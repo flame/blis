@@ -32,6 +32,8 @@
 
 */
 
+#ifdef BLIS_SANDBOX_POWER10
+
 #include "vector_int_macros.h"
 
 #define B_ACCUMULATE \
@@ -141,3 +143,4 @@ void bli_sbgemm_power10_mma_8x16
     }
 
 }
+#endif // BLIS_SANDBOX_POWER10

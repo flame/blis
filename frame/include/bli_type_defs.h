@@ -1419,6 +1419,15 @@ BLIS_INLINE void bli_obj_init_subpart_from( const obj_t* a, obj_t* b )
 	.i =           ( gint_t )val, \
 }
 
+#define bli_obj_init_constdata_ri( valr, vali ) \
+{ \
+	.s =           ( float  )valr, \
+	.d =           ( double )valr, \
+	.c = { .real = ( float  )valr, .imag = ( float  )vali }, \
+	.z = { .real = ( double )valr, .imag = ( double )vali }, \
+	.i =           ( gint_t )valr, \
+}
+
 
 // -- Context type --
 

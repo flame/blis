@@ -39,6 +39,8 @@ A few remarks / reminders:
 | ARMv8.1 A64FX (SVE)                  | `a64fx`                |  `d`   |            |
 | IBM Blue Gene/Q (QPX int)            | `bgq`                  |  `d`   |            |
 | IBM Power7 (QPX int)                 | `power7`               |  `d`   |            |
+| IBM Power9                           | `power9`               | `sdcz` |            |
+| IBM Power10                          | `power10`              | `sdcz` |            |
 | template (C99)                       | `template`             | `sdcz` | `sdcz`     |
 
 ## Level-1f kernels

@@ -533,7 +533,7 @@ void PASTEMAC0(opname) \
      ( \
        const obj_t* chi, \
        const obj_t* psi, \
-       bool*  is  \
+             bool*  is  \
      ) \
 { \
 	bli_init_once(); \

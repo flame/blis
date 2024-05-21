@@ -42,6 +42,9 @@ BLIS_EXPORT_BLIS extern const obj_t BLIS_ZERO;
 //BLIS_EXPORT_BLIS extern obj_t BLIS_MINUS_ONE_HALF;
 BLIS_EXPORT_BLIS extern const obj_t BLIS_MINUS_ONE;
 BLIS_EXPORT_BLIS extern const obj_t BLIS_MINUS_TWO;
+BLIS_EXPORT_BLIS extern const obj_t BLIS_ONE_I;
+BLIS_EXPORT_BLIS extern const obj_t BLIS_MINUS_ONE_I;
+BLIS_EXPORT_BLIS extern const obj_t BLIS_NAN;
 
 BLIS_EXPORT_BLIS extern thrcomm_t BLIS_SINGLE_COMM;
 

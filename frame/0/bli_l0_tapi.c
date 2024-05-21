@@ -66,9 +66,9 @@ INSERT_GENTFUNC_BASIC( subsc, subs )
 \
 void PASTEMAC(ch,opname) \
      ( \
-             conj_t  conjchi, \
-       const ctype*  chi, \
-             ctype*  psi  \
+             conj_t conjchi, \
+       const ctype* chi, \
+             ctype* psi  \
      ) \
 { \
 	bli_init_once(); \

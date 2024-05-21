@@ -5,124 +5,128 @@ Acknowledgements
 
 The BLIS framework was originally authored by
 
-  Field Van Zee            @fgvanzee           (The University of Texas at Austin)
+  Field Van Zee            @fgvanzee                  (The University of Texas at Austin)
 
-but many others have contributed code and feedback, including
+but many others have contributed code, ideas, and feedback, including
 
-  Jay Acosta               @jay-acosta         (Oracle)
-  Sameer Agarwal           @sandwichmaker      (Google)
-  Murtaza Ali                                  (Texas Instruments)
-  Sajid Ali                @s-sajid-ali        (Northwestern University)
+  Jay Acosta               @jay-acosta                (Oracle)
+  Sameer Agarwal           @sandwichmaker             (Google)
+  Murtaza Ali                                         (Texas Instruments)
+  Sajid Ali                @s-sajid-ali               (Northwestern University)
   Erling Andersen          @erling-d-andersen
   Alex Arslan              @ararslan
-  Vernon Austel                                (IBM, T.J. Watson Research Center)
-  Satish Balay             @balay              (Argonne National Laboratory)
+  Vernon Austel                                       (IBM, T.J. Watson Research Center)
+  Mohsen Aznaveh           @Aznaveh                   (Texas A&M University)
+  Satish Balay             @balay                     (Argonne National Laboratory)
   Kihiro Bando             @bandokihiro
-  Matthew Brett            @matthew-brett      (University of Birmingham)
+  Matthew Brett            @matthew-brett             (University of Birmingham)
   Jérémie du Boisberranger @jeremiedbb
-  Jed Brown                @jedbrown           (Argonne National Laboratory)
+  Jed Brown                @jedbrown                  (Argonne National Laboratory)
   Robin Christ             @robinchrist
   Dilyn Corner             @dilyn-corner
-  Mat Cross                @matcross           (NAG)
+  Mat Cross                @matcross                  (NAG)
                            @decandia50
-  Daniël de Kok            @danieldk           (Explosion)
-  Kay Dewhurst             @jkd2016            (Max Planck Institute, Halle, Germany)
-  Jeff Diamond                                 (Oracle)
+  Harsh Dave               @HarshDave12               (AMD)
+  Tim Davis                @DrTimothyAldenDavis       (Texas A&M University)
+  Daniël de Kok            @danieldk                  (Explosion)
+  Kay Dewhurst             @jkd2016                   (Max Planck Institute, Halle, Germany)
+  Jeff Diamond                                        (Oracle)
   Johannes Dieterich       @iotamudelta
   Krzysztof Drewniak       @krzysz00
-  Marat Dukhan             @Maratyszcza        (Google)
-  Victor Eijkhout          @VictorEijkhout     (Texas Advanced Computing Center)
-  Evgeny Epifanovsky       @epifanovsky        (Q-Chem)
+  Marat Dukhan             @Maratyszcza               (Google)
+  Victor Eijkhout          @VictorEijkhout            (Texas Advanced Computing Center)
+  Evgeny Epifanovsky       @epifanovsky               (Q-Chem)
   Isuru Fernando           @isuruf
   Roman Gareev             @gareevroman
   Richard Goldschmidt      @SuperFluffy
   Chris Goodyer
   Alexander Grund          @Flamefire
-  John Gunnels             @jagunnels          (IBM, T.J. Watson Research Center)
+  John Gunnels             @jagunnels                 (IBM, T.J. Watson Research Center)
   Ali Emre Gülcü           @Lephar
-  Jeff Hammond             @jeffhammond        (Intel)
+  Jeff Hammond             @jeffhammond               (Intel)
   Jacob Gorm Hansen        @jacobgorm
-  Shivaprashanth H                             (Global Edge)
+  Shivaprashanth H                                    (Global Edge)
   Jean-Michel Hautbois     @jhautbois
   Ian Henriksen            @insertinterestingnamehere (The University of Texas at Austin)
-  Greg Henry                                   (Intel)
+  Greg Henry                                          (Intel)
   Minh Quan Ho             @hominhquan
   Matthew Honnibal         @honnibal
   Stefan Husmann           @stefanhusmann
-  Francisco Igual          @figual             (Universidad Complutense de Madrid)
+  Francisco Igual          @figual                    (Universidad Complutense de Madrid)
   Madeesh Kannan           @shadeMe
   Tony Kelman              @tkelman
-  Lee Killough             @leekillough        (Cray)
-  Mike Kistler             @mkistler           (IBM, Austin Research Laboratory)
-  Ivan Korostelev          @ivan23kor          (University of Alberta)
-  Kyungmin Lee             @kyungminlee        (Ohio State University)
+  Lee Killough             @leekillough               (Cray)
+  Mike Kistler             @mkistler                  (IBM, Austin Research Laboratory)
+  Ivan Korostelev          @ivan23kor                 (University of Alberta)
+  Kyungmin Lee             @kyungminlee               (Ohio State University)
   Michael Lehn             @michael-lehn
   Shmuel Levine            @ShmuelLevine
                            @lschork2
   Dave Love                @loveshack
-  Tze Meng Low                                 (The University of Texas at Austin)
-  Ye Luo                   @ye-luo             (Argonne National Laboratory)
-  Ricardo Magana           @magania            (Hewlett Packard Enterprise)
-  Madan mohan Manokar      @madanm3            (AMD)
+  Tze Meng Low                                        (The University of Texas at Austin)
+  Ye Luo                   @ye-luo                    (Argonne National Laboratory)
+  Ricardo Magana           @magania                   (Hewlett Packard Enterprise)
+  Madan mohan Manokar      @madanm3                   (AMD)
   Giorgos Margaritis
-  Bryan Marker             @bamarker           (The University of Texas at Austin)
-  Simon Lukas Märtens      @ACSimon33          (RWTH Aachen University)
-  Devin Matthews           @devinamatthews     (The University of Texas at Austin)
+  Bryan Marker             @bamarker                  (The University of Texas at Austin)
+  Simon Lukas Märtens      @ACSimon33                 (RWTH Aachen University)
+  Devin Matthews           @devinamatthews            (The University of Texas at Austin)
   Stefanos Mavros          @smavros
-  Mithun Mohan             @MithunMohanKadavil (AMD)
+  Mithun Mohan             @MithunMohanKadavil        (AMD)
                            @moon-chilled
   Ilknur Mustafazade       @Runkli
                            @nagsingh
-  Bhaskar Nallani          @BhaskarNallani     (AMD)
-  Stepan Nassyr            @stepannassyr       (Jülich Supercomputing Centre)
+  Bhaskar Nallani          @BhaskarNallani            (AMD)
+  Stepan Nassyr            @stepannassyr              (Jülich Supercomputing Centre)
   Nisanth M P              @nisanthmp
-  Nisanth Padinharepatt                        (AMD)
+  Nisanth Padinharepatt                               (AMD)
   Ajay Panyala             @ajaypanyala
-  Marc-Antoine Parent      @maparent           (Conversence)
-  Devangi Parikh           @dnparikh           (The University of Texas at Austin)
-  Elmar Peise              @elmar-peise        (RWTH-Aachen)
+  Marc-Antoine Parent      @maparent                  (Conversence)
+  Devangi Parikh           @dnparikh                  (The University of Texas at Austin)
+  Elmar Peise              @elmar-peise               (RWTH-Aachen)
   Clément Pernet           @ClementPernet
   Ilya Polkovnichenko
-  Jack Poulson             @poulson            (Stanford)
+  Jack Poulson             @poulson                   (Stanford)
   Mathieu Poumeyrol        @kali
-  Christos Psarras         @ChrisPsa           (RWTH Aachen University)
+  Christos Psarras         @ChrisPsa                  (RWTH Aachen University)
                            @pkubaj
                            @qnerd
   Michael Rader            @mrader1248
-  Pradeep Rao              @pradeeptrgit       (AMD)
+  Pradeep Rao              @pradeeptrgit              (AMD)
   Aleksei Rechinskii
-  Leick Robinson           @LeickR             (Oracle)
+  Leick Robinson           @LeickR                    (Oracle)
   Karl Rupp                @karlrupp
-  Paul Sandoz              @PaulSandoz         (Oracle)
-  Martin Schatz                                (The University of Texas at Austin)
+  Paul Sandoz              @PaulSandoz                (Oracle)
+  Martin Schatz                                       (The University of Texas at Austin)
   Nico Schlömer            @nschloe
   Rene Sitt
-  Tony Skjellum            @tonyskjellum       (The University of Tennessee at Chattanooga)
-  Mikhail Smelyanskiy                          (Intel, Parallel Computing Lab)
+  Tony Skjellum            @tonyskjellum              (The University of Tennessee at Chattanooga)
+  Mikhail Smelyanskiy                                 (Intel, Parallel Computing Lab)
   Nathaniel Smith          @njsmith
   Shaden Smith             @ShadenSmith
-  Tyler Smith              @tlrmchlsmth        (The University of Texas at Austin)
+  Tyler Smith              @tlrmchlsmth               (The University of Texas at Austin)
   Snehith                  @ArcadioN09
-  Paul Springer            @springer13         (RWTH Aachen University)
-  Adam J. Stewart          @adamjstewart       (University of Illinois at Urbana-Champaign)
+  Paul Springer            @springer13                (RWTH Aachen University)
+  Adam J. Stewart          @adamjstewart              (University of Illinois at Urbana-Champaign)
   Vladimir Sukarev
+  Harihara Sudhan S        @ihariharasudhan           (AMD)
   Chengguo Sun             @chengguosun
-  Santanu Thangaraj                            (AMD)
-  Nicholai Tukanov         @nicholaiTukanov    (The University of Texas at Austin)
-  Rhys Ulerich             @RhysU              (The University of Texas at Austin)
-  Robert van de Geijn      @rvdg               (The University of Texas at Austin)
-  Meghana Vankadari        @Meghana-vankadari  (AMD)
-  Kiran Varaganti          @kvaragan           (AMD)
-  Natalia Vassilieva                           (Hewlett Packard Enterprise)
+  Santanu Thangaraj                                   (AMD)
+  Nicholai Tukanov         @nicholaiTukanov           (The University of Texas at Austin)
+  Rhys Ulerich             @RhysU                     (The University of Texas at Austin)
+  Robert van de Geijn      @rvdg                      (The University of Texas at Austin)
+  Meghana Vankadari        @Meghana-vankadari         (AMD)
+  Kiran Varaganti          @kvaragan                  (AMD)
+  Natalia Vassilieva                                  (Hewlett Packard Enterprise)
                            @h-vetinari
-  Andrew Wildman           @awild82            (University of Washington)
-  Zhang Xianyi             @xianyi             (Chinese Academy of Sciences)
+  Andrew Wildman           @awild82                   (University of Washington)
+  Zhang Xianyi             @xianyi                    (Chinese Academy of Sciences)
   Benda Xu                 @heroxbd
-  Guodong Xu               @docularxu          (Linaro.org)
-  RuQing Xu                @xrq-phys           (The University of Tokyo)
+  Guodong Xu               @docularxu                 (Linaro.org)
+  RuQing Xu                @xrq-phys                  (The University of Tokyo)
   Costas Yamin             @cosstas
-  Chenhan Yu               @ChenhanYu          (The University of Texas at Austin)
-  Roman Yurchak            @rth                (Symerio)
+  Chenhan Yu               @ChenhanYu                 (The University of Texas at Austin)
+  Roman Yurchak            @rth                       (Symerio)
   Stefano Zampini          @stefanozampini
   M. Zhou                  @cdluminate
 

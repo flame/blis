@@ -94,7 +94,7 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
 
 INSERT_GENTDEFR( normfsc )
 
-// sqrtsc
+// sqrtsc, sqrtrsc
 
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \

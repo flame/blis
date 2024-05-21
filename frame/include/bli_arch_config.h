@@ -257,7 +257,12 @@ CNTX_INIT_PROTS( generic )
 #include "bli_family_cortexa9.h"
 #endif
 
-// -- IBM Power --
+// -- IBM Power families --
+#ifdef BLIS_FAMILY_POWER
+#include "bli_family_power.h"
+#endif
+
+// -- IBM Power architectures --
 
 #ifdef BLIS_FAMILY_POWER10
 #include "bli_family_power10.h"

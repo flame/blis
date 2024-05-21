@@ -255,9 +255,9 @@ INSERT_GENTDEF( eqm )
 \
 typedef void (*PASTECH2(ch,opname,tsuf)) \
      ( \
-       ctype* chi, \
-       ctype* psi, \
-       bool*  is  \
+       const ctype* chi, \
+       const ctype* psi, \
+             bool*  is  \
      );
 
 INSERT_GENTDEF( ltsc )

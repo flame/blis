@@ -57,8 +57,8 @@ void bli_zgemm_armsve_asm_2vx10_unindexed
        cntx_t*             cntx
      )
 {
-  void* a_next = bli_auxinfo_next_a( data );
-  void* b_next = bli_auxinfo_next_b( data );
+  const void* a_next = bli_auxinfo_next_a( data );
+  const void* b_next = bli_auxinfo_next_b( data );
 
   // Typecast local copies of integers in case dim_t and inc_t are a
   // different size than is expected by load instructions.
@@ -68,7 +68,7 @@ void bli_zgemm_armsve_asm_2vx10_unindexed
   uint64_t cs_c   = cs_c0;
   uint64_t info   = 0;
 
-  GEMM_UKR_SETUP_CT( z, m, 10, false );
+  GEMM_UKR_SETUP_CT_ANY( z, m, 10, false );
 
   __asm__ volatile (
 " whilelo         p0.d, xzr, %12                  \n\t"
@@ -117,8 +117,8 @@ BEQ(END_CCOL_PRFM)
 GEMM_ACOLCMPLX_CONTIGUOUS_LOAD_FWD(z28,z29,p0,%0,x2)
 "                                                 \n\t"
 LABEL(CCOL_PRFM)
-// " cmp             %3, #1                          \n\t"
-// BNE(END_CCOL_PRFM) // Do not prefetch for generic C storage.
+" cmp             %3, #1                          \n\t"
+BNE(END_CCOL_PRFM) // Do not prefetch for generic C storage.
 " mov             x16, %2                         \n\t"
 " prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, %4                    \n\t"
@@ -232,8 +232,8 @@ MOV_COL2(z8 ,z9 ,z10,z11,z16,z17,z18,z19)
 LABEL(WRITE_MEM_EXEC)
 " mov             x9, %2                          \n\t" // C address for loading.
 "                                                 \n\t" // C address for storing is %2 itself.
-// " cmp             %3, #1                          \n\t"
-// BNE(WRITE_MEM_G)
+" cmp             %3, #1                          \n\t"
+BNE(WRITE_MEM_G)
 "                                                 \n\t"
 LABEL(WRITE_MEM_C)
 " fmov            d29, xzr                        \n\t"
@@ -259,38 +259,38 @@ LABEL(ZERO_BETA_C_4_5_6_7_8_9)
 GEMM_CCMPLX_STORE_COL2_C(z0 ,z1 ,z2 ,z3 ,p0,%2,%4)
 GEMM_CCMPLX_STORE_COL2_C(z4 ,z5 ,z6 ,z7 ,p0,%2,%4)
 GEMM_CCMPLX_STORE_COL2_C(z8 ,z9 ,z10,z11,p0,%2,%4)
-// BRANCH(END_WRITE_MEM)
-// "                                                 \n\t"
-// LABEL(WRITE_MEM_G)
-// " add             %3, %3, %3                      \n\t" // Skips passed to index is multiplied by 2,
-// " index           z28.d, xzr, %3                  \n\t" //  s.t. 2*sizeof(double) = 2*8 = 16.
-// " fmov            d29, xzr                        \n\t"
-// " fcmp            d31, #0.0                       \n\t" // Whether Imag(beta) == 0.
-// " fccmp           d30, d29, 0, eq                 \n\t" // Whether Real(beta) == 0.
-// BEQ(ZERO_BETA_G_0_1_2_3)
-// GEMM_CCMPLX_LOAD_COL2_G(z12,z13,z14,z15,p0,z28,x9,%4,x16)
-// GEMM_CCMPLX_LOAD_COL2_G(z16,z17,z18,z19,p0,z28,x9,%4,x16)
-// GEMM_FMLACMPLX_COL2(z20,z21,z22,z23,p0,z12,z13,z14,z15,z30,z31)
-// GEMM_FMLACMPLX_COL2(z24,z25,z26,z27,p0,z16,z17,z18,z19,z30,z31)
-// LABEL(ZERO_BETA_G_0_1_2_3)
-// GEMM_CCMPLX_STORE_COL2_G(z20,z21,z22,z23,p0,z28,%2,%4,x16)
-// GEMM_CCMPLX_STORE_COL2_G(z24,z25,z26,z27,p0,z28,%2,%4,x16)
-// "                                                 \n\t"
-// BEQ(ZERO_BETA_G_4_5_6_7_8_9)
-// GEMM_CCMPLX_LOAD_COL2_G(z12,z13,z14,z15,p0,z28,x9,%4,x16)
-// GEMM_CCMPLX_LOAD_COL2_G(z16,z17,z18,z19,p0,z28,x9,%4,x16)
-// GEMM_CCMPLX_LOAD_COL2_G(z20,z21,z22,z23,p0,z28,x9,%4,x16)
-// GEMM_FMLACMPLX_COL2(z0 ,z1 ,z2 ,z3 ,p0,z12,z13,z14,z15,z30,z31)
-// GEMM_FMLACMPLX_COL2(z4 ,z5 ,z6 ,z7 ,p0,z16,z17,z18,z19,z30,z31)
-// GEMM_FMLACMPLX_COL2(z8 ,z9 ,z10,z11,p0,z20,z21,z22,z23,z30,z31)
-// LABEL(ZERO_BETA_G_4_5_6_7_8_9)
-// GEMM_CCMPLX_STORE_COL2_G(z0 ,z1 ,z2 ,z3 ,p0,z28,%2,%4,x16)
-// GEMM_CCMPLX_STORE_COL2_G(z4 ,z5 ,z6 ,z7 ,p0,z28,%2,%4,x16)
-// GEMM_CCMPLX_STORE_COL2_G(z8 ,z9 ,z10,z11,p0,z28,%2,%4,x16)
-// "                                                 \n\t"
-// LABEL(END_WRITE_MEM)
-// BRANCH(END_EXEC)
-// "                                                 \n\t"
+BRANCH(END_WRITE_MEM)
+// General-storage case -- Mainly for Column-storage or other aligned cases.
+LABEL(WRITE_MEM_G)
+" add             %3, %3, %3                      \n\t" // Skips passed to index is multiplied by 2,
+" index           z28.d, xzr, %3                  \n\t" //  s.t. 2*sizeof(double) = 2*8 = 16.
+" fmov            d29, xzr                        \n\t"
+" fcmp            d31, #0.0                       \n\t" // Whether Imag(beta) == 0.
+" fccmp           d30, d29, 0, eq                 \n\t" // Whether Real(beta) == 0.
+BEQ(ZERO_BETA_G_0_1_2_3)
+GEMM_CCMPLX_LOAD_COL2_G(z12,z13,z14,z15,p0,z28,x9,%4,x16)
+GEMM_CCMPLX_LOAD_COL2_G(z16,z17,z18,z19,p0,z28,x9,%4,x16)
+GEMM_FMLACMPLX_COL2(z20,z21,z22,z23,p0,z12,z13,z14,z15,z30,z31)
+GEMM_FMLACMPLX_COL2(z24,z25,z26,z27,p0,z16,z17,z18,z19,z30,z31)
+LABEL(ZERO_BETA_G_0_1_2_3)
+GEMM_CCMPLX_STORE_COL2_G(z20,z21,z22,z23,p0,z28,%2,%4,x16)
+GEMM_CCMPLX_STORE_COL2_G(z24,z25,z26,z27,p0,z28,%2,%4,x16)
+"                                                 \n\t"
+BEQ(ZERO_BETA_G_4_5_6_7_8_9)
+GEMM_CCMPLX_LOAD_COL2_G(z12,z13,z14,z15,p0,z28,x9,%4,x16)
+GEMM_CCMPLX_LOAD_COL2_G(z16,z17,z18,z19,p0,z28,x9,%4,x16)
+GEMM_CCMPLX_LOAD_COL2_G(z20,z21,z22,z23,p0,z28,x9,%4,x16)
+GEMM_FMLACMPLX_COL2(z0 ,z1 ,z2 ,z3 ,p0,z12,z13,z14,z15,z30,z31)
+GEMM_FMLACMPLX_COL2(z4 ,z5 ,z6 ,z7 ,p0,z16,z17,z18,z19,z30,z31)
+GEMM_FMLACMPLX_COL2(z8 ,z9 ,z10,z11,p0,z20,z21,z22,z23,z30,z31)
+LABEL(ZERO_BETA_G_4_5_6_7_8_9)
+GEMM_CCMPLX_STORE_COL2_G(z0 ,z1 ,z2 ,z3 ,p0,z28,%2,%4,x16)
+GEMM_CCMPLX_STORE_COL2_G(z4 ,z5 ,z6 ,z7 ,p0,z28,%2,%4,x16)
+GEMM_CCMPLX_STORE_COL2_G(z8 ,z9 ,z10,z11,p0,z28,%2,%4,x16)
+"                                                 \n\t"
+LABEL(END_WRITE_MEM)
+BRANCH(END_EXEC)
+"                                                 \n\t"
 LABEL(END_EXEC)
 " mov             %11, #0                         \n\t" // Return normal.
 : "+r" (a),      // %0

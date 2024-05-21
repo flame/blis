@@ -35,24 +35,20 @@
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
-THIS_CONFIG    := newarch
+THIS_CONFIG    := power
 #CONFIGS_INCL   += $(THIS_CONFIG)
 
 #
 # --- Determine the C compiler and related flags ---
 #
 
-ifeq ($(CC),)
-CC             := gcc
-CC_VENDOR      := gcc
-endif
-
-# Enable IEEE Standard 1003.1-2004 (POSIX.1d).
-# NOTE: This is needed to enable posix_memalign().
-CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
-CMISCFLAGS     := -std=c99
-CPICFLAGS      := -fPIC
-CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
+# NOTE: The build system will append these variables with various
+# general-purpose/configuration-agnostic flags in common.mk. You
+# may specify additional flags here as needed.
+CPPROCFLAGS    :=
+CMISCFLAGS     :=
+CPICFLAGS      :=
+CWARNFLAGS     :=
 
 ifneq ($(DEBUG_TYPE),off)
 CDBGFLAGS      := -g
@@ -64,22 +60,23 @@ else
 COPTFLAGS      := -O2
 endif
 
-CKOPTFLAGS     := $(COPTFLAGS)
+# Flags specific to optimized kernels.
+CKOPTFLAGS     := $(COPTFLAGS) -O3
+CKVECFLAGS     :=
 
+# Flags specific to reference kernels.
+CROPTFLAGS     := $(CKOPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     :=
-else
-ifeq ($(CC_VENDOR),icc)
-CKVECFLAGS     :=
+CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
 else
 ifeq ($(CC_VENDOR),clang)
-CKVECFLAGS     :=
+CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
 else
-$(error gcc, icc, or clang is required for this configuration.)
-endif
+CRVECFLAGS     := $(CKVECFLAGS)
 endif
 endif
 
 # Store all of the variables here to new variables containing the
 # configuration name.
 $(eval $(call store-make-defs,$(THIS_CONFIG)))
+

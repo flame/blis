@@ -56,7 +56,7 @@ void bli_thread_launch_hpx
 	pool_t*    gl_comm_pool = nullptr;
 	thrcomm_t* gl_comm      = bli_thrcomm_create( ti, gl_comm_pool, n_threads );
 
-	auto irange = hpx::util::detail::make_counting_shape(n_threads);
+	auto irange = hpx::util::counting_shape(n_threads);
 
 	hpx::for_each(hpx::execution::par, hpx::util::begin(irange), hpx::util::end(irange),
 	[&gl_comm, &func, &params](const dim_t tid)
