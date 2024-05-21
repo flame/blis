@@ -325,18 +325,29 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 			if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 				( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
-				selector1 =
-				    _mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-				            post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-				selector2 =
-				    _mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-				            post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-				selector3 =
-				    _mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-				            post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-				selector4 =
-				    _mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-				            post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+				if ( post_ops_attr.c_stor_type == BF16 )
+				{
+					__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
+					BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
+					BF16_F32_BIAS_LOAD(selector2, bias_mask, 1);
+					BF16_F32_BIAS_LOAD(selector3, bias_mask, 2);
+					BF16_F32_BIAS_LOAD(selector4, bias_mask, 3);
+				}
+				else
+				{
+					selector1 =
+						_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+								post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+					selector2 =
+						_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+								post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+					selector3 =
+						_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+								post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+					selector4 =
+						_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+								post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+				}
 
 				zmm8  = _mm512_add_ps( selector1, zmm8  );
 				zmm12 = _mm512_add_ps( selector2, zmm12 );
@@ -345,9 +356,17 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 			}
 			else
 			{
-				selector1 =
-				    _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
-				            post_ops_attr.post_op_c_i + 0 ) );
+				if ( post_ops_attr.c_stor_type == BF16 )
+				{
+					__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
+					BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
+				}
+				else
+				{
+					selector1 =
+						_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+								post_ops_attr.post_op_c_i + 0 ) );
+				}
 
 				zmm8  = _mm512_add_ps( selector1, zmm8  );
 				zmm12 = _mm512_add_ps( selector1, zmm12 );

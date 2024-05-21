@@ -254,20 +254,20 @@ void bli_lpgemm_jit:: bf16_f32_beta_op( dim_t m_dim, dim_t n_dim )
 
     dim_t reg_num;
     mov( rcx, ptr[ rsp + stack_off_buf_downscale ] );
-    mov( rdi, ptr[ rsp + stack_off_postop + offsetof( lpgemm_post_op_attr,
+    mov( rax, ptr[ rsp + stack_off_postop + offsetof( lpgemm_post_op_attr,
                                                       rs_c_downscale ) ] );
 
 
 
     // rs_c_downscale *= sizeof(bfloat16)
-    lea( rdi, ptr[ rdi * 2 ] );
+    lea( rax, ptr[ rax * 2 ] );
     mov( rsi, ptr[ rsp + stack_off_postop +
                    offsetof( lpgemm_post_op_attr, post_op_c_i ) ] );
     mov( rbx, ptr[ rsp + stack_off_postop +
                    offsetof( lpgemm_post_op_attr, post_op_c_j ) ] );
 
     // rsi = post_op_c_i * ( rs_c_downscale * sizeof(bfloat16) )
-    imul( rsi, rdi );
+    imul( rsi, rax );
 
     // rsi = post_op_c_i * ( rs_c_downscale * sizeof(bfloat16) )
     //       + post_op_c_j * sizeof(bfloat16)
@@ -314,7 +314,7 @@ void bli_lpgemm_jit:: bf16_f32_beta_op( dim_t m_dim, dim_t n_dim )
         }
 
         // move to next row
-        add( rcx, rdi );
+        add( rcx, rax );
     }
 
 }
@@ -466,19 +466,52 @@ void bli_lpgemm_jit:: bias_row_major( dim_t m_dim, dim_t n_dim )
     mov( rbx, ptr[ rsp + stack_off_postop +
                    offsetof( lpgemm_post_op_attr, post_op_c_j ) ] );
 
+    mov( rcx, ptr[ rsp + stack_off_postop +
+                  offsetof( lpgemm_post_op_attr, c_stor_type ) ] );
+    cmp( rcx, 4 );
+    je( "BIAS_BF16_ROW_MAJOR", T_NEAR );
+
     // postops_c_j *= sizeof(float)
     lea( rbx, ptr[ rbx * 4 ] );
     add( rax, rbx );
-
-
     for( dim_t n = 0; n < num_full_loads; n++ )
     {
         vmovups( Zmm( load_start_idx + n ), ptr[ rax + n * 64 ] );
     }
-
     if( n_rem )
+    {
         vmovups( Zmm( load_start_idx + num_full_loads ) | k4,
                  ptr[ rax + num_full_loads * 64 ] );
+    }
+    jmp( "POST_BIAS_BF16_ROW_MAJOR", T_NEAR );
+
+    L( "BIAS_BF16_ROW_MAJOR" );
+    // postops_c_j *= sizeof(bfloat16)
+    lea( rbx, ptr[ rbx * 2 ] );
+    add( rax, rbx );
+    for( dim_t n = 0; n < num_full_loads; n++ )
+    {
+        // convert from 16 bit elements to 32 bit elements
+        vpmovsxwd( Zmm( load_start_idx + n ), ptr[ rax + n * 32 ] );
+
+        // Shift left by 16 bits
+        vpslld( Zmm( load_start_idx + n ), Zmm( load_start_idx + n ), 0x10 );
+    }
+    if( n_rem )
+    {
+        // load the bf16 elements from the downscale buffer using mask.
+        vmovdqu16( Ymm( load_start_idx + num_full_loads ) | k4 | T_z,
+                   ptr[rax + num_full_loads * 32 ] );
+
+        // convert from 16 bit elements to 32 bit elements
+        vpmovsxwd( Zmm( load_start_idx + num_full_loads ),
+                   Ymm( load_start_idx + num_full_loads ) );
+
+        // Shift left by 16 bits
+        vpslld( Zmm( load_start_idx + num_full_loads ),
+                 Zmm( load_start_idx + num_full_loads ), 0x10 );
+    }
+    L( "POST_BIAS_BF16_ROW_MAJOR" );
 
     for( dim_t m = 0; m < m_dim; m++ )
     {
@@ -498,10 +531,14 @@ void bli_lpgemm_jit:: bias_col_major( dim_t m_dim, dim_t n_dim )
     mov( rax, ptr[ rdx + offsetof( lpgemm_post_op, op_args1 ) ] );
     mov( rbx, ptr[ rdx + offsetof( lpgemm_post_op_attr, post_op_c_i ) ] );
 
+    mov( rcx, ptr[ rsp + stack_off_postop +
+                  offsetof( lpgemm_post_op_attr, c_stor_type ) ] );
+    cmp( rcx, 4 );
+    je( "BIAS_BF16_COL_MAJOR", T_NEAR );
+
     // postops_c_i *= sizeof(float)
     lea( rbx, ptr[ rbx * 4 ] );
     add( rax, rbx );
-
     for( dim_t m = 0; m < m_dim; m++ )
     {
         vbroadcastss( Zmm( alpha_reg ), ptr[ rax + m *  4 ] );
@@ -511,6 +548,29 @@ void bli_lpgemm_jit:: bias_col_major( dim_t m_dim, dim_t n_dim )
             vaddps( Zmm( reg_num ), Zmm( reg_num ), Zmm( alpha_reg ) );
         }
     }
+    jmp( "POST_BIAS_BF16_COL_MAJOR", T_NEAR );
+
+    L( "BIAS_BF16_COL_MAJOR" );
+    // postops_c_i *= sizeof(bfloat16)
+    lea( rbx, ptr[ rbx * 2 ] );
+    add( rax, rbx );
+    for( dim_t m = 0; m < m_dim; m++ )
+    {
+        vpbroadcastw( Zmm( alpha_reg ), ptr[ rax + m * 4 ] );
+
+        // convert from 16 bit elements to 32 bit elements
+        vpmovsxwd( Zmm( alpha_reg ), Ymm( alpha_reg ) );
+
+        // Shift left by 16 bits
+        vpslld( Zmm( alpha_reg ), Zmm( alpha_reg ), 0x10 );
+
+        for( dim_t n = 0; n < num_loads; n++ )
+        {
+            reg_num = fma_start_idx + ( m * num_loads ) + n;
+            vaddps( Zmm( reg_num ), Zmm( reg_num ), Zmm( alpha_reg ) );
+        }
+    }
+    L( "POST_BIAS_BF16_COL_MAJOR" );
 }
 
 void bli_lpgemm_jit:: relu( dim_t m_dim, dim_t n_dim )
@@ -900,17 +960,17 @@ void bli_lpgemm_jit:: cvt_store_f32_bf16_mask( dim_t m_dim, dim_t n_dim )
     dim_t reg_num;
 
     mov( rcx, ptr[ rsp + stack_off_buf_downscale ] );
-    mov( rdi, ptr[ rsp + stack_off_postop +
+    mov( rax, ptr[ rsp + stack_off_postop +
                    offsetof( lpgemm_post_op_attr, rs_c_downscale ) ] );
 
     // rs_c_downscale *= sizeof(bfloat16)
-    lea( rdi, ptr[rdi * 2 ] );
+    lea( rax, ptr[rax * 2 ] );
     mov( rsi, ptr[ rsp + stack_off_postop +
                    offsetof( lpgemm_post_op_attr, post_op_c_i ) ] );
     mov( rbx, ptr[ rsp + stack_off_postop +
                    offsetof( lpgemm_post_op_attr, post_op_c_j ) ] );
 
-    imul( rsi, rdi );
+    imul( rsi, rax );
     lea( rsi, ptr[ rsi + rbx * 2 ] );
     add( rcx, rsi );
 
@@ -931,7 +991,7 @@ void bli_lpgemm_jit:: cvt_store_f32_bf16_mask( dim_t m_dim, dim_t n_dim )
             vmovdqu16( ptr[ rcx + num_full_loads * 32 ] | k4, Ymm( reg_num ) );
        }
         // move to next row
-        add( rcx, rdi );
+        add( rcx, rax );
     }
 }
 
@@ -1315,7 +1375,6 @@ void bli_lpgemm_jit::generate_kernel( lpgemm_jit_inputs_t* params )
 
     bias_col_major( m_dim, n_dim );
     jmp( "POST_BIAS", T_NEAR );
-
 
     L( "BIAS_ROW_MAJOR" );
     bias_row_major( m_dim, n_dim );

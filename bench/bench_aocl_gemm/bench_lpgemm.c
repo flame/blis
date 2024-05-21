@@ -49,8 +49,8 @@ int64_t DSCALE_CLIP_MIN = 0;
 int64_t DSCALE_CLIP_MAX = 0;
 
 // Mode can be one of the follwoing:
-// 	1. p - performance, used for benchmarks.
-// 	2. a - accuracy, used to test accuracy/correctness.
+// 1. p - performance, used for benchmarks.
+// 2. a - accuracy, used to test accuracy/correctness.
 // Default value is p, can be modified by passing command line arg.
 char bench_mode = 'p';
 
@@ -243,6 +243,11 @@ GEN_FILL_ARRAY_POST_OPS_FUNC(int16_t)
 GEN_FILL_ARRAY_POST_OPS_FUNC(int32_t)
 GEN_FILL_ARRAY_POST_OPS_FUNC(float)
 
+void fill_array_post_ops_bfloat16( void* arr, dim_t size )
+{
+    fill_array_bfloat16( arr, size );
+}
+
 #define GEN_BLIS_MAT_MUL_FUNC(A_type,B_type,C_type,ACCUM_type,BLAS_SFX) \
 void mat_mul_ ## BLAS_SFX \
      ( \
@@ -419,7 +424,7 @@ static inline ACCUM_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX
                             *( ( C_type* )post_op->sum.zero_point + j_zp ), \
                             DSCALE_CLIP_MIN ), \
                         DSCALE_CLIP_MAX ); \
-    return 	out_temp_accum; \
+    return out_temp_accum; \
 }\
 
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int16_t,float,u8s8s16os8)
@@ -662,9 +667,9 @@ static inline float get_matrix_add_post_op_val_bf16bf16f32obf16
        bfloat16 val
      )
 {
-	float ret_val = 0.0;
-	bfloat16_to_float( val, &ret_val );
-	return ret_val;
+    float ret_val = 0.0;
+    bfloat16_to_float( val, &ret_val );
+    return ret_val;
 }
 
 #define GEN_GET_MATRIX_ADD_POST_OP_VAL(C_type,ACCUM_type,BLAS_SFX) \
@@ -673,7 +678,7 @@ static inline ACCUM_type get_matrix_add_post_op_val_ ## BLAS_SFX \
        C_type val \
      ) \
 { \
-	return (ACCUM_type) val; \
+    return (ACCUM_type) val; \
 } \
 
 GEN_GET_MATRIX_ADD_POST_OP_VAL(int8_t,int32_t,u8s8s32os8)
@@ -687,6 +692,39 @@ GEN_GET_MATRIX_ADD_POST_OP_VAL(int8_t,int16_t,s8s8s16os8)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(int16_t,int16_t,s8s8s16os16)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(float,float,f32f32f32of32)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(float,float,bf16bf16f32of32)
+
+static inline float get_bias_post_op_val_bf16bf16f32obf16
+     (
+       void* post_op_bias_ptr,
+       dim_t j
+     )
+{
+    float ret_val = 0.0;
+    bfloat16_to_float( *( ( bfloat16* )post_op_bias_ptr + j ), &ret_val );
+    return ret_val;
+}
+
+#define GEN_GET_BIAS_POST_OP_VAL(ACCUM_type,BLAS_SFX) \
+static inline ACCUM_type get_bias_post_op_val_ ## BLAS_SFX \
+     ( \
+       void* post_op_bias_ptr, \
+       dim_t j \
+     ) \
+{ \
+    return *( ( ACCUM_type* )post_op_bias_ptr + j ); \
+} \
+
+GEN_GET_BIAS_POST_OP_VAL(int32_t,u8s8s32os8)
+GEN_GET_BIAS_POST_OP_VAL(int32_t,u8s8s32os32)
+GEN_GET_BIAS_POST_OP_VAL(int16_t,u8s8s16os8)
+GEN_GET_BIAS_POST_OP_VAL(int16_t,u8s8s16ou8)
+GEN_GET_BIAS_POST_OP_VAL(int16_t,u8s8s16os16)
+GEN_GET_BIAS_POST_OP_VAL(int32_t,s8s8s32os8)
+GEN_GET_BIAS_POST_OP_VAL(int32_t,s8s8s32os32)
+GEN_GET_BIAS_POST_OP_VAL(int16_t,s8s8s16os8)
+GEN_GET_BIAS_POST_OP_VAL(int16_t,s8s8s16os16)
+GEN_GET_BIAS_POST_OP_VAL(float,f32f32f32of32)
+GEN_GET_BIAS_POST_OP_VAL(float,bf16bf16f32of32)
 
 #define GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(C_type, ACCUM_type) \
 void mat_mul_get_output_type_val ## ACCUM_type ## C_type \
@@ -809,7 +847,8 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                 { \
                     if ( post_op->seq_vector[op_id] == BIAS ) \
                     { \
-                        temp_accum += ( *( ( ACCUM_type* )post_op->bias.bias + j ) ); \
+                        temp_accum += GEN_FUNC_NAME(get_bias_post_op_val_,BLAS_SFX) \
+                                    ( post_op->bias.bias, j ); \
                     } \
                     else if ( post_op->seq_vector[op_id] == ELTWISE ) \
                     { \
@@ -884,7 +923,7 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                             rs_m = 1; \
                         } \
                         temp_accum += GEN_FUNC_NAME(get_matrix_add_post_op_val_,BLAS_SFX) \
-									( *( ( C_type* )post_op->matrix_add.matrix + \
+                                    ( *( ( C_type* )post_op->matrix_add.matrix + \
                                            ( i * rs_m ) + ( j * cs_m ) ) ); \
                     } \
                     else \
@@ -958,7 +997,7 @@ void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
     free( post_ops );
 }
 
-#define GEN_MAT_MUL_POST_OPS_CREATOR(C_DSCALE_type,C_type,DSCALE_type,BLAS_SFX) \
+#define GEN_MAT_MUL_POST_OPS_CREATOR(C_DSCALE_type,C_type,DSCALE_type,BIAS_type,BLAS_SFX) \
 aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
      ( \
        dim_t m, \
@@ -1136,7 +1175,7 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         { \
             goto err_handler; \
         } \
-        GEN_FUNC_NAME(fill_array_post_ops_,C_type)( post_ops->bias.bias, n ); \
+        GEN_FUNC_NAME(fill_array_post_ops_,BIAS_type)( post_ops->bias.bias, n ); \
     } \
  \
     if ( num_eltwise > 0 ) \
@@ -1335,12 +1374,12 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     return NULL; \
 } \
 
-GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int16_t,float,u8s8s16os16)
-GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int32_t,float,u8s8s32os32)
-GEN_MAT_MUL_POST_OPS_CREATOR(bfloat16,float,float,bf16bf16f32of32)
-GEN_MAT_MUL_POST_OPS_CREATOR(bfloat16,float,float,f32f32f32of32)
-GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int32_t,float,s8s8s32os32)
-GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int16_t,float,s8s8s16os16)
+GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int16_t,float,int16_t,u8s8s16os16)
+GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int32_t,float,int32_t,u8s8s32os32)
+GEN_MAT_MUL_POST_OPS_CREATOR(bfloat16,float,float,bfloat16,bf16bf16f32of32)
+GEN_MAT_MUL_POST_OPS_CREATOR(bfloat16,float,float,float,f32f32f32of32)
+GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int32_t,float,int32_t,s8s8s32os32)
+GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int16_t,float,int16_t,s8s8s16os16)
 
 #define GEN_MAT_MUL_BENCH_MAIN_FUNC(A_type, B_type, C_type, Sum_type, BLAS_SFX, REORDER_SFX) \
 void mat_mul_bench_main_ ## BLAS_SFX \
@@ -1415,7 +1454,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
         n_repeats = 1; \
         alpha = 2; \
         beta = 9; \
-    } 	\
+    }     \
  \
     aocl_post_op* post_op = NULL; \
     if ( ( ( post_ops_str != NULL ) && \
@@ -1546,14 +1585,14 @@ int main( int argc, char** argv )
     char* file_name = NULL;
 
 #define GEMM_TYPE_STR_LEN 24
-	char gemm_type_str[GEMM_TYPE_STR_LEN];
+    char gemm_type_str[GEMM_TYPE_STR_LEN];
 
 #define POST_OPS_STR_LEN 104
     char post_ops_str[POST_OPS_STR_LEN];
     char post_ops_str_dest[POST_OPS_STR_LEN]; //Strtok is used to parse, need to maintain a copy.
 
 #define OPS_INPUT_STR_LEN 128
-	char ops_input_str[OPS_INPUT_STR_LEN];
+    char ops_input_str[OPS_INPUT_STR_LEN];
 
     // Parse CLI arguments.
      getopt_t state;

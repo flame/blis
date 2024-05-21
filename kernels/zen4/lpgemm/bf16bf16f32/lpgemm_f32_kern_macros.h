@@ -100,6 +100,37 @@
 	  mask_all1, (__m256i) _mm512_cvtneps_pbh( reg ) \
 	) \
 
+// BF16 bias helper macros.
+#define BF16_F32_BIAS_LOAD(scr,mask,n_ind) \
+	scr = (__m512)( _mm512_sllv_epi32 \
+					( \
+					  _mm512_cvtepi16_epi32 \
+					  ( \
+						_mm256_maskz_loadu_epi16 \
+						( \
+						  ( mask ), \
+						  ( ( bfloat16* )post_ops_list_temp->op_args1 ) + \
+						  post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+						) \
+					  ), _mm512_set1_epi32( 16 ) \
+					) \
+				  ); \
+
+#define BF16_F32_BIAS_BCAST(scr,mask,m_ind) \
+	scr = (__m512)( _mm512_sllv_epi32 \
+					( \
+					  _mm512_cvtepi16_epi32 \
+					  ( \
+						_mm256_maskz_set1_epi16 \
+						( \
+						  ( mask ), \
+						  *( ( ( bfloat16* )post_ops_list_temp->op_args1 ) + \
+						  post_ops_attr.post_op_c_i + m_ind ) \
+						) \
+					  ), _mm512_set1_epi32( 16 ) \
+					) \
+				  ); \
+
 /* TANH GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */
 #define GELU_TANH_F32_AVX512(reg, r, r2, x, z, dn, x_tanh, q) \
 \
