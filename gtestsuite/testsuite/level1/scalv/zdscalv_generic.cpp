@@ -41,6 +41,7 @@ class zdscalvGenericTest :
                                                    gtint_t,     // incx
                                                    double>> {}; // alpha
 
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zdscalvGenericTest);
 
 // Tests using random integers as vector elements.
 TEST_P( zdscalvGenericTest, RandomData )
@@ -79,6 +80,8 @@ TEST_P( zdscalvGenericTest, RandomData )
     test_scalv<T, U>( conj_alpha, n, incx, alpha, thresh );
 }
 
+// bli_zdscal not present in BLIS
+#ifndef TEST_BLIS_TYPED
 // Black box testing for zdscal.
 // Tests with unit-positive increment.
 INSTANTIATE_TEST_SUITE_P(
@@ -133,3 +136,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scalvGenericPrint<dcomplex, double>())
     );
+
+#endif // not TEST_BLIS_TYPED

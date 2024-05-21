@@ -43,6 +43,7 @@ class zdscalvEVT :
                                                    dcomplex,        // x_exval
                                                    double>> {};     // alpha
 
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zdscalvEVT);
 
 // Tests using random integers as vector elements.
 TEST_P( zdscalvEVT, NaNInfCheck )
@@ -84,6 +85,9 @@ TEST_P( zdscalvEVT, NaNInfCheck )
     //----------------------------------------------------------
     test_scalv<T, RT>( conj_alpha, n, incx, xi, x_exval, alpha, thresh );
 }
+
+// bli_zdscal not present in BLIS
+#ifndef TEST_BLIS_TYPED
 
 static double NaN = std::numeric_limits<double>::quiet_NaN();
 static double Inf = std::numeric_limits<double>::infinity();
@@ -362,3 +366,5 @@ INSTANTIATE_TEST_SUITE_P(
     ),
     (::scalvEVTPrint<dcomplex, double>())
 );
+
+#endif // not TEST_BLIS_TYPED
