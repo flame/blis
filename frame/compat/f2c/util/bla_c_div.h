@@ -32,7 +32,7 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS
+#if 1
 
 void bla_c_div(bla_scomplex *cp, const bla_scomplex *ap, const bla_scomplex *bp);
 

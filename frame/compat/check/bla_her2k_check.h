@@ -32,7 +32,7 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS
+#if 1
 
 #define bla_her2k_check( dt_str, op_str, uploa, trans, m, k, lda, ldb, ldc ) \
 { \
