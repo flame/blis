@@ -28,6 +28,7 @@ use or performance of this software.
 #include <unistd.h>
 #endif
 #ifdef _MSC_VER
+#include <io.h>
 #define access _access
 #endif
 #include "f2c.h"
