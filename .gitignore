@@ -44,6 +44,7 @@ include/*/*.h
 # -- misc. --
 
 # BLIS testsuite output file
+output.testsuite
 output.testsuite.*
 
 # BLAS test output files

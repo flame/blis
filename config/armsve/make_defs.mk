@@ -47,7 +47,7 @@ THIS_CONFIG    := armsve
 # may specify additional flags here as needed.
 CPPROCFLAGS    := -D_GNU_SOURCE
 CMISCFLAGS     :=
-CPICFLAGS      :=
+CPICFLAGS      := -fPIC
 CWARNFLAGS     :=
 
 ifneq ($(DEBUG_TYPE),off)

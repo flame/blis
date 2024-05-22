@@ -47,7 +47,7 @@ THIS_CONFIG    := power7
 # may specify additional flags here as needed.
 CPPROCFLAGS    :=
 CMISCFLAGS     := -mcpu=power7
-CPICFLAGS      :=
+CPICFLAGS      := -fPIC
 CWARNFLAGS     :=
 
 ifneq ($(DEBUG_TYPE),off)

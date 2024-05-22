@@ -53,6 +53,12 @@
 #define BLIS_DISABLE_SYSTEM
 #endif
 
+#if @enable_tls@
+#define BLIS_ENABLE_TLS
+#else
+#define BLIS_DISABLE_TLS
+#endif
+
 #if @enable_openmp@
 #define BLIS_ENABLE_OPENMP
 #if @enable_openmp_as_def@

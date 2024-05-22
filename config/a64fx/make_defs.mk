@@ -47,7 +47,7 @@ THIS_CONFIG    := a64fx
 # may specify additional flags here as needed.
 CPPROCFLAGS    := -D_GNU_SOURCE -D_A64FX
 CMISCFLAGS     :=
-CPICFLAGS      :=
+CPICFLAGS      := -fPIC
 CWARNFLAGS     :=
 
 ifneq ($(DEBUG_TYPE),off)

@@ -48,7 +48,7 @@ THIS_CONFIG    := amd64_legacy
 # may specify additional flags here as needed.
 CPPROCFLAGS    :=
 CMISCFLAGS     :=
-CPICFLAGS      :=
+CPICFLAGS      := -fPIC
 CWARNFLAGS     :=
 
 ifneq ($(DEBUG_TYPE),off)
