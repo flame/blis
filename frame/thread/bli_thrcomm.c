@@ -149,10 +149,9 @@ void bli_thrcomm_init( timpl_t ti, dim_t nt, thrcomm_t* comm )
 	// Call the threading-specific init function.
 	fp( nt, comm );
 
-	// Embed the type of threading implementation within the thrcomm_t struct.
-	// Note that we wait until after the init function has returned in case
-	// that function zeros out the entire struct before setting the fields.
-	comm->ti = ti;
+	// NOTE: The init function that just returned intrinsically knows its
+	// timpl_t value, thus is able to set that value without us explicitly
+	// passing it in.
 }
 
 void bli_thrcomm_cleanup( thrcomm_t* comm )

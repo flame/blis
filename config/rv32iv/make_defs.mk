@@ -46,9 +46,17 @@ THIS_CONFIG    := rv32iv
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
 CPPROCFLAGS    := -DRISCV_SIZE=32
-# Atomic instructions must be enabled either via hardware
-# (-march=rv32iav) or by linking against libatomic
-CMISCFLAGS     := -march=$(shell $(CC) -DFORCE_RISCV_VECTOR -E frame/base/bli_riscv_detect_arch.h | grep '^[^\#]') -mabi=ilp32d
+
+RISCV_ARCH     := $(shell $(CC) -DFORCE_RISCV_VECTOR -E build/detect/riscv/bli_riscv_detect_arch.h | grep '^[^\#]')
+RISCV_ABI      := $(shell $(CC) -DFORCE_RISCV_VECTOR -E build/detect/riscv/bli_riscv_detect_abi.h | grep '^[^\#]')
+
+ifeq (,$(findstring 32,$(RISCV_ARCH)))
+$(error The RISC-V compiler architecture $(RISCV_ARCH) is not compatible with $(THIS_CONFIG))
+else ifeq (,$(findstring 32,$(RISCV_ABI)))
+$(error The RISC-V compiler ABI $(RISCV_ABI) is not compatible with $(THIS_CONFIG))
+endif
+
+CMISCFLAGS     := -march=$(RISCV_ARCH) -mabi=$(RISCV_ABI)
 CPICFLAGS      := -fPIC
 CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
 

@@ -61,6 +61,7 @@ but many others have contributed code, ideas, and feedback, including
   Ivan Korostelev          @ivan23kor                 (University of Alberta)
   Kyungmin Lee             @kyungminlee               (Ohio State University)
   Michael Lehn             @michael-lehn
+                           @leo4678
   Shmuel Levine            @ShmuelLevine
                            @lschork2
   Dave Love                @loveshack
@@ -105,6 +106,7 @@ but many others have contributed code, ideas, and feedback, including
   Rene Sitt
   Tony Skjellum            @tonyskjellum              (The University of Tennessee at Chattanooga)
   Mikhail Smelyanskiy                                 (Intel, Parallel Computing Lab)
+  Barry Smith              @BarrySmith                (Argonne National Laboratory)
   Nathaniel Smith          @njsmith
   Shaden Smith             @ShadenSmith
   Tyler Smith              @tlrmchlsmth               (The University of Texas at Austin)
@@ -134,6 +136,7 @@ but many others have contributed code, ideas, and feedback, including
   Roman Yurchak            @rth                       (Symerio)
   Stefano Zampini          @stefanozampini
   M. Zhou                  @cdluminate
+  Igor Zhuravlov           @jip                       (Far Eastern Federal University)
 
 BLIS's development was partially funded by grants from industry
 partners, including

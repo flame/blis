@@ -425,6 +425,7 @@ REFKERN_PATH       := $(DIST_PATH)/$(REFKERN_DIR)
 KERNELS_PATH       := $(DIST_PATH)/$(KERNELS_DIR)
 ADDON_PATH         := $(DIST_PATH)/$(ADDON_DIR)
 SANDBOX_PATH       := $(DIST_PATH)/$(SANDBOX_DIR)
+BUILD_PATH         := $(DIST_PATH)/$(BUILD_DIR)
 
 # Construct paths to some optional C++ template headers contributed by AMD.
 VEND_CPP_PATH      := $(DIST_PATH)/$(VEND_CPP_DIR)
@@ -546,6 +547,11 @@ ARFLAGS    := cr
 # Used to refresh CHANGELOG.
 GIT        := git
 GIT_LOG    := $(GIT) log --decorate
+
+# Define the locations of a script to generate a list of shared library symbols
+# within BLIS as well as the symbol file itself.
+GEN_SYMS   := $(BUILD_PATH)/gen-libblis-symbols.sh
+SYM_FILE   := $(BUILD_PATH)/libblis-symbols.def
 
 
 
@@ -719,7 +725,11 @@ CWARNFLAGS :=
 # Disable unused function warnings and stop compiling on first error for
 # all compilers that accept such options: gcc, clang, and icc.
 ifneq ($(CC_VENDOR),ibm)
+ifneq ($(CC_VENDOR),nvc)
 CWARNFLAGS += -Wall -Wno-unused-function -Wfatal-errors
+else
+CWARNFLAGS += -Wall -Wno-unused-function
+endif
 endif
 
 # Disable tautological comparision warnings in clang.
@@ -969,7 +979,13 @@ endif
 #
 
 ifeq ($(OS_NAME),Linux)
+# Exclude -lrt on Android by detecting Bionic.
+# $(CC) -E bionic.h returns a "bionic" substring iff Bionic is detected.
+BIONIC_H_PATH := $(DIST_PATH)/build/detect/android/bionic.h
+BIONIC := $(findstring bionic,$(shell $(CC) -E $(BIONIC_H_PATH)))
+ifeq (,$(BIONIC))
 LDFLAGS += -lrt
+endif
 endif
 
 
@@ -1272,4 +1288,3 @@ BUILD_CPPFLAGS := -DBLIS_IS_BUILDING_LIBRARY
 
 # end of ifndef COMMON_MK_INCLUDED conditional block
 endif
-

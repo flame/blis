@@ -115,7 +115,7 @@ int main( int argc, char** argv )
 
 	bli_printm( "a:", &a, "%4.1f", "" );
 
-	// Compute the one-norm of 'a'.
+	// Compute the one, infinity, and frobenius norms of 'a'.
 	bli_norm1m( &a, &norm1 );
 	bli_normim( &a, &normi );
 	bli_normfm( &a, &normf );

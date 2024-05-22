@@ -46,43 +46,22 @@
 void bli_thrcomm_init_openmp( dim_t n_threads, thrcomm_t* comm )
 {
 	if ( comm == NULL ) return;
-	comm->sent_object = NULL;
-	comm->n_threads = n_threads;
-	comm->barrier_sense = 0;
+
+	comm->sent_object             = NULL;
+	comm->n_threads               = n_threads;
+	comm->ti                      = BLIS_OPENMP;
+	comm->barrier_sense           = 0;
 	comm->barrier_threads_arrived = 0;
 }
 
 
 void bli_thrcomm_cleanup_openmp( thrcomm_t* comm )
 {
-	//if ( comm == NULL ) return;
 	return;
 }
 
-//'Normal' barrier for openmp
-//barrier routine taken from art of multicore programming
 void bli_thrcomm_barrier_openmp( dim_t t_id, thrcomm_t* comm )
 {
-#if 0
-	if ( comm == NULL || comm->n_threads == 1 )
-		return;
-	gint_t my_sense = comm->barrier_sense;
-	dim_t my_threads_arrived;
-
-	_Pragma( "omp atomic capture" )
-		my_threads_arrived = ++(comm->barrier_threads_arrived);
-
-	if ( my_threads_arrived == comm->n_threads )
-	{
-		comm->barrier_threads_arrived = 0;
-		comm->barrier_sense = !comm->barrier_sense;
-	}
-	else
-	{
-		volatile gint_t* listener = &comm->barrier_sense;
-		while ( *listener == my_sense ) {}
-	}
-#endif
 	bli_thrcomm_barrier_atomic( t_id, comm );
 }
 
@@ -96,19 +75,27 @@ void bli_thrcomm_init_openmp( dim_t n_threads, thrcomm_t* comm )
 	err_t r_val;
 
 	if ( comm == NULL ) return;
-	comm->sent_object = NULL;
-	comm->n_threads = n_threads;
+
+	comm->sent_object             = NULL;
+	comm->n_threads               = n_threads;
+	comm->ti                      = BLIS_OPENMP;
+	//comm->barrier_sense           = 0;
+	//comm->barrier_threads_arrived = 0;
+
 	comm->barriers = bli_malloc_intl( sizeof( barrier_t* ) * n_threads, &r_val );
+
 	bli_thrcomm_tree_barrier_create( n_threads, BLIS_TREE_BARRIER_ARITY, comm->barriers, 0 );
 }
 
 void bli_thrcomm_cleanup_openmp( thrcomm_t* comm )
 {
 	if ( comm == NULL ) return;
+
 	for ( dim_t i = 0; i < comm->n_threads; i++ )
 	{
 	   bli_thrcomm_tree_barrier_free( comm->barriers[i] );
 	}
+
 	bli_free_intl( comm->barriers );
 }
 

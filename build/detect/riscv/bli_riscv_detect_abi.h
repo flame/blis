@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2023, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -31,28 +30,34 @@
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
 */
 
-#include "blis.h"
+/* Construct a RISC-V ABI string based on available features. */
 
-void bli_thrcomm_init_single( dim_t n_threads, thrcomm_t* comm )
-{
-	if ( comm == NULL ) return;
+#if __riscv
 
-	comm->sent_object             = NULL;
-	comm->n_threads               = n_threads;
-	comm->ti                      = BLIS_SINGLE;
-	comm->barrier_sense           = 0;
-	comm->barrier_threads_arrived = 0;
-}
+#define CAT2(a,b) a##b
+#define CAT(a,b) CAT2(a,b)
 
-void bli_thrcomm_cleanup_single( thrcomm_t* comm )
-{
-	if ( comm == NULL ) return;
-}
+#if __riscv_xlen == 32
+#define RISCV_INT_ABI ilp32
+#else
+#define RISCV_INT_ABI lp64
+#endif
 
-void bli_thrcomm_barrier_single( dim_t t_id, thrcomm_t* comm )
-{
-	return;
-}
+#if __riscv_abi_rve
+CAT(RISCV_INT_ABI, e)
+#elif __riscv_float_abi_soft
+RISCV_INT_ABI
+#elif __riscv_float_abi_single
+CAT(RISCV_INT_ABI, f)
+#elif __riscv_float_abi_double
+CAT(RISCV_INT_ABI, d)
+#elif __riscv_float_abi_quad
+CAT(RISCV_INT_ABI, q)
+#else
+#error "Unknown RISC-V ABI"
+#endif
 
+#endif /* __riscv */

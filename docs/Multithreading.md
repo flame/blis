@@ -197,6 +197,8 @@ If `BLIS_THREAD_IMPL` is not set, BLIS will attempt to query its shorthand alter
 
 ## Globally at runtime
 
+***Note:** If you want to gain access to BLIS API function prototypes, be sure to #include "blis.h" from the relevant source files in your application.*
+
 If you still wish to set the parallelization scheme globally, but you want to do so at runtime, BLIS provides a thread-safe API for specifying multithreading. Think of these functions as a way to modify the same internal data structure into which the environment variables are read. (Recall that the environment variables are only read once, when BLIS is initialized).
 
 **Note**: If you set parallelization globally via environment variables and *then* your application *also* uses the global runtime API to set the ways of parallelism, the global runtime API will prevail.
@@ -246,7 +248,7 @@ This will result in both OpenMP and pthreads implementations being compiled and 
 ```c
 void bli_thread_set_thread_impl( timpl_t ti );
 ```
-The function takes a `timpl_t`, which is an enumerated type that has three valid values corresponding to the four possible threading implementations: `BLIS_OPENMP`, `BLIS_POSIX`, `BLIS_HPX`, and `BLIS_SINGLE`. Forcing use of pthreads is as simple as calling:
+The function takes a `timpl_t`, which is an enumerated type that has four valid values corresponding to the four possible threading implementations: `BLIS_OPENMP`, `BLIS_POSIX`, `BLIS_HPX`, and `BLIS_SINGLE`. Forcing use of pthreads is as simple as calling:
 ```c
 bli_thread_set_thread_impl( BLIS_POSIX )
 ```
@@ -258,7 +260,9 @@ Note that if `BLIS_SINGLE` is specified, any other-related parameters previously
 
 ## Locally at runtime
 
-In addition to the global methods based on environment variables and runtime function calls, BLIS also offers a local, *per-call* method of requesting parallelism at runtime. This method has the benefit of being thread-safe and flexible; your application can spawn two threads at the application level, with each thread requesting different degrees of parallelism from their respective calls to level-3 BLIS operations.
+***Note:** If you want to gain access to BLIS API function prototypes, be sure to #include "blis.h" from the relevant source files in your application.*
+
+In addition to the global methods based on environment variables and runtime function calls, BLIS also offers a local, *per-call* method of requesting parallelism at runtime. This method has the benefit of being thread-safe and flexible; your application can spawn two or more threads at the application level, with each thread requesting different degrees of parallelism from their respective calls to level-3 BLIS operations.
 
 As with environment variables and the global runtime API, there are two ways to specify parallelism: the automatic way and the manual way. Both ways involve allocating a BLIS-specific object, initializing the object and encoding the desired parallelization, and then passing a pointer to the object into one of the expert interfaces of either the [typed](docs/BLISTypedAPI.md) or [object](docs/BLISObjectAPI) APIs. We provide examples of utilizing this threading object below.
 
@@ -321,7 +325,7 @@ This will result in both OpenMP and pthreads implementations being compiled and 
 ```c
 void bli_rntm_set_thread_impl( timpl_t ti, rntm_t* rntm );
 ```
-The function takes a `timpl_t`, which is an enumerated type that has three valid values corresponding to the four possible threading implementations: `BLIS_OPENMP`, `BLIS_POSIX`, `BLIS_HPX`, and `BLIS_SINGLE`. Forcing use of pthreads is as simple as calling:
+The function takes a `timpl_t`, which is an enumerated type that has four valid values corresponding to the four possible threading implementations: `BLIS_OPENMP`, `BLIS_POSIX`, `BLIS_HPX`, and `BLIS_SINGLE`. Forcing use of pthreads is as simple as calling:
 ```c
 bli_rntm_set_thread_impl( BLIS_POSIX, &rntm );
 ```
