@@ -38,159 +38,181 @@
 // -- Instantiate kernel prototypes for the current architecture ---------------
 
 // Define macros to construct the full symbol name from the operation name.
-#undef  GENARNAME             // architecture, _ref (no bli_)
+#undef  GENARNAME             // opname, architecture, _ref (no bli_)
 #define GENARNAME(opname)     PASTECH2(opname,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
-#undef  GENBARNAME            // bli_, architecture, _ref
+#undef  GENTARNAME            // bli, ch, opname, architecture, _ref
+#define GENTARNAME(ch,opname) PASTEMAC3(ch,opname,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
+#undef  GENBARNAME            // bli_, opname, architecture, _ref
 #define GENBARNAME(opname)    PASTEMAC2(opname,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
-#undef  GENBAINAME            // bli_, architecture, _ind
+#undef  GENBAINAME            // bli_, opname, architecture, _ind
 #define GENBAINAME(opname)    PASTEMAC2(opname,BLIS_CNAME_INFIX,BLIS_IND_SUFFIX)
+
+// Define a prototype-inserting template that uses an arbitrary prototype-
+// generating macro.
+
+#undef  INSERT_PROTMAC_BASIC0
+#define INSERT_PROTMAC_BASIC0( protmac, kername ) \
+\
+protmac( float,    s, kername ) \
+protmac( double,   d, kername ) \
+protmac( scomplex, c, kername ) \
+protmac( dcomplex, z, kername )
+
 
 // -- Level-3 native micro-kernel prototype redefinitions ----------------------
 
-// -- Prototypes for completely generic level-3 microkernels --
+// -- Construct arch-specific names for reference level-3 microkernels --
 
-#undef  gemm_ukr_name
 #define gemm_ukr_name       GENARNAME(gemm)
-#undef  gemmtrsm_l_ukr_name
 #define gemmtrsm_l_ukr_name GENARNAME(gemmtrsm_l)
-#undef  gemmtrsm_u_ukr_name
 #define gemmtrsm_u_ukr_name GENARNAME(gemmtrsm_u)
-#undef  trsm_l_ukr_name
 #define trsm_l_ukr_name     GENARNAME(trsm_l)
-#undef  trsm_u_ukr_name
 #define trsm_u_ukr_name     GENARNAME(trsm_u)
 
-// Instantiate prototypes for above functions via the native micro-kernel API
-// template.
-#include "bli_l3_ukr.h"
+// Instantiate prototypes for above functions using the pre-defined level-3
+// microkernel prototype-generating macros.
+
+INSERT_PROTMAC_BASIC0( GEMM_UKR_PROT,     gemm_ukr_name )
+INSERT_PROTMAC_BASIC0( GEMMTRSM_UKR_PROT, gemmtrsm_l_ukr_name )
+INSERT_PROTMAC_BASIC0( GEMMTRSM_UKR_PROT, gemmtrsm_u_ukr_name )
+INSERT_PROTMAC_BASIC0( TRSM_UKR_PROT,     trsm_l_ukr_name )
+INSERT_PROTMAC_BASIC0( TRSM_UKR_PROT,     trsm_u_ukr_name )
+
 
 // -- Level-3 virtual micro-kernel prototype redefinitions ---------------------
 
-// -- Prototypes for induced method level-3 microkernels --
+// -- Construct arch-specific names for reference virtual level-3 microkernels --
 
 // -- 1m --
 
-#undef  gemm1m_ukr_name
 #define gemm1m_ukr_name        GENARNAME(gemm1m)
-#undef  gemmtrsm1m_l_ukr_name
 #define gemmtrsm1m_l_ukr_name  GENARNAME(gemmtrsm1m_l)
-#undef  gemmtrsm1m_u_ukr_name
 #define gemmtrsm1m_u_ukr_name  GENARNAME(gemmtrsm1m_u)
-#undef  trsm1m_l_ukr_name
 #define trsm1m_l_ukr_name      GENARNAME(trsm1m_l)
-#undef  trsm1m_u_ukr_name
 #define trsm1m_u_ukr_name      GENARNAME(trsm1m_u)
 
-// Instantiate prototypes for above functions via the virtual micro-kernel API
-// template.
-#include "bli_l3_ind_ukr.h"
+// Instantiate prototypes for above functions using the pre-defined level-3
+// microkernel prototype-generating macros.
+
+// -- 1m --
+
+INSERT_PROTMAC_BASIC0( GEMM_UKR_PROT,     gemm1m_ukr_name )
+INSERT_PROTMAC_BASIC0( GEMMTRSM_UKR_PROT, gemmtrsm1m_l_ukr_name )
+INSERT_PROTMAC_BASIC0( GEMMTRSM_UKR_PROT, gemmtrsm1m_u_ukr_name )
+INSERT_PROTMAC_BASIC0( TRSM_UKR_PROT,     trsm1m_l_ukr_name )
+INSERT_PROTMAC_BASIC0( TRSM_UKR_PROT,     trsm1m_u_ukr_name )
+
 
 // -- Level-3 small/unpacked micro-kernel prototype definitions ----------------
 
-// NOTE: This results in redundant prototypes for gemmsup_r and gemmsup_c
-// kernels, but since they will be identical the compiler won't complain.
+// -- Construct arch-specific names for reference gemmsup kernels --
 
-#undef  gemmsup_rv_ukr_name
-#define gemmsup_rv_ukr_name   GENARNAME(gemmsup_r)
-#undef  gemmsup_rg_ukr_name
-#define gemmsup_rg_ukr_name   GENARNAME(gemmsup_r)
-#undef  gemmsup_cv_ukr_name
-#define gemmsup_cv_ukr_name   GENARNAME(gemmsup_c)
-#undef  gemmsup_cg_ukr_name
-#define gemmsup_cg_ukr_name   GENARNAME(gemmsup_c)
+#define gemmsup_rv_ukr_name  GENARNAME(gemmsup_r)
+#define gemmsup_rg_ukr_name  GENARNAME(gemmsup_r)
+#define gemmsup_cv_ukr_name  GENARNAME(gemmsup_c)
+#define gemmsup_cg_ukr_name  GENARNAME(gemmsup_c)
+#define gemmsup_gx_ukr_name  GENARNAME(gemmsup_g)
 
-#undef  gemmsup_gx_ukr_name
-#define gemmsup_gx_ukr_name   GENARNAME(gemmsup_g)
+// Instantiate prototypes for above functions using the pre-defined gemmsup
+// kernel prototype-generating macros.
 
-// Include the small/unpacked kernel API template.
-#include "bli_l3_sup_ker.h"
+INSERT_PROTMAC_BASIC0( GEMMSUP_KER_PROT, gemmsup_rv_ukr_name )
+INSERT_PROTMAC_BASIC0( GEMMSUP_KER_PROT, gemmsup_rg_ukr_name )
+INSERT_PROTMAC_BASIC0( GEMMSUP_KER_PROT, gemmsup_cv_ukr_name )
+INSERT_PROTMAC_BASIC0( GEMMSUP_KER_PROT, gemmsup_cg_ukr_name )
+INSERT_PROTMAC_BASIC0( GEMMSUP_KER_PROT, gemmsup_gx_ukr_name )
+
 
 // -- Level-1m (packm/unpackm) kernel prototype redefinitions ------------------
 
-#undef  packm_mrxk_ker_name
-#define packm_mrxk_ker_name  GENARNAME(packm_mrxk)
-#undef  packm_nrxk_ker_name
-#define packm_nrxk_ker_name  GENARNAME(packm_nrxk)
+// -- Construct arch-specific names for reference packm kernels --
 
-#undef  packm_mrxk_1er_ker_name
-#define packm_mrxk_1er_ker_name  GENARNAME(packm_mrxk_1er)
-#undef  packm_nrxk_1er_ker_name
-#define packm_nrxk_1er_ker_name  GENARNAME(packm_nrxk_1er)
-
-#undef  packm_mrxmr_diag_ker_name
-#define packm_mrxmr_diag_ker_name  GENARNAME(packm_mrxmr_diag)
-#undef  packm_nrxnr_diag_ker_name
-#define packm_nrxnr_diag_ker_name  GENARNAME(packm_nrxnr_diag)
-
-#undef  packm_mrxmr_diag_1er_ker_name
+#define packm_mrxk_ker_name            GENARNAME(packm_mrxk)
+#define packm_nrxk_ker_name            GENARNAME(packm_nrxk)
+#define packm_mrxk_1er_ker_name        GENARNAME(packm_mrxk_1er)
+#define packm_nrxk_1er_ker_name        GENARNAME(packm_nrxk_1er)
+#define packm_mrxmr_diag_ker_name      GENARNAME(packm_mrxmr_diag)
+#define packm_nrxnr_diag_ker_name      GENARNAME(packm_nrxnr_diag)
 #define packm_mrxmr_diag_1er_ker_name  GENARNAME(packm_mrxmr_diag_1er)
-#undef  packm_nrxnr_diag_1er_ker_name
 #define packm_nrxnr_diag_1er_ker_name  GENARNAME(packm_nrxnr_diag_1er)
+#define unpackm_mrxk_ker_name          GENARNAME(unpackm_mrxk)
+#define unpackm_nrxk_ker_name          GENARNAME(unpackm_nrxk)
 
-#undef  unpackm_mrxk_ker_name
-#define unpackm_mrxk_ker_name  GENARNAME(unpackm_mrxk)
-#undef  unpackm_nrxk_ker_name
-#define unpackm_nrxk_ker_name  GENARNAME(unpackm_nrxk)
+// Instantiate prototypes for above functions using the pre-defined packm
+// kernel prototype-generating macros.
 
-// Instantiate prototypes for above functions via the level-1m kernel API
-// template.
-#include "bli_l1m_ker.h"
+INSERT_PROTMAC_BASIC0( PACKM_KER_PROT,      packm_mrxk_ker_name )
+INSERT_PROTMAC_BASIC0( PACKM_KER_PROT,      packm_nrxk_ker_name )
+INSERT_PROTMAC_BASIC0( PACKM_KER_PROT,      packm_mrxk_1er_ker_name )
+INSERT_PROTMAC_BASIC0( PACKM_KER_PROT,      packm_nrxk_1er_ker_name )
+INSERT_PROTMAC_BASIC0( PACKM_DIAG_KER_PROT, packm_mrxmr_diag_ker_name )
+INSERT_PROTMAC_BASIC0( PACKM_DIAG_KER_PROT, packm_nrxnr_diag_ker_name )
+INSERT_PROTMAC_BASIC0( PACKM_DIAG_KER_PROT, packm_mrxmr_diag_1er_ker_name )
+INSERT_PROTMAC_BASIC0( PACKM_DIAG_KER_PROT, packm_nrxnr_diag_1er_ker_name )
+INSERT_PROTMAC_BASIC0( UNPACKM_KER_PROT,    unpackm_mrxk_ker_name )
+INSERT_PROTMAC_BASIC0( UNPACKM_KER_PROT,    unpackm_nrxk_ker_name )
+
 
 // -- Level-1f kernel prototype redefinitions ----------------------------------
 
-#undef  axpy2v_ker_name
-#define axpy2v_ker_name     GENARNAME(axpy2v)
-#undef  dotaxpyv_ker_name
-#define dotaxpyv_ker_name   GENARNAME(dotaxpyv)
-#undef  axpyf_ker_name
-#define axpyf_ker_name      GENARNAME(axpyf)
-#undef  dotxf_ker_name
-#define dotxf_ker_name      GENARNAME(dotxf)
-#undef  dotxaxpyf_ker_name
-#define dotxaxpyf_ker_name  GENARNAME(dotxaxpyf)
+// -- Construct arch-specific names for reference level-1f kernels --
 
-// Instantiate prototypes for above functions via the level-1f kernel API
-// template.
-#include "bli_l1f_ker.h"
+#define axpy2v_ker_name     GENARNAME(axpy2v)
+#define axpyf_ker_name      GENARNAME(axpyf)
+#define dotaxpyv_ker_name   GENARNAME(dotaxpyv)
+#define dotxaxpyf_ker_name  GENARNAME(dotxaxpyf)
+#define dotxf_ker_name      GENARNAME(dotxf)
+
+// Instantiate prototypes for above functions using the pre-defined level-1f
+// kernel prototype-generating macros.
+
+INSERT_PROTMAC_BASIC0( AXPY2V_KER_PROT,     axpy2v_ker_name )
+INSERT_PROTMAC_BASIC0( AXPYF_KER_PROT,      axpyf_ker_name )
+INSERT_PROTMAC_BASIC0( DOTAXPYV_KER_PROT,   dotaxpyv_ker_name )
+INSERT_PROTMAC_BASIC0( DOTXAXPYF_KER_PROT,  dotxaxpyf_ker_name )
+INSERT_PROTMAC_BASIC0( DOTXF_KER_PROT,      dotxf_ker_name )
+
 
 // -- Level-1v kernel prototype redefinitions ----------------------------------
 
-// -- prototypes for completely generic level-1v kernels --
+// -- Construct arch-specific names for reference level-1v kernels --
 
-#undef  addv_ker_name
 #define addv_ker_name      GENARNAME(addv)
-#undef  amaxv_ker_name
 #define amaxv_ker_name     GENARNAME(amaxv)
-#undef  axpbyv_ker_name
 #define axpbyv_ker_name    GENARNAME(axpbyv)
-#undef  axpyv_ker_name
 #define axpyv_ker_name     GENARNAME(axpyv)
-#undef  copyv_ker_name
 #define copyv_ker_name     GENARNAME(copyv)
-#undef  dotv_ker_name
 #define dotv_ker_name      GENARNAME(dotv)
-#undef  dotxv_ker_name
 #define dotxv_ker_name     GENARNAME(dotxv)
-#undef  invertv_ker_name
 #define invertv_ker_name   GENARNAME(invertv)
-#undef  invscalv_ker_name
 #define invscalv_ker_name  GENARNAME(invscalv)
-#undef  scalv_ker_name
 #define scalv_ker_name     GENARNAME(scalv)
-#undef  scal2v_ker_name
 #define scal2v_ker_name    GENARNAME(scal2v)
-#undef  setv_ker_name
 #define setv_ker_name      GENARNAME(setv)
-#undef  subv_ker_name
 #define subv_ker_name      GENARNAME(subv)
-#undef  swapv_ker_name
 #define swapv_ker_name     GENARNAME(swapv)
-#undef  xpbyv_ker_name
 #define xpbyv_ker_name     GENARNAME(xpbyv)
 
-// Instantiate prototypes for above functions via the level-1v kernel API
-// template.
-#include "bli_l1v_ker.h"
+// Instantiate prototypes for above functions using the pre-defined level-1v
+// kernel prototype-generating macros.
+
+INSERT_PROTMAC_BASIC0( ADDV_KER_PROT,     addv_ker_name )
+INSERT_PROTMAC_BASIC0( AMAXV_KER_PROT,    amaxv_ker_name )
+INSERT_PROTMAC_BASIC0( AXPBYV_KER_PROT,   axpbyv_ker_name )
+INSERT_PROTMAC_BASIC0( AXPYV_KER_PROT,    axpyv_ker_name )
+INSERT_PROTMAC_BASIC0( COPYV_KER_PROT,    copyv_ker_name )
+INSERT_PROTMAC_BASIC0( DOTV_KER_PROT,     dotv_ker_name )
+INSERT_PROTMAC_BASIC0( DOTXV_KER_PROT,    dotxv_ker_name )
+INSERT_PROTMAC_BASIC0( INVERTV_KER_PROT,  invertv_ker_name )
+INSERT_PROTMAC_BASIC0( INVSCALV_KER_PROT, invscalv_ker_name )
+INSERT_PROTMAC_BASIC0( SCALV_KER_PROT,    scalv_ker_name )
+INSERT_PROTMAC_BASIC0( SCAL2V_KER_PROT,   scal2v_ker_name )
+INSERT_PROTMAC_BASIC0( SETV_KER_PROT,     setv_ker_name )
+INSERT_PROTMAC_BASIC0( SUBV_KER_PROT,     subv_ker_name )
+INSERT_PROTMAC_BASIC0( SWAPV_KER_PROT,    swapv_ker_name )
+INSERT_PROTMAC_BASIC0( XPBYV_KER_PROT,    xpbyv_ker_name )
+
+
 
 // -- Macros to help concisely instantiate bli_func_init() ---------------------
 

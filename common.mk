@@ -743,6 +743,9 @@ $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
 
 # --- Position-independent code flags (shared libraries only) ---
 
+
+ifeq ($(MK_ENABLE_SHARED),yes)
+
 # Emit position-independent code for dynamic linking.
 ifeq ($(IS_MSVC),yes)
 # Note: Don't use any fPIC flags for Windows builds since all code is position-
@@ -824,6 +827,14 @@ else # ifeq ($(EXPORT_SHARED),public)
 BUILD_SYMFLAGS := -fvisibility=hidden
 endif
 endif
+endif
+
+else #ifeq ($(MK_ENABLE_SHARED),no)
+
+# Don't modify CPICFLAGS for the various configuration family members.
+# Don't use any special symbol export flags.
+BUILD_SYMFLAGS :=
+
 endif
 
 # --- Language flags ---

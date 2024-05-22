@@ -50,16 +50,16 @@
  */
 void bli_sgemm_power7_int_8x4
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       float*     restrict alpha,
-       float*     restrict a,
-       float*     restrict b,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+              dim_t      m,
+              dim_t      n,
+              dim_t      k,
+        const void*      alpha0,
+        const void*      a0,
+        const void*      b0,
+        const void*      beta0,
+              void*      c0, inc_t rs_c, inc_t cs_c,
+              auxinfo_t* data,
+        const cntx_t*    cntx
      )
 {
 #if 1 || defined(UTEST)
@@ -67,6 +67,12 @@ void bli_sgemm_power7_int_8x4
     const long LDA = MR, LDB = NR;
     long i, j, kk;
     float c00;
+
+    const float* alpha = alpha0;
+    const float* a     = a0;
+    const float* b     = b0;
+    const float* beta  = beta0;
+          float* c     = c0;
 
     for (i=0; i < m; i++) {
         for (j=0; j < n; j++) {
@@ -92,18 +98,24 @@ void bli_sgemm_power7_int_8x4
  */
 void bli_dgemm_power7_int_8x4
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       double*    restrict alpha,
-       double*    restrict a,
-       double*    restrict b,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k,
+       const void*      alpha0,
+       const void*      a0,
+       const void*      b0,
+       const void*      beta0,
+             void*      c0, inc_t rs_c, inc_t cs_c,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
+    const double* alpha = alpha0;
+    const double* a     = a0;
+    const double* b     = b0;
+    const double* beta  = beta0;
+          double* c     = c0;
+
     if ( cs_c == 1 )
     {
         // Optimized code for case where C rows are contiguous (i.e. C is row-major)
@@ -449,16 +461,16 @@ void bli_dgemm_power7_int_8x4
  */
 void bli_cgemm_power7_int_8x4
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       scomplex*  restrict alpha,
-       scomplex*  restrict a,
-       scomplex*  restrict b,
-       scomplex*  restrict beta,
-       scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k,
+       const void*      alpha0,
+       const void*      a0,
+       const void*      b0,
+       const void*      beta0,
+             void*      c0, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 #if 1 || defined(UTEST)
@@ -466,6 +478,12 @@ void bli_cgemm_power7_int_8x4
     const long LDA = MR, LDB = NR;
     int i, j, kk;
     scomplex c00;
+
+    const scomplex* alpha = alpha0;
+    const scomplex* a     = a0;
+    const scomplex* b     = b0;
+    const scomplex* beta  = beta0;
+          scomplex* c     = c0;
 
     for (i=0; i < m; i++) {
         for (j=0; j < n; j++) {
@@ -502,16 +520,16 @@ void bli_cgemm_power7_int_8x4
  */
 void bli_zgemm_power7_int_8x4
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       scomplex*  restrict alpha,
-       scomplex*  restrict a,
-       scomplex*  restrict b,
-       scomplex*  restrict beta,
-       scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k,
+       const void*      alpha0,
+       const void*      a0,
+       const void*      b0,
+       const void*      beta0,
+             void*      c0, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 #if 1 || defined(UTEST)
@@ -519,6 +537,12 @@ void bli_zgemm_power7_int_8x4
     const long LDA = MR, LDB = NR;
     int i, j, kk;
     dcomplex c00;
+
+    const dcomplex* alpha = alpha0;
+    const dcomplex* a     = a0;
+    const dcomplex* b     = b0;
+    const dcomplex* beta  = beta0;
+          dcomplex* c     = c0;
 
     for (i=0; i < m; i++) {
         for (j=0; j < n; j++) {

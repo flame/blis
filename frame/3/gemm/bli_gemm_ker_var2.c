@@ -37,28 +37,28 @@
 
 typedef void (*xpbys_mxn_vft)
     (
-      dim_t m,
-      dim_t n,
-      void* x, inc_t rs_x, inc_t cs_x,
-      void* b,
-      void* y, inc_t rs_y, inc_t cs_y
+            dim_t m,
+            dim_t n,
+      const void* x, inc_t rs_x, inc_t cs_x,
+      const void* b,
+            void* y, inc_t rs_y, inc_t cs_y
     );
 
-#undef GENTFUNC2
+#undef  GENTFUNC2
 #define GENTFUNC2(ctypex,ctypey,chx,chy,op) \
 \
 BLIS_INLINE void PASTEMAC2(chx,chy,op) \
     ( \
-      dim_t m, \
-      dim_t n, \
-      void* x, inc_t rs_x, inc_t cs_x, \
-      void* b, \
-      void* y, inc_t rs_y, inc_t cs_y \
+            dim_t m, \
+            dim_t n, \
+      const void* x, inc_t rs_x, inc_t cs_x, \
+      const void* b, \
+            void* y, inc_t rs_y, inc_t cs_y \
     ) \
 { \
-	ctypex* restrict x_cast = x; \
-	ctypey* restrict b_cast = b; \
-	ctypey* restrict y_cast = y; \
+	const ctypex* restrict x_cast = x; \
+	const ctypey* restrict b_cast = b; \
+	      ctypey* restrict y_cast = y; \
 \
 	PASTEMAC3(chx,chy,chy,xpbys_mxn) \
 	( \
@@ -179,14 +179,14 @@ void bli_gemm_ker_var2
 
 	// Query the context for the micro-kernel address and cast it to its
 	// function pointer type.
-	gemm_ukr_vft gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt_exec, BLIS_GEMM_UKR, cntx );
+	gemm_ukr_ft gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt_exec, BLIS_GEMM_UKR, cntx );
 
 	// Query the params field from the obj_t. If it is non-NULL, grab the ukr
 	// field of the params struct. If that function pointer is non-NULL, use it
 	// as our microkernel instead of the default microkernel queried from the
 	// cntx above.
 	const gemm_ker_params_t* params = bli_obj_ker_params( c );
-	gemm_ukr_vft user_ukr = params ? params->ukr : NULL;
+	gemm_ukr_ft user_ukr = params ? params->ukr : NULL;
 	if ( user_ukr ) gemm_ukr = user_ukr;
 
 	// Temporary C buffer for edge cases. Note that the strides of this

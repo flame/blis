@@ -83,18 +83,18 @@ GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref )
 
 void bli_dgemmsup_rv_haswell_asm_6x8m
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       double*    restrict alpha,
-       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	uint64_t n_left = n0 % 8;
@@ -103,9 +103,9 @@ void bli_dgemmsup_rv_haswell_asm_6x8m
 	// dispatch other 6x?m kernels, as needed.
 	if ( n_left )
 	{
-		double* restrict cij = c;
-		double* restrict bj  = b;
-		double* restrict ai  = a;
+		      double* cij = ( double* )c;
+		const double* bj  = ( double* )b;
+		const double* ai  = ( double* )a;
 
 		if ( 6 <= n_left )
 		{
@@ -176,8 +176,8 @@ void bli_dgemmsup_rv_haswell_asm_6x8m
 				dim_t m_iter = ( m0 + mr - 1 ) / mr;
 				dim_t m_left =   m0            % mr;
 
-				double* restrict ai_ii  = ai;
-				double* restrict cij_ii = cij;
+				const double* ai_ii  = ai;
+				      double* cij_ii = cij;
 
 				for ( dim_t ii = 0; ii < m_iter; ii += 1 )
 				{
@@ -904,22 +904,22 @@ void bli_dgemmsup_rv_haswell_asm_6x8m
 	// Handle edge cases in the m dimension, if they exist.
 	if ( m_left )
 	{
-		const dim_t      nr_cur = 8;
-		const dim_t      i_edge = m0 - ( dim_t )m_left;
+		const dim_t   nr_cur = 8;
+		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		double* restrict cij = c + i_edge*rs_c;
-		//double* restrict ai  = a + i_edge*rs_a;
-		//double* restrict ai  = a + ( i_edge / 6 ) * ps_a;
-		double* restrict ai  = a + m_iter * ps_a;
-		double* restrict bj  = b;
+		      double* cij = ( double* )c + i_edge*rs_c;
+		//const double* ai  = ( double* )a + i_edge*rs_a;
+		//const double* ai  = ( double* )a + ( i_edge / 6 ) * ps_a;
+		const double* ai  = ( double* )a + m_iter * ps_a;
+		const double* bj  = ( double* )b;
 
 #if 0
 		// We add special handling for slightly inflated MR blocksizes
 		// at edge cases, up to a maximum of 9.
 		if ( 6 < m_left )
 		{
-			dgemmsup_ker_ft ker_fp1 = NULL;
-			dgemmsup_ker_ft ker_fp2 = NULL;
+			gemmsup_ker_ft  ker_fp1 = NULL;
+			gemmsup_ker_ft  ker_fp2 = NULL;
 			dim_t           mr1, mr2;
 
 			if ( m_left == 7 )
@@ -960,7 +960,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8m
 		}
 #endif
 
-		dgemmsup_ker_ft ker_fps[6] =
+		gemmsup_ker_ft  ker_fps[6] =
 		{
 		  NULL,
 		  bli_dgemmsup_rv_haswell_asm_1x8,
@@ -970,7 +970,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8m
 		  bli_dgemmsup_rv_haswell_asm_5x8
 		};
 
-		dgemmsup_ker_ft ker_fp = ker_fps[ m_left ];
+		gemmsup_ker_ft  ker_fp = ker_fps[ m_left ];
 
 		ker_fp
 		(
@@ -985,18 +985,18 @@ void bli_dgemmsup_rv_haswell_asm_6x8m
 
 void bli_dgemmsup_rv_haswell_asm_6x6m
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       double*    restrict alpha,
-       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -1683,22 +1683,22 @@ void bli_dgemmsup_rv_haswell_asm_6x6m
 	// Handle edge cases in the m dimension, if they exist.
 	if ( m_left )
 	{
-		const dim_t      nr_cur = 6;
-		const dim_t      i_edge = m0 - ( dim_t )m_left;
+		const dim_t   nr_cur = 6;
+		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		double* restrict cij = c + i_edge*rs_c;
-		//double* restrict ai  = a + i_edge*rs_a;
-		//double* restrict ai  = a + ( i_edge / 6 ) * ps_a;
-		double* restrict ai  = a + m_iter * ps_a;
-		double* restrict bj  = b;
+		      double* cij = ( double* )c + i_edge*rs_c;
+		//const double* ai  = ( double* )a + i_edge*rs_a;
+		//const double* ai  = ( double* )a + ( i_edge / 6 ) * ps_a;
+		const double* ai  = ( double* )a + m_iter * ps_a;
+		const double* bj  = ( double* )b;
 
 #if 0
 		// We add special handling for slightly inflated MR blocksizes
 		// at edge cases, up to a maximum of 9.
 		if ( 6 < m_left )
 		{
-			dgemmsup_ker_ft ker_fp1 = NULL;
-			dgemmsup_ker_ft ker_fp2 = NULL;
+			gemmsup_ker_ft  ker_fp1 = NULL;
+			gemmsup_ker_ft  ker_fp2 = NULL;
 			dim_t           mr1, mr2;
 
 			if ( m_left == 7 )
@@ -1739,7 +1739,7 @@ void bli_dgemmsup_rv_haswell_asm_6x6m
 		}
 #endif
 
-		dgemmsup_ker_ft ker_fps[6] =
+		gemmsup_ker_ft  ker_fps[6] =
 		{
 		  NULL,
 		  bli_dgemmsup_rv_haswell_asm_1x6,
@@ -1749,7 +1749,7 @@ void bli_dgemmsup_rv_haswell_asm_6x6m
 		  bli_dgemmsup_rv_haswell_asm_5x6
 		};
 
-		dgemmsup_ker_ft ker_fp = ker_fps[ m_left ];
+		gemmsup_ker_ft  ker_fp = ker_fps[ m_left ];
 
 		ker_fp
 		(
@@ -1764,18 +1764,18 @@ void bli_dgemmsup_rv_haswell_asm_6x6m
 
 void bli_dgemmsup_rv_haswell_asm_6x4m
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       double*    restrict alpha,
-       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -2340,22 +2340,22 @@ void bli_dgemmsup_rv_haswell_asm_6x4m
 	// Handle edge cases in the m dimension, if they exist.
 	if ( m_left )
 	{
-		const dim_t      nr_cur = 4;
-		const dim_t      i_edge = m0 - ( dim_t )m_left;
+		const dim_t   nr_cur = 4;
+		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		double* restrict cij = c + i_edge*rs_c;
-		//double* restrict ai  = a + i_edge*rs_a;
-		//double* restrict ai  = a + ( i_edge / 6 ) * ps_a;
-		double* restrict ai  = a + m_iter * ps_a;
-		double* restrict bj  = b;
+		      double* cij = ( double* )c + i_edge*rs_c;
+		//const double* ai  = ( double* )a + i_edge*rs_a;
+		//const double* ai  = ( double* )a + ( i_edge / 6 ) * ps_a;
+		const double* ai  = ( double* )a + m_iter * ps_a;
+		const double* bj  = ( double* )b;
 
 #if 0
 		// We add special handling for slightly inflated MR blocksizes
 		// at edge cases, up to a maximum of 9.
 		if ( 6 < m_left )
 		{
-			dgemmsup_ker_ft ker_fp1 = NULL;
-			dgemmsup_ker_ft ker_fp2 = NULL;
+			gemmsup_ker_ft  ker_fp1 = NULL;
+			gemmsup_ker_ft  ker_fp2 = NULL;
 			dim_t           mr1, mr2;
 
 			if ( m_left == 7 )
@@ -2396,7 +2396,7 @@ void bli_dgemmsup_rv_haswell_asm_6x4m
 		}
 #endif
 
-		dgemmsup_ker_ft ker_fps[6] =
+		gemmsup_ker_ft  ker_fps[6] =
 		{
 		  NULL,
 		  bli_dgemmsup_rv_haswell_asm_1x4,
@@ -2406,7 +2406,7 @@ void bli_dgemmsup_rv_haswell_asm_6x4m
 		  bli_dgemmsup_rv_haswell_asm_5x4
 		};
 
-		dgemmsup_ker_ft ker_fp = ker_fps[ m_left ];
+		gemmsup_ker_ft  ker_fp = ker_fps[ m_left ];
 
 		ker_fp
 		(
@@ -2421,18 +2421,18 @@ void bli_dgemmsup_rv_haswell_asm_6x4m
 
 void bli_dgemmsup_rv_haswell_asm_6x2m
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       double*    restrict alpha,
-       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -2973,22 +2973,22 @@ void bli_dgemmsup_rv_haswell_asm_6x2m
 	// Handle edge cases in the m dimension, if they exist.
 	if ( m_left )
 	{
-		const dim_t      nr_cur = 2;
-		const dim_t      i_edge = m0 - ( dim_t )m_left;
+		const dim_t   nr_cur = 2;
+		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		double* restrict cij = c + i_edge*rs_c;
-		//double* restrict ai  = a + i_edge*rs_a;
-		//double* restrict ai  = a + ( i_edge / 6 ) * ps_a;
-		double* restrict ai  = a + m_iter * ps_a;
-		double* restrict bj  = b;
+		      double* cij = ( double* )c + i_edge*rs_c;
+		//const double* ai  = ( double* )a + i_edge*rs_a;
+		//const double* ai  = ( double* )a + ( i_edge / 6 ) * ps_a;
+		const double* ai  = ( double* )a + m_iter * ps_a;
+		const double* bj  = ( double* )b;
 
 #if 0
 		// We add special handling for slightly inflated MR blocksizes
 		// at edge cases, up to a maximum of 9.
 		if ( 6 < m_left )
 		{
-			dgemmsup_ker_ft ker_fp1 = NULL;
-			dgemmsup_ker_ft ker_fp2 = NULL;
+			gemmsup_ker_ft  ker_fp1 = NULL;
+			gemmsup_ker_ft  ker_fp2 = NULL;
 			dim_t           mr1, mr2;
 
 			if ( m_left == 7 )
@@ -3029,7 +3029,7 @@ void bli_dgemmsup_rv_haswell_asm_6x2m
 		}
 #endif
 
-		dgemmsup_ker_ft ker_fps[6] =
+		gemmsup_ker_ft  ker_fps[6] =
 		{
 		  NULL,
 		  bli_dgemmsup_rv_haswell_asm_1x2,
@@ -3039,7 +3039,7 @@ void bli_dgemmsup_rv_haswell_asm_6x2m
 		  bli_dgemmsup_rv_haswell_asm_5x2
 		};
 
-		dgemmsup_ker_ft ker_fp = ker_fps[ m_left ];
+		gemmsup_ker_ft  ker_fp = ker_fps[ m_left ];
 
 		ker_fp
 		(

@@ -58,10 +58,8 @@ void PASTEMAC(ch,varname) \
 	ctype   alpha_psi1; \
 	dim_t   j; \
 \
-	PASTECH(ch,axpyv_ker_ft) kfp_av; \
-\
 	/* Query the context for the kernel function pointer. */ \
-	kfp_av = bli_cntx_get_ukr_dt( dt, BLIS_AXPYV_KER, cntx ); \
+	axpyv_ker_ft kfp_av = bli_cntx_get_ukr_dt( dt, BLIS_AXPYV_KER, cntx ); \
 \
 	for ( j = 0; j < n; ++j ) \
 	{ \

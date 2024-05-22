@@ -106,18 +106,18 @@
  */
 void bli_dgemmsup_rv_armv8a_asm_4x8n
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       double*    restrict alpha,
-       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
   // Fixme: This uker has no dispatching for unalighed sizes.
@@ -128,8 +128,8 @@ void bli_dgemmsup_rv_armv8a_asm_4x8n
   // LLVM has very bad routing ability for inline asm.
   // Limit number of registers in case of Clang compilation.
 #ifndef __clang__
-  void*    a_next = bli_auxinfo_next_a( data );
-  void*    b_next = bli_auxinfo_next_b( data );
+  const void* a_next = bli_auxinfo_next_a( data );
+  const void* b_next = bli_auxinfo_next_b( data );
 #endif
   uint64_t ps_b   = bli_auxinfo_ps_b( data );
 
@@ -440,8 +440,8 @@ consider_edge_cases:
   // TODO: Implement optimized kernel for this.
   //
   // Forward address.
-  b = b + n_iter * ps_b;
-  c = c + n_iter * 8 * cs_c;
+  b = ( double* )b + n_iter * ps_b;
+  c = ( double* )c + n_iter * 8 * cs_c;
   if ( n_left )
   {
     auxinfo_t data_d6x4mn = *data;

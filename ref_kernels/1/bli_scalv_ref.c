@@ -39,14 +39,17 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       conj_t           conjalpha, \
-       dim_t            n, \
-       ctype*  restrict alpha, \
-       ctype*  restrict x, inc_t incx, \
-       cntx_t*          cntx  \
+             conj_t  conjalpha, \
+             dim_t   n, \
+       const void*   alpha0, \
+             void*   x0, inc_t incx, \
+       const cntx_t* cntx  \
      ) \
 { \
 	if ( bli_zero_dim1( n ) ) return; \
+\
+	const ctype* alpha = alpha0; \
+	      ctype* x     = x0; \
 \
 	/* If alpha is one, return. */ \
 	if ( PASTEMAC(ch,eq1)( *alpha ) ) return; \
@@ -54,18 +57,18 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	/* If alpha is zero, use setv. */ \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
-		ctype* zero = PASTEMAC(ch,0); \
+		const ctype* zero = PASTEMAC(ch,0); \
 \
 		/* Query the context for the kernel function pointer. */ \
-		const num_t             dt     = PASTEMAC(ch,type); \
-		PASTECH(ch,setv_ker_ft) setv_p = bli_cntx_get_ukr_dt( dt, BLIS_SETV_KER, cntx ); \
+		const num_t dt     = PASTEMAC(ch,type); \
+		setv_ker_ft setv_p = bli_cntx_get_ukr_dt( dt, BLIS_SETV_KER, cntx ); \
 \
 		setv_p \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  n, \
 		  zero, \
-		  x, incx, \
+		  x0, incx, \
 		  cntx  \
 		); \
 		return; \

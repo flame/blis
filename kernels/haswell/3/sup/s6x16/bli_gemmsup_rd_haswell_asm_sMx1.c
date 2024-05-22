@@ -62,18 +62,18 @@ GEMMSUP_KER_PROT( float,    s, gemmsup_r_haswell_ref )
 
 void bli_sgemmsup_rd_haswell_asm_6x1
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       float*     restrict alpha,
-       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
-       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -588,18 +588,18 @@ void bli_sgemmsup_rd_haswell_asm_6x1
 
 void bli_sgemmsup_rd_haswell_asm_3x1
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       float*     restrict alpha,
-       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
-       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -1003,18 +1003,18 @@ void bli_sgemmsup_rd_haswell_asm_3x1
 
 void bli_sgemmsup_rd_haswell_asm_2x1
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       float*     restrict alpha,
-       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
-       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -1381,18 +1381,18 @@ void bli_sgemmsup_rd_haswell_asm_2x1
 
 void bli_sgemmsup_rd_haswell_asm_1x1
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       float*     restrict alpha,
-       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
-       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );

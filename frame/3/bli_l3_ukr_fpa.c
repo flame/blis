@@ -41,10 +41,10 @@
 #undef  GENFRONT
 #define GENFRONT( tname, opname ) \
 \
-GENARRAY_FPA( PASTECH2(tname,_ukr,_vft), \
+GENARRAY_FPA( PASTECH(tname,_ukr_ft), \
               opname ); \
 \
-PASTECH2(tname,_ukr,_vft) \
+PASTECH(tname,_ukr_ft) \
 PASTEMAC(opname,_qfp)( num_t dt ) \
 { \
 	return PASTECH(opname,_fpa)[ dt ]; \

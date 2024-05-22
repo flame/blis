@@ -62,16 +62,16 @@
 
 void bli_dgemm_power10_mma_8x8
     (
-        dim_t               m,
-        dim_t               n,
-        dim_t               k,
-        double*    restrict alpha,
-        double*    restrict a,
-        double*    restrict b,
-        double*    restrict beta,
-        double*    restrict c, inc_t rs_c0, inc_t cs_c,
-        auxinfo_t*          data,
-        cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
     )
 {
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -80,15 +80,16 @@ void bli_dgemm_power10_mma_8x8
     uint64_t k_left = k % 4;
 
     uint64_t rs_c   = rs_c0;
+    uint64_t cs_c   = cs_c0;
 
     GEMM_UKR_SETUP_CT( d, 8, 8, true );
 
-    double* restrict A0 = a;
-    double* restrict B0 = b;
-    double* restrict C0 = c;
+    const double* restrict A0 = a;
+    const double* restrict B0 = b;
+          double* restrict C0 = c;
 
-    double alpha_ = *alpha,
-           beta_ = *beta;
+    double alpha_ = *((double*)alpha),
+           beta_  = *((double*)beta);
 
     dv4sf_t result[4];
     dv4sf_t *rowC;

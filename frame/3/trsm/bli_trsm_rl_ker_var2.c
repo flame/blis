@@ -99,8 +99,8 @@ void bli_trsm_rl_ker_var2
 	// triangular), it becomes upper-triangular after the kernel operation
 	// is transposed so that all kernel instances are of the "left"
 	// variety (since those are the only trsm ukernels that exist).
-	gemmtrsm_ukr_vft gemmtrsm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMMTRSM_U_UKR, cntx );
-	gemm_ukr_vft     gemm_ukr     = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx );
+	gemmtrsm_ukr_ft gemmtrsm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMMTRSM_U_UKR, cntx );
+	gemm_ukr_ft     gemm_ukr     = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx );
 
 	const void* minus_one   = bli_obj_buffer_for_const( dt, &BLIS_MINUS_ONE );
 	const char* a_cast      = buf_a;

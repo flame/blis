@@ -94,8 +94,8 @@ void bli_trsm_ll_ker_var2
 	const dim_t PACKNR = rs_b;
 
 	// Cast the micro-kernel address to its function pointer type.
-	gemmtrsm_ukr_vft gemmtrsm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMMTRSM_L_UKR, cntx );
-	gemm_ukr_vft     gemm_ukr     = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx );
+	gemmtrsm_ukr_ft gemmtrsm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMMTRSM_L_UKR, cntx );
+	gemm_ukr_ft     gemm_ukr     = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx );
 
 	const void* minus_one   = bli_obj_buffer_for_const( dt, &BLIS_MINUS_ONE );
 	const char* a_cast      = buf_a;

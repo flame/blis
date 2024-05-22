@@ -43,15 +43,15 @@ PACKM_KER_PROT( scomplex, c, packm_3xk_haswell_ref )
 
 void bli_cpackm_haswell_asm_3xk
      (
-       conj_t              conja,
-       pack_t              schema,
-       dim_t               cdim0,
-       dim_t               k0,
-       dim_t               k0_max,
-       scomplex*  restrict kappa,
-       scomplex*  restrict a, inc_t inca0, inc_t lda0,
-       scomplex*  restrict p,              inc_t ldp0,
-       cntx_t*             cntx
+             conj_t    conja,
+             pack_t    schema,
+             dim_t     cdim0,
+             dim_t     k0,
+             dim_t     k0_max,
+       const void*     kappa,
+       const void*     a, inc_t inca0, inc_t lda0,
+             void*     p,              inc_t ldp0,
+       const cntx_t*   cntx
      )
 {
 #if 0
@@ -99,7 +99,7 @@ void bli_cpackm_haswell_asm_3xk
 
 	// NOTE: If/when this kernel ever supports scaling by kappa within the
 	// assembly region, this constraint should be lifted.
-	const bool     unitk  = bli_ceq1( *kappa );
+	const bool     unitk  = bli_ceq1( *(( scomplex* )kappa) );
 
 
 	// -------------------------------------------------------------------------
@@ -364,7 +364,7 @@ void bli_cpackm_haswell_asm_3xk
 			const dim_t        i      = cdim0;
 			const dim_t        m_edge = mnr - cdim0;
 			const dim_t        n_edge = k0_max;
-			scomplex* restrict p_edge = p + (i  )*1;
+			scomplex* restrict p_edge = ( scomplex* )p + (i  )*1;
 
 			bli_cset0s_mxn
 			(
@@ -384,7 +384,7 @@ void bli_cpackm_haswell_asm_3xk
 		const dim_t        j      = k0;
 		const dim_t        m_edge = mnr;
 		const dim_t        n_edge = k0_max - k0;
-		scomplex* restrict p_edge = p + (j  )*ldp;
+		scomplex* restrict p_edge = ( scomplex* )p + (j  )*ldp;
 
 		bli_cset0s_mxn
 		(

@@ -80,10 +80,8 @@ void PASTEMAC(ch,varname) \
 \
 	conja = bli_extract_conj( transa ); \
 \
-	PASTECH(ch,dotv_ker_ft) kfp_dv; \
-\
 	/* Query the context for the kernel function pointer. */ \
-	kfp_dv = bli_cntx_get_ukr_dt( dt, BLIS_DOTV_KER, cntx ); \
+	dotv_ker_ft kfp_dv = bli_cntx_get_ukr_dt( dt, BLIS_DOTV_KER, cntx ); \
 \
 	/* We reduce all of the possible cases down to just lower/upper. */ \
 	if      ( bli_is_upper( uploa_trans ) ) \

@@ -68,18 +68,18 @@ GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref )
 
 void bli_dgemmsup_rd_haswell_asm_6x8m
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       double*    restrict alpha,
-       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	uint64_t n_left = n0 % 8;
@@ -88,9 +88,9 @@ void bli_dgemmsup_rd_haswell_asm_6x8m
 	// dispatch other 6x?m kernels, as needed.
 	if ( n_left )
 	{
-		double* restrict cij = c;
-		double* restrict bj  = b;
-		double* restrict ai  = a;
+		      double* cij = ( double* )c;
+		const double* bj  = ( double* )b;
+		const double* ai  = ( double* )a;
 
 		if ( 4 <= n_left )
 		{
@@ -690,12 +690,12 @@ void bli_dgemmsup_rd_haswell_asm_6x8m
 	// Handle edge cases in the m dimension, if they exist.
 	if ( m_left )
 	{
-		const dim_t      nr_cur = 8;
-		const dim_t      i_edge = m0 - ( dim_t )m_left;
+		const dim_t   nr_cur = 8;
+		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		double* restrict cij = c + i_edge*rs_c;
-		double* restrict bj  = b;
-		double* restrict ai  = a + i_edge*rs_a;
+		      double* cij = ( double* )c + i_edge*rs_c;
+		const double* bj  = ( double* )b;
+		const double* ai  = ( double* )a + i_edge*rs_a;
 
 		if ( 2 == m_left )
 		{
@@ -725,18 +725,18 @@ void bli_dgemmsup_rd_haswell_asm_6x8m
 
 void bli_dgemmsup_rd_haswell_asm_6x4m
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       double*    restrict alpha,
-       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -1262,12 +1262,12 @@ void bli_dgemmsup_rd_haswell_asm_6x4m
 	// Handle edge cases in the m dimension, if they exist.
 	if ( m_left )
 	{
-		const dim_t      nr_cur = 4;
-		const dim_t      i_edge = m0 - ( dim_t )m_left;
+		const dim_t   nr_cur = 4;
+		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		double* restrict cij = c + i_edge*rs_c;
-		double* restrict bj  = b;
-		double* restrict ai  = a + i_edge*rs_a;
+		      double* cij = ( double* )c + i_edge*rs_c;
+		const double* bj  = ( double* )b;
+		const double* ai  = ( double* )a + i_edge*rs_a;
 
 		if ( 2 == m_left )
 		{
@@ -1297,18 +1297,18 @@ void bli_dgemmsup_rd_haswell_asm_6x4m
 
 void bli_dgemmsup_rd_haswell_asm_6x2m
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       double*    restrict alpha,
-       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -1875,12 +1875,12 @@ void bli_dgemmsup_rd_haswell_asm_6x2m
 	// Handle edge cases in the m dimension, if they exist.
 	if ( m_left )
 	{
-		const dim_t      nr_cur = 2;
-		const dim_t      i_edge = m0 - ( dim_t )m_left;
+		const dim_t   nr_cur = 2;
+		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		double* restrict cij = c + i_edge*rs_c;
-		double* restrict bj  = b;
-		double* restrict ai  = a + i_edge*rs_a;
+		      double* cij = ( double* )c + i_edge*rs_c;
+		const double* bj  = ( double* )b;
+		const double* ai  = ( double* )a + i_edge*rs_a;
 
 		if ( 3 <= m_left )
 		{

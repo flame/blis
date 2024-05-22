@@ -256,22 +256,22 @@ extern int offsets[16];
 //#define LOOPMON
 void bli_dgemm_knc_asm_30x8
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       double*    restrict alpha,
-       double*    restrict a,
-       double*    restrict b,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c, inc_t cs_c,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
-    double * a_next = bli_auxinfo_next_a( data );
-    double * b_next = bli_auxinfo_next_b( data );
+    double* a_next = bli_auxinfo_next_a( data );
+    double* b_next = bli_auxinfo_next_b( data );
 
-    int * offsetPtr = &offsets[0];
+    int* offsetPtr = &offsets[0];
 
     uint64_t k64 = k;
 
