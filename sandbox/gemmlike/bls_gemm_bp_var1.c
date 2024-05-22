@@ -388,7 +388,7 @@ PASTEMAC(ch,fprintm)( stdout, "gemm_bp_var1: c ", mr_cur, nr_cur, c_ir, rs_c, cs
 */ \
 }
 
-//INSERT_GENTFUNC_BASIC0( gemm_bp_var1 )
+//INSERT_GENTFUNC_BASIC( gemm_bp_var1 )
 GENTFUNC( float,    s, gemm_bp_var1 )
 GENTFUNC( double,   d, gemm_bp_var1 )
 GENTFUNC( scomplex, c, gemm_bp_var1 )

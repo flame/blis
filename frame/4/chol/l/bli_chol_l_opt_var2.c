@@ -155,6 +155,6 @@ err_t PASTEMAC(ch,varname) \
 	return BLIS_SUCCESS; \
 }
 
-INSERT_GENTFUNCR_BASIC0( chol_l_opt_var2 )
+INSERT_GENTFUNCR_BASIC( chol_l_opt_var2 )
 
 #endif

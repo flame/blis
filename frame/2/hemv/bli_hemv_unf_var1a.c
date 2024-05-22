@@ -164,5 +164,5 @@ void PASTEMAC(ch,varname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC0( hemv_unf_var1a )
+INSERT_GENTFUNC_BASIC( hemv_unf_var1a )
 

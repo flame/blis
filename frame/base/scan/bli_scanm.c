@@ -267,5 +267,5 @@ void PASTEMAC(ch,opname) \
 	bli_free_intl( line_buf ); \
 }
 
-INSERT_GENTFUNCR_BASIC0( fscanm )
+INSERT_GENTFUNCR_BASIC( fscanm )
 

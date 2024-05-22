@@ -119,5 +119,5 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	PASTEMAC(ch,copys)( dotxy, *rho ); \
 }
 
-INSERT_GENTFUNC_BASIC2( dotv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC_BASIC( dotv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

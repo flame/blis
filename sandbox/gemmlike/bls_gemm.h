@@ -93,7 +93,7 @@ void PASTECH2(bls_,ch,opname) \
        ctype*  c, inc_t rs_c, inc_t cs_c  \
      );
 
-//INSERT_GENTPROT_BASIC0( gemm )
+//INSERT_GENTPROT_BASIC( gemm )
 GENTPROT( float,    s, gemm )
 GENTPROT( double,   d, gemm )
 GENTPROT( scomplex, c, gemm )

@@ -70,7 +70,7 @@ err_t PASTEMAC(ch,opname) \
 	); \
 }
 
-INSERT_GENTFUNCR_BASIC0( hevd )
+INSERT_GENTFUNCR_BASIC( hevd )
 
 
 #undef  GENTFUNCR
@@ -286,5 +286,5 @@ void PASTEMAC(ch,opname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC0( hevd_induce_conjtrans )
+INSERT_GENTFUNC_BASIC( hevd_induce_conjtrans )
 

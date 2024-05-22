@@ -152,7 +152,7 @@ void PASTECH2(bls_,ch,opname) \
 	} \
 }
 
-//INSERT_GENTFUNC_BASIC0( packm_cxk )
+//INSERT_GENTFUNC_BASIC( packm_cxk )
 GENTFUNC( float,    s, packm_cxk )
 GENTFUNC( double,   d, packm_cxk )
 GENTFUNC( scomplex, c, packm_cxk )

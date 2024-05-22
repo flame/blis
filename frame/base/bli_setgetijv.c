@@ -97,7 +97,7 @@ void PASTEMAC(ch,opname) \
 	PASTEMAC2(z,ch,sets)( ar, ai, *x_i ); \
 }
 
-INSERT_GENTFUNC_BASIC0( setijv )
+INSERT_GENTFUNC_BASIC( setijv )
 
 // -----------------------------------------------------------------------------
 
@@ -164,5 +164,5 @@ void PASTEMAC(ch,opname) \
 	PASTEMAC2(ch,z,gets)( *x_i, *ar, *ai ); \
 }
 
-INSERT_GENTFUNC_BASIC0( getijv )
+INSERT_GENTFUNC_BASIC( getijv )
 

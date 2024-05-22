@@ -231,7 +231,7 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var1: b packed", panel_len_max, panel_dim_m
 	} \
 }
 
-//INSERT_GENTFUNC_BASIC0( packm_var1 )
+//INSERT_GENTFUNC_BASIC( packm_var1 )
 GENTFUNC( float,    s, packm_var2 )
 GENTFUNC( double,   d, packm_var2 )
 GENTFUNC( scomplex, c, packm_var2 )

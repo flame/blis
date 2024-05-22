@@ -74,6 +74,6 @@ BLIS_INLINE void PASTEMAC(ch,op) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC0(set0s_edge)
+INSERT_GENTFUNC_BASIC(set0s_edge)
 
 #endif

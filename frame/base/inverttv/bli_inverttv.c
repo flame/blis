@@ -171,5 +171,5 @@ void PASTEMAC(ch,opname) \
 	} \
 }
 
-INSERT_GENTFUNCR_BASIC0( inverttv )
+INSERT_GENTFUNCR_BASIC( inverttv )
 

@@ -243,7 +243,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC2( gemmsup_r, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC_BASIC( gemmsup_r, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 
 //
 // -- Column storage case ------------------------------------------------------
@@ -454,11 +454,11 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC2( gemmsup_c, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC_BASIC( gemmsup_c, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 
 //
 // -- General storage case -----------------------------------------------------
 //
 
-INSERT_GENTFUNC_BASIC2( gemmsup_g, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC_BASIC( gemmsup_g, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

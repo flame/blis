@@ -181,7 +181,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 */ \
 }
 
-INSERT_GENTFUNC_BASIC0( copym )
+INSERT_GENTFUNC_BASIC( copym )
 
 
 #undef  GENTFUNC
@@ -256,7 +256,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 */ \
 }
 
-INSERT_GENTFUNC_BASIC0( axpym )
+INSERT_GENTFUNC_BASIC( axpym )
 
 
 #undef  GENTFUNC
@@ -353,7 +353,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 */ \
 }
 
-INSERT_GENTFUNC_BASIC0( scal2m )
+INSERT_GENTFUNC_BASIC( scal2m )
 
 
 #undef  GENTFUNC
@@ -397,9 +397,9 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC0( invscalm )
-INSERT_GENTFUNC_BASIC0( scalm )
-INSERT_GENTFUNC_BASIC0( setm )
+INSERT_GENTFUNC_BASIC( invscalm )
+INSERT_GENTFUNC_BASIC( scalm )
+INSERT_GENTFUNC_BASIC( setm )
 
 
 #undef  GENTFUNC
@@ -490,7 +490,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 */ \
 }
 
-INSERT_GENTFUNC_BASIC0( xpbym )
+INSERT_GENTFUNC_BASIC( xpbym )
 
 
 #undef  GENTFUNC2
@@ -551,8 +551,8 @@ void PASTEMAC3(chx,chy,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC2_BASIC0( xpbym_md )
-INSERT_GENTFUNC2_MIXDP0( xpbym_md )
+INSERT_GENTFUNC2_BASIC( xpbym_md )
+INSERT_GENTFUNC2_MIX_DP( xpbym_md )
 
 
 #endif

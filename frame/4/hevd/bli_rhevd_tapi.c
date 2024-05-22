@@ -62,7 +62,7 @@ err_t PASTEMAC(ch,opname) \
 	); \
 }
 
-INSERT_GENTFUNCR_BASIC0( rhevd )
+INSERT_GENTFUNCR_BASIC( rhevd )
 
 
 #undef  GENTFUNCR
@@ -189,5 +189,5 @@ err_t PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
 	return BLIS_SUCCESS; \
 }
 
-INSERT_GENTFUNCR_BASIC0( rhevd )
+INSERT_GENTFUNCR_BASIC( rhevd )
 

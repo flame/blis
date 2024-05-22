@@ -92,12 +92,12 @@ err_t PASTEMAC(ch,varname) \
              rntm_t* rntm  \
      );
 
-INSERT_GENTPROT_BASIC0( ttmm_l_opt_var1 )
-INSERT_GENTPROT_BASIC0( ttmm_l_opt_var2 )
-INSERT_GENTPROT_BASIC0( ttmm_l_opt_var3 )
+INSERT_GENTPROT_BASIC( ttmm_l_opt_var1 )
+INSERT_GENTPROT_BASIC( ttmm_l_opt_var2 )
+INSERT_GENTPROT_BASIC( ttmm_l_opt_var3 )
 
-INSERT_GENTPROT_BASIC0( ttmm_u_opt_var1 )
-INSERT_GENTPROT_BASIC0( ttmm_u_opt_var2 )
-INSERT_GENTPROT_BASIC0( ttmm_u_opt_var3 )
+INSERT_GENTPROT_BASIC( ttmm_u_opt_var1 )
+INSERT_GENTPROT_BASIC( ttmm_u_opt_var2 )
+INSERT_GENTPROT_BASIC( ttmm_u_opt_var3 )
 
 #endif

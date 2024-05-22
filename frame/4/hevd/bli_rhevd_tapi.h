@@ -51,7 +51,7 @@ BLIS_EXPORT_BLIS err_t PASTEMAC(ch,opname) \
              ctype*   a, inc_t rs_a, inc_t cs_a  \
      );
 
-INSERT_GENTPROTR_BASIC0( rhevd )
+INSERT_GENTPROTR_BASIC( rhevd )
 
 
 #undef  GENTPROTR
@@ -68,7 +68,7 @@ BLIS_EXPORT_BLIS err_t PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
        const rntm_t*  rntm  \
      );
 
-INSERT_GENTPROTR_BASIC0( rhevd )
+INSERT_GENTPROTR_BASIC( rhevd )
 
 
 #endif

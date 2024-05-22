@@ -203,7 +203,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 }
 
-//INSERT_GENTFUNC_BASIC2( dotxaxpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+//INSERT_GENTFUNC_BASIC( dotxaxpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 GENTFUNC( float,    s, dotxaxpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4 )
 GENTFUNC( double,   d, dotxaxpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4 )
 GENTFUNC( scomplex, c, dotxaxpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4 )

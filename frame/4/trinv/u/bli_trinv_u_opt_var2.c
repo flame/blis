@@ -153,6 +153,6 @@ err_t PASTEMAC(ch,varname) \
 	return BLIS_SUCCESS; \
 }
 
-INSERT_GENTFUNCR_BASIC0( trinv_u_opt_var2 )
+INSERT_GENTFUNCR_BASIC( trinv_u_opt_var2 )
 
 #endif

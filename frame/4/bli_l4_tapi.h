@@ -47,9 +47,9 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
        ctype*  a, inc_t rs_a, inc_t cs_a  \
      );
 
-INSERT_GENTPROT_BASIC0( chol )
-INSERT_GENTPROT_BASIC0( ttmm )
-INSERT_GENTPROT_BASIC0( hpdinv )
+INSERT_GENTPROT_BASIC( chol )
+INSERT_GENTPROT_BASIC( ttmm )
+INSERT_GENTPROT_BASIC( hpdinv )
 
 
 #undef  GENTPROT
@@ -63,5 +63,5 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
        ctype*  a, inc_t rs_a, inc_t cs_a  \
      );
 
-INSERT_GENTPROT_BASIC0( trinv )
+INSERT_GENTPROT_BASIC( trinv )
 

@@ -108,5 +108,5 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
              ctype*  x, inc_t incx  \
      );
 
-INSERT_GENTPROTR_BASIC0( inverttv )
+INSERT_GENTPROTR_BASIC( inverttv )
 

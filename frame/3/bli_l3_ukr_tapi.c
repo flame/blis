@@ -75,7 +75,7 @@ void PASTEMAC(ch,opname) \
 	); \
 } \
 
-INSERT_GENTFUNC_BASIC2( gemm_ukernel, gemm, BLIS_GEMM_UKR )
+INSERT_GENTFUNC_BASIC( gemm_ukernel, gemm, BLIS_GEMM_UKR )
 
 
 #undef  GENTFUNC
@@ -121,8 +121,8 @@ void PASTEMAC(ch,opname) \
 	); \
 } \
 
-INSERT_GENTFUNC_BASIC2( gemmtrsm_l_ukernel, gemmtrsm, BLIS_GEMMTRSM_L_UKR )
-INSERT_GENTFUNC_BASIC2( gemmtrsm_u_ukernel, gemmtrsm, BLIS_GEMMTRSM_U_UKR )
+INSERT_GENTFUNC_BASIC( gemmtrsm_l_ukernel, gemmtrsm, BLIS_GEMMTRSM_L_UKR )
+INSERT_GENTFUNC_BASIC( gemmtrsm_u_ukernel, gemmtrsm, BLIS_GEMMTRSM_U_UKR )
 
 
 #undef  GENTFUNC
@@ -156,6 +156,6 @@ void PASTEMAC(ch,opname) \
 	); \
 } \
 
-INSERT_GENTFUNC_BASIC2( trsm_l_ukernel, trsm, BLIS_TRSM_L_UKR )
-INSERT_GENTFUNC_BASIC2( trsm_u_ukernel, trsm, BLIS_TRSM_U_UKR )
+INSERT_GENTFUNC_BASIC( trsm_l_ukernel, trsm, BLIS_TRSM_L_UKR )
+INSERT_GENTFUNC_BASIC( trsm_u_ukernel, trsm, BLIS_TRSM_U_UKR )
 

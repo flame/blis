@@ -114,7 +114,7 @@ void PASTEMAC(ch,varname) \
 	} \
 }
 
-//INSERT_GENTFUNC_BASIC0( gemv_unf_var2 )
+//INSERT_GENTFUNC_BASIC( gemv_unf_var2 )
 GENTFUNC( float,    s, gemv_unf_var2, _zen_int10, _zen_int_5,    5 )
 GENTFUNC( double,   d, gemv_unf_var2, _zen_int10, _zen_int_16x4, 4 )
 GENTFUNC( scomplex, c, gemv_unf_var2, _zen_int10, _zen_int_4,    4 )
@@ -215,6 +215,6 @@ void PASTEMAC(ch,varname) \
 	} \
 }
 
-//INSERT_GENTFUNC_BASIC0( gemv_unf_var2 )
+//INSERT_GENTFUNC_BASIC( gemv_unf_var2 )
 GENTFUNC( dcomplex, z, gemv_unf_var2 )
 

@@ -117,7 +117,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
        void*  x, inc_t rs_x, inc_t cs_x  \
      );
 
-INSERT_GENTPROT_BASIC0_I( scanm )
+INSERT_GENTPROT_BASIC_I( scanm )
 
 // -----------------------------------------------------------------------------
 
@@ -132,5 +132,5 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
        ctype* x, inc_t rs_x, inc_t cs_x  \
      );
 
-INSERT_GENTPROTR_BASIC0( fscanm )
+INSERT_GENTPROTR_BASIC( fscanm )
 

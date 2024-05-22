@@ -237,6 +237,6 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 	} \
 }
 
-INSERT_GENTFUNCCO_BASIC( gemm_md_c2r, BLIS_REF_SUFFIX )
+INSERT_GENTFUNCCO( gemm_md_c2r, BLIS_REF_SUFFIX )
 
 #endif

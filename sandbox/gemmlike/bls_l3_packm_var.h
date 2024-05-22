@@ -55,19 +55,19 @@ void PASTECH2(bls_,ch,varname) \
        thrinfo_t* restrict thread  \
      );
 
-//INSERT_GENTPROT_BASIC0( packm_var1 )
+//INSERT_GENTPROT_BASIC( packm_var1 )
 GENTPROT( float,    s, packm_var1 )
 GENTPROT( double,   d, packm_var1 )
 GENTPROT( scomplex, c, packm_var1 )
 GENTPROT( dcomplex, z, packm_var1 )
 
-//INSERT_GENTPROT_BASIC0( packm_var2 )
+//INSERT_GENTPROT_BASIC( packm_var2 )
 GENTPROT( float,    s, packm_var2 )
 GENTPROT( double,   d, packm_var2 )
 GENTPROT( scomplex, c, packm_var2 )
 GENTPROT( dcomplex, z, packm_var2 )
 
-//INSERT_GENTPROT_BASIC0( packm_var3 )
+//INSERT_GENTPROT_BASIC( packm_var3 )
 GENTPROT( float,    s, packm_var3 )
 GENTPROT( double,   d, packm_var3 )
 GENTPROT( scomplex, c, packm_var3 )

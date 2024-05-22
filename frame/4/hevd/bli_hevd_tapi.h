@@ -55,7 +55,7 @@ BLIS_EXPORT_BLIS err_t PASTEMAC(ch,opname) \
              ctype_r* rwork  \
      );
 
-INSERT_GENTPROTR_BASIC0( hevd )
+INSERT_GENTPROTR_BASIC( hevd )
 
 
 #undef  GENTPROTR
@@ -76,7 +76,7 @@ BLIS_EXPORT_BLIS err_t PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
        const rntm_t*  rntm  \
      );
 
-INSERT_GENTPROTR_BASIC0( hevd )
+INSERT_GENTPROTR_BASIC( hevd )
 
 
 #undef  GENTPROT
@@ -89,7 +89,7 @@ void PASTEMAC(ch,opname) \
        ctype*   a, inc_t* rs_a, inc_t* cs_a  \
      );
 
-INSERT_GENTPROT_BASIC0( hevd_induce_conjtrans )
+INSERT_GENTPROT_BASIC( hevd_induce_conjtrans )
 
 
 #endif

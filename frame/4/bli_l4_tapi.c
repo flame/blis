@@ -62,9 +62,9 @@ void PASTEMAC(ch,opname) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC0( chol )
-INSERT_GENTFUNC_BASIC0( ttmm )
-INSERT_GENTFUNC_BASIC0( hpdinv )
+INSERT_GENTFUNC_BASIC( chol )
+INSERT_GENTFUNC_BASIC( ttmm )
+INSERT_GENTFUNC_BASIC( hpdinv )
 
 // trinv
 
@@ -92,5 +92,5 @@ void PASTEMAC(ch,opname) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC0( trinv )
+INSERT_GENTFUNC_BASIC( trinv )
 

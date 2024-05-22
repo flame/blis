@@ -58,8 +58,8 @@ BLIS_EXPORT_BLIS void PASTEMAC2(cha,chb,opname) \
              void*   b, inc_t rs_b, inc_t cs_b  \
      );
 
-INSERT_GENTPROT2_BASIC0( castm )
-INSERT_GENTPROT2_MIXDP0( castm )
+INSERT_GENTPROT2_BASIC( castm )
+INSERT_GENTPROT2_MIX_DP( castm )
 
 //
 // Prototype object-based _check() function.

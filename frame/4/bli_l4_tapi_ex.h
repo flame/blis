@@ -49,9 +49,9 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
              rntm_t* rntm  \
      );
 
-INSERT_GENTPROT_BASIC0( chol )
-INSERT_GENTPROT_BASIC0( ttmm )
-INSERT_GENTPROT_BASIC0( hpdinv )
+INSERT_GENTPROT_BASIC( chol )
+INSERT_GENTPROT_BASIC( ttmm )
+INSERT_GENTPROT_BASIC( hpdinv )
 
 
 #undef  GENTPROT
@@ -67,5 +67,5 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
              rntm_t* rntm  \
      );
 
-INSERT_GENTPROT_BASIC0( trinv )
+INSERT_GENTPROT_BASIC( trinv )
 
