@@ -177,24 +177,24 @@ The functions listed in this document belong to the "basic" interface subset of 
 ```c
 void bli_gemm
      (
-       obj_t* alpha,
-       obj_t* a,
-       obj_t* b,
-       obj_t* beta,
-       obj_t* c,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
      );
 ```
 while the expert interface is:
 ```c
 void bli_gemm_ex
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
+       obj_t*   alpha,
+       obj_t*   a,
+       obj_t*   b,
+       obj_t*   beta,
+       obj_t*   c,
+       cntx_t*  cntx,
+       rntm_t*  rntm
      );
 ```
 The expert interface contains two additional parameters: a `cntx_t*` and `rntm_t*`. Note that calling a function from the expert interface with the `cntx_t*` and `rntm_t*` arguments each set to `NULL` is equivalent to calling the corresponding basic interface. Specifically, a `NULL` value passed in for the `cntx_t*` results in a valid context being queried from BLIS, and a `NULL` value passed in for the `rntm_t*` results in the current global settings for multithreading to be used.
@@ -254,12 +254,12 @@ Only objects that were created with automatic allocation must be freed via BLIS 
 ```c
 void bli_obj_create
      (
-       num_t  dt,
-       dim_t  m,
-       dim_t  n,
-       inc_t  rs,
-       inc_t  cs,
-       obj_t* obj
+       num_t   dt,
+       dim_t   m,
+       dim_t   n,
+       inc_t   rs,
+       inc_t   cs,
+       obj_t*  obj
      );
 ```
 Initialize an _m x n_ object `obj` and allocate sufficient storage to hold _mn_ elements whose storage type is specified by `dt` and with row and column strides `rs` and `cs`, respectively. This function allocates enough space to enforce alignment of leading dimensions, where the alignment factor is specific to the configuration being used, though the alignment factor is almost always equal to the size of the hardware's SIMD registers.
@@ -271,7 +271,7 @@ After an object created via `bli_obj_create()` is no longer needed, it should be
 ```c
 void bli_obj_free
      (
-       obj_t* obj
+       obj_t*  obj
      );
 ```
 Deallocate (release) an object `obj` that was previously created, typically via `bli_obj_create()`.
@@ -281,10 +281,10 @@ Deallocate (release) an object `obj` that was previously created, typically via 
 ```c
 void bli_obj_create_without_buffer
      (
-       num_t  dt,
-       dim_t  m,
-       dim_t  n,
-       obj_t* obj
+       num_t   dt,
+       dim_t   m,
+       dim_t   n,
+       obj_t*  obj
      );
 ```
 Partially initialize an _m x n_ object `obj` that will eventually contain elements whose storage type is specified by `dt`. This function does not result in any memory allocation. Before `obj` can be used, the object must be fully initialized by attaching a buffer via `bli_obj_attach_buffer()`. This function is useful when the user wishes to encapsulate existing buffers into one or more `obj_t` objects.
@@ -295,11 +295,11 @@ An object (partially) initialized via this function should generally not be pass
 ```c
 void bli_obj_attach_buffer
      (
-       void*  p,
-       inc_t  rs,
-       inc_t  cs,
-       inc_t  is,
-       obj_t* obj
+       void*   p,
+       inc_t   rs,
+       inc_t   cs,
+       inc_t   is,
+       obj_t*  obj
      );
 ```
 Given a partially initialized object (i.e., one that has already been passed to `bli_obj_create_without_buffer()`), attach the buffer pointed to by `p` to the object referenced by `obj` and initialize `obj` as containing elements with row and column strides `rs` and `cs`, respectively. The function also initializes the imaginary stride as `is`, which is experimental and not consistently used by all parts of BLIS.
@@ -309,13 +309,13 @@ Given a partially initialized object (i.e., one that has already been passed to 
 ```c
 void bli_obj_create_with_attached_buffer
      (
-       num_t  dt,
-       dim_t  m,
-       dim_t  n,
-       void*  p,
-       inc_t  rs,
-       inc_t  cs,
-       obj_t* obj
+       num_t   dt,
+       dim_t   m,
+       dim_t   n,
+       void*   p,
+       inc_t   rs,
+       inc_t   cs,
+       obj_t*  obj
      );
 ```
 Initialize an _m x n_ object `obj` as containing _mn_ elements whose storage type is specified by `dt` and with row and column strides `rs` and `cs`, respectively. The function does not allocate any memory and instead attaches the buffer pointed to by `p`. Note that calling this function is effectively equivalent to calling
@@ -330,10 +330,10 @@ Objects initialized via this function should generally not be passed to `bli_obj
 ```c
 void bli_obj_alloc_buffer
      (
-       inc_t  rs,
-       inc_t  cs,
-       inc_t  is,
-       obj_t* obj
+       inc_t   rs,
+       inc_t   cs,
+       inc_t   is,
+       obj_t*  obj
      );
 ```
 Given a partially initialized _m x n_ object, allocate and attach a buffer large enough to contain _mn_ elements with the row and column strides `rs` and `cs`, respectively. This function allocates enough space to enforce alignment of leading dimensions, where the alignment factor is specific to the configuration being used, though the alignment factor is almost always equal to the size of the hardware's SIMD registers.
@@ -349,8 +349,8 @@ Very few users will likely have a need to call this function. We provide documen
 ```c
 void bli_obj_create_1x1
      (
-       num_t  dt,
-       obj_t* obj
+       num_t   dt,
+       obj_t*  obj
      );
 ```
 Initialize a _1 x 1_ object `obj` and allocate sufficient storage to hold one element whose storage type is specified by `dt`.
@@ -368,9 +368,9 @@ After an object created via `bli_obj_create_1x1()` is no longer needed, it shoul
 ```c
 void bli_obj_create_1x1_with_attached_buffer
      (
-       num_t  dt,
-       void*  p,
-       obj_t* obj
+       num_t   dt,
+       void*   p,
+       obj_t*  obj
      );
 ```
 Initialize a _1 x 1_ object `obj` as containing one element whose storage type is specified by `dt`. The function does not allocate any memory and instead attaches the buffer pointed to by `p`. Note that calling this function is effectively equivalent to calling
@@ -385,8 +385,8 @@ Objects initialized via this function should generally not be passed to `bli_obj
 ```c
 void bli_obj_create_conf_to
      (
-       obj_t* s,
-       obj_t* d
+       obj_t*  s,
+       obj_t*  d
      );
 ```
 Initialize an object `d` with dimensions conformal to those of an existing object `s`. Object `d` is initialized with the same row and column strides as those of `s`. However, the structure, uplo, conjugation, and transposition properties of `s` are **not** inherited by `d`.
@@ -408,8 +408,8 @@ After an object created via `bli_obj_create_conf_to()` is no longer needed, it s
 ```c
 void bli_obj_scalar_init_detached
      (
-       num_t  dt,
-       obj_t* obj
+       num_t   dt,
+       obj_t*  obj
      );
 ```
 Initialize a _1 x 1_ object `obj` using internal storage sufficient to hold one element whose storage type is specified by `dt`. (Internal storage is present within every `obj_t` and is capable of holding on element of any supported type.) This function is similar to `bli_obj_create_1x1()`, except that the object does not trigger any dynamic memory allocation.
@@ -1284,6 +1284,7 @@ Observed object properties: `conj?(alpha)`, `diagoff(A)`, `uplo(A)`.
 ```c
 void bli_scal2m
      (
+       obj_t*  alpha,
        obj_t*  a,
        obj_t*  b
      );
@@ -1403,7 +1404,7 @@ void bli_axpy2v
 ```
 Perform
 ```
-  y := y + conj?(alphax) * conj?(x) + conj?(alphay) * conj?(y)
+  z := z + conj?(alphax) * conj?(x) + conj?(alphay) * conj?(y)
 ```
 where `x`, `y`, and `z` are vectors of length _m_. The kernel, if optimized, is implemented as a fused pair of calls to [axpyv](BLISObjectAPI.md#axpyv).
 
@@ -1425,7 +1426,7 @@ void bli_dotaxpyv
 Perform
 ```
   rho := conj?(x)^T * conj?(y)
-  y   := y + conj?(alpha) * conj?(x)
+  z   := z + conj?(alpha) * conj?(x)
 ```
 where `x`, `y`, and `z` are vectors of length _m_ and `alpha` and `rho` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotv](BLISObjectAPI.md#dotv) and [axpyv](BLISObjectAPI.md#axpyv).
 
@@ -2184,9 +2185,9 @@ where, on entry, `scale` and `sumsq` contain `scale_old` and `sumsq_old`, respec
 ```c
 void bli_getsc
      (
-       obj_t*  chi,
-       double* zeta_r,
-       double* zeta_i
+       obj_t*   chi,
+       double*  zeta_r,
+       double*  zeta_i
      );
 ```
 Copy the real and imaginary values from the scalar object `chi` to `zeta_r` and `zeta_i`. If `chi` is stored as a real type, then `zeta_i` is set to zero. (If `chi` is stored in single precision, the corresponding elements are typecast/promoted during the copy.)
@@ -2197,10 +2198,10 @@ Copy the real and imaginary values from the scalar object `chi` to `zeta_r` and 
 ```c
 err_t bli_getijv
       (
-        dim_t   i,
-        obj_t*  b,
-        double* ar,
-        double* ai
+        dim_t    i,
+        obj_t*   x,
+        double*  ar,
+        double*  ai
       )
 ```
 Copy the real and imaginary values at the `i`th element of vector object `x` to `ar` and `ai`. If elements of `x` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `x` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
@@ -2212,11 +2213,11 @@ If either the element offset `i` is beyond the vector dimension of `x` or less t
 ```c
 err_t bli_getijm
       (
-        dim_t   i,
-        dim_t   j,
-        obj_t*  b,
-        double* ar,
-        double* ai
+        dim_t    i,
+        dim_t    j,
+        obj_t*   b,
+        double*  ar,
+        double*  ai
       )
 ```
 Copy the real and imaginary values at the (`i`,`j`) element of object `b` to `ar` and `ai`. If elements of `b` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `b` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
@@ -2228,8 +2229,8 @@ If either the row offset `i` is beyond the _m_ dimension of `b` or less than zer
 ```c
 void bli_setsc
      (
-       double* zeta_r,
-       double* zeta_i,
+       double  zeta_r,
+       double  zeta_i,
        obj_t*  chi
      );
 ```
@@ -2272,9 +2273,9 @@ If either the row offset `i` is beyond the _m_ dimension of `b` or less than zer
 ```c
 void bli_eqsc
      (
-       obj_t  chi,
-       obj_t  psi,
-       bool*  is_eq
+       obj_t*  chi,
+       obj_t*  psi,
+       bool*   is_eq
      );
 ```
 Perform an element-wise comparison between scalars `chi` and `psi` and store the boolean result in the `bool` pointed to by `is_eq`.
@@ -2288,9 +2289,9 @@ Observed object properties: `conj?(chi)`, `conj?(psi)`.
 ```c
 void bli_eqv
      (
-       obj_t  x,
-       obj_t  y,
-       bool*  is_eq
+       obj_t*  x,
+       obj_t*  y,
+       bool*   is_eq
      );
 ```
 Perform an element-wise comparison between vectors `x` and `y` and store the boolean result in the `bool` pointed to by `is_eq`.
@@ -2304,9 +2305,9 @@ Observed object properties: `conj?(x)`, `conj?(y)`.
 ```c
 void bli_eqm
      (
-       obj_t  a,
-       obj_t  b,
-       bool*  is_eq
+       obj_t*  a,
+       obj_t*  b,
+       bool*   is_eq
      );
 ```
 Perform an element-wise comparison between matrices `A` and `B` and store the boolean result in the `bool` pointed to by `is_eq`.
@@ -2417,8 +2418,8 @@ Return the amount of time that has elapsed since some fixed time in the past. Th
 ```c
 double bli_clock_min_diff
      (
-       double time_prev_min,
-       double time_start
+       double  time_prev_min,
+       double  time_start
      );
 ```
 This function computes an intermediate value, `time_diff`, equal to `bli_clock() - time_start`, and then tentatively prepares to return the minimum value of `time_diff` and `time_min`. If that minimum value is extremely small (close to zero), the function returns `time_min` instead.

@@ -1191,6 +1191,10 @@ BLIS_H_SRC_PATH := $(filter %/$(BLIS_H), $(FRAME_H99_FILES))
 # blis.h file.
 BLIS_H_FLAT     := $(BASE_INC_PATH)/$(BLIS_H)
 
+# Construct the path to the helper blis.h file that will reside one directory
+# up from the installed copy of blis.h.
+HELP_BLIS_H_PATH := $(BUILD_DIR)/$(BLIS_H)
+
 
 #
 # --- cblas.h header definitions -----------------------------------------------
@@ -1205,7 +1209,11 @@ CBLAS_H_DIRPATH  := $(dir $(CBLAS_H_SRC_PATH))
 
 # Construct the path to what will be the intermediate flattened/monolithic
 # cblas.h file.
-CBLAS_H_FLAT    := $(BASE_INC_PATH)/$(CBLAS_H)
+CBLAS_H_FLAT      := $(BASE_INC_PATH)/$(CBLAS_H)
+
+# Construct the path to the helper cblas.h file that will reside one directory
+# up from the installed copy of cblas.h.
+HELP_CBLAS_H_PATH := $(BUILD_DIR)/$(CBLAS_H)
 
 
 #

@@ -50,11 +50,10 @@ extern "C" {
 
 // -- configure definitions --
 
-// NOTE: bli_config.h header must be included before any BLIS header.
-// It is bootstrapped by ./configure and does not depend on later
-// headers. Moreover, these configuration variables are necessary to change
-// some default behaviors (e.g. disable OS-detection in bli_system.h in case
-// of --disable-system).
+// NOTE: bli_config.h must be included before any other BLIS header. It is
+// bootstrapped by ./configure and does not depend on later headers. Moreover
+// these configuration variables are necessary to change some default behaviors
+// (e.g. disable OS detection in bli_system.h in case of --disable-system).
 #include "bli_config.h"
 
 // -- System and language-related headers --
