@@ -17,11 +17,13 @@ but many others have contributed code, ideas, and feedback, including
   Alex Arslan              @ararslan
   Vernon Austel                                       (IBM, T.J. Watson Research Center)
   Mohsen Aznaveh           @Aznaveh                   (Texas A&M University)
+  Abhishek Bagusetty       @abagusetty                (Argonne National Laboratory)
   Satish Balay             @balay                     (Argonne National Laboratory)
   Kihiro Bando             @bandokihiro
   Matthew Brett            @matthew-brett             (University of Birmingham)
   Jérémie du Boisberranger @jeremiedbb
   Jed Brown                @jedbrown                  (Argonne National Laboratory)
+  Alex Chiang              @alexsifivetw              (SiFive)
   Robin Christ             @robinchrist
   Dilyn Corner             @dilyn-corner
   Mat Cross                @matcross                  (NAG)
@@ -37,12 +39,14 @@ but many others have contributed code, ideas, and feedback, including
   Victor Eijkhout          @VictorEijkhout            (Texas Advanced Computing Center)
   Evgeny Epifanovsky       @epifanovsky               (Q-Chem)
   Isuru Fernando           @isuruf
+  James Foster             @jd-foster                 (CSIRO)
   Roman Gareev             @gareevroman
   Richard Goldschmidt      @SuperFluffy
   Chris Goodyer
   Alexander Grund          @Flamefire
   John Gunnels             @jagunnels                 (IBM, T.J. Watson Research Center)
   Ali Emre Gülcü           @Lephar
+                           @h-vetinari
   Jeff Hammond             @jeffhammond               (Intel)
   Jacob Gorm Hansen        @jacobgorm
   Shivaprashanth H                                    (Global Edge)
@@ -52,7 +56,9 @@ but many others have contributed code, ideas, and feedback, including
   Minh Quan Ho             @hominhquan
   Matthew Honnibal         @honnibal
   Stefan Husmann           @stefanhusmann
+  Aaron Hutchinson         @Aaron-Hutchinson          (SiFive)
   Francisco Igual          @figual                    (Universidad Complutense de Madrid)
+  John Mather              @jmather-sesi              (SideFX Software)
   Madeesh Kannan           @shadeMe
   Tony Kelman              @tkelman
   Lee Killough             @leekillough               (Tactical Computing Labs)
@@ -125,12 +131,12 @@ but many others have contributed code, ideas, and feedback, including
   Meghana Vankadari        @Meghana-vankadari         (AMD)
   Kiran Varaganti          @kvaragan                  (AMD)
   Natalia Vassilieva                                  (Hewlett Packard Enterprise)
-                           @h-vetinari
   Andrew Wildman           @awild82                   (University of Washington)
   Zhang Xianyi             @xianyi                    (Chinese Academy of Sciences)
   Benda Xu                 @heroxbd
   Guodong Xu               @docularxu                 (Linaro.org)
   RuQing Xu                @xrq-phys                  (The University of Tokyo)
+  Srinivas Yadav           @srinivasyadav18
   Costas Yamin             @cosstas
   Chenhan Yu               @ChenhanYu                 (The University of Texas at Austin)
   Roman Yurchak            @rth                       (Symerio)

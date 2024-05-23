@@ -59,5 +59,8 @@ rv64i:       rv64i/rvi
 rv32iv:      rv32iv/rviv
 rv64iv:      rv64iv/rviv
 
+# SiFive architectures.
+sifive_x280: sifive_x280
+
 # Generic architectures.
 generic:     generic

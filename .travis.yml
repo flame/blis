@@ -86,6 +86,11 @@ matrix:
     env: OOT=0 TEST=FAST SDE=0 THR="none" BLD="--disable-shared" CONF="rv32iv" \
       CC=riscv32-unknown-linux-gnu-gcc \
       LDFLAGS=-static
+  - os: linux
+    compiler: clang
+    env: OOT=0 TEST=FAST SDE=0 THR="none" BLD="--disable-shared" CONF="sifive_x280" \
+      CC=clang \
+      LDFLAGS=-static
 install:
 - if [ "$CC" = "gcc"  ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="gcc-9"; fi
 - if [ -n "$PACKAGES" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -y $PACKAGES; fi
@@ -105,6 +110,12 @@ script:
     export CC=$DIST_PATH/../toolchain/riscv/bin/riscv32-unknown-linux-gnu-gcc;
     export CXX=$DIST_PATH/../toolchain/riscv/bin/riscv32-unknown-linux-gnu-g++;
     export TESTSUITE_WRAPPER="$DIST_PATH/../toolchain/qemu-riscv32 -cpu rv32,vext_spec=v1.0,v=true,vlen=128 -B 0x100000";
+  fi
+- if [ "$CONF" = "sifive_x280" ]; then
+    $DIST_PATH/travis/do_riscv.sh "$CONF";
+    export CC=$DIST_PATH/../toolchain/riscv/bin/clang;
+    export CXX=$DIST_PATH/../toolchain/riscv/bin/clang++;
+    export TESTSUITE_WRAPPER="$DIST_PATH/../toolchain/qemu-riscv64 -cpu rv64,vext_spec=v1.0,v=true,vlen=512 -B 0x100000";
   fi
 - $DIST_PATH/configure -p `pwd`/../install -t $THR $BLD CC=$CC $CONF
 - pwd

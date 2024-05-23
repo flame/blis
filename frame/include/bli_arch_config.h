@@ -156,6 +156,11 @@ CNTX_INIT_PROTS( rv32iv )
 CNTX_INIT_PROTS( rv64iv )
 #endif
 
+// -- SiFive architectures --
+
+#ifdef BLIS_CONFIG_SIFIVE_X280
+CNTX_INIT_PROTS( sifive_x280 )
+#endif
 
 // -- Generic --
 
@@ -296,6 +301,12 @@ CNTX_INIT_PROTS( generic )
 #include "bli_family_bgq.h"
 #endif
 
+// -- SiFive families --
+
+#ifdef BLIS_FAMILY_SIFIVE_X280
+#include "bli_family_sifive_x280.h"
+#endif
+
 // -- Generic --
 
 #ifdef BLIS_FAMILY_GENERIC
@@ -385,6 +396,13 @@ CNTX_INIT_PROTS( generic )
 #ifdef BLIS_KERNELS_RVIV
 #include "bli_kernels_rviv.h"
 #endif
+
+// -- SiFive RISC-V architectures --
+
+#ifdef BLIS_KERNELS_SIFIVE_X280
+#include "bli_kernels_sifive_x280.h"
+#endif
+
 
 #endif
 

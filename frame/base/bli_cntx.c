@@ -100,7 +100,7 @@ void bli_cntx_set_blkszs( cntx_t* cntx, ... )
 		//cntx_blkszs[ bs_id ] = *blksz;
 		//bli_blksz_copy( blksz, cntx_blksz );
 		blksz_t* cntx_blksz = &cntx_blkszs[ bs_id ];
-		bli_blksz_copy_if_pos( blksz, cntx_blksz );
+		bli_blksz_copy_if_nonneg( blksz, cntx_blksz );
 
 		// Copy the blocksize multiple id into the context.
 		cntx_bmults[ bs_id ] = bm_id;

@@ -975,6 +975,9 @@ typedef enum
 	BLIS_ARCH_RV32IV,
 	BLIS_ARCH_RV64IV,
 
+	// SiFive
+	BLIS_ARCH_SIFIVE_X280,
+
 	// Generic architecture/configuration
 	BLIS_ARCH_GENERIC,
 

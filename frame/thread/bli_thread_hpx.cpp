@@ -36,9 +36,10 @@
 
 #ifdef BLIS_ENABLE_HPX
 
-#include <hpx/local/execution.hpp>
-#include <hpx/parallel/algorithms/for_each.hpp>
+#include <hpx/execution.hpp>
 #include <hpx/hpx_start.hpp>
+#include <hpx/parallel/algorithms/for_loop.hpp>
+#include <hpx/runtime_local/run_as_hpx_thread.hpp>
 
 extern "C"
 {
@@ -56,12 +57,21 @@ void bli_thread_launch_hpx
 	pool_t*    gl_comm_pool = nullptr;
 	thrcomm_t* gl_comm      = bli_thrcomm_create( ti, gl_comm_pool, n_threads );
 
-	auto irange = hpx::util::counting_shape(n_threads);
-
-	hpx::for_each(hpx::execution::par, hpx::util::begin(irange), hpx::util::end(irange),
-	[&gl_comm, &func, &params](const dim_t tid)
+	// Execute func on hpx-runtime with n_threads.
+	hpx::threads::run_as_hpx_thread([&]()
 	{
-		func( gl_comm, tid, params );
+		std::vector<hpx::future<void>> futures;
+		futures.reserve(n_threads);
+
+		for (dim_t tid = 0; tid < n_threads; ++tid)
+		{
+			futures.push_back(hpx::async([tid, &gl_comm, &func, &params]()
+			{
+			  func( gl_comm, tid, params );
+			}));
+		}
+
+		hpx::wait_all(futures);
 	});
 
 	// Free the global communicator, because the root thrinfo_t node
@@ -76,7 +86,7 @@ void bli_thread_initialize_hpx( int argc, char** argv )
 
 int bli_thread_finalize_hpx()
 {
-	hpx::apply([]() { hpx::finalize(); });
+	hpx::post([]() { hpx::finalize(); });
 	return hpx::stop();
 }
 

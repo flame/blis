@@ -259,6 +259,14 @@ int bli_gks_init( void )
 		                                              bli_cntx_init_rv64iv_ind );
 #endif
 
+		// -- SiFive architectures ----------------------------------------------
+
+#ifdef BLIS_CONFIG_SIFIVE_X280
+		bli_gks_register_cntx( BLIS_ARCH_SIFIVE_X280, bli_cntx_init_sifive_x280,
+		                                              bli_cntx_init_sifive_x280_ref,
+		                                              bli_cntx_init_sifive_x280_ind );
+#endif
+
 		// -- Generic architectures --------------------------------------------
 
 #ifdef BLIS_CONFIG_GENERIC
