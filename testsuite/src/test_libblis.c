@@ -2739,8 +2739,7 @@ thrinfo_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, inv
 	if ( inv_diag == BLIS_NO_INVERT_DIAG ) does_inv_diag = FALSE;
 	else                                   does_inv_diag = TRUE;
 
-	rntm_t rntm;
-	bli_rntm_init( &rntm );
+	rntm_t rntm = BLIS_RNTM_INITIALIZER;
 
 	// Create a control tree node for the packing operation.
 	cntl_t* cntl = bli_packm_cntl_create_node

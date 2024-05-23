@@ -38,8 +38,8 @@
 // level-3 induced method management
 #include "bli_l3_ind.h"
 
-void                         bli_ind_init( void );
-void                         bli_ind_finalize( void );
+int                          bli_ind_init( void );
+int                          bli_ind_finalize( void );
 
 BLIS_EXPORT_BLIS void        bli_ind_enable( ind_t method );
 BLIS_EXPORT_BLIS void        bli_ind_disable( ind_t method );

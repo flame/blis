@@ -42,8 +42,14 @@ static const char* bli_ind_impl_str[BLIS_NUM_IND_METHODS] =
 
 // -----------------------------------------------------------------------------
 
-void bli_ind_init( void )
+int bli_ind_init( void )
 {
+	// NOTE: If TLS is enabled, this function is called once by EACH application
+	// thread per library init/finalize cycle (see bli_init.c). In this case,
+	// the threads will initialize thread-local data (see bli_l3_ind.c). If TLS
+	// is disabled, this function is called once by ONLY ONE application thread.
+	// In neither case is a mutex needed to protect the data initialization.
+
 	// NOTE: We intentionally call bli_gks_query_nat_cntx_noinit() in order
 	// to avoid the internal call to bli_init_once().
 	const cntx_t* cntx = bli_gks_query_nat_cntx_noinit();
@@ -62,10 +68,13 @@ void bli_ind_init( void )
 
 	if ( c_is_ref && !s_is_ref ) bli_ind_enable_dt( BLIS_1M, BLIS_SCOMPLEX );
 	if ( z_is_ref && !d_is_ref ) bli_ind_enable_dt( BLIS_1M, BLIS_DCOMPLEX );
+
+	return 0;
 }
 
-void bli_ind_finalize( void )
+int bli_ind_finalize( void )
 {
+	return 0;
 }
 
 // -----------------------------------------------------------------------------

@@ -205,6 +205,8 @@ If you still wish to set the parallelization scheme globally, but you want to do
 
 **Note**: Regardless of which way ([automatic](Multithreading.md#globally-at-runtime-the-automatic-way) or [manual](Multithreading.md#globally-at-runtime-the-manual-way)) the global runtime API is used to specify multithreading, that specification will affect operation of BLIS through **both** the BLAS compatibility layer as well as the native ([typed](docs/BLISTypedAPI.md) and [object](docs/BLISObjectAPI.md)) APIs that are unique to BLIS.
 
+If BLIS is being used by two or more application-level threads, each of those application threads will track their own global state for the purpose of specifying parallelism. We felt this makes sense because each application thread may wish to specify a different parallelization scheme without affecting the scheme for the other application thread(s).
+
 ### Globally at runtime: the automatic way
 
 If you simply want to specify an overall number of threads and let BLIS choose a thread factorization automatically, use the following function:
@@ -280,10 +282,6 @@ You **must** initialize the `rntm_t`. This can be done in either of two ways.
 If you want to initialize it as part of the declaration, you may do so via the default `BLIS_RNTM_INITIALIZER` macro:
 ```c
 rntm_t rntm = BLIS_RNTM_INITIALIZER;
-```
-Alternatively, you can perform the same initialization by passing the address of the `rntm_t` to an initialization function:
-```c
-bli_rntm_init( &rntm );
 ```
 As of this writing, BLIS treats a default-initialized `rntm_t` as a request for single-threaded execution.
 

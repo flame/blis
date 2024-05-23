@@ -34,27 +34,214 @@
 
 #include "blis.h"
 
-// The global rntm_t structure, which holds the global thread settings
-// along with a few other key parameters.
-rntm_t global_rntm = BLIS_RNTM_INITIALIZER;
+// The global rntm_t structure, which holds the global thread settings along
+// with a few other key parameters, along with a spare copy to capture a
+// snapshot at init-time and a mutex to control access to both structs.
+static BLIS_THREAD_LOCAL
+rntm_t              global_rntm         = BLIS_RNTM_INITIALIZER;
+static BLIS_THREAD_LOCAL
+rntm_t              global_rntm_at_init = BLIS_RNTM_INITIALIZER;
+static BLIS_THREAD_LOCAL
+bli_pthread_mutex_t global_rntm_mutex   = BLIS_PTHREAD_MUTEX_INITIALIZER;
 
-// A mutex to allow synchronous access to global_rntm.
-bli_pthread_mutex_t global_rntm_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
+// Private functions to access the above static variables.
+rntm_t* bli_global_rntm( void )         { return &global_rntm; }
+rntm_t* bli_global_rntm_at_init( void ) { return &global_rntm_at_init; }
+bli_pthread_mutex_t*
+        bli_global_rntm_mutex( void )   { return &global_rntm_mutex; }
 
 // -----------------------------------------------------------------------------
+
+int bli_rntm_init( void )
+{
+	// NOTE: If TLS is enabled, this function is called once by EACH application
+	// thread per library init/finalize cycle (see bli_init.c). In this case,
+	// the threads will initialize thread-local data (see vars above). If TLS
+	// is disabled, this function is called once by ONLY ONE application thread.
+	// In neither case is a mutex needed to protect the data initialization.
+
+	rntm_t* gr   = bli_global_rntm();
+	rntm_t* grai = bli_global_rntm_at_init();
+
+	// Read the threading-related and sup packing-related environment variables
+	// and use them to initialize the global_rntm object.
+	bli_rntm_init_from_env( gr );
+
+	// Copy the contents of the global_rntm object into the global_rntm_at_init
+	// object, which is intended to remain unchanged for the duration of the
+	// current init/finalize cycle.
+	*grai = *gr;
+
+	return 0;
+}
+
+int bli_rntm_finalize( void )
+{
+	return 0;
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_rntm_init_from_env
+     (
+       rntm_t* rntm
+     )
+{
+
+#ifdef BLIS_ENABLE_MULTITHREADING
+
+	timpl_t ti = BLIS_SINGLE;
+
+	// Try to read BLIS_THREAD_IMPL.
+	char* ti_env = bli_env_get_str( "BLIS_THREAD_IMPL" );
+
+	// If BLIS_THREAD_IMPL was not set, try to read BLIS_TI.
+	if ( ti_env == NULL ) ti_env = bli_env_get_str( "BLIS_TI" );
+
+	if ( ti_env != NULL )
+	{
+		// If BLIS_THREAD_IMPL was set, parse the value. If the value was
+		// anything other than a "openmp" or "pthreads" (or reasonable
+		// variations thereof), interpret it as a request for single-threaded
+		// execution.
+		if      ( !strncmp( ti_env, "openmp",   6 ) ) ti = BLIS_OPENMP;
+		else if ( !strncmp( ti_env, "omp",      3 ) ) ti = BLIS_OPENMP;
+		else if ( !strncmp( ti_env, "pthreads", 8 ) ) ti = BLIS_POSIX;
+		else if ( !strncmp( ti_env, "pthread",  7 ) ) ti = BLIS_POSIX;
+		else if ( !strncmp( ti_env, "posix",    5 ) ) ti = BLIS_POSIX;
+		else if ( !strncmp( ti_env, "hpx",      3 ) ) ti = BLIS_HPX;
+		else                                          ti = BLIS_SINGLE;
+
+		#ifdef PRINT_IMPL
+		printf( "detected BLIS_THREAD_IMPL=%s.\n",
+		        bli_thread_get_thread_impl_str( ti );
+		#endif
+	}
+	else
+	{
+		// If BLIS_THREAD_IMPL was unset, default to the implementation that
+		// was determined at configure-time.
+		ti = BLIS_SINGLE;
+
+		#ifdef BLIS_ENABLE_OPENMP_AS_DEFAULT
+		ti = BLIS_OPENMP;
+		#endif
+		#ifdef BLIS_ENABLE_PTHREADS_AS_DEFAULT
+		ti = BLIS_POSIX;
+		#endif
+		#ifdef BLIS_ENABLE_HPX_AS_DEFAULT
+		ti = BLIS_HPX;
+		#endif
+
+		#ifdef PRINT_IMPL
+		printf( "BLIS_THREAD_IMPL unset; defaulting to BLIS_THREAD_IMPL=%s.\n",
+		        bli_thread_get_thread_impl_str( ti );
+		#endif
+	}
+
+	// ------------------------------------------------------------------------
+
+	// Try to read BLIS_NUM_THREADS first.
+	dim_t nt = bli_env_get_var( "BLIS_NUM_THREADS", -1 );
+
+	// If BLIS_NUM_THREADS was not set, try to read BLIS_NT.
+	if ( nt == -1 ) nt = bli_env_get_var( "BLIS_NT", -1 );
+
+	// If neither BLIS_NUM_THREADS nor BLIS_NT were set, try OMP_NUM_THREADS.
+	if ( nt == -1 ) nt = bli_env_get_var( "OMP_NUM_THREADS", -1 );
+
+	// ------------------------------------------------------------------------
+
+	// Read the environment variables for the number of threads (ways of
+	// parallelism) for each individual loop.
+	dim_t jc = bli_env_get_var( "BLIS_JC_NT", -1 );
+	dim_t pc = bli_env_get_var( "BLIS_PC_NT", -1 );
+	dim_t ic = bli_env_get_var( "BLIS_IC_NT", -1 );
+	dim_t jr = bli_env_get_var( "BLIS_JR_NT", -1 );
+	dim_t ir = bli_env_get_var( "BLIS_IR_NT", -1 );
+
+	// ------------------------------------------------------------------------
+
+	// Save the results back in the runtime object.
+	bli_rntm_set_thread_impl_only( ti, rntm );
+	bli_rntm_set_num_threads_only( nt, rntm );
+	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, rntm );
+
+	// ------------------------------------------------------------------------
+
+	// This function, bli_thread_init_rntm_from_env(), is only called when BLIS
+	// is initialized, and so we need to go one step further and process the
+	// rntm's contents into a standard form to ensure, for example, that none of
+	// the ways of parallelism are negative or zero (in case the user queries
+	// them later).
+	bli_rntm_sanitize( rntm );
+
+#else
+
+	// When multithreading is disabled, the global rntm can keep the values it
+	// was assigned at (static) initialization time.
+
+#endif
+
+	//printf( "bli_thread_init_rntm_from_env()\n" ); bli_rntm_print( rntm );
+
+	// ------------------------------------------------------------------------
+
+	bool pack_a;
+	bool pack_b;
+
+#if 1
+
+	// Try to read BLIS_PACK_A and BLIS_PACK_B. For each variable, default to
+	// -1 if it is unset.
+	gint_t pack_a_env = bli_env_get_var( "BLIS_PACK_A", -1 );
+	gint_t pack_b_env = bli_env_get_var( "BLIS_PACK_B", -1 );
+
+	// Enforce the default behavior first, then check for affirmative FALSE, and
+	// finally assume anything else is TRUE.
+	if      ( pack_a_env == -1 ) pack_a = FALSE; // default behavior
+	else if ( pack_a_env ==  0 ) pack_a = FALSE; // zero is FALSE
+	else                         pack_a = TRUE;  // anything else is TRUE
+
+	if      ( pack_b_env == -1 ) pack_b = FALSE; // default behavior
+	else if ( pack_b_env ==  0 ) pack_b = FALSE; // zero is FALSE
+	else                         pack_b = TRUE;  // anything else is TRUE
+
+#else
+
+	pack_a = TRUE;
+	pack_b = TRUE;
+
+#endif
+
+	// Save the results back in the runtime object.
+	bli_rntm_set_pack_a( pack_a, rntm );
+	bli_rntm_set_pack_b( pack_b, rntm );
+
+#if 0
+	printf( "bli_pack_init_rntm_from_env()\n" );
+	bli_rntm_print( rntm );
+#endif
+}
+
+// ----------------------------------------------------------------------------
 
 void bli_rntm_init_from_global( rntm_t* rntm )
 {
 	// We must ensure that global_rntm has been initialized.
 	bli_init_once();
 
-	// Acquire the mutex protecting global_rntm.
-	bli_pthread_mutex_lock( &global_rntm_mutex );
+	// If TLS is disabled, we need to use a mutex to protect the global rntm_t
+	// since it will be shared with all application threads.
+	#ifdef BLIS_DISABLE_TLS
+	bli_pthread_mutex_lock( bli_global_rntm_mutex() );
+	#endif
 
 	*rntm = global_rntm;
 
-	// Release the mutex protecting global_rntm.
-	bli_pthread_mutex_unlock( &global_rntm_mutex );
+	#ifdef BLIS_DISABLE_TLS
+	bli_pthread_mutex_unlock( bli_global_rntm_mutex() );
+	#endif
 }
 
 // -----------------------------------------------------------------------------
