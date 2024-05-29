@@ -91,7 +91,6 @@ bool bli_aocl_enable_instruction_query( void )
 
 arch_t bli_arch_query_id( void )
 {
-	bli_arch_set_id_once();
 	bli_arch_check_id_once();
 
 	// Simply return the id that was previously cached.
@@ -100,7 +99,6 @@ arch_t bli_arch_query_id( void )
 
 model_t bli_model_query_id( void )
 {
-	bli_arch_set_id_once();
 	bli_arch_check_id_once();
 
 	// Simply return the model_id that was previously cached.
