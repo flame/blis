@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "level3/trsm/test_trsm.h"
 
-class ctrsmAPI :
+class ctrsmGeneric :
         public ::testing::TestWithParam<std::tuple<char,          // storage format
                                                    char,          // side
                                                    char,          // uplo
@@ -47,7 +47,7 @@ class ctrsmAPI :
                                                    gtint_t,       // lda_inc
                                                    gtint_t>> {};  // ldb_inc
 
-TEST_P(ctrsmAPI, FunctionalTest)
+TEST_P( ctrsmGeneric, API )
 {
     using T = scomplex;
     //----------------------------------------------------------
@@ -103,7 +103,7 @@ TEST_P(ctrsmAPI, FunctionalTest)
  */
 INSTANTIATE_TEST_SUITE_P(
         Native,
-        ctrsmAPI,
+        ctrsmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -130,7 +130,7 @@ INSTANTIATE_TEST_SUITE_P(
  */
 INSTANTIATE_TEST_SUITE_P(
         Small_AVX2_fringe,
-        ctrsmAPI,
+        ctrsmGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format
             ::testing::Values('l','r'),                                      // side  l:left, r:right
@@ -151,7 +151,7 @@ INSTANTIATE_TEST_SUITE_P(
  */
 INSTANTIATE_TEST_SUITE_P(
         Small_AVX2,
-        ctrsmAPI,
+        ctrsmGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format
             ::testing::Values('l','r'),                                      // side  l:left, r:right
@@ -176,7 +176,7 @@ INSTANTIATE_TEST_SUITE_P(
  */
 INSTANTIATE_TEST_SUITE_P(
         Alpha,
-        ctrsmAPI,
+        ctrsmGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format
             ::testing::Values('l','r'),                                      // side  l:left, r:right

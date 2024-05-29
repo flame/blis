@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "level3/trsm/test_trsm.h"
 
-class strsmAPI :
+class strsmGeneric :
         public ::testing::TestWithParam<std::tuple<char,          // storage format
                                                    char,          // side
                                                    char,          // uplo
@@ -47,7 +47,7 @@ class strsmAPI :
                                                    gtint_t,       // lda_inc
                                                    gtint_t>> {};  // ldb_inc
 
-TEST_P(strsmAPI, FunctionalTest)
+TEST_P( strsmGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------
@@ -102,7 +102,7 @@ TEST_P(strsmAPI, FunctionalTest)
  */
 INSTANTIATE_TEST_SUITE_P(
         Native,
-        strsmAPI,
+        strsmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -129,7 +129,7 @@ INSTANTIATE_TEST_SUITE_P(
  */
 INSTANTIATE_TEST_SUITE_P(
         Small_AVX2_fringe,
-        strsmAPI,
+        strsmGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format
             ::testing::Values('l','r'),                                      // side  l:left, r:right
@@ -151,7 +151,7 @@ INSTANTIATE_TEST_SUITE_P(
  */
 INSTANTIATE_TEST_SUITE_P(
         Small_AVX2,
-        strsmAPI,
+        strsmGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format
             ::testing::Values('l','r'),                                      // side  l:left, r:right
@@ -177,7 +177,7 @@ INSTANTIATE_TEST_SUITE_P(
  */
 INSTANTIATE_TEST_SUITE_P(
         Alpha,
-        strsmAPI,
+        strsmGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format
             ::testing::Values('l','r'),                                      // side  l:left, r:right

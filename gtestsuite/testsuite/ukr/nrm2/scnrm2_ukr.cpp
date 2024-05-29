@@ -38,15 +38,15 @@
 using T = scomplex;
 using RT = typename testinghelpers::type_info<T>::real_type;
 
-class scnrm2Ukr :
+class scnrm2Generic :
         public ::testing::TestWithParam<std::tuple<nrm2_ker_ft<T, RT>,  // Kernel pointer type
                                                    gtint_t,             // n
                                                    gtint_t,             // incx
                                                    bool>> {};           // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(scnrm2Ukr);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(scnrm2Generic);
 
-TEST_P( scnrm2Ukr, AccuracyCheck )
+TEST_P( scnrm2Generic, UKR )
 {
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -86,7 +86,7 @@ TEST_P( scnrm2Ukr, AccuracyCheck )
 // Unit testing with unit strides, across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_scnorm2fv_unb_var1_avx2_unitStrides,
-        scnrm2Ukr,
+        scnrm2Generic,
         ::testing::Combine(
             ::testing::Values(bli_scnorm2fv_unb_var1_avx2), // ukr function
             // m size of vector
@@ -105,7 +105,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with non-unit strides.
 INSTANTIATE_TEST_SUITE_P(
         bli_scnorm2fv_unb_var1_avx2_nonUnitStrides,
-        scnrm2Ukr,
+        scnrm2Generic,
         ::testing::Combine(
             ::testing::Values(bli_scnorm2fv_unb_var1_avx2), // ukr function
             // m size of vector

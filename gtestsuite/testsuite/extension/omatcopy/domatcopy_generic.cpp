@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_omatcopy.h"
 
-class domatcopyAPI :
+class domatcopyGeneric :
         public ::testing::TestWithParam<std::tuple<char,        // storage
                                                    char,        // trans
                                                    gtint_t,     // m
@@ -45,10 +45,10 @@ class domatcopyAPI :
                                                    gtint_t,     // ldb_inc
                                                    bool>> {};   // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(domatcopyAPI);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(domatcopyGeneric);
 
 // Tests using random numbers as vector elements.
-TEST_P( domatcopyAPI, FunctionalTest )
+TEST_P( domatcopyGeneric, API )
 {
     using T = double;
     //----------------------------------------------------------
@@ -87,7 +87,7 @@ TEST_P( domatcopyAPI, FunctionalTest )
 // Black box testing for generic and main use of domatcopy.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        domatcopyAPI,
+        domatcopyGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format(currently only for BLAS testing)
             ::testing::Values('n', 't', 'r', 'c'),                           // trans(and/or conj) value

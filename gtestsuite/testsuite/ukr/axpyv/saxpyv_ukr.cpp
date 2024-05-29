@@ -36,7 +36,7 @@
 #include <gtest/gtest.h>
 #include "test_axpyv_ukr.h"
 
-class saxpyvUkr :
+class saxpyvGeneric :
         public ::testing::TestWithParam<std::tuple<saxpyv_ker_ft,   // Function pointer type for zaxpyv kernels
                                                    char,            // conj_x
                                                    gtint_t,         // n
@@ -45,10 +45,10 @@ class saxpyvUkr :
                                                    float,           // alpha
                                                    bool>> {};       // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(saxpyvUkr);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(saxpyvGeneric);
 
 // Defining the testsuite to check the accuracy of saxpyv micro-kernels
-TEST_P( saxpyvUkr, AccuracyCheck )
+TEST_P( saxpyvGeneric, UKR )
 {
     using T = float;
 
@@ -99,7 +99,7 @@ TEST_P( saxpyvUkr, AccuracyCheck )
 
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpyv_zen_int10_unitStrides,
-        saxpyvUkr,
+        saxpyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_saxpyv_zen_int10),   // kernel address
             ::testing::Values('n'),                    // use x, not conj(x) (since it is real)
@@ -127,7 +127,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpyv_zen_int10_nonUnitStrides,
-        saxpyvUkr,
+        saxpyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_saxpyv_zen_int10),    // kernel address
             ::testing::Values('n'),                     // use x, not conj(x) (since it is real)
@@ -156,7 +156,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpyv_zen_int_unitStrides,
-        saxpyvUkr,
+        saxpyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_saxpyv_zen_int),     // kernel address
             ::testing::Values('n'),                    // use x, not conj(x) (since it is real)
@@ -176,7 +176,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpyv_zen_int_nonUnitStrides,
-        saxpyvUkr,
+        saxpyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_saxpyv_zen_int),      // kernel address
             ::testing::Values('n'),                     // use x, not conj(x) (since it is real)
@@ -211,7 +211,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpyv_zen_int_avx512_unitStrides,
-        saxpyvUkr,
+        saxpyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_saxpyv_zen_int_avx512), // kernel address
             ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
@@ -235,7 +235,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpyv_zen_int_avx512_nonUnitStrides,
-        saxpyvUkr,
+        saxpyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_saxpyv_zen_int_avx512),  // kernel address
             ::testing::Values('n'),                         // use x, not conj(x) (since it is real)

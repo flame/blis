@@ -35,17 +35,17 @@
 #include <gtest/gtest.h>
 #include "test_xpbyv.h"
 
-class sxpbyvGenericTest :
+class sxpbyvGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    gtint_t,
                                                    gtint_t,
                                                    gtint_t,
                                                    float>> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(sxpbyvGenericTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(sxpbyvGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( sxpbyvGenericTest, RandomData )
+TEST_P( sxpbyvGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------
@@ -87,7 +87,7 @@ TEST_P( sxpbyvGenericTest, RandomData )
 // Black box testing for generic and main use of caxpy.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        sxpbyvGenericTest,
+        sxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
@@ -103,7 +103,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         ConjX,
-        sxpbyvGenericTest,
+        sxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // c: use conj(x)
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
@@ -120,7 +120,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NonUnitIncrements,
-        sxpbyvGenericTest,
+        sxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector

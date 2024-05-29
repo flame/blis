@@ -35,11 +35,11 @@
 #include <gtest/gtest.h>
 #include "test_swapv.h"
 
-class cswapvAPI :
+class cswapvGeneric :
         // input params : vector length, stride size of x, stride size of y
         public ::testing::TestWithParam<std::tuple<gtint_t, gtint_t, gtint_t>> {};
 
-TEST_P( cswapvAPI, FunctionalTest )
+TEST_P( cswapvGeneric, API )
 {
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -62,7 +62,7 @@ TEST_P( cswapvAPI, FunctionalTest )
 
 INSTANTIATE_TEST_SUITE_P(
         UnitIncrements,
-        cswapvAPI,
+        cswapvGeneric,
         ::testing::Combine(
             // n: size of vector.
             ::testing::Values(
@@ -84,7 +84,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         NonUnitIncrements,
-        cswapvAPI,
+        cswapvGeneric,
         ::testing::Combine(
             // n: size of vector.
             ::testing::Values(

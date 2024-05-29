@@ -167,7 +167,7 @@ public:
         gtint_t ldb = testinghelpers::get_leading_dimension( storage, trans, m, n, ldb_inc );
         str_name += "_lda" + std::to_string(lda);
         str_name += "_ldb" + std::to_string(ldb);
-        str_name += ( is_memory_test )? "_mem_test_enabled" : "_mem_test_disabled";
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
 
         return str_name;
     }

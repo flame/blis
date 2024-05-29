@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_scalv.h"
 
-class sscalvGenericTest :
+class sscalvGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    gtint_t,
                                                    gtint_t,
@@ -43,7 +43,7 @@ class sscalvGenericTest :
 
 
 // Tests using random integers as vector elements.
-TEST_P( sscalvGenericTest, RandomData )
+TEST_P( sscalvGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------
@@ -80,7 +80,7 @@ TEST_P( sscalvGenericTest, RandomData )
 // Black box testing for generic and main use of sscal.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        sscalvGenericTest,
+        sscalvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
@@ -96,7 +96,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         Conjalpha,
-        sscalvGenericTest,
+        sscalvGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // c: use conjugate
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector takes values from 10 to 100 with step size of 10.
@@ -112,7 +112,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NonUnitPositiveIncrements,
-        sscalvGenericTest,
+        sscalvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector takes values from 10 to 100 with step size of 10.
@@ -129,7 +129,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NegativeIncrements,
-        sscalvGenericTest,
+        sscalvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, c: use conj(x)
             ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m size of vector takes values from 10 to 100 with step size of 10.

@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_hemv.h"
 
-class zhemvTest :
+class zhemvGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -47,7 +47,7 @@ class zhemvTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P(zhemvTest, RandomData)
+TEST_P( zhemvGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -101,7 +101,7 @@ TEST_P(zhemvTest, RandomData)
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        zhemvTest,
+        zhemvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

@@ -35,17 +35,18 @@
 #include <gtest/gtest.h>
 #include "test_scalv_ukr.h"
 
-class zscalvUkrTest :
+class zscalvGeneric :
         public ::testing::TestWithParam<std::tuple<zscalv_ker_ft,   // Function pointer for zscalv kernels
                                                    char,            // conj_alpha
                                                    gtint_t,         // n
                                                    gtint_t,         // incx
                                                    dcomplex,        // alpha
                                                    bool>> {};       // is_memory_test
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zscalvUkrTest);
+
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zscalvGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( zscalvUkrTest, FunctionalTest )
+TEST_P( zscalvGeneric, UKR )
 {
     using T = dcomplex;
 
@@ -100,7 +101,7 @@ TEST_P( zscalvUkrTest, FunctionalTest )
 */
 INSTANTIATE_TEST_SUITE_P(
         bli_zscalv_zen_int_unitPositiveStride,
-        zscalvUkrTest,
+        zscalvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zscalv_zen_int),
             // conj(alpha): uses n (no_conjugate) since it is real.
@@ -135,7 +136,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         bli_zscalv_zen_int_nonUnitPositiveStrides,
-        zscalvUkrTest,
+        zscalvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zscalv_zen_int),
             // conj(alpha): uses n (no_conjugate) since it is real.
@@ -185,7 +186,7 @@ INSTANTIATE_TEST_SUITE_P(
 */
 INSTANTIATE_TEST_SUITE_P(
         bli_zscalv_zen_int_avx512_unitPositiveStride,
-        zscalvUkrTest,
+        zscalvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zscalv_zen_int_avx512),
             // conj(alpha): uses n (no_conjugate) since it is real.
@@ -224,7 +225,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         bli_zscalv_zen_int_avx512_nonUnitPositiveStrides,
-        zscalvUkrTest,
+        zscalvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zscalv_zen_int_avx512),
             // conj(alpha): uses n (no_conjugate) since it is real.

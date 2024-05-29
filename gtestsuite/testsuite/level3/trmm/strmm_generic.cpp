@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_trmm.h"
 
-class strmmTest :
+class strmmGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -47,7 +47,7 @@ class strmmTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P(strmmTest, RandomData)
+TEST_P( strmmGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------
@@ -99,7 +99,7 @@ TEST_P(strmmTest, RandomData)
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        strmmTest,
+        strmmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

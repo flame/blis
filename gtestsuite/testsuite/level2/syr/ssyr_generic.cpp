@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_syr.h"
 
-class ssyrTest :
+class ssyrGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -44,7 +44,7 @@ class ssyrTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P(ssyrTest, RandomData)
+TEST_P( ssyrGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------
@@ -87,7 +87,7 @@ TEST_P(ssyrTest, RandomData)
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        ssyrTest,
+        ssyrGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

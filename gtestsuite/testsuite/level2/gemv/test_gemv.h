@@ -179,7 +179,7 @@ public:
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
         gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
         str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
-        str_name = str_name + (( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled");
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
         return str_name;
     }
 };

@@ -35,19 +35,19 @@
 #include <gtest/gtest.h>
 #include "test_axpbyv_ukr.h"
 
-class saxpbyvUkrTest :
+class saxpbyvGeneric :
         public ::testing::TestWithParam<std::tuple<saxpbyv_ker_ft,  // Function pointer type for saxpbyv kernels
                                                    char,            // conjx
                                                    gtint_t,         // n
                                                    gtint_t,         // incx
                                                    gtint_t,         // incy
-                                                   float,          // alpha
-                                                   float>> {};     // beta
+                                                   float,           // alpha
+                                                   float>> {};      // beta
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(saxpbyvUkrTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(saxpbyvGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( saxpbyvUkrTest, AccuracyCheck )
+TEST_P( saxpbyvGeneric, UKR )
 {
     using T = float;
 
@@ -111,7 +111,7 @@ TEST_P( saxpbyvUkrTest, AccuracyCheck )
 // Unit testing with unit stride
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpbyv_zen_int10_unitStride,
-        saxpbyvUkrTest,
+        saxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_saxpbyv_zen_int10), // kernel address
             ::testing::Values('n'),                   // use x, not conj(x) (since it is real)
@@ -127,7 +127,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with unit stride
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpbyv_zen_int_unitStride,
-        saxpbyvUkrTest,
+        saxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_saxpbyv_zen_int),   // kernel address
             ::testing::Values('n'),                   // use x, not conj(x) (since it is real)

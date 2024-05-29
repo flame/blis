@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_imatcopy.h"
 
-class cimatcopyAPI :
+class cimatcopyGeneric :
         public ::testing::TestWithParam<std::tuple<char,        // storage
                                                    char,        // trans
                                                    gtint_t,     // m
@@ -45,10 +45,10 @@ class cimatcopyAPI :
                                                    gtint_t,     // lda_out_inc
                                                    bool>> {};   // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(cimatcopyAPI);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(cimatcopyGeneric);
 
 // Tests using random numbers as vector elements.
-TEST_P( cimatcopyAPI, FunctionalTest )
+TEST_P( cimatcopyGeneric, API )
 {
     using T = scomplex;
     //----------------------------------------------------------
@@ -87,7 +87,7 @@ TEST_P( cimatcopyAPI, FunctionalTest )
 // Black box testing for generic and main use of cimatcopy.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        cimatcopyAPI,
+        cimatcopyGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format(currently only for BLAS testing)
             ::testing::Values('n', 't', 'r', 'c'),                           // trans(and/or conj) value

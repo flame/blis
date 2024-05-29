@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "level3/gemm/test_gemm.h"
 
-class DGEMMTest :
+class dgemmGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -50,7 +50,7 @@ class DGEMMTest :
 
 
 //matrix storage format, transA, transB, m, n, k, alpha, beta, lda, ldb, ldc
-TEST_P(DGEMMTest, RandomData)
+TEST_P( dgemmGeneric, API )
 {
     using T = double;
     //----------------------------------------------------------
@@ -102,7 +102,7 @@ TEST_P(DGEMMTest, RandomData)
 
 INSTANTIATE_TEST_SUITE_P(
         expect_dgemm_k1_path,
-        DGEMMTest,
+        dgemmGeneric,
         ::testing::Combine(
             // No condition based on storage scheme of matrices
             ::testing::Values('c'),                                      // storage format
@@ -126,7 +126,7 @@ INSTANTIATE_TEST_SUITE_P(
 //----------------------------- bli_dgemm_tiny kernel ------------------------------------
 INSTANTIATE_TEST_SUITE_P(
         expect_dgemm_tiny_path,
-        DGEMMTest,
+        dgemmGeneric,
         ::testing::Combine(
             // No condition based on storage scheme of matrices
             ::testing::Values('c'),                                      // storage format
@@ -153,7 +153,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Tests both bli_dgemm_small and bli_dgemm_small_At
 INSTANTIATE_TEST_SUITE_P(
         expect_dgemm_small_path,
-        DGEMMTest,
+        dgemmGeneric,
         ::testing::Combine(
             // Test both storage types
             ::testing::Values('c'),                                        // storage format
@@ -178,7 +178,7 @@ INSTANTIATE_TEST_SUITE_P(
 // ----------------------------- SUP implementation --------------------------------------
 INSTANTIATE_TEST_SUITE_P(
         expect_dgemm_sup_path,
-        DGEMMTest,
+        dgemmGeneric,
         ::testing::Combine(
             // Storage of A and B is handled by packing
             ::testing::Values('c'),                                                         // storage format
@@ -201,7 +201,7 @@ INSTANTIATE_TEST_SUITE_P(
 // ----------------------------- Native implementation --------------------------------------
 INSTANTIATE_TEST_SUITE_P(
         expect_dgemm_native_path,
-        DGEMMTest,
+        dgemmGeneric,
         ::testing::Combine(
             // Storage of A and B is handled by packing
             ::testing::Values('c'),                            // storage format

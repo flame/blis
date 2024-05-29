@@ -36,6 +36,7 @@
 #include "level2/gemv/test_gemv.h"
 
 using T = float;
+
 class sgemvGeneric :
         public ::testing::TestWithParam<std::tuple<char,        // storage format
                                                    char,        // transa
@@ -49,7 +50,7 @@ class sgemvGeneric :
                                                    gtint_t,     // lda_inc
                                                    bool>> {};   // is_memory_test
 
-TEST_P(sgemvGeneric, FunctionalTest)
+TEST_P( sgemvGeneric, API )
 {
     //----------------------------------------------------------
     // Initialize values from the parameters passed through

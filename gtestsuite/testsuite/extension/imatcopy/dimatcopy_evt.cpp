@@ -49,7 +49,7 @@ class dimatcopyEVT :
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dimatcopyEVT);
 
 // Tests using random numbers as vector elements.
-TEST_P( dimatcopyEVT, NanInfCheck )
+TEST_P( dimatcopyEVT, API )
 {
     using T = double;
     //----------------------------------------------------------

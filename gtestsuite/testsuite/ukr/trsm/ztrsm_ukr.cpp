@@ -38,9 +38,8 @@
 #include "test_trsm_ukr.h"
 #include "level3/trsm/test_trsm.h"
 
-
-class ztrsmUkrNat :
-    public ::testing::TestWithParam<std::tuple< zgemmtrsm_ukr_ft,  // Function pointer type for ZTRSM kernels
+class ztrsmGenericNat :
+    public ::testing::TestWithParam<std::tuple< zgemmtrsm_ukr_ft,  // Function pointer type for ztrsm kernels
                                                 char,              // storage
                                                 char,              // uploa
                                                 char,              // diaga
@@ -51,8 +50,8 @@ class ztrsmUkrNat :
                                                 gtint_t,           // ldc_inc
                                                 bool      >> {};   // is_memory_test
 
-class ztrsmUkrSmall :
-    public ::testing::TestWithParam<std::tuple< trsm_small_ker_ft,  // Function pointer type for ZTRSM kernels
+class ztrsmGenericSmall :
+    public ::testing::TestWithParam<std::tuple< trsm_small_ker_ft,  // Function pointer type for ztrsm kernels
                                                 char,               // side
                                                 char,               // uploa
                                                 char,               // diaga
@@ -64,12 +63,12 @@ class ztrsmUkrSmall :
                                                 gtint_t,            // ldb_inc
                                                 bool      >> {};    // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ztrsmUkrNat);
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ztrsmUkrSmall);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ztrsmGenericNat);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ztrsmGenericSmall);
 
-TEST_P(ztrsmUkrNat, AccuracyCheck)
+TEST_P( ztrsmGenericNat, UKR )
 {
-    using   T = dcomplex;
+    using T = dcomplex;
     zgemmtrsm_ukr_ft ukr_fp = std::get<0>(GetParam());
     char storage            = std::get<1>(GetParam());
     char uploa              = std::get<2>(GetParam());
@@ -95,9 +94,9 @@ TEST_P(ztrsmUkrNat, AccuracyCheck)
     test_trsm_ukr<T, zgemmtrsm_ukr_ft>( ukr_fp, storage, uploa, diaga, m, n, k, alpha, ldc, thresh,  is_memory_test);
 }
 
-TEST_P(ztrsmUkrSmall, AccuracyCheck)
+TEST_P( ztrsmGenericSmall, UKR )
 {
-    using   T = dcomplex;
+    using T = dcomplex;
     trsm_small_ker_ft ukr_fp = std::get<0>(GetParam());
     char side                 = std::get<1>(GetParam());
     char uploa                = std::get<2>(GetParam());
@@ -127,7 +126,7 @@ TEST_P(ztrsmUkrSmall, AccuracyCheck)
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 INSTANTIATE_TEST_SUITE_P (
     bli_zgemmtrsm_l_zen4_asm_4x12,
-    ztrsmUkrNat,
+    ztrsmGenericNat,
     ::testing::Combine(
         ::testing::Values(bli_zgemmtrsm_l_zen4_asm_4x12),  // ker_ptr
         ::testing::Values('c', 'r', 'g'),                  // stor
@@ -148,7 +147,7 @@ INSTANTIATE_TEST_SUITE_P (
 
 INSTANTIATE_TEST_SUITE_P (
     bli_zgemmtrsm_u_zen4_asm_4x12,
-    ztrsmUkrNat,
+    ztrsmGenericNat,
     ::testing::Combine(
         ::testing::Values(bli_zgemmtrsm_u_zen4_asm_4x12),  // ker_ptr
         ::testing::Values('c', 'r', 'g'),                  // stor
@@ -169,7 +168,7 @@ INSTANTIATE_TEST_SUITE_P (
 
 INSTANTIATE_TEST_SUITE_P (
     bli_trsm_small_AVX512,
-    ztrsmUkrSmall,
+    ztrsmGenericSmall,
     ::testing::Combine(
         ::testing::Values(bli_trsm_small_AVX512),     // ker_ptr
         ::testing::Values('l', 'r'),                  // side
@@ -196,7 +195,7 @@ INSTANTIATE_TEST_SUITE_P (
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 INSTANTIATE_TEST_SUITE_P (
     bli_zgemmtrsm_l_zen_asm_2x6,
-    ztrsmUkrNat,
+    ztrsmGenericNat,
     ::testing::Combine(
         ::testing::Values(bli_zgemmtrsm_l_zen_asm_2x6),     // ker_ptr
         ::testing::Values('c', 'r', 'g'),                   // stor
@@ -217,7 +216,7 @@ INSTANTIATE_TEST_SUITE_P (
 
 INSTANTIATE_TEST_SUITE_P (
     bli_zgemmtrsm_u_zen_asm_2x6,
-    ztrsmUkrNat,
+    ztrsmGenericNat,
     ::testing::Combine(
         ::testing::Values(bli_zgemmtrsm_u_zen_asm_2x6),     // ker_ptr
         ::testing::Values('c', 'r', 'g'),                   // stor
@@ -238,7 +237,7 @@ INSTANTIATE_TEST_SUITE_P (
 
 INSTANTIATE_TEST_SUITE_P (
     bli_trsm_small,
-    ztrsmUkrSmall,
+    ztrsmGenericSmall,
     ::testing::Combine(
         ::testing::Values(bli_trsm_small),            // ker_ptr
         ::testing::Values('l', 'r'),                  // side

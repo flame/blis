@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_imatcopy.h"
 
-class zimatcopyAPI :
+class zimatcopyGeneric :
         public ::testing::TestWithParam<std::tuple<char,        // storage
                                                    char,        // trans
                                                    gtint_t,     // m
@@ -45,10 +45,10 @@ class zimatcopyAPI :
                                                    gtint_t,     // lda_out_inc
                                                    bool>> {};   // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zimatcopyAPI);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zimatcopyGeneric);
 
 // Tests using random numbers as vector elements.
-TEST_P( zimatcopyAPI, FunctionalTest )
+TEST_P( zimatcopyGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -87,7 +87,7 @@ TEST_P( zimatcopyAPI, FunctionalTest )
 // Black box testing for generic and main use of zimatcopy.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        zimatcopyAPI,
+        zimatcopyGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format(currently only for BLAS testing)
             ::testing::Values('n', 't', 'r', 'c'),                           // trans(and/or conj) value

@@ -36,11 +36,11 @@
 #include "test_scalv.h"
 
 template <typename T>
-class xscalv : public ::testing::Test {};
+class scalv_EIC : public ::testing::Test {};
 typedef ::testing::Types<float, double> TypeParam;
-TYPED_TEST_SUITE(xscalv, TypeParam);
+TYPED_TEST_SUITE(scalv_EIC, TypeParam);
 
-TYPED_TEST(xscalv, zero_alpha_x_fp)
+TYPED_TEST(scalv_EIC, zero_alpha_x_fp)
 {
     using T = TypeParam;
     gtint_t n = 10, incx = 1;
@@ -77,7 +77,7 @@ TYPED_TEST(xscalv, zero_alpha_x_fp)
     computediff<T>( "x", n, x.data(), x_ref.data(), incx, thresh, true );
 }
 
-TYPED_TEST(xscalv, zero_alpha_x_inf)
+TYPED_TEST(scalv_EIC, zero_alpha_x_inf)
 {
     using T = TypeParam;
     gtint_t n = 10, incx = 1;

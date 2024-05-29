@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_her2k.h"
 
-class zher2kTest :
+class zher2kGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -48,7 +48,7 @@ class zher2kTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P(zher2kTest, RandomData)
+TEST_P( zher2kGeneric, API )
 {
     using T = dcomplex;
     using RT = typename testinghelpers::type_info<T>::real_type;
@@ -102,7 +102,7 @@ TEST_P(zher2kTest, RandomData)
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        zher2kTest,
+        zher2kGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

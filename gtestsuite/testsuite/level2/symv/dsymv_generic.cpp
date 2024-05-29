@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_symv.h"
 
-class dsymvTest :
+class dsymvGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -47,7 +47,7 @@ class dsymvTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P(dsymvTest, RandomData)
+TEST_P( dsymvGeneric, API )
 {
     using T = double;
     //----------------------------------------------------------
@@ -100,7 +100,7 @@ TEST_P(dsymvTest, RandomData)
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        dsymvTest,
+        dsymvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

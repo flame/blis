@@ -35,17 +35,17 @@
 #include <gtest/gtest.h>
 #include "test_xpbyv.h"
 
-class cxpbyvGenericTest :
+class cxpbyvGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    gtint_t,
                                                    gtint_t,
                                                    gtint_t,
                                                    scomplex>> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(cxpbyvGenericTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(cxpbyvGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( cxpbyvGenericTest, RandomData )
+TEST_P( cxpbyvGeneric, API )
 {
     using T = scomplex;
     //----------------------------------------------------------
@@ -88,7 +88,7 @@ TEST_P( cxpbyvGenericTest, RandomData )
 // Black box testing for generic and main use of cxpby.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        cxpbyvGenericTest,
+        cxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values('n', 'c'),                                     // n: use x, c: use conj(x)
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
@@ -104,7 +104,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NonUnitIncrements,
-        cxpbyvGenericTest,
+        cxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values('n', 'c'),                                     // n: use x, c: use conj(x)
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.

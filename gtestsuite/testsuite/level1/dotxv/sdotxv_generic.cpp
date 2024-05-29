@@ -35,13 +35,13 @@
 #include <gtest/gtest.h>
 #include "test_dotxv.h"
 
-class sdotxvGenericTest :
+class sdotxvGeneric :
         public ::testing::TestWithParam<std::tuple<gtint_t, char, char, gtint_t, gtint_t, float, float>> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(sdotxvGenericTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(sdotxvGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( sdotxvGenericTest, RandomData )
+TEST_P( sdotxvGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------
@@ -108,7 +108,7 @@ TEST_P( sdotxvGenericTest, RandomData )
 // Black box testing for generic and main use of sdotxv.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        sdotxvGenericTest,
+        sdotxvGeneric,
         ::testing::Combine(
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
@@ -126,7 +126,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         ConjX,
-        sdotxvGenericTest,
+        sdotxvGeneric,
         ::testing::Combine(
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
             ::testing::Values('c'),                                          // c: use conj(x)
@@ -144,7 +144,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NonUnitIncrements,
-        sdotxvGenericTest,
+        sdotxvGeneric,
         ::testing::Combine(
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
             ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)

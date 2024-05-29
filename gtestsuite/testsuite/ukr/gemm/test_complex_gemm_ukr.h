@@ -179,7 +179,7 @@ static void test_complex_gemmsup_ukr( char storage, char trnsa, char trnsb, gtin
             NULL
           );
 
-        if (is_memory_test)
+        if ( is_memory_test )
         {
             // set pointers to second buffer
             buf_a    = (T*)buf_a_ptrs.greenzone_2;
@@ -343,7 +343,7 @@ static void test_gemmnat_ukr( char storage, gtint_t m, gtint_t n, gtint_t k, T a
                 &data,
                 NULL
             );
-        if(is_memory_test)
+        if ( is_memory_test )
         {
             // set pointers to second buffer
             buf_a    = (T*)buf_a_ptrs.greenzone_2;

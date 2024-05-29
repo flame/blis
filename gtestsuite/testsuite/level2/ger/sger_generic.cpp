@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_ger.h"
 
-class sgerGenericTest :
+class sgerGeneric :
         public ::testing::TestWithParam<std::tuple<char,            // storage
                                                    char,            // conjx
                                                    char,            // conjy
@@ -46,7 +46,7 @@ class sgerGenericTest :
                                                    gtint_t,         // incy
                                                    gtint_t>> {};	// lda_inc
 
-TEST_P(sgerGenericTest, RandomData)
+TEST_P( sgerGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------
@@ -92,7 +92,7 @@ TEST_P(sgerGenericTest, RandomData)
 
 INSTANTIATE_TEST_SUITE_P(
         unitPositiveIncrement,
-        sgerGenericTest,
+        sgerGeneric,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
@@ -127,7 +127,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         conjXY,
-        sgerGenericTest,
+        sgerGeneric,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
@@ -159,7 +159,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         nonUnitPositiveIncrements,
-        sgerGenericTest,
+        sgerGeneric,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
@@ -193,7 +193,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifndef TEST_BLIS_TYPED
 INSTANTIATE_TEST_SUITE_P(
         negativeIncrements,
-        sgerGenericTest,
+        sgerGeneric,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
@@ -225,7 +225,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         scalarCombinations,
-        sgerGenericTest,
+        sgerGeneric,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
@@ -255,7 +255,7 @@ INSTANTIATE_TEST_SUITE_P(
     );
 INSTANTIATE_TEST_SUITE_P(
         largeSize,
-        sgerGenericTest,
+        sgerGeneric,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
@@ -285,7 +285,7 @@ INSTANTIATE_TEST_SUITE_P(
     );
 INSTANTIATE_TEST_SUITE_P(
         strideGreaterThanSize,
-        sgerGenericTest,
+        sgerGeneric,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'

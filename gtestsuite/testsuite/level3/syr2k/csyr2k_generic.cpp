@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_syr2k.h"
 
-class csyr2kTest :
+class csyr2kGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -48,7 +48,7 @@ class csyr2kTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P(csyr2kTest, RandomData)
+TEST_P( csyr2kGeneric, API )
 {
     using T = scomplex;
     //----------------------------------------------------------
@@ -101,7 +101,7 @@ TEST_P(csyr2kTest, RandomData)
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        csyr2kTest,
+        csyr2kGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

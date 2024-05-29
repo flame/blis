@@ -35,10 +35,10 @@
 #include <gtest/gtest.h>
 #include "test_nrm2.h"
 
-class dnrm2Test :
+class dnrm2Generic :
         public ::testing::TestWithParam<std::tuple<gtint_t, gtint_t>> {};
 
-TEST_P( dnrm2Test, RandomData )
+TEST_P( dnrm2Generic, API )
 {
     using T = double;
     //----------------------------------------------------------
@@ -76,7 +76,7 @@ TEST_P( dnrm2Test, RandomData )
 
 INSTANTIATE_TEST_SUITE_P(
         AT_1T,
-        dnrm2Test,
+        dnrm2Generic,
         ::testing::Combine(
             // m size of vector
             ::testing::Values(gtint_t(1),  // trivial case n=1
@@ -125,7 +125,7 @@ INSTANTIATE_TEST_SUITE_P(
 */
 INSTANTIATE_TEST_SUITE_P(
         AT_MT_Unit_Tester,
-        dnrm2Test,
+        dnrm2Generic,
         ::testing::Combine(
             // m size of vector
             ::testing::Values(gtint_t(256),
@@ -159,7 +159,7 @@ INSTANTIATE_TEST_SUITE_P(
 */
 INSTANTIATE_TEST_SUITE_P(
         AT_MT_AOCL_DYNAMIC,
-        dnrm2Test,
+        dnrm2Generic,
         ::testing::Combine(
             // m size of vector
             ::testing::Values(gtint_t(2950000),

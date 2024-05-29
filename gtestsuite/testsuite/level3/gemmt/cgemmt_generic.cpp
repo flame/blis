@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_gemmt.h"
 
-class cgemmtTest :
+class cgemmtGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -48,9 +48,9 @@ class cgemmtTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(cgemmtTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(cgemmtGeneric);
 
-TEST_P(cgemmtTest, RandomData)
+TEST_P( cgemmtGeneric, API )
 {
     using T = scomplex;
     //----------------------------------------------------------
@@ -105,7 +105,7 @@ TEST_P(cgemmtTest, RandomData)
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        cgemmtTest,
+        cgemmtGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

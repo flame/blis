@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_symm.h"
 
-class dsymmTest :
+class dsymmGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -49,7 +49,7 @@ class dsymmTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P(dsymmTest, RandomData)
+TEST_P( dsymmGeneric, API )
 {
     using T = double;
     //----------------------------------------------------------
@@ -107,7 +107,7 @@ TEST_P(dsymmTest, RandomData)
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        dsymmTest,
+        dsymmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

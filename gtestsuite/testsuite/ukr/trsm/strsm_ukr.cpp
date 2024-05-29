@@ -37,9 +37,8 @@
 #include "level3/ref_gemm.h"
 #include "test_trsm_ukr.h"
 #include "level3/trsm/test_trsm.h"
-#include "blis.h"
 
-class strsmUkrNat :
+class strsmGenericNat :
     public ::testing::TestWithParam<std::tuple< sgemmtrsm_ukr_ft,  // Function pointer type for strsm kernels
                                                 char,              // storage
                                                 char,              // uploa
@@ -51,7 +50,7 @@ class strsmUkrNat :
                                                 gtint_t,           // ldc_inc
                                                 bool      >> {};   // is_memory_test
 
-class strsmUkrSmall :
+class strsmGenericSmall :
     public ::testing::TestWithParam<std::tuple< trsm_small_ker_ft,  // Function pointer type for strsm kernels
                                                 char,               // side
                                                 char,               // uploa
@@ -64,12 +63,12 @@ class strsmUkrSmall :
                                                 gtint_t,            // ldb_inc
                                                 bool      >> {};    // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(strsmUkrNat);
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(strsmUkrSmall);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(strsmGenericNat);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(strsmGenericSmall);
 
-TEST_P(strsmUkrNat, AccuracyCheck)
+TEST_P( strsmGenericNat, UKR )
 {
-    using   T = float;
+    using T = float;
     sgemmtrsm_ukr_ft ukr_fp = std::get<0>(GetParam());
     char storage            = std::get<1>(GetParam());
     char uploa              = std::get<2>(GetParam());
@@ -94,9 +93,9 @@ TEST_P(strsmUkrNat, AccuracyCheck)
     test_trsm_ukr<T, sgemmtrsm_ukr_ft>( ukr_fp, storage, uploa, diaga, m, n, k, alpha, ldc, thresh,  is_memory_test);
 }
 
-TEST_P(strsmUkrSmall, AccuracyCheck)
+TEST_P( strsmGenericSmall, UKR )
 {
-    using   T = float;
+    using T = float;
     trsm_small_ker_ft ukr_fp = std::get<0>(GetParam());
     char side                 = std::get<1>(GetParam());
     char uploa                = std::get<2>(GetParam());
@@ -125,7 +124,7 @@ TEST_P(strsmUkrSmall, AccuracyCheck)
 #if defined(BLIS_KERNELS_HASWELL) && defined(GTEST_AVX2FMA3)
 INSTANTIATE_TEST_SUITE_P (
     bli_sgemmtrsm_l_haswell_asm_6x16,
-    strsmUkrNat,
+    strsmGenericNat,
     ::testing::Combine(
         ::testing::Values(bli_sgemmtrsm_l_haswell_asm_6x16),  // ker_ptr
         ::testing::Values('c', 'r', 'g'),                     // stor
@@ -143,7 +142,7 @@ INSTANTIATE_TEST_SUITE_P (
 
 INSTANTIATE_TEST_SUITE_P (
     bli_sgemmtrsm_u_haswell_asm_6x16,
-    strsmUkrNat,
+    strsmGenericNat,
     ::testing::Combine(
         ::testing::Values(bli_sgemmtrsm_u_haswell_asm_6x16),  // ker_ptr
         ::testing::Values('c', 'r', 'g'),                     // stor
@@ -163,7 +162,7 @@ INSTANTIATE_TEST_SUITE_P (
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 INSTANTIATE_TEST_SUITE_P (
     bli_trsm_small,
-    strsmUkrSmall,
+    strsmGenericSmall,
     ::testing::Combine(
         ::testing::Values(bli_trsm_small),            // ker_ptr
         ::testing::Values('l', 'r'),                  // side

@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "level2/trsv/test_trsv.h"
 
-class strsvTest :
+class strsvGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -45,7 +45,7 @@ class strsvTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P(strsvTest, RandomData)
+TEST_P( strsvGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------
@@ -93,7 +93,7 @@ TEST_P(strsvTest, RandomData)
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        strsvTest,
+        strsvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

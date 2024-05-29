@@ -51,7 +51,7 @@ class domatcopy2EVT :
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(domatcopy2EVT);
 
 // Tests using random numbers as vector elements.
-TEST_P( domatcopy2EVT, NanInfCheck )
+TEST_P( domatcopy2EVT, API )
 {
     using T = double;
     //----------------------------------------------------------

@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "level2/trsv/test_trsv.h"
 
-class dtrsvAPI :
+class dtrsvGeneric :
         public ::testing::TestWithParam<std::tuple<char,         // storage format
                                                    char,         // uplo
                                                    char,         // trans
@@ -46,7 +46,7 @@ class dtrsvAPI :
                                                    gtint_t,      // ld_inc
                                                    bool>> {};    // is memory test
 
-TEST_P(dtrsvAPI, FunctionalTest)
+TEST_P( dtrsvGeneric, API )
 {
     using T = double;
     //----------------------------------------------------------
@@ -96,7 +96,7 @@ TEST_P(dtrsvAPI, FunctionalTest)
 
 INSTANTIATE_TEST_SUITE_P(
         Native,
-        dtrsvAPI,
+        dtrsvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

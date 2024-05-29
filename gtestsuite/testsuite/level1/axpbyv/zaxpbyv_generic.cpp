@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_axpbyv.h"
 
-class zaxpbyvAccTest :
+class zaxpbyvGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    gtint_t,
                                                    gtint_t,
@@ -43,7 +43,7 @@ class zaxpbyvAccTest :
                                                    dcomplex,
                                                    dcomplex>> {};
 // Tests using random integers as vector elements.
-TEST_P(zaxpbyvAccTest, RandomData)
+TEST_P( zaxpbyvGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -122,7 +122,7 @@ TEST_P(zaxpbyvAccTest, RandomData)
 // Accuracy testing of the main loop, single and multiple runs
 INSTANTIATE_TEST_SUITE_P(
     bli_zaxpbyv_zen_int_acc_unitStrides_main,
-    zaxpbyvAccTest,
+    zaxpbyvGeneric,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED
@@ -141,7 +141,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Accuracy testing of different combinations of fringe loops(L6, L4, L2, 1)
 INSTANTIATE_TEST_SUITE_P(
     bli_zaxpbyv_zen_int_acc_unitStrides_fringe,
-    zaxpbyvAccTest,
+    zaxpbyvGeneric,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED
@@ -160,7 +160,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Accuracy testing of 3*L8 + L6 + L4 + L2 + 1, a case of main + all fringe cases taken
 INSTANTIATE_TEST_SUITE_P(
     bli_zaxpbyv_zen_int_acc_unitStrides_combine,
-    zaxpbyvAccTest,
+    zaxpbyvGeneric,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED
@@ -179,7 +179,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Accuracy testing with non-unit strides
 INSTANTIATE_TEST_SUITE_P(
     bli_zaxpbyv_zen_int_acc_nonUnitStrides,
-    zaxpbyvAccTest,
+    zaxpbyvGeneric,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED

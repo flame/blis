@@ -35,10 +35,10 @@
 #include <gtest/gtest.h>
 #include "test_asumv.h"
 
-class dzasumvGenericTest :
+class dzasumvGeneric :
         public ::testing::TestWithParam<std::tuple<gtint_t, gtint_t>> {};
 
-TEST_P( dzasumvGenericTest, RandomData )
+TEST_P( dzasumvGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -69,7 +69,7 @@ TEST_P( dzasumvGenericTest, RandomData )
 
 INSTANTIATE_TEST_SUITE_P(
         unitPositiveIncrement,
-        dzasumvGenericTest,
+        dzasumvGeneric,
         ::testing::Combine(
             // m: size of vector.
             ::testing::Values(
@@ -95,7 +95,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         nonUnitPositiveIncrement,
-        dzasumvGenericTest,
+        dzasumvGeneric,
         ::testing::Combine(
             // m: size of vector.
             ::testing::Values(
@@ -125,7 +125,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifndef TEST_BLIS_TYPED
 INSTANTIATE_TEST_SUITE_P(
         negativeIncrement,
-        dzasumvGenericTest,
+        dzasumvGeneric,
         ::testing::Combine(
             // m: size of vector.
             ::testing::Values(

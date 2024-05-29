@@ -35,12 +35,12 @@
 #include <gtest/gtest.h>
 #include "test_addv.h"
 
-class ZAddvGenericTest :
+class zaddvGeneric :
         public ::testing::TestWithParam<std::tuple<char, gtint_t, gtint_t, gtint_t>> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ZAddvGenericTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zaddvGeneric);
 
-TEST_P( ZAddvGenericTest, RandomData )
+TEST_P( zaddvGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -77,7 +77,7 @@ TEST_P( ZAddvGenericTest, RandomData )
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        ZAddvGenericTest,
+        zaddvGeneric,
         ::testing::Combine(
             ::testing::Values('n','c'),                                      // n: not transpose for x, c: conjugate for x
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.

@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_dotv.h"
 
-class ddotvGenericTest :
+class ddotvGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    gtint_t,
@@ -43,7 +43,7 @@ class ddotvGenericTest :
                                                    gtint_t>> {};
 
 // Tests using random integers as vector elements.
-TEST_P( ddotvGenericTest, RandomData )
+TEST_P( ddotvGeneric, API )
 {
     using T = double;
     //----------------------------------------------------------
@@ -80,7 +80,7 @@ TEST_P( ddotvGenericTest, RandomData )
 // Black box testing for generic use of ddot.
 INSTANTIATE_TEST_SUITE_P(
         unitPositiveStride,
-        ddotvGenericTest,
+        ddotvGeneric,
         ::testing::Combine(
             // conj(x): user n (no_conjugate) since it is real.
             ::testing::Values('n'),
@@ -102,7 +102,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         ConjX,
-        ddotvGenericTest,
+        ddotvGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // c: use conj(x)
             ::testing::Values('c'),                                          // c: use conj(y)
@@ -119,7 +119,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         nonUnitPositiveStrides,
-        ddotvGenericTest,
+        ddotvGeneric,
         ::testing::Combine(
             // conj(x): user n (no_conjugate) since it is real.
             ::testing::Values('n'),
@@ -145,7 +145,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         negativeStrides,
-        ddotvGenericTest,
+        ddotvGeneric,
         ::testing::Combine(
             // conj(x): user n (no_conjugate) since it is real.
             ::testing::Values('n'),
@@ -169,7 +169,7 @@ INSTANTIATE_TEST_SUITE_P(
 #if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
 INSTANTIATE_TEST_SUITE_P(
         AOCLDynamicThresholds,
-        ddotvGenericTest,
+        ddotvGeneric,
         ::testing::Combine(
             // conj(x): user n (no_conjugate) since it is real.
             ::testing::Values('n'),

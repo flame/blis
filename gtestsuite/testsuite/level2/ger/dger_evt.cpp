@@ -39,7 +39,7 @@ using T = double;
 static T NaN = std::numeric_limits<T>::quiet_NaN();
 static T Inf = std::numeric_limits<T>::infinity();
 
-class dger_EVT :
+class dgerEVT :
         public ::testing::TestWithParam<std::tuple<char,        // storage
                                                    char,        // conjx
                                                    char,        // conjy
@@ -57,7 +57,7 @@ class dger_EVT :
                                                    gtint_t,     // yi
                                                    T>> {};      // y_exval
 
-TEST_P(dger_EVT, ExceptionValues)
+TEST_P( dgerEVT, API )
 {
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -118,7 +118,7 @@ TEST_P(dger_EVT, ExceptionValues)
 
 INSTANTIATE_TEST_SUITE_P(
         unitStride,
-        dger_EVT,
+        dgerEVT,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
@@ -163,7 +163,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         nonUnitStride,
-        dger_EVT,
+        dgerEVT,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'

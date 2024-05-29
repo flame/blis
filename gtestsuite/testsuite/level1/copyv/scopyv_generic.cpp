@@ -42,7 +42,7 @@ class scopyvGeneric :
                                                    gtint_t>> {};             // stride size for y
 
 // Tests using random values as vector elements.
-TEST_P( scopyvGeneric, FunctionalTest )
+TEST_P( scopyvGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------

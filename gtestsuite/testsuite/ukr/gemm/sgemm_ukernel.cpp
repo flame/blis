@@ -37,49 +37,78 @@
 #include "common/testing_helpers.h"
 #include "test_gemm_ukr.h"
 
-class sgemmUkrSUP :
-        public ::testing::TestWithParam<std::tuple<sgemmsup_ker_ft, gtint_t, gtint_t, gtint_t, float, float, char, gtint_t, char, char, bool, bool>> {};
-// m, n, k, alpha, beta,  storage of c, sgemm sup kernel, micro-kernel MR block, transa, transb, kernel transpose, memory test
+/*******************************************************/
+/*                 SUP Kernel testing                  */
+/*******************************************************/
+class sgemmGenericSUP :
+        public ::testing::TestWithParam<std::tuple< gtint_t,                // m
+                                                    gtint_t,                // n
+                                                    gtint_t,                // k
+                                                    float,                  // alpha
+                                                    float,                  // beta
+                                                    char,                   // storage of C matrix
+                                                    sgemmsup_ker_ft,        // Function pointer type for sgemm kernel
+                                                    gtint_t,                // micro-kernel MR block
+                                                    char,                   // transa
+                                                    char,                   // transb
+                                                    bool,                   // row preferred kernel
+                                                    bool                    // is_memory_test
+                                                    >> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(sgemmUkrSUP);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(sgemmGenericSUP);
 
-TEST_P(sgemmUkrSUP, functionality_testing)
+TEST_P( sgemmGenericSUP, functionality_testing)
 {
     using T = float;
-    sgemmsup_ker_ft kern_ptr = std::get<0>(GetParam()); //pointer to the gemm kernel
-    gtint_t m      = std::get<1>(GetParam());           // dimension m
-    gtint_t n      = std::get<2>(GetParam());           // dimension n
-    gtint_t k      = std::get<3>(GetParam());           // dimension k
-    T alpha        = std::get<4>(GetParam());           // alpha
-    T beta         = std::get<5>(GetParam());           // beta
-    char storageC   = std::get<6>(GetParam());          // storage scheme for C matrix
-    gtint_t MR  = std::get<7>(GetParam());              // Micro-kernel tile size
-    char transa = std::get<8>(GetParam());              // A transopse
-    char transb = std::get<9>(GetParam());              // B transpose
-    bool kern_trans = std::get<10>(GetParam());         // kernel transpose
-    bool memory_test = std::get<11>(GetParam());        // memory test
+    gtint_t m                = std::get<0>(GetParam());                     // dimension m
+    gtint_t n                = std::get<1>(GetParam());                     // dimension n
+    gtint_t k                = std::get<2>(GetParam());                     // dimension k
+    T alpha                  = std::get<3>(GetParam());                     // alpha
+    T beta                   = std::get<4>(GetParam());                     // beta
+    char storageC            = std::get<5>(GetParam());                     // storage scheme for C matrix
+    sgemmsup_ker_ft kern_ptr = std::get<6>(GetParam());                     // pointer to the gemm kernel
+    gtint_t MR               = std::get<7>(GetParam());                     // Micro-kernel tile size
+    char transa              = std::get<8>(GetParam());                     // transa
+    char transb              = std::get<9>(GetParam());                     // transb
+    bool row_pref            = std::get<10>(GetParam());                    // kernel transpose
+    bool is_memory_test      = std::get<11>(GetParam());                    // memory test
 
-    test_gemmsup_ukr(kern_ptr, transa, transb, m, n, k, alpha, beta, storageC, MR, kern_trans, memory_test);
+    // Set the threshold for the errors:
+    // Check gtestsuite gemm.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    double thresh;
+    if (m == 0 || n == 0)
+        thresh = 0.0;
+    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
+              beta == testinghelpers::ONE<T>()))
+        thresh = 0.0;
+    else
+        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
+
+    test_gemmsup_ukr(kern_ptr, transa, transb, m, n, k, alpha, beta, storageC, MR, row_pref, thresh, is_memory_test);
 
 }// end of function
 
 
-class sgemmUkrSUPPrint {
+class sgemmGenericSUPPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<sgemmsup_ker_ft, gtint_t, gtint_t, gtint_t, float, float, char, gtint_t, char, char, bool, bool>>  str) const {
+        testing::TestParamInfo<std::tuple<gtint_t, gtint_t, gtint_t, float, float, char,
+                                          sgemmsup_ker_ft, gtint_t, char, char, bool, bool>>  str) const {
 
-        gtint_t m        = std::get<1>(str.param);
-        gtint_t n        = std::get<2>(str.param);
-        gtint_t k        = std::get<3>(str.param);
-        float alpha      = std::get<4>(str.param);
-        float beta       = std::get<5>(str.param);
-        char storageC    = std::get<6>(str.param);
-        char transa      = std::get<8>(str.param);
-        char transb      = std::get<9>(str.param);
-        bool memory_test = std::get<11>(str.param);
+        gtint_t m           = std::get<0>(str.param);
+        gtint_t n           = std::get<1>(str.param);
+        gtint_t k           = std::get<2>(str.param);
+        float alpha         = std::get<3>(str.param);
+        float beta          = std::get<4>(str.param);
+        char storageC       = std::get<5>(str.param);
+        char transa         = std::get<8>(str.param);
+        char transb         = std::get<9>(str.param);
+        bool is_memory_test = std::get<11>(str.param);
+
         std::string str_name;
-        str_name += "_storC_" + std::string(&storageC, 1);
+        str_name += "_stor_" + std::string(&storageC, 1);
         str_name += "_transa_" + std::string(&transa, 1);
         str_name += "_transb_" + std::string(&transb, 1);
         str_name += "_m_" + std::to_string(m);
@@ -87,7 +116,7 @@ public:
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name += ( memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
 
         return str_name;
     }
@@ -97,122 +126,122 @@ public:
 
 INSTANTIATE_TEST_SUITE_P (
         bli_sgemmsup_rv_zen_asm_6x16m_row_stored_c,
-        sgemmUkrSUP,
+        sgemmGenericSUP,
         ::testing::Combine(
-            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x16m),       // sgemm_sup kernel
             ::testing::Range(gtint_t(1), gtint_t(7), 1),            // values of m
             ::testing::Range(gtint_t(1), gtint_t(17), 1),           // values of n
             ::testing::Range(gtint_t(0), gtint_t(17), 1),           // values of k
             ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                 // beta value
             ::testing::Values('r'),                                 // storage of c
+            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x16m),       // sgemm_sup kernel
             ::testing::Values(gtint_t(6)),                          // Micro kernel block MR
             ::testing::Values('t'),                                 // transa
             ::testing::Values('n'),                                 // transb
             ::testing::Values(true),                                // kernel pref
             ::testing::Values(true, false)                          // memory test
         ),
-        ::sgemmUkrSUPPrint()
+        ::sgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_sgemmsup_rv_zen_asm_6x16m_col_stored_c,
-        sgemmUkrSUP,
+        sgemmGenericSUP,
         ::testing::Combine(
-            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x16m),       // sgemm_sup kernel
             ::testing::Range(gtint_t(1), gtint_t(7), 1),            // values of m
             ::testing::Range(gtint_t(1), gtint_t(17), 1),           // values of n
             ::testing::Range(gtint_t(1), gtint_t(17), 1),           // values of k
             ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                 // beta value
             ::testing::Values('c'),                                 // storage of c
+            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x16m),       // sgemm_sup kernel
             ::testing::Values(gtint_t(6)),                          // Micro kernel block MR
             ::testing::Values('n'),                                 // transa
             ::testing::Values('t'),                                 // transb
             ::testing::Values(true),                                // kernel pref
             ::testing::Values(true, false)                          // memory test
         ),
-        ::sgemmUkrSUPPrint()
+        ::sgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_sgemmsup_rd_zen_asm_6x16m_col_stored_c,
-        sgemmUkrSUP,
+        sgemmGenericSUP,
         ::testing::Combine(
-            ::testing::Values(bli_sgemmsup_rd_zen_asm_6x16m),       // sgemm_sup kernel
             ::testing::Range(gtint_t(1), gtint_t(7), 1),            // values of m
             ::testing::Range(gtint_t(1), gtint_t(17), 1),           // values of n
             ::testing::Range(gtint_t(0), gtint_t(17), 1),           // values of k
             ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                 // beta value
             ::testing::Values('c'),                                 // storage of c
+            ::testing::Values(bli_sgemmsup_rd_zen_asm_6x16m),       // sgemm_sup kernel
             ::testing::Values(gtint_t(6)),                          // Micro kernel block MR
             ::testing::Values('t'),                                 // transa
             ::testing::Values('n'),                                 // transb
             ::testing::Values(true),                                // kernel pref
             ::testing::Values(true, false)                          // memory test
         ),
-        ::sgemmUkrSUPPrint()
+        ::sgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_sgemmsup_rv_zen_asm_6x16n_col_stored_c,
-        sgemmUkrSUP,
+        sgemmGenericSUP,
         ::testing::Combine(
-            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x16n),       // sgemm_sup kernel
             ::testing::Range(gtint_t(1), gtint_t(7), 1),            // values of m
             ::testing::Range(gtint_t(1), gtint_t(17), 1),           // values of n
             ::testing::Range(gtint_t(0), gtint_t(17), 1),           // values of k
             ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                 // beta value
             ::testing::Values('c'),                                 // storage of c
+            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x16n),       // sgemm_sup kernel
             ::testing::Values(gtint_t(6)),                          // Micro kernel block MR
             ::testing::Values('n'),                                 // transa
             ::testing::Values('t'),                                 // transb
             ::testing::Values(false),                               // kernel pref
             ::testing::Values(true, false)                          // memory test
         ),
-        ::sgemmUkrSUPPrint()
+        ::sgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_sgemmsup_rv_zen_asm_6x16n_row_stored_c,
-        sgemmUkrSUP,
+        sgemmGenericSUP,
         ::testing::Combine(
-            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x16n),       // sgemm_sup kernel
             ::testing::Range(gtint_t(1), gtint_t(7), 1),            // values of m
             ::testing::Range(gtint_t(1), gtint_t(17), 1),           // values of n
             ::testing::Range(gtint_t(0), gtint_t(17), 1),           // values of k
             ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                 // beta value
             ::testing::Values('r'),                                 // storage of c
+            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x16n),       // sgemm_sup kernel
             ::testing::Values(gtint_t(6)),                          // Micro kernel block MR
             ::testing::Values('t'),                                 // transa
             ::testing::Values('n'),                                 // transb
             ::testing::Values(true),                                // kernel pref
             ::testing::Values(true, false)                          // memory test
         ),
-        ::sgemmUkrSUPPrint()
+        ::sgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_sgemmsup_rd_zen_asm_6x16n_row_stored_c,
-        sgemmUkrSUP,
+        sgemmGenericSUP,
         ::testing::Combine(
-            ::testing::Values(bli_sgemmsup_rd_zen_asm_6x16n),       // sgemm_sup kernel
             ::testing::Range(gtint_t(1), gtint_t(7), 1),            // values of m
             ::testing::Range(gtint_t(1), gtint_t(17), 1),           // values of n
             ::testing::Range(gtint_t(0), gtint_t(17), 1),           // values of k
             ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                 // beta value
             ::testing::Values('r'),                                 // storage of c
+            ::testing::Values(bli_sgemmsup_rd_zen_asm_6x16n),       // sgemm_sup kernel
             ::testing::Values(gtint_t(6)),                          // Micro kernel block MR
             ::testing::Values('n'),                                 // transa
             ::testing::Values('t'),                                 // transb
             ::testing::Values(false),                               // kernel pref
             ::testing::Values(true, false)                          // memory test
         ),
-        ::sgemmUkrSUPPrint()
+        ::sgemmGenericSUPPrint()
     );
 
 #endif
@@ -220,145 +249,173 @@ INSTANTIATE_TEST_SUITE_P (
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 INSTANTIATE_TEST_SUITE_P (
         bli_sgemmsup_rv_zen_asm_6x64m_row_stored_c,
-        sgemmUkrSUP,
+        sgemmGenericSUP,
         ::testing::Combine(
-            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x64m_avx512), // sgemm_sup kernel
             ::testing::Range(gtint_t(1), gtint_t(7), 1),             // values of m
             ::testing::Range(gtint_t(1), gtint_t(65), 1),            // values of n
             ::testing::Range(gtint_t(0), gtint_t(17), 1),            // values of k
             ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
             ::testing::Values('r'),                                  // storage of c
+            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x64m_avx512), // sgemm_sup kernel
             ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
             ::testing::Values('t'),                                  // transa
             ::testing::Values('n'),                                  // transb
             ::testing::Values(true),                                 // kernel pref
             ::testing::Values(true, false)                           // memory test
         ),
-        ::sgemmUkrSUPPrint()
+        ::sgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_sgemmsup_rv_zen_asm_6x64m_col_stored_c,
-        sgemmUkrSUP,
+        sgemmGenericSUP,
         ::testing::Combine(
-            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x64m_avx512), // dgemm_sup kernel
             ::testing::Range(gtint_t(1), gtint_t(7), 1),             // values of m
             ::testing::Range(gtint_t(1), gtint_t(65), 1),            // values of n
             ::testing::Range(gtint_t(1), gtint_t(17), 1),            // values of k
             ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
             ::testing::Values('c'),                                  // storage of c
+            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x64m_avx512), // dgemm_sup kernel
             ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
             ::testing::Values('n'),                                  // transa
             ::testing::Values('t'),                                  // transb
             ::testing::Values(true),                                 // kernel pref
             ::testing::Values(true, false)                           // memory test
         ),
-        ::sgemmUkrSUPPrint()
+        ::sgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_sgemmsup_rd_zen_asm_6x64m_col_stored_c,
-        sgemmUkrSUP,
+        sgemmGenericSUP,
         ::testing::Combine(
-            ::testing::Values(bli_sgemmsup_rd_zen_asm_6x64m_avx512), // dgemm_sup kernel
             ::testing::Range(gtint_t(1), gtint_t(7), 1),             // values of m
             ::testing::Range(gtint_t(1), gtint_t(65), 1),            // values of n
             ::testing::Range(gtint_t(0), gtint_t(17), 1),            // values of k
             ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
             ::testing::Values('c'),                                  // storage of c
+            ::testing::Values(bli_sgemmsup_rd_zen_asm_6x64m_avx512), // dgemm_sup kernel
             ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
             ::testing::Values('t'),                                  // transa
             ::testing::Values('n'),                                  // transb
             ::testing::Values(true),                                 // kernel pref
             ::testing::Values(true, false)                           // memory test
         ),
-        ::sgemmUkrSUPPrint()
+        ::sgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_sgemmsup_rv_zen_asm_6x64n_row_stored_c,
-        sgemmUkrSUP,
+        sgemmGenericSUP,
         ::testing::Combine(
-            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x64n_avx512), // dgemm_sup kernel
             ::testing::Range(gtint_t(1), gtint_t(7), 1),             // values of m
             ::testing::Range(gtint_t(1), gtint_t(65), 1),            // values of n
             ::testing::Range(gtint_t(0), gtint_t(17), 1),            // values of k
             ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
             ::testing::Values('r'),                                  // storage of c
+            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x64n_avx512), // dgemm_sup kernel
             ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
             ::testing::Values('t'),                                  // transa
             ::testing::Values('n'),                                  // transb
             ::testing::Values(true),                                 // kernel pref
             ::testing::Values(true, false)                           // memory test
         ),
-        ::sgemmUkrSUPPrint()
+        ::sgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_sgemmsup_rd_zen_asm_6x64n_row_stored_c,
-        sgemmUkrSUP,
+        sgemmGenericSUP,
         ::testing::Combine(
-            ::testing::Values(bli_sgemmsup_rd_zen_asm_6x64n_avx512), // dgemm_sup kernel
             ::testing::Range(gtint_t(1), gtint_t(7), 1),             // values of m
             ::testing::Range(gtint_t(1), gtint_t(65), 1),            // values of n
             ::testing::Range(gtint_t(0), gtint_t(17), 1),            // values of k
             ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
             ::testing::Values('r'),                                  // storage of c
+            ::testing::Values(bli_sgemmsup_rd_zen_asm_6x64n_avx512), // dgemm_sup kernel
             ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
             ::testing::Values('n'),                                  // transa
             ::testing::Values('t'),                                  // transb
             ::testing::Values(false),                                // kernel pref
             ::testing::Values(true, false)                           // memory test
         ),
-        ::sgemmUkrSUPPrint()
+        ::sgemmGenericSUPPrint()
     );
 #endif
 
-
-
-class sgemmUkrNat :
-        public ::testing::TestWithParam<std::tuple<sgemm_ukr_ft, gtint_t, float, float, char, gtint_t, gtint_t, bool>> {};
+/*******************************************************/
+/*              Native Kernel testing                  */
+/*******************************************************/
+class sgemmGenericNat :
+//        public ::testing::TestWithParam<std::tuple<sgemm_ukr_ft, gtint_t, float, float, char, gtint_t, gtint_t, bool>> {};
 //sgemm native kernel, k, alpha, beta, storage of c, m, n, memory test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(sgemmUkrNat);
+        public ::testing::TestWithParam<std::tuple<gtint_t,                 // k
+                                                   float,                   // alpha
+                                                   float,                   // beta
+                                                   char,                    // storage of C matrix
+                                                   gtint_t,                 // m
+                                                   gtint_t,                 // n
+                                                   sgemm_ukr_ft,            // pointer to the gemm kernel
+                                                   bool                     // is_memory_test
+                                                   >> {};
 
-TEST_P(sgemmUkrNat, functionality_testing)
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(sgemmGenericNat);
+
+TEST_P( sgemmGenericNat, functionality_testing)
 {
     using T = float;
-    gtint_t k      = std::get<1>(GetParam());        // dimension k
-    T alpha        = std::get<2>(GetParam());        // alpha
-    T beta         = std::get<3>(GetParam());        // beta
-    char storageC  = std::get<4>(GetParam());        // indicates storage of all matrix operands
-                                                     // Fix m and n to MR and NR respectively.
-    gtint_t m = std::get<5>(GetParam());             // MR of native kernel
-    gtint_t n = std::get<6>(GetParam());             // NR of native kernel
-    bool memory_test = std::get<7>(GetParam());      // memory test
-    sgemm_ukr_ft kern_ptr = std::get<0>(GetParam()); //kernel's function pointer
-    test_gemmnat_ukr(storageC, m, n, k, alpha, beta, kern_ptr, memory_test);
+    gtint_t k             = std::get<0>(GetParam());                        // dimension k
+    T alpha               = std::get<1>(GetParam());                        // alpha
+    T beta                = std::get<2>(GetParam());                        // beta
+    char storageC         = std::get<3>(GetParam());                        // indicates storage of all matrix operands
+    // Fix m and n to MR and NR respectively.
+    gtint_t m             = std::get<4>(GetParam());                        // m
+    gtint_t n             = std::get<5>(GetParam());                        // n
+    sgemm_ukr_ft kern_ptr = std::get<6>(GetParam());                        // pointer to the gemm kernel
+    bool is_memory_test   = std::get<7>(GetParam());                        // is_memory_test
+
+    // Set the threshold for the errors:
+    // Check gtestsuite gemm.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    double thresh;
+    if (m == 0 || n == 0)
+        thresh = 0.0;
+    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
+              beta == testinghelpers::ONE<T>()))
+        thresh = 0.0;
+    else
+        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
+
+    test_gemmnat_ukr(storageC, m, n, k, alpha, beta, kern_ptr, thresh, is_memory_test);
+
 }// end of function
 
 
 
-class sgemmUkrNatPrint {
+class sgemmGenericNatPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<sgemm_ukr_ft, gtint_t, float, float, char, gtint_t, gtint_t, bool>>  str) const {
-        gtint_t k    = std::get<1>(str.param);
-        float alpha  = std::get<2>(str.param);
-        float beta   = std::get<3>(str.param);
-        char storageC= std::get<4>(str.param);
-        bool memory_test = std::get<7>(str.param);
+        testing::TestParamInfo<std::tuple<gtint_t, float, float, char, gtint_t, gtint_t, sgemm_ukr_ft, bool>>  str) const {
+
+        gtint_t k           = std::get<0>(str.param);
+        float alpha         = std::get<1>(str.param);
+        float beta          = std::get<2>(str.param);
+        char storageC       = std::get<3>(str.param);
+        bool is_memory_test = std::get<7>(str.param);
+
         std::string str_name;
-        str_name += "_storC_" + std::string(&storageC, 1);
+        str_name += "_stor_" + std::string(&storageC, 1);
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name += ( memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
 
         return str_name;
     }
@@ -367,18 +424,18 @@ public:
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 INSTANTIATE_TEST_SUITE_P (
     bli_sgemm_skx_asm_32x12_l2,
-    sgemmUkrNat,
+    sgemmGenericNat,
     ::testing::Combine(
-        ::testing::Values(bli_sgemm_skx_asm_32x12_l2),
         ::testing::Range(gtint_t(0), gtint_t(17), 1),   // values of k
         ::testing::Values(2.0, 1.0, -1.0),              // alpha value
         ::testing::Values(1.0, 0.0, -1.0, 2.3),         // beta value
         ::testing::Values('r', 'c'),                    // storage
         ::testing::Values(32),                          // values of m
         ::testing::Values(12),                          // values of n
+        ::testing::Values(bli_sgemm_skx_asm_32x12_l2),
         ::testing::Values(true, false)                  // memory test
     ),
-    ::sgemmUkrNatPrint()
+    ::sgemmGenericNatPrint()
 );
 
 
@@ -387,18 +444,18 @@ INSTANTIATE_TEST_SUITE_P (
 #if defined(BLIS_KERNELS_HASWELL) && defined(GTEST_AVX2FMA3)
 INSTANTIATE_TEST_SUITE_P (
     bli_sgemm_haswell_asm_6x16,
-    sgemmUkrNat,
+    sgemmGenericNat,
     ::testing::Combine(
-        ::testing::Values(bli_sgemm_haswell_asm_6x16),
         ::testing::Range(gtint_t(0), gtint_t(17), 1),   // values of k
         ::testing::Values(2.0, 1.0, -1.0),              // alpha value
         ::testing::Values(1.0, 0.0, -1.0, 2.3),         // beta value
         ::testing::Values('r', 'c'),                    // storage
         ::testing::Values(6),                           // values of m
         ::testing::Values(16),                          // values of n
+        ::testing::Values(bli_sgemm_haswell_asm_6x16),
         ::testing::Values(true, false)                  // memory test
     ),
-    ::sgemmUkrNatPrint()
+    ::sgemmGenericNatPrint()
 );
 #endif
 
@@ -410,14 +467,18 @@ INSTANTIATE_TEST_SUITE_P (
 */
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 
-class SGemmSmallUkernelTest :
-        public ::testing::TestWithParam<std::tuple<gtint_t, gtint_t, gtint_t, float, float, char>> {};
+class sgemmGenericSmallTest :
+        public ::testing::TestWithParam<std::tuple< gtint_t,                // m
+                                                    gtint_t,                // n
+                                                    gtint_t,                // k
+                                                    float,                  // alpha
+                                                    float,                  // beta
+                                                    char                    // storage of C matrix
+                                                    >> {};
 
-//m, n, k, alpha, beta, storage scheme
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(sgemmGenericSmallTest);
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(SGemmSmallUkernelTest);
-
-TEST_P(SGemmSmallUkernelTest, gemm_small)
+TEST_P( sgemmGenericSmallTest, gemm_small)
 {
     using T = float;
     gtint_t m      = std::get<0>(GetParam());  // dimension m
@@ -477,7 +538,17 @@ TEST_P(SGemmSmallUkernelTest, gemm_small)
 
 
     // Set the threshold for the errors:
-    double thresh = 10 * std::max(n,std::max(k,m)) * testinghelpers::getEpsilon<T>();
+    // Check gtestsuite gemm.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    double thresh;
+    if (m == 0 || n == 0)
+        thresh = 0.0;
+    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
+              beta == testinghelpers::ONE<T>()))
+        thresh = 0.0;
+    else
+        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
 
     // call reference implementation
     testinghelpers::ref_gemm<T>( storageC, 'n', 'n', m, n, k, alpha,
@@ -490,18 +561,20 @@ TEST_P(SGemmSmallUkernelTest, gemm_small)
 
 
 
-class SGemmSmallUkernelTestPrint {
+class sgemmGenericSmallTestPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<gtint_t, gtint_t, gtint_t, float, float, char>>  str) const {
+
         gtint_t m     = std::get<0>(str.param);
         gtint_t n     = std::get<1>(str.param);
         gtint_t k     = std::get<2>(str.param);
         float alpha   = std::get<3>(str.param);
         float beta    = std::get<4>(str.param);
         char storageC = std::get<5>(str.param);
+
         std::string str_name;
-        str_name += "_storC_" + std::string(&storageC, 1);
+        str_name += "_stor_" + std::string(&storageC, 1);
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_k_" + std::to_string(k);
@@ -515,7 +588,7 @@ public:
 
 INSTANTIATE_TEST_SUITE_P (
         bli_sgemm_small,
-        SGemmSmallUkernelTest,
+        sgemmGenericSmallTest,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(71), 1), // values of m
             ::testing::Range(gtint_t(1), gtint_t(21), 1), // values of n
@@ -524,7 +597,7 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values(1.0, 0.0, -1.0, 2.3),       // beta value
             ::testing::Values('c')                        // storage
         ),
-        ::SGemmSmallUkernelTestPrint()
+        ::sgemmGenericSmallTestPrint()
     );
 
 #endif

@@ -35,17 +35,17 @@
 #include <gtest/gtest.h>
 #include "test_scal2v.h"
 
-class cscal2vGenericTest :
+class cscal2vGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    gtint_t,
                                                    gtint_t,
                                                    gtint_t,
                                                    scomplex>> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(cscal2vGenericTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(cscal2vGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( cscal2vGenericTest, RandomData )
+TEST_P( cscal2vGeneric, API )
 {
     using T = scomplex;
     //----------------------------------------------------------
@@ -86,7 +86,7 @@ TEST_P( cscal2vGenericTest, RandomData )
 // Black box testing for generic and main use of cscal2.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        cscal2vGenericTest,
+        cscal2vGeneric,
         ::testing::Combine(
             ::testing::Values('n','c'),                                      // n: use x, c: use conj(x)
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
@@ -103,7 +103,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NonUnitIncrements,
-        cscal2vGenericTest,
+        cscal2vGeneric,
         ::testing::Combine(
             ::testing::Values('n','c'),                                      // n: use x, c: use conj(x)
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.

@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_dotv.h"
 
-class cdotvGenericTest :
+class cdotvGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    gtint_t,
@@ -43,7 +43,7 @@ class cdotvGenericTest :
                                                    gtint_t>> {};
 
 // Tests using random integers as vector elements.
-TEST_P( cdotvGenericTest, RandomData )
+TEST_P( cdotvGeneric, API )
 {
     using T = scomplex;
     //----------------------------------------------------------
@@ -81,7 +81,7 @@ TEST_P( cdotvGenericTest, RandomData )
 // Black box testing for generic and main use of cdot.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        cdotvGenericTest,
+        cdotvGeneric,
         ::testing::Combine(
             ::testing::Values('n', 'c'),                                    // 'n': tests cdotu_, 'c': tests cdotc_
             ::testing::Values('n'
@@ -101,7 +101,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NonUnitPositiveIncrements,
-        cdotvGenericTest,
+        cdotvGeneric,
         ::testing::Combine(
             ::testing::Values('n', 'c'),                                    // 'n': tests cdotu_, 'c': tests cdotc_
             ::testing::Values('n'
@@ -122,7 +122,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NegativeIncrements,
-        cdotvGenericTest,
+        cdotvGeneric,
         ::testing::Combine(
             ::testing::Values('n', 'c'),                                    // 'n': tests cdotu_, 'c': tests cdotc_
             ::testing::Values('n'),                                          // n: use y, c: use conj(y)

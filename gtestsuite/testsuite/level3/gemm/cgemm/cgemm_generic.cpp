@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "level3/gemm/test_gemm.h"
 
-class cgemmAPI :
+class cgemmGeneric :
         public ::testing::TestWithParam<std::tuple<char,       // storage format
                                                    char,       // transa
                                                    char,       // transb
@@ -48,7 +48,7 @@ class cgemmAPI :
                                                    gtint_t,    // inc to the ldb 
                                                    gtint_t     // inc to the ldc
                                                    >> {};
-TEST_P(cgemmAPI, FunctionalTest)
+TEST_P( cgemmGeneric, API )
 {
     using T = scomplex;
     //----------------------------------------------------------
@@ -127,7 +127,7 @@ TEST_P(cgemmAPI, FunctionalTest)
 
 INSTANTIATE_TEST_SUITE_P(
         Alpha_zero,
-        cgemmAPI,
+        cgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -152,7 +152,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         Matrix_Dimension_zero,
-        cgemmAPI,
+        cgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -177,7 +177,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         Skinny_Matrix,
-        cgemmAPI,
+        cgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -200,7 +200,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         Skinny_Matrix_Alpha_Beta,
-        cgemmAPI,
+        cgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -227,7 +227,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         Large_Matrix,
-        cgemmAPI,
+        cgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -250,7 +250,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         Large_Matrix_Alpha_Beta,
-        cgemmAPI,
+        cgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

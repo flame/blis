@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "level3/gemm/test_gemm.h"
 
-class ZGEMMAPI :
+class zgemmGeneric :
         public ::testing::TestWithParam<std::tuple<char,       // storage format
                                                    char,       // transa
                                                    char,       // transb
@@ -49,7 +49,7 @@ class ZGEMMAPI :
                                                    gtint_t     // inc to the ldc
                                                    >> {};
 
-TEST_P(ZGEMMAPI, FunctionalTest)
+TEST_P( zgemmGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -114,7 +114,7 @@ TEST_P(ZGEMMAPI, FunctionalTest)
 /********************************************************************/
 INSTANTIATE_TEST_SUITE_P(
         SCALM,
-        ZGEMMAPI,
+        zgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -139,7 +139,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         GEMV_M1_N1,
-        ZGEMMAPI,
+        zgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -166,7 +166,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         GEMV_M1,
-        ZGEMMAPI,
+        zgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -193,7 +193,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         GEMV_N1,
-        ZGEMMAPI,
+        zgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -224,7 +224,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         K_1,
-        ZGEMMAPI,
+        zgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -251,7 +251,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         SMALL_Matrix_ST,
-        ZGEMMAPI,
+        zgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -274,7 +274,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         Skinny_Matrix_Trans_N,
-        ZGEMMAPI,
+        zgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -301,7 +301,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         SKinny_Matrix_Trans_T,
-        ZGEMMAPI,
+        zgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -328,7 +328,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         Large_Matrix_Trans_N_C_T,
-        ZGEMMAPI,
+        zgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

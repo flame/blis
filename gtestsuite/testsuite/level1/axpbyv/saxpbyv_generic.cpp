@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_axpbyv.h"
 
-class saxpbyvGenericTest :
+class saxpbyvGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    gtint_t,
                                                    gtint_t,
@@ -43,7 +43,7 @@ class saxpbyvGenericTest :
                                                    float,
                                                    float>> {};
 // Tests using random integers as vector elements.
-TEST_P( saxpbyvGenericTest, RandomData )
+TEST_P( saxpbyvGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------
@@ -108,7 +108,7 @@ TEST_P( saxpbyvGenericTest, RandomData )
 // Black box testing for generic and main use of caxpy.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        saxpbyvGenericTest,
+        saxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
@@ -126,7 +126,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         ConjX,
-        saxpbyvGenericTest,
+        saxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // c: use conj(x)
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
@@ -144,7 +144,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NonUnitPositiveIncrements,
-        saxpbyvGenericTest,
+        saxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // use x, not conj(x) (since it is real)
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
@@ -162,7 +162,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NegativeIncrements,
-        saxpbyvGenericTest,
+        saxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, c: use conj(x)
             ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m size of vector takes values from 10 to 100 with step size of 10.

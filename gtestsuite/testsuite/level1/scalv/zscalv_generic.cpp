@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_scalv.h"
 
-class zscalvGenericTest :
+class zscalvGeneric :
         public ::testing::TestWithParam<std::tuple<char,            // conj_alpha
                                                    gtint_t,         // n
                                                    gtint_t,         // incx
@@ -43,7 +43,7 @@ class zscalvGenericTest :
 
 
 // Tests using random integers as vector elements.
-TEST_P( zscalvGenericTest, RandomData )
+TEST_P( zscalvGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -82,7 +82,7 @@ TEST_P( zscalvGenericTest, RandomData )
 // Tests with unit-positive increment.
 INSTANTIATE_TEST_SUITE_P(
         unitPositiveIncrement,
-        zscalvGenericTest,
+        zscalvGeneric,
         ::testing::Combine(
             // conj(alpha): uses n (no_conjugate) since it is real.
             ::testing::Values('n'
@@ -109,7 +109,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Test for non-unit increments.
 INSTANTIATE_TEST_SUITE_P(
         nonUnitPositiveIncrement,
-        zscalvGenericTest,
+        zscalvGeneric,
         ::testing::Combine(
             // conj(alpha): uses n (no_conjugate) since it is real.
             ::testing::Values('n'

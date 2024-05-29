@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "level3/trsm/test_trsm.h"
 
-class ztrsmAPI :
+class ztrsmGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -47,7 +47,7 @@ class ztrsmAPI :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P(ztrsmAPI, FunctionalTest)
+TEST_P( ztrsmGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -103,7 +103,7 @@ TEST_P(ztrsmAPI, FunctionalTest)
  */
 INSTANTIATE_TEST_SUITE_P(
         Native,
-        ztrsmAPI,
+        ztrsmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -130,7 +130,7 @@ INSTANTIATE_TEST_SUITE_P(
  */
 INSTANTIATE_TEST_SUITE_P(
         Small_AVX2_fringe,
-        ztrsmAPI,
+        ztrsmGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format
             ::testing::Values('l','r'),                                      // side  l:left, r:right
@@ -151,7 +151,7 @@ INSTANTIATE_TEST_SUITE_P(
  */
 INSTANTIATE_TEST_SUITE_P(
         Small_AVX2,
-        ztrsmAPI,
+        ztrsmGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format
             ::testing::Values('l','r'),                                      // side  l:left, r:right
@@ -176,7 +176,7 @@ INSTANTIATE_TEST_SUITE_P(
  */
 INSTANTIATE_TEST_SUITE_P(
         Alpha,
-        ztrsmAPI,
+        ztrsmGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format
             ::testing::Values('l','r'),                                      // side  l:left, r:right

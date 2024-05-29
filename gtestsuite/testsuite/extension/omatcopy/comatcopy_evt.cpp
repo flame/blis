@@ -49,7 +49,7 @@ class comatcopyEVT :
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(comatcopyEVT);
 
 // Tests using random numbers as vector elements.
-TEST_P( comatcopyEVT, NanInfCheck )
+TEST_P( comatcopyEVT, API )
 {
     using T = scomplex;
     //----------------------------------------------------------

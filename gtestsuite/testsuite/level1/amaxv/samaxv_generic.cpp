@@ -40,7 +40,7 @@ class samaxvGeneric :
                                                    gtint_t>> {};	//incx
 
 // Tests using random values as vector elements.
-TEST_P( samaxvGeneric, FunctionalTest )
+TEST_P( samaxvGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------

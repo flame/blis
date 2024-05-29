@@ -39,7 +39,7 @@
 using T = dcomplex;
 using FT = zaxpyf_ker_ft;
 
-class zaxpyfUkr :
+class zaxpyfGeneric :
         public ::testing::TestWithParam<std::tuple<FT,   // Function pointer type for zaxpyf kernels
                                                    char,            // conjA
                                                    char,            // conjx
@@ -52,10 +52,10 @@ class zaxpyfUkr :
                                                    gtint_t,         // incy
                                                    bool>> {};       // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zaxpyfUkr);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zaxpyfGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( zaxpyfUkr, AccuracyCheck )
+TEST_P( zaxpyfGeneric, UKR )
 {
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -122,7 +122,7 @@ TEST_P( zaxpyfUkr, AccuracyCheck )
 // Unit testing with unit strides, across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyf_zen_int_2_avx512_unitStrides,
-        zaxpyfUkr,
+        zaxpyfGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zaxpyf_zen_int_8_avx512),             // kernel address
             ::testing::Values('n'
@@ -155,7 +155,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with non-unit strides, across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyf_zen_int_2_avx512_nonUnitStrides,
-        zaxpyfUkr,
+        zaxpyfGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zaxpyf_zen_int_8_avx512),             // kernel address
             ::testing::Values('n'
@@ -192,7 +192,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with unit strides, across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyf_zen_int_4_avx512_unitStrides,
-        zaxpyfUkr,
+        zaxpyfGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zaxpyf_zen_int_8_avx512),             // kernel address
             ::testing::Values('n'
@@ -225,7 +225,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with non-unit strides, across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyf_zen_int_4_avx512_nonUnitStrides,
-        zaxpyfUkr,
+        zaxpyfGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zaxpyf_zen_int_8_avx512),             // kernel address
             ::testing::Values('n'
@@ -262,7 +262,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with unit strides, across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyf_zen_int_8_avx512_unitStrides,
-        zaxpyfUkr,
+        zaxpyfGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zaxpyf_zen_int_8_avx512),             // kernel address
             ::testing::Values('n'
@@ -295,7 +295,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with non-unit strides, across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyf_zen_int_8_avx512_nonUnitStrides,
-        zaxpyfUkr,
+        zaxpyfGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zaxpyf_zen_int_8_avx512),             // kernel address
             ::testing::Values('n'

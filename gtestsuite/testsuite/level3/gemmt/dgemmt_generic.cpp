@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_gemmt.h"
 
-class dgemmtAPI :
+class dgemmtGeneric :
         public ::testing::TestWithParam<std::tuple<char,         // storage
                                                    char,         // uplo
                                                    char,         // transa
@@ -49,9 +49,9 @@ class dgemmtAPI :
                                                    gtint_t,      // ldc_inc
                                                    bool>> {};    // is memory test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dgemmtAPI);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dgemmtGeneric);
 
-TEST_P(dgemmtAPI, FunctionalTest)
+TEST_P( dgemmtGeneric, API )
 {
     using T = double;
     //----------------------------------------------------------
@@ -104,7 +104,7 @@ TEST_P(dgemmtAPI, FunctionalTest)
 #ifndef TEST_BLIS_TYPED
 INSTANTIATE_TEST_SUITE_P(
         skinny_fringe_cases,
-        dgemmtAPI,
+        dgemmtGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -128,7 +128,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         skinny,
-        dgemmtAPI,
+        dgemmtGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -152,7 +152,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         large,
-        dgemmtAPI,
+        dgemmtGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

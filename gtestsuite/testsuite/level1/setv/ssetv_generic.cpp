@@ -35,12 +35,12 @@
 #include <gtest/gtest.h>
 #include "test_setv.h"
 
-class ssetvGenericTest :
+class ssetvGeneric :
         public ::testing::TestWithParam<std::tuple<char, gtint_t, gtint_t>> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ssetvGenericTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ssetvGeneric);
 
-TEST_P( ssetvGenericTest, RandomData )
+TEST_P( ssetvGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------
@@ -65,7 +65,7 @@ TEST_P( ssetvGenericTest, RandomData )
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        ssetvGenericTest,
+        ssetvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: not transpose for x
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.

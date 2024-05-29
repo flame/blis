@@ -35,19 +35,16 @@
 #include <gtest/gtest.h>
 #include "test_swapv_ukr.h"
 
-void test_swapv_ukr( sswapv_ker_ft ukr, gtint_t n, gtint_t incx, gtint_t incy,
-                            bool is_memory_test = false );
-
-class sswapvUkr :
+class sswapvGeneric :
         public ::testing::TestWithParam<std::tuple<sswapv_ker_ft,   // Function pointer for dswapv kernels
                                                    gtint_t,         // n
                                                    gtint_t,         // incx
                                                    gtint_t,         // incy
                                                    bool>> {};       // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(sswapvUkr);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(sswapvGeneric);
 
-TEST_P( sswapvUkr, FunctionalTest )
+TEST_P( sswapvGeneric, UKR )
 {
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -83,7 +80,7 @@ TEST_P( sswapvUkr, FunctionalTest )
 
 INSTANTIATE_TEST_SUITE_P(
         UnitIncrements,
-        sswapvUkr,
+        sswapvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_sswapv_zen_int8),
             // n: size of vector.
@@ -110,7 +107,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         NonUnitIncrements,
-        sswapvUkr,
+        sswapvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_sswapv_zen_int8),
             // n: size of vector.

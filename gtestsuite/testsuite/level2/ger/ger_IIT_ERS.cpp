@@ -40,10 +40,10 @@
 
 
 template <typename T>
-class ger_IIT_ERS_Test : public ::testing::Test {};
+class ger_IIT_ERS : public ::testing::Test {};
 typedef ::testing::Types<float, double, scomplex, dcomplex> TypeParam;
 
-TYPED_TEST_SUITE(ger_IIT_ERS_Test, TypeParam);
+TYPED_TEST_SUITE(ger_IIT_ERS, TypeParam);
 
 using namespace testinghelpers::IIT;
 
@@ -57,7 +57,7 @@ using namespace testinghelpers::IIT;
  * 3. alpha == 0
  */
 // m == 0, with unit stride
-TYPED_TEST(ger_IIT_ERS_Test, m_eq_zero_unitStride)
+TYPED_TEST(ger_IIT_ERS, m_eq_zero_unitStride)
 {
     using T = TypeParam;
     gtint_t invalid_m = 0;
@@ -87,7 +87,7 @@ TYPED_TEST(ger_IIT_ERS_Test, m_eq_zero_unitStride)
 }
 
 // m == 0, with non-unit stride
-TYPED_TEST(ger_IIT_ERS_Test, m_eq_zero_nonUnitStride)
+TYPED_TEST(ger_IIT_ERS, m_eq_zero_nonUnitStride)
 {
     using T = TypeParam;
     gtint_t invalid_m = 0;
@@ -117,7 +117,7 @@ TYPED_TEST(ger_IIT_ERS_Test, m_eq_zero_nonUnitStride)
 }
 
 // n == 0, with unit stride
-TYPED_TEST(ger_IIT_ERS_Test, n_eq_zero_unitStride)
+TYPED_TEST(ger_IIT_ERS, n_eq_zero_unitStride)
 {
     using T = TypeParam;
     gtint_t invalid_n = 0;
@@ -147,7 +147,7 @@ TYPED_TEST(ger_IIT_ERS_Test, n_eq_zero_unitStride)
 }
 
 // n == 0, with non-unit stride
-TYPED_TEST(ger_IIT_ERS_Test, n_eq_zero_nonUnitStride)
+TYPED_TEST(ger_IIT_ERS, n_eq_zero_nonUnitStride)
 {
     using T = TypeParam;
     gtint_t invalid_n = 0;
@@ -177,7 +177,7 @@ TYPED_TEST(ger_IIT_ERS_Test, n_eq_zero_nonUnitStride)
 }
 
 // alpha == 0, with unit stride
-TYPED_TEST(ger_IIT_ERS_Test, alpha_eq_zero_unitStride)
+TYPED_TEST(ger_IIT_ERS, alpha_eq_zero_unitStride)
 {
     using T = TypeParam;
     gtint_t unit_inc = 1;
@@ -205,7 +205,7 @@ TYPED_TEST(ger_IIT_ERS_Test, alpha_eq_zero_unitStride)
 }
 
 // alpha == 0, with non-unit stride
-TYPED_TEST(ger_IIT_ERS_Test, alpha_eq_zero_nonUnitStride)
+TYPED_TEST(ger_IIT_ERS, alpha_eq_zero_nonUnitStride)
 {
     using T = TypeParam;
     gtint_t inc = 3;
@@ -244,7 +244,7 @@ TYPED_TEST(ger_IIT_ERS_Test, alpha_eq_zero_nonUnitStride)
  * 5. lda < max(1, m)
  */
 // m < 0, with unit stride
-TYPED_TEST(ger_IIT_ERS_Test, m_lt_zero_unitStride)
+TYPED_TEST(ger_IIT_ERS, m_lt_zero_unitStride)
 {
     using T = TypeParam;
     gtint_t invalid_m = -1;
@@ -274,7 +274,7 @@ TYPED_TEST(ger_IIT_ERS_Test, m_lt_zero_unitStride)
 }
 
 // m < 0, with non-unit stride
-TYPED_TEST(ger_IIT_ERS_Test, m_lt_zero_nonUnitStride)
+TYPED_TEST(ger_IIT_ERS, m_lt_zero_nonUnitStride)
 {
     using T = TypeParam;
     gtint_t invalid_m = -1;
@@ -304,7 +304,7 @@ TYPED_TEST(ger_IIT_ERS_Test, m_lt_zero_nonUnitStride)
 }
 
 // n < 0, with unit stride
-TYPED_TEST(ger_IIT_ERS_Test, n_lt_zero_unitStride)
+TYPED_TEST(ger_IIT_ERS, n_lt_zero_unitStride)
 {
     using T = TypeParam;
     gtint_t invalid_n = -1;
@@ -334,7 +334,7 @@ TYPED_TEST(ger_IIT_ERS_Test, n_lt_zero_unitStride)
 }
 
 // n < 0, with non-unit stride
-TYPED_TEST(ger_IIT_ERS_Test, n_lt_zero_nonUnitStride)
+TYPED_TEST(ger_IIT_ERS, n_lt_zero_nonUnitStride)
 {
     using T = TypeParam;
     gtint_t invalid_n = -1;
@@ -364,7 +364,7 @@ TYPED_TEST(ger_IIT_ERS_Test, n_lt_zero_nonUnitStride)
 }
 
 // incx = 0, with unit incy
-TYPED_TEST(ger_IIT_ERS_Test, incx_eq_zero_unitStride)
+TYPED_TEST(ger_IIT_ERS, incx_eq_zero_unitStride)
 {
     using T = TypeParam;
     gtint_t invalid_incx = 0;
@@ -394,7 +394,7 @@ TYPED_TEST(ger_IIT_ERS_Test, incx_eq_zero_unitStride)
 }
 
 // incx = 0, with non-unit incy
-TYPED_TEST(ger_IIT_ERS_Test, incx_eq_zero_nonUnitStride)
+TYPED_TEST(ger_IIT_ERS, incx_eq_zero_nonUnitStride)
 {
     using T = TypeParam;
     gtint_t invalid_incx = 0;
@@ -424,7 +424,7 @@ TYPED_TEST(ger_IIT_ERS_Test, incx_eq_zero_nonUnitStride)
 }
 
 // incy = 0, with unit incy
-TYPED_TEST(ger_IIT_ERS_Test, incy_eq_zero_unitStride)
+TYPED_TEST(ger_IIT_ERS, incy_eq_zero_unitStride)
 {
     using T = TypeParam;
     gtint_t invalid_incy = 0;
@@ -454,7 +454,7 @@ TYPED_TEST(ger_IIT_ERS_Test, incy_eq_zero_unitStride)
 }
 
 // incy = 0, with non-unit incy
-TYPED_TEST(ger_IIT_ERS_Test, incy_eq_zero_nonUnitStride)
+TYPED_TEST(ger_IIT_ERS, incy_eq_zero_nonUnitStride)
 {
     using T = TypeParam;
     gtint_t invalid_incy = 0;
@@ -484,7 +484,7 @@ TYPED_TEST(ger_IIT_ERS_Test, incy_eq_zero_nonUnitStride)
 }
 
 // lda < max(1, M), with unit stride
-TYPED_TEST(ger_IIT_ERS_Test, lda_lt_max_1_m_unitStride)
+TYPED_TEST(ger_IIT_ERS, lda_lt_max_1_m_unitStride)
 {
     using T = TypeParam;
     gtint_t invalid_lda = M - 1;
@@ -514,7 +514,7 @@ TYPED_TEST(ger_IIT_ERS_Test, lda_lt_max_1_m_unitStride)
 }
 
 // lda < max(1, M), with non-unit stride
-TYPED_TEST(ger_IIT_ERS_Test, lda_lt_max_1_m_nonUnitStride)
+TYPED_TEST(ger_IIT_ERS, lda_lt_max_1_m_nonUnitStride)
 {
     using T = TypeParam;
     gtint_t invalid_lda = LDA - 1;

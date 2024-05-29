@@ -35,17 +35,17 @@
 #include <gtest/gtest.h>
 #include "test_scal2v.h"
 
-class sscal2vGenericTest :
+class sscal2vGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    gtint_t,
                                                    gtint_t,
                                                    gtint_t,
                                                    float>> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(sscal2vGenericTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(sscal2vGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( sscal2vGenericTest, RandomData )
+TEST_P( sscal2vGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------
@@ -85,7 +85,7 @@ TEST_P( sscal2vGenericTest, RandomData )
 // Black box testing for generic and main use of sscal2.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        sscal2vGenericTest,
+        sscal2vGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
@@ -101,7 +101,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         Conjalpha,
-        sscal2vGenericTest,
+        sscal2vGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // c: use conjugate
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector takes values from 10 to 100 with step size of 10.
@@ -117,7 +117,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NonUnitIncrements,
-        sscal2vGenericTest,
+        sscal2vGeneric,
         ::testing::Combine(
             ::testing::Values('n'), // n: use x
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),                  // m size of vector takes values from 10 to 100 with step size of 10.

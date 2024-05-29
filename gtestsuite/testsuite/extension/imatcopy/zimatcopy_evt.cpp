@@ -49,7 +49,7 @@ class zimatcopyEVT :
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zimatcopyEVT);
 
 // Tests using random numbers as vector elements.
-TEST_P( zimatcopyEVT, NanInfCheck )
+TEST_P( zimatcopyEVT, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------

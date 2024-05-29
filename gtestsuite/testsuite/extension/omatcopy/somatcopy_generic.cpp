@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_omatcopy.h"
 
-class somatcopyAPI :
+class somatcopyGeneric :
         public ::testing::TestWithParam<std::tuple<char,        // storage
                                                    char,        // trans
                                                    gtint_t,     // m
@@ -45,10 +45,10 @@ class somatcopyAPI :
                                                    gtint_t,     // ldb_inc
                                                    bool>> {};   // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(somatcopyAPI);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(somatcopyGeneric);
 
 // Tests using random numbers as vector elements.
-TEST_P( somatcopyAPI, FunctionalTest )
+TEST_P( somatcopyGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------
@@ -87,7 +87,7 @@ TEST_P( somatcopyAPI, FunctionalTest )
 // Black box testing for generic and main use of somatcopy.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        somatcopyAPI,
+        somatcopyGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format(currently only for BLAS testing)
             ::testing::Values('n', 't', 'r', 'c'),                           // trans(and/or conj) value

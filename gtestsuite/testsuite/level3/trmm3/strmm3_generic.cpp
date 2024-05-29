@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_trmm3.h"
 
-class strmm3Test :
+class strmm3Generic :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -50,9 +50,9 @@ class strmm3Test :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(strmm3Test);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(strmm3Generic);
 
-TEST_P(strmm3Test, RandomData)
+TEST_P( strmm3Generic, API )
 {
     using T = float;
     //----------------------------------------------------------
@@ -113,7 +113,7 @@ TEST_P(strmm3Test, RandomData)
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        strmm3Test,
+        strmm3Generic,
         ::testing::Combine(
             ::testing::Values('c','r'),                                      // storage format
             ::testing::Values('l','r'),                                      // side  l:left, r:right

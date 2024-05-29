@@ -176,7 +176,7 @@ static void test_trsm_ukr( FT ukr_fp, char storage, char uploa, char diaga,
     testinghelpers::ProtectedBuffer::start_signal_handler();
     try
     {
-        if( is_memory_test )
+        if ( is_memory_test )
         {
             // calling gemmtrsm ukr will modify b11 buffer
             // create a copy of B11 so that it can be restored
@@ -196,7 +196,7 @@ static void test_trsm_ukr( FT ukr_fp, char storage, char uploa, char diaga,
             rs_c, cs_c,
             nullptr, nullptr
         );
-        if (is_memory_test)
+        if ( is_memory_test )
         {
             // set pointers to second buffer
             c =   (T*)c_buffer.greenzone_2;
@@ -388,7 +388,7 @@ static void test_trsm_small_ukr( FT ukr_fp, char side, char uploa, char diaga,
     {
         // call trsm small kernel
         ukr_fp(blis_side, &alphao, &ao, &bo, NULL, NULL, false);
-        if(is_memory_test)
+        if ( is_memory_test )
         {
             // set A and B pointers to second buffer
             a = (T*)a_buf.greenzone_2;
@@ -457,7 +457,7 @@ public:
         gtint_t ldb = ldb_inc + m;
         str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
         str_name += "_ldb_i" + std::to_string(ldb_inc) + "_" + std::to_string(ldb);
-        str_name += is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled";
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
         return str_name;
     }
 };
@@ -488,7 +488,7 @@ public:
         str_name += "_k_" + std::to_string(k);
         gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, n, ldc_inc );
         str_name += "_ldc_i" + std::to_string(ldc_inc) + "_" + std::to_string(ldc);
-        str_name += is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled";
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
         return str_name;
     }
 };

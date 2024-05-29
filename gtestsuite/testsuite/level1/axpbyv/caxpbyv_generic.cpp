@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_axpbyv.h"
 
-class caxpbyvGenericTest :
+class caxpbyvGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    gtint_t,
                                                    gtint_t,
@@ -43,7 +43,7 @@ class caxpbyvGenericTest :
                                                    scomplex,
                                                    scomplex>> {};
 // Tests using random integers as vector elements.
-TEST_P( caxpbyvGenericTest, RandomData )
+TEST_P( caxpbyvGeneric, API )
 {
     using T = scomplex;
     //----------------------------------------------------------
@@ -109,7 +109,7 @@ TEST_P( caxpbyvGenericTest, RandomData )
 // Black box testing for generic and main use of caxpby.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        caxpbyvGenericTest,
+        caxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'                                            // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED
@@ -130,7 +130,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NonUnitPositiveIncrements,
-        caxpbyvGenericTest,
+        caxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'
 #ifdef TEST_BLIS_TYPED
@@ -152,7 +152,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NegativeIncrements,
-        caxpbyvGenericTest,
+        caxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x
             ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m size of vector takes values from 10 to 100 with step size of 10.

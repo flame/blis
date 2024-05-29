@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_dotv_ukr.h"
 
-class ddotvUkrTest :
+class ddotvGeneric :
         public ::testing::TestWithParam<std::tuple<ddotv_ker_ft,    // Function pointer for ddotv kernels
                                                    char,            // conjx
                                                    char,            // conjy
@@ -43,11 +43,11 @@ class ddotvUkrTest :
                                                    gtint_t,         // incx
                                                    gtint_t,         // incy
                                                    bool>> {};       // is_memory_test
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ddotvUkrTest);
 
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ddotvGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( ddotvUkrTest, FunctionalTest )
+TEST_P( ddotvGeneric, UKR )
 {
     using T = double;
     //----------------------------------------------------------
@@ -97,7 +97,7 @@ TEST_P( ddotvUkrTest, FunctionalTest )
 */
 INSTANTIATE_TEST_SUITE_P(
         bli_ddotv_zen_int_unitStride,
-        ddotvUkrTest,
+        ddotvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_ddotv_zen_int),
             // conj(x): use n (no_conjugate) since it is real.
@@ -133,7 +133,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         bli_ddotv_zen_int_nonUnitPositiveStrides,
-        ddotvUkrTest,
+        ddotvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_ddotv_zen_int),
             // conj(x): uses n (no_conjugate) since it is real.
@@ -172,7 +172,7 @@ INSTANTIATE_TEST_SUITE_P(
 */
 INSTANTIATE_TEST_SUITE_P(
         bli_ddotv_zen_int10_unitStride,
-        ddotvUkrTest,
+        ddotvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_ddotv_zen_int10),
             // conj(x): uses n (no_conjugate) since it is real.
@@ -219,7 +219,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         bli_ddotv_zen_int10_nonUnitPositiveStrides,
-        ddotvUkrTest,
+        ddotvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_ddotv_zen_int10),
             // conj(x): uses n (no_conjugate) since it is real.
@@ -265,7 +265,7 @@ INSTANTIATE_TEST_SUITE_P(
 */
 INSTANTIATE_TEST_SUITE_P(
         bli_ddotv_zen_int_avx512_unitStride,
-        ddotvUkrTest,
+        ddotvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_ddotv_zen_int_avx512),
             // conj(x): uses n (no_conjugate) since it is real.
@@ -308,7 +308,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         bli_ddotv_zen_int_avx512_nonUnitPositiveStrides,
-        ddotvUkrTest,
+        ddotvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_ddotv_zen_int_avx512),
             // conj(x): uses n (no_conjugate) since it is real.

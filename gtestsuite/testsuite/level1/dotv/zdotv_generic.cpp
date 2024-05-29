@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_dotv.h"
 
-class zdotvGenericTest :
+class zdotvGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    gtint_t,
@@ -43,7 +43,7 @@ class zdotvGenericTest :
                                                    gtint_t>> {};
 
 // Tests using random integers as vector elements.
-TEST_P( zdotvGenericTest, RandomData )
+TEST_P( zdotvGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -81,7 +81,7 @@ TEST_P( zdotvGenericTest, RandomData )
 // Black box testing for generic and main use of zdot.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        zdotvGenericTest,
+        zdotvGeneric,
         ::testing::Combine(
             ::testing::Values('n', 'c'),                                    // 'n': tests zdotu_, 'c': tests zdotc_
             ::testing::Values('n'
@@ -101,7 +101,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NonUnitPositiveIncrements,
-        zdotvGenericTest,
+        zdotvGeneric,
         ::testing::Combine(
             ::testing::Values('n', 'c'),                                    // 'n': tests zdotu_, 'c': tests zdotc_
             ::testing::Values('n'
@@ -122,7 +122,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NegativeIncrements,
-        zdotvGenericTest,
+        zdotvGeneric,
         ::testing::Combine(
             ::testing::Values('n', 'c'),                                    // 'n': tests zdotu_, 'c': tests zdotc_
             ::testing::Values('n'),                                         // n: use y, c: use conj(y)
@@ -137,7 +137,7 @@ INSTANTIATE_TEST_SUITE_P(
 #if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
 INSTANTIATE_TEST_SUITE_P(
         AOCLDynamicThresholds,
-        zdotvGenericTest,
+        zdotvGeneric,
         ::testing::Combine(
             // conj(x): user n (no_conjugate) since it is real.
             ::testing::Values('n', 'c'),

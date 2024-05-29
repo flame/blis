@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_axpyf.h"
 
-class daxpyfGenericTest :
+class daxpyfGeneric :
         public ::testing::TestWithParam<std::tuple<char,    // conjx
                                                    char,    // conja
                                                    gtint_t, // m
@@ -47,7 +47,7 @@ class daxpyfGenericTest :
                                                    gtint_t  // incy
                                                    >> {};
 // Tests using random integers as vector elements.
-TEST_P( daxpyfGenericTest, FunctionalTest )
+TEST_P( daxpyfGeneric, API )
 {
     using T = double;
     //----------------------------------------------------------
@@ -91,7 +91,7 @@ TEST_P( daxpyfGenericTest, FunctionalTest )
 // Black box testing for generic and main use of daxpy.
 INSTANTIATE_TEST_SUITE_P(
         FunctionalTest,
-        daxpyfGenericTest,
+        daxpyfGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
             ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)

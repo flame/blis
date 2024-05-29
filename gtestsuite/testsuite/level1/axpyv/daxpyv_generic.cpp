@@ -35,14 +35,14 @@
 #include <gtest/gtest.h>
 #include "test_axpyv.h"
 
-class daxpyvGenericTest :
+class daxpyvGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    gtint_t,
                                                    gtint_t,
                                                    gtint_t,
                                                    double>> {};
 // Tests using random integers as vector elements.
-TEST_P( daxpyvGenericTest, RandomData )
+TEST_P( daxpyvGeneric, API )
 {
     using T = double;
     //----------------------------------------------------------
@@ -83,7 +83,7 @@ TEST_P( daxpyvGenericTest, RandomData )
 // Black box testing for generic and main use of daxpy.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        daxpyvGenericTest,
+        daxpyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
@@ -101,7 +101,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         ConjX,
-        daxpyvGenericTest,
+        daxpyvGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // c: use conj(x)
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
@@ -119,7 +119,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         nonUnitPositiveIncrements,
-        daxpyvGenericTest,
+        daxpyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
@@ -137,7 +137,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         negativeIncrements,
-        daxpyvGenericTest,
+        daxpyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, c: use conj(x)
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
@@ -156,7 +156,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Checking for the thresholds with unit strides
 INSTANTIATE_TEST_SUITE_P(
         aoclDynamicThresholds_unitStrides,
-        daxpyvGenericTest,
+        daxpyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                         // n: use x, c: use conj(x)
             ::testing::Values(// Sizes are based on the thresholds
@@ -178,7 +178,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Checking for the thresholds with non-unit strides
 INSTANTIATE_TEST_SUITE_P(
         aoclDynamicThresholds_nonUnitStrides,
-        daxpyvGenericTest,
+        daxpyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                         // n: use x, c: use conj(x)
             ::testing::Values(// Sizes are based on the thresholds

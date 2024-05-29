@@ -42,7 +42,7 @@ class saxpyvGeneric :
                                                    gtint_t,     // incy
                                                    float>> {};  // alpha
 // Tests using random integers as vector elements.
-TEST_P( saxpyvGeneric, FunctionalTest )
+TEST_P( saxpyvGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------

@@ -42,7 +42,7 @@ class dcopyvGeneric :
                                                    gtint_t>> {};             // stride size for y
 
 // Tests using random values as vector elements.
-TEST_P( dcopyvGeneric, FunctionalTest )
+TEST_P( dcopyvGeneric, API )
 {
     using T = double;
     //----------------------------------------------------------

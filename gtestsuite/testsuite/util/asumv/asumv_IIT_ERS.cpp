@@ -39,9 +39,9 @@
 #include "inc/check_error.h"
 
 template <typename T>
-class asumv_IIT_ERS_Test : public ::testing::Test {};
+class asumv_IIT_ERS : public ::testing::Test {};
 typedef ::testing::Types<float, double, scomplex, dcomplex> TypeParam;
-TYPED_TEST_SUITE(asumv_IIT_ERS_Test, TypeParam);
+TYPED_TEST_SUITE(asumv_IIT_ERS, TypeParam);
 
 using namespace testinghelpers::IIT;
 
@@ -56,7 +56,7 @@ using namespace testinghelpers::IIT;
 */
 
 // n < 0, with non-unit stride
-TYPED_TEST(asumv_IIT_ERS_Test, n_lt_zero_nonUnitStride)
+TYPED_TEST(asumv_IIT_ERS, n_lt_zero_nonUnitStride)
 {
     using T = TypeParam;
     using RT = typename testinghelpers::type_info<T>::real_type;
@@ -81,7 +81,7 @@ TYPED_TEST(asumv_IIT_ERS_Test, n_lt_zero_nonUnitStride)
 }
 
 // n == 0, with non-unit stride
-TYPED_TEST(asumv_IIT_ERS_Test, n_eq_zero_nonUnitStride)
+TYPED_TEST(asumv_IIT_ERS, n_eq_zero_nonUnitStride)
 {
     using T = TypeParam;
     using RT = typename testinghelpers::type_info<T>::real_type;
@@ -106,7 +106,7 @@ TYPED_TEST(asumv_IIT_ERS_Test, n_eq_zero_nonUnitStride)
 }
 
 // n < 0, with unit stride
-TYPED_TEST(asumv_IIT_ERS_Test, n_lt_zero_unitStride)
+TYPED_TEST(asumv_IIT_ERS, n_lt_zero_unitStride)
 {
     using T = TypeParam;
     using RT = typename testinghelpers::type_info<T>::real_type;
@@ -131,7 +131,7 @@ TYPED_TEST(asumv_IIT_ERS_Test, n_lt_zero_unitStride)
 }
 
 // n == 0, with unit stride
-TYPED_TEST(asumv_IIT_ERS_Test, n_eq_zero_unitStride)
+TYPED_TEST(asumv_IIT_ERS, n_eq_zero_unitStride)
 {
     using T = TypeParam;
     using RT = typename testinghelpers::type_info<T>::real_type;
@@ -156,7 +156,7 @@ TYPED_TEST(asumv_IIT_ERS_Test, n_eq_zero_unitStride)
 }
 
 // inc < 0
-TYPED_TEST(asumv_IIT_ERS_Test, inc_lt_0)
+TYPED_TEST(asumv_IIT_ERS, inc_lt_0)
 {
     using T = TypeParam;
     using RT = typename testinghelpers::type_info<T>::real_type;
@@ -180,7 +180,7 @@ TYPED_TEST(asumv_IIT_ERS_Test, inc_lt_0)
 }
 
 // inc == 0
-TYPED_TEST(asumv_IIT_ERS_Test, inc_eq_0)
+TYPED_TEST(asumv_IIT_ERS, inc_eq_0)
 {
     using T = TypeParam;
     using RT = typename testinghelpers::type_info<T>::real_type;

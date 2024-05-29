@@ -38,9 +38,8 @@
 #include "test_trsm_ukr.h"
 #include "level3/trsm/test_trsm.h"
 
-
-class ctrsmUkrSmall :
-    public ::testing::TestWithParam<std::tuple< trsm_small_ker_ft,  // Function pointer type for CTRSM kernels
+class ctrsmGenericSmall :
+    public ::testing::TestWithParam<std::tuple< trsm_small_ker_ft,  // Function pointer type for ctrsm kernels
                                                 char,               // side
                                                 char,               // uploa
                                                 char,               // diaga
@@ -52,11 +51,11 @@ class ctrsmUkrSmall :
                                                 gtint_t,            // ldb_inc
                                                 bool      >> {};    // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ctrsmUkrSmall);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ctrsmGenericSmall);
 
-TEST_P(ctrsmUkrSmall, AccuracyCheck)
+TEST_P( ctrsmGenericSmall, UKR )
 {
-    using   T = scomplex;
+    using T = scomplex;
     trsm_small_ker_ft ukr_fp  = std::get<0>(GetParam());
     char side                 = std::get<1>(GetParam());
     char uploa                = std::get<2>(GetParam());
@@ -86,7 +85,7 @@ TEST_P(ctrsmUkrSmall, AccuracyCheck)
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 INSTANTIATE_TEST_SUITE_P (
     bli_trsm_small,
-    ctrsmUkrSmall,
+    ctrsmGenericSmall,
     ::testing::Combine(
         ::testing::Values(bli_trsm_small),            // ker_ptr
         ::testing::Values('l', 'r'),                  // side

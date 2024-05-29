@@ -40,7 +40,7 @@ class camaxvGeneric :
                                                    gtint_t>> {};	//incx
 
 // Tests using random values as vector elements.
-TEST_P( camaxvGeneric, FunctionalTest )
+TEST_P( camaxvGeneric, API )
 {
     using T = scomplex;
     //----------------------------------------------------------

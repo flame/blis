@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_imatcopy.h"
 
-class simatcopyAPI :
+class simatcopyGeneric :
         public ::testing::TestWithParam<std::tuple<char,        // storage
                                                    char,        // trans
                                                    gtint_t,     // m
@@ -45,10 +45,10 @@ class simatcopyAPI :
                                                    gtint_t,     // lda_out_inc
                                                    bool>> {};   // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(simatcopyAPI);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(simatcopyGeneric);
 
 // Tests using random numbers as vector elements.
-TEST_P( simatcopyAPI, FunctionalTest )
+TEST_P( simatcopyGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------
@@ -87,7 +87,7 @@ TEST_P( simatcopyAPI, FunctionalTest )
 // Black box testing for generic and main use of simatcopy.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        simatcopyAPI,
+        simatcopyGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format(currently only for BLAS testing)
             ::testing::Values('n', 't', 'c', 'r'),                           // trans(and/or conj) value

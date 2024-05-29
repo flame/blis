@@ -40,7 +40,7 @@
 /*******************************************************/
 /*                 SUP Kernel testing                  */
 /*******************************************************/
-class cgemmUkrSUP:
+class cgemmGenericSUP:
         public ::testing::TestWithParam<std::tuple< gtint_t,                // m
                                                     gtint_t,                // n
                                                     gtint_t,                // k
@@ -52,29 +52,45 @@ class cgemmUkrSUP:
                                                     bool                    // is_memory_test
                                                     >> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(cgemmUkrSUP);
-TEST_P(cgemmUkrSUP, FunctionalTest)
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(cgemmGenericSUP);
+
+TEST_P( cgemmGenericSUP, UKR )
 {
-    using T        = scomplex;
-    gtint_t m      = std::get<0>(GetParam());                               // dimension m
-    gtint_t n      = std::get<1>(GetParam());                               // dimension n
-    gtint_t k      = std::get<2>(GetParam());                               // dimension k
-    T alpha        = std::get<3>(GetParam());                               // alpha
-    T beta         = std::get<4>(GetParam());                               // beta
-    char storageC  = std::get<5>(GetParam());                               // storage scheme for C matrix
+    using T                  = scomplex;
+    gtint_t m                = std::get<0>(GetParam());                     // dimension m
+    gtint_t n                = std::get<1>(GetParam());                     // dimension n
+    gtint_t k                = std::get<2>(GetParam());                     // dimension k
+    T alpha                  = std::get<3>(GetParam());                     // alpha
+    T beta                   = std::get<4>(GetParam());                     // beta
+    char storageC            = std::get<5>(GetParam());                     // storage scheme for C matrix
     cgemmsup_ker_ft kern_ptr = std::get<6>(GetParam());                     // pointer to the gemm kernel
-    char transa    = std::get<7>(GetParam());                               // transa
-    char transb    = (storageC == 'r')? 'n' : 't';                          // transb
-    bool is_memory_test = std::get<8>(GetParam());                          // is_memory_test
-    double thresh = 40 * ((std::max)(k,gtint_t(1))) * testinghelpers::getEpsilon<T>(); // Set the threshold for the errors
+    char transa              = std::get<7>(GetParam());                     // transa
+    char transb              = (storageC == 'r')? 'n' : 't';                // transb
+    bool is_memory_test      = std::get<8>(GetParam());                     // is_memory_test
+
+    // Set the threshold for the errors:
+    // Check gtestsuite gemm.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    // No adjustment applied yet for complex data.
+    double thresh;
+    if (m == 0 || n == 0)
+        thresh = 0.0;
+    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
+              beta == testinghelpers::ONE<T>()))
+        thresh = 0.0;
+    else
+        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
+
     test_complex_gemmsup_ukr<scomplex, cgemmsup_ker_ft> (storageC, transa, transb, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
 }// end of function
 
-class cgemmUkrSUPPrint {
+class cgemmGenericSUPPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<gtint_t, gtint_t, gtint_t, scomplex, scomplex, char,
                                           cgemmsup_ker_ft, char, bool>>  str) const {
+
         gtint_t m           = std::get<0>(str.param);
         gtint_t n           = std::get<1>(str.param);
         gtint_t k           = std::get<2>(str.param);
@@ -84,8 +100,9 @@ public:
         char transa         = std::get<7>(str.param);
         char transb         = (storageC == 'r')? 'n' : 't';
         bool is_memory_test = std::get<8>(str.param);
-        std::string str_name ;
-        str_name += "_storC_" + std::string(&storageC, 1);
+
+        std::string str_name;
+        str_name += "_stor_" + std::string(&storageC, 1);
         str_name += "_transa_" + std::string(&transa, 1);
         str_name += "_transb_" + std::string(&transb, 1);
         str_name += "_m_" + std::to_string(m);
@@ -93,7 +110,8 @@ public:
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name = str_name + (is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled");
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
+
         return str_name;
     }
 };
@@ -131,11 +149,11 @@ public:
 
 /*Failures*/
 /* 1. blis_sol[i*ld + j] = (0.856704, 0.625597),   ref_sol[i*ld + j] = (0.856718, 0.625608), i = 5, j = 0,    thresh = 9.5367431640625e-06,    error = 1.7269374438910745e-05 (144.86601257324219 * eps)
-[  FAILED  ] bli_cgemmsup_rv_zen_asm_3x8m/cgemmUkrSUP.FunctionalTest/StorageOfMatrix_r_transA_t_transB_n_m_6_n_8_k_4_alpha_3i4_beta_m7i6_mem_test_disabled, where GetParam() = (6, 8, 4, (3, 4.5), (-7.3, 6.7), 'r' (114, 0x72), 0x5576cdf96cc7, 't' (116, 0x74), 'n' (110, 0x6E), false) (0 ms) */
+[  FAILED  ] bli_cgemmsup_rv_zen_asm_3x8m/cgemmGenericSUP.FunctionalTest/StorageOfMatrix_r_transA_t_transB_n_m_6_n_8_k_4_alpha_3i4_beta_m7i6_mem_test_disabled, where GetParam() = (6, 8, 4, (3, 4.5), (-7.3, 6.7), 'r' (114, 0x72), 0x5576cdf96cc7, 't' (116, 0x74), 'n' (110, 0x6E), false) (0 ms) */
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_3x8m,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(8), 1),                    // values of m
             ::testing::Range(gtint_t(1), gtint_t(9), 1),                    // values of n
@@ -147,12 +165,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_3x8m_alpha_beta,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(8), 1),                    // values of m
             ::testing::Range(gtint_t(1), gtint_t(9), 1),                    // values of n
@@ -164,12 +182,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_3x4m,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(8), 1),                    // values of m
             ::testing::Values(gtint_t(4)),                                  // values of n
@@ -181,12 +199,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_3x4m_alpha_beta,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(8), 1),                    // values of m
             ::testing::Values(gtint_t(4)),                                  // values of n
@@ -198,12 +216,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_3x2m,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(8), 1),                    // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -215,12 +233,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_3x2m_alpha_beta,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(8), 1),                    // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -232,12 +250,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_3x8n,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(4), 1),                    // values of m
             ::testing::Range(gtint_t(1), gtint_t(16), 1),                   // values of n
@@ -249,12 +267,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_3x8n_alpha_beta,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(4), 1),                    // values of m
             ::testing::Range(gtint_t(1), gtint_t(16), 1),                   // values of n
@@ -266,7 +284,7 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 #if 0
@@ -274,7 +292,7 @@ INSTANTIATE_TEST_SUITE_P (
 //Memtest diabled free(): invalid next size (fast)
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_2x8n,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(3), 1),                    // values of m
             ::testing::Range(gtint_t(1), gtint_t(16), 1),                   // values of n
@@ -286,12 +304,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false)                                        // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_2x8n_alpha_beta,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(3), 1),                    // values of m
             ::testing::Range(gtint_t(1), gtint_t(16), 1),                   // values of n
@@ -303,13 +321,13 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false)                                        // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 #endif
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_1x8n,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(1)),                                  // values of m
             ::testing::Range(gtint_t(1), gtint_t(16), 1),                   // values of n
@@ -321,12 +339,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_1x8n_alpha_beta,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(1)),                                  // values of m
             ::testing::Range(gtint_t(1), gtint_t(16), 1),                   // values of n
@@ -338,12 +356,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_3x4,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(3)),                                  // values of m
             ::testing::Values(gtint_t(4)),                                  // values of n
@@ -355,12 +373,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_3x4_alpha_beta,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(3)),                                  // values of m
             ::testing::Values(gtint_t(4)),                                  // values of n
@@ -372,12 +390,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_3x2,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(3)),                                  // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -389,12 +407,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_3x2_alpha_beta,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(3)),                                  // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -406,12 +424,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
  INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_2x8,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(2)),                                  // values of m
             ::testing::Values(gtint_t(8)),                                  // values of n
@@ -423,12 +441,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
  INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_2x8_alpha_beta,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(2)),                                  // values of m
             ::testing::Values(gtint_t(8)),                                  // values of n
@@ -440,12 +458,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_1x8,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(1)),                                  // values of m
             ::testing::Values(gtint_t(8)),                                  // values of n
@@ -457,12 +475,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_1x8_alpha_beta,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(1)),                                  // values of m
             ::testing::Values(gtint_t(8)),                                  // values of n
@@ -474,12 +492,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_2x4,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(2)),                                  // values of m
             ::testing::Values(gtint_t(4)),                                  // values of n
@@ -491,12 +509,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_2x4_alpha_beta,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(2)),                                  // values of m
             ::testing::Values(gtint_t(4)),                                  // values of n
@@ -508,12 +526,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_1x4,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(1)),                                  // values of m
             ::testing::Values(gtint_t(4)),                                  // values of n
@@ -525,12 +543,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_1x4_alpha_beta,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(1)),                                  // values of m
             ::testing::Values(gtint_t(4)),                                  // values of n
@@ -542,12 +560,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_2x2,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(2)),                                  // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -559,12 +577,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_2x2_alpha_beta,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(2)),                                  // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -576,12 +594,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_1x2,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(1)),                                  // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -593,12 +611,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_cgemmsup_rv_zen_asm_1x2_alpha_beta,
-        cgemmUkrSUP,
+        cgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(1)),                                  // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -610,7 +628,7 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n', 't'),                                    // transa
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::cgemmUkrSUPPrint()
+        ::cgemmGenericSUPPrint()
     );
 
 #endif
@@ -618,50 +636,66 @@ INSTANTIATE_TEST_SUITE_P (
 /*******************************************************/
 /*              Native Kernel testing                  */
 /*******************************************************/
-class cgemmUkrNat :
+class cgemmGenericNat :
         public ::testing::TestWithParam<std::tuple<gtint_t,                 // k
                                                    scomplex,                // alpha
                                                    scomplex,                // beta
-                                                   char,                    // storage matrix
+                                                   char,                    // storage of C matrix
                                                    gtint_t,                 // m
                                                    gtint_t,                 // n
                                                    cgemm_ukr_ft,            // pointer to the gemm kernel
                                                    bool                     // is_memory_test
                                                    >> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(cgemmUkrNat);
-TEST_P(cgemmUkrNat, FunctionalTest)
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(cgemmGenericNat);
+TEST_P( cgemmGenericNat, UKR )
 {
     using T = scomplex;
-    gtint_t k      = std::get<0>(GetParam());                               // dimension k
-    T alpha        = std::get<1>(GetParam());                               // alpha
-    T beta         = std::get<2>(GetParam());                               // beta
-    char storageC  = std::get<3>(GetParam());                               // indicates storage of all matrix operands
+    gtint_t k             = std::get<0>(GetParam());                        // dimension k
+    T alpha               = std::get<1>(GetParam());                        // alpha
+    T beta                = std::get<2>(GetParam());                        // beta
+    char storageC         = std::get<3>(GetParam());                        // indicates storage of all matrix operands
     // Fix m and n to MR and NR respectively.
-    gtint_t m = std::get<4>(GetParam());                                    // m
-    gtint_t n = std::get<5>(GetParam());                                    // n
+    gtint_t m             = std::get<4>(GetParam());                        // m
+    gtint_t n             = std::get<5>(GetParam());                        // n
     cgemm_ukr_ft kern_ptr = std::get<6>(GetParam());                        // pointer to the gemm kernel
     bool is_memory_test   = std::get<7>(GetParam());                        // is_memory_test
-    double thresh = 20 * ((std::max)(k,gtint_t(1))) * testinghelpers::getEpsilon<T>(); // Set the threshold for the errors
+
+    // Set the threshold for the errors:
+    // Check gtestsuite gemm.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    // No adjustment applied yet for complex data.
+    double thresh;
+    if (m == 0 || n == 0)
+        thresh = 0.0;
+    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
+              beta == testinghelpers::ONE<T>()))
+        thresh = 0.0;
+    else
+        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
 
     test_gemmnat_ukr(storageC, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
 }// end of function
 
-class cgemmukrnatTestPrint {
+class cgemmGenericNatPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<gtint_t, scomplex, scomplex, char, gtint_t, gtint_t, cgemm_ukr_ft, bool>>  str) const {
-        gtint_t k       = std::get<0>(str.param);
-        scomplex alpha  = std::get<1>(str.param);
-        scomplex beta   = std::get<2>(str.param);
-        char storageC   = std::get<3>(str.param);
-        bool is_memory_test  = std::get<7>(str.param);
+
+        gtint_t k           = std::get<0>(str.param);
+        scomplex alpha      = std::get<1>(str.param);
+        scomplex beta       = std::get<2>(str.param);
+        char storageC       = std::get<3>(str.param);
+        bool is_memory_test = std::get<7>(str.param);
+
         std::string str_name ;
-        str_name += "_storC_" + std::string(&storageC, 1);
+        str_name += "_stor_" + std::string(&storageC, 1);
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name = str_name + (is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled");
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
+
         return str_name;
     }
 };
@@ -669,7 +703,7 @@ public:
 #if defined(BLIS_KERNELS_HASWELL) && defined(GTEST_AVX2FMA3)
 INSTANTIATE_TEST_SUITE_P (
     bli_cgemm_haswell_asm_3x8,
-    cgemmUkrNat,
+    cgemmGenericNat,
     ::testing::Combine(
         ::testing::Range(gtint_t(1), gtint_t(20), 1),                       // values of k
         ::testing::Values(scomplex{0.0, 0.0}, scomplex{1.0, 0.0}, scomplex{-1.0, 0.0}, scomplex{4.0, 0.0}, scomplex{0.0, -0.2}, scomplex{3.5, 4.5}),   // alpha value
@@ -680,6 +714,6 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(bli_cgemm_haswell_asm_3x8),                       // cgemm_nat kernel
         ::testing::Values(false, true)                                      // is_memory_test
     ),
-    ::cgemmukrnatTestPrint()
+    ::cgemmGenericNatPrint()
 );
 #endif

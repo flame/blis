@@ -35,18 +35,18 @@
 #include <gtest/gtest.h>
 #include "test_scal2v.h"
 
-class zscal2vGenericTest :
+class zscal2vGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    gtint_t,
                                                    gtint_t,
                                                    gtint_t,
                                                    dcomplex>> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zscal2vGenericTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zscal2vGeneric);
 
 
 // Tests using random integers as vector elements.
-TEST_P( zscal2vGenericTest, RandomData )
+TEST_P( zscal2vGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -87,7 +87,7 @@ TEST_P( zscal2vGenericTest, RandomData )
 // Black box testing for generic and main use of cscal2.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        zscal2vGenericTest,
+        zscal2vGeneric,
         ::testing::Combine(
             ::testing::Values('n','c'),                                      // n: use x, c: use conj(x)
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
@@ -104,7 +104,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NonUnitIncrements,
-        zscal2vGenericTest,
+        zscal2vGeneric,
         ::testing::Combine(
             ::testing::Values('n','c'),                                      // n: use x, c: use conj(x)
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.

@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_axpbyv_ukr.h"
 
-class daxpbyvUkrTest :
+class daxpbyvGeneric :
         public ::testing::TestWithParam<std::tuple<daxpbyv_ker_ft,  // Function pointer type for daxpbyv kernels
                                                    char,            // conjx
                                                    gtint_t,         // n
@@ -45,10 +45,10 @@ class daxpbyvUkrTest :
                                                    double,          // beta
                                                    bool>> {};       // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(daxpbyvUkrTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(daxpbyvGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( daxpbyvUkrTest, AccuracyCheck )
+TEST_P( daxpbyvGeneric, UKR )
 {
     using T = double;
 
@@ -127,7 +127,7 @@ TEST_P( daxpbyvUkrTest, AccuracyCheck )
 // Unit testing with unit stride, across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_daxpbyv_zen_int10_unitStrides,
-        daxpbyvUkrTest,
+        daxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_daxpbyv_zen_int10),      // kernel address
             ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
@@ -159,7 +159,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing for non unit strides
 INSTANTIATE_TEST_SUITE_P(
         bli_daxpbyv_zen_int10_nonUnitStrides,
-        daxpbyvUkrTest,
+        daxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_daxpbyv_zen_int10),      // kernel address
             ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
@@ -190,7 +190,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with Unit Strides, across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_daxpbyv_zen_int_unitStrides,
-        daxpbyvUkrTest,
+        daxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_daxpbyv_zen_int),        // kernel address
             ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
@@ -213,7 +213,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing for Non-Unit Stride
 INSTANTIATE_TEST_SUITE_P(
         bli_daxpbyv_zen_int_nonUnitStrides,
-        daxpbyvUkrTest,
+        daxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_daxpbyv_zen_int),        // kernel address
             ::testing::Values('n'),                        // use x, not conj(x) (since it is real)

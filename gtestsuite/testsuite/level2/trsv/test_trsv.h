@@ -118,7 +118,7 @@ void test_trsv(
     try
     {
         trsv<T>( storage, uploa, transa, diaga, n, &alpha, a_ptr, lda, x_ptr, incx );
-        if (is_memory_test)
+        if ( is_memory_test )
         {
             memcpy(a.greenzone_2, a.greenzone_1, size_a);
             memcpy(x.greenzone_2,  x_ref.data(), size_x);

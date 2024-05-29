@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_omatcopy.h"
 
-class comatcopyAPI :
+class comatcopyGeneric :
         public ::testing::TestWithParam<std::tuple<char,        // storage
                                                    char,        // trans
                                                    gtint_t,     // m
@@ -45,10 +45,10 @@ class comatcopyAPI :
                                                    gtint_t,     // ldb_inc
                                                    bool>> {};   // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(comatcopyAPI);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(comatcopyGeneric);
 
 // Tests using random numbers as vector elements.
-TEST_P( comatcopyAPI, FunctionalTest )
+TEST_P( comatcopyGeneric, API )
 {
     using T = scomplex;
     //----------------------------------------------------------
@@ -87,7 +87,7 @@ TEST_P( comatcopyAPI, FunctionalTest )
 // Black box testing for generic and main use of comatcopy.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        comatcopyAPI,
+        comatcopyGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format(currently only for BLAS testing)
             ::testing::Values('n', 't', 'r', 'c'),                           // trans(and/or conj) value

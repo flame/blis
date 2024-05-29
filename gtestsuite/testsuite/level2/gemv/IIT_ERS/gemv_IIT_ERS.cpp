@@ -39,9 +39,9 @@
 #include "inc/check_error.h"
 
 template <typename T>
-class gemv_IIT_ERS_Test : public ::testing::Test {};
+class gemv_IIT_ERS : public ::testing::Test {};
 typedef ::testing::Types<float, double, scomplex, dcomplex> TypeParam;
-TYPED_TEST_SUITE(gemv_IIT_ERS_Test, TypeParam);
+TYPED_TEST_SUITE(gemv_IIT_ERS, TypeParam);
 
 using namespace testinghelpers::IIT;
 
@@ -55,7 +55,7 @@ using namespace testinghelpers::IIT;
 */
 
 // n = 0, with unit alpha
-TYPED_TEST(gemv_IIT_ERS_Test, n_eq_zero_Unitalphabeta)
+TYPED_TEST(gemv_IIT_ERS, n_eq_zero_Unitalphabeta)
 {
     using T = TypeParam;
     gtint_t invalid_n = 0;
@@ -95,7 +95,7 @@ TYPED_TEST(gemv_IIT_ERS_Test, n_eq_zero_Unitalphabeta)
 #endif
 }
 
-TYPED_TEST(gemv_IIT_ERS_Test, ZeroBeta_Unitalpha)
+TYPED_TEST(gemv_IIT_ERS, ZeroBeta_Unitalpha)
 {
     using T = TypeParam;
     gtint_t incx = 1;
@@ -134,7 +134,7 @@ TYPED_TEST(gemv_IIT_ERS_Test, ZeroBeta_Unitalpha)
 #endif
 }
 
-TYPED_TEST(gemv_IIT_ERS_Test, m_eq_zero_Unitbeta)
+TYPED_TEST(gemv_IIT_ERS, m_eq_zero_Unitbeta)
 {
     using T = TypeParam;
     gtint_t invalid_m = 0;
@@ -175,7 +175,7 @@ TYPED_TEST(gemv_IIT_ERS_Test, m_eq_zero_Unitbeta)
 #endif
 }
 
-TYPED_TEST(gemv_IIT_ERS_Test, m_lt_zero_Unitscalar)
+TYPED_TEST(gemv_IIT_ERS, m_lt_zero_Unitscalar)
 {
     using T = TypeParam;
     gtint_t invalid_m = -1;
@@ -216,7 +216,7 @@ TYPED_TEST(gemv_IIT_ERS_Test, m_lt_zero_Unitscalar)
 #endif
 }
 
-TYPED_TEST(gemv_IIT_ERS_Test, n_lt_zero_Unitscalar)
+TYPED_TEST(gemv_IIT_ERS, n_lt_zero_Unitscalar)
 {
     using T = TypeParam;
     gtint_t invalid_n = -1;
@@ -257,7 +257,7 @@ TYPED_TEST(gemv_IIT_ERS_Test, n_lt_zero_Unitscalar)
 #endif
 }
 
-TYPED_TEST(gemv_IIT_ERS_Test, Zero_scalar)
+TYPED_TEST(gemv_IIT_ERS, Zero_scalar)
 {
     using T = TypeParam;
     gtint_t incx = 3;

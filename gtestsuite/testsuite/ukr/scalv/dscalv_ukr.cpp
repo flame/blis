@@ -35,17 +35,18 @@
 #include <gtest/gtest.h>
 #include "test_scalv_ukr.h"
 
-class dscalvUkrTest :
+class dscalvGeneric :
         public ::testing::TestWithParam<std::tuple<dscalv_ker_ft,   // Function pointer for dscalv kernels
                                                    char,            // conj_alpha
                                                    gtint_t,         // n
                                                    gtint_t,         // incx
                                                    double,          // alpha
                                                    bool>> {};       // is_memory_test
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dscalvUkrTest);
+
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dscalvGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( dscalvUkrTest, FunctionalTest )
+TEST_P( dscalvGeneric, UKR )
 {
     using T = double;
     //----------------------------------------------------------
@@ -95,7 +96,7 @@ TEST_P( dscalvUkrTest, FunctionalTest )
 */
 INSTANTIATE_TEST_SUITE_P(
         bli_dscalv_zen_int_unitPositiveStride,
-        dscalvUkrTest,
+        dscalvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_dscalv_zen_int),
             // conj(alpha): uses n (no_conjugate) since it is real.
@@ -127,7 +128,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         bli_dscalv_zen_int_nonUnitPositiveStrides,
-        dscalvUkrTest,
+        dscalvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_dscalv_zen_int),
             // conj(alpha): uses n (no_conjugate) since it is real.
@@ -168,7 +169,7 @@ INSTANTIATE_TEST_SUITE_P(
 */
 INSTANTIATE_TEST_SUITE_P(
         bli_dscalv_zen_int10_unitPositiveStride,
-        dscalvUkrTest,
+        dscalvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_dscalv_zen_int10),
             // conj(alpha): uses n (no_conjugate) since it is real.
@@ -217,7 +218,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         bli_dscalv_zen_int10_nonUnitPositiveStrides,
-        dscalvUkrTest,
+        dscalvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_dscalv_zen_int10),
             // conj(alpha): uses n (no_conjugate) since it is real.
@@ -263,7 +264,7 @@ INSTANTIATE_TEST_SUITE_P(
 */
 INSTANTIATE_TEST_SUITE_P(
         bli_dscalv_zen_int_avx512_unitPositiveStride,
-        dscalvUkrTest,
+        dscalvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_dscalv_zen_int_avx512),
             // conj(alpha): uses n (no_conjugate) since it is real.
@@ -325,7 +326,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         bli_dscalv_zen_int_avx512_nonUnitPositiveStrides,
-        dscalvUkrTest,
+        dscalvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_dscalv_zen_int_avx512),
             // conj(alpha): uses n (no_conjugate) since it is real.

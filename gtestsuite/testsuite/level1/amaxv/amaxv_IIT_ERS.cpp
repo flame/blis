@@ -39,9 +39,9 @@
 #include "inc/check_error.h"
 
 template <typename T>
-class amaxv_IIT_ERS_Test : public ::testing::Test {};
+class amaxv_IIT_ERS : public ::testing::Test {};
 typedef ::testing::Types<float, double, scomplex, dcomplex> TypeParam;
-TYPED_TEST_SUITE(amaxv_IIT_ERS_Test, TypeParam);
+TYPED_TEST_SUITE(amaxv_IIT_ERS, TypeParam);
 
 using namespace testinghelpers::IIT;
 
@@ -64,7 +64,7 @@ using namespace testinghelpers::IIT;
 */
 
 // n < 1, with non-unit stride
-TYPED_TEST(amaxv_IIT_ERS_Test, n_lt_one_nonUnitStride)
+TYPED_TEST(amaxv_IIT_ERS, n_lt_one_nonUnitStride)
 {
  using T = TypeParam;
  gtint_t n = 0;
@@ -85,7 +85,7 @@ TYPED_TEST(amaxv_IIT_ERS_Test, n_lt_one_nonUnitStride)
 }
 
 // inc == 0, with non-unit stride
-TYPED_TEST(amaxv_IIT_ERS_Test, incx_eq_zero)
+TYPED_TEST(amaxv_IIT_ERS, incx_eq_zero)
 {
     using T = TypeParam;
     gtint_t inc = 0;
@@ -105,7 +105,7 @@ TYPED_TEST(amaxv_IIT_ERS_Test, incx_eq_zero)
 }
 
 // n < 1, with unit stride
-TYPED_TEST(amaxv_IIT_ERS_Test, n_lt_one_unitStride)
+TYPED_TEST(amaxv_IIT_ERS, n_lt_one_unitStride)
 {
  using T = TypeParam;
  gtint_t n = 0;
@@ -126,7 +126,7 @@ TYPED_TEST(amaxv_IIT_ERS_Test, n_lt_one_unitStride)
 }
 
 // n == 1, with unit stride
-TYPED_TEST(amaxv_IIT_ERS_Test, n_eq_one_unitStride)
+TYPED_TEST(amaxv_IIT_ERS, n_eq_one_unitStride)
 {
  using T = TypeParam;
  gtint_t n = 1;
@@ -146,7 +146,7 @@ TYPED_TEST(amaxv_IIT_ERS_Test, n_eq_one_unitStride)
 
 }
 
-TYPED_TEST(amaxv_IIT_ERS_Test, n_eq_one_nonUnitStrides)
+TYPED_TEST(amaxv_IIT_ERS, n_eq_one_nonUnitStrides)
 {
   using T = TypeParam;
   gtint_t n = 1;

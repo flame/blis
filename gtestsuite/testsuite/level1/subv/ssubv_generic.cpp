@@ -35,13 +35,13 @@
 #include <gtest/gtest.h>
 #include "test_subv.h"
 
-class ssubvGenericTest :
+class ssubvGeneric :
         // input params: x or conj(x), vector length, stride size of x, stride size of y
         public ::testing::TestWithParam<std::tuple<char, gtint_t, gtint_t, gtint_t>> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ssubvGenericTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ssubvGeneric);
 
-TEST_P( ssubvGenericTest, FunctionalTest )
+TEST_P( ssubvGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------
@@ -76,7 +76,7 @@ TEST_P( ssubvGenericTest, FunctionalTest )
 #ifdef TEST_BLIS_TYPED
 INSTANTIATE_TEST_SUITE_P(
         PositiveIncrements,
-        ssubvGenericTest,
+        ssubvGeneric,
         ::testing::Combine(
             // n: use x, c: use conj(x)
             ::testing::Values('n'),
@@ -113,7 +113,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef TEST_BLIS_TYPED
 INSTANTIATE_TEST_SUITE_P(
         PositiveIncrementforConjugate,
-        ssubvGenericTest,
+        ssubvGeneric,
         ::testing::Combine(
             // c: conjugate for x
             ::testing::Values('c'),

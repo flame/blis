@@ -49,7 +49,7 @@ class domatcopyEVT :
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(domatcopyEVT);
 
 // Tests using random numbers as vector elements.
-TEST_P( domatcopyEVT, NanInfCheck )
+TEST_P( domatcopyEVT, API )
 {
     using T = double;
     //----------------------------------------------------------

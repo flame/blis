@@ -49,7 +49,7 @@ class simatcopyEVT :
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(simatcopyEVT);
 
 // Tests using random numbers as vector elements.
-TEST_P( simatcopyEVT, NanInfCheck )
+TEST_P( simatcopyEVT, API )
 {
     using T = float;
     //----------------------------------------------------------

@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_copyv_ukr.h"
 
-class dcopyvUkrTest :
+class dcopyvGeneric :
         public ::testing::TestWithParam<std::tuple<dcopyv_ker_ft,   // Function pointer type for dcopyv kernels
                                                    char,            // conjx
                                                    gtint_t,         // n
@@ -43,10 +43,10 @@ class dcopyvUkrTest :
                                                    gtint_t,         // incy
                                                    bool>> {};       // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dcopyvUkrTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dcopyvGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( dcopyvUkrTest, AccuracyCheck )
+TEST_P( dcopyvGeneric, UKR )
 {
     using T = double;
     //----------------------------------------------------------
@@ -88,7 +88,7 @@ TEST_P( dcopyvUkrTest, AccuracyCheck )
 // Unit testing with Unit Strides(US), across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_dcopyv_zen_int_unitStrides,
-        dcopyvUkrTest,
+        dcopyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_dcopyv_zen_int),
             ::testing::Values('n'),                   // conjugate parameter, 'n' for dcopyv
@@ -116,7 +116,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with Non-Unit Strides(US), across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_dcopyv_zen_int_nonUnitStrides,
-        dcopyvUkrTest,
+        dcopyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_dcopyv_zen_int),
             ::testing::Values('n'),                      // conjugate parameter, 'n' for dcopyv
@@ -147,7 +147,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with Unit Strides(US), across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_dcopyv_zen4_asm_avx512_unitStrides,
-        dcopyvUkrTest,
+        dcopyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_dcopyv_zen4_asm_avx512),
             ::testing::Values('n'),                   // conjugate parameter, 'n' for dcopyv
@@ -177,7 +177,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with Non-Unit Strides(US), across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_dcopyv_zen4_asm_avx512_nonUnitStrides,
-        dcopyvUkrTest,
+        dcopyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_dcopyv_zen4_asm_avx512),
             ::testing::Values('n'),                      // conjugate parameter, 'n' for dcopyv

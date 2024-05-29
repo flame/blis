@@ -35,16 +35,16 @@
 #include <gtest/gtest.h>
 #include "test_amaxv_ukr.h"
 
-class samaxvUkr :
+class samaxvGeneric :
         public ::testing::TestWithParam<std::tuple<samaxv_ker_ft,   // Function pointer type for samaxv kernels
                                                    gtint_t,         // n
                                                    gtint_t,         // incx
                                                    bool>> {};       // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(samaxvUkr);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(samaxvGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( samaxvUkr, AccuracyCheck )
+TEST_P( samaxvGeneric, UKR )
 {
     using T = float;
 
@@ -85,7 +85,7 @@ TEST_P( samaxvUkr, AccuracyCheck )
 // Unit testing with unit strides, across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_samaxv_zen_int_unitStrides,
-        samaxvUkr,
+        samaxvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_samaxv_zen_int),   // kernel address
             ::testing::Values(gtint_t(8),            // for size n, L8
@@ -101,7 +101,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with non-unit strides.
 INSTANTIATE_TEST_SUITE_P(
         bli_samaxv_zen_int_nonUnitStrides,
-        samaxvUkr,
+        samaxvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_samaxv_zen_int),   // kernel address
             ::testing::Values(gtint_t(10),           // n, size of the vector
@@ -128,7 +128,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with unit strides, across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_samaxv_zen_int_avx512_unitStrides,
-        samaxvUkr,
+        samaxvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_samaxv_zen_int_avx512),   // kernel address
             ::testing::Values(gtint_t(80),                  // for size n, L80
@@ -145,7 +145,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with non-unit strides.
 INSTANTIATE_TEST_SUITE_P(
         bli_samaxv_zen_int_avx512_nonUnitStrides,
-        samaxvUkr,
+        samaxvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_samaxv_zen_int_avx512),   // kernel address
             ::testing::Values(gtint_t(10),                  // n, size of the vector

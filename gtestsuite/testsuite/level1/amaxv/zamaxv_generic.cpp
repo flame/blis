@@ -40,7 +40,7 @@ class zamaxvGeneric :
                                                    gtint_t>> {};	//incx
 
 // Tests using random values as vector elements.
-TEST_P( zamaxvGeneric, FunctionalTest )
+TEST_P( zamaxvGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------

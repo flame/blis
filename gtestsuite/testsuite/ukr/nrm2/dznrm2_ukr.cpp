@@ -38,15 +38,15 @@
 using T = dcomplex;
 using RT = typename testinghelpers::type_info<T>::real_type;
 
-class dznrm2UkrTest :
+class dznrm2Generic :
         public ::testing::TestWithParam<std::tuple<nrm2_ker_ft<T, RT>,  // Kernel pointer type
                                                    gtint_t,             // n
                                                    gtint_t,             // incx
                                                    bool>> {};           // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dznrm2UkrTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dznrm2Generic);
 
-TEST_P( dznrm2UkrTest, AccuracyCheck )
+TEST_P( dznrm2Generic, UKR )
 {
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -83,7 +83,7 @@ TEST_P( dznrm2UkrTest, AccuracyCheck )
 // Unit testing with unit strides, across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_dznorm2fv_unb_var1_avx2_unitStrides,
-        dznrm2UkrTest,
+        dznrm2Generic,
         ::testing::Combine(
             ::testing::Values(bli_dznorm2fv_unb_var1_avx2), // ukr function
             // m size of vector
@@ -104,7 +104,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with non-unit strides.
 INSTANTIATE_TEST_SUITE_P(
         bli_dznorm2fv_unb_var1_avx2_nonUnitStrides,
-        dznrm2UkrTest,
+        dznrm2Generic,
         ::testing::Combine(
             ::testing::Values(bli_dznorm2fv_unb_var1_avx2), // ukr function
             // m size of vector

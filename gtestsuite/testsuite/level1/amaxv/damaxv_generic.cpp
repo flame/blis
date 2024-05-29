@@ -40,7 +40,7 @@ class damaxvGeneric :
                                                    gtint_t>> {};	//incx
 
 // Tests using random values as vector elements.
-TEST_P( damaxvGeneric, FunctionalTest )
+TEST_P( damaxvGeneric, API )
 {
     using T = double;
     //----------------------------------------------------------

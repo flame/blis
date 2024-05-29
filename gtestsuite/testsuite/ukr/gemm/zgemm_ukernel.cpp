@@ -1,8 +1,11 @@
 /*
+
    BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
+
    Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
@@ -14,6 +17,7 @@
 	- Neither the name(s) of the copyright holder(s) nor the names of its
 	  contributors may be used to endorse or promote products derived
 	  from this software without specific prior written permission.
+
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -25,7 +29,9 @@
    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 */
+
 #include <gtest/gtest.h>
 #include "blis.h"
 #include "common/testing_helpers.h"
@@ -34,7 +40,7 @@
 /*******************************************************/
 /*                 SUP Kernel testing                  */
 /*******************************************************/
-class zgemmUkrSUP:
+class zgemmGenericSUP:
         public ::testing::TestWithParam<std::tuple< gtint_t,                // m
                                                     gtint_t,                // n
                                                     gtint_t,                // k
@@ -47,20 +53,21 @@ class zgemmUkrSUP:
                                                     bool                    // is_memory_test
                                                     >> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zgemmUkrSUP);
-TEST_P(zgemmUkrSUP, FunctionalTest)
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zgemmGenericSUP);
+
+TEST_P( zgemmGenericSUP, UKR )
 {
     using T = dcomplex;
-    gtint_t m      = std::get<0>(GetParam());                               // dimension m
-    gtint_t n      = std::get<1>(GetParam());                               // dimension n
-    gtint_t k      = std::get<2>(GetParam());                               // dimension k
-    T alpha        = std::get<3>(GetParam());                               // alpha
-    T beta         = std::get<4>(GetParam());                               // beta
-    char storageC   = std::get<5>(GetParam());                              // storage scheme for C matrix
+    gtint_t m                = std::get<0>(GetParam());                     // dimension m
+    gtint_t n                = std::get<1>(GetParam());                     // dimension n
+    gtint_t k                = std::get<2>(GetParam());                     // dimension k
+    T alpha                  = std::get<3>(GetParam());                     // alpha
+    T beta                   = std::get<4>(GetParam());                     // beta
+    char storageC            = std::get<5>(GetParam());                     // storage scheme for C matrix
     zgemmsup_ker_ft kern_ptr = std::get<6>(GetParam());                     // pointer to the gemm kernel
-    char transa = std::get<7>(GetParam());                                  // transa
-    char transb = std::get<8>(GetParam());                                  // transb
-    bool is_memory_test = std::get<9>(GetParam());                          // is_memory_test
+    char transa              = std::get<7>(GetParam());                     // transa
+    char transb              = std::get<8>(GetParam());                     // transb
+    bool is_memory_test      = std::get<9>(GetParam());                     // is_memory_test
 
     // Set the threshold for the errors:
     // Check gtestsuite gemm.h or netlib source code for reminder of the
@@ -75,16 +82,16 @@ TEST_P(zgemmUkrSUP, FunctionalTest)
         thresh = 0.0;
     else
         thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
-        //thresh = (63*k+1)*testinghelpers::getEpsilon<T>();
 
     test_complex_gemmsup_ukr(storageC, transa, transb, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
 }// end of function
 
-class zgemmUkrSUPPrint {
+class zgemmGenericSUPPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<gtint_t, gtint_t, gtint_t, dcomplex, dcomplex, char,
                                           zgemmsup_ker_ft, char, char, bool>>  str) const {
+
         gtint_t m           = std::get<0>(str.param);
         gtint_t n           = std::get<1>(str.param);
         gtint_t k           = std::get<2>(str.param);
@@ -94,8 +101,9 @@ public:
         char transa         = std::get<7>(str.param);
         char transb         = std::get<8>(str.param);
         bool is_memory_test = std::get<9>(str.param);
-        std::string str_name ;
-        str_name += "_storC_" + std::string(&storageC, 1);
+
+        std::string str_name;
+        str_name += "_stor_" + std::string(&storageC, 1);
         str_name += "_transa_" + std::string(&transa, 1);
         str_name += "_transb_" + std::string(&transb, 1);
         str_name += "_m_" + std::to_string(m);
@@ -103,7 +111,8 @@ public:
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name = str_name + (is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled");
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
+
         return str_name;
     }
 };
@@ -111,7 +120,7 @@ public:
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_3x4m_row_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(10), 1),                   // values of m
             ::testing::Range(gtint_t(1), gtint_t(5), 1),                    // values of n
@@ -125,12 +134,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_2x4_row_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(2)),                                  // values of m
             ::testing::Values(gtint_t(4)),                                  // values of n
@@ -143,12 +152,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_1x4_row_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(1)),                                  // values of m
             ::testing::Values(gtint_t(4)),                                  // values of n
@@ -161,12 +170,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_3x2m_row_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(20), 1),                   // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -179,12 +188,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_3x2_row_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(3)),                                  // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -197,12 +206,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_2x2_row_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(2)),                                  // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -215,12 +224,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_1x2_row_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(1)),                                  // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -233,12 +242,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_3x4m_col_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(14), 1),                   // values of m
             ::testing::Range(gtint_t(1), gtint_t(5), 1),                    // values of n
@@ -251,12 +260,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_3x2m_col_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(14), 1),                   // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -269,12 +278,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_3x2_col_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(3)),                                  // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -287,12 +296,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_2x4_col_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(2)),                                  // values of m
             ::testing::Values(gtint_t(4)),                                  // values of n
@@ -305,12 +314,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_1x4_col_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(1)),                                  // values of m
             ::testing::Values(gtint_t(4)),                                  // values of n
@@ -323,12 +332,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_2x2_col_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(2)),                                  // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -341,12 +350,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_1x2_col_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(1)),                                  // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -359,12 +368,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rd_zen_asm_3x4m_row_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(12), 1),                   // values of m
             ::testing::Range(gtint_t(1), gtint_t(5), 1),                    // values of n
@@ -377,12 +386,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rd_zen_asm_3x2m_row_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(11), 1),                   // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -395,12 +404,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rd_zen_asm_3x4n_row_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(4), 1),                    // values of m
             ::testing::Range(gtint_t(1), gtint_t(10), 1),                   // values of n
@@ -413,12 +422,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rd_zen_asm_2x4n_row_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(2)),                                  // values of m
             ::testing::Range(gtint_t(1), gtint_t(12), 1),                   // values of n
@@ -431,12 +440,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rd_zen_asm_2x4_row_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(2)),                                  // values of m
             ::testing::Values(gtint_t(4)),                                  // values of n
@@ -449,12 +458,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rd_zen_asm_1x4_row_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(1)),                                  // values of m
             ::testing::Values(gtint_t(4)),                                  // values of n
@@ -467,12 +476,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rd_zen_asm_1x2_row_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(1)),                                  // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -485,12 +494,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rd_zen_asm_2x2_row_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(2)),                                  // values of m
             ::testing::Values(gtint_t(2)),                                  // values of n
@@ -503,12 +512,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_3x4n_col_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(4), 1),                     // values of m
             ::testing::Range(gtint_t(1), gtint_t(15), 1),                    // values of n
@@ -521,12 +530,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_2x4n_col_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(2)),                                  // values of m
             ::testing::Range(gtint_t(1), gtint_t(13), 1),                   // values of n
@@ -539,12 +548,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_1x4n_col_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(1)),                                  // values of m
             ::testing::Range(gtint_t(1), gtint_t(8), 1),                    // values of n
@@ -557,12 +566,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_3x4n_row_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(4), 1),                     // values of m
             ::testing::Range(gtint_t(1), gtint_t(18), 1),                    // values of n
@@ -575,12 +584,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_2x4n_row_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(2)),                                  // values of m
             ::testing::Range(gtint_t(1), gtint_t(6), 1),                    // values of n
@@ -593,12 +602,12 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P (
         bli_zgemmsup_rv_zen_asm_1x4n_row_stored_c,
-        zgemmUkrSUP,
+        zgemmGenericSUP,
         ::testing::Combine(
             ::testing::Values(gtint_t(1)),                                  // values of m
             ::testing::Range(gtint_t(1), gtint_t(9), 1),                    // values of n
@@ -611,14 +620,14 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
         ),
-        ::zgemmUkrSUPPrint()
+        ::zgemmGenericSUPPrint()
     );
 #endif
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_12x4m_col_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Range(gtint_t(1), gtint_t(28), 1),                   // values of m
              ::testing::Range(gtint_t(1), gtint_t(5), 1),                    // values of n
@@ -631,12 +640,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_12x3m_col_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Range(gtint_t(1), gtint_t(25), 1),                   // values of m
              ::testing::Values(gtint_t(3)),                                  // values of n
@@ -649,12 +658,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_12x2m_col_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Range(gtint_t(1), gtint_t(20), 1),                   // values of m
              ::testing::Values(gtint_t(2)),                                  // values of n
@@ -667,12 +676,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_12x1m_col_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Range(gtint_t(1), gtint_t(25), 1),                   // values of m
              ::testing::Values(gtint_t(1)),                                  // values of n
@@ -685,12 +694,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_8x4_col_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Values(gtint_t(8)),                                  // values of m
              ::testing::Values(gtint_t(4)),                                  // values of n
@@ -703,12 +712,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_8x3_col_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Values(gtint_t(8)),                                  // values of m
              ::testing::Values(gtint_t(3)),                                  // values of n
@@ -721,12 +730,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_8x2_col_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Values(gtint_t(8)),                                  // values of m
              ::testing::Values(gtint_t(2)),                                  // values of n
@@ -739,12 +748,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_8x1_col_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Values(gtint_t(8)),                                  // values of m
              ::testing::Values(gtint_t(1)),                                  // values of n
@@ -757,12 +766,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_4x4_col_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Values(gtint_t(4)),                                  // values of m
              ::testing::Values(gtint_t(4)),                                  // values of n
@@ -775,12 +784,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_4x3_col_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Values(gtint_t(4)),                                  // values of m
              ::testing::Values(gtint_t(3)),                                  // values of n
@@ -793,12 +802,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_4x2_col_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Values(gtint_t(4)),                                  // values of m
              ::testing::Values(gtint_t(2)),                                  // values of n
@@ -811,12 +820,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_4x1_col_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Values(gtint_t(4)),                                  // values of m
              ::testing::Values(gtint_t(1)),                                  // values of n
@@ -829,12 +838,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_2x4_col_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Values(gtint_t(2)),                                  // values of m
              ::testing::Values(gtint_t(4)),                                  // values of n
@@ -847,12 +856,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_2x3_col_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Values(gtint_t(2)),                                  // values of m
              ::testing::Values(gtint_t(3)),                                  // values of n
@@ -865,12 +874,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_2x2_col_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Values(gtint_t(2)),                                  // values of m
              ::testing::Values(gtint_t(2)),                                  // values of n
@@ -883,12 +892,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_2x1_col_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Values(gtint_t(2)),                                  // values of m
              ::testing::Values(gtint_t(1)),                                  // values of n
@@ -901,12 +910,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_12x4m_row_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Range(gtint_t(1), gtint_t(13), 1),                   // values of m
              ::testing::Range(gtint_t(1), gtint_t(5), 1),                    // values of n
@@ -919,12 +928,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_12x3m_row_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Range(gtint_t(1), gtint_t(33), 1),                   // values of m
              ::testing::Values(gtint_t(3)),                                  // values of n
@@ -937,12 +946,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_12x2m_row_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Range(gtint_t(1), gtint_t(21), 1),                   // values of m
              ::testing::Values(gtint_t(2)),                                  // values of n
@@ -955,12 +964,12 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 
  INSTANTIATE_TEST_SUITE_P (
          bli_zgemmsup_cv_zen4_asm_12x1m_row_stored_c,
-         zgemmUkrSUP,
+         zgemmGenericSUP,
          ::testing::Combine(
              ::testing::Range(gtint_t(1), gtint_t(20), 1),                   // values of m
              ::testing::Values(gtint_t(1)),                                  // values of n
@@ -973,14 +982,14 @@ INSTANTIATE_TEST_SUITE_P (
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
          ),
-         ::zgemmUkrSUPPrint()
+         ::zgemmGenericSUPPrint()
      );
 #endif
 
 /*******************************************************/
 /*              Native Kernel testing                  */
 /*******************************************************/
-class zgemmUkrNat :
+class zgemmGenericNat :
         public ::testing::TestWithParam<std::tuple<gtint_t,                 // k
                                                    dcomplex,                // alpha
                                                    dcomplex,                // beta
@@ -991,17 +1000,17 @@ class zgemmUkrNat :
                                                    bool                     // is_memory_test
                                                    >> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zgemmUkrNat);
-TEST_P(zgemmUkrNat, MicroKernelTest)
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zgemmGenericNat);
+TEST_P( zgemmGenericNat, MicroKernelTest)
 {
     using T = dcomplex;
-    gtint_t k      = std::get<0>(GetParam());                               // dimension k
-    T alpha        = std::get<1>(GetParam());                               // alpha
-    T beta         = std::get<2>(GetParam());                               // beta
-    char storageC  = std::get<3>(GetParam());                               // indicates storage of all matrix operands
+    gtint_t k             = std::get<0>(GetParam());                        // dimension k
+    T alpha               = std::get<1>(GetParam());                        // alpha
+    T beta                = std::get<2>(GetParam());                        // beta
+    char storageC         = std::get<3>(GetParam());                        // indicates storage of all matrix operands
     // Fix m and n to MR and NR respectively.
-    gtint_t m = std::get<4>(GetParam());                                    // m
-    gtint_t n = std::get<5>(GetParam());                                    // n
+    gtint_t m             = std::get<4>(GetParam());                        // m
+    gtint_t n             = std::get<5>(GetParam());                        // n
     zgemm_ukr_ft kern_ptr = std::get<6>(GetParam());                        // pointer to the gemm kernel
     bool is_memory_test   = std::get<7>(GetParam());                        // is_memory_test    
 
@@ -1018,27 +1027,29 @@ TEST_P(zgemmUkrNat, MicroKernelTest)
         thresh = 0.0;
     else
         thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
-        //thresh = (4*k+1)*testinghelpers::getEpsilon<T>();
 
     test_gemmnat_ukr(storageC, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
+
 }// end of function
 
-class zgemmUkrNativePrint {
+class zgemmGenericNatPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<gtint_t, dcomplex, dcomplex, char, gtint_t, gtint_t, zgemm_ukr_ft, bool>>  str) const {
-        gtint_t k       = std::get<0>(str.param);
-        dcomplex alpha  = std::get<1>(str.param);
-        dcomplex beta   = std::get<2>(str.param);
-        char storageC   = std::get<3>(str.param);
-        bool is_memory_test  = std::get<7>(str.param);
-        std::string str_name ;
 
-        str_name += "_storC_" + std::string(&storageC, 1);
+        gtint_t k           = std::get<0>(str.param);
+        dcomplex alpha      = std::get<1>(str.param);
+        dcomplex beta       = std::get<2>(str.param);
+        char storageC       = std::get<3>(str.param);
+        bool is_memory_test = std::get<7>(str.param);
+
+        std::string str_name; 
+        str_name += "_stor_" + std::string(&storageC, 1);
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name = str_name + (is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled");
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
+
         return str_name;
     }
 };
@@ -1046,7 +1057,7 @@ public:
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 INSTANTIATE_TEST_SUITE_P (
     bli_zgemm_zen4_asm_12x4,
-    zgemmUkrNat,
+    zgemmGenericNat,
     ::testing::Combine( //Failure observed for this case zgemmnat_ukr_1_a0pi2_bm7pi6_r
         ::testing::Range(gtint_t(1), gtint_t(15), 1),                       // values of k
         ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{4.0, 0.0}, dcomplex{0.0, 2.3}, dcomplex{3.5, 4.5}), // alpha value
@@ -1057,13 +1068,13 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(bli_zgemm_zen4_asm_12x4),                         // zgemm_nat kernel
         ::testing::Values(false, true)                                      // is_memory_test
     ),
-    ::zgemmUkrNativePrint()
+    ::zgemmGenericNatPrint()
 );
 
 // Memory test fails when k=0, hence below test validated when is_memory_test disabled
 INSTANTIATE_TEST_SUITE_P (
     bli_zgemm_zen4_asm_12x4_k0,
-    zgemmUkrNat,
+    zgemmGenericNat,
     ::testing::Combine( //Failure observed for this case zgemmnat_ukr_1_a0pi2_bm7pi6_r
         ::testing::Values(gtint_t(0)),                                     // values of k
         ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{4.0, 0.0}, dcomplex{0.0, 2.3}, dcomplex{3.5, 4.5}), // alpha value
@@ -1074,13 +1085,13 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(bli_zgemm_zen4_asm_12x4),                         // zgemm_nat kernel
         ::testing::Values(false)                                            // is_memory_test
     ),
-    ::zgemmUkrNativePrint()
+    ::zgemmGenericNatPrint()
 );
 
 /*Kernel reqired for trsm computation*/
 INSTANTIATE_TEST_SUITE_P (
     bli_zgemm_zen4_asm_4x12,
-    zgemmUkrNat,
+    zgemmGenericNat,
     ::testing::Combine(
         ::testing::Range(gtint_t(1), gtint_t(10), 1),                       // values of k
         ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{4.0, 0.0}, dcomplex{0.0, 2.3}, dcomplex{3.5, 4.5}),     // alpha value
@@ -1091,13 +1102,13 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(bli_zgemm_zen4_asm_4x12),                         // zgemm_nat kernel
         ::testing::Values(false, true)                                      // is_memory_test
     ),
-    ::zgemmUkrNativePrint()
+    ::zgemmGenericNatPrint()
 );
 
 // Memory test fails when k=0, hence below test validated when is_memory_test disabled
 INSTANTIATE_TEST_SUITE_P (
     bli_zgemm_zen4_asm_4x12_k0,
-    zgemmUkrNat,
+    zgemmGenericNat,
     ::testing::Combine(
         ::testing::Values(gtint_t(0)),                                      // values of k
         ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{4.0, 0.0}, dcomplex{0.0, 2.3}, dcomplex{3.5, 4.5}),     // alpha value
@@ -1108,14 +1119,14 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(bli_zgemm_zen4_asm_4x12),                         // zgemm_nat kernel
         ::testing::Values(false)                                            // is_memory_test
     ),
-    ::zgemmUkrNativePrint()
+    ::zgemmGenericNatPrint()
 );
 #endif
 
 #if defined(BLIS_KERNELS_HASWELL) && defined(GTEST_AVX2FMA3)
 INSTANTIATE_TEST_SUITE_P (
     bli_zgemm_haswell_asm_3x4,
-    zgemmUkrNat,
+    zgemmGenericNat,
     ::testing::Combine(
         ::testing::Range(gtint_t(1), gtint_t(20), 1),                       // values of k
         ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{4.0, 0.0}, dcomplex{0.0, -0.2}, dcomplex{3.5, 4.5}),   // alpha value
@@ -1126,13 +1137,13 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(bli_zgemm_haswell_asm_3x4),                       // zgemm_nat kernel
         ::testing::Values(false, true)                                      // is_memory_test
     ),
-    ::zgemmUkrNativePrint()
+    ::zgemmGenericNatPrint()
 );
 
 // Memory test fails when k=0, hence below test validated when is_memory_test disabled
 INSTANTIATE_TEST_SUITE_P (
     bli_zgemm_haswell_asm_3x4_k0,
-    zgemmUkrNat,
+    zgemmGenericNat,
     ::testing::Combine(
         ::testing::Values(gtint_t(0)),                                      // values of k
         ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{4.0, 0.0}, dcomplex{0.0, -0.2}, dcomplex{3.5, 4.5}),   // alpha value
@@ -1143,7 +1154,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(bli_zgemm_haswell_asm_3x4),                       // zgemm_nat kernel
         ::testing::Values(false)                                            // is_memory_test
     ),
-    ::zgemmUkrNativePrint()
+    ::zgemmGenericNatPrint()
 );
 #endif
 
@@ -1151,7 +1162,7 @@ INSTANTIATE_TEST_SUITE_P (
 /*Kernel reqired for trsm computation*/
 INSTANTIATE_TEST_SUITE_P (
     bli_zgemm_zen_asm_2x6,
-    zgemmUkrNat,
+    zgemmGenericNat,
     ::testing::Combine(
         ::testing::Range(gtint_t(1), gtint_t(10), 1),                       // values of k
         ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{4.0, 0.0}, dcomplex{0.0, -0.3}, dcomplex{3.5, 4.5}),   // alpha value
@@ -1162,13 +1173,13 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(bli_zgemm_zen_asm_2x6),                           // zgemm_nat kernel
         ::testing::Values(false, true)                                      // is_memory_test
     ),
-    ::zgemmUkrNativePrint()
+    ::zgemmGenericNatPrint()
 );
 
 // Memory test fails when k=0, hence below test validated when is_memory_test disabled
 INSTANTIATE_TEST_SUITE_P (
     bli_zgemm_zen_asm_2x6_k0,
-    zgemmUkrNat,
+    zgemmGenericNat,
     ::testing::Combine(
         ::testing::Values(gtint_t(0)),                                      // values of k
         ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{4.0, 0.0}, dcomplex{0.0, -0.3}, dcomplex{3.5, 4.5}),   // alpha value
@@ -1179,6 +1190,6 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(bli_zgemm_zen_asm_2x6),                           // zgemm_nat kernel
         ::testing::Values(false)                                            // is_memory_test
     ),
-    ::zgemmUkrNativePrint()
+    ::zgemmGenericNatPrint()
 );
 #endif

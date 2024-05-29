@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "level2/trsv/test_trsv.h"
 
-class ctrsvTest :
+class ctrsvGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -45,7 +45,7 @@ class ctrsvTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P(ctrsvTest, RandomData)
+TEST_P( ctrsvGeneric, API )
 {
     using T = scomplex;
     //----------------------------------------------------------
@@ -95,7 +95,7 @@ TEST_P(ctrsvTest, RandomData)
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        ctrsvTest,
+        ctrsvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_hemm.h"
 
-class chemmTest :
+class chemmGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -49,7 +49,7 @@ class chemmTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P(chemmTest, RandomData)
+TEST_P( chemmGeneric, API )
 {
     using T = scomplex;
     //----------------------------------------------------------
@@ -109,7 +109,7 @@ TEST_P(chemmTest, RandomData)
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        chemmTest,
+        chemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_trmv.h"
 
-class ztrmvTest :
+class ztrmvGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -45,7 +45,7 @@ class ztrmvTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P(ztrmvTest, RandomData)
+TEST_P( ztrmvGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -94,7 +94,7 @@ TEST_P(ztrmvTest, RandomData)
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        ztrmvTest,
+        ztrmvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

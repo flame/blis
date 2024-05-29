@@ -35,13 +35,13 @@
 #include <gtest/gtest.h>
 #include "test_subv.h"
 
-class zsubvGenericTest :
+class zsubvGeneric :
         // input params: x or conj(x), vector length, stride size of x, stride size of y
         public ::testing::TestWithParam<std::tuple<char, gtint_t, gtint_t, gtint_t>> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zsubvGenericTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zsubvGeneric);
 
-TEST_P( zsubvGenericTest, FunctionalTest )
+TEST_P( zsubvGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -77,7 +77,7 @@ TEST_P( zsubvGenericTest, FunctionalTest )
 #ifdef TEST_BLIS_TYPED
 INSTANTIATE_TEST_SUITE_P(
         PositiveIncrements,
-        zsubvGenericTest,
+        zsubvGeneric,
         ::testing::Combine(
             // n: use x, c: use conj(x)
             ::testing::Values('n','c'),

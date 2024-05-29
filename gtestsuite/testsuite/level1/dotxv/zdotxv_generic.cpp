@@ -35,13 +35,13 @@
 #include <gtest/gtest.h>
 #include "test_dotxv.h"
 
-class zdotxvGenericTest :
+class zdotxvGeneric :
         public ::testing::TestWithParam<std::tuple<gtint_t, char, char, gtint_t, gtint_t, dcomplex, dcomplex>> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zdotxvGenericTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zdotxvGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( zdotxvGenericTest, RandomData )
+TEST_P( zdotxvGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -109,7 +109,7 @@ TEST_P( zdotxvGenericTest, RandomData )
 // Black box testing for generic and main use of zdotxv.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        zdotxvGenericTest,
+        zdotxvGeneric,
         ::testing::Combine(
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values('n', 'c'),                                     // n: use x, c: use conj(x)
@@ -127,7 +127,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NonUnitIncrements,
-        zdotxvGenericTest,
+        zdotxvGeneric,
         ::testing::Combine(
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
             ::testing::Values('n', 'c'),                                     // n: use x, c: use conj(x)

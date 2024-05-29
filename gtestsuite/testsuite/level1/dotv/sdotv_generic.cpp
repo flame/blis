@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_dotv.h"
 
-class sdotvGenericTest :
+class sdotvGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    gtint_t,
@@ -43,7 +43,7 @@ class sdotvGenericTest :
                                                    gtint_t>> {};
 
 // Tests using random integers as vector elements.
-TEST_P( sdotvGenericTest, RandomData )
+TEST_P( sdotvGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------
@@ -80,7 +80,7 @@ TEST_P( sdotvGenericTest, RandomData )
 // Black box testing for generic and main use of sdotv.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        sdotvGenericTest,
+        sdotvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
             ::testing::Values('n'),                                          // n: use y, not conj(y) (since it is real)
@@ -97,7 +97,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         ConjX,
-        sdotvGenericTest,
+        sdotvGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // c: use conj(x)
             ::testing::Values('c'),                                          // c: use conj(y)
@@ -114,7 +114,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NonUnitPositiveIncrements,
-        sdotvGenericTest,
+        sdotvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
             ::testing::Values('n'),                                          // n: use y, not conj(y) (since it is real)
@@ -131,7 +131,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NegativeIncrements,
-        sdotvGenericTest,
+        sdotvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, c: use conj(x)
             ::testing::Values('n'),                                          // n: use y, c: use conj(y)

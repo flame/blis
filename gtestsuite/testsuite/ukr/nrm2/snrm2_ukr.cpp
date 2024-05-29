@@ -38,15 +38,15 @@
 using T = float;
 using RT = typename testinghelpers::type_info<T>::real_type;
 
-class snrm2Ukr :
+class snrm2Generic :
         public ::testing::TestWithParam<std::tuple<nrm2_ker_ft<T, RT>,  // Kernel pointer type
                                                    gtint_t,             // n
                                                    gtint_t,             // incx
                                                    bool>> {};           // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(snrm2Ukr);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(snrm2Generic);
 
-TEST_P( snrm2Ukr, AccuracyCheck )
+TEST_P( snrm2Generic, UKR )
 {
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -86,7 +86,7 @@ TEST_P( snrm2Ukr, AccuracyCheck )
 // Unit testing with unit strides, across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_snorm2fv_unb_var1_avx2_unitStrides,
-        snrm2Ukr,
+        snrm2Generic,
         ::testing::Combine(
             ::testing::Values(bli_snorm2fv_unb_var1_avx2), // ukr function
             // m size of vector
@@ -105,7 +105,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with non-unit strides.
 INSTANTIATE_TEST_SUITE_P(
         bli_snorm2fv_unb_var1_avx2_nonUnitStrides,
-        snrm2Ukr,
+        snrm2Generic,
         ::testing::Combine(
             ::testing::Values(bli_snorm2fv_unb_var1_avx2), // ukr function
             // m size of vector

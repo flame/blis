@@ -36,7 +36,7 @@
 #include "test_dotv_ukr.h"
 
 using T = dcomplex;
-class zdotvUkrTest :
+class zdotvGeneric :
         public ::testing::TestWithParam<std::tuple<zdotv_ker_ft,    // Function pointer for ddotv kernels
                                                    char,            // conjx
                                                    char,            // conjy
@@ -44,11 +44,11 @@ class zdotvUkrTest :
                                                    gtint_t,         // incx
                                                    gtint_t,         // incy
                                                    bool>> {};       // is_memory_test
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zdotvUkrTest);
 
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zdotvGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( zdotvUkrTest, FunctionalTest )
+TEST_P( zdotvGeneric, UKR )
 {
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -103,7 +103,7 @@ TEST_P( zdotvUkrTest, FunctionalTest )
 */
 INSTANTIATE_TEST_SUITE_P(
         bli_zdotv_zen_int_avx512_unitStride,
-        zdotvUkrTest,
+        zdotvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zdotv_zen_int_avx512),
             // conj(x): use n (no_conjugate) or c (conjugate).
@@ -146,7 +146,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         bli_zdotv_zen_int_avx512_nonUnitPositiveStrides,
-        zdotvUkrTest,
+        zdotvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zdotv_zen_int_avx512),
             // conj(x): uses n (no_conjugate) since it is real.
@@ -185,7 +185,7 @@ INSTANTIATE_TEST_SUITE_P(
 */
 INSTANTIATE_TEST_SUITE_P(
         bli_zdotv_zen4_asm_avx512_unitStride,
-        zdotvUkrTest,
+        zdotvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zdotv_zen4_asm_avx512),
             // conj(x): use n (no_conjugate) or c (conjugate).
@@ -228,7 +228,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         bli_zdotv_zen4_asm_avx512_nonUnitPositiveStrides,
-        zdotvUkrTest,
+        zdotvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zdotv_zen4_asm_avx512),
             // conj(x): uses n (no_conjugate) since it is real.

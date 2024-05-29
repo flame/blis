@@ -35,16 +35,16 @@
 #include <gtest/gtest.h>
 #include "test_scalv.h"
 
-class zdscalvGenericTest :
+class zdscalvGeneric :
         public ::testing::TestWithParam<std::tuple<char,        // conj_alpha
                                                    gtint_t,     // n
                                                    gtint_t,     // incx
                                                    double>> {}; // alpha
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zdscalvGenericTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zdscalvGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( zdscalvGenericTest, RandomData )
+TEST_P( zdscalvGeneric, API )
 {
     using T = dcomplex;
     using U = double;
@@ -86,7 +86,7 @@ TEST_P( zdscalvGenericTest, RandomData )
 // Tests with unit-positive increment.
 INSTANTIATE_TEST_SUITE_P(
         unitPositiveIncrement,
-        zdscalvGenericTest,
+        zdscalvGeneric,
         ::testing::Combine(
             // conj(alpha): uses n (no_conjugate) since it is real.
             ::testing::Values('n'
@@ -112,7 +112,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Tests for non-unit increments.
 INSTANTIATE_TEST_SUITE_P(
         nonUnitPositiveIncrement,
-        zdscalvGenericTest,
+        zdscalvGeneric,
         ::testing::Combine(
             // conj(alpha): uses n (no_conjugate) since it is real.
             ::testing::Values('n'

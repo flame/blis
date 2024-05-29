@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_syrk.h"
 
-class zsyrkTest :
+class zsyrkGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -46,7 +46,7 @@ class zsyrkTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P(zsyrkTest, RandomData)
+TEST_P( zsyrkGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -96,7 +96,7 @@ TEST_P(zsyrkTest, RandomData)
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        zsyrkTest,
+        zsyrkGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_ger.h"
 
-class zgerGenericTest :
+class zgerGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -46,7 +46,7 @@ class zgerGenericTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P(zgerGenericTest, RandomData)
+TEST_P( zgerGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -92,7 +92,7 @@ TEST_P(zgerGenericTest, RandomData)
 
 INSTANTIATE_TEST_SUITE_P(
         unitPositiveIncrement,
-        zgerGenericTest,
+        zgerGeneric,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
@@ -127,7 +127,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         conjXY,
-        zgerGenericTest,
+        zgerGeneric,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
@@ -159,7 +159,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         nonUnitPositiveIncrements,
-        zgerGenericTest,
+        zgerGeneric,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
@@ -193,7 +193,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifndef TEST_BLIS_TYPED
 INSTANTIATE_TEST_SUITE_P(
         negativeIncrements,
-        zgerGenericTest,
+        zgerGeneric,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
@@ -225,7 +225,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         scalarCombinations,
-        zgerGenericTest,
+        zgerGeneric,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
@@ -255,7 +255,7 @@ INSTANTIATE_TEST_SUITE_P(
     );
 INSTANTIATE_TEST_SUITE_P(
         largeSize,
-        zgerGenericTest,
+        zgerGeneric,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
@@ -285,7 +285,7 @@ INSTANTIATE_TEST_SUITE_P(
     );
 INSTANTIATE_TEST_SUITE_P(
         strideGreaterThanSize,
-        zgerGenericTest,
+        zgerGeneric,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'

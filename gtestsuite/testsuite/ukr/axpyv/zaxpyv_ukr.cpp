@@ -36,7 +36,7 @@
 #include <gtest/gtest.h>
 #include "test_axpyv_ukr.h"
 
-class zaxpyvUkr :
+class zaxpyvGeneric :
         public ::testing::TestWithParam<std::tuple<zaxpyv_ker_ft,   // Function pointer type for zaxpyv kernels
                                                    char,            // conjx
                                                    gtint_t,         // n
@@ -45,10 +45,10 @@ class zaxpyvUkr :
                                                    dcomplex,        // alpha
                                                    bool>> {};       // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zaxpyvUkr);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zaxpyvGeneric);
 
-// Tests using random integers as vector elements.
-TEST_P( zaxpyvUkr, AccuracyCheck )
+// Defining the testsuite to check the accuracy of zaxpyv micro-kernels
+TEST_P( zaxpyvGeneric, UKR )
 {
     using T = dcomplex;
 
@@ -108,7 +108,7 @@ TEST_P( zaxpyvUkr, AccuracyCheck )
 // Unit testing with unit strides, across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyv_zen_int5_unitStrides,
-        zaxpyvUkr,
+        zaxpyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zaxpyv_zen_int5),                     // kernel address
             ::testing::Values('n'
@@ -143,7 +143,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing for non unit strides
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyv_zen_int5_nonUnitStrides,
-        zaxpyvUkr,
+        zaxpyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zaxpyv_zen_int5),                     // kernel address
             ::testing::Values('n'
@@ -181,7 +181,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with unit strides, across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyv_zen_int_avx512_unitStrides,
-        zaxpyvUkr,
+        zaxpyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zaxpyv_zen_int_avx512),               // kernel address
             ::testing::Values('n'
@@ -215,7 +215,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing for non unit strides
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyv_zen_int_avx512_nonUnitStrides,
-        zaxpyvUkr,
+        zaxpyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zaxpyv_zen_int_avx512),               // kernel address
             ::testing::Values('n'

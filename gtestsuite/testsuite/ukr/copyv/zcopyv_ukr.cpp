@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_copyv_ukr.h"
 
-class zcopyvUkrTest :
+class zcopyvGeneric :
         public ::testing::TestWithParam<std::tuple<zcopyv_ker_ft,   // Function pointer type for zcopyv kernels
                                                    char,            // conjx
                                                    gtint_t,         // n
@@ -43,10 +43,10 @@ class zcopyvUkrTest :
                                                    gtint_t,         // incy
                                                    bool>> {};       // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zcopyvUkrTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zcopyvGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( zcopyvUkrTest, AccuracyCheck )
+TEST_P( zcopyvGeneric, UKR )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -87,7 +87,7 @@ TEST_P( zcopyvUkrTest, AccuracyCheck )
 // Unit testing with Unit Strides(US), across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_zcopyv_zen_int_unitStrides,
-        zcopyvUkrTest,
+        zcopyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zcopyv_zen_int),
             ::testing::Values('n'                                           // n: use x, c: use conj(x)
@@ -117,7 +117,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with Non-Unit Strides(US), across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_zcopyv_zen_int_nonUnitStrides,
-        zcopyvUkrTest,
+        zcopyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zcopyv_zen_int),
             ::testing::Values('n'                                           // n: use x, c: use conj(x)
@@ -152,7 +152,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with Unit Strides(US), across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_zcopyv_zen4_asm_avx512_unitStrides,
-        zcopyvUkrTest,
+        zcopyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zcopyv_zen4_asm_avx512),
             ::testing::Values('n'                                           // n: use x, c: use conj(x)
@@ -186,7 +186,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with Non-Unit Strides(US), across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_zcopyv_zen4_asm_avx512_nonUnitStrides,
-        zcopyvUkrTest,
+        zcopyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zcopyv_zen4_asm_avx512),
             ::testing::Values('n'                                           // n: use x, c: use conj(x)

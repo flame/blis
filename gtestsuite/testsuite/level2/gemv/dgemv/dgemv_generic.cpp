@@ -50,7 +50,7 @@ class dgemvGeneric :
                                                    gtint_t,     // lda_inc
                                                    bool>> {};   // is_memory_test
 
-TEST_P(dgemvGeneric, FunctionalTest)
+TEST_P( dgemvGeneric, API )
 {
     //----------------------------------------------------------
     // Initialize values from the parameters passed through

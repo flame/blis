@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_trmm3.h"
 
-class ctrmm3Test :
+class ctrmm3Generic :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -50,9 +50,9 @@ class ctrmm3Test :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ctrmm3Test);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ctrmm3Generic);
 
-TEST_P(ctrmm3Test, RandomData)
+TEST_P( ctrmm3Generic, API )
 {
     using T = scomplex;
     //----------------------------------------------------------
@@ -114,7 +114,7 @@ TEST_P(ctrmm3Test, RandomData)
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        ctrmm3Test,
+        ctrmm3Generic,
         ::testing::Combine(
             ::testing::Values('c','r'),                                      // storage format
             ::testing::Values('l','r'),                                      // side  l:left, r:right

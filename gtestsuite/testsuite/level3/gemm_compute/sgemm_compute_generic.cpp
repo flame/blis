@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_gemm_compute.h"
 
-class SGemmComputeTest :
+class sgemmComputeGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -50,7 +50,7 @@ class SGemmComputeTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P(SGemmComputeTest, RandomData)
+TEST_P( sgemmComputeGeneric, API )
 {
 //     printf("SGemmCompute_test!!\n");
     using T = float;
@@ -108,7 +108,7 @@ TEST_P(SGemmComputeTest, RandomData)
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        SGemmComputeTest,
+        sgemmComputeGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -133,7 +133,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         TinySizes,
-        SGemmComputeTest,
+        sgemmComputeGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -158,7 +158,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         DimensionsGtBlocksizes,                                  // Dimensions > SUP Blocksizes
-        SGemmComputeTest,
+        sgemmComputeGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

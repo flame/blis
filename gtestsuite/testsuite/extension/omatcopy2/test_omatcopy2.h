@@ -172,7 +172,7 @@ public:
         str_name += "_stridea" + std::to_string(stridea);
         str_name += "_ldb" + std::to_string(ldb);
         str_name += "_strideb" + std::to_string(strideb);
-        str_name += ( is_memory_test )? "_mem_test_enabled" : "_mem_test_disabled";
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
 
         return str_name;
     }

@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_scalv.h"
 
-class dscalvGenericTest :
+class dscalvGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    gtint_t,
                                                    gtint_t,
@@ -43,7 +43,7 @@ class dscalvGenericTest :
 
 
 // Tests using random integers as vector elements.
-TEST_P( dscalvGenericTest, RandomData )
+TEST_P( dscalvGeneric, API )
 {
     using T = double;
     //----------------------------------------------------------
@@ -80,7 +80,7 @@ TEST_P( dscalvGenericTest, RandomData )
 // Black box testing for generic use of dscal.
 INSTANTIATE_TEST_SUITE_P(
         unitPositiveIncrement,
-        dscalvGenericTest,
+        dscalvGeneric,
         ::testing::Combine(
             // conj(alpha): uses n (no_conjugate) since it is real.
             ::testing::Values('n'),
@@ -102,7 +102,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         nonUnitPositiveIncrement,
-        dscalvGenericTest,
+        dscalvGeneric,
         ::testing::Combine(
             // conj(alpha): uses n (no_conjugate) since it is real.
             ::testing::Values('n'),
@@ -129,7 +129,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         conjalpha,
-        dscalvGenericTest,
+        dscalvGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // c: use conjugate
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector takes values from 10 to 100 with step size of 10.
@@ -143,7 +143,7 @@ INSTANTIATE_TEST_SUITE_P(
 #if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
 INSTANTIATE_TEST_SUITE_P(
         AOCLDynamic,
-        dscalvGenericTest,
+        dscalvGeneric,
         ::testing::Combine(
             // conj(alpha): uses n (no_conjugate) since it is real.
             ::testing::Values('n'),

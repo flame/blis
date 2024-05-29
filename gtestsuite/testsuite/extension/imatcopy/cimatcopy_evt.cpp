@@ -49,7 +49,7 @@ class cimatcopyEVT :
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(cimatcopyEVT);
 
 // Tests using random numbers as vector elements.
-TEST_P( cimatcopyEVT, NanInfCheck )
+TEST_P( cimatcopyEVT, API )
 {
     using T = scomplex;
     //----------------------------------------------------------

@@ -35,10 +35,10 @@
 #include <gtest/gtest.h>
 #include "test_asumv.h"
 
-class dasumvGenericTest :
+class dasumvGeneric :
         public ::testing::TestWithParam<std::tuple<gtint_t, gtint_t>> {};
 
-TEST_P( dasumvGenericTest, RandomData )
+TEST_P( dasumvGeneric, API )
 {
     using T = double;
     //----------------------------------------------------------
@@ -68,7 +68,7 @@ TEST_P( dasumvGenericTest, RandomData )
 
 INSTANTIATE_TEST_SUITE_P(
         unitPositiveIncrement,
-        dasumvGenericTest,
+        dasumvGeneric,
         ::testing::Combine(
             // m: size of vector.
             ::testing::Values(
@@ -94,7 +94,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         nonUnitPositiveIncrement,
-        dasumvGenericTest,
+        dasumvGeneric,
         ::testing::Combine(
             // m: size of vector.
             ::testing::Values(
@@ -124,7 +124,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifndef TEST_BLIS_TYPED
 INSTANTIATE_TEST_SUITE_P(
         negativeIncrement,
-        dasumvGenericTest,
+        dasumvGeneric,
         ::testing::Combine(
             // m: size of vector.
             ::testing::Values(

@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_her.h"
 
-class cherTest :
+class cherGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -44,7 +44,7 @@ class cherTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P(cherTest, RandomData) 
+TEST_P( cherGeneric, API ) 
 {
     using T = scomplex;
     //----------------------------------------------------------
@@ -88,7 +88,7 @@ TEST_P(cherTest, RandomData)
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        cherTest,
+        cherGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS

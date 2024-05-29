@@ -35,14 +35,14 @@
 #include <gtest/gtest.h>
 #include "test_axpyv.h"
 
-class caxpyvGenericTest :
+class caxpyvGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    gtint_t,
                                                    gtint_t,
                                                    gtint_t,
                                                    scomplex>> {};
 // Tests using random integers as vector elements.
-TEST_P( caxpyvGenericTest, RandomData )
+TEST_P( caxpyvGeneric, API )
 {
     using T = scomplex;
     //----------------------------------------------------------
@@ -84,7 +84,7 @@ TEST_P( caxpyvGenericTest, RandomData )
 // Black box testing for generic and main use of caxpy.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        caxpyvGenericTest,
+        caxpyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'
 #ifdef TEST_BLIS_TYPED
@@ -104,7 +104,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NonUnitPositiveIncrements,
-        caxpyvGenericTest,
+        caxpyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'
 #ifdef TEST_BLIS_TYPED
@@ -125,7 +125,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NegativeIncrements,
-        caxpyvGenericTest,
+        caxpyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, c: use conj(x)
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.

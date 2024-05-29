@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_imatcopy.h"
 
-class dimatcopyAPI :
+class dimatcopyGeneric :
         public ::testing::TestWithParam<std::tuple<char,        // storage
                                                    char,        // trans
                                                    gtint_t,     // m
@@ -45,10 +45,10 @@ class dimatcopyAPI :
                                                    gtint_t,     // lda_out_inc
                                                    bool>> {};   // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dimatcopyAPI);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dimatcopyGeneric);
 
 // Tests using random numbers as vector elements.
-TEST_P( dimatcopyAPI, FunctionalTest )
+TEST_P( dimatcopyGeneric, API )
 {
     using T = double;
     //----------------------------------------------------------
@@ -87,7 +87,7 @@ TEST_P( dimatcopyAPI, FunctionalTest )
 // Black box testing for generic and main use of dimatcopy.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        dimatcopyAPI,
+        dimatcopyGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format(currently only for BLAS testing)
             ::testing::Values('n', 't', 'r', 'c'),                           // trans(and/or conj) value

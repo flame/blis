@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "level3/trsm/test_trsm.h"
 
-class dtrsmTest :
+class dtrsmGeneric :
         public ::testing::TestWithParam<std::tuple<char,          // storage format
                                                    char,          // side
                                                    char,          // uplo
@@ -47,7 +47,7 @@ class dtrsmTest :
                                                    gtint_t,       // lda_inc
                                                    gtint_t>> {};  // ldb_inc
 
-TEST_P(dtrsmTest, Accuracy_test)
+TEST_P( dtrsmGeneric, API )
 {
     using T = double;
     //----------------------------------------------------------
@@ -102,7 +102,7 @@ TEST_P(dtrsmTest, Accuracy_test)
  */
 INSTANTIATE_TEST_SUITE_P(
         Native,
-        dtrsmTest,
+        dtrsmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -129,7 +129,7 @@ INSTANTIATE_TEST_SUITE_P(
  */
 INSTANTIATE_TEST_SUITE_P(
         Small_AVX2_fringe,
-        dtrsmTest,
+        dtrsmGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format
             ::testing::Values('l','r'),                                      // side  l:left, r:right
@@ -151,7 +151,7 @@ INSTANTIATE_TEST_SUITE_P(
  */
 INSTANTIATE_TEST_SUITE_P(
         Small_AVX2,
-        dtrsmTest,
+        dtrsmGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format
             ::testing::Values('l','r'),                                      // side  l:left, r:right
@@ -175,7 +175,7 @@ INSTANTIATE_TEST_SUITE_P(
  */
 INSTANTIATE_TEST_SUITE_P(
         Small_AVX512_fringe,
-        dtrsmTest,
+        dtrsmGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format
             ::testing::Values('l','r'),                                      // side  l:left, r:right
@@ -197,7 +197,7 @@ INSTANTIATE_TEST_SUITE_P(
  */
 INSTANTIATE_TEST_SUITE_P(
         Small_AVX512,
-        dtrsmTest,
+        dtrsmGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format
             ::testing::Values('l','r'),                                      // side  l:left, r:right
@@ -223,7 +223,7 @@ INSTANTIATE_TEST_SUITE_P(
  */
 INSTANTIATE_TEST_SUITE_P(
         Alpha,
-        dtrsmTest,
+        dtrsmGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format
             ::testing::Values('l','r'),                                      // side  l:left, r:right

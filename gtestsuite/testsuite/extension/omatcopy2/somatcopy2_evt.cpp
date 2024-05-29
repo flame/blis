@@ -51,7 +51,7 @@ class somatcopy2EVT :
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(somatcopy2EVT);
 
 // Tests using random numbers as vector elements.
-TEST_P( somatcopy2EVT, NanInfCheck )
+TEST_P( somatcopy2EVT, API )
 {
     using T = float;
     //----------------------------------------------------------

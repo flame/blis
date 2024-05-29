@@ -35,16 +35,16 @@
 #include <gtest/gtest.h>
 #include "test_amaxv_ukr.h"
 
-class damaxvUkr :
+class damaxvGeneric :
         public ::testing::TestWithParam<std::tuple<damaxv_ker_ft,   // Function pointer type for damaxv kernels
                                                    gtint_t,         // n
                                                    gtint_t,         // incx
                                                    bool>> {};       // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(damaxvUkr);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(damaxvGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( damaxvUkr, AccuracyCheck )
+TEST_P( damaxvGeneric, UKR )
 {
     using T = double;
 
@@ -100,7 +100,7 @@ TEST_P( damaxvUkr, AccuracyCheck )
 // Unit testing with unit strides, across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_damaxv_zen_int_unitStrides,
-        damaxvUkr,
+        damaxvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_damaxv_zen_int),   // kernel address
             ::testing::Values(gtint_t(48),           // for size n, L48
@@ -122,7 +122,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with non-unit strides.
 INSTANTIATE_TEST_SUITE_P(
         bli_damaxv_zen_int_nonUnitStrides,
-        damaxvUkr,
+        damaxvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_damaxv_zen_int),   // kernel address
             ::testing::Values(gtint_t(10),           // n, size of the vector
@@ -149,7 +149,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with unit strides, across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_damaxv_zen_int_avx512_unitStrides,
-        damaxvUkr,
+        damaxvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_damaxv_zen_int_avx512),   // kernel address
             ::testing::Values(gtint_t(32),                  // for size n, L32
@@ -169,7 +169,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with non-unit strides.
 INSTANTIATE_TEST_SUITE_P(
         bli_damaxv_zen_int_avx512_nonUnitStrides,
-        damaxvUkr,
+        damaxvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_damaxv_zen_int_avx512),   // kernel address
             ::testing::Values(gtint_t(10),                  // n, size of the vector

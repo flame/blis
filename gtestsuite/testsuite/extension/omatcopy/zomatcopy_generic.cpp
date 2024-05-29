@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_omatcopy.h"
 
-class zomatcopyAPI :
+class zomatcopyGeneric :
         public ::testing::TestWithParam<std::tuple<char,        // storage
                                                    char,        // trans
                                                    gtint_t,     // m
@@ -45,10 +45,10 @@ class zomatcopyAPI :
                                                    gtint_t,     // ldb_inc
                                                    bool>> {};   // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zomatcopyAPI);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zomatcopyGeneric);
 
 // Tests using random numbers as vector elements.
-TEST_P( zomatcopyAPI, FunctionalTest )
+TEST_P( zomatcopyGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -87,7 +87,7 @@ TEST_P( zomatcopyAPI, FunctionalTest )
 // Black box testing for generic and main use of zomatcopy.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        zomatcopyAPI,
+        zomatcopyGeneric,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format(currently only for BLAS testing)
             ::testing::Values('n', 't', 'r', 'c'),                           // trans(and/or conj) value

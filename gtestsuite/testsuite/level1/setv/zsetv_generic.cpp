@@ -35,12 +35,12 @@
 #include <gtest/gtest.h>
 #include "test_setv.h"
 
-class zsetvGenericTest :
+class zsetvGeneric :
         public ::testing::TestWithParam<std::tuple<char, gtint_t, gtint_t>> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zsetvGenericTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zsetvGeneric);
 
-TEST_P( zsetvGenericTest, RandomData )
+TEST_P( zsetvGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -65,7 +65,7 @@ TEST_P( zsetvGenericTest, RandomData )
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        zsetvGenericTest,
+        zsetvGeneric,
         ::testing::Combine(
             ::testing::Values('n','c'),                                      // n: not transpose for x, c: conjugate for x
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.

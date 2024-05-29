@@ -46,7 +46,7 @@
 // The function is templatized based on the datatype and function-pointer type to the kernel.
 template<typename T, typename FT>
 static void test_gemmnat_ukr(
-    char storage, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, FT ukr_fp, bool is_memory_test = false )
+    char storage, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, FT ukr_fp, double thresh, bool is_memory_test = false )
 {
     // In case of memory test:
     // Allocate packed buffer size for Matrix A, B native kernel works on packed buffer
@@ -155,7 +155,7 @@ static void test_gemmnat_ukr(
                 &data,
                 NULL
             );
-        if(is_memory_test)
+        if ( is_memory_test )
         {
             // set pointers to second buffer
             buf_a    = (T*)buf_a_ptrs.greenzone_2;
@@ -215,19 +215,6 @@ static void test_gemmnat_ukr(
         // since A is col-storage, A' will be row-storage
     }
 
-    // Set the threshold for the errors:
-    // Check gtestsuite gemm.h or netlib source code for reminder of the
-    // functionality from which we estimate operation count per element
-    // of output, and hence the multipler for epsilon.
-    double thresh;
-    if (m == 0 || n == 0)
-        thresh = 0.0;
-    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
-              beta == testinghelpers::ONE<T>()))
-        thresh = 0.0;
-    else
-        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
-
     // call reference implementation
     testinghelpers::ref_gemm<T>( storage, transa, transb, m, n, k, alpha,
                                 buf_a, lda, buf_b, ldb, beta, (T*)buf_cref, ldc);
@@ -239,7 +226,7 @@ static void test_gemmnat_ukr(
 
 // The function is templatized based on the datatype and function-pointer type to the kernel.
 template<typename T, typename FT>
-static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char storage, T alpha, T beta, bool memory_test  = false )
+static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char storage, T alpha, T beta, double thresh, bool is_memory_test  = false )
 {
     // Compute the leading dimensions of a, b, and c.
     //char storage = storageC;
@@ -254,9 +241,9 @@ static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char st
     gtint_t sizeb =  testinghelpers::matsize( storage, 'n', k, n, ldb ) * sizeof(T);
     gtint_t sizec =  testinghelpers::matsize( storage, 'n', m, n, ldc ) * sizeof(T);
 
-    testinghelpers::ProtectedBuffer mat_a(sizea, false, memory_test);
-    testinghelpers::ProtectedBuffer mat_b(sizeb, false, memory_test);
-    testinghelpers::ProtectedBuffer mat_c(sizec, false, memory_test);
+    testinghelpers::ProtectedBuffer mat_a(sizea, false, is_memory_test);
+    testinghelpers::ProtectedBuffer mat_b(sizeb, false, is_memory_test);
+    testinghelpers::ProtectedBuffer mat_c(sizec, false, is_memory_test);
     testinghelpers::ProtectedBuffer mat_cref(sizec, false, false);
 
     T *buf_a = (T*)mat_a.greenzone_1;
@@ -302,7 +289,7 @@ static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char st
             ldc
             );
 
-        if(memory_test == true)
+        if ( is_memory_test )
         {
             // set pointers to second buffer
             buf_a    = (T*)mat_a.greenzone_2;
@@ -350,19 +337,6 @@ static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char st
     // reset to default signal handler
     testinghelpers::ProtectedBuffer::stop_signal_handler();
 
-    // Set the threshold for the errors:
-    // Check gtestsuite gemm.h or netlib source code for reminder of the
-    // functionality from which we estimate operation count per element
-    // of output, and hence the multipler for epsilon.
-    double thresh;
-    if (m == 0 || n == 0)
-        thresh = 0.0;
-    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
-              beta == testinghelpers::ONE<T>()))
-        thresh = 0.0;
-    else
-        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
-
     // call reference implementation
     testinghelpers::ref_gemm<T>( storage, 'n', 'n', m, n, k, alpha,
                                  buf_a, lda, buf_b, ldb, beta, buf_cref, ldc);
@@ -372,7 +346,8 @@ static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char st
 }
 
 template<typename T, typename FT>
-static void test_gemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, char storageC, gtint_t MR, bool row_pref, bool memory_test = false)
+static void test_gemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta,
+                              char storageC, gtint_t MR, bool row_pref, double thresh, bool is_memory_test = false)
 {
     // Compute the leading dimensions of a, b, and c.
     char storage = storageC;
@@ -387,9 +362,9 @@ static void test_gemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtin
     gtint_t sizeb =  testinghelpers::matsize( storage, trnsb, k, n, ldb ) * sizeof(T);
     gtint_t sizec =  testinghelpers::matsize( storage, 'n', m, n, ldc ) * sizeof(T);
 
-    testinghelpers::ProtectedBuffer mat_a(sizea, false, memory_test);
-    testinghelpers::ProtectedBuffer mat_b(sizeb, false, memory_test);
-    testinghelpers::ProtectedBuffer mat_c(sizec, false, memory_test);
+    testinghelpers::ProtectedBuffer mat_a(sizea, false, is_memory_test);
+    testinghelpers::ProtectedBuffer mat_b(sizeb, false, is_memory_test);
+    testinghelpers::ProtectedBuffer mat_c(sizec, false, is_memory_test);
     testinghelpers::ProtectedBuffer mat_cref(sizec, false, false);
 
     T *buf_a = (T*)mat_a.greenzone_1;
@@ -526,7 +501,7 @@ static void test_gemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtin
             );
         }
 
-        if(memory_test)
+        if ( is_memory_test )
         {
             // set pointers to second buffer
             buf_a    = (T*)mat_a.greenzone_2;
@@ -593,19 +568,6 @@ static void test_gemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtin
     }
     // reset to default signal handler
     testinghelpers::ProtectedBuffer::stop_signal_handler();
-
-    // Set the threshold for the errors:
-    // Check gtestsuite gemm.h or netlib source code for reminder of the
-    // functionality from which we estimate operation count per element
-    // of output, and hence the multipler for epsilon.
-    double thresh;
-    if (m == 0 || n == 0)
-        thresh = 0.0;
-    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
-              beta == testinghelpers::ONE<T>()))
-        thresh = 0.0;
-    else
-        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
 
     // call reference implementation
     testinghelpers::ref_gemm<T>( storage, trnsa, trnsb, m, n, k, alpha,

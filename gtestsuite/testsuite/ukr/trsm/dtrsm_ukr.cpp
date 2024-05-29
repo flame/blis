@@ -38,8 +38,7 @@
 #include "test_trsm_ukr.h"
 #include "level3/trsm/test_trsm.h"
 
-
-class DTRSMUkrTest :
+class dtrsmGenericNat :
     public ::testing::TestWithParam<std::tuple< dgemmtrsm_ukr_ft,  // Function pointer type for dtrsm kernels
                                                 char,              // storage
                                                 char,              // uploa
@@ -48,10 +47,10 @@ class DTRSMUkrTest :
                                                 gtint_t,           // n
                                                 gtint_t,           // k
                                                 double,            // alpha
-                                                gtint_t,           // ldc_inc_inc
+                                                gtint_t,           // ldc_inc
                                                 bool      >> {};   // is_memory_test
 
-class DTRSMSmallUkrTest :
+class dtrsmGenericSmall :
     public ::testing::TestWithParam<std::tuple< trsm_small_ker_ft,  // Function pointer type for dtrsm kernels
                                                 char,               // side
                                                 char,               // uploa
@@ -64,12 +63,12 @@ class DTRSMSmallUkrTest :
                                                 gtint_t,            // ldb_inc
                                                 bool      >> {};    // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DTRSMUkrTest);
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DTRSMSmallUkrTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dtrsmGenericNat);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dtrsmGenericSmall);
 
-TEST_P(DTRSMUkrTest, native_kernel)
+TEST_P( dtrsmGenericNat, native_kernel)
 {
-    using   T = double;
+    using T = double;
     dgemmtrsm_ukr_ft ukr_fp = std::get<0>(GetParam());
     char storage            = std::get<1>(GetParam());
     char uploa              = std::get<2>(GetParam());
@@ -94,9 +93,9 @@ TEST_P(DTRSMUkrTest, native_kernel)
     test_trsm_ukr<T, dgemmtrsm_ukr_ft>( ukr_fp, storage, uploa, diaga, m, n, k, alpha, ldc, thresh, is_memory_test );
 }
 
-TEST_P(DTRSMSmallUkrTest, small_kernel)
+TEST_P( dtrsmGenericSmall, small_kernel)
 {
-    using   T = double;
+    using T = double;
     trsm_small_ker_ft ukr_fp  = std::get<0>(GetParam());
     char side                 = std::get<1>(GetParam());
     char uploa                = std::get<2>(GetParam());
@@ -125,7 +124,7 @@ TEST_P(DTRSMSmallUkrTest, small_kernel)
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 INSTANTIATE_TEST_SUITE_P (
     bli_dgemmtrsm_l_zen4_asm_8x24,
-    DTRSMUkrTest,
+    dtrsmGenericNat,
     ::testing::Combine(
         ::testing::Values(bli_dgemmtrsm_l_zen4_asm_8x24),  // ker_ptr
         ::testing::Values('c', 'r', 'g'),                  // stor
@@ -143,7 +142,7 @@ INSTANTIATE_TEST_SUITE_P (
 
 INSTANTIATE_TEST_SUITE_P (
     bli_dgemmtrsm_u_zen4_asm_8x24,
-    DTRSMUkrTest,
+    dtrsmGenericNat,
     ::testing::Combine(
         ::testing::Values(bli_dgemmtrsm_u_zen4_asm_8x24),  // ker_ptr
         ::testing::Values('c', 'r', 'g'),                  // stor
@@ -161,7 +160,7 @@ INSTANTIATE_TEST_SUITE_P (
 
 INSTANTIATE_TEST_SUITE_P (
     bli_trsm_small_AVX512,
-    DTRSMSmallUkrTest,
+    dtrsmGenericSmall,
     ::testing::Combine(
         ::testing::Values(bli_trsm_small_AVX512),     // ker_ptr
         ::testing::Values('l', 'r'),                  // side
@@ -183,7 +182,7 @@ INSTANTIATE_TEST_SUITE_P (
 #if defined(BLIS_KERNELS_HASWELL) && defined(GTEST_AVX2FMA3)
 INSTANTIATE_TEST_SUITE_P (
     bli_dgemmtrsm_l_haswell_asm_6x8,
-    DTRSMUkrTest,
+    dtrsmGenericNat,
     ::testing::Combine(
         ::testing::Values(bli_dgemmtrsm_l_haswell_asm_6x8), // ker_ptr
         ::testing::Values('c', 'r', 'g'),                   // stor
@@ -201,7 +200,7 @@ INSTANTIATE_TEST_SUITE_P (
 
 INSTANTIATE_TEST_SUITE_P (
     bli_dgemmtrsm_u_haswell_asm_6x8,
-    DTRSMUkrTest,
+    dtrsmGenericNat,
     ::testing::Combine(
         ::testing::Values(bli_dgemmtrsm_u_haswell_asm_6x8), // ker_ptr
         ::testing::Values('c', 'r', 'g'),                   // stor
@@ -221,7 +220,7 @@ INSTANTIATE_TEST_SUITE_P (
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 INSTANTIATE_TEST_SUITE_P (
     bli_trsm_small,
-    DTRSMSmallUkrTest,
+    dtrsmGenericSmall,
     ::testing::Combine(
         ::testing::Values(bli_trsm_small),            // ker_ptr
         ::testing::Values('l', 'r'),                  // side

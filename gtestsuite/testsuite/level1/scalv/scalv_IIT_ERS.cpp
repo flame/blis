@@ -39,7 +39,7 @@
 #include "inc/check_error.h"
 
 template <typename T>
-class scalv_IIT_ERS_Test : public ::testing::Test {};
+class scalv_IIT_ERS : public ::testing::Test {};
 typedef ::testing::Types<
                     // std::pair<type, real_type>
                     std::pair<   float,    float>,
@@ -49,7 +49,7 @@ typedef ::testing::Types<
                     std::pair<scomplex,    float>,
                     std::pair<dcomplex,   double>
                     > TypeParam;
-TYPED_TEST_SUITE(scalv_IIT_ERS_Test, TypeParam);
+TYPED_TEST_SUITE(scalv_IIT_ERS, TypeParam);
 
 using namespace testinghelpers::IIT;
 
@@ -65,7 +65,7 @@ using namespace testinghelpers::IIT;
 */
 
 // n < 0, with non-unit stride
-TYPED_TEST(scalv_IIT_ERS_Test, n_lt_zero_nonUnitStride)
+TYPED_TEST(scalv_IIT_ERS, n_lt_zero_nonUnitStride)
 {
     using  T = typename TypeParam::first_type;
     using RT = typename TypeParam::second_type;
@@ -88,7 +88,7 @@ TYPED_TEST(scalv_IIT_ERS_Test, n_lt_zero_nonUnitStride)
 }
 
 // n == 0, with non-unit stride
-TYPED_TEST(scalv_IIT_ERS_Test, n_eq_zero_nonUnitStride)
+TYPED_TEST(scalv_IIT_ERS, n_eq_zero_nonUnitStride)
 {
     using  T = typename TypeParam::first_type;
     using RT = typename TypeParam::second_type;
@@ -111,7 +111,7 @@ TYPED_TEST(scalv_IIT_ERS_Test, n_eq_zero_nonUnitStride)
 }
 
 // n < 0, with unit stride
-TYPED_TEST(scalv_IIT_ERS_Test, n_lt_zero_unitStride)
+TYPED_TEST(scalv_IIT_ERS, n_lt_zero_unitStride)
 {
     using  T = typename TypeParam::first_type;
     using RT = typename TypeParam::second_type;
@@ -134,7 +134,7 @@ TYPED_TEST(scalv_IIT_ERS_Test, n_lt_zero_unitStride)
 }
 
 // n == 0, with unit stride
-TYPED_TEST(scalv_IIT_ERS_Test, n_eq_zero_unitStride)
+TYPED_TEST(scalv_IIT_ERS, n_eq_zero_unitStride)
 {
     using  T = typename TypeParam::first_type;
     using RT = typename TypeParam::second_type;
@@ -157,7 +157,7 @@ TYPED_TEST(scalv_IIT_ERS_Test, n_eq_zero_unitStride)
 }
 
 // inc < 0
-TYPED_TEST(scalv_IIT_ERS_Test, inc_lt_0)
+TYPED_TEST(scalv_IIT_ERS, inc_lt_0)
 {
     using  T = typename TypeParam::first_type;
     using RT = typename TypeParam::second_type;
@@ -179,7 +179,7 @@ TYPED_TEST(scalv_IIT_ERS_Test, inc_lt_0)
 }
 
 // inc == 0
-TYPED_TEST(scalv_IIT_ERS_Test, inc_eq_0)
+TYPED_TEST(scalv_IIT_ERS, inc_eq_0)
 {
     using  T = typename TypeParam::first_type;
     using RT = typename TypeParam::second_type;
@@ -201,7 +201,7 @@ TYPED_TEST(scalv_IIT_ERS_Test, inc_eq_0)
 }
 
 // alpha == 1, with non-unit stride
-TYPED_TEST(scalv_IIT_ERS_Test, alpha_eq_one_nonUnitStride)
+TYPED_TEST(scalv_IIT_ERS, alpha_eq_one_nonUnitStride)
 {
     using  T = typename TypeParam::first_type;
     using RT = typename TypeParam::second_type;
@@ -222,7 +222,7 @@ TYPED_TEST(scalv_IIT_ERS_Test, alpha_eq_one_nonUnitStride)
 }
 
 // alpha == 1, with unit stride
-TYPED_TEST(scalv_IIT_ERS_Test, alpha_eq_one_unitStride)
+TYPED_TEST(scalv_IIT_ERS, alpha_eq_one_unitStride)
 {
     using  T = typename TypeParam::first_type;
     using RT = typename TypeParam::second_type;

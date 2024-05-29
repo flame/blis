@@ -38,7 +38,7 @@
 using T = double;
 using FT = dsetv_ker_ft;
 
-class dsetvUkr :
+class dsetvGeneric :
         public ::testing::TestWithParam<std::tuple<FT,              // Function pointer type for dsetv kernels
                                                    char,            // conjalpha
                                                    T,               // alpha
@@ -46,10 +46,10 @@ class dsetvUkr :
                                                    gtint_t,         // incx
                                                    bool>> {};       // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dsetvUkr);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dsetvGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( dsetvUkr, AccuracyCheck )
+TEST_P( dsetvGeneric, UKR )
 {
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -90,7 +90,7 @@ TEST_P( dsetvUkr, AccuracyCheck )
 // Unit testing with Unit Strides(US), across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_dsetv_zen_int_unitStrides,
-        dsetvUkr,
+        dsetvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_dsetv_zen_int),
             ::testing::Values('n', 'c'),              // conjalpha
@@ -124,7 +124,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with Non-Unit Strides(US), across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_dsetv_zen_int_nonUnitStrides,
-        dsetvUkr,
+        dsetvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_dsetv_zen_int),
             ::testing::Values('n', 'c'),                 // conjalpha
@@ -156,7 +156,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with Unit Strides(US), across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_dsetv_zen_int_avx512_unitStrides,
-        dsetvUkr,
+        dsetvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_dsetv_zen_int_avx512),
             ::testing::Values('n', 'c'),              // conjalpha
@@ -196,7 +196,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Unit testing with Non-Unit Strides(US), across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_dsetv_zen_int_avx512_nonUnitStrides,
-        dsetvUkr,
+        dsetvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_dsetv_zen_int_avx512),
             ::testing::Values('n', 'c'),                 // conjalpha

@@ -42,7 +42,7 @@ class zaxpyvGeneric :
                                                    gtint_t,         // incy
                                                    dcomplex>> {};   // alpha
 // Tests using random integers as vector elements.
-TEST_P( zaxpyvGeneric, FunctionalTest )
+TEST_P( zaxpyvGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------

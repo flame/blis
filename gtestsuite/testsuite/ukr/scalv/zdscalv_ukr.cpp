@@ -35,17 +35,18 @@
 #include <gtest/gtest.h>
 #include "test_scalv_ukr.h"
 
-class zdscalvUkrTest :
+class zdscalvGeneric :
         public ::testing::TestWithParam<std::tuple<zscalv_ker_ft,   // Function pointer for zdscalv kernels
                                                    char,            // conj_alpha
                                                    gtint_t,         // n
                                                    gtint_t,         // incx
                                                    dcomplex,        // alpha
                                                    bool>> {};       // is_memory_test
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zdscalvUkrTest);
+
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zdscalvGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( zdscalvUkrTest, FunctionalTest )
+TEST_P( zdscalvGeneric, UKR )
 {
     using T = dcomplex;
     using U = double;
@@ -104,7 +105,7 @@ TEST_P( zdscalvUkrTest, FunctionalTest )
 */
 INSTANTIATE_TEST_SUITE_P(
         bli_zdscalv_zen_int10_unitPositiveStride,
-        zdscalvUkrTest,
+        zdscalvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zdscalv_zen_int10),
             // conj(alpha): specify if alpha needs to be conjugated.
@@ -145,7 +146,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         bli_zdscalv_zen_int10_nonUnitPositiveStride,
-        zdscalvUkrTest,
+        zdscalvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zdscalv_zen_int10),
             // conj(alpha): specify if alpha needs to be conjugated.
@@ -194,7 +195,7 @@ INSTANTIATE_TEST_SUITE_P(
 */
 INSTANTIATE_TEST_SUITE_P(
         bli_zdscalv_zen_int_avx512_unitPositiveStride,
-        zdscalvUkrTest,
+        zdscalvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zdscalv_zen_int_avx512),
             // conj(alpha): specify if alpha needs to be conjugated.
@@ -230,7 +231,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         bli_zdscalv_zen_int_avx512_nonUnitPositiveStrides,
-        zdscalvUkrTest,
+        zdscalvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zdscalv_zen_int_avx512),
             // conj(alpha): specify if alpha needs to be conjugated.

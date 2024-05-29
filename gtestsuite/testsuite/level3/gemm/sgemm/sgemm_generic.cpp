@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "level3/gemm/test_gemm.h"
 
-class SGemm :
+class sgemmGeneric :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -50,7 +50,7 @@ class SGemm :
 
 //matrix storage format, transA, transB, m, n, k, alpha, beta, lda, ldb, ldc
 
-TEST_P(SGemm, FunctionalTest)
+TEST_P( sgemmGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------
@@ -102,7 +102,7 @@ TEST_P(SGemm, FunctionalTest)
 
 INSTANTIATE_TEST_SUITE_P(
         expect_sgemv_path,
-        SGemm,
+        sgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -123,10 +123,10 @@ INSTANTIATE_TEST_SUITE_P(
         ::gemmGenericPrint<float>()
     );
 
-//----------------------------- sgemm_small kernel ------------------------------------
+//----------------------------- sgemmGeneric_small kernel ------------------------------------
 INSTANTIATE_TEST_SUITE_P(
-        expect_sgemm_small_path,
-        SGemm,
+        expect_sgemmGeneric_small_path,
+        sgemmGeneric,
         ::testing::Combine(
             // Test both storage types
             ::testing::Values('c'),                                        // storage format
@@ -150,8 +150,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 // ----------------------------- SUP implementation --------------------------------------
 INSTANTIATE_TEST_SUITE_P(
-        expect_sgemm_sup_path,
-        SGemm,
+        expect_sgemmGeneric_sup_path,
+        sgemmGeneric,
         ::testing::Combine(
             // Storage of A and B is handled by packing
             ::testing::Values('c'),                                                         // storage format
@@ -173,8 +173,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 // ----------------------------- Native implementation --------------------------------------
 INSTANTIATE_TEST_SUITE_P(
-        expect_sgemm_native_path,
-        SGemm,
+        expect_sgemmGeneric_native_path,
+        sgemmGeneric,
         ::testing::Combine(
             // Storage of A and B is handled by packing
             ::testing::Values('c'),                            // storage format

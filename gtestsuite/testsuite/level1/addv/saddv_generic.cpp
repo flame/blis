@@ -35,12 +35,12 @@
 #include <gtest/gtest.h>
 #include "test_addv.h"
 
-class saddvGenericTest :
+class saddvGeneric :
         public ::testing::TestWithParam<std::tuple<char, gtint_t, gtint_t, gtint_t>> {};
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(saddvGenericTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(saddvGeneric);
 
-TEST_P( saddvGenericTest, RandomData )
+TEST_P( saddvGeneric, API )
 {
     using T = float;
     //----------------------------------------------------------
@@ -76,7 +76,7 @@ TEST_P( saddvGenericTest, RandomData )
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        saddvGenericTest,
+        saddvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: not transpose for x
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.

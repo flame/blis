@@ -42,7 +42,7 @@ class ccopyvGeneric :
                                                    gtint_t>> {};             // stride size for y
 
 // Tests using random values as vector elements.
-TEST_P( ccopyvGeneric, FunctionalTest )
+TEST_P( ccopyvGeneric, API )
 {
     using T = scomplex;
     //----------------------------------------------------------

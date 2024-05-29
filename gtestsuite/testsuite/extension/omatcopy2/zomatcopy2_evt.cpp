@@ -51,7 +51,7 @@ class zomatcopy2EVT :
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zomatcopy2EVT);
 
 // Tests using random numbers as vector elements.
-TEST_P( zomatcopy2EVT, NanInfCheck )
+TEST_P( zomatcopy2EVT, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------

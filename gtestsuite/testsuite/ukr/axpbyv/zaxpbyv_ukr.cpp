@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_axpbyv_ukr.h"
 
-class zaxpbyvUkr :
+class zaxpbyvGeneric :
         public ::testing::TestWithParam<std::tuple<zaxpbyv_ker_ft,  // Function pointer type for zaxpbyv kernels
                                                    char,            // conjx
                                                    gtint_t,         // n
@@ -45,10 +45,10 @@ class zaxpbyvUkr :
                                                    dcomplex,        // beta
                                                    bool>> {};       // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zaxpbyvUkr);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zaxpbyvGeneric);
 
 // Tests using random integers as vector elements.
-TEST_P( zaxpbyvUkr, AccuracyCheck )
+TEST_P( zaxpbyvGeneric, UKR )
 {
     using T = dcomplex;
 
@@ -127,7 +127,7 @@ TEST_P( zaxpbyvUkr, AccuracyCheck )
 
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpbyv_zen_int_unitStrides,
-        zaxpbyvUkr,
+        zaxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zaxpbyv_zen_int),                     // kernel address
             ::testing::Values('n'
@@ -165,7 +165,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpbyv_zen_int_nonUnitStrides,
-        zaxpbyvUkr,
+        zaxpbyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zaxpbyv_zen_int),                     // kernel address
             ::testing::Values('n'

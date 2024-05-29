@@ -42,7 +42,7 @@ class zcopyvGeneric :
                                                    gtint_t>> {};             // stride size for y
 
 // Tests using random values as vector elements.
-TEST_P( zcopyvGeneric, FunctionalTest )
+TEST_P( zcopyvGeneric, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
