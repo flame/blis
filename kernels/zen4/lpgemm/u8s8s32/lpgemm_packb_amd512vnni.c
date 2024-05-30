@@ -1210,8 +1210,7 @@ void packb_nr_mult_16_u8s8s32o32_col_major(
             SHUFFLE64x2_AVX512
 
             // store to pack_b buffer
-            //_mm512_mask_storeu_epi8((pack_b_buffer + (jr * 4) + (kr * NR)),(__mmask64)0xFFFFFFFF, a_reg[0]);
-            _mm512_storeu_epi8((pack_b_buffer + (jr * 4) + (kr * NR)), a_reg[0]);
+            _mm512_storeu_si512((pack_b_buffer + (jr * 4) + (kr * NR)), a_reg[0]);
         }
     }
 
@@ -1227,7 +1226,7 @@ void packb_nr_mult_16_u8s8s32o32_col_major(
             SHUFFLE64x2_AVX512
 
             // store to pack_b buffer
-            _mm512_storeu_epi8((pack_b_buffer + (jr * 4) + (kr * NR)), a_reg[0]);
+            _mm512_storeu_si512((pack_b_buffer + (jr * 4) + (kr * NR)), a_reg[0]);
         }
     }
 
@@ -1243,7 +1242,7 @@ void packb_nr_mult_16_u8s8s32o32_col_major(
             SHUFFLE64x2_AVX512
 
             // store to pack_b buffer
-            _mm512_storeu_epi8((pack_b_buffer + (jr * 4) + (kr * NR)), a_reg[0]);
+            _mm512_storeu_si512((pack_b_buffer + (jr * 4) + (kr * NR)), a_reg[0]);
         }
     }
 }

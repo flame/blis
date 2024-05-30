@@ -1597,7 +1597,7 @@ void packb_nr_mult_16_s8s8s32o32_col_major
             SHUFFLE64x2_AVX512
 
             // store to pack_b buffer
-            _mm512_storeu_epi8((pack_b_buffer + (jr * 4) + (kr * NR)), a_reg[0]);
+            _mm512_storeu_si512((pack_b_buffer + (jr * 4) + (kr * NR)), a_reg[0]);
         }
     }
 
@@ -1614,7 +1614,7 @@ void packb_nr_mult_16_s8s8s32o32_col_major
             SHUFFLE64x2_AVX512
 
             // store to pack_b buffer
-            _mm512_storeu_epi8((pack_b_buffer + (jr * 4) + (kr * NR)), a_reg[0]);
+            _mm512_storeu_si512((pack_b_buffer + (jr * 4) + (kr * NR)), a_reg[0]);
         }
     }
 
@@ -1631,7 +1631,7 @@ void packb_nr_mult_16_s8s8s32o32_col_major
             SHUFFLE64x2_AVX512
 
             // store to pack_b buffer
-            _mm512_storeu_epi8((pack_b_buffer + (jr * 4) + (kr * NR)), a_reg[0]);
+            _mm512_storeu_si512((pack_b_buffer + (jr * 4) + (kr * NR)), a_reg[0]);
         }
     }
 
@@ -1907,7 +1907,7 @@ void packb_nrlt16_s8s8s32o32_col_major
             );
     sum0 = _mm512_sllv_epi32(sum0, mul_128);
 
-    sum1 = _mm512_loadu_epi16(pack_b_column_sum);
+    sum1 = _mm512_loadu_epi32(pack_b_column_sum);
     sum1 = _mm512_add_epi32(sum0, sum1);
     _mm512_storeu_si512(pack_b_column_sum, sum1);
 }
