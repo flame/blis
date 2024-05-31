@@ -154,8 +154,7 @@
     } \
 } \
 
-// Generate two axpyf kernels with fuse_factor = 8 and 32
-GENTFUNC_AXPYF(8)
+// Generate two axpyf kernels with fuse_factor = 32
 GENTFUNC_AXPYF(32)
 
 #ifdef BLIS_ENABLE_OPENMP
@@ -2281,6 +2280,515 @@ void bli_zaxpyf_zen_int_8_avx512
                 a_ptr[6] += 2 * inca;
                 a_ptr[7] += 2 * inca;
             }
+        }
+    }
+}
+
+
+void bli_daxpyf_zen_int8_avx512
+      (
+       conj_t           conja,
+       conj_t           conjx,
+       dim_t            m,
+       dim_t            b_n,
+       double* restrict alpha,
+       double* restrict a, inc_t inca, inc_t lda,
+       double* restrict x, inc_t incx,
+       double* restrict y0, inc_t incy,
+       cntx_t* restrict cntx
+     )
+{
+
+    const dim_t n_elem_per_reg = 8;
+    dim_t       i = 0;
+    double*     y = y0;
+    double*     as[8] __attribute__((aligned(64)));
+    __m512d     chi[8];
+    __m512d     av[8];
+    __m512d     yv[8];
+
+
+
+    // If either dimension is zero, or if alpha is zero, return early.
+    if ( bli_zero_dim2( m, b_n ) || bli_deq0( *alpha ) )
+        return;
+
+    //  If b_n is not equal to the fusing factor, then perform the entire
+    //  operation as a loop over axpyv.
+    if ( b_n != 8 )
+    {
+        // Definition of function pointer
+        daxpyv_ker_ft axpyv_ker_ptr = bli_daxpyv_zen_int_avx512;
+
+        for ( i = 0; i < b_n; ++i )
+        {
+            double* a1   = a + (i  )*lda;
+            double* chi1 = x + (i  )*incx;
+            double  alphavchi1;
+
+            bli_dcopycjs( conjx, *chi1, alphavchi1 );
+            bli_dscals( *alpha, alphavchi1 );
+
+            axpyv_ker_ptr
+            (
+              conja,
+              m,
+              &alphavchi1,
+              a1, inca,
+              y, incy,
+              cntx
+            );
+        }
+        return;
+    }
+
+    // At this point, we know that b_n is exactly equal to the fusing factor.
+    // Load the address of the first element of each column into an array.
+    as[0] = a + (0 * lda);
+    as[1] = a + (1 * lda);
+    as[2] = a + (2 * lda);
+    as[3] = a + (3 * lda);
+
+    as[4] = a + (4 * lda);
+    as[5] = a + (5 * lda);
+    as[6] = a + (6 * lda);
+    as[7] = a + (7 * lda);
+
+    // Multiple the elements in the vector with alpha and broadcast the results into __m512 variables
+    chi[0] = _mm512_set1_pd( (*alpha) * (*(x + 0 * incx)) );
+    chi[1] = _mm512_set1_pd( (*alpha) * (*(x + 1 * incx)) );
+    chi[2] = _mm512_set1_pd( (*alpha) * (*(x + 2 * incx)) );
+    chi[3] = _mm512_set1_pd( (*alpha) * (*(x + 3 * incx)) );
+
+    chi[4] = _mm512_set1_pd( (*alpha) * (*(x + 4 * incx)) );
+    chi[5] = _mm512_set1_pd( (*alpha) * (*(x + 5 * incx)) );
+    chi[6] = _mm512_set1_pd( (*alpha) * (*(x + 6 * incx)) );
+    chi[7] = _mm512_set1_pd( (*alpha) * (*(x + 7 * incx)) );
+
+
+    // If there are vectorized iterations, perform them with vector instructions.
+    // The execution can be vectorized only when the strides are equal to 1
+    if ( inca == 1 && incy == 1 )
+    {
+        // Execute the loop with 8 rows of the matrix at a time.
+        // The loop is executed until less than 8 elements are remaining
+        for ( ; i + n_elem_per_reg <= m; i += n_elem_per_reg)
+        {
+            // Initialize the value of yv[7] to zero
+            // It will be used to store the result
+            yv[7] = _mm512_setzero_pd();
+
+            // Load 8 elements from each column into __m512 variables
+            // The elements will be stored using the pointers in the array as[]
+            av[0] = _mm512_loadu_pd( as[0] );
+            av[1] = _mm512_loadu_pd( as[1] );
+            av[2] = _mm512_loadu_pd( as[2] );
+            av[3] = _mm512_loadu_pd( as[3] );
+            av[4] = _mm512_loadu_pd( as[4] );
+            av[5] = _mm512_loadu_pd( as[5] );
+            av[6] = _mm512_loadu_pd( as[6] );
+            av[7] = _mm512_loadu_pd( as[7] );
+
+            // After loading the elements into the __m512 variable, the pointer will be updated
+            as[0] += n_elem_per_reg;
+            as[1] += n_elem_per_reg;
+            as[2] += n_elem_per_reg;
+            as[3] += n_elem_per_reg;
+            as[4] += n_elem_per_reg;
+            as[5] += n_elem_per_reg;
+            as[6] += n_elem_per_reg;
+            as[7] += n_elem_per_reg;
+
+            // fused-multiplication-add is used to multiple 8 elements in each column of the matrix
+            // with one element in the vector and store the results in multiple __m512 variables.
+            // Use of multiple __m512 variables reduces operand dependancy between the instructions.
+            yv[0] = _mm512_fmadd_pd( av[0], chi[0], yv[7] );
+            yv[1] = _mm512_fmadd_pd( av[1], chi[1], yv[7] );
+            yv[2] = _mm512_fmadd_pd( av[2], chi[2], yv[7] );
+            yv[3] = _mm512_fmadd_pd( av[3], chi[3], yv[7] );
+            yv[4] = _mm512_fmadd_pd( av[4], chi[4], yv[7] );
+            yv[5] = _mm512_fmadd_pd( av[5], chi[5], yv[7] );
+            yv[6] = _mm512_fmadd_pd( av[6], chi[6], yv[7] );
+            yv[7] = _mm512_fmadd_pd( av[7], chi[7], yv[7] );
+
+            // The values in the 8 __m512 variables together and store it in a __m512 variable.
+            yv[0] = _mm512_add_pd( yv[0], yv[1] );
+            yv[2] = _mm512_add_pd( yv[2], yv[3] );
+            yv[4] = _mm512_add_pd( yv[4], yv[5] );
+            yv[6] = _mm512_add_pd( yv[6], yv[7] );
+
+            // The existing value in y is loaded into a __m512 variable.
+            // It is then added together with the other __m512 variables.
+            yv[7] = _mm512_loadu_pd( y );
+            yv[3] = _mm512_add_pd( yv[0], yv[2] );
+            yv[5] = _mm512_add_pd( yv[4], yv[6] );
+
+            yv[1] = _mm512_add_pd( yv[3], yv[5] );
+            yv[7] = _mm512_add_pd( yv[1], yv[7] );
+
+            // Store the result from the __m512 variable into the destination
+            _mm512_storeu_pd( (double *)(y ), yv[7] );
+
+            y += n_elem_per_reg;
+
+        }
+
+        // Handling Fringe cases using masked operations
+        if ( m > i )
+        {
+            // Declaring and initialising the mask
+            __mmask8 m_mask  = (1 << (m - i)) - 1;
+
+            yv[7] = _mm512_setzero_pd();
+
+            // Load the remaining elements in each column into __m512 variables using mask operations
+            av[0] = _mm512_maskz_loadu_pd( m_mask, as[0] );
+            av[1] = _mm512_maskz_loadu_pd( m_mask, as[1] );
+            av[2] = _mm512_maskz_loadu_pd( m_mask, as[2] );
+            av[3] = _mm512_maskz_loadu_pd( m_mask, as[3] );
+            av[4] = _mm512_maskz_loadu_pd( m_mask, as[4] );
+            av[5] = _mm512_maskz_loadu_pd( m_mask, as[5] );
+            av[6] = _mm512_maskz_loadu_pd( m_mask, as[6] );
+            av[7] = _mm512_maskz_loadu_pd( m_mask, as[7] );
+
+            // Use fused-multiply-add operations to multiple the columns in the matrix with the elements of the vector
+            yv[0] = _mm512_fmadd_pd( av[0], chi[0], yv[7] );
+            yv[1] = _mm512_fmadd_pd( av[1], chi[1], yv[7] );
+            yv[2] = _mm512_fmadd_pd( av[2], chi[2], yv[7] );
+            yv[3] = _mm512_fmadd_pd( av[3], chi[3], yv[7] );
+            yv[4] = _mm512_fmadd_pd( av[4], chi[4], yv[7] );
+            yv[5] = _mm512_fmadd_pd( av[5], chi[5], yv[7] );
+            yv[6] = _mm512_fmadd_pd( av[6], chi[6], yv[7] );
+            yv[7] = _mm512_fmadd_pd( av[7], chi[7], yv[7] );
+
+            // The values in the 8 __m512 variables together and store it in a __m512 variable
+            yv[0] = _mm512_add_pd( yv[0], yv[1] );
+            yv[2] = _mm512_add_pd( yv[2], yv[3] );
+            yv[4] = _mm512_add_pd( yv[4], yv[5] );
+            yv[6] = _mm512_add_pd( yv[6], yv[7] );
+
+            // The existing value in y is loaded into a __m512 variable.
+            // It is then added together with the other __m512 variables.
+            yv[7]= _mm512_mask_loadu_pd( chi[0], m_mask, y );
+            yv[3] = _mm512_add_pd( yv[0], yv[2] );
+            yv[5] = _mm512_add_pd( yv[4], yv[6] );
+
+            yv[1] = _mm512_add_pd( yv[3], yv[5] );
+            yv[7] = _mm512_add_pd( yv[1], yv[7] );
+
+            // Store the result from the __m512 variable into the destination
+            _mm512_mask_storeu_pd( (double *)(y ), m_mask, yv[7]);
+        }
+    }
+
+    // To handle inputs that cannot be vectorized
+    else
+    {
+        double       yc = *y;
+        double       chi_s[8];
+
+        // The elements in the vector are multipled with alpha and the result is stored in an array
+        chi_s[0] = *(x + 0 * incx) * *alpha;
+        chi_s[1] = *(x + 1 * incx) * *alpha;
+        chi_s[2] = *(x + 2 * incx) * *alpha;
+        chi_s[3] = *(x + 3 * incx) * *alpha;
+        chi_s[4] = *(x + 4 * incx) * *alpha;
+        chi_s[5] = *(x + 5 * incx) * *alpha;
+        chi_s[6] = *(x + 6 * incx) * *alpha;
+        chi_s[7] = *(x + 7 * incx) * *alpha;
+
+        // A loop is used to iterate over the matrix row-by-row.
+        // The elements in each row are multipled with each value in the array
+        for ( i = 0; (i + 0) < m ; i++ )
+        {
+            yc = *y;
+
+            yc    += chi_s[0] * (*as[0]);
+            as[0] += inca;
+
+            yc    += chi_s[1] * (*as[1]);
+            as[1] += inca;
+
+            yc    += chi_s[2] * (*as[2]);
+            as[2] += inca;
+
+            yc    += chi_s[3] * (*as[3]);
+            as[3] += inca;
+
+            yc    += chi_s[4] * (*as[4]);
+            as[4] += inca;
+
+            yc    += chi_s[5] * (*as[5]);
+            as[5] += inca;
+
+            yc    += chi_s[6] * (*as[6]);
+            as[6] += inca;
+
+            yc    += chi_s[7] * (*as[7]);
+            as[7] += inca;
+
+            *y = yc;
+            y += incy;
+        }
+    }
+}
+
+void bli_daxpyf_zen_int12_avx512
+      (
+       conj_t           conja,
+       conj_t           conjx,
+       dim_t            m,
+       dim_t            b_n,
+       double* restrict alpha,
+       double* restrict a, inc_t inca, inc_t lda,
+       double* restrict x, inc_t incx,
+       double* restrict y0, inc_t incy,
+       cntx_t* restrict cntx
+     )
+{
+    const dim_t n_elem_per_reg = 8;
+    dim_t       i = 0;
+    __m512d     chi[12];
+    __m512d     av[12];
+    __m512d     yv;
+    double*     as[12] __attribute__((aligned(64)));
+    double*     y = y0;
+
+    // If either dimension is zero, or if alpha is zero, return early.
+    if ( bli_zero_dim2( m, b_n ) || bli_deq0( *alpha ) )
+        return;
+
+    //  If b_n is not equal to the fusing factor, then perform the entire
+    //  operation as a loop over axpyv.
+    if ( b_n != 12 )
+    {
+        // Definition of function pointer
+        daxpyv_ker_ft axpyv_ker_ptr = bli_daxpyv_zen_int_avx512;
+
+        for ( i = 0; i < b_n; ++i )
+        {
+            double* a1   = a + (i  )*lda;
+            double* chi1 = x + (i  )*incx;
+            double  alphavchi1;
+
+            bli_dcopycjs( conjx, *chi1, alphavchi1 );
+            bli_dscals( *alpha, alphavchi1 );
+
+            axpyv_ker_ptr
+            (
+              conja,
+              m,
+              &alphavchi1,
+              a1, inca,
+              y, incy,
+              cntx
+            );
+        }
+        return;
+    }
+
+    // At this point, we know that b_n is exactly equal to the fusing factor.
+    // Load the address of the first element of each column into an array.
+    as[0]  = a + (0  * lda);
+    as[1]  = a + (1  * lda);
+    as[2]  = a + (2  * lda);
+    as[3]  = a + (3  * lda);
+
+    as[4]  = a + (4  * lda);
+    as[5]  = a + (5  * lda);
+    as[6]  = a + (6  * lda);
+    as[7]  = a + (7  * lda);
+
+    as[8]  = a + (8  * lda);
+    as[9]  = a + (9  * lda);
+    as[10] = a + (10 * lda);
+    as[11] = a + (11 * lda);
+
+    // Multiple the elements in the vector with alpha and broadcast the results into __m512 variables
+    chi[0]  = _mm512_set1_pd( (*alpha) * (*(x + 0  * incx)) );
+    chi[1]  = _mm512_set1_pd( (*alpha) * (*(x + 1  * incx)) );
+    chi[2]  = _mm512_set1_pd( (*alpha) * (*(x + 2  * incx)) );
+    chi[3]  = _mm512_set1_pd( (*alpha) * (*(x + 3  * incx)) );
+
+    chi[4]  = _mm512_set1_pd( (*alpha) * (*(x + 4  * incx)) );
+    chi[5]  = _mm512_set1_pd( (*alpha) * (*(x + 5  * incx)) );
+    chi[6]  = _mm512_set1_pd( (*alpha) * (*(x + 6  * incx)) );
+    chi[7]  = _mm512_set1_pd( (*alpha) * (*(x + 7  * incx)) );
+
+    chi[8]  = _mm512_set1_pd( (*alpha) * (*(x + 8  * incx)) );
+    chi[9]  = _mm512_set1_pd( (*alpha) * (*(x + 9  * incx)) );
+    chi[10] = _mm512_set1_pd( (*alpha) * (*(x + 10 * incx)) );
+    chi[11] = _mm512_set1_pd( (*alpha) * (*(x + 11 * incx)) );
+
+
+    // If there are vectorized iterations, perform them with vector instructions.
+    // The execution can be vectorized only when the strides are equal to 1
+    if ( inca == 1 && incy == 1 )
+    {
+
+        for ( ; i + n_elem_per_reg <= m; i += n_elem_per_reg)
+        {
+            // The existing value in y is loaded into a __m512 variable.
+            yv = _mm512_loadu_pd( y );
+
+            // Load 12 elements from each column into __m512 variables
+            // The elements will be stored using the pointers in the array "as"
+            av[0]  = _mm512_loadu_pd( as[0]  );
+            av[1]  = _mm512_loadu_pd( as[1]  );
+            av[2]  = _mm512_loadu_pd( as[2]  );
+            av[3]  = _mm512_loadu_pd( as[3]  );
+            av[4]  = _mm512_loadu_pd( as[4]  );
+            av[5]  = _mm512_loadu_pd( as[5]  );
+            av[6]  = _mm512_loadu_pd( as[6]  );
+            av[7]  = _mm512_loadu_pd( as[7]  );
+            av[8]  = _mm512_loadu_pd( as[8]  );
+            av[9]  = _mm512_loadu_pd( as[9]  );
+            av[10] = _mm512_loadu_pd( as[10] );
+            av[11] = _mm512_loadu_pd( as[11] );
+
+            // After loading the elements into the __m512 variable, the pointer will be updated
+            as[0]  += n_elem_per_reg;
+            as[1]  += n_elem_per_reg;
+            as[2]  += n_elem_per_reg;
+            as[3]  += n_elem_per_reg;
+            as[4]  += n_elem_per_reg;
+            as[5]  += n_elem_per_reg;
+            as[6]  += n_elem_per_reg;
+            as[7]  += n_elem_per_reg;
+            as[8]  += n_elem_per_reg;
+            as[9]  += n_elem_per_reg;
+            as[10] += n_elem_per_reg;
+            as[11] += n_elem_per_reg;
+
+            // fused-multiplication-add is used to multiple 8 elements in each column of the matrix
+            // with one element in the vector and store the results in multiple __m512 variables.
+            yv    = _mm512_fmadd_pd( av[0],  chi[0],  yv );
+            yv    = _mm512_fmadd_pd( av[1],  chi[1],  yv );
+            yv    = _mm512_fmadd_pd( av[2],  chi[2],  yv );
+            yv    = _mm512_fmadd_pd( av[3],  chi[3],  yv );
+            yv    = _mm512_fmadd_pd( av[4],  chi[4],  yv );
+            yv    = _mm512_fmadd_pd( av[5],  chi[5],  yv );
+            yv    = _mm512_fmadd_pd( av[6],  chi[6],  yv );
+            yv    = _mm512_fmadd_pd( av[7],  chi[7],  yv );
+            yv    = _mm512_fmadd_pd( av[8],  chi[8],  yv );
+            yv    = _mm512_fmadd_pd( av[9],  chi[9],  yv );
+            yv    = _mm512_fmadd_pd( av[10], chi[10], yv );
+            yv    = _mm512_fmadd_pd( av[11], chi[11], yv );
+
+            // Store the result from the __m512 variable into the destination
+            _mm512_storeu_pd( (double *)(y ), yv );
+
+            y += n_elem_per_reg;
+
+        }
+
+        // Handling Fringe cases
+        if ( m > i )
+        {
+            // Declaring and initialising the mask
+            __mmask8 m_mask = (1 << (m - i)) - 1;
+
+            yv= _mm512_mask_loadu_pd( chi[0], m_mask, y );
+
+            // Load the remaining elements in each column into __m512 variables using mask operations
+            av[0]  = _mm512_maskz_loadu_pd( m_mask, as[0]  );
+            av[1]  = _mm512_maskz_loadu_pd( m_mask, as[1]  );
+            av[2]  = _mm512_maskz_loadu_pd( m_mask, as[2]  );
+            av[3]  = _mm512_maskz_loadu_pd( m_mask, as[3]  );
+            av[4]  = _mm512_maskz_loadu_pd( m_mask, as[4]  );
+            av[5]  = _mm512_maskz_loadu_pd( m_mask, as[5]  );
+            av[6]  = _mm512_maskz_loadu_pd( m_mask, as[6]  );
+            av[7]  = _mm512_maskz_loadu_pd( m_mask, as[7]  );
+            av[8]  = _mm512_maskz_loadu_pd( m_mask, as[8]  );
+            av[9]  = _mm512_maskz_loadu_pd( m_mask, as[9]  );
+            av[10] = _mm512_maskz_loadu_pd( m_mask, as[10] );
+            av[11] = _mm512_maskz_loadu_pd( m_mask, as[11] );
+
+            // Use fused-multiply-add operations to multiple the columns in the matrix with the elements of the vector
+            yv    = _mm512_fmadd_pd( av[0],  chi[0],  yv );
+            yv    = _mm512_fmadd_pd( av[1],  chi[1],  yv );
+            yv    = _mm512_fmadd_pd( av[2],  chi[2],  yv );
+            yv    = _mm512_fmadd_pd( av[3],  chi[3],  yv );
+            yv    = _mm512_fmadd_pd( av[4],  chi[4],  yv );
+            yv    = _mm512_fmadd_pd( av[5],  chi[5],  yv );
+            yv    = _mm512_fmadd_pd( av[6],  chi[6],  yv );
+            yv    = _mm512_fmadd_pd( av[7],  chi[7],  yv );
+            yv    = _mm512_fmadd_pd( av[8],  chi[8],  yv );
+            yv    = _mm512_fmadd_pd( av[9],  chi[9],  yv );
+            yv    = _mm512_fmadd_pd( av[10], chi[10], yv );
+            yv    = _mm512_fmadd_pd( av[11], chi[11], yv );
+
+            // Store the result from the __m512 variable into the destination
+            _mm512_mask_storeu_pd( (double *)(y ), m_mask, yv );
+        }
+    }
+    // To handle inputs that cannot be vectorized
+    else
+    {
+        double  yc = *y;
+        double  chi_s[12];
+
+        // The elements in the vector are multipled with alpha and the result is stored in an array
+        chi_s[0]  = *(x + 0 * incx) * *alpha;
+        chi_s[1]  = *(x + 1 * incx) * *alpha;
+        chi_s[2]  = *(x + 2 * incx) * *alpha;
+        chi_s[3]  = *(x + 3 * incx) * *alpha;
+
+        chi_s[4]  = *(x + 4 * incx) * *alpha;
+        chi_s[5]  = *(x + 5 * incx) * *alpha;
+        chi_s[6]  = *(x + 6 * incx) * *alpha;
+        chi_s[7]  = *(x + 7 * incx) * *alpha;
+
+        chi_s[8]  = *(x + 8 * incx) * *alpha;
+        chi_s[9]  = *(x + 9 * incx) * *alpha;
+        chi_s[10] = *(x + 10 * incx) * *alpha;
+        chi_s[11] = *(x + 11 * incx) * *alpha;
+
+
+        // A loop is used to iterate over the matrix row-by-row.
+        // The elements in each row are multipled with each value in the array
+        for ( i = 0; (i + 0) < m ; ++i )
+        {
+            yc = *y;
+
+            yc    += chi_s[0] * (*as[0]);
+            as[0] += inca;
+
+            yc    += chi_s[1] * (*as[1]);
+            as[1] += inca;
+
+            yc    += chi_s[2] * (*as[2]);
+            as[2] += inca;
+
+            yc    += chi_s[3] * (*as[3]);
+            as[3] += inca;
+
+            yc    += chi_s[4] * (*as[4]);
+            as[4] += inca;
+
+            yc    += chi_s[5] * (*as[5]);
+            as[5] += inca;
+
+            yc    += chi_s[6] * (*as[6]);
+            as[6] += inca;
+
+            yc    += chi_s[7] * (*as[7]);
+            as[7] += inca;
+
+            yc    += chi_s[8] * (*as[8]);
+            as[8] += inca;
+
+            yc    += chi_s[9] * (*as[9]);
+            as[9] += inca;
+
+            yc     += chi_s[10] * (*as[10]);
+            as[10] += inca;
+
+            yc     += chi_s[11] * (*as[11]);
+            as[11] += inca;
+
+            *y = yc;
+            y += incy;
         }
     }
 }

@@ -321,8 +321,16 @@ void bli_dtrsv_unf_var2
                 else
 #endif
                 {
-                    kfp_af = bli_daxpyf_zen_int8_avx512;
-                    b_fuse = 8;
+                    if ( m < 2500 )
+                    {
+                        kfp_af = bli_daxpyf_zen_int8_avx512;
+                        b_fuse = 8;
+                    }
+                    else
+                    {
+                        kfp_af = bli_daxpyf_zen_int12_avx512;
+                        b_fuse = 12;
+                    }
                 }
                 break;
             }

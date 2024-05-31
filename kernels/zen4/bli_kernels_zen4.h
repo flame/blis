@@ -68,6 +68,7 @@ AXPYF_KER_PROT( dcomplex, z, axpyf_zen_int_8_avx512 )
 
 // axpyf (intrinsics)
 AXPYF_KER_PROT( double,   d, axpyf_zen_int8_avx512 )
+AXPYF_KER_PROT( double,   d, axpyf_zen_int12_avx512 )
 AXPYF_KER_PROT( double,   d, axpyf_zen_int32_avx512 )
 #ifdef BLIS_ENABLE_OPENMP
 AXPYF_KER_PROT( double,   d, axpyf_zen_int32_avx512_mt )
