@@ -200,7 +200,7 @@ def main():
 		file_string = "".join( file_lines )
 
 		# Search for an existing copyright line.
-		has_cr = re.search( 'Copyright \(C\)', file_string )
+		has_cr = re.search( r'Copyright \(C\)', file_string )
 
 		# If the file does not have any copyright notice in it already, we
 		# assume we don't need to update it.
@@ -210,7 +210,7 @@ def main():
 
 		# Check whether the file already has a copyright for the_org. We may
 		# need to use this information later.
-		has_org_cr = re.search( 'Copyright \(C\) ([0-9][0-9][0-9][0-9]), %s' % the_org, file_string )
+		has_org_cr = re.search( r'Copyright \(C\) ([0-9][0-9][0-9][0-9]), %s' % the_org, file_string )
 
 		# Initialize the list of processed (potentially modified) file lines.
 		mod_file_lines = []
@@ -225,7 +225,7 @@ def main():
 			# Iterate through the lines in the current file.
 			for line in file_lines:
 
-				result = re.search( 'Copyright \(C\) ([0-9][0-9][0-9][0-9]), %s' % the_org, line )
+				result = re.search( r'Copyright \(C\) ([0-9][0-9][0-9][0-9]), %s' % the_org, line )
 
 				# If the current line matches a copyright line for the_org...
 				if result:
@@ -284,8 +284,8 @@ def main():
 					line_next = file_lines[i]
 
 				# Try to match both the current line and the next line.
-				result  = re.search( 'Copyright \(C\) ([0-9][0-9][0-9][0-9]), (.*)', line )
-				resnext = re.search( 'Copyright \(C\) ([0-9][0-9][0-9][0-9]), (.*)', line_next )
+				result  = re.search( r'Copyright \(C\) ([0-9][0-9][0-9][0-9]), (.*)', line )
+				resnext = re.search( r'Copyright \(C\) ([0-9][0-9][0-9][0-9]), (.*)', line_next )
 
 				# Parse the results.
 				if result:
