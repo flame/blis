@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -253,7 +253,7 @@ def main():
 
 						# Add the unchanged line to the running list.
 						mod_file_lines += line
-							
+
 				else:
 					# Add the unchanged line to the running list.
 					mod_file_lines += line
@@ -301,7 +301,7 @@ def main():
 						# The current line matches but the next does not. Thus,
 						# this branch only executes for the *last* copyright line
 						# in the file.
-						
+
 						# Extract the year and organization from the matched
 						# string.
 						old_year = result.group(1)
