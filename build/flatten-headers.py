@@ -110,7 +110,7 @@ def print_usage():
 
 def canonicalize_ws( s ):
 
-	return re.sub( '\s+', ' ', s ).strip()
+	return re.sub( r'\s+', ' ', s ).strip()
 
 # ---
 
@@ -166,7 +166,7 @@ def list_contains_header( items ):
 	rval = False
 	for item in items:
 
-		is_h = re.search( "\.h", item )
+		is_h = re.search( r"\.h", item )
 
 		if is_h:
 			rval = True
@@ -198,7 +198,7 @@ def get_header_path( filename, header_dirpaths ):
 
 def strip_cstyle_comments( string ):
 
-	return re.sub( "/\*.*?\*/", "", string, flags=re.S )
+	return re.sub( r"/\*.*?\*/", "", string, flags=re.S )
 
 # ------------------------------------------------------------------------------
 
@@ -512,7 +512,7 @@ def main():
 	# Precompile the main regular expression used to isolate #include
 	# directives and the headers they reference. This regex object will
 	# get reused over and over again in flatten_header().
-	regex = re.compile( '^[\s]*#include (["<])([\w\.\-/]*)([">])' )
+	regex = re.compile( r'^[\s]*#include (["<])([\w\.\-/]*)([">])' )
 
 	# Recursively substitute headers for occurrences of #include directives.
 	final_string = flatten_header( inputfile, header_dirpaths, nestsp )
