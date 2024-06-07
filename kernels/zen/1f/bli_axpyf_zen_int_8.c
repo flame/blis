@@ -301,7 +301,7 @@ void bli_daxpyf_zen_int_8
 	  operation as axpyv or perform the operation using axpyf kernels with
 	  lower fuse factor.
 	*/
-	if ( b_n != fuse_fac )
+	if ( b_n < fuse_fac )
 	{
 		if (b_n >= 5)
 		{
@@ -385,6 +385,33 @@ void bli_daxpyf_zen_int_8
 
 			PASTEMAC(d,copycjs)( conjx, *chi1, alpha_chi1 );
 			PASTEMAC(d,scals)( *alpha, alpha_chi1 );
+
+			f
+			(
+			  conja,
+			  m,
+			  &alpha_chi1,
+			  a1, inca,
+			  y1, incy,
+			  cntx
+			);
+		}
+
+		return;
+	}
+	else if ( b_n > fuse_fac )
+	{
+		daxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
+
+		for ( i = 0; i < b_n; ++i )
+		{
+			double* a1   = a + (0  )*inca + (i  )*lda;
+			double* chi1 = x + (i  )*incx;
+			double* y1   = y + (0  )*incy;
+			double  alpha_chi1;
+
+			bli_dcopycjs( conjx, *chi1, alpha_chi1 );
+			bli_dscals( *alpha, alpha_chi1 );
 
 			f
 			(

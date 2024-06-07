@@ -85,7 +85,7 @@ void bli_ddotxf_zen_int_avx512
       operation as dotxv or perform the operation using dotxf kernels with
       lower fuse factor.
     */
-    if (b_n != fuse_fac)
+    if (b_n < fuse_fac)
     {
         if (b_n >= 4)
         {
@@ -156,6 +156,27 @@ void bli_ddotxf_zen_int_avx512
                 cntx);
         }
         return;
+    }
+    else if (b_n > fuse_fac)
+    {
+        for (dim_t i = 0; i < b_n; ++i)
+		{
+			double *a1 = a + (0) * inca + (i)*lda;
+			double *x1 = x + (0) * incx;
+			double *psi1 = y + (i)*incy;
+
+			bli_ddotxv_zen_int(
+				conjat,
+				conjx,
+				m,
+				alpha,
+				a1, inca,
+				x1, incx,
+				beta,
+				psi1,
+				cntx);
+		}
+		return;
     }
 
     // At this point, we know that b_n is exactly equal to the fusing factor.

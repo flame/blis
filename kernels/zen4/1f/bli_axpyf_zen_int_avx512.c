@@ -1363,7 +1363,7 @@ void bli_zaxpyf_zen_int_8_avx512
     // If b_n is not equal to the fusing factor, then perform the entire
     // operation as a sequence of calls to zaxpyf kernels, with fuse-factor
     // 4 and 2 and a single call to zaxpyv, based on the need.
-    if ( b_n != fuse_fac )
+    if ( b_n < fuse_fac )
     {
         dcomplex *a1 = a;
         dcomplex *chi1 = x;
@@ -1445,6 +1445,33 @@ void bli_zaxpyf_zen_int_8_avx512
                 a1, inca,
                 y1, incy,
                 cntx
+            );
+        }
+
+        return;
+    }
+    else if ( b_n > fuse_fac )
+    {
+        zaxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DCOMPLEX, BLIS_AXPYV_KER, cntx );
+
+        for ( dim_t i = 0; i < b_n; ++i )
+        {
+            dcomplex* a1   = a + (0  )*inca + (i  )*lda;
+            dcomplex* chi1 = x + (i  )*incx;
+            dcomplex* y1   = y + (0  )*incy;
+            dcomplex  alpha_chi1;
+
+            bli_zcopycjs( conjx, *chi1, alpha_chi1 );
+            bli_zscals( *alpha, alpha_chi1 );
+
+            f
+            (
+              conja,
+              m,
+              &alpha_chi1,
+              a1, inca,
+              y1, incy,
+              cntx
             );
         }
 
