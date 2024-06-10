@@ -53,4 +53,12 @@ void reordera_mr6_u8s8s32o32
        lpgemm_cntx_t* lcntx
      );
 
+void reorderb_nr64_u8s4s32o32
+     (
+       lpgemm_obj_t*  b,
+       lpgemm_obj_t*  b_reorder,
+       rntm_t*        rntm,
+       lpgemm_cntx_t* lcntx
+     );
+
 #endif //LPGEMM_REORDER_H
