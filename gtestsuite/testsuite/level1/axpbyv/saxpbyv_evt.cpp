@@ -35,25 +35,25 @@
 #include <gtest/gtest.h>
 #include "test_axpbyv.h"
 
-class daxpbyvEVT :
+class saxpbyvEVT :
         public ::testing::TestWithParam<std::tuple<char,         // transpose
                                                    gtint_t,      // n, size of the vector
                                                    gtint_t,      // incx
                                                    gtint_t,      // incy
                                                    gtint_t,      // xi, index for exval in x
-                                                   double,       // xexval
+                                                   float,        // xexval
                                                    gtint_t,      // yi, index for exval in y
-                                                   double,       // yexval
-                                                   double,       // alpha
-                                                   double>> {};  // beta
+                                                   float,        // yexval
+                                                   float,        // alpha
+                                                   float>> {};   // beta
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(daxpbyvEVT);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(saxpbyvEVT);
 
 // Tests using random values as vector elements,
 // with exception values on the passed indices.
-TEST_P( daxpbyvEVT, API )
+TEST_P( saxpbyvEVT, API )
 {
-    using T = double;
+    using T = float;
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
     // test suite instantiation (INSTANTIATE_TEST_SUITE_P).
@@ -125,34 +125,34 @@ TEST_P( daxpbyvEVT, API )
 }
 
 #if defined(REF_IS_NETLIB)
-static double NaN = std::numeric_limits<double>::quiet_NaN();
-static double Inf = std::numeric_limits<double>::infinity();
+static float NaN = std::numeric_limits<float>::quiet_NaN();
+static float Inf = std::numeric_limits<float>::infinity();
 
 /*
     Exception value testing on vectors :
-    DAXPBY currently uses the bli_daxpbyv_zen_int10( ... ) kernel for computation.
+    DAXPBY currently uses the bli_saxpbyv_zen_int10( ... ) kernel for computation.
     The size and indices given in the instantiator are to ensure code coverage inside
     the kernel, and to verify the compliance accordingly.
 
     Kernel structure :
-    Main loop    :  In blocks of 40 --> L40
-    Fringe loops :  In blocks of 20 --> L20
+    Main loop    :  In blocks of 80 --> L00
+    Fringe loops :  In blocks of 20 --> L40
+                    In blocks of 32 --> L32
                     In blocks of 16 --> L16
-                    In blocks of 8  --> L8
-                    In blocks of 4  --> L4
+                    In blocks of 8 --> L8
                     Element-wise loop --> LScalar
 
-    For size 115 :  L40*2 + L20 + L8 + L4 + 3(LScalar)
-    Indices are  :  0, 79 -> In L40
-                    99    -> In L20
-                    107   -> In L8
-                    111   -> In L4
-                    114   -> In LScalar
+    For size 231 :  L80*2 + L40 + L16 + L8 + 7(LScalar)
+    Indices are  :  0, 159 -> In L80
+                    199    -> In L40
+                    215    -> In L16
+                    223    -> In L8
+                    230    -> In LScalar
 
-    For size 116 :  L40*2 + L20 + L16
-    Indices are  :  0, 79 -> In L40
-                    99    -> In L20
-                    107   -> In L16
+    For size 232 :  L80*2 + L40 + L32
+    Indices are  :  0, 159 -> In L80
+                    199    -> In L40
+                    215    -> In L32r
 
     The alpha and beta values are such that they check for compliance against possible
     optimizations that might have been done.
@@ -163,67 +163,67 @@ static double Inf = std::numeric_limits<double>::infinity();
 // Exception value testing(on X vector alone) with unit strides
 INSTANTIATE_TEST_SUITE_P(
     vecX_unitStrides,
-    daxpbyvEVT,
+    saxpbyvEVT,
     ::testing::Combine(
         ::testing::Values('n'),                                                     // use conjx as n for real types
-        ::testing::Values(gtint_t(115), gtint_t(116)),                              // n, size of vectors with unit-stride
+        ::testing::Values(gtint_t(231), gtint_t(232)),                              // n, size of vectors with unit-stride
         ::testing::Values(gtint_t(1)),                                              // stride size for x
         ::testing::Values(gtint_t(1)),                                              // stride size for y
-        ::testing::Values(gtint_t(0), gtint_t(79), gtint_t(99),
-                          gtint_t(107), gtint_t(111), gtint_t(114)),                // indices to set exception values on x
+        ::testing::Values(gtint_t(0), gtint_t(159), gtint_t(199),
+                          gtint_t(215), gtint_t(223), gtint_t(230)),                // indices to set exception values on x
         ::testing::Values(NaN, -Inf, Inf),                                          // exception values to set on x
         ::testing::Values(gtint_t(0)),                                              // dummy index on y
-        ::testing::Values(double(0.0)),                                             // dummy value on y
-        ::testing::Values(double(0.0), double(1.0), double(-1.0), double(-3.3)),    // alpha
-        ::testing::Values(double(0.0), double(1.0), double(-1.0), double(4.5))      // beta
+        ::testing::Values(float(0.0)),                                              // dummy value on y
+        ::testing::Values(float(0.0), float(1.0), float(-1.0), float(-3.3)),        // alpha
+        ::testing::Values(float(0.0), float(1.0), float(-1.0), float(4.5))          // beta
         ),
-    ::axpbyvEVTPrint<double>());
+    ::axpbyvEVTPrint<float>());
 
 // Exception value testing(on Y vector alone) with unit strides
 INSTANTIATE_TEST_SUITE_P(
     vecY_unitStrides,
-    daxpbyvEVT,
+    saxpbyvEVT,
     ::testing::Combine(
         ::testing::Values('n'),                                                     // use conjx as n for real types
-        ::testing::Values(gtint_t(115), gtint_t(116)),                              // n, size of vectors with unit-stride
+        ::testing::Values(gtint_t(231), gtint_t(232)),                              // n, size of vectors with unit-stride
         ::testing::Values(gtint_t(1)),                                              // stride size for x
         ::testing::Values(gtint_t(1)),                                              // stride size for y
         ::testing::Values(gtint_t(0)),                                              // dummy index on x
-        ::testing::Values(double(0.0)),                                             // dummy value on x
-        ::testing::Values(gtint_t(0), gtint_t(79), gtint_t(99),
-                          gtint_t(107), gtint_t(111), gtint_t(114)),                // indices to set exception values on y
+        ::testing::Values(float(0.0)),                                             // dummy value on x
+        ::testing::Values(gtint_t(0), gtint_t(159), gtint_t(199),
+                          gtint_t(215), gtint_t(223), gtint_t(230)),                // indices to set exception values on y
         ::testing::Values(NaN, -Inf, Inf),                                          // exception values to set on y
-        ::testing::Values(double(0.0), double(1.0), double(-1.0), double(-3.3)),    // alpha
-        ::testing::Values(double(0.0), double(1.0), double(-1.0), double(4.5))      // beta
+        ::testing::Values(float(0.0), float(1.0), float(-1.0), float(-3.3)),        // alpha
+        ::testing::Values(float(0.0), float(1.0), float(-1.0), float(4.5))          // beta
         ),
-    ::axpbyvEVTPrint<double>());
+    ::axpbyvEVTPrint<float>());
 
 // Exception value testing(on X and Y vectors) with unit strides
 INSTANTIATE_TEST_SUITE_P(
     vecXY_unitStrides,
-    daxpbyvEVT,
+    saxpbyvEVT,
     ::testing::Combine(
         ::testing::Values('n'),                                                     // use conjx as n for real types
-        ::testing::Values(gtint_t(115), gtint_t(116)),                              // n, size of vectors with unit-stride
+        ::testing::Values(gtint_t(231), gtint_t(232)),                              // n, size of vectors with unit-stride
         ::testing::Values(gtint_t(1)),                                              // stride size for x
         ::testing::Values(gtint_t(1)),                                              // stride size for y
-        ::testing::Values(gtint_t(0), gtint_t(79), gtint_t(99),
-                          gtint_t(107), gtint_t(111), gtint_t(114)),                // indices to set exception values on x
+        ::testing::Values(gtint_t(0), gtint_t(159), gtint_t(199),
+                          gtint_t(215), gtint_t(223), gtint_t(230)),                // indices to set exception values on x
         ::testing::Values(NaN, -Inf, Inf),                                          // exception values to set on x
-        ::testing::Values(gtint_t(0), gtint_t(79), gtint_t(99),
-                          gtint_t(107), gtint_t(111), gtint_t(114)),                // indices to set exception values on y
+        ::testing::Values(gtint_t(0), gtint_t(159), gtint_t(199),
+                          gtint_t(215), gtint_t(223), gtint_t(230)),                // indices to set exception values on y
         ::testing::Values(NaN, -Inf, Inf),                                          // exception values to set on y
-        ::testing::Values(double(0.0), double(1.0), double(-1.0), double(-3.3)),    // alpha
-        ::testing::Values(double(0.0), double(1.0), double(-1.0), double(4.5))      // beta
+        ::testing::Values(float(0.0), float(1.0), float(-1.0), float(-3.3)),        // alpha
+        ::testing::Values(float(0.0), float(1.0), float(-1.0), float(4.5))          // beta
         ),
-    ::axpbyvEVTPrint<double>());
+    ::axpbyvEVTPrint<float>());
 
 // Exception value testing(on vectors) with non-unit strides
 // We have to test a single scalar loop. The indices are such
 // that we cover _vecX_, _vecY_ and _vecXY_ cases together.
 INSTANTIATE_TEST_SUITE_P(
     vec_nonUnitStrides,
-    daxpbyvEVT,
+    saxpbyvEVT,
     ::testing::Combine(
         ::testing::Values('n'),                                                     // use conjx as n for real types
         ::testing::Values(gtint_t(50)),                                             // n, size of vectors with non-unit strides
@@ -233,10 +233,10 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(NaN, -Inf, Inf, 2.9),                                     // exception values to set on x
         ::testing::Values(gtint_t(0), gtint_t(26), gtint_t(49)),                    // indices to set exception values on y
         ::testing::Values(NaN, -Inf, Inf, -1.5),                                    // exception values to set on y
-        ::testing::Values(double(0.0), double(1.0), double(-1.0), double(-3.3)),    // alpha
-        ::testing::Values(double(0.0), double(1.0), double(-1.0), double(4.5))      // beta
+        ::testing::Values(float(0.0), float(1.0), float(-1.0), float(-3.3)),        // alpha
+        ::testing::Values(float(0.0), float(1.0), float(-1.0), float(4.5))          // beta
         ),
-    ::axpbyvEVTPrint<double>());
+    ::axpbyvEVTPrint<float>());
 
 /*
     Exception value testing on alpha and/or beta :
@@ -252,36 +252,36 @@ INSTANTIATE_TEST_SUITE_P(
 // Exception value testing(on alpha/beta) with unit strided vectors
 INSTANTIATE_TEST_SUITE_P(
     alphaBeta_unitStrides,
-    daxpbyvEVT,
+    saxpbyvEVT,
     ::testing::Combine(
         ::testing::Values('n'),                         // use conjx as n for real types
-        ::testing::Values(gtint_t(115), gtint_t(116)),  // n, size of vectors with unit-stride
+        ::testing::Values(gtint_t(231), gtint_t(232)),  // n, size of vectors with unit-stride
         ::testing::Values(gtint_t(1)),                  // stride size for x
         ::testing::Values(gtint_t(1)),                  // stride size for y
         ::testing::Values(gtint_t(0)),                  // indices to set zero on x
-        ::testing::Values(double(0.0)),
+        ::testing::Values(float(0.0)),
         ::testing::Values(gtint_t(0)),                  // indices to set zero on y
-        ::testing::Values(double(0.0)),
+        ::testing::Values(float(0.0)),
         ::testing::Values(NaN, -Inf, Inf, 2.3),         // alpha
         ::testing::Values(NaN, -Inf, Inf, -1.9)         // beta
         ),
-    ::axpbyvEVTPrint<double>());
+    ::axpbyvEVTPrint<float>());
 
 // Exception value testing(on alpha/beta) with non-unit strided vectors
 INSTANTIATE_TEST_SUITE_P(
     alphaBeta_nonUnitStrides,
-    daxpbyvEVT,
+    saxpbyvEVT,
     ::testing::Combine(
         ::testing::Values('n'),                         // use conjx as n for real types
         ::testing::Values(gtint_t(50)),                 // n, size of vector with non-unit strides
         ::testing::Values(gtint_t(3)),                  // stride size for x
         ::testing::Values(gtint_t(5)),                  // stride size for y
         ::testing::Values(gtint_t(1), gtint_t(25)),     // indices to set zero on x
-        ::testing::Values(double(0.0)),
+        ::testing::Values(float(0.0)),
         ::testing::Values(gtint_t(0), gtint_t(40)),     // indices to set zero on y
-        ::testing::Values(double(0.0)),
+        ::testing::Values(float(0.0)),
         ::testing::Values(NaN, -Inf, Inf, 2.3),         // alpha
         ::testing::Values(NaN, -Inf, Inf, -1.9)         // beta
         ),
-    ::axpbyvEVTPrint<double>());
+    ::axpbyvEVTPrint<float>());
 #endif

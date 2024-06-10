@@ -67,38 +67,42 @@ TEST_P( zaxpbyvGeneric, API )
     // Check gtestsuite axpbyv.h (no netlib version) for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // No adjustment applied yet for complex data.
+    // With adjustment for complex data.
+    // NOTE : Every mul for complex types involves 3 ops(2 muls + 1 add)
     double thresh;
+    double adj = 3;
     if (n == 0)
         thresh = 0.0;
-    else if (alpha == testinghelpers::ZERO<T>())
-    {
-        // Like SCALV
-        if (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>())
-            thresh = 0.0;
-        else
-            thresh = testinghelpers::getEpsilon<T>();
-    }
     else if (beta == testinghelpers::ZERO<T>())
     {
-        // Like SCAL2V
+        // Like SETV or COPYV(no ops)
         if (alpha == testinghelpers::ZERO<T>() || alpha == testinghelpers::ONE<T>())
             thresh = 0.0;
+        // Like SCAL2V(1 mul)
         else
-            thresh = testinghelpers::getEpsilon<T>();
+            thresh = (1 * adj) * testinghelpers::getEpsilon<T>();
     }
     else if (beta == testinghelpers::ONE<T>())
     {
-        // Like AXPYV
+        // Like ERS(no ops)
         if (alpha == testinghelpers::ZERO<T>())
             thresh = 0.0;
+        // Like ADDV(1 add)
+        else if (alpha == testinghelpers::ONE<T>())
+            thresh = testinghelpers::getEpsilon<T>();
+        // Like AXPYV(1 mul and 1 add)
         else
-            thresh = 2*testinghelpers::getEpsilon<T>();
+            thresh = (1 * adj + 1) * testinghelpers::getEpsilon<T>();
     }
-    else if (alpha == testinghelpers::ONE<T>())
-        thresh = 2*testinghelpers::getEpsilon<T>();
     else
-        thresh = 3*testinghelpers::getEpsilon<T>();
+    {
+        // Like SCALV(1 mul)
+        if (alpha == testinghelpers::ZERO<T>())
+            thresh = (1 * adj) * testinghelpers::getEpsilon<T>();
+        // Like AXPBYV(2 muls and 1 add)
+        else
+            thresh = (2 * adj + 1) * testinghelpers::getEpsilon<T>();
+    }
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters

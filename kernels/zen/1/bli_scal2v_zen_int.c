@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,7 +35,417 @@
 #include "blis.h"
 #include <immintrin.h>
 
-/*  This kernel performs  y := alpha * conjx(x)
+// This kernel performs  y := alpha * conjx(x)
+void bli_sscal2v_zen_int
+     (
+       conj_t           conjx,
+       dim_t            n,
+       float*  restrict alpha,
+       float*  restrict x, inc_t incx,
+       float*  restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     )
+{
+    // If the vector dimension is zero, return early.
+    if (bli_zero_dim1(n))
+        return;
+
+    if (PASTEMAC(s, eq0)(*alpha))
+    {
+        /* If alpha is zero, use setv. */
+        float *zero = PASTEMAC(s, 0);
+
+        bli_ssetv_zen_int
+        (
+            BLIS_NO_CONJUGATE,
+            n,
+            zero,
+            y, incy,
+            cntx
+        );
+
+        return;
+    }
+    else if (PASTEMAC(s, eq1)(*alpha))
+    {
+        /* If alpha is one, use copyv. */
+        bli_scopyv_zen_int
+        (
+            conjx,
+            n,
+            x, incx,
+            y, incy,
+            cntx
+        );
+
+        return;
+    }
+
+    dim_t i = 0;
+    float *x0 = x;
+    float *y0 = y;
+
+    if (incx == 1 && incy == 1)
+    {
+        __m256 x_vec[12], alphav;
+
+        alphav = _mm256_broadcast_ss(alpha);
+
+        const dim_t n_elem_per_reg = 8;
+
+        for (; (i + 95) < n; i += 96)
+        {
+            x_vec[0] = _mm256_loadu_ps((float *)x0);
+            x_vec[1] = _mm256_loadu_ps((float *)(x0 + n_elem_per_reg));
+            x_vec[2] = _mm256_loadu_ps((float *)(x0 + 2 * n_elem_per_reg));
+            x_vec[3] = _mm256_loadu_ps((float *)(x0 + 3 * n_elem_per_reg));
+
+            x_vec[0] = _mm256_mul_ps(x_vec[0], alphav);
+            x_vec[1] = _mm256_mul_ps(x_vec[1], alphav);
+            x_vec[2] = _mm256_mul_ps(x_vec[2], alphav);
+            x_vec[3] = _mm256_mul_ps(x_vec[3], alphav);
+            
+            _mm256_storeu_ps((float *)y0, x_vec[0]);
+            _mm256_storeu_ps((float *)(y0 + n_elem_per_reg), x_vec[1]);
+            _mm256_storeu_ps((float *)(y0 + 2 * n_elem_per_reg), x_vec[2]);
+            _mm256_storeu_ps((float *)(y0 + 3 * n_elem_per_reg), x_vec[3]);
+
+            x_vec[4] = _mm256_loadu_ps((float *)(x0 + 4 * n_elem_per_reg));
+            x_vec[5] = _mm256_loadu_ps((float *)(x0 + 5 * n_elem_per_reg));
+            x_vec[6] = _mm256_loadu_ps((float *)(x0 + 6 * n_elem_per_reg));
+            x_vec[7] = _mm256_loadu_ps((float *)(x0 + 7 * n_elem_per_reg));
+
+            x_vec[4] = _mm256_mul_ps(x_vec[4], alphav);
+            x_vec[5] = _mm256_mul_ps(x_vec[5], alphav);
+            x_vec[6] = _mm256_mul_ps(x_vec[6], alphav);
+            x_vec[7] = _mm256_mul_ps(x_vec[7], alphav);
+            
+            _mm256_storeu_ps((float *)(y0 + 4 * n_elem_per_reg), x_vec[4]);
+            _mm256_storeu_ps((float *)(y0 + 5 * n_elem_per_reg), x_vec[5]);
+            _mm256_storeu_ps((float *)(y0 + 6 * n_elem_per_reg), x_vec[6]);
+            _mm256_storeu_ps((float *)(y0 + 7 * n_elem_per_reg), x_vec[7]);
+
+            x_vec[8] = _mm256_loadu_ps((float *)(x0 + 8 * n_elem_per_reg));
+            x_vec[9] = _mm256_loadu_ps((float *)(x0 + 9 * n_elem_per_reg));
+            x_vec[10] = _mm256_loadu_ps((float *)(x0 + 10 * n_elem_per_reg));
+            x_vec[11] = _mm256_loadu_ps((float *)(x0 + 11 * n_elem_per_reg));
+
+            x_vec[8] = _mm256_mul_ps(x_vec[8], alphav);
+            x_vec[9] = _mm256_mul_ps(x_vec[9], alphav);
+            x_vec[10] = _mm256_mul_ps(x_vec[10], alphav);
+            x_vec[11] = _mm256_mul_ps(x_vec[11], alphav);
+
+            _mm256_storeu_ps((float *)(y0 + 8 * n_elem_per_reg), x_vec[8]);
+            _mm256_storeu_ps((float *)(y0 + 9 * n_elem_per_reg), x_vec[9]);
+            _mm256_storeu_ps((float *)(y0 + 10 * n_elem_per_reg), x_vec[10]);
+            _mm256_storeu_ps((float *)(y0 + 11 * n_elem_per_reg), x_vec[11]);
+
+            x0 += 96;
+            y0 += 96;
+        }
+
+        for (; (i + 63) < n; i += 64)
+        {
+            x_vec[0] = _mm256_loadu_ps((float *)x0);
+            x_vec[1] = _mm256_loadu_ps((float *)(x0 + n_elem_per_reg));
+            x_vec[2] = _mm256_loadu_ps((float *)(x0 + 2 * n_elem_per_reg));
+            x_vec[3] = _mm256_loadu_ps((float *)(x0 + 3 * n_elem_per_reg));
+
+            x_vec[0] = _mm256_mul_ps(x_vec[0], alphav);
+            x_vec[1] = _mm256_mul_ps(x_vec[1], alphav);
+            x_vec[2] = _mm256_mul_ps(x_vec[2], alphav);
+            x_vec[3] = _mm256_mul_ps(x_vec[3], alphav);
+            
+            _mm256_storeu_ps((float *)y0, x_vec[0]);
+            _mm256_storeu_ps((float *)(y0 + n_elem_per_reg), x_vec[1]);
+            _mm256_storeu_ps((float *)(y0 + 2 * n_elem_per_reg), x_vec[2]);
+            _mm256_storeu_ps((float *)(y0 + 3 * n_elem_per_reg), x_vec[3]);
+
+            x_vec[4] = _mm256_loadu_ps((float *)(x0 + 4 * n_elem_per_reg));
+            x_vec[5] = _mm256_loadu_ps((float *)(x0 + 5 * n_elem_per_reg));
+            x_vec[6] = _mm256_loadu_ps((float *)(x0 + 6 * n_elem_per_reg));
+            x_vec[7] = _mm256_loadu_ps((float *)(x0 + 7 * n_elem_per_reg));
+
+            x_vec[4] = _mm256_mul_ps(x_vec[4], alphav);
+            x_vec[5] = _mm256_mul_ps(x_vec[5], alphav);
+            x_vec[6] = _mm256_mul_ps(x_vec[6], alphav);
+            x_vec[7] = _mm256_mul_ps(x_vec[7], alphav);
+            
+            _mm256_storeu_ps((float *)(y0 + 4 * n_elem_per_reg), x_vec[4]);
+            _mm256_storeu_ps((float *)(y0 + 5 * n_elem_per_reg), x_vec[5]);
+            _mm256_storeu_ps((float *)(y0 + 6 * n_elem_per_reg), x_vec[6]);
+            _mm256_storeu_ps((float *)(y0 + 7 * n_elem_per_reg), x_vec[7]);
+
+            x0 += 64;
+            y0 += 64;
+        }
+
+        for (; (i + 31) < n; i += 32)
+        {
+            x_vec[0] = _mm256_loadu_ps((float *)x0);
+            x_vec[1] = _mm256_loadu_ps((float *)(x0 + n_elem_per_reg));
+            x_vec[2] = _mm256_loadu_ps((float *)(x0 + 2 * n_elem_per_reg));
+            x_vec[3] = _mm256_loadu_ps((float *)(x0 + 3 * n_elem_per_reg));
+
+            x_vec[0] = _mm256_mul_ps(x_vec[0], alphav);
+            x_vec[1] = _mm256_mul_ps(x_vec[1], alphav);
+            x_vec[2] = _mm256_mul_ps(x_vec[2], alphav);
+            x_vec[3] = _mm256_mul_ps(x_vec[3], alphav);
+            
+            _mm256_storeu_ps((float *)y0, x_vec[0]);
+            _mm256_storeu_ps((float *)(y0 + n_elem_per_reg), x_vec[1]);
+            _mm256_storeu_ps((float *)(y0 + 2 * n_elem_per_reg), x_vec[2]);
+            _mm256_storeu_ps((float *)(y0 + 3 * n_elem_per_reg), x_vec[3]);
+
+            x0 += 32;
+            y0 += 32;
+        }
+
+        for (; (i + 15) < n; i += 16)
+        {
+            x_vec[0] = _mm256_loadu_ps((float *)x0);
+            x_vec[1] = _mm256_loadu_ps((float *)(x0 + n_elem_per_reg));
+
+            x_vec[0] = _mm256_mul_ps(x_vec[0], alphav);
+            x_vec[1] = _mm256_mul_ps(x_vec[1], alphav);
+            
+            _mm256_storeu_ps((float *)y0, x_vec[0]);
+            _mm256_storeu_ps((float *)(y0 + n_elem_per_reg), x_vec[1]);
+
+            x0 += 16;
+            y0 += 16;
+        }
+
+        for (; (i + 7) < n; i += 8)
+        {
+            x_vec[0] = _mm256_loadu_ps((float *)x0);
+
+            x_vec[0] = _mm256_mul_ps(x_vec[0], alphav);
+            
+            _mm256_storeu_ps((float *)y0, x_vec[0]);
+
+            x0 += 8;
+            y0 += 8;
+        }
+
+        _mm256_zeroupper();
+    }
+    
+    // Handling fringe case or non-unit strides
+    for (; i < n; i++)
+    {
+        *y0 = (*alpha) * (*x0);
+        x0 += incx;
+        y0 += incy;
+    }
+}
+
+// This kernel performs  y := alpha * conjx(x)
+void bli_dscal2v_zen_int
+     (
+       conj_t           conjx,
+       dim_t            n,
+       double*  restrict alpha,
+       double*  restrict x, inc_t incx,
+       double*  restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     )
+{
+    // If the vector dimension is zero, return early.
+    if (bli_zero_dim1(n))
+        return;
+
+    if (PASTEMAC(d, eq0)(*alpha))
+    {
+        /* If alpha is zero, use setv. */
+        double *zero = PASTEMAC(d, 0);
+
+        bli_dsetv_zen_int
+        (
+            BLIS_NO_CONJUGATE,
+            n,
+            zero,
+            y, incy,
+            cntx
+        );
+
+        return;
+    }
+    else if (PASTEMAC(d, eq1)(*alpha))
+    {
+        /* If alpha is one, use copyv. */
+        bli_dcopyv_zen_int
+        (
+            conjx,
+            n,
+            x, incx,
+            y, incy,
+            cntx
+        );
+
+        return;
+    }
+
+    dim_t i = 0;
+    double *x0 = x;
+    double *y0 = y;
+
+    if (incx == 1 && incy == 1)
+    {
+        __m256d x_vec[12], alphav;
+
+        alphav = _mm256_broadcast_sd(alpha);
+
+        const dim_t n_elem_per_reg = 4;
+
+        for (; (i + 47) < n; i += 48)
+        {
+            x_vec[0] = _mm256_loadu_pd((double *)x0);
+            x_vec[1] = _mm256_loadu_pd((double *)(x0 + n_elem_per_reg));
+            x_vec[2] = _mm256_loadu_pd((double *)(x0 + 2 * n_elem_per_reg));
+            x_vec[3] = _mm256_loadu_pd((double *)(x0 + 3 * n_elem_per_reg));
+
+            x_vec[0] = _mm256_mul_pd(x_vec[0], alphav);
+            x_vec[1] = _mm256_mul_pd(x_vec[1], alphav);
+            x_vec[2] = _mm256_mul_pd(x_vec[2], alphav);
+            x_vec[3] = _mm256_mul_pd(x_vec[3], alphav);
+            
+            _mm256_storeu_pd((double *)y0, x_vec[0]);
+            _mm256_storeu_pd((double *)(y0 + n_elem_per_reg), x_vec[1]);
+            _mm256_storeu_pd((double *)(y0 + 2 * n_elem_per_reg), x_vec[2]);
+            _mm256_storeu_pd((double *)(y0 + 3 * n_elem_per_reg), x_vec[3]);
+
+            x_vec[4] = _mm256_loadu_pd((double *)(x0 + 4 * n_elem_per_reg));
+            x_vec[5] = _mm256_loadu_pd((double *)(x0 + 5 * n_elem_per_reg));
+            x_vec[6] = _mm256_loadu_pd((double *)(x0 + 6 * n_elem_per_reg));
+            x_vec[7] = _mm256_loadu_pd((double *)(x0 + 7 * n_elem_per_reg));
+
+            x_vec[4] = _mm256_mul_pd(x_vec[4], alphav);
+            x_vec[5] = _mm256_mul_pd(x_vec[5], alphav);
+            x_vec[6] = _mm256_mul_pd(x_vec[6], alphav);
+            x_vec[7] = _mm256_mul_pd(x_vec[7], alphav);
+            
+            _mm256_storeu_pd((double *)(y0 + 4 * n_elem_per_reg), x_vec[4]);
+            _mm256_storeu_pd((double *)(y0 + 5 * n_elem_per_reg), x_vec[5]);
+            _mm256_storeu_pd((double *)(y0 + 6 * n_elem_per_reg), x_vec[6]);
+            _mm256_storeu_pd((double *)(y0 + 7 * n_elem_per_reg), x_vec[7]);
+
+            x_vec[8] = _mm256_loadu_pd((double *)(x0 + 8 * n_elem_per_reg));
+            x_vec[9] = _mm256_loadu_pd((double *)(x0 + 9 * n_elem_per_reg));
+            x_vec[10] = _mm256_loadu_pd((double *)(x0 + 10 * n_elem_per_reg));
+            x_vec[11] = _mm256_loadu_pd((double *)(x0 + 11 * n_elem_per_reg));
+
+            x_vec[8] = _mm256_mul_pd(x_vec[8], alphav);
+            x_vec[9] = _mm256_mul_pd(x_vec[9], alphav);
+            x_vec[10] = _mm256_mul_pd(x_vec[10], alphav);
+            x_vec[11] = _mm256_mul_pd(x_vec[11], alphav);
+
+            _mm256_storeu_pd((double *)(y0 + 8 * n_elem_per_reg), x_vec[8]);
+            _mm256_storeu_pd((double *)(y0 + 9 * n_elem_per_reg), x_vec[9]);
+            _mm256_storeu_pd((double *)(y0 + 10 * n_elem_per_reg), x_vec[10]);
+            _mm256_storeu_pd((double *)(y0 + 11 * n_elem_per_reg), x_vec[11]);
+
+            x0 += 48;
+            y0 += 48;
+        }
+
+        for (; (i + 31) < n; i += 32)
+        {
+            x_vec[0] = _mm256_loadu_pd((double *)x0);
+            x_vec[1] = _mm256_loadu_pd((double *)(x0 + n_elem_per_reg));
+            x_vec[2] = _mm256_loadu_pd((double *)(x0 + 2 * n_elem_per_reg));
+            x_vec[3] = _mm256_loadu_pd((double *)(x0 + 3 * n_elem_per_reg));
+
+            x_vec[0] = _mm256_mul_pd(x_vec[0], alphav);
+            x_vec[1] = _mm256_mul_pd(x_vec[1], alphav);
+            x_vec[2] = _mm256_mul_pd(x_vec[2], alphav);
+            x_vec[3] = _mm256_mul_pd(x_vec[3], alphav);
+            
+            _mm256_storeu_pd((double *)y0, x_vec[0]);
+            _mm256_storeu_pd((double *)(y0 + n_elem_per_reg), x_vec[1]);
+            _mm256_storeu_pd((double *)(y0 + 2 * n_elem_per_reg), x_vec[2]);
+            _mm256_storeu_pd((double *)(y0 + 3 * n_elem_per_reg), x_vec[3]);
+
+            x_vec[4] = _mm256_loadu_pd((double *)(x0 + 4 * n_elem_per_reg));
+            x_vec[5] = _mm256_loadu_pd((double *)(x0 + 5 * n_elem_per_reg));
+            x_vec[6] = _mm256_loadu_pd((double *)(x0 + 6 * n_elem_per_reg));
+            x_vec[7] = _mm256_loadu_pd((double *)(x0 + 7 * n_elem_per_reg));
+
+            x_vec[4] = _mm256_mul_pd(x_vec[4], alphav);
+            x_vec[5] = _mm256_mul_pd(x_vec[5], alphav);
+            x_vec[6] = _mm256_mul_pd(x_vec[6], alphav);
+            x_vec[7] = _mm256_mul_pd(x_vec[7], alphav);
+            
+            _mm256_storeu_pd((double *)(y0 + 4 * n_elem_per_reg), x_vec[4]);
+            _mm256_storeu_pd((double *)(y0 + 5 * n_elem_per_reg), x_vec[5]);
+            _mm256_storeu_pd((double *)(y0 + 6 * n_elem_per_reg), x_vec[6]);
+            _mm256_storeu_pd((double *)(y0 + 7 * n_elem_per_reg), x_vec[7]);
+
+            x0 += 32;
+            y0 += 32;
+        }
+
+        for (; (i + 15) < n; i += 16)
+        {
+            x_vec[0] = _mm256_loadu_pd((double *)x0);
+            x_vec[1] = _mm256_loadu_pd((double *)(x0 + n_elem_per_reg));
+            x_vec[2] = _mm256_loadu_pd((double *)(x0 + 2 * n_elem_per_reg));
+            x_vec[3] = _mm256_loadu_pd((double *)(x0 + 3 * n_elem_per_reg));
+
+            x_vec[0] = _mm256_mul_pd(x_vec[0], alphav);
+            x_vec[1] = _mm256_mul_pd(x_vec[1], alphav);
+            x_vec[2] = _mm256_mul_pd(x_vec[2], alphav);
+            x_vec[3] = _mm256_mul_pd(x_vec[3], alphav);
+            
+            _mm256_storeu_pd((double *)y0, x_vec[0]);
+            _mm256_storeu_pd((double *)(y0 + n_elem_per_reg), x_vec[1]);
+            _mm256_storeu_pd((double *)(y0 + 2 * n_elem_per_reg), x_vec[2]);
+            _mm256_storeu_pd((double *)(y0 + 3 * n_elem_per_reg), x_vec[3]);
+
+            x0 += 16;
+            y0 += 16;
+        }
+
+        for (; (i + 7) < n; i += 8)
+        {
+            x_vec[0] = _mm256_loadu_pd((double *)x0);
+            x_vec[1] = _mm256_loadu_pd((double *)(x0 + n_elem_per_reg));
+
+            x_vec[0] = _mm256_mul_pd(x_vec[0], alphav);
+            x_vec[1] = _mm256_mul_pd(x_vec[1], alphav);
+            
+            _mm256_storeu_pd((double *)y0, x_vec[0]);
+            _mm256_storeu_pd((double *)(y0 + n_elem_per_reg), x_vec[1]);
+
+            x0 += 8;
+            y0 += 8;
+        }
+
+        for (; (i + 3) < n; i += 4)
+        {
+            x_vec[0] = _mm256_loadu_pd((double *)x0);
+
+            x_vec[0] = _mm256_mul_pd(x_vec[0], alphav);
+            
+            _mm256_storeu_pd((double *)y0, x_vec[0]);
+
+            x0 += 4;
+            y0 += 4;
+        }
+
+        _mm256_zeroupper();
+    }
+    
+    // Handling fringe case or non-unit strides
+    for (; i < n; i++)
+    {
+        *y0 = (*alpha) * (*x0);
+        x0 += incx;
+        y0 += incy;
+    }
+}
+
+/*  This kernels for cscal2v and zscal2v perform y := alpha * conjx(x)
 
     alpha   = a + i(b)
     X       = x + i(y)
@@ -114,6 +524,269 @@
        the behaviour is not defined. In this kernel, we return
        without performing any computation.
 */
+void bli_cscal2v_zen_int
+     (
+       conj_t           conjx,
+       dim_t            n,
+       scomplex*  restrict alpha,
+       scomplex*  restrict x, inc_t incx,
+       scomplex*  restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     )
+{
+    // If the vector dimension is zero, return early.
+    if (bli_zero_dim1(n))
+        return;
+
+    if (PASTEMAC(c, eq0)(*alpha))
+    {
+        /* If alpha is zero, use setv. */
+        scomplex *zero = PASTEMAC(c, 0);
+
+        bli_csetv_zen_int
+        (
+            BLIS_NO_CONJUGATE,
+            n,
+            zero,
+            y, incy,
+            cntx
+        );
+
+        return;
+    }
+    else if (PASTEMAC(c, eq1)(*alpha))
+    {
+        /* If alpha is one, use copyv. */
+        bli_ccopyv_zen_int
+        (
+            conjx,
+            n,
+            x, incx,
+            y, incy,
+            cntx
+        );
+
+        return;
+    }
+
+    // Setting the iterator and local pointers
+    dim_t i = 0;
+    scomplex *x0 = x;
+    scomplex *y0 = y;
+
+    float real = (*alpha).real;
+    float imag = (*alpha).imag;
+
+    if (bli_is_noconj(conjx))
+    {
+        if (incx == 1 && incy == 1)
+        {
+            __m256 temp[8], alpha_real, alpha_imag, x_vec[4];
+
+            alpha_real = _mm256_set1_ps(real);
+            alpha_imag = _mm256_set1_ps(imag);
+
+            const dim_t n_elem_per_reg = 4;
+
+            for (; (i + 15) < n; i += 16)
+            {
+                x_vec[0] = _mm256_loadu_ps((float *)x0);
+                x_vec[1] = _mm256_loadu_ps((float *)(x0 + n_elem_per_reg));
+                x_vec[2] = _mm256_loadu_ps((float *)(x0 + 2 * n_elem_per_reg));
+                x_vec[3] = _mm256_loadu_ps((float *)(x0 + 3 * n_elem_per_reg));
+
+                temp[0] = _mm256_mul_ps(x_vec[0], alpha_real);
+                temp[1] = _mm256_mul_ps(x_vec[0], alpha_imag);
+                temp[2] = _mm256_mul_ps(x_vec[1], alpha_real);
+                temp[3] = _mm256_mul_ps(x_vec[1], alpha_imag);
+                temp[4] = _mm256_mul_ps(x_vec[2], alpha_real);
+                temp[5] = _mm256_mul_ps(x_vec[2], alpha_imag);
+                temp[6] = _mm256_mul_ps(x_vec[3], alpha_real);
+                temp[7] = _mm256_mul_ps(x_vec[3], alpha_imag);
+
+                temp[1] = _mm256_permute_ps(temp[1], 0b10110001);
+                temp[3] = _mm256_permute_ps(temp[3], 0b10110001);
+                temp[5] = _mm256_permute_ps(temp[5], 0b10110001);
+                temp[7] = _mm256_permute_ps(temp[7], 0b10110001);
+
+                temp[0] = _mm256_addsub_ps(temp[0], temp[1]);
+                temp[2] = _mm256_addsub_ps(temp[2], temp[3]);
+                temp[4] = _mm256_addsub_ps(temp[4], temp[5]);
+                temp[6] = _mm256_addsub_ps(temp[6], temp[7]);
+
+                _mm256_storeu_ps((float *)y0, temp[0]);
+                _mm256_storeu_ps((float *)(y0 + n_elem_per_reg), temp[2]);
+                _mm256_storeu_ps((float *)(y0 + 2 * n_elem_per_reg), temp[4]);
+                _mm256_storeu_ps((float *)(y0 + 3 * n_elem_per_reg), temp[6]);
+
+                x0 += 16;
+                y0 += 16;
+            }
+
+            for (; (i + 7) < n; i += 8)
+            {
+                x_vec[0] = _mm256_loadu_ps((float *)x0);
+                x_vec[1] = _mm256_loadu_ps((float *)(x0 + n_elem_per_reg));
+
+                temp[0] = _mm256_mul_ps(x_vec[0], alpha_real);
+                temp[1] = _mm256_mul_ps(x_vec[0], alpha_imag);
+                temp[2] = _mm256_mul_ps(x_vec[1], alpha_real);
+                temp[3] = _mm256_mul_ps(x_vec[1], alpha_imag);
+
+                temp[1] = _mm256_permute_ps(temp[1], 0b10110001);
+                temp[3] = _mm256_permute_ps(temp[3], 0b10110001);
+
+                temp[0] = _mm256_addsub_ps(temp[0], temp[1]);
+                temp[2] = _mm256_addsub_ps(temp[2], temp[3]);
+
+                _mm256_storeu_ps((float *)y0, temp[0]);
+                _mm256_storeu_ps((float *)(y0 + n_elem_per_reg), temp[2]);
+
+                x0 += 8;
+                y0 += 8;
+            }
+
+            for (; (i + 3) < n; i += 4)
+            {
+                x_vec[0] = _mm256_loadu_ps((float *)x0);
+
+                temp[0] = _mm256_mul_ps(x_vec[0], alpha_real);
+                temp[1] = _mm256_mul_ps(x_vec[0], alpha_imag);
+
+                temp[1] = _mm256_permute_ps(temp[1], 0b10110001);
+
+                temp[0] = _mm256_addsub_ps(temp[0], temp[1]);
+
+                _mm256_storeu_ps((float *)y0, temp[0]);
+
+                x0 += 4;
+                y0 += 4;
+            }
+            _mm256_zeroupper();
+        }
+
+        // Handling fringe cases or non-unit strides
+        for (; i < n; i++)
+        {
+            y0->real = real * ( x0->real ) - imag * ( x0->imag );
+            y0->imag = imag * ( x0->real ) + real * ( x0->imag );
+
+            x0 += incx;
+            y0 += incy;
+        }
+    }
+    /* This else condition handles the computation
+        for conjugate X cases */
+    else
+    {
+        if (incx == 1 && incy == 1)
+        {
+            __m256 temp[8], alpha_real, alpha_imag, x_vec[4];
+
+            alpha_real = _mm256_set1_ps(real);
+            alpha_imag = _mm256_set1_ps(imag);
+
+            const dim_t n_elem_per_reg = 4;
+
+            for (; (i + 15) < n; i += 16)
+            {
+                x_vec[0] = _mm256_loadu_ps((float *)x0);
+                x_vec[1] = _mm256_loadu_ps((float *)(x0 + n_elem_per_reg));
+                x_vec[2] = _mm256_loadu_ps((float *)(x0 + 2 * n_elem_per_reg));
+                x_vec[3] = _mm256_loadu_ps((float *)(x0 + 3 * n_elem_per_reg));
+
+                temp[0] = _mm256_mul_ps(x_vec[0], alpha_real);
+                temp[1] = _mm256_mul_ps(x_vec[0], alpha_imag);
+                temp[2] = _mm256_mul_ps(x_vec[1], alpha_real);
+                temp[3] = _mm256_mul_ps(x_vec[1], alpha_imag);
+                temp[4] = _mm256_mul_ps(x_vec[2], alpha_real);
+                temp[5] = _mm256_mul_ps(x_vec[2], alpha_imag);
+                temp[6] = _mm256_mul_ps(x_vec[3], alpha_real);
+                temp[7] = _mm256_mul_ps(x_vec[3], alpha_imag);
+
+                temp[0] = _mm256_permute_ps(temp[0], 0b10110001);
+                temp[2] = _mm256_permute_ps(temp[2], 0b10110001);
+                temp[4] = _mm256_permute_ps(temp[4], 0b10110001);
+                temp[6] = _mm256_permute_ps(temp[6], 0b10110001);
+
+                temp[0] = _mm256_addsub_ps(temp[1], temp[0]);
+                temp[2] = _mm256_addsub_ps(temp[3], temp[2]);
+                temp[4] = _mm256_addsub_ps(temp[5], temp[4]);
+                temp[6] = _mm256_addsub_ps(temp[7], temp[6]);
+
+                temp[0] = _mm256_permute_ps(temp[0], 0b10110001);
+                temp[2] = _mm256_permute_ps(temp[2], 0b10110001);
+                temp[4] = _mm256_permute_ps(temp[4], 0b10110001);
+                temp[6] = _mm256_permute_ps(temp[6], 0b10110001);
+
+                _mm256_storeu_ps((float *)y0, temp[0]);
+                _mm256_storeu_ps((float *)(y0 + n_elem_per_reg), temp[2]);
+                _mm256_storeu_ps((float *)(y0 + 2 * n_elem_per_reg), temp[4]);
+                _mm256_storeu_ps((float *)(y0 + 3 * n_elem_per_reg), temp[6]);
+
+                x0 += 16;
+                y0 += 16;
+            }
+
+            for (; (i + 7) < n; i += 8)
+            {
+                x_vec[0] = _mm256_loadu_ps((float *)x0);
+                x_vec[1] = _mm256_loadu_ps((float *)(x0 + n_elem_per_reg));
+
+                temp[0] = _mm256_mul_ps(x_vec[0], alpha_real);
+                temp[1] = _mm256_mul_ps(x_vec[0], alpha_imag);
+                temp[2] = _mm256_mul_ps(x_vec[1], alpha_real);
+                temp[3] = _mm256_mul_ps(x_vec[1], alpha_imag);
+
+                temp[0] = _mm256_permute_ps(temp[0], 0b10110001);
+                temp[2] = _mm256_permute_ps(temp[2], 0b10110001);
+
+                temp[0] = _mm256_addsub_ps(temp[1], temp[0]);
+                temp[2] = _mm256_addsub_ps(temp[3], temp[2]);
+
+                temp[0] = _mm256_permute_ps(temp[0], 0b10110001);
+                temp[2] = _mm256_permute_ps(temp[2], 0b10110001);
+
+                _mm256_storeu_ps((float *)y0, temp[0]);
+                _mm256_storeu_ps((float *)(y0 + n_elem_per_reg), temp[2]);
+
+                x0 += 8;
+                y0 += 8;
+            }
+
+            for (; (i + 3) < n; i += 4)
+            {
+                x_vec[0] = _mm256_loadu_ps((float *)x0);
+
+                temp[0] = _mm256_mul_ps(x_vec[0], alpha_real);
+                temp[1] = _mm256_mul_ps(x_vec[0], alpha_imag);
+
+                temp[0] = _mm256_permute_ps(temp[0], 0b10110001);
+
+                temp[0] = _mm256_addsub_ps(temp[1], temp[0]);
+
+                temp[0] = _mm256_permute_ps(temp[0], 0b10110001);
+
+                _mm256_storeu_ps((float *)y0, temp[0]);
+
+                x0 += 4;
+                y0 += 4;
+            }
+
+            _mm256_zeroupper();
+        }
+
+        // Handling fringe cases or non-unit strides
+        for (; i < n; i++)
+        {
+            y0->real = real * ( x0->real ) + imag * ( x0->imag );
+            y0->imag = imag * ( x0->real ) - real * ( x0->imag );
+
+            x0 += incx;
+            y0 += incy;
+        }
+    }
+}
 
 void bli_zscal2v_zen_int
      (
@@ -127,9 +800,7 @@ void bli_zscal2v_zen_int
 {
 
     // If the vector dimension is zero, return early.
-    // When incx or incy is passed as zero or less than zero,
-    // the behaviour is not defined, so return early.
-    if (bli_zero_dim1(n)|| incx <= 0 || incy <=0)
+    if (bli_zero_dim1(n))
         return;
 
     if (PASTEMAC(z, eq0)(*alpha))
@@ -137,15 +808,7 @@ void bli_zscal2v_zen_int
         /* If alpha is zero, use setv. */
         dcomplex *zero = PASTEMAC(z, 0);
 
-        if(cntx == NULL) cntx = bli_gks_query_cntx();
-
-        /* Query the context for the kernel function pointer. */
-        const num_t dt = PASTEMAC(z, type);
-
-        PASTECH(z, setv_ker_ft)
-        setv_p = bli_cntx_get_l1v_ker_dt(dt, BLIS_SETV_KER, cntx);
-
-        setv_p
+        bli_zsetv_zen_int
         (
             BLIS_NO_CONJUGATE,
             n,

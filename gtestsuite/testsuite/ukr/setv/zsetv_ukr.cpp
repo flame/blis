@@ -93,7 +93,11 @@ INSTANTIATE_TEST_SUITE_P(
         zsetvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zsetv_zen_int),
-            ::testing::Values('n', 'c'),              // conjalpha
+            ::testing::Values('n'                      // conjx
+#ifdef TEST_BLIS_TYPED
+                            , 'c'
+#endif
+                             ),
             ::testing::Values(dcomplex{2.2, -1.8}),   // alpha
             ::testing::Values(// Testing the loops standalone
                               gtint_t(32),            // for size n, L32
@@ -127,7 +131,11 @@ INSTANTIATE_TEST_SUITE_P(
         zsetvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zsetv_zen_int),
-            ::testing::Values('n', 'c'),                 // conjalpha
+            ::testing::Values('n'                        // conjx
+#ifdef TEST_BLIS_TYPED
+                            , 'c'
+#endif
+                             ),
             ::testing::Values(dcomplex{2.2, -1.8}),      // alpha
             ::testing::Values(gtint_t(25), gtint_t(37)), // size of the vector
             ::testing::Values(gtint_t(5)),               // stride size for x
@@ -159,7 +167,11 @@ INSTANTIATE_TEST_SUITE_P(
         zsetvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zsetv_zen_int_avx512),
-            ::testing::Values('n', 'c'),              // conjalpha
+            ::testing::Values('n'                      // conjx
+#ifdef TEST_BLIS_TYPED
+                            , 'c'
+#endif
+                             ),
             ::testing::Values(dcomplex{2.2, -1.8}),   // alpha
             ::testing::Values(// Testing the loops standalone
                               gtint_t(128),           // for size n, L128
@@ -199,7 +211,11 @@ INSTANTIATE_TEST_SUITE_P(
         zsetvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zsetv_zen_int_avx512),
-            ::testing::Values('n', 'c'),                 // conjalpha
+            ::testing::Values('n'                      // conjx
+#ifdef TEST_BLIS_TYPED
+                            , 'c'
+#endif
+                             ),
             ::testing::Values(dcomplex{2.2, -1.8}),      // alpha
             ::testing::Values(gtint_t(25), gtint_t(37)), // size of the vector
             ::testing::Values(gtint_t(5)),               // stride size for x

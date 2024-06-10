@@ -807,6 +807,181 @@ void bli_zdscalv_zen_int10
 	}
 }
 
+void bli_cscalv_zen_int
+	(
+	conj_t           conjalpha,
+	dim_t            n,
+	scomplex* restrict alpha,
+	scomplex* restrict x, inc_t incx,
+	cntx_t* restrict cntx
+	)
+{
+	/*
+		Undefined behaviour
+		-------------------
+
+		1. This layer is not BLAS complaint and the kernel results in
+		undefined behaviour when n <= 0 and incx <= 1. The expectation
+		is that the application/higher-layer invoking this layer should
+		the arg checks.
+	*/
+	// if (bli_zero_dim1(n) || PASTEMAC(z, eq1)(*alpha))
+	//	return;
+
+	// To Do: This call to SETV needs to be removed for BLAS compliance
+	// Currently removing this is resulting in ZHERK failures
+	if (PASTEMAC(c, eq0)(*alpha))
+	{
+		// Expert interface of setv is invoked when alpha is zero
+		scomplex *zero = PASTEMAC(c, 0);
+
+		/* When alpha is zero all the element in x are set to zero */
+		PASTEMAC2(c, setv, BLIS_TAPI_EX_SUF)
+		(
+			BLIS_NO_CONJUGATE,
+			n,
+			zero,
+			x, incx,
+			cntx,
+			NULL);
+
+		return;
+	}
+
+	dim_t i = 0;
+	scomplex alpha_conj;
+	float *x0 = (float *)x;
+
+	// Performs conjugation of alpha based on conjalpha
+	PASTEMAC(c, copycjs)(conjalpha, *alpha, alpha_conj)
+
+	float real = alpha_conj.real;
+	float imag = alpha_conj.imag;
+
+	// Handling computation for unit-strided vectors
+	if ( incx == 1 )
+	{
+		dim_t const n_elem_per_reg = 8;
+
+		__m256 alpha_real_ymm, alpha_imag_ymm;
+
+		alpha_real_ymm = _mm256_broadcast_ss(&real);
+		alpha_imag_ymm = _mm256_broadcast_ss(&imag);
+
+		__m256 x_vec_ymm[4], temp_ymm[8];
+
+		/*  Code logic
+
+			Consider,
+			x1= a1 + ib1, x2 = a1 + ib2
+			alpha = p + iq
+
+			Vector values
+			x_vec_ymm = a1, b1, a2, b2
+			alpha_real_ymm = p, p, p, p
+			alpha_imag_ymm = q, q, q, q
+
+			Computation
+
+			All real values
+			temp_1 = x_vec_ymm * alpha_real_ymm = a1p, b1p, a2p, b2p
+
+			All imaginary values
+			temp_2 = x_vec_ymm * alpha_imag_ymm = a1q, b1q, a2q, b2q
+
+			permute temp_2 to get
+
+			b1q, a1q, b2q, a2q
+
+			addsub temp_1 and temp_2 to get the final result
+			and then store
+		*/
+
+		for (; (i + 15) < n; i += 16)
+		{
+			x_vec_ymm[0] = _mm256_loadu_ps(x0);
+			x_vec_ymm[1] = _mm256_loadu_ps(x0 + n_elem_per_reg);
+			x_vec_ymm[2] = _mm256_loadu_ps(x0 + 2 * n_elem_per_reg);
+			x_vec_ymm[3] = _mm256_loadu_ps(x0 + 3 * n_elem_per_reg);
+
+			temp_ymm[0] = _mm256_mul_ps(x_vec_ymm[0], alpha_imag_ymm);
+			temp_ymm[1] = _mm256_mul_ps(x_vec_ymm[1], alpha_imag_ymm);
+			temp_ymm[2] = _mm256_mul_ps(x_vec_ymm[2], alpha_imag_ymm);
+			temp_ymm[3] = _mm256_mul_ps(x_vec_ymm[3], alpha_imag_ymm);
+
+			temp_ymm[4] = _mm256_permute_ps(temp_ymm[0], 0xB1);
+			temp_ymm[5] = _mm256_permute_ps(temp_ymm[1], 0xB1);
+			temp_ymm[6] = _mm256_permute_ps(temp_ymm[2], 0xB1);
+			temp_ymm[7] = _mm256_permute_ps(temp_ymm[3], 0xB1);
+
+			temp_ymm[0] = _mm256_fmaddsub_ps(x_vec_ymm[0], alpha_real_ymm, temp_ymm[4]);
+			temp_ymm[1] = _mm256_fmaddsub_ps(x_vec_ymm[1], alpha_real_ymm, temp_ymm[5]);
+			temp_ymm[2] = _mm256_fmaddsub_ps(x_vec_ymm[2], alpha_real_ymm, temp_ymm[6]);
+			temp_ymm[3] = _mm256_fmaddsub_ps(x_vec_ymm[3], alpha_real_ymm, temp_ymm[7]);
+
+			_mm256_storeu_ps(x0, temp_ymm[0]);
+			_mm256_storeu_ps(x0 + n_elem_per_reg, temp_ymm[1]);
+			_mm256_storeu_ps(x0 + 2 * n_elem_per_reg, temp_ymm[2]);
+			_mm256_storeu_ps(x0 + 3 * n_elem_per_reg, temp_ymm[3]);
+
+			x0 += 4 * n_elem_per_reg;
+		}
+
+		for (; (i + 7) < n; i += 8)
+		{
+			x_vec_ymm[0] = _mm256_loadu_ps(x0);
+			x_vec_ymm[1] = _mm256_loadu_ps(x0 + n_elem_per_reg);
+
+			temp_ymm[0] = _mm256_mul_ps(x_vec_ymm[0], alpha_imag_ymm);
+			temp_ymm[1] = _mm256_mul_ps(x_vec_ymm[1], alpha_imag_ymm);
+
+			temp_ymm[2] = _mm256_permute_ps(temp_ymm[0], 0xB1);
+			temp_ymm[3] = _mm256_permute_ps(temp_ymm[1], 0xB1);
+
+			temp_ymm[0] = _mm256_fmaddsub_ps(x_vec_ymm[0], alpha_real_ymm, temp_ymm[2]);
+			temp_ymm[1] = _mm256_fmaddsub_ps(x_vec_ymm[1], alpha_real_ymm, temp_ymm[3]);
+
+			_mm256_storeu_ps(x0, temp_ymm[0]);
+			_mm256_storeu_ps(x0 + n_elem_per_reg, temp_ymm[1]);
+
+			x0 += 2 * n_elem_per_reg;
+		}
+
+		for (; (i + 3) < n; i += 4)
+		{
+			x_vec_ymm[0] = _mm256_loadu_ps(x0);
+
+			temp_ymm[0] = _mm256_mul_ps(x_vec_ymm[0], alpha_imag_ymm);
+
+			temp_ymm[1] = _mm256_permute_ps(temp_ymm[0], 0xB1);
+
+			temp_ymm[0] = _mm256_fmaddsub_ps(x_vec_ymm[0], alpha_real_ymm, temp_ymm[1]);
+
+			_mm256_storeu_ps(x0, temp_ymm[0]);
+
+			x0 += n_elem_per_reg;
+		}
+
+		// Issue vzeroupper instruction to clear upper lanes of ymm registers.
+		// This avoids a performance penalty caused by false dependencies when
+		// transitioning from AVX to SSE instructions (which may occur later,
+		// especially if BLIS is compiled with -mfpmath=sse).
+		_mm256_zeroupper();
+	}
+
+	for (; i < n; i++)
+	{
+		float x_real, x_imag;
+		x_real = real * (*x0) - imag * (*(x0 + 1));
+		x_imag = real * (*(x0 + 1)) + imag * (*x0);
+
+		*x0 = x_real;
+		*(x0 + 1) = x_imag;
+
+		x0 += 2 * incx;
+	}
+}
+
 void bli_zscalv_zen_int
 	(
 	conj_t           conjalpha,

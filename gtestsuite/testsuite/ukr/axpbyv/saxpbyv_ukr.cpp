@@ -42,7 +42,9 @@ class saxpbyvGeneric :
                                                    gtint_t,         // incx
                                                    gtint_t,         // incy
                                                    float,           // alpha
-                                                   float>> {};      // beta
+                                                   float,           // beta
+                                                   bool>> {};       // is_memory_test
+
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(saxpbyvGeneric);
 
@@ -70,6 +72,8 @@ TEST_P( saxpbyvGeneric, UKR )
     T alpha = std::get<5>(GetParam());
     // beta
     T beta = std::get<6>(GetParam());
+    // is_memory_test
+    bool is_memory_test = std::get<7>(GetParam());
 
     // Set the threshold for the errors:
     // Check gtestsuite axpbyv.h (no netlib version) for reminder of the
@@ -104,39 +108,128 @@ TEST_P( saxpbyvGeneric, UKR )
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_axpbyv_ukr<T, saxpbyv_ker_ft>( ukr_fp, conj_x, n, incx, incy, alpha, beta, thresh );
+    test_axpbyv_ukr<T, saxpbyv_ker_ft>( ukr_fp, conj_x, n, incx, incy, alpha, beta, thresh, is_memory_test );
 }
 
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
-// Unit testing with unit stride
+/*
+    Unit testing for functionality of bli_saxpbyv_zen_int10 kernel.
+    The code structure for bli_saxpbyv_zen_int10( ... ) is as follows :
+    For unit strides :
+        Main loop    :  In blocks of 80 --> L80
+        Fringe loops :  In blocks of 40 --> L40
+                        In blocks of 32 --> L32
+                        In blocks of 16  --> L16
+                        In blocks of 8  --> L8
+                        Element-wise loop --> LScalar
+
+    For non-unit strides : A single loop, to process element wise.
+*/
+
+// Unit testing with unit stride, across all loops.
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpbyv_zen_int10_unitStride,
         saxpbyvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_saxpbyv_zen_int10), // kernel address
-            ::testing::Values('n'),                   // use x, not conj(x) (since it is real)
-            ::testing::Values(gtint_t(32), gtint_t(45)), // size n
-            ::testing::Values(gtint_t(1)),            // stride size for x
-            ::testing::Values(gtint_t(1)),            // stride size for y
-            ::testing::Values(float(2.2)), // alpha
-            ::testing::Values(float(-1.8))  // beta
+            ::testing::Values(bli_saxpbyv_zen_int10),      // kernel address
+            ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
+            ::testing::Values(// Testing the loops standalone
+                              gtint_t(80),                 // size n, for L80
+                              gtint_t(40),                 // L40
+                              gtint_t(32),                 // L32
+                              gtint_t(16),                 // L16
+                              gtint_t(8),                  // L8
+                              gtint_t(7),                  // LScalar
+                              // Testing the loops with combination
+                              gtint_t(240),                // 3*L80
+                              gtint_t(312),                // 3*L80 + L40 + L32
+                              gtint_t(271)),               // 3*L80 + L16 + L8 + 7(LScalar)
+            ::testing::Values(gtint_t(1)),                 // stride size for x
+            ::testing::Values(gtint_t(1)),                 // stride size for y
+            ::testing::Values(float(1.0), float(-1.0),
+                              float(2.2), float(-4.1),
+                              float(0.0)),                 // alpha
+            ::testing::Values(float(1.0), float(-1.0),
+                              float(2.2), float(-4.1), 
+                              float(0.0)),                 // beta
+            ::testing::Values(false, true)                 // is_memory_test
         ),
-        (::axpbyvUKRPrint<float, saxpbyv_ker_ft>())
+        ((::axpbyvMemUKRPrint<float, saxpbyv_ker_ft>()))
     );
 
-// Unit testing with unit stride
+// Unit testing for non unit strides
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpbyv_zen_int_unitStride,
         saxpbyvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_saxpbyv_zen_int),   // kernel address
-            ::testing::Values('n'),                   // use x, not conj(x) (since it is real)
-            ::testing::Values(gtint_t(32), gtint_t(45)), // size n
-            ::testing::Values(gtint_t(1)),            // stride size for x
-            ::testing::Values(gtint_t(1)),            // stride size for y
-            ::testing::Values(float(2.2)), // alpha
-            ::testing::Values(float(-1.8))  // beta
+            ::testing::Values(bli_saxpbyv_zen_int10),      // kernel address
+            ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
+            ::testing::Values(gtint_t(10),                 // n, size of the vector
+                              gtint_t(25)),
+            ::testing::Values(gtint_t(5)),                 // stride size for x
+            ::testing::Values(gtint_t(3)),                 // stride size for y
+            ::testing::Values(float(1.0), float(-1.0),
+                              float(2.2), float(-4.1),
+                              float(0.0)),                 // alpha
+            ::testing::Values(float(1.0), float(-1.0),
+                              float(2.2), float(-4.1), 
+                              float(0.0)),                 // beta
+            ::testing::Values(false, true)                 // is_memory_test
         ),
-        (::axpbyvUKRPrint<float, saxpbyv_ker_ft>())
+        (::axpbyvMemUKRPrint<float, saxpbyv_ker_ft>())
+    );
+
+/*
+    Unit testing for functionality of bli_saxpbyv_zen_int kernel.
+    The code structure for bli_saxpbyv_zen_int( ... ) is as follows :
+    For unit strides :
+        Main loop    :  In blocks of 32 --> L32
+                        Element-wise loop --> LScalar
+
+    For non-unit strides : A single loop, to process element wise.
+*/
+// Unit testing with Unit Strides, across all loops.
+INSTANTIATE_TEST_SUITE_P(
+        bli_saxpbyv_zen_int_unitStrides,
+        saxpbyvGeneric,
+        ::testing::Combine(
+            ::testing::Values(bli_saxpbyv_zen_int),        // kernel address
+            ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
+            ::testing::Values(gtint_t(32),                 // size n, for L32
+                              gtint_t(96),                 // 3*L32
+                              gtint_t(111)),               // 3*L32 + 15(LScalar)
+            ::testing::Values(gtint_t(1)),                 // stride size for x
+            ::testing::Values(gtint_t(1)),                 // stride size for y
+            ::testing::Values(float(1.0), float(-1.0),
+                              float(2.2), float(-4.1),
+                              float(0.0)),                 // alpha
+            ::testing::Values(float(1.0), float(-1.0),
+                              float(2.2), float(-4.1), 
+                              float(0.0)),                 // beta
+            ::testing::Values(false, true)                 // is_memory_test
+        ),
+        (::axpbyvMemUKRPrint<float, saxpbyv_ker_ft>())
+    );
+
+// Unit testing for Non-Unit Stride
+INSTANTIATE_TEST_SUITE_P(
+        bli_saxpbyv_zen_int_nonUnitStrides,
+        saxpbyvGeneric,
+        ::testing::Combine(
+            ::testing::Values(bli_saxpbyv_zen_int),        // kernel address
+            ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
+            ::testing::Values(gtint_t(10),                 // n, size of the vector
+                              gtint_t(25)),
+            ::testing::Values(gtint_t(5)),                 // stride size for x
+            ::testing::Values(gtint_t(3)),                 // stride size for y
+            ::testing::Values(float(1.0), float(-1.0),
+                              float(2.2), float(-4.1),
+                              float(0.0)),                 // alpha
+            ::testing::Values(float(1.0), float(-1.0),
+                              float(2.2), float(-4.1), 
+                              float(0.0)),                 // beta
+            ::testing::Values(false, true)                 // is_memory_test
+        ),
+        (::axpbyvMemUKRPrint<float, saxpbyv_ker_ft>())
     );
 #endif

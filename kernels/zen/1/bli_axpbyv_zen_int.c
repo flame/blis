@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -72,93 +72,142 @@ void bli_saxpbyv_zen_int
 	const dim_t     n_elem_per_reg  = 8;    // number of elements per register
 	const dim_t     n_iter_unroll   = 4;    // num of registers per iteration
 
-	dim_t           i;          // iterator
+	dim_t           i = 0;          // iterator
 
 	float* restrict x0;
 	float* restrict y0;
 
 	v8sf_t          alphav;
 	v8sf_t          betav;
-	v8sf_t          y0v, y1v, y2v, y3v;
+	v8sf_t          yv[4];
 
-	/* if the vector dimension is zero, or if alpha & beta are zero,
-	   return early. */
-	if ( bli_zero_dim1( n ) ||
-		 ( PASTEMAC( s, eq0 )( *alpha ) && PASTEMAC( s, eq0 )( *beta ) ) )
-		 return;
+	bool is_alpha_one = bli_seq1( *alpha );
 
 	// initialize local pointers
 	x0 = x;
 	y0 = y;
 
-	if ( incx == 1 && incy == 1 )
+	if( incx == 1 && incy == 1 )
 	{
-		// broadcast alpha & beta to all elements of respective vector registers
-		alphav.v = _mm256_broadcast_ss( alpha );
-		betav.v  = _mm256_broadcast_ss( beta );
+		// Broadcasting beta onto a YMM register
+		betav.v = _mm256_broadcast_ss( beta );
 
-		// unrolling and vectorizing
-		for ( i = 0; ( i + 31 ) < n; i += 32 )
+		if( is_alpha_one ) // Scale y with beta and add x to it
 		{
-			// loading input y
-			y0v.v = _mm256_loadu_ps( y0 + 0*n_elem_per_reg );
-			y1v.v = _mm256_loadu_ps( y0 + 1*n_elem_per_reg );
-			y2v.v = _mm256_loadu_ps( y0 + 2*n_elem_per_reg );
-			y3v.v = _mm256_loadu_ps( y0 + 3*n_elem_per_reg );
+			for ( ; ( i + 31 ) < n; i += 32 )
+			{
+				// Loading input values
+				yv[0].v =  _mm256_loadu_ps( x0 + 0*n_elem_per_reg );
+				yv[1].v =  _mm256_loadu_ps( x0 + 1*n_elem_per_reg );
+				yv[2].v =  _mm256_loadu_ps( x0 + 2*n_elem_per_reg );
+				yv[3].v =  _mm256_loadu_ps( x0 + 3*n_elem_per_reg );
 
-			// y' := y := beta * y
-			y0v.v = _mm256_mul_ps( betav.v, y0v.v );
-			y1v.v = _mm256_mul_ps( betav.v, y1v.v );
-			y2v.v = _mm256_mul_ps( betav.v, y2v.v );
-			y3v.v = _mm256_mul_ps( betav.v, y3v.v );
+				// y := beta * y + x
+				yv[0].v = _mm256_fmadd_ps
+							(
+								betav.v,
+								_mm256_loadu_ps( y0 + 0*n_elem_per_reg ),
+								yv[0].v
+							);
+				yv[1].v = _mm256_fmadd_ps
+							(
+								betav.v,
+								_mm256_loadu_ps( y0 + 1*n_elem_per_reg ),
+								yv[1].v
+							);
+				yv[2].v = _mm256_fmadd_ps
+							(
+								betav.v,
+								_mm256_loadu_ps( y0 + 2*n_elem_per_reg ),
+								yv[2].v
+							);
+				yv[3].v = _mm256_fmadd_ps
+							(
+								betav.v,
+								_mm256_loadu_ps( y0 + 3*n_elem_per_reg ),
+								yv[3].v
+							);
 
-			// y := y' + alpha * x
-			y0v.v = _mm256_fmadd_ps
-					(
-					  alphav.v,
-					  _mm256_loadu_ps( x0 + 0*n_elem_per_reg ),
-					  y0v.v
-					);
-			y1v.v = _mm256_fmadd_ps
-					(
-					  alphav.v,
-					  _mm256_loadu_ps( x0 + 1*n_elem_per_reg ),
-					  y1v.v
-					);
-			y2v.v = _mm256_fmadd_ps
-					(
-					  alphav.v,
-					  _mm256_loadu_ps( x0 + 2*n_elem_per_reg ),
-					  y2v.v
-					);
-			y3v.v = _mm256_fmadd_ps
-					(
-					  alphav.v,
-					  _mm256_loadu_ps( x0 + 3*n_elem_per_reg ),
-					  y3v.v
-					);
+				// Storing the output
+				_mm256_storeu_ps( ( y0 + 0*n_elem_per_reg ), yv[0].v );
+				_mm256_storeu_ps( ( y0 + 1*n_elem_per_reg ), yv[1].v );
+				_mm256_storeu_ps( ( y0 + 2*n_elem_per_reg ), yv[2].v );
+				_mm256_storeu_ps( ( y0 + 3*n_elem_per_reg ), yv[3].v );
 
-			// storing the output
-			_mm256_storeu_ps( ( y0 + 0*n_elem_per_reg ), y0v.v );
-			_mm256_storeu_ps( ( y0 + 1*n_elem_per_reg ), y1v.v );
-			_mm256_storeu_ps( ( y0 + 2*n_elem_per_reg ), y2v.v );
-			_mm256_storeu_ps( ( y0 + 3*n_elem_per_reg ), y3v.v );
-
-			x0 += n_elem_per_reg * n_iter_unroll;
-			y0 += n_elem_per_reg * n_iter_unroll;
+				x0 += n_elem_per_reg * n_iter_unroll;
+				y0 += n_elem_per_reg * n_iter_unroll;
+			}
 		}
-		
+		else
+		{
+			// Broadcasting alpha onto a YMM register
+			alphav.v = _mm256_broadcast_ss( alpha );
+
+			for ( ; ( i + 31 ) < n; i += 32 )
+			{
+				// loading input values
+				yv[0].v = _mm256_loadu_ps( y0 + 0*n_elem_per_reg );
+				yv[1].v = _mm256_loadu_ps( y0 + 1*n_elem_per_reg );
+				yv[2].v = _mm256_loadu_ps( y0 + 2*n_elem_per_reg );
+				yv[3].v = _mm256_loadu_ps( y0 + 3*n_elem_per_reg );
+
+				// y' := beta * y
+				yv[0].v = _mm256_mul_ps( betav.v, yv[0].v );
+				yv[1].v = _mm256_mul_ps( betav.v, yv[1].v );
+				yv[2].v = _mm256_mul_ps( betav.v, yv[2].v );
+				yv[3].v = _mm256_mul_ps( betav.v, yv[3].v );
+
+				// y := y' + alpha * x
+				yv[0].v = _mm256_fmadd_ps
+							(
+								alphav.v,
+								_mm256_loadu_ps( x0 + 0*n_elem_per_reg ),
+								yv[0].v
+							);
+				yv[1].v = _mm256_fmadd_ps
+							(
+								alphav.v,
+								_mm256_loadu_ps( x0 + 1*n_elem_per_reg ),
+								yv[1].v
+							);
+				yv[2].v = _mm256_fmadd_ps
+							(
+								alphav.v,
+								_mm256_loadu_ps( x0 + 2*n_elem_per_reg ),
+								yv[2].v
+							);
+				yv[3].v = _mm256_fmadd_ps
+							(
+								alphav.v,
+								_mm256_loadu_ps( x0 + 3*n_elem_per_reg ),
+								yv[3].v
+							);
+
+				// storing the output
+				_mm256_storeu_ps( ( y0 + 0*n_elem_per_reg ), yv[0].v );
+				_mm256_storeu_ps( ( y0 + 1*n_elem_per_reg ), yv[1].v );
+				_mm256_storeu_ps( ( y0 + 2*n_elem_per_reg ), yv[2].v );
+				_mm256_storeu_ps( ( y0 + 3*n_elem_per_reg ), yv[3].v );
+
+				x0 += n_elem_per_reg * n_iter_unroll;
+				y0 += n_elem_per_reg * n_iter_unroll;
+			}
+		}
+
 		// Issue vzeroupper instruction to clear upper lanes of ymm registers.
 		// This avoids a performance penalty caused by false dependencies when
 		// transitioning from AVX to SSE instructions (which may occur as soon
 		// as the n_left cleanup loop below if BLIS is compiled with
 		// -mfpmath=sse).
 		_mm256_zeroupper();
+	}
 
-		// if there are leftover iterations, perform them with scaler code
+	// Handling fringe cases or non-unit strides
+	if( is_alpha_one )
+	{
 		for ( ; i < n; ++i )
 		{
-			*y0 = ( (*alpha) * (*x0) ) + ( (*beta) * (*y0) );
+			*y0 = (*beta) * (*y0) + (*x0);
 
 			x0 += incx;
 			y0 += incy;
@@ -166,15 +215,15 @@ void bli_saxpbyv_zen_int
 	}
 	else
 	{
-		// for non-unit increments, use scaler code
-		for ( i = 0; i < n; ++i )
+		for ( ; i < n; ++i )
 		{
-			*y0 = ( (*alpha) * (*x0) ) + ( (*beta) * (*y0) );
+			*y0 = (*beta) * (*y0) + (*alpha) * (*x0);
 
 			x0 += incx;
 			y0 += incy;
 		}
 	}
+
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
 }
 
@@ -200,23 +249,16 @@ void bli_daxpbyv_zen_int
 	const dim_t     n_elem_per_reg  = 4;    // number of elements per register
 	const dim_t     n_iter_unroll   = 4;    // number of registers per iteration
 
-	dim_t           i;          // iterator
+	dim_t           i = 0;          // iterator
 
 	double* restrict x0;
 	double* restrict y0;
 
 	v4df_t          alphav;
 	v4df_t          betav;
-	v4df_t          y0v, y1v, y2v, y3v;
+	v4df_t          yv[4];
 
-	/* if the vector dimension is zero, or if alpha & beta are zero,
-	   return early. */
-	if ( bli_zero_dim1( n ) ||
-		 ( PASTEMAC( s, eq0 )( *alpha ) && PASTEMAC( s, eq0 )( *beta ) ) )
-	{
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
-		return;
-	}
+	bool is_alpha_one = bli_deq1( *alpha );
 
 	// initialize local pointers
 	x0 = x;
@@ -224,60 +266,109 @@ void bli_daxpbyv_zen_int
 	
 	if ( incx == 1 && incy == 1 )
 	{
-		// broadcast alpha & beta to all elements of respective vector registers
-		alphav.v = _mm256_broadcast_sd( alpha );
-		betav.v  = _mm256_broadcast_sd( beta );
+		// Broadcasting beta onto a YMM register
+		betav.v = _mm256_broadcast_sd( beta );
 
-		// unrolling and vectorizing
-		for ( i = 0; ( i + 15 ) < n; i += 16 )
+		if( is_alpha_one ) // Scale y with beta and add x to it
 		{
-			// loading input y
-			y0v.v = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
-			y1v.v = _mm256_loadu_pd( y0 + 1*n_elem_per_reg );
-			y2v.v = _mm256_loadu_pd( y0 + 2*n_elem_per_reg );
-			y3v.v = _mm256_loadu_pd( y0 + 3*n_elem_per_reg );
+			for ( ; ( i + 15 ) < n; i += 16 )
+			{
+				// Loading input values
+				yv[0].v =  _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
+				yv[1].v =  _mm256_loadu_pd( x0 + 1*n_elem_per_reg );
+				yv[2].v =  _mm256_loadu_pd( x0 + 2*n_elem_per_reg );
+				yv[3].v =  _mm256_loadu_pd( x0 + 3*n_elem_per_reg );
 
-			// y' := y := beta * y
-			y0v.v = _mm256_mul_pd( betav.v, y0v.v );
-			y1v.v = _mm256_mul_pd( betav.v, y1v.v );
-			y2v.v = _mm256_mul_pd( betav.v, y2v.v );
-			y3v.v = _mm256_mul_pd( betav.v, y3v.v );
-			
-			// y := y' + alpha * x
-			//   := beta * y + alpha * x
-			y0v.v = _mm256_fmadd_pd
-					(
-					  alphav.v,
-					  _mm256_loadu_pd( x0 + 0*n_elem_per_reg ),
-					  y0v.v
-					);
-			y1v.v = _mm256_fmadd_pd
-					(
-					  alphav.v,
-					  _mm256_loadu_pd( x0 + 1*n_elem_per_reg ),
-					  y1v.v
-					);
-			y2v.v = _mm256_fmadd_pd
-					(
-					  alphav.v,
-					  _mm256_loadu_pd( x0 + 2*n_elem_per_reg ),
-					  y2v.v
-					);
-			y3v.v = _mm256_fmadd_pd
-					(
-					  alphav.v,
-					  _mm256_loadu_pd( x0 + 3*n_elem_per_reg ),
-					  y3v.v
-					);
+				// y := beta * y + x
+				yv[0].v = _mm256_fmadd_pd
+							(
+								betav.v,
+								_mm256_loadu_pd( y0 + 0*n_elem_per_reg ),
+								yv[0].v
+							);
+				yv[1].v = _mm256_fmadd_pd
+							(
+								betav.v,
+								_mm256_loadu_pd( y0 + 1*n_elem_per_reg ),
+								yv[1].v
+							);
+				yv[2].v = _mm256_fmadd_pd
+							(
+								betav.v,
+								_mm256_loadu_pd( y0 + 2*n_elem_per_reg ),
+								yv[2].v
+							);
+				yv[3].v = _mm256_fmadd_pd
+							(
+								betav.v,
+								_mm256_loadu_pd( y0 + 3*n_elem_per_reg ),
+								yv[3].v
+							);
 
-			// storing the output
-			_mm256_storeu_pd( ( y0 + 0*n_elem_per_reg ), y0v.v );
-			_mm256_storeu_pd( ( y0 + 1*n_elem_per_reg ), y1v.v );
-			_mm256_storeu_pd( ( y0 + 2*n_elem_per_reg ), y2v.v );
-			_mm256_storeu_pd( ( y0 + 3*n_elem_per_reg ), y3v.v );
+				// Storing the output
+				_mm256_storeu_pd( ( y0 + 0*n_elem_per_reg ), yv[0].v );
+				_mm256_storeu_pd( ( y0 + 1*n_elem_per_reg ), yv[1].v );
+				_mm256_storeu_pd( ( y0 + 2*n_elem_per_reg ), yv[2].v );
+				_mm256_storeu_pd( ( y0 + 3*n_elem_per_reg ), yv[3].v );
 
-			x0 += n_elem_per_reg * n_iter_unroll;
-			y0 += n_elem_per_reg * n_iter_unroll;
+				x0 += n_elem_per_reg * n_iter_unroll;
+				y0 += n_elem_per_reg * n_iter_unroll;
+			}
+		}
+		else
+		{
+			// Broadcasting alpha onto a YMM register
+			alphav.v = _mm256_broadcast_sd( alpha );
+
+			for ( ; ( i + 15 ) < n; i += 16 )
+			{
+				// loading input values
+				yv[0].v = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
+				yv[1].v = _mm256_loadu_pd( y0 + 1*n_elem_per_reg );
+				yv[2].v = _mm256_loadu_pd( y0 + 2*n_elem_per_reg );
+				yv[3].v = _mm256_loadu_pd( y0 + 3*n_elem_per_reg );
+
+				// y' := beta * y
+				yv[0].v = _mm256_mul_pd( betav.v, yv[0].v );
+				yv[1].v = _mm256_mul_pd( betav.v, yv[1].v );
+				yv[2].v = _mm256_mul_pd( betav.v, yv[2].v );
+				yv[3].v = _mm256_mul_pd( betav.v, yv[3].v );
+
+				// y := y' + alpha * x
+				yv[0].v = _mm256_fmadd_pd
+							(
+								alphav.v,
+								_mm256_loadu_pd( x0 + 0*n_elem_per_reg ),
+								yv[0].v
+							);
+				yv[1].v = _mm256_fmadd_pd
+							(
+								alphav.v,
+								_mm256_loadu_pd( x0 + 1*n_elem_per_reg ),
+								yv[1].v
+							);
+				yv[2].v = _mm256_fmadd_pd
+							(
+								alphav.v,
+								_mm256_loadu_pd( x0 + 2*n_elem_per_reg ),
+								yv[2].v
+							);
+				yv[3].v = _mm256_fmadd_pd
+							(
+								alphav.v,
+								_mm256_loadu_pd( x0 + 3*n_elem_per_reg ),
+								yv[3].v
+							);
+
+				// storing the output
+				_mm256_storeu_pd( ( y0 + 0*n_elem_per_reg ), yv[0].v );
+				_mm256_storeu_pd( ( y0 + 1*n_elem_per_reg ), yv[1].v );
+				_mm256_storeu_pd( ( y0 + 2*n_elem_per_reg ), yv[2].v );
+				_mm256_storeu_pd( ( y0 + 3*n_elem_per_reg ), yv[3].v );
+
+				x0 += n_elem_per_reg * n_iter_unroll;
+				y0 += n_elem_per_reg * n_iter_unroll;
+			}
 		}
 
 		// Issue vzeroupper instruction to clear upper lanes of ymm registers.
@@ -286,11 +377,14 @@ void bli_daxpbyv_zen_int
 		// as the n_left cleanup loop below if BLIS is compiled with
 		// -mfpmath=sse).
 		_mm256_zeroupper();
+	}
 
-		// if there are leftover iterations, perform them with scaler code
+	// Handling fringe cases or non-unit strided inputs
+	if( is_alpha_one )
+	{
 		for ( ; i < n; ++i )
 		{
-			*y0 = ( (*alpha) * (*x0) ) + ( (*beta) * (*y0) );
+			*y0 = (*beta) * (*y0) + (*x0);
 
 			x0 += incx;
 			y0 += incy;
@@ -298,15 +392,16 @@ void bli_daxpbyv_zen_int
 	}
 	else
 	{
-		// for non-unit increments, use scaler code
-		for ( i = 0; i < n; ++i )
+		for ( ; i < n; ++i )
 		{
-			*y0 = ( (*alpha) * (*x0) ) + ( (*beta) * (*y0) );
+			*y0 = (*beta) * (*y0) + (*alpha) * (*x0);
 
 			x0 += incx;
 			y0 += incy;
 		}
 	}
+
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
 }
 
 /**
@@ -328,390 +423,588 @@ void bli_caxpbyv_zen_int
 	 )
 {
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_4)
-	const dim_t      n_elem_per_reg = 8;    // number of elements per register
 
-	dim_t            i;     // iterator
+	dim_t i = 0; // iterator
 
+	// Local pointers to x and y vectors
 	float*  restrict x0;
 	float*  restrict y0;
 
+	// Boolean to check if alpha is 1
+	bool is_alpha_one = bli_ceq1( *alpha );
+
+	// Variables to store real and imaginary components of alpha and beta
 	float alphaR, alphaI, betaR, betaI;
 
-	__m256 alphaRv;
-	__m256 alphaIv;
-	__m256 betaRv;
-	__m256 betaIv;
-	__m256 xv[4];
-	__m256 yv[4];
-	__m256 iv[4];   // intermediate registers
-
-	conj_t conjx_use = conjx;
-	
-	/* if the vector dimension is zero, or if alpha & beta are zero,
-	   return early. */
-	if ( bli_zero_dim1( n ) ||
-		 ( PASTEMAC( c, eq0 )( *alpha ) && PASTEMAC( c, eq0 )( *beta ) ) )
-	{
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
-		return;
-	}
-
-	// initialize local pointers
-	x0     = ( float* ) x;
-	y0     = ( float* ) y;
+	// Initializing the local pointers
+	x0  = ( float* ) x;
+	y0  = ( float* ) y;
 
 	alphaR = alpha->real;
 	alphaI = alpha->imag;
 	betaR  = beta->real;
 	betaI  = beta->imag;
 
+	// In case of unit strides for x and y vectors
 	if ( incx == 1 && incy == 1 )
 	{
-		//---------- Scalar algorithm BLIS_NO_CONJUGATE -------------
-		// y = beta*y + alpha*x
-		// y = ( bR + ibI ) * ( yR + iyI ) + ( aR + iaI ) * ( xR + ixI )
-		// y = bR.yR + ibR.yI + ibI.yR - ibIyI + aR.xR + iaR.xI + iaI.xR - aI.xI
-		// y =   ( bR.yR - bI.yI + aR.xR - aI.xI ) +
-		//	   i ( bR.yI + bI.yR + aR.xI + aI.xR )
+		// Number of float precision elements in a YMM register
+		const dim_t  n_elem_per_reg = 8;
 
-		// SIMD Algorithm BLIS_NO_CONJUGATE
-		// yv  =  yR1  yI1  yR2  yI2  yR3  yI3  yR4  yI4
-		// yv' =  yI1  yR1  yI2  yR2  yI3  yR3  yI4  yR4
-		// xv  =  xR1  xI1  xR2  xI2  xR3  xI3  xR4  xI4
-		// xv' =  xI1  xR1  xI2  xR2  xI3  xR3  xI4  xR4
-		// arv =  aR   aR   aR   aR   aR   aR   aR   aR
-		// aiv = -aI   aI  -aI   aI  -aI   aI  -aI   aI
-		// brv =  bR   bR   bR   bR   bR   bR   bR   bR
-		// biv = -bI   bI  -bI   bI  -bI   bI  -bI   bI
-		
-		// step 1: iv = brv * iv
-		// step 2: shuffle yv -> yv'
-		// step 3: FMA yv = biv * yv' + iv
-		// step 4: iv = arv * xv
-		// step 5: shuffle xv -> xv'
-		// step 6: FMA yv = aiv * xv' + iv
+		// Scratch registers
+		__m256 xv[4];
+		__m256 yv[4];
+		__m256 iv[4];
 
-		//---------- Scalar algorithm BLIS_CONJUGATE -------------
-		// y = beta*y + alpha*conj(x)
-		// y = ( bR + ibI ) * ( yR + iyI ) + ( aR + iaI ) * ( xR - ixI )
-		// y = bR.yR + ibR.yI + ibI.yR - bI.yI + aR.xR - iaR.xI + iaI.xR + aI.xI
-		// y =   ( bR.yR - bI.yI + aR.xR + aI.xI ) +
-		//	   i ( bR.yI + bI.yR - aR.xI + aI.xR )
+		// Vectors to store real and imaginary components of beta
+		__m256 betaRv, betaIv;
 
-		// SIMD Algorithm BLIS_CONJUGATE
-		// yv  =  yR1  yI1  yR2  yI2  yR3  yI3  yR4  yI4
-		// yv' =  yI1  yR1  yI2  yR2  yI3  yR3  yI4  yR4
-		// xv  =  xR1  xI1  xR2  xI2  xR3  xI3  xR4  xI4
-		// xv' =  xI1  xR1  xI2  xR2  xI3  xR3  xI4  xR4
-		// arv =  aR  -aR   aR  -aR   aR  -aR   aR  -aR
-		// aiv =  aI   aI   aI   aI   aI   aI   aI   aI
-		// brv =  bR   bR   bR   bR   bR   bR   bR   bR
-		// biv = -bI   bI  -bI   bI  -bI   bI  -bI   bI
-		//
-		// step 1: iv = brv * iv
-		// step 2: shuffle yv -> yv'
-		// step 3: FMA yv = biv * yv' + iv
-		// step 4: iv = arv * xv
-		// step 5: shuffle xv -> xv'
-		// step 6: FMA yv = aiv * xv' + iv
+		// Broadcasting real and imaginary components of beta onto the registers
+		betaRv = _mm256_broadcast_ss( &betaR );
+		betaIv = _mm256_broadcast_ss( &betaI );
 
-		// broadcast alpha & beta to all elements of respective vector registers
-		if ( !bli_is_conj( conjx ) )    // If BLIS_NO_CONJUGATE
+		if( is_alpha_one )
 		{
-			// alphaRv =  aR   aR   aR   aR   aR   aR   aR   aR
-			// alphaIv = -aI   aI  -aI   aI  -aI   aI  -aI   aI
-			// betaRv  =  bR   bR   bR   bR   bR   bR   bR   bR
-			// betaIv  = -bI   bI  -bI   bI  -bI   bI  -bI   bI
-			alphaRv = _mm256_broadcast_ss( &alphaR );
-			alphaIv = _mm256_set_ps
-					  (
-						alphaI, -alphaI, alphaI, -alphaI,
-					    alphaI, -alphaI, alphaI, -alphaI
-					  );
-			betaRv  = _mm256_broadcast_ss( &betaR );
-			betaIv  = _mm256_set_ps
-					  (
-						betaI, -betaI, betaI, -betaI,
-						betaI, -betaI, betaI, -betaI
-					  );
-		}
-		else
-		{
-			// alphaRv =  aR  -aR   aR  -aR   aR  -aR   aR  -aR
-			// alphaIv =  aI   aI   aI   aI   aI   aI   aI   aI
-			// betaRv  =  bR   bR   bR   bR   bR   bR   bR   bR
-			// betaIv  = -bI   bI  -bI   bI  -bI   bI  -bI   bI
-			alphaRv = _mm256_set_ps
-					  (
-						-alphaR, alphaR, -alphaR, alphaR,
-						-alphaR, alphaR, -alphaR, alphaR
-					  );
-			alphaIv = _mm256_broadcast_ss( &alphaI );
-			betaRv  = _mm256_broadcast_ss( &betaR );
-			betaIv  = _mm256_set_ps
-					  (
-						betaI, -betaI, betaI, -betaI,
-						betaI, -betaI, betaI, -betaI
-					  );
-		}
+			__m256 reg_one = _mm256_set1_ps(1.0f);
+			iv[0] = _mm256_setzero_ps();
 
-		// Processing 16 elements per loop, 8 FMAs
-		for ( i = 0; ( i + 15 ) < n; i += 16 )
-		{
-			// xv = xR1  xI1  xR2  xI2  xR3  xI3  xR4  xI4
-			xv[0] = _mm256_loadu_ps( x0 + 0*n_elem_per_reg );
-			xv[1] = _mm256_loadu_ps( x0 + 1*n_elem_per_reg );
-			xv[2] = _mm256_loadu_ps( x0 + 2*n_elem_per_reg );
-			xv[3] = _mm256_loadu_ps( x0 + 3*n_elem_per_reg );
-
-			// yv  =  yR1  yI1  yR2  yI2  yR3  yI3  yR4  yI4
-			yv[0] = _mm256_loadu_ps( y0 + 0*n_elem_per_reg );
-			yv[1] = _mm256_loadu_ps( y0 + 1*n_elem_per_reg );
-			yv[2] = _mm256_loadu_ps( y0 + 2*n_elem_per_reg );
-			yv[3] = _mm256_loadu_ps( y0 + 3*n_elem_per_reg );
-
-			// iv = betaRv * yv
-			//    = yR1.bR, yI1.bR, yR2.bR, yI2.bR, ...
-			iv[0] = _mm256_mul_ps( betaRv, yv[0] );
-			iv[1] = _mm256_mul_ps( betaRv, yv[1] );
-			iv[2] = _mm256_mul_ps( betaRv, yv[2] );
-			iv[3] = _mm256_mul_ps( betaRv, yv[3] );
-
-			// yv' =  yI1  yR1  yI2  yR2  yI3  yR3  yI4  yR4
-			yv[0] = _mm256_permute_ps( yv[0], 0xB1);
-			yv[1] = _mm256_permute_ps( yv[1], 0xB1);
-			yv[2] = _mm256_permute_ps( yv[2], 0xB1);
-			yv[3] = _mm256_permute_ps( yv[3], 0xB1);
-			
-			// yv = betaIv * yv' + iv
-			//    = yR1.bR - yI1.bI, yI1.bR + yR1.bI, ...
-			yv[0] = _mm256_fmadd_ps( betaIv, yv[0], iv[0] );
-			yv[1] = _mm256_fmadd_ps( betaIv, yv[1], iv[1] );
-			yv[2] = _mm256_fmadd_ps( betaIv, yv[2], iv[2] );
-			yv[3] = _mm256_fmadd_ps( betaIv, yv[3], iv[3] );
-
-			// iv = alphaRv * xv
-			//    = xR1.aR, xI1.aR, xR2.aR, xI2.aR, ...
-			iv[0] = _mm256_mul_ps( alphaRv, xv[0] );
-			iv[1] = _mm256_mul_ps( alphaRv, xv[1] );
-			iv[2] = _mm256_mul_ps( alphaRv, xv[2] );
-			iv[3] = _mm256_mul_ps( alphaRv, xv[3] );
-
-			// xv' =  xI1  xR1  xI2  xR2  xI3  xR3  xI4  xR4
-			xv[0] = _mm256_permute_ps( xv[0], 0xB1);
-			xv[1] = _mm256_permute_ps( xv[1], 0xB1);
-			xv[2] = _mm256_permute_ps( xv[2], 0xB1);
-			xv[3] = _mm256_permute_ps( xv[3], 0xB1);
-
-			// yv = alphaIv * xv + yv
-			//    = yR1.bR - yR1.bI - xR1.aI, yI1.bR + yI1.bI + xI1.aI, ...
-			iv[0] = _mm256_fmadd_ps( alphaIv, xv[0], iv[0] );
-			iv[1] = _mm256_fmadd_ps( alphaIv, xv[1], iv[1] );
-			iv[2] = _mm256_fmadd_ps( alphaIv, xv[2], iv[2] );
-			iv[3] = _mm256_fmadd_ps( alphaIv, xv[3], iv[3] );
-
-			yv[0] = _mm256_add_ps( yv[0], iv[0] );
-			yv[1] = _mm256_add_ps( yv[1], iv[1] );
-			yv[2] = _mm256_add_ps( yv[2], iv[2] );
-			yv[3] = _mm256_add_ps( yv[3], iv[3] );
-
-			_mm256_storeu_ps( (y0 + 0*n_elem_per_reg), yv[0] );
-			_mm256_storeu_ps( (y0 + 1*n_elem_per_reg), yv[1] );
-			_mm256_storeu_ps( (y0 + 2*n_elem_per_reg), yv[2] );
-			_mm256_storeu_ps( (y0 + 3*n_elem_per_reg), yv[3] );
-
-			y0 += 4*n_elem_per_reg;
-			x0 += 4*n_elem_per_reg;
-		}
-
-		// Processing 12 elements per loop, 6 FMAs
-		for ( ; ( i + 11 ) < n; i += 12 )
-		{
-			// xv = xR1  xI1  xR2  xI2  xR3  xI3  xR4  xI4
-			xv[0] = _mm256_loadu_ps( x0 + 0*n_elem_per_reg );
-			xv[1] = _mm256_loadu_ps( x0 + 1*n_elem_per_reg );
-			xv[2] = _mm256_loadu_ps( x0 + 2*n_elem_per_reg );
-
-			// yv  =  yR1  yI1  yR2  yI2  yR3  yI3  yR4  yI4
-			yv[0] = _mm256_loadu_ps( y0 + 0*n_elem_per_reg );
-			yv[1] = _mm256_loadu_ps( y0 + 1*n_elem_per_reg );
-			yv[2] = _mm256_loadu_ps( y0 + 2*n_elem_per_reg );
-
-			// iv = betaRv * yv
-			//    = yR1.bR, yI1.bR, yR2.bR, yI2.bR, ...
-			iv[0] = _mm256_mul_ps( betaRv, yv[0] );
-			iv[1] = _mm256_mul_ps( betaRv, yv[1] );
-			iv[2] = _mm256_mul_ps( betaRv, yv[2] );
-
-			// yv' =  yI1  yR1  yI2  yR2  yI3  yR3  yI4  yR4
-			yv[0] = _mm256_permute_ps( yv[0], 0xB1);
-			yv[1] = _mm256_permute_ps( yv[1], 0xB1);
-			yv[2] = _mm256_permute_ps( yv[2], 0xB1);
-			
-			// yv = betaIv * yv' + iv
-			//    = yR1.bR - yI1.bI, yI1.bR + yR1.bI, ...
-			yv[0] = _mm256_fmadd_ps( betaIv, yv[0], iv[0] );
-			yv[1] = _mm256_fmadd_ps( betaIv, yv[1], iv[1] );
-			yv[2] = _mm256_fmadd_ps( betaIv, yv[2], iv[2] );
-
-			// iv = alphaRv * xv
-			//    = xR1.aR, xI1.aR, xR2.aR, xI2.aR, ...
-			iv[0] = _mm256_mul_ps( alphaRv, xv[0] );
-			iv[1] = _mm256_mul_ps( alphaRv, xv[1] );
-			iv[2] = _mm256_mul_ps( alphaRv, xv[2] );
-
-			// xv' =  xI1  xR1  xI2  xR2  xI3  xR3  xI4  xR4
-			xv[0] = _mm256_permute_ps( xv[0], 0xB1);
-			xv[1] = _mm256_permute_ps( xv[1], 0xB1);
-			xv[2] = _mm256_permute_ps( xv[2], 0xB1);
-
-			// yv = alphaIv * xv + yv
-			//    = yR1.bR - yR1.bI - xR1.aI, yI1.bR + yI1.bI + xI1.aI, ...
-			iv[0] = _mm256_fmadd_ps( alphaIv, xv[0], iv[0] );
-			iv[1] = _mm256_fmadd_ps( alphaIv, xv[1], iv[1] );
-			iv[2] = _mm256_fmadd_ps( alphaIv, xv[2], iv[2] );
-
-			yv[0] = _mm256_add_ps( yv[0], iv[0] );
-			yv[1] = _mm256_add_ps( yv[1], iv[1] );
-			yv[2] = _mm256_add_ps( yv[2], iv[2] );
-
-			_mm256_storeu_ps( (y0 + 0*n_elem_per_reg), yv[0] );
-			_mm256_storeu_ps( (y0 + 1*n_elem_per_reg), yv[1] );
-			_mm256_storeu_ps( (y0 + 2*n_elem_per_reg), yv[2] );
-
-			y0 += 3*n_elem_per_reg;
-			x0 += 3*n_elem_per_reg;
-		}
-
-		// Processing 16 elements per loop, 8 FMAs
-		for ( ; ( i + 7 ) < n; i += 8 )
-		{
-			// xv = xR1  xI1  xR2  xI2  xR3  xI3  xR4  xI4
-			xv[0] = _mm256_loadu_ps( x0 + 0*n_elem_per_reg );
-			xv[1] = _mm256_loadu_ps( x0 + 1*n_elem_per_reg );
-
-			// yv = yR1  yI1  yR2  yI2  yR3  yI3  yR4  yI4
-			yv[0] = _mm256_loadu_ps( y0 + 0*n_elem_per_reg );
-			yv[1] = _mm256_loadu_ps( y0 + 1*n_elem_per_reg );
-
-			// iv = betaRv * yv
-			//    = yR1.bR, yI1.bR, yR2.bR, yI2.bR, ...
-			iv[0] = _mm256_mul_ps( betaRv, yv[0] );
-			iv[1] = _mm256_mul_ps( betaRv, yv[1] );
-
-			// yv' = yI1  yR1  yI2  yR2  yI3  yR3  yI4  yR4
-			yv[0] = _mm256_permute_ps( yv[0], 0xB1);
-			yv[1] = _mm256_permute_ps( yv[1], 0xB1);
-
-			// yv = betaIv * yv' + iv
-			//    = yR1.bR - yI1.bI, yI1.bR + yR1.bI, ...
-			yv[0] = _mm256_fmadd_ps( betaIv, yv[0], iv[0] );
-			yv[1] = _mm256_fmadd_ps( betaIv, yv[1], iv[1] );
-
-			// iv = alphaRv * xv
-			//    = xR1.aR, xI1.aR, xR2.aR, xI2.aR, ...
-			iv[0] = _mm256_mul_ps( alphaRv, xv[0] );
-			iv[1] = _mm256_mul_ps( alphaRv, xv[1] );
-
-			// xv' =  xI1  xR1  xI2  xR2  xI3  xR3  xI4  xR4
-			xv[0] = _mm256_permute_ps( xv[0], 0xB1);
-			xv[1] = _mm256_permute_ps( xv[1], 0xB1);
-
-			// yv = alphaIv * xv + yv
-			//    = yR1.bR - yR1.bI - xR1.aI, yI1.bR + yI1.bI + xI1.aI, ...
-			iv[0] = _mm256_fmadd_ps( alphaIv, xv[0], iv[0] );
-			iv[1] = _mm256_fmadd_ps( alphaIv, xv[1], iv[1] );
-
-			yv[0] = _mm256_add_ps( yv[0], iv[0] );
-			yv[1] = _mm256_add_ps( yv[1], iv[1] );
-
-			_mm256_storeu_ps( (y0 + 0*n_elem_per_reg), yv[0] );
-			_mm256_storeu_ps( (y0 + 1*n_elem_per_reg), yv[1] );
-
-			y0 += 2*n_elem_per_reg;
-			x0 += 2*n_elem_per_reg;
-		}
-
-		// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-		// This avoids a performance penalty caused by false dependencies when
-		// transitioning from AVX to SSE instructions (which may occur as soon
-		// as the n_left cleanup loop below if BLIS is compiled with
-		// -mfpmath=sse).
-		_mm256_zeroupper();
-
-		if ( !bli_is_conj( conjx_use ) )
-		{
-			for ( ; i < n ; ++i )
+			// Converting reg_one to have {1.0, -1.0, 1.0, -1.0, ...}
+			// This is needed in case we have t0 conjugate X vector
+			if( bli_is_conj( conjx ) )
 			{
-				const float yRc = *y0;
-				const float yIc = *( y0 + 1 );
+				reg_one = _mm256_fmsubadd_ps( reg_one, iv[0], reg_one );
+			}
+			// Processing 16 elements per loop, 8 FMAs
+			for ( ; ( i + 15 ) < n; i += 16 )
+			{
+				// Load the y vector, 16 elements in total
+				// yv =  yR1  yI1  yR2  yI2 ...
+				yv[0] = _mm256_loadu_ps( y0 );
+				yv[1] = _mm256_loadu_ps( y0 + 1 * n_elem_per_reg );
+				yv[2] = _mm256_loadu_ps( y0 + 2 * n_elem_per_reg );
+				yv[3] = _mm256_loadu_ps( y0 + 3 * n_elem_per_reg );
 
-				*y0       = ( betaR  * yRc ) - ( betaI  * yIc ) +
-							( alphaR * (*x0) ) - ( alphaI * (*(x0 + 1)) );
-				*(y0 + 1) = ( betaR  * yIc ) + ( betaI  * yRc ) +
-							( alphaR * (*(x0 + 1)) ) + ( alphaI * (*x0) );
+				// Load the x vector, 16 elements in total
+				// xv = xR1  xI1  xR2  xI2 ...
+				xv[0] = _mm256_loadu_ps( x0 );
+				xv[1] = _mm256_loadu_ps( x0 + 1 * n_elem_per_reg );
+				xv[2] = _mm256_loadu_ps( x0 + 2 * n_elem_per_reg );
+				xv[3] = _mm256_loadu_ps( x0 + 3 * n_elem_per_reg );
 
-				x0 += 2;
-				y0 += 2;
+				// Permute the vectors from y for the required compute
+				// iv =  yI1  yR1  yI2  yR2 ...
+				iv[0] = _mm256_permute_ps( yv[0], 0xB1 );
+				iv[1] = _mm256_permute_ps( yv[1], 0xB1 );
+				iv[2] = _mm256_permute_ps( yv[2], 0xB1 );
+				iv[3] = _mm256_permute_ps( yv[3], 0xB1 );
+
+				// Scale the permuted vectors with imaginary component of beta
+				// iv = betaIv * yv
+				//    = yI1.bI, yR1.bI, yI2.bI, yR2.bI, ...
+				iv[0] = _mm256_mul_ps( betaIv, iv[0] );
+				iv[1] = _mm256_mul_ps( betaIv, iv[1] );
+				iv[2] = _mm256_mul_ps( betaIv, iv[2] );
+				iv[3] = _mm256_mul_ps( betaIv, iv[3] );
+
+				// Using fmaddsub to scale with real component of beta
+				// and sub/add to iv
+				// yv = betaRv * yv -/+ iv
+				//    = yR1.bR - yI1.bI, yI1.bR + yR1.bI, ...
+				yv[0] = _mm256_fmaddsub_ps( betaRv, yv[0], iv[0] );
+				yv[1] = _mm256_fmaddsub_ps( betaRv, yv[1], iv[1] );
+				yv[2] = _mm256_fmaddsub_ps( betaRv, yv[2], iv[2] );
+				yv[3] = _mm256_fmaddsub_ps( betaRv, yv[3], iv[3] );
+
+				// Adding X conjugate to it
+				yv[0] = _mm256_fmadd_ps( reg_one, xv[0], yv[0] );
+				yv[1] = _mm256_fmadd_ps( reg_one, xv[1], yv[1] );
+				yv[2] = _mm256_fmadd_ps( reg_one, xv[2], yv[2] );
+				yv[3] = _mm256_fmadd_ps( reg_one, xv[3], yv[3] );
+
+				// Storing the result to memory
+				_mm256_storeu_ps( ( y0 ), yv[0] );
+				_mm256_storeu_ps( ( y0 + 1 * n_elem_per_reg ), yv[1] );
+				_mm256_storeu_ps( ( y0 + 2 * n_elem_per_reg ), yv[2] );
+				_mm256_storeu_ps( ( y0 + 3 * n_elem_per_reg ), yv[3] );
+
+				// Adjusting the pointers for the next iteration
+				y0 += 4 * n_elem_per_reg;
+				x0 += 4 * n_elem_per_reg;
+			}
+
+			// Processing 12 elements per loop, 12 FMAs
+			for ( ; ( i + 11 ) < n; i += 12 )
+			{
+				// Load the y vector, 12 elements in total
+				// yv =  yR1  yI1  yR2  yI2 ...
+				yv[0] = _mm256_loadu_ps( y0 );
+				yv[1] = _mm256_loadu_ps( y0 + 1 * n_elem_per_reg );
+				yv[2] = _mm256_loadu_ps( y0 + 2 * n_elem_per_reg );
+
+				// Load the x vector, 12 elements in total
+				// xv = xR1  xI1  xR2  xI2
+				xv[0] = _mm256_loadu_ps( x0 );
+				xv[1] = _mm256_loadu_ps( x0 + 1 * n_elem_per_reg );
+				xv[2] = _mm256_loadu_ps( x0 + 2 * n_elem_per_reg );
+
+				// Permute the vectors from y for the required compute
+				// iv =  yI1  yR1  yI2  yR2 ...
+				iv[0] = _mm256_permute_ps( yv[0], 0xB1 );
+				iv[1] = _mm256_permute_ps( yv[1], 0xB1 );
+				iv[2] = _mm256_permute_ps( yv[2], 0xB1 );
+
+				// Scale the permuted vectors with imaginary component of beta
+				// iv = betaIv * yv
+				//    = yI1.bI, yR1.bI, yI2.bI, yR2.bI, ...
+				iv[0] = _mm256_mul_ps( betaIv, iv[0] );
+				iv[1] = _mm256_mul_ps( betaIv, iv[1] );
+				iv[2] = _mm256_mul_ps( betaIv, iv[2] );
+
+				// Using fmaddsub to scale with real component of beta
+				// and sub/add to iv
+				// yv = betaRv * yv -/+ iv
+				//    = yR1.bR - yI1.bI, yI1.bR + yR1.bI, ...
+				yv[0] = _mm256_fmaddsub_ps( betaRv, yv[0], iv[0] );
+				yv[1] = _mm256_fmaddsub_ps( betaRv, yv[1], iv[1] );
+				yv[2] = _mm256_fmaddsub_ps( betaRv, yv[2], iv[2] );
+
+				// Adding X conjugate to it
+				yv[0] = _mm256_fmadd_ps( reg_one, xv[0], yv[0] );
+				yv[1] = _mm256_fmadd_ps( reg_one, xv[1], yv[1] );
+				yv[2] = _mm256_fmadd_ps( reg_one, xv[2], yv[2] );
+
+				// Storing the result to memory
+				_mm256_storeu_ps( ( y0 ), yv[0] );
+				_mm256_storeu_ps( ( y0 + 1 * n_elem_per_reg ), yv[1] );
+				_mm256_storeu_ps( ( y0 + 2 * n_elem_per_reg ), yv[2] );
+
+				// Adjusting the pointers for the next iteration
+				y0 += 3 * n_elem_per_reg;
+				x0 += 3 * n_elem_per_reg;
+			}
+
+			// Processing 8 elements per loop, 8 FMAs
+			for ( ; ( i + 7 ) < n; i += 8 )
+			{
+				// Load the y vector, 8 elements in total
+				// yv =  yR1  yI1  yR2  yI2 ...
+				yv[0] = _mm256_loadu_ps( y0 );
+				yv[1] = _mm256_loadu_ps( y0 + 1 * n_elem_per_reg );
+
+				// Load the x vector, 8 elements in total
+				// xv = xR1  xI1  xR2  xI2 ...
+				xv[0] = _mm256_loadu_ps( x0 );
+				xv[1] = _mm256_loadu_ps( x0 + 1 * n_elem_per_reg );
+
+				// Permute the vectors from y for the required compute
+				// iv =  yI1  yR1  yI2  yR2
+				iv[0] = _mm256_permute_ps( yv[0], 0xB1 );
+				iv[1] = _mm256_permute_ps( yv[1], 0xB1 );
+
+				// Scale the permuted vectors with imaginary component of beta
+				// iv = betaIv * yv
+				//    = yI1.bI, yR1.bI, yI2.bI, yR2.bI, ...
+				iv[0] = _mm256_mul_ps( betaIv, iv[0] );
+				iv[1] = _mm256_mul_ps( betaIv, iv[1] );
+
+				// Using fmaddsub to scale with real component of beta
+				// and sub/add to iv
+				// yv = betaRv * yv -/+ iv
+				//    = yR1.bR - yI1.bI, yI1.bR + yR1.bI, ...
+				yv[0] = _mm256_fmaddsub_ps( betaRv, yv[0], iv[0] );
+				yv[1] = _mm256_fmaddsub_ps( betaRv, yv[1], iv[1] );
+
+				// Adding X conjugate to it
+				yv[0] = _mm256_fmadd_ps( reg_one, xv[0], yv[0] );
+				yv[1] = _mm256_fmadd_ps( reg_one, xv[1], yv[1] );
+
+				// Storing the result to memory
+				_mm256_storeu_ps( ( y0 ), yv[0] );
+				_mm256_storeu_ps( ( y0 + 1 * n_elem_per_reg ), yv[1] );
+
+				// Adjusting the pointers for the next iteration
+				y0 += 2 * n_elem_per_reg;
+				x0 += 2 * n_elem_per_reg;
+			}
+
+			// Processing 4 elements per loop, 4 FMAs
+			for ( ; ( i + 3 ) < n; i += 4 )
+			{
+				// Load the y vector, 4 elements in total
+				// yv =  yR1  yI1  yR2  yI2 ...
+				yv[0] = _mm256_loadu_ps( y0 );
+
+				// Load the x vector, 4 elements in total
+				// xv = xR1  xI1  xR2  xI2 ...
+				xv[0] = _mm256_loadu_ps( x0 );
+
+				// Permute the vectors from y for the required compute
+				// iv =  yI1  yR1  yI2  yR2 ...
+				iv[0] = _mm256_permute_ps( yv[0], 0xB1 );
+
+				// Scale the permuted vectors with imaginary component of beta
+				// iv = betaIv * yv
+				//    = yI1.bI, yR1.bI, yI2.bI, yR2.bI, ...
+				iv[0] = _mm256_mul_ps( betaIv, iv[0] );
+
+				// Using fmaddsub to scale with real component of beta
+				// and sub/add to iv
+				// yv = betaRv * yv -/+ iv
+				//    = yR1.bR - yI1.bI, yI1.bR + yR1.bI, ...
+				yv[0] = _mm256_fmaddsub_ps( betaRv, yv[0], iv[0] );
+
+				// Adding X conjugate to it
+				yv[0] = _mm256_fmadd_ps( reg_one, xv[0], yv[0] );
+
+				// Storing the result to memory
+				_mm256_storeu_ps( ( y0 ), yv[0] );
+
+				// Adjusting the pointers for the next iteration
+				y0 += 1 * n_elem_per_reg;
+				x0 += 1 * n_elem_per_reg;
 			}
 		}
 		else
 		{
-			for ( ; i < n ; ++i )
+			// Scratch registers for storing real and imaginary components of alpha
+			__m256 alphaRv, alphaIv;
+
+			iv[0] = _mm256_setzero_ps();
+
+			alphaRv = _mm256_broadcast_ss( &alphaR );
+			alphaIv = _mm256_broadcast_ss( &alphaI );
+
+			// The changes on alphaRv and alphaIv are as follows :
+			// If conjugate is required:
+			//		alphaRv =  aR  -aR  aR  -aR
+			// Else :
+			//		alphaIv =  -aI  aI  -aI  aI
+			if( bli_is_conj( conjx ) )
 			{
-				const float yRc = *y0;
-				const float yIc = *( y0 + 1 );
+				alphaRv = _mm256_fmsubadd_ps( iv[0], iv[0], alphaRv );
+			}
+			else
+			{
+				alphaIv = _mm256_addsub_ps( iv[0], alphaIv );
+			}
 
-				*y0       = ( betaR  * yRc ) - ( betaI  * yIc ) +
-							( alphaR * (*x0) ) + ( alphaI * (*(x0 + 1)) );
-				*(y0 + 1) = ( betaR  * yIc ) + ( betaI  * yRc ) -
-							( alphaR * (*(x0 + 1)) ) + ( alphaI * (*x0) );
+			// Processing 16 elements per loop, 16 FMAs
+			for ( i = 0; ( i + 15 ) < n; i += 16 )
+			{
+				// Load the y vector, 16 elements in total
+				// yv =  yR1  yI1  yR2  yI2 ...
+				yv[0] = _mm256_loadu_ps( y0 );
+				yv[1] = _mm256_loadu_ps( y0 + 1 * n_elem_per_reg );
+				yv[2] = _mm256_loadu_ps( y0 + 2 * n_elem_per_reg );
+				yv[3] = _mm256_loadu_ps( y0 + 3 * n_elem_per_reg );
 
-				x0 += 2;
-				y0 += 2;
+				// Load the x vector, 16 elements in total
+				// xv = xR1  xI1  xR2  xI2 ...
+				xv[0] = _mm256_loadu_ps( x0 );
+				xv[1] = _mm256_loadu_ps( x0 + 1 * n_elem_per_reg );
+				xv[2] = _mm256_loadu_ps( x0 + 2 * n_elem_per_reg );
+				xv[3] = _mm256_loadu_ps( x0 + 3 * n_elem_per_reg );
+
+				// Permute the vectors from y for the required compute
+				// iv =  yI1  yR1  yI2  yR2 ...
+				iv[0] = _mm256_permute_ps( yv[0], 0xB1 );
+				iv[1] = _mm256_permute_ps( yv[1], 0xB1 );
+				iv[2] = _mm256_permute_ps( yv[2], 0xB1 );
+				iv[3] = _mm256_permute_ps( yv[3], 0xB1 );
+
+				// Scale the permuted vectors with imaginary component of beta
+				// iv = betaIv * yv
+				//    = yI1.bI, yR1.bI, yI2.bI, yR2.bI, ...
+				iv[0] = _mm256_mul_ps( betaIv, iv[0] );
+				iv[1] = _mm256_mul_ps( betaIv, iv[1] );
+				iv[2] = _mm256_mul_ps( betaIv, iv[2] );
+				iv[3] = _mm256_mul_ps( betaIv, iv[3] );
+
+				// Using fmaddsub to scale with real component of beta
+				// and sub/add to iv
+				// yv = betaRv * yv -/+ iv
+				//    = yR1.bR - yI1.bI, yI1.bR + yR1.bI, ...
+				yv[0] = _mm256_fmaddsub_ps( betaRv, yv[0], iv[0] );
+				yv[1] = _mm256_fmaddsub_ps( betaRv, yv[1], iv[1] );
+				yv[2] = _mm256_fmaddsub_ps( betaRv, yv[2], iv[2] );
+				yv[3] = _mm256_fmaddsub_ps( betaRv, yv[3], iv[3] );
+
+				// Permute the loaded vectors from x for the required compute
+				// xv' =  xI1  xR1  xI2  xR2 ...
+				iv[0] = _mm256_permute_ps( xv[0], 0xB1 );
+				iv[1] = _mm256_permute_ps( xv[1], 0xB1 );
+				iv[2] = _mm256_permute_ps( xv[2], 0xB1 );
+				iv[3] = _mm256_permute_ps( xv[3], 0xB1 );
+
+				// yv = alphaRv * xv + yv
+				//    = yR1.bR - yR1.bI + xR1.aR, yI1.bR + yI1.bI + xI1.aR, ...
+				yv[0] = _mm256_fmadd_ps( alphaRv, xv[0], yv[0] );
+				yv[1] = _mm256_fmadd_ps( alphaRv, xv[1], yv[1] );
+				yv[2] = _mm256_fmadd_ps( alphaRv, xv[2], yv[2] );
+				yv[3] = _mm256_fmadd_ps( alphaRv, xv[3], yv[3] );
+
+				// yv = alphaIv * iv + yv
+				//    = yR1.bR - yR1.bI - xI1.aI, yI1.bR + yI1.bI + xR1.aI, ...
+				yv[0] = _mm256_fmadd_ps( alphaIv, iv[0], yv[0] );
+				yv[1] = _mm256_fmadd_ps( alphaIv, iv[1], yv[1] );
+				yv[2] = _mm256_fmadd_ps( alphaIv, iv[2], yv[2] );
+				yv[3] = _mm256_fmadd_ps( alphaIv, iv[3], yv[3] );
+
+				// Storing the result to memory
+				_mm256_storeu_ps( ( y0 ), yv[0] );
+				_mm256_storeu_ps( ( y0 + 1 * n_elem_per_reg ), yv[1] );
+				_mm256_storeu_ps( ( y0 + 2 * n_elem_per_reg ), yv[2] );
+				_mm256_storeu_ps( ( y0 + 3 * n_elem_per_reg ), yv[3] );
+
+				// Adjusting the pointers for the next iteration
+				y0 += 4 * n_elem_per_reg;
+				x0 += 4 * n_elem_per_reg;
+			}
+
+			// Processing 12 elements per loop, 12 FMAs
+			for ( ; ( i + 11 ) < n; i += 12 )
+			{
+				// Load the y vector, 12 elements in total
+				// yv =  yR1  yI1  yR2  yI2 ...
+				yv[0] = _mm256_loadu_ps( y0 );
+				yv[1] = _mm256_loadu_ps( y0 + 1 * n_elem_per_reg );
+				yv[2] = _mm256_loadu_ps( y0 + 2 * n_elem_per_reg );
+
+				// Load the x vector, 12 elements in total
+				// xv = xR1  xI1  xR2  xI2 ...
+				xv[0] = _mm256_loadu_ps( x0 );
+				xv[1] = _mm256_loadu_ps( x0 + 1 * n_elem_per_reg );
+				xv[2] = _mm256_loadu_ps( x0 + 2 * n_elem_per_reg );
+
+				// Permute the vectors from y for the required compute
+				// iv =  yI1  yR1  yI2  yR2 ...
+				iv[0] = _mm256_permute_ps( yv[0], 0xB1 );
+				iv[1] = _mm256_permute_ps( yv[1], 0xB1 );
+				iv[2] = _mm256_permute_ps( yv[2], 0xB1 );
+
+				// Scale the permuted vectors with imaginary component of beta
+				// iv = betaIv * yv
+				//    = yI1.bI, yR1.bI, yI2.bI, yR2.bI, ...`
+				iv[0] = _mm256_mul_ps( betaIv, iv[0] );
+				iv[1] = _mm256_mul_ps( betaIv, iv[1] );
+				iv[2] = _mm256_mul_ps( betaIv, iv[2] );
+
+				// Using fmaddsub to scale with real component of beta
+				// and sub/add to iv
+				// yv = betaRv * yv -/+ iv
+				//    = yR1.bR - yI1.bI, yI1.bR + yR1.bI, ...
+				yv[0] = _mm256_fmaddsub_ps( betaRv, yv[0], iv[0] );
+				yv[1] = _mm256_fmaddsub_ps( betaRv, yv[1], iv[1] );
+				yv[2] = _mm256_fmaddsub_ps( betaRv, yv[2], iv[2] );
+
+				// Permute the loaded vectors from x for the required compute
+				// xv' =  xI1  xR1  xI2  xR2 ...
+				iv[0] = _mm256_permute_ps( xv[0], 0xB1 );
+				iv[1] = _mm256_permute_ps( xv[1], 0xB1 );
+				iv[2] = _mm256_permute_ps( xv[2], 0xB1 );
+
+				// yv = alphaRv * xv + yv
+				//    = yR1.bR - yR1.bI + xR1.aR, yI1.bR + yI1.bI + xI1.aR, ...
+				yv[0] = _mm256_fmadd_ps( alphaRv, xv[0], yv[0] );
+				yv[1] = _mm256_fmadd_ps( alphaRv, xv[1], yv[1] );
+				yv[2] = _mm256_fmadd_ps( alphaRv, xv[2], yv[2] );
+
+				// yv = alphaIv * iv + yv
+				//    = yR1.bR - yR1.bI - xI1.aI, yI1.bR + yI1.bI + xR1.aI, ...
+				yv[0] = _mm256_fmadd_ps( alphaIv, iv[0], yv[0] );
+				yv[1] = _mm256_fmadd_ps( alphaIv, iv[1], yv[1] );
+				yv[2] = _mm256_fmadd_ps( alphaIv, iv[2], yv[2] );
+
+				// Storing the result to memory
+				_mm256_storeu_ps( ( y0 ), yv[0] );
+				_mm256_storeu_ps( ( y0 + 1 * n_elem_per_reg ), yv[1] );
+				_mm256_storeu_ps( ( y0 + 2 * n_elem_per_reg ), yv[2] );
+
+				// Adjusting the pointers for the next iteration
+				y0 += 3 * n_elem_per_reg;
+				x0 += 3 * n_elem_per_reg;
+			}
+
+			// Processing 8 elements per loop, 8 FMAs
+			for ( ; ( i + 7 ) < n; i += 8 )
+			{
+				// Load the y vector, 8 elements in total
+				// yv =  yR1  yI1  yR2  yI2 ...
+				yv[0] = _mm256_loadu_ps( y0 );
+				yv[1] = _mm256_loadu_ps( y0 + 1 * n_elem_per_reg );
+
+				// Load the x vector, 8 elements in total
+				// xv = xR1  xI1  xR2  xI2 ...
+				xv[0] = _mm256_loadu_ps( x0 );
+				xv[1] = _mm256_loadu_ps( x0 + 1 * n_elem_per_reg );
+
+				// Permute the vectors from y for the required compute
+				// iv =  yI1  yR1  yI2  yR2 ...
+				iv[0] = _mm256_permute_ps( yv[0], 0xB1 );
+				iv[1] = _mm256_permute_ps( yv[1], 0xB1 );
+
+				// Scale the permuted vectors with imaginary component of beta
+				// iv = betaIv * yv
+				//    = yI1.bI, yR1.bI, yI2.bI, yR2.bI, ...
+				iv[0] = _mm256_mul_ps( betaIv, iv[0] );
+				iv[1] = _mm256_mul_ps( betaIv, iv[1] );
+
+				// Using fmaddsub to scale with real component of beta
+				// and sub/add to iv
+				// yv = betaRv * yv -/+ iv
+				//    = yR1.bR - yI1.bI, yI1.bR + yR1.bI, ...
+				yv[0] = _mm256_fmaddsub_ps( betaRv, yv[0], iv[0] );
+				yv[1] = _mm256_fmaddsub_ps( betaRv, yv[1], iv[1] );
+
+				// Permute the loaded vectors from x for the required compute
+				// xv' =  xI1  xR1  xI2  xR2
+				iv[0] = _mm256_permute_ps( xv[0], 0xB1 );
+				iv[1] = _mm256_permute_ps( xv[1], 0xB1 );
+
+				// yv = alphaRv * xv + yv
+				//    = yR1.bR - yR1.bI + xR1.aR, yI1.bR + yI1.bI + xI1.aR, ...
+				yv[0] = _mm256_fmadd_ps( alphaRv, xv[0], yv[0] );
+				yv[1] = _mm256_fmadd_ps( alphaRv, xv[1], yv[1] );
+
+				// yv = alphaIv * iv + yv
+				//    = yR1.bR - yR1.bI - xI1.aI, yI1.bR + yI1.bI + xR1.aI, ...
+				yv[0] = _mm256_fmadd_ps( alphaIv, iv[0], yv[0] );
+				yv[1] = _mm256_fmadd_ps( alphaIv, iv[1], yv[1] );
+
+				// Storing the result to memory
+				_mm256_storeu_ps( ( y0 ), yv[0] );
+				_mm256_storeu_ps( ( y0 + 1 * n_elem_per_reg ), yv[1] );
+
+				// Adjusting the pointers for the next iteration
+				y0 += 2 * n_elem_per_reg;
+				x0 += 2 * n_elem_per_reg;
+			}
+
+			// Processing 4 elements per loop, 4 FMAs
+			for ( ; ( i + 3 ) < n; i += 4 )
+			{
+				// Load the y vector, 4 elements in total
+				// yv =  yR1  yI1  yR2  yI2 ...
+				yv[0] = _mm256_loadu_ps( y0 );
+
+				// Load the x vector, 4 elements in total
+				// xv = xR1  xI1  xR2  xI2 ...
+				xv[0] = _mm256_loadu_ps( x0 );
+
+				// Permute the vectors from y for the required compute
+				// iv =  yI1  yR1  yI2  yR2 ...
+				iv[0] = _mm256_permute_ps( yv[0], 0xB1 );
+
+				// Scale the permuted vectors with imaginary component of beta
+				// iv = betaIv * yv
+				//    = yI1.bI, yR1.bI, yI2.bI, yR2.bI, ...
+				iv[0] = _mm256_mul_ps( betaIv, iv[0] );
+
+				// Using fmaddsub to scale with real component of beta
+				// and sub/add to iv
+				// yv = betaRv * yv -/+ iv
+				//    = yR1.bR - yI1.bI, yI1.bR + yR1.bI, ...
+				yv[0] = _mm256_fmaddsub_ps( betaRv, yv[0], iv[0] );
+
+				// Permute the loaded vectors from x for the required compute
+				// xv' =  xI1  xR1  xI2  xR2 ...
+				iv[0] = _mm256_permute_ps( xv[0], 0xB1 );
+
+				// yv = alphaRv * xv + yv
+				//    = yR1.bR - yR1.bI + xR1.aR, yI1.bR + yI1.bI + xI1.aR, ...
+				yv[0] = _mm256_fmadd_ps( alphaRv, xv[0], yv[0] );
+
+				// yv = alphaIv * iv + yv
+				//    = yR1.bR - yR1.bI - xI1.aI, yI1.bR + yI1.bI + xR1.aI, ...
+				yv[0] = _mm256_fmadd_ps( alphaIv, iv[0], yv[0] );
+
+				// Storing the result to memory
+				_mm256_storeu_ps( ( y0 ), yv[0] );
+
+				// Adjusting the pointers for the next iteration
+				y0 += 1 * n_elem_per_reg;
+				x0 += 1 * n_elem_per_reg;
+			}
+		}
+
+		// Issue vzeroupper instruction to clear upper lanes of ymm registers.
+		// This avoids a performance penalty caused by false dependencies when
+		// transitioning from AVX to SSE instructions.
+		_mm256_zeroupper();
+	}
+
+	// Handling fringe cases or non-unit-strides
+	if ( is_alpha_one )
+	{
+		if( bli_is_conj( conjx ) )
+		{
+			for( ; i < n; i += 1 )
+			{
+				scomplex temp;
+				temp.real = ( betaR * (*y0) ) - ( betaI * (*(y0 + 1)) ) + (*x0);
+				temp.imag = ( betaR * (*(y0 + 1)) ) + ( betaI * (*y0) ) - (*(x0 + 1));
+
+				(*y0) = temp.real;
+				(*(y0 + 1)) = temp.imag;
+				
+				x0 += 2 * incx;
+				y0 += 2 * incy;
+			}
+		}
+		else
+		{
+			for( ; i < n; i += 1 )
+			{
+				scomplex temp;
+				temp.real = ( betaR * (*y0) ) - ( betaI * (*(y0 + 1)) ) + (*x0);
+				temp.imag = ( betaR * (*(y0 + 1)) ) + ( betaI * (*y0) ) + (*(x0 + 1));
+
+				(*y0) = temp.real;
+				(*(y0 + 1)) = temp.imag;
+				
+				x0 += 2 * incx;
+				y0 += 2 * incy;
 			}
 		}
 	}
 	else
 	{
-		// for non-unit increments, use scaler code
-		if ( !bli_is_conj( conjx_use ) )
+		if( bli_is_conj( conjx ) )
 		{
-			for ( i = 0; i < n ; ++i )
+			for( ; i < n; i += 1 )
 			{
-				const float yRc = *y0;
-				const float yIc = *( y0 + 1 );
+				scomplex temp;
+				temp.real = ( betaR * (*y0) ) - ( betaI * (*(y0 + 1)) ) +
+										( alphaR * (*x0) ) + ( alphaI * (*(x0 + 1)) );
+				temp.imag = ( betaR * (*(y0 + 1)) ) + ( betaI * (*y0) ) -
+										( alphaR * (*(x0 + 1)) ) + ( alphaI * (*x0) );
 
-				// yReal = ( bR.yR - bI.yI + aR.xR - aI.xI )
-				*y0       = ( betaR  * yRc ) - ( betaI  * yIc ) +
-							( alphaR * (*x0) ) - ( alphaI * (*(x0 + 1)) );
-				// yImag = ( bR.yI + bI.yR + aR.xI + aI.xR )
-				*(y0 + 1) = ( betaR  * yIc ) + ( betaI  * yRc ) +
-							( alphaR * (*(x0 + 1)) ) + ( alphaI * (*x0) );
-
-				x0 += incx * 2;
-				y0 += incy * 2;
+				(*y0) = temp.real;
+				(*(y0 + 1)) = temp.imag;
+				
+				x0 += 2 * incx;
+				y0 += 2 * incy;
 			}
 		}
 		else
 		{
-			for ( i = 0; i < n ; ++i )
+			for( ; i < n; i += 1 )
 			{
-				const float yRc = *y0;
-				const float yIc = *( y0 + 1 );
+				scomplex temp;
+				temp.real = ( betaR * (*y0) ) - ( betaI * (*(y0 + 1)) ) +
+										( alphaR * (*x0) ) - ( alphaI * (*(x0 + 1)) );
+				temp.imag = ( betaR * (*(y0 + 1)) ) + ( betaI * (*y0) ) +
+										( alphaR * (*(x0 + 1)) ) + ( alphaI * (*x0) );
 
-				// yReal = ( bR.yR - bI.yI + aR.xR - aI.xI )
-				*y0       = ( betaR  * yRc ) - ( betaI  * yIc ) +
-							( alphaR * (*x0) ) + ( alphaI * (*(x0 + 1)) );
-				// yImag = ( bR.yI + bI.yR + aR.xI + aI.xR )
-				*(y0 + 1) = ( betaR  * yIc ) + ( betaI  * yRc ) -
-							( alphaR * (*(x0 + 1)) ) + ( alphaI * (*x0) );
-
-				x0 += incx * 2;
-				y0 += incy * 2;
+				(*y0) = temp.real;
+				(*(y0 + 1)) = temp.imag;
+				
+				x0 += 2 * incx;
+				y0 += 2 * incy;
 			}
 		}
 	}
+
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
 }
 
@@ -741,18 +1034,11 @@ void bli_zaxpbyv_zen_int
 	double*  restrict x0;
 	double*  restrict y0;
 
+	// Boolean to check if alpha is 1
+	bool is_alpha_one = bli_zeq1( *alpha );
+
 	// Variables to store real and imaginary components of alpha and beta
 	double alphaR, alphaI, betaR, betaI;
-
-	// Local variable to store the conjugate type
-	conj_t conjx_use = conjx;
-
-	/* If the vector dimension is zero, return early. */
-	if ( bli_zero_dim1( n ) )
-	{
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
-		return;
-	}
 
 	// Initializing the local pointers
 	x0  = ( double* ) x;
@@ -762,16 +1048,6 @@ void bli_zaxpbyv_zen_int
 	alphaI = alpha->imag;
 	betaR  = beta->real;
 	betaI  = beta->imag;
-
-	// Vectors to store real and imaginary components of beta
-	__m256d betaRv, betaIv;
-
-	// Broadcasting real and imaginary components of beta onto the registers
-	betaRv = _mm256_broadcast_sd( &betaR );
-	betaIv = _mm256_broadcast_sd( &betaI );
-
-	// Initializing a variable to classify the type of the computation
-	bool is_alpha_zero = bli_zeq0( *alpha );
 
 	// In case of unit strides for x and y vectors
 	if ( incx == 1 && incy == 1 )
@@ -783,10 +1059,24 @@ void bli_zaxpbyv_zen_int
 		__m256d xv[4];
 		__m256d yv[4];
 		__m256d iv[4];
+		// Vectors to store real and imaginary components of beta
+		__m256d betaRv, betaIv;
 
-		// In case of alpha being 0, we just need to scale y by beta
-		if( is_alpha_zero )
+		// Broadcasting real and imaginary components of beta onto the registers
+		betaRv = _mm256_broadcast_sd( &betaR );
+		betaIv = _mm256_broadcast_sd( &betaI );
+
+		if( is_alpha_one )
 		{
+			__m256d reg_one = _mm256_set1_pd(1.0);
+			iv[0] = _mm256_setzero_pd();
+
+			// Converting reg_one to have {1.0, -1.0, 1.0, -1.0}
+			// This is needed in case we have t0 conjugate X vector
+			if( bli_is_conj( conjx ) )
+			{
+				reg_one = _mm256_fmsubadd_pd( reg_one, iv[0], reg_one );
+			}
 			// Processing 8 elements per loop, 8 FMAs
 			for ( i = 0; ( i + 7 ) < n; i += 8 )
 			{
@@ -797,27 +1087,42 @@ void bli_zaxpbyv_zen_int
 				yv[2] = _mm256_loadu_pd( y0 + 2 * n_elem_per_reg );
 				yv[3] = _mm256_loadu_pd( y0 + 3 * n_elem_per_reg );
 
-				// Permute the loaded vectors for the required compute
-				// xv =  yI1  yR1  yI2  yR2
-				xv[0] = _mm256_permute_pd( yv[0], 5 );
-				xv[1] = _mm256_permute_pd( yv[1], 5 );
-				xv[2] = _mm256_permute_pd( yv[2], 5 );
-				xv[3] = _mm256_permute_pd( yv[3], 5 );
+				// Load the x vector, 8 elements in total
+				// xv = xR1  xI1  xR2  xI2
+				xv[0] = _mm256_loadu_pd( x0 );
+				xv[1] = _mm256_loadu_pd( x0 + 1 * n_elem_per_reg );
+				xv[2] = _mm256_loadu_pd( x0 + 2 * n_elem_per_reg );
+				xv[3] = _mm256_loadu_pd( x0 + 3 * n_elem_per_reg );
+
+				// Permute the vectors from y for the required compute
+				// iv =  yI1  yR1  yI2  yR2
+				iv[0] = _mm256_permute_pd( yv[0], 0x5 );
+				iv[1] = _mm256_permute_pd( yv[1], 0x5 );
+				iv[2] = _mm256_permute_pd( yv[2], 0x5 );
+				iv[3] = _mm256_permute_pd( yv[3], 0x5 );
 
 				// Scale the permuted vectors with imaginary component of beta
-				// iv =  yI1  yR1  yI2  yR2
-				iv[0] = _mm256_mul_pd( betaIv, xv[0] );
-				iv[1] = _mm256_mul_pd( betaIv, xv[1] );
-				iv[2] = _mm256_mul_pd( betaIv, xv[2] );
-				iv[3] = _mm256_mul_pd( betaIv, xv[3] );
+				// iv = betaIv * yv
+				//    = yI1.bI, yR1.bI, yI2.bI, yR2.bI, ...
+				iv[0] = _mm256_mul_pd( betaIv, iv[0] );
+				iv[1] = _mm256_mul_pd( betaIv, iv[1] );
+				iv[2] = _mm256_mul_pd( betaIv, iv[2] );
+				iv[3] = _mm256_mul_pd( betaIv, iv[3] );
 
-				// Using fmaddsub to scale with real component of beta and sub/add to iv
+				// Using fmaddsub to scale with real component of beta
+				// and sub/add to iv
 				// yv = betaRv * yv -/+ iv
 				//    = yR1.bR - yI1.bI, yI1.bR + yR1.bI, ...
 				yv[0] = _mm256_fmaddsub_pd( betaRv, yv[0], iv[0] );
 				yv[1] = _mm256_fmaddsub_pd( betaRv, yv[1], iv[1] );
 				yv[2] = _mm256_fmaddsub_pd( betaRv, yv[2], iv[2] );
 				yv[3] = _mm256_fmaddsub_pd( betaRv, yv[3], iv[3] );
+
+				// Adding X conjugate to it
+				yv[0] = _mm256_fmadd_pd( reg_one, xv[0], yv[0] );
+				yv[1] = _mm256_fmadd_pd( reg_one, xv[1], yv[1] );
+				yv[2] = _mm256_fmadd_pd( reg_one, xv[2], yv[2] );
+				yv[3] = _mm256_fmadd_pd( reg_one, xv[3], yv[3] );
 
 				// Storing the result to memory
 				_mm256_storeu_pd( ( y0 ), yv[0] );
@@ -839,17 +1144,24 @@ void bli_zaxpbyv_zen_int
 				yv[1] = _mm256_loadu_pd( y0 + 1 * n_elem_per_reg );
 				yv[2] = _mm256_loadu_pd( y0 + 2 * n_elem_per_reg );
 
-				// Permute the loaded vectors for the required compute
-				// xv =  yI1  yR1  yI2  yR2
-				xv[0] = _mm256_permute_pd( yv[0], 5 );
-				xv[1] = _mm256_permute_pd( yv[1], 5 );
-				xv[2] = _mm256_permute_pd( yv[2], 5 );
+				// Load the x vector, 6 elements in total
+				// xv = xR1  xI1  xR2  xI2
+				xv[0] = _mm256_loadu_pd( x0 );
+				xv[1] = _mm256_loadu_pd( x0 + 1 * n_elem_per_reg );
+				xv[2] = _mm256_loadu_pd( x0 + 2 * n_elem_per_reg );
+
+				// Permute the vectors from y for the required compute
+				// iv =  yI1  yR1  yI2  yR2
+				iv[0] = _mm256_permute_pd( yv[0], 0x5 );
+				iv[1] = _mm256_permute_pd( yv[1], 0x5 );
+				iv[2] = _mm256_permute_pd( yv[2], 0x5 );
 
 				// Scale the permuted vectors with imaginary component of beta
-				// iv =  yI1  yR1  yI2  yR2
-				iv[0] = _mm256_mul_pd( betaIv, xv[0] );
-				iv[1] = _mm256_mul_pd( betaIv, xv[1] );
-				iv[2] = _mm256_mul_pd( betaIv, xv[2] );
+				// iv = betaIv * yv
+				//    = yI1.bI, yR1.bI, yI2.bI, yR2.bI, ...
+				iv[0] = _mm256_mul_pd( betaIv, iv[0] );
+				iv[1] = _mm256_mul_pd( betaIv, iv[1] );
+				iv[2] = _mm256_mul_pd( betaIv, iv[2] );
 
 				// Using fmaddsub to scale with real component of beta
 				// and sub/add to iv
@@ -858,6 +1170,11 @@ void bli_zaxpbyv_zen_int
 				yv[0] = _mm256_fmaddsub_pd( betaRv, yv[0], iv[0] );
 				yv[1] = _mm256_fmaddsub_pd( betaRv, yv[1], iv[1] );
 				yv[2] = _mm256_fmaddsub_pd( betaRv, yv[2], iv[2] );
+
+				// Adding X conjugate to it
+				yv[0] = _mm256_fmadd_pd( reg_one, xv[0], yv[0] );
+				yv[1] = _mm256_fmadd_pd( reg_one, xv[1], yv[1] );
+				yv[2] = _mm256_fmadd_pd( reg_one, xv[2], yv[2] );
 
 				// Storing the result to memory
 				_mm256_storeu_pd( ( y0 ), yv[0] );
@@ -877,15 +1194,21 @@ void bli_zaxpbyv_zen_int
 				yv[0] = _mm256_loadu_pd( y0 );
 				yv[1] = _mm256_loadu_pd( y0 + 1 * n_elem_per_reg );
 
-				// Permute the loaded vectors for the required compute
-				// xv =  yI1  yR1  yI2  yR2
-				xv[0] = _mm256_permute_pd( yv[0], 5 );
-				xv[1] = _mm256_permute_pd( yv[1], 5 );
+				// Load the x vector, 4 elements in total
+				// xv = xR1  xI1  xR2  xI2
+				xv[0] = _mm256_loadu_pd( x0 );
+				xv[1] = _mm256_loadu_pd( x0 + 1 * n_elem_per_reg );
+
+				// Permute the vectors from y for the required compute
+				// iv =  yI1  yR1  yI2  yR2
+				iv[0] = _mm256_permute_pd( yv[0], 0x5 );
+				iv[1] = _mm256_permute_pd( yv[1], 0x5 );
 
 				// Scale the permuted vectors with imaginary component of beta
-				// iv =  yI1.bI, yR1.bI, yI2.bI, yR2.bI
-				iv[0] = _mm256_mul_pd( betaIv, xv[0] );
-				iv[1] = _mm256_mul_pd( betaIv, xv[1] );
+				// iv = betaIv * yv
+				//    = yI1.bI, yR1.bI, yI2.bI, yR2.bI, ...
+				iv[0] = _mm256_mul_pd( betaIv, iv[0] );
+				iv[1] = _mm256_mul_pd( betaIv, iv[1] );
 
 				// Using fmaddsub to scale with real component of beta
 				// and sub/add to iv
@@ -893,6 +1216,10 @@ void bli_zaxpbyv_zen_int
 				//    = yR1.bR - yI1.bI, yI1.bR + yR1.bI, ...
 				yv[0] = _mm256_fmaddsub_pd( betaRv, yv[0], iv[0] );
 				yv[1] = _mm256_fmaddsub_pd( betaRv, yv[1], iv[1] );
+
+				// Adding X conjugate to it
+				yv[0] = _mm256_fmadd_pd( reg_one, xv[0], yv[0] );
+				yv[1] = _mm256_fmadd_pd( reg_one, xv[1], yv[1] );
 
 				// Storing the result to memory
 				_mm256_storeu_pd( ( y0 ), yv[0] );
@@ -903,26 +1230,34 @@ void bli_zaxpbyv_zen_int
 				x0 += 2 * n_elem_per_reg;
 			}
 
-			// Processing 2 elements per loop, 3 FMAs
+			// Processing 2 elements per loop, 2 FMAs
 			for ( ; ( i + 1 ) < n; i += 2 )
 			{
 				// Load the y vector, 2 elements in total
 				// yv =  yR1  yI1  yR2  yI2
 				yv[0] = _mm256_loadu_pd( y0 );
 
-				// Permute the loaded vectors for the required compute
-				// xv =  yI1  yR1  yI2  yR2
-				xv[0] = _mm256_permute_pd( yv[0], 5 );
+				// Load the x vector, 2 elements in total
+				// xv = xR1  xI1  xR2  xI2
+				xv[0] = _mm256_loadu_pd( x0 );
+
+				// Permute the vectors from y for the required compute
+				// iv =  yI1  yR1  yI2  yR2
+				iv[0] = _mm256_permute_pd( yv[0], 0x5 );
 
 				// Scale the permuted vectors with imaginary component of beta
-				// iv =  yI1  yR1  yI2  yR2
-				iv[0] = _mm256_mul_pd( betaIv, xv[0] );
+				// iv = betaIv * yv
+				//    = yI1.bI, yR1.bI, yI2.bI, yR2.bI, ...
+				iv[0] = _mm256_mul_pd( betaIv, iv[0] );
 
 				// Using fmaddsub to scale with real component of beta
 				// and sub/add to iv
 				// yv = betaRv * yv -/+ iv
 				//    = yR1.bR - yI1.bI, yI1.bR + yR1.bI, ...
 				yv[0] = _mm256_fmaddsub_pd( betaRv, yv[0], iv[0] );
+
+				// Adding X conjugate to it
+				yv[0] = _mm256_fmadd_pd( reg_one, xv[0], yv[0] );
 
 				// Storing the result to memory
 				_mm256_storeu_pd( ( y0 ), yv[0] );
@@ -932,7 +1267,6 @@ void bli_zaxpbyv_zen_int
 				x0 += 1 * n_elem_per_reg;
 			}
 		}
-
 		else
 		{
 			// Scratch registers for storing real and imaginary components of alpha
@@ -948,7 +1282,7 @@ void bli_zaxpbyv_zen_int
 			//		alphaRv =  aR  -aR  aR  -aR
 			// Else :
 			//		alphaIv =  -aI  aI  -aI  aI
-			if( bli_is_conj( conjx_use ) )
+			if( bli_is_conj( conjx ) )
 			{
 				alphaRv = _mm256_fmsubadd_pd( iv[0], iv[0], alphaRv );
 			}
@@ -960,14 +1294,14 @@ void bli_zaxpbyv_zen_int
 			// Processing 8 elements per loop, 8 FMAs
 			for ( i = 0; ( i + 7 ) < n; i += 8 )
 			{
-				// Load the y vector, 6 elements in total
+				// Load the y vector, 8 elements in total
 				// yv =  yR1  yI1  yR2  yI2
 				yv[0] = _mm256_loadu_pd( y0 );
 				yv[1] = _mm256_loadu_pd( y0 + 1 * n_elem_per_reg );
 				yv[2] = _mm256_loadu_pd( y0 + 2 * n_elem_per_reg );
 				yv[3] = _mm256_loadu_pd( y0 + 3 * n_elem_per_reg );
 
-				// Load the x vector, 6 elements in total
+				// Load the x vector, 8 elements in total
 				// xv = xR1  xI1  xR2  xI2
 				xv[0] = _mm256_loadu_pd( x0 );
 				xv[1] = _mm256_loadu_pd( x0 + 1 * n_elem_per_reg );
@@ -976,10 +1310,10 @@ void bli_zaxpbyv_zen_int
 
 				// Permute the vectors from y for the required compute
 				// iv =  yI1  yR1  yI2  yR2
-				iv[0] = _mm256_permute_pd( yv[0], 5 );
-				iv[1] = _mm256_permute_pd( yv[1], 5 );
-				iv[2] = _mm256_permute_pd( yv[2], 5 );
-				iv[3] = _mm256_permute_pd( yv[3], 5 );
+				iv[0] = _mm256_permute_pd( yv[0], 0x5 );
+				iv[1] = _mm256_permute_pd( yv[1], 0x5 );
+				iv[2] = _mm256_permute_pd( yv[2], 0x5 );
+				iv[3] = _mm256_permute_pd( yv[3], 0x5 );
 
 				// Scale the permuted vectors with imaginary component of beta
 				// iv = betaIv * yv
@@ -1000,10 +1334,10 @@ void bli_zaxpbyv_zen_int
 
 				// Permute the loaded vectors from x for the required compute
 				// xv' =  xI1  xR1  xI2  xR2
-				iv[0] = _mm256_permute_pd( xv[0], 5 );
-				iv[1] = _mm256_permute_pd( xv[1], 5 );
-				iv[2] = _mm256_permute_pd( xv[2], 5 );
-				iv[3] = _mm256_permute_pd( xv[3], 5 );
+				iv[0] = _mm256_permute_pd( xv[0], 0x5 );
+				iv[1] = _mm256_permute_pd( xv[1], 0x5 );
+				iv[2] = _mm256_permute_pd( xv[2], 0x5 );
+				iv[3] = _mm256_permute_pd( xv[3], 0x5 );
 
 				// yv = alphaRv * xv + yv
 				//    = yR1.bR - yR1.bI + xR1.aR, yI1.bR + yI1.bI + xI1.aR, ...
@@ -1047,9 +1381,9 @@ void bli_zaxpbyv_zen_int
 
 				// Permute the vectors from y for the required compute
 				// iv =  yI1  yR1  yI2  yR2
-				iv[0] = _mm256_permute_pd( yv[0], 5 );
-				iv[1] = _mm256_permute_pd( yv[1], 5 );
-				iv[2] = _mm256_permute_pd( yv[2], 5 );
+				iv[0] = _mm256_permute_pd( yv[0], 0x5 );
+				iv[1] = _mm256_permute_pd( yv[1], 0x5 );
+				iv[2] = _mm256_permute_pd( yv[2], 0x5 );
 
 				// Scale the permuted vectors with imaginary component of beta
 				// iv = betaIv * yv
@@ -1068,9 +1402,9 @@ void bli_zaxpbyv_zen_int
 
 				// Permute the loaded vectors from x for the required compute
 				// xv' =  xI1  xR1  xI2  xR2
-				iv[0] = _mm256_permute_pd( xv[0], 5 );
-				iv[1] = _mm256_permute_pd( xv[1], 5 );
-				iv[2] = _mm256_permute_pd( xv[2], 5 );
+				iv[0] = _mm256_permute_pd( xv[0], 0x5 );
+				iv[1] = _mm256_permute_pd( xv[1], 0x5 );
+				iv[2] = _mm256_permute_pd( xv[2], 0x5 );
 
 				// yv = alphaRv * xv + yv
 				//    = yR1.bR - yR1.bI + xR1.aR, yI1.bR + yI1.bI + xI1.aR, ...
@@ -1097,20 +1431,20 @@ void bli_zaxpbyv_zen_int
 			// Processing 4 elements per loop, 4 FMAs
 			for ( ; ( i + 3 ) < n; i += 4 )
 			{
-				// Load the y vector, 6 elements in total
+				// Load the y vector, 4 elements in total
 				// yv =  yR1  yI1  yR2  yI2
 				yv[0] = _mm256_loadu_pd( y0 );
 				yv[1] = _mm256_loadu_pd( y0 + 1 * n_elem_per_reg );
 
-				// Load the x vector, 6 elements in total
+				// Load the x vector, 4 elements in total
 				// xv = xR1  xI1  xR2  xI2
 				xv[0] = _mm256_loadu_pd( x0 );
 				xv[1] = _mm256_loadu_pd( x0 + 1 * n_elem_per_reg );
 
 				// Permute the vectors from y for the required compute
 				// iv =  yI1  yR1  yI2  yR2
-				iv[0] = _mm256_permute_pd( yv[0], 5 );
-				iv[1] = _mm256_permute_pd( yv[1], 5 );
+				iv[0] = _mm256_permute_pd( yv[0], 0x5 );
+				iv[1] = _mm256_permute_pd( yv[1], 0x5 );
 
 				// Scale the permuted vectors with imaginary component of beta
 				// iv = betaIv * yv
@@ -1127,8 +1461,8 @@ void bli_zaxpbyv_zen_int
 
 				// Permute the loaded vectors from x for the required compute
 				// xv' =  xI1  xR1  xI2  xR2
-				iv[0] = _mm256_permute_pd( xv[0], 5 );
-				iv[1] = _mm256_permute_pd( xv[1], 5 );
+				iv[0] = _mm256_permute_pd( xv[0], 0x5 );
+				iv[1] = _mm256_permute_pd( xv[1], 0x5 );
 
 				// yv = alphaRv * xv + yv
 				//    = yR1.bR - yR1.bI + xR1.aR, yI1.bR + yI1.bI + xI1.aR, ...
@@ -1149,20 +1483,20 @@ void bli_zaxpbyv_zen_int
 				x0 += 2 * n_elem_per_reg;
 			}
 
-			// Processing 2 elements per loop, 3 FMAs
+			// Processing 2 elements per loop, 2 FMAs
 			for ( ; ( i + 1 ) < n; i += 2 )
 			{
-				// Load the y vector, 6 elements in total
+				// Load the y vector, 2 elements in total
 				// yv =  yR1  yI1  yR2  yI2
 				yv[0] = _mm256_loadu_pd( y0 );
 
-				// Load the x vector, 6 elements in total
+				// Load the x vector, 2 elements in total
 				// xv = xR1  xI1  xR2  xI2
 				xv[0] = _mm256_loadu_pd( x0 );
 
 				// Permute the vectors from y for the required compute
 				// iv =  yI1  yR1  yI2  yR2
-				iv[0] = _mm256_permute_pd( yv[0], 5 );
+				iv[0] = _mm256_permute_pd( yv[0], 0x5 );
 
 				// Scale the permuted vectors with imaginary component of beta
 				// iv = betaIv * yv
@@ -1177,7 +1511,7 @@ void bli_zaxpbyv_zen_int
 
 				// Permute the loaded vectors from x for the required compute
 				// xv' =  xI1  xR1  xI2  xR2
-				iv[0] = _mm256_permute_pd( xv[0], 5 );
+				iv[0] = _mm256_permute_pd( xv[0], 0x5 );
 
 				// yv = alphaRv * xv + yv
 				//    = yR1.bR - yR1.bI + xR1.aR, yI1.bR + yI1.bI + xI1.aR, ...
@@ -1194,43 +1528,45 @@ void bli_zaxpbyv_zen_int
 				y0 += 1 * n_elem_per_reg;
 				x0 += 1 * n_elem_per_reg;
 			}
-
 		}
 
 		// Issue vzeroupper instruction to clear upper lanes of ymm registers.
 		// This avoids a performance penalty caused by false dependencies when
 		// transitioning from AVX to SSE instructions.
-        _mm256_zeroupper();
+		_mm256_zeroupper();
 
 	}
 
 	// Scratch registers to be used in case of non-unit strides or fringe case of 1.
 	__m128d x_elem, y_elem, x_perm, y_perm;
-	__m128d betaRv_128, betaIv_128;
+	__m128d betaRv, betaIv;
 
-	// Casting the lower 128-bit lanes from betaRv and betaIv to its 128-bit alternative
-	// registers to avoid redundant broadcasts.
-	betaRv_128 = _mm256_castpd256_pd128( betaRv );
-	betaIv_128 = _mm256_castpd256_pd128( betaIv );
+	// Broadcasting real and imag parts of beta onto 128 bit registers
+	betaRv = _mm_set1_pd( betaR );
+	betaIv = _mm_set1_pd( betaI );
 
-	// NOTE : We cannot similarly use _mm256_castpd256_pd128 to avoid loading alpha
-	//		  since alpha is loaded onto its YMM rgeisters on requirement basis.
-	//        In case of directly falling to this compute(non-unit stride cases),
-	//        alpha wouldn't have been loaded onto any YMM reigsters.
-
-	// Changing betaIv_128 to { -bI  bI } for the compute
+	// Changing betaIv to { -bI  bI } for the compute
 	x_elem = _mm_setzero_pd();
-	betaIv_128 = _mm_addsub_pd( x_elem, betaIv_128 );
+	betaIv = _mm_addsub_pd( x_elem, betaIv );
 
-	// In case of alpha being 0, we just need to scale y by beta
-	if ( is_alpha_zero )
+	if ( is_alpha_one )
 	{
+		__m128d reg_one = _mm_set1_pd(1.0);
+
+		if( bli_is_conj( conjx ) )
+		{
+			reg_one = _mm_addsub_pd( x_elem, reg_one );
+			reg_one = _mm_permute_pd( reg_one, 0x1 );
+		}
+
 		// Iterate over y, one element at a time
 		for ( ; i < n; i += 1 )
 		{
-			// Load an element from y
+			// Load an element from x and y
 			// y_elem =  yR1  yI1
+			// x_elem =  xR1  xI1
 			y_elem = _mm_loadu_pd( y0 );
+			x_elem = _mm_loadu_pd( x0 );
 
 			// Permute y in accordance to its compute
 			// y_perm =  yI1  yR1
@@ -1239,17 +1575,20 @@ void bli_zaxpbyv_zen_int
 			// Scale y_perm by the imaginary
 			// component of beta
 			// y_perm =  -yI1.bI, yR1.bI
-			y_perm = _mm_mul_pd( betaIv_128, y_perm );
+			y_perm = _mm_mul_pd( betaIv, y_perm );
 
 			// Use fmadd to scale with real component of
 			// beta and add with intermediate result
 			// y_elem =  yR1.bR - yI1.bI, yI1.bR + yR1.bI
-			y_elem = _mm_fmadd_pd( betaRv_128, y_elem, y_perm );
+			y_elem = _mm_fmadd_pd( betaRv, y_elem, y_perm );
+
+			y_elem = _mm_fmadd_pd( reg_one, x_elem, y_elem );
 
 			// Storing the result to memory
 			_mm_storeu_pd( y0, y_elem );
 
 			// Adjusting the pointer for the next iteration
+			x0 += incx * 2;
 			y0 += incy * 2;
 		}
 	}
@@ -1257,26 +1596,26 @@ void bli_zaxpbyv_zen_int
 	{
 		// Scratch registers to store real and imaginary components
 		// of alpha onto XMM registers
-		__m128d alphaRv_128, alphaIv_128;
+		__m128d alphaRv, alphaIv;
 
 		// Broadcasting real and imaginary components of alpha
 		x_elem = _mm_setzero_pd();
-		alphaRv_128 = _mm_loaddup_pd( &alphaR );
-		alphaIv_128 = _mm_loaddup_pd( &alphaI );
+		alphaRv = _mm_loaddup_pd( &alphaR );
+		alphaIv = _mm_loaddup_pd( &alphaI );
 
-		// The changes on alphaRv_128 and alphaIv_128 are as follows :
+		// The changes on alphaRv and alphaIv are as follows :
 		// If conjugate is required:
-		//		alphaRv_128 =  aR  -aR
+		//		alphaRv =  aR  -aR
 		// Else :
-		//		alphaIv_128 =  -aI  aI
-		if( bli_is_conj( conjx_use ) )
+		//		alphaIv =  -aI  aI
+		if( bli_is_conj( conjx ) )
 		{
-			alphaRv_128 = _mm_addsub_pd( x_elem, alphaRv_128 );
-			alphaRv_128 = _mm_permute_pd( alphaRv_128, 0x1 );
+			alphaRv = _mm_addsub_pd( x_elem, alphaRv );
+			alphaRv = _mm_permute_pd( alphaRv, 0x1 );
 		}
 		else
 		{
-			alphaIv_128 = _mm_addsub_pd( x_elem, alphaIv_128 );
+			alphaIv = _mm_addsub_pd( x_elem, alphaIv );
 		}
 
 		// Iterating over x and y vectors, on element at a time
@@ -1298,8 +1637,8 @@ void bli_zaxpbyv_zen_int
 			// component of beta and alpha
 			// y_perm =  -yI1.bI, yR1.bI
 			// x_perm =  -xI1.aI, xR1.aI
-			y_perm = _mm_mul_pd( betaIv_128, y_perm );
-			x_perm = _mm_mul_pd( alphaIv_128, x_perm );
+			y_perm = _mm_mul_pd( betaIv, y_perm );
+			x_perm = _mm_mul_pd( alphaIv, x_perm );
 
 			// Use fmadd to scale with y_elem with
 			// real component of beta and add with
@@ -1307,8 +1646,8 @@ void bli_zaxpbyv_zen_int
 			// for x_elem.
 			// y_elem =  yR1.bR - yI1.bI, yI1.bR + yR1.bI
 			// x_elem =  xR1.aR - xI1.aI, xI1.aR + xR1.aI
-			y_elem = _mm_fmadd_pd( betaRv_128, y_elem, y_perm );
-			x_elem = _mm_fmadd_pd( alphaRv_128, x_elem, x_perm );
+			y_elem = _mm_fmadd_pd( betaRv, y_elem, y_perm );
+			x_elem = _mm_fmadd_pd( alphaRv, x_elem, x_perm );
 
 			// Add the computed x and y vectors, store on y.
 			y_elem = _mm_add_pd( y_elem, x_elem );

@@ -180,7 +180,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 /*
     Unit testing for functionality of bli_daxpbyv_zen_int kernel.
-    The code structure for bli_daxpbyv_zen_int10( ... ) is as follows :
+    The code structure for bli_daxpbyv_zen_int( ... ) is as follows :
     For unit strides :
         Main loop    :  In blocks of 16 --> L16
                         Element-wise loop --> LScalar

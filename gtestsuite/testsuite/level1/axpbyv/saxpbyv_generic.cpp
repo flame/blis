@@ -70,34 +70,36 @@ TEST_P( saxpbyvGeneric, API )
     double thresh;
     if (n == 0)
         thresh = 0.0;
-    else if (alpha == testinghelpers::ZERO<T>())
-    {
-        // Like SCALV
-        if (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>())
-            thresh = 0.0;
-        else
-            thresh = testinghelpers::getEpsilon<T>();
-    }
     else if (beta == testinghelpers::ZERO<T>())
     {
-        // Like SCAL2V
+        // Like SETV or COPYV(no ops)
         if (alpha == testinghelpers::ZERO<T>() || alpha == testinghelpers::ONE<T>())
             thresh = 0.0;
+        // Like SCAL2V(1 mul)
         else
             thresh = testinghelpers::getEpsilon<T>();
     }
     else if (beta == testinghelpers::ONE<T>())
     {
-        // Like AXPYV
+        // Like ERS(no ops)
         if (alpha == testinghelpers::ZERO<T>())
             thresh = 0.0;
+        // Like ADDV(1 add)
+        else if (alpha == testinghelpers::ONE<T>())
+            thresh = testinghelpers::getEpsilon<T>();
+        // Like AXPYV(1 mul and 1 add)
         else
-            thresh = 2*testinghelpers::getEpsilon<T>();
+            thresh = 2 * testinghelpers::getEpsilon<T>();
     }
-    else if (alpha == testinghelpers::ONE<T>())
-        thresh = 2*testinghelpers::getEpsilon<T>();
     else
-        thresh = 3*testinghelpers::getEpsilon<T>();
+    {
+        // Like SCALV(1 mul)
+        if (alpha == testinghelpers::ZERO<T>())
+            thresh = testinghelpers::getEpsilon<T>();
+        // Like AXPBYV(2 muls and 1 add)
+        else
+            thresh = 3 * testinghelpers::getEpsilon<T>();
+    }
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters
@@ -114,8 +116,10 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(float(2.0), float(-2.0)),                      // alpha
-            ::testing::Values(float(-1.0))                                   // beta
+            ::testing::Values(float(2.3), float(1.0),
+                              float(-1.0), float(0.0)),                    // alpha
+            ::testing::Values(float(-4.9), float(1.0),
+                              float(-1.0), float(0.0))                     // beta
         ),
         ::axpbyvGenericPrint<float>()
     );
@@ -132,8 +136,10 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(float(2.0)),                                   // alpha
-            ::testing::Values(float(1.0))                                    // beta
+            ::testing::Values(float(2.3), float(1.0),
+                              float(-1.0), float(0.0)),                    // alpha
+            ::testing::Values(float(-4.9), float(1.0),
+                              float(-1.0), float(0.0))                     // beta
         ),
         ::axpbyvGenericPrint<float>()
     );
@@ -150,8 +156,10 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
             ::testing::Values(gtint_t(11)),                                  /*(gtint_t(-5), gtint_t(-17))*/// stride size for x
             ::testing::Values(gtint_t(3)),                                   /*(gtint_t(-12), gtint_t(-4))*/// stride size for y
-            ::testing::Values(float(4.0)),                                   // alpha
-            ::testing::Values(float(2.0))                                    // beta
+            ::testing::Values(float(2.3), float(1.0),
+                              float(-1.0), float(0.0)),                    // alpha
+            ::testing::Values(float(-4.9), float(1.0),
+                              float(-1.0), float(0.0))                     // beta
         ),
         ::axpbyvGenericPrint<float>()
     );
@@ -168,8 +176,10 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(11), gtint_t(-11)),                    // stride size for x
             ::testing::Values(gtint_t(-3), gtint_t(4)),                      // stride size for y
-            ::testing::Values(4.0),                                          // alpha
-            ::testing::Values(-2.0)                                          // beta
+            ::testing::Values(float(2.3), float(1.0),
+                              float(-1.0), float(0.0)),                    // alpha
+            ::testing::Values(float(-4.9), float(1.0),
+                              float(-1.0), float(0.0))                     // beta
         ),
         ::axpbyvGenericPrint<float>()
     );

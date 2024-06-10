@@ -117,7 +117,13 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	// Update the context with optimized level-1v kernels.
 	bli_cntx_set_l1v_kers
 	(
-	  30,
+	  40,
+	  // addv
+	  BLIS_ADDV_KER,  BLIS_FLOAT,      bli_saddv_zen_int,
+	  BLIS_ADDV_KER,  BLIS_DOUBLE,     bli_daddv_zen_int,
+	  BLIS_ADDV_KER,  BLIS_SCOMPLEX,   bli_caddv_zen_int,
+	  BLIS_ADDV_KER,  BLIS_DCOMPLEX,   bli_zaddv_zen_int,
+
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,    bli_samaxv_zen_int,
 	  BLIS_AMAXV_KER,  BLIS_DOUBLE,   bli_damaxv_zen_int,
@@ -149,6 +155,7 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  // scalv
 	  BLIS_SCALV_KER,  BLIS_FLOAT,    bli_sscalv_zen_int10,
 	  BLIS_SCALV_KER,  BLIS_DOUBLE,   bli_dscalv_zen_int10,
+	  BLIS_SCALV_KER,  BLIS_SCOMPLEX, bli_cscalv_zen_int,
 	  BLIS_SCALV_KER,  BLIS_DCOMPLEX, bli_zscalv_zen_int,
 
 	  // swapv
@@ -158,14 +165,19 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  // copyv
 	  BLIS_COPYV_KER,  BLIS_FLOAT,    bli_scopyv_zen_int,
 	  BLIS_COPYV_KER,  BLIS_DOUBLE,   bli_dcopyv_zen_int,
+	  BLIS_COPYV_KER,  BLIS_SCOMPLEX, bli_ccopyv_zen_int,
 	  BLIS_COPYV_KER,  BLIS_DCOMPLEX, bli_zcopyv_zen_int,
 
 	  // setv
 	  BLIS_SETV_KER,   BLIS_FLOAT,    bli_ssetv_zen_int,
 	  BLIS_SETV_KER,   BLIS_DOUBLE,   bli_dsetv_zen_int,
+	  BLIS_SETV_KER,   BLIS_SCOMPLEX, bli_csetv_zen_int,
 	  BLIS_SETV_KER,   BLIS_DCOMPLEX, bli_zsetv_zen_int,
 
 	  // scal2v
+	  BLIS_SCAL2V_KER, BLIS_FLOAT,    bli_sscal2v_zen_int,
+	  BLIS_SCAL2V_KER, BLIS_DOUBLE,   bli_dscal2v_zen_int,
+	  BLIS_SCAL2V_KER, BLIS_SCOMPLEX, bli_cscal2v_zen_int,
 	  BLIS_SCAL2V_KER, BLIS_DCOMPLEX, bli_zscal2v_zen_int,
 	  cntx
 	);

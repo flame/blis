@@ -35,67 +35,72 @@
 #pragma once
 
 #include <stdexcept>
-#include "level1/setv/setv.h"
+
+#include "level1/scal2v/scal2v.h"
+#include "level1/ref_scal2v.h"
 #include "inc/check_error.h"
 #include "common/testing_helpers.h"
 
 /**
- * @brief Generic test body for copyv operation.
+ * @brief Microkernel test body for scal2v operation.
  */
-
-template<typename T, typename FT>
-void test_setv_ukr( FT ukr_fp, char conjalpha, T alpha, gtint_t n, gtint_t incx, bool is_memory_test = false )
+template<typename T, typename U, typename FT>
+static void test_scal2v_ukr( FT ukr, char conjx, gtint_t n, gtint_t incx, gtint_t incy,
+                            T alpha, double thresh, bool is_memory_test = false )
 {
-    // Pointers to obtain the required memory.
-    T *x, *x_copy;
-    // Copying alpha to a local variable, since we pass by reference to kernel
-    T alpha_copy = alpha;
-    gtint_t size_x = testinghelpers::buff_dim( n, incx ) * sizeof( T );
+    // Obtain and allocate memory for vectors.
+    T *x, *y, *y_ref;
 
-    // Create the object for the required operand
+    // Sizes of x and y vectors
+    gtint_t size_x = testinghelpers::buff_dim( n, incx ) * sizeof( T );
+    gtint_t size_y = testinghelpers::buff_dim( n, incy ) * sizeof( T );
+
+    // Create the object for the required operands
     // The kernel does not expect the memory to be aligned
     testinghelpers::ProtectedBuffer x_buffer( size_x, false, is_memory_test );
+    testinghelpers::ProtectedBuffer y_buffer( size_y, false, is_memory_test );
 
-    // For x_copy, we don't need different greenzones and any redzone.
+    // For y_ref, we don't need different greenzones and any redzone.
     // Thus, we pass is_memory_test as false
-    testinghelpers::ProtectedBuffer x_copy_buffer( size_x, false, false );
+    testinghelpers::ProtectedBuffer y_ref_buffer( size_y, false, false );
 
-    // Acquire the first greenzone for x
+    // Acquire the first set of greenzones for x and y.
     x = ( T* )x_buffer.greenzone_1;
-    x_copy = ( T* )x_copy_buffer.greenzone_1; // For x_copy, there is no greenzone_2
+    y = ( T* )y_buffer.greenzone_1;
 
-    // Initiaize the memory with random data
+    // There is no greenzone_2 for y_ref.
+    y_ref = ( T* )y_ref_buffer.greenzone_1;
+
+    // Initialize x and y with random data.
     testinghelpers::datagenerators::randomgenerators( -10, 10, n, incx, x );
+    testinghelpers::datagenerators::randomgenerators( -10, 10, n, incy, y );
 
-    // Copying the contents of y to y_ref
-    memcpy( x_copy, x, size_x );
+    // Copying y to y_ref, for comparision after computation
+    memcpy( y_ref, y, size_y );
 
-    // Char conjalpha to BLIS conjalpha conversion
-    conj_t blis_conjalpha;
-    testinghelpers::char_to_blis_conj( conjalpha, &blis_conjalpha );
+    // Char conjx to BLIS conjx conversion
+    conj_t blis_conjx;
+    testinghelpers::char_to_blis_conj( conjx, &blis_conjx );
 
-    // Add signal handler for segmentation fault
     testinghelpers::ProtectedBuffer::start_signal_handler();
     try
     {
-        // Call the ukr function.
-        // This call is made irrespective of is_memory_test.
-        // This will check for out of bounds access with first redzone(if memory test is true)
-        // Else, it will just call the ukr function.
-        ukr_fp( blis_conjalpha, n, &alpha, x, incx, nullptr );
+        // Invoking BLIS ukr.
+        // This will check for out of bounds access within first redzone.
+        ukr( blis_conjx, n, &alpha, x, incx, y, incy, nullptr );
 
         if ( is_memory_test )
         {
-            // Acquire the pointers near the second redzone
+            // Acquire the pointers near the second redzone.
             x = ( T* )x_buffer.greenzone_2;
+            y = ( T* )y_buffer.greenzone_2;
 
-            // Copy the data for x accordingly
-            memcpy( x, x_copy, size_x );
+            // Copy the data for x and y accordingly
+            memcpy( x, x_buffer.greenzone_1, size_x );
+            memcpy( y, y_ref, size_y );
 
-            alpha = alpha_copy;
-
-            // Call the ukr function, to check with the second redzone.
-            ukr_fp( blis_conjalpha, n, &alpha, x, incx, nullptr );
+            // Invoking BLIS ukr to check with the second redzone.
+            ukr( blis_conjx, n, &alpha, x, incx, y, incy, nullptr );
         }
     }
     catch(const std::exception& e)
@@ -106,53 +111,39 @@ void test_setv_ukr( FT ukr_fp, char conjalpha, T alpha, gtint_t n, gtint_t incx,
         // Show failure in case seg fault was detected
         FAIL() << "Memory Test Failed";
     }
-    // Reset to default signal handler
-    testinghelpers::ProtectedBuffer::stop_signal_handler();
-
-    T alpha_ref = alpha_copy;
-#ifdef TEST_BLIS_TYPED
-    if( testinghelpers::chkconj( conjalpha ) )
-    {
-        alpha_ref = testinghelpers::conj<T>( alpha_copy );
-    }
-#endif
 
     //----------------------------------------------------------
-    //              Reference computation
+    //    Call reference implementation to get ref results.
     //----------------------------------------------------------
-    gtint_t i, idx;
-    for( idx = 0 ; idx < n ; idx++ )
-    {
-        i = (incx > 0) ? (idx * incx) : ( - ( n - idx - 1 ) * incx );
-        x_copy[i] = alpha_ref;
-    }
+    testinghelpers::ref_scal2v<T>( conjx, n, alpha, x, incx, y_ref, incy );
 
     //----------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
-    computediff<T>( "x", n, x, x_copy, incx );
+    computediff<T>( "y", n, y, y_ref, incy, thresh );
 }
 
-// Test-case logger : Used to print the test-case details for unit testing the kernels.
-// NOTE : The kernel name is the prefix in instantiator name, and thus is not printed
-// with this logger.
-template<typename T, typename FT>
-class setvUkrPrint {
+
+// Test-case logger : Used to print the test-case details based on parameters
+template <typename T, typename FT>
+class scal2vUKRPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<FT,char,T,gtint_t,gtint_t,bool>> str) const {
-        char conjalpha = std::get<1>(str.param);
-        T alpha        = std::get<2>(str.param);
-        gtint_t n      = std::get<3>(str.param);
-        gtint_t incx   = std::get<4>(str.param);
-        bool is_memory_test = std::get<5>(str.param);
+        testing::TestParamInfo<std::tuple<FT,char,gtint_t,gtint_t,gtint_t,T,bool>> str) const {
+        char conjx = std::get<1>(str.param);
+        gtint_t n = std::get<2>(str.param);
+        gtint_t incx = std::get<3>(str.param);
+        gtint_t incy = std::get<4>(str.param);
+        T alpha = std::get<5>(str.param);
+        bool is_memory_test = std::get<6>(str.param);
 
-        std::string str_name = "";
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_conjalpha_" + std::string(&conjalpha, 1);
+        std::string str_name = "_n_" + std::to_string(n);
+        str_name += "_conjx_" + std::string(&conjx, 1);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
+
         return str_name;
     }
 };

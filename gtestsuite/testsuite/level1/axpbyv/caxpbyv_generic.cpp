@@ -67,38 +67,42 @@ TEST_P( caxpbyvGeneric, API )
     // Check gtestsuite axpbyv.h (no netlib version) for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // No adjustment applied yet for complex data.
+    // With adjustment for complex data.
+    // NOTE : Every mul for complex types involves 3 ops(2 muls + 1 add)
     double thresh;
+    double adj = 3;
     if (n == 0)
         thresh = 0.0;
-    else if (alpha == testinghelpers::ZERO<T>())
-    {
-        // Like SCALV
-        if (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>())
-            thresh = 0.0;
-        else
-            thresh = testinghelpers::getEpsilon<T>();
-    }
     else if (beta == testinghelpers::ZERO<T>())
     {
-        // Like SCAL2V
+        // Like SETV or COPYV(no ops)
         if (alpha == testinghelpers::ZERO<T>() || alpha == testinghelpers::ONE<T>())
             thresh = 0.0;
+        // Like SCAL2V(1 mul)
         else
-            thresh = testinghelpers::getEpsilon<T>();
+            thresh = (1 * adj) * testinghelpers::getEpsilon<T>();
     }
     else if (beta == testinghelpers::ONE<T>())
     {
-        // Like AXPYV
+        // Like ERS(no ops)
         if (alpha == testinghelpers::ZERO<T>())
             thresh = 0.0;
+        // Like ADDV(1 add)
+        else if (alpha == testinghelpers::ONE<T>())
+            thresh = testinghelpers::getEpsilon<T>();
+        // Like AXPYV(1 mul and 1 add)
         else
-            thresh = 2*testinghelpers::getEpsilon<T>();
+            thresh = (1 * adj + 1) * testinghelpers::getEpsilon<T>();
     }
-    else if (alpha == testinghelpers::ONE<T>())
-        thresh = 2*testinghelpers::getEpsilon<T>();
     else
-        thresh = 3*testinghelpers::getEpsilon<T>();
+    {
+        // Like SCALV(1 mul)
+        if (alpha == testinghelpers::ZERO<T>())
+            thresh = (1 * adj) * testinghelpers::getEpsilon<T>();
+        // Like AXPBYV(2 muls and 1 add)
+        else
+            thresh = (2 * adj + 1) * testinghelpers::getEpsilon<T>();
+    }
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters
@@ -111,16 +115,16 @@ INSTANTIATE_TEST_SUITE_P(
         Blackbox,
         caxpbyvGeneric,
         ::testing::Combine(
-            ::testing::Values('n'                                            // n: use x, c: use conj(x)
+            ::testing::Values('n'                                                           // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED
-            , 'c'                                                            // this option is BLIS-api specific.
+            , 'c'                                                                           // this option is BLIS-api specific.
 #endif
             ),
-            ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
-            ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(scomplex{2.0, -1.0}, scomplex{-2.0, 3.0}),     // alpha
-            ::testing::Values(scomplex{1.0, 2.0})                            // beta
+            ::testing::Range(gtint_t(10), gtint_t(101), 10),                                // m size of vector takes values from 10 to 100 with step size of 10.
+            ::testing::Values(gtint_t(1)),                                                  // stride size for x
+            ::testing::Values(gtint_t(1)),                                                  // stride size for y
+            ::testing::Values(scomplex{0.0, 0.0}, scomplex{1.0, 0.0}, scomplex{2.2, -3.3}), // alpha
+            ::testing::Values(scomplex{0.0, 0.0}, scomplex{1.0, 0.0}, scomplex{1.0, 2.0})   // beta
         ),
         ::axpbyvGenericPrint<scomplex>()
     );
@@ -134,14 +138,14 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Combine(
             ::testing::Values('n'
 #ifdef TEST_BLIS_TYPED
-            , 'c'                                                            // this option is BLIS-api specific.
+            , 'c'                                                                           // this option is BLIS-api specific.
 #endif
-            ),                                                               // n: use x, c: use conj(x)
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m size of vector takes values from 10 to 100 with step size of 10.
-            ::testing::Values(gtint_t(2)),                                   // stride size for x
-            ::testing::Values(gtint_t(3)),                                   // stride size for y
-            ::testing::Values(scomplex{4.0, 3.1}),                           // alpha
-            ::testing::Values(scomplex{1.0, -2.0})                           // beta
+            ),                                                                              // n: use x, c: use conj(x)
+            ::testing::Range(gtint_t(10), gtint_t(31), 10),                                 // m size of vector takes values from 10 to 100 with step size of 10.
+            ::testing::Values(gtint_t(2)),                                                  // stride size for x
+            ::testing::Values(gtint_t(3)),                                                  // stride size for y
+            ::testing::Values(scomplex{0.0, 0.0}, scomplex{1.0, 0.0}, scomplex{2.2, -3.3}), // alpha
+            ::testing::Values(scomplex{0.0, 0.0}, scomplex{1.0, 0.0}, scomplex{1.0, 2.0})   // beta
         ),
         ::axpbyvGenericPrint<scomplex>()
     );
@@ -154,12 +158,12 @@ INSTANTIATE_TEST_SUITE_P(
         NegativeIncrements,
         caxpbyvGeneric,
         ::testing::Combine(
-            ::testing::Values('n'),                                          // n: use x
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m size of vector takes values from 10 to 100 with step size of 10.
-            ::testing::Values(gtint_t(-11), gtint_t(5)),                    // stride size for x
-            ::testing::Values(gtint_t(-3), gtint_t(7)),                      // stride size for y
-            ::testing::Values(scomplex{4.0, 3.1}),                           // alpha
-            ::testing::Values(scomplex{1.0, -2.0})                           // beta
+            ::testing::Values('n'),                                                         // n: use x
+            ::testing::Range(gtint_t(10), gtint_t(31), 10),                                 // m size of vector takes values from 10 to 100 with step size of 10.
+            ::testing::Values(gtint_t(-11), gtint_t(5)),                                    // stride size for x
+            ::testing::Values(gtint_t(-3), gtint_t(7)),                                     // stride size for y
+            ::testing::Values(scomplex{0.0, 0.0}, scomplex{1.0, 0.0}, scomplex{2.2, -3.3}), // alpha
+            ::testing::Values(scomplex{0.0, 0.0}, scomplex{1.0, 0.0}, scomplex{1.0, 2.0})   // beta
         ),
         ::axpbyvGenericPrint<scomplex>()
     );

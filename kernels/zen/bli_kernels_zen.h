@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -37,6 +37,12 @@
 
 
 // -- level-1v --
+
+// amaxv (intrinsics)
+ADDV_KER_PROT( float,    s, addv_zen_int )
+ADDV_KER_PROT( double,   d, addv_zen_int )
+ADDV_KER_PROT( scomplex, c, addv_zen_int )
+ADDV_KER_PROT( dcomplex, z, addv_zen_int )
 
 // amaxv (intrinsics)
 AMAXV_KER_PROT( float,    s, amaxv_zen_int )
@@ -81,6 +87,7 @@ DOTXV_KER_PROT( scomplex, c, dotxv_zen_int )
 // scalv (intrinsics)
 SCALV_KER_PROT( float,    s, scalv_zen_int )
 SCALV_KER_PROT( double,   d, scalv_zen_int )
+SCALV_KER_PROT( scomplex, c, scalv_zen_int )
 SCALV_KER_PROT( dcomplex, z, scalv_zen_int )
 
 // scalv (intrinsics unrolled x10)
@@ -95,14 +102,19 @@ SWAPV_KER_PROT(double,  d, swapv_zen_int8 )
 // copyv (intrinsics)
 COPYV_KER_PROT( float,      s, copyv_zen_int )
 COPYV_KER_PROT( double,     d, copyv_zen_int )
+COPYV_KER_PROT( scomplex,   c, copyv_zen_int )
 COPYV_KER_PROT( dcomplex,   z, copyv_zen_int )
 
 // scal2v (intrinsics)
+SCAL2V_KER_PROT(float,    s, scal2v_zen_int)
+SCAL2V_KER_PROT(double,   d, scal2v_zen_int)
+SCAL2V_KER_PROT(scomplex, c, scal2v_zen_int)
 SCAL2V_KER_PROT(dcomplex, z, scal2v_zen_int)
 
 // setv (intrinsics)
 SETV_KER_PROT( float,    s, setv_zen_int)
 SETV_KER_PROT( double,   d, setv_zen_int)
+SETV_KER_PROT( scomplex, c, setv_zen_int)
 SETV_KER_PROT( dcomplex, z, setv_zen_int)
 
 // -- level-1f --

@@ -54,6 +54,7 @@ using namespace testinghelpers::IIT;
 
     The AXPBY API is expected to return early in the following cases:
     1. When n <= 0.
+    2. When alpha is 0 and beta is 1.
 */
 
 // Early return cases with non-unit strides on vectors
@@ -97,6 +98,26 @@ TYPED_TEST(axpbyv_IIT_ERS, n_eq_zero_nonUnitStrides)
   computediff( "y", N, y.data(), y_ref.data(), 5 );
 }
 
+
+TYPED_TEST(axpbyv_IIT_ERS, alpha_eq_zero_beta_eq_one_nonUnitStrides)
+{
+  using T = TypeParam;
+  // Defining the x vector
+  std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 5 );
+  // Defining the y vector with values for debugging purposes
+  std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, 5 );
+
+  T alpha, beta;
+  testinghelpers::initzero<T>( alpha );
+  testinghelpers::initone<T>( beta );
+  // Copy so that we check that the elements of y are not modified.
+  std::vector<T> y_ref(y);
+
+  axpbyv<T>( CONJ, N, alpha, x.data(), 5, beta, y.data(), 5 );
+  // Use bitwise comparison (no threshold).
+  computediff( "y", N, y.data(), y_ref.data(), 5 );
+}
+
 // Early return cases with unit strides on vectors
 // When n < 0
 TYPED_TEST(axpbyv_IIT_ERS, n_lt_zero_unitStrides)
@@ -134,6 +155,26 @@ TYPED_TEST(axpbyv_IIT_ERS, n_eq_zero_unitStrides)
   std::vector<T> y_ref(y);
 
   axpbyv<T>( CONJ, 0, alpha, x.data(), 1, beta, y.data(), 1 );
+  // Use bitwise comparison (no threshold).
+  computediff( "y", N, y.data(), y_ref.data(), 1 );
+}
+
+// When alpha = 0 and beta = 1
+TYPED_TEST(axpbyv_IIT_ERS, alpha_eq_zero_beta_eq_one_unitStrides)
+{
+  using T = TypeParam;
+  // Defining the x vector
+  std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
+  // Defining the y vector with values for debugging purposes
+  std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
+
+  T alpha, beta;
+  testinghelpers::initzero<T>( alpha );
+  testinghelpers::initone<T>( beta );
+  // Copy so that we check that the elements of y are not modified.
+  std::vector<T> y_ref(y);
+
+  axpbyv<T>( CONJ, N, alpha, x.data(), 1, beta, y.data(), 1 );
   // Use bitwise comparison (no threshold).
   computediff( "y", N, y.data(), y_ref.data(), 1 );
 }

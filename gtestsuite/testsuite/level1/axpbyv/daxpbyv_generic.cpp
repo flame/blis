@@ -70,34 +70,36 @@ TEST_P( daxpbyvGeneric, API )
     double thresh;
     if (n == 0)
         thresh = 0.0;
-    else if (alpha == testinghelpers::ZERO<T>())
-    {
-        // Like SCALV
-        if (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>())
-            thresh = 0.0;
-        else
-            thresh = testinghelpers::getEpsilon<T>();
-    }
     else if (beta == testinghelpers::ZERO<T>())
     {
-        // Like SCAL2V
+        // Like SETV or COPYV(no ops)
         if (alpha == testinghelpers::ZERO<T>() || alpha == testinghelpers::ONE<T>())
             thresh = 0.0;
+        // Like SCAL2V(1 mul)
         else
             thresh = testinghelpers::getEpsilon<T>();
     }
     else if (beta == testinghelpers::ONE<T>())
     {
-        // Like AXPYV
+        // Like ERS(no ops)
         if (alpha == testinghelpers::ZERO<T>())
             thresh = 0.0;
+        // Like ADDV(1 add)
+        else if (alpha == testinghelpers::ONE<T>())
+            thresh = testinghelpers::getEpsilon<T>();
+        // Like AXPYV(1 mul and 1 add)
         else
-            thresh = 2*testinghelpers::getEpsilon<T>();
+            thresh = 2 * testinghelpers::getEpsilon<T>();
     }
-    else if (alpha == testinghelpers::ONE<T>())
-        thresh = 2*testinghelpers::getEpsilon<T>();
     else
-        thresh = 3*testinghelpers::getEpsilon<T>();
+    {
+        // Like SCALV(1 mul)
+        if (alpha == testinghelpers::ZERO<T>())
+            thresh = testinghelpers::getEpsilon<T>();
+        // Like AXPBYV(2 muls and 1 add)
+        else
+            thresh = 3 * testinghelpers::getEpsilon<T>();
+    }
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters
