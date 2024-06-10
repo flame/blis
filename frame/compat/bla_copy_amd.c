@@ -302,7 +302,7 @@ void dcopy_blis_impl
 		case BLIS_ARCH_ZEN5:
 		case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
-			// For Zen4 and Zen5 architecture, kernel implemented in AVX512 is used
+			// For Zen4 and Zen5, kernel implemented in AVX512 is used
 			copyv_ker_ptr = bli_dcopyv_zen4_asm_avx512;
 			break;
 #endif
@@ -358,51 +358,60 @@ void dcopy_blis_impl
 		cntx
 	);
 
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+	return;
 
 #ifdef BLIS_ENABLE_OPENMP
 	}
 
-	else
+	_Pragma("omp parallel num_threads(nt)")
 	{
-		_Pragma("omp parallel num_threads(nt)")
-		{
-			dim_t start, length;
+		dim_t start, end, length;
+		thrinfo_t thread;
 
-			// Get the thread ID
-			dim_t thread_id = omp_get_thread_num();
+		// The factor by which the size should be a multiple during thread partition. 
+		// The main loop of the kernel can handle 32 elements at a time hence 32 is selected for block_size.
+		dim_t block_size = 32;
 
-			// Get the actual number of threads spawned
-			dim_t nt_use = omp_get_num_threads();
+		// Get the thread ID
+		bli_thrinfo_set_work_id( omp_get_thread_num(), &thread );
 
-			/*
-				Calculate the compute range for the current thread
-				based on the actual number of threads spawned
-			*/
-			bli_thread_vector_partition
-			(
-				n0,
-				nt_use,
-				&start, &length,
-				thread_id
-			);
+		// Get the actual number of threads spawned
+		bli_thrinfo_set_n_way( omp_get_num_threads(), &thread );
 
-			// Adjust the local pointer for computation
-			double *x_thread_local = x0 + (start * incx0);
-			double *y_thread_local = y0 + (start * incy0);
+		/*
+		Calculate the compute range for the current thread
+		based on the actual number of threads spawned
+		*/
 
-			// Invoke the function based on the kernel function pointer
-			copyv_ker_ptr
-			(
-				BLIS_NO_CONJUGATE,
-				length,
-				x_thread_local, incx0,
-				y_thread_local, incy0,
-				cntx
-			);
-		}
+		bli_thread_range_sub
+		(
+			&thread,
+			n0,
+			block_size,
+			FALSE,
+			&start,
+			&end
+		);
+
+		length = end - start;
+
+		// Adjust the local pointer for computation
+		double *x_thread_local = x0 + (start * incx0);
+		double *y_thread_local = y0 + (start * incy0);
+
+		// Invoke the function based on the kernel function pointer
+		copyv_ker_ptr
+		(
+			BLIS_NO_CONJUGATE,
+			length,
+			x_thread_local, incx0,
+			y_thread_local, incy0,
+			cntx
+		);
 	}
 
-#endif
+#endif // BLIS_ENABLE_OPENMP
 
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 	/* Finalize BLIS. */
@@ -441,7 +450,7 @@ void zcopy_blis_impl
 
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
 	AOCL_DTL_LOG_COPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', *n, *incx, *incy)
-	
+
 	/* Initialize BLIS. */
 
 //  bli_init_auto();

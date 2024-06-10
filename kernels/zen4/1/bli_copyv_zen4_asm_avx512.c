@@ -108,7 +108,6 @@ void bli_scopyv_zen4_asm_avx512
     begin_asm()
 
      /*
-        rdi - > conjx
         rsi - > n
         rdx - > x
         rcx - > incx
@@ -133,146 +132,61 @@ void bli_scopyv_zen4_asm_avx512
 
     // ========================================================================================================================
 
-    // Section of code to move the data as blocks of 512 elements
-    label(.BLOCK512)
-
-    cmp(imm(16*32), rsi)               // check if the number of remaining elements greater than or equal to 512  -> (NUMBER OF ELEMENTS PER REGISTER) * (NUMBER OF REGISTERS USED IN THE BLOCK)
-    jl(.BLOCK256)                      // else, goto block of size 256
-
-    label(.MAINLOOP)
-    // Interleaved SIMD load and store operations to copy data from source to the destination
-    // Each vector register can hold 16 elements and is used twice before next jump operation (1 for loading the element from source and 1 for store it into the destination)
-
-    vmovupd(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+15]
-    vmovupd(zmm0,  mem(r8, 0*64))       // y[i+0] - y[i+15] = zmm0
-    vmovupd(mem(rdx, 1*64), zmm1)       // zmm1 = x[i+16] - x[i+31]
-    vmovupd(zmm1,  mem(r8, 1*64))       // y[i+16] - y[i+31] = zmm1
-    vmovupd(mem(rdx, 2*64), zmm2)       // zmm2 = x[i+32] - x[i+47]
-    vmovupd(zmm2,  mem(r8, 2*64))       // y[i+32] - y[i+47] = zmm2
-    vmovupd(mem(rdx, 3*64), zmm3)       // zmm3 = x[i+48] - x[i+63]
-    vmovupd(zmm3,  mem(r8, 3*64))       // y[i+48] - y[i+63] = zmm3
-
-    vmovupd(mem(rdx, 4*64), zmm4)       // zmm4 = x[i+64] - x[i+79]
-    vmovupd(zmm4,  mem(r8, 4*64))       // y[i+64] - y[i+79] = zmm4
-    vmovupd(mem(rdx, 5*64), zmm5)       // zmm5 = x[i+80] - x[i+95]
-    vmovupd(zmm5,  mem(r8, 5*64))       // y[i+80] - y[i+95] = zmm5
-    vmovupd(mem(rdx, 6*64), zmm6)       // zmm6 = x[i+96] - x[i+111]
-    vmovupd(zmm6,  mem(r8, 6*64))       // y[i+96] - y[i+111] = zmm6
-    vmovupd(mem(rdx, 7*64), zmm7)       // zmm7 = x[i+112] - x[i+127]
-    vmovupd(zmm7,  mem(r8, 7*64))       // y[i+112] - y[i+127] = zmm7
-
-    vmovupd(mem(rdx, 8*64), zmm8)       // zmm8 = x[i+128] - x[i+143]
-    vmovupd(zmm8,  mem(r8, 8*64))       // y[i+128] - y[i+143] = zmm8
-    vmovupd(mem(rdx, 9*64), zmm9)       // zmm9 = x[i+144] - x[i+159]
-    vmovupd(zmm9,  mem(r8, 9*64))       // y[i+144] - y[i+159] = zmm9
-    vmovupd(mem(rdx, 10*64), zmm10)     // zmm10 = x[i+160] - x[i+175]
-    vmovupd(zmm10,  mem(r8, 10*64))     // y[i+160] - y[i+175] = zmm10
-    vmovupd(mem(rdx, 11*64), zmm11)     // zmm11 = x[i+176] - x[i+191]
-    vmovupd(zmm11,  mem(r8, 11*64))     // y[i+176] - y[i+191] = zmm11
-
-    vmovupd(mem(rdx, 12*64), zmm12)     // zmm12 = x[i+192] - x[i+207]
-    vmovupd(zmm12,  mem(r8, 12*64))     // y[i+192] - y[i+207] = zmm12
-    vmovupd(mem(rdx, 13*64), zmm13)     // zmm13 = x[i+208] - x[i+223]
-    vmovupd(zmm13,  mem(r8, 13*64))     // y[i+208] - y[i+223] = zmm13
-    vmovupd(mem(rdx, 14*64), zmm14)     // zmm14 = x[i+224] - x[i+239]
-    vmovupd(zmm14,  mem(r8, 14*64))     // y[i+224] - y[i+239] = zmm14
-    vmovupd(mem(rdx, 15*64), zmm15)     // zmm15 = x[i+240] - x[i+255]
-    vmovupd(zmm15,  mem(r8, 15*64))     // y[i+240] - y[i+255] = zmm15
-
-    vmovupd(mem(rdx, 16*64), zmm16)     // zmm16 = x[i+256] - x[i+271]
-    vmovupd(zmm16,  mem(r8, 16*64))     // y[i+256] - y[i+271] = zmm16
-    vmovupd(mem(rdx, 17*64), zmm17)     // zmm17 = x[i+272] - x[i+287]
-    vmovupd(zmm17,  mem(r8, 17*64))     // y[i+272] - y[i+287] = zmm17
-    vmovupd(mem(rdx, 18*64), zmm18)     // zmm18 = x[i+288] - x[i+303]
-    vmovupd(zmm18,  mem(r8, 18*64))     // y[i+288] - y[i+303] = zmm18
-    vmovupd(mem(rdx, 19*64), zmm19)     // zmm19 = x[i+304] - x[i+319]
-    vmovupd(zmm19,  mem(r8, 19*64))     // y[i+304] - y[i+319] = zmm19
-
-    vmovupd(mem(rdx, 20*64), zmm20)     // zmm20 = x[i+320] - x[i+335]
-    vmovupd(zmm20,  mem(r8, 20*64))     // y[i+320] - y[i+335] = zmm20
-    vmovupd(mem(rdx, 21*64), zmm21)     // zmm21 = x[i+336] - x[i+351]
-    vmovupd(zmm21,  mem(r8, 21*64))     // y[i+336] - y[i+351] = zmm21
-    vmovupd(mem(rdx, 22*64), zmm22)     // zmm22 = x[i+352] - x[i+367]
-    vmovupd(zmm22,  mem(r8, 22*64))     // y[i+352] - y[i+367] = zmm22
-    vmovupd(mem(rdx, 23*64), zmm23)     // zmm23 = x[i+368] - x[i+383]
-    vmovupd(zmm23,  mem(r8, 23*64))     // y[i+368] - y[i+383] = zmm23
-
-    vmovupd(mem(rdx, 24*64), zmm24)     // zmm24 = x[i+384] - x[i+399]
-    vmovupd(zmm24,  mem(r8, 24*64))     // y[i+384] - y[i+399] = zmm24
-    vmovupd(mem(rdx, 25*64), zmm25)     // zmm25 = x[i+400] - x[i+415]
-    vmovupd(zmm25,  mem(r8, 25*64))     // y[i+400] - y[i+415] = zmm25
-    vmovupd(mem(rdx, 26*64), zmm26)     // zmm26 = x[i+416] - x[i+431]
-    vmovupd(zmm26,  mem(r8, 26*64))     // y[i+416] - y[i+431] = zmm26
-    vmovupd(mem(rdx, 27*64), zmm27)     // zmm27 = x[i+432] - x[i+447]
-    vmovupd(zmm27,  mem(r8, 27*64))     // y[i+432] - y[i+447] = zmm27
-
-    vmovupd(mem(rdx, 28*64), zmm28)     // zmm28 = x[i+448] - x[i+463]
-    vmovupd(zmm28,  mem(r8, 28*64))     // y[i+448] - y[i+463] = zmm28
-    vmovupd(mem(rdx, 29*64), zmm29)     // zmm29 = x[i+464] - x[i+479]
-    vmovupd(zmm29,  mem(r8, 29*64))     // y[i+464] - y[i+479] = zmm29
-    vmovupd(mem(rdx, 30*64), zmm30)     // zmm30 = x[i+480] - x[i+495]
-    vmovupd(zmm30,  mem(r8, 30*64))     // y[i+480] - y[i+495] = zmm30
-    vmovupd(mem(rdx, 31*64), zmm31)     // zmm31 = x[i+496] - x[i+511]
-    vmovupd(zmm31,  mem(r8, 31*64))     // y[i+496] - y[i+511] = zmm31
-
-    // Increment the pointer
-    add(imm(16*4*32), rdx)             // ( Size of float datatype ) * ( Number of elements per register ) * ( Number of zmm registers used in the section of code )
-    add(imm(16*4*32),  r8)
-    sub(imm(16*32),   rsi)             // reduce the number of remaining elements by 512  ->  ( Number of elements per register ) * ( Number of zmm registers used in the section of code )
-
-    cmp(imm(16*32), rsi)
-    jge(.MAINLOOP)
-
-    // -----------------------------------------------------------
-
     // Section of code to move the data as blocks of 256 elements
     label(.BLOCK256)
 
     cmp(imm(16*16), rsi)               // check if the number of remaining elements greater than or equal to 256
     jl(.BLOCK128)                      // else, goto to the section of code for block of size 128
 
+    label(.MAINLOOP)
+
     // Interleaved SIMD load and store operations to copy data from source to the destination
+    // Each vector register can hold 16 elements and is used twice before next jump operation 
+    // 1 for loading the element from source and 1 for store it into the destination
 
-    vmovupd(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+15]
-    vmovupd(zmm0,  mem(r8, 0*64))       // y[i+0] - y[i+15] = zmm0
-    vmovupd(mem(rdx, 1*64), zmm1)       // zmm1 = x[i+16] - x[i+31]
-    vmovupd(zmm1,  mem(r8, 1*64))       // y[i+16] - y[i+31] = zmm1
-    vmovupd(mem(rdx, 2*64), zmm2)       // zmm2 = x[i+32] - x[i+47]
-    vmovupd(zmm2,  mem(r8, 2*64))       // y[i+32] - y[i+47] = zmm2
-    vmovupd(mem(rdx, 3*64), zmm3)       // zmm3 = x[i+48] - x[i+63]
-    vmovupd(zmm3,  mem(r8, 3*64))       // y[i+48] - y[i+63] = zmm3
+    vmovups(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+15]
+    vmovups(zmm0,  mem(r8, 0*64))       // y[i+0] - y[i+15] = zmm0
+    vmovups(mem(rdx, 1*64), zmm1)       // zmm1 = x[i+16] - x[i+31]
+    vmovups(zmm1,  mem(r8, 1*64))       // y[i+16] - y[i+31] = zmm1
+    vmovups(mem(rdx, 2*64), zmm2)       // zmm2 = x[i+32] - x[i+47]
+    vmovups(zmm2,  mem(r8, 2*64))       // y[i+32] - y[i+47] = zmm2
+    vmovups(mem(rdx, 3*64), zmm3)       // zmm3 = x[i+48] - x[i+63]
+    vmovups(zmm3,  mem(r8, 3*64))       // y[i+48] - y[i+63] = zmm3
 
-    vmovupd(mem(rdx, 4*64), zmm4)       // zmm4 = x[i+64] - x[i+79]
-    vmovupd(zmm4,  mem(r8, 4*64))       // y[i+64] - y[i+79] = zmm4
-    vmovupd(mem(rdx, 5*64), zmm5)       // zmm5 = x[i+80] - x[i+95]
-    vmovupd(zmm5,  mem(r8, 5*64))       // y[i+80] - y[i+95] = zmm5
-    vmovupd(mem(rdx, 6*64), zmm6)       // zmm6 = x[i+96] - x[i+111]
-    vmovupd(zmm6,  mem(r8, 6*64))       // y[i+96] - y[i+111] = zmm6
-    vmovupd(mem(rdx, 7*64), zmm7)       // zmm7 = x[i+112] - x[i+127]
-    vmovupd(zmm7,  mem(r8, 7*64))       // y[i+112] - y[i+127] = zmm7
+    vmovups(mem(rdx, 4*64), zmm4)       // zmm4 = x[i+64] - x[i+79]
+    vmovups(zmm4,  mem(r8, 4*64))       // y[i+64] - y[i+79] = zmm4
+    vmovups(mem(rdx, 5*64), zmm5)       // zmm5 = x[i+80] - x[i+95]
+    vmovups(zmm5,  mem(r8, 5*64))       // y[i+80] - y[i+95] = zmm5
+    vmovups(mem(rdx, 6*64), zmm6)       // zmm6 = x[i+96] - x[i+111]
+    vmovups(zmm6,  mem(r8, 6*64))       // y[i+96] - y[i+111] = zmm6
+    vmovups(mem(rdx, 7*64), zmm7)       // zmm7 = x[i+112] - x[i+127]
+    vmovups(zmm7,  mem(r8, 7*64))       // y[i+112] - y[i+127] = zmm7
 
-    vmovupd(mem(rdx, 8*64), zmm8)       // zmm8 = x[i+128] - x[i+143]
-    vmovupd(zmm8,  mem(r8, 8*64))       // y[i+128] - y[i+143] = zmm8
-    vmovupd(mem(rdx, 9*64), zmm9)       // zmm9 = x[i+144] - x[i+159]
-    vmovupd(zmm9,  mem(r8, 9*64))       // y[i+144] - y[i+159] = zmm9
-    vmovupd(mem(rdx, 10*64), zmm10)     // zmm10 = x[i+160] - x[i+175]
-    vmovupd(zmm10,  mem(r8, 10*64))     // y[i+160] - y[i+175] = zmm10
-    vmovupd(mem(rdx, 11*64), zmm11)     // zmm11 = x[i+176] - x[i+191]
-    vmovupd(zmm11,  mem(r8, 11*64))     // y[i+176] - y[i+191] = zmm11
+    vmovups(mem(rdx, 8*64), zmm8)       // zmm8 = x[i+128] - x[i+143]
+    vmovups(zmm8,  mem(r8, 8*64))       // y[i+128] - y[i+143] = zmm8
+    vmovups(mem(rdx, 9*64), zmm9)       // zmm9 = x[i+144] - x[i+159]
+    vmovups(zmm9,  mem(r8, 9*64))       // y[i+144] - y[i+159] = zmm9
+    vmovups(mem(rdx, 10*64), zmm10)     // zmm10 = x[i+160] - x[i+175]
+    vmovups(zmm10,  mem(r8, 10*64))     // y[i+160] - y[i+175] = zmm10
+    vmovups(mem(rdx, 11*64), zmm11)     // zmm11 = x[i+176] - x[i+191]
+    vmovups(zmm11,  mem(r8, 11*64))     // y[i+176] - y[i+191] = zmm11
 
-    vmovupd(mem(rdx, 12*64), zmm12)     // zmm12 = x[i+192] - x[i+207]
-    vmovupd(zmm12,  mem(r8, 12*64))     // y[i+192] - y[i+207] = zmm12
-    vmovupd(mem(rdx, 13*64), zmm13)     // zmm13 = x[i+208] - x[i+223]
-    vmovupd(zmm13,  mem(r8, 13*64))     // y[i+208] - y[i+223] = zmm13
-    vmovupd(mem(rdx, 14*64), zmm14)     // zmm14 = x[i+224] - x[i+239]
-    vmovupd(zmm14,  mem(r8, 14*64))     // y[i+224] - y[i+239] = zmm14
-    vmovupd(mem(rdx, 15*64), zmm15)     // zmm15 = x[i+240] - x[i+255]
-    vmovupd(zmm15,  mem(r8, 15*64))     // y[i+240] - y[i+255] = zmm15
+    vmovups(mem(rdx, 12*64), zmm12)     // zmm12 = x[i+192] - x[i+207]
+    vmovups(zmm12,  mem(r8, 12*64))     // y[i+192] - y[i+207] = zmm12
+    vmovups(mem(rdx, 13*64), zmm13)     // zmm13 = x[i+208] - x[i+223]
+    vmovups(zmm13,  mem(r8, 13*64))     // y[i+208] - y[i+223] = zmm13
+    vmovups(mem(rdx, 14*64), zmm14)     // zmm14 = x[i+224] - x[i+239]
+    vmovups(zmm14,  mem(r8, 14*64))     // y[i+224] - y[i+239] = zmm14
+    vmovups(mem(rdx, 15*64), zmm15)     // zmm15 = x[i+240] - x[i+255]
+    vmovups(zmm15,  mem(r8, 15*64))     // y[i+240] - y[i+255] = zmm15
 
     // Increment the pointer
     add(imm(16*4*16), rdx)
     add(imm(16*4*16),  r8)
     sub(imm(16*16),   rsi)             // reduce the number of remaining elements by 256
+
+    cmp(imm(16*16), rsi)
+    jge(.MAINLOOP)
 
     // -----------------------------------------------------------
 
@@ -284,23 +198,23 @@ void bli_scopyv_zen4_asm_avx512
 
     // Interleaved SIMD load and store operations to copy data from source to the destination
 
-    vmovupd(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+15]
-    vmovupd(zmm0,  mem(r8, 0*64))       // y[i+0] - y[i+15] = zmm0
-    vmovupd(mem(rdx, 1*64), zmm1)       // zmm1 = x[i+16] - x[i+31]
-    vmovupd(zmm1,  mem(r8, 1*64))       // y[i+16] - y[i+31] = zmm1
-    vmovupd(mem(rdx, 2*64), zmm2)       // zmm2 = x[i+32] - x[i+47]
-    vmovupd(zmm2,  mem(r8, 2*64))       // y[i+32] - y[i+47] = zmm2
-    vmovupd(mem(rdx, 3*64), zmm3)       // zmm3 = x[i+48] - x[i+63]
-    vmovupd(zmm3,  mem(r8, 3*64))       // y[i+48] - y[i+63] = zmm3
+    vmovups(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+15]
+    vmovups(zmm0,  mem(r8, 0*64))       // y[i+0] - y[i+15] = zmm0
+    vmovups(mem(rdx, 1*64), zmm1)       // zmm1 = x[i+16] - x[i+31]
+    vmovups(zmm1,  mem(r8, 1*64))       // y[i+16] - y[i+31] = zmm1
+    vmovups(mem(rdx, 2*64), zmm2)       // zmm2 = x[i+32] - x[i+47]
+    vmovups(zmm2,  mem(r8, 2*64))       // y[i+32] - y[i+47] = zmm2
+    vmovups(mem(rdx, 3*64), zmm3)       // zmm3 = x[i+48] - x[i+63]
+    vmovups(zmm3,  mem(r8, 3*64))       // y[i+48] - y[i+63] = zmm3
 
-    vmovupd(mem(rdx, 4*64), zmm4)       // zmm4 = x[i+64] - x[i+79]
-    vmovupd(zmm4,  mem(r8, 4*64))       // y[i+64] - y[i+79] = zmm4
-    vmovupd(mem(rdx, 5*64), zmm5)       // zmm5 = x[i+80] - x[i+95]
-    vmovupd(zmm5,  mem(r8, 5*64))       // y[i+80] - y[i+95] = zmm5
-    vmovupd(mem(rdx, 6*64), zmm6)       // zmm6 = x[i+96] - x[i+111]
-    vmovupd(zmm6,  mem(r8, 6*64))       // y[i+96] - y[i+111] = zmm6
-    vmovupd(mem(rdx, 7*64), zmm7)       // zmm7 = x[i+112] - x[i+127]
-    vmovupd(zmm7,  mem(r8, 7*64))       // y[i+112] - y[i+127] = zmm7
+    vmovups(mem(rdx, 4*64), zmm4)       // zmm4 = x[i+64] - x[i+79]
+    vmovups(zmm4,  mem(r8, 4*64))       // y[i+64] - y[i+79] = zmm4
+    vmovups(mem(rdx, 5*64), zmm5)       // zmm5 = x[i+80] - x[i+95]
+    vmovups(zmm5,  mem(r8, 5*64))       // y[i+80] - y[i+95] = zmm5
+    vmovups(mem(rdx, 6*64), zmm6)       // zmm6 = x[i+96] - x[i+111]
+    vmovups(zmm6,  mem(r8, 6*64))       // y[i+96] - y[i+111] = zmm6
+    vmovups(mem(rdx, 7*64), zmm7)       // zmm7 = x[i+112] - x[i+127]
+    vmovups(zmm7,  mem(r8, 7*64))       // y[i+112] - y[i+127] = zmm7
 
     // Increment the pointer
     add(imm(16*4*8), rdx)
@@ -317,14 +231,14 @@ void bli_scopyv_zen4_asm_avx512
 
     // Interleaved SIMD load and store operations to copy data from source to the destination
 
-    vmovupd(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+15]
-    vmovupd(zmm0,  mem(r8, 0*64))       // y[i+0] - y[i+15] = zmm0
-    vmovupd(mem(rdx, 1*64), zmm1)       // zmm1 = x[i+16] - x[i+31]
-    vmovupd(zmm1,  mem(r8, 1*64))       // y[i+16] - y[i+31] = zmm1
-    vmovupd(mem(rdx, 2*64), zmm2)       // zmm2 = x[i+32] - x[i+47]
-    vmovupd(zmm2,  mem(r8, 2*64))       // y[i+32] - y[i+47] = zmm2
-    vmovupd(mem(rdx, 3*64), zmm3)       // zmm3 = x[i+48] - x[i+63]
-    vmovupd(zmm3,  mem(r8, 3*64))       // y[i+48] - y[i+63] = zmm3
+    vmovups(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+15]
+    vmovups(zmm0,  mem(r8, 0*64))       // y[i+0] - y[i+15] = zmm0
+    vmovups(mem(rdx, 1*64), zmm1)       // zmm1 = x[i+16] - x[i+31]
+    vmovups(zmm1,  mem(r8, 1*64))       // y[i+16] - y[i+31] = zmm1
+    vmovups(mem(rdx, 2*64), zmm2)       // zmm2 = x[i+32] - x[i+47]
+    vmovups(zmm2,  mem(r8, 2*64))       // y[i+32] - y[i+47] = zmm2
+    vmovups(mem(rdx, 3*64), zmm3)       // zmm3 = x[i+48] - x[i+63]
+    vmovups(zmm3,  mem(r8, 3*64))       // y[i+48] - y[i+63] = zmm3
 
     // Increment the pointer
     add(imm(16*4*4), rdx)
@@ -341,10 +255,10 @@ void bli_scopyv_zen4_asm_avx512
 
     // Interleaved SIMD load and store operations to copy data from source to the destination
 
-    vmovupd(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+15]
-    vmovupd(zmm0,  mem(r8, 0*64))       // y[i+0] - y[i+15] = zmm0
-    vmovupd(mem(rdx, 1*64), zmm1)       // zmm1 = x[i+16] - x[i+31]
-    vmovupd(zmm1,  mem(r8, 1*64))       // y[i+16] - y[i+31] = zmm1
+    vmovups(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+15]
+    vmovups(zmm0,  mem(r8, 0*64))       // y[i+0] - y[i+15] = zmm0
+    vmovups(mem(rdx, 1*64), zmm1)       // zmm1 = x[i+16] - x[i+31]
+    vmovups(zmm1,  mem(r8, 1*64))       // y[i+16] - y[i+31] = zmm1
 
     add(imm(16*4*2), rdx)
     add(imm(16*4*2),  r8)
@@ -360,8 +274,8 @@ void bli_scopyv_zen4_asm_avx512
 
     // Loading and storing the values to destination
 
-    vmovupd(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+15]
-    vmovupd(zmm0,  mem(r8, 0*64))       // y[i+0] - y[i+15] = zmm0
+    vmovups(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+15]
+    vmovups(zmm0,  mem(r8, 0*64))       // y[i+0] - y[i+15] = zmm0
 
     // Increment the pointer
     add(imm(16*4), rdx)
@@ -518,300 +432,225 @@ void bli_dcopyv_zen4_asm_avx512
         return;
     }
 
-       // assembly code
+    // assembly code
     begin_asm()
 
     /*
-        rdi - > conjx
-        rsi - > n
-        rdx - > x
-        rcx - > incx
-        r8  - > y
-        r9  - > incy
+        rcx  - > n
+        rsi  - > x
+        r8   - > incx
+        rdi  - > y
+        r9   - > incy
     */
 
     // Loading the source and destination memory addresses into the respective registers
-    mov(var(x0), rdx)
-    mov(var(y0),  r8)
+    mov(var(x0), rsi)
+    mov(var(y0), rdi)
 
     // Loading the values in n, incx and inxy into the respective registers
-    mov(var(n0), rsi)
-    mov(var(incx0), rcx)
-    mov(var(incy0), r9)
+    mov(var(n0),    rcx)
+    mov(var(incx0), r8 )
+    mov(var(incy0), r9 )
 
     // Checking if incx == 1 and incy == 1, incase the condition fails then SCALAR code section is executed
-    cmp(imm(1),rcx)
+    cmp(imm(1), r8)
     jne(.SCALAR)
     cmp(imm(1),r9)
     jne(.SCALAR)
 
 // ==========================================================================================================================
 
-    // Section of code to move the data as blocks of 256 elements
-    label(.BLOCK256)
-
-    cmp(imm(8*32), rsi)                // check if the number of remaining elements greater than or equal to 256  -> (NUMBER OF ELEMENTS PER REGISTER) * (NUMBER OF REGISTERS USED IN THE BLOCK)
-    jl(.BLOCK128)                      // else, goto block of size 128
-
-    label(.MAINLOOP)
-    // Interleaved SIMD load and store operations to copy data from source to the destination
-    // Each vector register can hold 8 elements and is used twice before next jump operation (1 for loading the element from source and 1 for store it into the destination)
-
-    vmovupd(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+7]
-    vmovupd(zmm0,  mem(r8, 0*64))       // y[i+0] - y[i+7] = zmm0
-    vmovupd(mem(rdx, 1*64), zmm1)       // zmm1 = x[i+8] - x[i+15]
-    vmovupd(zmm1,  mem(r8, 1*64))       // y[i+8] - y[i+15] = zmm1
-    vmovupd(mem(rdx, 2*64), zmm2)       // zmm2 = x[i+16] - x[i+23]
-    vmovupd(zmm2,  mem(r8, 2*64))       // y[i+16] - y[i+23] = zmm2
-    vmovupd(mem(rdx, 3*64), zmm3)       // zmm3 = x[i+24] - x[i+31]
-    vmovupd(zmm3,  mem(r8, 3*64))       // y[i+24] - y[i+31] = zmm3
-
-    vmovupd(mem(rdx, 4*64), zmm4)       // zmm4 = x[i+32] - x[i+39]
-    vmovupd(zmm4,  mem(r8, 4*64))       // y[i+32] - y[i+39] = zmm4
-    vmovupd(mem(rdx, 5*64), zmm5)       // zmm5 = x[i+40] - x[i+47]
-    vmovupd(zmm5,  mem(r8, 5*64))       // y[i+40] - y[i+47] = zmm5
-    vmovupd(mem(rdx, 6*64), zmm6)       // zmm6 = x[i+48] - x[i+55]
-    vmovupd(zmm6,  mem(r8, 6*64))       // y[i+48] - y[i+55] = zmm6
-    vmovupd(mem(rdx, 7*64), zmm7)       // zmm7 = x[i+56] - x[i+63]
-    vmovupd(zmm7,  mem(r8, 7*64))       // y[i+56] - y[i+63] = zmm7
-
-    vmovupd(mem(rdx, 8*64), zmm8)       // zmm8 = x[i+64] - x[i+71]
-    vmovupd(zmm8,  mem(r8, 8*64))       // y[i+64] - y[i+71] = zmm8
-    vmovupd(mem(rdx, 9*64), zmm9)       // zmm9 = x[i+72] - x[i+79]
-    vmovupd(zmm9,  mem(r8, 9*64))       // y[i+72] - y[i+79] = zmm9
-    vmovupd(mem(rdx, 10*64), zmm10)     // zmm10 = x[i+80] - x[i+87]
-    vmovupd(zmm10,  mem(r8, 10*64))     // y[i+80] - y[i+87] = zmm10
-    vmovupd(mem(rdx, 11*64), zmm11)     // zmm11 = x[i+88] - x[i+95]
-    vmovupd(zmm11,  mem(r8, 11*64))     // y[i+88] - y[i+95] = zmm11
-
-    vmovupd(mem(rdx, 12*64), zmm12)     // zmm12 = x[i+96] - x[i+103]
-    vmovupd(zmm12,  mem(r8, 12*64))     // y[i+96] - y[i+103] = zmm12
-    vmovupd(mem(rdx, 13*64), zmm13)     // zmm13 = x[i+104] - x[i+111]
-    vmovupd(zmm13,  mem(r8, 13*64))     // y[i+104] - y[i+111] = zmm13
-    vmovupd(mem(rdx, 14*64), zmm14)     // zmm14 = x[i+112] - x[i+119]
-    vmovupd(zmm14,  mem(r8, 14*64))     // y[i+112] - y[i+119] = zmm14
-    vmovupd(mem(rdx, 15*64), zmm15)     // zmm15 = x[i+120] - x[i+127]
-    vmovupd(zmm15,  mem(r8, 15*64))     // y[i+120] - y[i+127] = zmm15
-
-    vmovupd(mem(rdx, 16*64), zmm16)     // zmm16 = x[i+128] - x[i+135]
-    vmovupd(zmm16,  mem(r8, 16*64))     // y[i+128] - y[i+135] = zmm16
-    vmovupd(mem(rdx, 17*64), zmm17)     // zmm17 = x[i+136] - x[i+143]
-    vmovupd(zmm17,  mem(r8, 17*64))     // y[i+136] - y[i+143] = zmm17
-    vmovupd(mem(rdx, 18*64), zmm18)     // zmm18 = x[i+144] - x[i+151]
-    vmovupd(zmm18,  mem(r8, 18*64))     // y[i+144] - y[i+151] = zmm18
-    vmovupd(mem(rdx, 19*64), zmm19)     // zmm19 = x[i+152] - x[i+159]
-    vmovupd(zmm19,  mem(r8, 19*64))     // y[i+152] - y[i+159] = zmm19
-
-    vmovupd(mem(rdx, 20*64), zmm20)     // zmm20 = x[i+160] - x[i+167]
-    vmovupd(zmm20,  mem(r8, 20*64))     // y[i+160] - y[i+167] = zmm20
-    vmovupd(mem(rdx, 21*64), zmm21)     // zmm21 = x[i+168] - x[i+175]
-    vmovupd(zmm21,  mem(r8, 21*64))     // y[i+168] - y[i+175] = zmm21
-    vmovupd(mem(rdx, 22*64), zmm22)     // zmm22 = x[i+176] - x[i+183]
-    vmovupd(zmm22,  mem(r8, 22*64))     // y[i+176] - y[i+183] = zmm22
-    vmovupd(mem(rdx, 23*64), zmm23)     // zmm23 = x[i+184] - x[i+191]
-    vmovupd(zmm23,  mem(r8, 23*64))     // y[i+184] - y[i+191] = zmm23
-
-    vmovupd(mem(rdx, 24*64), zmm24)     // zmm24 = x[i+192] - x[i+199]
-    vmovupd(zmm24,  mem(r8, 24*64))     // y[i+192] - y[i+199] = zmm24
-    vmovupd(mem(rdx, 25*64), zmm25)     // zmm25 = x[i+200] - x[i+207]
-    vmovupd(zmm25,  mem(r8, 25*64))     // y[i+200] - y[i+207] = zmm25
-    vmovupd(mem(rdx, 26*64), zmm26)     // zmm26 = x[i+208] - x[i+215]
-    vmovupd(zmm26,  mem(r8, 26*64))     // y[i+208] - y[i+215] = zmm26
-    vmovupd(mem(rdx, 27*64), zmm27)     // zmm27 = x[i+216] - x[i+223]
-    vmovupd(zmm27,  mem(r8, 27*64))     // y[i+216] - y[i+223] = zmm27
-
-    vmovupd(mem(rdx, 28*64), zmm28)     // zmm28 = x[i+224] - x[i+231]
-    vmovupd(zmm28,  mem(r8, 28*64))     // y[i+224] - y[i+231] = zmm28
-    vmovupd(mem(rdx, 29*64), zmm29)     // zmm29 = x[i+232] - x[i+239]
-    vmovupd(zmm29,  mem(r8, 29*64))     // y[i+232] - y[i+239] = zmm29
-    vmovupd(mem(rdx, 30*64), zmm30)     // zmm30 = x[i+240] - x[i+247]
-    vmovupd(zmm30,  mem(r8, 30*64))     // y[i+240] - y[i+247] = zmm30
-    vmovupd(mem(rdx, 31*64), zmm31)     // zmm31 = x[i+248] - x[i+255]
-    vmovupd(zmm31,  mem(r8, 31*64))     // y[i+248] - y[i+255] = zmm31
-
-    // Increment the pointer
-    add(imm(8*8*32), rdx)              // ( Size of double datatype ) * ( Number of elements per register ) * ( Number of zmm registers used in the section of code )
-    add(imm(8*8*32),  r8)
-
-    sub(imm(8*32), rsi)                // reduce the number of remaining elements by 256  ->  ( Number of elements per register ) * ( Number of zmm registers used in the section of code )
-
-    cmp(imm(8*32), rsi)
-    jge(.MAINLOOP)
-
-    // -----------------------------------------------------------
-
     // Section of code to move the data as blocks of 128 elements
     label(.BLOCK128)
 
-    cmp(imm(8*16), rsi)                // check if the number of remaining elements greater than or equal to 128
-    jl(.BLOCK64)                       // else, goto to the section of code for block of size 64
+    cmp(imm(8*16), rcx)                 // Check if the number of remaining elements greater than or equal to 128 -> (NUMBER OF ELEMENTS PER REGISTER) * (NUMBER OF REGISTERS USED IN THE BLOCK)
+    jl(.BLOCK64)                        // Else, skip the BLOCK128 section and goto to BLOCK64 section of the code
 
+    label(.MAINLOOP)
+    
     // Interleaved SIMD load and store operations to copy data from source to the destination
+    // Each vector register can hold 8 elements and is used twice before next jump operation 
+    // 1 vmovupd for loading the element from source and 1 vmovupd for store it into the destination
 
-    vmovupd(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+7]
-    vmovupd(zmm0,  mem(r8, 0*64))       // y[i+0] - y[i+7] = zmm0
-    vmovupd(mem(rdx, 1*64), zmm1)       // zmm1 = x[i+8] - x[i+15]
-    vmovupd(zmm1,  mem(r8, 1*64))       // y[i+8] - y[i+15] = zmm1
-    vmovupd(mem(rdx, 2*64), zmm2)       // zmm2 = x[i+16] - x[i+23]
-    vmovupd(zmm2,  mem(r8, 2*64))       // y[i+16] - y[i+23] = zmm2
-    vmovupd(mem(rdx, 3*64), zmm3)       // zmm3 = x[i+24] - x[i+31]
-    vmovupd(zmm3,  mem(r8, 3*64))       // y[i+24] - y[i+31] = zmm3
+    vmovupd(mem(rsi, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+7]
+    vmovupd(zmm0, mem(rdi, 0*64))       // y[i+0] - y[i+7] = zmm0
+    vmovupd(mem(rsi, 1*64), zmm1)       // zmm1 = x[i+8] - x[i+15]
+    vmovupd(zmm1, mem(rdi, 1*64))       // y[i+8] - y[i+15] = zmm1
+    vmovupd(mem(rsi, 2*64), zmm2)       // zmm2 = x[i+16] - x[i+23]
+    vmovupd(zmm2, mem(rdi, 2*64))       // y[i+16] - y[i+23] = zmm2
+    vmovupd(mem(rsi, 3*64), zmm3)       // zmm3 = x[i+24] - x[i+31]
+    vmovupd(zmm3, mem(rdi, 3*64))       // y[i+24] - y[i+31] = zmm3
 
-    vmovupd(mem(rdx, 4*64), zmm4)       // zmm4 = x[i+32] - x[i+39]
-    vmovupd(zmm4,  mem(r8, 4*64))       // y[i+32] - y[i+39] = zmm4
-    vmovupd(mem(rdx, 5*64), zmm5)       // zmm5 = x[i+40] - x[i+47]
-    vmovupd(zmm5,  mem(r8, 5*64))       // y[i+40] - y[i+47] = zmm5
-    vmovupd(mem(rdx, 6*64), zmm6)       // zmm6 = x[i+48] - x[i+55]
-    vmovupd(zmm6,  mem(r8, 6*64))       // y[i+48] - y[i+55] = zmm6
-    vmovupd(mem(rdx, 7*64), zmm7)       // zmm7 = x[i+56] - x[i+63]
-    vmovupd(zmm7,  mem(r8, 7*64))       // y[i+56] - y[i+63] = zmm7
+    vmovupd(mem(rsi, 4*64), zmm4)       // zmm4 = x[i+32] - x[i+39]
+    vmovupd(zmm4, mem(rdi, 4*64))       // y[i+32] - y[i+39] = zmm4
+    vmovupd(mem(rsi, 5*64), zmm5)       // zmm5 = x[i+40] - x[i+47]
+    vmovupd(zmm5, mem(rdi, 5*64))       // y[i+40] - y[i+47] = zmm5
+    vmovupd(mem(rsi, 6*64), zmm6)       // zmm6 = x[i+48] - x[i+55]
+    vmovupd(zmm6, mem(rdi, 6*64))       // y[i+48] - y[i+55] = zmm6
+    vmovupd(mem(rsi, 7*64), zmm7)       // zmm7 = x[i+56] - x[i+63]
+    vmovupd(zmm7, mem(rdi, 7*64))       // y[i+56] - y[i+63] = zmm7
 
-    vmovupd(mem(rdx, 8*64), zmm8)       // zmm8 = x[i+64] - x[i+71]
-    vmovupd(zmm8,  mem(r8, 8*64))       // y[i+64] - y[i+71] = zmm8
-    vmovupd(mem(rdx, 9*64), zmm9)       // zmm9 = x[i+72] - x[i+79]
-    vmovupd(zmm9,  mem(r8, 9*64))       // y[i+72] - y[i+79] = zmm9
-    vmovupd(mem(rdx, 10*64), zmm10)     // zmm10 = x[i+80] - x[i+87]
-    vmovupd(zmm10,  mem(r8, 10*64))     // y[i+80] - y[i+87] = zmm10
-    vmovupd(mem(rdx, 11*64), zmm11)     // zmm11 = x[i+88] - x[i+95]
-    vmovupd(zmm11,  mem(r8, 11*64))     // y[i+88] - y[i+95] = zmm11
+    vmovupd(mem(rsi, 8*64), zmm8)       // zmm8 = x[i+64] - x[i+71]
+    vmovupd(zmm8, mem(rdi, 8*64))       // y[i+64] - y[i+71] = zmm8
+    vmovupd(mem(rsi, 9*64), zmm9)       // zmm9 = x[i+72] - x[i+79]
+    vmovupd(zmm9, mem(rdi, 9*64))       // y[i+72] - y[i+79] = zmm9
+    vmovupd(mem(rsi, 10*64), zmm10)     // zmm10 = x[i+80] - x[i+87]
+    vmovupd(zmm10, mem(rdi, 10*64))     // y[i+80] - y[i+87] = zmm10
+    vmovupd(mem(rsi, 11*64), zmm11)     // zmm11 = x[i+88] - x[i+95]
+    vmovupd(zmm11, mem(rdi, 11*64))     // y[i+88] - y[i+95] = zmm11
 
-    vmovupd(mem(rdx, 12*64), zmm12)     // zmm12 = x[i+96] - x[i+103]
-    vmovupd(zmm12,  mem(r8, 12*64))     // y[i+96] - y[i+103] = zmm12
-    vmovupd(mem(rdx, 13*64), zmm13)     // zmm13 = x[i+104] - x[i+111]
-    vmovupd(zmm13,  mem(r8, 13*64))     // y[i+104] - y[i+111] = zmm13
-    vmovupd(mem(rdx, 14*64), zmm14)     // zmm14 = x[i+112] - x[i+119]
-    vmovupd(zmm14,  mem(r8, 14*64))     // y[i+112] - y[i+119] = zmm14
-    vmovupd(mem(rdx, 15*64), zmm15)     // zmm15 = x[i+120] - x[i+127]
-    vmovupd(zmm15,  mem(r8, 15*64))     // y[i+120] - y[i+127] = zmm15
+    vmovupd(mem(rsi, 12*64), zmm12)     // zmm12 = x[i+96] - x[i+103]
+    vmovupd(zmm12, mem(rdi, 12*64))     // y[i+96] - y[i+103] = zmm12
+    vmovupd(mem(rsi, 13*64), zmm13)     // zmm13 = x[i+104] - x[i+111]
+    vmovupd(zmm13, mem(rdi, 13*64))     // y[i+104] - y[i+111] = zmm13
+    vmovupd(mem(rsi, 14*64), zmm14)     // zmm14 = x[i+112] - x[i+119]
+    vmovupd(zmm14, mem(rdi, 14*64))     // y[i+112] - y[i+119] = zmm14
+    vmovupd(mem(rsi, 15*64), zmm15)     // zmm15 = x[i+120] - x[i+127]
+    vmovupd(zmm15, mem(rdi, 15*64))     // y[i+120] - y[i+127] = zmm15
 
     // Increment the pointer
-    add(imm(8*8*16), rdx)
-    add(imm(8*8*16),  r8)
-    sub(imm(8*16),   rsi)              // reduce the number of remaining elements by 128
+    add(imm(8*8*16), rsi)               // Increment the x0 pointer by 1024 -> ( Size of double datatype ) * ( Number of elements per register ) * ( Number of zmm registers used in the section of code )
+    add(imm(8*8*16), rdi)               // Increment the y0 pointer by 1024
+    sub(imm(8*16),   rcx)               // reduce the number of remaining elements by 128 ->  ( Number of elements per register ) * ( Number of zmm registers used in the section of code )
+
+    // Jump back to the Main loop if the number of remaning elements are still greater than 128
+    cmp(imm(8*16), rcx)
+    jge(.MAINLOOP)
 
     // -----------------------------------------------------------
 
     // Section of code to move the data as blocks of 64 elements
     label(.BLOCK64)
 
-    cmp(imm(8*8), rsi)                 // check if the number of remaining elements greater than or equal to 64
-    jl(.BLOCK32)                       // else, goto to the section of code for block of size 32
+    cmp(imm(8*8), rcx)                  // Check if the number of remaining elements greater than or equal to 64
+    jl(.BLOCK32)                        // Else, skip the BLOCK64 section and goto to BLOCK32 section of the code
 
     // Interleaved SIMD load and store operations to copy data from source to the destination
 
-    vmovupd(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+7]
-    vmovupd(zmm0,  mem(r8, 0*64))       // y[i+0] - y[i+7] = zmm0
-    vmovupd(mem(rdx, 1*64), zmm1)       // zmm1 = x[i+8] - x[i+15]
-    vmovupd(zmm1,  mem(r8, 1*64))       // y[i+8] - y[i+15] = zmm1
-    vmovupd(mem(rdx, 2*64), zmm2)       // zmm2 = x[i+16] - x[i+23]
-    vmovupd(zmm2,  mem(r8, 2*64))       // y[i+16] - y[i+23] = zmm2
-    vmovupd(mem(rdx, 3*64), zmm3)       // zmm3 = x[i+24] - x[i+31]
-    vmovupd(zmm3,  mem(r8, 3*64))       // y[i+24] - y[i+31] = zmm3
+    vmovupd(mem(rsi, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+7]
+    vmovupd(zmm0, mem(rdi, 0*64))       // y[i+0] - y[i+7] = zmm0
+    vmovupd(mem(rsi, 1*64), zmm1)       // zmm1 = x[i+8] - x[i+15]
+    vmovupd(zmm1, mem(rdi, 1*64))       // y[i+8] - y[i+15] = zmm1
+    vmovupd(mem(rsi, 2*64), zmm2)       // zmm2 = x[i+16] - x[i+23]
+    vmovupd(zmm2, mem(rdi, 2*64))       // y[i+16] - y[i+23] = zmm2
+    vmovupd(mem(rsi, 3*64), zmm3)       // zmm3 = x[i+24] - x[i+31]
+    vmovupd(zmm3, mem(rdi, 3*64))       // y[i+24] - y[i+31] = zmm3
 
-    vmovupd(mem(rdx, 4*64), zmm4)       // zmm4 = x[i+32] - x[i+39]
-    vmovupd(zmm4,  mem(r8, 4*64))       // y[i+32] - y[i+39] = zmm4
-    vmovupd(mem(rdx, 5*64), zmm5)       // zmm5 = x[i+40] - x[i+47]
-    vmovupd(zmm5,  mem(r8, 5*64))       // y[i+40] - y[i+47] = zmm5
-    vmovupd(mem(rdx, 6*64), zmm6)       // zmm6 = x[i+48] - x[i+55]
-    vmovupd(zmm6,  mem(r8, 6*64))       // y[i+48] - y[i+55] = zmm6
-    vmovupd(mem(rdx, 7*64), zmm7)       // zmm7 = x[i+56] - x[i+63]
-    vmovupd(zmm7,  mem(r8, 7*64))       // y[i+56] - y[i+63] = zmm7
+    vmovupd(mem(rsi, 4*64), zmm4)       // zmm4 = x[i+32] - x[i+39]
+    vmovupd(zmm4, mem(rdi, 4*64))       // y[i+32] - y[i+39] = zmm4
+    vmovupd(mem(rsi, 5*64), zmm5)       // zmm5 = x[i+40] - x[i+47]
+    vmovupd(zmm5, mem(rdi, 5*64))       // y[i+40] - y[i+47] = zmm5
+    vmovupd(mem(rsi, 6*64), zmm6)       // zmm6 = x[i+48] - x[i+55]
+    vmovupd(zmm6, mem(rdi, 6*64))       // y[i+48] - y[i+55] = zmm6
+    vmovupd(mem(rsi, 7*64), zmm7)       // zmm7 = x[i+56] - x[i+63]
+    vmovupd(zmm7, mem(rdi, 7*64))       // y[i+56] - y[i+63] = zmm7
 
     // Increment the pointer
-    add(imm(8*8*8), rdx)
-    add(imm(8*8*8),  r8)
-    sub(imm(8*8),   rsi)               // reduce the number of remaining elements by 64
+    add(imm(8*8*8), rsi)                // Increment the x0 pointer by 512
+    add(imm(8*8*8), rdi)                // Increment the y0 pointer by 512
+    sub(imm(8*8),   rcx)                // reduce the number of remaining elements by 64
 
     // -----------------------------------------------------------
 
     // Section of code to move the data as blocks of 32 elements
     label(.BLOCK32)
 
-    cmp(imm(8*4), rsi)                 // check if the number of remaining elements greater than or equal to 32
-    jl(.BLOCK16)                       // else, goto to the section of code for block of size 16
+    cmp(imm(8*4), rcx)                  // check if the number of remaining elements greater than or equal to 32
+    jl(.BLOCK16)                        // Else, skip the BLOCK32 section and goto to BLOCK16 section of the code
 
     // Interleaved SIMD load and store operations to copy data from source to the destination
 
-    vmovupd(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+7]
-    vmovupd(zmm0,  mem(r8, 0*64))       // y[i+0] - y[i+7] = zmm0
-    vmovupd(mem(rdx, 1*64), zmm1)       // zmm1 = x[i+8] - x[i+15]
-    vmovupd(zmm1,  mem(r8, 1*64))       // y[i+8] - y[i+15] = zmm1
-    vmovupd(mem(rdx, 2*64), zmm2)       // zmm2 = x[i+16] - x[i+23]
-    vmovupd(zmm2,  mem(r8, 2*64))       // y[i+16] - y[i+23] = zmm2
-    vmovupd(mem(rdx, 3*64), zmm3)       // zmm3 = x[i+24] - x[i+31]
-    vmovupd(zmm3,  mem(r8, 3*64))       // y[i+24] - y[i+31] = zmm3
+    vmovupd(mem(rsi, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+7]
+    vmovupd(zmm0, mem(rdi, 0*64))       // y[i+0] - y[i+7] = zmm0
+    vmovupd(mem(rsi, 1*64), zmm1)       // zmm1 = x[i+8] - x[i+15]
+    vmovupd(zmm1, mem(rdi, 1*64))       // y[i+8] - y[i+15] = zmm1
+    vmovupd(mem(rsi, 2*64), zmm2)       // zmm2 = x[i+16] - x[i+23]
+    vmovupd(zmm2, mem(rdi, 2*64))       // y[i+16] - y[i+23] = zmm2
+    vmovupd(mem(rsi, 3*64), zmm3)       // zmm3 = x[i+24] - x[i+31]
+    vmovupd(zmm3, mem(rdi, 3*64))       // y[i+24] - y[i+31] = zmm3
 
     // Increment the pointer
-    add(imm(8*8*4), rdx)
-    add(imm(8*8*4),  r8)
-    sub(imm(8*4),   rsi)               // reduce the number of remaining elements by 32
+    add(imm(8*8*4), rsi)                // Increment the x0 pointer by 256
+    add(imm(8*8*4), rdi)                // Increment the y0 pointer by 256
+    sub(imm(8*4),   rcx)                // reduce the number of remaining elements by 32
 
     // -----------------------------------------------------------
 
     // Section of code to move the data as blocks of 16 elements
     label(.BLOCK16)
 
-    cmp(imm(8*2), rsi)                 // check if the number of remaining elements greater than or equal to 16
-    jl(.BLOCK8)                        // else, goto to the section of code for block of size 8
+    cmp(imm(8*2), rcx)                  // check if the number of remaining elements greater than or equal to 16
+    jl(.BLOCK8)                         // else, skip the BLOCK16 section and goto to BLOCK8 section of the code
 
     // Interleaved SIMD load and store operations to copy data from source to the destination
 
-    vmovupd(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+7]
-    vmovupd(zmm0,  mem(r8, 0*64))       // y[i+0] - y[i+7] = zmm0
-    vmovupd(mem(rdx, 1*64), zmm1)       // zmm1 = x[i+8] - x[i+15]
-    vmovupd(zmm1,  mem(r8, 1*64))       // y[i+8] - y[i+15] = zmm1
+    vmovupd(mem(rsi, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+7]
+    vmovupd(zmm0, mem(rdi, 0*64))       // y[i+0] - y[i+7] = zmm0
+    vmovupd(mem(rsi, 1*64), zmm1)       // zmm1 = x[i+8] - x[i+15]
+    vmovupd(zmm1, mem(rdi, 1*64))       // y[i+8] - y[i+15] = zmm1
 
     // Increment the pointer
-    add(imm(8*8*2), rdx)
-    add(imm(8*8*2),  r8)
-    sub(imm(8*2),   rsi)               // reduce the number of remaining elements by 16
+    add(imm(8*8*2), rsi)                // Increment the x0 pointer by 128
+    add(imm(8*8*2), rdi)                // Increment the y0 pointer by 128
+    sub(imm(8*2),   rcx)                // reduce the number of remaining elements by 16
 
     // -----------------------------------------------------------
 
     // Section of code to move the data as blocks of 8 elements
     label(.BLOCK8)
 
-    cmp(imm(8), rsi)                   // check if the number of remaining elements greater than or equal to 8
-    jl(.FRINGE)                        // else, goto to the section of code that deals with fringe cases
+    cmp(imm(8), rcx)                    // check if the number of remaining elements greater than or equal to 8
+    jl(.FRINGE)                         // else, skip the BLOCK8 section and goto to FRINGE section of the code
 
     // Load and store operations to copy data from source to the destination
 
-    vmovupd(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+7]
-    vmovupd(zmm0,  mem(r8, 0*64))       // y[i+0] - y[i+7] = zmm0
+    vmovupd(mem(rsi, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+7]
+    vmovupd(zmm0, mem(rdi, 0*64))       // y[i+0] - y[i+7] = zmm0
 
     // Increment the pointer
-    add(imm(8*8), rdx)
-    add(imm(8*8),  r8)
-    sub(imm(8),   rsi)                 // reduce the number of remaining elements by 8
+    add(imm(8*8), rsi)                  // Increment the x0 pointer by 64
+    add(imm(8*8), rdi)                  // Increment the y0 pointer by 64
+    sub(imm(8),   rcx)                  // reduce the number of remaining elements by 8
 
     // -----------------------------------------------------------
 
     // Section of code to deal with fringe cases
     label(.FRINGE)
 
-    cmp(imm(0), rsi)                   // check if there is any fringe cases
-    je(.END)
+    cmp(imm(0), rcx)                    // Check if there are any fringe cases
+    je(.END)                            // Else, skip rest of the code
 
     // Creating a 8-bit mask
-    mov(imm(255), rcx)                 // (255)10 -> (1111 1111)2
-    shlx(rsi, rcx, rcx)                // shifting the bits in the register to the left depending on the number of fringe elements remaining
-    xor(imm(255), rcx)                 // taking compliment of the register
-    kmovq(rcx, k(2))                   // copying the value in the register to mask register
+    mov(imm(255), r8)                   // (255)10 -> (1111 1111)2
+    shlx(rcx, r8, r8)                   // shifting the bits in the register to the left depending on the number of fringe elements remaining
+    xor(imm(255), r8)                   // taking compliment of the register
+    
+    // Copying the 8-bit mask in the register to mask register
+    kmovq(r8, k(2))                     
 
     /*
         Creating mask: Example - fringe case = 2
-            step 1 : rsi = (1111 1111)2  or  (255)10
-            step 2 : rsi = (1111 1100)2  or  (252)10
-            step 3 : rsi = (0000 0011)2  or  (3)10
+            step 1 : r8 = (1111 1111)2  or  (255)10
+            step 2 : r8 = (1111 1100)2  or  (252)10
+            step 3 : r8 = (0000 0011)2  or  (3)10
     */
 
     // Loading the input values using masked load
-    vmovupd(mem(rdx, 0*64), zmm0 MASK_(K(2)))
+    vmovupd(mem(rsi), zmm0 MASK_(K(2)))
 
     // Storing the values to destination using masked store
-    vmovupd(zmm0,  mem(r8) MASK_(K(2)))
+    vmovupd(zmm0, mem(rdi) MASK_(K(2)))
+    
+    // Multiple the value of remaining elements by 8
+    mov(imm(3), r11)                    // Load the value 3 to r11 register
+    shlx(r11, rcx, r11)                 // Left-Shift the value in rcx by 8
 
-    // After the above instructions are executed, the remaining part are not executed
+    // Increment the pointer
+    add(r11, rsi)                       // Increment the x0 pointer by (Number of remaining elements * 8)
+    add(r11, rdi)                       // Increment the y0 pointer by (Number of remaining elements * 8)
+    xor(rcx, rcx)                       // Set the value of remaining elements to 0
+
+    // After the above instructions are executed, the remaining part are skipped
     jmp(.END)
 
     // ========================================================================================================================
@@ -821,25 +660,28 @@ void bli_dcopyv_zen4_asm_avx512
 
     // incx and incy are multipled by 8 (shift left by 3 bits) and stored back into their respective registers
     mov(imm(3), r11)
-    shlx(r11, rcx, rcx)
+    shlx(r11, r8, r8)
     shlx(r11, r9, r9)
 
     // A loop is used to move one element at a time to the destination
     label(.SCALARLOOP)
 
-    // checking if all the elements are moved, then the loop will be terminated
-    cmp(imm(0), rsi)
+    // Checking if all the elements are moved, then the loop will be terminated
+    cmp(imm(0), rcx)
     je(.END)
 
     // Using vector register to mov one element at a time
-    vmovsd(mem(rdx, 0), xmm0)
-    vmovsd(xmm0,  mem(r8, 0))
+    vmovsd(mem(rsi, 0), xmm0)
+    vmovsd(xmm0, mem(rdi, 0))
 
     // Moving the address pointer of x and y array by incx*8 and incy*8 bytes
-    add(rcx, rdx)
-    add(r9, r8)
+    add(r8, rsi)
+    add(r9, rdi)
 
-    dec(rsi)
+    // Decrease the count for number of remaining elements
+    dec(rcx)
+
+    // Jump back to SCALARLOOP
     jmp(.SCALARLOOP)
 
     label(.END)
@@ -1404,7 +1246,8 @@ void bli_zcopyv_zen4_asm_avx512
 
             label(.MAINLOOP)
             // Interleaved SIMD load and store operations to copy data from source to the destination
-            // Each vector register can hold 4 elements and is used twice before next jump operation (1 for loading the element from source and 1 for store it into the destination)
+            // Each vector register can hold 4 elements and is used twice before next jump operation 
+            // 1 for loading the element from source and 1 for store it into the destination
 
             vmovupd(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+3]
             vmovupd(zmm0,  mem(r8, 0*64))       // y[i+0] - y[i+3] = zmm0
