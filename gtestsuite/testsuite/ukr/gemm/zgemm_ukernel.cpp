@@ -1071,7 +1071,6 @@ INSTANTIATE_TEST_SUITE_P (
     ::zgemmGenericNatPrint()
 );
 
-// Memory test fails when k=0, hence below test validated when is_memory_test disabled
 INSTANTIATE_TEST_SUITE_P (
     bli_zgemm_zen4_asm_12x4_k0,
     zgemmGenericNat,
@@ -1083,7 +1082,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(12),                                              // values of m
         ::testing::Values(4),                                               // values of n
         ::testing::Values(bli_zgemm_zen4_asm_12x4),                         // zgemm_nat kernel
-        ::testing::Values(false)                                            // is_memory_test
+        ::testing::Values(false, true)                                      // is_memory_test
     ),
     ::zgemmGenericNatPrint()
 );
@@ -1105,7 +1104,6 @@ INSTANTIATE_TEST_SUITE_P (
     ::zgemmGenericNatPrint()
 );
 
-// Memory test fails when k=0, hence below test validated when is_memory_test disabled
 INSTANTIATE_TEST_SUITE_P (
     bli_zgemm_zen4_asm_4x12_k0,
     zgemmGenericNat,
@@ -1117,7 +1115,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(4),                                               // values of m
         ::testing::Values(12),                                              // values of n
         ::testing::Values(bli_zgemm_zen4_asm_4x12),                         // zgemm_nat kernel
-        ::testing::Values(false)                                            // is_memory_test
+        ::testing::Values(false, true)                                      // is_memory_test
     ),
     ::zgemmGenericNatPrint()
 );
@@ -1140,7 +1138,6 @@ INSTANTIATE_TEST_SUITE_P (
     ::zgemmGenericNatPrint()
 );
 
-// Memory test fails when k=0, hence below test validated when is_memory_test disabled
 INSTANTIATE_TEST_SUITE_P (
     bli_zgemm_haswell_asm_3x4_k0,
     zgemmGenericNat,
@@ -1152,7 +1149,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(3),                                               // values of m
         ::testing::Values(4),                                               // values of n
         ::testing::Values(bli_zgemm_haswell_asm_3x4),                       // zgemm_nat kernel
-        ::testing::Values(false)                                            // is_memory_test
+        ::testing::Values(false, true)                                      // is_memory_test
     ),
     ::zgemmGenericNatPrint()
 );
@@ -1176,7 +1173,6 @@ INSTANTIATE_TEST_SUITE_P (
     ::zgemmGenericNatPrint()
 );
 
-// Memory test fails when k=0, hence below test validated when is_memory_test disabled
 INSTANTIATE_TEST_SUITE_P (
     bli_zgemm_zen_asm_2x6_k0,
     zgemmGenericNat,
@@ -1188,7 +1184,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(2),                                               // values of m
         ::testing::Values(6),                                               // values of n
         ::testing::Values(bli_zgemm_zen_asm_2x6),                           // zgemm_nat kernel
-        ::testing::Values(false)                                            // is_memory_test
+        ::testing::Values(false, true)                                      // is_memory_test
     ),
     ::zgemmGenericNatPrint()
 );
