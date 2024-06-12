@@ -1619,7 +1619,7 @@ err_t bli_smart_threading_sup
 	1. For non-Zen architectures, return -1. The expectation is that this is handled
 	   in the higher layer
 */
-static void aocl_dscalv_dynamic
+BLIS_INLINE void aocl_dscalv_dynamic
      (
        arch_t arch_id,
        dim_t  n_elem,
@@ -1694,7 +1694,7 @@ static void aocl_dscalv_dynamic
 	1. For non-Zen architectures, return -1. The expectation is that this is handled
 	   in the higher layer
 */
-static void aocl_zdscalv_dynamic
+BLIS_INLINE void aocl_zdscalv_dynamic
      (
        arch_t arch_id,
        dim_t  n_elem,
@@ -1765,7 +1765,7 @@ static void aocl_zdscalv_dynamic
 	1. For non-Zen architectures, return -1. The expectation is that this is handled
 	   in the higher layer
 */
-static void aocl_daxpyv_dynamic
+BLIS_INLINE void aocl_daxpyv_dynamic
      (
        arch_t arch_id,
        dim_t  n_elem,
@@ -1818,6 +1818,104 @@ static void aocl_daxpyv_dynamic
 /*
 	Functionality:
 	--------------
+	This function decides the AOCL dynamic logic for L1 zaxpyv API based on the
+	architecture ID and size of the input variable.
+
+	Function signature
+	-------------------
+
+	This function takes the following input:
+
+	* 'arch_id' - Architecture ID of the system (copy of BLIS global arch id)
+	* 'n_elem' - Number of elements in the vector
+	* 'nt_ideal' - Ideal number of threads
+
+	The function has been made static to restrict its scope.
+
+	Exception
+	----------
+
+	1. For non-Zen architectures, return -1. The expectation is that this is handled
+	   in the higher layer
+*/
+BLIS_INLINE void aocl_zaxpyv_dynamic
+     (
+       arch_t arch_id,
+       dim_t  n_elem,
+       dim_t* nt_ideal
+     )
+{
+	/*
+		Pick the AOCL dynamic logic based on the
+		architecture ID
+	*/
+	switch (arch_id)
+	{
+		case BLIS_ARCH_ZEN5:
+
+			if ( n_elem <= 16000 )
+				*nt_ideal = 1;
+			else if (n_elem <= 43000)
+				*nt_ideal = 4;
+			else if (n_elem <= 2300000)
+				*nt_ideal = 8;
+			else if (n_elem <= 4000000)
+				*nt_ideal = 32;
+			else if (n_elem <= 6600000)
+				*nt_ideal = 64;
+			else if (n_elem <= 6600000)
+				*nt_ideal = 96;
+			else
+				*nt_ideal = 128;
+			break;
+
+		case BLIS_ARCH_ZEN4:
+
+			if ( n_elem <= 4600 )
+				*nt_ideal = 1;
+			else if (n_elem <= 6700)
+				*nt_ideal = 2;
+			else if (n_elem <= 61500)
+				*nt_ideal = 4;
+			else if (n_elem <= 1200000)
+				*nt_ideal = 8;
+			else if (n_elem <= 4000000)
+				*nt_ideal = 32;
+			else
+				*nt_ideal = 96;
+			break;
+
+		case BLIS_ARCH_ZEN:
+		case BLIS_ARCH_ZEN2:
+		case BLIS_ARCH_ZEN3:
+
+			if ( n_elem <= 2600 )
+				*nt_ideal = 1;
+			else if( n_elem <= 11000)
+				*nt_ideal = 2;
+			else if (n_elem <= 33000)
+				*nt_ideal = 4;
+			else
+				// Performance does not scale with number of threads beyond 8 threads
+				*nt_ideal = 8;
+			break;
+
+		default:
+			/*
+				Without this default condition, compiler will throw
+				a warning saying other conditions are not handled
+			*/
+
+			/*
+				For other architectures, AOCL dynamic does not make any change
+			*/
+			*nt_ideal = -1;
+	}
+}
+
+/*
+	Functionality:
+	--------------
 	This function decides the AOCL dynamic logic for L1 ddotv API based on the
 	architecture ID and size of the input variable.
 
@@ -1838,7 +1936,7 @@ static void aocl_daxpyv_dynamic
 	1. For non-Zen architectures, return -1. The expectation is that this is handled
 	   in the higher layer
 */
-static void aocl_ddotv_dynamic
+BLIS_INLINE void aocl_ddotv_dynamic
      (
        arch_t arch_id,
        dim_t  n_elem,
@@ -1886,7 +1984,7 @@ static void aocl_ddotv_dynamic
 	}
 }
 
-static void aocl_zdotv_dynamic
+BLIS_INLINE void aocl_zdotv_dynamic
      (
        arch_t arch_id,
        dim_t  n_elem,
@@ -1958,7 +2056,7 @@ static void aocl_zdotv_dynamic
 	   in the higher layer
 */
 
-static void aocl_dcopyv_dynamic
+BLIS_INLINE void aocl_dcopyv_dynamic
      (
        arch_t arch_id,
        dim_t  n_elem,
@@ -2019,7 +2117,7 @@ static void aocl_dcopyv_dynamic
 	   in the higher layer
 */
 
-static void aocl_zcopyv_dynamic
+BLIS_INLINE void aocl_zcopyv_dynamic
      (
        arch_t arch_id,
        dim_t  n_elem,
@@ -2267,7 +2365,7 @@ static void aocl_daxpyf_dynamic
 			// these nt_ideal sizes are tuned for trsv only,
 			// when axpyf kernels are enabled for gemv, these might need
 			// to be re tuned
-			
+
 			// else if ( n_elem <= 224)
 			// 	*nt_ideal = 2;
 			// else if ( n_elem <= 860)
@@ -2360,9 +2458,16 @@ void bli_nthreads_l1
 
 		case BLIS_AXPYV_KER:
 
-			// Function for DAXPYV
-			aocl_dynamic_func_l1 = aocl_daxpyv_dynamic;
-
+			if ( data_type_a == BLIS_DOUBLE )
+			{
+				// Function for DAXPYV
+				aocl_dynamic_func_l1 = aocl_daxpyv_dynamic;
+			}
+			else if ( data_type_a == BLIS_DCOMPLEX )
+			{
+				// Function for ZAXPYV
+				aocl_dynamic_func_l1 = aocl_zaxpyv_dynamic;
+			}
 			break;
 
 		case BLIS_DOTV_KER:

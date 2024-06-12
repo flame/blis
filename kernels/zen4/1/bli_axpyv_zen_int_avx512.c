@@ -507,7 +507,7 @@ void bli_zaxpyv_zen_int_avx512
 
     if (incx == 1 && incy == 1)
     {
-        __m512d xv[8], yv[8], temp[8], alphaRv, alphaIv;
+        __m512d xv[8], yv[8], alphaRv, alphaIv;
 
         // Broadcast real and imag parts of alpha to separate registers
         alphaRv = _mm512_set1_pd(alpha->real);
@@ -538,23 +538,23 @@ void bli_zaxpyv_zen_int_avx512
                 yv[2] = _mm512_loadu_pd(y0 + 2 * n_elem_per_reg);
                 yv[3] = _mm512_loadu_pd(y0 + 3 * n_elem_per_reg);
 
-                // Swapping real and imag parts of every element in X
-                temp[0] = _mm512_permute_pd(xv[0], 0x55);
-                temp[1] = _mm512_permute_pd(xv[1], 0x55);
-                temp[2] = _mm512_permute_pd(xv[2], 0x55);
-                temp[3] = _mm512_permute_pd(xv[3], 0x55);
-
                 // Scale X with real-part of alpha and add to Y
                 yv[0] = _mm512_fmadd_pd(alphaRv, xv[0], yv[0]);
                 yv[1] = _mm512_fmadd_pd(alphaRv, xv[1], yv[1]);
                 yv[2] = _mm512_fmadd_pd(alphaRv, xv[2], yv[2]);
                 yv[3] = _mm512_fmadd_pd(alphaRv, xv[3], yv[3]);
 
+                // Swapping real and imag parts of every element in X
+                xv[0] = _mm512_permute_pd(xv[0], 0x55);
+                xv[1] = _mm512_permute_pd(xv[1], 0x55);
+                xv[2] = _mm512_permute_pd(xv[2], 0x55);
+                xv[3] = _mm512_permute_pd(xv[3], 0x55);
+
                 // Scale X with imag-part of alpha and add to Y
-                yv[0] = _mm512_fmadd_pd(alphaIv, temp[0], yv[0]);
-                yv[1] = _mm512_fmadd_pd(alphaIv, temp[1], yv[1]);
-                yv[2] = _mm512_fmadd_pd(alphaIv, temp[2], yv[2]);
-                yv[3] = _mm512_fmadd_pd(alphaIv, temp[3], yv[3]);
+                yv[0] = _mm512_fmadd_pd(alphaIv, xv[0], yv[0]);
+                yv[1] = _mm512_fmadd_pd(alphaIv, xv[1], yv[1]);
+                yv[2] = _mm512_fmadd_pd(alphaIv, xv[2], yv[2]);
+                yv[3] = _mm512_fmadd_pd(alphaIv, xv[3], yv[3]);
 
                 // Store updated Y
                 _mm512_storeu_pd((y0 + 0 * n_elem_per_reg), yv[0]);
@@ -574,23 +574,23 @@ void bli_zaxpyv_zen_int_avx512
                 yv[6] = _mm512_loadu_pd(y0 + 6 * n_elem_per_reg);
                 yv[7] = _mm512_loadu_pd(y0 + 7 * n_elem_per_reg);
 
-                // Swapping real and imag parts of every element in X
-                temp[4] = _mm512_permute_pd(xv[4], 0x55);
-                temp[5] = _mm512_permute_pd(xv[5], 0x55);
-                temp[6] = _mm512_permute_pd(xv[6], 0x55);
-                temp[7] = _mm512_permute_pd(xv[7], 0x55);
-
                 // Scale X with real-part of alpha and add to Y
                 yv[4] = _mm512_fmadd_pd(alphaRv, xv[4], yv[4]);
                 yv[5] = _mm512_fmadd_pd(alphaRv, xv[5], yv[5]);
                 yv[6] = _mm512_fmadd_pd(alphaRv, xv[6], yv[6]);
                 yv[7] = _mm512_fmadd_pd(alphaRv, xv[7], yv[7]);
 
+                // Swapping real and imag parts of every element in X
+                xv[4] = _mm512_permute_pd(xv[4], 0x55);
+                xv[5] = _mm512_permute_pd(xv[5], 0x55);
+                xv[6] = _mm512_permute_pd(xv[6], 0x55);
+                xv[7] = _mm512_permute_pd(xv[7], 0x55);
+
                 // Scale X with imag-part of alpha and add to Y
-                yv[4] = _mm512_fmadd_pd(alphaIv, temp[4], yv[4]);
-                yv[5] = _mm512_fmadd_pd(alphaIv, temp[5], yv[5]);
-                yv[6] = _mm512_fmadd_pd(alphaIv, temp[6], yv[6]);
-                yv[7] = _mm512_fmadd_pd(alphaIv, temp[7], yv[7]);
+                yv[4] = _mm512_fmadd_pd(alphaIv, xv[4], yv[4]);
+                yv[5] = _mm512_fmadd_pd(alphaIv, xv[5], yv[5]);
+                yv[6] = _mm512_fmadd_pd(alphaIv, xv[6], yv[6]);
+                yv[7] = _mm512_fmadd_pd(alphaIv, xv[7], yv[7]);
 
                 // Store updated Y
                 _mm512_storeu_pd((y0 + 4 * n_elem_per_reg), yv[4]);
@@ -616,23 +616,23 @@ void bli_zaxpyv_zen_int_avx512
                 yv[2] = _mm512_loadu_pd(y0 + 2 * n_elem_per_reg);
                 yv[3] = _mm512_loadu_pd(y0 + 3 * n_elem_per_reg);
 
-                // Swapping real and imag parts of every element in X
-                temp[0] = _mm512_permute_pd(xv[0], 0x55);
-                temp[1] = _mm512_permute_pd(xv[1], 0x55);
-                temp[2] = _mm512_permute_pd(xv[2], 0x55);
-                temp[3] = _mm512_permute_pd(xv[3], 0x55);
-
                 // Scale X with real-part of alpha and add to Y
                 yv[0] = _mm512_fmadd_pd(alphaRv, xv[0], yv[0]);
                 yv[1] = _mm512_fmadd_pd(alphaRv, xv[1], yv[1]);
                 yv[2] = _mm512_fmadd_pd(alphaRv, xv[2], yv[2]);
                 yv[3] = _mm512_fmadd_pd(alphaRv, xv[3], yv[3]);
 
+                // Swapping real and imag parts of every element in X
+                xv[0] = _mm512_permute_pd(xv[0], 0x55);
+                xv[1] = _mm512_permute_pd(xv[1], 0x55);
+                xv[2] = _mm512_permute_pd(xv[2], 0x55);
+                xv[3] = _mm512_permute_pd(xv[3], 0x55);
+
                 // Scale X with imag-part of alpha and add to Y
-                yv[0] = _mm512_fmadd_pd(alphaIv, temp[0], yv[0]);
-                yv[1] = _mm512_fmadd_pd(alphaIv, temp[1], yv[1]);
-                yv[2] = _mm512_fmadd_pd(alphaIv, temp[2], yv[2]);
-                yv[3] = _mm512_fmadd_pd(alphaIv, temp[3], yv[3]);
+                yv[0] = _mm512_fmadd_pd(alphaIv, xv[0], yv[0]);
+                yv[1] = _mm512_fmadd_pd(alphaIv, xv[1], yv[1]);
+                yv[2] = _mm512_fmadd_pd(alphaIv, xv[2], yv[2]);
+                yv[3] = _mm512_fmadd_pd(alphaIv, xv[3], yv[3]);
 
                 // Store updated Y
                 _mm512_storeu_pd((y0 + 0 * n_elem_per_reg), yv[0]);
@@ -654,17 +654,17 @@ void bli_zaxpyv_zen_int_avx512
                 yv[0] = _mm512_loadu_pd(y0 + 0 * n_elem_per_reg);
                 yv[1] = _mm512_loadu_pd(y0 + 1 * n_elem_per_reg);
 
-                // Swapping real and imag parts of every element in X
-                temp[0] = _mm512_permute_pd(xv[0], 0x55);
-                temp[1] = _mm512_permute_pd(xv[1], 0x55);
-
                 // Scale X with real-part of alpha and add to Y
                 yv[0] = _mm512_fmadd_pd(alphaRv, xv[0], yv[0]);
                 yv[1] = _mm512_fmadd_pd(alphaRv, xv[1], yv[1]);
 
+                // Swapping real and imag parts of every element in X
+                xv[0] = _mm512_permute_pd(xv[0], 0x55);
+                xv[1] = _mm512_permute_pd(xv[1], 0x55);
+
                 // Scale X with imag-part of alpha and add to Y
-                yv[0] = _mm512_fmadd_pd(alphaIv, temp[0], yv[0]);
-                yv[1] = _mm512_fmadd_pd(alphaIv, temp[1], yv[1]);
+                yv[0] = _mm512_fmadd_pd(alphaIv, xv[0], yv[0]);
+                yv[1] = _mm512_fmadd_pd(alphaIv, xv[1], yv[1]);
 
                 // Store updated Y
                 _mm512_storeu_pd((y0 + 0 * n_elem_per_reg), yv[0]);
@@ -682,20 +682,21 @@ void bli_zaxpyv_zen_int_avx512
                 // Loading elements from Y
                 yv[0] = _mm512_loadu_pd(y0 + 0 * n_elem_per_reg);
 
-                // Swapping real and imag parts of every element in X
-                temp[0] = _mm512_permute_pd(xv[0], 0x55);
-
                 // Scale X with real-part of alpha and add to Y
                 yv[0] = _mm512_fmadd_pd(alphaRv, xv[0], yv[0]);
 
+                                // Swapping real and imag parts of every element in X
+                xv[0] = _mm512_permute_pd(xv[0], 0x55);
+
                 // Scale X with imag-part of alpha and add to Y
-                yv[0] = _mm512_fmadd_pd(alphaIv, temp[0], yv[0]);
+                yv[0] = _mm512_fmadd_pd(alphaIv, xv[0], yv[0]);
 
                 // Store updated Y
                 _mm512_storeu_pd((y0 + 0 * n_elem_per_reg), yv[0]);
 
                 x0 += n_elem_per_reg;
                 y0 += n_elem_per_reg;
+
             }
         }
 
@@ -712,14 +713,14 @@ void bli_zaxpyv_zen_int_avx512
             // Loading elements from Y
             yv[0] = _mm512_maskz_loadu_pd(n_mask, y0);
 
-            // Swapping real and imag parts of every element in X
-            temp[0] = _mm512_permute_pd(xv[0], 0x55);
-
             // Scale X with real-part of alpha and add to Y
             yv[0] = _mm512_fmadd_pd(alphaRv, xv[0], yv[0]);
 
+            // Swapping real and imag parts of every element in X
+            xv[0] = _mm512_permute_pd(xv[0], 0x55);
+
             // Scale X with imag-part of alpha and add to Y
-            yv[0] = _mm512_fmadd_pd(alphaIv, temp[0], yv[0]);
+            yv[0] = _mm512_fmadd_pd(alphaIv, xv[0], yv[0]);
 
             // Store updated Y
             _mm512_mask_storeu_pd(y0, n_mask, yv[0]);
