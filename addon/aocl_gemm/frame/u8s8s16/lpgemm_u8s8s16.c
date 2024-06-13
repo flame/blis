@@ -63,6 +63,134 @@ typedef void (*lpgemm_rowvar_s16)
        lpgemm_post_op_attr
      );
 
+
+
+LPGEMV(uint8_t,int8_t,int16_t,u8s8s16os16)
+{
+	dim_t KC = lcntx->blksz.KC;
+	dim_t MC = lcntx->blksz.MC;
+
+	// Strides are updated based on matrix packing/reordering.
+	uint8_t* a_use = ( uint8_t* )a;
+	inc_t rs_a_use = rs_a;
+	inc_t cs_a_use = cs_a;
+
+	int8_t* b_use = ( int8_t* )b;
+	inc_t rs_b_use = rs_b;
+	inc_t cs_b_use = cs_b;
+
+	int16_t *c_use = NULL;
+
+	lpgemm_post_op_attr post_ops_attr;
+	post_ops_attr.c_stor_type = c_downscale;
+	if (c_downscale < S16) post_ops_attr.buf_downscale = c;
+	else  post_ops_attr.buf_downscale = NULL;
+
+	siz_t mem_a_size_req = 0;
+	siz_t mem_b_size_req = 0;
+
+	mem_t mem_a = BLIS_MEM_INITIALIZER;
+	mem_t mem_b = BLIS_MEM_INITIALIZER;
+
+	uint8_t* pack_a_buffer;
+	int8_t* pack_b_buffer;
+
+	// Generate thrinfo objects for jc and ic loops from lpgemm_thrinfo_t.
+	thrinfo_t thread_jc;
+	thrinfo_t thread_ic;
+
+	lpgemm_gen_thrinfo( thread, &thread_jc, &thread_ic );
+
+	// Increased MR from 6 to 8 to make use of 16 ymm regs
+	dim_t MR = 8;
+
+	// Pack B matrix if rs_b > 1
+	if( ( mtag_b == PACK ) && ( rs_b != 1 ) )
+	{
+		mem_b_size_req = sizeof( int8_t ) * k;
+
+		lpgemm_alloc_mem_panel
+		(
+		  mem_b_size_req, BLIS_BUFFER_FOR_GEN_USE,
+		  &mem_b, rntm
+		);
+
+		pack_b_buffer = ( int8_t* ) bli_mem_buffer( &mem_b );
+
+		for( dim_t k0 = 0; k0 < k; k0++ )
+		{
+			pack_b_buffer[k0] = b[ k0*rs_b ];
+		}
+
+		b_use = pack_b_buffer;
+		rs_b_use = 1;
+		cs_b_use = 1;
+	}
+
+	// Compute the IC loop thread range for the current thread.
+	dim_t ic_start, ic_end;
+	bli_thread_range_sub(&thread_ic, m, MR, FALSE, &ic_start, &ic_end);
+
+	for (dim_t ic = ic_start; ic < ic_end; ic += MC)
+	{
+		dim_t mc0 = bli_min((ic_end - ic), MC);
+
+		a_use = (uint8_t*)a + ic * rs_a;
+
+		c_use = c + ic * rs_c;
+
+		post_ops_attr.post_op_c_i = ic;
+		post_ops_attr.post_op_c_j = 0;
+		post_ops_attr.rs_c_downscale = rs_c;
+
+		if( mtag_a == PACK )
+		{
+			mem_a_size_req = sizeof( uint8_t ) * mc0 * k;
+
+			lpgemm_alloc_mem_panel
+			(
+			  mem_a_size_req, BLIS_BUFFER_FOR_GEN_USE,
+			  &mem_a, rntm
+			);
+
+			pack_a_buffer = ( uint8_t* ) bli_mem_buffer( &mem_a );
+
+			( ( packa_s16 ) lcntx->packa_fun_ptr )
+			(
+			  pack_a_buffer,
+			  ( a + ( rs_a * ic )), rs_a, cs_a,
+			  mc0, k,
+			  &rs_a_use, &cs_a_use
+			);
+			a_use = pack_a_buffer;
+		}
+
+		// Call lpgemv_n_one kernel
+		lpgemv_n_one_u8s8s16os16
+		(
+		  mc0, k,
+		  a_use, rs_a_use, cs_a_use, mtag_a,
+		  b_use, rs_b_use, cs_b_use, mtag_b,
+		  c_use, rs_c, cs_c,
+		  alpha, beta,
+		  MR, KC,
+		  post_op_list,
+		  &post_ops_attr
+		);
+	}
+
+	// Release pack buffers
+	if( mtag_a == PACK && bli_mem_is_alloc( &mem_a ) )
+	{
+		bli_pba_release(rntm, &mem_a);
+	}
+	if( mtag_b == PACK && bli_mem_is_alloc( &mem_b ) )
+	{
+		bli_pba_release(rntm, &mem_b);
+	}
+}
+
+
 // B should always be packed.
 LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 {
@@ -77,6 +205,22 @@ LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 	if (mtag_b == UNPACKED)
 	{
 		// Error: can only work with packed B now.
+		return;
+	}
+
+	if( n == 1 )
+	{
+		lpgemv_rowvar_u8s8s16os16( m, n, k,
+		                          a, rs_a, cs_a, mtag_a,
+		                          b, rs_b, cs_b, mtag_b,
+		                          c, rs_c, cs_c,
+		                          alpha,
+		                          beta,
+		                          rntm,
+		                          thread,
+		                          lcntx,
+		                          post_op_list,
+		                          c_downscale );
 		return;
 	}
 
@@ -346,7 +490,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 					);
 					a_use = pack_a_buffer_u8s8s16o16;
 
-					if( cs_a == 1 ) 
+					if( cs_a == 1 )
 					{
 						a_block_stride = kc0_updated;
 					}
@@ -355,7 +499,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 					{
 						a_block_stride = rs_a_use;
 					}
-					
+
 				}
 				else if ( mtag_a == REORDERED )
 				{

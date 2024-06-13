@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -130,7 +130,7 @@
 
 #define U8_S16_BETA_NLT16_MEMCP_UTIL(buf_,m_ind,bytes) \
 	US8_S16_BETA_NLT16_MEMCP_HELPER(buf_,m_ind,bytes,uint8_t) \
- 
+
 // Downscale macro
 #define CVT_MULRND_CVT16(reg, scale0, scale1, zero_point_0) \
  \
@@ -469,5 +469,14 @@
 \
 	in_reg = _mm256_packs_epi32(_mm256_cvtps_epi32(tmp_reg1), _mm256_cvtps_epi32(tmp_reg2));\
 	in_reg = _mm256_permute4x64_epi64(in_reg, 0XD8);\
+
+
+//Zero-out the given YMM accumulator registers
+#define ZERO_ACC_YMM_4_REG(ymm0,ymm1,ymm2,ymm3) \
+	ymm0 = _mm256_setzero_si256 (); \
+	ymm1 = _mm256_setzero_si256 (); \
+	ymm2 = _mm256_setzero_si256 (); \
+	ymm3 = _mm256_setzero_si256 ();
+
 
 #endif //LPGEMM_S16_KERN_MACROS_H

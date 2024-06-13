@@ -65,7 +65,7 @@ typedef void (*lpgemm_rowvar_s32)
 
 #ifdef BLIS_KERNELS_ZEN4
 
-LPGEMV(uint8_t,int8_t,int32_t,u8s8s32o32)
+LPGEMV(uint8_t,int8_t,int32_t,u8s8s32os32)
 {
 	dim_t NC = lcntx->blksz.NC;
 	dim_t KC = lcntx->blksz.KC;
@@ -330,7 +330,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 
 	if( ( m == 1 ) || ( n == 1 ) )
 	{
-		lpgemv_rowvar_u8s8s32o32( m, n, k,
+		lpgemv_rowvar_u8s8s32os32( m, n, k,
 		                          a, rs_a, cs_a, mtag_a,
 		                          b, rs_b, cs_b, mtag_b,
 		                          c, rs_c, cs_c,
@@ -503,7 +503,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 					  &mem_b, rntm
 					);
 
-					thread->comm[jc_work_id].sent_object = 
+					thread->comm[jc_work_id].sent_object =
 								bli_mem_buffer( &mem_b );
 				}
 
@@ -659,7 +659,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 					  ( c_use_ic + jr ), rs_c_use, 1,
 					  alpha, beta0,
 					  post_op_list, post_ops_attr
-					);					
+					);
 				}
 			}
 		}

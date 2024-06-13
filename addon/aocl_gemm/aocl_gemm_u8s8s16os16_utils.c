@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -73,10 +73,26 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(u8s8s16os16)
 	// loaded; and since k_dim needs to be at least 2, having n_dim at least 16
 	// should give 2x16=32 elements, enough for 1 ymm register.The padding is
 	// not rounded to NR (=16), since that would result in memory wastage.
-	dim_t n_reorder = make_multiple_of_n(n, 16);
 
-	// Extra space since packing does length in multiples of 2.
-	dim_t k_reorder = make_multiple_of_n(k, 2);
+	dim_t n_reorder;
+	if( n == 1 )
+	{
+		n_reorder = 1;
+	}
+	else
+	{
+		n_reorder = make_multiple_of_n( n, 16 );
+	}
+
+	dim_t k_reorder;
+	if( n == 1 )
+	{
+		k_reorder = k;
+	}
+	else
+	{
+		k_reorder = make_multiple_of_n( k, 2 );
+	}
 
 	siz_t size_req = sizeof(int8_t) * k_reorder * n_reorder;
 
@@ -111,6 +127,23 @@ AOCL_GEMM_REORDER(int8_t,u8s8s16os16)
 	if (input_mat_type == A_MATRIX)
 	{
 		return; // A reorder not supported.
+	}
+
+	if( n == 1 )
+	{
+		if (ldb == 1)
+		{
+			memcpy( reorder_buf_addr, input_buf_addr,
+			        ( k * sizeof( int8_t ) ) );
+		}
+		else
+		{
+			for( dim_t k0 = 0; k0 < k; k0++ )
+			{
+				reorder_buf_addr[k0] = input_buf_addr[k0 * ldb];
+			}
+		}
+		return;
 	}
 
 	// Initialize a local runtime with global settings if necessary. Note
