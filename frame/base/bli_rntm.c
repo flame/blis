@@ -1624,9 +1624,9 @@ static void aocl_dscalv_dynamic
 				*nt_ideal = 2;
 			else if (n_elem <= 500000)
 				*nt_ideal = 8;
-			else if (n_elem <= 4000000)
-				*nt_ideal = 12;
 			else if (n_elem <= 2500000)
+				*nt_ideal = 12;
+			else if (n_elem <= 4000000)
 				*nt_ideal = 16;
 			else if(n_elem <= 7000000)
 				*nt_ideal = 24;
