@@ -2246,7 +2246,6 @@ void bli_zgemm_haswell_asm_3x4
     {
         if(alpha->real == 1.0)          alpha_mul_type = BLIS_MUL_ONE;
         else if(alpha->real == -1.0)    alpha_mul_type = BLIS_MUL_MINUS_ONE;
-        else if(alpha->real == 0.0)     alpha_mul_type = BLIS_MUL_ZERO;
     }
 
     if(beta->imag == 0.0)// (beta is real)
