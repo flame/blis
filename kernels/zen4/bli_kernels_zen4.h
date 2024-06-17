@@ -268,6 +268,14 @@ err_t bli_dgemm_24x8_avx512_k1_nn
       double* c, const inc_t ldc
      );
 
+void bli_dnorm2fv_unb_var1_avx512
+     (
+       dim_t    n,
+       double*   x, inc_t incx,
+       double* norm,
+       cntx_t*  cntx
+     );
+
 // threshold functions
 bool bli_cntx_gemmsup_thresh_is_met_zen4
 	 (

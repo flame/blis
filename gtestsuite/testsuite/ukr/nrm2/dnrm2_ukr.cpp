@@ -119,3 +119,56 @@ INSTANTIATE_TEST_SUITE_P(
         ::nrm2UKRPrint<double>()
     );
 #endif
+
+#if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
+/*
+    Unit testing for functionality of bli_dnorm2fv_unb_var1_avx512 kernel.
+    The code structure for bli_dnorm2fv_unb_var1_avx512( ... ) is as follows :
+    For unit strides :
+        Main loop    :  In blocks of 32 --> L32
+        Fringe loops :  In blocks of 16 --> L16
+                        In blocks of 8 --> L8
+                        Masked loop     --> LMask
+
+    For non-unit strides : A single loop, to process element wise.
+*/
+// Unit testing with unit strides, across all loops.
+INSTANTIATE_TEST_SUITE_P(
+        bli_dnorm2fv_unb_var1_avx512_unitStrides,
+        dnrm2Generic,
+        ::testing::Combine(
+            ::testing::Values(bli_dnorm2fv_unb_var1_avx512), // ukr function
+            // m size of vector
+            ::testing::Values(// Testing the loops standalone
+                              gtint_t(32),                 // size n, for L32
+                              gtint_t(16),                 // L16
+                              gtint_t(8),                  // L8
+                              gtint_t(7),                  // LMask
+                              gtint_t(160),                // 5*L32
+                              gtint_t(176),                // 5*L32 + L16
+                              gtint_t(184),                // 5*L32 + L16 + L8
+                              gtint_t(191)),               // 5*L32 + L16 + L8 + 7(LMask)
+            ::testing::Values(gtint_t(1)),                 // stride size for x
+            ::testing::Values(true, false)                 // is_memory_test
+        ),
+        ::nrm2UKRPrint<double>()
+    );
+
+// Unit testing with non-unit strides.
+INSTANTIATE_TEST_SUITE_P(
+        bli_dnorm2fv_unb_var1_avx512_nonUnitStrides,
+        dnrm2Generic,
+        ::testing::Combine(
+            ::testing::Values(bli_dnorm2fv_unb_var1_avx512), // ukr function
+            // m size of vector
+            ::testing::Values(// Testing the loops standalone
+                              gtint_t(25),                 // n, size of the vector
+                              gtint_t(41),
+                              gtint_t(17),
+                              gtint_t(9)),
+            ::testing::Values(gtint_t(3), gtint_t(5)),     // stride size for x
+            ::testing::Values(true, false)                 // is_memory_test
+        ),
+        ::nrm2UKRPrint<double>()
+    );
+#endif

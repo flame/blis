@@ -103,6 +103,20 @@ err_t bli_smart_threading_sup
      );
 #endif
 
+void aocl_dnormfv_dynamic
+     (
+       arch_t arch_id,
+       dim_t  n_elem,
+       dim_t* nt_ideal
+     );
+
+void aocl_znormfv_dynamic
+     (
+       arch_t arch_id,
+       dim_t  n_elem,
+       dim_t* nt_ideal
+     );
+
 void bli_nthreads_l1
      (
        l1vkr_t ker_id,

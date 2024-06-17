@@ -2066,6 +2066,183 @@ static void aocl_zcopyv_dynamic
 	}
 }
 
+/*
+	Functionality:
+	--------------
+	This function decides the AOCL dynamic logic for L1 dnormfv API based on the
+	architecture ID and size of the input variable.
+
+	Function signature
+	-------------------
+
+	This function takes the following input:
+
+	* 'arch_id' - Architecture ID of the system (copy of BLIS global arch id)
+	* 'n_elem' - Number of elements in the vector
+	* 'nt_ideal' - Ideal number of threads
+
+	Exception
+	----------
+
+	1. For non-Zen architectures, return -1. The expectation is that this is handled
+	   in the higher layer
+*/
+void aocl_dnormfv_dynamic
+     (
+       arch_t arch_id,
+       dim_t  n_elem,
+       dim_t* nt_ideal
+     )
+{
+	/*
+		Pick the AOCL dynamic logic based on the
+		architecture ID
+	*/
+	switch ( arch_id )
+	{
+		case BLIS_ARCH_ZEN5:
+
+			#ifdef __clang__
+				// Threshold setting based on LLVM's OpenMP
+				if ( n_elem < 6000 )
+					*nt_ideal = 1;
+				else if ( n_elem < 16900 )
+					*nt_ideal = 4;
+				else if ( n_elem < 126000 )
+					*nt_ideal = 8;
+				else if ( n_elem < 200000 )
+					*nt_ideal = 16;
+				else if ( n_elem < 250000 )
+					*nt_ideal = 32;
+				else if ( n_elem < 500000 )
+					*nt_ideal = 64;
+				else
+					// For sizes in this range, AOCL dynamic does not make any change
+					*nt_ideal = -1;
+			#else
+				// Threshold setting based on GNU's OpenMP
+				if ( n_elem < 4500 )
+					*nt_ideal = 1;
+				else if ( n_elem < 15400 )
+					*nt_ideal = 4;
+				else if ( n_elem < 285000 )
+					*nt_ideal = 8;
+				else if ( n_elem < 604000 )
+					*nt_ideal = 16;
+				else if ( n_elem < 2780000 )
+					*nt_ideal = 32;
+				else if ( n_elem < 10500000 )
+					*nt_ideal = 64;
+				else
+					// For sizes in this range, AOCL dynamic does not make any change
+					*nt_ideal = -1;
+			#endif
+
+			break;
+
+		case BLIS_ARCH_ZEN4:
+		case BLIS_ARCH_ZEN:
+		case BLIS_ARCH_ZEN2:
+		case BLIS_ARCH_ZEN3:
+
+			if ( n_elem < 4000 )
+				*nt_ideal = 1;
+			else if ( n_elem < 17000 )
+				*nt_ideal = 4;
+			else if ( n_elem < 136000 )
+				*nt_ideal = 8;
+			else if ( n_elem < 365000 )
+				*nt_ideal = 16;
+			else if ( n_elem < 2950000 )
+				*nt_ideal = 32;
+			else
+				// For sizes in this range, AOCL dynamic does not make any change
+				*nt_ideal = -1;
+
+			break;
+
+		default:
+			/*
+				Without this default condition, compiler will throw
+				a warning saying other conditions are not handled
+			*/
+
+			/*
+				For other architectures, AOCL dynamic does not make any change
+			*/
+			*nt_ideal = -1;
+	}
+}
+
+/*
+	Functionality:
+	--------------
+	This function decides the AOCL dynamic logic for L1 znormfv API based on the
+	architecture ID and size of the input variable.
+
+	Function signature
+	-------------------
+
+	This function takes the following input:
+
+	* 'arch_id' - Architecture ID of the system (copy of BLIS global arch id)
+	* 'n_elem' - Number of elements in the vector
+	* 'nt_ideal' - Ideal number of threads
+
+	Exception
+	----------
+
+	1. For non-Zen architectures, return -1. The expectation is that this is handled
+	   in the higher layer
+*/
+void aocl_znormfv_dynamic
+     (
+       arch_t arch_id,
+       dim_t  n_elem,
+       dim_t* nt_ideal
+     )
+{
+	/*
+		Pick the AOCL dynamic logic based on the
+		architecture ID
+	*/
+	switch ( arch_id )
+	{
+		case BLIS_ARCH_ZEN5:
+		case BLIS_ARCH_ZEN4:
+		case BLIS_ARCH_ZEN:
+		case BLIS_ARCH_ZEN2:
+		case BLIS_ARCH_ZEN3:
+
+			if ( n_elem < 2000 )
+				*nt_ideal = 1;
+			else if ( n_elem < 6500 )
+				*nt_ideal = 4;
+			else if ( n_elem < 71000 )
+				*nt_ideal = 8;
+			else if ( n_elem < 200000 )
+				*nt_ideal = 16;
+			else if ( n_elem < 1530000 )
+				*nt_ideal = 32;
+			else
+				// For sizes in this range, AOCL dynamic does not make any change
+				*nt_ideal = -1;
+
+			break;
+
+		default:
+			/*
+				Without this default condition, compiler will throw
+				a warning saying other conditions are not handled
+			*/
+
+			/*
+				For other architectures, AOCL dynamic does not make any change
+			*/
+			*nt_ideal = -1;
+	}
+}
+
 static void aocl_daxpyf_dynamic
      (
        arch_t arch_id,
