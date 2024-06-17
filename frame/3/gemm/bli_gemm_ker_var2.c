@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -332,15 +332,15 @@ void PASTEMAC(ch,varname) \
 	{ \
 		ctype* restrict a1; \
 		ctype* restrict c11; \
-		ctype* restrict b2; \
+		ctype* b2; \
 \
 		b1 = b_cast + j * cstep_b; \
 		c1 = c_cast + j * cstep_c; \
 \
 		n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
 \
-		/* Initialize our next panel of B to be the current panel of B. */ \
-		b2 = b1; \
+		/* Initialize our next panel of B to be the beginnning of next panel of B. */ \
+		b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc );; \
 \
 		/* Loop over the m dimension (MR rows at a time). */ \
 		for ( i = ir_start; i < ir_end; i += ir_inc ) \
@@ -357,7 +357,6 @@ void PASTEMAC(ch,varname) \
 			if ( bli_is_last_iter( i, ir_end, ir_tid, ir_nt ) ) \
 			{ \
 				a2 = a_cast; \
-				b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc ); \
 				if ( bli_is_last_iter( j, jr_end, jr_tid, jr_nt ) ) \
 					b2 = b_cast; \
 			} \
@@ -404,6 +403,13 @@ void PASTEMAC(ch,varname) \
 				                        beta_cast, \
 				                        c11, rs_c,  cs_c ); \
 			} \
+			/*compute b_next*/ \
+			/*We want to prefetch NR * KC of b2 combined over all the ir loop iterations*/ \
+			/*If ir_nt == 1, ir loop will run MC/MR times, therefore amount of b2(b_next)*/ \
+			/*that should be prefetched per kernel call = (NR * KC) / (MC / MR)  */ \
+			/*For DGEMM in zen5, NR = 24, MC = 96, MR = 8*/ \
+			/*b2 prefetch per kernel call = (24*k) / (96/8) = 2*k */ \
+			b2 = (ctype*)(b2 + (k*2)); \
 		} \
 	} \
 \
