@@ -110,6 +110,12 @@
 #define BLIS_DISABLE_MEM_TRACING
 #endif
 
+#if @scalapack_compat@
+#define BLIS_ENABLE_SCALAPACK_COMPAT
+#else
+#define BLIS_DISABLE_SCALAPACK_COMPAT
+#endif
+
 #if @int_type_size@ == 64
 #define BLIS_INT_TYPE_SIZE 64
 #elif @int_type_size@ == 32
