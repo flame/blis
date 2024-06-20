@@ -105,7 +105,7 @@
  * Causing small regression in case of 128 threads square sizes.
  */
 #define PREFETCH_B_NXT() \
-    PREFETCH(2, MEM(RDX, 128*8)) LEA(RDX, MEM(RDX, 8*8))
+    PREFETCH(2, MEM(RDX)) LEA(RDX, MEM(RDX, 8*8))
 
 /*
  * Two different subiters(SUBITER_0 and SUBITER_1) are used
@@ -423,6 +423,7 @@ void bli_dgemm_avx512_asm_8x24(
     MOV(RBX, VAR(b))   // load address of b
     MOV(RCX, VAR(c))   // load address of c
     MOV(R8, VAR(rs_c)) // load rs_c
+    MOV(RDX, VAR(b_next)) // load next panel of b for prefetch
 
     LEA(R9, MEM(RCX,63)) // c for prefetching R9 := C + cacheline_offset
 
