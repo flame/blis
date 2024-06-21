@@ -166,3 +166,96 @@ INSTANTIATE_TEST_SUITE_P(
 // ----------------------------------------------
 // -----  End ZEN1/2/3 (AVX2) Kernel Tests  -----
 // ----------------------------------------------
+
+// ----------------------------------------------
+// -----  Begin ZEN4 (AVX512) Kernel Tests  -----
+// ----------------------------------------------
+#if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
+// Tests for bli_cscalv_zen_int_avx512 (AVX512) kernel.
+/**
+ * Loops:
+ * L96     - Main loop, handles 96 scomplex elements
+ * L64     - handles 64 scomplex elements
+ * L32     - handles 32 scomplex elements
+ * L16     - handles 16 scomplex elements
+ * L8      - handles 8 scomplex elements
+ * L4      - handles 4 scomplex elements
+ * LMasked - leftover loop
+ *
+ * LScalar - handles non-unit increments
+*/
+INSTANTIATE_TEST_SUITE_P(
+        bli_cscalv_zen_int_avx512_unitPositiveStride,
+        cscalvGeneric,
+        ::testing::Combine(
+            ::testing::Values(bli_cscalv_zen_int_avx512),
+            // conj(alpha): uses n (no_conjugate) since it is real.
+            ::testing::Values('n'
+#ifdef TEST_BLIS_TYPED
+                            , 'c'                   // conjx
+#endif
+            ),
+            // m: size of vector.
+            ::testing::Values(
+                                gtint_t(285),       // 2*L96 + L64 + L16 + L8 + L4 + LMasked
+                                gtint_t(255),       // 2*L96 + L32 + L16 + L8 + L4 + LMasked
+                                gtint_t( 96),       // L96
+                                gtint_t( 64),       // L64
+                                gtint_t( 32),       // L32
+                                gtint_t( 16),       // L16
+                                gtint_t(  8),       // L8
+                                gtint_t(  4),       // L4
+                                gtint_t(  3),       // LMasked
+                                gtint_t(  2),       // LMasked
+                                gtint_t(  1)        // LMasked
+            ),
+            // incx: stride of x vector.
+            ::testing::Values(
+                                gtint_t(1)          // unit stride
+            ),
+            // alpha: value of scalar.
+            ::testing::Values(
+                                scomplex{-5.1, -7.3},
+                                scomplex{ 0.0,  0.0},
+                                scomplex{ 1.0,  1.0},
+                                scomplex{ 7.3,  5.1}
+            ),
+            ::testing::Values(false, true)          // is_memory_test
+        ),
+        (::scalvUKRPrint<scomplex,cscalv_ker_ft>())
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        bli_cscalv_zen_int_avx512_nonUnitPositiveStrides,
+        cscalvGeneric,
+        ::testing::Combine(
+            ::testing::Values(bli_cscalv_zen_int_avx512),
+            // conj(alpha): uses n (no_conjugate) since it is real.
+            ::testing::Values('n'
+#ifdef TEST_BLIS_TYPED
+                            , 'c'                   // conjx
+#endif
+            ),
+            // m: size of vector.
+            ::testing::Values(
+                                gtint_t(3), gtint_t(30), gtint_t(112)
+            ),
+            // incx: stride of x vector.
+            ::testing::Values(
+                                gtint_t(3), gtint_t(7)  // few non-unit strides for sanity check
+            ),
+            // alpha: value of scalar.
+            ::testing::Values(
+                                scomplex{-5.1, -7.3},
+                                scomplex{ 0.0,  0.0},
+                                scomplex{ 1.0,  1.0},
+                                scomplex{ 7.3,  5.1}
+            ),
+            ::testing::Values(false, true)              // is_memory_test
+        ),
+        (::scalvUKRPrint<scomplex,cscalv_ker_ft>())
+    );
+#endif
+// ----------------------------------------------
+// -----   End ZEN4 (AVX512) Kernel Tests   -----
+// ----------------------------------------------

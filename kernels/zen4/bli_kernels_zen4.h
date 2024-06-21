@@ -41,6 +41,7 @@ AMAXV_KER_PROT( double,   d, amaxv_zen_int_avx512 )
 // scalv (AVX512 intrinsics)
 SCALV_KER_PROT( float,     s, scalv_zen_int_avx512 )
 SCALV_KER_PROT( double,    d, scalv_zen_int_avx512 )
+SCALV_KER_PROT( scomplex,  c, scalv_zen_int_avx512 )
 SCALV_KER_PROT( dcomplex,  z, scalv_zen_int_avx512 )
 SCALV_KER_PROT( dcomplex,  z, dscalv_zen_int_avx512) // ZDSCAL kernel
 

@@ -561,6 +561,90 @@ void zdscal_
 }
 #endif
 
+void cscal_blis_impl
+     (
+       const f77_int*  n,
+       const scomplex* alpha,
+             scomplex* x, const f77_int* incx
+     )
+{
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+    AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', (void *)alpha, *n, *incx);
+
+    dim_t n0 = (dim_t)(*n);
+    scomplex *x0 = x;
+    inc_t incx0 = (inc_t)(*incx);
+
+    /*
+        When n is zero or the alpha pointer passed is null
+        or the incx is zero or alpha is 1, return early.
+    */
+    if ((n0 <= 0) || (alpha == NULL) || (incx0 <= 0) || PASTEMAC(c, eq1)(*alpha))
+    {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+        return;
+    }
+
+    // Definition of function pointer
+    cscalv_ker_ft scalv_fun_ptr;
+
+    cntx_t* cntx = NULL;
+
+    // Query the architecture ID
+    arch_t id = bli_arch_query_id();
+
+    // Pick the kernel based on the architecture ID
+    switch (id)
+    {
+        case BLIS_ARCH_ZEN5:
+        case BLIS_ARCH_ZEN4:
+#if defined(BLIS_KERNELS_ZEN4)
+            // AVX512 Kernel
+            scalv_fun_ptr = bli_cscalv_zen_int_avx512;
+            break;
+#endif
+        case BLIS_ARCH_ZEN:
+        case BLIS_ARCH_ZEN2:
+        case BLIS_ARCH_ZEN3:
+
+            //   AVX2 Kernel
+            scalv_fun_ptr = bli_cscalv_zen_int;
+            break;
+
+        default:
+
+          // Query the context
+          cntx = bli_gks_query_cntx();
+
+          // Query the function pointer using the context
+          scalv_fun_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DCOMPLEX, BLIS_SCALV_KER, cntx);
+    }
+
+    // Call the function based on the function pointer assigned above
+    scalv_fun_ptr
+    (
+      BLIS_NO_CONJUGATE,
+      n0,
+      (scomplex*) alpha,
+      x0, incx0,
+      cntx
+    );
+
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+}
+
+#ifdef BLIS_ENABLE_BLAS
+void cscal_
+     (
+        const f77_int*  n,
+        const scomplex* alpha,
+              scomplex* x, const f77_int* incx
+     )
+{
+    cscal_blis_impl( n, alpha, x, incx );
+}
+#endif
+
 void zscal_blis_impl
      (
        const f77_int* n,
@@ -644,5 +728,4 @@ void zscal_
 }
 #endif
 
-INSERT_GENTFUNCSCAL_BLAS_C( scal, scalv )
-
+GENTFUNCSCAL( scomplex, float, c, s, scal, scalv )
