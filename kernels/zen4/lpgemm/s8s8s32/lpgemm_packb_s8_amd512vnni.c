@@ -734,7 +734,7 @@ void packb_nr32_s8s8s32os32_row_major
        const dim_t   KC
      )
 {
-    dim_t NR = 32;
+    dim_t NR = 64;
     dim_t kr_new = 0;
 
     dim_t k_full_pieces_blks = KC / 4;
@@ -910,7 +910,7 @@ void packb_nr16_s8s8s32os32_row_major
        const dim_t   KC
      )
 {
-    dim_t NR = 16;
+    dim_t NR = 64;
     dim_t kr_new = 0;
 
     dim_t k_full_pieces_blks = KC / 4;
@@ -1049,7 +1049,7 @@ void packb_nrlt16_s8s8s32os32_row_major
        const dim_t   n0_partial_rem
      )
 {
-    dim_t NR = 16;
+    dim_t NR = 64;
     int8_t buf0[16];
     int8_t buf1[16];
     int8_t buf2[16];

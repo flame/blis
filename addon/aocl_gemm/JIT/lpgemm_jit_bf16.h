@@ -151,18 +151,18 @@ private :
                               dim_t stack_off
                             );
 
-    const float gelu_consts[7] = { 0.044715, 0.797884, -2,  0.5, -1, 2, 1 };
-    const float gelu_macros[6] = { 1.4426950408889634, 1.2582912E7,
+    float gelu_consts[7] = { 0.044715, 0.797884, -2,  0.5, -1, 2, 1 };
+    float gelu_macros[6] = { 1.4426950408889634, 1.2582912E7,
                                    -88.0f,             88.0f,
                                    (float)(1.0/0.0),  -2147483648 };
 
-    const float lpgemm_exp[6] = { 1.0000000754895704,  0.6931472254087585,
+    float lpgemm_exp[6] = { 1.0000000754895704,  0.6931472254087585,
                                   0.2402210737432219,  0.05550297297702539,
                                   0.009676036358193323, 0.001341000536524434 };
 
-    const float erf_consts[4] = { 0.707107, 1.0, 0.5, 3.553f };
+    float erf_consts[4] = { 0.707107, 1.0, 0.5, 3.553f };
 
-    const float lpgemm_erf[16] = { 1.1283793786592402,    2.5468861568875563E-5,
+    float lpgemm_erf[16] = { 1.1283793786592402,    2.5468861568875563E-5,
                                    0.3756169877289898,    0.004025179163741976,
                                    0.12947984300439994,   0.0412525204794885,
                                    0.03918550001070417,   0.07104542913277255,
@@ -170,6 +170,19 @@ private :
                                    0.0067305713376882076, 0.0010410692067591445,
                                    6.921588102382636E-5,  4.092409485758739E-6,
                                    1.033131746125426E-6,  5.2927177513236435E-8 };
+
+
+    const dim_t gelu_consts_off = 0;
+    const dim_t gelu_macros_off = gelu_consts_off + sizeof(gelu_consts);
+    const dim_t lpgemm_exp_off = gelu_macros_off + sizeof(gelu_macros);
+    const dim_t erf_consts_off = lpgemm_exp_off + sizeof(lpgemm_exp);
+    const dim_t lpgemm_erf_off = erf_consts_off + sizeof(erf_consts);
+
+    Xbyak::Address get_constant( dim_t table_off, dim_t value_off )
+    {
+        return ptr[rip + tables + table_off + value_off * 4 ];
+    }
+    Xbyak::Label tables;
 
 public:
     bli_lpgemm_jit( void* buffer, size_t bufferSize );

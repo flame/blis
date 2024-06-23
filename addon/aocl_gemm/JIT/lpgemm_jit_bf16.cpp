@@ -529,7 +529,8 @@ void bli_lpgemm_jit:: bias_col_major( dim_t m_dim, dim_t n_dim )
     dim_t reg_num;
 
     mov( rax, ptr[ rdx + offsetof( lpgemm_post_op, op_args1 ) ] );
-    mov( rbx, ptr[ rdx + offsetof( lpgemm_post_op_attr, post_op_c_i ) ] );
+    mov( rbx, ptr[ rsp + stack_off_postop +
+                   offsetof( lpgemm_post_op_attr, post_op_c_i ) ] );
 
     mov( rcx, ptr[ rsp + stack_off_postop +
                   offsetof( lpgemm_post_op_attr, c_stor_type ) ] );
@@ -649,16 +650,16 @@ void bli_lpgemm_jit:: POLY_EVAL_6_AVX512( )
 {
     vmulps( Zmm( r2 ), Zmm( r ), Zmm( r ) );
 
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->lpgemm_exp[3] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(lpgemm_exp_off, 3) );
 
-    vbroadcastss( Zmm( const2 ), ptr[ &( this->lpgemm_exp[2] ) ] );
+    vbroadcastss( Zmm( const2 ), get_constant(lpgemm_exp_off, 2) );
 
     vmovups( Zmm( q ), Zmm( const2 ) );
     vfmadd231ps( Zmm( q ), Zmm( const1 ), Zmm( r ) );
 
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->lpgemm_exp[1] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(lpgemm_exp_off, 1) );
 
-    vbroadcastss( Zmm( const2 ), ptr[ &( this->lpgemm_exp[0] ) ] );
+    vbroadcastss( Zmm( const2 ), get_constant(lpgemm_exp_off, 0) );
 
     vmovups( Zmm( z ), Zmm( const2 ) );
     vfmadd231ps( Zmm( z ), Zmm( const1 ), Zmm( r ) );
@@ -667,9 +668,9 @@ void bli_lpgemm_jit:: POLY_EVAL_6_AVX512( )
 
     vmulps(Zmm( r2 ), Zmm( r2 ), Zmm( r2 ) );
 
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->lpgemm_exp[5] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(lpgemm_exp_off, 5) );
 
-    vbroadcastss( Zmm( const2 ), ptr[ &( this->lpgemm_exp[4] ) ] );
+    vbroadcastss( Zmm( const2 ), get_constant(lpgemm_exp_off, 4) );
 
     vfmadd231ps( Zmm( const2 ), Zmm( const1 ), Zmm( r ) );
 
@@ -681,11 +682,11 @@ void bli_lpgemm_jit:: POLY_EVAL_6_AVX512( )
 // takes 'x' as input and returns 'q' to the parent
 void bli_lpgemm_jit:: EXPF_AVX512()
 {
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_macros[0] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(gelu_macros_off, 0) );
 
     vmulps( Zmm( z ), Zmm( x ), Zmm(const1 ) );
 
-    vbroadcastss( Zmm( const2 ), ptr[ &( this->gelu_macros[1] ) ] );
+    vbroadcastss( Zmm( const2 ), get_constant(gelu_macros_off, 1) );
 
     vaddps( Zmm( dn ), Zmm( z ), Zmm( const2 ) );
 
@@ -700,17 +701,17 @@ void bli_lpgemm_jit:: EXPF_AVX512()
 
     vpxorq( Zmm( const2 ), Zmm( const2 ), Zmm( const2 ) );
 
-    vpbroadcastd( Zmm( const1 ), ptr[ &( this->gelu_macros[2] ) ] );
+    vpbroadcastd( Zmm( const1 ), get_constant(gelu_macros_off, 2) );
 
     vcmpps( k5, Zmm( const1 ), Zmm( x ), 0x06 );
 
     vpandd( Zmm( q ) | k5, Zmm( q ), Zmm( const2 ) );
 
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_macros[3] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(gelu_macros_off, 3) );
 
     vcmpps( k5, Zmm( const1 ), Zmm( x ), 0x06 );
 
-    vbroadcastss( Zmm( x ), ptr[ &( this->gelu_macros[4] ) ] );
+    vbroadcastss( Zmm( x ), get_constant(gelu_macros_off, 4) );
 
     vpxord( Zmm( x ) | k5, Zmm( q ), Zmm( const2 ) );
     vmovups(Zmm( q ), Zmm( x ) );
@@ -721,7 +722,7 @@ void bli_lpgemm_jit:: EXPF_AVX512()
 // takes x_tanh as input and gives back x_tanh
 void bli_lpgemm_jit:: TANHF_AVX512()
 {
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_consts[2] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(gelu_consts_off, 2) );
 
     mov( ebx, 0x7FFFFFFF );
     vpbroadcastd( Zmm( const2 ), ebx );
@@ -732,11 +733,11 @@ void bli_lpgemm_jit:: TANHF_AVX512()
     EXPF_AVX512();
 
     mov( eax, -1 );
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_consts[4] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(gelu_consts_off, 4) );
 
     vaddps( Zmm( z ), Zmm( q ), Zmm( const1 ) );
 
-    vbroadcastss( Zmm( const2 ), ptr[ &( this->gelu_consts[5] ) ] );
+    vbroadcastss( Zmm( const2 ), get_constant(gelu_consts_off, 5) );
 
     vaddps( Zmm( r ), Zmm( z ), Zmm( const2 ) );
 
@@ -757,20 +758,20 @@ void bli_lpgemm_jit:: GELU_TANH_F32_AVX512_DEF(dim_t reg )
     vmulps( Zmm( r2 ), Zmm( reg ), Zmm( reg ) );
     vmulps( Zmm( r2 ), Zmm( r2 ), Zmm( reg ) );
 
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_consts[0] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(gelu_consts_off, 0) );
     vmovups( Zmm( r ), Zmm( reg ) );
     vfmadd231ps( Zmm( r ), Zmm( r2 ), Zmm( const1 ) );
 
-    vbroadcastss( Zmm( const2 ), ptr[ &( this->gelu_consts[1] ) ] );
+    vbroadcastss( Zmm( const2 ), get_constant(gelu_consts_off, 1) );
     vmulps( Zmm( x_tanh ), Zmm( r ), Zmm( const2 ) );
 
     TANHF_AVX512();
 
-    vbroadcastss( Zmm( const2 ), ptr[ &( this->gelu_consts[6] ) ] );
+    vbroadcastss( Zmm( const2 ), get_constant(gelu_consts_off, 6) );
     vaddps( Zmm( x_tanh ), Zmm( x_tanh ), Zmm( const2 ) );
     vmulps( Zmm( x_tanh ), Zmm( x_tanh ), Zmm( reg ) );
 
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_consts[3] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(gelu_consts_off, 3) );
     vmulps( Zmm( reg ), Zmm( x_tanh ), Zmm( const1 ) );
 }
 
@@ -790,51 +791,51 @@ void bli_lpgemm_jit:: gelu_tanh( dim_t m_dim, dim_t n_dim )
 
 void bli_lpgemm_jit:: POLY_EVAL_HORNER_16_0_AVX512()
 {
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->lpgemm_erf[15] ) ] );
-    vbroadcastss( Zmm( const2 ), ptr[ &( this->lpgemm_erf[14] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(lpgemm_erf_off, 15) );
+    vbroadcastss( Zmm( const2 ), get_constant(lpgemm_erf_off, 14) );
 
     vfmadd231ps( Zmm( const2 ), Zmm( r ), Zmm( const1 ) );
 
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->lpgemm_erf[13] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(lpgemm_erf_off, 13) );
     vfmadd231ps( Zmm( const1 ), Zmm( r ), Zmm( const2 ) );
 
-    vbroadcastss( Zmm( const2 ), ptr[ &( this->lpgemm_erf[12] ) ] );
+    vbroadcastss( Zmm( const2 ), get_constant(lpgemm_erf_off, 12) );
     vfmadd231ps( Zmm( const2 ), Zmm( r ), Zmm( const1 ) );
 
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->lpgemm_erf[11] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(lpgemm_erf_off, 11) );
     vfmadd231ps( Zmm( const1 ), Zmm( r ), Zmm( const2 ) );
 
-    vbroadcastss( Zmm( const2 ), ptr[ &( this->lpgemm_erf[10] ) ] );
+    vbroadcastss( Zmm( const2 ), get_constant(lpgemm_erf_off, 10) );
     vfmadd231ps( Zmm( const2 ), Zmm( r ), Zmm( const1 ) );
 
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->lpgemm_erf[9] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(lpgemm_erf_off, 9) );
     vfmadd231ps( Zmm( const1 ), Zmm( r ), Zmm( const2 ) );
 
-    vbroadcastss( Zmm( const2 ), ptr[ &( this->lpgemm_erf[8] ) ] );
+    vbroadcastss( Zmm( const2 ), get_constant(lpgemm_erf_off, 8) );
     vfmadd231ps( Zmm( const2 ), Zmm( r ), Zmm( const1 ) );
 
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->lpgemm_erf[7] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(lpgemm_erf_off, 7 ) );
     vfmadd231ps( Zmm( const1 ), Zmm( r ), Zmm( const2 ) );
 
-    vbroadcastss( Zmm( const2 ), ptr[ &( this->lpgemm_erf[6] ) ] );
+    vbroadcastss( Zmm( const2 ), get_constant(lpgemm_erf_off, 6) );
     vfmadd231ps( Zmm( const2 ), Zmm( r ), Zmm( const1 ) );
 
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->lpgemm_erf[5] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(lpgemm_erf_off, 5) );
     vfmadd231ps( Zmm( const1 ), Zmm( r ), Zmm( const2 ) );
 
-    vbroadcastss( Zmm( const2 ), ptr[ &( this->lpgemm_erf[4] ) ] );
+    vbroadcastss( Zmm( const2 ), get_constant(lpgemm_erf_off, 4) );
     vfmadd231ps( Zmm( const2 ), Zmm( r ), Zmm( const1 ) );
 
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->lpgemm_erf[3] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(lpgemm_erf_off, 3) );
     vfmadd231ps( Zmm( const1 ), Zmm( r ), Zmm( const2 ) );
 
-    vbroadcastss( Zmm( const2 ), ptr[ &( this->lpgemm_erf[2] ) ] );
+    vbroadcastss( Zmm( const2 ), get_constant(lpgemm_erf_off, 2) );
     vfmadd231ps( Zmm( const2 ), Zmm( r ), Zmm( const1 ) );
 
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->lpgemm_erf[1] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(lpgemm_erf_off, 1) );
     vfmadd231ps( Zmm( const1 ), Zmm( r ), Zmm( const2 ) );
 
-    vbroadcastss( Zmm( const2 ), ptr[ &( this->lpgemm_erf[0] ) ] );
+    vbroadcastss( Zmm( const2 ), get_constant(lpgemm_erf_off, 0) );
     vfmadd231ps( Zmm( const2 ), Zmm( r ), Zmm( const1 ) );
 
     vmulps( Zmm( x ), Zmm( const2 ), Zmm( r ) );
@@ -848,9 +849,9 @@ void bli_lpgemm_jit:: ERF_AVX512()
 
     POLY_EVAL_HORNER_16_0_AVX512();
 
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->erf_consts[1] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(erf_consts_off, 1) );
 
-    vbroadcastss( Zmm( const2 ), ptr[ &( this->erf_consts[3] ) ] );
+    vbroadcastss( Zmm( const2 ), get_constant(erf_consts_off, 3) );
 
     vcmpps( k5, Zmm( const2 ), Zmm( r ), 0x06 );
 
@@ -860,7 +861,7 @@ void bli_lpgemm_jit:: ERF_AVX512()
     vmovups( Zmm( x ), Zmm( const1 ) );
 
 
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->erf_consts[1] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(erf_consts_off, 1) );
 
     vcmpps( k5, Zmm( const1 ), Zmm( x ), 0x06 );
 
@@ -876,16 +877,16 @@ void bli_lpgemm_jit:: ERF_AVX512()
 
 void bli_lpgemm_jit:: GELU_ERF_F32_AVX512_DEF( dim_t reg )
 {
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->erf_consts[0] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(erf_consts_off, 0) );
     vmulps( Zmm( x_erf ), Zmm( reg ), Zmm( const1 ) );
 
     ERF_AVX512();
 
-    vbroadcastss( Zmm( const2 ), ptr[ &( this->erf_consts[1] ) ] );
+    vbroadcastss( Zmm( const2 ), get_constant(erf_consts_off, 1) );
     vaddps( Zmm( x_erf ), Zmm( x_erf ), Zmm( const2 ) );
 
     vmulps( Zmm( x_erf ), Zmm( x_erf ), Zmm( reg ) );
-    vbroadcastss( Zmm( const2 ), ptr[ &( this->erf_consts[2] ) ] );
+    vbroadcastss( Zmm( const2 ), get_constant(erf_consts_off, 2) );
     vmulps( Zmm( reg ), Zmm( x_erf ), Zmm( const2 ) );
 
 }
@@ -912,7 +913,7 @@ void bli_lpgemm_jit::SWISH_F32_AVX512_DEF( dim_t reg )
     // Input reg x and output reg q.
     EXPF_AVX512();
 
-    vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_consts[6] ) ] );
+    vbroadcastss( Zmm( const1 ), get_constant(gelu_consts_off, 6) );
     vaddps( Zmm( q ), Zmm( q ), Zmm( const1 ) );
     vdivps( Zmm( reg ), Zmm( reg ), Zmm( q ) );
 }
@@ -1477,6 +1478,16 @@ void bli_lpgemm_jit::generate_kernel( lpgemm_jit_inputs_t* params )
     postamble();
 
     ret();
+
+    align(64);
+    L(tables);
+
+    db(reinterpret_cast<uint8_t*>( &gelu_consts ), sizeof( gelu_consts ) );
+    db(reinterpret_cast<uint8_t*>( &gelu_macros ), sizeof( gelu_macros ) );
+    db(reinterpret_cast<uint8_t*>( &lpgemm_exp ), sizeof( lpgemm_exp ) );
+    db(reinterpret_cast<uint8_t*>( &erf_consts ), sizeof( erf_consts ) );
+    db(reinterpret_cast<uint8_t*>( &lpgemm_erf ), sizeof( lpgemm_erf ) );
+
 }
 
 const void (* bli_lpgemm_jit:: get_function ()const)( lpgemm_jit_params_t*,
