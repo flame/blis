@@ -480,13 +480,19 @@ void packb_nr64_u8s8s32o32_row_major
         dim_t n0_48 = n_partial_pieces / 48;
         dim_t n0_32 = n_partial_pieces / 32;
         dim_t n0_16 = n_partial_pieces / 16;
+        dim_t scale_factor = 1;
+        if ( int4_upscale == TRUE )
+        {
+            scale_factor = 2;
+        }
 
         if ( n0_48 == 1 )
         {
             packb_nr48_u8s8s32o32_row_major
             (
               ( pack_b_buffer + ( n_full_pieces_loop_limit * KC_updated ) ),
-              ( b + n_full_pieces_loop_limit ), rs_b, KC, FALSE, FALSE
+              ( b + ( n_full_pieces_loop_limit / scale_factor ) ), rs_b, KC,
+              int4_upscale, signed_upscale
             );
 
             n0_partial_pack = 48;
@@ -496,7 +502,8 @@ void packb_nr64_u8s8s32o32_row_major
             packb_nr32_u8s8s32o32_row_major
             (
               ( pack_b_buffer + ( n_full_pieces_loop_limit * KC_updated ) ),
-              ( b + n_full_pieces_loop_limit ), rs_b, KC, FALSE, FALSE
+              ( b + ( n_full_pieces_loop_limit / scale_factor ) ), rs_b, KC,
+              int4_upscale, signed_upscale
             );
 
             n0_partial_pack = 32;
@@ -506,7 +513,8 @@ void packb_nr64_u8s8s32o32_row_major
             packb_nr16_u8s8s32o32_row_major
             (
               ( pack_b_buffer + ( n_full_pieces_loop_limit * KC_updated ) ),
-              ( b + n_full_pieces_loop_limit ), rs_b, KC, FALSE, FALSE
+              ( b + ( n_full_pieces_loop_limit / scale_factor ) ), rs_b, KC,
+              int4_upscale, signed_upscale
             );
 
             n0_partial_pack = 16;
@@ -518,8 +526,8 @@ void packb_nr64_u8s8s32o32_row_major
             (
               ( pack_b_buffer + ( n_full_pieces_loop_limit * KC_updated ) +
                 ( n0_partial_pack * KC_updated ) ),
-              ( b + n_full_pieces_loop_limit + n0_partial_pack ), rs_b, KC,
-              n0_partial_rem, FALSE, FALSE
+              ( b + ( ( n_full_pieces_loop_limit + n0_partial_pack ) / scale_factor ) ), rs_b, KC,
+              n0_partial_rem, int4_upscale, signed_upscale
             );
         }
     }
