@@ -173,6 +173,9 @@ ARG_MAX_HACK      := @enable_arg_max_hack@
 MK_ENABLE_STATIC  := @enable_static@
 MK_ENABLE_SHARED  := @enable_shared@
 
+# Whether to use an install_name based on @rpath.
+MK_ENABLE_RPATH   := @enable_rpath@
+
 # Whether to export all symbols within the shared library, even those symbols
 # that are considered to be for internal use only.
 EXPORT_SHARED     := @export_shared@

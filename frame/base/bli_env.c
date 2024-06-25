@@ -269,6 +269,18 @@ gint_t bli_env_get_var_arch_type( const char* env, gint_t fallback )
 			}
 #endif
 			// ARM
+			else if (strcmp(str, "armsve") == 0)
+			{
+				r_val = BLIS_ARCH_ARMSVE;
+			}
+			else if (strcmp(str, "a64fx") == 0)
+			{
+				r_val = BLIS_ARCH_A64FX;
+			}
+			else if (strcmp(str, "firestorm") == 0)
+			{
+				r_val = BLIS_ARCH_FIRESTORM;
+			}
 			else if (strcmp(str, "thunderx2") == 0)
 			{
 				r_val = BLIS_ARCH_THUNDERX2;

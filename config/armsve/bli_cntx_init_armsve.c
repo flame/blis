@@ -50,17 +50,23 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	// Block size.
 	dim_t m_r_s, n_r_s, k_c_s, m_c_s, n_c_s;
 	dim_t m_r_d, n_r_d, k_c_d, m_c_d, n_c_d;
+	dim_t m_r_c, n_r_c, k_c_c, m_c_c, n_c_c;
+	dim_t m_r_z, n_r_z, k_c_z, m_c_z, n_c_z;
 	bli_s_blksz_armsve(&m_r_s, &n_r_s, &k_c_s, &m_c_s, &n_c_s);
 	bli_d_blksz_armsve(&m_r_d, &n_r_d, &k_c_d, &m_c_d, &n_c_d);
+	bli_c_blksz_armsve(&m_r_c, &n_r_c, &k_c_c, &m_c_c, &n_c_c);
+	bli_z_blksz_armsve(&m_r_z, &n_r_z, &k_c_z, &m_c_z, &n_c_z);
 
 	// Update the context with optimized native gemm micro-kernels and
 	// their storage preferences.
 	bli_cntx_set_l3_nat_ukrs
 	(
-	  2,
+	  4,
 	  // These are vector-length agnostic kernels. Yet knowing mr is required at runtime.
-	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_armsve_asm_2vx10_unindexed, FALSE,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_armsve_asm_2vx10_unindexed, FALSE,
+	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_armsve_asm_2vx10_unindexed, FALSE,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armsve_asm_2vx10_unindexed, FALSE,
+	  BLIS_GEMM_UKR, BLIS_SCOMPLEX, bli_cgemm_armsve_asm_2vx10_unindexed, FALSE,
+	  BLIS_GEMM_UKR, BLIS_DCOMPLEX, bli_zgemm_armsve_asm_2vx10_unindexed, FALSE,
 	  cntx
 	);
 
@@ -68,9 +74,8 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	if (m_r_d==16)
 	  bli_cntx_set_packm_kers
 	  (
-		3,
+		2,
 		BLIS_PACKM_10XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_10xk,
-		BLIS_PACKM_12XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_12xk,
 		BLIS_PACKM_16XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16xk,
 		cntx
 	  );
@@ -78,17 +83,17 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	  bli_cntx_set_packm_kers
 	  (
 		1,
-		BLIS_PACKM_8XK_KER, BLIS_DOUBLE, bli_dpackm_armsve256_asm_8xk,
+		BLIS_PACKM_8XK_KER, BLIS_DOUBLE, bli_dpackm_armsve256_int_8xk,
 		cntx
 	  );
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ], m_r_s, m_r_d,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ], n_r_s, n_r_d,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ], m_c_s, m_c_d,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ], k_c_s, k_c_d,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ], n_c_s, n_c_d,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ], m_r_s, m_r_d, m_r_c, m_r_z );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ], n_r_s, n_r_d, n_r_c, n_r_z );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ], m_c_s, m_c_d, m_c_c, m_c_z );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ], k_c_s, k_c_d, k_c_c, k_c_z );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ], n_c_s, n_c_d, n_c_c, n_c_z );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.

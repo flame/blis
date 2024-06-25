@@ -144,6 +144,12 @@ print_usage()
 	echo "                 library. If the shared library build is disabled, the"
 	echo "                 static library build must remain enabled."
 	echo " "
+	echo "   --enable-rpath, --disable-rpath"
+	echo " "
+	echo "                 Enable (disabled by default) setting an install_name for"
+	echo "                 dynamic libraries on macOS which starts with @rpath rather"
+	echo "                 than the absolute install path."
+	echo " "
 	echo "   -e SYMBOLS, --export-shared[=SYMBOLS]"
 	echo " "
 	echo "                 Specify the subset of library symbols that are exported"
@@ -1558,6 +1564,8 @@ check_compiler()
 
 	echo "${script_name}: checking for blacklisted configurations due to ${cc} ${cc_version}."
 
+	# Fixme: check on a64fx, neoverse, and others
+
 	# gcc
 	if [ "x${cc_vendor}" = "xgcc" ]; then
 
@@ -2074,6 +2082,7 @@ main()
 	enable_arg_max_hack='no'
 	enable_static='yes'
 	enable_shared='yes'
+	enable_rpath='no'
 	export_shared='public'
 	enable_pba_pools='yes'
 	enable_sba_pools='yes'
@@ -2206,6 +2215,12 @@ main()
 							;;
 						disable-shared)
 							enable_shared='no'
+							;;
+						enable-rpath)
+							enable_rpath='yes'
+							;;
+						disable-rpath)
+							enable_rpath='no'
 							;;
 						export-shared=*)
 							export_shared=${OPTARG#*=}
@@ -3509,6 +3524,7 @@ main()
 		| sed -e "s/@enable_arg_max_hack@/${enable_arg_max_hack}/g" \
 		| sed -e "s/@enable_static@/${enable_static}/g" \
 		| sed -e "s/@enable_shared@/${enable_shared}/g" \
+		| sed -e "s/@enable_rpath@/${enable_rpath}/g" \
 		| sed -e "s/@export_shared@/${export_shared}/g" \
 		| sed -e "s/@enable_blas@/${enable_blas}/g" \
 		| sed -e "s/@enable_cblas@/${enable_cblas}/g" \

@@ -869,20 +869,14 @@ else
 	@$(RANLIB) $@
 endif
 
-# first argument: the base name of the BLAS test driver.
-define make-blat-rule
-$(BASE_EXE_BLASTEST_PATH)/$(1).x: $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK)
+$(BASE_EXE_BLASTEST_PATH)/%.x: $(BASE_OBJ_BLASTEST_PATH)/%.o $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK)
 	@mkdir -p $(BASE_EXE_BLASTEST_PATH)
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(LINKER) $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $$@
+	$(LINKER) $< $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 else
-	@echo "Linking $$(@F) against '$(notdir $(BLASTEST_F2C_LIB)) $(LIBBLIS_LINK) $(LDFLAGS)'"
-	@$(LINKER) $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $$@
+	@echo "Linking $@ against '$(notdir $(BLASTEST_F2C_LIB)) $(LIBBLIS_LINK) "$(LDFLAGS)"'"
+	@$(LINKER) $< $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 endif
-endef
-
-# Instantiate the rule above for each driver file.
-$(foreach name, $(BLASTEST_DRV_BASES), $(eval $(call make-blat-rule,$(name))))
 
 # A rule to run ?blat1.x driver files.
 define make-run-blat1-rule
@@ -952,7 +946,7 @@ $(TESTSUITE_BIN): $(MK_TESTSUITE_OBJS) $(LIBBLIS_LINK)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(LINKER) $(MK_TESTSUITE_OBJS) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 else
-	@echo "Linking $@ against '$(LIBBLIS_LINK) $(LDFLAGS)'"
+	@echo "Linking $@ against '$(LIBBLIS_LINK) "$(LDFLAGS)"'"
 	@$(LINKER) $(MK_TESTSUITE_OBJS) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 endif
 

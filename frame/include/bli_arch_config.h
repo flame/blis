@@ -98,6 +98,9 @@ CNTX_INIT_PROTS( armsve )
 #ifdef BLIS_CONFIG_A64FX
 CNTX_INIT_PROTS( a64fx )
 #endif
+#ifdef BLIS_CONFIG_FIRESTORM
+CNTX_INIT_PROTS( firestorm )
+#endif
 #ifdef BLIS_CONFIG_THUNDERX2
 CNTX_INIT_PROTS( thunderx2 )
 #endif
@@ -208,6 +211,14 @@ CNTX_INIT_PROTS( generic )
 #include "bli_family_bulldozer.h"
 #endif
 
+// -- ARM families --
+#ifdef BLIS_FAMILY_ARM64
+#include "bli_family_arm64.h"
+#endif
+#ifdef BLIS_FAMILY_ARM32
+#include "bli_family_arm32.h"
+#endif
+
 // -- ARM architectures --
 
 #ifdef BLIS_FAMILY_ARMSVE
@@ -215,6 +226,9 @@ CNTX_INIT_PROTS( generic )
 #endif
 #ifdef BLIS_FAMILY_A64FX
 #include "bli_family_a64fx.h"
+#endif
+#ifdef BLIS_FAMILY_FIRESTORM
+#include "bli_family_firestorm.h"
 #endif
 #ifdef BLIS_FAMILY_THUNDERX2
 #include "bli_family_thunderx2.h"

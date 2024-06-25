@@ -285,6 +285,9 @@ void bli_arch_set_id( void )
 		#ifdef BLIS_FAMILY_A64FX
 		arch_id = BLIS_ARCH_A64FX;
 		#endif
+		#ifdef BLIS_FAMILY_FIRESTORM
+		id = BLIS_ARCH_FIRESTORM;
+		#endif
 		#ifdef BLIS_FAMILY_THUNDERX2
 		arch_id = BLIS_ARCH_THUNDERX2;
 		#endif
@@ -633,11 +636,12 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "piledriver",
     "bulldozer",
 
+    "armsve",
+    "a64fx",
+    "firestorm",
     "thunderx2",
     "cortexa57",
     "cortexa53",
-    "armsve",
-    "a64fx",
     "cortexa15",
     "cortexa9",
 

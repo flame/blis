@@ -154,6 +154,11 @@ void bli_gks_init( void )
 #endif
 
 		// ARM architectures
+#ifdef BLIS_CONFIG_A64FX
+		bli_gks_register_cntx( BLIS_ARCH_A64FX,   bli_cntx_init_a64fx,
+		                                              bli_cntx_init_a64fx_ref,
+		                                              bli_cntx_init_a64fx_ind );
+#endif
 #ifdef BLIS_CONFIG_THUNDERX2
 		bli_gks_register_cntx( BLIS_ARCH_THUNDERX2,   bli_cntx_init_thunderx2,
 		                                              bli_cntx_init_thunderx2_ref,
@@ -178,6 +183,11 @@ void bli_gks_init( void )
 		bli_gks_register_cntx( BLIS_ARCH_A64FX,       bli_cntx_init_a64fx,
 		                                              bli_cntx_init_a64fx_ref,
 		                                              bli_cntx_init_a64fx_ind );
+#endif
+#ifdef BLIS_CONFIG_FIRESTORM
+		bli_gks_register_cntx( BLIS_ARCH_FIRESTORM,   bli_cntx_init_firestorm,
+		                                              bli_cntx_init_firestorm_ref,
+		                                              bli_cntx_init_firestorm_ind );
 #endif
 #ifdef BLIS_CONFIG_CORTEXA15
 		bli_gks_register_cntx( BLIS_ARCH_CORTEXA15,   bli_cntx_init_cortexa15,

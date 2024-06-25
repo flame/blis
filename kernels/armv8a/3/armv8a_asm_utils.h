@@ -47,3 +47,73 @@
 #define BRANCH(str) "b ." #str"  \n\t"
 #endif
 
+// Clear vectors.
+#define CLEAR1V(V) \
+" dup   v"#V".2d, xzr \n\t"
+#define CLEAR2V(V0,V1) \
+  CLEAR1V(V0) \
+  CLEAR1V(V1)
+#define CLEAR4V(V0,V1,V2,V3) \
+  CLEAR2V(V0,V1) \
+  CLEAR2V(V2,V3)
+#define CLEAR8V(V0,V1,V2,V3,V4,V5,V6,V7) \
+  CLEAR4V(V0,V1,V2,V3) \
+  CLEAR4V(V4,V5,V6,V7)
+
+// Scale vectors.
+#define DSCALE1V(V,A,IDX) \
+" fmul  v"#V".2d, v"#V".2d, v"#A".d["#IDX"] \n\t"
+#define DSCALE2V(V0,V1,A,IDX) \
+  DSCALE1V(V0,A,IDX) \
+  DSCALE1V(V1,A,IDX)
+#define DSCALE4V(V0,V1,V2,V3,A,IDX) \
+  DSCALE2V(V0,V1,A,IDX) \
+  DSCALE2V(V2,V3,A,IDX)
+#define DSCALE8V(V0,V1,V2,V3,V4,V5,V6,V7,A,IDX) \
+  DSCALE4V(V0,V1,V2,V3,A,IDX) \
+  DSCALE4V(V4,V5,V6,V7,A,IDX)
+
+// Scale-accumulate.
+#define DSCALEA1V(D,S,A,IDX) \
+" fmla  v"#D".2d, v"#S".2d, v"#A".d["#IDX"] \n\t"
+#define DSCALEA2V(D0,D1,S0,S1,A,IDX) \
+  DSCALEA1V(D0,S0,A,IDX) \
+  DSCALEA1V(D1,S1,A,IDX)
+#define DSCALEA4V(D0,D1,D2,D3,S0,S1,S2,S3,A,IDX) \
+  DSCALEA2V(D0,D1,S0,S1,A,IDX) \
+  DSCALEA2V(D2,D3,S2,S3,A,IDX)
+#define DSCALEA8V(D0,D1,D2,D3,D4,D5,D6,D7,S0,S1,S2,S3,S4,S5,S6,S7,A,IDX) \
+  DSCALEA4V(D0,D1,D2,D3,S0,S1,S2,S3,A,IDX) \
+  DSCALEA4V(D4,D5,D6,D7,S4,S5,S6,S7,A,IDX)
+
+// Load one line.
+#define DLOAD1V(V,ADDR,SHIFT) \
+" ldr   q"#V", ["#ADDR", #"#SHIFT"] \n\t"
+#define DLOAD2V(V0,V1,ADDR,SHIFT) \
+  DLOAD1V(V0,ADDR,SHIFT) \
+  DLOAD1V(V1,ADDR,SHIFT+16)
+#define DLOAD4V(V0,V1,V2,V3,ADDR,SHIFT) \
+  DLOAD2V(V0,V1,ADDR,SHIFT) \
+  DLOAD2V(V2,V3,ADDR,SHIFT+32)
+
+// Generic: load one line.
+#define DLOAD1V_GATHER_ELMFWD(V,ADDR,INC) \
+" ld1   {v"#V".d}[0], ["#ADDR"], "#INC" \n\t" \
+" ld1   {v"#V".d}[1], ["#ADDR"], "#INC" \n\t"
+
+// Store one line.
+#define DSTORE1V(V,ADDR,SHIFT) \
+" str   q"#V", ["#ADDR", #"#SHIFT"] \n\t"
+#define DSTORE2V(V0,V1,ADDR,SHIFT) \
+  DSTORE1V(V0,ADDR,SHIFT) \
+  DSTORE1V(V1,ADDR,SHIFT+16)
+#define DSTORE4V(V0,V1,V2,V3,ADDR,SHIFT) \
+  DSTORE2V(V0,V1,ADDR,SHIFT) \
+  DSTORE2V(V2,V3,ADDR,SHIFT+32)
+
+// Generic: store one line.
+#define DSTORE1V_SCATTER_ELMFWD(V,ADDR,INC) \
+" st1   {v"#V".d}[0], ["#ADDR"], "#INC" \n\t" \
+" st1   {v"#V".d}[1], ["#ADDR"], "#INC" \n\t"
+
+

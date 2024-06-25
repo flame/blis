@@ -32,5 +32,30 @@
 
 */
 
+PACKM_KER_PROT( float,    s, packm_armv8a_int_8xk )
+PACKM_KER_PROT( float,    s, packm_armv8a_int_12xk )
+PACKM_KER_PROT( double,   d, packm_armv8a_int_6xk )
+PACKM_KER_PROT( double,   d, packm_armv8a_int_8xk )
+
 GEMM_UKR_PROT( float,    s, gemm_armv8a_asm_8x12 )
 GEMM_UKR_PROT( double,   d, gemm_armv8a_asm_6x8 )
+// GEMM_UKR_PROT( double,   d, gemm_armv8a_asm_6x8r )
+// GEMM_UKR_PROT( double,   d, gemm_armv8a_asm_8x4 )
+// GEMM_UKR_PROT( double,   d, gemm_armv8a_asm_4x4 )
+
+GEMMSUP_KER_PROT( double,   d, gemmsup_rd_armv8a_asm_6x8n )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rd_armv8a_asm_6x8m )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armv8a_asm_6x8n )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armv8a_asm_6x8m )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armv8a_asm_4x8n )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armv8a_asm_4x8m )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armv8a_asm_8x4m )
+
+GEMMSUP_KER_PROT( double,   d, gemmsup_rd_armv8a_int_2x8 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rd_armv8a_int_3x4 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rd_armv8a_asm_3x4 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rd_armv8a_asm_6x3 )
+
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armv8a_int_6x4mn )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armv8a_int_3x8mn )
+
