@@ -1325,12 +1325,12 @@ void bli_cgemm_piledriver_asm_4x2
 		vmulps(xmm6, xmm0, xmm0)
 		vmulps(xmm7, xmm1, xmm1)
 		vaddsubps(xmm1, xmm0, xmm0)
-		vaddps(xmm8, xmm0, xmm0)
+		vaddps(xmm8, xmm0, xmm8)
 
 		vmulps(xmm6, xmm2, xmm2)
 		vmulps(xmm7, xmm3, xmm3)
 		vaddsubps(xmm3, xmm2, xmm2)
-		vaddps(xmm12, xmm2, xmm2)
+		vaddps(xmm12, xmm2, xmm12)
 
 		vmovups(mem(r10), xmm0) // load c01:c11
 		vmovups(mem(r10, 16), xmm2) // load c21:c31
@@ -1340,12 +1340,12 @@ void bli_cgemm_piledriver_asm_4x2
 		vmulps(xmm6, xmm0, xmm0)
 		vmulps(xmm7, xmm1, xmm1)
 		vaddsubps(xmm1, xmm0, xmm0)
-		vaddps(xmm10, xmm0, xmm0)
+		vaddps(xmm10, xmm0, xmm10)
 
 		vmulps(xmm6, xmm2, xmm2)
 		vmulps(xmm7, xmm3, xmm3)
 		vaddsubps(xmm3, xmm2, xmm2)
-		vaddps(xmm14, xmm2, xmm2)
+		vaddps(xmm14, xmm2, xmm14)
 
 		 // fall through
 
@@ -1737,12 +1737,12 @@ void bli_zgemm_piledriver_asm_2x2
 		vmulpd(xmm6, xmm0, xmm0)
 		vmulpd(xmm7, xmm1, xmm1)
 		vaddsubpd(xmm1, xmm0, xmm0)
-		vaddpd(xmm8, xmm0, xmm0)
+		vaddpd(xmm8, xmm0, xmm8)
 
 		vmulpd(xmm6, xmm2, xmm2)
 		vmulpd(xmm7, xmm3, xmm3)
 		vaddsubpd(xmm3, xmm2, xmm2)
-		vaddpd(xmm12, xmm2, xmm2)
+		vaddpd(xmm12, xmm2, xmm12)
 
 		vmovups(mem(r10), xmm0) // load c01
 		vmovups(mem(r10, 16), xmm2) // load c11
@@ -1752,12 +1752,12 @@ void bli_zgemm_piledriver_asm_2x2
 		vmulpd(xmm6, xmm0, xmm0)
 		vmulpd(xmm7, xmm1, xmm1)
 		vaddsubpd(xmm1, xmm0, xmm0)
-		vaddpd(xmm10, xmm0, xmm0)
+		vaddpd(xmm10, xmm0, xmm10)
 
 		vmulpd(xmm6, xmm2, xmm2)
 		vmulpd(xmm7, xmm3, xmm3)
 		vaddsubpd(xmm3, xmm2, xmm2)
-		vaddpd(xmm14, xmm2, xmm2)
+		vaddpd(xmm14, xmm2, xmm14)
 
 		 // fall through
 
