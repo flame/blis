@@ -321,6 +321,12 @@ print_usage()
                  which are determined by the BLIS subconfiguration used at
                  runtime.) By default, these customized files are disabled.
 
+   --enable-scalapack-compat, --disable-scalapack-compat
+
+                 Enable strict compatibility with ScaLAPACK, which may
+                 requiring disabling certain conflicting functionality
+                 available through the BLAS and/or CBLAS interfaces.
+
    -a NAME --enable-addon=NAME
 
                  Enable the code provided by an addon. An addon consists
@@ -2569,6 +2575,7 @@ main()
 	enable_amd_frame_tweaks='no'
 	enable_memkind='' # The default memkind value is determined later on.
 	enable_trsm_preinversion='yes'
+	enable_scalapack_compat='no'
 	force_version='no'
 	complex_return='default'
 
@@ -2830,6 +2837,13 @@ main()
 							;;
 						disable-amd-frame-tweaks)
 							enable_amd_frame_tweaks='no'
+							;;
+
+						enable-scalapack-compat)
+							enable_scalapack_compat='yes'
+							;;
+						disable-scalapack-compat)
+							enable_scalapack_compat='no'
 							;;
 
 						with-memkind)
@@ -3843,6 +3857,13 @@ main()
 		echo "${script_name}: memory tracing output is disabled."
 		enable_mem_tracing_01=0
 	fi
+	if [[ ${enable_scalapack_compat} = yes ]]; then
+		echo "${script_name}: ScaLAPACK compatibility is enabled."
+		enable_scalapack_compat_01=1
+	else
+		echo "${script_name}: ScaLAPACK compatibility is disabled."
+		enable_scalapack_compat_01=0
+	fi
 	if [[ ${has_memkind} = yes ]]; then
 		if [[ -z ${enable_memkind} ]]; then
 			# If no explicit option was given for libmemkind one way or the other,
@@ -4273,6 +4294,7 @@ main()
 	-e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g"       \
 	-e "s/@enable_sandbox@/${enable_sandbox_01}/g"                       \
 	-e "s/@enable_shared@/${enable_shared_01}/g"                         \
+	-e "s/@enable_scalapack_compat@/${enable_scalapack_compat_01}/g"     \
 	-e "s/@complex_return_intel@/${complex_return_intel01}/g"
 
 	# -- Instantiate bli_addon.h file from template ----------------------------
