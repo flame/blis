@@ -307,7 +307,7 @@ print_usage()
 
                  Enable strict compatibility with ScaLAPACK, which may
                  requiring disabling certain conflicting functionality
-                 available throught the BLAS and/or CBLAS interfaces.
+                 available through the BLAS and/or CBLAS interfaces.
 
    -a NAME --enable-addon=NAME
 
@@ -3015,9 +3015,9 @@ blis_main()
 	enable_amd_frame_tweaks='no'
 	enable_memkind='' # The default memkind value is determined later on.
 	enable_trsm_preinversion='yes'
+	enable_scalapack_compat='no'
 	force_version='no'
 	complex_return='default'
-	scalapack_compat='no'
 
 	# The addon flag and names.
 	addon_flag=''
@@ -3273,10 +3273,10 @@ blis_main()
 							;;
 
 						enable-scalapack-compat)
-							scalapack_compat='yes'
+							enable_scalapack_compat='yes'
 							;;
 						disable-scalapack-compat)
-							scalapack_compat='no'
+							enable_scalapack_compat='no'
 							;;
 
 						with-memkind)
@@ -3947,12 +3947,12 @@ blis_main()
 		echo "${script_name}: memory tracing output is disabled."
 		enable_mem_tracing_01=0
 	fi
-	if [[ ${scalapack_compat} = yes ]]; then
+	if [[ ${enable_scalapack_compat} = yes ]]; then
 		echo "${script_name}: ScaLAPACK compatibility is enabled."
-		scalapack_compat_01=1
+		enable_scalapack_compat_01=1
 	else
 		echo "${script_name}: ScaLAPACK compatibility is disabled."
-		scalapack_compat_01=0
+		enable_scalapack_compat_01=0
 	fi
 	if [[ ${has_memkind} = yes ]]; then
 		if [[ -z ${enable_memkind} ]]; then
@@ -4332,7 +4332,7 @@ blis_main()
 	add_config_var complex_return_intel      complex_return_intel01
 	add_config_var addon_list_includes
 	add_config_var enable_addons             enable_addons_01
-	add_config_var scalapack_compat          scalapack_compat_01
+	add_config_var enable_scalapack_compat   enable_scalapack_compat_01
 
 	generate_config_file "${config_mk_in_path}"    "${config_mk_out_path}"
 	generate_config_file "${bli_config_h_in_path}" "${bli_config_h_out_path}"

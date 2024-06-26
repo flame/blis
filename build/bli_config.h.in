@@ -110,7 +110,7 @@
 #define BLIS_DISABLE_MEM_TRACING
 #endif
 
-#if @scalapack_compat@
+#if @enable_scalapack_compat@
 #define BLIS_ENABLE_SCALAPACK_COMPAT
 #else
 #define BLIS_DISABLE_SCALAPACK_COMPAT
