@@ -203,15 +203,24 @@ void fill_array_ ## ctype ( void* arr, dim_t size ) \
     ctype* temp_arr = ( ctype* ) arr; \
     for ( dim_t i = 0; i < size; ++i ) \
     { \
-        temp_arr[i] = ( ctype )( rand() % 5 ); \
+        temp_arr[i] = ( ctype )( ( rand() % 11 ) - 5 ); \
     } \
 } \
 
-GEN_FILL_ARRAY_FUNC(uint8_t)
 GEN_FILL_ARRAY_FUNC(int8_t)
 GEN_FILL_ARRAY_FUNC(int16_t)
 GEN_FILL_ARRAY_FUNC(float)
 GEN_FILL_ARRAY_FUNC(int32_t)
+
+void fill_array_uint8_t ( void* arr, dim_t size )
+{
+    if( size < 0 ) return;
+    uint8_t* temp_arr = ( uint8_t* ) arr;
+    for ( dim_t i = 0; i < size; ++i )
+    {
+        temp_arr[i] = ( uint8_t )( rand() % 5 );
+    }
+}
 
 void fill_array_bfloat16( void* arr, dim_t size )
 {

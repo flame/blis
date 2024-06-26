@@ -57,10 +57,10 @@
 
 #define LPGEMV_N_KERNEL_4_FMA( zmm8, zmm9, zmm10, zmm11, \
                                zmm6, zmm0, zmm1, zmm2, zmm3 ) \
-  zmm8  = _mm512_dpbusd_epi32( zmm8,  zmm6, zmm0 ); \
-  zmm9  = _mm512_dpbusd_epi32( zmm9,  zmm6, zmm1 ); \
-  zmm10 = _mm512_dpbusd_epi32( zmm10, zmm6, zmm2 ); \
-  zmm11 = _mm512_dpbusd_epi32( zmm11, zmm6, zmm3 );
+  zmm8  = _mm512_dpbusd_epi32( zmm8,  zmm0, zmm6 ); \
+  zmm9  = _mm512_dpbusd_epi32( zmm9,  zmm1, zmm6 ); \
+  zmm10 = _mm512_dpbusd_epi32( zmm10, zmm2, zmm6 ); \
+  zmm11 = _mm512_dpbusd_epi32( zmm11, zmm3, zmm6 );
 
 #define LPGEMV_ZMM2XMM( zmm0, zmm1, zmm2, zmm3, \
                         ymm0, ymm1, ymm2, ymm3, xmm0) \
@@ -410,8 +410,8 @@ LPGEMV_N_EQ1_KERN(uint8_t, int8_t, int32_t, u8s8s32os32)
 						// Load 2x64 elements from row0-row1 of A
 						zmm0 = _mm512_loadu_si512( a_use );
 						zmm1 = _mm512_loadu_si512( a_use + rs_a );
-						zmm20 = _mm512_dpbusd_epi32( zmm20, zmm6, zmm0 );
-						zmm21 = _mm512_dpbusd_epi32( zmm21, zmm6, zmm1 );
+						zmm20 = _mm512_dpbusd_epi32( zmm20, zmm0, zmm6 );
+						zmm21 = _mm512_dpbusd_epi32( zmm21, zmm1, zmm6 );
 
 						b_use += 64; // move b pointer to next 64 elements
 						a_use += 64;
@@ -422,8 +422,8 @@ LPGEMV_N_EQ1_KERN(uint8_t, int8_t, int32_t, u8s8s32os32)
 						zmm6 = _mm512_maskz_loadu_epi8( k1, b_use );
 						zmm0 = _mm512_maskz_loadu_epi8( k1, a_use );
 						zmm1 = _mm512_maskz_loadu_epi8( k1, a_use + rs_a );
-						zmm20 = _mm512_dpbusd_epi32( zmm20, zmm6, zmm0 );
-						zmm21 = _mm512_dpbusd_epi32( zmm21, zmm6, zmm1 );
+						zmm20 = _mm512_dpbusd_epi32( zmm20, zmm0, zmm6 );
+						zmm21 = _mm512_dpbusd_epi32( zmm21, zmm1, zmm6 );
 					}
 					mr0_use -= 2;
 					a_use = a_use_fringe + 2 * rs_a;
@@ -439,7 +439,7 @@ LPGEMV_N_EQ1_KERN(uint8_t, int8_t, int32_t, u8s8s32os32)
 						// Load 0-63 in b[k+0 - k+63]
 						zmm6 = _mm512_loadu_si512( b_use );
 						zmm0 = _mm512_loadu_si512( a_use );
-						zmm22 = _mm512_dpbusd_epi32( zmm22, zmm6, zmm0 );
+						zmm22 = _mm512_dpbusd_epi32( zmm22, zmm0, zmm6 );
 						b_use += 64; // move b pointer to next 64 elements
 						a_use += 64;
 					}
@@ -448,7 +448,7 @@ LPGEMV_N_EQ1_KERN(uint8_t, int8_t, int32_t, u8s8s32os32)
 					{
 						zmm6 = _mm512_maskz_loadu_epi8( k1, b_use );
 						zmm0 = _mm512_maskz_loadu_epi8( k1, a_use );
-						zmm22 = _mm512_dpbusd_epi32( zmm22, zmm6, zmm0 );
+						zmm22 = _mm512_dpbusd_epi32( zmm22, zmm0, zmm6 );
 					}
 					// When only fringe 1,
 					// update the registers to store in order
