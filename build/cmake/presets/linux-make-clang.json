@@ -149,6 +149,70 @@
               "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-ilp64-auto"
             },
             "hidden": false
+          },
+          {
+            "name": "linux-make-clang-st-lp64-zen5-static",
+            "inherits": ["linux-make-clang", "st", "lp64", "zen5", "linux-static"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-lp64-zen5"
+            },
+            "hidden": false
+          },
+          {
+            "name": "linux-make-clang-st-lp64-zen5-shared",
+            "inherits": ["linux-make-clang", "st", "lp64", "zen5", "linux-shared"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-lp64-zen5"
+            },
+            "hidden": false
+          },
+          {
+            "name": "linux-make-clang-mt-lp64-zen5-static", 
+            "inherits": ["linux-make-clang", "mt", "lp64", "zen5", "linux-static"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-lp64-zen5"
+            },
+            "hidden": false
+          },
+          {
+            "name": "linux-make-clang-mt-lp64-zen5-shared",
+            "inherits": ["linux-make-clang", "mt", "lp64", "zen5", "linux-shared"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-lp64-zen5"
+            },
+            "hidden": false
+          },
+          {
+            "name": "linux-make-clang-st-ilp64-zen5-static",
+            "inherits": ["linux-make-clang", "st", "ilp64", "zen5", "linux-static"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-ilp64-zen5"
+            },
+            "hidden": false
+          },
+          {
+            "name": "linux-make-clang-st-ilp64-zen5-shared",
+            "inherits": ["linux-make-clang", "st", "ilp64", "zen5", "linux-shared"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-ilp64-zen5"
+            },
+            "hidden": false
+          },
+          {
+            "name": "linux-make-clang-mt-ilp64-zen5-static",
+            "inherits": ["linux-make-clang", "mt", "ilp64", "zen5", "linux-static"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-ilp64-zen5"
+            },
+            "hidden": false
+          },
+          {
+            "name": "linux-make-clang-mt-ilp64-zen5-shared",
+            "inherits": ["linux-make-clang", "mt", "ilp64", "zen5", "linux-shared"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-ilp64-zen5"
+            },
+            "hidden": false
           }
     ],
     "buildPresets": [
@@ -232,8 +296,49 @@
             "configurePreset": "linux-make-clang-mt-ilp64-auto-shared",
             "inherits": "base"
           },
+
+          {
+            "name": "linux-make-clang-st-lp64-zen5-static",
+            "configurePreset": "linux-make-clang-st-lp64-zen5-static",
+            "inherits": "base"
+          },
+          {
+            "name": "linux-make-clang-st-lp64-zen5-shared",
+            "configurePreset": "linux-make-clang-st-lp64-zen5-shared",
+            "inherits": "base"
+          },
+          {
+            "name": "linux-make-clang-mt-lp64-zen5-static",
+            "configurePreset": "linux-make-clang-mt-lp64-zen5-static",
+            "inherits": "base"
+          },
+          {
+            "name": "linux-make-clang-mt-lp64-zen5-shared",
+            "configurePreset": "linux-make-clang-mt-lp64-zen5-shared",
+            "inherits": "base"
+          },
+          {
+            "name": "linux-make-clang-st-ilp64-zen5-static",
+            "configurePreset": "linux-make-clang-st-ilp64-zen5-static",
+            "inherits": "base"
+          },
+          {
+            "name": "linux-make-clang-st-ilp64-zen5-shared",
+            "configurePreset": "linux-make-clang-st-ilp64-zen5-shared",
+            "inherits": "base"
+          },
+          {
+            "name": "linux-make-clang-mt-ilp64-zen5-static",
+            "configurePreset": "linux-make-clang-mt-ilp64-zen5-static",
+            "inherits": "base"
+          },
+          {
+            "name": "linux-make-clang-mt-ilp64-zen5-shared",
+            "configurePreset": "linux-make-clang-mt-ilp64-zen5-shared",
+            "inherits": "base"
+          },
           
-    {
+      {
         "name": "linux-make-clang-st-lp64-amdzen-static-check",
         "description": "Check static single-threaded LP64 BLIS with amdzen option on Linux",
         "configurePreset": "linux-make-clang-st-lp64-amdzen-static",
@@ -327,6 +432,54 @@
         "name": "linux-make-clang-mt-ilp64-auto-shared-check",
         "description": "Check multithreaded shared ILP64 BLIS with auto option on Linux",
         "configurePreset": "linux-make-clang-mt-ilp64-auto-shared",
+        "targets": ["check", "checkblis-salt", "checkblis-md"]
+      },
+      {
+        "name": "linux-make-clang-st-lp64-zen5-static-check",
+        "description": "Check static single-threaded LP64 BLIS with zen5 option on Linux",
+        "configurePreset": "linux-make-clang-st-lp64-zen5-static",
+        "targets": ["check", "checkblis-salt", "checkblis-md"]
+      },
+      {
+        "name": "linux-make-clang-st-lp64-zen5-shared-check",
+        "description": "Check shared single-threaded LP64 BLIS with zen5 option on Linux",
+        "configurePreset": "linux-make-clang-st-lp64-zen5-shared",
+        "targets": ["check", "checkblis-salt", "checkblis-md"]
+      },
+      {
+        "name": "linux-make-clang-mt-lp64-zen5-static-check",
+        "description": "Check multithreaded static LP64 BLIS with zen5 option on Linux",
+        "configurePreset": "linux-make-clang-mt-lp64-zen5-static",
+        "targets": ["check", "checkblis-salt", "checkblis-md"]
+      },
+      {
+        "name": "linux-make-clang-mt-lp64-zen5-shared-check",
+        "description": "Check multithreaded shared LP64 BLIS with zen5 option on Linux",
+        "configurePreset": "linux-make-clang-mt-lp64-zen5-shared",
+        "targets": ["check", "checkblis-salt", "checkblis-md"]
+      },
+      {
+        "name": "linux-make-clang-st-ilp64-zen5-static-check",
+        "description": "Check single-threaded static ILP64 BLIS with zen5 option on Linux",
+        "configurePreset": "linux-make-clang-st-ilp64-zen5-static",
+        "targets": ["check", "checkblis-salt", "checkblis-md"]
+      },
+      {
+        "name": "linux-make-clang-st-ilp64-zen5-shared-check",
+        "description": "Check single-threaded shared ILP64 BLIS with zen5 option on Linux",
+        "configurePreset": "linux-make-clang-st-ilp64-zen5-shared",
+        "targets": ["check", "checkblis-salt", "checkblis-md"]
+      },
+      {
+        "name": "linux-make-clang-mt-ilp64-zen5-static-check",
+        "description": "Check multithreaded static ILP64 BLIS with zen5 option on Linux",
+        "configurePreset": "linux-make-clang-mt-ilp64-zen5-static",
+        "targets": ["check", "checkblis-salt", "checkblis-md"]
+      },
+      {
+        "name": "linux-make-clang-mt-ilp64-zen5-shared-check",
+        "description": "Check multithreaded shared ILP64 BLIS with zen5 option on Linux",
+        "configurePreset": "linux-make-clang-mt-ilp64-zen5-shared",
         "targets": ["check", "checkblis-salt", "checkblis-md"]
       }
     ],
@@ -617,6 +770,150 @@
               {
                 "type": "build",
                 "name": "linux-make-clang-mt-ilp64-auto-shared-check"
+              }
+            ]
+          },
+          {
+            "name": "linux-make-clang-st-lp64-zen5-static",
+            "description": "Build and check single-threaded static BLIS for zen5 configuration on Linux",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "linux-make-clang-st-lp64-zen5-static"
+              },
+              {
+                "type": "build",
+                "name": "linux-make-clang-st-lp64-zen5-static"
+              },
+              {
+                "type": "build",
+                "name": "linux-make-clang-st-lp64-zen5-static-check"
+              }
+            ]
+          },
+          {
+            "name": "linux-make-clang-st-lp64-zen5-shared",
+            "description": "Build and check single-threaded shared BLIS for zen5 configuration on Linux",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "linux-make-clang-st-lp64-zen5-shared"
+              },
+              {
+                "type": "build",
+                "name": "linux-make-clang-st-lp64-zen5-shared"
+              },
+              {
+                "type": "build",
+                "name": "linux-make-clang-st-lp64-zen5-shared-check"
+              }
+            ]
+          },
+          {
+            "name": "linux-make-clang-mt-lp64-zen5-static",
+            "description": "Build and check multithreaded static BLIS for zen5 configuration on Linux",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "linux-make-clang-mt-lp64-zen5-static"
+              },
+              {
+                "type": "build",
+                "name": "linux-make-clang-mt-lp64-zen5-static"
+              },
+              {
+                "type": "build",
+                "name": "linux-make-clang-mt-lp64-zen5-static-check"
+              }
+            ]
+          },
+          {
+            "name": "linux-make-clang-mt-lp64-zen5-shared",
+            "description": "Build and check multithreaded shared BLIS for zen5 configuration on Linux",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "linux-make-clang-mt-lp64-zen5-shared"
+              },
+              {
+                "type": "build",
+                "name": "linux-make-clang-mt-lp64-zen5-shared"
+              },
+              {
+                "type": "build",
+                "name": "linux-make-clang-mt-lp64-zen5-shared-check"
+              }
+            ]
+          },
+          {
+            "name": "linux-make-clang-st-ilp64-zen5-static",
+            "description": "Build and check single-threaded static BLIS for zen5 configuration on Linux",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "linux-make-clang-st-ilp64-zen5-static"
+              },
+              {
+                "type": "build",
+                "name": "linux-make-clang-st-ilp64-zen5-static"
+              },
+              {
+                "type": "build",
+                "name": "linux-make-clang-st-ilp64-zen5-static-check"
+              }
+            ]
+          },
+          {
+            "name": "linux-make-clang-st-ilp64-zen5-shared",
+            "description": "Build and check single-threaded shared BLIS for zen5 configuration on Linux",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "linux-make-clang-st-ilp64-zen5-shared"
+              },
+              {
+                "type": "build",
+                "name": "linux-make-clang-st-ilp64-zen5-shared"
+              },
+              {
+                "type": "build",
+                "name": "linux-make-clang-st-ilp64-zen5-shared-check"
+              }
+            ]
+          },
+          {
+            "name": "linux-make-clang-mt-ilp64-zen5-static",
+            "description": "Build and check multithreaded static BLIS for zen5 configuration on Linux",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "linux-make-clang-mt-ilp64-zen5-static"
+              },
+              {
+                "type": "build",
+                "name": "linux-make-clang-mt-ilp64-zen5-static"
+              },
+              {
+                "type": "build",
+                "name": "linux-make-clang-mt-ilp64-zen5-static-check"
+              }
+            ]
+          },
+          {
+            "name": "linux-make-clang-mt-ilp64-zen5-shared",
+            "description": "Build and check multithreaded shared BLIS for zen5 configuration on Linux",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "linux-make-clang-mt-ilp64-zen5-shared"
+              },
+              {
+                "type": "build",
+                "name": "linux-make-clang-mt-ilp64-zen5-shared"
+              },
+              {
+                "type": "build",
+                "name": "linux-make-clang-mt-ilp64-zen5-shared-check"
               }
             ]
           }

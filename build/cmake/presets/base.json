@@ -46,6 +46,13 @@
       }
     },
     {
+      "name": "zen5",
+      "hidden": true,
+      "cacheVariables": {
+        "BLIS_CONFIG_FAMILY": "zen5"
+      }
+    },
+    {
       "name": "static",
       "hidden": true,
       "cacheVariables": {
