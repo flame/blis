@@ -52,6 +52,8 @@ void PASTEMAC(opname,_check) \
 GENPROT( gemv )
 GENPROT( hemv )
 GENPROT( symv )
+GENPROT( shmv )
+GENPROT( skmv )
 
 
 #undef  GENPROT
@@ -68,6 +70,8 @@ void PASTEMAC(opname,_check) \
 GENPROT( ger )
 GENPROT( her2 )
 GENPROT( syr2 )
+GENPROT( shr2 )
+GENPROT( skr2 )
 
 
 #undef  GENPROT

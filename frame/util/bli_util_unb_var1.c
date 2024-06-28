@@ -182,6 +182,122 @@ void PASTEMAC(ch,varname) \
 INSERT_GENTFUNC_BASIC( mksymm_unb_var1 )
 
 
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype, ctype_r, ch, chr, varname ) \
+\
+void PASTEMAC(ch,varname) \
+     ( \
+       uplo_t  uploa, \
+       dim_t   m, \
+       ctype*  a, inc_t rs_a, inc_t cs_a, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
+     ) \
+{ \
+	ctype_r* zeror     = PASTEMAC(chr,0); \
+	ctype*   minus_one = PASTEMAC(ch,m1); \
+	doff_t   diagoffa; \
+\
+	/* If the dimension is zero, return early. */ \
+	if ( bli_zero_dim1( m ) ) return; \
+\
+	/* In order to avoid the main diagonal, we must nudge the diagonal either
+	   up or down by one, depending on which triangle is currently stored. */ \
+	if        ( bli_is_upper( uploa ) )   diagoffa =  1; \
+	else /*if ( bli_is_lower( uploa ) )*/ diagoffa = -1; \
+\
+	/* We will be reflecting the stored region over the diagonal into the
+	   unstored region, so a transposition is necessary. Furthermore, since
+	   we are creating a Hermitian matrix, we must also conjugate. */ \
+	PASTEMAC(ch,scal2m,BLIS_TAPI_EX_SUF) \
+	( \
+	  diagoffa, \
+	  BLIS_NONUNIT_DIAG, \
+	  uploa, \
+	  BLIS_CONJ_TRANSPOSE, \
+	  m, \
+	  m, \
+	  minus_one, \
+	  a, rs_a, cs_a, \
+	  a, rs_a, cs_a, \
+	  cntx, \
+	  rntm  \
+	); \
+\
+	/* Set the real parts of the diagonal elements to zero. */ \
+	PASTEMAC(ch,setrd,BLIS_TAPI_EX_SUF) \
+	( \
+	  0, \
+	  m, \
+	  m, \
+	  zeror, \
+	  a, rs_a, cs_a, \
+	  cntx, \
+	  rntm  \
+	); \
+}
+
+INSERT_GENTFUNCR_BASIC( mkskewherm_unb_var1 )
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, varname ) \
+\
+void PASTEMAC(ch,varname) \
+     ( \
+       uplo_t  uploa, \
+       dim_t   m, \
+       ctype*  a, inc_t rs_a, inc_t cs_a, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
+     ) \
+{ \
+	doff_t diagoffa; \
+	ctype* zero      = PASTEMAC(ch,0); \
+	ctype* minus_one = PASTEMAC(ch,m1); \
+\
+	/* If the dimension is zero, return early. */ \
+	if ( bli_zero_dim1( m ) ) return; \
+\
+	/* In order to avoid the main diagonal, we must nudge the diagonal either
+	   up or down by one, depending on which triangle is currently stored. */ \
+	if        ( bli_is_upper( uploa ) )   diagoffa =  1; \
+	else /*if ( bli_is_lower( uploa ) )*/ diagoffa = -1; \
+\
+	/* We will be reflecting the stored region over the diagonal into the
+	   unstored region, so a transposition is necessary. */ \
+	PASTEMAC(ch,scal2m,BLIS_TAPI_EX_SUF) \
+	( \
+	  diagoffa, \
+	  BLIS_NONUNIT_DIAG, \
+	  uploa, \
+	  BLIS_TRANSPOSE, \
+	  m, \
+	  m, \
+	  minus_one, \
+	  a, rs_a, cs_a, \
+	  a, rs_a, cs_a, \
+	  cntx, \
+	  rntm  \
+	); \
+\
+	/* Set the diagonal elements to zero. */ \
+	PASTEMAC(ch,setd,BLIS_TAPI_EX_SUF) \
+	( \
+	  BLIS_NO_CONJUGATE, \
+	  0, \
+	  m, \
+	  m, \
+	  zero, \
+	  a, rs_a, cs_a, \
+	  cntx, \
+	  rntm  \
+	); \
+}
+
+INSERT_GENTFUNC_BASIC( mkskewsymm_unb_var1 )
+
+
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
 \

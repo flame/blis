@@ -51,7 +51,8 @@ void bli_ddotxaxpyf_penryn_int
              conj_t  conjx,
              dim_t   m,
              dim_t   b_n,
-       const void*   alpha,
+       const void*   alphaw,
+       const void*   alphax,
        const void*   a, inc_t inca, inc_t lda,
        const void*   w, inc_t incw,
        const void*   x, inc_t incx,
@@ -61,13 +62,14 @@ void bli_ddotxaxpyf_penryn_int
        const cntx_t* cntx
      )
 {
-	const double*  restrict alpha_cast = alpha;
-	const double*  restrict a_cast     = a;
-	const double*  restrict w_cast     = w;
-	const double*  restrict x_cast     = x;
-	const double*  restrict beta_cast  = beta;
-	      double*  restrict y_cast     = y;
-	      double*  restrict z_cast     = z;
+	const double*  restrict alphaw_cast = alphaw;
+	const double*  restrict alphax_cast = alphax;
+	const double*  restrict a_cast      = a;
+	const double*  restrict w_cast      = w;
+	const double*  restrict x_cast      = x;
+	const double*  restrict beta_cast   = beta;
+	      double*  restrict y_cast      = y;
+	      double*  restrict z_cast      = z;
 
 	const dim_t             n_elem_per_reg = 2;
 	const dim_t             n_iter_unroll  = 2;
@@ -152,7 +154,8 @@ void bli_ddotxaxpyf_penryn_int
 		  conjx,
 		  m,
 		  b_n,
-		  alpha_cast,
+		  alphaw_cast,
+		  alphax_cast,
 		  a_cast, inca, lda,
 		  w_cast, incw,
 		  x_cast, incx,
@@ -182,10 +185,10 @@ void bli_ddotxaxpyf_penryn_int
 	chi2 = *(x_cast + 2*incx);
 	chi3 = *(x_cast + 3*incx);
 
-	PASTEMAC(d,d,scals)( *alpha_cast, chi0 );
-	PASTEMAC(d,d,scals)( *alpha_cast, chi1 );
-	PASTEMAC(d,d,scals)( *alpha_cast, chi2 );
-	PASTEMAC(d,d,scals)( *alpha_cast, chi3 );
+	PASTEMAC(d,d,scals)( *alphax_cast, chi0 );
+	PASTEMAC(d,d,scals)( *alphax_cast, chi1 );
+	PASTEMAC(d,d,scals)( *alphax_cast, chi2 );
+	PASTEMAC(d,d,scals)( *alphax_cast, chi3 );
 
 	PASTEMAC(d,set0s)( rho0 );
 	PASTEMAC(d,set0s)( rho1 );
@@ -341,7 +344,7 @@ void bli_ddotxaxpyf_penryn_int
 	rho1v.d[1] = rho3;
 
 	betav.v  = _mm_loaddup_pd( ( double* ) beta_cast );
-	alphav.v = _mm_loaddup_pd( ( double* ) alpha_cast );
+	alphav.v = _mm_loaddup_pd( ( double* ) alphaw_cast );
 
 	psi0v.v = _mm_load_pd( ( double* )(y_cast + 0*n_elem_per_reg ) );
 	psi1v.v = _mm_load_pd( ( double* )(y_cast + 1*n_elem_per_reg ) );

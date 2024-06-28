@@ -39,10 +39,10 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
+       struc_t struc, \
        uplo_t  uplo, \
        conj_t  conja, \
        conj_t  conjx, \
-       conj_t  conjh, \
        dim_t   m, \
        ctype*  alpha, \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
@@ -69,25 +69,37 @@ void PASTEMAC(ch,varname) \
 	dim_t   n_ahead; \
 	inc_t   rs_at, cs_at; \
 	conj_t  conj0, conj1; \
+	ctype   alpha0, alpha1; \
+\
+	rs_at = rs_a; \
+	cs_at = cs_a; \
+\
+	conj0 = conja; \
+	conj1 = conja; \
+\
+	PASTEMAC(ch,copys)( *alpha, alpha0 ); \
+	PASTEMAC(ch,copys)( *alpha, alpha1 ); \
 \
 	/* The algorithm will be expressed in terms of the lower triangular case;
 	   the upper triangular case is supported by swapping the row and column
 	   strides of A and toggling some conj parameters. */ \
 	if      ( bli_is_lower( uplo ) ) \
 	{ \
-		rs_at = rs_a; \
-		cs_at = cs_a; \
+		if ( bli_is_hermitian( struc ) || bli_is_skew_hermitian( struc ) ) \
+			bli_toggle_conj( &conj0 ); \
 \
-		conj0 = bli_apply_conj( conjh, conja ); \
-		conj1 = conja; \
+		if ( bli_is_skew_symmetric( struc ) || bli_is_skew_hermitian( struc ) ) \
+			PASTEMAC(ch,neg2s)( *alpha, alpha0 ); \
 	} \
 	else /* if ( bli_is_upper( uplo ) ) */ \
 	{ \
-		rs_at = cs_a; \
-		cs_at = rs_a; \
+		bli_swap_incs( &rs_at, &cs_at ); \
 \
-		conj0 = conja; \
-		conj1 = bli_apply_conj( conjh, conja ); \
+		if ( bli_is_hermitian( struc ) || bli_is_skew_hermitian( struc ) ) \
+			bli_toggle_conj( &conj1 ); \
+\
+		if ( bli_is_skew_symmetric( struc ) || bli_is_skew_hermitian( struc ) ) \
+			PASTEMAC(ch,neg2s)( *alpha, alpha1 ); \
 	} \
 \
 	/* If beta is zero, use setv. Otherwise, scale by beta. */ \
@@ -133,26 +145,31 @@ void PASTEMAC(ch,varname) \
 		psi1     = y + (i  )*incy; \
 		y2       = y + (i+1)*incy; \
 \
-		/* Apply conjx to chi1 and and scale by alpha. */ \
-		PASTEMAC(ch,copycjs)( conjx, *chi1, conjx_chi1 ); \
-		PASTEMAC(ch,scal2s)( *alpha, conjx_chi1, alpha_chi1 ); \
-\
 		/* For hemv, explicitly set the imaginary component of alpha11 to
 		   zero. */ \
 		PASTEMAC(ch,copycjs)( conja, *alpha11, alpha11_temp ); \
-		if ( bli_is_conj( conjh ) ) \
+		if ( bli_is_hermitian( struc ) ) \
 			PASTEMAC(ch,seti0s)( alpha11_temp ); \
+		if ( bli_is_skew_hermitian( struc ) ) \
+			PASTEMAC(ch,setr0s)( alpha11_temp ); \
+		if ( bli_is_skew_symmetric( struc ) ) \
+			PASTEMAC(ch,set0s)( alpha11_temp ); \
 \
 		/* psi1 = psi1 + alpha * alpha11 * chi1; */ \
+		PASTEMAC(ch,scal2s)( *alpha, conjx_chi1, alpha_chi1 ); \
 		PASTEMAC(ch,axpys)( alpha_chi1, alpha11_temp, *psi1 ); \
 \
-		/* psi1 = psi1 + alpha * a21' * x2; */ \
+		/* Apply conjx to chi1 and and scale by alpha. */ \
+		PASTEMAC(ch,copycjs)( conjx, *chi1, conjx_chi1 ); \
+		PASTEMAC(ch,scal2s)( alpha1, conjx_chi1, alpha_chi1 ); \
+\
+		/* psi1 = psi1 +/- alpha * a21' * x2; */ \
 		kfp_dv \
 		( \
 		  conj0, \
 		  conjx, \
 		  n_ahead, \
-		  alpha, \
+		  &alpha0, \
 		  a21, rs_at, \
 		  x2,  incx, \
 		  one, \
@@ -160,7 +177,7 @@ void PASTEMAC(ch,varname) \
 		  cntx  \
 		); \
 \
-		/* y2 = y2 + alpha * a21 * chi1; */ \
+		/* y2 = y2 +/- alpha * a21 * chi1; */ \
 		kfp_av \
 		( \
 		  conj1, \

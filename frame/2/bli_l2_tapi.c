@@ -176,7 +176,7 @@ INSERT_GENTFUNC_BASIC( ger, ger, ger_unb_var1, ger_unb_var2 )
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, ftname, conjh, rvarname, cvarname ) \
+#define GENTFUNC( ctype, ch, opname, ftname, struca, rvarname, cvarname ) \
 \
 void PASTEMAC(ch,opname,EX_SUF) \
      ( \
@@ -234,10 +234,10 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	   level-1f kernel to implement the current operation. */ \
 	f \
 	( \
+	  struca, \
 	  uploa, \
 	  conja, \
 	  conjx, \
-	  conjh, /* used by variants to distinguish hemv from symv */ \
 	  m, \
 	  ( ctype* )alpha, \
 	  ( ctype* )a, rs_a, cs_a, \
@@ -248,8 +248,10 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC( hemv, hemv, BLIS_CONJUGATE,    hemv_unf_var1, hemv_unf_var3 )
-INSERT_GENTFUNC_BASIC( symv, hemv, BLIS_NO_CONJUGATE, hemv_unf_var1, hemv_unf_var3 )
+INSERT_GENTFUNC_BASIC( hemv, hemv, BLIS_HERMITIAN,      hemv_unf_var1, hemv_unf_var3 )
+INSERT_GENTFUNC_BASIC( symv, hemv, BLIS_SYMMETRIC,      hemv_unf_var1, hemv_unf_var3 )
+INSERT_GENTFUNC_BASIC( shmv, hemv, BLIS_SKEW_HERMITIAN, hemv_unf_var1, hemv_unf_var3 )
+INSERT_GENTFUNC_BASIC( skmv, hemv, BLIS_SKEW_SYMMETRIC, hemv_unf_var1, hemv_unf_var3 )
 
 
 #undef  GENTFUNCR
@@ -374,7 +376,7 @@ INSERT_GENTFUNC_BASIC( syr, her, BLIS_NO_CONJUGATE, her_unb_var1, her_unb_var2 )
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, ftname, conjh, rvarname, cvarname ) \
+#define GENTFUNC( ctype, ch, opname, ftname, struca, rvarname, cvarname ) \
 \
 void PASTEMAC(ch,opname,EX_SUF) \
      ( \
@@ -418,10 +420,10 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	   level-1f kernel to implement the current operation. */ \
 	f \
 	( \
+	  struca, \
 	  uploa, \
 	  conjx, \
 	  conjy, \
-	  conjh, \
 	  m, \
 	  ( ctype* )alpha, \
 	  ( ctype* )x, incx, \
@@ -431,8 +433,10 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC( her2, her2, BLIS_CONJUGATE,    her2_unf_var1, her2_unf_var4 )
-INSERT_GENTFUNC_BASIC( syr2, her2, BLIS_NO_CONJUGATE, her2_unf_var1, her2_unf_var4 )
+INSERT_GENTFUNC_BASIC( her2, her2, BLIS_HERMITIAN,      her2_unf_var1, her2_unf_var4 )
+INSERT_GENTFUNC_BASIC( syr2, her2, BLIS_SYMMETRIC,      her2_unf_var1, her2_unf_var4 )
+INSERT_GENTFUNC_BASIC( shr2, her2, BLIS_SKEW_HERMITIAN, her2_unf_var1, her2_unf_var4 )
+INSERT_GENTFUNC_BASIC( skr2, her2, BLIS_SKEW_SYMMETRIC, her2_unf_var1, her2_unf_var4 )
 
 
 #undef  GENTFUNC

@@ -70,7 +70,8 @@ void libblis_test_dotxaxpyf_experiment
 void libblis_test_dotxaxpyf_impl
      (
        iface_t   iface,
-       obj_t*    alpha,
+       obj_t*    alphaw,
+       obj_t*    alphax,
        obj_t*    at,
        obj_t*    a,
        obj_t*    w,
@@ -84,7 +85,8 @@ void libblis_test_dotxaxpyf_impl
 void libblis_test_dotxaxpyf_check
      (
        test_params_t* params,
-       obj_t*         alpha,
+       obj_t*         alphaw,
+       obj_t*         alphax,
        obj_t*         at,
        obj_t*         a,
        obj_t*         w,
@@ -177,7 +179,7 @@ void libblis_test_dotxaxpyf_experiment
 
 	conj_t       conjat, conja, conjw, conjx;
 
-	obj_t        alpha, at, a, w, x, beta, y, z;
+	obj_t        alphaw, alphax, at, a, w, x, beta, y, z;
 	obj_t        y_save, z_save;
 
 	cntx_t*      cntx;
@@ -206,7 +208,8 @@ void libblis_test_dotxaxpyf_experiment
 	bli_param_map_char_to_blis_conj( pc_str[3], &conjx );
 
 	// Create test scalars.
-	bli_obj_scalar_init_detached( datatype, &alpha );
+	bli_obj_scalar_init_detached( datatype, &alphaw );
+	bli_obj_scalar_init_detached( datatype, &alphax );
 	bli_obj_scalar_init_detached( datatype, &beta );
 
 	// Create test operands (vectors and/or matrices).
@@ -222,12 +225,14 @@ void libblis_test_dotxaxpyf_experiment
 	// Set alpha.
 	if ( bli_obj_is_real( &y ) )
 	{
-		bli_setsc(  1.2,  0.0, &alpha );
+		bli_setsc(  1.2,  0.0, &alphaw );
+		bli_setsc(  0.8,  0.0, &alphax );
 		bli_setsc( -1.0,  0.0, &beta );
 	}
 	else
 	{
-		bli_setsc(  1.2,  0.1, &alpha );
+		bli_setsc(  1.2,  0.1, &alphaw );
+		bli_setsc(  0.8,  0.1, &alphax );
 		bli_setsc( -1.0, -0.1, &beta );
 	}
 
@@ -260,7 +265,7 @@ void libblis_test_dotxaxpyf_experiment
 		time = bli_clock();
 
 		libblis_test_dotxaxpyf_impl( iface,
-		                             &alpha, &at, &a, &w, &x, &beta, &y, &z,
+		                             &alphaw, &alphax, &at, &a, &w, &x, &beta, &y, &z,
 		                             cntx );
 
 		time_min = bli_clock_min_diff( time_min, time );
@@ -271,7 +276,7 @@ void libblis_test_dotxaxpyf_experiment
 	if ( bli_obj_is_complex( &y ) ) *perf *= 4.0;
 
 	// Perform checks.
-	libblis_test_dotxaxpyf_check( params, &alpha, &at, &a, &w, &x, &beta, &y, &z, &y_save, &z_save, resid );
+	libblis_test_dotxaxpyf_check( params, &alphaw, &alphax, &at, &a, &w, &x, &beta, &y, &z, &y_save, &z_save, resid );
 
 	// Zero out performance and residual if either output vector is empty.
 	libblis_test_check_empty_problem( &y, perf, resid );
@@ -292,7 +297,8 @@ void libblis_test_dotxaxpyf_experiment
 void libblis_test_dotxaxpyf_impl
      (
        iface_t   iface,
-       obj_t*    alpha,
+       obj_t*    alphaw,
+       obj_t*    alphax,
        obj_t*    at,
        obj_t*    a,
        obj_t*    w,
@@ -306,7 +312,7 @@ void libblis_test_dotxaxpyf_impl
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bli_dotxaxpyf_ex( alpha, at, a, w, x, beta, y, z, cntx, NULL );
+		bli_dotxaxpyf_ex( alphaw, alphax, at, a, w, x, beta, y, z, cntx, NULL );
 		break;
 
 		default:
@@ -319,7 +325,8 @@ void libblis_test_dotxaxpyf_impl
 void libblis_test_dotxaxpyf_check
      (
        test_params_t* params,
-       obj_t*         alpha,
+       obj_t*         alphaw,
+       obj_t*         alphax,
        obj_t*         at,
        obj_t*         a,
        obj_t*         w,
@@ -356,13 +363,13 @@ void libblis_test_dotxaxpyf_check
 	// - z is randomized.
 	// - at is an alias to a.
 	// Note:
-	// - alpha and beta should have a non-zero imaginary component in the
+	// - alphaw, alphax, and beta should have a non-zero imaginary component in the
 	//   complex cases in order to more fully exercise the implementation.
 	//
 	// Under these conditions, we assume that the implementation for
 	//
-	//   y := beta * y_orig + alpha * conjat(A^T) * conjw(w)
-	//   z :=        z_orig + alpha * conja(A)    * conjx(x)
+	//   y := beta * y_orig + alphaw * conjat(A^T) * conjw(w)
+	//   z :=        z_orig + alphax * conja(A)    * conjx(x)
 	//
 	// is functioning correctly if
 	//
@@ -391,7 +398,7 @@ void libblis_test_dotxaxpyf_check
 		bli_acquire_mpart_l2r( BLIS_SUBPART1, i, 1, at, &a1 );
 		bli_acquire_vpart_f2b( BLIS_SUBPART1, i, 1, &v, &psi1 );
 
-		bli_dotxv( alpha, &a1, w, beta, &psi1 );
+		bli_dotxv( alphaw, &a1, w, beta, &psi1 );
 	}
 
 	// q := q + alpha * conja(a) * conjx(x)
@@ -401,7 +408,7 @@ void libblis_test_dotxaxpyf_check
 		bli_acquire_vpart_f2b( BLIS_SUBPART1, i, 1, x, &chi1 );
 
 		bli_copysc( &chi1, &alpha_chi1 );
-		bli_mulsc( alpha, &alpha_chi1 );
+		bli_mulsc( alphax, &alpha_chi1 );
 
 		bli_axpyv( &alpha_chi1, &a1, &q );
 	}

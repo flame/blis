@@ -310,6 +310,7 @@ void PASTEMAC(opname,EX_SUF) \
 	); \
 }
 
+GENFRONT( setrd )
 GENFRONT( setid )
 
 

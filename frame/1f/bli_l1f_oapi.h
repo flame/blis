@@ -90,7 +90,8 @@ GENTPROT( dotaxpyv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
-       const obj_t* alpha, \
+       const obj_t* alphaw, \
+       const obj_t* alphax, \
        const obj_t* at, \
        const obj_t* a, \
        const obj_t* w, \

@@ -67,6 +67,8 @@ typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
 
 INSERT_GENTDEF( mkherm )
 INSERT_GENTDEF( mksymm )
+INSERT_GENTDEF( mkskewherm )
+INSERT_GENTDEF( mkskewsymm )
 INSERT_GENTDEF( mktrim )
 
 // norm1v, normfv, normiv

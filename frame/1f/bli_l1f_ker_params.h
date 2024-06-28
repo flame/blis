@@ -78,7 +78,8 @@
              conj_t  conjx, \
              dim_t   m, \
              dim_t   b_n, \
-       const void*   alpha, \
+       const void*   alphaw, \
+       const void*   alphax, \
        const void*   a, inc_t inca, inc_t lda, \
        const void*   w, inc_t incw, \
        const void*   x, inc_t incx, \

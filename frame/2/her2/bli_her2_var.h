@@ -42,9 +42,7 @@
 \
 void PASTEMAC(opname) \
      ( \
-       conj_t  conjh, \
        obj_t*  alpha, \
-       obj_t*  alpha_conj, \
        obj_t*  x, \
        obj_t*  y, \
        obj_t*  c, \
@@ -75,10 +73,10 @@ GENPROT( her2_unf_var4 )
 \
 void PASTEMAC(ch,varname) \
      ( \
+       struc_t struc, \
        uplo_t  uplo, \
        conj_t  conjx, \
        conj_t  conjy, \
-       conj_t  conjh, \
        dim_t   m, \
        ctype*  alpha, \
        ctype*  x, inc_t incx, \

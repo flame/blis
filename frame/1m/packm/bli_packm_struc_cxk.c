@@ -86,6 +86,10 @@ void PASTEMAC(chc,chp,varname) \
 	ukr_t cxk_ker_id    = BLIS_PACKM_KER; \
 	ukr_t cxc_ker_id    = BLIS_PACKM_DIAG_KER; \
 \
+	ctypep* kappa_cast = ( ctypep* )kappa; \
+	ctypep  minus_kappa; \
+	PASTEMAC(chp,neg2s)( *kappa_cast, minus_kappa ); \
+\
 	if ( bli_is_1m_packed( schema ) ) \
 	{ \
 		cxk_ker_id = BLIS_PACKM_1ER_KER; \
@@ -95,7 +99,7 @@ void PASTEMAC(chc,chp,varname) \
 	{ \
 		ctypep_r kappa_r, kappa_i; \
 		( void )kappa_r; \
-		PASTEMAC(chp,gets)( *( ctypep* )kappa, kappa_r, kappa_i ); \
+		PASTEMAC(chp,gets)( *kappa_cast, kappa_r, kappa_i ); \
 		if ( PASTEMAC(chp_r,eq0)( kappa_i ) ) \
 		{ \
 			/* Treat the matrix as real with doubled strides. */ \
@@ -116,10 +120,10 @@ void PASTEMAC(chc,chp,varname) \
 		dt_p0 = bli_dt_proj_to_real( dt_p ); \
 	} \
 \
-	const void*           zero   = bli_obj_buffer_for_const( dt_p0, &BLIS_ZERO ); \
-	setv_ker_ft           f_setv = bli_cntx_get_ukr_dt( dt_p0, BLIS_SETV_KER, cntx ); \
-	packm_cxk_ker_ft      f_cxk  = bli_cntx_get_ukr2_dt( dt_c, dt_p, cxk_ker_id, cntx ); \
-	packm_cxc_diag_ker_ft f_cxc  = bli_cntx_get_ukr2_dt( dt_c, dt_p, cxc_ker_id, cntx ); \
+	const void*           zero       = bli_obj_buffer_for_const( dt_p0, &BLIS_ZERO ); \
+	setv_ker_ft           f_setv     = bli_cntx_get_ukr_dt( dt_p0, BLIS_SETV_KER, cntx ); \
+	packm_cxk_ker_ft      f_cxk      = bli_cntx_get_ukr2_dt( dt_c, dt_p, cxk_ker_id, cntx ); \
+	packm_cxc_diag_ker_ft f_cxc      = bli_cntx_get_ukr2_dt( dt_c, dt_p, cxc_ker_id, cntx ); \
 \
 	/* For general matrices, pack and return early */ \
 	if ( bli_is_general( strucc ) ) \
@@ -166,14 +170,20 @@ void PASTEMAC(chc,chp,varname) \
 		inc_t     ldc10_r     = ldc_r; \
 		inc_t     incc10      = incc; \
 		inc_t     ldc10       = ldc; \
+		ctypep*   kappa_use   = kappa_cast; \
 \
 		if ( bli_is_upper( uploc ) ) \
 		{ \
 			bli_reflect_to_stored_part( diagoffc, c10, incc10_r, ldc10_r ); \
 			bli_swap_incs(&incc10, &ldc10); \
 \
-			if ( bli_is_hermitian( strucc ) ) \
+			if ( bli_is_hermitian( strucc ) || \
+			     bli_is_skew_hermitian( strucc ) ) \
 				bli_toggle_conj( &conjc10 ); \
+\
+			if ( bli_is_skew_symmetric( strucc ) || \
+			     bli_is_skew_hermitian( strucc ) ) \
+				kappa_use = &minus_kappa; \
 		} \
 \
 		/* If we are referencing the unstored part of a triangular matrix,
@@ -200,7 +210,7 @@ void PASTEMAC(chc,chp,varname) \
 			  panel_bcast, \
 			  p10_len, \
 			  p10_len_max, \
-			  kappa, \
+			  kappa_use, \
 			  c10, incc10, ldc10, \
 			  p10,         ldp, \
 			  params, \
@@ -256,14 +266,20 @@ void PASTEMAC(chc,chp,varname) \
 		inc_t     ldc12_r     = ldc_r; \
 		inc_t     incc12      = incc; \
 		inc_t     ldc12       = ldc; \
+		ctypep*   kappa_use   = kappa_cast; \
 \
 		if ( bli_is_lower( uploc ) ) \
 		{ \
 			bli_reflect_to_stored_part( diagoffc - i, c12, incc12_r, ldc12_r ); \
 			bli_swap_incs(&incc12, &ldc12); \
 \
-			if ( bli_is_hermitian( strucc ) ) \
+			if ( bli_is_hermitian( strucc ) || \
+			     bli_is_skew_hermitian( strucc ) ) \
 				bli_toggle_conj( &conjc12 ); \
+\
+			if ( bli_is_skew_symmetric( strucc ) || \
+			     bli_is_skew_hermitian( strucc ) ) \
+				kappa_use = &minus_kappa; \
 		} \
 \
 		/* If we are referencing the unstored part of a triangular matrix,
@@ -290,7 +306,7 @@ void PASTEMAC(chc,chp,varname) \
 			  panel_bcast, \
 			  p12_len, \
 			  p12_len_max, \
-			  kappa, \
+			  kappa_use, \
 			  c12, incc12, ldc12, \
 			  p12,         ldp, \
 			  params, \

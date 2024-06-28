@@ -39,11 +39,13 @@
 
 #define bli_scopycjris( conj, xr, xi, yr, yi ) \
 { \
+	(void)conj; \
 	bli_scopyris( (xr), (xi), (yr), (yi) ); \
 }
 
 #define bli_dcopycjris( conj, xr, xi, yr, yi ) \
 { \
+	(void)conj; \
 	bli_dcopyris( (xr), (xi), (yr), (yi) ); \
 }
 
@@ -63,6 +65,7 @@
 
 #define bli_icopycjris( conj, xr, xi, yr, yi ) \
 { \
+	(void)conj; \
 	bli_icopyris( (xr), (xi), (yr), (yi) ); \
 }
 

@@ -54,7 +54,8 @@ void bli_sdotxaxpyf_sifive_x280_asm(
              conj_t           conjx,
              dim_t            m,
              dim_t            b,
-       const void*   restrict alpha_,
+       const void*   restrict alphaw_,
+       const void*   restrict alphax_,
        const void*   restrict a_, inc_t inca, inc_t lda,
        const void*   restrict w_, inc_t incw,
        const void*   restrict x_, inc_t incx,
@@ -68,7 +69,8 @@ void bli_sdotxaxpyf_sifive_x280_asm(
   (void)conjw;
   (void)conjx;
   (void)cntx;
-  const float *restrict alpha = alpha_;
+  const float *restrict alphaw = alphaw_;
+  const float *restrict alphax = alphax_;
   const float *restrict beta = beta_;
   const float *restrict a = a_;
   const float *restrict w = w_;
@@ -78,7 +80,7 @@ void bli_sdotxaxpyf_sifive_x280_asm(
 
   if (b == 0)
     return;
-  else if (m == 0 || *alpha == 0.f) {
+  else if (m == 0 || (*alphaw == 0.f && *alphax == 0.f)) {
     // scale y by beta
     if (*beta == 0.f)
         bli_ssetv_sifive_x280_asm(BLIS_NO_CONJUGATE, b, beta, y, incy, NULL);
@@ -87,7 +89,8 @@ void bli_sdotxaxpyf_sifive_x280_asm(
     return;
   }
 
-  __asm__(FLT_LOAD "ft10, (%0)" : : "r"(alpha));
+  __asm__(FLT_LOAD "ft9, (%0)" : : "r"(alphaw));
+  __asm__(FLT_LOAD "ft10, (%0)" : : "r"(alphax));
   __asm__(FLT_LOAD "ft11, (%0)" : : "r"(beta));
   inca *= FLT_SIZE;
   lda *= FLT_SIZE;
@@ -246,14 +249,14 @@ void bli_sdotxaxpyf_sifive_x280_asm(
     __asm__("vfredusum.vs v0, v0, v31");
     __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
     if (*beta == 0.f) {
-      __asm__("vfmul.vf v0, v0, ft10");
+      __asm__("vfmul.vf v0, v0, ft9");
       __asm__(VSE "v0, (%0)" : : "r"(y));
     }
     else {
       __asm__(FLT_LOAD "ft0, (%0)" : : "r"(y));
       __asm__(FMUL "ft0, ft11, ft0");
       __asm__("vfmv.s.f v30, ft0");
-      __asm__("vfmacc.vf v30, ft10, v0");
+      __asm__("vfmacc.vf v30, ft9, v0");
       __asm__(VSE "v30, (%0)" : : "r"(y));
     }
     __asm__("add %0, %0, %1" : "+r"(y) : "r"(incy));
@@ -262,14 +265,14 @@ void bli_sdotxaxpyf_sifive_x280_asm(
     __asm__("vfredusum.vs v4, v4, v31");
     __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
     if (*beta == 0.f) {
-      __asm__("vfmul.vf v4, v4, ft10");
+      __asm__("vfmul.vf v4, v4, ft9");
       __asm__(VSE "v4, (%0)" : : "r"(y));
     }
     else {
       __asm__(FLT_LOAD "ft0, (%0)" : : "r"(y));
       __asm__(FMUL "ft0, ft11, ft0");
       __asm__("vfmv.s.f v30, ft0");
-      __asm__("vfmacc.vf v30, ft10, v4");
+      __asm__("vfmacc.vf v30, ft9, v4");
       __asm__(VSE "v30, (%0)" : : "r"(y));
     }
     __asm__("add %0, %0, %1" : "+r"(y) : "r"(incy));
@@ -278,14 +281,14 @@ void bli_sdotxaxpyf_sifive_x280_asm(
     __asm__("vfredusum.vs v8, v8, v31");
     __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
     if (*beta == 0.f) {
-      __asm__("vfmul.vf v8, v8, ft10");
+      __asm__("vfmul.vf v8, v8, ft9");
       __asm__(VSE "v8, (%0)" : : "r"(y));
     }
     else {
       __asm__(FLT_LOAD "ft0, (%0)" : : "r"(y));
       __asm__(FMUL "ft0, ft11, ft0");
       __asm__("vfmv.s.f v30, ft0");
-      __asm__("vfmacc.vf v30, ft10, v8");
+      __asm__("vfmacc.vf v30, ft9, v8");
       __asm__(VSE "v30, (%0)" : : "r"(y));
     }
     __asm__("add %0, %0, %1" : "+r"(y) : "r"(incy));
@@ -294,14 +297,14 @@ void bli_sdotxaxpyf_sifive_x280_asm(
     __asm__("vfredusum.vs v12, v12, v31");
     __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
     if (*beta == 0.f) {
-      __asm__("vfmul.vf v12, v12, ft10");
+      __asm__("vfmul.vf v12, v12, ft9");
       __asm__(VSE "v12, (%0)" : : "r"(y));
     }
     else {
       __asm__(FLT_LOAD "ft0, (%0)" : : "r"(y));
       __asm__(FMUL "ft0, ft11, ft0");
       __asm__("vfmv.s.f v30, ft0");
-      __asm__("vfmacc.vf v30, ft10, v12");
+      __asm__("vfmacc.vf v30, ft9, v12");
       __asm__(VSE "v30, (%0)" : : "r"(y));
     }
     __asm__("add %0, %0, %1" : "+r"(y) : "r"(incy));
@@ -310,14 +313,14 @@ void bli_sdotxaxpyf_sifive_x280_asm(
     __asm__("vfredusum.vs v16, v16, v31");
     __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
     if (*beta == 0.f) {
-      __asm__("vfmul.vf v16, v16, ft10");
+      __asm__("vfmul.vf v16, v16, ft9");
       __asm__(VSE "v16, (%0)" : : "r"(y));
     }
     else {
       __asm__(FLT_LOAD "ft0, (%0)" : : "r"(y));
       __asm__(FMUL "ft0, ft11, ft0");
       __asm__("vfmv.s.f v30, ft0");
-      __asm__("vfmacc.vf v30, ft10, v16");
+      __asm__("vfmacc.vf v30, ft9, v16");
       __asm__(VSE "v30, (%0)" : : "r"(y));
     }
     __asm__("add %0, %0, %1" : "+r"(y) : "r"(incy));
@@ -483,14 +486,14 @@ void bli_sdotxaxpyf_sifive_x280_asm(
       __asm__("vfredusum.vs v12, v12, v31");
       __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
       if (*beta == 0.f) {
-        __asm__("vfmul.vf v12, v12, ft10");
+        __asm__("vfmul.vf v12, v12, ft9");
         __asm__(VSE "v12, (%0)" : : "r"(y));
       }
       else {
         __asm__(FLT_LOAD "ft0, (%0)" : : "r"(y));
         __asm__(FMUL "ft0, ft11, ft0");
         __asm__("vfmv.s.f v30, ft0");
-        __asm__("vfmacc.vf v30, ft10, v12");
+        __asm__("vfmacc.vf v30, ft9, v12");
         __asm__(VSE "v30, (%0)" : : "r"(y));
       }
       __asm__("sub %0, %0, %1" : "+r"(y) : "r"(incy));
@@ -499,14 +502,14 @@ void bli_sdotxaxpyf_sifive_x280_asm(
       __asm__("vfredusum.vs v8, v8, v31");
       __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
       if (*beta == 0.f) {
-        __asm__("vfmul.vf v8, v8, ft10");
+        __asm__("vfmul.vf v8, v8, ft9");
         __asm__(VSE "v8, (%0)" : : "r"(y));
       }
       else {
         __asm__(FLT_LOAD "ft0, (%0)" : : "r"(y));
         __asm__(FMUL "ft0, ft11, ft0");
         __asm__("vfmv.s.f v30, ft0");
-        __asm__("vfmacc.vf v30, ft10, v8");
+        __asm__("vfmacc.vf v30, ft9, v8");
         __asm__(VSE "v30, (%0)" : : "r"(y));
       }
       __asm__("sub %0, %0, %1" : "+r"(y) : "r"(incy));
@@ -515,14 +518,14 @@ void bli_sdotxaxpyf_sifive_x280_asm(
       __asm__("vfredusum.vs v4, v4, v31");
       __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
       if (*beta == 0.f) {
-        __asm__("vfmul.vf v4, v4, ft10");
+        __asm__("vfmul.vf v4, v4, ft9");
         __asm__(VSE "v4, (%0)" : : "r"(y));
       }
       else {
         __asm__(FLT_LOAD "ft0, (%0)" : : "r"(y));
         __asm__(FMUL "ft0, ft11, ft0");
         __asm__("vfmv.s.f v30, ft0");
-        __asm__("vfmacc.vf v30, ft10, v4");
+        __asm__("vfmacc.vf v30, ft9, v4");
         __asm__(VSE "v30, (%0)" : : "r"(y));
       }
       __asm__("sub %0, %0, %1" : "+r"(y) : "r"(incy));
@@ -531,14 +534,14 @@ void bli_sdotxaxpyf_sifive_x280_asm(
       __asm__("vfredusum.vs v0, v0, v31");
       __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
       if (*beta == 0.f) {
-        __asm__("vfmul.vf v0, v0, ft10");
+        __asm__("vfmul.vf v0, v0, ft9");
         __asm__(VSE "v0, (%0)" : : "r"(y));
       }
       else {
         __asm__(FLT_LOAD "ft0, (%0)" : : "r"(y));
         __asm__(FMUL "ft0, ft11, ft0");
         __asm__("vfmv.s.f v30, ft0");
-        __asm__("vfmacc.vf v30, ft10, v0");
+        __asm__("vfmacc.vf v30, ft9, v0");
         __asm__(VSE "v30, (%0)" : : "r"(y));
       }
     }
@@ -569,7 +572,8 @@ void bli_ddotxaxpyf_sifive_x280_asm(
              conj_t           conjx,
              dim_t            m,
              dim_t            b,
-       const void*   restrict alpha_,
+       const void*   restrict alphaw_,
+       const void*   restrict alphax_,
        const void*   restrict a_, inc_t inca, inc_t lda,
        const void*   restrict w_, inc_t incw,
        const void*   restrict x_, inc_t incx,
@@ -583,7 +587,8 @@ void bli_ddotxaxpyf_sifive_x280_asm(
   (void)conjw;
   (void)conjx;
   (void)cntx;
-  const double *restrict alpha = alpha_;
+  const double *restrict alphaw = alphaw_;
+  const double *restrict alphax = alphax_;
   const double *restrict beta = beta_;
   const double *restrict a = a_;
   const double *restrict w = w_;
@@ -593,7 +598,7 @@ void bli_ddotxaxpyf_sifive_x280_asm(
 
   if (b == 0)
     return;
-  else if (m == 0 || *alpha == 0.) {
+  else if (m == 0 || (*alphaw == 0. && *alphax == 0.)) {
     // scale y by beta
     if (*beta == 0.)
         bli_dsetv_sifive_x280_asm(BLIS_NO_CONJUGATE, b, beta, y, incy, NULL);
@@ -602,7 +607,8 @@ void bli_ddotxaxpyf_sifive_x280_asm(
     return;
   }
 
-  __asm__(FLT_LOAD "ft10, (%0)" : : "r"(alpha));
+  __asm__(FLT_LOAD "ft9, (%0)" : : "r"(alphaw));
+  __asm__(FLT_LOAD "ft10, (%0)" : : "r"(alphax));
   __asm__(FLT_LOAD "ft11, (%0)" : : "r"(beta));
   inca *= FLT_SIZE;
   lda *= FLT_SIZE;
@@ -761,14 +767,14 @@ void bli_ddotxaxpyf_sifive_x280_asm(
     __asm__("vfredusum.vs v0, v0, v31");
     __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
     if (*beta == 0.) {
-      __asm__("vfmul.vf v0, v0, ft10");
+      __asm__("vfmul.vf v0, v0, ft9");
       __asm__(VSE "v0, (%0)" : : "r"(y));
     }
     else {
       __asm__(FLT_LOAD "ft0, (%0)" : : "r"(y));
       __asm__(FMUL "ft0, ft11, ft0");
       __asm__("vfmv.s.f v30, ft0");
-      __asm__("vfmacc.vf v30, ft10, v0");
+      __asm__("vfmacc.vf v30, ft9, v0");
       __asm__(VSE "v30, (%0)" : : "r"(y));
     }
     __asm__("add %0, %0, %1" : "+r"(y) : "r"(incy));
@@ -777,14 +783,14 @@ void bli_ddotxaxpyf_sifive_x280_asm(
     __asm__("vfredusum.vs v4, v4, v31");
     __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
     if (*beta == 0.) {
-      __asm__("vfmul.vf v4, v4, ft10");
+      __asm__("vfmul.vf v4, v4, ft9");
       __asm__(VSE "v4, (%0)" : : "r"(y));
     }
     else {
       __asm__(FLT_LOAD "ft0, (%0)" : : "r"(y));
       __asm__(FMUL "ft0, ft11, ft0");
       __asm__("vfmv.s.f v30, ft0");
-      __asm__("vfmacc.vf v30, ft10, v4");
+      __asm__("vfmacc.vf v30, ft9, v4");
       __asm__(VSE "v30, (%0)" : : "r"(y));
     }
     __asm__("add %0, %0, %1" : "+r"(y) : "r"(incy));
@@ -793,14 +799,14 @@ void bli_ddotxaxpyf_sifive_x280_asm(
     __asm__("vfredusum.vs v8, v8, v31");
     __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
     if (*beta == 0.) {
-      __asm__("vfmul.vf v8, v8, ft10");
+      __asm__("vfmul.vf v8, v8, ft9");
       __asm__(VSE "v8, (%0)" : : "r"(y));
     }
     else {
       __asm__(FLT_LOAD "ft0, (%0)" : : "r"(y));
       __asm__(FMUL "ft0, ft11, ft0");
       __asm__("vfmv.s.f v30, ft0");
-      __asm__("vfmacc.vf v30, ft10, v8");
+      __asm__("vfmacc.vf v30, ft9, v8");
       __asm__(VSE "v30, (%0)" : : "r"(y));
     }
     __asm__("add %0, %0, %1" : "+r"(y) : "r"(incy));
@@ -809,14 +815,14 @@ void bli_ddotxaxpyf_sifive_x280_asm(
     __asm__("vfredusum.vs v12, v12, v31");
     __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
     if (*beta == 0.) {
-      __asm__("vfmul.vf v12, v12, ft10");
+      __asm__("vfmul.vf v12, v12, ft9");
       __asm__(VSE "v12, (%0)" : : "r"(y));
     }
     else {
       __asm__(FLT_LOAD "ft0, (%0)" : : "r"(y));
       __asm__(FMUL "ft0, ft11, ft0");
       __asm__("vfmv.s.f v30, ft0");
-      __asm__("vfmacc.vf v30, ft10, v12");
+      __asm__("vfmacc.vf v30, ft9, v12");
       __asm__(VSE "v30, (%0)" : : "r"(y));
     }
     __asm__("add %0, %0, %1" : "+r"(y) : "r"(incy));
@@ -825,14 +831,14 @@ void bli_ddotxaxpyf_sifive_x280_asm(
     __asm__("vfredusum.vs v16, v16, v31");
     __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
     if (*beta == 0.) {
-      __asm__("vfmul.vf v16, v16, ft10");
+      __asm__("vfmul.vf v16, v16, ft9");
       __asm__(VSE "v16, (%0)" : : "r"(y));
     }
     else {
       __asm__(FLT_LOAD "ft0, (%0)" : : "r"(y));
       __asm__(FMUL "ft0, ft11, ft0");
       __asm__("vfmv.s.f v30, ft0");
-      __asm__("vfmacc.vf v30, ft10, v16");
+      __asm__("vfmacc.vf v30, ft9, v16");
       __asm__(VSE "v30, (%0)" : : "r"(y));
     }
     __asm__("add %0, %0, %1" : "+r"(y) : "r"(incy));
@@ -998,14 +1004,14 @@ void bli_ddotxaxpyf_sifive_x280_asm(
       __asm__("vfredusum.vs v12, v12, v31");
       __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
       if (*beta == 0.) {
-        __asm__("vfmul.vf v12, v12, ft10");
+        __asm__("vfmul.vf v12, v12, ft9");
         __asm__(VSE "v12, (%0)" : : "r"(y));
       }
       else {
         __asm__(FLT_LOAD "ft0, (%0)" : : "r"(y));
         __asm__(FMUL "ft0, ft11, ft0");
         __asm__("vfmv.s.f v30, ft0");
-        __asm__("vfmacc.vf v30, ft10, v12");
+        __asm__("vfmacc.vf v30, ft9, v12");
         __asm__(VSE "v30, (%0)" : : "r"(y));
       }
       __asm__("sub %0, %0, %1" : "+r"(y) : "r"(incy));
@@ -1014,14 +1020,14 @@ void bli_ddotxaxpyf_sifive_x280_asm(
       __asm__("vfredusum.vs v8, v8, v31");
       __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
       if (*beta == 0.) {
-        __asm__("vfmul.vf v8, v8, ft10");
+        __asm__("vfmul.vf v8, v8, ft9");
         __asm__(VSE "v8, (%0)" : : "r"(y));
       }
       else {
         __asm__(FLT_LOAD "ft0, (%0)" : : "r"(y));
         __asm__(FMUL "ft0, ft11, ft0");
         __asm__("vfmv.s.f v30, ft0");
-        __asm__("vfmacc.vf v30, ft10, v8");
+        __asm__("vfmacc.vf v30, ft9, v8");
         __asm__(VSE "v30, (%0)" : : "r"(y));
       }
       __asm__("sub %0, %0, %1" : "+r"(y) : "r"(incy));
@@ -1030,14 +1036,14 @@ void bli_ddotxaxpyf_sifive_x280_asm(
       __asm__("vfredusum.vs v4, v4, v31");
       __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
       if (*beta == 0.) {
-        __asm__("vfmul.vf v4, v4, ft10");
+        __asm__("vfmul.vf v4, v4, ft9");
         __asm__(VSE "v4, (%0)" : : "r"(y));
       }
       else {
         __asm__(FLT_LOAD "ft0, (%0)" : : "r"(y));
         __asm__(FMUL "ft0, ft11, ft0");
         __asm__("vfmv.s.f v30, ft0");
-        __asm__("vfmacc.vf v30, ft10, v4");
+        __asm__("vfmacc.vf v30, ft9, v4");
         __asm__(VSE "v30, (%0)" : : "r"(y));
       }
       __asm__("sub %0, %0, %1" : "+r"(y) : "r"(incy));
@@ -1046,14 +1052,14 @@ void bli_ddotxaxpyf_sifive_x280_asm(
       __asm__("vfredusum.vs v0, v0, v31");
       __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
       if (*beta == 0.) {
-        __asm__("vfmul.vf v0, v0, ft10");
+        __asm__("vfmul.vf v0, v0, ft9");
         __asm__(VSE "v0, (%0)" : : "r"(y));
       }
       else {
         __asm__(FLT_LOAD "ft0, (%0)" : : "r"(y));
         __asm__(FMUL "ft0, ft11, ft0");
         __asm__("vfmv.s.f v30, ft0");
-        __asm__("vfmacc.vf v30, ft10, v0");
+        __asm__("vfmacc.vf v30, ft9, v0");
         __asm__(VSE "v30, (%0)" : : "r"(y));
       }
     }
@@ -1089,7 +1095,8 @@ void bli_cdotxaxpyf_sifive_x280_asm
              conj_t           conjx,
              dim_t            m,
              dim_t            b,
-       const void*   restrict alpha_,
+       const void*   restrict alphaw_,
+       const void*   restrict alphax_,
        const void*   restrict a_, inc_t inca, inc_t lda,
        const void*   restrict w_, inc_t incw,
        const void*   restrict x_, inc_t incx,
@@ -1100,17 +1107,18 @@ void bli_cdotxaxpyf_sifive_x280_asm
      )
 {
     (void)cntx;
-    const scomplex *restrict alpha = alpha_;
+    const scomplex *restrict alphaw = alphaw_;
+    const scomplex *restrict alphax = alphax_;
     const scomplex *restrict beta = beta_;
     const scomplex *restrict a = a_;
     const scomplex *restrict w = w_;
     const scomplex *restrict x = x_;
     scomplex *restrict y = y_;
     scomplex *restrict z = z_;
-    
+
     if (b == 0)
         return;
-    else if (m == 0 || (alpha->real == 0.f && alpha->imag == 0.f)) {
+    else if (m == 0 || (alphaw->real == 0.f && alphaw->imag == 0.f && alphax->real == 0.f && alphax->imag == 0.f)) {
         // scale y by beta
         if (beta->real == 0.f && beta->imag == 0.f)
             bli_csetv_sifive_x280_asm(BLIS_NO_CONJUGATE, b, beta, y, incy, NULL);
@@ -1119,10 +1127,12 @@ void bli_cdotxaxpyf_sifive_x280_asm
         return;
     }
 
-    // use ft0-ft9 to store 5 entries of x, ft10-ft11 to store alpha,
-    // and fa6-fa7 to store beta
-    __asm__(FLT_LOAD "ft10, (%0)" : : "r"(alpha));
-    __asm__(FLT_LOAD "ft11, %1(%0)" : : "r"(alpha), "I"(FLT_SIZE));
+    // use ft0-ft9 to store 5 entries of x, fa4-fa5 to store alphaw,
+    // ft10-ft11 to store alphax, and fa6-fa7 to store beta
+    __asm__(FLT_LOAD "fa4, (%0)" : : "r"(alphaw));
+    __asm__(FLT_LOAD "fa5, %1(%0)" : : "r"(alphaw), "I"(FLT_SIZE));
+    __asm__(FLT_LOAD "ft10, (%0)" : : "r"(alphax));
+    __asm__(FLT_LOAD "ft11, %1(%0)" : : "r"(alphax), "I"(FLT_SIZE));
     __asm__(FLT_LOAD "fa6, (%0)" : : "r"(beta));
     __asm__(FLT_LOAD "fa7, %1(%0)" : : "r"(beta), "I"(FLT_SIZE));
     // Reduce to case when A^T is not conjugated, then conjugate
@@ -1499,10 +1509,10 @@ void bli_cdotxaxpyf_sifive_x280_asm
         __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
         if (beta->real == 0.f && beta->imag == 0.f) {
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmul_vf(v28, v29, v0, v2, ft10, ft11);
+            vcmul_vf(v28, v29, v0, v2, fa4, fa5);
           }
           else {
-            vcmul_vf_conj(v28, v29, v0, v2, ft10, ft11);
+            vcmul_vf_conj(v28, v29, v0, v2, fa4, fa5);
           }
         }
         else {
@@ -1512,10 +1522,10 @@ void bli_cdotxaxpyf_sifive_x280_asm
           __asm__("vfmv.s.f v28, ft0");
           __asm__("vfmv.s.f v29, ft1");
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmacc_vf(v28, v29, ft10, ft11, v0, v2);
+            vcmacc_vf(v28, v29, fa4, fa5, v0, v2);
           }
           else {
-            vcmacc_vf_conj(v28, v29, ft10, ft11, v0, v2);
+            vcmacc_vf_conj(v28, v29, fa4, fa5, v0, v2);
           }
         }
         __asm__(VSE "v28, (%0)" : : "r"(y));
@@ -1529,10 +1539,10 @@ void bli_cdotxaxpyf_sifive_x280_asm
         __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
         if (beta->real == 0.f && beta->imag == 0.f) {
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmul_vf(v28, v29, v4, v6, ft10, ft11);
+            vcmul_vf(v28, v29, v4, v6, fa4, fa5);
           }
           else {
-            vcmul_vf_conj(v28, v29, v4, v6, ft10, ft11);
+            vcmul_vf_conj(v28, v29, v4, v6, fa4, fa5);
           }
         }
         else {
@@ -1542,10 +1552,10 @@ void bli_cdotxaxpyf_sifive_x280_asm
           __asm__("vfmv.s.f v28, ft0");
           __asm__("vfmv.s.f v29, ft1");
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmacc_vf(v28, v29, ft10, ft11, v4, v6);
+            vcmacc_vf(v28, v29, fa4, fa5, v4, v6);
           }
           else {
-            vcmacc_vf_conj(v28, v29, ft10, ft11, v4, v6);
+            vcmacc_vf_conj(v28, v29, fa4, fa5, v4, v6);
           }
         }
         __asm__(VSE "v28, (%0)" : : "r"(y));
@@ -1559,10 +1569,10 @@ void bli_cdotxaxpyf_sifive_x280_asm
         __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
         if (beta->real == 0.f && beta->imag == 0.f) {
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmul_vf(v28, v29, v8, v10, ft10, ft11);
+            vcmul_vf(v28, v29, v8, v10, fa4, fa5);
           }
           else {
-            vcmul_vf_conj(v28, v29, v8, v10, ft10, ft11);
+            vcmul_vf_conj(v28, v29, v8, v10, fa4, fa5);
           }
         }
         else {
@@ -1572,10 +1582,10 @@ void bli_cdotxaxpyf_sifive_x280_asm
           __asm__("vfmv.s.f v28, ft0");
           __asm__("vfmv.s.f v29, ft1");
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmacc_vf(v28, v29, ft10, ft11, v8, v10);
+            vcmacc_vf(v28, v29, fa4, fa5, v8, v10);
           }
           else {
-            vcmacc_vf_conj(v28, v29, ft10, ft11, v8, v10);
+            vcmacc_vf_conj(v28, v29, fa4, fa5, v8, v10);
           }
         }
         __asm__(VSE "v28, (%0)" : : "r"(y));
@@ -1589,10 +1599,10 @@ void bli_cdotxaxpyf_sifive_x280_asm
         __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
         if (beta->real == 0.f && beta->imag == 0.f) {
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmul_vf(v28, v29, v12, v14, ft10, ft11);
+            vcmul_vf(v28, v29, v12, v14, fa4, fa5);
           }
           else {
-            vcmul_vf_conj(v28, v29, v12, v14, ft10, ft11);
+            vcmul_vf_conj(v28, v29, v12, v14, fa4, fa5);
           }
         }
         else {
@@ -1602,10 +1612,10 @@ void bli_cdotxaxpyf_sifive_x280_asm
           __asm__("vfmv.s.f v28, ft0");
           __asm__("vfmv.s.f v29, ft1");
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmacc_vf(v28, v29, ft10, ft11, v12, v14);
+            vcmacc_vf(v28, v29, fa4, fa5, v12, v14);
           }
           else {
-            vcmacc_vf_conj(v28, v29, ft10, ft11, v12, v14);
+            vcmacc_vf_conj(v28, v29, fa4, fa5, v12, v14);
           }
         }
         __asm__(VSE "v28, (%0)" : : "r"(y));
@@ -1619,10 +1629,10 @@ void bli_cdotxaxpyf_sifive_x280_asm
         __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
         if (beta->real == 0.f && beta->imag == 0.f) {
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmul_vf(v28, v29, v16, v18, ft10, ft11);
+            vcmul_vf(v28, v29, v16, v18, fa4, fa5);
           }
           else {
-            vcmul_vf_conj(v28, v29, v16, v18, ft10, ft11);
+            vcmul_vf_conj(v28, v29, v16, v18, fa4, fa5);
           }
         }
         else {
@@ -1632,10 +1642,10 @@ void bli_cdotxaxpyf_sifive_x280_asm
           __asm__("vfmv.s.f v28, ft0");
           __asm__("vfmv.s.f v29, ft1");
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmacc_vf(v28, v29, ft10, ft11, v16, v18);
+            vcmacc_vf(v28, v29, fa4, fa5, v16, v18);
           }
           else {
-            vcmacc_vf_conj(v28, v29, ft10, ft11, v16, v18);
+            vcmacc_vf_conj(v28, v29, fa4, fa5, v16, v18);
           }
         }
         __asm__(VSE "v28, (%0)" : : "r"(y));
@@ -1971,10 +1981,10 @@ void bli_cdotxaxpyf_sifive_x280_asm
             __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
             if (beta->real == 0.f && beta->imag == 0.f) {
               if (conjatw == BLIS_NO_CONJUGATE) {
-                vcmul_vf(v28, v29, v12, v14, ft10, ft11);
+                vcmul_vf(v28, v29, v12, v14, fa4, fa5);
               }
               else {
-                vcmul_vf_conj(v28, v29, v12, v14, ft10, ft11);
+                vcmul_vf_conj(v28, v29, v12, v14, fa4, fa5);
               }
             }
             else {
@@ -1984,10 +1994,10 @@ void bli_cdotxaxpyf_sifive_x280_asm
               __asm__("vfmv.s.f v28, ft0");
               __asm__("vfmv.s.f v29, ft1");
               if (conjatw == BLIS_NO_CONJUGATE) {
-                vcmacc_vf(v28, v29, ft10, ft11, v12, v14);
+                vcmacc_vf(v28, v29, fa4, fa5, v12, v14);
               }
               else {
-                vcmacc_vf_conj(v28, v29, ft10, ft11, v12, v14);
+                vcmacc_vf_conj(v28, v29, fa4, fa5, v12, v14);
               }
             }
             __asm__(VSE "v28, (%0)" : : "r"(y));
@@ -2001,10 +2011,10 @@ void bli_cdotxaxpyf_sifive_x280_asm
             __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
             if (beta->real == 0.f && beta->imag == 0.f) {
               if (conjatw == BLIS_NO_CONJUGATE) {
-                vcmul_vf(v28, v29, v8, v10, ft10, ft11);
+                vcmul_vf(v28, v29, v8, v10, fa4, fa5);
               }
               else {
-                vcmul_vf_conj(v28, v29, v8, v10, ft10, ft11);
+                vcmul_vf_conj(v28, v29, v8, v10, fa4, fa5);
               }
             }
             else {
@@ -2014,10 +2024,10 @@ void bli_cdotxaxpyf_sifive_x280_asm
               __asm__("vfmv.s.f v28, ft0");
               __asm__("vfmv.s.f v29, ft1");
               if (conjatw == BLIS_NO_CONJUGATE) {
-                vcmacc_vf(v28, v29, ft10, ft11, v8, v10);
+                vcmacc_vf(v28, v29, fa4, fa5, v8, v10);
               }
               else {
-                vcmacc_vf_conj(v28, v29, ft10, ft11, v8, v10);
+                vcmacc_vf_conj(v28, v29, fa4, fa5, v8, v10);
               }
             }
             __asm__(VSE "v28, (%0)" : : "r"(y));
@@ -2031,10 +2041,10 @@ void bli_cdotxaxpyf_sifive_x280_asm
             __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
             if (beta->real == 0.f && beta->imag == 0.f) {
               if (conjatw == BLIS_NO_CONJUGATE) {
-                vcmul_vf(v28, v29, v4, v6, ft10, ft11);
+                vcmul_vf(v28, v29, v4, v6, fa4, fa5);
               }
               else {
-                vcmul_vf_conj(v28, v29, v4, v6, ft10, ft11);
+                vcmul_vf_conj(v28, v29, v4, v6, fa4, fa5);
               }
             }
             else {
@@ -2044,10 +2054,10 @@ void bli_cdotxaxpyf_sifive_x280_asm
               __asm__("vfmv.s.f v28, ft0");
               __asm__("vfmv.s.f v29, ft1");
               if (conjatw == BLIS_NO_CONJUGATE) {
-                vcmacc_vf(v28, v29, ft10, ft11, v4, v6);
+                vcmacc_vf(v28, v29, fa4, fa5, v4, v6);
               }
               else {
-                vcmacc_vf_conj(v28, v29, ft10, ft11, v4, v6);
+                vcmacc_vf_conj(v28, v29, fa4, fa5, v4, v6);
               }
             }
             __asm__(VSE "v28, (%0)" : : "r"(y));
@@ -2061,10 +2071,10 @@ void bli_cdotxaxpyf_sifive_x280_asm
             __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
             if (beta->real == 0.f && beta->imag == 0.f) {
               if (conjatw == BLIS_NO_CONJUGATE) {
-                vcmul_vf(v28, v29, v0, v2, ft10, ft11);
+                vcmul_vf(v28, v29, v0, v2, fa4, fa5);
               }
               else {
-                vcmul_vf_conj(v28, v29, v0, v2, ft10, ft11);
+                vcmul_vf_conj(v28, v29, v0, v2, fa4, fa5);
               }
             }
             else {
@@ -2074,10 +2084,10 @@ void bli_cdotxaxpyf_sifive_x280_asm
               __asm__("vfmv.s.f v28, ft0");
               __asm__("vfmv.s.f v29, ft1");
               if (conjatw == BLIS_NO_CONJUGATE) {
-                vcmacc_vf(v28, v29, ft10, ft11, v0, v2);
+                vcmacc_vf(v28, v29, fa4, fa5, v0, v2);
               }
               else {
-                vcmacc_vf_conj(v28, v29, ft10, ft11, v0, v2);
+                vcmacc_vf_conj(v28, v29, fa4, fa5, v0, v2);
               }
             }
             __asm__(VSE "v28, (%0)" : : "r"(y));
@@ -2120,7 +2130,8 @@ void bli_zdotxaxpyf_sifive_x280_asm
              conj_t           conjx,
              dim_t            m,
              dim_t            b,
-       const void*   restrict alpha_,
+       const void*   restrict alphaw_,
+       const void*   restrict alphax_,
        const void*   restrict a_, inc_t inca, inc_t lda,
        const void*   restrict w_, inc_t incw,
        const void*   restrict x_, inc_t incx,
@@ -2131,7 +2142,8 @@ void bli_zdotxaxpyf_sifive_x280_asm
      )
 {
     (void)cntx;
-    const dcomplex *restrict alpha = alpha_;
+    const dcomplex *restrict alphaw = alphaw_;
+    const dcomplex *restrict alphax = alphax_;
     const dcomplex *restrict beta = beta_;
     const dcomplex *restrict a = a_;
     const dcomplex *restrict w = w_;
@@ -2141,7 +2153,7 @@ void bli_zdotxaxpyf_sifive_x280_asm
 
     if (b == 0)
         return;
-    else if (m == 0 || (alpha->real == 0. && alpha->imag == 0.)) {
+    else if (m == 0 || (alphaw->real == 0. && alphaw->imag == 0. && alphax->real == 0. && alphax->imag == 0.)) {
         // scale y by beta
         if (beta->real == 0. && beta->imag == 0.)
             bli_zsetv_sifive_x280_asm(BLIS_NO_CONJUGATE, b, beta, y, incy, NULL);
@@ -2150,10 +2162,12 @@ void bli_zdotxaxpyf_sifive_x280_asm
         return;
     }
 
-    // use ft0-ft9 to store 5 entries of x, ft10-ft11 to store alpha,
-    // and fa6-fa7 to store beta
-    __asm__(FLT_LOAD "ft10, (%0)" : : "r"(alpha));
-    __asm__(FLT_LOAD "ft11, %1(%0)" : : "r"(alpha), "I"(FLT_SIZE));
+    // use ft0-ft9 to store 5 entries of x, fa4-fa5 to store alphaw,
+    // ft10-ft11 to store alphax, and fa6-fa7 to store beta
+    __asm__(FLT_LOAD "fa4, (%0)" : : "r"(alphaw));
+    __asm__(FLT_LOAD "fa5, %1(%0)" : : "r"(alphaw), "I"(FLT_SIZE));
+    __asm__(FLT_LOAD "ft10, (%0)" : : "r"(alphax));
+    __asm__(FLT_LOAD "ft11, %1(%0)" : : "r"(alphax), "I"(FLT_SIZE));
     __asm__(FLT_LOAD "fa6, (%0)" : : "r"(beta));
     __asm__(FLT_LOAD "fa7, %1(%0)" : : "r"(beta), "I"(FLT_SIZE));
     // Reduce to case when A^T is not conjugated, then conjugate
@@ -2530,10 +2544,10 @@ void bli_zdotxaxpyf_sifive_x280_asm
         __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
         if (beta->real == 0. && beta->imag == 0.) {
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmul_vf(v28, v29, v0, v2, ft10, ft11);
+            vcmul_vf(v28, v29, v0, v2, fa4, fa5);
           }
           else {
-            vcmul_vf_conj(v28, v29, v0, v2, ft10, ft11);
+            vcmul_vf_conj(v28, v29, v0, v2, fa4, fa5);
           }
         }
         else {
@@ -2543,10 +2557,10 @@ void bli_zdotxaxpyf_sifive_x280_asm
           __asm__("vfmv.s.f v28, ft0");
           __asm__("vfmv.s.f v29, ft1");
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmacc_vf(v28, v29, ft10, ft11, v0, v2);
+            vcmacc_vf(v28, v29, fa4, fa5, v0, v2);
           }
           else {
-            vcmacc_vf_conj(v28, v29, ft10, ft11, v0, v2);
+            vcmacc_vf_conj(v28, v29, fa4, fa5, v0, v2);
           }
         }
         __asm__(VSE "v28, (%0)" : : "r"(y));
@@ -2560,10 +2574,10 @@ void bli_zdotxaxpyf_sifive_x280_asm
         __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
         if (beta->real == 0. && beta->imag == 0.) {
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmul_vf(v28, v29, v4, v6, ft10, ft11);
+            vcmul_vf(v28, v29, v4, v6, fa4, fa5);
           }
           else {
-            vcmul_vf_conj(v28, v29, v4, v6, ft10, ft11);
+            vcmul_vf_conj(v28, v29, v4, v6, fa4, fa5);
           }
         }
         else {
@@ -2573,10 +2587,10 @@ void bli_zdotxaxpyf_sifive_x280_asm
           __asm__("vfmv.s.f v28, ft0");
           __asm__("vfmv.s.f v29, ft1");
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmacc_vf(v28, v29, ft10, ft11, v4, v6);
+            vcmacc_vf(v28, v29, fa4, fa5, v4, v6);
           }
           else {
-            vcmacc_vf_conj(v28, v29, ft10, ft11, v4, v6);
+            vcmacc_vf_conj(v28, v29, fa4, fa5, v4, v6);
           }
         }
         __asm__(VSE "v28, (%0)" : : "r"(y));
@@ -2590,10 +2604,10 @@ void bli_zdotxaxpyf_sifive_x280_asm
         __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
         if (beta->real == 0. && beta->imag == 0.) {
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmul_vf(v28, v29, v8, v10, ft10, ft11);
+            vcmul_vf(v28, v29, v8, v10, fa4, fa5);
           }
           else {
-            vcmul_vf_conj(v28, v29, v8, v10, ft10, ft11);
+            vcmul_vf_conj(v28, v29, v8, v10, fa4, fa5);
           }
         }
         else {
@@ -2603,10 +2617,10 @@ void bli_zdotxaxpyf_sifive_x280_asm
           __asm__("vfmv.s.f v28, ft0");
           __asm__("vfmv.s.f v29, ft1");
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmacc_vf(v28, v29, ft10, ft11, v8, v10);
+            vcmacc_vf(v28, v29, fa4, fa5, v8, v10);
           }
           else {
-            vcmacc_vf_conj(v28, v29, ft10, ft11, v8, v10);
+            vcmacc_vf_conj(v28, v29, fa4, fa5, v8, v10);
           }
         }
         __asm__(VSE "v28, (%0)" : : "r"(y));
@@ -2620,10 +2634,10 @@ void bli_zdotxaxpyf_sifive_x280_asm
         __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
         if (beta->real == 0. && beta->imag == 0.) {
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmul_vf(v28, v29, v12, v14, ft10, ft11);
+            vcmul_vf(v28, v29, v12, v14, fa4, fa5);
           }
           else {
-            vcmul_vf_conj(v28, v29, v12, v14, ft10, ft11);
+            vcmul_vf_conj(v28, v29, v12, v14, fa4, fa5);
           }
         }
         else {
@@ -2633,10 +2647,10 @@ void bli_zdotxaxpyf_sifive_x280_asm
           __asm__("vfmv.s.f v28, ft0");
           __asm__("vfmv.s.f v29, ft1");
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmacc_vf(v28, v29, ft10, ft11, v12, v14);
+            vcmacc_vf(v28, v29, fa4, fa5, v12, v14);
           }
           else {
-            vcmacc_vf_conj(v28, v29, ft10, ft11, v12, v14);
+            vcmacc_vf_conj(v28, v29, fa4, fa5, v12, v14);
           }
         }
         __asm__(VSE "v28, (%0)" : : "r"(y));
@@ -2650,10 +2664,10 @@ void bli_zdotxaxpyf_sifive_x280_asm
         __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
         if (beta->real == 0. && beta->imag == 0.) {
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmul_vf(v28, v29, v16, v18, ft10, ft11);
+            vcmul_vf(v28, v29, v16, v18, fa4, fa5);
           }
           else {
-            vcmul_vf_conj(v28, v29, v16, v18, ft10, ft11);
+            vcmul_vf_conj(v28, v29, v16, v18, fa4, fa5);
           }
         }
         else {
@@ -2663,10 +2677,10 @@ void bli_zdotxaxpyf_sifive_x280_asm
           __asm__("vfmv.s.f v28, ft0");
           __asm__("vfmv.s.f v29, ft1");
           if (conjatw == BLIS_NO_CONJUGATE) {
-            vcmacc_vf(v28, v29, ft10, ft11, v16, v18);
+            vcmacc_vf(v28, v29, fa4, fa5, v16, v18);
           }
           else {
-            vcmacc_vf_conj(v28, v29, ft10, ft11, v16, v18);
+            vcmacc_vf_conj(v28, v29, fa4, fa5, v16, v18);
           }
         }
         __asm__(VSE "v28, (%0)" : : "r"(y));
@@ -3002,10 +3016,10 @@ void bli_zdotxaxpyf_sifive_x280_asm
             __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
             if (beta->real == 0. && beta->imag == 0.) {
               if (conjatw == BLIS_NO_CONJUGATE) {
-                vcmul_vf(v28, v29, v12, v14, ft10, ft11);
+                vcmul_vf(v28, v29, v12, v14, fa4, fa5);
               }
               else {
-                vcmul_vf_conj(v28, v29, v12, v14, ft10, ft11);
+                vcmul_vf_conj(v28, v29, v12, v14, fa4, fa5);
               }
             }
             else {
@@ -3015,10 +3029,10 @@ void bli_zdotxaxpyf_sifive_x280_asm
               __asm__("vfmv.s.f v28, ft0");
               __asm__("vfmv.s.f v29, ft1");
               if (conjatw == BLIS_NO_CONJUGATE) {
-                vcmacc_vf(v28, v29, ft10, ft11, v12, v14);
+                vcmacc_vf(v28, v29, fa4, fa5, v12, v14);
               }
               else {
-                vcmacc_vf_conj(v28, v29, ft10, ft11, v12, v14);
+                vcmacc_vf_conj(v28, v29, fa4, fa5, v12, v14);
               }
             }
             __asm__(VSE "v28, (%0)" : : "r"(y));
@@ -3032,10 +3046,10 @@ void bli_zdotxaxpyf_sifive_x280_asm
             __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
             if (beta->real == 0. && beta->imag == 0.) {
               if (conjatw == BLIS_NO_CONJUGATE) {
-                vcmul_vf(v28, v29, v8, v10, ft10, ft11);
+                vcmul_vf(v28, v29, v8, v10, fa4, fa5);
               }
               else {
-                vcmul_vf_conj(v28, v29, v8, v10, ft10, ft11);
+                vcmul_vf_conj(v28, v29, v8, v10, fa4, fa5);
               }
             }
             else {
@@ -3045,10 +3059,10 @@ void bli_zdotxaxpyf_sifive_x280_asm
               __asm__("vfmv.s.f v28, ft0");
               __asm__("vfmv.s.f v29, ft1");
               if (conjatw == BLIS_NO_CONJUGATE) {
-                vcmacc_vf(v28, v29, ft10, ft11, v8, v10);
+                vcmacc_vf(v28, v29, fa4, fa5, v8, v10);
               }
               else {
-                vcmacc_vf_conj(v28, v29, ft10, ft11, v8, v10);
+                vcmacc_vf_conj(v28, v29, fa4, fa5, v8, v10);
               }
             }
             __asm__(VSE "v28, (%0)" : : "r"(y));
@@ -3062,10 +3076,10 @@ void bli_zdotxaxpyf_sifive_x280_asm
             __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
             if (beta->real == 0. && beta->imag == 0.) {
               if (conjatw == BLIS_NO_CONJUGATE) {
-                vcmul_vf(v28, v29, v4, v6, ft10, ft11);
+                vcmul_vf(v28, v29, v4, v6, fa4, fa5);
               }
               else {
-                vcmul_vf_conj(v28, v29, v4, v6, ft10, ft11);
+                vcmul_vf_conj(v28, v29, v4, v6, fa4, fa5);
               }
             }
             else {
@@ -3075,10 +3089,10 @@ void bli_zdotxaxpyf_sifive_x280_asm
               __asm__("vfmv.s.f v28, ft0");
               __asm__("vfmv.s.f v29, ft1");
               if (conjatw == BLIS_NO_CONJUGATE) {
-                vcmacc_vf(v28, v29, ft10, ft11, v4, v6);
+                vcmacc_vf(v28, v29, fa4, fa5, v4, v6);
               }
               else {
-                vcmacc_vf_conj(v28, v29, ft10, ft11, v4, v6);
+                vcmacc_vf_conj(v28, v29, fa4, fa5, v4, v6);
               }
             }
             __asm__(VSE "v28, (%0)" : : "r"(y));
@@ -3092,10 +3106,10 @@ void bli_zdotxaxpyf_sifive_x280_asm
             __asm__("vsetivli zero, 1, e%0, m1, ta, ma" : : "i"(8 * FLT_SIZE));
             if (beta->real == 0. && beta->imag == 0.) {
               if (conjatw == BLIS_NO_CONJUGATE) {
-                vcmul_vf(v28, v29, v0, v2, ft10, ft11);
+                vcmul_vf(v28, v29, v0, v2, fa4, fa5);
               }
               else {
-                vcmul_vf_conj(v28, v29, v0, v2, ft10, ft11);
+                vcmul_vf_conj(v28, v29, v0, v2, fa4, fa5);
               }
             }
             else {
@@ -3105,10 +3119,10 @@ void bli_zdotxaxpyf_sifive_x280_asm
               __asm__("vfmv.s.f v28, ft0");
               __asm__("vfmv.s.f v29, ft1");
               if (conjatw == BLIS_NO_CONJUGATE) {
-                vcmacc_vf(v28, v29, ft10, ft11, v0, v2);
+                vcmacc_vf(v28, v29, fa4, fa5, v0, v2);
               }
               else {
-                vcmacc_vf_conj(v28, v29, ft10, ft11, v0, v2);
+                vcmacc_vf_conj(v28, v29, fa4, fa5, v0, v2);
               }
             }
             __asm__(VSE "v28, (%0)" : : "r"(y));

@@ -43,7 +43,8 @@ void bli_zdotxaxpyf_template_noopt
        conj_t             conjx,
        dim_t              m,
        dim_t              b_n,
-       dcomplex* restrict alpha,
+       dcomplex* restrict alphaw,
+       dcomplex* restrict alphax,
        dcomplex* restrict a, inc_t inca, inc_t lda,
        dcomplex* restrict w, inc_t incw,
        dcomplex* restrict x, inc_t incx,
@@ -67,8 +68,8 @@ void bli_zdotxaxpyf_template_noopt
 
   This kernel performs the following two gemv-like operations:
 
-    y := beta * y + alpha * conjat( A^T ) * conjw( w )
-    z :=        z + alpha * conja( A )    * conjx( x )
+    y := beta * y + alphaw * conjat( A^T ) * conjw( w )
+    z :=        z + alphax * conja( A )    * conjx( x )
 
   where A is an m x b_n matrix, x and y are vector of length b_n, w and z
   are vectors of length m, and alpha and beta are scalars. The operation
@@ -84,7 +85,8 @@ void bli_zdotxaxpyf_template_noopt
   - m:      The number of rows in matrix A.
   - b_n:    The number of columns in matrix A. Must be equal to or less than
             the fusing factor.
-  - alpha:  The address of the scalar to be applied to A^T*w and A*x.
+  - alphaw: The address of the scalar to be applied to A^T*w.
+  - alphax: The address of the scalar to be applied to A*x.
   - a:      The address of matrix A.
   - inca:   The row stride of A. inca should be unit unless the
             implementation makes special accomodation for non-unit values.
@@ -205,7 +207,8 @@ void bli_zdotxaxpyf_template_noopt
 		  conjx,
 		  m,
 		  b_n,
-		  alpha,
+		  alphaw,
+		  alphax,
 		  a, inca, lda,
 		  w, incw,
 		  x, incx,
@@ -239,7 +242,7 @@ void bli_zdotxaxpyf_template_noopt
 		for ( j = 0; j < b_n; ++j )
 		{
 			bli_zcopys( *xp[ j ], alpha_x[ j ] );
-			bli_zscals( *alpha, alpha_x[ j ] );
+			bli_zscals( *alphax, alpha_x[ j ] );
 		}
 	}
 	else // if ( bli_is_conj( conjx ) )
@@ -247,7 +250,7 @@ void bli_zdotxaxpyf_template_noopt
 		for ( j = 0; j < b_n; ++j )
 		{
 			bli_zcopyjs( *xp[ j ], alpha_x[ j ] );
-			bli_zscals( *alpha, alpha_x[ j ] );
+			bli_zscals( *alphax, alpha_x[ j ] );
 		}
 	}
 
@@ -468,7 +471,7 @@ void bli_zdotxaxpyf_template_noopt
 	for ( j = 0; j < b_n; ++j )
 	{
 		bli_zscals( *beta, *yp[ j ] );
-		bli_zaxpys( *alpha, At_w[ j ], *yp[ j ] );
+		bli_zaxpys( *alphaw, At_w[ j ], *yp[ j ] );
 	}
 }
 

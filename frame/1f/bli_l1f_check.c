@@ -288,7 +288,8 @@ void bli_dotaxpyv_check
 
 void bli_dotxaxpyf_check
      (
-       const obj_t* alpha,
+       const obj_t* alphaw,
+       const obj_t* alphax,
        const obj_t* at,
        const obj_t* a,
        const obj_t* w,
@@ -302,7 +303,10 @@ void bli_dotxaxpyf_check
 
 	// Check object datatypes.
 
-	e_val = bli_check_noninteger_object( alpha );
+	e_val = bli_check_noninteger_object( alphaw );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_noninteger_object( alphax );
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_floating_object( at );
@@ -345,7 +349,10 @@ void bli_dotxaxpyf_check
 
 	// Check object dimensions.
 
-	e_val = bli_check_scalar_object( alpha );
+	e_val = bli_check_scalar_object( alphaw );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_scalar_object( alphax );
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_matrix_object( at );
@@ -397,7 +404,10 @@ void bli_dotxaxpyf_check
 
 	// Check object buffers (for non-NULLness).
 
-	e_val = bli_check_object_buffer( alpha );
+	e_val = bli_check_object_buffer( alphaw );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( alphax );
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_object_buffer( at );
