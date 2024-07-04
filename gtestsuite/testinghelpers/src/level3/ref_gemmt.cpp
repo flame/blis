@@ -49,7 +49,8 @@
 **/
 
 namespace testinghelpers {
-#if 1
+
+#if defined(REF_IS_NETLIB)
 template <typename T>
 void ref_gemmt (
     char storage, char uplo, char trnsa, char trnsb,

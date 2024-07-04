@@ -67,22 +67,32 @@ using namespace testinghelpers::IIT;
 // n < 1, with non-unit stride
 TYPED_TEST(amaxv_IIT_ERS, n_lt_one_nonUnitStride)
 {
- using T = TypeParam;
- gtint_t n = 0;
- gtint_t inc = 5;
+    using T = TypeParam;
+    gtint_t n = 0;
+    gtint_t inc = 5;
+    gtint_t idx = 42;
 
-  // Initialize vectors with random numbers.
-  std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
-
-// Invoking AMAXV with an value of n.
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
 #ifdef TEST_BLAS
-  gtint_t idx = amaxv_<T>( n, x.data(), inc );
+    idx = amaxv_<T>( n, nullptr, inc );
 #else
-  gtint_t idx = cblas_amaxv<T>( n, x.data(), inc );
+    idx = cblas_amaxv<T>( n, nullptr, inc );
+#endif
+    computediff<gtint_t>( "idx", idx, gtint_t(0) );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize vectors with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
+
+    // Invoking AMAXV with an invalid value of n.
+#ifdef TEST_BLAS
+    idx = amaxv_<T>( n, x.data(), inc );
+#else
+    idx = cblas_amaxv<T>( n, x.data(), inc );
 #endif
 
-  // Computing the difference.
-  computediff<gtint_t>( "idx", idx, gtint_t(0) );
+    // Computing the difference.
+    computediff<gtint_t>( "idx", idx, gtint_t(0) );
 }
 
 // inc == 0, with non-unit stride
@@ -90,77 +100,121 @@ TYPED_TEST(amaxv_IIT_ERS, incx_eq_zero)
 {
     using T = TypeParam;
     gtint_t inc = 0;
+    gtint_t idx = 42;
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#ifdef TEST_BLAS
+    idx = amaxv_<T>( N, nullptr, inc );
+#else
+    idx = cblas_amaxv<T>( N, nullptr, inc );
+#endif
+    computediff<gtint_t>( "idx", idx, gtint_t(0) );
+
+    // Test with all arguments correct except for the value we are choosing to test.
     // Initialize vectors with random numbers.
     std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
 
-// Invoking AMAXV with an invalid value of n.
+    // Invoking AMAXV with an invalid value of incx.
 #ifdef TEST_BLAS
-  gtint_t idx = amaxv_<T>( N, x.data(), inc );
+    idx = amaxv_<T>( N, x.data(), inc );
 #else
-  gtint_t idx = cblas_amaxv<T>( N, x.data(), inc );
+    idx = cblas_amaxv<T>( N, x.data(), inc );
 #endif
 
- // Computing the difference.
- computediff<gtint_t>( "idx", idx, gtint_t(0) );
+    // Computing the difference.
+    computediff<gtint_t>( "idx", idx, gtint_t(0) );
 }
 
 // n < 1, with unit stride
 TYPED_TEST(amaxv_IIT_ERS, n_lt_one_unitStride)
 {
- using T = TypeParam;
- gtint_t n = 0;
- gtint_t unit_inc = 1;
+    using T = TypeParam;
+    gtint_t n = 0;
+    gtint_t unit_inc = 1;
+    gtint_t idx = 42;
 
- // Initialize vectors with random numbers.
- std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
-
-// Invoking AMAXV with an value of n.
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
 #ifdef TEST_BLAS
-  gtint_t idx = amaxv_<T>( n, x.data(), unit_inc );
+    idx = amaxv_<T>( n, nullptr, unit_inc );
 #else
-  gtint_t idx = cblas_amaxv<T>( n, x.data(), unit_inc );
+    idx = cblas_amaxv<T>( n, nullptr, unit_inc );
+#endif
+    computediff<gtint_t>( "idx", idx, gtint_t(0) );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize vectors with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
+
+    // Invoking AMAXV with an invalid value of n.
+#ifdef TEST_BLAS
+    idx = amaxv_<T>( n, x.data(), unit_inc );
+#else
+    idx = cblas_amaxv<T>( n, x.data(), unit_inc );
 #endif
 
- // Computing the difference.
- computediff<gtint_t>( "idx", idx, gtint_t(0) );
+    // Computing the difference.
+    computediff<gtint_t>( "idx", idx, gtint_t(0) );
 }
 
 // n == 1, with unit stride
 TYPED_TEST(amaxv_IIT_ERS, n_eq_one_unitStride)
 {
- using T = TypeParam;
- gtint_t n = 1;
- gtint_t unit_inc = 1;
+    using T = TypeParam;
+    gtint_t n = 1;
+    gtint_t unit_inc = 1;
+    gtint_t idx = 42;
 
- // Initialize vectors with random numbers.
- std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
-
-// Invoking AMAXV with an value of n.
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
 #ifdef TEST_BLAS
-  gtint_t idx = amaxv_<T>( n, x.data(), unit_inc );
-  computediff<gtint_t>( "idx", idx, gtint_t(1) );
+    idx = amaxv_<T>( n, nullptr, unit_inc );
+    computediff<gtint_t>( "idx", idx, gtint_t(1) );
 #else
-  gtint_t idx = cblas_amaxv<T>( n, x.data(), unit_inc );
-  computediff<gtint_t>( "idx", idx, gtint_t(0) );
+    idx = cblas_amaxv<T>( n, nullptr, unit_inc );
+    computediff<gtint_t>( "idx", idx, gtint_t(0) );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize vectors with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
+
+    // Invoking AMAXV with an invalid value of n.
+#ifdef TEST_BLAS
+    idx = amaxv_<T>( n, x.data(), unit_inc );
+    computediff<gtint_t>( "idx", idx, gtint_t(1) );
+#else
+    idx = cblas_amaxv<T>( n, x.data(), unit_inc );
+    computediff<gtint_t>( "idx", idx, gtint_t(0) );
 #endif
 
 }
 
 TYPED_TEST(amaxv_IIT_ERS, n_eq_one_nonUnitStrides)
 {
-  using T = TypeParam;
-  gtint_t n = 1;
-  gtint_t inc = 5;
-  // Initialize vectors with random numbers.
-  std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
+    using T = TypeParam;
+    gtint_t n = 1;
+    gtint_t inc = 5;
+    gtint_t idx = 42;
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
 #ifdef TEST_BLAS
-  gtint_t idx = amaxv_<T>( n, x.data(), inc );
-  computediff<gtint_t>( "idx", idx, gtint_t(1) );
+    idx = amaxv_<T>( n, nullptr, inc );
+    computediff<gtint_t>( "idx", idx, gtint_t(1) );
 #else
-  gtint_t idx = cblas_amaxv<T>( n, x.data(), inc );
-  computediff<gtint_t>( "idx", idx, gtint_t(0) );
+    idx = cblas_amaxv<T>( n, nullptr, inc );
+    computediff<gtint_t>( "idx", idx, gtint_t(0) );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize vectors with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
+
+    // Invoking AMAXV with an invalid value of n.
+#ifdef TEST_BLAS
+    idx = amaxv_<T>( n, x.data(), inc );
+    computediff<gtint_t>( "idx", idx, gtint_t(1) );
+#else
+    idx = cblas_amaxv<T>( n, x.data(), inc );
+    computediff<gtint_t>( "idx", idx, gtint_t(0) );
 #endif
 }
 

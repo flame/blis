@@ -71,14 +71,17 @@ TYPED_TEST(scalv_IIT_ERS, n_lt_zero_nonUnitStride)
     using RT = typename TypeParam::second_type;
     gtint_t invalid_n = -1;
     gtint_t inc = 5;
-
-    // Initialize x vector with random numbers.
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
-    std::vector<T> x_ref(x);    // copy x to x_ref to verify elements of x are not modified.
-
     // Using alpha = 3 as a valid input since BLAS expects SCALV to return early
     // for alpha = 1.
     RT alpha = RT{3};
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    scalv<T, RT>( 'n', invalid_n, alpha, nullptr, inc );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize x vector with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
+    std::vector<T> x_ref(x);    // copy x to x_ref to verify elements of x are not modified.
 
     // Invoking SCALV with an invalid value of n.
     scalv<T, RT>( 'n', invalid_n, alpha, x.data(), inc );
@@ -94,14 +97,17 @@ TYPED_TEST(scalv_IIT_ERS, n_eq_zero_nonUnitStride)
     using RT = typename TypeParam::second_type;
     gtint_t invalid_n = 0;
     gtint_t inc = 5;
-
-    // Initialize x vector with random numbers.
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
-    std::vector<T> x_ref(x);    // copy x to x_ref to verify elements of x are not modified.
-
     // Using alpha = 3 as a valid input since BLAS expects SCALV to return early
     // for alpha = 1.
     RT alpha = RT{3};
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    scalv<T, RT>( 'n', invalid_n, alpha, nullptr, inc );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize x vector with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
+    std::vector<T> x_ref(x);    // copy x to x_ref to verify elements of x are not modified.
 
     // Invoking SCALV with an invalid value of n.
     scalv<T, RT>( 'n', invalid_n, alpha, x.data(), inc );
@@ -117,14 +123,17 @@ TYPED_TEST(scalv_IIT_ERS, n_lt_zero_unitStride)
     using RT = typename TypeParam::second_type;
     gtint_t invalid_n = -1;
     gtint_t unit_inc = 1;
-
-    // Initialize x vector with random numbers.
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
-    std::vector<T> x_ref(x);    // copy x to x_ref to verify elements of x are not modified.
-
     // Using alpha = 3 as a valid input since BLAS expects SCALV to return early
     // for alpha = 1.
     RT alpha = RT{3};
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    scalv<T, RT>( 'n', invalid_n, alpha, nullptr, unit_inc );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize x vector with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
+    std::vector<T> x_ref(x);    // copy x to x_ref to verify elements of x are not modified.
 
     // Invoking SCALV with an invalid value of n.
     scalv<T, RT>( 'n', invalid_n, alpha, x.data(), unit_inc );
@@ -140,14 +149,17 @@ TYPED_TEST(scalv_IIT_ERS, n_eq_zero_unitStride)
     using RT = typename TypeParam::second_type;
     gtint_t invalid_n = 0;
     gtint_t unit_inc = 1;
-
-    // Initialize x vector with random numbers.
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
-    std::vector<T> x_ref(x);    // copy x to x_ref to verify elements of x are not modified.
-
     // Using alpha = 3 as a valid input since BLAS expects SCALV to return early
     // for alpha = 1.
     RT alpha = RT{3};
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    scalv<T, RT>( 'n', invalid_n, alpha, nullptr, unit_inc );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize x vector with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
+    std::vector<T> x_ref(x);    // copy x to x_ref to verify elements of x are not modified.
 
     // Invoking SCALV with an invalid value of n.
     scalv<T, RT>( 'n', invalid_n, alpha, x.data(), unit_inc );
@@ -162,14 +174,17 @@ TYPED_TEST(scalv_IIT_ERS, inc_lt_0)
     using  T = typename TypeParam::first_type;
     using RT = typename TypeParam::second_type;
     gtint_t invalid_inc = -1;
-
-    // Initialize x vector with random numbers.
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, INC );
-    std::vector<T> x_ref(x);    // copy x to x_ref to verify elements of x are not modified.
-
     // Using alpha = 3 as a valid input since BLAS expects SCALV to return early
     // for alpha = 1.
     RT alpha = RT{3};
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    scalv<T, RT>( 'n', N, alpha, nullptr, invalid_inc );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize x vector with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, INC );
+    std::vector<T> x_ref(x);    // copy x to x_ref to verify elements of x are not modified.
 
     // Invoking SCALV with an invalid value of n.
     scalv<T, RT>( 'n', N, alpha, x.data(), invalid_inc );
@@ -184,14 +199,17 @@ TYPED_TEST(scalv_IIT_ERS, inc_eq_0)
     using  T = typename TypeParam::first_type;
     using RT = typename TypeParam::second_type;
     gtint_t invalid_inc = 0;
-
-    // Initialize x vector with random numbers.
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, INC );
-    std::vector<T> x_ref(x);    // copy x to x_ref to verify elements of x are not modified.
-
     // Using alpha = 3 as a valid input since BLAS expects SCALV to return early
     // for alpha = 1.
     RT alpha = RT{3};
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    scalv<T, RT>( 'n', N, alpha, nullptr, invalid_inc );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize x vector with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, INC );
+    std::vector<T> x_ref(x);    // copy x to x_ref to verify elements of x are not modified.
 
     // Invoking SCALV with an invalid value of n.
     scalv<T, RT>( 'n', N, alpha, x.data(), invalid_inc );
@@ -206,13 +224,16 @@ TYPED_TEST(scalv_IIT_ERS, alpha_eq_one_nonUnitStride)
     using  T = typename TypeParam::first_type;
     using RT = typename TypeParam::second_type;
     gtint_t inc = 5;
+    RT invalid_alpha;
+    testinghelpers::initone<RT>(invalid_alpha);
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    scalv<T, RT>( 'n', N, invalid_alpha, nullptr, inc );
+
+    // Test with all arguments correct except for the value we are choosing to test.
     // Initialize x vector with random numbers.
     std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
     std::vector<T> x_ref(x);    // copy x to x_ref to verify elements of x are not modified.
-
-    RT invalid_alpha;
-    testinghelpers::initone<RT>(invalid_alpha);
 
     // Invoking SCALV with an invalid value of n.
     scalv<T, RT>( 'n', N, invalid_alpha, x.data(), inc );
@@ -227,13 +248,16 @@ TYPED_TEST(scalv_IIT_ERS, alpha_eq_one_unitStride)
     using  T = typename TypeParam::first_type;
     using RT = typename TypeParam::second_type;
     gtint_t unit_inc = 1;
+    RT invalid_alpha;
+    testinghelpers::initone<RT>(invalid_alpha);
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    scalv<T, RT>( 'n', N, invalid_alpha, nullptr, unit_inc );
+
+    // Test with all arguments correct except for the value we are choosing to test.
     // Initialize x vector with random numbers.
     std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
     std::vector<T> x_ref(x);    // copy x to x_ref to verify elements of x are not modified.
-
-    RT invalid_alpha;
-    testinghelpers::initone<RT>(invalid_alpha);
 
     // Invoking SCALV with an invalid value of n.
     scalv<T, RT>( 'n', N, invalid_alpha, x.data(), unit_inc );

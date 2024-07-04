@@ -58,69 +58,89 @@ using namespace testinghelpers::IIT;
 // When n < 0
 TYPED_TEST(copyv_IIT_ERS, n_lt_zero_nonUnitStrides)
 {
-  using T = TypeParam;
-  // Defining the x vector
-  std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 5 );
-  // Defining the y_vector with values for debugging purposes
-  std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, 5 );
+    using T = TypeParam;
 
-  // Copy so that we check that the elements of y are not modified.
-  std::vector<T> y_ref(y);
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    copyv<T>( CONJ, -1, nullptr, 5, nullptr, 5 );
 
-  copyv<T>( CONJ, -1, x.data(), 5, y.data(), 5 );
-  // Use bitwise comparison (no threshold).
-  computediff( "y", N, y.data(), y_ref.data(), 5 );
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Defining the x vector
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 5 );
+    // Defining the y_vector with values for debugging purposes
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, 5 );
+
+    // Copy so that we check that the elements of y are not modified.
+    std::vector<T> y_ref(y);
+
+    copyv<T>( CONJ, -1, x.data(), 5, y.data(), 5 );
+    // Use bitwise comparison (no threshold).
+    computediff( "y", N, y.data(), y_ref.data(), 5 );
 }
 
 // When n = 0
 TYPED_TEST(copyv_IIT_ERS, n_eq_zero_nonUnitStrides)
 {
-  using T = TypeParam;
-  // Defining the x vector
-  std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 5 );
-  // Defining the y vector with values for debugging purposes
-  std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, 5 );
+    using T = TypeParam;
 
-  // Copy so that we check that the elements of y are not modified.
-  std::vector<T> y_ref(y);
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    copyv<T>( CONJ, 0, nullptr, 5, nullptr, 5 );
 
-  copyv<T>( CONJ, 0, x.data(), 5, y.data(), 5 );
-  // Use bitwise comparison (no threshold).
-  computediff( "y", N, y.data(), y_ref.data(), 5 );
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Defining the x vector
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 5 );
+    // Defining the y vector with values for debugging purposes
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, 5 );
+
+    // Copy so that we check that the elements of y are not modified.
+    std::vector<T> y_ref(y);
+
+    copyv<T>( CONJ, 0, x.data(), 5, y.data(), 5 );
+    // Use bitwise comparison (no threshold).
+    computediff( "y", N, y.data(), y_ref.data(), 5 );
 }
 
 // Early return cases with unit strides on vectors
 // When n < 0
 TYPED_TEST(copyv_IIT_ERS, n_lt_zero_unitStrides)
 {
-  using T = TypeParam;
-  // Defining the x vector
-  std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
-  // Defining the y_vector with values for debugging purposes
-  std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
+    using T = TypeParam;
 
-  // Copy so that we check that the elements of y are not modified.
-  std::vector<T> y_ref(y);
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    copyv<T>( CONJ, -1, nullptr, 1, nullptr, 1 );
 
-  copyv<T>( CONJ, -1, x.data(), 1, y.data(), 1 );
-  // Use bitwise comparison (no threshold).
-  computediff( "y", N, y.data(), y_ref.data(), 1 );
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Defining the x vector
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
+    // Defining the y_vector with values for debugging purposes
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
+
+    // Copy so that we check that the elements of y are not modified.
+    std::vector<T> y_ref(y);
+
+    copyv<T>( CONJ, -1, x.data(), 1, y.data(), 1 );
+    // Use bitwise comparison (no threshold).
+    computediff( "y", N, y.data(), y_ref.data(), 1 );
 }
 
 // When n = 0
 TYPED_TEST(copyv_IIT_ERS, n_eq_zero_unitStrides)
 {
-  using T = TypeParam;
-  // Defining the x vector
-  std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
-  // Defining the y vector with values for debugging purposes
-  std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
+    using T = TypeParam;
 
-  // Copy so that we check that the elements of y are not modified.
-  std::vector<T> y_ref(y);
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    copyv<T>( CONJ, 0, nullptr, 1, nullptr, 1 );
 
-  copyv<T>( CONJ, 0, x.data(), 1, y.data(), 1 );
-  // Use bitwise comparison (no threshold).
-  computediff( "y", N, y.data(), y_ref.data(), 1 );
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Defining the x vector
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
+    // Defining the y vector with values for debugging purposes
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
+
+    // Copy so that we check that the elements of y are not modified.
+    std::vector<T> y_ref(y);
+
+    copyv<T>( CONJ, 0, x.data(), 1, y.data(), 1 );
+    // Use bitwise comparison (no threshold).
+    computediff( "y", N, y.data(), y_ref.data(), 1 );
 }
 #endif

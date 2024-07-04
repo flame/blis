@@ -60,17 +60,21 @@ TYPED_TEST(dotv_IIT_ERS, n_lt_zero_nonUnitStride)
     using T = TypeParam;
     gtint_t invalid_n = -1;
     gtint_t inc = 5;
-
-    // Initialize vectors with random numbers.
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
-    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
-
     // Initialize rho (BLIS output) to garbage value.
     T rho = T{-7.3};
-
     // Initialize the expected output to zero.
     T rho_ref;
     testinghelpers::initzero<T>(rho_ref);
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    dotv<T>( CONJ, CONJ, invalid_n, nullptr, inc, nullptr, inc, &rho );
+    // Computing the difference.
+    computediff<T>( "rho", rho, rho_ref );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize vectors with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
 
     // Invoking DOTV with an invalid value of n.
     dotv<T>( CONJ, CONJ, invalid_n, x.data(), inc, y.data(), inc, &rho );
@@ -85,17 +89,21 @@ TYPED_TEST(dotv_IIT_ERS, n_eq_zero_nonUnitStride)
     using T = TypeParam;
     gtint_t invalid_n = 0;
     gtint_t inc = 5;
-
-    // Initialize vectors with random numbers.
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
-    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
-
     // Initialize rho (BLIS output) to garbage value.
     T rho = T{-7.3};
-
     // Initialize the expected output to zero.
     T rho_ref;
     testinghelpers::initzero<T>(rho_ref);
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    dotv<T>( CONJ, CONJ, invalid_n, nullptr, inc, nullptr, inc, &rho );
+    // Computing the difference.
+    computediff<T>( "rho", rho, rho_ref );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize vectors with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
 
     // Invoking DOTV with an invalid value of n.
     dotv<T>( CONJ, CONJ, invalid_n, x.data(), inc, y.data(), inc, &rho );
@@ -110,17 +118,21 @@ TYPED_TEST(dotv_IIT_ERS, n_lt_zero_unitStride)
     using T = TypeParam;
     gtint_t invalid_n = -1;
     gtint_t unit_inc = 1;
-
-    // Initialize vectors with random numbers.
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
-    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
-
     // Initialize rho (BLIS output) to garbage value.
     T rho = T{-7.3};
-
     // Initialize the expected output to zero.
     T rho_ref;
     testinghelpers::initzero<T>(rho_ref);
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    dotv<T>( CONJ, CONJ, invalid_n, nullptr, unit_inc, nullptr, unit_inc, &rho );
+    // Computing the difference.
+    computediff<T>( "rho", rho, rho_ref );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize vectors with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
 
     // Invoking DOTV with an invalid value of n.
     dotv<T>( CONJ, CONJ, invalid_n, x.data(), unit_inc, y.data(), unit_inc, &rho );
@@ -135,17 +147,21 @@ TYPED_TEST(dotv_IIT_ERS, n_eq_zero_unitStride)
     using T = TypeParam;
     gtint_t invalid_n = 0;
     gtint_t unit_inc = 1;
-
-    // Initialize vectors with random numbers.
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
-    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
-
     // Initialize rho (BLIS output) to garbage value.
     T rho = T{-7.3};
-
     // Initialize the expected output to zero.
     T rho_ref;
     testinghelpers::initzero<T>(rho_ref);
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    dotv<T>( CONJ, CONJ, invalid_n, nullptr, unit_inc, nullptr, unit_inc, &rho );
+    // Computing the difference.
+    computediff<T>( "rho", rho, rho_ref );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize vectors with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
 
     // Invoking DOTV with an invalid value of n.
     dotv<T>( CONJ, CONJ, invalid_n, x.data(), unit_inc, y.data(), unit_inc, &rho );

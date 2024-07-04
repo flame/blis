@@ -61,164 +61,181 @@ using namespace testinghelpers::IIT;
 // When TRANS is invalid
 TYPED_TEST(imatcopy_IIT_ERS, invalid_transa)
 {
-  using T = TypeParam;
+    using T = TypeParam;
+    T alpha = T{2.3};
 
-  // Defining the A matrix with values for debugging purposes
-  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDA );
-  // Copy so that we check that the elements of A are not modified.
-  std::vector<T> A_ref(A);
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    imatcopy<T>( 'Q', M, N, alpha, nullptr, LDA, LDA );
 
-  T alpha = T{2.3};
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Defining the A matrix with values for debugging purposes
+    std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDA );
+    // Copy so that we check that the elements of A are not modified.
+    std::vector<T> A_ref(A);
 
-  // Call imatcopy with a invalid value for TRANS value for the operation.
-  imatcopy<T>( 'Q', M, N, alpha, A.data(), LDA, LDA );
-  // Use bitwise comparison (no threshold).
-  computediff<T>( "A", 'c', M, N, A.data(), A_ref.data(), LDA );
+    // Call imatcopy with a invalid value for TRANS value for the operation.
+    imatcopy<T>( 'Q', M, N, alpha, A.data(), LDA, LDA );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "A", 'c', M, N, A.data(), A_ref.data(), LDA );
 }
 
 // When m < 0
 TYPED_TEST(imatcopy_IIT_ERS, m_lt_zero)
 {
-  using T = TypeParam;
+    using T = TypeParam;
+    T alpha = T{2.3};
 
-  // Defining the A matrix with values for debugging purposes
-  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDA );
-  // Copy so that we check that the elements of A are not modified.
-  std::vector<T> A_ref(A);
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    imatcopy<T>( TRANS, -1, N, alpha, nullptr, LDA, LDA );
 
-  T alpha = T{2.3};
+    // Defining the A matrix with values for debugging purposes
+    std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDA );
+    // Copy so that we check that the elements of A are not modified.
+    std::vector<T> A_ref(A);
 
-  // Call imatcopy with a invalid m for the operation.
-  imatcopy<T>( TRANS, -1, N, alpha, A.data(), LDA, LDA );
-  // Use bitwise comparison (no threshold).
-  computediff<T>( "A", 'c', M, N, A.data(), A_ref.data(), LDA );
+    // Call imatcopy with a invalid m for the operation.
+    imatcopy<T>( TRANS, -1, N, alpha, A.data(), LDA, LDA );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "A", 'c', M, N, A.data(), A_ref.data(), LDA );
 }
 
 // When n < 0
 TYPED_TEST(imatcopy_IIT_ERS, n_lt_zero)
 {
-  using T = TypeParam;
+    using T = TypeParam;
+    T alpha = T{2.3};
 
-  // Defining the A matrix with values for debugging purposes
-  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDA );
-  // Copy so that we check that the elements of A are not modified.
-  std::vector<T> A_ref(A);
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    imatcopy<T>( TRANS, M, -1, alpha, nullptr, LDA, LDA );
 
-  T alpha = T{2.3};
+    // Defining the A matrix with values for debugging purposes
+    std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDA );
+    // Copy so that we check that the elements of A are not modified.
+    std::vector<T> A_ref(A);
 
-  // Call imatcopy with a invalid n for the operation.
-  imatcopy<T>( TRANS, M, -1, alpha, A.data(), LDA, LDA );
-  // Use bitwise comparison (no threshold).
-  computediff<T>( "A", 'c', M, N, A.data(), A_ref.data(), LDA );
+    // Call imatcopy with a invalid n for the operation.
+    imatcopy<T>( TRANS, M, -1, alpha, A.data(), LDA, LDA );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "A", 'c', M, N, A.data(), A_ref.data(), LDA );
 }
 
 // When lda < m
 TYPED_TEST(imatcopy_IIT_ERS, invalid_lda_in)
 {
-  using T = TypeParam;
+    using T = TypeParam;
+    T alpha = T{2.3};
 
-  // Having different values for m and n
-  gtint_t m = 10;
-  gtint_t n = 5;
+    // Having different values for m and n
+    gtint_t m = 10;
+    gtint_t n = 5;
 
-  // Defining the A matrix with values for debugging purposes
-  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
-  // Copy so that we check that the elements of A are not modified.
-  std::vector<T> A_ref(A);
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    imatcopy<T>( TRANS, m, n, alpha, nullptr, m - 1, m );
 
-  T alpha = T{2.3};
+    // Defining the A matrix with values for debugging purposes
+    std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
+    // Copy so that we check that the elements of A are not modified.
+    std::vector<T> A_ref(A);
 
-  // Call imatcopy with a invalid lda for the operation.
-  imatcopy<T>( 'n', m, n, alpha, A.data(), m - 1, m );
-  // Use bitwise comparison (no threshold).
-  computediff<T>( "A", 'c', m, n, A.data(), A_ref.data(), m );
+    // Call imatcopy with a invalid lda for the operation.
+    imatcopy<T>( 'n', m, n, alpha, A.data(), m - 1, m );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "A", 'c', m, n, A.data(), A_ref.data(), m );
 }
 
 // When lda_out < m, with trans == 'n'
 TYPED_TEST(imatcopy_IIT_ERS, invalid_lda_out_no_transpose)
 {
-  using T = TypeParam;
+    using T = TypeParam;
+    T alpha = T{2.3};
 
-  // Having different values for m and n
-  gtint_t m = 10;
-  gtint_t n = 5;
+    // Having different values for m and n
+    gtint_t m = 10;
+    gtint_t n = 5;
 
-  // Defining the A matrix with values for debugging purposes
-  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
-  // Copy so that we check that the elements of A are not modified.
-  std::vector<T> A_ref(A);
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    imatcopy<T>( 'n', m, n, alpha, nullptr, m, m-1 );
 
-  T alpha = T{2.3};
+    // Defining the A matrix with values for debugging purposes
+    std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
+    // Copy so that we check that the elements of A are not modified.
+    std::vector<T> A_ref(A);
 
-  // Call imatcopy with a invalid lda for the operation.
-  imatcopy<T>( 'n', m, n, alpha, A.data(), m, m-1 );
-  // Use bitwise comparison (no threshold).
-  computediff<T>( "A", 'c', m, n, A.data(), A_ref.data(), m );
+    // Call imatcopy with a invalid lda for the operation.
+    imatcopy<T>( 'n', m, n, alpha, A.data(), m, m-1 );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "A", 'c', m, n, A.data(), A_ref.data(), m );
 }
 
 // When lda_out < m, with trans == 'r'
 TYPED_TEST(imatcopy_IIT_ERS, invalid_lda_out_conjugate)
 {
-   using T = TypeParam;
+    using T = TypeParam;
+    T alpha = T{2.3};
 
-  // Having different values for m and n
-  gtint_t m = 10;
-  gtint_t n = 5;
+    // Having different values for m and n
+    gtint_t m = 10;
+    gtint_t n = 5;
 
-  // Defining the A matrix with values for debugging purposes
-  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
-  // Copy so that we check that the elements of A are not modified.
-  std::vector<T> A_ref(A);
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    imatcopy<T>( 'r', m, n, alpha, nullptr, m, m-1 );
 
-  T alpha = T{2.3};
+    // Defining the A matrix with values for debugging purposes
+    std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
+    // Copy so that we check that the elements of A are not modified.
+    std::vector<T> A_ref(A);
 
-  // Call imatcopy with a invalid lda for the operation.
-  imatcopy<T>( 'r', m, n, alpha, A.data(), m, m-1 );
-  // Use bitwise comparison (no threshold).
-  computediff<T>( "A", 'c', m, n, A.data(), A_ref.data(), m );
+    // Call imatcopy with a invalid lda for the operation.
+    imatcopy<T>( 'r', m, n, alpha, A.data(), m, m-1 );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "A", 'c', m, n, A.data(), A_ref.data(), m );
 }
 
 // When lda_out < m, with trans == 't'
 TYPED_TEST(imatcopy_IIT_ERS, invalid_lda_out_transpose)
 {
-   using T = TypeParam;
+    using T = TypeParam;
+    T alpha = T{2.3};
 
-  // Having different values for m and n
-  gtint_t m = 10;
-  gtint_t n = 5;
+    // Having different values for m and n
+    gtint_t m = 10;
+    gtint_t n = 5;
 
-  // Defining the A matrix with values for debugging purposes
-  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
-  // Copy so that we check that the elements of A are not modified.
-  std::vector<T> A_ref(A);
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    imatcopy<T>( 't', m, n, alpha, nullptr, m, n-1 );
 
-  T alpha = T{2.3};
+    // Defining the A matrix with values for debugging purposes
+    std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
+    // Copy so that we check that the elements of A are not modified.
+    std::vector<T> A_ref(A);
 
-  // Call imatcopy with a invalid lda for the operation.
-  imatcopy<T>( 'n', m, n, alpha, A.data(), m, n-1 );
-  // Use bitwise comparison (no threshold).
-  computediff<T>( "A", 'c', m, n, A.data(), A_ref.data(), m );
+    // Call imatcopy with a invalid lda for the operation.
+    imatcopy<T>( 't', m, n, alpha, A.data(), m, n-1 );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "A", 'c', m, n, A.data(), A_ref.data(), m );
 }
 
 // When lda_out < m, with trans == 'c'
 TYPED_TEST(imatcopy_IIT_ERS, invalid_lda_out_conjugate_transpose)
 {
-   using T = TypeParam;
+    using T = TypeParam;
+    T alpha = T{2.3};
 
-  // Having different values for m and n
-  gtint_t m = 10;
-  gtint_t n = 5;
+    // Having different values for m and n
+    gtint_t m = 10;
+    gtint_t n = 5;
 
-  // Defining the A matrix with values for debugging purposes
-  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
-  // Copy so that we check that the elements of A are not modified.
-  std::vector<T> A_ref(A);
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    imatcopy<T>( 'c', m, n, alpha, nullptr, m, n-1 );
 
-  T alpha = T{2.3};
+    // Defining the A matrix with values for debugging purposes
+    std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
+    // Copy so that we check that the elements of A are not modified.
+    std::vector<T> A_ref(A);
 
-  // Call imatcopy with a invalid lda for the operation.
-  imatcopy<T>( 'n', m, n, alpha, A.data(), m, n-1 );
-  // Use bitwise comparison (no threshold).
-  computediff<T>( "A", 'c', m, n, A.data(), A_ref.data(), m );
+    // Call imatcopy with a invalid lda for the operation.
+    imatcopy<T>( 'c', m, n, alpha, A.data(), m, n-1 );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "A", 'c', m, n, A.data(), A_ref.data(), m );
 }
 #endif

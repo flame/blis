@@ -63,219 +63,254 @@ using namespace testinghelpers::IIT;
 // When TRANS is invalid
 TYPED_TEST(omatcopy2_IIT_ERS, invalid_transa)
 {
-  using T = TypeParam;
-  // Defining the A and B matrices with values for debugging purposes
-  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDA );
-  std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDB );
-  // Copy so that we check that the elements of B are not modified.
-  std::vector<T> B_ref(B);
+    using T = TypeParam;
+    T alpha;
+    testinghelpers::initone<T>( alpha );
 
-  T alpha;
-  testinghelpers::initone<T>( alpha );
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    omatcopy2<T>( 'Q', M, N, alpha, nullptr, LDA, 1, nullptr, LDB, 1 );
 
-  // Call OMATCOPY2 with a invalid value for TRANS value for the operation.
-  omatcopy2<T>( 'Q', M, N, alpha, A.data(), LDA, 1, B.data(), LDB, 1 );
-  // Use bitwise comparison (no threshold).
-  computediff<T>( "B", 'c', M, N, B.data(), B_ref.data(), LDB );
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Defining the A and B matrices with values for debugging purposes
+    std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDA );
+    std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDB );
+    // Copy so that we check that the elements of B are not modified.
+    std::vector<T> B_ref(B);
+
+    // Call OMATCOPY2 with a invalid value for TRANS value for the operation.
+    omatcopy2<T>( 'Q', M, N, alpha, A.data(), LDA, 1, B.data(), LDB, 1 );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "B", 'c', M, N, B.data(), B_ref.data(), LDB );
 }
 
 // When m < 0
 TYPED_TEST(omatcopy2_IIT_ERS, m_lt_zero)
 {
-  using T = TypeParam;
-  // Defining the A and B matrices with values for debugging purposes
-  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDA );
-  std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDB );
-  // Copy so that we check that the elements of B are not modified.
-  std::vector<T> B_ref(B);
+    using T = TypeParam;
+    T alpha;
+    testinghelpers::initone<T>( alpha );
 
-  T alpha;
-  testinghelpers::initone<T>( alpha );
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    omatcopy2<T>( TRANS, -1, N, alpha, nullptr, LDA, 1, nullptr, LDB, 1 );
 
-  // Call OMATCOPY2 with a invalid m for the operation.
-  omatcopy2<T>( TRANS, -1, N, alpha, A.data(), LDA, 1, B.data(), LDB, 1 );
-  // Use bitwise comparison (no threshold).
-  computediff<T>( "B", 'c', M, N, B.data(), B_ref.data(), LDB );
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Defining the A and B matrices with values for debugging purposes
+    std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDA );
+    std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDB );
+    // Copy so that we check that the elements of B are not modified.
+    std::vector<T> B_ref(B);
+
+    // Call OMATCOPY2 with a invalid m for the operation.
+    omatcopy2<T>( TRANS, -1, N, alpha, A.data(), LDA, 1, B.data(), LDB, 1 );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "B", 'c', M, N, B.data(), B_ref.data(), LDB );
 }
 
 // When n < 0
 TYPED_TEST(omatcopy2_IIT_ERS, n_lt_zero)
 {
-  using T = TypeParam;
-  // Defining the A and B matrices with values for debugging purposes
-  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDA );
-  std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDB );
-  // Copy so that we check that the elements of B are not modified.
-  std::vector<T> B_ref(B);
+    using T = TypeParam;
+    T alpha;
+    testinghelpers::initone<T>( alpha );
 
-  T alpha;
-  testinghelpers::initone<T>( alpha );
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    omatcopy2<T>( TRANS, M, -1, alpha, nullptr, LDA, 1, nullptr, LDB, 1 );
 
-  // Call OMATCOPY2 with a invalid n for the operation.
-  omatcopy2<T>( TRANS, M, -1, alpha, A.data(), LDA, 1, B.data(), LDB, 1 );
-  // Use bitwise comparison (no threshold).
-  computediff<T>( "B", 'c', M, N, B.data(), B_ref.data(), LDB );
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Defining the A and B matrices with values for debugging purposes
+    std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDA );
+    std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDB );
+    // Copy so that we check that the elements of B are not modified.
+    std::vector<T> B_ref(B);
+
+    // Call OMATCOPY2 with a invalid n for the operation.
+    omatcopy2<T>( TRANS, M, -1, alpha, A.data(), LDA, 1, B.data(), LDB, 1 );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "B", 'c', M, N, B.data(), B_ref.data(), LDB );
 }
 
 // When lda < m
 TYPED_TEST(omatcopy2_IIT_ERS, invalid_lda)
 {
-  using T = TypeParam;
+    using T = TypeParam;
+    T alpha;
+    testinghelpers::initone<T>( alpha );
 
-  // Having different values for m and n
-  gtint_t m = 5;
-  gtint_t n = 10;
+    // Having different values for m and n
+    gtint_t m = 5;
+    gtint_t n = 10;
 
-  // Defining the A and B matrices with values for debugging purposes
-  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
-  std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
-  // Copy so that we check that the elements of B are not modified.
-  std::vector<T> B_ref(B);
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    omatcopy2<T>( 'n', m, n, alpha, nullptr, m - 1, 1, nullptr, m, 1 );
 
-  T alpha;
-  testinghelpers::initone<T>( alpha );
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Defining the A and B matrices with values for debugging purposes
+    std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
+    std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
+    // Copy so that we check that the elements of B are not modified.
+    std::vector<T> B_ref(B);
 
-  // Call OMATCOPY2 with a invalid lda for the operation.
-  omatcopy2<T>( 'n', m, n, alpha, A.data(), m - 1, 1, B.data(), m, 1 );
-  // Use bitwise comparison (no threshold).
-  computediff<T>( "B", 'c', m, n, B.data(), B_ref.data(), m );
+    // Call OMATCOPY2 with a invalid lda for the operation.
+    omatcopy2<T>( 'n', m, n, alpha, A.data(), m - 1, 1, B.data(), m, 1 );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "B", 'c', m, n, B.data(), B_ref.data(), m );
 }
 
 // When stridea < 1
 TYPED_TEST(omatcopy2_IIT_ERS, invalid_stridea)
 {
-  using T = TypeParam;
-  // Defining the A and B matrices with values for debugging purposes
-  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDA );
-  std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDB );
-  // Copy so that we check that the elements of B are not modified.
-  std::vector<T> B_ref(B);
+    using T = TypeParam;
+    T alpha;
+    testinghelpers::initone<T>( alpha );
 
-  T alpha;
-  testinghelpers::initone<T>( alpha );
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    omatcopy2<T>( TRANS, M, N, alpha, nullptr, LDA, 0, nullptr, LDB, 1 );
 
-  // Call OMATCOPY2 with a invalid n for the operation.
-  omatcopy2<T>( TRANS, M, N, alpha, A.data(), LDA, 0, B.data(), LDB, 1 );
-  // Use bitwise comparison (no threshold).
-  computediff<T>( "B", 'c', M, N, B.data(), B_ref.data(), LDB );
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Defining the A and B matrices with values for debugging purposes
+    std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDA );
+    std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDB );
+    // Copy so that we check that the elements of B are not modified.
+    std::vector<T> B_ref(B);
+
+    // Call OMATCOPY2 with a invalid n for the operation.
+    omatcopy2<T>( TRANS, M, N, alpha, A.data(), LDA, 0, B.data(), LDB, 1 );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "B", 'c', M, N, B.data(), B_ref.data(), LDB );
 }
 
 // When ldb < m, with trans == 'n'
 TYPED_TEST(omatcopy2_IIT_ERS, invalid_ldb_no_transpose)
 {
-  using T = TypeParam;
+    using T = TypeParam;
+    T alpha;
+    testinghelpers::initone<T>( alpha );
 
-  // Having different values for m and n
-  gtint_t m = 5;
-  gtint_t n = 10;
-  char trans = 'n';
+    // Having different values for m and n
+    gtint_t m = 5;
+    gtint_t n = 10;
+    char trans = 'n';
 
-  // Defining the A and B matrices with values for debugging purposes
-  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
-  std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
-  // Copy so that we check that the elements of B are not modified.
-  std::vector<T> B_ref(B);
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    omatcopy2<T>( trans, m, n, alpha, nullptr, m, 1, nullptr, m - 1, 1 );
 
-  T alpha;
-  testinghelpers::initone<T>( alpha );
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Defining the A and B matrices with values for debugging purposes
+    std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
+    std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
+    // Copy so that we check that the elements of B are not modified.
+    std::vector<T> B_ref(B);
 
-  // Call OMATCOPY2 with a invalid ldb for the operation.
-  omatcopy2<T>( trans, m, n, alpha, A.data(), m, 1, B.data(), m - 1, 1 );
-  // Use bitwise comparison (no threshold).
-  computediff<T>( "B", 'c', m, n, B.data(), B_ref.data(), m );
+    // Call OMATCOPY2 with a invalid ldb for the operation.
+    omatcopy2<T>( trans, m, n, alpha, A.data(), m, 1, B.data(), m - 1, 1 );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "B", 'c', m, n, B.data(), B_ref.data(), m );
 }
 
 // When ldb < m, with trans == 'r'
 TYPED_TEST(omatcopy2_IIT_ERS, invalid_ldb_conjugate)
 {
-  using T = TypeParam;
+    using T = TypeParam;
+    T alpha;
+    testinghelpers::initone<T>( alpha );
 
-  // Having different values for m and n
-  gtint_t m = 5;
-  gtint_t n = 10;
-  char trans = 'r';
+    // Having different values for m and n
+    gtint_t m = 5;
+    gtint_t n = 10;
+    char trans = 'r';
 
-  // Defining the A and B matrices with values for debugging purposes
-  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
-  std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
-  // Copy so that we check that the elements of B are not modified.
-  std::vector<T> B_ref(B);
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    omatcopy2<T>( trans, m, n, alpha, nullptr, m, 1, nullptr, m - 1, 1 );
 
-  T alpha;
-  testinghelpers::initone<T>( alpha );
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Defining the A and B matrices with values for debugging purposes
+    std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
+    std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
+    // Copy so that we check that the elements of B are not modified.
+    std::vector<T> B_ref(B);
 
-  // Call OMATCOPY2 with a invalid ldb for the operation.
-  omatcopy2<T>( trans, m, n, alpha, A.data(), m, 1, B.data(), m - 1, 1 );
-  // Use bitwise comparison (no threshold).
-  computediff<T>( "B", 'c', m, n, B.data(), B_ref.data(), m );
+    // Call OMATCOPY2 with a invalid ldb for the operation.
+    omatcopy2<T>( trans, m, n, alpha, A.data(), m, 1, B.data(), m - 1, 1 );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "B", 'c', m, n, B.data(), B_ref.data(), m );
 }
 
 // When ldb < m, with trans == 't'
 TYPED_TEST(omatcopy2_IIT_ERS, invalid_ldb_transpose)
 {
-  using T = TypeParam;
+    using T = TypeParam;
+    T alpha;
+    testinghelpers::initone<T>( alpha );
 
-  // Having different values for m and n
-  gtint_t m = 5;
-  gtint_t n = 10;
-  char trans = 't';
+    // Having different values for m and n
+    gtint_t m = 5;
+    gtint_t n = 10;
+    char trans = 't';
 
-  // Defining the A and B matrices with values for debugging purposes
-  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
-  std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 't', m, n, n );
-  // Copy so that we check that the elements of B are not modified.
-  std::vector<T> B_ref(B);
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    omatcopy2<T>( trans, m, n, alpha, nullptr, m, 1, nullptr, n - 1, 1 );
 
-  T alpha;
-  testinghelpers::initone<T>( alpha );
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Defining the A and B matrices with values for debugging purposes
+    std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
+    std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 't', m, n, n );
+    // Copy so that we check that the elements of B are not modified.
+    std::vector<T> B_ref(B);
 
-  // Call OMATCOPY2 with a invalid ldb for the operation.
-  omatcopy2<T>( trans, m, n, alpha, A.data(), m, 1, B.data(), n - 1, 1 );
-  // Use bitwise comparison (no threshold).
-  computediff<T>( "B", 'c', n, m, B.data(), B_ref.data(), n );
+    // Call OMATCOPY2 with a invalid ldb for the operation.
+    omatcopy2<T>( trans, m, n, alpha, A.data(), m, 1, B.data(), n - 1, 1 );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "B", 'c', n, m, B.data(), B_ref.data(), n );
 }
 
 // When ldb < m, with trans == 'c'
 TYPED_TEST(omatcopy2_IIT_ERS, invalid_ldb_conjugate_transpose)
 {
-  using T = TypeParam;
+    using T = TypeParam;
+    T alpha;
+    testinghelpers::initone<T>( alpha );
 
-  // Having different values for m and n
-  gtint_t m = 5;
-  gtint_t n = 10;
-  char trans = 'c';
+    // Having different values for m and n
+    gtint_t m = 5;
+    gtint_t n = 10;
+    char trans = 'c';
 
-  // Defining the A and B matrices with values for debugging purposes
-  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
-  std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 't', m, n, n );
-  // Copy so that we check that the elements of B are not modified.
-  std::vector<T> B_ref(B);
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    omatcopy2<T>( trans, m, n, alpha, nullptr, m, 1, nullptr, n - 1, 1 );
 
-  T alpha;
-  testinghelpers::initone<T>( alpha );
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Defining the A and B matrices with values for debugging purposes
+    std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', m, n, m );
+    std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 't', m, n, n );
+    // Copy so that we check that the elements of B are not modified.
+    std::vector<T> B_ref(B);
 
-  // Call OMATCOPY2 with a invalid ldb for the operation.
-  omatcopy2<T>( trans, m, n, alpha, A.data(), m, 1, B.data(), n - 1, 1 );
-  // Use bitwise comparison (no threshold).
-  computediff<T>( "B", 'c', n, m, B.data(), B_ref.data(), n );
+    // Call OMATCOPY2 with a invalid ldb for the operation.
+    omatcopy2<T>( trans, m, n, alpha, A.data(), m, 1, B.data(), n - 1, 1 );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "B", 'c', n, m, B.data(), B_ref.data(), n );
 }
 
 // When strideb < 1
 TYPED_TEST(omatcopy2_IIT_ERS, invalid_strideb)
 {
-  using T = TypeParam;
-  // Defining the A and B matrices with values for debugging purposes
-  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDA );
-  std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDB );
-  // Copy so that we check that the elements of B are not modified.
-  std::vector<T> B_ref(B);
+    using T = TypeParam;
+    T alpha;
+    testinghelpers::initone<T>( alpha );
 
-  T alpha;
-  testinghelpers::initone<T>( alpha );
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    omatcopy2<T>( TRANS, M, N, alpha, nullptr, LDA, 1, nullptr, LDB, 0 );
 
-  // Call OMATCOPY2 with a invalid n for the operation.
-  omatcopy2<T>( TRANS, M, N, alpha, A.data(), LDA, 1, B.data(), LDB, 0 );
-  // Use bitwise comparison (no threshold).
-  computediff<T>( "B", 'c', M, N, B.data(), B_ref.data(), LDB );
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Defining the A and B matrices with values for debugging purposes
+    std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDA );
+    std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDB );
+    // Copy so that we check that the elements of B are not modified.
+    std::vector<T> B_ref(B);
+
+    // Call OMATCOPY2 with a invalid n for the operation.
+    omatcopy2<T>( TRANS, M, N, alpha, A.data(), LDA, 1, B.data(), LDB, 0 );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "B", 'c', M, N, B.data(), B_ref.data(), LDB );
 }
 #endif

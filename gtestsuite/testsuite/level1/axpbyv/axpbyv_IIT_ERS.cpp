@@ -62,14 +62,19 @@ using namespace testinghelpers::IIT;
 TYPED_TEST(axpbyv_IIT_ERS, n_lt_zero_nonUnitStrides)
 {
   using T = TypeParam;
+  T alpha, beta;
+  testinghelpers::initone<T>( alpha );
+  testinghelpers::initzero<T>( beta );
+
+  // Test with nullptr for all suitable arguments that shouldn't be accessed.
+  axpbyv<T>( CONJ, -1, alpha, nullptr, 5, beta, nullptr, 5 );
+
+  // Test with all arguments correct except for the value we are choosing to test.
   // Defining the x vector
   std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 5 );
   // Defining the y vector with values for debugging purposes
   std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, 5 );
 
-  T alpha, beta;
-  testinghelpers::initone<T>( alpha );
-  testinghelpers::initzero<T>( beta );
   // Copy so that we check that the elements of y are not modified.
   std::vector<T> y_ref(y);
 
@@ -82,14 +87,19 @@ TYPED_TEST(axpbyv_IIT_ERS, n_lt_zero_nonUnitStrides)
 TYPED_TEST(axpbyv_IIT_ERS, n_eq_zero_nonUnitStrides)
 {
   using T = TypeParam;
+  T alpha, beta;
+  testinghelpers::initone<T>( alpha );
+  testinghelpers::initzero<T>( beta );
+
+  // Test with nullptr for all suitable arguments that shouldn't be accessed.
+  axpbyv<T>( CONJ, 0, alpha, nullptr, 5, beta, nullptr, 5 );
+
+  // Test with all arguments correct except for the value we are choosing to test.
   // Defining the x vector
   std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 5 );
   // Defining the y vector with values for debugging purposes
   std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, 5 );
 
-  T alpha, beta;
-  testinghelpers::initone<T>( alpha );
-  testinghelpers::initzero<T>( beta );
   // Copy so that we check that the elements of y are not modified.
   std::vector<T> y_ref(y);
 
@@ -102,14 +112,19 @@ TYPED_TEST(axpbyv_IIT_ERS, n_eq_zero_nonUnitStrides)
 TYPED_TEST(axpbyv_IIT_ERS, alpha_eq_zero_beta_eq_one_nonUnitStrides)
 {
   using T = TypeParam;
+  T alpha, beta;
+  testinghelpers::initzero<T>( alpha );
+  testinghelpers::initone<T>( beta );
+
+  // Test with nullptr for all suitable arguments that shouldn't be accessed.
+  axpbyv<T>( CONJ, N, alpha, nullptr, 5, beta, nullptr, 5 );
+
+  // Test with all arguments correct except for the value we are choosing to test.
   // Defining the x vector
   std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 5 );
   // Defining the y vector with values for debugging purposes
   std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, 5 );
 
-  T alpha, beta;
-  testinghelpers::initzero<T>( alpha );
-  testinghelpers::initone<T>( beta );
   // Copy so that we check that the elements of y are not modified.
   std::vector<T> y_ref(y);
 
@@ -123,14 +138,19 @@ TYPED_TEST(axpbyv_IIT_ERS, alpha_eq_zero_beta_eq_one_nonUnitStrides)
 TYPED_TEST(axpbyv_IIT_ERS, n_lt_zero_unitStrides)
 {
   using T = TypeParam;
+  T alpha, beta;
+  testinghelpers::initone<T>( alpha );
+  testinghelpers::initzero<T>( beta );
+
+  // Test with nullptr for all suitable arguments that shouldn't be accessed.
+  axpbyv<T>( CONJ, -1, alpha, nullptr, 1, beta, nullptr, 1 );
+
+  // Test with all arguments correct except for the value we are choosing to test.
   // Defining the x vector
   std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
   // Defining the y vector with values for debugging purposes
   std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
 
-  T alpha, beta;
-  testinghelpers::initone<T>( alpha );
-  testinghelpers::initzero<T>( beta );
   // Copy so that we check that the elements of y are not modified.
   std::vector<T> y_ref(y);
 
@@ -143,14 +163,19 @@ TYPED_TEST(axpbyv_IIT_ERS, n_lt_zero_unitStrides)
 TYPED_TEST(axpbyv_IIT_ERS, n_eq_zero_unitStrides)
 {
   using T = TypeParam;
+  T alpha, beta;
+  testinghelpers::initone<T>( alpha );
+  testinghelpers::initzero<T>( beta );
+
+  // Test with nullptr for all suitable arguments that shouldn't be accessed.
+  axpbyv<T>( CONJ, 0, alpha, nullptr, 1, beta, nullptr, 1 );
+
+  // Test with all arguments correct except for the value we are choosing to test.
   // Defining the x vector
   std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
   // Defining the y vector with values for debugging purposes
   std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
 
-  T alpha, beta;
-  testinghelpers::initone<T>( alpha );
-  testinghelpers::initzero<T>( beta );
   // Copy so that we check that the elements of y are not modified.
   std::vector<T> y_ref(y);
 
@@ -163,14 +188,19 @@ TYPED_TEST(axpbyv_IIT_ERS, n_eq_zero_unitStrides)
 TYPED_TEST(axpbyv_IIT_ERS, alpha_eq_zero_beta_eq_one_unitStrides)
 {
   using T = TypeParam;
+  T alpha, beta;
+  testinghelpers::initzero<T>( alpha );
+  testinghelpers::initone<T>( beta );
+
+  // Test with nullptr for all suitable arguments that shouldn't be accessed.
+  axpbyv<T>( CONJ, N, alpha, nullptr, 1, beta, nullptr, 1 );
+
+  // Test with all arguments correct except for the value we are choosing to test.
   // Defining the x vector
   std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
   // Defining the y vector with values for debugging purposes
   std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
 
-  T alpha, beta;
-  testinghelpers::initzero<T>( alpha );
-  testinghelpers::initone<T>( beta );
   // Copy so that we check that the elements of y are not modified.
   std::vector<T> y_ref(y);
 

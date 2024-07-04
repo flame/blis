@@ -45,10 +45,51 @@ class trsv_IIT_ERS : public ::testing::Test {};
 typedef ::testing::Types<float, double, scomplex, dcomplex> TypeParam;
 TYPED_TEST_SUITE(trsv_IIT_ERS, TypeParam);
 
-
-#ifdef TEST_BLAS
-
+// Adding namespace to get default parameters(valid case) from testinghelpers/common/wrong_input_helpers.h.
 using namespace testinghelpers::IIT;
+
+#if defined(TEST_CBLAS)
+#define INFO_OFFSET 1
+#else
+#define INFO_OFFSET 0
+#endif
+
+#if defined(TEST_CBLAS)
+
+/**
+ * @brief Test TRSV when STORAGE argument is incorrect
+ *        when info == 1
+ *
+ */
+TYPED_TEST(trsv_IIT_ERS, invalid_storage)
+{
+    using T = TypeParam;
+    T alpha = T{1};
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    trsv<T>( 'x', UPLO, TRANS, DIAG, N, &alpha, nullptr, LDA, nullptr, INC);
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 1 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, STORAGE, TRANS, M, N, LDA);
+    std::vector<T> x = testinghelpers::get_random_vector<T>(0, 1, N, INC);
+    std::vector<T> x_ref(x);
+
+    trsv<T>( 'x', UPLO, TRANS, DIAG, N, &alpha, a.data(), LDA, x.data(), INC);
+    computediff<T>( "x", N, x.data(), x_ref.data(), INC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 1 );
+#endif
+}
+
+#endif
+
+#if defined(TEST_BLAS) || defined(TEST_CBLAS)
 
 /*
     Incorrect Input Testing(IIT)
@@ -73,15 +114,24 @@ TYPED_TEST(trsv_IIT_ERS, invalid_UPLO)
     using T = TypeParam;
     T alpha = T{1};
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    trsv<T>( STORAGE, 'A', TRANS, DIAG, N, &alpha, nullptr, LDA, nullptr, INC);
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, INFO_OFFSET+1 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, STORAGE, TRANS, M, N, LDA);
     std::vector<T> x = testinghelpers::get_random_vector<T>(0, 1, N, INC);
     std::vector<T> x_ref(x);
 
-    trsv<T>( STORAGE, 'A', TRANS, DIAG, N, &alpha, nullptr, LDA, x.data(), INC);
+    trsv<T>( STORAGE, 'A', TRANS, DIAG, N, &alpha, a.data(), LDA, x.data(), INC);
     computediff<T>( "x", N, x.data(), x_ref.data(), INC );
 
 #ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
-    computediff<gtint_t>( "info", info, 1 );
+    info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, INFO_OFFSET+1 );
 #endif
 }
 
@@ -95,15 +145,24 @@ TYPED_TEST(trsv_IIT_ERS, invalid_TRANS)
     using T = TypeParam;
     T alpha = T{1};
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    trsv<T>( STORAGE, UPLO, 'A', DIAG, N, &alpha, nullptr, LDA, nullptr, INC);
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, INFO_OFFSET+2 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, STORAGE, TRANS, M, N, LDA);
     std::vector<T> x = testinghelpers::get_random_vector<T>(0, 1, N, INC);
     std::vector<T> x_ref(x);
 
-    trsv<T>( STORAGE, UPLO, 'A', DIAG, N, &alpha, nullptr, LDA, x.data(), INC);
+    trsv<T>( STORAGE, UPLO, 'A', DIAG, N, &alpha, a.data(), LDA, x.data(), INC);
     computediff<T>( "x", N, x.data(), x_ref.data(), INC );
 
 #ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
-    computediff<gtint_t>( "info", info, 2 );
+    info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, INFO_OFFSET+2 );
 #endif
 }
 
@@ -116,15 +175,24 @@ TYPED_TEST(trsv_IIT_ERS, invalid_DIAG)
     using T = TypeParam;
     T alpha = T{1};
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    trsv<T>( STORAGE, UPLO, TRANS, 'A', N, &alpha, nullptr, LDA, nullptr, INC);
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, INFO_OFFSET+3 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, STORAGE, TRANS, M, N, LDA);
     std::vector<T> x = testinghelpers::get_random_vector<T>(0, 1, N, INC);
     std::vector<T> x_ref(x);
 
-    trsv<T>( STORAGE, UPLO, TRANS, 'A', N, &alpha, nullptr, LDA, x.data(), INC);
+    trsv<T>( STORAGE, UPLO, TRANS, 'A', N, &alpha, a.data(), LDA, x.data(), INC);
     computediff<T>( "x", N, x.data(), x_ref.data(), INC );
 
 #ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
-    computediff<gtint_t>( "info", info, 3 );
+    info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, INFO_OFFSET+3 );
 #endif
 }
 
@@ -137,14 +205,23 @@ TYPED_TEST(trsv_IIT_ERS, invalid_n)
     using T = TypeParam;
     T alpha = T{1};
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    trsv<T>( STORAGE, UPLO, TRANS, DIAG, -1, &alpha, nullptr, LDA, nullptr, INC);
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 4 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, STORAGE, TRANS, M, N, LDA);
     std::vector<T> x = testinghelpers::get_random_vector<T>(0, 1, N, INC);
     std::vector<T> x_ref(x);
 
-    trsv<T>( STORAGE, UPLO, TRANS, DIAG, -1, &alpha, nullptr, LDA, x.data(), INC);
+    trsv<T>( STORAGE, UPLO, TRANS, DIAG, -1, &alpha, a.data(), LDA, x.data(), INC);
     computediff<T>( "x", N, x.data(), x_ref.data(), INC );
 
 #ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
+    info = bli_info_get_info_value();
     computediff<gtint_t>( "info", info, 4 );
 #endif
 }
@@ -159,14 +236,23 @@ TYPED_TEST(trsv_IIT_ERS, invalid_lda)
     using T = TypeParam;
     T alpha = T{1};
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    trsv<T>( STORAGE, UPLO, TRANS, DIAG, N, &alpha, nullptr, LDA - 1, nullptr, INC);
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 6 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, STORAGE, TRANS, M, N, LDA);
     std::vector<T> x = testinghelpers::get_random_vector<T>(0, 1, N, INC);
     std::vector<T> x_ref(x);
 
-    trsv<T>( STORAGE, UPLO, TRANS, DIAG, N, &alpha, nullptr, LDA - 1, x.data(), INC);
+    trsv<T>( STORAGE, UPLO, TRANS, DIAG, N, &alpha, a.data(), LDA - 1, x.data(), INC);
     computediff<T>( "x", N, x.data(), x_ref.data(), INC );
 
 #ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
+    info = bli_info_get_info_value();
     computediff<gtint_t>( "info", info, 6 );
 #endif
 }
@@ -180,14 +266,23 @@ TYPED_TEST(trsv_IIT_ERS, invalid_incx)
     using T = TypeParam;
     T alpha = T{1};
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    trsv<T>( STORAGE, UPLO, TRANS, DIAG, N, &alpha, nullptr, LDA, nullptr, 0);
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 8 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, STORAGE, TRANS, M, N, LDA);
     std::vector<T> x = testinghelpers::get_random_vector<T>(0, 1, N, INC);
     std::vector<T> x_ref(x);
 
-    trsv<T>( STORAGE, UPLO, TRANS, DIAG, N, &alpha, nullptr, LDA, x.data(), 0);
+    trsv<T>( STORAGE, UPLO, TRANS, DIAG, N, &alpha, a.data(), LDA, x.data(), 0);
     computediff<T>( "x", N, x.data(), x_ref.data(), INC );
 
 #ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
+    info = bli_info_get_info_value();
     computediff<gtint_t>( "info", info, 8 );
 #endif
 }
@@ -210,14 +305,23 @@ TYPED_TEST(trsv_IIT_ERS, n_eq_zero)
     using T = TypeParam;
     T alpha = T{1};
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    trsv<T>( STORAGE, UPLO, TRANS, DIAG, 0, &alpha, nullptr, LDA, nullptr, INC);
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, STORAGE, TRANS, M, N, LDA);
     std::vector<T> x = testinghelpers::get_random_vector<T>(0, 1, N, INC);
     std::vector<T> x_ref(x);
 
-    trsv<T>( STORAGE, UPLO, TRANS, DIAG, 0, &alpha, nullptr, LDA, x.data(), INC);
+    trsv<T>( STORAGE, UPLO, TRANS, DIAG, 0, &alpha, a.data(), LDA, x.data(), INC);
     computediff<T>( "x", N, x.data(), x_ref.data(), INC );
 
 #ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
+    info = bli_info_get_info_value();
     computediff<gtint_t>( "info", info, 0 );
 #endif
 }

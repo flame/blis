@@ -61,6 +61,10 @@ TYPED_TEST(swapv_IIT_ERS, n_lt_zero_nonUnitStride)
   gtint_t invalid_n = -1;
   gtint_t inc = 5;
 
+  // Test with nullptr for all suitable arguments that shouldn't be accessed.
+  swapv<T>( invalid_n,  nullptr, inc, nullptr, inc );
+
+  // Test with all arguments correct except for the value we are choosing to test.
   // Defining the X & Y vectors with values for debugging purposes
   std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
   std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
@@ -82,6 +86,10 @@ TYPED_TEST(swapv_IIT_ERS, n_lt_zero_unitStride)
   gtint_t invalid_n = -1;
   gtint_t inc = 1;
 
+  // Test with nullptr for all suitable arguments that shouldn't be accessed.
+  swapv<T>( invalid_n,  nullptr, inc, nullptr, inc );
+
+  // Test with all arguments correct except for the value we are choosing to test.
   // Defining the X & Y vectors with values for debugging purposes
   std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
   std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
@@ -103,6 +111,10 @@ TYPED_TEST(swapv_IIT_ERS, n_eq_zero_nonUnitStride)
   gtint_t invalid_n = 0;
   gtint_t inc = 2;
 
+  // Test with nullptr for all suitable arguments that shouldn't be accessed.
+  swapv<T>( invalid_n,  nullptr, inc, nullptr, inc );
+
+  // Test with all arguments correct except for the value we are choosing to test.
   // Defining the X & Y vectors with values for debugging purposes
   std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
   std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
@@ -124,6 +136,10 @@ TYPED_TEST(swapv_IIT_ERS, n_eq_zero_unitStride)
   gtint_t invalid_n = 0;
   gtint_t inc = 1;
 
+  // Test with nullptr for all suitable arguments that shouldn't be accessed.
+  swapv<T>( invalid_n,  nullptr, inc, nullptr, inc );
+
+  // Test with all arguments correct except for the value we are choosing to test.
   // Defining the X & Y vectors with values for debugging purposes
   std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
   std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, N, inc );

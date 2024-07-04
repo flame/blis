@@ -62,16 +62,20 @@ TYPED_TEST(asumv_IIT_ERS, n_lt_zero_nonUnitStride)
     using RT = typename testinghelpers::type_info<T>::real_type;
     gtint_t invalid_n = -1;
     gtint_t inc = 5;
-
-    // Initialize x vector with random numbers.
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
-
     // Initialize asum (BLIS output) to garbage value.
     RT asum = RT{-7.3};
-
     // Initialize the expected output to zero.
     RT asum_ref;
     testinghelpers::initzero<RT>(asum_ref);
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    asum = asumv<T>( invalid_n, nullptr, inc );
+    // Computing the difference.
+    computediff<RT>( "asum", asum, asum_ref );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize x vector with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
 
     // Invoking asumV with an invalid value of n.
     asum = asumv<T>( invalid_n, x.data(), inc );
@@ -87,16 +91,20 @@ TYPED_TEST(asumv_IIT_ERS, n_eq_zero_nonUnitStride)
     using RT = typename testinghelpers::type_info<T>::real_type;
     gtint_t invalid_n = 0;
     gtint_t inc = 5;
-
-    // Initialize x vector with random numbers.
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
-
     // Initialize asum (BLIS output) to garbage value.
     RT asum = RT{-7.3};
-
     // Initialize the expected output to zero.
     RT asum_ref;
     testinghelpers::initzero<RT>(asum_ref);
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    asum = asumv<T>( invalid_n, nullptr, inc );
+    // Computing the difference.
+    computediff<RT>( "asum", asum, asum_ref );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize x vector with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
 
     // Invoking asumV with an invalid value of n.
     asum = asumv<T>( invalid_n, x.data(), inc );
@@ -112,16 +120,20 @@ TYPED_TEST(asumv_IIT_ERS, n_lt_zero_unitStride)
     using RT = typename testinghelpers::type_info<T>::real_type;
     gtint_t invalid_n = -1;
     gtint_t unit_inc = 1;
-
-    // Initialize x vector with random numbers.
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
-
     // Initialize asum (BLIS output) to garbage value.
     RT asum = RT{-7.3};
-
     // Initialize the expected output to zero.
     RT asum_ref;
     testinghelpers::initzero<RT>(asum_ref);
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    asum = asumv<T>( invalid_n, nullptr, unit_inc );
+    // Computing the difference.
+    computediff<RT>( "asum", asum, asum_ref );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize x vector with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
 
     // Invoking asumV with an invalid value of n.
     asum = asumv<T>( invalid_n, x.data(), unit_inc );
@@ -137,16 +149,20 @@ TYPED_TEST(asumv_IIT_ERS, n_eq_zero_unitStride)
     using RT = typename testinghelpers::type_info<T>::real_type;
     gtint_t invalid_n = 0;
     gtint_t unit_inc = 1;
-
-    // Initialize x vector with random numbers.
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
-
     // Initialize asum (BLIS output) to garbage value.
     RT asum = RT{-7.3};
-
     // Initialize the expected output to zero.
     RT asum_ref;
     testinghelpers::initzero<RT>(asum_ref);
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    asum = asumv<T>( invalid_n, nullptr, unit_inc );
+    // Computing the difference.
+    computediff<RT>( "asum", asum, asum_ref );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize x vector with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
 
     // Invoking asumV with an invalid value of n.
     asum = asumv<T>( invalid_n, x.data(), unit_inc );
@@ -161,16 +177,20 @@ TYPED_TEST(asumv_IIT_ERS, inc_lt_0)
     using T = TypeParam;
     using RT = typename testinghelpers::type_info<T>::real_type;
     gtint_t invalid_inc = -1;
-
-    // Initialize x vector with random numbers.
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, INC );
-
     // Initialize asum (BLIS output) to garbage value.
     RT asum = RT{-7.3};
-
     // Initialize the expected output to zero.
     RT asum_ref;
     testinghelpers::initzero<RT>(asum_ref);
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    asum = asumv<T>( N, nullptr, invalid_inc );
+    // Computing the difference.
+    computediff<RT>( "asum", asum, asum_ref );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize x vector with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, INC );
 
     // Invoking asumV with an invalid value of n.
     asum = asumv<T>( N, x.data(), invalid_inc );
@@ -185,16 +205,20 @@ TYPED_TEST(asumv_IIT_ERS, inc_eq_0)
     using T = TypeParam;
     using RT = typename testinghelpers::type_info<T>::real_type;
     gtint_t invalid_inc = 0;
-
-    // Initialize x vector with random numbers.
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, INC );
-
     // Initialize asum (BLIS output) to garbage value.
     RT asum = RT{-7.3};
-
     // Initialize the expected output to zero.
     RT asum_ref;
     testinghelpers::initzero<RT>(asum_ref);
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    asum = asumv<T>( N, nullptr, invalid_inc );
+    // Computing the difference.
+    computediff<RT>( "asum", asum, asum_ref );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize x vector with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, INC );
 
     // Invoking asumV with an invalid value of n.
     asum = asumv<T>( N, x.data(), invalid_inc );

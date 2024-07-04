@@ -47,191 +47,49 @@ TYPED_TEST_SUITE(ger_IIT_ERS, TypeParam);
 
 using namespace testinghelpers::IIT;
 
+#if defined(TEST_CBLAS)
+
+// Invalid value of STORAGE
+TYPED_TEST(ger_IIT_ERS, invalid_storage)
+{
+    using T = TypeParam;
+    gtint_t invalid_m = -1;
+    gtint_t unit_inc = 1;
+    // Using a random non-zero value of alpha.
+    T alpha = T{3};
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    ger<T>( 'x', CONJ, CONJ, M, N, &alpha, nullptr, unit_inc,
+            nullptr, unit_inc, nullptr, LDA );
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 1 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, unit_inc );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, unit_inc );
+
+    // Create a copy of a matrix so that we can check reference results.
+    std::vector<T> a_ref(a);
+
+    // Invoking GER with an invalid value of n.
+    ger<T>( 'x', CONJ, CONJ, invalid_m, N, &alpha, x.data(), unit_inc,
+            y.data(), unit_inc, a.data(), LDA );
+
+    // Computing bitwise difference.
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 1 );
+#endif
+}
+
+#endif
+
 #if defined(TEST_BLAS) || defined(TEST_CBLAS)
-/**
- * BLAS Early Return Scenarios(ERS):
- *
- * GER is expected to return early in the following cases:
- * 1. m == 0
- * 2. n == 0
- * 3. alpha == 0
- */
-// m == 0, with unit stride
-TYPED_TEST(ger_IIT_ERS, m_eq_zero_unitStride)
-{
-    using T = TypeParam;
-    gtint_t invalid_m = 0;
-    gtint_t unit_inc = 1;
-
-    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, unit_inc );
-    std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, unit_inc );
-
-    // Create a copy of a matrix so that we can check reference results.
-    std::vector<T> a_ref(a);
-
-    // Using a random non-zero value of alpha.
-    T alpha = T{3};
-
-    // Invoking GER with an invalid value of n.
-    ger<T>( STORAGE, CONJ, CONJ, invalid_m, N, &alpha, x.data(), unit_inc,
-            y.data(), unit_inc, a.data(), LDA );
-
-    // Computing bitwise difference.
-    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
-
-#ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
-    computediff<gtint_t>( "info", info, 0 );
-#endif
-}
-
-// m == 0, with non-unit stride
-TYPED_TEST(ger_IIT_ERS, m_eq_zero_nonUnitStride)
-{
-    using T = TypeParam;
-    gtint_t invalid_m = 0;
-    gtint_t inc = 3;
-
-    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, inc );
-    std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, inc );
-
-    // Create a copy of a matrix so that we can check reference results.
-    std::vector<T> a_ref(a);
-
-    // Using a random non-zero value of alpha.
-    T alpha = T{3};
-
-    // Invoking GER with an invalid value of n.
-    ger<T>( STORAGE, CONJ, CONJ, invalid_m, N, &alpha, x.data(), inc,
-            y.data(), inc, a.data(), LDA );
-
-    // Computing bitwise difference.
-    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
-
-#ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
-    computediff<gtint_t>( "info", info, 0 );
-#endif
-}
-
-// n == 0, with unit stride
-TYPED_TEST(ger_IIT_ERS, n_eq_zero_unitStride)
-{
-    using T = TypeParam;
-    gtint_t invalid_n = 0;
-    gtint_t unit_inc = 1;
-
-    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, unit_inc );
-    std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, unit_inc );
-
-    // Create a copy of a matrix so that we can check reference results.
-    std::vector<T> a_ref(a);
-
-    // Using a random non-zero value of alpha.
-    T alpha = T{3};
-
-    // Invoking GER with an invalid value of n.
-    ger<T>( STORAGE, CONJ, CONJ, M, invalid_n, &alpha, x.data(), unit_inc,
-            y.data(), unit_inc, a.data(), LDA );
-
-    // Computing bitwise difference.
-    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
-
-#ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
-    computediff<gtint_t>( "info", info, 0 );
-#endif
-}
-
-// n == 0, with non-unit stride
-TYPED_TEST(ger_IIT_ERS, n_eq_zero_nonUnitStride)
-{
-    using T = TypeParam;
-    gtint_t invalid_n = 0;
-    gtint_t inc = 3;
-
-    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, inc );
-    std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, inc );
-
-    // Create a copy of a matrix so that we can check reference results.
-    std::vector<T> a_ref(a);
-
-    // Using a random non-zero value of alpha.
-    T alpha = T{3};
-
-    // Invoking GER with an invalid value of n.
-    ger<T>( STORAGE, CONJ, CONJ, M, invalid_n, &alpha, x.data(), inc,
-            y.data(), inc, a.data(), LDA );
-
-    // Computing bitwise difference.
-    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
-
-#ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
-    computediff<gtint_t>( "info", info, 0 );
-#endif
-}
-
-// alpha == 0, with unit stride
-TYPED_TEST(ger_IIT_ERS, alpha_eq_zero_unitStride)
-{
-    using T = TypeParam;
-    gtint_t unit_inc = 1;
-
-    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, unit_inc );
-    std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, unit_inc );
-
-    // Create a copy of a matrix so that we can check reference results.
-    std::vector<T> a_ref(a);
-
-    T zero_alpha = T{0};
-
-    // Invoking GER with an invalid value of n.
-    ger<T>( STORAGE, CONJ, CONJ, M, N, &zero_alpha, x.data(), unit_inc,
-            y.data(), unit_inc, a.data(), LDA );
-
-    // Computing bitwise difference.
-    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
-
-#ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
-    computediff<gtint_t>( "info", info, 0 );
-#endif
-}
-
-// alpha == 0, with non-unit stride
-TYPED_TEST(ger_IIT_ERS, alpha_eq_zero_nonUnitStride)
-{
-    using T = TypeParam;
-    gtint_t inc = 3;
-
-    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, inc );
-    std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, inc );
-
-    // Create a copy of a matrix so that we can check reference results.
-    std::vector<T> a_ref(a);
-
-    T zero_alpha = T{0};
-
-    // Invoking GER with an invalid value of n.
-    ger<T>( STORAGE, CONJ, CONJ, M, N, &zero_alpha, x.data(), inc,
-            y.data(), inc, a.data(), LDA );
-
-    // Computing bitwise difference.
-    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
-
-#ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
-    computediff<gtint_t>( "info", info, 0 );
-#endif
-}
-
 
 /**
  * BLAS Invalid Input Tests(IIT):
@@ -249,7 +107,23 @@ TYPED_TEST(ger_IIT_ERS, m_lt_zero_unitStride)
     using T = TypeParam;
     gtint_t invalid_m = -1;
     gtint_t unit_inc = 1;
+    // Using a random non-zero value of alpha.
+    T alpha = T{3};
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#if defined(TEST_BLAS)
+    ger<T>( STORAGE, CONJ, CONJ, invalid_m, N, nullptr, nullptr, unit_inc,
+            nullptr, unit_inc, nullptr, LDA );
+#else
+    ger<T>( STORAGE, CONJ, CONJ, invalid_m, N, &alpha, nullptr, unit_inc,
+            nullptr, unit_inc, nullptr, LDA );
+#endif
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 1 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
     std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
     std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, unit_inc );
     std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, unit_inc );
@@ -257,10 +131,7 @@ TYPED_TEST(ger_IIT_ERS, m_lt_zero_unitStride)
     // Create a copy of a matrix so that we can check reference results.
     std::vector<T> a_ref(a);
 
-    // Using a random non-zero value of alpha.
-    T alpha = T{3};
-
-    // Invoking GER with an invalid value of n.
+    // Invoking GER with an invalid value of m.
     ger<T>( STORAGE, CONJ, CONJ, invalid_m, N, &alpha, x.data(), unit_inc,
             y.data(), unit_inc, a.data(), LDA );
 
@@ -268,7 +139,7 @@ TYPED_TEST(ger_IIT_ERS, m_lt_zero_unitStride)
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 
 #ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
+    info = bli_info_get_info_value();
     computediff<gtint_t>( "info", info, 1 );
 #endif
 }
@@ -279,7 +150,23 @@ TYPED_TEST(ger_IIT_ERS, m_lt_zero_nonUnitStride)
     using T = TypeParam;
     gtint_t invalid_m = -1;
     gtint_t inc = 3;
+    // Using a random non-zero value of alpha.
+    T alpha = T{3};
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#if defined(TEST_BLAS)
+    ger<T>( STORAGE, CONJ, CONJ, invalid_m, N, nullptr, nullptr, inc,
+            nullptr, inc, nullptr, LDA );
+#else
+    ger<T>( STORAGE, CONJ, CONJ, invalid_m, N, &alpha, nullptr, inc,
+            nullptr, inc, nullptr, LDA );
+#endif
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 1 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
     std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
     std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, inc );
     std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, inc );
@@ -287,10 +174,7 @@ TYPED_TEST(ger_IIT_ERS, m_lt_zero_nonUnitStride)
     // Create a copy of a matrix so that we can check reference results.
     std::vector<T> a_ref(a);
 
-    // Using a random non-zero value of alpha.
-    T alpha = T{3};
-
-    // Invoking GER with an invalid value of n.
+    // Invoking GER with an invalid value of m.
     ger<T>( STORAGE, CONJ, CONJ, invalid_m, N, &alpha, x.data(), inc,
             y.data(), inc, a.data(), LDA );
 
@@ -298,7 +182,7 @@ TYPED_TEST(ger_IIT_ERS, m_lt_zero_nonUnitStride)
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 
 #ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
+    info = bli_info_get_info_value();
     computediff<gtint_t>( "info", info, 1 );
 #endif
 }
@@ -309,16 +193,29 @@ TYPED_TEST(ger_IIT_ERS, n_lt_zero_unitStride)
     using T = TypeParam;
     gtint_t invalid_n = -1;
     gtint_t unit_inc = 1;
+    // Using a random non-zero value of alpha.
+    T alpha = T{3};
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#if defined(TEST_BLAS)
+    ger<T>( STORAGE, CONJ, CONJ, M, invalid_n, nullptr, nullptr, unit_inc,
+            nullptr, unit_inc, nullptr, LDA );
+#else
+    ger<T>( STORAGE, CONJ, CONJ, M, invalid_n, &alpha, nullptr, unit_inc,
+            nullptr, unit_inc, nullptr, LDA );
+#endif
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 2 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
     std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
     std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, unit_inc );
     std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, unit_inc );
 
     // Create a copy of a matrix so that we can check reference results.
     std::vector<T> a_ref(a);
-
-    // Using a random non-zero value of alpha.
-    T alpha = T{3};
 
     // Invoking GER with an invalid value of n.
     ger<T>( STORAGE, CONJ, CONJ, M, invalid_n, &alpha, x.data(), unit_inc,
@@ -328,7 +225,7 @@ TYPED_TEST(ger_IIT_ERS, n_lt_zero_unitStride)
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 
 #ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
+    info = bli_info_get_info_value();
     computediff<gtint_t>( "info", info, 2 );
 #endif
 }
@@ -339,16 +236,29 @@ TYPED_TEST(ger_IIT_ERS, n_lt_zero_nonUnitStride)
     using T = TypeParam;
     gtint_t invalid_n = -1;
     gtint_t inc = 3;
+    // Using a random non-zero value of alpha.
+    T alpha = T{3};
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#if defined(TEST_BLAS)
+    ger<T>( STORAGE, CONJ, CONJ, M, invalid_n, nullptr, nullptr, inc,
+            nullptr, inc, nullptr, LDA );
+#else
+    ger<T>( STORAGE, CONJ, CONJ, M, invalid_n, &alpha, nullptr, inc,
+            nullptr, inc, nullptr, LDA );
+#endif
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 2 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
     std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
     std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, inc );
     std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, inc );
 
     // Create a copy of a matrix so that we can check reference results.
     std::vector<T> a_ref(a);
-
-    // Using a random non-zero value of alpha.
-    T alpha = T{3};
 
     // Invoking GER with an invalid value of n.
     ger<T>( STORAGE, CONJ, CONJ, M, invalid_n, &alpha, x.data(), inc,
@@ -358,7 +268,7 @@ TYPED_TEST(ger_IIT_ERS, n_lt_zero_nonUnitStride)
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 
 #ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
+    info = bli_info_get_info_value();
     computediff<gtint_t>( "info", info, 2 );
 #endif
 }
@@ -369,7 +279,23 @@ TYPED_TEST(ger_IIT_ERS, incx_eq_zero_unitStride)
     using T = TypeParam;
     gtint_t invalid_incx = 0;
     gtint_t unit_inc = 1;
+    // Using a random non-zero value of alpha.
+    T alpha = T{3};
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#if defined(TEST_BLAS)
+    ger<T>( STORAGE, CONJ, CONJ, M, N, nullptr, nullptr, invalid_incx,
+            nullptr, unit_inc, nullptr, LDA );
+#else
+    ger<T>( STORAGE, CONJ, CONJ, M, N, &alpha, nullptr, invalid_incx,
+            nullptr, unit_inc, nullptr, LDA );
+#endif
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 5 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
     std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
     std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, unit_inc );
     std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, unit_inc );
@@ -377,10 +303,7 @@ TYPED_TEST(ger_IIT_ERS, incx_eq_zero_unitStride)
     // Create a copy of a matrix so that we can check reference results.
     std::vector<T> a_ref(a);
 
-    // Using a random non-zero value of alpha.
-    T alpha = T{3};
-
-    // Invoking GER with an invalid value of n.
+    // Invoking GER with an invalid value of incx.
     ger<T>( STORAGE, CONJ, CONJ, M, N, &alpha, x.data(), invalid_incx,
             y.data(), unit_inc, a.data(), LDA );
 
@@ -388,7 +311,7 @@ TYPED_TEST(ger_IIT_ERS, incx_eq_zero_unitStride)
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 
 #ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
+    info = bli_info_get_info_value();
     computediff<gtint_t>( "info", info, 5 );
 #endif
 }
@@ -399,7 +322,23 @@ TYPED_TEST(ger_IIT_ERS, incx_eq_zero_nonUnitStride)
     using T = TypeParam;
     gtint_t invalid_incx = 0;
     gtint_t inc = 3;
+    // Using a random non-zero value of alpha.
+    T alpha = T{3};
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#if defined(TEST_BLAS)
+    ger<T>( STORAGE, CONJ, CONJ, M, N, nullptr, nullptr, invalid_incx,
+            nullptr, inc, nullptr, LDA );
+#else
+    ger<T>( STORAGE, CONJ, CONJ, M, N, &alpha, nullptr, invalid_incx,
+            nullptr, inc, nullptr, LDA );
+#endif
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 5 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
     std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
     std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, inc );
     std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, inc );
@@ -407,10 +346,7 @@ TYPED_TEST(ger_IIT_ERS, incx_eq_zero_nonUnitStride)
     // Create a copy of a matrix so that we can check reference results.
     std::vector<T> a_ref(a);
 
-    // Using a random non-zero value of alpha.
-    T alpha = T{3};
-
-    // Invoking GER with an invalid value of n.
+    // Invoking GER with an invalid value of incx.
     ger<T>( STORAGE, CONJ, CONJ, M, N, &alpha, x.data(), invalid_incx,
             y.data(), inc, a.data(), LDA );
 
@@ -418,18 +354,34 @@ TYPED_TEST(ger_IIT_ERS, incx_eq_zero_nonUnitStride)
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 
 #ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
+    info = bli_info_get_info_value();
     computediff<gtint_t>( "info", info, 5 );
 #endif
 }
 
-// incy = 0, with unit incy
+// incy = 0, with unit incx
 TYPED_TEST(ger_IIT_ERS, incy_eq_zero_unitStride)
 {
     using T = TypeParam;
     gtint_t invalid_incy = 0;
     gtint_t unit_inc = 1;
+    // Using a random non-zero value of alpha.
+    T alpha = T{3};
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#if defined(TEST_BLAS)
+    ger<T>( STORAGE, CONJ, CONJ, M, N, nullptr, nullptr, unit_inc,
+            nullptr, invalid_incy, nullptr, LDA );
+#else
+    ger<T>( STORAGE, CONJ, CONJ, M, N, &alpha, nullptr, unit_inc,
+            nullptr, invalid_incy, nullptr, LDA );
+#endif
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 7 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
     std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
     std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, unit_inc );
     std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, unit_inc );
@@ -437,10 +389,7 @@ TYPED_TEST(ger_IIT_ERS, incy_eq_zero_unitStride)
     // Create a copy of a matrix so that we can check reference results.
     std::vector<T> a_ref(a);
 
-    // Using a random non-zero value of alpha.
-    T alpha = T{3};
-
-    // Invoking GER with an invalid value of n.
+    // Invoking GER with an invalid value of incy.
     ger<T>( STORAGE, CONJ, CONJ, M, N, &alpha, x.data(), unit_inc,
             y.data(), invalid_incy, a.data(), LDA );
 
@@ -448,18 +397,34 @@ TYPED_TEST(ger_IIT_ERS, incy_eq_zero_unitStride)
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 
 #ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
+    info = bli_info_get_info_value();
     computediff<gtint_t>( "info", info, 7 );
 #endif
 }
 
-// incy = 0, with non-unit incy
+// incy = 0, with non-unit incx
 TYPED_TEST(ger_IIT_ERS, incy_eq_zero_nonUnitStride)
 {
     using T = TypeParam;
     gtint_t invalid_incy = 0;
     gtint_t inc = 3;
+    // Using a random non-zero value of alpha.
+    T alpha = T{3};
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#if defined(TEST_BLAS)
+    ger<T>( STORAGE, CONJ, CONJ, M, N, nullptr, nullptr, inc,
+            nullptr, invalid_incy, nullptr, LDA );
+#else
+    ger<T>( STORAGE, CONJ, CONJ, M, N, &alpha, nullptr, inc,
+            nullptr, invalid_incy, nullptr, LDA );
+#endif
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 7 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
     std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
     std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, inc );
     std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, inc );
@@ -467,10 +432,7 @@ TYPED_TEST(ger_IIT_ERS, incy_eq_zero_nonUnitStride)
     // Create a copy of a matrix so that we can check reference results.
     std::vector<T> a_ref(a);
 
-    // Using a random non-zero value of alpha.
-    T alpha = T{3};
-
-    // Invoking GER with an invalid value of n.
+    // Invoking GER with an invalid value of incy.
     ger<T>( STORAGE, CONJ, CONJ, M, N, &alpha, x.data(), inc,
             y.data(), invalid_incy, a.data(), LDA );
 
@@ -478,7 +440,7 @@ TYPED_TEST(ger_IIT_ERS, incy_eq_zero_nonUnitStride)
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 
 #ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
+    info = bli_info_get_info_value();
     computediff<gtint_t>( "info", info, 7 );
 #endif
 }
@@ -489,7 +451,23 @@ TYPED_TEST(ger_IIT_ERS, lda_lt_max_1_m_unitStride)
     using T = TypeParam;
     gtint_t invalid_lda = M - 1;
     gtint_t unit_inc = 1;
+    // Using a random non-zero value of alpha.
+    T alpha = T{3};
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#if defined(TEST_BLAS)
+    ger<T>( STORAGE, CONJ, CONJ, M, N, nullptr, nullptr, unit_inc,
+            nullptr, unit_inc, nullptr, invalid_lda );
+#else
+    ger<T>( STORAGE, CONJ, CONJ, M, N, &alpha, nullptr, unit_inc,
+            nullptr, unit_inc, nullptr, invalid_lda );
+#endif
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 9 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
     std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
     std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, unit_inc );
     std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, unit_inc );
@@ -497,10 +475,7 @@ TYPED_TEST(ger_IIT_ERS, lda_lt_max_1_m_unitStride)
     // Create a copy of a matrix so that we can check reference results.
     std::vector<T> a_ref(a);
 
-    // Using a random non-zero value of alpha.
-    T alpha = T{3};
-
-    // Invoking GER with an invalid value of n.
+    // Invoking GER with an invalid value of lda.
     ger<T>( STORAGE, CONJ, CONJ, M, N, &alpha, x.data(), unit_inc,
             y.data(), unit_inc, a.data(), invalid_lda );
 
@@ -508,7 +483,7 @@ TYPED_TEST(ger_IIT_ERS, lda_lt_max_1_m_unitStride)
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 
 #ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
+    info = bli_info_get_info_value();
     computediff<gtint_t>( "info", info, 9 );
 #endif
 }
@@ -519,16 +494,29 @@ TYPED_TEST(ger_IIT_ERS, lda_lt_max_1_m_nonUnitStride)
     using T = TypeParam;
     gtint_t invalid_lda = LDA - 1;
     gtint_t inc = 3;
+    // Using a random non-zero value of alpha.
+    T alpha = T{3};
 
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#if defined(TEST_BLAS)
+    ger<T>( STORAGE, CONJ, CONJ, M, N, nullptr, nullptr, inc,
+            nullptr, inc, nullptr, invalid_lda );
+#else
+    ger<T>( STORAGE, CONJ, CONJ, M, N, &alpha, nullptr, inc,
+            nullptr, inc, nullptr, invalid_lda );
+#endif
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 9 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
     std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
     std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, inc );
     std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, inc );
 
     // Create a copy of a matrix so that we can check reference results.
     std::vector<T> a_ref(a);
-
-    // Using a random non-zero value of alpha.
-    T alpha = T{3};
 
     // Invoking GER with an invalid value of n.
     ger<T>( STORAGE, CONJ, CONJ, M, N, &alpha, x.data(), inc,
@@ -538,8 +526,261 @@ TYPED_TEST(ger_IIT_ERS, lda_lt_max_1_m_nonUnitStride)
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 
 #ifdef CAN_TEST_INFO_VALUE
-    gtint_t info = bli_info_get_info_value();
+    info = bli_info_get_info_value();
     computediff<gtint_t>( "info", info, 9 );
 #endif
 }
+
+/**
+ * BLAS Early Return Scenarios(ERS):
+ *
+ * GER is expected to return early in the following cases:
+ * 1. m == 0
+ * 2. n == 0
+ * 3. alpha == 0
+ */
+// m == 0, with unit stride
+TYPED_TEST(ger_IIT_ERS, m_eq_zero_unitStride)
+{
+    using T = TypeParam;
+    gtint_t invalid_m = 0;
+    gtint_t unit_inc = 1;
+    // Using a random non-zero value of alpha.
+    T alpha = T{3};
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#if defined(TEST_BLAS)
+    ger<T>( STORAGE, CONJ, CONJ, invalid_m, N, nullptr, nullptr, unit_inc,
+            nullptr, unit_inc, nullptr, LDA );
+#else
+    ger<T>( STORAGE, CONJ, CONJ, invalid_m, N, &alpha, nullptr, unit_inc,
+            nullptr, unit_inc, nullptr, LDA );
+#endif
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, unit_inc );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, unit_inc );
+
+    // Create a copy of a matrix so that we can check reference results.
+    std::vector<T> a_ref(a);
+
+    // Invoking GER with an invalid value of m.
+    ger<T>( STORAGE, CONJ, CONJ, invalid_m, N, &alpha, x.data(), unit_inc,
+            y.data(), unit_inc, a.data(), LDA );
+
+    // Computing bitwise difference.
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
+}
+
+// m == 0, with non-unit stride
+TYPED_TEST(ger_IIT_ERS, m_eq_zero_nonUnitStride)
+{
+    using T = TypeParam;
+    gtint_t invalid_m = 0;
+    gtint_t inc = 3;
+    // Using a random non-zero value of alpha.
+    T alpha = T{3};
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#if defined(TEST_BLAS)
+    ger<T>( STORAGE, CONJ, CONJ, invalid_m, N, nullptr, nullptr, inc,
+            nullptr, inc, nullptr, LDA );
+#else
+    ger<T>( STORAGE, CONJ, CONJ, invalid_m, N, &alpha, nullptr, inc,
+            nullptr, inc, nullptr, LDA );
+#endif
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, inc );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, inc );
+
+    // Create a copy of a matrix so that we can check reference results.
+    std::vector<T> a_ref(a);
+
+    // Invoking GER with an invalid value of m.
+    ger<T>( STORAGE, CONJ, CONJ, invalid_m, N, &alpha, x.data(), inc,
+            y.data(), inc, a.data(), LDA );
+
+    // Computing bitwise difference.
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
+}
+
+// n == 0, with unit stride
+TYPED_TEST(ger_IIT_ERS, n_eq_zero_unitStride)
+{
+    using T = TypeParam;
+    gtint_t invalid_n = 0;
+    gtint_t unit_inc = 1;
+    // Using a random non-zero value of alpha.
+    T alpha = T{3};
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#if defined(TEST_BLAS)
+    ger<T>( STORAGE, CONJ, CONJ, M, invalid_n, nullptr, nullptr, unit_inc,
+            nullptr, unit_inc, nullptr, LDA );
+#else
+    ger<T>( STORAGE, CONJ, CONJ, M, invalid_n, &alpha, nullptr, unit_inc,
+            nullptr, unit_inc, nullptr, LDA );
+#endif
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, unit_inc );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, unit_inc );
+
+    // Create a copy of a matrix so that we can check reference results.
+    std::vector<T> a_ref(a);
+
+    // Invoking GER with an invalid value of n.
+    ger<T>( STORAGE, CONJ, CONJ, M, invalid_n, &alpha, x.data(), unit_inc,
+            y.data(), unit_inc, a.data(), LDA );
+
+    // Computing bitwise difference.
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
+}
+
+// n == 0, with non-unit stride
+TYPED_TEST(ger_IIT_ERS, n_eq_zero_nonUnitStride)
+{
+    using T = TypeParam;
+    gtint_t invalid_n = 0;
+    gtint_t inc = 3;
+    // Using a random non-zero value of alpha.
+    T alpha = T{3};
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#if defined(TEST_BLAS)
+    ger<T>( STORAGE, CONJ, CONJ, M, invalid_n, nullptr, nullptr, inc,
+            nullptr, inc, nullptr, LDA );
+#else
+    ger<T>( STORAGE, CONJ, CONJ, M, invalid_n, &alpha, nullptr, inc,
+            nullptr, inc, nullptr, LDA );
+#endif
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, inc );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, inc );
+
+    // Create a copy of a matrix so that we can check reference results.
+    std::vector<T> a_ref(a);
+
+    // Invoking GER with an invalid value of n.
+    ger<T>( STORAGE, CONJ, CONJ, M, invalid_n, &alpha, x.data(), inc,
+            y.data(), inc, a.data(), LDA );
+
+    // Computing bitwise difference.
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
+}
+
+// alpha == 0, with unit stride
+TYPED_TEST(ger_IIT_ERS, alpha_eq_zero_unitStride)
+{
+    using T = TypeParam;
+    gtint_t unit_inc = 1;
+    T zero_alpha = T{0};
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    ger<T>( STORAGE, CONJ, CONJ, M, N, &zero_alpha, nullptr, unit_inc,
+            nullptr, unit_inc, nullptr, LDA );
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, unit_inc );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, unit_inc );
+
+    // Create a copy of a matrix so that we can check reference results.
+    std::vector<T> a_ref(a);
+
+    // Invoking GER with an invalid value of alpha.
+    ger<T>( STORAGE, CONJ, CONJ, M, N, &zero_alpha, x.data(), unit_inc,
+            y.data(), unit_inc, a.data(), LDA );
+
+    // Computing bitwise difference.
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
+}
+
+// alpha == 0, with non-unit stride
+TYPED_TEST(ger_IIT_ERS, alpha_eq_zero_nonUnitStride)
+{
+    using T = TypeParam;
+    gtint_t inc = 3;
+    T zero_alpha = T{0};
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    ger<T>( STORAGE, CONJ, CONJ, M, N, &zero_alpha, nullptr, inc,
+            nullptr, inc, nullptr, LDA );
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, STORAGE, 'n', M, N, LDA );
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, M, inc );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, N, inc );
+
+    // Create a copy of a matrix so that we can check reference results.
+    std::vector<T> a_ref(a);
+
+    // Invoking GER with an invalid value of alpha.
+    ger<T>( STORAGE, CONJ, CONJ, M, N, &zero_alpha, x.data(), inc,
+            y.data(), inc, a.data(), LDA );
+
+    // Computing bitwise difference.
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
+}
+
 #endif
