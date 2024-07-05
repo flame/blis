@@ -114,6 +114,7 @@ BASE_OBJ_PATH          := ./$(OBJ_DIR)/$(CONFIG_NAME)
 # of source code.
 BASE_OBJ_CONFIG_PATH   := $(BASE_OBJ_PATH)/$(CONFIG_DIR)
 BASE_OBJ_FRAME_PATH    := $(BASE_OBJ_PATH)/$(FRAME_DIR)
+BASE_OBJ_FRAME4_PATH   := $(BASE_OBJ_PATH)/$(FRAME_DIR)/4
 BASE_OBJ_REFKERN_PATH  := $(BASE_OBJ_PATH)/$(REFKERN_DIR)
 BASE_OBJ_KERNELS_PATH  := $(BASE_OBJ_PATH)/$(KERNELS_DIR)
 BASE_OBJ_ADDON_PATH    := $(BASE_OBJ_PATH)/$(ADDON_DIR)
@@ -212,6 +213,11 @@ MK_REFKERN_OBJS     := $(foreach arch, $(CONFIG_LIST), \
 
 # Generate object file paths for all of the portable framework source code.
 MK_FRAME_OBJS       := $(call gen-obj-paths-from-src,$(FRAME_SRC_SUFS),$(MK_FRAME_SRC),$(FRAME_PATH),$(BASE_OBJ_FRAME_PATH))
+
+# Filter out level-4 source files if necessary.
+ifeq ($(MK_ENABLE_LEVEL4),no)
+MK_FRAME_OBJS       := $(filter-out $(BASE_OBJ_FRAME4_PATH)/%, $(MK_FRAME_OBJS))
+endif
 
 # Generate object file paths for the addon source code. If one or more addons
 # were not enabled a configure-time, these variable will we empty.

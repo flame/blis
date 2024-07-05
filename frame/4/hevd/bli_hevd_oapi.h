@@ -35,6 +35,8 @@
 #ifndef BLIS_HEVD_OAPI_H
 #define BLIS_HEVD_OAPI_H
 
+#ifdef BLIS_ENABLE_LEVEL4
+
 //
 // Prototype object-based interfaces.
 //
@@ -54,6 +56,32 @@ BLIS_EXPORT_BLIS err_t bli_hevd_ex
        const cntx_t* cntx,
        const rntm_t* rntm
      );
+
+#else
+
+BLIS_INLINE err_t bli_hevd
+     (
+       const obj_t*  a,
+       const obj_t*  v,
+       const obj_t*  e
+     )
+{
+	return BLIS_SUCCESS;
+}
+
+BLIS_INLINE err_t bli_hevd_ex
+     (
+       const obj_t*  a,
+       const obj_t*  v,
+       const obj_t*  e,
+       const cntx_t* cntx,
+       const rntm_t* rntm
+     )
+{
+	return BLIS_SUCCESS;
+}
+
+#endif
 
 #endif
 
