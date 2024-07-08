@@ -69,7 +69,6 @@ void PASTEMAC2(cntx_init_,archname,BLIS_REF_SUFFIX) \
 void PASTEMAC2(cntx_init_,archname,BLIS_IND_SUFFIX) \
      ( \
        ind_t   method, \
-       num_t   dt, \
        cntx_t* cntx \
      );
 

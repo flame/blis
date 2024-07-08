@@ -187,6 +187,10 @@ mddm_t bli_gemm_md_ccr
 		bli_obj_induce_trans( b );
 		bli_obj_induce_trans( c );
 
+		// We must swap the pack schemas because the schemas were set before
+		// the objects were swapped.
+		bli_obj_swap_pack_schemas( a, b );
+
 		return bli_gemm_md_crc( a, b, beta, c, cntx_local, cntx );
 	}
 
@@ -230,7 +234,7 @@ mddm_t bli_gemm_md_ccr
 	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, blksz_mc );
 	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, blksz_mc );
 
-	// Use the default pack schemas in the context.
+	// Use the default pack schemas in the objects.
 
 	// static func_t* bli_cntx_get_l3_vir_ukrs( l3ukr_t ukr_id, cntx_t* cntx )
 	func_t* l3_vir_ukrs = bli_cntx_get_l3_vir_ukrs( BLIS_GEMM_UKR, *cntx );
@@ -288,6 +292,10 @@ mddm_t bli_gemm_md_crc
 		bli_obj_induce_trans( b );
 		bli_obj_induce_trans( c );
 
+		// We must swap the pack schemas because the schemas were set before
+		// the objects were swapped.
+		bli_obj_swap_pack_schemas( a, b );
+
 		return bli_gemm_md_ccr( a, b, beta, c, cntx_local, cntx );
 	}
 
@@ -331,7 +339,7 @@ mddm_t bli_gemm_md_crc
 	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, blksz_nc );
 	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, blksz_nc );
 
-	// Use the default pack schemas in the context.
+	// Use the default pack schemas in the objects.
 
 	// static func_t* bli_cntx_get_l3_vir_ukrs( l3ukr_t ukr_id, cntx_t* cntx )
 	func_t* l3_vir_ukrs = bli_cntx_get_l3_vir_ukrs( BLIS_GEMM_UKR, *cntx );
@@ -405,8 +413,8 @@ mddm_t bli_gemm_md_rcc
 
 	// Use the 1r pack schema for both A and B with the conjugation
 	// of A or B toggled (to produce ar * br - ai * bi).
-	bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_1R, *cntx );
-	bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_1R, *cntx );
+	bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS_1R, a );
+	bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS_1R, b );
 
 	bli_obj_toggle_conj( b );
 
@@ -485,7 +493,7 @@ mddm_t bli_gemm_md_crr
 	}
 #endif
 
-	// Use the default pack schemas in the context.
+	// Use the default pack schemas in the objects.
 
 	// Return the computation and execution domains.
 	return doms;
@@ -523,7 +531,7 @@ mddm_t bli_gemm_md_rcr
 	// Overwrite the complex obj_t with its real-only alias.
 	*a = a_real;
 
-	// Use the default pack schemas in the context.
+	// Use the default pack schemas in the objects.
 
 	// Return the computation and execution domains.
 	return doms;
@@ -561,7 +569,7 @@ mddm_t bli_gemm_md_rrc
 	// Overwrite the complex obj_t with its real-only alias.
 	*b = b_real;
 
-	// Use the default pack schemas in the context.
+	// Use the default pack schemas in the objects.
 
 	// Return the computation and execution domains.
 	return doms;
@@ -591,7 +599,7 @@ mddm_t bli_gemm_md_rrr
 	doms.comp = BLIS_REAL;
 	doms.exec = BLIS_REAL;
 
-	// Use the default pack schemas in the context.
+	// Use the default pack schemas in the objects.
 
 	// Return the computation and execution domains.
 	return doms;
@@ -621,248 +629,10 @@ mddm_t bli_gemm_md_ccc
 	doms.comp = BLIS_COMPLEX;
 	doms.exec = BLIS_COMPLEX;
 
-	// Use the default pack schemas in the context.
+	// Use the default pack schemas in the objects.
 
 	// Return the computation and execution domains.
 	return doms;
 }
-
-// -----------------------------------------------------------------------------
-
-#if 0
-void bli_gemm_md_front
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl
-     )
-{
-	bli_init_once();
-
-	obj_t   a_local;
-	obj_t   b_local;
-	obj_t   c_local;
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-	    bli_gemm_check( alpha, a, b, beta, c, cntx );
-
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
-
-	// Alias A, B, and C in case we need to apply transformations.
-	bli_obj_alias_to( a, &a_local );
-	bli_obj_alias_to( b, &b_local );
-	bli_obj_alias_to( c, &c_local );
-
-	// An optimization: If C is stored by rows and the micro-kernel prefers
-	// contiguous columns, or if C is stored by columns and the micro-kernel
-	// prefers contiguous rows, transpose the entire operation to allow the
-	// micro-kernel to access elements of C in its preferred manner.
-	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
-	{
-		bli_obj_swap( &a_local, &b_local );
-
-		bli_obj_induce_trans( &a_local );
-		bli_obj_induce_trans( &b_local );
-		bli_obj_induce_trans( &c_local );
-	}
-
-	cntx_t cntx_local;
-
-	// Handle mixed domain cases in bli_gemm_md(), which may modify
-	// the objects or the context. (If the context is modified, cntx
-	// is adjusted to point to cntx_local.)
-	bli_gemm_md( &a_local, &b_local, beta, &c_local, &cntx_local, &cntx );
-
-	// Record the threading for each level within the context.
-	bli_rntm_set_ways_for_op
-	(
-	  BLIS_GEMM,
-	  BLIS_LEFT, // ignored for gemm/hemm/symm
-	  bli_obj_length( &c_local ),
-	  bli_obj_width( &c_local ),
-	  bli_obj_width( &a_local ),
-	  rntm
-	);
-
-	// Invoke the internal back-end via the thread handler.
-	bli_l3_thread_decorator
-	(
-	  bli_gemm_int,
-	  BLIS_GEMM, // operation family id
-	  alpha,
-	  &a_local,
-	  &b_local,
-	  beta,
-	  &c_local,
-	  cntx,
-	  rntm,
-	  cntl
-	);
-}
-
-// -----------------------------------------------------------------------------
-
-void bli_gemm_md_zgemm
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl
-     )
-{
-	bli_init_once();
-
-	obj_t   a_local;
-	obj_t   b_local;
-	obj_t   c_local;
-
-#if 1
-	obj_t   am, bm, cm;
-	obj_t*  c_orig;
-
-	//if ( is_md == TRUE )
-	{
-		//num_t dt_c2 = bli_obj_dt( c );
-		//num_t dt_c1 = bli_dt_proj_to_complex( dt_c2 );
-		//num_t dt_c  = bli_dt_proj_to_double_prec( dt_c1 );
-		//num_t dt_c = bli_obj_dt_proj_to_complex( c );
-		num_t dt_c = BLIS_DCOMPLEX;
-
-		if ( bli_obj_is_single_prec( c ) ) dt_c = BLIS_SCOMPLEX;
-		else                               dt_c = BLIS_DCOMPLEX;
-
-		if ( bli_obj_is_real( a ) &&
-		     bli_obj_is_real( b ) &&
-		     bli_obj_is_real( c ) ) dt_c = bli_dt_proj_to_real( dt_c );
-
-		dim_t m = bli_obj_length( c );
-		dim_t n = bli_obj_width( c );
-		dim_t k = bli_obj_width_after_trans( a );
-
-		bli_obj_create( dt_c, m, k, 0, 0, &am );
-		bli_obj_create( dt_c, k, n, 0, 0, &bm );
-		bli_obj_create( dt_c, m, n, 0, 0, &cm );
-
-		//bli_projm( a, &am );
-		//bli_projm( b, &bm );
-		//bli_projm( c, &cm );
-		bli_castm( a, &am );
-		bli_castm( b, &bm );
-		bli_castm( c, &cm );
-
-		c_orig = c;
-
-		a = &am;
-		b = &bm;
-		c = &cm;
-	}
-#endif
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_gemm_check( alpha, a, b, beta, c, cntx );
-
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
-
-	// Alias A, B, and C in case we need to apply transformations.
-	bli_obj_alias_to( a, &a_local );
-	bli_obj_alias_to( b, &b_local );
-	bli_obj_alias_to( c, &c_local );
-
-	// An optimization: If C is stored by rows and the micro-kernel prefers
-	// contiguous columns, or if C is stored by columns and the micro-kernel
-	// prefers contiguous rows, transpose the entire operation to allow the
-	// micro-kernel to access elements of C in its preferred manner.
-	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
-	{
-		bli_obj_swap( &a_local, &b_local );
-
-		bli_obj_induce_trans( &a_local );
-		bli_obj_induce_trans( &b_local );
-		bli_obj_induce_trans( &c_local );
-	}
-
-	{
-		// A sort of hack for communicating the desired pack schemas for A and B
-		// to bli_gemm_cntl_create() (via bli_l3_thread_decorator() and
-		// bli_l3_cntl_create_if()). This allows us to access the schemas from
-		// the control tree, which hopefully reduces some confusion, particularly
-		// in bli_packm_init().
-		if ( bli_cntx_method( cntx ) == BLIS_NAT )
-		{
-			bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, &a_local );
-			bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, &b_local );
-		}
-		else // if ( bli_cntx_method( cntx ) != BLIS_NAT )
-		{
-			pack_t schema_a = bli_cntx_schema_a_block( cntx );
-			pack_t schema_b = bli_cntx_schema_b_panel( cntx );
-
-			bli_obj_set_pack_schema( schema_a, &a_local );
-			bli_obj_set_pack_schema( schema_b, &b_local );
-		}
-	}
-
-	// Parse and interpret the contents of the rntm_t object to properly
-	// set the ways of parallelism for each loop, and then make any
-	// additional modifications necessary for the current operation.
-	bli_rntm_set_ways_for_op
-	(
-	  BLIS_GEMM,
-	  BLIS_LEFT, // ignored for gemm/hemm/symm
-	  bli_obj_length( &c_local ),
-	  bli_obj_width( &c_local ),
-	  bli_obj_width( &a_local ),
-	  rntm
-	);
-
-	// Invoke the internal back-end via the thread handler.
-	bli_l3_thread_decorator
-	(
-	  bli_gemm_int,
-	  BLIS_GEMM, // operation family id
-	  alpha,
-	  &a_local,
-	  &b_local,
-	  beta,
-	  &c_local,
-	  cntx,
-	  rntm,
-	  cntl
-	);
-
-#if 1
-	//if ( is_md == TRUE )
-	{
-		//bli_projm( &cm, c_orig );
-		bli_castm( &cm, c_orig );
-
-		bli_obj_free( &am );
-		bli_obj_free( &bm );
-		bli_obj_free( &cm );
-	}
-#endif
-}
-#endif
 
 #endif

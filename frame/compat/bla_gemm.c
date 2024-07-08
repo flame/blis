@@ -538,8 +538,23 @@ void dzgemm_blis_impl
 	bli_obj_set_conjtrans( blis_transb, &bo );
 
 	// fall back on native path when zgemm is not handled in sup path.
-	bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
+	//bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
 
+	/* Default to using native execution. */
+	ind_t im = BLIS_NAT;
+
+	/* Mix of real and complex matrix data types, so assuming
+	   induced methods will not be available */
+
+	/* Obtain a valid context from the gks using the induced
+	   method id determined above. */
+	cntx_t* cntx = bli_gks_query_ind_cntx( im, dt );
+
+	rntm_t rntm_l;
+	bli_rntm_init_from_global( &rntm_l );
+
+	/* Invoke the operation's front-end and request the default control tree. */
+	PASTEMAC(gemm,_front)( &alphao, &ao, &bo, &betao, &co, cntx, &rntm_l, NULL );
 
 	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *m, *n, *k);
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);

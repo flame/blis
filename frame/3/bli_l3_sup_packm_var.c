@@ -276,29 +276,6 @@ bli_thread_barrier( thread ); \
 } \
 */
 /*
-		if ( bli_is_4mi_packed( schema ) ) { \
-		printf( "packm_var2: is_p_use = %lu\n", is_p_use ); \
-		if ( col_stored ) { \
-		if ( 0 ) \
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: a_r", *m_panel_use, *n_panel_use, \
-		                       ( ctype_r* )c_use,         2*rs_c, 2*cs_c, "%4.1f", "" ); \
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: ap_r", *m_panel_max, *n_panel_max, \
-		                       ( ctype_r* )p_use,            rs_p, cs_p, "%4.1f", "" ); \
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: ap_i", *m_panel_max, *n_panel_max, \
-		                       ( ctype_r* )p_use + is_p_use, rs_p, cs_p, "%4.1f", "" ); \
-		} \
-		if ( row_stored ) { \
-		if ( 0 ) \
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: b_r", *m_panel_use, *n_panel_use, \
-		                       ( ctype_r* )c_use,         2*rs_c, 2*cs_c, "%4.1f", "" ); \
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_r", *m_panel_max, *n_panel_max, \
-		                       ( ctype_r* )p_use,            rs_p, cs_p, "%4.1f", "" ); \
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_i", *m_panel_max, *n_panel_max, \
-		                       ( ctype_r* )p_use + is_p_use, rs_p, cs_p, "%4.1f", "" ); \
-		} \
-		} \
-*/
-/*
 		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_rpi", *m_panel_max, *n_panel_max, \
 		                       ( ctype_r* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
 */

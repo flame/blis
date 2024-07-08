@@ -35,23 +35,13 @@
 
 #include "blis.h"
 
-static void_fp bli_l3_ind_oper_fp[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] =
+// This array tracks whether a particular operation is implemented for each of
+// the induced methods.
+static bool bli_l3_ind_oper_impl[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] =
 {
-        /*   gemm   hemm   herk   her2k  symm   syrk,  syr2k  trmm3  trmm   trsm   gemmt*/
-/* 3mh  */ { bli_gemm3mh,  bli_hemm3mh,  bli_herk3mh,  bli_her2k3mh, bli_symm3mh,
-             bli_syrk3mh,  bli_syr2k3mh, bli_trmm33mh, NULL,         NULL        , NULL  },
-/* 3m1  */ { bli_gemm3m1,  bli_hemm3m1,  bli_herk3m1,  bli_her2k3m1, bli_symm3m1,
-             bli_syrk3m1,  bli_syr2k3m1, bli_trmm33m1, bli_trmm3m1,  bli_trsm3m1  , NULL },
-/* 4mh  */ { bli_gemm4mh,  bli_hemm4mh,  bli_herk4mh,  bli_her2k4mh, bli_symm4mh,
-             bli_syrk4mh,  bli_syr2k4mh, bli_trmm34mh, NULL,         NULL         , NULL },
-/* 4mb  */ { bli_gemm4mb,  NULL,         NULL,         NULL,         NULL,
-             NULL,         NULL,         NULL,         NULL,         NULL         , NULL },
-/* 4m1  */ { bli_gemm4m1,  bli_hemm4m1,  bli_herk4m1,  bli_her2k4m1, bli_symm4m1,
-             bli_syrk4m1,  bli_syr2k4m1, bli_trmm34m1, bli_trmm4m1,  bli_trsm4m1  , NULL },
-/* 1m   */ { bli_gemm1m,   bli_hemm1m,   bli_herk1m,   bli_her2k1m,  bli_symm1m,
-             bli_syrk1m,   bli_syr2k1m,  bli_trmm31m,  bli_trmm1m,   bli_trsm1m   , NULL },
-/* nat  */ { bli_gemmnat,  bli_hemmnat,  bli_herknat,  bli_her2knat, bli_symmnat,
-             bli_syrknat,  bli_syr2knat, bli_trmm3nat, bli_trmmnat,  bli_trsmnat  , bli_gemmtnat },
+        /*   gemm  gemmt  hemm  herk  her2k  symm  syrk  syr2k  trmm3  trmm  trsm  */
+/* 1m   */ { TRUE, TRUE,  TRUE, TRUE, TRUE,  TRUE, TRUE, TRUE,  TRUE,  TRUE, TRUE  },
+/* nat  */ { TRUE, TRUE,  TRUE, TRUE, TRUE,  TRUE, TRUE, TRUE,  TRUE,  TRUE, TRUE  }
 };
 
 //
@@ -64,21 +54,11 @@ static void_fp bli_l3_ind_oper_fp[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] =
 static BLIS_THREAD_LOCAL
 bool bli_l3_ind_oper_st[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS][2] =
 {
-        /*   gemm   hemm   herk   her2k  symm   syrk,  syr2k  trmm3  trmm   trsm  */
+        /*   gemm  gemmt  hemm  herk  her2k  symm  syrk  syr2k  trmm3  trmm  trsm  */
         /*    c     z    */
-/* 3mh  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
+/* 1m   */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
              {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
-/* 3m1  */ { {FALSE,FALSE},   {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
-             {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
-/* 4mh  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
-             {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
-/* 4mb  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
-             {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
-/* 4m1  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
-             {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
-/* 1m   */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
-             {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
-/* nat  */ { {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},
+/* nat  */ { {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},
              {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE}    },
 };
 
@@ -87,16 +67,14 @@ bool bli_l3_ind_oper_st[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS][2] =
 #undef  GENFUNC
 #define GENFUNC( opname, optype ) \
 \
-void_fp PASTEMAC(opname,ind_get_avail)( num_t dt ) \
+ind_t PASTEMAC(opname,ind_find_avail)( num_t dt ) \
 { \
-	return bli_ind_oper_get_avail( optype, dt ); \
+	return bli_l3_ind_oper_find_avail( optype, dt ); \
 }
-/*
-bool PASTEMAC(opname,ind_has_avail)( num_t dt )
-{
-	return bli_ind_oper_has_avail( optype, dt );
-}
-*/
+//bool PASTEMAC(opname,ind_has_avail)( num_t dt )
+//{
+//	return bli_ind_oper_has_avail( optype, dt );
+//}
 
 GENFUNC( gemm, BLIS_GEMM )
 GENFUNC( gemmt, BLIS_GEMMT )
@@ -115,16 +93,16 @@ GENFUNC( trsm, BLIS_TRSM )
 #if 0
 bool bli_l3_ind_oper_is_avail( opid_t oper, ind_t method, num_t dt )
 {
-	void_fp func;
-	bool    stat;
+	bool enabled;
+	bool stat;
 
 	// If the datatype is real, it is never available.
 	if ( !bli_is_complex( dt ) ) return FALSE;
 
-	func = bli_l3_ind_oper_get_func( oper, method );
-	stat = bli_l3_ind_oper_get_enable( oper, method, dt );
+	enabled = bli_l3_ind_oper_is_impl( oper, method );
+	stat    = bli_l3_ind_oper_get_enable( oper, method, dt );
 
-	return ( func != NULL && stat == TRUE );
+	return ( enabled == TRUE && stat == TRUE );
 }
 #endif
 
@@ -147,11 +125,11 @@ ind_t bli_l3_ind_oper_find_avail( opid_t oper, num_t dt )
 	// current operation and datatype.
 	for ( im = 0; im < BLIS_NUM_IND_METHODS; ++im )
 	{
-		void_fp func = bli_l3_ind_oper_get_func( oper, im );
-		bool    stat = bli_l3_ind_oper_get_enable( oper, im, dt );
+		bool enabled = bli_l3_ind_oper_is_impl( oper, im );
+		bool stat    = bli_l3_ind_oper_get_enable( oper, im, dt );
 
-		if ( func != NULL &&
-		     stat == TRUE ) return im;
+		if ( enabled == TRUE &&
+		     stat    == TRUE ) return im;
 	}
 
 	// This return statement should never execute since the native index
@@ -257,8 +235,7 @@ bool bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt )
 
 // -----------------------------------------------------------------------------
 
-void_fp bli_l3_ind_oper_get_func( opid_t oper, ind_t method )
+bool bli_l3_ind_oper_is_impl( opid_t oper, ind_t method )
 {
-	return bli_l3_ind_oper_fp[ method ][ oper ];
+	return bli_l3_ind_oper_impl[ method ][ oper ];
 }
-

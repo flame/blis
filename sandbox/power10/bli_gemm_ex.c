@@ -32,22 +32,48 @@
 
 */
 
+// Given the current architecture of BLIS sandboxes, bli_gemm_ex() is the
+// entry point to any sandbox implementation.
 
-#undef  GENTPROTCO
-#define GENTPROTCO( ctype, ctype_r, ch, chr, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t  conja, \
-       dim_t   panel_dim, \
-       dim_t   panel_dim_max, \
-       dim_t   panel_len, \
-       dim_t   panel_len_max, \
-       ctype*  kappa, \
-       ctype*  a, inc_t inca, inc_t lda, \
-       ctype*  p, inc_t is_p, inc_t ldp, \
-       cntx_t* cntx  \
-     );
+// NOTE: This function is implemented functionally identically to the
+// function that it overrides in frame/3/bli_l3_oapi_ex.c. This means that
+// we are forgoing the option of customizing the implementations that
+// underlie bli_gemm() and bli_?gemm() (which both call bli_gemm_ex()).
+// Any new code defined in this sandbox directory, however, will be
+// included in the BLIS.
 
-INSERT_GENTPROTCO_BASIC0( packm_cxk_4mi )
+#include "blis.h"
+
+void bli_gemm_ex
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm 
+     )
+{
+	bli_init_once();
+
+	// Initialize a local runtime with global settings if necessary. Note
+	// that in the case that a runtime is passed in, we make a local copy.
+	rntm_t rntm_l;
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+
+	// Obtain a valid (native) context from the gks if necessary.
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+
+	// Check the operands.
+	if ( bli_error_checking_is_enabled() )
+		bli_gemm_check( alpha, a, b, beta, c, cntx );
+
+	// Invoke the operation's front end.
+	bli_gemm_front
+	(
+	  alpha, a, b, beta, c, cntx, rntm, NULL
+	);
+}
 

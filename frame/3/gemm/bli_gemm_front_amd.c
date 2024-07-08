@@ -90,6 +90,29 @@ void bli_gemm_front
 	bli_obj_alias_to( c, &c_local );
 
 #ifdef BLIS_ENABLE_GEMM_MD
+	// Don't perform the following optimization for ccr or crc cases, as
+	// those cases are sensitive to the ukernel storage preference (ie:
+	// transposing the operation would break them).
+	if ( !bli_gemm_md_is_ccr( &a_local, &b_local, &c_local ) &&
+	     !bli_gemm_md_is_crc( &a_local, &b_local, &c_local ) )
+#endif
+	// An optimization: If C is stored by rows and the micro-kernel prefers
+	// contiguous columns, or if C is stored by columns and the micro-kernel
+	// prefers contiguous rows, transpose the entire operation to allow the
+	// micro-kernel to access elements of C in its preferred manner.
+	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
+	{
+		bli_obj_swap( &a_local, &b_local );
+
+		bli_obj_induce_trans( &a_local );
+		bli_obj_induce_trans( &b_local );
+		bli_obj_induce_trans( &c_local );
+	}
+
+	// Set the pack schemas within the objects.
+	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
+
+#ifdef BLIS_ENABLE_GEMM_MD
 	cntx_t cntx_local;
 
 	// If any of the storage datatypes differ, or if the computation precision
@@ -110,21 +133,6 @@ void bli_gemm_front
 	}
 	//else // homogeneous datatypes
 #endif
-
-	// Load the pack schemas from the context and embed them into the objects
-	// for A and B. (Native contexts are initialized with the correct pack
-	// schemas, as are contexts for 1m, and if necessary bli_gemm_md() would
-	// have made a copy and modified the schemas, so reading them from the
-	// context should be a safe bet at this point.) This is a sort of hack for
-	// communicating the desired pack schemas to bli_gemm_cntl_create() (via
-	// bli_l3_thread_decorator() and bli_l3_cntl_create_if()). This allows us
-	// to subsequently access the schemas from the control tree, which
-	// hopefully reduces some confusion, particularly in bli_packm_init().
-	const pack_t schema_a = bli_cntx_schema_a_block( cntx );
-	const pack_t schema_b = bli_cntx_schema_b_panel( cntx );
-
-	bli_obj_set_pack_schema( schema_a, &a_local );
-	bli_obj_set_pack_schema( schema_b, &b_local );
 
 	// Next, we handle the possibility of needing to typecast alpha to the
 	// computation datatype and/or beta to the storage datatype of C.

@@ -782,15 +782,28 @@ void strsm_blis_impl
     }
 #endif
 
-    bli_trsmnat
-    (
-        blis_side,
-        &alphao,
-        &ao,
-        &bo,
-        NULL,
-        NULL
-    );
+    //bli_trsmnat
+    //(
+    //    blis_side,
+    //    &alphao,
+    //    &ao,
+    //    &bo,
+    //    NULL,
+    //    NULL
+    //);
+
+    /* Default to using native execution. */
+    ind_t im = BLIS_NAT;
+
+    /* Obtain a valid context from the gks using the induced
+       method id determined above. */
+    cntx_t* cntx = bli_gks_query_ind_cntx( im, dt );
+
+    rntm_t rntm_l;
+    bli_rntm_init_from_global( &rntm_l );
+
+    /* Invoke the operation's front-end and request the default control tree. */
+    PASTEMAC(trsm,_front)( blis_side, &alphao, &ao, &bo, cntx, &rntm_l, NULL ); \
 
     AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *side, *m, *n);
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
@@ -1176,15 +1189,29 @@ void dtrsm_blis_impl
     } // bli_cpuid_is_avx2fma3_supported
 #endif// END of BLIS_ENABLE_SMALL_MATRIX_TRSM
 
-    bli_trsmnat
-    (
-        blis_side,
-        &alphao,
-        &ao,
-        &bo,
-        NULL,
-        NULL
-    );
+    //bli_trsmnat
+    //(
+    //    blis_side,
+    //    &alphao,
+    //    &ao,
+    //    &bo,
+    //    NULL,
+    //    NULL
+    //);
+
+    /* Default to using native execution. */
+    ind_t im = BLIS_NAT;
+
+    /* Obtain a valid context from the gks using the induced
+       method id determined above. */
+    cntx_t* cntx = bli_gks_query_ind_cntx( im, dt );
+
+    rntm_t rntm_l;
+    bli_rntm_init_from_global( &rntm_l );
+
+    /* Invoke the operation's front-end and request the default control tree. */
+    PASTEMAC(trsm,_front)( blis_side, &alphao, &ao, &bo, cntx, &rntm_l, NULL ); \
+
     AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *side, *m, *n);
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
     /* Finalize BLIS. */
@@ -1626,15 +1653,28 @@ void ztrsm_blis_impl
     } // bli_cpuid_is_avx2fma3_supported
 #endif// END of BLIS_ENABLE_SMALL_MATRIX_TRSM
 
-    bli_trsmnat
-    (
-        blis_side,
-        &alphao,
-        &ao,
-        &bo,
-        NULL,
-        NULL
-    );
+    //bli_trsmnat
+    //(
+    //    blis_side,
+    //    &alphao,
+    //    &ao,
+    //    &bo,
+    //    NULL,
+    //    NULL
+    //);
+
+    /* Default to using native execution. */
+    ind_t im = BLIS_NAT;
+
+    /* Obtain a valid context from the gks using the induced
+       method id determined above. */
+    cntx_t* cntx = bli_gks_query_ind_cntx( im, dt );
+
+    rntm_t rntm_l;
+    bli_rntm_init_from_global( &rntm_l );
+
+    /* Invoke the operation's front-end and request the default control tree. */
+    PASTEMAC(trsm,_front)( blis_side, &alphao, &ao, &bo, cntx, &rntm_l, NULL ); \
 
     AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
@@ -2010,15 +2050,28 @@ void ctrsm_blis_impl
     } // bli_cpuid_is_avx2fma3_supported
 #endif
 
-    bli_trsmnat
-    (
-        blis_side,
-        &alphao,
-        &ao,
-        &bo,
-        NULL,
-        NULL
-    );
+    //bli_trsmnat
+    //(
+    //    blis_side,
+    //    &alphao,
+    //    &ao,
+    //    &bo,
+    //    NULL,
+    //    NULL
+    //);
+
+    /* Default to using native execution. */
+    ind_t im = BLIS_NAT;
+
+    /* Obtain a valid context from the gks using the induced
+       method id determined above. */
+    cntx_t* cntx = bli_gks_query_ind_cntx( im, dt );
+
+    rntm_t rntm_l;
+    bli_rntm_init_from_global( &rntm_l );
+
+    /* Invoke the operation's front-end and request the default control tree. */
+    PASTEMAC(trsm,_front)( blis_side, &alphao, &ao, &bo, cntx, &rntm_l, NULL ); \
 
     AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *side, *m, *n);
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)

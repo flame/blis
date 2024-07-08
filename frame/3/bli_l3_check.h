@@ -72,8 +72,7 @@ void PASTEMAC(opname,_check) \
 
 GENPROT( hemm )
 GENPROT( symm )
-GENPROT( trmm )
-GENPROT( trsm )
+GENPROT( trmm3 )
 
 
 #undef  GENPROT
@@ -90,6 +89,22 @@ void PASTEMAC(opname,_check) \
 
 GENPROT( herk )
 GENPROT( syrk )
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       side_t  side, \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       cntx_t* cntx  \
+    );
+
+GENPROT( trmm )
+GENPROT( trsm )
 
 
 // -----------------------------------------------------------------------------

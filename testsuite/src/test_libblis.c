@@ -550,26 +550,6 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%u ", &(params->p_inc) );
 
-	// Read whether to enable 3mh.
-	libblis_test_read_next_line( buffer, input_stream );
-	sscanf( buffer, "%u ", &(params->ind_enable[ BLIS_3MH ]) );
-
-	// Read whether to enable 3m1.
-	libblis_test_read_next_line( buffer, input_stream );
-	sscanf( buffer, "%u ", &(params->ind_enable[ BLIS_3M1 ]) );
-
-	// Read whether to enable 4mh.
-	libblis_test_read_next_line( buffer, input_stream );
-	sscanf( buffer, "%u ", &(params->ind_enable[ BLIS_4MH ]) );
-
-	// Read whether to enable 4m1b (4mb).
-	libblis_test_read_next_line( buffer, input_stream );
-	sscanf( buffer, "%u ", &(params->ind_enable[ BLIS_4M1B ]) );
-
-	// Read whether to enable 4m1a (4m1).
-	libblis_test_read_next_line( buffer, input_stream );
-	sscanf( buffer, "%u ", &(params->ind_enable[ BLIS_4M1A ]) );
-
 	// Read whether to enable 1m.
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%u ", &(params->ind_enable[ BLIS_1M ]) );
@@ -589,24 +569,13 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 	// threads.
 	if ( params->n_app_threads > 1 )
 	{
-		if ( params->ind_enable[ BLIS_3MH  ] ||
-		     params->ind_enable[ BLIS_3M1  ] ||
-		     params->ind_enable[ BLIS_4MH  ] ||
-		     params->ind_enable[ BLIS_4M1B ] ||
-		     params->ind_enable[ BLIS_4M1A ] ||
-		     params->ind_enable[ BLIS_1M   ]
-		   )
+		if ( params->ind_enable[ BLIS_1M ] )
 		{
 			// Due to an inherent race condition in the way induced methods
 			// are enabled and disabled at runtime, all induced methods must be
 			// disabled when simulating multiple application threads.
 			libblis_test_printf_infoc( "simulating multiple application threads; disabling induced methods.\n" );
 
-			params->ind_enable[ BLIS_3MH  ] = 0;
-			params->ind_enable[ BLIS_3M1  ] = 0;
-			params->ind_enable[ BLIS_4MH  ] = 0;
-			params->ind_enable[ BLIS_4M1B ] = 0;
-			params->ind_enable[ BLIS_4M1A ] = 0;
 			params->ind_enable[ BLIS_1M   ] = 0;
 		}
 	}
@@ -1231,11 +1200,6 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "problem size: max to test    %u\n", params->p_max );
 	libblis_test_fprintf_c( os, "problem size increment       %u\n", params->p_inc );
 	libblis_test_fprintf_c( os, "complex implementations        \n" );
-	libblis_test_fprintf_c( os, "  3mh?                       %u\n", params->ind_enable[ BLIS_3MH ] );
-	libblis_test_fprintf_c( os, "  3m1?                       %u\n", params->ind_enable[ BLIS_3M1 ] );
-	libblis_test_fprintf_c( os, "  4mh?                       %u\n", params->ind_enable[ BLIS_4MH ] );
-	libblis_test_fprintf_c( os, "  4m1b (4mb)?                %u\n", params->ind_enable[ BLIS_4M1B ] );
-	libblis_test_fprintf_c( os, "  4m1a (4m1)?                %u\n", params->ind_enable[ BLIS_4M1A ] );
 	libblis_test_fprintf_c( os, "  1m?                        %u\n", params->ind_enable[ BLIS_1M ] );
 	libblis_test_fprintf_c( os, "  native?                    %u\n", params->ind_enable[ BLIS_NAT ] );
 	libblis_test_fprintf_c( os, "simulated app-level threads  %u\n", params->n_app_threads );
@@ -1790,8 +1754,8 @@ void libblis_test_op_driver
 		}
 	}
 
-	// Enumerate all combinations of datatype domains requested, but only
-	// for the gemm operation.
+	// Enumerate all combinations of datatypes requested, but only for the
+	// gemm operation.
 
 	if      ( !mixed_domain &&  mixed_precision && op->opid == BLIS_GEMM )
 	{

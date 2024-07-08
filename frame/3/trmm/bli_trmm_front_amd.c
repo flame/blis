@@ -54,7 +54,7 @@ void bli_trmm_front
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_trmm_check( side, alpha, a, b, &BLIS_ZERO, b, cntx );
+		bli_trmm_check( side, alpha, a, b, cntx );
 
 	// If alpha is zero, scale by beta and return.
 	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
@@ -148,6 +148,9 @@ void bli_trmm_front
 
 #endif
 
+	// Set the pack schemas within the objects.
+	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
+
 	// Set each alias as the root object.
 	// NOTE: We MUST wait until we are done potentially swapping the objects
 	// before setting the root fields!
@@ -176,17 +179,6 @@ void bli_trmm_front
 	  bli_obj_width( &a_local ),
 	  rntm
 	);
-
-	// A sort of hack for communicating the desired pack schemas for A and B
-	// to bli_gemm_cntl_create() (via bli_l3_thread_decorator() and
-	// bli_l3_cntl_create_if()). This allows us to access the schemas from
-	// the control tree, which hopefully reduces some confusion, particularly
-	// in bli_packm_init().
-	pack_t schema_a = bli_cntx_schema_a_block( cntx );
-	pack_t schema_b = bli_cntx_schema_b_panel( cntx );
-
-	bli_obj_set_pack_schema( schema_a, &a_local );
-	bli_obj_set_pack_schema( schema_b, &b_local );
 
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator

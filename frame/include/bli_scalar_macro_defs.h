@@ -206,37 +206,6 @@
 #include "bli_set0bbs_mxn.h"
 
 
-// -- 3m-specific scalar macros --
-
-#include "bli_copyri3s.h"
-#include "bli_copyjri3s.h"
-
-#include "bli_scal2ri3s.h"
-#include "bli_scal2jri3s.h"
-
-#include "bli_scal2ri3s_mxn.h"
-
-
-// -- 4mh/3mh-specific scalar macros --
-
-// ro
-#include "bli_scal2ros.h"
-#include "bli_scal2jros.h"
-
-// io
-#include "bli_scal2ios.h"
-#include "bli_scal2jios.h"
-
-// rpi
-#include "bli_scal2rpis.h"
-#include "bli_scal2jrpis.h"
-
-#include "bli_scal2rihs_mxn.h"
-#include "bli_scal2rihs_mxn_diag.h"
-#include "bli_scal2rihs_mxn_uplo.h"
-#include "bli_setrihs_mxn_diag.h"
-
-
 // -- 1m-specific scalar macros --
 
 // 1e

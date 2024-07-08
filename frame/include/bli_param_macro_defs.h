@@ -1000,50 +1000,6 @@ BLIS_INLINE bool bli_is_panel_packed( pack_t schema )
 	       ( schema & BLIS_PACK_PANEL_BIT );
 }
 
-BLIS_INLINE bool bli_is_4mi_packed( pack_t schema )
-{
-	return ( bool )
-	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_4MI );
-}
-
-BLIS_INLINE bool bli_is_3mi_packed( pack_t schema )
-{
-	return ( bool )
-	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MI );
-}
-
-BLIS_INLINE bool bli_is_3ms_packed( pack_t schema )
-{
-	return ( bool )
-	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MS );
-}
-
-BLIS_INLINE bool bli_is_ro_packed( pack_t schema )
-{
-	return ( bool )
-	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RO );
-}
-
-BLIS_INLINE bool bli_is_io_packed( pack_t schema )
-{
-	return ( bool )
-	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_IO );
-}
-
-BLIS_INLINE bool bli_is_rpi_packed( pack_t schema )
-{
-	return ( bool )
-	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RPI );
-}
-
-BLIS_INLINE bool bli_is_rih_packed( pack_t schema )
-{
-	return ( bool )
-	       ( bli_is_ro_packed( schema ) ||
-	         bli_is_io_packed( schema ) ||
-	         bli_is_rpi_packed( schema ) );
-}
-
 BLIS_INLINE bool bli_is_1r_packed( pack_t schema )
 {
 	return ( bool )
@@ -1080,20 +1036,6 @@ BLIS_INLINE guint_t bli_pack_schema_index( pack_t schema )
 	return ( guint_t )
 	       ( ( schema & BLIS_PACK_FORMAT_BITS ) >> BLIS_PACK_FORMAT_SHIFT );
 }
-
-
-
-// pointer-related
-
-// Increment a pointer by an integer fraction:
-//   p0 + (num/dem)
-// where p0 is a pointer to a datatype of size sizeof_p0.
-BLIS_INLINE void_fp bli_ptr_inc_by_frac( void_fp p0, siz_t sizeof_p0, dim_t num, dim_t den )
-{
-	return ( void_fp )
-	       ( ( char* )p0 + ( ( num * ( dim_t )sizeof_p0 ) / den ) );
-}
-
 
 
 // Set dimensions, increments, effective uplo/diagoff, etc for ONE matrix

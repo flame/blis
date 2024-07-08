@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2021, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,44 +32,10 @@
 
 */
 
-#ifndef BLIS_IND_H
-#define BLIS_IND_H
-
-// level-3 induced method management
-#include "bli_l3_ind.h"
-
-// level-3 object APIs
-#include "bli_l3_ind_oapi.h"
-
-// level-3 typed APIs
-#include "bli_l3_ind_tapi.h"
-
-// level-3 cntx initialization
-#include "bli_cntx_ind_stage.h"
-
-
-void   bli_ind_init( void );
-void   bli_ind_finalize( void );
-
-BLIS_EXPORT_BLIS void    bli_ind_enable( ind_t method );
-BLIS_EXPORT_BLIS void    bli_ind_disable( ind_t method );
-BLIS_EXPORT_BLIS void    bli_ind_disable_all( void );
-
-BLIS_EXPORT_BLIS void    bli_ind_enable_dt( ind_t method, num_t dt );
-BLIS_EXPORT_BLIS void    bli_ind_disable_dt( ind_t method, num_t dt );
-BLIS_EXPORT_BLIS void    bli_ind_disable_all_dt( num_t dt );
-
-BLIS_EXPORT_BLIS void    bli_ind_oper_enable_only( opid_t oper, ind_t method, num_t dt );
-
-BLIS_EXPORT_BLIS bool    bli_ind_oper_is_impl( opid_t oper, ind_t method );
-//bool bli_ind_oper_has_avail( opid_t oper, num_t dt );
-BLIS_EXPORT_BLIS void_fp bli_ind_oper_get_avail( opid_t oper, num_t dt );
-BLIS_EXPORT_BLIS ind_t   bli_ind_oper_find_avail( opid_t oper, num_t dt );
-BLIS_EXPORT_BLIS char*   bli_ind_oper_get_avail_impl_string( opid_t oper, num_t dt );
-
-char*  bli_ind_get_impl_string( ind_t method );
-num_t  bli_ind_map_cdt_to_index( num_t dt );
-
-
-#endif
-
+void bli_l3_set_schemas
+     (
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       cntx_t* cntx
+     );

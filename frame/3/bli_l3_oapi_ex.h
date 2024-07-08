@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,13 +33,81 @@
 
 */
 
-void bli_cntx_ind_stage( ind_t method, dim_t stage, cntx_t* cntx );
 
-void bli_cntx_3mh_stage( dim_t stage, cntx_t* cntx );
-void bli_cntx_3m1_stage( dim_t stage, cntx_t* cntx );
-void bli_cntx_4mh_stage( dim_t stage, cntx_t* cntx );
-void bli_cntx_4mb_stage( dim_t stage, cntx_t* cntx );
-void bli_cntx_4m1_stage( dim_t stage, cntx_t* cntx );
-void bli_cntx_1m_stage( dim_t stage, cntx_t* cntx );
-void bli_cntx_nat_stage( dim_t stage, cntx_t* cntx );
+//
+// Prototype object-based interfaces (expert).
+//
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
+     );
+
+GENPROT( gemm )
+GENPROT( gemmt )
+GENPROT( her2k )
+GENPROT( syr2k )
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+     ( \
+       side_t  side, \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
+     );
+
+GENPROT( hemm )
+GENPROT( symm )
+GENPROT( trmm3 )
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
+     );
+
+GENPROT( herk )
+GENPROT( syrk )
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+     ( \
+       side_t  side, \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
+     );
+
+GENPROT( trmm )
+GENPROT( trsm )
 

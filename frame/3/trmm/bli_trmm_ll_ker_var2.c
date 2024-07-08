@@ -203,9 +203,6 @@ void PASTEMAC(ch,varname) \
 	inc_t           rstep_c, cstep_c; \
 	inc_t           istep_a; \
 	inc_t           istep_b; \
-	inc_t           off_scl; \
-	inc_t           ss_a_num; \
-	inc_t           ss_a_den; \
 	inc_t           ps_a_cur; \
 	inc_t           is_a_cur; \
 	auxinfo_t       aux; \
@@ -243,30 +240,6 @@ void PASTEMAC(ch,varname) \
 	   matrix), which is used by 4m1/3m1 implementations, we need
 	   this unreduced value of k. */ \
 	k_full = k; \
-\
-	/* Compute indexing scaling factor for for 4m or 3m. This is
-	   needed because one of the packing register blocksizes (PACKMR
-	   or PACKNR) is used to index into the micro-panels of the non-
-	   triangular matrix when computing with a diagonal-intersecting
-	   micro-panel of the triangular matrix. In the case of 4m or 3m,
-	   real values are stored in both sub-panels, and so the indexing
-	   needs to occur in units of real values. The value computed
-	   here is divided into the complex pointer offset to cause the
-	   pointer to be advanced by the correct value. */ \
-	if ( bli_is_4mi_packed( schema_a ) || \
-	     bli_is_3mi_packed( schema_a ) || \
-	     bli_is_rih_packed( schema_a ) ) off_scl = 2; \
-	else                                 off_scl = 1; \
-\
-	/* Compute the storage stride scaling. Usually this is just 1.
-	   However, in the case of interleaved 3m, we need to scale the
-	   offset by 3/2. And if we are packing real-only, imag-only, or
-	   summed-only, we need to scale the computed panel sizes by 1/2
-	   to compensate for the fact that the pointer arithmetic occurs
-	   in terms of complex elements rather than real elements. */ \
-	if      ( bli_is_3mi_packed( schema_a ) ) { ss_a_num = 3; ss_a_den = 2; } \
-	else if ( bli_is_rih_packed( schema_a ) ) { ss_a_num = 1; ss_a_den = 2; } \
-	else                                      { ss_a_num = 1; ss_a_den = 1; } \
 \
 	/* If there is a zero region above where the diagonal of A intersects the
 	   left edge of the block, adjust the pointer to C and treat this case as
@@ -317,9 +290,6 @@ void PASTEMAC(ch,varname) \
 \
 	/* Save the imaginary stride of B to the auxinfo_t object. */ \
 	bli_auxinfo_set_is_b( istep_b, &aux ); \
-\
-	/* Save the desired output datatype (indicating no typecasting). */ \
-	/*bli_auxinfo_set_dt_on_output( dt, &aux );*/ \
 \
 	/* The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
 	   loop around the microkernel. Here we query the thrinfo_t node for the
@@ -387,12 +357,12 @@ void PASTEMAC(ch,varname) \
 				   intersecting micro-panel. */ \
 				is_a_cur  = k_a1011 * PACKMR; \
 				is_a_cur += ( bli_is_odd( is_a_cur ) ? 1 : 0 ); \
-				ps_a_cur  = ( is_a_cur * ss_a_num ) / ss_a_den; \
+				ps_a_cur  = is_a_cur; \
 \
 				/* NOTE: ir loop parallelism disabled for now. */ \
 				/*if ( bli_trmm_my_iter( i, ir_thread ) ) {*/ \
 \
-				b1_i = b1 + ( off_a1011 * PACKNR ) / off_scl; \
+				b1_i = b1 + off_a1011 * PACKNR; \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1; \
@@ -408,10 +378,6 @@ void PASTEMAC(ch,varname) \
 				   object. */ \
 				bli_auxinfo_set_next_a( a2, &aux ); \
 				bli_auxinfo_set_next_b( b2, &aux ); \
-\
-				/* Save the 4m1/3m1 imaginary stride of A to the auxinfo_t
-				   object. */ \
-				bli_auxinfo_set_is_a( is_a_cur, &aux ); \
 \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
@@ -479,10 +445,6 @@ void PASTEMAC(ch,varname) \
 				   object. */ \
 				bli_auxinfo_set_next_a( a2, &aux ); \
 				bli_auxinfo_set_next_b( b2, &aux ); \
-\
-				/* Save the 4m1/3m1 imaginary stride of A to the auxinfo_t
-				   object. */ \
-				bli_auxinfo_set_is_a( istep_a, &aux ); \
 \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \

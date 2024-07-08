@@ -72,30 +72,26 @@ void bls_gemm_ex
 {
 	bli_init_once();
 
-	// -- bli_gemmnat() --------------------------------------------------------
-
-	// Obtain a valid (native) context from the gks if necessary.
-	// NOTE: This must be done before calling the _check() function, since
-	// that function assumes the context pointer is valid.
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
-
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_l;
 	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
 	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
 
+	// Obtain a valid (native) context from the gks if necessary.
+	// NOTE: This must be done before calling the _check() function, since
+	// that function assumes the context pointer is valid.
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bls_gemm_check( alpha, a, b, beta, c, cntx );
+
 	// -- bli_gemm_front() -----------------------------------------------------
 
 	obj_t a_local;
 	obj_t b_local;
 	obj_t c_local;
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-	{
-		bls_gemm_check( alpha, a, b, beta, c, cntx );
-	}
 
 	// If C has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( c ) )
@@ -145,11 +141,6 @@ void bls_gemm_ex
 		bli_obj_induce_trans( &a_local );
 		bli_obj_induce_trans( &b_local );
 		bli_obj_induce_trans( &c_local );
-
-		// NOTE: This is probably not needed within the sandbox.
-		// We must also swap the pack schemas, which were set by bli_gemm_md()
-		// or the inlined code above.
-		//bli_obj_swap_pack_schemas( &a_local, &b_local );
 	}
 
 	// Parse and interpret the contents of the rntm_t object to properly

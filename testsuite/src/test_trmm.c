@@ -272,8 +272,6 @@ void libblis_test_trmm_impl
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
 		bli_trmm( side, alpha, a, b );
-		//bli_trmm4m( side, alpha, a, b );
-		//bli_trmm3m( side, alpha, a, b );
 		break;
 
 		default:

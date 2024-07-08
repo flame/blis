@@ -31,11 +31,6 @@ sdcz    # Datatype(s) to test:
 500     # Problem size: maximum to test
 100     # Problem size: increment between experiments
         # Complex level-3 implementations to test:
-0       #   3mh  ('1' = enable; '0' = disable)
-0       #   3m1  ('1' = enable; '0' = disable)
-0       #   4mh  ('1' = enable; '0' = disable)
-0       #   4m1b ('1' = enable; '0' = disable)
-0       #   4m1a ('1' = enable; '0' = disable)
 1       #   1m   ('1' = enable; '0' = disable)
 1       #   native ('1' = enable; '0' = disable)
 1       # Simulate application-level threading:

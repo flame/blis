@@ -36,11 +36,6 @@
 
 static char* bli_ind_impl_str[BLIS_NUM_IND_METHODS] =
 {
-/* 3mh  */ "3mh",
-/* 3m1  */ "3m1",
-/* 4mh  */ "4mh",
-/* 4m1b */ "4m1b",
-/* 4m1a */ "4m1a",
 /* 1m   */ "1m",
 /* nat  */ "native",
 };
@@ -147,8 +142,9 @@ bool bli_ind_oper_is_impl( opid_t oper, ind_t method )
 
 	if ( bli_opid_is_level3( oper ) )
 	{
-		// Look up whether its func_t pointer in the table is NULL.
-		is_impl = ( bli_l3_ind_oper_get_func( oper, method ) != NULL );
+		// Look up whether the operation is implemented for the given induced
+		// method id.
+		is_impl = bli_l3_ind_oper_is_impl( oper, method );
 	}
 	else
 	{
@@ -160,39 +156,6 @@ bool bli_ind_oper_is_impl( opid_t oper, ind_t method )
 	}
 
 	return is_impl;
-}
-
-#if 0
-bool bli_ind_oper_has_avail( opid_t oper, num_t dt )
-{
-	ind_t method = bli_ind_oper_find_avail( oper, dt );
-
-	if ( method == BLIS_NAT ) return FALSE;
-	else                      return TRUE;
-}
-#endif
-
-void_fp bli_ind_oper_get_avail( opid_t oper, num_t dt )
-{
-	void_fp func_p;
-
-	if ( bli_opid_is_level3( oper ) )
-	{
-		ind_t method = bli_ind_oper_find_avail( oper, dt );
-
-		func_p = bli_l3_ind_oper_get_func( oper, method );
-	}
-	else
-	{
-		// Currently, any operation that is not level-3 does not
-		// have induced method implementations. (This should actually	
-		// assign the pointer to be the native front-end, but for
-		// now there are no calls to bli_ind_oper_get_avail() in the
-		// context of level-2 operations.
-		func_p = NULL;
-	}
-
-	return func_p;
 }
 
 ind_t bli_ind_oper_find_avail( opid_t oper, num_t dt )

@@ -80,11 +80,10 @@ test_dts="s d c z"
 test_ops="gemm"
 
 # Implementations to test.
-#test_impls="openblas vendor asm_blis 1m_blis 4m1a_blis"
-#test_impls="asm_blis 1m_blis 4m1a_blis"
+#test_impls="openblas vendor asm_blis 1m_blis"
+#test_impls="asm_blis 1m_blis"
 #test_impls="asm_blis"
-#test_impls="4m1a_blis"
-test_impls="asm_blis 4m1a_blis 1m_blis"
+test_impls="asm_blis 1m_blis"
 
 # Save a copy of GOMP_CPU_AFFINITY so that if we have to unset it, we can
 # restore the value.
@@ -136,7 +135,7 @@ for th in ${threads}; do
 		for im in ${test_impls}; do
 
 			if [ "${dt}" = "s"       -o "${dt}" = "d"         ] && \
-			   [ "${im}" = "1m_blis" -o "${im}" = "4m1a_blis" ]; then
+			   [ "${im}" = "1m_blis" ]; then
 				continue
 			fi
 
@@ -164,8 +163,7 @@ for th in ${threads}; do
 					# Set the threading parameters based on the implementation
 					# that we are preparing to run.
 					if   [ "${im}" = "asm_blis"  ] || \
-					     [ "${im}" = "1m_blis"   ] || \
-					     [ "${im}" = "4m1a_blis" ]; then
+					     [ "${im}" = "1m_blis" ]; then
 						unset  OMP_NUM_THREADS
 						export BLIS_JC_NT=${jc_nt}
 						export BLIS_PC_NT=${pc_nt}

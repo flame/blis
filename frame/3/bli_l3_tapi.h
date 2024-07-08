@@ -35,13 +35,13 @@
 
 
 //
-// Prototype BLAS-like interfaces with typed operands.
+// Prototype BLAS-like interfaces with typed operands (basic).
 //
 
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        trans_t transa, \
        trans_t transb, \
@@ -53,16 +53,14 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        ctype*  b, inc_t rs_b, inc_t cs_b, \
        ctype*  beta, \
        ctype*  c, inc_t rs_c, inc_t cs_c  \
-       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTPROT_BASIC0( gemm )
-INSERT_GENTPROT_BASIC0( gemmt )
 
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        side_t  side, \
        uplo_t  uploa, \
@@ -75,7 +73,6 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        ctype*  b, inc_t rs_b, inc_t cs_b, \
        ctype*  beta, \
        ctype*  c, inc_t rs_c, inc_t cs_c  \
-       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTPROT_BASIC0( hemm )
@@ -85,7 +82,7 @@ INSERT_GENTPROT_BASIC0( symm )
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        uplo_t   uploc, \
        trans_t  transa, \
@@ -95,7 +92,6 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        ctype*   a, inc_t rs_a, inc_t cs_a, \
        ctype_r* beta, \
        ctype*   c, inc_t rs_c, inc_t cs_c  \
-       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTPROTR_BASIC0( herk )
@@ -104,7 +100,7 @@ INSERT_GENTPROTR_BASIC0( herk )
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        uplo_t   uploc, \
        trans_t  transa, \
@@ -116,7 +112,6 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        ctype*   b, inc_t rs_b, inc_t cs_b, \
        ctype_r* beta, \
        ctype*   c, inc_t rs_c, inc_t cs_c  \
-       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTPROTR_BASIC0( her2k )
@@ -125,7 +120,7 @@ INSERT_GENTPROTR_BASIC0( her2k )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        uplo_t  uploc, \
        trans_t transa, \
@@ -135,7 +130,6 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
        ctype*  beta, \
        ctype*  c, inc_t rs_c, inc_t cs_c  \
-       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTPROT_BASIC0( syrk )
@@ -144,7 +138,7 @@ INSERT_GENTPROT_BASIC0( syrk )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        uplo_t  uploc, \
        trans_t transa, \
@@ -156,16 +150,16 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        ctype*  b, inc_t rs_b, inc_t cs_b, \
        ctype*  beta, \
        ctype*  c, inc_t rs_c, inc_t cs_c  \
-       BLIS_TAPI_EX_PARAMS  \
      );
 
+INSERT_GENTPROT_BASIC0( gemmt )
 INSERT_GENTPROT_BASIC0( syr2k )
 
 
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        side_t  side, \
        uplo_t  uploa, \
@@ -179,7 +173,6 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        ctype*  b, inc_t rs_b, inc_t cs_b, \
        ctype*  beta, \
        ctype*  c, inc_t rs_c, inc_t cs_c  \
-       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTPROT_BASIC0( trmm3 )
@@ -188,7 +181,7 @@ INSERT_GENTPROT_BASIC0( trmm3 )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        side_t  side, \
        uplo_t  uploa, \
@@ -199,7 +192,6 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        ctype*  alpha, \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
        ctype*  b, inc_t rs_b, inc_t cs_b  \
-       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTPROT_BASIC0( trmm )

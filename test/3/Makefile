@@ -195,20 +195,10 @@ BLA_DEF  := -DBLAS
 EIG_DEF  := -DEIGEN
 
 # Complex implementation type
-D3MHW    := -DIND=BLIS_3MH
-D3M1     := -DIND=BLIS_3M1
-D4MHW    := -DIND=BLIS_4MH
-D4M1B    := -DIND=BLIS_4M1B
-D4M1A    := -DIND=BLIS_4M1A
 D1M      := -DIND=BLIS_1M
 DNAT     := -DIND=BLIS_NAT
 
 # Implementation string
-#STR_3MHW := -DSTR=\"3mhw\"
-#STR_3M1  := -DSTR=\"3m1\"
-#STR_4MHW := -DSTR=\"4mhw\"
-#STR_4M1B := -DSTR=\"4m1b\"
-#STR_4M1A := -DSTR=\"4m1a\"
 #STR_1M   := -DSTR=\"1m\"
 STR_NAT  := -DSTR=\"asm_blis\"
 STR_OBL  := -DSTR=\"openblas\"

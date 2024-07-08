@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,57 +33,45 @@
 
 */
 
-// Given the current architecture of BLIS sandboxes, bli_gemmnat() is the
-// entry point to any sandbox implementation.
+#ifndef BLIS_L3_IND_H
+#define BLIS_L3_IND_H
 
-// NOTE: This function is implemented identically to the function that it
-// overrides in frame/ind/oapi/bli_l3_nat_oapi.c. This means that we are
-// forgoing the option of customizing the implementations that underlie
-// bli_gemm() and bli_?gemm(). Any new code defined in this sandbox
-// directory, however, will be included in the BLIS.
+// -----------------------------------------------------------------------------
 
-#include "blis.h"
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+ind_t   PASTEMAC(opname,ind_find_avail)( num_t dt );
+/*bool PASTEMAC(opname,ind_has_avail)( num_t dt ); */
 
-#undef  GENFRONT
-#define GENFRONT( opname, cname, imeth ) \
-\
-void PASTEMAC(opname,imeth) \
-     ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  beta, \
-       obj_t*  c, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
-     ) \
-{ \
-\
-	/* A switch to easily toggle whether we use the sandbox implementation
-	   of bls_gemm() as the implementation for bli_gemm(). (This allows for
-	   easy testing of bls_gemm() via the testsuite.) */ \
-	if ( 1 ) \
-	{ \
-		bls_gemm_ex( alpha, a, b, beta, c, cntx, rntm ); \
-		return; \
-	} \
-\
-	bli_init_once(); \
-\
-	/* Obtain a valid (native) context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
-\
-	/* Initialize a local runtime with global settings if necessary. Note
-	   that in the case that a runtime is passed in, we make a local copy. */ \
-	rntm_t rntm_l; \
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
-\
-	/* Invoke the operation's front end. */ \
-	PASTEMAC(opname,_front) \
-	( \
-	  alpha, a, b, beta, c, cntx, rntm, NULL \
-	); \
-}
+GENPROT( gemm )
+GENPROT( gemmt )
+GENPROT( hemm )
+GENPROT( herk )
+GENPROT( her2k )
+GENPROT( symm )
+GENPROT( syrk )
+GENPROT( syr2k )
+GENPROT( trmm3 )
+GENPROT( trmm )
+GENPROT( trsm )
 
-GENFRONT( gemm, gemm, nat )
+// -----------------------------------------------------------------------------
+
+//bool bli_l3_ind_oper_is_avail( opid_t oper, ind_t method, num_t dt );
+
+ind_t   bli_l3_ind_oper_find_avail( opid_t oper, num_t dt );
+
+void    bli_l3_ind_set_enable_dt( ind_t method, num_t dt, bool status );
+
+void    bli_l3_ind_oper_enable_only( opid_t oper, ind_t method, num_t dt );
+void    bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool status );
+
+void    bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool status );
+bool    bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt );
+
+bool    bli_l3_ind_oper_is_impl( opid_t oper, ind_t method );
+
+
+#endif
+

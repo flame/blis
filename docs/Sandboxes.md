@@ -17,13 +17,9 @@ Simply put, a sandbox in BLIS provides an alternative implementation to the
 `gemm` operation.
 
 To get a little more specific, a sandbox provides an alternative implementation
-to the function `bli_gemmnat()`, which is the object-based API call for
-computing the `gemm` operation via native execution.
-
-**Note**: Native execution simply means that an induced method will not be used.
-It's what you probably already think of when you think of implementing the
-`gemm` operation: a series of loops around an optimized (usually assembly-based)
-microkernel with some packing functions thrown in at various levels.
+to the function `bli_gemm_ex()`, which is the
+[expert interface](BLISObjectAPI.md##basic-vs-expert-interfaces) for calling the
+[object-based API](BLISObjectAPI.md#gemm) for the `gemm` operation.
 
 Why sandboxes? Sometimes you want to experiment with tweaks or changes to
 the `gemm` operation, but you want to do so in a simple environment rather than
@@ -45,18 +41,11 @@ corresponds to a sub-directory of `sandbox` named `gemmlike`. (Reminder: the
 `auto` argument is the configuration target and thus unrelated to
 sandboxes.)
 
-NOTE: If you want your sandbox implementation to handle *all* problem
-sizes and shapes, you'll need to disable the skinny/unpacked "sup"
-sub-framework within BLIS, which is enabled by default. This can be
-done by passing the `--disable-sup-handling` option to configure:
-```
-$ ./configure --enable-sandbox=gemmlike --disable-sup-handling auto
-```
-If you leave sup enabled, the sup implementation will, at runtime, detect
-and handle certain smaller problem sizes upstream of where BLIS calls
-`bli_gemmnat()` while all other problems will fall to your sandbox
-implementation. Thus, you should only leave sup enabled if you are fine
-with those smaller problems being handled by sup.
+NOTE: Using your own sandbox implementation means that BLIS will call your
+sandbox for *all* problem sizes and shapes, for *all* datatypes supported
+by BLIS. If you intend to only implement a subset of this functionality
+within your sandbox, you should be sure to redirect execution back into
+the core framework for the parts that you don't wish to reimplement yourself.
 
 As `configure` runs, you should get output that includes lines
 similar to:
@@ -67,13 +56,12 @@ configure:   sandbox/gemmlike
 And when you build BLIS, the last files to be compiled will be the source
 code in the specified sandbox:
 ```
-Compiling obj/haswell/sandbox/gemmlike/bli_gemmnat.o ('haswell' CFLAGS for sandboxes)
 Compiling obj/haswell/sandbox/gemmlike/bls_gemm.o ('haswell' CFLAGS for sandboxes)
 Compiling obj/haswell/sandbox/gemmlike/bls_gemm_bp_var1.o ('haswell' CFLAGS for sandboxes)
 ...
 ```
 That's it! After the BLIS library is built, it will contain your chosen
-sandbox's implementation of `bli_gemmnat()` instead of the default
+sandbox's implementation of `bli_gemm_ex()` instead of the default BLIS
 implementation.
 
 ## Sandbox rules
@@ -97,7 +85,7 @@ Note that `blis.h` already contains all of its definitions inside of an
 `extern "C"` block, so you should be able to `#include "blis.h"` from your
 C++11 source code without any issues.
 
-3. All of your code to replace BLIS's default implementation of `bli_gemmnat()`
+3. All of your code to replace BLIS's default implementation of `bli_gemm_ex()`
 should reside in the named sandbox directory, or some directory therein.
 (Obviously.) For example, the "gemmlike" sandbox is located in
 `sandbox/gemmlike`. All of the code associated with this sandbox will be
@@ -105,7 +93,7 @@ contained within `sandbox/gemmlike`. Note that you absolutely *may* include
 additional code and interfaces within the sandbox, if you wish -- code and
 interfaces that are not directly or indirectly needed for satisfying the
 the "contract" set forth by the sandbox (i.e., including a local definition
-of`bli_gemmnat()`).
+of`bli_gemm_ex()`).
 
 4. The *only* header file that is required of your sandbox is `bli_sandbox.h`.
 It must be named `bli_sandbox.h` because `blis.h` will `#include` this file
@@ -119,12 +107,12 @@ you should only place things (e.g. prototypes or type definitions) in
 (b) an *application* that calls your sandbox-enabled BLIS library.
 Usually, neither of these situations will require any of your local definitions
 since those local definitions are only needed to define your sandbox
-implementation of `bli_gemmnat()`, and this function is already prototyped by
+implementation of `bli_gemm_ex()`, and this function is already prototyped by
 BLIS. *But if you are adding additional APIs and/or operations to the sandbox
-that are unrelated to `bli_gemmnat()`, then you'll want to `#include` those
+that are unrelated to `bli_gemm_ex()`, then you'll want to `#include` those
 function prototypes from within `bli_sandbox.h`*
 
-5. Your definition of `bli_gemmnat()` should be the **only function you define**
+5. Your definition of `bli_gemm_ex()` should be the **only function you define**
 in your sandbox that begins with `bli_`. If you define other functions that
 begin with `bli_`, you risk a namespace collision with existing framework
 functions. To guarantee safety, please prefix your locally-defined sandbox
@@ -147,9 +135,9 @@ For example, with a BLIS sandbox you **can** do the following kinds of things:
   kernels, which can already be customized within each sub-configuration);
 - try inlining your functions manually;
 - pivot away from using `obj_t` objects at higher algorithmic level (such as
-  immediately after calling `bli_gemmnat()`) to try to avoid some overhead;
+  immediately after calling `bli_gemm_ex()`) to try to avoid some overhead;
 - create experimental implementations of new BLAS-like operations (provided
-  that you also provide an implementation of `bli_gemmnat()`).
+  that you also provide an implementation of `bli_gemm_ex()`).
 
 You **cannot**, however, use a sandbox to do the following kinds of things:
 - define new datatypes (half-precision, quad-precision, short integer, etc.)
@@ -167,8 +155,8 @@ Another important limitation is the fact that the build system currently uses
 # Example framework CFLAGS used by 'haswell' sub-configuration
 -O3 -Wall -Wno-unused-function -Wfatal-errors -fPIC -std=c99
 -D_POSIX_C_SOURCE=200112L -I./include/haswell -I./frame/3/
--I./frame/ind/ukernels/ -I./frame/1m/ -I./frame/1f/ -I./frame/1/
--I./frame/include -DBLIS_VERSION_STRING=\"0.3.2-51\"
+-I./frame/1m/ -I./frame/1f/ -I./frame/1/ -I./frame/include
+-DBLIS_VERSION_STRING=\"0.3.2-51\"
 ```
 which are likely more general-purpose than the `CFLAGS` used for, say,
 optimized kernels or even reference kernels.
@@ -176,8 +164,8 @@ optimized kernels or even reference kernels.
 # Example optimized kernel CFLAGS used by 'haswell' sub-configuration
 -O3 -mavx2 -mfma -mfpmath=sse -march=core-avx2 -Wall -Wno-unused-function
 -Wfatal-errors -fPIC -std=c99 -D_POSIX_C_SOURCE=200112L -I./include/haswell
--I./frame/3/ -I./frame/ind/ukernels/ -I./frame/1m/ -I./frame/1f/ -I./frame/1/
--I./frame/include -DBLIS_VERSION_STRING=\"0.3.2-51\"
+-I./frame/3/ -I./frame/1m/ -I./frame/1f/ -I./frame/1/ -I./frame/include
+-DBLIS_VERSION_STRING=\"0.3.2-51\"
 ```
 (To see precisely which flags are being employed for any given file, enable
 verbosity at compile-time via `make V=1`.) Compiling sandboxes with these more

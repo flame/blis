@@ -60,7 +60,8 @@ void bli_gemm_int
 		bli_gemm_basic_check( alpha, a, b, beta, c, cntx );
 
 	// If C has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( c ) ) {
+	if ( bli_obj_has_zero_dim( c ) )
+	{
 		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4);
 		return;
 	}
@@ -69,9 +70,9 @@ void bli_gemm_int
 	if ( bli_obj_has_zero_dim( a ) ||
 	     bli_obj_has_zero_dim( b ) )
 	{
-        if ( bli_thread_am_ochief( thread ) )
-		    bli_scalm( beta, c );
-        bli_thread_barrier( thread );
+		if ( bli_thread_am_ochief( thread ) )
+			bli_scalm( beta, c );
+		bli_thread_barrier( thread );
 		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4);
 		return;
 	}
@@ -84,9 +85,9 @@ void bli_gemm_int
 		// This should never execute.
 		bli_abort();
 
-        if ( bli_thread_am_ochief( thread ) )
-		    bli_scalm( beta, c );
-        bli_thread_barrier( thread );
+		if ( bli_thread_am_ochief( thread ) )
+			bli_scalm( beta, c );
+		bli_thread_barrier( thread );
 		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4);
 		return;
 	}
@@ -100,14 +101,14 @@ void bli_gemm_int
 	// to B.
 	if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
 	{
-        bli_obj_scalar_apply_scalar( alpha, &b_local );
+		bli_obj_scalar_apply_scalar( alpha, &b_local );
 	}
 
 	// If beta is non-unit, typecast and apply it to the scalar attached
 	// to C.
 	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
 	{
-        bli_obj_scalar_apply_scalar( beta, &c_local );
+		bli_obj_scalar_apply_scalar( beta, &c_local );
 	}
 
 	// Create the next node in the thrinfo_t structure.
@@ -115,17 +116,6 @@ void bli_gemm_int
 
 	// Extract the function pointer from the current control tree node.
 	f = bli_cntl_var_func( cntl );
-
-	// Somewhat hackish support for 4m1b method implementation.
-	{
-		ind_t im = bli_cntx_method( cntx );
-
-		if ( im != BLIS_NAT )
-		{
-			if ( im == BLIS_4M1B )
-			if ( f == bli_gemm_ker_var2 ) f = bli_gemm4mb_ker_var2;
-		}
-	}
 
 	// Invoke the variant.
 	f
@@ -136,7 +126,7 @@ void bli_gemm_int
 	  cntx,
 	  rntm,
 	  cntl,
-      thread
+	  thread
 	);
 
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4);

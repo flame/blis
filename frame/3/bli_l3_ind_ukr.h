@@ -53,11 +53,6 @@ void PASTEMAC(ch,opname) \
        cntx_t*    restrict cntx  \
      );
 
-INSERT_GENTPROT_BASIC0( gemm3mh_ukr_name )
-INSERT_GENTPROT_BASIC0( gemm3m1_ukr_name )
-INSERT_GENTPROT_BASIC0( gemm4mh_ukr_name )
-INSERT_GENTPROT_BASIC0( gemm4mb_ukr_name )
-INSERT_GENTPROT_BASIC0( gemm4m1_ukr_name )
 INSERT_GENTPROT_BASIC0( gemm1m_ukr_name )
 
 
@@ -77,10 +72,6 @@ void PASTEMAC(ch,opname) \
        cntx_t*    restrict cntx  \
      );
 
-INSERT_GENTPROT_BASIC0( gemmtrsm3m1_l_ukr_name )
-INSERT_GENTPROT_BASIC0( gemmtrsm3m1_u_ukr_name )
-INSERT_GENTPROT_BASIC0( gemmtrsm4m1_l_ukr_name )
-INSERT_GENTPROT_BASIC0( gemmtrsm4m1_u_ukr_name )
 INSERT_GENTPROT_BASIC0( gemmtrsm1m_l_ukr_name )
 INSERT_GENTPROT_BASIC0( gemmtrsm1m_u_ukr_name )
 
@@ -97,10 +88,6 @@ void PASTEMAC(ch,opname) \
        cntx_t*    restrict cntx  \
      );
 
-INSERT_GENTPROT_BASIC0( trsm3m1_l_ukr_name )
-INSERT_GENTPROT_BASIC0( trsm3m1_u_ukr_name )
-INSERT_GENTPROT_BASIC0( trsm4m1_l_ukr_name )
-INSERT_GENTPROT_BASIC0( trsm4m1_u_ukr_name )
 INSERT_GENTPROT_BASIC0( trsm1m_l_ukr_name )
 INSERT_GENTPROT_BASIC0( trsm1m_u_ukr_name )
 

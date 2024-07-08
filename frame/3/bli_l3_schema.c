@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,45 +32,49 @@
 
 */
 
-#ifndef BLIS_L3_IND_H
-#define BLIS_L3_IND_H
+#include "blis.h"
 
-// -----------------------------------------------------------------------------
+void bli_l3_set_schemas
+     (
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       cntx_t* cntx
+     )
+{
+	// Begin with pack schemas for native execution.
+	pack_t schema_a = BLIS_PACKED_ROW_PANELS;
+	pack_t schema_b = BLIS_PACKED_COL_PANELS;
 
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-void_fp PASTEMAC(opname,ind_get_avail)( num_t dt );
-/*bool PASTEMAC(opname,ind_has_avail)( num_t dt ); */
+	// When executing the 1m method, choose the appropriate pack schemas based
+	// on the microkernel preference encoded within the current cntx_t (which
+	// was presumably returned by the gks).
+	if ( bli_cntx_method( cntx ) == BLIS_1M )
+	{
+		num_t dt = bli_obj_domain( c ) | bli_obj_comp_prec( c );
 
-GENPROT( gemm )
-GENPROT( gemmt )
-GENPROT( hemm )
-GENPROT( herk )
-GENPROT( her2k )
-GENPROT( symm )
-GENPROT( syrk )
-GENPROT( syr2k )
-GENPROT( trmm3 )
-GENPROT( trmm )
-GENPROT( trsm )
+		// Note that bli_cntx_l3_vir_ukr_prefers_cols_dt() will use the real
+		// projection of dt to query the preference of the corresponding native
+		// real-domain microkernel. This is what ultimately determines which
+		// variant of 1m is applicable.
+		if ( bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ) )
+		{
+			schema_a = BLIS_PACKED_ROW_PANELS_1E;
+			schema_b = BLIS_PACKED_COL_PANELS_1R;
+		}
+		else
+		{
+			schema_a = BLIS_PACKED_ROW_PANELS_1R;
+			schema_b = BLIS_PACKED_COL_PANELS_1E;
+		}
+	}
 
-// -----------------------------------------------------------------------------
-
-//bool bli_l3_ind_oper_is_avail( opid_t oper, ind_t method, num_t dt );
-
-ind_t   bli_l3_ind_oper_find_avail( opid_t oper, num_t dt );
-
-void    bli_l3_ind_set_enable_dt( ind_t method, num_t dt, bool status );
-
-void    bli_l3_ind_oper_enable_only( opid_t oper, ind_t method, num_t dt );
-void    bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool status );
-
-void    bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool status );
-bool    bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt );
-
-void_fp bli_l3_ind_oper_get_func( opid_t oper, ind_t method );
-
-
-#endif
+	// Embed the schemas into the objects for A and B. This is a sort of hack
+	// for communicating the desired pack schemas to bli_gemm_cntl_create()
+	// (via bli_l3_thread_decorator() and bli_l3_cntl_create_if()). This allows
+	// us to subsequently access the schemas from the control tree, which
+	// hopefully reduces some confusion, particularly in bli_packm_init().
+	bli_obj_set_pack_schema( schema_a, a );
+	bli_obj_set_pack_schema( schema_b, b );
+}
 

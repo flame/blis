@@ -63,9 +63,6 @@ typedef struct cntx_s
 	func_t*   unpackm_kers;
 
 	ind_t     method;
-	pack_t    schema_a;
-	pack_t    schema_b;
-	pack_t    schema_c;
 
 } cntx_t;
 */
@@ -156,18 +153,6 @@ BLIS_INLINE ind_t bli_cntx_method( cntx_t* cntx )
 {
 	return cntx->method;
 }
-BLIS_INLINE pack_t bli_cntx_schema_a_block( cntx_t* cntx )
-{
-	return cntx->schema_a_block;
-}
-BLIS_INLINE pack_t bli_cntx_schema_b_panel( cntx_t* cntx )
-{
-	return cntx->schema_b_panel;
-}
-BLIS_INLINE pack_t bli_cntx_schema_c_panel( cntx_t* cntx )
-{
-	return cntx->schema_c_panel;
-}
 
 // -----------------------------------------------------------------------------
 
@@ -178,23 +163,6 @@ BLIS_INLINE pack_t bli_cntx_schema_c_panel( cntx_t* cntx )
 BLIS_INLINE void bli_cntx_set_method( ind_t method, cntx_t* cntx )
 {
 	cntx->method = method;
-}
-BLIS_INLINE void bli_cntx_set_schema_a_block( pack_t schema, cntx_t* cntx )
-{
-	cntx->schema_a_block = schema;
-}
-BLIS_INLINE void bli_cntx_set_schema_b_panel( pack_t schema, cntx_t* cntx )
-{
-	cntx->schema_b_panel = schema;
-}
-BLIS_INLINE void bli_cntx_set_schema_c_panel( pack_t schema, cntx_t* cntx )
-{
-	cntx->schema_c_panel = schema;
-}
-BLIS_INLINE void bli_cntx_set_schema_ab_blockpanel( pack_t sa, pack_t sb, cntx_t* cntx )
-{
-	bli_cntx_set_schema_a_block( sa, cntx );
-	bli_cntx_set_schema_b_panel( sb, cntx );
 }
 
 // -----------------------------------------------------------------------------
@@ -942,7 +910,7 @@ BLIS_EXPORT_BLIS void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... );
 
 BLIS_EXPORT_BLIS void bli_cntx_set_trsm_blkszs( dim_t n_bs, ... );
 
-BLIS_EXPORT_BLIS void bli_cntx_set_ind_blkszs( ind_t method, dim_t n_bs, ... );
+BLIS_EXPORT_BLIS void bli_cntx_set_ind_blkszs( ind_t method, num_t dt, dim_t n_bs, ... );
 
 BLIS_EXPORT_BLIS void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... );
 BLIS_EXPORT_BLIS void bli_cntx_set_l3_vir_ukrs( dim_t n_ukrs, ... );

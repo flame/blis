@@ -276,8 +276,6 @@ void libblis_test_herk_impl
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
 		bli_herk( alpha, a, beta, c );
-		//bli_herk4m( alpha, a, beta, c );
-		//bli_herk3m( alpha, a, beta, c );
 		break;
 
 		default:

@@ -218,9 +218,6 @@ void PASTEMAC(ch,varname) \
 	inc_t           rstep_c, cstep_c; \
 	inc_t           istep_a; \
 	inc_t           istep_b; \
-	inc_t           off_scl; \
-	inc_t           ss_a_num; \
-	inc_t           ss_a_den; \
 	inc_t           ps_a_cur; \
 	inc_t           is_a_cur; \
 	auxinfo_t       aux; \
@@ -267,29 +264,6 @@ void PASTEMAC(ch,varname) \
 	   this unreduced value of k. */ \
 	k_full = ( k % MR != 0 ? k + MR - ( k % MR ) : k ); \
 \
-	/* Compute indexing scaling factor for for 4m or 3m. This is
-	   needed because one of the packing register blocksizes (PACKMR
-	   or PACKNR) is used to index into the micro-panels of the non-
-	   triangular matrix when computing with a diagonal-intersecting
-	   micro-panel of the triangular matrix. In the case of 4m or 3m,
-	   real values are stored in both sub-panels, and so the indexing
-	   needs to occur in units of real values. The value computed
-	   here is divided into the complex pointer offset to cause the
-	   pointer to be advanced by the correct value. */ \
-	if ( bli_is_4mi_packed( schema_a ) || \
-	     bli_is_3mi_packed( schema_a ) || \
-	     bli_is_rih_packed( schema_a ) ) off_scl = 2; \
-	else                                 off_scl = 1; \
-\
-	/* Compute the storage stride scaling. Usually this is just 1.
-	   However, in the case of interleaved 3m, we need to scale the
-	   offset by 3/2. Note that real-only, imag-only, and summed-only
-	   packing formats are not applicable here since trsm is a two-
-	   operand operation only (unlike trmm, which is capable of three-
-	   operand). */ \
-	if ( bli_is_3mi_packed( schema_a ) ) { ss_a_num = 3; ss_a_den = 2; } \
-	else                                 { ss_a_num = 1; ss_a_den = 1; } \
-\
 	/* If there is a zero region to the left of where the diagonal of A
 	   intersects the top edge of the block, adjust the pointer to B and
 	   treat this case as if the diagonal offset were zero. Note that we
@@ -300,7 +274,7 @@ void PASTEMAC(ch,varname) \
 		i        = diagoffa; \
 		k        = k - i; \
 		diagoffa = 0; \
-		b_cast   = b_cast + ( i * PACKNR ) / off_scl; \
+		b_cast   = b_cast + i * PACKNR; \
 	} \
 \
 	/* If there is a zero region below where the diagonal of A intersects the
@@ -363,9 +337,6 @@ void PASTEMAC(ch,varname) \
 \
 	/* Save the imaginary stride of B to the auxinfo_t object. */ \
 	bli_auxinfo_set_is_b( istep_b, &aux ); \
-\
-	/* Save the desired output datatype (indicating no typecasting). */ \
-	/*bli_auxinfo_set_dt_on_output( dt, &aux );*/ \
 \
 	/* We don't bother querying the thrinfo_t node for the 1st loop because
 	   we can't parallelize that loop in trsm due to the inter-iteration
@@ -437,18 +408,18 @@ void PASTEMAC(ch,varname) \
 				   intersecting micro-panel. */ \
 				is_a_cur  = k_a1112 * PACKMR; \
 				is_a_cur += ( bli_is_odd( is_a_cur ) ? 1 : 0 ); \
-				ps_a_cur  = ( is_a_cur * ss_a_num ) / ss_a_den; \
+				ps_a_cur  = is_a_cur; \
 \
 				/* Compute the addresses of the triangular block A11 and the
 				   panel A12. */ \
 				a11 = a1; \
-				/* a12 = a1 + ( k_a11 * PACKMR ) / off_scl; */ \
-				a12 = bli_ptr_inc_by_frac( a1, sizeof( ctype ), k_a11 * PACKMR, off_scl ); \
+				a12 = a1 + k_a11 * PACKMR; \
+				/*a12 = bli_ptr_inc_by_frac( a1, sizeof( ctype ), k_a11 * PACKMR, 1 );*/ \
 \
 				/* Compute the addresses of the panel B01 and the block
 				   B11. */ \
-				b11 = b1 + ( off_a11 * PACKNR ) / off_scl; \
-				b21 = b1 + ( off_a12 * PACKNR ) / off_scl; \
+				b11 = b1 + off_a11 * PACKNR; \
+				b21 = b1 + off_a12 * PACKNR; \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1 + ps_a_cur; \
@@ -464,10 +435,6 @@ void PASTEMAC(ch,varname) \
 				   object. */ \
 				bli_auxinfo_set_next_a( a2, &aux ); \
 				bli_auxinfo_set_next_b( b2, &aux ); \
-\
-				/* Save the 4m1/3m1 imaginary stride of A to the auxinfo_t
-				   object. */ \
-				bli_auxinfo_set_is_a( is_a_cur, &aux ); \
 \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
@@ -528,10 +495,6 @@ void PASTEMAC(ch,varname) \
 				   object. */ \
 				bli_auxinfo_set_next_a( a2, &aux ); \
 				bli_auxinfo_set_next_b( b2, &aux ); \
-\
-				/* Save the 4m1/3m1 imaginary stride of A to the auxinfo_t
-				   object. */ \
-				bli_auxinfo_set_is_a( istep_a, &aux ); \
 \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \

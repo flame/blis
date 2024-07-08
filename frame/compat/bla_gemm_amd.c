@@ -839,8 +839,20 @@ void dgemm_blis_impl
     }
 
     // fall back on native path when dgemm is not handled in sup path.
-    bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
+    //bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
 
+    /* Default to using native execution. */
+    ind_t im = BLIS_NAT;
+
+    /* Obtain a valid context from the gks using the induced
+       method id determined above. */
+    cntx_t* cntx = bli_gks_query_ind_cntx( im, dt );
+
+    rntm_t rntm_l;
+    bli_rntm_init_from_global( &rntm_l );
+
+    /* Invoke the operation's front-end and request the default control tree. */
+    PASTEMAC(gemm,_front)( &alphao, &ao, &bo, &betao, &co, cntx, &rntm_l, NULL );
 
     /* PASTEMAC(gemm, BLIS_OAPI_EX_SUF) */
     /*  ( */
@@ -1212,7 +1224,32 @@ void zgemm_blis_impl
     }
 
     // fall back on native path when zgemm is not handled in sup path.
-    bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
+    //bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
+
+    /* Default to using native execution. */
+    ind_t im = BLIS_NAT;
+
+    /* As each matrix operand has a complex storage datatype, try to get an
+       induced method (if one is available and enabled). NOTE: Allowing
+       precisions to vary while using 1m, which is what we do here, is unique
+       to gemm; other level-3 operations use 1m only if all storage datatypes
+       are equal (and they ignore the computation precision). */
+
+    /* Find the highest priority induced method that is both enabled and
+       available for the current operation. (If an induced method is
+       available but not enabled, or simply unavailable, BLIS_NAT will
+       be returned here.) */
+    im = bli_gemmind_find_avail( dt );
+
+    /* Obtain a valid context from the gks using the induced
+       method id determined above. */
+    cntx_t* cntx = bli_gks_query_ind_cntx( im, dt );
+
+    rntm_t rntm_l;
+    bli_rntm_init_from_global( &rntm_l );
+
+    /* Invoke the operation's front-end and request the default control tree. */
+    PASTEMAC(gemm,_front)( &alphao, &ao, &bo, &betao, &co, cntx, &rntm_l, NULL );
 
     AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *m, *n, *k);
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
@@ -1367,7 +1404,23 @@ void dzgemm_blis_impl
     bli_obj_set_conjtrans( blis_transb, &bo );
 
     // fall back on native path when zgemm is not handled in sup path.
-    bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
+    //bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
+
+    /* Default to using native execution. */
+    ind_t im = BLIS_NAT;
+
+    /* Mix of real and complex matrix data types, so assuming
+       induced methods will not be available */
+
+    /* Obtain a valid context from the gks using the induced
+       method id determined above. */
+    cntx_t* cntx = bli_gks_query_ind_cntx( im, dt );
+
+    rntm_t rntm_l;
+    bli_rntm_init_from_global( &rntm_l );
+
+    /* Invoke the operation's front-end and request the default control tree. */
+    PASTEMAC(gemm,_front)( &alphao, &ao, &bo, &betao, &co, cntx, &rntm_l, NULL );
 
     AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *m, *n, *k);
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);

@@ -224,7 +224,17 @@ void PASTEMAC(ch,varname) \
 	/*const dim_t     PACKNR     = rs_b;*/ \
 \
 	/* Query the context for the micro-kernel address and cast it to its
-	   function pointer type. */ \
+	   function pointer type. Note that the virtual gemm ukernel is queried
+	   instead of the native gemm ukernel. This is needed for certain
+	   situations for the 1m method that require an extra layer of logic
+	   to allow for handling (for example) complex values of beta. Also
+	   note that under certain circumstances, the real-domain version of
+	   this macrokernel will be called for 1m (NOT the complex version)
+	   as an optimization. In these cases, the corresponding real-domain
+	   slots within the cntx_t's virtual gemm ukernel func_t will contain
+	   pointers to the *native* gemm ukernel, thanks to logic in the
+	   context initialization function for the induced method (defined
+	   in bli_cntx_ref.c). */ \
 	PASTECH(ch,gemm_ukr_ft) \
 	                gemm_ukr   = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 \
