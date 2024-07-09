@@ -97,7 +97,7 @@ int main( int argc, char** argv )
         exit(1);
       }
 
-    fprintf(fout, "Dt\t alpha\t n\t incx\t gflops\n");
+    fprintf(fout, "Func Dt alphaR alphaI n incx gflops\n");
 
     dim_t n;
     double alpha_r, alpha_i;

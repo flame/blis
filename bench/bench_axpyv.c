@@ -86,7 +86,7 @@ int main( int argc, char** argv )
 #ifdef DEBUG
 	fprintf( fout, "gflops\n" );
 #else
-	fprintf(fout, "Dt\t n\t alpha_r\t alpha_i\t gflops\n" );
+	fprintf(fout, "Func Dt n alphaR  alphaI incx incy gflops\n" );
 #endif
 
 	dim_t n;        // dimension
@@ -246,8 +246,8 @@ int main( int argc, char** argv )
 				(unsigned long)n,
 				gflops );
 
-		fprintf( fout, "%c\t %ld\t %lf\t %lf\t %6.3f\n",
-				 dt_ch, n, alpha_r, alpha_i, gflops );
+		fprintf( fout, "%s %c %ld %lf %lf %ld %ld %6.3f\n",
+				 tmp, dt_ch, n, alpha_r, alpha_i, incx, incy, gflops );
 		fflush( fout );
 
 		bli_obj_free( &x );

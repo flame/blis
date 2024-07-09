@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    modification, are permitted provided that the following conditions are
    met:
@@ -107,7 +107,7 @@ int main( int argc, char** argv )
         printf("Error opening output file %s\n", argv[2]);
         exit(1);
       }
-    fprintf(fout, "Dt\t uplo\t  n\t  k\t lda\t ldb\t ldc\t transa\t transb\t alphaR\t alphaI\t betaR\t betaI\t gflops\n");
+    fprintf(fout, "Func Dt uplo n k lda ldb ldc transa transb alphaR alphaI betaR betaI gflops\n");
 
 
     inc_t lda;
@@ -463,8 +463,8 @@ int main( int argc, char** argv )
                 ( unsigned long )n,
                 ( unsigned long )k, gflops );
 
-        fprintf(fout, "%c\t %c\t %ld\t %ld\t %ld\t %ld\t %ld\t %c\t %c\t %lf\t %lf\t %lf\t %lf\t %6.3f\n", \
-                dt_ch, uplo_c, n, k, lda, ldb, ldc, 
+        fprintf(fout, "%s %c %c %ld %ld %ld %ld %ld %c %c %lf %lf %lf %lf %6.3f\n", \
+                tmp, dt_ch, uplo_c, n, k, lda, ldb, ldc, 
                 transA_c,
                 transB_c,
                 alpha_r, alpha_i,

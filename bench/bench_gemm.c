@@ -114,7 +114,7 @@ int main( int argc, char** argv )
 		n_repeats = atoi(argv[3]);
 	}
 
-    fprintf(fout, "Dt transa transb m n k alphaR alphaI lda ldb betaR betaI ldc gflops\n");
+    fprintf(fout, "Func Dt transa transb m n k alphaR alphaI lda ldb betaR betaI ldc gflops\n");
 
     // Following variables are needed for scanf to read inputs properly
     // however they are not used in bench.
@@ -482,8 +482,8 @@ int main( int argc, char** argv )
                (unsigned long)n,
                (unsigned long)k, gflops);
 
-        fprintf (fout, "%c %c %c %ld %ld %ld %lf %lf %ld %ld %lf %lf %ld %6.3f\n", \
-                 dt_ch, transA_c, transB_c, m, n, k, alpha_r, alpha_i, lda, ldb, beta_r, beta_i, ldc, gflops);
+        fprintf (fout, "%s %c %c %c %ld %ld %ld %lf %lf %ld %ld %lf %lf %ld %6.3f\n", \
+                 api_name, dt_ch, transA_c, transB_c, m, n, k, alpha_r, alpha_i, lda, ldb, beta_r, beta_i, ldc, gflops);
 
         fflush(fout);
 

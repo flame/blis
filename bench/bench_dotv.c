@@ -94,7 +94,7 @@ int main( int argc, char** argv )
         exit(1);
       }
 
-    fprintf(fout, "Dt\t n\t incx\t incy\t gflops\n");
+    fprintf(fout, "Func Dt trans n incx incy gflops\n");
 
     dim_t n;
     inc_t incx;
