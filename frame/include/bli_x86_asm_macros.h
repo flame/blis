@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2018, The University of Texas at Austin
-   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -147,6 +147,7 @@
 #define ALIGN8 ".p2align 3 \n\t"
 #define ALIGN16 ".p2align 4 \n\t"
 #define ALIGN32 ".p2align 5 \n\t"
+#define ALIGN64 ".p2align 6 \n\t"
 
 #endif
 
@@ -1153,11 +1154,13 @@
 
 // Conversions
 
+#define CVTSI2SD(_0, _1) INSTR_(cvtsi2sd, _0, _1)
 #define CVTSS2SD(_0, _1) INSTR_(cvtss2sd, _0, _1)
 #define CVTSD2SS(_0, _1) INSTR_(cvtsd2ss, _0, _1)
 #define CVTPS2PD(_0, _1) INSTR_(cvtps2pd, _0, _1)
 #define CVTPD2PS(_0, _1) INSTR_(cvtpd2ps, _0, _1)
 
+#define cvtsi2sd(_0, _1) CVTSI2SD(_0, _1)
 #define cvtss2sd(_0, _1) CVTSS2SD(_0, _1)
 #define cvtsd2ss(_0, _1) CVTSD2SS(_0, _1)
 #define cvtps2pd(_0, _1) CVTPS2PD(_0, _1)

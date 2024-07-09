@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -182,7 +182,21 @@ void bli_packm_blk_var1
 		// Acquire the buffer to the kappa chosen above.
 		buf_kappa = bli_obj_buffer_for_1x1( dt_p, kappa_p );
 	}
-
+	
+#ifdef BLIS_KERNELS_ZEN5
+	// For DGEMM in ZEN5, scale by alpha during packing
+	if
+	( 
+		( bli_obj_dt( p ) == BLIS_DOUBLE ) &&
+		( bli_arch_query_id() == BLIS_ARCH_ZEN5 )
+	)
+	{
+		bli_obj_scalar_detach( p, &kappa );
+		// Reset the attached scalar (to 1.0).
+		bli_obj_scalar_reset( p );
+		buf_kappa = kappa.buffer;
+	}
+#endif
 
 	// The original idea here was to read the packm_ukr from the context
 	// if it is non-NULL. The problem is, it requires that we be able to

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -117,18 +117,16 @@ void bli_dpackm_zen4_asm_24xk
 
 	const bool     gs     = ( inca0 != 1 && lda0 != 1 );
 
-	// NOTE: If/when this kernel ever supports scaling by kappa within the
-	// assembly region, this constraint should be lifted.
-	const bool     unitk  = bli_deq1( *kappa );
-
 	double* restrict a_next = a + cdim0;
 	// -------------------------------------------------------------------------
 
-	if ( cdim0 == mnr && !gs && unitk )
+	if ( cdim0 == mnr && !gs )
 	{
 		begin_asm()
 		mov(var(mask), rdx)                // load mask
 		kmovw(edx, k(2))                   // move mask to k2 register
+		mov(var(kappa),  r10)              // move kappa to r10
+		vbroadcastsd(mem(r10), zmm17)      // broadcast kappa into zmm17
 		mov(var(a), rax)                   // load address of source buffer.
 		mov(var(a), r13)                   // load address of source buffer.
 		mov(var(inca), r8)                 // load inca
@@ -207,13 +205,21 @@ void bli_dpackm_zen4_asm_24xk
 		SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
 		SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
 
+		vmulpd(zmm0, zmm17, zmm0) // scale by kappa
 		vmovupd(zmm0, mem(rbx, 0*192))
+		vmulpd(zmm4, zmm17, zmm4)
 		vmovupd(zmm4, mem(rbx, 1*192))
+		vmulpd(zmm2, zmm17, zmm2)
 		vmovupd(zmm2, mem(rbx, 2*192))
+		vmulpd(zmm6, zmm17, zmm6)
 		vmovupd(zmm6, mem(rbx, 3*192))
+		vmulpd(zmm1, zmm17, zmm1)
 		vmovupd(zmm1, mem(rbx, 4*192))
+		vmulpd(zmm5, zmm17, zmm5)
 		vmovupd(zmm5, mem(rbx, 5*192))
+		vmulpd(zmm3, zmm17, zmm3)
 		vmovupd(zmm3, mem(rbx, 6*192))
+		vmulpd(zmm8, zmm17, zmm8)
 		vmovupd(zmm8, mem(rbx, 7*192))
 
 		add(r15, rax)
@@ -238,13 +244,21 @@ void bli_dpackm_zen4_asm_24xk
 		SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
 		SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
 
+		vmulpd(zmm0, zmm17, zmm0)  // scale by kappa
 		vmovupd(zmm0, mem(rbx, 0*192 + 64))
+		vmulpd(zmm4, zmm17, zmm4)
 		vmovupd(zmm4, mem(rbx, 1*192 + 64))
+		vmulpd(zmm2, zmm17, zmm2)
 		vmovupd(zmm2, mem(rbx, 2*192 + 64))
+		vmulpd(zmm6, zmm17, zmm6)
 		vmovupd(zmm6, mem(rbx, 3*192 + 64))
+		vmulpd(zmm1, zmm17, zmm1)
 		vmovupd(zmm1, mem(rbx, 4*192 + 64))
+		vmulpd(zmm5, zmm17, zmm5)
 		vmovupd(zmm5, mem(rbx, 5*192 + 64))
+		vmulpd(zmm3, zmm17, zmm3)
 		vmovupd(zmm3, mem(rbx, 6*192 + 64))
+		vmulpd(zmm8, zmm17, zmm8)
 		vmovupd(zmm8, mem(rbx, 7*192 + 64))
 
 		add(r15, rax)
@@ -269,13 +283,21 @@ void bli_dpackm_zen4_asm_24xk
 		SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
 		SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
 
+		vmulpd(zmm0, zmm17, zmm0) // scale by kappa
 		vmovupd(zmm0, mem(rbx, 0*192 + 128))
+		vmulpd(zmm4, zmm17, zmm4)
 		vmovupd(zmm4, mem(rbx, 1*192 + 128))
+		vmulpd(zmm2, zmm17, zmm2)
 		vmovupd(zmm2, mem(rbx, 2*192 + 128))
+		vmulpd(zmm6, zmm17, zmm6)
 		vmovupd(zmm6, mem(rbx, 3*192 + 128))
+		vmulpd(zmm1, zmm17, zmm1)
 		vmovupd(zmm1, mem(rbx, 4*192 + 128))
+		vmulpd(zmm5, zmm17, zmm5)
 		vmovupd(zmm5, mem(rbx, 5*192 + 128))
+		vmulpd(zmm3, zmm17, zmm3)
 		vmovupd(zmm3, mem(rbx, 6*192 + 128))
+		vmulpd(zmm8, zmm17, zmm8)
 		vmovupd(zmm8, mem(rbx, 7*192 + 128))
 
 		add(imm(8*8), r13)
@@ -295,13 +317,21 @@ void bli_dpackm_zen4_asm_24xk
 		label(.DKLEFTROWU)                 // EDGE LOOP (k_left)
 
 		vmovupd(mem(rax,         0), zmm6 MASK_KZ(2))
+		vmulpd(zmm6, zmm17, zmm6) // scale by kappa
 		vmovupd(mem(rax,  r8, 1, 0), zmm8 MASK_KZ(2))
+		vmulpd(zmm8, zmm17, zmm8)
 		vmovupd(mem(rax,  r8, 2, 0), zmm10 MASK_KZ(2))
+		vmulpd(zmm10, zmm17, zmm10)
 		vmovupd(mem(rax, r12, 1, 0), zmm12 MASK_KZ(2))
+		vmulpd(zmm12, zmm17, zmm12)
 		vmovupd(mem(rax,  r8, 4, 0), zmm14 MASK_KZ(2))
+		vmulpd(zmm14, zmm17, zmm14)
 		vmovupd(mem(rax, rcx, 1, 0), zmm16 MASK_KZ(2))
+		vmulpd(zmm16, zmm17, zmm16)
 		vmovupd(mem(rax, r12, 2, 0), zmm18 MASK_KZ(2))
+		vmulpd(zmm18, zmm17, zmm18)
 		vmovupd(mem(rax, rdx, 1, 0), zmm20 MASK_KZ(2))
+		vmulpd(zmm20, zmm17, zmm20)
 
 		UNPACK_LO_HIGH(8, 6, 0, 1, 12, 10, 2, 3)
 		SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
@@ -387,13 +417,21 @@ void bli_dpackm_zen4_asm_24xk
 		LABEL(.UPDATEDONE)
 
 		vmovupd(mem(rax,         0), zmm6 MASK_KZ(2))
+		vmulpd(zmm6, zmm17, zmm6) // scale by kappa
 		vmovupd(mem(rax,  r8, 1, 0), zmm8 MASK_KZ(2))
+		vmulpd(zmm8, zmm17, zmm8)
 		vmovupd(mem(rax,  r8, 2, 0), zmm10 MASK_KZ(2))
+		vmulpd(zmm10, zmm17, zmm10)
 		vmovupd(mem(rax, r12, 1, 0), zmm12 MASK_KZ(2))
+		vmulpd(zmm12, zmm17, zmm12)
 		vmovupd(mem(rax,  r8, 4, 0), zmm14 MASK_KZ(2))
+		vmulpd(zmm14, zmm17, zmm14)
 		vmovupd(mem(rax, rcx, 1, 0), zmm16 MASK_KZ(2))
+		vmulpd(zmm16, zmm17, zmm16)
 		vmovupd(mem(rax, r12, 2, 0), zmm18 MASK_KZ(2))
+		vmulpd(zmm18, zmm17, zmm18)
 		vmovupd(mem(rax, rdx, 1, 0), zmm20 MASK_KZ(2))
+		vmulpd(zmm20, zmm17, zmm20)
 
 		UNPACK_LO_HIGH(8, 6, 0, 1, 12, 10, 2, 3)
 		SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
@@ -480,13 +518,21 @@ void bli_dpackm_zen4_asm_24xk
 		LABEL(.UPDATEDONEL2)
 
 		vmovupd(mem(rax,         0), zmm6 MASK_KZ(2))
+		vmulpd(zmm6, zmm17, zmm6) // scale by kappa
 		vmovupd(mem(rax,  r8, 1, 0), zmm8 MASK_KZ(2))
+		vmulpd(zmm8, zmm17, zmm8)
 		vmovupd(mem(rax,  r8, 2, 0), zmm10 MASK_KZ(2))
+		vmulpd(zmm10, zmm17, zmm10)
 		vmovupd(mem(rax, r12, 1, 0), zmm12 MASK_KZ(2))
+		vmulpd(zmm12, zmm17, zmm12)
 		vmovupd(mem(rax,  r8, 4, 0), zmm14 MASK_KZ(2))
+		vmulpd(zmm14, zmm17, zmm14)
 		vmovupd(mem(rax, rcx, 1, 0), zmm16 MASK_KZ(2))
+		vmulpd(zmm16, zmm17, zmm16)
 		vmovupd(mem(rax, r12, 2, 0), zmm18 MASK_KZ(2))
+		vmulpd(zmm18, zmm17, zmm18)
 		vmovupd(mem(rax, rdx, 1, 0), zmm20 MASK_KZ(2))
+		vmulpd(zmm20, zmm17, zmm20)
 
 		UNPACK_LO_HIGH(8, 6, 0, 1, 12, 10, 2, 3)
 		SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
@@ -608,80 +654,104 @@ void bli_dpackm_zen4_asm_24xk
 		 * where i is updated by 1 and rax and rbx updated by lda and ldp.
 		*/
 		vmovupd(mem(rax,         0), zmm6)
+		vmulpd(zmm6, zmm17, zmm6) // scale by kappa
 		vmovupd(mem(rax,         64), zmm8)
 		vmovupd(mem(rax,        128), zmm10)
+		vmulpd(zmm8, zmm17, zmm8)
 		vmovupd(zmm6, mem(rbx,  0*64+ 0))
 		vmovupd(zmm8, mem(rbx,  0*64+ 64))
+		vmulpd(zmm10, zmm17, zmm10)
 		vmovupd(zmm10, mem(rbx, 0*64+ 128))
 
 		add(r10, rax)
 		add(r8, rbx)
 
 		vmovupd(mem(rax,         0), zmm6)
+		vmulpd(zmm6, zmm17, zmm6) // scale by kappa
 		vmovupd(mem(rax,         64), zmm8)
 		vmovupd(mem(rax,        128), zmm10)
+		vmulpd(zmm8, zmm17, zmm8)
 		vmovupd(zmm6, mem(rbx,  0*64+ 0))
 		vmovupd(zmm8, mem(rbx,  0*64+ 64))
+		vmulpd(zmm10, zmm17, zmm10)
 		vmovupd(zmm10, mem(rbx, 0*64+ 128))
 
 		add(r10, rax)
 		add(r8, rbx)
 
 		vmovupd(mem(rax,         0), zmm6)
+		vmulpd(zmm6, zmm17, zmm6) // scale by kappa
 		vmovupd(mem(rax,         64), zmm8)
 		vmovupd(mem(rax,        128), zmm10)
+		vmulpd(zmm8, zmm17, zmm8)
 		vmovupd(zmm6, mem(rbx,  0*64+ 0))
 		vmovupd(zmm8, mem(rbx,  0*64+ 64))
+		vmulpd(zmm10, zmm17, zmm10)
 		vmovupd(zmm10, mem(rbx, 0*64+ 128))
 
 		add(r10, rax)
 		add(r8, rbx)
 
 		vmovupd(mem(rax,         0), zmm6)
+		vmulpd(zmm6, zmm17, zmm6) // scale by kappa
 		vmovupd(mem(rax,         64), zmm8)
 		vmovupd(mem(rax,        128), zmm10)
+		vmulpd(zmm8, zmm17, zmm8)
 		vmovupd(zmm6, mem(rbx,  0*64+ 0))
 		vmovupd(zmm8, mem(rbx,  0*64+ 64))
+		vmulpd(zmm10, zmm17, zmm10)
 		vmovupd(zmm10, mem(rbx, 0*64+ 128))
 
 		add(r10, rax)
 		add(r8, rbx)
 
 		vmovupd(mem(rax,         0), zmm6)
+		vmulpd(zmm6, zmm17, zmm6) // scale by kappa
 		vmovupd(mem(rax,         64), zmm8)
 		vmovupd(mem(rax,        128), zmm10)
+		vmulpd(zmm8, zmm17, zmm8)
 		vmovupd(zmm6, mem(rbx,  0*64+ 0))
 		vmovupd(zmm8, mem(rbx,  0*64+ 64))
+		vmulpd(zmm10, zmm17, zmm10)
 		vmovupd(zmm10, mem(rbx, 0*64+ 128))
 
 		add(r10, rax)
 		add(r8, rbx)
 
 		vmovupd(mem(rax,         0), zmm6)
+		vmulpd(zmm6, zmm17, zmm6) // scale by kappa
 		vmovupd(mem(rax,         64), zmm8)
 		vmovupd(mem(rax,        128), zmm10)
+		vmulpd(zmm8, zmm17, zmm8)
 		vmovupd(zmm6, mem(rbx,  0*64+ 0))
 		vmovupd(zmm8, mem(rbx,  0*64+ 64))
+		vmulpd(zmm10, zmm17, zmm10)
 		vmovupd(zmm10, mem(rbx, 0*64+ 128))
 
 		add(r10, rax)
 		add(r8, rbx)
 
 		vmovupd(mem(rax,         0), zmm6)
+		vmulpd(zmm6, zmm17, zmm6) // scale by kappa
 		vmovupd(mem(rax,         64), zmm8)
 		vmovupd(mem(rax,        128), zmm10)
+		vmulpd(zmm8, zmm17, zmm8)
 		vmovupd(zmm6, mem(rbx,  0*64+ 0))
 		vmovupd(zmm8, mem(rbx,  0*64+ 64))
+		vmulpd(zmm10, zmm17, zmm10)
 		vmovupd(zmm10, mem(rbx, 0*64+ 128))
 
 		add(r10, rax)
 		add(r8, rbx)
 
 		vmovupd(mem(rax,         0), zmm6)
+		vmulpd(zmm6, zmm17, zmm6) // scale by kappa
 		vmovupd(mem(rax,         64), zmm8)
 		vmovupd(mem(rax,        128), zmm10)
+		vmulpd(zmm8, zmm17, zmm8)
 		vmovupd(zmm6, mem(rbx,  0*64+ 0))
 		vmovupd(zmm8, mem(rbx,  0*64+ 64))
+		vmulpd(zmm10, zmm17, zmm10)
 		vmovupd(zmm10, mem(rbx, 0*64+ 128))
 
 		add(r10, rax)
@@ -699,10 +769,13 @@ void bli_dpackm_zen4_asm_24xk
 		label(.DKLEFTCOLU)                 // EDGE LOOP (k_left)
 
 		vmovupd(mem(rax,         0), zmm6)
+		vmulpd(zmm6, zmm17, zmm6) // scale by kappa
 		vmovupd(mem(rax,         64), zmm8)
 		vmovupd(mem(rax,        128), zmm10)
+		vmulpd(zmm8, zmm17, zmm8)
 		vmovupd(zmm6, mem(rbx,  0*64+ 0))
 		vmovupd(zmm8, mem(rbx,  0*64+ 64))
+		vmulpd(zmm10, zmm17, zmm10)
 		vmovupd(zmm10, mem(rbx, 0*64+ 128))
 
 		add(r10, rax)
@@ -723,6 +796,7 @@ void bli_dpackm_zen4_asm_24xk
 		  [lda]    "m" (lda),
 		  [p]      "m" (p),
 		  [ldp]    "m" (ldp),
+		  [kappa]  "m" (kappa),
 		  [a_next] "m" (a_next)
 		: // register clobber list
 		  "rax", "rbx", "rcx", "rdx", "rsi",
@@ -731,7 +805,7 @@ void bli_dpackm_zen4_asm_24xk
 		  "zmm4", "zmm5", "zmm6", "zmm7",
 		  "zmm8", "zmm9", "zmm10", "zmm11",
 		  "zmm12", "zmm13", "zmm14", "zmm15",
-		  "zmm16", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+		  "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
 		)
 	}
 	else // if ( cdim0 < mnr || gs || !unitk )

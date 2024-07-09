@@ -39,28 +39,28 @@
  * Converted it to macro as this list is used at multiple places in this file.
  */
 
-/* Starting point for Turin, copied from Genoa */
+/* Blocksizes for double(d) datetype are tuned for Turin, rest are copied from Genoa */
 #define BLI_CNTX_DEFAULT_BLKSZ_LIST_TURIN(blkszs) \
 	/*                                           s      d      c      z */  \
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,     8,     3,    12 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    24,     8,     4 );  \
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,    96,   144,    60 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,   120,   144,    60 );  \
 	bli_blksz_init     ( &blkszs[ BLIS_KC ],   480,   512,   256,   512,    \
 	                                           480,   320,   256,   160 );  \
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  4032,  4080,  2004 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  2016,  4080,  2004 );  \
 	                                                                        \
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
 
-/* Starting point for Turin Dense, copied from Bergamo */
+/* Blocksizes for double(d) datetype are tuned for Turin, rest are copied from Bergamo */
 #define BLI_CNTX_DEFAULT_BLKSZ_LIST_TURIN_DENSE(blkszs) \
 	/*                                           s      d      c      z */  \
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,     8,     3,    12 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    24,     8,     4 );  \
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,    96,   144,    60 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,   120,   144,    60 );  \
 	bli_blksz_init     ( &blkszs[ BLIS_KC ],   480,   512,   256,   512,    \
 	                                           480,   320,   256,   160 );  \
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  4032,  4080,  2004 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  2016,  4080,  2004 );  \
 	                                                                        \
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );

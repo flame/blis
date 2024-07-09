@@ -34,3 +34,15 @@
 
 // native dgemm kernel
 GEMM_UKR_PROT( double,   d, gemm_avx512_asm_8x24 )
+
+void bli_dgemm_avx512_asm_8x24_macro_kernel
+(
+    dim_t   n,
+    dim_t   m,
+    dim_t   k,
+    double* c,
+    double* a,
+    double* b,
+    dim_t   ldc,
+    double* beta
+);

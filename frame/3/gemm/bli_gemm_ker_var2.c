@@ -171,8 +171,31 @@ void bli_gemm_ker_var2
 	// function pointer.
 	f = ftypes[dt_exec];
 
-	// Invoke the function.
-	f( schema_a,
+#ifdef BLIS_KERNELS_ZEN5
+	const long MR = 8;
+	const long NR = 24;
+
+	// Optimizes macro kernel is avaible for DGEMM
+	// for ZEN5. This optimized macro kernel does not support
+	// fringe cases. Only row major stored C is supported.
+	// TODO: Add macro kernel function pointer in cntx
+	if
+	(
+		 ( bli_obj_dt( c ) == BLIS_DOUBLE ) &&
+		 ( bli_arch_query_id() == BLIS_ARCH_ZEN5 ) &&
+		 ( cs_c == 1 ) && // use this kernel only for row major C
+		 ( (n%NR) == 0 ) && ( (m%MR) == 0 )
+	)
+	{
+		bli_dgemm_avx512_asm_8x24_macro_kernel
+		(
+			n, m, k, buf_c, buf_a, buf_b, rs_c, buf_beta
+		);
+	}
+	else
+#endif
+	{
+	  f( schema_a,
 	   schema_b,
 	   m,
 	   n,
@@ -187,6 +210,7 @@ void bli_gemm_ker_var2
 	   cntx,
 	   rntm,
 	   thread );
+	}
 	
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_6);
 }
@@ -342,15 +366,15 @@ void PASTEMAC(ch,varname) \
 	{ \
 		ctype* restrict a1; \
 		ctype* restrict c11; \
-		ctype* b2; \
+		ctype* restrict b2; \
 \
 		b1 = b_cast + j * cstep_b; \
 		c1 = c_cast + j * cstep_c; \
 \
 		n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
 \
-		/* Initialize our next panel of B to be the beginnning of next panel of B. */ \
-		b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc );; \
+		/* Initialize our next panel of B to be the current panel of B. */ \
+		b2 = b1; \
 \
 		/* Loop over the m dimension (MR rows at a time). */ \
 		for ( i = ir_start; i < ir_end; i += ir_inc ) \
@@ -367,6 +391,7 @@ void PASTEMAC(ch,varname) \
 			if ( bli_is_last_iter( i, ir_end, ir_tid, ir_nt ) ) \
 			{ \
 				a2 = a_cast; \
+				b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc ); \
 				if ( bli_is_last_iter( j, jr_end, jr_tid, jr_nt ) ) \
 					b2 = b_cast; \
 			} \
@@ -413,13 +438,6 @@ void PASTEMAC(ch,varname) \
 				                        beta_cast, \
 				                        c11, rs_c,  cs_c ); \
 			} \
-			/*compute b_next*/ \
-			/*We want to prefetch NR * KC of b2 combined over all the ir loop iterations*/ \
-			/*If ir_nt == 1, ir loop will run MC/MR times, therefore amount of b2(b_next)*/ \
-			/*that should be prefetched per kernel call = (NR * KC) / (MC / MR)  */ \
-			/*For DGEMM in zen5, NR = 24, MC = 96, MR = 8*/ \
-			/*b2 prefetch per kernel call = (24*k) / (96/8) = 2*k */ \
-			b2 = (ctype*)(b2 + (k*2)); \
 		} \
 	} \
 \
