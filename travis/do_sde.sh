@@ -29,9 +29,7 @@ mv $SDE_DIRPATH/$SDE_TARBALL .
 
 tar xvf $SDE_TARBALL
 
-make -j2 testsuite-bin
-cp $DIST_PATH/testsuite/input.general.fast input.general
-cp $DIST_PATH/testsuite/input.operations.fast input.operations
+make -j2 testsuite-bin blastest-bin
 
 TMP=`ldd ./test_libblis.x | grep ld | sed 's/^.*=> //'`
 LD_SO=${TMP%% *}
@@ -47,11 +45,13 @@ done
 
 for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator zen; do
     if [ "$ARCH" = "knl" ]; then
-        $SDE -knl -- ./test_libblis.x > output.testsuite
+        TESTSUITE_WRAPPER="$SDE -knl --"
     else
-        $SDE -cpuid_in $DIST_PATH/travis/cpuid/$ARCH.def -- ./test_libblis.x > output.testsuite
+        TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/travis/cpuid/$ARCH.def --"
     fi
-    $DIST_PATH/testsuite/check-blistest.sh ./output.testsuite
+
+    make TESTSUITE_WRAPPER="$TESTSUITE_WRAPPER" check
+
     TMP=`grep "active sub-configuration" output.testsuite`
     CONFIG=${TMP##* }
     if [ "$CONFIG" != "$ARCH" ]; then
