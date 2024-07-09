@@ -1866,8 +1866,8 @@ int main( int argc, char** argv )
 
                 if ( ( op_b != 'r' ) && ( op_b != 'R' ) )
                 {
-                    bli_print_msg("Int4 B matrix only permitted if B reodering "
-                                  "is enabled.", __FILE__, __LINE__);
+                    printf("Int4 B matrix only permitted if B reodering "
+                                  "is enabled.\n");
                     continue;
                 }
                 GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os32)
