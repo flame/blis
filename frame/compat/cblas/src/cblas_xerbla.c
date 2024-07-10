@@ -7,13 +7,17 @@
 #include "cblas.h"
 #include "cblas_f77.h"
 
+// The global rntm_t structure. (The definition resides in bli_rntm.c.)
+extern rntm_t global_rntm;
+
+// Make thread settings local to each thread calling BLIS routines.
+// (The definition resides in bli_rntm.c.)
+extern BLIS_THREAD_LOCAL rntm_t tl_rntm;
+
 void cblas_xerbla(f77_int info, const char *rout, const char *form, ...)
 {
    extern int RowMajorStrg;
    char empty[1] = "";
-   va_list argptr;
-
-   va_start(argptr, form);
 
    if (RowMajorStrg)
    {
@@ -60,12 +64,36 @@ void cblas_xerbla(f77_int info, const char *rout, const char *form, ...)
          else if (info == 6) info = 8;
       }
    }
+
    if (info)
-      fprintf(stderr, "Parameter %jd to routine %s was incorrect\n", ( intmax_t )info, rout);
-   vfprintf(stderr, form, argptr);
-   va_end(argptr);
-   if (info && !info) 
-      F77_xerbla(empty, &info, 0); /* Force link of our F77 error handler */
-   exit(-1);
+   {
+      // Make sure rntm variables are initialized.
+      bli_init_once();
+
+      // Store info value in thread-local rntm data structure.
+      gint_t info_value = (gint_t) info;
+      bli_rntm_set_info_value_only( info_value, &tl_rntm );
+
+      bool print_on_error = bli_rntm_print_on_error( &global_rntm );
+      if (print_on_error)
+      {
+         va_list argptr;
+         va_start(argptr, form);
+
+         fprintf(stderr, "Parameter %d to routine %s was incorrect\n", (int)info, rout);
+         vfprintf(stderr, form, argptr);
+         va_end(argptr);
+      }
+
+      bool stop_on_error = bli_rntm_stop_on_error( &global_rntm );
+      if (stop_on_error)
+      {
+         bli_abort();
+      }
+
+      if (info && !info) 
+         F77_xerbla(empty, &info, 0); /* Force link of our F77 error handler */
+   }
 }
 #endif
+
