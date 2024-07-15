@@ -62,10 +62,14 @@ err_t lpgemm_translate_to_post_ops_list
        aocl_post_op*   post_op_unparsed,
        lpgemm_post_op* post_op_list,
        void*           scale_buffer,
-       void*           meta_arg
+       void*           meta_arg,
+       dim_t           m,
+       dim_t           n
      )
 {
 	( void )( scale_buffer ); //Unused for now, potential to be used later.
+	( void )( m ); //Unused for now, potential to be used later.
+
 	if ( ( post_op_unparsed == NULL ) || ( post_op_unparsed->seq_length <= 0 ) )
 	{
 		lpgemm_set_node_params
@@ -90,23 +94,30 @@ err_t lpgemm_translate_to_post_ops_list
 		return BLIS_UNEXPECTED_VECTOR_DIM; //Error, seq length exceeds max post ops permitted.
 	}
 
-	dim_t e_i = 0; //Multiple eltwise supported.
+	dim_t e_i = 0; // Multiple eltwise supported.
+	dim_t s_i = 0; // Multiple sum/scale supported.
+	dim_t b_i = 0; // Multiple bias supported.
+	dim_t m_i = 0; // Multiple matrix add supported.
 	for ( dim_t i = 0; i < post_op_unparsed->seq_length; ++i )
 	{
 		// Dispatcher code
 		switch ( *( post_op_unparsed->seq_vector + i ) )
 		{
 			case SUM:
-					lpgemm_set_node_params
-					(
-					  ( post_op_list + i ), POST_OPS_SUM,
-					  post_op_unparsed->sum.buff,
-					  post_op_unparsed->sum.zero_point,
-					  NULL,
-					  post_op_unparsed->sum.scale_factor,
-					  post_op_unparsed->sum.scale_factor_len,
-					  post_op_unparsed->sum.is_power_of_2
-					);
+					{
+						lpgemm_set_node_params
+						(
+						  ( post_op_list + i ), POST_OPS_SUM,
+						  ( post_op_unparsed->sum + s_i )->buff,
+						  ( post_op_unparsed->sum + s_i )->zero_point,
+						  NULL,
+						  ( post_op_unparsed->sum + s_i )->scale_factor,
+						  ( post_op_unparsed->sum + s_i )->scale_factor_len,
+						  ( post_op_unparsed->sum + s_i )->is_power_of_2
+						);
+
+						s_i += 1;
+					}
 					break;
 			case ELTWISE:
 					{
@@ -165,60 +176,87 @@ err_t lpgemm_translate_to_post_ops_list
 					}
 					break;
 			case BIAS:
-					if( post_op_unparsed->bias.bias == NULL )
 					{
-						bli_print_msg(" Post_op.bias is NULL. Exiting..", __FILE__, __LINE__ );
-						return BLIS_NULL_POINTER;
+						if( ( post_op_unparsed->bias + b_i )->bias == NULL )
+						{
+							bli_print_msg(" Post_op.bias is NULL. Exiting..", __FILE__, __LINE__ );
+							return BLIS_NULL_POINTER;
+						}
+
+						lpgemm_set_node_params
+						(
+						  ( post_op_list + i ), POST_OPS_BIAS,
+						  ( post_op_unparsed->bias + b_i )->bias,
+						  meta_arg, NULL, NULL, 0, FALSE
+						);
+
+						b_i += 1;
 					}
-					lpgemm_set_node_params
-					(
-					  ( post_op_list + i ), POST_OPS_BIAS,
-					  post_op_unparsed->bias.bias,
-					  meta_arg, NULL, NULL, 0, FALSE
-					);
 					break;
 			case SCALE:
-					if ( ( post_op_unparsed->sum.scale_factor_len > 0 ) &&
-						 ( post_op_unparsed->sum.scale_factor == NULL ) )
 					{
-						bli_print_msg(" Post_op.scale scale_factor is NULL. Exiting..",
-										__FILE__, __LINE__ );
-						return BLIS_NULL_POINTER;
-					}
-					if ( ( post_op_unparsed->sum.zero_point_len > 0 ) &&
-						  ( post_op_unparsed->sum.zero_point == NULL ) )
-					{
-						bli_print_msg(" Post_op.scale zero_point is NULL. Exiting..",
-										__FILE__, __LINE__ );
-						return BLIS_NULL_POINTER;
-					}
+						if ( ( ( post_op_unparsed->sum + s_i )->scale_factor_len > 0 ) &&
+							 ( ( post_op_unparsed->sum + s_i )->scale_factor == NULL ) )
+						{
+							bli_print_msg(" Post_op.scale scale_factor is NULL. Exiting..",
+											__FILE__, __LINE__ );
+							return BLIS_NULL_POINTER;
+						}
+						if ( ( ( post_op_unparsed->sum + s_i )->zero_point_len > 0 ) &&
+							 ( ( post_op_unparsed->sum + s_i )->zero_point == NULL ) )
+						{
+							bli_print_msg(" Post_op.scale zero_point is NULL. Exiting..",
+											__FILE__, __LINE__ );
+							return BLIS_NULL_POINTER;
+						}
+						if ( ( ( post_op_unparsed->sum + s_i )->scale_factor_len != 1 ) &&
+							 ( ( post_op_unparsed->sum + s_i )->scale_factor_len < n ) )
+						{
+							bli_print_msg(" Post_op.scale scale factor length is < n." \
+										  " Exiting..", __FILE__, __LINE__ );
+							return BLIS_NULL_POINTER;
+						}
+						if ( ( ( post_op_unparsed->sum + s_i )->zero_point_len != 1 ) &&
+							 ( ( post_op_unparsed->sum + s_i )->zero_point_len < n ) )
+						{
+							bli_print_msg(" Post_op.scale zero point length is < n." \
+										  " Exiting..", __FILE__, __LINE__ );
+							return BLIS_NULL_POINTER;
+						}
 
-					lpgemm_set_node_params
-					(
-					  ( post_op_list + i ), POST_OPS_DOWNSCALE,
-					  post_op_unparsed->sum.zero_point,
-					  meta_arg, &( post_op_unparsed->sum.zero_point_len ),
-					  post_op_unparsed->sum.scale_factor,
-					  post_op_unparsed->sum.scale_factor_len,
-					  FALSE
-					);
+						lpgemm_set_node_params
+						(
+						  ( post_op_list + i ), POST_OPS_DOWNSCALE,
+						  ( post_op_unparsed->sum + s_i )->zero_point,
+						  meta_arg, &( ( post_op_unparsed->sum + s_i )->zero_point_len ),
+						  ( post_op_unparsed->sum + s_i )->scale_factor,
+						  ( post_op_unparsed->sum + s_i )->scale_factor_len,
+						  FALSE
+						);
+
+						s_i += 1;
+					}
 					break;
 			case MATRIX_ADD:
-					if ( ( post_op_unparsed->matrix_add.matrix == NULL ) ||
-						 ( post_op_unparsed->matrix_add.ldm <= 0 ) )
 					{
-						bli_print_msg(" Post_op.matrix_add attributes are invalid. Exiting..",
-										__FILE__, __LINE__ );
-						return BLIS_NULL_POINTER;
-					}
+						if ( ( ( post_op_unparsed->matrix_add + m_i )->matrix == NULL ) ||
+							 ( ( post_op_unparsed->matrix_add + m_i )->ldm <= 0 ) )
+						{
+							bli_print_msg(" Post_op.matrix_add attributes are invalid. Exiting..",
+											__FILE__, __LINE__ );
+							return BLIS_NULL_POINTER;
+						}
 
-					lpgemm_set_node_params
-					(
-					  ( post_op_list + i ), POST_OPS_MATRIX_ADD,
-					  post_op_unparsed->matrix_add.matrix,
-					  meta_arg, &( post_op_unparsed->matrix_add.ldm ),
-					  NULL, 0, FALSE
-					);
+						lpgemm_set_node_params
+						(
+						  ( post_op_list + i ), POST_OPS_MATRIX_ADD,
+						  ( post_op_unparsed->matrix_add + m_i )->matrix,
+						  meta_arg, &( ( post_op_unparsed->matrix_add + m_i )->ldm ),
+						  NULL, 0, FALSE
+						);
+
+						m_i += 1;
+					}
 					break;
 			default:
 					break;

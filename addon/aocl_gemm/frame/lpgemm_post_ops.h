@@ -84,7 +84,9 @@ err_t lpgemm_translate_to_post_ops_list
        aocl_post_op*   post_op_unparsed,
        lpgemm_post_op* post_op_list,
        void*           scale_buffer,
-       void*           meta_arg
+       void*           meta_arg,
+       dim_t           m,
+       dim_t           n
      );
 
 #define POST_OP_LABEL_LASTK_SAFE_JUMP \

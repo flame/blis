@@ -430,13 +430,13 @@ static inline ACCUM_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX
      )\
 { \
     dim_t j_scale = j; \
-    if ( post_op->sum.scale_factor_len == 1 ) \
+    if ( ( post_op->sum )->scale_factor_len == 1 ) \
     { \
        j_scale = 0; \
     } \
  \
     dim_t j_zp = j; \
-    if ( post_op->sum.zero_point_len == 1 ) \
+    if ( ( post_op->sum )->zero_point_len == 1 ) \
     { \
        j_zp = 0; \
     } \
@@ -444,8 +444,8 @@ static inline ACCUM_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX
     ACCUM_type out_temp_accum = \
         ( ACCUM_type )min( \
                         max( nearbyintf( ( SCALE_type )( temp_accum ) * \
-                            ( *( ( SCALE_type* )post_op->sum.scale_factor + j_scale ) ) ) + \
-                            *( ( C_type* )post_op->sum.zero_point + j_zp ), \
+                            ( *( ( SCALE_type* )( post_op->sum )->scale_factor + j_scale ) ) ) + \
+                            *( ( C_type* )( post_op->sum )->zero_point + j_zp ), \
                             DSCALE_CLIP_MIN ), \
                         DSCALE_CLIP_MAX ); \
     return out_temp_accum; \
@@ -464,7 +464,25 @@ static inline float mat_mul_accuracy_check_downscale_bf16bf16f32obf16
        dim_t j
      )
 {
-    return temp_accum;
+    dim_t j_scale = j;
+    if ( ( post_op->sum )->scale_factor_len == 1 )
+    {
+       j_scale = 0;
+    }
+
+    dim_t j_zp = j;
+    if ( ( post_op->sum )->zero_point_len == 1 )
+    {
+       j_zp = 0;
+    }
+
+    float zp_float = 0.0;
+    bfloat16_to_float( *( ( bfloat16* )( post_op->sum )->zero_point + j_zp ),
+                       &zp_float );
+    float out_temp_accum = ( temp_accum *
+                ( *( ( float* )( post_op->sum )->scale_factor + j_scale ) ) +
+                zp_float );
+    return out_temp_accum;
 }
 
 #define GEN_MAT_MUL_ACC_CHK_ACCUM(A_type, B_type, C_type,ACCUM_type,BLAS_SFX) \
@@ -942,7 +960,7 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                     if ( post_op->seq_vector[op_id] == BIAS ) \
                     { \
                         temp_accum += GEN_FUNC_NAME(get_bias_post_op_val_,BLAS_SFX) \
-                                    ( post_op->bias.bias, j ); \
+                                    ( ( post_op->bias )->bias, j ); \
                     } \
                     else if ( post_op->seq_vector[op_id] == ELTWISE ) \
                     { \
@@ -1009,7 +1027,7 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                     } \
                     else if ( post_op->seq_vector[op_id] == MATRIX_ADD ) \
                     { \
-                        dim_t rs_m = post_op->matrix_add.ldm; \
+                        dim_t rs_m = ( post_op->matrix_add )->ldm; \
                         dim_t cs_m = 1; \
                         if ( ( stor_order == 'C' ) || ( stor_order == 'c' ) ) \
                         { \
@@ -1017,7 +1035,7 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                             rs_m = 1; \
                         } \
                         temp_accum += GEN_FUNC_NAME(get_matrix_add_post_op_val_,BLAS_SFX) \
-                                    ( *( ( C_type* )post_op->matrix_add.matrix + \
+                                    ( *( ( C_type* )( post_op->matrix_add )->matrix + \
                                            ( i * rs_m ) + ( j * cs_m ) ) ); \
                     } \
                     else \
@@ -1083,10 +1101,25 @@ void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
         free( post_ops->eltwise );
     }
 
-    free( post_ops->matrix_add.matrix );
-    free( post_ops->sum.scale_factor );
-    free( post_ops->sum.zero_point );
-    free( post_ops->bias.bias );
+    if ( post_ops->matrix_add != NULL )
+    {
+        free( ( post_ops->matrix_add )->matrix );
+        free( post_ops->matrix_add );
+    }
+
+    if ( post_ops->sum != NULL )
+    {
+        free( ( post_ops->sum )->scale_factor );
+        free( ( post_ops->sum )->zero_point );
+        free( post_ops->sum );
+    }
+
+    if ( post_ops->bias != NULL )
+    {
+        free( ( post_ops->bias )->bias );
+        free( post_ops->bias );
+    }
+
     free( post_ops->seq_vector );
     free( post_ops );
 }
@@ -1133,14 +1166,41 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     dim_t cur_op_index = 0; \
     /* Ensure the buffers that use NULL check in deinit code is properly set to NULL.*/ \
     post_ops->eltwise = NULL; \
-    post_ops->bias.bias = NULL; \
-    post_ops->sum.scale_factor = NULL; \
-    post_ops->sum.buff = NULL; \
-    post_ops->sum.zero_point = NULL; \
-    post_ops->sum.scale_factor_len = 0; \
-    post_ops->sum.zero_point_len = 0; \
-    post_ops->matrix_add.matrix = NULL; \
-    post_ops->matrix_add.ldm = 0; \
+ \
+    /* Bench limitation: can only support 1 bias, but LPGEMM can support
+     * multiple scale post-ops. */ \
+    post_ops->bias = NULL; \
+    post_ops->bias = malloc( sizeof( aocl_post_op_bias ) ); \
+    if ( post_ops->bias == NULL ) \
+    { \
+        goto err_handler; \
+    } \
+    ( post_ops->bias )->bias = NULL; \
+ \
+    /* Bench limitation: can only support 1 scale, but LPGEMM can support
+     * multiple scale post-ops. */ \
+    post_ops->sum = NULL; \
+    post_ops->sum = malloc( sizeof( aocl_post_op_sum ) ); \
+    if ( post_ops->sum == NULL ) \
+    { \
+        goto err_handler; \
+    } \
+    ( post_ops->sum )->scale_factor = NULL; \
+    ( post_ops->sum )->buff = NULL; \
+    ( post_ops->sum )->zero_point = NULL; \
+    ( post_ops->sum )->scale_factor_len = 0; \
+    ( post_ops->sum )->zero_point_len = 0; \
+ \
+    /* Bench limitation: can only support 1 matrix add, but LPGEMM can support
+     * multiple scale post-ops. */ \
+    post_ops->matrix_add = NULL; \
+    post_ops->matrix_add = malloc( sizeof( aocl_post_op_matrix_add ) ); \
+    if ( post_ops->sum == NULL ) \
+    { \
+        goto err_handler; \
+    } \
+    ( post_ops->matrix_add )->matrix = NULL; \
+    ( post_ops->matrix_add )->ldm = 0; \
  \
     bool is_bias = FALSE; \
     bool is_relu = FALSE; \
@@ -1264,12 +1324,12 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     if ( is_bias == TRUE ) \
     { \
         /* Allocate bias buffer, return early if alloc fails.*/ \
-        post_ops->bias.bias = malloc( n * sizeof( C_type ) ); \
-        if ( post_ops->bias.bias == NULL ) \
+        ( post_ops->bias )->bias = malloc( n * sizeof( C_type ) ); \
+        if ( ( post_ops->bias )->bias == NULL ) \
         { \
             goto err_handler; \
         } \
-        GEN_FUNC_NAME(fill_array_post_ops_,BIAS_type)( post_ops->bias.bias, n ); \
+        GEN_FUNC_NAME(fill_array_post_ops_,BIAS_type)( ( post_ops->bias )->bias, n ); \
     } \
  \
     if ( num_eltwise > 0 ) \
@@ -1380,7 +1440,7 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         post_ops->seq_vector[cur_op_index] = SCALE; \
         cur_op_index++; \
  \
-        post_ops->sum.is_power_of_2 = FALSE; \
+        ( post_ops->sum )->is_power_of_2 = FALSE; \
         if ( global_dscale_out == 'y' ) \
         { \
             dim_t n_scale = n; \
@@ -1396,31 +1456,31 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             } \
  \
             /* Allocate scale buffer, return early if alloc fails.*/ \
-            post_ops->sum.scale_factor = malloc( n_scale * sizeof( DSCALE_type ) ); \
-            if ( post_ops->sum.scale_factor == NULL ) \
+            ( post_ops->sum )->scale_factor = malloc( n_scale * sizeof( DSCALE_type ) ); \
+            if ( ( post_ops->sum )->scale_factor == NULL ) \
             { \
                 goto err_handler; \
             } \
-            post_ops->sum.zero_point = malloc( n_zp * sizeof( C_DSCALE_type ) ); \
-            if ( post_ops->sum.zero_point == NULL ) \
+            ( post_ops->sum )->zero_point = malloc( n_zp * sizeof( C_DSCALE_type ) ); \
+            if ( ( post_ops->sum )->zero_point == NULL ) \
             { \
                 goto err_handler; \
             } \
  \
             /* Fill scale factor and zero points.*/ \
-            DSCALE_type* temp_dscale_ptr = ( DSCALE_type* )post_ops->sum.scale_factor; \
+            DSCALE_type* temp_dscale_ptr = ( DSCALE_type* )( post_ops->sum )->scale_factor; \
             for ( dim_t i = 0; i < n_scale; ++i ) \
             { \
                 temp_dscale_ptr[i] = ( ( DSCALE_type )1 )/ ( ( DSCALE_type )1000 ); \
             } \
-            post_ops->sum.scale_factor_len = n_scale; \
+            ( post_ops->sum )->scale_factor_len = n_scale; \
  \
-            C_DSCALE_type* temp_dzero_point_ptr = ( C_DSCALE_type* )post_ops->sum.zero_point; \
+            C_DSCALE_type* temp_dzero_point_ptr = ( C_DSCALE_type* )( post_ops->sum )->zero_point; \
             for ( dim_t i = 0; i < n_zp; ++i ) \
             { \
                 temp_dzero_point_ptr[i] = (C_DSCALE_type)( ( i + 9 ) % 126 ); \
             } \
-            post_ops->sum.zero_point_len = n_zp; \
+            ( post_ops->sum )->zero_point_len = n_zp; \
         } \
     } \
  \
@@ -1436,26 +1496,26 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         { \
             ele_dsize = sizeof( C_type ); \
         } \
-        post_ops->matrix_add.matrix = malloc( m * n * ele_dsize ); \
-        if ( post_ops->matrix_add.matrix == NULL ) \
+        ( post_ops->matrix_add )->matrix = malloc( m * n * ele_dsize ); \
+        if ( ( post_ops->matrix_add )->matrix == NULL ) \
         { \
             goto err_handler; \
         } \
         if ( global_dscale_out == 'y' ) \
         { \
-            GEN_FUNC_NAME(fill_array_,C_DSCALE_type)( post_ops->matrix_add.matrix, ( m * n ) ); \
+            GEN_FUNC_NAME(fill_array_,C_DSCALE_type)( ( post_ops->matrix_add )->matrix, ( m * n ) ); \
         } \
         else \
         { \
-            GEN_FUNC_NAME(fill_array_,C_type)( post_ops->matrix_add.matrix, ( m * n ) ); \
+            GEN_FUNC_NAME(fill_array_,C_type)( ( post_ops->matrix_add )->matrix, ( m * n ) ); \
         } \
         if ( ( stor_order == 'C' ) || ( stor_order == 'c' ) ) \
         { \
-            post_ops->matrix_add.ldm = m; \
+            ( post_ops->matrix_add )->ldm = m; \
         } \
         else \
         { \
-            post_ops->matrix_add.ldm = n; \
+            ( post_ops->matrix_add )->ldm = n; \
         } \
     } \
  \
@@ -1868,14 +1928,16 @@ int main( int argc, char** argv )
                 {
                     printf("Int4 B matrix only permitted if B reodering "
                                   "is enabled.\n");
-                    continue;
                 }
-                GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os32)
-                (
-                  fin, fout, stor_order, transa, transb, op_a, op_b,
-                  m, n, k, stride_a, stride_b, stride_c,
-                  post_ops_str_dest, TRUE
-                );
+                else
+                {
+                    GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os32)
+                    (
+                      fin, fout, stor_order, transa, transb, op_a, op_b,
+                      m, n, k, stride_a, stride_b, stride_c,
+                      post_ops_str_dest, TRUE
+                    );
+                }
             }
             if ( ( strcmp( gemm_type_str, "f32f32f32of32" ) == 0 ) ||
                  ( strcmp( gemm_type_str, "*" ) == 0 ) )

@@ -134,7 +134,8 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int16_t,int16_t,u8s8s16os16)
 	err_t err = lpgemm_translate_to_post_ops_list
 	(
 	  post_op_unparsed, post_op_list,
-	  ( void* )c, ( void* )( &order )
+	  ( void* )c, ( void* )( &order ),
+	  m, n
 	);
 
 	if( err != BLIS_SUCCESS ) return;

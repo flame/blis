@@ -147,7 +147,8 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	err_t err = lpgemm_translate_to_post_ops_list
 	(
 	  post_op_unparsed, post_op_list,
-	  ( void* )c, ( void* )( &order )
+	  ( void* )c, ( void* )( &order ),
+	  m, n
 	);
 
 	if( err != BLIS_SUCCESS ) return;

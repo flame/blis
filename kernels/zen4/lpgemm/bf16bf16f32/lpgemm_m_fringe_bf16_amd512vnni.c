@@ -925,68 +925,269 @@ POST_OPS_CLIP_5x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-
 POST_OPS_DOWNSCALE_5x64:
 	{
-		// c[0, 0-15]
-		MULRND_F32(c_float_0p0,0,0);
+		__m512 selector3 = _mm512_setzero_ps();
+		__m512 selector4 = _mm512_setzero_ps();
 
-		// c[0, 16-31]
-		MULRND_F32(c_float_0p1,0,1);
+		__m512 zero_point0 = _mm512_setzero_ps();
+		__m512 zero_point1 = _mm512_setzero_ps();
+		__m512 zero_point2 = _mm512_setzero_ps();
+		__m512 zero_point3 = _mm512_setzero_ps();
 
-		// c[0, 32-47]
-		MULRND_F32(c_float_0p2,0,2);
+		__mmask16 zp_mask = _cvtu32_mask16( 0xFFFF );
 
-		// c[0, 48-63]
-		MULRND_F32(c_float_0p3,0,3);
+		// Need to account for row vs column major swaps. For scalars
+		// scale and zero point, no implications.
+		// Even though different registers are used for scalar in column
+		// and row major downscale path, all those registers will contain
+		// the same value.
+		if ( post_ops_list_temp->scale_factor_len == 1 )
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			selector3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			selector4 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+		}
 
-		// c[1, 0-15]
-		MULRND_F32(c_float_1p0,1,0);
+		// bf16 zero point value (scalar or vector).
+		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+		{
+			zero_point0 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+			zero_point1 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+			zero_point2 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+			zero_point3 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+		}
 
-		// c[1, 16-31]
-		MULRND_F32(c_float_1p1,1,1);
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			if ( post_ops_list_temp->scale_factor_len > 1 )
+			{
+				selector1 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				selector2 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+				selector3 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+				selector4 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			}
 
-		// c[1, 32-47]
-		MULRND_F32(c_float_1p2,1,2);
+			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+			{
+				zero_point0 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
+				zero_point1 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
+				zero_point2 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) ) );
+				zero_point3 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 3 * 16 ) ) );
+			}
 
-		// c[1, 48-63]
-		MULRND_F32(c_float_1p3,1,3);
+			// c[0, 0-15]
+			SCL_MULRND_F32(c_float_0p0,selector1,zero_point0);
 
-		// c[2, 0-15]
-		MULRND_F32(c_float_2p0,2,0);
+			// c[0, 16-31]
+			SCL_MULRND_F32(c_float_0p1,selector2,zero_point1);
 
-		// c[2, 16-31]
-		MULRND_F32(c_float_2p1,2,1);
+			// c[0, 32-47]
+			SCL_MULRND_F32(c_float_0p2,selector3,zero_point2);
 
-		// c[2, 32-47]
-		MULRND_F32(c_float_2p2,2,2);
+			// c[0, 48-63]
+			SCL_MULRND_F32(c_float_0p3,selector4,zero_point3);
 
-		// c[2, 48-63]
-		MULRND_F32(c_float_2p3,2,3);
+			// c[1, 0-15]
+			SCL_MULRND_F32(c_float_1p0,selector1,zero_point0);
 
-		// c[3, 0-15]
-		MULRND_F32(c_float_3p0,3,0);
+			// c[1, 16-31]
+			SCL_MULRND_F32(c_float_1p1,selector2,zero_point1);
 
-		// c[3, 16-31]
-		MULRND_F32(c_float_3p1,3,1);
+			// c[1, 32-47]
+			SCL_MULRND_F32(c_float_1p2,selector3,zero_point2);
 
-		// c[3, 32-47]
-		MULRND_F32(c_float_3p2,3,2);
+			// c[1, 48-63]
+			SCL_MULRND_F32(c_float_1p3,selector4,zero_point3);
 
-		// c[3, 48-63]
-		MULRND_F32(c_float_3p3,3,3);
+			// c[2, 0-15]
+			SCL_MULRND_F32(c_float_2p0,selector1,zero_point0);
 
-		// c[4, 0-15]
-		MULRND_F32(c_float_4p0,4,0);
+			// c[2, 16-31]
+			SCL_MULRND_F32(c_float_2p1,selector2,zero_point1);
 
-		// c[4, 16-31]
-		MULRND_F32(c_float_4p1,4,1);
+			// c[2, 32-47]
+			SCL_MULRND_F32(c_float_2p2,selector3,zero_point2);
 
-		// c[4, 32-47]
-		MULRND_F32(c_float_4p2,4,2);
+			// c[2, 48-63]
+			SCL_MULRND_F32(c_float_2p3,selector4,zero_point3);
 
-		// c[4, 48-63]
-		MULRND_F32(c_float_4p3,4,3);
+			// c[3, 0-15]
+			SCL_MULRND_F32(c_float_3p0,selector1,zero_point0);
+
+			// c[3, 16-31]
+			SCL_MULRND_F32(c_float_3p1,selector2,zero_point1);
+
+			// c[3, 32-47]
+			SCL_MULRND_F32(c_float_3p2,selector3,zero_point2);
+
+			// c[3, 48-63]
+			SCL_MULRND_F32(c_float_3p3,selector4,zero_point3);
+
+			// c[4, 0-15]
+			SCL_MULRND_F32(c_float_4p0,selector1,zero_point0);
+
+			// c[4, 16-31]
+			SCL_MULRND_F32(c_float_4p1,selector2,zero_point1);
+
+			// c[4, 32-47]
+			SCL_MULRND_F32(c_float_4p2,selector3,zero_point2);
+
+			// c[4, 48-63]
+			SCL_MULRND_F32(c_float_4p3,selector4,zero_point3);
+		}
+		else
+		{
+			// If original output was columns major, then by the time
+			// kernel sees it, the matrix would be accessed as if it were
+			// transposed. Due to this the scale as well as zp array will
+			// be accessed by the ic index, and each scale/zp element
+			// corresponds to an entire row of the transposed output array,
+			// instead of an entire column.
+			if ( post_ops_list_temp->scale_factor_len > 1 )
+			{
+				selector1 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_i + 0 ) );
+				selector2 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_i + 1 ) );
+				selector3 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_i + 2 ) );
+				selector4 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_i + 3 ) );
+			}
+
+			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+			{
+				zero_point0 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_i + 0 ) ) );
+				zero_point1 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_i + 1 ) ) );
+				zero_point2 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_i + 2 ) ) );
+				zero_point3 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_i + 3 ) ) );
+			}
+
+			// c[0, 0-15]
+			SCL_MULRND_F32(c_float_0p0,selector1,zero_point0);
+
+			// c[0, 16-31]
+			SCL_MULRND_F32(c_float_0p1,selector1,zero_point0);
+
+			// c[0, 32-47]
+			SCL_MULRND_F32(c_float_0p2,selector1,zero_point0);
+
+			// c[0, 48-63]
+			SCL_MULRND_F32(c_float_0p3,selector1,zero_point0);
+
+			// c[1, 0-15]
+			SCL_MULRND_F32(c_float_1p0,selector2,zero_point1);
+
+			// c[1, 16-31]
+			SCL_MULRND_F32(c_float_1p1,selector2,zero_point1);
+
+			// c[1, 32-47]
+			SCL_MULRND_F32(c_float_1p2,selector2,zero_point1);
+
+			// c[1, 48-63]
+			SCL_MULRND_F32(c_float_1p3,selector2,zero_point1);
+
+			// c[2, 0-15]
+			SCL_MULRND_F32(c_float_2p0,selector3,zero_point2);
+
+			// c[2, 16-31]
+			SCL_MULRND_F32(c_float_2p1,selector3,zero_point2);
+
+			// c[2, 32-47]
+			SCL_MULRND_F32(c_float_2p2,selector3,zero_point2);
+
+			// c[2, 48-63]
+			SCL_MULRND_F32(c_float_2p3,selector3,zero_point2);
+
+			// c[3, 0-15]
+			SCL_MULRND_F32(c_float_3p0,selector4,zero_point3);
+
+			// c[3, 16-31]
+			SCL_MULRND_F32(c_float_3p1,selector4,zero_point3);
+
+			// c[3, 32-47]
+			SCL_MULRND_F32(c_float_3p2,selector4,zero_point3);
+
+			// c[3, 48-63]
+			SCL_MULRND_F32(c_float_3p3,selector4,zero_point3);
+
+			if ( post_ops_list_temp->scale_factor_len > 1 )
+			{
+				selector1 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_i + 4 ) );
+			}
+
+			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+			{
+				zero_point0 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_i + 4 ) ) );
+			}
+			// c[4, 0-15]
+			SCL_MULRND_F32(c_float_4p0,selector1,zero_point0);
+
+			// c[4, 16-31]
+			SCL_MULRND_F32(c_float_4p1,selector1,zero_point0);
+
+			// c[4, 32-47]
+			SCL_MULRND_F32(c_float_4p2,selector1,zero_point0);
+
+			// c[4, 48-63]
+			SCL_MULRND_F32(c_float_4p3,selector1,zero_point0);
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -1988,56 +2189,231 @@ POST_OPS_CLIP_4x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-
 POST_OPS_DOWNSCALE_4x64:
 	{
-		// c[0, 0-15]
-		MULRND_F32(c_float_0p0,0,0);
+		__m512 selector3 = _mm512_setzero_ps();
+		__m512 selector4 = _mm512_setzero_ps();
 
-		// c[0, 16-31]
-		MULRND_F32(c_float_0p1,0,1);
+		__m512 zero_point0 = _mm512_setzero_ps();
+		__m512 zero_point1 = _mm512_setzero_ps();
+		__m512 zero_point2 = _mm512_setzero_ps();
+		__m512 zero_point3 = _mm512_setzero_ps();
 
-		// c[0, 32-47]
-		MULRND_F32(c_float_0p2,0,2);
+		__mmask16 zp_mask = _cvtu32_mask16( 0xFFFF );
 
-		// c[0, 48-63]
-		MULRND_F32(c_float_0p3,0,3);
+		// Need to account for row vs column major swaps. For scalars
+		// scale and zero point, no implications.
+		// Even though different registers are used for scalar in column
+		// and row major downscale path, all those registers will contain
+		// the same value.
+		if ( post_ops_list_temp->scale_factor_len == 1 )
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			selector3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			selector4 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+		}
 
-		// c[1, 0-15]
-		MULRND_F32(c_float_1p0,1,0);
+		// bf16 zero point value (scalar or vector).
+		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+		{
+			zero_point0 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+			zero_point1 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+			zero_point2 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+			zero_point3 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+		}
 
-		// c[1, 16-31]
-		MULRND_F32(c_float_1p1,1,1);
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			if ( post_ops_list_temp->scale_factor_len > 1 )
+			{
+				selector1 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				selector2 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+				selector3 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+				selector4 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			}
 
-		// c[1, 32-47]
-		MULRND_F32(c_float_1p2,1,2);
+			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+			{
+				zero_point0 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
+				zero_point1 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
+				zero_point2 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) ) );
+				zero_point3 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 3 * 16 ) ) );
+			}
 
-		// c[1, 48-63]
-		MULRND_F32(c_float_1p3,1,3);
+			// c[0, 0-15]
+			SCL_MULRND_F32(c_float_0p0,selector1,zero_point0);
 
-		// c[2, 0-15]
-		MULRND_F32(c_float_2p0,2,0);
+			// c[0, 16-31]
+			SCL_MULRND_F32(c_float_0p1,selector2,zero_point1);
 
-		// c[2, 16-31]
-		MULRND_F32(c_float_2p1,2,1);
+			// c[0, 32-47]
+			SCL_MULRND_F32(c_float_0p2,selector3,zero_point2);
 
-		// c[2, 32-47]
-		MULRND_F32(c_float_2p2,2,2);
+			// c[0, 48-63]
+			SCL_MULRND_F32(c_float_0p3,selector4,zero_point3);
 
-		// c[2, 48-63]
-		MULRND_F32(c_float_2p3,2,3);
+			// c[1, 0-15]
+			SCL_MULRND_F32(c_float_1p0,selector1,zero_point0);
 
-		// c[3, 0-15]
-		MULRND_F32(c_float_3p0,3,0);
+			// c[1, 16-31]
+			SCL_MULRND_F32(c_float_1p1,selector2,zero_point1);
 
-		// c[3, 16-31]
-		MULRND_F32(c_float_3p1,3,1);
+			// c[1, 32-47]
+			SCL_MULRND_F32(c_float_1p2,selector3,zero_point2);
 
-		// c[3, 32-47]
-		MULRND_F32(c_float_3p2,3,2);
+			// c[1, 48-63]
+			SCL_MULRND_F32(c_float_1p3,selector4,zero_point3);
 
-		// c[3, 48-63]
-		MULRND_F32(c_float_3p3,3,3);
+			// c[2, 0-15]
+			SCL_MULRND_F32(c_float_2p0,selector1,zero_point0);
+
+			// c[2, 16-31]
+			SCL_MULRND_F32(c_float_2p1,selector2,zero_point1);
+
+			// c[2, 32-47]
+			SCL_MULRND_F32(c_float_2p2,selector3,zero_point2);
+
+			// c[2, 48-63]
+			SCL_MULRND_F32(c_float_2p3,selector4,zero_point3);
+
+			// c[3, 0-15]
+			SCL_MULRND_F32(c_float_3p0,selector1,zero_point0);
+
+			// c[3, 16-31]
+			SCL_MULRND_F32(c_float_3p1,selector2,zero_point1);
+
+			// c[3, 32-47]
+			SCL_MULRND_F32(c_float_3p2,selector3,zero_point2);
+
+			// c[3, 48-63]
+			SCL_MULRND_F32(c_float_3p3,selector4,zero_point3);
+		}
+		else
+		{
+			// If original output was columns major, then by the time
+			// kernel sees it, the matrix would be accessed as if it were
+			// transposed. Due to this the scale as well as zp array will
+			// be accessed by the ic index, and each scale/zp element
+			// corresponds to an entire row of the transposed output array,
+			// instead of an entire column.
+			if ( post_ops_list_temp->scale_factor_len > 1 )
+			{
+				selector1 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_i + 0 ) );
+				selector2 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_i + 1 ) );
+				selector3 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_i + 2 ) );
+				selector4 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_i + 3 ) );
+			}
+
+			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+			{
+				zero_point0 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_i + 0 ) ) );
+				zero_point1 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_i + 1 ) ) );
+				zero_point2 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_i + 2 ) ) );
+				zero_point3 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_i + 3 ) ) );
+			}
+
+			// c[0, 0-15]
+			SCL_MULRND_F32(c_float_0p0,selector1,zero_point0);
+
+			// c[0, 16-31]
+			SCL_MULRND_F32(c_float_0p1,selector1,zero_point0);
+
+			// c[0, 32-47]
+			SCL_MULRND_F32(c_float_0p2,selector1,zero_point0);
+
+			// c[0, 48-63]
+			SCL_MULRND_F32(c_float_0p3,selector1,zero_point0);
+
+			// c[1, 0-15]
+			SCL_MULRND_F32(c_float_1p0,selector2,zero_point1);
+
+			// c[1, 16-31]
+			SCL_MULRND_F32(c_float_1p1,selector2,zero_point1);
+
+			// c[1, 32-47]
+			SCL_MULRND_F32(c_float_1p2,selector2,zero_point1);
+
+			// c[1, 48-63]
+			SCL_MULRND_F32(c_float_1p3,selector2,zero_point1);
+
+			// c[2, 0-15]
+			SCL_MULRND_F32(c_float_2p0,selector3,zero_point2);
+
+			// c[2, 16-31]
+			SCL_MULRND_F32(c_float_2p1,selector3,zero_point2);
+
+			// c[2, 32-47]
+			SCL_MULRND_F32(c_float_2p2,selector3,zero_point2);
+
+			// c[2, 48-63]
+			SCL_MULRND_F32(c_float_2p3,selector3,zero_point2);
+
+			// c[3, 0-15]
+			SCL_MULRND_F32(c_float_3p0,selector4,zero_point3);
+
+			// c[3, 16-31]
+			SCL_MULRND_F32(c_float_3p1,selector4,zero_point3);
+
+			// c[3, 32-47]
+			SCL_MULRND_F32(c_float_3p2,selector4,zero_point3);
+
+			// c[3, 48-63]
+			SCL_MULRND_F32(c_float_3p3,selector4,zero_point3);
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -2851,44 +3227,200 @@ POST_OPS_CLIP_3x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-
 POST_OPS_DOWNSCALE_3x64:
 	{
-		// c[0, 0-15]
-		MULRND_F32(c_float_0p0,0,0);
+		__m512 selector3 = _mm512_setzero_ps();
+		__m512 selector4 = _mm512_setzero_ps();
 
-		// c[0, 16-31]
-		MULRND_F32(c_float_0p1,0,1);
+		__m512 zero_point0 = _mm512_setzero_ps();
+		__m512 zero_point1 = _mm512_setzero_ps();
+		__m512 zero_point2 = _mm512_setzero_ps();
+		__m512 zero_point3 = _mm512_setzero_ps();
 
-		// c[0, 32-47]
-		MULRND_F32(c_float_0p2,0,2);
+		__mmask16 zp_mask = _cvtu32_mask16( 0xFFFF );
 
-		// c[0, 48-63]
-		MULRND_F32(c_float_0p3,0,3);
+		// Need to account for row vs column major swaps. For scalars
+		// scale and zero point, no implications.
+		// Even though different registers are used for scalar in column
+		// and row major downscale path, all those registers will contain
+		// the same value.
+		if ( post_ops_list_temp->scale_factor_len == 1 )
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			selector3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			selector4 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+		}
 
-		// c[1, 0-15]
-		MULRND_F32(c_float_1p0,1,0);
+		// bf16 zero point value (scalar or vector).
+		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+		{
+			zero_point0 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+			zero_point1 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+			zero_point2 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+			zero_point3 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+		}
 
-		// c[1, 16-31]
-		MULRND_F32(c_float_1p1,1,1);
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			if ( post_ops_list_temp->scale_factor_len > 1 )
+			{
+				selector1 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				selector2 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+				selector3 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+				selector4 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			}
 
-		// c[1, 32-47]
-		MULRND_F32(c_float_1p2,1,2);
+			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+			{
+				zero_point0 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
+				zero_point1 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
+				zero_point2 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) ) );
+				zero_point3 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 3 * 16 ) ) );
+			}
 
-		// c[1, 48-63]
-		MULRND_F32(c_float_1p3,1,3);
+			// c[0, 0-15]
+			SCL_MULRND_F32(c_float_0p0,selector1,zero_point0);
 
-		// c[2, 0-15]
-		MULRND_F32(c_float_2p0,2,0);
+			// c[0, 16-31]
+			SCL_MULRND_F32(c_float_0p1,selector2,zero_point1);
 
-		// c[2, 16-31]
-		MULRND_F32(c_float_2p1,2,1);
+			// c[0, 32-47]
+			SCL_MULRND_F32(c_float_0p2,selector3,zero_point2);
 
-		// c[2, 32-47]
-		MULRND_F32(c_float_2p2,2,2);
+			// c[0, 48-63]
+			SCL_MULRND_F32(c_float_0p3,selector4,zero_point3);
 
-		// c[2, 48-63]
-		MULRND_F32(c_float_2p3,2,3);
+			// c[1, 0-15]
+			SCL_MULRND_F32(c_float_1p0,selector1,zero_point0);
+
+			// c[1, 16-31]
+			SCL_MULRND_F32(c_float_1p1,selector2,zero_point1);
+
+			// c[1, 32-47]
+			SCL_MULRND_F32(c_float_1p2,selector3,zero_point2);
+
+			// c[1, 48-63]
+			SCL_MULRND_F32(c_float_1p3,selector4,zero_point3);
+
+			// c[2, 0-15]
+			SCL_MULRND_F32(c_float_2p0,selector1,zero_point0);
+
+			// c[2, 16-31]
+			SCL_MULRND_F32(c_float_2p1,selector2,zero_point1);
+
+			// c[2, 32-47]
+			SCL_MULRND_F32(c_float_2p2,selector3,zero_point2);
+
+			// c[2, 48-63]
+			SCL_MULRND_F32(c_float_2p3,selector4,zero_point3);
+		}
+		else
+		{
+			// If original output was columns major, then by the time
+			// kernel sees it, the matrix would be accessed as if it were
+			// transposed. Due to this the scale as well as zp array will
+			// be accessed by the ic index, and each scale/zp element
+			// corresponds to an entire row of the transposed output array,
+			// instead of an entire column.
+			if ( post_ops_list_temp->scale_factor_len > 1 )
+			{
+				selector1 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_i + 0 ) );
+				selector2 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_i + 1 ) );
+				selector3 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_i + 2 ) );
+			}
+
+			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+			{
+				zero_point0 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_i + 0 ) ) );
+				zero_point1 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_i + 1 ) ) );
+				zero_point2 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_i + 2 ) ) );
+			}
+
+			// c[0, 0-15]
+			SCL_MULRND_F32(c_float_0p0,selector1,zero_point0);
+
+			// c[0, 16-31]
+			SCL_MULRND_F32(c_float_0p1,selector1,zero_point0);
+
+			// c[0, 32-47]
+			SCL_MULRND_F32(c_float_0p2,selector1,zero_point0);
+
+			// c[0, 48-63]
+			SCL_MULRND_F32(c_float_0p3,selector1,zero_point0);
+
+			// c[1, 0-15]
+			SCL_MULRND_F32(c_float_1p0,selector2,zero_point1);
+
+			// c[1, 16-31]
+			SCL_MULRND_F32(c_float_1p1,selector2,zero_point1);
+
+			// c[1, 32-47]
+			SCL_MULRND_F32(c_float_1p2,selector2,zero_point1);
+
+			// c[1, 48-63]
+			SCL_MULRND_F32(c_float_1p3,selector2,zero_point1);
+
+			// c[2, 0-15]
+			SCL_MULRND_F32(c_float_2p0,selector3,zero_point2);
+
+			// c[2, 16-31]
+			SCL_MULRND_F32(c_float_2p1,selector3,zero_point2);
+
+			// c[2, 32-47]
+			SCL_MULRND_F32(c_float_2p2,selector3,zero_point2);
+
+			// c[2, 48-63]
+			SCL_MULRND_F32(c_float_2p3,selector3,zero_point2);
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -3512,32 +4044,169 @@ POST_OPS_CLIP_2x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-
 POST_OPS_DOWNSCALE_2x64:
 	{
-		// c[0, 0-15]
-		MULRND_F32(c_float_0p0,0,0);
+		__m512 selector3 = _mm512_setzero_ps();
+		__m512 selector4 = _mm512_setzero_ps();
 
-		// c[0, 16-31]
-		MULRND_F32(c_float_0p1,0,1);
+		__m512 zero_point0 = _mm512_setzero_ps();
+		__m512 zero_point1 = _mm512_setzero_ps();
+		__m512 zero_point2 = _mm512_setzero_ps();
+		__m512 zero_point3 = _mm512_setzero_ps();
 
-		// c[0, 32-47]
-		MULRND_F32(c_float_0p2,0,2);
+		__mmask16 zp_mask = _cvtu32_mask16( 0xFFFF );
 
-		// c[0, 48-63]
-		MULRND_F32(c_float_0p3,0,3);
+		// Need to account for row vs column major swaps. For scalars
+		// scale and zero point, no implications.
+		// Even though different registers are used for scalar in column
+		// and row major downscale path, all those registers will contain
+		// the same value.
+		if ( post_ops_list_temp->scale_factor_len == 1 )
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			selector3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			selector4 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+		}
 
-		// c[1, 0-15]
-		MULRND_F32(c_float_1p0,1,0);
+		// bf16 zero point value (scalar or vector).
+		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+		{
+			zero_point0 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+			zero_point1 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+			zero_point2 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+			zero_point3 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+		}
 
-		// c[1, 16-31]
-		MULRND_F32(c_float_1p1,1,1);
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			if ( post_ops_list_temp->scale_factor_len > 1 )
+			{
+				selector1 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				selector2 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+				selector3 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+				selector4 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			}
 
-		// c[1, 32-47]
-		MULRND_F32(c_float_1p2,1,2);
+			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+			{
+				zero_point0 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
+				zero_point1 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
+				zero_point2 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) ) );
+				zero_point3 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 3 * 16 ) ) );
+			}
 
-		// c[1, 48-63]
-		MULRND_F32(c_float_1p3,1,3);
+			// c[0, 0-15]
+			SCL_MULRND_F32(c_float_0p0,selector1,zero_point0);
+
+			// c[0, 16-31]
+			SCL_MULRND_F32(c_float_0p1,selector2,zero_point1);
+
+			// c[0, 32-47]
+			SCL_MULRND_F32(c_float_0p2,selector3,zero_point2);
+
+			// c[0, 48-63]
+			SCL_MULRND_F32(c_float_0p3,selector4,zero_point3);
+
+			// c[1, 0-15]
+			SCL_MULRND_F32(c_float_1p0,selector1,zero_point0);
+
+			// c[1, 16-31]
+			SCL_MULRND_F32(c_float_1p1,selector2,zero_point1);
+
+			// c[1, 32-47]
+			SCL_MULRND_F32(c_float_1p2,selector3,zero_point2);
+
+			// c[1, 48-63]
+			SCL_MULRND_F32(c_float_1p3,selector4,zero_point3);
+		}
+		else
+		{
+			// If original output was columns major, then by the time
+			// kernel sees it, the matrix would be accessed as if it were
+			// transposed. Due to this the scale as well as zp array will
+			// be accessed by the ic index, and each scale/zp element
+			// corresponds to an entire row of the transposed output array,
+			// instead of an entire column.
+			if ( post_ops_list_temp->scale_factor_len > 1 )
+			{
+				selector1 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_i + 0 ) );
+				selector2 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_i + 1 ) );
+			}
+
+			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+			{
+				zero_point0 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_i + 0 ) ) );
+				zero_point1 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_i + 1 ) ) );
+			}
+
+			// c[0, 0-15]
+			SCL_MULRND_F32(c_float_0p0,selector1,zero_point0);
+
+			// c[0, 16-31]
+			SCL_MULRND_F32(c_float_0p1,selector1,zero_point0);
+
+			// c[0, 32-47]
+			SCL_MULRND_F32(c_float_0p2,selector1,zero_point0);
+
+			// c[0, 48-63]
+			SCL_MULRND_F32(c_float_0p3,selector1,zero_point0);
+
+			// c[1, 0-15]
+			SCL_MULRND_F32(c_float_1p0,selector2,zero_point1);
+
+			// c[1, 16-31]
+			SCL_MULRND_F32(c_float_1p1,selector2,zero_point1);
+
+			// c[1, 32-47]
+			SCL_MULRND_F32(c_float_1p2,selector2,zero_point1);
+
+			// c[1, 48-63]
+			SCL_MULRND_F32(c_float_1p3,selector2,zero_point1);
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -3966,20 +4635,138 @@ POST_OPS_CLIP_1x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-
 POST_OPS_DOWNSCALE_1x64:
 	{
-		// c[0, 0-15]
-		MULRND_F32(c_float_0p0,0,0);
+		__m512 selector3 = _mm512_setzero_ps();
+		__m512 selector4 = _mm512_setzero_ps();
 
-		// c[0, 16-31]
-		MULRND_F32(c_float_0p1,0,1);
+		__m512 zero_point0 = _mm512_setzero_ps();
+		__m512 zero_point1 = _mm512_setzero_ps();
+		__m512 zero_point2 = _mm512_setzero_ps();
+		__m512 zero_point3 = _mm512_setzero_ps();
 
-		// c[0, 32-47]
-		MULRND_F32(c_float_0p2,0,2);
+		__mmask16 zp_mask = _cvtu32_mask16( 0xFFFF );
 
-		// c[0, 48-63]
-		MULRND_F32(c_float_0p3,0,3);
+		// Need to account for row vs column major swaps. For scalars
+		// scale and zero point, no implications.
+		// Even though different registers are used for scalar in column
+		// and row major downscale path, all those registers will contain
+		// the same value.
+		if ( post_ops_list_temp->scale_factor_len == 1 )
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			selector3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			selector4 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+		}
+
+		// bf16 zero point value (scalar or vector).
+		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+		{
+			zero_point0 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+			zero_point1 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+			zero_point2 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+			zero_point3 = _mm512_cvtpbh_ps(
+						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
+		}
+
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			if ( post_ops_list_temp->scale_factor_len > 1 )
+			{
+				selector1 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				selector2 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+				selector3 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+				selector4 =
+					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			}
+
+			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+			{
+				zero_point0 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
+				zero_point1 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
+				zero_point2 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) ) );
+				zero_point3 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_j + ( 3 * 16 ) ) );
+			}
+
+			// c[0, 0-15]
+			SCL_MULRND_F32(c_float_0p0,selector1,zero_point0);
+
+			// c[0, 16-31]
+			SCL_MULRND_F32(c_float_0p1,selector2,zero_point1);
+
+			// c[0, 32-47]
+			SCL_MULRND_F32(c_float_0p2,selector3,zero_point2);
+
+			// c[0, 48-63]
+			SCL_MULRND_F32(c_float_0p3,selector4,zero_point3);
+		}
+		else
+		{
+			// If original output was columns major, then by the time
+			// kernel sees it, the matrix would be accessed as if it were
+			// transposed. Due to this the scale as well as zp array will
+			// be accessed by the ic index, and each scale/zp element
+			// corresponds to an entire row of the transposed output array,
+			// instead of an entire column.
+			if ( post_ops_list_temp->scale_factor_len > 1 )
+			{
+				selector1 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_i + 0 ) );
+			}
+
+			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+			{
+				zero_point0 = _mm512_cvtpbh_ps(
+							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+							post_ops_attr.post_op_c_i + 0 ) ) );
+			}
+
+			// c[0, 0-15]
+			SCL_MULRND_F32(c_float_0p0,selector1,zero_point0);
+
+			// c[0, 16-31]
+			SCL_MULRND_F32(c_float_0p1,selector1,zero_point0);
+
+			// c[0, 32-47]
+			SCL_MULRND_F32(c_float_0p2,selector1,zero_point0);
+
+			// c[0, 48-63]
+			SCL_MULRND_F32(c_float_0p3,selector1,zero_point0);
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}

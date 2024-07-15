@@ -94,10 +94,10 @@ typedef struct
 
 typedef struct
 {
-	aocl_post_op_sum sum;
-	aocl_post_op_eltwise* eltwise; //Multiple eltwise allowed.
-	aocl_post_op_bias bias;
-	aocl_post_op_matrix_add matrix_add;
+	aocl_post_op_sum* sum; // Multiple scale/sum allowed.
+	aocl_post_op_eltwise* eltwise; // Multiple eltwise allowed.
+	aocl_post_op_bias* bias;
+	aocl_post_op_matrix_add* matrix_add;
 
 	// eg: seq_length = 2
 	dim_t seq_length;

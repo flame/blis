@@ -89,7 +89,10 @@
 	  ) ), _mm512_set1_epi32 (16) ) );\
 	F32_BETA_FMA(reg,scratch1,scratch2) \
 
-#define MULRND_F32(reg,m_ind,n_ind) \
+// zero_point(avx512 register) contains bf16 zp upscaled to f32.
+#define SCL_MULRND_F32(reg,selector,zero_point) \
+	reg = _mm512_mul_ps( reg, selector ); \
+	reg = _mm512_add_ps( reg, zero_point ); \
 
 #define CVT_STORE_F32_BF16_MASK(reg,m_ind,n_ind) \
 	_mm256_mask_storeu_epi16 \
