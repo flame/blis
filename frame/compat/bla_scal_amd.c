@@ -617,7 +617,7 @@ void cscal_blis_impl
           cntx = bli_gks_query_cntx();
 
           // Query the function pointer using the context
-          scalv_fun_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DCOMPLEX, BLIS_SCALV_KER, cntx);
+          scalv_fun_ptr = bli_cntx_get_l1v_ker_dt(BLIS_SCOMPLEX, BLIS_SCALV_KER, cntx);
     }
 
     // Call the function based on the function pointer assigned above
