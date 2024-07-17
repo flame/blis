@@ -34,13 +34,18 @@
 
 #include @PLUGIN_HEADER@
 
-void PASTEMAC(plugin_init,BLIS_PNAME_INFIX,BLIS_CNAME_INFIX)
+void PASTEMAC(plugin_init_@plugin_name@,BLIS_CNAME_INFIX)
      (
-       PASTECH(plugin,BLIS_PNAME_INFIX,_params)
+       plugin_@plugin_name@_params
      )
 {
 	cntx_t* cntx = ( cntx_t* )bli_gks_lookup_id( PASTECH(BLIS_ARCH,BLIS_CNAME_UPPER_INFIX) );
 	( void )cntx;
+
+	PASTEMAC(plugin_init_@plugin_name@,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
+    (
+      plugin_@plugin_name@_params_only
+    );
 
     // ------------------------------------------------------------------------>
 	// -- Example Initialization ---------------------------------------------->
