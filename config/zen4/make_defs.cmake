@@ -18,6 +18,9 @@ if(NOT WIN32)
     endif()
 endif()
 
+# Flags specific to LPGEMM kernels.
+set(CKLPOPTFLAGS "")
+
 # Flags specific to optimized kernels.
 # NOTE: The -fomit-frame-pointer option is needed for some kernels because
 # they make explicit use of the rbp register.
@@ -32,22 +35,22 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
         # gcc 13.0 or later
         list(APPEND CKVECFLAGS -march=znver4)
         list(APPEND CRVECFLAGS -march=znver4)
-        # Update CKOPTFLAGS for gcc to use O3 optimization without
+        # Update CKLPOPTFLAGS for gcc to use O3 optimization without
         # -ftree-pre and -ftree-partial-pre flag. These flag results
         # in suboptimal code generation for instrinsic based kernels.
         # The -ftree-loop-vectorize results in inefficient code gen
         # for amd optimized l1 kernels based on instrinsics.
-        list(APPEND CKOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize)
+        list(APPEND CKLPOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize)
     elseif(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 11.0.0)
         # gcc 11.0 or later
         list(APPEND CKVECFLAGS -march=znver3 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mavx512bf16 -mavx512vbmi)
         list(APPEND CRVECFLAGS -march=znver3)
-        list(APPEND CKOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize)
+        list(APPEND CKLPOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize)
     elseif(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0.0)
         # gcc 9.0 or later
         list(APPEND CKVECFLAGS -march=znver2 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mavx512vbmi)
         list(APPEND CRVECFLAGS -march=znver2)
-        list(APPEND CKOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize)
+        list(APPEND CKLPOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize)
     elseif(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 8.0.0)
         # gcc 8.0 or later
         list(APPEND CKVECFLAGS -march=znver1 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mavx512vbmi)

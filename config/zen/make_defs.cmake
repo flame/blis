@@ -14,6 +14,9 @@ if(NOT WIN32)
     endif()
 endif()
 
+# Flags specific to LPGEMM kernels.
+set(CKLPOPTFLAGS "")
+
 # Flags specific to optimized kernels.
 # NOTE: The -fomit-frame-pointer option is needed for some kernels because
 # they make explicit use of the rbp register.
@@ -26,7 +29,7 @@ endif()
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     list(APPEND CKVECFLAGS -march=znver1)
     if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0.0)
-        list(APPEND CKOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse)
+        list(APPEND CKLPOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse)
     endif()
 endif()
 

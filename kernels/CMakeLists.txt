@@ -1,4 +1,4 @@
-##Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.##
 
 # Writing a function that will be used to generate the required object
 # libraries for the required kernels.
@@ -8,6 +8,11 @@ function(generate_kernel_targets kernel_target)
 
     # Choose correct sub-configurarion name for the given kernel set.
     get_config_for_kernel_from_kconfig_map(LOCAL_CONFIG ${kernel_target} "${KCONFIG_MAP}")
+
+    # filter the lpgemm source files to a different array
+    set(LOCAL_LPEGMM_SOURCE_FILES ${LOCAL_SOURCE_FILES})
+    list(FILTER LOCAL_SOURCE_FILES EXCLUDE REGEX ".*/lpgemm/.*")
+    list(FILTER LOCAL_LPEGMM_SOURCE_FILES INCLUDE REGEX ".*/lpgemm/.*")
 
     # Only generate the object library if there is at least one source file.
     list(LENGTH LOCAL_SOURCE_FILES size)
@@ -19,7 +24,8 @@ function(generate_kernel_targets kernel_target)
                     )
         # Include the corresponding make_defs.cmake that holds the required compiler options.
         include(${CMAKE_SOURCE_DIR}/config/${LOCAL_CONFIG}/make_defs.cmake)
-        # Use PRIVATE keyword for option setting since we do not want the properties to propagate in other targets.
+        # Use PRIVATE keyword for option setting since we do not want the
+        # properties to propagate in other targets.
         # mimicing get-kernel-cflags-for
         target_compile_options(${kernel_target}_KERNELS
                                 PRIVATE
@@ -68,7 +74,71 @@ function(generate_kernel_targets kernel_target)
         # Put all those targets under object-libs-targets folder name so that they appear all together in IDE.
         set_target_properties(${kernel_target}_KERNELS PROPERTIES FOLDER object-libs-targets)
     endif()
-endfunction()
+
+    # Only generate the object library if there is at least one source file.
+    list(LENGTH LOCAL_LPEGMM_SOURCE_FILES size_lpgemm)
+    if (size_lpgemm GREATER 0)
+        # Create an object library using the source file list above.
+        add_library(${kernel_target}_LPGEMM_KERNELS
+                OBJECT
+                ${LOCAL_LPEGMM_SOURCE_FILES}
+            )
+        # Include the corresponding make_defs.cmake that holds the required compiler options.
+        include(${CMAKE_SOURCE_DIR}/config/${LOCAL_CONFIG}/make_defs.cmake)
+        # Use PRIVATE keyword for option setting since we do not want the
+        # properties to propagate in other targets.
+        # mimicing get-kernel-cflags-for
+        target_compile_options(${kernel_target}_LPGEMM_KERNELS
+                                PRIVATE
+                                # load-var-for,CKOPTFLAGS
+                                ${CKOPTFLAGS}
+                                # load-var-for,CKLPOPTFLAGS
+                                ${CKLPOPTFLAGS}
+                                # load-var-for,CKVECFLAGS
+                                ${CKVECFLAGS}
+                                # get-noopt-cflags-for
+                                ${CDBGFLAGS}
+                                # get-noopt-cflags-for
+                                ${CWARNFLAGS}
+                                # get-noopt-cflags-for
+                                ${CMISCFLAGS}
+                                # get-noopt-cflags-for
+                                ${CLANGFLAGS}
+                                # in get-kernel-cflags-for
+                                ${COMPSIMDFLAGS}
+                                # in get-kernel-cflags-for
+                                ${BUILD_SYMFLAGS}
+                            )
+        target_compile_definitions(${kernel_target}_LPGEMM_KERNELS
+                                    PRIVATE
+                                    # in get-noopt-cflags-for
+                                    ${CPPROCFLAGS}
+                                    # in get-noopt-cflags-for
+                                    ${VERS_DEF}
+                                    # in get-kernel-cflags-for
+                                    ${BUILD_CPPFLAGS}
+                                )
+        target_include_directories(${kernel_target}_LPGEMM_KERNELS
+                                    BEFORE
+                                    PRIVATE
+                                    # in get-noopt-cflags-for
+                                    ${CINFLAGS}
+                                )
+        if(THREADING_MODEL STREQUAL "openmp")
+        # Equivalent to CTHREADFLAGS in get-noopt-cflags-for
+        target_link_libraries(${kernel_target}_LPGEMM_KERNELS PRIVATE OpenMP::OpenMP_C)
+        elseif(THREADING_MODEL STREQUAL "pthreads")
+        # in get-noopt-cflags-for
+        target_compile_options(${kernel_target}_LPGEMM_KERNELS PRIVATE ${CTHREADFLAGS})
+        endif()
+        # Equivalent to CPICFLAGS in get-noopt-cflags-for
+        set_target_properties(${kernel_target}_LPGEMM_KERNELS PROPERTIES POSITION_INDEPENDENT_CODE ON)
+        add_dependencies(${kernel_target}_LPGEMM_KERNELS flat-header)
+        # Put all those targets under object-libs-targets folder name so that they appear
+        # all together in IDE.
+        set_target_properties(${kernel_target}_LPGEMM_KERNELS PROPERTIES FOLDER object-libs-targets)
+        endif()
+    endfunction()
 
 # Generate targets for each of the kernels present
 # in the kernel list.

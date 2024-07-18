@@ -1,4 +1,4 @@
-##Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved. ##
+##Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved. ##
 
 # FLAGS that are specific to the 'zen3' architecture are added here.
 # FLAGS that are common for all the AMD architectures are present in
@@ -20,6 +20,9 @@ if(NOT WIN32)
     endif()
 endif()
 
+# Flags specific to LPGEMM kernels.
+set(CKLPOPTFLAGS "")
+
 # Flags specific to optimized kernels.
 # NOTE: The -fomit-frame-pointer option is needed for some kernels because
 # they make explicit use of the rbp register.
@@ -33,16 +36,16 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL  11.0.0)
         # gcc 11.0 or later
         list(APPEND CKVECFLAGS -march=znver3)
-        # Update CKOPTFLAGS for gcc to use O3 optimization without
+        # Update CKLPOPTFLAGS for gcc to use O3 optimization without
         # -ftree-pre and -ftree-partial-pre flag. These flag results
         # in suboptimal code generation for instrinsic based kernels.
         # The -ftree-loop-vectorize results in inefficient code gen
         # for amd optimized l1 kernels based on instrinsics.
-        list(APPEND CKOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse)
+        list(APPEND CKLPOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse)
     elseif(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL  9.0.0)
        # gcc 9.0 or later
         list(APPEND CKVECFLAGS -march=znver2)
-        list(APPEND CKOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse)
+        list(APPEND CKLPOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse)
     else()
         # If gcc is older than 9.1.0 but at least 6.1.0, then we can use -march=znver1
         # as the fallback option.
