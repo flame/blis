@@ -69,6 +69,86 @@ void bli_saxpbyv_zen_int10
 	 )
 {
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_4)
+
+	// Redirecting to other L1 kernels based on alpha and beta values
+	// If alpha is 0, we call SSCALV
+	// This kernel would further reroute based on few other combinations
+	// of alpha and beta. They are as follows :
+	// When alpha = 0 :
+	// 		When beta = 0 --> SSETV
+	// 		When beta = 1 --> Early return
+	// 		When beta = !( 0 or 1 ) --> SSCALV
+	if ( bli_seq0( *alpha ) )
+	{
+		bli_sscalv_zen_int10
+		(
+		  BLIS_NO_CONJUGATE,
+		  n,
+		  beta,
+		  y, incy,
+		  cntx
+		);
+
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
+		return;
+	}
+
+	// If beta is 0, we call SSCAL2V
+	// This kernel would further reroute based on few other combinations
+	// of alpha and beta. They are as follows :
+	// When beta = 0 :
+	// 		When alpha = 0 --> SSETV
+	// 		When alpha = 1 --> SCOPYV
+	// 		When alpha = !( 0 or 1 ) --> SSCAL2V
+	else if ( bli_seq0( *beta ) )
+	{
+		bli_sscal2v_zen_int
+		(
+		  conjx,
+		  n,
+		  alpha,
+		  x, incx,
+		  y, incy,
+		  cntx
+		);
+
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
+		return;
+	}
+
+	// If beta is 1, we have 2 scenarios for rerouting
+	// 		When alpha = 1 --> SADDV
+	// 		When alpha = !( 0 or 1 ) --> SAXPYV
+	else if ( bli_seq1( *beta ) )
+	{
+		if( bli_seq1( *alpha ) )
+		{
+			bli_saddv_zen_int
+			(
+			  conjx,
+			  n,
+			  x, incx,
+			  y, incy,
+			  cntx
+			);
+		}
+		else
+		{
+			bli_saxpyv_zen_int
+			(
+			  conjx,
+			  n,
+			  alpha,
+			  x, incx,
+			  y, incy,
+			  cntx
+			);
+		}
+
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
+		return;
+	}
+
 	const dim_t n_elem_per_reg  = 8;    // number of elements per register
 
 	dim_t i = 0;          // iterator
@@ -665,6 +745,86 @@ void bli_daxpbyv_zen_int10
 	 )
 {
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_4)
+
+	// Redirecting to other L1 kernels based on alpha and beta values
+	// If alpha is 0, we call DSCALV
+	// This kernel would further reroute based on few other combinations
+	// of alpha and beta. They are as follows :
+	// When alpha = 0 :
+	// 		When beta = 0 --> DSETV
+	// 		When beta = 1 --> Early return
+	// 		When beta = !( 0 or 1 ) --> DSCALV
+	if ( bli_deq0( *alpha ) )
+	{
+		bli_dscalv_zen_int10
+		(
+		  BLIS_NO_CONJUGATE,
+		  n,
+		  beta,
+		  y, incy,
+		  cntx
+		);
+
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
+		return;
+	}
+
+	// If beta is 0, we call DSCAL2V
+	// This kernel would further reroute based on few other combinations
+	// of alpha and beta. They are as follows :
+	// When beta = 0 :
+	// 		When alpha = 0 --> DSETV
+	// 		When alpha = 1 --> DCOPYV
+	// 		When alpha = !( 0 or 1 ) --> DSCAL2V
+	else if ( bli_deq0( *beta ) )
+	{
+		bli_dscal2v_zen_int
+		(
+		  conjx,
+		  n,
+		  alpha,
+		  x, incx,
+		  y, incy,
+		  cntx
+		);
+
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
+		return;
+	}
+
+	// If beta is 1, we have 2 scenarios for rerouting
+	// 		When alpha = 1 --> DADDV
+	// 		When alpha = !( 0 or 1 ) --> DAXPYV
+	else if ( bli_deq1( *beta ) )
+	{
+		if( bli_deq1( *alpha ) )
+		{
+			bli_daddv_zen_int
+			(
+			  conjx,
+			  n,
+			  x, incx,
+			  y, incy,
+			  cntx
+			);
+		}
+		else
+		{
+			bli_daxpyv_zen_int
+			(
+			  conjx,
+			  n,
+			  alpha,
+			  x, incx,
+			  y, incy,
+			  cntx
+			);
+		}
+
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
+		return;
+	}
+
 	const dim_t n_elem_per_reg  = 4;    // number of elements per register
 
 	dim_t i = 0;          // iterator
