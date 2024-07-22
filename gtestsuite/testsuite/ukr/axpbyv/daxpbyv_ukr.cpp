@@ -232,3 +232,67 @@ INSTANTIATE_TEST_SUITE_P(
         (::axpbyvMemUKRPrint<double, daxpbyv_ker_ft>())
     );
 #endif
+
+#if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
+/*
+    Unit testing for functionality of bli_daxpbyv_zen_int_avx512 kernel.
+    The code structure for bli_daxpbyv_zen_int_avx512( ... ) is as follows :
+    For unit strides :
+        Main loop    :  In blocks of 64  --> L64
+        Fringe loops :  In blocks of 32  --> L32
+                        In blocks of 16  --> L16
+                        In blocks of 8   --> L8
+                        Element-wise loop --> LScalar
+
+    For non-unit strides : A single loop, to process element wise.
+*/
+
+// Unit testing with unit stride, across all loops.
+INSTANTIATE_TEST_SUITE_P(
+        bli_daxpbyv_zen_int_avx512_unitStrides,
+        daxpbyvGeneric,
+        ::testing::Combine(
+            ::testing::Values(bli_daxpbyv_zen_int_avx512),      // kernel address
+            ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
+            ::testing::Values(// Testing the loops standalone
+                              gtint_t(64),                 // size n, for L64
+                              gtint_t(32),                 // L32
+                              gtint_t(16),                 // L16
+                              gtint_t(8),                  // L8
+                              gtint_t(7),                  // LScalar
+                              gtint_t(191)),               // 2*L64 + L32 + L16 + L8 + 7(LScalar)
+            ::testing::Values(gtint_t(1)),                 // stride size for x
+            ::testing::Values(gtint_t(1)),                 // stride size for y
+            ::testing::Values(double(1.0), double(-1.0),
+                              double(2.2), double(-4.1),
+                              double(0.0)),                // alpha
+            ::testing::Values(double(1.0), double(-1.0),
+                              double(2.2), double(-4.1), 
+                              double(0.0)),                // beta
+            ::testing::Values(false, true)                 // is_memory_test
+        ),
+        ((::axpbyvMemUKRPrint<double, daxpbyv_ker_ft>()))
+    );
+
+// Unit testing for non unit strides
+INSTANTIATE_TEST_SUITE_P(
+        bli_daxpbyv_zen_int_avx512_nonUnitStrides,
+        daxpbyvGeneric,
+        ::testing::Combine(
+            ::testing::Values(bli_daxpbyv_zen_int_avx512),      // kernel address
+            ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
+            ::testing::Values(gtint_t(10),                 // n, size of the vector
+                              gtint_t(25)),
+            ::testing::Values(gtint_t(5)),                 // stride size for x
+            ::testing::Values(gtint_t(3)),                 // stride size for y
+            ::testing::Values(double(1.0), double(-1.0),
+                              double(2.2), double(-4.1),
+                              double(0.0)),                // alpha
+            ::testing::Values(double(1.0), double(-1.0),
+                              double(2.2), double(-4.1), 
+                              double(0.0)),                // beta
+            ::testing::Values(false, true)                 // is_memory_test
+        ),
+        (::axpbyvMemUKRPrint<double, daxpbyv_ker_ft>())
+    );
+#endif

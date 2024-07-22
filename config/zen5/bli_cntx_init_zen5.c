@@ -156,14 +156,17 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 	// Update the context with optimized level-1v kernels.
 	bli_cntx_set_l1v_kers
 	(
-	  30,
+	  32,
+	  // addv
+	  BLIS_ADDV_KER,  BLIS_DOUBLE,     bli_daddv_zen_int_avx512,
+
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,    bli_samaxv_zen_int_avx512,
 	  BLIS_AMAXV_KER,  BLIS_DOUBLE,   bli_damaxv_zen_int,
 
 	  // axpbyv
 	  BLIS_AXPBYV_KER, BLIS_FLOAT,    bli_saxpbyv_zen_int10,
-	  BLIS_AXPBYV_KER, BLIS_DOUBLE,   bli_daxpbyv_zen_int10,
+	  BLIS_AXPBYV_KER, BLIS_DOUBLE,   bli_daxpbyv_zen_int_avx512,
 	  BLIS_AXPBYV_KER, BLIS_SCOMPLEX, bli_caxpbyv_zen_int,
 	  BLIS_AXPBYV_KER, BLIS_DCOMPLEX, bli_zaxpbyv_zen_int,
 
@@ -205,6 +208,7 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 	  BLIS_SETV_KER,   BLIS_DCOMPLEX, bli_zsetv_zen_int_avx512,
 
 	  // scal2v
+	  BLIS_SCAL2V_KER, BLIS_DOUBLE,   bli_dscal2v_zen_int_avx512,
 	  BLIS_SCAL2V_KER, BLIS_DCOMPLEX, bli_zscal2v_zen_int,
 	  cntx
 	);

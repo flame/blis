@@ -152,3 +152,68 @@ INSTANTIATE_TEST_SUITE_P(
 // ----------------------------------------------
 // -----  End ZEN1/2/3 (AVX2) Kernel Tests  -----
 // ----------------------------------------------
+
+// ----------------------------------------------
+// ----- Begin ZEN4/5 (AVX512) Kernel Tests -----
+// ----------------------------------------------
+#if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
+/*
+    Unit testing for functionality of bli_dscal2v_zen_int_avx512 kernel.
+    The code structure for bli_dscal2v_zen_int_avx512( ... ) is as follows :
+    For unit strides :
+        Main loop    :  In blocks of 64  --> L64
+        Fringe loops :  In blocks of 32  --> L32
+                        In blocks of 16  --> L16
+                        In blocks of 8   --> L8
+                        In blocks of 4   --> L4
+                        Element-wise loop --> LScalar
+
+    For non-unit strides : A single loop, to process element wise.
+*/
+INSTANTIATE_TEST_SUITE_P(
+        bli_dscal2v_zen_int_avx512_unitPositiveStride,
+        dscal2vGeneric,
+        ::testing::Combine(
+            ::testing::Values(bli_dscal2v_zen_int_avx512),
+            // conjx: uses n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            ::testing::Values(// Testing the loops standalone
+                              gtint_t(64),                    // size n, for L64
+                              gtint_t(32),                    // L32
+                              gtint_t(16),                    // L16
+                              gtint_t(8),                     // L8
+                              gtint_t(7),                     // LScalar
+                              gtint_t(191)),                  // 2*L64 + L32 + L16 + L8 + 7(LScalar)
+            ::testing::Values(gtint_t(1)),                    // stride size for x
+            ::testing::Values(gtint_t(1)),                    // stride size for y
+            ::testing::Values(double(1.0), double(-1.0),
+                              double(2.3), double(-4.5),
+                              double(0.0)),                   // alpha
+            ::testing::Values(false, true)                    // is_memory_test
+        ),
+        (::scal2vUKRPrint<double,dscal2v_ker_ft>())
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        bli_dscal2v_zen_int_avx512_nonUnitPositiveStrides,
+        dscal2vGeneric,
+        ::testing::Combine(
+            ::testing::Values(bli_dscal2v_zen_int_avx512),
+            // conjx: uses n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            ::testing::Values(// Testing the loops standalone
+                              gtint_t(7),                   // size n, for LScalar
+                              gtint_t(15)),
+            ::testing::Values(gtint_t(3), gtint_t(5)),      // stride size for x
+            ::testing::Values(gtint_t(2), gtint_t(4)),      // stride size for y
+            ::testing::Values(double(1.0), double(-1.0),
+                              double(2.3), double(-4.5),
+                              double(0.0)),                 // alpha
+            ::testing::Values(false, true)                  // is_memory_test
+        ),
+        (::scal2vUKRPrint<double,dscal2v_ker_ft>())
+    );
+#endif
+// ----------------------------------------------
+// -----  End ZEN4/5 (AVX512) Kernel Tests  -----
+// ----------------------------------------------

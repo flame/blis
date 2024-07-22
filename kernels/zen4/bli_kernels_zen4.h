@@ -34,6 +34,9 @@
 
 // -- level-1v --
 
+// addv (intrinsics)
+ADDV_KER_PROT( double,   d, addv_zen_int_avx512 )
+
 // amaxv (intrinsics)
 AMAXV_KER_PROT( float,    s, amaxv_zen_int_avx512 )
 AMAXV_KER_PROT( double,   d, amaxv_zen_int_avx512 )
@@ -61,6 +64,9 @@ AXPYV_KER_PROT( float,    s, axpyv_zen_int_avx512 )
 AXPYV_KER_PROT( double,   d, axpyv_zen_int_avx512 )
 AXPYV_KER_PROT( dcomplex, z, axpyv_zen_int_avx512 )
 
+// axpbyv ( intrinsics )
+AXPBYV_KER_PROT( double, d, axpbyv_zen_int_avx512 );
+
 // axpyf (intrinsics)
 AXPYF_KER_PROT( dcomplex, z, axpyf_zen_int_2_avx512 )
 AXPYF_KER_PROT( dcomplex, z, axpyf_zen_int_4_avx512 )
@@ -86,6 +92,10 @@ DOTXF_KER_PROT( double,   d, dotxf_zen_int_avx512 )
 COPYV_KER_PROT( float,    s, copyv_zen4_asm_avx512 )
 COPYV_KER_PROT( double,   d, copyv_zen4_asm_avx512 )
 COPYV_KER_PROT( dcomplex, z, copyv_zen4_asm_avx512 )
+
+// scal2v (intrinsics)
+SCAL2V_KER_PROT(double,   d, scal2v_zen_int_avx512)
+
 // dotxv (intrinsics)
 DOTXV_KER_PROT( dcomplex, z, dotxv_zen_int_avx512 )
 
