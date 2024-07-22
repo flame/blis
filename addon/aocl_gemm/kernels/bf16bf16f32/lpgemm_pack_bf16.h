@@ -47,6 +47,17 @@ BLIS_INLINE dim_t get_packb_bf16bf16f32of32_min_NR()
 	return 16;
 }
 
+typedef void (*pack_s4bf16)(
+    bfloat16 *,
+    const int8_t *,
+    const dim_t,
+    const dim_t,
+    const dim_t,
+    const dim_t,
+    dim_t *,
+    dim_t *,
+    lpgemm_pre_op*);
+
 typedef void (*pack_bf16)
      (
        bfloat16*,
@@ -80,7 +91,8 @@ void packb_nr64_bf16s4f32of32
        const dim_t   NC,
        const dim_t   KC,
        dim_t*        rs_p,
-       dim_t*        cs_p
+       dim_t*        cs_p,
+      lpgemm_pre_op* pre_op
      );
 
 void packa_mr16_bf16bf16f32of32

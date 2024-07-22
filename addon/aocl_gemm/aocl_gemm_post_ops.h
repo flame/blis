@@ -36,6 +36,7 @@
 #define AOCL_GEMM_POST_OPS_H
 
 #define AOCL_MAX_POST_OPS 5
+#define AOCL_MAX_PRE_OPS 1
 
 typedef enum
 {
@@ -91,6 +92,28 @@ typedef struct
 	void* matrix;
 	dim_t ldm;
 } aocl_post_op_matrix_add;
+typedef struct
+{
+	void* zero_point;
+	//len should be one which is one or n i.e., one zp
+    //per tensor or one zp per channel respectively
+	dim_t zero_point_len;
+} aocl_pre_op_zp;
+
+typedef struct
+{
+	void* scale_factor;
+	//len should be one which is one or n i.e., one sf
+    //per tensor or one sf per channel respectively
+	dim_t scale_factor_len;
+} aocl_pre_op_sf;
+
+typedef struct
+{
+	aocl_pre_op_zp *b_zp;
+	aocl_pre_op_sf *b_scl;
+	dim_t seq_length;
+} aocl_pre_op;
 
 typedef struct
 {
@@ -105,6 +128,10 @@ typedef struct
 	// eg: seq_vector[0] = BIAS, seq_vector[1] = ELTWISE means bias followed
 	// by eltwise(relu, if AOCL_ELT_ALGO_TYPE = 1).
 	AOCL_POST_OP_TYPE* seq_vector;
+
+	//Pass pre-op structure also through post-ops
+	aocl_pre_op  *pre_ops;
+
 } aocl_post_op;
 
 #endif //AOCL_GEMM_POST_OPS_H

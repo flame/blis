@@ -63,15 +63,16 @@ typedef enum
 // Enum name template:A_mat_type ## B_mat_type ## Accumulate_type ## C_mat_type.
 typedef enum
 {
-	U8S8S16OS16 = 0, // uint8_t - A, int8_t - B, int16_t - C
-	U8S8S32OS32 = 1, // uint8_t - A, int8_t - B, int32_t - C
-	F32F32F32OF32 = 2, // float - A, float - B, float - C
+	U8S8S16OS16 = 0,	 // uint8_t - A, int8_t - B, int16_t - C
+	U8S8S32OS32 = 1,	 // uint8_t - A, int8_t - B, int32_t - C
+	F32F32F32OF32 = 2,	 // float - A, float - B, float - C
 	BF16BF16F32OF32 = 3, // bf16 - A, bf16 - B, float - C
-	S8S8S32OS32 = 4, // int8_t - A, int8_t - B, int32_t - C
-	S8S8S16OS16 = 5,  // int8_t - A, int8_t - B, int16_t - C
-	U8S4S32OS32 = 6 // Only used for reordering int4_t B matrix.
+	S8S8S32OS32 = 4,	 // int8_t - A, int8_t - B, int32_t - C
+	S8S8S16OS16 = 5,	 // int8_t - A, int8_t - B, int16_t - C
+	U8S4S32OS32 = 6,		 // Only used for reordering int4_t B matrix.
+	BF16S4F32OF32 = 7	 // Only used for reordering int4_t B matrix.
 } AOCL_OPERATION_TYPE;
-#define AOCL_OPERATION_TYPE_LEN 7
+#define AOCL_OPERATION_TYPE_LEN 8
 
 typedef enum
 {
@@ -144,6 +145,7 @@ typedef struct
 	void_fp kern_fun_ptr;
 	void_fp packa_fun_ptr;
 	void_fp packb_fun_ptr;
+	void_fp packsclb_fun_ptr;
 	lpgemm_pack_strides_t pack_s;
 } lpgemm_cntx_t;
 

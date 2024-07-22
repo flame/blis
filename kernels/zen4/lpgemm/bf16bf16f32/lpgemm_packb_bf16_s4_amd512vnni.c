@@ -48,7 +48,8 @@ void packb_nr64_bf16s4f32of32_row_major
       const dim_t   NC,
       const dim_t   KC,
       dim_t*        rs_p,
-      dim_t*        cs_p
+      dim_t*        cs_p,
+      lpgemm_pre_op* pre_op
     );
 
 void packb_nr48_bf16s4f32of32_row_major
@@ -93,13 +94,14 @@ void packb_nr64_bf16s4f32of32
        const dim_t   NC,
        const dim_t   KC,
        dim_t*        rs_p,
-       dim_t*        cs_p
+       dim_t*        cs_p,
+      lpgemm_pre_op* pre_op
      )
 {
 	if (cs_b == 1)
 	{
 		packb_nr64_bf16s4f32of32_row_major(pack_b_buffer,
-						b, rs_b, NC, KC, rs_p, cs_p);
+						b, rs_b, NC, KC, rs_p, cs_p, pre_op);
 	}
 	else
 	{
@@ -117,7 +119,8 @@ void packb_nr64_bf16s4f32of32_row_major
       const dim_t   NC,
       const dim_t   KC,
       dim_t*        rs_p,
-      dim_t*        cs_p
+      dim_t*        cs_p,
+	  lpgemm_pre_op* pre_op
     )
 {
 	dim_t NR = 64;

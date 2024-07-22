@@ -97,6 +97,7 @@ static void _lpgemm_cntx_init_func_map()
 #define KMACRO(ID,FUNC_PTR) global_cntx_t_list[ID].kern_fun_ptr = FUNC_PTR;
 #define PAMACRO(ID,FUNC_PTR) global_cntx_t_list[ID].packa_fun_ptr = FUNC_PTR;
 #define PBMACRO(ID,FUNC_PTR) global_cntx_t_list[ID].packb_fun_ptr = FUNC_PTR;
+#define PBSMACRO(ID, FUNC_PTR) global_cntx_t_list[ID].packsclb_fun_ptr = FUNC_PTR;
 #define JITMACRO(ID, FUNC_PTR) global_cntx_t_list[ID].jit_kernel = FUNC_PTR;
 	//TODO: Default initialize with reference kernels so that kernel pointer
 	// will be valid even in case none of the zen optimized kernels are
@@ -107,6 +108,7 @@ static void _lpgemm_cntx_init_func_map()
 	global_cntx_t_list[U8S8S32OS32].kern_fun_ptr = NULL;
 	global_cntx_t_list[F32F32F32OF32].kern_fun_ptr = NULL;
 	global_cntx_t_list[BF16BF16F32OF32].kern_fun_ptr = NULL;
+	global_cntx_t_list[BF16S4F32OF32].kern_fun_ptr = NULL;
 
 	// Kernel dispatch object factory.
 	if ( bli_cpuid_is_avx512bf16_supported() == TRUE )

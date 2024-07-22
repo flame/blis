@@ -51,18 +51,6 @@ typedef enum
 } LPGEMM_POST_OP_CODE;
 
 // Used as an internal structure.
-typedef struct lpgemm_pre_op_t
-{
-    uint64_t op_code;
-    void *scale_factor;
-    dim_t scale_factor_len;
-    void *zp;
-    dim_t zp_len;
-    dim_t pre_op_b_j;
-    struct lpgemm_pre_op_t *next;
-} lpgemm_pre_op;
-
-// Used as an internal structure.
 typedef struct lpgemm_post_op_t
 {
 	uint64_t op_code;
@@ -74,6 +62,18 @@ typedef struct lpgemm_post_op_t
 	bool is_power_of_2;
 	struct lpgemm_post_op_t* next;
 } lpgemm_post_op;
+
+// Used as an internal structure.
+typedef struct lpgemm_pre_op_t
+{
+	uint64_t op_code;
+	void *scale_factor;
+	dim_t scale_factor_len;
+	void *zp;
+	dim_t zp_len;
+	dim_t pre_op_b_j;
+	struct lpgemm_pre_op_t *next;
+} lpgemm_pre_op;
 
 // Used as an internal structure.
 typedef struct lpgemm_post_op_attr_t
@@ -91,6 +91,7 @@ typedef struct lpgemm_post_op_attr_t
 	int16_t* b_col_sum_vec_s16;
 } lpgemm_post_op_attr;
 
+
 err_t lpgemm_translate_to_post_ops_list
      (
        aocl_post_op*   post_op_unparsed,
@@ -100,6 +101,15 @@ err_t lpgemm_translate_to_post_ops_list
        dim_t           m,
        dim_t           n
      );
+
+err_t lpgemm_translate_to_pre_ops_list
+	(
+		aocl_pre_op *pre_op_unparsed,
+		lpgemm_pre_op *pre_op_list,
+		dim_t m,
+		dim_t n,
+		dim_t k
+	);
 
 #define POST_OP_LABEL_LASTK_SAFE_JUMP \
 		if ( ( post_ops_attr.is_last_k == TRUE ) && ( post_ops_list_temp != NULL ) ) \

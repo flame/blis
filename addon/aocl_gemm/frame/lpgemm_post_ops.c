@@ -35,17 +35,89 @@
 #include "blis.h"
 #include "lpgemm_post_ops.h"
 
-BLIS_INLINE void lpgemm_set_node_params
+BLIS_INLINE void lpgemm_set_pre_ops_node_params
      (
-       lpgemm_post_op* post_op_node,
-       LPGEMM_POST_OP_CODE op_code,
-       void* op1,
-       void* op2,
-       void* op3,
+       lpgemm_pre_op* pre_op_node,
+	   void* zero_point,
        void* scale_factor,
-       dim_t scale_factor_len,
-       bool is_power_of_2
+       dim_t zero_point_len,
+       dim_t scale_factor_len
      )
+{
+	pre_op_node->scale_factor = scale_factor;
+	pre_op_node->scale_factor_len = scale_factor_len;
+	pre_op_node->zp = zero_point;
+	pre_op_node->zp_len = zero_point_len;
+	pre_op_node->next = NULL;
+}
+
+err_t lpgemm_translate_to_pre_ops_list(
+	aocl_pre_op *pre_op_unparsed,
+	lpgemm_pre_op *pre_op_list,
+	dim_t m,
+	dim_t n,
+	dim_t k)
+{
+	(void)(m);			  // Unused for now, potential to be used later.
+	(void)(k);			  // Unused for now, potential to be used later.
+
+	if ((pre_op_unparsed == NULL) || (pre_op_unparsed->seq_length <= 0))
+	{
+		lpgemm_set_pre_ops_node_params
+		(
+			pre_op_list,
+			NULL, NULL, 0, 0
+		);
+
+		return BLIS_SUCCESS;
+	}
+
+	if ((pre_op_unparsed->seq_length > AOCL_MAX_POST_OPS))
+	{
+		lpgemm_set_pre_ops_node_params
+		(
+			pre_op_list, 
+			NULL, NULL, 0, 0
+		);
+
+		bli_print_msg(" Max supported pre-ops is 2, supplied input pre-ops"
+					  " are more. Exiting..",
+					  __FILE__, __LINE__);
+		return BLIS_UNEXPECTED_VECTOR_DIM; // Error, seq length exceeds max pre ops permitted.
+	}
+
+	for (dim_t i = 0; i < pre_op_unparsed->seq_length; ++i)
+	{
+		if (pre_op_unparsed->b_zp != NULL && pre_op_unparsed->b_scl!=NULL)
+		{
+			lpgemm_set_pre_ops_node_params
+			(
+				pre_op_list,
+				(pre_op_unparsed->b_zp)->zero_point,
+				(pre_op_unparsed->b_scl)->scale_factor,
+				(pre_op_unparsed->b_zp)->zero_point_len,
+				(pre_op_unparsed->b_scl)->scale_factor_len
+			);
+		}
+
+		// Simulating linked link using an array.
+		if (i < (pre_op_unparsed->seq_length - 1))
+		{
+			(pre_op_list + i)->next = (pre_op_list + i + 1);
+		}
+	}
+	return BLIS_SUCCESS;
+}
+
+BLIS_INLINE void lpgemm_set_node_params(
+	lpgemm_post_op *post_op_node,
+	LPGEMM_POST_OP_CODE op_code,
+	void *op1,
+	void *op2,
+	void *op3,
+	void *scale_factor,
+	dim_t scale_factor_len,
+	bool is_power_of_2)
 {
 	post_op_node->op_code = op_code;
 	post_op_node->op_args1 = op1;
