@@ -476,20 +476,20 @@ POST_OPS_DOWNSCALE_5xLT16:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point1 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point1 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point2 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point2 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point3 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point3 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point4 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point4 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -499,14 +499,14 @@ POST_OPS_DOWNSCALE_5xLT16:
 			if ( post_ops_list_temp->scale_factor_len > 1 )
 			{
 				selector1 = _mm512_maskz_loadu_ps( zp_mask,
-						  ( float* )post_ops_list_temp->op_args1 +
+						  ( float* )post_ops_list_temp->scale_factor +
 						  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			}
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
 			}
@@ -555,24 +555,24 @@ POST_OPS_DOWNSCALE_5xLT16:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 1 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 2 ) ) );
-				zero_point3 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point3 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 3 ) ) );
-				zero_point4 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point4 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 4 ) ) );
 			}
@@ -1089,17 +1089,17 @@ POST_OPS_DOWNSCALE_4xLT16:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point1 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point1 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point2 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point2 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point3 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point3 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -1109,14 +1109,14 @@ POST_OPS_DOWNSCALE_4xLT16:
 			if ( post_ops_list_temp->scale_factor_len > 1 )
 			{
 				selector1 = _mm512_maskz_loadu_ps( zp_mask,
-						  ( float* )post_ops_list_temp->op_args1 +
+						  ( float* )post_ops_list_temp->scale_factor +
 						  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			}
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
 			}
@@ -1159,20 +1159,20 @@ POST_OPS_DOWNSCALE_4xLT16:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 1 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 2 ) ) );
-				zero_point3 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point3 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 3 ) ) );
 			}
@@ -1614,14 +1614,14 @@ POST_OPS_DOWNSCALE_3xLT16:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point1 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point1 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point2 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point2 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -1631,14 +1631,14 @@ POST_OPS_DOWNSCALE_3xLT16:
 			if ( post_ops_list_temp->scale_factor_len > 1 )
 			{
 				selector1 = _mm512_maskz_loadu_ps( zp_mask,
-						  ( float* )post_ops_list_temp->op_args1 +
+						  ( float* )post_ops_list_temp->scale_factor +
 						  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			}
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
 			}
@@ -1675,16 +1675,16 @@ POST_OPS_DOWNSCALE_3xLT16:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 1 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 2 ) ) );
 			}
@@ -2051,11 +2051,11 @@ POST_OPS_DOWNSCALE_2xLT16:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point1 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point1 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -2065,14 +2065,14 @@ POST_OPS_DOWNSCALE_2xLT16:
 			if ( post_ops_list_temp->scale_factor_len > 1 )
 			{
 				selector1 = _mm512_maskz_loadu_ps( zp_mask,
-						  ( float* )post_ops_list_temp->op_args1 +
+						  ( float* )post_ops_list_temp->scale_factor +
 						  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			}
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
 			}
@@ -2103,12 +2103,12 @@ POST_OPS_DOWNSCALE_2xLT16:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 1 ) ) );
 			}
@@ -2402,8 +2402,8 @@ POST_OPS_DOWNSCALE_1xLT16:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -2413,14 +2413,14 @@ POST_OPS_DOWNSCALE_1xLT16:
 			if ( post_ops_list_temp->scale_factor_len > 1 )
 			{
 				selector1 = _mm512_maskz_loadu_ps( zp_mask,
-						  ( float* )post_ops_list_temp->op_args1 +
+						  ( float* )post_ops_list_temp->scale_factor +
 						  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			}
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
 			}
@@ -2445,8 +2445,8 @@ POST_OPS_DOWNSCALE_1xLT16:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
 			}
@@ -2941,20 +2941,20 @@ POST_OPS_DOWNSCALE_5x16:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point1 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point1 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point2 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point2 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point3 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point3 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point4 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point4 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -2964,14 +2964,14 @@ POST_OPS_DOWNSCALE_5x16:
 			if ( post_ops_list_temp->scale_factor_len > 1 )
 			{
 				selector1 = _mm512_maskz_loadu_ps( zp_mask,
-						  ( float* )post_ops_list_temp->op_args1 +
+						  ( float* )post_ops_list_temp->scale_factor +
 						  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			}
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
 			}
@@ -3020,24 +3020,24 @@ POST_OPS_DOWNSCALE_5x16:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 1 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 2 ) ) );
-				zero_point3 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point3 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 3 ) ) );
-				zero_point4 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point4 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 4 ) ) );
 			}
@@ -3546,17 +3546,17 @@ POST_OPS_DOWNSCALE_4x16:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point1 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point1 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point2 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point2 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point3 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point3 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -3566,14 +3566,14 @@ POST_OPS_DOWNSCALE_4x16:
 			if ( post_ops_list_temp->scale_factor_len > 1 )
 			{
 				selector1 = _mm512_maskz_loadu_ps( zp_mask,
-						  ( float* )post_ops_list_temp->op_args1 +
+						  ( float* )post_ops_list_temp->scale_factor +
 						  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			}
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
 			}
@@ -3616,20 +3616,20 @@ POST_OPS_DOWNSCALE_4x16:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 1 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 2 ) ) );
-				zero_point3 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point3 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 3 ) ) );
 			}
@@ -4064,14 +4064,14 @@ POST_OPS_DOWNSCALE_3x16:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point1 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point1 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point2 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point2 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -4081,14 +4081,14 @@ POST_OPS_DOWNSCALE_3x16:
 			if ( post_ops_list_temp->scale_factor_len > 1 )
 			{
 				selector1 = _mm512_maskz_loadu_ps( zp_mask,
-						  ( float* )post_ops_list_temp->op_args1 +
+						  ( float* )post_ops_list_temp->scale_factor +
 						  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			}
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
 			}
@@ -4125,16 +4125,16 @@ POST_OPS_DOWNSCALE_3x16:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 1 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 2 ) ) );
 			}
@@ -4494,11 +4494,11 @@ POST_OPS_DOWNSCALE_2x16:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point1 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point1 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -4508,14 +4508,14 @@ POST_OPS_DOWNSCALE_2x16:
 			if ( post_ops_list_temp->scale_factor_len > 1 )
 			{
 				selector1 = _mm512_maskz_loadu_ps( zp_mask,
-						  ( float* )post_ops_list_temp->op_args1 +
+						  ( float* )post_ops_list_temp->scale_factor +
 						  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			}
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
 			}
@@ -4546,12 +4546,12 @@ POST_OPS_DOWNSCALE_2x16:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 1 ) ) );
 			}
@@ -4837,8 +4837,8 @@ POST_OPS_DOWNSCALE_1x16:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -4848,14 +4848,14 @@ POST_OPS_DOWNSCALE_1x16:
 			if ( post_ops_list_temp->scale_factor_len > 1 )
 			{
 				selector1 = _mm512_maskz_loadu_ps( zp_mask,
-						  ( float* )post_ops_list_temp->op_args1 +
+						  ( float* )post_ops_list_temp->scale_factor +
 						  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			}
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
 			}
@@ -4880,8 +4880,8 @@ POST_OPS_DOWNSCALE_1x16:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
 			}
@@ -5523,20 +5523,20 @@ POST_OPS_DOWNSCALE_5x32:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point1 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point1 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point2 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point2 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point3 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point3 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point4 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point4 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -5555,12 +5555,12 @@ POST_OPS_DOWNSCALE_5x32:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
 			}
@@ -5624,24 +5624,24 @@ POST_OPS_DOWNSCALE_5x32:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 1 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 2 ) ) );
-				zero_point3 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point3 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 3 ) ) );
-				zero_point4 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point4 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 4 ) ) );
 			}
@@ -6331,17 +6331,17 @@ POST_OPS_DOWNSCALE_4x32:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point1 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point1 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point2 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point2 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point3 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point3 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -6360,12 +6360,12 @@ POST_OPS_DOWNSCALE_4x32:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
 			}
@@ -6420,20 +6420,20 @@ POST_OPS_DOWNSCALE_4x32:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 1 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 2 ) ) );
-				zero_point3 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point3 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 3 ) ) );
 			}
@@ -7007,14 +7007,14 @@ POST_OPS_DOWNSCALE_3x32:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point1 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point1 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point2 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point2 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -7033,12 +7033,12 @@ POST_OPS_DOWNSCALE_3x32:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
 			}
@@ -7084,16 +7084,16 @@ POST_OPS_DOWNSCALE_3x32:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 1 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 2 ) ) );
 			}
@@ -7550,11 +7550,11 @@ POST_OPS_DOWNSCALE_2x32:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point1 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point1 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -7573,12 +7573,12 @@ POST_OPS_DOWNSCALE_2x32:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
 			}
@@ -7615,12 +7615,12 @@ POST_OPS_DOWNSCALE_2x32:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 1 ) ) );
 			}
@@ -7965,11 +7965,11 @@ POST_OPS_DOWNSCALE_1x32:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point1 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point1 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -7988,12 +7988,12 @@ POST_OPS_DOWNSCALE_1x32:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
 			}
@@ -8021,8 +8021,8 @@ POST_OPS_DOWNSCALE_1x32:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
 			}
@@ -8836,17 +8836,17 @@ POST_OPS_DOWNSCALE_5x48:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point1 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point1 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point2 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point2 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point3 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point3 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -8868,16 +8868,16 @@ POST_OPS_DOWNSCALE_5x48:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 2 * 16 ) ) );
 			}
@@ -8953,20 +8953,20 @@ POST_OPS_DOWNSCALE_5x48:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 1 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 2 ) ) );
-				zero_point3 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point3 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 3 ) ) );
 			}
@@ -9016,8 +9016,8 @@ POST_OPS_DOWNSCALE_5x48:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 4 ) ) );
 			}
@@ -9863,17 +9863,17 @@ POST_OPS_DOWNSCALE_4x48:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point1 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point1 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point2 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point2 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point3 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point3 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -9895,16 +9895,16 @@ POST_OPS_DOWNSCALE_4x48:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 2 * 16 ) ) );
 			}
@@ -9971,20 +9971,20 @@ POST_OPS_DOWNSCALE_4x48:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 1 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 2 ) ) );
-				zero_point3 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point3 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 3 ) ) );
 			}
@@ -10709,14 +10709,14 @@ POST_OPS_DOWNSCALE_3x48:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point1 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point1 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point2 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point2 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -10738,16 +10738,16 @@ POST_OPS_DOWNSCALE_3x48:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 2 * 16 ) ) );
 			}
@@ -10802,16 +10802,16 @@ POST_OPS_DOWNSCALE_3x48:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 1 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 2 ) ) );
 			}
@@ -11381,14 +11381,14 @@ POST_OPS_DOWNSCALE_2x48:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point1 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point1 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point2 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point2 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -11410,16 +11410,16 @@ POST_OPS_DOWNSCALE_2x48:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 2 * 16 ) ) );
 			}
@@ -11462,12 +11462,12 @@ POST_OPS_DOWNSCALE_2x48:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 1 ) ) );
 			}
@@ -11884,14 +11884,14 @@ POST_OPS_DOWNSCALE_1x48:
 		// bf16 zero point value (scalar or vector).
 		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point0 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point1 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point1 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-			zero_point2 = _mm512_cvtpbh_ps(
-						( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+			zero_point2 = CVT_BF16_F32_INT_SHIFT(
+						_mm256_maskz_set1_epi16( zp_mask,
 						*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 		}
 
@@ -11913,16 +11913,16 @@ POST_OPS_DOWNSCALE_1x48:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_loadu_epi16( zp_mask,
 							( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_j + ( 2 * 16 ) ) );
 			}
@@ -11953,8 +11953,8 @@ POST_OPS_DOWNSCALE_1x48:
 
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 							post_ops_attr.post_op_c_i + 0 ) ) );
 			}

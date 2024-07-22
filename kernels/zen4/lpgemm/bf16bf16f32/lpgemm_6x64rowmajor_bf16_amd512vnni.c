@@ -1505,17 +1505,17 @@ POST_OPS_DOWNSCALE_6x64:
 			// bf16 zero point value (scalar or vector).
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-				zero_point3 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point3 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 			}
 
@@ -1540,20 +1540,20 @@ POST_OPS_DOWNSCALE_6x64:
 
 				if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 				{
-					zero_point0 = _mm512_cvtpbh_ps(
-								( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+					zero_point0 = CVT_BF16_F32_INT_SHIFT(
+								_mm256_maskz_loadu_epi16( zp_mask,
 								( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 								post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
-					zero_point1 = _mm512_cvtpbh_ps(
-								( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+					zero_point1 = CVT_BF16_F32_INT_SHIFT(
+								_mm256_maskz_loadu_epi16( zp_mask,
 								( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 								post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
-					zero_point2 = _mm512_cvtpbh_ps(
-								( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+					zero_point2 = CVT_BF16_F32_INT_SHIFT(
+								_mm256_maskz_loadu_epi16( zp_mask,
 								( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 								post_ops_attr.post_op_c_j + ( 2 * 16 ) ) );
-					zero_point3 = _mm512_cvtpbh_ps(
-								( __m256bh )_mm256_maskz_loadu_epi16( zp_mask,
+					zero_point3 = CVT_BF16_F32_INT_SHIFT(
+								_mm256_maskz_loadu_epi16( zp_mask,
 								( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 								post_ops_attr.post_op_c_j + ( 3 * 16 ) ) );
 				}
@@ -1656,20 +1656,20 @@ POST_OPS_DOWNSCALE_6x64:
 
 				if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 				{
-					zero_point0 = _mm512_cvtpbh_ps(
-								( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+					zero_point0 = CVT_BF16_F32_INT_SHIFT(
+								_mm256_maskz_set1_epi16( zp_mask,
 								*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 								post_ops_attr.post_op_c_i + 0 ) ) );
-					zero_point1 = _mm512_cvtpbh_ps(
-								( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+					zero_point1 = CVT_BF16_F32_INT_SHIFT(
+								_mm256_maskz_set1_epi16( zp_mask,
 								*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 								post_ops_attr.post_op_c_i + 1 ) ) );
-					zero_point2 = _mm512_cvtpbh_ps(
-								( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+					zero_point2 = CVT_BF16_F32_INT_SHIFT(
+								_mm256_maskz_set1_epi16( zp_mask,
 								*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 								post_ops_attr.post_op_c_i + 2 ) ) );
-					zero_point3 = _mm512_cvtpbh_ps(
-								( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+					zero_point3 = CVT_BF16_F32_INT_SHIFT(
+								_mm256_maskz_set1_epi16( zp_mask,
 								*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 								post_ops_attr.post_op_c_i + 3 ) ) );
 				}
@@ -1734,12 +1734,12 @@ POST_OPS_DOWNSCALE_6x64:
 
 				if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 				{
-					zero_point0 = _mm512_cvtpbh_ps(
-								( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+					zero_point0 = CVT_BF16_F32_INT_SHIFT(
+								_mm256_maskz_set1_epi16( zp_mask,
 								*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 								post_ops_attr.post_op_c_i + 4 ) ) );
-					zero_point1 = _mm512_cvtpbh_ps(
-								( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+					zero_point1 = CVT_BF16_F32_INT_SHIFT(
+								_mm256_maskz_set1_epi16( zp_mask,
 								*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 								post_ops_attr.post_op_c_i + 5 ) ) );
 				}

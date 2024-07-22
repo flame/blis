@@ -103,6 +103,11 @@
 	  mask_all1, (__m256i) _mm512_cvtneps_pbh( reg ) \
 	) \
 
+// BF16 -> F32 convert helpers. reg: __m512
+#define CVT_BF16_F32_INT_SHIFT(in) \
+	( __m512 )_mm512_sllv_epi32( _mm512_cvtepi16_epi32( ( in ) ), \
+								 _mm512_set1_epi32( 16 ) );
+
 // BF16 bias helper macros.
 #define BF16_F32_BIAS_LOAD(scr,mask,n_ind) \
 	scr = (__m512)( _mm512_sllv_epi32 \
