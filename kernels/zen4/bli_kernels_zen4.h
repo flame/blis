@@ -215,6 +215,14 @@ GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x8m)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x8m_lower)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x8m_upper)
 
+/* DGEMMT 24x8 triangular kernels */
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8m_lower_0)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8m_lower_1)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8m_lower_2)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8m_upper_0)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8m_upper_1)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8m_upper_2)
+
 GEMMSUP_KER_PROT( dcomplex,  z, gemmsup_rv_zen4_asm_4x4m)
 GEMMSUP_KER_PROT( dcomplex,  z, gemmsup_rv_zen4_asm_4x4m_lower)
 GEMMSUP_KER_PROT( dcomplex,  z, gemmsup_rv_zen4_asm_4x4m_upper)

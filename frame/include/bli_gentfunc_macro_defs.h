@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 23, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 24, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -198,6 +198,17 @@ GENTFUNC(scomplex,    c, opname, l, funcname)
 \
 GENTFUNC(float,       s, opname, u, funcname) \
 GENTFUNC(double,      d, opname, u, funcname) \
+GENTFUNC(scomplex,    c, opname, u, funcname)
+
+#define INSERT_GENTFUNC_L_SC( opname, funcname ) \
+\
+GENTFUNC(float,       s, opname, l, funcname) \
+GENTFUNC(scomplex,    c, opname, l, funcname)
+
+
+#define INSERT_GENTFUNC_U_SC( opname, funcname ) \
+\
+GENTFUNC(float,       s, opname, u, funcname) \
 GENTFUNC(scomplex,    c, opname, u, funcname)
 
 

@@ -450,3 +450,856 @@ void bli_dgemmsup_rv_zen4_asm_8x8m_upper
             MAIN_LOOP_UPPER_DIAG(7); break;
     }
 }
+
+/*
+    8x8 lower triangular DGEMMT kernel
+    This kernels expects M <= 8;
+
+    Region marked by '*' is computed by this kernel
+    Region marked by '-' is not computed.
+     ________
+    |*-------|
+    |**------|
+    |***-----|
+    |****----|
+    |*****---|
+    |******--|
+    |*******-|
+    |********|
+     ________
+*/
+void bli_dgemmsup_rv_zen4_asm_8x8m_lower_mle8
+      (
+        conj_t              conja,
+        conj_t              conjb,
+        dim_t               m,
+        dim_t               n,
+        dim_t               k,
+        double*    restrict alpha,
+        double*    restrict a, inc_t rs_a, inc_t cs_a,
+        double*    restrict b, inc_t rs_b, inc_t cs_b,
+        double*    restrict beta,
+        double*    restrict c_, inc_t rs_c, inc_t cs_c,
+        auxinfo_t* restrict data,
+        cntx_t*    restrict cntx
+      )
+{
+    uint64_t ps_a = bli_auxinfo_ps_a( data );
+    __m512d c_reg[8];
+    __m512d a_reg[8];
+    __m512d b_reg[2];
+    __mmask8 mask_n;
+    dim_t n_rem;
+    dim_t m_rem = m % 8;
+    double *a_curr = a, *b_curr, *c = c_;
+    dim_t i = 0;
+    if (m == 8)
+    {
+        MAIN_LOOP_LOWER_DIAG(8);
+    }
+    switch (m_rem)
+    {
+        case 1:
+            MAIN_LOOP_LOWER_DIAG(1); break;
+        case 2:
+            MAIN_LOOP_LOWER_DIAG(2); break;
+        case 3:
+            MAIN_LOOP_LOWER_DIAG(3); break;
+        case 4:
+            MAIN_LOOP_LOWER_DIAG(4); break;
+        case 5:
+            MAIN_LOOP_LOWER_DIAG(5); break;
+        case 6:
+            MAIN_LOOP_LOWER_DIAG(6); break;
+        case 7:
+            MAIN_LOOP_LOWER_DIAG(7); break;
+    }
+}
+
+/*
+    8x8 Upper triangular DGEMMT kernel
+    This kernels expects M <= 8;
+
+    Region marked by '*' is computed by this kernel
+    Region marked by '-' is not computed.
+     ________
+    |********|
+    |-*******|
+    |--******|
+    |---*****|
+    |----****|
+    |-----***|
+    |------**|
+    |-------*|
+     ________
+*/
+void bli_dgemmsup_rv_zen4_asm_8x8m_upper_mle8
+      (
+        conj_t              conja,
+        conj_t              conjb,
+        dim_t               m,
+        dim_t               n,
+        dim_t               k,
+        double*    restrict alpha,
+        double*    restrict a, inc_t rs_a, inc_t cs_a,
+        double*    restrict b, inc_t rs_b, inc_t cs_b,
+        double*    restrict beta,
+        double*    restrict c_, inc_t rs_c, inc_t cs_c,
+        auxinfo_t* restrict data,
+        cntx_t*    restrict cntx
+      )
+{
+    uint64_t ps_a = bli_auxinfo_ps_a( data );
+    __m512d c_reg[8];
+    __m512d a_reg[8];
+    __m512d b_reg[2];
+    __mmask8 mask_n;
+    dim_t n_rem;
+    // dim_t m_main = m / 8;
+    dim_t m_rem = m % 8;
+    double *a_curr = a, *b_curr, *c = c_;
+    dim_t i = 0;
+    // for (i = 0; i < m_main; i++)
+    if (m == 8)
+    {
+        MAIN_LOOP_UPPER_DIAG(8);
+    }
+    switch (m_rem)
+    {
+        case 1:
+            MAIN_LOOP_UPPER_DIAG(1); break;
+        case 2:
+            MAIN_LOOP_UPPER_DIAG(2); break;
+        case 3:
+            MAIN_LOOP_UPPER_DIAG(3); break;
+        case 4:
+            MAIN_LOOP_UPPER_DIAG(4); break;
+        case 5:
+            MAIN_LOOP_UPPER_DIAG(5); break;
+        case 6:
+            MAIN_LOOP_UPPER_DIAG(6); break;
+        case 7:
+            MAIN_LOOP_UPPER_DIAG(7); break;
+    }
+}
+
+/*
+    The diagonal pattern repeats after every block of
+    size 24x24, therefore three 24x8 kernels are added to
+    make sure that entire 24x24 block gets covered.
+
+    Diagram for Lower traingular 24x24 block
+
+     lower_0   lower_1  lower_2
+     ________ ________ ________
+    |*-------|--------|--------|
+    |**------|--------|--------|
+    |***-----|--------|--------|
+    |****----|--------|--------|
+    |*****---|--------|--------|
+    |******--|--------|--------|
+    |*******-|--------|--------|
+    |********|--------|--------|
+     ________ ________ ________
+    |********|*-------|--------|
+    |********|**------|--------|
+    |********|***-----|--------|
+    |********|****----|--------|
+    |********|*****---|--------|
+    |********|******--|--------|
+    |********|*******-|--------|
+    |********|********|--------|
+     ________ ________ ________
+    |********|********|*-------|
+    |********|********|**------|
+    |********|********|***-----|
+    |********|********|****----|
+    |********|********|*****---|
+    |********|********|******--|
+    |********|********|*******-|
+    |********|********|********|
+     ________ ________ ________
+*/
+
+/*
+    24x8 Lower traingular kernel, which computes the
+    first 24x8 micro panel of the 24x24 repeating block
+
+    Region marked by '*' is computed by this kernel
+    Region marked by '-' is not computed.
+     ________
+    |*-------|          <
+    |**------|          |
+    |***-----|          |
+    |****----|  intial 8x8 triangular panel
+    |*****---|          |
+    |******--|          |
+    |*******-|          >
+     ________
+    |********|         <
+    |********|         |
+    |********|         |
+    |********|         |
+    |********|
+    |********|
+    |********|   16x8 full GEMM panel
+    |********|
+    |********|
+    |********|
+    |********|
+    |********|         |
+    |********|         |
+    |********|         |
+    |********|         >
+     ________
+*/
+void bli_dgemmsup_rv_zen4_asm_24x8m_lower_0
+      (
+        conj_t              conja,
+        conj_t              conjb,
+        dim_t               m,
+        dim_t               n,
+        dim_t               k,
+        double*    restrict alpha,
+        double*    restrict a, inc_t rs_a, inc_t cs_a,
+        double*    restrict b, inc_t rs_b, inc_t cs_b,
+        double*    restrict beta,
+        double*    restrict c_, inc_t rs_c, inc_t cs_c,
+        auxinfo_t* restrict data,
+        cntx_t*    restrict cntx
+      )
+{
+    dim_t m_diag; // m for traingular kernel
+    dim_t m_full; // m for full GEMM kernel
+    // if m <= 8 then only diagonal region needs to be
+    // computed, therefor set m_full to 0.
+    if (m <= 8)
+    {
+        // if m <= 8, m_diag = 8 , m_full = 0
+        m_diag = m;
+        m_full = 0;
+    }
+    // if m > 8, then full diagonal(m=8) needs to be computed
+    // and remaning m (m - 8) will be computed by DGEMM SUP kernel.
+    else
+    {
+        m_diag = 8;
+        m_full = m - 8;
+    }
+
+    // since the 8x8m kernel is row major,
+    // call row major 8x8m upper diagonal kernel after
+    // inducing transpose to solve column major lower
+    // triangular GEMM
+    bli_dgemmsup_rv_zen4_asm_8x8m_upper_mle8
+    (
+        conjb,
+        conja,
+        n,
+        m_diag,
+        k,
+        alpha,
+        b, cs_b, rs_b,
+        a, cs_a, rs_a,
+        beta,
+        c_, cs_c, rs_c,
+        data,
+        cntx
+    );
+
+    // call full GEMM kernel for remaning parts of matrix
+    bli_dgemmsup_rv_zen4_asm_24x8m
+    (
+        conja,
+        conjb,
+        m_full,
+        n,
+        k,
+        alpha,
+        a + (rs_a * m_diag), rs_a, cs_a,
+        b, rs_b, cs_b,
+        beta,
+        c_ + (rs_c * m_diag), rs_c, cs_c,
+        data,
+        cntx
+    );
+}
+
+/*
+    24x8 Lower traingular kernel, which computes the
+    second 24x8 micro panel of the 24x24 repeating block
+
+    Region marked by '*' is computed by this kernel
+    Region marked by '-' is not computed.
+     ________
+    |--------|          <
+    |--------|          |
+    |--------|          |
+    |--------|  intial empty 8x8 panel
+    |--------|          |
+    |--------|          |
+    |--------|          >
+     ________
+    |*-------|          <
+    |**------|          |
+    |***-----|          |
+    |****----|   8x8 triangular panel
+    |*****---|          |
+    |******--|          |
+    |*******-|          >
+     ________
+    |********|         <
+    |********|         |
+    |********|         |
+    |********|         |
+    |********|   8x8 full GEMM panel
+    |********|         |
+    |********|         |
+    |********|         >
+     ________
+*/
+void bli_dgemmsup_rv_zen4_asm_24x8m_lower_1
+      (
+        conj_t              conja,
+        conj_t              conjb,
+        dim_t               m,
+        dim_t               n,
+        dim_t               k,
+        double*    restrict alpha,
+        double*    restrict a, inc_t rs_a, inc_t cs_a,
+        double*    restrict b, inc_t rs_b, inc_t cs_b,
+        double*    restrict beta,
+        double*    restrict c_, inc_t rs_c, inc_t cs_c,
+        auxinfo_t* restrict data,
+        cntx_t*    restrict cntx
+      )
+{
+    dim_t m_diag; // m for traingular kernel
+    dim_t m_full; // m for full GEMM kenrel
+    
+    // if m is less than 8, then only empty region is computed
+    // therefore set m_diag and m_full to 0.
+    if (m <= 8)
+    {
+        m_diag = 0;
+        m_full = 0;
+    }
+    // if m_diag is less than 16, then only empty region and triangular
+    // region needs to be computed, therefor set m_full to 0.
+    else if ( m <= 16)
+    {
+        m_diag = m - 8;
+        m_full = 0;
+    }
+    else
+    {
+        m_diag = 8;
+        m_full = m - 16;
+    }
+
+    // since the 8x8m kernel is row major,
+    // call row major 8x8m upper diagonal kernel after
+    // inducing transpose to solve column major lower
+    // triangular GEMM
+    bli_dgemmsup_rv_zen4_asm_8x8m_upper_mle8
+    (
+        conjb,
+        conja,
+        n,
+        m_diag,
+        k,
+        alpha,
+        b, cs_b, rs_b,
+        a + (rs_a * 8), cs_a, rs_a,
+        beta,
+        c_ + (rs_c * 8), cs_c, rs_c,
+        data,
+        cntx
+    );
+
+    // call full GEMM kernel for remaning parts of matrix
+    bli_dgemmsup_rv_zen4_asm_24x8m
+    (
+        conja,
+        conjb,
+        m_full,
+        n,
+        k,
+        alpha,
+        a + (rs_a*(8+m_diag)), rs_a, cs_a,
+        b, rs_b, cs_b,
+        beta,
+        c_ + (rs_c * (8+m_diag)), rs_c, cs_c,
+        data,
+        cntx
+    );
+}
+
+/*
+    24x8 Lower traingular kernel, which computes the
+    third 24x8 micro panel of the 24x24 repeating block
+
+    Region marked by '*' is computed by this kernel
+    Region marked by '-' is not computed.
+     ________
+    |--------|          <
+    |--------|          |
+    |--------|          |
+    |--------|          |
+    |--------|          |
+    |--------|          |
+    |--------|          |
+    |--------|          |
+    |--------|  intial empty 16x8 panel
+    |--------|          |
+    |--------|          |
+    |--------|          |
+    |--------|          |
+    |--------|          |
+    |--------|          |
+    |--------|          >
+     ________
+    |*-------|          <
+    |**------|          |
+    |***-----|          |
+    |****----|   8x8 triangular panel
+    |*****---|          |
+    |******--|          |
+    |*******-|          >
+     ________
+*/
+void bli_dgemmsup_rv_zen4_asm_24x8m_lower_2
+      (
+        conj_t              conja,
+        conj_t              conjb,
+        dim_t               m,
+        dim_t               n,
+        dim_t               k,
+        double*    restrict alpha,
+        double*    restrict a, inc_t rs_a, inc_t cs_a,
+        double*    restrict b, inc_t rs_b, inc_t cs_b,
+        double*    restrict beta,
+        double*    restrict c_, inc_t rs_c, inc_t cs_c,
+        auxinfo_t* restrict data,
+        cntx_t*    restrict cntx
+      )
+{
+    dim_t m_diag; // m for traingular kernel
+    dim_t m_full; // m for full GEMM kernel
+
+    // if m <= 16, only empty region needs to be computed.
+    if (m <= 16)
+    {
+        m_diag = 0;
+        m_full = 0;
+    }
+
+    // if m <= 24, initial 16 rows are empty and there is no full
+    // gemm region, therefore m_diag = 0
+    else if (m <= 24)
+    {
+        m_diag = m - 16;
+        m_full = 0; 
+    }
+    else
+    {
+        m_diag = 8;
+        m_full = m - 24; // m - (16(empty) + 8(diagonal))
+    }
+
+    // since the 8x8m kernel is row major,
+    // call row major 8x8m upper diagonal kernel after
+    // inducing transpose to solve column major lower
+    // triangular GEMM
+    bli_dgemmsup_rv_zen4_asm_8x8m_upper_mle8
+    (
+        conjb,
+        conja,
+        n,
+        m_diag,
+        k,
+        alpha,
+        b, cs_b, rs_b,
+        a + (rs_a * 16), cs_a, rs_a,
+        beta,
+        c_ + (rs_c * 16), cs_c, rs_c,
+        data,
+        cntx
+    );
+
+    // call full GEMM kernel for remaning parts of matrix
+    bli_dgemmsup_rv_zen4_asm_24x8m
+    (
+        conja,
+        conjb,
+        m_full,
+        n,
+        k,
+        alpha,
+        a + (rs_a*(16+m_diag)), rs_a, cs_a,
+        b, rs_b, cs_b,
+        beta,
+        c_ + (rs_c * (16+m_diag)), rs_c, cs_c,
+        data,
+        cntx
+    );
+}
+
+/*
+    The diagonal pattern repeats after every block of
+    size 24x24, therefore three 24x8 kernels are added to
+    make sure that entire 24x24 block gets covered.
+
+    Diagram for Upper traingular 24x24 block
+
+     upper_0   upper_1  upper_2
+     ________ ________ ________
+    |********|********|********|
+    |-*******|********|********|
+    |--******|********|********|
+    |---*****|********|********|
+    |----****|********|********|
+    |-----***|********|********|
+    |------**|********|********|
+    |-------*|********|********|
+     ________ ________ ________
+    |--------|********|********|
+    |--------|-*******|********|
+    |--------|--******|********|
+    |--------|---*****|********|
+    |--------|----****|********|
+    |--------|-----***|********|
+    |--------|------**|********|
+    |--------|-------*|********|
+     ________ ________ ________
+    |--------|--------|********|
+    |--------|--------|-*******|
+    |--------|--------|--******|
+    |--------|--------|---*****|
+    |--------|--------|----****|
+    |--------|--------|-----***|
+    |--------|--------|------**|
+    |--------|--------|-------*|
+     ________ ________ ________
+
+*/
+
+/*
+    24x8 Upper traingular kernel, which computes the
+    first 24x8 micro panel of the 24x24 repeating block
+
+    Region marked by '*' is computed by this kernel
+    Region marked by '-' is not computed.
+     ________ 
+    |********|          <
+    |-*******|          |
+    |--******|          |
+    |---*****| intial 8x8 triangular block
+    |----****|          |
+    |-----***|          |
+    |------**|          |
+    |-------*|          >
+     ________ 
+    |--------|
+    |--------|
+    |--------|
+    |--------|
+    |--------|
+    |--------|
+    |--------|
+    |--------|
+    |--------|
+    |--------|
+    |--------|
+    |--------|
+    |--------|
+    |--------|
+    |--------|
+    |--------|
+     ________ 
+*/
+void bli_dgemmsup_rv_zen4_asm_24x8m_upper_0
+      (
+        conj_t              conja,
+        conj_t              conjb,
+        dim_t               m,
+        dim_t               n,
+        dim_t               k,
+        double*    restrict alpha,
+        double*    restrict a, inc_t rs_a, inc_t cs_a,
+        double*    restrict b, inc_t rs_b, inc_t cs_b,
+        double*    restrict beta,
+        double*    restrict c_, inc_t rs_c, inc_t cs_c,
+        auxinfo_t* restrict data,
+        cntx_t*    restrict cntx
+      )
+{
+    dim_t m_diag; // m for traingular kernel
+    dim_t m_full; // m for full GEMM kenrel
+    
+    // if m <= 8, then only diagonal region exists
+    // therefore m_full = 0
+    if (m <= 8)
+    {
+        m_diag = m;
+        m_full = 0;
+    }
+
+    // if m >= 8, then initial 8 rows are computed
+    // by DGEMM SUP kernel, and last 16 rows are empty
+    else if (m <= 24)
+    {
+        m_diag = 8;
+        m_full = 0;
+    }
+    // if m > 24, then compute inital 24 rows with existing
+    // logic and use DGEMM SUP kernel for remainder.
+    else
+    {
+        m_diag = 8;
+        m_full = m - 24; // m - (16(empty) + 8(diagonal))
+    }
+
+    // call full GEMM kernel for intial part of matrix
+    bli_dgemmsup_rv_zen4_asm_24x8m
+    (
+        conja,
+        conjb,
+        m_full,
+        n,
+        k,
+        alpha,
+        a, rs_a, cs_a,
+        b, rs_b, cs_b,
+        beta,
+        c_, rs_c, cs_c,
+        data,
+        cntx
+    );
+
+    // since the 8x8m kernel is row major,
+    // call row major 8x8m lower diagonal kernel after
+    // inducing transpose to solve column major upper
+    // triangular GEMM
+    bli_dgemmsup_rv_zen4_asm_8x8m_lower_mle8
+    (
+        conjb,
+        conja,
+        n,
+        m_diag,
+        k,
+        alpha,
+        b, cs_b, rs_b,
+        a + (rs_a*m_full), cs_a, rs_a,
+        beta,
+        c_ + (rs_c * m_full), cs_c, rs_c,
+        data,
+        cntx
+    );
+}
+
+/*
+    24x8 Upper traingular kernel, which computes the
+    second 24x8 micro panel of the 24x24 repeating block
+
+    Region marked by '*' is computed by this kernel
+    Region marked by '-' is not computed.
+     ________ 
+    |********|          <
+    |********|          |
+    |********|          |
+    |********|    8x8 full GEMM block
+    |********|          |
+    |********|          |
+    |********|          |
+    |********|          >
+     ________ 
+    |********|          <
+    |-*******|          |
+    |--******|          |
+    |---*****|   8x8 triangular block
+    |----****|          |
+    |-----***|          |
+    |------**|          |
+    |-------*|          >
+     ________ 
+    |--------|
+    |--------|
+    |--------|
+    |--------|
+    |--------|
+    |--------|
+    |--------|
+    |--------|
+     ________ 
+*/
+void bli_dgemmsup_rv_zen4_asm_24x8m_upper_1
+      (
+        conj_t              conja,
+        conj_t              conjb,
+        dim_t               m,
+        dim_t               n,
+        dim_t               k,
+        double*    restrict alpha,
+        double*    restrict a, inc_t rs_a, inc_t cs_a,
+        double*    restrict b, inc_t rs_b, inc_t cs_b,
+        double*    restrict beta,
+        double*    restrict c_, inc_t rs_c, inc_t cs_c,
+        auxinfo_t* restrict data,
+        cntx_t*    restrict cntx
+      )
+{
+    dim_t m_diag, m_full;
+    if (m <= 8)
+    {
+        m_diag = m;
+        m_full = 0;
+    }
+    else if (m <= 16)
+    {
+        m_diag = 8;
+        m_full = 0;
+    }
+    else
+    {
+        m_diag = 8;
+        m_full = m - 16;
+    }
+
+    // call full GEMM kernel for intial part of matrix
+    bli_dgemmsup_rv_zen4_asm_24x8m
+    (
+        conja,
+        conjb,
+        m_full,
+        n,
+        k,
+        alpha,
+        a, rs_a, cs_a,
+        b, rs_b, cs_b,
+        beta,
+        c_, rs_c, cs_c,
+        data,
+        cntx
+    );
+
+    // since the 8x8m kernel is row major,
+    // call row major 8x8m lower diagonal kernel after
+    // inducing transpose to solve column major upper
+    // triangular GEMM
+    bli_dgemmsup_rv_zen4_asm_8x8m_lower_mle8
+    (
+        conjb,
+        conja,
+        n,
+        m_diag,
+        k,
+        alpha,
+        b, cs_b, rs_b,
+        a + (rs_a*m_full), cs_a, rs_a,
+        beta,
+        c_ + (rs_c * m_full), cs_c, rs_c,
+        data,
+        cntx
+    );
+}
+
+/*
+    24x8 Upper traingular kernel, which computes the
+    second 24x8 micro panel of the 24x24 repeating block
+
+    Region marked by '*' is computed by this kernel
+    Region marked by '-' is not computed.
+     ________ 
+    |********|          <
+    |********|          |
+    |********|          |
+    |********|          |
+    |********|          |
+    |********|          |
+    |********|          |
+    |********|    16x8 full GEMM block
+    |********|          |
+    |********|          |
+    |********|          |
+    |********|          |
+    |********|          |
+    |********|          |
+    |********|          |
+    |********|          >
+     ________
+    |********|          <
+    |-*******|          |
+    |--******|          |
+    |---*****|   8x8 triangular block
+    |----****|          |
+    |-----***|          |
+    |------**|          |
+    |-------*|          >
+     ________
+*/
+void bli_dgemmsup_rv_zen4_asm_24x8m_upper_2
+      (
+        conj_t              conja,
+        conj_t              conjb,
+        dim_t               m,
+        dim_t               n,
+        dim_t               k,
+        double*    restrict alpha,
+        double*    restrict a, inc_t rs_a, inc_t cs_a,
+        double*    restrict b, inc_t rs_b, inc_t cs_b,
+        double*    restrict beta,
+        double*    restrict c_, inc_t rs_c, inc_t cs_c,
+        auxinfo_t* restrict data,
+        cntx_t*    restrict cntx
+      )
+{
+    dim_t m_diag, m_full;
+    if (m <= 8)
+    {
+        m_diag = m;
+        m_full = 0;
+    }
+    else
+    {
+        m_diag = 8;
+        m_full = m - 8;
+    }
+
+    // call full GEMM kernel for intial part of matrix
+    bli_dgemmsup_rv_zen4_asm_24x8m
+    (
+        conja,
+        conjb,
+        m_full,
+        n,
+        k,
+        alpha,
+        a, rs_a, cs_a,
+        b, rs_b, cs_b,
+        beta,
+        c_, rs_c, cs_c,
+        data,
+        cntx
+    );
+
+    // since the 8x8m kernel is row major,
+    // call row major 8x8m lower diagonal kernel after
+    // inducing transpose to solve column major upper
+    // triangular GEMM
+    bli_dgemmsup_rv_zen4_asm_8x8m_lower_mle8
+    (
+        conjb,
+        conja,
+        n,
+        m_diag,
+        k,
+        alpha,
+        b, cs_b, rs_b,
+        a + (rs_a*m_full), cs_a, rs_a,
+        beta,
+        c_ + (rs_c * m_full), cs_c, rs_c,
+        data,
+        cntx
+    );
+}
