@@ -45,8 +45,7 @@
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,     8,     3,    12 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    24,     8,     4 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,   120,   144,    60 );  \
-	bli_blksz_init     ( &blkszs[ BLIS_KC ],   480,   512,   256,   512,    \
-	                                           480,   320,   256,   160 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   480,   512,   256,   512 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  2016,  4080,  2004 );  \
 	                                                                        \
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );  \
@@ -58,8 +57,7 @@
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,     8,     3,    12 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    24,     8,     4 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,   120,   144,    60 );  \
-	bli_blksz_init     ( &blkszs[ BLIS_KC ],   480,   512,   256,   512,    \
-	                                           480,   320,   256,   160 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   480,   512,   256,   512 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  2016,  4080,  2004 );  \
 	                                                                        \
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );  \
@@ -340,8 +338,7 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 	// Initialize level-3 sup blocksize objects with architecture-specific
 	// values.
 	//                                           s      d      c      z
-	bli_blksz_init     ( &blkszs[ BLIS_MR ],     6,    24,     3,    12,
-	                                             6,     9,     3,    12 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,    24,     3,    12 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    64,     8,     8,     4 );
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   192,   144,    72,    48 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   512,   384,   128,    64 );

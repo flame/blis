@@ -52,11 +52,4 @@
 #define BLIS_SMALL_MATRIX_A_THRES_M_SYRK 96
 #define BLIS_SMALL_MATRIX_A_THRES_N_SYRK 128
 
-// -- SIMD config  --------------------------------------------------------
-
-#define BLIS_SIMD_ALIGN_SIZE             64
-
-#define BLIS_SIMD_SIZE                   64
-#define BLIS_SIMD_NUM_REGISTERS          32
-
 #endif
