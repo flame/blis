@@ -479,17 +479,17 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 			// bf16 zero point value (scalar or vector).
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 			{
-				zero_point0 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point0 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-				zero_point1 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point1 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-				zero_point2 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point2 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
-				zero_point3 = _mm512_cvtpbh_ps(
-							( __m256bh )_mm256_maskz_set1_epi16( zp_mask,
+				zero_point3 = CVT_BF16_F32_INT_SHIFT(
+							_mm256_maskz_set1_epi16( zp_mask,
 							*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) );
 			}
 
@@ -518,20 +518,20 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 
 				if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 				{
-					zero_point0 = _mm512_cvtpbh_ps(
-								( __m256bh )_mm256_maskz_loadu_epi16( k1,
+					zero_point0 = CVT_BF16_F32_INT_SHIFT(
+								_mm256_maskz_loadu_epi16( k1,
 								( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 								post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
-					zero_point1 = _mm512_cvtpbh_ps(
-								( __m256bh )_mm256_maskz_loadu_epi16( k2,
+					zero_point1 = CVT_BF16_F32_INT_SHIFT(
+								_mm256_maskz_loadu_epi16( k2,
 								( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 								post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
-					zero_point2 = _mm512_cvtpbh_ps(
-								( __m256bh )_mm256_maskz_loadu_epi16( k3,
+					zero_point2 = CVT_BF16_F32_INT_SHIFT(
+								_mm256_maskz_loadu_epi16( k3,
 								( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 								post_ops_attr.post_op_c_j + ( 2 * 16 ) ) );
-					zero_point3 = _mm512_cvtpbh_ps(
-								( __m256bh )_mm256_maskz_loadu_epi16( k4,
+					zero_point3 = CVT_BF16_F32_INT_SHIFT(
+								_mm256_maskz_loadu_epi16( k4,
 								( ( bfloat16* )post_ops_list_temp->op_args1 ) +
 								post_ops_attr.post_op_c_j + ( 3 * 16 ) ) );
 				}

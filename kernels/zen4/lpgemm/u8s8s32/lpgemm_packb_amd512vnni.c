@@ -231,11 +231,7 @@ void packb_nr64_u8s8s32o32_row_major
     __mmask32 hmask = _cvtu32_mask32(0xFFFFFFFF); // 32 bytes or 64 int4.
     __mmask32 hmask_odd = _cvtu32_mask32(0x80000000); // Last 1 int4.
 
-    const int64_t conv_shift_arr[8] = {
-                    0x0807060504030201, 0x100F0E0D0C0B0A09, \
-                    0X1817161514131211, 0X201F1E1D1C1B1A19, \
-                    0X2827262524232221, 0X302F2E2D2C2B2A29, \
-                    0X3837363534333231, 0X7B3F3E3D3C3B3A39 };
+    CREATE_CVT_INT4_INT8_PERM_IDX_64ELEM_ODD_LD(conv_shift_arr);
     __m512i conv_shift = _mm512_loadu_epi64(conv_shift_arr);
 
     for ( dim_t jc = 0; jc < n_full_pieces_loop_limit; jc += NR )
@@ -569,6 +565,7 @@ void packb_nr48_u8s8s32o32_row_major
     __m128i a01_16;
     __m128i c01_16;
 
+    // First 32 int4 elements selectors.
     __m256i shift_idx_32;
     MULTISHIFT_32BIT_8_INT4_IDX_32ELEM(shift_idx_32);
 
@@ -577,12 +574,11 @@ void packb_nr48_u8s8s32o32_row_major
 
     __mmask16 hmask_odd_32 = _cvtu32_mask16( 0x00008000 ); // Last 1 int4.
 
-    const int64_t conv_shift_arr_32[4] = {
-                    0x0807060504030201, 0x100F0E0D0C0B0A09, \
-                    0X1817161514131211, 0X3B1F1E1D1C1B1A19 };
+    CREATE_CVT_INT4_INT8_PERM_IDX_32ELEM_ODD_LD(conv_shift_arr_32);
     __m256i conv_shift_32 = _mm256_maskz_loadu_epi64( _cvtu32_mask8( 0X000000FF ),
                     conv_shift_arr_32 );
 
+    // Next 16 int4 elements selectors.
     __m128i shift_idx_16;
     MULTISHIFT_32BIT_8_INT4_IDX_16ELEM(shift_idx_16);
 
@@ -591,8 +587,7 @@ void packb_nr48_u8s8s32o32_row_major
 
     __mmask16 hmask_odd_16 = _cvtu32_mask16( 0x00000080 ); // Last 1 int4.
 
-    const int64_t conv_shift_arr_16[2] = {
-                    0x0807060504030201, 0x1B0F0E0D0C0B0A09 };
+    CREATE_CVT_INT4_INT8_PERM_IDX_16ELEM_ODD_LD(conv_shift_arr_16);
     __m128i conv_shift_16 = _mm_maskz_loadu_epi64( _cvtu32_mask8( 0X000000FF ),
                     conv_shift_arr_16 );
 
@@ -1027,9 +1022,7 @@ void packb_nr32_u8s8s32o32_row_major
 
     __mmask16 hmask_odd_32 = _cvtu32_mask16( 0x00008000 ); // Last 1 int4.
 
-    const int64_t conv_shift_arr_32[4] = {
-                    0x0807060504030201, 0x100F0E0D0C0B0A09, \
-                    0X1817161514131211, 0X3B1F1E1D1C1B1A19 };
+    CREATE_CVT_INT4_INT8_PERM_IDX_32ELEM_ODD_LD(conv_shift_arr_32);
     __m256i conv_shift_32 = _mm256_maskz_loadu_epi64( _cvtu32_mask8( 0X000000FF ),
                     conv_shift_arr_32 );
 
@@ -1293,8 +1286,7 @@ void packb_nr16_u8s8s32o32_row_major
 
     __mmask16 hmask_odd_16 = _cvtu32_mask16( 0x00000080 ); // Last 1 int4.
 
-    const int64_t conv_shift_arr_16[2] = {
-                    0x0807060504030201, 0x1B0F0E0D0C0B0A09 };
+    CREATE_CVT_INT4_INT8_PERM_IDX_16ELEM_ODD_LD(conv_shift_arr_16);
     __m128i conv_shift_16 = _mm_maskz_loadu_epi64( _cvtu32_mask8( 0X000000FF ),
                     conv_shift_arr_16 );
 
@@ -1547,7 +1539,6 @@ void packb_nrlt16_u8s8s32o32_row_major
     }
     else
     {
-
         if ( ( n0_partial_rem % 2 ) == 0 )
         {
             // An interesting property here is that n0_partial_rem is
@@ -1570,8 +1561,7 @@ void packb_nrlt16_u8s8s32o32_row_major
         }
     }
 
-    const int64_t conv_shift_arr_16[2] = {
-                    0x0807060504030201, 0x1B0F0E0D0C0B0A09 };
+    CREATE_CVT_INT4_INT8_PERM_IDX_16ELEM_ODD_LD(conv_shift_arr_16);
     __m128i conv_shift_16 = _mm_maskz_loadu_epi64( _cvtu32_mask8( 0X000000FF ),
                     conv_shift_arr_16 );
 
