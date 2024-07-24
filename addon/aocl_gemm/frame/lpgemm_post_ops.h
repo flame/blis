@@ -51,6 +51,18 @@ typedef enum
 } LPGEMM_POST_OP_CODE;
 
 // Used as an internal structure.
+typedef struct lpgemm_pre_op_t
+{
+    uint64_t op_code;
+    void *scale_factor;
+    dim_t scale_factor_len;
+    void *zp;
+    dim_t zp_len;
+    dim_t pre_op_b_j;
+    struct lpgemm_pre_op_t *next;
+} lpgemm_pre_op;
+
+// Used as an internal structure.
 typedef struct lpgemm_post_op_t
 {
 	uint64_t op_code;
