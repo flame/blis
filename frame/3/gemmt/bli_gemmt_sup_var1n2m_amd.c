@@ -2512,13 +2512,22 @@ void bli_dgemmtsup_l_ref_var2m
 					#ifdef BLIS_KERNELS_ZEN4
 						if ( (MR == 24) && (NR == 8) && bli_cpuid_is_avx512_supported() &&
 								(stor_id != BLIS_CRC && stor_id != BLIS_RRC) &&
-								(mr_cur==MR) && (nr_cur==NR)
+								// verify if micro panel intersects with diagonal
+								// if distance from diagonal (n_off_cblock - m_off_cblock) is greater
+								// than (LCM(MR, NR) - NR) then it implies that micro panel is far
+								// from diagonal therefore it does not intersect with it.
+								(n_off_cblock - m_off_cblock) <= 16 // (n_off_cblock - m_off_cblock) <= (LCM(MR, NR) - NR)
 							)
 						{
 							/*
 								call traingular 24x8 DGEMMT kernels
 							*/
-							ker_fpls_zen4[j % 3]
+							// Difference between n_off_cblock and m_off_cblock is same as
+							// the size of empty region before diagonal region.
+							// kernel_idx = 0 is used when empty region size <= 0
+							// kernel_idx = 1 is used when empty region size <= 8
+							// kernel_idx = 2 is used when empty region size <= 16
+							ker_fpls_zen4[(n_off_cblock - m_off_cblock)/NR]
 							(
 								conja,
 								conjb,
@@ -3811,13 +3820,22 @@ void bli_dgemmtsup_u_ref_var2m
 					#ifdef BLIS_KERNELS_ZEN4
 						if ( (n_idx == m_idx) && (MR == 24) && (NR == 8) && bli_cpuid_is_avx512_supported() &&
 								(stor_id != BLIS_CRC && stor_id != BLIS_RRC) &&
-								(mr_cur==MR) && (nr_cur==NR)
+								// verify if micro panel intersects with diagonal
+								// if distance from diagonal (n_off_cblock - m_off_cblock) is greater
+								// than (LCM(MR, NR) - NR) then it implies that micro panel is far
+								// from diagonal therefore it it does not intersect with it.
+								(n_off_cblock - m_off_cblock) <= 16 // (n_off_cblock - m_off_cblock) <= (LCM(MR, NR) - NR)
 							)
 						{
 							/*
 								call traingular 24x8 DGEMMT kernels
 							*/
-							ker_fpus_zen4[n_idx]
+							// Difference between n_off_cblock and m_off_cblock is same as
+							// the size of full GEMM region.
+							// kernel_idx = 0 is used when full GEMM region size <= 0
+							// kernel_idx = 1 is used when full GEMM region size <= 8
+							// kernel_idx = 2 is used when full GEMM region size <= 16
+							ker_fpus_zen4[(n_off_cblock - m_off_cblock)/NR]
 							(
 								conja,
 								conjb,
