@@ -247,8 +247,7 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(bf16s4f32of32)
 		k_reorder = make_multiple_of_n(k, 2);
 	}
 
-	siz_t size_req = (sizeof(int8_t)/2) * k_reorder * n_reorder;
-
+	siz_t size_req = (sizeof(int8_t) * k_reorder * n_reorder)/2;
 	return size_req;
 }
 
@@ -311,7 +310,7 @@ AOCL_GEMM_REORDER(int8_t, bf16s4f32of32)
 	bli_rntm_init_from_global(&rntm_g);
 	bli_pba_rntm_set_pba(&rntm_g);
 
-	lpgemm_cntx_t *lcntx_g = lpgemm_get_global_cntx_obj(BF16BF16F32OF32);
+	lpgemm_cntx_t *lcntx_g = lpgemm_get_global_cntx_obj(BF16S4F32OF32);
 
 	// Create dummy b_reorder obj.
 	lpgemm_obj_t b_reorder;

@@ -75,6 +75,7 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
     dim_t a_block_stride = 0;
 
     const bfloat16 *b_use = NULL;
+    int8_t* b_reorder = NULL;
     dim_t rs_b_use = rs_b;
     dim_t cs_b_use = cs_b;
 
@@ -137,6 +138,7 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
     for (dim_t jc = jc_start; jc < jc_end; jc += NC)
     {
         dim_t nc0 = bli_min((jc_end - jc), NC);
+        dim_t nc0_updated = make_multiple_of_n( nc0, 16 );
 
         dim_t jc_cur_loop = jc;
         dim_t jc_cur_loop_rem = 0;
@@ -199,7 +201,14 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
             dim_t kc0_updated = kc0;
             kc0_updated += (kc0_updated & 0x1);
 
-            if (mtag_b == PACK)
+            // B is always supposed to be reordered.
+            b_reorder = (int8_t*)b + ( ( jc_cur_loop * k_updated ) +
+                        ( n_sub_updated * pc ) +
+                        ( jc_cur_loop_rem * kc0_updated ) ) / 2;
+
+
+            // B matrix will always be packed.
+            //if (mtag_b == PACK)
             {
                 // Pack B chunks are based on jc work id.
                 dim_t jc_work_id = bli_thread_work_id(&thread_jc);
@@ -212,7 +221,6 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
                     // vectorization. Packing B always results in buffers with width
                     // which is a multiple of 16. Subsequently the nc0 offsets used
                     // for packed/reordered buffers needs to be updated.
-                    dim_t nc0_updated = make_multiple_of_n(nc0, packb_min_NR);
                     mem_b_size_req = sizeof(bfloat16) * nc0_updated * kc0_updated;
 
                     lpgemm_alloc_mem_panel(
@@ -241,6 +249,9 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
                     &thread_ic, nc0, NR, FALSE,
                     &jc_packb_start, &jc_packb_end);
 
+                dim_t pre_op_off = jc_cur_loop + jc_cur_loop_rem
+                                   + jc_packb_start;
+
                 // Ensure thread ranges are valid, especially cases where no:
                 // of threads available for parallelization are greater than
                 // no: of B panel NR chunks.
@@ -249,12 +260,10 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
                 {
                     ((pack_s4bf16)lcntx->packsclb_fun_ptr)(
                         pack_b_buffer_bf16 + (jc_packb_start * kc0_updated),
-                        (b + (rs_b * pc) + (cs_b * jc) +
-                         (cs_b * jc_packb_start)),
-                        rs_b, cs_b,
+                        b_reorder + (jc_packb_start * kc0_updated)/2,
                         (jc_packb_end - jc_packb_start), kc0,
-                        &rs_b_use, &cs_b_use, 
-                        pre_op_list);
+                        &rs_b_use, &cs_b_use,
+                        pre_op_list, pre_op_off);
                 }
                 else
                 {
@@ -343,7 +352,7 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
     }
 
     // Release pack buffers.
-    if (mtag_b == PACK)
+    //if (mtag_b == PACK)
     {
         // All threads in work group should wait till B matrix usage is
         // completed by the participating threads.

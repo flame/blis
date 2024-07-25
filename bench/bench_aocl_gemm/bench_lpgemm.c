@@ -1334,7 +1334,7 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 { \
     if ( ( ( post_ops_str == NULL ) || \
            ( strcmp( post_ops_str, "none" ) == 0 ) ) && \
-         ( global_dscale_out == 'n' ) ) \
+         ( global_dscale_out == 'n' ) && ( global_pre_op == 'n' ) ) \
     { \
         return NULL; \
     } \
@@ -1862,7 +1862,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
     aocl_post_op* post_op = NULL; \
     if ( ( ( post_ops_str != NULL ) && \
            ( strcmp( post_ops_str, "none" ) != 0 ) ) || \
-         ( global_dscale_out == 'y' ) ) \
+         ( global_dscale_out == 'y' ) || ( global_pre_op == 'y' ) ) \
     { \
         post_op = GEN_FUNC_NAME(lpgemm_create_post_ops_struct_,REORDER_SFX)( m, n, post_ops_str, stor_order ); \
         if ( post_op == NULL ) \

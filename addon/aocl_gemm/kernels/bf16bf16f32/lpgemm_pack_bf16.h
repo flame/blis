@@ -52,11 +52,11 @@ typedef void (*pack_s4bf16)(
     const int8_t *,
     const dim_t,
     const dim_t,
-    const dim_t,
-    const dim_t,
     dim_t *,
     dim_t *,
-    lpgemm_pre_op*);
+    lpgemm_pre_op*,
+    dim_t
+  );
 
 typedef void (*pack_bf16)
      (
@@ -68,6 +68,19 @@ typedef void (*pack_bf16)
        const dim_t,
        dim_t*,
        dim_t*
+     );
+
+typedef void (*pack_s4)
+     (
+       int8_t*,
+       const int8_t*,
+       const dim_t,
+       const dim_t,
+       const dim_t,
+       const dim_t,
+       dim_t*,
+       dim_t*,
+       lpgemm_pre_op*
      );
 
 void packb_nr64_bf16bf16f32of32
@@ -94,6 +107,18 @@ void packb_nr64_bf16s4f32of32
        dim_t*        cs_p,
       lpgemm_pre_op* pre_op
      );
+
+void packsclb_nr64_bf16s4f32of32
+    (
+      bfloat16* packb_bf16,
+      const int8_t* b,
+      const dim_t NC,
+      const dim_t KC,
+      dim_t *rs_p,
+      dim_t *cs_p,
+      lpgemm_pre_op* b_pre_ops,
+      dim_t pre_op_off
+    );
 
 void packa_mr16_bf16bf16f32of32
      (

@@ -71,7 +71,6 @@ typedef struct lpgemm_pre_op_t
 	dim_t scale_factor_len;
 	void *zp;
 	dim_t zp_len;
-	dim_t pre_op_b_j;
 	struct lpgemm_pre_op_t *next;
 } lpgemm_pre_op;
 

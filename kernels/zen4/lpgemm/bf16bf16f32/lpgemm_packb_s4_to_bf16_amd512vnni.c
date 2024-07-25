@@ -58,7 +58,8 @@ void packsclb_nr48_bf16s4f32of32
     const int8_t* b,
     const dim_t KC,
     bool signed_upscale,
-    lpgemm_pre_op* b_pre_ops
+    lpgemm_pre_op* b_pre_ops,
+    dim_t pre_op_off
 )
 {
     dim_t NR = 48;
@@ -105,7 +106,7 @@ void packsclb_nr48_bf16s4f32of32
     if( b_pre_ops->zp_len > 1 )
     {
         zero_point = _mm512_maskz_loadu_epi8( 0xFFFFFFFFFFFF, ( b_pre_ops->zp +
-                                              b_pre_ops->pre_op_b_j ) );
+                                              pre_op_off ) );
     }
     else
     {
@@ -117,11 +118,11 @@ void packsclb_nr48_bf16s4f32of32
     if( b_pre_ops->scale_factor_len > 1 )
     {
         zmm4 = _mm512_loadu_ps( (float*)( b_pre_ops->scale_factor ) +
-                                          b_pre_ops->pre_op_b_j );
+                                          pre_op_off );
         zmm6 = _mm512_loadu_ps( (float*)( b_pre_ops->scale_factor )
-                                          + b_pre_ops->pre_op_b_j + 16 );
+                                          + pre_op_off + 16 );
         zmm8 = _mm512_loadu_ps( (float*)( b_pre_ops->scale_factor ) +
-                                          b_pre_ops->pre_op_b_j + 32 );
+                                          pre_op_off + 32 );
 
         zmm5 = _mm512_permutex2var_ps( zmm4, mask_scale2, zmm4 );
         zmm4 = _mm512_permutex2var_ps( zmm4, mask_scale1, zmm4 );
@@ -222,7 +223,8 @@ void packsclb_nr32_bf16s4f32of32
     const int8_t* b,
     const dim_t KC,
     bool signed_upscale,
-    lpgemm_pre_op* b_pre_ops
+    lpgemm_pre_op* b_pre_ops,
+    dim_t pre_op_off
 )
 {
     dim_t NR = 32;
@@ -264,7 +266,7 @@ void packsclb_nr32_bf16s4f32of32
     if( b_pre_ops->zp_len > 1 )
     {
         zero_point = _mm512_maskz_loadu_epi8( 0xFFFFFFFF, ( b_pre_ops->zp +
-                                              b_pre_ops->pre_op_b_j ) );
+                                              pre_op_off ) );
     }
     else
     {
@@ -275,9 +277,9 @@ void packsclb_nr32_bf16s4f32of32
     if( b_pre_ops->scale_factor_len > 1 )
     {
         zmm4 = _mm512_loadu_ps( (float*)( b_pre_ops->scale_factor ) +
-                                          b_pre_ops->pre_op_b_j );
+                                          pre_op_off );
         zmm6 = _mm512_loadu_ps( (float*)( b_pre_ops->scale_factor )
-                                          + b_pre_ops->pre_op_b_j + 16 );
+                                          + pre_op_off + 16 );
 
         zmm5 = _mm512_permutex2var_ps( zmm4, mask_scale2, zmm4 );
         zmm4 = _mm512_permutex2var_ps( zmm4, mask_scale1, zmm4 );
@@ -347,7 +349,8 @@ void packsclb_nr16_bf16s4f32of32
     const int8_t* b,
     const dim_t KC,
     bool signed_upscale,
-    lpgemm_pre_op* b_pre_ops
+    lpgemm_pre_op* b_pre_ops,
+    dim_t pre_op_off
 )
 {
     dim_t NR = 16;
@@ -389,7 +392,7 @@ void packsclb_nr16_bf16s4f32of32
     if( b_pre_ops->zp_len > 1 )
     {
         zero_point = _mm512_maskz_loadu_epi8( 0xFFFF, ( b_pre_ops->zp +
-                                              b_pre_ops->pre_op_b_j ) );
+                                              pre_op_off ) );
     }
     else
     {
@@ -400,7 +403,7 @@ void packsclb_nr16_bf16s4f32of32
     if( b_pre_ops->scale_factor_len > 1 )
     {
         zmm4 = _mm512_loadu_ps( (float*)( b_pre_ops->scale_factor ) +
-                                          b_pre_ops->pre_op_b_j );
+                                          pre_op_off );
         zmm5 = _mm512_permutex2var_ps( zmm4, mask_scale2, zmm4 );
         zmm4 = _mm512_permutex2var_ps( zmm4, mask_scale1, zmm4 );
     }
@@ -457,7 +460,8 @@ void packsclb_nrlt16_bf16s4f32of32
     const dim_t KC,
     const dim_t n_rem,
     bool signed_upscale,
-    lpgemm_pre_op* b_pre_ops
+    lpgemm_pre_op* b_pre_ops,
+    dim_t pre_op_off
 )
 {
     dim_t NR = 16;
@@ -501,7 +505,7 @@ void packsclb_nrlt16_bf16s4f32of32
     if( b_pre_ops->zp_len > 1 )
     {
         zero_point = _mm512_maskz_loadu_epi8( lmask, ( b_pre_ops->zp +
-                                              b_pre_ops->pre_op_b_j ) );
+                                              pre_op_off ) );
     }
     else
     {
@@ -512,7 +516,7 @@ void packsclb_nrlt16_bf16s4f32of32
     if( b_pre_ops->scale_factor_len > 1 )
     {
         zmm4 = _mm512_maskz_loadu_ps( lmask, (float*)( b_pre_ops->scale_factor ) +
-                                          b_pre_ops->pre_op_b_j );
+                                          pre_op_off );
         zmm5 = _mm512_permutex2var_ps( zmm4, mask_scale2, zmm4 );
         zmm4 = _mm512_permutex2var_ps( zmm4, mask_scale1, zmm4 );
     }
@@ -571,7 +575,8 @@ void packsclb_nr64_bf16s4f32of32
       const dim_t KC,
       dim_t *rs_p,
       dim_t *cs_p,
-      lpgemm_pre_op* b_pre_ops
+      lpgemm_pre_op* b_pre_ops,
+      dim_t pre_op_off
     )
 {
     dim_t NR = 64;
@@ -635,7 +640,7 @@ void packsclb_nr64_bf16s4f32of32
         if( b_pre_ops->zp_len > 1 )
         {
             zero_point = _mm512_loadu_si512( ( b_pre_ops->zp ) +
-                                     b_pre_ops->pre_op_b_j + jr );
+                                     pre_op_off + jr );
         }
         else
         {
@@ -649,13 +654,13 @@ void packsclb_nr64_bf16s4f32of32
         {
             // load and interleave scale factor vectors
             zmm4 = _mm512_loadu_ps( (float*)( b_pre_ops->scale_factor ) +
-                                    b_pre_ops->pre_op_b_j + jr);
+                                    pre_op_off + jr);
             zmm6 = _mm512_loadu_ps( (float*)( b_pre_ops->scale_factor ) +
-                                    b_pre_ops->pre_op_b_j + jr + 16 );
+                                    pre_op_off + jr + 16 );
             zmm8 = _mm512_loadu_ps( (float*)( b_pre_ops->scale_factor ) +
-                                    b_pre_ops->pre_op_b_j + jr + 32 );
+                                    pre_op_off + jr + 32 );
             zmm10 = _mm512_loadu_ps( (float*)( b_pre_ops->scale_factor ) +
-                                     b_pre_ops->pre_op_b_j + jr + 48 );
+                                     pre_op_off + jr + 48 );
 
             zmm5 = _mm512_permutex2var_ps( zmm4, mask_scale2, zmm4 );
             zmm4 = _mm512_permutex2var_ps( zmm4, mask_scale1, zmm4 );
@@ -770,7 +775,7 @@ void packsclb_nr64_bf16s4f32of32
 
     if( n_partial_pieces > 0 )
     {
-        b_pre_ops->pre_op_b_j += n_full_pieces_loop_limit;
+        pre_op_off += n_full_pieces_loop_limit;
 
         // Handle NR edge cases
         dim_t n0_partial_rem = n_partial_pieces % 16;
@@ -789,7 +794,7 @@ void packsclb_nr64_bf16s4f32of32
             (
               ( packb_bf16 + ( n_full_pieces_loop_limit * KC_updated ) ),
               ( b + ( n_full_pieces_loop_limit * KC_updated / 2 ) ), KC,
-                signed_upscale, b_pre_ops
+                signed_upscale, b_pre_ops, pre_op_off
             );
 
             n0_partial_pack = 48;
@@ -800,7 +805,7 @@ void packsclb_nr64_bf16s4f32of32
             (
               ( packb_bf16 + ( n_full_pieces_loop_limit * KC_updated ) ),
               ( b + ( n_full_pieces_loop_limit * KC_updated / 2 ) ), KC,
-                signed_upscale, b_pre_ops
+                signed_upscale, b_pre_ops, pre_op_off
             );
 
             n0_partial_pack = 32;
@@ -811,7 +816,7 @@ void packsclb_nr64_bf16s4f32of32
             (
               ( packb_bf16 + ( n_full_pieces_loop_limit * KC_updated ) ),
               ( b + ( n_full_pieces_loop_limit * KC_updated / 2 ) ), KC,
-                signed_upscale, b_pre_ops
+                signed_upscale, b_pre_ops, pre_op_off
             );
 
             n0_partial_pack = 16;
@@ -819,13 +824,13 @@ void packsclb_nr64_bf16s4f32of32
 
         if ( n0_partial_rem > 0 )
         {
-            b_pre_ops->pre_op_b_j += n0_partial_pack;
+            pre_op_off += n0_partial_pack;
             packsclb_nrlt16_bf16s4f32of32
             (
               ( packb_bf16 + ( n_full_pieces_loop_limit * KC_updated ) +
                 ( n0_partial_pack * KC_updated ) ),
               ( b + ( ( n_full_pieces_loop_limit + n0_partial_pack ) * KC_updated / 2 ) ),
-               KC, n0_partial_rem, signed_upscale, b_pre_ops
+               KC, n0_partial_rem, signed_upscale, b_pre_ops, pre_op_off
             );
         }
     }

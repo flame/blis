@@ -150,7 +150,7 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, float, float, bf16s4f32of32)
     lpgemm_pre_op pre_op_list[AOCL_MAX_PRE_OPS];
     err_t err = lpgemm_translate_to_pre_ops_list
                 (
-                    post_op_unparsed->pre_ops, 
+                    post_op_unparsed->pre_ops,
                     pre_op_list,
                     m, n, k
                 );
@@ -181,7 +181,7 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, float, float, bf16s4f32of32)
 
     if (is_column_major == TRUE)
     {
-        // Swapping inputs not possible in case of mixed precision. 
+        // Swapping inputs not possible in case of mixed precision.
         bli_print_msg(" column major not supported yet in bf16s4f32o<f32/bf16>.", __FILE__, __LINE__);
         return;
     }
@@ -358,7 +358,7 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, bfloat16, float, bf16s4f32obf16)
     // Swapping inputs to induce row major computation for column major inputs.
     if (is_column_major == TRUE)
     {
-        // Swapping inputs not possible in case of mixed precision. 
+        // Swapping inputs not possible in case of mixed precision.
         bli_print_msg(" column major not supported yet in bf16s4f32o<f32/bf16>.", __FILE__, __LINE__);
         return;
     }
@@ -389,7 +389,7 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, bfloat16, float, bf16s4f32obf16)
             m, n, k,
             a, rs_a, cs_a, mtag_a,
             b, rs_b, cs_b, mtag_b,
-            c, rs_c, cs_c,
+            (float*)c, rs_c, cs_c,
             alpha, beta,
             &rntm_g, lcntx_g, pre_op_list,
             post_op_list, BF16);
