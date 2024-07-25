@@ -172,19 +172,15 @@ void bli_gemm_ker_var2
 	f = ftypes[dt_exec];
 
 #ifdef BLIS_KERNELS_ZEN5
-	const long MR = 8;
-	const long NR = 24;
 
 	// Optimizes macro kernel is avaible for DGEMM
-	// for ZEN5. This optimized macro kernel does not support
-	// fringe cases. Only row major stored C is supported.
+	// for ZEN5. Only row major stored C is supported.
 	// TODO: Add macro kernel function pointer in cntx
 	if
 	(
 		 ( bli_obj_dt( c ) == BLIS_DOUBLE ) &&
 		 ( bli_arch_query_id() == BLIS_ARCH_ZEN5 ) &&
-		 ( cs_c == 1 ) && // use this kernel only for row major C
-		 ( (n%NR) == 0 ) && ( (m%MR) == 0 )
+		 ( cs_c == 1 ) // use this kernel only for row major C
 	)
 	{
 		bli_dgemm_avx512_asm_8x24_macro_kernel

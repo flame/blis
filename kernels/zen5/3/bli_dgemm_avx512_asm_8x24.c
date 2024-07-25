@@ -1059,7 +1059,7 @@ void bli_dgemm_avx512_asm_8x24(
         \
         MOV(VAR(m), RSI) /* backup m_iter into stack */             \
         MOV(R15, R8)     /* backup A macro panel pointer to R15 */  \
-        MOV(RBP, RCX)    /* backup C macro panel pointer to RBP */  \
+        MOV(R11, RCX)    /* backup C macro panel pointer to R11 */  \
         \
         CMP(RDI, IMM(0)) /* check if m_iter is zero */              \
         JLE(ENDJR)       /* JMP to endjr if m_iter <= 0*/           \
@@ -1069,7 +1069,7 @@ void bli_dgemm_avx512_asm_8x24(
         \
         MOV(R8, R15) /* restore A macro panel pointer */            \
         MOV(RSI, VAR(m)) /* copy m_iter to RSI */                   \
-        MOV(RCX, RBP) /* restore pointer to C macro panel pointer */\
+        MOV(RCX, R11) /* restore pointer to C macro panel pointer */\
         TEST(RSI, RSI)                                              \
         \
         JZ(ENDIR)       /* Jump to ENDIR if m_iter(RSI) == 0*/      \
@@ -1094,7 +1094,7 @@ void bli_dgemm_avx512_asm_8x24(
         MOV(R14, RDX) /* move k_iter into R14 */                     \
         IMUL(R14, IMM(24)) /* k_iter *= 24 */                        \
         LEA(R9, MEM(R9, R14, 8)) /* b_next_upanel = B + (k*24) */    \
-        LEA(RBP, MEM(RBP, 24*8)) /* c_next_upanel = C + (24*8) */    \
+        LEA(R11, MEM(R11, 24*8)) /* c_next_upanel = C + (24*8) */    \
         SUB(RDI, IMM(24))        /* subtract NR(24) from N */        \
         JNZ(LOOPJR)                                                  \
         \
@@ -1112,8 +1112,8 @@ void bli_dgemm_avx512_asm_8x24(
             [beta]    "m" (beta),                                    \
             [ldc]     "m" (ldc)                                      \
             :                                                        \
-            "rax", "rbp", "rbx", "rcx", "rdi", "rsi", "r8", "r9",    \
-            "r10", "r12", "r13", "r14", "r15", "xmm1", "xmm2",\
+            "rax", "rbx", "rcx", "rdi", "rsi", "r8", "r9",    \
+            "r10", "r11", "r12", "r13", "r14", "r15", "xmm1", "xmm2",\
             "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",  \
             "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",\
             "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19",    \
@@ -1251,7 +1251,161 @@ BLIS_INLINE void bli_dgemm_avx512_asm_8x24_macro_kernel_bn
 }
 
 /*
-    DGEMM 8x24 Macro kernel
+    DGEMM 8x24 Macro kernel for fringe cases.
+    MR = 8, NR = 24
+    Only row major stored C is supported by this kernel.
+    Alpha scaling is not supported.
+*/
+void bli_dgemm_avx512_asm_8x24_macro_kernel_fringe
+(
+    dim_t   n,
+    dim_t   m,
+    dim_t   k,
+    double* c,
+    double* a,
+    double* b,
+    dim_t   ldc,
+    double* beta
+)
+{
+    // Create temporary buffer for C
+    double ct[ BLIS_STACK_BUF_MAX_SIZE / sizeof( double ) ]
+                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE)));
+
+    dim_t ldct = 24;
+    double alpha = 1; // only alpha=1 is supported
+    double zero = 0;
+
+    dim_t m_left = m % 8; // M % MR (computed by this kernel)
+    dim_t m_main = m - m_left; // already computed by main kernel (multiple of MR)
+
+    dim_t n_left = n % 24; // N % NR (computed by this kernel)
+    dim_t n_main = n - n_left; // already computed by main kernel (multiple of NR)
+    double *a_temp = a;
+    double *b_temp = b;
+    double *c_temp = c;
+
+    /*
+        Region marked by '-' is already computed by macro kernel.
+        Region marked by '+' is computed in the m_left region
+        Region marked by '*' is computed in the n_left region.
+        <-n_main-><-n_left->
+         ___________________
+        |---------**********|
+        |---------**********|
+        |---------**********|
+        |---------**********|
+        |---------**********|
+     -> |+++++++++**********|
+  m_left|+++++++++**********|
+     ->  ___________________
+    */
+
+    if ( m_left )
+    {
+        // loop along N dimension
+        // initial m_main rows of 'C' are aready computed,
+        // to compute remaining m_left rows, pointer 'C'
+        // matrix shoule be moved forward by m_main rows,
+        // and pointer 'A' should point to  (m_main / MR)th
+        // micropanel.
+        // To move 'A' pointer to (m_main / MR)th micropanel.
+        //    A += (ps_a)    * (m_main / MR)
+        // => A += (k * MR)  * (m_main / MR)
+        // => A += k * m_main
+        //
+        // To Move 'C' pointer ahead by m_main rows,
+        //    C += (ldc * m_main)
+        a_temp = a + ( k * m_main );
+        c_temp = c + ( ldc * m_main );
+        for(dim_t j = 0; j < n_main; j += 24 )
+        {
+            // zen5 kernel is causing a seg fault because of B prelaod.
+            // Therefore using zen4 kernel.
+            bli_dgemm_zen4_asm_8x24
+            (
+                k,
+                &alpha,
+                a_temp,
+                // move B pointer to next micropanel of packB (( j / NR)th micropanel)
+                //     B += ( j / NR) * ps_b;
+                // =>  B += ( j / NR ) * ( k * NR );
+                // =>  B += j * k
+                b + ( j * k ),
+                &zero,
+                ct,
+                ldct,
+                1,
+                NULL,
+                NULL
+            );
+
+            // copy GEMM result from 'ct' into 'c'.
+            // 'n' will always be NR(24), fringe case when
+            // both M and N are less than MR and NR respectively
+            // is handled in n_left region.
+            PASTEMAC(d,xpbys_mxn)( m_left, 24,
+            ct,  ldct, 1,
+            beta,
+            // move 'C' pointer ahead by j columns.
+            c_temp + ( j ), ldc,  1 );
+        }
+    }
+    
+    if ( (n % 24) )
+    {
+        // loop along M dimension
+        // initial n_main rows of 'C' are aready computed,
+        // to compute remaining n_left rows, pointer 'C'
+        // matrix shoule be moved forward by n_main columns,
+        // and pointer 'B' should point to  (n_main / NR)th
+        // micropanel.
+        // To move 'B' pointer to (n_main / NR)th micropanel.
+        //    B += (ps_b)    * (n_main / NR)
+        // => B += (k * NR)  * (n_main / NR)
+        // => B += k * n_main
+        //
+        // To Move 'C' pointer ahead by n_main columns,
+        //    C += (n_main)
+        b_temp = b + ( k * n_main );
+        c_temp = c + ( n_main );
+        for (dim_t i = 0; i < m; i += 8 )
+        {
+            bli_dgemm_zen4_asm_8x24
+            (
+                k,
+                &alpha,
+                // move A pointer to next micropanel of packA (( i / MR)th micropanel)
+                //     A += ( i / MR) * ps_a;
+                // =>  A += ( i / MR ) * ( k * MR );
+                // =>  A += i * k
+                a + ( i * k),
+                b_temp,
+                &zero,
+                ct,
+                ldct,
+                1,
+                NULL,
+                NULL
+            );
+            // remaning compute along M dimension = m - i
+            dim_t m_curr = m - i;
+            // if M remainder compute > 8, then only MR is
+            // is solved in current iteration.
+            if (m_curr > 8) m_curr = 8;
+
+            // copy GEMM result from 'ct' into 'c'.
+            PASTEMAC(d,xpbys_mxn)( m_curr, n_left,
+            ct,  ldct, 1,
+            beta,
+            // move 'C' pointer ahead by i rows.
+            c_temp + ( ldc * i ), ldc,  1 );
+        }
+    }
+}
+
+/*
+    DGEMM 8x24 Macro kernel.
     MR = 8, NR = 24
     Only row major stored C is supported by this kernel.
     Alpha scaling is not supported.
@@ -1272,28 +1426,72 @@ void bli_dgemm_avx512_asm_8x24_macro_kernel
     {
         bli_dgemm_avx512_asm_8x24_macro_kernel_b1
         (
-            n, m, k, c, a, b, ldc, beta
+            n - (n % 24), // remaining N will be handled by fringe kernel.
+            m - (m % 8),  // remaining M will be handled by fringe kernel.
+            k,
+            c,
+            a,
+            b,
+            ldc,
+            beta
         );
     }
     else if(*(double*)beta == -1)
     {
         bli_dgemm_avx512_asm_8x24_macro_kernel_bm1
         (
-            n, m, k, c, a, b, ldc, beta
+            n - (n % 24),
+            m - (m % 8),
+            k,
+            c,
+            a,
+            b,
+            ldc,
+            beta
         );
     }
     else if (*(double*)beta == 0)
     {
         bli_dgemm_avx512_asm_8x24_macro_kernel_b0
         (
-            n, m, k, c, a, b, ldc, beta
+            n - (n % 24),
+            m - (m % 8),
+            k,
+            c,
+            a,
+            b,
+            ldc,
+            beta
         );
     }
     else
     {
         bli_dgemm_avx512_asm_8x24_macro_kernel_bn
         (
-            n, m, k, c, a, b, ldc, beta
+            n - (n % 24),
+            m - (m % 8),
+            k,
+            c,
+            a,
+            b,
+            ldc,
+            beta
         );
     }
+
+    if ( n % 24 || m % 8)
+    {
+        bli_dgemm_avx512_asm_8x24_macro_kernel_fringe
+        (
+            n,
+            m,
+            k,
+            c,
+            a,
+            b,
+            ldc,
+            beta
+        );
+    }
+
 }
