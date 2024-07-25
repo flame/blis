@@ -332,7 +332,7 @@ void bli_cnormfv_unb_var1
         case BLIS_ARCH_ZEN:;
 #ifdef BLIS_KERNELS_ZEN
             // Handling the kernel call in case of non-unit strides
-            if ( incx != 1 )
+            if ( ( incx != 1 ) && ( incx != 0 ) )
             {
                 // Memory pool declarations for packing vector X.
                 // Initialize mem pool buffer to NULL and size to 0.
@@ -454,9 +454,11 @@ void bli_znormfv_unb_var1
     void ( *reduce_fp )( dim_t, double*, inc_t, double*, cntx_t* ) = NULL;
 
     dcomplex *x_buf = x;
-    dim_t nt_ideal = -1;
     dim_t fast_path_thresh = 1;
+#ifdef BLIS_ENABLE_OPENMP
+    dim_t nt_ideal = -1;
     dim_t simd_factor = 1;
+#endif
 
     arch_t id = bli_arch_query_id();
     switch ( id )
@@ -471,7 +473,10 @@ void bli_znormfv_unb_var1
             norm_fp   = bli_dznorm2fv_unb_var1_avx2;
             reduce_fp = bli_dnorm2fv_unb_var1_avx2;
             fast_path_thresh = 2000;
+
+        #ifdef BLIS_ENABLE_OPENMP
             simd_factor = 2;
+        #endif
 
             break;
 #endif
@@ -517,11 +522,14 @@ void bli_znormfv_unb_var1
         return;
     
     /*
-        When the size is such that nt_ideal is 1, and packing is not
-        required( incx == 1 ), we can directly call the kernel to
-        avoid framework overheads( fast-path ).
+        Call the kernel directly in these two cases :
+        - When incx == 0, since the norm is based on only one dcomplex
+          element( two real double precision elements )
+        - When the size is such that nt_ideal is 1, and packing is not
+          required( incx == 1 ), we can directly call the kernel to
+          avoid framework overheads( fast-path ).
     */
-    else if ( ( incx == 1 ) && ( n < fast_path_thresh ) )
+    else if ( ( incx == 0 ) || ( ( incx == 1 ) && ( n < fast_path_thresh ) ) )
     {
         norm_fp( n, x, incx, norm, cntx );
         return;
@@ -574,8 +582,7 @@ void bli_znormfv_unb_var1
     bli_rntm_set_num_threads_only( 1, &rntm_l );
     bli_pba_rntm_set_pba( &rntm_l );
 
-    if ( incx == 0 )    nt_ideal = 1;
-    else if ( incx != 1 )
+    if ( incx != 1 )
     {
         // Calculate the size required for "n" double elements in vector x.
         size_t buffer_size = n * sizeof( dcomplex );
@@ -605,10 +612,14 @@ void bli_znormfv_unb_var1
             }
             incx_buf = 1;
         }
+        // Resort to using single-threaded kernel call if packing fails,
+        // since we execute non-unit strided code section.
+    #ifdef BLIS_ENABLE_OPENMP
         else
         {
             nt_ideal = 1;
         }
+    #endif
     }
 
     #ifdef BLIS_ENABLE_OPENMP
@@ -912,7 +923,7 @@ void bli_snormfv_unb_var1
         case BLIS_ARCH_ZEN:;
 #ifdef BLIS_KERNELS_ZEN
             // Handling the kernel call in case of non-unit strides
-            if ( incx != 1 )
+            if ( ( incx != 1 ) && ( incx != 0 ) )
             {
                 // Memory pool declarations for packing vector X.
                 // Initialize mem pool buffer to NULL and size to 0.
@@ -1041,9 +1052,11 @@ void bli_dnormfv_unb_var1
     void ( *norm_fp )( dim_t, double*, inc_t, double*, cntx_t* ) = NULL;
 
     double *x_buf = x;
-    dim_t nt_ideal = -1;
     dim_t fast_path_thresh = 1;
+#ifdef BLIS_ENABLE_OPENMP
     dim_t simd_factor = 1;
+    dim_t nt_ideal = -1;
+#endif
 
     arch_t id = bli_arch_query_id();
     switch ( id )
@@ -1054,7 +1067,10 @@ void bli_dnormfv_unb_var1
 
         norm_fp = bli_dnorm2fv_unb_var1_avx512;
         fast_path_thresh = 4500;
+
+    #ifdef BLIS_ENABLE_OPENMP
         simd_factor = 8;
+    #endif
 
         break;
 #endif
@@ -1065,7 +1081,10 @@ void bli_dnormfv_unb_var1
 
         norm_fp = bli_dnorm2fv_unb_var1_avx2;
         fast_path_thresh = 4000;
+
+    #ifdef BLIS_ENABLE_OPENMP
         simd_factor = 4;
+    #endif
 
         break;
 #endif
@@ -1110,11 +1129,14 @@ void bli_dnormfv_unb_var1
         return;
     
     /*
-        When the size is such that nt_ideal is 1, and packing is not
-        required( incx == 1 ), we can directly call the kernel to
-        avoid framework overheads( fast-path ).
+        Call the kernel directly in these two cases :
+        - When incx == 0, since the norm is based on only one dcomplex
+          element( two real double precision elements )
+        - When the size is such that nt_ideal is 1, and packing is not
+          required( incx == 1 ), we can directly call the kernel to
+          avoid framework overheads( fast-path ).
     */
-    else if ( ( incx == 1 ) && ( n < fast_path_thresh ) )
+    else if ( ( incx == 0 ) || ( ( incx == 1 ) && ( n < fast_path_thresh ) ) )
     {
         norm_fp( n, x, incx, norm, cntx );
         return;
@@ -1167,8 +1189,7 @@ void bli_dnormfv_unb_var1
     bli_rntm_set_num_threads_only( 1, &rntm_l );
     bli_pba_rntm_set_pba( &rntm_l );
 
-    if ( incx == 0 )    nt_ideal = 1;
-    else if ( incx != 1 )
+    if ( incx != 1 )
     {
         // Calculate the size required for "n" double elements in vector x.
         size_t buffer_size = n * sizeof( double );
@@ -1198,10 +1219,14 @@ void bli_dnormfv_unb_var1
             }
             incx_buf = 1;
         }
+        // In case packing fails, we use the original buffer. We have to make sure that
+        // we reset the number of threads to 1 if we have enabled openmp for multithreading.
+    #ifdef BLIS_ENABLE_OPENMP
         else
         {
             nt_ideal = 1;
         }
+    #endif
     }
 
     #ifdef BLIS_ENABLE_OPENMP
