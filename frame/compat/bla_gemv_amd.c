@@ -312,6 +312,31 @@ void dgemv_blis_impl
           NULL,
           NULL
         );
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+        return;
+    }
+
+    /**
+     * DGEMV Tiny Path
+     * If the matrix dimensions are within 8x8 then calculate the result
+     * using DGEMV Reference kernel.
+     */
+    if ( m0 < 8 && n0 < 8 )
+    {
+        bli_dgemv_zen_ref
+        (
+          blis_transa,
+          m0,
+          n0,
+          (double*)alpha,
+          (double*)a, rs_a, cs_a,
+          x0, incx0,
+          (double*)beta,
+          y0, incy0,
+          NULL
+        );
+
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         return;
     }

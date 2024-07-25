@@ -486,3 +486,16 @@ GEMM_UKR_PROT( dcomplex, z, gemm_zen_asm_2x6)
 
 GEMMTRSM_UKR_PROT( dcomplex,   z, gemmtrsm_l_zen_asm_2x6)
 GEMMTRSM_UKR_PROT( dcomplex,   z, gemmtrsm_u_zen_asm_2x6)
+
+void bli_dgemv_zen_ref
+    (
+       trans_t          transa,
+       dim_t            m,
+       dim_t            b_n,
+       double* restrict alpha,
+       double* restrict a, inc_t inca, inc_t lda,
+       double* restrict x, inc_t incx,
+       double* restrict beta,
+       double* restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     );

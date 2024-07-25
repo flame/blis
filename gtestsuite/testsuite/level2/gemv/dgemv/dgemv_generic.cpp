@@ -136,17 +136,17 @@ INSTANTIATE_TEST_SUITE_P(
 #ifndef TEST_BLAS
             ,'r'
 #endif
-            ),                                                               // storage format
-            ::testing::Values('n','c'),                                      // transa
-            ::testing::Values('n'),                                          // conjx
-            ::testing::Range(gtint_t(1), gtint_t(9), 1),                     // m
-            ::testing::Range(gtint_t(1), gtint_t(9), 1),                     // n
-            ::testing::Values( 1.0 ),                                        // alpha
-            ::testing::Values( -1.0 ),                                       // beta
-            ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(gtint_t(7), gtint_t(3)),                       // increment to the leading dim of a
-            ::testing::Values(false, true)                                   // is_memory_test
+            ),                                              // storage format
+            ::testing::Values('n', 'c', 't'),               // transa
+            ::testing::Values('n'),                         // conjx
+            ::testing::Range(gtint_t(1), gtint_t(8), 1),    // m
+            ::testing::Range(gtint_t(1), gtint_t(8), 1),    // n
+            ::testing::Values( -1.2, 0.0, 1.0 ),            // alpha
+            ::testing::Values(  0.0, 1.0, 2.1 ),            // beta
+            ::testing::Values(gtint_t(1), gtint_t(3)),      // stride size for x
+            ::testing::Values(gtint_t(1), gtint_t(5)),      // stride size for y
+            ::testing::Values(gtint_t(0), gtint_t(7)),      // increment to the leading dim of a
+            ::testing::Values(false, true)                  // is_memory_test
         ),
         ::gemvGenericPrint<T>()
     );
