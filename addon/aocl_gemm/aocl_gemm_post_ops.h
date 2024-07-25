@@ -35,7 +35,7 @@
 #ifndef AOCL_GEMM_POST_OPS_H
 #define AOCL_GEMM_POST_OPS_H
 
-#define AOCL_MAX_POST_OPS 5
+#define AOCL_MAX_POST_OPS 8
 #define AOCL_MAX_PRE_OPS 1
 
 typedef enum
