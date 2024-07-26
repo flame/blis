@@ -79,7 +79,7 @@ TYPED_TEST(amaxv_IIT_ERS, n_lt_one_nonUnitStride)
 #else
   gtint_t idx = cblas_amaxv<T>( n, x.data(), inc );
 #endif
- 
+
   // Computing the difference.
   computediff<gtint_t>( "idx", idx, gtint_t(0) );
 }
@@ -153,7 +153,7 @@ TYPED_TEST(amaxv_IIT_ERS, n_eq_one_nonUnitStrides)
   gtint_t inc = 5;
   // Initialize vectors with random numbers.
   std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
-  
+
 #ifdef TEST_BLAS
   gtint_t idx = amaxv_<T>( n, x.data(), inc );
   computediff<gtint_t>( "idx", idx, gtint_t(1) );

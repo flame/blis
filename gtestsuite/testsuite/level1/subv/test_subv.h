@@ -111,7 +111,7 @@ public:
         gtint_t n      = std::get<1>(str.param);
         gtint_t incx   = std::get<2>(str.param);
         gtint_t incy   = std::get<3>(str.param);
-       
+
         std::string str_name = API_PRINT;
         str_name += "_n_" + std::to_string(n);
         str_name += "_conjx_" + std::string(&conjx, 1);
@@ -134,7 +134,7 @@ public:
         T xexval = std::get<5>(str.param);
         gtint_t yj = std::get<6>(str.param);
         T yexval = std::get<7>(str.param);
-        
+
         std::string str_name = API_PRINT;
         str_name += "_n_" + std::to_string(n);
         str_name += "_conjx_" + std::string(&conjx, 1);

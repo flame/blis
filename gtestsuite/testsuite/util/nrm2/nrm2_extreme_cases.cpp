@@ -37,7 +37,7 @@
 
 /**
  * Testing edge input parameters.
- * 
+ *
  * zero incx should return sqrt(n*abs(x[0])**2).
 */
 
@@ -51,8 +51,8 @@ TYPED_TEST_SUITE(nrm2_EIC, TypeParam);
 
 TYPED_TEST(nrm2_EIC, zero_incx_scalar) {
     using T = TypeParam;
-    using RT = typename testinghelpers::type_info<T>::real_type;    
-    gtint_t n = 2;    
+    using RT = typename testinghelpers::type_info<T>::real_type;
+    gtint_t n = 2;
     gtint_t incx = 0;
     std::vector<T> x(n);
     for (auto &xi : x)
@@ -69,8 +69,8 @@ TYPED_TEST(nrm2_EIC, zero_incx_scalar) {
 
 TYPED_TEST(nrm2_EIC, zero_incx_vectorized) {
     using T = TypeParam;
-    using RT = typename testinghelpers::type_info<T>::real_type;    
-    gtint_t n = 64;    
+    using RT = typename testinghelpers::type_info<T>::real_type;
+    gtint_t n = 64;
     gtint_t incx = 0;
     std::vector<T> x(n);
     for (auto &xi : x)

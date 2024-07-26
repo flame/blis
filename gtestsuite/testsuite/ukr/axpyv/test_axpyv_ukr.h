@@ -123,7 +123,7 @@ static void test_axpyv_ukr( FT ukr_fp, char conjx, gtint_t n, gtint_t incx, gtin
     //              Compute component-wise error.
     //----------------------------------------------------------
     computediff<T>( "y", n, y, y_ref, incy, thresh );
-    
+
 }
 
 // Test-case logger : Used to print the test-case details for unit testing the kernels.

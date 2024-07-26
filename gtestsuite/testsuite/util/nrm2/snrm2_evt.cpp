@@ -66,9 +66,9 @@ static float NaN = std::numeric_limits<float>::quiet_NaN();
 static float Inf = std::numeric_limits<float>::infinity();
 
 /**
- * Note: snrm2 scalar ONLY implementation is used, but we write the test 
+ * Note: snrm2 scalar ONLY implementation is used, but we write the test
  * using values that worked for the vectorized path for the future.
- * 
+ *
  * scnrm2 implementation is composed by two parts:
  * - vectorized path for n>=64
  *      - for-loop for multiples of 32 (F32)
@@ -89,7 +89,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(3)),
             // stride size for x
             ::testing::Values(gtint_t(1)),
-            // i : index of x that has value iexval                   
+            // i : index of x that has value iexval
             ::testing::Values(0),
             // iexval
             ::testing::Values(NaN, Inf, -Inf),
@@ -107,7 +107,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(64)),
             // stride size for x
             ::testing::Values(gtint_t(1)),
-            // i : index of x that has value iexval                   
+            // i : index of x that has value iexval
             ::testing::Values(13),
             // iexval
             ::testing::Values(NaN, Inf, -Inf),
@@ -127,7 +127,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(88)),
             // stride size for x
             ::testing::Values(gtint_t(1)),
-            // i : index of x that has value iexval                   
+            // i : index of x that has value iexval
             ::testing::Values(70),
             // iexval
             ::testing::Values(NaN, Inf, -Inf),
@@ -147,7 +147,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(80)),
             // stride size for x
             ::testing::Values(gtint_t(1)),
-            // i : index of x that has value iexval                   
+            // i : index of x that has value iexval
             ::testing::Values(70),
             // iexval
             ::testing::Values(NaN, Inf, -Inf),
@@ -157,7 +157,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::nrm2EVTPrint<float>()
     );
 
-// Now let's check the combination of a vectorized path and 
+// Now let's check the combination of a vectorized path and
 // the scalar path, by putting an extreme value in each
 // to check that the checks are integrated correctly.
 INSTANTIATE_TEST_SUITE_P(
@@ -168,7 +168,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(68)),
             // stride size for x
             ::testing::Values(gtint_t(1)),
-            // i : index of x that has value iexval                   
+            // i : index of x that has value iexval
             ::testing::Values(5),
             // iexval
             ::testing::Values(NaN, Inf, -Inf),

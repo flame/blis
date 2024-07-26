@@ -1012,7 +1012,7 @@ TEST_P( zgemmGenericNat, MicroKernelTest)
     gtint_t m             = std::get<4>(GetParam());                        // m
     gtint_t n             = std::get<5>(GetParam());                        // n
     zgemm_ukr_ft kern_ptr = std::get<6>(GetParam());                        // pointer to the gemm kernel
-    bool is_memory_test   = std::get<7>(GetParam());                        // is_memory_test    
+    bool is_memory_test   = std::get<7>(GetParam());                        // is_memory_test
 
     // Set the threshold for the errors:
     // Check gtestsuite gemm.h or netlib source code for reminder of the
@@ -1043,7 +1043,7 @@ public:
         char storageC       = std::get<3>(str.param);
         bool is_memory_test = std::get<7>(str.param);
 
-        std::string str_name; 
+        std::string str_name;
         str_name += "_stor_" + std::string(&storageC, 1);
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);

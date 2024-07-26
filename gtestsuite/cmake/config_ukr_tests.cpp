@@ -35,7 +35,7 @@
  * the output is used to define macros that are used for kernel testing.
  * We MUST use ";" to create a list in CMake so make sure to add them in
  * the future if more instructions are added.
- * 
+ *
  * Note that this is only available on static blis since those symbols aren't
  * exported for shared libraries.
 */

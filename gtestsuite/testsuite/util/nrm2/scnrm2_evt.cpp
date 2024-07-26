@@ -85,7 +85,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(2)),
             // stride size for x
             ::testing::Values(gtint_t(1)),
-            // i : index of x that has value iexval                   
+            // i : index of x that has value iexval
             ::testing::Values(0),
             // iexval
             ::testing::Values(scomplex{NaN, 1.0}, scomplex{Inf, 9.0}, scomplex{-1.0, -Inf}, scomplex{2.0, NaN}, scomplex{NaN, Inf}, scomplex{Inf, NaN}),
@@ -103,7 +103,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(64)),
             // stride size for x
             ::testing::Values(gtint_t(1)),
-            // i : index of x that has value iexval                   
+            // i : index of x that has value iexval
             ::testing::Values(10),
             // iexval
             ::testing::Values(scomplex{NaN, 1.0}, scomplex{Inf, 9.0}, scomplex{-1.0, -Inf}, scomplex{2.0, NaN}, scomplex{NaN, Inf}, scomplex{Inf, NaN}),
@@ -123,7 +123,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(76)),
             // stride size for x
             ::testing::Values(gtint_t(1)),
-            // i : index of x that has value iexval                   
+            // i : index of x that has value iexval
             ::testing::Values(68),
             // iexval
             ::testing::Values(scomplex{NaN, 1.0}, scomplex{Inf, 9.0}, scomplex{-1.0, -Inf}, scomplex{2.0, NaN}, scomplex{NaN, Inf}, scomplex{Inf, NaN}),
@@ -143,7 +143,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(72)),
             // stride size for x
             ::testing::Values(gtint_t(1)),
-            // i : index of x that has value iexval                   
+            // i : index of x that has value iexval
             ::testing::Values(66),
             // iexval
             ::testing::Values(scomplex{NaN, 1.0}, scomplex{Inf, 9.0}, scomplex{-1.0, -Inf}, scomplex{2.0, NaN}, scomplex{NaN, Inf}, scomplex{Inf, NaN}),
@@ -153,7 +153,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::nrm2EVTPrint<scomplex>()
     );
 
-// Now let's check the combination of a vectorized path and 
+// Now let's check the combination of a vectorized path and
 // the scalar path, by putting an extreme value in each
 // to check that the checks are integrated correctly.
 INSTANTIATE_TEST_SUITE_P(
@@ -164,7 +164,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(79)),
             // stride size for x
             ::testing::Values(gtint_t(1)),
-            // i : index of x that has value iexval                   
+            // i : index of x that has value iexval
             ::testing::Values(25),
             // iexval
             ::testing::Values(scomplex{NaN, 1.0}, scomplex{Inf, 9.0}, scomplex{-1.0, -Inf}, scomplex{2.0, NaN}, scomplex{NaN, Inf}, scomplex{Inf, NaN}),

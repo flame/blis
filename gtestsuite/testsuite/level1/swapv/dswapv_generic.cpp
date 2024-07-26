@@ -77,7 +77,7 @@ INSTANTIATE_TEST_SUITE_P(
             // n: size of vector.
             ::testing::Values(
                 gtint_t(1), gtint_t(2), gtint_t(4), gtint_t(8), gtint_t(16), gtint_t(32),
-                gtint_t(64), gtint_t(128), gtint_t(5), gtint_t(9), gtint_t(17), gtint_t(33), 
+                gtint_t(64), gtint_t(128), gtint_t(5), gtint_t(9), gtint_t(17), gtint_t(33),
                 gtint_t(65), gtint_t(129), gtint_t(6), gtint_t(10), gtint_t(18), gtint_t(34),
                 gtint_t(68), gtint_t(130), gtint_t(12), gtint_t(24), gtint_t(40), gtint_t(72),
                 gtint_t(136), gtint_t(20), gtint_t(36), gtint_t(96), gtint_t(160)

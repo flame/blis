@@ -120,7 +120,7 @@ public:
         T alpha = std::get<4>(str.param);
         T beta  = std::get<5>(str.param);
 
-        std::string str_name = API_PRINT;    
+        std::string str_name = API_PRINT;
         str_name += "_n_" + std::to_string(n);
         str_name += "_conjx_" + std::string(&conjx, 1);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);

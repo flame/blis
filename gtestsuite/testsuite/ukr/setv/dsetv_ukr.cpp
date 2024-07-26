@@ -42,7 +42,7 @@ class dsetvGeneric :
         public ::testing::TestWithParam<std::tuple<FT,              // Function pointer type for dsetv kernels
                                                    char,            // conjalpha
                                                    T,               // alpha
-                                                   gtint_t,         // n            
+                                                   gtint_t,         // n
                                                    gtint_t,         // incx
                                                    bool>> {};       // is_memory_test
 

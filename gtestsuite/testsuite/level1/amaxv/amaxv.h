@@ -105,7 +105,7 @@ template<typename T>
 static gtint_t amaxv(gtint_t n, T* x, gtint_t incx)
 {
 #ifdef TEST_BLAS
-    // Since we would be comparing against CBLAS which is 0-based and BLAS 
+    // Since we would be comparing against CBLAS which is 0-based and BLAS
     // which is 1-based, we need decrement the result of BLAS call by 1.
     return ( amaxv_<T>(n, x, incx) - 1 );
 #elif TEST_CBLAS

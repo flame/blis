@@ -248,7 +248,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::gerGenericPrint<double>()
     );
-//large size for m and n   
+//large size for m and n
 INSTANTIATE_TEST_SUITE_P(
         largeSize,
         dgerGeneric,

@@ -78,7 +78,7 @@ TEST_P( zaxpyvEVT, API )
     // Check gtestsuite subv.h (no netlib version) for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    double thresh;    
+    double thresh;
     // Small adjustment has been applied for complex data.
     double adj = 1.5;
     if (n == 0)

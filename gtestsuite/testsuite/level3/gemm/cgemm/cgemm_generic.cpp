@@ -44,8 +44,8 @@ class cgemmGeneric :
                                                    gtint_t,    // k
                                                    scomplex,   // alpha
                                                    scomplex,   // beta
-                                                   gtint_t,    // inc to the lda 
-                                                   gtint_t,    // inc to the ldb 
+                                                   gtint_t,    // inc to the lda
+                                                   gtint_t,    // inc to the ldb
                                                    gtint_t     // inc to the ldc
                                                    >> {};
 TEST_P( cgemmGeneric, API )

@@ -128,7 +128,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'
 #if defined(TEST_BLIS_TYPED)
                               ,'c'
-#endif 
+#endif
                              ),                                         // conjA
             ::testing::Values('n', 'c'),                                // conjx
             ::testing::Values(// Testing the loops standalone
@@ -161,7 +161,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'
 #if defined(TEST_BLIS_TYPED)
                               ,'c'
-#endif 
+#endif
                              ),                                         // conjA
             ::testing::Values('n', 'c'),                                // conjx
             ::testing::Values(gtint_t(15), gtint_t(27)),                // for size n
@@ -198,7 +198,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'
 #if defined(TEST_BLIS_TYPED)
                               ,'c'
-#endif 
+#endif
                              ),                                         // conjA
             ::testing::Values('n', 'c'),                                // conjx
             ::testing::Values(// Testing the loops standalone
@@ -231,7 +231,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'
 #if defined(TEST_BLIS_TYPED)
                               ,'c'
-#endif 
+#endif
                              ),                                         // conjA
             ::testing::Values('n', 'c'),                                // conjx
             ::testing::Values(gtint_t(15), gtint_t(27)),                // for size n
@@ -268,7 +268,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'
 #if defined(TEST_BLIS_TYPED)
                               ,'c'
-#endif 
+#endif
                              ),                                         // conjA
             ::testing::Values('n', 'c'),                                // conjx
             ::testing::Values(// Testing the loops standalone
@@ -301,7 +301,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'
 #if defined(TEST_BLIS_TYPED)
                               ,'c'
-#endif 
+#endif
                              ),                                         // conjA
             ::testing::Values('n', 'c'),                                // conjx
             ::testing::Values(gtint_t(15), gtint_t(27)),                // for size n

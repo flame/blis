@@ -171,7 +171,7 @@ void ref_imatcopy( char storage, char trans, gtint_t m, gtint_t n, T alpha, T* A
                     gtint_t lda_in, gtint_t lda_out ) {
 
     // Defining the function pointer type for the native MKL call of imatcopy
-    typedef void (*Fptr_ref_mkl_imatcopy)( 
+    typedef void (*Fptr_ref_mkl_imatcopy)(
                                            char, char, size_t, size_t,
                                            const T, const T *, size_t,
                                            size_t

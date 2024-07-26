@@ -159,7 +159,7 @@ public:
         gtint_t ldb_inc = std::get<7>(str.param);
         gtint_t strideb = std::get<8>(str.param);
         bool is_memory_test = std::get<9>(str.param);
-        
+
         std::string str_name = API_PRINT;
         str_name += "_stor_" + std::string(&storage, 1);
         str_name += "_trans_" + std::string(&trans, 1);

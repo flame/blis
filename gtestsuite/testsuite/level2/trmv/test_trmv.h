@@ -92,7 +92,7 @@ public:
         T alpha = std::get<5>(str.param);
         gtint_t incx   = std::get<6>(str.param);
         gtint_t ld_inc = std::get<7>(str.param);
-        
+
         std::string str_name = API_PRINT;
         str_name += "_stor_" + std::string(&storage, 1);
         str_name += "_uploa_" + std::string(&uploa, 1);

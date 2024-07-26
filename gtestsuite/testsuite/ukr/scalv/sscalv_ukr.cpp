@@ -163,10 +163,10 @@ INSTANTIATE_TEST_SUITE_P(
  * C2 L24     - handles 24 elements
  * C2 L8      - handles 8 elements
  * C2 LScalar - leftover loop
- * 
+ *
  * The switch cases are cascading, and the order
  * is C0 --> C1 --> C2
- * 
+ *
  * LNUnit - loop for non-unit increments
 */
 INSTANTIATE_TEST_SUITE_P(

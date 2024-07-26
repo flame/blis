@@ -239,13 +239,13 @@ static void test_complex_gemmsup_ukr( char storage, char trnsa, char trnsb, gtin
 template<typename T, typename FT>
 static void test_gemmnat_ukr( char storage, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, double thresh, FT ukr_fp, bool is_memory_test = false )
 {
-    
+
     /*************Memory requirement*****************************/
     /* General requirement of memory allocation:                */
     /*        Block                Microkernel                  */
     /*     A = MC * KC            A = MR * k                    */
     /*     B = NC * KC            B = NR * k                    */
-    /*     C = MC * NC            C = MR * NR                   */    
+    /*     C = MC * NC            C = MR * NR                   */
     /* Native kernel works on packed buffer for A and B matrix  */
     /* Memory requirement for input matrix for a block:         */
     /*     A = (MC + max(MR, NR)) * (KC + max(MR, NR))          */

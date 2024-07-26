@@ -132,7 +132,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Combine(
             ::testing::Values(bli_samaxv_zen_int_avx512),   // kernel address
             ::testing::Values(gtint_t(80),                  // for size n, L80
-                              gtint_t(48),                  // 3*L16 
+                              gtint_t(48),                  // 3*L16
                               gtint_t(16),                  // L16
                               gtint_t(11),                  // 11(LScalar)
                               gtint_t(317)),                // 3*L80 + 4*L16 + 13(LScalar)

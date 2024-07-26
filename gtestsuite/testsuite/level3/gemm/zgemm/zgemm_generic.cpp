@@ -44,8 +44,8 @@ class zgemmGeneric :
                                                    gtint_t,    // k
                                                    dcomplex,   //alpha
                                                    dcomplex,   //beta
-                                                   gtint_t,    // inc to the lda 
-                                                   gtint_t,    // inc to the ldb 
+                                                   gtint_t,    // inc to the lda
+                                                   gtint_t,    // inc to the ldb
                                                    gtint_t     // inc to the ldc
                                                    >> {};
 

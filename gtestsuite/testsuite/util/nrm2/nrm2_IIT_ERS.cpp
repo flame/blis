@@ -53,7 +53,7 @@ using namespace testinghelpers::IIT;
 
 // Early return n < 0.
 TYPED_TEST(nrm2_IIT_ERS, negative_n) {
-    using T = TypeParam;    
+    using T = TypeParam;
     using RT = typename testinghelpers::type_info<T>::real_type;
     T x = T{-3.7};
     // initialize blis norm with garbage.
@@ -65,12 +65,12 @@ TYPED_TEST(nrm2_IIT_ERS, negative_n) {
 
 // Early return n = 0.
 TYPED_TEST(nrm2_IIT_ERS, zero_n) {
-    using T = TypeParam;    
+    using T = TypeParam;
     using RT = typename testinghelpers::type_info<T>::real_type;
     gtint_t n = 0;
     gtint_t incx = 1;
     // initialize norm to ensure that it is set to zero from nrm2 and it does not simply return.
-    RT blis_norm = 19.0; 
+    RT blis_norm = 19.0;
     // using nullptr since x should not be accessed anyway.
     // If "x" is accessed before return then nrm2 would segfault.
     blis_norm = nrm2<T>(n, nullptr, incx);

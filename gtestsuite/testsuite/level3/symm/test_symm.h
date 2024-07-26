@@ -114,7 +114,7 @@ public:
         gtint_t ldb_inc = std::get<10>(str.param);
         gtint_t ldc_inc = std::get<11>(str.param);
 
-        std::string str_name = API_PRINT; 
+        std::string str_name = API_PRINT;
         str_name += "_stor_" + std::string(&storage, 1);
         str_name += "_side_" + std::string(&side, 1);
         str_name += "_uplo_" + std::string(&uplo, 1);

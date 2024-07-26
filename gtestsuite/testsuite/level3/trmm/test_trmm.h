@@ -103,7 +103,7 @@ public:
         T alpha  = std::get<7>(str.param);
         gtint_t lda_inc = std::get<8>(str.param);
         gtint_t ldb_inc = std::get<9>(str.param);
-        
+
         std::string str_name = API_PRINT;
         str_name += "_stor_" + std::string(&storage, 1);
         str_name += "_side_" + std::string(&side, 1);

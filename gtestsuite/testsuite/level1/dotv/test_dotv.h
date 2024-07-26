@@ -133,7 +133,7 @@ public:
         gtint_t n     = std::get<2>(str.param);
         gtint_t incx  = std::get<3>(str.param);
         gtint_t incy  = std::get<4>(str.param);
-        
+
         std::string str_name = API_PRINT;
         str_name += "_n_" + std::to_string(n);
         str_name += "_conjx_" + std::string(&conjx, 1);

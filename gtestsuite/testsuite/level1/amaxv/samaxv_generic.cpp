@@ -58,7 +58,7 @@ TEST_P( samaxvGeneric, API )
     test_amaxv<T>( n, incx );
 }
 
-//Black box testing extended for different range of values 
+//Black box testing extended for different range of values
 INSTANTIATE_TEST_SUITE_P(
         Blackbox_Small_Size,
         samaxvGeneric,

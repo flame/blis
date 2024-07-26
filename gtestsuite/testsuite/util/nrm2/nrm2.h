@@ -39,19 +39,19 @@
 
 /**
  * @brief Computes the Euclidean norm of x.
- * 
+ *
  * Euclidean norm of a vector x is defined as nrm2 = sqrt(x'*x).
  * In case a vector element is NaN, nrm2 must be NaN.
  * In case a vector element is inf, and there is no element which is NaN, nrm2 must be inf.
  * If n <= 0, nrm2 returns zero.
  * If incx = 0, nrm2 returns sqrt(n*abs(x[0])**2).
- * 
+ *
  * @param[in] n vector length
  * @param[in] x pointer which points to the first element of x
  * @param[in] incx increment of x
  * @return the Euclidean norm of x
- * 
- * 
+ *
+ *
  */
 
 template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>

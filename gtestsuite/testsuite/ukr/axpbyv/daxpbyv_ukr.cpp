@@ -149,7 +149,7 @@ INSTANTIATE_TEST_SUITE_P(
                               double(2.2), double(-4.1),
                               double(0.0)),                // alpha
             ::testing::Values(double(1.0), double(-1.0),
-                              double(2.2), double(-4.1), 
+                              double(2.2), double(-4.1),
                               double(0.0)),                // beta
             ::testing::Values(false, true)                 // is_memory_test
         ),
@@ -171,7 +171,7 @@ INSTANTIATE_TEST_SUITE_P(
                               double(2.2), double(-4.1),
                               double(0.0)),                // alpha
             ::testing::Values(double(1.0), double(-1.0),
-                              double(2.2), double(-4.1), 
+                              double(2.2), double(-4.1),
                               double(0.0)),                // beta
             ::testing::Values(false, true)                 // is_memory_test
         ),
@@ -203,7 +203,7 @@ INSTANTIATE_TEST_SUITE_P(
                               double(2.2), double(-4.1),
                               double(0.0)),                // alpha
             ::testing::Values(double(1.0), double(-1.0),
-                              double(2.2), double(-4.1), 
+                              double(2.2), double(-4.1),
                               double(0.0)),                // beta
             ::testing::Values(false, true)                 // is_memory_test
         ),
@@ -225,7 +225,7 @@ INSTANTIATE_TEST_SUITE_P(
                               double(2.2), double(-4.1),
                               double(0.0)),                // alpha
             ::testing::Values(double(1.0), double(-1.0),
-                              double(2.2), double(-4.1), 
+                              double(2.2), double(-4.1),
                               double(0.0)),                // beta
             ::testing::Values(false, true)                 // is_memory_test
         ),
@@ -267,7 +267,7 @@ INSTANTIATE_TEST_SUITE_P(
                               double(2.2), double(-4.1),
                               double(0.0)),                // alpha
             ::testing::Values(double(1.0), double(-1.0),
-                              double(2.2), double(-4.1), 
+                              double(2.2), double(-4.1),
                               double(0.0)),                // beta
             ::testing::Values(false, true)                 // is_memory_test
         ),
@@ -289,7 +289,7 @@ INSTANTIATE_TEST_SUITE_P(
                               double(2.2), double(-4.1),
                               double(0.0)),                // alpha
             ::testing::Values(double(1.0), double(-1.0),
-                              double(2.2), double(-4.1), 
+                              double(2.2), double(-4.1),
                               double(0.0)),                // beta
             ::testing::Values(false, true)                 // is_memory_test
         ),

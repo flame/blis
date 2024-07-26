@@ -315,7 +315,7 @@ void computediff( std::string var_name, T blis_sol, T ref_sol, bool nan_inf_chec
 template <typename T>
 void computediff( std::string var_name, T blis_sol, T ref_sol, double thresh, bool nan_inf_check = false )
 {
-    ComparisonHelper comp_helper(SCALAR, thresh);    
+    ComparisonHelper comp_helper(SCALAR, thresh);
     comp_helper.nan_inf_check = nan_inf_check;
     ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol, ref_sol, comp_helper);
 }
@@ -564,7 +564,7 @@ testing::AssertionResult EqualityComparison(const char* var_name_char,
     if (blis_sol == ref_sol) return testing::AssertionSuccess();
     return testing::AssertionFailure() << error_message;
 }
- 
+
 /**
  * Comparison of two integers, printing variable name.
  */

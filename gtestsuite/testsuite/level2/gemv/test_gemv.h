@@ -63,7 +63,7 @@ void test_gemv( char storage, char transa, char conjx, gtint_t m, gtint_t n,
     dim_t size_y = testinghelpers::buff_dim(leny, incy) * sizeof(T);
     testinghelpers::ProtectedBuffer x_buf(size_x, false, is_memory_test);
     testinghelpers::ProtectedBuffer y_buf(size_y, false, is_memory_test);
-    
+
     // For y_ref, we don't need different greenzones and any redzone.
     // Thus, we pass is_memory_test as false
     testinghelpers::ProtectedBuffer y_ref_buffer( size_y, false, false );
@@ -107,7 +107,7 @@ void test_gemv( char storage, char transa, char conjx, gtint_t m, gtint_t n,
     {
         gemv<T>( storage, transa, conjx, m, n, &alpha, a, lda, x, incx, &beta,
                  y, incy );
-        
+
         if ( is_memory_test )
         {
             memcpy((a_buf.greenzone_2), (a_buf.greenzone_1), size_a);

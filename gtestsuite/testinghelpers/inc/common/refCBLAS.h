@@ -41,7 +41,7 @@
 #include <stdexcept>
 
 /**
- * This is a helper class that we use to load the symbols 
+ * This is a helper class that we use to load the symbols
  * from the reference library dynamically so that we get
  * the reference solution.
  * Since dynamic loading can be time consuming this class works
@@ -53,12 +53,12 @@
  *   loads the library either with a call to dlopen (Linux) or with
  *   a call to LoadLibrary (Windows).
  * - Similarly the destructor unloads the library.
- * - The member function loadSymbol() is used to return the pointer 
+ * - The member function loadSymbol() is used to return the pointer
  *   to that symbol in the library, either with a call to ldsym (Linux)
  *   or with a call to GetProcAddress (Windows).
  * This means that the library is only loaded once per executable
  * due to having the global variable refCBLASModule and unloaded once
- * at the end. Multiple calls to loadSymbol are used to access the 
+ * at the end. Multiple calls to loadSymbol are used to access the
  * corresponding API used for reference.
 */
 namespace testinghelpers {

@@ -89,7 +89,7 @@ macro(get_dirpaths_with_suffixes result curdir sufflist)
                 endif()
             endforeach()
             # If there is at least one *.suff file, add directory path in the list.
-            if(HAS_SUFF_FILE STREQUAL "true")                
+            if(HAS_SUFF_FILE STREQUAL "true")
                 list(APPEND dirlist "${child}")
             endif()
         endif()

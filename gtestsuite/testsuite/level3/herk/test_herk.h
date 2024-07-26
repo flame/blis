@@ -106,8 +106,8 @@ public:
         RT beta   = std::get<6>(str.param);
         gtint_t lda_inc = std::get<7>(str.param);
         gtint_t ldc_inc = std::get<8>(str.param);
-        
-        std::string str_name = API_PRINT; 
+
+        std::string str_name = API_PRINT;
         str_name += "_stor_" + std::string(&storage, 1);
         str_name += "_uplo_" + std::string(&uplo, 1);
         str_name += "_transa_" + std::string(&transa, 1);

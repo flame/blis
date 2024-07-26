@@ -672,7 +672,7 @@ TEST_P( dgemmGenericSmall, gemm_small)
 
         free(cref);
     }
-    else 
+    else
     {
         //----------------------------------------------------------
         //         Initialize matrics with random numbers

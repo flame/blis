@@ -112,7 +112,7 @@ static double Inf = std::numeric_limits<double>::infinity();
     160 <= idx < 168  - In L8
     168 <= idx < 172  - In L4
     172 <= idx < 174  - In L2
-    174 <= idx < 175  - In LScalar  
+    174 <= idx < 175  - In LScalar
 
     These sizes and indices also ensure code coverage for bli_vec_search_double().
     The testsuite requires 2 indices(and 2 exception values) to be induced in the vector.

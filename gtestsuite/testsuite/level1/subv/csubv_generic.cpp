@@ -83,7 +83,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n','c'),
             // n: size of vector.
             // as we don't have BLIS vectorized kernels for subv,
-            // having fewer sizes or maybe a Range would be sufficient 
+            // having fewer sizes or maybe a Range would be sufficient
             // to ensure code coverage of the reference kernel.
             ::testing::Values(
                 gtint_t( 1),

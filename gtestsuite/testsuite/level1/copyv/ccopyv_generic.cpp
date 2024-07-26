@@ -143,7 +143,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::copyvGenericPrint()
     );
-//To cover large sizes with non unit increments.   
+//To cover large sizes with non unit increments.
 INSTANTIATE_TEST_SUITE_P(
         largeSize,
         ccopyvGeneric,

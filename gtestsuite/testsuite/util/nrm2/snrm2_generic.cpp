@@ -67,9 +67,9 @@ TEST_P( snrm2Generic, API )
 }
 
 /**
- * Note: snrm2 scalar ONLY implementation is used, but we write the test 
+ * Note: snrm2 scalar ONLY implementation is used, but we write the test
  * using values that worked for the vectorized path for the future.
- * 
+ *
  * scnrm2 implementation is composed by two parts:
  * - vectorized path for n>=64
  *      - for-loop for multiples of 32 (F32)

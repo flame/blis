@@ -49,7 +49,7 @@ void test_nrm2( gtint_t n, gtint_t incx, double thresh )
     //        Initialize vectors with random numbers.
     //----------------------------------------------------------
     std::vector<T> x = testinghelpers::get_random_vector<T>( -10, -10, n, incx );
-    
+
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.
     //----------------------------------------------------------
@@ -107,7 +107,7 @@ public:
         testing::TestParamInfo<std::tuple<gtint_t, gtint_t>> str) const {
         gtint_t n     = std::get<0>(str.param);
         gtint_t incx  = std::get<1>(str.param);
-        
+
         std::string str_name = API_PRINT;
         str_name += "_n_" + std::to_string(n);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
@@ -132,7 +132,7 @@ public:
         // index with extreme value jexval.
         gtint_t j = std::get<4>(str.param);
         T jexval = std::get<5>(str.param);
-        
+
         std::string str_name = API_PRINT;
         str_name += "_n_" + std::to_string(n);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);

@@ -44,7 +44,7 @@ class cherGeneric :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P( cherGeneric, API ) 
+TEST_P( cherGeneric, API )
 {
     using T = scomplex;
     //----------------------------------------------------------
