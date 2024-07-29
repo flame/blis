@@ -397,25 +397,36 @@ void daxpy_blis_impl
 
     _Pragma("omp parallel num_threads(nt)")
     {
-        dim_t start, length;
+        dim_t start, end, length; 
+        thrinfo_t thrinfo_vec;
 
-        // Get the thread ID
-        dim_t thread_id = omp_get_thread_num();
+        // The block size is the minimum factor, whose multiple will ensure that only
+        // the vector code section is executed. Furthermore, for double datatype it corresponds
+        // to one cacheline size.
+        dim_t block_size = 8;
 
         // Get the actual number of threads spawned
-        dim_t nt_use = omp_get_num_threads();
+        thrinfo_vec.n_way = omp_get_num_threads();
+
+        // Get the thread ID
+        thrinfo_vec.work_id = omp_get_thread_num();
 
         /*
           Calculate the compute range for the current thread
           based on the actual number of threads spawned
         */
-        bli_thread_vector_partition
+
+        bli_thread_range_sub
         (
+          &thrinfo_vec,
           n_elem,
-          nt_use,
-          &start, &length,
-          thread_id
+          block_size,
+          FALSE,
+          &start,
+          &end
         );
+
+        length = end - start;
 
         // Adjust the local pointer for computation
         double *x_thread_local = x0 + (start * incx0);

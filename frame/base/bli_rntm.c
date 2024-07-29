@@ -1779,7 +1779,45 @@ BLIS_INLINE void aocl_daxpyv_dynamic
 	switch (arch_id)
 	{
 		case BLIS_ARCH_ZEN5:
+
+			if ( n_elem <= 34000 )
+				*nt_ideal = 1;
+			else if ( n_elem <= 82000 )
+				*nt_ideal = 4;
+			else if ( n_elem <= 2330000 )
+				*nt_ideal = 8;
+			else if ( n_elem <= 4250000 )
+				*nt_ideal = 16;
+			else if ( n_elem <= 7000000 )
+				*nt_ideal = 32;
+			else if ( n_elem <= 21300000 )
+				*nt_ideal = 64;
+			else
+				// For sizes in this range, AOCL dynamic does not make any change
+				*nt_ideal = -1;
+
+			break;
+
 		case BLIS_ARCH_ZEN4:
+
+			if ( n_elem <= 11000 )
+				*nt_ideal = 1;
+			else if ( n_elem <= 130000 )
+				*nt_ideal = 4;
+			else if ( n_elem <= 2230000 )
+				*nt_ideal = 8;
+			else if ( n_elem <= 3400000 )
+				*nt_ideal = 16;
+			else if ( n_elem <= 9250000 )
+				*nt_ideal = 32;
+			else if ( n_elem <= 15800000 )
+				*nt_ideal = 64;
+			else
+				// For sizes in this range, AOCL dynamic does not make any change
+				*nt_ideal = -1;
+
+			break;
+
 		case BLIS_ARCH_ZEN:
 		case BLIS_ARCH_ZEN2:
 		case BLIS_ARCH_ZEN3:
