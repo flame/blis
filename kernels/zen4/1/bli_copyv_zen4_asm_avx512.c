@@ -353,12 +353,9 @@ void bli_scopyv_zen4_asm_avx512
             "zmm4",  "zmm5",  "zmm6",  "zmm7",
             "zmm8",  "zmm9",  "zmm10", "zmm11",
             "zmm12", "zmm13", "zmm14", "zmm15",
-            "zmm16", "zmm17", "zmm18", "zmm19",
-            "zmm20", "zmm21", "zmm22", "zmm23",
-            "zmm24", "zmm25", "zmm26", "zmm27",
-            "zmm28", "zmm29", "zmm30", "zmm31",
-            "rsi",   "rdx",   "rcx",   "r8",
-            "r9",    "r11"
+            "xmm0",  "rsi",   "rdx",   "rcx",   
+            "r8",    "r9",    "r11",   "k2",
+            "memory"
             )
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)
@@ -697,12 +694,9 @@ void bli_dcopyv_zen4_asm_avx512
             "zmm4",  "zmm5",  "zmm6",  "zmm7",
             "zmm8",  "zmm9",  "zmm10", "zmm11",
             "zmm12", "zmm13", "zmm14", "zmm15",
-            "zmm16", "zmm17", "zmm18", "zmm19",
-            "zmm20", "zmm21", "zmm22", "zmm23",
-            "zmm24", "zmm25", "zmm26", "zmm27",
-            "zmm28", "zmm29", "zmm30", "zmm31",
-            "rsi",   "rdx",   "rcx",   "r8",
-            "r9",    "r11"
+            "rsi",   "rdi",   "rcx",   "r8",
+            "r9",    "r11",   "k2",    "xmm0",
+            "memory"
             )
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)
@@ -996,10 +990,10 @@ void bli_zcopyv_zen4_asm_avx512
 
             /*
                 Creating mask: Example - fringe case = 1
-                    step 1 : rdx_o = (1111 1111)2  or  (255)10
-                    step 2 : rdx_o = (1111 1110)2  or  (254)10
-                    step 3 : rdx_o = (1111 1100)2  or  (252)10
-                    step 4 : rdx_o = (0000 0011)2  or  (3)10
+                    step 1 : rcx = (1111 1111)2  or  (255)10
+                    step 2 : rcx = (1111 1110)2  or  (254)10
+                    step 3 : rcx = (1111 1100)2  or  (252)10
+                    step 4 : rcx = (0000 0011)2  or  (3)10
             */
             // Loading the input values using masked load
             vmovupd(mem(rdx, 0*64), zmm0 MASK_(K(2)))
@@ -1027,7 +1021,7 @@ void bli_zcopyv_zen4_asm_avx512
                     "zmm8",  "zmm9",  "zmm10", "zmm11",
                     "zmm12", "zmm13", "zmm14", "zmm15",
                     "zmm16", "rsi",   "rdx",   "rcx",
-                    "r8",    "r9"
+                    "r8",    "r9",    "k2",    "memory"
             )
         }
         else
@@ -1504,10 +1498,10 @@ void bli_zcopyv_zen4_asm_avx512
 
             /*
                 Creating mask: Example - fringe case = 1
-                    step 1 : rdx_o = (1111 1111)2  or  (255)10
-                    step 2 : rdx_o = (1111 1110)2  or  (254)10
-                    step 3 : rdx_o = (1111 1100)2  or  (252)10
-                    step 4 : rdx_o = (0000 0011)2  or  (3)10
+                    step 1 : rcx = (1111 1111)2  or  (255)10
+                    step 2 : rcx = (1111 1110)2  or  (254)10
+                    step 3 : rcx = (1111 1100)2  or  (252)10
+                    step 4 : rcx = (0000 0011)2  or  (3)10
             */
             // Loading the input values using masked load
             vmovupd(mem(rdx, 0*64), zmm0 MASK_(K(2)))
@@ -1536,7 +1530,7 @@ void bli_zcopyv_zen4_asm_avx512
                     "zmm24", "zmm25", "zmm26", "zmm27",
                     "zmm28", "zmm29", "zmm30", "zmm31",
                     "rsi",   "rdx",   "rcx",   "r8",
-                    "r9"
+                    "r9",    "k2",    "memory"
                     )
         }
         else
