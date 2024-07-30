@@ -237,6 +237,9 @@ void dscal_blis_impl
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', (void *)alpha, *n, *incx );
     dim_t  n_elem;
+#ifdef BLIS_ENABLE_OPENMP
+    dim_t  ST_THRESH;
+#endif
     double* x0;
     inc_t  incx0;
 
@@ -284,7 +287,9 @@ void dscal_blis_impl
       case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
         scalv_ker_ptr = bli_dscalv_zen_int_avx512;
-
+  #ifdef BLIS_ENABLE_OPENMP
+        ST_THRESH = 30000;
+  #endif
         break;
 #endif
       case BLIS_ARCH_ZEN:
@@ -293,6 +298,9 @@ void dscal_blis_impl
 
           // AVX2 Kernel
           scalv_ker_ptr = bli_dscalv_zen_int10;
+#ifdef BLIS_ENABLE_OPENMP
+          ST_THRESH = 30000;
+#endif
           break;
 
       default:
@@ -305,6 +313,30 @@ void dscal_blis_impl
     }
 
 #ifdef BLIS_ENABLE_OPENMP
+    /*
+      If the optimial number of threads is 1, the OpenMP and
+      'bli_nthreads_l1'overheads are avoided by calling the
+      function directly. This ensures that performance of dscalv
+      does not drop for single  thread when OpenMP is enabled.
+    */
+    if (n_elem <= ST_THRESH)
+    {
+#endif
+        scalv_ker_ptr
+        (
+          BLIS_NO_CONJUGATE,
+          n_elem,
+          (double *)alpha,
+          x0, incx0,
+          cntx
+        );
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+
+        return;
+#ifdef BLIS_ENABLE_OPENMP
+    }
+
     /*
       Initializing the number of thread to one
       to avoid compiler warnings
@@ -326,49 +358,38 @@ void dscal_blis_impl
       &nt
     );
 
-    /*
-      If the number of optimum threads is 1, the OpenMP overhead
-      is avoided by calling the function directly
-    */
-    if (nt == 1)
-    {
-#endif
-        scalv_ker_ptr
-        (
-          BLIS_NO_CONJUGATE,
-          n_elem,
-          (double *)alpha,
-          x0, incx0,
-          cntx
-        );
-
-        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-
-        return;
-#ifdef BLIS_ENABLE_OPENMP
-    }
-
     _Pragma("omp parallel num_threads(nt)")
     {
-        dim_t start, length;
+        dim_t start, end, length; 
+        thrinfo_t thrinfo_vec;
 
-        // Get the thread ID
-        dim_t thread_id = omp_get_thread_num();
+        // The block size is the minimum factor, whose multiple will ensure that only
+        // the vector code section is executed. Furthermore, for double datatype it corresponds
+        // to one cacheline size.
+        dim_t block_size = 8;
 
         // Get the actual number of threads spawned
-        dim_t nt_use = omp_get_num_threads();
+        thrinfo_vec.n_way = omp_get_num_threads();
+
+        // Get the thread ID
+        thrinfo_vec.work_id = omp_get_thread_num();
 
         /*
           Calculate the compute range for the current thread
           based on the actual number of threads spawned
         */
-        bli_thread_vector_partition
+
+        bli_thread_range_sub
         (
+          &thrinfo_vec,
           n_elem,
-          nt_use,
-          &start, &length,
-          thread_id
+          block_size,
+          FALSE,
+          &start,
+          &end
         );
+
+        length = end - start;
 
         // Adjust the local pointer for computation
         double *x_thread_local = x0 + (start * incx0);
@@ -383,12 +404,13 @@ void dscal_blis_impl
           cntx
         );
     }
-#endif
-
 
     /* Finalize BLIS. */
     // bli_finalize_auto();
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+
+#endif
+
 }
 #ifdef BLIS_ENABLE_BLAS
 void dscal_
