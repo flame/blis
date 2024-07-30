@@ -32,84 +32,15 @@
 
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <immintrin.h>
-#include <time.h>
-#include <float.h>
-#include <math.h>
-
-#include "blis.h"
-
-
-// Used to clip downscaled output, will be set in the main loop based
-// on the accumulation and C data type.
-int64_t DSCALE_CLIP_MIN = 0;
-int64_t DSCALE_CLIP_MAX = 0;
-
-// Mode can be one of the follwoing:
-// 1. p - performance, used for benchmarks.
-// 2. a - accuracy, used to test accuracy/correctness.
-// Default value is p, can be modified by passing command line arg.
-char bench_mode = 'p';
-
-int32_t global_n_repeat = 0;
-
-char global_dscale_out = 'n';
+#include "bench_lpgemm_helpers.h"
 
 char global_pre_op = 'n';
-
-dim_t num_eltwise = 0; // To keep track of eltwise operations.
-
-#define _XSTR(str) #str
-#define XSTR(str) _XSTR(str)
-
-#define GEN_FUNC_NAME(prototype,ctype) prototype ## ctype
-
-// Inplace to lower func.
-static inline void str_tolower( char* str )
-{
-    for ( char* c = str; ( *c ) != '\0'; ++c )
-    { *( c ) = tolower( *( c ) ); }
-}
-
-static inline void float_to_bf16( float* float_value, bfloat16* bf16_val )
-{
-    /*Set offset 2 to copy most significant 2 bytes of float
-    to convert float values to bf16 values*/
-    memcpy( ( bf16_val ), (char *)( float_value ) + 2, sizeof ( bfloat16 ) );
-}
-
-static inline void convert_float_arr_to_bf16( float* array, bfloat16* array_bf16, int size )
-{
-    for (int i=0; i< size; i++)
-    {
-        float_to_bf16( ( array + i ), ( array_bf16 + i ) );
-    }
-}
-
-
-static inline void bfloat16_to_float( bfloat16 bf16_val, float*  float_val )
-{
-    int32_t inter_temp = *( ( int16_t* ) &bf16_val );
-    inter_temp = inter_temp << 16;
-    memcpy( float_val, &inter_temp, sizeof( int32_t ) );
-}
-
-#define CONVERT_TO_FLOAT(ctype) \
-static inline void GEN_FUNC_NAME(ctype,_to_float) ( ctype val, float* float_val ) \
-{ \
-    *float_val = (float) val; \
-} \
 
 CONVERT_TO_FLOAT(uint8_t)
 CONVERT_TO_FLOAT(int8_t)
 CONVERT_TO_FLOAT(int16_t)
 CONVERT_TO_FLOAT(float)
 CONVERT_TO_FLOAT(int32_t)
-
-
 
 /* Helper functions to print matrices when debugging */
 void print_matrix_bfloat16
@@ -152,63 +83,6 @@ PRINT_MATRIX(int16_t)
 PRINT_MATRIX(float)
 PRINT_MATRIX(int32_t)
 
-void* lpgemm_malloc( int32_t size )
-{
-    void* p;
-    // creating a dummy buffer of size 4 bytes in case
-    // size of the matrix is negative.
-    if( size <= 0 )
-    {
-        p = malloc( 4 );
-        return p;
-    }
-
-    if( bench_mode == 'a' )
-    {
-        p = malloc(size);
-    }
-    else
-    {
-        err_t err = BLIS_SUCCESS;
-        p = bli_malloc_user(size, &err);
-    }
-    if ( p == NULL )
-    {
-        printf("Unable to allocate memory.\n");
-        exit(1);
-    }
-    return p;
-}
-
-void lpgemm_free( void* p )
-{
-    if( p == NULL)
-    {
-        printf("Attempt to free null pointer\n");
-        return;
-    }
-
-    if( bench_mode == 'a' )
-    {
-        free(p);
-    }
-    else
-    {
-        bli_free_user(p);
-    }
-}
-
-#define GEN_FILL_ARRAY_FUNC(ctype) \
-void fill_array_ ## ctype ( void* arr, dim_t size ) \
-{ \
-    if( size < 0 ) return; \
-    ctype* temp_arr = ( ctype* ) arr; \
-    for ( dim_t i = 0; i < size; ++i ) \
-    { \
-        temp_arr[i] = ( ctype )( ( rand() % 11 ) - 5 ); \
-    } \
-} \
-
 GEN_FILL_ARRAY_FUNC(int8_t)
 GEN_FILL_ARRAY_FUNC(int16_t)
 GEN_FILL_ARRAY_FUNC(float)
@@ -221,22 +95,6 @@ void fill_array_uint8_t ( void* arr, dim_t size )
     for ( dim_t i = 0; i < size; ++i )
     {
         temp_arr[i] = ( uint8_t )( rand() % 5 );
-    }
-}
-
-void fill_array_bfloat16( void* arr, dim_t size )
-{
-    err_t bli_errors = BLIS_SUCCESS;
-    if( size < 0 ) return;
-    float* c_float = ( float* ) bli_malloc_user( sizeof( float ) * size, &bli_errors );
-    for ( dim_t i = 0; i < size; ++i )
-    {
-        c_float[i] = (rand() % 5 );
-    }
-    convert_float_arr_to_bf16( c_float, arr, size );
-    if ( c_float != NULL )
-    {
-        bli_free_user( c_float );
     }
 }
 
@@ -255,24 +113,9 @@ void fill_array_int4_c_t( void* arr, dim_t size )
     }
 }
 
-#define GEN_FILL_ARRAY_POST_OPS_FUNC(ctype) \
-void fill_array_post_ops_ ## ctype ( void* arr, dim_t size ) \
-{ \
-    ctype* temp_arr = ( ctype* ) arr; \
-    for ( dim_t i = 0; i < size; ++i ) \
-    { \
-        temp_arr[i] = ( ctype )( rand() % 5 ); \
-    } \
-} \
-
 GEN_FILL_ARRAY_POST_OPS_FUNC(int16_t)
 GEN_FILL_ARRAY_POST_OPS_FUNC(int32_t)
 GEN_FILL_ARRAY_POST_OPS_FUNC(float)
-
-void fill_array_post_ops_bfloat16( void* arr, dim_t size )
-{
-    fill_array_bfloat16( arr, size );
-}
 
 #define GEN_BLIS_MAT_MUL_FUNC(A_type,B_type,C_type,ACCUM_type,BLAS_SFX) \
 void mat_mul_ ## BLAS_SFX \
@@ -414,18 +257,6 @@ GEN_MAT_MUL_BENCH_DRV_FUNC(int8_t,int8_t,int16_t,int16_t,s8s8s16os16)
 GEN_MAT_MUL_BENCH_DRV_FUNC(int8_t,int8_t,int8_t,int16_t,s8s8s16os8)
 GEN_MAT_MUL_BENCH_DRV_FUNC(bfloat16,int8_t,float,float,bf16s4f32of32)
 GEN_MAT_MUL_BENCH_DRV_FUNC(bfloat16,int8_t,bfloat16,float,bf16s4f32obf16)
-
-#ifndef WIN32
-int max (int a, int b)
-{
-    return ( a > b ? a : b );
-}
-
-int min (int a, int b)
-{
-    return ( a < b ? a : b );
-}
-#endif
 
 #define GEN_MAT_MUL_ACC_CHK_DOWNSCALE(C_type,ACCUM_type,SCALE_type,BLAS_DOWNSCALE_SFX) \
 static inline ACCUM_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX \
@@ -819,19 +650,6 @@ static inline float mat_mul_accuracy_check_accum_bf16s4f32obf16
     return temp_accum;
 }
 
-#define GEN_GELU_TANH_POSTOP_INT(ACCUM_type,BLAS_SFX) \
-static inline ACCUM_type GELU_TANH_post_op_ ## BLAS_SFX \
-     (\
-       ACCUM_type temp_accum \
-     )\
-{\
-    float gelu_reference = 0.5 *(double)temp_accum * (1 + tanhf( 0.797884 * ( (double)temp_accum + \
-                    ( 0.044715 * ((double)temp_accum * (double)temp_accum * \
-                    (double)temp_accum ) ) ) ) ); \
-    temp_accum = round (gelu_reference); \
-    return temp_accum; \
-}\
-
 GEN_GELU_TANH_POSTOP_INT(int16_t,u8s8s16os8)
 GEN_GELU_TANH_POSTOP_INT(int16_t,u8s8s16ou8)
 GEN_GELU_TANH_POSTOP_INT(int16_t,u8s8s16os16)
@@ -842,34 +660,11 @@ GEN_GELU_TANH_POSTOP_INT(int32_t,s8s8s32os32)
 GEN_GELU_TANH_POSTOP_INT(int16_t,s8s8s16os8)
 GEN_GELU_TANH_POSTOP_INT(int16_t,s8s8s16os16)
 
-#define GEN_GELU_TANH_POSTOP_FLOAT(BLAS_SFX) \
-static inline float GELU_TANH_post_op_ ## BLAS_SFX \
-     (\
-       float temp_accum \
-     )\
-{\
-    temp_accum = 0.5 *(double)temp_accum * (1 + tanhf( 0.797884 * ( (double)temp_accum + \
-                  ( 0.044715 * ((double)temp_accum * (double)temp_accum * \
-                  (double)temp_accum ) ) ) ) ); \
-    return temp_accum; \
-}\
-
 GEN_GELU_TANH_POSTOP_FLOAT(f32f32f32of32)
 GEN_GELU_TANH_POSTOP_FLOAT(bf16bf16f32of32)
 GEN_GELU_TANH_POSTOP_FLOAT(bf16bf16f32obf16)
 GEN_GELU_TANH_POSTOP_FLOAT(bf16s4f32of32)
 GEN_GELU_TANH_POSTOP_FLOAT(bf16s4f32obf16)
-
-#define GEN_GELU_ERF_POSTOP_INT(ACCUM_type,BLAS_SFX) \
-static inline ACCUM_type GELU_ERF_post_op_ ## BLAS_SFX \
-     (\
-       ACCUM_type temp_accum \
-     )\
-{\
-    float gelu_reference = 0.5 *(double)temp_accum * (1 + erff( (double)temp_accum * 0.707107 )); \
-    temp_accum = round (gelu_reference); \
-    return temp_accum; \
-}\
 
 GEN_GELU_ERF_POSTOP_INT(int16_t,u8s8s16os8)
 GEN_GELU_ERF_POSTOP_INT(int16_t,u8s8s16ou8)
@@ -881,34 +676,11 @@ GEN_GELU_ERF_POSTOP_INT(int32_t,s8s8s32os32)
 GEN_GELU_ERF_POSTOP_INT(int16_t,s8s8s16os8)
 GEN_GELU_ERF_POSTOP_INT(int16_t,s8s8s16os16)
 
-#define GEN_GELU_ERF_POSTOP_FLOAT(BLAS_SFX) \
-static inline float GELU_ERF_post_op_ ## BLAS_SFX \
-     (\
-       float temp_accum \
-     )\
-{\
-    temp_accum = 0.5 *(double)temp_accum * (1 + erff( (double)temp_accum * 0.707107 )); \
-    return temp_accum; \
-}\
-
 GEN_GELU_ERF_POSTOP_FLOAT(f32f32f32of32)
 GEN_GELU_ERF_POSTOP_FLOAT(bf16bf16f32of32)
 GEN_GELU_ERF_POSTOP_FLOAT(bf16bf16f32obf16)
 GEN_GELU_ERF_POSTOP_FLOAT(bf16s4f32of32)
 GEN_GELU_ERF_POSTOP_FLOAT(bf16s4f32obf16)
-
-#define GEN_SWISH_POSTOP_INT(ACCUM_type,BLAS_SFX) \
-static inline ACCUM_type SWISH_post_op_ ## BLAS_SFX \
-     ( \
-       ACCUM_type temp_accum, \
-       ACCUM_type alpha \
-     ) \
-{ \
-    float swish_reference = ( temp_accum / ( 1 + \
-                            expf( ( double )alpha * temp_accum * -1 ) ) ); \
-    temp_accum = round (swish_reference); \
-    return temp_accum; \
-} \
 
 GEN_SWISH_POSTOP_INT(int16_t,u8s8s16os8)
 GEN_SWISH_POSTOP_INT(int16_t,u8s8s16ou8)
@@ -920,46 +692,14 @@ GEN_SWISH_POSTOP_INT(int32_t,s8s8s32os32)
 GEN_SWISH_POSTOP_INT(int16_t,s8s8s16os8)
 GEN_SWISH_POSTOP_INT(int16_t,s8s8s16os16)
 
-#define GEN_SWISH_POSTOP_FLOAT(BLAS_SFX) \
-static inline float SWISH_post_op_ ## BLAS_SFX \
-     ( \
-       float temp_accum, \
-       float alpha \
-     ) \
-{ \
-    temp_accum = ( temp_accum / ( 1 + \
-                  expf( ( double )alpha * temp_accum * -1 ) ) ); \
-    return temp_accum; \
-} \
-
 GEN_SWISH_POSTOP_FLOAT(f32f32f32of32)
 GEN_SWISH_POSTOP_FLOAT(bf16bf16f32of32)
 GEN_SWISH_POSTOP_FLOAT(bf16bf16f32obf16)
 GEN_SWISH_POSTOP_FLOAT(bf16s4f32of32)
 GEN_SWISH_POSTOP_FLOAT(bf16s4f32obf16)
 
-#define GEN_GET_MATRIX_ADD_POST_OP_VAL_BF16(C_type,BLAS_SFX) \
-static inline float get_matrix_add_post_op_val_ ## BLAS_SFX \
-     ( \
-       C_type val \
-     ) \
-{ \
-    float ret_val = 0.0; \
-    bfloat16_to_float( val, &ret_val ); \
-    return ret_val; \
-} \
-
 GEN_GET_MATRIX_ADD_POST_OP_VAL_BF16(bfloat16,bf16bf16f32obf16)
 GEN_GET_MATRIX_ADD_POST_OP_VAL_BF16(bfloat16,bf16s4f32obf16)
-
-#define GEN_GET_MATRIX_ADD_POST_OP_VAL(C_type,ACCUM_type,BLAS_SFX) \
-static inline ACCUM_type get_matrix_add_post_op_val_ ## BLAS_SFX \
-     ( \
-       C_type val \
-     ) \
-{ \
-    return (ACCUM_type) val; \
-} \
 
 GEN_GET_MATRIX_ADD_POST_OP_VAL(int8_t,int32_t,u8s8s32os8)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(int32_t,int32_t,u8s8s32os32)
@@ -974,30 +714,8 @@ GEN_GET_MATRIX_ADD_POST_OP_VAL(float,float,f32f32f32of32)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(float,float,bf16bf16f32of32)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(float,float,bf16s4f32of32)
 
-#define GEN_GET_BIAS_POST_OP_VAL_BF16(BLAS_SFX) \
-static inline float get_bias_post_op_val_ ## BLAS_SFX \
-     ( \
-       void* post_op_bias_ptr, \
-       dim_t j \
-     ) \
-{ \
-    float ret_val = 0.0; \
-    bfloat16_to_float( *( ( bfloat16* )post_op_bias_ptr + j ), &ret_val ); \
-    return ret_val; \
-} \
-
 GEN_GET_BIAS_POST_OP_VAL_BF16(bf16bf16f32obf16)
 GEN_GET_BIAS_POST_OP_VAL_BF16(bf16s4f32obf16)
-
-#define GEN_GET_BIAS_POST_OP_VAL(ACCUM_type,BLAS_SFX) \
-static inline ACCUM_type get_bias_post_op_val_ ## BLAS_SFX \
-     ( \
-       void* post_op_bias_ptr, \
-       dim_t j \
-     ) \
-{ \
-    return *( ( ACCUM_type* )post_op_bias_ptr + j ); \
-} \
 
 GEN_GET_BIAS_POST_OP_VAL(int32_t,u8s8s32os8)
 GEN_GET_BIAS_POST_OP_VAL(int32_t,u8s8s32os32)
@@ -1012,31 +730,12 @@ GEN_GET_BIAS_POST_OP_VAL(float,f32f32f32of32)
 GEN_GET_BIAS_POST_OP_VAL(float,bf16bf16f32of32)
 GEN_GET_BIAS_POST_OP_VAL(float,bf16s4f32of32)
 
-#define GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(C_type, ACCUM_type) \
-void mat_mul_get_output_type_val ## ACCUM_type ## C_type \
-     ( \
-       C_type* out_temp_accum, \
-       ACCUM_type* temp_accum \
-     ) \
-{ \
-    ( *out_temp_accum ) = ( C_type )( *temp_accum ); \
-} \
-
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int32_t,int32_t)
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int8_t,int32_t)
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int16_t,int16_t)
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int8_t,int16_t)
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(uint8_t,int16_t)
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(float,float)
-
-void mat_mul_get_output_type_valfloatbfloat16
-     (
-       bfloat16* out_temp_accum,
-       float* temp_accum
-     )
-{
-    float_to_bf16( temp_accum, out_temp_accum );
-}
 
 #define GEN_MAT_MUL_ACC_CHK_DRV_FUNC(A_type,B_type,C_type,ACCUM_type,SCALE_type,BLAS_SFX,BLAS_DOWNSCALE_SFX) \
 void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
@@ -1268,63 +967,8 @@ GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int8_t,int16_t,float,s8s8s16os8,s8s8s
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(bfloat16,int8_t,float,float,float,bf16s4f32of32,bf16bf16f32obf16)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(bfloat16,int8_t,bfloat16,float,float,bf16s4f32obf16,bf16bf16f32obf16)
 
-void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
-{
-    if ( post_ops == NULL )
-    {
-        return;
-    }
-
-    if ( post_ops->eltwise != NULL )
-    {
-        for ( dim_t i = 0; i < num_eltwise; ++i )
-        {
-            free( ( post_ops->eltwise + i )->algo.alpha );
-            free( ( post_ops->eltwise + i )->algo.beta );
-        }
-        free( post_ops->eltwise );
-    }
-
-    if ( post_ops->matrix_add != NULL )
-    {
-        free( ( post_ops->matrix_add )->matrix );
-        free( post_ops->matrix_add );
-    }
-
-    if ( post_ops->sum != NULL )
-    {
-        free( ( post_ops->sum )->scale_factor );
-        free( ( post_ops->sum )->zero_point );
-        free( post_ops->sum );
-    }
-
-    if ( post_ops->bias != NULL )
-    {
-        free( ( post_ops->bias )->bias );
-        free( post_ops->bias );
-    }
-
-    if ( post_ops->pre_ops != NULL )
-    {
-        if ( ( post_ops->pre_ops )->b_zp != NULL )
-        {
-            free( ( ( post_ops->pre_ops )->b_zp )->zero_point );
-            free( ( post_ops->pre_ops )->b_zp );
-        }
-        if ( ( post_ops->pre_ops )->b_scl != NULL )
-        {
-            free( ( ( post_ops->pre_ops )->b_scl )->scale_factor );
-            free( ( post_ops->pre_ops )->b_scl );
-        }
-        free( post_ops->pre_ops );
-    }
-
-    free( post_ops->seq_vector );
-    free( post_ops );
-}
-
 #define GEN_MAT_MUL_POST_OPS_CREATOR(C_DSCALE_type,C_type,DSCALE_type,BIAS_type,BLAS_SFX) \
-aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
+static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
      ( \
        dim_t m, \
        dim_t n, \
@@ -1347,8 +991,8 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         return NULL; \
     } \
  \
-    /* Only supporting 5 post ops at max for now.*/ \
-    dim_t max_post_ops_seq_length = 5; \
+    /* Only supporting 8 post ops at max for now.*/ \
+    dim_t max_post_ops_seq_length = 8; \
     post_ops->seq_vector = ( AOCL_POST_OP_TYPE* ) \
                             malloc \
                             ( \

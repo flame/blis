@@ -99,7 +99,7 @@ void gelu_bench_driver_ ## GELU_SFX \
 			GEN_FUNC_NAME(fill_array_,V_type)( x, ( n * incx) ); \
 		} \
  \
-		GEN_FUNC_NAME(aocl_,GELU_SFX) \
+		GEN_FUNC_NAME(aocl_gemm_,GELU_SFX) \
 		( \
 		  n, x, incx \
 		); \
@@ -134,7 +134,7 @@ void softmax_bench_driver_ ## SOFTMAX_SFX \
 			GEN_FUNC_NAME(fill_array_,V_type)( x, ( n * incx) ); \
 		} \
  \
-		GEN_FUNC_NAME(aocl_,SOFTMAX_SFX) \
+		GEN_FUNC_NAME(aocl_gemm_,SOFTMAX_SFX) \
 		( \
 		  n, x, incx \
 		); \

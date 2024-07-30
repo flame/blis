@@ -107,7 +107,8 @@ all: blis
 
 blis: \
        bench_lpgemm_blis.x \
-       bench_lpgemm_utils_blis.x
+       bench_lpgemm_utils_blis.x \
+       bench_lpgemm_eltwise_ops_blis.x
 
 
 # --Object file rules --

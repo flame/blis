@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,33 +32,44 @@
 
 */
 
-#ifndef LPGEMM_BLKSZ_MAP_H
-#define LPGEMM_BLKSZ_MAP_H
+#ifndef BLIS_LPGEMM_ELTWISE_OPS_KERN_H
+#define BLIS_LPGEMM_ELTWISE_OPS_KERN_H
 
-// The XMACRO follows the format ID,MC,NC,KC,MR,NR,PACKA_RS,PACKA_CS,PACKB_RS,PACKB_CS:
-// ID = One of the AOCL_OPERATION_TYPE enum.
+#define LPGEMM_ELTWISE_OPS_KERNEL(A_type,B_type,LP_SFX) \
+void lpgemm_eltwise_ops_kernel_ ## LP_SFX \
+     ( \
+       const dim_t         m0, \
+       const dim_t         n0, \
+       const A_type*       a, \
+       const dim_t         rs_a, \
+       const dim_t         cs_a, \
+       B_type*             b, \
+       const dim_t         rs_b, \
+       const dim_t         cs_b, \
+       lpgemm_post_op*     post_ops_list, \
+       lpgemm_post_op_attr post_ops_attr \
+     ) \
 
-#define LPGEMM_BLKSZ_MAP_ZEN4 \
-	XMACRO(U8S8S16OS16, 252, 2048, 2048, 6, 32, 0, 0, 2*32, 32) \
-	XMACRO(U8S8S32OS32, 144, 1024, 2048, 6, 64, 4, 24, 4*64, 64) \
-	XMACRO(BF16BF16F32OF32, 144, 1024, 2048, 6, 64, 0, 0, 2*64, 64/2) \
-	XMACRO(BF16S4F32OF32, 144, 1024, 2048, 6, 64, 0, 0, 2*64, 64/2) \
-	XMACRO(S8S8S32OS32, 144, 1024, 2048, 6, 64, 4, 24, 4*64, 64) \
-	XMACRO(S8S8S16OS16, 252, 2048, 2048, 6, 32, 0, 0, 2*32, 32) \
-	XMACRO(U8S4S32OS32, 144, 1024, 2048, 6, 64, 4, 24, 4*64, 64) \
+LPGEMM_ELTWISE_OPS_KERNEL(bfloat16,float,bf16of32_6x64);
 
-#define LPGEMM_BLKSZ_MAP_ZEN \
-	XMACRO(U8S8S16OS16, 240, 2048, 2048, 6, 32, 0, 0, 2*32, 32) \
-	XMACRO(U8S8S32OS32, 144, 1024, 2048, 6, 64, 4, 24, 4*64, 64) \
-	XMACRO(BF16BF16F32OF32, 144, 1024, 2048, 6, 64, 0, 0, 2*64, 64/2) \
-	XMACRO(S8S8S32OS32, 144, 1024, 2048, 6, 64, 4, 24, 4*64, 64) \
-	XMACRO(S8S8S16OS16, 240, 2048, 2048, 6, 32, 0, 0, 2*32, 32) \
-	XMACRO(U8S4S32OS32, 144, 1024, 2048, 6, 64, 4, 24, 4*64, 64) \
-	XMACRO(BF16S4F32OF32, 144, 1024, 2048, 6, 64, 0, 0, 2*64, 64/2) \
+#define LPGEMM_ELTWISE_OPS_M_FRINGE_KERNEL(A_type,B_type,LP_SFX) \
+void lpgemm_eltwise_ops_kernel_ ## LP_SFX \
+     ( \
+       const dim_t         n0, \
+       const A_type*       a, \
+       const dim_t         rs_a, \
+       const dim_t         cs_a, \
+       B_type*             b, \
+       const dim_t         rs_b, \
+       const dim_t         cs_b, \
+       lpgemm_post_op*     post_ops_list, \
+       lpgemm_post_op_attr post_ops_attr \
+     ) \
 
-#define LPGEMM_ELTWISE_OPS_BLKSZ_MAP_ZEN4 \
-	XMACRO(BF16OF32, 144, 1024, 2048, 6, 64) \
+LPGEMM_ELTWISE_OPS_M_FRINGE_KERNEL(bfloat16,float,bf16of32_5x64);
+LPGEMM_ELTWISE_OPS_M_FRINGE_KERNEL(bfloat16,float,bf16of32_4x64);
+LPGEMM_ELTWISE_OPS_M_FRINGE_KERNEL(bfloat16,float,bf16of32_3x64);
+LPGEMM_ELTWISE_OPS_M_FRINGE_KERNEL(bfloat16,float,bf16of32_2x64);
+LPGEMM_ELTWISE_OPS_M_FRINGE_KERNEL(bfloat16,float,bf16of32_1x64);
 
-#define LPGEMM_ELTWISE_OPS_BLKSZ_MAP_ZEN
-
-#endif //LPGEMM_BLKSZ_MAP_H
+#endif //BLIS_LPGEMM_ELTWISE_OPS_KERN_H

@@ -47,9 +47,12 @@
 #include "lpgemm_packb_s8s16.h"
 
 static lpgemm_cntx_t global_cntx_t_list[AOCL_OPERATION_TYPE_LEN] \
-					__attribute__((aligned(64))); //Only one op type supported now.
+			__attribute__((aligned(64))); //Only one op type supported now.
 static lpgemm_util_cntx_t global_util_cntx_t_list[AOCL_UTIL_OPERATION_TYPE_LEN] \
-					__attribute__((aligned(64))); //Only post-ops like utils.
+			__attribute__((aligned(64))); //Only post-ops like utils.
+static lpgemm_eltwise_ops_cntx_t
+	global_eltwise_ops_cntx_t_list[AOCL_ELTWISE_OPS_OPERATION_TYPE_LEN] \
+			__attribute__((aligned(64))); //Post-ops only utils without gemm.
 
 // This array is to store function pointers to jit generated kernels.
 static void* global_jit_kernels[ LPGEMM_BF16_MR ]
@@ -62,12 +65,14 @@ static void* global_jit_kernels[ LPGEMM_BF16_MR ]
 #define JIT_KERNEL_SIZE ( 10 * BLIS_PAGE_SIZE )
 
 static bli_pthread_once_t once_check_lpgemm_func_map_init = BLIS_PTHREAD_ONCE_INIT;
+
 static void _lpgemm_util_cntx_init_func_map()
 {
 #define UMACRO(ID,FUNC_PTR) global_util_cntx_t_list[ID].kern_fun_ptr = FUNC_PTR;
 
 	global_util_cntx_t_list[F32_GELU_TANH].kern_fun_ptr = NULL;
 	global_util_cntx_t_list[F32_GELU_ERF].kern_fun_ptr = NULL;
+	global_util_cntx_t_list[F32_SOFTMAX].kern_fun_ptr = NULL;
 
 	// Kernel dispatch object factory.
 	if ( bli_cpuid_is_avx512bf16_supported() == TRUE )
@@ -90,6 +95,24 @@ static void _lpgemm_util_cntx_init_func_map()
 	}
 
 #undef UMACRO
+}
+
+static void _lpgemm_eltwise_ops_cntx_init_func_map()
+{
+#define POMACRO(ID,FUNC_PTR) \
+	global_eltwise_ops_cntx_t_list[ID].eltwise_ops_kern_fun_ptr = FUNC_PTR;
+
+	global_eltwise_ops_cntx_t_list[BF16OF32].eltwise_ops_kern_fun_ptr = NULL;
+
+	// Kernel dispatch object factory.
+	if ( bli_cpuid_is_avx512bf16_supported() == TRUE )
+	{
+#ifdef BLIS_KERNELS_ZEN4
+		LPGEMM_ELTWISE_OPS_KERN_FUNC_MAP_AVX512_VNNI_BF16
+#endif
+	}
+
+#undef POMACRO
 }
 
 static void _lpgemm_cntx_init_func_map()
@@ -190,6 +213,7 @@ static void _lpgemm_cntx_init_func_map()
 {
 	return global_jit_kernels[m_index][n_index];
 }
+
 BLIS_INLINE void lpgemm_set_block_sizes_global_cntx
      (
        AOCL_OPERATION_TYPE op_type,
@@ -249,10 +273,51 @@ static void _lpgemm_cntx_init_blksz_map()
 #undef XMACRO
 }
 
+BLIS_INLINE void lpgemm_set_block_sizes_global_eltwise_ops_cntx
+     (
+       AOCL_ELTWISE_OPS_OPERATION_TYPE op_type,
+       dim_t MC,
+       dim_t NC,
+       dim_t KC,
+       dim_t MR,
+       dim_t NR
+     )
+{
+	global_eltwise_ops_cntx_t_list[op_type].blksz.MC = MC;
+	global_eltwise_ops_cntx_t_list[op_type].blksz.NC = NC;
+	global_eltwise_ops_cntx_t_list[op_type].blksz.KC = KC;
+	global_eltwise_ops_cntx_t_list[op_type].blksz.MR = MR;
+	global_eltwise_ops_cntx_t_list[op_type].blksz.NR = NR;
+}
+
+static void _lpgemm_eltwise_ops_cntx_init_blksz_map()
+{
+#define XMACRO(ID,MC,NC,KC,MR,NR) \
+	lpgemm_set_block_sizes_global_eltwise_ops_cntx(ID, MC, NC, KC, MR, NR);
+
+	// Ideally the blocksize needs to be set based on arch id. However
+	// since this code is also expected to work on other vendor machines,
+	// the blocksize for a particular version of zen id is generalized
+	// for all machines that support the ISA supported by that particular
+	// zen id.
+	if ( bli_cpuid_is_avx512bf16_supported() == TRUE )
+	{
+		LPGEMM_ELTWISE_OPS_BLKSZ_MAP_ZEN4
+	}
+	else
+	{
+		LPGEMM_ELTWISE_OPS_BLKSZ_MAP_ZEN
+	}
+
+#undef XMACRO
+}
+
 static void lpgemm_cntx_init_map()
 {
 	_lpgemm_cntx_init_func_map();
 	_lpgemm_cntx_init_blksz_map();
+	_lpgemm_eltwise_ops_cntx_init_blksz_map();
+	_lpgemm_eltwise_ops_cntx_init_func_map();
 	_lpgemm_util_cntx_init_func_map();
 }
 
@@ -274,6 +339,12 @@ lpgemm_cntx_t* lpgemm_get_global_cntx_obj( AOCL_OPERATION_TYPE op )
 lpgemm_util_cntx_t* lpgemm_util_get_global_cntx_obj( AOCL_UTIL_OPERATION_TYPE op )
 {
 	return &global_util_cntx_t_list[op];
+}
+
+lpgemm_eltwise_ops_cntx_t* lpgemm_eltwise_ops_get_global_cntx_obj
+							( AOCL_ELTWISE_OPS_OPERATION_TYPE op )
+{
+	return &global_eltwise_ops_cntx_t_list[op];
 }
 
 dim_t lpgemm_get_block_size_MC_global_cntx( AOCL_OPERATION_TYPE op_type )

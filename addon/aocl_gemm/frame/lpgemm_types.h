@@ -84,6 +84,12 @@ typedef enum
 
 typedef enum
 {
+	BF16OF32 = 0
+} AOCL_ELTWISE_OPS_OPERATION_TYPE;
+#define AOCL_ELTWISE_OPS_OPERATION_TYPE_LEN 1
+
+typedef enum
+{
 	UNPACKED = 0,
 	PACK = 1,
 	REORDERED = 2,
@@ -148,6 +154,12 @@ typedef struct
 	void_fp packsclb_fun_ptr;
 	lpgemm_pack_strides_t pack_s;
 } lpgemm_cntx_t;
+
+typedef struct
+{
+	lpgemm_block_size_t blksz;
+	void_fp eltwise_ops_kern_fun_ptr;
+} lpgemm_eltwise_ops_cntx_t;
 
 typedef struct
 {

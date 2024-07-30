@@ -103,6 +103,13 @@
 	  mask_all1, (__m256i) _mm512_cvtneps_pbh( reg ) \
 	) \
 
+#define CVT_STORE_F32_BF16_POST_OPS_MASK(reg,mask,m_ind,n_ind) \
+	_mm256_mask_storeu_epi16 \
+	( \
+	  b_q + ( rs_b * ( ir + m_ind ) ) + ( cs_b * ( jr + n_ind ) ), \
+	  mask, (__m256i) _mm512_cvtneps_pbh( reg ) \
+	) \
+
 // BF16 -> F32 convert helpers. reg: __m512
 #define CVT_BF16_F32_INT_SHIFT(in) \
 	( __m512 )_mm512_sllv_epi32( _mm512_cvtepi16_epi32( ( in ) ), \
@@ -213,6 +220,13 @@
 	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr3,m_ind,3); \
 	F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3,m_ind); \
 
+#define BF16_F32_MATRIX_ADD_4COL_MASK(k0,k1,k2,k3,scr0,scr1,scr2,scr3,m_ind) \
+	BF16_F32_MATRIX_ADD_LOAD(k0,scr0,m_ind,0); \
+	BF16_F32_MATRIX_ADD_LOAD(k1,scr1,m_ind,1); \
+	BF16_F32_MATRIX_ADD_LOAD(k2,scr2,m_ind,2); \
+	BF16_F32_MATRIX_ADD_LOAD(k3,scr3,m_ind,3); \
+	F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3,m_ind); \
+
 #define F32_F32_MATRIX_ADD_LOAD(mask,scr,m_ind,n_ind) \
 	scr = _mm512_maskz_loadu_ps \
 			( \
@@ -245,6 +259,13 @@
 	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
 	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,m_ind,2); \
 	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr3,m_ind,3); \
+	F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3,m_ind); \
+
+#define F32_F32_MATRIX_ADD_4COL_MASK(k0,k1,k2,k3,scr0,scr1,scr2,scr3,m_ind) \
+	F32_F32_MATRIX_ADD_LOAD(k0,scr0,m_ind,0); \
+	F32_F32_MATRIX_ADD_LOAD(k1,scr1,m_ind,1); \
+	F32_F32_MATRIX_ADD_LOAD(k2,scr2,m_ind,2); \
+	F32_F32_MATRIX_ADD_LOAD(k3,scr3,m_ind,3); \
 	F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3,m_ind); \
 
 //Zero-out the given ZMM accumulator registers

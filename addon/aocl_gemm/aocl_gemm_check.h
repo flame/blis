@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,7 +32,6 @@
 
 */
 
-// yet to add validity check for postops
 #define AOCL_GEMM_CHECK( op_str, \
                          order, transa, transb, \
                          m, n, k, \
@@ -92,6 +91,59 @@
         info = 16; \
     else if ( col_stored && ( ldc < m ) ) \
         info = 16; \
+ \
+    if( info != 0 ) \
+    { \
+        char print_msg[ 100 ]; \
+ \
+        sprintf( print_msg, "** On entry to %6s, parameter number %2i had an illegal value", op_str, info); \
+        bli_print_msg(print_msg, __FILE__, __LINE__); \
+        return; \
+    } \
+}
+
+#define AOCL_UTIL_ELTWISE_OPS_CHECK( op_str, \
+                         order, transa, transb, \
+                         m, n, \
+                         a, lda, \
+                         b, ldb \
+                       ) \
+{ \
+    int32_t info = 0; \
+    bool col_stored, row_stored; \
+    bool nota, notb, ta, tb; \
+ \
+    col_stored = ( order == 'c' ) || ( order == 'C' ); \
+    row_stored = ( order == 'r' ) || ( order == 'R' ); \
+ \
+    nota = ( transa == 'n' ) || ( transa == 'N' ); \
+    notb = ( transb == 'n' ) || ( transb == 'N' ); \
+ \
+    ta   = ( transa == 't' ) || ( transa == 'T' ); \
+    tb   = ( transb == 't' ) || ( transb == 'T' ); \
+ \
+    if( ( order != 'r') && ( order != 'R' ) && ( order != 'c' ) && ( order != 'C' ) ) \
+        info = 1; \
+    else if( ( transa != 'n' ) && ( transa != 'N' ) && ( transa != 't' ) && ( transa != 'T' ) ) \
+        info = 2; \
+    else if( ( transb != 'n' ) && ( transb != 'N' ) && ( transb != 't' ) && ( transb != 'T' ) ) \
+        info = 3; \
+    else if ( m <= 0 ) \
+        info = 4; \
+    else if ( n <= 0 ) \
+        info = 5; \
+    else if ( a == NULL ) \
+        info = 6; \
+    else if ( row_stored && ( ( nota && ( lda < n ) ) || ( ta && ( lda < m ) ) ) ) \
+        info = 7; \
+    else if ( col_stored && ( ( nota && ( lda < m ) ) || ( ta && ( lda < n ) ) ) ) \
+        info = 8; \
+    else if ( b == NULL ) \
+        info = 9; \
+    else if ( row_stored && ( ( notb && ( ldb < n ) ) || ( tb && ( ldb < m ) ) ) ) \
+        info = 10; \
+    else if ( col_stored && ( ( notb && ( ldb < m ) ) || ( tb && ( ldb < n ) ) ) ) \
+        info = 11; \
  \
     if( info != 0 ) \
     { \

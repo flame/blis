@@ -37,6 +37,7 @@
 #include "lpgemm_thread_decor_openmp.h"
 #include "lpgemm_types.h"
 #include "lpgemm_5loop_interface_apis.h"
+#include "lpgemm_eltwise_ops_interface_apis.h"
 
 #ifdef BLIS_ENABLE_OPENMP
 
@@ -927,6 +928,181 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
 
 GEN_LPGEMM_OPENMP_DECORATOR1(bfloat16, int8_t, float, bf16s4f32of32)
 
+BLIS_INLINE void lpgemm_eltwise_ops_bf16of32_get_threading
+     (
+       dim_t*                      n_threads,
+       dim_t*                      ic_ways,
+       dim_t*                      jc_ways,
+       dim_t                       m,
+       dim_t                       n,
+       rntm_t*                     rntm_g,
+       lpgemm_eltwise_ops_cntx_t* lcntx
+     )
+{
+	*n_threads = bli_rntm_num_threads( rntm_g );
+	*jc_ways = bli_rntm_jc_ways( rntm_g );
+	*ic_ways = bli_rntm_ic_ways( rntm_g );
+
+	if ( ( ( *ic_ways ) > 0 ) || ( ( *jc_ways ) > 0 ) )
+	{
+		// If BLIS_IC_NT or JC_NT are set.
+		// Default cases.
+ 		*ic_ways = ( ( *ic_ways ) > 0 ) ? ( *ic_ways ) : 1;
+		*jc_ways = ( ( *jc_ways ) > 0 ) ? ( *jc_ways ) : 1;
+
+		*n_threads = ( *jc_ways ) * ( *ic_ways );
+	}
+	else if ( ( *n_threads ) > 1 )
+	{
+		dim_t NR = lcntx->blksz.NR;
+		dim_t MR = lcntx->blksz.MR;
+		dim_t mr_blks = ( m + MR - 1 ) / MR;
+		dim_t nr_blks = ( n + NR - 1 ) / NR;
+
+		if ( n <= NR )
+		{
+			( *ic_ways ) = ( mr_blks < ( *n_threads ) ) ? mr_blks : ( *n_threads );
+			( *jc_ways ) = 1;
+			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
+		}
+		else if ( m <= MR )
+		{
+			( *jc_ways ) = ( nr_blks < ( *n_threads ) ) ? nr_blks : ( *n_threads );
+			( *ic_ways ) = 1;
+			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
+		}
+		else if ( mr_blks >= ( *n_threads ) )
+		{
+			( *ic_ways ) = ( *n_threads );
+			( *jc_ways ) = 1;
+		}
+		else if ( mr_blks >= ( dim_t )( ( 3.0 / 4.0 ) * ( *n_threads ) ) )
+		{
+			( *ic_ways ) = mr_blks;
+			dim_t rem_jc_ways = ( dim_t )( ( *n_threads ) / ( *ic_ways ) );
+			( *jc_ways ) = ( rem_jc_ways < nr_blks ) ? rem_jc_ways : nr_blks;
+			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
+		}
+		else
+		{
+			// If BLIS_NUM_THREADS are set, generate jc,ic from the same.
+			bli_thread_partition_2x2( ( *n_threads ), m, n, ic_ways, jc_ways );
+			if ( ( mr_blks < ( *ic_ways ) ) && ( nr_blks < ( *jc_ways ) ) )
+			{
+				( *ic_ways ) = mr_blks;
+				( *jc_ways ) = nr_blks;
+				( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
+			}
+			else if ( mr_blks < ( *ic_ways ) )
+			{
+				( *ic_ways ) = mr_blks;
+				dim_t rem_jc_ways = ( dim_t )( ( *n_threads ) / ( *ic_ways ) );
+				( *jc_ways ) = ( rem_jc_ways < nr_blks ) ? rem_jc_ways : nr_blks;
+				( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
+			}
+			else if ( nr_blks < ( *jc_ways ) )
+			{
+				( *jc_ways ) = nr_blks;
+				dim_t rem_ic_ways = ( dim_t )( ( *n_threads ) / ( *jc_ways ) );
+				( *ic_ways ) = ( rem_ic_ways < mr_blks ) ? rem_ic_ways : mr_blks;
+				( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
+			}
+		}
+	}
+	else
+	{
+		// Setting all the values to 1 in case n_threads <= 1. This ensures
+		// the threading parameters are valid.
+		( *n_threads ) = 1;
+		( *jc_ways ) = 1;
+		( *ic_ways ) = 1;
+	}
+}
+
+#define GEN_UTIL_ELTWISE_OPS_OPENMP_DECORATOR(A_type,B_type,LPGEMM_SFX) \
+void lpgemm_eltwise_ops_ ## LPGEMM_SFX ## _openmp_thread_decorator \
+     ( \
+       const dim_t                 m, \
+       const dim_t                 n, \
+       const A_type*               a, \
+       const dim_t                 rs_a, \
+       const dim_t                 cs_a, \
+       B_type*                     b, \
+       const dim_t                 rs_b, \
+       const dim_t                 cs_b, \
+       rntm_t*                     rntm_g, \
+       lpgemm_eltwise_ops_cntx_t* lcntx, \
+       lpgemm_post_op*             post_op_list, \
+       AOCL_STORAGE_TYPE           c_downscale \
+     ) \
+{ \
+	dim_t n_threads; \
+ \
+	/* Factorization of threads along m and n dimension respectively.*/ \
+	dim_t ic_ways; \
+	dim_t jc_ways; \
+ \
+	lpgemm_eltwise_ops_ ## LPGEMM_SFX ## _get_threading \
+	( \
+	  &n_threads, \
+	  &ic_ways, &jc_ways, \
+	  m, n, rntm_g, lcntx \
+	); \
+ \
+	/* Set the packing block allocator field of the rntm. This will be
+	 * inherited by all of the child threads when they make local copies of
+	 * the rntm below.*/ \
+	bli_pba_rntm_set_pba( rntm_g ); \
+ \
+	thrcomm_t static_lpgemm_comms[BLIS_LPGEMM_NUM_STATIC_COMMS]; \
+	thrcomm_t* cur_lpgemm_comms = static_lpgemm_comms; \
+	err_t bli_errors = BLIS_SUCCESS; \
+ \
+	if ( jc_ways > BLIS_LPGEMM_NUM_STATIC_COMMS ) \
+	{ \
+		cur_lpgemm_comms = bli_malloc_intl( jc_ways * sizeof( thrcomm_t ), &bli_errors ); \
+	} \
+	for ( dim_t i = 0; i < jc_ways; ++i ) \
+	{ \
+		bli_thrcomm_init( ic_ways, &cur_lpgemm_comms[i] ); \
+	} \
+ \
+	_Pragma( "omp parallel num_threads(n_threads)" ) \
+	{ \
+		/* Create a thread-local copy of the master thread's rntm_t. This is
+		 * necessary since we want each thread to be able to track its own
+		 * small block pool_t as it executes down the function stack.*/ \
+		rntm_t rntm_l = *rntm_g; \
+ \
+		/* lpgemm_thrinfo_t object will be used to generate thrinfo_t objects
+		 * for use in blis mt framework inside the respective mat mul driver
+		 * functions.*/ \
+		lpgemm_thrinfo_t thread; \
+		thread.n_threads = n_threads; \
+		thread.tid = omp_get_thread_num(); \
+		thread.ic_ways = ic_ways; \
+		thread.jc_ways = jc_ways; \
+		thread.comm = cur_lpgemm_comms; \
+ \
+		lpgemm_eltwise_ops_interface_ ## LPGEMM_SFX \
+		( \
+		  m, n, \
+		  a, rs_a, cs_a, \
+		  b, rs_b, cs_b, \
+		  &rntm_l, \
+		  &thread, \
+		  lcntx, \
+		  post_op_list, c_downscale \
+		); \
+	} \
+	if ( jc_ways > BLIS_LPGEMM_NUM_STATIC_COMMS ) \
+	{ \
+		bli_free_intl( cur_lpgemm_comms ); \
+	} \
+} \
+
+GEN_UTIL_ELTWISE_OPS_OPENMP_DECORATOR(bfloat16,float,bf16of32)
+
 #else
 
 #define GEN_LPGEMM_DECORATOR(A_type,B_type,C_type,LPGEMM_SFX) \
@@ -1071,5 +1247,62 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
 }
 
 GEN_LPGEMM_DECORATOR1(bfloat16, int8_t, float, bf16s4f32of32)
+
+#define GEN_UTIL_ELTWISE_OPS_DECORATOR(A_type,B_type,LPGEMM_SFX) \
+void lpgemm_eltwise_ops_ ## LPGEMM_SFX ## _thread_decorator \
+     ( \
+       const dim_t                 m, \
+       const dim_t                 n, \
+       const A_type*               a, \
+       const dim_t                 rs_a, \
+       const dim_t                 cs_a, \
+       B_type*                     b, \
+       const dim_t                 rs_b, \
+       const dim_t                 cs_b, \
+       rntm_t*                     rntm_g, \
+       lpgemm_eltwise_ops_cntx_t* lcntx, \
+       lpgemm_post_op*             post_op_list, \
+       AOCL_STORAGE_TYPE           c_downscale \
+     ) \
+{ \
+	dim_t n_threads = 1; \
+ \
+	/* Factorization of threads along m and n dimension respectively.*/ \
+	dim_t ic_ways = 1; \
+	dim_t jc_ways = 1; \
+ \
+	/* Set the packing block allocator field of the rntm. This will be
+	 * inherited by all of the child threads when they make local copies of
+	 * the rntm below.*/ \
+	bli_pba_rntm_set_pba( rntm_g ); \
+ \
+	thrcomm_t static_lpgemm_comm; \
+	thrcomm_t* cur_lpgemm_comm = &static_lpgemm_comm; \
+ \
+	bli_thrcomm_init( ic_ways, cur_lpgemm_comm ); \
+ \
+	/* lpgemm_thrinfo_t object will be used to generate thrinfo_t objects
+	 * for use in blis mt framework inside the respective mat mul driver
+	 * functions.*/ \
+	lpgemm_thrinfo_t thread; \
+	thread.n_threads = n_threads; \
+	thread.tid = 0; \
+	thread.ic_ways = ic_ways; \
+	thread.jc_ways = jc_ways; \
+	thread.comm = cur_lpgemm_comm; \
+ \
+	lpgemm_eltwise_ops_interface_ ## LPGEMM_SFX \
+	( \
+	  m, n, \
+	  a, rs_a, cs_a, \
+	  b, rs_b, cs_b, \
+	  rntm_g, \
+	  &thread, \
+	  lcntx, \
+	  post_op_list, c_downscale \
+	); \
+} \
+
+GEN_UTIL_ELTWISE_OPS_DECORATOR(bfloat16,float,bf16of32)
 
 #endif

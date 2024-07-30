@@ -42,16 +42,14 @@
 // num_f32_elems_per_zmm = zmm_width / sizeof( float )
 #define NUM_F32_ELEMS_PER_ZMM ( 64 / sizeof(float) )
 
-// equals to number of ops in enum AOCL_OPERATION_TYPE.
-extern lpgemm_cntx_t lpgemm_global_cntx_t_list[AOCL_OPERATION_TYPE_LEN];
-extern lpgemm_cntx_t lpgemm_util_global_cntx_t_list[AOCL_UTIL_OPERATION_TYPE_LEN];
-
-
 void aocl_lpgemm_init_global_cntx();
 
 lpgemm_cntx_t* lpgemm_get_global_cntx_obj( AOCL_OPERATION_TYPE op );
 
 lpgemm_util_cntx_t* lpgemm_util_get_global_cntx_obj( AOCL_UTIL_OPERATION_TYPE op );
+
+lpgemm_eltwise_ops_cntx_t* lpgemm_eltwise_ops_get_global_cntx_obj
+							( AOCL_ELTWISE_OPS_OPERATION_TYPE op );
 
 dim_t lpgemm_get_block_size_MC_global_cntx( AOCL_OPERATION_TYPE op_type );
 

@@ -83,9 +83,6 @@ AOCL_GEMM_REORDER(int8_t,s8s8s16os16);
 AOCL_GEMM_REORDER(int8_t,u8s4s32os32);
 AOCL_GEMM_REORDER(int8_t, bf16s4f32of32);
 
-// Only supports matrices in row major format. This api can perform gemm with
-// both normal as well as reordered B matrix as opposesd to sgemm (only
-// supports former). This api can be considered analogous to packed sgemm api.
 #define AOCL_GEMM_MATMUL(A_type,B_type,C_type,Sum_type,LP_SFX) \
 BLIS_EXPORT_ADDON void aocl_gemm_ ## LP_SFX \
      ( \
