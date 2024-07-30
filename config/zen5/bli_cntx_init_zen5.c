@@ -108,7 +108,7 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 	(
 	  3,
 	  // GEMM
-	  BLIS_GEMM,  bli_cntx_gemmsup_thresh_is_met_zen4,
+	  BLIS_GEMM,  bli_cntx_gemmsup_thresh_is_met_zen5,
 	  // GEMMT
 	  BLIS_GEMMT, bli_cntx_gemmtsup_thresh_is_met_zen,
 	  // SYRK

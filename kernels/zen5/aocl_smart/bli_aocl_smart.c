@@ -32,26 +32,40 @@
 
 */
 
-// native dgemm kernel
-GEMM_UKR_PROT( double,   d, gemm_avx512_asm_8x24 )
+#include "blis.h"
 
-void bli_dgemm_avx512_asm_8x24_macro_kernel
-(
-    dim_t   n,
-    dim_t   m,
-    dim_t   k,
-    double* c,
-    double* a,
-    double* b,
-    dim_t   ldc,
-    double* beta
-);
+/* This function determines if we need to take SUP or native path
+   for given matrix sizes for zen5 configuration.
+   * Returns TRUE if the dimensions fall under SUP range
+   * Returns FALSE if the dimensions fall under Native range
+*/
+bool bli_cntx_gemmsup_thresh_is_met_zen5( obj_t* a, obj_t* b, obj_t* c, cntx_t* cntx )
+{
+	num_t       dt          =   bli_obj_dt( c );
 
-// threshold functions
-bool bli_cntx_gemmsup_thresh_is_met_zen5
-(
-    obj_t*  a,
-    obj_t*  b,
-    obj_t*  c,
-    cntx_t* cntx
-);
+	if( dt == BLIS_DOUBLE )
+	{
+		dim_t k           =   bli_obj_width_after_trans( a );
+		dim_t m, n;
+
+		const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
+
+		if ( bli_cntx_l3_sup_ker_dislikes_storage_of( c, stor_id, cntx ) )
+		{
+			m = bli_obj_width(c);
+			n = bli_obj_length(c);
+		}
+		else
+		{
+			m = bli_obj_length( c );
+			n = bli_obj_width( c );
+		}
+		// For skinny sizes where one/two dimensions are small
+		if((m < 1000) || (n < 1000)) return TRUE;
+		// // For all combinations in small sizes
+		if((m < 2200) && (n < 2200) && (k < 2200)) return TRUE;
+		return FALSE;
+	}
+	else
+		return bli_cntx_l3_sup_thresh_is_met( a, b, c, cntx );
+}
