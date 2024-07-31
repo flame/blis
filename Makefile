@@ -191,6 +191,13 @@ gen-obj-paths-from-src = $(foreach ch, $(1), \
 # directories.
 MK_CONFIG_OBJS      := $(call gen-obj-paths-from-src,$(CONFIG_SRC_SUFS),$(MK_CONFIG_SRC),$(CONFIG_PATH),$(BASE_OBJ_CONFIG_PATH))
 
+MK_KERNELS_LPGEMM_SRC   := $(filter  ./kernels/zen/lpgemm/%.c, $(MK_KERNELS_SRC))
+MK_KERNELS_LPGEMM_SRC   += $(filter  ./kernels/zen4/lpgemm/%.c, $(MK_KERNELS_SRC))
+MK_KERNELS_SRC          := $(filter-out $(MK_KERNELS_LPGEMM_SRC),$(MK_KERNELS_SRC))
+ifeq ($(filter aocl_gemm, $(ADDON_LIST)), aocl_gemm)
+  MK_KERNELS_LPGEMM_OBJS  := $(call gen-obj-paths-from-src,$(KERNELS_SRC_SUFS),$(MK_KERNELS_LPGEMM_SRC),$(KERNELS_PATH),$(BASE_OBJ_KERNELS_PATH))
+endif
+
 # Generate object file paths for architecture-specific kernel source code.
 # We target only .c, .s, and .S files. Note that MK_KERNELS_SRC is already
 # limited to the kernel source corresponding to the kernel sets in
@@ -282,6 +289,10 @@ MK_BLIS_OBJS        := $(MK_CONFIG_OBJS) \
                        $(MK_AOCLDTL_OBJS) \
                        $(MK_ADDON_OBJS) \
                        $(MK_SANDBOX_OBJS)
+
+ifeq ($(filter aocl_gemm, $(ADDON_LIST)), aocl_gemm)
+  MK_BLIS_OBJS      += $(MK_KERNELS_LPGEMM_OBJS)
+endif
 
 # Optionally filter out the BLAS and CBLAS compatibility layer object files.
 # This is not actually necessary, since each affected file is guarded by C
@@ -625,6 +636,19 @@ else
 endif
 endef
 
+# first argument: a kernel set (name) being targeted (e.g. haswell).
+# second argument: the configuration whose CFLAGS we should use in compilation.
+# third argument: the kernel file suffix being considered.
+define make-kernels-lpgemm-rule
+$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.$(3) $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CC) $(call get-kernel-lpgemm-cflags-for,$(2)) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-kernel-lpgemm-text-for,$(2))
+	@$(CC) $(call get-kernel-lpgemm-cflags-for,$(2)) -c $$< -o $$@
+endif
+endef
+
 # first argument: a configuration name from the union of config_list and
 # config_name, used to look up the CFLAGS to use during compilation.
 # second argument: the C99 addon file suffix being considered.
@@ -729,6 +753,10 @@ $(foreach conf, $(CONFIG_LIST), $(eval $(call make-refkern-rule,$(conf))))
 $(foreach suf, $(KERNELS_SRC_SUFS), \
 $(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call get-config-for-kset,$(kset)),$(suf)))))
 
+ifeq ($(filter aocl_gemm, $(ADDON_LIST)), aocl_gemm)
+  $(foreach suf, $(KERNELS_SRC_SUFS), \
+  $(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-lpgemm-rule,$(kset)/lpgemm,$(call get-config-for-kset,$(kset)),$(suf)))))
+endif
 # Instantiate the build rule for C addon files. Use the CFLAGS for the
 # configuration family.
 $(foreach suf, $(ADDON_C99_SUFS), \

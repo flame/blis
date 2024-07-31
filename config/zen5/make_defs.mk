@@ -73,6 +73,8 @@ endif
 # NOTE: The -fomit-frame-pointer option is needed for some kernels because
 # they make explicit use of the rbp register.
 CKOPTFLAGS     := $(COPTFLAGS) -fomit-frame-pointer
+# Additional flag which is required for lpgemm kernels
+CKLPOPTFLAGS     :=
 
 # gcc or clang version must be at least 4.0
 ifeq ($(CC_VENDOR),gcc)
@@ -87,7 +89,7 @@ ifeq ($(CC_VENDOR),gcc)
     # in suboptimal code generation for instrinsic based kernels.
     # The -ftree-loop-vectorize results in inefficient code gen
     # for amd optimized l1 kernels based on instrinsics.
-    CKOPTFLAGS += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize
+    CKLPOPTFLAGS += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize
   else ifeq ($(shell test $(GCC_VERSION) -ge 13; echo $$?),0)
     # gcc 13.0 or later
     CKVECFLAGS += -march=znver4
@@ -97,17 +99,17 @@ ifeq ($(CC_VENDOR),gcc)
     # in suboptimal code generation for instrinsic based kernels.
     # The -ftree-loop-vectorize results in inefficient code gen
     # for amd optimized l1 kernels based on instrinsics.
-    CKOPTFLAGS += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize
+    CKLPOPTFLAGS += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize
   else ifeq ($(shell test $(GCC_VERSION) -ge 11; echo $$?),0)
     # gcc 11.0 or later
     CKVECFLAGS += -march=znver3 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mavx512bf16 -mavx512vbmi
     CRVECFLAGS += -march=znver3
-    CKOPTFLAGS += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize
+    CKLPOPTFLAGS += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize
   else ifeq ($(shell test $(GCC_VERSION) -ge 9; echo $$?),0)
     # gcc 9.0 or later
     CKVECFLAGS += -march=znver2 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mavx512vbmi
     CRVECFLAGS += -march=znver2
-    CKOPTFLAGS += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize
+    CKLPOPTFLAGS += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize
   else ifeq ($(shell test $(GCC_VERSION) -ge 8; echo $$?),0)
     # gcc 8.0 or later
     CKVECFLAGS += -march=znver1 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mavx512vbmi

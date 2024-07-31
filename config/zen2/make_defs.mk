@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2019 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -74,6 +74,8 @@ endif
 # NOTE: The -fomit-frame-pointer option is needed for some kernels because
 # they make explicit use of the rbp register.
 CKOPTFLAGS     := $(COPTFLAGS) -fomit-frame-pointer
+# Additional flag which is required for lpgemm kernels
+CKLPOPTFLAGS   :=
 
 # gcc or clang version must be at least 4.0
 ifeq ($(CC_VENDOR),gcc)
@@ -82,7 +84,7 @@ ifeq ($(CC_VENDOR),gcc)
   ifeq ($(shell test $(GCC_VERSION) -ge 9; echo $$?),0)
     # gcc 9.0 or later
     CKVECFLAGS += -march=znver2
-    CKOPTFLAGS += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse
+    CKLPOPTFLAGS += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse
   else
     # If gcc is older than 9.1.0 but at least 6.1.0, then we can use -march=znver1
     # as the fallback option.

@@ -78,12 +78,15 @@ endif
 # NOTE: The -fomit-frame-pointer option is needed for some kernels because
 # they make explicit use of the rbp register.
 CKOPTFLAGS     := $(COPTFLAGS) -fomit-frame-pointer
+# Additional flag which is required for lpgemm kernels
+CKLPOPTFLAGS   :=
+
 ifeq ($(CC_VENDOR),gcc)
   CKVECFLAGS += -march=znver1
   GCC_VERSION := $(strip $(shell $(CC) -dumpversion | cut -d. -f1))
 
   ifeq ($(shell test $(GCC_VERSION) -ge 9; echo $$?),0)
-    CKOPTFLAGS += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse
+    CKLPOPTFLAGS += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse
   endif
 endif# gcc
 
