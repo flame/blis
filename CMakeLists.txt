@@ -1164,6 +1164,26 @@ set(LIBBLIS_SHARED ${LIBBLIS})
 if(WIN32)
     string(APPEND LIBBLIS_SHARED -dll)
 endif()
+
+# Set directories for installation of libraries and header files.
+set(LIB_DIR ${CMAKE_INSTALL_PREFIX}/lib)
+set(INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include)
+# Set LDFLAGS to be replaced in pc file.
+set(LDFLAGS_STRING ${LDFLAGS})
+# Add OpenMP flags as required.
+if(THREADING_MODEL STREQUAL "openmp")
+ list(APPEND LDFLAGS_STRING "${OpenMP_C_FLAGS}")
+endif()
+string(JOIN " " LDFLAGS_STRING ${LDFLAGS_STRING})
+if(NOT WIN32)
+    configure_file(
+        ${CMAKE_SOURCE_DIR}/build/cmake/aocl-blas.pc.in
+        ${CMAKE_BINARY_DIR}/aocl-blas.pc
+        @ONLY
+    )
+endif()
+include(GNUInstallDirs)
+
 if(BUILD_SHARED_LIBS)
     # Build shared library.
     add_library(libblis-shared SHARED ${OBJECT_LIBRARIES})
@@ -1210,6 +1230,11 @@ if(BUILD_STATIC_LIBS OR NOT BUILD_SHARED_LIBS)
             RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
             PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
     list(APPEND libblis_depends libblis-static)
+endif()
+
+if(NOT WIN32)
+    # Install package-config file.
+    install(FILES ${CMAKE_BINARY_DIR}/aocl-blas.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
 endif()
 
 # Set libblis to the shared or static libblis depending on the option setting.
