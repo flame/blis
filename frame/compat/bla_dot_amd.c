@@ -470,8 +470,19 @@ double ddot_blis_impl
     }
     else
     {
-        nt = 1;
-        rho_temp = &rho;
+      dotv_ker_ptr
+        (
+          BLIS_NO_CONJUGATE,
+          BLIS_NO_CONJUGATE,
+          n_elem,
+          x0, incx0,
+          y0, incy0,
+          &rho,
+          cntx
+        );
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+        return rho;
     }
 
     _Pragma("omp parallel num_threads(nt)")
@@ -867,8 +878,19 @@ dcomplex zdotu_blis_impl
     }
     else
     {
-        nt = 1;
-        rho_temp = &rho;
+      zdotv_ker_ptr
+        (
+          BLIS_NO_CONJUGATE,
+          BLIS_NO_CONJUGATE,
+          n0,
+          x0, incx0,
+          y0, incy0,
+          &rho,
+          cntx
+        );
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+        return rho;
     }
 
     _Pragma("omp parallel num_threads(nt)")
@@ -1267,8 +1289,19 @@ dcomplex zdotc_blis_impl
     }
     else
     {
-        nt = 1;
-        rho_temp = &rho;
+      zdotv_ker_ptr
+        (
+          BLIS_CONJUGATE,
+          BLIS_NO_CONJUGATE,
+          n0,
+          x0, incx0,
+          y0, incy0,
+          &rho,
+          cntx
+        );
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+        return rho;
     }
 
     _Pragma("omp parallel num_threads(nt)")
