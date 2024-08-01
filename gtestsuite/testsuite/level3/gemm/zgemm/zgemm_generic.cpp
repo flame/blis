@@ -89,6 +89,8 @@ TEST_P( zgemmGeneric, API )
     else if ((alpha == testinghelpers::ZERO<T>() || k == 0) &&
              (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>()))
         thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>())
+        thresh = testinghelpers::getEpsilon<T>();
     else
         thresh = (7*k+3)*testinghelpers::getEpsilon<T>();
         //thresh = (15*k+1)*testinghelpers::getEpsilon<T>();

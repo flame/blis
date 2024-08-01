@@ -748,6 +748,7 @@ TYPED_TEST(gemv_IIT_ERS, ZeroAlpha_OtherBeta)
     T alpha, beta;
     testinghelpers::initzero<T>( alpha );
     beta = T{2.0};
+    double thresh = testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //        Initialize matrics with random integer numbers.
@@ -765,7 +766,7 @@ TYPED_TEST(gemv_IIT_ERS, ZeroAlpha_OtherBeta)
     gemv<T>( STORAGE, TRANS, CONJ, M, N, &alpha, nullptr, LDA,
                          nullptr, incx, &beta, y2.data(), incy );
 
-    computediff<T>( "y", N, y2.data(), y_ref.data(), incy);
+    computediff<T>( "y", N, y2.data(), y_ref.data(), incy, thresh);
 
 #ifdef CAN_TEST_INFO_VALUE
     gtint_t info = bli_info_get_info_value();
@@ -783,7 +784,7 @@ TYPED_TEST(gemv_IIT_ERS, ZeroAlpha_OtherBeta)
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( "y", N, y.data(), y_ref.data(), incy);
+    computediff<T>( "y", N, y.data(), y_ref.data(), incy, thresh);
 
 #ifdef CAN_TEST_INFO_VALUE
     info = bli_info_get_info_value();

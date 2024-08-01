@@ -80,6 +80,8 @@ TEST_P( zgemmGenericSUP, UKR )
     else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
               beta == testinghelpers::ONE<T>()))
         thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>())
+        thresh = testinghelpers::getEpsilon<T>();
     else
         thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
 
@@ -1025,6 +1027,8 @@ TEST_P( zgemmGenericNat, MicroKernelTest)
     else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
               beta == testinghelpers::ONE<T>()))
         thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>())
+        thresh = testinghelpers::getEpsilon<T>();
     else
         thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
 

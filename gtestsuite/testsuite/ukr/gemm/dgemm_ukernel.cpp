@@ -83,6 +83,8 @@ TEST_P( dgemmGenericSUP, sup_kernel)
     else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
               beta == testinghelpers::ONE<T>()))
         thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>())
+        thresh = testinghelpers::getEpsilon<T>();
     else
         thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
 
@@ -375,6 +377,8 @@ TEST_P( dgemmGenericNat, native_kernel_testing)
     else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
               beta == testinghelpers::ONE<T>()))
         thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>())
+        thresh = testinghelpers::getEpsilon<T>();
     else
         thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
 
@@ -504,6 +508,8 @@ TEST_P( dgemmGenericK1, k1_kernel_testing)
     else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
               beta == testinghelpers::ONE<T>()))
         thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>())
+        thresh = testinghelpers::getEpsilon<T>();
     else
         thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
 
@@ -633,6 +639,8 @@ TEST_P( dgemmGenericSmall, gemm_small)
     else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
               beta == testinghelpers::ONE<T>()))
         thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>())
+        thresh = testinghelpers::getEpsilon<T>();
     else
         thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
 

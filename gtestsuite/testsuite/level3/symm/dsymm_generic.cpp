@@ -92,6 +92,8 @@ TEST_P( dsymmGeneric, API )
     else if (alpha == testinghelpers::ZERO<T>() &&
             (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>()))
         thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>())
+        thresh = testinghelpers::getEpsilon<T>();
     else
         if ( side == 'l' || side == 'L' )
            thresh = (3*m+1)*testinghelpers::getEpsilon<T>();

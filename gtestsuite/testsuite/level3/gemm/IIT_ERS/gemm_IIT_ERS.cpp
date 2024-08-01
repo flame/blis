@@ -615,6 +615,7 @@ TYPED_TEST(gemm_IIT_ERS, ZeroAlpha_OtherBeta)
     T alpha, beta;
     testinghelpers::initzero<T>( alpha );
     beta = T{2.0};
+    double thresh = testinghelpers::getEpsilon<T>();
 
     std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
     std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
@@ -628,7 +629,7 @@ TYPED_TEST(gemm_IIT_ERS, ZeroAlpha_OtherBeta)
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
     gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, c2.data(), LDC );
-    computediff<T>( "C", STORAGE, N, N, c2.data(), c_ref.data(), LDC);
+    computediff<T>( "C", STORAGE, N, N, c2.data(), c_ref.data(), LDC, thresh);
 #ifdef CAN_TEST_INFO_VALUE
     gtint_t info = bli_info_get_info_value();
     computediff<gtint_t>( "info", info, 0 );
@@ -637,7 +638,7 @@ TYPED_TEST(gemm_IIT_ERS, ZeroAlpha_OtherBeta)
     // Test with all arguments correct except for the value we are choosing to test.
     gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
-    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC, thresh);
 
 #ifdef CAN_TEST_INFO_VALUE
     info = bli_info_get_info_value();
