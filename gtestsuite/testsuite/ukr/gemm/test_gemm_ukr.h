@@ -202,7 +202,7 @@ static void test_gemmnat_ukr(
     char transb = 't';
 
     // The objective here is to make storage of all matrices same
-    // To do this we set transpose of A and B appropriatley.
+    // To do this we set transpose of A and B appropriately.
     if (storage == 'r' || storage == 'R')
     {
         // if row-storage

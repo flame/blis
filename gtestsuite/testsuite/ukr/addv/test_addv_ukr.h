@@ -68,7 +68,7 @@ void test_addv_ukr( FT ukr_fp, char conjx, gtint_t n, gtint_t incx, gtint_t incy
     y = ( T* )y_buffer.greenzone_1;
     y_ref = ( T* )y_ref_buffer.greenzone_1; // y_ref does not have multiple greenzones
 
-    // Initiaize the memory with random data
+    // Initialize the memory with random data
     testinghelpers::datagenerators::randomgenerators( -10, 10, n, incx, x );
     testinghelpers::datagenerators::randomgenerators( -10, 10, n, incy, y );
 

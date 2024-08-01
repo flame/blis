@@ -64,7 +64,7 @@ void test_setv_ukr( FT ukr_fp, char conjalpha, T alpha, gtint_t n, gtint_t incx,
     x = ( T* )x_buffer.greenzone_1;
     x_copy = ( T* )x_copy_buffer.greenzone_1; // For x_copy, there is no greenzone_2
 
-    // Initiaize the memory with random data
+    // Initialize the memory with random data
     testinghelpers::datagenerators::randomgenerators( -10, 10, n, incx, x );
 
     // Copying the contents of y to y_ref

@@ -465,7 +465,7 @@ void bli_zdotv_zen_int_avx512
         __m512d yv[8];
         __m512d rhov[16];
 
-        // Initialze rho accumulation vectors to 0.
+        // Initialize rho accumulation vectors to 0.
         // rhov[0] - rhov[7] store the real part of intermediate result.
         // rhov[8] - rhov[15] store the imaginary part of intermediate result.
         rhov[0] = _mm512_setzero_pd();

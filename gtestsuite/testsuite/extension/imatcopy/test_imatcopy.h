@@ -74,7 +74,7 @@ static void test_imatcopy( char storage, char trans, gtint_t m, gtint_t n, T alp
     A = ( T* )A_buf.greenzone_1;
     A_ref = ( T* )A_ref_buf.greenzone_1; // For A_ref, there is no greenzone_2
 
-    // Initiaize the memory with random data
+    // Initialize the memory with random data
     testinghelpers::datagenerators::randomgenerators( -10, 10, storage, m, n, A, 'n', lda_in );
 
     if( is_nan_inf_test )

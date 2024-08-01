@@ -199,9 +199,9 @@ You can also find more details in [CMake Documentation](https://cmake.org/cmake/
 ## Using the Executables
 As we mentioned earlier, all cpp files of each API directory are compiled into one executable. This executable can be run separately which can be very useful while developing or debugging.
 When MKL is used as a reference, the following environment variables need to be set before calling the executables, depending on the configuration.
-* MKL_INTERFACE_LAYER=LP64 or MKL_INTERFACE_LAYER=ILP64 depending on whether 32 or 64 bit integers are used, respectivelly.
+* MKL_INTERFACE_LAYER=LP64 or MKL_INTERFACE_LAYER=ILP64 depending on whether 32 or 64 bit integers are used, respectively.
 * MKL_THREADING_LAYER=SEQUENTIAL for sequential MKL.
-* MKL_THREADING_LAYER=INTEL or MKL_THREADING_LAYER=GNU depending on whether we execute on Windows or on Linux, respectivelly.
+* MKL_THREADING_LAYER=INTEL or MKL_THREADING_LAYER=GNU depending on whether we execute on Windows or on Linux, respectively.
 
 ### To run all addv tests use:
 ```console

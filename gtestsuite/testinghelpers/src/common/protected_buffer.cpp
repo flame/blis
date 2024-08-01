@@ -104,7 +104,7 @@ testinghelpers::ProtectedBuffer::ProtectedBuffer(dim_t size, bool is_aligned, bo
         // redzone_2 = redzone_1 + sizeof redzone_1 + sizeof buffer
         redzone_2 = (void*)((char*)redzone_1 + (page_size * REDZONE_SIZE)  + buffer_size);
 
-        // make redzones read/wrtite/execute protected
+        // make redzones read/write/execute protected
         int res = mprotect(redzone_1, page_size * REDZONE_SIZE, PROT_NONE);
         if (res == -1)
         {

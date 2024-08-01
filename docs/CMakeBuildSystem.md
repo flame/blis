@@ -139,7 +139,7 @@ Please note that CMake does not provide functionality to uninstall targets.
 
 ## Available targets
 
-The BLIS CMake system aims to be combatible with the current `make` system. For that reason, it implements the same targets for the generation of libraries and the tests. The table of avalable targets can be found below.
+The BLIS CMake system aims to be combatible with the current `make` system. For that reason, it implements the same targets for the generation of libraries and the tests. The table of available targets can be found below.
 
 | target   | Description                                        |
 |:----------------|:---------------------------------------------------|

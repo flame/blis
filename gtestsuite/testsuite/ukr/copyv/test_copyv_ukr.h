@@ -66,7 +66,7 @@ static void test_copyv_ukr( FT ukr_fp, char conjx, gtint_t n, gtint_t incx, gtin
     y = ( T* )y_buffer.greenzone_1;
     y_ref = ( T* )y_ref_buffer.greenzone_1; // For y_ref, there is no greenzone_2
 
-    // Initiaize the memory with random data
+    // Initialize the memory with random data
     testinghelpers::datagenerators::randomgenerators( -10, 10, n, incx, x );
     testinghelpers::datagenerators::randomgenerators( -10, 10, n, incy, y );
 

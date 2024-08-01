@@ -846,7 +846,7 @@ BLIS_EXPORT_BLIS void bli_damaxv_zen_int
        cntx_t* restrict cntx
      )
 {
-	// Temproray pointer used inside the function
+	// Temporary pointer used inside the function
 	double *x_temp = x;
 
 	// Will hold the absolute largest element in the array

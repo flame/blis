@@ -116,8 +116,8 @@ endif()
 # Set common libraries.
 if(LINUX)
     set(COMMON_LIBS pthread m dl)
-    option(ENABLE_ASAN "Run tests using Address Sanatizer" OFF)
-    option(ENABLE_COVERAGE "Run tests for Code Coderage" OFF)
+    option(ENABLE_ASAN "Run tests using Address Sanitizer" OFF)
+    option(ENABLE_COVERAGE "Run tests for Code Coverage" OFF)
 endif()
 
 # Use INT_SIZE to set the int type used for testing.

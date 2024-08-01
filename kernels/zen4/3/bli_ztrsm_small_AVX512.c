@@ -53,7 +53,7 @@
 #endif
 
 /*
-* Multiply dcomplex vector with a dcomplex scaler(S)
+* Multiply dcomplex vector with a dcomplex scalar(S)
 * reg_a      ->      input dcomplex vector
 * reg_r      ->      vector with S->real broadcasted
 * reg_i      ->      vector with S->imag broadcasted
@@ -77,9 +77,9 @@
     /* output   = [a1c-b1d, a1d+b1c, a2c-b2d, a2d+b2c, ......]*/  \
 
 /*
-* Divide dcomplex vector with a dcomplex scaler(S)
+* Divide dcomplex vector with a dcomplex scalar(S)
 * reg_a      ->      input dcomplex vector
-* addr       ->      address of scaler
+* addr       ->      address of scalar
 * output is stored in reg_a
 *
 * t_teg[4] contains [-1, -1, -1, -1, -1, -1, -1, -1]

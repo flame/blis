@@ -99,7 +99,7 @@
 #endif
 
 // Macros to define names _blis_impl suffix, *_blis_impl is the blis
-// blis implmenation of the respective API's which is invoked from CBLAS
+// blis implementation of the respective API's which is invoked from CBLAS
 // and BLAS wrapper. 
 #define PASTEF770S(name)                                   name ## _blis_impl
 #define PASTEF77S(ch1,name)                         ch1 ## name ## _blis_impl

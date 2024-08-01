@@ -965,7 +965,7 @@ void bli_dgemm_avx512_asm_8x24(
 
     LABEL(END)
 
-    // VZEROUPPER() // slight imporvement when K is small by removing vzeroupper
+    // VZEROUPPER() // slight improvement when K is small by removing vzeroupper
 
     END_ASM
     (

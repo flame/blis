@@ -47,8 +47,8 @@
 
 namespace testinghelpers {
     // type_info<T>::real_type will return the real type of T.
-    // If T is float or double, real_type is float or double respectivelly.
-    // If T is scomplex or dcomplex, real_type is float or double respectivelly.
+    // If T is float or double, real_type is float or double respectively.
+    // If T is scomplex or dcomplex, real_type is float or double respectively.
     template<typename T>
     struct type_info {
         using real_type = T;

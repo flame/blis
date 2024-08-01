@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -245,7 +245,7 @@ void bli_gemm_front
 		bli_obj_set_exec_dt( dt_exec, &ct );
 		bli_obj_set_comp_dt( dt_comp, &ct );
 
-		// A naive approach would cast C to the comptuation datatype,
+		// A naive approach would cast C to the computation datatype,
 		// compute with beta, and then cast the result back to the
 		// user-provided output matrix. However, we employ a different
 		// approach that halves the number of memops on C (or its

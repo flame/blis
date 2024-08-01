@@ -70,7 +70,7 @@ static void test_nrm2_ukr( nrm2_ker_ft<T, RT> ukr_fp, gtint_t n, gtint_t incx, d
     // Acquire the first greenzone for x
     x = ( T* )x_buffer.greenzone_1;
 
-    // Initiaize the memory with random data
+    // Initialize the memory with random data
     testinghelpers::datagenerators::randomgenerators( -10, 10, n, incx, x );
 
     RT norm = 0.0;

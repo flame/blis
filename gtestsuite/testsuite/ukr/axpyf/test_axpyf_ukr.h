@@ -77,7 +77,7 @@ static void test_axpyf_ukr( FT ukr_fp, char conjA, char conjx, gtint_t m, gtint_
     y = ( T* )y_buffer.greenzone_1;
     y_ref = ( T* )y_ref_buffer.greenzone_1;   // For y_ref, there is no greenzone_2
 
-    // Initiaize the memory with random data
+    // Initialize the memory with random data
     testinghelpers::datagenerators::randomgenerators( -2, 8, 'c', m, b_fuse, A, 'n', lda );
     testinghelpers::datagenerators::randomgenerators( -10, 10, b_fuse, incx, x );
     testinghelpers::datagenerators::randomgenerators( -10, 10, m, incy, y );

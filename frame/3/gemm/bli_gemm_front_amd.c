@@ -285,7 +285,7 @@ void bli_gemm_front
 		bli_obj_set_exec_dt( dt_exec, &ct );
 		bli_obj_set_comp_dt( dt_comp, &ct );
 
-		// A naive approach would cast C to the comptuation datatype,
+		// A naive approach would cast C to the computation datatype,
 		// compute with beta, and then cast the result back to the
 		// user-provided output matrix. However, we employ a different
 		// approach that halves the number of memops on C (or its

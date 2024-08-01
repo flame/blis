@@ -2528,7 +2528,7 @@ void fill_string_with_n_spaces( char* str, unsigned int n_spaces )
 {
 	unsigned int i;
 
-	// Initialze to empty string in case n_spaces == 0.
+	// Initialize to empty string in case n_spaces == 0.
 	sprintf( str, "%s", "" );
 
 	for ( i = 0; i < n_spaces; ++i )

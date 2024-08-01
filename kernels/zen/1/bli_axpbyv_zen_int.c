@@ -55,7 +55,7 @@ typedef union
  * y := beta * y + alpha * conjx(x)
  * where,
  * 		x & y are single precision vectors of length n.
- * 		alpha & beta are scalers.
+ * 		alpha & beta are scalars.
  */
 void bli_saxpbyv_zen_int
 	 (
@@ -312,7 +312,7 @@ void bli_saxpbyv_zen_int
  * y := beta * y + alpha * conjx(x)
  * where,
  * 		x & y are double precision vectors of length n.
- * 		alpha & beta are scalers.
+ * 		alpha & beta are scalars.
  */
 void bli_daxpbyv_zen_int
 	 (
@@ -569,7 +569,7 @@ void bli_daxpbyv_zen_int
  * y := beta * y + alpha * conjx(x)
  * where,
  * 		x & y are simple complex vectors of length n.
- * 		alpha & beta are scalers.
+ * 		alpha & beta are scalars.
  */
 void bli_caxpbyv_zen_int
 	 (
@@ -1252,7 +1252,7 @@ void bli_caxpbyv_zen_int
  * y := beta * y + alpha * conjx(x)
  * where,
  * 		x & y are double complex vectors of length n.
- * 		alpha & beta are scalers.
+ * 		alpha & beta are scalars.
  */
 void bli_zaxpbyv_zen_int
 	 (

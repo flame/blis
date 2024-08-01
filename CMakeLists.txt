@@ -336,7 +336,7 @@ if(NOT WIN32)
     option(ENABLE_COVERAGE "Enable Code Coverage using gcov(only GCC/Debug build)" OFF)
 endif()
 if(NOT WIN32)
-    option(ENABLE_ASAN "Enable Address Sanatizer (Debug build)" OFF)
+    option(ENABLE_ASAN "Enable Address Sanitizer (Debug build)" OFF)
 endif()
 
 #------------------------------------
@@ -770,9 +770,9 @@ if(NOT WIN32)
         endif()
     endif()
     if(ENABLE_ASAN)
-        message("   Address Sanatizer is enabled.")
+        message("   Address Sanitizer is enabled.")
     else()
-        message("   Address Sanatizer is disabled.")
+        message("   Address Sanitizer is disabled.")
     endif()
 endif()
 
@@ -952,7 +952,7 @@ if(ENABLE_COVERAGE AND (NOT WIN32))
 endif()
 
 #--------------------------------------------
-#         Address Sanatizer flags
+#         Address Sanitizer flags
 #--------------------------------------------
 if(ENABLE_ASAN AND (NOT WIN32))
     set(ASAN_FLAGS "-g -fsanitize=address")

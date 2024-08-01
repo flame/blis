@@ -74,7 +74,7 @@ static void test_omatcopy( char storage, char trans, gtint_t m, gtint_t n, T alp
     B = ( T* )B_buf.greenzone_1;
     B_ref = ( T* )B_ref_buf.greenzone_1; // For B_ref, there is no greenzone_2
 
-    // Initiaize the memory with random data
+    // Initialize the memory with random data
     testinghelpers::datagenerators::randomgenerators( -10, 10, storage, m, n, A, 'n', lda );
     testinghelpers::datagenerators::randomgenerators( -10, 10, storage, m, n, B, B_trans, ldb );
 

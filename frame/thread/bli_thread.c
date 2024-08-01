@@ -121,7 +121,7 @@ void bli_thread_range_sub
 
 	// In this function, we partition the space between all_start and
 	// all_end into n_way partitions, each a multiple of block_factor
-	// with the exception of the one partition that recieves the
+	// with the exception of the one partition that receives the
 	// "edge" case (if applicable).
 	//
 	// Here are examples of various thread partitionings, in units of
