@@ -3,7 +3,7 @@
 set -e
 set -x
 
-TAG=2023.10.18
+TAG=2024.04.12
 
 # The prebuilt toolchains only support hardfloat, so we only
 # test these for now.
