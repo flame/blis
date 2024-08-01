@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -86,7 +86,7 @@ void sgemm_compute_blis_impl
     );
 
     /* Quick return. */
-    if ( *m == 0 || *n == 0 )
+    if ( *m == 0 || *n == 0 || ( ( *k == 0) && PASTEMAC(s,eq1)( *beta ) ) )
     {
       /* Finalize BLIS. */
       bli_finalize_auto();
@@ -214,7 +214,7 @@ void dgemm_compute_blis_impl
     );
 
    /* Quick return. */
-    if ( *m == 0 || *n == 0 )
+    if ( *m == 0 || *n == 0 || ( ( *k == 0) && PASTEMAC(d,eq1)( *beta ) ) )
     {
       /* Finalize BLIS. */
       bli_finalize_auto();

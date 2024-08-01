@@ -62,7 +62,13 @@ f77_int PASTEF772S(i,chx,blasname) \
        being returned, which is not what we want. */ \
     if ( *n < 1 || *incx <= 0 ) { \
       AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "iamax_: vector empty") \
-       return 0;                                   \
+      return 0;                                   \
+    }\
+\
+    /* If n=1, return 1 here to emulate netlib BLAS and avoid touching vector */ \
+    if ( *n == 1 ) { \
+      AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "iamax_: n=1") \
+      return 1;                                   \
     }\
 \
     /* Initialize BLIS. */ \
@@ -131,6 +137,12 @@ f77_int isamax_blis_impl
     if ( *n < 1 || *incx <= 0 ) {
       AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "isamax_: vector empty");
       return 0;
+    }
+
+    /* If n=1, return 1 here to emulate netlib BLAS and avoid touching vector */
+    if ( *n == 1 ) {
+      AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "iamax_: n=1");
+      return 1;
     }
 
     /* Initialize BLIS. */
@@ -240,6 +252,12 @@ f77_int idamax_blis_impl
     if ( *n < 1 || *incx <= 0 ) {
       AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "idamax_: vector empty");
       return 0;
+    }
+
+    /* If n=1, return 1 here to emulate netlib BLAS and avoid touching vector */
+    if ( *n == 1 ) {
+      AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "iamax_: n=1");
+      return 1;
     }
 
     /*

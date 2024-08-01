@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 24, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -150,6 +150,18 @@ GENTFUNCR2( float,    float,  s,  , blasname, blisname ) \
 GENTFUNCR2( double,   double, d,  , blasname, blisname ) \
 GENTFUNCR2( scomplex, float,  c, s, blasname, blisname ) \
 GENTFUNCR2( dcomplex, double, z, d, blasname, blisname )
+
+
+// -- Alternate three-operand macro (one char for complex, one for real proj
+//       for name, one for real proj for use) --
+
+
+#define INSERT_GENTFUNCR3_BLAS( blasname, blisname ) \
+\
+GENTFUNCR3( float,    float,  s,  , s, blasname, blisname ) \
+GENTFUNCR3( double,   double, d,  , d, blasname, blisname ) \
+GENTFUNCR3( scomplex, float,  c, s, s, blasname, blisname ) \
+GENTFUNCR3( dcomplex, double, z, d, d, blasname, blisname )
 
 
 // -- Extended two-operand macro (used only for scal) --

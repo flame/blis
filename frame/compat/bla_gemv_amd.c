@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -85,8 +85,9 @@ void PASTEF77S(ch,blasname) \
       incy  \
     ); \
 \
-    if (*m == 0 || *n == 0) { \
-      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
+    if ( *m == 0 || *n == 0 || \
+         ( PASTEMAC(ch,eq0)( *alpha ) && PASTEMAC(ch,eq1)( *beta ) ) ) { \
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
         return; \
     } \
 \
@@ -207,7 +208,8 @@ void dgemv_blis_impl
       incy
     );
 
-    if (*m == 0 || *n == 0)
+    if ( *m == 0 || *n == 0 || \
+         ( PASTEMAC(d,eq0)( *alpha ) && PASTEMAC(d,eq1)( *beta ) ) )
     {
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         return;
@@ -412,7 +414,8 @@ void sgemv_blis_impl
       incy
     );
 
-    if (*m == 0 || *n == 0)
+    if ( *m == 0 || *n == 0 || \
+         ( PASTEMAC(s,eq0)( *alpha ) && PASTEMAC(s,eq1)( *beta ) ) )
     {
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         return;
@@ -612,7 +615,8 @@ void cgemv_blis_impl
       incy
     );
 
-    if (*m == 0 || *n == 0)
+    if ( *m == 0 || *n == 0 || \
+         ( PASTEMAC(c,eq0)( *alpha ) && PASTEMAC(c,eq1)( *beta ) ) )
     {
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         return;
@@ -854,7 +858,8 @@ void zgemv_blis_impl
       incy
     );
 
-    if (*m == 0 || *n == 0)
+    if ( *m == 0 || *n == 0 || \
+         ( PASTEMAC(z,eq0)( *alpha ) && PASTEMAC(z,eq1)( *beta ) ) )
     {
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         return;
