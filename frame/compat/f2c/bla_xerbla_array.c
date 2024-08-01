@@ -35,6 +35,7 @@
 #include "blis.h"
 
 #ifdef BLIS_ENABLE_BLAS
+#ifdef BLIS_ENABLE_XERBLA_ARRAY
 
 #define MAX_NUM_CHARS 32
 
@@ -70,5 +71,6 @@ int PASTEF77(xerbla_array)(const bla_character *srname_array, const bla_integer 
 	return 0;
 }
 
+#endif
 #endif
 

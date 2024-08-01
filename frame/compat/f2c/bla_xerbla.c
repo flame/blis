@@ -35,6 +35,7 @@
 #include "blis.h"
 
 #ifdef BLIS_ENABLE_BLAS
+#ifdef BLIS_ENABLE_XERBLA
 
 /* xerbla.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
@@ -87,5 +88,6 @@
     return 0;
 } /* xerbla */
 
+#endif
 #endif
 

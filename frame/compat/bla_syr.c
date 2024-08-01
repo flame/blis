@@ -103,10 +103,12 @@ void PASTEF77(ch,blasname) \
 }
 
 #ifdef BLIS_ENABLE_BLAS
-#ifdef BLIS_ENABLE_SCALAPACK_COMPAT
-INSERT_GENTFUNCRO_BLAS( syr, syr )
-#else
-INSERT_GENTFUNC_BLAS( syr, syr )
+GENTFUNC( float,    s, syr, syr )
+GENTFUNC( double,   d, syr, syr )
+#ifdef BLIS_ENABLE_CSYR
+GENTFUNC( scomplex, c, syr, syr )
+#endif
+#ifdef BLIS_ENABLE_ZSYR
+GENTFUNC( dcomplex, z, syr, syr )
 #endif
 #endif
-

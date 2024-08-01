@@ -35,6 +35,7 @@
 #include "blis.h"
 
 #ifdef BLIS_ENABLE_BLAS
+#ifdef BLIS_ENABLE_LSAME
 
 /* lsame.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
@@ -150,5 +151,6 @@ int PASTEF77(lsame)(const char *ca, const char *cb, int ca_len, int cb_len)
     return ret_val;
 } /* lsame */
 
+#endif
 #endif
 

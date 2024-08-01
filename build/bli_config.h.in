@@ -45,6 +45,9 @@
 // Enabled kernel sets (kernel_list)
 @kernel_list_defines@
 
+// Disabled symbols (symbol_omit_list)
+@omit_symbol_list_defines@
+
 #define BLIS_VERSION_STRING "@version@"
 
 #if @enable_system@
