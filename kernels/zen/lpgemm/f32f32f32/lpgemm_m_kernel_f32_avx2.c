@@ -55,6 +55,7 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
               &&POST_OPS_CLIP_6x16F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_6x16F,
+              &&POST_OPS_MATRIX_MUL_6x16F,
               &&POST_OPS_SWISH_6x16F
             };
     uint64_t n_left = n0 % NR;  //n0 is expected to be n0<=NR
@@ -583,6 +584,31 @@ POST_OPS_MATRIX_ADD_6x16F:
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_MATRIX_MUL_6x16F:
+      {
+          dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+          float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+          // c[0:0-15]
+          F32_F32_MATRIX_MUL_2COL(ymm1,ymm2,0,4,5);
+
+          // c[1:0-15]
+          F32_F32_MATRIX_MUL_2COL(ymm1,ymm2,1,6,7);
+
+          // c[2:0-15]
+          F32_F32_MATRIX_MUL_2COL(ymm1,ymm2,2,8,9);
+
+          // c[3:0-15]
+          F32_F32_MATRIX_MUL_2COL(ymm1,ymm2,3,10,11);
+
+          // c[4:0-15]
+          F32_F32_MATRIX_MUL_2COL(ymm1,ymm2,4,12,13);
+
+          // c[5:0-15]
+          F32_F32_MATRIX_MUL_2COL(ymm1,ymm2,5,14,15);
+
+          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }      
 POST_OPS_SWISH_6x16F:
       {
           ymm0 =
@@ -701,6 +727,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x8m)
               &&POST_OPS_CLIP_6x8F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_6x8F,
+              &&POST_OPS_MATRIX_MUL_6x8F,
               &&POST_OPS_SWISH_6x8F
             };
 
@@ -1008,6 +1035,31 @@ POST_OPS_MATRIX_ADD_6x8F:
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_MATRIX_MUL_6x8F:
+      {
+          dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+          float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+          // c[0:0-7]
+          F32_F32_MATRIX_MUL_1COL(ymm1,0,4);
+
+          // c[1:0-7]
+          F32_F32_MATRIX_MUL_1COL(ymm1,1,6);
+
+          // c[2:0-7]
+          F32_F32_MATRIX_MUL_1COL(ymm1,2,8);
+
+          // c[3:0-7]
+          F32_F32_MATRIX_MUL_1COL(ymm1,3,10);
+
+          // c[4:0-7]
+          F32_F32_MATRIX_MUL_1COL(ymm1,4,12);
+
+          // c[5:0-7]
+          F32_F32_MATRIX_MUL_1COL(ymm1,5,14);
+
+          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }      
 POST_OPS_SWISH_6x8F:
       {
           ymm0 =
@@ -1102,6 +1154,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x4m)
               &&POST_OPS_CLIP_6x4F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_6x4F,
+              &&POST_OPS_MATRIX_MUL_6x4F,
               &&POST_OPS_SWISH_6x4F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -1406,6 +1459,31 @@ POST_OPS_MATRIX_ADD_6x4F:
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_MATRIX_MUL_6x4F:
+      {
+          dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+          float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+          // c[0:0-3]
+          F32_F32_MATRIX_MUL_1COL_XMM(xmm1,0,4);
+
+          // c[1:0-3]
+          F32_F32_MATRIX_MUL_1COL_XMM(xmm1,1,5);
+
+          // c[2:0-3]
+          F32_F32_MATRIX_MUL_1COL_XMM(xmm1,2,6);
+
+          // c[3:0-3]
+          F32_F32_MATRIX_MUL_1COL_XMM(xmm1,3,7);
+
+          // c[4:0-3]
+          F32_F32_MATRIX_MUL_1COL_XMM(xmm1,4,8);
+
+          // c[5:0-3]
+          F32_F32_MATRIX_MUL_1COL_XMM(xmm1,5,9);
+
+          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }      
 POST_OPS_SWISH_6x4F:
       {
           xmm0 =
@@ -1500,6 +1578,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x2m)
               &&POST_OPS_CLIP_6x2F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_6x2F,
+              &&POST_OPS_MATRIX_MUL_6x2F,
               &&POST_OPS_SWISH_6x2F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -1805,6 +1884,31 @@ POST_OPS_MATRIX_ADD_6x2F:
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_MATRIX_MUL_6x2F:
+      {
+          dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+          float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+          // c[0:0-1]
+          F32_F32_MATRIX_MUL_1COL_XMM_2ELE(xmm1,0,4);
+
+          // c[1:0-1]
+          F32_F32_MATRIX_MUL_1COL_XMM_2ELE(xmm1,1,5);
+
+          // c[2:0-1]
+          F32_F32_MATRIX_MUL_1COL_XMM_2ELE(xmm1,2,6);
+
+          // c[3:0-1]
+          F32_F32_MATRIX_MUL_1COL_XMM_2ELE(xmm1,3,7);
+
+          // c[4:0-1]
+          F32_F32_MATRIX_MUL_1COL_XMM_2ELE(xmm1,4,8);
+
+          // c[5:0-1]
+          F32_F32_MATRIX_MUL_1COL_XMM_2ELE(xmm1,5,9);
+
+          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }      
 POST_OPS_SWISH_6x2F:
       {
           xmm0 =
@@ -1899,6 +2003,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x1m)
               &&POST_OPS_CLIP_6x1F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_6x1F,
+              &&POST_OPS_MATRIX_MUL_6x1F,
               &&POST_OPS_SWISH_6x1F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -2203,6 +2308,31 @@ POST_OPS_MATRIX_ADD_6x1F:
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_MATRIX_MUL_6x1F:
+      {
+          dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+          float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+          // c[0:0-0]
+          F32_F32_MATRIX_MUL_1COL_XMM_1ELE(xmm1,0,4);
+
+          // c[1:0-0]
+          F32_F32_MATRIX_MUL_1COL_XMM_1ELE(xmm1,1,5);
+
+          // c[2:0-0]
+          F32_F32_MATRIX_MUL_1COL_XMM_1ELE(xmm1,2,6);
+
+          // c[3:0-0]
+          F32_F32_MATRIX_MUL_1COL_XMM_1ELE(xmm1,3,7);
+
+          // c[4:0-0]
+          F32_F32_MATRIX_MUL_1COL_XMM_1ELE(xmm1,4,8);
+
+          // c[5:0-0]
+          F32_F32_MATRIX_MUL_1COL_XMM_1ELE(xmm1,5,9);
+
+          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }      
 POST_OPS_SWISH_6x1F:
       {
           xmm0 =

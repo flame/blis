@@ -88,6 +88,7 @@ LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32 )
           &&POST_OPS_CLIP_6x64F,
           NULL, // Virtual node for downscale, else segfault
           &&POST_OPS_MATRIX_ADD_6x64F,
+          &&POST_OPS_MATRIX_MUL_6x64F,
           &&POST_OPS_SWISH_6x64F
       };
 
@@ -468,6 +469,13 @@ LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32 )
     float *matptr = (float *)post_ops_list_temp->op_args1;
     zmm0 = _mm512_maskz_loadu_ps(k2, (matptr + post_ops_attr.post_op_c_i));
     zmm8 = _mm512_add_ps(zmm8, zmm0);
+    POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+  }
+   POST_OPS_MATRIX_MUL_6x64F:
+  {
+    float *matptr = (float *)post_ops_list_temp->op_args1;
+    zmm0 = _mm512_maskz_loadu_ps(k2, (matptr + post_ops_attr.post_op_c_i));
+    zmm8 = _mm512_mul_ps(zmm8, zmm0);
     POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
   }
   POST_OPS_SWISH_6x64F:

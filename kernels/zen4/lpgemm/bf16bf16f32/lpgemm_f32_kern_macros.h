@@ -268,6 +268,100 @@
 	F32_F32_MATRIX_ADD_LOAD(k3,scr3,m_ind,3); \
 	F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3,m_ind); \
 
+// Matrix mul post-ops helper macros
+#define F32_MATRIX_MUL_1COL(scr0,m_ind) \
+	c_float_ ## m_ind ## p0 = _mm512_mul_ps( scr0, c_float_ ## m_ind ## p0 ); \
+
+#define F32_MATRIX_MUL_2COL(scr0,scr1,m_ind) \
+	c_float_ ## m_ind ## p0 = _mm512_mul_ps( scr0, c_float_ ## m_ind ## p0 ); \
+	c_float_ ## m_ind ## p1 = _mm512_mul_ps( scr1, c_float_ ## m_ind ## p1 ); \
+
+#define F32_MATRIX_MUL_3COL(scr0,scr1,scr2,m_ind) \
+	c_float_ ## m_ind ## p0 = _mm512_mul_ps( scr0, c_float_ ## m_ind ## p0 ); \
+	c_float_ ## m_ind ## p1 = _mm512_mul_ps( scr1, c_float_ ## m_ind ## p1 ); \
+	c_float_ ## m_ind ## p2 = _mm512_mul_ps( scr2, c_float_ ## m_ind ## p2 ); \
+
+#define F32_MATRIX_MUL_4COL(scr0,scr1,scr2,scr3,m_ind) \
+	c_float_ ## m_ind ## p0 = _mm512_mul_ps( scr0, c_float_ ## m_ind ## p0 ); \
+	c_float_ ## m_ind ## p1 = _mm512_mul_ps( scr1, c_float_ ## m_ind ## p1 ); \
+	c_float_ ## m_ind ## p2 = _mm512_mul_ps( scr2, c_float_ ## m_ind ## p2 ); \
+	c_float_ ## m_ind ## p3 = _mm512_mul_ps( scr3, c_float_ ## m_ind ## p3 ); \
+
+#define BF16_F32_MATRIX_MUL_LOAD(mask,scr,m_ind,n_ind) \
+	scr = (__m512)( _mm512_sllv_epi32 \
+					( \
+					  _mm512_cvtepi16_epi32 \
+					  ( \
+						_mm256_maskz_loadu_epi16 \
+						( \
+						  mask, \
+						  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+						  post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+						) \
+					  ), _mm512_set1_epi32( 16 ) \
+					) \
+				  ); \
+
+#define BF16_F32_MATRIX_MUL_1COL_PAR(mask,scr0,m_ind) \
+	BF16_F32_MATRIX_MUL_LOAD(mask,scr0,m_ind,0); \
+	F32_MATRIX_MUL_1COL(scr0,m_ind); \
+
+#define BF16_F32_MATRIX_MUL_1COL(scr0,m_ind) \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
+	F32_MATRIX_MUL_1COL(scr0,m_ind); \
+
+#define BF16_F32_MATRIX_MUL_2COL(scr0,scr1,m_ind) \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
+	F32_MATRIX_MUL_2COL(scr0,scr1,m_ind); \
+
+#define BF16_F32_MATRIX_MUL_3COL(scr0,scr1,scr2,m_ind) \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,m_ind,2); \
+	F32_MATRIX_MUL_3COL(scr0,scr1,scr2,m_ind); \
+
+#define BF16_F32_MATRIX_MUL_4COL(scr0,scr1,scr2,scr3,m_ind) \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,m_ind,2); \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr3,m_ind,3); \
+	F32_MATRIX_MUL_4COL(scr0,scr1,scr2,scr3,m_ind); \
+
+#define F32_F32_MATRIX_MUL_LOAD(mask,scr,m_ind,n_ind) \
+	scr = _mm512_maskz_loadu_ps \
+			( \
+			  mask, \
+			  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+			  post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+			); \
+
+#define F32_F32_MATRIX_MUL_1COL_PAR(mask,scr0,m_ind) \
+	F32_F32_MATRIX_MUL_LOAD(mask,scr0,m_ind,0); \
+	F32_MATRIX_MUL_1COL(scr0,m_ind); \
+
+#define F32_F32_MATRIX_MUL_1COL(scr0,m_ind) \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
+	F32_MATRIX_MUL_1COL(scr0,m_ind); \
+
+#define F32_F32_MATRIX_MUL_2COL(scr0,scr1,m_ind) \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
+	F32_MATRIX_MUL_2COL(scr0,scr1,m_ind); \
+
+#define F32_F32_MATRIX_MUL_3COL(scr0,scr1,scr2,m_ind) \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,m_ind,2); \
+	F32_MATRIX_MUL_3COL(scr0,scr1,scr2,m_ind); \
+
+#define F32_F32_MATRIX_MUL_4COL(scr0,scr1,scr2,scr3,m_ind) \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,m_ind,2); \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr3,m_ind,3); \
+	F32_MATRIX_MUL_4COL(scr0,scr1,scr2,scr3,m_ind); \
+
 //Zero-out the given ZMM accumulator registers
 #define ZERO_ACC_ZMM_4_REG(zmm0,zmm1,zmm2,zmm3) \
 	zmm0 = _mm512_setzero_ps(); \

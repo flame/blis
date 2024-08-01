@@ -59,6 +59,7 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 	                      &&POST_OPS_CLIP_6x64,
 	                      &&POST_OPS_DOWNSCALE_6x64,
 	                      &&POST_OPS_MATRIX_ADD_6x64,
+						  &&POST_OPS_MATRIX_MUL_6x64,
 	                      &&POST_OPS_SWISH_6x64
 	                    };
 
@@ -617,6 +618,53 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 				zmm12 = _mm512_add_ps( selector2, zmm12 );
 				zmm16 = _mm512_add_ps( selector3, zmm16 );
 				zmm20 = _mm512_add_ps( selector4, zmm20 );
+			}
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+
+		POST_OPS_MATRIX_MUL_6x64:
+		{
+			__m512 selector3;
+			__m512 selector4;
+
+			dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+
+			if ( post_ops_attr.c_stor_type == BF16 )
+			{
+				bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
+
+				BF16_F32_MATRIX_MUL_LOAD
+				            ( k1, selector1, 0, 0 )
+				BF16_F32_MATRIX_MUL_LOAD
+				            ( k2, selector2, 0, 1 )
+				BF16_F32_MATRIX_MUL_LOAD
+				            ( k3, selector3, 0, 2 )
+				BF16_F32_MATRIX_MUL_LOAD
+				            ( k4, selector4, 0, 3 )
+
+				zmm8  = _mm512_mul_ps( selector1, zmm8  );
+				zmm12 = _mm512_mul_ps( selector2, zmm12 );
+				zmm16 = _mm512_mul_ps( selector3, zmm16 );
+				zmm20 = _mm512_mul_ps( selector4, zmm20 );
+			}
+			else
+			{
+				float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+				F32_F32_MATRIX_MUL_LOAD
+				            ( k1, selector1, 0, 0 )
+				F32_F32_MATRIX_MUL_LOAD
+				            ( k2, selector2, 0, 1 )
+				F32_F32_MATRIX_MUL_LOAD
+				            ( k3, selector3, 0, 2 )
+				F32_F32_MATRIX_MUL_LOAD
+				            ( k4, selector4, 0, 3 )
+
+				zmm8  = _mm512_mul_ps( selector1, zmm8  );
+				zmm12 = _mm512_mul_ps( selector2, zmm12 );
+				zmm16 = _mm512_mul_ps( selector3, zmm16 );
+				zmm20 = _mm512_mul_ps( selector4, zmm20 );
 			}
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR

@@ -373,6 +373,12 @@ static inline void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
         free( post_ops->sum );
     }
 
+    if ( post_ops->matrix_mul != NULL )
+    {
+        free( ( post_ops->matrix_mul )->matrix );
+        free( post_ops->matrix_mul );
+    }
+
     if ( post_ops->bias != NULL )
     {
         free( ( post_ops->bias )->bias );

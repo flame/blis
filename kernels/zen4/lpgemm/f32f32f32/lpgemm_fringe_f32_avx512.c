@@ -52,6 +52,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x64)
               &&POST_OPS_CLIP_5x64F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_5x64F,
+              &&POST_OPS_MATRIX_MUL_5x64F,
               &&POST_OPS_SWISH_5x64F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -714,6 +715,28 @@ POST_OPS_MATRIX_ADD_5x64F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_MATRIX_MUL_5x64F:
+    {
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+        // c[0:0-15,16-31,32-47,48-63]
+        F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,0,8,9,10,11);
+
+        // c[1:0-15,16-31,32-47,48-63]
+        F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,1,12,13,14,15);
+
+        // c[2:0-15,16-31,32-47,48-63]
+        F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,2,16,17,18,19);
+
+        // c[3:0-15,16-31,32-47,48-63]
+        F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,3,20,21,22,23);
+
+        // c[4:0-15,16-31,32-47,48-63]
+        F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,4,24,25,26,27);
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }    
 POST_OPS_SWISH_5x64F:
     {
         zmm7 =
@@ -824,6 +847,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x64)
               &&POST_OPS_CLIP_4x64F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_4x64F,
+              &&POST_OPS_MATRIX_MUL_4x64F,
               &&POST_OPS_SWISH_4x64F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -1383,6 +1407,25 @@ POST_OPS_MATRIX_ADD_4x64F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_MATRIX_MUL_4x64F:
+    {
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+        // c[0:0-15,16-31,32-47,48-63]
+        F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,0,8,9,10,11);
+
+        // c[1:0-15,16-31,32-47,48-63]
+        F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,1,12,13,14,15);
+
+        // c[2:0-15,16-31,32-47,48-63]
+        F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,2,16,17,18,19);
+
+        // c[3:0-15,16-31,32-47,48-63]
+        F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,3,20,21,22,23);
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }    
 POST_OPS_SWISH_4x64F:
     {
         zmm7 =
@@ -1476,6 +1519,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x64)
               &&POST_OPS_CLIP_3x64F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_3x64F,
+              &&POST_OPS_MATRIX_MUL_3x64F,
               &&POST_OPS_SWISH_3x64F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -1924,6 +1968,22 @@ POST_OPS_MATRIX_ADD_3x64F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_MATRIX_MUL_3x64F:
+    {
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+        // c[0:0-15,16-31,32-47,48-63]
+        F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,0,8,9,10,11);
+
+        // c[1:0-15,16-31,32-47,48-63]
+        F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,1,12,13,14,15);
+
+        // c[2:0-15,16-31,32-47,48-63]
+        F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,2,16,17,18,19);
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }    
 POST_OPS_SWISH_3x64F:
     {
         zmm7 =
@@ -2000,6 +2060,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x64)
               &&POST_OPS_CLIP_2x64F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_2x64F,
+              &&POST_OPS_MATRIX_MUL_2x64F,
               &&POST_OPS_SWISH_2x64F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -2332,6 +2393,19 @@ POST_OPS_MATRIX_ADD_2x64F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_MATRIX_MUL_2x64F:
+    {
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+        // c[0:0-15,16-31,32-47,48-63]
+        F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,0,8,9,10,11);
+
+        // c[1:0-15,16-31,32-47,48-63]
+        F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,1,12,13,14,15);
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }    
 POST_OPS_SWISH_2x64F:
     {
         zmm7 =
@@ -2391,6 +2465,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x64)
               &&POST_OPS_CLIP_1x64F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_1x64F,
+              &&POST_OPS_MATRIX_MUL_1x64F,
               &&POST_OPS_SWISH_1x64F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -2613,6 +2688,16 @@ POST_OPS_MATRIX_ADD_1x64F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_MATRIX_MUL_1x64F:
+    {
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+        // c[0:0-15,16-31,32-47,48-63]
+        F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,0,8,9,10,11);
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }    
 POST_OPS_SWISH_1x64F:
     {
         zmm7 =
@@ -2655,6 +2740,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x48)
               &&POST_OPS_CLIP_5x48F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_5x48F,
+              &&POST_OPS_MATRIX_MUL_5x48F,
               &&POST_OPS_SWISH_5x48F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -3191,6 +3277,28 @@ POST_OPS_MATRIX_ADD_5x48F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_MATRIX_MUL_5x48F:
+    {
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+        // c[0:0-15,16-31,32-47]
+        F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,0,8,9,10);
+
+        // c[1:0-15,16-31,32-47]
+        F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,1,12,13,14);
+
+        // c[2:0-15,16-31,32-47]
+        F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,2,16,17,18);
+
+        // c[3:0-15,16-31,32-47]
+        F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,3,20,21,22);
+
+        // c[4:0-15,16-31,32-47]
+        F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,4,24,25,26);
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }    
 POST_OPS_SWISH_5x48F:
     {
         __m512 zmm7 =
@@ -3281,6 +3389,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x48)
               &&POST_OPS_CLIP_4x48F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_4x48F,
+              &&POST_OPS_MATRIX_MUL_4x48F,
               &&POST_OPS_SWISH_4x48F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -3731,6 +3840,25 @@ POST_OPS_MATRIX_ADD_4x48F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_MATRIX_MUL_4x48F:
+    {
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+        // c[0:0-15,16-31,32-47]
+        F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,0,8,9,10);
+
+        // c[1:0-15,16-31,32-47]
+        F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,1,12,13,14);
+
+        // c[2:0-15,16-31,32-47]
+        F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,2,16,17,18);
+
+        // c[3:0-15,16-31,32-47]
+        F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,3,20,21,22);
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }    
 POST_OPS_SWISH_4x48F:
     {
         __m512 zmm7 =
@@ -3808,6 +3936,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x48)
               &&POST_OPS_CLIP_3x48F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_3x48F,
+              &&POST_OPS_MATRIX_MUL_3x48F,
               &&POST_OPS_SWISH_3x48F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -4174,6 +4303,22 @@ POST_OPS_MATRIX_ADD_3x48F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_MATRIX_MUL_3x48F:
+    {
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+        // c[0:0-15,16-31,32-47]
+        F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,0,8,9,10);
+
+        // c[1:0-15,16-31,32-47]
+        F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,1,12,13,14);
+
+        // c[2:0-15,16-31,32-47]
+        F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,2,16,17,18);
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }    
 POST_OPS_SWISH_3x48F:
     {
         __m512 zmm7 =
@@ -4238,6 +4383,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x48)
               &&POST_OPS_CLIP_2x48F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_2x48F,
+              &&POST_OPS_MATRIX_MUL_2x48F,
               &&POST_OPS_SWISH_2x48F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -4518,6 +4664,19 @@ POST_OPS_MATRIX_ADD_2x48F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_MATRIX_MUL_2x48F:
+    {
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+        // c[0:0-15,16-31,32-47]
+        F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,0,8,9,10);
+
+        // c[1:0-15,16-31,32-47]
+        F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,1,12,13,14);
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }    
 POST_OPS_SWISH_2x48F:
     {
         __m512 zmm7 =
@@ -4569,6 +4728,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x48)
               &&POST_OPS_CLIP_1x48F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_1x48F,
+              &&POST_OPS_MATRIX_MUL_1x48F,
               &&POST_OPS_SWISH_1x48F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -4762,6 +4922,16 @@ POST_OPS_MATRIX_ADD_1x48F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_MATRIX_MUL_1x48F:
+    {
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+        // c[0:0-15,16-31,32-47]
+        F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,0,8,9,10);
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }    
 POST_OPS_SWISH_1x48F:
     {
         __m512 zmm7 =
@@ -4800,6 +4970,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x32)
               &&POST_OPS_CLIP_5x32F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_5x32F,
+              &&POST_OPS_MATRIX_MUL_5x32F,
               &&POST_OPS_SWISH_5x32F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -5204,6 +5375,28 @@ POST_OPS_MATRIX_ADD_5x32F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_MATRIX_MUL_5x32F:
+    {
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+        // c[0:0-15,16-31]
+        F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,0,8,9);
+
+        // c[1:0-15,16-31]
+        F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,1,12,13);
+
+        // c[2:0-15,16-31]
+        F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,2,16,17);
+
+        // c[3:0-15,16-31]
+        F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,3,20,21);
+
+        // c[4:0-15,16-31]
+        F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,4,24,25);
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }    
 POST_OPS_SWISH_5x32F:
     {
         __m512 zmm7 =
@@ -5274,6 +5467,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x32)
               &&POST_OPS_CLIP_4x32F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_4x32F,
+              &&POST_OPS_MATRIX_MUL_4x32F,
               &&POST_OPS_SWISH_4x32F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -5616,6 +5810,25 @@ POST_OPS_MATRIX_ADD_4x32F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_MATRIX_MUL_4x32F:
+    {
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+        // c[0:0-15,16-31]
+        F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,0,8,9);
+
+        // c[1:0-15,16-31]
+        F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,1,12,13);
+
+        // c[2:0-15,16-31]
+        F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,2,16,17);
+
+        // c[3:0-15,16-31]
+        F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,3,20,21);
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }    
 POST_OPS_SWISH_4x32F:
     {
         __m512 zmm7 =
@@ -5677,6 +5890,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x32)
               &&POST_OPS_CLIP_3x32F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_3x32F,
+              &&POST_OPS_MATRIX_MUL_3x32F,
               &&POST_OPS_SWISH_3x32F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -5962,6 +6176,22 @@ POST_OPS_MATRIX_ADD_3x32F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_MATRIX_MUL_3x32F:
+    {
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+        // c[0:0-15,16-31]
+        F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,0,8,9);
+
+        // c[1:0-15,16-31]
+        F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,1,12,13);
+
+        // c[2:0-15,16-31]
+        F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,2,16,17);
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }    
 POST_OPS_SWISH_3x32F:
     {
         __m512 zmm7 =
@@ -6014,6 +6244,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x32)
               &&POST_OPS_CLIP_2x32F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_2x32F,
+              &&POST_OPS_MATRIX_MUL_2x32F,
               &&POST_OPS_SWISH_2x32F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -6237,6 +6468,19 @@ POST_OPS_MATRIX_ADD_2x32F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_MATRIX_MUL_2x32F:
+    {
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+        // c[0:0-15,16-31]
+        F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,0,8,9);
+
+        // c[1:0-15,16-31]
+        F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,1,12,13);
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }    
 POST_OPS_SWISH_2x32F:
     {
         __m512 zmm7 =
@@ -6280,6 +6524,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x32)
               &&POST_OPS_CLIP_1x32F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_1x32F,
+              &&POST_OPS_MATRIX_MUL_1x32F,
               &&POST_OPS_SWISH_1x32F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -6443,6 +6688,16 @@ POST_OPS_MATRIX_ADD_1x32F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_MATRIX_MUL_1x32F:
+    {
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+        // c[0:0-15,16-31]
+        F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,0,8,9);
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }    
 POST_OPS_SWISH_1x32F:
     {
         __m512 zmm7 =

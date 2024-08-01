@@ -714,6 +714,42 @@ GEN_GET_MATRIX_ADD_POST_OP_VAL(float,float,f32f32f32of32)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(float,float,bf16bf16f32of32)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(float,float,bf16s4f32of32)
 
+#define GEN_GET_MATRIX_MUL_POST_OP_VAL_BF16(C_type,BLAS_SFX) \
+static inline float get_matrix_mul_post_op_val_ ## BLAS_SFX \
+     ( \
+       C_type val \
+     ) \
+{ \
+    float ret_val = 0.0; \
+    bfloat16_to_float( val, &ret_val ); \
+    return ret_val; \
+} \
+
+GEN_GET_MATRIX_MUL_POST_OP_VAL_BF16(bfloat16,bf16bf16f32obf16)
+GEN_GET_MATRIX_MUL_POST_OP_VAL_BF16(bfloat16,bf16s4f32obf16)
+
+#define GEN_GET_MATRIX_MUL_POST_OP_VAL(C_type,ACCUM_type,BLAS_SFX) \
+static inline ACCUM_type get_matrix_mul_post_op_val_ ## BLAS_SFX \
+     ( \
+       C_type val \
+     ) \
+{ \
+    return (ACCUM_type) val; \
+} \
+
+GEN_GET_MATRIX_MUL_POST_OP_VAL(int8_t,int32_t,u8s8s32os8)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(int32_t,int32_t,u8s8s32os32)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(int8_t,int16_t,u8s8s16os8)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(uint8_t,int16_t,u8s8s16ou8)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(int16_t,int16_t,u8s8s16os16)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(int8_t,int32_t,s8s8s32os8)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(int32_t,int32_t,s8s8s32os32)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(int8_t,int16_t,s8s8s16os8)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(int16_t,int16_t,s8s8s16os16)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(float,float,f32f32f32of32)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(float,float,bf16bf16f32of32)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(float,float,bf16s4f32of32)
+
 GEN_GET_BIAS_POST_OP_VAL_BF16(bf16bf16f32obf16)
 GEN_GET_BIAS_POST_OP_VAL_BF16(bf16s4f32obf16)
 
@@ -919,6 +955,19 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                                     ( *( ( C_type* )( post_op->matrix_add )->matrix + \
                                            ( i * rs_m ) + ( j * cs_m ) ) ); \
                     } \
+                    else if ( post_op->seq_vector[op_id] == MATRIX_MUL ) \
+                    { \
+                        dim_t rs_m = ( post_op->matrix_mul )->ldm; \
+                        dim_t cs_m = 1; \
+                        if ( ( stor_order == 'C' ) || ( stor_order == 'c' ) ) \
+                        { \
+                            cs_m = rs_m; \
+                            rs_m = 1; \
+                        } \
+                        temp_accum *= GEN_FUNC_NAME(get_matrix_mul_post_op_val_,BLAS_SFX) \
+                                    ( *( ( C_type* )( post_op->matrix_mul )->matrix + \
+                                           ( i * rs_m ) + ( j * cs_m ) ) ); \
+                    } \
                     else \
                     {} \
                 } \
@@ -1044,6 +1093,17 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     } \
     ( post_ops->matrix_add )->matrix = NULL; \
     ( post_ops->matrix_add )->ldm = 0; \
+\
+    /* Bench limitation: can only support 1 matrix mul, but LPGEMM can support
+     * multiple scale post-ops. */ \
+    post_ops->matrix_mul = NULL; \
+    post_ops->matrix_mul = malloc( sizeof( aocl_post_op_matrix_mul ) ); \
+    if ( post_ops->sum == NULL ) \
+    { \
+        goto err_handler; \
+    } \
+    ( post_ops->matrix_mul )->matrix = NULL; \
+    ( post_ops->matrix_mul )->ldm = 0; \
  \
     bool is_bias = FALSE; \
     bool is_relu = FALSE; \
@@ -1055,6 +1115,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     bool is_scalar_scale = FALSE; \
     bool is_scalar_zp = FALSE; \
     bool is_matrix_add = FALSE; \
+    bool is_matrix_mul = FALSE; \
     dim_t activator_idx = 0; \
     dim_t clip_idx = 0; \
  \
@@ -1157,6 +1218,12 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             { \
                 post_ops->seq_vector[cur_op_index] = MATRIX_ADD; \
                 is_matrix_add = TRUE; \
+                cur_op_index++; \
+            } \
+            else if ( strcmp( ops_tok, "matrix_mul" ) == 0 ) \
+            { \
+                post_ops->seq_vector[cur_op_index] = MATRIX_MUL; \
+                is_matrix_mul = TRUE; \
                 cur_op_index++; \
             } \
  \
@@ -1359,6 +1426,41 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         else \
         { \
             ( post_ops->matrix_add )->ldm = n; \
+        } \
+    } \
+ \
+    if ( is_matrix_mul == TRUE ) \
+    { \
+        /* Allocate bias buffer, return early if alloc fails.*/ \
+        dim_t ele_dsize = 0; \
+        if ( global_dscale_out == 'y' ) \
+        { \
+            ele_dsize = sizeof( C_DSCALE_type ); \
+        } \
+        else \
+        { \
+            ele_dsize = sizeof( C_type ); \
+        } \
+        ( post_ops->matrix_mul )->matrix = malloc( m * n * ele_dsize ); \
+        if ( ( post_ops->matrix_mul )->matrix == NULL ) \
+        { \
+            goto err_handler; \
+        } \
+        if ( global_dscale_out == 'y' ) \
+        { \
+            GEN_FUNC_NAME(fill_array_,C_DSCALE_type)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
+        } \
+        else \
+        { \
+            GEN_FUNC_NAME(fill_array_,C_type)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
+        } \
+        if ( ( stor_order == 'C' ) || ( stor_order == 'c' ) ) \
+        { \
+            ( post_ops->matrix_mul )->ldm = m; \
+        } \
+        else \
+        { \
+            ( post_ops->matrix_mul )->ldm = n; \
         } \
     } \
  \

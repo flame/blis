@@ -100,6 +100,7 @@ LPGEMV_N_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 	                      &&POST_OPS_CLIP_6x64,
 	                      &&POST_OPS_DOWNSCALE_6x64,
 	                      &&POST_OPS_MATRIX_ADD_6x64,
+						  &&POST_OPS_MATRIX_MUL_6x64,
 	                      &&POST_OPS_SWISH_6x64
 	                    };
 
@@ -775,7 +776,70 @@ LPGEMV_N_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+		POST_OPS_MATRIX_MUL_6x64:
+		{
+			dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+			if ( post_ops_attr.c_stor_type == BF16 )
+			{
+				bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
+
+				if( ldm == 1 )
+				{
+					BF16_F32_MATRIX_MUL_LOAD(k2,selector1,0,0)
+
+					zmm8 = _mm512_mul_ps( selector1, zmm8 );
+				}
+				else
+				{
+					bfloat16 ctemp[16];
+					for( dim_t i = 0; i < mr0; i++ )
+					{
+						ctemp[i] = *( matptr +
+						            ( ( post_ops_attr.post_op_c_i + i )
+						                * ldm ) );
+					}
+					selector1 = (__m512)( _mm512_sllv_epi32 \
+					                    ( \
+					                      _mm512_cvtepi16_epi32 \
+					                      ( \
+					                        _mm256_maskz_loadu_epi16 \
+					                        ( \
+					                          k2 , ctemp \
+					                        ) \
+					                      ), _mm512_set1_epi32( 16 ) \
+					                    ) \
+					                   ); \
+					zmm8 = _mm512_mul_ps( selector1, zmm8 );
+				}
+			}
+			else
+			{
+
+				float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+				if( ldm == 1 )
+				{
+					F32_F32_MATRIX_MUL_LOAD(k2,selector1,0,0)
+					zmm8 = _mm512_mul_ps( selector1, zmm8 );
+				}
+				else
+				{
+					float ctemp[16];
+					for( dim_t i = 0; i < mr0; i++ )
+					{
+						ctemp[i] = *( matptr +
+						            ( ( post_ops_attr.post_op_c_i + i )
+						                * ldm ) );
+					}
+					selector1 = _mm512_maskz_loadu_ps( k2, ctemp );
+					zmm8 = _mm512_mul_ps( selector1, zmm8 );
+				}
+
+			}
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 		POST_OPS_SWISH_6x64:
 		{
 			selector1 =

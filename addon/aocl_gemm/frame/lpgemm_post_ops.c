@@ -170,6 +170,7 @@ err_t lpgemm_translate_to_post_ops_list
 	dim_t s_i = 0; // Multiple sum/scale supported.
 	dim_t b_i = 0; // Multiple bias supported.
 	dim_t m_i = 0; // Multiple matrix add supported.
+	dim_t mul_i = 0; // Multiple matrix mul supported.
 	for ( dim_t i = 0; i < post_op_unparsed->seq_length; ++i )
 	{
 		// Dispatcher code
@@ -330,6 +331,27 @@ err_t lpgemm_translate_to_post_ops_list
 						m_i += 1;
 					}
 					break;
+			case MATRIX_MUL:
+					{
+						if ( ( ( post_op_unparsed->matrix_mul + mul_i )->matrix == NULL ) ||
+							 ( ( post_op_unparsed->matrix_mul + mul_i )->ldm <= 0 ) )
+						{
+							bli_print_msg(" Post_op.matrix_add attributes are invalid. Exiting..",
+											__FILE__, __LINE__ );
+							return BLIS_NULL_POINTER;
+						}
+
+						lpgemm_set_node_params
+						(
+						  ( post_op_list + i ), POST_OPS_MATRIX_MUL,
+						  ( post_op_unparsed->matrix_mul + mul_i )->matrix,
+						  meta_arg, &( ( post_op_unparsed->matrix_mul + mul_i )->ldm ),
+						  NULL, 0, FALSE
+						);
+
+						mul_i += 1;
+					}
+					break;		
 			default:
 					break;
 		}
