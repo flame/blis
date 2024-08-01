@@ -40,6 +40,22 @@
 
 #include "../int4_utils_avx512.h"
 
+#ifdef LPGEMM_BF16_JIT
+
+void packsclb_nr64_bf16s4f32of32(
+    bfloat16 *packb_bf16,
+    const int8_t *b,
+    const dim_t NC,
+    const dim_t KC,
+    dim_t *rs_p,
+    dim_t *cs_p,
+    lpgemm_pre_op *b_pre_ops,
+    dim_t pre_op_off)
+{
+    //This bf16 packB_s4_bf16 is Not supported for gcc<11.2
+}
+
+#else //LPGEMM_BF16_JIT
 /*
 input:__m512i containing 64 int8 elements
 output: two __m512 containing 16 f32 elements
@@ -49,8 +65,6 @@ output: two __m512 containing 16 f32 elements
       _mm512_cvtepi32_ps( \
        _mm512_cvtepi8_epi32( \
         _mm512_extracti32x4_epi32( in, idx ) ) ), scale_reg ) )
-
-
 
 void packsclb_nr48_bf16s4f32of32
 (
@@ -839,5 +853,5 @@ void packsclb_nr64_bf16s4f32of32
     *cs_p = NR / 2;
 }
 
-
+#endif  // LPGEMM_BF16_JIT
 #endif // BLIS_ADDON_LPGEMM

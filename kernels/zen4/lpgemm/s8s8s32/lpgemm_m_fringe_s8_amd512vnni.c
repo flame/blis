@@ -1239,11 +1239,14 @@ LPGEMM_M_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_4x64)
 	__m512i c_int32_3p1 = _mm512_setzero_epi32();
 	__m512i c_int32_3p2 = _mm512_setzero_epi32();
 	__m512i c_int32_3p3 = _mm512_setzero_epi32();
-
+	// gcc compiler (atleast 11.2 to 13.1) avoid loading B into
+	//  registers while generating the code. A dummy shuffle instruction
+	//  is used on b data to explicitly specify to gcc compiler
+	//  b data needs to be kept in registers to reuse across FMA's
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
 	{
 		b0 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 0 ) );
-
+		b0 = _mm512_shuffle_epi8(b0, b0);
 		// Broadcast a[0,kr:kr+4].
 		a_int32_0 = _mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
@@ -1251,8 +1254,11 @@ LPGEMM_M_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_4x64)
 		a_int32_0 = _mm512_add_epi8( a_int32_0, vec_uint8 );
 
 		b1 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 1 ) );
+		b1 = _mm512_shuffle_epi8(b1, b1);
 		b2 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 2 ) );
+		b2 = _mm512_shuffle_epi8(b2, b2);
 		b3 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 3 ) );
+		b3 = _mm512_shuffle_epi8(b3, b3);
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
@@ -2206,7 +2212,7 @@ LPGEMM_M_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_3x64)
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
 	{
 		b0 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 0 ) );
-
+		b0 = _mm512_shuffle_epi8(b0, b0);
 		// Broadcast a[0,kr:kr+4].
 		a_int32_0 = _mm512_set1_epi32( *( int32_t* )( a + ( rs_a *  0 ) + ( cs_a * kr ) ) );
 
@@ -2214,9 +2220,11 @@ LPGEMM_M_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_3x64)
 		a_int32_0 = _mm512_add_epi8( a_int32_0, vec_uint8 );
 
 		b1 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 1 ) );
+		b1 = _mm512_shuffle_epi8(b1, b1);
 		b2 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 2 ) );
+		b2 = _mm512_shuffle_epi8(b2, b2);
 		b3 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 3 ) );
-
+		b3 = _mm512_shuffle_epi8(b3, b3);
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
 		c_int32_0p0 = _mm512_dpbusd_epi32( c_int32_0p0, a_int32_0, b0 );
@@ -2989,7 +2997,7 @@ LPGEMM_M_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_2x64)
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
 	{
 		b0 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 0 ) );
-
+		b0 = _mm512_shuffle_epi8(b0, b0);
 		// Broadcast a[0,kr:kr+4].
 		a_int32_0 = _mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
@@ -2997,8 +3005,11 @@ LPGEMM_M_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_2x64)
 		a_int32_0 = _mm512_add_epi8( a_int32_0, vec_uint8 );
 
 		b1 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 1 ) );
+		b1 = _mm512_shuffle_epi8(b1, b1);
 		b2 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 2 ) );
+		b2 = _mm512_shuffle_epi8(b2, b2);
 		b3 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 3 ) );
+		b3 = _mm512_shuffle_epi8(b3, b3);
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
@@ -3598,7 +3609,7 @@ LPGEMM_M_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_1x64)
 		// Broadcast a[0,kr]
 		a_int32_0 = _mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
-        	//convert signed int8 to uint8 for VNNI
+		//convert signed int8 to uint8 for VNNI
 		a_int32_0 = _mm512_add_epi8( a_int32_0, vec_uint8 );
 
 		b1 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 1 ) );
@@ -3606,7 +3617,7 @@ LPGEMM_M_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_1x64)
 		b3 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 3 ) );
 
 		// Perform column direction mat-mul with k = 4.
-                // c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
+		// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
 		c_int32_0p0 = _mm512_dpbusd_epi32( c_int32_0p0, a_int32_0, b0 );
 		c_int32_0p1 = _mm512_dpbusd_epi32( c_int32_0p1, a_int32_0, b1 );
 		c_int32_0p2 = _mm512_dpbusd_epi32( c_int32_0p2, a_int32_0, b2 );

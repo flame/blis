@@ -851,10 +851,18 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x64)
         zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
 
+        //dummy shuffles  are added to fix an issue with gcc to use registers for B
+        //instead of memory as operand in vfma
+        zmm0 = _mm512_shuffle_ps(zmm0, zmm0, 0xff);  // dummy shuffle
+        zmm1 = _mm512_shuffle_ps(zmm1, zmm1, 0xff);  // dummy shuffle
+
         /*Load Next 32 elements from row0 of B*/
         zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row 
         zmm7 = _mm512_loadu_ps (bbuf + 48); //load 48-63 from current row
-        
+
+        zmm6 = _mm512_shuffle_ps(zmm6, zmm6, 0xff); // dummy shuffle
+        zmm7 = _mm512_shuffle_ps(zmm7, zmm7, 0xff); // dummy shuffle
+
         /*Broadcast col0 elements of 12 rows of A*/
         zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
         zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1  
@@ -1493,11 +1501,17 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x64)
         /*Load 32 elements from row0 of B*/
         zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
-
+        // dummy shuffles  are added to fix an issue with gcc to use registers for B
+        // instead of memory as operand in vfma
+        zmm0 = _mm512_shuffle_ps(zmm0, zmm0, 0xff); // dummy shuffle
+        zmm1 = _mm512_shuffle_ps(zmm1, zmm1, 0xff); // dummy shuffle
         /*Load Next 32 elements from row0 of B*/
         zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row 
         zmm7 = _mm512_loadu_ps (bbuf + 48); //load 48-63 from current row
-        
+
+        zmm6 = _mm512_shuffle_ps(zmm6, zmm6, 0xff); // dummy shuffle
+        zmm7 = _mm512_shuffle_ps(zmm7, zmm7, 0xff); // dummy shuffle
+
         /*Broadcast col0 elements of 12 rows of A*/
         zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
         zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1  
