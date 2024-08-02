@@ -47,7 +47,7 @@
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,   120,   144,    60 );  \
 	bli_blksz_init     ( &blkszs[ BLIS_KC ],   480,   512,   256,   512,    \
 	                                           480,   320,   256,   160 );  \
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  4032,  4080,  2004 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  2016,  4080,  2004 );  \
 	                                                                        \
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
@@ -60,7 +60,7 @@
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,   120,   144,    60 );  \
 	bli_blksz_init     ( &blkszs[ BLIS_KC ],   480,   512,   256,   512,    \
 	                                           480,   320,   256,   160 );  \
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  4032,  4080,  2004 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  2016,  4080,  2004 );  \
 	                                                                        \
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
