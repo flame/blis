@@ -289,6 +289,50 @@ INSTANTIATE_TEST_SUITE_P (
      );
 #endif
 
+#if defined(BLIS_KERNELS_ZEN5) && defined(GTEST_AVX512)
+
+INSTANTIATE_TEST_SUITE_P (
+         bli_dgemmsup_rv_zen5_asm_24x8m_col_stored_c,
+         dgemmGenericSUP,
+         ::testing::Combine(
+            ::testing::Range(gtint_t(1), gtint_t(25), 1),           // values of m
+            ::testing::Range(gtint_t(1), gtint_t(9), 1),            // values of n
+            ::testing::Range(gtint_t(0), gtint_t(25), 1),           // values of k
+            ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
+            ::testing::Values(1.0, 0.0, -1.0, 2.3),                 // beta value
+            ::testing::Values('c'),                                 // storage of c
+            ::testing::Values(bli_dgemmsup_rv_zen5_asm_24x8m),      // dgemm_sup kernel
+            ::testing::Values(gtint_t(8)),                          // Micro kernel block MR
+            ::testing::Values('n'),                                 // transa
+            ::testing::Values('n'),                                 // transb
+            ::testing::Values(false),                               // row preferred kernel?
+            ::testing::Values(true, false)                          // memory test
+         ),
+         ::dgemmGenericSUPPrint()
+     );
+
+ INSTANTIATE_TEST_SUITE_P (
+         bli_dgemmsup_rv_zen5_asm_24x8m_row_stored_c,
+         dgemmGenericSUP,
+         ::testing::Combine(
+            ::testing::Range(gtint_t(1), gtint_t(25), 1),           // values of m
+            ::testing::Range(gtint_t(1), gtint_t(9), 1),            // values of n
+            ::testing::Range(gtint_t(0), gtint_t(25), 1),           // values of k
+            ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
+            ::testing::Values(1.0, 0.0, -1.0, 2.3),                 // beta value
+            ::testing::Values('r'),                                 // storage of c
+            ::testing::Values(bli_dgemmsup_rv_zen5_asm_24x8m),      // dgemm_sup kernel
+            ::testing::Values(gtint_t(8)),                          // Micro kernel block MR
+            ::testing::Values('t'),                                 // transa
+            ::testing::Values('n'),                                 // transb
+            ::testing::Values(false),                               // row preferred kernel?
+            ::testing::Values(true, false)                          // memory test
+         ),
+         ::dgemmGenericSUPPrint()
+     );
+
+#endif
+
 /*******************************************************/
 /*              Native Kernel testing                  */
 /*******************************************************/
