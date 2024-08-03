@@ -360,7 +360,7 @@ L20:
 } /* zdrot_ */
 
 
-#ifdef BLIS_ENABLE_CROT
+#ifndef BLIS_DISABLE_CROT
 /* crot.f -- translated by f2c (version 20100827).
    You must link the resulting object file with libf2c:
 	on Microsoft Windows system, link with libf2c.lib;
@@ -601,7 +601,7 @@ L20:
 #endif
 
 
-#ifdef BLIS_ENABLE_ZROT
+#ifndef BLIS_DISABLE_ZROT
 /* zrot.f -- translated by f2c (version 20100827).
    You must link the resulting object file with libf2c:
 	on Microsoft Windows system, link with libf2c.lib;

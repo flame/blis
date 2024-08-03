@@ -114,10 +114,10 @@ void PASTEF77(ch,blasname) \
 #ifdef BLIS_ENABLE_BLAS
 GENTFUNC( float,    s, symv, symv )
 GENTFUNC( double,   d, symv, symv )
-#ifdef BLIS_ENABLE_CSYMV
+#ifndef BLIS_DISABLE_CSYMV
 GENTFUNC( scomplex, c, symv, symv )
 #endif
-#ifdef BLIS_ENABLE_ZSYMV
+#ifndef BLIS_DISABLE_ZSYMV
 GENTFUNC( dcomplex, z, symv, symv )
 #endif
 #endif

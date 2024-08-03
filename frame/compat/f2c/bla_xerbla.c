@@ -35,7 +35,6 @@
 #include "blis.h"
 
 #ifdef BLIS_ENABLE_BLAS
-#ifdef BLIS_ENABLE_XERBLA
 
 /* xerbla.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
@@ -44,6 +43,7 @@
 
 /* Table of constant values */
 
+#ifndef BLIS_DISABLE_XERBLA
 /* Subroutine */ int PASTEF77(xerbla)(const bla_character *srname, const bla_integer *info, ftnlen srname_len)
 {
 /*  -- LAPACK auxiliary routine (preliminary version) -- */

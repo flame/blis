@@ -105,10 +105,10 @@ void PASTEF77(ch,blasname) \
 #ifdef BLIS_ENABLE_BLAS
 GENTFUNC( float,    s, syr, syr )
 GENTFUNC( double,   d, syr, syr )
-#ifdef BLIS_ENABLE_CSYR
+#ifndef BLIS_DISABLE_CSYR
 GENTFUNC( scomplex, c, syr, syr )
 #endif
-#ifdef BLIS_ENABLE_ZSYR
+#ifndef BLIS_DISABLE_ZSYR
 GENTFUNC( dcomplex, z, syr, syr )
 #endif
 #endif

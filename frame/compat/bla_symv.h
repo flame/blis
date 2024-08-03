@@ -52,10 +52,10 @@ BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
 #ifdef BLIS_ENABLE_BLAS
 GENTPROT( float,    s, symv )
 GENTPROT( double,   d, symv )
-#ifdef BLIS_ENABLE_CSYMV
+#ifndef BLIS_DISABLE_CSYMV
 GENTPROT( scomplex, c, symv )
 #endif
-#ifdef BLIS_ENABLE_ZSYMV
+#ifndef BLIS_DISABLE_ZSYMV
 GENTPROT( dcomplex, z, symv )
 #endif
 #endif
