@@ -54,8 +54,10 @@ GPATH
 GRTAGS
 GTAGS
 
-# Windows Build
-build/*
+# cmake builds
+build_*/*
+
+# Windows build
 bin/*
 *.dll
 *.lib
