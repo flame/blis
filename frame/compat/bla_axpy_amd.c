@@ -63,6 +63,18 @@ void PASTEF77S(ch,blasname) \
              ftype*   y, const f77_int* incy  \
      ) \
 { \
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *n, (void*)alpha, *incx, *incy) \
+\
+    /*
+      BLAS exception: If the vector dimension is zero, or if alpha is zero, return early.
+    */ \
+    if ((*n) <= 0 || PASTEMAC(ch, eq0)(*alpha)) \
+    { \
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
+      return; \
+    } \
+\
     dim_t  n_elem; \
     ftype* x0; \
     ftype* y0; \
@@ -71,8 +83,7 @@ void PASTEF77S(ch,blasname) \
 \
     /* Initialize BLIS. */ \
     bli_init_auto(); \
-    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
-    AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *n, (void*)alpha, *incx, *incy) \
+\
     /* Convert/typecast negative values of n to zero. */ \
     bli_convert_blas_dim1( *n, n_elem ); \
 \
@@ -130,7 +141,6 @@ void saxpy_blis_impl
     if ((*n) <= 0 || PASTEMAC(s, eq0)(*alpha))
     {
       AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-
       return;
     }
 
@@ -262,27 +272,30 @@ void daxpy_blis_impl
  double*   y, const f77_int* incy
  )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+    AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, (double*)alpha, *incx, *incy)
+
+    /*
+      BLAS exception: If the vector dimension is zero, or if alpha is zero, return early.
+    */
+    if ((*n) <= 0 || PASTEMAC(d, eq0)(*alpha))
+    {
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+      return;
+    }
+
     dim_t  n_elem;
     double* x0;
     double* y0;
     inc_t  incx0;
     inc_t  incy0;
 
-    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
-    AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, (double*)alpha, *incx, *incy)
     /* Initialize BLIS. */
     // bli_init_auto();
 
     /* Convert/typecast negative values of n to zero. */
     if ( *n < 0 ) n_elem = ( dim_t )0;
     else          n_elem = ( dim_t )(*n);
-
-    // BLAS exception to return early when n <= 0 or alpha is 0.0
-    if(*n <= 0 || bli_deq0(*alpha))
-    {
-      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-      return;
-    }
 
     /* If the input increments are negative, adjust the pointers so we can
       use positive increments instead. */
@@ -333,9 +346,8 @@ void daxpy_blis_impl
       case BLIS_ARCH_ZEN5:
       case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
-        axpyv_ker_ptr = bli_daxpyv_zen_int_avx512;
-
-        break;
+          axpyv_ker_ptr = bli_daxpyv_zen_int_avx512;
+          break;
 #endif
       case BLIS_ARCH_ZEN:
       case BLIS_ARCH_ZEN2:
@@ -390,8 +402,8 @@ void daxpy_blis_impl
         );
 
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-
         return;
+
 #ifdef BLIS_ENABLE_OPENMP
     }
 
@@ -473,24 +485,34 @@ void caxpy_blis_impl
  scomplex*   y, const f77_int* incy
  )
 {
-  dim_t     n_elem;
-  scomplex* x0;
-  scomplex* y0;
-  inc_t  incx0;
-  inc_t  incy0;
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+    AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', *n, (scomplex*)alpha, *incx, *incy)
 
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
-  AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', *n, (scomplex*)alpha, *incx, *incy)
+    /*
+      BLAS exception: If the vector dimension is zero, or if alpha is zero, return early.
+    */
+    if ((*n) <= 0 || PASTEMAC(c, eq0)(*alpha))
+    {
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+      return;
+    }
 
-  /* Initialize BLIS. */
-  //    bli_init_auto();
-  /* Convert/typecast negative values of n to zero. */
-  if ( *n < 0 ) n_elem = ( dim_t )0;
-  else              n_elem = ( dim_t )(*n);
+    dim_t     n_elem;
+    scomplex* x0;
+    scomplex* y0;
+    inc_t  incx0;
+    inc_t  incy0;
 
-  /* If the input increments are negative, adjust the pointers so we can
-     use positive increments instead. */
-  if ( *incx < 0 )
+    /* Initialize BLIS. */
+    //    bli_init_auto();
+
+    /* Convert/typecast negative values of n to zero. */
+    if ( *n < 0 ) n_elem = ( dim_t )0;
+    else              n_elem = ( dim_t )(*n);
+
+    /* If the input increments are negative, adjust the pointers so we can
+       use positive increments instead. */
+    if ( *incx < 0 )
     {
       /* The semantics of negative stride in BLAS are that the vector
          operand be traversed in reverse order. (Another way to think
@@ -507,54 +529,54 @@ void caxpy_blis_impl
       x0    = ((scomplex*)x) + (n_elem-1)*(-*incx);
       incx0 = ( inc_t )(*incx);
     }
-  else
+    else
     {
       x0    = ((scomplex*)x);
       incx0 = ( inc_t )(*incx);
     }
-  if ( *incy < 0 )
+    if ( *incy < 0 )
     {
       y0    = ((scomplex*)y) + (n_elem-1)*(-*incy);
       incy0 = ( inc_t )(*incy);
     }
-  else
+    else
     {
       y0    = ((scomplex*)y);
       incy0 = ( inc_t )(*incy);
     }
 
-  // This function is invoked on all architectures including 'generic'.
-  // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
-  if (bli_cpuid_is_avx2fma3_supported() == TRUE)
-  {
-      bli_caxpyv_zen_int5
-      (
-        BLIS_NO_CONJUGATE,
-        n_elem,
-        (scomplex*)alpha,
-        x0, incx0,
-        y0, incy0,
-        NULL
-      );
+    // This function is invoked on all architectures including 'generic'.
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE)
+    {
+        bli_caxpyv_zen_int5
+        (
+          BLIS_NO_CONJUGATE,
+          n_elem,
+          (scomplex*)alpha,
+          x0, incx0,
+          y0, incy0,
+          NULL
+        );
 
-  }
-  else
-  {
-      PASTEMAC2(c,axpyv,BLIS_TAPI_EX_SUF)
-      (
-        BLIS_NO_CONJUGATE,
-        n_elem,
-        (scomplex*)alpha,
-        x0, incx0,
-        y0, incy0,
-        NULL,
-        NULL
-      );
-  }
+    }
+    else
+    {
+        PASTEMAC2(c,axpyv,BLIS_TAPI_EX_SUF)
+        (
+          BLIS_NO_CONJUGATE,
+          n_elem,
+          (scomplex*)alpha,
+          x0, incx0,
+          y0, incy0,
+          NULL,
+          NULL
+        );
+    }
 
-  AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-  /* Finalize BLIS. */
-  //    bli_finalize_auto();
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+    /* Finalize BLIS. */
+    //    bli_finalize_auto();
 }
 
 #ifdef BLIS_ENABLE_BLAS
@@ -580,27 +602,36 @@ void zaxpy_blis_impl
  dcomplex*   y, const f77_int* incy
  )
 {
-  dim_t  n_elem;
-  dcomplex* x0;
-  dcomplex* y0;
-  inc_t  incx0;
-  inc_t  incy0;
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+    AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', *n, (dcomplex*)alpha, *incx, *incy)
 
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
-  AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', *n, (dcomplex*)alpha, *incx, *incy)
+    /*
+      BLAS exception: If the vector dimension is zero, or if alpha is zero, return early.
+    */
+    if ((*n) <= 0 || PASTEMAC(z, eq0)(*alpha))
+    {
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+      return;
+    }
 
-  /* Initialize BLIS. */
-  //    bli_init_auto();
+    dim_t  n_elem;
+    dcomplex* x0;
+    dcomplex* y0;
+    inc_t  incx0;
+    inc_t  incy0;
 
-  // Convert/typecast negative values of n to zero.
-  if ( *n < 0 )
-      n_elem = ( dim_t )0;
-  else
-      n_elem = ( dim_t )(*n);
+    /* Initialize BLIS. */
+    //    bli_init_auto();
 
-  /* If the input increments are negative, adjust the pointers so we can
-     use positive increments instead. */
-  if ( *incx < 0 )
+    // Convert/typecast negative values of n to zero.
+    if ( *n < 0 )
+        n_elem = ( dim_t )0;
+    else
+        n_elem = ( dim_t )(*n);
+
+    /* If the input increments are negative, adjust the pointers so we can
+       use positive increments instead. */
+    if ( *incx < 0 )
     {
       /* The semantics of negative stride in BLAS are that the vector
          operand be traversed in reverse order. (Another way to think
@@ -617,20 +648,17 @@ void zaxpy_blis_impl
       x0    = ( (dcomplex*)x ) + ( n_elem - 1) * ( -*incx );
       incx0 = ( inc_t )(*incx);
     }
-
-  else
+    else
     {
       x0    = ( (dcomplex*)x );
       incx0 = ( inc_t )(*incx);
     }
-
-  if ( *incy < 0 )
+    if ( *incy < 0 )
     {
       y0    = ( (dcomplex*)y ) + ( n_elem - 1 ) * ( -*incy );
       incy0 = ( inc_t )(*incy);
     }
-
-  else
+    else
     {
       y0    = ( (dcomplex*)y );
       incy0 = ( inc_t )(*incy);
@@ -651,32 +679,32 @@ void zaxpy_blis_impl
       case BLIS_ARCH_ZEN4:
 
 #if defined(BLIS_KERNELS_ZEN4)
-        // AVX512 Kernel
-        axpyv_ker_ptr = bli_zaxpyv_zen_int_avx512;
-        break;
+          // AVX512 Kernel
+          axpyv_ker_ptr = bli_zaxpyv_zen_int_avx512;
+          break;
 #endif
       case BLIS_ARCH_ZEN:
       case BLIS_ARCH_ZEN2:
       case BLIS_ARCH_ZEN3:
 
-        // AVX2 Kernel
-        axpyv_ker_ptr = bli_zaxpyv_zen_int5;
-        break;
+          // AVX2 Kernel
+          axpyv_ker_ptr = bli_zaxpyv_zen_int5;
+          break;
+
       default:
 
-        // Query the context
-        cntx = bli_gks_query_cntx();
-        // Query the function pointer using the context
-        axpyv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DCOMPLEX, BLIS_AXPYV_KER, cntx);
+          // Query the context
+          cntx = bli_gks_query_cntx();
+
+          // Query the function pointer using the context
+          axpyv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DCOMPLEX, BLIS_AXPYV_KER, cntx);
     }
 
 #ifdef BLIS_ENABLE_OPENMP
-
     /*
       Initializing the number of thread to one
       to avoid compiler warnings
     */
-
     dim_t nt = 1;
 
     /*
@@ -699,18 +727,18 @@ void zaxpy_blis_impl
     {
 #endif
 
-    axpyv_ker_ptr
-      (
-        BLIS_NO_CONJUGATE,
-        n_elem,
-        (dcomplex*)alpha,
-        x0, incx0,
-        y0, incy0,
-        NULL
-      );
+        axpyv_ker_ptr
+        (
+          BLIS_NO_CONJUGATE,
+          n_elem,
+          (dcomplex*)alpha,
+          x0, incx0,
+          y0, incy0,
+          NULL
+        );
 
-    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-    return;
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+        return;
     
 #ifdef BLIS_ENABLE_OPENMP
     }
@@ -763,9 +791,9 @@ void zaxpy_blis_impl
     }
 #endif // BLIS_ENABLE_OPENMP
 
-  AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-  /* Finalize BLIS. */
-  //    bli_finalize_auto();
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+    /* Finalize BLIS. */
+    //    bli_finalize_auto();
 }
 
 #ifdef BLIS_ENABLE_BLAS
