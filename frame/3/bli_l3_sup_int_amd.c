@@ -427,7 +427,29 @@ err_t bli_gemmtsup_int
 
 		/* Enable packing for A matrix for higher sizes. Note that pack A
 		 * * becomes pack B inside var2m because this is transpose case*/
-		if(bli_is_double(dt) && (n_threads==1))
+		arch_t cpu_id = bli_arch_query_id();
+		/* Do not pack A for ZEN4 and ZEN5 because the GEMM kernels
+		 * used are column major and GEMMT kernels used are row major.
+		 * Packing matrix A makes matrix B in the GEMMT kernels column
+		 * major which is not supported by row major kernels.
+		 *
+		 * C<- alpha * op(A) *op(B) + beta * C.
+		 * C(nxn) - A(n x k) * B(k x n)
+		 * DGEMM is col-preferred kernel
+		 * DGEMMT = DGEMM + DGEMMT
+		 * DGEMM is col-preferred and DGEMMT is row-preferred.
+ 		 * DGEMM is evaluated as C = A*B (all col-storage)
+		 * whereas DGEMMT is evaluated as C = B * A (row-storage).
+		 * When A is packed it is packed as row-panels with
+		 * col-stored elements.
+		 * So DGEMM is evaluated as C = A*B (A is col-stored)
+		 * it aligns with col-stored preference.
+		 * For DGEMMT: C = B * A, here A will become col-stored because of packing
+		 * and as result it will break the DGEMMT kernel assumption that A is
+		 * row-storage.
+		**/
+		if( ( cpu_id != BLIS_ARCH_ZEN4 && cpu_id != BLIS_ARCH_ZEN5) &&
+		    bli_is_double(dt) && (n_threads==1))
 		{
 			if((m > 320) &&  (k > 50))
 				bli_rntm_set_pack_a( 1, rntm );
