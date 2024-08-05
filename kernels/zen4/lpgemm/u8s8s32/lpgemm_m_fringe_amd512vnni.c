@@ -1168,15 +1168,25 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x64)
 	// registers while generating the code. A dummy shuffle instruction
 	// is used on b data to explicitly specify to gcc compiler
  	// b data needs to be kept in registers to reuse across FMA's
-	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
+	__m512i dsmask = _mm512_set_epi64(
+					0x0F0E0D0C0B0A0908, 0x0706050403020100,
+					0x0F0E0D0C0B0A0908, 0x0706050403020100,
+					0x0F0E0D0C0B0A0908, 0x0706050403020100,
+					0x0F0E0D0C0B0A0908, 0x0706050403020100);
+
+	for (dim_t kr = 0; kr < k_full_pieces; kr += 1)
 	{
 		b0 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 0 ) );
+
 		// Broadcast a[0,kr:kr+4].
 		a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
-
+		b0 = _mm512_shuffle_epi8(b0, dsmask);
 		b1 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 1 ) );
+		b1 = _mm512_shuffle_epi8(b1, dsmask);
 		b2 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 2 ) );
+		b2 = _mm512_shuffle_epi8(b2, dsmask);
 		b3 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 3 ) );
+		b3 = _mm512_shuffle_epi8(b3, dsmask);
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
@@ -2065,15 +2075,29 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x64)
 	__m512i c_int32_2p2 = _mm512_setzero_epi32();
 	__m512i c_int32_2p3 = _mm512_setzero_epi32();
 
+	// gcc compiler (atleast 11.2 to 13.1) avoid loading B into
+	//  registers while generating the code. A dummy shuffle instruction
+	//  is used on b data to explicitly specify to gcc compiler
+	//  b data needs to be kept in registers to reuse across FMA's
+	__m512i dsmask = _mm512_set_epi64(
+					0x0F0E0D0C0B0A0908, 0x0706050403020100,
+					0x0F0E0D0C0B0A0908, 0x0706050403020100,
+					0x0F0E0D0C0B0A0908, 0x0706050403020100,
+					0x0F0E0D0C0B0A0908, 0x0706050403020100);
+
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
 	{
 		b0 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 0 ) );
+		b0 = _mm512_shuffle_epi8(b0, dsmask);
 		// Broadcast a[0,kr:kr+4].
 		a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a *  0 ) + ( cs_a * kr ) ) );
 
 		b1 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 1 ) );
+		b1 = _mm512_shuffle_epi8(b1, dsmask);
 		b2 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 2 ) );
+		b2 = _mm512_shuffle_epi8(b2, dsmask);
 		b3 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 3 ) );
+		b3 = _mm512_shuffle_epi8(b3, dsmask);
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
@@ -2794,16 +2818,29 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x64)
 	__m512i c_int32_1p2 = _mm512_setzero_epi32();
 	__m512i c_int32_1p3 = _mm512_setzero_epi32();
 
+	// gcc compiler (atleast 11.2 to 13.1) avoid loading B into
+	//  registers while generating the code. A dummy shuffle instruction
+	//  is used on b data to explicitly specify to gcc compiler
+	//  b data needs to be kept in registers to reuse across FMA's
+	__m512i dsmask = _mm512_set_epi64(
+					0x0F0E0D0C0B0A0908, 0x0706050403020100,
+					0x0F0E0D0C0B0A0908, 0x0706050403020100,
+					0x0F0E0D0C0B0A0908, 0x0706050403020100,
+					0x0F0E0D0C0B0A0908, 0x0706050403020100);
+
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
 	{
 		b0 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 0 ) );
-
+		b0 = _mm512_shuffle_epi8(b0, dsmask);
 		// Broadcast a[0,kr:kr+4].
 		a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
-		b1 = _mm512_loadu_si512(b + (rs_b * kr) + (cs_b * 1));
-		b2 = _mm512_loadu_si512(b + (rs_b * kr) + (cs_b * 2));
-		b3 = _mm512_loadu_si512(b + (rs_b * kr) + (cs_b * 3));
+		b1 = _mm512_loadu_si512( b + (rs_b * kr) + (cs_b * 1));
+		b1 = _mm512_shuffle_epi8( b1, dsmask);
+		b2 = _mm512_loadu_si512( b + (rs_b * kr) + (cs_b * 2));
+		b2 = _mm512_shuffle_epi8( b2, dsmask);
+		b3 = _mm512_loadu_si512( b + (rs_b * kr) + (cs_b * 3));
+		b3 = _mm512_shuffle_epi8( b3, dsmask);
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
