@@ -52,8 +52,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x64)
               &&POST_OPS_CLIP_5x64F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_5x64F,
-              &&POST_OPS_MATRIX_MUL_5x64F,
-              &&POST_OPS_SWISH_5x64F
+              &&POST_OPS_SWISH_5x64F,
+              &&POST_OPS_MATRIX_MUL_5x64F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -847,8 +847,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x64)
               &&POST_OPS_CLIP_4x64F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_4x64F,
-              &&POST_OPS_MATRIX_MUL_4x64F,
-              &&POST_OPS_SWISH_4x64F
+              &&POST_OPS_SWISH_4x64F,
+              &&POST_OPS_MATRIX_MUL_4x64F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -875,17 +875,9 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x64)
         zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
 
-        //dummy shuffles  are added to fix an issue with gcc to use registers for B
-        //instead of memory as operand in vfma
-        zmm0 = _mm512_shuffle_ps(zmm0, zmm0, 0xff);  // dummy shuffle
-        zmm1 = _mm512_shuffle_ps(zmm1, zmm1, 0xff);  // dummy shuffle
-
         /*Load Next 32 elements from row0 of B*/
         zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row 
         zmm7 = _mm512_loadu_ps (bbuf + 48); //load 48-63 from current row
-
-        zmm6 = _mm512_shuffle_ps(zmm6, zmm6, 0xff); // dummy shuffle
-        zmm7 = _mm512_shuffle_ps(zmm7, zmm7, 0xff); // dummy shuffle
 
         /*Broadcast col0 elements of 12 rows of A*/
         zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
@@ -1519,8 +1511,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x64)
               &&POST_OPS_CLIP_3x64F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_3x64F,
-              &&POST_OPS_MATRIX_MUL_3x64F,
-              &&POST_OPS_SWISH_3x64F
+              &&POST_OPS_SWISH_3x64F,
+              &&POST_OPS_MATRIX_MUL_3x64F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -1545,16 +1537,9 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x64)
         /*Load 32 elements from row0 of B*/
         zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
-        // dummy shuffles  are added to fix an issue with gcc to use registers for B
-        // instead of memory as operand in vfma
-        zmm0 = _mm512_shuffle_ps(zmm0, zmm0, 0xff); // dummy shuffle
-        zmm1 = _mm512_shuffle_ps(zmm1, zmm1, 0xff); // dummy shuffle
         /*Load Next 32 elements from row0 of B*/
         zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row 
         zmm7 = _mm512_loadu_ps (bbuf + 48); //load 48-63 from current row
-
-        zmm6 = _mm512_shuffle_ps(zmm6, zmm6, 0xff); // dummy shuffle
-        zmm7 = _mm512_shuffle_ps(zmm7, zmm7, 0xff); // dummy shuffle
 
         /*Broadcast col0 elements of 12 rows of A*/
         zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
@@ -2060,8 +2045,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x64)
               &&POST_OPS_CLIP_2x64F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_2x64F,
-              &&POST_OPS_MATRIX_MUL_2x64F,
-              &&POST_OPS_SWISH_2x64F
+              &&POST_OPS_SWISH_2x64F,
+              &&POST_OPS_MATRIX_MUL_2x64F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -2465,8 +2450,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x64)
               &&POST_OPS_CLIP_1x64F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_1x64F,
-              &&POST_OPS_MATRIX_MUL_1x64F,
-              &&POST_OPS_SWISH_1x64F
+              &&POST_OPS_SWISH_1x64F,
+              &&POST_OPS_MATRIX_MUL_1x64F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -2740,8 +2725,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x48)
               &&POST_OPS_CLIP_5x48F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_5x48F,
-              &&POST_OPS_MATRIX_MUL_5x48F,
-              &&POST_OPS_SWISH_5x48F
+              &&POST_OPS_SWISH_5x48F,
+              &&POST_OPS_MATRIX_MUL_5x48F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -3389,8 +3374,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x48)
               &&POST_OPS_CLIP_4x48F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_4x48F,
-              &&POST_OPS_MATRIX_MUL_4x48F,
-              &&POST_OPS_SWISH_4x48F
+              &&POST_OPS_SWISH_4x48F,
+              &&POST_OPS_MATRIX_MUL_4x48F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -3936,8 +3921,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x48)
               &&POST_OPS_CLIP_3x48F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_3x48F,
-              &&POST_OPS_MATRIX_MUL_3x48F,
-              &&POST_OPS_SWISH_3x48F
+              &&POST_OPS_SWISH_3x48F,
+              &&POST_OPS_MATRIX_MUL_3x48F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -4383,8 +4368,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x48)
               &&POST_OPS_CLIP_2x48F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_2x48F,
-              &&POST_OPS_MATRIX_MUL_2x48F,
-              &&POST_OPS_SWISH_2x48F
+              &&POST_OPS_SWISH_2x48F,
+              &&POST_OPS_MATRIX_MUL_2x48F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -4728,8 +4713,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x48)
               &&POST_OPS_CLIP_1x48F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_1x48F,
-              &&POST_OPS_MATRIX_MUL_1x48F,
-              &&POST_OPS_SWISH_1x48F
+              &&POST_OPS_SWISH_1x48F,
+              &&POST_OPS_MATRIX_MUL_1x48F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -4970,8 +4955,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x32)
               &&POST_OPS_CLIP_5x32F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_5x32F,
-              &&POST_OPS_MATRIX_MUL_5x32F,
-              &&POST_OPS_SWISH_5x32F
+              &&POST_OPS_SWISH_5x32F,
+              &&POST_OPS_MATRIX_MUL_5x32F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -5467,8 +5452,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x32)
               &&POST_OPS_CLIP_4x32F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_4x32F,
-              &&POST_OPS_MATRIX_MUL_4x32F,
-              &&POST_OPS_SWISH_4x32F
+              &&POST_OPS_SWISH_4x32F,
+              &&POST_OPS_MATRIX_MUL_4x32F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -5890,8 +5875,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x32)
               &&POST_OPS_CLIP_3x32F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_3x32F,
-              &&POST_OPS_MATRIX_MUL_3x32F,
-              &&POST_OPS_SWISH_3x32F
+              &&POST_OPS_SWISH_3x32F,
+              &&POST_OPS_MATRIX_MUL_3x32F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -6244,8 +6229,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x32)
               &&POST_OPS_CLIP_2x32F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_2x32F,
-              &&POST_OPS_MATRIX_MUL_2x32F,
-              &&POST_OPS_SWISH_2x32F
+              &&POST_OPS_SWISH_2x32F,
+              &&POST_OPS_MATRIX_MUL_2x32F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -6524,8 +6509,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x32)
               &&POST_OPS_CLIP_1x32F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_1x32F,
-              &&POST_OPS_MATRIX_MUL_1x32F,
-              &&POST_OPS_SWISH_1x32F
+              &&POST_OPS_SWISH_1x32F,
+              &&POST_OPS_MATRIX_MUL_1x32F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.

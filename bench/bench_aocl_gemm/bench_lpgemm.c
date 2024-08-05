@@ -714,28 +714,8 @@ GEN_GET_MATRIX_ADD_POST_OP_VAL(float,float,f32f32f32of32)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(float,float,bf16bf16f32of32)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(float,float,bf16s4f32of32)
 
-#define GEN_GET_MATRIX_MUL_POST_OP_VAL_BF16(C_type,BLAS_SFX) \
-static inline float get_matrix_mul_post_op_val_ ## BLAS_SFX \
-     ( \
-       C_type val \
-     ) \
-{ \
-    float ret_val = 0.0; \
-    bfloat16_to_float( val, &ret_val ); \
-    return ret_val; \
-} \
-
 GEN_GET_MATRIX_MUL_POST_OP_VAL_BF16(bfloat16,bf16bf16f32obf16)
 GEN_GET_MATRIX_MUL_POST_OP_VAL_BF16(bfloat16,bf16s4f32obf16)
-
-#define GEN_GET_MATRIX_MUL_POST_OP_VAL(C_type,ACCUM_type,BLAS_SFX) \
-static inline ACCUM_type get_matrix_mul_post_op_val_ ## BLAS_SFX \
-     ( \
-       C_type val \
-     ) \
-{ \
-    return (ACCUM_type) val; \
-} \
 
 GEN_GET_MATRIX_MUL_POST_OP_VAL(int8_t,int32_t,u8s8s32os8)
 GEN_GET_MATRIX_MUL_POST_OP_VAL(int32_t,int32_t,u8s8s32os32)
@@ -1087,7 +1067,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
      * multiple scale post-ops. */ \
     post_ops->matrix_add = NULL; \
     post_ops->matrix_add = malloc( sizeof( aocl_post_op_matrix_add ) ); \
-    if ( post_ops->sum == NULL ) \
+    if ( post_ops->matrix_add == NULL ) \
     { \
         goto err_handler; \
     } \
@@ -1098,7 +1078,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
      * multiple scale post-ops. */ \
     post_ops->matrix_mul = NULL; \
     post_ops->matrix_mul = malloc( sizeof( aocl_post_op_matrix_mul ) ); \
-    if ( post_ops->sum == NULL ) \
+    if ( post_ops->matrix_mul == NULL ) \
     { \
         goto err_handler; \
     } \

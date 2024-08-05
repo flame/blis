@@ -1171,16 +1171,12 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x64)
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
 	{
 		b0 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 0 ) );
-		b0 = _mm512_shuffle_epi8(b0, b0);
 		// Broadcast a[0,kr:kr+4].
 		a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
 		b1 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 1 ) );
-		b1 = _mm512_shuffle_epi8(b1, b1);
 		b2 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 2 ) );
-		b2 = _mm512_shuffle_epi8(b2, b2);
 		b3 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 3 ) );
-		b3 = _mm512_shuffle_epi8(b3, b3);
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
@@ -1229,7 +1225,6 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x64)
 		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
 
 		b0 = _mm512_loadu_si512( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
-		//b0 = _mm512_shuffle_epi8(b0, b0);
 		// Broadcast a[0,kr:kr+4].
 		a_kfringe_buf = _mm_maskz_loadu_epi8
 		(
@@ -1239,11 +1234,8 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x64)
 		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		b1 = _mm512_loadu_si512( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
-		//b1 = _mm512_shuffle_epi8(b1, b1);
 		b2 = _mm512_loadu_si512( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
-		//b2 = _mm512_shuffle_epi8(b2, b2);
 		b3 = _mm512_loadu_si512( b + ( rs_b * k_full_pieces ) + ( cs_b * 3 ) );
-		//b3 = _mm512_shuffle_epi8(b3, b3);
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
@@ -2076,16 +2068,12 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x64)
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
 	{
 		b0 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 0 ) );
-		b0 = _mm512_shuffle_epi8(b0, b0);
 		// Broadcast a[0,kr:kr+4].
 		a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a *  0 ) + ( cs_a * kr ) ) );
 
 		b1 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 1 ) );
-		b1 = _mm512_shuffle_epi8(b1, b1);
 		b2 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 2 ) );
-		b2 = _mm512_shuffle_epi8(b2, b2);
 		b3 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 3 ) );
-		b3 = _mm512_shuffle_epi8(b3, b3);
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
@@ -2809,17 +2797,13 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x64)
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
 	{
 		b0 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 0 ) );
-		b0 = _mm512_shuffle_epi8(b0, b0);
 
 		// Broadcast a[0,kr:kr+4].
 		a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
 		b1 = _mm512_loadu_si512(b + (rs_b * kr) + (cs_b * 1));
-		b1 = _mm512_shuffle_epi8(b1, b1);
 		b2 = _mm512_loadu_si512(b + (rs_b * kr) + (cs_b * 2));
-		b2 = _mm512_shuffle_epi8(b2, b2);
 		b3 = _mm512_loadu_si512(b + (rs_b * kr) + (cs_b * 3));
-		b3 = _mm512_shuffle_epi8(b3, b3);
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]

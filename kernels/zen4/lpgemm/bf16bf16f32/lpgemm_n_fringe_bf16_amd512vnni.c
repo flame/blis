@@ -54,8 +54,8 @@ LPGEMM_N_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6xlt16)
 						  &&POST_OPS_CLIP_6xLT16,
 						  &&POST_OPS_DOWNSCALE_6xLT16,
 						  &&POST_OPS_MATRIX_ADD_6xLT16,
-						  &&POST_OPS_MATRIX_MUL_6xLT16,
-						  &&POST_OPS_SWISH_6xLT16
+						  &&POST_OPS_SWISH_6xLT16,
+						  &&POST_OPS_MATRIX_MUL_6xLT16
 						};
 	dim_t MR = 6;
 	dim_t m_full_pieces = m0 / MR;
@@ -1037,8 +1037,8 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x16)
 						  &&POST_OPS_CLIP_6x16,
 						  &&POST_OPS_DOWNSCALE_6x16,
 						  &&POST_OPS_MATRIX_ADD_6x16,
-						  &&POST_OPS_MATRIX_MUL_6x16,
-						  &&POST_OPS_SWISH_6x16
+						  &&POST_OPS_SWISH_6x16,
+						  &&POST_OPS_MATRIX_MUL_6x16
 						};
 	dim_t MR = 6;
 	dim_t m_full_pieces = m0 / MR;
@@ -2010,8 +2010,8 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x32)
 						  &&POST_OPS_CLIP_6x32,
 						  &&POST_OPS_DOWNSCALE_6x32,
 						  &&POST_OPS_MATRIX_ADD_6x32,
-						  &&POST_OPS_MATRIX_MUL_6x32,
-						  &&POST_OPS_SWISH_6x32
+						  &&POST_OPS_SWISH_6x32,
+						  &&POST_OPS_MATRIX_MUL_6x32
 						};
 	dim_t MR = 6;
 	dim_t m_full_pieces = m0 / MR;
@@ -3271,8 +3271,8 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x48)
 						  &&POST_OPS_CLIP_6x48,
 						  &&POST_OPS_DOWNSCALE_6x48,
 						  &&POST_OPS_MATRIX_ADD_6x48,
-						  &&POST_OPS_MATRIX_MUL_6x48,
-						  &&POST_OPS_SWISH_6x48
+						  &&POST_OPS_SWISH_6x48,
+						  &&POST_OPS_MATRIX_MUL_6x48
 						};
 	dim_t MR = 6;
 	dim_t m_full_pieces = m0 / MR;

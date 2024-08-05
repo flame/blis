@@ -59,8 +59,8 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 	                      &&POST_OPS_CLIP_6x64,
 	                      &&POST_OPS_DOWNSCALE_6x64,
 	                      &&POST_OPS_MATRIX_ADD_6x64,
-						  &&POST_OPS_MATRIX_MUL_6x64,
-	                      &&POST_OPS_SWISH_6x64
+	                      &&POST_OPS_SWISH_6x64,
+						  &&POST_OPS_MATRIX_MUL_6x64
 	                    };
 
 

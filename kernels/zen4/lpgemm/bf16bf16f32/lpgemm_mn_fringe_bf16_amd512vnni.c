@@ -55,8 +55,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5xlt16)
 						  &&POST_OPS_CLIP_5xLT16,
 						  &&POST_OPS_DOWNSCALE_5xLT16,
 						  &&POST_OPS_MATRIX_ADD_5xLT16,
+						  &&POST_OPS_SWISH_5xLT16,
 						  &&POST_OPS_MATRIX_MUL_5xLT16,
-						  &&POST_OPS_SWISH_5xLT16
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -771,8 +771,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4xlt16)
 						  &&POST_OPS_CLIP_4xLT16,
 						  &&POST_OPS_DOWNSCALE_4xLT16,
 						  &&POST_OPS_MATRIX_ADD_4xLT16,
-						  &&POST_OPS_MATRIX_MUL_4xLT16,
-						  &&POST_OPS_SWISH_4xLT16
+						  &&POST_OPS_SWISH_4xLT16,
+						  &&POST_OPS_MATRIX_MUL_4xLT16
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -1393,8 +1393,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3xlt16)
 						  &&POST_OPS_CLIP_3xLT16,
 						  &&POST_OPS_DOWNSCALE_3xLT16,
 						  &&POST_OPS_MATRIX_ADD_3xLT16,
-						  &&POST_OPS_MATRIX_MUL_3xLT16,
-						  &&POST_OPS_SWISH_3xLT16
+						  &&POST_OPS_SWISH_3xLT16,
+						  &&POST_OPS_MATRIX_MUL_3xLT16
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -1922,8 +1922,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2xlt16)
 						  &&POST_OPS_CLIP_2xLT16,
 						  &&POST_OPS_DOWNSCALE_2xLT16,
 						  &&POST_OPS_MATRIX_ADD_2xLT16,
-						  &&POST_OPS_MATRIX_MUL_2xLT16,
-						  &&POST_OPS_SWISH_2xLT16
+						  &&POST_OPS_SWISH_2xLT16,
+						  &&POST_OPS_MATRIX_MUL_2xLT16
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -2356,8 +2356,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1xlt16)
 						  &&POST_OPS_CLIP_1xLT16,
 						  &&POST_OPS_DOWNSCALE_1xLT16,
 						  &&POST_OPS_MATRIX_ADD_1xLT16,
-						  &&POST_OPS_MATRIX_MUL_1xLT16,
-						  &&POST_OPS_SWISH_1xLT16
+						  &&POST_OPS_SWISH_1xLT16,
+						  &&POST_OPS_MATRIX_MUL_1xLT16
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -2698,8 +2698,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x16)
 						  &&POST_OPS_CLIP_5x16,
 						  &&POST_OPS_DOWNSCALE_5x16,
 						  &&POST_OPS_MATRIX_ADD_5x16,
-						  &&POST_OPS_MATRIX_MUL_5x16,
-						  &&POST_OPS_SWISH_5x16
+						  &&POST_OPS_SWISH_5x16,
+						  &&POST_OPS_MATRIX_MUL_5x16
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -3405,8 +3405,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x16)
 						  &&POST_OPS_CLIP_4x16,
 						  &&POST_OPS_DOWNSCALE_4x16,
 						  &&POST_OPS_MATRIX_ADD_4x16,
-						  &&POST_OPS_MATRIX_MUL_4x16,
-						  &&POST_OPS_SWISH_4x16
+						  &&POST_OPS_SWISH_4x16,
+						  &&POST_OPS_MATRIX_MUL_4x16
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -4018,8 +4018,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x16)
 						  &&POST_OPS_CLIP_3x16,
 						  &&POST_OPS_DOWNSCALE_3x16,
 						  &&POST_OPS_MATRIX_ADD_3x16,
-						  &&POST_OPS_MATRIX_MUL_3x16,
-						  &&POST_OPS_SWISH_3x16
+						  &&POST_OPS_SWISH_3x16,
+						  &&POST_OPS_MATRIX_MUL_3x16
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -4538,8 +4538,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x16)
 						  &&POST_OPS_CLIP_2x16,
 						  &&POST_OPS_DOWNSCALE_2x16,
 						  &&POST_OPS_MATRIX_ADD_2x16,
-						  &&POST_OPS_MATRIX_MUL_2x16,
-						  &&POST_OPS_SWISH_2x16
+						  &&POST_OPS_SWISH_2x16,
+						  &&POST_OPS_MATRIX_MUL_2x16
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -4964,8 +4964,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x16)
 						  &&POST_OPS_CLIP_1x16,
 						  &&POST_OPS_DOWNSCALE_1x16,
 						  &&POST_OPS_MATRIX_ADD_1x16,
-						  &&POST_OPS_MATRIX_MUL_1x16,
-						  &&POST_OPS_SWISH_1x16
+						  &&POST_OPS_SWISH_1x16,
+						  &&POST_OPS_MATRIX_MUL_1x16
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -5296,8 +5296,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x32)
 						  &&POST_OPS_CLIP_5x32,
 						  &&POST_OPS_DOWNSCALE_5x32,
 						  &&POST_OPS_MATRIX_ADD_5x32,
-						  &&POST_OPS_MATRIX_MUL_5x32,
-						  &&POST_OPS_SWISH_5x32
+						  &&POST_OPS_SWISH_5x32,
+						  &&POST_OPS_MATRIX_MUL_5x32
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -6234,8 +6234,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x32)
 						  &&POST_OPS_CLIP_4x32,
 						  &&POST_OPS_DOWNSCALE_4x32,
 						  &&POST_OPS_MATRIX_ADD_4x32,
-						  &&POST_OPS_MATRIX_MUL_4x32,
-						  &&POST_OPS_SWISH_4x32
+						  &&POST_OPS_SWISH_4x32,
+						  &&POST_OPS_MATRIX_MUL_4x32
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -7035,8 +7035,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x32)
 						  &&POST_OPS_CLIP_3x32,
 						  &&POST_OPS_DOWNSCALE_3x32,
 						  &&POST_OPS_MATRIX_ADD_3x32,
-						  &&POST_OPS_MATRIX_MUL_3x32,
-						  &&POST_OPS_SWISH_3x32
+						  &&POST_OPS_SWISH_3x32,
+						  &&POST_OPS_MATRIX_MUL_3x32
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -7698,8 +7698,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x32)
 						  &&POST_OPS_CLIP_2x32,
 						  &&POST_OPS_DOWNSCALE_2x32,
 						  &&POST_OPS_MATRIX_ADD_2x32,
-						  &&POST_OPS_MATRIX_MUL_2x32,
-						  &&POST_OPS_SWISH_2x32
+						  &&POST_OPS_SWISH_2x32,
+						  &&POST_OPS_MATRIX_MUL_2x32
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -8221,8 +8221,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x32)
 						  &&POST_OPS_CLIP_1x32,
 						  &&POST_OPS_DOWNSCALE_1x32,
 						  &&POST_OPS_MATRIX_ADD_1x32,
-						  &&POST_OPS_MATRIX_MUL_1x32,
-						  &&POST_OPS_SWISH_1x32
+						  &&POST_OPS_SWISH_1x32,
+						  &&POST_OPS_MATRIX_MUL_1x32
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -8615,8 +8615,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x48)
 						  &&POST_OPS_CLIP_5x48,
 						  &&POST_OPS_DOWNSCALE_5x48,
 						  &&POST_OPS_MATRIX_ADD_5x48,
-						  &&POST_OPS_MATRIX_MUL_5x48,
-						  &&POST_OPS_SWISH_5x48
+						  &&POST_OPS_SWISH_5x48,
+						  &&POST_OPS_MATRIX_MUL_5x48
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -9801,8 +9801,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x48)
 						  &&POST_OPS_CLIP_4x48,
 						  &&POST_OPS_DOWNSCALE_4x48,
 						  &&POST_OPS_MATRIX_ADD_4x48,
-						  &&POST_OPS_MATRIX_MUL_4x48,
-						  &&POST_OPS_SWISH_4x48
+						  &&POST_OPS_SWISH_4x48,
+						  &&POST_OPS_MATRIX_MUL_4x48
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -10803,8 +10803,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x48)
 						  &&POST_OPS_CLIP_3x48,
 						  &&POST_OPS_DOWNSCALE_3x48,
 						  &&POST_OPS_MATRIX_ADD_3x48,
-						  &&POST_OPS_MATRIX_MUL_3x48,
-						  &&POST_OPS_SWISH_3x48
+						  &&POST_OPS_SWISH_3x48,
+						  &&POST_OPS_MATRIX_MUL_3x48
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -11622,8 +11622,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x48)
 						  &&POST_OPS_CLIP_2x48,
 						  &&POST_OPS_DOWNSCALE_2x48,
 						  &&POST_OPS_MATRIX_ADD_2x48,
-						  &&POST_OPS_MATRIX_MUL_2x48,
-						  &&POST_OPS_SWISH_2x48
+						  &&POST_OPS_SWISH_2x48,
+						  &&POST_OPS_MATRIX_MUL_2x48
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -12264,8 +12264,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x48)
 						  &&POST_OPS_CLIP_1x48,
 						  &&POST_OPS_DOWNSCALE_1x48,
 						  &&POST_OPS_MATRIX_ADD_1x48,
-						  &&POST_OPS_MATRIX_MUL_1x48,
-						  &&POST_OPS_SWISH_1x48
+						  &&POST_OPS_SWISH_1x48,
+						  &&POST_OPS_MATRIX_MUL_1x48
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;

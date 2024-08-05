@@ -54,7 +54,8 @@ LPGEMM_ELTWISE_OPS_M_FRINGE_KERNEL(bfloat16,float,bf16of32_5x64)
 						  &&POST_OPS_CLIP_5x64_OPS,
 						  &&POST_OPS_DOWNSCALE_5x64_OPS,
 						  &&POST_OPS_MATRIX_ADD_5x64_OPS,
-						  &&POST_OPS_SWISH_5x64_OPS
+						  &&POST_OPS_SWISH_5x64_OPS,
+						  &&POST_OPS_MATRIX_MUL_5x64_OPS
 						};
 	dim_t NR = 64;
 
@@ -1017,6 +1018,52 @@ POST_OPS_MATRIX_ADD_5x64_OPS:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_MATRIX_MUL_5x64_OPS:
+		{
+			dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+			// It is expected the post-op matrix arg has the same storage
+			// order as the output C matrix.
+			if ( post_ops_attr.c_stor_type == BF16 )
+			{
+				bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
+
+				// c[0:0-15,16-31,32-47,48-63]
+				BF16_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,0);
+
+				// c[1:0-15,16-31,32-47,48-63]
+				BF16_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,1);
+
+				// c[2:0-15,16-31,32-47,48-63]
+				BF16_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,2);
+
+				// c[3:0-15,16-31,32-47,48-63]
+				BF16_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,3);
+
+				// c[4:0-15,16-31,32-47,48-63]
+				BF16_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,4);
+			}
+			else
+			{
+				float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+				// c[0:0-15,16-31,32-47,48-63]
+				F32_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,0);
+
+				// c[1:0-15,16-31,32-47,48-63]
+				F32_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,1);
+
+				// c[2:0-15,16-31,32-47,48-63]
+				F32_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,2);
+
+				// c[3:0-15,16-31,32-47,48-63]
+				F32_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,3);
+
+				// c[4:0-15,16-31,32-47,48-63]
+				F32_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,4);
+			}
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 POST_OPS_SWISH_5x64_OPS:
 		{
 			selector1 =
@@ -1234,7 +1281,8 @@ LPGEMM_ELTWISE_OPS_M_FRINGE_KERNEL(bfloat16,float,bf16of32_4x64)
 						  &&POST_OPS_CLIP_4x64_OPS,
 						  &&POST_OPS_DOWNSCALE_4x64_OPS,
 						  &&POST_OPS_MATRIX_ADD_4x64_OPS,
-						  &&POST_OPS_SWISH_4x64_OPS
+						  &&POST_OPS_SWISH_4x64_OPS,
+						  &&POST_OPS_MATRIX_MUL_4x64_OPS
 						};
 	dim_t NR = 64;
 
@@ -2049,6 +2097,46 @@ POST_OPS_MATRIX_ADD_4x64_OPS:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_MATRIX_MUL_4x64_OPS:
+		{
+			dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+			// It is expected the post-op matrix arg has the same storage
+			// order as the output C matrix.
+			if ( post_ops_attr.c_stor_type == BF16 )
+			{
+				bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
+
+				// c[0:0-15,16-31,32-47,48-63]
+				BF16_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,0);
+
+				// c[1:0-15,16-31,32-47,48-63]
+				BF16_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,1);
+
+				// c[2:0-15,16-31,32-47,48-63]
+				BF16_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,2);
+
+				// c[3:0-15,16-31,32-47,48-63]
+				BF16_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,3);
+			}
+			else
+			{
+				float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+				// c[0:0-15,16-31,32-47,48-63]
+				F32_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,0);
+
+				// c[1:0-15,16-31,32-47,48-63]
+				F32_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,1);
+
+				// c[2:0-15,16-31,32-47,48-63]
+				F32_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,2);
+
+				// c[3:0-15,16-31,32-47,48-63]
+				F32_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,3);
+			}
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 POST_OPS_SWISH_4x64_OPS:
 		{
 			selector1 =
@@ -2232,7 +2320,8 @@ LPGEMM_ELTWISE_OPS_M_FRINGE_KERNEL(bfloat16,float,bf16of32_3x64)
 						  &&POST_OPS_CLIP_3x64_OPS,
 						  &&POST_OPS_DOWNSCALE_3x64_OPS,
 						  &&POST_OPS_MATRIX_ADD_3x64_OPS,
-						  &&POST_OPS_SWISH_3x64_OPS
+						  &&POST_OPS_SWISH_3x64_OPS,
+						  &&POST_OPS_MATRIX_MUL_3x64_OPS
 						};
 	dim_t NR = 64;
 
@@ -2907,6 +2996,40 @@ POST_OPS_MATRIX_ADD_3x64_OPS:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_MATRIX_MUL_3x64_OPS:
+		{
+			dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+			// It is expected the post-op matrix arg has the same storage
+			// order as the output C matrix.
+			if ( post_ops_attr.c_stor_type == BF16 )
+			{
+				bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
+
+				// c[0:0-15,16-31,32-47,48-63]
+				BF16_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,0);
+
+				// c[1:0-15,16-31,32-47,48-63]
+				BF16_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,1);
+
+				// c[2:0-15,16-31,32-47,48-63]
+				BF16_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,2);
+			}
+			else
+			{
+				float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+				// c[0:0-15,16-31,32-47,48-63]
+				F32_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,0);
+
+				// c[1:0-15,16-31,32-47,48-63]
+				F32_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,1);
+
+				// c[2:0-15,16-31,32-47,48-63]
+				F32_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,2);
+			}
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 POST_OPS_SWISH_3x64_OPS:
 		{
 			selector1 =
@@ -3056,7 +3179,8 @@ LPGEMM_ELTWISE_OPS_M_FRINGE_KERNEL(bfloat16,float,bf16of32_2x64)
 						  &&POST_OPS_CLIP_2x64_OPS,
 						  &&POST_OPS_DOWNSCALE_2x64_OPS,
 						  &&POST_OPS_MATRIX_ADD_2x64_OPS,
-						  &&POST_OPS_SWISH_2x64_OPS
+						  &&POST_OPS_SWISH_2x64_OPS,
+						  &&POST_OPS_MATRIX_MUL_2x64_OPS
 						};
 	dim_t NR = 64;
 
@@ -3591,6 +3715,34 @@ POST_OPS_MATRIX_ADD_2x64_OPS:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_MATRIX_MUL_2x64_OPS:
+		{
+			dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+			// It is expected the post-op matrix arg has the same storage
+			// order as the output C matrix.
+			if ( post_ops_attr.c_stor_type == BF16 )
+			{
+				bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
+
+				// c[0:0-15,16-31,32-47,48-63]
+				BF16_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,0);
+
+				// c[1:0-15,16-31,32-47,48-63]
+				BF16_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,1);
+			}
+			else
+			{
+				float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+				// c[0:0-15,16-31,32-47,48-63]
+				F32_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,0);
+
+				// c[1:0-15,16-31,32-47,48-63]
+				F32_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,1);
+			}
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 POST_OPS_SWISH_2x64_OPS:
 		{
 			selector1 =
@@ -3706,7 +3858,8 @@ LPGEMM_ELTWISE_OPS_M_FRINGE_KERNEL(bfloat16,float,bf16of32_1x64)
 						  &&POST_OPS_CLIP_1x64_OPS,
 						  &&POST_OPS_DOWNSCALE_1x64_OPS,
 						  &&POST_OPS_MATRIX_ADD_1x64_OPS,
-						  &&POST_OPS_SWISH_1x64_OPS
+						  &&POST_OPS_SWISH_1x64_OPS,
+						  &&POST_OPS_MATRIX_MUL_1x64_OPS
 						};
 	dim_t NR = 64;
 
@@ -4097,6 +4250,28 @@ POST_OPS_MATRIX_ADD_1x64_OPS:
 
 				// c[0:0-15,16-31,32-47,48-63]
 				F32_F32_MATRIX_ADD_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,0);
+			}
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_MATRIX_MUL_1x64_OPS:
+		{
+			dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+			// It is expected the post-op matrix arg has the same storage
+			// order as the output C matrix.
+			if ( post_ops_attr.c_stor_type == BF16 )
+			{
+				bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
+
+				// c[0:0-15,16-31,32-47,48-63]
+				BF16_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,0);
+			}
+			else
+			{
+				float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+				// c[0:0-15,16-31,32-47,48-63]
+				F32_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,selector1,selector2,selector3,selector4,0);
 			}
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR

@@ -70,7 +70,7 @@ ACCUM_type eltwise_ops_get_temp_accum_ ## LP_SFX \
 { \
     float a_float; \
     bfloat16_to_float( *( a + ( i * rs_a ) + ( j * cs_a ) ), &a_float ); \
-	return a_float; \
+    return a_float; \
 } \
 
 GEN_ELTWISE_OPS_GET_TEMP_ACCUM(bfloat16,float,bf16of32)
@@ -145,6 +145,9 @@ static inline float eltwise_ops_accuracy_check_downscale_bf16obf16
 GEN_GET_MATRIX_ADD_POST_OP_VAL(float,float,bf16of32)
 GEN_GET_MATRIX_ADD_POST_OP_VAL_BF16(bfloat16,bf16obf16)
 
+GEN_GET_MATRIX_MUL_POST_OP_VAL(float,float,bf16of32)
+GEN_GET_MATRIX_MUL_POST_OP_VAL_BF16(bfloat16,bf16obf16)
+
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(float,float)
 
 #define GEN_ELTWISE_OPS_ACC_CHK_DRV_FUNC(A_type,B_type,ACCUM_type,LP_SFX) \
@@ -217,8 +220,8 @@ void eltwise_ops_accuracy_check_driver_ ## LP_SFX \
             ACCUM_type temp_accum = 0; \
             B_type out_temp_accum = 0; \
  \
-			temp_accum = GEN_FUNC_NAME(eltwise_ops_get_temp_accum_,LP_SFX) \
-				( a, rs_a, cs_a, i, j ); \
+            temp_accum = GEN_FUNC_NAME(eltwise_ops_get_temp_accum_,LP_SFX) \
+                ( a, rs_a, cs_a, i, j ); \
 \
             if ( post_op != NULL ) \
             { \
@@ -306,6 +309,19 @@ void eltwise_ops_accuracy_check_driver_ ## LP_SFX \
                                     ( *( ( B_type* )( post_op->matrix_add )->matrix + \
                                            ( i * rs_m ) + ( j * cs_m ) ) ); \
                     } \
+                    else if ( post_op->seq_vector[op_id] == MATRIX_MUL ) \
+                    { \
+                        dim_t rs_m = ( post_op->matrix_mul )->ldm; \
+                        dim_t cs_m = 1; \
+                        if ( ( stor_order == 'C' ) || ( stor_order == 'c' ) ) \
+                        { \
+                            cs_m = rs_m; \
+                            rs_m = 1; \
+                        } \
+                        temp_accum *= GEN_FUNC_NAME(get_matrix_mul_post_op_val_,LP_SFX) \
+                                    ( *( ( B_type* )( post_op->matrix_mul )->matrix + \
+                                           ( i * rs_m ) + ( j * cs_m ) ) ); \
+                    } \
                     else \
                     {} \
                 } \
@@ -368,7 +384,7 @@ void eltwise_ops_bench_driver_ ## LP_SFX \
         GEN_FUNC_NAME(aocl_gemm_eltwise_ops_,LP_SFX) \
         ( \
           stor_order, transa, transb, \
-		  m, n, \
+          m, n, \
           a, lda, \
           b, ldb, \
           post_op \
@@ -453,15 +469,26 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     ( post_ops->sum )->zero_point_len = 0; \
  \
     /* Bench limitation: can only support 1 matrix add, but LPGEMM can support
-     * multiple scale post-ops. */ \
+     * multiple matrix add post-ops. */ \
     post_ops->matrix_add = NULL; \
     post_ops->matrix_add = malloc( sizeof( aocl_post_op_matrix_add ) ); \
-    if ( post_ops->sum == NULL ) \
+    if ( post_ops->matrix_add == NULL ) \
     { \
         goto err_handler; \
     } \
     ( post_ops->matrix_add )->matrix = NULL; \
     ( post_ops->matrix_add )->ldm = 0; \
+\
+    /* Bench limitation: can only support 1 matrix mul, but LPGEMM can support
+     * multiple matrix mul post-ops. */ \
+    post_ops->matrix_mul = NULL; \
+    post_ops->matrix_mul = malloc( sizeof( aocl_post_op_matrix_mul ) ); \
+    if ( post_ops->matrix_mul == NULL ) \
+    { \
+        goto err_handler; \
+    } \
+    ( post_ops->matrix_mul )->matrix = NULL; \
+    ( post_ops->matrix_mul )->ldm = 0; \
  \
     bool is_bias = FALSE; \
     bool is_relu = FALSE; \
@@ -473,6 +500,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     bool is_scalar_scale = FALSE; \
     bool is_scalar_zp = FALSE; \
     bool is_matrix_add = FALSE; \
+    bool is_matrix_mul = FALSE; \
     dim_t activator_idx = 0; \
     dim_t clip_idx = 0; \
  \
@@ -577,6 +605,12 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
                 is_matrix_add = TRUE; \
                 cur_op_index++; \
             } \
+            else if ( strcmp( ops_tok, "matrix_mul" ) == 0 ) \
+            { \
+                post_ops->seq_vector[cur_op_index] = MATRIX_MUL; \
+                is_matrix_mul = TRUE; \
+                cur_op_index++; \
+            } \
  \
             ops_tok = strtok( NULL, ", =" ); \
         } \
@@ -592,11 +626,11 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         } \
         if ( global_dscale_out == 'y' ) \
         { \
-        	GEN_FUNC_NAME(fill_array_post_ops_,C_DSCALE_type)( ( post_ops->bias )->bias, n ); \
+            GEN_FUNC_NAME(fill_array_post_ops_,C_DSCALE_type)( ( post_ops->bias )->bias, n ); \
         } \
         else \
         { \
-        	GEN_FUNC_NAME(fill_array_post_ops_,C_type)( ( post_ops->bias )->bias, n ); \
+            GEN_FUNC_NAME(fill_array_post_ops_,C_type)( ( post_ops->bias )->bias, n ); \
         } \
     } \
  \
@@ -687,18 +721,18 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             ( post_ops->eltwise + clip_idx )->scale_factor = NULL; \
             ( post_ops->eltwise + clip_idx )->algo.alpha = NULL; \
             ( post_ops->eltwise + clip_idx )->algo.beta = NULL; \
-            ( post_ops->eltwise + clip_idx )->algo.alpha = malloc( sizeof( C_type ) ); \
+            ( post_ops->eltwise + clip_idx )->algo.alpha = malloc( sizeof( DSCALE_type ) ); \
             if ( ( post_ops->eltwise + clip_idx )->algo.alpha == NULL ) \
             { \
                 goto err_handler; \
             } \
-            ( post_ops->eltwise + clip_idx )->algo.beta = malloc( sizeof( C_type ) ); \
+            ( post_ops->eltwise + clip_idx )->algo.beta = malloc( sizeof( DSCALE_type ) ); \
             if ( ( post_ops->eltwise + clip_idx )->algo.beta == NULL ) \
             { \
                 goto err_handler; \
             } \
-            *( ( C_type* ) ( post_ops->eltwise + clip_idx )->algo.alpha ) = ( C_type ) ( -64 ); \
-            *( ( C_type* ) ( post_ops->eltwise + clip_idx )->algo.beta ) = ( C_type ) ( 23 ); \
+            *( ( DSCALE_type* ) ( post_ops->eltwise + clip_idx )->algo.alpha ) = ( DSCALE_type ) ( -64 ); \
+            *( ( DSCALE_type* ) ( post_ops->eltwise + clip_idx )->algo.beta ) = ( DSCALE_type ) ( 23 ); \
             ( post_ops->eltwise + clip_idx )->algo.algo_type = CLIP; \
         } \
     } \
@@ -784,6 +818,41 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         } \
     } \
  \
+    if ( is_matrix_mul == TRUE ) \
+    { \
+        /* Allocate bias buffer, return early if alloc fails.*/ \
+        dim_t ele_dsize = 0; \
+        if ( global_dscale_out == 'y' ) \
+        { \
+            ele_dsize = sizeof( C_DSCALE_type ); \
+        } \
+        else \
+        { \
+            ele_dsize = sizeof( C_type ); \
+        } \
+        ( post_ops->matrix_mul )->matrix = malloc( m * n * ele_dsize ); \
+        if ( ( post_ops->matrix_mul )->matrix == NULL ) \
+        { \
+            goto err_handler; \
+        } \
+        if ( global_dscale_out == 'y' ) \
+        { \
+            GEN_FUNC_NAME(fill_array_,C_DSCALE_type)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
+        } \
+        else \
+        { \
+            GEN_FUNC_NAME(fill_array_,C_type)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
+        } \
+        if ( ( stor_order == 'C' ) || ( stor_order == 'c' ) ) \
+        { \
+            ( post_ops->matrix_mul )->ldm = m; \
+        } \
+        else \
+        { \
+            ( post_ops->matrix_mul )->ldm = n; \
+        } \
+    } \
+ \
     post_ops->seq_length = cur_op_index; \
  \
     post_ops->pre_ops = NULL; \
@@ -837,7 +906,7 @@ void eltwise_ops_bench_main_ ## LP_SFX \
     B_type* b = ( B_type* ) lpgemm_malloc( sizeof( B_type ) * size_B ); \
     memset( ( void* ) b, 0, sizeof( B_type ) * size_B ); \
  \
-	if ( bench_mode == 'a' ) \
+    if ( bench_mode == 'a' ) \
     { \
         n_repeats = 1; \
     } \
@@ -858,7 +927,7 @@ void eltwise_ops_bench_main_ ## LP_SFX \
     GEN_FUNC_NAME(eltwise_ops_bench_driver_,LP_SFX) \
     ( \
       stor_order, transa, transb, n_repeats, \
-	  m, n, \
+      m, n, \
       a, stride_a, \
       b, stride_b, \
       post_op \
@@ -870,7 +939,7 @@ void eltwise_ops_bench_main_ ## LP_SFX \
         GEN_FUNC_NAME(eltwise_ops_accuracy_check_driver_,LP_SFX) \
         ( \
           fout, stor_order, transa, transb, \
-		  m, n,\
+          m, n,\
           a, stride_a, \
           b, stride_b, \
           post_op \

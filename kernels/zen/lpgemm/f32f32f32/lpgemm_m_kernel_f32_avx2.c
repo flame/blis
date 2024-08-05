@@ -55,8 +55,8 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
               &&POST_OPS_CLIP_6x16F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_6x16F,
-              &&POST_OPS_MATRIX_MUL_6x16F,
-              &&POST_OPS_SWISH_6x16F
+              &&POST_OPS_SWISH_6x16F,
+              &&POST_OPS_MATRIX_MUL_6x16F
             };
     uint64_t n_left = n0 % NR;  //n0 is expected to be n0<=NR
 
@@ -727,8 +727,8 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x8m)
               &&POST_OPS_CLIP_6x8F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_6x8F,
-              &&POST_OPS_MATRIX_MUL_6x8F,
-              &&POST_OPS_SWISH_6x8F
+              &&POST_OPS_SWISH_6x8F,
+              &&POST_OPS_MATRIX_MUL_6x8F
             };
 
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -1154,8 +1154,8 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x4m)
               &&POST_OPS_CLIP_6x4F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_6x4F,
-              &&POST_OPS_MATRIX_MUL_6x4F,
-              &&POST_OPS_SWISH_6x4F
+              &&POST_OPS_SWISH_6x4F,
+              &&POST_OPS_MATRIX_MUL_6x4F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -1578,8 +1578,8 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x2m)
               &&POST_OPS_CLIP_6x2F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_6x2F,
-              &&POST_OPS_MATRIX_MUL_6x2F,
-              &&POST_OPS_SWISH_6x2F
+              &&POST_OPS_SWISH_6x2F,
+              &&POST_OPS_MATRIX_MUL_6x2F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -2003,8 +2003,8 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x1m)
               &&POST_OPS_CLIP_6x1F,
               NULL, // Virtual node for downscale, else segfault
               &&POST_OPS_MATRIX_ADD_6x1F,
-              &&POST_OPS_MATRIX_MUL_6x1F,
-              &&POST_OPS_SWISH_6x1F
+              &&POST_OPS_SWISH_6x1F,
+              &&POST_OPS_MATRIX_MUL_6x1F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.

@@ -52,8 +52,8 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32 )
 			&&POST_OPS_CLIP_6x64F,
 			NULL, // Virtual node for downscale, else segfault
 			&&POST_OPS_MATRIX_ADD_6x64F,
-			&&POST_OPS_MATRIX_MUL_6x64F,
-			&&POST_OPS_SWISH_6x64F
+			&&POST_OPS_SWISH_6x64F,
+			&&POST_OPS_MATRIX_MUL_6x64F
 		};
 
 	// Strides are updated based on matrix packing/reordering.

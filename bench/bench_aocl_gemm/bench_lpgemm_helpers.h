@@ -311,6 +311,26 @@ static inline ACCUM_type get_matrix_add_post_op_val_ ## BLAS_SFX \
     return (ACCUM_type) val; \
 } \
 
+#define GEN_GET_MATRIX_MUL_POST_OP_VAL_BF16(C_type,BLAS_SFX) \
+static inline float get_matrix_mul_post_op_val_ ## BLAS_SFX \
+     ( \
+       C_type val \
+     ) \
+{ \
+    float ret_val = 0.0; \
+    bfloat16_to_float( val, &ret_val ); \
+    return ret_val; \
+} \
+
+#define GEN_GET_MATRIX_MUL_POST_OP_VAL(C_type,ACCUM_type,BLAS_SFX) \
+static inline ACCUM_type get_matrix_mul_post_op_val_ ## BLAS_SFX \
+     ( \
+       C_type val \
+     ) \
+{ \
+    return (ACCUM_type) val; \
+} \
+
 /* Final output type value getter. */
 #define GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(C_type, ACCUM_type) \
 static inline void mat_mul_get_output_type_val ## ACCUM_type ## C_type \

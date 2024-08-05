@@ -55,8 +55,8 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x64)
 						  &&POST_OPS_CLIP_5x64,
 						  &&POST_OPS_DOWNSCALE_5x64,
 						  &&POST_OPS_MATRIX_ADD_5x64,
-						  &&POST_OPS_MATRIX_MUL_5x64,
-						  &&POST_OPS_SWISH_5x64
+						  &&POST_OPS_SWISH_5x64,
+						  &&POST_OPS_MATRIX_MUL_5x64
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -1511,8 +1511,8 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x64)
 						  &&POST_OPS_CLIP_4x64,
 						  &&POST_OPS_DOWNSCALE_4x64,
 						  &&POST_OPS_MATRIX_ADD_4x64,
-						  &&POST_OPS_MATRIX_MUL_4x64,
-						  &&POST_OPS_SWISH_4x64
+						  &&POST_OPS_SWISH_4x64,
+						  &&POST_OPS_MATRIX_MUL_4x64
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -2736,8 +2736,8 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x64)
 						  &&POST_OPS_CLIP_3x64,
 						  &&POST_OPS_DOWNSCALE_3x64,
 						  &&POST_OPS_MATRIX_ADD_3x64,
-						  &&POST_OPS_MATRIX_MUL_3x64,
-						  &&POST_OPS_SWISH_3x64
+						  &&POST_OPS_SWISH_3x64,
+						  &&POST_OPS_MATRIX_MUL_3x64
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -3734,8 +3734,8 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x64)
 						  &&POST_OPS_CLIP_2x64,
 						  &&POST_OPS_DOWNSCALE_2x64,
 						  &&POST_OPS_MATRIX_ADD_2x64,
-						  &&POST_OPS_MATRIX_MUL_2x64,
-						  &&POST_OPS_SWISH_2x64
+						  &&POST_OPS_SWISH_2x64,
+						  &&POST_OPS_MATRIX_MUL_2x64
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -4508,8 +4508,8 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x64)
 						  &&POST_OPS_CLIP_1x64,
 						  &&POST_OPS_DOWNSCALE_1x64,
 						  &&POST_OPS_MATRIX_ADD_1x64,
-						  &&POST_OPS_MATRIX_MUL_1x64,
-						  &&POST_OPS_SWISH_1x64
+						  &&POST_OPS_SWISH_1x64,
+						  &&POST_OPS_MATRIX_MUL_1x64
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;

@@ -1,17 +1,9 @@
-r n n n r 482 690 2050 2050 690 690 f32f32f32of32:sum,matrix_mul
-r n n n r 144 6424 2090 2090 6424 6424 f32f32f32of32:matrix_mul
-r n n n r 253 2048 660 660 2048 2048 bf16bf16f32of32:matrix_mul
-r n n n p 81 128 3 3 128 128 f32f32f32of32:matrix_mul
-r n n n p 81 128 3 3 128 128 bf16bf16f32of32:matrix_mul
-r n n n p 181 1280 3000 3000 1280 1280 f32f32f32of32:matrix_mul
-r n n n r 482 690 2050 2050 690 690 f32f32f32of32:matrix_mul,sum,clip
-r n n n r 482 690 2050 2050 690 690 bf16bf16f32of32:matrix_mul,matrix_add
-c n n n p 100 200 300 100 300 100 f32f32f32of32:matrix_mul
-c n n n p 100 200 300 100 300 100 bf16bf16f32of32:matrix_mul
-r n n n r 144 1024 512 512 1024 1024 bf16bf16f32of32:matrix_mul
-r n n n r 144 1024 512 512 1024 1024 f32f32f32of32:matrix_mul
+r n n n r 482 690 2050 2050 690 690 f32f32f32of32:bias,matrix_mul
+r n n n r 253 2048 660 660 2048 2048 bf16bf16f32of32:matrix_mul,clip
+c n n n p 100 200 300 100 300 100 f32f32f32of32:matrix_mul,gelu_tanh
 c t n n n 16 256 512 512 512 256 bf16bf16f32of32:matrix_mul
-#
+r n n n n 160 6424 2051 2051 6424 6424 *:bias,swish
+r n n n r 74 512 515 515 512 512 *:none
 r n n n r 253 2048 660 660 2048 2048 *:matrix_add
 r n n n p 81 128 3 3 128 128 u8s8s32os32:bias,relu,clip
 r n n n p 81 128 3 3 128 128 u8s8s32os8:bias,relu,clip
