@@ -238,7 +238,7 @@ void dscal_blis_impl
     AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', (void *)alpha, *n, *incx );
     dim_t  n_elem;
 #ifdef BLIS_ENABLE_OPENMP
-    dim_t  ST_THRESH;
+    dim_t  ST_THRESH = 30000;
 #endif
     double* x0;
     inc_t  incx0;
@@ -310,6 +310,7 @@ void dscal_blis_impl
 
           // Query the function pointer using the context
           scalv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DOUBLE, BLIS_SCALV_KER, cntx);
+
     }
 
 #ifdef BLIS_ENABLE_OPENMP
