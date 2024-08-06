@@ -1175,7 +1175,7 @@ void bli_zdotv_zen4_asm_avx512
             "zmm16", "zmm17", "zmm18", "zmm19",
             "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
             "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-            "memory"
+            "k1", "xmm8", "ymm0", "ymm2", "ymm8", "memory"
         )
 
         rho0.real = *rho0R;

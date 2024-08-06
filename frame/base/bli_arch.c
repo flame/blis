@@ -483,7 +483,7 @@ void bli_arch_check_id( void )
 			// Non-x86 platforms just accept value given for now.
 			// Similar logic to x86 if block could be implemented
 			// here if desired.
-			test_arch = FALSE;
+			arch_reset = FALSE;
 #endif
 		}
 		else

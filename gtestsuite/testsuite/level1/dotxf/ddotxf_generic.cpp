@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_dotxf.h"
 
-class ddotxffGeneric :
+class ddotxfGeneric :
         public ::testing::TestWithParam<std::tuple<char,    // conj_x
                                                    char,    // conj_a
                                                    gtint_t, // m
@@ -48,7 +48,7 @@ class ddotxffGeneric :
                                                    gtint_t  // incy
                                                    >> {};
 // Tests using random integers as vector elements.
-TEST_P( ddotxffGeneric, API )
+TEST_P( ddotxfGeneric, API )
 {
     using T = double;
     //----------------------------------------------------------
@@ -112,7 +112,7 @@ TEST_P( ddotxffGeneric, API )
 // Black box testing for generic and main use of ddotxf.
 INSTANTIATE_TEST_SUITE_P(
         FunctionalTest,
-        ddotxffGeneric,
+        ddotxfGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                         // n: use x, not conj(x) (since it is real)
             ::testing::Values('n'),                                         // n: use x, not conj(x) (since it is real)

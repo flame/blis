@@ -205,10 +205,14 @@ err_t bli_gemmtsup
     return BLIS_FAILURE;
     #endif
 
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
     if (bli_cpuid_is_avx2fma3_supported() == FALSE){
-    AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "AVX instruction is not supported");
-    return BLIS_FAILURE;
+        AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "AVX instruction is not supported");
+        return BLIS_FAILURE;
     }
+#else
+    return BLIS_FAILURE;
+#endif
 
     // Return early if this is a mixed-datatype computation.
     if ( bli_obj_dt( c ) != bli_obj_dt( a ) ||

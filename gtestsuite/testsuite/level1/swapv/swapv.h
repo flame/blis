@@ -73,9 +73,9 @@ static void cblas_swapv(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy)
     else if constexpr (std::is_same<T, double>::value)
         cblas_dswap( n, x, incx, y, incy );
     else if constexpr (std::is_same<T, scomplex>::value)
-        cblas_cswap( n, &x, incx, y, incy );
+        cblas_cswap( n, x, incx, y, incy );
     else if constexpr (std::is_same<T, dcomplex>::value)
-        cblas_zswap( n, &x, incx, y, incy );
+        cblas_zswap( n, x, incx, y, incy );
     else
         throw std::runtime_error("Error in testsuite/level1/swapv.h: Invalid typename in cblas_swapv().");
 }
