@@ -281,16 +281,17 @@ endif
 # --- Monolithic header definitions --------------------------------------------
 #
 
-# Define a list of headers to install. The default is to only install blis.h.
+# Define lists of headers to create/install. The default is to only
+# create/install blis.h.
+HEADERS_TO_BUILD        := $(BLIS_H_FLAT)
 HEADERS_TO_INSTALL      := $(BLIS_H_FLAT)
 
-# If CBLAS is enabled, we also install cblas.h. This allows the user to continue
-# using #include "cblas.h" in their application, if they wish. (NOTE: Even if we
-# didn't install cblas.h, the user could *still* access CBLAS definitions and
-# function prototypes, but they would have to update their source code to use
-# #include "blis.h" instead of #include "cblas.h" since the latter header file
-# would not exist.)
+# If CBLAS is enabled, we also create/install cblas.h. This allows the user to
+# continue using #include "cblas.h" in their application, if they wish. (NOTE:
+# The user can also access CBLAS definitions and function prototypes by
+# #include'ing "blis.h".)
 ifeq ($(MK_ENABLE_CBLAS),yes)
+HEADERS_TO_BUILD   += $(CBLAS_H_FLAT)
 HEADERS_TO_INSTALL += $(CBLAS_H_FLAT)
 endif
 
@@ -568,7 +569,11 @@ endif
 
 flat-cblas-header: check-env $(CBLAS_H_FLAT)
 
-$(CBLAS_H_FLAT): $(FRAME_H99_FILES)
+# Note that the flattened blis.h is a prerequisite of flattening cblas.h. This
+# is done so that the two headers are built sequentially even when using
+# 'make -j[n]'. Otherwise, the output from the two processes can become
+# interleaved, which looks awkward/confusing.
+$(CBLAS_H_FLAT): $(FRAME_H99_FILES) $(BLIS_H_FLAT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(FLATTEN_H) -l -v1 $(CBLAS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
 else
@@ -587,7 +592,7 @@ endif
 # first argument: a configuration name from config_list, used to look up the
 # CFLAGS to use during compilation.
 define make-config-rule
-$(BASE_OBJ_CONFIG_PATH)/$(1)/%.o: $(CONFIG_PATH)/$(1)/%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_CONFIG_PATH)/$(1)/%.o: $(CONFIG_PATH)/$(1)/%.c $(HEADERS_TO_BUILD) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-config-cflags-for,$(1)) -c $$< -o $$@
 else
@@ -599,7 +604,7 @@ endef
 # first argument: a configuration name from the union of config_list and
 # config_name, used to look up the CFLAGS to use during compilation.
 define make-frame-rule
-$(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.c $(HEADERS_TO_BUILD) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-frame-cflags-for,$(1)) -c $$< -o $$@
 else
@@ -608,7 +613,7 @@ else
 endif
 
 ifneq ($(findstring hpx,$(THREADING_MODEL)),)
-$(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.cpp $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.cpp $(HEADERS_TO_BUILD) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CXX) $(call get-frame-cxxflags-for,$(1)) -c $$< -o $$@
 else
@@ -620,7 +625,7 @@ endef
 
 # first argument: a kernel set (name) being targeted (e.g. haswell).
 define make-refinit-rule
-$(BASE_OBJ_REFKERN_PATH)/$(1)/bli_cntx_$(1)_ref.o: $(REFKERN_PATH)/bli_cntx_ref.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_REFKERN_PATH)/$(1)/bli_cntx_$(1)_ref.o: $(REFKERN_PATH)/bli_cntx_ref.c $(HEADERS_TO_BUILD) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-refinit-cflags-for,$(1)) -c $$< -o $$@
 else
@@ -631,7 +636,7 @@ endef
 
 # first argument: a kernel set (name) being targeted (e.g. haswell).
 define make-refkern-rule
-$(BASE_OBJ_REFKERN_PATH)/$(1)/%_$(1)_ref.o: $(REFKERN_PATH)/%_ref.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_REFKERN_PATH)/$(1)/%_$(1)_ref.o: $(REFKERN_PATH)/%_ref.c $(HEADERS_TO_BUILD) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-refkern-cflags-for,$(1)) -c $$< -o $$@
 else
@@ -644,7 +649,7 @@ endef
 # second argument: the configuration whose CFLAGS we should use in compilation.
 # third argument: the kernel file suffix being considered.
 define make-kernels-rule
-$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.$(3) $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.$(3) $(HEADERS_TO_BUILD) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-kernel-cflags-for,$(2)) -c $$< -o $$@
 else
@@ -657,7 +662,7 @@ endef
 # config_name, used to look up the CFLAGS to use during compilation.
 # second argument: the C99 addon file suffix being considered.
 define make-c99-addon-rule
-$(BASE_OBJ_ADDON_PATH)/%.o: $(ADDON_PATH)/%.$(2) $(BLIS_H_FLAT) $(ADDON_H99_FILES) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_ADDON_PATH)/%.o: $(ADDON_PATH)/%.$(2) $(HEADERS_TO_BUILD) $(ADDON_H99_FILES) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-addon-c99flags-for,$(1)) -c $$< -o $$@
 else
@@ -671,7 +676,7 @@ endef
 # second argument: the C99 addon file suffix being considered.
 # third argument: the name of the addon being considered.
 define make-c99-addon-kers-rule
-$(BASE_OBJ_ADDON_PATH)/$(3)/$(KERNELS_DIR)/%.o: $(ADDON_PATH)/$(3)/$(KERNELS_DIR)/%.$(2) $(BLIS_H_FLAT) $(ADDON_H99_FILES) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_ADDON_PATH)/$(3)/$(KERNELS_DIR)/%.o: $(ADDON_PATH)/$(3)/$(KERNELS_DIR)/%.$(2) $(HEADERS_TO_BUILD) $(ADDON_H99_FILES) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-addon-kernel-c99flags-for,$(1)) -c $$< -o $$@
 else
@@ -684,7 +689,7 @@ endef
 # config_name, used to look up the CFLAGS to use during compilation.
 # second argument: the C++ addon file suffix being considered.
 define make-cxx-addon-rule
-$(BASE_OBJ_ADDON_PATH)/%.o: $(ADDON_PATH)/%.$(2) $(BLIS_H_FLAT) $(ADDON_HXX_FILES) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_ADDON_PATH)/%.o: $(ADDON_PATH)/%.$(2) $(HEADERS_TO_BUILD) $(ADDON_HXX_FILES) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CXX) $(call get-addon-cxxflags-for,$(1)) -c $$< -o $$@
 else
@@ -697,7 +702,7 @@ endef
 # config_name, used to look up the CFLAGS to use during compilation.
 # second argument: the C99 sandbox file suffix being considered.
 define make-c99-sandbox-rule
-$(BASE_OBJ_SANDBOX_PATH)/%.o: $(SANDBOX_PATH)/%.$(2) $(BLIS_H_FLAT) $(SANDBOX_H99_FILES) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_SANDBOX_PATH)/%.o: $(SANDBOX_PATH)/%.$(2) $(HEADERS_TO_BUILD) $(SANDBOX_H99_FILES) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-sandbox-c99flags-for,$(1)) -c $$< -o $$@
 else
@@ -710,7 +715,7 @@ endef
 # config_name, used to look up the CFLAGS to use during compilation.
 # second argument: the C++ sandbox file suffix being considered.
 define make-cxx-sandbox-rule
-$(BASE_OBJ_SANDBOX_PATH)/%.o: $(SANDBOX_PATH)/%.$(2) $(BLIS_H_FLAT) $(SANDBOX_HXX_FILES) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_SANDBOX_PATH)/%.o: $(SANDBOX_PATH)/%.$(2) $(HEADERS_TO_BUILD) $(SANDBOX_HXX_FILES) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CXX) $(call get-sandbox-cxxflags-for,$(1)) -c $$< -o $$@
 else
@@ -861,7 +866,7 @@ blastest-bin: check-env blastest-f2c $(BLASTEST_DRV_BIN_PATHS)
 blastest-run: $(BLASTEST_DRV_BINS_R)
 
 # f2c object file rule.
-$(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_F2C_SRC_PATH)/%.c $(BLIS_H_FLAT)
+$(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_F2C_SRC_PATH)/%.c $(HEADERS_TO_BUILD)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-user-cflags-for,$(CONFIG_NAME)) $(BLAT_CFLAGS) -c $< -o $@
 else
@@ -870,7 +875,7 @@ else
 endif
 
 # driver object file rule.
-$(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_DRV_SRC_PATH)/%.c $(BLIS_H_FLAT)
+$(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_DRV_SRC_PATH)/%.c $(HEADERS_TO_BUILD)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-user-cflags-for,$(CONFIG_NAME)) $(BLAT_CFLAGS) -c $< -o $@
 else
@@ -951,7 +956,7 @@ testsuite: testsuite-run
 testsuite-bin: check-env $(TESTSUITE_BIN)
 
 # Object file rule.
-$(BASE_OBJ_TESTSUITE_PATH)/%.o: $(TESTSUITE_SRC_PATH)/%.c $(BLIS_H_FLAT)
+$(BASE_OBJ_TESTSUITE_PATH)/%.o: $(TESTSUITE_SRC_PATH)/%.c $(HEADERS_TO_BUILD)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-user-cflags-for,$(CONFIG_NAME)) -c $< -o $@
 else
