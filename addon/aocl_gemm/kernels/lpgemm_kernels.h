@@ -432,5 +432,7 @@ LPGEMV_N_EQ1_KERN(float, float, float,f32f32f32of32);
 LPGEMV_N_EQ1_KERN(bfloat16, bfloat16, float,bf16bf16f32of32);
 LPGEMV_N_EQ1_KERN(uint8_t,int8_t,int32_t,u8s8s32os32);
 LPGEMV_N_EQ1_KERN(uint8_t,int8_t,int16_t,u8s8s16os16);
+LPGEMV_N_EQ1_KERN(int8_t,int8_t,int32_t,s8s8s32os32);
+LPGEMV_N_EQ1_KERN(int8_t,int8_t,int16_t,s8s8s16os16);
 
 #endif //BLIS_LPGEMM_KERN_H

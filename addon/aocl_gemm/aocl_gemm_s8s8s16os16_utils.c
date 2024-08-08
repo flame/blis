@@ -107,6 +107,16 @@ AOCL_GEMM_REORDER(int8_t,s8s8s16os16)
 		return; // Error.
 	}
 
+	trans_t blis_trans;
+	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
+	bli_param_map_netlib_to_blis_trans(trans, &blis_trans);
+
+	if( bli_is_trans( blis_trans ) )
+	{
+		bli_print_msg(" Transpose of matrix is not supported in "
+		                     "s8s8s16 gemm.", __FILE__, __LINE__ );
+		return; // Error.
+	}
 	// Check if AVX2 ISA is supported, lpgemm s8s8s16os16 matmul only works with it.
 	if ( bli_cpuid_is_avx2fma3_supported() == FALSE )
 	{
@@ -131,18 +141,17 @@ AOCL_GEMM_REORDER(int8_t,s8s8s16os16)
 
 	if( n == 1 )
 	{
-		if ( ldb == 1 )
+		int16_t* pack_b_column_sum = ( int16_t* ) ( reorder_buf_addr +
+		                               ( sizeof( int8_t ) * n * k ));
+
+		*pack_b_column_sum =  0;
+
+		for( dim_t k0 = 0; k0 < k; k0++ )
 		{
-			memcpy( reorder_buf_addr, input_buf_addr,
-			        ( k * sizeof( int8_t ) ) );
+			reorder_buf_addr[k0] = input_buf_addr[ k0 * ldb ];
+			*pack_b_column_sum += reorder_buf_addr[k0];
 		}
-		else
-		{
-			for( dim_t k0 = 0; k0 < k; k0++ )
-			{
-				reorder_buf_addr[k0] = input_buf_addr[ k0 * ldb ];
-			}
-		}
+		*pack_b_column_sum *= 128;
 		return;
 	}
 

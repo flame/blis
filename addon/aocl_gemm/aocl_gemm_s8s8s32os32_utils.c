@@ -158,17 +158,17 @@ AOCL_GEMM_REORDER(int8_t,s8s8s32os32)
 #ifdef BLIS_KERNELS_ZEN4
 	if( n == 1 )
 	{
-		if ( rs_b == 1 )
+		int32_t* pack_b_column_sum = ( int32_t* ) ( reorder_buf_addr +
+		                               ( sizeof( int8_t ) * n * k ));
+
+		*pack_b_column_sum =  0;
+
+		for( dim_t k0 = 0; k0 < k; k0++ )
 		{
-			memcpy( reorder_buf_addr, input_buf_addr, ( k * sizeof( int8_t ) ) );
+			reorder_buf_addr[k0] = input_buf_addr[ k0 * rs_b ];
+			*pack_b_column_sum += reorder_buf_addr[k0];
 		}
-		else
-		{
-			for( dim_t k0 = 0; k0 < k; k0++ )
-			{
-				reorder_buf_addr[k0] = input_buf_addr[ k0 * rs_b ];
-			}
-		}
+		*pack_b_column_sum *= 128;
 		return;
 	}
 #endif

@@ -112,9 +112,9 @@ LPGEMV(int8_t,int8_t,int32_t,s8s8s32o32)
 		dim_t MR = 16;
 
 		// pack B matrix if rs_b > 1
-		if( ( mtag_b == PACK ) && ( rs_b != 1 ) )
+		if( ( mtag_b == PACK ) )
 		{
-			mem_b_size_req = sizeof( int8_t ) * k;
+			mem_b_size_req = sizeof( int8_t ) * k + sizeof( int32_t );
 
 			lpgemm_alloc_mem_panel
 			(
@@ -124,14 +124,26 @@ LPGEMV(int8_t,int8_t,int32_t,s8s8s32o32)
 
 			pack_b_buffer_s8s8s32os32 = ( int8_t* ) bli_mem_buffer( &mem_b );
 
+			int32_t* pack_b_column_sum = ( int32_t* ) ( pack_b_buffer_s8s8s32os32 +
+		                                     ( sizeof( int8_t ) * k ));
+
+			*pack_b_column_sum =  0;
+
 			for( dim_t k0 = 0; k0 < k; k0++ )
 			{
 				pack_b_buffer_s8s8s32os32[k0] = b[ k0*rs_b ];
+				*pack_b_column_sum += pack_b_buffer_s8s8s32os32[k0];
 			}
+			*pack_b_column_sum *= 128;
+			post_ops_attr.b_col_sum_vec = pack_b_column_sum;
 
 			b_use = pack_b_buffer_s8s8s32os32;
 			rs_b_use = 1;
 			cs_b_use = 1;
+		}
+		else if( mtag_b == REORDERED )
+		{
+			post_ops_attr.b_col_sum_vec = ( int32_t* )( b + k );
 		}
 
 		// Compute the IC loop thread range for the current thread.
@@ -171,10 +183,10 @@ LPGEMV(int8_t,int8_t,int32_t,s8s8s32o32)
 				a_use = pack_a_buffer_s8s8s32os32;
 			}
 			// Call lpgemv_n_one kernel
-			lpgemv_n_one_u8s8s32os32
+			lpgemv_n_one_s8s8s32os32
 			(
 			  mc0, k,
-			  (uint8_t*)a_use, rs_a_use, cs_a_use, mtag_a,
+			  a_use, rs_a_use, cs_a_use, mtag_a,
 			  b_use, rs_b_use, cs_b_use, mtag_b,
 			  c_use, rs_c, cs_c,
 			  alpha, beta,

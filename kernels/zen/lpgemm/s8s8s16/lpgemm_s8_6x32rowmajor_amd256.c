@@ -109,7 +109,7 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int16_t,s8s8s16o16_6x32)
 		return;
 	}
 
-    uint8_t cvt_uint8 = 128;
+	uint8_t cvt_uint8 = 128;
 	__m256i vec_uint8 = _mm256_set1_epi8 (cvt_uint8);
 
 	for (dim_t ir = 0; ir < m_full_pieces_loop_limit; ir += MR)
@@ -148,9 +148,9 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int16_t,s8s8s16o16_6x32)
             //convert signed int8 to uint8 for u8s8s16 FMA ops
 			a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-			__m256i b0 = 
+			__m256i b0 =
 					_mm256_loadu_si256((__m256i const *)(b + (64 * kr) + (NR * 0)));
-			__m256i b1 = 
+			__m256i b1 =
 					_mm256_loadu_si256((__m256i const *)(b + (64 * kr) + (NR * 1)));
 
 			// Separate register for intermediate op
@@ -168,7 +168,7 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int16_t,s8s8s16o16_6x32)
 				_mm256_set1_epi16(*(int16_t *)(a + (rs_a * 1) + (cs_a * offset)));
 
             //convert signed int8 to uint8 for u8s8s16 FMA ops
-			a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );    
+			a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
 			// Separate register for intermediate op
 			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -181,11 +181,11 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int16_t,s8s8s16o16_6x32)
 			c_int16_1p1 = _mm256_add_epi16(inter_vec, c_int16_1p1);
 
 			// Broadcast a[2,kr:kr+2].
-			a_int32_0 = 
+			a_int32_0 =
 				_mm256_set1_epi16(*(int16_t *)(a + (rs_a * 2) + (cs_a * offset)));
 
             //convert signed int8 to uint8 for u8s8s16 FMA ops
-			a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );    
+			a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
 			// Separate register for intermediate op
 			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -197,11 +197,11 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int16_t,s8s8s16o16_6x32)
 			c_int16_2p1 = _mm256_add_epi16(inter_vec, c_int16_2p1);
 
 			// Broadcast a[3,kr:kr+2].
-			a_int32_0 = 
+			a_int32_0 =
 				_mm256_set1_epi16(*(int16_t *)(a + (rs_a * 3) + (cs_a * offset)));
 
             //convert signed int8 to uint8 for u8s8s16 FMA ops
-			a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );    
+			a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
 			// Separate register for intermediate op
 			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -218,7 +218,7 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int16_t,s8s8s16o16_6x32)
 				_mm256_set1_epi16(*(int16_t *)(a + (rs_a * 4) + (cs_a * offset)));
 
             //convert signed int8 to uint8 for u8s8s16 FMA ops
-			a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );    
+			a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
 			// Separate register for intermediate op
 			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -232,11 +232,11 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int16_t,s8s8s16o16_6x32)
 			c_int16_4p1 = _mm256_add_epi16(inter_vec, c_int16_4p1);
 
 			// Broadcast a[5,kr:kr+2].
-			a_int32_0 = 
+			a_int32_0 =
 				_mm256_set1_epi16(*(int16_t *)(a + (rs_a * 5) + (cs_a * offset)));
 
             //convert signed int8 to uint8 for u8s8s16 FMA ops
-			a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );    
+			a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
 			// Separate register for intermediate op
 			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -357,7 +357,7 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int16_t,s8s8s16o16_6x32)
 		}
         if ( post_ops_attr.is_last_k == 1 )
 		{
-            //Subtract B matrix sum column values to compensate 
+            //Subtract B matrix sum column values to compensate
 			//for addition of 128 to A matrix elements
 
             int16_t* bsumptr = post_ops_attr.b_col_sum_vec_s16 + post_ops_attr.b_sum_offset;
@@ -1060,7 +1060,7 @@ POST_OPS_6x32_DISABLE:
 			// c[5,16-31]
 			_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 5 ) ) + ( 1*16 )), c_int16_5p1 );
 		}
-		
+
 		a = a + ( MR * ps_a );
 		post_ops_attr.post_op_c_i += MR;
 	}
