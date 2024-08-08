@@ -2211,7 +2211,6 @@ void bli_sgemmsup_rd_haswell_asm_1x16n
 	                                   // which would destory intermediate results.
 
 	vmovss(mem(rax       ), xmm0)
-	vmovss(mem(rax, r8, 1), xmm1)
 	add(imm(1*4), rax)                 // a += 1*cs_a = 1*4;
 
 	vmovss(mem(rbx        ), xmm3)
@@ -2412,5 +2411,6 @@ void bli_sgemmsup_rd_haswell_asm_1x16n
 			#endif
 		}
 	}
+
 }
 
