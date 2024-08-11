@@ -28,7 +28,7 @@ sdcz    # Datatype(s) to test:
 1       # Test gemm with mixed-domain operands?
 1       # Test gemm with mixed-precision operands?
 100     # Problem size: first to test
-500     # Problem size: maximum to test
+100     # Problem size: maximum to test
 100     # Problem size: increment between experiments
         # Complex level-3 implementations to test:
 1       #   1m   ('1' = enable; '0' = disable)

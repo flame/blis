@@ -40,7 +40,7 @@
 #undef  GENTPROT
 #define GENTPROT( ftype_x, chx, blasname ) \
 \
-BLIS_EXPORT_BLAS f77_int PASTEF772(i,chx,blasname) \
+BLIS_EXPORT_BLAS f77_int PASTEF77(i,chx,blasname) \
      ( \
        const f77_int* n, \
        const ftype_x* x, const f77_int* incx  \

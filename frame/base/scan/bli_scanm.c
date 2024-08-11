@@ -85,7 +85,7 @@ GENARRAY_FPA( void_fp, opname ); \
 */ \
 \
 GENARRAY_FPA( PASTECH(opname,_vft), \
-              PASTECH0(opname) ); \
+              PASTECH(opname) ); \
 \
 PASTECH(opname,_vft) \
 PASTEMAC(opname,_qfp)( num_t dt ) \
@@ -100,7 +100,7 @@ GENFRONT( fscanm )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC(opname) \
      ( \
        FILE*   file, \
        obj_t*  x  \
@@ -138,7 +138,7 @@ GENFRONT( fscanm )
 #undef  GENFRONT
 #define GENFRONT( opname, varname ) \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC(opname) \
      ( \
        obj_t*  x  \
      ) \
@@ -146,7 +146,7 @@ void PASTEMAC0(opname) \
 	bli_init_once(); \
 \
 	/* Invoke the typed function. */ \
-	PASTEMAC0(varname) \
+	PASTEMAC(varname) \
 	( \
 	  stdin, \
 	  x  \
@@ -249,6 +249,9 @@ void PASTEMAC(ch,opname) \
 			{ \
 				/* Read the string for the next floating-point number. */ \
 				ctype_r chi_imag = ( ctype_r )strtod( start_p, &end_p ); \
+\
+				/* Suppress unused variable warning for real cases. */ \
+				( void )chi_imag; \
 \
 				if ( start_p != end_p ) \
 				{ \

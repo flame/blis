@@ -44,7 +44,7 @@
 #undef  GENTPROTDOT
 #define GENTPROTDOT( ftype, ch, chc, blasname ) \
 \
-void PASTEF2C2(ch,blasname,chc) \
+void PASTEF2C(ch,blasname,chc) \
      ( \
              ftype*   rho, \
        const f77_int* n, \

@@ -45,7 +45,7 @@
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef err_t (*PASTECH3(ch,opname,_opt,tsuf)) \
+typedef err_t (*PASTECH(ch,opname,_opt,tsuf)) \
      ( \
              uplo_t  uploa, \
              dim_t   m, \
@@ -63,7 +63,7 @@ INSERT_GENTDEF( hpdinv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef err_t (*PASTECH3(ch,opname,_opt,tsuf)) \
+typedef err_t (*PASTECH(ch,opname,_opt,tsuf)) \
      ( \
              uplo_t  uploa, \
              diag_t  diaga, \

@@ -59,7 +59,7 @@
 \
 		bli_string_mkupper( func_str ); \
 \
-		PASTEF770(xerbla)( func_str, &info, (ftnlen)6 ); \
+		PASTEF77(xerbla)( func_str, &info, (ftnlen)6 ); \
 \
 		return; \
 	} \

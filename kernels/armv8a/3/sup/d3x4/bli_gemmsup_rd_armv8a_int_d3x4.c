@@ -69,7 +69,7 @@ void bli_dgemmsup_rd_armv8a_int_3x4
        const void*      b, inc_t rs_b, inc_t cs_b,
        const void*      beta,
              void*      c, inc_t rs_c, inc_t cs_c,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {

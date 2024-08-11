@@ -50,7 +50,7 @@ err_t PASTEMAC(ch,opname) \
              ctype*   p, inc_t rs_p, inc_t cs_p  \
      ) \
 { \
-	return PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+	return PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
 	( \
 	  thresh, \
 	  uploa, \
@@ -68,7 +68,7 @@ INSERT_GENTFUNCR_BASIC( hevpinv )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-err_t PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+err_t PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
      ( \
              double   thresh, \
              uplo_t   uploa, \
@@ -105,7 +105,7 @@ err_t PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
 \
 	/* Perform a Hermitian EVD on A, storing eigenvectors to V and eigenvalues
 	   to e. */ \
-	r_val = PASTEMAC2(ch,hevd,BLIS_TAPI_EX_SUF) \
+	r_val = PASTEMAC(ch,hevd,BLIS_TAPI_EX_SUF) \
 	( \
 	  TRUE,  /* Always compute eigenvectors. */ \
 	  uploa, \
@@ -132,7 +132,7 @@ err_t PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
 \
 	/* Perform a reverse Hermitian EVD with the inverted eigenvalues to
 	   compute the pseudo-inverse, storing the result to P. */ \
-	r_val = PASTEMAC2(ch,rhevd,BLIS_TAPI_EX_SUF) \
+	r_val = PASTEMAC(ch,rhevd,BLIS_TAPI_EX_SUF) \
 	( \
 	  uploa, \
 	  m, \
@@ -145,7 +145,7 @@ err_t PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
 	if ( r_val != BLIS_SUCCESS ) bli_abort(); \
 \
 	/* Make P explicitly/densely Hermitian. */ \
-	PASTEMAC2(ch,mkherm,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,mkherm,BLIS_TAPI_EX_SUF) \
 	( \
 	  uploa, \
 	  m, \

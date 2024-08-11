@@ -50,7 +50,7 @@ err_t PASTEMAC(ch,opname) \
              ctype*   a, inc_t rs_a, inc_t cs_a  \
      ) \
 { \
-	return PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+	return PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
 	( \
 	  uploa, \
 	  m, \
@@ -68,7 +68,7 @@ INSERT_GENTFUNCR_BASIC( rhevd )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-err_t PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+err_t PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
      ( \
              uplo_t   uploa, \
              dim_t    m, \
@@ -82,9 +82,6 @@ err_t PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
 	err_t r_val; \
 \
 	bli_init_once(); \
-\
-	/* Acquire a num_t for the datatype so we can branch on it later. */ \
-	const num_t dt = PASTEMAC(ch,type); \
 \
 	/* Initialize some strides to use for a temporary "Ve" matrix. */ \
 	inc_t rs_ve = 0; /* rs = cs = 0 requests default (column-major) storage. */ \
@@ -108,7 +105,7 @@ err_t PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
 	if ( r_val != BLIS_SUCCESS ) bli_abort(); \
 \
 	/* Copy V to Ve. */ \
-	PASTEMAC2(ch,copym,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,copym,BLIS_TAPI_EX_SUF) \
 	( \
 	  0, \
 	  BLIS_NONUNIT_DIAG, \
@@ -130,11 +127,11 @@ err_t PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
 	   imaginary parts of the elements of e. */ \
 	for ( dim_t j = 0; j < m; ++j ) \
 	{ \
-		ctype_r* vej_r = ( ctype_r* )( ve + j*cs_ve ); \
-		ctype_r* ej    =               e  + j*ince; \
-		dim_t    scl   = sizeof( ctype )/sizeof( ctype_r ); \
+		const ctype_r* ej    =               e  + j*ince; \
+		      ctype_r* vej_r = ( ctype_r* )( ve + j*cs_ve ); \
+		      dim_t    scl   = sizeof( ctype )/sizeof( ctype_r ); \
 \
-		PASTEMAC2(chr,scalv,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(chr,scalv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  scl * m, \
@@ -150,7 +147,7 @@ err_t PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
 \
 	/* Use gemmt to compute A = Ve * V^H, storing only the triangle specified
 	   by uploa. */ \
-	PASTEMAC2(ch,gemmt,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,gemmt,BLIS_TAPI_EX_SUF) \
 	( \
 	  uploa, \
 	  BLIS_NO_TRANSPOSE, \
@@ -169,7 +166,7 @@ err_t PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
 	ctype_r* zero_r = PASTEMAC(chr,0); \
 \
 	/* For complex domain computation, set the imaginary part of A to zero. */ \
-	PASTEMAC2(ch,setid,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,setid,BLIS_TAPI_EX_SUF) \
 	( \
 	  0, \
 	  m, m, \

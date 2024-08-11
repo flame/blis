@@ -122,7 +122,7 @@
  /* System generated locals */
  bla_integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5;
  /* Local variables */
- bla_integer i__, j, l, ib, nb, kk, nx, iws, nbmin, iinfo;
+ bla_integer i__, j, l, ib, nb = 1, kk, nx, iws, nbmin, iinfo;
  bla_integer ldwork, lwkopt;
  bla_logical lquery;
  /* -- LAPACK computational routine -- */

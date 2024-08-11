@@ -37,17 +37,16 @@
 
 BLIS_INLINE void bli_thread_range_rr
      (
-       const thrinfo_t* thread,
-             dim_t      n,
-             dim_t      bf,
-             bool       handle_edge_low,
-             dim_t*     start,
-             dim_t*     end,
-             dim_t*     inc
+       dim_t  tid,
+       dim_t  nt,
+       dim_t  n,
+       dim_t  bf,
+       bool   handle_edge_low,
+       dim_t* start,
+       dim_t* end,
+       dim_t* inc
      )
 {
-	const dim_t tid    = bli_thrinfo_work_id( thread );
-	const dim_t nt     = bli_thrinfo_n_way( thread );
 	const dim_t n_iter = n / bf + ( n % bf ? 1 : 0 );
 
 	// Use round-robin (interleaved) partitioning of jr/ir loops.
@@ -58,29 +57,31 @@ BLIS_INLINE void bli_thread_range_rr
 
 BLIS_INLINE void bli_thread_range_sl
      (
-       const thrinfo_t* thread,
-             dim_t      n,
-             dim_t      bf,
-             bool       handle_edge_low,
-             dim_t*     start,
-             dim_t*     end,
-             dim_t*     inc
+       dim_t  work_id,
+       dim_t  n_way,
+       dim_t  n,
+       dim_t  bf,
+       bool   handle_edge_low,
+       dim_t* start,
+       dim_t* end,
+       dim_t* inc
      )
 {
 	// Use contiguous slab partitioning of jr/ir loops.
-	bli_thread_range_sub( thread, n, bf, handle_edge_low, start, end );
+	bli_thread_range_sub( work_id, n_way, n, bf, handle_edge_low, start, end );
 	*inc = 1;
 }
 
 BLIS_INLINE void bli_thread_range_slrr
      (
-       const thrinfo_t* thread,
-             dim_t      n,
-             dim_t      bf,
-             bool       handle_edge_low,
-             dim_t*     start,
-             dim_t*     end,
-             dim_t*     inc
+       dim_t  work_id,
+       dim_t  n_way,
+       dim_t  n,
+       dim_t  bf,
+       bool   handle_edge_low,
+       dim_t* start,
+       dim_t* end,
+       dim_t* inc
      )
 {
 	// Define a general-purpose slab/rr function whose definition depends on
@@ -90,9 +91,9 @@ BLIS_INLINE void bli_thread_range_slrr
 	// are used together by packm.
 
 #ifdef BLIS_ENABLE_JRIR_RR
-	bli_thread_range_rr( thread, n, bf, handle_edge_low, start, end, inc );
+	bli_thread_range_rr( work_id, n_way, bf, handle_edge_low, start, end, inc );
 #else // ifdef ( _SLAB || _TLB )
-	bli_thread_range_sl( thread, n, bf, handle_edge_low, start, end, inc );
+	bli_thread_range_sl( work_id, n_way, n, bf, handle_edge_low, start, end, inc );
 #endif
 }
 

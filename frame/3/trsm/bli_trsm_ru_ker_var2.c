@@ -45,31 +45,37 @@ void bli_trsm_ru_ker_var2
              thrinfo_t* thread_par
      )
 {
-	const num_t     dt        = bli_obj_exec_dt( c );
-	const dim_t     dt_size   = bli_dt_size( dt );
+	const num_t  dt_comp   = bli_gemm_var_cntl_comp_dt( cntl );
+	const num_t  dt_a      = bli_obj_dt( a );
+	const num_t  dt_b      = bli_obj_dt( b );
+	const num_t  dt_c      = bli_obj_dt( c );
 
-	      doff_t    diagoffb  = bli_obj_diag_offset( b );
+	const siz_t  dt_a_size = bli_dt_size( dt_a );
+	const siz_t  dt_b_size = bli_dt_size( dt_b );
+	const siz_t  dt_c_size = bli_dt_size( dt_c );
 
-	const pack_t    schema_a  = bli_obj_pack_schema( a );
-	const pack_t    schema_b  = bli_obj_pack_schema( b );
+	      doff_t diagoffb  = bli_obj_diag_offset( b );
 
-	      dim_t     m         = bli_obj_length( c );
-	      dim_t     n         = bli_obj_width( c );
-	      dim_t     k         = bli_obj_width( a );
+	const pack_t schema_a  = bli_obj_pack_schema( a );
+	const pack_t schema_b  = bli_obj_pack_schema( b );
 
-	const void*     buf_a     = bli_obj_buffer_at_off( a );
-	const inc_t     cs_a      = bli_obj_col_stride( a );
-	const dim_t     pd_a      = bli_obj_panel_dim( a );
-	const inc_t     ps_a      = bli_obj_panel_stride( a );
+	      dim_t  m         = bli_obj_length( c );
+	      dim_t  n         = bli_obj_width( c );
+	      dim_t  k         = bli_obj_width( a );
 
-	const void*     buf_b     = bli_obj_buffer_at_off( b );
-	const inc_t     rs_b      = bli_obj_row_stride( b );
-	const dim_t     pd_b      = bli_obj_panel_dim( b );
-	const inc_t     ps_b      = bli_obj_panel_stride( b );
+	const void*  buf_a     = bli_obj_buffer_at_off( a );
+	const inc_t  cs_a      = bli_obj_col_stride( a );
+	const dim_t  pd_a      = bli_obj_panel_dim( a );
+	const inc_t  ps_a      = bli_obj_panel_stride( a );
 
-	      void*     buf_c     = bli_obj_buffer_at_off( c );
-	const inc_t     rs_c      = bli_obj_row_stride( c );
-	const inc_t     cs_c      = bli_obj_col_stride( c );
+	const void*  buf_b     = bli_obj_buffer_at_off( b );
+	const inc_t  rs_b      = bli_obj_row_stride( b );
+	const dim_t  pd_b      = bli_obj_panel_dim( b );
+	const inc_t  ps_b      = bli_obj_panel_stride( b );
+
+	      void*  buf_c     = bli_obj_buffer_at_off( c );
+	const inc_t  rs_c      = bli_obj_row_stride( c );
+	const inc_t  cs_c      = bli_obj_col_stride( c );
 
 	// Grab the address of the internal scalar buffer for the scalar
 	// attached to A (the non-triangular matrix). This will be the alpha
@@ -99,10 +105,11 @@ void bli_trsm_ru_ker_var2
 	// triangular), it becomes lower-triangular after the kernel operation
 	// is transposed so that all kernel instances are of the "left"
 	// variety (since those are the only trsm ukernels that exist).
-	gemmtrsm_ukr_ft gemmtrsm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMMTRSM_L_UKR, cntx );
-	gemm_ukr_ft     gemm_ukr     = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx );
+	gemmtrsm_ukr_ft gemmtrsm_ukr = bli_trsm_var_cntl_gemmtrsm_ukr( cntl );
+	gemm_ukr_ft     gemm_ukr     = bli_trsm_var_cntl_gemm_ukr( cntl );
+	const void*     params       = bli_trsm_var_cntl_params( cntl );
 
-	const void* minus_one   = bli_obj_buffer_for_const( dt, &BLIS_MINUS_ONE );
+	const void* minus_one   = bli_obj_buffer_for_const( dt_comp, &BLIS_MINUS_ONE );
 	const char* a_cast      = buf_a;
 	const char* b_cast      = buf_b;
 	      char* c_cast      = buf_c;
@@ -152,7 +159,7 @@ void bli_trsm_ru_ker_var2
 	if ( diagoffb > 0 )
 	{
 		n        -= diagoffb;
-		c_cast   += diagoffb * cs_c * dt_size;
+		c_cast   += diagoffb * cs_c * dt_c_size;
 		diagoffb  = 0;
 	}
 
@@ -181,7 +188,7 @@ void bli_trsm_ru_ker_var2
 	// dimension that is a multiple of PACKNR, with the region between the
 	// last column and the next multiple of NR zero-padded accordingly.
 
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	thrinfo_t* thread = bli_thrinfo_sub_node( 0, thread_par );
 
 	// Compute number of primary and leftover components of the m and n
 	// dimensions.
@@ -195,12 +202,12 @@ void bli_trsm_ru_ker_var2
 	if ( m_left ) ++m_iter;
 
 	// Determine some increments used to step through A, B, and C.
-	inc_t rstep_a = ps_a * dt_size;
+	inc_t rstep_a = ps_a * dt_a_size;
 
-	inc_t cstep_b = ps_b * dt_size;
+	inc_t cstep_b = ps_b * dt_b_size;
 
-	inc_t rstep_c = rs_c * MR * dt_size;
-	inc_t cstep_c = cs_c * NR * dt_size;
+	inc_t rstep_c = rs_c * MR * dt_c_size;
+	inc_t cstep_c = cs_c * NR * dt_c_size;
 
 	// Save the pack schemas of A and B to the auxinfo_t object.
 	// NOTE: We swap the values for A and B since the triangular
@@ -208,6 +215,10 @@ void bli_trsm_ru_ker_var2
 	auxinfo_t aux;
 	bli_auxinfo_set_schema_a( schema_b, &aux );
 	bli_auxinfo_set_schema_b( schema_a, &aux );
+
+	// Save the virtual microkernel address and the params.
+	bli_auxinfo_set_ukr( gemm_ukr, &aux );
+	bli_auxinfo_set_params( params, &aux );
 
 	const char* b1 = b_cast;
 	      char* c1 = c_cast;
@@ -243,13 +254,13 @@ void bli_trsm_ru_ker_var2
 			// Compute the addresses of the panel B10 and the triangular
 			// block B11.
 			const char* b01 = b1;
-			const char* b11 = b1 + k_b01 * PACKNR * dt_size;
+			const char* b11 = b1 + k_b01 * PACKNR * dt_b_size;
 			//b11 = bli_ptr_inc_by_frac( b1, sizeof( ctype ), k_b01 * PACKNR, 1 );
 
 			// Compute the panel stride for the current micro-panel.
 			inc_t ps_b_cur  = k_b0111 * PACKNR;
 				  ps_b_cur += ( bli_is_odd( ps_b_cur ) ? 1 : 0 );
-				  ps_b_cur *= dt_size;
+				  ps_b_cur *= dt_b_size;
 
 			// Loop over the m dimension (MR rows at a time).
 			for ( dim_t i = 0; i < m_iter; ++i )
@@ -259,8 +270,8 @@ void bli_trsm_ru_ker_var2
 				dim_t m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left );
 
 				// Compute the addresses of the A10 panel and A11 block.
-				const char* a10  = a1 + off_b01 * PACKMR * dt_size;
-				const char* a11  = a1 + off_b11 * PACKMR * dt_size;
+				const char* a10  = a1 + off_b01 * PACKMR * dt_a_size;
+				const char* a11  = a1 + off_b11 * PACKMR * dt_a_size;
 
 				// Compute the addresses of the next panels of A and B.
 				const char* a2 = a1;

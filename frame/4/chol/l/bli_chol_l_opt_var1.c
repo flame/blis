@@ -42,7 +42,7 @@ err_t bli_chol_l_opt_var1
        const obj_t*  a,
        const cntx_t* cntx,
              rntm_t* rntm,
-             cntl_t* cntl
+             l4_cntl_t* cntl
      )
 {
 	num_t     dt        = bli_obj_dt( a );
@@ -101,7 +101,7 @@ err_t PASTEMAC(ch,varname) \
 \
 		/* a10   = a10 / tril( A00 )';
 		   a10^T = conj( tril( A00 ) ) / a10^T */ \
-		PASTEMAC2(ch,trsv,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,trsv,BLIS_TAPI_EX_SUF) \
 		( \
 		  uploa, \
 		  BLIS_CONJ_NO_TRANSPOSE, \
@@ -115,7 +115,7 @@ err_t PASTEMAC(ch,varname) \
 		); \
 \
 		/* [ alpha11, 0.0 ] = alpha11 - a10 * a10'; */ \
-		PASTEMAC2(ch,dotxv,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,dotxv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  BLIS_CONJUGATE, \

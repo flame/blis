@@ -33,24 +33,23 @@
 
 */
 
-struct unpackm_params_s
+struct unpackm_cntl_s
 {
-	uint64_t        size; // size field must be present and come first.
+	cntl_t          cntl; // cntl field must be present and come first.
 	unpackm_var_oft var_func;
 };
-typedef struct unpackm_params_s unpackm_params_t;
+typedef struct unpackm_cntl_s unpackm_cntl_t;
 
 #define bli_cntl_unpackm_params_var_func( cntl ) \
 \
-	( ( (unpackm_params_t*)(cntl)->params )->var_func )
+	( ( (const unpackm_cntl_t*) cntl )->var_func )
 
 // -----------------------------------------------------------------------------
 
-cntl_t* bli_unpackm_cntl_create_node
+void bli_unpackm_cntl_init_node
      (
-       pool_t* pool,
-       void_fp var_func,
-       void_fp unpackm_var_func,
-       cntl_t* sub_node
+       void_fp         var_func,
+       void_fp         unpackm_var_func,
+       unpackm_cntl_t* cntl
      );
 

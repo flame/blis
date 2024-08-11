@@ -37,18 +37,16 @@
 
 void* bli_packm_scalar( obj_t* kappa, obj_t* p )
 {
-	num_t  dt_p   = bli_obj_dt( p );
-	pack_t schema = bli_obj_pack_schema( p );
+	num_t dt_p = bli_obj_dt( p );
 
 	// The value for kappa we use will depends on whether the scalar
 	// attached to A has a nonzero imaginary component. If it does,
-	// then we will apply the scalar during packing to facilitate
-	// implementing induced complex domain algorithms in terms of
-	// real domain micro-kernels. (In the aforementioned situation,
-	// applying a real scalar is easy, but applying a complex one is
-	// harder, so we avoid the need altogether with the code below.)
+	// and the matrix to pack is complex, then we apply the scalar now
+	// because we may not have a chance later due to using real-domain
+	// microkernels.
 	if ( bli_obj_scalar_has_nonzero_imag( p ) &&
-	     !bli_is_nat_packed( schema ) )
+	     ( bli_obj_is_complex( p ) ||
+	       bli_obj_pack_schema( p ) == BLIS_PACKED_PANELS_RO ) )
 	{
 		//printf( "applying non-zero imag kappa\n_p" );
 
@@ -60,11 +58,6 @@ void* bli_packm_scalar( obj_t* kappa, obj_t* p )
 
 		return bli_obj_buffer_for_1x1( dt_p, kappa );
 	}
-	// This branch is also for native execution, where we assume that
-	// the micro-kernel will always apply the alpha scalar of the
-	// higher-level operation. Thus, we use BLIS_ONE for kappa so
-	// that the underlying packm implementation does not perform
-	// any scaling during packing.
 	else
 	{
 		// If the internal scalar of A has only a real component, then

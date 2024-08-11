@@ -52,7 +52,7 @@ void PASTEMAC(ch,opname) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t
 	   objects. */ \
-	PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
 	( \
 	  uploa, \
 	  m, \
@@ -81,7 +81,7 @@ void PASTEMAC(ch,opname) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t
 	   objects. */ \
-	PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
 	( \
 	  uploa, \
 	  diaga, \

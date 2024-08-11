@@ -37,7 +37,6 @@
 #define BLIS_TRINV_H
 
 #include "bli_trinv_var.h"
-#include "bli_trinv_blksz.h"
 #include "bli_trinv_cntl.h"
 #include "bli_trinv_int.h"
 

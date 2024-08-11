@@ -61,7 +61,7 @@ void bli_utilm_fscan_check
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH(ch,opname,tsuf)) \
      ( \
        FILE*  file, \
        dim_t  m, \
@@ -86,7 +86,7 @@ GENPROT( fscanm )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname) \
      ( \
        FILE*   file, \
        obj_t*  x  \
@@ -98,7 +98,7 @@ GENPROT( fscanm )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname) \
      ( \
        obj_t*  x  \
      );

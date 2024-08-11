@@ -50,9 +50,9 @@ int bli_ind_init( void )
 	// is disabled, this function is called once by ONLY ONE application thread.
 	// In neither case is a mutex needed to protect the data initialization.
 
-	// NOTE: We intentionally call bli_gks_query_nat_cntx_noinit() in order
+	// NOTE: We intentionally call bli_gks_query_cntx_noinit() in order
 	// to avoid the internal call to bli_init_once().
-	const cntx_t* cntx = bli_gks_query_nat_cntx_noinit();
+	const cntx_t* cntx = bli_gks_query_cntx_noinit();
 
 	// For each precision, enable the default induced method (1m) if both of
 	// the following conditions are met:
@@ -61,10 +61,10 @@ int bli_ind_init( void )
 	// The second condition means that BLIS will not bother to use an induced
 	// method if both the real and complex domain kernels are reference.
 
-	bool s_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref( BLIS_FLOAT,    BLIS_GEMM_UKR, cntx );
-	bool d_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref( BLIS_DOUBLE,   BLIS_GEMM_UKR, cntx );
-	bool c_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref( BLIS_SCOMPLEX, BLIS_GEMM_UKR, cntx );
-	bool z_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref( BLIS_DCOMPLEX, BLIS_GEMM_UKR, cntx );
+	bool s_is_ref = bli_gks_cntx_ukr_is_ref( BLIS_FLOAT,    BLIS_GEMM_UKR, cntx );
+	bool d_is_ref = bli_gks_cntx_ukr_is_ref( BLIS_DOUBLE,   BLIS_GEMM_UKR, cntx );
+	bool c_is_ref = bli_gks_cntx_ukr_is_ref( BLIS_SCOMPLEX, BLIS_GEMM_UKR, cntx );
+	bool z_is_ref = bli_gks_cntx_ukr_is_ref( BLIS_DCOMPLEX, BLIS_GEMM_UKR, cntx );
 
 	if ( c_is_ref && !s_is_ref ) bli_ind_enable_dt( BLIS_1M, BLIS_SCOMPLEX );
 	if ( z_is_ref && !d_is_ref ) bli_ind_enable_dt( BLIS_1M, BLIS_DCOMPLEX );

@@ -35,104 +35,300 @@
 
 #include "blis.h"
 
-cntl_t* bli_trsm_cntl_create
+
+static packm_ker_ft GENARRAY2_MIXP(packm_struc_cxk,packm_struc_cxk);
+
+void bli_trsm_var_cntl_init_node
      (
-       pool_t* pool,
-       side_t  side,
-       pack_t  schema_a,
-       pack_t  schema_b,
-       void_fp ker
+       void_fp          var_func,
+       num_t            dt_comp,
+       num_t            dt_out,
+       gemmtrsm_ukr_ft  gemmtrsm_ukr,
+       gemm_ukr_ft      gemm_ukr,
+       gemm_ukr_ft      real_gemm_ukr,
+       bool             row_pref,
+       dim_t            mr,
+       dim_t            nr,
+       dim_t            mr_pack,
+       dim_t            nr_pack,
+       dim_t            mr_bcast,
+       dim_t            nr_bcast,
+       dim_t            mr_scale,
+       dim_t            nr_scale,
+       trsm_var_cntl_t* cntl
      )
 {
-	if ( bli_is_left( side ) )
-		return bli_trsm_l_cntl_create( pool, schema_a, schema_b, ker );
-	else
-		return bli_trsm_r_cntl_create( pool, schema_a, schema_b, ker );
+	// Initialize the embedded gemm_var_cntl_t struct.
+	bli_gemm_var_cntl_init_node
+	(
+	  var_func,
+	  dt_comp,
+	  dt_out,
+	  gemm_ukr,
+	  real_gemm_ukr,
+	  row_pref,
+	  mr,
+	  nr,
+	  mr_scale,
+	  nr_scale,
+	  ( gemm_var_cntl_t* )cntl
+	);
+
+	// Initialize the trsm_var_cntl_t struct.
+	cntl->gemmtrsm_ukr  = gemmtrsm_ukr;
+	cntl->mr_pack       = mr_pack;
+	cntl->nr_pack       = nr_pack;
+	cntl->mr_bcast      = mr_bcast;
+	cntl->nr_bcast      = nr_bcast;
 }
 
-cntl_t* bli_trsm_l_cntl_create
+void bli_trsm_cntl_init
      (
-       pool_t* pool,
-       pack_t  schema_a,
-       pack_t  schema_b,
-       void_fp ker
+             ind_t        im,
+       const obj_t*       alpha,
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
+       const cntx_t*      cntx,
+             trsm_cntl_t* cntl
      )
 {
-	void_fp macro_kernel_p;
+	if ( bli_obj_is_triangular( a ) )
+		bli_trsm_l_cntl_init( im, alpha, a, b, beta, c, cntx, cntl );
+	else
+		bli_check_error_code(BLIS_NOT_YET_IMPLEMENTED);
+		//bli_trsm_r_cntl_init( im, alpha, a, b, beta, c, cntx, cntl );
+}
 
-	// Set the default macrokernel. If a non-NULL kernel function pointer is
-	// passed in, we use that instead.
-	macro_kernel_p = bli_trsm_xx_ker_var2;
-	if ( ker ) macro_kernel_p = ker;
+void bli_trsm_l_cntl_init
+     (
+             ind_t        im,
+       const obj_t*       alpha,
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
+       const cntx_t*      cntx,
+             trsm_cntl_t* cntl
+     )
+{
+	const prec_t           comp_prec      = bli_obj_comp_prec( c );
+	const num_t            dt_a           = bli_obj_dt( a );
+	const num_t            dt_b           = bli_obj_dt( b );
+	const num_t            dt_c           = bli_obj_dt( c );
+	const num_t            dt_ap          = bli_dt_domain( dt_a ) | comp_prec;
+	const num_t            dt_bp          = bli_dt_domain( dt_b ) | comp_prec;
+	const num_t            dt_comp        = ( im == BLIS_1M ? BLIS_REAL
+	                                                        : bli_dt_domain( dt_c )
+	                                        ) | comp_prec;
 
-	const opid_t family = BLIS_TRSM;
+	const void_fp          macro_kernel_p = bli_obj_is_lower( a ) ? bli_trsm_ll_ker_var2
+	                                                              : bli_trsm_lu_ker_var2;
+	      gemmtrsm_ukr_ft  gemmtrsm_ukr   = bli_obj_is_lower( a )
+	                                        ? bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMMTRSM_L_UKR, cntx )
+	                                        : bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMMTRSM_U_UKR, cntx );
+	      gemm_ukr_ft      gemm_ukr       = bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMM_UKR, cntx );
+	      gemm_ukr_ft      real_gemm_ukr  = NULL;
+	const dir_t            direct         = bli_obj_is_lower( a ) ? BLIS_FWD
+	                                                              : BLIS_BWD;
+	const bool             row_pref       = bli_cntx_get_ukr_prefs_dt( dt_comp, BLIS_GEMM_UKR_ROW_PREF, cntx );
+	      pack_t           schema_a       = BLIS_PACKED_PANELS;
+	      pack_t           schema_b       = BLIS_PACKED_PANELS;
+	const packm_ker_ft     packm_a_ukr    = packm_struc_cxk[ dt_a ][ dt_ap ];
+	const packm_ker_ft     packm_b_ukr    = packm_struc_cxk[ dt_b ][ dt_bp ];
+	const dim_t            mr_def         = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
+	const dim_t            mr_pack        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MR, cntx );
+	const dim_t            mr_bcast       = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_BBM, cntx );
+	      dim_t            mr_scale       = 1;
+	      dim_t            mr_pack_scale  = 1;
+	const dim_t            nr_def         = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx );
+	const dim_t            nr_pack        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NR, cntx );
+	const dim_t            nr_bcast       = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_BBN, cntx );
+	      dim_t            nr_scale       = 1;
+	      dim_t            nr_pack_scale  = 1;
+	const dim_t            kr_def         = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KR, cntx );
+	const dim_t            mc_def         = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MC, cntx );
+	const dim_t            mc_max         = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MC, cntx );
+	      dim_t            mc_scale       = 1;
+	const dim_t            nc_def         = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NC, cntx );
+	const dim_t            nc_max         = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NC, cntx );
+	      dim_t            nc_scale       = 1;
+	const dim_t            kc_def         = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KC, cntx );
+	const dim_t            kc_max         = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_KC, cntx );
+	      dim_t            kc_scale       = 1;
+
+	if ( im == BLIS_1M )
+	{
+		if ( ! row_pref )
+		{
+			schema_a = BLIS_PACKED_PANELS_1E;
+			schema_b = BLIS_PACKED_PANELS_1R;
+			mr_scale = 2;
+			mc_scale = 2;
+			mr_pack_scale = 1; //don't divide PACKMR by 2 since we are also doubling k
+		}
+		else
+		{
+			schema_a = BLIS_PACKED_PANELS_1R;
+			schema_b = BLIS_PACKED_PANELS_1E;
+			nr_scale = 2;
+			nc_scale = 2;
+			nr_pack_scale = 1; //don't divide PACKNR by 2 since we are also doubling k
+		}
+
+		kc_scale = 2;
+		real_gemm_ukr = gemm_ukr;
+		gemm_ukr = bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMM1M_UKR, cntx );
+		gemmtrsm_ukr = bli_obj_is_lower( a )
+		               ? bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMMTRSM1M_L_UKR, cntx )
+		               : bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMMTRSM1M_U_UKR, cntx );
+	}
+
+	// If alpha is non-unit, typecast and apply it to the scalar attached
+	// to B, unless it happens to be triangular.
+	if ( bli_obj_root_is_triangular( b ) )
+	{
+		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
+			bli_obj_scalar_apply_scalar( alpha, a );
+	}
+	else // if ( bli_obj_root_is_triangular( b ) )
+	{
+		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
+			bli_obj_scalar_apply_scalar( alpha, b );
+	}
+
+	// If beta is non-unit, typecast and apply it to the scalar attached
+	// to C.
+	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
+		bli_obj_scalar_apply_scalar( beta, c );
 
 	//
 	// Create nodes for packing A and the macro-kernel (gemm branch).
 	//
 
-	cntl_t* gemm_cntl_bu_ke = bli_trsm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,         // the thread's sba pool
-	  family,       // the operation family
-	  BLIS_MR,
 	  NULL,         // variant function pointer not used
-	  NULL          // no sub-node; this is the leaf of the tree.
+	  &cntl->ir_loop_gemm
 	);
 
-	cntl_t* gemm_cntl_bp_bu = bli_trsm_cntl_create_node
+	bli_trsm_var_cntl_init_node
 	(
-	  pool,
-	  family,
-	  BLIS_NR,
 	  macro_kernel_p,
-	  gemm_cntl_bu_ke
+	  dt_comp,
+	  dt_c,
+	  gemmtrsm_ukr,
+	  gemm_ukr,
+	  real_gemm_ukr,
+	  row_pref,
+	  mr_def / mr_scale,
+	  nr_def / nr_scale,
+	  mr_pack,
+	  nr_pack,
+	  mr_bcast,
+	  nr_bcast,
+	  mr_scale,
+	  nr_scale,
+	  &cntl->gemm_ker
 	);
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_MR | BLIS_THREAD_NR,
+	  ( cntl_t* )&cntl->ir_loop_gemm,
+	  ( cntl_t* )&cntl->gemm_ker
+	);
+
+	// Give the trsm kernel control tree node to the
+	// virtual microkernel as the parameters, so that e.g.
+	// the 1m virtual microkernel can look up the real-domain
+	// micro-kernel and its parameters.
+	bli_trsm_var_cntl_set_params( &cntl->gemm_ker, ( cntl_t* )&cntl->gemm_ker );
 
 	// Create a node for packing matrix A.
-	cntl_t* gemm_cntl_packa = bli_packm_cntl_create_node
+	bli_packm_def_cntl_init_node
 	(
-	  pool,
 	  bli_l3_packa, // trsm operation's packm function for A.
-	  BLIS_MR,
-	  BLIS_MR,
+	  dt_a,
+	  dt_ap,
+	  dt_comp,
+	  packm_a_ukr,
+	  mr_def / mr_scale,
+	  mr_pack,
+	  mr_bcast,
+	  mr_scale,
+	  mr_pack_scale,
+	  mr_def / mr_scale,
 	  FALSE,        // do NOT invert diagonal
 	  TRUE,         // reverse iteration if upper?
 	  FALSE,        // reverse iteration if lower?
-	  schema_a,     // normally BLIS_PACKED_ROW_PANELS
+	  schema_a,
 	  BLIS_BUFFER_FOR_A_BLOCK,
-	  gemm_cntl_bp_bu
+	  &cntl->pack_a_gemm
+	);
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_NONE,
+	  ( cntl_t* )&cntl->gemm_ker,
+	  ( cntl_t* )&cntl->pack_a_gemm
 	);
 
 	//
 	// Create nodes for packing A and the macro-kernel (trsm branch).
 	//
 
-	cntl_t* trsm_cntl_bu_ke = bli_trsm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,         // the thread's sba pool
-	  family,       // the operation family
-	  BLIS_MR,
-	  NULL,         // variant function pointer not used
-	  NULL          // no sub-node; this is the leaf of the tree.
+	  NULL,
+	  &cntl->ir_loop_trsm
 	);
 
-	cntl_t* trsm_cntl_bp_bu = bli_trsm_cntl_create_node
+	bli_trsm_var_cntl_init_node
 	(
-	  pool,
-	  family,
-	  BLIS_NR,
 	  macro_kernel_p,
-	  trsm_cntl_bu_ke
+	  dt_comp,
+	  dt_c,
+	  gemmtrsm_ukr,
+	  gemm_ukr,
+	  real_gemm_ukr,
+	  row_pref,
+	  mr_def / mr_scale,
+	  nr_def / nr_scale,
+	  mr_pack,
+	  nr_pack,
+	  mr_bcast,
+	  nr_bcast,
+	  mr_scale,
+	  nr_scale,
+	  &cntl->trsm_ker
 	);
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_MC | BLIS_THREAD_KC | BLIS_THREAD_NR,
+	  ( cntl_t* )&cntl->ir_loop_trsm,
+	  ( cntl_t* )&cntl->trsm_ker
+	);
+
+	// Give the trsm kernel control tree node to the
+	// virtual microkernel as the parameters, so that e.g.
+	// the 1m virtual microkernel can look up the real-domain
+	// micro-kernel and its parameters.
+	bli_trsm_var_cntl_set_params( &cntl->trsm_ker, ( cntl_t* )&cntl->trsm_ker );
 
 	// Create a node for packing matrix A.
-	cntl_t* trsm_cntl_packa = bli_packm_cntl_create_node
+	bli_packm_def_cntl_init_node
 	(
-	  pool,
 	  bli_l3_packa, // trsm operation's packm function for A.
-	  BLIS_MR,
-	  BLIS_MR,
+	  dt_a,
+	  dt_ap,
+	  dt_comp,
+	  packm_a_ukr,
+	  mr_def / mr_scale,
+	  mr_pack,
+	  mr_bcast,
+	  mr_scale,
+	  mr_pack_scale,
+	  mr_def / mr_scale,
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
 	  TRUE,         // invert diagonal
 #else
@@ -140,185 +336,327 @@ cntl_t* bli_trsm_l_cntl_create
 #endif
 	  TRUE,         // reverse iteration if upper?
 	  FALSE,        // reverse iteration if lower?
-	  schema_a,     // normally BLIS_PACKED_ROW_PANELS
+	  schema_a,
 	  BLIS_BUFFER_FOR_A_BLOCK,
-	  trsm_cntl_bp_bu
+	  &cntl->pack_a_trsm
+	);
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_NONE,
+	  ( cntl_t* )&cntl->trsm_ker,
+	  ( cntl_t* )&cntl->pack_a_trsm
 	);
 
 	// -------------------------------------------------------------------------
 
 	// Create a node for partitioning the m dimension by MC.
 	// NOTE: We attach the gemm sub-tree as the main branch.
-	cntl_t* trsm_cntl_op_bp = bli_trsm_cntl_create_node
+	bli_part_cntl_init_node
 	(
-	  pool,
-	  family,
-	  BLIS_MC,
 	  bli_trsm_blk_var1,
-	  gemm_cntl_packa
+	  dt_comp,
+	  mc_def / mc_scale,
+	  mc_max / mc_scale,
+	  mc_scale,
+	  mr_def / mr_scale,
+	  mr_scale,
+	  direct,
+	  FALSE,
+	  &cntl->part_ic
 	);
-
-	// Attach the trsm sub-tree as the auxiliary "prenode" branch.
-	bli_cntl_set_sub_prenode( trsm_cntl_packa, trsm_cntl_op_bp );
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_NONE,
+	  ( cntl_t* )&cntl->pack_a_trsm,
+	  ( cntl_t* )&cntl->part_ic
+	);
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_MC | BLIS_THREAD_KC,
+	  ( cntl_t* )&cntl->pack_a_gemm,
+	  ( cntl_t* )&cntl->part_ic
+	);
 
 	// -------------------------------------------------------------------------
 
 	// Create a node for packing matrix B.
-	cntl_t* trsm_cntl_packb = bli_packm_cntl_create_node
+	bli_packm_def_cntl_init_node
 	(
-	  pool,
 	  bli_l3_packb,
-	  BLIS_NR,
-	  BLIS_MR,
+	  dt_b,
+	  dt_bp,
+	  dt_comp,
+	  packm_b_ukr,
+	  nr_def / nr_scale,
+	  nr_pack,
+	  nr_bcast,
+	  nr_scale,
+	  nr_pack_scale,
+	  mr_def / mr_scale,
 	  FALSE,        // do NOT invert diagonal
 	  FALSE,        // reverse iteration if upper?
 	  FALSE,        // reverse iteration if lower?
-	  schema_b,     // normally BLIS_PACKED_COL_PANELS
+	  schema_b,
 	  BLIS_BUFFER_FOR_B_PANEL,
-	  trsm_cntl_op_bp
+	  &cntl->pack_b
+	);
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_NONE,
+	  ( cntl_t* )&cntl->part_ic,
+	  ( cntl_t* )&cntl->pack_b
 	);
 
 	// Create a node for partitioning the k dimension by KC.
-	cntl_t* trsm_cntl_mm_op = bli_trsm_cntl_create_node
+	bli_part_cntl_init_node
 	(
-	  pool,
-	  family,
-	  BLIS_KC,
 	  bli_trsm_blk_var3,
-	  trsm_cntl_packb
+	  dt_comp,
+	  kc_def / kc_scale,
+	  kc_max / kc_scale,
+	  kc_scale,
+	  kr_def,
+	  1,
+	  direct,
+	  FALSE,
+	  &cntl->part_pc
+	);
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_NONE,
+	  ( cntl_t* )&cntl->pack_b,
+	  ( cntl_t* )&cntl->part_pc
 	);
 
 	// Create a node for partitioning the n dimension by NC.
-	cntl_t* trsm_cntl_vl_mm = bli_trsm_cntl_create_node
+	bli_part_cntl_init_node
 	(
-	  pool,
-	  family,
-	  BLIS_NC,
 	  bli_trsm_blk_var2,
-	  trsm_cntl_mm_op
+	  dt_comp,
+	  nc_def / nc_scale,
+	  nc_max / nc_scale,
+	  nc_scale,
+	  nr_def / nr_scale,
+	  nr_scale,
+	  BLIS_FWD,
+	  FALSE,
+	  &cntl->part_jc
+	);
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_NC,
+	  ( cntl_t* )&cntl->part_pc,
+	  ( cntl_t* )&cntl->part_jc
 	);
 
-	return trsm_cntl_vl_mm;
+	bli_trsm_cntl_finalize( cntl );
 }
 
-cntl_t* bli_trsm_r_cntl_create
+#if 0
+
+void bli_trsm_r_cntl_init
      (
-       pool_t* pool,
-       pack_t  schema_a,
-       pack_t  schema_b,
-       void_fp ker
+             ind_t        im,
+       const obj_t*       alpha,
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
+       const cntx_t*      cntx,
+             trsm_cntl_t* cntl
      )
 {
-	// NOTE: trsm macrokernels are presently disabled for right-side execution.
-	// Set the default macrokernel. If a non-NULL kernel function pointer is
-	// passed in, we use that instead.
-	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
-	if ( ker ) macro_kernel_p = ker;
+	const num_t            dt_a           = bli_obj_dt( a );
+	const num_t            dt_b           = bli_obj_dt( b );
+	const num_t            dt_ap          = bli_obj_target_dt( a );
+	const num_t            dt_bp          = bli_obj_target_dt( b );
+	const num_t            dt_exec        = bli_obj_exec_dt( c );
 
-	const opid_t family = BLIS_TRSM;
+	const void_fp          macro_kernel_p = bli_obj_is_lower( b ) ? bli_trsm_rl_ker_var2 : bli_trsm_ru_ker_var2;
+	const gemmtrsm_ukr_vft gemmtrsm_ukr   = bli_obj_is_lower( b )
+	    ? bli_cntx_get_ukr_dt( dt_exec, BLIS_GEMMTRSM_L_UKR, cntx )
+	    : bli_cntx_get_ukr_dt( dt_exec, BLIS_GEMMTRSM_U_UKR, cntx );
+	const gemm_ukr_vft     gemm_ukr       = bli_cntx_get_ukr_dt( dt_exec, BLIS_GEMM_UKR, cntx );
 
-	// Create two nodes for the macro-kernel.
-	cntl_t* trsm_cntl_bu_ke = bli_trsm_cntl_create_node
+	const dir_t            direct         = bli_obj_is_lower( b ) ? BLIS_BWD : BLIS_FWD;
+	const dim_t            ic_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MC, cntx );
+	const dim_t            ic_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_MC, cntx );
+	const dim_t            ic_mult        = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NR, cntx ); //note: different!
+	      dim_t            pc_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KC, cntx );
+	      dim_t            pc_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_KC, cntx );
+	const dim_t            pc_mult        = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KR, cntx );
+	const dim_t            jc_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NC, cntx );
+	const dim_t            jc_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_NC, cntx );
+	const dim_t            jc_mult        = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MR, cntx ); //note: different!
+
+	const dim_t            bmult_m_def    = bli_cntx_get_blksz_def_dt(   dt_ap, BLIS_NR, cntx );
+	const dim_t            bmult_m_pack   = bli_cntx_get_blksz_max_dt(   dt_ap, BLIS_NR, cntx );
+	const dim_t            bmult_n_def    = bli_cntx_get_blksz_def_dt(   dt_bp, BLIS_MR, cntx );
+	const dim_t            bmult_n_pack   = bli_cntx_get_blksz_max_dt(   dt_bp, BLIS_MR, cntx );
+	const dim_t            bmult_k_def    = bmult_n_def;
+
+	bli_l3_adjust_kc
 	(
-	  pool,
-	  family,
-	  BLIS_MR, // needed for bli_thrinfo_rgrow()
-	  NULL,    // variant function pointer not used
-	  NULL     // no sub-node; this is the leaf of the tree.
+	  BLIS_TRSM,
+	  a,
+	  b,
+	  &pc_alg,
+	  &pc_max,
+	  ic_mult,
+	  jc_mult
 	);
 
-	cntl_t* trsm_cntl_bp_bu = bli_trsm_cntl_create_node
+	// Create two nodes for the macro-kernel.
+	bli_cntl_init_node
 	(
-	  pool,
-	  family,
-	  BLIS_NR, // not used by macro-kernel, but needed for bli_thrinfo_rgrow()
+	  NULL,         // variant function pointer not used
+	  &cntl->ir_loop_trsm
+	);
+
+	bli_trsm_var_cntl_init_node
+	(
 	  macro_kernel_p,
-	  trsm_cntl_bu_ke
+	  gemmtrsm_ukr,
+	  gemm_ukr,
+	  &cntl->trsm_ker
+	);
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_NONE,
+	  ( cntl_t* )&cntl->ir_loop_trsm,
+	  ( cntl_t* )&cntl->trsm_ker
 	);
 
 	// Create a node for packing matrix A.
-	cntl_t* trsm_cntl_packa = bli_packm_cntl_create_node
+	bli_packm_def_cntl_init_node
 	(
-	  pool,
 	  bli_l3_packa,
-	  BLIS_NR,
-	  BLIS_MR,
+	  dt_a,
+	  dt_ap,
+	  bmult_m_def,
+	  bmult_m_pack,
+	  bmult_k_def,
 	  FALSE,   // do NOT invert diagonal
 	  FALSE,   // reverse iteration if upper?
 	  FALSE,   // reverse iteration if lower?
-	  schema_a, // normally BLIS_PACKED_ROW_PANELS
+	  schema_a, // normally BLIS_PACKED_PANELS
 	  BLIS_BUFFER_FOR_A_BLOCK,
-	  trsm_cntl_bp_bu
+	  &cntl->pack_a_trsm
+	);
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_NONE,
+	  ( cntl_t* )&cntl->trsm_ker,
+	  ( cntl_t* )&cntl->pack_a_trsm
 	);
 
 	// Create a node for partitioning the m dimension by MC.
-	cntl_t* trsm_cntl_op_bp = bli_trsm_cntl_create_node
+	bli_part_cntl_init_node
 	(
-	  pool,
-	  family,
-	  BLIS_MC,
 	  bli_trsm_blk_var1,
-	  trsm_cntl_packa
+	  ic_alg,
+	  ic_max,
+	  ic_mult,
+	  BLIS_FWD,
+	  FALSE,
+	  &cntl->part_ic
+	);
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_MC | BLIS_THREAD_KC | BLIS_THREAD_NC | BLIS_THREAD_MR | BLIS_THREAD_NR,
+	  ( cntl_t* )&cntl->pack_a_trsm,
+	  ( cntl_t* )&cntl->part_ic
 	);
 
 	// Create a node for packing matrix B.
-	cntl_t* trsm_cntl_packb = bli_packm_cntl_create_node
+	bli_packm_def_cntl_init_node
 	(
-	  pool,
 	  bli_l3_packb,
-	  BLIS_MR,
-	  BLIS_MR,
+	  dt_b,
+	  dt_bp,
+	  bmult_n_def,
+	  bmult_n_pack,
+	  bmult_k_def,
 	  TRUE,    // do NOT invert diagonal
 	  FALSE,   // reverse iteration if upper?
 	  TRUE,    // reverse iteration if lower?
-	  schema_b, // normally BLIS_PACKED_COL_PANELS
+	  schema_b, // normally BLIS_PACKED_PANELS
 	  BLIS_BUFFER_FOR_B_PANEL,
-	  trsm_cntl_op_bp
+	  &cntl->pack_b
+	);
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_NONE,
+	  ( cntl_t* )&cntl->part_ic,
+	  ( cntl_t* )&cntl->pack_b
 	);
 
 	// Create a node for partitioning the k dimension by KC.
-	cntl_t* trsm_cntl_mm_op = bli_trsm_cntl_create_node
+	bli_part_cntl_init_node
 	(
-	  pool,
-	  family,
-	  BLIS_KC,
 	  bli_trsm_blk_var3,
-	  trsm_cntl_packb
+	  pc_alg,
+	  pc_max,
+	  pc_mult,
+	  direct,
+	  FALSE,
+	  &cntl->part_pc
+	);
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_NONE,
+	  ( cntl_t* )&cntl->pack_b,
+	  ( cntl_t* )&cntl->part_pc
 	);
 
 	// Create a node for partitioning the n dimension by NC.
-	cntl_t* trsm_cntl_vl_mm = bli_trsm_cntl_create_node
+	bli_part_cntl_init_node
 	(
-	  pool,
-	  family,
-	  BLIS_NC,
 	  bli_trsm_blk_var2,
-	  trsm_cntl_mm_op
+	  jc_alg,
+	  jc_max,
+	  jc_mult,
+	  direct,
+	  FALSE,
+	  &cntl->part_jc
 	);
-
-	return trsm_cntl_vl_mm;
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_NONE,
+	  ( cntl_t* )&cntl->part_pc,
+	  ( cntl_t* )&cntl->part_jc
+	);
 }
 
-void bli_trsm_cntl_free
+#endif
+
+void bli_trsm_cntl_finalize
      (
-       pool_t* pool,
-       cntl_t* cntl
+       trsm_cntl_t* cntl
      )
 {
-	bli_cntl_free( pool, cntl );
-}
+	const dim_t ic_mult = bli_part_cntl_blksz_mult( ( cntl_t* )&cntl->part_ic );
 
-// -----------------------------------------------------------------------------
+	//
+	// Ensure that:
+	//
+	// 1. KC is a multiple of MR (NR) if A (B) is triangular, hermitian, or symmetric.
+	//    KC is always rounded up.
+	//
+	// 2. MC and NR are multiples of MR and NR, respectively. MC and NC are always
+	//    rounded down.
+	//
 
-cntl_t* bli_trsm_cntl_create_node
-     (
-       pool_t* pool,
-       opid_t  family,
-       bszid_t bszid,
-       void_fp var_func,
-       cntl_t* sub_node
-     )
-{
-	return bli_cntl_create_node( pool, family, bszid, var_func, NULL, sub_node );
+	// Nudge the default and maximum kc blocksizes up to the nearest
+	// multiple of MR if A is Hermitian, symmetric, or triangular or
+	// NR if B is Hermitian, symmetric, or triangular. If neither case
+	// applies, then we leave the blocksizes unchanged. For trsm we
+	// always use MR (rather than sometimes using NR) because even
+	// when the triangle is on the right, packing of that matrix uses
+	// MR, since only left-side trsm micro-kernels are supported.
+	bli_part_cntl_align_blksz_to_mult( ic_mult, true, ( cntl_t* )&cntl->part_pc );
+
+	bli_part_cntl_align_blksz( false, ( cntl_t* )&cntl->part_ic );
+	bli_part_cntl_align_blksz( false, ( cntl_t* )&cntl->part_jc );
 }
 

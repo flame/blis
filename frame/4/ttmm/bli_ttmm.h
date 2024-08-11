@@ -37,7 +37,6 @@
 #define BLIS_TTMM_H
 
 #include "bli_ttmm_var.h"
-#include "bli_ttmm_blksz.h"
 #include "bli_ttmm_cntl.h"
 #include "bli_ttmm_int.h"
 

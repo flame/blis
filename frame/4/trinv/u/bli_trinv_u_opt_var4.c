@@ -42,7 +42,7 @@ err_t bli_trinv_u_opt_var4
        const obj_t*  a,
        const cntx_t* cntx,
              rntm_t* rntm,
-             cntl_t* cntl
+             l4_cntl_t* cntl
      )
 {
 	num_t     dt        = bli_obj_dt( a );
@@ -107,7 +107,7 @@ err_t PASTEMAC(ch,varname) \
 \
 		/* a12   = a12 * triu( A22 ); */ \
 		/* a12^T = triu( A22 )^T * a12^T; */ \
-		PASTEMAC2(ch,trsv,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,trsv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_UPPER, \
 		  BLIS_TRANSPOSE, \
@@ -121,7 +121,7 @@ err_t PASTEMAC(ch,varname) \
 		); \
 \
 		/* A02 = -a01 * a12 + A02; */ \
-		PASTEMAC2(ch,ger,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,ger,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  BLIS_NO_CONJUGATE, \
@@ -136,7 +136,7 @@ err_t PASTEMAC(ch,varname) \
 		); \
 \
 		/* a01 = triu( A00 ) * a01; */ \
-		PASTEMAC2(ch,trmv,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,trmv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_UPPER, \
 		  BLIS_NO_TRANSPOSE, \

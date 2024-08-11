@@ -235,161 +235,49 @@ void bli_blksz_reduce_max_to
 
 dim_t bli_determine_blocksize
      (
-             dir_t   direct,
-             dim_t   i,
-             dim_t   dim,
-       const obj_t*  obj,
-             bszid_t bszid,
-       const cntx_t* cntx
+       dir_t direct,
+       dim_t i,
+       dim_t dim,
+       dim_t b_alg,
+       dim_t b_max
      )
 {
-	if ( direct == BLIS_FWD )
-		return bli_determine_blocksize_f( i, dim, obj, bszid, cntx );
-	else
-		return bli_determine_blocksize_b( i, dim, obj, bszid, cntx );
-}
-
-dim_t bli_determine_blocksize_f
-     (
-             dim_t   i,
-             dim_t   dim,
-       const obj_t*  obj,
-             bszid_t bszid,
-       const cntx_t* cntx
-     )
-{
-	num_t          dt;
-	const blksz_t* bsize;
-	dim_t          b_alg, b_max;
-	dim_t          b_use;
-
-	// Extract the execution datatype and use it to query the corresponding
-	// blocksize and blocksize maximum values from the blksz_t object.
-	dt    = bli_obj_exec_dt( obj );
-	bsize = bli_cntx_get_blksz( bszid, cntx );
-	b_alg = bli_blksz_get_def( dt, bsize );
-	b_max = bli_blksz_get_max( dt, bsize );
-
-	b_use = bli_determine_blocksize_f_sub( i, dim, b_alg, b_max );
-
-	return b_use;
-}
-
-dim_t bli_determine_blocksize_b
-     (
-             dim_t   i,
-             dim_t   dim,
-       const obj_t*  obj,
-             bszid_t bszid,
-       const cntx_t* cntx
-     )
-{
-	num_t          dt;
-	const blksz_t* bsize;
-	dim_t          b_alg, b_max;
-	dim_t          b_use;
-
-	// Extract the execution datatype and use it to query the corresponding
-	// blocksize and blocksize maximum values from the blksz_t object.
-	dt    = bli_obj_exec_dt( obj );
-	bsize = bli_cntx_get_blksz( bszid, cntx );
-	b_alg = bli_blksz_get_def( dt, bsize );
-	b_max = bli_blksz_get_max( dt, bsize );
-
-	b_use = bli_determine_blocksize_b_sub( i, dim, b_alg, b_max );
-
-	return b_use;
-}
-
-dim_t bli_determine_blocksize_f_sub
-     (
-       dim_t  i,
-       dim_t  dim,
-       dim_t  b_alg,
-       dim_t  b_max
-     )
-{
-	dim_t b_now;
-	dim_t dim_left_now;
-
-	// We assume that this function is being called from an algorithm that
-	// is moving "forward" (ie: top to bottom, left to right, top-left
-	// to bottom-right).
+    const bool handle_edge_low = ( direct == BLIS_BWD );
 
 	// Compute how much of the matrix dimension is left, including the
 	// chunk that will correspond to the blocksize we are computing now.
-	dim_left_now = dim - i;
+	dim_t dim_left_now = dim - i;
 
-	// If the dimension currently remaining is less than the maximum
-	// blocksize, use it instead of the default blocksize b_alg.
-	// Otherwise, use b_alg.
-	if ( dim_left_now <= b_max )
+	if ( handle_edge_low )
 	{
-		b_now = dim_left_now;
+		dim_t dim_at_edge = dim_left_now % b_alg;
+
+		// To determine how much of the remaining dimension we should use for the
+		// current blocksize, we inspect dim_at_edge; if it is smaller than (or
+		// equal to) b_max - b_alg, then we use b_alg + dim_at_edge. Otherwise,
+		// dim_at_edge is greater than b_max - b_alg, in which case we use dim_at_edge.
+		if ( b_alg + dim_at_edge <= b_max )
+		{
+			return b_alg + dim_at_edge;
+		}
+		else
+		{
+			return dim_at_edge;
+		}
 	}
 	else
 	{
-		b_now = b_alg;
-	}
-
-	return b_now;
-}
-
-dim_t bli_determine_blocksize_b_sub
-     (
-       dim_t  i,
-       dim_t  dim,
-       dim_t  b_alg,
-       dim_t  b_max
-     )
-{
-	dim_t b_now;
-	dim_t dim_left_now;
-	dim_t dim_at_edge;
-
-	// We assume that this function is being called from an algorithm that
-	// is moving "backward" (ie: bottom to top, right to left, bottom-right
-	// to top-left).
-
-	// Compute how much of the matrix dimension is left, including the
-	// chunk that will correspond to the blocksize we are computing now.
-	dim_left_now = dim - i;
-
-	// Sanity check: if dim_left_now is zero, then we can return zero
-	// without going any further.
-	if ( dim_left_now == 0 )
-		return 0;
-
-	dim_at_edge = dim_left_now % b_alg;
-
-	// If dim_left_now is a multiple of b_alg, we can safely return b_alg
-	// without going any further.
-	if ( dim_at_edge == 0 )
-		return b_alg;
-
-	// If the dimension currently remaining is less than the maximum
-	// blocksize, use it as the chosen blocksize. If this is not the case,
-	// then we know dim_left_now is greater than the maximum blocksize.
-	// To determine how much of it we should use for the current blocksize,
-	// we inspect dim_at_edge; if it is smaller than (or equal to) b_max -
-	// b_alg, then we use b_alg + dim_at_edge. Otherwise, dim_at_edge is
-	// greater than b_max - b_alg, in which case we use dim_at_edge.
-	if ( dim_left_now <= b_max )
-	{
-		b_now = dim_left_now;
-	}
-	else // if ( dim_left_now > b_max )
-	{
-		if ( dim_at_edge <= b_max - b_alg )
+		// If the dimension currently remaining is less than the maximum
+		// blocksize, use it instead of the default blocksize b_alg.
+		// Otherwise, use b_alg.
+		if ( dim_left_now <= b_max )
 		{
-			b_now = b_alg + dim_at_edge;
+			return dim_left_now;
 		}
-		else // if ( dim_at_edge > b_max - b_alg )
+		else
 		{
-			b_now = dim_at_edge;
+			return b_alg;
 		}
 	}
-
-	return b_now;
 }
 

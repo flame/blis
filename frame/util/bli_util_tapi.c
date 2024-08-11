@@ -43,7 +43,7 @@
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              dim_t    n, \
        const ctype*   x, inc_t incx, \
@@ -68,7 +68,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
-	PASTEMAC2(ch,opname,_unb_var1) \
+	PASTEMAC(ch,opname,_unb_var1) \
 	( \
 	  n, \
 	  ( ctype* )x, incx, \
@@ -84,7 +84,7 @@ INSERT_GENTFUNCR_BASIC( asumv )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
        uplo_t uploa, \
        dim_t  m, \
@@ -104,7 +104,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
-	PASTEMAC2(ch,opname,_unb_var1) \
+	PASTEMAC(ch,opname,_unb_var1) \
 	( \
 	  uploa, \
 	  m, \
@@ -122,7 +122,7 @@ INSERT_GENTFUNC_BASIC( mktrim )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              dim_t    n, \
        const ctype*   x, inc_t incx, \
@@ -147,7 +147,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
-	PASTEMAC2(ch,opname,_unb_var1) \
+	PASTEMAC(ch,opname,_unb_var1) \
 	( \
 	  n, \
 	  ( ctype* )x, incx, \
@@ -165,7 +165,7 @@ INSERT_GENTFUNCR_BASIC( normiv )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              doff_t   diagoffx, \
              diag_t   diagx, \
@@ -194,7 +194,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
-	PASTEMAC2(ch,opname,_unb_var1) \
+	PASTEMAC(ch,opname,_unb_var1) \
 	( \
 	  diagoffx, \
 	  diagx, \
@@ -216,7 +216,7 @@ INSERT_GENTFUNCR_BASIC( normim )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
        dim_t  n, \
        ctype* x, inc_t incx  \
@@ -243,7 +243,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	{ \
 		/* Invoke the helper variant, which loops over the appropriate kernel
 		   to implement the current operation. */ \
-		PASTEMAC2(ch,opname,_unb_var1) \
+		PASTEMAC(ch,opname,_unb_var1) \
 		( \
 		  n, \
 		  x, incx, \
@@ -254,7 +254,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		/* Check the 1-norm of the randomzied vector. In the unlikely event that
 		   the 1-norm is zero, it means that *all* elements are zero, in which
 		   case we want to re-randomize until the 1-norm is not zero. */ \
-		PASTEMAC2(ch,norm1v,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,norm1v,BLIS_TAPI_EX_SUF) \
 		( \
 		  n, \
 		  x, incx, \
@@ -272,7 +272,7 @@ INSERT_GENTFUNCR_BASIC( randnv )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
        doff_t diagoffx, \
        uplo_t uplox, \
@@ -302,7 +302,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	{ \
 		/* Invoke the helper variant, which loops over the appropriate kernel
 		   to implement the current operation. */ \
-		PASTEMAC2(ch,opname,_unb_var1) \
+		PASTEMAC(ch,opname,_unb_var1) \
 		( \
 		  diagoffx, \
 		  uplox, \
@@ -316,7 +316,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		/* Check the 1-norm of the randomzied matrix. In the unlikely event that
 		   the 1-norm is zero, it means that *all* elements are zero, in which
 		   case we want to re-randomize until the 1-norm is not zero. */ \
-		PASTEMAC2(ch,norm1m,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,norm1m,BLIS_TAPI_EX_SUF) \
 		( \
 		  diagoffx, \
 		  BLIS_NONUNIT_DIAG, \
@@ -338,7 +338,7 @@ INSERT_GENTFUNCR_BASIC( randnm )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              dim_t    n, \
        const ctype*   x, inc_t incx, \
@@ -359,7 +359,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
-	PASTEMAC2(ch,opname,_unb_var1) \
+	PASTEMAC(ch,opname,_unb_var1) \
 	( \
 	  n, \
 	  ( ctype* )x, incx, \
@@ -421,7 +421,7 @@ void PASTEMAC(ch,opname) \
 	/* Obtain a valid context from the gks if necessary. */ \
 	/*if ( cntx == NULL ) cntx = bli_gks_query_cntx();*/ \
 \
-	*is_eq = PASTEMAC2(ch,opname,_unb_var1) \
+	*is_eq = PASTEMAC(ch,opname,_unb_var1) \
 	( \
 	  conjx, \
 	  n, \
@@ -459,7 +459,7 @@ void PASTEMAC(ch,opname) \
 	/*if ( cntx == NULL ) cntx = bli_gks_query_cntx();*/ \
 \
 	/* Invoke the helper variant. */ \
-	*is_eq = PASTEMAC2(ch,opname,_unb_var1) \
+	*is_eq = PASTEMAC(ch,opname,_unb_var1) \
 	( \
 	  diagoffx, \
 	  diagx, \

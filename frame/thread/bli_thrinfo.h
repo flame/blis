@@ -68,8 +68,8 @@ struct thrinfo_s
 	// Storage for allocated memory obtained from the packing block allocator.
 	mem_t              mem;
 
-	struct thrinfo_s*  sub_prenode;
-	struct thrinfo_s*  sub_node;
+	// Child thread info nodes.
+	struct thrinfo_s*  sub_nodes[ BLIS_MAX_SUB_NODES ];
 };
 typedef struct thrinfo_s thrinfo_t;
 
@@ -124,14 +124,9 @@ BLIS_INLINE mem_t* bli_thrinfo_mem( thrinfo_t* t )
 	return &t->mem;
 }
 
-BLIS_INLINE thrinfo_t* bli_thrinfo_sub_node( const thrinfo_t* t )
+BLIS_INLINE thrinfo_t* bli_thrinfo_sub_node( dim_t which, const thrinfo_t* t )
 {
-	return t->sub_node;
-}
-
-BLIS_INLINE thrinfo_t* bli_thrinfo_sub_prenode( const thrinfo_t* t )
-{
-	return t->sub_prenode;
+	return t->sub_nodes[ which ];
 }
 
 // thrinfo_t query (complex)
@@ -178,15 +173,12 @@ BLIS_INLINE void bli_thrinfo_set_pba( pba_t* pba, thrinfo_t* t )
 	t->pba = pba;
 }
 
-BLIS_INLINE void bli_thrinfo_set_sub_node( thrinfo_t* sub_node, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_sub_node( dim_t which, thrinfo_t* sub_node, thrinfo_t* t )
 {
-	t->sub_node = sub_node;
+	t->sub_nodes[ which ] = sub_node;
 }
 
-BLIS_INLINE void bli_thrinfo_set_sub_prenode( thrinfo_t* sub_prenode, thrinfo_t* t )
-{
-	t->sub_prenode = sub_prenode;
-}
+void bli_thrinfo_attach_sub_node( thrinfo_t* sub_node, thrinfo_t* t );
 
 // other thrinfo_t-related functions
 

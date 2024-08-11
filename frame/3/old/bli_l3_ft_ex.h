@@ -45,7 +45,7 @@
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
      ( \
        trans_t transa, \
        trans_t transb, \
@@ -69,7 +69,7 @@ INSERT_GENTDEF( gemm )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
      ( \
        side_t  side, \
        uplo_t  uploa, \
@@ -95,7 +95,7 @@ INSERT_GENTDEF( symm )
 #undef  GENTDEFR
 #define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
      ( \
        uplo_t   uploc, \
        trans_t  transa, \
@@ -117,7 +117,7 @@ INSERT_GENTDEFR( herk )
 #undef  GENTDEFR
 #define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
      ( \
        uplo_t   uploc, \
        trans_t  transa, \
@@ -141,7 +141,7 @@ INSERT_GENTDEFR( her2k )
 #undef  GENTDEFR
 #define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
      ( \
        uplo_t  uploc, \
        trans_t transa, \
@@ -163,7 +163,7 @@ INSERT_GENTDEFR( syrk )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
      ( \
        uplo_t  uploc, \
        trans_t transa, \
@@ -187,7 +187,7 @@ INSERT_GENTDEF( syr2k )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
      ( \
        side_t  side, \
        uplo_t  uploa, \
@@ -213,7 +213,7 @@ INSERT_GENTDEF( trmm3 )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
      ( \
        side_t  side, \
        uplo_t  uploa, \

@@ -55,7 +55,7 @@
 #undef  GENTFUNCDOT
 #define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
 \
-void PASTEF2C2(ch,blasname,chc) \
+void PASTEF2C(ch,blasname,chc) \
      ( \
              ftype*   rho, \
        const f77_int* n, \
@@ -64,7 +64,7 @@ void PASTEF2C2(ch,blasname,chc) \
      ) \
 { \
 	/* Call BLAS interface. */ \
-	*rho = PASTEF772(ch,blasname,chc) \
+	*rho = PASTEF77(ch,blasname,chc) \
 	( \
 	  n, \
 	  x, incx, \

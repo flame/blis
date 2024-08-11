@@ -42,7 +42,7 @@ err_t bli_chol_u_blk_var1
        const obj_t*  a,
        const cntx_t* cntx,
              rntm_t* rntm,
-             cntl_t* cntl
+             l4_cntl_t* cntl
      )
 {
 	err_t r_val = BLIS_SUCCESS;
@@ -57,7 +57,7 @@ err_t bli_chol_u_blk_var1
 
 	for ( dim_t ij = 0; ij < m; ij += b_alg )
 	{
-		b_alg = bli_chol_determine_blocksize( ij, m, a, cntx, cntl );
+		b_alg = bli_l4_determine_blocksize( ij, m, a, cntx, cntl );
 
 		const dim_t mn_behind = ij;
 
@@ -78,7 +78,7 @@ err_t bli_chol_u_blk_var1
 
 		// A11 = chol( A11 );
 		// NOTE: If r_val is not BLIS_SUCCESS, it will be on the interval [1,b_alg].
-		r_val = bli_chol_int( &a11, cntx, rntm, bli_cntl_sub_node( cntl ) );
+		r_val = bli_chol_int( &a11, cntx, rntm, bli_l4_cntl_sub_node( cntl ) );
 
 		if ( r_val != BLIS_SUCCESS )
 			return ( mn_behind + r_val );

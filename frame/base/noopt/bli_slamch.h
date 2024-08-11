@@ -32,4 +32,4 @@
 
 */
 
-bla_real bli_slamch( bla_character* cmach, ftnlen cmach_len );
+bla_real bli_slamch( const bla_character* cmach, const ftnlen cmach_len );

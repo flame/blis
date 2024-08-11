@@ -139,7 +139,7 @@ void bli_dgemmsup_rv_armv8a_asm_6x8n
        const void*      b, inc_t rs_b0, inc_t cs_b0,
        const void*      beta,
              void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
@@ -151,7 +151,7 @@ void bli_dgemmsup_rv_armv8a_asm_6x8n
     gemmsup_ker_ft ker_fp1 = NULL;
     gemmsup_ker_ft ker_fp2 = NULL;
     dim_t          mr1, mr2;
-    
+
     if ( m0 == 9 )
     {
       ker_fp1 = bli_dgemmsup_rv_armv8a_asm_5x8n; mr1 = 5;

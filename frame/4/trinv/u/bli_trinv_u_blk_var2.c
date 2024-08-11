@@ -42,7 +42,7 @@ err_t bli_trinv_u_blk_var2
        const obj_t*  a,
        const cntx_t* cntx,
              rntm_t* rntm,
-             cntl_t* cntl
+             l4_cntl_t* cntl
      )
 {
 	const dim_t m = bli_obj_length( a );
@@ -55,7 +55,7 @@ err_t bli_trinv_u_blk_var2
 
 	for ( dim_t ij = 0; ij < m; ij += b_alg )
 	{
-		b_alg = bli_trinv_determine_blocksize( ij, m, a, cntx, cntl );
+		b_alg = bli_l4_determine_blocksize( ij, m, a, cntx, cntl );
 
 		bli_acquire_mparts_tl2br( ij, b_alg, a,
 		                          NULL, NULL, NULL,
@@ -72,7 +72,7 @@ err_t bli_trinv_u_blk_var2
 		bli_trsm_ex( BLIS_LEFT, &BLIS_MINUS_ONE, &a11, &a12, cntx, rntm );
 
 		// A11 = inv( A11 );
-		bli_trinv_int( &a11, cntx, rntm, bli_cntl_sub_node( cntl ) );
+		bli_trinv_int( &a11, cntx, rntm, bli_l4_cntl_sub_node( cntl ) );
 	}
 
 	return BLIS_SUCCESS;

@@ -41,7 +41,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, struca ) \
 \
-void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
+void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
              uplo_t  uploa, \
              dim_t   m, \
@@ -78,7 +78,7 @@ INSERT_GENTFUNC_BASIC( hpdinv, BLIS_HERMITIAN  )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, struca ) \
 \
-void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
+void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
              uplo_t  uploa, \
              diag_t  diaga, \

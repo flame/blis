@@ -57,7 +57,7 @@ INSERT_GENTPROTR_BASIC( hevpinv )
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
 \
-BLIS_EXPORT_BLIS err_t PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+BLIS_EXPORT_BLIS err_t PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
      ( \
              double   thresh, \
              uplo_t   uploa, \

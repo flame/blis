@@ -51,7 +51,7 @@ typedef struct
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC(opname) \
      ( \
        const obj_t*     a, \
        const obj_t*     b, \
@@ -66,6 +66,4 @@ GENPROT( gemm_blk_var2 )
 GENPROT( gemm_blk_var3 )
 
 GENPROT( gemm_ker_var2 )
-
-GENPROT( gemm_ker_var2b )
 

@@ -40,7 +40,7 @@
 /*static gemv_vft GENARRAY(ftypes,gemv_unb_var1);*/ \
 static GENARRAY_VFP(ftname,opname); \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC(opname) \
      ( \
        obj_t*  alpha, \
        obj_t*  a, \

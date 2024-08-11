@@ -49,13 +49,13 @@ void bli_trsm_blk_var3
 	bli_obj_alias_to( b, &bp );
 	bli_obj_alias_to( c, &cs );
 
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	thrinfo_t* thread = bli_thrinfo_sub_node( 0, thread_par );
 
 	// Determine the direction in which to partition (forwards or backwards).
-	dir_t direct = bli_l3_direct( &ap, &bp, &cs, cntl );
+	const dir_t direct = bli_part_cntl_direct( cntl );
 
 	// Prune any zero region that exists along the partitioning dimension.
-	bli_l3_prune_unref_mparts_k( &ap, &bp, &cs, cntl );
+	bli_l3_prune_unref_mparts_k( &ap, &bp, &cs );
 
 	// Query dimension in partitioning direction.
 	dim_t k_trans = bli_obj_width_after_trans( &ap );
@@ -65,8 +65,9 @@ void bli_trsm_blk_var3
 	for ( dim_t i = 0; i < k_trans; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_l3_determine_kc( direct, i, k_trans, &ap, &bp,
-		                             bli_cntl_bszid( cntl ), cntx, cntl );
+		b_alg = bli_determine_blocksize( direct, i, k_trans,
+		                                 bli_part_cntl_blksz_alg( cntl ),
+		                                 bli_part_cntl_blksz_max( cntl ) );
 
 		// Acquire partitions for A1 and B1.
 		obj_t a1, b1;
@@ -78,13 +79,11 @@ void bli_trsm_blk_var3
 		// Perform trsm subproblem.
 		bli_l3_int
 		(
-		  &BLIS_ONE,
 		  &a1,
 		  &b1,
-		  &BLIS_ONE,
 		  &cs,
 		  cntx,
-		  bli_cntl_sub_node( cntl ),
+		  bli_cntl_sub_node( 0, cntl ),
 		  thread
 		);
 

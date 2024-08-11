@@ -117,7 +117,7 @@
  /* Local variables */
  bla_integer i__, j;
  bla_double sum, ssq[2], absa;
- bla_double value;
+ bla_double value = 0.;
  bla_double colssq[2];
  /* -- LAPACK auxiliary routine -- */
  /* -- LAPACK is a software package provided by Univ. of Tennessee, -- */

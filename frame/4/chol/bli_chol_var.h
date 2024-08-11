@@ -42,12 +42,12 @@
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-err_t PASTEMAC0(opname) \
+err_t PASTEMAC(opname) \
      ( \
-       const obj_t*  a, \
-       const cntx_t* cntx, \
-             rntm_t* rntm, \
-             cntl_t* cntl  \
+       const obj_t*     a, \
+       const cntx_t*    cntx, \
+             rntm_t*    rntm, \
+             l4_cntl_t* cntl  \
      );
 
 GENPROT(chol_l_blk_var1)

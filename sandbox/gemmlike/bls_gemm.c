@@ -102,10 +102,6 @@ void bls_gemm_ex
 
 	// -- bli_gemm_front() -----------------------------------------------------
 
-	obj_t a_local;
-	obj_t b_local;
-	obj_t c_local;
-
 	// If C has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( c ) )
 	{
@@ -123,31 +119,24 @@ void bls_gemm_ex
 	}
 
 	// Alias A, B, and C in case we need to apply transformations.
-	bli_obj_alias_to( a, &a_local );
-	bli_obj_alias_to( b, &b_local );
-	bli_obj_alias_to( c, &c_local );
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+	bli_obj_alias_submatrix( a, &a_local );
+	bli_obj_alias_submatrix( b, &b_local );
+	bli_obj_alias_submatrix( c, &c_local );
 
-	// Induce a transposition of A if it has its transposition property set.
-	// Then clear the transposition bit in the object.
-	if ( bli_obj_has_trans( &a_local ) )
-	{
-		bli_obj_induce_trans( &a_local );
-		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &a_local );
-	}
-
-	// Induce a transposition of B if it has its transposition property set.
-	// Then clear the transposition bit in the object.
-	if ( bli_obj_has_trans( &b_local ) )
-	{
-		bli_obj_induce_trans( &b_local );
-		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &b_local );
-	}
+	// Typecast alpha and beta to the correct type
+	obj_t alpha_cast, beta_cast;
+	num_t dt = bli_obj_dt( c );
+	bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, alpha, &alpha_cast );
+	bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, beta, &beta_cast );
 
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel
 	// prefers contiguous rows, transpose the entire operation to allow the
 	// micro-kernel to access elements of C in its preferred manner.
-	if ( bli_cntx_dislikes_storage_of( &c_local, BLIS_GEMM_VIR_UKR, cntx ) )
+	if ( bli_cntx_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
 	{
 		bli_obj_swap( &a_local, &b_local );
 
@@ -159,10 +148,8 @@ void bls_gemm_ex
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop, and then make any
 	// additional modifications necessary for the current operation.
-	bli_rntm_set_ways_for_op
+	bli_rntm_factorize
 	(
-	  BLIS_GEMM,
-	  BLIS_LEFT, // ignored for gemm/hemm/symm
 	  bli_obj_length( &c_local ),
 	  bli_obj_width( &c_local ),
 	  bli_obj_width( &a_local ),
@@ -176,10 +163,10 @@ void bls_gemm_ex
 	(
 	  bls_gemm_int,
 	  BLIS_GEMM, // operation family id
-	  alpha,
+	  &alpha_cast,
 	  &a_local,
 	  &b_local,
-	  beta,
+	  &beta_cast,
 	  &c_local,
 	  cntx,
 	  &rntm_l
@@ -227,7 +214,7 @@ err_t bls_gemm_int
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTECH2(bls_,ch,opname) \
+void PASTECH(bls_,ch,opname) \
      ( \
        trans_t transa, \
        trans_t transb, \

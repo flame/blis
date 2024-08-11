@@ -54,7 +54,7 @@ err_t PASTEMAC(ch,opname) \
              ctype_r* rwork  \
      ) \
 { \
-	return PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+	return PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
 	( \
 	  comp_evecs, \
 	  uploa, \
@@ -76,7 +76,7 @@ INSERT_GENTFUNCR_BASIC( hevd )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname, laname ) \
 \
-err_t PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+err_t PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
      ( \
              bool     comp_evecs, \
              uplo_t   uploa, \
@@ -270,6 +270,9 @@ void PASTEMAC(ch,opname) \
 	{ \
 		const dim_t rs = *rs_a; \
 		const dim_t cs = *cs_a; \
+\
+		/* Suppress unused variable warning for real cases. */ \
+		( void )rs; ( void )cs; \
 \
 		if ( bli_is_lower( *uploa ) ) \
 		{ \

@@ -35,48 +35,6 @@
 #ifndef BLIS_CHOL_CNTL_H
 #define BLIS_CHOL_CNTL_H
 
-typedef struct
-{
-	uint64_t size;
-	dim_t    scale_num;
-	dim_t    scale_den;
-	dim_t    depth;
-} chol_params_t;
-
-BLIS_INLINE dim_t bli_chol_params_scale_num( const chol_params_t* params )
-{
-	return params->scale_num;
-}
-
-BLIS_INLINE dim_t bli_chol_params_scale_den( const chol_params_t* params )
-{
-	return params->scale_den;
-}
-
-BLIS_INLINE dim_t bli_chol_params_depth( const chol_params_t* params )
-{
-	return params->depth;
-}
-
-// -----------------------------------------------------------------------------
-
-cntl_t* bli_chol_cntl_create( uplo_t uplo, pool_t* pool );
-
-// -----------------------------------------------------------------------------
-
-void bli_chol_cntl_free( pool_t* pool, cntl_t* cntl );
-
-// -----------------------------------------------------------------------------
-
-cntl_t* bli_chol_cntl_create_node
-     (
-       pool_t* pool,
-       bszid_t bszid,
-       dim_t   scale_num,
-       dim_t   scale_den,
-       dim_t   depth,
-       void_fp var_func,
-       cntl_t* sub_node
-     );
+l4_cntl_t* bli_chol_cntl_create( uplo_t uplo, pool_t* pool );
 
 #endif

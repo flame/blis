@@ -393,8 +393,6 @@ void bli_pba_compute_pool_block_sizes
        const cntx_t* cntx
      )
 {
-	const ind_t im = bli_cntx_method( cntx );
-
 	siz_t bs_cand_a = 0;
 	siz_t bs_cand_b = 0;
 	siz_t bs_cand_c = 0;
@@ -407,9 +405,6 @@ void bli_pba_compute_pool_block_sizes
 		siz_t bs_dt_a;
 		siz_t bs_dt_b;
 		siz_t bs_dt_c;
-
-		// Avoid considering induced methods for real datatypes.
-		if ( bli_is_real( dt ) && im != BLIS_NAT ) continue;
 
 		bli_pba_compute_pool_block_sizes_dt( dt,
 		                                     &bs_dt_a,

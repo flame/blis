@@ -42,7 +42,7 @@ err_t bli_ttmm_l_opt_var2
        const obj_t*  a,
        const cntx_t* cntx,
              rntm_t* rntm,
-             cntl_t* cntl
+             l4_cntl_t* cntl
      )
 {
 	num_t     dt        = bli_obj_dt( a );
@@ -99,7 +99,7 @@ err_t PASTEMAC(ch,varname) \
 		ctype*   a21       = a + (i+1)*rs_a + (i  )*cs_a; \
 \
 		/* a10 = alpha11 * a10; */ \
-		PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,scalv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  mn_behind, \
@@ -111,7 +111,7 @@ err_t PASTEMAC(ch,varname) \
 \
 		/* a10   = a10   + a21'  * A20; */ \
 		/* a10^T = a10^T + A20^T * conj( a21 ); */ \
-		PASTEMAC2(ch,gemv,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,gemv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_TRANSPOSE, \
 		  BLIS_CONJUGATE, \
@@ -130,7 +130,7 @@ err_t PASTEMAC(ch,varname) \
 		PASTEMAC(ch,absq2s)( *alpha11, *alpha11 ); \
 \
 		/* alpha11 = alpha11 + a21' * a21; */ \
-		PASTEMAC2(ch,dotxv,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,dotxv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_CONJUGATE, \
 		  BLIS_NO_CONJUGATE, \

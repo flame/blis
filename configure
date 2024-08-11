@@ -278,24 +278,6 @@ print_usage()
                  compatibility layer. This automatically enables the
                  BLAS compatibility layer as well.
 
-   --disable-mixed-dt, --enable-mixed-dt
-
-                 Disable (enabled by default) support for mixing the
-                 storage domain and/or storage precision of matrix
-                 operands for the gemm operation, as well as support
-                 for computing in a precision different from one or
-                 both of matrices A and B.
-
-   --disable-mixed-dt-extra-mem, --enable-mixed-dt-extra-mem
-
-                 Disable (enabled by default) support for additional
-                 mixed datatype optimizations that require temporarily
-                 allocating extra memory--specifically, a single m x n
-                 matrix (per application thread) whose storage datatype
-                 is equal to the computation datatype. This option may
-                 only be enabled when mixed domain/precision support is
-                 enabled.
-
    --disable-sup-handling, --enable-sup-handling
 
                  Disable (enabled by default) handling of small/skinny
@@ -485,6 +467,57 @@ assign_key_value()
 	printf -v "${arr}_${key}" %s "${val}"
 }
 
+fully_eval()
+{
+	local old new
+
+	old=""
+	new="$1"
+
+	while [ "x${old}" != "x${new}" ]; do
+		old="${new}"
+		new=$(eval echo "${old}")
+	done
+
+	echo "${new}"
+}
+
+add_config_var()
+{
+	local sub_var var
+
+	sub_var="$1"
+	var="${2:-${sub_var}}"
+
+	#
+	# Use the | character in the substitution command to avoid mangling variables
+	# which contain forward slashes (e.g. paths). There *shouldn't* be any variables
+	# that have | in them...
+	#
+	config_substitutions="${config_substitutions} -e \\\"s|\@${sub_var}\@|\${${var}}|g;\\\""
+}
+
+generate_config_file()
+{
+	local in_file out_file sub
+
+	in_file="$1"
+	out_file="$2"
+
+	echo "${script_name}: creating ${out_file} from ${in_file}"
+
+	#
+	# Use 'eval' to expand the variable references.
+	#
+	eval "sub=\"${config_substitutions}\""
+
+	#
+	# 'eval' also has to be used here to get the proper quoting.
+	# This 'eval' CAN NOT be combined with the one above.
+	#
+	eval "perl -p ${sub} <\"${in_file}\" >\"${out_file}\""
+}
+
 #
 # FGVZ: This commented-out function is being kept as an example how how
 # to effectively "pass by reference" in bash. That is, pass the name of
@@ -636,6 +669,10 @@ pass_config_kernel_registries()
 		# - pass 1: compare cname to the blacklists and commit clist/klist
 		#   to their respective registries, as appropriate.
 
+		# Add cname to full_config_list. Duplicates will
+		# be filtered out later.
+		full_config_list="${full_config_list} ${cname}"
+
 		# Handle singleton and umbrella configuration entries separately.
 		if [[ $(is_singleton_family "${cname}" "${clist}") == "true" ]]; then
 
@@ -643,6 +680,11 @@ pass_config_kernel_registries()
 			# Note: for singleton families, clist contains one item, which
 			# always equals cname, but klist could contain more than one
 			# item.
+
+			# Add the kernels in klist to full_kernel_list. Duplicates will
+			# be filtered out later.
+			full_subconfig_list="${full_subconfig_list} ${cname}"
+			full_kernel_list="${full_kernel_list} ${klist}"
 
 			# Only consider updating the indirect blacklist (pass 0) or
 			# committing clist and klist to the registries (pass 1) if the
@@ -719,6 +761,12 @@ pass_config_kernel_registries()
 		# Assign the final indirect blacklist (with whitespace removed).
 		indirect_blist=$(canonicalize_ws "${indirect_blist}")
 	fi
+
+	# Remove duplicates and excess whitespace from the full config and
+	# kernel lists.
+	full_config_list=$(canonicalize_ws "$(rm_duplicate_words_simple "${full_config_list}")")
+	full_subconfig_list=$(canonicalize_ws "$(rm_duplicate_words_simple "${full_subconfig_list}")")
+	full_kernel_list=$(canonicalize_ws "$(rm_duplicate_words_simple "${full_kernel_list}")")
 }
 
 read_registry_file()
@@ -1332,9 +1380,11 @@ has_pragma_omp_simd()
 {
 	local main_c main_c_filepath binname rval
 
+	omp_simd_path="${omp_simd_path-${dist_path}/build}"
+
 	# Path to omp-simd detection source file.
 	main_c="omp_simd_detect.c"
-	main_c_filepath=$(find "${dist_path}/build" -name "${main_c}")
+	main_c_filepath=$(find "${omp_simd_path}" -name "${main_c}")
 
 	# Binary executable filename.
 	binname="omp_simd-detect.x"
@@ -1973,12 +2023,12 @@ check_compiler_version_ranges()
 
 check_assembler()
 {
-	local cc asm_dir cflags asm_fp
+	local cc cflags asm_fp
 
 	cc="${found_cc}"
 
 	# The directory where the assembly files will be.
-	asm_dir="${dist_path}/build"
+	asm_dir=${asm_dir-${dist_path}/build}
 
 	# Most of the time, we won't need any additional compiler flags.
 	cflags=""
@@ -2179,8 +2229,18 @@ select_tool_w_env()
 
 		echo "${script_name}: user specified a ${tool_str} via ${env_str} (${env_var})."
 
-		# See if the binary specified by env_var exists.
-		_the_tool=$(select_tool "${env_var}" "${env_str}")
+		# Map the tool (via its canonical environment variable form) to the set
+		# of options we should use to check that it is working and available.
+		the_flags=$(get_tool_checkflags "${env_str}")
+
+		# Check that the tool works with at least one of the flags in the_flags
+		# the_flags (or, if the_flags is empty, check that the tool exists).
+		rval=$(check_tool "${env_var}" "${the_flags}")
+
+		# If check_tool() returns 0, we're done.
+		if [ "${rval}" == "0" ]; then
+			_the_tool="${env_var}"
+		fi
 
 		# Copy the result into the variable specified by found_var.
 		eval "${found_var}=\"${_the_tool}\""
@@ -2345,7 +2405,7 @@ check_tool()
 		for opt in ${the_flags}; do
 
 			# See if the tool responds to the current flag.
-			"${tool}" "${opt}" > /dev/null 2>&1
+			${tool} ${opt} > /dev/null 2>&1
 
 			# If the tool responded to the flag with a nominal error code of
 			# 0, we found one that works and set rval accoringly.
@@ -2372,853 +2432,8 @@ check_tool()
 	echo "${rval}"
 }
 
-
-
-#
-# -- main function -------------------------------------------------------------
-#
-
-main()
+build_and_check_configurations()
 {
-	#declare -A config_registry
-	#declare -A kernel_registry
-	#declare -A kconfig_registry
-
-	# -- Basic names and paths --
-
-	# The name of the script, stripped of any preceeding path.
-	script_name=${0##*/}
-
-	# The path to the script. We need this to find the top-level directory
-	# of the source distribution in the event that the user has chosen to
-	# build elsewhere.
-	dist_path=${0%"/${script_name}"}
-
-	# The path to the directory in which we are building. We do this to
-	# make explicit that we distinguish between the top-level directory
-	# of the distribution and the directory in which we are building.
-	cur_dirpath="."
-
-	# The name of and path to the directory named "build" in the top-level
-	# directory of the source distribution.
-	build_dir='build'
-	build_dirpath="${dist_path}/${build_dir}"
-
-	# The name/path to the registry (master list) of supported configurations.
-	registry_file="config_registry"
-	registry_filepath=${dist_path}/${registry_file}
-
-	# The names/paths for the template config.mk.in and its instantiated
-	# counterpart.
-	config_mk_in='config.mk.in'
-	config_mk_out='config.mk'
-	config_mk_in_path="${build_dirpath}/${config_mk_in}"
-	config_mk_out_path="${cur_dirpath}/${config_mk_out}"
-
-	# The names/paths for the template bli_config.h.in and its instantiated
-	# counterpart.
-	bli_config_h_in='bli_config.h.in'
-	bli_config_h_out='bli_config.h'
-	bli_config_h_in_path="${build_dirpath}/${bli_config_h_in}"
-	bli_config_h_out_path="${cur_dirpath}/${bli_config_h_out}"
-
-	# The names/paths for the template bli_addon.h.in and its instantiated
-	# counterpart.
-	bli_addon_h_in='bli_addon.h.in'
-	bli_addon_h_out='bli_addon.h'
-	bli_addon_h_in_path="${build_dirpath}/${bli_addon_h_in}"
-	bli_addon_h_out_path="${cur_dirpath}/${bli_addon_h_out}"
-
-	# Path to 'mirror-tree.sh' script.
-	mirror_tree_sh="${build_dirpath}/mirror-tree.sh"
-
-	# Path to 'gen-make-frags.sh' script and directory.
-	gen_make_frags_dirpath="${build_dirpath}/gen-make-frags"
-	gen_make_frags_sh="${gen_make_frags_dirpath}/gen-make-frag.sh"
-
-	# The name of the (top-level) configuration directory.
-	config_dir='config'
-	config_dirpath="${dist_path}/${config_dir}"
-
-	# The name of the (top-level) kernels directory.
-	kernels_dir='kernels'
-	kernels_dirpath="${dist_path}/${kernels_dir}"
-
-	# The name of the (top-level) reference kernels directory.
-	refkern_dir='ref_kernels'
-	refkern_dirpath="${dist_path}/${refkern_dir}"
-
-	# The root directory of the BLIS framework.
-	frame_dir='frame'
-	frame_dirpath="${dist_path}/${frame_dir}"
-
-	# The names of the addons.
-	addon_dir='addon'
-	addon_dirpath="${dist_path}/${addon_dir}"
-
-	# The name of the sandbox directory.
-	sandbox_dir='sandbox'
-	sandbox_dirpath="${dist_path}/${sandbox_dir}"
-
-	# The name of the directory in which object files will be kept.
-	obj_dir='obj'
-	obj_dirpath="${cur_dirpath}/${obj_dir}"
-
-	# The name of the directory in which libraries will be kept.
-	lib_dir='lib'
-	lib_dirpath="${cur_dirpath}/${lib_dir}"
-
-	# The name of the directory in which headers will be kept.
-	include_dir='include'
-	include_dirpath="${cur_dirpath}/${include_dir}"
-
-	# The name of the directory in which the BLAS test suite is kept.
-	blastest_dir='blastest'
-
-	# The name of the directory in which the BLIS test suite is kept.
-	testsuite_dir='testsuite'
-
-	# -- Version-related --
-
-	# The file in which the version string is kept.
-	version_file="version"
-	version_filepath="${build_dirpath}/${version_file}"
-
-	# The shared library (.so) version file.
-	so_version_file='so_version'
-	so_version_filepath="${build_dirpath}/${so_version_file}"
-
-	# The major and minor/build .so version numbers.
-	so_version_major=''
-	so_version_minorbuild=''
-
-	# -- configure options --
-
-	# Define the default prefix so that the print_usage() function can
-	# output it in the --help text.
-	prefix_def='/usr/local'
-
-	# The installation prefix, assigned its default value, and a flag to
-	# track whether or not it was given by the user.
-	prefix=${prefix_def}
-	prefix_flag=''
-
-	# The installation exec_prefix, assigned its default value, and a flag to
-	# track whether or not it was given by the user.
-	# shellcheck disable=2016
-	exec_prefix='${prefix}'
-	exec_prefix_flag=''
-
-	# The installation libdir, assigned its default value, and a flag to
-	# track whether or not it was given by the user.
-	# shellcheck disable=2016
-	libdir='${exec_prefix}/lib'
-	libdir_flag=''
-
-	# The installation includedir, assigned its default value, and a flag to
-	# track whether or not it was given by the user.
-	# shellcheck disable=2016
-	includedir='${prefix}/include'
-	includedir_flag=''
-
-	# The installation sharedir, assigned its default value, and a flag to
-	# track whether or not it was given by the user.
-	# shellcheck disable=2016
-	sharedir='${prefix}/share'
-	sharedir_flag=''
-
-	# The preset value of CFLAGS and LDFLAGS (ie: compiler and linker flags
-	# to use in addition to those determined by the build system).
-	cflags_preset=''
-	ldflags_preset=''
-
-	# The user-given debug type and a flag indicating it was given.
-	debug_type=''
-	debug_flag=''
-	enable_debug='no'
-
-	# A flag indicating whether AddressSanitizer should be used.
-	enable_asan='no'
-
-	# The system flag.
-	enable_system='yes'
-
-	# The thread-local storage flag.
-	enable_tls='yes'
-
-	# The threading flag.
-	threading_model='off'
-
-	# The method of assigning micropanels to threads in the JR and JR loops.
-	thread_part_jrir='slab'
-
-	# Option variables.
-	quiet_flag=''
-	show_config_list=''
-
-	# Additional flags.
-	enable_verbose='no'
-	enable_arg_max_hack='no'
-	enable_static='yes'
-	enable_shared='yes'
-	enable_rpath='no'
-	export_shared='public'
-	enable_pba_pools='yes'
-	enable_sba_pools='yes'
-	enable_mem_tracing='no'
-	int_type_size=0
-	blas_int_type_size=32
-	enable_blas='yes'
-	enable_cblas='no'
-	enable_mixed_dt='yes'
-	enable_mixed_dt_extra_mem='yes'
-	enable_sup_handling='yes'
-	enable_level4='yes'
-	enable_amd_frame_tweaks='no'
-	enable_memkind='' # The default memkind value is determined later on.
-	enable_trsm_preinversion='yes'
-	force_version='no'
-	complex_return='default'
-
-	# The addon flag and names.
-	addon_flag=''
-	addon_list=''
-
-	# The sandbox flag and name.
-	sandbox_flag=''
-	sandbox=''
-
-	# -- Configuration registry --
-
-	# The name of the chosen configuration (the configuration "family").
-	config_name=''
-
-	# The list of sub-configurations associated with config_name.
-	config_list=''
-
-	# The list of kernel sets that will be needed by the sub-configurations
-	# in config_list..
-	kernel_list=''
-
-	# The list of kernel:sub-configuration pairs for all kernels contained
-	# in kernel_list.
-	kconfig_map=''
-
-	# -- Out-of-tree --
-
-	# Whether we are building out-of-tree.
-	configured_oot="no"
-
-	# Dummy file. Used to check whether the cwd is the same as the top-level
-	# source distribution directory.
-	dummy_file='_blis_dir_detect.tmp'
-
-	# -- Debugging --
-
-	# A global flag to help debug the compilation command for the executable
-	# that configure builds on-the-fly to perform hardware auto-detection.
-	debug_auto_detect="no"
-
-
-
-	# -- Command line option/argument parsing ----------------------------------
-
-	found=true
-	while [[ $found = true ]]; do
-
-		# Process our command line options.
-		unset OPTIND
-		while getopts ":hp:d:e:a:s:t:r:qci:b:-:" opt; do
-			case $opt in
-				-)
-					case "$OPTARG" in
-
-						help)
-							print_usage
-							;;
-
-						quiet)
-							quiet_flag=1
-							;;
-
-						prefix=*)
-							prefix_flag=1
-							prefix=${OPTARG#*=}
-							;;
-						exec-prefix=*)
-							exec_prefix_flag=1
-							exec_prefix=${OPTARG#*=}
-							;;
-						libdir=*)
-							libdir_flag=1
-							libdir=${OPTARG#*=}
-							;;
-						includedir=*)
-							includedir_flag=1
-							includedir=${OPTARG#*=}
-							;;
-						sharedir=*)
-							sharedir_flag=1
-							sharedir=${OPTARG#*=}
-							;;
-
-						enable-debug)
-							debug_flag=1
-							debug_type=noopt
-							;;
-						enable-debug=*)
-							debug_flag=1
-							debug_type=${OPTARG#*=}
-							;;
-						disable-debug)
-							debug_flag=0
-							;;
-
-						enable-asan)
-							enable_asan='yes'
-							;;
-						disable-asan)
-							enable_asan='no'
-							;;
-
-						enable-verbose-make)
-							enable_verbose='yes'
-							;;
-						disable-verbose-make)
-							enable_verbose='no'
-							;;
-
-						enable-arg-max-hack)
-							enable_arg_max_hack='yes'
-							;;
-						disable-arg-max-hack)
-							enable_arg_max_hack='no'
-							;;
-
-						enable-static)
-							enable_static='yes'
-							;;
-						disable-static)
-							enable_static='no'
-							;;
-
-						enable-shared)
-							enable_shared='yes'
-							;;
-						disable-shared)
-							enable_shared='no'
-							;;
-
-						enable-rpath)
-							enable_rpath='yes'
-							;;
-						disable-rpath)
-							enable_rpath='no'
-							;;
-
-						export-shared=*)
-							export_shared=${OPTARG#*=}
-							;;
-
-						enable-system)
-							enable_system='yes'
-							;;
-						disable-system)
-							enable_system='no'
-							;;
-
-						enable-tls)
-							enable_tls='yes'
-							;;
-						disable-tls)
-							enable_tls='no'
-							;;
-
-						enable-threading=*)
-							threading_model=${OPTARG#*=}
-							;;
-						disable-threading)
-							threading_model='single'
-							;;
-
-						thread-part-jrir=*)
-							thread_part_jrir=${OPTARG#*=}
-							;;
-
-						enable-pba-pools)
-							enable_pba_pools='yes'
-							;;
-						disable-pba-pools)
-							enable_pba_pools='no'
-							;;
-
-						enable-sba-pools)
-							enable_sba_pools='yes'
-							;;
-						disable-sba-pools)
-							enable_sba_pools='no'
-							;;
-
-						enable-mem-tracing)
-							enable_mem_tracing='yes'
-							;;
-						disable-mem-tracing)
-							enable_mem_tracing='no'
-							;;
-
-						enable-addon=*)
-							addon_flag=1
-							addon_name=${OPTARG#*=}
-							# Append the addon name to the list.
-							addon_list="${addon_list} ${addon_name}"
-							;;
-						disable-addon)
-							addon_flag=''
-							;;
-
-						enable-sandbox=*)
-							sandbox_flag=1
-							sandbox=${OPTARG#*=}
-							;;
-						disable-sandbox)
-							sandbox_flag=''
-							;;
-
-						int-size=*)
-							int_type_size=${OPTARG#*=}
-							;;
-
-						blas-int-size=*)
-							blas_int_type_size=${OPTARG#*=}
-							;;
-
-						enable-blas)
-							enable_blas='yes'
-							;;
-						disable-blas)
-							enable_blas='no'
-							;;
-
-						enable-cblas)
-							enable_cblas='yes'
-							;;
-						disable-cblas)
-							enable_cblas='no'
-							;;
-
-						enable-mixed-dt)
-							enable_mixed_dt='yes'
-							;;
-						disable-mixed-dt)
-							enable_mixed_dt='no'
-							;;
-
-						enable-mixed-dt-extra-mem)
-							enable_mixed_dt_extra_mem='yes'
-							;;
-						disable-mixed-dt-extra-mem)
-							enable_mixed_dt_extra_mem='no'
-							;;
-
-						sup)
-							enable_sup_handling='yes'
-							;;
-						enable-sup-handling)
-							enable_sup_handling='yes'
-							;;
-						nosup)
-							enable_sup_handling='no'
-							;;
-						disable-sup-handling)
-							enable_sup_handling='no'
-							;;
-
-						enable-level4)
-							enable_level4='yes'
-							;;
-						disable-level4)
-							enable_level4='no'
-							;;
-
-						enable-amd-frame-tweaks)
-							enable_amd_frame_tweaks='yes'
-							;;
-						disable-amd-frame-tweaks)
-							enable_amd_frame_tweaks='no'
-							;;
-
-						with-memkind)
-							enable_memkind='yes'
-							;;
-						without-memkind)
-							enable_memkind='no'
-							;;
-
-						enable-trsm-preinversion)
-							enable_trsm_preinversion='yes'
-							;;
-						disable-trsm-preinversion)
-							enable_trsm_preinversion='no'
-							;;
-
-						force-version=*)
-							force_version=${OPTARG#*=}
-							;;
-
-						show-config-list)
-							show_config_list=1
-							;;
-
-						complex-return=*)
-							complex_return=${OPTARG#*=}
-							;;
-
-						*)
-							print_usage
-							;;
-					esac;;
-				h)
-					print_usage
-					;;
-				p)
-					prefix_flag=1
-					prefix=$OPTARG
-					;;
-				d)
-					debug_flag=1
-					debug_type=$OPTARG
-					;;
-				e)
-					export_shared=$OPTARG
-					;;
-				a)
-					addon_flag=1
-					addon_name=$OPTARG
-					# Append the addon name to the list.
-					addon_list="${addon_list} ${addon_name}"
-					;;
-				s)
-					sandbox_flag=1
-					sandbox=$OPTARG
-					;;
-				q)
-					quiet_flag=1
-					;;
-				t)
-					threading_model=$OPTARG
-					;;
-				r)
-					thread_part_jrir=$OPTARG
-					;;
-				i)
-					int_type_size=$OPTARG
-					;;
-				b)
-					blas_int_type_size=$OPTARG
-					;;
-				c)
-					show_config_list=1
-					;;
-				\?)
-					print_usage
-					;;
-			esac
-		done
-		shift $((OPTIND - 1))
-
-		# Parse environment variables
-		found=false
-		while [ $# -gt 0 ]; do
-			case $1 in
-				*=*)
-					var=$(expr "$1" : '\([^=]*\)=')
-					value=$(expr "$1" : '[^=]*=\(.*\)')
-					eval "export $var=\$value"
-					shift
-					found=true
-					;;
-				*)
-					break
-					;;
-			esac
-		done
-	done
-
-
-	# -- Check the operating system --------------------------------------------
-
-	os_name=$(uname -s)
-	os_vers=$(uname -r)
-	echo "${script_name}: detected ${os_name} kernel version ${os_vers}."
-
-	# Define a single variable off of which we can branch to tell if we are
-	# building for Windows.
-	is_win=no
-	if [[ $os_name == MSYS* ]] || \
-	   [[ $os_name == MINGW* ]]  || \
-	   [[ $os_name == CYGWIN* ]] ; then
-		is_win=yes
-	fi
-
-
-	# -- Find a python interpreter ---------------------------------------------
-
-	# Acquire the default python search order.
-	python_search_list=$(get_python_search_list)
-
-	# Select a python interpreter from the default list, or from PYTHON if it
-	# refers to a valid binary.
-	# shellcheck disable=2153
-	select_tool_w_env "${python_search_list}" "${PYTHON}" "PYTHON" \
-	                  "python interpreter" "yes" found_python
-
-	# -- Check the python version ----------------------------------------------
-
-	# Check the python interpreter's version.
-	get_python_version
-	check_python
-
-
-	# -- Find a C compiler -----------------------------------------------------
-
-	# Acquire the default compiler search order. This will vary based on os_name.
-	cc_search_list=$(get_cc_search_list)
-
-	# Select a C compiler from the default list, or from CC if it refers to a
-	# valid binary.
-	select_tool_w_env "${cc_search_list}" "${CC}" "CC" \
-	                  "C compiler" "yes" found_cc
-
-	# Also check the compiler to see if we are (cross-)compiling for Windows
-	if "${found_cc}" -dM -E - < /dev/null 2> /dev/null | grep -q _WIN32; then
-		is_win=yes
-	fi
-	is_msvc=no
-	if "${found_cc}" -dM -E - < /dev/null 2> /dev/null | grep -q _MSC_VER; then
-		is_msvc=yes
-	fi
-
-
-	# -- Check the compiler version --------------------------------------------
-
-	# Initialize the blacklist to empty.
-	blacklist_init
-
-	# Check the compiler's version. Certain versions of certain compilers
-	# will preclude building certain sub-configurations, which are added
-	# to a blacklist. We also make note of certain version ranges that
-	# will be useful to know about later.
-	get_compiler_version
-	check_compiler
-	check_compiler_version_ranges
-
-	# Now check the assembler's ability to assemble code. Older versions
-	# of binutils may not be aware of certain instruction sets. Those
-	# sub-configurations employing kernels that use such instruction sets
-	# will also be blacklisted.
-	get_binutils_version
-	check_assembler
-
-	# Check if there is any incompatibility due to the operating system.
-	check_os
-
-	# Remove duplicates and whitespace from the blacklist.
-	blacklist_cleanup
-
-	if [ -n "${config_blist}" ]; then
-
-		echo "${script_name}: configuration blacklist:"
-		echo "${script_name}:   ${config_blist}"
-	fi
-
-
-	# -- Find a C++ compiler ---------------------------------------------------
-
-	# Acquire the default C++ compiler search order. This will vary based on
-	# os_name.
-	cxx_search_list=$(get_cxx_search_list)
-
-	# Select a C compiler from the default list, or from CC if it refers to a
-	# valid binary.
-	select_tool_w_env "${cxx_search_list}" "${CXX}" "CXX" \
-	                  "C++ compiler" "no" found_cxx
-
-
-	# -- Find a Fortran compiler -----------------------------------------------
-
-	# Acquire the default Fortran compiler search order.
-	fc_search_list=$(get_fc_search_list)
-
-	# Select a Fortran compiler from the default list, or from FC if it refers
-	# to a valid binary.
-	# NOTE: A Fortran compiler is not necessary for building BLIS. The only
-	# reason we might want to query it is to detect the style of returning
-	# complex values from functions. The 'gnu' style returns complex values
-	# from functions normally, via the C language return statement, while the
-	# 'intel' style returns them in a "hidden" parameter (inserted by the
-	# compiler) that precedes all other function parameters.
-	select_tool_w_env "${fc_search_list}" "${FC}" "FC" \
-	                  "Fortran compiler" "no" found_fc
-
-
-	# -- Find a static library archiver ----------------------------------------
-
-	# Acquire the default archiver search order.
-	ar_search_list=$(get_ar_search_list)
-
-	# Select an archiver from the default list, or from AR if it refers
-	# to a valid binary.
-	select_tool_w_env "${ar_search_list}" "${AR}" "AR" \
-	                  "library archiver" "yes" found_ar
-
-
-	# -- Find an archive indexer -----------------------------------------------
-
-	# Acquire the default archive indexer search order.
-	ranlib_search_list=$(get_ranlib_search_list)
-
-	# Select an archive indexer from the default list, or from RANLIB if it
-	# refers to a valid binary.
-	select_tool_w_env "${ranlib_search_list}" "${RANLIB}" "RANLIB" \
-	                  "archive indexer" "yes" found_ranlib
-
-
-	# -- Read the configuration registry ---------------------------------------
-
-	# Make sure the config registry file exists and can be opened.
-	if [ ! -f "${registry_filepath}" ]; then
-
-		echo "${script_name}: could not open '${registry_file}' file; cannot continue."
-		echo "${script_name}: BLIS distribution appears to be incomplete."
-		echo "${script_name}: *** Please verify source distribution."
-
-		exit 1
-	fi
-
-	# Read the registered configuration names and lists into associative
-	# arrays.
-	echo -n "${script_name}: reading configuration registry..."
-	read_registry_file "${registry_filepath}"
-	echo "done."
-
-	# Report if additional configurations needed to be blacklisted.
-	# NOTE: This branch should never execute so long as indirect blacklisting
-	# is disabled. See comment regarding issue #214 in the definition of
-	# pass_config_kernel_registries().
-	if [ -n "${indirect_blist}" ]; then
-		echo "${script_name}: needed to indirectly blacklist additional configurations:"
-		echo "${script_name}:   ${indirect_blist}"
-	fi
-
-
-	# -- Acquire the BLIS version ----------------------------------------------
-
-	# Set the 'version' variable to the default value (the 'git describe'
-	# augmented instance of whatever is in the 'version' file if this is a git
-	# clone, or whatever is in the 'version' file unmodified if it is a bare
-	# source release).
-	set_default_version "${version_filepath}"
-
-	# Initial message.
-	echo "${script_name}: starting configuration of BLIS ${version}."
-
-	# Check if the user requested a custom version string.
-	if [[ ${force_version} = no ]]; then
-		echo "${script_name}: configuring with official version string."
-	else
-		echo "${script_name}: configuring with custom version string '${force_version}'."
-		version="${force_version}"
-	fi
-
-
-	# -- Acquire the shared library (.so) versions -----------------------------
-
-	# The first line of the 'so_version' file contains the .so major version.
-	so_version_major=$(sed -n "1p" < "${so_version_filepath}")
-
-	# The second line contains the minor and build .so version numbers
-	# (separated by a '.').
-	so_version_minorbuild=$(sed -n "2p" < "${so_version_filepath}")
-
-	echo "${script_name}: found shared library .so version '${so_version_major}.${so_version_minorbuild}'."
-	echo "${script_name}:   .so major version: ${so_version_major}"
-	echo "${script_name}:   .so minor.build version: ${so_version_minorbuild}"
-
-
-	# -- Various pre-configuration checks --------------------------------------
-
-	# Set config_name based on the number of arguments leftover (after command
-	# line option processing).
-	if [ $# = "0" ]; then
-
-		#configs_avail="auto "$(ls ${config_dirpath})
-
-		echo "${script_name}: "
-		echo "${script_name}: *** No configuration given! ***"
-		echo "${script_name}: "
-		echo "${script_name}: Default configuration behavior is not implemented (for your"
-		echo "${script_name}: own safety). Please re-run '${script_name}' and specify one"
-		echo "${script_name}: of the existing configurations in the source distribution's"
-		echo "${script_name}  '${registry_file}' file:"
-		echo "${script_name}: "
-		#for k in "${!config_registry[@]}"; do
-		for cr_var in ${!config_registry_*}; do
-
-			#v=${config_registry[$k]}
-			k=${cr_var##config_registry_}; v=${!cr_var}
-
-			echo "${script_name}:   $k (${v})"
-		done
-		echo "${script_name}: "
-
-		exit 1
-
-	elif [ $# != "1" ]; then   # more than one configuration argument given.
-
-		print_usage
-
-	fi
-
-	if [[ $1 = auto ]]; then
-
-		echo "${script_name}: automatic configuration requested."
-
-		# Call the auto_detect() function and save the returned string in
-		# config_name.
-		config_name=$(auto_detect)
-
-		# Debugging stuff. When confirming the behavior of auto_detect(),
-		# it is useful to output ${config_name}, which in theory could be
-		# set temoprarily to something other than the config_name, such as
-		# the compilation command.
-		if [ "${debug_auto_detect}" = "yes" ]; then
-			echo "auto-detect program compilation command: ${config_name}"
-			exit 1
-		fi
-
-		echo "${script_name}: hardware detection driver returned '${config_name}'."
-
-		# If the auto-detect code returned the "generic" string, it means we
-		# were unable to automatically detect the user's hardware type. While
-		# this is going to be a rare event, it will likely lead the user to
-		# experience much lower performance than expected, and thus we will
-		# warn them about it at the end of the configure output (to increase
-		# the chances that they see it).
-		if [ "${config_name}" = "generic" ]; then
-
-			warn_user_generic=1
-		else
-			warn_user_generic=0
-		fi
-	else
-
-		# Use the command line argument as the configuration name.
-		config_name=$1
-
-		echo "${script_name}: manual configuration requested; configuring with '${config_name}'."
-
-	fi
-
 	# Use the selected config name to look up the list of configurations
 	# and kernels associated with that name.
 	#config_list=${config_registry[${config_name}]}
@@ -3436,6 +2651,871 @@ main()
 			echo "exist."
 		fi
 	done
+}
+
+check_build_tools()
+{
+	# -- Check the operating system --------------------------------------------
+
+	os_name=$(uname -s)
+	os_vers=$(uname -r)
+	echo "${script_name}: detected ${os_name} kernel version ${os_vers}."
+
+	# Define a single variable off of which we can branch to tell if we are
+	# building for Windows.
+	is_win=no
+	if [[ $os_name == MSYS* ]] || \
+	   [[ $os_name == MINGW* ]]  || \
+	   [[ $os_name == CYGWIN* ]] ; then
+		is_win=yes
+	fi
+
+
+	# -- Find a python interpreter ---------------------------------------------
+
+	# Acquire the default python search order.
+	python_search_list=$(get_python_search_list)
+
+	# Select a python interpreter from the default list, or from PYTHON if it
+	# refers to a valid binary.
+	# shellcheck disable=2153
+	select_tool_w_env "${python_search_list}" "${PYTHON}" "PYTHON" \
+	                  "python interpreter" "yes" found_python
+
+	# -- Check the python version ----------------------------------------------
+
+	# Check the python interpreter's version.
+	get_python_version
+	check_python
+
+
+	# -- Find a C compiler -----------------------------------------------------
+
+	# Acquire the default compiler search order. This will vary based on os_name.
+	cc_search_list=$(get_cc_search_list)
+
+	# Select a C compiler from the default list, or from CC if it refers to a
+	# valid binary.
+	select_tool_w_env "${cc_search_list}" "${CC}" "CC" \
+	                  "C compiler" "yes" found_cc
+
+	# Also check the compiler to see if we are (cross-)compiling for Windows
+	if "${found_cc}" -dM -E - < /dev/null 2> /dev/null | grep -q _WIN32; then
+		is_win=yes
+	fi
+	is_msvc=no
+	if "${found_cc}" -dM -E - < /dev/null 2> /dev/null | grep -q _MSC_VER; then
+		is_msvc=yes
+	fi
+
+
+	# -- Check the compiler version --------------------------------------------
+
+	# Initialize the blacklist to empty.
+	blacklist_init
+
+	# Check the compiler's version. Certain versions of certain compilers
+	# will preclude building certain sub-configurations, which are added
+	# to a blacklist. We also make note of certain version ranges that
+	# will be useful to know about later.
+	get_compiler_version
+	check_compiler
+	check_compiler_version_ranges
+
+	# Now check the assembler's ability to assemble code. Older versions
+	# of binutils may not be aware of certain instruction sets. Those
+	# sub-configurations employing kernels that use such instruction sets
+	# will also be blacklisted.
+	get_binutils_version
+	check_assembler
+
+	# Check if there is any incompatibility due to the operating system.
+	check_os
+
+	# Remove duplicates and whitespace from the blacklist.
+	blacklist_cleanup
+
+	if [ -n "${config_blist}" ]; then
+
+		echo "${script_name}: configuration blacklist:"
+		echo "${script_name}:   ${config_blist}"
+	fi
+
+
+	# -- Find a C++ compiler ---------------------------------------------------
+
+	# Acquire the default C++ compiler search order. This will vary based on
+	# os_name.
+	cxx_search_list=$(get_cxx_search_list)
+
+	# Select a C compiler from the default list, or from CC if it refers to a
+	# valid binary.
+	select_tool_w_env "${cxx_search_list}" "${CXX}" "CXX" \
+	                  "C++ compiler" "no" found_cxx
+
+
+	# -- Find a Fortran compiler -----------------------------------------------
+
+	# Acquire the default Fortran compiler search order.
+	fc_search_list=$(get_fc_search_list)
+
+	# Select a Fortran compiler from the default list, or from FC if it refers
+	# to a valid binary.
+	# NOTE: A Fortran compiler is not necessary for building BLIS. The only
+	# reason we might want to query it is to detect the style of returning
+	# complex values from functions. The 'gnu' style returns complex values
+	# from functions normally, via the C language return statement, while the
+	# 'intel' style returns them in a "hidden" parameter (inserted by the
+	# compiler) that precedes all other function parameters.
+	select_tool_w_env "${fc_search_list}" "${FC}" "FC" \
+	                  "Fortran compiler" "no" found_fc
+
+
+	# -- Find a static library archiver ----------------------------------------
+
+	# Acquire the default archiver search order.
+	ar_search_list=$(get_ar_search_list)
+
+	# Select an archiver from the default list, or from AR if it refers
+	# to a valid binary.
+	select_tool_w_env "${ar_search_list}" "${AR}" "AR" \
+	                  "library archiver" "yes" found_ar
+
+
+	# -- Find an archive indexer -----------------------------------------------
+
+	# Acquire the default archive indexer search order.
+	ranlib_search_list=$(get_ranlib_search_list)
+
+	# Select an archive indexer from the default list, or from RANLIB if it
+	# refers to a valid binary.
+	select_tool_w_env "${ranlib_search_list}" "${RANLIB}" "RANLIB" \
+	                  "archive indexer" "yes" found_ranlib
+}
+
+create_makefile_fragment()
+{
+	local recursive
+	recursive="-r"
+	if [ "$4" = "false" ]; then
+		recursive=""
+	fi
+	echo "${script_name}: creating makefile fragments in $3"
+	"${gen_make_frags_sh}"                       \
+		-h ${recursive} -v0                      \
+		-o "${script_name}"                      \
+		-p "$1" "$2" "$3"                        \
+		"${gen_make_frags_dirpath}/fragment.mk"  \
+		"${gen_make_frags_dirpath}/suffix_list"  \
+		"${gen_make_frags_dirpath}/ignore_list"
+}
+
+
+#
+# -- blis_main function -------------------------------------------------------------
+#
+
+blis_main()
+{
+	#declare -A config_registry
+	#declare -A kernel_registry
+	#declare -A kconfig_registry
+
+	# -- Basic names and paths --
+
+	# The name of the script, stripped of any preceeding path.
+	script_name=${0##*/}
+
+	# The path to the script. We need this to find the top-level directory
+	# of the source distribution in the event that the user has chosen to
+	# build elsewhere.
+	dist_path=${0%"/${script_name}"}
+
+	# The path to the directory in which we are building. We do this to
+	# make explicit that we distinguish between the top-level directory
+	# of the distribution and the directory in which we are building.
+	cur_dirpath="."
+
+	# The name of and path to the directory named "build" in the top-level
+	# directory of the source distribution.
+	build_dir='build'
+	build_dirpath="${dist_path}/${build_dir}"
+
+	# The name/path to the registry (master list) of supported configurations.
+	registry_file="config_registry"
+	registry_filepath=${dist_path}/${registry_file}
+
+	# The names/paths for the template config.mk.in and its instantiated
+	# counterpart.
+	config_mk_in='config.mk.in'
+	config_mk_out='config.mk'
+	config_mk_in_path="${build_dirpath}/${config_mk_in}"
+	config_mk_out_path="${cur_dirpath}/${config_mk_out}"
+
+	# The names/paths for the template bli_config.h.in and its instantiated
+	# counterpart.
+	bli_config_h_in='bli_config.h.in'
+	bli_config_h_out='bli_config.h'
+	bli_config_h_in_path="${build_dirpath}/${bli_config_h_in}"
+	bli_config_h_out_path="${cur_dirpath}/${bli_config_h_out}"
+
+	# The names/paths for the template bli_addon.h.in and its instantiated
+	# counterpart.
+	bli_addon_h_in='bli_addon.h.in'
+	bli_addon_h_out='bli_addon.h'
+	bli_addon_h_in_path="${build_dirpath}/${bli_addon_h_in}"
+	bli_addon_h_out_path="${cur_dirpath}/${bli_addon_h_out}"
+
+	# Path to 'mirror-tree.sh' script.
+	mirror_tree_sh="${build_dirpath}/mirror-tree.sh"
+
+	# Path to 'gen-make-frags.sh' script and directory.
+	gen_make_frags_dirpath="${build_dirpath}/gen-make-frags"
+	gen_make_frags_sh="${gen_make_frags_dirpath}/gen-make-frag.sh"
+
+	# The name of the (top-level) configuration directory.
+	config_dir='config'
+	config_dirpath="${dist_path}/${config_dir}"
+
+	# The name of the (top-level) kernels directory.
+	kernels_dir='kernels'
+	kernels_dirpath="${dist_path}/${kernels_dir}"
+
+	# The name of the (top-level) reference kernels directory.
+	refkern_dir='ref_kernels'
+	refkern_dirpath="${dist_path}/${refkern_dir}"
+
+	# The root directory of the BLIS framework.
+	frame_dir='frame'
+	frame_dirpath="${dist_path}/${frame_dir}"
+
+	# The names of the addons.
+	addon_dir='addon'
+	addon_dirpath="${dist_path}/${addon_dir}"
+
+	# The name of the sandbox directory.
+	sandbox_dir='sandbox'
+	sandbox_dirpath="${dist_path}/${sandbox_dir}"
+
+	# The name of the directory in which object files will be kept.
+	obj_dir='obj'
+	obj_dirpath="${cur_dirpath}/${obj_dir}"
+
+	# The name of the directory in which libraries will be kept.
+	lib_dir='lib'
+	lib_dirpath="${cur_dirpath}/${lib_dir}"
+
+	# The name of the directory in which headers will be kept.
+	include_dir='include'
+	include_dirpath="${cur_dirpath}/${include_dir}"
+
+	# The name of the directory in which the BLAS test suite is kept.
+	blastest_dir='blastest'
+
+	# The name of the directory in which the BLIS test suite is kept.
+	testsuite_dir='testsuite'
+
+	# -- Version-related --
+
+	# The file in which the version string is kept.
+	version_file="version"
+	version_filepath="${build_dirpath}/${version_file}"
+
+	# The shared library (.so) version file.
+	so_version_file='so_version'
+	so_version_filepath="${build_dirpath}/${so_version_file}"
+
+	# The major and minor/build .so version numbers.
+	so_version_major=''
+	so_version_minorbuild=''
+
+	# -- configure options --
+
+	# Define the default prefix so that the print_usage() function can
+	# output it in the --help text.
+	prefix_def='/usr/local'
+
+	# The installation prefix, assigned its default value, and a flag to
+	# track whether or not it was given by the user.
+	prefix=${prefix_def}
+	prefix_flag=''
+
+	# The installation exec_prefix, assigned its default value, and a flag to
+	# track whether or not it was given by the user. Double-escaping the
+	# variable is necessary because it will pass through 'eval' twice.
+	# shellcheck disable=2016
+	exec_prefix='\\\${prefix}'
+	exec_prefix_flag=''
+
+	# The installation libdir, assigned its default value, and a flag to
+	# track whether or not it was given by the user. Double-escaping the
+	# variable is necessary because it will pass through 'eval' twice.
+	# shellcheck disable=2016
+	libdir='\\\${exec_prefix}/lib'
+	libdir_flag=''
+
+	# The installation includedir, assigned its default value, and a flag to
+	# track whether or not it was given by the user. Double-escaping the
+	# variable is necessary because it will pass through 'eval' twice.
+	# shellcheck disable=2016
+	includedir='\\\${prefix}/include'
+	includedir_flag=''
+
+	# The installation sharedir, assigned its default value, and a flag to
+	# track whether or not it was given by the user. Double-escaping the
+	# variable is necessary because it will pass through 'eval' twice.
+	# shellcheck disable=2016
+	sharedir='\\\${prefix}/share'
+	sharedir_flag=''
+
+	# The preset value of CFLAGS, CXXFLAGS, and LDFLAGS (ie: compiler and linker flags
+	# to use in addition to those determined by the build system).
+	cflags_preset=''
+	cxxflags_preset=''
+	ldflags_preset=''
+
+	# The user-given debug type and a flag indicating it was given.
+	debug_type=''
+	debug_flag=''
+	enable_debug='no'
+
+	# A flag indicating whether AddressSanitizer should be used.
+	enable_asan='no'
+
+	# The system flag.
+	enable_system='yes'
+
+	# The thread-local storage flag.
+	enable_tls='yes'
+
+	# The threading flag.
+	threading_model='off'
+
+	# The method of assigning micropanels to threads in the JR and JR loops.
+	thread_part_jrir='slab'
+
+	# Option variables.
+	quiet_flag=''
+	show_config_list=''
+
+	# Additional flags.
+	enable_verbose='no'
+	enable_arg_max_hack='no'
+	enable_static='yes'
+	enable_shared='yes'
+	enable_rpath='no'
+	export_shared='public'
+	enable_pba_pools='yes'
+	enable_sba_pools='yes'
+	enable_mem_tracing='no'
+	int_type_size=0
+	blas_int_type_size=32
+	enable_blas='yes'
+	enable_cblas='no'
+	enable_sup_handling='yes'
+	enable_level4='yes'
+	enable_amd_frame_tweaks='no'
+	enable_memkind='' # The default memkind value is determined later on.
+	enable_trsm_preinversion='yes'
+	force_version='no'
+	complex_return='default'
+
+	# The addon flag and names.
+	addon_flag=''
+	addon_list=''
+
+	# The sandbox flag and name.
+	sandbox_flag=''
+	sandbox=''
+
+	# -- Configuration registry --
+
+	# The name of the chosen configuration (the configuration "family").
+	config_name=''
+
+	# The list of sub-configurations associated with config_name.
+	config_list=''
+
+	# The list of all sub-configurations and configuration families.
+	full_config_list=''
+	full_subconfig_list=''
+
+	# The list of kernel sets that will be needed by the sub-configurations
+	# in config_list.
+	kernel_list=''
+
+	# The list of all kernel sets.
+	full_kernel_list=''
+
+	# The list of kernel:sub-configuration pairs for all kernels contained
+	# in kernel_list.
+	kconfig_map=''
+
+	# -- Out-of-tree --
+
+	# Whether we are building out-of-tree.
+	configured_oot="no"
+
+	# Dummy file. Used to check whether the cwd is the same as the top-level
+	# source distribution directory.
+	dummy_file='_blis_dir_detect.tmp'
+
+	# -- Debugging --
+
+	# A global flag to help debug the compilation command for the executable
+	# that configure builds on-the-fly to perform hardware auto-detection.
+	debug_auto_detect="no"
+
+
+
+	# -- Command line option/argument parsing ----------------------------------
+
+	found=true
+	while [[ $found = true ]]; do
+
+		# Process our command line options.
+		unset OPTIND
+		while getopts ":hp:d:e:a:s:t:r:qci:b:-:" opt; do
+			case $opt in
+				-)
+					case "$OPTARG" in
+
+						help)
+							print_usage
+							;;
+
+						quiet)
+							quiet_flag=1
+							;;
+
+						prefix=*)
+							prefix_flag=1
+							prefix=${OPTARG#*=}
+							;;
+						exec-prefix=*)
+							exec_prefix_flag=1
+							exec_prefix=${OPTARG#*=}
+							;;
+						libdir=*)
+							libdir_flag=1
+							libdir=${OPTARG#*=}
+							;;
+						includedir=*)
+							includedir_flag=1
+							includedir=${OPTARG#*=}
+							;;
+						sharedir=*)
+							sharedir_flag=1
+							sharedir=${OPTARG#*=}
+							;;
+
+						enable-debug)
+							debug_flag=1
+							debug_type=noopt
+							;;
+						enable-debug=*)
+							debug_flag=1
+							debug_type=${OPTARG#*=}
+							;;
+						disable-debug)
+							debug_flag=0
+							;;
+
+						enable-asan)
+							enable_asan='yes'
+							;;
+						disable-asan)
+							enable_asan='no'
+							;;
+
+						enable-verbose-make)
+							enable_verbose='yes'
+							;;
+						disable-verbose-make)
+							enable_verbose='no'
+							;;
+
+						enable-arg-max-hack)
+							enable_arg_max_hack='yes'
+							;;
+						disable-arg-max-hack)
+							enable_arg_max_hack='no'
+							;;
+
+						enable-static)
+							enable_static='yes'
+							;;
+						disable-static)
+							enable_static='no'
+							;;
+
+						enable-shared)
+							enable_shared='yes'
+							;;
+						disable-shared)
+							enable_shared='no'
+							;;
+
+						enable-rpath)
+							enable_rpath='yes'
+							;;
+						disable-rpath)
+							enable_rpath='no'
+							;;
+
+						export-shared=*)
+							export_shared=${OPTARG#*=}
+							;;
+
+						enable-system)
+							enable_system='yes'
+							;;
+						disable-system)
+							enable_system='no'
+							;;
+
+						enable-tls)
+							enable_tls='yes'
+							;;
+						disable-tls)
+							enable_tls='no'
+							;;
+
+						enable-threading=*)
+							threading_model=${OPTARG#*=}
+							;;
+						disable-threading)
+							threading_model='single'
+							;;
+
+						thread-part-jrir=*)
+							thread_part_jrir=${OPTARG#*=}
+							;;
+
+						enable-pba-pools)
+							enable_pba_pools='yes'
+							;;
+						disable-pba-pools)
+							enable_pba_pools='no'
+							;;
+
+						enable-sba-pools)
+							enable_sba_pools='yes'
+							;;
+						disable-sba-pools)
+							enable_sba_pools='no'
+							;;
+
+						enable-mem-tracing)
+							enable_mem_tracing='yes'
+							;;
+						disable-mem-tracing)
+							enable_mem_tracing='no'
+							;;
+
+						enable-addon=*)
+							addon_flag=1
+							addon_name=${OPTARG#*=}
+							# Append the addon name to the list.
+							addon_list="${addon_list} ${addon_name}"
+							;;
+						disable-addon)
+							addon_flag=''
+							;;
+
+						enable-sandbox=*)
+							sandbox_flag=1
+							sandbox=${OPTARG#*=}
+							;;
+						disable-sandbox)
+							sandbox_flag=''
+							;;
+
+						int-size=*)
+							int_type_size=${OPTARG#*=}
+							;;
+
+						blas-int-size=*)
+							blas_int_type_size=${OPTARG#*=}
+							;;
+
+						enable-blas)
+							enable_blas='yes'
+							;;
+						disable-blas)
+							enable_blas='no'
+							;;
+
+						enable-cblas)
+							enable_cblas='yes'
+							;;
+						disable-cblas)
+							enable_cblas='no'
+							;;
+
+						sup)
+							enable_sup_handling='yes'
+							;;
+						enable-sup-handling)
+							enable_sup_handling='yes'
+							;;
+						nosup)
+							enable_sup_handling='no'
+							;;
+						disable-sup-handling)
+							enable_sup_handling='no'
+							;;
+
+						enable-level4)
+							enable_level4='yes'
+							;;
+						disable-level4)
+							enable_level4='no'
+							;;
+
+						enable-amd-frame-tweaks)
+							enable_amd_frame_tweaks='yes'
+							;;
+						disable-amd-frame-tweaks)
+							enable_amd_frame_tweaks='no'
+							;;
+
+						with-memkind)
+							enable_memkind='yes'
+							;;
+						without-memkind)
+							enable_memkind='no'
+							;;
+
+						enable-trsm-preinversion)
+							enable_trsm_preinversion='yes'
+							;;
+						disable-trsm-preinversion)
+							enable_trsm_preinversion='no'
+							;;
+
+						force-version=*)
+							force_version=${OPTARG#*=}
+							;;
+
+						show-config-list)
+							show_config_list=1
+							;;
+
+						complex-return=*)
+							complex_return=${OPTARG#*=}
+							;;
+
+						*)
+							print_usage
+							;;
+					esac;;
+				h)
+					print_usage
+					;;
+				p)
+					prefix_flag=1
+					prefix=$OPTARG
+					;;
+				d)
+					debug_flag=1
+					debug_type=$OPTARG
+					;;
+				e)
+					export_shared=$OPTARG
+					;;
+				a)
+					addon_flag=1
+					addon_name=$OPTARG
+					# Append the addon name to the list.
+					addon_list="${addon_list} ${addon_name}"
+					;;
+				s)
+					sandbox_flag=1
+					sandbox=$OPTARG
+					;;
+				q)
+					quiet_flag=1
+					;;
+				t)
+					threading_model=$OPTARG
+					;;
+				r)
+					thread_part_jrir=$OPTARG
+					;;
+				i)
+					int_type_size=$OPTARG
+					;;
+				b)
+					blas_int_type_size=$OPTARG
+					;;
+				c)
+					show_config_list=1
+					;;
+				\?)
+					print_usage
+					;;
+			esac
+		done
+		shift $((OPTIND - 1))
+
+		# Parse environment variables
+		found=false
+		while [ $# -gt 0 ]; do
+			case $1 in
+				*=*)
+					var=$(expr "$1" : '\([^=]*\)=')
+					value=$(expr "$1" : '[^=]*=\(.*\)')
+					eval "export $var=\$value"
+					shift
+					found=true
+					;;
+				*)
+					break
+					;;
+			esac
+		done
+	done
+
+	check_build_tools
+
+	# -- Read the configuration registry ---------------------------------------
+
+	# Make sure the config registry file exists and can be opened.
+	if [ ! -f "${registry_filepath}" ]; then
+
+		echo "${script_name}: could not open '${registry_file}' file; cannot continue."
+		echo "${script_name}: BLIS distribution appears to be incomplete."
+		echo "${script_name}: *** Please verify source distribution."
+
+		exit 1
+	fi
+
+	# Read the registered configuration names and lists into associative
+	# arrays.
+	echo -n "${script_name}: reading configuration registry..."
+	read_registry_file "${registry_filepath}"
+	echo "done."
+
+	# Report if additional configurations needed to be blacklisted.
+	# NOTE: This branch should never execute so long as indirect blacklisting
+	# is disabled. See comment regarding issue #214 in the definition of
+	# pass_config_kernel_registries().
+	if [ -n "${indirect_blist}" ]; then
+		echo "${script_name}: needed to indirectly blacklist additional configurations:"
+		echo "${script_name}:   ${indirect_blist}"
+	fi
+
+
+	# -- Acquire the BLIS version ----------------------------------------------
+
+	# Set the 'version' variable to the default value (the 'git describe'
+	# augmented instance of whatever is in the 'version' file if this is a git
+	# clone, or whatever is in the 'version' file unmodified if it is a bare
+	# source release).
+	set_default_version "${version_filepath}"
+
+	# Initial message.
+	echo "${script_name}: starting configuration of BLIS ${version}."
+
+	# Check if the user requested a custom version string.
+	if [[ ${force_version} = no ]]; then
+		echo "${script_name}: configuring with official version string."
+	else
+		echo "${script_name}: configuring with custom version string '${force_version}'."
+		version="${force_version}"
+	fi
+
+
+	# -- Acquire the shared library (.so) versions -----------------------------
+
+	# The first line of the 'so_version' file contains the .so major version.
+	so_version_major=$(sed -n "1p" < "${so_version_filepath}")
+
+	# The second line contains the minor and build .so version numbers
+	# (separated by a '.').
+	so_version_minorbuild=$(sed -n "2p" < "${so_version_filepath}")
+
+	echo "${script_name}: found shared library .so version '${so_version_major}.${so_version_minorbuild}'."
+	echo "${script_name}:   .so major version: ${so_version_major}"
+	echo "${script_name}:   .so minor.build version: ${so_version_minorbuild}"
+
+
+	# -- Various pre-configuration checks --------------------------------------
+
+	# Set config_name based on the number of arguments leftover (after command
+	# line option processing).
+	if [ $# = "0" ]; then
+
+		#configs_avail="auto "$(ls ${config_dirpath})
+
+		echo "${script_name}: "
+		echo "${script_name}: *** No configuration given! ***"
+		echo "${script_name}: "
+		echo "${script_name}: Default configuration behavior is not implemented (for your"
+		echo "${script_name}: own safety). Please re-run '${script_name}' and specify one"
+		echo "${script_name}: of the existing configurations in the source distribution's"
+		echo "${script_name}  '${registry_file}' file:"
+		echo "${script_name}: "
+		#for k in "${!config_registry[@]}"; do
+		for cr_var in ${!config_registry_*}; do
+
+			#v=${config_registry[$k]}
+			k=${cr_var##config_registry_}; v=${!cr_var}
+
+			echo "${script_name}:   $k (${v})"
+		done
+		echo "${script_name}: "
+
+		exit 1
+
+	elif [ $# != "1" ]; then   # more than one configuration argument given.
+
+		print_usage
+
+	fi
+
+	if [[ $1 = auto ]]; then
+
+		echo "${script_name}: automatic configuration requested."
+
+		# Call the auto_detect() function and save the returned string in
+		# config_name.
+		config_name=$(auto_detect)
+
+		# Debugging stuff. When confirming the behavior of auto_detect(),
+		# it is useful to output ${config_name}, which in theory could be
+		# set temoprarily to something other than the config_name, such as
+		# the compilation command.
+		if [ "${debug_auto_detect}" = "yes" ]; then
+			echo "auto-detect program compilation command: ${config_name}"
+			exit 1
+		fi
+
+		echo "${script_name}: hardware detection driver returned '${config_name}'."
+
+		# If the auto-detect code returned the "generic" string, it means we
+		# were unable to automatically detect the user's hardware type. While
+		# this is going to be a rare event, it will likely lead the user to
+		# experience much lower performance than expected, and thus we will
+		# warn them about it at the end of the configure output (to increase
+		# the chances that they see it).
+		if [ "${config_name}" = "generic" ]; then
+
+			warn_user_generic=1
+		else
+			warn_user_generic=0
+		fi
+	else
+
+		# Use the command line argument as the configuration name.
+		config_name=$1
+
+		echo "${script_name}: manual configuration requested; configuring with '${config_name}'."
+
+	fi
+
+	build_and_check_configurations
 
 	# In order to determine the default behavior of the --with[out]-memkind
 	# option, we try to detect whether libmemkind is available. If it is,
@@ -3486,11 +3566,11 @@ main()
 
 	# Echo the installation directories that we settled on.
 	echo "${script_name}: final installation directories:"
-	echo "${script_name}:   prefix:      $(eval echo "${prefix}")"
-	echo "${script_name}:   exec_prefix: $(eval echo "${exec_prefix}")"
-	echo "${script_name}:   libdir:      $(eval echo "$(eval echo "${libdir}")")"
-	echo "${script_name}:   includedir:  $(eval echo "${includedir}")"
-	echo "${script_name}:   sharedir:    $(eval echo "${sharedir}")"
+	echo "${script_name}:   prefix:      $(fully_eval "${prefix}")"
+	echo "${script_name}:   exec_prefix: $(fully_eval "${exec_prefix}")"
+	echo "${script_name}:   libdir:      $(fully_eval "${libdir}")"
+	echo "${script_name}:   includedir:  $(fully_eval "${includedir}")"
+	echo "${script_name}:   sharedir:    $(fully_eval "${sharedir}")"
 	echo "${script_name}: NOTE: the variables above can be overridden when running make."
 
 	# Check if CFLAGS is non-empty.
@@ -3501,6 +3581,16 @@ main()
 	else
 		cflags_preset=''
 		echo "${script_name}: no preset CFLAGS detected."
+	fi
+
+	# Check if CXXFLAGS is non-empty.
+	if [ -n "${CXXFLAGS}" ]; then
+		cxxflags_preset="${CXXFLAGS}"
+		echo "${script_name}: detected preset CXXFLAGS; prepending:"
+		echo "${script_name}:   ${cxxflags_preset}"
+	else
+		cxxflags_preset=''
+		echo "${script_name}: no preset CXXFLAGS detected."
 	fi
 
 	# Check if LDFLAGS is non-empty.
@@ -3908,24 +3998,6 @@ main()
 		echo "${script_name}: the CBLAS compatibility layer is disabled."
 		enable_cblas_01=0
 	fi
-	if [[ ${enable_mixed_dt} = yes ]]; then
-		echo "${script_name}: mixed datatype support is enabled."
-
-		if [[ ${enable_mixed_dt_extra_mem} = yes ]]; then
-			echo "${script_name}: mixed datatype optimizations requiring extra memory are enabled."
-			enable_mixed_dt_extra_mem_01=1
-		else
-			echo "${script_name}: mixed datatype optimizations requiring extra memory are disabled."
-			enable_mixed_dt_extra_mem_01=0
-		fi
-
-		enable_mixed_dt_01=1
-	else
-		echo "${script_name}: mixed datatype support is disabled."
-
-		enable_mixed_dt_extra_mem_01=0
-		enable_mixed_dt_01=0
-	fi
 	if [[ ${enable_sup_handling} = yes ]]; then
 		echo "${script_name}: sup (skinny/unpacked) matrix handling is enabled."
 		enable_sup_handling_01=1
@@ -4092,45 +4164,21 @@ main()
 
 	echo "${script_name}: configuring complex return type as \"${complex_return}\"."
 
-	# Variables that may contain forward slashes, such as paths, need extra
-	# escaping when used in sed commands. We insert those extra escape
-	# characters here so that the sed commands below do the right thing.
-	os_name_esc=$(echo     "${os_name}"      | sed 's/\//\\\//g')
-	prefix_esc=$(echo      "${prefix}"       | sed 's/\//\\\//g')
-	exec_prefix_esc=$(echo "${exec_prefix}"  | sed 's/\//\\\//g')
-	libdir_esc=$(echo      "${libdir}"       | sed 's/\//\\\//g')
-	includedir_esc=$(echo  "${includedir}"   | sed 's/\//\\\//g')
-	sharedir_esc=$(echo    "${sharedir}"     | sed 's/\//\\\//g')
-	dist_path_esc=$(echo   "${dist_path}"    | sed 's/\//\\\//g')
-	cc_esc=$(echo          "${found_cc}"     | sed 's/\//\\\//g')
-	cxx_esc=$(echo         "${found_cxx}"    | sed 's/\//\\\//g')
-	ar_esc=$(echo          "${found_ar}"     | sed 's/\//\\\//g')
-	ranlib_esc=$(echo      "${found_ranlib}" | sed 's/\//\\\//g')
-	python_esc=$(echo      "${found_python}" | sed 's/\//\\\//g')
+	# Set a default value and friendlier name for LIBPTHREAD
+	libpthread="${LIBPTHREAD--lpthread}"
 
-	libpthread_esc=$(echo "${LIBPTHREAD--lpthread}" | sed 's/\//\\\//g')
-	cflags_preset_esc=$(echo "${cflags_preset}" | sed 's/\//\\\//g')
-	ldflags_preset_esc=$(echo "${ldflags_preset}" | sed 's/\//\\\//g')
-
-	# For Windows builds, clear the libpthread_esc variable so that
+	# For Windows builds, clear the libpthread variable so that
 	# no pthreads library is substituted into config.mk. (Windows builds
 	# employ an implementation of pthreads that is internal to BLIS.)
 	if [[ "$is_win" == "yes" && "$cc_vendor" == "clang" ]]; then
-		libpthread_esc=
+		libpthread=
 	fi
 
-	# We also clear the libpthread_esc variable for systemless builds
+	# We also clear the libpthread variable for systemless builds
 	# (--disable-system).
 	if [[ "$enable_system" == "no" ]]; then
-		libpthread_esc=
+		libpthread=
 	fi
-
-	# Typically, there are no slashes in the version variable. However,
-	# downstream maintainers (such as those for Debian) may create custom
-	# tags in their local clones such as "upstream/0.4.1", which obviously
-	# contain slashes. This line, and subsequent use of the escaped variable
-	# for the version string, accommodates those use cases.
-	version_esc=$(echo "${version}" | sed 's/\//\\\//g')
 
 	# Create a #define for the configuration family (config_name).
 	uconf=$(echo "${config_name}" | tr '[:lower:]' '[:upper:]')
@@ -4196,118 +4244,101 @@ main()
 	fi
 
 
-	# -- Instantiate config.mk file from template ------------------------------
+	# -- Instantiate configuration files from templates ------------------------
 
-	# Begin substituting information into the config_mk_in file, outputting
-	# to config_mk_out.
-	echo "${script_name}: creating ${config_mk_out_path} from ${config_mk_in_path}"
-	sed <"${config_mk_in_path}" >"${config_mk_out_path}"          \
-	-e "s/@version@/${version_esc}/g"                             \
-	-e "s/@so_version_major@/${so_version_major}/g"               \
-	-e "s/@so_version_minorbuild@/${so_version_minorbuild}/g"     \
-	-e "s/@config_name@/${config_name}/g"                         \
-	-e "s/@config_list@/${config_list}/g"                         \
-	-e "s/@kernel_list@/${kernel_list}/g"                         \
-	-e "s/@kconfig_map@/${kconfig_map}/g"                         \
-	-e "s/@os_name@/${os_name_esc}/g"                             \
-	-e "s/@is_win@/${is_win}/g"                                   \
-	-e "s/@is_msvc@/${is_msvc}/g"                                 \
-	-e "s/@dist_path@/${dist_path_esc}/g"                         \
-	-e "s/@CC_VENDOR@/${cc_vendor}/g"                             \
-	-e "s/@gcc_older_than_4_9_0@/${gcc_older_than_4_9_0}/g"       \
-	-e "s/@gcc_older_than_6_1_0@/${gcc_older_than_6_1_0}/g"       \
-	-e "s/@gcc_older_than_9_1_0@/${gcc_older_than_9_1_0}/g"       \
-	-e "s/@gcc_older_than_10_3_0@/${gcc_older_than_10_3_0}/g"     \
-	-e "s/@clang_older_than_9_0_0@/${clang_older_than_9_0_0}/g"   \
-	-e "s/@clang_older_than_12_0_0@/${clang_older_than_12_0_0}/g" \
-	-e "s/@aocc_older_than_2_0_0@/${aocc_older_than_2_0_0}/g"     \
-	-e "s/@aocc_older_than_3_0_0@/${aocc_older_than_3_0_0}/g"     \
-	-e "s/@CC@/${cc_esc}/g"                                       \
-	-e "s/@CXX@/${cxx_esc}/g"                                     \
-	-e "s/@AR@/${ar_esc}/g"                                       \
-	-e "s/@RANLIB@/${ranlib_esc}/g"                               \
-	-e "s/@PYTHON@/${python_esc}/g"                               \
-	-e "s/@libpthread@/${libpthread_esc}/g"                       \
-	-e "s/@cflags_preset@/${cflags_preset_esc}/g"                 \
-	-e "s/@ldflags_preset@/${ldflags_preset_esc}/g"               \
-	-e "s/@enable_asan@/${enable_asan}/g"                         \
-	-e "s/@debug_type@/${debug_type}/g"                           \
-	-e "s/@enable_debug@/${enable_debug}/g"                       \
-	-e "s/@enable_system@/${enable_system}/g"                     \
-	-e "s/@threading_model@/${threading_model}/g"                 \
-	-e "s/@prefix@/${prefix_esc}/g"                               \
-	-e "s/@exec_prefix@/${exec_prefix_esc}/g"                     \
-	-e "s/@libdir@/${libdir_esc}/g"                               \
-	-e "s/@includedir@/${includedir_esc}/g"                       \
-	-e "s/@sharedir@/${sharedir_esc}/g"                           \
-	-e "s/@enable_verbose@/${enable_verbose}/g"                   \
-	-e "s/@configured_oot@/${configured_oot}/g"                   \
-	-e "s/@enable_arg_max_hack@/${enable_arg_max_hack}/g"         \
-	-e "s/@enable_static@/${enable_static}/g"                     \
-	-e "s/@enable_shared@/${enable_shared}/g"                     \
-	-e "s/@enable_rpath@/${enable_rpath}/g"                       \
-	-e "s/@export_shared@/${export_shared}/g"                     \
-	-e "s/@enable_blas@/${enable_blas}/g"                         \
-	-e "s/@enable_cblas@/${enable_cblas}/g"                       \
-	-e "s/@enable_level4@/${enable_level4}/g"                     \
-	-e "s/@enable_amd_frame_tweaks@/${enable_amd_frame_tweaks}/g" \
-	-e "s/@enable_memkind@/${enable_memkind}/g"                   \
-	-e "s/@pragma_omp_simd@/${pragma_omp_simd}/g"                 \
-	-e "s/@addon_list@/${addon_list}/g"                           \
-	-e "s/@sandbox@/${sandbox}/g"
+	add_config_var version
+	add_config_var so_version_major
+	add_config_var so_version_minorbuild
+	add_config_var config_name
+	add_config_var config_list
+	add_config_var kernel_list
+	add_config_var full_config_list
+	add_config_var full_subconfig_list
+	add_config_var full_kernel_list
+	add_config_var kconfig_map
+	add_config_var os_name
+	add_config_var is_win
+	add_config_var is_msvc
+	add_config_var dist_path
+	add_config_var CC_VENDOR                 cc_vendor
+	add_config_var gcc_older_than_4_9_0
+	add_config_var gcc_older_than_6_1_0
+	add_config_var gcc_older_than_9_1_0
+	add_config_var gcc_older_than_10_3_0
+	add_config_var clang_older_than_9_0_0
+	add_config_var clang_older_than_12_0_0
+	add_config_var aocc_older_than_2_0_0
+	add_config_var aocc_older_than_3_0_0
+	add_config_var CC                        found_cc
+	add_config_var CXX                       found_cxx
+	add_config_var FC                        found_fc
+	add_config_var AR                        found_ar
+	add_config_var RANLIB                    found_ranlib
+	add_config_var PYTHON                    found_python
+	add_config_var libpthread
+	add_config_var cflags_preset
+	add_config_var cxxflags_preset
+	add_config_var ldflags_preset
+	add_config_var enable_asan
+	add_config_var debug_type
+	add_config_var enable_debug
+	add_config_var mk_enable_system          enable_system
+	add_config_var enable_system             enable_system_01
+	add_config_var threading_model
+	add_config_var prefix
+	add_config_var exec_prefix
+	add_config_var libdir
+	add_config_var includedir
+	add_config_var sharedir
+	add_config_var enable_verbose
+	add_config_var configured_oot
+	add_config_var enable_arg_max_hack
+	add_config_var mk_enable_static          enable_static
+	add_config_var mk_enable_shared          enable_shared
+	add_config_var enable_shared             enable_shared_01
+	add_config_var enable_rpath
+	add_config_var export_shared
+	add_config_var mk_enable_blas            enable_blas
+	add_config_var mk_enable_cblas           enable_cblas
+	add_config_var enable_blas               enable_blas_01
+	add_config_var enable_cblas              enable_cblas_01
+	add_config_var enable_amd_frame_tweaks
+	add_config_var mk_enable_memkind         enable_memkind
+	add_config_var enable_memkind            enable_memkind_01
+	add_config_var pragma_omp_simd
+	add_config_var mk_enable_level4          enable_level4
+	add_config_var enable_level4             enable_level4_01
+	add_config_var addon_list
+	add_config_var sandbox
+	add_config_var config_name_define
+	add_config_var config_list_defines
+	add_config_var kernel_list_defines
+	add_config_var enable_tls                enable_tls_01
+	add_config_var enable_openmp             enable_openmp_01
+	add_config_var enable_openmp_as_def      enable_openmp_as_def_01
+	add_config_var enable_pthreads           enable_pthreads_01
+	add_config_var enable_pthreads_as_def    enable_pthreads_as_def_01
+	add_config_var enable_hpx                enable_hpx_01
+	add_config_var enable_hpx_as_def         enable_hpx_as_def_01
+	add_config_var enable_jrir_rr            enable_jrir_rr_01
+	add_config_var enable_jrir_slab          enable_jrir_slab_01
+	add_config_var enable_jrir_tlb           enable_jrir_tlb_01
+	add_config_var enable_pba_pools          enable_pba_pools_01
+	add_config_var enable_sba_pools          enable_sba_pools_01
+	add_config_var enable_mem_tracing        enable_mem_tracing_01
+	add_config_var int_type_size
+	add_config_var blas_int_type_size
+	add_config_var enable_sup_handling       enable_sup_handling_01
+	add_config_var enable_trsm_preinversion  enable_trsm_preinversion_01
+	add_config_var enable_pragma_omp_simd    enable_pragma_omp_simd_01
+	add_config_var enable_sandbox            enable_sandbox_01
+	add_config_var complex_return_intel      complex_return_intel01
+	add_config_var addon_list_includes
+	add_config_var enable_addons             enable_addons_01
 
-	# -- Instantiate bli_config.h file from template ---------------------------
-
-	# Begin substituting information into the bli_config_h_in file, outputting
-	# to bli_config_h_out. NOTE: We use perl instead of sed because the version
-	# of sed used on OS X is old and does not handle the '\n' character
-	# intuitively, which was used when constructing ${config_name_define},
-	# ${config_list_defines}, and ${kernel_list_defines}.
-	echo "${script_name}: creating ${bli_config_h_out_path} from ${bli_config_h_in_path}"
-	<"${bli_config_h_in_path}" perl -p                                   \
-	-e "s/\@config_name_define\@/${config_name_define}/g;"               \
-	-e "s/\@config_list_defines\@/${config_list_defines}/g;"             \
-	-e "s/\@kernel_list_defines\@/${kernel_list_defines}/g;"             \
-	| sed >"${bli_config_h_out_path}"                                    \
-	-e "s/@version@/${version_esc}/g"                                    \
-	-e "s/@enable_system@/${enable_system_01}/g"                         \
-	-e "s/@enable_tls@/${enable_tls_01}/g"                               \
-	-e "s/@enable_openmp@/${enable_openmp_01}/g"                         \
-	-e "s/@enable_openmp_as_def@/${enable_openmp_as_def_01}/g"           \
-	-e "s/@enable_pthreads@/${enable_pthreads_01}/g"                     \
-	-e "s/@enable_pthreads_as_def@/${enable_pthreads_as_def_01}/g"       \
-	-e "s/@enable_hpx@/${enable_hpx_01}/g"                               \
-	-e "s/@enable_hpx_as_def@/${enable_hpx_as_def_01}/g"                 \
-	-e "s/@enable_jrir_rr@/${enable_jrir_rr_01}/g"                       \
-	-e "s/@enable_jrir_slab@/${enable_jrir_slab_01}/g"                   \
-	-e "s/@enable_jrir_tlb@/${enable_jrir_tlb_01}/g"                     \
-	-e "s/@enable_pba_pools@/${enable_pba_pools_01}/g"                   \
-	-e "s/@enable_sba_pools@/${enable_sba_pools_01}/g"                   \
-	-e "s/@enable_mem_tracing@/${enable_mem_tracing_01}/g"               \
-	-e "s/@int_type_size@/${int_type_size}/g"                            \
-	-e "s/@blas_int_type_size@/${blas_int_type_size}/g"                  \
-	-e "s/@enable_blas@/${enable_blas_01}/g"                             \
-	-e "s/@enable_cblas@/${enable_cblas_01}/g"                           \
-	-e "s/@enable_mixed_dt@/${enable_mixed_dt_01}/g"                     \
-	-e "s/@enable_mixed_dt_extra_mem@/${enable_mixed_dt_extra_mem_01}/g" \
-	-e "s/@enable_sup_handling@/${enable_sup_handling_01}/g"             \
-	-e "s/@enable_memkind@/${enable_memkind_01}/g"                       \
-	-e "s/@enable_trsm_preinversion@/${enable_trsm_preinversion_01}/g"   \
-	-e "s/@enable_level4@/${enable_level4_01}/g"                         \
-	-e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g"       \
-	-e "s/@enable_sandbox@/${enable_sandbox_01}/g"                       \
-	-e "s/@enable_shared@/${enable_shared_01}/g"                         \
-	-e "s/@complex_return_intel@/${complex_return_intel01}/g"
-
-	# -- Instantiate bli_addon.h file from template ----------------------------
-
-	# Begin substituting information into the bli_addon_h_in file, outputting
-	# to bli_addon_h_out. NOTE: We use perl instead of sed because the version
-	# of sed used on OS X is old and does not handle the '\n' character
-	# intuitively, which was used when constructing ${addon_list_includes}.
-	echo "${script_name}: creating ${bli_addon_h_out_path} from ${bli_addon_h_in_path}"
-	perl -pe "s/\@addon_list_includes\@/${addon_list_includes}/g" "${bli_addon_h_in_path}" \
-	| sed -e "s/@enable_addons@/${enable_addons_01}/g" > "${bli_addon_h_out_path}"
+	generate_config_file "${config_mk_in_path}"    "${config_mk_out_path}"
+	generate_config_file "${bli_config_h_in_path}" "${bli_config_h_out_path}"
+	generate_config_file "${bli_addon_h_in_path}"  "${bli_addon_h_out_path}"
 
 	# -- Create top-level object directories -----------------------------------
 
@@ -4464,17 +4495,6 @@ main()
 
 	# -- Generate makefile fragements ------------------------------------------
 
-	create_makefile_fragment() {
-		echo "${script_name}: creating makefile fragments in $3"
-		"${gen_make_frags_sh}"                           \
-			-h -r -v0                                \
-			-o "${script_name}"                      \
-			-p "$1" "$2" "$3"                        \
-			"${gen_make_frags_dirpath}/fragment.mk"  \
-			"${gen_make_frags_dirpath}/suffix_list"  \
-			"${gen_make_frags_dirpath}/ignore_list"
-	}
-
 	clist_contains_cname=$(is_in_list "${config_name}" "${config_list}")
 
 	# If the config_list does not already contain the config_name (i.e.,
@@ -4569,5 +4589,822 @@ main()
 }
 
 
+#
+# -- plugin functions ----------------------------------------------------------
+#
+
+print_usage_plugin()
+{
+	# Use the version string in the 'version' file since we don't have
+	# the patched version string yet.
+	if [ -z "${version}" ]; then
+		version=$(<"${version_filepath}")
+	fi
+
+	# Echo usage info.
+	cat <<EOF
+
+ ${script_name} (BLIS ${version})
+
+ Configure a BLIS plugin for compilation.
+
+ Usage:
+
+   ${script_name} [options] [env. vars.] plugin_name
+
+ Arguments:
+
+   plugin_name   The name of the plugin which is being configured. This
+                 name will form part of the symbol name for the kernel
+                 registration function. This argument is optional if it
+                 can be determined from the name of an existing
+                 bli_plugin_<plugin_name>.h file.
+
+ Options:
+
+   --init
+
+                 A synonym for '--disable-examples --enable-templates --disable-build'.
+
+   --build
+
+                 A synonym for '--disable-examples --disable-templates --enable-build'.
+
+   --disable-examples, --enable-examples
+
+                 Do not include (created by default) example code for plugin
+                 registration, kernels, etc.
+
+   --disable-templates, --enable-templates
+
+                 Do not create (created by default) files which make up the
+                 basic plug-in file structure, for example if the plugin has
+                 already been created and only build files need to be generated.
+
+   --disable-build, --enable-build
+
+                 Do not create (created by default) files necessary for
+                 actually building the plugin. ${script_name} can be re-run
+                 later to generate these files if desired.
+
+   --enable-verbose-make, --disable-verbose-make
+
+                 Enable (disabled by default) verbose compilation output
+                 during make.
+
+   --enable-arg-max-hack --disable-arg-max-hack
+
+                 Enable (disabled by default) build system logic that
+                 will allow archiving/linking the static/shared library
+                 even if the command plus command line arguments exceeds
+                 the operating system limit (ARG_MAX).
+
+   -d DEBUG, --enable-debug[=DEBUG]
+
+                 Enable debugging symbols in the library. If argument
+                 DEBUG is given as 'opt', then optimization flags are
+                 kept in the framework, otherwise optimization is
+                 turned off.
+
+   --disable-static, --enable-static
+
+                 Disable (enabled by default) building BLIS as a static
+                 library. If the static library build is disabled, the
+                 shared library build must remain enabled.
+
+   --disable-shared, --enable-shared
+
+                 Disable (enabled by default) building BLIS as a shared
+                 library. If the shared library build is disabled, the
+                 static library build must remain enabled.
+
+   --enable-rpath, --disable-rpath
+
+                 Enable (disabled by default) setting an install_name for
+                 dynamic libraries on macOS which starts with @rpath rather
+                 than the absolute install path.
+
+   -e SYMBOLS, --export-shared[=SYMBOLS]
+
+                 Specify the subset of library symbols that are exported
+                 within a shared library. Valid values for SYMBOLS are:
+                 'public' (the default) and 'all'. By default, only
+                 functions and variables that belong to public APIs are
+                 exported in shared libraries. However, the user may
+                 instead export all symbols in BLIS, even those that were
+                 intended for internal use only. Note that the public APIs
+                 encompass all functions that almost any user would ever
+                 want to call, including the BLAS/CBLAS compatibility APIs
+                 as well as the basic and expert interfaces to the typed
+                 and object APIs that are unique to BLIS. Also note that
+                 changing this option to 'all' will have no effect in some
+                 environments, such as when compiling with clang on
+                 Windows.
+
+   --enable-asan, --disable-asan
+
+                 Enable (disabled by default) compiling and linking BLIS
+                 framework code with the AddressSanitizer (ASan) library.
+                 Optimized kernels are NOT compiled with ASan support due
+                 to limitations of register assignment in inline assembly.
+                 WARNING: ENABLING THIS OPTION WILL NEGATIVELY IMPACT
+                 PERFORMANCE. Please use only for informational/debugging
+                 purposes.
+
+   -p PATH, --path=PATH
+
+                 Look for the plugin source in PATH instead of the current
+                 directory. This option is used to build the plugin
+                 out-of-tree. In this case, only '--enable-build' (== '--build')
+                 may be specified.
+
+   -q, --quiet   Suppress informational output.
+
+   -f, --force   Overwrite any files in the current directory which are
+                 normally copied by configure-plugin, for example 'Makefile'
+                 and 'config_registry'.
+
+   -h, --help    Output this information and quit.
+
+ Environment Variables:
+
+   CC            Specifies the C compiler to use.
+   CXX           Specifies the C++ compiler to use.
+   FC            Specifies the Fortran compiler to use.
+   AR            Specifies the static library archiver to use.
+   RANLIB        Specifies the ranlib (library indexer) executable to use.
+   CFLAGS        Specifies additional compiler flags to use (prepended).
+   LDFLAGS       Specifies additional linker flags to use (prepended).
+
+   Environment variables are traditionally set prior to running configure-plugin:
+
+     CC=gcc ./configure-plugin [options] plugin-name
+
+   However, they may also be specified as command line options, e.g.:
+
+     ./configure-plugin [options] CC=gcc plugin-name
+
+   Note that the compiler used must be compatible with the compiler used
+   to compile the BLIS library.
+
+EOF
+
+	# Exit with non-zero exit status
+	exit 1
+}
+
+get_config_var()
+{
+	echo "$(grep "^ *$1 *:=" ${sharedir}/blis/config.mk | sed 's/'$1' *:= *//')"
+}
+
+maybe_echo()
+{
+	[ ${quiet_flag} == '0' ] && echo "$@"
+}
+
+strip_examples()
+{
+	local src dest
+
+	src="$1"
+	dest="$2"
+
+	perl -p0 -e 's/[^\n]*----->.*<-----[^\n]*//gms;' -e 's/[^\n]*<-----[^\n]*\n//gms;' "${src}" > "${dest}"
+}
+
+plugin_main()
+{
+	# -- Basic names and paths --
+
+	# The name of the script, stripped of any preceeding path.
+	script_name=${0##*/}
+
+	# The path to the script. We need this to find the top-level directory
+	# of the source distribution in the event that the user has chosen to
+	# build elsewhere.
+	sharedir=${0%"/${script_name}"}/..
+	add_config_var sharedir
+
+	# Other paths which we'll need to build the plugin
+	prefix=$(get_config_var prefix | sed 's/\$/\\\\\\$/g')
+	exec_prefix=$(get_config_var exec_prefix | sed 's/\$/\\\\\\$/g')
+	libdir=$(get_config_var libdir | sed 's/\$/\\\\\\$/g')
+	includedir=$(get_config_var includedir | sed 's/\$/\\\\\\$/g')
+	add_config_var prefix
+	add_config_var exec_prefix
+	add_config_var libdir
+	add_config_var includedir
+
+	# Compiler information which might be overridden for this plugin.
+	CC="${CC-$(get_config_var CC)}"
+	CXX="${CXX-$(get_config_var CXX)}"
+	FC="${FC-$(get_config_var FC)}"
+	PYTHON="${PYTHON-$(get_config_var PYTHON)}"
+	AR="${AR-$(get_config_var AR)}"
+	RANLIB="${RANLIB-$(get_config_var RANLIB)}"
+	add_config_var CC        found_cc
+	add_config_var CC_VENDOR cc_vendor
+	add_config_var CXX       found_cxx
+	add_config_var FC        found_fc
+	add_config_var AR        found_ar
+	add_config_var RANLIB    found_ranlib
+	add_config_var PYTHON    found_python
+
+	add_config_var gcc_older_than_4_9_0
+	add_config_var gcc_older_than_6_1_0
+	add_config_var gcc_older_than_9_1_0
+	add_config_var gcc_older_than_10_3_0
+	add_config_var clang_older_than_9_0_0
+	add_config_var clang_older_than_12_0_0
+	add_config_var aocc_older_than_2_0_0
+	add_config_var aocc_older_than_3_0_0
+
+	asm_dir="${sharedir}/blis"
+	omp_simd_path="${sharedir}/blis"
+
+	# Path to 'mirror-tree.sh' script.
+	mirror_tree_sh="${sharedir}/blis/mirror-tree.sh"
+
+	# Path to 'gen-make-frags.sh' script.
+	gen_make_frags_sh="${sharedir}/blis/gen-make-frag.sh"
+	gen_make_frags_dirpath="${sharedir}/blis"
+
+	# The major and minor/build .so version numbers.
+	so_version_major=$(get_config_var SO_MAJOR)
+	so_version_minorbuild=$(get_config_var SO_MINORB)
+
+	# The preset value of CFLAGS and LDFLAGS (ie: compiler and linker flags
+	# to use in addition to those determined by the build system).
+	cflags_preset=$(get_config_var CFLAGS_PRESET)
+	cxxflags_preset=$(get_config_var CXXFLAGS_PRESET)
+	ldflags_preset=$(get_config_var LDFLAGS_PRESET)
+	add_config_var cflags_preset
+	add_config_var cxxflags_preset
+	add_config_var ldflags_preset
+
+	# Option variables.
+	quiet_flag='0'
+	force_flag='0'
+	show_config_list='0'
+	examples_flag='1'
+	buildfiles_flag='1'
+	templates_flag='1'
+
+	# Additional flags.
+	enable_verbose=$(get_config_var ENABLE_VERBOSE)
+	enable_static=$(get_config_var MK_ENABLE_STATIC)
+	enable_shared=$(get_config_var MK_ENABLE_SHARED)
+	enable_rpath=$(get_config_var MK_ENABLE_RPATH)
+	export_shared=$(get_config_var EXPORT_SHARED)
+	enable_asan=$(get_config_var MK_ENABLE_ASAN)
+	enable_debug=$(get_config_var ENABLE_DEBUG)
+	debug_type=$(get_config_var DEBUG_TYPE)
+	enable_arg_max_hack=$(get_config_var ARG_MAX_HACK)
+	add_config_var enable_verbose
+	add_config_var mk_enable_static enable_static
+	add_config_var mk_enable_shared enable_shared
+	add_config_var enable_rpath
+	add_config_var export_shared
+	add_config_var enable_asan
+	add_config_var enable_debug
+	add_config_var debug_type
+	add_config_var enable_arg_max_hack
+
+	# -- Configuration registry --
+
+	# The name of the chosen configuration (the configuration "family").
+	config_name=$(get_config_var CONFIG_NAME)
+
+	# The list of sub-configurations associated with config_name.
+	config_list=''
+
+	# The list of kernel sets that will be needed by the sub-configurations
+	# in config_list.
+	kernel_list=''
+
+	# The list of kernel:sub-configuration pairs for all kernels contained
+	# in kernel_list.
+	kconfig_map=''
+	add_config_var kconfig_map
+
+	# BLIS version.
+	version=$(get_config_var VERSION)
+
+	# The list of all sub-configurations and configuration families.
+	full_config_list=$(get_config_var FULL_CONFIG_LIST)
+	full_subconfig_list=$(get_config_var FULL_SUBCONFIG_LIST)
+
+	# The list of all kernel sets.
+	full_kernel_list=$(get_config_var FULL_KERNEL_LIST)
+
+	# -- Command line option/argument parsing ----------------------------------
+
+	# By default build in-tree
+	plugin_dir="."
+
+	found=true
+	while [[ $found = true ]]; do
+
+		# Process our command line options.
+		unset OPTIND
+		while getopts ":hcd:e:p:qf-:" opt; do
+			case $opt in
+				-)
+					case "$OPTARG" in
+
+						help)
+							print_usage_plugin
+							;;
+
+						init)
+							examples_flag=0
+							templates_flag=1
+							buildfiles_flag=0
+							;;
+
+						build)
+							examples_flag=0
+							templates_flag=0
+							buildfiles_flag=1
+							;;
+
+						quiet)
+							quiet_flag=1
+							;;
+
+						force)
+							force_flag=1
+							;;
+
+						enable-examples)
+							examples_flag=1
+							;;
+						disable-examples)
+							examples_flag=0
+							;;
+
+						enable-templates)
+							templates_flag=1
+							;;
+						disable-templates)
+							templates_flag=0
+							;;
+
+						enable-build)
+							buildfiles_flag=1
+							;;
+						disable-build)
+							buildfiles_flag=0
+							;;
+
+						path=*)
+							plugin_dir=${OPTARG#*=}
+							;;
+
+						enable-debug)
+							debug_type=noopt
+							;;
+						enable-debug=*)
+							debug_type=${OPTARG#*=}
+							;;
+						disable-debug)
+							debug_type='off'
+							;;
+
+						enable-asan)
+							enable_asan='yes'
+							;;
+						disable-asan)
+							enable_asan='no'
+							;;
+
+						enable-verbose-make)
+							enable_verbose='yes'
+							;;
+						disable-verbose-make)
+							enable_verbose='no'
+							;;
+
+						enable-arg-max-hack)
+							enable_arg_max_hack='yes'
+							;;
+						disable-arg-max-hack)
+							enable_arg_max_hack='no'
+							;;
+
+						enable-static)
+							enable_static='yes'
+							;;
+						disable-static)
+							enable_static='no'
+							;;
+
+						enable-shared)
+							enable_shared='yes'
+							;;
+						disable-shared)
+							enable_shared='no'
+							;;
+
+						enable-rpath)
+							enable_rpath='yes'
+							;;
+						disable-rpath)
+							enable_rpath='no'
+							;;
+
+						export-shared=*)
+							export_shared=${OPTARG#*=}
+							;;
+
+						show-config-list)
+							show_config_list=1
+							;;
+
+						*)
+							print_usage_plugin
+							;;
+					esac;;
+				h)
+					print_usage_plugin
+					;;
+				d)
+					debug_type=$OPTARG
+					;;
+				e)
+					export_shared=$OPTARG
+					;;
+				p)
+					plugin_dir=$OPTARG
+					;;
+				q)
+					quiet_flag=1
+					;;
+				f)
+					force_flag=1
+					;;
+				c)
+					show_config_list=1
+					;;
+				\?)
+					print_usage_plugin
+					;;
+			esac
+		done
+		shift $((OPTIND - 1))
+
+		# Parse environment variables
+		found=false
+		while [ $# -gt 0 ]; do
+			case $1 in
+				*=*)
+					var=$(expr "$1" : '\([^=]*\)=')
+					value=$(expr "$1" : '[^=]*=\(.*\)')
+					eval "export $var=\$value"
+					shift
+					found=true
+					;;
+				*)
+					break
+					;;
+			esac
+		done
+	done
+
+	# The path to the directory in which we are building. We do this to
+	# make explicit that we distinguish between the top-level directory
+	# of the distribution and the directory in which we are building.
+	cur_dirpath="."
+
+	# The name of the (top-level) configuration directory.
+	config_dir='config'
+	config_dirpath="${plugin_dir}/${config_dir}"
+
+	# The name of the (top-level) kernels directory.
+	kernels_dir='kernels'
+	kernels_dirpath="${plugin_dir}/${kernels_dir}"
+
+	# The name of the (top-level) reference kernels directory.
+	refkern_dir='ref_kernels'
+	refkern_dirpath="${plugin_dir}/${refkern_dir}"
+
+	add_config_var plugin_dir
+
+	# Get the name of the plugin to build.
+	if [ $# -gt "1" ]; then   # more than one configuration argument given.
+		print_usage_plugin
+	elif [ $# == "0" ]; then   # try to guess the plugin name.
+		plugin_h=$(ls ${plugin_dir}/bli_plugin_*.h 2>/dev/null)
+		if [ -z ${plugin_h} ]; then
+			print_usage_plugin
+		else
+			plugin_name=$(echo ${plugin_h} | sed -e 's/.*bli_plugin_//' -e 's/\.h//')
+		fi
+	else
+		plugin_name="${1}"
+	fi
+	add_config_var plugin_name
+
+	maybe_echo "${script_name}: configuring BLIS plugin '${plugin_name}'"
+
+	if [[ ${plugin_dir} != . ]]; then
+		if [ ${templates_flag} == '1' ] ||
+		   [ ${examples_flag}  == '1' ]; then
+			echo "${script_name}: *** Only --enable-build may be specified when configuring out-of-tree."
+			echo "${script_name}: *** Please use '--build' with '-p' or '--path'."
+			exit 1
+		fi
+	fi
+
+	# Check if CFLAGS is non-empty.
+	if [ -n "${CFLAGS}" ]; then
+		cflags_preset="${CFLAGS}"
+		maybe_echo "${script_name}: detected preset CFLAGS; prepending:"
+		maybe_echo "${script_name}:   ${cflags_preset}"
+	else
+		cflags_preset=''
+		maybe_echo "${script_name}: no preset CFLAGS detected."
+	fi
+
+	# Check if CXXFLAGS is non-empty.
+	if [ -n "${CXXFLAGS}" ]; then
+		cxxflags_preset="${CXXFLAGS}"
+		maybe_echo "${script_name}: detected preset CXXFLAGS; prepending:"
+		maybe_echo "${script_name}:   ${cxxflags_preset}"
+	else
+		cxxflags_preset=''
+		maybe_echo "${script_name}: no preset CXXFLAGS detected."
+	fi
+
+	# Check if LDFLAGS is non-empty.
+	if [ -n "${LDFLAGS}" ]; then
+		ldflags_preset="${LDFLAGS}"
+		maybe_echo "${script_name}: detected preset LDFLAGS; prepending:"
+		maybe_echo "${script_name}:   ${ldflags_preset}"
+	else
+		ldflags_preset=''
+		maybe_echo "${script_name}: no preset LDFLAGS detected."
+	fi
+
+	# Check if the verbose make flag was specified.
+	if [[ ${enable_verbose} = yes ]]; then
+		maybe_echo "${script_name}: enabling verbose make output. (disable with 'make V=0'.)"
+	else
+		maybe_echo "${script_name}: disabling verbose make output. (enable with 'make V=1'.)"
+	fi
+
+	# Check if the ARG_MAX hack was requested.
+	if [[ ${enable_arg_max_hack} = yes ]]; then
+		maybe_echo "${script_name}: enabling ARG_MAX hack."
+	else
+		echo "${script_name}: disabling ARG_MAX hack."
+	fi
+
+	# Check if the debug flag was specified.
+	if [[ ${debug_type} = opt ]]; then
+		enable_debug='yes'
+		maybe_echo "${script_name}: enabling debug symbols with optimizations."
+	elif [[ ${debug_type} = sde ]]; then
+		enable_debug='yes'
+		maybe_echo "${script_name}: enabling SDE processor emulation."
+	elif [[ ${debug_type} = noopt ]]; then
+		enable_debug='yes'
+		maybe_echo "${script_name}: enabling debug symbols; optimizations disabled."
+	else
+		debug_type='off'
+		enable_debug='no'
+		maybe_echo "${script_name}: debug symbols disabled."
+	fi
+
+	# Check if the AddressSanitizer flag was specified.
+	if [[ ${enable_asan} = yes ]]; then
+		maybe_echo "${script_name}: enabling AddressSanitizer support (except for optimized kernels)."
+	else
+		enable_asan='no'
+		maybe_echo "${script_name}: AddressSanitizer support disabled."
+	fi
+
+	# Check if the static lib flag was specified.
+	if   [[ ${enable_static} = yes && ${enable_shared} = yes ]]; then
+		maybe_echo "${script_name}: building BLIS plugin '${plugin_name}' as both static and shared libraries."
+		enable_shared_01=1
+	elif [[ ${enable_static} = no && ${enable_shared} = yes ]]; then
+		maybe_echo "${script_name}: building BLIS plugin '${plugin_name}' as a shared library (static library disabled)."
+		enable_shared_01=1
+	elif [[ ${enable_static} = yes && ${enable_shared} = no ]]; then
+		maybe_echo "${script_name}: building BLIS plugin '${plugin_name}' as a static library (shared library disabled)."
+		enable_shared_01=0
+	else
+		maybe_echo "${script_name}: Both static and shared libraries were disabled."
+		maybe_echo "${script_name}: *** Please enable one (or both) to continue."
+		exit 1
+	fi
+
+	# Check if the "export shared" flag was specified.
+	if [[ ${export_shared} = all ]]; then
+		if [[ ${enable_shared} = yes ]]; then
+			echo "${script_name}: exporting all symbols within shared library."
+		else
+			echo "${script_name}: ignoring request to export all symbols within shared library."
+		fi
+	elif [[ ${export_shared} = public ]]; then
+		if [[ ${enable_shared} = yes ]]; then
+			echo "${script_name}: exporting only public symbols within shared library."
+		fi
+	else
+		echo "${script_name}: *** Invalid argument '${export_shared}' to --export-shared option given."
+		echo "${script_name}: *** Please use 'public' or 'all'."
+		exit 1
+	fi
+
+	if [ ${templates_flag} == '1' ]; then
+
+		plugin_h="\"bli_plugin_${plugin_name}.h\""
+
+		# -- config_registry --
+
+		maybe_echo -n "${script_name}: copying the configuration registry..."
+
+		if [ -e config_registry ] && [ ${force_flag} == '0' ]; then
+			maybe_echo "already done"
+		else
+			cp ${sharedir}/blis/config_registry config_registry
+			maybe_echo "done"
+		fi
+
+		# -- bli_plugin_register.c --
+
+		maybe_echo -n "${script_name}: copying bli_plugin_register.c..."
+
+		if [ -e bli_plugin_register.c ] && [ ${force_flag} == '0' ]; then
+			maybe_echo "already done"
+		else
+			if [ ${examples_flag} == '1' ]; then
+				cp ${sharedir}/blis/plugin/bli_plugin_register.c bli_plugin_register.c
+			else
+				strip_examples ${sharedir}/blis/plugin/bli_plugin_register.c bli_plugin_register.c
+			fi
+			perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|" bli_plugin_register.c
+			maybe_echo "done"
+		fi
+
+		# -- bli_plugin_<name>.h --
+
+		if [ -e bli_plugin_${plugin_name}.h ] && [ ${force_flag} == '0' ]; then
+			maybe_echo "${script_name}: creating bli_plugin_${plugin_name}.h from ${sharedir}/blis/plugin/bli_plugin.h.in...already done"
+		else
+			if [ ${examples_flag} == '1' ]; then
+				generate_config_file ${sharedir}/blis/plugin/bli_plugin.h.in bli_plugin_${plugin_name}.h
+			else
+				generate_config_file ${sharedir}/blis/plugin/bli_plugin.h.in bli_plugin_${plugin_name}_.h
+				strip_examples bli_plugin_${plugin_name}_.h bli_plugin_${plugin_name}.h
+				rm bli_plugin_${plugin_name}_.h
+			fi
+		fi
+
+		# -- ref_kernels directory --
+
+		maybe_echo -n "${script_name}: creating ref_kernels directory..."
+
+		done="true"
+		if [ ${examples_flag} == '1' ]; then
+			files="bli_plugin_init_ref.c my_kernel_1_ref.c my_kernel_2_ref.c"
+		else
+			files="bli_plugin_init_ref.c"
+		fi
+		for file in ${files}; do
+			if [ ! -e ref_kernels/${file} ] || [ ${force_flag} == '1' ]; then
+				mkdir -p ref_kernels
+				if [ ${examples_flag} == '1' ]; then
+					cp ${sharedir}/blis/plugin/${file} ref_kernels/${file}
+				else
+					strip_examples ${sharedir}/blis/plugin/${file} ref_kernels/${file}
+				fi
+				perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|" ref_kernels/${file}
+				done="false"
+			fi
+		done
+
+		if [ "${done}" == "true" ]; then
+			maybe_echo "already done"
+		else
+			maybe_echo "done"
+		fi
+
+		# -- config directory --
+
+		maybe_echo "${script_name}: creating config directories:"
+
+		for config in ${full_config_list}; do
+			maybe_echo -n "${script_name}:   config/${config}..."
+
+			if [ -e config/${config}/make_defs.mk ] && [ ${force_flag} == '0' ]; then
+				maybe_echo "already done"
+			else
+				mkdir -p config/${config}
+				cp ${sharedir}/blis/config/${config}/make_defs.mk config/${config}
+				maybe_echo "done"
+			fi
+		done
+
+		for config in ${full_subconfig_list}; do
+			if [ ! -e config/${config}/bli_plugin_init_${config}.c ] || [ ${force_flag} == '1' ]; then
+				if [ ${config} != zen3 ] || [ ${examples_flag} == '0' ]; then
+					strip_examples ${sharedir}/blis/plugin/bli_plugin_init_zen3.c config/${config}/bli_plugin_init_${config}.c
+					perl -pi -e "s/zen3/${config}/g" config/${config}/bli_plugin_init_${config}.c
+				else
+					cp ${sharedir}/blis/plugin/bli_plugin_init_zen3.c config/${config}/bli_plugin_init_${config}.c
+				fi
+				perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|" config/${config}/bli_plugin_init_${config}.c
+			fi
+
+			if [ ! -e config/${config}/bli_kernel_defs_${config}.h ] || [ ${force_flag} == '1' ]; then
+				cp ${sharedir}/blis/config/${config}/bli_kernel_defs_${config}.h config/${config}/bli_kernel_defs_${config}.h
+			fi
+		done
+
+		# -- kernels directory --
+
+		maybe_echo "${script_name}: creating kernels directories:"
+
+		for kernels in ${full_kernel_list}; do
+			maybe_echo -n "${script_name}:   kernels/${kernels}..."
+
+			if [ -e kernels/${kernels} ] && [ ${force_flag} == '0' ]; then
+				maybe_echo "already done"
+			else
+				mkdir -p kernels/${kernels}
+				maybe_echo "done"
+			fi
+		done
+
+		if [ ${examples_flag} == '1' ]; then
+			if [ ! -e kernels/zen3/my_kernel_1_zen3.c ] || [ ${force_flag} == '1' ]; then
+				cp ${sharedir}/blis/plugin/my_kernel_1_zen3.c kernels/zen3
+				perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|" kernels/zen3/my_kernel_1_zen3.c
+			fi
+		fi
+
+	fi
+
+	if [ ${buildfiles_flag} == '1' ]; then
+
+		check_build_tools
+
+		# Try to determine whether the chosen compiler supports #pragma omp simd.
+		pragma_omp_simd=$(has_pragma_omp_simd)
+		add_config_var pragma_omp_simd
+
+		# -- Makefile --
+
+		maybe_echo -n "${script_name}: copying Makefile..."
+
+		if [ -e Makefile ] && [ ${force_flag} == '0' ]; then
+			maybe_echo "already done"
+		else
+			cp ${sharedir}/blis/plugin/Makefile Makefile
+			maybe_echo "done"
+		fi
+
+		# -- config.mk --
+
+		# The name/path to the registry (master list) of supported configurations.
+		registry_file="config_registry"
+		registry_filepath=${plugin_dir}/${registry_file}
+
+		# Read the registered configuration names and lists into associative
+		# arrays.
+		echo -n "${script_name}: reading configuration registry..."
+		read_registry_file "${registry_filepath}"
+		echo "done."
+
+		build_and_check_configurations
+
+		generate_config_file ${sharedir}/blis/plugin/config.mk.in config.mk
+
+		# -- Makefile fragments --
+
+		# The extra '/.' on the FRAME call is necessary to trick create_makefile_fragments
+		# into not taking the last entry in ${plugin_dir} as the 'current directory name'.
+		create_makefile_fragment FRAME ${plugin_dir}/. obj/${config_name} false
+		create_makefile_fragment CONFIG ${config_dirpath} obj/${config_name}/config
+		create_makefile_fragment KERNELS ${kernels_dirpath} obj/${config_name}/kernels
+		create_makefile_fragment REFKERN ${refkern_dirpath} obj/${config_name}/ref_kernels
+
+	fi
+
+	# Exit peacefully.
+	return 0
+}
+
+
 # The script's main entry point, passing all parameters given.
-main "$@"
+case ${0##*/} in
+	configure)
+		blis_main "$@"
+		;;
+	configure-plugin)
+		plugin_main "$@"
+		;;
+esac

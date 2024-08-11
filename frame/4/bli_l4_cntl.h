@@ -1,0 +1,141 @@
+/*
+
+   BLIS
+   An object-based framework for developing high-performance BLAS-like
+   libraries.
+
+   Copyright (C) 2022, The University of Texas at Austin
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
+   met:
+    - Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    - Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+   HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
+#ifndef BLIS_L4_CNTL_H
+#define BLIS_L4_CNTL_H
+
+struct l4_cntl_s
+{
+	bszid_t           bszid;
+	void_fp           var_func;
+	struct l4_cntl_s* sub_node;
+	void*             params;
+};
+typedef struct l4_cntl_s l4_cntl_t;
+
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE bszid_t bli_l4_cntl_bszid( const l4_cntl_t* cntl )
+{
+	return cntl->bszid;
+}
+
+BLIS_INLINE void_fp bli_l4_cntl_var_func( const l4_cntl_t* cntl )
+{
+	return cntl->var_func;
+}
+
+BLIS_INLINE l4_cntl_t* bli_l4_cntl_sub_node( const l4_cntl_t* cntl )
+{
+	return cntl->sub_node;
+}
+
+BLIS_INLINE void* bli_l4_cntl_params( const l4_cntl_t* cntl )
+{
+	return cntl->params;
+}
+
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE void bli_l4_cntl_set_bszid( bszid_t bszid, l4_cntl_t* cntl )
+{
+	cntl->bszid = bszid;
+}
+
+BLIS_INLINE void bli_l4_cntl_set_var_func( void_fp var_func, l4_cntl_t* cntl )
+{
+	cntl->var_func = var_func;
+}
+
+BLIS_INLINE void bli_l4_cntl_set_params( void* params, l4_cntl_t* cntl )
+{
+	cntl->params = params;
+}
+
+BLIS_INLINE void bli_l4_cntl_set_sub_node( l4_cntl_t* sub_node, l4_cntl_t* cntl )
+{
+	cntl->sub_node = sub_node;
+}
+
+// -----------------------------------------------------------------------------
+
+typedef struct
+{
+	uint64_t size;
+	dim_t    scale_num;
+	dim_t    scale_den;
+	dim_t    depth;
+} l4_params_t;
+
+BLIS_INLINE dim_t bli_l4_params_scale_num( const l4_params_t* params )
+{
+	return params->scale_num;
+}
+
+BLIS_INLINE dim_t bli_l4_params_scale_den( const l4_params_t* params )
+{
+	return params->scale_den;
+}
+
+BLIS_INLINE dim_t bli_l4_params_depth( const l4_params_t* params )
+{
+	return params->depth;
+}
+
+// -----------------------------------------------------------------------------
+
+l4_cntl_t* bli_l4_cntl_create_node
+     (
+       pool_t*    pool,
+       bszid_t    bszid,
+       dim_t      scale_num,
+       dim_t      scale_den,
+       dim_t      depth,
+       void_fp    var_func,
+       l4_cntl_t* sub_node
+     );
+
+void bli_l4_cntl_free
+     (
+       pool_t*    pool,
+       l4_cntl_t* cntl
+     );
+
+void bli_l4_cntl_free_node
+     (
+       pool_t*    pool,
+       l4_cntl_t* cntl
+     );
+
+#endif

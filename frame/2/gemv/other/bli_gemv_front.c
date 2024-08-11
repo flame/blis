@@ -205,7 +205,7 @@ void PASTEMAC(ch,opname) \
 	bli_obj_set_conjtrans( transa, &ao ); \
 	bli_obj_set_conj( conjx, &xo ); \
 \
-	PASTEMAC0(opname)( &alphao, \
+	PASTEMAC(opname)( &alphao, \
 	                   &ao, \
 	                   &xo, \
 	                   &betao, \

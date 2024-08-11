@@ -43,7 +43,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, kerid ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              conj_t conjx, \
              conj_t conjy, \
@@ -87,7 +87,7 @@ INSERT_GENTFUNC_BASIC( axpy2v, BLIS_AXPY2V_KER )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, kerid ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              conj_t conja, \
              conj_t conjx, \
@@ -131,7 +131,7 @@ INSERT_GENTFUNC_BASIC( axpyf, BLIS_AXPYF_KER )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, kerid ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              conj_t conjxt, \
              conj_t conjx, \
@@ -177,7 +177,7 @@ INSERT_GENTFUNC_BASIC( dotaxpyv, BLIS_DOTAXPYV_KER )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, kerid ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              conj_t conjat, \
              conj_t conja, \
@@ -231,7 +231,7 @@ INSERT_GENTFUNC_BASIC( dotxaxpyf, BLIS_DOTXAXPYF_KER )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, kerid ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              conj_t conjat, \
              conj_t conjx, \

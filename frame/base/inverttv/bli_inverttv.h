@@ -52,7 +52,7 @@ void bli_inverttv_check
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH(ch,opname,tsuf)) \
      ( \
              double  thresh, \
              dim_t   m, \
@@ -84,7 +84,7 @@ GENPROT( inverttv )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname) \
      ( \
              double  thresh, \
        const obj_t*  x  \

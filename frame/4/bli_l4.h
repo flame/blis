@@ -40,6 +40,9 @@
 #include "f2c_lapack.h"
 #endif
 
+#include "bli_l4_cntl.h"
+#include "bli_l4_blksz.h"
+
 // Define function types.
 #include "bli_l4_ft_opt.h"
 #include "bli_l4_ft.h"

@@ -38,7 +38,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, arch, suf ) \
 \
-void PASTEMAC3(ch,opname,arch,suf) \
+void PASTEMAC(ch,opname,arch,suf) \
      ( \
              conj_t  conjxt, \
              conj_t  conjx, \

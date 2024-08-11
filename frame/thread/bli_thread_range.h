@@ -41,54 +41,46 @@
 
 BLIS_EXPORT_BLIS void bli_thread_range_sub
      (
-       const thrinfo_t* thread,
-             dim_t      n,
-             dim_t      bf,
-             bool       handle_edge_low,
-             dim_t*     start,
-             dim_t*     end
+       dim_t  work_id,
+       dim_t  n_way,
+       dim_t  n,
+       dim_t  bf,
+       bool   handle_edge_low,
+       dim_t* start,
+       dim_t* end
      );
 
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-siz_t PASTEMAC0( opname ) \
+siz_t PASTEMAC( opname ) \
      ( \
              dir_t      direct, \
+             dim_t      bmult, \
+             bool       use_weighted, \
        const thrinfo_t* thr, \
        const obj_t*     a, \
        const obj_t*     b, \
        const obj_t*     c, \
-       const cntl_t*    cntl, \
-       const cntx_t*    cntx, \
              dim_t*     start, \
-             dim_t*     end  \
+             dim_t*     end \
      );
 
 GENPROT( thread_range_mdim )
 GENPROT( thread_range_ndim )
 
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-siz_t PASTEMAC0( opname ) \
-     ( \
-       const thrinfo_t* thr, \
-       const obj_t*     a, \
-       const blksz_t*   bmult, \
-             dim_t*     start, \
-             dim_t*     end  \
+
+BLIS_EXPORT_BLIS siz_t bli_thread_range
+     (
+       const thrinfo_t* thr,
+       const obj_t*     a,
+             dim_t      bf,
+             dir_t      direct,
+             mdim_t     dim,
+             bool       use_weighted,
+             dim_t*     start,
+             dim_t*     end
      );
-
-GENPROT( thread_range_l2r )
-GENPROT( thread_range_r2l )
-GENPROT( thread_range_t2b )
-GENPROT( thread_range_b2t )
-
-GENPROT( thread_range_weighted_l2r )
-GENPROT( thread_range_weighted_r2l )
-GENPROT( thread_range_weighted_t2b )
-GENPROT( thread_range_weighted_b2t )
 
 
 dim_t bli_thread_range_width_l

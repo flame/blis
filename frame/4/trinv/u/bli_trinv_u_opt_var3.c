@@ -42,7 +42,7 @@ err_t bli_trinv_u_opt_var3
        const obj_t*  a,
        const cntx_t* cntx,
              rntm_t* rntm,
-             cntl_t* cntl
+             l4_cntl_t* cntl
      )
 {
 	num_t     dt        = bli_obj_dt( a );
@@ -109,7 +109,7 @@ err_t PASTEMAC(ch,varname) \
 			ctype alpha11_m1; \
 \
 			PASTEMAC(ch,scal2s)( minus_one, *alpha11, alpha11_m1 ) \
-			PASTEMAC2(ch,invscalv,BLIS_TAPI_EX_SUF) \
+			PASTEMAC(ch,invscalv,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
 			  mn_ahead, \
@@ -121,7 +121,7 @@ err_t PASTEMAC(ch,varname) \
 		} \
 		else \
 		{ \
-			PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
+			PASTEMAC(ch,scalv,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
 			  mn_ahead, \
@@ -133,7 +133,7 @@ err_t PASTEMAC(ch,varname) \
 		} \
 \
 		/* A02 = a01 * a12 + A02; */ \
-		PASTEMAC2(ch,ger,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,ger,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  BLIS_NO_CONJUGATE, \
@@ -149,7 +149,7 @@ err_t PASTEMAC(ch,varname) \
 \
 		/* a01 = a01 / alpha11; */ \
 		if ( bli_is_nonunit_diag( diaga ) ) \
-			PASTEMAC2(ch,invscalv,BLIS_TAPI_EX_SUF) \
+			PASTEMAC(ch,invscalv,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
 			  mn_behind, \

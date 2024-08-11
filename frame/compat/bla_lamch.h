@@ -39,7 +39,7 @@
 #undef  GENTPROTRO
 #define GENTPROTRO( ftype, ch, blasname ) \
 \
-BLIS_EXPORT_BLAS ftype PASTEF772(bla_,ch,blasname) \
+BLIS_EXPORT_BLAS ftype PASTEF77(bla_,ch,blasname) \
      ( \
        const f77_char* cmach, \
        const ftnlen    cmach_len  \

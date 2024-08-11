@@ -108,16 +108,19 @@ static int32_t offsets[32] __attribute__((aligned(64))) =
     { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,
      16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
 
-void bli_spackm_knl_asm_16xk
+void bli_spackm_knl_asm_24x16
      (
              conj_t  conja,
              pack_t  schema,
              dim_t   cdim_,
+             dim_t   cdim_max,
+             dim_t   cdim_bcast,
              dim_t   n_,
              dim_t   n_max_,
        const void*   kappa_,
        const void*   a_, inc_t inca_, inc_t lda_,
              void*   p_,              inc_t ldp_,
+       const void*   params,
        const cntx_t* cntx
      )
 {
@@ -127,281 +130,16 @@ void bli_spackm_knl_asm_16xk
     float*        p     = ( float* )p_;
     float*        kappa = ( float* )kappa_;
     const int64_t cdim  = cdim_;
-    const int64_t mnr   = 16;
+    const int64_t mr    = 24;
+    const int64_t nr    = 16;
     const int64_t n     = n_;
     const int64_t n_max = n_max_;
     const int64_t inca  = inca_;
     const int64_t lda   = lda_;
     const int64_t ldp   = ldp_;
 
-    if ( cdim == mnr )
-    {
 
-    BEGIN_ASM()
-
-        MOV(RSI, VAR(n))
-        MOV(RAX, VAR(a))
-        MOV(RBX, VAR(inca))
-        MOV(RCX, VAR(lda))
-        MOV(R14, VAR(p))
-
-        TEST(RSI, RSI)
-        JZ(PACK16_DONE)
-
-        LEA(RBX, MEM(,RBX,4))    //inca in bytes
-        LEA(RCX, MEM(,RCX,4))    //lda in bytes
-
-        VBROADCASTSS(YMM(15), VAR(kappa))
-
-        CMP(RBX, IMM(4))
-        JNE(PACK16_T)
-
-        LABEL(PACK16_N)
-
-            MOV(RDX, RSI)
-            AND(RDX, IMM(7))
-            SAR(RSI, IMM(3))
-            JZ(PACK16_N_TAIL)
-
-            LEA(R8,  MEM(RCX,RCX,2)) //lda*3
-            LEA(R9,  MEM(RCX,RCX,4)) //lda*5
-            LEA(R10, MEM(R8 ,RCX,4)) //lda*7
-
-            LABEL(PACK16_N_LOOP)
-
-                LOADMUL8x8(RAX,0,RCX,R8,R9,R10,0,1,2,3,4,5,6,7)
-                STORE8x8(R14,0,16*4,0,1,2,3,4,5,6,7)
-
-                LOADMUL8x8(RAX,32,RCX,R8,R9,R10,0,1,2,3,4,5,6,7)
-                STORE8x8(R14,32,16*4,0,1,2,3,4,5,6,7)
-
-                LEA(RAX, MEM(RAX,RCX,8))
-                LEA(R14, MEM(R14,16*8*4))
-
-                SUB(RSI, IMM(1))
-
-            JNZ(PACK16_N_LOOP)
-
-            TEST(RDX, RDX)
-            JZ(PACK16_DONE)
-
-            LABEL(PACK16_N_TAIL)
-
-                VMULPS(YMM(0), YMM(15), MEM(RAX   ))
-                VMULPS(YMM(1), YMM(15), MEM(RAX,32))
-                VMOVUPS(MEM(R14   ), YMM(0))
-                VMOVUPS(MEM(R14,32), YMM(1))
-
-                LEA(RAX, MEM(RAX,RCX,1))
-                LEA(R14, MEM(R14, 16*4))
-
-                SUB(RDX, IMM(1))
-
-            JNZ(PACK16_N_TAIL)
-
-            JMP(PACK16_DONE)
-
-        LABEL(PACK16_T)
-
-            CMP(RCX, IMM(4))
-            JNE(PACK16_G)
-
-            LEA(R8,  MEM(RBX,RBX,2)) //inca*3
-            LEA(R9,  MEM(RBX,RBX,4)) //inca*5
-            LEA(R10, MEM(R8 ,RBX,4)) //inca*7
-            LEA(R11, MEM(RAX,RBX,8))
-
-            MOV(RDX, RSI)
-            AND(RDX, IMM(7))
-            SAR(RSI, IMM(3))
-            JZ(PACK16_T_TAIL)
-
-            LABEL(PACK16_T_LOOP)
-
-                LOADMUL8x8(RAX,0,RBX,R8,R9,R10,0,1,2,3,4,5,6,7)
-                STORETRANS8x8(R14,0,16*4,0,1,2,3,4,5,6,7,8,9,10,11,12,13)
-
-                LOADMUL8x8(R11,0,RBX,R8,R9,R10,0,1,2,3,4,5,6,7)
-                STORETRANS8x8(R14,32,16*4,0,1,2,3,4,5,6,7,8,9,10,11,12,13)
-
-                LEA(RAX, MEM(RAX,   8*4))
-                LEA(R11, MEM(R11,   8*4))
-                LEA(R14, MEM(R14,16*8*4))
-
-                SUB(RSI, IMM(1))
-
-            JNZ(PACK16_T_LOOP)
-
-            TEST(RDX, RDX)
-            JZ(PACK16_DONE)
-
-            LABEL(PACK16_T_TAIL)
-
-                VMULSS(XMM(0), XMM(15), MEM(RAX      ))
-                VMULSS(XMM(1), XMM(15), MEM(RAX,RBX,1))
-                VMULSS(XMM(2), XMM(15), MEM(RAX,RBX,2))
-                VMULSS(XMM(3), XMM(15), MEM(RAX,R8 ,1))
-                VMULSS(XMM(4), XMM(15), MEM(RAX,RBX,4))
-                VMULSS(XMM(5), XMM(15), MEM(RAX,R9 ,1))
-                VMULSS(XMM(6), XMM(15), MEM(RAX,R8 ,2))
-                VMULSS(XMM(7), XMM(15), MEM(RAX,R10,1))
-                VMOVSS(MEM(R14,0*4), XMM(0))
-                VMOVSS(MEM(R14,1*4), XMM(1))
-                VMOVSS(MEM(R14,2*4), XMM(2))
-                VMOVSS(MEM(R14,3*4), XMM(3))
-                VMOVSS(MEM(R14,4*4), XMM(4))
-                VMOVSS(MEM(R14,5*4), XMM(5))
-                VMOVSS(MEM(R14,6*4), XMM(6))
-                VMOVSS(MEM(R14,7*4), XMM(7))
-
-                VMULSS(XMM(0), XMM(15), MEM(R11      ))
-                VMULSS(XMM(1), XMM(15), MEM(R11,RBX,1))
-                VMULSS(XMM(2), XMM(15), MEM(R11,RBX,2))
-                VMULSS(XMM(3), XMM(15), MEM(R11,R8 ,1))
-                VMULSS(XMM(4), XMM(15), MEM(R11,RBX,4))
-                VMULSS(XMM(5), XMM(15), MEM(R11,R9 ,1))
-                VMULSS(XMM(6), XMM(15), MEM(R11,R8 ,2))
-                VMULSS(XMM(7), XMM(15), MEM(R11,R10,1))
-                VMOVSS(MEM(R14, 8*4), XMM(0))
-                VMOVSS(MEM(R14, 9*4), XMM(1))
-                VMOVSS(MEM(R14,10*4), XMM(2))
-                VMOVSS(MEM(R14,11*4), XMM(3))
-                VMOVSS(MEM(R14,12*4), XMM(4))
-                VMOVSS(MEM(R14,13*4), XMM(5))
-                VMOVSS(MEM(R14,14*4), XMM(6))
-                VMOVSS(MEM(R14,15*4), XMM(7))
-
-                LEA(RAX, MEM(RAX,   4))
-                LEA(R11, MEM(R11,   4))
-                LEA(R14, MEM(R14,16*4))
-
-                SUB(RDX, IMM(1))
-
-            JNZ(PACK16_T_TAIL)
-
-            JMP(PACK16_DONE)
-
-        LABEL(PACK16_G)
-
-            VPBROADCASTD(ZMM(3), VAR(inca))
-            MOV(RBX, VAR(offsetPtr))
-            VPMULLD(ZMM(0), ZMM(3), MEM(RBX))
-
-            LABEL(PACK16_G_LOOP)
-
-                KXNORW(K(1), K(0), K(0))
-                VGATHERDPS(ZMM(3) MASK_K(1), MEM(RAX,ZMM(0),8))
-                VMULPS(ZMM(3), ZMM(3), ZMM(15))
-                VMOVUPS(MEM(R14), ZMM(3))
-
-                LEA(RAX, MEM(RAX,RCX,1))
-                LEA(R14, MEM(R14, 16*4))
-
-                SUB(RSI, IMM(1))
-
-            JNZ(PACK16_G_LOOP)
-
-        LABEL(PACK16_DONE)
-
-    END_ASM(
-        : //output operands
-        : //input operands
-          [n]         "m" (n),
-          [kappa]     "m" (*kappa),
-          [a]         "m" (a),
-          [inca]      "m" (inca),
-          [lda]       "m" (lda),
-          [p]         "m" (p),
-          [ldp]       "m" (ldp),
-          [offsetPtr] "m" (offsetPtr)
-        : //clobbers
-          "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5",
-          "zmm6", "zmm7", "zmm8", "zmm9", "zmm10", "zmm11",
-          "zmm12", "zmm13", "zmm14", "zmm15", "zmm16", "zmm17",
-          "zmm18", "zmm19", "zmm20", "zmm21", "zmm22", "zmm23",
-          "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
-          "zmm30", "zmm31",
-          "rax", "rbx", "rcx", "rdx", "rdi", "rsi",
-          "r8", "r9", "r10", "r11", "r12", "r13", "r14", "memory"
-    )
-
-	}
-	else // if ( cdim < mnr )
-	{
-		bli_sscal2m_ex \
-		( \
-		  0, \
-		  BLIS_NONUNIT_DIAG, \
-		  BLIS_DENSE, \
-		  ( trans_t )conja, \
-		  cdim, \
-		  n, \
-		  kappa, \
-		  a, inca, lda, \
-		  p, 1,    ldp, \
-		  cntx, \
-		  NULL  \
-		); \
-
-		// if ( cdim < mnr )
-		{
-			const dim_t      i      = cdim;
-			const dim_t      m_edge = mnr - i;
-			const dim_t      n_edge = n_max;
-			float*  restrict p_edge = ( float* )p + (i  )*1;
-
-			bli_sset0s_mxn
-			(
-			  m_edge,
-			  n_edge,
-			  p_edge, 1, ldp
-			);
-		}
-	}
-
-	if ( n < n_max )
-	{
-		const dim_t      j      = n;
-		const dim_t      m_edge = mnr;
-		const dim_t      n_edge = n_max - j;
-		float*  restrict p_edge = ( float* )p + (j  )*ldp;
-
-		bli_sset0s_mxn
-		(
-		  m_edge,
-		  n_edge,
-		  p_edge, 1, ldp
-		);
-	}
-}
-
-void bli_spackm_knl_asm_24xk
-     (
-             conj_t  conja,
-             pack_t  schema,
-             dim_t   cdim_,
-             dim_t   n_,
-             dim_t   n_max_,
-       const void*   kappa_,
-       const void*   a_, inc_t inca_, inc_t lda_,
-             void*   p_,              inc_t ldp_,
-       const cntx_t* cntx
-     )
-{
-    const int32_t* offsetPtr = &offsets[0];
-
-    float*        a     = ( float* )a_;
-    float*        p     = ( float* )p_;
-    float*        kappa = ( float* )kappa_;
-    const int64_t cdim  = cdim_;
-    const int64_t mnr   = 24;
-    const int64_t n     = n_;
-    const int64_t n_max = n_max_;
-    const int64_t inca  = inca_;
-    const int64_t lda   = lda_;
-    const int64_t ldp   = ldp_;
-
-    if ( cdim == mnr )
+    if ( cdim == mr && cdim_bcast == 1 )
     {
 
     BEGIN_ASM()
@@ -629,51 +367,215 @@ void bli_spackm_knl_asm_24xk
     )
 
 	}
-	else // if ( cdim < mnr )
-	{
-		bli_sscal2m_ex \
-		( \
-		  0, \
-		  BLIS_NONUNIT_DIAG, \
-		  BLIS_DENSE, \
-		  ( trans_t )conja, \
-		  cdim, \
-		  n, \
-		  kappa, \
-		  a, inca, lda, \
-		  p, 1,    ldp, \
-		  cntx, \
-		  NULL  \
-		); \
+    if ( cdim == nr && ldp == nr && cdim_bcast == 1 )
+    {
 
-		// if ( cdim < mnr )
-		{
-			const dim_t      i      = cdim;
-			const dim_t      m_edge = mnr - i;
-			const dim_t      n_edge = n_max;
-			float*  restrict p_edge = ( float* )p + (i  )*1;
+    BEGIN_ASM()
 
-			bli_sset0s_mxn
-			(
-			  m_edge,
-			  n_edge,
-			  p_edge, 1, ldp
-			);
-		}
+        MOV(RSI, VAR(n))
+        MOV(RAX, VAR(a))
+        MOV(RBX, VAR(inca))
+        MOV(RCX, VAR(lda))
+        MOV(R14, VAR(p))
+
+        TEST(RSI, RSI)
+        JZ(PACK16_DONE)
+
+        LEA(RBX, MEM(,RBX,4))    //inca in bytes
+        LEA(RCX, MEM(,RCX,4))    //lda in bytes
+
+        VBROADCASTSS(YMM(15), VAR(kappa))
+
+        CMP(RBX, IMM(4))
+        JNE(PACK16_T)
+
+        LABEL(PACK16_N)
+
+            MOV(RDX, RSI)
+            AND(RDX, IMM(7))
+            SAR(RSI, IMM(3))
+            JZ(PACK16_N_TAIL)
+
+            LEA(R8,  MEM(RCX,RCX,2)) //lda*3
+            LEA(R9,  MEM(RCX,RCX,4)) //lda*5
+            LEA(R10, MEM(R8 ,RCX,4)) //lda*7
+
+            LABEL(PACK16_N_LOOP)
+
+                LOADMUL8x8(RAX,0,RCX,R8,R9,R10,0,1,2,3,4,5,6,7)
+                STORE8x8(R14,0,16*4,0,1,2,3,4,5,6,7)
+
+                LOADMUL8x8(RAX,32,RCX,R8,R9,R10,0,1,2,3,4,5,6,7)
+                STORE8x8(R14,32,16*4,0,1,2,3,4,5,6,7)
+
+                LEA(RAX, MEM(RAX,RCX,8))
+                LEA(R14, MEM(R14,16*8*4))
+
+                SUB(RSI, IMM(1))
+
+            JNZ(PACK16_N_LOOP)
+
+            TEST(RDX, RDX)
+            JZ(PACK16_DONE)
+
+            LABEL(PACK16_N_TAIL)
+
+                VMULPS(YMM(0), YMM(15), MEM(RAX   ))
+                VMULPS(YMM(1), YMM(15), MEM(RAX,32))
+                VMOVUPS(MEM(R14   ), YMM(0))
+                VMOVUPS(MEM(R14,32), YMM(1))
+
+                LEA(RAX, MEM(RAX,RCX,1))
+                LEA(R14, MEM(R14, 16*4))
+
+                SUB(RDX, IMM(1))
+
+            JNZ(PACK16_N_TAIL)
+
+            JMP(PACK16_DONE)
+
+        LABEL(PACK16_T)
+
+            CMP(RCX, IMM(4))
+            JNE(PACK16_G)
+
+            LEA(R8,  MEM(RBX,RBX,2)) //inca*3
+            LEA(R9,  MEM(RBX,RBX,4)) //inca*5
+            LEA(R10, MEM(R8 ,RBX,4)) //inca*7
+            LEA(R11, MEM(RAX,RBX,8))
+
+            MOV(RDX, RSI)
+            AND(RDX, IMM(7))
+            SAR(RSI, IMM(3))
+            JZ(PACK16_T_TAIL)
+
+            LABEL(PACK16_T_LOOP)
+
+                LOADMUL8x8(RAX,0,RBX,R8,R9,R10,0,1,2,3,4,5,6,7)
+                STORETRANS8x8(R14,0,16*4,0,1,2,3,4,5,6,7,8,9,10,11,12,13)
+
+                LOADMUL8x8(R11,0,RBX,R8,R9,R10,0,1,2,3,4,5,6,7)
+                STORETRANS8x8(R14,32,16*4,0,1,2,3,4,5,6,7,8,9,10,11,12,13)
+
+                LEA(RAX, MEM(RAX,   8*4))
+                LEA(R11, MEM(R11,   8*4))
+                LEA(R14, MEM(R14,16*8*4))
+
+                SUB(RSI, IMM(1))
+
+            JNZ(PACK16_T_LOOP)
+
+            TEST(RDX, RDX)
+            JZ(PACK16_DONE)
+
+            LABEL(PACK16_T_TAIL)
+
+                VMULSS(XMM(0), XMM(15), MEM(RAX      ))
+                VMULSS(XMM(1), XMM(15), MEM(RAX,RBX,1))
+                VMULSS(XMM(2), XMM(15), MEM(RAX,RBX,2))
+                VMULSS(XMM(3), XMM(15), MEM(RAX,R8 ,1))
+                VMULSS(XMM(4), XMM(15), MEM(RAX,RBX,4))
+                VMULSS(XMM(5), XMM(15), MEM(RAX,R9 ,1))
+                VMULSS(XMM(6), XMM(15), MEM(RAX,R8 ,2))
+                VMULSS(XMM(7), XMM(15), MEM(RAX,R10,1))
+                VMOVSS(MEM(R14,0*4), XMM(0))
+                VMOVSS(MEM(R14,1*4), XMM(1))
+                VMOVSS(MEM(R14,2*4), XMM(2))
+                VMOVSS(MEM(R14,3*4), XMM(3))
+                VMOVSS(MEM(R14,4*4), XMM(4))
+                VMOVSS(MEM(R14,5*4), XMM(5))
+                VMOVSS(MEM(R14,6*4), XMM(6))
+                VMOVSS(MEM(R14,7*4), XMM(7))
+
+                VMULSS(XMM(0), XMM(15), MEM(R11      ))
+                VMULSS(XMM(1), XMM(15), MEM(R11,RBX,1))
+                VMULSS(XMM(2), XMM(15), MEM(R11,RBX,2))
+                VMULSS(XMM(3), XMM(15), MEM(R11,R8 ,1))
+                VMULSS(XMM(4), XMM(15), MEM(R11,RBX,4))
+                VMULSS(XMM(5), XMM(15), MEM(R11,R9 ,1))
+                VMULSS(XMM(6), XMM(15), MEM(R11,R8 ,2))
+                VMULSS(XMM(7), XMM(15), MEM(R11,R10,1))
+                VMOVSS(MEM(R14, 8*4), XMM(0))
+                VMOVSS(MEM(R14, 9*4), XMM(1))
+                VMOVSS(MEM(R14,10*4), XMM(2))
+                VMOVSS(MEM(R14,11*4), XMM(3))
+                VMOVSS(MEM(R14,12*4), XMM(4))
+                VMOVSS(MEM(R14,13*4), XMM(5))
+                VMOVSS(MEM(R14,14*4), XMM(6))
+                VMOVSS(MEM(R14,15*4), XMM(7))
+
+                LEA(RAX, MEM(RAX,   4))
+                LEA(R11, MEM(R11,   4))
+                LEA(R14, MEM(R14,16*4))
+
+                SUB(RDX, IMM(1))
+
+            JNZ(PACK16_T_TAIL)
+
+            JMP(PACK16_DONE)
+
+        LABEL(PACK16_G)
+
+            VPBROADCASTD(ZMM(3), VAR(inca))
+            MOV(RBX, VAR(offsetPtr))
+            VPMULLD(ZMM(0), ZMM(3), MEM(RBX))
+
+            LABEL(PACK16_G_LOOP)
+
+                KXNORW(K(1), K(0), K(0))
+                VGATHERDPS(ZMM(3) MASK_K(1), MEM(RAX,ZMM(0),8))
+                VMULPS(ZMM(3), ZMM(3), ZMM(15))
+                VMOVUPS(MEM(R14), ZMM(3))
+
+                LEA(RAX, MEM(RAX,RCX,1))
+                LEA(R14, MEM(R14, 16*4))
+
+                SUB(RSI, IMM(1))
+
+            JNZ(PACK16_G_LOOP)
+
+        LABEL(PACK16_DONE)
+
+    END_ASM(
+        : //output operands
+        : //input operands
+          [n]         "m" (n),
+          [kappa]     "m" (*kappa),
+          [a]         "m" (a),
+          [inca]      "m" (inca),
+          [lda]       "m" (lda),
+          [p]         "m" (p),
+          [ldp]       "m" (ldp),
+          [offsetPtr] "m" (offsetPtr)
+        : //clobbers
+          "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5",
+          "zmm6", "zmm7", "zmm8", "zmm9", "zmm10", "zmm11",
+          "zmm12", "zmm13", "zmm14", "zmm15", "zmm16", "zmm17",
+          "zmm18", "zmm19", "zmm20", "zmm21", "zmm22", "zmm23",
+          "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
+          "zmm30", "zmm31",
+          "rax", "rbx", "rcx", "rdx", "rdi", "rsi",
+          "r8", "r9", "r10", "r11", "r12", "r13", "r14", "memory"
+    )
+
 	}
-
-	if ( n < n_max )
+	else
 	{
-		const dim_t      j      = n;
-		const dim_t      m_edge = mnr;
-		const dim_t      n_edge = n_max - j;
-		float*  restrict p_edge = ( float* )p + (j  )*ldp;
-
-		bli_sset0s_mxn
+		bli_sscal2bbs_mxn
 		(
-		  m_edge,
-		  n_edge,
-		  p_edge, 1, ldp
+		  BLIS_NO_CONJUGATE,
+		  cdim,
+		  n,
+		  kappa,
+		  a,       inca, lda,
+		  p, cdim_bcast, ldp
 		);
 	}
+
+	bli_sset0s_edge
+	(
+	  cdim*cdim_bcast, cdim_max*cdim_bcast,
+	  n, n_max,
+	  p, ldp
+	);
 }

@@ -168,7 +168,7 @@ void PASTEMAC(ch,opname) \
 \
 	bli_obj_set_struc( BLIS_TRIANGULAR, &ao ); \
 \
-	PASTEMAC0(opname)( &alphao, \
+	PASTEMAC(opname)( &alphao, \
 	                   &ao, \
 	                   &xo, \
 	                   cntx ); \

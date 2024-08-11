@@ -82,7 +82,7 @@ GENARRAY_FPA( void_fp, opname ); \
 */ \
 \
 GENARRAY_FPA( PASTECH(opname,_vft), \
-              PASTECH0(opname) ); \
+              PASTECH(opname) ); \
 \
 PASTECH(opname,_vft) \
 PASTEMAC(opname,_qfp)( num_t dt ) \
@@ -97,7 +97,7 @@ GENFRONT( inverttv )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC(opname) \
      ( \
              double  thresh, \
        const obj_t*  x  \

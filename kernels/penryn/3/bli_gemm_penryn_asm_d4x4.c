@@ -47,7 +47,7 @@ void bli_sgemm_penryn_asm_8x4
        const void*      b,
        const void*      beta,
              void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
@@ -522,7 +522,7 @@ void bli_dgemm_penryn_asm_4x4
        const void*      b,
        const void*      beta,
              void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {

@@ -94,7 +94,7 @@
  /* Local variables */
  bla_integer i__;
  bla_real sum, scale;
- bla_real anorm;
+ bla_real anorm = 0.f;
  /* -- LAPACK auxiliary routine -- */
  /* -- LAPACK is a software package provided by Univ. of Tennessee, -- */
  /* -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..-- */

@@ -40,7 +40,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, arch, suf, trsmkerid ) \
 \
-void PASTEMAC3(ch,opname,arch,suf) \
+void PASTEMAC(ch,opname,arch,suf) \
      ( \
              dim_t      m, \
              dim_t      n, \
@@ -51,7 +51,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
        const void*      bx10, \
              void*      b110, \
              void*      c110, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
+       const auxinfo_t* data, \
        const cntx_t*    cntx  \
      ) \
 { \
@@ -99,7 +99,7 @@ PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11", mr, 2*nr, \
 	   circumstances where we would want the gemmtrsm_? operations to have
 	   and exercise their own IO preferences -- I'd have to think about it --
 	   but this doesn't seem to be one of them. */ \
-	const bool      col_pref = bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_VIR_UKR, cntx ); \
+	const bool      col_pref = bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	const inc_t     rs_ct    = ( col_pref ? 1 : nr ); \
 	const inc_t     cs_ct    = ( col_pref ? mr : 1 ); \
 \

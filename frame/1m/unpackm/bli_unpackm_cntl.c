@@ -35,43 +35,28 @@
 
 #include "blis.h"
 
-cntl_t* bli_unpackm_cntl_create_node
+void bli_unpackm_cntl_init_node
      (
-       pool_t* pool,
-       void_fp var_func,
-       void_fp unpackm_var_func,
-       cntl_t* sub_node
+       void_fp         var_func,
+       void_fp         unpackm_var_func,
+       unpackm_cntl_t* cntl
      )
 {
-	cntl_t*           cntl;
-	unpackm_params_t* params;
-	err_t             r_val;
-
 	// NOTE: If this function is ever called, figure out whether the
 	// bli_malloc_intl() below needs to be changed to bli_sba_acquire().
 	bli_abort();
 
-	// Allocate an unpackm_params_t struct.
-	params = bli_malloc_intl( sizeof( unpackm_params_t ), &r_val );
-
-	// Initialize the unpackm_params_t struct.
-	params->size      = sizeof( unpackm_params_t );
-	params->var_func  = unpackm_var_func;
+	// Initialize the unpackm_cntl_t struct.
+	cntl->var_func = unpackm_var_func;
 
 	// It's important that we set the bszid field to BLIS_NO_PART to indicate
 	// that no blocksize partitioning is performed. bli_cntl_free() will rely
 	// on this information to know how to step through the thrinfo_t tree in
 	// sync with the cntl_t tree.
-	cntl = bli_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,
-	  BLIS_NOID,
-	  BLIS_NO_PART,
 	  var_func,
-	  params,
-	  sub_node
+	  &cntl->cntl
 	);
-
-	return cntl;
 }
 

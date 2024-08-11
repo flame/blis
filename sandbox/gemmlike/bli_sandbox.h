@@ -47,11 +47,8 @@
 #include "bls_gemm_check.h"
 #include "bls_gemm_var.h"
 
-#include "bls_l3_packm_a.h"
-#include "bls_l3_packm_b.h"
+#include "bls_l3_packm.h"
 #include "bls_l3_packm_var.h"
-
-#include "bls_packm_cxk.h"
 
 
 #endif

@@ -37,10 +37,10 @@
 
 err_t bli_chol_int
      (
-       const obj_t*  a,
-       const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl
+       const obj_t*     a,
+       const cntx_t*    cntx,
+             rntm_t*    rntm,
+             l4_cntl_t* cntl
      );
 
 #endif

@@ -49,7 +49,7 @@ BLIS_EXPORT_BLIS void bli_acquire_mpart
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0( opname ) \
+BLIS_EXPORT_BLIS void PASTEMAC( opname ) \
      ( \
              subpart_t req_part, \
              dim_t     i, \
@@ -69,7 +69,7 @@ GENPROT( acquire_mpart_br2tl )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0( opname ) \
+BLIS_EXPORT_BLIS void PASTEMAC( opname ) \
      ( \
              dir_t     direct, \
              subpart_t req_part, \
@@ -89,7 +89,7 @@ GENPROT( acquire_mpart_mndim )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0( opname ) \
+BLIS_EXPORT_BLIS void PASTEMAC( opname ) \
      ( \
              subpart_t req_part, \
              dim_t     i, \

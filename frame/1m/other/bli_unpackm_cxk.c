@@ -53,7 +53,7 @@ void PASTEMAC(ch,opname) \
 	ukr_t ker_id = bli_is_col_packed( schema ) ? BLIS_UNPACKM_NRXK_KER \
 	                                           : BLIS_UNPACKM_MRXK_KER; \
 \
-	PASTECH2(ch,opname,_ker_ft) f; \
+	PASTECH(ch,opname,_ker_ft) f; \
 \
 	/* Query the context for the unpackm kernel corresponding to the current
 	   panel dimension, or kernel id. If the id is invalid, the function will

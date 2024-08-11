@@ -36,48 +36,6 @@
 #ifndef BLIS_TTMM_CNTL_H
 #define BLIS_TTMM_CNTL_H
 
-typedef struct
-{
-	uint64_t size;
-	dim_t    scale_num;
-	dim_t    scale_den;
-	dim_t    depth;
-} ttmm_params_t;
-
-BLIS_INLINE dim_t bli_ttmm_params_scale_num( const ttmm_params_t* params )
-{
-	return params->scale_num;
-}
-
-BLIS_INLINE dim_t bli_ttmm_params_scale_den( const ttmm_params_t* params )
-{
-	return params->scale_den;
-}
-
-BLIS_INLINE dim_t bli_ttmm_params_depth( const ttmm_params_t* params )
-{
-	return params->depth;
-}
-
-// -----------------------------------------------------------------------------
-
-cntl_t* bli_ttmm_cntl_create( uplo_t uplo, pool_t* pool );
-
-// -----------------------------------------------------------------------------
-
-void bli_ttmm_cntl_free( pool_t* pool, cntl_t* cntl );
-
-// -----------------------------------------------------------------------------
-
-cntl_t* bli_ttmm_cntl_create_node
-     (
-       pool_t* pool,
-       bszid_t bszid,
-       dim_t   scale_num,
-       dim_t   scale_den,
-       dim_t   depth,
-       void_fp var_func,
-       cntl_t* sub_node
-     );
+l4_cntl_t* bli_ttmm_cntl_create( uplo_t uplo, pool_t* pool );
 
 #endif

@@ -41,7 +41,7 @@
 #undef  GENTFUNCSCAL
 #define GENTFUNCSCAL( ftype_x, ftype_a, chx, cha, blasname, blisname ) \
 \
-void PASTEF772(chx,cha,blasname) \
+void PASTEF77(chx,cha,blasname) \
      ( \
        const f77_int* n, \
        const ftype_a* alpha, \
@@ -67,10 +67,10 @@ void PASTEF772(chx,cha,blasname) \
 	   that is, we just always sub-optimally implement those cases
 	   by casting alpha to ctype_x (potentially the complex domain) and
 	   using the homogeneous datatype instance according to that type. */ \
-	PASTEMAC2(cha,chx,copys)( *alpha, alpha_cast ); \
+	PASTEMAC(cha,chx,copys)( *alpha, alpha_cast ); \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC2(chx,blisname,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(chx,blisname,BLIS_TAPI_EX_SUF) \
 	( \
 	  BLIS_NO_CONJUGATE, \
 	  n0, \

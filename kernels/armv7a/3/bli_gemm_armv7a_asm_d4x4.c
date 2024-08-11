@@ -38,7 +38,7 @@
 #define GENTPROT( ctype, ch, opname, suf ) \
 \
 extern \
-void PASTEMAC2(ch,opname,suf) \
+void PASTEMAC(ch,opname,suf) \
      ( \
              uint32_t   k, \
        const ctype*     alpha, \
@@ -46,7 +46,7 @@ void PASTEMAC2(ch,opname,suf) \
        const ctype*     b, \
        const ctype*     beta, \
              ctype*     c, uint32_t rs_c, uint32_t cs_c, \
-             auxinfo_t* data  \
+       const auxinfo_t* data  \
      );
 
 GENTPROT( float,    s, gemm_armv7a_ker_, 4x4 )
@@ -67,7 +67,7 @@ void bli_sgemm_armv7a_asm_4x4
        const void*      b,
        const void*      beta,
              void*      c, inc_t rs_c, inc_t cs_c,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
@@ -89,7 +89,7 @@ void bli_dgemm_armv7a_asm_4x4
        const void*      b,
        const void*      beta,
              void*      c, inc_t rs_c, inc_t cs_c,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
@@ -111,7 +111,7 @@ void bli_cgemm_armv7a_asm_2x2
        const void*      b,
        const void*      beta,
              void*      c, inc_t rs_c, inc_t cs_c,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
@@ -132,7 +132,7 @@ void bli_zgemm_armv7a_asm_2x2
        const void*      b,
        const void*      beta,
              void*      c, inc_t rs_c, inc_t cs_c,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {

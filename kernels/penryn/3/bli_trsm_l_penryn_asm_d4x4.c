@@ -50,7 +50,7 @@ void bli_dtrsm_l_penryn_asm_4x4
        const void*      a11,
              void*      b11,
              void*      c11, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {

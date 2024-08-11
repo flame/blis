@@ -261,15 +261,9 @@ GENTFUNC2( dcomplex, double,   z, d, __VA_ARGS__ )
 #define INSERT_GENTFUNC2_MIX_P( ... ) \
 \
 GENTFUNC2( float,    double,   s, d, __VA_ARGS__ ) \
-GENTFUNC2( float,    dcomplex, s, z, __VA_ARGS__ ) \
-\
 GENTFUNC2( double,   float,    d, s, __VA_ARGS__ ) \
-GENTFUNC2( double,   scomplex, d, c, __VA_ARGS__ ) \
 \
-GENTFUNC2( scomplex, double,   c, d, __VA_ARGS__ ) \
 GENTFUNC2( scomplex, dcomplex, c, z, __VA_ARGS__ ) \
-\
-GENTFUNC2( dcomplex, float,    z, s, __VA_ARGS__ ) \
 GENTFUNC2( dcomplex, scomplex, z, c, __VA_ARGS__ )
 
 
@@ -324,16 +318,28 @@ GENTFUNC2R( dcomplex, double,   double,   z, d, d, __VA_ARGS__ )
 #define INSERT_GENTFUNC2R_MIX_P( ... ) \
 \
 GENTFUNC2R( float,    double,   double,   s, d, d, __VA_ARGS__ ) \
-GENTFUNC2R( float,    dcomplex, double,   s, z, d, __VA_ARGS__ ) \
-\
 GENTFUNC2R( double,   float,    float,    d, s, s, __VA_ARGS__ ) \
-GENTFUNC2R( double,   scomplex, float,    d, c, s, __VA_ARGS__ ) \
 \
-GENTFUNC2R( scomplex, double,   double,   c, d, d, __VA_ARGS__ ) \
 GENTFUNC2R( scomplex, dcomplex, double,   c, z, d, __VA_ARGS__ ) \
-\
-GENTFUNC2R( dcomplex, float,    float,    z, s, s, __VA_ARGS__ ) \
 GENTFUNC2R( dcomplex, scomplex, float,    z, c, s, __VA_ARGS__ )
+
+
+
+// -- Real-only two-operand with complex projection of both operands --
+
+#define INSERT_GENTFUNC2RO( ... ) \
+\
+GENTFUNC2RO( float,  scomplex, float,  scomplex, s, c, s, c, __VA_ARGS__ ) \
+GENTFUNC2RO( double, dcomplex, double, dcomplex, d, z, d, z, __VA_ARGS__ )
+
+
+
+// -- Mixed precision real-only two-operand with complex projection of both operands --
+
+#define INSERT_GENTFUNC2RO_MIX_P( ... ) \
+\
+GENTFUNC2RO( float,  scomplex, double, dcomplex, s, c, d, z, __VA_ARGS__ ) \
+GENTFUNC2RO( double, dcomplex, float,  scomplex, d, z, s, c, __VA_ARGS__ )
 
 
 

@@ -110,14 +110,14 @@ void bli_daxpyf_bgq_int
 	double chi6 = *(x + 6*incx);
 	double chi7 = *(x + 7*incx);
 
-	PASTEMAC2(d,d,scals)( *alpha, chi0 );
-	PASTEMAC2(d,d,scals)( *alpha, chi1 );
-	PASTEMAC2(d,d,scals)( *alpha, chi2 );
-	PASTEMAC2(d,d,scals)( *alpha, chi3 );
-	PASTEMAC2(d,d,scals)( *alpha, chi4 );
-	PASTEMAC2(d,d,scals)( *alpha, chi5 );
-	PASTEMAC2(d,d,scals)( *alpha, chi6 );
-	PASTEMAC2(d,d,scals)( *alpha, chi7 );
+	PASTEMAC(d,d,scals)( *alpha, chi0 );
+	PASTEMAC(d,d,scals)( *alpha, chi1 );
+	PASTEMAC(d,d,scals)( *alpha, chi2 );
+	PASTEMAC(d,d,scals)( *alpha, chi3 );
+	PASTEMAC(d,d,scals)( *alpha, chi4 );
+	PASTEMAC(d,d,scals)( *alpha, chi5 );
+	PASTEMAC(d,d,scals)( *alpha, chi6 );
+	PASTEMAC(d,d,scals)( *alpha, chi7 );
 
 	vector4double   a0v, a1v, a2v, a3v, a4v, a5v, a6v, a7v;
     vector4double   yv;

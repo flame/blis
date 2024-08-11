@@ -37,7 +37,7 @@
 #undef  GENFRONT
 #define GENFRONT( opname, varname ) \
 \
-void PASTEMAC0(varname) \
+void PASTEMAC(varname) \
      ( \
        conj_t  conjh, \
        obj_t*  alpha, \
@@ -67,7 +67,7 @@ void PASTEMAC0(varname) \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
-	PASTECH2(opname,_unb,_vft) f = \
+	PASTECH(opname,_unb,_vft) f = \
 	PASTEMAC(varname,_qfp)( dt ); \
 \
 	f \

@@ -40,7 +40,7 @@
 #undef  GENTFUNCRO
 #define GENTFUNCRO( ftype, ch, blasname, blisname ) \
 \
-ftype PASTEF772(bla_,ch,blasname) \
+ftype PASTEF77(bla_,ch,blasname) \
      ( \
        const f77_char* cmach, \
        const ftnlen    cmach_len  \

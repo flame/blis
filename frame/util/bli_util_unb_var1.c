@@ -66,7 +66,7 @@ void PASTEMAC(ch,varname) \
 		chi1 = x + (i  )*incx; \
 \
 		/* Get the real and imaginary components of chi1. */ \
-		PASTEMAC2(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
+		PASTEMAC(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
 \
 		/* Replace chi1_r and chi1_i with their absolute values. */ \
 		chi1_r = bli_fabs( chi1_r ); \
@@ -110,7 +110,7 @@ void PASTEMAC(ch,varname) \
 	/* We will be reflecting the stored region over the diagonal into the
 	   unstored region, so a transposition is necessary. Furthermore, since
 	   we are creating a Hermitian matrix, we must also conjugate. */ \
-	PASTEMAC2(ch,copym,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,copym,BLIS_TAPI_EX_SUF) \
 	( \
 	  diagoffa, \
 	  BLIS_NONUNIT_DIAG, \
@@ -125,7 +125,7 @@ void PASTEMAC(ch,varname) \
 	); \
 \
 	/* Set the imaginary parts of the diagonal elements to zero. */ \
-	PASTEMAC2(ch,setid,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,setid,BLIS_TAPI_EX_SUF) \
 	( \
 	  0, \
 	  m, \
@@ -164,7 +164,7 @@ void PASTEMAC(ch,varname) \
 \
 	/* We will be reflecting the stored region over the diagonal into the
 	   unstored region, so a transposition is necessary. */ \
-	PASTEMAC2(ch,copym,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,copym,BLIS_TAPI_EX_SUF) \
 	( \
 	  diagoffa, \
 	  BLIS_NONUNIT_DIAG, \
@@ -209,7 +209,7 @@ void PASTEMAC(ch,varname) \
 	else /*if ( bli_is_lower( uploa ) )*/ diagoffa = -1; \
 \
 	/* Set the unstored triangle to zero. */ \
-	PASTEMAC2(ch,setm,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,setm,BLIS_TAPI_EX_SUF) \
 	( \
 	  BLIS_NO_CONJUGATE, \
 	  diagoffa, \
@@ -252,7 +252,7 @@ void PASTEMAC(ch,varname) \
 		chi1 = x + (i  )*incx; \
 \
 		/* Compute the absolute value (or complex magnitude) of chi1. */ \
-		PASTEMAC2(ch,chr,abval2s)( *chi1, abs_chi1 ); \
+		PASTEMAC(ch,chr,abval2s)( *chi1, abs_chi1 ); \
 \
 		/* Accumulate the absolute value of chi1 into absum. */ \
 		PASTEMAC(chr,adds)( abs_chi1, absum ); \
@@ -356,7 +356,7 @@ void PASTEMAC(ch,varname) \
 \
 		feclearexcept( FE_ALL_EXCEPT );\
 \
-		PASTEMAC2(ch,dotv,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,dotv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  BLIS_NO_CONJUGATE, \
@@ -368,7 +368,7 @@ void PASTEMAC(ch,varname) \
 		  rntm  \
 		); \
 \
-		PASTEMAC2(ch,chr,copys)( sumsqc, sumsq ); \
+		PASTEMAC(ch,chr,copys)( sumsqc, sumsq ); \
 \
 		f_exp_raised = fetestexcept( FE_OVERFLOW | FE_INVALID );\
 \
@@ -468,7 +468,7 @@ void PASTEMAC(ch,varname) \
 		chi1 = x + (i  )*incx; \
 \
 		/* Compute the absolute value (or complex magnitude) of chi1. */ \
-		PASTEMAC2(ch,chr,abval2s)( *chi1, abs_chi1 ); \
+		PASTEMAC(ch,chr,abval2s)( *chi1, abs_chi1 ); \
 \
 		/* If the absolute value of the current element exceeds that of
 		   the previous largest, save it and its index. If NaN is
@@ -598,7 +598,7 @@ void PASTEMAC(ch,varname) \
 \
 				/* Handle the diagonal element separately in case it's
 				   unit. */ \
-				PASTEMAC2(ch,chr,abval2s)( *chi1, abval_chi1 ); \
+				PASTEMAC(ch,chr,abval2s)( *chi1, abval_chi1 ); \
 				PASTEMAC(chr,adds)( abval_chi1, absum_j ); \
 \
 				/* If absum_j is greater than the previous maximum value,
@@ -633,7 +633,7 @@ void PASTEMAC(ch,varname) \
 \
 				/* Handle the diagonal element separately in case it's
 				   unit. */ \
-				PASTEMAC2(ch,chr,abval2s)( *chi1, abval_chi1 ); \
+				PASTEMAC(ch,chr,abval2s)( *chi1, abval_chi1 ); \
 				PASTEMAC(chr,adds)( abval_chi1, absum_j ); \
 \
 				/* If absum_j is greater than the previous maximum value,
@@ -940,7 +940,7 @@ void PASTEMAC(ch,varname) \
 \
 			x1     = x + (j  )*ldx + (0  )*incx; \
 \
-			/*PASTEMAC2(ch,kername,BLIS_TAPI_EX_SUF)*/ \
+			/*PASTEMAC(ch,kername,BLIS_TAPI_EX_SUF)*/ \
 			PASTEMAC(ch,kername) \
 			( \
 			  n_elem, \
@@ -954,7 +954,7 @@ void PASTEMAC(ch,varname) \
 	{ \
 		max_m_n = bli_max( m, n ); \
 \
-		PASTEMAC2(d,ch,sets)( max_m_n, 0.0, omega ); \
+		PASTEMAC(d,ch,sets)( max_m_n, 0.0, omega ); \
 		PASTEMAC(ch,copys)( *one, beta ); \
 		PASTEMAC(ch,invscals)( omega, beta ); \
 \
@@ -968,7 +968,7 @@ void PASTEMAC(ch,varname) \
 				x0     = x1; \
 				chi1   = x1 + (n_elem-1)*incx; \
 \
-				/*PASTEMAC2(ch,kername,BLIS_TAPI_EX_SUF)*/ \
+				/*PASTEMAC(ch,kername,BLIS_TAPI_EX_SUF)*/ \
 				PASTEMAC(ch,kername) \
 				( \
 				  n_elem, \
@@ -1009,7 +1009,7 @@ void PASTEMAC(ch,varname) \
 				x2     = x1 + incx; \
 				chi1   = x1; \
 \
-				/*PASTEMAC2(ch,kername,BLIS_TAPI_EX_SUF)*/ \
+				/*PASTEMAC(ch,kername,BLIS_TAPI_EX_SUF)*/ \
 				PASTEMAC(ch,kername) \
 				( \
 				  n_elem, \
@@ -1083,7 +1083,7 @@ void PASTEMAC(ch,varname) \
 	for ( i = 0; i < n; ++i ) \
 	{ \
 		/* Get the real and imaginary components of chi1. */ \
-		PASTEMAC2(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
+		PASTEMAC(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
 \
 		abs_chi1_r = bli_fabs( chi1_r ); \
 		abs_chi1_i = bli_fabs( chi1_i ); \

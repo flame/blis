@@ -55,9 +55,9 @@
     bla_integer info;
     bla_scomplex temp1, temp2;
     bla_integer i__, j, k;
-    //extern bla_logical PASTEF770(bla_lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTEF77(bla_lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer kk, ix, iy, jx = 0, jy = 0, kx = 0, ky = 0;
-    //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
+    //extern /* Subroutine */ int PASTEF77(xerbla)(bla_character *, bla_integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -167,7 +167,7 @@
 
     /* Function Body */
     info = 0;
-    if (! PASTEF770(bla_lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(bla_lsame)(uplo, "L", (
+    if (! PASTEF77(bla_lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF77(bla_lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -178,7 +178,7 @@
 	info = 7;
     }
     if (info != 0) {
-	PASTEF770(xerbla)("CHPR2 ", &info, (ftnlen)6);
+	PASTEF77(xerbla)("CHPR2 ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -210,7 +210,7 @@
 /*     are accessed sequentially with one pass through AP. */
 
     kk = 1;
-    if (PASTEF770(bla_lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF77(bla_lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  A  when upper triangle is stored in AP. */
 
@@ -443,9 +443,9 @@
     bla_integer info;
     bla_dcomplex temp1, temp2;
     bla_integer i__, j, k;
-    //extern bla_logical PASTEF770(bla_lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTEF77(bla_lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer kk, ix, iy, jx = 0, jy = 0, kx = 0, ky = 0;
-    //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
+    //extern /* Subroutine */ int PASTEF77(xerbla)(bla_character *, bla_integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -555,7 +555,7 @@
 
     /* Function Body */
     info = 0;
-    if (! PASTEF770(bla_lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(bla_lsame)(uplo, "L", (
+    if (! PASTEF77(bla_lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF77(bla_lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -566,7 +566,7 @@
 	info = 7;
     }
     if (info != 0) {
-	PASTEF770(xerbla)("ZHPR2 ", &info, (ftnlen)6);
+	PASTEF77(xerbla)("ZHPR2 ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -598,7 +598,7 @@
 /*     are accessed sequentially with one pass through AP. */
 
     kk = 1;
-    if (PASTEF770(bla_lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF77(bla_lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  A  when upper triangle is stored in AP. */
 

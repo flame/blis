@@ -42,7 +42,7 @@ err_t bli_trinv_l_unb_var2
        const obj_t*  a,
        const cntx_t* cntx,
              rntm_t* rntm,
-             cntl_t* cntl
+             l4_cntl_t* cntl
      )
 {
 	const dim_t m = bli_obj_length( a );

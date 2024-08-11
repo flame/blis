@@ -45,56 +45,65 @@
 // because sometimes it is needed if, for example, one of the PASTE
 // macros is invoked with an "op" argument that is itself a macro.
 
-#define PASTEMAC0_(op)             bli_ ## op
-#define PASTEMAC0(op)              PASTEMAC0_(op)
-
-#define PASTEMAC_(ch,op)           bli_ ## ch  ## op
-#define PASTEMAC(ch,op)            PASTEMAC_(ch,op)
-
-#define PASTEMAC2_(ch1,ch2,op)     bli_ ## ch1 ## ch2 ## op
-#define PASTEMAC2(ch1,ch2,op)      PASTEMAC2_(ch1,ch2,op)
-
-#define PASTEMAC3_(ch1,ch2,ch3,op) bli_ ## ch1 ## ch2 ## ch3 ## op
-#define PASTEMAC3(ch1,ch2,ch3,op)  PASTEMAC3_(ch1,ch2,ch3,op)
-
-#define PASTEMAC4_(ch1,ch2,ch3,ch4,op) bli_ ## ch1 ## ch2 ## ch3 ## ch4 ## op
-#define PASTEMAC4(ch1,ch2,ch3,ch4,op)  PASTEMAC4_(ch1,ch2,ch3,ch4,op)
-
-#define PASTEMAC5_(ch1,ch2,ch3,ch4,ch5,op) bli_ ## ch1 ## ch2 ## ch3 ## ch4 ## ch5 ## op
-#define PASTEMAC5(ch1,ch2,ch3,ch4,ch5,op)  PASTEMAC5_(ch1,ch2,ch3,ch4,ch5,op)
-
+// Macros for BLIS typed APIs (note the 'bli_' prefix).
+#define PASTEMAC0_(op)                         bli_ ## op
+#define PASTEMAC1_(ch,op)                      bli_ ## ch  ## op
+#define PASTEMAC2_(ch1,ch2,op)                 bli_ ## ch1 ## ch2 ## op
+#define PASTEMAC3_(ch1,ch2,ch3,op)             bli_ ## ch1 ## ch2 ## ch3 ## op
+#define PASTEMAC4_(ch1,ch2,ch3,ch4,op)         bli_ ## ch1 ## ch2 ## ch3 ## ch4 ## op
+#define PASTEMAC5_(ch1,ch2,ch3,ch4,ch5,op)     bli_ ## ch1 ## ch2 ## ch3 ## ch4 ## ch5 ## op
 #define PASTEMAC6_(ch1,ch2,ch3,ch4,ch5,ch6,op) bli_ ## ch1 ## ch2 ## ch3 ## ch4 ## ch5 ## ch6 ## op
-#define PASTEMAC6(ch1,ch2,ch3,ch4,ch5,ch6,op)  PASTEMAC6_(ch1,ch2,ch3,ch4,ch5,ch6,op)
 
+#define PASTEMAC__(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,...) PASTEMAC ## arg8 ## _
+#define PASTEMAC_(...) PASTEMAC__(__VA_ARGS__, 6, 5, 4, 3, 2, 1, 0, XXX)
+#define PASTEMAC(...) PASTEMAC_(__VA_ARGS__)(__VA_ARGS__)
+
+// Same as above, but without the 'bli_' prefix.
+#define PASTECH0_(op)                         op
+#define PASTECH1_(ch,op)                      ch  ## op
+#define PASTECH2_(ch1,ch2,op)                 ch1 ## ch2 ## op
+#define PASTECH3_(ch1,ch2,ch3,op)             ch1 ## ch2 ## ch3 ## op
+#define PASTECH4_(ch1,ch2,ch3,ch4,op)         ch1 ## ch2 ## ch3 ## ch4 ## op
+#define PASTECH5_(ch1,ch2,ch3,ch4,ch5,op)     ch1 ## ch2 ## ch3 ## ch4 ## ch5 ## op
+#define PASTECH6_(ch1,ch2,ch3,ch4,ch5,ch6,op) ch1 ## ch2 ## ch3 ## ch4 ## ch5 ## ch6 ## op
+
+#define PASTECH__(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,...) PASTECH ## arg8 ## _
+#define PASTECH_(...) PASTECH__(__VA_ARGS__, 6, 5, 4, 3, 2, 1, 0, XXX)
+#define PASTECH(...) PASTECH_(__VA_ARGS__)(__VA_ARGS__)
+
+// Fortran-77 name-mangling macros. (Same as above, but with a '_' suffix.)
+#define PASTEF770_(op)                         op  ## _
+#define PASTEF771_(ch,op)                      ch  ## op ## _
+#define PASTEF772_(ch1,ch2,op)                 ch1 ## ch2 ## op ## _
+#define PASTEF773_(ch1,ch2,ch3,op)             ch1 ## ch2 ## ch3 ## op ## _
+#define PASTEF774_(ch1,ch2,ch3,ch4,op)         ch1 ## ch2 ## ch3 ## ch4 ## op ## _
+#define PASTEF775_(ch1,ch2,ch3,ch4,ch5,op)     ch1 ## ch2 ## ch3 ## ch4 ## ch5 ## op ## _
+#define PASTEF776_(ch1,ch2,ch3,ch4,ch5,ch6,op) ch1 ## ch2 ## ch3 ## ch4 ## ch5 ## ch6 ## op ## _
+
+#define PASTEF77__(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,...) PASTEF77 ## arg8 ## _
+#define PASTEF77_(...) PASTEF77__(__VA_ARGS__, 6, 5, 4, 3, 2, 1, 0, XXX)
+#define PASTEF77(...) PASTEF77_(__VA_ARGS__)(__VA_ARGS__)
+
+// Same as above, except with f2c_ prefix.
+#define PASTEF2C0_(op)                         f2c_ ## op  ## _
+#define PASTEF2C1_(ch,op)                      f2c_ ## ch  ## op ## _
+#define PASTEF2C2_(ch1,ch2,op)                 f2c_ ## ch1 ## ch2 ## op ## _
+#define PASTEF2C3_(ch1,ch2,ch3,op)             f2c_ ## ch1 ## ch2 ## ch3 ## op ## _
+#define PASTEF2C4_(ch1,ch2,ch3,ch4,op)         f2c_ ## ch1 ## ch2 ## ch3 ## ch4 ## op ## _
+#define PASTEF2C5_(ch1,ch2,ch3,ch4,ch5,op)     f2c_ ## ch1 ## ch2 ## ch3 ## ch4 ## ch5 ## op ## _
+#define PASTEF2C6_(ch1,ch2,ch3,ch4,ch5,ch6,op) f2c_ ## ch1 ## ch2 ## ch3 ## ch4 ## ch5 ## ch6 ## op ## _
+
+#define PASTEF2C__(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,...) PASTEF2C ## arg8 ## _
+#define PASTEF2C_(...) PASTEF2C__(__VA_ARGS__, 6, 5, 4, 3, 2, 1, 0, XXX)
+#define PASTEF2C(...) PASTEF2C_(__VA_ARGS__)(__VA_ARGS__)
+
+// For BLAS _check() functions.
 #define PASTEBLACHK_(op)           bla_ ## op ## _check
 #define PASTEBLACHK(op)            PASTEBLACHK_(op)
 
-#define PASTECH0_(op)              op
-#define PASTECH0(op)               PASTECH0_(op)
-
-#define PASTECH_(ch,op)            ch ## op
-#define PASTECH(ch,op)             PASTECH_(ch,op)
-
-#define PASTECH2_(ch1,ch2,op)      ch1 ## ch2 ## op
-#define PASTECH2(ch1,ch2,op)       PASTECH2_(ch1,ch2,op)
-
-#define PASTECH3_(ch1,ch2,ch3,op)  ch1 ## ch2 ## ch3 ## op
-#define PASTECH3(ch1,ch2,ch3,op)   PASTECH3_(ch1,ch2,ch3,op)
-
+// For making a string out of the integer type size.
 #define MKSTR(s1)                  #s1
 #define STRINGIFY_INT( s )         MKSTR( s )
-
-// Fortran-77 name-mangling macros.
-#define PASTEF770(name)                                      name ## _
-#define PASTEF77(ch1,name)                     ch1        ## name ## _
-#define PASTEF772(ch1,ch2,name)                ch1 ## ch2 ## name ## _
-#define PASTEF773(ch1,ch2,ch3,name)     ch1 ## ch2 ## ch3 ## name ## _
-
-// Same as above, except with f2c_ prefix.
-#define PASTEF2C(ch1,name)          f2c_ ## ch1               ## name ## _
-#define PASTEF2C2(ch1,ch2,name)     f2c_ ## ch1 ## ch2        ## name ## _
-#define PASTEF2C3(ch1,ch2,ch3,name) f2c_ ## ch1 ## ch2 ## ch3 ## name ## _
-
 
 // -- Include other groups of macros
 
@@ -102,6 +111,7 @@
 #include "bli_gentdef_macro_defs.h"
 #include "bli_gentfunc_macro_defs.h"
 #include "bli_gentprot_macro_defs.h"
+#include "bli_gentconf_macro_defs.h"
 
 #include "bli_misc_macro_defs.h"
 #include "bli_edge_case_macro_defs.h"

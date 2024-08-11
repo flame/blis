@@ -586,8 +586,8 @@ void PASTEMAC(ch,varname) \
 	const dim_t MR  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MR, cntx ); \
 \
 	/* Nudge NC up to a multiple of MR and MC up to a multiple of NR. */ \
-	const dim_t NC  = bli_align_dim_to_mult( NC0, MR ); \
-	const dim_t MC  = bli_align_dim_to_mult( MC0, NR ); \
+	const dim_t NC  = bli_align_dim_to_mult( NC0, MR, true ); \
+	const dim_t MC  = bli_align_dim_to_mult( MC0, NR, true ); \
 \
 	/* Compute partitioning step values for each matrix of each loop. */ \
 	const inc_t jcstep_c = rs_c * NC; \

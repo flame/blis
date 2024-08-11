@@ -37,6 +37,21 @@
 
 #define BLIS_NUM_STATIC_COMMS 80
 
+void bli_thrinfo_attach_sub_node( thrinfo_t* sub_node, thrinfo_t* t )
+{
+	dim_t next = 0;
+	for ( ; next < BLIS_MAX_SUB_NODES; next++ )
+	{
+		if ( bli_thrinfo_sub_node( next, t ) == NULL )
+			break;
+	}
+
+	if ( next == BLIS_MAX_SUB_NODES )
+		bli_abort();
+
+	bli_thrinfo_set_sub_node( next, sub_node, t );
+}
+
 thrinfo_t* bli_thrinfo_create_root
      (
        thrcomm_t* comm,
@@ -83,8 +98,8 @@ thrinfo_t* bli_thrinfo_create
 	bli_thrinfo_set_pba( pba, thread );
 	bli_mem_clear( bli_thrinfo_mem( thread ) );
 
-	bli_thrinfo_set_sub_node( NULL, thread );
-	bli_thrinfo_set_sub_prenode( NULL, thread );
+	for ( dim_t i = 0; i < BLIS_MAX_SUB_NODES; i++ )
+		bli_thrinfo_set_sub_node( i, NULL, thread );
 
 	return thread;
 }
@@ -96,22 +111,16 @@ void bli_thrinfo_free
 {
 	if ( thread == NULL ) return;
 
-	thrinfo_t* thrinfo_sub_prenode = bli_thrinfo_sub_prenode( thread );
-	thrinfo_t* thrinfo_sub_node    = bli_thrinfo_sub_node( thread );
-	pool_t*    sba_pool            = bli_thrinfo_sba_pool( thread );
-	mem_t*     cntl_mem_p          = bli_thrinfo_mem( thread );
-	pba_t*     pba                 = bli_thrinfo_pba( thread );
+	pool_t* sba_pool   = bli_thrinfo_sba_pool( thread );
+	mem_t*  cntl_mem_p = bli_thrinfo_mem( thread );
+	pba_t*  pba        = bli_thrinfo_pba( thread );
 
 	// Recursively free all children of the current thrinfo_t.
-	if ( thrinfo_sub_prenode != NULL )
+	for ( dim_t i = 0; i < BLIS_MAX_SUB_NODES; i++ )
 	{
-		bli_thrinfo_free( thrinfo_sub_prenode );
-	}
-
-	// Recursively free all children of the current thrinfo_t.
-	if ( thrinfo_sub_node != NULL )
-	{
-		bli_thrinfo_free( thrinfo_sub_node );
+		thrinfo_t* thrinfo_sub_node = bli_thrinfo_sub_node( i, thread );
+		if ( thrinfo_sub_node != NULL )
+			bli_thrinfo_free( thrinfo_sub_node );
 	}
 
 	// Free the communicators, but only if the current thrinfo_t struct
@@ -269,7 +278,7 @@ void bli_thrinfo_print_sub
 	        ( unsigned long )bli_thrinfo_work_id( thread ),
 	        ( unsigned long )bli_thrinfo_needs_free_comm( thread ));
 
-	bli_thrinfo_print_sub( bli_thrinfo_sub_prenode( thread ), level+1 );
-	bli_thrinfo_print_sub( bli_thrinfo_sub_node( thread ), level+1 );
+	for ( dim_t i = 0; i < BLIS_MAX_SUB_NODES; i++ )
+		bli_thrinfo_print_sub( bli_thrinfo_sub_node( i, thread ), level+1 );
 }
 

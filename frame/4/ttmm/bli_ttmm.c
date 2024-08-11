@@ -79,7 +79,7 @@ err_t bli_ttmm_ex
 	const dim_t nt  = 1;
 	const dim_t tid = 0;
 	array_t* array    = bli_sba_checkout_array( nt );
-	pool_t*  sba_pool = bli_apool_array_elem( tid, array );
+	pool_t*  sba_pool = bli_sba_array_elem( tid, array );
 
 	// Alias matrix A in case we need to apply any transformations.
 	bli_obj_alias_to( a, &a_local );
@@ -97,13 +97,13 @@ err_t bli_ttmm_ex
 	const uplo_t uploa = bli_obj_uplo( &a_local );
 
 	// Create a control tree for the parameters encoded in A.
-	cntl_t* cntl = bli_ttmm_cntl_create( uploa, sba_pool );
+	l4_cntl_t* cntl = bli_ttmm_cntl_create( uploa, sba_pool );
 
 	// Pass the control tree into the internal back-end.
 	err_t r_val = bli_ttmm_int( &a_local, cntx, rntm, cntl );
 
 	// Free the control tree.
-	bli_ttmm_cntl_free( sba_pool, cntl );
+	bli_l4_cntl_free( sba_pool, cntl );
 
 	// Check the array_t back into the small block allocator. Similar to the
 	// check-out, this is done using a lock embedded within the sba to ensure

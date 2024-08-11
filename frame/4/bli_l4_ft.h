@@ -45,7 +45,7 @@
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef err_t (*PASTECH2(ch,opname,tsuf)) \
+typedef err_t (*PASTECH(ch,opname,tsuf)) \
      ( \
              uplo_t  uploa, \
              dim_t   m, \
@@ -63,7 +63,7 @@ INSERT_GENTDEF( hpdinv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef err_t (*PASTECH2(ch,opname,tsuf)) \
+typedef err_t (*PASTECH(ch,opname,tsuf)) \
      ( \
              uplo_t  uploa, \
              diag_t  diaga, \
@@ -80,7 +80,7 @@ INSERT_GENTDEF( trinv )
 #undef  GENTDEFR
 #define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
 \
-typedef err_t (*PASTECH3(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
+typedef err_t (*PASTECH(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
      ( \
              bool     comp_evecs, \
              uplo_t   uploa, \
@@ -102,7 +102,7 @@ INSERT_GENTDEFR( hevd )
 #undef  GENTDEFR
 #define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
 \
-typedef err_t (*PASTECH3(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
+typedef err_t (*PASTECH(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
      ( \
              uplo_t   uploa, \
              dim_t    m, \
@@ -120,7 +120,7 @@ INSERT_GENTDEFR( rhevd )
 #undef  GENTDEFR
 #define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
 \
-typedef err_t (*PASTECH3(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
+typedef err_t (*PASTECH(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
      ( \
              double   thresh, \
              uplo_t   uploa, \

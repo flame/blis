@@ -182,7 +182,7 @@ void PASTEMAC(ch,opname) \
 \
 	bli_obj_set_struc( BLIS_SYMMETRIC, &co ); \
 \
-	PASTEMAC0(opname)( &alphao, \
+	PASTEMAC(opname)( &alphao, \
 	                   &xo, \
 	                   &yo, \
 	                   &co, \

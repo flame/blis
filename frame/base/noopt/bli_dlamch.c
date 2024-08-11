@@ -47,7 +47,7 @@ double bli_pow_di(bla_double *ap, bla_integer *bp)
 	return pow;
 }
 
-bla_double bli_dlamch(bla_character *cmach, ftnlen cmach_len)
+bla_double bli_dlamch(const bla_character *cmach, const ftnlen cmach_len)
 {
     /* Initialized data */
 
@@ -1031,7 +1031,7 @@ L10:
 
 #else
 
-bla_double bli_dlamch(bla_character *cmach, ftnlen cmach_len)
+bla_double bli_dlamch(const bla_character *cmach, const ftnlen cmach_len)
 {
 /*          = 'E' or 'e',   DLAMCH := eps */
 /*          = 'S' or 's ,   DLAMCH := sfmin */

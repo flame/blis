@@ -38,13 +38,13 @@
 
 err_t bli_chol_int
      (
-       const obj_t*  a,
-       const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl
+       const obj_t*     a,
+       const cntx_t*    cntx,
+             rntm_t*    rntm,
+             l4_cntl_t* cntl
      )
 {
-	chol_oft chol_fp = bli_cntl_var_func( cntl );
+	chol_oft chol_fp = bli_l4_cntl_var_func( cntl );
 
 	return chol_fp( a, cntx, rntm, cntl );
 }

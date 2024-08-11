@@ -56,7 +56,7 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
        const void*      b21,
              void*      b11,
              void*      c11, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {

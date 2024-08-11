@@ -39,7 +39,7 @@
 // Define Fortran-compatible BLIS interfaces.
 //
 
-void PASTEF770(bli_thread_set_ways)
+void PASTEF77(bli_thread_set_ways)
      (
        const f77_int* jc,
        const f77_int* pc,
@@ -71,7 +71,7 @@ void PASTEF770(bli_thread_set_ways)
 	bli_finalize_auto();
 }
 
-void PASTEF770(bli_thread_set_num_threads)
+void PASTEF77(bli_thread_set_num_threads)
      (
        const f77_int* nt
      )

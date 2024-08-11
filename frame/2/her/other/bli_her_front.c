@@ -167,7 +167,7 @@ void PASTEMAC(ch,opname) \
 \
 	bli_obj_set_struc( BLIS_HERMITIAN, &co ); \
 \
-	PASTEMAC0(opname)( &alphao, \
+	PASTEMAC(opname)( &alphao, \
 	                   &xo, \
 	                   &co, \
 	                   cntx ); \

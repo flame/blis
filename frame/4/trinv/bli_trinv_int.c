@@ -39,13 +39,13 @@
 
 err_t bli_trinv_int
      (
-       const obj_t*  a,
-       const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl
+       const obj_t*     a,
+       const cntx_t*    cntx,
+             rntm_t*    rntm,
+             l4_cntl_t* cntl
      )
 {
-	trinv_oft trinv_fp = bli_cntl_var_func( cntl );
+	trinv_oft trinv_fp = bli_l4_cntl_var_func( cntl );
 
 	return trinv_fp( a, cntx, rntm, cntl );
 }

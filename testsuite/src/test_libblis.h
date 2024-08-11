@@ -67,7 +67,7 @@
 #define INPUT_BUFFER_SIZE            256
 #define MAX_FILENAME_LENGTH          1000
 #define MAX_BINARY_NAME_LENGTH       256
-#define MAX_FUNC_STRING_LENGTH       26
+#define MAX_FUNC_STRING_LENGTH       32
 #define FLOPS_PER_UNIT_PERF          1e9
 
 #define MAX_NUM_MSTORAGE             4
@@ -352,6 +352,7 @@ void libblis_test_read_op_info( test_ops_t*  ops,
 void libblis_test_output_section_overrides( FILE* os, test_ops_t* ops );
 void libblis_test_output_params_struct( FILE* os, test_params_t* params );
 void libblis_test_output_op_struct( FILE* os, test_op_t* op, char* op_str );
+void libblis_test_output_term_tag( void );
 
 // --- Mapping ---
 
@@ -481,6 +482,9 @@ int  libblis_test_l2_is_disabled( test_op_t* op );
 int  libblis_test_l3ukr_is_disabled( test_op_t* op );
 int  libblis_test_l3_is_disabled( test_op_t* op );
 int  libblis_test_l4_is_disabled( test_op_t* op );
+
+double libblis_test_l3_flops( opid_t op, obj_t* a, obj_t* b, obj_t* c );
+
 int  libblis_test_dt_str_has_sp_char( test_params_t* params );
 int  libblis_test_dt_str_has_sp_char_str( int n, char* str );
 int  libblis_test_dt_str_has_dp_char( test_params_t* params );

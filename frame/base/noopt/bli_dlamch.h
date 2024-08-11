@@ -32,4 +32,4 @@
 
 */
 
-bla_double bli_dlamch( bla_character* cmach, ftnlen cmach_len );
+bla_double bli_dlamch( const bla_character* cmach, const ftnlen cmach_len );

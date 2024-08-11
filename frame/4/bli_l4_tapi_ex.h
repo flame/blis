@@ -40,7 +40,7 @@
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
      ( \
              uplo_t  uploa, \
              dim_t   m, \
@@ -57,7 +57,7 @@ INSERT_GENTPROT_BASIC( hpdinv )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
      ( \
              uplo_t  uploa, \
              diag_t  diaga, \

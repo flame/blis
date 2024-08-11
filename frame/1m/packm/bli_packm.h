@@ -40,14 +40,7 @@
 #include "bli_packm_int.h"
 #include "bli_packm_scalar.h"
 
-#include "bli_packm_part.h"
-
 #include "bli_packm_struc_cxk.h"
-
-// Mixed datatype support.
-#ifdef BLIS_ENABLE_GEMM_MD
-#include "bli_packm_struc_cxk_md.h"
-#endif
 
 #include "bli_packm_blk_var1.h"
 

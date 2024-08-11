@@ -37,7 +37,6 @@
 
 #include "bli_chol_var.h"
 #include "bli_chol_int.h"
-#include "bli_chol_blksz.h"
 #include "bli_chol_cntl.h"
 
 #ifdef BLIS_ENABLE_LEVEL4
