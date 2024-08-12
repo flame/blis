@@ -642,6 +642,26 @@ err_t bli_check_symmetric_object( const obj_t* a )
 	return e_val;
 }
 
+err_t bli_check_skew_hermitian_object( const obj_t* a )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( !bli_obj_is_skew_hermitian( a ) )
+		e_val = BLIS_EXPECTED_SKEW_HERMITIAN_OBJECT;
+
+	return e_val;
+}
+
+err_t bli_check_skew_symmetric_object( const obj_t* a )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( !bli_obj_is_skew_symmetric( a ) )
+		e_val = BLIS_EXPECTED_SKEW_SYMMETRIC_OBJECT;
+
+	return e_val;
+}
+
 err_t bli_check_triangular_object( const obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;

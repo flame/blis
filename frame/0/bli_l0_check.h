@@ -54,6 +54,7 @@ GENTPROT( sqrtsc )
 GENTPROT( sqrtrsc )
 GENTPROT( subsc )
 GENTPROT( invertsc )
+GENTPROT( negsc )
 
 
 #undef  GENTPROT

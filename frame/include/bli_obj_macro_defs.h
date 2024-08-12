@@ -336,6 +336,18 @@ BLIS_INLINE bool bli_obj_is_symmetric( const obj_t* obj )
 	       ( bli_obj_struc( obj ) == BLIS_BITVAL_SYMMETRIC );
 }
 
+BLIS_INLINE bool bli_obj_is_skew_hermitian( const obj_t* obj )
+{
+	return ( bool )
+	       ( bli_obj_struc( obj ) == BLIS_BITVAL_SKEW_HERMITIAN );
+}
+
+BLIS_INLINE bool bli_obj_is_skew_symmetric( const obj_t* obj )
+{
+	return ( bool )
+	       ( bli_obj_struc( obj ) == BLIS_BITVAL_SKEW_SYMMETRIC );
+}
+
 BLIS_INLINE bool bli_obj_is_triangular( const obj_t* obj )
 {
 	return ( bool )
@@ -504,6 +516,18 @@ BLIS_INLINE bool bli_obj_root_is_symmetric( const obj_t* obj )
 	       ( bli_obj_is_symmetric( bli_obj_root( obj ) ) );
 }
 
+BLIS_INLINE bool bli_obj_root_is_skew_hermitian( const obj_t* obj )
+{
+	return ( bool )
+	       ( bli_obj_is_skew_hermitian( bli_obj_root( obj ) ) );
+}
+
+BLIS_INLINE bool bli_obj_root_is_skew_symmetric( const obj_t* obj )
+{
+	return ( bool )
+	       ( bli_obj_is_skew_symmetric( bli_obj_root( obj ) ) );
+}
+
 BLIS_INLINE bool bli_obj_root_is_triangular( const obj_t* obj )
 {
 	return ( bool )
@@ -515,6 +539,13 @@ BLIS_INLINE bool bli_obj_root_is_herm_or_symm( const obj_t* obj )
 	return ( bool )
 	       ( bli_obj_is_hermitian( bli_obj_root( obj ) ) ||
 	         bli_obj_is_symmetric( bli_obj_root( obj ) ) );
+}
+
+BLIS_INLINE bool bli_obj_root_is_skew_herm_or_symm( const obj_t* obj )
+{
+	return ( bool )
+	       ( bli_obj_is_skew_hermitian( bli_obj_root( obj ) ) ||
+	         bli_obj_is_skew_symmetric( bli_obj_root( obj ) ) );
 }
 
 BLIS_INLINE bool bli_obj_root_is_upper( const obj_t* obj )

@@ -260,11 +260,15 @@ typedef struct test_ops_s
 	test_op_t gemv;
 	test_op_t ger;
 	test_op_t hemv;
+	test_op_t shmv;
 	test_op_t her;
 	test_op_t her2;
+	test_op_t shr2;
 	test_op_t symv;
+	test_op_t skmv;
 	test_op_t syr;
 	test_op_t syr2;
+	test_op_t skr2;
 	test_op_t trmv;
 	test_op_t trsv;
 
@@ -277,11 +281,15 @@ typedef struct test_ops_s
 	test_op_t gemm;
 	test_op_t gemmt;
 	test_op_t hemm;
+	test_op_t shmm;
 	test_op_t herk;
 	test_op_t her2k;
+	test_op_t shr2k;
 	test_op_t symm;
+	test_op_t skmm;
 	test_op_t syrk;
 	test_op_t syr2k;
+	test_op_t skr2k;
 	test_op_t trmm;
 	test_op_t trmm3;
 	test_op_t trsm;
@@ -538,11 +546,15 @@ char libblis_test_proj_dtchar_to_precchar( char dt_char );
 #include "test_gemv.h"
 #include "test_ger.h"
 #include "test_hemv.h"
+#include "test_shmv.h"
 #include "test_her.h"
 #include "test_her2.h"
+#include "test_shr2.h"
 #include "test_symv.h"
+#include "test_skmv.h"
 #include "test_syr.h"
 #include "test_syr2.h"
+#include "test_skr2.h"
 #include "test_trmv.h"
 #include "test_trsv.h"
 
@@ -555,11 +567,15 @@ char libblis_test_proj_dtchar_to_precchar( char dt_char );
 #include "test_gemm.h"
 #include "test_gemmt.h"
 #include "test_hemm.h"
+#include "test_shmm.h"
 #include "test_herk.h"
 #include "test_her2k.h"
+#include "test_shr2k.h"
 #include "test_symm.h"
+#include "test_skmm.h"
 #include "test_syrk.h"
 #include "test_syr2k.h"
+#include "test_skr2k.h"
 #include "test_trmm.h"
 #include "test_trmm3.h"
 #include "test_trsm.h"

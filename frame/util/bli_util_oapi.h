@@ -61,6 +61,8 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
 
 GENPROT( mkherm )
 GENPROT( mksymm )
+GENPROT( mkskewherm )
+GENPROT( mkskewsymm )
 GENPROT( mktrim )
 
 

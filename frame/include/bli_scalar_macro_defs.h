@@ -97,6 +97,7 @@
 #include "bli_invscaljris.h"
 
 #include "bli_neg2ris.h"
+#include "bli_negris.h"
 
 #include "bli_scalris.h"
 #include "bli_scaljris.h"
@@ -165,6 +166,7 @@
 #include "bli_invscaljs.h"
 
 #include "bli_neg2s.h"
+#include "bli_negs.h"
 
 #include "bli_rands.h"
 #include "bli_randnp2s.h"
@@ -180,6 +182,7 @@
 
 #include "bli_set1s.h"
 
+#include "bli_setr0s.h"
 #include "bli_seti0s.h"
 
 #include "bli_sqrt2s.h"

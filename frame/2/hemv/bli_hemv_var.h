@@ -42,7 +42,6 @@
 \
 void PASTEMAC(opname) \
      ( \
-       conj_t  conjh, \
        obj_t*  alpha, \
        obj_t*  a, \
        obj_t*  x, \
@@ -77,10 +76,10 @@ GENPROT( hemv_unf_var3a )
 \
 void PASTEMAC(ch,varname) \
      ( \
+       struc_t struca, \
        uplo_t  uplo, \
        conj_t  conja, \
        conj_t  conjx, \
-       conj_t  conjh, \
        dim_t   m, \
        ctype*  alpha, \
        ctype*  a, inc_t rs_a, inc_t cs_a, \

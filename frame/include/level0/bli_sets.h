@@ -41,19 +41,19 @@
 // - The first char encodes the type of x.
 // - The second char encodes the type of y.
 
-#define bli_sssets( xr, xi, y )  { (y) = (xr); }
-#define bli_dssets( xr, xi, y )  { (y) = (xr); }
-#define bli_cssets( xr, xi, y )  { (y) = (xr); }
-#define bli_zssets( xr, xi, y )  { (y) = (xr); }
-#define bli_issets( xr, xi, y )  { (y) = (xr); }
+#define bli_sssets( xr, xi, y )  { (y) = (xr); (void)(xi); }
+#define bli_dssets( xr, xi, y )  { (y) = (xr); (void)(xi); }
+#define bli_cssets( xr, xi, y )  { (y) = (xr); (void)(xi); }
+#define bli_zssets( xr, xi, y )  { (y) = (xr); (void)(xi); }
+#define bli_issets( xr, xi, y )  { (y) = (xr); (void)(xi); }
 
-#define bli_sdsets( xr, xi, y )  { (y) = (xr); }
-#define bli_ddsets( xr, xi, y )  { (y) = (xr); }
-#define bli_cdsets( xr, xi, y )  { (y) = (xr); }
-#define bli_zdsets( xr, xi, y )  { (y) = (xr); }
-#define bli_idsets( xr, xi, y )  { (y) = (xr); }
+#define bli_sdsets( xr, xi, y )  { (y) = (xr); (void)(xi); }
+#define bli_ddsets( xr, xi, y )  { (y) = (xr); (void)(xi); }
+#define bli_cdsets( xr, xi, y )  { (y) = (xr); (void)(xi); }
+#define bli_zdsets( xr, xi, y )  { (y) = (xr); (void)(xi); }
+#define bli_idsets( xr, xi, y )  { (y) = (xr); (void)(xi); }
 
-#ifndef BLIS_ENABLE_C99_COMPLEX 
+#ifndef BLIS_ENABLE_C99_COMPLEX
 
 #define bli_scsets( xr, xi, y ) { bli_creal(y) = (xr); bli_cimag(y) = (xi); }
 #define bli_dcsets( xr, xi, y ) { bli_creal(y) = (xr); bli_cimag(y) = (xi); }
@@ -81,11 +81,11 @@
 
 #endif // BLIS_ENABLE_C99_COMPLEX
 
-#define bli_sisets( xr, xi, y ) { (y) = bli_sreal(xr); }
-#define bli_disets( xr, xi, y ) { (y) = bli_dreal(xr); }
-#define bli_cisets( xr, xi, y ) { (y) = bli_creal(xr); }
-#define bli_zisets( xr, xi, y ) { (y) = bli_zreal(xr); }
-#define bli_iisets( xr, xi, y ) { (y) =          (xr); }
+#define bli_sisets( xr, xi, y ) { (y) = bli_sreal(xr); (void)(xi); }
+#define bli_disets( xr, xi, y ) { (y) = bli_dreal(xr); (void)(xi); }
+#define bli_cisets( xr, xi, y ) { (y) = bli_creal(xr); (void)(xi); }
+#define bli_zisets( xr, xi, y ) { (y) = bli_zreal(xr); (void)(xi); }
+#define bli_iisets( xr, xi, y ) { (y) =          (xr); (void)(xi); }
 
 
 #define bli_ssets( xr, xi, y )  bli_sssets( xr, xi, y )

@@ -124,6 +124,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      );
 
+INSERT_GENTPROTR_BASIC( setrd )
 INSERT_GENTPROTR_BASIC( setid )
 
 

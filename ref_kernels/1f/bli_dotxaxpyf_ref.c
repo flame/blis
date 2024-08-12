@@ -46,7 +46,8 @@ void PASTEMAC(ch,opname,arch,suf) \
              conj_t  conjx, \
              dim_t   m, \
              dim_t   b_n, \
-       const void*   alpha0, \
+       const void*   alphaw0, \
+       const void*   alphax0, \
        const void*   a0, inc_t inca, inc_t lda, \
        const void*   w0, inc_t incw, \
        const void*   x0, inc_t incx, \
@@ -57,16 +58,17 @@ void PASTEMAC(ch,opname,arch,suf) \
      ) \
 { \
 	/* A is m x n.                   */ \
-	/* y = beta * y + alpha * A^T w; */ \
-	/* z =        z + alpha * A   x; */ \
+	/* y = beta * y + alphaw * A^T w; */ \
+	/* z =        z + alphax * A   x; */ \
 \
-	const ctype* restrict alpha = alpha0; \
-	const ctype* restrict a     = a0; \
-	const ctype* restrict w     = w0; \
-	const ctype* restrict x     = x0; \
-	const ctype* restrict beta  = beta0; \
-	      ctype* restrict y     = y0; \
-	      ctype* restrict z     = z0; \
+	const ctype* restrict alphaw = alphaw0; \
+	const ctype* restrict alphax = alphax0; \
+	const ctype* restrict a      = a0; \
+	const ctype* restrict w      = w0; \
+	const ctype* restrict x      = x0; \
+	const ctype* restrict beta   = beta0; \
+	      ctype* restrict y      = y0; \
+	      ctype* restrict z      = z0; \
 \
 	if ( 1 && inca == 1 && incw == 1 && incx == 1 && \
 	     incy == 1 && incz == 1 && b_n == ff ) \
@@ -84,9 +86,6 @@ void PASTEMAC(ch,opname,arch,suf) \
 			for ( dim_t i = 0; i < ff; ++i ) PASTEMAC(ch,scals)( *beta, y[i] ); \
 		} \
 \
-		/* If the vectors are empty or if alpha is zero, return early. */ \
-		if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
-\
 		/* Initialize r vector to 0. */ \
 		for ( dim_t i = 0; i < ff; ++i ) PASTEMAC(ch,set0s)( r[i] ); \
 \
@@ -95,13 +94,13 @@ void PASTEMAC(ch,opname,arch,suf) \
 		{ \
 			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < ff; ++i ) \
-				PASTEMAC(ch,scal2js)( *alpha, x[i], ax[i] ); \
+				PASTEMAC(ch,scal2js)( *alphax, x[i], ax[i] ); \
 		} \
 		else \
 		{ \
 			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < ff; ++i ) \
-				PASTEMAC(ch,scal2s)( *alpha, x[i], ax[i] ); \
+				PASTEMAC(ch,scal2s)( *alphax, x[i], ax[i] ); \
 		} \
 \
 		/* If a must be conjugated, we do so indirectly by first toggling the
@@ -164,7 +163,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 \
 		for ( dim_t i = 0; i < ff; ++i ) \
 		{ \
-			PASTEMAC(ch,axpys)( *alpha, r[i], y[i] ); \
+			PASTEMAC(ch,axpys)( *alphaw, r[i], y[i] ); \
 		} \
 	} \
 	else \
@@ -180,7 +179,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 		  conjw, \
 		  m, \
 		  b_n, \
-		  alpha, \
+		  alphaw, \
 		  a, inca, lda, \
 		  w, incw, \
 		  beta, \
@@ -194,7 +193,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 		  conjx, \
 		  m, \
 		  b_n, \
-		  alpha, \
+		  alphax, \
 		  a, inca, lda, \
 		  x, incx, \
 		  z, incz, \

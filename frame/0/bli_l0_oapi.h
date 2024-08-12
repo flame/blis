@@ -66,6 +66,7 @@ GENPROT( sqrtsc )
 GENPROT( sqrtrsc )
 GENPROT( subsc )
 GENPROT( invertsc )
+GENPROT( negsc )
 
 
 #undef  GENPROT

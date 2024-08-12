@@ -116,6 +116,7 @@ GENFRONT( divsc )
 GENFRONT( mulsc )
 GENFRONT( subsc )
 GENFRONT( invertsc )
+GENFRONT( negsc )
 
 
 #undef  GENFRONT

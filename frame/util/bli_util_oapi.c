@@ -124,6 +124,8 @@ void PASTEMAC(opname,EX_SUF) \
 
 GENFRONT( mkherm )
 GENFRONT( mksymm )
+GENFRONT( mkskewherm )
+GENFRONT( mkskewsymm )
 GENFRONT( mktrim )
 
 
