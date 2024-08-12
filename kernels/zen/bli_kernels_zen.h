@@ -46,7 +46,7 @@ ADDV_KER_PROT( dcomplex, z, addv_zen_int )
 
 // amaxv (intrinsics)
 AMAXV_KER_PROT( float,    s, amaxv_zen_int )
-AMAXV_KER_PROT( double,   d, amaxv_zen_int )
+BLIS_EXPORT_BLIS AMAXV_KER_PROT( double,   d, amaxv_zen_int )
 
 // axpbyv (intrinsics)
 AXPBYV_KER_PROT( float,    s, axpbyv_zen_int )
@@ -64,7 +64,7 @@ AXPYV_KER_PROT( double,   d, axpyv_zen_int )
 
 // axpyv (intrinsics unrolled x10)
 AXPYV_KER_PROT( float,    s, axpyv_zen_int10 )
-AXPYV_KER_PROT( double,   d, axpyv_zen_int10 )
+BLIS_EXPORT_BLIS AXPYV_KER_PROT( double,   d, axpyv_zen_int10 )
 AXPYV_KER_PROT( scomplex, c, axpyv_zen_int5 )
 AXPYV_KER_PROT( dcomplex, z, axpyv_zen_int5 )
 
@@ -92,12 +92,12 @@ SCALV_KER_PROT( dcomplex, z, scalv_zen_int )
 
 // scalv (intrinsics unrolled x10)
 SCALV_KER_PROT( float,      s, scalv_zen_int10 )
-SCALV_KER_PROT( double,     d, scalv_zen_int10 )
+BLIS_EXPORT_BLIS SCALV_KER_PROT( double,     d, scalv_zen_int10 )
 SCALV_KER_PROT( dcomplex,   z, dscalv_zen_int10 )
 
 // swapv (intrinsics)
 SWAPV_KER_PROT(float,   s, swapv_zen_int8 )
-SWAPV_KER_PROT(double,  d, swapv_zen_int8 )
+BLIS_EXPORT_BLIS SWAPV_KER_PROT(double,  d, swapv_zen_int8 )
 
 // copyv (intrinsics)
 COPYV_KER_PROT( float,      s, copyv_zen_int )
