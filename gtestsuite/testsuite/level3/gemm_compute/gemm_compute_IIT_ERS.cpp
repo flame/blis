@@ -584,7 +584,9 @@ TYPED_TEST(gemm_compute_IIT_ERS, ZeroAlpha_ZeroBeta)
     // Test with all arguments correct except for the value we are choosing to test.
     std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
     std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
-    gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
+
+    // Enable packing of A matrix to accound for alpha = 0 scaling.
+    gemm_compute<T>( STORAGE, TRANS, TRANS, 'P', 'U', M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
     computediff<T>( "C", STORAGE, N, N, c.data(), zero_mat.data(), LDC);
 
