@@ -295,7 +295,7 @@ void bli_dtrsv_unf_var2
 
     conja = bli_extract_conj( transa );
 
-    PASTECH(d,axpyf_ker_ft) kfp_af;
+    PASTECH(d,axpyf_ker_ft) kfp_af = NULL;
 
     // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
@@ -308,20 +308,29 @@ void bli_dtrsv_unf_var2
             case BLIS_ARCH_ZEN4:
             {
 #ifdef BLIS_ENABLE_OPENMP
-                rntm_t rntm;
-                bli_rntm_init_from_global(&rntm);
-                dim_t n_threads = bli_rntm_num_threads(&rntm);
-                // For small sizes and single thred, kernel with
-                // fuse_factor 8 is performing better
-                if ( m > 800 && n_threads > 1 )
+                // For sizes < 800 ST kernels are performing better.
+                if (m > 800)
                 {
-                    kfp_af = bli_daxpyf_zen_int32_avx512_mt;
-                    b_fuse = 32;
+                    rntm_t rntm;
+                    bli_rntm_init_from_global(&rntm);
+                    dim_t n_threads = bli_rntm_num_threads(&rntm);
+                    // If NT == 1, don't use MT kernel.
+                    if ( n_threads > 1 )
+                    {
+                        kfp_af = bli_daxpyf_zen_int32_avx512_mt;
+                        b_fuse = 32;
+                    }
                 }
-                else
 #endif
+                if ( kfp_af == NULL )
                 {
-                    if ( m < 2500 )
+                    // AVX2 kernel performs better for small sizes on Genoa
+                    if ( id == BLIS_ARCH_ZEN4 && m < 380 )
+                    {
+                        kfp_af = bli_daxpyf_zen_int_16x4;
+                        b_fuse = 4;
+                    }
+                    else if ( m < 2500 )
                     {
                         kfp_af = bli_daxpyf_zen_int8_avx512;
                         b_fuse = 8;
