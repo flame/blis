@@ -184,7 +184,10 @@ void bli_gemm_ker_var2
 		 ( bli_obj_dt( c ) == BLIS_DOUBLE ) &&
 		 ( bli_arch_query_id() == BLIS_ARCH_ZEN5 ) &&
 		 ( cs_c == 1 ) && // use this kernel only for row major C
-		 ( (n%NR) == 0 ) && ( (m%MR) == 0 )
+		 ( (n%NR) == 0 ) && ( (m%MR) == 0 ) &&
+		 // use generic macro kernel for mixed precision
+		 ( bli_obj_elem_size( a ) == 8 ) && // check if elem_size == sizeof(double)
+		 ( bli_obj_elem_size( b ) == 8 )
 	)
 	{
 		bli_dgemm_avx512_asm_8x24_macro_kernel
