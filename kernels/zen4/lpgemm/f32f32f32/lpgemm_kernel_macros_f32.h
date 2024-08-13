@@ -123,7 +123,14 @@
 	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,m_ind,2); \
 	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr3,m_ind,3); \
 	F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3,m_ind,r_ind0,r_ind1,r_ind2,r_ind3); \
- 
+
+#define F32_F32_MATRIX_ADD_4COL_MASK(k0,k1,k2,k3,r_ind0,r_ind1,r_ind2,r_ind3,scr0,scr1,scr2,scr3,m_ind) \
+	F32_F32_MATRIX_ADD_LOAD(k0,scr0,m_ind,0); \
+	F32_F32_MATRIX_ADD_LOAD(k1,scr1,m_ind,1); \
+	F32_F32_MATRIX_ADD_LOAD(k2,scr2,m_ind,2); \
+	F32_F32_MATRIX_ADD_LOAD(k3,scr3,m_ind,3); \
+	F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3,m_ind,r_ind0,r_ind1,r_ind2,r_ind3); \
+
 // Matrix Mul post-ops helper macros
 #define F32_MATRIX_MUL_2COL(scr0,scr1,m_ind,r_ind0,r_ind1) \
 	zmm ## r_ind0 = _mm512_mul_ps( scr0, zmm ## r_ind0 ); \
@@ -165,6 +172,13 @@
 	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,m_ind,2); \
 	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr3,m_ind,3); \
 	F32_MATRIX_MUL_4COL(scr0,scr1,scr2,scr3,m_ind,r_ind0,r_ind1,r_ind2,r_ind3); \
-  
+
+#define F32_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,r_ind0,r_ind1,r_ind2,r_ind3,scr0,scr1,scr2,scr3,m_ind) \
+	F32_F32_MATRIX_MUL_LOAD(k0,scr0,m_ind,0); \
+	F32_F32_MATRIX_MUL_LOAD(k1,scr1,m_ind,1); \
+	F32_F32_MATRIX_MUL_LOAD(k2,scr2,m_ind,2); \
+	F32_F32_MATRIX_MUL_LOAD(k3,scr3,m_ind,3); \
+	F32_MATRIX_MUL_4COL(scr0,scr1,scr2,scr3,m_ind,r_ind0,r_ind1,r_ind2,r_ind3); \
+
 #endif //LPGEMM_F32_SGEMM_KERN_MACROS_H
 

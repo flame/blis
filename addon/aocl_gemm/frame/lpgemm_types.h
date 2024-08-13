@@ -84,9 +84,10 @@ typedef enum
 
 typedef enum
 {
-	BF16OF32 = 0
+	BF16OF32 = 0,
+	F32OF32 = 1
 } AOCL_ELTWISE_OPS_OPERATION_TYPE;
-#define AOCL_ELTWISE_OPS_OPERATION_TYPE_LEN 1
+#define AOCL_ELTWISE_OPS_OPERATION_TYPE_LEN 2
 
 typedef enum
 {

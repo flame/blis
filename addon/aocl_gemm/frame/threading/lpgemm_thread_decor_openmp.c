@@ -1019,6 +1019,26 @@ BLIS_INLINE void lpgemm_eltwise_ops_bf16of32_get_threading
 	}
 }
 
+BLIS_INLINE void lpgemm_eltwise_ops_f32of32_get_threading
+     (
+       dim_t*                      n_threads,
+       dim_t*                      ic_ways,
+       dim_t*                      jc_ways,
+       dim_t                       m,
+       dim_t                       n,
+       rntm_t*                     rntm_g,
+       lpgemm_eltwise_ops_cntx_t* lcntx
+     )
+{
+	lpgemm_eltwise_ops_bf16of32_get_threading
+	(
+	  n_threads,
+	  ic_ways, jc_ways,
+	  m, n, rntm_g,
+	  lcntx
+	);
+}
+
 #define GEN_UTIL_ELTWISE_OPS_OPENMP_DECORATOR(A_type,B_type,LPGEMM_SFX) \
 void lpgemm_eltwise_ops_ ## LPGEMM_SFX ## _openmp_thread_decorator \
      ( \
@@ -1102,6 +1122,7 @@ void lpgemm_eltwise_ops_ ## LPGEMM_SFX ## _openmp_thread_decorator \
 } \
 
 GEN_UTIL_ELTWISE_OPS_OPENMP_DECORATOR(bfloat16,float,bf16of32)
+GEN_UTIL_ELTWISE_OPS_OPENMP_DECORATOR(float,float,f32of32)
 
 #else
 
@@ -1304,5 +1325,6 @@ void lpgemm_eltwise_ops_ ## LPGEMM_SFX ## _thread_decorator \
 } \
 
 GEN_UTIL_ELTWISE_OPS_DECORATOR(bfloat16,float,bf16of32)
+GEN_UTIL_ELTWISE_OPS_DECORATOR(float,float,f32of32)
 
 #endif

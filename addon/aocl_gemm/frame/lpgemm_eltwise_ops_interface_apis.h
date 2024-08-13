@@ -58,5 +58,6 @@ void lpgemm_eltwise_ops_interface_ ## LP_SFX \
      ) \
 
 LPGEMM_ELTWISE_OPS_IFACE(bfloat16,float,bf16of32);
+LPGEMM_ELTWISE_OPS_IFACE(float,float,f32of32);
 
 #endif //LPGEMM_POSTOP_INTF_H

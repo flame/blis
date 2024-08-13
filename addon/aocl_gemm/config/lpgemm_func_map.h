@@ -82,6 +82,7 @@
 
 #define LPGEMM_ELTWISE_OPS_KERN_FUNC_MAP_AVX512_VNNI_BF16 \
 	POMACRO(BF16OF32, lpgemm_eltwise_ops_kernel_bf16of32_6x64) \
+	POMACRO(F32OF32, lpgemm_eltwise_ops_kernel_f32of32_6x64) \
 
 #define LPGEMM_UTIL_KERN_FUNC_MAP_AVX512_VNNI_BF16 \
 	UMACRO(F32_GELU_TANH, lpgemm_util_f32_gelu_tanh_avx512_kernel) \

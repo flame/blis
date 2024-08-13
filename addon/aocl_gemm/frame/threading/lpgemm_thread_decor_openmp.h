@@ -120,6 +120,7 @@ void lpgemm_eltwise_ops_ ## LPGEMM_SFX ## _openmp_thread_decorator \
      ); \
 
 GEN_UTIL_ELTWISE_OPS_OPENMP_DECORATOR_FN(bfloat16,float,bf16of32)
+GEN_UTIL_ELTWISE_OPS_OPENMP_DECORATOR_FN(float,float,f32of32)
 
 #else
 
@@ -201,6 +202,7 @@ void lpgemm_eltwise_ops_ ## LPGEMM_SFX ## _thread_decorator \
      ); \
 
 GEN_UTIL_ELTWISE_OPS_DECORATOR_FN(bfloat16,float,bf16of32)
+GEN_UTIL_ELTWISE_OPS_DECORATOR_FN(float,float,f32of32)
 
 #endif
 

@@ -55,5 +55,6 @@ BLIS_EXPORT_ADDON void aocl_gemm_eltwise_ops_ ## LP_SFX \
 
 AOCL_UTIL_ELTWISE_OPS(bfloat16,float,bf16of32);
 AOCL_UTIL_ELTWISE_OPS(bfloat16,bfloat16,bf16obf16);
+AOCL_UTIL_ELTWISE_OPS(float,float,f32of32);
 
 #endif // AOCL_ELTWISE_OPS_INTERFACE_H

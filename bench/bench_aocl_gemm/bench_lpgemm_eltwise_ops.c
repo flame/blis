@@ -76,17 +76,37 @@ ACCUM_type eltwise_ops_get_temp_accum_ ## LP_SFX \
 GEN_ELTWISE_OPS_GET_TEMP_ACCUM(bfloat16,float,bf16of32)
 GEN_ELTWISE_OPS_GET_TEMP_ACCUM(bfloat16,float,bf16obf16)
 
+#define GEN_ELTWISE_OPS_GET_TEMP_ACCUM_F(A_type,ACCUM_type,LP_SFX) \
+ACCUM_type eltwise_ops_get_temp_accum_ ## LP_SFX \
+     ( \
+       A_type* a, \
+       dim_t rs_a, \
+       dim_t cs_a, \
+       dim_t i, \
+       dim_t j \
+     ) \
+{ \
+    float a_float = *( a + ( i * rs_a ) + ( j * cs_a ) ); \
+    return a_float; \
+} \
+
+GEN_ELTWISE_OPS_GET_TEMP_ACCUM_F(float,float,f32of32)
+
 GEN_GET_BIAS_POST_OP_VAL(float,bf16of32)
 GEN_GET_BIAS_POST_OP_VAL_BF16(bf16obf16)
+GEN_GET_BIAS_POST_OP_VAL(float,f32of32)
 
 GEN_GELU_TANH_POSTOP_FLOAT(bf16of32)
 GEN_GELU_TANH_POSTOP_FLOAT(bf16obf16)
+GEN_GELU_TANH_POSTOP_FLOAT(f32of32)
 
 GEN_GELU_ERF_POSTOP_FLOAT(bf16of32)
 GEN_GELU_ERF_POSTOP_FLOAT(bf16obf16)
+GEN_GELU_ERF_POSTOP_FLOAT(f32of32)
 
 GEN_SWISH_POSTOP_FLOAT(bf16of32)
 GEN_SWISH_POSTOP_FLOAT(bf16obf16)
+GEN_SWISH_POSTOP_FLOAT(f32of32)
 
 static inline float eltwise_ops_accuracy_check_downscale_bf16of32
      (
@@ -142,11 +162,39 @@ static inline float eltwise_ops_accuracy_check_downscale_bf16obf16
     return out_temp_accum;
 }
 
+static inline float eltwise_ops_accuracy_check_downscale_f32of32
+     (
+       float temp_accum,
+       aocl_post_op*  post_op,
+       dim_t j
+     )
+{
+     dim_t j_scale = j;
+    if ( ( post_op->sum )->scale_factor_len == 1 )
+    {
+       j_scale = 0;
+    }
+
+    dim_t j_zp = j;
+    if ( ( post_op->sum )->zero_point_len == 1 )
+    {
+       j_zp = 0;
+    }
+
+    float zp_float = *( ( float* )( post_op->sum )->zero_point + j_zp );
+    float out_temp_accum = ( temp_accum *
+                ( *( ( float* )( post_op->sum )->scale_factor + j_scale ) ) +
+                zp_float );
+    return out_temp_accum;
+}
+
 GEN_GET_MATRIX_ADD_POST_OP_VAL(float,float,bf16of32)
 GEN_GET_MATRIX_ADD_POST_OP_VAL_BF16(bfloat16,bf16obf16)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(float,float,f32of32)
 
 GEN_GET_MATRIX_MUL_POST_OP_VAL(float,float,bf16of32)
 GEN_GET_MATRIX_MUL_POST_OP_VAL_BF16(bfloat16,bf16obf16)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(float,float,f32of32)
 
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(float,float)
 
@@ -357,6 +405,7 @@ cleanup_acc: \
 
 GEN_ELTWISE_OPS_ACC_CHK_DRV_FUNC(bfloat16,float,float,bf16of32)
 GEN_ELTWISE_OPS_ACC_CHK_DRV_FUNC(bfloat16,bfloat16,float,bf16obf16)
+GEN_ELTWISE_OPS_ACC_CHK_DRV_FUNC(float,float,float,f32of32)
 
 #define GEN_ELTWISE_OPS_BENCH_DRV_FUNC(A_type,B_type,LP_SFX) \
 void eltwise_ops_bench_driver_ ## LP_SFX \
@@ -400,6 +449,7 @@ void eltwise_ops_bench_driver_ ## LP_SFX \
 
 GEN_ELTWISE_OPS_BENCH_DRV_FUNC(bfloat16,float,bf16of32)
 GEN_ELTWISE_OPS_BENCH_DRV_FUNC(bfloat16,bfloat16,bf16obf16)
+GEN_ELTWISE_OPS_BENCH_DRV_FUNC(float,float,f32of32)
 
 #define GEN_ELTWISE_OPS_POST_OPS_CREATOR(C_DSCALE_type,C_type,DSCALE_type,BLAS_SFX) \
 static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
@@ -866,6 +916,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 
 GEN_ELTWISE_OPS_POST_OPS_CREATOR(bfloat16,float,float,bf16of32)
 GEN_ELTWISE_OPS_POST_OPS_CREATOR(bfloat16,bfloat16,float,bf16obf16)
+GEN_ELTWISE_OPS_POST_OPS_CREATOR(float,float,float,f32of32)
 
 #define GEN_ELTWISE_OPS_BENCH_MAIN_FUNC(A_type, B_type, LP_SFX) \
 void eltwise_ops_bench_main_ ## LP_SFX \
@@ -954,6 +1005,7 @@ void eltwise_ops_bench_main_ ## LP_SFX \
 
 GEN_ELTWISE_OPS_BENCH_MAIN_FUNC(bfloat16,float,bf16of32)
 GEN_ELTWISE_OPS_BENCH_MAIN_FUNC(bfloat16,bfloat16,bf16obf16)
+GEN_ELTWISE_OPS_BENCH_MAIN_FUNC(float,float,f32of32)
 
 int main( int argc, char** argv )
 {
@@ -1131,6 +1183,18 @@ int main( int argc, char** argv )
                 strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
                 global_dscale_out = 'y';
                 GEN_FUNC_NAME(eltwise_ops_bench_main_, bf16obf16)
+                (
+                    fout, stor_order, transa, transb,
+                    m, n, stride_a, stride_b,
+                    post_ops_str_dest
+                );
+            }
+            if ( ( strcmp( eltwise_ops_type_str, "f32of32" ) == 0 ) ||
+                 ( strcmp( eltwise_ops_type_str, "*" ) == 0 ) )
+            {
+                strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
+                global_dscale_out = 'n';
+                GEN_FUNC_NAME(eltwise_ops_bench_main_, f32of32)
                 (
                     fout, stor_order, transa, transb,
                     m, n, stride_a, stride_b,
