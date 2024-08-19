@@ -279,7 +279,7 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
             ::testing::Values('c'),                                  // storage of c
-            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x64m_avx512), // dgemm_sup kernel
+            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x64m_avx512), // sgemm_sup_kernel
             ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
             ::testing::Values('n'),                                  // transa
             ::testing::Values('t'),                                  // transb
@@ -289,20 +289,85 @@ INSTANTIATE_TEST_SUITE_P (
         ::sgemmGenericSUPPrint()
     );
 
+/*
+    The bli_sgemmsup_rd_zen_asm_6x64m_avx512(standalone), accepts inputs with the
+    following contingency for n.
+        n <= NR, where NR is 64
+    The code structure for the sgemm_sup rd kernels(m-var) are as follows: 
+    In m direction :
+        Main kernel    : Blocks of 6(L6_M)
+        Fringe kernels : 5 ... 1(L5_M ... L1_M)
+    In k direction :
+        Main loop   : Blocks of 64(L64_K)
+        Fringe loop : Blocks of 32, 8, 1(L32_K ... L1_K)
+    In n direction :
+        Main kernel    : NR = 64(L64_N)
+        Fringe kernels : With n being 48, 32(AVX512 kernels)(L48_N, L32_N)
+                         With n being 16, 8, 4, 2, 1(Reusing AVX2 kernels)(L16_N ... L1_N)
+
+    The inherent storage scheme format for the kernel is RRC, for C, A and B.
+    The testing interface allows for testing row-storage(inherent) and col-storage(operation transpose)
+    of C. We still need to pass the right transpose value pair for A and B, as per the kernel requirement. 
+*/
+
+// Checking with row storage of C
+INSTANTIATE_TEST_SUITE_P (
+        bli_sgemmsup_rd_zen_asm_6x64m_row_stored_c,
+        sgemmGenericSUP,
+        ::testing::Combine(
+            ::testing::Range(gtint_t(1), gtint_t(7), gtint_t(1)),    // values of m(L6_M to L1_M)
+            ::testing::Values(gtint_t(64),                           // values of n, L64_N
+                              gtint_t(48),                           // L48_N
+                              gtint_t(32),                           // L32_N
+                              gtint_t(8),                            // L8_N
+                              gtint_t(7),                            // 7 * L1_N
+                              gtint_t(63)),                          // Combination of fringe cases for N
+            ::testing::Values(gtint_t(64),                           // values of k, L64_K
+                              gtint_t(32),                           // L32_K
+                              gtint_t(8),                            // L8_K
+                              gtint_t(7),                            // 7 * L1_K
+                              gtint_t(256),                          // 4 * L64_K
+                              gtint_t(303)),                         // Combination of main and fringe cases for K
+            ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
+            ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
+            ::testing::Values('r'),                                  // storage of c
+            ::testing::Values(bli_sgemmsup_rd_zen_asm_6x64m_avx512), // sgemm_sup_kernel
+            ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
+            ::testing::Values('n'),                                  // transa, has to be N for row storage
+            ::testing::Values('t'),                                  // transb, has to be T for row storage
+            ::testing::Values(true),                                 // kernel pref
+            ::testing::Values(true, false)                           // memory test
+        ),
+        ::sgemmGenericSUPPrint()
+    );
+
+// Checking with col storage of C
+// NOTE : Since we are inducing transpose at opertaion level, for code coverage, we
+//        have to interchange m and n instantiations
 INSTANTIATE_TEST_SUITE_P (
         bli_sgemmsup_rd_zen_asm_6x64m_col_stored_c,
         sgemmGenericSUP,
         ::testing::Combine(
-            ::testing::Range(gtint_t(1), gtint_t(7), 1),             // values of m
-            ::testing::Range(gtint_t(1), gtint_t(65), 1),            // values of n
-            ::testing::Range(gtint_t(0), gtint_t(17), 1),            // values of k
+            ::testing::Values(gtint_t(64),                           // values of m, L64_N
+                              gtint_t(48),                           // L48_N
+                              gtint_t(32),                           // L32_N
+                              gtint_t(8),                            // L8_N
+                              gtint_t(7),                            // 7 * L1_N
+                              gtint_t(63)),                          // Combination of fringe cases
+            ::testing::Range(gtint_t(1), gtint_t(7), gtint_t(1)),    // values of n(L6_M to L1_M)
+            ::testing::Values(gtint_t(64),                           // values of k, L64_K
+                              gtint_t(32),                           // L32_K
+                              gtint_t(8),                            // L8_K
+                              gtint_t(7),                            // 7 * L1_K
+                              gtint_t(256),                          // 4 * L64_K
+                              gtint_t(303)),                         // Combination of main and fringe cases for K
             ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
             ::testing::Values('c'),                                  // storage of c
-            ::testing::Values(bli_sgemmsup_rd_zen_asm_6x64m_avx512), // dgemm_sup kernel
+            ::testing::Values(bli_sgemmsup_rd_zen_asm_6x64m_avx512), // sgemm_sup_kernel
             ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
-            ::testing::Values('t'),                                  // transa
-            ::testing::Values('n'),                                  // transb
+            ::testing::Values('t'),                                  // transa, has to be T for row storage
+            ::testing::Values('n'),                                  // transb, has to be N for row storage
             ::testing::Values(true),                                 // kernel pref
             ::testing::Values(true, false)                           // memory test
         ),
@@ -319,7 +384,7 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
             ::testing::Values('r'),                                  // storage of c
-            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x64n_avx512), // dgemm_sup kernel
+            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x64n_avx512), // sgemm_sup_kernel
             ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
             ::testing::Values('t'),                                  // transa
             ::testing::Values('n'),                                  // transb
@@ -339,7 +404,7 @@ INSTANTIATE_TEST_SUITE_P (
             ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
             ::testing::Values('r'),                                  // storage of c
-            ::testing::Values(bli_sgemmsup_rd_zen_asm_6x64n_avx512), // dgemm_sup kernel
+            ::testing::Values(bli_sgemmsup_rd_zen_asm_6x64n_avx512), // sgemm_sup_kernel
             ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
             ::testing::Values('n'),                                  // transa
             ::testing::Values('t'),                                  // transb
