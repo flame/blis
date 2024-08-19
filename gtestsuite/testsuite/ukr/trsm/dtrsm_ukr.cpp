@@ -218,6 +218,7 @@ INSTANTIATE_TEST_SUITE_P (
 #endif
 
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
+#ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
 INSTANTIATE_TEST_SUITE_P (
     bli_trsm_small,
     dtrsmGenericSmall,
@@ -236,4 +237,5 @@ INSTANTIATE_TEST_SUITE_P (
     ),
     (::trsmSmallUKRPrint<double,trsm_small_ker_ft>())
 );
+#endif
 #endif

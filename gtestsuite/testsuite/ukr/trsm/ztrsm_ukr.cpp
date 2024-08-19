@@ -166,6 +166,7 @@ INSTANTIATE_TEST_SUITE_P (
     (::trsmNatUKRPrint<dcomplex,zgemmtrsm_ukr_ft>())
 );
 
+#ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
 INSTANTIATE_TEST_SUITE_P (
     bli_trsm_small_AVX512,
     ztrsmGenericSmall,
@@ -187,7 +188,7 @@ INSTANTIATE_TEST_SUITE_P (
     ),
     (::trsmSmallUKRPrint<dcomplex, trsm_small_ker_ft>())
 );
-
+#endif
 
 #endif
 
@@ -235,6 +236,7 @@ INSTANTIATE_TEST_SUITE_P (
     (::trsmNatUKRPrint<dcomplex,zgemmtrsm_ukr_ft>())
 );
 
+#ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
 INSTANTIATE_TEST_SUITE_P (
     bli_trsm_small,
     ztrsmGenericSmall,
@@ -256,4 +258,5 @@ INSTANTIATE_TEST_SUITE_P (
     ),
     (::trsmSmallUKRPrint<dcomplex, trsm_small_ker_ft>())
 );
+#endif
 #endif

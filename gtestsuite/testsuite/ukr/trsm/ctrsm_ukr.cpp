@@ -83,6 +83,7 @@ TEST_P( ctrsmGenericSmall, UKR )
 }
 
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
+#ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
 INSTANTIATE_TEST_SUITE_P (
     bli_trsm_small,
     ctrsmGenericSmall,
@@ -104,4 +105,5 @@ INSTANTIATE_TEST_SUITE_P (
     ),
     (::trsmSmallUKRPrint<scomplex, trsm_small_ker_ft>())
 );
+#endif
 #endif
