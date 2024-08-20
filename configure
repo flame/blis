@@ -3133,7 +3133,9 @@ main()
 		echo "${script_name}: internal memory pools for small blocks are enabled."
 		enable_sba_pools_01=1
 	else
-		echo "${script_name}: internal memory pools for small blocks are disabled."
+		#echo "${script_name}: internal memory pools for small blocks are disabled."
+		echo "${script_name}: *** disabling memory pools for small blocks is currently disabled, awaiting fixes to this functionality."
+		exit 1
 		enable_sba_pools_01=0
 	fi
 	if [ "x${enable_mem_tracing}" = "xyes" ]; then
