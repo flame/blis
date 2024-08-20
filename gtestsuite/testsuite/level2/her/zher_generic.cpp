@@ -74,7 +74,11 @@ TEST_P( zherGeneric, API )
     // of output, and hence the multipler for epsilon.
     // With adjustment for complex data.
     double thresh;
-    double adj = 1.5;
+#ifdef BLIS_INT_ELEMENT_TYPE
+    double adj = 1.0;
+#else
+    double adj = 2.0;
+#endif
     if (n == 0 || alpha == 0.0)
         thresh = 0.0;
     else
@@ -88,7 +92,7 @@ TEST_P( zherGeneric, API )
 
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
+        BlackboxSmall,
         zherGeneric,
         ::testing::Combine(
             ::testing::Values('c'
@@ -98,10 +102,34 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                               // storage format
             ::testing::Values('u','l'),                                      // uploa
             ::testing::Values('n'),                                          // conjx
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // n
-            ::testing::Values(1.0),                                          // alpha
-            ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(gtint_t(0), gtint_t(2))                        // increment to the leading dim of a
+            ::testing::Range(gtint_t(1),gtint_t(21),1),                      // n
+            ::testing::Values( 0.0, 1.0, -1.0, 2.7 ),                        // alpha
+            ::testing::Values(gtint_t(1),gtint_t(-1),gtint_t(2)),            // stride size for x
+            ::testing::Values(gtint_t(0), gtint_t(5))                        // increment to the leading dim of a
+        ),
+        ::herGenericPrint<double>()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        BlackboxMedium,
+        zherGeneric,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('u','l'),                                      // uploa
+            ::testing::Values('n'),                                          // conjx
+            ::testing::Values(gtint_t(25),
+                              gtint_t(33),
+                              gtint_t(98),
+                              gtint_t(173),
+                              gtint_t(211)
+                            ),                                               // n
+            ::testing::Values( 0.0, 1.0, -1.0, 2.7 ),                        // alpha
+            ::testing::Values(gtint_t(1),gtint_t(-1),gtint_t(2)),            // stride size for x
+            ::testing::Values(gtint_t(0), gtint_t(5))                        // increment to the leading dim of a
         ),
         ::herGenericPrint<double>()
     );

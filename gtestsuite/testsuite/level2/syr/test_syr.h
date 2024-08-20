@@ -85,13 +85,13 @@ class syrGenericPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,char,char,gtint_t,T,gtint_t,gtint_t>> str) const {
-        char storage   = std::get<0>(str.param);
-        char uploa     = std::get<1>(str.param);
-        char conjx     = std::get<2>(str.param);
-        gtint_t n      = std::get<3>(str.param);
-        T alpha   = std::get<4>(str.param);
-        gtint_t incx   = std::get<5>(str.param);
-        gtint_t ld_inc = std::get<6>(str.param);
+        char storage    = std::get<0>(str.param);
+        char uploa      = std::get<1>(str.param);
+        char conjx      = std::get<2>(str.param);
+        gtint_t n       = std::get<3>(str.param);
+        T alpha         = std::get<4>(str.param);
+        gtint_t incx    = std::get<5>(str.param);
+        gtint_t lda_inc = std::get<6>(str.param);
 
         std::string str_name = API_PRINT;
         str_name += "_stor_" + std::string(&storage, 1);
@@ -100,7 +100,8 @@ public:
         str_name += "_n_" + std::to_string(n);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name    = str_name + "_" + std::to_string(ld_inc);
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', n, n, lda_inc );
+        str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
         return str_name;
     }
 };

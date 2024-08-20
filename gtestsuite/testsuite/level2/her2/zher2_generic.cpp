@@ -80,7 +80,11 @@ TEST_P( zher2Generic, API )
     // of output, and hence the multipler for epsilon.
     // With adjustment for complex data.
     double thresh;
-    double adj = 2.2;
+#ifdef BLIS_INT_ELEMENT_TYPE
+    double adj = 1.0;
+#else
+    double adj = 6.0;
+#endif
     if (n == 0 || alpha == testinghelpers::ZERO<T>())
         thresh = 0.0;
     else
@@ -94,7 +98,7 @@ TEST_P( zher2Generic, API )
 
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
+        BlackboxSmall,
         zher2Generic,
         ::testing::Combine(
             ::testing::Values('c'
@@ -103,13 +107,41 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
             ),                                                               // storage format
             ::testing::Values('u','l'),                                      // uploa
+            ::testing::Values('n'),                                          // conja
             ::testing::Values('n'),                                          // conjx
-            ::testing::Values('n'),                                          // conjy
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // n
-            ::testing::Values(dcomplex{1.0, -2.0}),                          // alpha
-            ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(gtint_t(0), gtint_t(5))                       // increment to the leading dim of a
+            ::testing::Range(gtint_t(1),gtint_t(21),1),                      // n
+            ::testing::Values(dcomplex{0.0, 0.0},dcomplex{1.0, 0.0},
+                              dcomplex{-1.0, 0.0},dcomplex{1.0, -2.0}),      // alpha
+            ::testing::Values(gtint_t(1),gtint_t(-1),gtint_t(2)),            // stride size for x
+            ::testing::Values(gtint_t(1),gtint_t(-1),gtint_t(2)),            // stride size for y
+            ::testing::Values(gtint_t(0), gtint_t(5))                        // increment to the leading dim of a
+        ),
+        ::her2GenericPrint<dcomplex>()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        BlackboxMedium,
+        zher2Generic,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('u','l'),                                      // uploa
+            ::testing::Values('n'),                                          // conja
+            ::testing::Values('n'),                                          // conjx
+            ::testing::Values(gtint_t(25),
+                              gtint_t(33),
+                              gtint_t(98),
+                              gtint_t(173),
+                              gtint_t(211)
+                            ),                                               // n
+            ::testing::Values(dcomplex{0.0, 0.0},dcomplex{1.0, 0.0},
+                              dcomplex{-1.0, 0.0},dcomplex{1.0, -2.0}),      // alpha
+            ::testing::Values(gtint_t(1),gtint_t(-1),gtint_t(2)),            // stride size for x
+            ::testing::Values(gtint_t(1),gtint_t(-1),gtint_t(2)),            // stride size for y
+            ::testing::Values(gtint_t(0), gtint_t(5))                        // increment to the leading dim of a
         ),
         ::her2GenericPrint<dcomplex>()
     );

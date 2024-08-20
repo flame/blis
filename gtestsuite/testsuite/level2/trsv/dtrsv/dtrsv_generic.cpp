@@ -65,7 +65,7 @@ TEST_P( dtrsvGeneric, API )
     gtint_t n  = std::get<4>(GetParam());
     // specifies alpha value
     T alpha = std::get<5>(GetParam());
-    // increment for x(incx):
+    // increment for x (incx):
     gtint_t incx = std::get<6>(GetParam());
     // lda increment.
     // If increment is zero, then the array size matches the matrix size.
@@ -79,8 +79,15 @@ TEST_P( dtrsvGeneric, API )
     // of output, and hence the multipler for epsilon.
     double thresh;
     // Threshold adjustment
-    double adj = 15;
-    if (n == 0)
+#ifdef BLIS_INT_ELEMENT_TYPE
+    double adj = 1.0;
+#else
+    double adj = 7.5;
+  #ifdef REF_IS_MKL
+    adj = 8.3;
+  #endif
+#endif
+    if (n == 0 || alpha == T{0.0})
         thresh = 0.0;
     else
         if(alpha == T{1.0})
@@ -94,8 +101,9 @@ TEST_P( dtrsvGeneric, API )
     test_trsv<T>( storage, uploa, transa, diaga, n, alpha, lda_inc, incx, thresh, is_mem_test);
 }
 
+// Black box testing.
 INSTANTIATE_TEST_SUITE_P(
-        Native,
+        BlackboxSmall,
         dtrsvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
@@ -104,30 +112,48 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
             ),                                                               // storage format
             ::testing::Values('u','l'),                                      // uploa
-            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n','t','c'),                                  // transa
             ::testing::Values('n','u'),                                      // diaga , n=NONUNIT_DIAG u=UNIT_DIAG
-            ::testing::Values(gtint_t(32),
-                              gtint_t(24),
-                              gtint_t(8),
-                              gtint_t(4),
-                              gtint_t(2),
-                              gtint_t(1),
-                              gtint_t(15),
-                              gtint_t(98),
-                              gtint_t(173),
-                              gtint_t(211)
-                            ),                                               // n
-            ::testing::Values( 1.0                                           // Only blis types api supports
+            ::testing::Range(gtint_t(1),gtint_t(21),1),                      // n
+            ::testing::Values(1.0                                            // Only blis typed api supports
 #ifdef TEST_BLIS_TYPED                                                       // values of alpha other than 1
             , -2.2, 5.4, -1.0, 0.0
 #endif
             ),                                                               // alpha
-            ::testing::Values(gtint_t(-153), gtint_t(-10),
-                              gtint_t(-2), gtint_t(-1),
-                              gtint_t( 1), gtint_t( 2),
-                              gtint_t(14), gtint_t(433)),                    // incx
-            ::testing::Values(gtint_t(0), gtint_t(10), gtint_t(358)),        // increment to the leading dim of a
+            ::testing::Values(gtint_t(-1),gtint_t(1), gtint_t(33)),          // incx
+            ::testing::Values(gtint_t(0), gtint_t(11)),                      // increment to the leading dim of a
             ::testing::Values(false, true)                                   // is memory test
         ),
-        ::trsvMemGenericPrint<double>()
+        ::trsvGenericPrint<double>()
+    );
+
+// Black box testing.
+INSTANTIATE_TEST_SUITE_P(
+        BlackboxMedium,
+        dtrsvGeneric,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('u','l'),                                      // uploa
+            ::testing::Values('n','t','c'),                                  // transa
+            ::testing::Values('n','u'),                                      // diaga , n=NONUNIT_DIAG u=UNIT_DIAG
+            ::testing::Values(gtint_t(25),
+                              gtint_t(33),
+                              gtint_t(98),
+                              gtint_t(173),
+                              gtint_t(211)
+                            ),                                               // n
+            ::testing::Values(1.0                                            // Only blis typed api supports
+#ifdef TEST_BLIS_TYPED                                                       // values of alpha other than 1
+            , -2.2, 5.4, -1.0, 0.0
+#endif
+            ),                                                               // alpha
+            ::testing::Values(gtint_t(-1),gtint_t(1), gtint_t(33)),          // incx
+            ::testing::Values(gtint_t(0), gtint_t(11)),                      // increment to the leading dim of a
+            ::testing::Values(false, true)                                   // is memory test
+        ),
+        ::trsvGenericPrint<double>()
     );

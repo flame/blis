@@ -116,7 +116,7 @@ INSTANTIATE_TEST_SUITE_P(
             // incy: stride of y vector.
             ::testing::Values( gtint_t(1) ),
             // inc_lda: increment to the leading dim of a
-            ::testing::Values( gtint_t(0) )
+            ::testing::Values( gtint_t(0), gtint_t(3) )
         ),
         ::gerGenericPrint<dcomplex>()
     );
@@ -151,7 +151,7 @@ INSTANTIATE_TEST_SUITE_P(
             // incy: stride of y vector.
             ::testing::Values( gtint_t(1) ),
             // inc_lda: increment to the leading dim of a
-            ::testing::Values( gtint_t(1) )
+            ::testing::Values( gtint_t(0), gtint_t(3) )
         ),
         ::gerGenericPrint<dcomplex>()
     );
@@ -183,7 +183,7 @@ INSTANTIATE_TEST_SUITE_P(
             // incy: stride of y vector.
             ::testing::Values( gtint_t(3) ),
             // inc_lda: increment to the leading dim of a
-            ::testing::Values( gtint_t(5) )
+            ::testing::Values( gtint_t(0), gtint_t(3) )
         ),
         ::gerGenericPrint<dcomplex>()
     );
@@ -217,7 +217,7 @@ INSTANTIATE_TEST_SUITE_P(
             // incy: stride of y vector.
             ::testing::Values( gtint_t(-3) ),
             // inc_lda: increment to the leading dim of a
-            ::testing::Values( gtint_t(0) )
+            ::testing::Values( gtint_t(0), gtint_t(3) )
         ),
         ::gerGenericPrint<dcomplex>()
     );
@@ -249,7 +249,7 @@ INSTANTIATE_TEST_SUITE_P(
             // incy: stride of y vector.
             ::testing::Values( gtint_t(3) ),
             // inc_lda: increment to the leading dim of a
-            ::testing::Values( gtint_t(1) )
+            ::testing::Values( gtint_t(0), gtint_t(3) )
         ),
         ::gerGenericPrint<dcomplex>()
     );
@@ -279,7 +279,7 @@ INSTANTIATE_TEST_SUITE_P(
             // incy: stride of y vector.
             ::testing::Values( gtint_t(4), gtint_t(1) ),
             // inc_lda: increment to the leading dim of a
-            ::testing::Values( gtint_t(1) )
+            ::testing::Values( gtint_t(0), gtint_t(3) )
         ),
         ::gerGenericPrint<dcomplex>()
     );

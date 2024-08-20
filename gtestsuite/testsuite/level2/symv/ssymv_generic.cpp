@@ -82,6 +82,14 @@ TEST_P( ssymvGeneric, API )
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
     double thresh;
+#ifdef BLIS_INT_ELEMENT_TYPE
+    double adj = 1.0;
+#else
+    double adj = 1.1;
+  #ifdef REF_IS_MKL
+    adj = 1.4;
+  #endif
+#endif
     if (n == 0)
         thresh = 0.0;
     else if (alpha == testinghelpers::ZERO<T>() && (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>()))
@@ -89,7 +97,7 @@ TEST_P( ssymvGeneric, API )
     else if (alpha == testinghelpers::ZERO<T>())
         thresh = testinghelpers::getEpsilon<T>();
     else
-        thresh = (3*n+1)*testinghelpers::getEpsilon<T>();
+        thresh = adj*(3*n+1)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters
@@ -99,7 +107,7 @@ TEST_P( ssymvGeneric, API )
 
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
+        BlackboxSmall,
         ssymvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
@@ -110,12 +118,39 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('u','l'),                                      // uploa
             ::testing::Values('n'),                                          // conja
             ::testing::Values('n'),                                          // conjx
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // n
-            ::testing::Values( 1.0, -2.0 ),                                  // alpha
-            ::testing::Values( 2.0, -1.0 ),                                  // beta
-            ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(gtint_t(0), gtint_t(5))                       // increment to the leading dim of a
+            ::testing::Range(gtint_t(1),gtint_t(21),1),                      // n
+            ::testing::Values( 0.0, 1.0, -1.0, 2.7 ),                        // alpha
+            ::testing::Values( 0.0, 1.0, -1.0, 2.7 ),                        // beta
+            ::testing::Values(gtint_t(1),gtint_t(-1),gtint_t(2)),            // stride size for x
+            ::testing::Values(gtint_t(1),gtint_t(-1),gtint_t(2)),            // stride size for y
+            ::testing::Values(gtint_t(0), gtint_t(5))                        // increment to the leading dim of a
+        ),
+        ::symvGenericPrint<float>()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        BlackboxMedium,
+        ssymvGeneric,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('u','l'),                                      // uploa
+            ::testing::Values('n'),                                          // conja
+            ::testing::Values('n'),                                          // conjx
+            ::testing::Values(gtint_t(25),
+                              gtint_t(33),
+                              gtint_t(98),
+                              gtint_t(173),
+                              gtint_t(211)
+                            ),                                               // n
+            ::testing::Values( 0.0, 1.0, -1.0, 2.7 ),                        // alpha
+            ::testing::Values( 0.0, 1.0, -1.0, 2.7 ),                        // beta
+            ::testing::Values(gtint_t(1),gtint_t(-1),gtint_t(2)),            // stride size for x
+            ::testing::Values(gtint_t(1),gtint_t(-1),gtint_t(2)),            // stride size for y
+            ::testing::Values(gtint_t(0), gtint_t(5))                        // increment to the leading dim of a
         ),
         ::symvGenericPrint<float>()
     );

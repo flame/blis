@@ -85,6 +85,7 @@ TEST_P( zgemvGeneric, API )
     // Check gtestsuite gemv.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
+    // No adjustment applied yet for complex data.
     double thresh;
     if (m == 0 || n == 0)
         thresh = 0.0;
@@ -106,30 +107,7 @@ TEST_P( zgemvGeneric, API )
 
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
-        zgemvGeneric,
-        ::testing::Combine(
-            ::testing::Values('c'
-#ifndef TEST_BLAS_LIKE
-                             ,'r'
-#endif
-            ),                                                          // storage format
-            ::testing::Values('n','c','t'),                             // transa
-            ::testing::Values('n'),                                     // conjx
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),             // m
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),             // n
-            ::testing::Values(T{1.0, 1.0}, T{0.0, 0.0}, T{1.0, -2.0}),  // alpha
-            ::testing::Values(T{1.0, 1.0}, T{0.0, 0.0}, T{-1.0, 1.0}),  // beta
-            ::testing::Values(gtint_t(1)),                              // stride size for x
-            ::testing::Values(gtint_t(1)),                              // stride size for y
-            ::testing::Values(gtint_t(0)),                              // increment to the leading dim of a
-            ::testing::Values(false, true)                              // is_memory_test
-        ),
-        ::gemvGenericPrint<T>()
-    );
-
-INSTANTIATE_TEST_SUITE_P(
-        Blackbox_Tiny_Matrixsizes,
+        BlackboxSmall,
         zgemvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
@@ -137,45 +115,24 @@ INSTANTIATE_TEST_SUITE_P(
             ,'r'
 #endif
             ),                                                               // storage format
-            ::testing::Values('n','c'),                                      // transa
+            ::testing::Values('n', 'c', 't'),                                // transa
             ::testing::Values('n'),                                          // conjx
-            ::testing::Range(gtint_t(1), gtint_t(9), 1),                     // m
-            ::testing::Range(gtint_t(1), gtint_t(9), 1),                     // n
-            ::testing::Values(T{1.0, 1.0}, T{0.0, 0.0}, T{1.0, -2.0}),       // alpha
-            ::testing::Values(T{1.0, 1.0}, T{0.0, 0.0}, T{1.0, -2.0}),       // beta
-            ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(gtint_t(7), gtint_t(3)),                       // increment to the leading dim of a
+            ::testing::Range(gtint_t(1), gtint_t(20), 1),                    // m
+            ::testing::Range(gtint_t(1), gtint_t(20), 1),                    // n
+            ::testing::Values(T{0.0, 0.0}, T{1.0, 0.0}, T{-1.0, 0.0},
+                              T{1.1, -2.0} ),                                // alpha
+            ::testing::Values(T{0.0, 0.0}, T{1.0, 0.0}, T{-1.0, 0.0},
+                              T{1.1, -2.0} ),                                // beta
+            ::testing::Values(gtint_t(1), gtint_t(3), gtint_t(-1)),          // stride size for x
+            ::testing::Values(gtint_t(1), gtint_t(5), gtint_t(-2)),          // stride size for y
+            ::testing::Values(gtint_t(0), gtint_t(7)),                       // increment to the leading dim of a
             ::testing::Values(false, true)                                   // is_memory_test
         ),
         ::gemvGenericPrint<T>()
     );
 
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox_Average_Matrixsizes,
-        zgemvGeneric,
-        ::testing::Combine(
-            ::testing::Values('c'
-#ifndef TEST_BLAS_LIKE
-            ,'r'
-#endif
-            ),                                                                          // storage format
-            ::testing::Values('t','c'),                                                 // transa
-            ::testing::Values('n'),                                                     // conjx
-            ::testing::Range(gtint_t(128), gtint_t(512), 31),                           // m
-            ::testing::Range(gtint_t(512), gtint_t(128), -31),                          // n
-            ::testing::Values(T{1.0, 1.0}, T{0.0, 0.0}, T{-1.0, 2.0}, T{-2.0, 1.0}),    // alpha
-            ::testing::Values(T{1.0, 1.0}, T{0.0, 0.0}, T{-1.0, -3.1}),                 // beta
-            ::testing::Values(gtint_t(1)),                                              // stride size for x
-            ::testing::Values(gtint_t(1)),                                              // stride size for y
-            ::testing::Values(gtint_t(1)),                                              // increment to the leading dim of a
-            ::testing::Values(false, true)                                              // is_memory_test
-        ),
-        ::gemvGenericPrint<T>()
-    );
-
-INSTANTIATE_TEST_SUITE_P(
-        Blackbox_Large_Matrixsizes,
+        BlackboxMedium,
         zgemvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
@@ -183,23 +140,35 @@ INSTANTIATE_TEST_SUITE_P(
             ,'r'
 #endif
             ),                                                               // storage format
-            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n', 'c', 't'),                                // transa
             ::testing::Values('n'),                                          // conjx
-            ::testing::Range(gtint_t(1024), gtint_t(32767), 1023),           // m
-            ::testing::Range(gtint_t(1024), gtint_t(32767), 1023),           // n
-            ::testing::Values(T{1.0, 1.0}, T{0.0, 0.0}, T{1.1, 2.1}),        // alpha
-            ::testing::Values(T{1.0, 1.0}, T{0.0, 0.0}, T{1.1, 2.1}),        // beta
-            ::testing::Values(gtint_t(11), gtint_t(119), gtint_t(211)),      // stride size for x
-            ::testing::Values(gtint_t(211), gtint_t(119), gtint_t(11)),      // stride size for y
-            ::testing::Values(gtint_t(1), gtint_t(252)),                     // increment to the leading dim of a
+            ::testing::Values(gtint_t(25),
+                              gtint_t(33),
+                              gtint_t(98),
+                              gtint_t(173),
+                              gtint_t(211)
+                            ),                                               // m
+            ::testing::Values(gtint_t(25),
+                              gtint_t(33),
+                              gtint_t(98),
+                              gtint_t(173),
+                              gtint_t(211)
+                            ),                                               // n
+            ::testing::Values(T{0.0, 0.0}, T{1.0, 0.0}, T{-1.0, 0.0},
+                              T{1.1, -2.0} ),                                // alpha
+            ::testing::Values(T{0.0, 0.0}, T{1.0, 0.0}, T{-1.0, 0.0},
+                              T{1.1, -2.0} ),                                // beta
+            ::testing::Values(gtint_t(1), gtint_t(3), gtint_t(-1)),          // stride size for x
+            ::testing::Values(gtint_t(1), gtint_t(5), gtint_t(-1)),          // stride size for y
+            ::testing::Values(gtint_t(0), gtint_t(7)),                       // increment to the leading dim of a
             ::testing::Values(false, true)                                   // is_memory_test
         ),
-
-      ::gemvGenericPrint<T>()
+        ::gemvGenericPrint<T>()
     );
 
+#if 1
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox_Unit_MN,
+        Blackbox_Large,
         zgemvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
@@ -207,17 +176,71 @@ INSTANTIATE_TEST_SUITE_P(
             ,'r'
 #endif
             ),                                                               // storage format
-            ::testing::Values('n','c','t'),                                  // transa
+            ::testing::Values('n', 'c', 't'),                                // transa
             ::testing::Values('n'),                                          // conjx
-            ::testing::Values(gtint_t(1)),                                   // m
-            ::testing::Values(gtint_t(1)),                                   // n
-            ::testing::Values(T{1.0, 1.0}, T{0.0, 0.0}, T{1.0, -0.1}),       // alpha
-            ::testing::Values(T{1.0, 1.0}, T{0.0, 0.0}, T{0.1, 1.0},
-                              T{-2.0, 1.0}, T{-3.0, 2.0}, T{-1.0, -2.0}),    // beta
-            ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of a
+            ::testing::Values(gtint_t(2127)),                                // m
+            ::testing::Values(gtint_t(2127)),                                // n
+            ::testing::Values(T{0.0, 0.0}, T{1.0, 0.0}, T{-1.0, 0.0},
+                              T{1.1, -2.0} ),                                // alpha
+            ::testing::Values(T{0.0, 0.0}, T{1.0, 0.0}, T{-1.0, 0.0},
+                              T{1.1, -2.0} ),                                // beta
+            ::testing::Values(gtint_t(1), gtint_t(211)),                     // stride size for x
+            ::testing::Values(gtint_t(1), gtint_t(11)),                      // stride size for y
+            ::testing::Values(gtint_t(0), gtint_t(57)),                      // increment to the leading dim of a
             ::testing::Values(false, true)                                   // is_memory_test
         ),
         ::gemvGenericPrint<T>()
     );
+
+INSTANTIATE_TEST_SUITE_P(
+        Blackbox_LargeM,
+        zgemvGeneric,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('n', 'c', 't'),                                // transa
+            ::testing::Values('n'),                                          // conjx
+            ::testing::Values(gtint_t(5099)),                                // m
+            ::testing::Values(gtint_t(1), gtint_t(2), gtint_t(17),
+                              gtint_t(173)),                                 // n
+            ::testing::Values(T{0.0, 0.0}, T{1.0, 0.0}, T{-1.0, 0.0},
+                              T{1.1, -2.0} ),                                // alpha
+            ::testing::Values(T{0.0, 0.0}, T{1.0, 0.0}, T{-1.0, 0.0},
+                              T{1.1, -2.0} ),                                // beta
+            ::testing::Values(gtint_t(1), gtint_t(211)),                     // stride size for x
+            ::testing::Values(gtint_t(1), gtint_t(11)),                      // stride size for y
+            ::testing::Values(gtint_t(0), gtint_t(57)),                      // increment to the leading dim of a
+            ::testing::Values(false, true)                                   // is_memory_test
+        ),
+        ::gemvGenericPrint<T>()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        Blackbox_LargeN,
+        zgemvGeneric,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('n', 'c', 't'),                                // transa
+            ::testing::Values('n'),                                          // conjx
+            ::testing::Values(gtint_t(1), gtint_t(2), gtint_t(17),
+                              gtint_t(173)),                                 // m
+            ::testing::Values(gtint_t(5099)),                                // n
+            ::testing::Values(T{0.0, 0.0}, T{1.0, 0.0}, T{-1.0, 0.0},
+                              T{1.1, -2.0} ),                                // alpha
+            ::testing::Values(T{0.0, 0.0}, T{1.0, 0.0}, T{-1.0, 0.0},
+                              T{1.1, -2.0} ),                                // beta
+            ::testing::Values(gtint_t(1), gtint_t(211)),                     // stride size for x
+            ::testing::Values(gtint_t(1), gtint_t(11)),                      // stride size for y
+            ::testing::Values(gtint_t(0), gtint_t(57)),                      // increment to the leading dim of a
+            ::testing::Values(false, true)                                   // is_memory_test
+        ),
+        ::gemvGenericPrint<T>()
+    );
+#endif

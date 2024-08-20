@@ -90,7 +90,7 @@ TEST_P( zhemvGeneric, API )
     else if (alpha == testinghelpers::ZERO<T>())
         thresh = testinghelpers::getEpsilon<T>();
     else
-        thresh = (3*n+1)*n*testinghelpers::getEpsilon<T>();
+        thresh = (3*n+1)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters
@@ -100,7 +100,7 @@ TEST_P( zhemvGeneric, API )
 
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
+        BlackboxSmall,
         zhemvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
@@ -111,11 +111,42 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('u','l'),                                      // uploa
             ::testing::Values('n'),                                          // conja
             ::testing::Values('n'),                                          // conjx
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // n
-            ::testing::Values(dcomplex{1.0, -2.0}),                          // alpha
-            ::testing::Values(dcomplex{2.0, -1.0}),                          // beta
-            ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(gtint_t(1)),                                   // stride size for y
+            ::testing::Range(gtint_t(1),gtint_t(21),1),                      // n
+            ::testing::Values(dcomplex{0.0, 0.0},dcomplex{1.0, 0.0},
+                              dcomplex{-1.0, 0.0},dcomplex{1.0, -2.0}),      // alpha
+            ::testing::Values(dcomplex{0.0, 0.0},dcomplex{1.0, 0.0},
+                              dcomplex{-1.0, 0.0},dcomplex{1.0, -2.0}),      // beta
+            ::testing::Values(gtint_t(1),gtint_t(-1),gtint_t(2)),            // stride size for x
+            ::testing::Values(gtint_t(1),gtint_t(-1),gtint_t(2)),            // stride size for y
+            ::testing::Values(gtint_t(0), gtint_t(5))                        // increment to the leading dim of a
+        ),
+        ::hemvGenericPrint<dcomplex>()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        BlackboxMedium,
+        zhemvGeneric,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('u','l'),                                      // uploa
+            ::testing::Values('n'),                                          // conja
+            ::testing::Values('n'),                                          // conjx
+            ::testing::Values(gtint_t(25),
+                              gtint_t(33),
+                              gtint_t(98),
+                              gtint_t(173),
+                              gtint_t(211)
+                            ),                                               // n
+            ::testing::Values(dcomplex{0.0, 0.0},dcomplex{1.0, 0.0},
+                              dcomplex{-1.0, 0.0},dcomplex{1.0, -2.0}),      // alpha
+            ::testing::Values(dcomplex{0.0, 0.0},dcomplex{1.0, 0.0},
+                              dcomplex{-1.0, 0.0},dcomplex{1.0, -2.0}),      // beta
+            ::testing::Values(gtint_t(1),gtint_t(-1),gtint_t(2)),            // stride size for x
+            ::testing::Values(gtint_t(1),gtint_t(-1),gtint_t(2)),            // stride size for y
             ::testing::Values(gtint_t(0), gtint_t(5))                        // increment to the leading dim of a
         ),
         ::hemvGenericPrint<dcomplex>()

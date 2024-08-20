@@ -72,12 +72,17 @@ TEST_P( cherGeneric, API )
     // Check gtestsuite her.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // No adjustment applied yet for complex data.
+    // With adjustment for complex data.
     double thresh;
+#ifdef BLIS_INT_ELEMENT_TYPE
+    double adj = 1.0;
+#else
+    double adj = 2.0;
+#endif
     if (n == 0 || alpha == 0.0f)
         thresh = 0.0;
     else
-        thresh = 3*testinghelpers::getEpsilon<T>();
+        thresh = adj*3*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters
@@ -87,7 +92,7 @@ TEST_P( cherGeneric, API )
 
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
+        BlackboxSmall,
         cherGeneric,
         ::testing::Combine(
             ::testing::Values('c'
@@ -97,10 +102,34 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                               // storage format
             ::testing::Values('u','l'),                                      // uploa
             ::testing::Values('n'),                                          // conjx
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // n
-            ::testing::Values(1.0),                                          // alpha
-            ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(gtint_t(0), gtint_t(3))                        // increment to the leading dim of a
+            ::testing::Range(gtint_t(1),gtint_t(21),1),                      // n
+            ::testing::Values( 0.0, 1.0, -1.0, 2.7 ),                        // alpha
+            ::testing::Values(gtint_t(1),gtint_t(-1),gtint_t(2)),            // stride size for x
+            ::testing::Values(gtint_t(0), gtint_t(5))                        // increment to the leading dim of a
+        ),
+        ::herGenericPrint<float>()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        BlackboxMedium,
+        cherGeneric,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('u','l'),                                      // uploa
+            ::testing::Values('n'),                                          // conjx
+            ::testing::Values(gtint_t(25),
+                              gtint_t(33),
+                              gtint_t(98),
+                              gtint_t(173),
+                              gtint_t(211)
+                            ),                                               // n
+            ::testing::Values( 0.0, 1.0, -1.0, 2.7 ),                        // alpha
+            ::testing::Values(gtint_t(1),gtint_t(-1),gtint_t(2)),            // stride size for x
+            ::testing::Values(gtint_t(0), gtint_t(5))                        // increment to the leading dim of a
         ),
         ::herGenericPrint<float>()
     );

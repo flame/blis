@@ -212,6 +212,13 @@ $ ./testsuite.level1.addv
 ```console
 $ ./testuite.util.nrm2 --gtest_filter="*snrm2*"
 ```
+Alternatively, use the GTEST_FILTER environment variable. This is particularly useful for
+passing gtest filter options to executables run via ctest, e.g.:
+```console
+$ GTEST_FILTER="*snrm2*" ./testuite.util.nrm2
+$ GTEST_FILTER=-"EVT" ctest -R level2
+```
+
 ## Running tests using Valgrind
 We can run any executable using valgrind as usual. For example, use the following command
 ```console

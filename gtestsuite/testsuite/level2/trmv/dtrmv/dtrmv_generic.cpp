@@ -33,17 +33,18 @@
 */
 
 #include <gtest/gtest.h>
-#include "test_trmv.h"
+#include "level2/trmv/test_trmv.h"
 
 class dtrmvGeneric :
-        public ::testing::TestWithParam<std::tuple<char,
-                                                   char,
-                                                   char,
-                                                   char,
-                                                   gtint_t,
-                                                   double,
-                                                   gtint_t,
-                                                   gtint_t>> {};
+        public ::testing::TestWithParam<std::tuple<char,         // storage format
+                                                   char,         // uplo
+                                                   char,         // trans
+                                                   char,         // diag
+                                                   gtint_t,      // n
+                                                   double,       // alpha
+                                                   gtint_t,      // incx
+                                                   gtint_t,      // ld_inc
+                                                   bool>> {};    // is memory test
 
 TEST_P( dtrmvGeneric, API )
 {
@@ -54,9 +55,9 @@ TEST_P( dtrmvGeneric, API )
     //----------------------------------------------------------
     // matrix storage format(row major, column major)
     char storage = std::get<0>(GetParam());
-    // denotes whether matrix a is u,l
+    // denotes whether matrix A is u,l
     char uploa = std::get<1>(GetParam());
-    // denotes whether matrix a is n,c,t,h
+    // denotes whether matrix A is n,c,t,h
     char transa = std::get<2>(GetParam());
     // denotes whether matrix diag is u,n
     char diaga = std::get<3>(GetParam());
@@ -64,12 +65,13 @@ TEST_P( dtrmvGeneric, API )
     gtint_t n  = std::get<4>(GetParam());
     // specifies alpha value
     T alpha = std::get<5>(GetParam());
-    // stride size for x:
+    // increment for x (incx):
     gtint_t incx = std::get<6>(GetParam());
     // lda increment.
     // If increment is zero, then the array size matches the matrix size.
     // If increment are nonnegative, the array size is bigger than the matrix size.
     gtint_t lda_inc = std::get<7>(GetParam());
+    bool is_mem_test = std::get<8>(GetParam());
 
     // Set the threshold for the errors:
     // Check gtestsuite trmv.h or netlib source code for reminder of the
@@ -77,7 +79,11 @@ TEST_P( dtrmvGeneric, API )
     // of output, and hence the multipler for epsilon.
     double thresh;
     // Threshold adjustment
-    double adj = 1.5;
+#ifdef BLIS_INT_ELEMENT_TYPE
+    double adj = 1.0;
+#else
+    double adj = 1.0;
+#endif
     if (n == 0 || alpha == T{0.0})
         thresh = 0.0;
     else
@@ -89,30 +95,62 @@ TEST_P( dtrmvGeneric, API )
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
-    test_trmv<T>( storage, uploa, transa, diaga, n, alpha, lda_inc, incx, thresh );
+    test_trmv<T>( storage, uploa, transa, diaga, n, alpha, lda_inc, incx, thresh, is_mem_test);
 }
 
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
+        BlackboxSmall,
         dtrmvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS_LIKE
-            ,'r'
+                             ,'r'
 #endif
             ),                                                               // storage format
             ::testing::Values('u','l'),                                      // uploa
-            ::testing::Values('n','t'),                                      // transa
-            ::testing::Values('n','u'),                                      // diaga
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // n
-            ::testing::Values( 1.0
-#ifdef TEST_BLIS_TYPED
-            , -2.0
+            ::testing::Values('n','t','c'),                                  // transa
+            ::testing::Values('n','u'),                                      // diaga , n=NONUNIT_DIAG u=UNIT_DIAG
+            ::testing::Range(gtint_t(1),gtint_t(21),1),                      // n
+            ::testing::Values(1.0                                            // Only blis typed api supports
+#ifdef TEST_BLIS_TYPED                                                       // values of alpha other than 1
+            , -2.2, 5.4, -1.0, 0.0
 #endif
             ),                                                               // alpha
-            ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(gtint_t(0), gtint_t(3))                        // increment to the leading dim of a
+            ::testing::Values(gtint_t(-1),gtint_t(1), gtint_t(33)),          // incx
+            ::testing::Values(gtint_t(0), gtint_t(11)),                      // increment to the leading dim of a
+            ::testing::Values(false, true)                                   // is memory test
+        ),
+        ::trmvGenericPrint<double>()
+    );
+
+// Black box testing.
+INSTANTIATE_TEST_SUITE_P(
+        BlackboxMedium,
+        dtrmvGeneric,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('u','l'),                                      // uploa
+            ::testing::Values('n','t','c'),                                  // transa
+            ::testing::Values('n','u'),                                      // diaga , n=NONUNIT_DIAG u=UNIT_DIAG
+            ::testing::Values(gtint_t(25),
+                              gtint_t(33),
+                              gtint_t(98),
+                              gtint_t(173),
+                              gtint_t(211)
+                            ),                                               // n
+            ::testing::Values(1.0                                            // Only blis typed api supports
+#ifdef TEST_BLIS_TYPED                                                       // values of alpha other than 1
+            , -2.2, 5.4, -1.0, 0.0
+#endif
+            ),                                                               // alpha
+            ::testing::Values(gtint_t(-1),gtint_t(1), gtint_t(33)),          // incx
+            ::testing::Values(gtint_t(0), gtint_t(11)),                      // increment to the leading dim of a
+            ::testing::Values(false, true)                                   // is memory test
         ),
         ::trmvGenericPrint<double>()
     );
