@@ -4,6 +4,7 @@
 
 ## Contents
 
+* [Changes in 1.0](ReleaseNotes.md#changes-in-10)
 * [Changes in 0.9.0](ReleaseNotes.md#changes-in-090)
 * [Changes in 0.8.1](ReleaseNotes.md#changes-in-081)
 * [Changes in 0.8.0](ReleaseNotes.md#changes-in-080)
@@ -39,6 +40,130 @@
 * [Changes in 0.0.3](ReleaseNotes.md#changes-in-003)
 * [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
+
+## Changes in 1.0
+May 6, 2024
+
+Improvements present in 1.0:
+
+Framework:
+- Initialize/finalize BLIS via a new `bli_pthread_switch_t` API. (Field Van Zee, Devin Matthews)
+- Revamped `bli_init()` to use TLS where feasible. (Field Van Zee, Edward Smyth, Minh Quan Ho)
+- Implemented support for fat multithreading.
+- Implemented tile-level load balancing (tlb), or tile-level partitioning, in jr/ir loops for `gemm`, `gemmt`, and `trmm` macrokernels. (Field Van Zee, Devin Matthews, Leick Robinson, Minh Quan Ho)
+- Added padding to `thrcomm_t` fields to avoid false sharing of cache lines. (Leick Robinson)
+- Rewrote/fixed broken tree barrier implementation. (Leick Robinson)
+- Refactored some `rntm_t` management code. (Field Van Zee, Devin Matthews)
+- Initialize `rntm_t` nt/ways fields with 1 (not -1). (Field Van Zee, Jeff Diamond, Leick Robinson, Devin Matthews)
+- Defined `invscalv`, `invscalm`, `invscald` operations.
+- Added consistent `NaN`/`Inf` handling in `sumsqv`. (Devin Matthews)
+- Implemented support for HPX as a threading backend option. (Christopher Taylor, Srinivas Yadav)
+- Relocated the pba, sba pool (from the `rntm_t`), and `mem_t` (from the `cntl_t`) to the `thrinfo_t` object.
+- Modified which communicator is associated with a given node of the `thrinfo_t` tree. (Devin Matthews)
+- Refactored level-3 thread decorator into two parts: a thread launcher and a function to pass operands. (Devin Matthews)
+- Refactored structure awareness in `bli_packm_blk_var1.c`. (Devin Matthews)
+- Reimplemented `bli_l3_determine_kc()`. (Devin Matthews)
+- Implemented `cntx_t` pointer caching in gks. (Field Van Zee, Harihara Sudhan S)
+- Added `const` keyword to pointers in kernel APIs. (Field Van Zee, Nisanth M P)
+- Migrated all kernel APIs to use `void*` pointers.
+- Defined new global scalar constants: `BLIS_ONE_I`, `BLIS_MINUS_ONE_I`, `BLIS_NAN`. (Devin Matthews)
+- Disabled modification of KC in the `gemmsup` kernels. (Devin Matthews)
+- Defined `lt`, `lte`, `gt`, `gte` operations and other miscellaneous updates.
+- Consolidated `INSERT_` macro sets via variadic macros. (Devin Matthews)
+- De-templatized macrokernels for `gemmt`, `trmm`, and `trsm` to match that of `gemm`. (Devin Matthews)
+- De-templatized `bli_l3_sup_var1n2m.c` and unified `_sup_packm_a/b()`. (Devin Matthews)
+- Fixed 1m enablement for `herk`/`her2k`/`syrk`/`syr2k`. (Devin Matthews)
+- Fixed `trmm[3]`/`trsm` performance bug introduced in `cf7d616`. (Field Van Zee, Leick Robinson)
+- Fixed a 1m optimization bug in right-sided `hemm`/`symm`. (Field Van Zee, Nisanth M P)
+- Fixed a bug in sup threshold registration. (Devin Matthews, Field Van Zee)
+- Fixed brokenness in the small block allocator (sba) when the sba is disabled. (Field Van Zee, John Mather)
+- Fixed type bug in `bli_cntx_set_ukr_prefs()`. (Field Van Zee, Leick Robinson, Devin Matthews, Jeff Diamond)
+- Fixed incorrect `sizeof(type)` in edge case macros. (@moon-chilled)
+- Fixed bugs and added sanity check in `bli_pool.c`. (Devin Matthews)
+- Fixed a typo in the macro definition for `VEXTRACTF64X2` in `bli_x86_asm_macros.h`. (Harsh Dave)
+- Fixed a typo in `bli_type_defs.h` where `BLIS_BLAS_INT_TYPE_SIZE` was misspelled. (Devin Matthews)
+- Typecast `printf()` args in `bli_thread_range_tlb.c` to avoid compiler warnings. (Lee Killough)
+- Minor tweaks to `bli_l3_check.c`.
+- Partial addition of `const` to all interfaces above the (micro)kernels. (Devin Matthews)
+- Fixed a harmless misspelling of `xpbys` in gemm macrokernel.
+- Various internal API renaming/reorganization.
+- Various other fixes.
+
+Compatibility:
+- Implemented `[cz]symv_()`, `[cz]syr_()`, `[cz]rot_()`. (Field Van Zee, James Foster)
+- Fixed compilation errors when `BLIS_DISABLE_BLAS_DEFS` is defined. (Field Van Zee, Edward Smyth, Devin Matthews)
+- Include `bli_config.h` before `bli_system.h` in `cblas.h` so that `BLIS_ENABLE_SYSTEM` is defined in time for proper OS detection. (Edward Smyth)
+
+Kernels:
+- Updated ARMv8a kernels to fix two prefetching issues and re-enable general stride IO. (Jeff Diamond)
+- Restored general storage case to `armsve` kernels. (RuQing Xu)
+- Added arm64 `dgemmsup` with extended MR and NR. (RuQing Xu)
+- Reorganized the way `packm` kernels are stored within the `cntx_t` so that BLIS only stores two `packm` kernels per datatype: one for MRxk upanels and one for kxNR upanels. (Devin Matthews)
+- Fixed bugs in `scal2v` reference kernel when alpha == 1.
+- Fixed out-of-bounds read in `haswell` `gemmsup` kernels. (Daniël de Kok, Bhaskar Nallani, Madeesh Kannan)
+- Fixed k = 0 edge case in `power10` microkernels. (Nisanth M P)
+- Disabled `power10` kernels other than `sgemm`, `dgemm`. (Nisanth M P)
+- Fixed `bli_gemm_small()` prototype mismatch. (Jeff Diamond)
+
+Extras:
+- Use the conventional level-3 sup thread decorator within the `gemmlike` sandbox.
+- Fixed type-mismatch errors in `power10` sandbox. (Nisanth M P)
+- Fixed `gemmlike` sandbox bug that stems from reuse of `bli_thrinfo_sup_grow()`.
+
+Build system:
+- Added two arm64 subconfigs: `altra` and `altramax`. (Jeff Diamond, Leick Robinson)
+- Added support for RISC-V configuration targets. (Angelika Schwarz, Lee Killough)
+- Auto-detect the RISC-V ABI of the compiler and use `-mabi=` during RISC-V builds. (Lee Killough)
+- Added `sifive_x280` subconfig and kernel set. (Aaron Hutchinson, Lee Killough, Devin Matthews, and Angelika Schwarz)
+- Added AddressSanitizer (--enable-asan) option to `configure`. (Devin Matthews)
+- Added option to disable thread-local storage via `--disable-tls`. (Field Van Zee, Nick Knight)
+- Exclude `-lrt` on Android with Bionic libraries. (Lee Killough)
+- Omit `-fPIC` option when shared library build is disabled. (Field Van Zee, Nick Knight)
+- Move `-fPIC` option insertion to subconfigs' `make_defs.mk` files. (Field Van Zee, Nick Knight)
+- Install one-line helper headers to `INCDIR` prefix so that user can `#include "blis.h"` instead of `#include <blis/blis.h>` and/or `"cblas.h"` instead of `<blis/cblas.h>` if CBLAS is enabled). (Field Van Zee, Jed Brown, Devin Matthews, Mo Zhou)
+- Enhanced detection of Fortran compiler when checking the version string for the purposes of determining a default return convention for complex domain values. (Bart Oldeman)
+- Added detection of the NVIDIA nvhpc compiler (`nvc`) in `configure`. (Ajay Panyala)
+- Updated `zen3` subconfig to support NVHPC compilers. (Abhishek Bagusetty)
+- Use kernel CFLAGS for `kernels` subdirs in addons. (AMD, Mithun Mohan)
+- Created `power` umbrella configuration family (which currently includes `power9` and `power10` subconfigs). (Nisanth M P)
+- Defined `BLIS_VERSION_STRING` in `blis.h` instead of via command line argument during compilation. (Field Van Zee, Mohsen Aznaveh, Tim Davis)
+- Rewrote `regen-symbols.sh` as `gen-libblis-symbols.sh`. (Field Van Zee)
+- Support `clang` targetting MinGW. (Isuru Fernando)
+- Added autodetection (via `/proc/cpuinfo`) for POWER7, POWER9 and POWER10 microarchitectures. (Alexander Grund)
+- Added `#line` directives to flattened `blis.h` to facilitate easier debugging. (Devin Matthews)
+- Added `--nosup` and `--sup` shorthand options to `configure`.
+- Use here-document syntax for `configure --help` output. (Lee Killough)
+- Updated `configure` to pass all `shellcheck` checks. (Lee Killough)
+- Tweaks to `.dir-locals.el` to enhance emacs formatting of C files. (Lee Killough)
+- Removed buggy cruft from `power10` subconfig. (Field Van Zee, Nicholai Tukanov)
+- Added missing `#include <io.h>` for Windows. (@h-vetinari)
+- Fixed hardware auto-detection for `firestorm` (Apple M1) subconfig. (Devin Matthews)
+- Fixed bug in detection of Fortran compiler vendor. (Devin Matthews)
+- Fixed version check for `znver3`, which needs gcc >= 10.3. (Jed Brown)
+- Fixed typo in `configure --help` text. (Lee Killough)
+- Fixed warning about regular expressions with stray backslashes as the result of recent changes to `grep`.
+- Added `output.testsuite` to `.gitignore`.
+- Minor changes to .gitignore and LICENSE files. (Jeff Diamond)
+- Minor decluttering of top-level directory.
+- Very minor tweaks to common.mk.
+
+Testing:
+- Rewrote `test/3` drivers to take parameters via command line arguments. (Field Van Zee, Jeff Diamond, Leick Robinson)
+- Added `arm64` entry to `.travis.yml` so that Travis CI will compile/test ARM builds. (Field Van Zee, RuQing Xu)
+- Test the `gemmlike` sandbox via AppVeyor. (Jeff Diamond)
+- Added `-q` quiet mode option to testsuite.
+- Fixed non-deterministic segfault in standalone `test/3` drivers. (Field Van Zee, Leick Robinson)
+- Fixed a crash that occurs when either `cblat1` or `zblat1` are linked with a build of BLIS that was compiled with `--complex-return=intel`. (Bart Oldeman)
+- Other minor fixes/tweaks.
+
+Documentation:
+- Added Discord documentation (`docs/Discord.md`) and logo to `README.md`.
+- Added the `mm_algorithm` files (for bp and pb) to `docs/diagrams`.
+- Added mention of Wilkinson Prize to `README.md`.
+- Minor fixes and improvements to `docs/Multithreading.md`.
+- Fix typos in docs + example code comments. (Igor Zhuravlov)
+- Fixed broken "tagged releases" link in `README.md`.
+- Added SMU citation to `README.md` intro.
 
 ## Changes in 0.9.0
 April 1, 2022
