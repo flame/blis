@@ -107,6 +107,7 @@ $ ASAN_OPTIONS=redzone=2048 <executable>
 ## BLIS Library Interface to be Tested
 * To build the testsuite using BLAS interface, configure using `-DTEST_INTERFACE=BLAS`. [**Default**]
 * To build the testsuite using CBLAS interface, configure using `-DTEST_INTERFACE=CBLAS`.
+* To build the testsuite using BLAS_BLIS_IMPL wrapper layer (called underneath BLAS and CBLAS interfaces), configure using `-DTEST_INTERFACE=BLAS_BLIS_IMPL`.
 * To build the testsuite using BLIS-typed interface, configure using `-DTEST_INTERFACE=BLIS_TYPED`. Note that more tests are built for this option, due to the extended APIs.
 ## Test with upper case character arguments
 * To test with upper case character arguments, configure using `-DTEST_UPPERCASE_ARGS=ON`. [**OFF by default**]

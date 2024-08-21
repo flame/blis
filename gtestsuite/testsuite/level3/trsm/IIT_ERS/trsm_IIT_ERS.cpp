@@ -90,7 +90,7 @@ TYPED_TEST(trsm_IIT_ERS, invalid_storage)
 
 #endif
 
-#if defined(TEST_BLAS) || defined(TEST_CBLAS)
+#if defined(TEST_BLAS_LIKE) || defined(TEST_CBLAS)
 
 /**
  * @brief Test TRSM when side argument is incorrect
@@ -102,7 +102,7 @@ TYPED_TEST(trsm_IIT_ERS, invalid_side)
     T ALPHA = T{2.3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     trsm<T>( STORAGE, 'a', UPLO, TRANS, DIAG, M, N, nullptr, nullptr, LDA, nullptr, LDB);
 #else
     trsm<T>( STORAGE, 'a', UPLO, TRANS, DIAG, M, N, &ALPHA, nullptr, LDA, nullptr, LDB);
@@ -137,7 +137,7 @@ TYPED_TEST(trsm_IIT_ERS, invalid_UPLO)
     T ALPHA = T{2.3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     trsm<T>( STORAGE, SIDE, 'a', TRANS, DIAG, M, N, nullptr, nullptr, LDA, nullptr, LDB);
 #else
     trsm<T>( STORAGE, SIDE, 'a', TRANS, DIAG, M, N, &ALPHA, nullptr, LDA, nullptr, LDB);
@@ -172,7 +172,7 @@ TYPED_TEST(trsm_IIT_ERS, invalid_TRANS)
     T ALPHA = T{2.3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     trsm<T>( STORAGE, SIDE, UPLO, 'a', DIAG, M, N, nullptr, nullptr, LDA, nullptr, LDB);
 #else
     trsm<T>( STORAGE, SIDE, UPLO, 'a', DIAG, M, N, &ALPHA, nullptr, LDA, nullptr, LDB);
@@ -206,7 +206,7 @@ TYPED_TEST(trsm_IIT_ERS, invalid_DIAG)
     T ALPHA = T{2.3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, 'a', M, N, nullptr, nullptr, LDA, nullptr, LDB);
 #else
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, 'a', M, N, &ALPHA, nullptr, LDA, nullptr, LDB);
@@ -240,7 +240,7 @@ TYPED_TEST(trsm_IIT_ERS, invalid_m)
     T ALPHA = T{2.3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, -1, N, nullptr, nullptr, LDA, nullptr, LDB);
 #else
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, -1, N, &ALPHA, nullptr, LDA, nullptr, LDB);
@@ -274,7 +274,7 @@ TYPED_TEST(trsm_IIT_ERS, invalid_n)
     T ALPHA = T{2.3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, M, -1, nullptr, nullptr, LDA, nullptr, LDB);
 #else
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, M, -1, &ALPHA, nullptr, LDA, nullptr, LDB);
@@ -308,7 +308,7 @@ TYPED_TEST(trsm_IIT_ERS, invalid_lda)
     T ALPHA = T{2.3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, M, N, nullptr, nullptr, LDA - 1, nullptr, LDB);
 #else
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, M, N, &ALPHA, nullptr, LDA - 1, nullptr, LDB);
@@ -342,7 +342,7 @@ TYPED_TEST(trsm_IIT_ERS, invalid_ldb)
     T ALPHA = T{2.3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, M, N, nullptr, nullptr, LDA, nullptr, LDB - 1);
 #else
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, M, N, &ALPHA, nullptr, LDA, nullptr, LDB - 1);
@@ -387,7 +387,7 @@ TYPED_TEST(trsm_IIT_ERS, m_eq_zero)
     T ALPHA = T{2.3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, 0, N, nullptr, nullptr, LDA, nullptr, LDB);
 #else
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, 0, N, &ALPHA, nullptr, LDA, nullptr, LDB);
@@ -420,7 +420,7 @@ TYPED_TEST(trsm_IIT_ERS, n_eq_zero)
     T ALPHA = T{2.3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, M, 0, nullptr, nullptr, LDA, nullptr, LDB);
 #else
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, M, 0, &ALPHA, nullptr, LDA, nullptr, LDB);

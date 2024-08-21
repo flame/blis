@@ -80,6 +80,22 @@ static void trmm_( char side, char uploa, char transa, char diaga, gtint_t m,
 }
 
 template<typename T>
+static void trmm_blis_impl( char side, char uploa, char transa, char diaga, gtint_t m,
+               gtint_t n, T* alpha, T* ap, gtint_t lda, T* bp, gtint_t ldb )
+{
+    if constexpr (std::is_same<T, float>::value)
+        strmm_blis_impl( &side, &uploa, &transa, &diaga, &m, &n, alpha, ap, &lda, bp, &ldb );
+    else if constexpr (std::is_same<T, double>::value)
+        dtrmm_blis_impl( &side, &uploa, &transa, &diaga, &m, &n, alpha, ap, &lda, bp, &ldb );
+    else if constexpr (std::is_same<T, scomplex>::value)
+        ctrmm_blis_impl( &side, &uploa, &transa, &diaga, &m, &n, alpha, ap, &lda, bp, &ldb );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        ztrmm_blis_impl( &side, &uploa, &transa, &diaga, &m, &n, alpha, ap, &lda, bp, &ldb );
+    else
+        throw std::runtime_error("Error in testsuite/level3/trmm.h: Invalid typename in trmm_blis_impl().");
+}
+
+template<typename T>
 static void cblas_trmm( char storage, char side, char uploa, char transa,
     char diaga, gtint_t m, gtint_t n, T* alpha, T* ap, gtint_t lda,
     T* bp, gtint_t ldb )
@@ -194,7 +210,11 @@ static void trmm( char storage, char side, char uploa, char transa, char diaga,
         trmm_<T>( side, uploa, transa, diaga, m, n, alpha, ap, lda, bp, ldb );
     else
         throw std::runtime_error("Error in testsuite/level3/trmm.h: BLAS interface cannot be tested for row-major order.");
-
+#elif TEST_BLAS_BLIS_IMPL
+    if( storage == 'c' || storage == 'C' )
+        trmm_blis_impl<T>( side, uploa, transa, diaga, m, n, alpha, ap, lda, bp, ldb );
+    else
+        throw std::runtime_error("Error in testsuite/level3/trmm.h: BLAS_BLIS_IMPL interface cannot be tested for row-major order.");
 #elif TEST_CBLAS
     cblas_trmm<T>( storage, side, uploa, transa, diaga, m, n, alpha, ap, lda, bp, ldb );
 #elif TEST_BLIS_TYPED

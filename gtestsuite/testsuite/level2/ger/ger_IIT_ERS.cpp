@@ -89,7 +89,7 @@ TYPED_TEST(ger_IIT_ERS, invalid_storage)
 
 #endif
 
-#if defined(TEST_BLAS) || defined(TEST_CBLAS)
+#if defined(TEST_BLAS_LIKE) || defined(TEST_CBLAS)
 
 /**
  * BLAS Invalid Input Tests(IIT):
@@ -111,7 +111,7 @@ TYPED_TEST(ger_IIT_ERS, m_lt_zero_unitStride)
     T alpha = T{3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     ger<T>( STORAGE, CONJ, CONJ, invalid_m, N, nullptr, nullptr, unit_inc,
             nullptr, unit_inc, nullptr, LDA );
 #else
@@ -154,7 +154,7 @@ TYPED_TEST(ger_IIT_ERS, m_lt_zero_nonUnitStride)
     T alpha = T{3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     ger<T>( STORAGE, CONJ, CONJ, invalid_m, N, nullptr, nullptr, inc,
             nullptr, inc, nullptr, LDA );
 #else
@@ -197,7 +197,7 @@ TYPED_TEST(ger_IIT_ERS, n_lt_zero_unitStride)
     T alpha = T{3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     ger<T>( STORAGE, CONJ, CONJ, M, invalid_n, nullptr, nullptr, unit_inc,
             nullptr, unit_inc, nullptr, LDA );
 #else
@@ -240,7 +240,7 @@ TYPED_TEST(ger_IIT_ERS, n_lt_zero_nonUnitStride)
     T alpha = T{3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     ger<T>( STORAGE, CONJ, CONJ, M, invalid_n, nullptr, nullptr, inc,
             nullptr, inc, nullptr, LDA );
 #else
@@ -283,7 +283,7 @@ TYPED_TEST(ger_IIT_ERS, incx_eq_zero_unitStride)
     T alpha = T{3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     ger<T>( STORAGE, CONJ, CONJ, M, N, nullptr, nullptr, invalid_incx,
             nullptr, unit_inc, nullptr, LDA );
 #else
@@ -326,7 +326,7 @@ TYPED_TEST(ger_IIT_ERS, incx_eq_zero_nonUnitStride)
     T alpha = T{3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     ger<T>( STORAGE, CONJ, CONJ, M, N, nullptr, nullptr, invalid_incx,
             nullptr, inc, nullptr, LDA );
 #else
@@ -369,7 +369,7 @@ TYPED_TEST(ger_IIT_ERS, incy_eq_zero_unitStride)
     T alpha = T{3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     ger<T>( STORAGE, CONJ, CONJ, M, N, nullptr, nullptr, unit_inc,
             nullptr, invalid_incy, nullptr, LDA );
 #else
@@ -412,7 +412,7 @@ TYPED_TEST(ger_IIT_ERS, incy_eq_zero_nonUnitStride)
     T alpha = T{3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     ger<T>( STORAGE, CONJ, CONJ, M, N, nullptr, nullptr, inc,
             nullptr, invalid_incy, nullptr, LDA );
 #else
@@ -455,7 +455,7 @@ TYPED_TEST(ger_IIT_ERS, lda_lt_max_1_m_unitStride)
     T alpha = T{3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     ger<T>( STORAGE, CONJ, CONJ, M, N, nullptr, nullptr, unit_inc,
             nullptr, unit_inc, nullptr, invalid_lda );
 #else
@@ -498,7 +498,7 @@ TYPED_TEST(ger_IIT_ERS, lda_lt_max_1_m_nonUnitStride)
     T alpha = T{3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     ger<T>( STORAGE, CONJ, CONJ, M, N, nullptr, nullptr, inc,
             nullptr, inc, nullptr, invalid_lda );
 #else
@@ -549,7 +549,7 @@ TYPED_TEST(ger_IIT_ERS, m_eq_zero_unitStride)
     T alpha = T{3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     ger<T>( STORAGE, CONJ, CONJ, invalid_m, N, nullptr, nullptr, unit_inc,
             nullptr, unit_inc, nullptr, LDA );
 #else
@@ -592,7 +592,7 @@ TYPED_TEST(ger_IIT_ERS, m_eq_zero_nonUnitStride)
     T alpha = T{3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     ger<T>( STORAGE, CONJ, CONJ, invalid_m, N, nullptr, nullptr, inc,
             nullptr, inc, nullptr, LDA );
 #else
@@ -635,7 +635,7 @@ TYPED_TEST(ger_IIT_ERS, n_eq_zero_unitStride)
     T alpha = T{3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     ger<T>( STORAGE, CONJ, CONJ, M, invalid_n, nullptr, nullptr, unit_inc,
             nullptr, unit_inc, nullptr, LDA );
 #else
@@ -678,7 +678,7 @@ TYPED_TEST(ger_IIT_ERS, n_eq_zero_nonUnitStride)
     T alpha = T{3};
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     ger<T>( STORAGE, CONJ, CONJ, M, invalid_n, nullptr, nullptr, inc,
             nullptr, inc, nullptr, LDA );
 #else

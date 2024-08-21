@@ -90,7 +90,7 @@ TYPED_TEST(gemm_IIT_ERS, invalid_storage)
 
 #endif
 
-#if defined(TEST_BLAS) || defined(TEST_CBLAS)
+#if defined(TEST_BLAS_LIKE) || defined(TEST_CBLAS)
 
 /*
     Incorrect Input Testing(IIT)
@@ -117,7 +117,7 @@ TYPED_TEST(gemm_IIT_ERS, invalid_transa)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemm<T>( STORAGE, 'p', TRANS, M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
     gemm<T>( STORAGE, 'p', TRANS, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
@@ -155,7 +155,7 @@ TYPED_TEST(gemm_IIT_ERS, invalid_transb)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemm<T>( STORAGE, TRANS, 'p', M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
     gemm<T>( STORAGE, TRANS, 'p', M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
@@ -193,7 +193,7 @@ TYPED_TEST(gemm_IIT_ERS, m_lt_zero)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemm<T>( STORAGE, TRANS, TRANS, -1, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
     gemm<T>( STORAGE, TRANS, TRANS, -1, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
@@ -231,7 +231,7 @@ TYPED_TEST(gemm_IIT_ERS, n_lt_zero)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemm<T>( STORAGE, TRANS, TRANS, M, -1, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
     gemm<T>( STORAGE, TRANS, TRANS, M, -1, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
@@ -269,7 +269,7 @@ TYPED_TEST(gemm_IIT_ERS, k_lt_zero)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemm<T>( STORAGE, TRANS, TRANS, M, N, -1, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
     gemm<T>( STORAGE, TRANS, TRANS, M, N, -1, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
@@ -307,7 +307,7 @@ TYPED_TEST(gemm_IIT_ERS, invalid_lda)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemm<T>( STORAGE, TRANS, TRANS, M, N, K, nullptr, nullptr, LDA - 1, nullptr, LDB, nullptr, nullptr, LDC );
 #else
     gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, nullptr, LDA - 1, nullptr, LDB, &beta, nullptr, LDC );
@@ -345,7 +345,7 @@ TYPED_TEST(gemm_IIT_ERS, invalid_ldb)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemm<T>( STORAGE, TRANS, TRANS, M, N, K, nullptr, nullptr, LDA, nullptr, LDB - 1, nullptr, nullptr, LDC );
 #else
     gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, nullptr, LDA, nullptr, LDB - 1, &beta, nullptr, LDC );
@@ -383,7 +383,7 @@ TYPED_TEST(gemm_IIT_ERS, invalid_ldc)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemm<T>( STORAGE, TRANS, TRANS, M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC - 1 );
 #else
     gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC - 1 );
@@ -434,7 +434,7 @@ TYPED_TEST(gemm_IIT_ERS, m_eq_zero)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemm<T>( STORAGE, TRANS, TRANS, 0, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
     gemm<T>( STORAGE, TRANS, TRANS, 0, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
@@ -471,7 +471,7 @@ TYPED_TEST(gemm_IIT_ERS, n_eq_zero)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemm<T>( STORAGE, TRANS, TRANS, M, 0, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
     gemm<T>( STORAGE, TRANS, TRANS, M, 0, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
@@ -508,7 +508,7 @@ TYPED_TEST(gemm_IIT_ERS, alpha_zero_beta_one)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
 #else
     gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
@@ -545,7 +545,7 @@ TYPED_TEST(gemm_IIT_ERS, k_zero_beta_one)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemm<T>( STORAGE, TRANS, TRANS, M, N, 0, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
 #else
     gemm<T>( STORAGE, TRANS, TRANS, M, N, 0, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );

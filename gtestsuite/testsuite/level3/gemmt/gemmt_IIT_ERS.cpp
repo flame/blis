@@ -88,7 +88,7 @@ TYPED_TEST(gemmt_IIT_ERS, invalid_storage)
 
 #endif
 
-#if defined(TEST_BLAS) || defined(TEST_CBLAS)
+#if defined(TEST_BLAS_LIKE) || defined(TEST_CBLAS)
 
 /*
     Incorrect Input Testing(IIT)
@@ -114,7 +114,7 @@ TYPED_TEST(gemmt_IIT_ERS, invalid_uploa)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemmt<T>( STORAGE, 'A', TRANS, TRANS, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
     gemmt<T>( STORAGE, 'A', TRANS, TRANS, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
@@ -150,7 +150,7 @@ TYPED_TEST(gemmt_IIT_ERS, invalid_transa)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemmt<T>( STORAGE, UPLO, 'A', TRANS, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
     gemmt<T>( STORAGE, UPLO, 'A', TRANS, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
@@ -186,7 +186,7 @@ TYPED_TEST(gemmt_IIT_ERS, invalid_transb)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemmt<T>( STORAGE, UPLO, TRANS, 'A', N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
     gemmt<T>( STORAGE, UPLO, TRANS, 'A', N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
@@ -222,7 +222,7 @@ TYPED_TEST(gemmt_IIT_ERS, n_lt_zero)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, -1, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, -1, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
@@ -258,7 +258,7 @@ TYPED_TEST(gemmt_IIT_ERS, k_lt_zero)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, -1, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, -1, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
@@ -294,7 +294,7 @@ TYPED_TEST(gemmt_IIT_ERS, invalid_lda)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, K, nullptr, nullptr, LDA - 1, nullptr, LDB, nullptr, nullptr, LDC );
 #else
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, K, &alpha, nullptr, LDA - 1, nullptr, LDB, &beta, nullptr, LDC );
@@ -330,7 +330,7 @@ TYPED_TEST(gemmt_IIT_ERS, invalid_ldb)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, K, nullptr, nullptr, LDA, nullptr, LDB - 1, nullptr, nullptr, LDC );
 #else
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, K, &alpha, nullptr, LDA, nullptr, LDB - 1, &beta, nullptr, LDC );
@@ -366,7 +366,7 @@ TYPED_TEST(gemmt_IIT_ERS, invalid_ldc)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC - 1 );
 #else
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC - 1 );
@@ -412,7 +412,7 @@ TYPED_TEST(gemmt_IIT_ERS, n_eq_zero)
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, 0, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, 0, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );

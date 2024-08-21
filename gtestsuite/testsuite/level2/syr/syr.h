@@ -65,6 +65,18 @@ static void syr_( char uploa, gtint_t n, T* alpha, T* xp, gtint_t incx,
 }
 
 template<typename T>
+static void syr_blis_impl( char uploa, gtint_t n, T* alpha, T* xp, gtint_t incx,
+                                                  T* ap, gtint_t lda )
+{
+    if constexpr (std::is_same<T, float>::value)
+        ssyr_blis_impl( &uploa, &n, alpha, xp, &incx, ap, &lda );
+    else if constexpr (std::is_same<T, double>::value)
+        dsyr_blis_impl( &uploa, &n, alpha, xp, &incx, ap, &lda );
+    else
+        throw std::runtime_error("Error in testsuite/level2/syr.h: Invalid typename in syr_blis_impl().");
+}
+
+template<typename T>
 static void cblas_syr( char storage, char uploa, gtint_t n, T* alpha,
                             T* xp, gtint_t incx, T* ap, gtint_t lda )
 {
@@ -146,6 +158,11 @@ static void syr( char storage, char uploa, char conj_x, gtint_t n, T* alpha,
         syr_<T>( uploa, n, alpha, xp, incx, ap, lda );
     else
         throw std::runtime_error("Error in testsuite/level2/syr.h: BLAS interface cannot be tested for row-major order.");
+#elif TEST_BLAS_BLIS_IMPL
+    if( storage == 'c' || storage == 'C' )
+        syr_blis_impl<T>( uploa, n, alpha, xp, incx, ap, lda );
+    else
+        throw std::runtime_error("Error in testsuite/level2/syr.h: BLAS_BLIS_IMPL interface cannot be tested for row-major order.");
 #elif TEST_CBLAS
     cblas_syr<T>( storage, uploa, n, alpha, xp, incx, ap, lda );
 #elif TEST_BLIS_TYPED

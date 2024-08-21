@@ -93,7 +93,7 @@ static void omatcopy( char trans, gtint_t m, gtint_t n, T alpha, T* A, gtint_t l
     }
 #endif
 
-#ifdef TEST_BLAS
+#ifdef TEST_BLAS_LIKE
     omatcopy_<T>( trans, m, n, alpha, A, lda, B, ldb );
 #else
     throw std::runtime_error("Error in testsuite/extension/omatcopy.h: No interfaces are set to be tested.");

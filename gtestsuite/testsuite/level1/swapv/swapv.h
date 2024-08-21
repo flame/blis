@@ -65,6 +65,22 @@ static void swapv_(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy)
 }
 
 template<typename T>
+static void swapv_blis_impl(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy)
+{
+
+    if constexpr (std::is_same<T, float>::value)
+        sswap_blis_impl( &n, x, &incx, y, &incy );
+    else if constexpr (std::is_same<T, double>::value)
+        dswap_blis_impl( &n, x, &incx, y, &incy );
+    else if constexpr (std::is_same<T, scomplex>::value)
+        cswap_blis_impl( &n, x, &incx, y, &incy );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        zswap_blis_impl( &n, x, &incx, y, &incy );
+    else
+        throw std::runtime_error("Error in testsuite/level1/swapv.h: Invalid typename in swapv_blis_impl().");
+}
+
+template<typename T>
 static void cblas_swapv(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy)
 {
 
@@ -109,6 +125,8 @@ static void swapv(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy)
 
 #ifdef TEST_BLAS
     swapv_<T>( n, x, incx, y, incy );
+#elif TEST_BLAS_BLIS_IMPL
+    swapv_blis_impl<T>( n, x, incx, y, incy );
 #elif TEST_CBLAS
     cblas_swapv<T>( n, x, incx, y, incy );
 #elif TEST_BLIS_TYPED

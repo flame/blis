@@ -53,7 +53,7 @@ TYPED_TEST_SUITE(scalv_IIT_ERS, TypeParam);
 
 using namespace testinghelpers::IIT;
 
-#if defined(TEST_BLAS) || defined(TEST_CBLAS)
+#if defined(TEST_BLAS_LIKE) || defined(TEST_CBLAS)
 
 /*
     BLAS Early Return Scenarios(ERS):

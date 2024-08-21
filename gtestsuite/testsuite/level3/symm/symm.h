@@ -88,6 +88,22 @@ static void symm_(char side, char uplo, gtint_t m, gtint_t n, T* alpha,
 }
 
 template<typename T>
+static void symm_blis_impl(char side, char uplo, gtint_t m, gtint_t n, T* alpha,
+                    T* ap, gtint_t lda,  T* bp, gtint_t ldb, T* beta, T* cp, gtint_t ldc )
+{
+    if constexpr (std::is_same<T, float>::value)
+        ssymm_blis_impl( &side, &uplo, &m, &n, alpha, ap, &lda, bp, &ldb, beta, cp, &ldc );
+    else if constexpr (std::is_same<T, double>::value)
+        dsymm_blis_impl( &side, &uplo, &m, &n, alpha, ap, &lda, bp, &ldb, beta, cp, &ldc );
+    else if constexpr (std::is_same<T, scomplex>::value)
+        csymm_blis_impl( &side, &uplo, &m, &n, alpha, ap, &lda, bp, &ldb, beta, cp, &ldc );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        zsymm_blis_impl( &side, &uplo, &m, &n, alpha, ap, &lda, bp, &ldb, beta, cp, &ldc );
+    else
+        throw std::runtime_error("Error in testsuite/level3/symm.h: Invalid typename in symm_blis_impl().");
+}
+
+template<typename T>
 static void cblas_symm(char storage, char side, char uplo,
     gtint_t m, gtint_t n, T* alpha, T* ap, gtint_t lda,
     T* bp, gtint_t ldb, T* beta, T* cp, gtint_t ldc)
@@ -208,7 +224,11 @@ static void symm( char storage, char side, char uplo, char conja, char transb, g
         symm_<T>( side, uplo, m, n, alpha, ap, lda, bp, ldb, beta, cp, ldc );
     else
         throw std::runtime_error("Error in testsuite/level3/symm.h: BLAS interface cannot be tested for row-major order.");
-
+#elif TEST_BLAS_BLIS_IMPL
+    if( storage == 'c' || storage == 'C' )
+        symm_blis_impl<T>( side, uplo, m, n, alpha, ap, lda, bp, ldb, beta, cp, ldc );
+    else
+        throw std::runtime_error("Error in testsuite/level3/symm.h: BLAS_BLIS_IMPL interface cannot be tested for row-major order.");
 #elif TEST_CBLAS
     cblas_symm<T>( storage, side, uplo, m, n, alpha, ap, lda, bp, ldb, beta, cp, ldc );
 #elif TEST_BLIS_TYPED

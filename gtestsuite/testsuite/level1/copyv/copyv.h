@@ -66,6 +66,21 @@ static void copyv_(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy) {
 }
 
 template<typename T>
+static void copyv_blis_impl(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy) {
+
+    if constexpr (std::is_same<T, float>::value)
+        scopy_blis_impl( &n, x, &incx, y, &incy );
+    else if constexpr (std::is_same<T, double>::value)
+        dcopy_blis_impl( &n, x, &incx, y, &incy );
+    else if constexpr (std::is_same<T, scomplex>::value)
+        ccopy_blis_impl( &n, x, &incx, y, &incy );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        zcopy_blis_impl( &n, x, &incx, y, &incy );
+    else
+        throw std::runtime_error("Error in testsuite/level1/copyv.h: Invalid typename in copyv_blis_impl().");
+}
+
+template<typename T>
 static void cblas_copyv(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy) {
 
     if constexpr (std::is_same<T, float>::value)
@@ -125,6 +140,8 @@ static void copyv(char conjx, gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy)
 
 #ifdef TEST_BLAS
     copyv_<T>(n, x, incx, y, incy);
+#elif TEST_BLAS_BLIS_IMPL
+    copyv_blis_impl<T>(n, x, incx, y, incy);
 #elif TEST_CBLAS
     cblas_copyv<T>(n, x, incx, y, incy);
 #elif TEST_BLIS_TYPED

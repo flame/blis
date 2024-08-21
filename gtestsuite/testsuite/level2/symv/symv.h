@@ -67,6 +67,18 @@ static void symv_( char uploa, gtint_t n, T* alpha, T* ap, gtint_t lda,
 }
 
 template<typename T>
+static void symv_blis_impl( char uploa, gtint_t n, T* alpha, T* ap, gtint_t lda,
+                    T* xp, gtint_t incx, T* beta, T* yp, gtint_t incy )
+{
+    if constexpr (std::is_same<T, float>::value)
+        ssymv_blis_impl( &uploa, &n, alpha, ap, &lda, xp, &incx, beta, yp, &incy );
+    else if constexpr (std::is_same<T, double>::value)
+        dsymv_blis_impl( &uploa, &n, alpha, ap, &lda, xp, &incx, beta, yp, &incy );
+    else
+        throw std::runtime_error("Error in testsuite/level2/symv.h: Invalid typename in symv_blis_impl().");
+}
+
+template<typename T>
 static void cblas_symv( char storage, char uploa, gtint_t n, T* alpha,
     T* ap, gtint_t lda, T* xp, gtint_t incx, T* beta, T* yp, gtint_t incy )
 {
@@ -162,6 +174,11 @@ static void symv( char storage, char uploa, char conja, char conjx, gtint_t n,
         symv_<T>( uploa, n, alpha, ap, lda, xp, incx, beta, yp, incy );
     else
         throw std::runtime_error("Error in testsuite/level2/symv.h: BLAS interface cannot be tested for row-major order.");
+#elif TEST_BLAS_BLIS_IMPL
+    if( storage == 'c' || storage == 'C' )
+        symv_blis_impl<T>( uploa, n, alpha, ap, lda, xp, incx, beta, yp, incy );
+    else
+        throw std::runtime_error("Error in testsuite/level2/symv.h: BLAS_BLIS_IMPL interface cannot be tested for row-major order.");
 #elif TEST_CBLAS
     cblas_symv<T>( storage, uploa, n, alpha, ap, lda, xp, incx, beta, yp, incy );
 #elif TEST_BLIS_TYPED

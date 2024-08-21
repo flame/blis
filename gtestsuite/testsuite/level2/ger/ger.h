@@ -82,6 +82,30 @@ static void ger_( char conjy, gtint_t m, gtint_t n, T* alpha,
 }
 
 template<typename T>
+static void ger_blis_impl( char conjy, gtint_t m, gtint_t n, T* alpha,
+    T* xp, gtint_t incx, T* yp, gtint_t incy, T* ap, gtint_t lda )
+{
+    if constexpr (std::is_same<T, float>::value)
+        sger_blis_impl( &m, &n, alpha, xp, &incx, yp, &incy, ap, &lda );
+    else if constexpr (std::is_same<T, double>::value)
+        dger_blis_impl( &m, &n, alpha, xp, &incx, yp, &incy, ap, &lda );
+    else if constexpr (std::is_same<T, scomplex>::value) {
+      if( testinghelpers::chkconj( conjy ) )
+        cgerc_blis_impl( &m, &n, alpha, xp, &incx, yp, &incy, ap, &lda );
+      else
+        cgeru_blis_impl( &m, &n, alpha, xp, &incx, yp, &incy, ap, &lda );
+    }
+    else if constexpr (std::is_same<T, dcomplex>::value) {
+      if( testinghelpers::chkconj( conjy ) )
+        zgerc_blis_impl( &m, &n, alpha, xp, &incx, yp, &incy, ap, &lda );
+      else
+        zgeru_blis_impl( &m, &n, alpha, xp, &incx, yp, &incy, ap, &lda );
+    }
+    else
+        throw std::runtime_error("Error in testsuite/level2/ger.h: Invalid typename in ger_blis_impl().");
+}
+
+template<typename T>
 static void cblas_ger( char storage, char conjy, gtint_t m, gtint_t n,
     T* alpha, T* xp, gtint_t incx,T* yp, gtint_t incy, T* ap, gtint_t lda )
 {
@@ -185,6 +209,11 @@ static void ger( char storage, char conjx, char conjy, gtint_t m, gtint_t n,
         ger_<T>( conjy, m, n, alpha, xp, incx, yp, incy, ap, lda );
     else
         throw std::runtime_error("Error in testsuite/level2/ger.h: BLAS interface cannot be tested for row-major order.");
+#elif TEST_BLAS_BLIS_IMPL
+    if( storage == 'c' || storage == 'C' )
+        ger_blis_impl<T>( conjy, m, n, alpha, xp, incx, yp, incy, ap, lda );
+    else
+        throw std::runtime_error("Error in testsuite/level2/ger.h: BLAS_BLIS_IMPL interface cannot be tested for row-major order.");
 #elif TEST_CBLAS
     cblas_ger<T>( storage, conjy, m, n, alpha, xp, incx, yp, incy, ap, lda );
 #elif TEST_BLIS_TYPED

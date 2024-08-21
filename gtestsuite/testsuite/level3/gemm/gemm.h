@@ -83,6 +83,22 @@ static void gemm_(char transa, char transb, gtint_t m, gtint_t n, gtint_t k, T* 
 }
 
 template<typename T>
+static void gemm_blis_impl(char transa, char transb, gtint_t m, gtint_t n, gtint_t k, T* alpha,
+                    T* ap, gtint_t lda,  T* bp, gtint_t ldb, T* beta, T* cp, gtint_t ldc )
+{
+    if constexpr (std::is_same<T, float>::value)
+        sgemm_blis_impl( &transa, &transb, &m, &n, &k, alpha, ap, &lda, bp, &ldb, beta, cp, &ldc );
+    else if constexpr (std::is_same<T, double>::value)
+        dgemm_blis_impl( &transa, &transb, &m, &n, &k, alpha, ap, &lda, bp, &ldb, beta, cp, &ldc );
+    else if constexpr (std::is_same<T, scomplex>::value)
+        cgemm_blis_impl( &transa, &transb, &m, &n, &k, alpha, ap, &lda, bp, &ldb, beta, cp, &ldc );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        zgemm_blis_impl( &transa, &transb, &m, &n, &k, alpha, ap, &lda, bp, &ldb, beta, cp, &ldc );
+    else
+        throw std::runtime_error("Error in testsuite/level3/gemm.h: Invalid typename in gemm_blis_impl().");
+}
+
+template<typename T>
 static void cblas_gemm(char storage, char transa, char transb,
     gtint_t m, gtint_t n, gtint_t k, T* alpha, T* ap, gtint_t lda,
     T* bp, gtint_t ldb, T* beta, T* cp, gtint_t ldc)
@@ -195,7 +211,11 @@ static void gemm( char storage, char transa, char transb, gtint_t m, gtint_t n, 
         gemm_<T>( transa, transb, m, n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
     else
         throw std::runtime_error("Error in testsuite/level3/gemm.h: BLAS interface cannot be tested for row-major order.");
-
+#elif TEST_BLAS_BLIS_IMPL
+    if( storage == 'c' || storage == 'C' )
+        gemm_blis_impl<T>( transa, transb, m, n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
+    else
+        throw std::runtime_error("Error in testsuite/level3/gemm.h: BLAS_BLIS_IMPL interface cannot be tested for row-major order.");
 #elif TEST_CBLAS
     cblas_gemm<T>( storage, transa, transb, m, n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
 #elif TEST_BLIS_TYPED

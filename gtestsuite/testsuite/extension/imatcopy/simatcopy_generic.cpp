@@ -83,7 +83,7 @@ TEST_P( simatcopyGeneric, API )
     test_imatcopy<T>( storage, trans, m, n, alpha, lda_in_inc, lda_out_inc, thresh, is_memory_test );
 }
 
-#if defined(TEST_BLAS) && (defined(REF_IS_MKL) || defined(REF_IS_OPENBLAS))
+#if defined(TEST_BLAS_LIKE) && (defined(REF_IS_MKL) || defined(REF_IS_OPENBLAS))
 // Black box testing for generic and main use of simatcopy.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,

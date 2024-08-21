@@ -45,7 +45,7 @@ TYPED_TEST_SUITE(imatcopy_IIT_ERS, TypeParam);
 
 using namespace testinghelpers::IIT;
 
-#if defined(TEST_BLAS)
+#if defined(TEST_BLAS_LIKE)
 
 /*
     Incorrect Input Testing(IIT)

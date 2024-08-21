@@ -72,6 +72,18 @@ static void herk_(char uplo, char transa, gtint_t n, gtint_t k, RT* alpha,
 }
 
 template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
+static void herk_blis_impl(char uplo, char transa, gtint_t n, gtint_t k, RT* alpha,
+                    T* ap, gtint_t lda,  RT* beta, T* cp, gtint_t ldc )
+{
+    if constexpr (std::is_same<T, scomplex>::value)
+        cherk_blis_impl( &uplo, &transa, &n, &k, alpha, ap, &lda, beta, cp, &ldc );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        zherk_blis_impl( &uplo, &transa, &n, &k, alpha, ap, &lda, beta, cp, &ldc );
+    else
+        throw std::runtime_error("Error in testsuite/level3/herk.h: Invalid typename in herk_blis_impl().");
+}
+
+template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
 static void cblas_herk(char storage, char uplo, char trnsa,
     gtint_t n, gtint_t k, RT* alpha, T* ap, gtint_t lda,
     RT* beta, T* cp, gtint_t ldc)
@@ -167,6 +179,11 @@ static void herk( char storage, char uplo, char transa, gtint_t n, gtint_t k,
         herk_<T>( uplo, transa, n, k, alpha, ap, lda, beta, cp, ldc );
     else
         throw std::runtime_error("Error in testsuite/level3/herk.h: BLAS interface cannot be tested for row-major order.");
+#elif TEST_BLAS_BLIS_IMPL
+    if( storage == 'c' || storage == 'C' )
+        herk_blis_impl<T>( uplo, transa, n, k, alpha, ap, lda, beta, cp, ldc );
+    else
+        throw std::runtime_error("Error in testsuite/level3/herk.h: BLAS_BLIS_IMPL interface cannot be tested for row-major order.");
 #elif TEST_CBLAS
     cblas_herk<T>( storage, uplo, transa, n, k, alpha, ap, lda, beta, cp, ldc );
 #elif TEST_BLIS_TYPED

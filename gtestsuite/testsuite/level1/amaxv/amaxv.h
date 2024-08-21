@@ -67,6 +67,24 @@ static gtint_t amaxv_(gtint_t n, T* x, gtint_t incx) {
 }
 
 template<typename T>
+static gtint_t amaxv_blis_impl(gtint_t n, T* x, gtint_t incx) {
+
+    gtint_t idx;
+    if constexpr (std::is_same<T, float>::value)
+        idx = isamax_blis_impl( &n, x, &incx );
+    else if constexpr (std::is_same<T, double>::value)
+        idx = idamax_blis_impl( &n, x, &incx );
+    else if constexpr (std::is_same<T, scomplex>::value)
+        idx = icamax_blis_impl( &n, x, &incx );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        idx = izamax_blis_impl( &n, x, &incx );
+    else
+      throw std::runtime_error("Error in testsuite/level1/amaxv.h: Invalid typename in amaxv_blis_impl().");
+
+    return idx;
+}
+
+template<typename T>
 static gtint_t cblas_amaxv(gtint_t n, T* x, gtint_t incx) {
 
     gtint_t idx;
@@ -125,6 +143,10 @@ static gtint_t amaxv(gtint_t n, T* x, gtint_t incx)
     // Since we would be comparing against CBLAS which is 0-based and BLAS
     // which is 1-based, we need decrement the result of BLAS call by 1.
     return ( amaxv_<T>(n, x, incx) - 1 );
+#elif TEST_BLAS_BLIS_IMPL
+    // Since we would be comparing against CBLAS which is 0-based and BLAS
+    // which is 1-based, we need decrement the result of BLAS call by 1.
+    return ( amaxv_blis_impl<T>(n, x, incx) - 1 );
 #elif TEST_CBLAS
     return cblas_amaxv<T>(n, x, incx);
 #elif TEST_BLIS_TYPED

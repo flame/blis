@@ -71,6 +71,22 @@ static void trmv_( char uploa, char transa, char diaga, gtint_t n,
 }
 
 template<typename T>
+static void trmv_blis_impl( char uploa, char transa, char diaga, gtint_t n,
+                         T *ap, gtint_t lda, T *xp, gtint_t incx )
+{
+    if constexpr (std::is_same<T, float>::value)
+        strmv_blis_impl( &uploa, &transa, &diaga, &n, ap, &lda, xp, &incx );
+    else if constexpr (std::is_same<T, double>::value)
+        dtrmv_blis_impl( &uploa, &transa, &diaga, &n, ap, &lda, xp, &incx );
+    else if constexpr (std::is_same<T, scomplex>::value)
+        ctrmv_blis_impl( &uploa, &transa, &diaga, &n, ap, &lda, xp, &incx );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        ztrmv_blis_impl( &uploa, &transa, &diaga, &n, ap, &lda, xp, &incx );
+    else
+        throw std::runtime_error("Error in testsuite/level2/trmv.h: Invalid typename in trmv_blis_impl().");
+}
+
+template<typename T>
 static void cblas_trmv( char storage, char uploa, char transa, char diaga,
                       gtint_t n, T *ap, gtint_t lda, T *xp, gtint_t incx )
 {
@@ -135,7 +151,7 @@ template<typename T>
 static void trmv( char storage, char uploa, char transa, char diaga,
     gtint_t n, T *alpha, T *ap, gtint_t lda, T *xp, gtint_t incx )
 {
-#if (defined TEST_BLAS || defined  TEST_CBLAS)
+#if (defined TEST_BLAS_LIKE || defined TEST_CBLAS)
     T one;
     testinghelpers::initone(one);
 #endif
@@ -176,6 +192,14 @@ static void trmv( char storage, char uploa, char transa, char diaga,
             throw std::runtime_error("Error in testsuite/level2/trmv.h: BLAS interface cannot be tested for alpha != one.");
     else
         throw std::runtime_error("Error in testsuite/level2/trmv.h: BLAS interface cannot be tested for row-major order.");
+#elif TEST_BLAS_BLIS_IMPL
+    if(( storage == 'c' || storage == 'C' ))
+        if( *alpha == one )
+            trmv_blis_impl<T>( uploa, transa, diaga, n, ap, lda, xp, incx );
+        else
+            throw std::runtime_error("Error in testsuite/level2/trmv.h: BLAS_BLIS_IMPL interface cannot be tested for alpha != one.");
+    else
+        throw std::runtime_error("Error in testsuite/level2/trmv.h: BLAS_BLIS_IMPL interface cannot be tested for row-major order.");
 #elif TEST_CBLAS
     if( *alpha == one )
         cblas_trmv<T>( storage, uploa, transa, diaga, n, ap, lda, xp, incx );

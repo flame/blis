@@ -73,6 +73,29 @@ static void scalv_(gtint_t n, U alpha, T* x, gtint_t incx)
         throw std::runtime_error("Error in testsuite/level1/scalv.h: Invalid typename in scalv_().");
 }
 
+template<typename T, typename U>
+static void scalv_blis_impl(gtint_t n, U alpha, T* x, gtint_t incx)
+{
+    if constexpr (std::is_same<T, U>::value)
+    {
+        if constexpr (std::is_same<T, float>::value)
+            sscal_blis_impl( &n, &alpha, x, &incx );
+        else if constexpr (std::is_same<T, double>::value)
+            dscal_blis_impl( &n, &alpha, x, &incx );
+        else if constexpr (std::is_same<T, scomplex>::value)
+            cscal_blis_impl( &n, &alpha, x, &incx );
+        else if constexpr (std::is_same<T, dcomplex>::value)
+            zscal_blis_impl( &n, &alpha, x, &incx );
+        else
+            throw std::runtime_error("Error in testsuite/level1/scalv.h: Invalid typename in scalv_blis_impl().");
+    }
+    else if constexpr (std::is_same<T, scomplex>::value && std::is_same<U, float>::value )
+        csscal_blis_impl( &n, &alpha, x, &incx );
+    else if constexpr (std::is_same<T, dcomplex>::value && std::is_same<U, double>::value )
+        zdscal_blis_impl( &n, &alpha, x, &incx );
+    else
+        throw std::runtime_error("Error in testsuite/level1/scalv.h: Invalid typename in scalv_blis_impl().");
+}
 
 template<typename T, typename U>
 static void cblas_scalv(gtint_t n, U alpha, T* x, gtint_t incx)
@@ -147,6 +170,8 @@ static void scalv(char conj_alpha, gtint_t n, U alpha, T* x, gtint_t incx)
 
 #ifdef TEST_BLAS
     scalv_<T, U>( n, alpha, x, incx );
+#elif TEST_BLAS_BLIS_IMPL
+    scalv_blis_impl<T, U>( n, alpha, x, incx );
 #elif TEST_CBLAS
     cblas_scalv<T, U>( n, alpha, x, incx );
 #elif TEST_BLIS_TYPED

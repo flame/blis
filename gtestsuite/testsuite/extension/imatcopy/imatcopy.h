@@ -82,7 +82,7 @@ static void imatcopy( char trans, gtint_t m, gtint_t n, T alpha, T* A, gtint_t l
     gtint_t lda_out_cpy = lda_out;
 #endif
 
-#ifdef TEST_BLAS
+#ifdef TEST_BLAS_LIKE
     imatcopy_<T>( trans, m, n, alpha, A, lda_in, lda_out );
 #else
     throw std::runtime_error("Error in testsuite/level1/imatcopy.h: No interfaces are set to be tested.");

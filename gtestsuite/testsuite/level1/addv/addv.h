@@ -94,6 +94,8 @@ static void addv(char conjx, gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy)
 
 #ifdef TEST_BLAS
     throw std::runtime_error("Error in testsuite/level1/addv.h: BLAS interface is not available.");
+#elif TEST_BLAS_BLIS_IMPL
+    throw std::runtime_error("Error in testsuite/level1/addv.h: BLAS_BLIS_IMPL interface is not available.");
 #elif TEST_CBLAS
     throw std::runtime_error("Error in testsuite/level1/addv.h: CBLAS interface is not available.");
 #elif TEST_BLIS_TYPED

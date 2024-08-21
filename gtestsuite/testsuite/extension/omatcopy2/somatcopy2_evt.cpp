@@ -93,7 +93,7 @@ TEST_P( somatcopy2EVT, API )
     test_omatcopy2<T>( storage, trans, m, n, alpha, lda_inc, stridea, ldb_inc, strideb, thresh, false, is_nan_inf_test, exval );
 }
 
-#if defined(TEST_BLAS) && defined(REF_IS_MKL)
+#if defined(TEST_BLAS_LIKE) && defined(REF_IS_MKL)
 
 static float AOCL_NAN = std::numeric_limits<float>::quiet_NaN();
 static float AOCL_INF = std::numeric_limits<float>::infinity();

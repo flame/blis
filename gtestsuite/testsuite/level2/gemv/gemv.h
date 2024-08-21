@@ -78,6 +78,22 @@ static void gemv_( char transa, gtint_t m, gtint_t n, T* alpha, T* ap, gtint_t l
 }
 
 template<typename T>
+static void gemv_blis_impl( char transa, gtint_t m, gtint_t n, T* alpha, T* ap, gtint_t lda,
+  T* xp, gtint_t incx, T* beta, T* yp, gtint_t incy )
+{
+    if constexpr (std::is_same<T, float>::value)
+        sgemv_blis_impl( &transa, &m, &n, alpha, ap, &lda, xp, &incx, beta, yp, &incy );
+    else if constexpr (std::is_same<T, double>::value)
+        dgemv_blis_impl( &transa, &m, &n, alpha, ap, &lda, xp, &incx, beta, yp, &incy );
+    else if constexpr (std::is_same<T, scomplex>::value)
+        cgemv_blis_impl( &transa, &m, &n, alpha, ap, &lda, xp, &incx, beta, yp, &incy );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        zgemv_blis_impl( &transa, &m, &n, alpha, ap, &lda, xp, &incx, beta, yp, &incy );
+    else
+        throw std::runtime_error("Error in testsuite/level2/gemv.h: Invalid typename in gemv_blis_impl().");
+}
+
+template<typename T>
 static void cblas_gemv( char storage, char trans, gtint_t m, gtint_t n, T* alpha,
     T* ap, gtint_t lda,  T* xp, gtint_t incx, T* beta, T* yp, gtint_t incy )
 {
@@ -182,6 +198,11 @@ static void gemv( char storage, char trans, char conj_x, gtint_t m, gtint_t n,
         gemv_<T>( trans, m, n, alpha, ap, lda, xp, incx, beta, yp, incy );
     else
         throw std::runtime_error("Error in testsuite/level2/gemv.h: BLAS interface cannot be tested for row-major order.");
+#elif TEST_BLAS_BLIS_IMPL
+    if( storage == 'c' || storage == 'C' )
+        gemv_blis_impl<T>( trans, m, n, alpha, ap, lda, xp, incx, beta, yp, incy );
+    else
+        throw std::runtime_error("Error in testsuite/level2/gemv.h: BLAS_BLIS_IMPL interface cannot be tested for row-major order.");
 #elif TEST_CBLAS
     cblas_gemv<T>( storage, trans, m, n, alpha, ap, lda, xp, incx, beta, yp, incy );
 #elif TEST_BLIS_TYPED

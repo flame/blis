@@ -61,7 +61,21 @@ static RT asumv_(gtint_t n, T* x, gtint_t incx){
     else if constexpr (std::is_same<T, dcomplex>::value)
         return dzasum_( &n, x, &incx );
     else
-      throw std::runtime_error("Error in testsuite/util/asumv.h: Invalid typename in asumv().");
+      throw std::runtime_error("Error in testsuite/util/asumv.h: Invalid typename in asumv_().");
+}
+
+template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
+static RT asumv_blis_impl(gtint_t n, T* x, gtint_t incx){
+    if constexpr (std::is_same<T, float>::value)
+        return sasum_blis_impl( &n, x, &incx );
+    else if constexpr (std::is_same<T, double>::value)
+        return dasum_blis_impl( &n, x, &incx );
+    else if constexpr (std::is_same<T, scomplex>::value)
+        return scasum_blis_impl( &n, x, &incx );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        return dzasum_blis_impl( &n, x, &incx );
+    else
+      throw std::runtime_error("Error in testsuite/util/asumv.h: Invalid typename in asumv_blis_impl().");
 }
 
 template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
@@ -115,6 +129,8 @@ static RT asumv(gtint_t n, T* x, gtint_t incx)
 
 #ifdef TEST_BLAS
     return asumv_<T>(n, x, incx);
+#elif TEST_BLAS_BLIS_IMPL
+    return asumv_blis_impl<T>(n, x, incx);
 #elif TEST_CBLAS
     return cblas_asumv<T>(n, x, incx);
 #elif TEST_BLIS_TYPED

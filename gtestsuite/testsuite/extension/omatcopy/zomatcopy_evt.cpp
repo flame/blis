@@ -87,7 +87,7 @@ TEST_P( zomatcopyEVT, API )
     test_omatcopy<T>( storage, trans, m, n, alpha, lda_inc, ldb_inc, thresh, false, is_nan_inf_test, exval );
 }
 
-#if defined(TEST_BLAS) && (defined(REF_IS_MKL) || defined(REF_IS_OPENBLAS))
+#if defined(TEST_BLAS_LIKE) && (defined(REF_IS_MKL) || defined(REF_IS_OPENBLAS))
 
 static double AOCL_NAN = std::numeric_limits<double>::quiet_NaN();
 static double AOCL_INF = std::numeric_limits<double>::infinity();

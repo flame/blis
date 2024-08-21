@@ -68,6 +68,7 @@
  * @param[in]     ldc    specifies the leading dimension of cp.
  */
 
+#ifdef TEST_BLAS
 template<typename T>
 static void gemm_compute_(char transa, char transb, char packa, char packb, gtint_t m, gtint_t n, gtint_t k, T* alpha,
                     T* ap, gtint_t lda,  T* bp, gtint_t ldb, T* beta, T* cp, gtint_t ldc )
@@ -211,6 +212,7 @@ static void gemm_compute_(char transa, char transb, char packa, char packb, gtin
                          bBuffer );
 
             dgemm_compute_( &packa, &packb, &m, &n, &k, aBuffer, &lda, bBuffer, &ldb, beta, cp, &ldc );
+
             bli_free_user( aBuffer );
             bli_free_user( bBuffer );
         }
@@ -267,6 +269,209 @@ static void gemm_compute_(char transa, char transb, char packa, char packb, gtin
     }
     else
         throw std::runtime_error("Error in testsuite/level3/gemm.h: Invalid typename in gemm_compute_().");
+}
+#endif
+
+template<typename T>
+static void gemm_compute_blis_impl(char transa, char transb, char packa, char packb, gtint_t m, gtint_t n, gtint_t k, T* alpha,
+                    T* ap, gtint_t lda,  T* bp, gtint_t ldb, T* beta, T* cp, gtint_t ldc )
+{
+    T unit_alpha = 1.0;
+    err_t err = BLIS_SUCCESS;
+    if constexpr (std::is_same<T, float>::value)
+    {
+        if ( ( packa == 'P' || packa == 'p' ) && ( packb == 'P' || packb == 'p' ) )
+        {
+            // Reorder A
+            char identifierA = 'A';
+            gtint_t bufSizeA = sgemm_pack_get_size_blis_impl( &identifierA,
+                                                     &m,
+                                                     &n,
+                                                     &k );
+
+            float* aBuffer = (float*) bli_malloc_user( bufSizeA, &err );
+            sgemm_pack_blis_impl( &identifierA,
+                         &transa,
+                         &m,
+                         &n,
+                         &k,
+                         &unit_alpha,
+                         ap,
+                         &lda,
+                         aBuffer );
+
+            // Reorder B
+            char identifierB = 'B';
+            gtint_t bufSizeB = sgemm_pack_get_size_blis_impl( &identifierB,
+                                                     &m,
+                                                     &n,
+                                                     &k );
+
+            float* bBuffer = (float*) bli_malloc_user( bufSizeB, &err );
+            sgemm_pack_blis_impl( &identifierB,
+                         &transb,
+                         &m,
+                         &n,
+                         &k,
+                         alpha,
+                         bp,
+                         &ldb,
+                         bBuffer );
+
+            sgemm_compute_blis_impl( &packa, &packb, &m, &n, &k, aBuffer, &lda, bBuffer, &ldb, beta, cp, &ldc );
+
+            bli_free_user( aBuffer );
+            bli_free_user( bBuffer );
+        }
+        else if ( ( packa == 'P' || packa == 'p' ) )
+        {
+            // Reorder A
+            char identifierA = 'A';
+            gtint_t bufSizeA = sgemm_pack_get_size_blis_impl( &identifierA,
+                                                     &m,
+                                                     &n,
+                                                     &k );
+
+            float* aBuffer = (float*) bli_malloc_user( bufSizeA, &err );
+            sgemm_pack_blis_impl( &identifierA,
+                         &transa,
+                         &m,
+                         &n,
+                         &k,
+                         alpha,
+                         ap,
+                         &lda,
+                         aBuffer );
+
+            sgemm_compute_blis_impl( &packa, &transb, &m, &n, &k, aBuffer, &lda, bp, &ldb, beta, cp, &ldc );
+            bli_free_user( aBuffer );
+        }
+        else if ( ( packb == 'P' || packb == 'p' ) )
+        {
+            // Reorder B
+            char identifierB = 'B';
+            gtint_t bufSizeB = sgemm_pack_get_size_blis_impl( &identifierB,
+                                                     &m,
+                                                     &n,
+                                                     &k );
+
+            float* bBuffer = (float*) bli_malloc_user( bufSizeB, &err );
+            sgemm_pack_blis_impl( &identifierB,
+                         &transb,
+                         &m,
+                         &n,
+                         &k,
+                         alpha,
+                         bp,
+                         &ldb,
+                         bBuffer );
+
+            sgemm_compute_blis_impl( &transa, &packb, &m, &n, &k, ap, &lda, bBuffer, &ldb, beta, cp, &ldc );
+            bli_free_user( bBuffer );
+        }
+        else
+        {
+            sgemm_compute_blis_impl( &transa, &transb, &m, &n, &k, ap, &lda, bp, &ldb, beta, cp, &ldc );
+        }
+    }
+    else if constexpr (std::is_same<T, double>::value)
+    {
+        if ( ( packa == 'P' || packa == 'p' ) && ( packb == 'P' || packb == 'p' ) )
+        {
+            // Reorder A
+            char identifierA = 'A';
+            gtint_t bufSizeA = dgemm_pack_get_size_blis_impl( &identifierA,
+                                                     &m,
+                                                     &n,
+                                                     &k );
+
+            double* aBuffer = (double*) bli_malloc_user( bufSizeA, &err );
+            dgemm_pack_blis_impl( &identifierA,
+                         &transa,
+                         &m,
+                         &n,
+                         &k,
+                         &unit_alpha,
+                         ap,
+                         &lda,
+                         aBuffer );
+
+            // Reorder B
+            char identifierB = 'B';
+            gtint_t bufSizeB = dgemm_pack_get_size_blis_impl( &identifierB,
+                                                     &m,
+                                                     &n,
+                                                     &k );
+
+            double* bBuffer = (double*) bli_malloc_user( bufSizeB, &err );
+            dgemm_pack_blis_impl( &identifierB,
+                         &transb,
+                         &m,
+                         &n,
+                         &k,
+                         alpha,
+                         bp,
+                         &ldb,
+                         bBuffer );
+
+            dgemm_compute_blis_impl( &packa, &packb, &m, &n, &k, aBuffer, &lda, bBuffer, &ldb, beta, cp, &ldc );
+
+            bli_free_user( aBuffer );
+            bli_free_user( bBuffer );
+        }
+        else if ( ( packa == 'P' || packa == 'p' ) )
+        {
+            // Reorder A
+            char identifierA = 'A';
+            gtint_t bufSizeA = dgemm_pack_get_size_blis_impl( &identifierA,
+                                                     &m,
+                                                     &n,
+                                                     &k );
+
+            double* aBuffer = (double*) bli_malloc_user( bufSizeA, &err );
+            dgemm_pack_blis_impl( &identifierA,
+                         &transa,
+                         &m,
+                         &n,
+                         &k,
+                         alpha,
+                         ap,
+                         &lda,
+                         aBuffer );
+
+            dgemm_compute_blis_impl( &packa, &transb, &m, &n, &k, aBuffer, &lda, bp, &ldb, beta, cp, &ldc );
+            bli_free_user( aBuffer );
+        }
+        else if ( ( packb == 'P' || packb == 'p' ) )
+        {
+            // Reorder B
+            char identifierB = 'B';
+            gtint_t bufSizeB = dgemm_pack_get_size_blis_impl( &identifierB,
+                                                     &m,
+                                                     &n,
+                                                     &k );
+
+            double* bBuffer = (double*) bli_malloc_user( bufSizeB, &err );
+            dgemm_pack_blis_impl( &identifierB,
+                         &transb,
+                         &m,
+                         &n,
+                         &k,
+                         alpha,
+                         bp,
+                         &ldb,
+                         bBuffer );
+
+            dgemm_compute_blis_impl( &transa, &packb, &m, &n, &k, ap, &lda, bBuffer, &ldb, beta, cp, &ldc );
+            bli_free_user( bBuffer );
+        }
+        else
+        {
+            dgemm_compute_blis_impl( &transa, &transb, &m, &n, &k, ap, &lda, bp, &ldb, beta, cp, &ldc );
+        }
+    }
+    else
+        throw std::runtime_error("Error in testsuite/level3/gemm.h: Invalid typename in gemm_compute_blis_impl().");
 }
 
 template<typename T>
@@ -488,7 +693,11 @@ static void gemm_compute( char storage, char transa, char transb, char packa, ch
         gemm_compute_<T>( transa, transb, packa, packb, m, n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
     else
         throw std::runtime_error("Error in testsuite/level3/gemm_compute.h: BLAS interface cannot be tested for row-major order.");
-
+#elif TEST_BLAS_BLIS_IMPL
+    if( storage == 'c' || storage == 'C' )
+        gemm_compute_blis_impl<T>( transa, transb, packa, packb, m, n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
+    else
+        throw std::runtime_error("Error in testsuite/level3/gemm_compute.h: BLAS_BLIS_IMPL interface cannot be tested for row-major order.");
 #elif TEST_CBLAS
     cblas_gemm_compute<T>( storage, transa, transb, packa, packb, m, n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
 #elif TEST_BLIS_TYPED

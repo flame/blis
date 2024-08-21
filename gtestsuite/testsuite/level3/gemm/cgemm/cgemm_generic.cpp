@@ -132,7 +132,7 @@ INSTANTIATE_TEST_SUITE_P(
         cgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
-#ifndef TEST_BLAS
+#ifndef TEST_BLAS_LIKE
                              ,'r'
 #endif
             ),                                                              // storage format
@@ -157,7 +157,7 @@ INSTANTIATE_TEST_SUITE_P(
         cgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
-#ifndef TEST_BLAS
+#ifndef TEST_BLAS_LIKE
                              ,'r'
 #endif
             ),                                                              // storage format
@@ -182,7 +182,7 @@ INSTANTIATE_TEST_SUITE_P(
         cgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
-#ifndef TEST_BLAS
+#ifndef TEST_BLAS_LIKE
                              ,'r'
 #endif
             ),                                                              // storage format
@@ -205,7 +205,7 @@ INSTANTIATE_TEST_SUITE_P(
         cgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
-#ifndef TEST_BLAS
+#ifndef TEST_BLAS_LIKE
                              ,'r'
 #endif
             ),                                                              // storage format
@@ -232,7 +232,7 @@ INSTANTIATE_TEST_SUITE_P(
         cgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
-#ifndef TEST_BLAS
+#ifndef TEST_BLAS_LIKE
                              ,'r'
 #endif
             ),                                                              // storage format
@@ -255,7 +255,7 @@ INSTANTIATE_TEST_SUITE_P(
         cgemmGeneric,
         ::testing::Combine(
             ::testing::Values('c'
-#ifndef TEST_BLAS
+#ifndef TEST_BLAS_LIKE
                              ,'r'
 #endif
             ),                                                              // storage format

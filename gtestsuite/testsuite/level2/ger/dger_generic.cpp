@@ -97,7 +97,7 @@ INSTANTIATE_TEST_SUITE_P(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
             // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
-#ifndef TEST_BLAS
+#ifndef TEST_BLAS_LIKE
                              , 'r'
 #endif
             ),
@@ -159,7 +159,7 @@ INSTANTIATE_TEST_SUITE_P(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
             // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
-#ifndef TEST_BLAS
+#ifndef TEST_BLAS_LIKE
                              , 'r'
 #endif
             ),
@@ -193,7 +193,7 @@ INSTANTIATE_TEST_SUITE_P(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
             // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
-#ifndef TEST_BLAS
+#ifndef TEST_BLAS_LIKE
                              , 'r'
 #endif
             ),
@@ -225,7 +225,7 @@ INSTANTIATE_TEST_SUITE_P(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
             // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
-#ifndef TEST_BLAS
+#ifndef TEST_BLAS_LIKE
                              , 'r'
 #endif
             ),
@@ -256,7 +256,7 @@ INSTANTIATE_TEST_SUITE_P(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
             // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
-#ifndef TEST_BLAS
+#ifndef TEST_BLAS_LIKE
                              , 'r'
 #endif
             ),
@@ -287,7 +287,7 @@ INSTANTIATE_TEST_SUITE_P(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
             // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
-#ifndef TEST_BLAS
+#ifndef TEST_BLAS_LIKE
                              , 'r'
 #endif
             ),

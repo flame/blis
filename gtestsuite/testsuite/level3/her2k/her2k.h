@@ -78,6 +78,18 @@ static void her2k_(char uplo, char transa, gtint_t n, gtint_t k, T* alpha,
 }
 
 template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
+static void her2k_blis_impl(char uplo, char transa, gtint_t n, gtint_t k, T* alpha,
+                    T* ap, gtint_t lda, T* bp, gtint_t ldb, RT* beta, T* cp, gtint_t ldc )
+{
+    if constexpr (std::is_same<T, scomplex>::value)
+        cher2k_blis_impl( &uplo, &transa, &n, &k, alpha, ap, &lda, bp, &ldb, beta, cp, &ldc );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        zher2k_blis_impl( &uplo, &transa, &n, &k, alpha, ap, &lda, bp, &ldb, beta, cp, &ldc );
+    else
+        throw std::runtime_error("Error in testsuite/level3/her2k.h: Invalid typename in her2k_blis_impl().");
+}
+
+template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
 static void cblas_her2k(char storage, char uplo, char transa,
     gtint_t n, gtint_t k, T* alpha, T* ap, gtint_t lda,
     T* bp, gtint_t ldb, RT* beta, T* cp, gtint_t ldc)
@@ -186,7 +198,11 @@ static void her2k( char storage, char uplo, char transa, char transb, gtint_t n,
         her2k_<T>( uplo, transa, n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
     else
         throw std::runtime_error("Error in testsuite/level3/her2k.h: BLAS interface cannot be tested for row-major order.");
-
+#elif TEST_BLAS_BLIS_IMPL
+    if( storage == 'c' || storage == 'C' )
+        her2k_blis_impl<T>( uplo, transa, n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
+    else
+        throw std::runtime_error("Error in testsuite/level3/her2k.h: BLAS_BLIS_IMPL interface cannot be tested for row-major order.");
 #elif TEST_CBLAS
     cblas_her2k<T>( storage, uplo, transa, n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
 #elif TEST_BLIS_TYPED

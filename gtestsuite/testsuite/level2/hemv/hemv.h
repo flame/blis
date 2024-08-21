@@ -72,6 +72,18 @@ static void hemv_( char uploa, gtint_t n, T* alpha, T* ap, gtint_t lda,
 }
 
 template<typename T>
+static void hemv_blis_impl( char uploa, gtint_t n, T* alpha, T* ap, gtint_t lda,
+                    T* xp, gtint_t incx, T* beta, T* yp, gtint_t incy )
+{
+    if constexpr (std::is_same<T, scomplex>::value)
+        chemv_blis_impl( &uploa, &n, alpha, ap, &lda, xp, &incx, beta, yp, &incy );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        zhemv_blis_impl( &uploa, &n, alpha, ap, &lda, xp, &incx, beta, yp, &incy );
+    else
+        throw std::runtime_error("Error in testsuite/level2/hemv.h: Invalid typename in hemv_blis_impl().");
+}
+
+template<typename T>
 static void cblas_hemv( char storage, char uploa, gtint_t n, T* alpha,
     T* ap, gtint_t lda, T* xp, gtint_t incx, T* beta, T* yp, gtint_t incy )
 {
@@ -167,6 +179,11 @@ static void hemv( char storage, char uploa, char conja, char conjx, gtint_t n,
         hemv_<T>( uploa, n, alpha, ap, lda, xp, incx, beta, yp, incy );
     else
         throw std::runtime_error("Error in testsuite/level2/hemv.h: BLAS interface cannot be tested for row-major order.");
+#elif TEST_BLAS_BLIS_IMPL
+    if( storage == 'c' || storage == 'C' )
+        hemv_blis_impl<T>( uploa, n, alpha, ap, lda, xp, incx, beta, yp, incy );
+    else
+        throw std::runtime_error("Error in testsuite/level2/hemv.h: BLAS_BLIS_IMPL interface cannot be tested for row-major order.");
 #elif TEST_CBLAS
     cblas_hemv<T>( storage, uploa, n, alpha, ap, lda, xp, incx, beta, yp, incy );
 #elif TEST_BLIS_TYPED

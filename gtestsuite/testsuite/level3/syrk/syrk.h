@@ -77,6 +77,22 @@ static void syrk_(char uplo, char transa, gtint_t n, gtint_t k, T* alpha,
 }
 
 template<typename T>
+static void syrk_blis_impl(char uplo, char transa, gtint_t n, gtint_t k, T* alpha,
+                    T* ap, gtint_t lda,  T* beta, T* cp, gtint_t ldc )
+{
+    if constexpr (std::is_same<T, float>::value)
+        ssyrk_blis_impl( &uplo, &transa, &n, &k, alpha, ap, &lda, beta, cp, &ldc );
+    else if constexpr (std::is_same<T, double>::value)
+        dsyrk_blis_impl( &uplo, &transa, &n, &k, alpha, ap, &lda, beta, cp, &ldc );
+    else if constexpr (std::is_same<T, scomplex>::value)
+        csyrk_blis_impl( &uplo, &transa, &n, &k, alpha, ap, &lda, beta, cp, &ldc );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        zsyrk_blis_impl( &uplo, &transa, &n, &k, alpha, ap, &lda, beta, cp, &ldc );
+    else
+        throw std::runtime_error("Error in testsuite/level3/syrk.h: Invalid typename in syrk_blis_impl().");
+}
+
+template<typename T>
 static void cblas_syrk(char storage, char uplo, char trnsa,
     gtint_t n, gtint_t k, T* alpha, T* ap, gtint_t lda,
     T* beta, T* cp, gtint_t ldc)
@@ -176,6 +192,11 @@ static void syrk( char storage, char uplo, char transa, gtint_t n, gtint_t k,
         syrk_<T>( uplo, transa, n, k, alpha, ap, lda, beta, cp, ldc );
     else
         throw std::runtime_error("Error in testsuite/level3/syrk.h: BLAS interface cannot be tested for row-major order.");
+#elif TEST_BLAS_BLIS_IMPL
+    if( storage == 'c' || storage == 'C' )
+        syrk_blis_impl<T>( uplo, transa, n, k, alpha, ap, lda, beta, cp, ldc );
+    else
+        throw std::runtime_error("Error in testsuite/level3/syrk.h: BLAS_BLIS_IMPL interface cannot be tested for row-major order.");
 #elif TEST_CBLAS
     cblas_syrk<T>( storage, uplo, transa, n, k, alpha, ap, lda, beta, cp, ldc );
 #elif TEST_BLIS_TYPED

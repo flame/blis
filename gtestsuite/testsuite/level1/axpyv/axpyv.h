@@ -67,6 +67,21 @@ static void axpyv_(gtint_t n, T alpha, T* x, gtint_t incx, T* y, gtint_t incy)
 }
 
 template<typename T>
+static void axpyv_blis_impl(gtint_t n, T alpha, T* x, gtint_t incx, T* y, gtint_t incy)
+{
+    if constexpr (std::is_same<T, float>::value)
+        saxpy_blis_impl( &n, &alpha, x, &incx, y, &incy );
+    else if constexpr (std::is_same<T, double>::value)
+        daxpy_blis_impl( &n, &alpha, x, &incx, y, &incy );
+    else if constexpr (std::is_same<T, scomplex>::value)
+        caxpy_blis_impl( &n, &alpha, x, &incx, y, &incy );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        zaxpy_blis_impl( &n, &alpha, x, &incx, y, &incy );
+    else
+        throw std::runtime_error("Error in testsuite/level1/axpyv.h: Invalid typename in axpyv_blis_impl().");
+}
+
+template<typename T>
 static void cblas_axpyv(gtint_t n, T alpha, T* x, gtint_t incx, T* y, gtint_t incy)
 {
     if constexpr (std::is_same<T, float>::value)
@@ -127,6 +142,8 @@ static void axpyv(char conj_x, gtint_t n, T alpha, T* x, gtint_t incx, T* y, gti
 
 #ifdef TEST_BLAS
     axpyv_<T>( n, alpha, x, incx, y, incy );
+#elif TEST_BLAS_BLIS_IMPL
+    axpyv_blis_impl<T>( n, alpha, x, incx, y, incy );
 #elif TEST_CBLAS
     cblas_axpyv<T>( n, alpha, x, incx, y, incy );
 #elif TEST_BLIS_TYPED

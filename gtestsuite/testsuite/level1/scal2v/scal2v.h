@@ -97,8 +97,10 @@ static void scal2v(char conjx, gtint_t n, T alpha, T* x, gtint_t incx, T* y, gti
 
 #ifdef TEST_BLAS
     throw std::runtime_error("Error in testsuite/level1/scal2v.h: BLAS interface is not available.");
+#elif TEST_BLAS_BLIS_IMPL
+    throw std::runtime_error("Error in testsuite/level1/scal2v.h: BLAS_BLIS_IMPL interface is not available.");
 #elif TEST_CBLAS
-    throw std::runtime_error("Error in testsuite/level1/scal2v.h: BLAS interface is not available.");
+    throw std::runtime_error("Error in testsuite/level1/scal2v.h: CBLAS interface is not available.");
 #elif TEST_BLIS_TYPED
     typed_scal2v<T>( conjx, n, alpha, x, incx, y, incy );
 #else

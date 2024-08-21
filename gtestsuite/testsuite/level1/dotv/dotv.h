@@ -111,6 +111,64 @@ static void dotc_(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy, T* rho) {
 }
 
 template<typename T>
+static void dotv_blis_impl(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy, T* rho) {
+    if constexpr (std::is_same<T, float>::value)
+        *rho = sdot_blis_impl(&n, x, &incx, y, &incy);
+    else if constexpr (std::is_same<T, double>::value)
+        *rho = ddot_blis_impl( &n, x, &incx, y, &incy );
+    else if constexpr (std::is_same<T, scomplex>::value)
+    #ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
+        *rho = cdotu_blis_impl(&n, x, &incx, y, &incy);
+    #else
+        cdotu_blis_impl(rho, &n, x, &incx, y, &incy);
+    #endif
+    else if constexpr (std::is_same<T, dcomplex>::value)
+    #ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
+        *rho = zdotu_blis_impl(&n, x, &incx, y, &incy);
+    #else
+        zdotu_blis_impl(rho, &n, x, &incx, y, &incy);
+    #endif
+    else
+        throw std::runtime_error("Error in testsuite/level1/dotv.h: Invalid typename in dotv_blis_impl().");
+}
+
+template<typename T>
+static void dotu_blis_impl(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy, T* rho) {
+    if constexpr (std::is_same<T, scomplex>::value)
+    #ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
+        *rho = cdotu_blis_impl(&n, x, &incx, y, &incy);
+    #else
+        cdotu_blis_impl(rho, &n, x, &incx, y, &incy);
+    #endif
+    else if constexpr (std::is_same<T, dcomplex>::value)
+    #ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
+        *rho = zdotu_blis_impl(&n, x, &incx, y, &incy);
+    #else
+        zdotu_blis_impl(rho, &n, x, &incx, y, &incy);
+    #endif
+    else
+        throw std::runtime_error("Error in testsuite/level1/dotv.h: Invalid typename in dotu_blis_impl().");
+}
+
+template<typename T>
+static void dotc_blis_impl(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy, T* rho) {
+    if constexpr (std::is_same<T, scomplex>::value)
+    #ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
+        *rho = cdotc_blis_impl(&n, x, &incx, y, &incy);
+    #else
+        cdotc_blis_impl(rho, &n, x, &incx, y, &incy);
+    #endif
+    else if constexpr (std::is_same<T, dcomplex>::value)
+    #ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
+        *rho = zdotc_blis_impl(&n, x, &incx, y, &incy);
+    #else
+        zdotc_blis_impl(rho, &n, x, &incx, y, &incy);
+    #endif
+    else
+        throw std::runtime_error("Error in testsuite/level1/dotv.h: Invalid typename in dotc_blis_impl().");
+}
+
+template<typename T>
 static void cblas_dotv(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy, T* rho) {
     if constexpr (std::is_same<T, float>::value)
         *rho = cblas_sdot( n, x, incx, y, incy );
@@ -204,6 +262,16 @@ static void dotv(char conjx, char conjy, gtint_t n,
             dotc_<T>(n, x, incx, y, incy, rho);
         else
             dotu_<T>(n, x, incx, y, incy, rho);
+    }
+#elif TEST_BLAS_BLIS_IMPL
+    if constexpr ( testinghelpers::type_info<T>::is_real )
+        dotv_blis_impl<T>(n, x, incx, y, incy, rho);
+    else if constexpr ( testinghelpers::type_info<T>::is_complex )
+    {
+        if ( testinghelpers::chkconj(conjx) )
+            dotc_blis_impl<T>(n, x, incx, y, incy, rho);
+        else
+            dotu_blis_impl<T>(n, x, incx, y, incy, rho);
     }
 #elif TEST_CBLAS
     if constexpr ( testinghelpers::type_info<T>::is_real )

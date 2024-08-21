@@ -70,6 +70,20 @@ static RT nrm2_(gtint_t n, T* x, gtint_t incx){
 }
 
 template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
+static RT nrm2_blis_impl(gtint_t n, T* x, gtint_t incx){
+    if constexpr (std::is_same<T, float>::value)
+        return snrm2_blis_impl( &n, x, &incx );
+    else if constexpr (std::is_same<T, double>::value)
+        return dnrm2_blis_impl( &n, x, &incx );
+    else if constexpr (std::is_same<T, scomplex>::value)
+        return scnrm2_blis_impl( &n, x, &incx );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        return dznrm2_blis_impl( &n, x, &incx );
+    else
+      throw std::runtime_error("Error in testsuite/level1/nrm2.h: Invalid typename in nrm2_blis_impl().");
+}
+
+template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
 static RT cblas_nrm2(gtint_t n, T* x, gtint_t incx){
     if constexpr (std::is_same<T, float>::value)
         return cblas_snrm2( n, x, incx );
@@ -120,6 +134,8 @@ static RT nrm2(gtint_t n, T* x, gtint_t incx)
 
 #ifdef TEST_BLAS
     return nrm2_<T>(n, x, incx);
+#elif TEST_BLAS_BLIS_IMPL
+    return nrm2_blis_impl<T>(n, x, incx);
 #elif TEST_CBLAS
     return cblas_nrm2<T>(n, x, incx);
 #elif TEST_BLIS_TYPED

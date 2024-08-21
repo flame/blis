@@ -132,10 +132,10 @@ endif()
 # Use TEST_INTERFACE to set which interface, supported by BLIS is meant to be tested.
 set(TEST_INTERFACE "BLAS" CACHE STRING "Interface of BLIS that is being tested.")
 # Set the possible values of interfaces for cmake-gui
-set_property(CACHE TEST_INTERFACE PROPERTY STRINGS "BLAS" "CBLAS" "BLIS_TYPED")
-if( NOT ((TEST_INTERFACE STREQUAL "BLAS") OR (TEST_INTERFACE STREQUAL "CBLAS") OR (TEST_INTERFACE STREQUAL "BLIS_TYPED")) )
+set_property(CACHE TEST_INTERFACE PROPERTY STRINGS "BLAS" "BLAS_BLIS_IMPL" "CBLAS" "BLIS_TYPED")
+if( NOT ((TEST_INTERFACE STREQUAL "BLAS") OR (TEST_INTERFACE STREQUAL "BLAS_BLIS_IMPL") OR (TEST_INTERFACE STREQUAL "CBLAS") OR (TEST_INTERFACE STREQUAL "BLIS_TYPED")) )
     message(FATAL_ERROR "TEST_INTERFACE option ${TEST_INTERFACE} is not supported. Please use on of the following options \
-            during CMake invokation: BLAS, CBLAS, BLIS_TYPED")
+            during CMake invokation: BLAS, BLAS_BLIS_IMPL, CBLAS, BLIS_TYPED")
 endif()
 
 # Use BLIS_ELEMENT_TYPE to set whether the elements of any matrix/vector tested are integers or floating point values.

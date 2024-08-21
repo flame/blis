@@ -68,6 +68,21 @@ static void axpbyv_(gtint_t n, T alpha, T* x, gtint_t incx, T beta, T* y, gtint_
 }
 
 template<typename T>
+static void axpbyv_blis_impl(gtint_t n, T alpha, T* x, gtint_t incx, T beta, T* y, gtint_t incy)
+{
+    if constexpr (std::is_same<T, float>::value)
+        saxpby_blis_impl( &n, &alpha, x, &incx, &beta, y, &incy );
+    else if constexpr (std::is_same<T, double>::value)
+        daxpby_blis_impl( &n, &alpha, x, &incx, &beta, y, &incy );
+    else if constexpr (std::is_same<T, scomplex>::value)
+        caxpby_blis_impl( &n, &alpha, x, &incx, &beta, y, &incy );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        zaxpby_blis_impl( &n, &alpha, x, &incx, &beta, y, &incy );
+    else
+        throw std::runtime_error("Error in testsuite/level1/axpbyv.h: Invalid typename in axpbyv_blis_impl().");
+}
+
+template<typename T>
 static void cblas_axpbyv(gtint_t n, T alpha, T* x, gtint_t incx, T beta, T* y, gtint_t incy)
 {
     if constexpr (std::is_same<T, float>::value)
@@ -129,6 +144,8 @@ static void axpbyv(char conj_x, gtint_t n, T alpha, T* x, gtint_t incx, T beta, 
 
 #ifdef TEST_BLAS
     axpbyv_<T>( n, alpha, x, incx, beta, y, incy );
+#elif TEST_BLAS_BLIS_IMPL
+    axpbyv_blis_impl<T>( n, alpha, x, incx, beta, y, incy );
 #elif TEST_CBLAS
     cblas_axpbyv<T>( n, alpha, x, incx, beta, y, incy );
 #elif TEST_BLIS_TYPED

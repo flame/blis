@@ -174,8 +174,10 @@ static void trmm3( char storage, char side, char uploa, char transa, char diaga,
 
 #ifdef TEST_BLAS
     throw std::runtime_error("Error in testsuite/level3/trmm3.h: BLAS interface is not available.");
+#elif TEST_BLAS_BLIS_IMPL
+    throw std::runtime_error("Error in testsuite/level3/trmm3.h: BLAS_BLIS_IMPL interface is not available.");
 #elif TEST_CBLAS
-    throw std::runtime_error("Error in testsuite/level3/trmm3.h: BLAS interface is not available.");
+    throw std::runtime_error("Error in testsuite/level3/trmm3.h: CBLAS interface is not available.");
 #elif TEST_BLIS_TYPED
     typed_trmm3<T>( storage, side, uploa, transa, diaga, transb, m, n, alpha,
                                             ap, lda, bp, ldb, beta, c, ldc );

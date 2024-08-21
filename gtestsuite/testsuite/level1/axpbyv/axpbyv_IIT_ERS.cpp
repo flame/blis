@@ -46,7 +46,7 @@ TYPED_TEST_SUITE(axpbyv_IIT_ERS, TypeParam); // Defining individual testsuites b
 // Adding namespace to get default parameters(valid case) from testinghelpers/common/wrong_input_helpers.h.
 using namespace testinghelpers::IIT;
 
-#if defined(TEST_BLAS) || defined(TEST_CBLAS)
+#if defined(TEST_BLAS_LIKE) || defined(TEST_CBLAS)
 /*
     Early Return Scenarios(ERS) :
     The early return cases for ?axpbyv are not defined under BLAS compliance.

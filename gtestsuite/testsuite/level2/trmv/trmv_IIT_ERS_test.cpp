@@ -89,7 +89,7 @@ TYPED_TEST(trmv_IIT_ERS, invalid_storage)
 
 #endif
 
-#if defined(TEST_BLAS) || defined(TEST_CBLAS)
+#if defined(TEST_BLAS_LIKE) || defined(TEST_CBLAS)
 
 /*
     Incorrect Input Testing(IIT)

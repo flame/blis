@@ -85,6 +85,22 @@ static void gemmt_(char uplo, char transa, char transb, gtint_t n, gtint_t k, T*
 }
 
 template<typename T>
+static void gemmt_blis_impl(char uplo, char transa, char transb, gtint_t n, gtint_t k, T* alpha,
+                    T* ap, gtint_t lda,  T* bp, gtint_t ldb, T* beta, T* cp, gtint_t ldc )
+{
+    if constexpr (std::is_same<T, float>::value)
+        sgemmt_blis_impl( &uplo, &transa, &transb, &n, &k, alpha, ap, &lda, bp, &ldb, beta, cp, &ldc );
+    else if constexpr (std::is_same<T, double>::value)
+        dgemmt_blis_impl( &uplo, &transa, &transb, &n, &k, alpha, ap, &lda, bp, &ldb, beta, cp, &ldc );
+    else if constexpr (std::is_same<T, scomplex>::value)
+        cgemmt_blis_impl( &uplo, &transa, &transb, &n, &k, alpha, ap, &lda, bp, &ldb, beta, cp, &ldc );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        zgemmt_blis_impl( &uplo, &transa, &transb, &n, &k, alpha, ap, &lda, bp, &ldb, beta, cp, &ldc );
+    else
+        throw std::runtime_error("Error in testsuite/level3/gemmt.h: Invalid typename in gemmt_blis_impl().");
+}
+
+template<typename T>
 static void cblas_gemmt(char storage, char uplo, char transa, char transb,
     gtint_t n, gtint_t k, T* alpha, T* ap, gtint_t lda,
     T* bp, gtint_t ldb, T* beta, T* cp, gtint_t ldc)
@@ -204,7 +220,11 @@ static void gemmt( char storage, char uplo, char transa, char transb, gtint_t n,
         gemmt_<T>( uplo, transa, transb, n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
     else
         throw std::runtime_error("Error in testsuite/level3/gemmt.h: BLAS interface cannot be tested for row-major order.");
-
+#elif TEST_BLAS_BLIS_IMPL
+    if( storage == 'c' || storage == 'C' )
+        gemmt_blis_impl<T>( uplo, transa, transb, n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
+    else
+        throw std::runtime_error("Error in testsuite/level3/gemmt.h: BLAS_BLIS_IMPL interface cannot be tested for row-major order.");
 #elif TEST_CBLAS
     cblas_gemmt<T>( storage, uplo, transa, transb, n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
 #elif TEST_BLIS_TYPED

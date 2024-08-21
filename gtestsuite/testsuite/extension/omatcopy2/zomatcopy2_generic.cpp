@@ -89,7 +89,7 @@ TEST_P( zomatcopy2Generic, API )
     test_omatcopy2<T>( storage, trans, m, n, alpha, lda_inc, stridea, ldb_inc, strideb, thresh, is_memory_test );
 }
 
-#if defined(TEST_BLAS) && defined(REF_IS_MKL)
+#if defined(TEST_BLAS_LIKE) && defined(REF_IS_MKL)
 // Black box testing for generic and main use of zomatcopy2.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,

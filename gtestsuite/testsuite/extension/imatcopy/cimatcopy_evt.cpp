@@ -87,7 +87,7 @@ TEST_P( cimatcopyEVT, API )
     test_imatcopy<T>( storage, trans, m, n, alpha, lda_inc, ldb_inc, thresh, false, is_nan_inf_test, exval );
 }
 
-#if defined(TEST_BLAS) && (defined(REF_IS_MKL) || defined(REF_IS_OPENBLAS))
+#if defined(TEST_BLAS_LIKE) && (defined(REF_IS_MKL) || defined(REF_IS_OPENBLAS))
 
 static float AOCL_NAN = std::numeric_limits<float>::quiet_NaN();
 static float AOCL_INF = std::numeric_limits<float>::infinity();

@@ -63,6 +63,18 @@ static void her_( char uploa, gtint_t n, Tr* alpha, T* xp, gtint_t incx,
 }
 
 template<typename T, typename Tr>
+static void her_blis_impl( char uploa, gtint_t n, Tr* alpha, T* xp, gtint_t incx,
+                                                  T* ap, gtint_t lda )
+{
+    if constexpr (std::is_same<T, scomplex>::value)
+        cher_blis_impl( &uploa, &n, alpha, xp, &incx, ap, &lda );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        zher_blis_impl( &uploa, &n, alpha, xp, &incx, ap, &lda );
+    else
+        throw std::runtime_error("Error in testsuite/level2/her.h: Invalid typename in her_blis_impl().");
+}
+
+template<typename T, typename Tr>
 static void cblas_her( char storage, char uploa, gtint_t n, Tr* alpha,
                             T* xp, gtint_t incx, T* ap, gtint_t lda )
 {
@@ -144,6 +156,11 @@ static void her( char storage, char uploa, char conj_x, gtint_t n,
         her_<T>( uploa, n, alpha, xp, incx, ap, lda );
     else
         throw std::runtime_error("Error in testsuite/level2/her.h: BLAS interface cannot be tested for row-major order.");
+#elif TEST_BLAS_BLIS_IMPL
+    if( storage == 'c' || storage == 'C' )
+        her_blis_impl<T>( uploa, n, alpha, xp, incx, ap, lda );
+    else
+        throw std::runtime_error("Error in testsuite/level2/her.h: BLAS_BLIS_IMPL interface cannot be tested for row-major order.");
 #elif TEST_CBLAS
     cblas_her<T>( storage, uploa, n, alpha, xp, incx, ap, lda );
 #elif TEST_BLIS_TYPED

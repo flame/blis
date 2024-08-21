@@ -105,6 +105,8 @@ static void dotxv( char conjx, char conjy, gtint_t n, T* alpha,
 
 #ifdef TEST_BLAS
     throw std::runtime_error("Error in testsuite/level1/dotxv.h: BLAS interface is not available.");
+#elif TEST_BLAS_BLIS_IMPL
+    throw std::runtime_error("Error in testsuite/level1/dotxv.h: BLAS_BLIS_IMPL interface is not available.");
 #elif TEST_CBLAS
     throw std::runtime_error("Error in testsuite/level1/dotxv.h: CBLAS interface is not available.");
 #elif TEST_BLIS_TYPED
