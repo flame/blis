@@ -6,6 +6,6 @@ includedir=@includedir@
 Name: BLIS
 Description: BLAS-like Library Instantiation Software Framework
 Version: @PACKAGE_VERSION@
-Libs: -L${libdir} -lblis
+Libs: -L${libdir} -l@AOCLLIB@
 Libs.private: @LDFLAGS@
 Cflags: -I${includedir}/blis

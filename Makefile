@@ -1122,6 +1122,13 @@ else
 	               $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)/
 endif
 
+# BLIS library in pkg-configure blis.pc.in file.
+ifeq ($(THREADING_MODEL),off)
+AOCLLIB            := blis
+else
+AOCLLIB            := blis-mt
+endif
+
 $(PC_SHARE_DIR_INST):  $(PC_IN_FILE)
 	$(MKDIR) $(@)
 ifeq ($(ENABLE_VERBOSE),no)
@@ -1129,6 +1136,7 @@ ifeq ($(ENABLE_VERBOSE),no)
 endif
 	$(shell cat "$(PC_IN_FILE)" \
 	| sed -e "s#@PACKAGE_VERSION@#$(VERSION)#g" \
+	| sed -e "s#@AOCLLIB@#$(AOCLLIB)#g" \
 	| sed -e "s#@prefix@#$(prefix)#g" \
 	| sed -e "s#@exec_prefix@#$(exec_prefix)#g" \
 	| sed -e "s#@libdir@#$(libdir)#g" \
