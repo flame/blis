@@ -971,8 +971,8 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                                     ref_float, comp_float - ref_float); \
                     fflush( fout ); \
                 } \
-                    printf("failure, m: %ld, n: %ld, k: %ld, computed:%f, ref:%f, diff:%f\n", i, j, k, \
-                            comp_float, ref_float, comp_float-ref_float); \
+                    printf("failure, m_index: %ld, n_index: %ld, k: %ld, computed:%f, ref:%f," \
+                            "diff:%f\n", i, j, k, comp_float, ref_float, comp_float-ref_float); \
                 goto cleanup_acc; \
             } \
         } \
