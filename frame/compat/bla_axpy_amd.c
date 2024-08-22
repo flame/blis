@@ -258,7 +258,7 @@ void saxpy_
  float*   y, const f77_int* incy
  )
 {
-  saxpy_blis_impl( n, alpha, x, incx, y, incy ) ; 
+  saxpy_blis_impl( n, alpha, x, incx, y, incy ) ;
 }
 #endif
 
@@ -409,7 +409,7 @@ void daxpy_blis_impl
 
     _Pragma("omp parallel num_threads(nt)")
     {
-        dim_t start, end, length; 
+        dim_t start, end, length;
         thrinfo_t thrinfo_vec;
 
         // The block size is the minimum factor, whose multiple will ensure that only
@@ -471,7 +471,7 @@ void daxpy_
  double*   y, const f77_int* incy
  )
 {
-  daxpy_blis_impl( n, alpha, x, incx, y, incy ) ; 
+  daxpy_blis_impl( n, alpha, x, incx, y, incy ) ;
 }
 #endif
 
@@ -588,7 +588,7 @@ void caxpy_
  scomplex*   y, const f77_int* incy
  )
 {
-  caxpy_blis_impl( n, alpha, x, incx, y, incy ) ; 
+  caxpy_blis_impl( n, alpha, x, incx, y, incy ) ;
 }
 #endif
 
@@ -734,18 +734,18 @@ void zaxpy_blis_impl
           (dcomplex*)alpha,
           x0, incx0,
           y0, incy0,
-          NULL
+          cntx
         );
 
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
         return;
-    
+
 #ifdef BLIS_ENABLE_OPENMP
     }
 
     _Pragma("omp parallel num_threads(nt)")
     {
-        dim_t start, end, length; 
+        dim_t start, end, length;
         thrinfo_t thread;
 
         // The factor by which the size should be a multiple during thread partition. The main loop of the kernel can handle 32 elements at a time hence 32 is selected for block_size.
@@ -805,6 +805,6 @@ void zaxpy_
  dcomplex*   y, const f77_int* incy
  )
 {
-  zaxpy_blis_impl( n, alpha, x, incx, y, incy ) ; 
+  zaxpy_blis_impl( n, alpha, x, incx, y, incy ) ;
 }
 #endif

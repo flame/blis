@@ -337,7 +337,7 @@ void daxpby_blis_impl
         cntx = bli_gks_query_cntx();
 
         // Query the context for the kernel function pointers for daxpbyv
-        axpbyv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_FLOAT, BLIS_AXPBYV_KER, cntx);
+        axpbyv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DOUBLE, BLIS_AXPBYV_KER, cntx);
     }
 
     // Call the function based on the function pointer assigned above
@@ -470,7 +470,7 @@ void caxpby_blis_impl
         cntx = bli_gks_query_cntx();
 
         // Query the context for the kernel function pointers for caxpbyv
-        axpbyv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_FLOAT, BLIS_AXPBYV_KER, cntx);
+        axpbyv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_SCOMPLEX, BLIS_AXPBYV_KER, cntx);
     }
 
     // Call the function based on the function pointer assigned above
@@ -603,7 +603,7 @@ void zaxpby_blis_impl
         cntx = bli_gks_query_cntx();
 
         // Query the context for the kernel function pointers for zaxpbyv
-        axpbyv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_FLOAT, BLIS_AXPBYV_KER, cntx);
+        axpbyv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DCOMPLEX, BLIS_AXPBYV_KER, cntx);
     }
 
     // Call the function based on the function pointer assigned above
