@@ -32,6 +32,9 @@
 
 */
 
+#ifndef BLI_UTIL_API_WRAP_H_
+#define BLI_UTIL_API_WRAP_H_
+
 #ifdef BLIS_ENABLE_BLAS
 
 // file define different formats of BLAS APIs- uppercase with
@@ -322,7 +325,7 @@ BLIS_EXPORT_BLIS scomplex CDOTC(const f77_int* n, const scomplex*   x, const f77
 
 BLIS_EXPORT_BLIS scomplex cdotc(const f77_int* n, const scomplex*   x, const f77_int* incx, const scomplex*   y, const f77_int* incy);
 
-BLIS_EXPORT_BLIS scomplex CDOTC_ (const f77_int* n, const scomplex*   x, const f77_int* incx, const scomplex*   y, const f77_int* incy);
+BLIS_EXPORT_BLIS scomplex CDOTC_(const f77_int* n, const scomplex*   x, const f77_int* incx, const scomplex*   y, const f77_int* incy);
 
 
 
@@ -336,15 +339,15 @@ BLIS_EXPORT_BLIS scomplex CDOTU_(const f77_int* n, const scomplex*   x, const f7
 
 BLIS_EXPORT_BLIS dcomplex ZDOTC(const f77_int* n, const dcomplex*   x, const f77_int* incx, const dcomplex*   y, const f77_int* incy);
 
-BLIS_EXPORT_BLIS dcomplex zdotc (const f77_int* n, const dcomplex*   x, const f77_int* incx, const dcomplex*   y, const f77_int* incy);
+BLIS_EXPORT_BLIS dcomplex zdotc(const f77_int* n, const dcomplex*   x, const f77_int* incx, const dcomplex*   y, const f77_int* incy);
 
-BLIS_EXPORT_BLIS dcomplex ZDOTC_ (const f77_int* n, const dcomplex*   x, const f77_int* incx, const dcomplex*   y, const f77_int* incy);
+BLIS_EXPORT_BLIS dcomplex ZDOTC_(const f77_int* n, const dcomplex*   x, const f77_int* incx, const dcomplex*   y, const f77_int* incy);
 
 
 
 BLIS_EXPORT_BLIS dcomplex ZDOTU(const f77_int* n, const dcomplex*   x, const f77_int* incx, const dcomplex*   y, const f77_int* incy);
 
-BLIS_EXPORT_BLIS dcomplex zdotu (const f77_int* n, const dcomplex*   x, const f77_int* incx, const dcomplex*   y, const f77_int* incy);
+BLIS_EXPORT_BLIS dcomplex zdotu(const f77_int* n, const dcomplex*   x, const f77_int* incx, const dcomplex*   y, const f77_int* incy);
 
 BLIS_EXPORT_BLIS dcomplex ZDOTU_(const f77_int* n, const dcomplex*   x, const f77_int* incx, const dcomplex*   y, const f77_int* incy);
 
@@ -1797,3 +1800,5 @@ BLIS_EXPORT_BLIS void ZOMATCOPY_(f77_char* trans,  f77_int* rows,  f77_int* cols
 #endif
 
 #endif // BLIS_ENABLE_BLAS
+
+#endif // BLI_UTIL_API_WRAP_H_

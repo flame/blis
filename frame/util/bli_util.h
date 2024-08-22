@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,6 +32,9 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+
+#ifndef BLI_UTIL_H_
+#define BLI_UTIL_H_
 
 #include "bli_util_check.h"
 
@@ -68,5 +71,11 @@
 // and without underscore, lowercase without underscore.
 #include "bli_util_api_wrap.h"
 
+// Header file define different formats of BLAS APIs- uppercase with
+// and without underscore, lowercase without underscore.
+#include "bli_util_api_wrap_blis_impl.h"
+
 // Public interface for the progress feature
 #include "bli_util_progress.h"
+
+#endif // BLI_UTIL_H_

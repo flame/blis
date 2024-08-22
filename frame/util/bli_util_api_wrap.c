@@ -779,6 +779,7 @@ void DZGEMM_( const f77_char *transa, const f77_char *transb, const f77_int *m, 
 {
     dzgemm_blis_impl( transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
 }
+
 void DGEMV(const char   *trans,const f77_int *m,const f77_int *n,const double *alpha,const double *a,const f77_int *lda,const double *x,const f77_int *incx,const double *beta,double *y,const f77_int *incy)
 {
     dgemv_blis_impl( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
