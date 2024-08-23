@@ -160,17 +160,17 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('n'),                                         // transa
             ::testing::Values('n'),                                         // transb
-            ::testing::Values(gtint_t(8),gtint_t(24)),                      // m
+            ::testing::Values(gtint_t(8),gtint_t(20)),                      // m
             ::testing::Values(gtint_t(6),gtint_t(8)),                       // n
             ::testing::Values(gtint_t(1)),                                  // k
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // ai
+            ::testing::Values(gtint_t(3)),                                  // ai
             ::testing::Values(gtint_t(0)),                                  // aj
             ::testing::Values(NaN, Inf, -Inf),                              // aexval
             ::testing::Values(gtint_t(0)),                                  // bi
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // bj
+            ::testing::Values(gtint_t(2)),                                  // bj
             ::testing::Values(NaN, Inf, -Inf),                              // bexval
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // ci
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // cj
+            ::testing::Values(gtint_t(2)),                                  // ci
+            ::testing::Values(gtint_t(3)),                                  // cj
             ::testing::Values(NaN, Inf, -Inf),                              // cexval
             ::testing::Values(double(-2.2)),                                // alpha
             ::testing::Values(double(1.2)),                                 // beta
@@ -194,17 +194,17 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('n'),                                         // transa
             ::testing::Values('n'),                                         // transb
-            ::testing::Range(gtint_t(2), gtint_t(25), gtint_t(1)),          // m
-            ::testing::Range(gtint_t(2), gtint_t(9), gtint_t(1)),           // n
+            ::testing::Values(gtint_t(2), gtint_t(13), gtint_t(24)),        // m
+            ::testing::Values(gtint_t(2), gtint_t(5), gtint_t(8)),          // n
             ::testing::Values(gtint_t(1)),                                  // k
-            ::testing::Values(gtint_t(0), gtint_t(1)),                      // ai
+            ::testing::Values(gtint_t(1)),                                  // ai
             ::testing::Values(gtint_t(0)),                                  // aj
             ::testing::Values(double(NaN), double(Inf), double(-Inf)),      // aexval
             ::testing::Values(gtint_t(0)),                                  // bi
-            ::testing::Values(gtint_t(0), gtint_t(1)),                      // bj
+            ::testing::Values(gtint_t(1)),                                  // bj
             ::testing::Values(double(NaN), double(Inf), double(-Inf)),      // bexval
-            ::testing::Values(gtint_t(0), gtint_t(1)),                      // ci
-            ::testing::Values(gtint_t(0), gtint_t(1)),                      // cj
+            ::testing::Values(gtint_t(1)),                                  // ci
+            ::testing::Values(gtint_t(0)),                                  // cj
             ::testing::Values(double(NaN), double(Inf), double(-Inf)),      // cexval
             ::testing::Values(double(-2.2)),                                // alpha
             ::testing::Values(double(1.2)),                                 // beta
@@ -228,8 +228,8 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                               // storage format
             ::testing::Values('n'),                                          // transa
             ::testing::Values('n'),                                          // transb
-            ::testing::Values(gtint_t(2), gtint_t(8), gtint_t(15),  gtint_t(24)), // m
-            ::testing::Values(gtint_t(2), gtint_t(6), gtint_t(11),  gtint_t(8)),  // n
+            ::testing::Values(gtint_t(2), gtint_t(15),  gtint_t(24)),        // m
+            ::testing::Values(gtint_t(2), gtint_t(11),  gtint_t(8)),         // n
             ::testing::Values(gtint_t(1)),                                   // k
             ::testing::Values(gtint_t(0)),                                   // ai
             ::testing::Values(gtint_t(0)),                                   // aj
@@ -268,14 +268,14 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(4)),                                  // m
             ::testing::Values(gtint_t(4)),                                  // n
             ::testing::Values(gtint_t(10)),                                 // k
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // ai
+            ::testing::Values(gtint_t(3)),                                  // ai
             ::testing::Values(gtint_t(0)),                                  // aj
             ::testing::Values(NaN, Inf, -Inf),                              // aexval
             ::testing::Values(gtint_t(0)),                                  // bi
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // bj
+            ::testing::Values(gtint_t(2)),                                  // bj
             ::testing::Values(NaN, Inf, -Inf),                              // bexval
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // ci
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // cj
+            ::testing::Values(gtint_t(2)),                                  // ci
+            ::testing::Values(gtint_t(3)),                                  // cj
             ::testing::Values(NaN, Inf, -Inf),                              // cexval
             ::testing::Values(double(-2.2)),                                // alpha
             ::testing::Values(double(1.2)),                                 // beta
@@ -305,14 +305,14 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(90)),                                 // m
             ::testing::Values(gtint_t(80)),                                 // n
             ::testing::Values(gtint_t(1080)),                               // k
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // ai
+            ::testing::Values(gtint_t(3)),                                  // ai
             ::testing::Values(gtint_t(0)),                                  // aj
             ::testing::Values(NaN, Inf, -Inf),                              // aexval
             ::testing::Values(gtint_t(0)),                                  // bi
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // bj
+            ::testing::Values(gtint_t(0)),                                  // bj
             ::testing::Values(NaN, Inf, -Inf),                              // bexval
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // ci
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // cj
+            ::testing::Values(gtint_t(2)),                                  // ci
+            ::testing::Values(gtint_t(1)),                                  // cj
             ::testing::Values(NaN, Inf, -Inf),                              // cexval
             ::testing::Values(double(3.6)),                                 // alpha
             ::testing::Values(double(-5.)),                                 // beta

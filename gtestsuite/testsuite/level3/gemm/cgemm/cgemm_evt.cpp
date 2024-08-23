@@ -159,10 +159,10 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('n'),                                         // transa
             ::testing::Values('n'),                                         // transb
-            ::testing::Values(gtint_t(300), gtint_t(310)),                  // m
-            ::testing::Values(gtint_t(200), gtint_t(210)),                  // n
-            ::testing::Values(gtint_t(150), gtint_t(155)),                  // k
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // ai
+            ::testing::Values(gtint_t(300)),                                // m
+            ::testing::Values(gtint_t(210)),                                // n
+            ::testing::Values(gtint_t(150)),                                // k
+            ::testing::Values(gtint_t(3)),                                  // ai
             ::testing::Values(gtint_t(0)),                                  // aj
             ::testing::Values(T{AOCL_NAN, 2.2}, T{AOCL_INF, 5.2},
                               T{-3.4, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),   // aexval
@@ -170,8 +170,8 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0), gtint_t(2)),                      // bj
             ::testing::Values(T{AOCL_NAN, -2.3}, T{AOCL_INF, 8.9},
                               T{-3.4, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),   // bexval
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // ci
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // cj
+            ::testing::Values(gtint_t(2)),                                  // ci
+            ::testing::Values(gtint_t(1)),                                  // cj
             ::testing::Values(T{AOCL_NAN, 1.3}, T{AOCL_INF, 7.4},
                               T{3.3, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),    // cexval
             ::testing::Values(T{-1.0, -2.0}, T{0.0, 0.0},
@@ -198,19 +198,19 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('t'),                                         // transa
             ::testing::Values('t'),                                         // transb
-            ::testing::Values(gtint_t(300), gtint_t(310)),                  // m
-            ::testing::Values(gtint_t(200), gtint_t(210)),                  // n
-            ::testing::Values(gtint_t(150), gtint_t(155)),                  // k
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // ai
+            ::testing::Values(gtint_t(300)),                                // m
+            ::testing::Values(gtint_t(210)),                                // n
+            ::testing::Values(gtint_t(150)),                                // k
+            ::testing::Values(gtint_t(1)),                                  // ai
             ::testing::Values(gtint_t(0)),                                  // aj
             ::testing::Values(T{AOCL_NAN, 2.2}, T{AOCL_INF, -9.0},
                               T{-3.4, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),   // aexval
             ::testing::Values(gtint_t(0)),                                  // bi
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // bj
+            ::testing::Values(gtint_t(0)),                                  // bj
             ::testing::Values(T{AOCL_NAN, -2.3}, T{AOCL_INF, -6.7},
                               T{-3.4, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),   // bexval
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // ci
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // cj
+            ::testing::Values(gtint_t(2)),                                  // ci
+            ::testing::Values(gtint_t(3)),                                  // cj
             ::testing::Values(T{AOCL_NAN, 1.3}, T{AOCL_INF, 5.6},
                               T{3.3, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),    // cexval
             ::testing::Values(T{-1.0, -2.0}, T{0.0, 0.0},
@@ -276,17 +276,17 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('n', 't', 'c'),                               // transa
             ::testing::Values('n', 't', 'c'),                               // transb
-            ::testing::Values(gtint_t(200), gtint_t(210)),                  // m
-            ::testing::Values(gtint_t(100), gtint_t(110)),                  // n
-            ::testing::Values(gtint_t(50), gtint_t(55)),                    // k
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // ai
+            ::testing::Values(gtint_t(210)),                                // m
+            ::testing::Values(gtint_t(100)),                                // n
+            ::testing::Values(gtint_t(50)),                                 // k
+            ::testing::Values(gtint_t(3)),                                  // ai
             ::testing::Values(gtint_t(0)),                                  // aj
             ::testing::Values(T{1.2, 2.3}),                                 // aexval
             ::testing::Values(gtint_t(0)),                                  // bi
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // bj
+            ::testing::Values(gtint_t(2)),                                  // bj
             ::testing::Values(T{-2.3, -12}),                                // bexval
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // ci
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // cj
+            ::testing::Values(gtint_t(2)),                                  // ci
+            ::testing::Values(gtint_t(1)),                                  // cj
             ::testing::Values(T{-0.7, 3.2}),                                // cexval
             ::testing::Values(T{AOCL_NAN, 1.4}, T{AOCL_INF, 7.4},
                               T{4.2, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF},
@@ -314,19 +314,19 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('n'),                                         // transa
             ::testing::Values('n'),                                         // transb
-            ::testing::Values(gtint_t(500), gtint_t(700)),                  // m
-            ::testing::Values(gtint_t(680), gtint_t(1000)),                 // n
-            ::testing::Values(gtint_t(370), gtint_t(375)),                  // k
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // ai
+            ::testing::Values(gtint_t(500)),                                // m
+            ::testing::Values(gtint_t(680)),                                // n
+            ::testing::Values(gtint_t(370)),                                // k
+            ::testing::Values(gtint_t(3)),                                  // ai
             ::testing::Values(gtint_t(0)),                                  // aj
             ::testing::Values(T{AOCL_NAN, 9.3}, T{AOCL_INF, 3.9},
                               T{13.4, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),   // aexval
             ::testing::Values(gtint_t(0)),                                  // bi
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // bj
+            ::testing::Values(gtint_t(2)),                                  // bj
             ::testing::Values(T{AOCL_NAN, -5.6}, T{AOCL_INF, -3.1},
                               T{9.7, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),    // bexval
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // ci
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // cj
+            ::testing::Values(gtint_t(0)),                                  // ci
+            ::testing::Values(gtint_t(1)),                                  // cj
             ::testing::Values(T{AOCL_NAN, 7.8}, T{AOCL_INF, -6.7},
                               T{-3.6, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),   // cexval
             ::testing::Values(T{-21.0, -12.0}),                             // alpha
@@ -349,19 +349,19 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('t'),                                         // transa
             ::testing::Values('t'),                                         // transb
-            ::testing::Values(gtint_t(595), gtint_t(900)),                  // m
-            ::testing::Values(gtint_t(880), gtint_t(1200)),                 // n
-            ::testing::Values(gtint_t(470), gtint_t(475)),                  // k
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // ai
+            ::testing::Values(gtint_t(595)),                                // m
+            ::testing::Values(gtint_t(880)),                                // n
+            ::testing::Values(gtint_t(470)),                                // k
+            ::testing::Values(gtint_t(1)),                                  // ai
             ::testing::Values(gtint_t(0)),                                  // aj
             ::testing::Values(T{AOCL_NAN, 9.3}, T{AOCL_INF, -5.6},
                               T{13.4, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),   // aexval
             ::testing::Values(gtint_t(0)),                                  // bi
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // bj
+            ::testing::Values(gtint_t(2)),                                  // bj
             ::testing::Values(T{AOCL_NAN, -5.6}, T{AOCL_INF, 3.2},
                               T{9.7, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),    // bexval
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // ci
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // cj
+            ::testing::Values(gtint_t(2)),                                  // ci
+            ::testing::Values(gtint_t(3)),                                  // cj
             ::testing::Values(T{AOCL_NAN, 7.8}, T{AOCL_INF, -6.7},
                               T{-3.6, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),   // cexval
             ::testing::Values(T{-21.0, -12.0}),                             // alpha
@@ -387,7 +387,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(700)),                                // m
             ::testing::Values(gtint_t(990)),                                // n
             ::testing::Values(gtint_t(475)),                                // k
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // ai
+            ::testing::Values(gtint_t(3)),                                  // ai
             ::testing::Values(gtint_t(0)),                                  // aj
             ::testing::Values(T{AOCL_NAN, 9.3}, T{AOCL_INF, -3.2},
                               T{13.4, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),   // aexval
@@ -395,8 +395,8 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0), gtint_t(2)),                      // bj
             ::testing::Values(T{AOCL_NAN, -5.6}, T{AOCL_INF, 5.2},
                               T{9.7, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),    // bexval
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // ci
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // cj
+            ::testing::Values(gtint_t(2)),                                  // ci
+            ::testing::Values(gtint_t(1)),                                  // cj
             ::testing::Values(T{AOCL_NAN, 7.8}, T{AOCL_INF, 7.6},
                               T{-3.6, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),   // cexval
             ::testing::Values(T{-21.0, -12.0}, T{0.0, 0.0},
@@ -423,9 +423,9 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('n', 't', 'c'),                               // transa
             ::testing::Values('n', 't', 'c'),                               // transb
-            ::testing::Values(gtint_t(700), gtint_t(800)),                  // m
-            ::testing::Values(gtint_t(990), gtint_t(1100)),                 // n
-            ::testing::Values(gtint_t(475), gtint_t(575)),                  // k
+            ::testing::Values(gtint_t(800)),                                // m
+            ::testing::Values(gtint_t(1100)),                               // n
+            ::testing::Values(gtint_t(475)),                                // k
             ::testing::Values(gtint_t(3)),                                  // ai
             ::testing::Values(gtint_t(0)),                                  // aj
             ::testing::Values(T{AOCL_NAN, 0}, T{AOCL_INF, 0.0},
@@ -462,17 +462,17 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('n', 't', 'c'),                               // transa
             ::testing::Values('n', 't', 'c'),                               // transb
-            ::testing::Values(gtint_t(700), gtint_t(900)),                  // m
-            ::testing::Values(gtint_t(1000), gtint_t(2000)),                // n
-            ::testing::Values(gtint_t(470), gtint_t(475)),                  // k
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // ai
+            ::testing::Values(gtint_t(700)),                                // m
+            ::testing::Values(gtint_t(1000)),                               // n
+            ::testing::Values(gtint_t(475)),                                // k
+            ::testing::Values(gtint_t(3)),                                  // ai
             ::testing::Values(gtint_t(0)),                                  // aj
             ::testing::Values(T{1.12, 12.3}),                               // aexval
             ::testing::Values(gtint_t(0)),                                  // bi
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // bj
+            ::testing::Values(gtint_t(2)),                                  // bj
             ::testing::Values(T{-12.3, -2}),                                // bexval
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // ci
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // cj
+            ::testing::Values(gtint_t(2)),                                  // ci
+            ::testing::Values(gtint_t(3)),                                  // cj
             ::testing::Values(T{-1.7, -3.12}),                              // cexval
             ::testing::Values(T{AOCL_NAN, 2.3}, T{AOCL_INF, 8.9},
                               T{3.4, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF},

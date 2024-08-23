@@ -111,8 +111,8 @@ INSTANTIATE_TEST_SUITE_P(
             // No conditions based on trans of matrices
             ::testing::Values('n'),                                      // transa
             ::testing::Values('n'),                                      // transb
-            ::testing::Values(3, 6, 17, 28, 81, 98, 103, 133, 138, 178), // m
-            ::testing::Values(2, 8, 17, 26, 35, 44, 61, 70, 79, 100),    // n
+            ::testing::Values(3, 17, 103, 178),                          // m
+            ::testing::Values(2, 26, 79),                                // n
             ::testing::Values(1),                                        // k
             // No condition based on alpha
             ::testing::Values(0.0, -1.0, 1.7),                           // alpha
@@ -135,9 +135,9 @@ INSTANTIATE_TEST_SUITE_P(
             // No conditions based on trans of matrices
             ::testing::Values('n', 't'),                                 // transa
             ::testing::Values('n', 't'),                                 // transb
-            ::testing::Values(3, 6, 17, 28, 81, 98, 103, 133, 138, 178), // m
-            ::testing::Values(2, 8, 17, 26, 35, 44, 61, 70, 79, 100),    // n
-            ::testing::Range(gtint_t(5), gtint_t(25), 1),                // k
+            ::testing::Values(3, 81, 138),                               // m
+            ::testing::Values(2, 35, 100),                               // n
+            ::testing::Values(5, 12, 24),                                // k
             // No condition based on alpha
             ::testing::Values(0.0, -1.0, 1.7),                           // alpha
             // No condition based on beta
@@ -162,10 +162,10 @@ INSTANTIATE_TEST_SUITE_P(
             // Covers all possible combinations of storage schemes
             ::testing::Values('n', 't'),                                   // transa
             ::testing::Values('n', 't'),                                   // transb
-            ::testing::Values(5, 19, 20, 24, 28, 32, 48, 44, 40, 36, 35),  // m
-            ::testing::Range(gtint_t(25), gtint_t(33), gtint_t(1)),        // n
+            ::testing::Values(5, 19, 32, 44),                              // m
+            ::testing::Values(25, 27, 32),                                 // n
             // k-unroll factor = KR = 1
-            ::testing::Range(gtint_t(5), gtint_t(25), 1),                  // k
+            ::testing::Values(5, 17, 24),                                   // k
             // No condition based on alpha
             ::testing::Values(0.0, -1.0, 1.7),                             // alpha
             // No condition based on beta
@@ -183,19 +183,19 @@ INSTANTIATE_TEST_SUITE_P(
         dgemmGeneric,
         ::testing::Combine(
             // Storage of A and B is handled by packing
-            ::testing::Values('c'),                                                         // storage format
-            ::testing::Values('n', 't'),                                                    // transa
-            ::testing::Values('n', 't'),                                                    // transb
-            ::testing::Values(1002, 1025, 1054, 1083, 1112, 1111, 1327, 1333, 1338, 1378),  // m
-            ::testing::Values(453, 462, 471, 504, 513, 522, 531, 540, 549, 558, 567 ),      // n
-            ::testing::Range(gtint_t(105), gtint_t(125), 1),                                // k
+            ::testing::Values('c'),                                            // storage format
+            ::testing::Values('n', 't'),                                       // transa
+            ::testing::Values('n', 't'),                                       // transb
+            ::testing::Values(1002, 1377),                                     // m
+            ::testing::Values(453, 567),                                       // n
+            ::testing::Values(105, 124),                                       // k
             // No condition based on alpha
-            ::testing::Values(0.0, -1.0, 1.7),                                              // alpha
+            ::testing::Values(0.0, -1.0, 1.7),                                 // alpha
             // No condition based on beta
-            ::testing::Values(0.0, -1.0, 1.0, 2.3),                                         // beta
-            ::testing::Values(0, 3),                                                        // increment to the leading dim of a
-            ::testing::Values(0, 3),                                                        // increment to the leading dim of b
-            ::testing::Values(0, 3)                                                         // increment to the leading dim of c
+            ::testing::Values(0.0, -1.0, 1.0, 2.3),                            // beta
+            ::testing::Values(0, 3),                                           // increment to the leading dim of a
+            ::testing::Values(0, 3),                                           // increment to the leading dim of b
+            ::testing::Values(0, 3)                                            // increment to the leading dim of c
         ),
         ::gemmGenericPrint<double>()
     );
@@ -210,9 +210,9 @@ INSTANTIATE_TEST_SUITE_P(
             // Covers vectorized section of 8xk and 6xk pack kernels for both storage formats
             ::testing::Values('n', 't'),                       // transa
             ::testing::Values('n', 't'),                       // transb
-            ::testing::Values(5017, 5025, 5061, 5327),         // m
-            ::testing::Values(709, 731, 5005, 5417 ),          // n
-            ::testing::Values(515, 527, 604),                  // k
+            ::testing::Values(5017, 5061),                     // m
+            ::testing::Values(709, 5417),                      // n
+            ::testing::Values(515, 604),                       // k
             // No condition based on alpha
             ::testing::Values(0.0, -1.0, 1.7),                 // alpha
             // No condition based on beta

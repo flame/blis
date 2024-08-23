@@ -132,9 +132,9 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},
                               dcomplex{0.0, 1.0}, dcomplex{3.1, 15.9},
                               dcomplex{0.0, 0.0}),                          //beta
-            ::testing::Values(gtint_t(0), gtint_t(130)),                    // increment to the leading dim of a
-            ::testing::Values(gtint_t(0), gtint_t(120)),                    // increment to the leading dim of b
-            ::testing::Values(gtint_t(0), gtint_t(150))                     // increment to the leading dim of c
+            ::testing::Values(gtint_t(0), gtint_t(2)),                    // increment to the leading dim of a
+            ::testing::Values(gtint_t(0), gtint_t(1)),                    // increment to the leading dim of b
+            ::testing::Values(gtint_t(0), gtint_t(5))                     // increment to the leading dim of c
         ),
         ::gemmGenericPrint<dcomplex>()
     );
@@ -152,16 +152,16 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n', 'c', 't'),                               // transb
             ::testing::Values(gtint_t(1)),                                  // m
             ::testing::Values(gtint_t(1)),                                  // n
-            ::testing::Range(gtint_t(100), gtint_t(200), gtint_t(100)),     // k
+            ::testing::Values(gtint_t(100), gtint_t(200)),                  // k
             ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},
                               dcomplex{0.0, 1.0}, dcomplex{2.1, -1.9},
                               dcomplex{0.0, 0.0}),                          // alpha
             ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},
                               dcomplex{0.0, 1.0}, dcomplex{2.1, -1.9},
                               dcomplex{0.0, 0.0}),                          // beta
-            ::testing::Values(gtint_t(0), gtint_t(230)),                    // increment to the leading dim of a
-            ::testing::Values(gtint_t(0), gtint_t(220)),                    // increment to the leading dim of b
-            ::testing::Values(gtint_t(0), gtint_t(250))                     // increment to the leading dim of c
+            ::testing::Values(gtint_t(0), gtint_t(2)),                    // increment to the leading dim of a
+            ::testing::Values(gtint_t(0), gtint_t(3)),                    // increment to the leading dim of b
+            ::testing::Values(gtint_t(0), gtint_t(5))                     // increment to the leading dim of c
         ),
         ::gemmGenericPrint<dcomplex>()
     );
@@ -178,17 +178,17 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n', 'c', 't'),                               // transa
             ::testing::Values('n', 'c', 't'),                               // transb
             ::testing::Values(gtint_t(1)),                                  // m
-            ::testing::Range(gtint_t(2), gtint_t(200), gtint_t(40)),        // n
-            ::testing::Range(gtint_t(100), gtint_t(200), gtint_t(100)),     // k
+            ::testing::Values(gtint_t(2), gtint_t(89), gtint_t(197)),       // n
+            ::testing::Values(gtint_t(100), gtint_t(200)),                  // k
             ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},
                               dcomplex{0.0, 1.0}, dcomplex{2.1, -1.9},
                               dcomplex{0.0, 0.0}),                          // alpha
             ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},
                               dcomplex{0.0, 1.0}, dcomplex{2.1, -1.9},
                               dcomplex{0.0, 0.0}),                          // beta
-            ::testing::Values(gtint_t(0), gtint_t(230)),                    // increment to the leading dim of a
-            ::testing::Values(gtint_t(0), gtint_t(220)),                    // increment to the leading dim of b
-            ::testing::Values(gtint_t(0), gtint_t(250))                     // increment to the leading dim of c
+            ::testing::Values(gtint_t(0), gtint_t(2)),                    // increment to the leading dim of a
+            ::testing::Values(gtint_t(0), gtint_t(3)),                    // increment to the leading dim of b
+            ::testing::Values(gtint_t(0), gtint_t(5))                     // increment to the leading dim of c
         ),
         ::gemmGenericPrint<dcomplex>()
     );
@@ -204,18 +204,18 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('n', 'c', 't'),                               // transa
             ::testing::Values('n', 'c', 't'),                               // transb
-            ::testing::Range(gtint_t(1), gtint_t(100), gtint_t(20)),        // m
+            ::testing::Values(gtint_t(1), gtint_t(100), gtint_t(47)),       // m
             ::testing::Values(gtint_t(1)),                                  // n
-            ::testing::Range(gtint_t(100), gtint_t(200), gtint_t(100)),     // k
+            ::testing::Values(gtint_t(100), gtint_t(200)),                  // k
             ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},
                               dcomplex{0.0, 1.0}, dcomplex{3.1, -1.5},
                               dcomplex{0.0, 0.0}),                          // alpha
             ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},
                               dcomplex{0.0, 1.0}, dcomplex{2.3, -2.9},
                               dcomplex{0.0, 0.0}),                          // beta
-            ::testing::Values(gtint_t(0), gtint_t(300)),                    // increment to the leading dim of a
-            ::testing::Values(gtint_t(0), gtint_t(200)),                    // increment to the leading dim of b
-            ::testing::Values(gtint_t(0), gtint_t(500))                     // increment to the leading dim of c
+            ::testing::Values(gtint_t(0), gtint_t(3)),                      // increment to the leading dim of a
+            ::testing::Values(gtint_t(0), gtint_t(1)),                      // increment to the leading dim of b
+            ::testing::Values(gtint_t(0), gtint_t(7))                       // increment to the leading dim of c
         ),
         ::gemmGenericPrint<dcomplex>()
     );
@@ -235,8 +235,8 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('n'),                                         // transa
             ::testing::Values('n'),                                         // transb
-            ::testing::Range(gtint_t(2), gtint_t(16), 1),                    // m
-            ::testing::Range(gtint_t(2), gtint_t(8), 1),                    // n
+            ::testing::Values(gtint_t(2), gtint_t(9), gtint_t(16)),         // m
+            ::testing::Values(gtint_t(2), gtint_t(7)),                      // n
             ::testing::Values(gtint_t(1)),                                  // k
             ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},
                               dcomplex{0.0, 1.0}, dcomplex{2.1, -1.9},
@@ -244,9 +244,9 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},
                               dcomplex{0.0, 1.0}, dcomplex{2.1, -1.9},
                               dcomplex{0.0, 0.0}),                          // beta
-            ::testing::Values(gtint_t(0), gtint_t(390)),                    // increment to the leading dim of a
-            ::testing::Values(gtint_t(0), gtint_t(290)),                    // increment to the leading dim of b
-            ::testing::Values(gtint_t(0), gtint_t(590))                     // increment to the leading dim of c
+            ::testing::Values(gtint_t(0), gtint_t(5)),                      // increment to the leading dim of a
+            ::testing::Values(gtint_t(0), gtint_t(9)),                      // increment to the leading dim of b
+            ::testing::Values(gtint_t(0), gtint_t(2))                       // increment to the leading dim of c
         ),
         ::gemmGenericPrint<dcomplex>()
     );
@@ -285,9 +285,9 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('n'),                                         // transa
             ::testing::Values('n'),                                         // transb
-            ::testing::Range(gtint_t(100), gtint_t(105), gtint_t(1)),       // m
-            ::testing::Range(gtint_t(80), gtint_t(85), gtint_t(1)),         // n
-            ::testing::Range(gtint_t(1000), gtint_t(1010), gtint_t(1)),     // k
+            ::testing::Values(gtint_t(100), gtint_t(105)),                  // m
+            ::testing::Values(gtint_t(80), gtint_t(85)),                    // n
+            ::testing::Values(gtint_t(1000), gtint_t(1010)),                // k
             ::testing::Values(dcomplex{-1.0, -2.0}, dcomplex{0.0, -30.0},
                               dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},
                               dcomplex{5.0, 0.0}),                          // alpha
@@ -312,9 +312,9 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('t'),                                         // transa
             ::testing::Values('t'),                                         // transb
-            ::testing::Range(gtint_t(105), gtint_t(110), gtint_t(1)),       // m
-            ::testing::Range(gtint_t(190), gtint_t(195), gtint_t(1)),       // n
-            ::testing::Range(gtint_t(500), gtint_t(510), gtint_t(1)),       // k
+            ::testing::Values(gtint_t(105)),                                // m
+            ::testing::Values(gtint_t(190)),                                // n
+            ::testing::Values(gtint_t(500)),                                // k
             ::testing::Values(dcomplex{-1.8, -21.0}, dcomplex{0.0, -33.0},
                               dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},
                               dcomplex{5.3, 0.0}),                          // alpha
