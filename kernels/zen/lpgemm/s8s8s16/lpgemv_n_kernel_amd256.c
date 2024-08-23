@@ -333,7 +333,7 @@ LPGEMV_N_EQ1_KERN(int8_t, int8_t, int16_t, s8s8s16os16)
 
 				xmm0 = _mm_hadd_epi16( xmm0, xmm0 );
 
-				__int64_t data = _mm_extract_epi64( xmm0, 0);
+				int64_t data = _mm_extract_epi64( xmm0, 0);
 				//insert xmm outputs into final output reg based on regidx
 				ymm8 = _mm256_setzero_si256();
 				ymm8 = _mm256_insert_epi64( ymm8, data, 0 );
@@ -446,7 +446,7 @@ LPGEMV_N_EQ1_KERN(int8_t, int8_t, int16_t, s8s8s16os16)
 				LPGEMV_YMM2XMM( ymm12, ymm13, ymm14, ymm15, xmm0)
 				xmm0 = _mm_hadd_epi16( xmm0, xmm0 );
 
-				__int64_t data = _mm_extract_epi64( xmm0, 0);
+				int64_t data = _mm_extract_epi64( xmm0, 0);
 				//insert xmm outputs into final output reg based on regidx
 
 				if( regidx == 0 )
