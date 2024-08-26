@@ -79,6 +79,15 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
 	bool is_row_major = ((order == 'r') || (order == 'R'));
 	bool is_column_major = ((order == 'c') || (order == 'C'));
 
+	// Column major support disabled for int API's till micro-kernel
+	// post-ops are updated to account for column major.
+	if ( (is_column_major == TRUE) && (post_op_unparsed != NULL) )
+	{
+		bli_print_msg("Column major inputs not supported with Post-ops.",
+					  __FILE__, __LINE__);
+		return;
+	}
+	
 	// The strides are set assuming a row major kernel.
 	inc_t rs_a = lda;
 	inc_t cs_a = 1;
