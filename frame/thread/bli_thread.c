@@ -75,13 +75,6 @@ void bli_thread_update_tl( void )
 	bli_thread_update_rntm_from_env( &tl_rntm );
 }
 
-void bli_thread_update_tl_nt( void )
-{
-	// Updates only number of threads in thread local global runtime object from any runtime BLIS
-	// or OpenMP calls or nested parallelism.
-	bli_thread_update_rntm_nt_from_env( &tl_rntm );
-}
-
 void bli_thread_finalize( void )
 {
 }
@@ -1896,69 +1889,6 @@ void bli_thread_init_rntm_from_env
 
 #ifdef PRINT_THREADING
 	printf( "bli_thread_init_rntm_from_env(): global_rntm\n" );
-	bli_rntm_print( rntm );
-#endif
-}
-
-void bli_thread_update_rntm_nt_from_env
-	 (
-		rntm_t* rntm
-	 )
-{
-	// Refer comment section in bli_thread_update_rntm_from_env() for detailed explanation of scenarios.
-	dim_t nt;
-	bool blis_mt;
-
-	// Acquire the mutex protecting global_rntm.
-	bli_pthread_mutex_lock( &global_rntm_mutex );
-
-	// Extract number of threads from global_rntm.
-	nt = bli_rntm_num_threads( &global_rntm );
-	blis_mt = bli_rntm_blis_mt( &global_rntm );
-
-	// Release the mutex protecting global_rntm.
-	bli_pthread_mutex_unlock( &global_rntm_mutex );
-
-#ifdef BLIS_ENABLE_MULTITHREADING
-	if(blis_mt)
-	{
-#ifdef BLIS_ENABLE_OPENMP
-		dim_t active_level = omp_get_active_level();
-		dim_t max_levels = omp_get_max_active_levels();
-		if ( active_level >= max_levels )
-		{
-			nt = 1;
-		}
-#endif
-	} else {
-#ifdef BLIS_ENABLE_OPENMP
-		dim_t active_level = omp_get_active_level();
-		dim_t max_levels = omp_get_max_active_levels();
-		if ( active_level < max_levels )
-		{
-			nt = omp_get_max_threads();
-		} else {
-			nt = 1;
-		}
-#else
-		nt = 1;
-#endif
-	}
-#else
-	// Multithreading is disabled. Set number of threads to 1.
-	nt = 1;
-#endif // BLIS_ENABLE_MULTITHREADING
-
-	// Save the results back in the runtime object.
-	bli_rntm_set_num_threads_only( nt, rntm );
-	bli_rntm_set_blis_mt_only( blis_mt, rntm );
-
-	// Initialize info_value to 0
-	gint_t info_value = 0;
-	bli_rntm_set_info_value_only( info_value, rntm );
-
-#ifdef PRINT_THREADING
-	printf( "bli_thread_update_rntm_nt_from_env(): tl_rntm\n" );
 	bli_rntm_print( rntm );
 #endif
 }

@@ -46,27 +46,6 @@ BLIS_THREAD_LOCAL rntm_t tl_rntm = BLIS_RNTM_INITIALIZER;
 bli_pthread_mutex_t global_rntm_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
 
 // ----------------------------------------------------------------------------
-void bli_rntm_init_l1_from_global( rntm_t* rntm )
-{
-	// Initializes supplied rntm from a combination of global and
-	// thread local data (global_rntm and tl_rntm respectively).
-
-	// We must ensure that global_rntm has been initialized
-	bli_init_once();
-
-	// We must also ensure that tl_rntm has been updated.
-	bli_thread_update_tl_nt();
-
-	// tl_rntm is updated in bli_thread_update_tl_nt() from global_rntm
-	// Now update threading info in supplied rntm from tl_rntm
-	bli_rntm_set_num_threads_only( tl_rntm.num_threads, rntm );
-	bli_rntm_set_blis_mt_only( tl_rntm.blis_mt, rntm );
-
-#if 0
-	printf( "bli_rntm_init_l1_from_global()\n" );
-	bli_rntm_print( rntm );
-#endif
-}
 
 void bli_rntm_init_from_global( rntm_t* rntm )
 {
@@ -2592,10 +2571,17 @@ void bli_nthreads_l1
 	rntm_t rntm_local;
 
 	// Initialize a local runtime with global settings.
-	bli_rntm_init_l1_from_global(&rntm_local);
+	bli_rntm_init_from_global(&rntm_local);
 
 	// Query the total number of threads from the rntm_t object.
 	dim_t nt_rntm = bli_rntm_num_threads(&rntm_local);
+
+	if (nt_rntm <= 0)
+	{
+		// nt is less than one if BLIS manual setting of parallelism
+		// has been used. Parallelism here will be product of values.
+		nt_rntm = bli_rntm_calc_num_threads(&rntm_local);
+	}
 
 #ifdef AOCL_DYNAMIC
 
