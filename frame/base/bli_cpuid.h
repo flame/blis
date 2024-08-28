@@ -55,6 +55,8 @@ arch_t bli_cpuid_query_id( void );
 
 model_t bli_cpuid_query_model_id( arch_t id );
 
+uint32_t bli_cpuid_query_fp_datapath( void );
+
 uint32_t bli_cpuid_query_l1d_cache_size( void );
 uint32_t bli_cpuid_query_l1i_cache_size( void );
 uint32_t bli_cpuid_query_l2_cache_size( void );
@@ -93,6 +95,8 @@ bool bli_cpuid_is_cortexa15( uint32_t model, uint32_t part, uint32_t features );
 bool bli_cpuid_is_cortexa9( uint32_t model, uint32_t part, uint32_t features );
 
 uint32_t bli_cpuid_query( uint32_t* family, uint32_t* model, uint32_t* features );
+
+void bli_cpuid_check_datapath( uint32_t vendor, uint32_t features );
 
 void bli_cpuid_check_cache( uint32_t vendor );
 
@@ -189,7 +193,21 @@ enum
 	FEATURE_AVXVNNI = 0x20000,
 	FEATURE_AVX512VP2INTERSECT = 0x40000,
 	FEATURE_MOVDIRI = 0x80000,
-	FEATURE_MOVDIR64B = 0x100000
+	FEATURE_MOVDIR64B = 0x100000,
+	FEATURE_DATAPATH_FP128 = 0x200000,
+	FEATURE_DATAPATH_FP256 = 0x400000,
+	FEATURE_DATAPATH_FP512 = 0x800000
+};
+
+// To reduce confusion, include MOVU bit so enum values match those in
+// CPUID_Fn8000001A_EAX id function.
+enum
+{
+	DATAPATH_UNSET = -1,
+	DATAPATH_FP128,
+	DATAPATH_MOVU,
+	DATAPATH_FP256,
+	DATAPATH_FP512
 };
 
 #elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM)

@@ -94,6 +94,9 @@ static bool is_avx512_supported = FALSE;
 static bool is_avx512vnni_supported = FALSE;
 static bool is_avx512bf16_supported = FALSE;
 
+// Variable to represent FP/SIMD execution datapath width.
+static uint32_t bli_fp_datapath = -1;
+
 // Variables to store the cache sizes (in KB). L3 size is shared by all
 // logical processors in the package (i.e. per socket).
 static uint32_t bli_l1d_cache_size = -1;
@@ -118,6 +121,9 @@ arch_t bli_cpuid_query_id( void )
 		bli_cpuid_check_avx512vnni_support( family, model, features );
 		bli_cpuid_check_avx512bf16_support( family, model, features );
 
+		// Check FP/SIMD execution datapath
+		bli_cpuid_check_datapath( vendor, features );
+
 		// Find out cache sizes and set in static variables.
 		// Currently only enabled for VENDOR_AMD.
 		bli_cpuid_check_cache( vendor );
@@ -133,6 +139,9 @@ arch_t bli_cpuid_query_id( void )
 	printf( "AVX512 F/DQ/CD/BW/VL = %d\n", is_avx512_supported );
 	printf( "AVX512 VNNI          = %d\n", is_avx512vnni_supported );
 	printf( "AVX512 BF16          = %d\n", is_avx512bf16_supported );
+
+	const char* datapath_names[] = {"UNSET", "FP128", "INVALID", "FP256", "FP512"};
+	printf( "FP/SIMD datapath     = %d (%s)\n", bli_fp_datapath, datapath_names[bli_fp_datapath+1] );
 
 	printf( "Cache Information:\n" );
 	printf( "L1I size = %u KB\n",bli_l1i_cache_size );
@@ -218,6 +227,12 @@ arch_t bli_cpuid_query_id( void )
 #ifdef BLIS_CONFIG_ZEN
 		if ( bli_cpuid_is_zen( family, model, features ) )
 			return BLIS_ARCH_ZEN;
+#endif
+#ifdef BLIS_CONFIG_ZEN3
+		// Fallback test for future AMD processors
+		// Use zen3 if AVX512 support is not available but AVX2 is.
+		if ( is_avx2fma3_supported )
+			return BLIS_ARCH_ZEN3;
 #endif
 #ifdef BLIS_CONFIG_EXCAVATOR
 		if ( bli_cpuid_is_excavator( family, model, features ) )
@@ -914,6 +929,12 @@ bool bli_cpuid_is_avx512bf16_supported( void )
 	return is_avx512bf16_supported;
 }
 
+uint32_t bli_cpuid_query_fp_datapath( void )
+{
+	bli_cpuid_query_id_once();
+	return bli_fp_datapath;
+}
+
 uint32_t bli_cpuid_query_l1d_cache_size( void )
 {
 	bli_cpuid_query_id_once();
@@ -1111,7 +1132,10 @@ enum
                                           (1u<<27), // cpuid[eax=1]          :ecx[27:26]
 	XGETBV_MASK_XMM                 = 0x02u,    // xcr0[1]
 	XGETBV_MASK_YMM                 = 0x04u,    // xcr0[2]
-	XGETBV_MASK_ZMM                 = 0xe0u     // xcr0[7:5]
+	XGETBV_MASK_ZMM                 = 0xe0u,    // xcr0[7:5]
+	FEATURE_MASK_DATAPATH_FP128     = (1u<<0),  // cpuid[eax=0x8000001A] :eax[0]
+	FEATURE_MASK_DATAPATH_FP256     = (1u<<2),  // cpuid[eax=0x8000001A] :eax[2]
+	FEATURE_MASK_DATAPATH_FP512     = (1u<<3)   // cpuid[eax=0x8000001A] :eax[3]
 };
 
 
@@ -1189,7 +1213,6 @@ uint32_t bli_cpuid_query
 
 		if ( bli_cpuid_has_features( eax, FEATURE_MASK_AVXVNNI ) )    *features |= FEATURE_AVXVNNI;
 		if ( bli_cpuid_has_features( eax, FEATURE_MASK_AVX512BF16 ) ) *features |= FEATURE_AVX512BF16;
-
 	}
 
 	// Check extended processor info / features bits for AMD-specific features.
@@ -1206,6 +1229,17 @@ uint32_t bli_cpuid_query
 		//print_binary(edx);
 
 		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_FMA4 ) ) *features |= FEATURE_FMA4;
+	}
+	if ( cpuid_max_ext >= 0x8000001Au )
+	{
+		// This is actually a macro that modifies the last four operands,
+		// hence why they are not passed by address.
+		// This returns extended feature flags in EAX.
+		__cpuid( 0x8000001A, eax, ebx, ecx, edx );
+
+		if ( bli_cpuid_has_features( eax, FEATURE_MASK_DATAPATH_FP128 ) ) *features |= FEATURE_DATAPATH_FP128;
+		if ( bli_cpuid_has_features( eax, FEATURE_MASK_DATAPATH_FP256 ) ) *features |= FEATURE_DATAPATH_FP256;
+		if ( bli_cpuid_has_features( eax, FEATURE_MASK_DATAPATH_FP512 ) ) *features |= FEATURE_DATAPATH_FP512;
 	}
 
 	// Unconditionally check processor info / features bits.
@@ -1375,6 +1409,34 @@ uint32_t bli_cpuid_query
 		return VENDOR_INTEL;
 	else
 		return VENDOR_UNKNOWN;
+}
+
+void bli_cpuid_check_datapath(
+       uint32_t vendor,
+       uint32_t features )
+{
+        if ( vendor == VENDOR_AMD )
+	{
+		uint32_t expected;
+		expected = FEATURE_DATAPATH_FP512;
+		if ( bli_cpuid_has_features( features, expected ) )
+		{
+			bli_fp_datapath = DATAPATH_FP512;
+			return;
+		}
+		expected = FEATURE_DATAPATH_FP256;
+		if ( bli_cpuid_has_features( features, expected ) )
+		{
+			bli_fp_datapath = DATAPATH_FP256;
+			return;
+		}
+		expected = FEATURE_DATAPATH_FP128;
+		if ( bli_cpuid_has_features( features, expected ) )
+		{
+			bli_fp_datapath = DATAPATH_FP128;
+			return;
+		}
+	}
 }
 
 void bli_cpuid_check_cache( uint32_t vendor )
