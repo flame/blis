@@ -32,29 +32,39 @@
 
 */
 
-#ifndef BLIS_L1M_KER_FT_H
-#define BLIS_L1M_KER_FT_H
+
+typedef struct gemmd_params
+{
+	const void* d;
+	inc_t incd;
+} gemmd_params;
 
 
-//
-// -- Level-1m kernel function types -------------------------------------------
-//
-
-#undef  GENTDEF
-#define GENTDEF( opname ) \
+#undef  GENTPROT2
+#define GENTPROT2( ctypec, ctypep, chc, chp, varname ) \
 \
-typedef void (*PASTECH(opname,_ker_ft)) \
+BLIS_EXPORT_BLIS void PASTEMAC(chc,chp,varname) \
      ( \
-       PASTECH(opname,_params), \
-       BLIS_CNTX_PARAM  \
+             struc_t strucc, \
+             diag_t  diagc, \
+             uplo_t  uploc, \
+             conj_t  conjc, \
+             pack_t  schema, \
+             bool    invdiag, \
+             dim_t   panel_dim, \
+             dim_t   panel_len, \
+             dim_t   panel_dim_max, \
+             dim_t   panel_len_max, \
+             dim_t   panel_dim_off, \
+             dim_t   panel_len_off, \
+             dim_t   panel_bcast, \
+       const void*   kappa, \
+       const void*   c, inc_t incc, inc_t ldc, \
+             void*   p,             inc_t ldp, \
+       const void*   params, \
+       const cntx_t* cntx \
      );
 
-GENTDEF( packm )
-GENTDEF( packm_cxk )
-GENTDEF( packmd_cxk )
-GENTDEF( unpackm_cxk )
-GENTDEF( packm_cxc_diag )
-
-
-#endif
+INSERT_GENTPROT2_BASIC( packmd_struc_cxk )
+INSERT_GENTPROT2_MIX_P( packmd_struc_cxk )
 
