@@ -304,13 +304,13 @@ BLIS_INLINE void lpgemm_s16o16_get_threading
 
 		if ( n <= NR )
 		{
-			( *ic_ways ) = ( mr_blks < ( *n_threads ) ) ? mr_blks : ( *n_threads );
+			( *ic_ways ) = ( *n_threads );
 			( *jc_ways ) = 1;
 			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
 		}
 		else if ( m <= MR )
 		{
-			( *jc_ways ) = ( nr_blks < ( *n_threads ) ) ? nr_blks : ( *n_threads );
+			( *jc_ways ) = ( *n_threads );
 			( *ic_ways ) = 1;
 			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
 		}
@@ -425,13 +425,13 @@ BLIS_INLINE void lpgemm_s32o32_get_threading
 
 		if ( n <= NR )
 		{
-			( *ic_ways ) = ( mr_blks < ( *n_threads ) ) ? mr_blks : ( *n_threads );
+			( *ic_ways ) = ( *n_threads );
 			( *jc_ways ) = 1;
 			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
 		}
 		else if ( m <= MR )
 		{
-			( *jc_ways ) = ( nr_blks < ( *n_threads ) ) ? nr_blks : ( *n_threads );
+			( *jc_ways ) = ( *n_threads );
 			( *ic_ways ) = 1;
 			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
 		}
@@ -553,13 +553,13 @@ BLIS_INLINE void lpgemm_bf16bf16f32of32_get_threading
 
 		if ( n <= NR )
 		{
-			( *ic_ways ) = ( mr_blks < ( *n_threads ) ) ? mr_blks : ( *n_threads );
+			( *ic_ways ) = ( *n_threads );
 			( *jc_ways ) = 1;
 			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
 		}
 		else if ( m <= MR )
 		{
-			( *jc_ways ) = ( nr_blks < ( *n_threads ) ) ? nr_blks : ( *n_threads );
+			( *jc_ways ) = ( *n_threads );
 			( *ic_ways ) = 1;
 			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
 		}
@@ -659,13 +659,13 @@ BLIS_INLINE void lpgemm_f32f32f32of32_get_threading
 
 		if ( n <= NR )
 		{
-			( *ic_ways ) = ( mr_blks < ( *n_threads ) ) ? mr_blks : ( *n_threads );
+			( *ic_ways ) = ( *n_threads );
 			( *jc_ways ) = 1;
 			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
 		}
 		else if ( m <= MR )
 		{
-			( *jc_ways ) = ( nr_blks < ( *n_threads ) ) ? nr_blks : ( *n_threads );
+			( *jc_ways ) = ( *n_threads );
 			( *ic_ways ) = 1;
 			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
 		}
