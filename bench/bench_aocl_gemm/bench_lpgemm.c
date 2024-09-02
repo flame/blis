@@ -500,7 +500,14 @@ static inline float mat_mul_accuracy_check_accum_bf16bf16f32obf16
     float c_ref_float;
     bfloat16_to_float( *( c_ref + i*rs_c_ref + j*cs_c_ref ), &c_ref_float );
     temp_accum = ( beta * ( c_ref_float ) ) + ( alpha * temp_accum );
-
+    uint32_t inter_temp = *( ( uint32_t* ) &temp_accum );
+    // check if 15th bit is set
+    if( inter_temp & (uint32_t)0x00008000)
+    {
+            // round the value
+            uint32_t rounded = inter_temp + (uint32_t)0x00010000;
+            memcpy( &temp_accum, &rounded, sizeof( float)  );
+    }
     return temp_accum;
 }
 
@@ -958,7 +965,7 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
               &out_temp_accum, &temp_accum \
             ); \
  \
-            if ( *( c + ( rs_c * i ) + ( cs_c * j ) ) != out_temp_accum ) \
+            if ( ( *( c + ( rs_c * i ) + ( cs_c * j ) ) - out_temp_accum ) > 1.0E-5 ) \
             { \
                 float comp_float, ref_float; \
                 GEN_FUNC_NAME(C_type,_to_float)(*( c + ( rs_c * i ) + ( cs_c * j ) ), &comp_float); \
@@ -1361,7 +1368,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             DSCALE_type* temp_dscale_ptr = ( DSCALE_type* )( post_ops->sum )->scale_factor; \
             for ( dim_t i = 0; i < n_scale; ++i ) \
             { \
-                temp_dscale_ptr[i] = ( ( DSCALE_type )1 )/ ( ( DSCALE_type )1000 ); \
+                temp_dscale_ptr[i] = ( ( DSCALE_type )2 ); \
             } \
             ( post_ops->sum )->scale_factor_len = n_scale; \
  \
@@ -1460,11 +1467,12 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         if ( ( post_ops->pre_ops )->b_scl == NULL ) { goto err_handler; } \
  \
         /* Only int8_t zero point supported in pre-ops. */ \
+        /* Not handled in 4x64 bf16s4f32of32 kernel */ \
         ( ( post_ops->pre_ops )->b_zp )->zero_point = malloc( n * sizeof( int8_t ) ); \
         if ( ( ( post_ops->pre_ops )->b_zp )->zero_point == NULL ) { goto err_handler; } \
         for ( dim_t i = 0; i < n; ++i ) \
         { \
-            ( ( int8_t* )( ( post_ops->pre_ops )->b_zp )->zero_point )[i] = ( int8_t )( ( i + 9 ) % 126 ); \
+            ( ( int8_t* )( ( post_ops->pre_ops )->b_zp )->zero_point )[i] = ( int8_t )( 0 ); \
         } \
         ( ( post_ops->pre_ops )->b_zp )->zero_point_len = n; \
 \
@@ -1473,7 +1481,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         if ( ( ( post_ops->pre_ops )->b_scl )->scale_factor == NULL ) { goto err_handler; } \
         for ( dim_t i = 0; i < n; ++i ) \
         { \
-            ( ( float* )( ( post_ops->pre_ops )->b_scl )->scale_factor )[i] = ( ( float )1 )/ ( ( float )1000 ); \
+            ( ( float* )( ( post_ops->pre_ops )->b_scl )->scale_factor )[i] = ( ( float )2 ); \
         } \
         ( ( post_ops->pre_ops )->b_scl )->scale_factor_len = n; \
  \

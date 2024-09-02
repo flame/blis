@@ -49,7 +49,7 @@ typedef enum
 	POST_OPS_SWISH = 9,
 	POST_OPS_MATRIX_MUL = 10,
 	POST_OPS_SUM = 11,
-	
+
 } LPGEMM_POST_OP_CODE;
 
 // Used as an internal structure.
@@ -90,6 +90,9 @@ typedef struct lpgemm_post_op_attr_t
 	uint64_t b_sum_offset;
 	int32_t* b_col_sum_vec;
 	int16_t* b_col_sum_vec_s16;
+	void*    pre_op_scale_factor;
+	dim_t    pre_op_scale_factor_len;
+	dim_t    pre_op_off;
 } lpgemm_post_op_attr;
 
 

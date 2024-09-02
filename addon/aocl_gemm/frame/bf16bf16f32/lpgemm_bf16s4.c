@@ -122,6 +122,9 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
         post_ops_attr.buf_downscale = NULL;
     }
 
+    post_ops_attr.pre_op_scale_factor = pre_op_list->scale_factor;
+    post_ops_attr.pre_op_scale_factor_len = pre_op_list->scale_factor_len;
+
     // Generate thrinfo objects for jc and ic loops from lpgemm_thrinfo_t.
     thrinfo_t thread_jc;
     thrinfo_t thread_ic;
@@ -135,6 +138,33 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
     dim_t ic_start, ic_end;
     bli_thread_range_sub(&thread_ic, m, MR, FALSE, &ic_start, &ic_end);
 
+    // By default use the pack-based implementation.
+    mtag_b = PACK_KC;
+
+#ifdef BLIS_KERNELS_ZEN4
+    // Special case handling
+    // s4->bf16 happens at kernel level
+    if( m == 4 )
+    {
+        mtag_b = UNPACKED;
+    }
+#endif
+
+
+    bfloat16* b_use_jr;
+
+    if( mtag_b == PACK_NR )
+    {
+        /* Allocating private pack buffer of size KCxNR for each thread */
+        mem_b_size_req = ( KC * NR * sizeof( bfloat16 ) );
+
+        lpgemm_alloc_mem_panel(
+                        mem_b_size_req, BLIS_BUFFER_FOR_GEN_USE,
+                        &mem_b, rntm);
+
+        b_use_jr = bli_mem_buffer(&mem_b);
+    }
+
     for (dim_t jc = jc_start; jc < jc_end; jc += NC)
     {
         dim_t nc0 = bli_min((jc_end - jc), NC);
@@ -144,12 +174,14 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
         dim_t jc_cur_loop_rem = 0;
         dim_t n_sub_updated = 0;
 
-        if (mtag_b == REORDERED)
+        /* B should always be reordered */
         {
             get_B_panel_reordered_start_offset_width(
                 jc, n, NC, packb_min_NR,
                 &jc_cur_loop, &jc_cur_loop_rem,
                 &nc0, &n_sub_updated);
+
+            lpgemm_get_packb_strides(lcntx, &rs_b_use, &cs_b_use);
         }
 
         if (c_downscale == F32)
@@ -208,7 +240,7 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
 
 
             // B matrix will always be packed.
-            //if (mtag_b == PACK)
+            if ( mtag_b == PACK_KC )
             {
                 // Pack B chunks are based on jc work id.
                 dim_t jc_work_id = bli_thread_work_id(&thread_jc);
@@ -334,25 +366,71 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
                     post_ops_attr.post_op_c_j = (jc + jr);
                     post_ops_attr.rs_c_downscale = rs_c_downscale;
 
-                    // Reorder/Packed B, Reorder/Packed/Unpacked A call.
-                    ((lpgemm_rowvar_bf16)lcntx->kern_fun_ptr)(
+                    if( mtag_b == PACK_NR )
+                    {
+                        int8_t* b_jr = b_reorder + ( jr * kc0_updated ) / 2;
+                        dim_t pre_op_off = jc_cur_loop + jc_cur_loop_rem
+                                    + jr;
+                        /* packing B at JR level */
+                        packsclb_nr64_bf16s4f32of32( b_use_jr, b_jr, nr0, kc0,
+                                                    &rs_b_use, &cs_b_use,
+                                                    pre_op_list, pre_op_off );
+
+                        /* packed B kernel */
+                        ((lpgemm_rowvar_bf16)lcntx->kern_fun_ptr)(
                         mc0, nr0, kc0,
                         a_use, rs_a_use, cs_a_use, a_block_stride,
-                        (b_use + (jr * kc0_updated)), rs_b_use, cs_b_use,
+                        b_use_jr, rs_b_use, cs_b_use,
                         (c_use_ic + jr), rs_c_use, 1,
                         alpha, beta0,
                         post_op_list, post_ops_attr);
+                    }
+                    else if ( mtag_b == PACK_KC)
+                    {
+                        b_use_jr = ( bfloat16* )b_use + ( jr * kc0_updated );
+
+                        /* packed B kernel */
+                        ((lpgemm_rowvar_bf16)lcntx->kern_fun_ptr)(
+                        mc0, nr0, kc0,
+                        a_use, rs_a_use, cs_a_use, a_block_stride,
+                        b_use_jr, rs_b_use, cs_b_use,
+                        (c_use_ic + jr), rs_c_use, 1,
+                        alpha, beta0,
+                        post_op_list, post_ops_attr);
+                    }
+#ifdef BLIS_KERNELS_ZEN4
+                    else // mtag_b == UNPACKED
+                    {
+                        int8_t* b_jr = b_reorder + ( jr * kc0_updated ) / 2;
+                        post_ops_attr.pre_op_off = jc_cur_loop + jc_cur_loop_rem
+                                    + jr;
+
+                        /* Hardcoding the kernel call since this kernel will be called
+                           only when m is 4. In future, if we decide to use this kind of
+                           implementation for all sizes, cntx can be updated with bf16s4 kernel
+                         */
+
+                        /* bf16s4f32of32 kernel */
+                        lpgemm_rowvar_bf16s4f32of32_4x64(
+                        4, nr0, kc0,
+                        a_use, rs_a_use, cs_a_use, a_block_stride,
+                        b_jr, rs_b_use, cs_b_use,
+                        (c_use_ic + jr), rs_c_use, 1,
+                        alpha, beta0,
+                        post_op_list, post_ops_attr );
+                    }
+#endif
                 }
             }
         }
-        if (mtag_b == REORDERED)
+        /* B is always reordered */
         {
             adjust_B_panel_reordered_jc(&jc, jc_cur_loop);
         }
     }
 
     // Release pack buffers.
-    //if (mtag_b == PACK)
+    if ( mtag_b == PACK_KC )
     {
         // All threads in work group should wait till B matrix usage is
         // completed by the participating threads.
@@ -366,6 +444,14 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
             {
                 bli_pba_release(rntm, &mem_b);
             }
+        }
+    }
+    else if ( mtag_b == PACK_NR )
+    {
+        /* releasing private B buffer */
+        if (bli_mem_is_alloc(&mem_b))
+        {
+            bli_pba_release(rntm, &mem_b);
         }
     }
     if (mtag_a == PACK)

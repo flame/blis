@@ -93,7 +93,9 @@ typedef enum
 {
 	UNPACKED = 0,
 	PACK = 1,
-	REORDERED = 2,
+	PACK_KC = 2,
+	PACK_NR = 3,
+	REORDERED = 4,
 } AOCL_MEMORY_TAG;
 
 typedef enum
