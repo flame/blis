@@ -94,15 +94,15 @@ static inline void bfloat16_to_float( bfloat16 bf16_val, float*  float_val )
     memcpy( float_val, &inter_temp, sizeof( int32_t ) );
 }
 
-static inline void convert_float_arr_to_bf16( float* array, bfloat16* array_bf16, int size )
+static inline void convert_float_arr_to_bf16( float* array, bfloat16* array_bf16, dim_t size )
 {
-    for (int i=0; i< size; i++)
+    for (dim_t i=0; i< size; i++)
     {
         float_to_bf16( ( array + i ), ( array_bf16 + i ) );
     }
 }
 
-static inline void* lpgemm_malloc( int32_t size )
+static inline void* lpgemm_malloc( dim_t size )
 {
     void* p;
     // creating a dummy buffer of size 4 bytes in case

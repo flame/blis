@@ -65,11 +65,11 @@ void print_matrix_bfloat16
 }
 
 #define PRINT_MATRIX(ctype) \
-void print_matrix_## ctype ( ctype* a, int32_t m, int32_t n, int32_t rs, int32_t cs) \
+void print_matrix_## ctype ( ctype* a, dim_t m, dim_t n, dim_t rs, dim_t cs) \
 { \
-    for(int32_t i = 0; i < m; i++) \
+    for(dim_t i = 0; i < m; i++) \
     { \
-        for(int32_t j = 0; j < n; j++) \
+        for(dim_t j = 0; j < n; j++) \
         { \
             printf("%f ", (float) (*(a + i * ( rs ) + j * cs ) ) ); \
         } \
@@ -1512,12 +1512,12 @@ void mat_mul_bench_main_ ## BLAS_SFX \
        char    transb, \
        char    op_a, \
        char    op_b, \
-       int32_t m, \
-       int32_t n, \
-       int32_t k, \
-       int32_t stride_a, \
-       int32_t stride_b, \
-       int32_t stride_c, \
+       dim_t m, \
+       dim_t n, \
+       dim_t k, \
+       dim_t stride_a, \
+       dim_t stride_b, \
+       dim_t stride_c, \
        char*   post_ops_str, \
        bool    int4_testing /* Workaround to enable int4 B matrix testing. */\
      ) \
@@ -1528,9 +1528,9 @@ void mat_mul_bench_main_ ## BLAS_SFX \
         n_repeats = global_n_repeat; \
     } \
  \
-    int32_t size_A = 0; \
-    int32_t size_B = 0; \
-    int32_t size_C = 0; \
+    dim_t size_A = 0; \
+    dim_t size_B = 0; \
+    dim_t size_C = 0; \
     if( ( stor_order == 'r' ) || ( stor_order == 'R' ) ) \
     { \
         size_A = ( ( transa == 'n' ) || ( transa == 'N' ) ) ? m * stride_a : k * stride_a; \
@@ -1798,8 +1798,8 @@ int main( int argc, char** argv )
     char op_a, op_b;
     char stor_order;
     char transa, transb;
-    int32_t m, n, k;
-    int32_t stride_a, stride_b, stride_c;
+    dim_t m, n, k;
+    dim_t stride_a, stride_b, stride_c;
 
     const dim_t len_list_omp_cores_for_testing = 2;
     const dim_t list_omp_cores_for_testing[2] = { 1, 64 };
@@ -1836,7 +1836,7 @@ int main( int argc, char** argv )
         }
 
         // Input format: data_type stor_type pack/reorder m n k lda ldb ldc
-        while ( fscanf( fin, "%c %c %c %c %c %d %d %d %d %d %d %s\n",
+        while ( fscanf( fin, "%c %c %c %c %c %ld %ld %ld %ld %ld %ld %s\n",
                 &stor_order, &transa, &transb, &op_a, &op_b, &m, &n, &k,
                 &stride_a, &stride_b, &stride_c, ops_input_str ) == 12 )
         {
