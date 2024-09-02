@@ -37,18 +37,6 @@
 # FLAGS that are common for all the AMD architectures are present in
 # config/zen/amd_config.mk.
 
-# In case of amdzen:
-# Include zen2 config to use znver2 flag
-# THIS_CONFIG variable will be zen2 in zen2 config,
-# Hence override the variable with zen.
-# For intrinsic code, using znver2 flag improves
-# performance significantly
-ifeq ($(CONFIG_NAME),amdzen)
-  -include $(BASE_SHARE_PATH)/config/zen2/make_defs.mk
-  THIS_CONFIG    := zen
-  $(eval $(call store-make-defs,$(THIS_CONFIG)))
-else
-
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
 THIS_CONFIG    := zen
@@ -119,4 +107,3 @@ endif
 # configuration name.
 $(eval $(call store-make-defs,$(THIS_CONFIG)))
 
-endif # amdzen cofig

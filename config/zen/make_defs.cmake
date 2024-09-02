@@ -32,54 +32,47 @@
 
 ]=]
 
-# If we are building for amdzen, use zen2 flags (znver2)
-# for zen/zen2/zen3 cases.
-if(${BLIS_CONFIG_FAMILY} STREQUAL "amdzen")
-    include(${CMAKE_SOURCE_DIR}/config/zen2/make_defs.cmake)
-else()
-
-# Include file containing common flags for all AMD architectures except amdzen
+# Include file containing common flags for all AMD architectures
 include(${CMAKE_SOURCE_DIR}/config/zen/amd_config.cmake)
-    if(NOT WIN32)
-        if(NOT (DEBUG_TYPE STREQUAL "off"))
-            set(CDBGFLAGS -g)
-        endif()
-
-        if(DEBUG_TYPE STREQUAL "noopt")
-            set(COPTFLAGS -O0)
-        else() # off or opt
-            set(COPTFLAGS -O3)
-        endif()
+if(NOT WIN32)
+    if(NOT (DEBUG_TYPE STREQUAL "off"))
+        set(CDBGFLAGS -g)
     endif()
 
-    # Flags specific to LPGEMM kernels.
-    set(CKLPOPTFLAGS "")
-
-    # Flags specific to optimized kernels.
-    # NOTE: The -fomit-frame-pointer option is needed for some kernels because
-    # they make explicit use of the rbp register.
-    if(MSVC)
-        set(CKOPTFLAGS ${COPTFLAGS} /Oy)
-    else()
-        set(CKOPTFLAGS ${COPTFLAGS} -fomit-frame-pointer)
+    if(DEBUG_TYPE STREQUAL "noopt")
+        set(COPTFLAGS -O0)
+    else() # off or opt
+        set(COPTFLAGS -O3)
     endif()
+endif()
 
-    if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-        list(APPEND CKVECFLAGS -march=znver1)
-        if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0.0)
-            list(APPEND CKLPOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse)
-        endif()
+# Flags specific to LPGEMM kernels.
+set(CKLPOPTFLAGS "")
+
+# Flags specific to optimized kernels.
+# NOTE: The -fomit-frame-pointer option is needed for some kernels because
+# they make explicit use of the rbp register.
+if(MSVC)
+    set(CKOPTFLAGS ${COPTFLAGS} /Oy)
+else()
+    set(CKOPTFLAGS ${COPTFLAGS} -fomit-frame-pointer)
+endif()
+
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    list(APPEND CKVECFLAGS -march=znver1)
+    if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0.0)
+        list(APPEND CKLPOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse)
     endif()
+endif()
 
-    if("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
-        list(APPEND CKVECFLAGS -march=znver1)
-    endif() # clang
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+    list(APPEND CKVECFLAGS -march=znver1)
+endif() # clang
 
-    # Flags specific to reference kernels.
-    set(CROPTFLAGS ${CKOPTFLAGS})
-    if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-        set(CRVECFLAGS ${CKVECFLAGS})
-    else()
-        set(CRVECFLAGS ${CKVECFLAGS})
-    endif()
-endif() # amdzen cofig
+# Flags specific to reference kernels.
+set(CROPTFLAGS ${CKOPTFLAGS})
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    set(CRVECFLAGS ${CKVECFLAGS})
+else()
+    set(CRVECFLAGS ${CKVECFLAGS})
+endif()
