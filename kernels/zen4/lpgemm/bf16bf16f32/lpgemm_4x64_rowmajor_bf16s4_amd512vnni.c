@@ -3418,6 +3418,7 @@ LPGEMM_MAIN_KERN1(bfloat16, int8_t, float, bf16s4f32of32_4x64)
 			b = b + ( 48 * k0_updated ) / 2; // k0x48 packed contiguosly.
 			c = c + 48;
 			post_ops_attr.post_op_c_j += 48;
+			post_ops_attr.pre_op_off += 48;
 		}
 
 		else if ( n0_32 == 1 )
@@ -3435,6 +3436,7 @@ LPGEMM_MAIN_KERN1(bfloat16, int8_t, float, bf16s4f32of32_4x64)
 			b = b + ( 32 * k0_updated ) / 2; // k0x32 packed contiguosly.
 			c = c + 32;
 			post_ops_attr.post_op_c_j += 32;
+			post_ops_attr.pre_op_off += 32;
 		}
 
 		else if ( n0_16 == 1 )
@@ -3452,6 +3454,7 @@ LPGEMM_MAIN_KERN1(bfloat16, int8_t, float, bf16s4f32of32_4x64)
 			b = b + ( 16 * k0_updated ) / 2; // k0x16 packed contiguosly.
 			c = c + 16;
 			post_ops_attr.post_op_c_j += 16;
+			post_ops_attr.pre_op_off += 16;
 		}
 
 		if ( n0_rem > 0 )

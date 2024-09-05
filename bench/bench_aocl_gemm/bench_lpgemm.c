@@ -500,7 +500,8 @@ static inline float mat_mul_accuracy_check_accum_bf16bf16f32obf16
     float c_ref_float;
     bfloat16_to_float( *( c_ref + i*rs_c_ref + j*cs_c_ref ), &c_ref_float );
     temp_accum = ( beta * ( c_ref_float ) ) + ( alpha * temp_accum );
-    uint32_t inter_temp = *( ( uint32_t* ) &temp_accum );
+    uint32_t inter_temp;
+    memcpy( &inter_temp, &temp_accum, sizeof( float ) );
     // check if 15th bit is set
     if( inter_temp & (uint32_t)0x00008000)
     {
@@ -1481,7 +1482,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         if ( ( ( post_ops->pre_ops )->b_scl )->scale_factor == NULL ) { goto err_handler; } \
         for ( dim_t i = 0; i < n; ++i ) \
         { \
-            ( ( float* )( ( post_ops->pre_ops )->b_scl )->scale_factor )[i] = ( ( float )2 ); \
+            ( ( float* )( ( post_ops->pre_ops )->b_scl )->scale_factor )[i] = ( ( float )( ( i + 1 ) % 5 ) ); \
         } \
         ( ( post_ops->pre_ops )->b_scl )->scale_factor_len = n; \
  \
