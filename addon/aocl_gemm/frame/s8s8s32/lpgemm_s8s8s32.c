@@ -148,6 +148,9 @@ LPGEMV(int8_t,int8_t,int32_t,s8s8s32o32)
 
 		// Compute the IC loop thread range for the current thread.
 		dim_t ic_start, ic_end;
+		thread_ic.n_way = ( thread_ic.n_way == 1 ) ?
+			( thread->n_threads ) : ( thread_ic.n_way );
+		thread_ic.work_id = thread->tid;
 		bli_thread_range_sub(&thread_ic, m, MR, FALSE, &ic_start, &ic_end);
 
 		for (dim_t ic = ic_start; ic < ic_end; ic += MC)
@@ -209,6 +212,9 @@ LPGEMV(int8_t,int8_t,int32_t,s8s8s32o32)
 	else
 	{
 		dim_t jc_start, jc_end;
+		thread_jc.n_way = ( thread_jc.n_way == 1 ) ?
+			( thread->n_threads ) : ( thread_jc.n_way );
+		thread_jc.work_id = thread->tid;
 		bli_thread_range_sub(&thread_jc, n, NR, FALSE, &jc_start, &jc_end);
 
 		dim_t packb_min_NR = get_packb_s8s8s32o32_min_NR();

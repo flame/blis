@@ -299,8 +299,6 @@ BLIS_INLINE void lpgemm_s16o16_get_threading
 
 		dim_t NR = lpgemm_get_block_size_NR_global_cntx( op_type );
 		dim_t MR = lpgemm_get_block_size_MR_global_cntx( op_type );
-		dim_t mr_blks = ( m + MR - 1 ) / MR;
-		dim_t nr_blks = ( n + NR - 1 ) / NR;
 
 		if ( n <= NR )
 		{
@@ -318,26 +316,6 @@ BLIS_INLINE void lpgemm_s16o16_get_threading
 		{
 			// If BLIS_NUM_THREADS are set, generate jc,ic from the same.
 			bli_thread_partition_2x2( ( *n_threads ), m, n, ic_ways, jc_ways );
-			if ( ( mr_blks < ( *ic_ways ) ) && ( nr_blks < ( *jc_ways ) ) )
-			{
-				( *ic_ways ) = mr_blks;
-				( *jc_ways ) = nr_blks;
-				( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
-			}
-			else if ( mr_blks < ( *ic_ways ) )
-			{
-				( *ic_ways ) = mr_blks;
-				dim_t rem_jc_ways = ( dim_t )( ( *n_threads ) / ( *ic_ways ) );
-				( *jc_ways ) = ( rem_jc_ways < nr_blks ) ? rem_jc_ways : nr_blks;
-				( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
-			}
-			else if ( nr_blks < ( *jc_ways ) )
-			{
-				( *jc_ways ) = nr_blks;
-				dim_t rem_ic_ways = ( dim_t )( ( *n_threads ) / ( *jc_ways ) );
-				( *ic_ways ) = ( rem_ic_ways < mr_blks ) ? rem_ic_ways : mr_blks;
-				( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
-			}
 		}
 	}
 	else
@@ -439,27 +417,7 @@ BLIS_INLINE void lpgemm_s32o32_get_threading
 		{
 			// If BLIS_NUM_THREADS are set, generate jc,ic from the same.
 			bli_thread_partition_2x2( ( *n_threads ), m, n, ic_ways, jc_ways );
-			if ( ( mr_blks < ( *ic_ways ) ) && ( nr_blks < ( *jc_ways ) ) )
-			{
-				( *ic_ways ) = mr_blks;
-				( *jc_ways ) = nr_blks;
-				( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
-			}
-			else if ( mr_blks < ( *ic_ways ) )
-			{
-				( *ic_ways ) = mr_blks;
-				dim_t rem_jc_ways = ( dim_t )( ( *n_threads ) / ( *ic_ways ) );
-				( *jc_ways ) = ( rem_jc_ways < nr_blks ) ? rem_jc_ways : nr_blks;
-				( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
-			}
-			else if ( nr_blks < ( *jc_ways ) )
-			{
-				( *jc_ways ) = nr_blks;
-				dim_t rem_ic_ways = ( dim_t )( ( *n_threads ) / ( *jc_ways ) );
-				( *ic_ways ) = ( rem_ic_ways < mr_blks ) ? rem_ic_ways : mr_blks;
-				( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
-			}
-			else
+			if ( ( mr_blks >= ( *ic_ways ) ) && ( nr_blks >= ( *jc_ways ) ) )
 			{
 				lpgemm_pnl_wrk_heur_adjust_ic_jc_ways
 				(
@@ -567,27 +525,7 @@ BLIS_INLINE void lpgemm_bf16bf16f32of32_get_threading
 		{
 			// If BLIS_NUM_THREADS are set, generate jc,ic from the same.
 			bli_thread_partition_2x2( ( *n_threads ), m, n, ic_ways, jc_ways );
-			if ( ( mr_blks < ( *ic_ways ) ) && ( nr_blks < ( *jc_ways ) ) )
-			{
-				( *ic_ways ) = mr_blks;
-				( *jc_ways ) = nr_blks;
-				( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
-			}
-			else if ( mr_blks < ( *ic_ways ) )
-			{
-				( *ic_ways ) = mr_blks;
-				dim_t rem_jc_ways = ( dim_t )( ( *n_threads ) / ( *ic_ways ) );
-				( *jc_ways ) = ( rem_jc_ways < nr_blks ) ? rem_jc_ways : nr_blks;
-				( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
-			}
-			else if ( nr_blks < ( *jc_ways ) )
-			{
-				( *jc_ways ) = nr_blks;
-				dim_t rem_ic_ways = ( dim_t )( ( *n_threads ) / ( *jc_ways ) );
-				( *ic_ways ) = ( rem_ic_ways < mr_blks ) ? rem_ic_ways : mr_blks;
-				( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
-			}
-			else
+			if ( ( mr_blks >= ( *ic_ways ) ) && ( nr_blks >= ( *jc_ways ) ) )
 			{
 				lpgemm_pnl_wrk_heur_adjust_ic_jc_ways
 				(
@@ -673,27 +611,7 @@ BLIS_INLINE void lpgemm_f32f32f32of32_get_threading
 		{
 			// If BLIS_NUM_THREADS are set, generate jc,ic from the same.
 			bli_thread_partition_2x2( ( *n_threads ), m, n, ic_ways, jc_ways );
-			if ( ( mr_blks < ( *ic_ways ) ) && ( nr_blks < ( *jc_ways ) ) )
-			{
-				( *ic_ways ) = mr_blks;
-				( *jc_ways ) = nr_blks;
-				( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
-			}
-			else if ( mr_blks < ( *ic_ways ) )
-			{
-				( *ic_ways ) = mr_blks;
-				dim_t rem_jc_ways = ( dim_t )( ( *n_threads ) / ( *ic_ways ) );
-				( *jc_ways ) = ( rem_jc_ways < nr_blks ) ? rem_jc_ways : nr_blks;
-				( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
-			}
-			else if ( nr_blks < ( *jc_ways ) )
-			{
-				( *jc_ways ) = nr_blks;
-				dim_t rem_ic_ways = ( dim_t )( ( *n_threads ) / ( *jc_ways ) );
-				( *ic_ways ) = ( rem_ic_ways < mr_blks ) ? rem_ic_ways : mr_blks;
-				( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
-			}
-			else
+			if ( ( mr_blks >= ( *ic_ways ) ) && ( nr_blks >= ( *jc_ways ) ) )
 			{
 		       	lpgemm_adjust_ic_jc_ways
 		      	(

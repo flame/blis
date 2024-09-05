@@ -152,6 +152,9 @@ LPGEMV(float, float, float, f32f32f32of32)
 
     // Compute the IC loop thread range for the current thread.
     dim_t ic_start, ic_end;
+	thread_ic.n_way = ( thread_ic.n_way == 1 ) ?
+		( thread->n_threads ) : ( thread_ic.n_way );
+	thread_ic.work_id = thread->tid;
     bli_thread_range_sub(&thread_ic, m, MR, FALSE, &ic_start, &ic_end);
 
     for (dim_t ic = ic_start; ic < ic_end; ic += MC)
@@ -179,6 +182,9 @@ LPGEMV(float, float, float, f32f32f32of32)
   {
     // Compute the JC loop thread range for the current thread.
     dim_t jc_start, jc_end;
+	thread_jc.n_way = ( thread_jc.n_way == 1 ) ?
+		( thread->n_threads ) : ( thread_jc.n_way );
+	thread_jc.work_id = thread->tid;
     bli_thread_range_sub(&thread_jc, n, NR, FALSE, &jc_start, &jc_end);
 
     for (dim_t jc = jc_start; jc < jc_end; jc += NC)
