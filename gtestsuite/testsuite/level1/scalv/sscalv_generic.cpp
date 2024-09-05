@@ -63,7 +63,7 @@ TEST_P( sscalvGeneric, API )
     // Check gtestsuite scalv.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    double thresh;
+    float thresh;
     if (n == 0)
         thresh = 0.0;
     else if (alpha == testinghelpers::ZERO<T>() || alpha == testinghelpers::ONE<T>())
@@ -77,18 +77,119 @@ TEST_P( sscalvGeneric, API )
     test_scalv<T>( conj_alpha, n, incx, alpha, thresh );
 }
 
-// Black box testing for generic and main use of sscal.
+// Black box testing for generic use of sscal.
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
+        unitPositiveIncrementSmall,
         sscalvGeneric,
         ::testing::Combine(
-            ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
-            ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
-            ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(float(3.0), float(-5.0))                       // alpha
+            // conj(alpha): uses n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Range(gtint_t(1), gtint_t(101), 1),
+            // incx: stride of x vector.
+            ::testing::Values(
+                                gtint_t(1)
+            ),
+            // alpha: value of scalar.
+            ::testing::Values(
+                                float( 7.0),
+                                float(-3.0)
+            )
         ),
         (::scalvGenericPrint<float, float>())
     );
+
+// Black box testing for generic use of dscal.
+INSTANTIATE_TEST_SUITE_P(
+        unitPositiveIncrementLarge,
+        sscalvGeneric,
+        ::testing::Combine(
+            // conj(alpha): uses n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Values(gtint_t(111), gtint_t(193), gtint_t(403)),
+            // incx: stride of x vector.
+            ::testing::Values(
+                                gtint_t(1)
+            ),
+            // alpha: value of scalar.
+            ::testing::Values(
+                                float( 7.0),
+                                float(-3.0)
+            )
+        ),
+        (::scalvGenericPrint<float, float>())
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        nonUnitPositiveIncrementSmall,
+        sscalvGeneric,
+        ::testing::Combine(
+            // conj(alpha): uses n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Range(gtint_t(1), gtint_t(17), 1),
+            // incx: stride of x vector.
+            ::testing::Values(
+                                gtint_t(2),
+                                gtint_t(41)
+            ),
+            // alpha: value of scalar.
+            ::testing::Values(
+                                float( 7.0),
+                                float(-3.0)
+            )
+        ),
+        (::scalvGenericPrint<float, float>())
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        nonUnitPositiveIncrementLarge,
+        sscalvGeneric,
+        ::testing::Combine(
+            // conj(alpha): uses n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Values(gtint_t(111), gtint_t(193), gtint_t(403)),
+            // incx: stride of x vector.
+            ::testing::Values(
+                                gtint_t(2),
+                                gtint_t(41)
+            ),
+            // alpha: value of scalar.
+            ::testing::Values(
+                                float( 7.0),
+                                float(-3.0)
+            )
+        ),
+        (::scalvGenericPrint<float, float>())
+    );
+
+#ifndef TEST_BLIS_TYPED
+// alpha=0 testing only for BLAS and CBLAS as
+// BLIS uses setv and won't propagate Inf and NaNs
+INSTANTIATE_TEST_SUITE_P(
+        alphaZero,
+        sscalvGeneric,
+        ::testing::Combine(
+            // conj(alpha): uses n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Range(gtint_t(1), gtint_t(101), 1),
+            // incx: stride of x vector.
+            ::testing::Values(
+                                gtint_t(1),
+                                gtint_t(2),
+                                gtint_t(41)
+            ),
+            // alpha: value of scalar.
+            ::testing::Values(
+                                float( 0.0)
+            )
+        ),
+        (::scalvGenericPrint<float, float>())
+    );
+#endif
 
 #ifdef TEST_BLIS_TYPED
 // Test when conjugate of x is used as an argument. This option is BLIS-api specific.
@@ -101,27 +202,11 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('c'),                                          // c: use conjugate
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(float(9.0))                                    // alpha
+            ::testing::Values(float(-3.0))                                  // alpha
         ),
         (::scalvGenericPrint<float, float>())
     );
 #endif
-
-// Test for non-unit increments.
-// Only test very few cases as sanity check.
-// We can modify the values using implementantion details.
-INSTANTIATE_TEST_SUITE_P(
-        NonUnitPositiveIncrements,
-        sscalvGeneric,
-        ::testing::Combine(
-            ::testing::Values('n'),                                          // n: use x
-            ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector takes values from 10 to 100 with step size of 10.
-            ::testing::Values(gtint_t(2), gtint_t(11)),                      //(gtint_t(-5), gtint_t(-17)) // stride size for x
-            ::testing::Values(float(2.0))                                    // alpha
-        ),
-        (::scalvGenericPrint<float, float>())
-    );
-
 
 #ifndef TEST_BLIS_TYPED
 // Test for negative increments.

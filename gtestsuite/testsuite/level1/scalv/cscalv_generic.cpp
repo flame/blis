@@ -36,10 +36,10 @@
 #include "test_scalv.h"
 
 class cscalvGeneric :
-        public ::testing::TestWithParam<std::tuple<char,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   scomplex>> {};
+        public ::testing::TestWithParam<std::tuple<char,            // conj_alpha
+                                                   gtint_t,         // n
+                                                   gtint_t,         // incx
+                                                   scomplex>> {};   // alpha
 
 
 // Tests using random integers as vector elements.
@@ -78,42 +78,140 @@ TEST_P( cscalvGeneric, API )
     test_scalv<T>( conj_alpha, n, incx, alpha, thresh );
 }
 
-// Black box testing for generic and main use of cscal.
+// Black box testing for generic use of dscal.
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
+        unitPositiveIncrementSmall,
         cscalvGeneric,
         ::testing::Combine(
-            ::testing::Values('n'
-#ifdef TEST_BLIS_TYPED
-            , 'c'                                                            // this option is BLIS-api specific.
-#endif
-            ),                                                               // n: use x, c: use conj(x)
-            ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
-            ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(scomplex{2.0, -1.0}, scomplex{-2.0, 3.0})      // alpha
+            // conj(alpha): uses n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Range(gtint_t(1), gtint_t(101), 1),
+            // incx: stride of x vector.
+            ::testing::Values(
+                                gtint_t(1)
+            ),
+            // alpha: value of scalar.
+            ::testing::Values(
+                                scomplex{-5.1, -7.3},
+                                scomplex{ 1.0,  1.0},
+                                scomplex{ 7.3,  5.1}
+            )
         ),
         (::scalvGenericPrint<scomplex, scomplex>())
     );
 
+// Black box testing for generic use of dscal.
+INSTANTIATE_TEST_SUITE_P(
+        unitPositiveIncrementLarge,
+        cscalvGeneric,
+        ::testing::Combine(
+            // conj(alpha): uses n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Values(gtint_t(111), gtint_t(193), gtint_t(403)),
+            // incx: stride of x vector.
+            ::testing::Values(
+                                gtint_t(1)
+            ),
+            // alpha: value of scalar.
+            ::testing::Values(
+                                scomplex{-5.1, -7.3},
+                                scomplex{ 1.0,  1.0},
+                                scomplex{ 7.3,  5.1}
+            )
+        ),
+        (::scalvGenericPrint<scomplex, scomplex>())
+    );
 
-// Test for non-unit increments.
-// Only test very few cases as sanity check.
+INSTANTIATE_TEST_SUITE_P(
+        nonUnitPositiveIncrementSmall,
+        cscalvGeneric,
+        ::testing::Combine(
+            // conj(alpha): uses n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Range(gtint_t(1), gtint_t(9), 1),
+            // incx: stride of x vector.
+            ::testing::Values(
+                                gtint_t(2),
+                                gtint_t(41)
+            ),
+            // alpha: value of scalar.
+            ::testing::Values(
+                                scomplex{-5.1, -7.3},
+                                scomplex{ 1.0,  1.0},
+                                scomplex{ 7.3,  5.1}
+            )
+        ),
+        (::scalvGenericPrint<scomplex, scomplex>())
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        nonUnitPositiveIncrementLarge,
+        cscalvGeneric,
+        ::testing::Combine(
+            // conj(alpha): uses n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Values(gtint_t(111), gtint_t(193), gtint_t(403)),
+            // incx: stride of x vector.
+            ::testing::Values(
+                                gtint_t(2),
+                                gtint_t(41)
+            ),
+            // alpha: value of scalar.
+            ::testing::Values(
+                                scomplex{-5.1, -7.3},
+                                scomplex{ 1.0,  1.0},
+                                scomplex{ 7.3,  5.1}
+            )
+        ),
+        (::scalvGenericPrint<scomplex, scomplex>())
+    );
+
+#ifndef TEST_BLIS_TYPED
+// alpha=0 testing only for BLAS and CBLAS as
+// BLIS uses setv and won't propagate Inf and NaNs
+INSTANTIATE_TEST_SUITE_P(
+        alphaZero,
+        cscalvGeneric,
+        ::testing::Combine(
+            // conj(alpha): uses n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Range(gtint_t(1), gtint_t(101), 1),
+            // incx: stride of x vector.
+            ::testing::Values(
+                                gtint_t(1),
+                                gtint_t(2),
+                                gtint_t(41)
+            ),
+            // alpha: value of scalar.
+            ::testing::Values(
+                                scomplex{ 0.0,  0.0}
+            )
+        ),
+        (::scalvGenericPrint<scomplex, scomplex>())
+    );
+#endif
+
+#ifdef TEST_BLIS_TYPED
+// Test when conjugate of x is used as an argument. This option is BLIS-api specific.
+// Only test very few cases as sanity check since conj(x) = x for real types.
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
-        NonUnitPositiveIncrements,
+        conjalpha,
         cscalvGeneric,
         ::testing::Combine(
-            ::testing::Values('n'
-#ifdef TEST_BLIS_TYPED
-            , 'c'                                                            // this option is BLIS-api specific.
-#endif
-            ),                                                               // n: use x, c: use conj(x)
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m size of vector takes values from 10 to 100 with step size of 10.
-            ::testing::Values(gtint_t(2), gtint_t(11)),                      //(gtint_t(-5), gtint_t(-17)) // stride size for x
-            ::testing::Values(scomplex{4.0, 3.1})                            // alpha
+            ::testing::Values('c'),                                          // c: use conjugate
+            ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector takes values from 10 to 100 with step size of 10.
+            ::testing::Values(gtint_t(1)),                                   // stride size for x
+            ::testing::Values(scomplex{ 7.3,  5.1})                          // alpha
         ),
         (::scalvGenericPrint<scomplex, scomplex>())
     );
+#endif
 
 #ifndef TEST_BLIS_TYPED
 // Test for negative increments.
@@ -126,7 +224,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'),                                          // n: use x, c: use conj(x)
             ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(-2), gtint_t(-1)),                     // stride size for x
-            ::testing::Values(scomplex{4.0, 3.1})                            // alpha
+            ::testing::Values(scomplex{ 7.3,  5.1})                          // alpha
         ),
         (::scalvGenericPrint<scomplex, scomplex>())
     );

@@ -50,13 +50,16 @@
 
   1. When alpha == NaN - Propogate the NaN to the vector
   2. When alpha == 0 - Perform the SCALV operation completely and don't use setv.
+     As SCALV kernels are used in many other BLAS APIs where we want setv to be
+     used in this scenario, here we call the kernels with n=-n to signify that
+     setv should not be used.
 */
 
 //
 // Define BLAS-to-BLIS interfaces.
 //
 #undef  GENTFUNCSCAL
-#define GENTFUNCSCAL( ftype_x, ftype_a, chx, cha, blasname, blisname ) \
+#define GENTFUNCSCAL( ftype_x, ftype_a, chx, cha, chau, blasname, blisname ) \
 \
 void PASTEF772S(chx,cha,blasname) \
      ( \
@@ -66,55 +69,42 @@ void PASTEF772S(chx,cha,blasname) \
      ) \
 { \
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
-	dim_t    n0; \
-	ftype_x* x0; \
-	inc_t    incx0; \
-	ftype_x  alpha_cast; \
 \
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
 \
-	if (*n == 0 || alpha == NULL) { \
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
-		return ; \
-	} \
+	dim_t n0 = (dim_t)(*n); \
+	ftype_x *x0 = x; \
+	inc_t incx0 = (inc_t)(*incx); \
 \
-	/* Convert/typecast negative values of n to zero. */ \
-	bli_convert_blas_dim1( *n, n0 ); \
-\
-	/* If the input increments are less than or equal to zero, return. */ \
-	if ( (*incx) <= 0 ) { \
+	if ((n0 <= 0) || (alpha == NULL) || (incx0 <= 0) || PASTEMAC(chau, eq1)(*alpha)) \
+	{ \
 		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
+		/* Finalize BLIS. */ \
+		bli_finalize_auto(); \
 		return ; \
-	} else { \
-		incx0 = ( inc_t )(*incx); \
-		x0 = (x); \
 	} \
 \
 	/* NOTE: We do not natively implement BLAS's csscal/zdscal in BLIS.
 	   that is, we just always sub-optimally implement those cases
 	   by casting alpha to ctype_x (potentially the complex domain) and
 	   using the homogeneous datatype instance according to that type. */ \
+	ftype_x  alpha_cast; \
 	PASTEMAC2(cha,chx,copys)( *alpha, alpha_cast ); \
 \
-	/* If alpha is a unit scalar, return early. */ \
-	if ( PASTEMAC(c, eq1)(alpha_cast) ) { \
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
-		return ; \
-	} \
-\
 	/* Call BLIS interface. */ \
+	/* Pass size as negative to stipulate don't use SETV when alpha=0 */ \
 	PASTEMAC2(chx,blisname,BLIS_TAPI_EX_SUF) \
 	( \
 	  BLIS_NO_CONJUGATE, \
-	  n0, \
+	  -n0, \
 	  &alpha_cast, \
 	  x0, incx0, \
 	  NULL, \
 	  NULL  \
 	); \
 \
-  AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
 }\
@@ -139,82 +129,72 @@ void sscal_blis_impl
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', (void *) alpha, *n, *incx );
-    dim_t  n0;
-    float* x0;
-    inc_t  incx0;
+
     /* Initialize BLIS. */
     //bli_init_auto();
 
-    if ((*n) <= 0 || alpha == NULL || bli_seq1(*alpha))
+    dim_t n0 = (dim_t)(*n);
+    float *x0 = x;
+    inc_t incx0 = (inc_t)(*incx);
+
+    /*
+      Return early when n <= 0 or incx <= 0 or alpha == 1.0 - BLAS exception
+      Return early when alpha pointer is NULL - BLIS exception
+    */
+    if ((n0 <= 0) || (alpha == NULL) || (incx0 <= 0) || PASTEMAC(s, eq1)(*alpha))
     {
-      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-      return;
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+        /* Finalize BLIS. */
+        //bli_finalize_auto();
+        return;
     }
 
-    /* Convert/typecast negative values of n to zero. */
-    if ( *n < 0 ) n0 = ( dim_t )0;
-    else          n0 = ( dim_t )(*n);
-
-    /* If the input increments are less than or equal to zero, return. */
-    if ( (*incx) <= 0 )
-    {
-      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-      return ;
-    }
-    else
-    {
-      x0    = (x);
-      incx0 = ( inc_t )(*incx);
-    }
+    // Definition of function pointer
+    sscalv_ker_ft scalv_ker_ptr;
 
     cntx_t *cntx = NULL;
 
     // Query the architecture ID
     arch_t id = bli_arch_query_id();
 
-    /*
-      Function pointer declaration for the function
-      that will be used by this API
-    */
-    sscalv_ker_ft scalv_ker_ptr; // DSCALV
-
     // Pick the kernel based on the architecture ID
     switch (id)
     {
-      case BLIS_ARCH_ZEN5:
-      case BLIS_ARCH_ZEN4:
+        case BLIS_ARCH_ZEN5:
+        case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
-        scalv_ker_ptr = bli_sscalv_zen_int_avx512;
-
-        break;
+          scalv_ker_ptr = bli_sscalv_zen_int_avx512;
+          break;
 #endif
-      case BLIS_ARCH_ZEN:
-      case BLIS_ARCH_ZEN2:
-      case BLIS_ARCH_ZEN3:
-        scalv_ker_ptr = bli_sscalv_zen_int10;
+        case BLIS_ARCH_ZEN:
+        case BLIS_ARCH_ZEN2:
+        case BLIS_ARCH_ZEN3:
+          scalv_ker_ptr = bli_sscalv_zen_int10;
+          break;
 
-        break;
-      default:
+        default:
 
-        // For non-Zen architectures, query the context
-        cntx = bli_gks_query_cntx();
+          // For non-Zen architectures, query the context
+          cntx = bli_gks_query_cntx();
 
-        // Query the context for the kernel function pointers for sscalv
-        scalv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_FLOAT, BLIS_SCALV_KER, cntx);
+          // Query the context for the kernel function pointers for sscalv
+          scalv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_FLOAT, BLIS_SCALV_KER, cntx);
     }
 
+    // Invoke the function based on the kernel function pointer
+    // Pass size as negative to stipulate don't use SETV when alpha=0
     scalv_ker_ptr
     (
       BLIS_NO_CONJUGATE,
-      n0,
+      -n0,
       (float *)alpha,
       x0, incx0,
       cntx
     );
 
-    /* Finalize BLIS. */
-    //    bli_finalize_auto();
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+    /* Finalize BLIS. */
+    //bli_finalize_auto();
 }
 #ifdef BLIS_ENABLE_BLAS
 void sscal_
@@ -224,7 +204,7 @@ void sscal_
        float*   x, const f77_int* incx
      )
 {
-  sscal_blis_impl( n, alpha, x, incx );
+    sscal_blis_impl( n, alpha, x, incx );
 }
 #endif
 void dscal_blis_impl
@@ -236,65 +216,54 @@ void dscal_blis_impl
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', (void *)alpha, *n, *incx );
-    dim_t  n_elem;
-#ifdef BLIS_ENABLE_OPENMP
-    dim_t  ST_THRESH = 30000;
-#endif
-    double* x0;
-    inc_t  incx0;
 
-    /* Initialize BLIS  */
+    /* Initialize BLIS. */
     //bli_init_auto();
 
-    /* Convert typecast negative values of n to zero. */
-    if ( *n < 0 ) n_elem = ( dim_t )0;
-    else          n_elem = ( dim_t )(*n);
+    dim_t n0 = (dim_t)(*n);
+    double *x0 = x;
+    inc_t incx0 = (inc_t)(*incx);
 
     /*
       Return early when n <= 0 or incx <= 0 or alpha == 1.0 - BLAS exception
       Return early when alpha pointer is NULL - BLIS exception
     */
-    if ((*n) <= 0 || alpha == NULL || bli_deq1(*alpha))
+    if ((n0 <= 0) || (alpha == NULL) || (incx0 <= 0) || PASTEMAC(d, eq1)(*alpha))
     {
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+        /* Finalize BLIS. */
+        //bli_finalize_auto();
         return;
     }
 
-    /* If the input increments are less than or equal to zero, return. */
-    if ( (*incx) <= 0 )
-    {
-      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-      return ;
-    }
-    else
-    {
-      x0    = (x);
-      incx0 = ( inc_t )(*incx);
-    }
-
-     // Definition of function pointer
+    // Definition of function pointer
     dscalv_ker_ft scalv_ker_ptr;
 
     cntx_t *cntx = NULL;
 
+#ifdef BLIS_ENABLE_OPENMP
+    dim_t ST_THRESH = 30000;
+#endif
+
     // Query the architecture ID
-    arch_t arch_id_local = bli_arch_query_id();
+    arch_t id = bli_arch_query_id();
 
     // Pick the kernel based on the architecture ID
-    switch (arch_id_local)
+    switch (id)
     {
-      case BLIS_ARCH_ZEN5:
-      case BLIS_ARCH_ZEN4:
+        case BLIS_ARCH_ZEN5:
+        case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
-        scalv_ker_ptr = bli_dscalv_zen_int_avx512;
+          // AVX512 Kernel
+          scalv_ker_ptr = bli_dscalv_zen_int_avx512;
   #ifdef BLIS_ENABLE_OPENMP
-        ST_THRESH = 30000;
+          ST_THRESH = 30000;
   #endif
-        break;
+          break;
 #endif
-      case BLIS_ARCH_ZEN:
-      case BLIS_ARCH_ZEN2:
-      case BLIS_ARCH_ZEN3:
+        case BLIS_ARCH_ZEN:
+        case BLIS_ARCH_ZEN2:
+        case BLIS_ARCH_ZEN3:
 
           // AVX2 Kernel
           scalv_ker_ptr = bli_dscalv_zen_int10;
@@ -303,9 +272,9 @@ void dscal_blis_impl
 #endif
           break;
 
-      default:
+        default:
 
-          // Query the context
+          // For non-Zen architectures, query the context
           cntx = bli_gks_query_cntx();
 
           // Query the function pointer using the context
@@ -315,25 +284,28 @@ void dscal_blis_impl
 
 #ifdef BLIS_ENABLE_OPENMP
     /*
-      If the optimial number of threads is 1, the OpenMP and
-      'bli_nthreads_l1'overheads are avoided by calling the
+      If the optimal number of threads is 1, the OpenMP and
+      'bli_nthreads_l1' overheads are avoided by calling the
       function directly. This ensures that performance of dscalv
       does not drop for single  thread when OpenMP is enabled.
     */
-    if (n_elem <= ST_THRESH)
+    if (n0 <= ST_THRESH)
     {
 #endif
+        // Invoke the function based on the kernel function pointer
+        // Pass size as negative to stipulate don't use SETV when alpha=0
         scalv_ker_ptr
         (
           BLIS_NO_CONJUGATE,
-          n_elem,
+          -n0,
           (double *)alpha,
           x0, incx0,
           cntx
         );
 
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-
+        /* Finalize BLIS. */
+        //bli_finalize_auto();
         return;
 #ifdef BLIS_ENABLE_OPENMP
     }
@@ -354,14 +326,14 @@ void dscal_blis_impl
       BLIS_SCALV_KER,
       BLIS_DOUBLE,
       BLIS_DOUBLE,
-      arch_id_local,
-      n_elem,
+      id,
+      n0,
       &nt
     );
 
     _Pragma("omp parallel num_threads(nt)")
     {
-        dim_t start, end, length; 
+        dim_t start, end, length;
         thrinfo_t thrinfo_vec;
 
         // The block size is the minimum factor, whose multiple will ensure that only
@@ -383,7 +355,7 @@ void dscal_blis_impl
         bli_thread_range_sub
         (
           &thrinfo_vec,
-          n_elem,
+          n0,
           block_size,
           FALSE,
           &start,
@@ -396,22 +368,21 @@ void dscal_blis_impl
         double *x_thread_local = x0 + (start * incx0);
 
         // Invoke the function based on the kernel function pointer
+        // Pass size as negative to stipulate don't use SETV when alpha=0
         scalv_ker_ptr
         (
           BLIS_NO_CONJUGATE,
-          length,
+          -length,
           (double *)alpha,
           x_thread_local, incx0,
           cntx
         );
     }
 
-    /* Finalize BLIS. */
-    // bli_finalize_auto();
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-
+    /* Finalize BLIS. */
+    //bli_finalize_auto();
 #endif
-
 }
 #ifdef BLIS_ENABLE_BLAS
 void dscal_
@@ -421,7 +392,7 @@ void dscal_
        double*   x, const f77_int* incx
      )
 {
-  dscal_blis_impl( n, alpha, x, incx );
+    dscal_blis_impl( n, alpha, x, incx );
 }
 #endif
 void zdscal_blis_impl
@@ -433,19 +404,23 @@ void zdscal_blis_impl
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', (void *) alpha, *n, *incx );
-    dim_t  n_elem = (dim_t)(*n);
-    dcomplex* x0 = x;
-    inc_t  incx0 = (inc_t)(*incx);
+
     /* Initialize BLIS. */
     //bli_init_auto();
 
+    dim_t  n0 = (dim_t)(*n);
+    dcomplex* x0 = x;
+    inc_t  incx0 = (inc_t)(*incx);
+
     /*
-        When n is zero or the alpha pointer passed is null
-        or the incx is zero or alpha is 1, return early.
+      Return early when n <= 0 or incx <= 0 or alpha == 1.0 - BLAS exception
+      Return early when alpha pointer is NULL - BLIS exception
     */
-    if ((n_elem <= 0) || (alpha == NULL) || (incx0 <= 0) || PASTEMAC(d, eq1)(*alpha))
+    if ((n0 <= 0) || (alpha == NULL) || (incx0 <= 0) || PASTEMAC(d, eq1)(*alpha))
     {
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+        /* Finalize BLIS. */
+        //bli_finalize_auto();
         return;
     }
 
@@ -458,30 +433,34 @@ void zdscal_blis_impl
 
     cntx_t *cntx = NULL;
 
+#ifdef BLIS_ENABLE_OPENMP
+    dim_t ST_THRESH = 10000;
+#endif
+
     // Query the architecture ID
-    arch_t arch_id_local = bli_arch_query_id();
+    arch_t id = bli_arch_query_id();
 
     // Pick the kernel based on the architecture ID
-    switch (arch_id_local)
+    switch (id)
     {
-      case BLIS_ARCH_ZEN5:
-      case BLIS_ARCH_ZEN4:
+        case BLIS_ARCH_ZEN5:
+        case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
           // AVX512 Kernel
           scalv_ker_ptr = bli_zdscalv_zen_int_avx512;
           break;
 #endif
-      case BLIS_ARCH_ZEN:
-      case BLIS_ARCH_ZEN2:
-      case BLIS_ARCH_ZEN3:
+        case BLIS_ARCH_ZEN:
+        case BLIS_ARCH_ZEN2:
+        case BLIS_ARCH_ZEN3:
 
           // AVX2 Kernel
           scalv_ker_ptr = bli_zdscalv_zen_int10;
           break;
 
-      default:
+        default:
 
-          // Query the context
+          // For non-Zen architectures, query the context
           cntx = bli_gks_query_cntx();
 
           // Query the function pointer using the context
@@ -489,6 +468,32 @@ void zdscal_blis_impl
     }
 
 #ifdef BLIS_ENABLE_OPENMP
+    /*
+      If the optimal number of threads is 1, the OpenMP and
+      'bli_nthreads_l1' overheads are avoided by calling the
+      function directly. This ensures that performance of dscalv
+      does not drop for single  thread when OpenMP is enabled.
+    */
+    if (n0 <= ST_THRESH)
+    {
+#endif
+        // Invoke the function based on the kernel function pointer
+        // Pass size as negative to stipulate don't use SETV when alpha=0
+        scalv_ker_ptr
+        (
+          BLIS_NO_CONJUGATE,
+          -n0,
+          (dcomplex *)&alpha_cast,
+          x0, incx0,
+          cntx
+        );
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+        /* Finalize BLIS. */
+        //bli_finalize_auto();
+        return;
+#ifdef BLIS_ENABLE_OPENMP
+    }
 
     /*
       Initializing the number of thread to one
@@ -506,32 +511,10 @@ void zdscal_blis_impl
       BLIS_SCALV_KER,
       BLIS_DCOMPLEX,
       BLIS_DOUBLE,
-      arch_id_local,
-      n_elem,
+      id,
+      n0,
       &nt
     );
-
-    /*
-      If the number of optimum threads is 1, the OpenMP overhead
-      is avoided by calling the function directly
-    */
-    if (nt == 1)
-    {
-#endif
-        scalv_ker_ptr
-        (
-          BLIS_NO_CONJUGATE,
-          n_elem,
-          (dcomplex *)&alpha_cast,
-          x0, incx0,
-          cntx
-        );
-
-        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-
-        return;
-#ifdef BLIS_ENABLE_OPENMP
-    }
 
     _Pragma("omp parallel num_threads(nt)")
     {
@@ -549,7 +532,7 @@ void zdscal_blis_impl
         */
         bli_thread_vector_partition
         (
-          n_elem,
+          n0,
           nt_use,
           &start, &length,
           thread_id
@@ -559,18 +542,21 @@ void zdscal_blis_impl
         dcomplex *x_thread_local = x0 + (start * incx0);
 
         // Invoke the function based on the kernel function pointer
+        // Pass size as negative to stipulate don't use SETV when alpha=0
         scalv_ker_ptr
         (
           BLIS_NO_CONJUGATE,
-          length,
+          -length,
           (dcomplex *)&alpha_cast,
           x_thread_local, incx0,
           cntx
         );
     }
-#endif
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+    /* Finalize BLIS. */
+    //bli_finalize_auto();
+#endif
 }
 #ifdef BLIS_ENABLE_BLAS
 void zdscal_
@@ -594,22 +580,27 @@ void cscal_blis_impl
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', (void *)alpha, *n, *incx);
 
+    /* Initialize BLIS. */
+    //bli_init_auto();
+
     dim_t n0 = (dim_t)(*n);
     scomplex *x0 = x;
     inc_t incx0 = (inc_t)(*incx);
 
     /*
-        When n is zero or the alpha pointer passed is null
-        or the incx is zero or alpha is 1, return early.
+      Return early when n <= 0 or incx <= 0 or alpha == 1.0 - BLAS exception
+      Return early when alpha pointer is NULL - BLIS exception
     */
     if ((n0 <= 0) || (alpha == NULL) || (incx0 <= 0) || PASTEMAC(c, eq1)(*alpha))
     {
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+        /* Finalize BLIS. */
+        //bli_finalize_auto();
         return;
     }
 
     // Definition of function pointer
-    cscalv_ker_ft scalv_fun_ptr;
+    cscalv_ker_ft scalv_ker_ptr;
 
     cntx_t* cntx = NULL;
 
@@ -622,40 +613,42 @@ void cscal_blis_impl
         case BLIS_ARCH_ZEN5:
         case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
-            // AVX512 Kernel
-            scalv_fun_ptr = bli_cscalv_zen_int_avx512;
-            break;
+          // AVX512 Kernel
+          scalv_ker_ptr = bli_cscalv_zen_int_avx512;
+          break;
 #endif
         case BLIS_ARCH_ZEN:
         case BLIS_ARCH_ZEN2:
         case BLIS_ARCH_ZEN3:
 
-            //   AVX2 Kernel
-            scalv_fun_ptr = bli_cscalv_zen_int;
-            break;
+          // AVX2 Kernel
+          scalv_ker_ptr = bli_cscalv_zen_int;
+          break;
 
         default:
 
-          // Query the context
+          // For non-Zen architectures, query the context
           cntx = bli_gks_query_cntx();
 
           // Query the function pointer using the context
-          scalv_fun_ptr = bli_cntx_get_l1v_ker_dt(BLIS_SCOMPLEX, BLIS_SCALV_KER, cntx);
+          scalv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_SCOMPLEX, BLIS_SCALV_KER, cntx);
     }
 
-    // Call the function based on the function pointer assigned above
-    scalv_fun_ptr
+    // Invoke the function based on the kernel function pointer
+    // Pass size as negative to stipulate don't use SETV when alpha=0
+    scalv_ker_ptr
     (
       BLIS_NO_CONJUGATE,
-      n0,
+      -n0,
       (scomplex*) alpha,
       x0, incx0,
       cntx
     );
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+    /* Finalize BLIS. */
+    //bli_finalize_auto();
 }
-
 #ifdef BLIS_ENABLE_BLAS
 void cscal_
      (
@@ -678,22 +671,27 @@ void zscal_blis_impl
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', (void *)alpha, *n, *incx);
 
+    /* Initialize BLIS. */
+    //bli_init_auto();
+
     dim_t n0 = (dim_t)(*n);
     dcomplex *x0 = x;
     inc_t incx0 = (inc_t)(*incx);
 
     /*
-        When n is zero or the alpha pointer passed is null
-        or the incx is zero or alpha is 1, return early.
+      Return early when n <= 0 or incx <= 0 or alpha == 1.0 - BLAS exception
+      Return early when alpha pointer is NULL - BLIS exception
     */
     if ((n0 <= 0) || (alpha == NULL) || (incx0 <= 0) || PASTEMAC(z, eq1)(*alpha))
     {
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+        /* Finalize BLIS. */
+        //bli_finalize_auto();
         return;
     }
 
     // Definition of function pointer
-    zscalv_ker_ft scalv_fun_ptr;
+    zscalv_ker_ft scalv_ker_ptr;
 
     cntx_t* cntx = NULL;
 
@@ -707,7 +705,7 @@ void zscal_blis_impl
         case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
           // AVX512 Kernel
-          scalv_fun_ptr = bli_zscalv_zen_int_avx512;
+          scalv_ker_ptr = bli_zscalv_zen_int_avx512;
           break;
 #endif
         case BLIS_ARCH_ZEN:
@@ -715,29 +713,32 @@ void zscal_blis_impl
         case BLIS_ARCH_ZEN3:
 
           // AVX2 Kernel
-          scalv_fun_ptr = bli_zscalv_zen_int;
+          scalv_ker_ptr = bli_zscalv_zen_int;
           break;
 
         default:
 
-          // Query the context
+          // For non-Zen architectures, query the context
           cntx = bli_gks_query_cntx();
 
           // Query the function pointer using the context
-          scalv_fun_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DCOMPLEX, BLIS_SCALV_KER, cntx);
+          scalv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DCOMPLEX, BLIS_SCALV_KER, cntx);
     }
 
-    // Call the function based on the function pointer assigned above
-    scalv_fun_ptr
+    // Invoke the function based on the kernel function pointer
+    // Pass size as negative to stipulate don't use SETV when alpha=0
+    scalv_ker_ptr
     (
       BLIS_NO_CONJUGATE,
-      n0,
+      -n0,
       (dcomplex*) alpha,
       x0, incx0,
       cntx
     );
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+    /* Finalize BLIS. */
+    //bli_finalize_auto();
 }
 #ifdef BLIS_ENABLE_BLAS
 void zscal_
@@ -751,4 +752,4 @@ void zscal_
 }
 #endif
 
-GENTFUNCSCAL( scomplex, float, c, s, scal, scalv )
+GENTFUNCSCAL( scomplex, float, c, s, s, scal, scalv )

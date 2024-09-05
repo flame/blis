@@ -61,13 +61,14 @@
     Deviation from BLAS
     --------------------
 
-    None
+    Setv is used when alpha=0 unless a negative value of n is supplied.
+    This only occurs in calls from BLAS and CBLAS scal APIs.
 
     Undefined behaviour
     -------------------
 
-    1. The kernel results in undefined behaviour when n <= 0 and incx <= 1. The expectation
-       is that these are standard BLAS exceptions and should be handled in a higher layer.
+    None
+
 */
 void bli_sscalv_zen_int_avx512
         (
@@ -78,6 +79,30 @@ void bli_sscalv_zen_int_avx512
           cntx_t *restrict cntx
         )
 {
+    // If the vector dimension is zero, or if alpha is unit, return early.
+    if ( bli_zero_dim1( n ) || PASTEMAC(s,eq1)( *alpha ) ) return;
+
+    // If alpha is zero, use setv if not called from BLAS scal itself (indicated by n being negative).
+    if ( PASTEMAC(s,eq0)( *alpha ) && n > 0 )
+    {
+        float *zero = bli_s0;
+        if (cntx == NULL) cntx = bli_gks_query_cntx();
+        ssetv_ker_ft f = bli_cntx_get_l1v_ker_dt(BLIS_FLOAT, BLIS_SETV_KER, cntx);
+
+        f
+        (
+          BLIS_NO_CONJUGATE,
+          n,
+          zero,
+          x, incx,
+          cntx
+        );
+
+        return;
+    }
+
+    dim_t n0 = bli_abs(n);
+
     dim_t i = 0;
     float *restrict x0 = x;
 
@@ -89,7 +114,7 @@ void bli_sscalv_zen_int_avx512
         __m512 xv[8], alphav;
         alphav = _mm512_set1_ps(*alpha);
 
-        for (i = 0; (i + 127) < n; i += 128)
+        for (i = 0; (i + 127) < n0; i += 128)
         {
             // Loading the input values
             xv[0] = _mm512_loadu_ps(x0 + 0 * n_elem_per_reg);
@@ -125,7 +150,7 @@ void bli_sscalv_zen_int_avx512
             x0 += 8 * n_elem_per_reg;
         }
 
-        for (; (i + 63) < n; i += 64)
+        for (; (i + 63) < n0; i += 64)
         {
             // Loading the input values
             xv[0] = _mm512_loadu_ps(x0 + 0 * n_elem_per_reg);
@@ -147,7 +172,7 @@ void bli_sscalv_zen_int_avx512
             x0 += 4 * n_elem_per_reg;
         }
 
-        for (; (i + 31) < n; i += 32)
+        for (; (i + 31) < n0; i += 32)
         {
             // Loading the input values
             xv[0] = _mm512_loadu_ps(x0 + 0 * n_elem_per_reg);
@@ -163,7 +188,7 @@ void bli_sscalv_zen_int_avx512
             x0 += 2 * n_elem_per_reg;
         }
 
-        for (; (i + 15) < n; i += 16)
+        for (; (i + 15) < n0; i += 16)
         {
             // Loading the input values
             xv[0] = _mm512_loadu_ps(x0 + 0 * n_elem_per_reg);
@@ -176,7 +201,7 @@ void bli_sscalv_zen_int_avx512
             x0 += n_elem_per_reg;
         }
 
-        for (; (i + 7) < n; i += 8)
+        for (; (i + 7) < n0; i += 8)
         {
             // Loading the input values
             __m256 x_vec = _mm256_loadu_ps(x0);
@@ -198,7 +223,7 @@ void bli_sscalv_zen_int_avx512
         */
         _mm256_zeroupper();
 
-        for (; (i + 3) < n; i += 4)
+        for (; (i + 3) < n0; i += 4)
         {
             // Loading the input values
             __m128 x_vec = _mm_loadu_ps(x0);
@@ -215,7 +240,7 @@ void bli_sscalv_zen_int_avx512
 
     const float alphac = *alpha;
 
-    for (; i < n; ++i)
+    for (; i < n0; ++i)
     {
         *x0 *= alphac;
 
@@ -252,13 +277,14 @@ void bli_sscalv_zen_int_avx512
     Deviation from BLAS
     --------------------
 
-    None
+    Setv is used when alpha=0 unless a negative value of n is supplied.
+    This only occurs in calls from BLAS and CBLAS scal APIs.
 
     Undefined behaviour
     -------------------
 
-    1. The kernel results in undefined behaviour when n <= 0 and incx <= 1. The expectation
-       is that these are standard BLAS exceptions and should be handled in a higher layer.
+    None
+
 */
 BLIS_EXPORT_BLIS void bli_dscalv_zen_int_avx512
         (
@@ -270,11 +296,10 @@ BLIS_EXPORT_BLIS void bli_dscalv_zen_int_avx512
         )
 {
     // If the vector dimension is zero, or if alpha is unit, return early.
-    if (bli_zero_dim1(n) || PASTEMAC(d, eq1)(*alpha))
-        return;
+    if ( bli_zero_dim1( n ) || PASTEMAC(d,eq1)( *alpha ) ) return;
 
-    // If alpha is zero, use setv.
-    if (PASTEMAC(d, eq0)(*alpha))
+    // If alpha is zero, use setv if not called from BLAS scal itself (indicated by n being negative).
+    if ( PASTEMAC(d,eq0)( *alpha ) && n > 0 )
     {
         double *zero = bli_d0;
         if (cntx == NULL) cntx = bli_gks_query_cntx();
@@ -292,6 +317,8 @@ BLIS_EXPORT_BLIS void bli_dscalv_zen_int_avx512
         return;
     }
 
+    dim_t n0 = bli_abs(n);
+
     dim_t i = 0;
     double *restrict x0;
 
@@ -307,7 +334,7 @@ BLIS_EXPORT_BLIS void bli_dscalv_zen_int_avx512
         alphav = _mm512_set1_pd(*alpha);
         __m512d xv[8];
 
-        for (i = 0; (i + 63) < n; i += 64)
+        for (i = 0; (i + 63) < n0; i += 64)
         {
             // Loading the input values
             xv[0] = _mm512_loadu_pd(x0 + 0 * n_elem_per_reg);
@@ -343,7 +370,7 @@ BLIS_EXPORT_BLIS void bli_dscalv_zen_int_avx512
             x0 += 8 * n_elem_per_reg;
         }
 
-        for (; (i + 31) < n; i += 32)
+        for (; (i + 31) < n0; i += 32)
         {
             // Loading the input values
             xv[0] = _mm512_loadu_pd(x0 + 0 * n_elem_per_reg);
@@ -365,7 +392,7 @@ BLIS_EXPORT_BLIS void bli_dscalv_zen_int_avx512
             x0 += 4 * n_elem_per_reg;
         }
 
-        for (; (i + 15) < n; i += 16)
+        for (; (i + 15) < n0; i += 16)
         {
             // Loading the input values
             xv[0] = _mm512_loadu_pd(x0 + 0 * n_elem_per_reg);
@@ -381,7 +408,7 @@ BLIS_EXPORT_BLIS void bli_dscalv_zen_int_avx512
             x0 += 2 * n_elem_per_reg;
         }
 
-        for (; (i + 7) < n; i += 8)
+        for (; (i + 7) < n0; i += 8)
         {
             // Loading the input values
             xv[0] = _mm512_loadu_pd(x0 + 0 * n_elem_per_reg);
@@ -394,7 +421,7 @@ BLIS_EXPORT_BLIS void bli_dscalv_zen_int_avx512
             x0 += n_elem_per_reg;
         }
 
-        for (; (i + 3) < n; i += 4)
+        for (; (i + 3) < n0; i += 4)
         {
             // Loading the input values
             __m256d x_vec = _mm256_loadu_pd(x0);
@@ -416,7 +443,7 @@ BLIS_EXPORT_BLIS void bli_dscalv_zen_int_avx512
        */
         _mm256_zeroupper();
 
-        for (; (i + 1) < n; i += 2)
+        for (; (i + 1) < n0; i += 2)
         {
             // Loading the input values
             __m128d x_vec = _mm_loadu_pd(x0);
@@ -433,7 +460,7 @@ BLIS_EXPORT_BLIS void bli_dscalv_zen_int_avx512
 
     const double alphac = *alpha;
 
-    for (; i < n; ++i)
+    for (; i < n0; ++i)
     {
         *x0 *= alphac;
 
@@ -468,13 +495,14 @@ BLIS_EXPORT_BLIS void bli_dscalv_zen_int_avx512
     Deviation from BLAS
     --------------------
 
-    None
+    Setv is used when alpha=0 unless a negative value of n is supplied.
+    This only occurs in calls from BLAS and CBLAS scal APIs.
 
     Undefined behaviour
     -------------------
 
-    1. The kernel results in undefined behaviour when n <= 0 and incx <= 1. The expectation
-       is that these are standard BLAS exceptions and should be handled in a higher layer.
+    None
+
 */
 void bli_zdscalv_zen_int_avx512
      (
@@ -491,6 +519,31 @@ void bli_zdscalv_zen_int_avx512
         alpha is passed as double complex to adhere
         to function pointer definition in BLIS
     */
+
+    // If the vector dimension is zero, or if alpha is unit, return early.
+    if ( bli_zero_dim1( n ) || PASTEMAC(z,eq1)( *alpha ) ) return;
+
+    // If alpha is zero, use setv if not called from BLAS scal itself (indicated by n being negative).
+    if ( PASTEMAC(z,eq0)( *alpha ) && n > 0 )
+    {
+        // Expert interface of setv is invoked when alpha is zero
+        dcomplex *zero = bli_z0;
+
+        /* When alpha is zero all the element in x are set to zero */
+        PASTEMAC2(z, setv, BLIS_TAPI_EX_SUF)
+        (
+            BLIS_NO_CONJUGATE,
+            n,
+            zero,
+            x, incx,
+            cntx,
+            NULL);
+
+        return;
+    }
+
+    dim_t n0 = bli_abs(n);
+
     const double alphac = (*alpha).real;
 
     dim_t i = 0;
@@ -504,7 +557,7 @@ void bli_zdscalv_zen_int_avx512
 
         alphav = _mm512_set1_pd(alphac);
 
-        for (; (i + 15) < n; i += 16)
+        for (; (i + 15) < n0; i += 16)
         {
             xv[0] = _mm512_loadu_pd(x0);
             xv[1] = _mm512_loadu_pd(x0 + n_elem_per_reg);
@@ -524,7 +577,7 @@ void bli_zdscalv_zen_int_avx512
             x0 += 4 * n_elem_per_reg;
         }
 
-        for (; (i + 7) < n; i += 8)
+        for (; (i + 7) < n0; i += 8)
         {
             xv[0] = _mm512_loadu_pd(x0);
             xv[1] = _mm512_loadu_pd(x0 + n_elem_per_reg);
@@ -538,7 +591,7 @@ void bli_zdscalv_zen_int_avx512
             x0 += 2 * n_elem_per_reg;
         }
 
-        for (; (i + 3) < n; i += 4)
+        for (; (i + 3) < n0; i += 4)
         {
             xv[0] = _mm512_loadu_pd(x0);
 
@@ -549,7 +602,7 @@ void bli_zdscalv_zen_int_avx512
             x0 += n_elem_per_reg;
         }
 
-        for (; (i + 1) < n; i += 2)
+        for (; (i + 1) < n0; i += 2)
         {
             __m256d xv = _mm256_loadu_pd(x0);
 
@@ -576,7 +629,7 @@ void bli_zdscalv_zen_int_avx512
 
     alpha_reg = _mm_set1_pd((*alpha).real);
 
-    for (; i < n; ++i)
+    for (; i < n0; ++i)
     {
         x_vec = _mm_loadu_pd(x0);
 
@@ -674,8 +727,8 @@ void bli_zdscalv_zen_int_avx512
     Undefined behaviour
     -------------------
 
-    1. The kernel results in undefined behaviour when n <= 0 and incx <= 1. The expectation
-       is that these are standard BLAS exceptions and should be handled in a higher layer.
+    None
+
 */
 void bli_cscalv_zen_int_avx512
      (
@@ -689,14 +742,11 @@ void bli_cscalv_zen_int_avx512
     // If the vector dimension is zero, or if alpha is unit, return early.
     if ( bli_zero_dim1( n ) || PASTEMAC(c,eq1)( *alpha ) ) return;
 
-    /**
-     * @note Currently this kernel is not BLAS compliant. For BLAS compliance,
-     * the below call to SETV needs to be removed.
-     */
-    if ( PASTEMAC(c,eq0)(*alpha) )
+    // If alpha is zero, use setv if not called from BLAS scal itself (indicated by n being negative).
+    if ( PASTEMAC(c,eq0)( *alpha ) && n > 0 )
     {
         // Expert interface of setv is invoked when alpha is zero
-        scomplex *zero = PASTEMAC(c,0);
+        scomplex *zero = bli_c0;
 
         /* When alpha is zero all the element in x are set to zero */
         PASTEMAC2(c, setv, BLIS_TAPI_EX_SUF)
@@ -711,6 +761,8 @@ void bli_cscalv_zen_int_avx512
 
         return;
     }
+
+    dim_t n0 = bli_abs(n);
 
     dim_t i = 0;
     scomplex alpha_conj;
@@ -760,7 +812,7 @@ void bli_cscalv_zen_int_avx512
          */
 
         // Processing 96 scomplex elements (192 floats) per iteration
-        for ( ; (i + 95) < n; i += 96 )
+        for ( ; (i + 95) < n0; i += 96 )
         {
             __m512 xv[12], inter[12];
 
@@ -776,7 +828,7 @@ void bli_cscalv_zen_int_avx512
         }
 
         // Processing 64 scomplex elements (128 floats) per iteration
-        for ( ; (i + 63) < n; i += 64 )
+        for ( ; (i + 63) < n0; i += 64 )
         {
             __m512 xv[8], inter[8];
 
@@ -790,7 +842,7 @@ void bli_cscalv_zen_int_avx512
         }
 
         // Processing 32 scomplex elements (64 floats) per iteration
-        for ( ; (i + 31) < n; i += 32 )
+        for ( ; (i + 31) < n0; i += 32 )
         {
             __m512 xv[4], inter[4];
 
@@ -802,7 +854,7 @@ void bli_cscalv_zen_int_avx512
         }
 
         // Processing 16 scomplex elements (32 floats) per iteration
-        for ( ; (i + 15) < n; i += 16 )
+        for ( ; (i + 15) < n0; i += 16 )
         {
             __m512 xv[2], inter[2];
 
@@ -842,7 +894,7 @@ void bli_cscalv_zen_int_avx512
         }
 
         // Processing 8 scomplex elements (16 floats) per iteration
-        for ( ; (i + 7) < n; i += 8 )
+        for ( ; (i + 7) < n0; i += 8 )
         {
             __m512 xv[1], inter[1];
 
@@ -877,21 +929,23 @@ void bli_cscalv_zen_int_avx512
         }
 
         // Processing remaining elements, if any.
-        if ( i < n ) {
+        if ( i < n0 )
+        {
             // Setting the mask bit based on remaining elements.
             // Since each scomplex element corresponds to 2 floats,
-            // we need to load and store 2*(n-i) elements.
+            // we need to load and store 2*(n0-i) elements.
 
-            __mmask16 mask = ( 1 << ( 2 * ( n - i ) ) ) - 1;
+            __mmask16 mask = ( 1 << ( 2 * ( n0 - i ) ) ) - 1;
 
-            __m512 xv, inter;
+            __m512 xv, temp;
+
             xv = _mm512_maskz_loadu_ps( mask, x0 );
 
-            inter = _mm512_permute_ps( xv, 0xB1 );
+            temp = _mm512_permute_ps( xv, 0xB1 );
 
-            inter = _mm512_mul_ps( alphaIv, inter );
+            temp = _mm512_mul_ps( alphaIv, temp );
 
-            xv = _mm512_fmaddsub_ps( alphaRv, xv, inter );
+            xv = _mm512_fmaddsub_ps( alphaRv, xv, temp );
 
             _mm512_mask_storeu_ps( x0, mask, xv );
         }
@@ -902,7 +956,7 @@ void bli_cscalv_zen_int_avx512
         const float alphaI = alpha_conj.imag;
 
         float x0R, x0I;
-        for (; i < n; ++i)
+        for (; i < n0; ++i)
         {
             x0R = *(x0);
             x0I = *(x0 + 1);
@@ -942,13 +996,14 @@ void bli_cscalv_zen_int_avx512
     Deviation from BLAS
     --------------------
 
-    None
+    Setv is used when alpha=0 unless a negative value of n is supplied.
+    This only occurs in calls from BLAS and CBLAS scal APIs.
 
     Undefined behaviour
     -------------------
 
-    1. The kernel results in undefined behaviour when n <= 0 and incx <= 1. The expectation
-       is that these are standard BLAS exceptions and should be handled in a higher layer.
+    None
+
 */
 void bli_zscalv_zen_int_avx512
      (
@@ -960,17 +1015,13 @@ void bli_zscalv_zen_int_avx512
      )
 {
     // If the vector dimension is zero, or if alpha is unit, return early.
-    if (bli_zero_dim1(n) || PASTEMAC(z, eq1)(*alpha))
-        return;
+    if ( bli_zero_dim1( n ) || PASTEMAC(z,eq1)( *alpha ) ) return;
 
-    /**
-     * @note Currently this kernel is not BLAS compliant. For BLAS compliance,
-     * the below call to SETV needs to be removed.
-    */
-    if (PASTEMAC(z, eq0)(*alpha))
+    // If alpha is zero, use setv if not called from BLAS scal itself (indicated by n being negative).
+    if (PASTEMAC(z,eq0)( *alpha ) && n > 0 )
     {
         // Expert interface of setv is invoked when alpha is zero
-        dcomplex *zero = PASTEMAC(z, 0);
+        dcomplex *zero = bli_z0;
 
         /* When alpha is zero all the element in x are set to zero */
         PASTEMAC2(z, setv, BLIS_TAPI_EX_SUF)
@@ -984,6 +1035,8 @@ void bli_zscalv_zen_int_avx512
 
         return;
     }
+
+    dim_t n0 = bli_abs(n);
 
     dim_t i = 0;
     dcomplex alpha_conj;
@@ -1022,7 +1075,7 @@ void bli_zscalv_zen_int_avx512
         */
 
         // Processing 48 dcomplex elements per iteration.
-        for (; (i + 47) < n; i += 48)
+        for (; (i + 47) < n0; i += 48)
         {
             __m512d xv[12], temp[12];
 
@@ -1116,7 +1169,7 @@ void bli_zscalv_zen_int_avx512
         }
 
         // Processing 32 dcomplex elements per iteration.
-        for (; (i + 31) < n; i += 32)
+        for (; (i + 31) < n0; i += 32)
         {
             __m512d xv[8], temp[8];
             xv[0] = _mm512_loadu_pd(x0);
@@ -1173,7 +1226,7 @@ void bli_zscalv_zen_int_avx512
         }
 
         // Processing 16 dcomplex elements per iteration.
-        for (; (i + 15) < n; i += 16)
+        for (; (i + 15) < n0; i += 16)
         {
             __m512d xv[4], temp[4];
             xv[0] = _mm512_loadu_pd(x0);
@@ -1205,7 +1258,7 @@ void bli_zscalv_zen_int_avx512
         }
 
         // Processing 8 dcomplex elements per iteration.
-        for (; (i + 7) < n; i += 8)
+        for (; (i + 7) < n0; i += 8)
         {
             __m512d xv[2], temp[2];
             xv[0] = _mm512_loadu_pd(x0);
@@ -1227,7 +1280,7 @@ void bli_zscalv_zen_int_avx512
         }
 
         // Processing 4 dcomplex elements per iteration.
-        for (; (i + 3) < n; i += 4)
+        for (; (i + 3) < n0; i += 4)
         {
             __m512d xv, temp;
             xv = _mm512_loadu_pd(x0);
@@ -1244,23 +1297,24 @@ void bli_zscalv_zen_int_avx512
         }
 
         // Processing the remainder elements.
-        if( i < n )
+        if( i < n0 )
         {
             // Setting the mask bit based on remaining elements
             // Since each dcomplex elements corresponds to 2 doubles
-            // we need to load and store 2*(m-i) elements.
-            __mmask8 mask = (1 << (2 * (n-i)) ) - 1;
+            // we need to load and store 2*(n0-i) elements.
+
+            __mmask8 mask = ( 1 << ( 2 * ( n0 - i ) ) ) - 1;
 
             __m512d xv, temp, zero;
             zero = _mm512_setzero_pd();
 
             xv = _mm512_mask_loadu_pd( zero, mask, x0 );
 
-            temp = _mm512_permute_pd(xv, 0x55);
+            temp = _mm512_permute_pd( xv, 0x55 );
 
-            temp = _mm512_mul_pd(alphaIv, temp);
+            temp = _mm512_mul_pd( alphaIv, temp );
 
-            xv = _mm512_fmaddsub_pd(alphaRv, xv, temp);
+            xv = _mm512_fmaddsub_pd( alphaRv, xv, temp );
 
             _mm512_mask_storeu_pd( x0, mask, xv );
         }
@@ -1272,7 +1326,7 @@ void bli_zscalv_zen_int_avx512
         alphaRv = _mm_loaddup_pd(&alphaR);
         alphaIv = _mm_loaddup_pd(&alphaI);
 
-        for (; i < n; ++i)
+        for (; i < n0; ++i)
         {
             x_vec = _mm_loadu_pd(x0);
 

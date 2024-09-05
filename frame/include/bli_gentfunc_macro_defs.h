@@ -174,12 +174,12 @@ GENTFUNCSCAL( scomplex, float,    c, s, blasname, blisname )
 
 #define INSERT_GENTFUNCSCAL_BLAS( blasname, blisname ) \
 \
-GENTFUNCSCAL( float,    float,    s,  , blasname, blisname ) \
-GENTFUNCSCAL( double,   double,   d,  , blasname, blisname ) \
-GENTFUNCSCAL( scomplex, scomplex, c,  , blasname, blisname ) \
-GENTFUNCSCAL( dcomplex, dcomplex, z,  , blasname, blisname ) \
-GENTFUNCSCAL( scomplex, float,    c, s, blasname, blisname ) \
-GENTFUNCSCAL( dcomplex, double,   z, d, blasname, blisname )
+GENTFUNCSCAL( float,    float,    s,  , s, blasname, blisname ) \
+GENTFUNCSCAL( double,   double,   d,  , d, blasname, blisname ) \
+GENTFUNCSCAL( scomplex, scomplex, c,  , c, blasname, blisname ) \
+GENTFUNCSCAL( dcomplex, dcomplex, z,  , z, blasname, blisname ) \
+GENTFUNCSCAL( scomplex, float,    c, s, s, blasname, blisname ) \
+GENTFUNCSCAL( dcomplex, double,   z, d, d, blasname, blisname )
 
 // --GEMMT specific kernels ----------------------------------------------------
 

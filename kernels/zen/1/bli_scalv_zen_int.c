@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2017 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2017 - 2024, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2018, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
@@ -80,9 +80,11 @@ void bli_sscalv_zen_int
 	if ( bli_zero_dim1( n ) || PASTEMAC(s,eq1)( *alpha ) ) return;
 
 	// If alpha is zero, use setv (in case y contains NaN or Inf).
-	if ( PASTEMAC(s,eq0)( *alpha ) )
+	// If alpha is zero, use setv if not called from BLAS scal itself (indicated by n being negative).
+	if ( PASTEMAC(s,eq0)( *alpha ) && n > 0 )
 	{
 		float*       zero = bli_s0;
+		if (cntx == NULL) cntx = bli_gks_query_cntx();
 		ssetv_ker_ft f    = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_SETV_KER, cntx );
 
 		f
@@ -96,10 +98,12 @@ void bli_sscalv_zen_int
 		return;
 	}
 
+	dim_t n0 = bli_abs(n);
+
 	// Use the unrolling factor and the number of elements per register
 	// to compute the number of vectorized and leftover iterations.
-	n_viter = ( n ) / ( n_elem_per_reg * n_iter_unroll );
-	n_left  = ( n ) % ( n_elem_per_reg * n_iter_unroll );
+	n_viter = ( n0 ) / ( n_elem_per_reg * n_iter_unroll );
+	n_left  = ( n0 ) % ( n_elem_per_reg * n_iter_unroll );
 
 	// If there is anything that would interfere with our use of contiguous
 	// vector loads/stores, override n_viter and n_left to use scalar code
@@ -107,7 +111,7 @@ void bli_sscalv_zen_int
 	if ( incx != 1 )
 	{
 		n_viter = 0;
-		n_left  = n;
+		n_left  = n0;
 	}
 
 	// Initialize local pointers.
@@ -178,10 +182,11 @@ void bli_dscalv_zen_int
 	// If the vector dimension is zero, or if alpha is unit, return early.
 	if ( bli_zero_dim1( n ) || PASTEMAC(d,eq1)( *alpha ) ) return;
 
-	// If alpha is zero, use setv (in case y contains NaN or Inf).
-	if ( PASTEMAC(d,eq0)( *alpha ) )
+	// If alpha is zero, use setv if not called from BLAS scal itself (indicated by n being negative).
+	if ( PASTEMAC(d,eq0)( *alpha ) && n > 0 )
 	{
 		double*      zero = bli_d0;
+		if (cntx == NULL) cntx = bli_gks_query_cntx();
 		dsetv_ker_ft f    = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_SETV_KER, cntx );
 
 		f
@@ -195,10 +200,12 @@ void bli_dscalv_zen_int
 		return;
 	}
 
+	dim_t n0 = bli_abs(n);
+
 	// Use the unrolling factor and the number of elements per register
 	// to compute the number of vectorized and leftover iterations.
-	n_viter = ( n ) / ( n_elem_per_reg * n_iter_unroll );
-	n_left  = ( n ) % ( n_elem_per_reg * n_iter_unroll );
+	n_viter = ( n0 ) / ( n_elem_per_reg * n_iter_unroll );
+	n_left  = ( n0 ) % ( n_elem_per_reg * n_iter_unroll );
 
 	// If there is anything that would interfere with our use of contiguous
 	// vector loads/stores, override n_viter and n_left to use scalar code
@@ -206,7 +213,7 @@ void bli_dscalv_zen_int
 	if ( incx != 1 )
 	{
 		n_viter = 0;
-		n_left  = n;
+		n_left  = n0;
 	}
 
 	// Initialize local pointers.

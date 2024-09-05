@@ -82,59 +82,187 @@ TEST_P( zdscalvGeneric, API )
 
 // bli_zdscal not present in BLIS
 #ifndef TEST_BLIS_TYPED
-// Black box testing for zdscal.
-// Tests with unit-positive increment.
+
+// Black box testing for generic use of dscal.
 INSTANTIATE_TEST_SUITE_P(
-        unitPositiveIncrement,
+        unitPositiveIncrementSmall,
         zdscalvGeneric,
         ::testing::Combine(
             // conj(alpha): uses n (no_conjugate) since it is real.
-            ::testing::Values('n'
-#ifdef TEST_BLIS_TYPED
-                            , 'c'       // this option is BLIS-api specific.
-#endif
-            ),
+            ::testing::Values('n'),
             // m: size of vector.
-            ::testing::Range(gtint_t(10), gtint_t(101), 10),
+            ::testing::Range(gtint_t(1), gtint_t(101), 1),
             // incx: stride of x vector.
-            ::testing::Values(gtint_t(1)),
+            ::testing::Values(
+                                gtint_t(1)
+            ),
             // alpha: value of scalar.
             ::testing::Values(
-                                double(-5.1),
-                                double( 0.0),
-                                double( 7.3)
+                                double( 7.0),
+                                double(-3.0)
             )
         ),
-        (::scalvGenericPrint<dcomplex, double>())
+        (::scalvGenericPrint<double, double>())
     );
 
-
-// Tests for non-unit increments.
+// Black box testing for generic use of dscal.
 INSTANTIATE_TEST_SUITE_P(
-        nonUnitPositiveIncrement,
+        unitPositiveIncrementLarge,
         zdscalvGeneric,
         ::testing::Combine(
             // conj(alpha): uses n (no_conjugate) since it is real.
-            ::testing::Values('n'
-#ifdef TEST_BLIS_TYPED
-                            , 'c'       // this option is BLIS-api specific.
-#endif
-            ),
+            ::testing::Values('n'),
             // m: size of vector.
-            ::testing::Range(gtint_t(10), gtint_t(101), 10),
+            ::testing::Values(gtint_t(111), gtint_t(193), gtint_t(403)),
+            // incx: stride of x vector.
+            ::testing::Values(
+                                gtint_t(1)
+            ),
+            // alpha: value of scalar.
+            ::testing::Values(
+                                double( 7.0),
+                                double(-3.0)
+            )
+        ),
+        (::scalvGenericPrint<double, double>())
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        nonUnitPositiveIncrementSmall,
+        zdscalvGeneric,
+        ::testing::Combine(
+            // conj(alpha): uses n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Range(gtint_t(1), gtint_t(9), 1),
             // incx: stride of x vector.
             ::testing::Values(
                                 gtint_t(2),
+                                gtint_t(41)
+            ),
+            // alpha: value of scalar.
+            ::testing::Values(
+                                double( 7.0),
+                                double(-3.0)
+            )
+        ),
+        (::scalvGenericPrint<double, double>())
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        nonUnitPositiveIncrementLarge,
+        zdscalvGeneric,
+        ::testing::Combine(
+            // conj(alpha): uses n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Values(gtint_t(111), gtint_t(193), gtint_t(403)),
+            // incx: stride of x vector.
+            ::testing::Values(
+                                gtint_t(2),
+                                gtint_t(41)
+            ),
+            // alpha: value of scalar.
+            ::testing::Values(
+                                double( 7.0),
+                                double(-3.0)
+            )
+        ),
+        (::scalvGenericPrint<double, double>())
+    );
+
+// alpha=0 testing only for BLAS and CBLAS as
+// BLIS uses setv and won't propagate Inf and NaNs
+INSTANTIATE_TEST_SUITE_P(
+        alphaZero,
+        zdscalvGeneric,
+        ::testing::Combine(
+            // conj(alpha): uses n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Range(gtint_t(1), gtint_t(101), 1),
+            // incx: stride of x vector.
+            ::testing::Values(
+                                gtint_t(1),
+                                gtint_t(2),
+                                gtint_t(41)
+            ),
+            // alpha: value of scalar.
+            ::testing::Values(
+                                double( 0.0)
+            )
+        ),
+        (::scalvGenericPrint<double, double>())
+    );
+
+// Test for negative increments.
+// Only test very few cases as sanity check.
+// We can modify the values using implementantion details.
+INSTANTIATE_TEST_SUITE_P(
+        NegativeIncrements,
+        zdscalvGeneric,
+        ::testing::Combine(
+            ::testing::Values('n'),                                          // n: use x, c: use conj(x)
+            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m size of vector takes values from 10 to 100 with step size of 10.
+            ::testing::Values(gtint_t(-2), gtint_t(-1)),                     // stride size for x
+            ::testing::Values(3)                                             // alpha
+        ),
+        (::scalvGenericPrint<double, double>())
+    );
+
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
+INSTANTIATE_TEST_SUITE_P(
+        AOCLDynamic,
+        zdscalvGeneric,
+        ::testing::Combine(
+            // conj(alpha): uses n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Values(
+                               gtint_t(   10000),     // nt_ideal = 1
+                               gtint_t(   20000),     // nt_ideal = 4
+                               gtint_t(  486919),     // nt_ideal = 8
+                               gtint_t( 1000000),     // nt_ideal = 8
+                               gtint_t( 2500000),     // nt_ideal = 12
+                               gtint_t( 5000000),     // nt_ideal = 32
+                               gtint_t( 7000000)      // nt_ideal = max_available
+            ),
+            // incx: stride of x vector.
+            ::testing::Values(
+                                gtint_t(1),
                                 gtint_t(3)
             ),
             // alpha: value of scalar.
             ::testing::Values(
-                                double(-5.1),
-                                double( 0.0),
-                                double( 7.3)
+                                double( 7.0)
             )
         ),
-        (::scalvGenericPrint<dcomplex, double>())
+        (::scalvGenericPrint<double, double>())
     );
+
+INSTANTIATE_TEST_SUITE_P(
+        AOCLDynamicAlphaZero,
+        zdscalvGeneric,
+        ::testing::Combine(
+            // conj(alpha): uses n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Values(
+                               gtint_t(  486919),     // nt_ideal = 8
+                               gtint_t( 7000000)      // nt_ideal = max_available
+            ),
+            // incx: stride of x vector.
+            ::testing::Values(
+                                gtint_t(1),
+                                gtint_t(3)
+            ),
+            // alpha: value of scalar.
+            ::testing::Values(
+                                double( 0.0)
+            )
+        ),
+        (::scalvGenericPrint<double, double>())
+    );
+#endif
 
 #endif // not TEST_BLIS_TYPED

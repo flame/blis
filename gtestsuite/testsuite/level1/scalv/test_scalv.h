@@ -48,6 +48,8 @@ static void test_scalv( char conja_alpha, gtint_t n, gtint_t incx, U alpha, doub
     //        Initialize vector with random numbers.
     //----------------------------------------------------------
     std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, n, incx );
+    if (alpha == testinghelpers::ZERO<U>())
+        testinghelpers::set_vector( n, incx, x.data(), testinghelpers::aocl_extreme<T>() );
 
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.
@@ -64,7 +66,7 @@ static void test_scalv( char conja_alpha, gtint_t n, gtint_t incx, U alpha, doub
     //----------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
-    computediff<T>( "x", n, x.data(), x_ref.data(), incx, thresh );
+    computediff<T>( "x", n, x.data(), x_ref.data(), incx, thresh, true );
 }
 
 /**
