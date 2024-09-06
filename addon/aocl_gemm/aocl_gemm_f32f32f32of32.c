@@ -80,24 +80,26 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	bli_param_map_netlib_to_blis_trans( transa, &blis_transa );
 	bli_param_map_netlib_to_blis_trans( transb, &blis_transb );
 
-	/* Perform BLAS parameter checking. */
-	// Transpose not supported.
-	if ( ( blis_transa != BLIS_NO_TRANSPOSE ) ||
-	     ( blis_transb != BLIS_NO_TRANSPOSE ) )
-	{
-		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, \
-						"Input matrix transpose not supported.");
-		return; // Error.
-	}
-
 	bool is_row_major = ( ( order == 'r' ) || ( order == 'R' ) );
 	bool is_column_major = ( ( order == 'c' ) || ( order == 'C' ) );
 
 	// The strides are set assuming a row major kernel.
-	const inc_t rs_a = lda;
-	const inc_t cs_a = 1;
-	const inc_t rs_b = ldb;
-	const inc_t cs_b = 1;
+	inc_t rs_a = lda;
+	inc_t cs_a = 1;
+
+	if(bli_is_trans(blis_transa)) {
+		rs_a = 1;
+		cs_a = lda;
+	}
+
+	inc_t rs_b = ldb;
+	inc_t cs_b = 1;
+
+	if(bli_is_trans(blis_transb)) {
+		rs_b = 1;
+		cs_b = ldb;
+	}
+	
 	const inc_t rs_c = ldc;
 	const inc_t cs_c = 1;
 
@@ -107,11 +109,19 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	bli_param_map_char_to_lpmtag( mem_format_a, &mtag_a );
 	bli_param_map_char_to_lpmtag( mem_format_b, &mtag_b );
 
-	if ( ( is_column_major == TRUE ) && ( mtag_b == REORDERED ) )
+	// Reordered A not supported now.
+	if ( ( is_row_major == TRUE ) && ( mtag_a == REORDERED ) )
 	{
-		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, \
-					"Reordered B matrix not supported in column major case.");
-		return;
+		bli_print_msg(" Reordering of A matrix is not supported.", __FILE__, __LINE__ );
+		return; // Error.
+	}
+
+	// Inputs swapped in column major, A becomes B from kernel point of view.
+	else if ( ( is_column_major == TRUE ) && ( ( mtag_b == REORDERED ) || (mtag_a == REORDERED ) ) )
+	{
+		bli_print_msg(" Reordering of column major matrices is not supported.", 
+			__FILE__, __LINE__ );
+		return; //Error
 	}
 
 	// By default enable packing for B matrix. Before the 5 loop, based on
@@ -127,19 +137,17 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 		mtag_a = PACK;
 	}
 
-	// Reordered A not supported now.
-	if ( ( is_row_major == TRUE ) && ( mtag_a == REORDERED ) )
+	// From 5-loop function point of view,
+	// A matrix when in column major storage needs to be packed to row-major
+	// storage as kernel expects A matrix to be in row-major format.
+	if( ( is_row_major == TRUE ) && ( bli_is_trans(blis_transa ) ) )
 	{
-		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, \
-				"A matrix reordering not supported for row major inputs.");
-		return; // Error.
+		mtag_a = PACK;
 	}
 	// Inputs swapped in column major, A becomes B from kernel point of view.
-	else if ( ( is_column_major == TRUE ) && ( mtag_b == REORDERED ) )
+	else if ( ( is_column_major == TRUE ) && ( bli_is_trans(blis_transb ) ) )
 	{
-		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, \
-				"B matrix reordering not supported for column major inputs.");
-		return; // Error.
+		mtag_b = PACK;
 	}
 
 	// Convert post op struct to post op linked list format.
@@ -160,7 +168,6 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	bli_pba_rntm_set_pba( &rntm_g );
 
 	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( F32F32F32OF32 );
-
 #ifdef BLIS_ENABLE_OPENMP
 	// The lpgemm_cntx_t argument will be NULL for f32 since it still uses
 	// BLIS cntx_t internally. Its a workaround for now and will be replaced

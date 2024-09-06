@@ -52,7 +52,7 @@ void lpgemm_rowvar_ ## LP_SFX \
        const B_type*         b, \
        const dim_t           rs_b, \
        const dim_t           cs_b, \
-       const AOCL_MEMORY_TAG mtag_b, \
+       AOCL_MEMORY_TAG       mtag_b, \
        C_type*               c, \
        const dim_t           rs_c, \
        const dim_t           cs_c, \

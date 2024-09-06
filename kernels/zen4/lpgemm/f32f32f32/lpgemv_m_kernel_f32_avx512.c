@@ -124,7 +124,7 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32 )
 			dim_t ps_b_use = 0;
 			dim_t rs_b_use = NR;
 			// No parallelization in k dim, k always starts at 0.
-			if (mtag_b == REORDERED)
+			if (mtag_b == REORDERED||mtag_b == PACK)
 			{
 				// In multi-threaded scenarios, an extra offset into a given
 				// packed B panel is required, since the jc loop split can
