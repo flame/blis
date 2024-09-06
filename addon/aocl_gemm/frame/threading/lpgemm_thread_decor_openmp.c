@@ -749,7 +749,7 @@ GEN_LPGEMM_OPENMP_DECORATOR(float,float,float,f32f32f32of32)
 GEN_LPGEMM_OPENMP_DECORATOR(int8_t,int8_t,int32_t,s8s8s32o32)
 GEN_LPGEMM_OPENMP_DECORATOR(int8_t,int8_t,int16_t,s8s8s16o16)
 
-#define GEN_LPGEMM_OPENMP_DECORATOR1(A_type,B_type,C_type,LPGEMM_SFX) \
+#define GEN_LPGEMM_OPENMP_DECORATOR_MP(A_type,B_type,C_type,LPGEMM_SFX) \
 void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
      ( \
        const dim_t           m, \
@@ -762,7 +762,7 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
        const B_type*         b, \
        const dim_t           rs_b, \
        const dim_t           cs_b, \
-       const AOCL_MEMORY_TAG mtag_b, \
+       AOCL_MEMORY_TAG       mtag_b, \
        C_type*               c, \
        const dim_t           rs_c, \
        const dim_t           cs_c, \
@@ -787,6 +787,12 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
 	  &ic_ways, &jc_ways, \
 	  m, n, k, rntm_g \
 	); \
+ \
+	/* Decide whether to go with pack-based implementation
+	   or kernel-level implementation */ \
+	dim_t MC = lpgemm_get_block_size_MC_global_cntx( BF16BF16F32OF32 ); \
+	if( ( m / ic_ways ) > MC ) mtag_b = PACK_KC; \
+	else mtag_b = UNPACKED; \
  \
 	/* Set the packing block allocator field of the rntm. This will be
 	 * inherited by all of the child threads when they make local copies of
@@ -844,7 +850,7 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
 	} \
 } \
 
-GEN_LPGEMM_OPENMP_DECORATOR1(bfloat16, int8_t, float, bf16s4f32of32)
+GEN_LPGEMM_OPENMP_DECORATOR_MP(bfloat16, int8_t, float, bf16s4f32of32)
 
 BLIS_INLINE void lpgemm_eltwise_ops_bf16of32_get_threading
      (

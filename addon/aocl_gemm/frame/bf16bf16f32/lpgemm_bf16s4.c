@@ -138,21 +138,6 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
     dim_t ic_start, ic_end;
     bli_thread_range_sub(&thread_ic, m, MR, FALSE, &ic_start, &ic_end);
 
-    // By default use the pack-based implementation.
-    mtag_b = PACK_KC;
-
-#ifdef BLIS_KERNELS_ZEN4
-    // Special case handling
-    // s4->bf16 happens at kernel level
-    if( m == 4 )
-    {
-        mtag_b = UNPACKED;
-    }
-#endif
-
-
-    bfloat16* b_use_jr;
-
     if( mtag_b == PACK_NR )
     {
         /* Allocating private pack buffer of size KCxNR for each thread */
@@ -161,8 +146,6 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
         lpgemm_alloc_mem_panel(
                         mem_b_size_req, BLIS_BUFFER_FOR_GEN_USE,
                         &mem_b, rntm);
-
-        b_use_jr = bli_mem_buffer(&mem_b);
     }
 
     for (dim_t jc = jc_start; jc < jc_end; jc += NC)
@@ -371,8 +354,11 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
                         int8_t* b_jr = b_reorder + ( jr * kc0_updated ) / 2;
                         dim_t pre_op_off = jc_cur_loop + jc_cur_loop_rem
                                     + jr;
+
+                        bfloat16* b_use_jr = bli_mem_buffer(&mem_b);
+
                         /* packing B at JR level */
-                        packsclb_nr64_bf16s4f32of32( b_use_jr, b_jr, nr0, kc0,
+                        ((pack_s4bf16)lcntx->packsclb_fun_ptr)( b_use_jr, b_jr, nr0, kc0,
                                                     &rs_b_use, &cs_b_use,
                                                     pre_op_list, pre_op_off );
 
@@ -387,7 +373,7 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
                     }
                     else if ( mtag_b == PACK_KC)
                     {
-                        b_use_jr = ( bfloat16* )b_use + ( jr * kc0_updated );
+                        bfloat16* b_use_jr = ( bfloat16* )b_use + ( jr * kc0_updated );
 
                         /* packed B kernel */
                         ((lpgemm_rowvar_bf16)lcntx->kern_fun_ptr)(
@@ -405,14 +391,9 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
                         post_ops_attr.pre_op_off = jc_cur_loop + jc_cur_loop_rem
                                     + jr;
 
-                        /* Hardcoding the kernel call since this kernel will be called
-                           only when m is 4. In future, if we decide to use this kind of
-                           implementation for all sizes, cntx can be updated with bf16s4 kernel
-                         */
-
                         /* bf16s4f32of32 kernel */
-                        lpgemm_rowvar_bf16s4f32of32_4x64(
-                        4, nr0, kc0,
+                        lpgemm_rowvar_bf16s4f32of32_6x64m(
+                        mc0, nr0, kc0,
                         a_use, rs_a_use, cs_a_use, a_block_stride,
                         b_jr, rs_b_use, cs_b_use,
                         (c_use_ic + jr), rs_c_use, 1,

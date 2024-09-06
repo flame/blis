@@ -394,4 +394,18 @@ do { \
 	output = _mm_or_epi32( output, odd_out ); \
 } while (0);
 
+
+#define CVT_INT8_F32_SCAL_16( in, idx, scale_reg) \
+    (_mm512_mul_ps( \
+      _mm512_cvtepi32_ps( \
+       _mm512_cvtepi8_epi32( \
+        _mm512_extracti32x4_epi32( in, idx ) ) ), scale_reg ) )
+
+#define CVT_INT8_F32_SCAL_8( in, idx, scale_reg) \
+    (_mm512_mul_ps( \
+      _mm512_cvtepi32_ps( \
+       _mm512_cvtepi8_epi32( \
+        _mm256_extracti32x4_epi32( in, idx ) ) ), scale_reg ) )
+
+
 #endif //LPGEMM_INT4_CVT_UTILS_H
