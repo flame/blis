@@ -321,10 +321,10 @@ set(RENAME_BLIS_ARCH_TYPE "BLIS_ARCH_TYPE" CACHE STRING "BLIS_ARCH_TYPE env var 
 set(RENAME_BLIS_MODEL_TYPE "BLIS_MODEL_TYPE" CACHE STRING "BLIS_MODEL_TYPE env var renamed to supplied value")
 if(ENABLE_ADDON)
     if((NOT WIN32) OR
-       (WIN32 AND (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang") AND NOT (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS "17.0")))
+       (WIN32 AND (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang") AND NOT (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS "18.0")))
         set(ENABLE_ADDON "" CACHE STRING "Configure with specific addons using a ';'-separated list")
     else()
-        message(FATAL_ERROR "On Windows, aocl_gemm addon requires Clang version at least 17.0. Current version: ${CMAKE_CXX_COMPILER_VERSION}")
+        message(FATAL_ERROR "On Windows, aocl_gemm addon requires Clang version at least 18.0. Current version: ${CMAKE_CXX_COMPILER_VERSION}")
     endif()
 endif()
 set(ENABLE_SANDBOX "" CACHE STRING "Enable a separate sandbox implementation of gemm.")
