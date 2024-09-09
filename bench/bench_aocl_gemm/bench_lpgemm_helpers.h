@@ -87,6 +87,7 @@ static inline void float_to_bf16( float* float_value, bfloat16* bf16_val )
     memcpy( ( bf16_val ), (char *)( float_value ) + 2, sizeof ( bfloat16 ) );
 }
 
+// Only works for little endian systems.
 static inline void bfloat16_to_float( bfloat16 bf16_val, float*  float_val )
 {
     int32_t inter_temp = *( ( int16_t* ) &bf16_val );
@@ -348,6 +349,17 @@ static inline void mat_mul_get_output_type_valfloatbfloat16
        float* temp_accum
      )
 {
+	/* Fix for rounding bias. */
+	uint32_t inter_temp;
+	memcpy( &inter_temp, temp_accum, sizeof( float ) );
+
+	/* Check if 16th bit is set */
+	uint32_t tlsb = ( inter_temp & ( uint32_t )0x00010000 ) > 16;
+
+	/* Adding rounding bias. */
+	uint32_t rounded = inter_temp + ( uint32_t )0x00007FFF + tlsb;
+	memcpy( temp_accum, &rounded, sizeof( float ) );
+
     float_to_bf16( temp_accum, out_temp_accum );
 }
 

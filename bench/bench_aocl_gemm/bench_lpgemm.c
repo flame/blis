@@ -500,15 +500,7 @@ static inline float mat_mul_accuracy_check_accum_bf16bf16f32obf16
     float c_ref_float;
     bfloat16_to_float( *( c_ref + i*rs_c_ref + j*cs_c_ref ), &c_ref_float );
     temp_accum = ( beta * ( c_ref_float ) ) + ( alpha * temp_accum );
-    uint32_t inter_temp;
-    memcpy( &inter_temp, &temp_accum, sizeof( float ) );
-    // check if 15th bit is set
-    if( inter_temp & (uint32_t)0x00008000)
-    {
-            // round the value
-            uint32_t rounded = inter_temp + (uint32_t)0x00010000;
-            memcpy( &temp_accum, &rounded, sizeof( float)  );
-    }
+
     return temp_accum;
 }
 
@@ -966,7 +958,8 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
               &out_temp_accum, &temp_accum \
             ); \
  \
-            if ( ( *( c + ( rs_c * i ) + ( cs_c * j ) ) - out_temp_accum ) > 1.0E-5 ) \
+            if ( ( ( *( c + ( rs_c * i ) + ( cs_c * j ) ) - out_temp_accum ) > 1.0E-5 ) || \
+                 ( ( out_temp_accum - *( c + ( rs_c * i ) + ( cs_c * j ) ) ) > 1.0E-5 ) ) \
             { \
                 float comp_float, ref_float; \
                 GEN_FUNC_NAME(C_type,_to_float)(*( c + ( rs_c * i ) + ( cs_c * j ) ), &comp_float); \
@@ -1048,7 +1041,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     post_ops->eltwise = NULL; \
  \
     /* Bench limitation: can only support 1 bias, but LPGEMM can support
-     * multiple scale post-ops. */ \
+     * multiple bias post-ops. */ \
     post_ops->bias = NULL; \
     post_ops->bias = malloc( sizeof( aocl_post_op_bias ) ); \
     if ( post_ops->bias == NULL ) \
@@ -1384,7 +1377,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
  \
     if ( is_matrix_add == TRUE ) \
     { \
-        /* Allocate bias buffer, return early if alloc fails.*/ \
+        /* Allocate add matrix buffer, return early if alloc fails.*/ \
         dim_t ele_dsize = 0; \
         if ( global_dscale_out == 'y' ) \
         { \
@@ -1419,7 +1412,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
  \
     if ( is_matrix_mul == TRUE ) \
     { \
-        /* Allocate bias buffer, return early if alloc fails.*/ \
+        /* Allocate mul matrix buffer, return early if alloc fails.*/ \
         dim_t ele_dsize = 0; \
         if ( global_dscale_out == 'y' ) \
         { \
