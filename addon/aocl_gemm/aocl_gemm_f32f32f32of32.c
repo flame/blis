@@ -168,6 +168,7 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	bli_pba_rntm_set_pba( &rntm_g );
 
 	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( F32F32F32OF32 );
+	
 #ifdef BLIS_ENABLE_OPENMP
 	// The lpgemm_cntx_t argument will be NULL for f32 since it still uses
 	// BLIS cntx_t internally. Its a workaround for now and will be replaced

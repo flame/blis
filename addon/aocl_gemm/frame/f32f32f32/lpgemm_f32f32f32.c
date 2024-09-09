@@ -249,6 +249,9 @@ LPGEMV(float, float, float, f32f32f32of32)
             &nc0, &n_sub_updated);
 
         b_use = (float*) ( b + (jc_cur_loop * k) );
+
+        rs_b_use = NR;
+        cs_b_use = 1;
       }
       else if (mtag_b == PACK) 
       {
@@ -335,7 +338,8 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
   // The avx512 check will be removed when avx2 kernels added in future
   //ToDo: with trasnsA row storage and transB column storage, the packed matrices will be in col stored row access
   //which will give error in the computation. Hence, for now redirecting those cases to GEMM instead of GEMV to avoid the errors.
-  if ( ( (m == 1 ) ||  (n == 1) ) && (bli_cpuid_is_avx512_supported() == TRUE) && ( mtag_a != PACK ) )
+  if ( ( ( m == 1 ) ||  ( n == 1 ) ) && (bli_cpuid_is_avx512_supported() == TRUE) && 
+      ( mtag_a != PACK ) )
   {
     lpgemv_rowvar_f32f32f32of32(m, n, k,
                                 a, rs_a, cs_a, mtag_a,
@@ -353,7 +357,14 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
 #endif
     //ToDo: In case of transA with row storage, the padding will not be done if mtag_a is enabled by user. 
     //This would give a seg fault. Hence, adding the condition here so that this will be taken care.
-    if( ( ( m == 1) || ( n == 1 ) ) && ( mtag_a == PACK ) ) mtag_b = PACK;
+    if( ( n == 1 ) && ( mtag_a == PACK ) ) {
+      if(mtag_b == REORDERED) {
+        rs_b = 1;
+        cs_b = 1;
+      }
+      mtag_b = PACK;
+    }
+  
     // Query the global cntx.
     cntx_t* cntx = bli_gks_query_cntx();
 
