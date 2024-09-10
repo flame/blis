@@ -150,7 +150,7 @@ static void axpyf(
     computediff<char>( "conj_x", conj_x, conj_x_cpy );
     computediff<gtint_t>( "m", m, m_cpy );
     computediff<gtint_t>( "b", b, b_cpy );
-    computediff<T>( "alpha", *alpha, *alpha_cpy );
+    if (alpha) computediff<T>( "alpha", *alpha, *alpha_cpy );
     computediff<gtint_t>( "inca", inca, inca_cpy );
     computediff<gtint_t>( "lda", lda, lda_cpy );
     computediff<gtint_t>( "incx", incx, incx_cpy );

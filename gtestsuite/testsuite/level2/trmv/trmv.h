@@ -221,7 +221,7 @@ static void trmv( char storage, char uploa, char transa, char diaga,
     computediff<char>( "transa", transa, transa_cpy );
     computediff<char>( "diaga", diaga, diaga_cpy );
     computediff<gtint_t>( "n", n, n_cpy );
-    computediff<T>( "alpha", *alpha, *alpha_cpy );
+    if (alpha) computediff<T>( "alpha", *alpha, *alpha_cpy );
     computediff<gtint_t>( "lda", lda, lda_cpy );
     computediff<gtint_t>( "incx", incx, incx_cpy );
 

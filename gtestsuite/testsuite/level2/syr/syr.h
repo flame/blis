@@ -180,7 +180,7 @@ static void syr( char storage, char uploa, char conj_x, gtint_t n, T* alpha,
     computediff<char>( "uploa", uploa, uploa_cpy );
     computediff<char>( "conj_x", conj_x, conj_x_cpy );
     computediff<gtint_t>( "n", n, n_cpy );
-    computediff<T>( "alpha", *alpha, *alpha_cpy );
+    if (alpha) computediff<T>( "alpha", *alpha, *alpha_cpy );
     computediff<gtint_t>( "incx", incx, incx_cpy );
     computediff<gtint_t>( "lda", lda, lda_cpy );
 

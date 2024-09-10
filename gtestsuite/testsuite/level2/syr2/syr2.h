@@ -194,7 +194,7 @@ static void syr2( char storage, char uploa, char conj_x, char conj_y, gtint_t n,
     computediff<char>( "conj_x", conj_x, conj_x_cpy );
     computediff<char>( "conj_y", conj_y, conj_y_cpy );
     computediff<gtint_t>( "n", n, n_cpy );
-    computediff<T>( "alpha", *alpha, *alpha_cpy );
+    if (alpha) computediff<T>( "alpha", *alpha, *alpha_cpy );
     computediff<gtint_t>( "lda", lda, lda_cpy );
     computediff<gtint_t>( "incx", incx, incx_cpy );
     computediff<gtint_t>( "incy", incy, incy_cpy );

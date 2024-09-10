@@ -235,7 +235,7 @@ static void trmm( char storage, char side, char uploa, char transa, char diaga,
     computediff<char>( "diaga", diaga, diaga_cpy );
     computediff<gtint_t>( "m", m, m_cpy );
     computediff<gtint_t>( "n", n, n_cpy );
-    computediff<T>( "alpha", *alpha, *alpha_cpy );
+    if (alpha) computediff<T>( "alpha", *alpha, *alpha_cpy );
     computediff<gtint_t>( "lda", lda, lda_cpy );
     computediff<gtint_t>( "ldb", ldb, ldb_cpy );
 

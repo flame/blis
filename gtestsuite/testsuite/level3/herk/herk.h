@@ -202,9 +202,9 @@ static void herk( char storage, char uplo, char transa, gtint_t n, gtint_t k,
     computediff<char>( "transa", transa, transa_cpy );
     computediff<gtint_t>( "n", n, n_cpy );
     computediff<gtint_t>( "k", k, k_cpy );
-    computediff<RT>( "alpha", *alpha, *alpha_cpy );
+    if (alpha) computediff<RT>( "alpha", *alpha, *alpha_cpy );
     computediff<gtint_t>( "lda", lda, lda_cpy );
-    computediff<RT>( "beta", *beta, *beta_cpy );
+    if (beta) computediff<RT>( "beta", *beta, *beta_cpy );
     computediff<gtint_t>( "ldc", ldc, ldc_cpy );
 
     //----------------------------------------------------------

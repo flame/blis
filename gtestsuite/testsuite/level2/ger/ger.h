@@ -191,6 +191,7 @@ static void ger( char storage, char conjx, char conjy, gtint_t m, gtint_t n,
     T* xp_cpy = nullptr;
     gtint_t size_xp;
     size_xp = testinghelpers::buff_dim( m, incx );
+    if (xp && size_xp > 0)
     {
         xp_cpy = new T[size_xp];
         memcpy( xp_cpy, xp, size_xp * sizeof( T ) );
@@ -198,6 +199,7 @@ static void ger( char storage, char conjx, char conjy, gtint_t m, gtint_t n,
     T* yp_cpy = nullptr;
     gtint_t size_yp;
     size_yp = testinghelpers::buff_dim( n, incy );
+    if (yp && size_yp > 0)
     {
         yp_cpy = new T[size_yp];
         memcpy( yp_cpy, yp, size_yp * sizeof( T ) );
@@ -232,7 +234,7 @@ static void ger( char storage, char conjx, char conjy, gtint_t m, gtint_t n,
     computediff<char>( "conjy", conjy, conjy_cpy );
     computediff<gtint_t>( "m", m, m_cpy );
     computediff<gtint_t>( "n", n, n_cpy );
-    computediff<T>( "alpha", *alpha, *alpha_cpy );
+    if (alpha) computediff<T>( "alpha", *alpha, *alpha_cpy );
     computediff<gtint_t>( "lda", lda, lda_cpy );
     computediff<gtint_t>( "incx", incx, incx_cpy );
     computediff<gtint_t>( "incy", incy, incy_cpy );

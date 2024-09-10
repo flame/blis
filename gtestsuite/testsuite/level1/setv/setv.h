@@ -101,7 +101,7 @@ static void setv(char conjalpha, gtint_t n, T* alpha, T* x, gtint_t incx)
 
     computediff<char>( "conjalpha", conjalpha, conjalpha_cpy );
     computediff<gtint_t>( "n", n, n_cpy );
-    computediff<T>( "alpha", *alpha, *alpha_cpy );
+    if (alpha) computediff<T>( "alpha", *alpha, *alpha_cpy );
     computediff<gtint_t>( "incx", incx, incx_cpy );
 #endif
 }

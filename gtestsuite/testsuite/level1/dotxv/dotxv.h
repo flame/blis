@@ -123,10 +123,10 @@ static void dotxv( char conjx, char conjy, gtint_t n, T* alpha,
     computediff<char>( "conjx", conjx, conjx_cpy );
     computediff<char>( "conjy", conjy, conjy_cpy );
     computediff<gtint_t>( "n", n, n_cpy );
-    computediff<T>( "alpha", *alpha, *alpha_cpy );
+    if (alpha) computediff<T>( "alpha", *alpha, *alpha_cpy );
     computediff<gtint_t>( "incx", incx, incx_cpy );
     computediff<gtint_t>( "incy", incy, incy_cpy );
-    computediff<T>( "beta", *beta, *beta_cpy );
+    if (beta) computediff<T>( "beta", *beta, *beta_cpy );
 
     //----------------------------------------------------------
     // Bitwise-wise check array inputs have not been modified.

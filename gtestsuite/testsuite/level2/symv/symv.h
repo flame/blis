@@ -197,10 +197,10 @@ static void symv( char storage, char uploa, char conja, char conjx, gtint_t n,
     computediff<char>( "conja", conja, conja_cpy );
     computediff<char>( "conjx", conjx, conjx_cpy );
     computediff<gtint_t>( "n", n, n_cpy );
-    computediff<T>( "alpha", *alpha, *alpha_cpy );
+    if (alpha) computediff<T>( "alpha", *alpha, *alpha_cpy );
     computediff<gtint_t>( "lda", lda, lda_cpy );
     computediff<gtint_t>( "incx", incx, incx_cpy );
-    computediff<T>( "beta", *beta, *beta_cpy );
+    if (beta) computediff<T>( "beta", *beta, *beta_cpy );
     computediff<gtint_t>( "incy", incy, incy_cpy );
 
     //----------------------------------------------------------
