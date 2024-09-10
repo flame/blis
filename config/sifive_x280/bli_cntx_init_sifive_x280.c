@@ -157,19 +157,19 @@ void bli_cntx_init_sifive_x280( cntx_t* cntx )
 	  BLIS_PACKM_KER,      BLIS_DCOMPLEX, bli_zpackm_sifive_x280_intr,
 
 	  // Level 3
-	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_sifive_x280_asm_7m4,
-	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_sifive_x280_asm_7m4,
-	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_sifive_x280_asm_6m2,
-	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_sifive_x280_asm_6m2,
+	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_sifive_x280_intr,
+	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_sifive_x280_intr,
+	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_sifive_x280_intr,
+	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_sifive_x280_intr,
 
-	  BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsm_l_sifive_x280_asm,
-	  BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_l_sifive_x280_asm,
-	  BLIS_GEMMTRSM_L_UKR, BLIS_SCOMPLEX, bli_cgemmtrsm_l_sifive_x280_asm,
-	  BLIS_GEMMTRSM_L_UKR, BLIS_DCOMPLEX, bli_zgemmtrsm_l_sifive_x280_asm,
-	  BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_sifive_x280_asm,
-	  BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_sifive_x280_asm,
-	  BLIS_GEMMTRSM_U_UKR, BLIS_SCOMPLEX, bli_cgemmtrsm_u_sifive_x280_asm,
-	  BLIS_GEMMTRSM_U_UKR, BLIS_DCOMPLEX, bli_zgemmtrsm_u_sifive_x280_asm,
+	  BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsm_l_sifive_x280_intr,
+	  BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_l_sifive_x280_intr,
+	  BLIS_GEMMTRSM_L_UKR, BLIS_SCOMPLEX, bli_cgemmtrsm_l_sifive_x280_intr,
+	  BLIS_GEMMTRSM_L_UKR, BLIS_DCOMPLEX, bli_zgemmtrsm_l_sifive_x280_intr,
+	  BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_sifive_x280_intr,
+	  BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_sifive_x280_intr,
+	  BLIS_GEMMTRSM_U_UKR, BLIS_SCOMPLEX, bli_cgemmtrsm_u_sifive_x280_intr,
+	  BLIS_GEMMTRSM_U_UKR, BLIS_DCOMPLEX, bli_zgemmtrsm_u_sifive_x280_intr,
 
 	  BLIS_VA_END
 	);

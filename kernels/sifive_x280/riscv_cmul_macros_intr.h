@@ -109,6 +109,24 @@
         VD_I = VFNMSAC_VF(PREC, LMUL)(VD_I, RS1_R, VS2_I, VL);                 \
     } while(0)
 
+// vd = vs2 * f[rs1] - vd
+#define VCMSAC_VF(PREC, LMUL, VD_R, VD_I, RS1_R, RS1_I, VS2_R, VS2_I, VL)  \
+    do {                                                                   \
+        VD_R = VFMSAC_VF(PREC, LMUL)(VD_R, RS1_R, VS2_R, VL);              \
+        VD_I = VFMSAC_VF(PREC, LMUL)(VD_I, RS1_I, VS2_R, VL);              \
+        VD_R = VFNMSAC_VF(PREC, LMUL)(VD_R, RS1_I, VS2_I, VL);             \
+        VD_I = VFMACC_VF(PREC, LMUL)(VD_I, RS1_R, VS2_I, VL);              \
+    } while(0)
+
+// vd -= vs2 * f[rs1]
+#define VCNMSAC_VF(PREC, LMUL, VD_R, VD_I, RS1_R, RS1_I, VS2_R, VS2_I, VL) \
+    do {                                                                   \
+        VD_R = VFNMSAC_VF(PREC, LMUL)(VD_R, RS1_R, VS2_R, VL);             \
+        VD_I = VFNMSAC_VF(PREC, LMUL)(VD_I, RS1_I, VS2_R, VL);             \
+        VD_R = VFMACC_VF(PREC, LMUL)(VD_R, RS1_I, VS2_I, VL);              \
+        VD_I = VFNMSAC_VF(PREC, LMUL)(VD_I, RS1_R, VS2_I, VL);             \
+    } while(0)
+
 // vd += vs2 * vs1
 #define VCMACC_VV_TU(PREC, LMUL, VD_R, VD_I, VS1_R, VS1_I, VS2_R, VS2_I, VL) \
     do {                                                                     \
