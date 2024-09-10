@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, SiFive, Inc.
+   Copyright (C) 2024, SiFive, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,39 +34,44 @@
 
 // clang-format off
 
+#include "../../riscv_cmul_macros_intr.h"
+#include "../../riscv_overloaded_intrinsics.h"
+#include "blis.h"
 #include <stdint.h>
 #include <riscv_vector.h>
-#include "blis.h"
-#include "../../riscv_overloaded_intrinsics.h"
 
-
-#define AXPBYV_(PRECISION_CHAR, T) void bli_##PRECISION_CHAR##axpbyv_sifive_x280_intr(\
-          conj_t           conjx,          \
-          dim_t            n,              \
-    const T*      restrict alpha_,         \
-    const T*      restrict x_, inc_t incx, \
-    const T*      restrict beta_,          \
-          T*      restrict y_, inc_t incy, \
-    const cntx_t*          cntx            \
+#define DOTXAXPYF_(PRECISION_CHAR, T) void bli_##PRECISION_CHAR##dotxaxpyf_sifive_x280_intr(\
+          conj_t           conjat,                    \
+          conj_t           conja,                     \
+          conj_t           conjw,                     \
+          conj_t           conjx,                     \
+          dim_t            m,                         \
+          dim_t            b,                         \
+    const T*      restrict alpha_,                    \
+    const T*      restrict a_, inc_t inca, inc_t lda, \
+    const T*      restrict w_, inc_t incw,            \
+    const T*      restrict x_, inc_t incx,            \
+    const T*      restrict beta_,                     \
+          T*      restrict y_, inc_t incy,            \
+          T*      restrict z_, inc_t incz,            \
+    const cntx_t* restrict cntx                       \
 )
 
-#define AXPBYV(...)  AXPBYV_(__VA_ARGS__)
+#define DOTXAXPYF(...)  DOTXAXPYF_(__VA_ARGS__)
 
 #define SETV_(PRECISION_CHAR) bli_##PRECISION_CHAR##setv_sifive_x280_intr
 #define SETV(PRECISION_CHAR) SETV_(PRECISION_CHAR)
 #define SCALV_(PRECISION_CHAR) bli_##PRECISION_CHAR##scalv_sifive_x280_intr
 #define SCALV(PRECISION_CHAR) SCALV_(PRECISION_CHAR)
-#define SCAL2V_(PRECISION_CHAR) bli_##PRECISION_CHAR##scal2v_sifive_x280_intr
-#define SCAL2V(PRECISION_CHAR) SCAL2V_(PRECISION_CHAR)
 
 // Single precision real
 #define DATATYPE float
 #define PRECISION_CHAR s
 #define PREC 32
-#define LMUL m8
+#define LMUL m4
 #define FLT_SIZE sizeof(float)
 
-#include "./bli_axpbyv_sifive_x280_intr_real.c"
+#include "./bli_dotxaxpyf_sifive_x280_intr_real.c"
 
 #undef DATATYPE
 #undef PRECISION_CHAR
@@ -78,10 +83,10 @@
 #define DATATYPE double
 #define PRECISION_CHAR d
 #define PREC 64
-#define LMUL m8
+#define LMUL m4
 #define FLT_SIZE sizeof(double)
 
-#include "./bli_axpbyv_sifive_x280_intr_real.c"
+#include "./bli_dotxaxpyf_sifive_x280_intr_real.c"
 
 #undef DATATYPE
 #undef PRECISION_CHAR
@@ -94,10 +99,10 @@
 #define BASE_DT float
 #define PRECISION_CHAR c
 #define PREC 32
-#define LMUL m4
+#define LMUL m2
 #define FLT_SIZE sizeof(float)
 
-#include "./bli_axpbyv_sifive_x280_intr_complex.c"
+#include "./bli_dotxaxpyf_sifive_x280_intr_complex.c"
 
 #undef DATATYPE
 #undef BASE_DT
@@ -111,10 +116,10 @@
 #define BASE_DT double
 #define PRECISION_CHAR z
 #define PREC 64
-#define LMUL m4
+#define LMUL m2
 #define FLT_SIZE sizeof(double)
 
-#include "./bli_axpbyv_sifive_x280_intr_complex.c"
+#include "./bli_dotxaxpyf_sifive_x280_intr_complex.c"
 
 #undef DATATYPE
 #undef BASE_DT
@@ -123,5 +128,10 @@
 #undef LMUL
 #undef FLT_SIZE
 
-#undef AXPBYV
-#undef AXPBYV_
+#undef SETV_
+#undef SETV
+#undef SCALV_
+#undef SCALV
+
+#undef DOTXAXPYF
+#undef DOTXAXPYF_

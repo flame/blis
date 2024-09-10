@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, SiFive, Inc.
+   Copyright (C) 2024, SiFive, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,31 +33,18 @@
 */
 
 // clang-format off
-
-#include <stdint.h>
-#include <riscv_vector.h>
-#include "blis.h"
 #include "../../riscv_overloaded_intrinsics.h"
+#include "blis.h"
+#include <riscv_vector.h>
+#include <stddef.h>
 
-
-#define AXPBYV_(PRECISION_CHAR, T) void bli_##PRECISION_CHAR##axpbyv_sifive_x280_intr(\
-          conj_t           conjx,          \
+#define INVERTV_(PRECISION_CHAR, T) void bli_##PRECISION_CHAR##invertv_sifive_x280_intr(\
           dim_t            n,              \
-    const T*      restrict alpha_,         \
-    const T*      restrict x_, inc_t incx, \
-    const T*      restrict beta_,          \
-          T*      restrict y_, inc_t incy, \
+          T*      restrict x_, inc_t incx, \
     const cntx_t*          cntx            \
 )
 
-#define AXPBYV(...)  AXPBYV_(__VA_ARGS__)
-
-#define SETV_(PRECISION_CHAR) bli_##PRECISION_CHAR##setv_sifive_x280_intr
-#define SETV(PRECISION_CHAR) SETV_(PRECISION_CHAR)
-#define SCALV_(PRECISION_CHAR) bli_##PRECISION_CHAR##scalv_sifive_x280_intr
-#define SCALV(PRECISION_CHAR) SCALV_(PRECISION_CHAR)
-#define SCAL2V_(PRECISION_CHAR) bli_##PRECISION_CHAR##scal2v_sifive_x280_intr
-#define SCAL2V(PRECISION_CHAR) SCAL2V_(PRECISION_CHAR)
+#define INVERTV(...)  INVERTV_(__VA_ARGS__)
 
 // Single precision real
 #define DATATYPE float
@@ -66,7 +53,7 @@
 #define LMUL m8
 #define FLT_SIZE sizeof(float)
 
-#include "./bli_axpbyv_sifive_x280_intr_real.c"
+#include "./bli_invertv_sifive_x280_intr_real.c"
 
 #undef DATATYPE
 #undef PRECISION_CHAR
@@ -81,7 +68,7 @@
 #define LMUL m8
 #define FLT_SIZE sizeof(double)
 
-#include "./bli_axpbyv_sifive_x280_intr_real.c"
+#include "./bli_invertv_sifive_x280_intr_real.c"
 
 #undef DATATYPE
 #undef PRECISION_CHAR
@@ -95,15 +82,17 @@
 #define PRECISION_CHAR c
 #define PREC 32
 #define LMUL m4
+#define RATIO 8
 #define FLT_SIZE sizeof(float)
 
-#include "./bli_axpbyv_sifive_x280_intr_complex.c"
+#include "./bli_invertv_sifive_x280_intr_complex.c"
 
 #undef DATATYPE
 #undef BASE_DT
 #undef PRECISION_CHAR
 #undef PREC
 #undef LMUL
+#undef RATIO
 #undef FLT_SIZE
 
 // Double precision complex
@@ -112,16 +101,18 @@
 #define PRECISION_CHAR z
 #define PREC 64
 #define LMUL m4
+#define RATIO 16
 #define FLT_SIZE sizeof(double)
 
-#include "./bli_axpbyv_sifive_x280_intr_complex.c"
+#include "./bli_invertv_sifive_x280_intr_complex.c"
 
 #undef DATATYPE
 #undef BASE_DT
 #undef PRECISION_CHAR
 #undef PREC
 #undef LMUL
+#undef RATIO
 #undef FLT_SIZE
 
-#undef AXPBYV
-#undef AXPBYV_
+#undef INVERTV
+#undef INVERTV_
