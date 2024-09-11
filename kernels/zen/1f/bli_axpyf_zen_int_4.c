@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -440,10 +440,10 @@ void bli_zaxpyf_zen_int_4
 
     // Prefetching the elements of A to the L1 cache.
     // These will be used even if SSE instructions are used
-    _mm_prefetch(a_ptr[0], _MM_HINT_T1);
-    _mm_prefetch(a_ptr[1], _MM_HINT_T1);
-    _mm_prefetch(a_ptr[2], _MM_HINT_T1);
-    _mm_prefetch(a_ptr[3], _MM_HINT_T1);
+    _mm_prefetch((char const*)(a_ptr[0]), _MM_HINT_T1);
+    _mm_prefetch((char const*)(a_ptr[1]), _MM_HINT_T1);
+    _mm_prefetch((char const*)(a_ptr[2]), _MM_HINT_T1);
+    _mm_prefetch((char const*)(a_ptr[3]), _MM_HINT_T1);
 
     if (inca == 1 && incy == 1)
     {
@@ -482,15 +482,15 @@ void bli_zaxpyf_zen_int_4
                 ymm12.v = _mm256_fmadd_pd(ymm10.v, ymm2.v, ymm12.v);
                 ymm13.v = _mm256_fmadd_pd(ymm10.v, ymm3.v, ymm13.v);
 
-                _mm_prefetch(a_ptr[0] + distance, _MM_HINT_T1);
-                _mm_prefetch(a_ptr[1] + distance, _MM_HINT_T1);
-                _mm_prefetch(a_ptr[2] + distance, _MM_HINT_T1);
-                _mm_prefetch(a_ptr[3] + distance, _MM_HINT_T1);
+                _mm_prefetch((char const*)(a_ptr[0] + distance), _MM_HINT_T1);
+                _mm_prefetch((char const*)(a_ptr[1] + distance), _MM_HINT_T1);
+                _mm_prefetch((char const*)(a_ptr[2] + distance), _MM_HINT_T1);
+                _mm_prefetch((char const*)(a_ptr[3] + distance), _MM_HINT_T1);
 
                 ymm12.v = _mm256_fmadd_pd(ymm14.v, ymm4.v, ymm12.v);
                 ymm13.v = _mm256_fmadd_pd(ymm14.v, ymm5.v, ymm13.v);
 
-                _mm_prefetch(y0 + distance, _MM_HINT_T1);
+                _mm_prefetch((char const*)(y0 + distance), _MM_HINT_T1);
 
                 ymm12.v = _mm256_fmadd_pd(ymm15.v, ymm6.v, ymm12.v);
                 ymm13.v = _mm256_fmadd_pd(ymm15.v, ymm7.v, ymm13.v);
@@ -519,15 +519,15 @@ void bli_zaxpyf_zen_int_4
                 ymm12.v = _mm256_fmadd_pd(ymm10.v, ymm2.v, ymm12.v);
                 ymm13.v = _mm256_fmadd_pd(ymm10.v, ymm3.v, ymm13.v);
 
-                _mm_prefetch(a_ptr[0] + distance * 2, _MM_HINT_T1);
-                _mm_prefetch(a_ptr[1] + distance * 2, _MM_HINT_T1);
-                _mm_prefetch(a_ptr[2] + distance * 2, _MM_HINT_T1);
-                _mm_prefetch(a_ptr[3] + distance * 2, _MM_HINT_T1);
+                _mm_prefetch((char const*)(a_ptr[0] + distance * 2), _MM_HINT_T1);
+                _mm_prefetch((char const*)(a_ptr[1] + distance * 2), _MM_HINT_T1);
+                _mm_prefetch((char const*)(a_ptr[2] + distance * 2), _MM_HINT_T1);
+                _mm_prefetch((char const*)(a_ptr[3] + distance * 2), _MM_HINT_T1);
 
                 ymm12.v = _mm256_fmadd_pd(ymm14.v, ymm4.v, ymm12.v);
                 ymm13.v = _mm256_fmadd_pd(ymm14.v, ymm5.v, ymm13.v);
 
-                _mm_prefetch(y0 + distance * 2, _MM_HINT_T1);
+                _mm_prefetch((char const*)(y0 + distance * 2), _MM_HINT_T1);
 
                 ymm12.v = _mm256_fmadd_pd(ymm15.v, ymm6.v, ymm12.v);
                 ymm13.v = _mm256_fmadd_pd(ymm15.v, ymm7.v, ymm13.v);
@@ -605,15 +605,15 @@ void bli_zaxpyf_zen_int_4
                 ymm12.v = _mm256_fmadd_pd(ymm10.v, ymm2.v, ymm12.v);
                 ymm13.v = _mm256_fmadd_pd(ymm10.v, ymm3.v, ymm13.v);
 
-                _mm_prefetch(a_ptr[0] + distance, _MM_HINT_T1);
-                _mm_prefetch(a_ptr[1] + distance, _MM_HINT_T1);
-                _mm_prefetch(a_ptr[2] + distance, _MM_HINT_T1);
-                _mm_prefetch(a_ptr[3] + distance, _MM_HINT_T1);
+                _mm_prefetch((char const*)(a_ptr[0] + distance), _MM_HINT_T1);
+                _mm_prefetch((char const*)(a_ptr[1] + distance), _MM_HINT_T1);
+                _mm_prefetch((char const*)(a_ptr[2] + distance), _MM_HINT_T1);
+                _mm_prefetch((char const*)(a_ptr[3] + distance), _MM_HINT_T1);
 
                 ymm12.v = _mm256_fmadd_pd(ymm14.v, ymm4.v, ymm12.v);
                 ymm13.v = _mm256_fmadd_pd(ymm14.v, ymm5.v, ymm13.v);
 
-                _mm_prefetch(y0 + distance, _MM_HINT_T1);
+                _mm_prefetch((char const*)(y0 + distance), _MM_HINT_T1);
 
                 ymm12.v = _mm256_fmadd_pd(ymm15.v, ymm6.v, ymm12.v);
                 ymm13.v = _mm256_fmadd_pd(ymm15.v, ymm7.v, ymm13.v);
@@ -641,15 +641,15 @@ void bli_zaxpyf_zen_int_4
                 ymm12.v = _mm256_fmadd_pd(ymm10.v, ymm2.v, ymm12.v);
                 ymm13.v = _mm256_fmadd_pd(ymm10.v, ymm3.v, ymm13.v);
 
-                _mm_prefetch(a_ptr[0] + distance * 2, _MM_HINT_T1);
-                _mm_prefetch(a_ptr[1] + distance * 2, _MM_HINT_T1);
-                _mm_prefetch(a_ptr[2] + distance * 2, _MM_HINT_T1);
-                _mm_prefetch(a_ptr[3] + distance * 2, _MM_HINT_T1);
+                _mm_prefetch((char const*)(a_ptr[0] + distance * 2), _MM_HINT_T1);
+                _mm_prefetch((char const*)(a_ptr[1] + distance * 2), _MM_HINT_T1);
+                _mm_prefetch((char const*)(a_ptr[2] + distance * 2), _MM_HINT_T1);
+                _mm_prefetch((char const*)(a_ptr[3] + distance * 2), _MM_HINT_T1);
 
                 ymm12.v = _mm256_fmadd_pd(ymm14.v, ymm4.v, ymm12.v);
                 ymm13.v = _mm256_fmadd_pd(ymm14.v, ymm5.v, ymm13.v);
 
-                _mm_prefetch(y0 + distance * 2, _MM_HINT_T1);
+                _mm_prefetch((char const*)(y0 + distance * 2), _MM_HINT_T1);
 
                 ymm12.v = _mm256_fmadd_pd(ymm15.v, ymm6.v, ymm12.v);
                 ymm13.v = _mm256_fmadd_pd(ymm15.v, ymm7.v, ymm13.v);

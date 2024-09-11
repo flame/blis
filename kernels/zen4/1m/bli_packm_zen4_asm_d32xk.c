@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -125,7 +125,7 @@ void bli_dpackm_zen4_asm_32xk
 				{
 					for ( dim_t k = k0; k != 0; --k )
 					{
-						_mm_prefetch( a + (8*lda), _MM_HINT_T0 );
+						_mm_prefetch((char const*)(a + (8*lda)), _MM_HINT_T0 );
 						for ( dim_t i = 0 ; i < 32 ; i++ ) {
 							bli_dcopys( *(a + i), *(pi1 + i) );
 						}

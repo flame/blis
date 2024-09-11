@@ -816,7 +816,7 @@ void bli_zaxpyv_zen_int5
 
         // Prefetch X vector to the L1 cache
         // as these elements will be need anyway
-        _mm_prefetch(x0, _MM_HINT_T1);
+        _mm_prefetch((char const*)x0, _MM_HINT_T1);
 
         // Broadcast the alpha scalar to all elements of a vector register.
         if (bli_is_noconj(conjx)) // If BLIS_NO_CONJUGATE
@@ -922,8 +922,8 @@ void bli_zaxpyv_zen_int5
             xv[6] = _mm256_permute_pd(xv[6], 5);
 
             // Prefetch X and Y vectors to the L1 cache
-            _mm_prefetch(x0 + distance, _MM_HINT_T1);
-            _mm_prefetch(y0 + distance, _MM_HINT_T1);
+            _mm_prefetch((char const*)(x0 + distance), _MM_HINT_T1);
+            _mm_prefetch((char const*)(y0 + distance), _MM_HINT_T1);
             // alphaIv = -aI   aI  -aI   aI
 
             // yv  =  ar*xv + yv

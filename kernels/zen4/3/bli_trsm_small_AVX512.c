@@ -760,7 +760,7 @@ err_t bli_trsm_small_mt_AVX512
     zmm8 = _mm512_set1_pd(*(a01 + (p_lda * 7))); \
     \
     /*prefetch b10 4 iterations in advance*/ \
-    _mm_prefetch((b10 + 4 * cs_b), _MM_HINT_T0); \
+    _mm_prefetch((char const*)(b10 + 4 * cs_b), _MM_HINT_T0); \
     zmm9  = _mm512_fmadd_pd(zmm1, zmm0, zmm9 ); \
     zmm10 = _mm512_fmadd_pd(zmm2, zmm0, zmm10); \
     zmm11 = _mm512_fmadd_pd(zmm3, zmm0, zmm11); \
@@ -784,7 +784,7 @@ err_t bli_trsm_small_mt_AVX512
     zmm21 = _mm512_set1_pd(*(a01_2 + (p_lda * 4))); \
     zmm22 = _mm512_set1_pd(*(a01_2 + (p_lda * 5))); \
     \
-    _mm_prefetch((b10_2 + 4 * cs_b), _MM_HINT_T0); \
+    _mm_prefetch((char const*)(b10_2 + 4 * cs_b), _MM_HINT_T0); \
     zmm24 = _mm512_fmadd_pd(zmm17, zmm23, zmm24); \
     zmm17 = _mm512_set1_pd(*(a01_2 + (p_lda * 6))); \
     zmm25 = _mm512_fmadd_pd(zmm18, zmm23, zmm25); \
@@ -801,22 +801,22 @@ err_t bli_trsm_small_mt_AVX512
   } \
   \
   /*prefetch 8 columns of b11)*/ \
-  _mm_prefetch((b11 + (0) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (0) * cs_b), _MM_HINT_T0); \
   /*combine the results of both loops*/ \
   zmm9 = _mm512_add_pd(zmm9, zmm24); \
-  _mm_prefetch((b11 + (1) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (1) * cs_b), _MM_HINT_T0); \
   zmm10 = _mm512_add_pd(zmm10, zmm25); \
-  _mm_prefetch((b11 + (2) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (2) * cs_b), _MM_HINT_T0); \
   zmm11 = _mm512_add_pd(zmm11, zmm26); \
-  _mm_prefetch((b11 + (3) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (3) * cs_b), _MM_HINT_T0); \
   zmm12 = _mm512_add_pd(zmm12, zmm27); \
-  _mm_prefetch((b11 + (4) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (4) * cs_b), _MM_HINT_T0); \
   zmm13 = _mm512_add_pd(zmm13, zmm28); \
-  _mm_prefetch((b11 + (5) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (5) * cs_b), _MM_HINT_T0); \
   zmm14 = _mm512_add_pd(zmm14, zmm29); \
-  _mm_prefetch((b11 + (6) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (6) * cs_b), _MM_HINT_T0); \
   zmm15 = _mm512_add_pd(zmm15, zmm30); \
-  _mm_prefetch((b11 + (7) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (7) * cs_b), _MM_HINT_T0); \
   zmm16 = _mm512_add_pd(zmm16, zmm31);
 /*
 // alternative way to prrefetch b11
@@ -832,8 +832,8 @@ err_t bli_trsm_small_mt_AVX512
 //   zmm21 = _mm512_set1_pd(*(a01_2 + p_lda * 4)); \
 //   zmm22 = _mm512_set1_pd(*(a01_2 + p_lda * 5)); \
 //   \
-//   _mm_prefetch((b10_2 + 4*cs_b), _MM_HINT_T0); \
-//   _mm_prefetch((b11 + (itr2-1)*cs_b), _MM_HINT_T0); \
+//   _mm_prefetch((char const*)(b10_2 + 4*cs_b), _MM_HINT_T0); \
+//   _mm_prefetch((char const*)(b11 + (itr2-1)*cs_b), _MM_HINT_T0); \
 //   zmm24 = _mm512_fmadd_pd(zmm17, zmm23, zmm24); \
 //   zmm17 = _mm512_set1_pd(*(a01_2 + p_lda * 6)); \
 //   zmm25 = _mm512_fmadd_pd(zmm18, zmm23, zmm25); \
@@ -866,7 +866,7 @@ err_t bli_trsm_small_mt_AVX512
   zmm7 = _mm512_set1_pd(*(a01 + p_lda * 6)); \
   zmm8 = _mm512_set1_pd(*(a01 + p_lda * 7)); \
   \
-  _mm_prefetch((b10 + 4*cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b10 + 4*cs_b), _MM_HINT_T0); \
   zmm9  = _mm512_fmadd_pd(zmm1, zmm0, zmm9 ); \
   zmm10 = _mm512_fmadd_pd(zmm2, zmm0, zmm10); \
   zmm11 = _mm512_fmadd_pd(zmm3, zmm0, zmm11); \
@@ -893,8 +893,8 @@ err_t bli_trsm_small_mt_AVX512
   zmm7 = _mm512_set1_pd(*(a01 + p_lda * 6)); \
   zmm8 = _mm512_set1_pd(*(a01 + p_lda * 7)); \
   \
-  _mm_prefetch((b10 + 4*cs_b), _MM_HINT_T0); \
-  _mm_prefetch((b11 + (itr-1)*cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b10 + 4*cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (itr-1)*cs_b), _MM_HINT_T0); \
   zmm9  = _mm512_fmadd_pd(zmm1, zmm0, zmm9 ); \
   zmm10 = _mm512_fmadd_pd(zmm2, zmm0, zmm10); \
   zmm11 = _mm512_fmadd_pd(zmm3, zmm0, zmm11); \
@@ -930,7 +930,7 @@ err_t bli_trsm_small_mt_AVX512
     ymm7 = _mm256_broadcast_sd((a01 + (p_lda * 6))); \
     ymm8 = _mm256_broadcast_sd((a01 + (p_lda * 7))); \
     \
-    _mm_prefetch((b10 + 4 * cs_b), _MM_HINT_T0); \
+    _mm_prefetch((char const*)(b10 + 4 * cs_b), _MM_HINT_T0); \
     ymm9  = _mm256_fmadd_pd(ymm1, ymm0, ymm9 ); \
     ymm10 = _mm256_fmadd_pd(ymm2, ymm0, ymm10); \
     ymm11 = _mm256_fmadd_pd(ymm3, ymm0, ymm11); \
@@ -954,7 +954,7 @@ err_t bli_trsm_small_mt_AVX512
     ymm21 = _mm256_broadcast_sd((a01_2 + (p_lda * 4))); \
     ymm22 = _mm256_broadcast_sd((a01_2 + (p_lda * 5))); \
     \
-    _mm_prefetch((b10_2 + 4 * cs_b), _MM_HINT_T0); \
+    _mm_prefetch((char const*)(b10_2 + 4 * cs_b), _MM_HINT_T0); \
     ymm24 = _mm256_fmadd_pd(ymm17, ymm23, ymm24); \
     ymm17 = _mm256_broadcast_sd((a01_2 + (p_lda * 6))); \
     ymm25 = _mm256_fmadd_pd(ymm18, ymm23, ymm25); \
@@ -970,21 +970,21 @@ err_t bli_trsm_small_mt_AVX512
     b10_2 += cs_b; \
   } \
   /*combine the results of both loops*/ \
-  _mm_prefetch((b11 + (0) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (0) * cs_b), _MM_HINT_T0); \
   ymm9  = _mm256_add_pd(ymm9, ymm24); \
-  _mm_prefetch((b11 + (1) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (1) * cs_b), _MM_HINT_T0); \
   ymm10 = _mm256_add_pd(ymm10, ymm25); \
-  _mm_prefetch((b11 + (2) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (2) * cs_b), _MM_HINT_T0); \
   ymm11 = _mm256_add_pd(ymm11, ymm26); \
-  _mm_prefetch((b11 + (3) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (3) * cs_b), _MM_HINT_T0); \
   ymm12 = _mm256_add_pd(ymm12, ymm27); \
-  _mm_prefetch((b11 + (4) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (4) * cs_b), _MM_HINT_T0); \
   ymm13 = _mm256_add_pd(ymm13, ymm28); \
-  _mm_prefetch((b11 + (5) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (5) * cs_b), _MM_HINT_T0); \
   ymm14 = _mm256_add_pd(ymm14, ymm29); \
-  _mm_prefetch((b11 + (6) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (6) * cs_b), _MM_HINT_T0); \
   ymm15 = _mm256_add_pd(ymm15, ymm30); \
-  _mm_prefetch((b11 + (7) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (7) * cs_b), _MM_HINT_T0); \
   ymm16 = _mm256_add_pd(ymm16, ymm31);
 
 
@@ -1012,7 +1012,7 @@ err_t bli_trsm_small_mt_AVX512
     ymm7 = _mm256_broadcast_sd((a01 + (p_lda * 6))); \
     ymm8 = _mm256_broadcast_sd((a01 + (p_lda * 7))); \
     \
-    _mm_prefetch((b10 + 4 * cs_b), _MM_HINT_T0); \
+    _mm_prefetch((char const*)(b10 + 4 * cs_b), _MM_HINT_T0); \
     ymm9  = _mm256_fmadd_pd(ymm1, ymm0, ymm9 ); \
     ymm10 = _mm256_fmadd_pd(ymm2, ymm0, ymm10); \
     ymm11 = _mm256_fmadd_pd(ymm3, ymm0, ymm11); \
@@ -1038,7 +1038,7 @@ err_t bli_trsm_small_mt_AVX512
     ymm21 = _mm256_broadcast_sd((a01_2 + (p_lda * 4))); \
     ymm22 = _mm256_broadcast_sd((a01_2 + (p_lda * 5))); \
     \
-    _mm_prefetch((b10_2 + 4 * cs_b), _MM_HINT_T0); \
+    _mm_prefetch((char const*)(b10_2 + 4 * cs_b), _MM_HINT_T0); \
     ymm24 = _mm256_fmadd_pd(ymm17, ymm23, ymm24); \
     ymm17 = _mm256_broadcast_sd((a01_2 + (p_lda * 6))); \
     ymm25 = _mm256_fmadd_pd(ymm18, ymm23, ymm25); \
@@ -1054,21 +1054,21 @@ err_t bli_trsm_small_mt_AVX512
     b10_2 += cs_b; \
   } \
   /*combine the results of both loops*/ \
-  _mm_prefetch((b11 + (0) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (0) * cs_b), _MM_HINT_T0); \
   ymm9  = _mm256_add_pd(ymm9, ymm24); \
-  _mm_prefetch((b11 + (1) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (1) * cs_b), _MM_HINT_T0); \
   ymm10 = _mm256_add_pd(ymm10, ymm25); \
-  _mm_prefetch((b11 + (2) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (2) * cs_b), _MM_HINT_T0); \
   ymm11 = _mm256_add_pd(ymm11, ymm26); \
-  _mm_prefetch((b11 + (3) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (3) * cs_b), _MM_HINT_T0); \
   ymm12 = _mm256_add_pd(ymm12, ymm27); \
-  _mm_prefetch((b11 + (4) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (4) * cs_b), _MM_HINT_T0); \
   ymm13 = _mm256_add_pd(ymm13, ymm28); \
-  _mm_prefetch((b11 + (5) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (5) * cs_b), _MM_HINT_T0); \
   ymm14 = _mm256_add_pd(ymm14, ymm29); \
-  _mm_prefetch((b11 + (6) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (6) * cs_b), _MM_HINT_T0); \
   ymm15 = _mm256_add_pd(ymm15, ymm30); \
-  _mm_prefetch((b11 + (7) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (7) * cs_b), _MM_HINT_T0); \
   ymm16 = _mm256_add_pd(ymm16, ymm31);
 
   #define BLIS_DTRSM_SMALL_GEMM_8nx2m_AVX512(a01, b10, cs_b, p_lda, k_iter, b11) \
@@ -1093,7 +1093,7 @@ err_t bli_trsm_small_mt_AVX512
     ymm7 = _mm256_broadcast_sd((a01 + (p_lda * 6))); \
     ymm8 = _mm256_broadcast_sd((a01 + (p_lda * 7))); \
     \
-    _mm_prefetch((b10 + 4 * cs_b), _MM_HINT_T0); \
+    _mm_prefetch((char const*)(b10 + 4 * cs_b), _MM_HINT_T0); \
     ymm9  = _mm256_fmadd_pd(ymm1, ymm0, ymm9 ); \
     ymm10 = _mm256_fmadd_pd(ymm2, ymm0, ymm10); \
     ymm11 = _mm256_fmadd_pd(ymm3, ymm0, ymm11); \
@@ -1118,7 +1118,7 @@ err_t bli_trsm_small_mt_AVX512
     ymm21 = _mm256_broadcast_sd((a01_2 + (p_lda * 4))); \
     ymm22 = _mm256_broadcast_sd((a01_2 + (p_lda * 5))); \
     \
-    _mm_prefetch((b10_2 + 4 * cs_b), _MM_HINT_T0); \
+    _mm_prefetch((char const*)(b10_2 + 4 * cs_b), _MM_HINT_T0); \
     ymm24 = _mm256_fmadd_pd(ymm17, ymm23, ymm24); \
     ymm17 = _mm256_broadcast_sd((a01_2 + (p_lda * 6))); \
     ymm25 = _mm256_fmadd_pd(ymm18, ymm23, ymm25); \
@@ -1134,21 +1134,21 @@ err_t bli_trsm_small_mt_AVX512
     b10_2 += cs_b; \
   } \
   /*combine the results of both loops*/ \
-  _mm_prefetch((b11 + (0) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (0) * cs_b), _MM_HINT_T0); \
   ymm9 = _mm256_add_pd(ymm9, ymm24); \
-  _mm_prefetch((b11 + (1) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (1) * cs_b), _MM_HINT_T0); \
   ymm10 = _mm256_add_pd(ymm10, ymm25); \
-  _mm_prefetch((b11 + (2) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (2) * cs_b), _MM_HINT_T0); \
   ymm11 = _mm256_add_pd(ymm11, ymm26); \
-  _mm_prefetch((b11 + (3) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (3) * cs_b), _MM_HINT_T0); \
   ymm12 = _mm256_add_pd(ymm12, ymm27); \
-  _mm_prefetch((b11 + (4) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (4) * cs_b), _MM_HINT_T0); \
   ymm13 = _mm256_add_pd(ymm13, ymm28); \
-  _mm_prefetch((b11 + (5) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (5) * cs_b), _MM_HINT_T0); \
   ymm14 = _mm256_add_pd(ymm14, ymm29); \
-  _mm_prefetch((b11 + (6) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (6) * cs_b), _MM_HINT_T0); \
   ymm15 = _mm256_add_pd(ymm15, ymm30); \
-  _mm_prefetch((b11 + (7) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (7) * cs_b), _MM_HINT_T0); \
   ymm16 = _mm256_add_pd(ymm16, ymm31);
 
 #define BLIS_DTRSM_SMALL_GEMM_8nx1m_AVX512(a01, b10, cs_b, p_lda, k_iter, b11) \
@@ -1172,7 +1172,7 @@ err_t bli_trsm_small_mt_AVX512
     ymm7 = _mm256_broadcast_sd((a01 + (p_lda * 6))); \
     ymm8 = _mm256_broadcast_sd((a01 + (p_lda * 7))); \
     \
-    _mm_prefetch((b10 + 4 * cs_b), _MM_HINT_T0); \
+    _mm_prefetch((char const*)(b10 + 4 * cs_b), _MM_HINT_T0); \
     ymm9  = _mm256_fmadd_pd(ymm1, ymm0, ymm9 ); \
     ymm10 = _mm256_fmadd_pd(ymm2, ymm0, ymm10); \
     ymm11 = _mm256_fmadd_pd(ymm3, ymm0, ymm11); \
@@ -1196,7 +1196,7 @@ err_t bli_trsm_small_mt_AVX512
     ymm21 = _mm256_broadcast_sd((a01_2 + (p_lda * 4))); \
     ymm22 = _mm256_broadcast_sd((a01_2 + (p_lda * 5))); \
     \
-    _mm_prefetch((b10_2 + 4 * cs_b), _MM_HINT_T0); \
+    _mm_prefetch((char const*)(b10_2 + 4 * cs_b), _MM_HINT_T0); \
     ymm24 = _mm256_fmadd_pd(ymm17, ymm23, ymm24); \
     ymm17 = _mm256_broadcast_sd((a01_2 + (p_lda * 6))); \
     ymm25 = _mm256_fmadd_pd(ymm18, ymm23, ymm25); \
@@ -1212,21 +1212,21 @@ err_t bli_trsm_small_mt_AVX512
     b10_2 += cs_b; \
   } \
   /*combine the results of both loops*/ \
-  _mm_prefetch((b11 + (0) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (0) * cs_b), _MM_HINT_T0); \
   ymm9 = _mm256_add_pd(ymm9, ymm24); \
-  _mm_prefetch((b11 + (1) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (1) * cs_b), _MM_HINT_T0); \
   ymm10 = _mm256_add_pd(ymm10, ymm25); \
-  _mm_prefetch((b11 + (2) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (2) * cs_b), _MM_HINT_T0); \
   ymm11 = _mm256_add_pd(ymm11, ymm26); \
-  _mm_prefetch((b11 + (3) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (3) * cs_b), _MM_HINT_T0); \
   ymm12 = _mm256_add_pd(ymm12, ymm27); \
-  _mm_prefetch((b11 + (4) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (4) * cs_b), _MM_HINT_T0); \
   ymm13 = _mm256_add_pd(ymm13, ymm28); \
-  _mm_prefetch((b11 + (5) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (5) * cs_b), _MM_HINT_T0); \
   ymm14 = _mm256_add_pd(ymm14, ymm29); \
-  _mm_prefetch((b11 + (6) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (6) * cs_b), _MM_HINT_T0); \
   ymm15 = _mm256_add_pd(ymm15, ymm30); \
-  _mm_prefetch((b11 + (7) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (7) * cs_b), _MM_HINT_T0); \
   ymm16 = _mm256_add_pd(ymm16, ymm31);
 
 
@@ -6866,7 +6866,7 @@ zmm7 = zmm16[0] zmm15[0] zmm14[0] zmm13[0] zmm12[0] zmm11[0] zmm10[0] zmm9 [0]
     zmm7 = _mm512_set1_pd(*(b01 + cs_b * 6)); \
     zmm8 = _mm512_set1_pd(*(b01 + cs_b * 7)); \
     \
-    _mm_prefetch((b01 + 8), _MM_HINT_T0); \
+    _mm_prefetch((char const*)(b01 + 8), _MM_HINT_T0); \
     zmm9 = _mm512_fmadd_pd(zmm1, zmm0, zmm9); \
     zmm10 = _mm512_fmadd_pd(zmm2, zmm0, zmm10); \
     zmm11 = _mm512_fmadd_pd(zmm3, zmm0, zmm11); \
@@ -6890,7 +6890,7 @@ zmm7 = zmm16[0] zmm15[0] zmm14[0] zmm13[0] zmm12[0] zmm11[0] zmm10[0] zmm9 [0]
     zmm21 = _mm512_set1_pd(*(b01_2 + cs_b * 4)); \
     zmm22 = _mm512_set1_pd(*(b01_2 + cs_b * 5)); \
     \
-    _mm_prefetch((b01_2 + 8), _MM_HINT_T0); \
+    _mm_prefetch((char const*)(b01_2 + 8), _MM_HINT_T0); \
     zmm24 = _mm512_fmadd_pd(zmm17, zmm23, zmm24); \
     zmm17 = _mm512_set1_pd(*(b01_2 + cs_b * 6)); \
     zmm25 = _mm512_fmadd_pd(zmm18, zmm23, zmm25); \
@@ -6905,21 +6905,21 @@ zmm7 = zmm16[0] zmm15[0] zmm14[0] zmm13[0] zmm12[0] zmm11[0] zmm10[0] zmm9 [0]
     b01_2 += 1; \
     a10_2 += p_lda; \
   } \
-  _mm_prefetch((b11 + (0) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (0) * cs_b), _MM_HINT_T0); \
   zmm9 = _mm512_add_pd(zmm9, zmm24); \
-  _mm_prefetch((b11 + (1) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (1) * cs_b), _MM_HINT_T0); \
   zmm10 = _mm512_add_pd(zmm10, zmm25); \
-  _mm_prefetch((b11 + (2) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (2) * cs_b), _MM_HINT_T0); \
   zmm11 = _mm512_add_pd(zmm11, zmm26); \
-  _mm_prefetch((b11 + (3) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (3) * cs_b), _MM_HINT_T0); \
   zmm12 = _mm512_add_pd(zmm12, zmm27); \
-  _mm_prefetch((b11 + (4) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (4) * cs_b), _MM_HINT_T0); \
   zmm13 = _mm512_add_pd(zmm13, zmm28); \
-  _mm_prefetch((b11 + (5) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (5) * cs_b), _MM_HINT_T0); \
   zmm14 = _mm512_add_pd(zmm14, zmm29); \
-  _mm_prefetch((b11 + (6) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (6) * cs_b), _MM_HINT_T0); \
   zmm15 = _mm512_add_pd(zmm15, zmm30); \
-  _mm_prefetch((b11 + (7) * cs_b), _MM_HINT_T0); \
+  _mm_prefetch((char const*)(b11 + (7) * cs_b), _MM_HINT_T0); \
   zmm16 = _mm512_add_pd(zmm16, zmm31);
 
 #define BLIS_DTRSM_SMALL_GEMM_8mx4n(a10, b01, cs_b, p_lda, k_iter) \
@@ -7015,7 +7015,7 @@ zmm7 = zmm16[0] zmm15[0] zmm14[0] zmm13[0] zmm12[0] zmm11[0] zmm10[0] zmm9 [0]
     ymm7 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 6))); \
     ymm8 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 7))); \
     \
-    _mm_prefetch((b01 + 4 * cs_b), _MM_HINT_T0); \
+    _mm_prefetch((char const*)(b01 + 4 * cs_b), _MM_HINT_T0); \
     ymm9  = _mm256_fmadd_pd (ymm1, ymm0, ymm9); \
     ymm10 = _mm256_fmadd_pd(ymm2, ymm0, ymm10); \
     ymm11 = _mm256_fmadd_pd(ymm3, ymm0, ymm11); \
