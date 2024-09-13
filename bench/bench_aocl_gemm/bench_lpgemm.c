@@ -1838,9 +1838,10 @@ int main( int argc, char** argv )
         }
 
         // Input format: data_type stor_type pack/reorder m n k lda ldb ldc
-        while ( fscanf( fin, "%c %c %c %c %c %ld %ld %ld %ld %ld %ld %s\n",
-                &stor_order, &transa, &transb, &op_a, &op_b, &m, &n, &k,
-                &stride_a, &stride_b, &stride_c, ops_input_str ) == 12 )
+        while ( fscanf( fin, "%c %c %c %c %c " INT_FS INT_FS INT_FS
+                INT_FS INT_FS INT_FS " %s\n", &stor_order, &transa,
+                &transb, &op_a, &op_b, &m, &n, &k, &stride_a,
+                &stride_b, &stride_c, ops_input_str ) == 12 )
         {
             char* ops_tok = strtok( ops_input_str, ":" );
             strncpy( gemm_type_str, ops_tok, GEMM_TYPE_STR_LEN - 1 );

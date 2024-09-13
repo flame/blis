@@ -36,7 +36,7 @@
 # Gather all local source files.
 file(GLOB file_list LIST_DIRECTORIES false RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/" "*.c")
 
-set(LPGEMM_FLAGS -DBLAS="aocl" -DN_REPEAT=${NREPEATS} -DINT_FS="%ld" -DUINT_FS="%lu")
+set(LPGEMM_FLAGS -DBLAS="aocl" -DN_REPEAT=${NREPEATS} -DINT_FS="%lld" -DUINT_FS="%llu")
 # Create an executable using the sources above.
 function(lpgemmbenchexe extn)
     foreach(src ${file_list})
