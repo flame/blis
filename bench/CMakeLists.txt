@@ -121,7 +121,15 @@ include(${CMAKE_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY}/make_defs.cmake)
 # Gather all local source files.
 file(GLOB file_list LIST_DIRECTORIES false RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/" "*.c")
 
-set(BENCH_FLAGS -DN_REPEAT=${NREPEATS} -DINT_FS="%lld" -DUINT_FS="%llu")
+# Defining the format specifiers to read long double value from input file using fscanf
+if (WIN32 AND ((INT_SIZE STREQUAL "auto") OR (INT_SIZE STREQUAL "64")))
+    set(BENCH_FLAGS -DN_REPEAT=${NREPEATS} -DINT_FS="%lld" -DUINT_FS="%llu")
+elseif ((INT_SIZE STREQUAL "auto") OR (INT_SIZE STREQUAL "64"))
+    set(BENCH_FLAGS -DN_REPEAT=${NREPEATS} -DINT_FS="%ld" -DUINT_FS="%lu")
+else()
+    set(BENCH_FLAGS -DN_REPEAT=${NREPEATS} -DINT_FS="%d" -DUINT_FS="%u")
+endif()
+
 # Create an executable using the sources above.
 function(benchexe extn)
     set(dblas "aocl")
