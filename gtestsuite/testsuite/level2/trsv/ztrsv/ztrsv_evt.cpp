@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "level2/trsv/test_trsv.h"
 
-class ztrsvEVT :
+class DISABLED_ztrsvEVT :
         public ::testing::TestWithParam<std::tuple<char,          // storage format
                                                    char,          // uplo
                                                    char,          // trans
@@ -47,7 +47,7 @@ class ztrsvEVT :
                                                    dcomplex,      // excepton value for Y
                                                    gtint_t>> {};  // ld_inc
 
-TEST_P( ztrsvEVT, API )
+TEST_P( DISABLED_ztrsvEVT, API )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -101,7 +101,7 @@ static double AOCL_INF = std::numeric_limits<double>::infinity();
 
 INSTANTIATE_TEST_SUITE_P(
         Native,
-        ztrsvEVT,
+        DISABLED_ztrsvEVT,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS_LIKE

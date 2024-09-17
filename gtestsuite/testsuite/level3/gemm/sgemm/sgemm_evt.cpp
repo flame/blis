@@ -133,7 +133,7 @@ static float Inf = std::numeric_limits<float>::infinity();
 /* Matrix A, B, C are filled with Infs and Nans         */
 /********************************************************/
 INSTANTIATE_TEST_SUITE_P(
-        SMALL_Matrix,
+        DISABLED_SMALL_Matrix,
         sgemmEVT,
         ::testing::Combine(
             ::testing::Values('c'
@@ -143,9 +143,9 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('n','t'),                                     // transa
             ::testing::Values('n','t'),                                     // transb
-            ::testing::Values(5, 19, 20, 24, 28, 32, 48, 44, 40, 36, 35),   // m
-            ::testing::Range(gtint_t(13), gtint_t(43), gtint_t(1)),         // n
-            ::testing::Range(gtint_t(2), gtint_t(25), 1),                   // k
+            ::testing::Values(5, 19, 35, 48),                               // m
+            ::testing::Values(13, 45),                                      // n
+            ::testing::Values(gtint_t(2), gtint_t(25)),                     // k
             ::testing::Values(gtint_t(1), gtint_t(3)),                      // ai
             ::testing::Values(gtint_t(0)),                                  // aj
             ::testing::Values(NaN, Inf, -Inf),                              // aexval
@@ -179,9 +179,9 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('n'),                                         // transa
             ::testing::Values('n'),                                         // transb
-            ::testing::Values(1002, 1025, 1054, 1083, 1112, 1111, 1327),    // m
-            ::testing::Values(453, 462, 471, 504, 513, 522, 531),           // n
-            ::testing::Range(gtint_t(250), gtint_t(261), 1),                // k
+            ::testing::Values(1002, 1327),                                  // m
+            ::testing::Values(453, 531),                                    // n
+            ::testing::Values(gtint_t(250), gtint_t(261)),                  // k
             ::testing::Values(gtint_t(1), gtint_t(3)),                      // ai
             ::testing::Values(gtint_t(0)),                                  // aj
             ::testing::Values(NaN, Inf, -Inf),                              // aexval

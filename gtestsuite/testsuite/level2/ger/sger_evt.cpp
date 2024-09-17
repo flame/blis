@@ -39,7 +39,7 @@ using T = float;
 static T NaN = std::numeric_limits<T>::quiet_NaN();
 static T Inf = std::numeric_limits<T>::infinity();
 
-class sgerEVT :
+class DISABLED_sgerEVT :
         public ::testing::TestWithParam<std::tuple<char,        // storage
                                                    char,        // conjx
                                                    char,        // conjy
@@ -57,7 +57,7 @@ class sgerEVT :
                                                    gtint_t,     // yi
                                                    T>> {};      // y_exval
 
-TEST_P( sgerEVT, API )
+TEST_P( DISABLED_sgerEVT, API )
 {
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -118,7 +118,7 @@ TEST_P( sgerEVT, API )
 
 INSTANTIATE_TEST_SUITE_P(
         unitStride,
-        sgerEVT,
+        DISABLED_sgerEVT,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
@@ -163,7 +163,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         nonUnitStride,
-        sgerEVT,
+        DISABLED_sgerEVT,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'

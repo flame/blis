@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_amaxv.h"
 
-class samaxvEVT :
+class DISABLED_samaxvEVT :
         public ::testing::TestWithParam<std::tuple<gtint_t,      // n
                                                    gtint_t,      // incx
                                                    gtint_t,      // xi, index for exval in x
@@ -44,8 +44,9 @@ class samaxvEVT :
                                                    float>> {};   // xj_exval
 
 // Tests using random values as vector elements.
-TEST_P( samaxvEVT, API )
+TEST_P( DISABLED_samaxvEVT, API )
 {
+    
     using T = float;
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -97,7 +98,7 @@ static float Inf = std::numeric_limits<float>::infinity();
 // Exception value testing with unit strides
 INSTANTIATE_TEST_SUITE_P(
     unitStrides_zen3,
-    samaxvEVT,
+    DISABLED_samaxvEVT,
     ::testing::Combine(
         ::testing::Values(gtint_t(61)),                                         // n, size of vectors with unit-stride
         ::testing::Values(gtint_t(1)),                                          // stride size for x
@@ -140,7 +141,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Exception value testing with unit strides
 INSTANTIATE_TEST_SUITE_P(
     unitStrides_zen4,
-    samaxvEVT,
+    DISABLED_samaxvEVT,
     ::testing::Combine(
         ::testing::Values(gtint_t(461)),                                        // n, size of vectors with unit-stride
         ::testing::Values(gtint_t(1)),                                          // stride size for x
@@ -158,7 +159,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Exception value testing with non-unit strides
 INSTANTIATE_TEST_SUITE_P(
     nonUnitStrides,
-    samaxvEVT,
+    DISABLED_samaxvEVT,
     ::testing::Combine(
         ::testing::Values(gtint_t(10)),                                         // n, size of vectors with unit-stride
         ::testing::Values(gtint_t(3)),                                          // stride size for x

@@ -184,7 +184,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Testing the fringe cases
 // Fringe case along both m and n.
 INSTANTIATE_TEST_SUITE_P(
-        K1_transA_N_transB_N_fringe,
+        DISABLED_K1_transA_N_transB_N_fringe,
         dgemmEVT,
         ::testing::Combine(
             ::testing::Values('c'

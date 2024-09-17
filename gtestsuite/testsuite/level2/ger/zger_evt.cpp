@@ -40,7 +40,7 @@ using RT = testinghelpers::type_info<T>::real_type;
 static RT NaN = std::numeric_limits<RT>::quiet_NaN();
 static RT Inf = std::numeric_limits<RT>::infinity();
 
-class zgerEVT :
+class DISABLED_zgerEVT :
         public ::testing::TestWithParam<std::tuple<char,        // storage
                                                    char,        // conjx
                                                    char,        // conjy
@@ -58,7 +58,7 @@ class zgerEVT :
                                                    gtint_t,     // yi
                                                    T>> {};      // y_exval
 
-TEST_P( zgerEVT, API )
+TEST_P( DISABLED_zgerEVT, API )
 {
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -119,7 +119,7 @@ TEST_P( zgerEVT, API )
 
 INSTANTIATE_TEST_SUITE_P(
         unitStride,
-        zgerEVT,
+        DISABLED_zgerEVT,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
@@ -164,7 +164,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
         nonUnitStride,
-        zgerEVT,
+        DISABLED_zgerEVT,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'

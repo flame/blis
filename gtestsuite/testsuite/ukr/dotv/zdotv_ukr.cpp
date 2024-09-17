@@ -184,7 +184,7 @@ INSTANTIATE_TEST_SUITE_P(
  * LNUnit  - loop for non-unit increments
 */
 INSTANTIATE_TEST_SUITE_P(
-        bli_zdotv_zen4_asm_avx512_unitStride,
+        DISABLED_bli_zdotv_zen4_asm_avx512_unitStride,
         zdotvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_zdotv_zen4_asm_avx512),

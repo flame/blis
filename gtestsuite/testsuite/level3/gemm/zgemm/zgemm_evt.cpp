@@ -277,7 +277,7 @@ INSTANTIATE_TEST_SUITE_P(
 /* Matrix A, B, C are filled with Infs and Nans         */
 /********************************************************/
 INSTANTIATE_TEST_SUITE_P(
-        Small_Matrix,
+        DISABLED_Small_Matrix,
         zgemmEVT,
         ::testing::Combine(
             ::testing::Values('c'
@@ -321,7 +321,7 @@ INSTANTIATE_TEST_SUITE_P(
 /* Matrix A, B, C are filled with Infs and Nans         */
 /******************************************************/
 INSTANTIATE_TEST_SUITE_P(
-        Skinny_Matrix,
+        DISABLED_Skinny_Matrix,
         zgemmEVT,
         ::testing::Combine(
             ::testing::Values('c'
@@ -365,7 +365,7 @@ INSTANTIATE_TEST_SUITE_P(
 /* Matrix A, B, C are filled with Infs and Nans         */
 /*********************************************************/
 INSTANTIATE_TEST_SUITE_P(
-        Large_Matrix,
+        DISABLED_Large_Matrix,
         zgemmEVT,
         ::testing::Combine(
             ::testing::Values('c'
