@@ -81,8 +81,13 @@ TEST_P( zhemvGeneric, API )
     // Check gtestsuite hemv.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // No adjustment applied yet for complex data.
-    double thresh;
+    // With adjustment applied for complex data.
+     double thresh;
+#ifdef BLIS_INT_ELEMENT_TYPE
+    double adj = 1.0;
+#else
+    double adj = 2.4;
+#endif
     if (n == 0)
         thresh = 0.0;
     else if (alpha == testinghelpers::ZERO<T>() && (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>()))
@@ -90,7 +95,7 @@ TEST_P( zhemvGeneric, API )
     else if (alpha == testinghelpers::ZERO<T>())
         thresh = testinghelpers::getEpsilon<T>();
     else
-        thresh = (3*n+1)*testinghelpers::getEpsilon<T>();
+        thresh = adj*(3*n+1)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters

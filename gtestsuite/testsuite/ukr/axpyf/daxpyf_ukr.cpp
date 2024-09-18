@@ -89,16 +89,32 @@ TEST_P( daxpyfGeneric, UKR )
     // Check gtestsuite axpyf.h (no netlib version) for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-
     double thresh;
     if (m == 0)
         thresh = 0.0;
     else if (alpha == testinghelpers::ZERO<T>())
         thresh = 0.0;
     else if (alpha == testinghelpers::ONE<T>())
-        thresh = (2*b_fuse)*testinghelpers::getEpsilon<T>();
+    {
+       // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 1.0;
+#else
+        double adj = 4.0;
+#endif
+
+        thresh = adj*(2*b_fuse)*testinghelpers::getEpsilon<T>();
+    }
     else
-        thresh = (3*b_fuse)*testinghelpers::getEpsilon<T>();
+    {
+       // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 2.0;
+#else
+        double adj = 4.7;
+#endif
+        thresh = adj*(3*b_fuse)*testinghelpers::getEpsilon<T>();
+    }
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters

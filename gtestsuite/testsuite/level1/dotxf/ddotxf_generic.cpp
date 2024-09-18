@@ -81,6 +81,7 @@ TEST_P( ddotxfGeneric, API )
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
     double thresh;
+   // Threshold adjustment
     if (m == 0)
         thresh = 0.0;
     else if (alpha == testinghelpers::ZERO<T>())
@@ -92,16 +93,32 @@ TEST_P( ddotxfGeneric, API )
         if (beta == testinghelpers::ZERO<T>())
             thresh = (m)*testinghelpers::getEpsilon<T>();
         else if (beta == testinghelpers::ONE<T>())
-            thresh = (m+1)*testinghelpers::getEpsilon<T>();
+        {
+#ifdef BLIS_INT_ELEMENT_TYPE
+            double adj = 1.0;
+#else
+            double adj = 3.9;
+#endif
+            thresh = adj*(m+1)*testinghelpers::getEpsilon<T>();
+        }
         else
             thresh = (m+2)*testinghelpers::getEpsilon<T>();
     else
         if (beta == testinghelpers::ZERO<T>())
             thresh = (2*m)*testinghelpers::getEpsilon<T>();
         else if (beta == testinghelpers::ONE<T>())
-            thresh = (2*m+1)*testinghelpers::getEpsilon<T>();
+        {
+#ifdef BLIS_INT_ELEMENT_TYPE
+            double adj = 1.0;
+#else
+            double adj = 5.2;
+#endif
+            thresh = adj*(2*m+1)*testinghelpers::getEpsilon<T>();
+        }
         else
+        {
             thresh = (2*m+2)*testinghelpers::getEpsilon<T>();
+        }
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters

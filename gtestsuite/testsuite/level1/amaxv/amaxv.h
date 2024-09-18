@@ -1,4 +1,4 @@
-/*
+ /*
 
    BLIS
    An object-based framework for developing high-performance BLAS-like
@@ -139,14 +139,21 @@ static gtint_t amaxv(gtint_t n, T* x, gtint_t incx)
     }
 #endif
 
-#ifdef TEST_BLAS
+#ifdef TEST_BLAS_LIKE
     // Since we would be comparing against CBLAS which is 0-based and BLAS
     // which is 1-based, we need decrement the result of BLAS call by 1.
-    return ( amaxv_<T>(n, x, incx) - 1 );
-#elif TEST_BLAS_BLIS_IMPL
-    // Since we would be comparing against CBLAS which is 0-based and BLAS
-    // which is 1-based, we need decrement the result of BLAS call by 1.
-    return ( amaxv_blis_impl<T>(n, x, incx) - 1 );
+    // Exception is IIT tests which return 0 in both BLAS and CBLAS.
+
+  #ifdef TEST_BLAS
+    gtint_t idx = amaxv_<T>(n, x, incx);
+  #elif TEST_BLAS_BLIS_IMPL
+    gtint_t idx = amaxv_blis_impl<T>(n, x, incx);
+  #endif
+    if ( n < 1 || incx <= 0 )
+        return idx;
+    else
+        return idx - 1;
+
 #elif TEST_CBLAS
     return cblas_amaxv<T>(n, x, incx);
 #elif TEST_BLIS_TYPED

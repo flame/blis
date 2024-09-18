@@ -447,7 +447,7 @@ void computediff(std::string var_name, char storage, gtint_t m, gtint_t n, T *bl
             // so we use binary comparison to verify that are exactly the same as the reference.
             // Since to get create the data we use a copy to initialize the reference results, those
             // elements are expected to identical.
-            for (i = m; i < ld; i++)
+            for (i = (std::max)(m,0); i < ld; i++)
             {
                 ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol[i + j*ld], ref_sol[i + j*ld], comp_helper) << "This element is expected to not be modified.";
             }
@@ -470,7 +470,7 @@ void computediff(std::string var_name, char storage, gtint_t m, gtint_t n, T *bl
             // so we use binary comparison to verify that are exactly the same as the reference.
             // Since to get create the data we use a copy to initialize the reference results, those
             // elements are expected to identical.
-            for (j = n; j < ld; j++)
+            for (j = (std::max)(n,0); j < ld; j++)
             {
                 ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol[i*ld + j], ref_sol[i*ld + j], comp_helper) << "This element is expected to not be modified.";
             }
@@ -506,7 +506,7 @@ void computediff(std::string var_name, char storage, gtint_t m, gtint_t n, T *bl
             // Since to get create the data we use a copy to initialize the reference results, those
             // elements are expected to identical.
             comp_helper.binary_comparison = true;
-            for (i = m; i < ld; i++)
+            for (i = (std::max)(m,0); i < ld; i++)
             {
                 ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol[i + j*ld], ref_sol[i + j*ld], comp_helper) << "This element is expected to not be modified.";
             }
@@ -532,7 +532,7 @@ void computediff(std::string var_name, char storage, gtint_t m, gtint_t n, T *bl
             // Since to get create the data we use a copy to initialize the reference results, those
             // elements are expected to identical.
             comp_helper.binary_comparison = true;
-            for (j = n; j < ld; j++)
+            for (j = (std::max)(n,0); j < ld; j++)
             {
                 ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol[i*ld + j], ref_sol[i*ld + j], comp_helper) << "This element is expected to not be modified.";
             }

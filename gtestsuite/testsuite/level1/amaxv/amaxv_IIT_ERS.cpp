@@ -61,7 +61,8 @@ using namespace testinghelpers::IIT;
     3. When n == 1.
 
     The index returned in this case is expected to be 1(BLAS)
-    or 0(CBLAS).
+    or 0(CBLAS), but we handle all comparisons as if from CBLAS
+    with the conversion occurring in the amaxv.h header file.
 */
 
 // n < 1, with non-unit stride
@@ -150,11 +151,7 @@ TYPED_TEST(amaxvIIT_ERS, n_eq_one_unitStride)
     idx = amaxv<T>( n, nullptr, unit_inc );
 
     // Computing the difference.
-#ifdef TEST_BLAS_LIKE
-    computediff<gtint_t>( "idx", idx, gtint_t(1) );
-#else
     computediff<gtint_t>( "idx", idx, gtint_t(0) );
-#endif
 
     // Test with all arguments correct except for the value we are choosing to test.
     // Initialize vectors with random numbers.
@@ -164,11 +161,7 @@ TYPED_TEST(amaxvIIT_ERS, n_eq_one_unitStride)
     idx = amaxv<T>( n, x.data(), unit_inc );
 
     // Computing the difference.
-#ifdef TEST_BLAS_LIKE
-    computediff<gtint_t>( "idx", idx, gtint_t(1) );
-#else
     computediff<gtint_t>( "idx", idx, gtint_t(0) );
-#endif
 
 }
 
@@ -183,11 +176,7 @@ TYPED_TEST(amaxvIIT_ERS, n_eq_one_nonUnitStrides)
     idx = amaxv<T>( n, nullptr, inc );
 
     // Computing the difference.
-#ifdef TEST_BLAS_LIKE
-    computediff<gtint_t>( "idx", idx, gtint_t(1) );
-#else
     computediff<gtint_t>( "idx", idx, gtint_t(0) );
-#endif
 
     // Test with all arguments correct except for the value we are choosing to test.
     // Initialize vectors with random numbers.
@@ -197,11 +186,7 @@ TYPED_TEST(amaxvIIT_ERS, n_eq_one_nonUnitStrides)
     idx = amaxv<T>( n, x.data(), inc );
 
     // Computing the difference.
-#ifdef TEST_BLAS_LIKE
-    computediff<gtint_t>( "idx", idx, gtint_t(1) );
-#else
     computediff<gtint_t>( "idx", idx, gtint_t(0) );
-#endif
 }
 
 #endif

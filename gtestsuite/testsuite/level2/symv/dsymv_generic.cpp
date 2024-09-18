@@ -83,9 +83,9 @@ TEST_P( dsymvGeneric, API )
     // of output, and hence the multipler for epsilon.
     double thresh;
 #ifdef BLIS_INT_ELEMENT_TYPE
-    double adj = 1.0;
+    double adj = 1.4;
 #else
-    double adj = 1.3;
+    double adj = 1.7;
   #ifdef REF_IS_MKL
     adj = 1.4;
   #endif

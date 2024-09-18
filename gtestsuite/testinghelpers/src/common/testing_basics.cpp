@@ -143,7 +143,7 @@ gtint_t matsize( char storage, char trans, gtint_t m, gtint_t n, gtint_t ldm )
         km  = chktrans( trans ) ? n : m ;
         lm  = chktrans( trans ) ? m : n ;
     }
-    if ( m <= 0 || n <= 0 || ldm <= 0 || ldm < lm )
+    if ( ldm <= 0 || ldm < lm )
         return 0;
     else
         return (km*ldm);
