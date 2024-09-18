@@ -186,8 +186,10 @@ void bli_gemm_ker_var2
 		 ( cs_c == 1 ) && // use this kernel only for row major C
 		 ( (n%NR) == 0 ) && ( (m%MR) == 0 ) &&
 		 // use generic macro kernel for mixed precision
-		 ( bli_obj_elem_size( a ) == 8 ) && // check if elem_size == sizeof(double)
-		 ( bli_obj_elem_size( b ) == 8 )
+		 ( bli_obj_elem_size( a ) == 8 ) && // check if elem_sizeof(a) == sizeof(double)
+		 ( bli_obj_is_real( a ) )        && // check if A is real
+		 ( bli_obj_elem_size( b ) == 8 ) && // check if elem_sizeof(b) == sizeof(double)
+		 ( bli_obj_is_real( b ) )           // check if B is real
 	)
 	{
 		bli_dgemm_avx512_asm_8x24_macro_kernel
