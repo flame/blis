@@ -1,3 +1,5 @@
+r n t n r 288 12 6460 6460 6460 12 bf16s4f32of32:none
+r n t n r 150 2048 6460 6460 6460 2048 bf16s4f32of32:none
 r n n n r 1 10 2050 2050 20 20 bf16bf16f32obf16:none
 r n n n r 482 690 2050 2050 690 690 f32f32f32of32:bias,matrix_mul
 r n n n r 253 2048 660 660 2048 2048 bf16bf16f32of32:matrix_mul,clip
