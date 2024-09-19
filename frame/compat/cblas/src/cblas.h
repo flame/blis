@@ -185,7 +185,7 @@ void BLIS_EXPORT_BLAS cblas_zaxpby(f77_int N, const void *alpha,
 
 
 /*
- * Routines with S and D prefix only
+ * Routines with S D C Z CS and ZD prefixes
  */
 void BLIS_EXPORT_BLAS cblas_srotg(float *a, float *b, float *c, float *s);
 void BLIS_EXPORT_BLAS cblas_srotmg(float *d1, float *d2, float *b1, const float b2, float *P);
@@ -201,10 +201,13 @@ void BLIS_EXPORT_BLAS cblas_drot(f77_int N, double *X, f77_int incX,
 void BLIS_EXPORT_BLAS cblas_drotm(f77_int N, double *X, f77_int incX,
                 double *Y, f77_int incY, const double *P);
 
+void BLIS_EXPORT_BLAS cblas_crotg(void *a, void *b, float *c, void *s);
+void BLIS_EXPORT_BLAS cblas_csrot(f77_int N, void *X, f77_int incX,
+                void *Y, f77_int incY, const float c, const float s);
+void BLIS_EXPORT_BLAS cblas_zrotg(void *a, void *b, double *c, void *s);
+void BLIS_EXPORT_BLAS cblas_zdrot(f77_int N, void *X, f77_int incX,
+                void *Y, f77_int incY, const double c, const double s);
 
-/*
- * Routines with S D C Z CS and ZD prefixes
- */
 void BLIS_EXPORT_BLAS cblas_sscal(f77_int N, float alpha, float *X, f77_int incX);
 void BLIS_EXPORT_BLAS cblas_dscal(f77_int N, double alpha, double *X, f77_int incX);
 void BLIS_EXPORT_BLAS cblas_cscal(f77_int N, const void *alpha, void *X, f77_int incX);

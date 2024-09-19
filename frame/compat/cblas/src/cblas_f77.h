@@ -256,6 +256,10 @@
 #define F77_drotmg     drotmg_blis_impl
 #define F77_drot       drot_blis_impl
 #define F77_drotm      drotm_blis_impl
+#define F77_crotg      crotg_blis_impl
+#define F77_csrot      csrot_blis_impl
+#define F77_zrotg      zrotg_blis_impl
+#define F77_zdrot      zdrot_blis_impl
 #define F77_sswap      sswap_blis_impl
 #define F77_scopy      scopy_blis_impl
 #define F77_saxpy      saxpy_blis_impl
