@@ -117,8 +117,8 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                               // storage format
             ::testing::Values('n', 'c', 't'),                                // transa
             ::testing::Values('n'),                                          // conjx
-            ::testing::Range(gtint_t(1), gtint_t(20), 1),                    // m
-            ::testing::Range(gtint_t(1), gtint_t(20), 1),                    // n
+            ::testing::Values(gtint_t(1), gtint_t(12), gtint_t(20)),                    // m
+            ::testing::Values(gtint_t(1), gtint_t(17), gtint_t(20)),                    // n
             ::testing::Values(T{0.0, 0.0}, T{1.0, 0.0}, T{-1.0, 0.0},
                               T{1.1, -2.0} ),                                // alpha
             ::testing::Values(T{0.0, 0.0}, T{1.0, 0.0}, T{-1.0, 0.0},
@@ -143,16 +143,10 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n', 'c', 't'),                                // transa
             ::testing::Values('n'),                                          // conjx
             ::testing::Values(gtint_t(25),
-                              gtint_t(33),
-                              gtint_t(98),
-                              gtint_t(173),
                               gtint_t(211)
                             ),                                               // m
             ::testing::Values(gtint_t(25),
-                              gtint_t(33),
-                              gtint_t(98),
-                              gtint_t(173),
-                              gtint_t(211)
+                              gtint_t(173)
                             ),                                               // n
             ::testing::Values(T{0.0, 0.0}, T{1.0, 0.0}, T{-1.0, 0.0},
                               T{1.1, -2.0} ),                                // alpha
@@ -204,7 +198,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n', 'c', 't'),                                // transa
             ::testing::Values('n'),                                          // conjx
             ::testing::Values(gtint_t(5099)),                                // m
-            ::testing::Values(gtint_t(1), gtint_t(2), gtint_t(17),
+            ::testing::Values(gtint_t(1), gtint_t(17),
                               gtint_t(173)),                                 // n
             ::testing::Values(T{0.0, 0.0}, T{1.0, 0.0}, T{-1.0, 0.0},
                               T{1.1, -2.0} ),                                // alpha
@@ -229,7 +223,7 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                               // storage format
             ::testing::Values('n', 'c', 't'),                                // transa
             ::testing::Values('n'),                                          // conjx
-            ::testing::Values(gtint_t(1), gtint_t(2), gtint_t(17),
+            ::testing::Values(gtint_t(1), 
                               gtint_t(173)),                                 // m
             ::testing::Values(gtint_t(5099)),                                // n
             ::testing::Values(T{0.0, 0.0}, T{1.0, 0.0}, T{-1.0, 0.0},

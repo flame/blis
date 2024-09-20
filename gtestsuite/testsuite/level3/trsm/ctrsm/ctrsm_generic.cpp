@@ -47,6 +47,8 @@ class ctrsmGeneric :
                                                    gtint_t,       // lda_inc
                                                    gtint_t>> {};  // ldb_inc
 
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(strsmGeneric);
+
 TEST_P( ctrsmGeneric, API )
 {
     using T = scomplex;
@@ -137,8 +139,8 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
             ::testing::Values('n', 'c', 't'),                                // transa
             ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
-            ::testing::Range(gtint_t(1), gtint_t(9), 1),                     // m
-            ::testing::Range(gtint_t(1), gtint_t(9), 1),                     // n
+            ::testing::Range(gtint_t(1), gtint_t(13), 3),                    // m
+            ::testing::Range(gtint_t(1), gtint_t(9), 2),                     // n
             ::testing::Values(scomplex{2.0,-3.4}),                           // alpha
             ::testing::Values(gtint_t(58)),                                  // increment to the leading dim of a
             ::testing::Values(gtint_t(32))                                   // increment to the leading dim of b

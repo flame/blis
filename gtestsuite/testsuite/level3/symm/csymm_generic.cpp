@@ -122,8 +122,8 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('u','l'),                                      // u:upper, l:lower
             ::testing::Values('n'),                                          // conja
             ::testing::Values('n'),                                          // transb
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // n
+            ::testing::Values(gtint_t(1), gtint_t(3), gtint_t(30)),          // m
+            ::testing::Values(gtint_t(1), gtint_t(2), gtint_t(26)),          // n
             ::testing::Values(scomplex{2.0, -1.0}, scomplex{-2.0, 3.0}),     // alpha
             ::testing::Values(scomplex{-3.0, 2.0}, scomplex{4.0, -1.0}),     // beta
             ::testing::Values(gtint_t(0), gtint_t(3)),                       // increment to the leading dim of a

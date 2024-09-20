@@ -105,8 +105,8 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                               // storage format
             ::testing::Values('u','l'),                                      // u:upper, l:lower
             ::testing::Values('n','c'),                                      // transa
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // n
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // k
+            ::testing::Values(gtint_t(1), gtint_t(3), gtint_t(30)),          // n
+            ::testing::Values(gtint_t(1), gtint_t(2), gtint_t(26)),          // k
             ::testing::Values(2.0, -1.0),                                    // alpha
             ::testing::Values(-3.0, 2.0),                                    // beta
             ::testing::Values(gtint_t(0), gtint_t(4)),                       // increment to the leading dim of a

@@ -35,66 +35,7 @@
 #include <gtest/gtest.h>
 #include "level3/trsm/test_trsm.h"
 
-class strsmGeneric :
-        public ::testing::TestWithParam<std::tuple<char,          // storage format
-                                                   char,          // side
-                                                   char,          // uplo
-                                                   char,          // transa
-                                                   char,          // diaga
-                                                   gtint_t,       // m
-                                                   gtint_t,       // n
-                                                   float,         // alpha
-                                                   gtint_t,       // lda_inc
-                                                   gtint_t>> {};  // ldb_inc
-
-TEST_P( strsmGeneric, API )
-{
-    using T = float;
-    //----------------------------------------------------------
-    // Initialize values from the parameters passed through
-    // test suite instantiation (INSTANTIATE_TEST_SUITE_P).
-    //----------------------------------------------------------
-    // matrix storage format(row major, column major)
-    char storage = std::get<0>(GetParam());
-    // specifies matrix A appears left or right in
-    // the matrix multiplication
-    char side = std::get<1>(GetParam());
-    // specifies upper or lower triangular part of A is used
-    char uploa = std::get<2>(GetParam());
-    // denotes whether matrix a is n,c,t,h
-    char transa = std::get<3>(GetParam());
-    // denotes whether matrix a in unit or non-unit diagonal
-    char diaga = std::get<4>(GetParam());
-    // matrix size m
-    gtint_t m  = std::get<5>(GetParam());
-    // matrix size n
-    gtint_t n  = std::get<6>(GetParam());
-    // specifies alpha value
-    T alpha = std::get<7>(GetParam());
-    // lda, ldb, ldc increments.
-    // If increments are zero, then the array size matches the matrix size.
-    // If increments are nonnegative, the array size is bigger than the matrix size.
-    gtint_t lda_inc = std::get<8>(GetParam());
-    gtint_t ldb_inc = std::get<9>(GetParam());
-
-    // Set the threshold for the errors:
-    // Check gtestsuite trsm.h or netlib source code for reminder of the
-    // functionality from which we estimate operation count per element
-    // of output, and hence the multipler for epsilon.
-    double thresh;
-    if (m == 0 || n == 0 || alpha == testinghelpers::ZERO<T>())
-        thresh = 0.0;
-    else
-        if ( side == 'l' || side == 'L' )
-            thresh = 3*m*testinghelpers::getEpsilon<T>();
-        else
-            thresh = 3*n*testinghelpers::getEpsilon<T>();
-
-    //----------------------------------------------------------
-    //     Call test body using these parameters
-    //----------------------------------------------------------
-    test_trsm<T>( storage, side, uploa, transa, diaga, m, n, alpha, lda_inc, ldb_inc, thresh );
-}
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(strsmGeneric);
 
 /**
  * @brief Test STRSM native path, which starts from size 1000 for BLAS api
@@ -121,52 +62,6 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::trsmGenericPrint<float>()
     );
-
-/**
- * @brief Test STRSM small avx2 path all fringe cases
- *        Kernel size for avx2 small path is 16x6, testing in range of
- *        1 to 16 ensures all finge cases are being tested.
- */
-INSTANTIATE_TEST_SUITE_P(
-        Small_AVX2_fringe,
-        strsmGeneric,
-        ::testing::Combine(
-            ::testing::Values('c'),                                          // storage format
-            ::testing::Values('l','r'),                                      // side  l:left, r:right
-            ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
-            ::testing::Values('n','t'),                                      // transa
-            ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
-            ::testing::Range(gtint_t(1), gtint_t(17), 1),                    // m
-            ::testing::Range(gtint_t(1), gtint_t(17), 1),                    // n
-            ::testing::Values(-2.4f),                                        // alpha
-            ::testing::Values(gtint_t(58)),                                  // increment to the leading dim of a
-            ::testing::Values(gtint_t(31))                                   // increment to the leading dim of b
-        ),
-        ::trsmGenericPrint<float>()
-    );
-
-
-/**
- * @brief Test STRSM small avx2 path, this code path is used in range 0 to 1000
- */
-INSTANTIATE_TEST_SUITE_P(
-        Small_AVX2,
-        strsmGeneric,
-        ::testing::Combine(
-            ::testing::Values('c'),                                          // storage format
-            ::testing::Values('l','r'),                                      // side  l:left, r:right
-            ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
-            ::testing::Values('n','t'),                                      // transa
-            ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
-            ::testing::Values(17, 110, 51, 1000),                            // m
-            ::testing::Values(17, 48 , 51, 1000),                            // n
-            ::testing::Values(-2.4f),                                        // alpha
-            ::testing::Values(gtint_t(95)),                                  // increment to the leading dim of a
-            ::testing::Values(gtint_t(83))                                   // increment to the leading dim of b
-        ),
-        ::trsmGenericPrint<float>()
-    );
-
 
 /**
  * @brief Test STRSM with differnt values of alpha

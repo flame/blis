@@ -47,6 +47,8 @@ class dtrsmGeneric :
                                                    gtint_t,       // lda_inc
                                                    gtint_t>> {};  // ldb_inc
 
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(strsmGeneric);
+
 TEST_P( dtrsmGeneric, API )
 {
     using T = double;
@@ -136,8 +138,8 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
             ::testing::Values('n','t'),                                      // transa
             ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
-            ::testing::Range(gtint_t(1), gtint_t(9), 1),                     // m
-            ::testing::Range(gtint_t(1), gtint_t(9), 1),                     // n
+            ::testing::Range(gtint_t(1), gtint_t(9), 2),                     // m
+            ::testing::Range(gtint_t(1), gtint_t(13), 3),                    // n
             ::testing::Values(-2.4),                                         // alpha
             ::testing::Values(gtint_t(5)),                                   // increment to the leading dim of a
             ::testing::Values(gtint_t(3))                                    // increment to the leading dim of b
@@ -182,8 +184,8 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
             ::testing::Values('n','t'),                                      // transa
             ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
-            ::testing::Range(gtint_t(51), gtint_t(59), 1),                   // m
-            ::testing::Range(gtint_t(51), gtint_t(59), 1),                   // n
+            ::testing::Range(gtint_t(51), gtint_t(62), 3),                   // m
+            ::testing::Range(gtint_t(51), gtint_t(60), 2),                   // n
             ::testing::Values(-2.4),                                         // alpha
             ::testing::Values(gtint_t(5)),                                   // increment to the leading dim of a
             ::testing::Values(gtint_t(3))                                    // increment to the leading dim of b

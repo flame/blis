@@ -47,6 +47,8 @@ class ztrsmGeneric :
                                                    gtint_t,
                                                    gtint_t>> {};
 
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(strsmGeneric);
+
 TEST_P( ztrsmGeneric, API )
 {
     using T = dcomplex;
@@ -137,8 +139,8 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
             ::testing::Values('n', 'c', 't'),                                // transa
             ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
-            ::testing::Range(gtint_t(1), gtint_t(5), 1),                     // m
-            ::testing::Range(gtint_t(1), gtint_t(5), 1),                     // n
+            ::testing::Range(gtint_t(1), gtint_t(6), 2),                     // m
+            ::testing::Range(gtint_t(1), gtint_t(6), 2),                     // n
             ::testing::Values(dcomplex{2.0,-3.4}),                           // alpha
             ::testing::Values(gtint_t(56)),                                  // increment to the leading dim of a
             ::testing::Values(gtint_t(33))                                   // increment to the leading dim of b

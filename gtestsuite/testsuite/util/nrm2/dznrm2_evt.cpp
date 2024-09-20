@@ -209,7 +209,7 @@ INSTANTIATE_TEST_SUITE_P(
   the thread setting logic with AOCL_DYNAMIC enabled
 */
 INSTANTIATE_TEST_SUITE_P(
-        EVT_MT_AOCL_DYNAMIC,
+        EVT_MT_AOCLDynamic,
         dznrm2EVT,
         ::testing::Combine(
             // m size of vector

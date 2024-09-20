@@ -52,6 +52,7 @@ class ctrsmGenericSmall :
                                                 bool      >> {};    // is_memory_test
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ctrsmGenericSmall);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(strsmGeneric);
 
 #ifndef BLIS_INT_ELEMENT_TYPE
 

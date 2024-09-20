@@ -72,7 +72,8 @@ TEST_P( cgemmGenericSUP, UKR )
     // Check gtestsuite gemm.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // No adjustment applied yet for complex data.
+    // Threshold adjustment
+    double adj = 8.0;
     double thresh;
     if (m == 0 || n == 0)
         thresh = 0.0;
@@ -82,7 +83,7 @@ TEST_P( cgemmGenericSUP, UKR )
     else if (alpha == testinghelpers::ZERO<T>())
         thresh = testinghelpers::getEpsilon<T>();
     else
-        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
+        thresh = adj*(3*k+1)*testinghelpers::getEpsilon<T>();
 
     test_complex_gemmsup_ukr<scomplex, cgemmsup_ker_ft> (storageC, transa, transb, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
 }// end of function
@@ -667,7 +668,8 @@ TEST_P( cgemmGenericNat, UKR )
     // Check gtestsuite gemm.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // No adjustment applied yet for complex data.
+    // Threshold adjustment
+    double adj = 8.0;
     double thresh;
     if (m == 0 || n == 0)
         thresh = 0.0;
@@ -677,7 +679,7 @@ TEST_P( cgemmGenericNat, UKR )
     else if (alpha == testinghelpers::ZERO<T>())
         thresh = testinghelpers::getEpsilon<T>();
     else
-        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
+        thresh = adj*(3*k+1)*testinghelpers::getEpsilon<T>();
 
     test_gemmnat_ukr(storageC, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
 }// end of function

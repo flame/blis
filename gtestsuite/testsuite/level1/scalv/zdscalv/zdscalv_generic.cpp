@@ -137,8 +137,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(1), gtint_t(9), 1),
             // incx: stride of x vector.
             ::testing::Values(
-                                gtint_t(2),
-                                gtint_t(41)
+                                gtint_t(2)
             ),
             // alpha: value of scalar.
             ::testing::Values(
@@ -159,8 +158,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(111), gtint_t(193), gtint_t(403)),
             // incx: stride of x vector.
             ::testing::Values(
-                                gtint_t(2),
-                                gtint_t(41)
+                                gtint_t(3)
             ),
             // alpha: value of scalar.
             ::testing::Values(
@@ -180,12 +178,11 @@ INSTANTIATE_TEST_SUITE_P(
             // conj(alpha): uses n (no_conjugate) since it is real.
             ::testing::Values('n'),
             // m: size of vector.
-            ::testing::Range(gtint_t(1), gtint_t(101), 1),
+            ::testing::Values(gtint_t(1), gtint_t(3), gtint_t(17)),
             // incx: stride of x vector.
             ::testing::Values(
                                 gtint_t(1),
-                                gtint_t(2),
-                                gtint_t(41)
+                                gtint_t(3)
             ),
             // alpha: value of scalar.
             ::testing::Values(
@@ -203,7 +200,7 @@ INSTANTIATE_TEST_SUITE_P(
         zdscalvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, c: use conj(x)
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m size of vector takes values from 10 to 100 with step size of 10.
+            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m size of vector
             ::testing::Values(gtint_t(-2), gtint_t(-1)),                     // stride size for x
             ::testing::Values(3)                                             // alpha
         ),

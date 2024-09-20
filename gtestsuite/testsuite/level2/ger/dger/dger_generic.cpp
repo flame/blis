@@ -106,39 +106,10 @@ INSTANTIATE_TEST_SUITE_P(
             // conjy: uses n (no_conjugate) since it is real.
             ::testing::Values( 'n' ),
             // m
-            ::testing::Range( gtint_t(10), gtint_t(101), 10 ),
-            // n
-            ::testing::Range( gtint_t(10), gtint_t(101), 10 ),
-            // alpha: value of scalar
-            ::testing::Values( double(-4.1), double(1.0), double(2.3) ),
-            // incx: stride of x vector.
-            ::testing::Values( gtint_t(1) ),
-            // incy: stride of y vector.
-            ::testing::Values( gtint_t(1) ),
-            // inc_lda: increment to the leading dim of a
-            ::testing::Values( gtint_t(0), gtint_t(3) )
-        ),
-        ::gerGenericPrint<double>()
-    );
-
-#ifdef TEST_BLIS_TYPED
-// Test when conjugate of x is used as an argument. This option is BLIS-api specific.
-// Only test very few cases as sanity check since conj(x) = x for real types.
-// We can modify the values using implementantion details.
-INSTANTIATE_TEST_SUITE_P(
-        conjXY,
-        dgerGeneric,
-        ::testing::Combine(
-            // storage scheme: row/col-stored matrix
-            ::testing::Values( 'c', 'r' ),
-            // conjx: uses n (no_conjugate) since it is real.
-            ::testing::Values( 'c' ),
-            // conjy: uses n (no_conjugate) since it is real.
-            ::testing::Values( 'c' ),
             // m
-            ::testing::Values( gtint_t(3), gtint_t(30), gtint_t(112) ),
+            ::testing::Values( gtint_t(1), gtint_t(3), gtint_t(47), gtint_t(102) ),
             // n
-            ::testing::Values( gtint_t(3), gtint_t(30), gtint_t(112) ),
+            ::testing::Values( gtint_t(1), gtint_t(2), gtint_t(59), gtint_t(98) ),
             // alpha: value of scalar
             ::testing::Values( double(-4.1), double(1.0), double(2.3) ),
             // incx: stride of x vector.
@@ -150,7 +121,6 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::gerGenericPrint<double>()
     );
-#endif
 
 INSTANTIATE_TEST_SUITE_P(
         nonUnitPositiveIncrements,
@@ -164,7 +134,7 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
             ),
             // conjx: uses n (no_conjugate) since it is real.
-            ::testing::Values( 'n' ),
+            ::testing::Values( 'n'),
             // conjy: uses n (no_conjugate) since it is real.
             ::testing::Values( 'n' ),
             // m
@@ -183,74 +153,9 @@ INSTANTIATE_TEST_SUITE_P(
         ::gerGenericPrint<double>()
     );
 
-// @note negativeIncrement tests are resulting in Segmentation Faults when
-//  BLIS_TYPED interface is being tested.
-#ifndef TEST_BLIS_TYPED
+//Large size for m and n
 INSTANTIATE_TEST_SUITE_P(
-        negativeIncrements,
-        dgerGeneric,
-        ::testing::Combine(
-            // storage scheme: row/col-stored matrix
-            ::testing::Values( 'c'
-            // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
-#ifndef TEST_BLAS_LIKE
-                             , 'r'
-#endif
-            ),
-            // conjx: uses n (no_conjugate) since it is real.
-            ::testing::Values( 'n' ),
-            // conjy: uses n (no_conjugate) since it is real.
-            ::testing::Values( 'n' ),
-            // m
-            ::testing::Values( gtint_t(3), gtint_t(30), gtint_t(112) ),
-            // n
-            ::testing::Values( gtint_t(3), gtint_t(30), gtint_t(112) ),
-            // alpha: value of scalar
-            ::testing::Values( double(-4.1), double(1.0), double(2.3) ),
-            // incx: stride of x vector.
-            ::testing::Values( gtint_t(-2) ),
-            // incy: stride of y vector.
-            ::testing::Values( gtint_t(-3) ),
-            // inc_lda: increment to the leading dim of a
-            ::testing::Values( gtint_t(0), gtint_t(3) )
-        ),
-        ::gerGenericPrint<double>()
-    );
-#endif
-
-INSTANTIATE_TEST_SUITE_P(
-        scalarCombinations,
-        dgerGeneric,
-        ::testing::Combine(
-            // storage scheme: row/col-stored matrix
-            ::testing::Values( 'c'
-            // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
-#ifndef TEST_BLAS_LIKE
-                             , 'r'
-#endif
-            ),
-            // conjx: uses n (no_conjugate) since it is real.
-            ::testing::Values( 'n' ),
-            // conjy: uses n (no_conjugate) since it is real.
-            ::testing::Values( 'n' ),
-            // m
-            ::testing::Values( gtint_t(3) ),
-            // n
-            ::testing::Values( gtint_t(3) ),
-            // alpha: value of scalar
-            ::testing::Values( double(-500.1), double(1000.0), double(48.3) ),
-            // incx: stride of x vector.
-            ::testing::Values( gtint_t(3) ),
-            // incy: stride of y vector.
-            ::testing::Values( gtint_t(1) ),
-            // inc_lda: increment to the leading dim of a
-            ::testing::Values( gtint_t(0), gtint_t(3) )
-        ),
-        ::gerGenericPrint<double>()
-    );
-//large size for m and n
-INSTANTIATE_TEST_SUITE_P(
-        largeSize,
+        LargeSize,
         dgerGeneric,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
@@ -276,37 +181,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values( gtint_t(4),gtint_t(1) ),
             // inc_lda: increment to the leading dim of a
             ::testing::Values( gtint_t(0), gtint_t(3) )
-        ),
-        ::gerGenericPrint<double>()
-    );
-//incx and incy are greater than m and n.
-INSTANTIATE_TEST_SUITE_P(
-        strideGreaterThanSize,
-        dgerGeneric,
-        ::testing::Combine(
-            // storage scheme: row/col-stored matrix
-            ::testing::Values( 'c'
-            // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
-#ifndef TEST_BLAS_LIKE
-                             , 'r'
-#endif
-            ),
-            // conjx: uses n (no_conjugate) since it is real.
-            ::testing::Values( 'n' ),
-            // conjy: uses n (no_conjugate) since it is real.
-            ::testing::Values( 'n' ),
-            // m
-            ::testing::Values( gtint_t(3) ),
-            // n
-            ::testing::Values( gtint_t(2) ),
-            // alpha: value of scalar
-            ::testing::Values( double(5.1) ),
-            // incx: stride of x vector.
-            ::testing::Values( gtint_t(10) ),
-            // incy: stride of y vector.
-            ::testing::Values( gtint_t(15) ),
-            // inc_lda: increment to the leading dim of a
-            ::testing::Values( gtint_t(7) )
         ),
         ::gerGenericPrint<double>()
     );

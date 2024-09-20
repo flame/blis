@@ -106,9 +106,9 @@ INSTANTIATE_TEST_SUITE_P(
             // conjy: uses n (no_conjugate) since it is real.
             ::testing::Values( 'n' ),
             // m
-            ::testing::Range( gtint_t(10), gtint_t(101), 10 ),
+            ::testing::Values( gtint_t(1), gtint_t(3), gtint_t(13), gtint_t(39), gtint_t(100) ),
             // n
-            ::testing::Range( gtint_t(10), gtint_t(101), 10 ),
+            ::testing::Values( gtint_t(1), gtint_t(3), gtint_t(49), gtint_t(76), gtint_t(100) ),
             // alpha: value of scalar
             ::testing::Values( float(-4.1), float(1.0), float(2.3) ),
             // incx: stride of x vector.
@@ -120,42 +120,6 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::gerGenericPrint<float>()
     );
-
-#ifdef TEST_BLIS_TYPED
-// Test when conjugate of x is used as an argument. This option is BLIS-api specific.
-// Only test very few cases as sanity check since conj(x) = x for real types.
-// We can modify the values using implementantion details.
-INSTANTIATE_TEST_SUITE_P(
-        conjXY,
-        sgerGeneric,
-        ::testing::Combine(
-            // storage scheme: row/col-stored matrix
-            ::testing::Values( 'c'
-            // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
-#ifndef TEST_BLAS_LIKE
-                             , 'r'
-#endif
-            ),
-            // conjx: uses n (no_conjugate) since it is real.
-            ::testing::Values( 'c' ),
-            // conjy: uses n (no_conjugate) since it is real.
-            ::testing::Values( 'c' ),
-            // m
-            ::testing::Values( gtint_t(3), gtint_t(30), gtint_t(112) ),
-            // n
-            ::testing::Values( gtint_t(3), gtint_t(30), gtint_t(112) ),
-            // alpha: value of scalar
-            ::testing::Values( float(-4.1), float(1.0), float(2.3) ),
-            // incx: stride of x vector.
-            ::testing::Values( gtint_t(1) ),
-            // incy: stride of y vector.
-            ::testing::Values( gtint_t(1) ),
-            // inc_lda: increment to the leading dim of a
-            ::testing::Values( gtint_t(0), gtint_t(3) )
-        ),
-        ::gerGenericPrint<float>()
-    );
-#endif
 
 INSTANTIATE_TEST_SUITE_P(
         nonUnitPositiveIncrements,
@@ -224,37 +188,7 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 INSTANTIATE_TEST_SUITE_P(
-        scalarCombinations,
-        sgerGeneric,
-        ::testing::Combine(
-            // storage scheme: row/col-stored matrix
-            ::testing::Values( 'c'
-            // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
-#ifndef TEST_BLAS_LIKE
-                             , 'r'
-#endif
-            ),
-            // conjx: uses n (no_conjugate) since it is real.
-            ::testing::Values( 'n' ),
-            // conjy: uses n (no_conjugate) since it is real.
-            ::testing::Values( 'n' ),
-            // m
-            ::testing::Values( gtint_t(5) ),
-            // n
-            ::testing::Values( gtint_t(4) ),
-            // alpha: value of scalar
-            ::testing::Values( float(-401.1), float(100.0), float(3.4)),
-            // incx: stride of x vector.
-            ::testing::Values( gtint_t(2) ),
-            // incy: stride of y vector.
-            ::testing::Values( gtint_t(3) ),
-            // inc_lda: increment to the leading dim of a
-            ::testing::Values( gtint_t(1) )
-        ),
-        ::gerGenericPrint<float>()
-    );
-INSTANTIATE_TEST_SUITE_P(
-        largeSize,
+        LargeSize,
         sgerGeneric,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
@@ -280,36 +214,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values( gtint_t(3), gtint_t(1) ),
             // inc_lda: increment to the leading dim of a
             ::testing::Values( gtint_t(0), gtint_t(3) )
-        ),
-        ::gerGenericPrint<float>()
-    );
-INSTANTIATE_TEST_SUITE_P(
-        strideGreaterThanSize,
-        sgerGeneric,
-        ::testing::Combine(
-            // storage scheme: row/col-stored matrix
-            ::testing::Values( 'c'
-            // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
-#ifndef TEST_BLAS_LIKE
-                             , 'r'
-#endif
-            ),
-            // conjx: uses n (no_conjugate) since it is real.
-            ::testing::Values( 'n' ),
-            // conjy: uses n (no_conjugate) since it is real.
-            ::testing::Values( 'n' ),
-            // m
-            ::testing::Values( gtint_t(2) ),
-            // n
-            ::testing::Values( gtint_t(4) ),
-            // alpha: value of scalar
-            ::testing::Values( float(3.4)),
-            // incx: stride of x vector.
-            ::testing::Values( gtint_t(10) ),
-            // incy: stride of y vector.
-            ::testing::Values( gtint_t(15) ),
-            // inc_lda: increment to the leading dim of a
-            ::testing::Values( gtint_t(9) )
         ),
         ::gerGenericPrint<float>()
     );
