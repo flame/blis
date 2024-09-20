@@ -461,7 +461,7 @@ where `a` is the matrix to pack and `p` is an uninitialized matrix object which 
 bli_gemm_cntl_set_pack[ab]_var( &pack_variant, &cntl );
 ```
 
-If the default parameter structure which is included in the `gemm_cntl_t` object (and which is pointed to by the default value of the params pointer) can be used by your custom packing variant, then the [packing parameters API](frame/3m/gemm/bli_gemm_cntl.h) can be used. However, if different information is required then you can create your own structure (which must be treated as read-only during the operation) and insert it into the control tree with:
+If the default parameter structure which is included in the `gemm_cntl_t` object (and which is pointed to by the default value of the params pointer) can be used by your custom packing variant, then the [packing parameters API](../frame/3m/gemm/bli_gemm_cntl.h) can be used. However, if different information is required then you can create your own structure (which must be treated as read-only during the operation) and insert it into the control tree with:
 
 ```C
 my_params_t params;
@@ -535,7 +535,7 @@ You can set a custom computational variant with:
 bli_gemm_cntl_set_var( &comp_variant, &cntl );
 ```
 
-If the default parameter structure which is included in the `gemm_cntl_t` object can be used by your custom computational variant, then the [computational parameters API](frame/3m/gemm/bli_gemm_cntl.h) can be used. However, if different information is required then you can create your own structure (which must be treated as read-only during the operation) and insert it into the control tree with:
+If the default parameter structure which is included in the `gemm_cntl_t` object can be used by your custom computational variant, then the [computational parameters API](../frame/3m/gemm/bli_gemm_cntl.h) can be used. However, if different information is required then you can create your own structure (which must be treated as read-only during the operation) and insert it into the control tree with:
 
 ```C
 my_params_t params;
@@ -580,7 +580,7 @@ xcomp_ukr(       dim_t      m,
            const cntx_t*    cntx );
 ```
 
-As with packing microkernels, a params pointer is also available to computational microkernels and can be set using `bli_gemm_cntl_set_params`. The params pointer is stored in the `auxinfo_t` struct, and can be obtained with `bli_auxinfo_params( &auxinfo )` (see also the [auxinfo API](frame/base/bli_auxinfo.h)).
+As with packing microkernels, a params pointer is also available to computational microkernels and can be set using `bli_gemm_cntl_set_params`. The params pointer is stored in the `auxinfo_t` struct, and can be obtained with `bli_auxinfo_params( &auxinfo )` (see also the [auxinfo API](../frame/base/bli_auxinfo.h)).
 
 ## SYRKD
 
