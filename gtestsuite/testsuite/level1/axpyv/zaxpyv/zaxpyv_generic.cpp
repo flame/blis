@@ -64,14 +64,7 @@ TEST_P( zaxpyvGeneric, API )
     // Check gtestsuite axpyv.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // With small adjustment applied for complex data.
     double thresh;
-   // Threshold adjustment
-#ifdef BLIS_INT_ELEMENT_TYPE
-    double adj = 1.02;
-#else
-    double adj = 1.0;
-#endif
     if (n == 0)
         thresh = 0.0;
     else if (alpha == testinghelpers::ZERO<T>())
@@ -79,8 +72,15 @@ TEST_P( zaxpyvGeneric, API )
     else if (alpha == testinghelpers::ONE<T>())
         thresh = testinghelpers::getEpsilon<T>();
     else
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 1.02;
+#else
+        double adj = 1.0;
+#endif
         thresh = adj*2*testinghelpers::getEpsilon<T>();
-
+    }
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------

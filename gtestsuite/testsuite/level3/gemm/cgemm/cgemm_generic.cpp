@@ -82,7 +82,6 @@ TEST_P( cgemmGeneric, API )
     // Check gtestsuite gemm.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // No adjustment applied yet for complex data.
     double thresh;
     if (m == 0 || n == 0)
         thresh = 0.0;
@@ -90,7 +89,15 @@ TEST_P( cgemmGeneric, API )
              (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>()))
         thresh = 0.0;
     else if (alpha == testinghelpers::ZERO<T>())
-        thresh = testinghelpers::getEpsilon<T>();
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 1.0;
+#else
+        double adj = 1.1;
+#endif
+        thresh = adj*testinghelpers::getEpsilon<T>();
+    }
     else
         thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
 

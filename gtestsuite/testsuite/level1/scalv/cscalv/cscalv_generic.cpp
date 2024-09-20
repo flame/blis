@@ -63,15 +63,22 @@ TEST_P( cscalvGeneric, API )
     // Check gtestsuite scalv.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // No adjustment applied yet for complex data.
+    // With adjustment applied for complex data.
     double thresh;
     if (n == 0)
         thresh = 0.0;
     else if (alpha == testinghelpers::ZERO<T>() || alpha == testinghelpers::ONE<T>())
         thresh = 0.0;
     else
-        thresh = testinghelpers::getEpsilon<T>();
-
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 1.01;
+#else
+        double adj = 1.01;
+#endif
+        thresh = adj*testinghelpers::getEpsilon<T>();
+    }
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------

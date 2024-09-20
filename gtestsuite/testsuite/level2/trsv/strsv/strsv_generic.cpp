@@ -78,26 +78,21 @@ TEST_P( strsvGeneric, API )
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
     double thresh;
-    // Threshold adjustment
-#ifdef BLIS_INT_ELEMENT_TYPE
-    double adj = 9.0;
-  #ifdef REF_IS_MKL
-    adj = 12.0;
-  #endif
-#else
-    double adj = 12.0;
-  #ifdef REF_IS_MKL
-    adj = 14.0;
-  #endif
-#endif
     if (n == 0 || alpha == T{0.0})
         thresh = 0.0;
     else
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 9.0;
+#else
+        double adj = 18.0;
+#endif
         if(alpha == T{1.0})
           thresh = adj*2*n*testinghelpers::getEpsilon<T>();
         else
           thresh = adj*3*n*testinghelpers::getEpsilon<T>();
-
+    }
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------

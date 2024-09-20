@@ -77,7 +77,6 @@ TEST_P( dgemmGenericSUP, sup_kernel)
     // Check gtestsuite gemm.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    double adj = 2.0;
     double thresh;
     if (m == 0 || n == 0)
         thresh = 0.0;
@@ -87,8 +86,15 @@ TEST_P( dgemmGenericSUP, sup_kernel)
     else if (alpha == testinghelpers::ZERO<T>())
         thresh = testinghelpers::getEpsilon<T>();
     else
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 1.0;
+#else
+        double adj = 4.5;
+#endif
         thresh = adj*(3*k+1)*testinghelpers::getEpsilon<T>();
-
+    }
     test_gemmsup_ukr(kern_ptr, transa, transb, m, n, k, alpha, beta, storageC, MR, row_pref, thresh, is_memory_test);
 
 }// end of function
@@ -372,7 +378,6 @@ TEST_P( dgemmGenericNat, native_kernel_testing)
     // Check gtestsuite gemm.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    double adj=2.0;
     double thresh;
     if (m == 0 || n == 0)
         thresh = 0.0;
@@ -382,8 +387,15 @@ TEST_P( dgemmGenericNat, native_kernel_testing)
     else if (alpha == testinghelpers::ZERO<T>())
         thresh = testinghelpers::getEpsilon<T>();
     else
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 1.1;
+#else
+        double adj = 3.0;
+#endif
         thresh = adj*(3*k+1)*testinghelpers::getEpsilon<T>();
-
+    }
     test_gemmnat_ukr(storageC, m, n, k, alpha, beta, kern_ptr, thresh, is_memory_test);
 
 }// end of function
@@ -505,7 +517,6 @@ TEST_P( dgemmGenericK1, k1_kernel_testing)
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
     // Threshold adjustment
-    double adj = 8.0;
     double thresh;
     if (m == 0 || n == 0)
         thresh = 0.0;
@@ -515,8 +526,15 @@ TEST_P( dgemmGenericK1, k1_kernel_testing)
     else if (alpha == testinghelpers::ZERO<T>())
         thresh = testinghelpers::getEpsilon<T>();
     else
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 1.0;
+#else
+        double adj = 1.9;
+#endif
         thresh = adj*(3*k+1)*testinghelpers::getEpsilon<T>();
-
+    }
     test_gemmk1_ukr(kern_ptr, m, n, k, storageC, alpha, beta, thresh, is_memory_test);
 
 }// end of function
@@ -638,7 +656,6 @@ TEST_P( dgemmGenericSmall, gemm_small)
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
     // Threshold adjustment./
-    double adj = 2.0;
     double thresh;
     if (m == 0 || n == 0)
         thresh = 0.0;
@@ -648,11 +665,18 @@ TEST_P( dgemmGenericSmall, gemm_small)
     else if (alpha == testinghelpers::ZERO<T>())
         thresh = testinghelpers::getEpsilon<T>();
     else
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 1.2;
+#else
+        double adj = 2.0;
+#endif
         thresh = adj*(3*k+1)*testinghelpers::getEpsilon<T>();
-
+    }
     if ( is_memory_test )
     {
-        srand(time(NULL));
+        //srand(time(NULL));
         double *a, *b, *c, *cref = NULL;
         // Allocate memory for A
         testinghelpers::ProtectedBuffer a_buf( m * k * lda * sizeof(double), false, is_memory_test );

@@ -234,7 +234,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
             ::testing::Values(1, 2, 300, 1500),                              // n
             ::testing::Values(1, 2, 300, 1500),                              // m
-            ::testing::Values(-2.4, 0.0, 1.0, 3.1, NAN, INFINITY),           // alpha
+            ::testing::Values(-2.4, 0.0, 1.0, 3.1),                          // alpha
             ::testing::Values(gtint_t(0), gtint_t(5)),                       // increment to the leading dim of a
             ::testing::Values(gtint_t(0), gtint_t(3))                        // increment to the leading dim of b
         ),

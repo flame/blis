@@ -72,18 +72,19 @@ TEST_P( cherGeneric, API )
     // Check gtestsuite her.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // With adjustment for complex data.
     double thresh;
-#ifdef BLIS_INT_ELEMENT_TYPE
-    double adj = 1.0;
-#else
-    double adj = 2.0;
-#endif
     if (n == 0 || alpha == 0.0f)
         thresh = 0.0;
     else
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 1.0;
+#else
+        double adj = 2.0;
+#endif
         thresh = adj*3*testinghelpers::getEpsilon<T>();
-
+    }
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------

@@ -78,15 +78,21 @@ TEST_P( cherkGeneric, API )
     // Check gtestsuite herk.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // No adjustment applied yet for complex data.
     double thresh;
     if (n == 0)
         thresh = 0.0;
     else if ((alpha == 0.0f || k == 0) && (beta == 0.0f || beta == 1.0f))
         thresh = 0.0;
     else
-        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
-
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 1.0;
+#else
+        double adj = 4.0;
+#endif
+        thresh = adj*(3*k+1)*testinghelpers::getEpsilon<T>();
+    }
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------

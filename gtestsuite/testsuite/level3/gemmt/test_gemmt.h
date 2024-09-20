@@ -83,7 +83,8 @@ void test_gemmt( char storage, char uploc, char transa, char transb, gtint_t n,
     dim_t size_c = testinghelpers::matsize(storage, 'n', n, n, ldc) * sizeof(T);
     testinghelpers::ProtectedBuffer c(size_c, false, is_mem_test );
     c_ptr = (T*)c.greenzone_1;
-    if (beta != testinghelpers::ZERO<T>())
+    //if (beta != testinghelpers::ZERO<T>())
+    if (1)
     {
         testinghelpers::datagenerators::randomgenerators<T>( -3, 5, storage, n, n, c_ptr, 'n', ldc);
         if ( is_evt_test )

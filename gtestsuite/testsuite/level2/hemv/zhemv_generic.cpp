@@ -83,11 +83,6 @@ TEST_P( zhemvGeneric, API )
     // of output, and hence the multipler for epsilon.
     // With adjustment applied for complex data.
      double thresh;
-#ifdef BLIS_INT_ELEMENT_TYPE
-    double adj = 1.0;
-#else
-    double adj = 2.4;
-#endif
     if (n == 0)
         thresh = 0.0;
     else if (alpha == testinghelpers::ZERO<T>() && (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>()))
@@ -95,8 +90,15 @@ TEST_P( zhemvGeneric, API )
     else if (alpha == testinghelpers::ZERO<T>())
         thresh = testinghelpers::getEpsilon<T>();
     else
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 1.0;
+#else
+        double adj = 2.4;
+#endif
         thresh = adj*(3*n+1)*testinghelpers::getEpsilon<T>();
-
+    }
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------

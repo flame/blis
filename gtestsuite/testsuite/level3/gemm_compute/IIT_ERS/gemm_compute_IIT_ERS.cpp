@@ -569,7 +569,39 @@ TYPED_TEST(gemm_compute_IIT_ERS, k_zero_beta_one)
 }
 
 // zero alpha and zero beta - set C to 0
-TYPED_TEST(gemm_compute_IIT_ERS, ZeroAlpha_ZeroBeta)
+// Not packing A and not packing B, so alpha is actually one.
+TYPED_TEST(gemm_compute_IIT_ERS, ZeroAlpha_ZeroBeta_UU)
+{
+    using T = TypeParam;
+
+    T alpha, beta;
+    testinghelpers::initzero<T>( alpha );
+    testinghelpers::initzero<T>( beta );
+    double adj = 2.7;
+    double thresh = adj*(2*K)*testinghelpers::getEpsilon<T>();
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
+    std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
+    // Copy so that we check that the elements of C are not modified.
+    std::vector<T> c_ref(c);
+
+    testinghelpers::ref_gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, K, alpha,
+               a.data(), LDA, b.data(), LDB, beta, c_ref.data(), LDC );
+
+    // Enable packing of A matrix to accound for alpha = 0 scaling.
+    gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC, thresh);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
+}
+
+TYPED_TEST(gemm_compute_IIT_ERS, ZeroAlpha_ZeroBeta_PU)
 {
     using T = TypeParam;
 
@@ -596,8 +628,66 @@ TYPED_TEST(gemm_compute_IIT_ERS, ZeroAlpha_ZeroBeta)
 #endif
 }
 
+TYPED_TEST(gemm_compute_IIT_ERS, ZeroAlpha_ZeroBeta_UP)
+{
+    using T = TypeParam;
+
+    T alpha, beta;
+    testinghelpers::initzero<T>( alpha );
+    testinghelpers::initzero<T>( beta );
+
+    std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
+    // Copy so that we check that the elements of C are not modified.
+    std::vector<T> zero_mat = testinghelpers::get_random_matrix<T>(0, 0, STORAGE, 'n', M, N, LDB);
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
+
+    // Enable packing of A matrix to accound for alpha = 0 scaling.
+    gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'P', M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "C", STORAGE, N, N, c.data(), zero_mat.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
+}
+
 // zero alpha and non-zero/non-unit beta - scale C only
-TYPED_TEST(gemm_compute_IIT_ERS, ZeroAlpha_OtherBeta)
+// Not packing A and not packing B, so alpha is actually one.
+TYPED_TEST(gemm_compute_IIT_ERS, ZeroAlpha_OtherBeta_UU)
+{
+    using T = TypeParam;
+
+    T alpha, beta;
+    testinghelpers::initzero<T>( alpha );
+    beta = T{2.0};
+    double thresh = (2*K+1)*testinghelpers::getEpsilon<T>();
+
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
+    std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
+    // Copy so that we check that the elements of C are not modified.
+    std::vector<T> c_ref(c);
+
+    testinghelpers::ref_gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, K, alpha,
+               a.data(), LDA, b.data(), LDB, beta, c_ref.data(), LDC );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC, thresh);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
+}
+
+// zero alpha and non-zero/non-unit beta - scale C only
+TYPED_TEST(gemm_compute_IIT_ERS, ZeroAlpha_OtherBeta_PU)
 {
     using T = TypeParam;
 
@@ -612,11 +702,41 @@ TYPED_TEST(gemm_compute_IIT_ERS, ZeroAlpha_OtherBeta)
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> c_ref(c);
 
-    testinghelpers::ref_gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, K, alpha,
+    testinghelpers::ref_gemm_compute<T>( STORAGE, TRANS, TRANS, 'P', 'U', M, N, K, alpha,
                a.data(), LDA, b.data(), LDB, beta, c_ref.data(), LDC );
 
     // Test with all arguments correct except for the value we are choosing to test.
-    gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
+    gemm_compute<T>( STORAGE, TRANS, TRANS, 'P', 'U', M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC, thresh);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
+}
+
+// zero alpha and non-zero/non-unit beta - scale C only
+TYPED_TEST(gemm_compute_IIT_ERS, ZeroAlpha_OtherBeta_UP)
+{
+    using T = TypeParam;
+
+    T alpha, beta;
+    testinghelpers::initzero<T>( alpha );
+    beta = T{2.0};
+    double thresh = testinghelpers::getEpsilon<T>();
+
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
+    std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
+    // Copy so that we check that the elements of C are not modified.
+    std::vector<T> c_ref(c);
+
+    testinghelpers::ref_gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'P', M, N, K, alpha,
+               a.data(), LDA, b.data(), LDB, beta, c_ref.data(), LDC );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'P', M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
     computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC, thresh);
 

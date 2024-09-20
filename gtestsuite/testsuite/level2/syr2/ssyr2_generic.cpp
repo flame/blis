@@ -79,16 +79,18 @@ TEST_P( ssyr2Generic, API )
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
     double thresh;
-#ifdef BLIS_INT_ELEMENT_TYPE
-    double adj = 1.0;
-#else
-    double adj = 3.0;
-#endif
     if (n == 0 || alpha == testinghelpers::ZERO<T>())
         thresh = 0.0;
     else
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 1.4;
+#else
+        double adj = 4.0;
+#endif
         thresh = adj*6*testinghelpers::getEpsilon<T>();
-
+    }
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------

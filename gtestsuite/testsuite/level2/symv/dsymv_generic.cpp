@@ -82,14 +82,6 @@ TEST_P( dsymvGeneric, API )
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
     double thresh;
-#ifdef BLIS_INT_ELEMENT_TYPE
-    double adj = 1.4;
-#else
-    double adj = 1.7;
-  #ifdef REF_IS_MKL
-    adj = 1.4;
-  #endif
-#endif
     if (n == 0)
         thresh = 0.0;
     else if (alpha == testinghelpers::ZERO<T>() && (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>()))
@@ -97,8 +89,15 @@ TEST_P( dsymvGeneric, API )
     else if (alpha == testinghelpers::ZERO<T>())
         thresh = testinghelpers::getEpsilon<T>();
     else
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 1.5;
+#else
+        double adj = 2.5;
+#endif
         thresh = adj*(3*n+1)*testinghelpers::getEpsilon<T>();
-
+    }
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------

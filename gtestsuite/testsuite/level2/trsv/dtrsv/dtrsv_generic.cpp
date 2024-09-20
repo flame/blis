@@ -78,23 +78,21 @@ TEST_P( dtrsvGeneric, API )
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
     double thresh;
-    // Threshold adjustment
-#ifdef BLIS_INT_ELEMENT_TYPE
-    double adj = 1.0;
-#else
-    double adj = 7.5;
-  #ifdef REF_IS_MKL
-    adj = 8.3;
-  #endif
-#endif
     if (n == 0 || alpha == T{0.0})
         thresh = 0.0;
     else
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 1.0;
+#else
+        double adj = 7.5;
+#endif
         if(alpha == T{1.0})
           thresh = adj*2*n*testinghelpers::getEpsilon<T>();
         else
           thresh = adj*3*n*testinghelpers::getEpsilon<T>();
-
+    }
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------

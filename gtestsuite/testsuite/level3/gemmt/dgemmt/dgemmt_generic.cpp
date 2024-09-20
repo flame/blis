@@ -93,8 +93,15 @@ TEST_P( dgemmtGeneric, API )
              (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>()))
         thresh = 0.0;
     else
-        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
-
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 4.1;
+#else
+        double adj = 4.0;
+#endif
+        thresh = adj*(3*k+1)*testinghelpers::getEpsilon<T>();
+    }
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------

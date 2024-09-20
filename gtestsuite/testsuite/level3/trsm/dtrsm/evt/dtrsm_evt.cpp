@@ -126,11 +126,35 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
             ::testing::Values(1, 2, 301, 1551),                              // m
             ::testing::Values(1, 2, 324, 1676),                              // n
-            ::testing::Values(-2.4, 0),                                      // alpha
+            ::testing::Values(-2.4, 1.0, 0.0),                               // alpha
             ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of a
             ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of b
             ::testing::Values(NO_EVT, NaN, INF, NaN_INF, DIAG_NaN, DIAG_INF),// EVT test for A
             ::testing::Values(NO_EVT, NaN, INF, NaN_INF)                     // EVT test for B
+        ),
+        ::trsmEVTPrint<double>()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        alpha,
+        dtrsmEVT,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('l','r'),                                      // side  l:left, r:right
+            ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
+            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
+            ::testing::Values(1, 2, 301, 1551),                              // m
+            ::testing::Values(1, 2, 324, 1676),                              // n
+            ::testing::Values(NaN, INF, -INF),                               // alpha
+            ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of a
+            ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of b
+            ::testing::Values(NO_EVT),                                       // EVT test for A
+            ::testing::Values(NO_EVT)                                        // EVT test for B
         ),
         ::trsmEVTPrint<double>()
     );

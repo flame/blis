@@ -86,9 +86,7 @@ TEST_P( csymmGeneric, API )
     // Check gtestsuite symm.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // With adjustment for complex data.
     double thresh;
-    double adj = 1.5;
     if (m == 0 || n == 0)
         thresh = 0.0;
     else if (alpha == testinghelpers::ZERO<T>() &&
@@ -97,11 +95,18 @@ TEST_P( csymmGeneric, API )
     else if (alpha == testinghelpers::ZERO<T>())
         thresh = testinghelpers::getEpsilon<T>();
     else
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 1.0;
+#else
+        double adj = 3.5;
+#endif
         if ( side == 'l' || side == 'L' )
            thresh = adj*(3*m+1)*testinghelpers::getEpsilon<T>();
         else
            thresh = adj*(3*n+1)*testinghelpers::getEpsilon<T>();
-
+    }
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------

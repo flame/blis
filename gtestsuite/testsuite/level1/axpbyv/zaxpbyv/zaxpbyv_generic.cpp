@@ -67,7 +67,6 @@ TEST_P( zaxpbyvGeneric, API )
     // Check gtestsuite axpbyv.h (no netlib version) for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // With adjustment for complex data.
     // NOTE : Every mul for complex types involves 3 ops(2 muls + 1 add)
     double thresh;
     double adj = 3;

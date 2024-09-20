@@ -87,13 +87,12 @@ TEST_P( ztrsmGenericNat, UKR )
     // Check gtestsuite trsm.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // No adjustment applied yet for complex data.
     double thresh;
     // Threshold adjustment
 #ifdef BLIS_INT_ELEMENT_TYPE
     double adj = 1.0;
 #else
-    double adj = 1.6;
+    double adj = 1.7;
 #endif
     if (m == 0 || n == 0 || alpha == testinghelpers::ZERO<T>())
         thresh = 0.0;

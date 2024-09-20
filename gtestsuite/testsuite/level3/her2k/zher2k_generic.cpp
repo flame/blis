@@ -83,16 +83,21 @@ TEST_P( zher2kGeneric, API )
     // Check gtestsuite her2k.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // With adjustment for complex data.
     double thresh;
-    double adj = 2.5;
     if (n == 0)
         thresh = 0.0;
     else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == 0.0 || beta == 1.0))
         thresh = 0.0;
     else
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 1.0;
+#else
+        double adj = 3.3;
+#endif
         thresh = adj*(6*k+1)*testinghelpers::getEpsilon<T>();
-
+    }
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------

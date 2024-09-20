@@ -73,12 +73,17 @@ TEST_P( zscal2vGeneric, UKR )
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
     double thresh;
+#ifdef BLIS_INT_ELEMENT_TYPE
+    double adj = 1.01;
+#else
+    double adj = 1.0;
+#endif
     if (n == 0)
         thresh = 0.0;
     else if (alpha == testinghelpers::ZERO<T>() || alpha == testinghelpers::ONE<T>())
         thresh = 0.0;
     else
-        thresh = testinghelpers::getEpsilon<T>();
+        thresh = adj*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters

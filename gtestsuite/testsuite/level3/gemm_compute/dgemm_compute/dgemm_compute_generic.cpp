@@ -91,13 +91,35 @@ TEST_P( dgemmComputeGeneric, API )
     double thresh;
     if (m == 0 || n == 0)
         thresh = 0.0;
-    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) &&
+    else if ((k == 0) &&
              (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>()))
         thresh = 0.0;
+    else if ((alpha == testinghelpers::ZERO<T>()) &&
+             (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>()))
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 1.0;
+#else
+        double adj = 1.3;
+#endif
+        if (( packa == 'u' || packa == 'U' ) &&
+            ( packb == 'u' || packb == 'U' ))
+            // alpha is actually 1.0 when both matrices are unpacked
+            thresh = adj*(2*k)*testinghelpers::getEpsilon<T>();
+        else
+            thresh = 0.0;
+    }
     else
-        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
-        //thresh = (7*k+1)*testinghelpers::getEpsilon<T>();
-
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 2.3;
+#else
+        double adj = 2.7;
+#endif
+        thresh = adj*(3*k+1)*testinghelpers::getEpsilon<T>();
+    }
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------

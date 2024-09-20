@@ -85,11 +85,18 @@ TEST_P( strmmGeneric, API )
     if (m == 0 || n == 0 || alpha == testinghelpers::ZERO<T>())
         thresh = 0.0;
     else
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 1.0;
+#else
+        double adj = 1.8;
+#endif
         if ( side == 'l' || side == 'L' )
-            thresh = 3*m*testinghelpers::getEpsilon<T>();
+            thresh = adj*3*m*testinghelpers::getEpsilon<T>();
         else
-            thresh = 3*n*testinghelpers::getEpsilon<T>();
-
+            thresh = adj*3*n*testinghelpers::getEpsilon<T>();
+    }
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------

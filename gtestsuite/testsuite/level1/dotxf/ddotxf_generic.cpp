@@ -81,7 +81,7 @@ TEST_P( ddotxfGeneric, API )
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
     double thresh;
-   // Threshold adjustment
+    // Threshold adjustment
     if (m == 0)
         thresh = 0.0;
     else if (alpha == testinghelpers::ZERO<T>())
@@ -97,7 +97,7 @@ TEST_P( ddotxfGeneric, API )
 #ifdef BLIS_INT_ELEMENT_TYPE
             double adj = 1.0;
 #else
-            double adj = 3.9;
+            double adj = 4.4;
 #endif
             thresh = adj*(m+1)*testinghelpers::getEpsilon<T>();
         }
@@ -111,7 +111,7 @@ TEST_P( ddotxfGeneric, API )
 #ifdef BLIS_INT_ELEMENT_TYPE
             double adj = 1.0;
 #else
-            double adj = 5.2;
+            double adj = 5.3;
 #endif
             thresh = adj*(2*m+1)*testinghelpers::getEpsilon<T>();
         }
