@@ -626,6 +626,11 @@ typedef enum
 #define bli_ker_idx( ker )	 ((ker) & ~BLIS_NTYPE_KER_BITS)
 #define bli_ker_ntype( ker ) ((((ker) & BLIS_NTYPE_KER_BITS) >> BLIS_NTYPE_KER_SHIFT) + 1)
 
+// Sentinel constant used to indicate the end of a variable argument function
+// (See bli_cntx.c)
+
+#define BLIS_VA_END  ((siz_t)-1)
+
 typedef enum
 {
 	// -- Single-type kernels --
