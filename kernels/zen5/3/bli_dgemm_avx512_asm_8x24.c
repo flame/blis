@@ -1042,6 +1042,10 @@ void bli_dgemm_avx512_asm_8x24(
     LEA(RCX, MEM(RCX, R10, 1)) \
 
 #define PRE_K_LOOP() \
+        const int64_t n   = n0;                  \
+        const int64_t m   = m0;                  \
+        const int64_t k   = k0;                  \
+        const int64_t ldc = ldc0;                \
         BEGIN_ASM()  \
         \
         MOV(RDI, VAR(n))   /* load N into RDI */ \
@@ -1128,13 +1132,13 @@ void bli_dgemm_avx512_asm_8x24(
 */
 BLIS_INLINE void bli_dgemm_avx512_asm_8x24_macro_kernel_b0
 (
-    dim_t   n,
-    dim_t   m,
-    dim_t   k,
+    dim_t   n0,
+    dim_t   m0,
+    dim_t   k0,
     double* c,
     double* a,
     double* b,
-    dim_t   ldc,
+    dim_t   ldc0,
     double* beta
 )
 {
@@ -1159,13 +1163,13 @@ BLIS_INLINE void bli_dgemm_avx512_asm_8x24_macro_kernel_b0
 */
 BLIS_INLINE void bli_dgemm_avx512_asm_8x24_macro_kernel_b1
 (
-    dim_t   n,
-    dim_t   m,
-    dim_t   k,
+    dim_t   n0,
+    dim_t   m0,
+    dim_t   k0,
     double* c,
     double* a,
     double* b,
-    dim_t   ldc,
+    dim_t   ldc0,
     double* beta
 )
 {
@@ -1190,13 +1194,13 @@ BLIS_INLINE void bli_dgemm_avx512_asm_8x24_macro_kernel_b1
 */
 BLIS_INLINE void bli_dgemm_avx512_asm_8x24_macro_kernel_bm1
 (
-    dim_t   n,
-    dim_t   m,
-    dim_t   k,
+    dim_t   n0,
+    dim_t   m0,
+    dim_t   k0,
     double* c,
     double* a,
     double* b,
-    dim_t   ldc,
+    dim_t   ldc0,
     double* beta
 )
 {
@@ -1223,13 +1227,13 @@ BLIS_INLINE void bli_dgemm_avx512_asm_8x24_macro_kernel_bm1
 */
 BLIS_INLINE void bli_dgemm_avx512_asm_8x24_macro_kernel_bn
 (
-    dim_t   n,
-    dim_t   m,
-    dim_t   k,
+    dim_t   n0,
+    dim_t   m0,
+    dim_t   k0,
     double* c,
     double* a,
     double* b,
-    dim_t   ldc,
+    dim_t   ldc0,
     double* beta
 )
 {
