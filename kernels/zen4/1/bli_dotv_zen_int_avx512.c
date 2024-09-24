@@ -801,7 +801,7 @@ void bli_zdotv_zen4_asm_avx512
      (
        conj_t             conjx,
        conj_t             conjy,
-       dim_t              n,
+       dim_t              n0,
        dcomplex* restrict x, inc_t incx,
        dcomplex* restrict y, inc_t incy,
        dcomplex* restrict rho,
@@ -809,6 +809,7 @@ void bli_zdotv_zen4_asm_avx512
      )
 {
     // Initialize local pointers.
+    int64_t n = n0;
     double* restrict x0 = (double*)x;
     double* restrict y0 = (double*)y;
 
@@ -826,7 +827,7 @@ void bli_zdotv_zen4_asm_avx512
 
     // Copying conjx_use to  a local conj variable for simple condition check
     // within inline assembly.
-    dim_t conj = 0;
+    int64_t conj = 0;
     if ( bli_is_conj( conjx_use ) ) conj = 1;
 
     if ( incx == 1 && incy == 1 )   // Inline ASM used to handle unit-increment.
