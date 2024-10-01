@@ -121,6 +121,7 @@ static void _lpgemm_cntx_init_func_map()
 #define KMACRO(ID,FUNC_PTR) global_cntx_t_list[ID].kern_fun_ptr = FUNC_PTR;
 #define PAMACRO(ID,FUNC_PTR) global_cntx_t_list[ID].packa_fun_ptr = FUNC_PTR;
 #define PBMACRO(ID,FUNC_PTR) global_cntx_t_list[ID].packb_fun_ptr = FUNC_PTR;
+#define UBMACRO(ID, FUNC_PTR) global_cntx_t_list[ID].unpackb_fun_ptr = FUNC_PTR;
 #define PBSMACRO(ID, FUNC_PTR) global_cntx_t_list[ID].packsclb_fun_ptr = FUNC_PTR;
 #define JITMACRO(ID, FUNC_PTR) global_cntx_t_list[ID].jit_kernel = FUNC_PTR;
 	//TODO: Default initialize with reference kernels so that kernel pointer
@@ -141,6 +142,7 @@ static void _lpgemm_cntx_init_func_map()
 		LPGEMM_KERN_FUNC_MAP_AVX512_VNNI_BF16
 		LPGEMM_PACKA_FUNC_MAP_AVX512_VNNI_BF16
 		LPGEMM_PACKB_FUNC_MAP_AVX512_VNNI_BF16
+		LPGEMM_UNPACKB_FUNC_MAP_AVX512_VNNI_BF16
 		LPGEMM_PACKSCLB_FUNC_MAP_AVX512_VNNI_BF16
 
 #ifdef LPGEMM_BF16_JIT

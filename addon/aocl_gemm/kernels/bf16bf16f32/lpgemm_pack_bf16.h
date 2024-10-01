@@ -70,6 +70,16 @@ typedef void (*pack_bf16)
        dim_t*
      );
 
+typedef void (*unpack_bf16)
+     (
+       const bfloat16*,
+       bfloat16*,
+       const dim_t,
+       const dim_t,
+       const dim_t,
+       const dim_t
+     );
+
 typedef void (*pack_s4)
      (
        int8_t*,
@@ -131,4 +141,15 @@ void packa_mr16_bf16bf16f32of32
        dim_t* rs_p,
        dim_t* cs_p
      );
+
+void unpackb_nr64_bf16bf16f32of32
+     (
+        const bfloat16* unpack_b_buffer_bf16bf16f32of32,
+        bfloat16*       b,
+        const dim_t     NC,
+        const dim_t     KC,
+        dim_t           rs_b,
+        dim_t           cs_b
+      );
+
 #endif //BLIS_GEMM_BF16_PACKB

@@ -112,8 +112,7 @@ AOCL_GEMM_REORDER(bfloat16, bf16bf16f32of32)
 	bli_param_map_netlib_to_blis_trans( trans, &blis_trans );
 
 	if ( ( input_buf_addr == NULL ) || ( reorder_buf_addr == NULL ) ||
-	     ( k <= 0 ) || ( n <= 0 ) || ( bli_is_notrans( blis_trans ) && ( ldb < n ) ) ||
-	    ( bli_is_trans( blis_trans ) && ( ldb < k ) ) )
+	     ( k <= 0 ) || ( n <= 0 ) )
 	{
 		return; // Error.
 	}
@@ -121,13 +120,29 @@ AOCL_GEMM_REORDER(bfloat16, bf16bf16f32of32)
 	inc_t rs_b, cs_b;
 	if( ( order == 'r') || ( order == 'R' ) )
 	{
-		rs_b = bli_is_notrans( blis_trans ) ? ldb : 1;
-		cs_b = bli_is_notrans( blis_trans ) ? 1 : ldb;
+		if( ( bli_is_notrans( blis_trans ) && ( ldb < n ) ) ||
+	        ( bli_is_trans( blis_trans ) && ( ldb < k ) ) )
+		{
+			return; // Error.
+		}
+		else
+		{
+			rs_b = bli_is_notrans( blis_trans ) ? ldb : 1;
+			cs_b = bli_is_notrans( blis_trans ) ? 1 : ldb;
+		}
 	}
 	else if ( ( order == 'c' ) || ( order == 'C' ) )
 	{
-		rs_b = bli_is_notrans( blis_trans ) ? 1 : ldb;
-		cs_b = bli_is_notrans( blis_trans ) ? ldb : 1;
+		if( ( bli_is_notrans( blis_trans ) && ( ldb < k ) ) ||
+	        ( bli_is_trans( blis_trans ) && ( ldb < n ) ) )
+		{
+			return; // Error.
+		}
+		else
+		{
+			rs_b = bli_is_notrans( blis_trans ) ? 1 : ldb;
+			cs_b = bli_is_notrans( blis_trans ) ? ldb : 1;
+		}
 	}
 	else
 	{
@@ -193,6 +208,102 @@ AOCL_GEMM_REORDER(bfloat16, bf16bf16f32of32)
 	b.length = k;
 
 	reorderb_nr64_bf16bf16f32of32( &b, &b_reorder, &rntm_g, lcntx_g );
+}
+
+
+AOCL_GEMM_UNREORDER(bfloat16, bf16bf16f32of32)
+{
+	if ( ( output_buf_addr == NULL ) || ( reorder_buf_addr == NULL ) ||
+	     ( k <= 0 ) || ( n <= 0 ) )
+	{
+		return; // Error.
+	}
+
+	inc_t rs_b, cs_b;
+
+	// Check for the validity of strides.
+	if( ( order == 'r' ) || ( order == 'R' ) )
+	{
+		if( ldb < n ) return; // Error
+		else
+		{
+			rs_b = ldb;
+			cs_b = 1;
+		}
+	}
+	else if( ( order == 'c' ) || ( order == 'C' ) )
+	{
+		if( ldb < k ) return; // Error.
+		else
+		{
+			rs_b = 1;
+			cs_b = ldb;
+		}
+	}
+	else
+	{
+		return; // Error.
+	}
+
+	// Check if avx512_bf16 ISA is supported, lpgemm matmul only works with it.
+	if ( bli_cpuid_is_avx512bf16_supported() == FALSE )
+	{
+		bli_print_msg(" AVX512_BF16 ISA not supported by processor, "
+				"cannot perform bf16bf16f32 gemm.", __FILE__, __LINE__ );
+		return; // Error.
+	}
+
+	/* Initialize BLIS. */
+	bli_init_auto();
+
+	// Set MC, NC, KC, NR, MR.
+	aocl_lpgemm_init_global_cntx();
+
+	AOCL_MATRIX_TYPE input_mat_type;
+	bli_param_map_char_to_lpmat_type( mat_type, &input_mat_type );
+
+	if ( input_mat_type == A_MATRIX )
+	{
+		return; // A reorder not supported.
+	}
+#if (defined(BLIS_KERNELS_ZEN4) && (!defined(LPGEMM_BF16_JIT)))
+	if( n == 1 )
+	{
+		if( rs_b == 1 )
+		{
+			memcpy( output_buf_addr, reorder_buf_addr, ( k * sizeof( bfloat16 ) ) );
+		}
+		else
+		{
+			for( dim_t k0 = 0; k0 < k; k0++ )
+			{
+				output_buf_addr[k0*rs_b] = reorder_buf_addr[k0];
+			}
+		}
+		return;
+	}
+#endif
+	// Initialize a local runtime with global settings if necessary. Note
+	// that in the case that a runtime is passed in, we make a local copy.
+	rntm_t rntm_g;
+	bli_rntm_init_from_global( &rntm_g );
+	bli_pba_rntm_set_pba( &rntm_g );
+
+	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( BF16BF16F32OF32 );
+
+	// create dummy b_reorder obj.
+	lpgemm_obj_t b_reorder;
+	b_reorder.storage.aligned_buffer = ( void* )reorder_buf_addr;
+
+	// create dummy b obj.
+	lpgemm_obj_t b;
+	b.storage.aligned_buffer = ( void* )output_buf_addr;
+	b.rs = rs_b;
+	b.cs = cs_b;
+	b.width = n;
+	b.length = k;
+
+	unreorderb_nr64_bf16bf16f32of32( &b, &b_reorder, &rntm_g, lcntx_g );
 }
 
 AOCL_GEMM_GET_REORDER_BUF_SIZE(bf16s4f32of32)

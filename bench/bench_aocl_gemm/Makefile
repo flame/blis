@@ -88,7 +88,7 @@ TEST_OBJS      := $(patsubst $(TEST_SRC_PATH)/%.c, \
 CINCFLAGS      := -I$(INC_PATH) -I$(CBLAS_HEADER_PATH)
 
 # Use the CFLAGS for the configuration family.
-CFLAGS         := $(call get-user-cflags-for,$(CONFIG_NAME)) 
+CFLAGS         := $(call get-user-cflags-for,$(CONFIG_NAME))
 
 # Add local header paths to CFLAGS
 CFLAGS         += -I$(TEST_SRC_PATH)
@@ -109,6 +109,7 @@ all: blis
 blis: \
        bench_lpgemm_blis.x \
        bench_lpgemm_utils_blis.x \
+       bench_lpgemm_unpack_blis.x \
        bench_lpgemm_eltwise_ops_blis.x
 
 

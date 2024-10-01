@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -167,6 +167,91 @@ void reorderb_nr64_bf16bf16f32of32
 	b_reorder->rs = rs_b_reorder;
 	b_reorder->cs = cs_b_reorder;
 	b_reorder->mtag = REORDERED;
+}
+
+void unreorderb_nr64_bf16bf16f32of32
+     (
+       lpgemm_obj_t * b,
+       lpgemm_obj_t * b_reorder,
+       rntm_t*        rntm,
+       lpgemm_cntx_t* lcntx
+     )
+{
+	dim_t NC = lcntx->blksz.NC;
+	dim_t KC = lcntx->blksz.KC;
+	dim_t NR = lcntx->blksz.NR;
+
+	// Extracting the matrix properties from the lpgemm object
+	dim_t rs_b = b->rs;
+	dim_t cs_b = b->cs;
+	dim_t n = b->width;
+	dim_t k = b->length;
+
+	dim_t k_updated = k;
+	k_updated += (k_updated & 0x1);
+
+	dim_t n_threads = bli_rntm_num_threads( rntm );
+	n_threads = ( n_threads > 0 ) ? n_threads : 1;
+
+#ifdef BLIS_ENABLE_OPENMP
+	_Pragma( "omp parallel num_threads(n_threads)" )
+	{
+		// Initialise a local thrinfo obj for work split across threads.
+		thrinfo_t thread_jc;
+		bli_thrinfo_set_n_way( n_threads, &thread_jc );
+		bli_thrinfo_set_work_id( omp_get_thread_num(), &thread_jc );
+#else
+	{
+		// Initialise a local thrinfo obj for work split across threads.
+		thrinfo_t thread_jc;
+		bli_thrinfo_set_n_way( 1, &thread_jc );
+		bli_thrinfo_set_work_id( 0, &thread_jc );
+#endif
+
+		// Compute the JC loop thread range for the current thread.
+		dim_t jc_start, jc_end;
+		bli_thread_range_sub( &thread_jc, n, NR, FALSE, &jc_start, &jc_end );
+
+		for ( dim_t jc = jc_start; jc < jc_end; jc += NC )
+		{
+			dim_t nc0 = bli_min( ( jc_end - jc ), NC );
+
+			dim_t jc_cur_loop = jc;
+			dim_t jc_cur_loop_rem = 0;
+			dim_t n_sub_updated;
+
+			get_B_panel_reordered_start_offset_width
+			(
+			  jc, n, NC, 16,
+			  &jc_cur_loop, &jc_cur_loop_rem,
+			  &nc0, &n_sub_updated
+			);
+
+			for ( dim_t pc = 0; pc < k; pc += KC )
+			{
+				dim_t kc0 = bli_min( ( k - pc ), KC );
+
+				// k needs to be a multiple of 2 so that it can be used with dpbf
+				// instruction. Padding is added in cases this condition is not
+				// satisfied, and therefore the k offset used for packed/reordered
+				// buffer needs to be updated.
+				dim_t kc0_updated = kc0;
+				kc0_updated += (kc0_updated & 0x1);
+
+				( ( unpack_bf16 )lcntx->unpackb_fun_ptr )
+				(
+				  ( ( const bfloat16* )b_reorder->storage.aligned_buffer ) +
+				  ( jc_cur_loop * k_updated ) + ( n_sub_updated * pc ) +
+				  ( jc_cur_loop_rem * kc0_updated ),
+				  ( ( ( bfloat16* )b->storage.aligned_buffer ) +
+				  ( rs_b * pc ) + (jc * cs_b)),
+				  nc0, kc0, rs_b, cs_b
+				);
+			}
+
+			adjust_B_panel_reordered_jc( &jc, jc_cur_loop );
+		}
+	}
 }
 
 void reorderb_nr64_bf16s4f32of32(

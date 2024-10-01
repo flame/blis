@@ -1,0 +1,6 @@
+r b 23 45 45 bf16bf16f32of32
+r b 1 118 118 bf16bf16f32of32
+c b 51 75 51 bf16bf16f32of32
+c b 1 65 1 bf16bf16f32of32
+c b 39 45 39 bf16bf16f32of32
+r b 12 63 63 bf16bf16f32of32

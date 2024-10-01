@@ -154,6 +154,7 @@ typedef struct
 	void_fp kern_fun_ptr;
 	void_fp packa_fun_ptr;
 	void_fp packb_fun_ptr;
+	void_fp unpackb_fun_ptr;
 	void_fp packsclb_fun_ptr;
 	lpgemm_pack_strides_t pack_s;
 } lpgemm_cntx_t;

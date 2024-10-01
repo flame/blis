@@ -42,41 +42,6 @@ CONVERT_TO_FLOAT(int16_t)
 CONVERT_TO_FLOAT(float)
 CONVERT_TO_FLOAT(int32_t)
 
-/* Helper functions to print matrices when debugging */
-void print_matrix_bfloat16
-     (
-       bfloat16* a,
-       dim_t m,
-       dim_t n,
-       dim_t rs_a,
-       dim_t cs_a
-     )
-{
-    for(dim_t i = 0; i < m; i++)
-    {
-        for(dim_t j = 0; j < n; j++)
-        {
-            float temp;
-            bfloat16_to_float(*(a + i*(rs_a) + j *cs_a), &temp);
-            printf("%f ",  temp);
-        }
-        printf("\n");
-    }
-}
-
-#define PRINT_MATRIX(ctype) \
-void print_matrix_## ctype ( ctype* a, dim_t m, dim_t n, dim_t rs, dim_t cs) \
-{ \
-    for(dim_t i = 0; i < m; i++) \
-    { \
-        for(dim_t j = 0; j < n; j++) \
-        { \
-            printf("%f ", (float) (*(a + i * ( rs ) + j * cs ) ) ); \
-        } \
-        printf("\n"); \
-    } \
-} \
-
 PRINT_MATRIX(uint8_t)
 PRINT_MATRIX(int8_t)
 PRINT_MATRIX(int16_t)

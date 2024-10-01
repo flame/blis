@@ -437,4 +437,40 @@ static inline void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
     free( post_ops );
 }
 
+
+#define PRINT_MATRIX(ctype) \
+void print_matrix_## ctype ( ctype* a, dim_t m, dim_t n, dim_t rs, dim_t cs) \
+{ \
+    for(dim_t i = 0; i < m; i++) \
+    { \
+        for(dim_t j = 0; j < n; j++) \
+        { \
+            printf("%f ", (float) (*(a + i * ( rs ) + j * cs ) ) ); \
+        } \
+        printf("\n"); \
+    } \
+} \
+
+/* Helper functions to print matrices when debugging */
+void print_matrix_bfloat16
+     (
+       bfloat16* a,
+       dim_t m,
+       dim_t n,
+       dim_t rs_a,
+       dim_t cs_a
+     )
+{
+    for(dim_t i = 0; i < m; i++)
+    {
+        for(dim_t j = 0; j < n; j++)
+        {
+            float temp;
+            bfloat16_to_float(*(a + i*(rs_a) + j *cs_a), &temp);
+            printf("%3d ",  (int)temp);
+        }
+        printf("\n");
+    }
+}
+
 #endif //LPGEMM_BENCH_UTILS_H

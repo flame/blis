@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -82,6 +82,20 @@ AOCL_GEMM_REORDER(int8_t,s8s8s32os32);
 AOCL_GEMM_REORDER(int8_t,s8s8s16os16);
 AOCL_GEMM_REORDER(int8_t,u8s4s32os32);
 AOCL_GEMM_REORDER(int8_t, bf16s4f32of32);
+
+#define AOCL_GEMM_UNREORDER(B_type, LP_SFX) \
+BLIS_EXPORT_ADDON void aocl_unreorder_ ## LP_SFX \
+     ( \
+       const char    order, \
+       const char    mat_type, \
+       const B_type* reorder_buf_addr, \
+       B_type*       output_buf_addr, \
+       const dim_t   k, \
+       const dim_t   n, \
+       const dim_t   ldb \
+     ) \
+
+AOCL_GEMM_UNREORDER(bfloat16, bf16bf16f32of32);
 
 #define AOCL_GEMM_MATMUL(A_type,B_type,C_type,Sum_type,LP_SFX) \
 BLIS_EXPORT_ADDON void aocl_gemm_ ## LP_SFX \
