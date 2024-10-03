@@ -906,116 +906,248 @@ void packb_nrlt16_bf16s4f32of32_row_major
 
 
 #define LOAD_16_COLS_AVX2 \
-	a_reg[0] = _mm256_loadu_si256((__m256i const *)(b + ( ( ldb * ( jr + 0 ) ) + kr) / 2 )); \
-	a_reg[1] = _mm256_loadu_si256((__m256i const *) (b + ( ( ldb * ( jr + 1 ) ) + kr) / 2 )); \
-	a_reg[2] = _mm256_loadu_si256((__m256i const *) (b + ( ( ldb * ( jr + 2 ) ) + kr) / 2 )); \
-	a_reg[3] = _mm256_loadu_si256((__m256i const *) (b + ( ( ldb * ( jr + 3 ) ) + kr) / 2 )); \
-	a_reg[4] = _mm256_loadu_si256((__m256i const *) (b + ( ( ldb * ( jr + 4 ) ) + kr) / 2 )); \
-	a_reg[5] = _mm256_loadu_si256((__m256i const *) (b + ( ( ldb * ( jr + 5 ) ) + kr) / 2 )); \
-	a_reg[6] = _mm256_loadu_si256((__m256i const *) (b + ( ( ldb * ( jr + 6 ) ) + kr) / 2 )); \
-	a_reg[7] = _mm256_loadu_si256((__m256i const *) (b + ( ( ldb * ( jr + 7 ) ) + kr) / 2 )); \
-	a_reg[8] = _mm256_loadu_si256((__m256i const *) (b + ( ( ldb * ( jr + 8 ) ) + kr) / 2 )); \
-	a_reg[9] = _mm256_loadu_si256((__m256i const *) (b + ( ( ldb * ( jr + 9 ) ) + kr) / 2 )); \
-	a_reg[10] = _mm256_loadu_si256((__m256i const *) (b + ( ( ldb * ( jr + 10 ) ) + kr) / 2 )); \
-	a_reg[11] = _mm256_loadu_si256((__m256i const *) (b + ( ( ldb * ( jr + 11 ) ) + kr) / 2 )); \
-	a_reg[12] = _mm256_loadu_si256((__m256i const *) (b + ( ( ldb * ( jr + 12 ) ) + kr) / 2 )); \
-	a_reg[13] = _mm256_loadu_si256((__m256i const *) (b + ( ( ldb * ( jr + 13 ) ) + kr) / 2 )); \
-	a_reg[14] = _mm256_loadu_si256((__m256i const *) (b + ( ( ldb * ( jr + 14 ) ) + kr) / 2 )); \
-	a_reg[15] = _mm256_loadu_si256((__m256i const *) (b + ( ( ldb * ( jr + 15 ) ) + kr) / 2 ));
+	a_reg[0] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+				( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) ); \
+	a_reg[1] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+				( ( ldb * ( jr + 1 ) ) + kr ) / 2 ) ); \
+	a_reg[2] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+				( ( ldb * ( jr + 2 ) ) + kr ) / 2 ) ); \
+	a_reg[3] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+				( ( ldb * ( jr + 3 ) ) + kr ) / 2 ) ); \
+	a_reg[4] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+				( ( ldb * ( jr + 4 ) ) + kr ) / 2 ) ); \
+	a_reg[5] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+				( ( ldb * ( jr + 5 ) ) + kr ) / 2 ) ); \
+	a_reg[6] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+				( ( ldb * ( jr + 6 ) ) + kr ) / 2 ) ); \
+	a_reg[7] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+				( ( ldb * ( jr + 7 ) ) + kr ) / 2 ) ); \
+	a_reg[8] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+				( ( ldb * ( jr + 8 ) ) + kr ) / 2 ) ); \
+	a_reg[9] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+				( ( ldb * ( jr + 9 ) ) + kr ) / 2 ) ); \
+	a_reg[10] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+				( ( ldb * ( jr + 10 ) ) + kr ) / 2 ) ); \
+	a_reg[11] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+				( ( ldb * ( jr + 11 ) ) + kr ) / 2 ) ); \
+	a_reg[12] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+				( ( ldb * ( jr + 12 ) ) + kr ) / 2 ) ); \
+	a_reg[13] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+				( ( ldb * ( jr + 13 ) ) + kr ) / 2 ) ); \
+	a_reg[14] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+				( ( ldb * ( jr + 14 ) ) + kr ) / 2 ) ); \
+	a_reg[15] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+				( ( ldb * ( jr + 15 ) ) + kr ) / 2 ) );
 
 #define UNPACKHILO8_AVX2 \
-	b_reg[0] = _mm256_unpacklo_epi8(a_reg[0], a_reg[1]); \
-	b_reg[2] = _mm256_unpacklo_epi8(a_reg[2], a_reg[3]); \
-	b_reg[4] = _mm256_unpacklo_epi8(a_reg[4], a_reg[5]); \
-	b_reg[6] = _mm256_unpacklo_epi8(a_reg[6], a_reg[7]); \
-	b_reg[8] = _mm256_unpacklo_epi8(a_reg[8], a_reg[9]); \
-	b_reg[10] = _mm256_unpacklo_epi8(a_reg[10], a_reg[11]); \
-	b_reg[12] = _mm256_unpacklo_epi8(a_reg[12], a_reg[13]); \
-	b_reg[14] = _mm256_unpacklo_epi8(a_reg[14], a_reg[15]); \
+	b_reg[0] = _mm256_unpacklo_epi8( a_reg[0], a_reg[1] ); \
+	b_reg[2] = _mm256_unpacklo_epi8( a_reg[2], a_reg[3] ); \
+	b_reg[4] = _mm256_unpacklo_epi8( a_reg[4], a_reg[5] ); \
+	b_reg[6] = _mm256_unpacklo_epi8( a_reg[6], a_reg[7] ); \
+	b_reg[8] = _mm256_unpacklo_epi8( a_reg[8], a_reg[9] ); \
+	b_reg[10] = _mm256_unpacklo_epi8( a_reg[10], a_reg[11] ); \
+	b_reg[12] = _mm256_unpacklo_epi8( a_reg[12], a_reg[13] ); \
+	b_reg[14] = _mm256_unpacklo_epi8( a_reg[14], a_reg[15] ); \
 \
-	b_reg[1] = _mm256_unpackhi_epi8(a_reg[0], a_reg[1]); \
-	b_reg[3] = _mm256_unpackhi_epi8(a_reg[2], a_reg[3]); \
-	b_reg[5] = _mm256_unpackhi_epi8(a_reg[4], a_reg[5]); \
-	b_reg[7] = _mm256_unpackhi_epi8(a_reg[6], a_reg[7]); \
-	b_reg[9] = _mm256_unpackhi_epi8(a_reg[8], a_reg[9]); \
-	b_reg[11] = _mm256_unpackhi_epi8(a_reg[10], a_reg[11]); \
-	b_reg[13] = _mm256_unpackhi_epi8(a_reg[12], a_reg[13]); \
-	b_reg[15] = _mm256_unpackhi_epi8(a_reg[14], a_reg[15]);
+	b_reg[1] = _mm256_unpackhi_epi8( a_reg[0], a_reg[1] ); \
+	b_reg[3] = _mm256_unpackhi_epi8( a_reg[2], a_reg[3] ); \
+	b_reg[5] = _mm256_unpackhi_epi8( a_reg[4], a_reg[5] ); \
+	b_reg[7] = _mm256_unpackhi_epi8( a_reg[6], a_reg[7] ); \
+	b_reg[9] = _mm256_unpackhi_epi8( a_reg[8], a_reg[9] ); \
+	b_reg[11] = _mm256_unpackhi_epi8( a_reg[10], a_reg[11] ); \
+	b_reg[13] = _mm256_unpackhi_epi8( a_reg[12], a_reg[13] ); \
+	b_reg[15] = _mm256_unpackhi_epi8( a_reg[14], a_reg[15] );
 
 #define UNPACKHILO16_AVX2 \
-	a_reg[0] = _mm256_unpacklo_epi16(b_reg[0], b_reg[2]); \
-	a_reg[1] = _mm256_unpacklo_epi16(b_reg[4], b_reg[6]); \
-	a_reg[2] = _mm256_unpacklo_epi16(b_reg[8], b_reg[10]); \
-	a_reg[3] = _mm256_unpacklo_epi16(b_reg[12], b_reg[14]); \
-	a_reg[4] = _mm256_unpacklo_epi16(b_reg[1], b_reg[3]); \
-	a_reg[5] = _mm256_unpacklo_epi16(b_reg[5], b_reg[7]); \
-	a_reg[6] = _mm256_unpacklo_epi16(b_reg[9], b_reg[11]); \
-	a_reg[7] = _mm256_unpacklo_epi16(b_reg[13], b_reg[15]); \
+	a_reg[0] = _mm256_unpacklo_epi16( b_reg[0], b_reg[2] ); \
+	a_reg[1] = _mm256_unpacklo_epi16( b_reg[4], b_reg[6] ); \
+	a_reg[2] = _mm256_unpacklo_epi16( b_reg[8], b_reg[10] ); \
+	a_reg[3] = _mm256_unpacklo_epi16( b_reg[12], b_reg[14] ); \
+	a_reg[4] = _mm256_unpacklo_epi16( b_reg[1], b_reg[3] ); \
+	a_reg[5] = _mm256_unpacklo_epi16( b_reg[5], b_reg[7] ); \
+	a_reg[6] = _mm256_unpacklo_epi16( b_reg[9], b_reg[11]  ); \
+	a_reg[7] = _mm256_unpacklo_epi16( b_reg[13], b_reg[15] ); \
 \
-	a_reg[8] = _mm256_unpackhi_epi16(b_reg[0], b_reg[2]); \
-	a_reg[9] = _mm256_unpackhi_epi16(b_reg[4], b_reg[6]); \
-	a_reg[10] = _mm256_unpackhi_epi16(b_reg[8], b_reg[10]); \
-	a_reg[11] = _mm256_unpackhi_epi16(b_reg[12], b_reg[14]); \
-	a_reg[12] = _mm256_unpackhi_epi16(b_reg[1], b_reg[3]); \
-	a_reg[13] = _mm256_unpackhi_epi16(b_reg[5], b_reg[7]); \
-	a_reg[14] = _mm256_unpackhi_epi16(b_reg[9], b_reg[11]); \
-	a_reg[15] = _mm256_unpackhi_epi16(b_reg[13], b_reg[15]);
+	a_reg[8] = _mm256_unpackhi_epi16( b_reg[0], b_reg[2] ); \
+	a_reg[9] = _mm256_unpackhi_epi16( b_reg[4], b_reg[6] ); \
+	a_reg[10] = _mm256_unpackhi_epi16( b_reg[8], b_reg[10]  ); \
+	a_reg[11] = _mm256_unpackhi_epi16( b_reg[12], b_reg[14] ); \
+	a_reg[12] = _mm256_unpackhi_epi16( b_reg[1], b_reg[3] ); \
+	a_reg[13] = _mm256_unpackhi_epi16( b_reg[5], b_reg[7] ); \
+	a_reg[14] = _mm256_unpackhi_epi16( b_reg[9], b_reg[11]  ); \
+	a_reg[15] = _mm256_unpackhi_epi16( b_reg[13], b_reg[15] );
 
 #define UNPACKHILO32_AVX2 \
-	b_reg[0] = _mm256_unpacklo_epi32(a_reg[0], a_reg[1]); \
-	b_reg[1] = _mm256_unpacklo_epi32(a_reg[2], a_reg[3]); \
-	b_reg[2] = _mm256_unpacklo_epi32(a_reg[4], a_reg[5]); \
-	b_reg[3] = _mm256_unpacklo_epi32(a_reg[6], a_reg[7]); \
-	b_reg[4] = _mm256_unpacklo_epi32(a_reg[8], a_reg[9]); \
-	b_reg[5] = _mm256_unpacklo_epi32(a_reg[10], a_reg[11]); \
-	b_reg[6] = _mm256_unpacklo_epi32(a_reg[12], a_reg[13]); \
-	b_reg[7] = _mm256_unpacklo_epi32(a_reg[14], a_reg[15]); \
+	b_reg[0] = _mm256_unpacklo_epi32( a_reg[0], a_reg[1] ); \
+	b_reg[1] = _mm256_unpacklo_epi32( a_reg[2], a_reg[3] ); \
+	b_reg[2] = _mm256_unpacklo_epi32( a_reg[4], a_reg[5] ); \
+	b_reg[3] = _mm256_unpacklo_epi32( a_reg[6], a_reg[7] ); \
+	b_reg[4] = _mm256_unpacklo_epi32( a_reg[8], a_reg[9] ); \
+	b_reg[5] = _mm256_unpacklo_epi32( a_reg[10], a_reg[11] ); \
+	b_reg[6] = _mm256_unpacklo_epi32( a_reg[12], a_reg[13] ); \
+	b_reg[7] = _mm256_unpacklo_epi32( a_reg[14], a_reg[15] ); \
 \
-	b_reg[8] = _mm256_unpackhi_epi32(a_reg[0], a_reg[1]); \
-	b_reg[9] = _mm256_unpackhi_epi32(a_reg[2], a_reg[3]); \
-	b_reg[10] = _mm256_unpackhi_epi32(a_reg[4], a_reg[5]); \
-	b_reg[11] = _mm256_unpackhi_epi32(a_reg[6], a_reg[7]); \
-	b_reg[12] = _mm256_unpackhi_epi32(a_reg[8], a_reg[9]); \
-	b_reg[13] = _mm256_unpackhi_epi32(a_reg[10], a_reg[11]); \
-	b_reg[14] = _mm256_unpackhi_epi32(a_reg[12], a_reg[13]); \
-	b_reg[15] = _mm256_unpackhi_epi32(a_reg[14], a_reg[15]);
+	b_reg[8] = _mm256_unpackhi_epi32( a_reg[0], a_reg[1]  ); \
+	b_reg[9] = _mm256_unpackhi_epi32( a_reg[2], a_reg[3]  ); \
+	b_reg[10] = _mm256_unpackhi_epi32( a_reg[4], a_reg[5] ); \
+	b_reg[11] = _mm256_unpackhi_epi32( a_reg[6], a_reg[7] ); \
+	b_reg[12] = _mm256_unpackhi_epi32( a_reg[8], a_reg[9] ); \
+	b_reg[13] = _mm256_unpackhi_epi32( a_reg[10], a_reg[11] ); \
+	b_reg[14] = _mm256_unpackhi_epi32( a_reg[12], a_reg[13] ); \
+	b_reg[15] = _mm256_unpackhi_epi32( a_reg[14], a_reg[15] );
 
 #define UNPACKHILO64_AVX2 \
-	a_reg[0] = _mm256_unpacklo_epi64(b_reg[0], b_reg[1]); \
-	a_reg[1] = _mm256_unpacklo_epi64(b_reg[2], b_reg[3]); \
-	a_reg[2] = _mm256_unpacklo_epi64(b_reg[4], b_reg[5]); \
-	a_reg[3] = _mm256_unpacklo_epi64(b_reg[6], b_reg[7]); \
-	a_reg[4] = _mm256_unpacklo_epi64(b_reg[8], b_reg[9]); \
-	a_reg[5] = _mm256_unpacklo_epi64(b_reg[10], b_reg[11]); \
-	a_reg[6] = _mm256_unpacklo_epi64(b_reg[12], b_reg[13]); \
-	a_reg[7] = _mm256_unpacklo_epi64(b_reg[14], b_reg[15]); \
+	a_reg[0] = _mm256_unpacklo_epi64( b_reg[0], b_reg[1] ); \
+	a_reg[1] = _mm256_unpacklo_epi64( b_reg[2], b_reg[3] ); \
+	a_reg[2] = _mm256_unpacklo_epi64( b_reg[4], b_reg[5] ); \
+	a_reg[3] = _mm256_unpacklo_epi64( b_reg[6], b_reg[7] ); \
+	a_reg[4] = _mm256_unpacklo_epi64( b_reg[8], b_reg[9] ); \
+	a_reg[5] = _mm256_unpacklo_epi64( b_reg[10], b_reg[11] ); \
+	a_reg[6] = _mm256_unpacklo_epi64( b_reg[12], b_reg[13] ); \
+	a_reg[7] = _mm256_unpacklo_epi64( b_reg[14], b_reg[15] ); \
 \
-	a_reg[8] = _mm256_unpackhi_epi64(b_reg[0], b_reg[1]); \
-	a_reg[9] = _mm256_unpackhi_epi64(b_reg[2], b_reg[3]); \
-	a_reg[10] = _mm256_unpackhi_epi64(b_reg[4], b_reg[5]); \
-	a_reg[11] = _mm256_unpackhi_epi64(b_reg[6], b_reg[7]); \
-	a_reg[12] = _mm256_unpackhi_epi64(b_reg[8], b_reg[9]); \
-	a_reg[13] = _mm256_unpackhi_epi64(b_reg[10], b_reg[11]); \
-	a_reg[14] = _mm256_unpackhi_epi64(b_reg[12], b_reg[13]); \
-	a_reg[15] = _mm256_unpackhi_epi64(b_reg[14], b_reg[15]);
+	a_reg[8] = _mm256_unpackhi_epi64( b_reg[0], b_reg[1] ); \
+	a_reg[9] = _mm256_unpackhi_epi64( b_reg[2], b_reg[3] ); \
+	a_reg[10] = _mm256_unpackhi_epi64( b_reg[4], b_reg[5] ); \
+	a_reg[11] = _mm256_unpackhi_epi64( b_reg[6], b_reg[7] ); \
+	a_reg[12] = _mm256_unpackhi_epi64( b_reg[8], b_reg[9] ); \
+	a_reg[13] = _mm256_unpackhi_epi64( b_reg[10], b_reg[11] ); \
+	a_reg[14] = _mm256_unpackhi_epi64( b_reg[12], b_reg[13] ); \
+	a_reg[15] = _mm256_unpackhi_epi64( b_reg[14], b_reg[15] );
 
-#define MASK_LOAD_16_COLS_AVX2(mask) \
-	a_reg[0] = _mm256_maskz_loadu_epi8( mask, (b + ( ( ldb * ( jr + 0 ) ) + kr) / 2 )); \
-	a_reg[1] = _mm256_maskz_loadu_epi8( mask, (b + ( ( ldb * ( jr + 1 ) ) + kr) / 2 )); \
-	a_reg[2] = _mm256_maskz_loadu_epi8( mask, (b + ( ( ldb * ( jr + 2 ) ) + kr) / 2 )); \
-	a_reg[3] = _mm256_maskz_loadu_epi8( mask, (b + ( ( ldb * ( jr + 3 ) ) + kr) / 2 )); \
-	a_reg[4] = _mm256_maskz_loadu_epi8( mask, (b + ( ( ldb * ( jr + 4 ) ) + kr) / 2 )); \
-	a_reg[5] = _mm256_maskz_loadu_epi8( mask, (b + ( ( ldb * ( jr + 5 ) ) + kr) / 2 )); \
-	a_reg[6] = _mm256_maskz_loadu_epi8( mask, (b + ( ( ldb * ( jr + 6 ) ) + kr) / 2 )); \
-	a_reg[7] = _mm256_maskz_loadu_epi8( mask, (b + ( ( ldb * ( jr + 7 ) ) + kr) / 2 )); \
-	a_reg[8] = _mm256_maskz_loadu_epi8( mask, (b + ( ( ldb * ( jr + 8 ) ) + kr) / 2 )); \
-	a_reg[9] = _mm256_maskz_loadu_epi8( mask, (b + ( ( ldb * ( jr + 9 ) ) + kr) / 2 )); \
-	a_reg[10] = _mm256_maskz_loadu_epi8( mask, (b + ( ( ldb * ( jr + 10 ) ) + kr) / 2 )); \
-	a_reg[11] = _mm256_maskz_loadu_epi8( mask, (b + ( ( ldb * ( jr + 11 ) ) + kr) / 2 )); \
-	a_reg[12] = _mm256_maskz_loadu_epi8( mask, (b + ( ( ldb * ( jr + 12 ) ) + kr) / 2 )); \
-	a_reg[13] = _mm256_maskz_loadu_epi8( mask, (b + ( ( ldb * ( jr + 13 ) ) + kr) / 2 )); \
-	a_reg[14] = _mm256_maskz_loadu_epi8( mask, (b + ( ( ldb * ( jr + 14 ) ) + kr) / 2 )); \
-	a_reg[15] = _mm256_maskz_loadu_epi8( mask, (b + ( ( ldb * ( jr + 15 ) ) + kr) / 2 ));
+#define MASK_LOAD_16_COLS_AVX2( mask ) \
+	a_reg[0] = _mm256_maskz_loadu_epi8( mask, ( b + \
+				( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) ); \
+	a_reg[1] = _mm256_maskz_loadu_epi8( mask, ( b + \
+				( ( ldb * ( jr + 1 ) ) + kr ) / 2 ) ); \
+	a_reg[2] = _mm256_maskz_loadu_epi8( mask, ( b + \
+				( ( ldb * ( jr + 2 ) ) + kr ) / 2 ) ); \
+	a_reg[3] = _mm256_maskz_loadu_epi8( mask, ( b + \
+				( ( ldb * ( jr + 3 ) ) + kr ) / 2 ) ); \
+	a_reg[4] = _mm256_maskz_loadu_epi8( mask, ( b + \
+				( ( ldb * ( jr + 4 ) ) + kr ) / 2 ) ); \
+	a_reg[5] = _mm256_maskz_loadu_epi8( mask, ( b + \
+				( ( ldb * ( jr + 5 ) ) + kr ) / 2 ) ); \
+	a_reg[6] = _mm256_maskz_loadu_epi8( mask, ( b + \
+				( ( ldb * ( jr + 6 ) ) + kr ) / 2 ) ); \
+	a_reg[7] = _mm256_maskz_loadu_epi8( mask, ( b + \
+				( ( ldb * ( jr + 7 ) ) + kr ) / 2 ) ); \
+	a_reg[8] = _mm256_maskz_loadu_epi8( mask, ( b + \
+				( ( ldb * ( jr + 8 ) ) + kr ) / 2 ) ); \
+	a_reg[9] = _mm256_maskz_loadu_epi8( mask, ( b + \
+				( ( ldb * ( jr + 9 ) ) + kr ) / 2 ) ); \
+	a_reg[10] = _mm256_maskz_loadu_epi8( mask, ( b + \
+				( ( ldb * ( jr + 10 ) ) + kr ) / 2 ) ); \
+	a_reg[11] = _mm256_maskz_loadu_epi8( mask, ( b + \
+				( ( ldb * ( jr + 11 ) ) + kr ) / 2 ) ); \
+	a_reg[12] = _mm256_maskz_loadu_epi8( mask, ( b + \
+				( ( ldb * ( jr + 12 ) ) + kr ) / 2 ) ); \
+	a_reg[13] = _mm256_maskz_loadu_epi8( mask, ( b + \
+				( ( ldb * ( jr + 13 ) ) + kr ) / 2 ) ); \
+	a_reg[14] = _mm256_maskz_loadu_epi8( mask, ( b + \
+				( ( ldb * ( jr + 14 ) ) + kr ) / 2 ) ); \
+	a_reg[15] = _mm256_maskz_loadu_epi8( mask, ( b + \
+				( ( ldb * ( jr + 15 ) ) + kr ) / 2 ) );
+
+//odd cases
+#define REMOVE_EXTRA_BITS( reg ) \
+	odd_256 = _mm512_cvtepi16_epi8( \
+		_mm512_srli_epi16( _mm512_cvtepu8_epi16( reg ), 0x4 ) ); \
+	even_256 = _mm512_cvtepi16_epi8( \
+		_mm512_slli_epi16( _mm512_cvtepu8_epi16( reg ), 0x4 ) ); \
+	even_256 =	_mm256_permutex2var_epi8( odd_256, shift_index, even_256 );\
+	reg = _mm256_or_epi32( odd_256, even_256 ); \
+\
+
+#define MASK_LOAD_16_COLS_AVX2_ODD( mask1, mask2 ) \
+	__m256i shift_index = _mm256_setr_epi8( \
+					33, 34, 35, 36, 37, 38, 39, 40, \
+					41, 42, 43, 44, 45, 46, 47, 48, \
+					49, 50, 51, 52, 53, 54, 55, 56, \
+					57, 58, 59, 60, 61, 62, 63, 32 ); \
+	__m256i odd_256; \
+	__m256i even_256; \
+	a_reg[0] = _mm256_maskz_loadu_epi8( mask1,( b + ((  ldb * ( jr + 0 ) ) + kr ) / 2 ) ); \
+	a_reg[1] = _mm256_maskz_loadu_epi8( mask2,( b + ((  ldb * ( jr + 1 ) ) + kr ) / 2 ) ); \
+	REMOVE_EXTRA_BITS( a_reg[1] )\
+	a_reg[2] = _mm256_maskz_loadu_epi8( mask1,( b + ( (  ldb * ( jr + 2 ) ) + kr ) / 2 ) ); \
+	a_reg[3] = _mm256_maskz_loadu_epi8( mask2,( b + ( (  ldb * ( jr + 3 ) ) + kr ) / 2 ) ); \
+	REMOVE_EXTRA_BITS( a_reg[3] )\
+	a_reg[4] = _mm256_maskz_loadu_epi8( mask1,( b + ( (  ldb * ( jr + 4 ) ) + kr ) / 2 ) ); \
+	a_reg[5] = _mm256_maskz_loadu_epi8( mask2,( b + ( (  ldb * ( jr + 5 ) ) + kr ) / 2 ) ); \
+	REMOVE_EXTRA_BITS( a_reg[5] )\
+	a_reg[6] = _mm256_maskz_loadu_epi8( mask1,( b + ( (  ldb * ( jr + 6 ) ) + kr ) / 2 ) ); \
+	a_reg[7] = _mm256_maskz_loadu_epi8( mask2,( b + ( (  ldb * ( jr + 7 ) ) + kr ) / 2 ) ); \
+	REMOVE_EXTRA_BITS( a_reg[7] )\
+	a_reg[8] = _mm256_maskz_loadu_epi8( mask1,( b + ( (  ldb * ( jr + 8 ) ) + kr ) / 2 ) ); \
+	a_reg[9] = _mm256_maskz_loadu_epi8( mask2,( b + ( (  ldb * ( jr + 9 ) ) + kr ) / 2 ) ); \
+	REMOVE_EXTRA_BITS( a_reg[9] )\
+	a_reg[10] = _mm256_maskz_loadu_epi8( mask1, ( b + ( ( ldb * ( jr + 10 ) ) + kr ) / 2 ) ); \
+	a_reg[11] = _mm256_maskz_loadu_epi8( mask2, ( b + ( ( ldb * ( jr + 11 ) ) + kr ) / 2 ) ); \
+	REMOVE_EXTRA_BITS( a_reg[11] )\
+	a_reg[12] = _mm256_maskz_loadu_epi8( mask1, ( b + ( ( ldb * ( jr + 12 ) ) + kr ) / 2 ) ); \
+	a_reg[13] = _mm256_maskz_loadu_epi8( mask2, ( b + ( ( ldb * ( jr + 13 ) ) + kr ) / 2 ) ); \
+	REMOVE_EXTRA_BITS( a_reg[13] )\
+	a_reg[14] = _mm256_maskz_loadu_epi8( mask1, ( b + ( ( ldb * ( jr + 14 ) ) + kr ) / 2 ) ); \
+	a_reg[15] = _mm256_maskz_loadu_epi8( mask2, ( b + ( ( ldb * ( jr + 15 ) ) + kr ) / 2 ) );\
+	REMOVE_EXTRA_BITS( a_reg[15] )
+
+#define MASK_LOAD_16_COLS_AVX2_LAST_4BITS( mask ) \
+	a_reg[0] = _mm256_maskz_loadu_epi8( mask, ( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) ); \
+	a_reg[1] = _mm256_maskz_loadu_epi8( mask, ( b + ( ( ldb * ( jr + 1 ) ) + kr ) / 2 ) ); \
+	a_reg[2] = _mm256_maskz_loadu_epi8( mask, ( b + ( ( ldb * ( jr + 2 ) ) + kr ) / 2 ) ); \
+	a_reg[3] = _mm256_maskz_loadu_epi8( mask, ( b + ( ( ldb * ( jr + 3 ) ) + kr ) / 2 ) ); \
+	a_reg[4] = _mm256_maskz_loadu_epi8( mask, ( b + ( ( ldb * ( jr + 4 ) ) + kr ) / 2 ) ); \
+	a_reg[5] = _mm256_maskz_loadu_epi8( mask, ( b + ( ( ldb * ( jr + 5 ) ) + kr ) / 2 ) ); \
+	a_reg[6] = _mm256_maskz_loadu_epi8( mask, ( b + ( ( ldb * ( jr + 6 ) ) + kr ) / 2 ) ); \
+	a_reg[7] = _mm256_maskz_loadu_epi8( mask, ( b + ( ( ldb * ( jr + 7 ) ) + kr ) / 2 ) ); \
+	a_reg[8] = _mm256_maskz_loadu_epi8( mask, ( b + ( ( ldb * ( jr + 8 ) ) + kr ) / 2 ) ); \
+	a_reg[9] = _mm256_maskz_loadu_epi8( mask, ( b + ( ( ldb * ( jr + 9 ) ) + kr ) / 2 ) ); \
+	a_reg[10] = _mm256_maskz_loadu_epi8( mask, ( b + ( ( ldb * ( jr + 10 ) ) + kr ) / 2 ) ); \
+	a_reg[11] = _mm256_maskz_loadu_epi8( mask, ( b + ( ( ldb * ( jr + 11 ) ) + kr ) / 2 ) ); \
+	a_reg[12] = _mm256_maskz_loadu_epi8( mask, ( b + ( ( ldb * ( jr + 12 ) ) + kr ) / 2 ) ); \
+	a_reg[13] = _mm256_maskz_loadu_epi8( mask, ( b + ( ( ldb * ( jr + 13 ) ) + kr ) / 2 ) ); \
+	a_reg[14] = _mm256_maskz_loadu_epi8( mask, ( b + ( ( ldb * ( jr + 14 ) ) + kr ) / 2 ) ); \
+	a_reg[15] = _mm256_maskz_loadu_epi8( mask, ( b + ( ( ldb * ( jr + 15 ) ) + kr ) / 2 ) );
+
+#define RIGHT_SHIFT_LAST_4BITS_ODD \
+	a_reg[1] = _mm512_cvtepi16_epi8( _mm512_srli_epi16  \
+			( _mm512_cvtepu8_epi16( a_reg[1] ), 0x4 ) ); \
+	a_reg[3] = _mm512_cvtepi16_epi8( _mm512_srli_epi16  \
+			( _mm512_cvtepu8_epi16( a_reg[3] ), 0x4 ) ); \
+	a_reg[5] = _mm512_cvtepi16_epi8( _mm512_srli_epi16  \
+			( _mm512_cvtepu8_epi16( a_reg[5] ), 0x4 ) ); \
+	a_reg[7] = _mm512_cvtepi16_epi8( _mm512_srli_epi16  \
+			( _mm512_cvtepu8_epi16( a_reg[7] ), 0x4 ) ); \
+	a_reg[9] = _mm512_cvtepi16_epi8( _mm512_srli_epi16  \
+			( _mm512_cvtepu8_epi16( a_reg[9] ), 0x4 ) ); \
+	a_reg[11] = _mm512_cvtepi16_epi8( _mm512_srli_epi16  \
+			( _mm512_cvtepu8_epi16( a_reg[11] ), 0x4 ) ); \
+	a_reg[13] = _mm512_cvtepi16_epi8( _mm512_srli_epi16  \
+			( _mm512_cvtepu8_epi16( a_reg[13] ), 0x4 ) ); \
+	a_reg[15] = _mm512_cvtepi16_epi8( _mm512_srli_epi16  \
+			( _mm512_cvtepu8_epi16( a_reg[15] ), 0x4 ) );
+
+#define CLEAN_HIGH_4BITS_EVEN \
+	__m512i clear_hi_bits = _mm512_maskz_set1_epi8( \
+			_cvtu64_mask64( 0xFFFFFFFFFFFFFFFF ), 0x0F ); \
+	a_reg[0] = _mm512_maskz_cvtepi16_epi8( 0x0F, _mm512_and_epi32( \
+			_mm512_cvtepu8_epi16( a_reg[0] ), clear_hi_bits ) ); \
+	a_reg[2] = _mm512_maskz_cvtepi16_epi8( 0x0F, _mm512_and_epi32( \
+			_mm512_cvtepu8_epi16( a_reg[2] ), clear_hi_bits ) ); \
+	a_reg[4] = _mm512_maskz_cvtepi16_epi8( 0x0F, _mm512_and_epi32( \
+			_mm512_cvtepu8_epi16( a_reg[4] ), clear_hi_bits ) ); \
+	a_reg[6] = _mm512_maskz_cvtepi16_epi8( 0x0F, _mm512_and_epi32( \
+			_mm512_cvtepu8_epi16( a_reg[6] ), clear_hi_bits ) ); \
+	a_reg[8] = _mm512_maskz_cvtepi16_epi8( 0x0F, _mm512_and_epi32( \
+			_mm512_cvtepu8_epi16( a_reg[8] ), clear_hi_bits ) ); \
+	a_reg[10] = _mm512_maskz_cvtepi16_epi8( 0x0F, _mm512_and_epi32( \
+			_mm512_cvtepu8_epi16( a_reg[10] ), clear_hi_bits ) ); \
+	a_reg[12] = _mm512_maskz_cvtepi16_epi8( 0x0F, _mm512_and_epi32( \
+			_mm512_cvtepu8_epi16( a_reg[12] ), clear_hi_bits ) ); \
+	a_reg[14] = _mm512_maskz_cvtepi16_epi8( 0x0F, _mm512_and_epi32( \
+			_mm512_cvtepu8_epi16( a_reg[14] ), clear_hi_bits ) );
+
 
 void packb_nr_mult_16_bf16s4f32of32_col_major
     (
@@ -1027,167 +1159,414 @@ void packb_nr_mult_16_bf16s4f32of32_col_major
     )
 {
 	// Used for storing the mm256i elements for use in dpbf16_ps instruction.
-    __mmask8 msk0 = _cvtu32_mask8(0x0F);
-	__mmask8 msk1 = _cvtu32_mask8(0xF0);
+	__mmask8 msk0 = _cvtu32_mask8( 0x0F );
+	__mmask8 msk1 = _cvtu32_mask8( 0xF0 );
 
 	__m256i a_reg[16];
 	__m256i b_reg[16];
 
+	bool is_odd_stride = ( ( ldb % 2 ) == 0 ) ? FALSE : TRUE;
+
 	dim_t kr = 0;
-	for (kr= 0; ( kr + 63 ) < KC; kr += 64 )
+
+	if( is_odd_stride == FALSE )
 	{
-		for( dim_t jr = 0; jr < NR; jr += 16 )
+
+		for ( kr= 0; ( kr + 63 ) < KC; kr += 64 )
 		{
-			// Rearrange for dpbf16_ps, read 16 cols from B with 64 elements in each row.
-			LOAD_16_COLS_AVX2
-			UNPACKHILO8_AVX2
-			UNPACKHILO16_AVX2
-			UNPACKHILO32_AVX2
-			UNPACKHILO64_AVX2
+			for( dim_t jr = 0; jr < NR; jr += 16 )
+			{
+				/* Rearrange for dpbf16_ps, read 16 cols
+				from B with 64 elements in each row.*/
+				LOAD_16_COLS_AVX2
+				UNPACKHILO8_AVX2
+				UNPACKHILO16_AVX2
+				UNPACKHILO32_AVX2
+				UNPACKHILO64_AVX2
 
-			// store to pack_b buffer
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 0  ) * NR))/2 )), msk0, a_reg[0]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 2  ) * NR))/2 )), msk0, a_reg[8]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 4  ) * NR))/2 )), msk0, a_reg[4]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 6  ) * NR))/2 )), msk0, a_reg[12]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 8  ) * NR))/2 )), msk0, a_reg[2]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 10 ) * NR))/2 )), msk0, a_reg[10]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 12 ) * NR))/2 )), msk0, a_reg[6]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 14 ) * NR))/2 )), msk0, a_reg[14]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 16 ) * NR))/2 )), msk0, a_reg[1]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 18 ) * NR))/2 )), msk0, a_reg[9]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 20 ) * NR))/2 )), msk0, a_reg[5] );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 22 ) * NR))/2 )), msk0, a_reg[13] );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 24 ) * NR))/2 )), msk0, a_reg[3] );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 26 ) * NR))/2 )), msk0, a_reg[11] );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 28 ) * NR))/2 )), msk0, a_reg[7] );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 30 ) * NR))/2 )), msk0, a_reg[15] );
+				// store to pack_b buffer
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + 	( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + 	( ( kr + 2  ) * NR ) ) /2 ) ), msk0, a_reg[8]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + 	( ( kr + 4  ) * NR ) ) /2 ) ), msk0, a_reg[4]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + 	( ( kr + 6  ) * NR ) ) /2 ) ), msk0, a_reg[12] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + 	( ( kr + 8  ) * NR ) ) /2 ) ), msk0, a_reg[2]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + 	( ( kr + 10 ) * NR ) ) /2 ) ), msk0, a_reg[10] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + 	( ( kr + 12 ) * NR ) ) /2 ) ), msk0, a_reg[6]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + 	( ( kr + 14 ) * NR ) ) /2 ) ), msk0, a_reg[14] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + 	( ( kr + 16 ) * NR ) ) /2 ) ), msk0, a_reg[1]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + 	( ( kr + 18 ) * NR ) ) /2 ) ), msk0, a_reg[9]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + 	( ( kr + 20 ) * NR ) ) /2 ) ), msk0, a_reg[5]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + 	( ( kr + 22 ) * NR ) ) /2 ) ), msk0, a_reg[13] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + 	( ( kr + 24 ) * NR ) ) /2 ) ), msk0, a_reg[3]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + 	( ( kr + 26 ) * NR ) ) /2 ) ), msk0, a_reg[11] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + 	( ( kr + 28 ) * NR ) ) /2 ) ), msk0, a_reg[7]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + 	( ( kr + 30 ) * NR ) ) /2 ) ), msk0, a_reg[15] );
 
-			// The 16 value decrement is to correct the masked store starting postion with respect to the msk1.
- 			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 32  ) * NR))/2 - 16)), msk1, a_reg[0]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 34  ) * NR))/2 - 16)), msk1, a_reg[8]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 36  ) * NR))/2 - 16)), msk1, a_reg[4]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 38  ) * NR))/2 - 16)), msk1, a_reg[12]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 40  ) * NR))/2 - 16)), msk1, a_reg[2]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 42  ) * NR))/2 - 16)), msk1, a_reg[10]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 44  ) * NR))/2 - 16)), msk1, a_reg[6]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 46  ) * NR))/2 - 16)), msk1, a_reg[14]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 48  ) * NR))/2 - 16)), msk1, a_reg[1]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 50  ) * NR))/2 - 16)), msk1, a_reg[9]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 52  ) * NR))/2 - 16)), msk1, a_reg[5]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 54  ) * NR))/2 - 16)), msk1, a_reg[13]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 56  ) * NR))/2 - 16)), msk1, a_reg[3]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 58  ) * NR))/2 - 16)), msk1, a_reg[11]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 60  ) * NR))/2 - 16)), msk1, a_reg[7]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 62  ) * NR))/2 - 16)), msk1, a_reg[15]  );
+				/*The 16 value decrement is to correct the masked
+				store starting position with respect to the msk1.*/
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer + ( ( jr * 2 )
+				+ ( ( kr + 32  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[0]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer + ( ( jr * 2 )
+				+ ( ( kr + 34  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[8]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer + ( ( jr * 2 )
+				+ ( ( kr + 36  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[4]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer + ( ( jr * 2 )
+				+ ( ( kr + 38  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[12] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer + ( ( jr * 2 )
+				+ ( ( kr + 40  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[2]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer + ( ( jr * 2 )
+				+ ( ( kr + 42  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[10] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer + ( ( jr * 2 )
+				+ ( ( kr + 44  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[6]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer + ( ( jr * 2 )
+				+ ( ( kr + 46  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[14] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer + ( ( jr * 2 )
+				+ ( ( kr + 48  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[1]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer + ( ( jr * 2 )
+				+ ( ( kr + 50  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[9]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer + ( ( jr * 2 )
+				+ ( ( kr + 52  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[5]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer + ( ( jr * 2 )
+				+ ( ( kr + 54  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[13] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer + ( ( jr * 2 )
+				+ ( ( kr + 56  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[3]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer + ( ( jr * 2 )
+				+ ( ( kr + 58  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[11] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer + ( ( jr * 2 )
+				+ ( ( kr + 60  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[7]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer + ( ( jr * 2 )
+				+ ( ( kr + 62  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[15] );
+			}
 		}
+
+		for ( ; ( kr + 31 ) < KC; kr += 32 )
+		{
+			for( dim_t jr = 0; jr < NR; jr += 16 )
+			{
+				/* Rearrange for dpbf16_ps, read 16 cols
+				from B with 64 elements in each row.*/
+				MASK_LOAD_16_COLS_AVX2( 0x0000FFFF )
+				UNPACKHILO8_AVX2
+				UNPACKHILO16_AVX2
+				UNPACKHILO32_AVX2
+				UNPACKHILO64_AVX2
+
+				//store to pack_b buffer
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 2  ) * NR ) ) /2 ) ), msk0, a_reg[8]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 4  ) * NR ) ) /2 ) ), msk0, a_reg[4]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 6  ) * NR ) ) /2 ) ), msk0, a_reg[12] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 8  ) * NR ) ) /2 ) ), msk0, a_reg[2]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 10 ) * NR ) ) /2 ) ), msk0, a_reg[10] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 12 ) * NR ) ) /2 ) ), msk0, a_reg[6]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 14 ) * NR ) ) /2 ) ), msk0, a_reg[14] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 16 ) * NR ) ) /2 ) ), msk0, a_reg[1]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 18 ) * NR ) ) /2 ) ), msk0, a_reg[9]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 20 ) * NR ) ) /2 ) ), msk0, a_reg[5]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 22 ) * NR ) ) /2 ) ), msk0, a_reg[13] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 24 ) * NR ) ) /2 ) ), msk0, a_reg[3]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 26 ) * NR ) ) /2 ) ), msk0, a_reg[11] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 28 ) * NR ) ) /2 ) ), msk0, a_reg[7]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 30 ) * NR ) ) /2 ) ), msk0, a_reg[15] );
+			}
+		}
+
+		for ( ; ( kr + 15 ) < KC; kr += 16 )
+		{
+			for( dim_t jr = 0; jr < NR; jr += 16 )
+			{
+				/* Rearrange for dpbf16_ps, read 16 cols
+				from B with 64 elements in each row.*/
+				MASK_LOAD_16_COLS_AVX2( 0x000000FF )
+				UNPACKHILO8_AVX2
+				UNPACKHILO16_AVX2
+				UNPACKHILO32_AVX2
+				UNPACKHILO64_AVX2
+
+				// store to pack_b buffer
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 2  ) * NR ) ) /2 ) ), msk0, a_reg[8]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 4  ) * NR ) ) /2 ) ), msk0, a_reg[4]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 6  ) * NR ) ) /2 ) ), msk0, a_reg[12] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 8  ) * NR ) ) /2 ) ), msk0, a_reg[2]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 10 ) * NR ) ) /2 ) ), msk0, a_reg[10] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 12 ) * NR ) ) /2 ) ), msk0, a_reg[6]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 14 ) * NR ) ) /2 ) ), msk0, a_reg[14] );
+			}
+		}
+
+		for ( ; ( kr + 7 ) < KC; kr += 8 )
+		{
+			for( dim_t jr = 0; jr < NR; jr += 16 )
+			{
+				/* Rearrange for dpbf16_ps, read 16 cols
+				from B with 64 elements in each row.*/
+				MASK_LOAD_16_COLS_AVX2( 0x0F )
+				UNPACKHILO8_AVX2
+				UNPACKHILO16_AVX2
+				UNPACKHILO32_AVX2
+				UNPACKHILO64_AVX2
+
+				// store to pack_b buffer
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 2  ) * NR ) ) /2 ) ), msk0, a_reg[8]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 4  ) * NR ) ) /2 ) ), msk0, a_reg[4]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 6  ) * NR ) ) /2 ) ), msk0, a_reg[12] );
+			}
+		}
+
+		for ( ; ( kr + 3 ) < KC; kr += 4 )
+		{
+			for( dim_t jr = 0; jr < NR; jr += 16 )
+			{
+				/* Rearrange for dpbf16_ps, read 16 cols
+				from B with 64 elements in each row.*/
+				MASK_LOAD_16_COLS_AVX2( 0x03 )
+				UNPACKHILO8_AVX2
+				UNPACKHILO16_AVX2
+				UNPACKHILO32_AVX2
+				UNPACKHILO64_AVX2
+
+				// store to pack_b buffer
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 2  ) * NR ) ) /2 ) ), msk0, a_reg[8] );
+			}
+		}
+
+		for ( ; ( kr + 1 ) < KC; kr += 2 )
+		{
+			for( dim_t jr = 0; jr < NR; jr += 16 )
+			{
+				/* Rearrange for dpbf16_ps, read 16 cols
+				from B with 64 elements in each row.*/
+				MASK_LOAD_16_COLS_AVX2( 0x01 )
+				UNPACKHILO8_AVX2
+				UNPACKHILO16_AVX2
+				UNPACKHILO32_AVX2
+				UNPACKHILO64_AVX2
+
+				// store to pack_b buffer
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0] );
+			}
+		}
+
+
+	}
+	else
+	{
+		for ( ; ( kr + 31 ) < KC; kr += 32 )
+		{
+			for( dim_t jr = 0; jr < NR; jr += 16 )
+			{
+				/* Rearrange for dpbf16_ps, read 16 cols
+				from B with 64 elements in each row.*/
+				MASK_LOAD_16_COLS_AVX2_ODD( 0x0000FFFF, 0x0001FFFF )
+				UNPACKHILO8_AVX2
+				UNPACKHILO16_AVX2
+				UNPACKHILO32_AVX2
+				UNPACKHILO64_AVX2
+
+				//store to pack_b buffer
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 2  ) * NR ) ) /2 ) ), msk0, a_reg[8]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 4  ) * NR ) ) /2 ) ), msk0, a_reg[4]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 6  ) * NR ) ) /2 ) ), msk0, a_reg[12] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 8  ) * NR ) ) /2 ) ), msk0, a_reg[2]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 10 ) * NR ) ) /2 ) ), msk0, a_reg[10] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 12 ) * NR ) ) /2 ) ), msk0, a_reg[6]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 14 ) * NR ) ) /2 ) ), msk0, a_reg[14] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 16 ) * NR ) ) /2 ) ), msk0, a_reg[1]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 18 ) * NR ) ) /2 ) ), msk0, a_reg[9]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 20 ) * NR ) ) /2 ) ), msk0, a_reg[5]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 22 ) * NR ) ) /2 ) ), msk0, a_reg[13] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 24 ) * NR ) ) /2 ) ), msk0, a_reg[3]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 26 ) * NR ) ) /2 ) ), msk0, a_reg[11] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 28 ) * NR ) ) /2 ) ), msk0, a_reg[7]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 30 ) * NR ) ) /2 ) ), msk0, a_reg[15] );
+			}
+		}
+
+		for ( ; ( kr + 15 ) < KC; kr += 16 )
+		{
+			for( dim_t jr = 0; jr < NR; jr += 16 )
+			{
+				/* Rearrange for dpbf16_ps, read 16 cols
+				from B with 64 elements in each row.*/
+				MASK_LOAD_16_COLS_AVX2_ODD( 0x00000000000000FF, 0x00000000000001FF )
+				UNPACKHILO8_AVX2
+				UNPACKHILO16_AVX2
+				UNPACKHILO32_AVX2
+				UNPACKHILO64_AVX2
+
+				// store to pack_b buffer
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 0  ) * NR) ) /2 ) ), msk0, a_reg[0]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 2  ) * NR) ) /2 ) ), msk0, a_reg[8]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 4  ) * NR) ) /2 ) ), msk0, a_reg[4]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 6  ) * NR) ) /2 ) ), msk0, a_reg[12] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 8  ) * NR) ) /2 ) ), msk0, a_reg[2]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 10 ) * NR) ) /2 ) ), msk0, a_reg[10] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 12 ) * NR) ) /2 ) ), msk0, a_reg[6]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 14 ) * NR) ) /2 ) ), msk0, a_reg[14] );
+			}
+		}
+
+		for ( ; ( kr + 7 ) < KC; kr += 8 )
+		{
+			for( dim_t jr = 0; jr < NR; jr += 16 )
+			{
+				/* Rearrange for dpbf16_ps, read 16 cols
+				from B with 64 elements in each row.*/
+				MASK_LOAD_16_COLS_AVX2_ODD( 0x000000000000000F, 0x000000000000001F )
+				UNPACKHILO8_AVX2
+				UNPACKHILO16_AVX2
+				UNPACKHILO32_AVX2
+				UNPACKHILO64_AVX2
+
+				// store to pack_b buffer
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 2  ) * NR ) ) /2 ) ), msk0, a_reg[8]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 4  ) * NR ) ) /2 ) ), msk0, a_reg[4]  );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 6  ) * NR ) ) /2 ) ), msk0, a_reg[12] );
+			}
+		}
+
+		for ( ; ( kr + 3 ) < KC; kr += 4 )
+		{
+			for( dim_t jr = 0; jr < NR; jr += 16 )
+			{
+				/* Rearrange for dpbf16_ps, read 16 cols
+				from B with 64 elements in each row.*/
+				MASK_LOAD_16_COLS_AVX2_ODD( 0x0000000000000003, 0x000000000000007 )
+				UNPACKHILO8_AVX2
+				UNPACKHILO16_AVX2
+				UNPACKHILO32_AVX2
+				UNPACKHILO64_AVX2
+
+				// store to pack_b buffer
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 0 ) * NR ) ) /2 ) ), msk0, a_reg[0] );
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 2 ) * NR ) ) /2 ) ), msk0, a_reg[8] );
+			}
+		}
+
+		for ( ; ( kr + 1 ) < KC; kr += 2 )
+		{
+			for( dim_t jr = 0; jr < NR; jr += 16 )
+			{
+				/* Rearrange for dpbf16_ps, read 16 cols
+				from B with 64 elements in each row.*/
+				MASK_LOAD_16_COLS_AVX2_ODD( 0x0000000000000001, 0x000000000000003 )
+				UNPACKHILO8_AVX2
+				UNPACKHILO16_AVX2
+				UNPACKHILO32_AVX2
+				UNPACKHILO64_AVX2
+
+				// store to pack_b buffer
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 0  ) * NR) ) /2 ) ), msk0, a_reg[0] );
+			}
+		}
+		for ( ; kr < KC; kr += 1 )
+		{
+			for( dim_t jr = 0; jr < NR; jr += 16 )
+			{
+				/* Rearrange for dpbf16_ps, read 16 cols
+				from B with 64 elements in each row.*/
+				MASK_LOAD_16_COLS_AVX2_LAST_4BITS( 0x01 )
+				RIGHT_SHIFT_LAST_4BITS_ODD
+				CLEAN_HIGH_4BITS_EVEN
+				UNPACKHILO8_AVX2
+				UNPACKHILO16_AVX2
+				UNPACKHILO32_AVX2
+				UNPACKHILO64_AVX2
+
+				// store to pack_b buffer
+				_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( jr * 2 ) + ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0] );
+
+			}
+		}
+
+
 	}
 
-	for ( ; ( kr + 31 ) < KC; kr += 32 )
-	{
-		for( dim_t jr = 0; jr < NR; jr += 16 )
-		{
-			// Rearrange for dpbf16_ps, read 16 cols from B with 64 elements in each row.
-			MASK_LOAD_16_COLS_AVX2(0x0000FFFF)
-			UNPACKHILO8_AVX2
-			UNPACKHILO16_AVX2
-			UNPACKHILO32_AVX2
-			UNPACKHILO64_AVX2
 
-			//store to pack_b buffer
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 0  ) * NR))/2 )), msk0, a_reg[0]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 2  ) * NR))/2 )), msk0, a_reg[8]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 4  ) * NR))/2 )), msk0, a_reg[4]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 6  ) * NR))/2 )), msk0, a_reg[12]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 8  ) * NR))/2 )), msk0, a_reg[2]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 10 ) * NR))/2 )), msk0, a_reg[10]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 12 ) * NR))/2 )), msk0, a_reg[6]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 14 ) * NR))/2 )), msk0, a_reg[14]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 16 ) * NR))/2 )), msk0, a_reg[1]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 18 ) * NR))/2 )), msk0, a_reg[9]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 20 ) * NR))/2 )), msk0, a_reg[5] );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 22 ) * NR))/2 )), msk0, a_reg[13] );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 24 ) * NR))/2 )), msk0, a_reg[3] );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 26 ) * NR))/2 )), msk0, a_reg[11] );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 28 ) * NR))/2 )), msk0, a_reg[7] );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 30 ) * NR))/2 )), msk0, a_reg[15] );
-		}
-	}
-
-	for ( ; ( kr + 15 ) < KC; kr += 16 )
-	{
-		for( dim_t jr = 0; jr < NR; jr += 16 )
-		{
-			// Rearrange for dpbf16_ps, read 16 cols from B with 64 elements in each row.
-			MASK_LOAD_16_COLS_AVX2(0x000000FF)
-			UNPACKHILO8_AVX2
-			UNPACKHILO16_AVX2
-			UNPACKHILO32_AVX2
-			UNPACKHILO64_AVX2
-
-			// store to pack_b buffer
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 0  ) * NR))/2 )), msk0, a_reg[0]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 2  ) * NR))/2 )), msk0, a_reg[8]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 4  ) * NR))/2 )), msk0, a_reg[4]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 6  ) * NR))/2 )), msk0, a_reg[12]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 8  ) * NR))/2 )), msk0, a_reg[2]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 10 ) * NR))/2 )), msk0, a_reg[10]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 12 ) * NR))/2 )), msk0, a_reg[6]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 14 ) * NR))/2 )), msk0, a_reg[14]  );
-		}
-	}
-
-	for ( ; ( kr + 7 ) < KC; kr += 8 )
-	{
-		for( dim_t jr = 0; jr < NR; jr += 16 )
-		{
-			// Rearrange for dpbf16_ps, read 16 cols from B with 64 elements in each row.
-			MASK_LOAD_16_COLS_AVX2(0x0F)
-			UNPACKHILO8_AVX2
-			UNPACKHILO16_AVX2
-			UNPACKHILO32_AVX2
-			UNPACKHILO64_AVX2
-
-			// store to pack_b buffer
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 0  ) * NR))/2 )), msk0, a_reg[0]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 2  ) * NR))/2 )), msk0, a_reg[8]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 4  ) * NR))/2 )), msk0, a_reg[4]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 6  ) * NR))/2 )), msk0, a_reg[12]  );
-		}
-	}
-
-	for ( ; ( kr + 3 ) < KC; kr += 4 )
-	{
-		for( dim_t jr = 0; jr < NR; jr += 16 )
-		{
-			// Rearrange for dpbf16_ps, read 16 cols from B with 64 elements in each row.
-			MASK_LOAD_16_COLS_AVX2(0x03)
-			UNPACKHILO8_AVX2
-			UNPACKHILO16_AVX2
-			UNPACKHILO32_AVX2
-			UNPACKHILO64_AVX2
-
-			// store to pack_b buffer
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 0  ) * NR))/2 )), msk0, a_reg[0]  );
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 2  ) * NR))/2 )), msk0, a_reg[8]  );
-		}
-	}
-
-	for ( ; ( kr + 1 ) < KC; kr += 2 )
-	{
-		for( dim_t jr = 0; jr < NR; jr += 16 )
-		{
-			// Rearrange for dpbf16_ps, read 16 cols from B with 64 elements in each row.
-			MASK_LOAD_16_COLS_AVX2(0x01)
-			UNPACKHILO8_AVX2
-			UNPACKHILO16_AVX2
-			UNPACKHILO32_AVX2
-			UNPACKHILO64_AVX2
-
-			// store to pack_b buffer
-			_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((jr * 2) + (( kr + 0  ) * NR))/2 )), msk0, a_reg[0] );
-		}
-	}
 }
 
 void packb_nrlt16_bf16s4f32of32_col_major
@@ -1202,197 +1581,559 @@ void packb_nrlt16_bf16s4f32of32_col_major
 	dim_t NR = 16;
 
 	// Used for storing the mm256i elements for use in dpbf16_ps instruction.
-    __mmask8 msk0 = _cvtu32_mask8(0x0F);
-	__mmask8 msk1 = _cvtu32_mask8(0xF0);
+	__mmask8 msk0 = _cvtu32_mask8( 0x0F );
+	__mmask8 msk1 = _cvtu32_mask8( 0xF0 );
 
 	__m256i a_reg[16];
 	__m256i b_reg[16];
+    bool is_odd_stride = ( ( ldb % 2 ) == 0 ) ? FALSE : TRUE;
 
 	dim_t kr = 0, jr = 0;
-	for ( kr = 0; ( kr + 63 ) < KC; kr += 64 )
+
+	if( is_odd_stride == FALSE )
 	{
-		for( jr = 0; jr < n0_partial_rem; jr += 1 )
+		for ( kr = 0; ( kr + 63 ) < KC; kr += 64 )
 		{
-			// Rearrange for dpbf16_ps, read n0_partial_rem cols from B with 64 elements in each row
-			a_reg[jr] = _mm256_loadu_si256((__m256i const *)(b + ( ( ldb * jr ) + kr) / 2 ));
+			for( jr = 0; jr < n0_partial_rem; jr += 1 )
+			{
+				/*Rearrange for dpbf16_ps, read n0_partial_rem
+				cols from B with 64 elements in each row*/
+				a_reg[jr] = _mm256_loadu_si256( ( __m256i const * ) ( b +
+						( ( ldb * jr ) + kr ) / 2 ) );
+			}
+			for( ; jr < NR; jr++ )
+			{
+				a_reg[jr] = _mm256_setzero_si256();
+			}
+
+			UNPACKHILO8_AVX2
+			UNPACKHILO16_AVX2
+			UNPACKHILO32_AVX2
+			UNPACKHILO64_AVX2
+
+			// store to pack_b buffer
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 2  ) * NR ) ) /2 ) ), msk0, a_reg[8]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 4  ) * NR ) ) /2 ) ), msk0, a_reg[4]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 6  ) * NR ) ) /2 ) ), msk0, a_reg[12] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 8  ) * NR ) ) /2 ) ), msk0, a_reg[2]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 10 ) * NR ) ) /2 ) ), msk0, a_reg[10] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 12 ) * NR ) ) /2 ) ), msk0, a_reg[6]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 14 ) * NR ) ) /2 ) ), msk0, a_reg[14] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 16 ) * NR ) ) /2 ) ), msk0, a_reg[1]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 18 ) * NR ) ) /2 ) ), msk0, a_reg[9]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 20 ) * NR ) ) /2 ) ), msk0, a_reg[5]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 22 ) * NR ) ) /2 ) ), msk0, a_reg[13] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 24 ) * NR ) ) /2 ) ), msk0, a_reg[3]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 26 ) * NR ) ) /2 ) ), msk0, a_reg[11] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 28 ) * NR ) ) /2 ) ), msk0, a_reg[7]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 30 ) * NR ) ) /2 ) ), msk0, a_reg[15] );
+
+			/*The 16 value decrement is to correct the masked
+			store starting postion with respect to the msk1.*/
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 32  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[0]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 34  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[8]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 36  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[4]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 38  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[12] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 40  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[2]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 42  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[10] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 44  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[6]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 46  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[14] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 48  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[1]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 50  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[9]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 52  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[5]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 54  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[13] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 56  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[3]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 58  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[11] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 60  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[7]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+			( ( ( kr + 62  ) * NR ) ) /2 - 16 ) ), msk1, a_reg[15] );
 		}
-		for(; jr < NR; jr++)
+
+		for ( ; ( kr + 31 ) < KC; kr += 32 )
 		{
-			a_reg[jr] = _mm256_setzero_si256();
+			for( jr = 0; jr  < n0_partial_rem; jr += 1 )
+			{
+				/*Rearrange for dpbf16_ps, read n0_partial_rem
+				cols from B with 64 elements in each row*/
+				a_reg[jr] = _mm256_maskz_loadu_epi8( 0x0000FFFF,
+					( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) );
+			}
+			for( ; jr < NR; jr++ )
+			{
+				a_reg[jr] = _mm256_setzero_si256();
+			}
+
+			UNPACKHILO8_AVX2
+			UNPACKHILO16_AVX2
+			UNPACKHILO32_AVX2
+			UNPACKHILO64_AVX2
+
+			// store to pack_b buffer
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 2  ) * NR ) ) /2 ) ), msk0, a_reg[8]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 4  ) * NR ) ) /2 ) ), msk0, a_reg[4]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 6  ) * NR ) ) /2 ) ), msk0, a_reg[12] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 8  ) * NR ) ) /2 ) ), msk0, a_reg[2]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 10 ) * NR ) ) /2 ) ), msk0, a_reg[10] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 12 ) * NR ) ) /2 ) ), msk0, a_reg[6]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 14 ) * NR ) ) /2 ) ), msk0, a_reg[14] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 16 ) * NR ) ) /2 ) ), msk0, a_reg[1]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 18 ) * NR ) ) /2 ) ), msk0, a_reg[9]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 20 ) * NR ) ) /2 ) ), msk0, a_reg[5]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 22 ) * NR ) ) /2 ) ), msk0, a_reg[13] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 24 ) * NR ) ) /2 ) ), msk0, a_reg[3]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 26 ) * NR ) ) /2 ) ), msk0, a_reg[11] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 28 ) * NR ) ) /2 ) ), msk0, a_reg[7]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 30 ) * NR ) ) /2 ) ), msk0, a_reg[15] );
 		}
 
-		 UNPACKHILO8_AVX2
-		 UNPACKHILO16_AVX2
-		 UNPACKHILO32_AVX2
-		 UNPACKHILO64_AVX2
+		for ( ; ( kr + 15 ) < KC; kr += 16 )
+		{
+			for( jr = 0; jr  < n0_partial_rem; jr += 1 )
+			{
+				/*Rearrange for dpbf16_ps, read n0_partial_rem
+				cols from B with 64 elements in each row*/
+				a_reg[jr] = _mm256_maskz_loadu_epi8( 0xFF,
+					( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) ); \
+			}
+			for( ; jr < NR; jr++ )
+			{
+				a_reg[jr] = _mm256_setzero_si256();
+			}
 
-		// store to pack_b buffer
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 0  ) * NR))/2 )), msk0, a_reg[0]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 2  ) * NR))/2 )), msk0, a_reg[8]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 4  ) * NR))/2 )), msk0, a_reg[4]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 6  ) * NR))/2 )), msk0, a_reg[12]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 8  ) * NR))/2 )), msk0, a_reg[2]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 10 ) * NR))/2 )), msk0, a_reg[10]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 12 ) * NR))/2 )), msk0, a_reg[6]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 14 ) * NR))/2 )), msk0, a_reg[14]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 16 ) * NR))/2 )), msk0, a_reg[1]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 18 ) * NR))/2 )), msk0, a_reg[9]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 20 ) * NR))/2 )), msk0, a_reg[5] );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 22 ) * NR))/2 )), msk0, a_reg[13] );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 24 ) * NR))/2 )), msk0, a_reg[3] );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 26 ) * NR))/2 )), msk0, a_reg[11] );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 28 ) * NR))/2 )), msk0, a_reg[7] );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 30 ) * NR))/2 )), msk0, a_reg[15] );
+			UNPACKHILO8_AVX2
+			UNPACKHILO16_AVX2
+			UNPACKHILO32_AVX2
+			UNPACKHILO64_AVX2
 
-		// The 16 value decrement is to correct the masked store starting postion with respect to the msk1.
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 32  ) * NR))/2 - 16)), msk1, a_reg[0]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 34  ) * NR))/2 - 16)), msk1, a_reg[8]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 36  ) * NR))/2 - 16)), msk1, a_reg[4]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 38  ) * NR))/2 - 16)), msk1, a_reg[12]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 40  ) * NR))/2 - 16)), msk1, a_reg[2]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 42  ) * NR))/2 - 16)), msk1, a_reg[10]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 44  ) * NR))/2 - 16)), msk1, a_reg[6]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 46  ) * NR))/2 - 16)), msk1, a_reg[14]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 48  ) * NR))/2 - 16)), msk1, a_reg[1]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 50  ) * NR))/2 - 16)), msk1, a_reg[9]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 52  ) * NR))/2 - 16)), msk1, a_reg[5]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 54  ) * NR))/2 - 16)), msk1, a_reg[13]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 56  ) * NR))/2 - 16)), msk1, a_reg[3]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 58  ) * NR))/2 - 16)), msk1, a_reg[11]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 60  ) * NR))/2 - 16)), msk1, a_reg[7]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 62  ) * NR))/2 - 16)), msk1, a_reg[15]  );
+			// store to pack_b buffer
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 2  ) * NR ) ) /2 ) ), msk0, a_reg[8]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 4  ) * NR ) ) /2 ) ), msk0, a_reg[4]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 6  ) * NR ) ) /2 ) ), msk0, a_reg[12] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 8  ) * NR ) ) /2 ) ), msk0, a_reg[2]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 10 ) * NR ) ) /2 ) ), msk0, a_reg[10] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 12 ) * NR ) ) /2 ) ), msk0, a_reg[6]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 14 ) * NR ) ) /2 ) ), msk0, a_reg[14] );
+		}
+
+		for ( ; ( kr + 7 ) < KC; kr += 8 )
+		{
+			for( jr = 0; jr  < n0_partial_rem; jr += 1 )
+			{
+				/*Rearrange for dpbf16_ps, read n0_partial_rem
+				cols from B with 64 elements in each row*/
+				a_reg[jr] = _mm256_maskz_loadu_epi8( 0x0F,
+					(b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) ); \
+			}
+			for( ; jr < NR; jr++ )
+			{
+				a_reg[jr] = _mm256_setzero_si256();
+			}
+
+			UNPACKHILO8_AVX2
+			UNPACKHILO16_AVX2
+			UNPACKHILO32_AVX2
+			UNPACKHILO64_AVX2
+
+			// store to pack_b buffer
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 2  ) * NR ) ) /2 ) ), msk0, a_reg[8]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 4  ) * NR ) ) /2 ) ), msk0, a_reg[4]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 6  ) * NR ) ) /2 ) ), msk0, a_reg[12] );
+		}
+
+		for ( ; ( kr+3 ) < KC; kr += 4 )
+		{
+			for( jr = 0; jr  < n0_partial_rem; jr += 1 )
+			{
+				/*Rearrange for dpbf16_ps, read n0_partial_rem
+				cols from B with 64 elements in each row*/
+				a_reg[jr] = _mm256_maskz_loadu_epi8( 0x03,
+					( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) ); \
+			}
+			for( ; jr < NR; jr++ )
+			{
+				a_reg[jr] = _mm256_setzero_si256();
+			}
+
+			UNPACKHILO8_AVX2
+			UNPACKHILO16_AVX2
+			UNPACKHILO32_AVX2
+			UNPACKHILO64_AVX2
+
+			// store to pack_b buffer
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 2  ) * NR ) ) /2 ) ), msk0, a_reg[8] );
+		}
+
+		for ( ; ( kr + 1 ) < KC; kr += 2 )
+		{
+			for( jr = 0; jr  < n0_partial_rem; jr += 1 )
+			{
+				/*Rearrange for dpbf16_ps, read n0_partial_rem
+				cols from B with 64 elements in each row*/
+				a_reg[jr] = _mm256_maskz_loadu_epi8( 0x01,
+					( b + ( ( ldb * ( jr + 0 ) ) + kr) / 2 ) );
+			}
+			for( ; jr < NR; jr++ )
+			{
+				a_reg[jr] = _mm256_setzero_si256();
+			}
+
+			UNPACKHILO8_AVX2
+			UNPACKHILO16_AVX2
+			UNPACKHILO32_AVX2
+			UNPACKHILO64_AVX2
+
+			// store to pack_b buffer
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 0  ) * NR) ) /2 ) ), msk0, a_reg[0] );
+		}
+
+		for ( ; kr < KC; kr += 1 )
+		{
+			for( jr = 0; jr  < n0_partial_rem; jr += 1 )
+			{
+				/*Rearrange for dpbf16_ps, read n0_partial_rem
+				cols from B with 64 elements in each row*/
+				a_reg[jr] = _mm256_maskz_loadu_epi8( 0x01,
+					( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) );
+			}
+			for( ; jr < NR; jr++ )
+			{
+				a_reg[jr] = _mm256_setzero_si256();
+			}
+
+			UNPACKHILO8_AVX2
+			UNPACKHILO16_AVX2
+			UNPACKHILO32_AVX2
+			UNPACKHILO64_AVX2
+
+			// store to pack_b buffer
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 0  ) * NR ) )/2 ) ), msk0, b_reg[0] );
+		}
 	}
-
-	for ( ; ( kr + 31 ) < KC; kr += 32 )
+    else
 	{
-		for( jr = 0; jr  < n0_partial_rem; jr += 1 )
+		__m256i shift_index = _mm256_setr_epi8(
+					33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43,
+					44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54,
+					55, 56, 57, 58, 59, 60, 61, 62, 63, 32 );
+		__m256i odd_256;
+		__m256i even_256;
+		for ( ; ( kr + 31 ) < KC; kr += 32 )
 		{
-			// Rearrange for dpbf16_ps, read n0_partial_rem cols from B with 64 elements in each row
-			a_reg[jr] = _mm256_maskz_loadu_epi8( 0x0000FFFF, (b + ( ( ldb * ( jr + 0 ) ) + kr) / 2 ));
-		}
-		for( ; jr < NR; jr++ )
-		{
-			a_reg[jr] = _mm256_setzero_si256();
-		}
+			for( jr = 0; jr  < n0_partial_rem; jr += 1 )
+			{
+				/*Rearrange for dpbf16_ps, read n0_partial_rem
+				cols from B with 64 elements in each row*/
+				if( jr % 2 == 0 )
+				{
+					a_reg[jr] = _mm256_maskz_loadu_epi8( 0x0000FFFF,
+						( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) );
+				}
+				else
+				{
+					a_reg[jr] = _mm256_maskz_loadu_epi8( 0x0001FFFF,
+						( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) );
+					REMOVE_EXTRA_BITS( a_reg[jr] )
+				}
 
-		UNPACKHILO8_AVX2
-		UNPACKHILO16_AVX2
-		UNPACKHILO32_AVX2
-		UNPACKHILO64_AVX2
+			}
+			for( ; jr < NR; jr++ )
+			{
+				a_reg[jr] = _mm256_setzero_si256();
+			}
 
-		// store to pack_b buffer
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 0  ) * NR))/2 )), msk0, a_reg[0]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 2  ) * NR))/2 )), msk0, a_reg[8]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 4  ) * NR))/2 )), msk0, a_reg[4]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 6  ) * NR))/2 )), msk0, a_reg[12]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 8  ) * NR))/2 )), msk0, a_reg[2]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 10 ) * NR))/2 )), msk0, a_reg[10]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 12 ) * NR))/2 )), msk0, a_reg[6]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 14 ) * NR))/2 )), msk0, a_reg[14]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 16 ) * NR))/2 )), msk0, a_reg[1]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 18 ) * NR))/2 )), msk0, a_reg[9]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 20 ) * NR))/2 )), msk0, a_reg[5] );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 22 ) * NR))/2 )), msk0, a_reg[13] );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 24 ) * NR))/2 )), msk0, a_reg[3] );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 26 ) * NR))/2 )), msk0, a_reg[11] );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 28 ) * NR))/2 )), msk0, a_reg[7] );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 30 ) * NR))/2 )), msk0, a_reg[15] );
-	}
+			UNPACKHILO8_AVX2
+			UNPACKHILO16_AVX2
+			UNPACKHILO32_AVX2
+			UNPACKHILO64_AVX2
 
-	for ( ; ( kr + 15 ) < KC; kr += 16 )
-	{
-		for( jr = 0; jr  < n0_partial_rem; jr += 1 )
-		{
-			// Rearrange for dpbf16_ps, read n0_partial_rem cols from B with 64 elements in each row
-			a_reg[jr] = _mm256_maskz_loadu_epi8( 0xFF, (b + ( ( ldb * ( jr + 0 ) ) + kr) / 2 )); \
-		}
-		for( ; jr < NR; jr++ )
-		{
-			a_reg[jr] = _mm256_setzero_si256();
-		}
-
-	    UNPACKHILO8_AVX2
-		UNPACKHILO16_AVX2
-		UNPACKHILO32_AVX2
-		UNPACKHILO64_AVX2
-
-		// store to pack_b buffer
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 0  ) * NR))/2 )), msk0, a_reg[0]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 2  ) * NR))/2 )), msk0, a_reg[8]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 4  ) * NR))/2 )), msk0, a_reg[4]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 6  ) * NR))/2 )), msk0, a_reg[12]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 8  ) * NR))/2 )), msk0, a_reg[2]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 10 ) * NR))/2 )), msk0, a_reg[10]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 12 ) * NR))/2 )), msk0, a_reg[6]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 14 ) * NR))/2 )), msk0, a_reg[14]  );
-	}
-
-	for ( ; ( kr + 7 ) < KC; kr += 8 )
-	{
-		for( jr = 0; jr  < n0_partial_rem; jr += 1 )
-		{
-			// Rearrange for dpbf16_ps, read n0_partial_rem cols from B with 64 elements in each row
-			a_reg[jr] = _mm256_maskz_loadu_epi8( 0x0F, (b + ( ( ldb * ( jr + 0 ) ) + kr) / 2 )); \
-		}
-		for( ; jr < NR; jr++ )
-		{
-			a_reg[jr] = _mm256_setzero_si256();
+			// store to pack_b buffer
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 2  ) * NR ) ) /2 ) ), msk0, a_reg[8]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 4  ) * NR ) ) /2 ) ), msk0, a_reg[4]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 6  ) * NR ) ) /2 ) ), msk0, a_reg[12] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 8  ) * NR ) ) /2 ) ), msk0, a_reg[2]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 10 ) * NR ) ) /2 ) ), msk0, a_reg[10] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 12 ) * NR ) ) /2 ) ), msk0, a_reg[6]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 14 ) * NR ) ) /2 ) ), msk0, a_reg[14] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 16 ) * NR ) ) /2 ) ), msk0, a_reg[1]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 18 ) * NR ) ) /2 ) ), msk0, a_reg[9]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 20 ) * NR ) ) /2 ) ), msk0, a_reg[5]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 22 ) * NR ) ) /2 ) ), msk0, a_reg[13] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 24 ) * NR ) ) /2 ) ), msk0, a_reg[3]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 26 ) * NR ) ) /2 ) ), msk0, a_reg[11] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 28 ) * NR ) ) /2 ) ), msk0, a_reg[7]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 30 ) * NR ) ) /2 ) ), msk0, a_reg[15] );
 		}
 
-	    UNPACKHILO8_AVX2
-		UNPACKHILO16_AVX2
-		UNPACKHILO32_AVX2
-		UNPACKHILO64_AVX2
-
-		// store to pack_b buffer
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 0  ) * NR))/2 )), msk0, a_reg[0]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 2  ) * NR))/2 )), msk0, a_reg[8]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 4  ) * NR))/2 )), msk0, a_reg[4]  );
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 6  ) * NR))/2 )), msk0, a_reg[12]  );
-	}
-
-	for ( ; (kr+3) < KC; kr += 4 )
-	{
-		for( jr = 0; jr  < n0_partial_rem; jr += 1 )
+		for ( ; ( kr + 15 ) < KC; kr += 16 )
 		{
-			// Rearrange for dpbf16_ps, read n0_partial_rem cols from B with 64 elements in each row
-			a_reg[jr] = _mm256_maskz_loadu_epi8( 0x03, (b + ( ( ldb * ( jr + 0 ) ) + kr) / 2 )); \
+			for( jr = 0; jr  < n0_partial_rem; jr += 1 )
+			{
+				/*Rearrange for dpbf16_ps, read n0_partial_rem
+				cols from B with 64 elements in each row*/
+				if( jr % 2 == 0 )
+				{
+					a_reg[jr] = _mm256_maskz_loadu_epi8( 0x00000000000000FF,
+						( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) );
+				}
+				else
+				{
+					a_reg[jr] = _mm256_maskz_loadu_epi8( 0x00000000000001FF,
+						( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) );
+					REMOVE_EXTRA_BITS( a_reg[jr] )
+				}
+
+			}
+			for( ; jr < NR; jr++ )
+			{
+				a_reg[jr] = _mm256_setzero_si256();
+			}
+
+			UNPACKHILO8_AVX2
+			UNPACKHILO16_AVX2
+			UNPACKHILO32_AVX2
+			UNPACKHILO64_AVX2
+
+			// store to pack_b buffer
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 2  ) * NR ) ) /2 ) ), msk0, a_reg[8]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 4  ) * NR ) ) /2 ) ), msk0, a_reg[4]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 6  ) * NR ) ) /2 ) ), msk0, a_reg[12] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 8  ) * NR ) ) /2 ) ), msk0, a_reg[2]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 10 ) * NR ) ) /2 ) ), msk0, a_reg[10] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 12 ) * NR ) ) /2 ) ), msk0, a_reg[6]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 14 ) * NR ) ) /2 ) ), msk0, a_reg[14] );
 		}
-		for( ; jr < NR; jr++ )
+
+		for ( ; ( kr + 7 ) < KC; kr += 8 )
 		{
-			a_reg[jr] = _mm256_setzero_si256();
+			for( jr = 0; jr  < n0_partial_rem; jr += 1 )
+			{
+				/*Rearrange for dpbf16_ps, read n0_partial_rem
+				cols from B with 64 elements in each row*/
+				if( jr % 2 == 0 )
+				{
+					a_reg[jr] = _mm256_maskz_loadu_epi8( 0x000000000000000F,
+						( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) );
+				}
+				else
+				{
+					a_reg[jr] = _mm256_maskz_loadu_epi8( 0x000000000000001F,
+						( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) );
+					REMOVE_EXTRA_BITS( a_reg[jr] )
+				}
+			}
+			for( ; jr < NR; jr++ )
+			{
+				a_reg[jr] = _mm256_setzero_si256();
+			}
+
+			UNPACKHILO8_AVX2
+			UNPACKHILO16_AVX2
+			UNPACKHILO32_AVX2
+			UNPACKHILO64_AVX2
+
+			// store to pack_b buffer
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 2  ) * NR ) ) /2 ) ), msk0, a_reg[8]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 4  ) * NR ) ) /2 ) ), msk0, a_reg[4]  );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 6  ) * NR ) ) /2 ) ), msk0, a_reg[12] );
 		}
 
-		UNPACKHILO8_AVX2
-		UNPACKHILO16_AVX2
-		UNPACKHILO32_AVX2
-		UNPACKHILO64_AVX2
-
-		// store to pack_b buffer
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 0  ) * NR))/2 )), msk0, a_reg[0]  );
-	    _mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 2  ) * NR))/2 )), msk0, a_reg[8]  );
-	}
-
-	for ( ; ( kr + 1 ) < KC; kr += 2 )
-	{
-		for( jr = 0; jr  < n0_partial_rem; jr += 1 )
+		for ( ; ( kr+3 ) < KC; kr += 4 )
 		{
-			// Rearrange for dpbf16_ps, read n0_partial_rem cols from B with 64 elements in each row
-			a_reg[jr] = _mm256_maskz_loadu_epi8( 0x01, (b + ( ( ldb * ( jr + 0 ) ) + kr) / 2 ));
-		}
-		for( ; jr < NR; jr++ )
-		{
-			a_reg[jr] = _mm256_setzero_si256();
-		}
-		UNPACKHILO8_AVX2
-		UNPACKHILO16_AVX2
-		UNPACKHILO32_AVX2
-		UNPACKHILO64_AVX2
+			for( jr = 0; jr  < n0_partial_rem; jr += 1 )
+			{
+				/*Rearrange for dpbf16_ps, read n0_partial_rem
+				cols from B with 64 elements in each row*/
+				if( jr % 2 == 0 )
+				{
+					a_reg[jr] = _mm256_maskz_loadu_epi8( 0x0000000000000003,
+						( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) );
+				}
+				else
+				{
+					a_reg[jr] = _mm256_maskz_loadu_epi8( 0x000000000000007,
+						( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) );
+					REMOVE_EXTRA_BITS( a_reg[jr] )
+				}
+			}
+			for( ; jr < NR; jr++ )
+			{
+				a_reg[jr] = _mm256_setzero_si256();
+			}
 
-		// store to pack_b buffer
-		_mm256_mask_storeu_epi32( ((pack_b_buffer +  ((( kr + 0  ) * NR))/2 )), msk0, a_reg[0]  );
+			UNPACKHILO8_AVX2
+			UNPACKHILO16_AVX2
+			UNPACKHILO32_AVX2
+			UNPACKHILO64_AVX2
+
+			// store to pack_b buffer
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0] );
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 2  ) * NR ) ) /2 ) ), msk0, a_reg[8] );
+		}
+
+		for ( ; ( kr + 1 ) < KC; kr += 2 )
+		{
+			for( jr = 0; jr  < n0_partial_rem; jr += 1 )
+			{
+				/*Rearrange for dpbf16_ps, read n0_partial_rem
+				cols from B with 64 elements in each row*/
+				if( jr % 2 == 0 )
+				{
+					a_reg[jr] = _mm256_maskz_loadu_epi8( 0x0000000000000001,
+						(b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) );
+				}
+				else
+				{
+					a_reg[jr] = _mm256_maskz_loadu_epi8( 0x000000000000003,
+						(b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) );
+					REMOVE_EXTRA_BITS(a_reg[jr])
+				}
+			}
+			for( ; jr < NR; jr++ )
+			{
+				a_reg[jr] = _mm256_setzero_si256();
+			}
+			UNPACKHILO8_AVX2
+			UNPACKHILO16_AVX2
+			UNPACKHILO32_AVX2
+			UNPACKHILO64_AVX2
+
+			// store to pack_b buffer
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, a_reg[0]  );
+		}
+
+		for ( ; kr < KC; kr += 1 )
+		{
+			for( jr = 0; jr  < n0_partial_rem; jr += 1 )
+			{
+				/*Rearrange for dpbf16_ps, read n0_partial_rem
+				cols from B with 64 elements in each row*/
+				a_reg[jr] = _mm256_maskz_loadu_epi8( 0x01,
+					( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) );
+			}
+			for( ; jr < NR; jr++ )
+			{
+				a_reg[jr] = _mm256_setzero_si256();
+			}
+
+			RIGHT_SHIFT_LAST_4BITS_ODD
+			CLEAN_HIGH_4BITS_EVEN
+			UNPACKHILO8_AVX2
+			UNPACKHILO16_AVX2
+			UNPACKHILO32_AVX2
+			UNPACKHILO64_AVX2
+
+			// store to pack_b buffer
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				( ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, b_reg[0] );
+			//store remaining elements after 8 elements are stored
+			_mm256_mask_storeu_epi32( ( ( pack_b_buffer +
+				8 + ( ( ( kr + 0  ) * NR ) ) /2 ) ), msk0, b_reg[1] );
+		}
 	}
 }
+
 
 
 void packb_nr64_bf16s4f32of32_col_major
@@ -1423,9 +2164,8 @@ void packb_nr64_bf16s4f32of32_col_major
 	for ( dim_t jc = 0; jc < n_full_pieces_loop_limit; jc += NR )
 	{
 		packb_nr_mult_16_bf16s4f32of32_col_major
-		(
-			( pack_b_buffer + ((jc* KC_updated)/2)) , (b + (jc*ldb)/2), 64, ldb, KC
-		);
+		(( pack_b_buffer + ((jc* KC_updated)/2)) ,
+		(b + (jc*ldb)/2), 64, ldb, KC);
 	}
 
 	if(n_partial_pieces > 0)
