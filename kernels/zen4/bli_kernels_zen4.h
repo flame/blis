@@ -109,6 +109,34 @@ DOTXF_KER_PROT( dcomplex, z, dotxf_zen_int_8_avx512 )
 DOTXF_KER_PROT( dcomplex, z, dotxf_zen_int_4_avx512 )
 DOTXF_KER_PROT( dcomplex, z, dotxf_zen_int_2_avx512 )
 
+// gemv (intrinsics)
+// dgemv_n kernels for handling op(A) = 'n', i.e., transa = 'n' cases.
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_16mx8_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_16mx7_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_16mx6_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_16mx5_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_16mx4_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_16mx3_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_16mx2_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_16mx1_avx512 )
+
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_32x8n_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_16x8n_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_8x8n_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_m_leftx8n_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_32x4n_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_16x4n_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_8x4n_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_m_leftx4n_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_32x2n_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_16x2n_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_8x2n_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_m_leftx2n_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_32x1n_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_16x1n_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_8x1n_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen_int_m_leftx1n_avx512 )
+
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_l_zen_asm_16x14)
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_zen_asm_16x14)
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_l_zen4_asm_8x24)
@@ -358,3 +386,17 @@ void bli_dynamic_blkszs_zen4
 
 // function for resetting zmm registers after L3 apis
 void bli_zero_zmm();
+
+void bli_dgemv_n_avx512
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     );

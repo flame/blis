@@ -257,35 +257,15 @@ void bli_dgemv_unf_var2
        conj_t  conjx,
        dim_t   m,
        dim_t   n,
-       double*  alpha,
-       double*  a, inc_t rs_a, inc_t cs_a,
-       double*  x, inc_t incx,
-       double*  beta,
-       double*  y, inc_t incy,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
        cntx_t* cntx
      )
 {
-
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3);
-    double*  A1;
-    double*  x1;
-    dim_t   i;
-    dim_t   f, b_fuse;
-    dim_t   n_elem, n_iter;
-    inc_t   rs_at, cs_at;
-    conj_t  conja;
-
-    // Memory pool declarations for packing vector Y.
-    mem_t   mem_bufY;
-    rntm_t  rntm;
-    double* y_temp = y;
-    inc_t   temp_incy = incy;
-
-    bli_set_dims_incs_with_trans( transa,
-                                  m, n, rs_a, cs_a,
-                                  &n_elem, &n_iter, &rs_at, &cs_at );
-
-    conja = bli_extract_conj( transa );
 
     /*
       Fatbinary config amdzen when run on non-AMD X86 will query for
@@ -293,6 +273,9 @@ void bli_dgemv_unf_var2
       or for AVX2 it will be zen3.
     */
     arch_t id = bli_arch_query_id();
+
+    // b_fuse stores the fusing factor for AXPYF kernel.
+    dim_t b_fuse;
 
     /*
       Function pointer declaration for the functions
@@ -303,73 +286,91 @@ void bli_dgemv_unf_var2
     dscalv_ker_ft   scalv_kr_ptr; // DSCALV
     dcopyv_ker_ft   copyv_kr_ptr; // DCOPYV
 
+    switch (id)
+    {
+        case BLIS_ARCH_ZEN5:
+        case BLIS_ARCH_ZEN4:
+#if defined(BLIS_KERNELS_ZEN4)
+            bli_dgemv_n_avx512(
+                transa,
+                conjx,
+                m,
+                n,
+                alpha,
+                a, rs_a, cs_a,
+                x, incx,
+                beta,
+                y, incy,
+                cntx
+            );
+            return;
+#endif
+        case BLIS_ARCH_ZEN:
+        case BLIS_ARCH_ZEN2:
+        case BLIS_ARCH_ZEN3:
+            bli_dgemv_n_avx2(
+                transa,
+                conjx,
+                m,
+                n,
+                alpha,
+                a, rs_a, cs_a,
+                x, incx,
+                beta,
+                y, incy,
+                cntx
+            );
+            return;
+
+        default:
+            // For non-Zen architectures, query the context if it is NULL
+            if (cntx == NULL) cntx = bli_gks_query_cntx();
+
+            /*
+            Query the context for the kernel function pointers for
+            AXPYF, SCALV, COPYV and corresponding fusing
+            factor of AXPYF kernel
+            */
+            axpyf_kr_ptr = bli_cntx_get_l1f_ker_dt(BLIS_DOUBLE, BLIS_AXPYF_KER, cntx);
+            b_fuse       = bli_cntx_get_blksz_def_dt(BLIS_DOUBLE, BLIS_AF, cntx);
+
+            scalv_kr_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DOUBLE, BLIS_SCALV_KER, cntx);
+
+            copyv_kr_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DOUBLE, BLIS_COPYV_KER, cntx);
+    }
+
+    double*  A1;
+    double*  x1;
+    dim_t   i;
+    dim_t   f;
+    dim_t   n_elem, n_iter;
+    inc_t   rs_at, cs_at;
+    conj_t  conja;
+
+    // Memory pool declarations for packing vector Y.
+    mem_t   mem_bufY;
+    rntm_t  rntm;
+    double* y_temp = y;
+    inc_t   temp_incy = incy;
+
     /*
       Boolean to check if the y has been packed
       and memory needs to be freed in the end
     */
     bool is_y_temp_buf_created = FALSE;
 
-    switch (id)
-    {
-      case BLIS_ARCH_ZEN5:
-      case BLIS_ARCH_ZEN4:
-#if defined(BLIS_KERNELS_ZEN4)
-        /*
-          Assign the AVX512 based kernel function pointers for
-          AXPYF, SCALV, COPYV and corresponding fusing
-          factor of DAXPYF kernel
-        */
+    bli_set_dims_incs_with_trans( transa,
+                                  m, n, rs_a, cs_a,
+                                  &n_elem, &n_iter, &rs_at, &cs_at );
 
-        axpyf_kr_ptr = bli_daxpyf_zen_int_avx512;
-        b_fuse = 32;
-
-        scalv_kr_ptr = bli_dscalv_zen_int_avx512;
-
-        copyv_kr_ptr = bli_dcopyv_zen_int;
-
-        break;
-#endif
-      case BLIS_ARCH_ZEN:
-      case BLIS_ARCH_ZEN2:
-      case BLIS_ARCH_ZEN3:
-
-        /*
-          Assign the AVX2 based kernel function pointers for
-          AXPYF, SCALV, COPYV and corresponding fusing
-          factor of DAXPYF kernel
-        */
-
-        axpyf_kr_ptr = bli_daxpyf_zen_int_8;
-        b_fuse = 8;
-
-        scalv_kr_ptr = bli_dscalv_zen_int10;
-
-        copyv_kr_ptr = bli_dcopyv_zen_int;
-
-        break;
-      default:
-        // For non-Zen architectures, query the context if it is NULL
-        if(cntx == NULL) cntx = bli_gks_query_cntx();
-
-        /*
-          Query the context for the kernel function pointers for
-          AXPYF, SCALV, COPYV and corresponding fusing
-          factor of AXPYF kernel
-        */
-        axpyf_kr_ptr = bli_cntx_get_l1f_ker_dt(BLIS_DOUBLE, BLIS_AXPYF_KER, cntx);
-        b_fuse = bli_cntx_get_blksz_def_dt(BLIS_DOUBLE, BLIS_AF, cntx);
-
-        scalv_kr_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DOUBLE, BLIS_SCALV_KER, cntx);
-
-        copyv_kr_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DOUBLE, BLIS_COPYV_KER, cntx);
-    }
+    conja = bli_extract_conj( transa );
 
     /*
       If alpha is equal to zero, y is only scaled by beta and returned.
       In this case, packing and unpacking y will be costly and it is
       avoided.
     */
-    if ( (incy > 1) && (!bli_deq0( *alpha )))
+    if ( (incy != 1) && (!bli_deq0( *alpha )))
     {
         /*
           Initialize mem pool buffer to NULL and size to 0
@@ -398,13 +399,16 @@ void bli_dgemv_unf_var2
 
         /*acquire a Buffer(n_elem*size(double)) from the memory broker
         and save the associated mem_t entry to mem_bufY.*/
-        bli_pba_acquire_m(&rntm,
-                                buffer_size,
-                                BLIS_BUFFER_FOR_B_PANEL,
-                                &mem_bufY);
+        bli_pba_acquire_m
+        (
+          &rntm,
+          buffer_size,
+          BLIS_BUFFER_FOR_B_PANEL,
+          &mem_bufY
+        );
 
         /*Continue packing Y if buffer memory is allocated*/
-        if ((bli_mem_is_alloc( &mem_bufY )))
+        if ( bli_mem_is_alloc( &mem_bufY ) )
         {
             y_temp = bli_mem_buffer(&mem_bufY);
 
@@ -455,23 +459,23 @@ void bli_dgemv_unf_var2
 
     for (i = 0; i < n_iter; i += f)
     {
-      f = bli_determine_blocksize_dim_f(i, n_iter, b_fuse);
+        f = bli_determine_blocksize_dim_f(i, n_iter, b_fuse);
 
-      A1 = a + (i * cs_at);
-      x1 = x + (i * incx);
+        A1 = a + (i * cs_at);
+        x1 = x + (i * incx);
 
-      axpyf_kr_ptr
-      (
-        conja,
-        conjx,
-        n_elem,
-        f,
-        alpha,
-        A1, rs_at, cs_at,
-        x1, incx,
-        y_temp, temp_incy,
-        cntx
-      );
+        axpyf_kr_ptr
+        (
+          conja,
+          conjx,
+          n_elem,
+          f,
+          alpha,
+          A1, rs_at, cs_at,
+          x1, incx,
+          y_temp, temp_incy,
+          cntx
+        );
     }
 
     if (is_y_temp_buf_created)
@@ -1108,6 +1112,3 @@ void bli_cgemv_unf_var2
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
 }
-
-
-

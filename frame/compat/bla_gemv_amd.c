@@ -322,7 +322,7 @@ void dgemv_blis_impl
      * If the matrix dimensions are within 8x8 then calculate the result
      * using DGEMV Reference kernel.
      */
-    if ( m0 < 8 && n0 < 8 )
+    if ( (m0 < 8 && n0 < 8) )
     {
         bli_dgemv_zen_ref
         (

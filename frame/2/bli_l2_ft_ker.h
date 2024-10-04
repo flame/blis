@@ -4,7 +4,6 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -33,46 +32,29 @@
 
 */
 
-#include "bli_l2_check.h"
 
-// Define function types.
-#include "bli_l2_ft_unb.h"
-
+//
 // Define kernel function types for level-2 kernels.
-#include "bli_l2_ft_ker.h"
+//
 
-// Prototype object APIs (expert and non-expert).
-#include "bli_oapi_ex.h"
-#include "bli_l2_oapi.h"
-#include "bli_xapi_undef.h"
+// gemv
+#undef  GENTDEF
+#define GENTDEF( ctype, ch, opname, tsuf ) \
+\
+typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
+     ( \
+       conj_t  conja, \
+       conj_t  conjx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  a, inc_t rs_a, inc_t cs_a, \
+       ctype*  x, inc_t incx, \
+       ctype*  beta, \
+       ctype*  y, inc_t incy, \
+       cntx_t* restrict cntx  \
+     );
 
-#include "bli_oapi_ba.h"
-#include "bli_l2_oapi.h"
-#include "bli_xapi_undef.h"
-
-// Prototype typed APIs (expert and non-expert).
-#include "bli_tapi_ex.h"
-#include "bli_l2_tapi.h"
-#include "bli_l2_ft.h"
-#include "bli_xapi_undef.h"
-
-#include "bli_tapi_ba.h"
-#include "bli_l2_tapi.h"
-#include "bli_l2_ft.h"
-#include "bli_xapi_undef.h"
-
-// Generate function pointer arrays for tapi functions (expert only).
-#include "bli_l2_fpa.h"
-
-// Operation-specific headers
-#include "bli_gemv.h"
-#include "bli_ger.h"
-#include "bli_hemv.h"
-#include "bli_her.h"
-#include "bli_her2.h"
-#include "bli_symv.h"
-#include "bli_syr.h"
-#include "bli_syr2.h"
-#include "bli_trmv.h"
-#include "bli_trsv.h"
-
+// INSERT_GENTDEF( gemv )
+// Currently only generating the function type for double datatype.
+GENTDEF( double, d, gemv, _ft )
