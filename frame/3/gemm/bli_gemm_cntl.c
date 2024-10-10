@@ -71,7 +71,7 @@ void bli_gemm_var_cntl_init_node
 	);
 }
 
-void bli_gemm_cntl_init
+bool bli_gemm_cntl_init
      (
              ind_t        im,
              opid_t       family,
@@ -559,6 +559,8 @@ void bli_gemm_cntl_init
 	  c,
 	  cntl
 	);
+
+	return needs_swap;
 }
 
 void bli_gemm_cntl_finalize

@@ -137,10 +137,10 @@ INSERT_GENTCONF
 #undef GENTCONF
 #define GENTCONF( CONFIG, config ) \
 \
-void PASTEMAC(plugin_init,BLIS_PNAME_INFIX,_,config)( PASTECH(plugin,BLIS_PNAME_INFIX,_params) ); \
-void PASTEMAC(plugin_init,BLIS_PNAME_INFIX,_,config,BLIS_REF_SUFFIX)( PASTECH(plugin,BLIS_PNAME_INFIX,_params) );
+void PASTEMAC(plugin_init_@plugin_name@_,config)( plugin_@plugin_name@_params ); \
+void PASTEMAC(plugin_init_@plugin_name@_,config,BLIS_REF_SUFFIX)( plugin_@plugin_name@_params );
 
 INSERT_GENTCONF
 
-BLIS_EXPORT_BLIS err_t PASTEMAC(plugin_register,BLIS_PNAME_INFIX)( PASTECH(plugin,BLIS_PNAME_INFIX,_params) );
+BLIS_EXPORT_BLIS err_t bli_plugin_register_@plugin_name@( plugin_@plugin_name@_params );
 
