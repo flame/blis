@@ -113,6 +113,12 @@ typedef enum
 	AWQ_B_MATRIX = 2,
 } AOCL_MATRIX_TYPE;
 
+typedef enum
+{
+	DEFAULT = 0,
+	STRIDE2,
+} AOCL_TID_DISTR_TYPE;
+
 typedef struct
 {
 	void* aligned_buffer;

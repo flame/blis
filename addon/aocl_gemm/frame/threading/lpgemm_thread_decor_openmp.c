@@ -38,6 +38,7 @@
 #include "lpgemm_types.h"
 #include "lpgemm_5loop_interface_apis.h"
 #include "lpgemm_eltwise_ops_interface_apis.h"
+#include "lpgemm_thread_utils.h"
 
 #ifdef BLIS_ENABLE_OPENMP
 
@@ -930,6 +931,89 @@ BLIS_INLINE void batch_lpgemm_f32f32f32of32_get_threading
 	}
 }
 
+BLIS_INLINE AOCL_TID_DISTR_TYPE lpgemm_get_tid_distr_type
+     (
+       dim_t          m,
+       dim_t          n,
+       dim_t          k,
+       dim_t          n_threads,
+       dim_t          ic_ways,
+       dim_t          jc_ways,
+       lpgemm_cntx_t* lcntx
+     )
+{
+	AOCL_TID_DISTR_TYPE tid_distr = DEFAULT;
+
+	dim_t NR = lcntx->blksz.NR;
+	dim_t MR = lcntx->blksz.MR;
+
+	dim_t mr_blks = ( m + MR - 1 ) / MR;
+	dim_t nr_blks = ( n + NR - 1 ) / NR;
+	dim_t mr_x_nr_blks = mr_blks * nr_blks;
+
+	dim_t low_util_n_thread_thres = ( 2 * n_threads ) / 3;
+	dim_t mr_x_nr_blks_fringe = mr_x_nr_blks % n_threads;
+
+	lpgemm_thread_attrs_t* thr_attrs = lpgemm_get_thread_attrs();
+
+	// Ensure nt for init and now are same.
+	bool can_spread_tids =
+			( thr_attrs->openmp_enabled == TRUE ) &&
+			( thr_attrs->tid_distr_nearly_seq == TRUE ) &&
+			( thr_attrs->tid_core_grp_load_high == TRUE );
+
+	if ( ( mr_x_nr_blks < low_util_n_thread_thres ) &&
+		 ( can_spread_tids == TRUE ) )
+	{
+		tid_distr = STRIDE2;
+	}
+	else if ( ( mr_x_nr_blks > n_threads ) &&
+			  ( ( mr_x_nr_blks / n_threads ) <= 2 ) &&
+			  ( mr_x_nr_blks_fringe > 4 ) &&
+			  ( mr_x_nr_blks_fringe < low_util_n_thread_thres ) &&
+			  ( can_spread_tids == TRUE ) )
+	{
+		tid_distr = STRIDE2;
+	}
+
+	return tid_distr;
+}
+
+BLIS_INLINE void lpgemm_modify_tid_on_distr_type
+     (
+       dim_t* tid,
+       dim_t n_threads,
+       AOCL_TID_DISTR_TYPE tid_distr
+     )
+{
+	if ( tid_distr == STRIDE2 )
+	/* || ( tid_distr == STRIDE4 ) || ( tid_distr == STRIDE8 ) */
+	{
+		const dim_t modif_factor = 2; /* or 4 or 8 depending on distr type. */
+		dim_t tid_modif_limit = ( n_threads / modif_factor ) * modif_factor;
+
+		/* Distribute 0 - (n_threads/2 - 1) on even cores and remaining
+		 * (n_threads/2) - (n_threads - 1) on odd cores. Fringe tids,
+		 * ones that are beyond modif_factor multiple closest to n_threads
+		 * are ignored. */
+		if ( ( *tid ) < tid_modif_limit )
+		{
+			( *tid ) = ( ( *tid ) / modif_factor ) +
+				( ( ( *tid ) % modif_factor ) * ( n_threads / modif_factor ) );
+		}
+	}
+
+	/* 4 tid together. */
+	/* thread.tid = ( ( ( thread.tid - ( ( thread.tid / 8 ) * 8 ) ) / 4 ) *
+				   ( ( n_threads / 8 ) * 4 ) ) +
+				 ( ( ( thread.tid / 8 ) * 4 ) + ( thread.tid % 4 ) ); */
+
+	/* 2 tid together. */
+	/* thread.tid = ( ( ( thread.tid - ( ( thread.tid / 8 ) * 8 ) ) / 2 ) *
+				   ( ( n_threads / 8 ) * 2 ) ) +
+				 ( ( ( thread.tid / 8 ) * 2 ) + ( thread.tid % 2 ) ); */
+}
+
 #define GEN_LPGEMM_OPENMP_DECORATOR(A_type,B_type,C_type,LPGEMM_SFX) \
 void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
      ( \
@@ -968,6 +1052,14 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
 	  m, n, k, rntm_g \
 	); \
  \
+	AOCL_TID_DISTR_TYPE tid_distr = \
+				lpgemm_get_tid_distr_type\
+				( \
+				  m, n, k, \
+				  n_threads, ic_ways, jc_ways, \
+				  lcntx \
+				); \
+ \
 	/* Set the packing block allocator field of the rntm. This will be
 	 * inherited by all of the child threads when they make local copies of
 	 * the rntm below.*/ \
@@ -999,6 +1091,11 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
 		lpgemm_thrinfo_t thread; \
 		thread.n_threads = n_threads; \
 		thread.tid = omp_get_thread_num(); \
+		/* Performance improvement only observed when reordered buffers are used. */ \
+		if ( mtag_b == REORDERED ) { \
+			lpgemm_modify_tid_on_distr_type(&thread.tid, n_threads, tid_distr); \
+		} \
+ \
 		thread.ic_ways = ic_ways; \
 		thread.jc_ways = jc_ways; \
 		thread.comm = cur_lpgemm_comms; \
@@ -1193,6 +1290,14 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
 	  m, n, k, rntm_g \
 	); \
  \
+	AOCL_TID_DISTR_TYPE tid_distr = \
+				lpgemm_get_tid_distr_type\
+				( \
+				  m, n, k, \
+				  n_threads, ic_ways, jc_ways, \
+				  lcntx \
+				); \
+ \
 	/* Decide whether to go with pack-based implementation
 	   or kernel-level implementation */ \
 	dim_t MC = lpgemm_get_block_size_MC_global_cntx( BF16BF16F32OF32 ); \
@@ -1230,6 +1335,10 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
 		lpgemm_thrinfo_t thread; \
 		thread.n_threads = n_threads; \
 		thread.tid = omp_get_thread_num(); \
+		if ( mtag_b == REORDERED ) { \
+			lpgemm_modify_tid_on_distr_type(&thread.tid, n_threads, tid_distr); \
+		} \
+ \
 		thread.ic_ways = ic_ways; \
 		thread.jc_ways = jc_ways; \
 		thread.comm = cur_lpgemm_comms; \

@@ -47,6 +47,7 @@
 #include "lpgemm_packb_s8s16.h"
 #include "lpgemm_pack_f32.h"
 #include "lpgemm_logger.h"
+#include "lpgemm_thread_utils.h"
 
 static lpgemm_cntx_t global_cntx_t_list[AOCL_OPERATION_TYPE_LEN] \
 			__attribute__((aligned(64))); //Only one op type supported now.
@@ -453,7 +454,8 @@ static void lpgemm_cntx_init_map()
 	_lpgemm_util_cntx_init_func_map();
 }
 
-// Sets default block sizes for lpgemm. Currently only u8s8s32 supported.
+// Set default block sizes for lpgemm.
+// Detect thread topology for lpgemm.
 void aocl_lpgemm_init_global_cntx()
 {
 	bli_pthread_once
@@ -461,6 +463,8 @@ void aocl_lpgemm_init_global_cntx()
 	  &once_check_lpgemm_func_map_init,
 	  lpgemm_cntx_init_map
 	);
+
+	lpgemm_init_thread_attrs();
 }
 
 lpgemm_cntx_t* lpgemm_get_global_cntx_obj( AOCL_OPERATION_TYPE op )
