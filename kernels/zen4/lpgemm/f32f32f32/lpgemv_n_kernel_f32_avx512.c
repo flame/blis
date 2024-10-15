@@ -86,7 +86,7 @@ LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32 )
           &&POST_OPS_GELU_TANH_6x64F,
           &&POST_OPS_GELU_ERF_6x64F,
           &&POST_OPS_CLIP_6x64F,
-          NULL, // Virtual node for downscale, else segfault
+          &&POST_OPS_DOWNSCALE_6x64F,
           &&POST_OPS_MATRIX_ADD_6x64F,
           &&POST_OPS_SWISH_6x64F,
           &&POST_OPS_MATRIX_MUL_6x64F
@@ -96,7 +96,6 @@ LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32 )
   const float *a_use = NULL;
   const float *b_use = NULL;
   float *c_use = NULL;
-
   lpgemm_post_op_attr post_ops_attr = *(post_op_attr);
 
   for (dim_t mr = 0; mr < m0; mr += MR)
@@ -462,6 +461,53 @@ LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32 )
     // c[0, 0-15]
     CLIP_F32S_AVX512(zmm8, zmm0, zmm1)
 
+    POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+  }
+  POST_OPS_DOWNSCALE_6x64F:
+  {
+    __m512 zero_point0 = _mm512_setzero_ps();
+    __m512 selector1 = _mm512_setzero_ps();
+    // Need to account for row vs column major swaps. For scalars
+    // scale and zero point, no implications.
+    // Even though different registers are used for scalar in column
+    // and row major downscale path, all those registers will contain
+    // the same value.
+    if ( post_ops_list_temp->scale_factor_len == 1 )
+    {
+      selector1 =
+        _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+
+    }
+    if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+    {
+      zero_point0 = _mm512_set1_ps( *(float *)post_ops_list_temp->op_args1 );
+    }
+    if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+        ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+    {
+      // Scale/zp len cannot be > 1, since orignal n = 1.
+      F32_SCL_MULRND(zmm8, selector1, zero_point0);
+    }
+    else
+    {
+      // If original output was columns major, then by the time
+      // kernel sees it, the matrix would be accessed as if it were
+      // transposed. Due to this the scale as well as zp array will
+      // be accessed by the ic index, and each scale/zp element
+      // corresponds to an entire row of the transposed output array,
+      // instead of an entire column.
+      if( post_ops_list_temp->scale_factor_len > 1 )
+      {
+        selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 0 );
+      }
+      if( *( dim_t*)post_ops_list_temp->op_args3 > 1 )
+      {
+        zero_point0 = _mm512_loadu_ps( (float *)post_ops_list_temp->op_args1 +
+                              post_op_attr->post_op_c_i + 0 );
+      }
+      F32_SCL_MULRND(zmm8, selector1, zero_point0);
+    }
     POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
   }
   POST_OPS_MATRIX_ADD_6x64F:

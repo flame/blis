@@ -50,7 +50,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x64)
               &&POST_OPS_GELU_TANH_5x64F,
               &&POST_OPS_GELU_ERF_5x64F,
               &&POST_OPS_CLIP_5x64F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_5x64F,
               &&POST_OPS_MATRIX_ADD_5x64F,
               &&POST_OPS_SWISH_5x64F,
               &&POST_OPS_MATRIX_MUL_5x64F
@@ -63,7 +63,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x64)
     __m512 zmm8, zmm9, zmm10, zmm11, zmm12, zmm13, zmm14, zmm15;
     __m512 zmm16, zmm17, zmm18, zmm19, zmm20, zmm21, zmm22, zmm23;
     __m512 zmm24, zmm25, zmm26, zmm27;
-    
+
     /* zero the accumulator registers */
     ZERO_ACC_ZMM_4_REG(zmm8, zmm9, zmm10, zmm11);
     ZERO_ACC_ZMM_4_REG(zmm12, zmm13, zmm14, zmm15);
@@ -79,17 +79,17 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x64)
     for(dim_t k = 0; k < k_iter; k++)
     {
         /*Load 32 elements from row0 of B*/
-        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
+        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
 
         /*Load Next 32 elements from row0 of B*/
-        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row 
+        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row
         zmm7 = _mm512_loadu_ps (bbuf + 48); //load 48-63 from current row
-        
+
         /*Broadcast col0 elements of 12 rows of A*/
         zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
-        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1  
-        zmm4 = _mm512_set1_ps(*(abuf + 2*rs_a)); //broadcast c0r2 
+        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1
+        zmm4 = _mm512_set1_ps(*(abuf + 2*rs_a)); //broadcast c0r2
         zmm5 = _mm512_set1_ps(*(abuf + 3*rs_a)); //broadcast c0r3
 
         zmm8 = _mm512_fmadd_ps(zmm0, zmm2, zmm8);
@@ -103,12 +103,12 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x64)
         zmm15 = _mm512_fmadd_ps(zmm7, zmm3, zmm15);
 
         zmm2 = _mm512_set1_ps(*(abuf + 4*rs_a)); //broadcast c0r4
-        
+
         zmm16 = _mm512_fmadd_ps(zmm0, zmm4, zmm16);
         zmm17 = _mm512_fmadd_ps(zmm1, zmm4, zmm17);
         zmm18 = _mm512_fmadd_ps(zmm6, zmm4, zmm18);
         zmm19 = _mm512_fmadd_ps(zmm7, zmm4, zmm19);
-        
+
         zmm20 = _mm512_fmadd_ps(zmm0, zmm5, zmm20);
         zmm21 = _mm512_fmadd_ps(zmm1, zmm5, zmm21);
         zmm22 = _mm512_fmadd_ps(zmm6, zmm5, zmm22);
@@ -133,8 +133,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x64)
 
     if ( beta != 0.0 )
     {
-        _cbuf = cbuf; 
-        //load c and multiply with beta and 
+        _cbuf = cbuf;
+        //load c and multiply with beta and
         //add to accumulator and store back
         zmm3 = _mm512_set1_ps(beta);
 
@@ -693,6 +693,234 @@ POST_OPS_CLIP_5x64F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_DOWNSCALE_5x64F:
+    {
+      __m512 selector1 = _mm512_setzero_ps();
+      __m512 selector2 = _mm512_setzero_ps();
+      __m512 selector3 = _mm512_setzero_ps();
+      __m512 selector4 = _mm512_setzero_ps();
+
+      __m512 zero_point0 = _mm512_setzero_ps();
+      __m512 zero_point1 = _mm512_setzero_ps();
+      __m512 zero_point2 = _mm512_setzero_ps();
+      __m512 zero_point3 = _mm512_setzero_ps();
+
+      // Need to account for row vs column major swaps. For scalars
+      // scale and zero point, no implications.
+      // Even though different registers are used for scalar in column
+      // and row major downscale path, all those registers will contain
+      // the same value.
+
+      if( post_ops_list_temp->scale_factor_len == 1 )
+      {
+        selector1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector4 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+      }
+      if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+      {
+        zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+      }
+      if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+      {
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          selector3 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+          selector4 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+        }
+        if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          zero_point2 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+          zero_point3 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector2, zero_point1);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector3, zero_point2);
+
+        //c[0, 48-63]
+        F32_SCL_MULRND(zmm11, selector4, zero_point3);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector1, zero_point0);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[1, 32-47]
+        F32_SCL_MULRND(zmm14, selector3, zero_point2);
+
+        //c[1, 48-63]
+        F32_SCL_MULRND(zmm15, selector4, zero_point3);
+
+        //c[2, 0-15]
+        F32_SCL_MULRND(zmm16, selector1, zero_point0);
+
+        //c[2, 16-31]
+        F32_SCL_MULRND(zmm17, selector2, zero_point1);
+
+        //c[2, 32-47]
+        F32_SCL_MULRND(zmm18, selector3, zero_point2);
+
+        //c[2, 48-63]
+        F32_SCL_MULRND(zmm19, selector4, zero_point3);
+
+        //c[3, 0-15]
+        F32_SCL_MULRND(zmm20, selector1, zero_point0);
+
+        //c[3, 16-31]
+        F32_SCL_MULRND(zmm21, selector2, zero_point1);
+
+        //c[3, 32-47]
+        F32_SCL_MULRND(zmm22, selector3, zero_point2);
+
+        //c[3, 48-63]
+        F32_SCL_MULRND(zmm23, selector4, zero_point3);
+
+        //c[4, 0-15]
+        F32_SCL_MULRND(zmm24, selector1, zero_point0);
+
+        //c[4, 16-31]
+        F32_SCL_MULRND(zmm25, selector2, zero_point1);
+
+        //c[4, 32-47]
+        F32_SCL_MULRND(zmm26, selector3, zero_point2);
+
+        //c[4, 48-63]
+        F32_SCL_MULRND(zmm27, selector4, zero_point3);
+      }
+      else
+      {
+        // If original output was columns major, then by the time
+        // kernel sees it, the matrix would be accessed as if it were
+        // transposed. Due to this the scale as well as zp array will
+        // be accessed by the ic index, and each scale/zp element
+        // corresponds to an entire row of the transposed output array,
+        // instead of an entire column.
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 0 ) );
+          selector2 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 1 ) );
+          selector3 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 2 ) );
+          selector4 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 3 ) );
+        }
+        if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 0 );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 1);
+          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 2 );
+          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 3 );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector1, zero_point0);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector1, zero_point0);
+
+        //c[0, 48-63]
+        F32_SCL_MULRND(zmm11, selector1, zero_point0);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector2, zero_point1);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[1, 32-47]
+        F32_SCL_MULRND(zmm14, selector2, zero_point1);
+
+        //c[1, 48-63]
+        F32_SCL_MULRND(zmm15, selector2, zero_point1);
+
+        //c[2, 0-15]
+        F32_SCL_MULRND(zmm16, selector3, zero_point2);
+
+        //c[2, 16-31]
+        F32_SCL_MULRND(zmm17, selector3, zero_point2);
+
+        //c[2, 32-47]
+        F32_SCL_MULRND(zmm18, selector3, zero_point2);
+
+        //c[2, 48-63]
+        F32_SCL_MULRND(zmm19, selector3, zero_point2);
+
+        //c[3, 0-15]
+        F32_SCL_MULRND(zmm20, selector4, zero_point3);
+
+        //c[3, 16-31]
+        F32_SCL_MULRND(zmm21, selector4, zero_point3);
+
+        //c[3, 32-47]
+        F32_SCL_MULRND(zmm22, selector4, zero_point3);
+
+        //c[3, 48-63]
+        F32_SCL_MULRND(zmm23, selector4, zero_point3);
+
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 = _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 4 ) );
+        }
+        if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 4 );
+        }
+        //c[4, 0-15]
+        F32_SCL_MULRND(zmm24, selector1, zero_point0);
+
+        //c[4, 16-31]
+        F32_SCL_MULRND(zmm25, selector1, zero_point0);
+
+        //c[4, 32-47]
+        F32_SCL_MULRND(zmm26, selector1, zero_point0);
+
+        //c[4, 48-63]
+        F32_SCL_MULRND(zmm27, selector1, zero_point0);
+
+      }
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_MATRIX_ADD_5x64F:
     {
         dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -736,7 +964,7 @@ POST_OPS_MATRIX_MUL_5x64F:
         F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,4,24,25,26,27);
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-    }    
+    }
 POST_OPS_SWISH_5x64F:
     {
         zmm7 =
@@ -808,7 +1036,7 @@ POST_OPS_SWISH_5x64F:
 POST_OPS_5x64F_DISABLE:
     ;
 
-    _mm512_storeu_ps(cbuf, zmm8); 
+    _mm512_storeu_ps(cbuf, zmm8);
     _mm512_storeu_ps(cbuf + 16, zmm9);
     _mm512_storeu_ps(cbuf + 32, zmm10);
     _mm512_storeu_ps(cbuf + 48, zmm11);
@@ -845,7 +1073,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x64)
               &&POST_OPS_GELU_TANH_4x64F,
               &&POST_OPS_GELU_ERF_4x64F,
               &&POST_OPS_CLIP_4x64F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_4x64F,
               &&POST_OPS_MATRIX_ADD_4x64F,
               &&POST_OPS_SWISH_4x64F,
               &&POST_OPS_MATRIX_MUL_4x64F
@@ -857,7 +1085,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x64)
     __m512 zmm0, zmm1, zmm2, zmm3, zmm4, zmm5, zmm6, zmm7;
     __m512 zmm8, zmm9, zmm10, zmm11, zmm12, zmm13, zmm14, zmm15;
     __m512 zmm16, zmm17, zmm18, zmm19, zmm20, zmm21, zmm22, zmm23;
-    
+
     /* zero the accumulator registers */
     ZERO_ACC_ZMM_4_REG(zmm8, zmm9, zmm10, zmm11);
     ZERO_ACC_ZMM_4_REG(zmm12, zmm13, zmm14, zmm15);
@@ -872,20 +1100,20 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x64)
     for(dim_t k = 0; k < k_iter; k++)
     {
         /*Load 32 elements from row0 of B*/
-        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
+        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
         zmm0 = _mm512_shuffle_ps(zmm0, zmm0, 0xE4); // dummy shuffle
         zmm1 = _mm512_shuffle_ps(zmm1, zmm1, 0xE4); // dummy shuffle
         /*Load Next 32 elements from row0 of B*/
-        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row 
+        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row
         zmm7 = _mm512_loadu_ps (bbuf + 48); //load 48-63 from current row
         zmm6 = _mm512_shuffle_ps(zmm6, zmm6, 0xE4); // dummy shuffle
         zmm7 = _mm512_shuffle_ps(zmm7, zmm7, 0xE4); // dummy shuffle
 
         /*Broadcast col0 elements of 12 rows of A*/
         zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
-        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1  
-        zmm4 = _mm512_set1_ps(*(abuf + 2*rs_a)); //broadcast c0r2 
+        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1
+        zmm4 = _mm512_set1_ps(*(abuf + 2*rs_a)); //broadcast c0r2
         zmm5 = _mm512_set1_ps(*(abuf + 3*rs_a)); //broadcast c0r3
 
         zmm8 = _mm512_fmadd_ps(zmm0, zmm2, zmm8);
@@ -902,7 +1130,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x64)
         zmm17 = _mm512_fmadd_ps(zmm1, zmm4, zmm17);
         zmm18 = _mm512_fmadd_ps(zmm6, zmm4, zmm18);
         zmm19 = _mm512_fmadd_ps(zmm7, zmm4, zmm19);
-        
+
         zmm20 = _mm512_fmadd_ps(zmm0, zmm5, zmm20);
         zmm21 = _mm512_fmadd_ps(zmm1, zmm5, zmm21);
         zmm22 = _mm512_fmadd_ps(zmm6, zmm5, zmm22);
@@ -921,8 +1149,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x64)
 
     if ( beta != 0.0 )
     {
-        _cbuf = cbuf; 
-        //load c and multiply with beta and 
+        _cbuf = cbuf;
+        //load c and multiply with beta and
         //add to accumulator and store back
         zmm3 = _mm512_set1_ps(beta);
 
@@ -1383,6 +1611,199 @@ POST_OPS_CLIP_4x64F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_DOWNSCALE_4x64F:
+    {
+      __m512 selector1 = _mm512_setzero_ps();
+      __m512 selector2 = _mm512_setzero_ps();
+      __m512 selector3 = _mm512_setzero_ps();
+      __m512 selector4 = _mm512_setzero_ps();
+
+      __m512 zero_point0 = _mm512_setzero_ps();
+      __m512 zero_point1 = _mm512_setzero_ps();
+      __m512 zero_point2 = _mm512_setzero_ps();
+      __m512 zero_point3 = _mm512_setzero_ps();
+
+      // Need to account for row vs column major swaps. For scalars
+      // scale and zero point, no implications.
+      // Even though different registers are used for scalar in column
+      // and row major downscale path, all those registers will contain
+      // the same value.
+
+      if( post_ops_list_temp->scale_factor_len == 1 )
+      {
+        selector1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector4 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+      }
+      if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+      {
+        zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+      }
+      if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+      {
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          selector3 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+          selector4 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+        }
+        if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          zero_point2 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+          zero_point3 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector2, zero_point1);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector3, zero_point2);
+
+        //c[0, 48-63]
+        F32_SCL_MULRND(zmm11, selector4, zero_point3);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector1, zero_point0);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[1, 32-47]
+        F32_SCL_MULRND(zmm14, selector3, zero_point2);
+
+        //c[1, 48-63]
+        F32_SCL_MULRND(zmm15, selector4, zero_point3);
+
+        //c[2, 0-15]
+        F32_SCL_MULRND(zmm16, selector1, zero_point0);
+
+        //c[2, 16-31]
+        F32_SCL_MULRND(zmm17, selector2, zero_point1);
+
+        //c[2, 32-47]
+        F32_SCL_MULRND(zmm18, selector3, zero_point2);
+
+        //c[2, 48-63]
+        F32_SCL_MULRND(zmm19, selector4, zero_point3);
+
+        //c[3, 0-15]
+        F32_SCL_MULRND(zmm20, selector1, zero_point0);
+
+        //c[3, 16-31]
+        F32_SCL_MULRND(zmm21, selector2, zero_point1);
+
+        //c[3, 32-47]
+        F32_SCL_MULRND(zmm22, selector3, zero_point2);
+
+        //c[3, 48-63]
+        F32_SCL_MULRND(zmm23, selector4, zero_point3);
+      }
+      else
+      {
+        // If original output was columns major, then by the time
+        // kernel sees it, the matrix would be accessed as if it were
+        // transposed. Due to this the scale as well as zp array will
+        // be accessed by the ic index, and each scale/zp element
+        // corresponds to an entire row of the transposed output array,
+        // instead of an entire column.
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 0 ) );
+          selector2 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 1 ) );
+          selector3 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 2 ) );
+          selector4 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 3 ) );
+        }
+        if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 0 );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 1);
+          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 2 );
+          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 3 );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector1, zero_point0);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector1, zero_point0);
+
+        //c[0, 48-63]
+        F32_SCL_MULRND(zmm11, selector1, zero_point0);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector2, zero_point1);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[1, 32-47]
+        F32_SCL_MULRND(zmm14, selector2, zero_point1);
+
+        //c[1, 48-63]
+        F32_SCL_MULRND(zmm15, selector2, zero_point1);
+
+        //c[2, 0-15]
+        F32_SCL_MULRND(zmm16, selector3, zero_point2);
+
+        //c[2, 16-31]
+        F32_SCL_MULRND(zmm17, selector3, zero_point2);
+
+        //c[2, 32-47]
+        F32_SCL_MULRND(zmm18, selector3, zero_point2);
+
+        //c[2, 48-63]
+        F32_SCL_MULRND(zmm19, selector3, zero_point2);
+
+        //c[3, 0-15]
+        F32_SCL_MULRND(zmm20, selector4, zero_point3);
+
+        //c[3, 16-31]
+        F32_SCL_MULRND(zmm21, selector4, zero_point3);
+
+        //c[3, 32-47]
+        F32_SCL_MULRND(zmm22, selector4, zero_point3);
+
+        //c[3, 48-63]
+        F32_SCL_MULRND(zmm23, selector4, zero_point3);
+      }
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_MATRIX_ADD_4x64F:
     {
         dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -1420,7 +1841,7 @@ POST_OPS_MATRIX_MUL_4x64F:
         F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,3,20,21,22,23);
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-    }    
+    }
 POST_OPS_SWISH_4x64F:
     {
         zmm7 =
@@ -1480,7 +1901,7 @@ POST_OPS_SWISH_4x64F:
 POST_OPS_4x64F_DISABLE:
     ;
 
-    _mm512_storeu_ps(cbuf, zmm8); 
+    _mm512_storeu_ps(cbuf, zmm8);
     _mm512_storeu_ps(cbuf + 16, zmm9);
     _mm512_storeu_ps(cbuf + 32, zmm10);
     _mm512_storeu_ps(cbuf + 48, zmm11);
@@ -1512,7 +1933,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x64)
               &&POST_OPS_GELU_TANH_3x64F,
               &&POST_OPS_GELU_ERF_3x64F,
               &&POST_OPS_CLIP_3x64F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_3x64F,
               &&POST_OPS_MATRIX_ADD_3x64F,
               &&POST_OPS_SWISH_3x64F,
               &&POST_OPS_MATRIX_MUL_3x64F
@@ -1524,7 +1945,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x64)
     __m512 zmm0, zmm1, zmm2, zmm3, zmm4, zmm5, zmm6, zmm7;
     __m512 zmm8, zmm9, zmm10, zmm11, zmm12, zmm13, zmm14, zmm15;
     __m512 zmm16, zmm17, zmm18, zmm19;
-    
+
     /* zero the accumulator registers */
     ZERO_ACC_ZMM_4_REG(zmm8, zmm9, zmm10, zmm11);
     ZERO_ACC_ZMM_4_REG(zmm12, zmm13, zmm14, zmm15);
@@ -1538,21 +1959,21 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x64)
     for(dim_t k = 0; k < k_iter; k++)
     {
         /*Load 32 elements from row0 of B*/
-        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
+        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
         zmm0 = _mm512_shuffle_ps(zmm0, zmm0, 0xE4); // dummy shuffle
         zmm1 = _mm512_shuffle_ps(zmm1, zmm1, 0xE4); // dummy shuffle
 
         /*Load Next 32 elements from row0 of B*/
-        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row 
+        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row
         zmm7 = _mm512_loadu_ps (bbuf + 48); //load 48-63 from current row
         zmm6 = _mm512_shuffle_ps(zmm6, zmm6, 0xE4); // dummy shuffle
         zmm7 = _mm512_shuffle_ps(zmm7, zmm7, 0xE4); // dummy shuffle
 
         /*Broadcast col0 elements of 12 rows of A*/
         zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
-        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1  
-        zmm4 = _mm512_set1_ps(*(abuf + 2*rs_a)); //broadcast c0r2 
+        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1
+        zmm4 = _mm512_set1_ps(*(abuf + 2*rs_a)); //broadcast c0r2
 
         zmm8 = _mm512_fmadd_ps(zmm0, zmm2, zmm8);
         zmm9 = _mm512_fmadd_ps(zmm1, zmm2, zmm9);
@@ -1582,7 +2003,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x64)
     if ( beta != 0.0 )
     {
         _cbuf = cbuf;
-        //load c and multiply with beta and 
+        //load c and multiply with beta and
         //add to accumulator and store back
         zmm3 = _mm512_set1_ps(beta);
 
@@ -1945,6 +2366,170 @@ POST_OPS_CLIP_3x64F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_DOWNSCALE_3x64F:
+{
+      __m512 selector1 = _mm512_setzero_ps();
+      __m512 selector2 = _mm512_setzero_ps();
+      __m512 selector3 = _mm512_setzero_ps();
+      __m512 selector4 = _mm512_setzero_ps();
+
+      __m512 zero_point0 = _mm512_setzero_ps();
+      __m512 zero_point1 = _mm512_setzero_ps();
+      __m512 zero_point2 = _mm512_setzero_ps();
+      __m512 zero_point3 = _mm512_setzero_ps();
+
+      // Need to account for row vs column major swaps. For scalars
+      // scale and zero point, no implications.
+      // Even though different registers are used for scalar in column
+      // and row major downscale path, all those registers will contain
+      // the same value.
+
+      if( post_ops_list_temp->scale_factor_len == 1 )
+      {
+        selector1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector4 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+      }
+      if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+      {
+        zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+      }
+      if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+      {
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          selector3 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+          selector4 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+        }
+        if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          zero_point2 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+          zero_point3 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector2, zero_point1);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector3, zero_point2);
+
+        //c[0, 48-63]
+        F32_SCL_MULRND(zmm11, selector4, zero_point3);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector1, zero_point0);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[1, 32-47]
+        F32_SCL_MULRND(zmm14, selector3, zero_point2);
+
+        //c[1, 48-63]
+        F32_SCL_MULRND(zmm15, selector4, zero_point3);
+
+        //c[2, 0-15]
+        F32_SCL_MULRND(zmm16, selector1, zero_point0);
+
+        //c[2, 16-31]
+        F32_SCL_MULRND(zmm17, selector2, zero_point1);
+
+        //c[2, 32-47]
+        F32_SCL_MULRND(zmm18, selector3, zero_point2);
+
+        //c[2, 48-63]
+        F32_SCL_MULRND(zmm19, selector4, zero_point3);
+      }
+      else
+      {
+        // If original output was columns major, then by the time
+        // kernel sees it, the matrix would be accessed as if it were
+        // transposed. Due to this the scale as well as zp array will
+        // be accessed by the ic index, and each scale/zp element
+        // corresponds to an entire row of the transposed output array,
+        // instead of an entire column.
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 0 ) );
+          selector2 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 1 ) );
+          selector3 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 2 ) );
+        }
+        if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 0 );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 1);
+          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 2 );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector1, zero_point0);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector1, zero_point0);
+
+        //c[0, 48-63]
+        F32_SCL_MULRND(zmm11, selector1, zero_point0);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector2, zero_point1);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[1, 32-47]
+        F32_SCL_MULRND(zmm14, selector2, zero_point1);
+
+        //c[1, 48-63]
+        F32_SCL_MULRND(zmm15, selector2, zero_point1);
+
+        //c[2, 0-15]
+        F32_SCL_MULRND(zmm16, selector3, zero_point2);
+
+        //c[2, 16-31]
+        F32_SCL_MULRND(zmm17, selector3, zero_point2);
+
+        //c[2, 32-47]
+        F32_SCL_MULRND(zmm18, selector3, zero_point2);
+
+        //c[2, 48-63]
+        F32_SCL_MULRND(zmm19, selector3, zero_point2);
+      }
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+}
 POST_OPS_MATRIX_ADD_3x64F:
     {
         dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -1976,7 +2561,7 @@ POST_OPS_MATRIX_MUL_3x64F:
         F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,2,16,17,18,19);
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-    }    
+    }
 POST_OPS_SWISH_3x64F:
     {
         zmm7 =
@@ -2024,7 +2609,7 @@ POST_OPS_SWISH_3x64F:
 POST_OPS_3x64F_DISABLE:
     ;
 
-    _mm512_storeu_ps(cbuf, zmm8); 
+    _mm512_storeu_ps(cbuf, zmm8);
     _mm512_storeu_ps(cbuf + 16, zmm9);
     _mm512_storeu_ps(cbuf + 32, zmm10);
     _mm512_storeu_ps(cbuf + 48, zmm11);
@@ -2051,7 +2636,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x64)
               &&POST_OPS_GELU_TANH_2x64F,
               &&POST_OPS_GELU_ERF_2x64F,
               &&POST_OPS_CLIP_2x64F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_2x64F,
               &&POST_OPS_MATRIX_ADD_2x64F,
               &&POST_OPS_SWISH_2x64F,
               &&POST_OPS_MATRIX_MUL_2x64F
@@ -2062,7 +2647,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x64)
 
     __m512 zmm0, zmm1, zmm2, zmm3, zmm4, zmm5, zmm6, zmm7;
     __m512 zmm8, zmm9, zmm10, zmm11, zmm12, zmm13, zmm14, zmm15;
-    
+
     /* zero the accumulator registers */
     ZERO_ACC_ZMM_4_REG(zmm8, zmm9, zmm10, zmm11);
     ZERO_ACC_ZMM_4_REG(zmm12, zmm13, zmm14, zmm15);
@@ -2075,20 +2660,20 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x64)
     for(dim_t k = 0; k < k_iter; k++)
     {
         /*Load 32 elements from row0 of B*/
-        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
+        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
         zmm0 = _mm512_shuffle_ps(zmm0, zmm0, 0xE4); // dummy shuffle
         zmm1 = _mm512_shuffle_ps(zmm1, zmm1, 0xE4); // dummy shuffle
 
         /*Load Next 32 elements from row0 of B*/
-        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row 
+        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row
         zmm7 = _mm512_loadu_ps (bbuf + 48); //load 48-63 from current row
         zmm6 = _mm512_shuffle_ps(zmm6, zmm6, 0xE4); // dummy shuffle
         zmm7 = _mm512_shuffle_ps(zmm7, zmm7, 0xE4); // dummy shuffle
 
         /*Broadcast col0 elements of 12 rows of A*/
         zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
-        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1 
+        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1
 
         zmm8 = _mm512_fmadd_ps(zmm0, zmm2, zmm8);
         zmm9 = _mm512_fmadd_ps(zmm1, zmm2, zmm9);
@@ -2112,7 +2697,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x64)
     if ( beta != 0.0 )
     {
         _cbuf = cbuf;
-        //load c and multiply with beta and 
+        //load c and multiply with beta and
         //add to accumulator and store back
         zmm3 = _mm512_set1_ps(beta);
 
@@ -2377,6 +2962,141 @@ POST_OPS_CLIP_2x64F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_DOWNSCALE_2x64F:
+    {
+      __m512 selector1 = _mm512_setzero_ps();
+      __m512 selector2 = _mm512_setzero_ps();
+      __m512 selector3 = _mm512_setzero_ps();
+      __m512 selector4 = _mm512_setzero_ps();
+
+      __m512 zero_point0 = _mm512_setzero_ps();
+      __m512 zero_point1 = _mm512_setzero_ps();
+      __m512 zero_point2 = _mm512_setzero_ps();
+      __m512 zero_point3 = _mm512_setzero_ps();
+
+      // Need to account for row vs column major swaps. For scalars
+      // scale and zero point, no implications.
+      // Even though different registers are used for scalar in column
+      // and row major downscale path, all those registers will contain
+      // the same value.
+
+      if( post_ops_list_temp->scale_factor_len == 1 )
+      {
+        selector1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector4 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+      }
+      if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+      {
+        zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+      }
+      if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+      {
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          selector3 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+          selector4 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+        }
+        if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          zero_point2 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+          zero_point3 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector2, zero_point1);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector3, zero_point2);
+
+        //c[0, 48-63]
+        F32_SCL_MULRND(zmm11, selector4, zero_point3);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector1, zero_point0);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[1, 32-47]
+        F32_SCL_MULRND(zmm14, selector3, zero_point2);
+
+        //c[1, 48-63]
+        F32_SCL_MULRND(zmm15, selector4, zero_point3);
+      }
+      else
+      {
+        // If original output was columns major, then by the time
+        // kernel sees it, the matrix would be accessed as if it were
+        // transposed. Due to this the scale as well as zp array will
+        // be accessed by the ic index, and each scale/zp element
+        // corresponds to an entire row of the transposed output array,
+        // instead of an entire column.
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 0 ) );
+          selector2 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 1 ) );
+        }
+        if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 0 );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 1);
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector1, zero_point0);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector1, zero_point0);
+
+        //c[0, 48-63]
+        F32_SCL_MULRND(zmm11, selector1, zero_point0);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector2, zero_point1);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[1, 32-47]
+        F32_SCL_MULRND(zmm14, selector2, zero_point1);
+
+        //c[1, 48-63]
+        F32_SCL_MULRND(zmm15, selector2, zero_point1);
+      }
+    POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+}
 POST_OPS_MATRIX_ADD_2x64F:
     {
         dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -2402,7 +3122,7 @@ POST_OPS_MATRIX_MUL_2x64F:
         F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,1,12,13,14,15);
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-    }    
+    }
 POST_OPS_SWISH_2x64F:
     {
         zmm7 =
@@ -2438,7 +3158,7 @@ POST_OPS_SWISH_2x64F:
 POST_OPS_2x64F_DISABLE:
     ;
 
-    _mm512_storeu_ps(cbuf, zmm8); 
+    _mm512_storeu_ps(cbuf, zmm8);
     _mm512_storeu_ps(cbuf + 16, zmm9);
     _mm512_storeu_ps(cbuf + 32, zmm10);
     _mm512_storeu_ps(cbuf + 48, zmm11);
@@ -2460,7 +3180,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x64)
               &&POST_OPS_GELU_TANH_1x64F,
               &&POST_OPS_GELU_ERF_1x64F,
               &&POST_OPS_CLIP_1x64F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_1x64F,
               &&POST_OPS_MATRIX_ADD_1x64F,
               &&POST_OPS_SWISH_1x64F,
               &&POST_OPS_MATRIX_MUL_1x64F
@@ -2471,7 +3191,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x64)
 
     __m512 zmm0, zmm1, zmm2, zmm3, zmm4, zmm5, zmm6, zmm7;
     __m512 zmm8, zmm9, zmm10, zmm11;
-    
+
     /* zero the accumulator registers */
     ZERO_ACC_ZMM_4_REG(zmm8, zmm9, zmm10, zmm11);
 
@@ -2482,13 +3202,13 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x64)
     for(dim_t k = 0; k < k_iter; k++)
     {
         /*Load 32 elements from row0 of B*/
-        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
+        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
 
         /*Load Next 32 elements from row0 of B*/
-        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row 
+        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row
         zmm7 = _mm512_loadu_ps (bbuf + 48); //load 48-63 from current row
-        
+
         /*Broadcast col0 elements of 12 rows of A*/
         zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
 
@@ -2507,8 +3227,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x64)
     ALPHA_MUL_ACC_ZMM_4_REG(zmm8,  zmm9,  zmm10, zmm11, zmm0);
 
     if ( beta != 0.0 )
-    { 
-        //load c and multiply with beta and 
+    {
+        //load c and multiply with beta and
         //add to accumulator and store back
         zmm3 = _mm512_set1_ps(beta);
 
@@ -2675,6 +3395,112 @@ POST_OPS_CLIP_1x64F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_DOWNSCALE_1x64F:
+    {
+      __m512 selector1 = _mm512_setzero_ps();
+      __m512 selector2 = _mm512_setzero_ps();
+      __m512 selector3 = _mm512_setzero_ps();
+      __m512 selector4 = _mm512_setzero_ps();
+
+      __m512 zero_point0 = _mm512_setzero_ps();
+      __m512 zero_point1 = _mm512_setzero_ps();
+      __m512 zero_point2 = _mm512_setzero_ps();
+      __m512 zero_point3 = _mm512_setzero_ps();
+
+      // Need to account for row vs column major swaps. For scalars
+      // scale and zero point, no implications.
+      // Even though different registers are used for scalar in column
+      // and row major downscale path, all those registers will contain
+      // the same value.
+
+      if( post_ops_list_temp->scale_factor_len == 1 )
+      {
+        selector1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector4 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+      }
+      if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+      {
+        zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+      }
+      if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+      {
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          selector3 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+          selector4 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+        }
+        if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          zero_point2 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+          zero_point3 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector2, zero_point1);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector3, zero_point2);
+
+        //c[0, 48-63]
+        F32_SCL_MULRND(zmm11, selector4, zero_point3);
+      }
+      else
+      {
+        // If original output was columns major, then by the time
+        // kernel sees it, the matrix would be accessed as if it were
+        // transposed. Due to this the scale as well as zp array will
+        // be accessed by the ic index, and each scale/zp element
+        // corresponds to an entire row of the transposed output array,
+        // instead of an entire column.
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 0 ) );
+        }
+        if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 0 );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector1, zero_point0);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector1, zero_point0);
+
+        //c[0, 48-63]
+        F32_SCL_MULRND(zmm11, selector1, zero_point0);
+      }
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_MATRIX_ADD_1x64F:
     {
         dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -2694,7 +3520,7 @@ POST_OPS_MATRIX_MUL_1x64F:
         F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,0,8,9,10,11);
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-    }    
+    }
 POST_OPS_SWISH_1x64F:
     {
         zmm7 =
@@ -2718,7 +3544,7 @@ POST_OPS_SWISH_1x64F:
 POST_OPS_1x64F_DISABLE:
     ;
 
-    _mm512_storeu_ps(cbuf, zmm8); 
+    _mm512_storeu_ps(cbuf, zmm8);
     _mm512_storeu_ps(cbuf + 16, zmm9);
     _mm512_storeu_ps(cbuf + 32, zmm10);
     _mm512_storeu_ps(cbuf + 48, zmm11);
@@ -2735,7 +3561,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x48)
               &&POST_OPS_GELU_TANH_5x48F,
               &&POST_OPS_GELU_ERF_5x48F,
               &&POST_OPS_CLIP_5x48F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_5x48F,
               &&POST_OPS_MATRIX_ADD_5x48F,
               &&POST_OPS_SWISH_5x48F,
               &&POST_OPS_MATRIX_MUL_5x48F
@@ -2763,16 +3589,16 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x48)
     for(dim_t k = 0; k < k_iter; k++)
     {
         /*Load 32 elements from row0 of B*/
-        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
+        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
 
         /*Load Next 32 elements from row0 of B*/
-        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row 
-        
+        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row
+
         /*Broadcast col0 elements of 12 rows of A*/
         zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
-        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1  
-        zmm4 = _mm512_set1_ps(*(abuf + 2*rs_a)); //broadcast c0r2 
+        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1
+        zmm4 = _mm512_set1_ps(*(abuf + 2*rs_a)); //broadcast c0r2
         zmm5 = _mm512_set1_ps(*(abuf + 3*rs_a)); //broadcast c0r3
 
         zmm8 = _mm512_fmadd_ps(zmm0, zmm2, zmm8);
@@ -2784,11 +3610,11 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x48)
         zmm14 = _mm512_fmadd_ps(zmm6, zmm3, zmm14);
 
         zmm2 = _mm512_set1_ps(*(abuf + 4*rs_a)); //broadcast c0r4
-        
+
         zmm16 = _mm512_fmadd_ps(zmm0, zmm4, zmm16);
         zmm17 = _mm512_fmadd_ps(zmm1, zmm4, zmm17);
         zmm18 = _mm512_fmadd_ps(zmm6, zmm4, zmm18);
-        
+
         zmm20 = _mm512_fmadd_ps(zmm0, zmm5, zmm20);
         zmm21 = _mm512_fmadd_ps(zmm1, zmm5, zmm21);
         zmm22 = _mm512_fmadd_ps(zmm6, zmm5, zmm22);
@@ -2811,7 +3637,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x48)
     if ( beta != 0.0 )
     {
       _cbuf = cbuf;
-      //load c and multiply with beta and 
+      //load c and multiply with beta and
       //add to accumulator and store back
       zmm3 = _mm512_set1_ps(beta);
 
@@ -3252,6 +4078,199 @@ POST_OPS_CLIP_5x48F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_DOWNSCALE_5x48F:
+    {
+      __m512 selector1 = _mm512_setzero_ps();
+      __m512 selector2 = _mm512_setzero_ps();
+      __m512 selector3 = _mm512_setzero_ps();
+      __m512 selector4 = _mm512_setzero_ps();
+
+      __m512 zero_point0 = _mm512_setzero_ps();
+      __m512 zero_point1 = _mm512_setzero_ps();
+      __m512 zero_point2 = _mm512_setzero_ps();
+      __m512 zero_point3 = _mm512_setzero_ps();
+
+      // Need to account for row vs column major swaps. For scalars
+      // scale and zero point, no implications.
+      // Even though different registers are used for scalar in column
+      // and row major downscale path, all those registers will contain
+      // the same value.
+
+      if( post_ops_list_temp->scale_factor_len == 1 )
+      {
+        selector1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector4 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+      }
+      if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+      {
+        zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+      }
+      if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+      {
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          selector3 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+        }
+        if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          zero_point2 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector2, zero_point1);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector3, zero_point2);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector1, zero_point0);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[1, 32-47]
+        F32_SCL_MULRND(zmm14, selector3, zero_point2);
+
+        //c[2, 0-15]
+        F32_SCL_MULRND(zmm16, selector1, zero_point0);
+
+        //c[2, 16-31]
+        F32_SCL_MULRND(zmm17, selector2, zero_point1);
+
+        //c[2, 32-47]
+        F32_SCL_MULRND(zmm18, selector3, zero_point2);
+
+        //c[3, 0-15]
+        F32_SCL_MULRND(zmm20, selector1, zero_point0);
+
+        //c[3, 16-31]
+        F32_SCL_MULRND(zmm21, selector2, zero_point1);
+
+        //c[3, 32-47]
+        F32_SCL_MULRND(zmm22, selector3, zero_point2);
+
+        //c[4, 0-15]
+        F32_SCL_MULRND(zmm24, selector1, zero_point0);
+
+        //c[4, 16-31]
+        F32_SCL_MULRND(zmm25, selector2, zero_point1);
+
+        //c[4, 32-47]
+        F32_SCL_MULRND(zmm26, selector3, zero_point2);
+      }
+      else
+      {
+        // If original output was columns major, then by the time
+        // kernel sees it, the matrix would be accessed as if it were
+        // transposed. Due to this the scale as well as zp array will
+        // be accessed by the ic index, and each scale/zp element
+        // corresponds to an entire row of the transposed output array,
+        // instead of an entire column.
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 0 ) );
+          selector2 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 1 ) );
+          selector3 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 2 ) );
+          selector4 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 3 ) );
+        }
+        if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 0 );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 1);
+          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 2 );
+          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 3 );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector1, zero_point0);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector1, zero_point0);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector2, zero_point1);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[1, 32-47]
+        F32_SCL_MULRND(zmm14, selector2, zero_point1);
+
+        //c[2, 0-15]
+        F32_SCL_MULRND(zmm16, selector3, zero_point2);
+
+        //c[2, 16-31]
+        F32_SCL_MULRND(zmm17, selector3, zero_point2);
+
+        //c[2, 32-47]
+        F32_SCL_MULRND(zmm18, selector3, zero_point2);
+
+        //c[3, 0-15]
+        F32_SCL_MULRND(zmm20, selector4, zero_point3);
+
+        //c[3, 16-31]
+        F32_SCL_MULRND(zmm21, selector4, zero_point3);
+
+        //c[3, 32-47]
+        F32_SCL_MULRND(zmm22, selector4, zero_point3);
+
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 = _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 4 ) );
+        }
+        if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 4 );
+        }
+        //c[4, 0-15]
+        F32_SCL_MULRND(zmm24, selector1, zero_point0);
+
+        //c[4, 16-31]
+        F32_SCL_MULRND(zmm25, selector1, zero_point0);
+
+        //c[4, 32-47]
+        F32_SCL_MULRND(zmm26, selector1, zero_point0);
+      }
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_MATRIX_ADD_5x48F:
     {
         dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -3295,7 +4314,7 @@ POST_OPS_MATRIX_MUL_5x48F:
         F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,4,24,25,26);
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-    }    
+    }
 POST_OPS_SWISH_5x48F:
     {
         __m512 zmm7 =
@@ -3352,7 +4371,7 @@ POST_OPS_SWISH_5x48F:
 POST_OPS_5x48F_DISABLE:
     ;
 
-    _mm512_storeu_ps(cbuf, zmm8); 
+    _mm512_storeu_ps(cbuf, zmm8);
     _mm512_storeu_ps(cbuf + 16, zmm9);
     _mm512_storeu_ps(cbuf + 32, zmm10);
     cbuf += rs_c;
@@ -3384,7 +4403,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x48)
               &&POST_OPS_GELU_TANH_4x48F,
               &&POST_OPS_GELU_ERF_4x48F,
               &&POST_OPS_CLIP_4x48F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_4x48F,
               &&POST_OPS_MATRIX_ADD_4x48F,
               &&POST_OPS_SWISH_4x48F,
               &&POST_OPS_MATRIX_MUL_4x48F
@@ -3410,16 +4429,16 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x48)
     for(dim_t k = 0; k < k_iter; k++)
     {
         /*Load 32 elements from row0 of B*/
-        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
+        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
 
         /*Load Next 32 elements from row0 of B*/
-        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row 
-        
+        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row
+
         /*Broadcast col0 elements of 12 rows of A*/
         zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
-        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1  
-        zmm4 = _mm512_set1_ps(*(abuf + 2*rs_a)); //broadcast c0r2 
+        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1
+        zmm4 = _mm512_set1_ps(*(abuf + 2*rs_a)); //broadcast c0r2
         zmm5 = _mm512_set1_ps(*(abuf + 3*rs_a)); //broadcast c0r3
 
         zmm8 = _mm512_fmadd_ps(zmm0, zmm2, zmm8);
@@ -3433,7 +4452,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x48)
         zmm16 = _mm512_fmadd_ps(zmm0, zmm4, zmm16);
         zmm17 = _mm512_fmadd_ps(zmm1, zmm4, zmm17);
         zmm18 = _mm512_fmadd_ps(zmm6, zmm4, zmm18);
-        
+
         zmm20 = _mm512_fmadd_ps(zmm0, zmm5, zmm20);
         zmm21 = _mm512_fmadd_ps(zmm1, zmm5, zmm21);
         zmm22 = _mm512_fmadd_ps(zmm6, zmm5, zmm22);
@@ -3452,7 +4471,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x48)
     if ( beta != 0.0 )
     {
       _cbuf = cbuf;
-      //load c and multiply with beta and 
+      //load c and multiply with beta and
       //add to accumulator and store back
       zmm3 = _mm512_set1_ps(beta);
 
@@ -3818,6 +4837,171 @@ POST_OPS_CLIP_4x48F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_DOWNSCALE_4x48F:
+    {
+      __m512 selector1 = _mm512_setzero_ps();
+      __m512 selector2 = _mm512_setzero_ps();
+      __m512 selector3 = _mm512_setzero_ps();
+      __m512 selector4 = _mm512_setzero_ps();
+
+      __m512 zero_point0 = _mm512_setzero_ps();
+      __m512 zero_point1 = _mm512_setzero_ps();
+      __m512 zero_point2 = _mm512_setzero_ps();
+      __m512 zero_point3 = _mm512_setzero_ps();
+
+      // Need to account for row vs column major swaps. For scalars
+      // scale and zero point, no implications.
+      // Even though different registers are used for scalar in column
+      // and row major downscale path, all those registers will contain
+      // the same value.
+
+      if( post_ops_list_temp->scale_factor_len == 1 )
+      {
+        selector1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector4 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+      }
+      if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+      {
+        zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+      }
+      if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+      {
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          selector3 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+        }
+        if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          zero_point2 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector2, zero_point1);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector3, zero_point2);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector1, zero_point0);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[1, 32-47]
+        F32_SCL_MULRND(zmm14, selector3, zero_point2);
+
+        //c[2, 0-15]
+        F32_SCL_MULRND(zmm16, selector1, zero_point0);
+
+        //c[2, 16-31]
+        F32_SCL_MULRND(zmm17, selector2, zero_point1);
+
+        //c[2, 32-47]
+        F32_SCL_MULRND(zmm18, selector3, zero_point2);
+
+        //c[3, 0-15]
+        F32_SCL_MULRND(zmm20, selector1, zero_point0);
+
+        //c[3, 16-31]
+        F32_SCL_MULRND(zmm21, selector2, zero_point1);
+
+        //c[3, 32-47]
+        F32_SCL_MULRND(zmm22, selector3, zero_point2);
+      }
+      else
+      {
+        // If original output was columns major, then by the time
+        // kernel sees it, the matrix would be accessed as if it were
+        // transposed. Due to this the scale as well as zp array will
+        // be accessed by the ic index, and each scale/zp element
+        // corresponds to an entire row of the transposed output array,
+        // instead of an entire column.
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 0 ) );
+          selector2 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 1 ) );
+          selector3 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 2 ) );
+          selector4 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 3 ) );
+        }
+        if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 0 );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 1);
+          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 2 );
+          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 3 );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector1, zero_point0);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector1, zero_point0);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector2, zero_point1);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[1, 32-47]
+        F32_SCL_MULRND(zmm14, selector2, zero_point1);
+
+        //c[2, 0-15]
+        F32_SCL_MULRND(zmm16, selector3, zero_point2);
+
+        //c[2, 16-31]
+        F32_SCL_MULRND(zmm17, selector3, zero_point2);
+
+        //c[2, 32-47]
+        F32_SCL_MULRND(zmm18, selector3, zero_point2);
+
+        //c[3, 0-15]
+        F32_SCL_MULRND(zmm20, selector4, zero_point3);
+
+        //c[3, 16-31]
+        F32_SCL_MULRND(zmm21, selector4, zero_point3);
+
+        //c[3, 32-47]
+        F32_SCL_MULRND(zmm22, selector4, zero_point3);
+      }
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_MATRIX_ADD_4x48F:
     {
         dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -3855,7 +5039,7 @@ POST_OPS_MATRIX_MUL_4x48F:
         F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,3,20,21,22);
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-    }    
+    }
 POST_OPS_SWISH_4x48F:
     {
         __m512 zmm7 =
@@ -3903,7 +5087,7 @@ POST_OPS_SWISH_4x48F:
 POST_OPS_4x48F_DISABLE:
     ;
 
-    _mm512_storeu_ps(cbuf, zmm8); 
+    _mm512_storeu_ps(cbuf, zmm8);
     _mm512_storeu_ps(cbuf + 16, zmm9);
     _mm512_storeu_ps(cbuf + 32, zmm10);
     cbuf += rs_c;
@@ -3931,7 +5115,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x48)
               &&POST_OPS_GELU_TANH_3x48F,
               &&POST_OPS_GELU_ERF_3x48F,
               &&POST_OPS_CLIP_3x48F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_3x48F,
               &&POST_OPS_MATRIX_ADD_3x48F,
               &&POST_OPS_SWISH_3x48F,
               &&POST_OPS_MATRIX_MUL_3x48F
@@ -3957,16 +5141,16 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x48)
     for(dim_t k = 0; k < k_iter; k++)
     {
         /*Load 32 elements from row0 of B*/
-        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
+        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
 
         /*Load Next 32 elements from row0 of B*/
-        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row 
-        
+        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row
+
         /*Broadcast col0 elements of 12 rows of A*/
         zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
-        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1  
-        zmm4 = _mm512_set1_ps(*(abuf + 2*rs_a)); //broadcast c0r2 
+        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1
+        zmm4 = _mm512_set1_ps(*(abuf + 2*rs_a)); //broadcast c0r2
 
         zmm8 = _mm512_fmadd_ps(zmm0, zmm2, zmm8);
         zmm9 = _mm512_fmadd_ps(zmm1, zmm2, zmm9);
@@ -3978,7 +5162,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x48)
 
         zmm16 = _mm512_fmadd_ps(zmm0, zmm4, zmm16);
         zmm17 = _mm512_fmadd_ps(zmm1, zmm4, zmm17);
-        zmm18 = _mm512_fmadd_ps(zmm6, zmm4, zmm18);        
+        zmm18 = _mm512_fmadd_ps(zmm6, zmm4, zmm18);
 
         bbuf += rs_b;  //move b pointer to next row
         abuf += cs_a;  //move a pointer to next col
@@ -3993,7 +5177,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x48)
     if ( beta != 0.0 )
     {
       _cbuf = cbuf;
-      //load c and multiply with beta and 
+      //load c and multiply with beta and
       //add to accumulator and store back
       zmm3 = _mm512_set1_ps(beta);
 
@@ -4284,6 +5468,143 @@ POST_OPS_CLIP_3x48F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_DOWNSCALE_3x48F:
+    {
+      __m512 selector1 = _mm512_setzero_ps();
+      __m512 selector2 = _mm512_setzero_ps();
+      __m512 selector3 = _mm512_setzero_ps();
+
+      __m512 zero_point0 = _mm512_setzero_ps();
+      __m512 zero_point1 = _mm512_setzero_ps();
+      __m512 zero_point2 = _mm512_setzero_ps();
+
+      // Need to account for row vs column major swaps. For scalars
+      // scale and zero point, no implications.
+      // Even though different registers are used for scalar in column
+      // and row major downscale path, all those registers will contain
+      // the same value.
+
+      if( post_ops_list_temp->scale_factor_len == 1 )
+      {
+        selector1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+      }
+      if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+      {
+        zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+      }
+      if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+      {
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          selector3 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+        }
+        if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          zero_point2 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector2, zero_point1);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector3, zero_point2);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector1, zero_point0);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[1, 32-47]
+        F32_SCL_MULRND(zmm14, selector3, zero_point2);
+
+        //c[2, 0-15]
+        F32_SCL_MULRND(zmm16, selector1, zero_point0);
+
+        //c[2, 16-31]
+        F32_SCL_MULRND(zmm17, selector2, zero_point1);
+
+        //c[2, 32-47]
+        F32_SCL_MULRND(zmm18, selector3, zero_point2);
+      }
+      else
+      {
+        // If original output was columns major, then by the time
+        // kernel sees it, the matrix would be accessed as if it were
+        // transposed. Due to this the scale as well as zp array will
+        // be accessed by the ic index, and each scale/zp element
+        // corresponds to an entire row of the transposed output array,
+        // instead of an entire column.
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 0 ) );
+          selector2 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 1 ) );
+          selector3 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 2 ) );
+        }
+        if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 0 );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 1);
+          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 2 );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector1, zero_point0);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector1, zero_point0);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector2, zero_point1);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[1, 32-47]
+        F32_SCL_MULRND(zmm14, selector2, zero_point1);
+
+        //c[2, 0-15]
+        F32_SCL_MULRND(zmm16, selector3, zero_point2);
+
+        //c[2, 16-31]
+        F32_SCL_MULRND(zmm17, selector3, zero_point2);
+
+        //c[2, 32-47]
+        F32_SCL_MULRND(zmm18, selector3, zero_point2);
+      }
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_MATRIX_ADD_3x48F:
     {
         dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -4315,7 +5636,7 @@ POST_OPS_MATRIX_MUL_3x48F:
         F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,2,16,17,18);
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-    }    
+    }
 POST_OPS_SWISH_3x48F:
     {
         __m512 zmm7 =
@@ -4354,7 +5675,7 @@ POST_OPS_SWISH_3x48F:
 POST_OPS_3x48F_DISABLE:
     ;
 
-    _mm512_storeu_ps(cbuf, zmm8); 
+    _mm512_storeu_ps(cbuf, zmm8);
     _mm512_storeu_ps(cbuf + 16, zmm9);
     _mm512_storeu_ps(cbuf + 32, zmm10);
     cbuf += rs_c;
@@ -4378,7 +5699,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x48)
               &&POST_OPS_GELU_TANH_2x48F,
               &&POST_OPS_GELU_ERF_2x48F,
               &&POST_OPS_CLIP_2x48F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_2x48F,
               &&POST_OPS_MATRIX_ADD_2x48F,
               &&POST_OPS_SWISH_2x48F,
               &&POST_OPS_MATRIX_MUL_2x48F
@@ -4402,12 +5723,12 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x48)
     for(dim_t k = 0; k < k_iter; k++)
     {
         /*Load 32 elements from row0 of B*/
-        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
+        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
 
         /*Load Next 32 elements from row0 of B*/
-        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row 
-        
+        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row
+
         /*Broadcast col0 elements of 12 rows of A*/
         zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
         zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1
@@ -4432,7 +5753,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x48)
     if ( beta != 0.0 )
     {
       _cbuf = cbuf;
-      //load c and multiply with beta and 
+      //load c and multiply with beta and
       //add to accumulator and store back
       zmm3 = _mm512_set1_ps(beta);
 
@@ -4648,6 +5969,120 @@ POST_OPS_CLIP_2x48F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_DOWNSCALE_2x48F:
+    {
+      __m512 selector1 = _mm512_setzero_ps();
+      __m512 selector2 = _mm512_setzero_ps();
+      __m512 selector3 = _mm512_setzero_ps();
+
+      __m512 zero_point0 = _mm512_setzero_ps();
+      __m512 zero_point1 = _mm512_setzero_ps();
+      __m512 zero_point2 = _mm512_setzero_ps();
+
+      // Need to account for row vs column major swaps. For scalars
+      // scale and zero point, no implications.
+      // Even though different registers are used for scalar in column
+      // and row major downscale path, all those registers will contain
+      // the same value.
+
+      if( post_ops_list_temp->scale_factor_len == 1 )
+      {
+        selector1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+     }
+      if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+      {
+        zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+      }
+      if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+      {
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          selector3 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+        }
+        if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          zero_point2 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector2, zero_point1);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector3, zero_point2);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector1, zero_point0);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[1, 32-47]
+        F32_SCL_MULRND(zmm14, selector3, zero_point2);
+      }
+      else
+      {
+        // If original output was columns major, then by the time
+        // kernel sees it, the matrix would be accessed as if it were
+        // transposed. Due to this the scale as well as zp array will
+        // be accessed by the ic index, and each scale/zp element
+        // corresponds to an entire row of the transposed output array,
+        // instead of an entire column.
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 0 ) );
+          selector2 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 1 ) );
+        }
+        if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 0 );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 1);
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector1, zero_point0);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector1, zero_point0);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector2, zero_point1);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[1, 32-47]
+        F32_SCL_MULRND(zmm14, selector2, zero_point1);
+      }
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_MATRIX_ADD_2x48F:
     {
         dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -4673,7 +6108,7 @@ POST_OPS_MATRIX_MUL_2x48F:
         F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,1,12,13,14);
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-    }    
+    }
 POST_OPS_SWISH_2x48F:
     {
         __m512 zmm7 =
@@ -4703,7 +6138,7 @@ POST_OPS_SWISH_2x48F:
 POST_OPS_2x48F_DISABLE:
     ;
 
-    _mm512_storeu_ps(cbuf, zmm8); 
+    _mm512_storeu_ps(cbuf, zmm8);
     _mm512_storeu_ps(cbuf + 16, zmm9);
     _mm512_storeu_ps(cbuf + 32, zmm10);
     cbuf += rs_c;
@@ -4723,7 +6158,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x48)
               &&POST_OPS_GELU_TANH_1x48F,
               &&POST_OPS_GELU_ERF_1x48F,
               &&POST_OPS_CLIP_1x48F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_1x48F,
               &&POST_OPS_MATRIX_ADD_1x48F,
               &&POST_OPS_SWISH_1x48F,
               &&POST_OPS_MATRIX_MUL_1x48F
@@ -4745,12 +6180,12 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x48)
     for(dim_t k = 0; k < k_iter; k++)
     {
         /*Load 32 elements from row0 of B*/
-        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
+        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
 
         /*Load Next 32 elements from row0 of B*/
-        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row 
-        
+        zmm6 = _mm512_loadu_ps (bbuf + 32); //load 32-47 from current row
+
         /*Broadcast col0 elements of 12 rows of A*/
         zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
 
@@ -4767,8 +6202,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x48)
     ALPHA_MUL_ACC_ZMM_4_REG(zmm8,zmm9,zmm10,zmm12,zmm0)
 
     if ( beta != 0.0 )
-    { 
-      //load c and multiply with beta and 
+    {
+      //load c and multiply with beta and
       //add to accumulator and store back
       zmm3 = _mm512_set1_ps(beta);
 
@@ -4909,6 +6344,98 @@ POST_OPS_CLIP_1x48F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_DOWNSCALE_1x48F:
+    {
+      __m512 selector1 = _mm512_setzero_ps();
+      __m512 selector2 = _mm512_setzero_ps();
+      __m512 selector3 = _mm512_setzero_ps();
+
+      __m512 zero_point0 = _mm512_setzero_ps();
+      __m512 zero_point1 = _mm512_setzero_ps();
+      __m512 zero_point2 = _mm512_setzero_ps();
+
+      // Need to account for row vs column major swaps. For scalars
+      // scale and zero point, no implications.
+      // Even though different registers are used for scalar in column
+      // and row major downscale path, all those registers will contain
+      // the same value.
+
+      if( post_ops_list_temp->scale_factor_len == 1 )
+      {
+        selector1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+     }
+      if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+      {
+        zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+      }
+      if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+      {
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          selector3 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+        }
+        if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          zero_point2 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+        }
+
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector2, zero_point1);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector3, zero_point2);
+      }
+      else
+      {
+        // If original output was columns major, then by the time
+        // kernel sees it, the matrix would be accessed as if it were
+        // transposed. Due to this the scale as well as zp array will
+        // be accessed by the ic index, and each scale/zp element
+        // corresponds to an entire row of the transposed output array,
+        // instead of an entire column.
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 0 ) );
+        }
+        if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 0 );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector1, zero_point0);
+
+        //c[0, 32-47]
+        F32_SCL_MULRND(zmm10, selector1, zero_point0);
+      }
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_MATRIX_ADD_1x48F:
     {
         dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -4928,7 +6455,7 @@ POST_OPS_MATRIX_MUL_1x48F:
         F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,0,8,9,10);
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-    }    
+    }
 POST_OPS_SWISH_1x48F:
     {
         __m512 zmm7 =
@@ -4949,7 +6476,7 @@ POST_OPS_SWISH_1x48F:
 POST_OPS_1x48F_DISABLE:
     ;
 
-    _mm512_storeu_ps(cbuf, zmm8); 
+    _mm512_storeu_ps(cbuf, zmm8);
     _mm512_storeu_ps(cbuf + 16, zmm9);
     _mm512_storeu_ps(cbuf + 32, zmm10);
 }
@@ -4965,7 +6492,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x32)
               &&POST_OPS_GELU_TANH_5x32F,
               &&POST_OPS_GELU_ERF_5x32F,
               &&POST_OPS_CLIP_5x32F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_5x32F,
               &&POST_OPS_MATRIX_ADD_5x32F,
               &&POST_OPS_SWISH_5x32F,
               &&POST_OPS_MATRIX_MUL_5x32F
@@ -4992,13 +6519,13 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x32)
     for(dim_t k = 0; k < k_iter; k++)
     {
         /*Load 32 elements from row0 of B*/
-        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
+        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
 
        /*Broadcast col0 elements of 12 rows of A*/
         zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
-        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1  
-        zmm4 = _mm512_set1_ps(*(abuf + 2*rs_a)); //broadcast c0r2 
+        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1
+        zmm4 = _mm512_set1_ps(*(abuf + 2*rs_a)); //broadcast c0r2
         zmm5 = _mm512_set1_ps(*(abuf + 3*rs_a)); //broadcast c0r3
 
         zmm8 = _mm512_fmadd_ps(zmm0, zmm2, zmm8);
@@ -5008,10 +6535,10 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x32)
         zmm13 = _mm512_fmadd_ps(zmm1, zmm3, zmm13);
 
         zmm2 = _mm512_set1_ps(*(abuf + 4*rs_a)); //broadcast c0r4
-        
+
         zmm16 = _mm512_fmadd_ps(zmm0, zmm4, zmm16);
         zmm17 = _mm512_fmadd_ps(zmm1, zmm4, zmm17);
-        
+
         zmm20 = _mm512_fmadd_ps(zmm0, zmm5, zmm20);
         zmm21 = _mm512_fmadd_ps(zmm1, zmm5, zmm21);
 
@@ -5024,7 +6551,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x32)
     }//kloop
 
     zmm0 = _mm512_set1_ps(alpha);
-      
+
     ALPHA_MUL_ACC_ZMM_4_REG(zmm8,zmm9,zmm12,zmm13,zmm0)
     ALPHA_MUL_ACC_ZMM_4_REG(zmm16,zmm17,zmm20,zmm21,zmm0)
     ALPHA_MUL_ACC_ZMM_4_REG(zmm24,zmm25,zmm28,zmm29,zmm0)
@@ -5032,7 +6559,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x32)
     if ( beta != 0.0 )
     {
         _cbuf = cbuf;
-        //load c and multiply with beta and 
+        //load c and multiply with beta and
         //add to accumulator and store back
         zmm3 = _mm512_set1_ps(beta);
 
@@ -5350,6 +6877,165 @@ POST_OPS_CLIP_5x32F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_DOWNSCALE_5x32F:
+    {
+      __m512 selector1 = _mm512_setzero_ps();
+      __m512 selector2 = _mm512_setzero_ps();
+      __m512 selector3 = _mm512_setzero_ps();
+      __m512 selector4 = _mm512_setzero_ps();
+      __m512 selector5 = _mm512_setzero_ps();
+
+      __m512 zero_point0 = _mm512_setzero_ps();
+      __m512 zero_point1 = _mm512_setzero_ps();
+      __m512 zero_point2 = _mm512_setzero_ps();
+      __m512 zero_point3 = _mm512_setzero_ps();
+      __m512 zero_point4 = _mm512_setzero_ps();
+
+      // Need to account for row vs column major swaps. For scalars
+      // scale and zero point, no implications.
+      // Even though different registers are used for scalar in column
+      // and row major downscale path, all those registers will contain
+      // the same value.
+
+      if( post_ops_list_temp->scale_factor_len == 1 )
+      {
+        selector1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector4 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector5 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+      }
+      if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+      {
+        zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point4 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+      }
+      if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+      {
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+        }
+        if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector2, zero_point1);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector1, zero_point0);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[2, 0-15]
+        F32_SCL_MULRND(zmm16, selector1, zero_point0);
+
+        //c[2, 16-31]
+        F32_SCL_MULRND(zmm17, selector2, zero_point1);
+
+        //c[3, 0-15]
+        F32_SCL_MULRND(zmm20, selector1, zero_point0);
+
+        //c[3, 16-31]
+        F32_SCL_MULRND(zmm21, selector2, zero_point1);
+
+        //c[4, 0-15]
+        F32_SCL_MULRND(zmm24, selector1, zero_point0);
+
+        //c[4, 16-31]
+        F32_SCL_MULRND(zmm25, selector2, zero_point1);
+      }
+      else
+      {
+        // If original output was columns major, then by the time
+        // kernel sees it, the matrix would be accessed as if it were
+        // transposed. Due to this the scale as well as zp array will
+        // be accessed by the ic index, and each scale/zp element
+        // corresponds to an entire row of the transposed output array,
+        // instead of an entire column.
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 0 ) );
+          selector2 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 1 ) );
+          selector3 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 2 ) );
+          selector4 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 3 ) );
+          selector5 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 4 ) );
+        }
+        if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 0 );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 1);
+          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 2 );
+          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 3 );
+          zero_point4 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 4 );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector1, zero_point0);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector2, zero_point1);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[2, 0-15]
+        F32_SCL_MULRND(zmm16, selector3, zero_point2);
+
+        //c[2, 16-31]
+        F32_SCL_MULRND(zmm17, selector3, zero_point2);
+
+        //c[3, 0-15]
+        F32_SCL_MULRND(zmm20, selector4, zero_point3);
+
+        //c[3, 16-31]
+        F32_SCL_MULRND(zmm21, selector4, zero_point3);
+
+        //c[4, 0-15]
+        F32_SCL_MULRND(zmm24, selector5, zero_point4);
+
+        //c[4, 16-31]
+        F32_SCL_MULRND(zmm25, selector5, zero_point4);
+      }
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_MATRIX_ADD_5x32F:
     {
         dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -5393,7 +7079,7 @@ POST_OPS_MATRIX_MUL_5x32F:
         F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,4,24,25);
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-    }    
+    }
 POST_OPS_SWISH_5x32F:
     {
         __m512 zmm7 =
@@ -5435,7 +7121,7 @@ POST_OPS_SWISH_5x32F:
 POST_OPS_5x32F_DISABLE:
     ;
 
-    _mm512_storeu_ps(cbuf, zmm8); 
+    _mm512_storeu_ps(cbuf, zmm8);
     _mm512_storeu_ps(cbuf + 16, zmm9);
     cbuf += rs_c;
     _mm512_storeu_ps(cbuf, zmm12);
@@ -5462,7 +7148,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x32)
               &&POST_OPS_GELU_TANH_4x32F,
               &&POST_OPS_GELU_ERF_4x32F,
               &&POST_OPS_CLIP_4x32F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_4x32F,
               &&POST_OPS_MATRIX_ADD_4x32F,
               &&POST_OPS_SWISH_4x32F,
               &&POST_OPS_MATRIX_MUL_4x32F
@@ -5487,13 +7173,13 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x32)
     for(dim_t k = 0; k < k_iter; k++)
     {
         /*Load 32 elements from row0 of B*/
-        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
+        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
 
        /*Broadcast col0 elements of 12 rows of A*/
         zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
-        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1  
-        zmm4 = _mm512_set1_ps(*(abuf + 2*rs_a)); //broadcast c0r2 
+        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1
+        zmm4 = _mm512_set1_ps(*(abuf + 2*rs_a)); //broadcast c0r2
         zmm5 = _mm512_set1_ps(*(abuf + 3*rs_a)); //broadcast c0r3
 
         zmm8 = _mm512_fmadd_ps(zmm0, zmm2, zmm8);
@@ -5501,10 +7187,10 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x32)
 
         zmm12 = _mm512_fmadd_ps(zmm0, zmm3, zmm12);
         zmm13 = _mm512_fmadd_ps(zmm1, zmm3, zmm13);
-    
+
         zmm16 = _mm512_fmadd_ps(zmm0, zmm4, zmm16);
         zmm17 = _mm512_fmadd_ps(zmm1, zmm4, zmm17);
-        
+
         zmm20 = _mm512_fmadd_ps(zmm0, zmm5, zmm20);
         zmm21 = _mm512_fmadd_ps(zmm1, zmm5, zmm21);
 
@@ -5514,14 +7200,14 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x32)
     }//kloop
 
     zmm0 = _mm512_set1_ps(alpha);
-      
+
     ALPHA_MUL_ACC_ZMM_4_REG(zmm8,zmm9,zmm12,zmm13,zmm0)
     ALPHA_MUL_ACC_ZMM_4_REG(zmm16,zmm17,zmm20,zmm21,zmm0)
 
     if ( beta != 0.0 )
     {
         _cbuf = cbuf;
-        //load c and multiply with beta and 
+        //load c and multiply with beta and
         //add to accumulator and store back
         zmm3 = _mm512_set1_ps(beta);
 
@@ -5788,6 +7474,143 @@ POST_OPS_CLIP_4x32F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_DOWNSCALE_4x32F:
+    {
+      __m512 selector1 = _mm512_setzero_ps();
+      __m512 selector2 = _mm512_setzero_ps();
+      __m512 selector3 = _mm512_setzero_ps();
+      __m512 selector4 = _mm512_setzero_ps();
+
+      __m512 zero_point0 = _mm512_setzero_ps();
+      __m512 zero_point1 = _mm512_setzero_ps();
+      __m512 zero_point2 = _mm512_setzero_ps();
+      __m512 zero_point3 = _mm512_setzero_ps();
+
+      // Need to account for row vs column major swaps. For scalars
+      // scale and zero point, no implications.
+      // Even though different registers are used for scalar in column
+      // and row major downscale path, all those registers will contain
+      // the same value.
+
+      if( post_ops_list_temp->scale_factor_len == 1 )
+      {
+        selector1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector4 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+      }
+      if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+      {
+        zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+      }
+      if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+      {
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+        }
+        if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector2, zero_point1);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector1, zero_point0);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[2, 0-15]
+        F32_SCL_MULRND(zmm16, selector1, zero_point0);
+
+        //c[2, 16-31]
+        F32_SCL_MULRND(zmm17, selector2, zero_point1);
+
+        //c[3, 0-15]
+        F32_SCL_MULRND(zmm20, selector1, zero_point0);
+
+        //c[3, 16-31]
+        F32_SCL_MULRND(zmm21, selector2, zero_point1);
+      }
+      else
+      {
+        // If original output was columns major, then by the time
+        // kernel sees it, the matrix would be accessed as if it were
+        // transposed. Due to this the scale as well as zp array will
+        // be accessed by the ic index, and each scale/zp element
+        // corresponds to an entire row of the transposed output array,
+        // instead of an entire column.
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 0 ) );
+          selector2 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 1 ) );
+          selector3 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 2 ) );
+          selector4 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 3 ) );
+        }
+        if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 0 );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 1);
+          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 2 );
+          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 3 );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector1, zero_point0);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector2, zero_point1);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[2, 0-15]
+        F32_SCL_MULRND(zmm16, selector3, zero_point2);
+
+        //c[2, 16-31]
+        F32_SCL_MULRND(zmm17, selector3, zero_point2);
+
+        //c[3, 0-15]
+        F32_SCL_MULRND(zmm20, selector4, zero_point3);
+
+        //c[3, 16-31]
+        F32_SCL_MULRND(zmm21, selector4, zero_point3);
+      }
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_MATRIX_ADD_4x32F:
     {
         dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -5825,7 +7648,7 @@ POST_OPS_MATRIX_MUL_4x32F:
         F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,3,20,21);
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-    }    
+    }
 POST_OPS_SWISH_4x32F:
     {
         __m512 zmm7 =
@@ -5861,7 +7684,7 @@ POST_OPS_SWISH_4x32F:
 POST_OPS_4x32F_DISABLE:
     ;
 
-    _mm512_storeu_ps(cbuf, zmm8); 
+    _mm512_storeu_ps(cbuf, zmm8);
     _mm512_storeu_ps(cbuf + 16, zmm9);
     cbuf += rs_c;
     _mm512_storeu_ps(cbuf, zmm12);
@@ -5885,7 +7708,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x32)
               &&POST_OPS_GELU_TANH_3x32F,
               &&POST_OPS_GELU_ERF_3x32F,
               &&POST_OPS_CLIP_3x32F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_3x32F,
               &&POST_OPS_MATRIX_ADD_3x32F,
               &&POST_OPS_SWISH_3x32F,
               &&POST_OPS_MATRIX_MUL_3x32F
@@ -5910,20 +7733,20 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x32)
     for(dim_t k = 0; k < k_iter; k++)
     {
         /*Load 32 elements from row0 of B*/
-        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
+        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
 
        /*Broadcast col0 elements of 12 rows of A*/
         zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
-        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1  
-        zmm4 = _mm512_set1_ps(*(abuf + 2*rs_a)); //broadcast c0r2 
+        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1
+        zmm4 = _mm512_set1_ps(*(abuf + 2*rs_a)); //broadcast c0r2
 
         zmm8 = _mm512_fmadd_ps(zmm0, zmm2, zmm8);
         zmm9 = _mm512_fmadd_ps(zmm1, zmm2, zmm9);
 
         zmm12 = _mm512_fmadd_ps(zmm0, zmm3, zmm12);
         zmm13 = _mm512_fmadd_ps(zmm1, zmm3, zmm13);
-    
+
         zmm16 = _mm512_fmadd_ps(zmm0, zmm4, zmm16);
         zmm17 = _mm512_fmadd_ps(zmm1, zmm4, zmm17);
 
@@ -5933,14 +7756,14 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x32)
     }//kloop
 
     zmm0 = _mm512_set1_ps(alpha);
-      
+
     ALPHA_MUL_ACC_ZMM_4_REG(zmm8,zmm9,zmm12,zmm13,zmm0)
     ALPHA_MUL_ACC_ZMM_4_REG(zmm16,zmm17,zmm20,zmm21,zmm0)
 
     if ( beta != 0.0 )
     {
         _cbuf = cbuf;
-        //load c and multiply with beta and 
+        //load c and multiply with beta and
         //add to accumulator and store back
         zmm3 = _mm512_set1_ps(beta);
 
@@ -6157,6 +7980,121 @@ POST_OPS_CLIP_3x32F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_DOWNSCALE_3x32F:
+    {
+      __m512 selector1 = _mm512_setzero_ps();
+      __m512 selector2 = _mm512_setzero_ps();
+      __m512 selector3 = _mm512_setzero_ps();
+
+      __m512 zero_point0 = _mm512_setzero_ps();
+      __m512 zero_point1 = _mm512_setzero_ps();
+      __m512 zero_point2 = _mm512_setzero_ps();
+
+      // Need to account for row vs column major swaps. For scalars
+      // scale and zero point, no implications.
+      // Even though different registers are used for scalar in column
+      // and row major downscale path, all those registers will contain
+      // the same value.
+
+      if( post_ops_list_temp->scale_factor_len == 1 )
+      {
+        selector1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+      }
+      if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+      {
+        zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+      }
+      if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+      {
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+        }
+        if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector2, zero_point1);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector1, zero_point0);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[2, 0-15]
+        F32_SCL_MULRND(zmm16, selector1, zero_point0);
+
+        //c[2, 16-31]
+        F32_SCL_MULRND(zmm17, selector2, zero_point1);
+      }
+      else
+      {
+        // If original output was columns major, then by the time
+        // kernel sees it, the matrix would be accessed as if it were
+        // transposed. Due to this the scale as well as zp array will
+        // be accessed by the ic index, and each scale/zp element
+        // corresponds to an entire row of the transposed output array,
+        // instead of an entire column.
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 0 ) );
+          selector2 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 1 ) );
+          selector3 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 2 ) );
+        }
+        if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 0 );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 1);
+          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 2 );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector1, zero_point0);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector2, zero_point1);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+
+        //c[2, 0-15]
+        F32_SCL_MULRND(zmm16, selector3, zero_point2);
+
+        //c[2, 16-31]
+        F32_SCL_MULRND(zmm17, selector3, zero_point2);
+      }
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_MATRIX_ADD_3x32F:
     {
         dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -6188,7 +8126,7 @@ POST_OPS_MATRIX_MUL_3x32F:
         F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,2,16,17);
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-    }    
+    }
 POST_OPS_SWISH_3x32F:
     {
         __m512 zmm7 =
@@ -6218,7 +8156,7 @@ POST_OPS_SWISH_3x32F:
 POST_OPS_3x32F_DISABLE:
     ;
 
-    _mm512_storeu_ps(cbuf, zmm8); 
+    _mm512_storeu_ps(cbuf, zmm8);
     _mm512_storeu_ps(cbuf + 16, zmm9);
     cbuf += rs_c;
     _mm512_storeu_ps(cbuf, zmm12);
@@ -6239,7 +8177,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x32)
               &&POST_OPS_GELU_TANH_2x32F,
               &&POST_OPS_GELU_ERF_2x32F,
               &&POST_OPS_CLIP_2x32F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_2x32F,
               &&POST_OPS_MATRIX_ADD_2x32F,
               &&POST_OPS_SWISH_2x32F,
               &&POST_OPS_MATRIX_MUL_2x32F
@@ -6262,32 +8200,32 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x32)
     for(dim_t k = 0; k < k_iter; k++)
     {
         /*Load 32 elements from row0 of B*/
-        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
+        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
 
        /*Broadcast col0 elements of 12 rows of A*/
         zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
-        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1  
+        zmm3 = _mm512_set1_ps(*(abuf + 1*rs_a)); //broadcast c0r1
 
         zmm8 = _mm512_fmadd_ps(zmm0, zmm2, zmm8);
         zmm9 = _mm512_fmadd_ps(zmm1, zmm2, zmm9);
 
         zmm12 = _mm512_fmadd_ps(zmm0, zmm3, zmm12);
         zmm13 = _mm512_fmadd_ps(zmm1, zmm3, zmm13);
-    
+
         bbuf += rs_b;  //move b pointer to next row
         abuf += cs_a;  //move a pointer to next col
 
     }//kloop
 
     zmm0 = _mm512_set1_ps(alpha);
-      
+
     ALPHA_MUL_ACC_ZMM_4_REG(zmm8,zmm9,zmm12,zmm13,zmm0)
 
     if ( beta != 0.0 )
     {
         _cbuf = cbuf;
-        //load c and multiply with beta and 
+        //load c and multiply with beta and
         //add to accumulator and store back
         zmm3 = _mm512_set1_ps(beta);
 
@@ -6452,6 +8390,99 @@ POST_OPS_CLIP_2x32F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_DOWNSCALE_2x32F:
+    {
+      __m512 selector1 = _mm512_setzero_ps();
+      __m512 selector2 = _mm512_setzero_ps();
+
+      __m512 zero_point0 = _mm512_setzero_ps();
+      __m512 zero_point1 = _mm512_setzero_ps();
+
+      // Need to account for row vs column major swaps. For scalars
+      // scale and zero point, no implications.
+      // Even though different registers are used for scalar in column
+      // and row major downscale path, all those registers will contain
+      // the same value.
+
+      if( post_ops_list_temp->scale_factor_len == 1 )
+      {
+        selector1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+      }
+      if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+      {
+        zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+      }
+      if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+      {
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+        }
+        if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector2, zero_point1);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector1, zero_point0);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+      }
+      else
+      {
+        // If original output was columns major, then by the time
+        // kernel sees it, the matrix would be accessed as if it were
+        // transposed. Due to this the scale as well as zp array will
+        // be accessed by the ic index, and each scale/zp element
+        // corresponds to an entire row of the transposed output array,
+        // instead of an entire column.
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 0 ) );
+          selector2 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 1 ) );
+        }
+        if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 0 );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 1);
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector1, zero_point0);
+
+        //c[1, 0-15]
+        F32_SCL_MULRND(zmm12, selector2, zero_point1);
+
+        //c[1, 16-31]
+        F32_SCL_MULRND(zmm13, selector2, zero_point1);
+      }
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_MATRIX_ADD_2x32F:
     {
         dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -6477,7 +8508,7 @@ POST_OPS_MATRIX_MUL_2x32F:
         F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,1,12,13);
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-    }    
+    }
 POST_OPS_SWISH_2x32F:
     {
         __m512 zmm7 =
@@ -6501,7 +8532,7 @@ POST_OPS_SWISH_2x32F:
 POST_OPS_2x32F_DISABLE:
     ;
 
-    _mm512_storeu_ps(cbuf, zmm8); 
+    _mm512_storeu_ps(cbuf, zmm8);
     _mm512_storeu_ps(cbuf + 16, zmm9);
     cbuf += rs_c;
     _mm512_storeu_ps(cbuf, zmm12);
@@ -6519,7 +8550,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x32)
               &&POST_OPS_GELU_TANH_1x32F,
               &&POST_OPS_GELU_ERF_1x32F,
               &&POST_OPS_CLIP_1x32F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_1x32F,
               &&POST_OPS_MATRIX_ADD_1x32F,
               &&POST_OPS_SWISH_1x32F,
               &&POST_OPS_MATRIX_MUL_1x32F
@@ -6541,27 +8572,27 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x32)
     for(dim_t k = 0; k < k_iter; k++)
     {
         /*Load 32 elements from row0 of B*/
-        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row 
+        zmm0 = _mm512_loadu_ps (bbuf );     //load 0-15 values from current row
         zmm1 = _mm512_loadu_ps (bbuf + 16); //load 16-31 values from current row
 
        /*Broadcast col0 elements of 12 rows of A*/
-        zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0 
+        zmm2 = _mm512_set1_ps(*(abuf + 0*rs_a)); //broadcast c0r0
 
         zmm8 = _mm512_fmadd_ps(zmm0, zmm2, zmm8);
         zmm9 = _mm512_fmadd_ps(zmm1, zmm2, zmm9);
-    
+
         bbuf += rs_b;  //move b pointer to next row
         abuf += cs_a;  //move a pointer to next col
 
     }//kloop
 
     zmm0 = _mm512_set1_ps(alpha);
-      
+
     ALPHA_MUL_ACC_ZMM_4_REG(zmm8,zmm9,zmm12,zmm13,zmm0)
 
     if ( beta != 0.0 )
     {
-        //load c and multiply with beta and 
+        //load c and multiply with beta and
         //add to accumulator and store back
         zmm3 = _mm512_set1_ps(beta);
 
@@ -6675,6 +8706,82 @@ POST_OPS_CLIP_1x32F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_DOWNSCALE_1x32F:
+    {
+      __m512 selector1 = _mm512_setzero_ps();
+      __m512 selector2 = _mm512_setzero_ps();
+
+      __m512 zero_point0 = _mm512_setzero_ps();
+      __m512 zero_point1 = _mm512_setzero_ps();
+
+      // Need to account for row vs column major swaps. For scalars
+      // scale and zero point, no implications.
+      // Even though different registers are used for scalar in column
+      // and row major downscale path, all those registers will contain
+      // the same value.
+
+      if( post_ops_list_temp->scale_factor_len == 1 )
+      {
+        selector1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        selector2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+      }
+      if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+      {
+        zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+      }
+      if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+      {
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+        }
+        if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+          zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                        post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector2, zero_point1);
+      }
+      else
+      {
+        // If original output was columns major, then by the time
+        // kernel sees it, the matrix would be accessed as if it were
+        // transposed. Due to this the scale as well as zp array will
+        // be accessed by the ic index, and each scale/zp element
+        // corresponds to an entire row of the transposed output array,
+        // instead of an entire column.
+        if( post_ops_list_temp->scale_factor_len > 1 )
+        {
+          selector1 =
+              _mm512_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                              post_ops_attr.post_op_c_i + 0 ) );
+        }
+        if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+        {
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                post_ops_attr.post_op_c_i + 0 );
+        }
+        //c[0, 0-15]
+        F32_SCL_MULRND(zmm8, selector1, zero_point0);
+
+        //c[0, 16-31]
+        F32_SCL_MULRND(zmm9, selector1, zero_point0);
+      }
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_MATRIX_ADD_1x32F:
     {
         dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -6694,7 +8801,7 @@ POST_OPS_MATRIX_MUL_1x32F:
         F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,0,8,9);
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-    }    
+    }
 POST_OPS_SWISH_1x32F:
     {
         __m512 zmm7 =
@@ -6712,7 +8819,7 @@ POST_OPS_SWISH_1x32F:
 POST_OPS_1x32F_DISABLE:
     ;
 
-    _mm512_storeu_ps(cbuf, zmm8); 
+    _mm512_storeu_ps(cbuf, zmm8);
     _mm512_storeu_ps(cbuf + 16, zmm9);
 }
 #endif

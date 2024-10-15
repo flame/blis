@@ -25,3 +25,10 @@ c n n n n 160 6400 2051 160 2051 160 bf16bf16f32obf16:bias,matrix_mul
 c n n n n 160 6400 2051 160 2051 160 bf16bf16f32of32:bias,matrix_add
 r n n n n 160 6424 2051 2051 6424 6424 *:bias,swish
 r n n n r 74 512 515 515 512 512 *:none
+c n t n n 1 10 10 10 10 1 f32f32f32of32:none
+r t t n p 84 22 921 84 921 22 f32f32f32of32:none
+c t n p n 67 52 1003 1003 1003 67 f32f32f32of32:none
+r n n n n 66 73 1022 1022 73 73 f32f32f32of32:scale=scalar,zp=scalar
+r n t n n 1 690 2050 2050 2050 690 f32f32f32of32:scale=scalar,zp=vector
+c n n n n 6 64 1024 96 1024 96 f32f32f32of32:scale=vector,zp=scalar
+r n t n n 1 690 2050 2050 2050 690 f32f32f32of32:scale=vector,zp=vector

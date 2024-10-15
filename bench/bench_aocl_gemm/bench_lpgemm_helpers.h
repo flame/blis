@@ -59,6 +59,7 @@ char bench_mode = 'p';
 int32_t global_n_repeat = 0;
 
 char global_dscale_out = 'n';
+char global_can_dscale = 'n';
 
 dim_t num_eltwise = 0; // To keep track of eltwise operations.
 

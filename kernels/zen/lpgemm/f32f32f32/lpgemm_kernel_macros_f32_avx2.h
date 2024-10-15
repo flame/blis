@@ -81,6 +81,16 @@
 \
 	reg = _mm_min_ps( _mm_max_ps( reg, min ), max ); \
 
+#define F32_SCL_MULRND_AVX2(reg, selector, zero_point)   \
+\
+	reg = _mm256_mul_ps(reg, selector);  \
+	reg = _mm256_add_ps(reg, zero_point);  \
+
+#define F32_SCL_MULRND_SSE(reg, selector, zero_point)   \
+\
+	reg = _mm_mul_ps(reg, selector);   \
+	reg = _mm_add_ps(reg, zero_point);   \
+
 //Zero-out the given YMM accumulator registers
 #define ZERO_ACC_YMM_4_REG(ymm0,ymm1,ymm2,ymm3) \
       ymm0 = _mm256_setzero_ps(); \
@@ -94,7 +104,7 @@
       xmm1 = _mm_setzero_ps(); \
       xmm2 = _mm_setzero_ps(); \
       xmm3 = _mm_setzero_ps();
- 
+
 /*Multiply alpha with accumulator registers and store back*/
 #define ALPHA_MUL_ACC_YMM_4_REG(ymm0,ymm1,ymm2,ymm3,alpha) \
       ymm0 = _mm256_mul_ps(ymm0,alpha); \
@@ -108,7 +118,7 @@
       xmm1 = _mm_mul_ps(xmm1,alpha); \
       xmm2 = _mm_mul_ps(xmm2,alpha); \
       xmm3 = _mm_mul_ps(xmm3,alpha);
- 
+
 /*Load C, Multiply with beta and add with A*B and store*/
 #define F32_C_BNZ_8(cbuf,rs_c,ymm0,beta,ymm2) \
       ymm0 = _mm256_loadu_ps(cbuf); \

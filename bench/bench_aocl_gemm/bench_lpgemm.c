@@ -321,7 +321,29 @@ static inline float mat_mul_accuracy_check_downscale_bf16bf16f32obf16
                 zp_float );
     return out_temp_accum;
 }
+static inline float mat_mul_accuracy_check_downscale_f32f32f32of32
+     (
+       float temp_accum,
+       aocl_post_op*  post_op,
+       dim_t j
+     )
+{
+    dim_t j_scale = j;
+    if ( ( post_op->sum )->scale_factor_len == 1 )
+    {
+       j_scale = 0;
+    }
 
+    dim_t j_zp = j;
+    if ( ( post_op->sum )->zero_point_len == 1 )
+    {
+       j_zp = 0;
+    }
+    float out_temp_accum = ( temp_accum *
+                ( *( ( float* )( post_op->sum )->scale_factor + j_scale ) ) +
+                 *( ( float* )( post_op->sum )->zero_point + j_zp ) );
+    return out_temp_accum;
+}
 #define GEN_MAT_MUL_ACC_CHK_ACCUM(A_type, B_type, C_type,ACCUM_type,BLAS_SFX) \
 static inline ACCUM_type mat_mul_accuracy_check_accum_ ## BLAS_SFX \
      (\
@@ -989,7 +1011,7 @@ GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int32_t,int32_t,float,u8s8s32os32,u8
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int8_t,int32_t,float,u8s8s32os8,u8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(bfloat16,bfloat16,float,float,float,bf16bf16f32of32,bf16bf16f32obf16)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(bfloat16,bfloat16,bfloat16,float,float,bf16bf16f32obf16,bf16bf16f32obf16)
-GEN_MAT_MUL_ACC_CHK_DRV_FUNC(float,float,float,float,float,f32f32f32of32,bf16bf16f32obf16)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(float,float,float,float,float,f32f32f32of32,f32f32f32of32)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int32_t,int32_t,float,s8s8s32os32,s8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int8_t,int32_t,float,s8s8s32os8,s8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int16_t,int16_t,float,s8s8s16os16,s8s8s16os8)
@@ -1326,53 +1348,50 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         } \
     } \
  \
-    if ( global_dscale_out == 'y' ) \
+    if ( global_dscale_out == 'y' || global_can_dscale == 'y') \
     { \
         post_ops->seq_vector[cur_op_index] = SCALE; \
         cur_op_index++; \
  \
         ( post_ops->sum )->is_power_of_2 = FALSE; \
-        if ( global_dscale_out == 'y' ) \
+        dim_t n_scale = n; \
+        if ( is_scalar_scale == TRUE ) \
         { \
-            dim_t n_scale = n; \
-            if ( is_scalar_scale == TRUE ) \
-            { \
-                n_scale = 1; \
-            } \
- \
-            dim_t n_zp = n; \
-            if ( is_scalar_zp == TRUE ) \
-            { \
-                n_zp = 1; \
-            } \
- \
-            /* Allocate scale buffer, return early if alloc fails.*/ \
-            ( post_ops->sum )->scale_factor = malloc( n_scale * sizeof( DSCALE_type ) ); \
-            if ( ( post_ops->sum )->scale_factor == NULL ) \
-            { \
-                goto err_handler; \
-            } \
-            ( post_ops->sum )->zero_point = malloc( n_zp * sizeof( C_DSCALE_type ) ); \
-            if ( ( post_ops->sum )->zero_point == NULL ) \
-            { \
-                goto err_handler; \
-            } \
- \
-            /* Fill scale factor and zero points.*/ \
-            DSCALE_type* temp_dscale_ptr = ( DSCALE_type* )( post_ops->sum )->scale_factor; \
-            for ( dim_t i = 0; i < n_scale; ++i ) \
-            { \
-                temp_dscale_ptr[i] = ( ( DSCALE_type )2 ); \
-            } \
-            ( post_ops->sum )->scale_factor_len = n_scale; \
- \
-            C_DSCALE_type* temp_dzero_point_ptr = ( C_DSCALE_type* )( post_ops->sum )->zero_point; \
-            for ( dim_t i = 0; i < n_zp; ++i ) \
-            { \
-                temp_dzero_point_ptr[i] = (C_DSCALE_type)( ( i + 9 ) % 126 ); \
-            } \
-            ( post_ops->sum )->zero_point_len = n_zp; \
+            n_scale = 1; \
         } \
+\
+        dim_t n_zp = n; \
+        if ( is_scalar_zp == TRUE ) \
+        { \
+            n_zp = 1; \
+        } \
+\
+        /* Allocate scale buffer, return early if alloc fails.*/ \
+        ( post_ops->sum )->scale_factor = malloc( n_scale * sizeof( DSCALE_type ) ); \
+        if ( ( post_ops->sum )->scale_factor == NULL ) \
+        { \
+            goto err_handler; \
+        } \
+        ( post_ops->sum )->zero_point = malloc( n_zp * sizeof( C_DSCALE_type ) ); \
+        if ( ( post_ops->sum )->zero_point == NULL ) \
+        { \
+            goto err_handler; \
+        } \
+\
+        /* Fill scale factor and zero points.*/ \
+        DSCALE_type* temp_dscale_ptr = ( DSCALE_type* )( post_ops->sum )->scale_factor; \
+        for ( dim_t i = 0; i < n_scale; ++i ) \
+        { \
+            temp_dscale_ptr[i] = ( ( DSCALE_type )2 ); \
+        } \
+        ( post_ops->sum )->scale_factor_len = n_scale; \
+\
+        C_DSCALE_type* temp_dzero_point_ptr = ( C_DSCALE_type* )( post_ops->sum )->zero_point; \
+        for ( dim_t i = 0; i < n_zp; ++i ) \
+        { \
+            temp_dzero_point_ptr[i] = (C_DSCALE_type)( ( i + 9 ) % 126 ); \
+        } \
+        ( post_ops->sum )->zero_point_len = n_zp; \
     } \
  \
     if ( is_matrix_add == TRUE ) \
@@ -1492,7 +1511,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int16_t,float,int16_t,u8s8s16os16)
 GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int32_t,float,int32_t,u8s8s32os32)
 GEN_MAT_MUL_POST_OPS_CREATOR(bfloat16,float,float,bfloat16,bf16bf16f32of32)
-GEN_MAT_MUL_POST_OPS_CREATOR(bfloat16,float,float,float,f32f32f32of32)
+GEN_MAT_MUL_POST_OPS_CREATOR(float,float,float,float,f32f32f32of32)
 GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int32_t,float,int32_t,s8s8s32os32)
 GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int16_t,float,int16_t,s8s8s16os16)
 
@@ -1921,6 +1940,7 @@ int main( int argc, char** argv )
                  ( strcmp( gemm_type_str, "*" ) == 0 ) )
             {
                 strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
+                global_can_dscale = 'y';
                 global_dscale_out = 'n';
                 global_pre_op = 'n';
                 GEN_FUNC_NAME(mat_mul_bench_main_,f32f32f32of32)

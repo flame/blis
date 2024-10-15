@@ -53,7 +53,7 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
               &&POST_OPS_GELU_TANH_6x16F,
               &&POST_OPS_GELU_ERF_6x16F,
               &&POST_OPS_CLIP_6x16F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_6x16F,
               &&POST_OPS_MATRIX_ADD_6x16F,
               &&POST_OPS_SWISH_6x16F,
               &&POST_OPS_MATRIX_MUL_6x16F
@@ -85,7 +85,7 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
             cij += nr_cur*cs_c; bj += nr_cur*cs_b; n_left -= nr_cur;
 			post_ops_attr.post_op_c_j += 8;
         }
-  
+
         if ( 4 <= n_left )
         {
             const dim_t nr_cur = 4;
@@ -102,11 +102,11 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
             cij += nr_cur*cs_c; bj += nr_cur*cs_b; n_left -= nr_cur;
 			post_ops_attr.post_op_c_j += 4;
         }
-        
+
         if ( 2 <= n_left )
         {
             const dim_t nr_cur = 2;
-  
+
             lpgemm_rowvar_f32f32f32of32_6x2m
             (
               m0, k0,
@@ -119,9 +119,9 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
             cij += nr_cur*cs_c; bj += nr_cur*cs_b; n_left -= nr_cur;
 			post_ops_attr.post_op_c_j += 2;
         }
-        
+
         if ( 1 == n_left )
-        {    
+        {
             lpgemm_rowvar_f32f32f32of32_6x1m
             (
               m0, k0,
@@ -132,7 +132,7 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
               post_ops_list, post_ops_attr
             );
         }
-        
+
         return;
     }
 
@@ -162,9 +162,9 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
       float *abuf, *bbuf, *cbuf, *_cbuf;
 
       abuf = (float *)a + m * ps_a; // Move to next MRxKC in MCxKC (where MC>=MR)
-      bbuf = (float *)b;  //Same KCxNR panel is used across MCxKC block 
+      bbuf = (float *)b;  //Same KCxNR panel is used across MCxKC block
       cbuf = (float *)c + m * MR * rs_c; // Move to next MRXNR in output
-      
+
       /*_mm_prefetch( (MR X NR) from C*/
       _mm_prefetch((cbuf + 0*rs_c), _MM_HINT_T0);
       _mm_prefetch((cbuf + 1*rs_c), _MM_HINT_T0);
@@ -181,14 +181,14 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
         bbuf += rs_b;  //move b pointer to next row
 
         ymm2 = _mm256_broadcast_ss((abuf + 0*rs_a)); //broadcast c0r0
-        ymm3 = _mm256_broadcast_ss((abuf + 1*rs_a)); //broadcast c0r1  
+        ymm3 = _mm256_broadcast_ss((abuf + 1*rs_a)); //broadcast c0r1
 
         ymm4 = _mm256_fmadd_ps(ymm0, ymm2, ymm4);
         ymm5 = _mm256_fmadd_ps(ymm1, ymm2, ymm5);
         ymm6 = _mm256_fmadd_ps(ymm0, ymm3, ymm6);
         ymm7 = _mm256_fmadd_ps(ymm1, ymm3, ymm7);
 
-        ymm2 = _mm256_broadcast_ss((abuf + 2*rs_a)); //broadcast c0r2 
+        ymm2 = _mm256_broadcast_ss((abuf + 2*rs_a)); //broadcast c0r2
         ymm3 = _mm256_broadcast_ss((abuf + 3*rs_a)); //broadcast c0r3
 
         ymm8 = _mm256_fmadd_ps(ymm0, ymm2, ymm8);
@@ -197,13 +197,13 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
         ymm11 = _mm256_fmadd_ps(ymm1, ymm3, ymm11);
 
         ymm2 = _mm256_broadcast_ss((abuf + 4*rs_a)); //broadcast c0r4
-        ymm3 = _mm256_broadcast_ss((abuf + 5*rs_a)); //broadcast c0r5        
+        ymm3 = _mm256_broadcast_ss((abuf + 5*rs_a)); //broadcast c0r5
         abuf += cs_a;  //move a pointer to next col
-        
+
         ymm12 = _mm256_fmadd_ps(ymm0, ymm2, ymm12);
         ymm13 = _mm256_fmadd_ps(ymm1, ymm2, ymm13);
         ymm14 = _mm256_fmadd_ps(ymm0, ymm3, ymm14);
-        ymm15 = _mm256_fmadd_ps(ymm1, ymm3, ymm15);    
+        ymm15 = _mm256_fmadd_ps(ymm1, ymm3, ymm15);
       }//kloop
 
       ymm0 = _mm256_broadcast_ss(&(alpha));
@@ -214,7 +214,7 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
       if ( beta != 0.0 )
       {
         _cbuf = cbuf;
-        //load c and multiply with beta and 
+        //load c and multiply with beta and
         //add to accumulator and store back
         ymm3 = _mm256_broadcast_ss(&(beta));
 
@@ -559,6 +559,187 @@ POST_OPS_CLIP_6x16F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_DOWNSCALE_6x16F:
+      {
+        __m256 selector1 = _mm256_setzero_ps();
+        __m256 selector2 = _mm256_setzero_ps();
+        __m256 selector3 = _mm256_setzero_ps();
+        __m256 selector4 = _mm256_setzero_ps();
+        __m256 selector5 = _mm256_setzero_ps();
+        __m256 selector6 = _mm256_setzero_ps();
+
+        __m256 zero_point0 = _mm256_setzero_ps();
+        __m256 zero_point1 = _mm256_setzero_ps();
+        __m256 zero_point2 = _mm256_setzero_ps();
+        __m256 zero_point3 = _mm256_setzero_ps();
+        __m256 zero_point4 = _mm256_setzero_ps();
+        __m256 zero_point5 = _mm256_setzero_ps();
+
+        // Need to account for row vs column major swaps. For scalars
+        // scale and zero point, no implications.
+        // Even though different registers are used for scalar in column
+        // and row major downscale path, all those registers will contain
+        // the same value.
+
+        if( post_ops_list_temp->scale_factor_len == 1 )
+        {
+          selector1 =
+                _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector2 =
+                _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector3 =
+                _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector4 =
+                _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector5 =
+                _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector6 =
+                _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        }
+        if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+        {
+          zero_point0 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point1 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point2 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point3 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point4 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point5 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        }
+        if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+            ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+        {
+          if( post_ops_list_temp->scale_factor_len > 1 )
+          {
+            selector1 = _mm256_loadu_ps ( ( float* )post_ops_list_temp->scale_factor +
+                          post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+            selector2 = _mm256_loadu_ps ( ( float* )post_ops_list_temp->scale_factor +
+                          post_ops_attr.post_op_c_j + ( 1 * 8 ) );
+          }
+          if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+          {
+            zero_point0 = _mm256_loadu_ps ( (float* )post_ops_list_temp->op_args1 +
+                          post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+            zero_point1 = _mm256_loadu_ps ( (float* )post_ops_list_temp->op_args1 +
+                          post_ops_attr.post_op_c_j + ( 1 * 8 ) );
+          }
+          //c[0, 0-7]
+          F32_SCL_MULRND_AVX2(ymm4, selector1, zero_point0);
+
+          //c[0, 8-15]
+          F32_SCL_MULRND_AVX2(ymm5, selector2, zero_point1);
+
+          //c[1, 0-7]
+          F32_SCL_MULRND_AVX2(ymm6, selector1, zero_point0);
+
+          //c[1, 8-15]
+          F32_SCL_MULRND_AVX2(ymm7, selector2, zero_point1);
+
+          //c[2, 0-7]
+          F32_SCL_MULRND_AVX2(ymm8, selector1, zero_point0);
+
+          //c[2, 8-15]
+          F32_SCL_MULRND_AVX2(ymm9, selector2, zero_point1);
+
+          //c[3, 0-7]
+          F32_SCL_MULRND_AVX2(ymm10, selector1, zero_point0);
+
+          //c[3, 8-15]
+          F32_SCL_MULRND_AVX2(ymm11, selector2, zero_point1);
+
+          //c[4, 0-7]
+          F32_SCL_MULRND_AVX2(ymm12, selector1, zero_point0);
+
+          //c[4, 8-15]
+          F32_SCL_MULRND_AVX2(ymm13, selector2, zero_point1);
+
+          //c[5, 0-7]
+          F32_SCL_MULRND_AVX2(ymm14, selector1, zero_point0);
+
+          //c[5, 8-15]
+          F32_SCL_MULRND_AVX2(ymm15, selector2, zero_point1);
+        }
+        else
+        {
+          // If original output was columns major, then by the time
+          // kernel sees it, the matrix would be accessed as if it were
+          // transposed. Due to this the scale as well as zp array will
+          // be accessed by the ic index, and each scale/zp element
+          // corresponds to an entire row of the transposed output array,
+          // instead of an entire column.
+          if( post_ops_list_temp->scale_factor_len > 1 )
+          {
+            selector1 =
+                _mm256_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                                post_ops_attr.post_op_c_i + 0 ) );
+            selector2 =
+                _mm256_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                                post_ops_attr.post_op_c_i + 1 ) );
+            selector3 =
+                _mm256_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                                post_ops_attr.post_op_c_i + 2 ) );
+            selector4 =
+                _mm256_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                                post_ops_attr.post_op_c_i + 3 ) );
+            selector5 =
+                _mm256_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                                post_ops_attr.post_op_c_i + 4 ) );
+            selector6 =
+                _mm256_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                                post_ops_attr.post_op_c_i + 5 ) );
+          }
+          if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+          {
+            zero_point0 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                  post_ops_attr.post_op_c_i + 0 );
+            zero_point1 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                  post_ops_attr.post_op_c_i + 1);
+            zero_point2 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                  post_ops_attr.post_op_c_i + 2 );
+            zero_point3 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                  post_ops_attr.post_op_c_i + 3 );
+            zero_point4 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                  post_ops_attr.post_op_c_i + 4 );
+            zero_point5 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                  post_ops_attr.post_op_c_i + 5 );
+          }
+          //c[0, 0-7]
+          F32_SCL_MULRND_AVX2(ymm4, selector1, zero_point0);
+
+          //c[0, 8-15]
+          F32_SCL_MULRND_AVX2(ymm5, selector1, zero_point0);
+
+          //c[1, 0-7]
+          F32_SCL_MULRND_AVX2(ymm6, selector2, zero_point1);
+
+          //c[1, 8-15]
+          F32_SCL_MULRND_AVX2(ymm7, selector2, zero_point1);
+
+          //c[2, 0-7]
+          F32_SCL_MULRND_AVX2(ymm8, selector3, zero_point2);
+
+          //c[2, 8-15]
+          F32_SCL_MULRND_AVX2(ymm9, selector3, zero_point2);
+
+          //c[3, 0-7]
+          F32_SCL_MULRND_AVX2(ymm10, selector4, zero_point3);
+
+        //c[3, 8-15]
+          F32_SCL_MULRND_AVX2(ymm11, selector4, zero_point3);
+
+          //c[4, 0-7]
+          F32_SCL_MULRND_AVX2(ymm12, selector5, zero_point4);
+
+          //c[4, 8-15]
+          F32_SCL_MULRND_AVX2(ymm13, selector5, zero_point4);
+
+          //c[5, 0-7]
+          F32_SCL_MULRND_AVX2(ymm14, selector6, zero_point5);
+
+          //c[5, 8-15]
+          F32_SCL_MULRND_AVX2(ymm15, selector6, zero_point5);
+        }
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
 POST_OPS_MATRIX_ADD_6x16F:
       {
           dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -608,7 +789,7 @@ POST_OPS_MATRIX_MUL_6x16F:
           F32_F32_MATRIX_MUL_2COL(ymm1,ymm2,5,14,15);
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-      }      
+      }
 POST_OPS_SWISH_6x16F:
       {
           ymm0 =
@@ -657,22 +838,22 @@ POST_OPS_SWISH_6x16F:
 POST_OPS_6x16F_DISABLE:
       ;
 
-      _mm256_storeu_ps(cbuf, ymm4); 
+      _mm256_storeu_ps(cbuf, ymm4);
       _mm256_storeu_ps(cbuf + 8, ymm5);
       cbuf += rs_c;
-      _mm256_storeu_ps(cbuf, ymm6); 
+      _mm256_storeu_ps(cbuf, ymm6);
       _mm256_storeu_ps(cbuf + 8, ymm7);
       cbuf += rs_c;
-      _mm256_storeu_ps(cbuf, ymm8); 
+      _mm256_storeu_ps(cbuf, ymm8);
       _mm256_storeu_ps(cbuf + 8, ymm9);
       cbuf += rs_c;
-      _mm256_storeu_ps(cbuf, ymm10); 
+      _mm256_storeu_ps(cbuf, ymm10);
       _mm256_storeu_ps(cbuf + 8, ymm11);
       cbuf += rs_c;
-      _mm256_storeu_ps(cbuf, ymm12); 
+      _mm256_storeu_ps(cbuf, ymm12);
       _mm256_storeu_ps(cbuf + 8, ymm13);
       cbuf += rs_c;
-      _mm256_storeu_ps(cbuf, ymm14); 
+      _mm256_storeu_ps(cbuf, ymm14);
       _mm256_storeu_ps(cbuf + 8, ymm15);
 
       post_ops_attr.post_op_c_i += MR;
@@ -725,7 +906,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x8m)
               &&POST_OPS_GELU_TANH_6x8F,
               &&POST_OPS_GELU_ERF_6x8F,
               &&POST_OPS_CLIP_6x8F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_6x8F,
               &&POST_OPS_MATRIX_ADD_6x8F,
               &&POST_OPS_SWISH_6x8F,
               &&POST_OPS_MATRIX_MUL_6x8F
@@ -744,20 +925,20 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x8m)
     __m256 ymm0, ymm1, ymm2, ymm3;
     __m256 ymm4, ymm6, ymm8, ymm10;
     __m256 ymm12, ymm13, ymm14, ymm15;
-    
+
     /*Produce MRxNR outputs */
     for(dim_t m=0; m < m_iter; m++)
     {
       /* zero the accumulator registers */
       ZERO_ACC_YMM_4_REG(ymm4, ymm6, ymm8, ymm10);
       ZERO_ACC_YMM_4_REG(ymm12, ymm13, ymm14, ymm15);
-      
+
       float *abuf, *bbuf, *cbuf, *_cbuf;
 
       abuf = (float *)a + m * ps_a; // Move to next MRxKC in MCxKC (where MC>=MR)
-      bbuf = (float *)b;  //Same KCxNR panel is used across MCxKC block 
+      bbuf = (float *)b;  //Same KCxNR panel is used across MCxKC block
       cbuf = (float *)c + m * MR * rs_c; // Move to next MRXNR in output
-      
+
       /*_mm_prefetch( (MR X NR) from C*/
       _mm_prefetch((cbuf + 0*rs_c), _MM_HINT_T0);
       _mm_prefetch((cbuf + 1*rs_c), _MM_HINT_T0);
@@ -773,21 +954,21 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x8m)
         bbuf += rs_b;  //move b pointer to next row
 
         ymm2 = _mm256_broadcast_ss((abuf + 0*rs_a)); //broadcast c0r0
-        ymm3 = _mm256_broadcast_ss((abuf + 1*rs_a)); //broadcast c0r1  
+        ymm3 = _mm256_broadcast_ss((abuf + 1*rs_a)); //broadcast c0r1
 
         ymm4 = _mm256_fmadd_ps(ymm0, ymm2, ymm4);
         ymm6 = _mm256_fmadd_ps(ymm0, ymm3, ymm6);
 
-        ymm2 = _mm256_broadcast_ss((abuf + 2*rs_a)); //broadcast c0r2 
+        ymm2 = _mm256_broadcast_ss((abuf + 2*rs_a)); //broadcast c0r2
         ymm3 = _mm256_broadcast_ss((abuf + 3*rs_a)); //broadcast c0r3
 
         ymm8 = _mm256_fmadd_ps(ymm0, ymm2, ymm8);
         ymm10 = _mm256_fmadd_ps(ymm0, ymm3, ymm10);
 
         ymm2 = _mm256_broadcast_ss((abuf + 4*rs_a)); //broadcast c0r4
-        ymm3 = _mm256_broadcast_ss((abuf + 5*rs_a)); //broadcast c0r5        
+        ymm3 = _mm256_broadcast_ss((abuf + 5*rs_a)); //broadcast c0r5
         abuf += cs_a;  //move a pointer to next col
-        
+
         ymm12 = _mm256_fmadd_ps(ymm0, ymm2, ymm12);
         ymm14 = _mm256_fmadd_ps(ymm0, ymm3, ymm14);
       }//kloop
@@ -799,7 +980,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x8m)
       if ( beta != 0.0 )
       {
         _cbuf = cbuf;
-        //load c and multiply with beta and 
+        //load c and multiply with beta and
         //add to accumulator and store back
         ymm3 = _mm256_broadcast_ss(&(beta));
 
@@ -1010,6 +1191,147 @@ POST_OPS_CLIP_6x8F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_DOWNSCALE_6x8F:
+      {
+        __m256 selector1 = _mm256_setzero_ps();
+        __m256 selector2 = _mm256_setzero_ps();
+        __m256 selector3 = _mm256_setzero_ps();
+        __m256 selector4 = _mm256_setzero_ps();
+        __m256 selector5 = _mm256_setzero_ps();
+        __m256 selector6 = _mm256_setzero_ps();
+
+        __m256 zero_point0 = _mm256_setzero_ps();
+        __m256 zero_point1 = _mm256_setzero_ps();
+        __m256 zero_point2 = _mm256_setzero_ps();
+        __m256 zero_point3 = _mm256_setzero_ps();
+        __m256 zero_point4 = _mm256_setzero_ps();
+        __m256 zero_point5 = _mm256_setzero_ps();
+
+        // Need to account for row vs column major swaps. For scalars
+        // scale and zero point, no implications.
+        // Even though different registers are used for scalar in column
+        // and row major downscale path, all those registers will contain
+        // the same value.
+
+        if( post_ops_list_temp->scale_factor_len == 1 )
+        {
+          selector1 =
+                _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector2 =
+                _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector3 =
+                _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector4 =
+                _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector5 =
+                _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector6 =
+                _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        }
+        if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+        {
+          zero_point0 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point1 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point2 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point3 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point4 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point5 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        }
+        if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+            ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+        {
+          if( post_ops_list_temp->scale_factor_len > 1 )
+          {
+            selector1 = _mm256_loadu_ps ( ( float* )post_ops_list_temp->scale_factor +
+                          post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+          }
+          if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+          {
+            zero_point0 = _mm256_loadu_ps ( (float* )post_ops_list_temp->op_args1 +
+                          post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+          }
+          //c[0, 0-7]
+          F32_SCL_MULRND_AVX2(ymm4, selector1, zero_point0);
+
+          //c[1, 0-7]
+          F32_SCL_MULRND_AVX2(ymm6, selector1, zero_point0);
+
+          //c[2, 0-7]
+          F32_SCL_MULRND_AVX2(ymm8, selector1, zero_point0);
+
+          //c[3, 0-7]
+          F32_SCL_MULRND_AVX2(ymm10, selector1, zero_point0);
+
+          //c[4, 0-7]
+          F32_SCL_MULRND_AVX2(ymm12, selector1, zero_point0);
+
+          //c[5, 0-7]
+          F32_SCL_MULRND_AVX2(ymm14, selector1, zero_point0);
+        }
+        else
+        {
+          // If original output was columns major, then by the time
+          // kernel sees it, the matrix would be accessed as if it were
+          // transposed. Due to this the scale as well as zp array will
+          // be accessed by the ic index, and each scale/zp element
+          // corresponds to an entire row of the transposed output array,
+          // instead of an entire column.
+          if( post_ops_list_temp->scale_factor_len > 1 )
+          {
+            selector1 =
+                _mm256_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                                post_ops_attr.post_op_c_i + 0 ) );
+            selector2 =
+                _mm256_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                                post_ops_attr.post_op_c_i + 1 ) );
+            selector3 =
+                _mm256_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                                post_ops_attr.post_op_c_i + 2 ) );
+            selector4 =
+                _mm256_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                                post_ops_attr.post_op_c_i + 3 ) );
+            selector5 =
+                _mm256_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                                post_ops_attr.post_op_c_i + 4 ) );
+            selector6 =
+                _mm256_set1_ps( *( (float* )post_ops_list_temp->scale_factor +
+                                post_ops_attr.post_op_c_i + 5 ) );
+          }
+          if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+          {
+            zero_point0 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                  post_ops_attr.post_op_c_i + 0 );
+            zero_point1 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                  post_ops_attr.post_op_c_i + 1);
+            zero_point2 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                  post_ops_attr.post_op_c_i + 2 );
+            zero_point3 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                  post_ops_attr.post_op_c_i + 3 );
+            zero_point4 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                  post_ops_attr.post_op_c_i + 4 );
+            zero_point5 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
+                                  post_ops_attr.post_op_c_i + 5 );
+          }
+          //c[0, 0-7]
+          F32_SCL_MULRND_AVX2(ymm4, selector1, zero_point0);
+
+          //c[1, 0-7]
+          F32_SCL_MULRND_AVX2(ymm6, selector2, zero_point1);
+
+          //c[2, 0-7]
+          F32_SCL_MULRND_AVX2(ymm8, selector3, zero_point2);
+
+          //c[3, 0-7]
+          F32_SCL_MULRND_AVX2(ymm10, selector4, zero_point3);
+
+          //c[4, 0-7]
+          F32_SCL_MULRND_AVX2(ymm12, selector5, zero_point4);
+
+          //c[5, 0-7]
+          F32_SCL_MULRND_AVX2(ymm14, selector6, zero_point5);
+        }
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
 POST_OPS_MATRIX_ADD_6x8F:
       {
           dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -1059,7 +1381,7 @@ POST_OPS_MATRIX_MUL_6x8F:
           F32_F32_MATRIX_MUL_1COL(ymm1,5,14);
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-      }      
+      }
 POST_OPS_SWISH_6x8F:
       {
           ymm0 =
@@ -1090,17 +1412,17 @@ POST_OPS_SWISH_6x8F:
 POST_OPS_6x8F_DISABLE:
       ;
 
-      _mm256_storeu_ps(cbuf, ymm4); 
+      _mm256_storeu_ps(cbuf, ymm4);
       cbuf += rs_c;
-      _mm256_storeu_ps(cbuf, ymm6); 
+      _mm256_storeu_ps(cbuf, ymm6);
       cbuf += rs_c;
-      _mm256_storeu_ps(cbuf, ymm8); 
+      _mm256_storeu_ps(cbuf, ymm8);
       cbuf += rs_c;
-      _mm256_storeu_ps(cbuf, ymm10); 
+      _mm256_storeu_ps(cbuf, ymm10);
       cbuf += rs_c;
-      _mm256_storeu_ps(cbuf, ymm12); 
+      _mm256_storeu_ps(cbuf, ymm12);
       cbuf += rs_c;
-      _mm256_storeu_ps(cbuf, ymm14); 
+      _mm256_storeu_ps(cbuf, ymm14);
 
       post_ops_attr.post_op_c_i += MR;
     }//mloop
@@ -1152,7 +1474,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x4m)
               &&POST_OPS_GELU_TANH_6x4F,
               &&POST_OPS_GELU_ERF_6x4F,
               &&POST_OPS_CLIP_6x4F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_6x4F,
               &&POST_OPS_MATRIX_ADD_6x4F,
               &&POST_OPS_SWISH_6x4F,
               &&POST_OPS_MATRIX_MUL_6x4F
@@ -1170,20 +1492,20 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x4m)
     __m128 xmm0, xmm1, xmm2, xmm3;
     __m128 xmm4, xmm5, xmm6, xmm7;
     __m128 xmm8, xmm9;
-    
+
     /*Produce MRxNR outputs */
     for(dim_t m=0; m < m_iter; m++)
     {
       /* zero the accumulator registers */
-      ZERO_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7) 
-      ZERO_ACC_XMM_4_REG(xmm8,xmm9,xmm0,xmm1) 
-      
+      ZERO_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7)
+      ZERO_ACC_XMM_4_REG(xmm8,xmm9,xmm0,xmm1)
+
       float *abuf, *bbuf, *cbuf, *_cbuf;
 
       abuf = (float *)a + m * ps_a; // Move to next MRxKC in MCxKC (where MC>=MR)
-      bbuf = (float *)b;  //Same KCxNR panel is used across MCxKC block 
+      bbuf = (float *)b;  //Same KCxNR panel is used across MCxKC block
       cbuf = (float *)c + m * MR * rs_c; // Move to next MRXNR in output
-      
+
       /*_mm_prefetch( (MR X NR) from C*/
       _mm_prefetch((cbuf + 0*rs_c), _MM_HINT_T0);
       _mm_prefetch((cbuf + 1*rs_c), _MM_HINT_T0);
@@ -1217,13 +1539,13 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x4m)
       }//kloop
 
       xmm0 = _mm_broadcast_ss(&(alpha));
-      ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0) 
+      ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0)
       ALPHA_MUL_ACC_XMM_4_REG(xmm8,xmm9,xmm2,xmm3,xmm0)
 
       if ( beta != 0.0 )
       {
         _cbuf = cbuf;
-        //load c and multiply with beta and 
+        //load c and multiply with beta and
         //add to accumulator and store back
         xmm3 = _mm_broadcast_ss(&(beta));
 
@@ -1434,6 +1756,128 @@ POST_OPS_CLIP_6x4F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_DOWNSCALE_6x4F:
+      {
+        __m128 selector0 = _mm_setzero_ps();
+        __m128 selector1 = _mm_setzero_ps();
+        __m128 selector2 = _mm_setzero_ps();
+        __m128 selector3 = _mm_setzero_ps();
+
+        __m128 zero_point0 = _mm_setzero_ps();
+        __m128 zero_point1 = _mm_setzero_ps();
+        __m128 zero_point2 = _mm_setzero_ps();
+        __m128 zero_point3 = _mm_setzero_ps();
+
+        // Need to account for row vs column major swaps. For scalars
+        // scale and zero point, no implications.
+        // Even though different registers are used for scalar in column
+        // and row major downscale path, all those registers will contain
+        // the same value.
+        if( post_ops_list_temp->scale_factor_len == 1 )
+        {
+          selector0 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector1 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector2 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector3 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        }
+        if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+        {
+          zero_point0 = _mm_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point1 = _mm_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point2 = _mm_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point3 = _mm_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        }
+        if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+              ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+        {
+          if( post_ops_list_temp->scale_factor_len > 1 )
+          {
+            selector0 = _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_j + ( 0 * 4) );
+          }
+          if( *( (dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+          {
+            zero_point0 = _mm_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_j + ( 0 * 4 ) );
+          }
+
+          //c[0, 0-3]
+          F32_SCL_MULRND_SSE(xmm4, selector0, zero_point0);
+
+          //c[1, 0-3]
+          F32_SCL_MULRND_SSE(xmm5, selector0, zero_point0);
+
+          //c[2, 0-3]
+          F32_SCL_MULRND_SSE(xmm6, selector0, zero_point0);
+
+          //c[3, 0-3]
+          F32_SCL_MULRND_SSE(xmm7, selector0, zero_point0);
+
+          //c[4, 0-3]
+          F32_SCL_MULRND_SSE(xmm8, selector0, zero_point0);
+
+          //c[5, 0-3]
+          F32_SCL_MULRND_SSE(xmm9, selector0, zero_point0);
+        }
+        else
+        {
+          if( post_ops_list_temp->scale_factor_len > 1 )
+          {
+            selector0 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_i + 0 ) );
+            selector1 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_i + 1 ) );
+            selector2 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_i + 2 ) );
+            selector3 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_i + 3 ) );
+          }
+          if( *( (dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+          {
+            zero_point0 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_i + 0 ) );
+            zero_point1 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_i + 1 ) );
+            zero_point2 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_i + 2 ) );
+            zero_point3 =_mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_i + 3 ) );
+          }
+          //c[0, 0-3]
+          F32_SCL_MULRND_SSE(xmm4, selector0, zero_point0);
+
+          //c[1, 0-3]
+          F32_SCL_MULRND_SSE(xmm5, selector1, zero_point1);
+
+          //c[2, 0-3]
+          F32_SCL_MULRND_SSE(xmm6, selector2, zero_point2);
+
+          //c[3, 0-3]
+          F32_SCL_MULRND_SSE(xmm7, selector3, zero_point3);
+
+          if( post_ops_list_temp->scale_factor_len > 1 )
+          {
+            selector0 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_i + 4 ) );
+            selector1 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_i + 5 ) );
+          }
+          if( *( (dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+          {
+            zero_point0 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_i + 4 ) );
+            zero_point1 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_i + 5 ) );
+          }
+
+          //c[4, 0-3]
+          F32_SCL_MULRND_SSE(xmm8, selector0, zero_point0);
+
+          //c[5, 0-3]
+          F32_SCL_MULRND_SSE(xmm9, selector1, zero_point1);
+        }
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
 POST_OPS_MATRIX_ADD_6x4F:
       {
           dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -1483,7 +1927,7 @@ POST_OPS_MATRIX_MUL_6x4F:
           F32_F32_MATRIX_MUL_1COL_XMM(xmm1,5,9);
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-      }      
+      }
 POST_OPS_SWISH_6x4F:
       {
           xmm0 =
@@ -1576,7 +2020,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x2m)
               &&POST_OPS_GELU_TANH_6x2F,
               &&POST_OPS_GELU_ERF_6x2F,
               &&POST_OPS_CLIP_6x2F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_6x2F,
               &&POST_OPS_MATRIX_ADD_6x2F,
               &&POST_OPS_SWISH_6x2F,
               &&POST_OPS_MATRIX_MUL_6x2F
@@ -1594,20 +2038,20 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x2m)
     __m128 xmm0, xmm1, xmm2, xmm3;
     __m128 xmm4, xmm5, xmm6, xmm7;
     __m128 xmm8, xmm9;
-    
+
     /*Produce MRxNR outputs */
     for(dim_t m=0; m < m_iter; m++)
     {
       /* zero the accumulator registers */
-      ZERO_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7) 
-      ZERO_ACC_XMM_4_REG(xmm8,xmm9,xmm0,xmm1) 
-      
+      ZERO_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7)
+      ZERO_ACC_XMM_4_REG(xmm8,xmm9,xmm0,xmm1)
+
       float *abuf, *bbuf, *cbuf, *_cbuf;
 
       abuf = (float *)a + m * ps_a; // Move to next MRxKC in MCxKC (where MC>=MR)
-      bbuf = (float *)b;  //Same KCxNR panel is used across MCxKC block 
+      bbuf = (float *)b;  //Same KCxNR panel is used across MCxKC block
       cbuf = (float *)c + m * MR * rs_c; // Move to next MRXNR in output
-      
+
       /*_mm_prefetch( (MR X NR) from C*/
       _mm_prefetch((cbuf + 0*rs_c), _MM_HINT_T0);
       _mm_prefetch((cbuf + 1*rs_c), _MM_HINT_T0);
@@ -1641,13 +2085,13 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x2m)
       }//kloop
 
       xmm0 = _mm_broadcast_ss(&(alpha));
-      ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0) 
+      ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0)
       ALPHA_MUL_ACC_XMM_4_REG(xmm8,xmm9,xmm2,xmm3,xmm0)
 
       if ( beta != 0.0 )
       {
         _cbuf = cbuf;
-        //load c and multiply with beta and 
+        //load c and multiply with beta and
         //add to accumulator and store back
         xmm3 = _mm_broadcast_ss(&(beta));
 
@@ -1673,7 +2117,7 @@ POST_OPS_BIAS_6x2F:
         if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
              ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
         {
-          xmm0 = ( __m128 )_mm_load_sd( (const double*) 
+          xmm0 = ( __m128 )_mm_load_sd( (const double*)
                   (( float* )post_ops_list_temp->op_args1 +
                   post_ops_attr.post_op_c_j + ( 0 * 8 ) ));
 
@@ -1859,6 +2303,128 @@ POST_OPS_CLIP_6x2F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_DOWNSCALE_6x2F:
+      {
+        __m128 selector0 = _mm_setzero_ps();
+        __m128 selector1 = _mm_setzero_ps();
+        __m128 selector2 = _mm_setzero_ps();
+        __m128 selector3 = _mm_setzero_ps();
+
+        __m128 zero_point0 = _mm_setzero_ps();
+        __m128 zero_point1 = _mm_setzero_ps();
+        __m128 zero_point2 = _mm_setzero_ps();
+        __m128 zero_point3 = _mm_setzero_ps();
+
+        // Need to account for row vs column major swaps. For scalars
+        // scale and zero point, no implications.
+        // Even though different registers are used for scalar in column
+        // and row major downscale path, all those registers will contain
+        // the same value.
+        if( post_ops_list_temp->scale_factor_len == 1 )
+        {
+          selector0 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector1 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector2 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector3 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        }
+        if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+        {
+          zero_point0 = _mm_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point1 = _mm_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point2 = _mm_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point3 = _mm_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        }
+        if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+              ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+        {
+          if( post_ops_list_temp->scale_factor_len > 1 )
+          {
+            selector0 = ( __m128 )_mm_load_sd( (const double*)
+                            ( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_j + ( 0 * 8 ) ) );
+          }
+          if( *( (dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+          {
+            zero_point0 = ( __m128 )_mm_load_sd( (const double*)
+                            ( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_j + ( 0 * 8 ) ) );
+          }
+          //c[0, 0-3]
+          F32_SCL_MULRND_SSE(xmm4, selector0, zero_point0);
+
+          //c[1, 0-3]
+          F32_SCL_MULRND_SSE(xmm5, selector0, zero_point0);
+
+          //c[2, 0-3]
+          F32_SCL_MULRND_SSE(xmm6, selector0, zero_point0);
+
+          //c[3, 0-3]
+          F32_SCL_MULRND_SSE(xmm7, selector0, zero_point0);
+
+          //c[4, 0-3]
+          F32_SCL_MULRND_SSE(xmm8, selector0, zero_point0);
+
+          //c[5, 0-3]
+          F32_SCL_MULRND_SSE(xmm9, selector0, zero_point0);
+        }
+        else
+        {
+          if( post_ops_list_temp->scale_factor_len > 1 )
+          {
+            selector0 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_i + 0 ) );
+            selector1 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_i + 1 ) );
+            selector2 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_i + 2 ) );
+            selector3 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_i + 3 ) );
+          }
+          if( *( (dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+          {
+            zero_point0 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_i + 0 ) );
+            zero_point1 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_i + 1 ) );
+            zero_point2 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_i + 2 ) );
+            zero_point3 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_i + 3 ) );
+          }
+          //c[0, 0-3]
+          F32_SCL_MULRND_SSE(xmm4, selector0, zero_point0);
+
+          //c[1, 0-3]
+          F32_SCL_MULRND_SSE(xmm5, selector1, zero_point1);
+
+          //c[2, 0-3]
+          F32_SCL_MULRND_SSE(xmm6, selector2, zero_point2);
+
+          //c[3, 0-3]
+          F32_SCL_MULRND_SSE(xmm7, selector3, zero_point3);
+
+          if( post_ops_list_temp->scale_factor_len > 1 )
+          {
+            selector0 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_i + 4 ) );
+            selector1 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_i + 5 ) );
+          }
+          if( *( (dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+          {
+            zero_point0 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_i + 4 ) );
+            zero_point1 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_i + 5 ) );
+          }
+          //c[4, 0-3]
+          F32_SCL_MULRND_SSE(xmm8, selector0, zero_point0);
+
+          //c[5, 0-3]
+          F32_SCL_MULRND_SSE(xmm9, selector1, zero_point1);
+        }
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
 POST_OPS_MATRIX_ADD_6x2F:
       {
           dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -1908,7 +2474,7 @@ POST_OPS_MATRIX_MUL_6x2F:
           F32_F32_MATRIX_MUL_1COL_XMM_2ELE(xmm1,5,9);
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-      }      
+      }
 POST_OPS_SWISH_6x2F:
       {
           xmm0 =
@@ -2001,7 +2567,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x1m)
               &&POST_OPS_GELU_TANH_6x1F,
               &&POST_OPS_GELU_ERF_6x1F,
               &&POST_OPS_CLIP_6x1F,
-              NULL, // Virtual node for downscale, else segfault
+              &&POST_OPS_DOWNSCALE_6x1F,
               &&POST_OPS_MATRIX_ADD_6x1F,
               &&POST_OPS_SWISH_6x1F,
               &&POST_OPS_MATRIX_MUL_6x1F
@@ -2019,20 +2585,20 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x1m)
     __m128 xmm0, xmm1, xmm2, xmm3;
     __m128 xmm4, xmm5, xmm6, xmm7;
     __m128 xmm8, xmm9;
-    
+
     /*Produce MRxNR outputs */
     for(dim_t m=0; m < m_iter; m++)
     {
       /* zero the accumulator registers */
-      ZERO_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7) 
-      ZERO_ACC_XMM_4_REG(xmm8,xmm9,xmm0,xmm1) 
-      
+      ZERO_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7)
+      ZERO_ACC_XMM_4_REG(xmm8,xmm9,xmm0,xmm1)
+
       float *abuf, *bbuf, *cbuf, *_cbuf;
 
       abuf = (float *)a + m * ps_a; // Move to next MRxKC in MCxKC (where MC>=MR)
-      bbuf = (float *)b;  //Same KCxNR panel is used across MCxKC block 
+      bbuf = (float *)b;  //Same KCxNR panel is used across MCxKC block
       cbuf = (float *)c + m * MR * rs_c; // Move to next MRXNR in output
-      
+
       /*_mm_prefetch( (MR X NR) from C*/
       _mm_prefetch((cbuf + 0*rs_c), _MM_HINT_T0);
       _mm_prefetch((cbuf + 1*rs_c), _MM_HINT_T0);
@@ -2066,13 +2632,13 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x1m)
       }//kloop
 
       xmm0 = _mm_broadcast_ss(&(alpha));
-      ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0) 
+      ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0)
       ALPHA_MUL_ACC_XMM_4_REG(xmm8,xmm9,xmm2,xmm3,xmm0)
 
       if ( beta != 0.0 )
       {
         _cbuf = cbuf;
-        //load c and multiply with beta and 
+        //load c and multiply with beta and
         //add to accumulator and store back
         xmm3 = _mm_broadcast_ss(&(beta));
 
@@ -2283,6 +2849,126 @@ POST_OPS_CLIP_6x1F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_DOWNSCALE_6x1F:
+      {
+        __m128 selector0 = _mm_setzero_ps();
+        __m128 selector1 = _mm_setzero_ps();
+        __m128 selector2 = _mm_setzero_ps();
+        __m128 selector3 = _mm_setzero_ps();
+
+        __m128 zero_point0 = _mm_setzero_ps();
+        __m128 zero_point1 = _mm_setzero_ps();
+        __m128 zero_point2 = _mm_setzero_ps();
+        __m128 zero_point3 = _mm_setzero_ps();
+
+        // Need to account for row vs column major swaps. For scalars
+        // scale and zero point, no implications.
+        // Even though different registers are used for scalar in column
+        // and row major downscale path, all those registers will contain
+        // the same value.
+        if( post_ops_list_temp->scale_factor_len == 1 )
+        {
+          selector0 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector1 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector2 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          selector3 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        }
+        if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+        {
+          zero_point0 = _mm_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point1 = _mm_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point2 = _mm_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          zero_point3 = _mm_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+        }
+        if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+              ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+        {
+          if( post_ops_list_temp->scale_factor_len > 1 )
+          {
+            selector0 = _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_j + ( 0 * 4) );
+          }
+          if( *( (dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+          {
+            zero_point0 = _mm_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_j + ( 0 * 4 ) );
+          }
+          //c[0, 0-3]
+          F32_SCL_MULRND_SSE(xmm4, selector0, zero_point0);
+
+          //c[1, 0-3]
+          F32_SCL_MULRND_SSE(xmm5, selector0, zero_point0);
+
+          //c[2, 0-3]
+          F32_SCL_MULRND_SSE(xmm6, selector0, zero_point0);
+
+          //c[3, 0-3]
+          F32_SCL_MULRND_SSE(xmm7, selector0, zero_point0);
+
+          //c[4, 0-3]
+          F32_SCL_MULRND_SSE(xmm8, selector0, zero_point0);
+
+          //c[5, 0-3]
+          F32_SCL_MULRND_SSE(xmm9, selector0, zero_point0);
+        }
+        else
+        {
+          if( post_ops_list_temp->scale_factor_len > 1 )
+          {
+            selector0 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_i + 0 ) );
+            selector1 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_i + 1 ) );
+            selector2 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_i + 2 ) );
+            selector3 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_i + 3 ) );
+          }
+          if( *( (dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+          {
+            zero_point0 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_i + 0 ) );
+            zero_point1 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_i + 1 ) );
+            zero_point2 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_i + 2 ) );
+            zero_point3 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_i + 3 ) );
+          }
+          //c[0, 0-3]
+          F32_SCL_MULRND_SSE(xmm4, selector0, zero_point0);
+
+          //c[1, 0-3]
+          F32_SCL_MULRND_SSE(xmm5, selector1, zero_point1);
+
+          //c[2, 0-3]
+          F32_SCL_MULRND_SSE(xmm6, selector2, zero_point2);
+
+          //c[3, 0-3]
+          F32_SCL_MULRND_SSE(xmm7, selector3, zero_point3);
+
+          if( post_ops_list_temp->scale_factor_len > 1 )
+          {
+            selector0 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_i + 4 ) );
+            selector1 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                            post_ops_attr.post_op_c_i + 5 ) );
+          }
+          if( *( (dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+          {
+            zero_point0 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_i + 4 ) );
+            zero_point1 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                            post_ops_attr.post_op_c_i + 5) );
+          }
+          //c[4, 0-3]
+          F32_SCL_MULRND_SSE(xmm8, selector0, zero_point0);
+
+          //c[5, 0-3]
+          F32_SCL_MULRND_SSE(xmm9, selector1, zero_point1);
+        }
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
 POST_OPS_MATRIX_ADD_6x1F:
       {
           dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
@@ -2332,7 +3018,7 @@ POST_OPS_MATRIX_MUL_6x1F:
           F32_F32_MATRIX_MUL_1COL_XMM_1ELE(xmm1,5,9);
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-      }      
+      }
 POST_OPS_SWISH_6x1F:
       {
           xmm0 =

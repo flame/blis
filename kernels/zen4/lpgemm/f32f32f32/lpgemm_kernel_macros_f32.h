@@ -180,5 +180,10 @@
 	F32_F32_MATRIX_MUL_LOAD(k3,scr3,m_ind,3); \
 	F32_MATRIX_MUL_4COL(scr0,scr1,scr2,scr3,m_ind,r_ind0,r_ind1,r_ind2,r_ind3); \
 
+//Downscale Post-ops helpers.
+#define F32_SCL_MULRND(reg,selector,zero_point) \
+	reg = _mm512_mul_ps( reg, selector ); \
+	reg = _mm512_add_ps( reg, zero_point ); \
+
 #endif //LPGEMM_F32_SGEMM_KERN_MACROS_H
 
