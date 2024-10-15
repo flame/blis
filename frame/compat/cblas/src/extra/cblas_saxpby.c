@@ -23,10 +23,6 @@ void cblas_saxpby( f77_int N, float alpha,
    #define F77_incX incX
    #define F77_incY incY
 #endif
-
    F77_saxpby( &F77_N, &alpha, X, &F77_incX, &beta, Y, &F77_incY);
-
 }
-
 #endif
-
