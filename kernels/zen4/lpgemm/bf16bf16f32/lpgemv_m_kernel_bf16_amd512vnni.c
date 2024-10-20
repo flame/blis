@@ -60,7 +60,10 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 	                      &&POST_OPS_DOWNSCALE_6x64,
 	                      &&POST_OPS_MATRIX_ADD_6x64,
 	                      &&POST_OPS_SWISH_6x64,
-						  &&POST_OPS_MATRIX_MUL_6x64
+						  &&POST_OPS_MATRIX_MUL_6x64,
+						  &&POST_OPS_TANH_6x64,
+						  &&POST_OPS_SIGMOID_6x64
+
 	                    };
 
 
@@ -685,7 +688,30 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+		POST_OPS_TANH_6x64:
+		{
+			__m512 dn, z, x, r2, r;
+			__m512i q;
 
+			TANHF_AVX512(zmm8, r, r2, x, z, dn,  q)
+			TANHF_AVX512(zmm12, r, r2, x, z, dn, q)
+			TANHF_AVX512(zmm16, r, r2, x, z, dn, q)
+			TANHF_AVX512(zmm20, r, r2, x, z, dn, q)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+		POST_OPS_SIGMOID_6x64:
+		{
+			__m512 al_in, r, r2, z, dn;
+			__m512i ex_out;
+
+			SIGMOID_F32_AVX512_DEF(zmm8, al_in, r, r2, z, dn, ex_out);
+			SIGMOID_F32_AVX512_DEF(zmm12, al_in, r, r2, z, dn, ex_out);
+			SIGMOID_F32_AVX512_DEF(zmm16, al_in, r, r2, z, dn, ex_out);
+			SIGMOID_F32_AVX512_DEF(zmm20, al_in, r, r2, z, dn, ex_out);
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 		POST_OPS_6x64_DISABLE:
 		{
 			// Case where the output C matrix is bf16 (downscaled)

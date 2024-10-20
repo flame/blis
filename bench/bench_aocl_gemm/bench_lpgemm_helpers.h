@@ -266,6 +266,52 @@ static inline float GELU_ERF_post_op_ ## BLAS_SFX \
     return temp_accum; \
 } \
 
+/* TANH. */
+#define GEN_TANH_POSTOP_INT(ACCUM_type,BLAS_SFX) \
+static inline ACCUM_type TANH_post_op_ ## BLAS_SFX \
+     ( \
+       ACCUM_type temp_accum \
+     ) \
+{ \
+    double tanh_reference = tanhf( ( double )temp_accum ); \
+    temp_accum = round( tanh_reference ); \
+    return temp_accum; \
+} \
+
+#define GEN_TANH_POSTOP_FLOAT(BLAS_SFX) \
+static inline float TANH_post_op_ ## BLAS_SFX \
+     ( \
+       float temp_accum \
+     ) \
+{ \
+    temp_accum = tanhf( ( double )temp_accum ); \
+    return temp_accum; \
+} \
+
+/* SIGMOID. */
+#define GEN_SIGMOID_POSTOP_INT(ACCUM_type,BLAS_SFX) \
+static inline ACCUM_type SIGMOID_post_op_ ## BLAS_SFX \
+     ( \
+       ACCUM_type temp_accum \
+     ) \
+{ \
+    float sigmoid_reference = ( 1 / ( 1 + \
+                            expf( ( double )temp_accum * -1 ) ) ); \
+    temp_accum = round (sigmoid_reference); \
+    return temp_accum; \
+} \
+
+#define GEN_SIGMOID_POSTOP_FLOAT(BLAS_SFX) \
+static inline float SIGMOID_post_op_ ## BLAS_SFX \
+     ( \
+       float temp_accum \
+     ) \
+{ \
+    temp_accum = ( 1 / ( 1 + \
+                  expf( ( double )temp_accum * -1 ) ) ); \
+    return temp_accum; \
+} \
+
 /* SWISH. */
 #define GEN_SWISH_POSTOP_INT(ACCUM_type,BLAS_SFX) \
 static inline ACCUM_type SWISH_post_op_ ## BLAS_SFX \

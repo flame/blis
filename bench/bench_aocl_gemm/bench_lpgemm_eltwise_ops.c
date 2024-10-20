@@ -100,6 +100,11 @@ GEN_GELU_TANH_POSTOP_FLOAT(bf16of32)
 GEN_GELU_TANH_POSTOP_FLOAT(bf16obf16)
 GEN_GELU_TANH_POSTOP_FLOAT(f32of32)
 
+GEN_TANH_POSTOP_FLOAT(bf16of32)
+GEN_TANH_POSTOP_FLOAT(bf16obf16)
+GEN_TANH_POSTOP_FLOAT(f32of32)
+
+
 GEN_GELU_ERF_POSTOP_FLOAT(bf16of32)
 GEN_GELU_ERF_POSTOP_FLOAT(bf16obf16)
 GEN_GELU_ERF_POSTOP_FLOAT(f32of32)
@@ -107,6 +112,10 @@ GEN_GELU_ERF_POSTOP_FLOAT(f32of32)
 GEN_SWISH_POSTOP_FLOAT(bf16of32)
 GEN_SWISH_POSTOP_FLOAT(bf16obf16)
 GEN_SWISH_POSTOP_FLOAT(f32of32)
+
+GEN_SIGMOID_POSTOP_FLOAT(bf16of32)
+GEN_SIGMOID_POSTOP_FLOAT(bf16obf16)
+GEN_SIGMOID_POSTOP_FLOAT(f32of32)
 
 static inline float eltwise_ops_accuracy_check_downscale_bf16of32
      (
@@ -317,6 +326,18 @@ void eltwise_ops_accuracy_check_driver_ ## LP_SFX \
                                 RELU ) /* ReLU*/ \
                         { \
                             temp_accum = ( temp_accum > 0 ) ? temp_accum : 0 ; \
+                            ele_i += 1; \
+                        } \
+                        else if ( ( post_op->eltwise + ele_i )->algo.algo_type == \
+                                TANH ) /* TANH*/ \
+                        { \
+                            temp_accum = GEN_FUNC_NAME(TANH_post_op_,LP_SFX) (temp_accum);\
+                            ele_i += 1; \
+                        } \
+                        else if ( ( post_op->eltwise + ele_i )->algo.algo_type == \
+                                SIGMOID ) /* Sigmoid*/ \
+                        { \
+                            temp_accum = GEN_FUNC_NAME(SIGMOID_post_op_,LP_SFX) (temp_accum);\
                             ele_i += 1; \
                         } \
                         else if ( ( post_op->eltwise + ele_i )->algo.algo_type == \
@@ -551,6 +572,8 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     bool is_scalar_zp = FALSE; \
     bool is_matrix_add = FALSE; \
     bool is_matrix_mul = FALSE; \
+    bool is_tanh = FALSE; \
+    bool is_sigmoid = FALSE; \
     dim_t activator_idx = 0; \
     dim_t clip_idx = 0; \
  \
@@ -627,6 +650,26 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
                 is_clip = TRUE; \
                 num_eltwise += 1; \
                 clip_idx = cur_op_index; \
+                cur_op_index++; \
+            } \
+            else if ( ( strcmp( ops_tok, "tanh" ) == 0 ) && \
+                      ( is_activator_set == FALSE ) ) \
+            { \
+                post_ops->seq_vector[cur_op_index] = ELTWISE; \
+                is_tanh = TRUE; \
+                is_activator_set = TRUE; \
+                num_eltwise += 1; \
+                activator_idx = cur_op_index; \
+                cur_op_index++; \
+            } \
+             else if ( ( strcmp( ops_tok, "sigmoid" ) == 0 ) && \
+                      ( is_activator_set == FALSE ) ) \
+            { \
+                post_ops->seq_vector[cur_op_index] = ELTWISE; \
+                is_sigmoid = TRUE; \
+                is_activator_set = TRUE; \
+                num_eltwise += 1; \
+                activator_idx = cur_op_index; \
                 cur_op_index++; \
             } \
             else if ( strcmp( ops_tok, "scale" ) == 0 ) \
@@ -764,6 +807,21 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             ( post_ops->eltwise + activator_idx )->algo.alpha = NULL; \
             ( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
             ( post_ops->eltwise + activator_idx )->algo.algo_type = GELU_ERF; \
+        } \
+         else if ( is_tanh == TRUE ) \
+        { \
+            ( post_ops->eltwise + activator_idx )->is_power_of_2 = FALSE; \
+            ( post_ops->eltwise + activator_idx )->scale_factor = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.alpha = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.algo_type = TANH; \
+        } \
+        if ( is_sigmoid == TRUE ) \
+        { \
+            ( post_ops->eltwise + activator_idx )->is_power_of_2 = FALSE; \
+            ( post_ops->eltwise + activator_idx )->scale_factor = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.alpha = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.algo_type = SIGMOID; \
         } \
         if ( is_clip == TRUE ) \
         { \

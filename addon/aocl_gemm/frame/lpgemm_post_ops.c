@@ -232,6 +232,12 @@ err_t lpgemm_translate_to_post_ops_list
 									}
 									tmp_code = POST_OPS_SWISH;
 									break;
+							case TANH:
+									tmp_code = POST_OPS_TANH;
+									break;
+							case SIGMOID:
+									tmp_code = POST_OPS_SIGMOID;
+									break;
 							default:
 									break;
 						}

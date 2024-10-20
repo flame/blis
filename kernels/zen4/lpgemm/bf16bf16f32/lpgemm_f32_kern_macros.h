@@ -37,6 +37,7 @@
 
 #include "../gelu_avx512.h"
 #include "../silu_avx512.h"
+#include "../sigmoid_avx512.h"
 #include "../math_utils_avx512.h"
 
 /* ReLU scale (Parametric ReLU):  f(x) = x, when x > 0 and f(x) = a*x when x <= 0 */

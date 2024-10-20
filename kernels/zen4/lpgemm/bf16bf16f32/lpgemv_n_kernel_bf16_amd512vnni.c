@@ -101,7 +101,9 @@ LPGEMV_N_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 	                      &&POST_OPS_DOWNSCALE_6x64,
 	                      &&POST_OPS_MATRIX_ADD_6x64,
 	                      &&POST_OPS_SWISH_6x64,
-						  &&POST_OPS_MATRIX_MUL_6x64
+						  &&POST_OPS_MATRIX_MUL_6x64,
+						  &&POST_OPS_TANH_6x64,
+						  &&POST_OPS_SIGMOID_6x64
 	                    };
 
 	// Strides are updated based on matrix packing/reordering.
@@ -850,6 +852,24 @@ LPGEMV_N_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 
 			SWISH_F32_AVX512_DEF( zmm8, selector1, al_in,
 			                      r, r2, z, dn, ex_out );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+		POST_OPS_TANH_6x64:
+		{
+			__m512 dn, z, x, r2, r;
+			__m512i q;
+
+			TANHF_AVX512(zmm8, r, r2, x, z, dn,  q)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+		POST_OPS_SIGMOID_6x64:
+		{
+			__m512 al_in, r, r2, z, dn;
+			__m512i ex_out;
+
+			SIGMOID_F32_AVX512_DEF(zmm8, al_in, r, r2, z, dn, ex_out);
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
