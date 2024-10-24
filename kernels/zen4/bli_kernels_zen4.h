@@ -281,6 +281,19 @@ GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_2x3 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_2x2 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_2x1 )
 
+// Zgemm sup CD kernels
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_12x4m )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_12x2m )
+
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_8x4 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_8x2 )
+
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_4x4 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_4x2 )
+
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_2x4 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_2x2 )
+
 err_t bli_dgemm_24x8_avx512_k1_nn
     (
       dim_t m,
