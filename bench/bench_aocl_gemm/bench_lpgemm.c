@@ -1313,7 +1313,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         } \
     } \
  \
-    if ( global_dscale_out == 'y' || global_can_dscale == 'y') \
+    if ( ( global_dscale_out == 'y' ) || ( global_can_dscale == 'y' ) ) \
     { \
         post_ops->seq_vector[cur_op_index] = SCALE; \
         cur_op_index++; \

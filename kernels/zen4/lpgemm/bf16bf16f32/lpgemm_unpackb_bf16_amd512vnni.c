@@ -125,13 +125,6 @@ void unpackb_nr32_bf16bf16f32of32_row_major
 	dim_t k_full_pieces = k_full_pieces_blks * 2;
 	dim_t k_partial_pieces = KC % 2;
 
-	// KC when not multiple of 2 will have padding to make it multiple of 2 in packed buffer.
-	dim_t KC_updated = KC;
-	if ( k_partial_pieces > 0 )
-	{
-		KC_updated += ( 2 - k_partial_pieces );
-	}
-
 	__m512i a0, c0;
 	__m512i a01;
 

@@ -58,11 +58,6 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(f32f32f32of32)
 	// Initialize lpgemm context.
 	aocl_lpgemm_init_global_cntx();
 
-	// Query the global cntx.
-	cntx_t* cntx = bli_gks_query_cntx();
-
-	num_t dt = BLIS_FLOAT;
-
 	AOCL_MATRIX_TYPE input_mat_type;
 	bli_param_map_char_to_lpmat_type( mat_type, &input_mat_type );
 
@@ -71,15 +66,18 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(f32f32f32of32)
 		return 0; // A reorder not supported.
 	}
 
-	const dim_t NR = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NR, cntx );
+	const dim_t NR = lpgemm_get_block_size_NR_global_cntx( F32F32F32OF32 );
 
 	// Extra space since packing does width in multiples of NR.
 	dim_t n_reorder;
-	if(n == 1)
+#ifdef BLIS_KERNELS_ZEN4
+	if( ( n == 1 ) && ( lpgemm_get_enabled_arch() != BLIS_ARCH_ZEN3 ) )
 	{
 		//When n == 1, LPGEMV doesn't expect B to be reordered.
 		n_reorder = 1;
-	}else
+	}
+	else
+#endif
 	{
 		n_reorder = ( ( n + NR - 1 ) / NR ) * NR;
 	}
@@ -134,11 +132,6 @@ AOCL_GEMM_REORDER(float,f32f32f32of32)
 	// Initialize lpgemm context.
 	aocl_lpgemm_init_global_cntx();
 
-	// Query the global cntx.
-	cntx_t* cntx = bli_gks_query_cntx();
-
-	num_t dt = BLIS_FLOAT;
-
 	AOCL_MATRIX_TYPE input_mat_type;
 	bli_param_map_char_to_lpmat_type( mat_type, &input_mat_type );
 
@@ -147,20 +140,14 @@ AOCL_GEMM_REORDER(float,f32f32f32of32)
 		return; // A reorder not supported.
 	}
 
-	const dim_t NC = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NC, cntx );
-	const dim_t KC = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_KC, cntx );
-	const dim_t NR  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NR, cntx );
+	// Query the context for various blocksizes.
+	lpgemm_cntx_t* lcntx = lpgemm_get_global_cntx_obj( F32F32F32OF32 );
+	dim_t NC = lcntx->blksz.NC;
+	dim_t KC = lcntx->blksz.KC;
+	dim_t NR = lcntx->blksz.NR;
 
-	inc_t rs_p = NR;
-
-	float one_local  = *PASTEMAC(s,1);
-	float* restrict kappa_cast = &one_local;
-
-	// Set the schema to "row stored column panels" to indicate packing to
-	// conventional row-stored column panels.
-	pack_t schema = BLIS_PACKED_COL_PANELS;
-	trans_t transc = BLIS_NO_TRANSPOSE;
-	conj_t conjc = bli_extract_conj( transc );
+	dim_t rs_b_reorder = 0;
+	dim_t cs_b_reorder = 0;
 
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
@@ -170,9 +157,10 @@ AOCL_GEMM_REORDER(float,f32f32f32of32)
 	dim_t n_threads = bli_rntm_num_threads( &rntm_g );
 	n_threads = ( n_threads > 0 ) ? n_threads : 1;
 
+#ifdef BLIS_KERNELS_ZEN4
 	//When n == 1, B marix becomes a vector. 
 	//Reordering is avoided so that LPGEMV can process it efficiently.
-	if(n == 1)
+	if( ( n == 1 ) && ( lpgemm_get_enabled_arch() != BLIS_ARCH_ZEN3 ) )
 	{
 		if(rs_b == 1)
 		{
@@ -186,6 +174,7 @@ AOCL_GEMM_REORDER(float,f32f32f32of32)
 		}
 		return;
 	}
+#endif
 
 #ifdef BLIS_ENABLE_OPENMP
 	_Pragma( "omp parallel num_threads(n_threads)" )
@@ -220,15 +209,9 @@ AOCL_GEMM_REORDER(float,f32f32f32of32)
 			  &nc0, &n_sub_updated
 			);
 
-			// Compute the total number of iterations we'll need.
-			dim_t n_iter = ( nc0 + NR - 1 ) / NR;
-			
 			for ( dim_t pc = 0; pc < k; pc += KC )
 			{
 				dim_t kc0 = bli_min( ( k - pc ), KC );
-				inc_t ps_p = kc0 * NR;
-
-				const float* b_temp = input_buf_addr + ( jc * cs_b ) + ( pc * rs_b );
 
 				// The offsets are calculated in such a way that it resembles
 				// the reorder buffer traversal in single threaded reordering.
@@ -265,34 +248,13 @@ AOCL_GEMM_REORDER(float,f32f32f32of32)
 				// st = ( jc_cur_loop * k )    <traverse blocks 1,2,3,4>
 				//    + ( n_sub_updated * pc ) <traverse block 5>
 				//    + ( NC' * kc0_updated)   <traverse block 6>
-				float* p_temp = reorder_buf_addr + ( jc_cur_loop * k ) +
-								( n_sub_updated * pc ) + ( jc_cur_loop_rem * kc0 );
-
-				dim_t jr, it;
-				// Iterate over every logical micropanel in the source matrix.
-				for ( jr = 0, it = 0; it < n_iter; jr += NR, it += 1 )
-				{
-					dim_t panel_dim_i = bli_min( NR, nc0 - jr );
-
-					const float* b_use = b_temp + ( jr * cs_b );
-					float* p_use = p_temp;
-
-					PASTEMAC(s,packm_cxk)
-					(
-					  conjc,
-					  schema,
-					  panel_dim_i,
-					  NR,
-					  kc0,
-					  kc0,
-					  kappa_cast,
-					  ( float* )b_use, cs_b, rs_b,
-					  p_use, rs_p,
-					  cntx
-					);
-
-					p_temp += ps_p;
-				}
+				( ( lpgemm_pack_f32 )lcntx->packb_fun_ptr )
+				(
+				  reorder_buf_addr + ( jc_cur_loop * k ) +
+				  ( n_sub_updated * pc ) + ( jc_cur_loop_rem * kc0 ),
+				  input_buf_addr + ( rs_b * pc ) + ( cs_b * jc ),
+				  rs_b, cs_b, nc0, kc0, &rs_b_reorder, &cs_b_reorder
+				);
 			}
 
 			adjust_B_panel_reordered_jc( &jc, jc_cur_loop );

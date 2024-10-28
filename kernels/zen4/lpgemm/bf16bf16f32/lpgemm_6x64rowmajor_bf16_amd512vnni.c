@@ -322,7 +322,7 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 			     post_ops_list, post_ops_attr
 				);
 
-			// No leftover fringe after this podint.
+			// No leftover fringe after this point.
 		}
 		return;
 	}

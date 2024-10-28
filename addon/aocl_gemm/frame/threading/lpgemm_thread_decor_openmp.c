@@ -503,7 +503,6 @@ BLIS_INLINE void lpgemm_bf16bf16f32of32_get_threading
 	}
 	else if ( ( *n_threads ) > 1 )
 	{
-
 		dim_t NR = lpgemm_get_block_size_NR_global_cntx( BF16BF16F32OF32 );
 		dim_t MR = lpgemm_get_block_size_MR_global_cntx( BF16BF16F32OF32 );
 		dim_t mr_blks = ( m + MR - 1 ) / MR;
@@ -558,22 +557,17 @@ BLIS_INLINE void lpgemm_f32f32f32of32_get_threading
        rntm_t* rntm_g
      )
 {
-	// Query the global cntx.
-	cntx_t* cntx = bli_gks_query_cntx();
-
-	num_t dt = BLIS_FLOAT;
-
 	// Query the context for SUP limits.
-	const dim_t MT = bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_MT, cntx );
-	const dim_t NT = bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_NT, cntx );
-	const dim_t KT = bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_KT, cntx );
+	const dim_t MT = lpgemm_get_sup_thres_MT_global_cntx( F32F32F32OF32 );
+	const dim_t NT = lpgemm_get_sup_thres_NT_global_cntx( F32F32F32OF32 );
+	const dim_t KT = lpgemm_get_sup_thres_KT_global_cntx( F32F32F32OF32 );
 
 	// Query the context for various blocksizes.
-	const dim_t NR = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NR, cntx );
-	const dim_t MR = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MR, cntx );
-	const dim_t NC = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NC, cntx );
-	const dim_t MC = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MC, cntx );
-	const dim_t KC = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_KC, cntx );
+	dim_t NR = lpgemm_get_block_size_NR_global_cntx( F32F32F32OF32 );
+	dim_t MR = lpgemm_get_block_size_MR_global_cntx( F32F32F32OF32 );
+	dim_t MC = lpgemm_get_block_size_MC_global_cntx( F32F32F32OF32 );
+	dim_t NC = lpgemm_get_block_size_NC_global_cntx( F32F32F32OF32 );
+	dim_t KC = lpgemm_get_block_size_KC_global_cntx( F32F32F32OF32 );
 
 	const dim_t MT_2 = MT / 2;
 
@@ -640,7 +634,7 @@ BLIS_INLINE void lpgemm_f32f32f32of32_get_threading
 
 	if ( ( m >= MT ) && ( n >= NT ) && ( k >= KT ) )
 	{
-		if (((k <= page_size_b_floatx2) && (m_ic > MT_2) && (n_jc >= NT)) ||
+		if (((k >= page_size_b_floatx2) && (m_ic > MT_2) && (n_jc >= NT)) ||
 		    ((bli_cpuid_is_avx512_supported() == FALSE) && (k > page_size_b_floatx2)))
 		{
 			bli_rntm_set_pack_b( 1, rntm_g );

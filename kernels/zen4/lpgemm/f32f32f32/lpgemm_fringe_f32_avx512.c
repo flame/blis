@@ -839,14 +839,14 @@ POST_OPS_DOWNSCALE_5x64F:
         }
         if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 0 );
-          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 1);
-          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 2 );
-          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 3 );
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 0 ) );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 1) );
+          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 2 ) );
+          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 3 ) );
         }
         //c[0, 0-15]
         F32_SCL_MULRND(zmm8, selector1, zero_point0);
@@ -903,8 +903,8 @@ POST_OPS_DOWNSCALE_5x64F:
         }
         if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 4 );
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 4 ) );
         }
         //c[4, 0-15]
         F32_SCL_MULRND(zmm24, selector1, zero_point0);
@@ -1745,14 +1745,14 @@ POST_OPS_DOWNSCALE_4x64F:
         }
         if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 0 );
-          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 1);
-          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 2 );
-          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 3 );
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 0 ) );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 1) );
+          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 2 ) );
+          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 3 ) );
         }
         //c[0, 0-15]
         F32_SCL_MULRND(zmm8, selector1, zero_point0);
@@ -2485,12 +2485,12 @@ POST_OPS_DOWNSCALE_3x64F:
         }
         if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 0 );
-          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 1);
-          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 2 );
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 0 ) );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 1) );
+          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 2 ) );
         }
         //c[0, 0-15]
         F32_SCL_MULRND(zmm8, selector1, zero_point0);
@@ -3066,10 +3066,10 @@ POST_OPS_DOWNSCALE_2x64F:
         }
         if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 0 );
-          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 1);
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 0 ) );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 1 ) );
         }
         //c[0, 0-15]
         F32_SCL_MULRND(zmm8, selector1, zero_point0);
@@ -3484,8 +3484,8 @@ POST_OPS_DOWNSCALE_1x64F:
         }
         if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 0 );
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 0 ) );
         }
         //c[0, 0-15]
         F32_SCL_MULRND(zmm8, selector1, zero_point0);
@@ -4205,14 +4205,14 @@ POST_OPS_DOWNSCALE_5x48F:
         }
         if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 0 );
-          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 1);
-          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 2 );
-          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 3 );
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 0 ) );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 1 ) );
+          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 2 ) );
+          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 3 ) );
         }
         //c[0, 0-15]
         F32_SCL_MULRND(zmm8, selector1, zero_point0);
@@ -4257,8 +4257,8 @@ POST_OPS_DOWNSCALE_5x48F:
         }
         if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 4 );
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 4 ) );
         }
         //c[4, 0-15]
         F32_SCL_MULRND(zmm24, selector1, zero_point0);
@@ -4955,14 +4955,14 @@ POST_OPS_DOWNSCALE_4x48F:
         }
         if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 0 );
-          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 1);
-          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 2 );
-          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 3 );
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 0 ) );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 1 ) );
+          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 2 ) );
+          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 3 ) );
         }
         //c[0, 0-15]
         F32_SCL_MULRND(zmm8, selector1, zero_point0);
@@ -5569,12 +5569,12 @@ POST_OPS_DOWNSCALE_3x48F:
         }
         if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 0 );
-          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 1);
-          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 2 );
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 0 ) );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 1) );
+          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 2 ) );
         }
         //c[0, 0-15]
         F32_SCL_MULRND(zmm8, selector1, zero_point0);
@@ -6058,10 +6058,10 @@ POST_OPS_DOWNSCALE_2x48F:
         }
         if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 0 );
-          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 1);
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 0 ) );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 1) );
         }
         //c[0, 0-15]
         F32_SCL_MULRND(zmm8, selector1, zero_point0);
@@ -6422,8 +6422,8 @@ POST_OPS_DOWNSCALE_1x48F:
         }
         if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 0 );
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 0 ) );
         }
         //c[0, 0-15]
         F32_SCL_MULRND(zmm8, selector1, zero_point0);
@@ -6993,16 +6993,16 @@ POST_OPS_DOWNSCALE_5x32F:
         }
         if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 0 );
-          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 1);
-          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 2 );
-          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 3 );
-          zero_point4 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 4 );
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 0 ) );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 1 ) );
+          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 2 ) );
+          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 3 ) );
+          zero_point4 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 4 ) );
         }
         //c[0, 0-15]
         F32_SCL_MULRND(zmm8, selector1, zero_point0);
@@ -7576,14 +7576,14 @@ POST_OPS_DOWNSCALE_4x32F:
         }
         if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 0 );
-          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 1);
-          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 2 );
-          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 3 );
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 0 ) );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 1 ) );
+          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 2 ) );
+          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 3 ) );
         }
         //c[0, 0-15]
         F32_SCL_MULRND(zmm8, selector1, zero_point0);
@@ -8068,12 +8068,12 @@ POST_OPS_DOWNSCALE_3x32F:
         }
         if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 0 );
-          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 1);
-          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 2 );
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 0 ) );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 1 ) );
+          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 2 ) );
         }
         //c[0, 0-15]
         F32_SCL_MULRND(zmm8, selector1, zero_point0);
@@ -8464,10 +8464,10 @@ POST_OPS_DOWNSCALE_2x32F:
         }
         if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 0 );
-          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 1);
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 0 ) );
+          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 1 ) );
         }
         //c[0, 0-15]
         F32_SCL_MULRND(zmm8, selector1, zero_point0);
@@ -8771,8 +8771,8 @@ POST_OPS_DOWNSCALE_1x32F:
         }
         if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) +
-                                post_ops_attr.post_op_c_i + 0 );
+          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_i + 0 ) );
         }
         //c[0, 0-15]
         F32_SCL_MULRND(zmm8, selector1, zero_point0);
