@@ -142,6 +142,7 @@ static void _lpgemm_cntx_init_func_map()
 #define KMACRO(ID,FUNC_PTR) global_cntx_t_list[ID].kern_fun_ptr = FUNC_PTR;
 #define PAMACRO(ID,FUNC_PTR) global_cntx_t_list[ID].packa_fun_ptr = FUNC_PTR;
 #define PBMACRO(ID,FUNC_PTR) global_cntx_t_list[ID].packb_fun_ptr = FUNC_PTR;
+#define PBMXPMACRO(ID, FUNC_PTR) global_cntx_t_list[ID].packb_mxp_fun_ptr = FUNC_PTR;
 #define UBMACRO(ID, FUNC_PTR) global_cntx_t_list[ID].unpackb_fun_ptr = FUNC_PTR;
 #define PBSMACRO(ID, FUNC_PTR) global_cntx_t_list[ID].packsclb_fun_ptr = FUNC_PTR;
 #define JITMACRO(ID, FUNC_PTR) global_cntx_t_list[ID].jit_kernel = FUNC_PTR;
@@ -155,6 +156,7 @@ static void _lpgemm_cntx_init_func_map()
 	global_cntx_t_list[F32F32F32OF32].kern_fun_ptr = NULL;
 	global_cntx_t_list[BF16BF16F32OF32].kern_fun_ptr = NULL;
 	global_cntx_t_list[BF16S4F32OF32].kern_fun_ptr = NULL;
+	global_cntx_t_list[F32OBF16].kern_fun_ptr = NULL;
 
 	// Kernel dispatch object factory.
 	if ( bli_cpuid_is_avx512bf16_supported() == TRUE )
@@ -163,6 +165,7 @@ static void _lpgemm_cntx_init_func_map()
 		LPGEMM_KERN_FUNC_MAP_AVX512_VNNI_BF16
 		LPGEMM_PACKA_FUNC_MAP_AVX512_VNNI_BF16
 		LPGEMM_PACKB_FUNC_MAP_AVX512_VNNI_BF16
+		LPGEMM_PACKBMXP_FUNC_MAP_AVX512_VNNI_BF16
 		LPGEMM_UNPACKB_FUNC_MAP_AVX512_VNNI_BF16
 		LPGEMM_PACKSCLB_FUNC_MAP_AVX512_VNNI_BF16
 
@@ -210,6 +213,7 @@ static void _lpgemm_cntx_init_func_map()
 		LPGEMM_KERN_FUNC_MAP_AVX512_VNNI
 		LPGEMM_PACKA_FUNC_MAP_AVX512_VNNI
 		LPGEMM_PACKB_FUNC_MAP_AVX512_VNNI
+		LPGEMM_PACKBMXP_FUNC_MAP_AVX512_VNNI
 #endif
 
 		if ( global_lpgemm_enable_arch == BLIS_ARCH_ZEN3 )
@@ -226,9 +230,10 @@ static void _lpgemm_cntx_init_func_map()
 		LPGEMM_PACKB_FUNC_MAP_AVX2
 #endif
 	}
+
 	// If built with a config not supporting zen3/zen4/amdzen, error out
 	// since reference kernels are not available.
-	if ( global_cntx_t_list[F32F32F32OF32].kern_fun_ptr == NULL )
+	if (global_cntx_t_list[F32F32F32OF32].kern_fun_ptr == NULL)
 	{
 		bli_print_msg( "AOCL_GEMM is not compiled using correct Zen config."
 				" Compile using zen3/zen4/amdzen config.",
@@ -237,6 +242,7 @@ static void _lpgemm_cntx_init_func_map()
 	}
 
 #undef PBMACRO
+#undef PBMXPMACRO
 #undef PAMACRO
 #undef KMACRO
 }

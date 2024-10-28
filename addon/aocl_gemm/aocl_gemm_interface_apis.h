@@ -83,6 +83,21 @@ AOCL_GEMM_REORDER(int8_t,s8s8s16os16);
 AOCL_GEMM_REORDER(int8_t,u8s4s32os32);
 AOCL_GEMM_REORDER(int8_t, bf16s4f32of32);
 
+#define AOCL_GEMM_REORDER_MXP(A_type,B_type,LP_SFX) \
+BLIS_EXPORT_ADDON void aocl_reorder_ ## LP_SFX \
+     ( \
+       const char    order, \
+       const char    trans, \
+       const char    mat_type, \
+       const A_type* input_buf_addr, \
+       B_type*       reorder_buf_addr, \
+       const dim_t   k, \
+       const dim_t   n, \
+       const dim_t   ldb \
+     ) \
+
+AOCL_GEMM_REORDER_MXP(float,bfloat16,f32obf16);
+
 #define AOCL_GEMM_UNREORDER(B_type, LP_SFX) \
 BLIS_EXPORT_ADDON void aocl_unreorder_ ## LP_SFX \
      ( \

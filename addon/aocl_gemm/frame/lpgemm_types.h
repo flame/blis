@@ -69,10 +69,11 @@ typedef enum
 	BF16BF16F32OF32 = 3, // bf16 - A, bf16 - B, float - C
 	S8S8S32OS32 = 4,	 // int8_t - A, int8_t - B, int32_t - C
 	S8S8S16OS16 = 5,	 // int8_t - A, int8_t - B, int16_t - C
-	U8S4S32OS32 = 6,	 // Only used for reordering int4_t B matrix.
-	BF16S4F32OF32 = 7	 // Only used for reordering int4_t B matrix.
+	U8S4S32OS32 = 6,		 // Only used for reordering int4_t B matrix.
+	BF16S4F32OF32 = 7,	 // Only used for reordering int4_t B matrix.
+    F32OBF16 = 8 // Only used for reordering input float matrix to bf16 reorder
 } AOCL_OPERATION_TYPE;
-#define AOCL_OPERATION_TYPE_LEN 8
+#define AOCL_OPERATION_TYPE_LEN 9
 
 typedef enum
 {
@@ -160,6 +161,7 @@ typedef struct
 	lpgemm_block_size_t blksz;
 	void_fp kern_fun_ptr;
 	void_fp packa_fun_ptr;
+	void_fp packb_mxp_fun_ptr;
 	void_fp packb_fun_ptr;
 	void_fp unpackb_fun_ptr;
 	void_fp packsclb_fun_ptr;

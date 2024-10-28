@@ -53,6 +53,14 @@ void reorderb_nr64_bf16s4f32of32
        lpgemm_cntx_t* lcntx
      );
 
+void reorderb_mxp_nr64_f32obf16
+     (
+       lpgemm_obj_t * b,
+       lpgemm_obj_t * b_reorder,
+       rntm_t*        rntm,
+       lpgemm_cntx_t* lcntx
+     );
+
 void unreorderb_nr64_bf16bf16f32of32
      (
        lpgemm_obj_t * b,
