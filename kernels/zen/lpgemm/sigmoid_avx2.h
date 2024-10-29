@@ -32,15 +32,23 @@
 
 */
 
-#ifndef AOCL_LPGEMM_SIGMOID_AVX512_H
-#define AOCL_LPGEMM_SIGMOID_AVX512_H
+#ifndef AOCL_LPGEMM_SIGMOID_AVX2_H
+#define AOCL_LPGEMM_SIGMOID_AVX2_H
 
 // Sigmoid(in_reg) = 1 / (1 + exp(-1 * in_reg)).
-// in_reg and al are expected to contain float values.
-#define SIGMOID_F32_AVX512_DEF(in_reg, al_in, r, r2, z, dn, ex_out) \
-  al_in = _mm512_mul_ps ( in_reg, _mm512_set1_ps(-1) ); \
-	EXPF_AVX512(al_in, r, r2, z, dn, ex_out); \
-	in_reg = _mm512_div_ps( _mm512_set1_ps ( 1 ), \
-           _mm512_add_ps( ( __m512 )ex_out, _mm512_set1_ps( 1 ) ) );
+// in_reg is expected to contain float values.
+#define SIGMOID_F32_AVX2_DEF(in_reg, al_in, r, r2, z, dn, ex_out) \
+  al_in = _mm256_mul_ps ( in_reg, _mm256_set1_ps(-1) ); \
+	EXPF_AVX2(al_in, r, r2, z, dn, ex_out); \
+    ex_out = ( __m256i )_mm256_add_ps( ( __m256 )ex_out, _mm256_set1_ps( 1 ) ); \
+	in_reg = _mm256_div_ps( _mm256_set1_ps ( 1 ), ( __m256 )ex_out ); \
 
-#endif // AOCL_LPGEMM_SIGMOID_AVX512_H
+// Sigmoid(in_reg) = 1 / (1 + exp(-1 * in_reg)).
+// in_reg is expected to contain float values.
+#define SIGMOID_F32_SSE_DEF(in_reg, al_in, r, r2, z, dn, ex_out) \
+  al_in = _mm_mul_ps ( in_reg, _mm_set1_ps(-1) ); \
+	EXPF_SSE(al_in, r, r2, z, dn, ex_out); \
+    ex_out = ( __m128i )_mm_add_ps( ( __m128 )ex_out, _mm_set1_ps( 1 ) ); \
+	in_reg = _mm_div_ps( _mm_set1_ps ( 1 ), ( __m128 )ex_out ); \
+
+#endif // AOCL_LPGEMM_SIGMOID_AVX2_H

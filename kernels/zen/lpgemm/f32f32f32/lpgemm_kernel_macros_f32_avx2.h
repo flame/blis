@@ -37,6 +37,7 @@
 
 #include "../gelu_avx2.h"
 #include "../silu_avx2.h"
+#include "../sigmoid_avx2.h"
 #include "../math_utils_avx2.h"
 
 /* ReLU scale (Parametric ReLU):  f(x) = x, when x > 0 and f(x) = a*x when x <= 0 */
@@ -258,5 +259,15 @@
 	F32_F32_MATRIX_MUL_LOAD_YMM(scr0,m_ind,0); \
 	F32_F32_MATRIX_MUL_LOAD_YMM(scr1,m_ind,1); \
 	F32_MATRIX_MUL_2COL_YMM(scr0,scr1,m_ind,r_ind0,r_ind1); \
+
+// TANH
+#define TANH_F32S_AVX2(reg, r, r2, x, z, dn, q) \
+\
+	TANHF_AVX2(reg, r, r2, x, z, dn, q); \
+
+// TANH
+#define TANH_F32S_SSE(reg, r, r2, x, z, dn, q) \
+\
+	TANHF_SSE(reg, r, r2, x, z, dn, q);
 
 #endif //LPGEMM_F32_SGEMM_AVX2_KERN_MACROS_H

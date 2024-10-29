@@ -37,6 +37,7 @@
 
 #include "../gelu_avx512.h"
 #include "../silu_avx512.h"
+#include "../sigmoid_avx512.h"
 #include "../math_utils_avx512.h"
 
 /* ReLU scale (Parametric ReLU):  f(x) = x, when x > 0 and f(x) = a*x when x <= 0 */
@@ -184,6 +185,12 @@
 #define F32_SCL_MULRND(reg,selector,zero_point) \
 	reg = _mm512_mul_ps( reg, selector ); \
 	reg = _mm512_add_ps( reg, zero_point ); \
+
+
+/*x_tanh = tanhf(x_tanh) */  \
+#define TANH_F32S_AVX512(x_tanh, r, r2, x, z, dn, q) \
+\
+	TANHF_AVX512(x_tanh, r, r2, x, z, dn, q)
 
 #endif //LPGEMM_F32_SGEMM_KERN_MACROS_H
 

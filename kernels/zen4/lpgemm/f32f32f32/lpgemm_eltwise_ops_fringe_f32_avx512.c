@@ -53,7 +53,9 @@ LPGEMM_ELTWISE_OPS_M_FRINGE_KERNEL(float,float,f32of32_5x64)
 						  NULL,// Virtual node for downscale, else segfault
 						  &&POST_OPS_MATRIX_ADD_5x64_OPS,
 						  &&POST_OPS_SWISH_5x64_OPS,
-						  &&POST_OPS_MATRIX_MUL_5x64_OPS
+						  &&POST_OPS_MATRIX_MUL_5x64_OPS,
+						  &&POST_OPS_TANH_5x64_OPS,
+						  &&POST_OPS_SIGMOID_5x64_OPS
 						};
 	dim_t NR = 64;
 
@@ -775,6 +777,140 @@ POST_OPS_SWISH_5x64_OPS:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_TANH_5x64_OPS:
+			{
+				__m512 dn, z, x, r2, r;
+				__m512i q;
+
+				// c[0, 0-15]
+				TANH_F32S_AVX512(zmm8, r, r2, x, z, dn, q)
+
+				// c[0, 16-31]
+				TANH_F32S_AVX512(zmm9, r, r2, x, z, dn, q)
+
+				// c[0, 32-47]
+				TANH_F32S_AVX512(zmm10, r, r2, x, z, dn, q)
+
+				// c[0, 48-63]
+				TANH_F32S_AVX512(zmm11, r, r2, x, z, dn, q)
+
+				// c[1, 0-15]
+				TANH_F32S_AVX512(zmm12, r, r2, x, z, dn, q)
+
+				// c[1, 16-31]
+				TANH_F32S_AVX512(zmm13, r, r2, x, z, dn, q)
+
+				// c[1, 32-47]
+				TANH_F32S_AVX512(zmm14, r, r2, x, z, dn, q)
+
+				// c[1, 48-63]
+				TANH_F32S_AVX512(zmm15, r, r2, x, z, dn, q)
+
+				// c[2, 0-15]
+				TANH_F32S_AVX512(zmm16, r, r2, x, z, dn, q)
+
+				// c[2, 16-31]
+				TANH_F32S_AVX512(zmm17, r, r2, x, z, dn, q)
+
+				// c[2, 32-47]
+				TANH_F32S_AVX512(zmm18, r, r2, x, z, dn, q)
+
+				// c[2, 48-63]
+				TANH_F32S_AVX512(zmm19, r, r2, x, z, dn, q)
+
+				// c[3, 0-15]
+				TANH_F32S_AVX512(zmm20, r, r2, x, z, dn, q)
+
+				// c[3, 16-31]
+				TANH_F32S_AVX512(zmm21, r, r2, x, z, dn, q)
+
+				// c[3, 32-47]
+				TANH_F32S_AVX512(zmm22, r, r2, x, z, dn, q)
+
+				// c[3, 48-63]
+				TANH_F32S_AVX512(zmm23, r, r2, x, z, dn, q)
+
+				// c[4, 0-15]
+				TANH_F32S_AVX512(zmm24, r, r2, x, z, dn, q)
+
+				// c[4, 16-31]
+				TANH_F32S_AVX512(zmm25, r, r2, x, z, dn, q)
+
+				// c[4, 32-47]
+				TANH_F32S_AVX512(zmm26, r, r2, x, z, dn, q)
+
+				// c[4, 48-63]
+				TANH_F32S_AVX512(zmm27, r, r2, x, z, dn, q)
+
+				POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+			}
+POST_OPS_SIGMOID_5x64_OPS:
+			{
+				__m512 al_in, r, r2, z, dn;
+				__m512i ex_out;
+
+				// c[0, 0-15]
+				SIGMOID_F32_AVX512_DEF(zmm8, al_in, r, r2, z, dn, ex_out);
+
+				// c[0, 16-31]
+				SIGMOID_F32_AVX512_DEF(zmm9, al_in, r, r2, z, dn, ex_out);
+
+				// c[0, 32-47]
+				SIGMOID_F32_AVX512_DEF(zmm10, al_in, r, r2, z, dn, ex_out);
+
+				// c[0, 48-63]
+				SIGMOID_F32_AVX512_DEF(zmm11, al_in, r, r2, z, dn, ex_out);
+
+				// c[1, 0-15]
+				SIGMOID_F32_AVX512_DEF(zmm12, al_in, r, r2, z, dn, ex_out);
+
+				// c[1, 16-31]
+				SIGMOID_F32_AVX512_DEF(zmm13, al_in, r, r2, z, dn, ex_out);
+
+				// c[1, 32-47]
+				SIGMOID_F32_AVX512_DEF(zmm14, al_in, r, r2, z, dn, ex_out);
+
+				// c[1, 48-63]
+				SIGMOID_F32_AVX512_DEF(zmm15, al_in, r, r2, z, dn, ex_out);
+
+				// c[2, 0-15]
+				SIGMOID_F32_AVX512_DEF(zmm16, al_in, r, r2, z, dn, ex_out);
+
+				// c[2, 16-31]
+				SIGMOID_F32_AVX512_DEF(zmm17, al_in, r, r2, z, dn, ex_out);
+
+				// c[2, 32-47]
+				SIGMOID_F32_AVX512_DEF(zmm18, al_in, r, r2, z, dn, ex_out);
+
+				// c[2, 48-63]
+				SIGMOID_F32_AVX512_DEF(zmm19, al_in, r, r2, z, dn, ex_out);
+
+				// c[3, 0-15]
+				SIGMOID_F32_AVX512_DEF(zmm20, al_in, r, r2, z, dn, ex_out);
+
+				// c[3, 16-31]
+				SIGMOID_F32_AVX512_DEF(zmm21, al_in, r, r2, z, dn, ex_out);
+
+				// c[3, 32-47]
+				SIGMOID_F32_AVX512_DEF(zmm22, al_in, r, r2, z, dn, ex_out);
+
+				// c[3, 48-63]
+				SIGMOID_F32_AVX512_DEF(zmm23, al_in, r, r2, z, dn, ex_out);
+
+				// c[4, 0-15]
+				SIGMOID_F32_AVX512_DEF(zmm24, al_in, r, r2, z, dn, ex_out);
+
+				// c[4, 16-31]
+				SIGMOID_F32_AVX512_DEF(zmm25, al_in, r, r2, z, dn, ex_out);
+
+				// c[4, 32-47]
+				SIGMOID_F32_AVX512_DEF(zmm26, al_in, r, r2, z, dn, ex_out);
+
+				// c[4, 48-63]
+				SIGMOID_F32_AVX512_DEF(zmm27, al_in, r, r2, z, dn, ex_out);
+
+				POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+			}
 POST_OPS_5x64_OPS_DISABLE:
 		;
 
@@ -862,7 +998,9 @@ LPGEMM_ELTWISE_OPS_M_FRINGE_KERNEL(float,float,f32of32_4x64)
 						  NULL,// Virtual node for downscale, else segfault
 						  &&POST_OPS_MATRIX_ADD_4x64_OPS,
 						  &&POST_OPS_SWISH_4x64_OPS,
-						  &&POST_OPS_MATRIX_MUL_4x64_OPS
+						  &&POST_OPS_MATRIX_MUL_4x64_OPS,
+						  &&POST_OPS_TANH_4x64_OPS,
+						  &&POST_OPS_SIGMOID_4x64_OPS
 						};
 	dim_t NR = 64;
 
@@ -1488,6 +1626,116 @@ POST_OPS_SWISH_4x64_OPS:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_TANH_4x64_OPS:
+			{
+				__m512 dn, z, x, r2, r;
+				__m512i q;
+
+				// c[0, 0-15]
+				TANH_F32S_AVX512(zmm8, r, r2, x, z, dn, q)
+
+				// c[0, 16-31]
+				TANH_F32S_AVX512(zmm9, r, r2, x, z, dn, q)
+
+				// c[0, 32-47]
+				TANH_F32S_AVX512(zmm10, r, r2, x, z, dn, q)
+
+				// c[0, 48-63]
+				TANH_F32S_AVX512(zmm11, r, r2, x, z, dn, q)
+
+				// c[1, 0-15]
+				TANH_F32S_AVX512(zmm12, r, r2, x, z, dn, q)
+
+				// c[1, 16-31]
+				TANH_F32S_AVX512(zmm13, r, r2, x, z, dn, q)
+
+				// c[1, 32-47]
+				TANH_F32S_AVX512(zmm14, r, r2, x, z, dn, q)
+
+				// c[1, 48-63]
+				TANH_F32S_AVX512(zmm15, r, r2, x, z, dn, q)
+
+				// c[2, 0-15]
+				TANH_F32S_AVX512(zmm16, r, r2, x, z, dn, q)
+
+				// c[2, 16-31]
+				TANH_F32S_AVX512(zmm17, r, r2, x, z, dn, q)
+
+				// c[2, 32-47]
+				TANH_F32S_AVX512(zmm18, r, r2, x, z, dn, q)
+
+				// c[2, 48-63]
+				TANH_F32S_AVX512(zmm19, r, r2, x, z, dn, q)
+
+				// c[3, 0-15]
+				TANH_F32S_AVX512(zmm20, r, r2, x, z, dn, q)
+
+				// c[3, 16-31]
+				TANH_F32S_AVX512(zmm21, r, r2, x, z, dn, q)
+
+				// c[3, 32-47]
+				TANH_F32S_AVX512(zmm22, r, r2, x, z, dn, q)
+
+				// c[3, 48-63]
+				TANH_F32S_AVX512(zmm23, r, r2, x, z, dn, q)
+
+				POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+			}
+POST_OPS_SIGMOID_4x64_OPS:
+			{
+				__m512 al_in, r, r2, z, dn;
+				__m512i ex_out;
+
+				// c[0, 0-15]
+				SIGMOID_F32_AVX512_DEF(zmm8, al_in, r, r2, z, dn, ex_out);
+
+				// c[0, 16-31]
+				SIGMOID_F32_AVX512_DEF(zmm9, al_in, r, r2, z, dn, ex_out);
+
+				// c[0, 32-47]
+				SIGMOID_F32_AVX512_DEF(zmm10, al_in, r, r2, z, dn, ex_out);
+
+				// c[0, 48-63]
+				SIGMOID_F32_AVX512_DEF(zmm11, al_in, r, r2, z, dn, ex_out);
+
+				// c[1, 0-15]
+				SIGMOID_F32_AVX512_DEF(zmm12, al_in, r, r2, z, dn, ex_out);
+
+				// c[1, 16-31]
+				SIGMOID_F32_AVX512_DEF(zmm13, al_in, r, r2, z, dn, ex_out);
+
+				// c[1, 32-47]
+				SIGMOID_F32_AVX512_DEF(zmm14, al_in, r, r2, z, dn, ex_out);
+
+				// c[1, 48-63]
+				SIGMOID_F32_AVX512_DEF(zmm15, al_in, r, r2, z, dn, ex_out);
+
+				// c[2, 0-15]
+				SIGMOID_F32_AVX512_DEF(zmm16, al_in, r, r2, z, dn, ex_out);
+
+				// c[2, 16-31]
+				SIGMOID_F32_AVX512_DEF(zmm17, al_in, r, r2, z, dn, ex_out);
+
+				// c[2, 32-47]
+				SIGMOID_F32_AVX512_DEF(zmm18, al_in, r, r2, z, dn, ex_out);
+
+				// c[2, 48-63]
+				SIGMOID_F32_AVX512_DEF(zmm19, al_in, r, r2, z, dn, ex_out);
+
+				// c[3, 0-15]
+				SIGMOID_F32_AVX512_DEF(zmm20, al_in, r, r2, z, dn, ex_out);
+
+				// c[3, 16-31]
+				SIGMOID_F32_AVX512_DEF(zmm21, al_in, r, r2, z, dn, ex_out);
+
+				// c[3, 32-47]
+				SIGMOID_F32_AVX512_DEF(zmm22, al_in, r, r2, z, dn, ex_out);
+
+				// c[3, 48-63]
+				SIGMOID_F32_AVX512_DEF(zmm23, al_in, r, r2, z, dn, ex_out);
+
+				POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+			}
 POST_OPS_4x64_OPS_DISABLE:
 		;
 
@@ -1562,7 +1810,9 @@ LPGEMM_ELTWISE_OPS_M_FRINGE_KERNEL(float,float,f32of32_3x64)
 						  NULL,// Virtual node for downscale, else segfault
 						  &&POST_OPS_MATRIX_ADD_3x64_OPS,
 						  &&POST_OPS_SWISH_3x64_OPS,
-						  &&POST_OPS_MATRIX_MUL_3x64_OPS
+						  &&POST_OPS_MATRIX_MUL_3x64_OPS,
+						  &&POST_OPS_TANH_3x64_OPS,
+						  &&POST_OPS_SIGMOID_3x64_OPS
 						};
 	dim_t NR = 64;
 
@@ -2068,6 +2318,92 @@ POST_OPS_SWISH_3x64_OPS:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_TANH_3x64_OPS:
+			{
+				__m512 dn, z, x, r2, r;
+				__m512i q;
+
+				// c[0, 0-15]
+				TANH_F32S_AVX512(zmm8, r, r2, x, z, dn, q)
+
+				// c[0, 16-31]
+				TANH_F32S_AVX512(zmm9, r, r2, x, z, dn, q)
+
+				// c[0, 32-47]
+				TANH_F32S_AVX512(zmm10, r, r2, x, z, dn, q)
+
+				// c[0, 48-63]
+				TANH_F32S_AVX512(zmm11, r, r2, x, z, dn, q)
+
+				// c[1, 0-15]
+				TANH_F32S_AVX512(zmm12, r, r2, x, z, dn, q)
+
+				// c[1, 16-31]
+				TANH_F32S_AVX512(zmm13, r, r2, x, z, dn, q)
+
+				// c[1, 32-47]
+				TANH_F32S_AVX512(zmm14, r, r2, x, z, dn, q)
+
+				// c[1, 48-63]
+				TANH_F32S_AVX512(zmm15, r, r2, x, z, dn, q)
+
+				// c[2, 0-15]
+				TANH_F32S_AVX512(zmm16, r, r2, x, z, dn, q)
+
+				// c[2, 16-31]
+				TANH_F32S_AVX512(zmm17, r, r2, x, z, dn, q)
+
+				// c[2, 32-47]
+				TANH_F32S_AVX512(zmm18, r, r2, x, z, dn, q)
+
+				// c[2, 48-63]
+				TANH_F32S_AVX512(zmm19, r, r2, x, z, dn, q)
+
+				POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+			}
+POST_OPS_SIGMOID_3x64_OPS:
+			{
+				__m512 al_in, r, r2, z, dn;
+				__m512i ex_out;
+
+				// c[0, 0-15]
+				SIGMOID_F32_AVX512_DEF(zmm8, al_in, r, r2, z, dn, ex_out);
+
+				// c[0, 16-31]
+				SIGMOID_F32_AVX512_DEF(zmm9, al_in, r, r2, z, dn, ex_out);
+
+				// c[0, 32-47]
+				SIGMOID_F32_AVX512_DEF(zmm10, al_in, r, r2, z, dn, ex_out);
+
+				// c[0, 48-63]
+				SIGMOID_F32_AVX512_DEF(zmm11, al_in, r, r2, z, dn, ex_out);
+
+				// c[1, 0-15]
+				SIGMOID_F32_AVX512_DEF(zmm12, al_in, r, r2, z, dn, ex_out);
+
+				// c[1, 16-31]
+				SIGMOID_F32_AVX512_DEF(zmm13, al_in, r, r2, z, dn, ex_out);
+
+				// c[1, 32-47]
+				SIGMOID_F32_AVX512_DEF(zmm14, al_in, r, r2, z, dn, ex_out);
+
+				// c[1, 48-63]
+				SIGMOID_F32_AVX512_DEF(zmm15, al_in, r, r2, z, dn, ex_out);
+
+				// c[2, 0-15]
+				SIGMOID_F32_AVX512_DEF(zmm16, al_in, r, r2, z, dn, ex_out);
+
+				// c[2, 16-31]
+				SIGMOID_F32_AVX512_DEF(zmm17, al_in, r, r2, z, dn, ex_out);
+
+				// c[2, 32-47]
+				SIGMOID_F32_AVX512_DEF(zmm18, al_in, r, r2, z, dn, ex_out);
+
+				// c[2, 48-63]
+				SIGMOID_F32_AVX512_DEF(zmm19, al_in, r, r2, z, dn, ex_out);
+
+				POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+			}
 POST_OPS_3x64_OPS_DISABLE:
 		;
 
@@ -2129,7 +2465,9 @@ LPGEMM_ELTWISE_OPS_M_FRINGE_KERNEL(float,float,f32of32_2x64)
 						  NULL,// Virtual node for downscale, else segfault
 						  &&POST_OPS_MATRIX_ADD_2x64_OPS,
 						  &&POST_OPS_SWISH_2x64_OPS,
-						  &&POST_OPS_MATRIX_MUL_2x64_OPS
+						  &&POST_OPS_MATRIX_MUL_2x64_OPS,
+						  &&POST_OPS_TANH_2x64_OPS,
+						  &&POST_OPS_SIGMOID_2x64_OPS
 						};
 	dim_t NR = 64;
 
@@ -2514,6 +2852,68 @@ POST_OPS_SWISH_2x64_OPS:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_TANH_2x64_OPS:
+			{
+				__m512 dn, z, x, r2, r;
+				__m512i q;
+
+				// c[0, 0-15]
+				TANH_F32S_AVX512(zmm8, r, r2, x, z, dn, q)
+
+				// c[0, 16-31]
+				TANH_F32S_AVX512(zmm9, r, r2, x, z, dn, q)
+
+				// c[0, 32-47]
+				TANH_F32S_AVX512(zmm10, r, r2, x, z, dn, q)
+
+				// c[0, 48-63]
+				TANH_F32S_AVX512(zmm11, r, r2, x, z, dn, q)
+
+				// c[1, 0-15]
+				TANH_F32S_AVX512(zmm12, r, r2, x, z, dn, q)
+
+				// c[1, 16-31]
+				TANH_F32S_AVX512(zmm13, r, r2, x, z, dn, q)
+
+				// c[1, 32-47]
+				TANH_F32S_AVX512(zmm14, r, r2, x, z, dn, q)
+
+				// c[1, 48-63]
+				TANH_F32S_AVX512(zmm15, r, r2, x, z, dn, q)
+
+				POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+			}
+POST_OPS_SIGMOID_2x64_OPS:
+			{
+				__m512 al_in, r, r2, z, dn;
+				__m512i ex_out;
+
+				// c[0, 0-15]
+				SIGMOID_F32_AVX512_DEF(zmm8, al_in, r, r2, z, dn, ex_out);
+
+				// c[0, 16-31]
+				SIGMOID_F32_AVX512_DEF(zmm9, al_in, r, r2, z, dn, ex_out);
+
+				// c[0, 32-47]
+				SIGMOID_F32_AVX512_DEF(zmm10, al_in, r, r2, z, dn, ex_out);
+
+				// c[0, 48-63]
+				SIGMOID_F32_AVX512_DEF(zmm11, al_in, r, r2, z, dn, ex_out);
+
+				// c[1, 0-15]
+				SIGMOID_F32_AVX512_DEF(zmm12, al_in, r, r2, z, dn, ex_out);
+
+				// c[1, 16-31]
+				SIGMOID_F32_AVX512_DEF(zmm13, al_in, r, r2, z, dn, ex_out);
+
+				// c[1, 32-47]
+				SIGMOID_F32_AVX512_DEF(zmm14, al_in, r, r2, z, dn, ex_out);
+
+				// c[1, 48-63]
+				SIGMOID_F32_AVX512_DEF(zmm15, al_in, r, r2, z, dn, ex_out);
+
+				POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+			}
 POST_OPS_2x64_OPS_DISABLE:
 		;
 
@@ -2562,7 +2962,9 @@ LPGEMM_ELTWISE_OPS_M_FRINGE_KERNEL(float,float,f32of32_1x64)
 						  NULL,// Virtual node for downscale, else segfault
 						  &&POST_OPS_MATRIX_ADD_1x64_OPS,
 						  &&POST_OPS_SWISH_1x64_OPS,
-						  &&POST_OPS_MATRIX_MUL_1x64_OPS
+						  &&POST_OPS_MATRIX_MUL_1x64_OPS,
+						  &&POST_OPS_TANH_1x64_OPS,
+						  &&POST_OPS_SIGMOID_1x64_OPS
 						};
 	dim_t NR = 64;
 
@@ -2827,6 +3229,44 @@ POST_OPS_SWISH_1x64_OPS:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_TANH_1x64_OPS:
+			{
+				__m512 dn, z, x, r2, r;
+				__m512i q;
+
+				// c[0, 0-15]
+				TANH_F32S_AVX512(zmm8, r, r2, x, z, dn, q)
+
+				// c[0, 16-31]
+				TANH_F32S_AVX512(zmm9, r, r2, x, z, dn, q)
+
+				// c[0, 32-47]
+				TANH_F32S_AVX512(zmm10, r, r2, x, z, dn, q)
+
+				// c[0, 48-63]
+				TANH_F32S_AVX512(zmm11, r, r2, x, z, dn, q)
+
+				POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+			}
+POST_OPS_SIGMOID_1x64_OPS:
+			{
+				__m512 al_in, r, r2, z, dn;
+				__m512i ex_out;
+
+				// c[0, 0-15]
+				SIGMOID_F32_AVX512_DEF(zmm8, al_in, r, r2, z, dn, ex_out);
+
+				// c[0, 16-31]
+				SIGMOID_F32_AVX512_DEF(zmm9, al_in, r, r2, z, dn, ex_out);
+
+				// c[0, 32-47]
+				SIGMOID_F32_AVX512_DEF(zmm10, al_in, r, r2, z, dn, ex_out);
+
+				// c[0, 48-63]
+				SIGMOID_F32_AVX512_DEF(zmm11, al_in, r, r2, z, dn, ex_out);
+
+				POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+			}
 POST_OPS_1x64_OPS_DISABLE:
 		;
 

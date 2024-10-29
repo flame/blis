@@ -89,7 +89,9 @@ LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32 )
           &&POST_OPS_DOWNSCALE_6x64F,
           &&POST_OPS_MATRIX_ADD_6x64F,
           &&POST_OPS_SWISH_6x64F,
-          &&POST_OPS_MATRIX_MUL_6x64F
+          &&POST_OPS_MATRIX_MUL_6x64F,
+          &&POST_OPS_TANH_6x64F,
+          &&POST_OPS_SIGMOID_6x64F
       };
 
   // Strides are updated based on matrix packing/reordering.
@@ -532,6 +534,21 @@ LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32 )
 
     // c[0, 0-15]
     SWISH_F32_AVX512_DEF(zmm8, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+  }
+  POST_OPS_TANH_6x64F:
+  {
+    __m512i zmm6;
+    // c[0, 0-15]
+    TANH_F32S_AVX512(zmm8, zmm0, zmm1, zmm2, zmm3, zmm4, zmm6)
+
+    POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+  }
+  POST_OPS_SIGMOID_6x64F:
+  {
+    __m512i ex_out;
+
+    // c[0, 0-15]
+    SIGMOID_F32_AVX512_DEF(zmm8, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
   }
   POST_OPS_6x64F_DISABLE:
   {

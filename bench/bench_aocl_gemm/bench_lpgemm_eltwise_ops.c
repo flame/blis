@@ -401,7 +401,8 @@ void eltwise_ops_accuracy_check_driver_ ## LP_SFX \
               &out_temp_accum, &temp_accum \
             ); \
  \
-            if ( *( b + ( rs_b * i ) + ( cs_b * j ) ) != out_temp_accum ) \
+            if ( ( ( *( b + ( rs_b * i ) + ( cs_b * j ) ) - out_temp_accum ) > 1.0E-5 ) || \
+                  ( (out_temp_accum - *( b + ( rs_b * i ) + ( cs_b * j ) ) ) > 1.0E-5 ) ) \
             { \
                 float comp_float, ref_float; \
                 GEN_FUNC_NAME(B_type,_to_float)(*( b + ( rs_b * i ) + ( cs_b * j ) ), &comp_float); \

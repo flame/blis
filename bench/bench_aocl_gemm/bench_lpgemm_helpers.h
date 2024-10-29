@@ -273,7 +273,7 @@ static inline ACCUM_type TANH_post_op_ ## BLAS_SFX \
        ACCUM_type temp_accum \
      ) \
 { \
-    double tanh_reference = tanhf( ( double )temp_accum ); \
+    float tanh_reference = tanhf( ( double )temp_accum ); \
     temp_accum = round( tanh_reference ); \
     return temp_accum; \
 } \

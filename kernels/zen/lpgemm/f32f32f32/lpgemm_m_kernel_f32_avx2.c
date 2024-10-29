@@ -56,7 +56,9 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
               &&POST_OPS_DOWNSCALE_6x16F,
               &&POST_OPS_MATRIX_ADD_6x16F,
               &&POST_OPS_SWISH_6x16F,
-              &&POST_OPS_MATRIX_MUL_6x16F
+              &&POST_OPS_MATRIX_MUL_6x16F,
+              &&POST_OPS_TANH_6x16F,
+              &&POST_OPS_SIGMOID_6x16F
             };
     uint64_t n_left = n0 % NR;  //n0 is expected to be n0<=NR
 
@@ -835,6 +837,92 @@ POST_OPS_SWISH_6x16F:
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_TANH_6x16F:
+      {
+        __m256 dn;
+        __m256i q;
+
+        // c[0,0-7]
+        TANH_F32S_AVX2(ymm4, ymm0, ymm1, ymm2, ymm3, dn, q)
+
+        // c[0,8-15]
+        TANH_F32S_AVX2(ymm5, ymm0, ymm1, ymm2, ymm3, dn, q)
+
+        // c[1,0-7]
+        TANH_F32S_AVX2(ymm6, ymm0, ymm1, ymm2, ymm3, dn, q)
+
+        // c[1,8-15]
+        TANH_F32S_AVX2(ymm7, ymm0, ymm1, ymm2, ymm3, dn, q)
+
+        // c[2,0-7]
+        TANH_F32S_AVX2(ymm8, ymm0, ymm1, ymm2, ymm3, dn, q)
+
+        // c[2,8-15]
+        TANH_F32S_AVX2(ymm9, ymm0, ymm1, ymm2, ymm3, dn, q)
+
+        // c[3,0-7]
+        TANH_F32S_AVX2(ymm10, ymm0, ymm1, ymm2, ymm3, dn, q)
+
+        // c[3,8-15]
+        TANH_F32S_AVX2(ymm11, ymm0, ymm1, ymm2, ymm3, dn, q)
+
+        // c[4,0-7]
+        TANH_F32S_AVX2(ymm12, ymm0, ymm1, ymm2, ymm3, dn, q)
+
+        // c[4,8-15]
+        TANH_F32S_AVX2(ymm13, ymm0, ymm1, ymm2, ymm3, dn, q)
+
+        // c[5,0-7]
+        TANH_F32S_AVX2(ymm14, ymm0, ymm1, ymm2, ymm3, dn, q)
+
+        // c[5,8-15]
+        TANH_F32S_AVX2(ymm15, ymm0, ymm1, ymm2, ymm3, dn, q)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_SIGMOID_6x16F:
+      {
+          __m256 z, dn;
+          __m256i ex_out;
+
+          // c[0,0-7]
+          SIGMOID_F32_AVX2_DEF(ymm4, ymm1, ymm2, ymm3, z, dn, ex_out)
+
+          // c[0,8-15]
+          SIGMOID_F32_AVX2_DEF(ymm5, ymm1, ymm2, ymm3, z, dn, ex_out)
+
+          // c[1,0-7]
+          SIGMOID_F32_AVX2_DEF(ymm6, ymm1, ymm2, ymm3, z, dn, ex_out)
+
+          // c[1,8-15]
+          SIGMOID_F32_AVX2_DEF(ymm7, ymm1, ymm2, ymm3, z, dn, ex_out)
+
+          // c[2,0-7]
+          SIGMOID_F32_AVX2_DEF(ymm8, ymm1, ymm2, ymm3, z, dn, ex_out)
+
+          // c[2,8-15]
+          SIGMOID_F32_AVX2_DEF(ymm9, ymm1, ymm2, ymm3, z, dn, ex_out)
+
+          // c[3,0-7]
+          SIGMOID_F32_AVX2_DEF(ymm10, ymm1, ymm2, ymm3, z, dn, ex_out)
+
+          // c[3,8-15]
+          SIGMOID_F32_AVX2_DEF(ymm11, ymm1, ymm2, ymm3, z, dn, ex_out)
+
+          // c[4,0-7]
+          SIGMOID_F32_AVX2_DEF(ymm12, ymm1, ymm2, ymm3, z, dn, ex_out)
+
+          // c[4,8-15]
+          SIGMOID_F32_AVX2_DEF(ymm13, ymm1, ymm2, ymm3, z, dn, ex_out)
+
+          // c[5,0-7]
+          SIGMOID_F32_AVX2_DEF(ymm14, ymm1, ymm2, ymm3, z, dn, ex_out)
+
+          // c[5,8-15]
+          SIGMOID_F32_AVX2_DEF(ymm15, ymm1, ymm2, ymm3, z, dn, ex_out)
+
+          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
 POST_OPS_6x16F_DISABLE:
       ;
 
@@ -909,7 +997,9 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x8m)
               &&POST_OPS_DOWNSCALE_6x8F,
               &&POST_OPS_MATRIX_ADD_6x8F,
               &&POST_OPS_SWISH_6x8F,
-              &&POST_OPS_MATRIX_MUL_6x8F
+              &&POST_OPS_MATRIX_MUL_6x8F,
+              &&POST_OPS_TANH_6x8F,
+              &&POST_OPS_SIGMOID_6x8F
             };
 
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -1409,6 +1499,56 @@ POST_OPS_SWISH_6x8F:
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_TANH_6x8F:
+      {
+        __m256 dn;
+        __m256i q;
+
+        // c[0,0-7]
+        TANH_F32S_AVX2(ymm4, ymm0, ymm1, ymm2, ymm3, dn, q)
+
+        // c[1,0-7]
+        TANH_F32S_AVX2(ymm6, ymm0, ymm1, ymm2, ymm3, dn, q)
+
+        // c[2,0-7]
+        TANH_F32S_AVX2(ymm8, ymm0, ymm1, ymm2, ymm3, dn, q)
+
+        // c[3,0-7]
+        TANH_F32S_AVX2(ymm10, ymm0, ymm1, ymm2, ymm3, dn, q)
+
+        // c[4,0-7]
+        TANH_F32S_AVX2(ymm12, ymm0, ymm1, ymm2, ymm3, dn, q)
+
+        // c[5,0-7]
+        TANH_F32S_AVX2(ymm14, ymm0, ymm1, ymm2, ymm3, dn, q)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_SIGMOID_6x8F:
+      {
+          __m256 z, dn;
+          __m256i ex_out;
+
+          // c[0,0-7]
+          SIGMOID_F32_AVX2_DEF(ymm4, ymm1, ymm2, ymm3, z, dn, ex_out)
+
+          // c[1,0-7]
+          SIGMOID_F32_AVX2_DEF(ymm6, ymm1, ymm2, ymm3, z, dn, ex_out)
+
+          // c[2,0-7]
+          SIGMOID_F32_AVX2_DEF(ymm8, ymm1, ymm2, ymm3, z, dn, ex_out)
+
+          // c[3,0-7]
+          SIGMOID_F32_AVX2_DEF(ymm10, ymm1, ymm2, ymm3, z, dn, ex_out)
+
+          // c[4,0-7]
+          SIGMOID_F32_AVX2_DEF(ymm12, ymm1, ymm2, ymm3, z, dn, ex_out)
+
+          // c[5,0-7]
+          SIGMOID_F32_AVX2_DEF(ymm14, ymm1, ymm2, ymm3, z, dn, ex_out)
+
+          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
 POST_OPS_6x8F_DISABLE:
       ;
 
@@ -1477,7 +1617,9 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x4m)
               &&POST_OPS_DOWNSCALE_6x4F,
               &&POST_OPS_MATRIX_ADD_6x4F,
               &&POST_OPS_SWISH_6x4F,
-              &&POST_OPS_MATRIX_MUL_6x4F
+              &&POST_OPS_MATRIX_MUL_6x4F,
+              &&POST_OPS_TANH_6x4F,
+              &&POST_OPS_SIGMOID_6x4F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -1955,6 +2097,56 @@ POST_OPS_SWISH_6x4F:
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_TANH_6x4F:
+      {
+        __m128 dn;
+        __m128i q;
+
+        // c[0,0-3]
+        TANH_F32S_SSE(xmm4, xmm0, xmm1, xmm2, xmm3, dn, q)
+
+        // c[1,0-3]
+        TANH_F32S_SSE(xmm5, xmm0, xmm1, xmm2, xmm3, dn, q)
+
+        // c[2,0-3]
+        TANH_F32S_SSE(xmm6, xmm0, xmm1, xmm2, xmm3, dn, q)
+
+        // c[3,0-3]
+        TANH_F32S_SSE(xmm7, xmm0, xmm1, xmm2, xmm3, dn, q)
+
+        // c[4,0-3]
+        TANH_F32S_SSE(xmm8, xmm0, xmm1, xmm2, xmm3, dn, q)
+
+        // c[5,0-3]
+        TANH_F32S_SSE(xmm9, xmm0, xmm1, xmm2, xmm3, dn, q)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_SIGMOID_6x4F:
+      {
+          __m128 z, dn;
+          __m128i ex_out;
+
+          // c[0,0-3]
+          SIGMOID_F32_SSE_DEF(xmm4, xmm1, xmm2, xmm3, z, dn, ex_out)
+
+          // c[1,0-3]
+          SIGMOID_F32_SSE_DEF(xmm5, xmm1, xmm2, xmm3, z, dn, ex_out)
+
+          // c[2,0-3]
+          SIGMOID_F32_SSE_DEF(xmm6, xmm1, xmm2, xmm3, z, dn, ex_out)
+
+          // c[3,0-3]
+          SIGMOID_F32_SSE_DEF(xmm7, xmm1, xmm2, xmm3, z, dn, ex_out)
+
+          // c[4,0-3]
+          SIGMOID_F32_SSE_DEF(xmm8, xmm1, xmm2, xmm3, z, dn, ex_out)
+
+          // c[5,0-3]
+          SIGMOID_F32_SSE_DEF(xmm9, xmm1, xmm2, xmm3, z, dn, ex_out)
+
+          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
 POST_OPS_6x4F_DISABLE:
       ;
 
@@ -2023,7 +2215,9 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x2m)
               &&POST_OPS_DOWNSCALE_6x2F,
               &&POST_OPS_MATRIX_ADD_6x2F,
               &&POST_OPS_SWISH_6x2F,
-              &&POST_OPS_MATRIX_MUL_6x2F
+              &&POST_OPS_MATRIX_MUL_6x2F,
+              &&POST_OPS_TANH_6x2F,
+              &&POST_OPS_SIGMOID_6x2F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -2502,6 +2696,56 @@ POST_OPS_SWISH_6x2F:
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_TANH_6x2F:
+      {
+        __m128 dn;
+        __m128i q;
+
+        // c[0,0-1]
+        TANH_F32S_SSE(xmm4, xmm0, xmm1, xmm2, xmm3, dn, q)
+
+        // c[1,0-1]
+        TANH_F32S_SSE(xmm5, xmm0, xmm1, xmm2, xmm3, dn, q)
+
+        // c[2,0-1]
+        TANH_F32S_SSE(xmm6, xmm0, xmm1, xmm2, xmm3, dn, q)
+
+        // c[3,0-1]
+        TANH_F32S_SSE(xmm7, xmm0, xmm1, xmm2, xmm3, dn, q)
+
+        // c[4,0-1]
+        TANH_F32S_SSE(xmm8, xmm0, xmm1, xmm2, xmm3, dn, q)
+
+        // c[5,0-1]
+        TANH_F32S_SSE(xmm9, xmm0, xmm1, xmm2, xmm3, dn, q)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_SIGMOID_6x2F:
+      {
+          __m128 z, dn;
+          __m128i ex_out;
+
+          // c[0,0-1]
+          SIGMOID_F32_SSE_DEF(xmm4, xmm1, xmm2, xmm3, z, dn, ex_out)
+
+          // c[1,0-1]
+          SIGMOID_F32_SSE_DEF(xmm5, xmm1, xmm2, xmm3, z, dn, ex_out)
+
+          // c[2,0-1]
+          SIGMOID_F32_SSE_DEF(xmm6, xmm1, xmm2, xmm3, z, dn, ex_out)
+
+          // c[3,0-1]
+          SIGMOID_F32_SSE_DEF(xmm7, xmm1, xmm2, xmm3, z, dn, ex_out)
+
+          // c[4,0-1]
+          SIGMOID_F32_SSE_DEF(xmm8, xmm1, xmm2, xmm3, z, dn, ex_out)
+
+          // c[5,0-1]
+          SIGMOID_F32_SSE_DEF(xmm9, xmm1, xmm2, xmm3, z, dn, ex_out)
+
+          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
 POST_OPS_6x2F_DISABLE:
       ;
 
@@ -2570,7 +2814,9 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x1m)
               &&POST_OPS_DOWNSCALE_6x1F,
               &&POST_OPS_MATRIX_ADD_6x1F,
               &&POST_OPS_SWISH_6x1F,
-              &&POST_OPS_MATRIX_MUL_6x1F
+              &&POST_OPS_MATRIX_MUL_6x1F,
+              &&POST_OPS_TANH_6x1F,
+              &&POST_OPS_SIGMOID_6x1F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -3043,6 +3289,56 @@ POST_OPS_SWISH_6x1F:
 
           // c[5,0-0]
           SWISH_F32_SSE_DEF(xmm9, xmm0, xmm1, xmm2, xmm3, z, dn, ex_out)
+
+          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_TANH_6x1F:
+      {
+        __m128 dn;
+        __m128i q;
+
+        // c[0,0-0]
+        TANH_F32S_SSE(xmm4, xmm0, xmm1, xmm2, xmm3, dn, q)
+
+        // c[1,0-0]
+        TANH_F32S_SSE(xmm5, xmm0, xmm1, xmm2, xmm3, dn, q)
+
+        // c[2,0-0]
+        TANH_F32S_SSE(xmm6, xmm0, xmm1, xmm2, xmm3, dn, q)
+
+        // c[3,0-0]
+        TANH_F32S_SSE(xmm7, xmm0, xmm1, xmm2, xmm3, dn, q)
+
+        // c[4,0-0]
+        TANH_F32S_SSE(xmm8, xmm0, xmm1, xmm2, xmm3, dn, q)
+
+        // c[5,0-0]
+        TANH_F32S_SSE(xmm9, xmm0, xmm1, xmm2, xmm3, dn, q)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_SIGMOID_6x1F:
+      {
+          __m128 z, dn;
+          __m128i ex_out;
+
+          // c[0,0-0]
+          SIGMOID_F32_SSE_DEF(xmm4, xmm1, xmm2, xmm3, z, dn, ex_out)
+
+          // c[1,0-0]
+          SIGMOID_F32_SSE_DEF(xmm5, xmm1, xmm2, xmm3, z, dn, ex_out)
+
+          // c[2,0-0]
+          SIGMOID_F32_SSE_DEF(xmm6, xmm1, xmm2, xmm3, z, dn, ex_out)
+
+          // c[3,0-0]
+          SIGMOID_F32_SSE_DEF(xmm7, xmm1, xmm2, xmm3, z, dn, ex_out)
+
+          // c[4,0-0]
+          SIGMOID_F32_SSE_DEF(xmm8, xmm1, xmm2, xmm3, z, dn, ex_out)
+
+          // c[5,0-0]
+          SIGMOID_F32_SSE_DEF(xmm9, xmm1, xmm2, xmm3, z, dn, ex_out)
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
