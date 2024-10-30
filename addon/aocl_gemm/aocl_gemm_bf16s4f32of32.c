@@ -64,7 +64,7 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, float, float, bf16s4f32of32)
 
     // check for validity of params.
     AOCL_GEMM_CHECK(
-        "bf16s4f32obf16",
+        "bf16s4f32of32",
         order, transa, transb,
         m, n, k,
         a, lda, mem_format_a,
@@ -244,7 +244,7 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, bfloat16, float, bf16s4f32obf16)
 
     // check for validity of params.
     AOCL_GEMM_CHECK(
-        "bf16s4f32of32",
+        "bf16s4f32obf16",
         order, transa, transb,
         m, n, k,
         a, lda, mem_format_a,

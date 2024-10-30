@@ -108,6 +108,7 @@ typedef struct
 	void* matrix;
 	dim_t ldm;
 } aocl_post_op_matrix_mul;
+
 typedef struct
 {
 	void* zero_point;
@@ -122,6 +123,7 @@ typedef struct
 	//len should be one which is one or n i.e., one sf
     //per tensor or one sf per channel respectively
 	dim_t scale_factor_len;
+	AOCL_PARAMS_STORAGE_TYPES scale_factor_type;
 } aocl_pre_op_sf;
 
 typedef struct
@@ -129,6 +131,7 @@ typedef struct
 	aocl_pre_op_zp *b_zp;
 	aocl_pre_op_sf *b_scl;
 	dim_t seq_length;
+	dim_t group_size;
 } aocl_pre_op;
 
 typedef struct

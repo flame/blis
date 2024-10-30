@@ -43,10 +43,8 @@
 
 #ifndef LPGEMM_BF16_JIT
 // 5x64 bf16 kernel
-LPGEMM_M_FRINGE_KERN(bfloat16, int8_t, float, bf16s4f32of32_5x64)
+LPGEMM_M_FRINGE_KERN1(bfloat16, int8_t, float, bf16s4f32of32_5x64)
 {
-
-	dim_t pre_op_off = post_ops_attr.pre_op_off;
 
 	static void* post_ops_labels[] =
 						{
@@ -66,10 +64,7 @@ LPGEMM_M_FRINGE_KERN(bfloat16, int8_t, float, bf16s4f32of32_5x64)
 						};
 
 
-	dim_t k_full_pieces = k0 / 2;
-	dim_t k_partial_pieces = k0 % 2;
-
-	int16_t a_kfringe_buf = 0;
+	dim_t group_size = pre_ops_attr.group_size;
 
 	// B matrix storage bfloat type
 	__m512bh b0;
@@ -131,203 +126,587 @@ LPGEMM_M_FRINGE_KERN(bfloat16, int8_t, float, bf16s4f32of32_5x64)
 	                                0x0C, 0x1B, 0x0B, 0x1A, 0x0A, 0x19, 0x09,
 	                                0x18, 0x08);
 
-	if( post_ops_attr.pre_op_scale_factor_len > 1 )
+	/* Regs to store zero-point values */
+	__m512i zero_point, zero_point0, zero_point1;
+
+	/* Reg to store masks to interleave zero-point */
+	__m512i mask_zp1, mask_zp2;
+
+	mask_zp1 = _mm512_set_epi64( 0x5F1F5E1E5D1D5C1C, 0x5B1B5A1A59195818,
+                                 0x5717561655155414, 0x5313521251115010,
+                                 0x4F0F4E0E4D0D4C0C, 0x4B0B4A0A49094808,
+                                 0x4707460645054404, 0x4303420241014000 );
+
+    mask_zp2 = _mm512_set_epi64( 0x7F3F7E3E7D3D7C3C, 0x7B3B7A3A79397838,
+                                 0x7737763675357434, 0x7333723271317030,
+                                 0x6F2F6E2E6D2D6C2C, 0x6B2B6A2A69296828,
+                                 0x6727662665256424, 0x6323622261216020 );
+
+	dim_t group_start = pre_ops_attr.pre_op_b_i / group_size;
+	dim_t group_end   = ( pre_ops_attr.pre_op_b_i + k0 - 1 ) / group_size;
+
+	bfloat16* a_group = (bfloat16*) a;
+	int8_t* b_group = (int8_t*)b;
+
+	if( pre_ops_attr.zero_point_len > 0 )
 	{
-		// load and interleave scale factor vectors
-		scale0 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                                    pre_op_off);
-		scale2 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                            pre_op_off + 16 );
-		scale4 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                            pre_op_off + 32 );
-		scale6 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                             pre_op_off + 48 );
+		dim_t pre_op_sf_off = 0;
+		dim_t pre_op_zp_off = 0;
 
-		scale1 = _mm512_permutex2var_ps( scale0, mask_scale2, scale0 );
-		scale0 = _mm512_permutex2var_ps( scale0, mask_scale1, scale0 );
-		scale3 = _mm512_permutex2var_ps( scale2, mask_scale2, scale2 );
-		scale2 = _mm512_permutex2var_ps( scale2, mask_scale1, scale2 );
-		scale5 = _mm512_permutex2var_ps( scale4, mask_scale2, scale4 );
-		scale4 = _mm512_permutex2var_ps( scale4, mask_scale1, scale4 );
-		scale7 = _mm512_permutex2var_ps( scale6, mask_scale2, scale6 );
-		scale6 = _mm512_permutex2var_ps( scale6, mask_scale1, scale6 );
+		for( dim_t group = group_start; group <= group_end; group++ )
+		{
+			dim_t k_start = bli_max( group * group_size, pre_ops_attr.pre_op_b_i );
+			dim_t k_end = bli_min( ( ( group + 1 ) * group_size - 1 ),
+			                       pre_ops_attr.pre_op_b_i + k0 - 1);
+			dim_t kg0 = k_end - k_start + 1;
+			dim_t k_full_pieces = kg0 / 2;
+			dim_t k_partial_pieces = kg0 % 2;
 
-	}
+			int16_t a_kfringe_buf = 0;
+
+			if( pre_ops_attr.scale_factor_len > 1 )
+			{
+				pre_op_sf_off = ( group * pre_ops_attr.pre_op_ld ) +
+					                pre_ops_attr.pre_op_b_j;
+
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					// load scale factor vectors
+					scale0 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off);
+					scale2 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 );
+					scale4 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 );
+					scale6 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 );
+				}
+				else
+				{
+					// load and convert scale factor vectors to F32 type
+					scale0 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off ));
+					scale2 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 ));
+					scale4 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 ));
+					scale6 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 ));
+				}
+
+				// interleave scale factor vectors
+				scale1 = _mm512_permutex2var_ps( scale0, mask_scale2, scale0 );
+				scale0 = _mm512_permutex2var_ps( scale0, mask_scale1, scale0 );
+				scale3 = _mm512_permutex2var_ps( scale2, mask_scale2, scale2 );
+				scale2 = _mm512_permutex2var_ps( scale2, mask_scale1, scale2 );
+				scale5 = _mm512_permutex2var_ps( scale4, mask_scale2, scale4 );
+				scale4 = _mm512_permutex2var_ps( scale4, mask_scale1, scale4 );
+				scale7 = _mm512_permutex2var_ps( scale6, mask_scale2, scale6 );
+				scale6 = _mm512_permutex2var_ps( scale6, mask_scale1, scale6 );
+
+			}
+			else
+			{
+				pre_op_sf_off = group;
+
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					scale0 = _mm512_set1_ps(
+					               *( ( float* )pre_ops_attr.scale_factor +
+					                            pre_op_sf_off ) );
+				}
+				else
+				{
+					scale0 = CVT_BF16_F32_INT_SHIFT( _mm256_set1_epi16(
+					                *(( bfloat16* )( pre_ops_attr.scale_factor ) +
+					                                pre_op_sf_off ) ) );
+				}
+
+				scale1 = scale0;
+				scale2 = scale0;
+				scale3 = scale0;
+				scale4 = scale0;
+				scale5 = scale0;
+				scale6 = scale0;
+				scale7 = scale0;
+			}
+
+			if( pre_ops_attr.zero_point_len > 1 )
+			{
+				pre_op_zp_off = ( group * pre_ops_attr.pre_op_ld ) +
+				                          pre_ops_attr.pre_op_b_j;
+				zero_point = _mm512_loadu_si512((int8_t*)( pre_ops_attr.zero_point ) +
+				                                pre_op_zp_off );
+			}
+			else
+			{
+				pre_op_zp_off = group;
+				zero_point = _mm512_set1_epi8( *( ( int8_t* )( pre_ops_attr.zero_point
+				                               + pre_op_zp_off) ) );
+			}
+
+			zero_point1 = _mm512_permutex2var_epi8( zero_point, mask_zp2, zero_point );
+			zero_point0 = _mm512_permutex2var_epi8( zero_point, mask_zp1, zero_point );
+
+			for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
+			{
+				// Broadcast a[0,kr:kr+2].
+				a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )
+				            ( a_group + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group + ( rs_b * kr ) / 2 ) );
+
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
+
+				b0_s8 = _mm512_sub_epi8( b0_s8, zero_point0 );
+
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group
+												+ ( ( rs_b * kr ) / 2 ) + 32 ) );
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
+
+				b1_s8 = _mm512_sub_epi8( b1_s8, zero_point1 );
+
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+
+				// Broadcast a[1,kr:kr+2].
+				a_bf16_1 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                            + ( rs_a * 1 ) + ( cs_a * kr ) ) );
+
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
+
+				// Broadcast a[2,kr:kr+2].
+				a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                            + ( rs_a * 2 ) + ( cs_a * kr ) ) );
+
+				c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
+				c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
+				c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[2,0-63] = a[2,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
+
+				// Broadcast a[3,kr:kr+2].
+				a_bf16_1 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                            + ( rs_a * 3 ) + ( cs_a * kr ) ) );
+
+				c_float_2p1 =  _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
+				c_float_2p2 =  _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
+				c_float_2p3 =  _mm512_dpbf16_ps( c_float_2p3, a_bf16_0, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[3,0-63] = a[3,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_3p0 =  _mm512_dpbf16_ps( c_float_3p0, a_bf16_1, b0 );
+
+				// Broadcast a[4,kr:kr+2].
+				a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                            + ( rs_a * 4 ) + ( cs_a * kr ) ) );
+
+				c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_1, b1 );
+				c_float_3p2 = _mm512_dpbf16_ps( c_float_3p2, a_bf16_1, b2 );
+				c_float_3p3 = _mm512_dpbf16_ps( c_float_3p3, a_bf16_1, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[4,0-63] = a[4,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_4p0 = _mm512_dpbf16_ps( c_float_4p0, a_bf16_0, b0 );
+				c_float_4p1 = _mm512_dpbf16_ps( c_float_4p1, a_bf16_0, b1 );
+				c_float_4p2 = _mm512_dpbf16_ps( c_float_4p2, a_bf16_0, b2 );
+				c_float_4p3 = _mm512_dpbf16_ps( c_float_4p3, a_bf16_0, b3 );
+			} // k-loop
+
+			a_group += k_full_pieces * cs_a;
+			b_group += ( k_full_pieces * rs_b ) / 2;
+
+			// Group_size is always even, so k_partial_pieces will always
+			// appear in the last group. So, a_group and b_group pointers
+			// need not be updated after handling k_partial pieces.
+			if( k_partial_pieces )
+			{
+				__m512i zero_reg = _mm512_setzero_si512();
+
+				/* Interleave zero_point values with zeroes */
+				zero_point1 = _mm512_permutex2var_epi8( zero_point, mask_zp2, zero_reg );
+				zero_point0 = _mm512_permutex2var_epi8( zero_point, mask_zp1, zero_reg );
+
+				// Broadcast a[0,kr:kr+2].
+				a_kfringe_buf = *( a_group + (rs_a * 0) );
+				a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group ) );
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
+
+				b0_s8 = _mm512_sub_epi8( b0_s8, zero_point0 );
+
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group + 32 ) );
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
+
+				b1_s8 = _mm512_sub_epi8( b1_s8, zero_point1 );
+
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+
+				// Broadcast a[1,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 1) );
+				a_bf16_1 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
+
+				// Broadcast a[2,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 2) );
+				a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
+				c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
+				c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[2,0-63] = a[2,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
+
+				// Broadcast a[3,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 3) );
+				a_bf16_1 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
+				c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
+				c_float_2p3 = _mm512_dpbf16_ps( c_float_2p3, a_bf16_0, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[3,0-63] = a[3,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_1, b0 );
+
+				// Broadcast a[4,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 4) );
+				a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_1, b1 );
+				c_float_3p2 = _mm512_dpbf16_ps( c_float_3p2, a_bf16_1, b2 );
+				c_float_3p3 = _mm512_dpbf16_ps( c_float_3p3, a_bf16_1, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[4,0-63] = a[4,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_4p0 = _mm512_dpbf16_ps( c_float_4p0, a_bf16_0, b0 );
+				c_float_4p1 = _mm512_dpbf16_ps( c_float_4p1, a_bf16_0, b1 );
+				c_float_4p2 = _mm512_dpbf16_ps( c_float_4p2, a_bf16_0, b2 );
+				c_float_4p3 = _mm512_dpbf16_ps( c_float_4p3, a_bf16_0, b3 );
+			} // k_partial_pieces
+		} // group loop
+
+	} // zero-point condition
 	else
 	{
-		scale0 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale1 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale2 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale3 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale4 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale5 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale6 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale7 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-	}
+		dim_t pre_op_sf_off = 0;
 
-	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
-	{
-		// Broadcast a[0,kr:kr+2].
-		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+		for( dim_t group = group_start; group <= group_end; group++ )
+		{
 
-		b0_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( rs_b * kr ) / 2 ) );
+			dim_t k_start = bli_max( group * group_size, pre_ops_attr.pre_op_b_i );
+			dim_t k_end = bli_min( ( ( group + 1 ) * group_size - 1 ),
+			                       pre_ops_attr.pre_op_b_i + k0 - 1);
+			dim_t kg0 = k_end - k_start + 1;
+			dim_t k_full_pieces = kg0 / 2;
+			dim_t k_partial_pieces = kg0 % 2;
 
+			int16_t a_kfringe_buf = 0;
 
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
+			if( pre_ops_attr.scale_factor_len > 1 )
+			{
+				pre_op_sf_off = ( group * pre_ops_attr.pre_op_ld ) +
+					                pre_ops_attr.pre_op_b_j;
 
-		b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					// load scale factor vectors
+					scale0 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off);
+					scale2 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 );
+					scale4 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 );
+					scale6 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 );
+				}
+				else
+				{
+					// load and convert scale factor vectors to F32 type
+					scale0 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off ));
+					scale2 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 ));
+					scale4 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 ));
+					scale6 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 ));
+				}
 
-		b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+				scale1 = _mm512_permutex2var_ps( scale0, mask_scale2, scale0 );
+				scale0 = _mm512_permutex2var_ps( scale0, mask_scale1, scale0 );
+				scale3 = _mm512_permutex2var_ps( scale2, mask_scale2, scale2 );
+				scale2 = _mm512_permutex2var_ps( scale2, mask_scale1, scale2 );
+				scale5 = _mm512_permutex2var_ps( scale4, mask_scale2, scale4 );
+				scale4 = _mm512_permutex2var_ps( scale4, mask_scale1, scale4 );
+				scale7 = _mm512_permutex2var_ps( scale6, mask_scale2, scale6 );
+				scale6 = _mm512_permutex2var_ps( scale6, mask_scale1, scale6 );
 
-		b1_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( ( rs_b * kr ) / 2 ) + 32 ) );
+			}
+			else
+			{
+				pre_op_sf_off = group;
 
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					scale0 = _mm512_set1_ps(
+					               *( ( float* )pre_ops_attr.scale_factor +
+					                            pre_op_sf_off ) );
+				}
+				else
+				{
+					scale0 = CVT_BF16_F32_INT_SHIFT( _mm256_set1_epi16(
+					                *(( bfloat16* )( pre_ops_attr.scale_factor ) +
+					                                pre_op_sf_off ) ) );
+				}
 
-		b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+				scale1 = scale0;
+				scale2 = scale0;
+				scale3 = scale0;
+				scale4 = scale0;
+				scale5 = scale0;
+				scale6 = scale0;
+				scale7 = scale0;
+			}
 
-		b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+			for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
+			{
+				// Broadcast a[0,kr:kr+2].
+				a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )
+				            ( a_group + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-
-		// Broadcast a[1,kr:kr+2].
-		a_bf16_1 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
-
-		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
-		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
-		c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
-
-		// Perform column direction mat-mul with k = 2.
-		// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
-
-		// Broadcast a[2,kr:kr+2].
-		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
-
-		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
-		c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
-		c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
-
-		// Perform column direction mat-mul with k = 2.
-		// c[2,0-63] = a[2,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
-
-		// Broadcast a[3,kr:kr+2].
-		a_bf16_1 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
-
-		c_float_2p1 =  _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
-		c_float_2p2 =  _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
-		c_float_2p3 =  _mm512_dpbf16_ps( c_float_2p3, a_bf16_0, b3 );
-
-		// Perform column direction mat-mul with k = 2.
-		// c[3,0-63] = a[3,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_3p0 =  _mm512_dpbf16_ps( c_float_3p0, a_bf16_1, b0 );
-
-		// Broadcast a[4,kr:kr+2].
-		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 4 ) + ( cs_a * kr ) ) );
-
-		c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_1, b1 );
-		c_float_3p2 = _mm512_dpbf16_ps( c_float_3p2, a_bf16_1, b2 );
-		c_float_3p3 = _mm512_dpbf16_ps( c_float_3p3, a_bf16_1, b3 );
-
-		// Perform column direction mat-mul with k = 2.
-		// c[4,0-63] = a[4,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_4p0 = _mm512_dpbf16_ps( c_float_4p0, a_bf16_0, b0 );
-		c_float_4p1 = _mm512_dpbf16_ps( c_float_4p1, a_bf16_0, b1 );
-		c_float_4p2 = _mm512_dpbf16_ps( c_float_4p2, a_bf16_0, b2 );
-		c_float_4p3 = _mm512_dpbf16_ps( c_float_4p3, a_bf16_0, b3 );
-	}
-	// Handle k remainder.
-	if ( k_partial_pieces > 0 )
-	{
-		// Broadcast a[0,kr:kr+4].
-		a_kfringe_buf = *( a + (rs_a * 0) + (cs_a * ( k_full_pieces )));
-		a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
-
-				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( rs_b * k_full_pieces ) / 2 ) );
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group + ( rs_b * kr ) / 2 ) );
 
 
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
 
-		b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
 
-		b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
 
-		b1_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( ( rs_b * k_full_pieces ) / 2 ) + 32 ) );
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group
+												+ ( ( rs_b * kr ) / 2 ) + 32 ) );
 
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
 
-		b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
 
-		b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 
-		// Broadcast a[1,kr:kr+2].
-		a_kfringe_buf = *(a + (rs_a * 1) + (cs_a * ( k_full_pieces )));
-		a_bf16_1 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+				// Broadcast a[1,kr:kr+2].
+				a_bf16_1 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                            + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
-		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
-		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
-		c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
+				// Perform column direction mat-mul with k = 2.
+				// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
 
-		// Broadcast a[2,kr:kr+2].
-		a_kfringe_buf = *(a + (rs_a * 2) + (cs_a * ( k_full_pieces )));
-		a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+				// Broadcast a[2,kr:kr+2].
+				a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                            + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
-		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
-		c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
-		c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
+				c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
+				c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
+				c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[2,0-63] = a[2,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
+				// Perform column direction mat-mul with k = 2.
+				// c[2,0-63] = a[2,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 
-		// Broadcast a[3,kr:kr+4].
-		a_kfringe_buf = *(a + (rs_a * 3) + (cs_a * ( k_full_pieces )));
-		a_bf16_1 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+				// Broadcast a[3,kr:kr+2].
+				a_bf16_1 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                            + ( rs_a * 3 ) + ( cs_a * kr ) ) );
 
-		c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
-		c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
-		c_float_2p3 = _mm512_dpbf16_ps( c_float_2p3, a_bf16_0, b3 );
+				c_float_2p1 =  _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
+				c_float_2p2 =  _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
+				c_float_2p3 =  _mm512_dpbf16_ps( c_float_2p3, a_bf16_0, b3 );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[3,0-63] = a[3,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_1, b0 );
+				// Perform column direction mat-mul with k = 2.
+				// c[3,0-63] = a[3,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_3p0 =  _mm512_dpbf16_ps( c_float_3p0, a_bf16_1, b0 );
 
-		// Broadcast a[4,kr:kr+2].
-		a_kfringe_buf = *(a + (rs_a * 4) + (cs_a * ( k_full_pieces )));
-		a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+				// Broadcast a[4,kr:kr+2].
+				a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                            + ( rs_a * 4 ) + ( cs_a * kr ) ) );
 
-		c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_1, b1 );
-		c_float_3p2 = _mm512_dpbf16_ps( c_float_3p2, a_bf16_1, b2 );
-		c_float_3p3 = _mm512_dpbf16_ps( c_float_3p3, a_bf16_1, b3 );
+				c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_1, b1 );
+				c_float_3p2 = _mm512_dpbf16_ps( c_float_3p2, a_bf16_1, b2 );
+				c_float_3p3 = _mm512_dpbf16_ps( c_float_3p3, a_bf16_1, b3 );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[4,0-63] = a[4,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_4p0 = _mm512_dpbf16_ps( c_float_4p0, a_bf16_0, b0 );
-		c_float_4p1 = _mm512_dpbf16_ps( c_float_4p1, a_bf16_0, b1 );
-		c_float_4p2 = _mm512_dpbf16_ps( c_float_4p2, a_bf16_0, b2 );
-		c_float_4p3 = _mm512_dpbf16_ps( c_float_4p3, a_bf16_0, b3 );
+				// Perform column direction mat-mul with k = 2.
+				// c[4,0-63] = a[4,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_4p0 = _mm512_dpbf16_ps( c_float_4p0, a_bf16_0, b0 );
+				c_float_4p1 = _mm512_dpbf16_ps( c_float_4p1, a_bf16_0, b1 );
+				c_float_4p2 = _mm512_dpbf16_ps( c_float_4p2, a_bf16_0, b2 );
+				c_float_4p3 = _mm512_dpbf16_ps( c_float_4p3, a_bf16_0, b3 );
+			} // k-loop
+
+			a_group += k_full_pieces * cs_a;
+			b_group += ( k_full_pieces * rs_b ) / 2;
+
+			// Group_size is always even, so k_partial_pieces will always
+			// appear in the last group. So, a_group and b_group pointers
+			// need not be updated after handling k_partial pieces.
+			if( k_partial_pieces )
+			{
+				// Broadcast a[0,kr:kr+2].
+				a_kfringe_buf = *( a_group + (rs_a * 0) );
+				a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group ) );
+
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
+
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group + 32 ) );
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
+
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+
+				// Broadcast a[1,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 1) );
+				a_bf16_1 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
+
+				// Broadcast a[2,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 2) );
+				a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
+				c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
+				c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[2,0-63] = a[2,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
+
+				// Broadcast a[3,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 3) );
+				a_bf16_1 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
+				c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
+				c_float_2p3 = _mm512_dpbf16_ps( c_float_2p3, a_bf16_0, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[3,0-63] = a[3,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_1, b0 );
+
+				// Broadcast a[4,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 4) );
+				a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_1, b1 );
+				c_float_3p2 = _mm512_dpbf16_ps( c_float_3p2, a_bf16_1, b2 );
+				c_float_3p3 = _mm512_dpbf16_ps( c_float_3p3, a_bf16_1, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[4,0-63] = a[4,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_4p0 = _mm512_dpbf16_ps( c_float_4p0, a_bf16_0, b0 );
+				c_float_4p1 = _mm512_dpbf16_ps( c_float_4p1, a_bf16_0, b1 );
+				c_float_4p2 = _mm512_dpbf16_ps( c_float_4p2, a_bf16_0, b2 );
+				c_float_4p3 = _mm512_dpbf16_ps( c_float_4p3, a_bf16_0, b3 );
+			} // k_partial_pieces
+		} // group loop
 	}
 
 	// Load alpha and beta
@@ -1732,7 +2111,7 @@ POST_OPS_5x64_DISABLE:
 }
 
 // 4x64 bf16 kernel
-LPGEMM_M_FRINGE_KERN(bfloat16, int8_t, float, bf16s4f32of32_4x64)
+LPGEMM_M_FRINGE_KERN1(bfloat16, int8_t, float, bf16s4f32of32_4x64)
 {
 
 	static void* post_ops_labels[] =
@@ -1752,12 +2131,7 @@ LPGEMM_M_FRINGE_KERN(bfloat16, int8_t, float, bf16s4f32of32_4x64)
 						  &&POST_OPS_SIGMOID_4x64
 						};
 
-	dim_t pre_op_off = post_ops_attr.pre_op_off;
-
-	dim_t k_full_pieces = k0 / 2;
-	dim_t k_partial_pieces = k0 % 2;
-
-	int16_t a_kfringe_buf = 0;
+	dim_t group_size = pre_ops_attr.group_size;
 
 	// B matrix storage bfloat type
 	__m512bh b0;
@@ -1793,6 +2167,22 @@ LPGEMM_M_FRINGE_KERN(bfloat16, int8_t, float, bf16s4f32of32_4x64)
 	                                0x0C, 0x1B, 0x0B, 0x1A, 0x0A, 0x19, 0x09,
 	                                0x18, 0x08);
 
+	/* Regs to store zero-point values */
+	__m512i zero_point, zero_point0, zero_point1;
+
+	/* Reg to store masks to interleave zero-point */
+	__m512i mask_zp1, mask_zp2;
+
+	mask_zp1 = _mm512_set_epi64( 0x5F1F5E1E5D1D5C1C, 0x5B1B5A1A59195818,
+                                 0x5717561655155414, 0x5313521251115010,
+                                 0x4F0F4E0E4D0D4C0C, 0x4B0B4A0A49094808,
+                                 0x4707460645054404, 0x4303420241014000 );
+
+    mask_zp2 = _mm512_set_epi64( 0x7F3F7E3E7D3D7C3C, 0x7B3B7A3A79397838,
+                                 0x7737763675357434, 0x7333723271317030,
+                                 0x6F2F6E2E6D2D6C2C, 0x6B2B6A2A69296828,
+                                 0x6727662665256424, 0x6323622261216020 );
+
 	// Registers to use for accumulating C.
 	__m512 c_float_0p0 = _mm512_setzero_ps();
 	__m512 c_float_0p1 = _mm512_setzero_ps();
@@ -1814,182 +2204,527 @@ LPGEMM_M_FRINGE_KERN(bfloat16, int8_t, float, bf16s4f32of32_4x64)
 	__m512 c_float_3p2 = _mm512_setzero_ps();
 	__m512 c_float_3p3 = _mm512_setzero_ps();
 
-	if( post_ops_attr.pre_op_scale_factor_len > 1 )
+	dim_t group_start = pre_ops_attr.pre_op_b_i / group_size;
+	dim_t group_end   = ( pre_ops_attr.pre_op_b_i + k0 - 1 ) / group_size;
+
+	bfloat16* a_group = (bfloat16*) a;
+	int8_t* b_group = (int8_t*)b;
+
+	if( pre_ops_attr.zero_point_len > 0 )
 	{
-		// load and interleave scale factor vectors
-		scale0 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                                    pre_op_off);
-		scale2 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                            pre_op_off + 16 );
-		scale4 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                            pre_op_off + 32 );
-		scale6 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                             pre_op_off + 48 );
+		dim_t pre_op_sf_off = 0;
+		dim_t pre_op_zp_off = 0;
 
-		scale1 = _mm512_permutex2var_ps( scale0, mask_scale2, scale0 );
-		scale0 = _mm512_permutex2var_ps( scale0, mask_scale1, scale0 );
-		scale3 = _mm512_permutex2var_ps( scale2, mask_scale2, scale2 );
-		scale2 = _mm512_permutex2var_ps( scale2, mask_scale1, scale2 );
-		scale5 = _mm512_permutex2var_ps( scale4, mask_scale2, scale4 );
-		scale4 = _mm512_permutex2var_ps( scale4, mask_scale1, scale4 );
-		scale7 = _mm512_permutex2var_ps( scale6, mask_scale2, scale6 );
-		scale6 = _mm512_permutex2var_ps( scale6, mask_scale1, scale6 );
+		for( dim_t group = group_start; group <= group_end; group++ )
+		{
 
-	}
+			dim_t k_start = bli_max( group * group_size, pre_ops_attr.pre_op_b_i );
+			dim_t k_end = bli_min( ( ( group + 1 ) * group_size - 1 ),
+			                       pre_ops_attr.pre_op_b_i + k0 - 1);
+			dim_t kg0 = k_end - k_start + 1;
+			dim_t k_full_pieces = kg0 / 2;
+			dim_t k_partial_pieces = kg0 % 2;
+
+			int16_t a_kfringe_buf = 0;
+
+			if( pre_ops_attr.scale_factor_len > 1 )
+			{
+				pre_op_sf_off = ( group * pre_ops_attr.pre_op_ld ) +
+					                pre_ops_attr.pre_op_b_j;
+
+
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					// load scale factor vectors
+					scale0 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off);
+					scale2 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 );
+					scale4 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 );
+					scale6 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 );
+				}
+				else
+				{
+					// load and convert scale factor vectors to F32 type
+					scale0 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off ));
+					scale2 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 ));
+					scale4 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 ));
+					scale6 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 ));
+				}
+
+				// interleave scale factor vectors
+				scale1 = _mm512_permutex2var_ps( scale0, mask_scale2, scale0 );
+				scale0 = _mm512_permutex2var_ps( scale0, mask_scale1, scale0 );
+				scale3 = _mm512_permutex2var_ps( scale2, mask_scale2, scale2 );
+				scale2 = _mm512_permutex2var_ps( scale2, mask_scale1, scale2 );
+				scale5 = _mm512_permutex2var_ps( scale4, mask_scale2, scale4 );
+				scale4 = _mm512_permutex2var_ps( scale4, mask_scale1, scale4 );
+				scale7 = _mm512_permutex2var_ps( scale6, mask_scale2, scale6 );
+				scale6 = _mm512_permutex2var_ps( scale6, mask_scale1, scale6 );
+
+			}
+			else
+			{
+				pre_op_sf_off = group;
+
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					scale0 = _mm512_set1_ps(
+					               *( ( float* )pre_ops_attr.scale_factor +
+					                            pre_op_sf_off ) );
+				}
+				else
+				{
+					scale0 = CVT_BF16_F32_INT_SHIFT( _mm256_set1_epi16(
+					                *(( bfloat16* )( pre_ops_attr.scale_factor ) +
+					                                pre_op_sf_off ) ) );
+				}
+
+				scale1 = scale0;
+				scale2 = scale0;
+				scale3 = scale0;
+				scale4 = scale0;
+				scale5 = scale0;
+				scale6 = scale0;
+				scale7 = scale0;
+			}
+
+			if( pre_ops_attr.zero_point_len > 1 )
+			{
+				pre_op_zp_off = ( group * pre_ops_attr.pre_op_ld ) +
+				                          pre_ops_attr.pre_op_b_j;
+				zero_point = _mm512_loadu_si512((int8_t*)( pre_ops_attr.zero_point ) +
+				                                pre_op_zp_off );
+			}
+			else
+			{
+				pre_op_zp_off = group;
+				zero_point = _mm512_set1_epi8( *( ( int8_t* )( pre_ops_attr.zero_point
+				                               + pre_op_zp_off) ) );
+			}
+
+			zero_point1 = _mm512_permutex2var_epi8( zero_point, mask_zp2, zero_point );
+			zero_point0 = _mm512_permutex2var_epi8( zero_point, mask_zp1, zero_point );
+
+			for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
+			{
+				// Broadcast a[0,kr:kr+2].
+				a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                          + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group + ( rs_b * kr ) / 2 ) );
+
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
+
+				b0_s8 = _mm512_sub_epi8( b0_s8, zero_point0 );
+
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group + ( ( rs_b * kr ) / 2 ) + 32 ) );
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
+
+				b1_s8 = _mm512_sub_epi8( b1_s8, zero_point1 );
+
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+
+				// Broadcast a[1,kr:kr+2].
+				a_bf16_1 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                            + ( rs_a * 1 ) + ( cs_a * kr ) ) );
+
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
+
+				// Broadcast a[2,kr:kr+2].
+				a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                           + ( rs_a * 2 ) + ( cs_a * kr ) ) );
+
+				c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
+				c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
+				c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[2,0-63] = a[2,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
+
+				// Broadcast a[3,kr:kr+2].
+				a_bf16_1 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                           + ( rs_a * 3 ) + ( cs_a * kr ) ) );
+
+				c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
+				c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
+				c_float_2p3 = _mm512_dpbf16_ps( c_float_2p3, a_bf16_0, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[3,0-63] = a[3,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_1, b0 );
+				c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_1, b1 );
+				c_float_3p2 = _mm512_dpbf16_ps( c_float_3p2, a_bf16_1, b2 );
+				c_float_3p3 = _mm512_dpbf16_ps( c_float_3p3, a_bf16_1, b3 );
+			} // k-loop
+
+			a_group += k_full_pieces * cs_a;
+			b_group += ( k_full_pieces * rs_b ) / 2;
+
+			// Group_size is always even, so k_partial_pieces will always
+			// appear in the last group. So, a_group and b_group pointers
+			// need not be updated after handling k_partial pieces.
+			if( k_partial_pieces )
+			{
+				__m512i zero_reg = _mm512_setzero_si512();
+
+				/* Interleave zero_point values with zeroes */
+				zero_point1 = _mm512_permutex2var_epi8( zero_point, mask_zp2, zero_reg );
+				zero_point0 = _mm512_permutex2var_epi8( zero_point, mask_zp1, zero_reg );
+
+				// Broadcast a[0,kr:kr+2].
+				a_kfringe_buf = *( a_group + (rs_a * 0) );
+				a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group ) );
+
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
+
+				b0_s8 = _mm512_sub_epi8( b0_s8, zero_point0 );
+
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group + 32 ) );
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
+
+				b1_s8 = _mm512_sub_epi8( b1_s8, zero_point1 );
+
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+
+				// Broadcast a[1,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 1) );
+				a_bf16_1 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
+
+				// Broadcast a[2,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 2) );
+				a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
+				c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
+				c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[2,0-63] = a[2,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
+
+				// Broadcast a[3,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 3) );
+				a_bf16_1 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
+				c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
+				c_float_2p3 = _mm512_dpbf16_ps( c_float_2p3, a_bf16_0, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[3,0-63] = a[3,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_1, b0 );
+				c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_1, b1 );
+				c_float_3p2 = _mm512_dpbf16_ps( c_float_3p2, a_bf16_1, b2 );
+				c_float_3p3 = _mm512_dpbf16_ps( c_float_3p3, a_bf16_1, b3 );
+			} // k_partial_pieces
+		} // group loop
+
+	} // zero-point condition
 	else
 	{
-		scale0 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale1 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale2 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale3 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale4 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale5 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale6 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale7 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-	}
+		dim_t pre_op_sf_off = 0;
 
-	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
-	{
-		// Broadcast a[0,kr:kr+2].
-		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+		for( dim_t group = group_start; group <= group_end; group++ )
+		{
 
-		b0_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( rs_b * kr ) / 2 ) );
+			dim_t k_start = bli_max( group * group_size, pre_ops_attr.pre_op_b_i );
+			dim_t k_end = bli_min( ( ( group + 1 ) * group_size - 1 ),
+			                       pre_ops_attr.pre_op_b_i + k0 - 1);
+			dim_t kg0 = k_end - k_start + 1;
+			dim_t k_full_pieces = kg0 / 2;
+			dim_t k_partial_pieces = kg0 % 2;
+
+			int16_t a_kfringe_buf = 0;
+
+			if( pre_ops_attr.scale_factor_len > 1 )
+			{
+				pre_op_sf_off = ( group * pre_ops_attr.pre_op_ld ) +
+					                pre_ops_attr.pre_op_b_j;
+
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					// load scale factor vectors
+					scale0 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off);
+					scale2 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 );
+					scale4 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 );
+					scale6 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 );
+				}
+				else
+				{
+					// load and convert scale factor vectors to F32 type
+					scale0 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off ));
+					scale2 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 ));
+					scale4 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 ));
+					scale6 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 ));
+				}
+
+				// interleave scale factor vectors
+				scale1 = _mm512_permutex2var_ps( scale0, mask_scale2, scale0 );
+				scale0 = _mm512_permutex2var_ps( scale0, mask_scale1, scale0 );
+				scale3 = _mm512_permutex2var_ps( scale2, mask_scale2, scale2 );
+				scale2 = _mm512_permutex2var_ps( scale2, mask_scale1, scale2 );
+				scale5 = _mm512_permutex2var_ps( scale4, mask_scale2, scale4 );
+				scale4 = _mm512_permutex2var_ps( scale4, mask_scale1, scale4 );
+				scale7 = _mm512_permutex2var_ps( scale6, mask_scale2, scale6 );
+				scale6 = _mm512_permutex2var_ps( scale6, mask_scale1, scale6 );
+
+			}
+			else
+			{
+				pre_op_sf_off = group;
+
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					scale0 = _mm512_set1_ps(
+					               *( ( float* )pre_ops_attr.scale_factor +
+					                            pre_op_sf_off ) );
+				}
+				else
+				{
+					scale0 = CVT_BF16_F32_INT_SHIFT( _mm256_set1_epi16(
+					                *(( bfloat16* )( pre_ops_attr.scale_factor ) +
+					                                pre_op_sf_off ) ) );
+				}
+
+				scale1 = scale0;
+				scale2 = scale0;
+				scale3 = scale0;
+				scale4 = scale0;
+				scale5 = scale0;
+				scale6 = scale0;
+				scale7 = scale0;
+			}
+
+			for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
+			{
+				// Broadcast a[0,kr:kr+2].
+				a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                          + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group + ( rs_b * kr ) / 2 ) );
 
 
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
 
-		b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
 
-		b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
 
-		b1_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( ( rs_b * kr ) / 2 ) + 32 ) );
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group + ( ( rs_b * kr ) / 2 ) + 32 ) );
 
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
 
-		b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
 
-		b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
-		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 
-		// Broadcast a[1,kr:kr+2].
-		a_bf16_1 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
+				// Broadcast a[1,kr:kr+2].
+				a_bf16_1 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                            + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
-		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
-		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
-		c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
+				// Perform column direction mat-mul with k = 2.
+				// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
 
-		// Broadcast a[2,kr:kr+2].
-		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
+				// Broadcast a[2,kr:kr+2].
+				a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                           + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
-		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
-		c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
-		c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
+				c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
+				c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
+				c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[2,0-63] = a[2,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
+				// Perform column direction mat-mul with k = 2.
+				// c[2,0-63] = a[2,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 
-		// Broadcast a[3,kr:kr+2].
-		a_bf16_1 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
+				// Broadcast a[3,kr:kr+2].
+				a_bf16_1 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                           + ( rs_a * 3 ) + ( cs_a * kr ) ) );
 
-		c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
-		c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
-		c_float_2p3 = _mm512_dpbf16_ps( c_float_2p3, a_bf16_0, b3 );
+				c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
+				c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
+				c_float_2p3 = _mm512_dpbf16_ps( c_float_2p3, a_bf16_0, b3 );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[3,0-63] = a[3,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_1, b0 );
-		c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_1, b1 );
-		c_float_3p2 = _mm512_dpbf16_ps( c_float_3p2, a_bf16_1, b2 );
-		c_float_3p3 = _mm512_dpbf16_ps( c_float_3p3, a_bf16_1, b3 );
-	}
+				// Perform column direction mat-mul with k = 2.
+				// c[3,0-63] = a[3,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_1, b0 );
+				c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_1, b1 );
+				c_float_3p2 = _mm512_dpbf16_ps( c_float_3p2, a_bf16_1, b2 );
+				c_float_3p3 = _mm512_dpbf16_ps( c_float_3p3, a_bf16_1, b3 );
+			} // k-loop
 
-	// Handle k remainder.
-	if ( k_partial_pieces > 0 )
-	{
-		// Broadcast a[0,kr:kr+2].
-		a_kfringe_buf = *( a + (rs_a * 0) + (cs_a * ( k_full_pieces )));
-		a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+			a_group += k_full_pieces * cs_a;
+			b_group += ( k_full_pieces * rs_b ) / 2;
 
-		b0_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( rs_b * k_full_pieces ) / 2 ) );
+			// Group_size is always even, so k_partial_pieces will always
+			// appear in the last group. So, a_group and b_group pointers
+			// need not be updated after handling k_partial pieces.
+			if( k_partial_pieces )
+			{
+				// Broadcast a[0,kr:kr+2].
+				a_kfringe_buf = *( a_group + (rs_a * 0) );
+				a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group ) );
 
 
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
 
-		b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
 
-		b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
 
-		b1_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( ( rs_b * k_full_pieces ) / 2 ) + 32 ) );
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group + 32 ) );
 
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
 
-		b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
 
-		b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 
-		// Broadcast a[1,kr:kr+2].
-		a_kfringe_buf = *(a + (rs_a * 1) + (cs_a * ( k_full_pieces )));
-		a_bf16_1 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+				// Broadcast a[1,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 1) );
+				a_bf16_1 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
 
-		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
-		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
-		c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
+				// Perform column direction mat-mul with k = 2.
+				// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
 
-		// Broadcast a[2,kr:kr+2].
-		a_kfringe_buf = *(a + (rs_a * 2) + (cs_a * ( k_full_pieces )));
-		a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+				// Broadcast a[2,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 2) );
+				a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
 
-		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
-		c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
-		c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
+				c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
+				c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
+				c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[2,0-63] = a[2,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
+				// Perform column direction mat-mul with k = 2.
+				// c[2,0-63] = a[2,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 
-		// Broadcast a[3,kr:kr+2].
-		a_kfringe_buf = *(a + (rs_a * 3) + (cs_a * ( k_full_pieces )));
-		a_bf16_1 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+				// Broadcast a[3,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 3) );
+				a_bf16_1 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
 
-		c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
-		c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
-		c_float_2p3 = _mm512_dpbf16_ps( c_float_2p3, a_bf16_0, b3 );
+				c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
+				c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
+				c_float_2p3 = _mm512_dpbf16_ps( c_float_2p3, a_bf16_0, b3 );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[3,0-63] = a[3,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_1, b0 );
-		c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_1, b1 );
-		c_float_3p2 = _mm512_dpbf16_ps( c_float_3p2, a_bf16_1, b2 );
-		c_float_3p3 = _mm512_dpbf16_ps( c_float_3p3, a_bf16_1, b3 );
-	}
+				// Perform column direction mat-mul with k = 2.
+				// c[3,0-63] = a[3,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_1, b0 );
+				c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_1, b1 );
+				c_float_3p2 = _mm512_dpbf16_ps( c_float_3p2, a_bf16_1, b2 );
+				c_float_3p3 = _mm512_dpbf16_ps( c_float_3p3, a_bf16_1, b3 );
+			} // k_partial_pieces
+		} // group loop
+
+	} // zero-point condition
 
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
@@ -3164,7 +3899,7 @@ POST_OPS_4x64_DISABLE:
 }
 
 // 3x64 bf16 kernel
-LPGEMM_M_FRINGE_KERN(bfloat16, int8_t, float, bf16s4f32of32_3x64)
+LPGEMM_M_FRINGE_KERN1(bfloat16, int8_t, float, bf16s4f32of32_3x64)
 {
 
 	static void* post_ops_labels[] =
@@ -3184,13 +3919,7 @@ LPGEMM_M_FRINGE_KERN(bfloat16, int8_t, float, bf16s4f32of32_3x64)
 						  &&POST_OPS_SIGMOID_3x64
 						};
 
-	dim_t pre_op_off = post_ops_attr.pre_op_off;
-
-	dim_t k_full_pieces = k0 / 2;
-	dim_t k_partial_pieces = k0 % 2;
-
-	int16_t a_kfringe_buf = 0;
-
+	dim_t group_size = pre_ops_attr.group_size;
 	// B matrix storage bfloat type
 	__m512bh b0;
 	__m512bh b1;
@@ -3241,159 +3970,499 @@ LPGEMM_M_FRINGE_KERN(bfloat16, int8_t, float, bf16s4f32of32_3x64)
 	                                0x0C, 0x1B, 0x0B, 0x1A, 0x0A, 0x19, 0x09,
 	                                0x18, 0x08);
 
-	if( post_ops_attr.pre_op_scale_factor_len > 1 )
+	/* Regs to store zero-point values */
+	__m512i zero_point, zero_point0, zero_point1;
+
+	/* Reg to store masks to interleave zero-point */
+	__m512i mask_zp1, mask_zp2;
+
+	mask_zp1 = _mm512_set_epi64( 0x5F1F5E1E5D1D5C1C, 0x5B1B5A1A59195818,
+                                 0x5717561655155414, 0x5313521251115010,
+                                 0x4F0F4E0E4D0D4C0C, 0x4B0B4A0A49094808,
+                                 0x4707460645054404, 0x4303420241014000 );
+
+    mask_zp2 = _mm512_set_epi64( 0x7F3F7E3E7D3D7C3C, 0x7B3B7A3A79397838,
+                                 0x7737763675357434, 0x7333723271317030,
+                                 0x6F2F6E2E6D2D6C2C, 0x6B2B6A2A69296828,
+                                 0x6727662665256424, 0x6323622261216020 );
+	dim_t group_start = pre_ops_attr.pre_op_b_i / group_size;
+	dim_t group_end   = ( pre_ops_attr.pre_op_b_i + k0 - 1 ) / group_size;
+
+	bfloat16* a_group = (bfloat16*) a;
+	int8_t* b_group = (int8_t*)b;
+
+	if( pre_ops_attr.zero_point_len > 0 )
 	{
-		// load and interleave scale factor vectors
-		scale0 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                                    pre_op_off);
-		scale2 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                            pre_op_off + 16 );
-		scale4 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                            pre_op_off + 32 );
-		scale6 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                             pre_op_off + 48 );
+		dim_t pre_op_sf_off = 0;
+		dim_t pre_op_zp_off = 0;
 
-		scale1 = _mm512_permutex2var_ps( scale0, mask_scale2, scale0 );
-		scale0 = _mm512_permutex2var_ps( scale0, mask_scale1, scale0 );
-		scale3 = _mm512_permutex2var_ps( scale2, mask_scale2, scale2 );
-		scale2 = _mm512_permutex2var_ps( scale2, mask_scale1, scale2 );
-		scale5 = _mm512_permutex2var_ps( scale4, mask_scale2, scale4 );
-		scale4 = _mm512_permutex2var_ps( scale4, mask_scale1, scale4 );
-		scale7 = _mm512_permutex2var_ps( scale6, mask_scale2, scale6 );
-		scale6 = _mm512_permutex2var_ps( scale6, mask_scale1, scale6 );
+		for( dim_t group = group_start; group <= group_end; group++ )
+		{
 
-	}
+			dim_t k_start = bli_max( group * group_size, pre_ops_attr.pre_op_b_i );
+			dim_t k_end = bli_min( ( ( group + 1 ) * group_size - 1 ),
+			                       pre_ops_attr.pre_op_b_i + k0 - 1);
+			dim_t kg0 = k_end - k_start + 1;
+			dim_t k_full_pieces = kg0 / 2;
+			dim_t k_partial_pieces = kg0 % 2;
+
+			int16_t a_kfringe_buf = 0;
+
+			if( pre_ops_attr.scale_factor_len > 1 )
+			{
+				pre_op_sf_off = ( group * pre_ops_attr.pre_op_ld ) +
+					                pre_ops_attr.pre_op_b_j;
+
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					// load scale factor vectors
+					scale0 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off);
+					scale2 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 );
+					scale4 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 );
+					scale6 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 );
+				}
+				else
+				{
+					// load and convert scale factor vectors to F32 type
+					scale0 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off ));
+					scale2 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 ));
+					scale4 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 ));
+					scale6 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 ));
+				}
+
+				// interleave scale factor vectors
+				scale1 = _mm512_permutex2var_ps( scale0, mask_scale2, scale0 );
+				scale0 = _mm512_permutex2var_ps( scale0, mask_scale1, scale0 );
+				scale3 = _mm512_permutex2var_ps( scale2, mask_scale2, scale2 );
+				scale2 = _mm512_permutex2var_ps( scale2, mask_scale1, scale2 );
+				scale5 = _mm512_permutex2var_ps( scale4, mask_scale2, scale4 );
+				scale4 = _mm512_permutex2var_ps( scale4, mask_scale1, scale4 );
+				scale7 = _mm512_permutex2var_ps( scale6, mask_scale2, scale6 );
+				scale6 = _mm512_permutex2var_ps( scale6, mask_scale1, scale6 );
+
+			}
+			else
+			{
+				pre_op_sf_off = group;
+
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					scale0 = _mm512_set1_ps(
+					               *( ( float* )pre_ops_attr.scale_factor +
+					                            pre_op_sf_off ) );
+				}
+				else
+				{
+					scale0 = CVT_BF16_F32_INT_SHIFT( _mm256_set1_epi16(
+					                *(( bfloat16* )( pre_ops_attr.scale_factor ) +
+					                                pre_op_sf_off ) ) );
+				}
+
+				scale1 = scale0;
+				scale2 = scale0;
+				scale3 = scale0;
+				scale4 = scale0;
+				scale5 = scale0;
+				scale6 = scale0;
+				scale7 = scale0;
+			}
+
+			if( pre_ops_attr.zero_point_len > 1 )
+			{
+				pre_op_zp_off = ( group * pre_ops_attr.pre_op_ld ) +
+				                          pre_ops_attr.pre_op_b_j;
+				zero_point = _mm512_loadu_si512((int8_t*)( pre_ops_attr.zero_point ) +
+				                                pre_op_zp_off );
+			}
+			else
+			{
+				pre_op_zp_off = group;
+				zero_point = _mm512_set1_epi8( *( ( int8_t* )( pre_ops_attr.zero_point
+				                               + pre_op_zp_off) ) );
+			}
+
+			zero_point1 = _mm512_permutex2var_epi8( zero_point, mask_zp2, zero_point );
+			zero_point0 = _mm512_permutex2var_epi8( zero_point, mask_zp1, zero_point );
+
+			for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
+			{
+				// Broadcast a[0,kr:kr+2].
+				a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                           + ( rs_a *  0 ) + ( cs_a * kr ) ) );
+
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group
+				                               + ( rs_b * kr ) / 2 ) );
+
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
+
+				b0_s8 = _mm512_sub_epi8( b0_s8, zero_point0 );
+
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group
+				                      + ( ( rs_b * kr ) / 2 ) + 32 ) );
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
+
+				b1_s8 = _mm512_sub_epi8( b1_s8, zero_point1 );
+
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+
+				// Broadcast a[1,kr:kr+2].
+				a_bf16_1 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                            + ( rs_a * 1 ) + ( cs_a * kr ) ) );
+
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
+
+				// Broadcast a[2,kr:kr+4].
+				a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                           + ( rs_a * 2 ) + ( cs_a * kr ) ) );
+
+				c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
+				c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
+				c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[2,0-63] = a[2,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
+				c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
+				c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
+				c_float_2p3 = _mm512_dpbf16_ps( c_float_2p3, a_bf16_0, b3 );
+			} // k-loop
+
+			a_group += k_full_pieces * cs_a;
+			b_group += ( k_full_pieces * rs_b ) / 2;
+
+			// Group_size is always even, so k_partial_pieces will always
+			// appear in the last group. So, a_group and b_group pointers
+			// need not be updated after handling k_partial pieces.
+			if( k_partial_pieces )
+			{
+				__m512i zero_reg = _mm512_setzero_si512();
+
+				/* Interleave zero_point values with zeroes */
+				zero_point1 = _mm512_permutex2var_epi8( zero_point, mask_zp2, zero_reg );
+				zero_point0 = _mm512_permutex2var_epi8( zero_point, mask_zp1, zero_reg );
+
+				// Broadcast a[0,kr:kr+2].
+				a_kfringe_buf = *( a_group + (rs_a * 0) );
+				a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group ) );
+
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
+
+				b0_s8 = _mm512_sub_epi8( b0_s8, zero_point0 );
+
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group + 32 ) );
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
+
+				b1_s8 = _mm512_sub_epi8( b1_s8, zero_point1 );
+
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+
+				// Broadcast a[1,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 1) );
+				a_bf16_1 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
+
+				// Broadcast a[2,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 2) );
+				a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
+				c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
+				c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[2,0-63] = a[2,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
+				c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
+				c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
+				c_float_2p3 = _mm512_dpbf16_ps( c_float_2p3, a_bf16_0, b3 );
+
+			} // k_partial_pieces
+		} // group loop
+
+	} // zero-point condition
 	else
 	{
-		scale0 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale1 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale2 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale3 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale4 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale5 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale6 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale7 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-	}
+		dim_t pre_op_sf_off = 0;
 
-	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
-	{
-		// Broadcast a[0,kr:kr+2].
-		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a *  0 ) + ( cs_a * kr ) ) );
+		for( dim_t group = group_start; group <= group_end; group++ )
+		{
 
-		b0_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( rs_b * kr ) / 2 ) );
+			dim_t k_start = bli_max( group * group_size, pre_ops_attr.pre_op_b_i );
+			dim_t k_end = bli_min( ( ( group + 1 ) * group_size - 1 ),
+			                       pre_ops_attr.pre_op_b_i + k0 - 1);
+			dim_t kg0 = k_end - k_start + 1;
+			dim_t k_full_pieces = kg0 / 2;
+			dim_t k_partial_pieces = kg0 % 2;
+
+			int16_t a_kfringe_buf = 0;
+
+			if( pre_ops_attr.scale_factor_len > 1 )
+			{
+				pre_op_sf_off = ( group * pre_ops_attr.pre_op_ld ) +
+					                pre_ops_attr.pre_op_b_j;
+
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					// load scale factor vectors
+					scale0 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off);
+					scale2 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 );
+					scale4 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 );
+					scale6 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 );
+				}
+				else
+				{
+					// load and convert scale factor vectors to F32 type
+					scale0 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off ));
+					scale2 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 ));
+					scale4 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 ));
+					scale6 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 ));
+				}
+
+				// interleave scale factor vectors
+				scale1 = _mm512_permutex2var_ps( scale0, mask_scale2, scale0 );
+				scale0 = _mm512_permutex2var_ps( scale0, mask_scale1, scale0 );
+				scale3 = _mm512_permutex2var_ps( scale2, mask_scale2, scale2 );
+				scale2 = _mm512_permutex2var_ps( scale2, mask_scale1, scale2 );
+				scale5 = _mm512_permutex2var_ps( scale4, mask_scale2, scale4 );
+				scale4 = _mm512_permutex2var_ps( scale4, mask_scale1, scale4 );
+				scale7 = _mm512_permutex2var_ps( scale6, mask_scale2, scale6 );
+				scale6 = _mm512_permutex2var_ps( scale6, mask_scale1, scale6 );
+
+			}
+			else
+			{
+				pre_op_sf_off = group;
+
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					scale0 = _mm512_set1_ps(
+					               *( ( float* )pre_ops_attr.scale_factor +
+					                            pre_op_sf_off ) );
+				}
+				else
+				{
+					scale0 = CVT_BF16_F32_INT_SHIFT( _mm256_set1_epi16(
+					                *(( bfloat16* )( pre_ops_attr.scale_factor ) +
+					                                pre_op_sf_off ) ) );
+				}
+
+				scale1 = scale0;
+				scale2 = scale0;
+				scale3 = scale0;
+				scale4 = scale0;
+				scale5 = scale0;
+				scale6 = scale0;
+				scale7 = scale0;
+			}
+			for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
+			{
+				// Broadcast a[0,kr:kr+2].
+				a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                           + ( rs_a *  0 ) + ( cs_a * kr ) ) );
+
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group
+				                               + ( rs_b * kr ) / 2 ) );
 
 
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
 
-		b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
 
-		b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
 
-		b1_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( ( rs_b * kr ) / 2 ) + 32 ) );
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group
+				                      + ( ( rs_b * kr ) / 2 ) + 32 ) );
 
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
 
-		b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
 
-		b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 
-		// Broadcast a[1,kr:kr+2].
-		a_bf16_1 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
+				// Broadcast a[1,kr:kr+2].
+				a_bf16_1 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                            + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
-		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
-		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
-		c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
+				// Perform column direction mat-mul with k = 2.
+				// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
 
-		// Broadcast a[2,kr:kr+4].
-		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
+				// Broadcast a[2,kr:kr+4].
+				a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                           + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
-		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
-		c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
-		c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
+				c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
+				c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
+				c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[2,0-63] = a[2,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
-		c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
-		c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
-		c_float_2p3 = _mm512_dpbf16_ps( c_float_2p3, a_bf16_0, b3 );
-	}
+				// Perform column direction mat-mul with k = 2.
+				// c[2,0-63] = a[2,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
+				c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
+				c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
+				c_float_2p3 = _mm512_dpbf16_ps( c_float_2p3, a_bf16_0, b3 );
+			} // k-loop
 
-	// Handle k remainder.
-	if ( k_partial_pieces > 0 )
-	{
-		// Broadcast a[0,kr:kr+2].
-		a_kfringe_buf = *( a + (rs_a * 0) + (cs_a * ( k_full_pieces )));
-		a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+			a_group += k_full_pieces * cs_a;
+			b_group += ( k_full_pieces * rs_b ) / 2;
 
-		b0_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( rs_b * k_full_pieces ) / 2 ) );
+			// Group_size is always even, so k_partial_pieces will always
+			// appear in the last group. So, a_group and b_group pointers
+			// need not be updated after handling k_partial pieces.
+			if( k_partial_pieces )
+			{
+				// Broadcast a[0,kr:kr+2].
+				a_kfringe_buf = *( a_group + (rs_a * 0) );
+				a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group ) );
 
 
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
 
-		b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
 
-		b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
 
-		b1_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( ( rs_b * k_full_pieces ) / 2 ) + 32 ) );
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group + 32 ) );
 
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
 
-		b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
 
-		b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 
-		// Broadcast a[1,kr:kr+2].
-		a_kfringe_buf = *(a + (rs_a * 1) + (cs_a * ( k_full_pieces )));
-		a_bf16_1 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+				// Broadcast a[1,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 1) );
+				a_bf16_1 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
 
-		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
-		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
-		c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
+				// Perform column direction mat-mul with k = 2.
+				// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
 
-		// Broadcast a[2,kr:kr+2].
-		a_kfringe_buf = *(a + (rs_a * 2) + (cs_a * ( k_full_pieces )));
-		a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+				// Broadcast a[2,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 2) );
+				a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
 
-		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
-		c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
-		c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
+				c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
+				c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
+				c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[2,0-63] = a[2,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
-		c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
-		c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
-		c_float_2p3 = _mm512_dpbf16_ps( c_float_2p3, a_bf16_0, b3 );
-	}
+				// Perform column direction mat-mul with k = 2.
+				// c[2,0-63] = a[2,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
+				c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
+				c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
+				c_float_2p3 = _mm512_dpbf16_ps( c_float_2p3, a_bf16_0, b3 );
+
+			} // k_partial_pieces
+		} // group loop
+
+	} // zero-point condition
+
 
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
@@ -4346,10 +5415,8 @@ POST_OPS_3x64_DISABLE:
 }
 
 // 2x64 bf16 kernel
-LPGEMM_M_FRINGE_KERN(bfloat16, int8_t, float, bf16s4f32of32_2x64)
+LPGEMM_M_FRINGE_KERN1(bfloat16, int8_t, float, bf16s4f32of32_2x64)
 {
-	dim_t pre_op_off = post_ops_attr.pre_op_off;
-
 	static void* post_ops_labels[] =
 						{
 						  &&POST_OPS_2x64_DISABLE,
@@ -4366,10 +5433,9 @@ LPGEMM_M_FRINGE_KERN(bfloat16, int8_t, float, bf16s4f32of32_2x64)
 						  &&POST_OPS_TANH_2x64,
 						  &&POST_OPS_SIGMOID_2x64
 						};
-	dim_t k_full_pieces = k0 / 2;
-	dim_t k_partial_pieces = k0 % 2;
 
-	int16_t a_kfringe_buf = 0;
+	dim_t group_size = pre_ops_attr.group_size;
+
 	// B matrix storage bfloat type
 	__m512bh b0;
 	__m512bh b1;
@@ -4404,6 +5470,22 @@ LPGEMM_M_FRINGE_KERN(bfloat16, int8_t, float, bf16s4f32of32_2x64)
 	                                0x0C, 0x1B, 0x0B, 0x1A, 0x0A, 0x19, 0x09,
 	                                0x18, 0x08);
 
+	/* Regs to store zero-point values */
+	__m512i zero_point, zero_point0, zero_point1;
+
+	/* Reg to store masks to interleave zero-point */
+	__m512i mask_zp1, mask_zp2;
+
+	mask_zp1 = _mm512_set_epi64( 0x5F1F5E1E5D1D5C1C, 0x5B1B5A1A59195818,
+                                 0x5717561655155414, 0x5313521251115010,
+                                 0x4F0F4E0E4D0D4C0C, 0x4B0B4A0A49094808,
+                                 0x4707460645054404, 0x4303420241014000 );
+
+    mask_zp2 = _mm512_set_epi64( 0x7F3F7E3E7D3D7C3C, 0x7B3B7A3A79397838,
+                                 0x7737763675357434, 0x7333723271317030,
+                                 0x6F2F6E2E6D2D6C2C, 0x6B2B6A2A69296828,
+                                 0x6727662665256424, 0x6323622261216020 );
+
 	// Registers to use for accumulating C.
 	__m512 c_float_0p0 = _mm512_setzero_ps();
 	__m512 c_float_0p1 = _mm512_setzero_ps();
@@ -4415,137 +5497,436 @@ LPGEMM_M_FRINGE_KERN(bfloat16, int8_t, float, bf16s4f32of32_2x64)
 	__m512 c_float_1p2 = _mm512_setzero_ps();
 	__m512 c_float_1p3 = _mm512_setzero_ps();
 
-	if( post_ops_attr.pre_op_scale_factor_len > 1 )
+	dim_t group_start = pre_ops_attr.pre_op_b_i / group_size;
+	dim_t group_end   = ( pre_ops_attr.pre_op_b_i + k0 - 1 ) / group_size;
+
+	bfloat16* a_group = (bfloat16*) a;
+	int8_t* b_group = (int8_t*)b;
+
+	if( pre_ops_attr.zero_point_len > 0 )
 	{
-		// load and interleave scale factor vectors
-		scale0 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                                    pre_op_off);
-		scale2 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                            pre_op_off + 16 );
-		scale4 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                            pre_op_off + 32 );
-		scale6 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                             pre_op_off + 48 );
+		dim_t pre_op_sf_off = 0;
+		dim_t pre_op_zp_off = 0;
 
-		scale1 = _mm512_permutex2var_ps( scale0, mask_scale2, scale0 );
-		scale0 = _mm512_permutex2var_ps( scale0, mask_scale1, scale0 );
-		scale3 = _mm512_permutex2var_ps( scale2, mask_scale2, scale2 );
-		scale2 = _mm512_permutex2var_ps( scale2, mask_scale1, scale2 );
-		scale5 = _mm512_permutex2var_ps( scale4, mask_scale2, scale4 );
-		scale4 = _mm512_permutex2var_ps( scale4, mask_scale1, scale4 );
-		scale7 = _mm512_permutex2var_ps( scale6, mask_scale2, scale6 );
-		scale6 = _mm512_permutex2var_ps( scale6, mask_scale1, scale6 );
+		for( dim_t group = group_start; group <= group_end; group++ )
+		{
 
-	}
+			dim_t k_start = bli_max( group * group_size, pre_ops_attr.pre_op_b_i );
+			dim_t k_end = bli_min( ( ( group + 1 ) * group_size - 1 ),
+			                       pre_ops_attr.pre_op_b_i + k0 - 1);
+			dim_t kg0 = k_end - k_start + 1;
+			dim_t k_full_pieces = kg0 / 2;
+			dim_t k_partial_pieces = kg0 % 2;
+
+			int16_t a_kfringe_buf = 0;
+
+			if( pre_ops_attr.scale_factor_len > 1 )
+			{
+				pre_op_sf_off = ( group * pre_ops_attr.pre_op_ld ) +
+					                pre_ops_attr.pre_op_b_j;
+
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					// load scale factor vectors
+					scale0 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off);
+					scale2 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 );
+					scale4 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 );
+					scale6 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 );
+				}
+				else
+				{
+					// load and convert scale factor vectors to F32 type
+					scale0 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off ));
+					scale2 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 ));
+					scale4 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 ));
+					scale6 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 ));
+				}
+
+				// interleave scale factor vectors
+				scale1 = _mm512_permutex2var_ps( scale0, mask_scale2, scale0 );
+				scale0 = _mm512_permutex2var_ps( scale0, mask_scale1, scale0 );
+				scale3 = _mm512_permutex2var_ps( scale2, mask_scale2, scale2 );
+				scale2 = _mm512_permutex2var_ps( scale2, mask_scale1, scale2 );
+				scale5 = _mm512_permutex2var_ps( scale4, mask_scale2, scale4 );
+				scale4 = _mm512_permutex2var_ps( scale4, mask_scale1, scale4 );
+				scale7 = _mm512_permutex2var_ps( scale6, mask_scale2, scale6 );
+				scale6 = _mm512_permutex2var_ps( scale6, mask_scale1, scale6 );
+
+			}
+			else
+			{
+				pre_op_sf_off = group;
+
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					scale0 = _mm512_set1_ps(
+					               *( ( float* )pre_ops_attr.scale_factor +
+					                            pre_op_sf_off ) );
+				}
+				else
+				{
+					scale0 = CVT_BF16_F32_INT_SHIFT( _mm256_set1_epi16(
+					                *(( bfloat16* )( pre_ops_attr.scale_factor ) +
+					                                pre_op_sf_off ) ) );
+				}
+
+				scale1 = scale0;
+				scale2 = scale0;
+				scale3 = scale0;
+				scale4 = scale0;
+				scale5 = scale0;
+				scale6 = scale0;
+				scale7 = scale0;
+			}
+
+			if( pre_ops_attr.zero_point_len > 1 )
+			{
+				pre_op_zp_off = ( group * pre_ops_attr.pre_op_ld ) +
+				                          pre_ops_attr.pre_op_b_j;
+				zero_point = _mm512_loadu_si512((int8_t*)( pre_ops_attr.zero_point ) +
+				                                pre_op_zp_off );
+			}
+			else
+			{
+				pre_op_zp_off = group;
+				zero_point = _mm512_set1_epi8( *( ( int8_t* )( pre_ops_attr.zero_point
+				                               + pre_op_zp_off) ) );
+			}
+
+			zero_point1 = _mm512_permutex2var_epi8( zero_point, mask_zp2, zero_point );
+			zero_point0 = _mm512_permutex2var_epi8( zero_point, mask_zp1, zero_point );
+
+
+			for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
+			{
+				// Broadcast a[0,kr:kr+2].
+				a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                           + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group
+				                               + ( rs_b * kr ) / 2 ) );
+
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
+
+				b0_s8 = _mm512_sub_epi8( b0_s8, zero_point0 );
+
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group
+				                     + ( ( rs_b * kr ) / 2 ) + 32 ) );
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
+
+				b1_s8 = _mm512_sub_epi8( b1_s8, zero_point1 );
+
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+
+				// Broadcast a[1,kr:kr+2].
+				a_bf16_1 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                           + ( rs_a * 1 ) + ( cs_a * kr ) ) );
+
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
+				c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
+				c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
+				c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
+			} // k-loop
+
+			a_group += k_full_pieces * cs_a;
+			b_group += ( k_full_pieces * rs_b ) / 2;
+
+			// Group_size is always even, so k_partial_pieces will always
+			// appear in the last group. So, a_group and b_group pointers
+			// need not be updated after handling k_partial pieces.
+			if( k_partial_pieces )
+			{
+				__m512i zero_reg = _mm512_setzero_si512();
+
+				/* Interleave zero_point values with zeroes */
+				zero_point1 = _mm512_permutex2var_epi8( zero_point, mask_zp2, zero_reg );
+				zero_point0 = _mm512_permutex2var_epi8( zero_point, mask_zp1, zero_reg );
+
+				// Broadcast a[0,kr:kr+2].
+				a_kfringe_buf = *( a_group + (rs_a * 0) );
+				a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group ) );
+
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
+
+				b0_s8 = _mm512_sub_epi8( b0_s8, zero_point0 );
+
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group + 32 ) );
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
+
+				b1_s8 = _mm512_sub_epi8( b1_s8, zero_point1 );
+
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+
+				// Broadcast a[1,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 1) );
+				a_bf16_1 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
+				c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
+				c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
+				c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
+			} // k_partial_pieces
+		} // group loop
+
+	} // zero-point condition
 	else
 	{
-		scale0 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale1 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale2 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale3 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale4 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale5 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale6 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale7 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-	}
+		dim_t pre_op_sf_off = 0;
 
-	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
-	{
-		// Broadcast a[0,kr:kr+2].
-		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+		for( dim_t group = group_start; group <= group_end; group++ )
+		{
 
-		b0_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( rs_b * kr ) / 2 ) );
+			dim_t k_start = bli_max( group * group_size, pre_ops_attr.pre_op_b_i );
+			dim_t k_end = bli_min( ( ( group + 1 ) * group_size - 1 ),
+			                       pre_ops_attr.pre_op_b_i + k0 - 1);
+			dim_t kg0 = k_end - k_start + 1;
+			dim_t k_full_pieces = kg0 / 2;
+			dim_t k_partial_pieces = kg0 % 2;
+
+			int16_t a_kfringe_buf = 0;
+
+			if( pre_ops_attr.scale_factor_len > 1 )
+			{
+				pre_op_sf_off = ( group * pre_ops_attr.pre_op_ld ) +
+					                pre_ops_attr.pre_op_b_j;
+
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					// load scale factor vectors
+					scale0 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off);
+					scale2 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 );
+					scale4 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 );
+					scale6 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 );
+				}
+				else
+				{
+					// load and convert scale factor vectors to F32 type
+					scale0 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off ));
+					scale2 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 ));
+					scale4 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 ));
+					scale6 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 ));
+				}
+
+				// interleave scale factor vectors
+				scale1 = _mm512_permutex2var_ps( scale0, mask_scale2, scale0 );
+				scale0 = _mm512_permutex2var_ps( scale0, mask_scale1, scale0 );
+				scale3 = _mm512_permutex2var_ps( scale2, mask_scale2, scale2 );
+				scale2 = _mm512_permutex2var_ps( scale2, mask_scale1, scale2 );
+				scale5 = _mm512_permutex2var_ps( scale4, mask_scale2, scale4 );
+				scale4 = _mm512_permutex2var_ps( scale4, mask_scale1, scale4 );
+				scale7 = _mm512_permutex2var_ps( scale6, mask_scale2, scale6 );
+				scale6 = _mm512_permutex2var_ps( scale6, mask_scale1, scale6 );
+
+			}
+			else
+			{
+				pre_op_sf_off = group;
+
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					scale0 = _mm512_set1_ps(
+					               *( ( float* )pre_ops_attr.scale_factor +
+					                            pre_op_sf_off ) );
+				}
+				else
+				{
+					scale0 = CVT_BF16_F32_INT_SHIFT( _mm256_set1_epi16(
+					                *(( bfloat16* )( pre_ops_attr.scale_factor ) +
+					                                pre_op_sf_off ) ) );
+				}
+
+				scale1 = scale0;
+				scale2 = scale0;
+				scale3 = scale0;
+				scale4 = scale0;
+				scale5 = scale0;
+				scale6 = scale0;
+				scale7 = scale0;
+			}
+
+			for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
+			{
+				// Broadcast a[0,kr:kr+2].
+				a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                           + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group
+				                               + ( rs_b * kr ) / 2 ) );
 
 
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
 
-		b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
 
-		b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
 
-		b1_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( ( rs_b * kr ) / 2 ) + 32 ) );
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group
+				                     + ( ( rs_b * kr ) / 2 ) + 32 ) );
 
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
 
-		b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
 
-		b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 
-		// Broadcast a[1,kr:kr+2].
-		a_bf16_1 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
+				// Broadcast a[1,kr:kr+2].
+				a_bf16_1 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                           + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
-		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
-		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
-		c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
-		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
-		c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
-		c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
-	}
+				// Perform column direction mat-mul with k = 2.
+				// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
+				c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
+				c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
+				c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
+			} // k-loop
 
-	// Handle k remainder.
-	if ( k_partial_pieces > 0 )
-	{
-		// Broadcast a[0,kr:kr+2].
-		a_kfringe_buf = *( a + (rs_a * 0) + (cs_a * ( k_full_pieces )));
-		a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+			a_group += k_full_pieces * cs_a;
+			b_group += ( k_full_pieces * rs_b ) / 2;
 
-		b0_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( rs_b * k_full_pieces ) / 2 ) );
+			// Group_size is always even, so k_partial_pieces will always
+			// appear in the last group. So, a_group and b_group pointers
+			// need not be updated after handling k_partial pieces.
+			if( k_partial_pieces )
+			{
+				// Broadcast a[0,kr:kr+2].
+				a_kfringe_buf = *( a_group + (rs_a * 0) );
+				a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
 
-
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
-
-		b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
-
-		b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
-
-		b1_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( ( rs_b * k_full_pieces ) / 2 ) + 32 ) );
-
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
-
-		b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
-
-		b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group ) );
 
 
-		// Perform column direction mat-mul with k = 2.
-		// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
 
-		// Broadcast a[1,kr:kr+2].
-		a_kfringe_buf = *(a + (rs_a * 1) + (cs_a * ( k_full_pieces )));
-		a_bf16_1 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
 
-		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
-		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
-		c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
 
-		// Perform column direction mat-mul with k = 2.
-		// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
-		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
-		c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
-		c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
-	}
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group + 32 ) );
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
+
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+
+				// Broadcast a[1,kr:kr+2].
+				a_kfringe_buf = *(a_group + (rs_a * 1) );
+				a_bf16_1 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[1,0-63] = a[1,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
+				c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
+				c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_1, b2 );
+				c_float_1p3 = _mm512_dpbf16_ps( c_float_1p3, a_bf16_1, b3 );
+			} // k_partial_pieces
+		} // group loop
+
+	} // zero-point condition
+
 
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
@@ -5279,7 +6660,7 @@ POST_OPS_2x64_DISABLE:
 }
 
 // 1x64 bf16 kernel
-LPGEMM_M_FRINGE_KERN(bfloat16, int8_t, float, bf16s4f32of32_1x64)
+LPGEMM_M_FRINGE_KERN1(bfloat16, int8_t, float, bf16s4f32of32_1x64)
 {
 	static void* post_ops_labels[] =
 						{
@@ -5298,13 +6679,7 @@ LPGEMM_M_FRINGE_KERN(bfloat16, int8_t, float, bf16s4f32of32_1x64)
 						  &&POST_OPS_SIGMOID_1x64
 						};
 
-
-	dim_t pre_op_off = post_ops_attr.pre_op_off;
-
-	dim_t k_full_pieces = k0 / 2;
-	dim_t k_partial_pieces = k0 % 2;
-
-	int16_t a_kfringe_buf = 0;
+	dim_t group_size = pre_ops_attr.group_size;
 
 	// B matrix storage bfloat type
 	__m512bh b0;
@@ -5336,119 +6711,410 @@ LPGEMM_M_FRINGE_KERN(bfloat16, int8_t, float, bf16s4f32of32_1x64)
 	                                0x0C, 0x1B, 0x0B, 0x1A, 0x0A, 0x19, 0x09,
 	                                0x18, 0x08);
 
+	/* Regs to store zero-point values */
+	__m512i zero_point, zero_point0, zero_point1;
+
+	/* Reg to store masks to interleave zero-point */
+	__m512i mask_zp1, mask_zp2;
+
+	mask_zp1 = _mm512_set_epi64( 0x5F1F5E1E5D1D5C1C, 0x5B1B5A1A59195818,
+                                 0x5717561655155414, 0x5313521251115010,
+                                 0x4F0F4E0E4D0D4C0C, 0x4B0B4A0A49094808,
+                                 0x4707460645054404, 0x4303420241014000 );
+
+    mask_zp2 = _mm512_set_epi64( 0x7F3F7E3E7D3D7C3C, 0x7B3B7A3A79397838,
+                                 0x7737763675357434, 0x7333723271317030,
+                                 0x6F2F6E2E6D2D6C2C, 0x6B2B6A2A69296828,
+                                 0x6727662665256424, 0x6323622261216020 );
+
 	//  Registers to use for accumulating C.
 	__m512 c_float_0p0 = _mm512_setzero_ps();
 	__m512 c_float_0p1 = _mm512_setzero_ps();
 	__m512 c_float_0p2 = _mm512_setzero_ps();
 	__m512 c_float_0p3 = _mm512_setzero_ps();
 
-	if( post_ops_attr.pre_op_scale_factor_len > 1 )
+	dim_t group_start = pre_ops_attr.pre_op_b_i / group_size;
+	dim_t group_end   = ( pre_ops_attr.pre_op_b_i + k0 - 1 ) / group_size;
+
+	bfloat16* a_group = (bfloat16*) a;
+	int8_t* b_group = (int8_t*)b;
+
+	if( pre_ops_attr.zero_point_len > 0 )
 	{
-		// load and interleave scale factor vectors
-		scale0 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                                    pre_op_off);
-		scale2 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                            pre_op_off + 16 );
-		scale4 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                            pre_op_off + 32 );
-		scale6 = _mm512_loadu_ps( (float*)( post_ops_attr.pre_op_scale_factor ) +
-		                             pre_op_off + 48 );
+		dim_t pre_op_sf_off = 0;
+		dim_t pre_op_zp_off = 0;
 
-		scale1 = _mm512_permutex2var_ps( scale0, mask_scale2, scale0 );
-		scale0 = _mm512_permutex2var_ps( scale0, mask_scale1, scale0 );
-		scale3 = _mm512_permutex2var_ps( scale2, mask_scale2, scale2 );
-		scale2 = _mm512_permutex2var_ps( scale2, mask_scale1, scale2 );
-		scale5 = _mm512_permutex2var_ps( scale4, mask_scale2, scale4 );
-		scale4 = _mm512_permutex2var_ps( scale4, mask_scale1, scale4 );
-		scale7 = _mm512_permutex2var_ps( scale6, mask_scale2, scale6 );
-		scale6 = _mm512_permutex2var_ps( scale6, mask_scale1, scale6 );
+		for( dim_t group = group_start; group <= group_end; group++ )
+		{
 
-	}
+			dim_t k_start = bli_max( group * group_size, pre_ops_attr.pre_op_b_i );
+			dim_t k_end = bli_min( ( ( group + 1 ) * group_size - 1 ),
+			                       pre_ops_attr.pre_op_b_i + k0 - 1);
+			dim_t kg0 = k_end - k_start + 1;
+			dim_t k_full_pieces = kg0 / 2;
+			dim_t k_partial_pieces = kg0 % 2;
+
+			int16_t a_kfringe_buf = 0;
+
+			if( pre_ops_attr.scale_factor_len > 1 )
+			{
+				pre_op_sf_off = ( group * pre_ops_attr.pre_op_ld ) +
+					                pre_ops_attr.pre_op_b_j;
+
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					// load scale factor vectors
+					scale0 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off);
+					scale2 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 );
+					scale4 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 );
+					scale6 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 );
+				}
+				else
+				{
+					// load and convert scale factor vectors to F32 type
+					scale0 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off ));
+					scale2 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 ));
+					scale4 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 ));
+					scale6 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 ));
+				}
+
+				// interleave scale factor vectors
+				scale1 = _mm512_permutex2var_ps( scale0, mask_scale2, scale0 );
+				scale0 = _mm512_permutex2var_ps( scale0, mask_scale1, scale0 );
+				scale3 = _mm512_permutex2var_ps( scale2, mask_scale2, scale2 );
+				scale2 = _mm512_permutex2var_ps( scale2, mask_scale1, scale2 );
+				scale5 = _mm512_permutex2var_ps( scale4, mask_scale2, scale4 );
+				scale4 = _mm512_permutex2var_ps( scale4, mask_scale1, scale4 );
+				scale7 = _mm512_permutex2var_ps( scale6, mask_scale2, scale6 );
+				scale6 = _mm512_permutex2var_ps( scale6, mask_scale1, scale6 );
+
+			}
+			else
+			{
+				pre_op_sf_off = group;
+
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					scale0 = _mm512_set1_ps(
+					               *( ( float* )pre_ops_attr.scale_factor +
+					                            pre_op_sf_off ) );
+				}
+				else
+				{
+					scale0 = CVT_BF16_F32_INT_SHIFT( _mm256_set1_epi16(
+					                *(( bfloat16* )( pre_ops_attr.scale_factor ) +
+					                                pre_op_sf_off ) ) );
+				}
+
+				scale1 = scale0;
+				scale2 = scale0;
+				scale3 = scale0;
+				scale4 = scale0;
+				scale5 = scale0;
+				scale6 = scale0;
+				scale7 = scale0;
+			}
+
+			if( pre_ops_attr.zero_point_len > 1 )
+			{
+				pre_op_zp_off = ( group * pre_ops_attr.pre_op_ld ) +
+				                          pre_ops_attr.pre_op_b_j;
+				zero_point = _mm512_loadu_si512((int8_t*)( pre_ops_attr.zero_point ) +
+				                                pre_op_zp_off );
+			}
+			else
+			{
+				pre_op_zp_off = group;
+				zero_point = _mm512_set1_epi8( *( ( int8_t* )( pre_ops_attr.zero_point
+				                               + pre_op_zp_off) ) );
+			}
+
+			zero_point1 = _mm512_permutex2var_epi8( zero_point, mask_zp2, zero_point );
+			zero_point0 = _mm512_permutex2var_epi8( zero_point, mask_zp1, zero_point );
+
+			for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
+			{
+				// Broadcast a[0,kr]
+				__m512bh a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                                     + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group
+				                               + ( rs_b * kr ) / 2 ) );
+
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
+
+				b0_s8 = _mm512_sub_epi8( b0_s8, zero_point0 );
+
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group
+				                     + ( ( rs_b * kr ) / 2 ) + 32 ) );
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
+
+				b1_s8 = _mm512_sub_epi8( b1_s8, zero_point1 );
+
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+			} // k-loop
+
+			a_group += k_full_pieces * cs_a;
+			b_group += ( k_full_pieces * rs_b ) / 2;
+
+			// Group_size is always even, so k_partial_pieces will always
+			// appear in the last group. So, a_group and b_group pointers
+			// need not be updated after handling k_partial pieces.
+			if( k_partial_pieces )
+			{
+				__m512i zero_reg = _mm512_setzero_si512();
+
+				/* Interleave zero_point values with zeroes */
+				zero_point1 = _mm512_permutex2var_epi8( zero_point, mask_zp2, zero_reg );
+				zero_point0 = _mm512_permutex2var_epi8( zero_point, mask_zp1, zero_reg );
+
+				// Broadcast a[0,kr:kr+2].
+				a_kfringe_buf = *( a_group + (rs_a * 0) );
+				__m512bh a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group ) );
+
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
+
+				b0_s8 = _mm512_sub_epi8( b0_s8, zero_point0 );
+
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group + 32 ) );
+
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
+
+				b1_s8 = _mm512_sub_epi8( b1_s8, zero_point1 );
+
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+
+			} // k_partial_pieces
+		} // group loop
+
+	} // zero-point condition
 	else
 	{
-		scale0 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale1 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale2 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale3 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale4 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale5 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale6 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-		scale7 = _mm512_set1_ps( *( ( float* )post_ops_attr.pre_op_scale_factor ) );
-	}
+		dim_t pre_op_sf_off = 0;
 
-	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
-	{
-		// Broadcast a[0,kr]
-		__m512bh a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+		for( dim_t group = group_start; group <= group_end; group++ )
+		{
 
-		b0_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( rs_b * kr ) / 2 ) );
+			dim_t k_start = bli_max( group * group_size, pre_ops_attr.pre_op_b_i );
+			dim_t k_end = bli_min( ( ( group + 1 ) * group_size - 1 ),
+			                       pre_ops_attr.pre_op_b_i + k0 - 1);
+			dim_t kg0 = k_end - k_start + 1;
+			dim_t k_full_pieces = kg0 / 2;
+			dim_t k_partial_pieces = kg0 % 2;
+
+			int16_t a_kfringe_buf = 0;
+
+			if( pre_ops_attr.scale_factor_len > 1 )
+			{
+				pre_op_sf_off = ( group * pre_ops_attr.pre_op_ld ) +
+					                pre_ops_attr.pre_op_b_j;
+
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					// load scale factor vectors
+					scale0 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off);
+					scale2 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 );
+					scale4 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 );
+					scale6 = _mm512_loadu_ps( (float*)( pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 );
+				}
+				else
+				{
+					// load and convert scale factor vectors to F32 type
+					scale0 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off ));
+					scale2 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 16 ));
+					scale4 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 32 ));
+					scale6 = CVT_BF16_F32_INT_SHIFT( (__m256i)_mm256_loadu_epi16(
+					                        (bfloat16*)(pre_ops_attr.scale_factor ) +
+					                                    pre_op_sf_off + 48 ));
+				}
+
+				// interleave scale factor vectors
+				scale1 = _mm512_permutex2var_ps( scale0, mask_scale2, scale0 );
+				scale0 = _mm512_permutex2var_ps( scale0, mask_scale1, scale0 );
+				scale3 = _mm512_permutex2var_ps( scale2, mask_scale2, scale2 );
+				scale2 = _mm512_permutex2var_ps( scale2, mask_scale1, scale2 );
+				scale5 = _mm512_permutex2var_ps( scale4, mask_scale2, scale4 );
+				scale4 = _mm512_permutex2var_ps( scale4, mask_scale1, scale4 );
+				scale7 = _mm512_permutex2var_ps( scale6, mask_scale2, scale6 );
+				scale6 = _mm512_permutex2var_ps( scale6, mask_scale1, scale6 );
+
+			}
+			else
+			{
+				pre_op_sf_off = group;
+
+				if( pre_ops_attr.scale_factor_type == F32 )
+				{
+					scale0 = _mm512_set1_ps(
+					               *( ( float* )pre_ops_attr.scale_factor +
+					                            pre_op_sf_off ) );
+				}
+				else
+				{
+					scale0 = CVT_BF16_F32_INT_SHIFT( _mm256_set1_epi16(
+					                *(( bfloat16* )( pre_ops_attr.scale_factor ) +
+					                                pre_op_sf_off ) ) );
+				}
+
+				scale1 = scale0;
+				scale2 = scale0;
+				scale3 = scale0;
+				scale4 = scale0;
+				scale5 = scale0;
+				scale6 = scale0;
+				scale7 = scale0;
+			}
+
+			for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
+			{
+				// Broadcast a[0,kr]
+				__m512bh a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a_group
+				                                     + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group
+				                               + ( rs_b * kr ) / 2 ) );
 
 
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
 
-		b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
 
-		b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+					                      CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
 
-		b1_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( ( rs_b * kr ) / 2 ) + 32 ) );
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group
+				                     + ( ( rs_b * kr ) / 2 ) + 32 ) );
 
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+					                                sign_comp, signed_upscale);
 
-		b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
 
-		b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+					                      CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
 
-		// Perform column direction mat-mul with k = 2.
-        // c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
-		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
-		c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
-	}
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+			} // k-loop
 
-	// Handle k remainder.
-	if ( k_partial_pieces > 0 )
-	{
-		// Broadcast a[0,kr:kr+2].
-		a_kfringe_buf = *( a + (rs_a * 0) + (cs_a * ( k_full_pieces )));
-		__m512bh a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+			a_group += k_full_pieces * cs_a;
+			b_group += ( k_full_pieces * rs_b ) / 2;
 
-		b0_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( rs_b * k_full_pieces ) / 2 ) );
+			// Group_size is always even, so k_partial_pieces will always
+			// appear in the last group. So, a_group and b_group pointers
+			// need not be updated after handling k_partial pieces.
+			if( k_partial_pieces )
+			{
+				// Broadcast a[0,kr:kr+2].
+				a_kfringe_buf = *( a_group + (rs_a * 0) );
+				__m512bh a_bf16_0 = (__m512bh)_mm512_set1_epi16( a_kfringe_buf );
+
+				b0_s4 = _mm256_loadu_si256( (__m256i const *)( b_group ) );
 
 
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b0_s4, b0_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
 
-		b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
+				b0 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 1, scale1 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 0, scale0 ) );
 
-		b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
-		                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
+				b1 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b0_s8, 3, scale3 ),
+				                          CVT_INT8_F32_SCAL_16( b0_s8, 2, scale2 ) );
 
-		b1_s4 = _mm256_loadu_si256( (__m256i const *)( b + ( ( rs_b * k_full_pieces ) / 2 ) + 32 ) );
+				b1_s4 = _mm256_loadu_si256( (__m256i const *)( b_group + 32 ) );
 
-		CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
-		                                    sign_comp, signed_upscale);
+				CVT_INT4_TO_INT8_64ELEM_MULTISHIFT( b1_s4, b1_s8, shift_idx_64, \
+				                                    sign_comp, signed_upscale);
 
-		b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
+				b2 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 1, scale5 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 0, scale4 ) );
 
-		b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
-		                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
+				b3 = _mm512_cvtne2ps_pbh( CVT_INT8_F32_SCAL_16( b1_s8, 3, scale7 ),
+				                          CVT_INT8_F32_SCAL_16( b1_s8, 2, scale6 ) );
 
-		// Perform column direction mat-mul with k = 2.
-        // c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
-		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
-		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
-		c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
-	}
+				// Perform column direction mat-mul with k = 2.
+				// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
+				c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
+				c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
+				c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
+				c_float_0p3 = _mm512_dpbf16_ps( c_float_0p3, a_bf16_0, b3 );
+
+			} // k_partial_pieces
+		} // group loop
+
+	} // zero-point condition
 
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );

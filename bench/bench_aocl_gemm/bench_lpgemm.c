@@ -327,6 +327,7 @@ static inline ACCUM_type mat_mul_accuracy_check_accum_ ## BLAS_SFX \
        dim_t i, \
        dim_t j, \
        dim_t k, \
+       dim_t pre_op_ld, /* Ignored */ \
        bool int4_testing, /* Workaround to enable int4 B matrix testing. */\
        aocl_pre_op* pre_op /* Workaround to enable B pre-ops. */ \
      ) \
@@ -371,6 +372,7 @@ static inline ACCUM_type mat_mul_accuracy_check_accum_ ## BLAS_SFX \
        dim_t i, \
        dim_t j, \
        dim_t k, \
+       dim_t pre_op_ld, /* Ignored */ \
        bool int4_testing, /* Workaround to enable int4 B matrix testing. */\
        aocl_pre_op* pre_op /* Workaround to enable B pre-ops. */ \
      ) \
@@ -436,6 +438,7 @@ static inline float mat_mul_accuracy_check_accum_bf16bf16f32of32
        dim_t i,
        dim_t j,
        dim_t k,
+       dim_t pre_op_ld, /* Ignored */ \
        bool int4_testing, /* Ignored for bf16 testing */\
        aocl_pre_op* pre_op /* Workaround to enable B pre-ops. */ \
      )
@@ -471,6 +474,7 @@ static inline float mat_mul_accuracy_check_accum_bf16bf16f32obf16
        dim_t i,
        dim_t j,
        dim_t k,
+       dim_t pre_op_ld, /* Ignored */
        bool int4_testing, /* Ignored for bf16 testing */\
        aocl_pre_op* pre_op /* Workaround to enable B pre-ops. */ \
      )
@@ -494,13 +498,17 @@ static inline float mat_mul_accuracy_check_accum_bf16bf16f32obf16
 static inline float get_s4_to_f32_scale_val
      (
        int8_t* b,
+       dim_t p,
        dim_t j,
+       dim_t n,
        dim_t b_inc,
        aocl_pre_op* pre_op
      )
 {
     float b_float = 0.0;
     int8_t b_val = 0;
+
+    dim_t group_size = pre_op->group_size;
 
     /* Even index will have data at low 4 bits, and odd at hi 4 bits.
      * B matrix increments has to be halved to account for 4 bit
@@ -522,17 +530,22 @@ static inline float get_s4_to_f32_scale_val
 
     if ( ( pre_op != NULL ) && ( pre_op->seq_length > 0 ) )
     {
-        dim_t j_zp = j;
-        if ( ( pre_op->b_zp != NULL ) &&
-             ( ( pre_op->b_zp )->zero_point_len == 1 ) )
+        dim_t j_zp=0, j_scale=0;
+        if(group_size!=0)
         {
-           j_zp = 0;
-        }
-        dim_t j_scale = j;
-        if ( ( pre_op->b_scl != NULL ) &&
-             ( ( pre_op->b_scl )->scale_factor_len == 1 ) )
-        {
-           j_scale = 0;
+            j_zp = ( ( p / group_size ) * n ) + j;
+            if ( ( pre_op->b_zp != NULL ) &&
+                ( ( pre_op->b_zp )->zero_point_len == 1 ) )
+            {
+                j_zp = p / group_size;
+            }
+
+            j_scale = ( ( p / group_size ) * n ) + j;
+            if ( ( pre_op->b_scl != NULL ) &&
+                ( ( pre_op->b_scl )->scale_factor_len == 1 ) )
+            {
+                j_scale = (p / group_size);
+            }
         }
 
         // Assuming only 1 scale and zp.
@@ -547,7 +560,15 @@ static inline float get_s4_to_f32_scale_val
         if ( ( pre_op->b_scl != NULL ) &&
              ( ( pre_op->b_scl )->scale_factor != NULL ) )
         {
-            scale_factor = *( ( float* )( pre_op->b_scl )->scale_factor + j_scale );
+            if( pre_op->b_scl->scale_factor_type == FLOAT )
+            {
+                scale_factor = *( ( float* )( pre_op->b_scl )->scale_factor + j_scale );
+            }
+            else
+            {
+                bfloat16_to_float( *( ( bfloat16* )( pre_op->b_scl )->scale_factor + j_scale ) , &scale_factor);
+            }
+
         }
         b_float = (float)( b_val - zp ) * scale_factor;
     }
@@ -576,6 +597,7 @@ static inline float mat_mul_accuracy_check_accum_bf16s4f32of32
        dim_t i,
        dim_t j,
        dim_t k,
+       dim_t pre_op_ld,
        bool int4_testing, /* Ignored s4 implies int4 testing. */\
        aocl_pre_op* pre_op /* Workaround to enable B pre-ops. */ \
      )
@@ -588,7 +610,7 @@ static inline float mat_mul_accuracy_check_accum_bf16s4f32of32
 
         /* Get B matrix int4_t value and upscale it to float. */
         dim_t b_inc = ( rs_b * p ) + ( cs_b * j );
-        b_float = get_s4_to_f32_scale_val( b, j, b_inc, pre_op );
+        b_float = get_s4_to_f32_scale_val( b, p, j, pre_op_ld, b_inc, pre_op );
 
         temp_accum += ( ( a_float ) * ( b_float ) );
     }
@@ -614,6 +636,7 @@ static inline float mat_mul_accuracy_check_accum_bf16s4f32obf16
        dim_t i,
        dim_t j,
        dim_t k,
+       dim_t pre_op_ld,
        bool int4_testing, /* Ignored for bf16 testing */\
        aocl_pre_op* pre_op /* Workaround to enable B pre-ops. */ \
      )
@@ -626,7 +649,7 @@ static inline float mat_mul_accuracy_check_accum_bf16s4f32obf16
 
         /* Get B matrix int4_t value and upscale it to float. */
         dim_t b_inc = ( rs_b * p ) + ( cs_b * j );
-        b_float = get_s4_to_f32_scale_val( b, j, b_inc, pre_op );
+        b_float = get_s4_to_f32_scale_val( b, p, j, pre_op_ld, b_inc, pre_op );
 
         temp_accum += ( ( a_float ) * ( b_float ) );
     }
@@ -865,7 +888,7 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
  \
             temp_accum = GEN_FUNC_NAME(mat_mul_accuracy_check_accum_,BLAS_SFX) \
                 (a, b, c_ref, temp_accum, alpha, beta,\
-                 rs_a, rs_b, cs_a, cs_b, rs_c_ref, cs_c_ref, i, j, k, \
+                 rs_a, rs_b, cs_a, cs_b, rs_c_ref, cs_c_ref, i, j, k, n, \
                  int4_testing, a_pre_op); \
 \
             if ( post_op != NULL ) \
@@ -989,12 +1012,13 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
               &out_temp_accum, &temp_accum \
             ); \
  \
-            if ( ( ( *( c + ( rs_c * i ) + ( cs_c * j ) ) - out_temp_accum ) > 1.0E-5 ) || \
-                 ( ( out_temp_accum - *( c + ( rs_c * i ) + ( cs_c * j ) ) ) > 1.0E-5 ) ) \
+            float comp_float, ref_float; \
+            GEN_FUNC_NAME(C_type,_to_float)(*( c + ( rs_c * i ) + ( cs_c * j ) ), &comp_float); \
+            GEN_FUNC_NAME(C_type,_to_float)(out_temp_accum, &ref_float); \
+ \
+            if ( ( ( comp_float - ref_float ) > 1.0E-5 ) || \
+                 ( ( ref_float - comp_float ) > 1.0E-5 ) ) \
             { \
-                float comp_float, ref_float; \
-                GEN_FUNC_NAME(C_type,_to_float)(*( c + ( rs_c * i ) + ( cs_c * j ) ), &comp_float); \
-                GEN_FUNC_NAME(C_type,_to_float)(out_temp_accum, &ref_float); \
                 if ( fout ) \
                 { \
                     fprintf( fout, "%s Failure input m: %ld, n: %ld, k: %ld," \
@@ -1033,6 +1057,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
      ( \
        dim_t m, \
        dim_t n, \
+       dim_t k, \
        char* post_ops_str, \
        char  stor_order \
      ) \
@@ -1134,6 +1159,11 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     dim_t activator_idx = 0; \
     dim_t clip_idx = 0; \
     char * bias_stor_type = ""; \
+    bool is_group_quant = FALSE; \
+    bool is_pre_op_scale_scalar = FALSE; \
+    bool is_pre_op_scale_f32 = TRUE; \
+    dim_t zp_vec_length = 0; \
+    dim_t quant_group_size = 0; \
  \
     /* Post-Ops string parser. */ \
     num_eltwise = 0; /* Global variable, zero out for definied behavior. */\
@@ -1235,16 +1265,6 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
                     is_scalar_scale = TRUE; \
                 } \
             } \
-            else if ( strcmp( ops_tok, "zp" ) == 0 ) \
-            { \
-                ops_tok = strtok( NULL, ", " ); \
-                str_tolower( ops_tok ); \
-                if ( ( strcmp( ops_tok, "scalar" ) == 0 ) || \
-                     ( strcmp( ops_tok, "s" ) == 0 ) ) \
-                { \
-                    is_scalar_zp = TRUE; \
-                } \
-            } \
             else if ( strcmp( ops_tok, "matrix_add" ) == 0 ) \
             { \
                 post_ops->seq_vector[cur_op_index] = MATRIX_ADD; \
@@ -1277,6 +1297,59 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
                 activator_idx = cur_op_index; \
                 cur_op_index++; \
             } \
+            else if ( strcmp( ops_tok, "group_size" ) == 0 ) \
+            { \
+                ops_tok = strtok( NULL, ", " ); \
+                quant_group_size = atoi(ops_tok); \
+                is_group_quant = TRUE; \
+            } \
+            else if ( strcmp( ops_tok, "pre_op_zp" ) == 0 ) \
+            { \
+               ops_tok = strtok( NULL, ", " ); \
+                str_tolower( ops_tok ); \
+                if ( ( strcmp( ops_tok, "scalar" ) == 0 ) || \
+                     ( strcmp( ops_tok, "s" ) == 0 ) ) \
+                { \
+                    /* set scalar zp */\
+                    zp_vec_length = 1; \
+                }else if ( ( strcmp( ops_tok, "vector" ) == 0 ) || \
+                           ( strcmp( ops_tok, "v" ) == 0 ) ) \
+                { \
+                    /* set vector zp */\
+                    zp_vec_length = n; \
+                } \
+            } \
+            else if ( strcmp( ops_tok, "pre_op_scale" ) == 0 ) \
+            { \
+               ops_tok = strtok( NULL, ", " ); \
+                str_tolower( ops_tok ); \
+                if ( ( strcmp( ops_tok, "scalar" ) == 0 ) || \
+                     ( strcmp( ops_tok, "s" ) == 0 ) ) \
+                { \
+                    /* set scalar scale */\
+                    is_pre_op_scale_scalar = TRUE; \
+                }else if ( ( strcmp( ops_tok, "vector" ) == 0 ) || \
+                           ( strcmp( ops_tok, "v" ) == 0 ) ) \
+                { \
+                    /* set vector scale */\
+                    is_pre_op_scale_scalar = FALSE; \
+                } \
+            } \
+            else if ( strcmp( ops_tok, "pre_op_scale_type" ) == 0 ) \
+            { \
+               ops_tok = strtok( NULL, ", " ); \
+                str_tolower( ops_tok ); \
+                if ( ( strcmp( ops_tok, "bf16" ) == 0 ) ) \
+                { \
+                    /* set scalar scale */\
+                    is_pre_op_scale_f32 = FALSE; \
+                }else \
+                { \
+                    /* set vector scale */\
+                    is_pre_op_scale_f32 = TRUE; \
+                } \
+            } \
+            else{} \
  \
             ops_tok = strtok( NULL, ", =" ); \
         } \
@@ -1552,31 +1625,52 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     { \
         post_ops->pre_ops = malloc( sizeof( aocl_pre_op ) ); \
         if ( post_ops->pre_ops == NULL ) { goto err_handler; } \
- \
-        ( post_ops->pre_ops )->b_zp = malloc( sizeof( aocl_pre_op_zp ) ); \
-        if ( ( post_ops->pre_ops )->b_zp == NULL ) { goto err_handler; } \
- \
+\
+        dim_t num_groups = 1; \
+        if(quant_group_size == 0) \
+        { \
+            post_ops->pre_ops->group_size = k; \
+        }else \
+        { \
+            post_ops->pre_ops->group_size = quant_group_size; \
+            if(is_group_quant) \
+            { \
+                num_groups = ( k + post_ops->pre_ops->group_size - 1 ) / post_ops->pre_ops->group_size; \
+            } \
+        } \
+\
+        ( post_ops->pre_ops )->b_zp = NULL; \
+        if( zp_vec_length != 0 ) \
+        { \
+            ( post_ops->pre_ops )->b_zp = malloc( sizeof( aocl_pre_op_zp ) ); \
+            if ( ( post_ops->pre_ops )->b_zp == NULL ) { goto err_handler; } \
+            ( ( post_ops->pre_ops )->b_zp )->zero_point = malloc( num_groups * zp_vec_length * sizeof( int8_t ) ); \
+            if ( ( ( post_ops->pre_ops )->b_zp )->zero_point == NULL ) { goto err_handler; } \
+            for ( dim_t i = 0; i < num_groups * zp_vec_length; ++i ) \
+            { \
+                ( ( int8_t* )( ( post_ops->pre_ops )->b_zp )->zero_point )[i] = ( int8_t )( ( i + 1 ) % 5 ); \
+            } \
+            ( ( post_ops->pre_ops )->b_zp )->zero_point_len = zp_vec_length; \
+        } \
+\
         ( post_ops->pre_ops )->b_scl = malloc( sizeof( aocl_pre_op_sf ) ); \
         if ( ( post_ops->pre_ops )->b_scl == NULL ) { goto err_handler; } \
- \
-        /* Only int8_t zero point supported in pre-ops. */ \
-        /* Not handled in 4x64 bf16s4f32of32 kernel */ \
-        ( ( post_ops->pre_ops )->b_zp )->zero_point = malloc( n * sizeof( int8_t ) ); \
-        if ( ( ( post_ops->pre_ops )->b_zp )->zero_point == NULL ) { goto err_handler; } \
-        for ( dim_t i = 0; i < n; ++i ) \
+        dim_t scale_factor_len  = (is_pre_op_scale_scalar == TRUE)? 1 : n; \
+        ( ( post_ops->pre_ops )->b_scl )->scale_factor_len = scale_factor_len; \
+        if( is_pre_op_scale_f32 ) \
         { \
-            ( ( int8_t* )( ( post_ops->pre_ops )->b_zp )->zero_point )[i] = ( int8_t )( 0 ); \
+            ( ( post_ops->pre_ops )->b_scl )->scale_factor = malloc( num_groups * scale_factor_len * sizeof( float ) ); \
+            if ( ( ( post_ops->pre_ops )->b_scl )->scale_factor == NULL ) { goto err_handler; } \
+            GEN_FUNC_NAME(fill_array_,float)( ( ( post_ops->pre_ops )->b_scl )->scale_factor, num_groups * scale_factor_len ); \
+            ((post_ops->pre_ops)->b_scl)->scale_factor_type = FLOAT; \
         } \
-        ( ( post_ops->pre_ops )->b_zp )->zero_point_len = n; \
-\
-        /* Only float scale factor supported in pre-ops. */ \
-        ( ( post_ops->pre_ops )->b_scl )->scale_factor = malloc( n * sizeof( float ) ); \
-        if ( ( ( post_ops->pre_ops )->b_scl )->scale_factor == NULL ) { goto err_handler; } \
-        for ( dim_t i = 0; i < n; ++i ) \
+        else \
         { \
-            ( ( float* )( ( post_ops->pre_ops )->b_scl )->scale_factor )[i] = ( ( float )( ( i + 1 ) % 5 ) ); \
+            ( ( post_ops->pre_ops )->b_scl )->scale_factor = malloc( num_groups * scale_factor_len * sizeof( bfloat16 ) ); \
+            if ( ( ( post_ops->pre_ops )->b_scl )->scale_factor == NULL ) { goto err_handler; } \
+            GEN_FUNC_NAME(fill_array_,bfloat16)( ( ( post_ops->pre_ops )->b_scl )->scale_factor, num_groups * scale_factor_len ); \
+            ((post_ops->pre_ops)->b_scl)->scale_factor_type = BFLOAT16; \
         } \
-        ( ( post_ops->pre_ops )->b_scl )->scale_factor_len = n; \
  \
          ( post_ops->pre_ops )->seq_length = 1; \
     } \
@@ -1691,7 +1785,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
            ( strcmp( post_ops_str, "none" ) != 0 ) ) || \
          ( global_dscale_out == 'y' ) || ( global_pre_op == 'y' ) ) \
     { \
-        post_op = GEN_FUNC_NAME(lpgemm_create_post_ops_struct_,REORDER_SFX)( m, n, post_ops_str, stor_order ); \
+        post_op = GEN_FUNC_NAME(lpgemm_create_post_ops_struct_,REORDER_SFX)( m, n, k, post_ops_str, stor_order ); \
         if ( post_op == NULL ) \
         { \
             printf(" post op struct allocation failure, returning.\n"); \

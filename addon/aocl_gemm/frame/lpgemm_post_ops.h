@@ -74,10 +74,12 @@ typedef struct lpgemm_post_op_t
 typedef struct lpgemm_pre_op_t
 {
 	uint64_t op_code;
+	uint64_t group_size;
 	void *scale_factor;
-	dim_t scale_factor_len;
+	uint64_t scale_factor_len;
+	uint64_t scale_factor_type;
 	void *zp;
-	dim_t zp_len;
+	uint64_t zp_len;
 	struct lpgemm_pre_op_t *next;
 } lpgemm_pre_op;
 
@@ -96,11 +98,20 @@ typedef struct lpgemm_post_op_attr_t
 	uint64_t b_sum_offset;
 	int32_t* b_col_sum_vec;
 	int16_t* b_col_sum_vec_s16;
-	void*    pre_op_scale_factor;
-	dim_t    pre_op_scale_factor_len;
-	dim_t    pre_op_off;
 } lpgemm_post_op_attr;
 
+typedef struct lpgemm_pre_op_attr_t
+{
+	void*     scale_factor;
+	uint64_t  scale_factor_len;
+	uint64_t  scale_factor_type;
+	void*     zero_point;
+	uint64_t  zero_point_len;
+	uint64_t  pre_op_b_i;
+	uint64_t  pre_op_b_j;
+	uint64_t  group_size;
+	uint64_t  pre_op_ld;
+} lpgemm_pre_op_attr;
 
 err_t lpgemm_translate_to_post_ops_list
      (

@@ -1130,7 +1130,7 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
        const B_type*         b, \
        const dim_t           rs_b, \
        const dim_t           cs_b, \
-       const AOCL_MEMORY_TAG mtag_b, \
+       AOCL_MEMORY_TAG       mtag_b, \
        C_type*               c, \
        const dim_t           rs_c, \
        const dim_t           cs_c, \
@@ -1148,6 +1148,12 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
 	/* Factorization of threads along m and n dimension respectively.*/ \
 	dim_t ic_ways = 1; \
 	dim_t jc_ways = 1; \
+ \
+	/* Decide whether to go with pack-based implementation
+	   or kernel-level implementation */ \
+	dim_t MC = lpgemm_get_block_size_MC_global_cntx( BF16BF16F32OF32 ); \
+	if( ( m / ic_ways ) > MC ) mtag_b = PACK_KC; \
+	else mtag_b = UNPACKED; \
  \
 	/* Set the packing block allocator field of the rntm. This will be
 	 * inherited by all of the child threads when they make local copies of

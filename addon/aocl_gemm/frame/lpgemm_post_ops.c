@@ -39,16 +39,20 @@
 BLIS_INLINE void lpgemm_set_pre_ops_node_params
      (
        lpgemm_pre_op* pre_op_node,
-	   void* zero_point,
+       dim_t group_size,
+       void* zero_point,
        void* scale_factor,
        dim_t zero_point_len,
-       dim_t scale_factor_len
+       dim_t scale_factor_len,
+       dim_t scale_factor_type
      )
 {
+	pre_op_node->group_size = group_size;
 	pre_op_node->scale_factor = scale_factor;
 	pre_op_node->scale_factor_len = scale_factor_len;
 	pre_op_node->zp = zero_point;
 	pre_op_node->zp_len = zero_point_len;
+	pre_op_node->scale_factor_type = scale_factor_type;
 	pre_op_node->next = NULL;
 }
 
@@ -66,8 +70,8 @@ err_t lpgemm_translate_to_pre_ops_list(
 	{
 		lpgemm_set_pre_ops_node_params
 		(
-			pre_op_list,
-			NULL, NULL, 0, 0
+			pre_op_list, 0,
+			NULL, NULL, 0, 0, NONE
 		);
 
 		return BLIS_SUCCESS;
@@ -77,8 +81,8 @@ err_t lpgemm_translate_to_pre_ops_list(
 	{
 		lpgemm_set_pre_ops_node_params
 		(
-			pre_op_list, 
-			NULL, NULL, 0, 0
+			pre_op_list, 0,
+			NULL, NULL, 0, 0, NONE
 		);
 
 		bli_print_msg(" Max supported pre-ops is 2, supplied input pre-ops"
@@ -89,17 +93,35 @@ err_t lpgemm_translate_to_pre_ops_list(
 
 	for (dim_t i = 0; i < pre_op_unparsed->seq_length; ++i)
 	{
-		if (pre_op_unparsed->b_zp != NULL && pre_op_unparsed->b_scl!=NULL)
+
+		/* odd group_size is supported only when group_size == k */
+		dim_t group_size = pre_op_unparsed->group_size;
+		if( ( group_size == 0 ) || ( group_size > k ) || ( group_size == k ) ) group_size = k;
+		else if(pre_op_unparsed->group_size % 2  == 1 ) return BLIS_FAILURE;
+
+		if (pre_op_unparsed->b_zp != NULL)
 		{
-			lpgemm_set_pre_ops_node_params
-			(
-				pre_op_list,
-				(pre_op_unparsed->b_zp)->zero_point,
-				(pre_op_unparsed->b_scl)->scale_factor,
-				(pre_op_unparsed->b_zp)->zero_point_len,
-				(pre_op_unparsed->b_scl)->scale_factor_len
-			);
+			/* check for validity of pre-ops */
+			if( ( ( pre_op_unparsed->b_zp)->zero_point_len > 0 ) &&
+			    ( ( pre_op_unparsed->b_zp)->zero_point == NULL ) ) return BLIS_FAILURE;
 		}
+
+		if (pre_op_unparsed->b_scl!=NULL)
+		{
+			if( ( ( pre_op_unparsed->b_scl)->scale_factor_len > 0 ) &&
+			    ( ( pre_op_unparsed->b_scl)->scale_factor == NULL ) ) return BLIS_FAILURE;
+
+		}
+		lpgemm_set_pre_ops_node_params
+		(
+			pre_op_list,
+			group_size,
+			pre_op_unparsed->b_zp==NULL? NULL: (pre_op_unparsed->b_zp)->zero_point,
+			(pre_op_unparsed->b_scl)->scale_factor,
+			pre_op_unparsed->b_zp==NULL? 0: (pre_op_unparsed->b_zp)->zero_point_len,
+			(pre_op_unparsed->b_scl)->scale_factor_len,
+			(pre_op_unparsed->b_scl)->scale_factor_type == BFLOAT16 ? BF16 : F32
+		);
 
 		// Simulating linked link using an array.
 		if (i < (pre_op_unparsed->seq_length - 1))
@@ -107,6 +129,7 @@ err_t lpgemm_translate_to_pre_ops_list(
 			(pre_op_list + i)->next = (pre_op_list + i + 1);
 		}
 	}
+
 	return BLIS_SUCCESS;
 }
 
@@ -373,7 +396,7 @@ err_t lpgemm_translate_to_post_ops_list
 
 						mul_i += 1;
 					}
-					break;		
+					break;
 			default:
 					break;
 		}

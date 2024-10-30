@@ -69,6 +69,8 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
     dim_t NR = lcntx->blksz.NR;
     dim_t MR = lcntx->blksz.MR;
 
+    dim_t group_size = pre_op_list->group_size;
+
     const int16_t *a_use = NULL;
     dim_t cs_a_use = cs_a;
     dim_t rs_a_use = rs_a;
@@ -112,6 +114,8 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
     bool is_first_k = FALSE;
 
     lpgemm_post_op_attr post_ops_attr;
+    lpgemm_pre_op_attr pre_ops_attr;
+
     post_ops_attr.c_stor_type = c_downscale;
     post_ops_attr.bias_stor_type = (
 		post_op_list->bias_stor_type != NONE ) ?
@@ -125,8 +129,16 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
         post_ops_attr.buf_downscale = NULL;
     }
 
-    post_ops_attr.pre_op_scale_factor = pre_op_list->scale_factor;
-    post_ops_attr.pre_op_scale_factor_len = pre_op_list->scale_factor_len;
+    //Initialize group scaling and zero-point params
+    pre_ops_attr.scale_factor = pre_op_list->scale_factor;
+    pre_ops_attr.scale_factor_len = pre_op_list->scale_factor_len;
+    pre_ops_attr.scale_factor_type = pre_op_list->scale_factor_type;
+    pre_ops_attr.group_size = group_size;
+
+    pre_ops_attr.pre_op_ld = n;
+
+    pre_ops_attr.zero_point = pre_op_list->zp;
+    pre_ops_attr.zero_point_len = pre_op_list->zp_len;
 
     // Generate thrinfo objects for jc and ic loops from lpgemm_thrinfo_t.
     thrinfo_t thread_jc;
@@ -141,6 +153,7 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
     dim_t ic_start, ic_end;
     bli_thread_range_sub(&thread_ic, m, MR, FALSE, &ic_start, &ic_end);
 
+    /* Group quantization is not supported for this packing schema */
     if( mtag_b == PACK_NR )
     {
         /* Allocating private pack buffer of size KCxNR for each thread */
@@ -267,8 +280,8 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
                     &thread_ic, nc0, NR, FALSE,
                     &jc_packb_start, &jc_packb_end);
 
-                dim_t pre_op_off = jc_cur_loop + jc_cur_loop_rem
-                                   + jc_packb_start;
+                pre_ops_attr.pre_op_b_i = pc;
+                pre_ops_attr.pre_op_b_j = jc_cur_loop + jc_cur_loop_rem + jc_packb_start;
 
                 // Ensure thread ranges are valid, especially cases where no:
                 // of threads available for parallelization are greater than
@@ -281,7 +294,7 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
                         b_reorder + (jc_packb_start * kc0_updated)/2,
                         (jc_packb_end - jc_packb_start), kc0,
                         &rs_b_use, &cs_b_use,
-                        pre_op_list, pre_op_off);
+                        pre_ops_attr);
                 }
                 else
                 {
@@ -355,15 +368,15 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
                     if( mtag_b == PACK_NR )
                     {
                         int8_t* b_jr = b_reorder + ( jr * kc0_updated ) / 2;
-                        dim_t pre_op_off = jc_cur_loop + jc_cur_loop_rem
-                                    + jr;
+                        pre_ops_attr.pre_op_b_i = pc;
+                        pre_ops_attr.pre_op_b_j = jc_cur_loop + jc_cur_loop_rem + jr;
 
                         bfloat16* b_use_jr = bli_mem_buffer(&mem_b);
 
                         /* packing B at JR level */
                         ((pack_s4bf16)lcntx->packsclb_fun_ptr)( b_use_jr, b_jr, nr0, kc0,
                                                     &rs_b_use, &cs_b_use,
-                                                    pre_op_list, pre_op_off );
+                                                    pre_ops_attr );
 
                         /* packed B kernel */
                         ((lpgemm_rowvar_bf16)lcntx->kern_fun_ptr)(
@@ -391,9 +404,11 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
                     else // mtag_b == UNPACKED
                     {
                         int8_t* b_jr = b_reorder + ( jr * kc0_updated ) / 2;
-                        post_ops_attr.pre_op_off = jc_cur_loop + jc_cur_loop_rem
-                                    + jr;
 
+                        /* set offsets to determine scale factors and zero-point values */
+                        pre_ops_attr.pre_op_b_i = pc;
+                        pre_ops_attr.pre_op_b_j = jc_cur_loop + jc_cur_loop_rem
+                                                  + jr;
                         /* bf16s4f32of32 kernel */
                         lpgemm_rowvar_bf16s4f32of32_6x64m(
                         mc0, nr0, kc0,
@@ -401,7 +416,7 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
                         b_jr, rs_b_use, cs_b_use,
                         (c_use_ic + jr), rs_c_use, 1,
                         alpha, beta0,
-                        post_op_list, post_ops_attr );
+                        post_op_list, post_ops_attr, pre_ops_attr );
                     }
 #endif
                 }
