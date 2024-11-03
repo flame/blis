@@ -37,6 +37,7 @@
 
 #include "../gelu_avx2.h"
 #include "../silu_avx2.h"
+#include "../sigmoid_avx2.h"
 #include "../math_utils_avx2.h"
 
 #define S8_MIN  (-128)
@@ -470,6 +471,33 @@
 	in_reg = _mm256_packs_epi32(_mm256_cvtps_epi32(tmp_reg1), _mm256_cvtps_epi32(tmp_reg2));\
 	in_reg = _mm256_permute4x64_epi64(in_reg, 0XD8);\
 
+//TANH utility macros.
+#define TANH_S16_AVX2(reg, y1, y2, r, r2, x, z, dn, q) \
+\
+	y1 = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32(_mm256_extractf128_si256(reg, 0)) ); \
+	y2 = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32(_mm256_extractf128_si256(reg, 1)) ); \
+\
+	TANHF_AVX2(y1, r, r2, x, z, dn, q); \
+\
+	TANHF_AVX2(y2, r, r2, x, z, dn, q); \
+\
+	reg = _mm256_packs_epi32(_mm256_cvtps_epi32(y1), _mm256_cvtps_epi32(y2));\
+	reg = _mm256_permute4x64_epi64(reg, 0XD8);\
+
+// SIGMOID utility macros. al1, al2 register expected to contain floats.
+#define SIGMOID_S16_AVX2(in_reg, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out) \
+\
+	tmp_reg1 = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32( \
+							_mm256_extractf128_si256( in_reg, 0 ) ) ); \
+	tmp_reg2 = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32( \
+							_mm256_extractf128_si256( in_reg, 1 ) ) ); \
+\
+	SIGMOID_F32_AVX2_DEF(tmp_reg1, al_in, r, r2, z, dn, ex_out); \
+\
+	SIGMOID_F32_AVX2_DEF(tmp_reg2, al_in, r, r2, z, dn, ex_out); \
+\
+	in_reg = _mm256_packs_epi32(_mm256_cvtps_epi32(tmp_reg1), _mm256_cvtps_epi32(tmp_reg2));\
+	in_reg = _mm256_permute4x64_epi64(in_reg, 0XD8);\
 
 //Zero-out the given YMM accumulator registers
 #define ZERO_ACC_YMM_4_REG(ymm0,ymm1,ymm2,ymm3) \

@@ -92,7 +92,10 @@ LPGEMV_N_EQ1_KERN(uint8_t, int8_t, int16_t, u8s8s16os16)
 	              &&POST_OPS_CLIP,
 	              &&POST_OPS_DOWNSCALE,
 	              &&POST_OPS_MATRIX_ADD,
-	              &&POST_OPS_SWISH
+	              &&POST_OPS_SWISH,
+				  NULL,// Virtual node for matrix_mul, else segfault
+				  &&POST_OPS_TANH,
+				  &&POST_OPS_SIGMOID
 	            };
 
 	uint8_t *a_use = NULL;
@@ -701,6 +704,25 @@ LPGEMV_N_EQ1_KERN(uint8_t, int8_t, int16_t, u8s8s16os16)
 			__m256i ex_out;
 
 			SWISH_S16_AVX2( ymm8, al, al_in, tmp_reg1,
+			                tmp_reg2, r, r2, z, dn, ex_out );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+		POST_OPS_TANH:
+		{
+			__m256 dn, z, x, r2, r, y1, y2;
+			__m256i q;
+
+			TANH_S16_AVX2( ymm8, y1, y2, r, r2, x, z, dn, q )
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+		POST_OPS_SIGMOID:
+		{
+			__m256 al_in, tmp_reg1, tmp_reg2, r, r2, z, dn;
+			__m256i ex_out;
+
+			SIGMOID_S16_AVX2( ymm8, al_in, tmp_reg1,
 			                tmp_reg2, r, r2, z, dn, ex_out );
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR

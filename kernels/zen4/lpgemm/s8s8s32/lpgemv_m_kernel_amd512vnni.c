@@ -53,7 +53,10 @@ LPGEMV_M_EQ1_KERN(int8_t,int8_t,int32_t,s8s8s32os32)
 	                      &&POST_OPS_CLIP_6x64,
 	                      &&POST_OPS_DOWNSCALE_6x64,
 	                      &&POST_OPS_MATRIX_ADD_6x64,
-	                      &&POST_OPS_SWISH_6x64
+	                      &&POST_OPS_SWISH_6x64,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_6x64,
+						  &&POST_OPS_SIGMOID_6x64
 	                    };
 
 	const int8_t *a_use = NULL;
@@ -540,6 +543,36 @@ LPGEMV_M_EQ1_KERN(int8_t,int8_t,int32_t,s8s8s32os32)
 			SWISH_S32_AVX512( zmm16, fl_reg, al, al_in,
 			                  r, r2, z, dn, selector2 );
 			SWISH_S32_AVX512( zmm20, fl_reg, al, al_in,
+			                  r, r2, z, dn, selector2 );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+		POST_OPS_TANH_6x64:
+		{
+			__m512 dn, z, x, r2, r, y;
+
+			TANH_S32_AVX512( zmm8,  y, r, r2, x,
+			                    z, dn, selector1 );
+			TANH_S32_AVX512( zmm12, y, r, r2, x,
+			                    z, dn, selector1 );
+			TANH_S32_AVX512( zmm16, y, r, r2, x,
+			                    z, dn, selector1 );
+			TANH_S32_AVX512( zmm20, y, r, r2, x,
+			                    z, dn, selector1 );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+		POST_OPS_SIGMOID_6x64:
+		{
+			__m512 fl_reg, al_in, r, r2, z, dn;
+
+			SIGMOID_S32_AVX512( zmm8,  fl_reg, al_in,
+			                  r, r2, z, dn, selector2 );
+			SIGMOID_S32_AVX512( zmm12, fl_reg, al_in,
+			                  r, r2, z, dn, selector2 );
+			SIGMOID_S32_AVX512( zmm16, fl_reg, al_in,
+			                  r, r2, z, dn, selector2 );
+			SIGMOID_S32_AVX512( zmm20, fl_reg, al_in,
 			                  r, r2, z, dn, selector2 );
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR

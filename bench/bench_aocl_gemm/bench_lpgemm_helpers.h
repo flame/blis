@@ -296,7 +296,7 @@ static inline ACCUM_type SIGMOID_post_op_ ## BLAS_SFX \
      ) \
 { \
     float sigmoid_reference = ( 1 / ( 1 + \
-                            expf( ( double )temp_accum * -1 ) ) ); \
+                            (dim_t) round( expf( temp_accum * -1 ) ) ) ); \
     temp_accum = round (sigmoid_reference); \
     return temp_accum; \
 } \

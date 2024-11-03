@@ -36,9 +36,9 @@
 #define AOCL_LPGEMM_SIGMOID_AVX512_H
 
 // Sigmoid(in_reg) = 1 / (1 + exp(-1 * in_reg)).
-// in_reg and al are expected to contain float values.
+// in_reg is expected to contain float values.
 #define SIGMOID_F32_AVX512_DEF(in_reg, al_in, r, r2, z, dn, ex_out) \
-  al_in = _mm512_mul_ps ( in_reg, _mm512_set1_ps(-1) ); \
+  al_in = _mm512_mul_ps ( in_reg, _mm512_set1_ps( -1 ) ); \
 	EXPF_AVX512(al_in, r, r2, z, dn, ex_out); \
 	in_reg = _mm512_div_ps( _mm512_set1_ps ( 1 ), \
            _mm512_add_ps( ( __m512 )ex_out, _mm512_set1_ps( 1 ) ) );

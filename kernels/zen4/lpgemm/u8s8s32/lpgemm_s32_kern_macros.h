@@ -38,6 +38,7 @@
 #include "../gelu_avx512.h"
 #include "../silu_avx512.h"
 #include "../math_utils_avx512.h"
+#include "../sigmoid_avx512.h"
 
 #define S32_BETA_FMA(reg,scratch1,scratch2) \
 	scratch1 = _mm512_mullo_epi32( scratch2, scratch1 ); \
@@ -168,6 +169,16 @@
 	y = _mm512_cvtepi32_ps( reg ); \
 \
 	GELU_TANH_F32_AVX512_DEF(y, r, r2, x, z, dn, x_tanh, q); \
+\
+	reg = _mm512_cvtps_epi32( y ); \
+
+
+/* TANH */
+#define TANH_S32_AVX512(reg, y, r, r2, x, z, dn, q) \
+\
+	y = _mm512_cvtepi32_ps( reg ); \
+\
+	TANHF_AVX512(y, r, r2, x, z, dn, q); \
 \
 	reg = _mm512_cvtps_epi32( y ); \
 
@@ -316,6 +327,12 @@
 #define SWISH_S32_AVX512(in_reg, fl_reg, al, al_in, r, r2, z, dn, ex_out) \
 	fl_reg = _mm512_cvtepi32_ps( in_reg ); \
 	SWISH_F32_AVX512_DEF( fl_reg, al, al_in, r, r2, z, dn, ex_out); \
+	in_reg = _mm512_cvtps_epi32( fl_reg ); \
+
+// Sigmoid utility macros. al register expected to contains floats.
+#define SIGMOID_S32_AVX512(in_reg, fl_reg, al_in, r, r2, z, dn, ex_out) \
+	fl_reg = _mm512_cvtepi32_ps( in_reg ); \
+	SIGMOID_F32_AVX512_DEF( fl_reg, al_in, r, r2, z, dn, ex_out); \
 	in_reg = _mm512_cvtps_epi32( fl_reg ); \
 
 //Zero-out the given ZMM accumulator registers

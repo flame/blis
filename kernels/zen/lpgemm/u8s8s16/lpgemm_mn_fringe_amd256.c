@@ -55,7 +55,10 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4x16)
 			&&POST_OPS_CLIP_4x16,
 			&&POST_OPS_DOWNSCALE_4x16,
 			&&POST_OPS_MATRIX_ADD_4x16,
-			&&POST_OPS_SWISH_4x16
+			&&POST_OPS_SWISH_4x16,
+			NULL,// Virtual node for matrix_mul, else segfault
+			&&POST_OPS_TANH_4x16,
+			&&POST_OPS_SIGMOID_4x16
 		};
 
 	// The division is done by considering the vpmaddubsw instruction
@@ -495,6 +498,44 @@ POST_OPS_SWISH_4x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_4x16:
+	{
+		__m256 dn, z, x, r2, r, y1, y2;
+		__m256i q;
+
+		// c[0,0-15]
+		TANH_S16_AVX2(c_int16_0p0, y1, y2, r, r2, x, z, dn, q);
+
+		// c[1,0-15]
+		TANH_S16_AVX2(c_int16_1p0, y1, y2, r, r2, x, z, dn, q);
+
+		// c[2,0-15]
+		TANH_S16_AVX2(c_int16_2p0, y1, y2, r, r2, x, z, dn, q);
+
+		// c[3,0-15]
+		TANH_S16_AVX2(c_int16_3p0, y1, y2, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_4x16:
+	{
+		__m256 al_in, tmp_reg1, tmp_reg2, r, r2, z, dn;
+		__m256i ex_out;
+
+		// c[0,0-15]
+		SIGMOID_S16_AVX2(c_int16_0p0, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		// c[1,0-15]
+		SIGMOID_S16_AVX2(c_int16_1p0, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		// c[2,0-15]
+		SIGMOID_S16_AVX2(c_int16_2p0, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		// c[3,0-15]
+		SIGMOID_S16_AVX2(c_int16_3p0, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_4x16_DISABLE:
 	;
 
@@ -561,7 +602,10 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4xlt16)
 			&&POST_OPS_CLIP_4xlt16,
 			&&POST_OPS_DOWNSCALE_4xlt16,
 			&&POST_OPS_MATRIX_ADD_4xlt16,
-			&&POST_OPS_SWISH_4xlt16
+			&&POST_OPS_SWISH_4xlt16,
+			NULL,// Virtual node for matrix_mul, else segfault
+			&&POST_OPS_TANH_4xlt16,
+			&&POST_OPS_SIGMOID_4xlt16
 		};
 
 	// The division is done by considering the vpmaddubsw instruction
@@ -1046,6 +1090,44 @@ POST_OPS_SWISH_4xlt16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_4xlt16:
+	{
+		__m256 dn, z, x, r2, r, y1, y2;
+		__m256i q;
+
+		// c[0,0-15]
+		TANH_S16_AVX2(c_int16_0p0, y1, y2, r, r2, x, z, dn, q);
+
+		// c[1,0-15]
+		TANH_S16_AVX2(c_int16_1p0, y1, y2, r, r2, x, z, dn, q);
+
+		// c[2,0-15]
+		TANH_S16_AVX2(c_int16_2p0, y1, y2, r, r2, x, z, dn, q);
+
+		// c[3,0-15]
+		TANH_S16_AVX2(c_int16_3p0, y1, y2, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_4xlt16:
+	{
+		__m256 al_in, tmp_reg1, tmp_reg2, r, r2, z, dn;
+		__m256i ex_out;
+
+		// c[0,0-15]
+		SIGMOID_S16_AVX2(c_int16_0p0, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		// c[1,0-15]
+		SIGMOID_S16_AVX2(c_int16_1p0, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		// c[2,0-15]
+		SIGMOID_S16_AVX2(c_int16_2p0, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		// c[3,0-15]
+		SIGMOID_S16_AVX2(c_int16_3p0, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_4xlt16_DISABLE:
 	;
 
@@ -1136,10 +1218,13 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_2x16)
 			&&POST_OPS_RELU_SCALE_2x16,
 			&&POST_OPS_GELU_TANH_2x16,
 			&&POST_OPS_GELU_ERF_2x16,
-			&&POST_OPS_CLIP_2x16,	
+			&&POST_OPS_CLIP_2x16,
 			&&POST_OPS_DOWNSCALE_2x16,
 			&&POST_OPS_MATRIX_ADD_2x16,
-			&&POST_OPS_SWISH_2x16
+			&&POST_OPS_SWISH_2x16,
+			NULL,// Virtual node for matrix_mul, else segfault
+			&&POST_OPS_TANH_2x16,
+			&&POST_OPS_SIGMOID_2x16
 		};
 
 	// The division is done by considering the vpmaddubsw instruction
@@ -1453,6 +1538,32 @@ POST_OPS_SWISH_2x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_2x16:
+	{
+		__m256 dn, z, x, r2, r, y1, y2;
+		__m256i q;
+
+		// c[0,0-15]
+		TANH_S16_AVX2(c_int16_0p0, y1, y2, r, r2, x, z, dn, q);
+
+		// c[1,0-15]
+		TANH_S16_AVX2(c_int16_1p0, y1, y2, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_2x16:
+	{
+		__m256 al_in, tmp_reg1, tmp_reg2, r, r2, z, dn;
+		__m256i ex_out;
+
+		// c[0,0-15]
+		SIGMOID_S16_AVX2(c_int16_0p0, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		// c[1,0-15]
+		SIGMOID_S16_AVX2(c_int16_1p0, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_2x16_DISABLE:
 	;
 
@@ -1507,7 +1618,10 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_2xlt16)
 			&&POST_OPS_CLIP_2xlt16,
 			&&POST_OPS_DOWNSCALE_2xlt16,
 			&&POST_OPS_MATRIX_ADD_2xlt16,
-			&&POST_OPS_SWISH_2xlt16
+			&&POST_OPS_SWISH_2xlt16,
+			NULL,// Virtual node for matrix_mul, else segfault
+			&&POST_OPS_TANH_2xlt16,
+			&&POST_OPS_SIGMOID_2xlt16
 		};
 
 	// The division is done by considering the vpmaddubsw instruction
@@ -1855,6 +1969,32 @@ POST_OPS_SWISH_2xlt16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_2xlt16:
+	{
+		__m256 dn, z, x, r2, r, y1, y2;
+		__m256i q;
+
+		// c[0,0-15]
+		TANH_S16_AVX2(c_int16_0p0, y1, y2, r, r2, x, z, dn, q);
+
+		// c[1,0-15]
+		TANH_S16_AVX2(c_int16_1p0, y1, y2, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_2xlt16:
+	{
+		__m256 al_in, tmp_reg1, tmp_reg2, r, r2, z, dn;
+		__m256i ex_out;
+
+		// c[0,0-15]
+		SIGMOID_S16_AVX2(c_int16_0p0, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		// c[1,0-15]
+		SIGMOID_S16_AVX2(c_int16_1p0, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_2xlt16_DISABLE:
 	;
 
@@ -1926,7 +2066,10 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_1x16)
 			&&POST_OPS_CLIP_1x16,
 			&&POST_OPS_DOWNSCALE_1x16,
 			&&POST_OPS_MATRIX_ADD_1x16,
-			&&POST_OPS_SWISH_1x16
+			&&POST_OPS_SWISH_1x16,
+			NULL,// Virtual node for matrix_mul, else segfault
+			&&POST_OPS_TANH_1x16,
+			&&POST_OPS_SIGMOID_1x16
 		};
 
 	// The division is done by considering the vpmaddubsw instruction
@@ -2176,6 +2319,26 @@ POST_OPS_SWISH_1x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_1x16:
+	{
+		__m256 dn, z, x, r2, r, y1, y2;
+		__m256i q;
+
+		// c[0,0-15]
+		TANH_S16_AVX2(c_int16_0p0, y1, y2, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_1x16:
+	{
+		__m256 al_in, tmp_reg1, tmp_reg2, r, r2, z, dn;
+		__m256i ex_out;
+
+		// c[0,0-15]
+		SIGMOID_S16_AVX2(c_int16_0p0, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_1x16_DISABLE:
 	;
 
@@ -2229,7 +2392,10 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_1xlt16)
 			&&POST_OPS_CLIP_1xlt16,
 			&&POST_OPS_DOWNSCALE_1xlt16,
 			&&POST_OPS_MATRIX_ADD_1xlt16,
-			&&POST_OPS_SWISH_1xlt16
+			&&POST_OPS_SWISH_1xlt16,
+			NULL,// Virtual node for matrix_mul, else segfault
+			&&POST_OPS_TANH_1xlt16,
+			&&POST_OPS_SIGMOID_1xlt16
 		};
 
 	// The division is done by considering the vpmaddubsw instruction
@@ -2506,6 +2672,26 @@ POST_OPS_SWISH_1xlt16:
 
 		// c[0,0-15]
 		SWISH_S16_AVX2(c_int16_0p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_TANH_1xlt16:
+	{
+		__m256 dn, z, x, r2, r, y1, y2;
+		__m256i q;
+
+		// c[0,0-15]
+		TANH_S16_AVX2(c_int16_0p0, y1, y2, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_1xlt16:
+	{
+		__m256 al_in, tmp_reg1, tmp_reg2, r, r2, z, dn;
+		__m256i ex_out;
+
+		// c[0,0-15]
+		SIGMOID_S16_AVX2(c_int16_0p0, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}

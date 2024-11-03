@@ -55,7 +55,10 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_5xlt16)
 						  &&POST_OPS_CLIP_5xLT16,
 						  &&POST_OPS_DOWNSCALE_5xLT16,
 						  &&POST_OPS_MATRIX_ADD_5xLT16,
-						  &&POST_OPS_SWISH_5xLT16
+						  &&POST_OPS_SWISH_5xLT16,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_5xLT16,
+						  &&POST_OPS_SIGMOID_5xLT16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -546,6 +549,49 @@ POST_OPS_SWISH_5xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_TANH_5xLT16:
+		{
+			__m512 dn, z, x, r2, r, y;
+			__m512i q;
+			// c[0, 0-15]
+			TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+			// c[1, 0-15]
+			TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, q);
+
+			// c[2, 0-15]
+			TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, q);
+
+			// c[3, 0-15]
+			TANH_S32_AVX512(c_int32_3p0, y, r, r2, x, z, dn, q);
+
+			// c[4, 0-15]
+			TANH_S32_AVX512(c_int32_4p0, y, r, r2, x, z, dn, q);
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_SIGMOID_5xLT16:
+		{
+
+			__m512 fl_reg, al_in, r, r2, z, dn;
+
+			// c[0, 0-15]
+			SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+			// c[1, 0-15]
+			SIGMOID_S32_AVX512(c_int32_1p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+			// c[2, 0-15]
+			SIGMOID_S32_AVX512(c_int32_2p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+			// c[3, 0-15]
+			SIGMOID_S32_AVX512(c_int32_3p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+			// c[4, 0-15]
+			SIGMOID_S32_AVX512(c_int32_4p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 POST_OPS_5xLT16_DISABLE:
 		;
 
@@ -607,7 +653,11 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_4xlt16)
 						  &&POST_OPS_CLIP_4xLT16,
 						  &&POST_OPS_DOWNSCALE_4xLT16,
 						  &&POST_OPS_MATRIX_ADD_4xLT16,
-						  &&POST_OPS_SWISH_4xLT16
+						  &&POST_OPS_SWISH_4xLT16,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_4xLT16,
+						  &&POST_OPS_SIGMOID_4xLT16
+
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -1033,6 +1083,43 @@ POST_OPS_SWISH_4xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_TANH_4xLT16:
+		{
+			__m512 dn, z, x, r2, r, y;
+			__m512i q;
+			// c[0, 0-15]
+			TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+			// c[1, 0-15]
+			TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, q);
+
+			// c[2, 0-15]
+			TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, q);
+
+			// c[3, 0-15]
+			TANH_S32_AVX512(c_int32_3p0, y, r, r2, x, z, dn, q);
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_SIGMOID_4xLT16:
+		{
+
+			__m512 fl_reg, al_in, r, r2, z, dn;
+
+			// c[0, 0-15]
+			SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+			// c[1, 0-15]
+			SIGMOID_S32_AVX512(c_int32_1p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+			// c[2, 0-15]
+			SIGMOID_S32_AVX512(c_int32_2p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+			// c[3, 0-15]
+			SIGMOID_S32_AVX512(c_int32_3p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 POST_OPS_4xLT16_DISABLE:
 		;
 
@@ -1088,7 +1175,10 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_3xlt16)
 						  &&POST_OPS_CLIP_3xLT16,
 						  &&POST_OPS_DOWNSCALE_3xLT16,
 						  &&POST_OPS_MATRIX_ADD_3xLT16,
-						  &&POST_OPS_SWISH_3xLT16
+						  &&POST_OPS_SWISH_3xLT16,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_3xLT16,
+						  &&POST_OPS_SIGMOID_3xLT16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -1450,6 +1540,37 @@ POST_OPS_SWISH_3xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_TANH_3xLT16:
+		{
+			__m512 dn, z, x, r2, r, y;
+			__m512i q;
+			// c[0, 0-15]
+			TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+			// c[1, 0-15]
+			TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, q);
+
+			// c[2, 0-15]
+			TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, q);
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_SIGMOID_3xLT16:
+		{
+
+			__m512 fl_reg, al_in, r, r2, z, dn;
+
+			// c[0, 0-15]
+			SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+			// c[1, 0-15]
+			SIGMOID_S32_AVX512(c_int32_1p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+			// c[2, 0-15]
+			SIGMOID_S32_AVX512(c_int32_2p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 POST_OPS_3xLT16_DISABLE:
 		;
 
@@ -1499,7 +1620,10 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_2xlt16)
 						  &&POST_OPS_CLIP_2xLT16,
 						  &&POST_OPS_DOWNSCALE_2xLT16,
 						  &&POST_OPS_MATRIX_ADD_2xLT16,
-						  &&POST_OPS_SWISH_2xLT16
+						  &&POST_OPS_SWISH_2xLT16,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_2xLT16,
+						  &&POST_OPS_SIGMOID_2xLT16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -1797,6 +1921,31 @@ POST_OPS_SWISH_2xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_TANH_2xLT16:
+		{
+			__m512 dn, z, x, r2, r, y;
+			__m512i q;
+			// c[0, 0-15]
+			TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+			// c[1, 0-15]
+			TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, q);
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_SIGMOID_2xLT16:
+		{
+
+			__m512 fl_reg, al_in, r, r2, z, dn;
+
+			// c[0, 0-15]
+			SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+			// c[1, 0-15]
+			SIGMOID_S32_AVX512(c_int32_1p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 POST_OPS_2xLT16_DISABLE:
 		;
 
@@ -1840,7 +1989,10 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_1xlt16)
 						  &&POST_OPS_CLIP_1xLT16,
 						  &&POST_OPS_DOWNSCALE_1xLT16,
 						  &&POST_OPS_MATRIX_ADD_1xLT16,
-						  &&POST_OPS_SWISH_1xLT16
+						  &&POST_OPS_SWISH_1xLT16,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_1xLT16,
+						  &&POST_OPS_SIGMOID_1xLT16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -2074,6 +2226,25 @@ POST_OPS_SWISH_1xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_TANH_1xLT16:
+		{
+			__m512 dn, z, x, r2, r, y;
+			__m512i q;
+			// c[0, 0-15]
+			TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_SIGMOID_1xLT16:
+		{
+
+			__m512 fl_reg, al_in, r, r2, z, dn;
+
+			// c[0, 0-15]
+			SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 POST_OPS_1xLT16_DISABLE:
 		;
 
@@ -2111,7 +2282,10 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_5x16)
 						  &&POST_OPS_CLIP_5x16,
 						  &&POST_OPS_DOWNSCALE_5x16,
 						  &&POST_OPS_MATRIX_ADD_5x16,
-						  &&POST_OPS_SWISH_5x16
+						  &&POST_OPS_SWISH_5x16,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_5x16,
+						  &&POST_OPS_SIGMOID_5x16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -2572,6 +2746,49 @@ POST_OPS_SWISH_5x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_5x16:
+	{
+		__m512 dn, z, x, r2, r, y;
+		__m512i q;
+		// c[0, 0-15]
+		TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+		// c[1, 0-15]
+		TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, q);
+
+		// c[2, 0-15]
+		TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, q);
+
+		// c[3, 0-15]
+		TANH_S32_AVX512(c_int32_3p0, y, r, r2, x, z, dn, q);
+
+		// c[4, 0-15]
+		TANH_S32_AVX512(c_int32_4p0, y, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_5x16:
+	{
+
+		__m512 fl_reg, al_in, r, r2, z, dn;
+
+		// c[0, 0-15]
+		SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 0-15]
+		SIGMOID_S32_AVX512(c_int32_1p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[2, 0-15]
+		SIGMOID_S32_AVX512(c_int32_2p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[3, 0-15]
+		SIGMOID_S32_AVX512(c_int32_3p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[4, 0-15]
+		SIGMOID_S32_AVX512(c_int32_4p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_5x16_DISABLE:
 	;
 
@@ -2632,7 +2849,10 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_4x16)
 						  &&POST_OPS_CLIP_4x16,
 						  &&POST_OPS_DOWNSCALE_4x16,
 						  &&POST_OPS_MATRIX_ADD_4x16,
-						  &&POST_OPS_SWISH_4x16
+						  &&POST_OPS_SWISH_4x16,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_4x16,
+						  &&POST_OPS_SIGMOID_4x16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -3031,6 +3251,43 @@ POST_OPS_SWISH_4x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_4x16:
+	{
+		__m512 dn, z, x, r2, r, y;
+		__m512i q;
+		// c[0, 0-15]
+		TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+		// c[1, 0-15]
+		TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, q);
+
+		// c[2, 0-15]
+		TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, q);
+
+		// c[3, 0-15]
+		TANH_S32_AVX512(c_int32_3p0, y, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_4x16:
+	{
+
+		__m512 fl_reg, al_in, r, r2, z, dn;
+
+		// c[0, 0-15]
+		SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 0-15]
+		SIGMOID_S32_AVX512(c_int32_1p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[2, 0-15]
+		SIGMOID_S32_AVX512(c_int32_2p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[3, 0-15]
+		SIGMOID_S32_AVX512(c_int32_3p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_4x16_DISABLE:
 	;
 
@@ -3085,7 +3342,10 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_3x16)
 						  &&POST_OPS_CLIP_3x16,
 						  &&POST_OPS_DOWNSCALE_3x16,
 						  &&POST_OPS_MATRIX_ADD_3x16,
-						  &&POST_OPS_SWISH_3x16
+						  &&POST_OPS_SWISH_3x16,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_3x16,
+						  &&POST_OPS_SIGMOID_3x16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -3422,6 +3682,37 @@ POST_OPS_SWISH_3x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_3x16:
+	{
+		__m512 dn, z, x, r2, r, y;
+		__m512i q;
+		// c[0, 0-15]
+		TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+		// c[1, 0-15]
+		TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, q);
+
+		// c[2, 0-15]
+		TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_3x16:
+	{
+
+		__m512 fl_reg, al_in, r, r2, z, dn;
+
+		// c[0, 0-15]
+		SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 0-15]
+		SIGMOID_S32_AVX512(c_int32_1p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[2, 0-15]
+		SIGMOID_S32_AVX512(c_int32_2p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_3x16_DISABLE:
 	;
 
@@ -3470,7 +3761,10 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_2x16)
 						  &&POST_OPS_CLIP_2x16,
 						  &&POST_OPS_DOWNSCALE_2x16,
 						  &&POST_OPS_MATRIX_ADD_2x16,
-						  &&POST_OPS_SWISH_2x16
+						  &&POST_OPS_SWISH_2x16,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_2x16,
+						  &&POST_OPS_SIGMOID_2x16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -3745,6 +4039,31 @@ POST_OPS_SWISH_2x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_2x16:
+	{
+		__m512 dn, z, x, r2, r, y;
+		__m512i q;
+		// c[0, 0-15]
+		TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+		// c[1, 0-15]
+		TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_2x16:
+	{
+
+		__m512 fl_reg, al_in, r, r2, z, dn;
+
+		// c[0, 0-15]
+		SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 0-15]
+		SIGMOID_S32_AVX512(c_int32_1p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_2x16_DISABLE:
 	;
 
@@ -3787,7 +4106,10 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_1x16)
 						  &&POST_OPS_CLIP_1x16,
 						  &&POST_OPS_DOWNSCALE_1x16,
 						  &&POST_OPS_MATRIX_ADD_1x16,
-						  &&POST_OPS_SWISH_1x16
+						  &&POST_OPS_SWISH_1x16,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_1x16,
+						  &&POST_OPS_SIGMOID_1x16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -4000,6 +4322,25 @@ POST_OPS_SWISH_1x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_1x16:
+	{
+		__m512 dn, z, x, r2, r, y;
+		__m512i q;
+		// c[0, 0-15]
+		TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_1x16:
+	{
+
+		__m512 fl_reg, al_in, r, r2, z, dn;
+
+		// c[0, 0-15]
+		SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_1x16_DISABLE:
 	;
 
@@ -4036,7 +4377,10 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_5x32)
 						  &&POST_OPS_CLIP_5x32,
 						  &&POST_OPS_DOWNSCALE_5x32,
 						  &&POST_OPS_MATRIX_ADD_5x32,
-						  &&POST_OPS_SWISH_5x32
+						  &&POST_OPS_SWISH_5x32,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_5x32,
+						  &&POST_OPS_SIGMOID_5x32
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -4668,6 +5012,79 @@ POST_OPS_SWISH_5x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_5x32:
+	{
+		__m512 dn, z, x, r2, r, y;
+		__m512i q;
+		// c[0, 0-15]
+		TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+		// c[0, 16-31]
+		TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, q);
+
+		// c[1, 0-15]
+		TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, q);
+
+		// c[1, 16-31]
+		TANH_S32_AVX512(c_int32_1p1, y, r, r2, x, z, dn, q);
+
+		// c[2, 0-15]
+		TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, q);
+
+		// c[2, 16-31]
+		TANH_S32_AVX512(c_int32_2p1, y, r, r2, x, z, dn, q);
+
+		// c[3, 0-15]
+		TANH_S32_AVX512(c_int32_3p0, y, r, r2, x, z, dn, q);
+
+		// c[3, 16-31]
+		TANH_S32_AVX512(c_int32_3p1, y, r, r2, x, z, dn, q);
+
+		// c[4, 0-15]
+		TANH_S32_AVX512(c_int32_4p0, y, r, r2, x, z, dn, q);
+
+		// c[4, 16-31]
+		TANH_S32_AVX512(c_int32_4p1, y, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_5x32:
+	{
+
+		__m512 fl_reg, al_in, r, r2, z, dn;
+
+		// c[0, 0-15]
+		SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[0, 16-31]
+		SIGMOID_S32_AVX512(c_int32_0p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 0-15]
+		SIGMOID_S32_AVX512(c_int32_1p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 16-31]
+		SIGMOID_S32_AVX512(c_int32_1p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[2, 0-15]
+		SIGMOID_S32_AVX512(c_int32_2p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[2, 16-31]
+		SIGMOID_S32_AVX512(c_int32_2p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[3, 0-15]
+		SIGMOID_S32_AVX512(c_int32_3p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[3, 16-31]
+		SIGMOID_S32_AVX512(c_int32_3p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[4, 0-15]
+		SIGMOID_S32_AVX512(c_int32_4p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[4, 16-31]
+		SIGMOID_S32_AVX512(c_int32_4p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_5x32_DISABLE:
 	;
 
@@ -4758,7 +5175,10 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_4x32)
 						  &&POST_OPS_CLIP_4x32,
 						  &&POST_OPS_DOWNSCALE_4x32,
 						  &&POST_OPS_MATRIX_ADD_4x32,
-						  &&POST_OPS_SWISH_4x32
+						  &&POST_OPS_SWISH_4x32,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_4x32,
+						  &&POST_OPS_SIGMOID_4x32
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -5299,6 +5719,67 @@ POST_OPS_SWISH_4x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_4x32:
+	{
+		__m512 dn, z, x, r2, r, y;
+		__m512i q;
+		// c[0, 0-15]
+		TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+		// c[0, 16-31]
+		TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, q);
+
+		// c[1, 0-15]
+		TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, q);
+
+		// c[1, 16-31]
+		TANH_S32_AVX512(c_int32_1p1, y, r, r2, x, z, dn, q);
+
+		// c[2, 0-15]
+		TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, q);
+
+		// c[2, 16-31]
+		TANH_S32_AVX512(c_int32_2p1, y, r, r2, x, z, dn, q);
+
+		// c[3, 0-15]
+		TANH_S32_AVX512(c_int32_3p0, y, r, r2, x, z, dn, q);
+
+		// c[3, 16-31]
+		TANH_S32_AVX512(c_int32_3p1, y, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_4x32:
+	{
+
+		__m512 fl_reg, al_in, r, r2, z, dn;
+
+		// c[0, 0-15]
+		SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[0, 16-31]
+		SIGMOID_S32_AVX512(c_int32_0p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 0-15]
+		SIGMOID_S32_AVX512(c_int32_1p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 16-31]
+		SIGMOID_S32_AVX512(c_int32_1p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[2, 0-15]
+		SIGMOID_S32_AVX512(c_int32_2p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[2, 16-31]
+		SIGMOID_S32_AVX512(c_int32_2p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[3, 0-15]
+		SIGMOID_S32_AVX512(c_int32_3p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[3, 16-31]
+		SIGMOID_S32_AVX512(c_int32_3p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_4x32_DISABLE:
 	;
 
@@ -5377,7 +5858,10 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_3x32)
 						  &&POST_OPS_CLIP_3x32,
 						  &&POST_OPS_DOWNSCALE_3x32,
 						  &&POST_OPS_MATRIX_ADD_3x32,
-						  &&POST_OPS_SWISH_3x32
+						  &&POST_OPS_SWISH_3x32,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_3x32,
+						  &&POST_OPS_SIGMOID_3x32
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -5827,6 +6311,55 @@ POST_OPS_SWISH_3x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_3x32:
+	{
+		__m512 dn, z, x, r2, r, y;
+		__m512i q;
+		// c[0, 0-15]
+		TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+		// c[0, 16-31]
+		TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, q);
+
+		// c[1, 0-15]
+		TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, q);
+
+		// c[1, 16-31]
+		TANH_S32_AVX512(c_int32_1p1, y, r, r2, x, z, dn, q);
+
+		// c[2, 0-15]
+		TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, q);
+
+		// c[2, 16-31]
+		TANH_S32_AVX512(c_int32_2p1, y, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_3x32:
+	{
+
+		__m512 fl_reg, al_in, r, r2, z, dn;
+
+		// c[0, 0-15]
+		SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[0, 16-31]
+		SIGMOID_S32_AVX512(c_int32_0p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 0-15]
+		SIGMOID_S32_AVX512(c_int32_1p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 16-31]
+		SIGMOID_S32_AVX512(c_int32_1p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[2, 0-15]
+		SIGMOID_S32_AVX512(c_int32_2p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[2, 16-31]
+		SIGMOID_S32_AVX512(c_int32_2p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_3x32_DISABLE:
 	;
 
@@ -5893,7 +6426,10 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_2x32)
 						  &&POST_OPS_CLIP_2x32,
 						  &&POST_OPS_DOWNSCALE_2x32,
 						  &&POST_OPS_MATRIX_ADD_2x32,
-						  &&POST_OPS_SWISH_2x32
+						  &&POST_OPS_SWISH_2x32,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_2x32,
+						  &&POST_OPS_SIGMOID_2x32
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -6252,6 +6788,43 @@ POST_OPS_SWISH_2x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_2x32:
+	{
+		__m512 dn, z, x, r2, r, y;
+		__m512i q;
+		// c[0, 0-15]
+		TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+		// c[0, 16-31]
+		TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, q);
+
+		// c[1, 0-15]
+		TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, q);
+
+		// c[1, 16-31]
+		TANH_S32_AVX512(c_int32_1p1, y, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_2x32:
+	{
+
+		__m512 fl_reg, al_in, r, r2, z, dn;
+
+		// c[0, 0-15]
+		SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[0, 16-31]
+		SIGMOID_S32_AVX512(c_int32_0p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 0-15]
+		SIGMOID_S32_AVX512(c_int32_1p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 16-31]
+		SIGMOID_S32_AVX512(c_int32_1p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_2x32_DISABLE:
 	;
 
@@ -6306,7 +6879,10 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_1x32)
 						  &&POST_OPS_CLIP_1x32,
 						  &&POST_OPS_DOWNSCALE_1x32,
 						  &&POST_OPS_MATRIX_ADD_1x32,
-						  &&POST_OPS_SWISH_1x32
+						  &&POST_OPS_SWISH_1x32,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_1x32,
+						  &&POST_OPS_SIGMOID_1x32
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -6574,6 +7150,31 @@ POST_OPS_SWISH_1x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_1x32:
+	{
+		__m512 dn, z, x, r2, r, y;
+		__m512i q;
+		// c[0, 0-15]
+		TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+		// c[0, 16-31]
+		TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_1x32:
+	{
+
+		__m512 fl_reg, al_in, r, r2, z, dn;
+
+		// c[0, 0-15]
+		SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[0, 16-31]
+		SIGMOID_S32_AVX512(c_int32_0p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_1x32_DISABLE:
 	;
 
@@ -6616,7 +7217,10 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_5x48)
 						  &&POST_OPS_CLIP_5x48,
 						  &&POST_OPS_DOWNSCALE_5x48,
 						  &&POST_OPS_MATRIX_ADD_5x48,
-						  &&POST_OPS_SWISH_5x48
+						  &&POST_OPS_SWISH_5x48,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_5x48,
+						  &&POST_OPS_SIGMOID_5x48
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -7413,6 +8017,109 @@ POST_OPS_SWISH_5x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_5x48:
+	{
+		__m512 dn, z, x, r2, r, y;
+		__m512i q;
+		// c[0, 0-15]
+		TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+		// c[0, 16-31]
+		TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, q);
+
+		// c[0, 32-47]
+		TANH_S32_AVX512(c_int32_0p2, y, r, r2, x, z, dn, q);
+
+		// c[1, 0-15]
+		TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, q);
+
+		// c[1, 16-31]
+		TANH_S32_AVX512(c_int32_1p1, y, r, r2, x, z, dn, q);
+
+		// c[1, 32-47]
+		TANH_S32_AVX512(c_int32_1p2, y, r, r2, x, z, dn, q);
+
+		// c[2, 0-15]
+		TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, q);
+
+		// c[2, 16-31]
+		TANH_S32_AVX512(c_int32_2p1, y, r, r2, x, z, dn, q);
+
+		// c[2, 32-47]
+		TANH_S32_AVX512(c_int32_2p2, y, r, r2, x, z, dn, q);
+
+		// c[3, 0-15]
+		TANH_S32_AVX512(c_int32_3p0, y, r, r2, x, z, dn, q);
+
+		// c[3, 16-31]
+		TANH_S32_AVX512(c_int32_3p1, y, r, r2, x, z, dn, q);
+
+		// c[3, 32-47]
+		TANH_S32_AVX512(c_int32_3p2, y, r, r2, x, z, dn, q);
+
+		// c[4, 0-15]
+		TANH_S32_AVX512(c_int32_4p0, y, r, r2, x, z, dn, q);
+
+		// c[4, 16-31]
+		TANH_S32_AVX512(c_int32_4p1, y, r, r2, x, z, dn, q);
+
+		// c[4, 32-47]
+		TANH_S32_AVX512(c_int32_4p2, y, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_5x48:
+	{
+
+		__m512 fl_reg, al_in, r, r2, z, dn;
+
+		// c[0, 0-15]
+		SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[0, 16-31]
+		SIGMOID_S32_AVX512(c_int32_0p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[0, 32-47]
+		SIGMOID_S32_AVX512(c_int32_0p2, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 0-15]
+		SIGMOID_S32_AVX512(c_int32_1p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 16-31]
+		SIGMOID_S32_AVX512(c_int32_1p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 32-47]
+		SIGMOID_S32_AVX512(c_int32_1p2, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[2, 0-15]
+		SIGMOID_S32_AVX512(c_int32_2p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[2, 16-31]
+		SIGMOID_S32_AVX512(c_int32_2p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[2, 32-47]
+		SIGMOID_S32_AVX512(c_int32_2p2, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[3, 0-15]
+		SIGMOID_S32_AVX512(c_int32_3p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[3, 16-31]
+		SIGMOID_S32_AVX512(c_int32_3p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[3, 32-47]
+		SIGMOID_S32_AVX512(c_int32_3p2, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[4, 0-15]
+		SIGMOID_S32_AVX512(c_int32_4p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[4, 16-31]
+		SIGMOID_S32_AVX512(c_int32_4p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[4, 32-47]
+		SIGMOID_S32_AVX512(c_int32_4p2, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_5x48_DISABLE:
 	;
 
@@ -7533,7 +8240,10 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_4x48)
 						  &&POST_OPS_CLIP_4x48,
 						  &&POST_OPS_DOWNSCALE_4x48,
 						  &&POST_OPS_MATRIX_ADD_4x48,
-						  &&POST_OPS_SWISH_4x48
+						  &&POST_OPS_SWISH_4x48,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_4x48,
+						  &&POST_OPS_SIGMOID_4x48
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -8210,6 +8920,91 @@ POST_OPS_SWISH_4x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_4x48:
+	{
+		__m512 dn, z, x, r2, r, y;
+		__m512i q;
+		// c[0, 0-15]
+		TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+		// c[0, 16-31]
+		TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, q);
+
+		// c[0, 32-47]
+		TANH_S32_AVX512(c_int32_0p2, y, r, r2, x, z, dn, q);
+
+		// c[1, 0-15]
+		TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, q);
+
+		// c[1, 16-31]
+		TANH_S32_AVX512(c_int32_1p1, y, r, r2, x, z, dn, q);
+
+		// c[1, 32-47]
+		TANH_S32_AVX512(c_int32_1p2, y, r, r2, x, z, dn, q);
+
+		// c[2, 0-15]
+		TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, q);
+
+		// c[2, 16-31]
+		TANH_S32_AVX512(c_int32_2p1, y, r, r2, x, z, dn, q);
+
+		// c[2, 32-47]
+		TANH_S32_AVX512(c_int32_2p2, y, r, r2, x, z, dn, q);
+
+		// c[3, 0-15]
+		TANH_S32_AVX512(c_int32_3p0, y, r, r2, x, z, dn, q);
+
+		// c[3, 16-31]
+		TANH_S32_AVX512(c_int32_3p1, y, r, r2, x, z, dn, q);
+
+		// c[3, 32-47]
+		TANH_S32_AVX512(c_int32_3p2, y, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_4x48:
+	{
+
+		__m512 fl_reg, al_in, r, r2, z, dn;
+
+		// c[0, 0-15]
+		SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[0, 16-31]
+		SIGMOID_S32_AVX512(c_int32_0p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[0, 32-47]
+		SIGMOID_S32_AVX512(c_int32_0p2, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 0-15]
+		SIGMOID_S32_AVX512(c_int32_1p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 16-31]
+		SIGMOID_S32_AVX512(c_int32_1p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 32-47]
+		SIGMOID_S32_AVX512(c_int32_1p2, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[2, 0-15]
+		SIGMOID_S32_AVX512(c_int32_2p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[2, 16-31]
+		SIGMOID_S32_AVX512(c_int32_2p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[2, 32-47]
+		SIGMOID_S32_AVX512(c_int32_2p2, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[3, 0-15]
+		SIGMOID_S32_AVX512(c_int32_3p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[3, 16-31]
+		SIGMOID_S32_AVX512(c_int32_3p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[3, 32-47]
+		SIGMOID_S32_AVX512(c_int32_3p2, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_4x48_DISABLE:
 	;
 
@@ -8312,7 +9107,10 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_3x48)
 						  &&POST_OPS_CLIP_3x48,
 						  &&POST_OPS_DOWNSCALE_3x48,
 						  &&POST_OPS_MATRIX_ADD_3x48,
-						  &&POST_OPS_SWISH_3x48
+						  &&POST_OPS_SWISH_3x48,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_3x48,
+						  &&POST_OPS_SIGMOID_3x48
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -8869,6 +9667,72 @@ POST_OPS_SWISH_3x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_3x48:
+	{
+		__m512 dn, z, x, r2, r, y;
+		__m512i q;
+		// c[0, 0-15]
+		TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+		// c[0, 16-31]
+		TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, q);
+
+		// c[0, 32-47]
+		TANH_S32_AVX512(c_int32_0p2, y, r, r2, x, z, dn, q);
+
+		// c[1, 0-15]
+		TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, q);
+
+		// c[1, 16-31]
+		TANH_S32_AVX512(c_int32_1p1, y, r, r2, x, z, dn, q);
+
+		// c[1, 32-47]
+		TANH_S32_AVX512(c_int32_1p2, y, r, r2, x, z, dn, q);
+
+		// c[2, 0-15]
+		TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, q);
+
+		// c[2, 16-31]
+		TANH_S32_AVX512(c_int32_2p1, y, r, r2, x, z, dn, q);
+
+		// c[2, 32-47]
+		TANH_S32_AVX512(c_int32_2p2, y, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_3x48:
+	{
+		__m512 fl_reg, al_in, r, r2, z, dn;
+
+		// c[0, 0-15]
+		SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[0, 16-31]
+		SIGMOID_S32_AVX512(c_int32_0p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[0, 32-47]
+		SIGMOID_S32_AVX512(c_int32_0p2, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 0-15]
+		SIGMOID_S32_AVX512(c_int32_1p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 16-31]
+		SIGMOID_S32_AVX512(c_int32_1p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 32-47]
+		SIGMOID_S32_AVX512(c_int32_1p2, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[2, 0-15]
+		SIGMOID_S32_AVX512(c_int32_2p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[2, 16-31]
+		SIGMOID_S32_AVX512(c_int32_2p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[2, 32-47]
+		SIGMOID_S32_AVX512(c_int32_2p2, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_3x48_DISABLE:
 	;
 
@@ -8953,7 +9817,10 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_2x48)
 						  &&POST_OPS_CLIP_2x48,
 						  &&POST_OPS_DOWNSCALE_2x48,
 						  &&POST_OPS_MATRIX_ADD_2x48,
-						  &&POST_OPS_SWISH_2x48
+						  &&POST_OPS_SWISH_2x48,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_2x48,
+						  &&POST_OPS_SIGMOID_2x48
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -9391,6 +10258,55 @@ POST_OPS_SWISH_2x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_TANH_2x48:
+	{
+		__m512 dn, z, x, r2, r, y;
+		__m512i q;
+		// c[0, 0-15]
+		TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+		// c[0, 16-31]
+		TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, q);
+
+		// c[0, 32-47]
+		TANH_S32_AVX512(c_int32_0p2, y, r, r2, x, z, dn, q);
+
+		// c[1, 0-15]
+		TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, q);
+
+		// c[1, 16-31]
+		TANH_S32_AVX512(c_int32_1p1, y, r, r2, x, z, dn, q);
+
+		// c[1, 32-47]
+		TANH_S32_AVX512(c_int32_1p2, y, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_2x48:
+	{
+
+		__m512 fl_reg, al_in, r, r2, z, dn;
+
+		// c[0, 0-15]
+		SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[0, 16-31]
+		SIGMOID_S32_AVX512(c_int32_0p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[0, 32-47]
+		SIGMOID_S32_AVX512(c_int32_0p2, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 0-15]
+		SIGMOID_S32_AVX512(c_int32_1p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 16-31]
+		SIGMOID_S32_AVX512(c_int32_1p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[1, 32-47]
+		SIGMOID_S32_AVX512(c_int32_1p2, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_2x48_DISABLE:
 	;
 
@@ -9457,7 +10373,10 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_1x48)
 						  &&POST_OPS_CLIP_1x48,
 						  &&POST_OPS_DOWNSCALE_1x48,
 						  &&POST_OPS_MATRIX_ADD_1x48,
-						  &&POST_OPS_SWISH_1x48
+						  &&POST_OPS_SWISH_1x48,
+						  NULL, // Virtual node for matrix_mul, else segfault
+						  &&POST_OPS_TANH_1x48,
+						  &&POST_OPS_SIGMOID_1x48
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -9772,6 +10691,37 @@ POST_OPS_SWISH_1x48:
 
 		// c[0, 32-47]
 		SWISH_S32_AVX512(c_int32_0p2, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_TANH_1x48:
+	{
+		__m512 dn, z, x, r2, r, y;
+		__m512i q;
+		// c[0, 0-15]
+		TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, q);
+
+		// c[0, 16-31]
+		TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, q);
+
+		// c[0, 32-47]
+		TANH_S32_AVX512(c_int32_0p2, y, r, r2, x, z, dn, q);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SIGMOID_1x48:
+	{
+
+		__m512 fl_reg, al_in, r, r2, z, dn;
+
+		// c[0, 0-15]
+		SIGMOID_S32_AVX512(c_int32_0p0, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[0, 16-31]
+		SIGMOID_S32_AVX512(c_int32_0p1, fl_reg, al_in, r, r2, z, dn, selector2);
+
+		// c[0, 32-47]
+		SIGMOID_S32_AVX512(c_int32_0p2, fl_reg, al_in, r, r2, z, dn, selector2);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
