@@ -37,8 +37,10 @@
 
 // -- Implementation macro -----------------------------------------------------
 
-// (yr) := (ar) * (xr) - (ai) * (xi);
-// (yi) := (ai) * (xr) + (ar) * (xi);
+// (tr) := (ar) * (xr) - (ai) * (xi);
+// (ti) := (ai) * (xr) + (ar) * (xi);
+// (yr) := (tr);
+// (yi) := (ti);
 
 #define bli_tscal2ims( \
           \
@@ -48,8 +50,9 @@
           chc  \
         ) \
 { \
-	PASTEMAC(dy,assigns) \
+	PASTEMAC(c,declinits) \
 	( \
+	  py, \
 	  PASTEMAC(chc,py,tcast)( \
 	    PASTEMAC(chc,sub)( \
 	      PASTEMAC(da,dx,termrr)( \
@@ -86,6 +89,13 @@
 	      ) \
 	    ) \
 	  ), \
+	  tr, \
+	  ti \
+	); \
+	PASTEMAC(dy,assigns) \
+	( \
+	  tr, \
+	  ti, \
 	  yr, \
 	  yi \
 	); \

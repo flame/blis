@@ -37,8 +37,10 @@
 
 // -- Implementation macro -----------------------------------------------------
 
-// (yr) += (ar) * (xr) - (ai) * (xi);
-// (yi) += (ai) * (xr) + (ar) * (xi);
+// (tr) += (ar) * (xr) - (ai) * (xi);
+// (ti) += (ai) * (xr) + (ar) * (xi);
+// (yr) += (tr);
+// (yi) += (ti);
 
 #define bli_taxpyims( \
           \
@@ -48,8 +50,9 @@
           chc  \
         ) \
 { \
-	PASTEMAC(dy,assigns) \
+	PASTEMAC(c,declinits) \
 	( \
+	  py, \
 	  PASTEMAC(chc,py,tcast)( \
 	    PASTEMAC(chc,add)( \
 	      PASTEMAC(py,chc,tcast)(yr), \
@@ -92,6 +95,13 @@
 	      ) \
 	    ) \
 	  ), \
+	  tr, \
+	  ti \
+	); \
+	PASTEMAC(dy,assigns) \
+	( \
+	  tr, \
+	  ti, \
 	  yr, \
 	  yi \
 	); \
