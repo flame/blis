@@ -205,8 +205,9 @@
 	   output microtile. Used by trsm. */ \
 	if ( _use_ct ) \
 	{ \
-		PASTEMAC(ch,copys_mxn) \
+		PASTEMAC(t,copys_mxn) \
 		( \
+		  ch,ch, \
 		  m, n, \
 		  _ct, _rs_ct, _cs_ct, \
 		  _c,  _rs_c,  _cs_c \
