@@ -59,7 +59,7 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	   zero and return early. */ \
 	if ( bli_zero_dim1( n ) ) \
 	{ \
-		PASTEMAC(chr,set0s)( *asum ); \
+		bli_tset0s( chr, *asum ); \
 		return; \
 	} \
 \
@@ -138,7 +138,7 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	   early. */ \
 	if ( bli_zero_dim1( n ) ) \
 	{ \
-		PASTEMAC(chr,set0s)( *norm ); \
+		bli_tset0s( chr, *norm ); \
 		return; \
 	} \
 \
@@ -185,7 +185,7 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	   early. */ \
 	if ( bli_zero_dim2( m, n ) ) \
 	{ \
-		PASTEMAC(chr,set0s)( *norm ); \
+		bli_tset0s( chr, *norm ); \
 		return; \
 	} \
 \
@@ -236,10 +236,10 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	ctype_r norm; \
 \
 	/* Set the norm to zero. */ \
-	PASTEMAC(chr,set0s)( norm ); \
+	bli_tset0s( chr, norm ); \
 \
 	/* Iterate at least once, but continue iterating until the norm is not zero. */ \
-	while ( PASTEMAC(chr,eq0)( norm ) ) \
+	while ( bli_teq0s( chr, norm ) ) \
 	{ \
 		/* Invoke the helper variant, which loops over the appropriate kernel
 		   to implement the current operation. */ \
@@ -295,10 +295,10 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	ctype_r norm; \
 \
 	/* Set the norm to zero. */ \
-	PASTEMAC(chr,set0s)( norm ); \
+	bli_tset0s( chr, norm ); \
 \
 	/* Iterate at least once, but continue iterating until the norm is not zero. */ \
-	while ( PASTEMAC(chr,eq0)( norm ) ) \
+	while ( bli_teq0s( chr, norm ) ) \
 	{ \
 		/* Invoke the helper variant, which loops over the appropriate kernel
 		   to implement the current operation. */ \
@@ -393,9 +393,9 @@ void PASTEMAC(ch,opname) \
 \
 	ctype chi_conj; \
 \
-	PASTEMAC(ch,copycjs)( conjchi, *chi, chi_conj ); \
+	bli_tcopycjs( ch,ch, conjchi, *chi, chi_conj ); \
 \
-	*is_eq = PASTEMAC(ch,eq)( chi_conj, *psi ); \
+	*is_eq = PASTEMAC(t,eqs)( ch,ch,ch, chi_conj, *psi ); \
 }
 
 INSERT_GENTFUNC_BASIC( eqsc )
@@ -475,8 +475,8 @@ void PASTEMAC(ch,opname) \
 INSERT_GENTFUNC_BASIC( eqm )
 
 
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, kername ) \
+#undef  GENTFUNCRO
+#define GENTFUNCRO( ctype, ch, opname, kername ) \
 \
 void PASTEMAC(ch,opname) \
      ( \
@@ -490,10 +490,10 @@ void PASTEMAC(ch,opname) \
 	*is = PASTEMAC(ch,kername)( *chi, *psi ); \
 }
 
-INSERT_GENTFUNC_BASIC( ltsc,  lt )
-INSERT_GENTFUNC_BASIC( ltesc, lte )
-INSERT_GENTFUNC_BASIC( gtsc,  gt )
-INSERT_GENTFUNC_BASIC( gtesc, gte )
+INSERT_GENTFUNCRO_BASIC( ltsc, lt )
+INSERT_GENTFUNCRO_BASIC( lesc, le )
+INSERT_GENTFUNCRO_BASIC( gtsc, gt )
+INSERT_GENTFUNCRO_BASIC( gesc, ge )
 
 
 #undef  GENTFUNC

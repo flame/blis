@@ -117,7 +117,7 @@ void bli_zaxpyv_template_noopt
 
 	if ( bli_zero_dim1( n ) ) return;
 
-	if ( bli_zeq0( *alpha ) ) return;
+	if ( bli_teq0s( z, *alpha ) ) return;
 
 
 	// If there is anything that would interfere with our use of aligned

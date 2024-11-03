@@ -44,13 +44,15 @@ do \
 		pragma \
 		for ( dim_t mn = 0; mn < cdim; ++mn ) \
 		{ \
-			ctypep_r alpha_r, alpha_i, ka_r, ka_i; \
-			PASTEMAC(cha,chp,copyris)( *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), alpha_r, alpha_i ); \
-			PASTEMAC(chp,op)( kappa_r, kappa_i, alpha_r, alpha_i, ka_r, ka_i ); \
+			ctypep_r ka_r, ka_i; \
+			PASTEMAC(t,op)( chp,cha,chp,chp, \
+			                kappa_r, kappa_i, \
+			                *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), \
+			                ka_r, ka_i ); \
 			for ( dim_t d = 0; d < dfac; ++d ) \
 			{ \
-				PASTEMAC(chp,copyris)(  ka_r, ka_i, *(pi1_ri + (mn*2 + 0)*dfac + d), *(pi1_ri + (mn*2 + 1)*dfac + d) ); \
-				PASTEMAC(chp,copyris)( -ka_i, ka_r, *(pi1_ir + (mn*2 + 0)*dfac + d), *(pi1_ir + (mn*2 + 1)*dfac + d) ); \
+				bli_tcopyris( chp,chp,  ka_r, ka_i, *(pi1_ri + (mn*2 + 0)*dfac + d), *(pi1_ri + (mn*2 + 1)*dfac + d) ); \
+				bli_tcopyris( chp,chp, -ka_i, ka_r, *(pi1_ir + (mn*2 + 0)*dfac + d), *(pi1_ir + (mn*2 + 1)*dfac + d) ); \
 			} \
 		} \
 \
@@ -70,11 +72,13 @@ do \
 		pragma \
 		for ( dim_t mn = 0; mn < cdim; ++mn ) \
 		{ \
-			ctypep_r alpha_r, alpha_i, ka_r, ka_i; \
-			PASTEMAC(cha,chp,copyris)( *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), alpha_r, alpha_i ); \
-			PASTEMAC(chp,op)( kappa_r, kappa_i, alpha_r, alpha_i, ka_r, ka_i ); \
+			ctypep_r ka_r, ka_i; \
+			PASTEMAC(t,op)( chp,cha,chp,chp, \
+			                kappa_r, kappa_i, \
+			                *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), \
+			                ka_r, ka_i ); \
 			for ( dim_t d = 0; d < dfac; ++d ) \
-				PASTEMAC(chp,copyris)( ka_r, ka_i, *(pi1_r + mn*dfac + d), *(pi1_i + mn*dfac + d) ); \
+				bli_tcopyris( chp,chp, ka_r, ka_i, *(pi1_r + mn*dfac + d), *(pi1_i + mn*dfac + d) ); \
 		} \
 \
 		alpha1 += lda2; \
@@ -153,8 +157,9 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
 			else                        PACKM_1E_BODY( ctypep_r, cha, chp, , cdim, cdim_bcast, inca2, scal2ris ); \
 		} \
 \
-		PASTEMAC(chp_r,set0s_edge) \
+		bli_tset0s_edge \
 		( \
+		  chp_r, \
 		  cdim2*cdim_bcast, 2*cdim_max*cdim_bcast, \
 		  2*n, 2*n_max, \
 		  ( ctypep_r* )p, ldp  \
@@ -204,8 +209,9 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
 			else                        PACKM_1R_BODY( ctypep_r, cha, chp, , cdim, cdim_bcast, inca2, scal2ris ); \
 		} \
 \
-		PASTEMAC(chp_r,set0s_edge) \
+		bli_tset0s_edge \
 		( \
+		  chp_r, \
 		  cdim*cdim_bcast, cdim_max*cdim_bcast, \
 		  2*n, 2*n_max, \
 		  ( ctypep_r* )p, ldp  \

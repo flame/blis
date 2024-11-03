@@ -39,7 +39,7 @@
 // Define BLAS-to-BLIS interfaces.
 //
 #undef  GENTFUNCSCAL
-#define GENTFUNCSCAL( ftype_x, ftype_a, chx, cha, blasname, blisname ) \
+#define GENTFUNCSCAL( ftype_x, ftype_a, chx, cha, cha_real, blasname, blisname ) \
 \
 void PASTEF77(chx,cha,blasname) \
      ( \
@@ -67,7 +67,7 @@ void PASTEF77(chx,cha,blasname) \
 	   that is, we just always sub-optimally implement those cases
 	   by casting alpha to ctype_x (potentially the complex domain) and
 	   using the homogeneous datatype instance according to that type. */ \
-	PASTEMAC(cha,chx,copys)( *alpha, alpha_cast ); \
+	bli_tcopys( cha_real,chx, *alpha, alpha_cast ); \
 \
 	/* Call BLIS interface. */ \
 	PASTEMAC(chx,blisname,BLIS_TAPI_EX_SUF) \

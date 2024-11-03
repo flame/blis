@@ -91,7 +91,7 @@ void bli_zpackm_haswell_asm_3x4
 
 	// NOTE: If/when this kernel ever supports scaling by kappa within the
 	// assembly region, this constraint should be lifted.
-	const bool     unitk  = bli_zeq1( *(( dcomplex* )kappa) );
+	const bool     unitk  = bli_teq1s( z, *(( dcomplex* )kappa) );
 
 
 	// -------------------------------------------------------------------------
@@ -592,8 +592,9 @@ void bli_zpackm_haswell_asm_3x4
 	}
 	else
 	{
-		bli_zscal2bbs_mxn
+		bli_tscal2bbs_mxn
 		(
+		  z,z,z,z,
 		  conja,
 		  cdim0,
 		  k0,
@@ -603,11 +604,12 @@ void bli_zpackm_haswell_asm_3x4
 		);
 	}
 
-	bli_zset0s_edge
+	bli_tset0s_edge
 	(
+	  z,
 	  cdim0*cdim_bcast, cdim_max*cdim_bcast,
 	  k0, k0_max,
-	  p, ldp
+	  (dcomplex*)p, ldp
 	);
 }
 

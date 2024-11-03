@@ -79,7 +79,7 @@ void bli_saxpyv_zen_int10
 	__m256           zv[10];
 
 	// If the vector dimension is zero, or if alpha is zero, return early.
-	if ( bli_zero_dim1( n ) || PASTEMAC(s,eq0)( *alpha ) ) return;
+	if ( bli_zero_dim1( n ) || bli_teq0s( s, *alpha ) ) return;
 
 	// Initialize local pointers.
 	const float* restrict xp = x;
@@ -286,7 +286,7 @@ void bli_daxpyv_zen_int10
 	__m256d          zv[10];
 
 	// If the vector dimension is zero, or if alpha is zero, return early.
-	if ( bli_zero_dim1( n ) || PASTEMAC(d,eq0)( *alpha ) ) return;
+	if ( bli_zero_dim1( n ) || bli_teq0s( d, *alpha ) ) return;
 
 	// Initialize local pointers.
 	const double* restrict xp = x;

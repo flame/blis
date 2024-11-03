@@ -181,14 +181,14 @@ void bli_sswapv_zen_int8
 
 		for ( ; (i + 0) < n; i += 1 )
 		{
-			PASTEMAC(s,swaps)( x[i], y[i] );
+			bli_tswaps( s,s, x[i], y[i] );
 		}
 	}
 	else
 	{
 		for ( i = 0; i < n; ++i )
 		{
-			PASTEMAC(s,swaps)( (*xp), (*yp) );
+			bli_tswaps( s,s, (*xp), (*yp) );
 
 			xp += incx;
 			yp += incy;
@@ -326,14 +326,14 @@ void bli_dswapv_zen_int8
 
 		for ( ; (i + 0) < n; i += 1 )
 		{
-			PASTEMAC(d,swaps)( x[i], y[i] );
+			bli_tswaps( d,d, x[i], y[i] );
 		}
 	}
 	else
 	{
 		for ( i = 0; i < n; ++i )
 		{
-			PASTEMAC(d,swaps)( (*xp), (*yp) );
+			bli_tswaps( d,d, (*xp), (*yp) );
 
 			xp += incx;
 			yp += incy;

@@ -182,15 +182,15 @@ void bli_ddotxaxpyf_penryn_int
 	chi2 = *(x_cast + 2*incx);
 	chi3 = *(x_cast + 3*incx);
 
-	PASTEMAC(d,d,scals)( *alpha_cast, chi0 );
-	PASTEMAC(d,d,scals)( *alpha_cast, chi1 );
-	PASTEMAC(d,d,scals)( *alpha_cast, chi2 );
-	PASTEMAC(d,d,scals)( *alpha_cast, chi3 );
+	bli_tscals( d,d,d, *alpha_cast, chi0 );
+	bli_tscals( d,d,d, *alpha_cast, chi1 );
+	bli_tscals( d,d,d, *alpha_cast, chi2 );
+	bli_tscals( d,d,d, *alpha_cast, chi3 );
 
-	PASTEMAC(d,set0s)( rho0 );
-	PASTEMAC(d,set0s)( rho1 );
-	PASTEMAC(d,set0s)( rho2 );
-	PASTEMAC(d,set0s)( rho3 );
+	bli_tset0s( d, rho0 );
+	bli_tset0s( d, rho1 );
+	bli_tset0s( d, rho2 );
+	bli_tset0s( d, rho3 );
 
 	if ( m_pre == 1 )
 	{

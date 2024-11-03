@@ -1586,7 +1586,7 @@ static err_t bli_sgemmt_small
         }
 
         //copy/compute sryk values back to C using SIMD
-        if ( bli_seq0( *beta_cast ) )
+        if ( bli_teq0s( s, *beta_cast ) )
         {//just copy in case of beta = 0
             dim_t _i, _j, k, _l;
             if(bli_obj_is_lower(c)) // c is lower
@@ -3156,7 +3156,7 @@ static err_t bli_dgemmt_small
         }
 
         //copy/compute sryk values back to C using SIMD
-        if ( bli_seq0( *beta_cast ) )
+        if ( bli_teq0s( s, *beta_cast ) )
         {//just copy for beta = 0
             dim_t _i, _j, k, _l;
             if(bli_obj_is_lower(c)) //c is lower
@@ -3717,7 +3717,7 @@ static err_t bli_sgemmt_small_atbn
         }
 
         //copy/compute sryk values back to C
-        if ( bli_seq0( *beta_cast ) ) //when beta is 0, just copy result to C
+        if ( bli_teq0s( s, *beta_cast ) ) //when beta is 0, just copy result to C
         {
             dim_t _i, _j;
             if(bli_obj_is_lower(c)) //c is lower
@@ -4149,7 +4149,7 @@ static err_t bli_dgemmt_small_atbn
         }
 
 		//copy/compute sryk values back to C
-        if ( bli_seq0( *beta_cast ) ) //when beta is 0, just copy result to C
+        if ( bli_teq0s( s, *beta_cast ) ) //when beta is 0, just copy result to C
         {
             dim_t _i, _j;
             if(bli_obj_is_lower(c)) //c is lower

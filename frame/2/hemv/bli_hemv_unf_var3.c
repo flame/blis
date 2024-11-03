@@ -100,7 +100,7 @@ void PASTEMAC(ch,varname) \
 	} \
 \
 	/* If beta is zero, use setv. Otherwise, scale by beta. */ \
-	if ( PASTEMAC(ch,eq0)( *beta ) ) \
+	if ( bli_teq0s( ch, *beta ) ) \
 	{ \
 		/* y = 0; */ \
 		PASTEMAC(ch,setv,BLIS_TAPI_EX_SUF) \
@@ -156,38 +156,38 @@ void PASTEMAC(ch,varname) \
 			y21      = y1  + (k+1)*incy; \
 \
 			/* y01 = y01 + alpha * a10t' * chi11; */ \
-			PASTEMAC(ch,copycjs)( conjx, *chi11, conjx_chi11 ); \
-			PASTEMAC(ch,scal2s)( *alpha, conjx_chi11, alpha_chi11 ); \
+			bli_tcopycjs( ch,ch, conjx, *chi11, conjx_chi11 ); \
+			bli_tscal2s( ch,ch,ch,ch, *alpha, conjx_chi11, alpha_chi11 ); \
 			if ( bli_is_conj( conj0 ) ) \
 			{ \
 				for ( j = 0; j < f_behind; ++j ) \
-					PASTEMAC(ch,axpyjs)( alpha_chi11, *(a10t + j*cs_at), *(y01 + j*incy) ); \
+					bli_taxpyjs( ch,ch,ch,ch, alpha_chi11, *(a10t + j*cs_at), *(y01 + j*incy) ); \
 			} \
 			else \
 			{ \
 				for ( j = 0; j < f_behind; ++j ) \
-					PASTEMAC(ch,axpys)( alpha_chi11, *(a10t + j*cs_at), *(y01 + j*incy) ); \
+					bli_taxpys( ch,ch,ch,ch, alpha_chi11, *(a10t + j*cs_at), *(y01 + j*incy) ); \
 			} \
 \
 			/* For hemv, explicitly set the imaginary component of alpha11 to
 			   zero. */ \
-			PASTEMAC(ch,copycjs)( conja, *alpha11, alpha11_temp ); \
+			bli_tcopycjs( ch,ch, conja, *alpha11, alpha11_temp ); \
 			if ( bli_is_conj( conjh ) ) \
-				PASTEMAC(ch,seti0s)( alpha11_temp ); \
+				bli_tseti0s( ch, alpha11_temp ); \
 \
 			/* psi11 = psi11 + alpha * alpha11 * chi11; */ \
-			PASTEMAC(ch,axpys)( alpha_chi11, alpha11_temp, *psi11 ); \
+			bli_taxpys( ch,ch,ch,ch, alpha_chi11, alpha11_temp, *psi11 ); \
 \
 			/* y21 = y21 + alpha * a21 * chi11; */ \
 			if ( bli_is_conj( conj1 ) ) \
 			{ \
 				for ( j = 0; j < f_ahead; ++j ) \
-					PASTEMAC(ch,axpyjs)( alpha_chi11, *(a21 + j*rs_at), *(y21 + j*incy) ); \
+					bli_taxpyjs( ch,ch,ch,ch, alpha_chi11, *(a21 + j*rs_at), *(y21 + j*incy) ); \
 			} \
 			else \
 			{ \
 				for ( j = 0; j < f_ahead; ++j ) \
-					PASTEMAC(ch,axpys)( alpha_chi11, *(a21 + j*rs_at), *(y21 + j*incy) ); \
+					bli_taxpys( ch,ch,ch,ch, alpha_chi11, *(a21 + j*rs_at), *(y21 + j*incy) ); \
 			} \
 		} \
 \

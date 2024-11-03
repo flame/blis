@@ -67,13 +67,13 @@ void PASTEMAC(ch,opname,arch,suf) \
 		{ \
 			PRAGMA_SIMD \
 			for ( dim_t j = 0; j < ff; ++j ) \
-				PASTEMAC(ch,scal2js)( *alpha, x[j], ax[j] ); \
+				bli_tscal2js( ch,ch,ch,ch, *alpha, x[j], ax[j] ); \
 		} \
 		else \
 		{ \
 			PRAGMA_SIMD \
 			for ( dim_t j = 0; j < ff; ++j ) \
-				PASTEMAC(ch,scal2s)( *alpha, x[j], ax[j] ); \
+				bli_tscal2s( ch,ch,ch,ch, *alpha, x[j], ax[j] ); \
 		} \
 \
 		/* Accumulate ff separate axpyv's into y. */ \
@@ -83,7 +83,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 			for ( dim_t i = 0; i < m; ++i ) \
 			for ( dim_t j = 0; j < ff; ++j ) \
 			{ \
-				PASTEMAC(ch,axpys)( ax[j], a[i + j*lda], y[i] ); \
+				bli_taxpys( ch,ch,ch,ch, ax[j], a[i + j*lda], y[i] ); \
 			} \
 		} \
 		else \
@@ -92,7 +92,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 			for ( dim_t i = 0; i < m; ++i ) \
 			for ( dim_t j = 0; j < ff; ++j ) \
 			{ \
-				PASTEMAC(ch,axpyjs)( ax[j], a[i + j*lda], y[i] ); \
+				bli_taxpyjs( ch,ch,ch,ch, ax[j], a[i + j*lda], y[i] ); \
 			} \
 		} \
 	} \
@@ -110,8 +110,8 @@ void PASTEMAC(ch,opname,arch,suf) \
 \
 			ctype alpha_chi1; \
 \
-			PASTEMAC(ch,copycjs)( conjx, *chi1, alpha_chi1 ); \
-			PASTEMAC(ch,scals)( *alpha, alpha_chi1 ); \
+			bli_tcopycjs( ch,ch, conjx, *chi1, alpha_chi1 ); \
+			bli_tscals( ch,ch,ch, *alpha, alpha_chi1 ); \
 \
 			kfp_av \
 			( \

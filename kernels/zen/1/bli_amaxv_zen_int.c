@@ -123,17 +123,17 @@ void bli_samaxv_zen_int
 	   the behavior of netlib BLAS's i?amax() routines. */
 	if ( bli_zero_dim1( n ) )
 	{
-		PASTEMAC(i,copys)( *zero_i, *index );
+		bli_tcopys( i,i, *zero_i, *index );
 		return;
 	}
 
 	/* Initialize the index of the maximum absolute value to zero. */
-	PASTEMAC(i,copys)( *zero_i, i_max_l );
+	bli_tcopys( i,i, *zero_i, i_max_l );
 
 	/* Initialize the maximum absolute value search candidate with
 	   -1, which is guaranteed to be less than all values we will
 	   compute. */
-	PASTEMAC(s,copys)( *minus_one, abs_chi1_max );
+	bli_tcopys( s,s, *minus_one, abs_chi1_max );
 
 	// For non-unit strides, or very small vector lengths, compute with
 	// scalar code.
@@ -290,17 +290,17 @@ void bli_damaxv_zen_int
 	   the behavior of netlib BLAS's i?amax() routines. */
 	if ( bli_zero_dim1( n ) )
 	{
-		PASTEMAC(i,copys)( *zero_i, *index );
+		bli_tcopys( i,i, *zero_i, *index );
 		return;
 	}
 
 	/* Initialize the index of the maximum absolute value to zero. */ \
-	PASTEMAC(i,copys)( *zero_i, i_max_l );
+	bli_tcopys( i,i, *zero_i, i_max_l );
 
 	/* Initialize the maximum absolute value search candidate with
 	   -1, which is guaranteed to be less than all values we will
 	   compute. */
-	PASTEMAC(d,copys)( *minus_one, abs_chi1_max );
+	bli_tcopys( d,d, *minus_one, abs_chi1_max );
 
 	// For non-unit strides, or very small vector lengths, compute with
 	// scalar code.
@@ -446,7 +446,7 @@ void PASTEMAC(ch,varname) \
 	dim_t    i; \
 \
 	/* Initialize the index of the maximum absolute value to zero. */ \
-	PASTEMAC(i,copys)( zero_i, *index ); \
+	bli_tcopys( i,i, zero_i, *index ); \
 \
 	/* If the vector length is zero, return early. This directly emulates
 	   the behavior of netlib BLAS's i?amax() routines. */ \
@@ -455,30 +455,30 @@ void PASTEMAC(ch,varname) \
 	/* Initialize the maximum absolute value search candidate with
 	   -1, which is guaranteed to be less than all values we will
 	   compute. */ \
-	PASTEMAC(chr,copys)( *minus_one, abs_chi1_max ); \
+	bli_tcopys( chr, *minus_one, abs_chi1_max ); \
 \
 	if ( incx == 1 ) \
 	{ \
 		for ( i = 0; i < n; ++i ) \
 		{ \
 			/* Get the real and imaginary components of chi1. */ \
-			PASTEMAC(ch,chr,gets)( x[i], chi1_r, chi1_i ); \
+			bli_tgets( ch,chr, x[i], chi1_r, chi1_i ); \
 \
 			/* Replace chi1_r and chi1_i with their absolute values. */ \
-			PASTEMAC(chr,abval2s)( chi1_r, chi1_r ); \
-			PASTEMAC(chr,abval2s)( chi1_i, chi1_i ); \
+			tabval2s( chr, chi1_r, chi1_r ); \
+			tabval2s( chr, chi1_i, chi1_i ); \
 \
 			/* Add the real and imaginary absolute values together. */ \
-			PASTEMAC(chr,set0s)( abs_chi1 ); \
-			PASTEMAC(chr,adds)( chi1_r, abs_chi1 ); \
-			PASTEMAC(chr,adds)( chi1_i, abs_chi1 ); \
+			bli_tset0s( chr, abs_chi1 ); \
+			bli_tadds( chr, chi1_r, abs_chi1 ); \
+			bli_tadds( chr, chi1_i, abs_chi1 ); \
 \
 			/* If the absolute value of the current element exceeds that of
 			   the previous largest, save it and its index. If NaN is
 			   encountered, then treat it the same as if it were a valid
 			   value that was smaller than any previously seen. This
 			   behavior mimics that of LAPACK's ?lange(). */ \
-			if ( abs_chi1_max < abs_chi1 || bli_isnan( abs_chi1 ) ) \
+			if ( abs_chi1_max < abs_chi1 || PASTEMAC(chr,isnan)( abs_chi1 ) ) \
 			{ \
 				abs_chi1_max = abs_chi1; \
 				*index       = i; \
@@ -492,23 +492,23 @@ void PASTEMAC(ch,varname) \
 			ctype* chi1 = x + (i  )*incx; \
 \
 			/* Get the real and imaginary components of chi1. */ \
-			PASTEMAC(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
+			bli_tgets( ch,chr, *chi1, chi1_r, chi1_i ); \
 \
 			/* Replace chi1_r and chi1_i with their absolute values. */ \
-			PASTEMAC(chr,abval2s)( chi1_r, chi1_r ); \
-			PASTEMAC(chr,abval2s)( chi1_i, chi1_i ); \
+			tabval2s( chr, chi1_r, chi1_r ); \
+			tabval2s( chr, chi1_i, chi1_i ); \
 \
 			/* Add the real and imaginary absolute values together. */ \
-			PASTEMAC(chr,set0s)( abs_chi1 ); \
-			PASTEMAC(chr,adds)( chi1_r, abs_chi1 ); \
-			PASTEMAC(chr,adds)( chi1_i, abs_chi1 ); \
+			bli_tset0s( chr, abs_chi1 ); \
+			bli_tadds( chr, chi1_r, abs_chi1 ); \
+			bli_tadds( chr, chi1_i, abs_chi1 ); \
 \
 			/* If the absolute value of the current element exceeds that of
 			   the previous largest, save it and its index. If NaN is
 			   encountered, then treat it the same as if it were a valid
 			   value that was smaller than any previously seen. This
 			   behavior mimics that of LAPACK's ?lange(). */ \
-			if ( abs_chi1_max < abs_chi1 || bli_isnan( abs_chi1 ) ) \
+			if ( abs_chi1_max < abs_chi1 || PASTEMAC(chr,isnan)( abs_chi1 ) ) \
 			{ \
 				abs_chi1_max = abs_chi1; \
 				*index       = i; \

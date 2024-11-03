@@ -87,7 +87,7 @@ void bli_sdotv_zen_int
 	// If the vector dimension is zero, set rho to zero and return early.
 	if ( bli_zero_dim1( n ) )
 	{
-		PASTEMAC(s,set0s)( *rho );
+		bli_tset0s( s, *rho );
 		return;
 	}
 
@@ -110,7 +110,7 @@ void bli_sdotv_zen_int
 	const float* restrict yp = y;
 
 	// Initialize the local scalar rho1 to zero.
-	PASTEMAC(s,set0s)( rho_l );
+	bli_tset0s( s, rho_l );
 
 	// Initialize the unrolled iterations' rho vectors to zero.
 	rho0v.v = _mm256_setzero_ps();
@@ -173,7 +173,7 @@ void bli_sdotv_zen_int
 	}
 
 	// Copy the final result into the output variable.
-	PASTEMAC(s,copys)( rho_l, *rho );
+	bli_tcopys( s,s, rho_l, *rho );
 }
 
 // -----------------------------------------------------------------------------
@@ -211,7 +211,7 @@ void bli_ddotv_zen_int
 	// If the vector dimension is zero, set rho to zero and return early.
 	if ( bli_zero_dim1( n ) )
 	{
-		PASTEMAC(d,set0s)( *rho );
+		bli_tset0s( d, *rho );
 		return;
 	}
 
@@ -234,7 +234,7 @@ void bli_ddotv_zen_int
 	const double* restrict yp = y;
 
 	// Initialize the local scalar rho1 to zero.
-	PASTEMAC(d,set0s)( rho_l );
+	bli_tset0s( d, rho_l );
 
 	// Initialize the unrolled iterations' rho vectors to zero.
 	rho0v.v = _mm256_setzero_pd();
@@ -296,6 +296,6 @@ void bli_ddotv_zen_int
 	}
 
 	// Copy the final result into the output variable.
-	PASTEMAC(d,copys)( rho_l, *rho );
+	bli_tcopys( d,d, rho_l, *rho );
 }
 

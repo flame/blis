@@ -62,14 +62,16 @@ BLIS_INLINE void PASTEMAC(ch,op) \
 	const ctype* restrict b_cast = b; \
 	      ctype* restrict y_cast = y; \
 \
-	PASTEMAC(ch,ch,ch,xpbys_mxn_l) \
+	bli_txpbys_mxn_uplo \
 	( \
+	  ch,ch,ch,ch, \
 	  diagoff, \
+	  BLIS_LOWER, \
 	  m, \
 	  n, \
 	  x_cast, rs_x, cs_x, \
 	  b_cast, \
-	  y_cast, rs_y,  cs_y \
+	  y_cast, rs_y, cs_y \
 	); \
 }
 

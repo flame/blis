@@ -38,8 +38,8 @@
 
 void bla_z_div(bla_dcomplex *cp, const bla_dcomplex *ap, const bla_dcomplex *bp)
 {
-	bli_zcopys( *ap, *cp );
-	bli_zinvscals( *bp, *cp );
+	bli_tcopys( z,z, *ap, *cp );
+	bli_tinvscals( z,z,z, *bp, *cp );
 }
 
 #endif

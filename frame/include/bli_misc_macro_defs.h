@@ -84,14 +84,6 @@ BLIS_INLINE guint_t bli_round_to_mult( guint_t val, guint_t mult )
 	       );
 }
 
-// isnan, isinf
-// NOTE: These must remain macros, since isinf() and isnan() are macros
-// (defined in math.h) that likely depend on the type of the argument 'a'
-// below.
-
-#define bli_isinf( a )  isinf( a )
-#define bli_isnan( a )  isnan( a )
-
 // is_odd, is_even
 
 BLIS_INLINE bool bli_is_odd( gint_t a )
@@ -130,26 +122,49 @@ BLIS_INLINE void bli_toggle_bool( bool* b )
 	else              *b = TRUE;
 }
 
-// return datatype for char
+// return datatype for datatype char
 
 #define bli_stype ( BLIS_FLOAT    )
 #define bli_dtype ( BLIS_DOUBLE   )
 #define bli_ctype ( BLIS_SCOMPLEX )
 #define bli_ztype ( BLIS_DCOMPLEX )
 
-// return C type for char
+// return C type for datatype char
 
 #define bli_sctype  float
 #define bli_dctype  double
 #define bli_cctype  scomplex
 #define bli_zctype  dcomplex
 
-// return real proj of C type for char
+// return C type for domain and precision chars
+
+#define bli_rsctype float
+#define bli_rdctype double
+#define bli_csctype scomplex
+#define bli_cdctype dcomplex
+
+// return real proj of C type for datatype char
 
 #define bli_sctyper  float
 #define bli_dctyper  double
 #define bli_cctyper  float
 #define bli_zctyper  double
+
+// return precision component of dt char
+
+#define bli_sprec  s
+#define bli_dprec  d
+#define bli_cprec  s
+#define bli_zprec  d
+#define bli_iprec  i
+
+// return domain component of dt char
+
+#define bli_sdom   r
+#define bli_ddom   r
+#define bli_cdom   c
+#define bli_zdom   c
+#define bli_idom   r
 
 // return whether or not two types are the same
 

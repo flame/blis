@@ -208,7 +208,7 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* If alpha is zero, then the entire operation is a no-op. */ \
-	if ( PASTEMAC(ch,eq0)( *alpha ) ) return; \
+	if ( bli_teq0s( ch, *alpha ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
@@ -288,7 +288,7 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	/* If alpha is zero, then we set the output matrix to zero. This
 	   seemingly minor optimization is important because it will clear
 	   any NaNs and Infs in x that would otherwise propogate. */ \
-	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
+	if ( bli_teq0s( ch, *alpha ) ) \
 	{ \
 \
 		PASTEMAC(ch,setm,BLIS_TAPI_EX_SUF) \
@@ -429,7 +429,7 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* If beta is zero, then the operation reduces to copym. */ \
-	if ( PASTEMAC(ch,eq0)( *beta ) ) \
+	if ( bli_teq0s( ch, *beta ) ) \
 	{ \
 		PASTEMAC(ch,copym,_unb_var1) \
 		( \
@@ -520,7 +520,7 @@ void PASTEMAC(chx,chy,opname,EX_SUF) \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* If beta is zero, then the operation reduces to copym. */ \
-	if ( PASTEMAC(chy,eq0)( *beta ) ) \
+	if ( bli_teq0s( chy, *beta ) ) \
 	{ \
 		PASTEMAC(chx,chy,castm) \
 		( \

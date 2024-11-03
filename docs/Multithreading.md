@@ -38,7 +38,7 @@ To summarize: In order to observe multithreaded parallelism within a BLIS operat
 
 BLIS disables multithreading by default. In order to allow multithreaded parallelism from BLIS, you must first enable multithreading explicitly at configure-time.
 
-As of this writing, BLIS optionally supports multithreading via OpenMP or POSIX threads(or both).
+As of this writing, BLIS optionally supports multithreading via OpenMP or POSIX bli_threads(or both).
 
 To enable multithreading via OpenMP, you must provide the `--enable-threading` option to the `configure` script:
 ```

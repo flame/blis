@@ -79,7 +79,7 @@ void bli_caxpyf_zen_int_4
     }
 
     // If either dimension is zero, or if alpha is zero, return early.
-    if ( bli_zero_dim2( m, b_n ) || bli_ceq0( *alpha ) ) return;
+    if ( bli_zero_dim2( m, b_n ) || bli_teq0s( c, *alpha ) ) return;
 
     // If b_n is not equal to the fusing factor, then perform the entire
     // operation as a loop over axpyv.

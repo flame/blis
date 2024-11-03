@@ -238,7 +238,7 @@ void bli_zdotxaxpyf_template_noopt
 	{
 		for ( j = 0; j < b_n; ++j )
 		{
-			bli_zcopys( *xp[ j ], alpha_x[ j ] );
+			bli_tcopys( z,z, *xp[ j ], alpha_x[ j ] );
 			bli_zscals( *alpha, alpha_x[ j ] );
 		}
 	}
@@ -246,7 +246,7 @@ void bli_zdotxaxpyf_template_noopt
 	{
 		for ( j = 0; j < b_n; ++j )
 		{
-			bli_zcopyjs( *xp[ j ], alpha_x[ j ] );
+			bli_tcopyjs( z,z, *xp[ j ], alpha_x[ j ] );
 			bli_zscals( *alpha, alpha_x[ j ] );
 		}
 	}

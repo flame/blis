@@ -58,14 +58,14 @@ void PASTEMAC(ch,opname,arch,suf) \
 			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,subjs)( x[i], y[i] ); \
+				bli_tsubjs( ch,ch,ch, x[i], y[i] ); \
 			} \
 		} \
 		else \
 		{ \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,subjs)( *x, *y ); \
+				bli_tsubjs( ch,ch,ch, *x, *y ); \
 \
 				x += incx; \
 				y += incy; \
@@ -79,14 +79,14 @@ void PASTEMAC(ch,opname,arch,suf) \
 			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,subs)( x[i], y[i] ); \
+				bli_tsubs( ch,ch,ch, x[i], y[i] ); \
 			} \
 		} \
 		else \
 		{ \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,subs)( *x, *y ); \
+				bli_tsubs( ch,ch,ch, *x, *y ); \
 \
 				x += incx; \
 				y += incy; \

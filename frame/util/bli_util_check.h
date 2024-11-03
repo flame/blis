@@ -130,9 +130,9 @@ void PASTEMAC(opname,_check) \
 
 GENTPROT( eqsc )
 GENTPROT( ltsc )
-GENTPROT( ltesc )
+GENTPROT( lesc )
 GENTPROT( gtsc )
-GENTPROT( gtesc )
+GENTPROT( gesc )
 
 
 #undef  GENPROT

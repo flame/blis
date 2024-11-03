@@ -86,8 +86,8 @@ void PASTEMAC(ch,varname) \
 		rs_ct = rs_c; \
 		cs_ct = cs_c; \
 \
-		PASTEMAC(ch,copys)( *alpha, alpha0 ); \
-		PASTEMAC(ch,copycjs)( conjh, *alpha, alpha1 ); \
+		bli_tcopys( ch,ch, *alpha, alpha0 ); \
+		bli_tcopycjs( ch,ch, conjh, *alpha, alpha1 ); \
 	} \
 	else /* if ( bli_is_upper( uplo ) ) */ \
 	{ \
@@ -99,8 +99,8 @@ void PASTEMAC(ch,varname) \
 		conjx = bli_apply_conj( conjh, conjx ); \
 		conjy = bli_apply_conj( conjh, conjy ); \
 \
-		PASTEMAC(ch,copycjs)( conjh, *alpha, alpha0 ); \
-		PASTEMAC(ch,copys)( *alpha, alpha1 ); \
+		bli_tcopycjs( ch,ch, conjh, *alpha, alpha0 ); \
+		bli_tcopys( ch,ch, *alpha, alpha1 ); \
 	} \
 \
 	/* Apply conjh (which carries the conjugation component of the Hermitian
@@ -125,17 +125,17 @@ void PASTEMAC(ch,varname) \
 		c21      = c + (i+1)*rs_ct + (i  )*cs_ct; \
 \
 		/* Apply conjx and/or conjy to chi1 and/or psi1. */ \
-		PASTEMAC(ch,copycjs)( conjh_conjy, *psi1, conjy0_psi1 ); \
-		PASTEMAC(ch,copycjs)( conjh_conjx, *chi1, conjx1_chi1 ); \
-		PASTEMAC(ch,copycjs)( conj0,       *chi1, conjx0_chi1 ); \
+		bli_tcopycjs( ch,ch, conjh_conjy, *psi1, conjy0_psi1 ); \
+		bli_tcopycjs( ch,ch, conjh_conjx, *chi1, conjx1_chi1 ); \
+		bli_tcopycjs( ch,ch, conj0,       *chi1, conjx0_chi1 ); \
 \
 		/* Compute scalars for vector subproblems. */ \
-		PASTEMAC(ch,scal2s)( alpha0, conjy0_psi1, alpha0_psi1 ); \
-		PASTEMAC(ch,scal2s)( alpha1, conjx1_chi1, alpha1_chi1 ); \
+		bli_tscal2s( ch,ch,ch,ch, alpha0, conjy0_psi1, alpha0_psi1 ); \
+		bli_tscal2s( ch,ch,ch,ch, alpha1, conjx1_chi1, alpha1_chi1 ); \
 \
 		/* Compute alpha * chi1 * conj(psi1) after both chi1 and psi1 have
 		   already been conjugated, if needed, by conjx and conjy. */ \
-		PASTEMAC(ch,scal2s)( alpha0_psi1, conjx0_chi1, alpha0_chi1_psi1 ); \
+		bli_tscal2s( ch,ch,ch,ch, alpha0_psi1, conjx0_chi1, alpha0_chi1_psi1 ); \
 \
 		/* c21 = c21 + alpha * x2 * conj(psi1); */ \
 		kfp_av \
@@ -161,13 +161,13 @@ void PASTEMAC(ch,varname) \
 \
 		/* gamma11 = gamma11 +      alpha  * chi1 * conj(psi1) \
 		                     + conj(alpha) * psi1 * conj(chi1); */ \
-		PASTEMAC(ch,adds)( alpha0_chi1_psi1, *gamma11 ); \
-		PASTEMAC(ch,adds)( alpha0_chi1_psi1, *gamma11 ); \
+		bli_tadds( ch,ch,ch, alpha0_chi1_psi1, *gamma11 ); \
+		bli_tadds( ch,ch,ch, alpha0_chi1_psi1, *gamma11 ); \
 \
 		/* For her2, explicitly set the imaginary component of gamma11 to
            zero. */ \
 		if ( bli_is_conj( conjh ) ) \
-			PASTEMAC(ch,seti0s)( *gamma11 ); \
+			bli_tseti0s( ch, *gamma11 ); \
 	} \
 }
 

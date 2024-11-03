@@ -99,7 +99,7 @@ void bli_saxpyf_zen_int_5
     float           chi4;
 
     // If either dimension is zero, or if alpha is zero, return early.
-    if ( bli_zero_dim2( m, b_n ) || bli_seq0( *alpha ) ) return;
+    if ( bli_zero_dim2( m, b_n ) || bli_teq0s( s, *alpha ) ) return;
 
     // If b_n is not equal to the fusing factor, then perform the entire
     // operation as a loop over axpyv.
@@ -348,7 +348,7 @@ void bli_daxpyf_zen_int_5
     double           chi4;
 
     // If either dimension is zero, or if alpha is zero, return early.
-    if ( bli_zero_dim2( m, b_n ) || bli_deq0( *alpha ) ) return;
+    if ( bli_zero_dim2( m, b_n ) || bli_teq0s( d, *alpha ) ) return;
 
     // If b_n is not equal to the fusing factor, then perform the entire
     // operation as a loop over axpyv.
@@ -597,10 +597,10 @@ void bli_daxpyf_zen_int_16x2
 
     v2df_t           a40v, a41v;
 
-    v2df_t           y4v; 
+    v2df_t           y4v;
 
     // If either dimension is zero, or if alpha is zero, return early.
-    if ( bli_zero_dim2( m, b_n ) || bli_deq0( *alpha ) ) return;
+    if ( bli_zero_dim2( m, b_n ) || bli_teq0s( d, *alpha ) ) return;
 
     // If b_n is not equal to the fusing factor, then perform the entire
     // operation as a loop over axpyv.
@@ -888,7 +888,7 @@ void bli_daxpyf_zen_int_16x4
     v2df_t           a40v, a41v, a42v, a43v;
 
     // If either dimension is zero, or if alpha is zero, return early.
-    if ( bli_zero_dim2( m, b_n ) || bli_deq0( *alpha ) ) return;
+    if ( bli_zero_dim2( m, b_n ) || bli_teq0s( d, *alpha ) ) return;
 
     // If b_n is not equal to the fusing factor, then perform the entire
     // operation as a loop over axpyv.

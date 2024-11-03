@@ -91,7 +91,7 @@ void bli_cpackm_haswell_asm_3x8
 
 	// NOTE: If/when this kernel ever supports scaling by kappa within the
 	// assembly region, this constraint should be lifted.
-	const bool     unitk  = bli_ceq1( *(( scomplex* )kappa) );
+	const bool     unitk  = bli_teq1s( c, *(( scomplex* )kappa) );
 
 
 	// -------------------------------------------------------------------------
@@ -590,8 +590,9 @@ void bli_cpackm_haswell_asm_3x8
 	}
 	else
 	{
-		bli_cscal2bbs_mxn
+		bli_tscal2bbs_mxn
 		(
+		  c,c,c,c,
 		  conja,
 		  cdim0,
 		  k0,
@@ -601,11 +602,12 @@ void bli_cpackm_haswell_asm_3x8
 		);
 	}
 
-	bli_cset0s_edge
+	bli_tset0s_edge
 	(
+	  c,
 	  cdim0*cdim_bcast, cdim_max*cdim_bcast,
 	  k0, k0_max,
-	  p, ldp
+	  (scomplex*)p, ldp
 	);
 }
 

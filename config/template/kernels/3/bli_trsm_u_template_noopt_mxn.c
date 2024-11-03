@@ -134,7 +134,7 @@ void bli_ztrsm_u_template_noopt
 			bli_zscals( *alpha11, *chi11 );
 
 			/* Output final result to matrix C. */
-			bli_zcopys( *chi11, *gamma11 );
+			bli_tcopys( z,z, *chi11, *gamma11 );
 		}
 	}
 }

@@ -363,6 +363,6 @@ void bli_zdotaxpyv_template_noopt
 	if ( bli_is_conj( conjy ) )
 		bli_zconjs( dotxy );
 
-	bli_zcopys( dotxy, *rho );
+	bli_tcopys( z,z, dotxy, *rho );
 }
 

@@ -89,12 +89,29 @@ PASTEMAC(opname,_qfp)( num_t dt ) \
 GENFRONT( eqsc )
 GENFRONT( eqv )
 GENFRONT( eqm )
-GENFRONT( ltsc )
-GENFRONT( ltesc )
-GENFRONT( gtsc )
-GENFRONT( gtesc )
 GENFRONT( fprintv )
 GENFRONT( fprintm )
 //GENFRONT( printv )
 //GENFRONT( printm )
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+/*
+GENARRAY_FPA( void_fp, opname ); \
+*/ \
+\
+GENARRAYRO_FPA( PASTECH(opname,_vft), \
+                PASTECH(opname) ); \
+\
+PASTECH(opname,_vft) \
+PASTEMAC(opname,_qfp)( num_t dt ) \
+{ \
+	return PASTECH(opname,_fpa)[ dt ]; \
+}
+
+GENFRONT( ltsc )
+GENFRONT( lesc )
+GENFRONT( gtsc )
+GENFRONT( gesc )
 

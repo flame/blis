@@ -157,10 +157,10 @@ void bli_ddotxf_penryn_int
 	const double* restrict x3 = a_cast + 3*lda;
 	const double* restrict y0 = x_cast;
 
-	PASTEMAC(d,set0s)( rho0 );
-	PASTEMAC(d,set0s)( rho1 );
-	PASTEMAC(d,set0s)( rho2 );
-	PASTEMAC(d,set0s)( rho3 );
+	bli_tset0s( d, rho0 );
+	bli_tset0s( d, rho1 );
+	bli_tset0s( d, rho2 );
+	bli_tset0s( d, rho3 );
 
 	if ( m_pre == 1 )
 	{
@@ -269,15 +269,15 @@ void bli_ddotxf_penryn_int
 		}
 	}
 /*
-	PASTEMAC(d,d,scals)( *beta_cast, *(y_cast  ) ); \
-	PASTEMAC(d,d,scals)( *beta_cast, *(y_cast+1) ); \
-	PASTEMAC(d,d,scals)( *beta_cast, *(y_cast+2) ); \
-	PASTEMAC(d,d,scals)( *beta_cast, *(y_cast+3) ); \
+	bli_tscals( d,d,d, *beta_cast, *(y_cast  ) ); \
+	bli_tscals( d,d,d, *beta_cast, *(y_cast+1) ); \
+	bli_tscals( d,d,d, *beta_cast, *(y_cast+2) ); \
+	bli_tscals( d,d,d, *beta_cast, *(y_cast+3) ); \
 
-	PASTEMAC(d,d,d,axpys)( *alpha_cast, rho1, *(y_cast  ) ); \
-	PASTEMAC(d,d,d,axpys)( *alpha_cast, rho2, *(y_cast+1) ); \
-	PASTEMAC(d,d,d,axpys)( *alpha_cast, rho3, *(y_cast+2) ); \
-	PASTEMAC(d,d,d,axpys)( *alpha_cast, rho4, *(y_cast+3) ); \
+	bli_taxpys( d,d,d,d, *alpha_cast, rho1, *(y_cast  ) ); \
+	bli_taxpys( d,d,d,d, *alpha_cast, rho2, *(y_cast+1) ); \
+	bli_taxpys( d,d,d,d, *alpha_cast, rho3, *(y_cast+2) ); \
+	bli_taxpys( d,d,d,d, *alpha_cast, rho4, *(y_cast+3) ); \
 */
 
 	rho1v.d[0] = rho0;

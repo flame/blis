@@ -83,7 +83,7 @@ void bli_sdotv_zen_int10
 	// If the vector dimension is zero, or if alpha is zero, return early.
 	if ( bli_zero_dim1( n ) )
 	{
-		PASTEMAC(s,set0s)( *rho );
+		bli_tset0s( s, *rho );
 		return;
 	}
 
@@ -91,7 +91,7 @@ void bli_sdotv_zen_int10
 	const float* restrict xp = x;
 	const float* restrict yp = y;
 
-	PASTEMAC(s,set0s)( rho_l );
+	bli_tset0s( s, rho_l );
 
 	if ( incx == 1 && incy == 1 )
 	{
@@ -242,7 +242,7 @@ void bli_sdotv_zen_int10
 	}
 
 	// Copy the final result into the output variable.
-	PASTEMAC(s,copys)( rho_l, *rho );
+	bli_tcopys( s,s, rho_l, *rho );
 }
 
 // -----------------------------------------------------------------------------
@@ -275,7 +275,7 @@ void bli_ddotv_zen_int10
 	// If the vector dimension is zero, or if alpha is zero, return early.
 	if ( bli_zero_dim1( n ) )
 	{
-		PASTEMAC(d,set0s)( *rho );
+		bli_tset0s( d, *rho );
 		return;
 	}
 
@@ -283,7 +283,7 @@ void bli_ddotv_zen_int10
 	const double* restrict xp = x;
 	const double* restrict yp = y;
 
-	PASTEMAC(d,set0s)( rho_l );
+	bli_tset0s( d, rho_l );
 
 	if ( incx == 1 && incy == 1 )
 	{
@@ -455,6 +455,6 @@ void bli_ddotv_zen_int10
 	}
 
 	// Copy the final result into the output variable.
-	PASTEMAC(d,copys)( rho_l, *rho );
+	bli_tcopys( d,d, rho_l, *rho );
 }
 

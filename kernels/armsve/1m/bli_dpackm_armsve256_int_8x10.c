@@ -79,7 +79,7 @@ void bli_dpackm_armsve256_int_8x10
 
     if ( cdim == mr && cdim_bcast == 1 )
     {
-        if ( bli_deq1( *(( double* )kappa) ) )
+        if ( bli_teq1s( d, *(( double* )kappa) ) )
         {
             if ( inca == 1 )  // continous memory. packA style
             {
@@ -183,8 +183,9 @@ void bli_dpackm_armsve256_int_8x10
     }
 	else
 	{
-		bli_dscal2bbs_mxn
+		bli_tscal2bbs_mxn
 		(
+		  d,d,d,d,
 		  conja,
 		  cdim_,
 		  n_,
@@ -194,11 +195,12 @@ void bli_dpackm_armsve256_int_8x10
 		);
 	}
 
-	bli_dset0s_edge
+	bli_tset0s_edge
 	(
+	  d,
 	  cdim_*cdim_bcast, cdim_max*cdim_bcast,
 	  n_, n_max_,
-	  p, ldp
+	  (double*)p, ldp
 	);
 }
 

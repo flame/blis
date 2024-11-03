@@ -73,7 +73,7 @@ void bli_ddotv_penryn_int
 	// If the vector lengths are zero, set rho to zero and return.
 	if ( bli_zero_dim1( n ) )
 	{
-		PASTEMAC(d,set0s)( *rho_cast );
+		bli_tset0s( d, *rho_cast );
 		return;
 	}
 
@@ -122,7 +122,7 @@ void bli_ddotv_penryn_int
 	const double* restrict x1 = x_cast;
 	const double* restrict y1 = y_cast;
 
-	PASTEMAC(d,set0s)( rho1 );
+	bli_tset0s( d, rho1 );
 
 	if ( n_pre == 1 )
 	{
@@ -166,5 +166,5 @@ void bli_ddotv_penryn_int
 		}
 	}
 
-	PASTEMAC(d,copys)( rho1, *rho_cast );
+	bli_tcopys( d,d, rho1, *rho_cast );
 }

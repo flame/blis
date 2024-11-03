@@ -214,7 +214,7 @@ void PASTEMAC(ch,varname) \
 	if ( bli_zero_dim3( m, n, k ) ) return; \
 \
 	/* If alpha is zero, scale by beta and return. */ \
-	if ( PASTEMAC(ch,eq0)( *(( ctype* )alpha) ) ) \
+	if ( bli_teq0s( ch, *(( ctype* )alpha) ) ) \
 	{ \
 		PASTEMAC(ch,scalm) \
 		( \
@@ -561,7 +561,7 @@ void PASTEMAC(ch,varname) \
 	if ( bli_zero_dim3( m, n, k ) ) return; \
 \
 	/* If alpha is zero, scale by beta and return. */ \
-	if ( PASTEMAC(ch,eq0)( *(( ctype* )alpha) ) ) \
+	if ( bli_teq0s( ch, *(( ctype* )alpha) ) ) \
 	{ \
 		PASTEMAC(ch,scalm) \
 		( \

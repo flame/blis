@@ -123,10 +123,10 @@ void bli_obj_create_without_buffer
 	// for A and B are merged).
 	//if      ( bli_is_float( dt )    ) { bli_sset1s( *(( float*    )s) ); }
 	//else if ( bli_is_double( dt )   ) { bli_dset1s( *(( double*   )s) ); }
-	if      ( bli_is_float( dt )    ) { bli_cset1s( *(( scomplex* )s) ); }
-	else if ( bli_is_double( dt )   ) { bli_zset1s( *(( dcomplex* )s) ); }
-	else if ( bli_is_scomplex( dt ) ) { bli_cset1s( *(( scomplex* )s) ); }
-	else if ( bli_is_dcomplex( dt ) ) { bli_zset1s( *(( dcomplex* )s) ); }
+	if      ( bli_is_float( dt )    ) { bli_tset1s( c, *(( scomplex* )s) ); }
+	else if ( bli_is_double( dt )   ) { bli_tset1s( z, *(( dcomplex* )s) ); }
+	else if ( bli_is_scomplex( dt ) ) { bli_tset1s( c, *(( scomplex* )s) ); }
+	else if ( bli_is_dcomplex( dt ) ) { bli_tset1s( z, *(( dcomplex* )s) ); }
 }
 
 void bli_obj_alloc_buffer

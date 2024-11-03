@@ -82,7 +82,7 @@ void bli_sdotxf_zen_int_8
 
 	// If the m dimension is zero, or if alpha is zero, the computation
 	// simplifies to updating y.
-	if ( bli_zero_dim1( m ) || PASTEMAC(s,eq0)( *alpha ) )
+	if ( bli_zero_dim1( m ) || bli_teq0s( s, *alpha ) )
 	{
 		scalv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_SCALV_KER, cntx );
 
@@ -404,7 +404,7 @@ void bli_sdotxf_zen_int_8
 	// We know at this point that alpha is nonzero; however, beta may still
 	// be zero. If beta is indeed zero, we must overwrite y rather than scale
 	// by beta (in case y contains NaN or Inf).
-	if ( PASTEMAC(s,eq0)( *beta ) )
+	if ( bli_teq0s( s, *beta ) )
 	{
 		// Apply alpha to the accumulated dot product in rho:
 		//   y := alpha * rho
@@ -478,7 +478,7 @@ void bli_ddotxf_zen_int_8
 
 	// If the m dimension is zero, or if alpha is zero, the computation
 	// simplifies to updating y.
-	if ( bli_zero_dim1( m ) || PASTEMAC(d,eq0)( *alpha ) )
+	if ( bli_zero_dim1( m ) || bli_teq0s( d, *alpha ) )
 	{
 		scalv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_SCALV_KER, cntx );
 
@@ -791,7 +791,7 @@ void bli_ddotxf_zen_int_8
 	// We know at this point that alpha is nonzero; however, beta may still
 	// be zero. If beta is indeed zero, we must overwrite y rather than scale
 	// by beta (in case y contains NaN or Inf).
-	if ( PASTEMAC(d,eq0)( *beta ) )
+	if ( bli_teq0s( d, *beta ) )
 	{
 		// Apply alpha to the accumulated dot product in rho:
 		//   y := alpha * rho

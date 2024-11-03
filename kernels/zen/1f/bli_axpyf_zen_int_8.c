@@ -92,7 +92,7 @@ void bli_saxpyf_zen_int_8
 	float            chi4, chi5, chi6, chi7;
 
 	// If either dimension is zero, or if alpha is zero, return early.
-	if ( bli_zero_dim2( m, b_n ) || PASTEMAC(s,eq0)( *alpha ) ) return;
+	if ( bli_zero_dim2( m, b_n ) || bli_teq0s( s, *alpha ) ) return;
 
 	// If b_n is not equal to the fusing factor, then perform the entire
 	// operation as a loop over axpyv.
@@ -107,8 +107,8 @@ void bli_saxpyf_zen_int_8
 			      float* restrict y1   = y + (0  )*incy;
 			      float           alpha_chi1;
 
-			PASTEMAC(s,copycjs)( conjx, *chi1, alpha_chi1 );
-			PASTEMAC(s,scals)( *alpha, alpha_chi1 );
+			bli_tcopycjs( s,s, conjx, *chi1, alpha_chi1 );
+			bli_tscals( s,s,s, *alpha, alpha_chi1 );
 
 			f
 			(
@@ -160,14 +160,14 @@ void bli_saxpyf_zen_int_8
 	chi7 = *( x + 7*incx );
 
 	// Scale each chi scalar by alpha.
-	PASTEMAC(s,scals)( *alpha, chi0 );
-	PASTEMAC(s,scals)( *alpha, chi1 );
-	PASTEMAC(s,scals)( *alpha, chi2 );
-	PASTEMAC(s,scals)( *alpha, chi3 );
-	PASTEMAC(s,scals)( *alpha, chi4 );
-	PASTEMAC(s,scals)( *alpha, chi5 );
-	PASTEMAC(s,scals)( *alpha, chi6 );
-	PASTEMAC(s,scals)( *alpha, chi7 );
+	bli_tscals( s,s,s, *alpha, chi0 );
+	bli_tscals( s,s,s, *alpha, chi1 );
+	bli_tscals( s,s,s, *alpha, chi2 );
+	bli_tscals( s,s,s, *alpha, chi3 );
+	bli_tscals( s,s,s, *alpha, chi4 );
+	bli_tscals( s,s,s, *alpha, chi5 );
+	bli_tscals( s,s,s, *alpha, chi6 );
+	bli_tscals( s,s,s, *alpha, chi7 );
 
 	// Broadcast the (alpha*chi?) scalars to all elements of vector registers.
 	chi0v.v = _mm256_broadcast_ss( &chi0 );
@@ -295,7 +295,7 @@ void bli_daxpyf_zen_int_8
 	double           chi4, chi5, chi6, chi7;
 
 	// If either dimension is zero, or if alpha is zero, return early.
-	if ( bli_zero_dim2( m, b_n ) || PASTEMAC(d,eq0)( *alpha ) ) return;
+	if ( bli_zero_dim2( m, b_n ) || bli_teq0s( d, *alpha ) ) return;
 
 	// If b_n is not equal to the fusing factor, then perform the entire
 	// operation as a loop over axpyv.
@@ -310,8 +310,8 @@ void bli_daxpyf_zen_int_8
 			      double* restrict y1   = y + (0  )*incy;
 			      double           alpha_chi1;
 
-			PASTEMAC(d,copycjs)( conjx, *chi1, alpha_chi1 );
-			PASTEMAC(d,scals)( *alpha, alpha_chi1 );
+			bli_tcopycjs( d,d, conjx, *chi1, alpha_chi1 );
+			bli_tscals( d,d,d, *alpha, alpha_chi1 );
 
 			f
 			(
@@ -363,14 +363,14 @@ void bli_daxpyf_zen_int_8
 	chi7 = *( x + 7*incx );
 
 	// Scale each chi scalar by alpha.
-	PASTEMAC(d,scals)( *alpha, chi0 );
-	PASTEMAC(d,scals)( *alpha, chi1 );
-	PASTEMAC(d,scals)( *alpha, chi2 );
-	PASTEMAC(d,scals)( *alpha, chi3 );
-	PASTEMAC(d,scals)( *alpha, chi4 );
-	PASTEMAC(d,scals)( *alpha, chi5 );
-	PASTEMAC(d,scals)( *alpha, chi6 );
-	PASTEMAC(d,scals)( *alpha, chi7 );
+	bli_tscals( d,d,d, *alpha, chi0 );
+	bli_tscals( d,d,d, *alpha, chi1 );
+	bli_tscals( d,d,d, *alpha, chi2 );
+	bli_tscals( d,d,d, *alpha, chi3 );
+	bli_tscals( d,d,d, *alpha, chi4 );
+	bli_tscals( d,d,d, *alpha, chi5 );
+	bli_tscals( d,d,d, *alpha, chi6 );
+	bli_tscals( d,d,d, *alpha, chi7 );
 
 	// Broadcast the (alpha*chi?) scalars to all elements of vector registers.
 	chi0v.v = _mm256_broadcast_sd( &chi0 );
