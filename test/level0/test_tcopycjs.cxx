@@ -35,7 +35,58 @@
 
 #include "test_l0.hpp"
 
-int main()
-{
-	get_unit_test_registrar().run_tests();
-}
+/******************************************************************************
+ *
+ * copycjs
+ *
+ *****************************************************************************/
+
+#undef GENTFUNC
+#define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
+UNIT_TEST(chx,chy,opname) \
+( \
+	for ( auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
+	for ( auto x : test_values<ctypex>() ) \
+	{ \
+		auto y0 = convert<ctypey>( bli_is_conj( conjx ) ? conj( x ) : x ); \
+\
+		INFO( "conjx:    " << bli_is_conj( conjx ) ); \
+		INFO( "x:        " << x ); \
+\
+		ctypey y; \
+		bli_tcopycjs( chx,chy, conjx, x, y ); \
+\
+		INFO( "y (C++):  " << y0 ); \
+		INFO( "y (BLIS): " << y ); \
+\
+		check<ctypey>( y, y0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX2( RC, R, copycjs )
+
+#undef GENTFUNC
+#define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
+UNIT_TEST(chx,chy,opname) \
+( \
+	for ( auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
+	for ( auto x : test_values<ctypex>() ) \
+	{ \
+		auto y0 = convert<ctypey>( bli_is_conj( conjx ) ? conj( x ) : x ); \
+\
+		INFO( "conjx:    " << bli_is_conj( conjx ) ); \
+		INFO( "x:        " << x); \
+\
+		ctypey y; \
+		bli_tcopycjris( chx,chy, conjx, \
+		                real( x ), imag( x ), \
+		                real( y ), imag( y ) ); \
+\
+		INFO( "y (C++):  " << y0 ); \
+		INFO( "y (BLIS): " << y ); \
+\
+		check<ctypey>( y, y0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX2( RC, R, copycjris )

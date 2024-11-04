@@ -35,7 +35,64 @@
 
 #include "test_l0.hpp"
 
-int main()
-{
-	get_unit_test_registrar().run_tests();
-}
+/******************************************************************************
+ *
+ * swaps
+ *
+ *****************************************************************************/
+
+#undef GENTFUNC
+#define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
+UNIT_TEST(chx,chy,opname) \
+( \
+	for ( auto x : test_values<ctypex>() ) \
+	for ( auto y : test_values<ctypey>() ) \
+	{ \
+		auto x0 = convert<ctypex>( y ); \
+		auto y0 = convert<ctypey>( x ); \
+\
+		INFO( "x (init): " << x ); \
+		INFO( "y (init): " << y ); \
+\
+		bli_tswaps( chx,chy, x, y ); \
+\
+		INFO( "x (C++):  " << x0 ); \
+		INFO( "y (C++):  " << y0 ); \
+		INFO( "x (BLIS): " << x ); \
+		INFO( "y (BLIS): " << y ); \
+\
+		check<ctypex>( x, x0 ); \
+		check<ctypey>( y, y0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX2( RC, RC, swaps )
+
+#undef GENTFUNC
+#define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
+UNIT_TEST(chx,chy,opname) \
+( \
+	for ( auto x : test_values<ctypex>() ) \
+	for ( auto y : test_values<ctypey>() ) \
+	{ \
+		auto x0 = convert<ctypex>( y ); \
+		auto y0 = convert<ctypey>( x ); \
+\
+		INFO( "x (init): " << x ); \
+		INFO( "y (init): " << y ); \
+\
+		bli_tswapris( chx,chy, \
+		              real( x ), imag( x ), \
+		              real( y ), imag( y ) ); \
+\
+		INFO( "x (C++):  " << x0 ); \
+		INFO( "y (C++):  " << y0 ); \
+		INFO( "x (BLIS): " << x ); \
+		INFO( "y (BLIS): " << y ); \
+\
+		check<ctypex>( x, x0 ); \
+		check<ctypey>( y, y0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX2( RC, RC, swapris )

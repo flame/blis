@@ -43,10 +43,11 @@
 #include <cassert>
 #include <signal.h>
 #include <type_traits>
+#include <functional>
 
 #include "blis.h"
 
-using unit_test_t = void(*)();
+using unit_test_t = std::function<void()>;
 
 struct variable_printer_base
 {
@@ -109,7 +110,7 @@ struct unit_test_registrar
             {
                 test();
             }
-            catch (unit_test_failure)
+            catch (const unit_test_failure&)
             {
                 failed++;
             }
@@ -135,6 +136,7 @@ struct unit_test_registrar
         vars.pop_back();
     }
 
+    [[noreturn]]
     void fail(const char* cond)
     {
         printf("%sFAILURE%s\n\n", red().c_str(), normal().c_str());
@@ -178,15 +180,15 @@ struct variable_printer : variable_printer_base
         get_unit_test_registrar().pop_var(this);
     }
 
-    variable_printer& operator<<(const char* message)
+    variable_printer& operator<<(const char* m)
     {
-        this->message = message;
+        message = m;
         return *this;
     }
 
-    variable_printer& operator<<(const T& var)
+    variable_printer& operator<<(const T& v)
     {
-        this->var = var;
+        var = v;
         return *this;
     }
 
@@ -206,14 +208,14 @@ struct variable_printer<void> : variable_printer_base
         get_unit_test_registrar().push_var(this);
     }
 
-    virtual ~variable_printer()
+    virtual ~variable_printer() override
     {
         get_unit_test_registrar().pop_var(this);
     }
 
-    variable_printer& operator<<(const char* message)
+    variable_printer& operator<<(const char* m)
     {
-        this->message = message;
+        message = m;
         return *this;
     }
 
@@ -243,27 +245,27 @@ struct variable_printer_helper
 VARIABLE_PRINTER(__VA_ARGS__) VAR_NAME(id); \
 VAR_NAME(id) << __VA_ARGS__;
 
-#if ENABLE_INFO
+#ifdef ENABLE_INFO
 #define INFO(...) INFO_(__COUNTER__, __VA_ARGS__)
 #else
 #define INFO(...)
 #endif
 
-#define TEST_NAME_(line) unit_test_##line
-#define TEST_NAME(line) TEST_NAME_(line)
+#define TEST_NAME_(line,name) unit_test_##name##_##line
+#define TEST_NAME(line,name) TEST_NAME_(line,name)
 
-#define TEST_ID_(line) unit_test_id_##line
-#define TEST_ID(line) TEST_ID_(line)
+#define TEST_ID_(line,name) unit_test_id_##name##_##line
+#define TEST_ID(line,name) TEST_ID_(line,name)
 
 #define TEST_CASE_(id,name) \
-extern "C" void TEST_NAME(id)(); \
-static auto TEST_ID(id) = register_unit_test(TEST_NAME(id)); \
-void TEST_NAME(id)()
-#define TEST_CASE(name) TEST_CASE_(__COUNTER__,name)
+extern "C" void TEST_NAME(id,name)(); \
+static auto TEST_ID(id,name) = register_unit_test(TEST_NAME(id,name)); \
+void TEST_NAME(id,name)()
+#define TEST_CASE(name) TEST_CASE_(__LINE__,name)
 
 #define REQUIRE(cond) \
 do { \
-    if ( !BLIS_LIKELY( cond ) ) \
+    if ( !__builtin_expect( !!(cond), 1 ) ) \
     { \
         get_unit_test_registrar().fail( #cond ); \
     } \
@@ -302,20 +304,20 @@ class Approx
 };
 
 #define UNIT_TEST1( ch1, opname ) \
-TEST_CASE(STRINGIFY_INT(ch1##opname)) \
+TEST_CASE(ch1##opname) \
 { \
     INFO("Type character 1: " << #ch1); \
     printf("Testing: %s...", STRINGIFY_INT(ch1##opname));
 
 #define UNIT_TEST2( ch1, ch2, opname ) \
-TEST_CASE(STRINGIFY_INT(ch1##ch2##opname)) \
+TEST_CASE(ch1##ch2##opname) \
 { \
     INFO("Type character 1: " << #ch1); \
     INFO("Type character 2: " << #ch2); \
     printf("Testing: %s...", STRINGIFY_INT(ch1##ch2##opname));
 
 #define UNIT_TEST3( ch1, ch2, ch3, opname ) \
-TEST_CASE(STRINGIFY_INT(ch1##ch2##ch3##opname)) \
+TEST_CASE(ch1##ch2##ch3##opname) \
 { \
     INFO("Type character 1: " << #ch1); \
     INFO("Type character 2: " << #ch2); \
@@ -323,7 +325,7 @@ TEST_CASE(STRINGIFY_INT(ch1##ch2##ch3##opname)) \
     printf("Testing: %s...", STRINGIFY_INT(ch1##ch2##ch3##opname));
 
 #define UNIT_TEST4( ch1, ch2, ch3, ch4, opname ) \
-TEST_CASE(STRINGIFY_INT(ch1##ch2##ch3##ch4##opname)) \
+TEST_CASE(ch1##ch2##ch3##ch4##opname) \
 { \
     INFO("Type character 1: " << #ch1); \
     INFO("Type character 2: " << #ch2); \
@@ -332,7 +334,7 @@ TEST_CASE(STRINGIFY_INT(ch1##ch2##ch3##ch4##opname)) \
     printf("Testing: %s...", STRINGIFY_INT(ch1##ch2##ch3##ch4##opname));
 
 #define UNIT_TEST5( ch1, ch2, ch3, ch4, ch5, opname ) \
-TEST_CASE(STRINGIFY_INT(ch1##ch2##ch3##ch4##ch5##opname)) \
+TEST_CASE(ch1##ch2##ch3##ch4##ch5##opname) \
 { \
     INFO("Type character 1: " << #ch1); \
     INFO("Type character 2: " << #ch2); \
@@ -714,6 +716,40 @@ std::array<std::array<make_real_t<T>,N>,M> imag(const std::array<std::array<T,N>
     return ret;
 }
 
+template <size_t D, size_t M, size_t N, typename T>
+std::enable_if_t<!is_complex<T>::value,std::array<std::array<T,N>,M*D>>
+bcast(const std::array<std::array<T,N>,M>& x)
+{
+    std::array<std::array<T,N>,D*M> ret;
+    for (size_t d = 0;d < D;d++)
+    for (size_t i = 0;i < M;i++)
+    for (size_t j = 0;j < N;j++)
+        ret[d + i*D][j] = x[i][j];
+    return ret;
+}
+
+template <size_t D, size_t M, size_t N, typename T>
+std::enable_if_t<is_complex<T>::value,std::array<std::array<T,N>,M*D>>
+bcast(const std::array<std::array<T,N>,M>& x)
+{
+    std::array<std::array<make_real_t<T>,N>,2*D*M> ret_r;
+    std::array<std::array<T,N>,D*M> ret;
+    for (size_t d = 0;d < D;d++)
+    for (size_t i = 0;i < M;i++)
+    for (size_t j = 0;j < N;j++)
+    {
+        ret_r[d + i*D + 0*D*M][j] = real(x[i][j]);
+        ret_r[d + i*D + 1*D*M][j] = imag(x[i][j]);
+    }
+    for (size_t i = 0;i < D*M;i++)
+    for (size_t j = 0;j < N;j++)
+    {
+        real(ret[i][j]) = ret_r[i*2+0][j];
+        imag(ret[i][j]) = ret_r[i*2+1][j];
+    }
+    return ret;
+}
+
 struct dense_cond
 {
     bool operator()(dim_t, dim_t) const { return true; }
@@ -725,7 +761,7 @@ struct is_below
 {
     doff_t diagoff;
 
-    is_below(doff_t diagoff) : diagoff(diagoff) {}
+    is_below(doff_t d) : diagoff(d) {}
 
     bool operator()(dim_t i, dim_t j) const { return j-i <= diagoff; }
 };
@@ -734,7 +770,7 @@ struct is_above
 {
     doff_t diagoff;
 
-    is_above(doff_t diagoff) : diagoff(diagoff) {}
+    is_above(doff_t d) : diagoff(d) {}
 
     bool operator()(dim_t i, dim_t j) const { return j-i >= diagoff; }
 };

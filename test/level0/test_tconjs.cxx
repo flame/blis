@@ -35,7 +35,50 @@
 
 #include "test_l0.hpp"
 
-int main()
-{
-	get_unit_test_registrar().run_tests();
-}
+/******************************************************************************
+ *
+ * conjs
+ *
+ *****************************************************************************/
+
+#undef GENTFUNC
+#define GENTFUNC( opname, ctypey, chy ) \
+UNIT_TEST(chy,opname) \
+( \
+	for ( auto y : test_values<ctypey>() ) \
+	{ \
+		auto y0 = conj( y ); \
+\
+		INFO( "y (init): " << y ); \
+\
+		bli_tconjs( chy, y ); \
+\
+		INFO( "y (C++):  " << y0 ); \
+		INFO( "y (BLIS): " << y ); \
+\
+		check<ctypey>( y, y0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX1( C, conjs )
+
+#undef GENTFUNC
+#define GENTFUNC( opname, ctypey, chy ) \
+UNIT_TEST(chy,opname) \
+( \
+	for ( auto y : test_values<ctypey>() ) \
+	{ \
+		auto y0 = conj( y ); \
+\
+		INFO( "y (init): " << y ); \
+\
+		bli_tconjris( chy, real( y ), imag( y ) ); \
+\
+		INFO( "y (C++):  " << y0 ); \
+		INFO( "y (BLIS): " << y ); \
+\
+		check<ctypey>( y, y0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX1( C, conjris )

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -36,7 +36,7 @@
 # Makefile
 #
 # Field G. Van Zee
-# 
+#
 # Makefile for standalone BLIS test drivers.
 #
 
@@ -47,7 +47,6 @@
 .PHONY: all \
         test-ranges \
         clean cleanx
-
 
 
 #
@@ -63,12 +62,12 @@ LIB_PATH   := $(BLIS_INSTALL_PATH)/lib
 INC_PATH   := $(BLIS_INSTALL_PATH)/include/blis
 SHARE_PATH := $(BLIS_INSTALL_PATH)/share/blis
 else
+CONFIG_NAME := $(shell grep -E "CONFIG_NAME *:=" ../../config.mk | sed 's/.*:= *//')
 DIST_PATH  := ../..
 LIB_PATH    = ../../lib/$(CONFIG_NAME)
 INC_PATH    = ../../include/$(CONFIG_NAME)
 SHARE_PATH := ../..
 endif
-
 
 
 #
@@ -79,7 +78,6 @@ endif
 -include $(SHARE_PATH)/common.mk
 
 
-
 #
 # --- General build definitions ------------------------------------------------
 #
@@ -88,56 +86,51 @@ TEST_SRC_PATH  := .
 TEST_OBJ_PATH  := .
 
 # Gather all local object files.
-TEST_OBJS      := $(sort $(patsubst $(TEST_SRC_PATH)/%.c, \
-                                    $(TEST_OBJ_PATH)/%.o, \
-                                    $(wildcard $(TEST_SRC_PATH)/*.c)))
+SRC_SUFFIXES   := c cxx cpp
+TEST_OBJS      := $(foreach suf, \
+                            $(SRC_SUFFIXES), \
+                            $(sort $(patsubst $(TEST_SRC_PATH)/%.$(suf), \
+                                              $(TEST_OBJ_PATH)/%.o, \
+                                              $(wildcard $(TEST_SRC_PATH)/*.$(suf)))))
 
 # Override the value of CINCFLAGS so that the value of CFLAGS returned by
 # get-user-cflags-for() is not cluttered up with include paths needed only
 # while building BLIS.
 CINCFLAGS      := -I$(INC_PATH)
+CXXINCFLAGS    := -I$(INC_PATH)
+CXXLANGFLAGS   := -std=c++17
 
 # Use the CFLAGS for the configuration family.
-#CFLAGS         := $(call get-user-cflags-for,$(CONFIG_NAME))
-CFLAGS         := $(strip -mavx2 -mfma -mfpmath=sse -march=haswell \
-                          -funsafe-math-optimizations \
-                          $(call get-user-cflags-for,$(CONFIG_NAME)))
-#                          -funsafe-math-optimizations -ffp-contract=fast
+CFLAGS         := $(call get-frame-cflags-for,$(CONFIG_NAME))
+CXXFLAGS       := $(call get-frame-cxxflags-for,$(CONFIG_NAME))
 
 # Add installed and local header paths to CFLAGS
 CFLAGS         += -I$(TEST_SRC_PATH)
+CXXFLAGS       += -I$(TEST_SRC_PATH)
 
-HEADERS         := $(wildcard $(TEST_SRC_PATH)/*.h)
-
-# Locate the libblis library to which we will link.
-#LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
-
+HDR_SUFFIXES   := h hpp
+HEADERS        := $(foreach suf, $(HDR_SUFFIXES), $(wildcard $(TEST_SRC_PATH)/*.$(suf)))
 
 
 #
 # --- Targets/rules ------------------------------------------------------------
 #
 
-all: test asm
-
-asm: test_l0.s
+all: test
 
 test: test_l0.x
 
-
-
-# -- Object file rules --
-
-$(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
 
 # -- Source file rules --
 
 test_%.o: test_%.c Makefile $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-test_%.s: test_%.c Makefile $(HEADERS)
-	$(CC) -S $(CFLAGS) -c $< -o $@
+test_%.o: test_%.cpp Makefile $(HEADERS)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+test_%.o: test_%.cxx Makefile $(HEADERS)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 
 # -- Executable file rules --
@@ -147,8 +140,8 @@ test_%.s: test_%.c Makefile $(HEADERS)
 # compatibility layer. This prevents BLIS from inadvertently getting called
 # for the BLAS routines we are trying to test with.
 
-test_l0.x: test_l0.o $(LIBBLIS_LINK)
-	$(LINKER) $< $(LIBBLIS_LINK) $(LDFLAGS) -o $@
+test_l0.x: $(TEST_OBJS) $(LIBBLIS_LINK)
+	$(CXX) $(TEST_OBJS) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
 
 # -- Clean rules --
@@ -156,5 +149,5 @@ test_l0.x: test_l0.o $(LIBBLIS_LINK)
 clean: cleanx
 
 cleanx:
-	- $(RM_F) *.o *.x test_l0.s
+	- $(RM_F) *.o *.x
 

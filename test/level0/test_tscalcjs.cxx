@@ -35,7 +35,34 @@
 
 #include "test_l0.hpp"
 
-int main()
-{
-	get_unit_test_registrar().run_tests();
-}
+/******************************************************************************
+ *
+ * scalcjs
+ *
+ *****************************************************************************/
+
+#undef GENTFUNC
+#define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypec, chc ) \
+UNIT_TEST(cha,chx,chc,opname) \
+( \
+	for ( auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
+	for ( auto a : test_values<ctypea>() ) \
+	for ( auto x : test_values<ctypex>() ) \
+	{ \
+		auto y0 = convert<ctypex>( convert_prec<ctypec>( a ) * \
+		                           convert_prec<ctypec>( bli_is_conj( conjx ) ? conj( x ) : x ) ); \
+\
+		INFO( "a:        " << a ); \
+		INFO( "x:        " << x ); \
+\
+		ctypex y = x; \
+		bli_tscalcjs( cha,chx,chc, conjx, a, y ); \
+\
+		INFO( "y (C++):  " << y0 ); \
+		INFO( "y (BLIS): " << y ); \
+\
+		check<ctypec>( y, y0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX3( RC, RC, R, scalcjs )

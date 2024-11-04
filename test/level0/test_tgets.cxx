@@ -35,7 +35,37 @@
 
 #include "test_l0.hpp"
 
-int main()
-{
-	get_unit_test_registrar().run_tests();
-}
+/******************************************************************************
+ *
+ * gets
+ *
+ *****************************************************************************/
+
+#undef GENTFUNC
+#define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
+UNIT_TEST(chx,chy,opname) \
+( \
+\
+	using ctypeyr = make_real_t<ctypey>; \
+	using ctypeyc = make_complex_t<ctypey>; \
+\
+	for ( auto x : test_values<ctypex>() ) \
+	{ \
+		auto y0 = convert<ctypeyc>( x ); \
+\
+		INFO( "x:        " << x ); \
+\
+		ctypeyr yr, yi; \
+		bli_tgets( chx,chy, x, yr, yi ); \
+\
+		INFO( "yr (C++):  " << real( y0 ) ); \
+		INFO( "yi (C++):  " << imag( y0 ) ); \
+		INFO( "yr (BLIS): " << yr ); \
+		INFO( "yi (BLIS): " << yi ); \
+\
+		check<ctypey>( yr, real( y0 ) ); \
+		check<ctypey>( yi, imag( y0 ) ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX2( RC, RC, gets )

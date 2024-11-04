@@ -35,7 +35,54 @@
 
 #include "test_l0.hpp"
 
-int main()
-{
-	get_unit_test_registrar().run_tests();
-}
+/******************************************************************************
+ *
+ * neg2s
+ *
+ *****************************************************************************/
+
+#undef GENTFUNC
+#define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
+UNIT_TEST(chx,chy,opname) \
+( \
+	for ( auto x : test_values<ctypex>() ) \
+	{ \
+		auto y0 = convert<ctypey>( -x ); \
+\
+		INFO( "x:        " << x ); \
+\
+		ctypey y; \
+		bli_tneg2s( chx,chy, x, y ); \
+\
+		INFO( "y (C++):  " << y0 ); \
+		INFO( "y (BLIS): " << y ); \
+\
+		check<ctypey>( y, y0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX2( RC, R, neg2s )
+
+#undef GENTFUNC
+#define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
+UNIT_TEST(chx,chy,opname) \
+( \
+	for ( auto x : test_values<ctypex>() ) \
+	{ \
+		auto y0 = convert<ctypey>( -x ); \
+\
+		INFO( "x:        " << x ); \
+\
+		ctypey y; \
+		bli_tneg2ris( chx,chy, \
+		              real( x ), imag( x ), \
+		              real( y ), imag( y ) ); \
+\
+		INFO( "y (C++):  " << y0 ); \
+		INFO( "y (BLIS): " << y ); \
+\
+		check<ctypey>( y, y0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX2( RC, R, neg2ris )

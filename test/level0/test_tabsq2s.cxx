@@ -35,7 +35,52 @@
 
 #include "test_l0.hpp"
 
-int main()
-{
-	get_unit_test_registrar().run_tests();
-}
+/******************************************************************************
+ *
+ * absq2s
+ *
+ *****************************************************************************/
+
+#undef GENTFUNC
+#define GENTFUNC( opname, ctypex, chx, ctypey, chy, ctypec, chc ) \
+UNIT_TEST(chx,chy,chc,opname) \
+( \
+	for ( auto x : test_values<ctypex>() ) \
+	{ \
+		auto y0 = convert<ctypey>( norm( convert_prec<ctypec>( x ) ) ); \
+\
+		ctypey y; \
+		bli_tabsq2s( chx,chy,chc, x, y ); \
+\
+		INFO( "x:        " << x ); \
+		INFO( "y (C++):  " << y0 ); \
+		INFO( "y (BLIS): " << y ); \
+\
+		check<ctypec>( y, y0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX3( RC, RC, R, absq2s )
+
+#undef GENTFUNC
+#define GENTFUNC( opname, ctypex, chx, ctypey, chy, ctypec, chc ) \
+UNIT_TEST(chx,chy,chc,opname) \
+( \
+	for ( auto x : test_values<ctypex>() ) \
+	{ \
+		auto y0 = convert<ctypey>( norm( convert_prec<ctypec>( x ) ) ); \
+\
+		ctypey y; \
+		bli_tabsq2ris( chx,chy,chc, \
+		               real( x ), imag( x ), \
+		               real( y ), imag( y ) ); \
+\
+		INFO( "x:        " << x ); \
+		INFO( "y (C++):  " << y0 ); \
+		INFO( "y (BLIS): " << y ); \
+\
+		check<ctypec>( y, y0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX3( RC, RC, R, absq2ris )
