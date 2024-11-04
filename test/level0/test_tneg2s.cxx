@@ -61,7 +61,28 @@ UNIT_TEST(chx,chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX2( RC, R, neg2s )
+INSERT_GENTFUNC_MIX2( RC, RC, neg2s )
+
+#undef GENTFUNC
+#define GENTFUNC( opname, ctypex, chx ) \
+UNIT_TEST(chx,opname) \
+( \
+	for ( auto x : test_values<ctypex>() ) \
+	{ \
+		auto x0 = -x; \
+\
+		INFO( "x:        " << x ); \
+\
+		bli_tneg2s( chx,chx, x, x ); \
+\
+		INFO( "x (C++):  " << x0 ); \
+		INFO( "x (BLIS): " << x ); \
+\
+		check<ctypex>( x, x0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX1( RC, neg2s_inplace )
 
 #undef GENTFUNC
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
@@ -85,4 +106,4 @@ UNIT_TEST(chx,chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX2( RC, R, neg2ris )
+INSERT_GENTFUNC_MIX2( RC, RC, neg2ris )

@@ -299,15 +299,15 @@ UNIT_TEST(chy,PASTECH(opname,_,D)) \
   \
 	for ( auto y : test_values<ctypey>() ) \
 	{ \
-		auto ymn = tile<D*M,N>( y ); \
+		auto ymn = tile<M,D*N>( y ); \
 \
 		INFO( "column-major" ); \
 \
-		auto ymn0 = tile<D*M,N>( convert<ctypey>( 0.0 ) ); \
+		auto ymn0 = tile<M,D*N>( convert<ctypey>( 0.0 ) ); \
 \
 		INFO( "y (init):\n" << ymn ); \
 \
-		bli_tset0s_mxn( chy, N, M, &ymn[0][0], 1, N ); \
+		bli_tset0bbs_mxn( chy, N, M, &ymn[0][0], D, D*N ); \
 \
 		INFO( "y (C++):\n" << ymn0 ); \
 		INFO( "y (BLIS):\n" << ymn ); \
@@ -349,7 +349,7 @@ UNIT_TEST(chy,PASTECH(opname,_,M,_,N)) \
 \
 		INFO( "y (init):\n" << ymn ); \
 \
-		bli_tset0s_edge( chy, M, M0, N, N0, &ymn[0][0], M0 ); \
+		bli_tset0s_edge( chy, N, N0, M, M0, &ymn[0][0], N0 ); \
 \
 		INFO( "y (C++):\n" << ymn0 ); \
 		INFO( "y (BLIS):\n" << ymn ); \

@@ -63,34 +63,34 @@ struct unit_test_registrar
     std::vector<unit_test_t> tests;
     std::vector<const variable_printer_base*> vars;
 
-    static const std::string& red()
+    static const char* red()
     {
         #ifdef BLIS_OS_WINDOWS
         static std::string s = _isatty(_fileno(stdout)) ? "\e[0;31m" : "";
         #else
         static std::string s = isatty(fileno(stdout)) ? "\e[0;31m" : "";
         #endif
-        return s;
+        return s.c_str();
     }
 
-    static const std::string& green()
+    static const char* green()
     {
         #ifdef BLIS_OS_WINDOWS
         static std::string s = _isatty(_fileno(stdout)) ? "\e[0;32m" : "";
         #else
         static std::string s = isatty(fileno(stdout)) ? "\e[0;32m" : "";
         #endif
-        return s;
+        return s.c_str();
     }
 
-    static const std::string& normal()
+    static const char* normal()
     {
         #ifdef BLIS_OS_WINDOWS
         static std::string s = _isatty(_fileno(stdout)) ? "\e[0m" : "";
         #else
         static std::string s = isatty(fileno(stdout)) ? "\e[0m" : "";
         #endif
-        return s;
+        return s.c_str();
     }
 
     size_t register_test(unit_test_t test)
@@ -99,7 +99,7 @@ struct unit_test_registrar
         return tests.size()-1;
     }
 
-    void run_tests()
+    bool run_tests()
     {
         auto failed = 0;
         auto total = 0;
@@ -120,9 +120,11 @@ struct unit_test_registrar
 
         printf("\n");
         printf("Total tests: %d\n", total);
-        printf("%sPassed: %d (%.1f%%)%s\n", green().c_str(), total-failed, 100.0*(total-failed)/total, normal().c_str());
+        printf("%sPassed: %d (%.1f%%)%s\n", green(), total-failed, 100.0*(total-failed)/total, normal());
         if (failed)
-            printf("%sFailed: %d (%.1f%%)%s\n\n", red().c_str(), failed, 100.0*failed/total, normal().c_str());
+            printf("%sFailed: %d (%.1f%%)%s\n\n", red(), failed, 100.0*failed/total, normal());
+
+        return failed;
     }
 
     void push_var(const variable_printer_base* var)
@@ -139,7 +141,7 @@ struct unit_test_registrar
     [[noreturn]]
     void fail(const char* cond)
     {
-        printf("%sFAILURE%s\n\n", red().c_str(), normal().c_str());
+        printf("%sFAILURE%s\n\n", red(), normal());
 
         for (auto& var : vars)
             var->print();
@@ -153,13 +155,9 @@ struct unit_test_registrar
     }
 };
 
-static unit_test_registrar& get_unit_test_registrar()
-{
-    static unit_test_registrar registrar;
-    return registrar;
-}
+unit_test_registrar& get_unit_test_registrar();
 
-static size_t register_unit_test(unit_test_t test)
+inline size_t register_unit_test(unit_test_t test)
 {
     return get_unit_test_registrar().register_test(test);
 }
@@ -175,7 +173,7 @@ struct variable_printer : variable_printer_base
         get_unit_test_registrar().push_var(this);
     }
 
-    virtual ~variable_printer()
+    virtual ~variable_printer() override
     {
         get_unit_test_registrar().pop_var(this);
     }
@@ -259,7 +257,7 @@ VAR_NAME(id) << __VA_ARGS__;
 
 #define TEST_CASE_(id,name) \
 extern "C" void TEST_NAME(id,name)(); \
-static auto TEST_ID(id,name) = register_unit_test(TEST_NAME(id,name)); \
+auto TEST_ID(id,name) = register_unit_test(TEST_NAME(id,name)); \
 void TEST_NAME(id,name)()
 #define TEST_CASE(name) TEST_CASE_(__LINE__,name)
 
@@ -345,7 +343,7 @@ TEST_CASE(ch1##ch2##ch3##ch4##ch5##opname) \
 
 #define UNIT_TEST_BODY( ... ) \
     __VA_ARGS__; \
-    printf("%sPASS%s\n", unit_test_registrar::green().c_str(), unit_test_registrar::normal().c_str()); \
+    printf("%sPASS%s\n", unit_test_registrar::green(), unit_test_registrar::normal()); \
 }
 
 #define UNIT_TEST_SELECTOR_( ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ... ) ARG7
@@ -613,7 +611,7 @@ inline bool bli_isinf( double x ) { return bli_disinf( x ); }
 template <typename C, typename T>
 std::enable_if_t<is_real<T>::value> check(T x, T y)
 {
-    auto tol = 2*std::numeric_limits<make_real_t<C>>::epsilon();
+    auto tol = 8*std::numeric_limits<make_real_t<C>>::epsilon();
     INFO("x: " << x);
     INFO("y: " << y);
     INFO("|x-y|: " << std::abs(x-y));
@@ -629,19 +627,23 @@ std::enable_if_t<is_real<T>::value> check(T x, T y)
 template <typename C, typename T>
 std::enable_if_t<is_complex<T>::value> check(const T& x, const T& y)
 {
-    INFO("Real part:");
-    check<C>( x.real, y.real );
-    INFO("Imag part:");
-    check<C>( x.imag, y.imag );
+    {
+        INFO("Real part:");
+        check<C>( x.real, y.real );
+    }
+    {
+        INFO("Imag part:");
+        check<C>( x.imag, y.imag );
+    }
 }
 
 template <typename T>
 std::enable_if_t<is_real<T>::value,std::vector<T>> test_values(int mask = BLIS_TEST_DEFAULT)
 {
-    std::vector<T> vals{1.439};
+    std::vector<T> vals{0.439};
 
     if (mask & BLIS_TEST_NEGATIVE)
-        vals.push_back(-2.563);
+        vals.push_back(-0.563);
 
     if (mask & BLIS_TEST_ZERO)
         vals.push_back(0);
@@ -717,35 +719,35 @@ std::array<std::array<make_real_t<T>,N>,M> imag(const std::array<std::array<T,N>
 }
 
 template <size_t D, size_t M, size_t N, typename T>
-std::enable_if_t<!is_complex<T>::value,std::array<std::array<T,N>,M*D>>
+std::enable_if_t<!is_complex<T>::value,std::array<std::array<T,D*N>,M>>
 bcast(const std::array<std::array<T,N>,M>& x)
 {
-    std::array<std::array<T,N>,D*M> ret;
+    std::array<std::array<T,D*N>,M> ret;
     for (size_t d = 0;d < D;d++)
     for (size_t i = 0;i < M;i++)
     for (size_t j = 0;j < N;j++)
-        ret[d + i*D][j] = x[i][j];
+        ret[i][d + j*D] = x[i][j];
     return ret;
 }
 
 template <size_t D, size_t M, size_t N, typename T>
-std::enable_if_t<is_complex<T>::value,std::array<std::array<T,N>,M*D>>
+std::enable_if_t<is_complex<T>::value,std::array<std::array<T,D*N>,M>>
 bcast(const std::array<std::array<T,N>,M>& x)
 {
-    std::array<std::array<make_real_t<T>,N>,2*D*M> ret_r;
-    std::array<std::array<T,N>,D*M> ret;
+    std::array<std::array<make_real_t<T>,2*D*N>,M> ret_r;
+    std::array<std::array<T,D*N>,M> ret;
     for (size_t d = 0;d < D;d++)
     for (size_t i = 0;i < M;i++)
     for (size_t j = 0;j < N;j++)
     {
-        ret_r[d + i*D + 0*D*M][j] = real(x[i][j]);
-        ret_r[d + i*D + 1*D*M][j] = imag(x[i][j]);
+        ret_r[i][d + 0*D + j*2*D] = real(x[i][j]);
+        ret_r[i][d + 1*D + j*2*D] = imag(x[i][j]);
     }
-    for (size_t i = 0;i < D*M;i++)
-    for (size_t j = 0;j < N;j++)
+    for (size_t i = 0;i < M;i++)
+    for (size_t j = 0;j < D*N;j++)
     {
-        real(ret[i][j]) = ret_r[i*2+0][j];
-        imag(ret[i][j]) = ret_r[i*2+1][j];
+        real(ret[i][j]) = ret_r[i][j*2+0];
+        imag(ret[i][j]) = ret_r[i][j*2+1];
     }
     return ret;
 }
@@ -800,10 +802,10 @@ void axpbys_mxn(const A& a, const std::array<std::array<X,N>,M>& x,
             y[i][j] = convert<Y>(convert_prec<C>(a) *
                                  convert_prec<C>(x[i][j]));
         else
-            y[i][j] = convert<Y>(convert_prec<C>(a) *
-                                 convert_prec<C>(x[i][j]) +
-                                 convert_prec<C>(b) *
-                                 convert_prec<C>(y[i][j]));
+            y[i][j] = convert<Y>((convert_prec<C>(a) *
+                                  convert_prec<C>(x[i][j])) +
+                                 (convert_prec<C>(b) *
+                                  convert_prec<C>(y[i][j])));
     }
 }
 

@@ -106,10 +106,10 @@ CXXFLAGS       := $(call get-frame-cxxflags-for,$(CONFIG_NAME))
 
 # Add installed and local header paths to CFLAGS
 CFLAGS         += -I$(TEST_SRC_PATH)
-CXXFLAGS       += -I$(TEST_SRC_PATH)
+CXXFLAGS       += -I$(TEST_SRC_PATH) -DENABLE_INFO
 
 HDR_SUFFIXES   := h hpp
-HEADERS        := $(foreach suf, $(HDR_SUFFIXES), $(wildcard $(TEST_SRC_PATH)/*.$(suf)))
+HEADERS        := $(foreach suf, $(HDR_SUFFIXES), $(wildcard $(TEST_SRC_PATH)/*.$(suf))) $(INC_PATH)/blis.h
 
 
 #

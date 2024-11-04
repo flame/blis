@@ -67,6 +67,30 @@ UNIT_TEST(cha,chx,chy,chc,opname) \
 INSERT_GENTFUNC_MIX4( RC, RC, RC, R, scal2s )
 
 #undef GENTFUNC
+#define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypec, chc ) \
+UNIT_TEST(cha,chx,chc,opname) \
+( \
+	for ( auto a : test_values<ctypea>() ) \
+	for ( auto x : test_values<ctypex>() ) \
+	{ \
+		auto x0 = convert<ctypex>( convert_prec<ctypec>( a ) * \
+		                           convert_prec<ctypec>( x ) ); \
+\
+		INFO( "a:        " << a ); \
+		INFO( "x:        " << x ); \
+\
+		bli_tscal2s( cha,chx,chx,chc, a, x, x ); \
+\
+		INFO( "x (C++):  " << x0 ); \
+		INFO( "x (BLIS): " << x ); \
+\
+		check<ctypec>( x, x0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX3( RC, RC, R, scal2s_inplace )
+
+#undef GENTFUNC
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(cha,chx,chy,chc,opname) \
 ( \
@@ -274,7 +298,7 @@ UNIT_TEST(cha,chx,chy,chc,PASTECH(opname,_,D)) \
 	{ \
 		auto xmn = tile<M,N>( x ); \
 		auto ymn00 = tile<M,N,ctypey>(); \
-		auto ymn = tile<D*M,N,ctypey>(); \
+		auto ymn = tile<M,D*N,ctypey>(); \
 \
 		INFO("column-major"); \
 \
@@ -285,7 +309,7 @@ UNIT_TEST(cha,chx,chy,chc,PASTECH(opname,_,D)) \
 		INFO( "a:     " << a ); \
 		INFO( "x:\n" << xmn ); \
 \
-		bli_tscal2bbs_mxn( cha,chx,chy,chc, conjx, N, M, &a, &xmn[0][0], 1, N, &ymn[0][0], D, N ); \
+		bli_tscal2bbs_mxn( cha,chx,chy,chc, conjx, N, M, &a, &xmn[0][0], 1, N, &ymn[0][0], D, D*N ); \
 \
 		INFO( "y (C++):\n" << ymn0 ); \
 		INFO( "y (BLIS):\n" << ymn ); \

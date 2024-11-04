@@ -51,9 +51,9 @@
           chc  \
         ) \
 { \
-	PASTEMAC(dy,declinits)( py, yr, yi, yorigr, yorigi ) \
-	PASTEMAC(dy,assigns) \
+	PASTEMAC(c,declinits) \
 	( \
+	  py, \
 	  PASTEMAC(chc,py,tcast)( \
 	    PASTEMAC(chc,add)( \
 	      PASTEMAC(chc,sub)( \
@@ -77,14 +77,14 @@
 	          chc, \
 	          PASTEMAC(chc,mul)( \
 	            PASTEMAC(pb,chc,tcast)(br), \
-	            PASTEMAC(py,chc,tcast)(yorigr) \
+	            PASTEMAC(py,chc,tcast)(yr) \
 	          )  \
 	        ), \
 	        PASTEMAC(db,dy,termii)( \
 	          chc, \
 	          PASTEMAC(chc,mul)( \
 	            PASTEMAC(pb,chc,tcast)(bi), \
-	            PASTEMAC(py,chc,tcast)(yorigi) \
+	            PASTEMAC(py,chc,tcast)(yi) \
 	          ) \
 	        ) \
 	      ) \
@@ -113,19 +113,26 @@
 	          chc, \
 	          PASTEMAC(chc,mul)( \
 	            PASTEMAC(pb,chc,tcast)(bi), \
-	            PASTEMAC(py,chc,tcast)(yorigr) \
+	            PASTEMAC(py,chc,tcast)(yr) \
 	          )  \
 	        ), \
 	        PASTEMAC(db,dy,termri)( \
 	          chc, \
 	          PASTEMAC(chc,mul)( \
 	            PASTEMAC(pb,chc,tcast)(br), \
-	            PASTEMAC(py,chc,tcast)(yorigi) \
+	            PASTEMAC(py,chc,tcast)(yi) \
 	          ) \
 	        ) \
 	      ) \
 	    ) \
 	  ), \
+	  tr, \
+	  ti \
+	); \
+	PASTEMAC(dy,assigns) \
+	( \
+	  tr, \
+	  ti, \
 	  yr, \
 	  yi \
 	); \

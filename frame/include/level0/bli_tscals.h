@@ -168,7 +168,7 @@
 // -- 1e / 1r --
 
 // scal1es
-#define bli_tscal1es( cha, chx, chc, a, xir, xri ) \
+#define bli_tscal1es( cha, chx, chc, a, xri, xir ) \
         bli_tscalims \
         ( \
           PASTEMAC(cha,dom),  \

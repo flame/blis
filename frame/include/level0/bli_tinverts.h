@@ -177,7 +177,7 @@
 // -- 1e / 1r --
 
 // invert1es
-#define bli_tinvert1es( chx, chc, xir, xri ) \
+#define bli_tinvert1es( chx, chc, xri, xir ) \
         bli_tinvertims \
         ( \
           PASTEMAC(chx,dom),  \

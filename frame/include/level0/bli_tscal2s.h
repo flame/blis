@@ -317,23 +317,49 @@
 	const dim_t d    = incy; \
 	const dim_t ds_y = 1; \
 \
-	for ( dim_t j = 0; j < (n); ++j ) \
+	if ( bli_is_conj( conjx ) ) \
 	{ \
-		ctypex* restrict xj = (ctypex*)(x) + j*(ldx); \
-		ctypey* restrict yj = (ctypey*)(y) + j*(ldy); \
-\
-		for ( dim_t i = 0; i < (m); ++i ) \
+		for ( dim_t j = 0; j < (n); ++j ) \
 		{ \
-			ctypex* restrict xij = xj + i*(incx); \
-			ctypey* restrict yij = yj + i*(incy); \
-\
-			bli_tscal2s( cha,chx,chy,chc, *(const ctypea* restrict)(alpha), *xij, *yij ); \
-\
-			for ( dim_t p = 1; p < d; ++p ) \
+			ctypex* restrict xj = (ctypex*)(x) + j*(ldx); \
+			ctypey* restrict yj = (ctypey*)(y) + j*(ldy); \
+	\
+			for ( dim_t i = 0; i < (m); ++i ) \
 			{ \
-				ctypey* restrict yijd = yij + p*ds_y; \
-\
-				bli_tcopys( chy,chy, *yij, *yijd ); \
+				ctypex* restrict xij = xj + i*(incx); \
+				ctypey* restrict yij = yj + i*(incy); \
+	\
+				bli_tscal2js( cha,chx,chy,chc, *(const ctypea* restrict)(alpha), *xij, *yij ); \
+	\
+				for ( dim_t p = 1; p < d; ++p ) \
+				{ \
+					ctypey* restrict yijd = yij + p*ds_y; \
+	\
+					bli_tcopys( chy,chy, *yij, *yijd ); \
+				} \
+			} \
+		} \
+	} \
+	else \
+	{ \
+		for ( dim_t j = 0; j < (n); ++j ) \
+		{ \
+			ctypex* restrict xj = (ctypex*)(x) + j*(ldx); \
+			ctypey* restrict yj = (ctypey*)(y) + j*(ldy); \
+	\
+			for ( dim_t i = 0; i < (m); ++i ) \
+			{ \
+				ctypex* restrict xij = xj + i*(incx); \
+				ctypey* restrict yij = yj + i*(incy); \
+	\
+				bli_tscal2s( cha,chx,chy,chc, *(const ctypea* restrict)(alpha), *xij, *yij ); \
+	\
+				for ( dim_t p = 1; p < d; ++p ) \
+				{ \
+					ctypey* restrict yijd = yij + p*ds_y; \
+	\
+					bli_tcopys( chy,chy, *yij, *yijd ); \
+				} \
 			} \
 		} \
 	} \
@@ -356,11 +382,11 @@
 	const dim_t       d          = incy; \
 	const dim_t       ds_y       = 1; \
 \
-	const inc_t       incx2      = 2 * (incx); \
-	const inc_t       ldx2       = 2 * (ldx); \
+	const inc_t       incx2      = sizeof(ctypex) / sizeof(ctypex_r) * (incx); \
+	const inc_t       ldx2       = sizeof(ctypex) / sizeof(ctypex_r) * (ldx); \
 \
-	const inc_t       incy2      = 2 * (incy); \
-	const inc_t       ldy2       = 2 * (ldy); \
+	const inc_t       incy2      = sizeof(ctypey) / sizeof(ctypey_r) * (incy); \
+	const inc_t       ldy2       = sizeof(ctypey) / sizeof(ctypey_r) * (ldy); \
 \
 	ctypea_r* restrict alpha_r    = ( ctypea_r* )(alpha); \
 	ctypea_r* restrict alpha_i    = ( ctypea_r* )(alpha) + 1; (void)alpha_i; \

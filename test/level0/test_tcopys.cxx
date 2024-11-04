@@ -61,7 +61,7 @@ UNIT_TEST(chx,chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX2( RC, R, copys )
+INSERT_GENTFUNC_MIX2( RC, RC, copys )
 
 #undef GENTFUNC
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
@@ -83,7 +83,28 @@ UNIT_TEST(chx,chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX2( RC, R, copyjs )
+INSERT_GENTFUNC_MIX2( RC, RC, copyjs )
+
+#undef GENTFUNC
+#define GENTFUNC( opname, ctypex, chx ) \
+UNIT_TEST(chx,opname) \
+( \
+	for ( auto x : test_values<ctypex>() ) \
+	{ \
+		auto x0 = convert<ctypex>( conj( x ) ); \
+\
+		INFO( "x:        " << x ); \
+\
+		bli_tcopyjs( chx,chx, x, x ); \
+\
+		INFO( "x (C++):  " << x0 ); \
+		INFO( "x (BLIS): " << x ); \
+\
+		check<ctypex>( x, x0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX1( RC, copyjs_inplace )
 
 #undef GENTFUNC
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
@@ -107,7 +128,7 @@ UNIT_TEST(chx,chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX2( RC, R, copyris )
+INSERT_GENTFUNC_MIX2( RC, RC, copyris )
 
 #undef GENTFUNC
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
@@ -131,7 +152,7 @@ UNIT_TEST(chx,chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX2( RC, R, copyjris )
+INSERT_GENTFUNC_MIX2( RC, RC, copyjris )
 
 #undef GENTFUNC
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
@@ -157,7 +178,7 @@ UNIT_TEST(chx,chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX2( C, R, copy1es )
+INSERT_GENTFUNC_MIX2( C, C, copy1es )
 
 #undef GENTFUNC
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
@@ -183,7 +204,7 @@ UNIT_TEST(chx,chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX2( C, R, copyj1es )
+INSERT_GENTFUNC_MIX2( C, C, copyj1es )
 
 #undef GENTFUNC
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
@@ -205,7 +226,7 @@ UNIT_TEST(chx,chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX2( C, R, copy1rs )
+INSERT_GENTFUNC_MIX2( C, C, copy1rs )
 
 #undef GENTFUNC
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
@@ -218,7 +239,7 @@ UNIT_TEST(chx,chy,opname) \
 		INFO( "x:        " << x ); \
 \
 		ctypey y; \
-		bli_tcopy1rs( chx,chy, x, real( y ), imag( y ) ); \
+		bli_tcopyj1rs( chx,chy, x, real( y ), imag( y ) ); \
 \
 		INFO( "y (C++):  " << y0 ); \
 		INFO( "y (BLIS): " << y ); \
@@ -227,7 +248,7 @@ UNIT_TEST(chx,chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX2( C, R, copyj1rs )
+INSERT_GENTFUNC_MIX2( C, C, copyj1rs )
 
 #undef GENTFUNC
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
@@ -277,4 +298,4 @@ UNIT_TEST(chx,chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX2( RC, R, copys_mxn )
+INSERT_GENTFUNC_MIX2( RC, RC, copys_mxn )

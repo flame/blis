@@ -63,7 +63,30 @@ UNIT_TEST(chx,chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX2( RC, R, copycjs )
+INSERT_GENTFUNC_MIX2( RC, RC, copycjs )
+
+#undef GENTFUNC
+#define GENTFUNC( opname, ctypex, chx ) \
+UNIT_TEST(chx,opname) \
+( \
+	for ( auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
+	for ( auto x : test_values<ctypex>() ) \
+	{ \
+		auto x0 = convert<ctypex>( bli_is_conj( conjx ) ? conj( x ) : x ); \
+\
+		INFO( "conjx:    " << bli_is_conj( conjx ) ); \
+		INFO( "x:        " << x ); \
+\
+		bli_tcopycjs( chx,chx, conjx, x, x ); \
+\
+		INFO( "x (C++):  " << x0 ); \
+		INFO( "x (BLIS): " << x ); \
+\
+		check<ctypex>( x, x0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX1( RC, copycjs_inplace )
 
 #undef GENTFUNC
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
@@ -89,4 +112,4 @@ UNIT_TEST(chx,chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX2( RC, R, copycjris )
+INSERT_GENTFUNC_MIX2( RC, RC, copycjris )

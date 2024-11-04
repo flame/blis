@@ -60,7 +60,7 @@ UNIT_TEST(chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX1( C, conjs )
+INSERT_GENTFUNC_MIX1( RC, conjs )
 
 #undef GENTFUNC
 #define GENTFUNC( opname, ctypey, chy ) \
@@ -81,4 +81,4 @@ UNIT_TEST(chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX1( C, conjris )
+INSERT_GENTFUNC_MIX1( RC, conjris )

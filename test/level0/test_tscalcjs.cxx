@@ -49,9 +49,10 @@ UNIT_TEST(cha,chx,chc,opname) \
 	for ( auto a : test_values<ctypea>() ) \
 	for ( auto x : test_values<ctypex>() ) \
 	{ \
-		auto y0 = convert<ctypex>( convert_prec<ctypec>( a ) * \
-		                           convert_prec<ctypec>( bli_is_conj( conjx ) ? conj( x ) : x ) ); \
+		auto y0 = convert<ctypex>( convert_prec<ctypec>( bli_is_conj( conjx ) ? conj( a ) : a ) * \
+		                           convert_prec<ctypec>( x ) ); \
 \
+		INFO( "conjx:    " << conjx ); \
 		INFO( "a:        " << a ); \
 		INFO( "x:        " << x ); \
 \

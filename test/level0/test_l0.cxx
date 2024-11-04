@@ -35,7 +35,13 @@
 
 #include "test_l0.hpp"
 
+unit_test_registrar& get_unit_test_registrar()
+{
+	static unit_test_registrar registrar;
+	return registrar;
+}
+
 int main()
 {
-	get_unit_test_registrar().run_tests();
+	return !get_unit_test_registrar().run_tests();
 }

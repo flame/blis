@@ -72,6 +72,34 @@ UNIT_TEST(cha,chx,chb,chy,chc,opname) \
 INSERT_GENTFUNC_MIX5( RC, RC, RC, RC, R, axpbys )
 
 #undef GENTFUNC
+#define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypeb, chb, ctypec, chc ) \
+UNIT_TEST(cha,chx,chb,chc,opname) \
+( \
+	for ( auto a : test_values<ctypea>() ) \
+	for ( auto x : test_values<ctypex>() ) \
+	for ( auto b : test_values<ctypeb>() ) \
+	{ \
+		auto x0 = convert<ctypex>( convert_prec<ctypec>( a ) * \
+		                           convert_prec<ctypec>( x ) + \
+		                           convert_prec<ctypec>( b ) * \
+		                           convert_prec<ctypec>( x ) ); \
+\
+		INFO( "a:        " << a ); \
+		INFO( "x:        " << x ); \
+		INFO( "b:        " << b ); \
+\
+		bli_taxpbys( cha,chx,chb,chx,chc, a, x, b, x ); \
+\
+		INFO( "x (C++):  " << x0 ); \
+		INFO( "x (BLIS): " << x ); \
+\
+		check<ctypec>( x, x0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX4( RC, RC, RC, R, axpbys_inplace )
+
+#undef GENTFUNC
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypeb, chb, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(cha,chx,chb,chy,chc,opname) \
 ( \

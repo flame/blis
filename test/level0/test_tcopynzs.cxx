@@ -65,7 +65,7 @@ UNIT_TEST(chx,chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX2( RC, R, copynzs )
+INSERT_GENTFUNC_MIX2( RC, RC, copynzs )
 
 #undef GENTFUNC
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
@@ -91,7 +91,7 @@ UNIT_TEST(chx,chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX2( RC, R, copyjnzs )
+INSERT_GENTFUNC_MIX2( RC, RC, copyjnzs )
 
 #undef GENTFUNC
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
@@ -119,7 +119,7 @@ UNIT_TEST(chx,chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX2( RC, R, copynzris )
+INSERT_GENTFUNC_MIX2( RC, RC, copynzris )
 
 #undef GENTFUNC
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
@@ -147,4 +147,4 @@ UNIT_TEST(chx,chy,opname) \
 	} \
 )
 
-INSERT_GENTFUNC_MIX2( RC, R, copyjnzris )
+INSERT_GENTFUNC_MIX2( RC, RC, copyjnzris )
