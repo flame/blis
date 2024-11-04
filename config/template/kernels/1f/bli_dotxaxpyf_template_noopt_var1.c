@@ -239,7 +239,7 @@ void bli_zdotxaxpyf_template_noopt
 		for ( j = 0; j < b_n; ++j )
 		{
 			bli_tcopys( z,z, *xp[ j ], alpha_x[ j ] );
-			bli_zscals( *alpha, alpha_x[ j ] );
+			bli_tscals( z,z,z, *alpha, alpha_x[ j ] );
 		}
 	}
 	else // if ( bli_is_conj( conjx ) )
@@ -247,14 +247,14 @@ void bli_zdotxaxpyf_template_noopt
 		for ( j = 0; j < b_n; ++j )
 		{
 			bli_tcopyjs( z,z, *xp[ j ], alpha_x[ j ] );
-			bli_zscals( *alpha, alpha_x[ j ] );
+			bli_tscals( z,z,z, *alpha, alpha_x[ j ] );
 		}
 	}
 
 	// Initialize our accumulators to zero.
 	for ( j = 0; j < b_n; ++j )
 	{
-		bli_zset0s( At_w[ j ] );
+		bli_tset0s( z, At_w[ j ] );
 	}
 
 
@@ -278,8 +278,8 @@ void bli_zdotxaxpyf_template_noopt
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zdots( *ap[ j ], *wp, At_w[ j ] );
-				bli_zdots( *ap[ j ], alpha_x[ j ], *zp );
+				bli_tdots( z,z,z,z, *ap[ j ], *wp, At_w[ j ] );
+				bli_tdots( z,z,z,z, *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += 1;
 			}
@@ -295,8 +295,8 @@ void bli_zdotxaxpyf_template_noopt
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zdots( *ap[ j ], *wp, At_w[ j ] );
-				bli_zdots( *ap[ j ], alpha_x[ j ], *zp );
+				bli_tdots( z,z,z,z, *ap[ j ], *wp, At_w[ j ] );
+				bli_tdots( z,z,z,z, *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += n_elem_per_iter;
 			}
@@ -308,8 +308,8 @@ void bli_zdotxaxpyf_template_noopt
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zdots( *ap[ j ], *wp, At_w[ j ] );
-				bli_zdots( *ap[ j ], alpha_x[ j ], *zp );
+				bli_tdots( z,z,z,z, *ap[ j ], *wp, At_w[ j ] );
+				bli_tdots( z,z,z,z, *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += 1;
 			}
@@ -323,8 +323,8 @@ void bli_zdotxaxpyf_template_noopt
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zdotjs( *ap[ j ], *wp, At_w[ j ] );
-				bli_zdots( *ap[ j ], alpha_x[ j ], *zp );
+				bli_tdotjs( z,z,z,z, *ap[ j ], *wp, At_w[ j ] );
+				bli_tdots( z,z,z,z, *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += 1;
 			}
@@ -340,8 +340,8 @@ void bli_zdotxaxpyf_template_noopt
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zdotjs( *ap[ j ], *wp, At_w[ j ] );
-				bli_zdots( *ap[ j ], alpha_x[ j ], *zp );
+				bli_tdotjs( z,z,z,z, *ap[ j ], *wp, At_w[ j ] );
+				bli_tdots( z,z,z,z, *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += n_elem_per_iter;
 			}
@@ -353,8 +353,8 @@ void bli_zdotxaxpyf_template_noopt
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zdotjs( *ap[ j ], *wp, At_w[ j ] );
-				bli_zdots( *ap[ j ], alpha_x[ j ], *zp );
+				bli_tdotjs( z,z,z,z, *ap[ j ], *wp, At_w[ j ] );
+				bli_tdots( z,z,z,z, *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += 1;
 			}
@@ -368,8 +368,8 @@ void bli_zdotxaxpyf_template_noopt
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zdots( *ap[ j ], *wp, At_w[ j ] );
-				bli_zdotjs( *ap[ j ], alpha_x[ j ], *zp );
+				bli_tdots( z,z,z,z, *ap[ j ], *wp, At_w[ j ] );
+				bli_tdotjs( z,z,z,z, *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += 1;
 			}
@@ -385,8 +385,8 @@ void bli_zdotxaxpyf_template_noopt
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zdots( *ap[ j ], *wp, At_w[ j ] );
-				bli_zdotjs( *ap[ j ], alpha_x[ j ], *zp );
+				bli_tdots( z,z,z,z, *ap[ j ], *wp, At_w[ j ] );
+				bli_tdotjs( z,z,z,z, *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += n_elem_per_iter;
 			}
@@ -398,8 +398,8 @@ void bli_zdotxaxpyf_template_noopt
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zdots( *ap[ j ], *wp, At_w[ j ] );
-				bli_zdotjs( *ap[ j ], alpha_x[ j ], *zp );
+				bli_tdots( z,z,z,z, *ap[ j ], *wp, At_w[ j ] );
+				bli_tdotjs( z,z,z,z, *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += 1;
 			}
@@ -413,8 +413,8 @@ void bli_zdotxaxpyf_template_noopt
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zdotjs( *ap[ j ], *wp, At_w[ j ] );
-				bli_zdotjs( *ap[ j ], alpha_x[ j ], *zp );
+				bli_tdotjs( z,z,z,z, *ap[ j ], *wp, At_w[ j ] );
+				bli_tdotjs( z,z,z,z, *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += 1;
 			}
@@ -430,8 +430,8 @@ void bli_zdotxaxpyf_template_noopt
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zdotjs( *ap[ j ], *wp, At_w[ j ] );
-				bli_zdotjs( *ap[ j ], alpha_x[ j ], *zp );
+				bli_tdotjs( z,z,z,z, *ap[ j ], *wp, At_w[ j ] );
+				bli_tdotjs( z,z,z,z, *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += n_elem_per_iter;
 			}
@@ -443,8 +443,8 @@ void bli_zdotxaxpyf_template_noopt
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zdotjs( *ap[ j ], *wp, At_w[ j ] );
-				bli_zdotjs( *ap[ j ], alpha_x[ j ], *zp );
+				bli_tdotjs( z,z,z,z, *ap[ j ], *wp, At_w[ j ] );
+				bli_tdotjs( z,z,z,z, *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += 1;
 			}
@@ -459,7 +459,7 @@ void bli_zdotxaxpyf_template_noopt
 	{
 		for ( j = 0; j < b_n; ++j )
 		{
-			bli_zconjs( At_w[ j ] );
+			bli_tconjs( z, At_w[ j ] );
 		}
 	}
 
@@ -467,8 +467,8 @@ void bli_zdotxaxpyf_template_noopt
 	// scaling by beta.
 	for ( j = 0; j < b_n; ++j )
 	{
-		bli_zscals( *beta, *yp[ j ] );
-		bli_zaxpys( *alpha, At_w[ j ], *yp[ j ] );
+		bli_tscals( z,z,z, *beta, *yp[ j ] );
+		bli_taxpys( z,z,z,z, *alpha, At_w[ j ], *yp[ j ] );
 	}
 }
 

@@ -121,8 +121,8 @@ void bli_obj_create_without_buffer
 	// scenarios. Failing to do this can lead to reading uninitialized
 	// memory just before calling the macrokernel (as the internal scalars
 	// for A and B are merged).
-	//if      ( bli_is_float( dt )    ) { bli_sset1s( *(( float*    )s) ); }
-	//else if ( bli_is_double( dt )   ) { bli_dset1s( *(( double*   )s) ); }
+	//if      ( bli_is_float( dt )    ) { bli_tset1s( s, *(( float*    )s) ); }
+	//else if ( bli_is_double( dt )   ) { bli_tset1s( d, *(( double*   )s) ); }
 	if      ( bli_is_float( dt )    ) { bli_tset1s( c, *(( scomplex* )s) ); }
 	else if ( bli_is_double( dt )   ) { bli_tset1s( z, *(( dcomplex* )s) ); }
 	else if ( bli_is_scomplex( dt ) ) { bli_tset1s( c, *(( scomplex* )s) ); }
@@ -312,10 +312,10 @@ void bli_obj_free
 	//temp_z = bli_obj_buffer_for_const( BLIS_DCOMPLEX, obj );
 	//temp_i = bli_obj_buffer_for_const( BLIS_INT,      obj );
 
-	bli_dssets( value, 0.0, *temp_s );
-	bli_ddsets( value, 0.0, *temp_d );
-	bli_dcsets( value, 0.0, *temp_c );
-	bli_dzsets( value, 0.0, *temp_z );
+	bli_tsets( d,s, value, 0.0, *temp_s );
+	bli_tsets( d,d, value, 0.0, *temp_d );
+	bli_tsets( d,c, value, 0.0, *temp_c );
+	bli_tsets( d,z, value, 0.0, *temp_z );
 
 	*temp_i = ( gint_t ) value;
 }
@@ -347,33 +347,33 @@ void bli_obj_free
 
 	buf_a = bli_obj_buffer_at_off( a );
 
-	bli_zzsets( 0.0, 0.0, value );
+	bli_tsets( z,z, 0.0, 0.0, value );
 
 	if ( bli_obj_is_float( a ) )
 	{
-		bli_szcopys( *(( float*    )buf_a), value );
+		bli_tcopys( s,z, *(( float*    )buf_a), value );
 	}
 	else if ( bli_obj_is_double( a ) )
 	{
-		bli_dzcopys( *(( double*   )buf_a), value );
+		bli_tcopys( d,z, *(( double*   )buf_a), value );
 	}
 	else if ( bli_obj_is_scomplex( a ) )
 	{
-		bli_czcopys( *(( scomplex* )buf_a), value );
+		bli_tcopys( c,z, *(( scomplex* )buf_a), value );
 	}
 	else if ( bli_obj_is_dcomplex( a ) )
 	{
-		bli_zzcopys( *(( dcomplex* )buf_a), value );
+		bli_tcopys( z,z, *(( dcomplex* )buf_a), value );
 	}
 	else
 	{
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 	}
 
-	bli_zscopys( value, *temp_s );
-	bli_zdcopys( value, *temp_d );
-	bli_zccopys( value, *temp_c );
-	bli_zzcopys( value, *temp_z );
+	bli_tcopys( z,s, value, *temp_s );
+	bli_tcopys( z,d, value, *temp_d );
+	bli_tcopys( z,c, value, *temp_c );
+	bli_tcopys( z,z, value, *temp_z );
 
 	*temp_i = ( gint_t ) bli_zreal( value );
 }

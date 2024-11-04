@@ -194,8 +194,8 @@ void bli_zaxpy2v_template_noopt
 		// Compute front edge cases if x, y, and z were unaligned.
 		for ( i = 0; i < n_pre; ++i )
 		{
-			bli_zaxpys( *alpha1, *xp, *zp );
-			bli_zaxpys( *alpha2, *yp, *zp );
+			bli_taxpys( z,z,z,z, *alpha1, *xp, *zp );
+			bli_taxpys( z,z,z,z, *alpha2, *yp, *zp );
 
 			xp += 1; yp += 1; zp += 1;
 		}
@@ -207,8 +207,8 @@ void bli_zaxpy2v_template_noopt
 		// to BLIS_SIMD_ALIGN_SIZE.
 		for ( i = 0; i < n_iter; ++i )
 		{
-			bli_zaxpys( *alpha1, *xp, *zp );
-			bli_zaxpys( *alpha2, *yp, *zp );
+			bli_taxpys( z,z,z,z, *alpha1, *xp, *zp );
+			bli_taxpys( z,z,z,z, *alpha2, *yp, *zp );
 
 			xp += n_elem_per_iter;
 			yp += n_elem_per_iter;
@@ -218,8 +218,8 @@ void bli_zaxpy2v_template_noopt
 		// Compute tail edge cases, if applicable.
 		for ( i = 0; i < n_left; ++i )
 		{
-			bli_zaxpys( *alpha1, *xp, *zp );
-			bli_zaxpys( *alpha2, *yp, *zp );
+			bli_taxpys( z,z,z,z, *alpha1, *xp, *zp );
+			bli_taxpys( z,z,z,z, *alpha2, *yp, *zp );
 
 			xp += 1; yp += 1; zp += 1;
 		}
@@ -229,8 +229,8 @@ void bli_zaxpy2v_template_noopt
 		// Compute front edge cases if x, y, and z were unaligned.
 		for ( i = 0; i < n_pre; ++i )
 		{
-			bli_zaxpys(  *alpha1, *xp, *zp );
-			bli_zaxpyjs( *alpha2, *yp, *zp );
+			bli_taxpys( z,z,z,z,  *alpha1, *xp, *zp );
+			bli_taxpyjs( z,z,z,z, *alpha2, *yp, *zp );
 
 			xp += 1; yp += 1; zp += 1;
 		}
@@ -242,8 +242,8 @@ void bli_zaxpy2v_template_noopt
 		// to BLIS_SIMD_ALIGN_SIZE.
 		for ( i = 0; i < n_iter; ++i )
 		{
-			bli_zaxpys(  *alpha1, *xp, *zp );
-			bli_zaxpyjs( *alpha2, *yp, *zp );
+			bli_taxpys( z,z,z,z,  *alpha1, *xp, *zp );
+			bli_taxpyjs( z,z,z,z, *alpha2, *yp, *zp );
 
 			xp += n_elem_per_iter;
 			yp += n_elem_per_iter;
@@ -253,8 +253,8 @@ void bli_zaxpy2v_template_noopt
 		// Compute tail edge cases, if applicable.
 		for ( i = 0; i < n_left; ++i )
 		{
-			bli_zaxpys(  *alpha1, *xp, *zp );
-			bli_zaxpyjs( *alpha2, *yp, *zp );
+			bli_taxpys( z,z,z,z,  *alpha1, *xp, *zp );
+			bli_taxpyjs( z,z,z,z, *alpha2, *yp, *zp );
 
 			xp += 1; yp += 1; zp += 1;
 		}
@@ -264,8 +264,8 @@ void bli_zaxpy2v_template_noopt
 		// Compute front edge cases if x, y, and z were unaligned.
 		for ( i = 0; i < n_pre; ++i )
 		{
-			bli_zaxpyjs( *alpha1, *xp, *zp );
-			bli_zaxpys(  *alpha2, *yp, *zp );
+			bli_taxpyjs( z,z,z,z, *alpha1, *xp, *zp );
+			bli_taxpys( z,z,z,z,  *alpha2, *yp, *zp );
 
 			xp += 1; yp += 1; zp += 1;
 		}
@@ -277,8 +277,8 @@ void bli_zaxpy2v_template_noopt
 		// to BLIS_SIMD_ALIGN_SIZE.
 		for ( i = 0; i < n_iter; ++i )
 		{
-			bli_zaxpyjs( *alpha1, *xp, *zp );
-			bli_zaxpys(  *alpha2, *yp, *zp );
+			bli_taxpyjs( z,z,z,z, *alpha1, *xp, *zp );
+			bli_taxpys( z,z,z,z,  *alpha2, *yp, *zp );
 
 			xp += n_elem_per_iter;
 			yp += n_elem_per_iter;
@@ -288,8 +288,8 @@ void bli_zaxpy2v_template_noopt
 		// Compute tail edge cases, if applicable.
 		for ( i = 0; i < n_left; ++i )
 		{
-			bli_zaxpyjs( *alpha1, *xp, *zp );
-			bli_zaxpys(  *alpha2, *yp, *zp );
+			bli_taxpyjs( z,z,z,z, *alpha1, *xp, *zp );
+			bli_taxpys( z,z,z,z,  *alpha2, *yp, *zp );
 
 			xp += 1; yp += 1; zp += 1;
 		}
@@ -299,8 +299,8 @@ void bli_zaxpy2v_template_noopt
 		// Compute front edge cases if x, y, and z were unaligned.
 		for ( i = 0; i < n_pre; ++i )
 		{
-			bli_zaxpyjs( *alpha1, *xp, *zp );
-			bli_zaxpyjs( *alpha2, *yp, *zp );
+			bli_taxpyjs( z,z,z,z, *alpha1, *xp, *zp );
+			bli_taxpyjs( z,z,z,z, *alpha2, *yp, *zp );
 
 			xp += 1; yp += 1; zp += 1;
 		}
@@ -312,8 +312,8 @@ void bli_zaxpy2v_template_noopt
 		// to BLIS_SIMD_ALIGN_SIZE.
 		for ( i = 0; i < n_iter; ++i )
 		{
-			bli_zaxpyjs( *alpha1, *xp, *zp );
-			bli_zaxpyjs( *alpha2, *yp, *zp );
+			bli_taxpyjs( z,z,z,z, *alpha1, *xp, *zp );
+			bli_taxpyjs( z,z,z,z, *alpha2, *yp, *zp );
 
 			xp += n_elem_per_iter;
 			yp += n_elem_per_iter;
@@ -323,8 +323,8 @@ void bli_zaxpy2v_template_noopt
 		// Compute tail edge cases, if applicable.
 		for ( i = 0; i < n_left; ++i )
 		{
-			bli_zaxpyjs( *alpha1, *xp, *zp );
-			bli_zaxpyjs( *alpha2, *yp, *zp );
+			bli_taxpyjs( z,z,z,z, *alpha1, *xp, *zp );
+			bli_taxpyjs( z,z,z,z, *alpha2, *yp, *zp );
 
 			xp += 1; yp += 1; zp += 1;
 		}

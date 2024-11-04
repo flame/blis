@@ -45,7 +45,7 @@ using namespace std;
 /*
  * Test application assumes matrices to be column major, non-transposed
  */
- 
+
  #if 0
 template< typename T >
 void ref_sdsot(int64_t n,
@@ -61,7 +61,7 @@ void ref_sdsot(int64_t n,
    obj_t obj_res;
    obj_t obj_alpha;
    num_t dt;
-  
+
    if(is_same<T, complex<float>>::value)
         dt = BLIS_SCOMPLEX;
    else if(is_same<T, complex<double>>::value)
@@ -72,10 +72,10 @@ void ref_sdsot(int64_t n,
    bli_obj_create_with_attached_buffer( dt, 1, 1, &alpha, 1,1,&obj_alpha );
    bli_obj_create_with_attached_buffer( dt, 1, 1, res_ref, 1, 1,&obj_res );
 
-   bli_ddots( &obj_x,
+   bli_tdots( d,d,d,d, &obj_x,
             &obj_y,
             &obj_res );
- 
+
 }
 #endif
 
@@ -113,7 +113,7 @@ void test_sdsdot()
     printf("Dot product = %E  \n", res);
 
 #endif
-    //ref_sdsot(n, aplha, X, Y , &res_ref ); 
+    //ref_sdsot(n, aplha, X, Y , &res_ref );
 
 #ifdef PRINT
     printf("Ref Dot product %E  \n", res_ref);

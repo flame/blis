@@ -96,8 +96,8 @@ void bli_caxpyf_zen_int_4
                   scomplex* restrict y1   = y + (0  )*incy;
                   scomplex           alpha_chi1;
 
-            bli_ccopycjs( conjx, *chi1, alpha_chi1 );
-            bli_cscals( *alpha, alpha_chi1 );
+            bli_tcopycjs( c,c, conjx, *chi1, alpha_chi1 );
+            bli_tscals( c,c,c, *alpha, alpha_chi1 );
 
             f
             (
@@ -129,17 +129,17 @@ void bli_caxpyf_zen_int_4
         const scomplex* restrict pchi2 = x + 2*incx ;
         const scomplex* restrict pchi3 = x + 3*incx ;
 
-        bli_ccopycjs( conjx, *pchi0, chi0 );
-        bli_ccopycjs( conjx, *pchi1, chi1 );
-        bli_ccopycjs( conjx, *pchi2, chi2 );
-        bli_ccopycjs( conjx, *pchi3, chi3 );
+        bli_tcopycjs( c,c, conjx, *pchi0, chi0 );
+        bli_tcopycjs( c,c, conjx, *pchi1, chi1 );
+        bli_tcopycjs( c,c, conjx, *pchi2, chi2 );
+        bli_tcopycjs( c,c, conjx, *pchi3, chi3 );
     }
 
     // Scale each chi scalar by alpha.
-    bli_cscals( *alpha, chi0 );
-    bli_cscals( *alpha, chi1 );
-    bli_cscals( *alpha, chi2 );
-    bli_cscals( *alpha, chi3 );
+    bli_tscals( c,c,c, *alpha, chi0 );
+    bli_tscals( c,c,c, *alpha, chi1 );
+    bli_tscals( c,c,c, *alpha, chi2 );
+    bli_tscals( c,c,c, *alpha, chi3 );
 
     lda *= 2;
     incx *= 2;
