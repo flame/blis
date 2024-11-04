@@ -34,6 +34,15 @@
 
 #include "blis.h"
 
+// Apparently gcc 11 and older have a bug where the _Pragma
+// erroneously moves to the beginning of the entire macro
+// body (e.g. just before "do")
+#ifdef __GNUC__
+#if __GNUC__ < 12
+#undef PRAGMA_SIMD
+#define PRAGMA_SIMD
+#endif
+#endif
 
 #define PACKM_BODY_r( ctypea, ctypep, cha, chp, pragma, cdim, dfac, inca, op ) \
 \
