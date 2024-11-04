@@ -129,7 +129,7 @@
           PASTEMAC(chx,dom),  \
           PASTEMAC(chx,prec), \
           PASTEMAC(chx,real)(x), \
-          PASTEMAC(chx,imag)(x)  \
+          PASTEMAC(chx,imag)(x), \
           PASTEMAC(chy,dom),  \
           PASTEMAC(chy,prec), \
           PASTEMAC(chy,real)(yri), \
@@ -183,7 +183,7 @@
           PASTEMAC(chx,dom),  \
           PASTEMAC(chx,prec), \
           PASTEMAC(chx,real)(x), \
-          PASTEMAC(chx,imag)(x)  \
+          PASTEMAC(chx,imag)(x), \
           PASTEMAC(chy,dom),  \
           PASTEMAC(chy,prec), \
           yr, \

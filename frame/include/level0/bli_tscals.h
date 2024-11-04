@@ -89,8 +89,8 @@
 	) \
 	PASTEMAC(dx,assigns) \
 	( \
-	  tr, \
-	  ti, \
+	  PASTEMAC(chc,px,tcast)(tr), \
+	  PASTEMAC(chc,px,tcast)(ti), \
 	  xr, \
 	  xi \
 	); \
@@ -195,7 +195,7 @@
           PASTEMAC(chx,imag)(xir) \
         )
 
-// scal1es
+// scal1rs
 #define bli_tscal1rs( cha, chx, chc, a, xr, xi ) \
         bli_tscalims \
         ( \

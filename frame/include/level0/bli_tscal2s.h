@@ -363,11 +363,11 @@
 	const inc_t       ldy2       = 2 * (ldy); \
 \
 	ctypea_r* restrict alpha_r    = ( ctypea_r* )(alpha); \
-	ctypea_r* restrict alpha_i    = ( ctypea_r* )(alpha) + 1; \
+	ctypea_r* restrict alpha_i    = ( ctypea_r* )(alpha) + 1; (void)alpha_i; \
 	ctypex_r* restrict chi_r      = ( ctypex_r* )(x); \
-	ctypex_r* restrict chi_i      = ( ctypex_r* )(x) + 1; \
+	ctypex_r* restrict chi_i      = ( ctypex_r* )(x) + 1; (void)chi_i; \
 	ctypey_r* restrict psi_r      = ( ctypey_r* )(y); \
-	ctypey_r* restrict psi_i      = ( ctypey_r* )(y) + 1*d; \
+	ctypey_r* restrict psi_i      = ( ctypey_r* )(y) + 1*d; (void)psi_i; \
 \
 	if ( bli_is_conj( conjx ) ) \
 	{ \
@@ -381,9 +381,9 @@
 			for ( dim_t i = 0; i < (m); ++i ) \
 			{ \
 				ctypex_r* restrict chiij_r = chij_r + i*incx2; \
-				ctypex_r* restrict chiij_i = chij_i + i*incx2; \
+				ctypex_r* restrict chiij_i = chij_i + i*incx2; (void)chiij_i; \
 				ctypey_r* restrict psiij_r = psij_r + i*incy2; \
-				ctypey_r* restrict psiij_i = psij_i + i*incy2; \
+				ctypey_r* restrict psiij_i = psij_i + i*incy2; (void)psiij_i; \
 \
 				bli_tscal2jris( cha,chx,chy,chc, \
 				                *alpha_r, *alpha_i, \
@@ -393,7 +393,7 @@
 				for ( dim_t p = 1; p < d; ++p ) \
 				{ \
 					ctypey_r* restrict psiijd_r = psiij_r + p*ds_y; \
-					ctypey_r* restrict psiijd_i = psiij_i + p*ds_y; \
+					ctypey_r* restrict psiijd_i = psiij_i + p*ds_y; (void)psiijd_i; \
 \
 					bli_tcopyris( chy,chy, *psiij_r,  *psiij_i, \
 					                       *psiijd_r, *psiijd_i ); \
@@ -413,9 +413,9 @@
 			for ( dim_t i = 0; i < (m); ++i ) \
 			{ \
 				ctypex_r* restrict chiij_r = chij_r + i*incx2; \
-				ctypex_r* restrict chiij_i = chij_i + i*incx2; \
+				ctypex_r* restrict chiij_i = chij_i + i*incx2; (void)chiij_i; \
 				ctypey_r* restrict psiij_r = psij_r + i*incy2; \
-				ctypey_r* restrict psiij_i = psij_i + i*incy2; \
+				ctypey_r* restrict psiij_i = psij_i + i*incy2; (void)psiij_i; \
 \
 				bli_tscal2ris( cha,chx,chy,chc, \
 				               *alpha_r, *alpha_i, \
@@ -425,7 +425,7 @@
 				for ( dim_t p = 1; p < d; ++p ) \
 				{ \
 					ctypey_r* restrict psiijd_r = psiij_r + p*ds_y; \
-					ctypey_r* restrict psiijd_i = psiij_i + p*ds_y; \
+					ctypey_r* restrict psiijd_i = psiij_i + p*ds_y; (void)psiijd_i; \
 \
 					bli_tcopyris( chy,chy, *psiij_r,  *psiij_i, \
 					                       *psiijd_r, *psiijd_i ); \

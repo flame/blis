@@ -64,7 +64,7 @@
 	    PASTEMAC(da,dx,termii)( \
 	      chc, \
 	      PASTEMAC(chc,mul)( \
-	        ( bli_is_conj( conj ) ? PASTEMAC(pa,neg)( \
+	        ( bli_is_conj( conj ) ? PASTEMAC(chc,neg)( \
 	                                  PASTEMAC(pa,chc,tcast)(ai) \
 	                                ) \
 	                              :   PASTEMAC(pa,chc,tcast)(ai) \
@@ -77,7 +77,7 @@
 	    PASTEMAC(da,dx,termir)( \
 	      chc, \
 	      PASTEMAC(chc,mul)( \
-	        ( bli_is_conj( conj ) ? PASTEMAC(pa,neg)( \
+	        ( bli_is_conj( conj ) ? PASTEMAC(chc,neg)( \
 	                                  PASTEMAC(pa,chc,tcast)(ai) \
 	                                ) \
 	                              :   PASTEMAC(pa,chc,tcast)(ai) \
@@ -98,8 +98,8 @@
 	) \
 	PASTEMAC(dx,assigns) \
 	( \
-	  tr, \
-	  ti, \
+	  PASTEMAC(chc,px,tcast)(tr), \
+	  PASTEMAC(chc,px,tcast)(ti), \
 	  xr, \
 	  xi \
 	); \

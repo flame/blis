@@ -65,8 +65,10 @@
 { \
 	PASTEMAC(dy,assigns) \
 	( \
-	  PASTEMAC(chc,sqrt)( \
-	    PASTEMAC(px,chc,tcast)( xr )  \
+	  PASTEMAC(chc,py,tcast)( \
+	    PASTEMAC(chc,sqrt)( \
+	      PASTEMAC(px,chc,tcast)( xr )  \
+	    ) \
 	  ), \
 	  PASTEMAC(py,zero), \
 	  yr, \

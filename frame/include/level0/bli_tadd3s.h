@@ -90,7 +90,6 @@
           PASTEMAC(chc,prec)  \
         )
 
-// tadd3s unit test
 #undef GENTFUNC
 #define GENTFUNC( ctypex, chx, ctypey, chy, ctypez, chz, ctypec, chc, opname ) \
 UNIT_TEST(chx,chy,chz,chc,opname) \
@@ -137,9 +136,9 @@ UNIT_TEST(chx,chy,chz,chc,opname) \
 
 // -- Exposed real/imaginary --
 
-// taddris
-#define bli_taddris( chx, chy, chc, xr, xi, yr, yi ) \
-        bli_taddims \
+// tadd3ris
+#define bli_tadd3ris( chx, chy, chz, chc, xr, xi, yr, yi, zr, zi ) \
+        bli_tadd3ims \
         ( \
           PASTEMAC(chx,dom),  \
           PASTEMAC(chx,prec), \
@@ -149,12 +148,16 @@ UNIT_TEST(chx,chy,chz,chc,opname) \
           PASTEMAC(chy,prec), \
                      yr, \
                      yi, \
+          PASTEMAC(chz,dom),  \
+          PASTEMAC(chz,prec), \
+                     zr, \
+                     zi, \
           PASTEMAC(chc,prec)  \
         )
 
-// taddjris
-#define bli_taddjris( chx, chy, chc, xr, xi, yr, yi ) \
-        bli_taddims \
+// tadd3jris
+#define bli_tadd3jris( chx, chy, chz, chc, xr, xi, yr, yi, zr, zi ) \
+        bli_tadd3ims \
         ( \
           PASTEMAC(chx,dom),  \
           PASTEMAC(chx,prec), \
@@ -165,6 +168,10 @@ UNIT_TEST(chx,chy,chz,chc,opname) \
           PASTEMAC(chy,prec), \
                      yr, \
                      yi, \
+          PASTEMAC(chz,dom),  \
+          PASTEMAC(chz,prec), \
+                     zr, \
+                     zi, \
           PASTEMAC(chc,prec)  \
         )
 

@@ -221,17 +221,17 @@
 \
 	for ( dim_t _j = 0; _j < (n); ++_j ) \
 	{ \
-		PASTEMAC(chy,ctype)* restrict yj = (PASTEMAC(chy,ctype)*)(y) + _j*(ldy); \
+		PASTEMAC(chy,ctype)* restrict _yj = (PASTEMAC(chy,ctype)*)(y) + _j*(ldy); \
 \
 		for ( dim_t _i = 0; _i < (m); ++_i ) \
 		{ \
-			PASTEMAC(chy,ctype)* restrict yij = yj + _i*(incy); \
+			PASTEMAC(chy,ctype)* restrict _yij = _yj + _i*(incy); \
 \
 			for ( dim_t _p = 0; _p < _d; ++_p ) \
 			{ \
-				PASTEMAC(chy,ctype)* restrict yijd = yij + _p*_ds_y; \
+				PASTEMAC(chy,ctype)* restrict _yijd = _yij + _p*_ds_y; \
 \
-				bli_tset0s( chy, *yijd ); \
+				bli_tset0s( chy, *_yijd ); \
 			} \
 		} \
 	} \
@@ -246,19 +246,19 @@
 \
 	for ( dim_t _j = 0; _j < (n); ++_j ) \
 	{ \
-		PASTEMAC(chy,ctype)* restrict yj = (PASTEMAC(chy,ctype)*)(y) + _j*(ldy); \
+		PASTEMAC(chy,ctype)* restrict _yj = (PASTEMAC(chy,ctype)*)(y) + _j*(ldy); \
 \
 		for ( dim_t _i = 0; _i < (m); ++_i ) \
 		{ \
-			PASTEMAC(chy,ctyper)* restrict yij_r = (PASTEMAC(chy,ctyper)*)( (PASTEMAC(chy,ctype)*)yj + _i*(incy) ); \
-			PASTEMAC(chy,ctyper)* restrict yij_i = yij_r + (incy); \
+			PASTEMAC(chy,ctyper)* restrict _yij_r = (PASTEMAC(chy,ctyper)*)( _yj + _i*(incy) ); \
+			PASTEMAC(chy,ctyper)* restrict _yij_i = _yij_r + (incy); \
 \
 			for ( dim_t _p = 1; _p < _d; ++_p ) \
 			{ \
-				PASTEMAC(chy,ctyper)* restrict yijd_r = yij_r + _p*_ds_y; \
-				PASTEMAC(chy,ctyper)* restrict yijd_i = yij_i + _p*_ds_y; (void)yijd_i; \
+				PASTEMAC(chy,ctyper)* restrict _yijd_r = _yij_r + _p*_ds_y; \
+				PASTEMAC(chy,ctyper)* restrict _yijd_i = _yij_i + _p*_ds_y; (void)_yijd_i; \
 \
-				bli_tcopyris( chy,chy, *yij_r, *yij_i, *yijd_r, *yijd_i ); \
+				bli_tcopyris( chy,chy, *_yij_r, *_yij_i, *_yijd_r, *_yijd_i ); \
 			} \
 		} \
 	} \
@@ -271,9 +271,9 @@
 		bli_tset0s_mxn \
 		( \
 		  chp, \
-		  m - i, \
+		  (m) - (i), \
 		  j, \
-		  p + (i)*1, 1, ldp \
+		  (p) + (i)*1, 1, ldp \
 		); \
 	} \
 \
@@ -283,8 +283,8 @@
 		( \
 		  chp, \
 		  m, \
-		  n - j, \
-		  p + (j)*(ldp), 1, ldp \
+		  (n) - (j), \
+		  (p) + (j)*(ldp), 1, ldp \
 		); \
 	} \
 }
