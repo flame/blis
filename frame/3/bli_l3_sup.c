@@ -112,9 +112,9 @@ err_t bli_gemmsup
     // Query the architecture ID
     arch_t id = bli_arch_query_id();
 
-    if((id == BLIS_ARCH_ZEN5) || (id == BLIS_ARCH_ZEN4))
+    if(( id == BLIS_ARCH_ZEN5 ) || ( id == BLIS_ARCH_ZEN4 ))
     {
-        if(( bli_obj_dt(a) == BLIS_DOUBLE ) || ( bli_obj_dt(a) == BLIS_DCOMPLEX))
+        if(( bli_obj_dt(a) == BLIS_DOUBLE ))
         {
             // Pack A to avoid RD kernels.
             if((stor_id == BLIS_CRC || stor_id == BLIS_RRC))
