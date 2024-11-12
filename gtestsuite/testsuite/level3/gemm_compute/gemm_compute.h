@@ -278,6 +278,9 @@ static void gemm_compute_blis_impl(char transa, char transb, char packa, char pa
 {
     T unit_alpha = 1.0;
     err_t err = BLIS_SUCCESS;
+    gtint_t rs_a = 1;
+    gtint_t rs_b = 1;
+    gtint_t rs_c = 1;
     if constexpr (std::is_same<T, float>::value)
     {
         if ( ( packa == 'P' || packa == 'p' ) && ( packb == 'P' || packb == 'p' ) )
@@ -318,7 +321,7 @@ static void gemm_compute_blis_impl(char transa, char transb, char packa, char pa
                          &ldb,
                          bBuffer );
 
-            sgemm_compute_blis_impl( &packa, &packb, &m, &n, &k, aBuffer, &lda, bBuffer, &ldb, beta, cp, &ldc );
+            sgemm_compute_blis_impl( &packa, &packb, &m, &n, &k, aBuffer, &rs_a, &lda, bBuffer, &rs_b, &ldb, beta, cp, &rs_c, &ldc );
 
             bli_free_user( aBuffer );
             bli_free_user( bBuffer );
@@ -343,7 +346,7 @@ static void gemm_compute_blis_impl(char transa, char transb, char packa, char pa
                          &lda,
                          aBuffer );
 
-            sgemm_compute_blis_impl( &packa, &transb, &m, &n, &k, aBuffer, &lda, bp, &ldb, beta, cp, &ldc );
+            sgemm_compute_blis_impl( &packa, &transb, &m, &n, &k, aBuffer, &rs_a, &lda, bp, &rs_b, &ldb, beta, cp, &rs_c, &ldc );
             bli_free_user( aBuffer );
         }
         else if ( ( packb == 'P' || packb == 'p' ) )
@@ -366,12 +369,12 @@ static void gemm_compute_blis_impl(char transa, char transb, char packa, char pa
                          &ldb,
                          bBuffer );
 
-            sgemm_compute_blis_impl( &transa, &packb, &m, &n, &k, ap, &lda, bBuffer, &ldb, beta, cp, &ldc );
+            sgemm_compute_blis_impl( &transa, &packb, &m, &n, &k, ap, &rs_a, &lda, bBuffer, &rs_b, &ldb, beta, cp, &rs_c, &ldc );
             bli_free_user( bBuffer );
         }
         else
         {
-            sgemm_compute_blis_impl( &transa, &transb, &m, &n, &k, ap, &lda, bp, &ldb, beta, cp, &ldc );
+            sgemm_compute_blis_impl( &transa, &transb, &m, &n, &k, ap, &rs_a, &lda, bp, &rs_b, &ldb, beta, cp, &rs_c, &ldc );
         }
     }
     else if constexpr (std::is_same<T, double>::value)
@@ -414,7 +417,7 @@ static void gemm_compute_blis_impl(char transa, char transb, char packa, char pa
                          &ldb,
                          bBuffer );
 
-            dgemm_compute_blis_impl( &packa, &packb, &m, &n, &k, aBuffer, &lda, bBuffer, &ldb, beta, cp, &ldc );
+            dgemm_compute_blis_impl( &packa, &packb, &m, &n, &k, aBuffer, &rs_a, &lda, bBuffer, &rs_b, &ldb, beta, cp, &rs_c, &ldc );
 
             bli_free_user( aBuffer );
             bli_free_user( bBuffer );
@@ -439,7 +442,7 @@ static void gemm_compute_blis_impl(char transa, char transb, char packa, char pa
                          &lda,
                          aBuffer );
 
-            dgemm_compute_blis_impl( &packa, &transb, &m, &n, &k, aBuffer, &lda, bp, &ldb, beta, cp, &ldc );
+            dgemm_compute_blis_impl( &packa, &transb, &m, &n, &k, aBuffer, &rs_a, &lda, bp, &rs_b, &ldb, beta, cp, &rs_c, &ldc );
             bli_free_user( aBuffer );
         }
         else if ( ( packb == 'P' || packb == 'p' ) )
@@ -462,12 +465,12 @@ static void gemm_compute_blis_impl(char transa, char transb, char packa, char pa
                          &ldb,
                          bBuffer );
 
-            dgemm_compute_blis_impl( &transa, &packb, &m, &n, &k, ap, &lda, bBuffer, &ldb, beta, cp, &ldc );
+            dgemm_compute_blis_impl( &transa, &packb, &m, &n, &k, ap, &rs_a, &lda, bBuffer, &rs_b, &ldb, beta, cp, &rs_c, &ldc );
             bli_free_user( bBuffer );
         }
         else
         {
-            dgemm_compute_blis_impl( &transa, &transb, &m, &n, &k, ap, &lda, bp, &ldb, beta, cp, &ldc );
+            dgemm_compute_blis_impl( &transa, &transb, &m, &n, &k, ap, &rs_a, &lda, bp, &rs_b, &ldb, beta, cp, &rs_c, &ldc );
         }
     }
     else
