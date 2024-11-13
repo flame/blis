@@ -36,6 +36,7 @@
 #include "blis.h"
 #include "common/testing_helpers.h"
 #include "ukr/gemm/test_gemm_ukr.h"
+#include "common/blis_version_defs.h"
 
 /*******************************************************/
 /*                 SUP Kernel testing                  */
@@ -133,7 +134,8 @@ public:
 
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_sgemmsup_rv_zen_asm_6x16m
+INSTANTIATE_TEST_SUITE_P(
         bli_sgemmsup_rv_zen_asm_6x16m_row_stored_c,
         sgemmGenericSUP,
         ::testing::Combine(
@@ -152,8 +154,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::sgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_sgemmsup_rv_zen_asm_6x16m
+INSTANTIATE_TEST_SUITE_P(
         bli_sgemmsup_rv_zen_asm_6x16m_col_stored_c,
         sgemmGenericSUP,
         ::testing::Combine(
@@ -172,8 +176,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::sgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_sgemmsup_rd_zen_asm_6x16m
+INSTANTIATE_TEST_SUITE_P(
         bli_sgemmsup_rd_zen_asm_6x16m_col_stored_c,
         sgemmGenericSUP,
         ::testing::Combine(
@@ -192,8 +198,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::sgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_sgemmsup_rv_zen_asm_6x16n
+INSTANTIATE_TEST_SUITE_P(
         bli_sgemmsup_rv_zen_asm_6x16n_col_stored_c,
         sgemmGenericSUP,
         ::testing::Combine(
@@ -212,8 +220,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::sgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_sgemmsup_rv_zen_asm_6x16n
+INSTANTIATE_TEST_SUITE_P(
         bli_sgemmsup_rv_zen_asm_6x16n_row_stored_c,
         sgemmGenericSUP,
         ::testing::Combine(
@@ -232,8 +242,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::sgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_sgemmsup_rd_zen_asm_6x16n
+INSTANTIATE_TEST_SUITE_P(
         bli_sgemmsup_rd_zen_asm_6x16n_row_stored_c,
         sgemmGenericSUP,
         ::testing::Combine(
@@ -252,11 +264,14 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::sgemmGenericSUPPrint()
     );
-
 #endif
 
+#endif // defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
+
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
-INSTANTIATE_TEST_SUITE_P (
+
+#ifdef K_bli_sgemmsup_rv_zen_asm_6x64m_avx512
+INSTANTIATE_TEST_SUITE_P(
         bli_sgemmsup_rv_zen_asm_6x64m_row_stored_c,
         sgemmGenericSUP,
         ::testing::Combine(
@@ -275,8 +290,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::sgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_sgemmsup_rv_zen_asm_6x64m_avx512
+INSTANTIATE_TEST_SUITE_P(
         bli_sgemmsup_rv_zen_asm_6x64m_col_stored_c,
         sgemmGenericSUP,
         ::testing::Combine(
@@ -295,6 +312,7 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::sgemmGenericSUPPrint()
     );
+#endif
 
 /*
     The bli_sgemmsup_rd_zen_asm_6x64m_avx512(standalone), accepts inputs with the
@@ -318,7 +336,8 @@ INSTANTIATE_TEST_SUITE_P (
 */
 
 // Checking with row storage of C
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_sgemmsup_rd_zen_asm_6x64m_avx512
+INSTANTIATE_TEST_SUITE_P(
         bli_sgemmsup_rd_zen_asm_6x64m_row_stored_c,
         sgemmGenericSUP,
         ::testing::Combine(
@@ -347,11 +366,13 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::sgemmGenericSUPPrint()
     );
+#endif
 
 // Checking with col storage of C
 // NOTE : Since we are inducing transpose at opertaion level, for code coverage, we
 //        have to interchange m and n instantiations
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_sgemmsup_rd_zen_asm_6x64m_avx512
+INSTANTIATE_TEST_SUITE_P(
         bli_sgemmsup_rd_zen_asm_6x64m_col_stored_c,
         sgemmGenericSUP,
         ::testing::Combine(
@@ -380,8 +401,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::sgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_sgemmsup_rv_zen_asm_6x64n_avx512
+INSTANTIATE_TEST_SUITE_P(
         bli_sgemmsup_rv_zen_asm_6x64n_row_stored_c,
         sgemmGenericSUP,
         ::testing::Combine(
@@ -400,8 +423,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::sgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_sgemmsup_rd_zen_asm_6x64n_avx512
+INSTANTIATE_TEST_SUITE_P(
         bli_sgemmsup_rd_zen_asm_6x64n_row_stored_c,
         sgemmGenericSUP,
         ::testing::Combine(
@@ -421,6 +446,8 @@ INSTANTIATE_TEST_SUITE_P (
         ::sgemmGenericSUPPrint()
     );
 #endif
+
+#endif // defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 
 /*******************************************************/
 /*              Native Kernel testing                  */
@@ -505,7 +532,9 @@ public:
 };
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
-INSTANTIATE_TEST_SUITE_P (
+
+#ifdef K_bli_sgemm_skx_asm_32x12_l2
+INSTANTIATE_TEST_SUITE_P(
     bli_sgemm_skx_asm_32x12_l2,
     sgemmGenericNat,
     ::testing::Combine(
@@ -520,12 +549,14 @@ INSTANTIATE_TEST_SUITE_P (
     ),
     ::sgemmGenericNatPrint()
 );
-
+#endif
 
 #endif
 
 #if defined(BLIS_KERNELS_HASWELL) && defined(GTEST_AVX2FMA3)
-INSTANTIATE_TEST_SUITE_P (
+
+#ifdef K_bli_sgemm_haswell_asm_6x16
+INSTANTIATE_TEST_SUITE_P(
     bli_sgemm_haswell_asm_6x16,
     sgemmGenericNat,
     ::testing::Combine(
@@ -540,6 +571,8 @@ INSTANTIATE_TEST_SUITE_P (
     ),
     ::sgemmGenericNatPrint()
 );
+#endif
+
 #endif
 
 #if 0
@@ -671,7 +704,8 @@ public:
 };
 
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_sgemm_small
+INSTANTIATE_TEST_SUITE_P(
         bli_sgemm_small,
         sgemmGenericSmallTest,
         ::testing::Combine(
@@ -684,6 +718,7 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::sgemmGenericSmallTestPrint()
     );
+#endif
 
 #endif
 #endif

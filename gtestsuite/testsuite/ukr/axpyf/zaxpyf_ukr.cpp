@@ -35,6 +35,7 @@
 
 #include <gtest/gtest.h>
 #include "test_axpyf_ukr.h"
+#include "common/blis_version_defs.h"
 
 using T = dcomplex;
 using FT = zaxpyf_ker_ft;
@@ -120,6 +121,7 @@ TEST_P( zaxpyfGeneric, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_zaxpyf_zen_int_8_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyf_zen_int_2_avx512_unitStrides,
         zaxpyfGeneric,
@@ -151,8 +153,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyfUkrPrint<T, FT>())
     );
+#endif
 
 // Unit testing with non-unit strides, across all loops.
+#ifdef K_bli_zaxpyf_zen_int_8_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyf_zen_int_2_avx512_nonUnitStrides,
         zaxpyfGeneric,
@@ -178,6 +182,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyfUkrPrint<T, FT>())
     );
+#endif
 
 /*
     Unit testing for functionality of bli_zaxpyf_zen_int_4_avx512 kernel.
@@ -190,6 +195,7 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_zaxpyf_zen_int_8_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyf_zen_int_4_avx512_unitStrides,
         zaxpyfGeneric,
@@ -221,8 +227,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyfUkrPrint<T, FT>())
     );
+#endif
 
 // Unit testing with non-unit strides, across all loops.
+#ifdef K_bli_zaxpyf_zen_int_8_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyf_zen_int_4_avx512_nonUnitStrides,
         zaxpyfGeneric,
@@ -248,6 +256,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyfUkrPrint<T, FT>())
     );
+#endif
 
 /*
     Unit testing for functionality of bli_zaxpyf_zen_int_8_avx512 kernel.
@@ -260,6 +269,7 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_zaxpyf_zen_int_8_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyf_zen_int_8_avx512_unitStrides,
         zaxpyfGeneric,
@@ -291,8 +301,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyfUkrPrint<T, FT>())
     );
+#endif
 
 // Unit testing with non-unit strides, across all loops.
+#ifdef K_bli_zaxpyf_zen_int_8_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyf_zen_int_8_avx512_nonUnitStrides,
         zaxpyfGeneric,
@@ -318,4 +330,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyfUkrPrint<T, FT>())
     );
+#endif
 #endif

@@ -35,6 +35,7 @@
 
 #include <gtest/gtest.h>
 #include "test_axpyv_ukr.h"
+#include "common/blis_version_defs.h"
 
 class zaxpyvGeneric :
         public ::testing::TestWithParam<std::tuple<zaxpyv_ker_ft,   // Function pointer type for zaxpyv kernels
@@ -106,6 +107,7 @@ TEST_P( zaxpyvGeneric, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_zaxpyv_zen_int5
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyv_zen_int5_unitStrides,
         zaxpyvGeneric,
@@ -139,8 +141,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyvUKRPrint<dcomplex, zaxpyv_ker_ft>())
     );
+#endif
 
 // Unit testing for non unit strides
+#ifdef K_bli_zaxpyv_zen_int5
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyv_zen_int5_nonUnitStrides,
         zaxpyvGeneric,
@@ -162,7 +166,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyvUKRPrint<dcomplex, zaxpyv_ker_ft>())
     );
-
+#endif
 #endif
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
@@ -179,6 +183,7 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_zaxpyv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyv_zen_int_avx512_unitStrides,
         zaxpyvGeneric,
@@ -211,8 +216,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyvUKRPrint<dcomplex, zaxpyv_ker_ft>())
     );
+#endif
 
 // Unit testing for non unit strides
+#ifdef K_bli_zaxpyv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyv_zen_int_avx512_nonUnitStrides,
         zaxpyvGeneric,
@@ -234,5 +241,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyvUKRPrint<dcomplex, zaxpyv_ker_ft>())
     );
-
+#endif
 #endif

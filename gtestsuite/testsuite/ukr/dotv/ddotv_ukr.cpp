@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_dotv_ukr.h"
+#include "common/blis_version_defs.h"
 
 class ddotvGeneric :
         public ::testing::TestWithParam<std::tuple<ddotv_ker_ft,    // Function pointer for ddotv kernels
@@ -95,6 +96,7 @@ TEST_P( ddotvGeneric, UKR )
  * L16     - handles 16 elements
  * LScalar - leftover loop (also handles non-unit increments)
 */
+#ifdef K_bli_ddotv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_ddotv_zen_int_unitStride,
         ddotvGeneric,
@@ -130,7 +132,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::dotvUKRPrint<ddotv_ker_ft>()
     );
+#endif
 
+#ifdef K_bli_ddotv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_ddotv_zen_int_nonUnitPositiveStrides,
         ddotvGeneric,
@@ -157,6 +161,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::dotvUKRPrint<ddotv_ker_ft>()
     );
+#endif
 
 // Tests for bli_ddotv_zen_int10 (AVX2) kernel.
 /**
@@ -170,6 +175,7 @@ INSTANTIATE_TEST_SUITE_P(
  *
  * LNUnit  - loop for non-unit increments
 */
+#ifdef K_bli_ddotv_zen_int10
 INSTANTIATE_TEST_SUITE_P(
         bli_ddotv_zen_int10_unitStride,
         ddotvGeneric,
@@ -216,7 +222,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::dotvUKRPrint<ddotv_ker_ft>()
     );
+#endif
 
+#ifdef K_bli_ddotv_zen_int10
 INSTANTIATE_TEST_SUITE_P(
         bli_ddotv_zen_int10_nonUnitPositiveStrides,
         ddotvGeneric,
@@ -244,6 +252,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::dotvUKRPrint<ddotv_ker_ft>()
     );
 #endif
+#endif
 // ----------------------------------------------
 // -----  End ZEN1/2/3 (AVX2) Kernel Tests  -----
 // ----------------------------------------------
@@ -263,6 +272,7 @@ INSTANTIATE_TEST_SUITE_P(
  *
  * LNUnit  - loop for non-unit increments
 */
+#ifdef K_bli_ddotv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_ddotv_zen_int_avx512_unitStride,
         ddotvGeneric,
@@ -305,7 +315,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::dotvUKRPrint<ddotv_ker_ft>()
     );
+#endif
 
+#ifdef K_bli_ddotv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_ddotv_zen_int_avx512_nonUnitPositiveStrides,
         ddotvGeneric,
@@ -332,6 +344,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::dotvUKRPrint<ddotv_ker_ft>()
     );
+#endif
 #endif
 // ----------------------------------------------
 // -----   End ZEN4 (AVX512) Kernel Tests   -----

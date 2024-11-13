@@ -37,6 +37,7 @@
 #include "level3/ref_gemm.h"
 #include "ukr/trsm/test_trsm_ukr.h"
 #include "level3/trsm/test_trsm.h"
+#include "common/blis_version_defs.h"
 
 class dtrsmGenericNat :
     public ::testing::TestWithParam<std::tuple< dgemmtrsm_ukr_ft,  // Function pointer type for dtrsm kernels
@@ -123,7 +124,9 @@ TEST_P( dtrsmGenericSmall, small_kernel)
 }
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
-INSTANTIATE_TEST_SUITE_P (
+
+#ifdef K_bli_dgemmtrsm_l_zen4_asm_8x24
+INSTANTIATE_TEST_SUITE_P(
     bli_dgemmtrsm_l_zen4_asm_8x24,
     dtrsmGenericNat,
     ::testing::Combine(
@@ -140,8 +143,10 @@ INSTANTIATE_TEST_SUITE_P (
     ),
     (::trsmNatUKRPrint<double,dgemmtrsm_ukr_ft>())
 );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_dgemmtrsm_u_zen4_asm_8x24
+INSTANTIATE_TEST_SUITE_P(
     bli_dgemmtrsm_u_zen4_asm_8x24,
     dtrsmGenericNat,
     ::testing::Combine(
@@ -158,8 +163,10 @@ INSTANTIATE_TEST_SUITE_P (
    ),
     (::trsmNatUKRPrint<double,dgemmtrsm_ukr_ft>())
 );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_trsm_small_AVX512
+INSTANTIATE_TEST_SUITE_P(
     bli_trsm_small_AVX512,
     dtrsmGenericSmall,
     ::testing::Combine(
@@ -179,9 +186,13 @@ INSTANTIATE_TEST_SUITE_P (
 );
 #endif
 
+#endif // defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
+
 
 #if defined(BLIS_KERNELS_HASWELL) && defined(GTEST_AVX2FMA3)
-INSTANTIATE_TEST_SUITE_P (
+
+#ifdef K_bli_dgemmtrsm_l_haswell_asm_6x8
+INSTANTIATE_TEST_SUITE_P(
     bli_dgemmtrsm_l_haswell_asm_6x8,
     dtrsmGenericNat,
     ::testing::Combine(
@@ -198,8 +209,10 @@ INSTANTIATE_TEST_SUITE_P (
     ),
     (::trsmNatUKRPrint<double,dgemmtrsm_ukr_ft>())
 );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_dgemmtrsm_u_haswell_asm_6x8
+INSTANTIATE_TEST_SUITE_P(
     bli_dgemmtrsm_u_haswell_asm_6x8,
     dtrsmGenericNat,
     ::testing::Combine(
@@ -218,9 +231,12 @@ INSTANTIATE_TEST_SUITE_P (
 );
 #endif
 
+#endif // defined(BLIS_KERNELS_HASWELL) && defined(GTEST_AVX2FMA3)
+
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_trsm_small
+INSTANTIATE_TEST_SUITE_P(
     bli_trsm_small,
     dtrsmGenericSmall,
     ::testing::Combine(
@@ -238,5 +254,6 @@ INSTANTIATE_TEST_SUITE_P (
     ),
     (::trsmSmallUKRPrint<double,trsm_small_ker_ft>())
 );
+#endif
 #endif
 #endif

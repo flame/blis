@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_nrm2_ukr.h"
+#include "common/blis_version_defs.h"
 
 using T = scomplex;
 using RT = typename testinghelpers::type_info<T>::real_type;
@@ -84,6 +85,7 @@ TEST_P( scnrm2Generic, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_scnorm2fv_unb_var1_avx2
 INSTANTIATE_TEST_SUITE_P(
         bli_scnorm2fv_unb_var1_avx2_unitStrides,
         scnrm2Generic,
@@ -101,8 +103,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::nrm2UKRPrint<scomplex>()
     );
+#endif
 
 // Unit testing with non-unit strides.
+#ifdef K_bli_scnorm2fv_unb_var1_avx2
 INSTANTIATE_TEST_SUITE_P(
         bli_scnorm2fv_unb_var1_avx2_nonUnitStrides,
         scnrm2Generic,
@@ -119,4 +123,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::nrm2UKRPrint<scomplex>()
     );
+#endif
 #endif

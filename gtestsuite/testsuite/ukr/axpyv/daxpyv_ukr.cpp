@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_axpyv_ukr.h"
+#include "common/blis_version_defs.h"
 
 class daxpyvGeneric :
         public ::testing::TestWithParam<std::tuple<daxpyv_ker_ft,   // Function pointer type for daxpyv kernels
@@ -105,6 +106,7 @@ TEST_P( daxpyvGeneric, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_daxpyv_zen_int10
 INSTANTIATE_TEST_SUITE_P(
         bli_daxpyv_zen_int10_unitStrides,
         daxpyvGeneric,
@@ -136,8 +138,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyvUKRPrint<double, daxpyv_ker_ft>())
     );
+#endif
 
 // Unit testing for non unit strides
+#ifdef K_bli_daxpyv_zen_int10
 INSTANTIATE_TEST_SUITE_P(
         bli_daxpyv_zen_int10_nonUnitStrides,
         daxpyvGeneric,
@@ -155,6 +159,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyvUKRPrint<double, daxpyv_ker_ft>())
     );
+#endif
 
 /*
     Unit testing for functionality of bli_daxpyv_zen_int kernel.
@@ -166,6 +171,7 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_daxpyv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_daxpyv_zen_int_unitStrides,
         daxpyvGeneric,
@@ -184,8 +190,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyvUKRPrint<double, daxpyv_ker_ft>())
     );
+#endif
 
 // Unit testing for non unit strides
+#ifdef K_bli_daxpyv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_daxpyv_zen_int_nonUnitStrides,
         daxpyvGeneric,
@@ -204,6 +212,7 @@ INSTANTIATE_TEST_SUITE_P(
         (::axpyvUKRPrint<double, daxpyv_ker_ft>())
     );
 #endif
+#endif
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 /*
@@ -220,6 +229,7 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_daxpyv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_daxpyv_zen_int_avx512_unitStrides,
         daxpyvGeneric,
@@ -249,8 +259,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyvUKRPrint<double, daxpyv_ker_ft>())
     );
+#endif
 
 // Unit testing for non unit strides
+#ifdef K_bli_daxpyv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_daxpyv_zen_int_avx512_nonUnitStrides,
         daxpyvGeneric,
@@ -268,4 +280,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyvUKRPrint<double, daxpyv_ker_ft>())
     );
+#endif
 #endif

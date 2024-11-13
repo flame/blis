@@ -35,6 +35,7 @@
 
 #include <gtest/gtest.h>
 #include "test_axpyv_ukr.h"
+#include "common/blis_version_defs.h"
 
 class saxpyvGeneric :
         public ::testing::TestWithParam<std::tuple<saxpyv_ker_ft,   // Function pointer type for zaxpyv kernels
@@ -97,6 +98,7 @@ TEST_P( saxpyvGeneric, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 
+#ifdef K_bli_saxpyv_zen_int10
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpyv_zen_int10_unitStrides,
         saxpyvGeneric,
@@ -124,7 +126,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyvUKRPrint<float, saxpyv_ker_ft>())
     );
+#endif
 
+#ifdef K_bli_saxpyv_zen_int10
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpyv_zen_int10_nonUnitStrides,
         saxpyvGeneric,
@@ -143,6 +147,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyvUKRPrint<float, saxpyv_ker_ft>())
     );
+#endif
 
 /*
     Unit testing for functionality of bli_saxpyv_zen_int kernel.
@@ -154,6 +159,7 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 
+#ifdef K_bli_saxpyv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpyv_zen_int_unitStrides,
         saxpyvGeneric,
@@ -173,7 +179,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyvUKRPrint<float, saxpyv_ker_ft>())
     );
+#endif
 
+#ifdef K_bli_saxpyv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpyv_zen_int_nonUnitStrides,
         saxpyvGeneric,
@@ -193,6 +201,7 @@ INSTANTIATE_TEST_SUITE_P(
         (::axpyvUKRPrint<float, saxpyv_ker_ft>())
     );
 #endif
+#endif
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 /*
@@ -209,6 +218,7 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 
+#ifdef K_bli_saxpyv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpyv_zen_int_avx512_unitStrides,
         saxpyvGeneric,
@@ -232,7 +242,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyvUKRPrint<float, saxpyv_ker_ft>())
     );
+#endif
 
+#ifdef K_bli_saxpyv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpyv_zen_int_avx512_nonUnitStrides,
         saxpyvGeneric,
@@ -251,4 +263,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyvUKRPrint<float, saxpyv_ker_ft>())
     );
+#endif
 #endif

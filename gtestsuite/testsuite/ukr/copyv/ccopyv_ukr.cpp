@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_copyv_ukr.h"
+#include "common/blis_version_defs.h"
 
 class ccopyvGeneric :
         public ::testing::TestWithParam<std::tuple<ccopyv_ker_ft,   // Function pointer type for ccopyv kernels
@@ -85,6 +86,7 @@ TEST_P( ccopyvGeneric, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with Unit Strides(US), across all loops.
+#ifdef K_bli_ccopyv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_ccopyv_zen_int_unitStrides,
         ccopyvGeneric,
@@ -113,8 +115,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::copyvUKRPrint<ccopyv_ker_ft>()
     );
+#endif
 
 // Unit testing with Non-Unit Strides(US), across all loops.
+#ifdef K_bli_ccopyv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_ccopyv_zen_int_nonUnitStrides,
         ccopyvGeneric,
@@ -132,4 +136,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::copyvUKRPrint<ccopyv_ker_ft>()
     );
+#endif
 #endif

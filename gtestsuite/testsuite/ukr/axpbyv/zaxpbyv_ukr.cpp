@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_axpbyv_ukr.h"
+#include "common/blis_version_defs.h"
 
 class zaxpbyvGeneric :
         public ::testing::TestWithParam<std::tuple<zaxpbyv_ker_ft,  // Function pointer type for zaxpbyv kernels
@@ -125,6 +126,7 @@ TEST_P( zaxpbyvGeneric, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 
+#ifdef K_bli_zaxpbyv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpbyv_zen_int_unitStrides,
         zaxpbyvGeneric,
@@ -162,7 +164,9 @@ INSTANTIATE_TEST_SUITE_P(
         (::axpbyvMemUKRPrint<dcomplex, zaxpbyv_ker_ft>())
 
     );
+#endif
 
+#ifdef K_bli_zaxpbyv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpbyv_zen_int_nonUnitStrides,
         zaxpbyvGeneric,
@@ -187,4 +191,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpbyvMemUKRPrint<dcomplex, zaxpbyv_ker_ft>())
     );
+#endif
 #endif

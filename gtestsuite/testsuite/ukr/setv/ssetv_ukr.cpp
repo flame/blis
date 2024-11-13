@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_setv_ukr.h"
+#include "common/blis_version_defs.h"
 
 using T = float;
 using FT = ssetv_ker_ft;
@@ -88,6 +89,7 @@ TEST_P( ssetvGeneric, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_ssetv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_ssetv_zen_int_unitStrides,
         ssetvGeneric,
@@ -120,8 +122,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::setvUkrPrint<T, FT>())
     );
+#endif
 
 // Unit testing with non-unit strides, across all loops.
+#ifdef K_bli_ssetv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_ssetv_zen_int_nonUnitStrides,
         ssetvGeneric,
@@ -135,6 +139,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::setvUkrPrint<T, FT>())
     );
+#endif
 #endif
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
@@ -153,6 +158,7 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_ssetv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_ssetv_zen_int_avx512_unitStrides,
         ssetvGeneric,
@@ -188,8 +194,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::setvUkrPrint<T, FT>())
     );
+#endif
 
 // Unit testing with non-unit strides, across all loops.
+#ifdef K_bli_ssetv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_ssetv_zen_int_avx512_nonUnitStrides,
         ssetvGeneric,
@@ -203,4 +211,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::setvUkrPrint<T, FT>())
     );
+#endif
 #endif

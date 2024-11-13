@@ -39,6 +39,9 @@
 #include "inc/check_error.h"
 #include <stdexcept>
 #include <algorithm>
+#include "common/blis_version_defs.h"
+
+#ifdef E_GEMM_COMPUTE
 
 template<typename T>
 void test_gemm_compute( char storage, char trnsa, char trnsb, char pcka, char pckb,
@@ -130,3 +133,5 @@ public:
         return str_name;
     }
 };
+
+#endif // ifdef E_GEMM_COMPUTE

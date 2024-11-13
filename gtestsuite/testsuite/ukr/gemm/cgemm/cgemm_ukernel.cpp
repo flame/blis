@@ -36,6 +36,7 @@
 #include "blis.h"
 #include "common/testing_helpers.h"
 #include "ukr/gemm/test_complex_gemm_ukr.h"
+#include "common/blis_version_defs.h"
 
 /*******************************************************/
 /*                 SUP Kernel testing                  */
@@ -159,7 +160,8 @@ public:
 /* 1. blis_sol[i*ld + j] = (0.856704, 0.625597),   ref_sol[i*ld + j] = (0.856718, 0.625608), i = 5, j = 0,    thresh = 9.5367431640625e-06,    error = 1.7269374438910745e-05 (144.86601257324219 * eps)
 [  FAILED  ] bli_cgemmsup_rv_zen_asm_3x8m/cgemmGenericSUP.FunctionalTest/StorageOfMatrix_r_transA_t_transB_n_m_6_n_8_k_4_alpha_3i4_beta_m7i6_mem_test_disabled, where GetParam() = (6, 8, 4, (3, 4.5), (-7.3, 6.7), 'r' (114, 0x72), 0x5576cdf96cc7, 't' (116, 0x74), 'n' (110, 0x6E), false) (0 ms) */
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_3x8m
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_3x8m,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -175,8 +177,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_3x8m
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_3x8m_alpha_beta,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -192,8 +196,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_3x4m
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_3x4m,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -209,8 +215,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_3x4m
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_3x4m_alpha_beta,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -226,8 +234,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_3x2m
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_3x2m,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -243,8 +253,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_3x2m
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_3x2m_alpha_beta,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -260,8 +272,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_3x8n
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_3x8n,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -277,8 +291,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_3x8n
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_3x8n_alpha_beta,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -294,11 +310,13 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
 #if 0
 //Memtest fails
 //Memtest diabled free(): invalid next size (fast)
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_2x8n
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_2x8n,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -314,8 +332,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_2x8n
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_2x8n_alpha_beta,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -331,9 +351,12 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
-
 #endif
-INSTANTIATE_TEST_SUITE_P (
+
+#endif // disable memtest
+
+#ifdef K_bli_cgemmsup_rv_zen_asm_1x8n
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_1x8n,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -349,8 +372,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_1x8n
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_1x8n_alpha_beta,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -366,8 +391,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_3x4
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_3x4,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -383,8 +410,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_3x4
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_3x4_alpha_beta,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -400,8 +429,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_3x2
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_3x2,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -417,8 +448,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_3x2
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_3x2_alpha_beta,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -434,8 +467,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
- INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_2x8
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_2x8,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -451,8 +486,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
- INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_2x8
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_2x8_alpha_beta,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -468,8 +505,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_1x8
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_1x8,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -485,8 +524,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_1x8
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_1x8_alpha_beta,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -502,8 +543,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_2x4
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_2x4,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -519,8 +562,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_2x4
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_2x4_alpha_beta,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -536,8 +581,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_1x4
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_1x4,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -553,8 +600,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_1x4
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_1x4_alpha_beta,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -570,8 +619,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_2x2
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_2x2,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -587,8 +638,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_2x2
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_2x2_alpha_beta,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -604,8 +657,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_1x2
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_1x2,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -621,8 +676,10 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::cgemmGenericSUPPrint()
     );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemmsup_rv_zen_asm_1x2
+INSTANTIATE_TEST_SUITE_P(
         bli_cgemmsup_rv_zen_asm_1x2_alpha_beta,
         cgemmGenericSUP,
         ::testing::Combine(
@@ -639,6 +696,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::cgemmGenericSUPPrint()
     );
 
+#endif
 #endif
 
 /*******************************************************/
@@ -717,7 +775,8 @@ public:
 };
 
 #if defined(BLIS_KERNELS_HASWELL) && defined(GTEST_AVX2FMA3)
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_cgemm_haswell_asm_3x8
+INSTANTIATE_TEST_SUITE_P(
     bli_cgemm_haswell_asm_3x8,
     cgemmGenericNat,
     ::testing::Combine(
@@ -732,4 +791,5 @@ INSTANTIATE_TEST_SUITE_P (
     ),
     ::cgemmGenericNatPrint()
 );
+#endif
 #endif

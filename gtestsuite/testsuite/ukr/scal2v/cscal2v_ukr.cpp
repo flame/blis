@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_scal2v_ukr.h"
+#include "common/blis_version_defs.h"
 
 class cscal2vGeneric :
         public ::testing::TestWithParam<std::tuple<cscal2v_ker_ft,  // Function pointer for cscal2v kernels
@@ -101,6 +102,7 @@ TEST_P( cscal2vGeneric, UKR )
 
     For non-unit strides : A single loop, to process element wise.
 */
+#ifdef K_bli_cscal2v_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_cscal2v_zen_int_unitPositiveStride,
         cscal2vGeneric,
@@ -128,7 +130,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scal2vUKRPrint<scomplex,cscal2v_ker_ft>())
     );
+#endif
 
+#ifdef K_bli_cscal2v_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_cscal2v_zen_int_nonUnitPositiveStrides,
         cscal2vGeneric,
@@ -153,6 +157,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scal2vUKRPrint<scomplex,cscal2v_ker_ft>())
     );
+#endif
 #endif
 // ----------------------------------------------
 // -----  End ZEN1/2/3 (AVX2) Kernel Tests  -----

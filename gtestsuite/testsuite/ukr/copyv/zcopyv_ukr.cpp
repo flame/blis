@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_copyv_ukr.h"
+#include "common/blis_version_defs.h"
 
 class zcopyvGeneric :
         public ::testing::TestWithParam<std::tuple<zcopyv_ker_ft,   // Function pointer type for zcopyv kernels
@@ -85,6 +86,7 @@ TEST_P( zcopyvGeneric, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with Unit Strides(US), across all loops.
+#ifdef K_bli_zcopyv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_zcopyv_zen_int_unitStrides,
         zcopyvGeneric,
@@ -113,8 +115,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::copyvUKRPrint<zcopyv_ker_ft>()
     );
+#endif
 
 // Unit testing with Non-Unit Strides(US), across all loops.
+#ifdef K_bli_zcopyv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_zcopyv_zen_int_nonUnitStrides,
         zcopyvGeneric,
@@ -133,6 +137,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::copyvUKRPrint<zcopyv_ker_ft>()
     );
 #endif
+#endif
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 /*
@@ -150,6 +155,7 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with Unit Strides(US), across all loops.
+#ifdef K_bli_zcopyv_zen4_asm_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_zcopyv_zen4_asm_avx512_unitStrides,
         zcopyvGeneric,
@@ -182,8 +188,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::copyvUKRPrint<zcopyv_ker_ft>()
     );
+#endif
 
 // Unit testing with Non-Unit Strides(US), across all loops.
+#ifdef K_bli_zcopyv_zen4_asm_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_zcopyv_zen4_asm_avx512_nonUnitStrides,
         zcopyvGeneric,
@@ -201,4 +209,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::copyvUKRPrint<zcopyv_ker_ft>()
     );
+#endif
 #endif

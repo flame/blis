@@ -35,6 +35,7 @@
 
 #include <gtest/gtest.h>
 #include "test_axpyf_ukr.h"
+#include "common/blis_version_defs.h"
 
 using T = double;
 using FT = daxpyf_ker_ft;
@@ -127,6 +128,7 @@ TEST_P( daxpyfGeneric, UKR )
     Unit testing for functionality of bli_daxpyf_zen_int_avx512 kernel.
 */
 // Unit testing with unit strides, across all fuse-factors.
+#ifdef K_bli_daxpyf_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_daxpyf_zen_int_avx512_unitStrides,
         daxpyfGeneric,
@@ -162,8 +164,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyfUkrPrint<T, FT>())
     );
+#endif
 
 // Unit testing with non-unit strides, across all fuse-factors.
+#ifdef K_bli_daxpyf_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_daxpyf_zen_int_avx512_nonUnitStrides,
         daxpyfGeneric,
@@ -189,4 +193,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyfUkrPrint<T, FT>())
     );
+#endif
 #endif

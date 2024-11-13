@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_scal2v_ukr.h"
+#include "common/blis_version_defs.h"
 
 class zscal2vGeneric :
         public ::testing::TestWithParam<std::tuple<zscal2v_ker_ft,  // Function pointer for zscal2v kernels
@@ -109,6 +110,7 @@ TEST_P( zscal2vGeneric, UKR )
         Fringe loops :  In blocks of 2  --> L2
                         Element-wise loop --> LScalar
 */
+#ifdef K_bli_zscal2v_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_zscal2v_zen_int_unitPositiveStride,
         zscal2vGeneric,
@@ -136,7 +138,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scal2vUKRPrint<dcomplex,zscal2v_ker_ft>())
     );
+#endif
 
+#ifdef K_bli_zscal2v_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_zscal2v_zen_int_nonUnitPositiveStrides,
         zscal2vGeneric,
@@ -163,6 +167,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scal2vUKRPrint<dcomplex,zscal2v_ker_ft>())
     );
+#endif
 #endif
 // ----------------------------------------------
 // -----  End ZEN1/2/3 (AVX2) Kernel Tests  -----

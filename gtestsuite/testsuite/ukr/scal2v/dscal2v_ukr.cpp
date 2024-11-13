@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_scal2v_ukr.h"
+#include "common/blis_version_defs.h"
 
 class dscal2vGeneric :
         public ::testing::TestWithParam<std::tuple<dscal2v_ker_ft,  // Function pointer for dscal2v kernels
@@ -103,6 +104,7 @@ TEST_P( dscal2vGeneric, UKR )
 
     For non-unit strides : A single loop, to process element wise.
 */
+#ifdef K_bli_dscal2v_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_dscal2v_zen_int_unitPositiveStride,
         dscal2vGeneric,
@@ -128,7 +130,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scal2vUKRPrint<double,dscal2v_ker_ft>())
     );
+#endif
 
+#ifdef K_bli_dscal2v_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_dscal2v_zen_int_nonUnitPositiveStrides,
         dscal2vGeneric,
@@ -148,6 +152,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scal2vUKRPrint<double,dscal2v_ker_ft>())
     );
+#endif
 #endif
 // ----------------------------------------------
 // -----  End ZEN1/2/3 (AVX2) Kernel Tests  -----
@@ -170,6 +175,7 @@ INSTANTIATE_TEST_SUITE_P(
 
     For non-unit strides : A single loop, to process element wise.
 */
+#ifdef K_bli_dscal2v_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_dscal2v_zen_int_avx512_unitPositiveStride,
         dscal2vGeneric,
@@ -193,7 +199,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scal2vUKRPrint<double,dscal2v_ker_ft>())
     );
+#endif
 
+#ifdef K_bli_dscal2v_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_dscal2v_zen_int_avx512_nonUnitPositiveStrides,
         dscal2vGeneric,
@@ -213,6 +221,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scal2vUKRPrint<double,dscal2v_ker_ft>())
     );
+#endif
 #endif
 // ----------------------------------------------
 // -----  End ZEN4/5 (AVX512) Kernel Tests  -----

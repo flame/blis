@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_scalv_ukr.h"
+#include "common/blis_version_defs.h"
 
 class sscalvGeneric :
         public ::testing::TestWithParam<std::tuple<sscalv_ker_ft,   // Function pointer for sscalv kernels
@@ -93,6 +94,7 @@ TEST_P( sscalvGeneric, UKR )
  * L32     - Main loop, handles 32 elements
  * LScalar - leftover loop (also handles non-unit increments)
 */
+#ifdef K_bli_sscalv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_sscalv_zen_int_unitPositiveStride,
         sscalvGeneric,
@@ -124,7 +126,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scalvUKRPrint<float,sscalv_ker_ft>())
     );
+#endif
 
+#ifdef K_bli_sscalv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_sscalv_zen_int_nonUnitPositiveStrides,
         sscalvGeneric,
@@ -153,6 +157,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scalvUKRPrint<float,sscalv_ker_ft>())
     );
+#endif
 
 // Tests for bli_sscalv_zen_int10 (AVX2) kernel.
 /**
@@ -169,6 +174,7 @@ INSTANTIATE_TEST_SUITE_P(
  *
  * LNUnit - loop for non-unit increments
 */
+#ifdef K_bli_sscalv_zen_int10
 INSTANTIATE_TEST_SUITE_P(
         bli_sscalv_zen_int10_unitPositiveStride,
         sscalvGeneric,
@@ -211,7 +217,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scalvUKRPrint<float,sscalv_ker_ft>())
     );
+#endif
 
+#ifdef K_bli_sscalv_zen_int10
 INSTANTIATE_TEST_SUITE_P(
         bli_sscalv_zen_int10_nonUnitPositiveStrides,
         sscalvGeneric,
@@ -237,6 +245,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scalvUKRPrint<float,sscalv_ker_ft>())
     );
+#endif
 #endif
 // ----------------------------------------------
 // -----  End ZEN1/2/3 (AVX2) Kernel Tests  -----

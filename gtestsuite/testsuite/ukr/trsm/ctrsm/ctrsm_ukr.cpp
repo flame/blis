@@ -37,6 +37,7 @@
 #include "level3/ref_gemm.h"
 #include "ukr/trsm/test_trsm_ukr.h"
 #include "level3/trsm/test_trsm.h"
+#include "common/blis_version_defs.h"
 
 class ctrsmGenericSmall :
     public ::testing::TestWithParam<std::tuple< trsm_small_ker_ft,  // Function pointer type for ctrsm kernels
@@ -87,7 +88,8 @@ TEST_P( ctrsmGenericSmall, UKR )
 
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_trsm_small
+INSTANTIATE_TEST_SUITE_P(
     bli_trsm_small,
     ctrsmGenericSmall,
     ::testing::Combine(
@@ -108,6 +110,7 @@ INSTANTIATE_TEST_SUITE_P (
     ),
     (::trsmSmallUKRPrint<scomplex, trsm_small_ker_ft>())
 );
+#endif
 #endif
 #endif
 

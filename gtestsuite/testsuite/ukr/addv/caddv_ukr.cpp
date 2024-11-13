@@ -35,6 +35,7 @@
 
 #include <gtest/gtest.h>
 #include "test_addv_ukr.h"
+#include "common/blis_version_defs.h"
 
 class caddvGeneric :
         public ::testing::TestWithParam<std::tuple<caddv_ker_ft,    // Function pointer type for caddv kernels
@@ -95,6 +96,7 @@ TEST_P( caddvGeneric, UKR )
 
     For non-unit strides : A single loop, to process element wise.
 */
+#ifdef K_bli_caddv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_caddv_zen_int_unitStrides,
         caddvGeneric,
@@ -120,7 +122,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::addvUKRPrint<scomplex, caddv_ker_ft>())
     );
+#endif
 
+#ifdef K_bli_caddv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_caddv_zen_int_nonUnitStrides,
         caddvGeneric,
@@ -140,6 +144,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::addvUKRPrint<scomplex, caddv_ker_ft>())
     );
+#endif
 #endif
 // ----------------------------------------------
 // -----  End ZEN1/2/3 (AVX2) Kernel Tests  -----

@@ -34,6 +34,9 @@
 
 #include <gtest/gtest.h>
 #include "level3/gemm_compute/test_gemm_compute.h"
+#include "common/blis_version_defs.h"
+
+#ifdef E_GEMM_COMPUTE
 
 class sgemmComputeGeneric :
         public ::testing::TestWithParam<std::tuple<char,
@@ -202,3 +205,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::gemm_computeGeneticPrint<float>()
     );
+
+#endif // ifdef E_GEMM_COMPUTE

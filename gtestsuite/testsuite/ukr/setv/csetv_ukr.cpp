@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_setv_ukr.h"
+#include "common/blis_version_defs.h"
 
 using T = scomplex;
 using FT = csetv_ker_ft;
@@ -88,6 +89,7 @@ TEST_P( csetvGeneric, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_csetv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_csetv_zen_int_unitStrides,
         csetvGeneric,
@@ -124,8 +126,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::setvUkrPrint<T, FT>())
     );
+#endif
 
 // Unit testing with non-unit strides, across all loops.
+#ifdef K_bli_csetv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_csetv_zen_int_nonUnitStrides,
         csetvGeneric,
@@ -143,4 +147,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::setvUkrPrint<T, FT>())
     );
+#endif
 #endif

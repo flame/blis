@@ -35,6 +35,7 @@
 
 #include <gtest/gtest.h>
 #include "test_axpyv_ukr.h"
+#include "common/blis_version_defs.h"
 
 class caxpyvGeneric :
         public ::testing::TestWithParam<std::tuple<caxpyv_ker_ft,   // Function pointer type for caxpyv kernels
@@ -104,6 +105,7 @@ TEST_P( caxpyvGeneric, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_caxpyv_zen_int5
 INSTANTIATE_TEST_SUITE_P(
         bli_caxpyv_zen_int5_unitStrides,
         caxpyvGeneric,
@@ -133,8 +135,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyvUKRPrint<scomplex, caxpyv_ker_ft>())
     );
+#endif
 
 // Unit testing for non unit strides
+#ifdef K_bli_caxpyv_zen_int5
 INSTANTIATE_TEST_SUITE_P(
         bli_caxpyv_zen_int5_nonUnitStrides,
         caxpyvGeneric,
@@ -156,5 +160,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpyvUKRPrint<scomplex, caxpyv_ker_ft>())
     );
-
+#endif
 #endif

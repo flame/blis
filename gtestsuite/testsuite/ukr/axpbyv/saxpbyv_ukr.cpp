@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_axpbyv_ukr.h"
+#include "common/blis_version_defs.h"
 
 class saxpbyvGeneric :
         public ::testing::TestWithParam<std::tuple<saxpbyv_ker_ft,  // Function pointer type for saxpbyv kernels
@@ -127,6 +128,7 @@ TEST_P( saxpbyvGeneric, UKR )
 */
 
 // Unit testing with unit stride, across all loops.
+#ifdef K_bli_saxpbyv_zen_int10
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpbyv_zen_int10_unitStride,
         saxpbyvGeneric,
@@ -156,8 +158,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ((::axpbyvMemUKRPrint<float, saxpbyv_ker_ft>()))
     );
+#endif
 
 // Unit testing for non unit strides
+#ifdef K_bli_saxpbyv_zen_int10
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpbyv_zen_int_unitStride,
         saxpbyvGeneric,
@@ -178,6 +182,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpbyvMemUKRPrint<float, saxpbyv_ker_ft>())
     );
+#endif
 
 /*
     Unit testing for functionality of bli_saxpbyv_zen_int kernel.
@@ -189,6 +194,7 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with Unit Strides, across all loops.
+#ifdef K_bli_saxpbyv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpbyv_zen_int_unitStrides,
         saxpbyvGeneric,
@@ -210,8 +216,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpbyvMemUKRPrint<float, saxpbyv_ker_ft>())
     );
+#endif
 
 // Unit testing for Non-Unit Stride
+#ifdef K_bli_saxpbyv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpbyv_zen_int_nonUnitStrides,
         saxpbyvGeneric,
@@ -232,4 +240,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::axpbyvMemUKRPrint<float, saxpbyv_ker_ft>())
     );
+#endif
 #endif

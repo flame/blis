@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_scalv_ukr.h"
+#include "common/blis_version_defs.h"
 
 class dscalvGeneric :
         public ::testing::TestWithParam<std::tuple<dscalv_ker_ft,   // Function pointer for dscalv kernels
@@ -94,6 +95,7 @@ TEST_P( dscalvGeneric, UKR )
  * L16     - Main loop, handles 16 elements
  * LScalar - leftover loop (also handles non-unit increments)
 */
+#ifdef K_bli_dscalv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_dscalv_zen_int_unitPositiveStride,
         dscalvGeneric,
@@ -125,7 +127,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scalvUKRPrint<double,dscalv_ker_ft>())
     );
+#endif
 
+#ifdef K_bli_dscalv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_dscalv_zen_int_nonUnitPositiveStrides,
         dscalvGeneric,
@@ -154,6 +158,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scalvUKRPrint<double,dscalv_ker_ft>())
     );
+#endif
 
 // Tests for bli_dscalv_zen_int10 (AVX2) kernel.
 /**
@@ -167,6 +172,7 @@ INSTANTIATE_TEST_SUITE_P(
  *
  * LNUnit - loop for non-unit increments
 */
+#ifdef K_bli_dscalv_zen_int10
 INSTANTIATE_TEST_SUITE_P(
         bli_dscalv_zen_int10_unitPositiveStride,
         dscalvGeneric,
@@ -215,7 +221,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scalvUKRPrint<double,dscalv_ker_ft>())
     );
+#endif
 
+#ifdef K_bli_dscalv_zen_int10
 INSTANTIATE_TEST_SUITE_P(
         bli_dscalv_zen_int10_nonUnitPositiveStrides,
         dscalvGeneric,
@@ -242,6 +250,7 @@ INSTANTIATE_TEST_SUITE_P(
         (::scalvUKRPrint<double,dscalv_ker_ft>())
     );
 #endif
+#endif
 // ----------------------------------------------
 // -----  End ZEN1/2/3 (AVX2) Kernel Tests  -----
 // ----------------------------------------------
@@ -262,6 +271,7 @@ INSTANTIATE_TEST_SUITE_P(
  * L2      - handles 2 elements
  * LScalar - leftover loop (also handles non-unit increments)
 */
+#ifdef K_bli_dscalv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_dscalv_zen_int_avx512_unitPositiveStride,
         dscalvGeneric,
@@ -323,7 +333,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scalvUKRPrint<double,dscalv_ker_ft>())
     );
+#endif
 
+#ifdef K_bli_dscalv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_dscalv_zen_int_avx512_nonUnitPositiveStrides,
         dscalvGeneric,
@@ -349,6 +361,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scalvUKRPrint<double,dscalv_ker_ft>())
     );
+#endif
 #endif
 // ----------------------------------------------
 // -----   End ZEN4 (AVX512) Kernel Tests   -----

@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_nrm2_ukr.h"
+#include "common/blis_version_defs.h"
 
 using T = double;
 using RT = typename testinghelpers::type_info<T>::real_type;
@@ -81,6 +82,7 @@ TEST_P( dnrm2Generic, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_dnorm2fv_unb_var1_avx2
 INSTANTIATE_TEST_SUITE_P(
         bli_dnorm2fv_unb_var1_avx2_unitStrides,
         dnrm2Generic,
@@ -100,8 +102,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::nrm2UKRPrint<double>()
     );
+#endif
 
 // Unit testing with non-unit strides.
+#ifdef K_bli_dnorm2fv_unb_var1_avx2
 INSTANTIATE_TEST_SUITE_P(
         bli_dnorm2fv_unb_var1_avx2_nonUnitStrides,
         dnrm2Generic,
@@ -119,6 +123,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::nrm2UKRPrint<double>()
     );
 #endif
+#endif
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 /*
@@ -133,6 +138,7 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_dnorm2fv_unb_var1_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_dnorm2fv_unb_var1_avx512_unitStrides,
         dnrm2Generic,
@@ -153,8 +159,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::nrm2UKRPrint<double>()
     );
+#endif
 
 // Unit testing with non-unit strides.
+#ifdef K_bli_dnorm2fv_unb_var1_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_dnorm2fv_unb_var1_avx512_nonUnitStrides,
         dnrm2Generic,
@@ -171,4 +179,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::nrm2UKRPrint<double>()
     );
+#endif
 #endif

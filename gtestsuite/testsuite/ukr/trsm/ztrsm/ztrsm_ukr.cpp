@@ -37,6 +37,7 @@
 #include "level3/ref_gemm.h"
 #include "ukr/trsm/test_trsm_ukr.h"
 #include "level3/trsm/test_trsm.h"
+#include "common/blis_version_defs.h"
 
 class ztrsmGenericNat :
     public ::testing::TestWithParam<std::tuple< zgemmtrsm_ukr_ft,  // Function pointer type for ztrsm kernels
@@ -132,7 +133,8 @@ TEST_P( ztrsmGenericSmall, UKR )
 }
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_zgemmtrsm_l_zen4_asm_4x12
+INSTANTIATE_TEST_SUITE_P(
     bli_zgemmtrsm_l_zen4_asm_4x12,
     ztrsmGenericNat,
     ::testing::Combine(
@@ -152,8 +154,10 @@ INSTANTIATE_TEST_SUITE_P (
     ),
     (::trsmNatUKRPrint<dcomplex,zgemmtrsm_ukr_ft>())
 );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_zgemmtrsm_u_zen4_asm_4x12
+INSTANTIATE_TEST_SUITE_P(
     bli_zgemmtrsm_u_zen4_asm_4x12,
     ztrsmGenericNat,
     ::testing::Combine(
@@ -173,9 +177,11 @@ INSTANTIATE_TEST_SUITE_P (
    ),
     (::trsmNatUKRPrint<dcomplex,zgemmtrsm_ukr_ft>())
 );
+#endif
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_trsm_small_AVX512
+INSTANTIATE_TEST_SUITE_P(
     bli_trsm_small_AVX512,
     ztrsmGenericSmall,
     ::testing::Combine(
@@ -197,12 +203,14 @@ INSTANTIATE_TEST_SUITE_P (
     (::trsmSmallUKRPrint<dcomplex, trsm_small_ker_ft>())
 );
 #endif
-
 #endif
 
+#endif // defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
-INSTANTIATE_TEST_SUITE_P (
+
+#ifdef K_bli_zgemmtrsm_l_zen_asm_2x6
+INSTANTIATE_TEST_SUITE_P(
     bli_zgemmtrsm_l_zen_asm_2x6,
     ztrsmGenericNat,
     ::testing::Combine(
@@ -222,8 +230,10 @@ INSTANTIATE_TEST_SUITE_P (
     ),
     (::trsmNatUKRPrint<dcomplex,zgemmtrsm_ukr_ft>())
 );
+#endif
 
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_zgemmtrsm_u_zen_asm_2x6
+INSTANTIATE_TEST_SUITE_P(
     bli_zgemmtrsm_u_zen_asm_2x6,
     ztrsmGenericNat,
     ::testing::Combine(
@@ -243,9 +253,11 @@ INSTANTIATE_TEST_SUITE_P (
     ),
     (::trsmNatUKRPrint<dcomplex,zgemmtrsm_ukr_ft>())
 );
+#endif
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-INSTANTIATE_TEST_SUITE_P (
+#ifdef K_bli_trsm_small
+INSTANTIATE_TEST_SUITE_P(
     bli_trsm_small,
     ztrsmGenericSmall,
     ::testing::Combine(
@@ -268,5 +280,7 @@ INSTANTIATE_TEST_SUITE_P (
 );
 #endif
 #endif
+
+#endif // defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 
 #endif // ifndef BLIS_INT_ELEMENT_TYPE

@@ -37,6 +37,7 @@
 #include "blis.h"
 #include "common/testing_helpers.h"
 #include "inc/check_error.h"
+#include "common/blis_version_defs.h"
 
 /**
  * @brief Performs the operation:
@@ -67,6 +68,8 @@
  * @param[in,out] cp     specifies pointer which points to the first element of cp.
  * @param[in]     ldc    specifies the leading dimension of cp.
  */
+
+#ifdef E_GEMM_COMPUTE
 
 #ifdef TEST_BLAS
 template<typename T>
@@ -751,3 +754,5 @@ static void gemm_compute( char storage, char transa, char transb, char packa, ch
     }
 #endif
 }
+
+#endif // ifdef E_GEMM_COMPUTE

@@ -38,6 +38,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include "blis.h"
+#include "common/blis_version_defs.h"
 
 /**
  * @brief Generic test body for gemm operation.
@@ -63,12 +64,21 @@ static void test_gemmnat_ukr(
     bli_obj_create(dt, m, k, 1, m, &ap);
     bli_obj_create(dt, k, n, n, 1, &bp);
 
+#ifdef AOCL_42
     gtint_t sizea = bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_GEMM, BLIS_PACKED_ROW_PANELS,
                         BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
                         BLIS_MR, BLIS_KR, &a, &ap, cntx) * sizeof(T);
     gtint_t sizeb = bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_GEMM, BLIS_PACKED_COL_PANELS,
                              BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
                              BLIS_KR, BLIS_NR, &b, &bp, cntx ) * sizeof(T);
+#else
+    gtint_t sizea = bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS,
+                        BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
+                        BLIS_MR, BLIS_KR, &a, &ap, cntx) * sizeof(T);
+    gtint_t sizeb = bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS,
+                             BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
+                             BLIS_KR, BLIS_NR, &b, &bp, cntx ) * sizeof(T);
+#endif
 
     // Create test operands
     // matrix A will be in col-storage

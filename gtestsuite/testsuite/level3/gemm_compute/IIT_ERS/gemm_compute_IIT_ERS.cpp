@@ -37,6 +37,7 @@
 #include "common/wrong_inputs_helpers.h"
 #include "common/testing_helpers.h"
 #include "inc/check_error.h"
+#include "common/blis_version_defs.h"
 
 template <typename T>
 class gemm_compute_IIT_ERS : public ::testing::Test {};
@@ -50,6 +51,8 @@ using namespace testinghelpers::IIT;
 #else
 #define INFO_OFFSET 0
 #endif
+
+#ifdef E_GEMM_COMPUTE
 
 #if defined(TEST_CBLAS)
 
@@ -746,4 +749,6 @@ TYPED_TEST(gemm_compute_IIT_ERS, ZeroAlpha_OtherBeta_UP)
 #endif
 }
 
-#endif
+#endif // defined(TEST_BLAS_LIKE) || defined(TEST_CBLAS)
+
+#endif // ifdef E_GEMM_COMPUTE

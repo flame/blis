@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_amaxv_ukr.h"
+#include "common/blis_version_defs.h"
 
 class damaxvGeneric :
         public ::testing::TestWithParam<std::tuple<damaxv_ker_ft,   // Function pointer type for damaxv kernels
@@ -98,6 +99,7 @@ TEST_P( damaxvGeneric, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_damaxv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_damaxv_zen_int_unitStrides,
         damaxvGeneric,
@@ -118,8 +120,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::amaxvUKRPrint<damaxv_ker_ft>()
     );
+#endif
 
 // Unit testing with non-unit strides.
+#ifdef K_bli_damaxv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_damaxv_zen_int_nonUnitStrides,
         damaxvGeneric,
@@ -132,6 +136,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::amaxvUKRPrint<damaxv_ker_ft>()
     );
+#endif
 #endif
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
@@ -147,6 +152,7 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_damaxv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_damaxv_zen_int_avx512_unitStrides,
         damaxvGeneric,
@@ -165,7 +171,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::amaxvUKRPrint<damaxv_ker_ft>()
     );
+#endif
 
+#ifdef K_bli_damaxv_zen_int_avx512
 // Unit testing with non-unit strides.
 INSTANTIATE_TEST_SUITE_P(
         bli_damaxv_zen_int_avx512_nonUnitStrides,
@@ -179,4 +187,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::amaxvUKRPrint<damaxv_ker_ft>()
     );
+#endif
 #endif

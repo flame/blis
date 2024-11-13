@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_swapv_ukr.h"
+#include "common/blis_version_defs.h"
 
 class dswapvGeneric :
         public ::testing::TestWithParam<std::tuple<dswapv_ker_ft,   // Function pointer for dswapv kernels
@@ -78,6 +79,7 @@ TEST_P( dswapvGeneric, UKR )
 // For unit inc on x and y:
 // Optimised code is avialble for n = 32, 16, 8, 4
 
+#ifdef K_bli_dswapv_zen_int8
 INSTANTIATE_TEST_SUITE_P(
         UnitIncrements,
         dswapvGeneric,
@@ -104,7 +106,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::swapvUKRPrint<dswapv_ker_ft>()
     );
+#endif
 
+#ifdef K_bli_dswapv_zen_int8
 INSTANTIATE_TEST_SUITE_P(
         NonUnitIncrements,
         dswapvGeneric,
@@ -129,4 +133,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::swapvUKRPrint<dswapv_ker_ft>()
     );
+#endif
 #endif

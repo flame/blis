@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_dotv_ukr.h"
+#include "common/blis_version_defs.h"
 
 using T = dcomplex;
 class zdotvGeneric :
@@ -101,6 +102,7 @@ TEST_P( zdotvGeneric, UKR )
  *
  * LNUnit  - loop for non-unit increments
 */
+#ifdef K_bli_zdotv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_zdotv_zen_int_avx512_unitStride,
         zdotvGeneric,
@@ -143,7 +145,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::dotvUKRPrint<zdotv_ker_ft>()
     );
+#endif
 
+#ifdef K_bli_zdotv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_zdotv_zen_int_avx512_nonUnitPositiveStrides,
         zdotvGeneric,
@@ -170,6 +174,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::dotvUKRPrint<zdotv_ker_ft>()
     );
+#endif
 
 // Tests for bli_zdotv_zen_int_avx512 (AVX512) kernel.
 /**
@@ -183,6 +188,7 @@ INSTANTIATE_TEST_SUITE_P(
  *
  * LNUnit  - loop for non-unit increments
 */
+#ifdef K_bli_zdotv_zen4_asm_avx512
 INSTANTIATE_TEST_SUITE_P(
         DISABLED_bli_zdotv_zen4_asm_avx512_unitStride,
         zdotvGeneric,
@@ -225,7 +231,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::dotvUKRPrint<zdotv_ker_ft>()
     );
+#endif
 
+#ifdef K_bli_zdotv_zen4_asm_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_zdotv_zen4_asm_avx512_nonUnitPositiveStrides,
         zdotvGeneric,
@@ -252,6 +260,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::dotvUKRPrint<zdotv_ker_ft>()
     );
+#endif
 #endif
 // ----------------------------------------------
 // -----   End ZEN4 (AVX512) Kernel Tests   -----

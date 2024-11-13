@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_scalv_ukr.h"
+#include "common/blis_version_defs.h"
 
 class zscalvGeneric :
         public ::testing::TestWithParam<std::tuple<zscalv_ker_ft,   // Function pointer for zscalv kernels
@@ -99,6 +100,7 @@ TEST_P( zscalvGeneric, UKR )
  * L2      - handles 2 elements
  * LScalar - leftover loop (also handles non-unit increments)
 */
+#ifdef K_bli_zscalv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_zscalv_zen_int_unitPositiveStride,
         zscalvGeneric,
@@ -133,7 +135,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scalvUKRPrint<dcomplex,zscalv_ker_ft>())
     );
+#endif
 
+#ifdef K_bli_zscalv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_zscalv_zen_int_nonUnitPositiveStrides,
         zscalvGeneric,
@@ -164,6 +168,7 @@ INSTANTIATE_TEST_SUITE_P(
         (::scalvUKRPrint<dcomplex,zscalv_ker_ft>())
     );
 #endif
+#endif
 // ----------------------------------------------
 // -----  End ZEN1/2/3 (AVX2) Kernel Tests  -----
 // ----------------------------------------------
@@ -184,6 +189,7 @@ INSTANTIATE_TEST_SUITE_P(
  * L2      - handles 2 elements
  * LScalar - leftover loop (also handles non-unit increments)
 */
+#ifdef K_bli_zscalv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_zscalv_zen_int_avx512_unitPositiveStride,
         zscalvGeneric,
@@ -222,7 +228,9 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scalvUKRPrint<dcomplex,zscalv_ker_ft>())
     );
+#endif
 
+#ifdef K_bli_zscalv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_zscalv_zen_int_avx512_nonUnitPositiveStrides,
         zscalvGeneric,
@@ -252,4 +260,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         (::scalvUKRPrint<dcomplex,zscalv_ker_ft>())
     );
+#endif
 #endif

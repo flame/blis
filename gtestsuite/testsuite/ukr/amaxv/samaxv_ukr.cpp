@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 #include "test_amaxv_ukr.h"
+#include "common/blis_version_defs.h"
 
 class samaxvGeneric :
         public ::testing::TestWithParam<std::tuple<samaxv_ker_ft,   // Function pointer type for samaxv kernels
@@ -83,6 +84,7 @@ TEST_P( samaxvGeneric, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_samaxv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_samaxv_zen_int_unitStrides,
         samaxvGeneric,
@@ -97,8 +99,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::amaxvUKRPrint<samaxv_ker_ft>()
     );
+#endif
 
 // Unit testing with non-unit strides.
+#ifdef K_bli_samaxv_zen_int
 INSTANTIATE_TEST_SUITE_P(
         bli_samaxv_zen_int_nonUnitStrides,
         samaxvGeneric,
@@ -111,6 +115,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::amaxvUKRPrint<samaxv_ker_ft>()
     );
+#endif
 #endif
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
@@ -126,6 +131,7 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
+#ifdef K_bli_samaxv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_samaxv_zen_int_avx512_unitStrides,
         samaxvGeneric,
@@ -141,8 +147,10 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::amaxvUKRPrint<samaxv_ker_ft>()
     );
+#endif
 
 // Unit testing with non-unit strides.
+#ifdef K_bli_samaxv_zen_int_avx512
 INSTANTIATE_TEST_SUITE_P(
         bli_samaxv_zen_int_avx512_nonUnitStrides,
         samaxvGeneric,
@@ -155,4 +163,5 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::amaxvUKRPrint<samaxv_ker_ft>()
     );
+#endif
 #endif
