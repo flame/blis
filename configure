@@ -306,6 +306,13 @@ print_usage()
                  "small" depends on thresholds that may vary by sub-
                  configuration.
 
+   --enable-level4, --disable-level4
+
+                 Disable (enabled by default) building level-4 operations
+                 into BLIS. These operations include certain LAPACK-level
+                 operations. NOTE: This feature is experimental and subject
+                 to change.
+
    --enable-amd-frame-tweaks, --disable-amd-frame-tweaks
 
                  Enable building with certain framework files that have
@@ -2566,6 +2573,7 @@ main()
 	enable_mixed_dt='yes'
 	enable_mixed_dt_extra_mem='yes'
 	enable_sup_handling='yes'
+	enable_level4='yes'
 	enable_amd_frame_tweaks='no'
 	enable_memkind='' # The default memkind value is determined later on.
 	enable_trsm_preinversion='yes'
@@ -2823,6 +2831,13 @@ main()
 							;;
 						disable-sup-handling)
 							enable_sup_handling='no'
+							;;
+
+						enable-level4)
+							enable_level4='yes'
+							;;
+						disable-level4)
+							enable_level4='no'
 							;;
 
 						enable-amd-frame-tweaks)
@@ -3925,6 +3940,13 @@ main()
 		echo "${script_name}: trsm diagonal element pre-inversion is disabled."
 		enable_trsm_preinversion_01=0
 	fi
+	if [[ ${enable_level4} = yes ]]; then
+		echo "${script_name}: level-4 operations are enabled."
+		enable_level4_01=1
+	else
+		echo "${script_name}: level-4 operations are disabled."
+		enable_level4_01=0
+	fi
 
 	# Report integer sizes.
 	if [[ ${int_type_size} = 32 ]]; then
@@ -4227,6 +4249,7 @@ main()
 	-e "s/@export_shared@/${export_shared}/g"                     \
 	-e "s/@enable_blas@/${enable_blas}/g"                         \
 	-e "s/@enable_cblas@/${enable_cblas}/g"                       \
+	-e "s/@enable_level4@/${enable_level4}/g"                     \
 	-e "s/@enable_amd_frame_tweaks@/${enable_amd_frame_tweaks}/g" \
 	-e "s/@enable_memkind@/${enable_memkind}/g"                   \
 	-e "s/@pragma_omp_simd@/${pragma_omp_simd}/g"                 \
@@ -4270,6 +4293,7 @@ main()
 	-e "s/@enable_sup_handling@/${enable_sup_handling_01}/g"             \
 	-e "s/@enable_memkind@/${enable_memkind_01}/g"                       \
 	-e "s/@enable_trsm_preinversion@/${enable_trsm_preinversion_01}/g"   \
+	-e "s/@enable_level4@/${enable_level4_01}/g"                         \
 	-e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g"       \
 	-e "s/@enable_sandbox@/${enable_sandbox_01}/g"                       \
 	-e "s/@enable_shared@/${enable_shared_01}/g"                         \

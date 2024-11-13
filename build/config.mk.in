@@ -189,6 +189,9 @@ MK_ENABLE_RPATH   := @enable_rpath@
 # that are considered to be for internal use only.
 EXPORT_SHARED     := @export_shared@
 
+# Whether to enable level-4 operations.
+MK_ENABLE_LEVEL4  := @enable_level4@
+
 # Whether to enable either the BLAS or CBLAS compatibility layers.
 MK_ENABLE_BLAS    := @enable_blas@
 MK_ENABLE_CBLAS   := @enable_cblas@

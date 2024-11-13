@@ -184,6 +184,12 @@
 #define BLIS_DISABLE_TRSM_PREINVERSION
 #endif
 
+#if @enable_level4@
+#define BLIS_ENABLE_LEVEL4
+#else
+#define BLIS_DISABLE_LEVEL4
+#endif
+
 #if @enable_pragma_omp_simd@
 #define BLIS_ENABLE_PRAGMA_OMP_SIMD
 #else

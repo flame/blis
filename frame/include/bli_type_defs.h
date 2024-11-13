@@ -133,14 +133,51 @@ typedef uint32_t objbits_t;  // object information bit field
 
 // -- Complex types --
 
-#ifdef BLIS_ENABLE_C99_COMPLEX
+#if defined(__cplusplus) && defined(BLIS_ENABLE_STD_COMPLEX)
+
+	} //extern "C"
+
+	#include <complex>
+
+	// Typedef official C++ complex types to BLIS complex type names.
+
+	// This cpp guard provides a temporary hack to allow libflame
+	// interoperability with BLIS.
+	#ifndef _DEFINED_SCOMPLEX
+	#define _DEFINED_SCOMPLEX
+	typedef std::complex<float> scomplex;
+	#endif
+
+	// This cpp guard provides a temporary hack to allow libflame
+	// interoperability with BLIS.
+	#ifndef _DEFINED_DCOMPLEX
+	#define _DEFINED_DCOMPLEX
+	typedef std::complex<double> dcomplex;
+	#endif
+
+	extern "C"
+	{
+
+#elif defined(BLIS_ENABLE_C99_COMPLEX)
 
 	#if __STDC_VERSION__ >= 199901L
 		#include <complex.h>
 
-		// Typedef official complex types to BLIS complex type names.
-		typedef  float complex scomplex;
+		// Typedef official C99 complex types to BLIS complex type names.
+
+		// This cpp guard provides a temporary hack to allow libflame
+		// interoperability with BLIS.
+		#ifndef _DEFINED_SCOMPLEX
+		#define _DEFINED_SCOMPLEX
+		typedef float complex scomplex;
+		#endif
+
+		// This cpp guard provides a temporary hack to allow libflame
+		// interoperability with BLIS.
+		#ifndef _DEFINED_DCOMPLEX
+		#define _DEFINED_DCOMPLEX
 		typedef double complex dcomplex;
+		#endif
 	#else
 		#error "Configuration requested C99 complex types, but C99 does not appear to be supported."
 	#endif
@@ -1255,68 +1292,68 @@ typedef struct obj_s
 
 #define BLIS_OBJECT_INITIALIZER \
 { \
-	.root        = NULL, \
+	/* .root        = */ NULL, \
 \
-	.off         = { 0, 0 }, \
-	.dim         = { 0, 0 }, \
-	.diag_off    = 0, \
+	/* .off         = */ { 0, 0 }, \
+	/* .dim         = */ { 0, 0 }, \
+	/* .diag_off    = */ 0, \
 \
-	.info        = 0x0 | BLIS_BITVAL_DENSE      | \
-	                     BLIS_BITVAL_GENERAL, \
-	.info2       = 0x0, \
-	.elem_size   = sizeof( float ), /* this is changed later. */ \
+	/* .info        = */ 0x0 | BLIS_BITVAL_DENSE      | \
+	/*              */         BLIS_BITVAL_GENERAL, \
+	/* .info2       = */ 0x0, \
+	/* .elem_size   = */ sizeof( float ), /* this is changed later. */ \
 \
-	.buffer      = NULL, \
-	.rs          = 0, \
-	.cs          = 0, \
-	.is          = 1,  \
+	/* .buffer      = */ NULL, \
+	/* .rs          = */ 0, \
+	/* .cs          = */ 0, \
+	/* .is          = */ 1,  \
 \
-	.scalar      = { 0.0, 0.0 }, \
+	/* .scalar      = */ { 0.0, 0.0 }, \
 \
-	.m_padded    = 0, \
-	.n_padded    = 0, \
-	.ps          = 0, \
-	.pd          = 0, \
-	.m_panel     = 0, \
-	.n_panel     = 0, \
+	/* .m_padded    = */ 0, \
+	/* .n_padded    = */ 0, \
+	/* .ps          = */ 0, \
+	/* .pd          = */ 0, \
+	/* .m_panel     = */ 0, \
+	/* .n_panel     = */ 0, \
 \
-	.pack_fn     = NULL, \
-	.pack_params = NULL, \
-	.ker_fn      = NULL, \
-	.ker_params  = NULL  \
+	/* .pack_fn     = */ NULL, \
+	/* .pack_params = */ NULL, \
+	/* .ker_fn      = */ NULL, \
+	/* .ker_params  = */ NULL  \
 }
 
 #define BLIS_OBJECT_INITIALIZER_1X1 \
 { \
-	.root        = NULL, \
+	/* .root        = */ NULL, \
 \
-	.off         = { 0, 0 }, \
-	.dim         = { 1, 1 }, \
-	.diag_off    = 0, \
+	/* .off         = */ { 0, 0 }, \
+	/* .dim         = */ { 1, 1 }, \
+	/* .diag_off    = */ 0, \
 \
-	.info        = 0x0 | BLIS_BITVAL_DENSE      | \
-	                     BLIS_BITVAL_GENERAL, \
-	.info2       = 0x0, \
-	.elem_size   = sizeof( float ), /* this is changed later. */ \
+	/* .info        = */ 0x0 | BLIS_BITVAL_DENSE      | \
+	/*              */         BLIS_BITVAL_GENERAL, \
+	/* .info2       = */ 0x0, \
+	/* .elem_size   = */ sizeof( float ), /* this is changed later. */ \
 \
-	.buffer      = NULL, \
-	.rs          = 0, \
-	.cs          = 0, \
-	.is          = 1,  \
+	/* .buffer      = */ NULL, \
+	/* .rs          = */ 0, \
+	/* .cs          = */ 0, \
+	/* .is          = */ 1,  \
 \
-	.scalar      = { 0.0, 0.0 }, \
+	/* .scalar      = */ { 0.0, 0.0 }, \
 \
-	.m_padded    = 0, \
-	.n_padded    = 0, \
-	.ps          = 0, \
-	.pd          = 0, \
-	.m_panel     = 0, \
-	.n_panel     = 0, \
+	/* .m_padded    = */ 0, \
+	/* .n_padded    = */ 0, \
+	/* .ps          = */ 0, \
+	/* .pd          = */ 0, \
+	/* .m_panel     = */ 0, \
+	/* .n_panel     = */ 0, \
 \
-	.pack_fn     = NULL, \
-	.pack_params = NULL, \
-	.ker_fn      = NULL, \
-	.ker_params  = NULL  \
+	/* .pack_fn     = */ NULL, \
+	/* .pack_params = */ NULL, \
+	/* .ker_fn      = */ NULL, \
+	/* .ker_params  = */ NULL  \
 }
 
 // Define these macros here since they must be updated if contents of

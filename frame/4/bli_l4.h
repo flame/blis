@@ -33,12 +33,12 @@
 
 */
 
-// FGVZ: Temporary. Remove me once support is added to configure.
-#define BLIS_ENABLE_LEVEL4
 
 #include "bli_l4_check.h"
 
+#ifdef BLIS_ENABLE_LEVEL4
 #include "f2c_lapack.h"
+#endif
 
 // Define function types.
 #include "bli_l4_ft_opt.h"
@@ -51,6 +51,7 @@
 
 // Generate function pointer arrays for tapi functions (expert only).
 #include "bli_l4_fpa.h"
+
 
 // Operation-specific headers (including object APIs).
 #include "bli_chol.h"

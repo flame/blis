@@ -41,6 +41,8 @@
 #include "bli_ttmm_cntl.h"
 #include "bli_ttmm_int.h"
 
+#ifdef BLIS_ENABLE_LEVEL4
+
 BLIS_EXPORT_BLIS err_t bli_ttmm
      (
        const obj_t*  a
@@ -52,5 +54,27 @@ BLIS_EXPORT_BLIS err_t bli_ttmm_ex
        const cntx_t* cntx,
              rntm_t* rntm
      );
+
+#else
+
+BLIS_INLINE err_t bli_ttmm
+     (
+       const obj_t*  a
+     )
+{
+	return BLIS_SUCCESS;
+}
+
+BLIS_INLINE err_t bli_ttmm_ex
+     (
+       const obj_t*  a,
+       const cntx_t* cntx,
+             rntm_t* rntm
+     )
+{
+	return BLIS_SUCCESS;
+}
+
+#endif
 
 #endif
