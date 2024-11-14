@@ -64,6 +64,12 @@ CNTX_INIT_PROTS( penryn )
 
 // -- AMD64 architectures --
 
+#ifdef BLIS_CONFIG_ZEN5
+CNTX_INIT_PROTS( zen5 )
+#endif
+#ifdef BLIS_CONFIG_ZEN4
+CNTX_INIT_PROTS( zen4 )
+#endif
 #ifdef BLIS_CONFIG_ZEN3
 CNTX_INIT_PROTS( zen3 )
 #endif
@@ -96,6 +102,9 @@ CNTX_INIT_PROTS( armsve )
 CNTX_INIT_PROTS( a64fx )
 #endif
 // ARM-NEON(4x128)
+#ifdef BLIS_CONFIG_BANSHEE
+CNTX_INIT_PROTS( banshee )
+#endif
 #ifdef BLIS_CONFIG_ALTRAMAX
 CNTX_INIT_PROTS( altramax )
 #endif
@@ -211,6 +220,12 @@ CNTX_INIT_PROTS( generic )
 
 // -- AMD64 architectures --
 
+#ifdef BLIS_FAMILY_ZEN5
+#include "bli_family_zen5.h"
+#endif
+#ifdef BLIS_FAMILY_ZEN4
+#include "bli_family_zen4.h"
+#endif
 #ifdef BLIS_FAMILY_ZEN3
 #include "bli_family_zen3.h"
 #endif
@@ -251,6 +266,9 @@ CNTX_INIT_PROTS( generic )
 #include "bli_family_a64fx.h"
 #endif
 // ARM-NEON (4x128)
+#ifdef BLIS_FAMILY_BANSHEE
+#include "bli_family_banshee.h"
+#endif
 #ifdef BLIS_FAMILY_ALTRAMAX
 #include "bli_family_altramax.h"
 #endif

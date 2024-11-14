@@ -61,6 +61,8 @@ bool bli_cpuid_is_sandybridge( uint32_t family, uint32_t model, uint32_t feature
 bool bli_cpuid_is_penryn( uint32_t family, uint32_t model, uint32_t features );
 
 // AMD
+bool bli_cpuid_is_zen5( uint32_t family, uint32_t model, uint32_t features );
+bool bli_cpuid_is_zen4( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_zen3( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_zen2( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_zen( uint32_t family, uint32_t model, uint32_t features );

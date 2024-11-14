@@ -4,7 +4,7 @@
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
-#  Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2014, The University of Texas at Austin
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,7 +35,7 @@
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
-THIS_CONFIG    := zen3
+THIS_CONFIG    := banshee
 #CONFIGS_INCL   += $(THIS_CONFIG)
 
 #
@@ -45,7 +45,7 @@ THIS_CONFIG    := zen3
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
-CPPROCFLAGS    :=
+CPPROCFLAGS    := -D_GNU_SOURCE
 CMISCFLAGS     :=
 CPICFLAGS      := -fPIC
 CWARNFLAGS     :=
@@ -57,70 +57,34 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O3
+COPTFLAGS      := -O2 -mcpu=neoverse-n1
 endif
 
-# Flags specific to optimized and reference kernels.
-# NOTE: The -fomit-frame-pointer option is needed for some kernels because
-# they make explicit use of the rbp register.
-CKOPTFLAGS         := $(COPTFLAGS) -fomit-frame-pointer
-CROPTFLAGS         := $(CKOPTFLAGS)
-CKVECFLAGS         := -mavx2 -mfma
-CRVECFLAGS         := $(CKVECFLAGS)
+# Flags specific to optimized kernels.
+CKOPTFLAGS     := $(COPTFLAGS) -O3 -ftree-vectorize
 ifeq ($(CC_VENDOR),gcc)
-  ifeq ($(GCC_OT_9_1_0),yes)  # gcc versions older than 9.1.
-    CVECFLAGS_VER  := -march=znver1 -mno-avx256-split-unaligned-store
-  else
-  ifeq ($(GCC_OT_10_3_0),yes) # gcc versions 9.1 or newer, but older than 10.3.
-    CVECFLAGS_VER  := -march=znver2
-  else                        # gcc versions 10.3 or newer.
-    CVECFLAGS_VER  := -march=znver3
-  endif
-  endif
-  CKVECFLAGS       += -mfpmath=sse
-  CRVECFLAGS       += -funsafe-math-optimizations -ffp-contract=fast
+CKVECFLAGS     := -mcpu=neoverse-n1
 else
 ifeq ($(CC_VENDOR),clang)
-  ifeq ($(CLANG_OT_9_0_0),yes)  # clang versions older than 9.0.
-    CVECFLAGS_VER  := -march=znver1
-  else
-  ifeq ($(CLANG_OT_12_0_0),yes) # clang versions 9.0 or newer, but older than 12.0.
-    CVECFLAGS_VER  := -march=znver2
-  else
-  ifeq ($(OS_NAME),Darwin)      # clang version 12.0 on OSX lacks znver3 support
-    CVECFLAGS_VER  := -march=znver2
-  else                          # clang versions 12.0 or newer.
-    CVECFLAGS_VER  := -march=znver3
-  endif
-  endif
-  endif
-  CKVECFLAGS       += -mfpmath=sse
-  CRVECFLAGS       += -funsafe-math-optimizations -ffp-contract=fast
+CKVECFLAGS     := -mcpu=neoverse-n1
 else
-ifeq ($(CC_VENDOR),aocc)
-  ifeq ($(AOCC_OT_2_0_0),yes)   # aocc versions older than 2.0.
-    CVECFLAGS_VER  := -march=znver1
-  else
-  ifeq ($(AOCC_OT_3_0_0),yes)   # aocc versions 2.0 or newer, but older than 3.0.
-    CVECFLAGS_VER  := -march=znver2
-  else                          # aocc versions 3.0 or newer.
-    CVECFLAGS_VER  := -march=znver3
-  endif
-  endif
-  CKVECFLAGS       += -mfpmath=sse
-  CRVECFLAGS       += -funsafe-math-optimizations -ffp-contract=fast
-ifeq ($(CC_VENDOR),nvc)
-  CVECFLAGS_VER    := -march=znver3
-  CRVECFLAGS       += -fast
+$(error gcc or clang is required for this configuration.)
+endif
+endif
+
+# Flags specific to reference kernels.
+CROPTFLAGS     := $(CKOPTFLAGS)
+ifeq ($(CC_VENDOR),gcc)
+CRVECFLAGS     := $(CKVECFLAGS)
 else
-  $(error gcc, clang, nvc or aocc is required for this configuration.)
+ifeq ($(CC_VENDOR),clang)
+CRVECFLAGS     := $(CKVECFLAGS)
+else
+CRVECFLAGS     := $(CKVECFLAGS)
 endif
 endif
-endif
-endif
-CKVECFLAGS         += $(CVECFLAGS_VER)
-CRVECFLAGS         += $(CVECFLAGS_VER)
 
 # Store all of the variables here to new variables containing the
 # configuration name.
 $(eval $(call store-make-defs,$(THIS_CONFIG)))
+

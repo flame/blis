@@ -24,6 +24,8 @@ sandybridge: sandybridge
 penryn:      penryn
 
 # AMD architectures.
+zen5:        zen5/zen3/zen2/zen/haswell
+zen4:        zen4/zen3/zen2/zen/haswell
 zen3:        zen3/zen3/zen2/zen/haswell
 zen2:        zen2/zen2/zen/haswell
 zen:         zen/zen/haswell
@@ -37,6 +39,7 @@ armsve:      armsve/armsve
 a64fx:       a64fx/armsve
 
 # ARM Neon64 architectures
+banshee:     banshee/armv8a
 altramax:    altramax/armv8a
 altra:       altra/armv8a
 firestorm:   firestorm/armv8a

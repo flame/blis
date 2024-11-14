@@ -132,6 +132,14 @@ arch_t bli_cpuid_query_id( void )
 
 		// Check for each AMD configuration that is enabled, check for that
 		// microarchitecture. We check from most recent to most dated.
+#ifdef BLIS_CONFIG_ZEN5
+		if ( bli_cpuid_is_zen5( family, model, features ) )
+			return BLIS_ARCH_ZEN5;
+#endif
+#ifdef BLIS_CONFIG_ZEN4
+		if ( bli_cpuid_is_zen4( family, model, features ) )
+			return BLIS_ARCH_ZEN4;
+#endif
 #ifdef BLIS_CONFIG_ZEN3
 		if ( bli_cpuid_is_zen3( family, model, features ) )
 			return BLIS_ARCH_ZEN3;
@@ -282,6 +290,28 @@ bool bli_cpuid_is_penryn
 }
 
 // -----------------------------------------------------------------------------
+
+bool bli_cpuid_is_zen5
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	// This is a placeholder until proper CPUID detection code is written.
+	return FALSE;
+}
+
+bool bli_cpuid_is_zen4
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	// This is a placeholder until proper CPUID detection code is written.
+	return FALSE;
+}
 
 bool bli_cpuid_is_zen3
      (

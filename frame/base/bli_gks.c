@@ -114,6 +114,16 @@ int bli_gks_init( void )
 
 		// -- AMD architectures ------------------------------------------------
 
+#ifdef BLIS_CONFIG_ZEN5
+		bli_gks_register_cntx( BLIS_ARCH_ZEN5,        bli_cntx_init_zen5,
+		                                              bli_cntx_init_zen5_ref,
+		                                              bli_cntx_init_zen5_ind );
+#endif
+#ifdef BLIS_CONFIG_ZEN4
+		bli_gks_register_cntx( BLIS_ARCH_ZEN4,        bli_cntx_init_zen4,
+		                                              bli_cntx_init_zen4_ref,
+		                                              bli_cntx_init_zen4_ind );
+#endif
 #ifdef BLIS_CONFIG_ZEN3
 		bli_gks_register_cntx( BLIS_ARCH_ZEN3,        bli_cntx_init_zen3,
 		                                              bli_cntx_init_zen3_ref,
@@ -165,6 +175,11 @@ int bli_gks_init( void )
 #endif
 
 		// -- ARM-NEON (4 pipes x 128-bit vectors) --
+#ifdef BLIS_CONFIG_BANSHEE
+		bli_gks_register_cntx( BLIS_ARCH_BANSHEE,     bli_cntx_init_banshee,
+		                                              bli_cntx_init_banshee_ref,
+		                                              bli_cntx_init_banshee_ind );
+#endif
 #ifdef BLIS_CONFIG_ALTRAMAX
 		bli_gks_register_cntx( BLIS_ARCH_ALTRAMAX,    bli_cntx_init_altramax,
 		                                              bli_cntx_init_altramax_ref,

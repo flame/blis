@@ -201,6 +201,12 @@ arch_t bli_arch_query_id_impl( void )
 		#endif
 
 		// AMD microarchitectures.
+		#ifdef BLIS_FAMILY_ZEN5
+		id = BLIS_ARCH_ZEN5;
+		#endif
+		#ifdef BLIS_FAMILY_ZEN4
+		id = BLIS_ARCH_ZEN4;
+		#endif
 		#ifdef BLIS_FAMILY_ZEN3
 		id = BLIS_ARCH_ZEN3;
 		#endif
@@ -231,6 +237,9 @@ arch_t bli_arch_query_id_impl( void )
 		id = BLIS_ARCH_A64FX;
 		#endif
 
+		#ifdef BLIS_FAMILY_BANSHEE
+		id = BLIS_ARCH_BANSHEE;
+		#endif
 		#ifdef BLIS_FAMILY_ALTRAMAX
 		id = BLIS_ARCH_ALTRAMAX;
 		#endif
@@ -324,6 +333,8 @@ static const char* config_name[ BLIS_NUM_ARCHS ] =
     "sandybridge",
     "penryn",
 
+    "zen5",
+    "zen4",
     "zen3",
     "zen2",
     "zen",
@@ -335,6 +346,7 @@ static const char* config_name[ BLIS_NUM_ARCHS ] =
     "armsve",
     "a64fx",
 
+    "banshee",
     "altramax",
     "altra",
     "firestorm",

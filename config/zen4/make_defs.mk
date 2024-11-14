@@ -35,7 +35,7 @@
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
-THIS_CONFIG    := zen3
+THIS_CONFIG    := zen4
 #CONFIGS_INCL   += $(THIS_CONFIG)
 
 #
@@ -74,7 +74,7 @@ ifeq ($(CC_VENDOR),gcc)
   ifeq ($(GCC_OT_10_3_0),yes) # gcc versions 9.1 or newer, but older than 10.3.
     CVECFLAGS_VER  := -march=znver2
   else                        # gcc versions 10.3 or newer.
-    CVECFLAGS_VER  := -march=znver3
+    CVECFLAGS_VER  := -march=znver4
   endif
   endif
   CKVECFLAGS       += -mfpmath=sse
@@ -90,7 +90,7 @@ ifeq ($(CC_VENDOR),clang)
   ifeq ($(OS_NAME),Darwin)      # clang version 12.0 on OSX lacks znver3 support
     CVECFLAGS_VER  := -march=znver2
   else                          # clang versions 12.0 or newer.
-    CVECFLAGS_VER  := -march=znver3
+    CVECFLAGS_VER  := -march=znver4
   endif
   endif
   endif
@@ -104,13 +104,13 @@ ifeq ($(CC_VENDOR),aocc)
   ifeq ($(AOCC_OT_3_0_0),yes)   # aocc versions 2.0 or newer, but older than 3.0.
     CVECFLAGS_VER  := -march=znver2
   else                          # aocc versions 3.0 or newer.
-    CVECFLAGS_VER  := -march=znver3
+    CVECFLAGS_VER  := -march=znver4
   endif
   endif
   CKVECFLAGS       += -mfpmath=sse
   CRVECFLAGS       += -funsafe-math-optimizations -ffp-contract=fast
 ifeq ($(CC_VENDOR),nvc)
-  CVECFLAGS_VER    := -march=znver3
+  CVECFLAGS_VER    := -march=znver4
   CRVECFLAGS       += -fast
 else
   $(error gcc, clang, nvc or aocc is required for this configuration.)

@@ -32,8 +32,8 @@
 
 */
 
-#ifndef BLI_FAMILY_ZEN3_
-#define BLI_FAMILY_ZEN3_
+#ifndef BLI_FAMILY_ZEN5_
+#define BLI_FAMILY_ZEN5_
 
 // By default, it is effective to parallelize the outer loops.
 // Setting these macros to 1 will force JR and IR inner loops
@@ -44,9 +44,9 @@
 #define BLIS_THREAD_MAX_JR      1
 
 
-// To enable framework optimizations for zen3 platform
-// All zen3 specific code should be included in this macro
-#define BLIS_CONFIG_ZEN3
+// To enable framework optimizations for zen5 platform
+// All zen5 specific code should be included in this macro
+#define BLIS_CONFIG_ZEN5
 
 
 //#define BLIS_ENABLE_SMALL_MATRIX
