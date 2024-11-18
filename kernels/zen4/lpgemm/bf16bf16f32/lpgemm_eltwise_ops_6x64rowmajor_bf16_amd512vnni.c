@@ -214,7 +214,7 @@ POST_OPS_BIAS_6x64_OPS:
 				if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 					 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 				{
-					if ( post_ops_attr.c_stor_type == BF16 )
+					if ( post_ops_attr.bias_stor_type == BF16 )
 					{
 						BF16_F32_BIAS_LOAD(selector1, k0, 0);
 						BF16_F32_BIAS_LOAD(selector2, k1, 1);
@@ -323,7 +323,7 @@ POST_OPS_BIAS_6x64_OPS:
 					// entire column.
 					__m512 selector5;
 					__m512 selector6;
-					if ( post_ops_attr.c_stor_type == BF16 )
+					if ( post_ops_attr.bias_stor_type == BF16 )
 					{
 						__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 						BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);

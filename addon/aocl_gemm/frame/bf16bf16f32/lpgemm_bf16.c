@@ -87,6 +87,9 @@ LPGEMV(bfloat16, bfloat16, float, bf16bf16f32of32)
 
 	lpgemm_post_op_attr post_ops_attr;
 	post_ops_attr.c_stor_type = c_downscale;
+	post_ops_attr.bias_stor_type = (
+		post_op_list->bias_stor_type != NONE ) ?
+		post_op_list->bias_stor_type : c_downscale;
 	if (c_downscale < F32) post_ops_attr.buf_downscale = c;
 	else  post_ops_attr.buf_downscale = NULL;
 
@@ -407,6 +410,9 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 
 	lpgemm_post_op_attr post_ops_attr;
 	post_ops_attr.c_stor_type = c_downscale;
+	post_ops_attr.bias_stor_type = (
+		post_op_list->bias_stor_type != NONE ) ?
+		post_op_list->bias_stor_type : c_downscale;
 	if ( c_downscale < F32 )
 	{
 		post_ops_attr.buf_downscale = c;

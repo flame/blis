@@ -506,7 +506,7 @@ POST_OPS_BIAS_5x64:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -599,7 +599,7 @@ POST_OPS_BIAS_5x64:
 			// entire row of the transposed output array, instead of an
 			// entire column.
 			__m512 selector5;
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -2138,7 +2138,7 @@ POST_OPS_BIAS_4x64:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -2218,7 +2218,7 @@ POST_OPS_BIAS_4x64:
 			// the ic index, and each bias element corresponds to an
 			// entire row of the transposed output array, instead of an
 			// entire column.
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -3512,7 +3512,7 @@ POST_OPS_BIAS_3x64:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -3580,7 +3580,7 @@ POST_OPS_BIAS_3x64:
 			// the ic index, and each bias element corresponds to an
 			// entire row of the transposed output array, instead of an
 			// entire column.
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -4635,7 +4635,7 @@ POST_OPS_BIAS_2x64:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -4691,7 +4691,7 @@ POST_OPS_BIAS_2x64:
 			// the ic index, and each bias element corresponds to an
 			// entire row of the transposed output array, instead of an
 			// entire column.
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -5509,7 +5509,7 @@ POST_OPS_BIAS_1x64:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -5553,7 +5553,7 @@ POST_OPS_BIAS_1x64:
 			// the ic index, and each bias element corresponds to an
 			// entire row of the transposed output array, instead of an
 			// entire column.
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);

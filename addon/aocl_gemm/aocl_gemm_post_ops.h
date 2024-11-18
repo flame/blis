@@ -60,6 +60,12 @@ typedef enum
 	MATRIX_MUL = 6,
 } AOCL_POST_OP_TYPE;
 
+typedef enum
+{
+	FLOAT = 0,
+	BFLOAT16 = 1
+} AOCL_PARAMS_STORAGE_TYPES;
+
 typedef struct
 {
 	void* alpha;
@@ -88,6 +94,7 @@ typedef struct
 typedef struct
 {
 	void* bias;
+	AOCL_PARAMS_STORAGE_TYPES bias_stor_type;
 } aocl_post_op_bias;
 
 typedef struct

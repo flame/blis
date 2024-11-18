@@ -200,10 +200,15 @@ static inline void fill_array_post_ops_bfloat16( void* arr, dim_t size )
 static inline float get_bias_post_op_val_ ## BLAS_SFX \
      ( \
        void* post_op_bias_ptr, \
-       dim_t j \
+       dim_t j, \
+       AOCL_PARAMS_STORAGE_TYPES bais_stor_type \
      ) \
 { \
     float ret_val = 0.0; \
+    if(bais_stor_type == FLOAT) \
+    { \
+        return *( ( float* )post_op_bias_ptr + j ); \
+    } \
     bfloat16_to_float( *( ( bfloat16* )post_op_bias_ptr + j ), &ret_val ); \
     return ret_val; \
 } \
@@ -212,9 +217,16 @@ static inline float get_bias_post_op_val_ ## BLAS_SFX \
 static inline ACCUM_type get_bias_post_op_val_ ## BLAS_SFX \
      ( \
        void* post_op_bias_ptr, \
-       dim_t j \
+       dim_t j, \
+       AOCL_PARAMS_STORAGE_TYPES bais_stor_type \
      ) \
 { \
+    if(bais_stor_type == BFLOAT16) \
+    { \
+       float ret_val = 0.0; \
+        bfloat16_to_float( *( ( bfloat16* )post_op_bias_ptr + j ), &ret_val ); \
+        return ret_val; \
+    } \
     return *( ( ACCUM_type* )post_op_bias_ptr + j ); \
 } \
 

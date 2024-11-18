@@ -34,6 +34,7 @@
 
 #include "blis.h"
 #include "lpgemm_post_ops.h"
+#include "lpgemm_types.h"
 
 BLIS_INLINE void lpgemm_set_pre_ops_node_params
      (
@@ -117,7 +118,8 @@ BLIS_INLINE void lpgemm_set_node_params(
 	void *op3,
 	void *scale_factor,
 	dim_t scale_factor_len,
-	bool is_power_of_2)
+	bool is_power_of_2,
+	AOCL_STORAGE_TYPE bias_stor_type)
 {
 	post_op_node->op_code = op_code;
 	post_op_node->op_args1 = op1;
@@ -126,6 +128,7 @@ BLIS_INLINE void lpgemm_set_node_params(
 	post_op_node->scale_factor = scale_factor;
 	post_op_node->scale_factor_len = scale_factor_len;
 	post_op_node->is_power_of_2 = is_power_of_2;
+	post_op_node->bias_stor_type = bias_stor_type;
 	post_op_node->next = NULL;
 }
 
@@ -147,7 +150,7 @@ err_t lpgemm_translate_to_post_ops_list
 		lpgemm_set_node_params
 		(
 		  post_op_list, POST_OPS_DISABLE,
-		  NULL, NULL, NULL, NULL, 0, FALSE
+		  NULL, NULL, NULL, NULL, 0, FALSE, NONE
 		);
 
 		return BLIS_SUCCESS;
@@ -158,7 +161,7 @@ err_t lpgemm_translate_to_post_ops_list
 		lpgemm_set_node_params
 		(
 		  post_op_list, POST_OPS_DISABLE,
-		  NULL, NULL, NULL, NULL, 0, FALSE
+		  NULL, NULL, NULL, NULL, 0, FALSE, NONE
 		);
 
 		bli_print_msg(" Max supported post-ops is 5, supplied input post-ops" \
@@ -186,7 +189,8 @@ err_t lpgemm_translate_to_post_ops_list
 						  NULL,
 						  ( post_op_unparsed->sum + s_i )->scale_factor,
 						  ( post_op_unparsed->sum + s_i )->scale_factor_len,
-						  ( post_op_unparsed->sum + s_i )->is_power_of_2
+						  ( post_op_unparsed->sum + s_i )->is_power_of_2,
+						  NONE
 						);
 
 						s_i += 1;
@@ -249,7 +253,8 @@ err_t lpgemm_translate_to_post_ops_list
 						  ( post_op_unparsed->eltwise + e_i )->algo.beta,
 						  ( post_op_unparsed->eltwise + e_i )->scale_factor,
 						  ( post_op_unparsed->eltwise + e_i )->scale_factor_len,
-						  ( post_op_unparsed->eltwise + e_i )->is_power_of_2
+						  ( post_op_unparsed->eltwise + e_i )->is_power_of_2,
+						  NONE
 						);
 						e_i += 1;
 					}
@@ -261,12 +266,23 @@ err_t lpgemm_translate_to_post_ops_list
 							bli_print_msg(" Post_op.bias is NULL. Exiting..", __FILE__, __LINE__ );
 							return BLIS_NULL_POINTER;
 						}
-
+						AOCL_STORAGE_TYPE tmp_bias_stor_type = NONE;
+						switch ( ( post_op_unparsed->bias + b_i )->bias_stor_type )
+						{
+							case FLOAT:
+									tmp_bias_stor_type = F32;
+									break;
+							case BFLOAT16:
+									tmp_bias_stor_type = BF16;
+									break;
+							default:
+									break;
+						}
 						lpgemm_set_node_params
 						(
 						  ( post_op_list + i ), POST_OPS_BIAS,
 						  ( post_op_unparsed->bias + b_i )->bias,
-						  meta_arg, NULL, NULL, 0, FALSE
+						  meta_arg, NULL, NULL, 0, FALSE, tmp_bias_stor_type
 						);
 
 						b_i += 1;
@@ -310,7 +326,7 @@ err_t lpgemm_translate_to_post_ops_list
 						  meta_arg, &( ( post_op_unparsed->sum + s_i )->zero_point_len ),
 						  ( post_op_unparsed->sum + s_i )->scale_factor,
 						  ( post_op_unparsed->sum + s_i )->scale_factor_len,
-						  FALSE
+						  FALSE, NONE
 						);
 
 						s_i += 1;
@@ -331,7 +347,7 @@ err_t lpgemm_translate_to_post_ops_list
 						  ( post_op_list + i ), POST_OPS_MATRIX_ADD,
 						  ( post_op_unparsed->matrix_add + m_i )->matrix,
 						  meta_arg, &( ( post_op_unparsed->matrix_add + m_i )->ldm ),
-						  NULL, 0, FALSE
+						  NULL, 0, FALSE, NONE
 						);
 
 						m_i += 1;
@@ -352,7 +368,7 @@ err_t lpgemm_translate_to_post_ops_list
 						  ( post_op_list + i ), POST_OPS_MATRIX_MUL,
 						  ( post_op_unparsed->matrix_mul + mul_i )->matrix,
 						  meta_arg, &( ( post_op_unparsed->matrix_mul + mul_i )->ldm ),
-						  NULL, 0, FALSE
+						  NULL, 0, FALSE, NONE
 						);
 
 						mul_i += 1;

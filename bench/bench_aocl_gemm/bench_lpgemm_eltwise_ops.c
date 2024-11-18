@@ -288,7 +288,7 @@ void eltwise_ops_accuracy_check_driver_ ## LP_SFX \
                     if ( post_op->seq_vector[op_id] == BIAS ) \
                     { \
                         temp_accum += GEN_FUNC_NAME(get_bias_post_op_val_,LP_SFX) \
-                                    ( ( post_op->bias )->bias, j ); \
+                            ( ( post_op->bias )->bias, j, ( post_op->bias )->bias_stor_type ); \
                     } \
                     else if ( post_op->seq_vector[op_id] == ELTWISE ) \
                     { \
@@ -575,8 +575,10 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     bool is_matrix_mul = FALSE; \
     bool is_tanh = FALSE; \
     bool is_sigmoid = FALSE; \
+     bool is_bias_stor_type = FALSE; \
     dim_t activator_idx = 0; \
     dim_t clip_idx = 0; \
+    char * bias_stor_type = ""; \
  \
     /* Post-Ops string parser. */ \
     num_eltwise = 0; /* Global variable, zero out for definied behavior. */\
@@ -589,9 +591,24 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         while ( ops_tok ) \
         { \
             str_tolower( ops_tok ); \
-            if ( strcmp( ops_tok, "bias" ) == 0 ) \
+             if ( strcmp( ops_tok, "bias" ) == 0 ) \
             { \
                 post_ops->seq_vector[cur_op_index] = BIAS; \
+                ops_tok = strtok( NULL, ", " ); \
+                if(ops_tok == NULL) \
+                { \
+                    is_bias_stor_type = FALSE; \
+                } \
+                else if ( ( strcmp( ops_tok, "f32" ) == 0 ) ) \
+                { \
+                    is_bias_stor_type = TRUE; \
+                    bias_stor_type = "F32"; \
+                } \
+                else if ( ( strcmp( ops_tok, "bf16" ) == 0 ) ) \
+                { \
+                    is_bias_stor_type = TRUE; \
+                    bias_stor_type = "BF16"; \
+                } \
                 is_bias = TRUE; \
                 cur_op_index++; \
             } \
@@ -715,8 +732,24 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         /* Allocate bias buffer, return early if alloc fails.*/ \
         ( post_ops->bias )->bias = malloc( n * sizeof( C_type ) ); \
         if ( ( post_ops->bias )->bias == NULL ) \
+            { \
+                goto err_handler; \
+            } \
+        if(is_bias_stor_type == TRUE) \
         { \
-            goto err_handler; \
+            if( ( strcmp( bias_stor_type, "BF16" ) == 0 ) ) \
+            { \
+                ( post_ops->bias )-> bias_stor_type = BFLOAT16; \
+            } \
+            else if( ( strcmp( bias_stor_type, "F32" ) == 0 ) ) \
+            { \
+                ( post_ops->bias )-> bias_stor_type = FLOAT; \
+            } \
+            else {} \
+        } \
+        else \
+        { \
+            ( post_ops->bias )-> bias_stor_type = NONE; \
         } \
         if ( global_dscale_out == 'y' ) \
         { \

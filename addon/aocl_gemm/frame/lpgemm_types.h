@@ -57,7 +57,8 @@ typedef enum
 	F32 = 7,
 	S64 = 8,
 	U64 = 9,
-	F64 = 10
+	F64 = 10,
+	NONE = 11 // when we want to use default case.
 } AOCL_STORAGE_TYPE;
 
 // Enum name template:A_mat_type ## B_mat_type ## Accumulate_type ## C_mat_type.

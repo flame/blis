@@ -247,7 +247,7 @@ POST_OPS_BIAS_5xLT16:
 				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
-				if ( post_ops_attr.c_stor_type == BF16 )
+				if ( post_ops_attr.bias_stor_type == BF16 )
 				{
 					BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
 				}
@@ -282,7 +282,7 @@ POST_OPS_BIAS_5xLT16:
 				__m512 selector3;
 				__m512 selector4;
 				__m512 selector5;
-				if ( post_ops_attr.c_stor_type == BF16 )
+				if ( post_ops_attr.bias_stor_type == BF16 )
 				{
 					__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 					BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -984,7 +984,7 @@ POST_OPS_BIAS_4xLT16:
 				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
-				if ( post_ops_attr.c_stor_type == BF16 )
+				if ( post_ops_attr.bias_stor_type == BF16 )
 				{
 					BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
 				}
@@ -1015,7 +1015,7 @@ POST_OPS_BIAS_4xLT16:
 			{
 				__m512 selector3;
 				__m512 selector4;
-				if ( post_ops_attr.c_stor_type == BF16 )
+				if ( post_ops_attr.bias_stor_type == BF16 )
 				{
 					__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 					BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -1619,7 +1619,7 @@ POST_OPS_BIAS_3xLT16:
 				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
-				if ( post_ops_attr.c_stor_type == BF16 )
+				if ( post_ops_attr.bias_stor_type == BF16 )
 				{
 					BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
 				}
@@ -1646,7 +1646,7 @@ POST_OPS_BIAS_3xLT16:
 			else
 			{
 				__m512 selector3;
-				if ( post_ops_attr.c_stor_type == BF16 )
+				if ( post_ops_attr.bias_stor_type == BF16 )
 				{
 					__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 					BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -2159,7 +2159,7 @@ POST_OPS_BIAS_2xLT16:
 				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
-				if ( post_ops_attr.c_stor_type == BF16 )
+				if ( post_ops_attr.bias_stor_type == BF16 )
 				{
 					BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
 				}
@@ -2182,7 +2182,7 @@ POST_OPS_BIAS_2xLT16:
 			}
 			else
 			{
-				if ( post_ops_attr.c_stor_type == BF16 )
+				if ( post_ops_attr.bias_stor_type == BF16 )
 				{
 					__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 					BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -2594,7 +2594,7 @@ POST_OPS_BIAS_1xLT16:
 				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
-				if ( post_ops_attr.c_stor_type == BF16 )
+				if ( post_ops_attr.bias_stor_type == BF16 )
 				{
 					BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
 				}
@@ -2614,7 +2614,7 @@ POST_OPS_BIAS_1xLT16:
 			}
 			else
 			{
-				if ( post_ops_attr.c_stor_type == BF16 )
+				if ( post_ops_attr.bias_stor_type == BF16 )
 				{
 					__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 					BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -3062,7 +3062,7 @@ POST_OPS_BIAS_5x16:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -3094,7 +3094,7 @@ POST_OPS_BIAS_5x16:
 			__m512 selector3;
 			__m512 selector4;
 			__m512 selector5;
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -3788,7 +3788,7 @@ POST_OPS_BIAS_4x16:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -3816,7 +3816,7 @@ POST_OPS_BIAS_4x16:
 		{
 			__m512 selector3;
 			__m512 selector4;
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -4415,7 +4415,7 @@ POST_OPS_BIAS_3x16:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -4439,7 +4439,7 @@ POST_OPS_BIAS_3x16:
 		else
 		{
 			__m512 selector3;
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -4942,7 +4942,7 @@ POST_OPS_BIAS_2x16:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -4962,7 +4962,7 @@ POST_OPS_BIAS_2x16:
 		}
 		else
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -5369,7 +5369,7 @@ POST_OPS_BIAS_1x16:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -5386,7 +5386,7 @@ POST_OPS_BIAS_1x16:
 		}
 		else
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -5873,7 +5873,7 @@ POST_OPS_BIAS_5x32:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -5924,7 +5924,7 @@ POST_OPS_BIAS_5x32:
 			__m512 selector3;
 			__m512 selector4;
 			__m512 selector5;
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -6852,7 +6852,7 @@ POST_OPS_BIAS_4x32:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -6896,7 +6896,7 @@ POST_OPS_BIAS_4x32:
 		{
 			__m512 selector3;
 			__m512 selector4;
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -7682,7 +7682,7 @@ POST_OPS_BIAS_3x32:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -7719,7 +7719,7 @@ POST_OPS_BIAS_3x32:
 		else
 		{
 			__m512 selector3;
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -8362,7 +8362,7 @@ POST_OPS_BIAS_2x32:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -8392,7 +8392,7 @@ POST_OPS_BIAS_2x32:
 		}
 		else
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -8891,7 +8891,7 @@ POST_OPS_BIAS_1x32:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -8915,7 +8915,7 @@ POST_OPS_BIAS_1x32:
 		}
 		else
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -9507,7 +9507,7 @@ POST_OPS_BIAS_5x48:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -9576,7 +9576,7 @@ POST_OPS_BIAS_5x48:
 		{
 			__m512 selector4;
 			__m512 selector5;
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -10754,7 +10754,7 @@ POST_OPS_BIAS_4x48:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -10813,7 +10813,7 @@ POST_OPS_BIAS_4x48:
 		else
 		{
 			__m512 selector4;
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -11799,7 +11799,7 @@ POST_OPS_BIAS_3x48:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -11848,7 +11848,7 @@ POST_OPS_BIAS_3x48:
 		}
 		else
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -12643,7 +12643,7 @@ POST_OPS_BIAS_2x48:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -12683,7 +12683,7 @@ POST_OPS_BIAS_2x48:
 		}
 		else
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -13292,7 +13292,7 @@ POST_OPS_BIAS_1x48:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -13323,7 +13323,7 @@ POST_OPS_BIAS_1x48:
 		}
 		else
 		{
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( post_ops_attr.bias_stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);

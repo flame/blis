@@ -876,7 +876,7 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                     if ( post_op->seq_vector[op_id] == BIAS ) \
                     { \
                         temp_accum += GEN_FUNC_NAME(get_bias_post_op_val_,BLAS_SFX) \
-                                    ( ( post_op->bias )->bias, j ); \
+                            ( ( post_op->bias )->bias, j, ( post_op->bias )->bias_stor_type ); \
                     } \
                     else if ( post_op->seq_vector[op_id] == ELTWISE ) \
                     { \
@@ -1130,8 +1130,10 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     bool is_matrix_mul = FALSE; \
     bool is_tanh = FALSE; \
     bool is_sigmoid = FALSE; \
+    bool is_bias_stor_type = FALSE; \
     dim_t activator_idx = 0; \
     dim_t clip_idx = 0; \
+    char * bias_stor_type = ""; \
  \
     /* Post-Ops string parser. */ \
     num_eltwise = 0; /* Global variable, zero out for definied behavior. */\
@@ -1147,6 +1149,21 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             if ( strcmp( ops_tok, "bias" ) == 0 ) \
             { \
                 post_ops->seq_vector[cur_op_index] = BIAS; \
+                ops_tok = strtok( NULL, ", " ); \
+                if(ops_tok == NULL) \
+                { \
+                    is_bias_stor_type = FALSE; \
+                } \
+                else if ( ( strcmp( ops_tok, "f32" ) == 0 ) ) \
+                { \
+                    is_bias_stor_type = TRUE; \
+                    bias_stor_type = "F32"; \
+                } \
+                else if ( ( strcmp( ops_tok, "bf16" ) == 0 ) ) \
+                { \
+                    is_bias_stor_type = TRUE; \
+                    bias_stor_type = "BF16"; \
+                } \
                 is_bias = TRUE; \
                 cur_op_index++; \
             } \
@@ -1265,36 +1282,52 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         } \
     } \
  \
-    if ( is_bias == TRUE ) \
-    { \
-        /* Allocate bias buffer, return early if alloc fails.*/ \
-        ( post_ops->bias )->bias = malloc( n * sizeof( C_type ) ); \
-        if ( ( post_ops->bias )->bias == NULL ) \
+        if ( is_bias == TRUE ) \
         { \
-            goto err_handler; \
-        } \
-        GEN_FUNC_NAME(fill_array_post_ops_,BIAS_type)( ( post_ops->bias )->bias, n ); \
-    } \
- \
-    if ( num_eltwise > 0 ) \
-    { \
-        if ( num_eltwise > 1 ) \
-        { \
-            if ( activator_idx < clip_idx ) \
+            /* Allocate bias buffer, return early if alloc fails.*/ \
+            ( post_ops->bias )->bias = malloc( n * sizeof( C_type ) ); \
+            if ( ( post_ops->bias )->bias == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+            if(is_bias_stor_type == TRUE) \
             { \
-                activator_idx = 0; \
-                clip_idx = 1; \
+                if( ( strcmp( bias_stor_type, "BF16" ) == 0 ) ) \
+                { \
+                    ( post_ops->bias )-> bias_stor_type = BFLOAT16; \
+                } \
+                else if( ( strcmp( bias_stor_type, "F32" ) == 0 ) ) \
+                { \
+                    ( post_ops->bias )-> bias_stor_type = FLOAT; \
+                } \
+                else {} \
             } \
             else \
             { \
-                activator_idx = 1; \
-                clip_idx = 0; \
+                ( post_ops->bias )-> bias_stor_type = NONE; \
             } \
+            GEN_FUNC_NAME(fill_array_post_ops_,BIAS_type)( ( post_ops->bias )->bias, n ); \
         } \
-        else \
+ \
+        if ( num_eltwise > 0 ) \
         { \
-           activator_idx = 0; \
-           clip_idx = 0; \
+            if ( num_eltwise > 1 ) \
+            { \
+                if ( activator_idx < clip_idx ) \
+                { \
+                    activator_idx = 0; \
+                    clip_idx = 1; \
+                } \
+                else \
+                { \
+                    activator_idx = 1; \
+                    clip_idx = 0; \
+                } \
+            } \
+            else \
+            { \
+            activator_idx = 0; \
+            clip_idx = 0; \
         } \
  \
         post_ops->eltwise = malloc( num_eltwise * sizeof( aocl_post_op_eltwise ) ); \

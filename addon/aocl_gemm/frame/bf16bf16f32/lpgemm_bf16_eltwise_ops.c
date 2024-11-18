@@ -61,6 +61,9 @@ LPGEMM_ELTWISE_OPS_IFACE(bfloat16,float,bf16of32)
 
 	lpgemm_post_op_attr post_ops_attr;
 	post_ops_attr.c_stor_type = c_downscale;
+	post_ops_attr.bias_stor_type = (
+		post_op_list->bias_stor_type != NONE ) ?
+		post_op_list->bias_stor_type : c_downscale;
 	post_ops_attr.buf_downscale = NULL;
 
 	// Generate thrinfo objects for jc and ic loops from lpgemm_thrinfo_t.
