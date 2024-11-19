@@ -97,42 +97,42 @@
 */
 #define SUBITER_0(n) \
 \
-    VFMADD231PD(ZMM( 8), ZMM(0), ZMM(6))                       /*b(0 : 7, n) * a(n, 0) */\
+    VFMADD231PD(ZMM( 8), ZMM(0), ZMM(6))                       /*b(0 : 7, n) * a(n, 0) */ \
     VFMADD231PD(ZMM( 9), ZMM(1), ZMM(6))                       /*b(8 :15, n) * a(n, 0) */ \
     VFMADD231PD(ZMM(10), ZMM(2), ZMM(6))                       /*b(16:23, n) * a(n, 0) */ \
     \
     VBROADCASTSD(ZMM(6), MEM(RAX,(8*n+ 2)*8 - A_ADDITION))     /*zmm6 = a(n, 2)*/  \
-    VFMADD231PD(ZMM(11), ZMM(0), ZMM(7))                       /*b(0 : 7, n) * a(n, 1) */\
+    VFMADD231PD(ZMM(11), ZMM(0), ZMM(7))                       /*b(0 : 7, n) * a(n, 1) */ \
     VFMADD231PD(ZMM(12), ZMM(1), ZMM(7))                       /*b(8 :15, n) * a(n, 1) */ \
     VFMADD231PD(ZMM(13), ZMM(2), ZMM(7))                       /*b(16:23, n) * a(n, 1) */ \
     \
     VBROADCASTSD(ZMM(7), MEM(RAX,(8*n+ 3)*8 - A_ADDITION))     /*zmm7 = a(n, 3)*/ \
-    VFMADD231PD(ZMM(14), ZMM(0), ZMM(6))                       /*b(0 : 7, n) * a(n, 2) */\
+    VFMADD231PD(ZMM(14), ZMM(0), ZMM(6))                       /*b(0 : 7, n) * a(n, 2) */ \
     VFMADD231PD(ZMM(15), ZMM(1), ZMM(6))                       /*b(8 :15, n) * a(n, 2) */ \
     VFMADD231PD(ZMM(16), ZMM(2), ZMM(6))                       /*b(16:23, n) * a(n, 2) */ \
     \
     VBROADCASTSD(ZMM(6), MEM(RAX,(8*n+ 4)*8 - A_ADDITION))     /*zmm6 = a(n, 4)*/ \
-    VFMADD231PD(ZMM(17), ZMM(0), ZMM(7))                       /*b(0 : 7, n) * a(n, 3) */\
+    VFMADD231PD(ZMM(17), ZMM(0), ZMM(7))                       /*b(0 : 7, n) * a(n, 3) */ \
     VFMADD231PD(ZMM(18), ZMM(1), ZMM(7))                       /*b(8 :15, n) * a(n, 3) */ \
     VFMADD231PD(ZMM(19), ZMM(2), ZMM(7))                       /*b(16:23, n) * a(n, 3) */ \
     \
     VBROADCASTSD(ZMM(7), MEM(RAX,(8*n+ 5)*8 - A_ADDITION))     /*zmm7 = a(n, 5)*/ \
-    VFMADD231PD(ZMM(20), ZMM(0), ZMM(6))                       /*b(0 : 7, n) * a(n, 4) */\
+    VFMADD231PD(ZMM(20), ZMM(0), ZMM(6))                       /*b(0 : 7, n) * a(n, 4) */ \
     VFMADD231PD(ZMM(21), ZMM(1), ZMM(6))                       /*b(8 :15, n) * a(n, 4) */ \
     VFMADD231PD(ZMM(22), ZMM(2), ZMM(6))                       /*b(16:23, n) * a(n, 4) */ \
     \
     VBROADCASTSD(ZMM(6), MEM(RAX,(8*n+ 6)*8 - A_ADDITION))     /*zmm6 = a(n, 6)*/ \
-    VFMADD231PD(ZMM(23), ZMM(0), ZMM(7))                       /*b(0 : 7, n) * a(n, 5) */\
+    VFMADD231PD(ZMM(23), ZMM(0), ZMM(7))                       /*b(0 : 7, n) * a(n, 5) */ \
     VFMADD231PD(ZMM(24), ZMM(1), ZMM(7))                       /*b(8 :15, n) * a(n, 5) */ \
     VFMADD231PD(ZMM(25), ZMM(2), ZMM(7))                       /*b(16:23, n) * a(n, 5) */ \
     \
     VBROADCASTSD(ZMM(7), MEM(RAX,(8*n+ 7)*8 - A_ADDITION))     /*zmm7 = a(n, 7)*/ \
-    VFMADD231PD(ZMM(26), ZMM(0), ZMM(6))                       /*b(0 : 7, n) * a(n, 6) */\
+    VFMADD231PD(ZMM(26), ZMM(0), ZMM(6))                       /*b(0 : 7, n) * a(n, 6) */ \
     VFMADD231PD(ZMM(27), ZMM(1), ZMM(6))                       /*b(8 :15, n) * a(n, 6) */ \
     VFMADD231PD(ZMM(28), ZMM(2), ZMM(6))                       /*b(16:23, n) * a(n, 6) */ \
     \
     VBROADCASTSD(ZMM(6), MEM(RAX,(8*n+ 8)*8 - A_ADDITION))     /*zmm6 = a(n+1, 0)*/\
-    VFMADD231PD(ZMM(29), ZMM(0), ZMM(7))                       /*b(0 : 7, n) * a(n, 7) */\
+    VFMADD231PD(ZMM(29), ZMM(0), ZMM(7))                       /*b(0 : 7, n) * a(n, 7) */ \
     VFMADD231PD(ZMM(30), ZMM(1), ZMM(7))                       /*b(8 :15, n) * a(n, 7) */ \
     VFMADD231PD(ZMM(31), ZMM(2), ZMM(7))                       /*b(16:23, n) * a(n, 7) */ \
     VBROADCASTSD(ZMM(7), MEM(RAX,(8*n+ 9)*8 - A_ADDITION))     /*zmm7 = a(n+1, 1)*/ \
@@ -154,42 +154,42 @@
 */
 #define SUBITER_1(n) \
 \
-    VFMADD231PD(ZMM( 8), ZMM(3), ZMM(6))                       /*b(0 : 7, n) * a(n, 0) */\
+    VFMADD231PD(ZMM( 8), ZMM(3), ZMM(6))                       /*b(0 : 7, n) * a(n, 0) */ \
     VFMADD231PD(ZMM( 9), ZMM(4), ZMM(6))                       /*b(8 :15, n) * a(n, 0) */ \
     VFMADD231PD(ZMM(10), ZMM(5), ZMM(6))                       /*b(16:23, n) * a(n, 0) */ \
     \
     VBROADCASTSD(ZMM(6), MEM(RAX,(8*n+ 2)*8 - A_ADDITION))     /*zmm6 = a(n, 2)*/  \
-    VFMADD231PD(ZMM(11), ZMM(3), ZMM(7))                       /*b(0 : 7, n) * a(n, 1) */\
+    VFMADD231PD(ZMM(11), ZMM(3), ZMM(7))                       /*b(0 : 7, n) * a(n, 1) */ \
     VFMADD231PD(ZMM(12), ZMM(4), ZMM(7))                       /*b(8 :15, n) * a(n, 1) */ \
     VFMADD231PD(ZMM(13), ZMM(5), ZMM(7))                       /*b(16:23, n) * a(n, 1) */ \
     \
     VBROADCASTSD(ZMM(7), MEM(RAX,(8*n+ 3)*8 - A_ADDITION))     /*zmm7 = a(n, 3)*/ \
-    VFMADD231PD(ZMM(14), ZMM(3), ZMM(6))                       /*b(0 : 7, n) * a(n, 2) */\
+    VFMADD231PD(ZMM(14), ZMM(3), ZMM(6))                       /*b(0 : 7, n) * a(n, 2) */ \
     VFMADD231PD(ZMM(15), ZMM(4), ZMM(6))                       /*b(8 :15, n) * a(n, 2) */ \
     VFMADD231PD(ZMM(16), ZMM(5), ZMM(6))                       /*b(16:23, n) * a(n, 2) */ \
     \
     VBROADCASTSD(ZMM(6), MEM(RAX,(8*n+ 4)*8 - A_ADDITION))     /*zmm6 = a(n, 4)*/ \
-    VFMADD231PD(ZMM(17), ZMM(3), ZMM(7))                       /*b(0 : 7, n) * a(n, 3) */\
+    VFMADD231PD(ZMM(17), ZMM(3), ZMM(7))                       /*b(0 : 7, n) * a(n, 3) */ \
     VFMADD231PD(ZMM(18), ZMM(4), ZMM(7))                       /*b(8 :15, n) * a(n, 3) */ \
     VFMADD231PD(ZMM(19), ZMM(5), ZMM(7))                       /*b(16:23, n) * a(n, 3) */ \
     \
     VBROADCASTSD(ZMM(7), MEM(RAX,(8*n+ 5)*8 - A_ADDITION))     /*zmm7 = a(n, 5)*/ \
-    VFMADD231PD(ZMM(20), ZMM(3), ZMM(6))                       /*b(0 : 7, n) * a(n, 4) */\
+    VFMADD231PD(ZMM(20), ZMM(3), ZMM(6))                       /*b(0 : 7, n) * a(n, 4) */ \
     VFMADD231PD(ZMM(21), ZMM(4), ZMM(6))                       /*b(8 :15, n) * a(n, 4) */ \
     VFMADD231PD(ZMM(22), ZMM(5), ZMM(6))                       /*b(16:23, n) * a(n, 4) */ \
     \
     VBROADCASTSD(ZMM(6), MEM(RAX,(8*n+ 6)*8 - A_ADDITION))     /*zmm6 = a(n, 6)*/ \
-    VFMADD231PD(ZMM(23), ZMM(3), ZMM(7))                       /*b(0 : 7, n) * a(n, 5) */\
+    VFMADD231PD(ZMM(23), ZMM(3), ZMM(7))                       /*b(0 : 7, n) * a(n, 5) */ \
     VFMADD231PD(ZMM(24), ZMM(4), ZMM(7))                       /*b(8 :15, n) * a(n, 5) */ \
     VFMADD231PD(ZMM(25), ZMM(5), ZMM(7))                       /*b(16:23, n) * a(n, 5) */ \
     \
     VBROADCASTSD(ZMM(7), MEM(RAX,(8*n+ 7)*8 - A_ADDITION))     /*zmm7 = a(n, 7)*/ \
-    VFMADD231PD(ZMM(26), ZMM(3), ZMM(6))                       /*b(0 : 7, n) * a(n, 6) */\
+    VFMADD231PD(ZMM(26), ZMM(3), ZMM(6))                       /*b(0 : 7, n) * a(n, 6) */ \
     VFMADD231PD(ZMM(27), ZMM(4), ZMM(6))                       /*b(8 :15, n) * a(n, 6) */ \
     VFMADD231PD(ZMM(28), ZMM(5), ZMM(6))                       /*b(16:23, n) * a(n, 6) */ \
     VBROADCASTSD(ZMM(6), MEM(RAX,(8*n+ 8)*8 - A_ADDITION))     /*zmm6 = a(n+1, 0)*/ \
     \
-    VFMADD231PD(ZMM(29), ZMM(3), ZMM(7))                       /*b(0 : 7, n) * a(n, 7) */\
+    VFMADD231PD(ZMM(29), ZMM(3), ZMM(7))                       /*b(0 : 7, n) * a(n, 7) */ \
     VFMADD231PD(ZMM(30), ZMM(4), ZMM(7))                       /*b(8 :15, n) * a(n, 7) */ \
     VFMADD231PD(ZMM(31), ZMM(5), ZMM(7))                       /*b(16:23, n) * a(n, 7) */ \
     VBROADCASTSD(ZMM(7), MEM(RAX,(8*n+ 9)*8 - A_ADDITION))     /*zmm7 = a(n+1, 1)*/ \
@@ -981,8 +981,8 @@ void bli_dgemm_avx512_asm_8x24(
           [cs_c]      "m" (cs_c),
           [offsetPtr] "m" (offsetPtr)
         : // register clobber list
-          "rax", "rbx", "rcx", "r10", "r12", "r13", "r14",
-          "k0", "k1", "k2", "k3", "xmm1", "xmm2",
+          "rax", "rbx", "rcx", "rdx", "r10", "r12", "r13", "r14",
+          "k0", "k1", "k2", "k3", "xmm1", "xmm2", "xmm3",
           "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",
           "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
           "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19",
@@ -1063,7 +1063,7 @@ void bli_dgemm_avx512_asm_8x24(
         \
         MOV(VAR(m), RSI) /* backup m_iter into stack */             \
         MOV(R15, R8)     /* backup A macro panel pointer to R15 */  \
-        MOV(RBP, RCX)    /* backup C macro panel pointer to RBP */  \
+        MOV(R11, RCX)    /* backup C macro panel pointer to R11 */  \
         \
         CMP(RDI, IMM(0)) /* check if m_iter is zero */              \
         JLE(ENDJR)       /* JMP to endjr if m_iter <= 0*/           \
@@ -1073,7 +1073,7 @@ void bli_dgemm_avx512_asm_8x24(
         \
         MOV(R8, R15) /* restore A macro panel pointer */            \
         MOV(RSI, VAR(m)) /* copy m_iter to RSI */                   \
-        MOV(RCX, RBP) /* restore pointer to C macro panel pointer */\
+        MOV(RCX, R11) /* restore pointer to C macro panel pointer */\
         TEST(RSI, RSI)                                              \
         \
         JZ(ENDIR)       /* Jump to ENDIR if m_iter(RSI) == 0*/      \
@@ -1098,7 +1098,7 @@ void bli_dgemm_avx512_asm_8x24(
         MOV(R14, RDX) /* move k_iter into R14 */                     \
         IMUL(R14, IMM(24)) /* k_iter *= 24 */                        \
         LEA(R9, MEM(R9, R14, 8)) /* b_next_upanel = B + (k*24) */    \
-        LEA(RBP, MEM(RBP, 24*8)) /* c_next_upanel = C + (24*8) */    \
+        LEA(R11, MEM(R11, 24*8)) /* c_next_upanel = C + (24*8) */    \
         SUB(RDI, IMM(24))        /* subtract NR(24) from N */        \
         JNZ(LOOPJR)                                                  \
         \
@@ -1116,8 +1116,8 @@ void bli_dgemm_avx512_asm_8x24(
             [beta]    "m" (beta),                                    \
             [ldc]     "m" (ldc)                                      \
             :                                                        \
-            "rax", "rbp", "rbx", "rcx", "rdi", "rsi", "r8", "r9",    \
-            "r10", "r12", "r13", "r14", "r15", "xmm1", "xmm2",       \
+            "rax", "rbx", "rcx", "rdi", "rdx", "rsi", "r8", "r9",    \
+            "r10", "r11", "r12", "r13", "r14", "r15", "xmm1", "xmm2",\
             "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",  \
             "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",\
             "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19",    \
@@ -1329,9 +1329,7 @@ void bli_dgemm_avx512_asm_8x24_macro_kernel_fringe
         c_actual = c + ( ldc * m_main );
         for(dim_t j = 0; j < n_main; j += 24 )
         {
-            // zen5 kernel is causing a seg fault because of B prelaod.
-            // Therefore using zen4 kernel.
-            bli_dgemm_zen4_asm_8x24
+            bli_dgemm_avx512_asm_8x24
             (
                 k,
                 &alpha,
@@ -1382,7 +1380,7 @@ void bli_dgemm_avx512_asm_8x24_macro_kernel_fringe
         c_actual = c + ( n_main );
         for (dim_t i = 0; i < m; i += 8 )
         {
-            bli_dgemm_zen4_asm_8x24
+            bli_dgemm_avx512_asm_8x24
             (
                 k,
                 &alpha,
