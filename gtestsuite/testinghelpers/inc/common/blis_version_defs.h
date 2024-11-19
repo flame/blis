@@ -48,6 +48,7 @@
     #define K_bli_zgemmsup_cd_zen4_asm_4x4 1
     #define K_bli_zgemmsup_cd_zen4_asm_8x2 1
     #define K_bli_zgemmsup_cd_zen4_asm_8x4 1
+    #define K_bli_dgemmsup_rv_zen4_asm_24x8m_new 1
 
     #define AOCL_50
 

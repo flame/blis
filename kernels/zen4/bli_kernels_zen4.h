@@ -254,6 +254,16 @@ GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x3m)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x2m)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x1m)
 
+
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x7m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x6m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x5m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x4m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x3m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x2m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x1m_new)
+
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x8)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x8)
@@ -345,6 +355,22 @@ err_t bli_dgemm_24x8_avx512_k1_nn
       double* b, const inc_t ldb,
       double* beta,
       double* c, const inc_t ldc
+     );
+
+err_t bli_dgemm_tiny_24x8
+     (
+        conj_t              conja,
+        conj_t              conjb,
+        trans_t transa,
+        trans_t transb,
+        dim_t  m,
+        dim_t  n,
+        dim_t  k,
+        const double*    alpha,
+        const double*    a, const inc_t rs_a0, const inc_t cs_a0,
+        const double*    b, const inc_t rs_b0, const inc_t cs_b0,
+        const double*    beta,
+        double*    c, const inc_t rs_c0, const inc_t cs_c0
      );
 
 void bli_dnorm2fv_unb_var1_avx512
