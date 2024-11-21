@@ -4,7 +4,7 @@
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
-#  Copyright (C) 2023, SiFive, Inc.
+#  Copyright (C) 2024, SiFive, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,7 +35,7 @@
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
-THIS_CONFIG    := sifive_x280
+THIS_CONFIG    := sifive_rvv
 #CONFIGS_INCL   += $(THIS_CONFIG)
 
 #
@@ -46,7 +46,7 @@ THIS_CONFIG    := sifive_x280
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
-CMISCFLAGS_SIFIVE := -mcmodel=medany -march=rv64gcv_zba_zbb_zvl512b -mabi=lp64d
+CMISCFLAGS_SIFIVE := -mcmodel=medany -march=rv64gcv_zba_zbb_zvl128b -mabi=lp64d
 CMISCFLAGS_SIFIVE_OTHER :=
 CPPROCFLAGS    :=
 CMISCFLAGS     := $(CMISCFLAGS_SIFIVE) $(CMISCFLAGS_SIFIVE_OTHER) \
