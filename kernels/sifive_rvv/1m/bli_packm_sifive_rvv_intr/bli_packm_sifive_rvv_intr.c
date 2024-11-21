@@ -164,8 +164,11 @@
 #undef MR
 #undef NR
 
-#undef REF_KERNEL_
-#undef REF_KERNEL
+#undef BLI_SCAL2BBS_MXN_
+#undef BLI_SCAL2BBS_MXN
+
+#undef BLI_SET0S_EDGE_
+#undef BLI_SET0S_EDGE
 
 #undef PACKM
 #undef PACKM_
