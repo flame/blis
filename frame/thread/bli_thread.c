@@ -1906,8 +1906,6 @@ void bli_thread_update_rntm_from_env
 	dim_t jc, pc, ic, jr, ir, nt;
 	bool blis_mt;
 
-	// Acquire the mutex protecting global_rntm.
-	bli_pthread_mutex_lock( &global_rntm_mutex );
 
 	// Extract threading data from global_rntm.
 	nt = bli_rntm_num_threads( &global_rntm );
@@ -1918,8 +1916,6 @@ void bli_thread_update_rntm_from_env
 	ir = bli_rntm_ir_ways( &global_rntm );
 	blis_mt = bli_rntm_blis_mt( &global_rntm );
 
-	// Release the mutex protecting global_rntm.
-	bli_pthread_mutex_unlock( &global_rntm_mutex );
 
 #ifdef BLIS_ENABLE_MULTITHREADING
 
