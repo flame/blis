@@ -35,14 +35,18 @@
 
 #include "blis.h"
 
+// Make thread settings local to each thread calling BLIS routines.
+// (The definition resides in bli_rntm.c.)
+extern BLIS_THREAD_LOCAL rntm_t tl_rntm;
+
+// Thread local variable to handle initialization of tl_rntm from global_rntm.
+BLIS_THREAD_LOCAL bool initialize_tl_rntm = TRUE;
+
 // -----------------------------------------------------------------------------
 
 void bli_init( void )
 {
 	bli_init_once();
-	// Always update thread-local rntm from environment as threading values
-	// may have changed from any previous calls.
-	bli_thread_update_tl();
 }
 
 void bli_finalize( void )
@@ -56,9 +60,6 @@ void bli_finalize( void )
 void bli_init_auto( void )
 {
 	bli_init_once();
-	// Always update thread-local rntm from environment as threading values
-	// may have changed from any previous calls.
-	bli_thread_update_tl();
 }
 
 void bli_finalize_auto( void )
@@ -80,7 +81,22 @@ static bli_pthread_once_t once_finalize = BLIS_PTHREAD_ONCE_INIT;
 
 void bli_init_once( void )
 {
+	// Initialize all global data structures
 	bli_pthread_once( &once_init, bli_init_apis );
+
+	// Initialize tl_rntm as a copy of global_rntm
+	// Need to do this once per application thread
+	if (initialize_tl_rntm)
+	{
+		bli_thread_init_tl();
+		initialize_tl_rntm = FALSE;
+	}
+
+	// On every call each application thread must
+	// reset info_value to 0
+	gint_t info_value = 0;
+	bli_rntm_set_info_value_only( info_value, &tl_rntm );
+
 }
 
 void bli_finalize_once( void )

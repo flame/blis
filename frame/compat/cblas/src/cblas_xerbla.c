@@ -7,9 +7,6 @@
 #include "cblas.h"
 #include "cblas_f77.h"
 
-// The global rntm_t structure. (The definition resides in bli_rntm.c.)
-extern rntm_t global_rntm;
-
 // Make thread settings local to each thread calling BLIS routines.
 // (The definition resides in bli_rntm.c.)
 extern BLIS_THREAD_LOCAL rntm_t tl_rntm;
@@ -74,7 +71,7 @@ void cblas_xerbla(f77_int info, const char *rout, const char *form, ...)
       gint_t info_value = (gint_t) info;
       bli_rntm_set_info_value_only( info_value, &tl_rntm );
 
-      bool print_on_error = bli_rntm_print_on_error( &global_rntm );
+      bool print_on_error = bli_rntm_print_on_error( &tl_rntm );
       if (print_on_error)
       {
          va_list argptr;
@@ -85,7 +82,7 @@ void cblas_xerbla(f77_int info, const char *rout, const char *form, ...)
          va_end(argptr);
       }
 
-      bool stop_on_error = bli_rntm_stop_on_error( &global_rntm );
+      bool stop_on_error = bli_rntm_stop_on_error( &tl_rntm );
       if (stop_on_error)
       {
          bli_abort();

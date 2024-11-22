@@ -35,9 +35,6 @@
 
 #include "blis.h"
 
-// The global rntm_t structure. (The definition resides in bli_rntm.c.)
-extern rntm_t global_rntm;
-
 // Make thread settings local to each thread calling BLIS routines.
 // (The definition resides in bli_rntm.c.)
 extern BLIS_THREAD_LOCAL rntm_t tl_rntm;
@@ -90,7 +87,7 @@ extern BLIS_THREAD_LOCAL rntm_t tl_rntm;
     gint_t info_value = (gint_t) *info;
     bli_rntm_set_info_value_only( info_value, &tl_rntm );
 
-    bool print_on_error = bli_rntm_print_on_error( &global_rntm );
+    bool print_on_error = bli_rntm_print_on_error( &tl_rntm );
     if (print_on_error)
     {
         // The check for -10 is specific to xerbla_()'s use-case in ?imatcopy_() APIs.
@@ -109,7 +106,7 @@ extern BLIS_THREAD_LOCAL rntm_t tl_rntm;
         }
     }
 
-    bool stop_on_error = bli_rntm_stop_on_error( &global_rntm );
+    bool stop_on_error = bli_rntm_stop_on_error( &tl_rntm );
     if (stop_on_error)
     {
         bli_abort();

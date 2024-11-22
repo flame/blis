@@ -49,38 +49,17 @@ bli_pthread_mutex_t global_rntm_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
 
 void bli_rntm_init_from_global( rntm_t* rntm )
 {
-	// Initializes supplied rntm from a combination of global and
-	// thread local data (global_rntm and tl_rntm respectively).
-
-	dim_t jc, pc, ic, jr, ir;
-
-	// We must ensure that global_rntm has been initialized
+	// We must ensure that global_rntm and tl_rntm have been initialized
 	bli_init_once();
 
-	// We must also ensure that tl_rntm has been updated.
-	bli_thread_update_tl();
+	// Initialize supplied rntm from tl_rntm.
+	*rntm = tl_rntm;
 
-	// Acquire the mutex protecting global_rntm.
-	bli_pthread_mutex_lock( &global_rntm_mutex );
-
-	// Initialize supplied rntm from global_rntm.
-	*rntm = global_rntm;
-
-	// Release the mutex protecting global_rntm.
-	bli_pthread_mutex_unlock( &global_rntm_mutex );
-
-	// Now update threading info in supplied rntm from tl_rntm
-	bli_rntm_set_auto_factor_only( tl_rntm.auto_factor, rntm );
-	bli_rntm_set_num_threads_only( tl_rntm.num_threads, rntm );
-
-	jc = bli_rntm_jc_ways( &tl_rntm );
-	pc = bli_rntm_pc_ways( &tl_rntm );
-	ic = bli_rntm_ic_ways( &tl_rntm );
-	jr = bli_rntm_jr_ways( &tl_rntm );
-	ir = bli_rntm_ir_ways( &tl_rntm );
-	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, rntm );
-
-	bli_rntm_set_blis_mt_only( tl_rntm.blis_mt, rntm );
+#ifdef BLIS_ENABLE_MULTITHREADING
+	// Now update threading info to account for current OpenMP
+	// number of threads and active levels.
+	bli_thread_update_rntm_from_env( rntm );
+#endif
 
 #if 0
 	printf( "bli_rntm_init_from_global()\n" );

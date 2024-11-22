@@ -66,7 +66,7 @@
 
 // Initialization-related prototypes.
 void bli_thread_init( void );
-void bli_thread_update_tl( void );
+void bli_thread_init_tl( void );
 void bli_thread_finalize( void );
 void bli_thread_finalize_tl( void );
 
@@ -238,6 +238,8 @@ BLIS_EXPORT_BLIS void  bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t 
 BLIS_EXPORT_BLIS void  bli_thread_set_num_threads( dim_t value );
 
 BLIS_EXPORT_BLIS void  bli_thread_init_rntm_from_env( rntm_t* rntm );
+
+BLIS_EXPORT_BLIS void  bli_thread_init_rntm_from_global_rntm( rntm_t* rntm );
 
 BLIS_EXPORT_BLIS void  bli_thread_update_rntm_from_env( rntm_t* rntm );
 
