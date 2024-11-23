@@ -86,6 +86,9 @@ print_usage()
 	echo "                 root_dir."
 	echo "   -h          hide"
 	echo "                 Hide the makefile fragments by prepending filenames with '.'."
+	echo "   -i LIST     ignore"
+	echo "                 Augment the list of directory names contained in ign_list"
+	echo "                 with the directory names in LIST."
 	echo "   -p PREFIX   prefix name"
 	echo "                 Use PREFIX instead of uppercased root_dir in the makefile"
 	echo "                 variable name. If the root_dir were 'stuff' and -p was not"
@@ -430,6 +433,7 @@ main()
 	# Flags set by getopts.
 	dry_run_flag=""
 	hide_flag=""
+	ignore_list=""
 	recursive_flag=""
 	output_name=""
 	prefix_flag=""
@@ -443,11 +447,12 @@ main()
 
 
 	# Process our command line options.
-	while getopts ":dho:p:rv:" opt; do
+	while getopts ":dhi:o:p:rv:" opt; do
 		case $opt in
 			d  ) dry_run_flag="1" ;;
 			h  ) hide_flag="1" ;;
 			r  ) recursive_flag="1" ;;
+			i  ) ignore_list="$OPTARG" ;;
 			o  ) output_name=$OPTARG ;;
 			p  ) prefix_flag=$OPTARG ;;
 			v  ) verbose_flag=$OPTARG ;;
@@ -486,6 +491,10 @@ main()
 	# Read the makefile config files to be used in the makefile fragment
 	# generation.
 	read_mkfile_config
+
+	# Append the command line ignore_list to the ignore_dirs variable read from
+	# ignore_file by read_mkfile_config().
+	ignore_dirs="${ignore_dirs} ${ignore_list}"
 
 
 	# Strip / from end of directory path, if there is one.
