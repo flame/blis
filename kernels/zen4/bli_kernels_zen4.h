@@ -348,5 +348,13 @@ bool bli_cntx_gemmsup_thresh_is_met_zen4
 		cntx_t* cntx
 	 );
 
+// dynamic blocksizes function
+void bli_dynamic_blkszs_zen4
+    (
+      dim_t n_threads,
+      cntx_t* cntx,
+      num_t dt
+    );
+
 // function for resetting zmm registers after L3 apis
 void bli_zero_zmm();

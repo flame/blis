@@ -96,3 +96,66 @@ bool bli_cntx_gemmsup_thresh_is_met_zen5( obj_t* a, obj_t* b, obj_t* c, cntx_t* 
 	else
 		return bli_cntx_l3_sup_thresh_is_met( a, b, c, cntx );
 }
+
+/* This function determines the ideal blocksizes for given datatype
+   and num_threads.
+*/
+void bli_dynamic_blkszs_zen5( dim_t n_threads, cntx_t* cntx, num_t dt )
+{
+	// dynamic blocksizes enabled only for double datatype.
+	if (dt != BLIS_DOUBLE) return;
+
+	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
+	dim_t mc, kc, nc;
+	model_t model = bli_init_model_query_id();
+
+	// determine ideal blocksize
+	if ( model == BLIS_MODEL_TURIN_DENSE )
+	{
+		if (n_threads == 1 )
+		{
+			mc = 88, kc = 384, nc = 4032;
+		}
+		else if (n_threads <= 48) // more than one node
+		{
+			mc = 72, kc = 448, nc = 1008;
+		}
+		else if (n_threads <= 128)
+		{
+			mc = 80, kc = 576, nc = 2016;
+		}
+		else
+		{
+			mc = 128, kc = 576, nc = 2016;
+		}
+	}
+	else // BLIS_MODEL_TURIN
+	{
+		if (n_threads <= 24) // one node
+		{
+			mc = 80, kc = 384, nc = 4032;
+		}
+		else if (n_threads <= 64)
+		{
+			mc = 112, kc = 512, nc = 4032;
+		}
+		else
+		{
+			mc = 112, kc = 512, nc = 2016;
+		}
+	}
+
+	// set blocksizes
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   192,  mc,    72,    48 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   512,  kc,   128,    64 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  8064,  nc,  2040,  1020 );
+
+	bli_cntx_set_blkszs
+	(
+		BLIS_NAT, 3,
+		BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
+		BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
+		BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
+		cntx
+	);
+}

@@ -300,6 +300,35 @@ void bli_gemm_front
 #endif
 #endif
 
+	cntx_t* cntx_dynamic = cntx; // pointer to local cntx. Copy is not created here.
+#if defined(BLIS_KERNELS_ZEN4) // dynamic blocksizes are enabled only for AVX512 kernels.
+	cntx_t cntx_copy;
+	dim_t n_threads = bli_rntm_num_threads( rntm );
+
+	switch (bli_arch_query_id() )
+	{
+	case BLIS_ARCH_ZEN5:;
+        #if defined(BLIS_KERNELS_ZEN5)
+		cntx_copy = *cntx; // create a copy of cntx.
+		cntx_dynamic = &cntx_copy; // use local copy of cntx for GEMM
+		// dynamically set blocksizes according to num threads
+		bli_dynamic_blkszs_zen5(n_threads, cntx_dynamic, bli_obj_dt(c));
+		break;
+        #endif //BLIS_KERNELS_ZEN5
+
+	case BLIS_ARCH_ZEN4:;
+		cntx_copy = *cntx; // create a copy of cntx.
+		cntx_dynamic = &cntx_copy; // use local copy of cntx for GEMM
+		// dynamically set blocksizes according to num threads
+		bli_dynamic_blkszs_zen4(n_threads, cntx_dynamic, bli_obj_dt(c));
+		break;
+
+	default:
+		// use default blocksizes for other architectures.
+		break;
+	}
+#endif
+
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator
 	(
@@ -310,7 +339,7 @@ void bli_gemm_front
 	  &b_local,
 	  betap,
 	  cp,
-	  cntx,
+	  cntx_dynamic,
 	  rntm,
 	  cntl
 	);

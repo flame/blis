@@ -50,3 +50,11 @@ bool bli_cntx_gemmsup_thresh_is_met_zen5
     obj_t*  c,
     cntx_t* cntx
 );
+
+// dynamic blocksizes function
+void bli_dynamic_blkszs_zen5
+    (
+      dim_t n_threads,
+      cntx_t* cntx,
+      num_t dt
+    );

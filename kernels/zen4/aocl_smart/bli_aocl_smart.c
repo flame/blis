@@ -63,7 +63,7 @@ bool bli_cntx_gemmsup_thresh_is_met_zen4( obj_t* a, obj_t* b, obj_t* c, cntx_t* 
 		// For skinny sizes where one/two dimensions are small
 		if((m < 1000) || (n < 1000)) return TRUE;
 		// For all combinations in small sizes
-		if((m < 5000) && (n < 5000) && (k < 5000)) return TRUE;
+		if((m < 2200) && (n < 2200) && (k < 2200)) return TRUE;
 		return FALSE;
 	}
 	else if( dt == BLIS_DCOMPLEX )
@@ -95,4 +95,55 @@ bool bli_cntx_gemmsup_thresh_is_met_zen4( obj_t* a, obj_t* b, obj_t* c, cntx_t* 
 	}
 	else
 		return bli_cntx_l3_sup_thresh_is_met( a, b, c, cntx );
+}
+
+/* This function determines the ideal blocksizes for given datatype
+   and num_threads.
+*/
+void bli_dynamic_blkszs_zen4( dim_t n_threads, cntx_t* cntx, num_t dt )
+{
+	// dynamic blocksizes enabled only for double datatype.
+	if (dt != BLIS_DOUBLE) return;
+
+	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
+	dim_t mc, kc, nc;
+	model_t model = bli_init_model_query_id();
+
+	// determine ideal blocksize
+	if ( model == BLIS_MODEL_GENOA)
+	{
+		if (n_threads < 32 )
+		{
+			mc = 80, kc = 512, nc = 4032;
+		}
+		else
+		{
+			mc = 80, kc = 512, nc = 1008;
+		}
+	}
+	else // BLIS_MODEL_BERGAMO
+	{
+		if (n_threads < 32 )
+		{
+			mc = 80, kc = 512, nc = 4032;
+		}
+		else
+		{
+			mc = 80, kc = 512, nc = 1008;
+		}
+	}
+	
+	// set blocksizes
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,  mc,   144,    60 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   480,  kc,   256,   512 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  nc,  4080,  2004 );
+
+	bli_cntx_set_blkszs
+	(
+		BLIS_NAT, 3,
+		BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
+		BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
+		BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
+		cntx
+	);
 }
