@@ -49,7 +49,8 @@ void packb_nr64_bf16s4f32of32_row_major
       const dim_t   KC,
       dim_t*        rs_p,
       dim_t*        cs_p,
-      lpgemm_pre_op* pre_op
+      lpgemm_pre_op* pre_op,
+      AOCL_MATRIX_TYPE mtag
     );
 
 void packb_nr64_bf16s4f32of32_col_major
@@ -61,7 +62,8 @@ void packb_nr64_bf16s4f32of32_col_major
       const dim_t   KC,
       dim_t*        rs_p,
       dim_t*        cs_p,
-      lpgemm_pre_op* pre_op
+      lpgemm_pre_op* pre_op,
+      AOCL_MATRIX_TYPE mtag
     );
 
 void packb_nr48_bf16s4f32of32_row_major
@@ -69,7 +71,8 @@ void packb_nr48_bf16s4f32of32_row_major
       int8_t*       pack_b_buffer,
       const int8_t* b,
       const dim_t   rs_b,
-      const dim_t   KC
+      const dim_t   KC,
+      AOCL_MATRIX_TYPE mtag
     );
 
 void packb_nr32_bf16s4f32of32_row_major
@@ -77,7 +80,8 @@ void packb_nr32_bf16s4f32of32_row_major
       int8_t*       pack_b_buffer,
       const int8_t* b,
       const dim_t   rs_b,
-      const dim_t   KC
+      const dim_t   KC,
+      AOCL_MATRIX_TYPE mtag
     );
 
 void packb_nr16_bf16s4f32of32_row_major
@@ -85,7 +89,8 @@ void packb_nr16_bf16s4f32of32_row_major
       int8_t*       pack_b_buffer,
       const int8_t* b,
       const dim_t   rs_b,
-      const dim_t   KC
+      const dim_t   KC,
+      AOCL_MATRIX_TYPE mtag
     );
 
 void packb_nrlt16_bf16s4f32of32_row_major
@@ -94,7 +99,8 @@ void packb_nrlt16_bf16s4f32of32_row_major
       const int8_t* b,
       const dim_t   rs_b,
       const dim_t   KC,
-      const dim_t n0_partial_rem
+      const dim_t n0_partial_rem,
+      AOCL_MATRIX_TYPE mtag
     );
 
 void packb_nr64_bf16s4f32of32
@@ -107,7 +113,8 @@ void packb_nr64_bf16s4f32of32
        const dim_t   KC,
        dim_t*        rs_p,
        dim_t*        cs_p,
-      lpgemm_pre_op* pre_op
+       lpgemm_pre_op* pre_op,
+       AOCL_MATRIX_TYPE mtag
      )
 {
 	if (cs_b == 1)
@@ -115,7 +122,7 @@ void packb_nr64_bf16s4f32of32
 		packb_nr64_bf16s4f32of32_row_major
 		(
 			pack_b_buffer, b, rs_b, NC,
-			KC, rs_p, cs_p, pre_op
+			KC, rs_p, cs_p, pre_op, mtag
 		);
 	}
 	else
@@ -123,7 +130,7 @@ void packb_nr64_bf16s4f32of32
 		packb_nr64_bf16s4f32of32_col_major
 		(
 			pack_b_buffer, b, cs_b, NC, KC,
-			rs_p, cs_p, pre_op
+			rs_p, cs_p, pre_op, mtag
 		);
 	}
 }
@@ -137,7 +144,8 @@ void packb_nr64_bf16s4f32of32_row_major
       const dim_t   KC,
       dim_t*        rs_p,
       dim_t*        cs_p,
-	  lpgemm_pre_op* pre_op
+      lpgemm_pre_op* pre_op,
+      AOCL_MATRIX_TYPE mtag
     )
 {
 	dim_t NR = 64;
@@ -168,7 +176,15 @@ void packb_nr64_bf16s4f32of32_row_major
 
 	// Selectors for int4 -> int8 conversion.
 	__m512i shift_idx_64;
-	MULTISHIFT_32BIT_8_INT4_IDX_64ELEM( shift_idx_64 );
+
+	if(mtag == AWQ_B_MATRIX)
+	{
+		MULTISHIFT_AWQ_32BIT_8_INT4_IDX_64ELEM(shift_idx_64)
+	}
+	else
+	{
+		MULTISHIFT_32BIT_8_INT4_IDX_64ELEM(shift_idx_64)
+	}
 
 	__m512i sign_comp = _mm512_set1_epi8( 0x08 );
 	__mmask32 hmask = _cvtu32_mask32(0xFFFFFFFF); // 32 bytes or 64 int4.
@@ -297,7 +313,7 @@ void packb_nr64_bf16s4f32of32_row_major
 				( ( n_full_pieces_loop_limit * KC_updated ) /
 				  incr_adj_factor ) ),
 			  ( b + ( n_full_pieces_loop_limit / incr_adj_factor ) ),
-			  rs_b, KC
+			  rs_b, KC, mtag
 			);
 
 			n0_partial_pack = 48;
@@ -310,7 +326,7 @@ void packb_nr64_bf16s4f32of32_row_major
 				( ( n_full_pieces_loop_limit * KC_updated ) /
 				  incr_adj_factor ) ),
 			  ( b + ( n_full_pieces_loop_limit / incr_adj_factor ) ),
-			  rs_b, KC
+			  rs_b, KC, mtag
 			);
 
 			n0_partial_pack = 32;
@@ -323,7 +339,7 @@ void packb_nr64_bf16s4f32of32_row_major
 				( ( n_full_pieces_loop_limit * KC_updated ) /
 				  incr_adj_factor ) ),
 			  ( b + ( n_full_pieces_loop_limit / incr_adj_factor ) ),
-			  rs_b, KC
+			  rs_b, KC, mtag
 			);
 
 			n0_partial_pack = 16;
@@ -337,7 +353,7 @@ void packb_nr64_bf16s4f32of32_row_major
 			    ( n0_partial_pack * KC_updated ) ) / incr_adj_factor ) ),
 			  ( b + ( ( n_full_pieces_loop_limit + n0_partial_pack ) /
 					  incr_adj_factor ) ),
-			  rs_b, KC, n0_partial_rem
+			  rs_b, KC, n0_partial_rem, mtag
 			);
 		}
 	}
@@ -350,7 +366,8 @@ void packb_nr48_bf16s4f32of32_row_major
       int8_t*       pack_b_buffer,
       const int8_t* b,
       const dim_t   rs_b,
-      const dim_t   KC
+      const dim_t   KC,
+      AOCL_MATRIX_TYPE mtag
     )
 {
 	const dim_t NR = 48;
@@ -371,7 +388,6 @@ void packb_nr48_bf16s4f32of32_row_major
 	// Selectors for int4 -> int8 conversion.
 	// First 32 int4 elements selectors.
 	__m256i shift_idx_32;
-	MULTISHIFT_32BIT_8_INT4_IDX_32ELEM(shift_idx_32);
 
 	__m256i sign_comp_32 = _mm256_set1_epi8( 0x08 );
 	__mmask16 hmask_32 = _cvtu32_mask16( 0x0000FFFF ); //16 bytes or 32 int4.
@@ -383,7 +399,17 @@ void packb_nr48_bf16s4f32of32_row_major
 
 	// Next 16 int4 elements selectors.
 	__m128i shift_idx_16;
-	MULTISHIFT_32BIT_8_INT4_IDX_16ELEM(shift_idx_16);
+
+	if(mtag == AWQ_B_MATRIX)
+	{
+		MULTISHIFT_AWQ_32BIT_8_INT4_IDX_32ELEM(shift_idx_32)
+		MULTISHIFT_AWQ_32BIT_8_INT4_IDX_16ELEM(shift_idx_16)
+	}
+	else
+	{
+		MULTISHIFT_32BIT_8_INT4_IDX_32ELEM(shift_idx_32)
+		MULTISHIFT_32BIT_8_INT4_IDX_16ELEM(shift_idx_16)
+	}
 
 	__m128i sign_comp_16 = _mm_set1_epi8( 0x08 );
 	__mmask16 hmask_16 = _cvtu32_mask16( 0x000000FF ); //8 bytes or 16 int4.
@@ -550,7 +576,8 @@ void packb_nr32_bf16s4f32of32_row_major
       int8_t*       pack_b_buffer,
       const int8_t* b,
       const dim_t   rs_b,
-      const dim_t   KC
+      const dim_t   KC,
+      AOCL_MATRIX_TYPE mtag
     )
 {
 	const dim_t NR = 32;
@@ -569,7 +596,15 @@ void packb_nr32_bf16s4f32of32_row_major
 
 	// Selectors for int4 -> int8 conversion.
 	__m256i shift_idx_32;
-	MULTISHIFT_32BIT_8_INT4_IDX_32ELEM(shift_idx_32);
+
+	if(mtag == AWQ_B_MATRIX)
+	{
+		 MULTISHIFT_AWQ_32BIT_8_INT4_IDX_32ELEM(shift_idx_32)
+	}
+	else
+	{
+		MULTISHIFT_32BIT_8_INT4_IDX_32ELEM(shift_idx_32)
+	}
 
 	__m256i sign_comp_32 = _mm256_set1_epi8( 0x08 );
 	__mmask16 hmask_32 = _cvtu32_mask16( 0x0000FFFF ); //16 bytes or 32 int4.
@@ -666,7 +701,8 @@ void packb_nr16_bf16s4f32of32_row_major
       int8_t*       pack_b_buffer,
       const int8_t* b,
       const dim_t   rs_b,
-      const dim_t   KC
+      const dim_t   KC,
+      AOCL_MATRIX_TYPE mtag
     )
 {
 	const dim_t NR = 16;
@@ -681,7 +717,15 @@ void packb_nr16_bf16s4f32of32_row_major
 
 	// Selectors for int4 -> int8 conversion.
 	__m128i shift_idx_16;
-	MULTISHIFT_32BIT_8_INT4_IDX_16ELEM(shift_idx_16);
+
+	if(mtag == AWQ_B_MATRIX)
+	{
+		MULTISHIFT_AWQ_32BIT_8_INT4_IDX_16ELEM(shift_idx_16)
+	}
+	else
+	{
+		 MULTISHIFT_32BIT_8_INT4_IDX_16ELEM(shift_idx_16)
+	}
 
 	__m128i sign_comp_16 = _mm_set1_epi8( 0x08 );
 	__mmask16 hmask_16 = _cvtu32_mask16( 0x000000FF ); //8 bytes or 16 int4.
@@ -773,7 +817,8 @@ void packb_nrlt16_bf16s4f32of32_row_major
       const int8_t* b,
       const dim_t   rs_b,
       const dim_t   KC,
-      const dim_t n0_partial_rem
+      const dim_t n0_partial_rem,
+      AOCL_MATRIX_TYPE mtag
     )
 {
 	const dim_t NR = 16;
@@ -788,7 +833,15 @@ void packb_nrlt16_bf16s4f32of32_row_major
 
 	// Selectors for int4 -> int8 conversion.
 	__m128i shift_idx_16;
-	MULTISHIFT_32BIT_8_INT4_IDX_16ELEM(shift_idx_16);
+
+	if(mtag == AWQ_B_MATRIX)
+	{
+		MULTISHIFT_AWQ_32BIT_8_INT4_IDX_16ELEM(shift_idx_16)
+	}
+	else
+	{
+		MULTISHIFT_32BIT_8_INT4_IDX_16ELEM(shift_idx_16)
+	}
 
 	__m128i sign_comp_16 = _mm_set1_epi8( 0x08 );
 	// 16 int4 elems in 8 bytes, so adjusting the mask for nr < 16 by
@@ -905,39 +958,76 @@ void packb_nrlt16_bf16s4f32of32_row_major
 }
 
 
-#define LOAD_16_COLS_AVX2 \
-	a_reg[0] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+#define MASK_LOAD_16_COLS_AVX2( mask ) \
+	a_reg[0] = _mm256_maskz_loadu_epi8( mask, ( b + \
 				( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) ); \
-	a_reg[1] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+	a_reg[1] = _mm256_maskz_loadu_epi8( mask, ( b + \
 				( ( ldb * ( jr + 1 ) ) + kr ) / 2 ) ); \
-	a_reg[2] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+	a_reg[2] = _mm256_maskz_loadu_epi8( mask, ( b + \
 				( ( ldb * ( jr + 2 ) ) + kr ) / 2 ) ); \
-	a_reg[3] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+	a_reg[3] = _mm256_maskz_loadu_epi8( mask, ( b + \
 				( ( ldb * ( jr + 3 ) ) + kr ) / 2 ) ); \
-	a_reg[4] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+	a_reg[4] = _mm256_maskz_loadu_epi8( mask, ( b + \
 				( ( ldb * ( jr + 4 ) ) + kr ) / 2 ) ); \
-	a_reg[5] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+	a_reg[5] = _mm256_maskz_loadu_epi8( mask, ( b + \
 				( ( ldb * ( jr + 5 ) ) + kr ) / 2 ) ); \
-	a_reg[6] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+	a_reg[6] = _mm256_maskz_loadu_epi8( mask, ( b + \
 				( ( ldb * ( jr + 6 ) ) + kr ) / 2 ) ); \
-	a_reg[7] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+	a_reg[7] = _mm256_maskz_loadu_epi8( mask, ( b + \
 				( ( ldb * ( jr + 7 ) ) + kr ) / 2 ) ); \
-	a_reg[8] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+	a_reg[8] = _mm256_maskz_loadu_epi8( mask, ( b + \
 				( ( ldb * ( jr + 8 ) ) + kr ) / 2 ) ); \
-	a_reg[9] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+	a_reg[9] = _mm256_maskz_loadu_epi8( mask, ( b + \
 				( ( ldb * ( jr + 9 ) ) + kr ) / 2 ) ); \
-	a_reg[10] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+	a_reg[10] = _mm256_maskz_loadu_epi8( mask, ( b + \
 				( ( ldb * ( jr + 10 ) ) + kr ) / 2 ) ); \
-	a_reg[11] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+	a_reg[11] = _mm256_maskz_loadu_epi8( mask, ( b + \
 				( ( ldb * ( jr + 11 ) ) + kr ) / 2 ) ); \
-	a_reg[12] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+	a_reg[12] = _mm256_maskz_loadu_epi8( mask, ( b + \
 				( ( ldb * ( jr + 12 ) ) + kr ) / 2 ) ); \
-	a_reg[13] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+	a_reg[13] = _mm256_maskz_loadu_epi8( mask, ( b + \
 				( ( ldb * ( jr + 13 ) ) + kr ) / 2 ) ); \
-	a_reg[14] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+	a_reg[14] = _mm256_maskz_loadu_epi8( mask, ( b + \
 				( ( ldb * ( jr + 14 ) ) + kr ) / 2 ) ); \
-	a_reg[15] = _mm256_loadu_si256( ( __m256i const * ) ( b + \
+	a_reg[15] = _mm256_maskz_loadu_epi8( mask, ( b + \
 				( ( ldb * ( jr + 15 ) ) + kr ) / 2 ) );
+
+/* This order shift transforms a 32 bits sequence of int4 elements
+ * representing an AWQ order [0, 2, 4, 6, 1, 3, 5, 7] into a
+ * sequential order [0, 1, 2, 3, 4, 5, 6, 7].
+ */  \
+#define ORDER_SHIFT_AVX2( reg ) \
+	MULTISHIFT_AWQ_32BIT_8_INT4_IDX_64ELEM( shift_idx_64 ); \
+	CVT_INT4_TO_INT8_64ELEM_MULTISHIFT(reg, a0, shift_idx_64, \
+			sign_comp, signed_upscale); \
+	even = _mm512_cvtepi16_epi8(a0); \
+	odd = _mm512_cvtepi16_epi8( \
+		 _mm512_srli_epi16( a0 , 0x4 )); \
+	reg = _mm256_or_epi32( even, odd ); \
+
+#define ORDER_SHIFT_AVX2_ALLREG \
+	__m512i shift_idx_64; \
+	__m512i a0; \
+	__m512i sign_comp = _mm512_set1_epi8( 0x08 ); \
+	__m256i even; \
+	__m256i odd; \
+	bool signed_upscale = TRUE; \
+	ORDER_SHIFT_AVX2( a_reg[0]) \
+	ORDER_SHIFT_AVX2( a_reg[1]) \
+	ORDER_SHIFT_AVX2( a_reg[2]) \
+	ORDER_SHIFT_AVX2( a_reg[3]) \
+	ORDER_SHIFT_AVX2( a_reg[4]) \
+	ORDER_SHIFT_AVX2( a_reg[5]) \
+	ORDER_SHIFT_AVX2( a_reg[6]) \
+	ORDER_SHIFT_AVX2( a_reg[7]) \
+	ORDER_SHIFT_AVX2( a_reg[8]) \
+	ORDER_SHIFT_AVX2( a_reg[9]) \
+	ORDER_SHIFT_AVX2( a_reg[10]) \
+	ORDER_SHIFT_AVX2( a_reg[11]) \
+	ORDER_SHIFT_AVX2( a_reg[12]) \
+	ORDER_SHIFT_AVX2( a_reg[13]) \
+	ORDER_SHIFT_AVX2( a_reg[14]) \
+	ORDER_SHIFT_AVX2( a_reg[15])
 
 #define UNPACKHILO8_AVX2 \
 	b_reg[0] = _mm256_unpacklo_epi8( a_reg[0], a_reg[1] ); \
@@ -1014,40 +1104,6 @@ void packb_nrlt16_bf16s4f32of32_row_major
 	a_reg[13] = _mm256_unpackhi_epi64( b_reg[10], b_reg[11] ); \
 	a_reg[14] = _mm256_unpackhi_epi64( b_reg[12], b_reg[13] ); \
 	a_reg[15] = _mm256_unpackhi_epi64( b_reg[14], b_reg[15] );
-
-#define MASK_LOAD_16_COLS_AVX2( mask ) \
-	a_reg[0] = _mm256_maskz_loadu_epi8( mask, ( b + \
-				( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) ); \
-	a_reg[1] = _mm256_maskz_loadu_epi8( mask, ( b + \
-				( ( ldb * ( jr + 1 ) ) + kr ) / 2 ) ); \
-	a_reg[2] = _mm256_maskz_loadu_epi8( mask, ( b + \
-				( ( ldb * ( jr + 2 ) ) + kr ) / 2 ) ); \
-	a_reg[3] = _mm256_maskz_loadu_epi8( mask, ( b + \
-				( ( ldb * ( jr + 3 ) ) + kr ) / 2 ) ); \
-	a_reg[4] = _mm256_maskz_loadu_epi8( mask, ( b + \
-				( ( ldb * ( jr + 4 ) ) + kr ) / 2 ) ); \
-	a_reg[5] = _mm256_maskz_loadu_epi8( mask, ( b + \
-				( ( ldb * ( jr + 5 ) ) + kr ) / 2 ) ); \
-	a_reg[6] = _mm256_maskz_loadu_epi8( mask, ( b + \
-				( ( ldb * ( jr + 6 ) ) + kr ) / 2 ) ); \
-	a_reg[7] = _mm256_maskz_loadu_epi8( mask, ( b + \
-				( ( ldb * ( jr + 7 ) ) + kr ) / 2 ) ); \
-	a_reg[8] = _mm256_maskz_loadu_epi8( mask, ( b + \
-				( ( ldb * ( jr + 8 ) ) + kr ) / 2 ) ); \
-	a_reg[9] = _mm256_maskz_loadu_epi8( mask, ( b + \
-				( ( ldb * ( jr + 9 ) ) + kr ) / 2 ) ); \
-	a_reg[10] = _mm256_maskz_loadu_epi8( mask, ( b + \
-				( ( ldb * ( jr + 10 ) ) + kr ) / 2 ) ); \
-	a_reg[11] = _mm256_maskz_loadu_epi8( mask, ( b + \
-				( ( ldb * ( jr + 11 ) ) + kr ) / 2 ) ); \
-	a_reg[12] = _mm256_maskz_loadu_epi8( mask, ( b + \
-				( ( ldb * ( jr + 12 ) ) + kr ) / 2 ) ); \
-	a_reg[13] = _mm256_maskz_loadu_epi8( mask, ( b + \
-				( ( ldb * ( jr + 13 ) ) + kr ) / 2 ) ); \
-	a_reg[14] = _mm256_maskz_loadu_epi8( mask, ( b + \
-				( ( ldb * ( jr + 14 ) ) + kr ) / 2 ) ); \
-	a_reg[15] = _mm256_maskz_loadu_epi8( mask, ( b + \
-				( ( ldb * ( jr + 15 ) ) + kr ) / 2 ) );
 
 //odd cases
 #define REMOVE_EXTRA_BITS( reg ) \
@@ -1155,7 +1211,8 @@ void packb_nr_mult_16_bf16s4f32of32_col_major
       const int8_t*   b,
       const dim_t     NR,
       const dim_t     ldb,
-      const dim_t     KC
+      const dim_t     KC,
+      AOCL_MATRIX_TYPE mtag
     )
 {
 	// Used for storing the mm256i elements for use in dpbf16_ps instruction.
@@ -1178,7 +1235,11 @@ void packb_nr_mult_16_bf16s4f32of32_col_major
 			{
 				/* Rearrange for dpbf16_ps, read 16 cols
 				from B with 64 elements in each row.*/
-				LOAD_16_COLS_AVX2
+				MASK_LOAD_16_COLS_AVX2( 0xFFFFFFFF )
+				if( mtag == AWQ_B_MATRIX )
+				{
+					ORDER_SHIFT_AVX2_ALLREG
+				}
 				UNPACKHILO8_AVX2
 				UNPACKHILO16_AVX2
 				UNPACKHILO32_AVX2
@@ -1262,6 +1323,10 @@ void packb_nr_mult_16_bf16s4f32of32_col_major
 				/* Rearrange for dpbf16_ps, read 16 cols
 				from B with 64 elements in each row.*/
 				MASK_LOAD_16_COLS_AVX2( 0x0000FFFF )
+				if( mtag == AWQ_B_MATRIX )
+				{
+					ORDER_SHIFT_AVX2_ALLREG
+				}
 				UNPACKHILO8_AVX2
 				UNPACKHILO16_AVX2
 				UNPACKHILO32_AVX2
@@ -1310,6 +1375,10 @@ void packb_nr_mult_16_bf16s4f32of32_col_major
 				/* Rearrange for dpbf16_ps, read 16 cols
 				from B with 64 elements in each row.*/
 				MASK_LOAD_16_COLS_AVX2( 0x000000FF )
+				if( mtag == AWQ_B_MATRIX )
+				{
+					ORDER_SHIFT_AVX2_ALLREG
+				}
 				UNPACKHILO8_AVX2
 				UNPACKHILO16_AVX2
 				UNPACKHILO32_AVX2
@@ -1342,6 +1411,10 @@ void packb_nr_mult_16_bf16s4f32of32_col_major
 				/* Rearrange for dpbf16_ps, read 16 cols
 				from B with 64 elements in each row.*/
 				MASK_LOAD_16_COLS_AVX2( 0x0F )
+				if( mtag == AWQ_B_MATRIX )
+				{
+					ORDER_SHIFT_AVX2_ALLREG
+				}
 				UNPACKHILO8_AVX2
 				UNPACKHILO16_AVX2
 				UNPACKHILO32_AVX2
@@ -1575,7 +1648,8 @@ void packb_nrlt16_bf16s4f32of32_col_major
       const int8_t* b,
       const dim_t     ldb,
       const dim_t     KC,
-      const dim_t     n0_partial_rem
+      const dim_t     n0_partial_rem,
+      AOCL_MATRIX_TYPE mtag
     )
 {
 	dim_t NR = 16;
@@ -1589,6 +1663,12 @@ void packb_nrlt16_bf16s4f32of32_col_major
     bool is_odd_stride = ( ( ldb % 2 ) == 0 ) ? FALSE : TRUE;
 
 	dim_t kr = 0, jr = 0;
+	__m512i shift_idx_64;
+	__m512i a0;
+	__m512i sign_comp = _mm512_set1_epi8( 0x08 );
+	__m256i even;
+	__m256i odd;
+	bool signed_upscale = TRUE;
 
 	if( is_odd_stride == FALSE )
 	{
@@ -1600,6 +1680,11 @@ void packb_nrlt16_bf16s4f32of32_col_major
 				cols from B with 64 elements in each row*/
 				a_reg[jr] = _mm256_loadu_si256( ( __m256i const * ) ( b +
 						( ( ldb * jr ) + kr ) / 2 ) );
+
+				if( mtag == AWQ_B_MATRIX )
+				{
+					ORDER_SHIFT_AVX2( a_reg[jr] )
+				}
 			}
 			for( ; jr < NR; jr++ )
 			{
@@ -1689,6 +1774,11 @@ void packb_nrlt16_bf16s4f32of32_col_major
 				cols from B with 64 elements in each row*/
 				a_reg[jr] = _mm256_maskz_loadu_epi8( 0x0000FFFF,
 					( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) );
+
+				if( mtag == AWQ_B_MATRIX )
+				{
+					ORDER_SHIFT_AVX2( a_reg[jr] )
+				}
 			}
 			for( ; jr < NR; jr++ )
 			{
@@ -1742,7 +1832,12 @@ void packb_nrlt16_bf16s4f32of32_col_major
 				/*Rearrange for dpbf16_ps, read n0_partial_rem
 				cols from B with 64 elements in each row*/
 				a_reg[jr] = _mm256_maskz_loadu_epi8( 0xFF,
-					( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) ); \
+					( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) );
+
+				if( mtag == AWQ_B_MATRIX )
+				{
+					ORDER_SHIFT_AVX2( a_reg[jr] )
+				}
 			}
 			for( ; jr < NR; jr++ )
 			{
@@ -1780,7 +1875,12 @@ void packb_nrlt16_bf16s4f32of32_col_major
 				/*Rearrange for dpbf16_ps, read n0_partial_rem
 				cols from B with 64 elements in each row*/
 				a_reg[jr] = _mm256_maskz_loadu_epi8( 0x0F,
-					(b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) ); \
+					(b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) );
+
+				if( mtag == AWQ_B_MATRIX )
+				{
+					ORDER_SHIFT_AVX2( a_reg[jr] )
+				}
 			}
 			for( ; jr < NR; jr++ )
 			{
@@ -1810,7 +1910,7 @@ void packb_nrlt16_bf16s4f32of32_col_major
 				/*Rearrange for dpbf16_ps, read n0_partial_rem
 				cols from B with 64 elements in each row*/
 				a_reg[jr] = _mm256_maskz_loadu_epi8( 0x03,
-					( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) ); \
+					( b + ( ( ldb * ( jr + 0 ) ) + kr ) / 2 ) );
 			}
 			for( ; jr < NR; jr++ )
 			{
@@ -2145,7 +2245,8 @@ void packb_nr64_bf16s4f32of32_col_major
       const dim_t   KC,
       dim_t*        rs_b,
       dim_t*        cs_b,
-	  lpgemm_pre_op* pre_op
+      lpgemm_pre_op* pre_op,
+      AOCL_MATRIX_TYPE mtag
     )
 {
     dim_t NR = 64;
@@ -2165,7 +2266,7 @@ void packb_nr64_bf16s4f32of32_col_major
 	{
 		packb_nr_mult_16_bf16s4f32of32_col_major
 		(( pack_b_buffer + ((jc* KC_updated)/2)) ,
-		(b + (jc*ldb)/2), 64, ldb, KC);
+		(b + (jc*ldb)/2), 64, ldb, KC, mtag);
 	}
 
 	if(n_partial_pieces > 0)
@@ -2186,7 +2287,7 @@ void packb_nr64_bf16s4f32of32_col_major
 			packb_nr_mult_16_bf16s4f32of32_col_major
 				(
 				 ( pack_b_buffer + ( n_full_pieces_loop_limit * KC_updated )/2 ),
-				 ( b + (n_full_pieces_loop_limit * ldb )/2), 48, ldb, KC
+				 ( b + (n_full_pieces_loop_limit * ldb )/2), 48, ldb, KC, mtag
 				);
 
 			n0_partial_pack = 48;
@@ -2196,7 +2297,7 @@ void packb_nr64_bf16s4f32of32_col_major
 			packb_nr_mult_16_bf16s4f32of32_col_major
 				(
 				 ( pack_b_buffer + ( n_full_pieces_loop_limit * KC_updated )/2 ),
-				 ( b + (n_full_pieces_loop_limit * ldb)/2 ), 32, ldb, KC
+				 ( b + (n_full_pieces_loop_limit * ldb)/2 ), 32, ldb, KC, mtag
 				);
 
 			n0_partial_pack = 32;
@@ -2206,7 +2307,7 @@ void packb_nr64_bf16s4f32of32_col_major
 			packb_nr_mult_16_bf16s4f32of32_col_major
 				(
 				 ( pack_b_buffer + ( n_full_pieces_loop_limit * KC_updated )/2 ),
-				 ( b + (n_full_pieces_loop_limit * ldb)/2 ), 16, ldb, KC
+				 ( b + (n_full_pieces_loop_limit * ldb)/2 ), 16, ldb, KC, mtag
 				);
 
 			n0_partial_pack = 16;
@@ -2219,7 +2320,7 @@ void packb_nr64_bf16s4f32of32_col_major
 				 ( pack_b_buffer + (( n_full_pieces_loop_limit * KC_updated )  +
 				   ( n0_partial_pack * KC_updated ))/2 ),
 				 ( b + (( n_full_pieces_loop_limit + n0_partial_pack ) * ldb)/2 ), ldb, KC,
-				 n0_partial_rem
+				 n0_partial_rem, mtag
 				);
 		}
 	}

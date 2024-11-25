@@ -63,7 +63,8 @@ typedef enum
 typedef enum
 {
 	FLOAT = 0,
-	BFLOAT16 = 1
+	BFLOAT16 = 1,
+	NULLTYPE = 2,
 } AOCL_PARAMS_STORAGE_TYPES;
 
 typedef struct

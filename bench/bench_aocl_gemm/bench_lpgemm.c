@@ -1180,7 +1180,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             { \
                 post_ops->seq_vector[cur_op_index] = BIAS; \
                 ops_tok = strtok( NULL, ", " ); \
-                if(ops_tok == NULL) \
+                if( ( strcmp( ops_tok, "na" ) == 0 ) ) \
                 { \
                     is_bias_stor_type = FALSE; \
                 } \
@@ -1377,7 +1377,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             } \
             else \
             { \
-                ( post_ops->bias )-> bias_stor_type = NONE; \
+                ( post_ops->bias )-> bias_stor_type = NULLTYPE; \
             } \
             GEN_FUNC_NAME(fill_array_post_ops_,BIAS_type)( ( post_ops->bias )->bias, n ); \
         } \

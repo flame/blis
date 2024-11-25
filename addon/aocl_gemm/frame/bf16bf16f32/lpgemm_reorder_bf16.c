@@ -271,6 +271,7 @@ void reorderb_nr64_bf16s4f32of32
 	dim_t cs_b = b->cs;
 	dim_t n = b->width;
 	dim_t k = b->length;
+	AOCL_MATRIX_TYPE mtag = b->mtag;
 
 	dim_t rs_b_reorder;
 	dim_t cs_b_reorder;
@@ -368,7 +369,7 @@ void reorderb_nr64_bf16s4f32of32
 						(jc_cur_loop_rem * kc0_updated) ) / 2,
 					(((int8_t *)b->storage.aligned_buffer) +
 					  ( (rs_b * pc) + (jc * cs_b) ) / 2),
-					rs_b, cs_b, nc0, kc0, &rs_b_reorder, &cs_b_reorder, NULL);
+					rs_b, cs_b, nc0, kc0, &rs_b_reorder, &cs_b_reorder, NULL, mtag);
 			}
 
 			adjust_B_panel_reordered_jc(&jc, jc_cur_loop);

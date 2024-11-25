@@ -102,7 +102,8 @@ typedef void (*pack_s4)
        const dim_t,
        dim_t*,
        dim_t*,
-       lpgemm_pre_op*
+       lpgemm_pre_op*,
+       AOCL_MATRIX_TYPE
      );
 
 void packb_mxp_nr64_f32obf16
@@ -139,7 +140,8 @@ void packb_nr64_bf16s4f32of32
        const dim_t   KC,
        dim_t*        rs_p,
        dim_t*        cs_p,
-      lpgemm_pre_op* pre_op
+      lpgemm_pre_op* pre_op,
+      AOCL_MATRIX_TYPE mtag
      );
 
 void packsclb_nr64_bf16s4f32of32

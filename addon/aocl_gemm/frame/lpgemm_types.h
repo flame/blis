@@ -110,6 +110,7 @@ typedef enum
 {
 	A_MATRIX = 0,
 	B_MATRIX = 1,
+	AWQ_B_MATRIX = 2,
 } AOCL_MATRIX_TYPE;
 
 typedef struct

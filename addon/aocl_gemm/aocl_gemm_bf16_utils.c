@@ -545,6 +545,7 @@ AOCL_GEMM_REORDER(int8_t, bf16s4f32of32)
 	b.cs = cs_b;
 	b.width = n;
 	b.length = k;
+	b.mtag = input_mat_type;
 
 	reorderb_nr64_bf16s4f32of32(&b, &b_reorder, &rntm_g, lcntx_g);
 }

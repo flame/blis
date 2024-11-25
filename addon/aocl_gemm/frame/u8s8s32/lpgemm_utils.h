@@ -97,6 +97,7 @@ BLIS_INLINE void bli_param_map_char_to_lpmat_type
 {
         if      ( mtag == 'a' || mtag == 'A' ) *lp_mat_type = A_MATRIX;
         else if ( mtag == 'b' || mtag == 'B' ) *lp_mat_type = B_MATRIX;
+        else if ( mtag == 'w' || mtag == 'W' ) *lp_mat_type = AWQ_B_MATRIX;
         else
         {
                 *lp_mat_type = B_MATRIX;

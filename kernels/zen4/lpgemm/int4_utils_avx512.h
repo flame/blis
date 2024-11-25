@@ -42,6 +42,15 @@
 	 * 16, 20, 24, 28. */ \
 	shift_idx = _mm512_set1_epi64( 0x1C1814100C080400lu );
 
+/* shift_idx:__m512i*/
+#define MULTISHIFT_AWQ_32BIT_8_INT4_IDX_64ELEM(shift_idx) \
+	/* Multi shift uses indices that corresponds to the bit starting positions
+	 * of each of the 8 int4 elements in a given 32 bits, which is 0, 16, 4, 20,
+	 * 8, 24, 12, 28. This transforms a 32 bits sequence of int4 elements
+	 * representing an AWQ order [0, 2, 4, 6, 1, 3, 5, 7] into a sequential order
+	 * [0, 1, 2, 3, 4, 5, 6, 7].  */ \
+	shift_idx = _mm512_set1_epi64( 0x1C0C180814041000lu );
+
 /* shift_idx:__m256i*/
 #define MULTISHIFT_32BIT_8_INT4_IDX_32ELEM(shift_idx) \
 	/* Multi shift uses indices that corresponds to the bit starting positions
@@ -50,6 +59,16 @@
 	shift_idx = _mm256_maskz_set1_epi64( _cvtu32_mask8( 0xFF ), \
 					0x1C1814100C080400lu );
 
+/* shift_idx:__m256i*/
+#define MULTISHIFT_AWQ_32BIT_8_INT4_IDX_32ELEM(shift_idx) \
+	/* Multi shift uses indices that corresponds to the bit starting positions
+	 * of each of the 8 int4 elements in a given 32 bits, which is 0, 16, 4, 20,
+	 * 8, 24, 12, 28. This transforms a 32 bits sequence of int4 elements
+	 * representing an AWQ order [0, 2, 4, 6, 1, 3, 5, 7] into a sequential order
+	 * [0, 1, 2, 3, 4, 5, 6, 7].  */ \
+	shift_idx = _mm256_maskz_set1_epi64( _cvtu32_mask8( 0xFF ), \
+					0x1C0C180814041000lu );
+
 /* shift_idx:__m128i*/
 #define MULTISHIFT_32BIT_8_INT4_IDX_16ELEM(shift_idx) \
 	/* Multi shift uses indices that corresponds to the bit starting positions
@@ -57,6 +76,16 @@
 	 * 16, 20, 24, 28. */ \
 	shift_idx = _mm_maskz_set1_epi64( _cvtu32_mask8( 0xFF ), \
 					0x1C1814100C080400lu );
+
+/* shift_idx:__m128i*/
+#define MULTISHIFT_AWQ_32BIT_8_INT4_IDX_16ELEM(shift_idx) \
+	/* Multi shift uses indices that corresponds to the bit starting positions
+	 * of each of the 8 int4 elements in a given 32 bits, which is 0, 16, 4, 20,
+	 * 8, 24, 12, 28. This transforms a 32 bits sequence of int4 elements
+	 * representing an AWQ order [0, 2, 4, 6, 1, 3, 5, 7] into a sequential order
+	 * [0, 1, 2, 3, 4, 5, 6, 7].  */ \
+	shift_idx = _mm_maskz_set1_epi64( _cvtu32_mask8( 0xFF ), \
+					0x1C0C180814041000lu );
 
 /* input:__m256i, output: __m512i*/
 #define UPSCALE_INT4_TO_INT8_64ELEM_MULTISHIFT(input, output, shift_idx) \
