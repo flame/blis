@@ -44,8 +44,12 @@
 
 // -- API macros ---------------------------------------------------------------
 
-// NOTE: The first two operands must be swapped, because axpy conjugates
-// x (the first operand), while dot conjugates y (the second operand).
+// NOTE: When defining the tdots macros, we can recycle taxpys since they both
+// perform c += a * b. However, when invoking taxpys, the first two operands
+// passed in must be swapped because in BLIS axpy is set up to conjugate its
+// second operand (ie: the second operand to the a*x product) while dot
+// is set up to conjugate its first operand (ie: the first operand to the x*y
+// product).
 
 // -- Consolidated --
 
