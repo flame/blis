@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -72,6 +72,35 @@ GEN_LPGEMM_OPENMP_DECORATOR_FN(bfloat16,bfloat16,float,bf16bf16f32of32)
 GEN_LPGEMM_OPENMP_DECORATOR_FN(float,float,float,f32f32f32of32)
 GEN_LPGEMM_OPENMP_DECORATOR_FN(int8_t,int8_t,int32_t,s8s8s32o32)
 GEN_LPGEMM_OPENMP_DECORATOR_FN(int8_t,int8_t,int16_t,s8s8s16o16)
+
+
+#define GEN_BATCH_LPGEMM_OPENMP_DECORATOR_FN(A_type,B_type,C_type,LPGEMM_SFX) \
+void batch_lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
+     ( \
+       const dim_t            batch_size, \
+       const dim_t*           m, \
+       const dim_t*           n, \
+       const dim_t*           k, \
+       const A_type**         a, \
+       const dim_t*           rs_a, \
+       const dim_t*           cs_a, \
+       const AOCL_MEMORY_TAG* mtag_a, \
+       const B_type**         b, \
+       const dim_t*           rs_b, \
+       const dim_t*           cs_b, \
+       const AOCL_MEMORY_TAG* mtag_b, \
+       C_type**               c, \
+       const dim_t*           rs_c, \
+       const dim_t*           cs_c, \
+       const C_type*          alpha, \
+       const C_type*          beta, \
+       rntm_t*                rntm_g, \
+       lpgemm_cntx_t*         lcntx, \
+       lpgemm_post_op(*post_op_list)[AOCL_MAX_POST_OPS], \
+       AOCL_STORAGE_TYPE      c_downscale \
+     ); \
+
+GEN_BATCH_LPGEMM_OPENMP_DECORATOR_FN(bfloat16,bfloat16,float,bf16bf16f32of32)
 
 
 #define GEN_LPGEMM_OPENMP_DECORATOR_FN1(A_type,B_type,C_type,LPGEMM_SFX) \
@@ -155,6 +184,36 @@ GEN_LPGEMM_DECORATOR_FN(bfloat16,bfloat16,float,bf16bf16f32of32)
 GEN_LPGEMM_DECORATOR_FN(float,float,float,f32f32f32of32)
 GEN_LPGEMM_DECORATOR_FN(int8_t,int8_t,int32_t,s8s8s32o32)
 GEN_LPGEMM_DECORATOR_FN(int8_t,int8_t,int16_t,s8s8s16o16)
+
+
+#define GEN_BATCH_LPGEMM_DECORATOR_FN(A_type,B_type,C_type,LPGEMM_SFX) \
+void batch_lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
+     ( \
+       const dim_t            bs, \
+       const dim_t*           m, \
+       const dim_t*           n, \
+       const dim_t*           k, \
+       const A_type**         a, \
+       const dim_t*           rs_a, \
+       const dim_t*           cs_a, \
+       const AOCL_MEMORY_TAG* mtag_a, \
+       const B_type**         b, \
+       const dim_t*           rs_b, \
+       const dim_t*           cs_b, \
+       const AOCL_MEMORY_TAG* mtag_b, \
+       C_type**               c, \
+       const dim_t*           rs_c, \
+       const dim_t*           cs_c, \
+       const C_type*          alpha, \
+       const C_type*          beta, \
+       rntm_t*                rntm_g, \
+       lpgemm_cntx_t*         lcntx, \
+       lpgemm_post_op(*post_op_list)[AOCL_MAX_POST_OPS], \
+       AOCL_STORAGE_TYPE     c_downscale \
+     ); \
+
+GEN_BATCH_LPGEMM_DECORATOR_FN(bfloat16,bfloat16,float,bf16bf16f32of32)
+
 
 #define GEN_LPGEMM_DECORATOR_FN1(A_type,B_type,C_type,LPGEMM_SFX) \
 void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \

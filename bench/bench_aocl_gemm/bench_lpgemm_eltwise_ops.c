@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,8 +35,6 @@
 #include "bench_lpgemm_helpers.h"
 
 GEN_FILL_ARRAY_FUNC(float)
-
-GEN_FILL_ARRAY_POST_OPS_FUNC(float)
 
 CONVERT_TO_FLOAT(float)
 
@@ -581,7 +579,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     char * bias_stor_type = ""; \
  \
     /* Post-Ops string parser. */ \
-    num_eltwise = 0; /* Global variable, zero out for definied behavior. */\
+    dim_t num_eltwise = 0; \
     if ( strcmp( post_ops_str, "none" ) != 0 ) \
     { \
         char* ops_tok = strtok(post_ops_str, ", =" ); \
@@ -782,6 +780,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
            clip_idx = 0; \
         } \
  \
+        post_ops->num_eltwise = num_eltwise; \
         post_ops->eltwise = malloc( num_eltwise * sizeof( aocl_post_op_eltwise ) ); \
         if ( post_ops->eltwise == NULL ) \
         { \

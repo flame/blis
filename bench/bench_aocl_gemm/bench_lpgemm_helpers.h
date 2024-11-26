@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -42,6 +42,7 @@
 #include <time.h>
 #include <float.h>
 #include <math.h>
+#include <omp.h>
 
 #include "blis.h"
 
@@ -60,8 +61,8 @@ int32_t global_n_repeat = 0;
 
 char global_dscale_out = 'n';
 char global_can_dscale = 'n';
+char global_pre_op = 'n';
 
-dim_t num_eltwise = 0; // To keep track of eltwise operations.
 
 #define _XSTR(str) #str
 #define XSTR(str) _XSTR(str)
@@ -98,6 +99,9 @@ static inline void bfloat16_to_float( bfloat16 bf16_val, float*  float_val )
 
 static inline void convert_float_arr_to_bf16( float* array, bfloat16* array_bf16, dim_t size )
 {
+#ifdef BLIS_ENABLE_OPENMP
+    #pragma omp parallel for
+#endif
     for (dim_t i=0; i< size; i++)
     {
         float_to_bf16( ( array + i ), ( array_bf16 + i ) );
@@ -150,6 +154,20 @@ static inline void lpgemm_free( void* p )
     }
 }
 
+#ifdef BLIS_ENABLE_OPENMP
+/* Matrix fill helper macros. */
+#define GEN_FILL_ARRAY_FUNC(ctype) \
+static inline void fill_array_ ## ctype ( void* arr, dim_t size ) \
+{ \
+    if( size < 0 ) return; \
+    ctype* temp_arr = ( ctype* ) arr; \
+    _Pragma( "omp parallel " ) \
+    for ( dim_t i = 0; i < size; ++i ) \
+    { \
+        temp_arr[i] = ( ctype )( ( i % 11 ) - 5 ); \
+    } \
+}
+#else
 /* Matrix fill helper macros. */
 #define GEN_FILL_ARRAY_FUNC(ctype) \
 static inline void fill_array_ ## ctype ( void* arr, dim_t size ) \
@@ -158,18 +176,22 @@ static inline void fill_array_ ## ctype ( void* arr, dim_t size ) \
     ctype* temp_arr = ( ctype* ) arr; \
     for ( dim_t i = 0; i < size; ++i ) \
     { \
-        temp_arr[i] = ( ctype )( ( rand() % 11 ) - 5 ); \
+        temp_arr[i] = ( ctype )( ( i % 11 ) - 5 ); \
     } \
-} \
+}
 
+#endif
 static inline void fill_array_bfloat16( void* arr, dim_t size )
 {
     err_t bli_errors = BLIS_SUCCESS;
     if( size < 0 ) return;
     float* c_float = ( float* ) bli_malloc_user( sizeof( float ) * size, &bli_errors );
+#ifdef BLIS_ENABLE_OPENMP
+    #pragma omp parallel for
+#endif
     for ( dim_t i = 0; i < size; ++i )
     {
-        c_float[i] = (rand() % 5 );
+        c_float[i] = (i % 5 );
     }
     convert_float_arr_to_bf16( c_float, arr, size );
     if ( c_float != NULL )
@@ -184,9 +206,13 @@ static inline void fill_array_post_ops_ ## ctype ( void* arr, dim_t size ) \
     ctype* temp_arr = ( ctype* ) arr; \
     for ( dim_t i = 0; i < size; ++i ) \
     { \
-        temp_arr[i] = ( ctype )( rand() % 5 ); \
+        temp_arr[i] = ( ctype )( i % 5 ); \
     } \
 } \
+
+GEN_FILL_ARRAY_POST_OPS_FUNC(int16_t)
+GEN_FILL_ARRAY_POST_OPS_FUNC(int32_t)
+GEN_FILL_ARRAY_POST_OPS_FUNC(float)
 
 static inline void fill_array_post_ops_bfloat16( void* arr, dim_t size )
 {
@@ -443,6 +469,7 @@ static inline void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
 
     if ( post_ops->eltwise != NULL )
     {
+        dim_t num_eltwise = post_ops->num_eltwise;
         for ( dim_t i = 0; i < num_eltwise; ++i )
         {
             free( ( post_ops->eltwise + i )->algo.alpha );
@@ -530,5 +557,646 @@ void print_matrix_bfloat16
         printf("\n");
     }
 }
+
+
+#define GEN_MAT_MUL_POST_OPS_CREATOR(C_DSCALE_type,C_type,DSCALE_type,BIAS_type,BLAS_SFX) \
+static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
+     ( \
+       dim_t m, \
+       dim_t n, \
+       dim_t k, \
+       char* post_ops_str, \
+       char  stor_order \
+     ) \
+{ \
+    if ( ( ( post_ops_str == NULL ) || \
+           ( strcmp( post_ops_str, "none" ) == 0 ) ) && \
+         ( global_dscale_out == 'n' ) && ( global_pre_op == 'n' ) ) \
+    { \
+        return NULL; \
+    } \
+ \
+    aocl_post_op* post_ops = NULL; \
+    post_ops = ( aocl_post_op* ) malloc( sizeof( aocl_post_op ) ); \
+ \
+    if ( post_ops == NULL ) \
+    { \
+        return NULL; \
+    } \
+ \
+    /* Only supporting 8 post ops at max for now.*/ \
+    dim_t max_post_ops_seq_length = 8; \
+    post_ops->seq_vector = ( AOCL_POST_OP_TYPE* ) \
+                            malloc \
+                            ( \
+                              max_post_ops_seq_length * \
+                              sizeof( AOCL_POST_OP_TYPE ) \
+                            ); \
+ \
+    if ( post_ops->seq_vector == NULL ) \
+    { \
+        goto err_handler; \
+    } \
+ \
+    /* Parse post ops list.*/ \
+    dim_t cur_op_index = 0; \
+    /* Ensure the buffers that use NULL check in deinit code is properly set to NULL.*/ \
+    post_ops->eltwise = NULL; \
+ \
+    /* Bench limitation: can only support 1 bias, but LPGEMM can support
+     * multiple bias post-ops. */ \
+    post_ops->bias = NULL; \
+    post_ops->bias = malloc( sizeof( aocl_post_op_bias ) ); \
+    if ( post_ops->bias == NULL ) \
+    { \
+        goto err_handler; \
+    } \
+    ( post_ops->bias )->bias = NULL; \
+ \
+    /* Bench limitation: can only support 1 scale, but LPGEMM can support
+     * multiple scale post-ops. */ \
+    post_ops->sum = NULL; \
+    post_ops->sum = malloc( sizeof( aocl_post_op_sum ) ); \
+    if ( post_ops->sum == NULL ) \
+    { \
+        goto err_handler; \
+    } \
+    ( post_ops->sum )->scale_factor = NULL; \
+    ( post_ops->sum )->buff = NULL; \
+    ( post_ops->sum )->zero_point = NULL; \
+    ( post_ops->sum )->scale_factor_len = 0; \
+    ( post_ops->sum )->zero_point_len = 0; \
+ \
+    /* Bench limitation: can only support 1 matrix add, but LPGEMM can support
+     * multiple scale post-ops. */ \
+    post_ops->matrix_add = NULL; \
+    post_ops->matrix_add = malloc( sizeof( aocl_post_op_matrix_add ) ); \
+    if ( post_ops->matrix_add == NULL ) \
+    { \
+        goto err_handler; \
+    } \
+    ( post_ops->matrix_add )->matrix = NULL; \
+    ( post_ops->matrix_add )->ldm = 0; \
+\
+    /* Bench limitation: can only support 1 matrix mul, but LPGEMM can support
+     * multiple scale post-ops. */ \
+    post_ops->matrix_mul = NULL; \
+    post_ops->matrix_mul = malloc( sizeof( aocl_post_op_matrix_mul ) ); \
+    if ( post_ops->matrix_mul == NULL ) \
+    { \
+        goto err_handler; \
+    } \
+    ( post_ops->matrix_mul )->matrix = NULL; \
+    ( post_ops->matrix_mul )->ldm = 0; \
+ \
+    bool is_bias = FALSE; \
+    bool is_relu = FALSE; \
+    bool is_param_relu = FALSE; \
+    bool is_gelu_tanh = FALSE; \
+    bool is_gelu_erf = FALSE; \
+    bool is_swish = FALSE; \
+    bool is_clip = FALSE; \
+    bool is_scalar_scale = FALSE; \
+    bool is_scalar_zp = FALSE; \
+    bool is_matrix_add = FALSE; \
+    bool is_matrix_mul = FALSE; \
+    bool is_tanh = FALSE; \
+    bool is_sigmoid = FALSE; \
+    bool is_bias_stor_type = FALSE; \
+    dim_t activator_idx = 0; \
+    dim_t clip_idx = 0; \
+    char * bias_stor_type = ""; \
+    bool is_group_quant = FALSE; \
+    bool is_pre_op_scale_scalar = FALSE; \
+    bool is_pre_op_scale_f32 = TRUE; \
+    dim_t zp_vec_length = 0; \
+    dim_t quant_group_size = 0; \
+ \
+    /* Post-Ops string parser. */ \
+    dim_t num_eltwise = 0; \
+    if ( strcmp( post_ops_str, "none" ) != 0 ) \
+    { \
+        char* ops_tok = strtok(post_ops_str, ", =" ); \
+ \
+        /* Ensure only one activator is used as an eltwise post-op.*/ \
+        bool is_activator_set = FALSE; \
+        while ( ops_tok ) \
+        { \
+            str_tolower( ops_tok ); \
+            if ( strcmp( ops_tok, "bias" ) == 0 ) \
+            { \
+                post_ops->seq_vector[cur_op_index] = BIAS; \
+                ops_tok = strtok( NULL, ", " ); \
+                if( ( strcmp( ops_tok, "na" ) == 0 ) ) \
+                { \
+                    is_bias_stor_type = FALSE; \
+                } \
+                else if ( ( strcmp( ops_tok, "f32" ) == 0 ) ) \
+                { \
+                    is_bias_stor_type = TRUE; \
+                    bias_stor_type = "F32"; \
+                } \
+                else if ( ( strcmp( ops_tok, "bf16" ) == 0 ) ) \
+                { \
+                    is_bias_stor_type = TRUE; \
+                    bias_stor_type = "BF16"; \
+                } \
+                is_bias = TRUE; \
+                cur_op_index++; \
+            } \
+            else if ( ( strcmp( ops_tok, "relu" ) == 0 ) && \
+                      ( is_activator_set == FALSE ) ) \
+            { \
+                post_ops->seq_vector[cur_op_index] = ELTWISE; \
+                is_relu = TRUE; \
+                is_activator_set = TRUE; \
+                num_eltwise += 1; \
+                activator_idx = cur_op_index; \
+                cur_op_index++; \
+            } \
+            else if ( ( strcmp( ops_tok, "prelu" ) == 0 ) && \
+                      ( is_activator_set == FALSE ) ) \
+            { \
+                post_ops->seq_vector[cur_op_index] = ELTWISE; \
+                is_param_relu = TRUE; \
+                is_activator_set = TRUE; \
+                num_eltwise += 1; \
+                activator_idx = cur_op_index; \
+                cur_op_index++; \
+            } \
+            else if ( ( strcmp( ops_tok, "swish" ) == 0 ) && \
+                      ( is_activator_set == FALSE ) ) \
+            { \
+                post_ops->seq_vector[cur_op_index] = ELTWISE; \
+                is_swish = TRUE; \
+                is_activator_set = TRUE; \
+                num_eltwise += 1; \
+                activator_idx = cur_op_index; \
+                cur_op_index++; \
+            } \
+            else if ( ( strcmp( ops_tok, "gelu_tanh" ) == 0 ) && \
+                      ( is_activator_set == FALSE ) ) \
+            { \
+                post_ops->seq_vector[cur_op_index] = ELTWISE; \
+                is_gelu_tanh = TRUE; \
+                is_activator_set = TRUE; \
+                num_eltwise += 1; \
+                activator_idx = cur_op_index; \
+                cur_op_index++; \
+            } \
+            else if ( ( strcmp( ops_tok, "gelu_erf" ) == 0 ) && \
+                      ( is_activator_set == FALSE ) ) \
+            { \
+                post_ops->seq_vector[cur_op_index] = ELTWISE; \
+                is_gelu_erf = TRUE; \
+                is_activator_set = TRUE; \
+                num_eltwise += 1; \
+                activator_idx = cur_op_index; \
+                cur_op_index++; \
+            } \
+            else if ( strcmp( ops_tok, "clip" ) == 0 ) \
+            { \
+                post_ops->seq_vector[cur_op_index] = ELTWISE; \
+                is_clip = TRUE; \
+                num_eltwise += 1; \
+                clip_idx = cur_op_index; \
+                cur_op_index++; \
+            } \
+            else if ( strcmp( ops_tok, "scale" ) == 0 ) \
+            { \
+                ops_tok = strtok( NULL, ", " ); \
+                str_tolower( ops_tok ); \
+                if ( ( strcmp( ops_tok, "scalar" ) == 0 ) || \
+                     ( strcmp( ops_tok, "s" ) == 0 ) ) \
+                { \
+                    is_scalar_scale = TRUE; \
+                } \
+            } \
+            else if ( strcmp( ops_tok, "matrix_add" ) == 0 ) \
+            { \
+                post_ops->seq_vector[cur_op_index] = MATRIX_ADD; \
+                is_matrix_add = TRUE; \
+                cur_op_index++; \
+            } \
+            else if ( strcmp( ops_tok, "matrix_mul" ) == 0 ) \
+            { \
+                post_ops->seq_vector[cur_op_index] = MATRIX_MUL; \
+                is_matrix_mul = TRUE; \
+                cur_op_index++; \
+            } \
+            else if ( ( strcmp( ops_tok, "tanh" ) == 0 ) && \
+                      ( is_activator_set == FALSE ) ) \
+            { \
+                post_ops->seq_vector[cur_op_index] = ELTWISE; \
+                is_tanh = TRUE; \
+                is_activator_set = TRUE; \
+                num_eltwise += 1; \
+                activator_idx = cur_op_index; \
+                cur_op_index++; \
+            } \
+             else if ( ( strcmp( ops_tok, "sigmoid" ) == 0 ) && \
+                      ( is_activator_set == FALSE ) ) \
+            { \
+                post_ops->seq_vector[cur_op_index] = ELTWISE; \
+                is_sigmoid = TRUE; \
+                is_activator_set = TRUE; \
+                num_eltwise += 1; \
+                activator_idx = cur_op_index; \
+                cur_op_index++; \
+            } \
+            else if ( strcmp( ops_tok, "group_size" ) == 0 ) \
+            { \
+                ops_tok = strtok( NULL, ", " ); \
+                quant_group_size = atoi(ops_tok); \
+                is_group_quant = TRUE; \
+            } \
+            else if ( strcmp( ops_tok, "pre_op_zp" ) == 0 ) \
+            { \
+               ops_tok = strtok( NULL, ", " ); \
+                str_tolower( ops_tok ); \
+                if ( ( strcmp( ops_tok, "scalar" ) == 0 ) || \
+                     ( strcmp( ops_tok, "s" ) == 0 ) ) \
+                { \
+                    /* set scalar zp */\
+                    zp_vec_length = 1; \
+                }else if ( ( strcmp( ops_tok, "vector" ) == 0 ) || \
+                           ( strcmp( ops_tok, "v" ) == 0 ) ) \
+                { \
+                    /* set vector zp */\
+                    zp_vec_length = n; \
+                } \
+            } \
+            else if ( strcmp( ops_tok, "pre_op_scale" ) == 0 ) \
+            { \
+               ops_tok = strtok( NULL, ", " ); \
+                str_tolower( ops_tok ); \
+                if ( ( strcmp( ops_tok, "scalar" ) == 0 ) || \
+                     ( strcmp( ops_tok, "s" ) == 0 ) ) \
+                { \
+                    /* set scalar scale */\
+                    is_pre_op_scale_scalar = TRUE; \
+                }else if ( ( strcmp( ops_tok, "vector" ) == 0 ) || \
+                           ( strcmp( ops_tok, "v" ) == 0 ) ) \
+                { \
+                    /* set vector scale */\
+                    is_pre_op_scale_scalar = FALSE; \
+                } \
+            } \
+            else if ( strcmp( ops_tok, "pre_op_scale_type" ) == 0 ) \
+            { \
+               ops_tok = strtok( NULL, ", " ); \
+                str_tolower( ops_tok ); \
+                if ( ( strcmp( ops_tok, "bf16" ) == 0 ) ) \
+                { \
+                    /* set scalar scale */\
+                    is_pre_op_scale_f32 = FALSE; \
+                }else \
+                { \
+                    /* set vector scale */\
+                    is_pre_op_scale_f32 = TRUE; \
+                } \
+            } \
+            else{} \
+ \
+            ops_tok = strtok( NULL, ", =" ); \
+        } \
+    } \
+ \
+        if ( is_bias == TRUE ) \
+        { \
+            /* Allocate bias buffer, return early if alloc fails.*/ \
+            ( post_ops->bias )->bias = malloc( n * sizeof( C_type ) ); \
+            if ( ( post_ops->bias )->bias == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+            if(is_bias_stor_type == TRUE) \
+            { \
+                if( ( strcmp( bias_stor_type, "BF16" ) == 0 ) ) \
+                { \
+                    ( post_ops->bias )-> bias_stor_type = AOCL_GEMM_BF16; \
+                    GEN_FUNC_NAME(fill_array_post_ops_,bfloat16)( ( post_ops->bias )->bias, n ); \
+                } \
+                else if( ( strcmp( bias_stor_type, "F32" ) == 0 ) ) \
+                { \
+                    ( post_ops->bias )-> bias_stor_type = AOCL_GEMM_F32; \
+                    GEN_FUNC_NAME(fill_array_post_ops_,float)( ( post_ops->bias )->bias, n ); \
+                } \
+                else {} \
+            } \
+            else \
+            { \
+                ( post_ops->bias )-> bias_stor_type = NULLTYPE; \
+                if( global_dscale_out == 'y') \
+                { \
+                    GEN_FUNC_NAME(fill_array_post_ops_,BIAS_type)( ( post_ops->bias )->bias, n ); \
+                } \
+                else \
+                { \
+                    GEN_FUNC_NAME(fill_array_post_ops_,C_type)( ( post_ops->bias )->bias, n ); \
+                } \
+            } \
+        } \
+ \
+        if ( num_eltwise > 0 ) \
+        { \
+            if ( num_eltwise > 1 ) \
+            { \
+                if ( activator_idx < clip_idx ) \
+                { \
+                    activator_idx = 0; \
+                    clip_idx = 1; \
+                } \
+                else \
+                { \
+                    activator_idx = 1; \
+                    clip_idx = 0; \
+                } \
+            } \
+            else \
+            { \
+            activator_idx = 0; \
+            clip_idx = 0; \
+        } \
+ \
+        post_ops->num_eltwise = num_eltwise; \
+        post_ops->eltwise = malloc( num_eltwise * sizeof( aocl_post_op_eltwise ) ); \
+        if ( post_ops->eltwise == NULL ) \
+        { \
+            goto err_handler; \
+        } \
+ \
+        /* Only one of relu, prelu, swish, gelu_tanh, gelu_erf allowed as
+         * an activator. */ \
+        if ( is_relu == TRUE ) \
+        { \
+            ( post_ops->eltwise + activator_idx )->is_power_of_2 = FALSE; \
+            ( post_ops->eltwise + activator_idx )->scale_factor = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.alpha = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.algo_type = RELU; \
+        } \
+        else if ( is_param_relu == TRUE ) \
+        { \
+            ( post_ops->eltwise + activator_idx )->is_power_of_2 = FALSE; \
+            ( post_ops->eltwise + activator_idx )->scale_factor = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.alpha = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.alpha = malloc( sizeof( C_type ) ); \
+            if ( ( post_ops->eltwise + activator_idx )->algo.alpha == NULL ) \
+            { \
+                goto err_handler; \
+            } \
+            *( ( C_type* ) ( post_ops->eltwise + activator_idx )->algo.alpha ) = ( C_type )6; \
+            ( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.algo_type = PRELU; \
+        } \
+        if ( is_swish == TRUE ) \
+        { \
+            ( post_ops->eltwise + activator_idx )->is_power_of_2 = FALSE; \
+            ( post_ops->eltwise + activator_idx )->scale_factor = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.alpha = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.alpha = malloc( sizeof( C_type ) ); \
+            if ( ( post_ops->eltwise + activator_idx )->algo.alpha == NULL ) \
+            { \
+                goto err_handler; \
+            } \
+            *( ( C_type* ) ( post_ops->eltwise + activator_idx )->algo.alpha ) = ( C_type )2; \
+            ( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.algo_type = SWISH; \
+        } \
+        else if ( is_gelu_tanh == TRUE ) \
+        { \
+            ( post_ops->eltwise + activator_idx )->is_power_of_2 = FALSE; \
+            ( post_ops->eltwise + activator_idx )->scale_factor = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.alpha = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.algo_type = GELU_TANH; \
+        } \
+        else if ( is_gelu_erf == TRUE ) \
+        { \
+            ( post_ops->eltwise + activator_idx )->is_power_of_2 = FALSE; \
+            ( post_ops->eltwise + activator_idx )->scale_factor = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.alpha = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.algo_type = GELU_ERF; \
+        } \
+        if ( is_clip == TRUE ) \
+        { \
+            ( post_ops->eltwise + clip_idx )->is_power_of_2 = FALSE; \
+            ( post_ops->eltwise + clip_idx )->scale_factor = NULL; \
+            ( post_ops->eltwise + clip_idx )->algo.alpha = NULL; \
+            ( post_ops->eltwise + clip_idx )->algo.beta = NULL; \
+            ( post_ops->eltwise + clip_idx )->algo.alpha = malloc( sizeof( C_type ) ); \
+            if ( ( post_ops->eltwise + clip_idx )->algo.alpha == NULL ) \
+            { \
+                goto err_handler; \
+            } \
+            ( post_ops->eltwise + clip_idx )->algo.beta = malloc( sizeof( C_type ) ); \
+            if ( ( post_ops->eltwise + clip_idx )->algo.beta == NULL ) \
+            { \
+                goto err_handler; \
+            } \
+            *( ( C_type* ) ( post_ops->eltwise + clip_idx )->algo.alpha ) = ( C_type ) ( -64 ); \
+            *( ( C_type* ) ( post_ops->eltwise + clip_idx )->algo.beta ) = ( C_type ) ( 23 ); \
+            ( post_ops->eltwise + clip_idx )->algo.algo_type = CLIP; \
+        } \
+        else if ( is_tanh == TRUE ) \
+        { \
+            ( post_ops->eltwise + activator_idx )->is_power_of_2 = FALSE; \
+            ( post_ops->eltwise + activator_idx )->scale_factor = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.alpha = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.algo_type = TANH; \
+        } \
+        if ( is_sigmoid == TRUE ) \
+        { \
+            ( post_ops->eltwise + activator_idx )->is_power_of_2 = FALSE; \
+            ( post_ops->eltwise + activator_idx )->scale_factor = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.alpha = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.algo_type = SIGMOID; \
+        } \
+    } \
+ \
+    if ( ( global_dscale_out == 'y' ) || ( global_can_dscale == 'y' ) ) \
+    { \
+        post_ops->seq_vector[cur_op_index] = SCALE; \
+        cur_op_index++; \
+ \
+        ( post_ops->sum )->is_power_of_2 = FALSE; \
+        dim_t n_scale = n; \
+        if ( is_scalar_scale == TRUE ) \
+        { \
+            n_scale = 1; \
+        } \
+\
+        dim_t n_zp = n; \
+        if ( is_scalar_zp == TRUE ) \
+        { \
+            n_zp = 1; \
+        } \
+\
+        /* Allocate scale buffer, return early if alloc fails.*/ \
+        ( post_ops->sum )->scale_factor = malloc( n_scale * sizeof( DSCALE_type ) ); \
+        if ( ( post_ops->sum )->scale_factor == NULL ) \
+        { \
+            goto err_handler; \
+        } \
+        ( post_ops->sum )->zero_point = malloc( n_zp * sizeof( C_DSCALE_type ) ); \
+        if ( ( post_ops->sum )->zero_point == NULL ) \
+        { \
+            goto err_handler; \
+        } \
+\
+        /* Fill scale factor and zero points.*/ \
+        DSCALE_type* temp_dscale_ptr = ( DSCALE_type* )( post_ops->sum )->scale_factor; \
+        for ( dim_t i = 0; i < n_scale; ++i ) \
+        { \
+            temp_dscale_ptr[i] = ( ( DSCALE_type )2 ); \
+        } \
+        ( post_ops->sum )->scale_factor_len = n_scale; \
+\
+        C_DSCALE_type* temp_dzero_point_ptr = ( C_DSCALE_type* )( post_ops->sum )->zero_point; \
+        for ( dim_t i = 0; i < n_zp; ++i ) \
+        { \
+            temp_dzero_point_ptr[i] = (C_DSCALE_type)( ( i + 9 ) % 126 ); \
+        } \
+        ( post_ops->sum )->zero_point_len = n_zp; \
+    } \
+ \
+    if ( is_matrix_add == TRUE ) \
+    { \
+        /* Allocate add matrix buffer, return early if alloc fails.*/ \
+        dim_t ele_dsize = 0; \
+        if ( global_dscale_out == 'y' ) \
+        { \
+            ele_dsize = sizeof( C_DSCALE_type ); \
+        } \
+        else \
+        { \
+            ele_dsize = sizeof( C_type ); \
+        } \
+        ( post_ops->matrix_add )->matrix = malloc( m * n * ele_dsize ); \
+        if ( ( post_ops->matrix_add )->matrix == NULL ) \
+        { \
+            goto err_handler; \
+        } \
+        if ( global_dscale_out == 'y' ) \
+        { \
+            GEN_FUNC_NAME(fill_array_,C_DSCALE_type)( ( post_ops->matrix_add )->matrix, ( m * n ) ); \
+        } \
+        else \
+        { \
+            GEN_FUNC_NAME(fill_array_,C_type)( ( post_ops->matrix_add )->matrix, ( m * n ) ); \
+        } \
+        if ( ( stor_order == 'C' ) || ( stor_order == 'c' ) ) \
+        { \
+            ( post_ops->matrix_add )->ldm = m; \
+        } \
+        else \
+        { \
+            ( post_ops->matrix_add )->ldm = n; \
+        } \
+    } \
+ \
+    if ( is_matrix_mul == TRUE ) \
+    { \
+        /* Allocate mul matrix buffer, return early if alloc fails.*/ \
+        dim_t ele_dsize = 0; \
+        if ( global_dscale_out == 'y' ) \
+        { \
+            ele_dsize = sizeof( C_DSCALE_type ); \
+        } \
+        else \
+        { \
+            ele_dsize = sizeof( C_type ); \
+        } \
+        ( post_ops->matrix_mul )->matrix = malloc( m * n * ele_dsize ); \
+        if ( ( post_ops->matrix_mul )->matrix == NULL ) \
+        { \
+            goto err_handler; \
+        } \
+        if ( global_dscale_out == 'y' ) \
+        { \
+            GEN_FUNC_NAME(fill_array_,C_DSCALE_type)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
+        } \
+        else \
+        { \
+            GEN_FUNC_NAME(fill_array_,C_type)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
+        } \
+        if ( ( stor_order == 'C' ) || ( stor_order == 'c' ) ) \
+        { \
+            ( post_ops->matrix_mul )->ldm = m; \
+        } \
+        else \
+        { \
+            ( post_ops->matrix_mul )->ldm = n; \
+        } \
+    } \
+ \
+    post_ops->seq_length = cur_op_index; \
+ \
+     /* Setup the pre_ops struct */ \
+    post_ops->pre_ops = NULL; \
+    if ( global_pre_op == 'y' ) \
+    { \
+        post_ops->pre_ops = malloc( sizeof( aocl_pre_op ) ); \
+        if ( post_ops->pre_ops == NULL ) { goto err_handler; } \
+\
+        dim_t num_groups = 1; \
+        if(quant_group_size == 0) \
+        { \
+            post_ops->pre_ops->group_size = k; \
+        }else \
+        { \
+            post_ops->pre_ops->group_size = quant_group_size; \
+            if(is_group_quant) \
+            { \
+                num_groups = ( k + post_ops->pre_ops->group_size - 1 ) / post_ops->pre_ops->group_size; \
+            } \
+        } \
+\
+        ( post_ops->pre_ops )->b_zp = NULL; \
+        if( zp_vec_length != 0 ) \
+        { \
+            ( post_ops->pre_ops )->b_zp = malloc( sizeof( aocl_pre_op_zp ) ); \
+            if ( ( post_ops->pre_ops )->b_zp == NULL ) { goto err_handler; } \
+            ( ( post_ops->pre_ops )->b_zp )->zero_point = malloc( num_groups * zp_vec_length * sizeof( int8_t ) ); \
+            if ( ( ( post_ops->pre_ops )->b_zp )->zero_point == NULL ) { goto err_handler; } \
+            for ( dim_t i = 0; i < num_groups * zp_vec_length; ++i ) \
+            { \
+                ( ( int8_t* )( ( post_ops->pre_ops )->b_zp )->zero_point )[i] = ( int8_t )( ( i + 1 ) % 5 ); \
+            } \
+            ( ( post_ops->pre_ops )->b_zp )->zero_point_len = zp_vec_length; \
+        } \
+\
+        ( post_ops->pre_ops )->b_scl = malloc( sizeof( aocl_pre_op_sf ) ); \
+        if ( ( post_ops->pre_ops )->b_scl == NULL ) { goto err_handler; } \
+        dim_t scale_factor_len  = (is_pre_op_scale_scalar == TRUE)? 1 : n; \
+        ( ( post_ops->pre_ops )->b_scl )->scale_factor_len = scale_factor_len; \
+        if( is_pre_op_scale_f32 ) \
+        { \
+            ( ( post_ops->pre_ops )->b_scl )->scale_factor = malloc( num_groups * scale_factor_len * sizeof( float ) ); \
+            if ( ( ( post_ops->pre_ops )->b_scl )->scale_factor == NULL ) { goto err_handler; } \
+            GEN_FUNC_NAME(fill_array_,float)( ( ( post_ops->pre_ops )->b_scl )->scale_factor, num_groups * scale_factor_len ); \
+            ((post_ops->pre_ops)->b_scl)->scale_factor_type = AOCL_GEMM_F32; \
+        } \
+        else \
+        { \
+            ( ( post_ops->pre_ops )->b_scl )->scale_factor = malloc( num_groups * scale_factor_len * sizeof( bfloat16 ) ); \
+            if ( ( ( post_ops->pre_ops )->b_scl )->scale_factor == NULL ) { goto err_handler; } \
+            GEN_FUNC_NAME(fill_array_,bfloat16)( ( ( post_ops->pre_ops )->b_scl )->scale_factor, num_groups * scale_factor_len ); \
+            ((post_ops->pre_ops)->b_scl)->scale_factor_type = AOCL_GEMM_BF16; \
+        } \
+ \
+         ( post_ops->pre_ops )->seq_length = 1; \
+    } \
+ \
+    return post_ops; \
+ \
+    err_handler: \
+    lpgemm_destroy_post_ops_struct( post_ops ); \
+    return NULL; \
+} \
 
 #endif //LPGEMM_BENCH_UTILS_H

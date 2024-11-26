@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -544,6 +544,87 @@ BLIS_INLINE void lpgemm_bf16bf16f32of32_get_threading
 	}
 }
 
+BLIS_INLINE void calculate_n_threads_per_gemm
+  (
+	dim_t   batch_size,
+	dim_t* n_threads,
+	dim_t* n_gemms_in_parallel,
+	dim_t* n_threads_per_gemm,
+	rntm_t* rntm_g
+  )
+{
+	*n_threads = bli_rntm_num_threads( rntm_g ); \
+	*n_gemms_in_parallel = -1; \
+	if( *n_threads == 1 ) *n_gemms_in_parallel = 1; \
+	else if( *n_gemms_in_parallel < 1 ) *n_gemms_in_parallel = bli_min(*n_threads, batch_size); \
+	/* ToDo: All the leftover thrads might go under-utilized. Could be optimized further. */ \
+	*n_threads_per_gemm = ( *n_threads ) / *n_gemms_in_parallel;
+}
+
+BLIS_INLINE void batch_lpgemm_bf16bf16f32of32_get_threading
+     (
+       dim_t   batch_size,
+       dim_t*  n_threads,
+       dim_t*  n_gemms_in_parallel,
+       dim_t*  n_threads_per_gemm,
+       dim_t*  ic_ways,
+       dim_t*  jc_ways,
+       dim_t   m,
+       dim_t   n,
+       dim_t   k,
+       rntm_t* rntm_g
+     )
+{
+
+	calculate_n_threads_per_gemm(batch_size, n_threads, n_gemms_in_parallel, n_threads_per_gemm, rntm_g );
+
+	/* The user is not allowed to set ic_ways or jc_ways */
+	if ( ( *n_threads_per_gemm ) > 1 )
+	{
+		dim_t NR = lpgemm_get_block_size_NR_global_cntx( BF16BF16F32OF32 );
+		dim_t MR = lpgemm_get_block_size_MR_global_cntx( BF16BF16F32OF32 );
+		dim_t mr_blks = ( m + MR - 1 ) / MR;
+		dim_t nr_blks = ( n + NR - 1 ) / NR;
+
+		if ( n <= NR )
+		{
+			( *ic_ways ) = ( *n_threads_per_gemm );
+			( *jc_ways ) = 1;
+			( *n_threads_per_gemm ) = ( *ic_ways ) * ( *jc_ways );
+		}
+		else if ( m <= MR )
+		{
+			( *jc_ways ) = ( *n_threads_per_gemm );
+			( *ic_ways ) = 1;
+			( *n_threads_per_gemm ) = ( *ic_ways ) * ( *jc_ways );
+		}
+		else
+		{
+			// If BLIS_NUM_THREADS are set, generate jc,ic from the same.
+			bli_thread_partition_2x2( ( *n_threads_per_gemm ), m, n, ic_ways, jc_ways );
+			if ( ( mr_blks >= ( *ic_ways ) ) && ( nr_blks >= ( *jc_ways ) ) )
+			{
+				lpgemm_pnl_wrk_heur_adjust_ic_jc_ways
+				(
+					MR, NR, m, n,
+					n_threads_per_gemm, ic_ways, jc_ways
+				);
+			}
+		}
+		( *n_threads ) = ( *n_gemms_in_parallel ) * ( *ic_ways ) * ( *jc_ways );
+	}
+	else
+	{
+		// Setting all the values to 1 in case n_threads <= 1. This ensures
+		// the threading parameters are valid.
+		*n_threads = 1;
+		*n_gemms_in_parallel = 1;
+		*n_threads_per_gemm = 1;
+		*jc_ways = 1;
+		*ic_ways = 1;
+	}
+}
+
 // Some aspects of sgemm smart threading incorporated here. Eventually this
 // will be redirected to the sgemm smart threading API.
 BLIS_INLINE void lpgemm_f32f32f32of32_get_threading
@@ -742,6 +823,127 @@ GEN_LPGEMM_OPENMP_DECORATOR(bfloat16,bfloat16,float,bf16bf16f32of32)
 GEN_LPGEMM_OPENMP_DECORATOR(float,float,float,f32f32f32of32)
 GEN_LPGEMM_OPENMP_DECORATOR(int8_t,int8_t,int32_t,s8s8s32o32)
 GEN_LPGEMM_OPENMP_DECORATOR(int8_t,int8_t,int16_t,s8s8s16o16)
+
+
+#define GEN_BATCH_LPGEMM_OPENMP_DECORATOR(A_type,B_type,C_type,LPGEMM_SFX) \
+void batch_lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
+     ( \
+       const dim_t            batch_size, \
+       const dim_t*           m, \
+       const dim_t*           n, \
+       const dim_t*           k, \
+       const A_type**         a, \
+       const dim_t*           rs_a, \
+       const dim_t*           cs_a, \
+       const AOCL_MEMORY_TAG* mtag_a, \
+       const B_type**         b, \
+       const dim_t*           rs_b, \
+       const dim_t*           cs_b, \
+       const AOCL_MEMORY_TAG* mtag_b, \
+       C_type**               c, \
+       const dim_t*           rs_c, \
+       const dim_t*           cs_c, \
+       const C_type*          alpha, \
+       const C_type*          beta, \
+       rntm_t*                rntm_g, \
+       lpgemm_cntx_t*         lcntx, \
+       lpgemm_post_op(*post_op_list)[AOCL_MAX_POST_OPS], \
+       AOCL_STORAGE_TYPE      c_downscale \
+     ) \
+{ \
+	/* For now, Assuming all the problems in GEMM are of same size.
+	 * To-Do: optimize work distribution for case where a batch contains
+	   GEMM problems of different sizes.
+	 */ \
+	dim_t n_threads; \
+	/* Factorization of threads along m and n dimension respectively.*/ \
+	dim_t ic_ways; \
+	dim_t jc_ways; \
+	dim_t n_gemms_in_parallel; \
+	dim_t n_threads_per_gemm; \
+ \
+	/* Assuming all the problems in GEMM are of same size */ \
+	batch_lpgemm_ ## LPGEMM_SFX ## _get_threading \
+	( \
+	  batch_size, \
+	  &n_threads, \
+	  &n_gemms_in_parallel, \
+	  &n_threads_per_gemm, \
+	  &ic_ways, &jc_ways, \
+	  m[0], n[0], k[0], rntm_g \
+	); \
+ \
+	/* Set the packing block allocator field of the rntm. This will be
+	 * inherited by all of the child threads when they make local copies of
+	 * the rntm below.*/ \
+	bli_pba_rntm_set_pba( rntm_g ); \
+ \
+	thrcomm_t static_lpgemm_comms[BLIS_LPGEMM_NUM_STATIC_COMMS]; \
+	thrcomm_t* cur_lpgemm_comms = static_lpgemm_comms; \
+	err_t bli_errors = BLIS_SUCCESS; \
+ \
+	if ( jc_ways * n_gemms_in_parallel > BLIS_LPGEMM_NUM_STATIC_COMMS ) \
+	{ \
+		cur_lpgemm_comms = bli_malloc_intl( jc_ways * n_gemms_in_parallel * \
+		                              sizeof( thrcomm_t ), &bli_errors ); \
+	} \
+	for( dim_t i = 0; i < n_gemms_in_parallel * jc_ways; i++ ) \
+	{ \
+			bli_thrcomm_init( ic_ways, &cur_lpgemm_comms[i] ); \
+	} \
+ \
+	_Pragma( "omp parallel num_threads(n_threads)" ) \
+	{ \
+		/* Create a thread-local copy of the master thread's rntm_t. This is
+		 * necessary since we want each thread to be able to track its own
+		 * small block pool_t as it executes down the function stack.*/ \
+		rntm_t rntm_l = *rntm_g; \
+ \
+		/* lpgemm_thrinfo_t object will be used to generate thrinfo_t objects
+		 * for use in blis mt framework inside the respective mat mul driver
+		 * functions.*/ \
+		lpgemm_thrinfo_t thread; \
+		thread.n_threads = n_threads_per_gemm; \
+		thread.tid = omp_get_thread_num() % n_threads_per_gemm; \
+		thread.ic_ways = ic_ways; \
+		thread.jc_ways = jc_ways; \
+		thread.comm = cur_lpgemm_comms + (omp_get_thread_num() / n_threads_per_gemm) * jc_ways; \
+ \
+		dim_t gemm_start; \
+		dim_t gemm_end; \
+ \
+		/* This structure is filled only to calculate workload distribution of GEMM problems
+		   among threads. This struct is not passed to 5-loop.
+		*/ \
+		thrinfo_t thrinfo; \
+		thrinfo.n_way = n_gemms_in_parallel; \
+		thrinfo.work_id = omp_get_thread_num() / n_threads_per_gemm; \
+		bli_thread_range_sub( &thrinfo, batch_size, 1, FALSE, &gemm_start, &gemm_end ); \
+ \
+		for( dim_t i = gemm_start; i < gemm_end; i++ ) \
+		{ \
+			lpgemm_rowvar_ ## LPGEMM_SFX \
+			( \
+			m[i], n[i], k[i], \
+			a[i], rs_a[i], cs_a[i], mtag_a[i], \
+			b[i], rs_b[i], cs_b[i], mtag_b[i], \
+			c[i], rs_c[i], cs_c[i],\
+			alpha[i], \
+			beta[i], \
+			&rntm_l, \
+			&thread, \
+			lcntx, \
+			post_op_list[i], c_downscale \
+			); \
+		} \
+	} \
+	if ( jc_ways * n_gemms_in_parallel > BLIS_LPGEMM_NUM_STATIC_COMMS ) \
+	{ \
+		bli_free_intl( cur_lpgemm_comms ); \
+	} \
+} \
+
+GEN_BATCH_LPGEMM_OPENMP_DECORATOR(bfloat16,bfloat16,float,bf16bf16f32of32)
 
 #define GEN_LPGEMM_OPENMP_DECORATOR_MP(A_type,B_type,C_type,LPGEMM_SFX) \
 void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
@@ -1192,6 +1394,81 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
 }
 
 GEN_LPGEMM_DECORATOR1(bfloat16, int8_t, float, bf16s4f32of32)
+
+
+#define GEN_BATCH_LPGEMM_OPENMP_DECORATOR(A_type,B_type,C_type,LPGEMM_SFX) \
+void batch_lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
+     ( \
+	   const dim_t            batch_size, \
+       const dim_t*           m, \
+       const dim_t*           n, \
+       const dim_t*           k, \
+       const A_type**         a, \
+       const dim_t*           rs_a, \
+       const dim_t*           cs_a, \
+       const AOCL_MEMORY_TAG* mtag_a, \
+       const B_type**         b, \
+       const dim_t*           rs_b, \
+       const dim_t*           cs_b, \
+       const AOCL_MEMORY_TAG* mtag_b, \
+       C_type**               c, \
+       const dim_t*           rs_c, \
+       const dim_t*           cs_c, \
+       const C_type*          alpha, \
+       const C_type*          beta, \
+       rntm_t*                rntm_g, \
+       lpgemm_cntx_t*         lcntx, \
+       lpgemm_post_op(*post_op_list)[AOCL_MAX_POST_OPS], \
+       AOCL_STORAGE_TYPE      c_downscale \
+     ) \
+{ \
+	dim_t n_threads = 1; \
+ \
+	/* Factorization of threads along m and n dimension respectively.*/ \
+	dim_t ic_ways = 1; \
+	dim_t jc_ways = 1; \
+ \
+	/* Set the packing block allocator field of the rntm. This will be
+	 * inherited by all of the child threads when they make local copies of
+	 * the rntm below.*/ \
+	bli_pba_rntm_set_pba( rntm_g ); \
+ \
+	thrcomm_t static_lpgemm_comm; \
+	thrcomm_t* cur_lpgemm_comm = &static_lpgemm_comm; \
+ \
+	bli_thrcomm_init( ic_ways, cur_lpgemm_comm ); \
+	/* lpgemm_thrinfo_t object will be used to generate thrinfo_t objects
+	 * for use in blis mt framework inside the respective mat mul driver
+	 * functions.*/ \
+	lpgemm_thrinfo_t thread; \
+	thread.n_threads = n_threads; \
+	thread.tid = 0; \
+	thread.ic_ways = ic_ways; \
+	thread.jc_ways = jc_ways; \
+	thread.comm = cur_lpgemm_comm; \
+	dim_t gemm_start = 0; \
+	dim_t gemm_end = batch_size; \
+ \
+	for( dim_t i = gemm_start; i < gemm_end; i++ ) \
+	{ \
+		lpgemm_rowvar_ ## LPGEMM_SFX \
+		( \
+		m[i], n[i], k[i], \
+		a[i], rs_a[i], cs_a[i], mtag_a[i], \
+		b[i], rs_b[i], cs_b[i], mtag_b[i], \
+		c[i], rs_c[i], cs_c[i],\
+		alpha[i], \
+		beta[i], \
+		rntm_g, \
+		&thread, \
+		lcntx, \
+		post_op_list[i], c_downscale \
+		); \
+	} \
+} \
+
+GEN_BATCH_LPGEMM_OPENMP_DECORATOR(bfloat16,bfloat16,float,bf16bf16f32of32)
+
 
 #define GEN_UTIL_ELTWISE_OPS_DECORATOR(A_type,B_type,LPGEMM_SFX) \
 void lpgemm_eltwise_ops_ ## LPGEMM_SFX ## _thread_decorator \

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -73,15 +73,12 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 	);
 
 #ifdef LPGEMM_BF16_JIT
-	dim_t num_N_variants = ( LPGEMM_BF16_NR / NUM_F32_ELEMS_PER_ZMM ) + 1;
-	for( dim_t m = 0; m < LPGEMM_BF16_MR; m++ )
-		for( dim_t n = 0; n < num_N_variants; n++ )
-			if( lpgemm_get_jit_kernel(m, n ) == NULL )
-			{
-				bli_print_msg(" Could not generate bf16bf16f32obf16 "
-				" kernels using JIT.", __FILE__, __LINE__ );
-				return;
-			}
+	if( jit_kernels_generated == FALSE )
+	{
+		bli_print_msg(" Could not generate bf16bf16f32obf16 "
+			" kernels using JIT.", __FILE__, __LINE__ );
+			return;
+	}
 #endif
 
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */

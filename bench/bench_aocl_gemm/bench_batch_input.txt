@@ -1,0 +1,6 @@
+bf16bf16f32obf16:bs=5
+r t n n p 83 3847 1930 83 3847 3847 scale=vector,zp=scalar,relu,clip
+c n t n n 50 1297 707 50 1297 50 scale=vector,zp=vector,bias=na,clip
+c n n n n 12 128 1605 12 1605 12 scale=vector,zp=vector
+r n t n r 63 95 1319 1319 1319 95 scale=vector,zp=scalar,relu,clip
+r n n n r 65 2283 911 911 2283 2283 bias=na,swish
