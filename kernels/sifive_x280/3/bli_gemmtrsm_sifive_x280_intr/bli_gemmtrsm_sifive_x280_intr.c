@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, SiFive, Inc.
+   Copyright (C) 2024, SiFive, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,12 +34,12 @@
 
 // clang-format off
 #include "blis.h"
-#include "../../riscv_cmul_macros_asm.h"
+#include "../../riscv_cmul_macros_intr.h"
 #include "../../bli_kernels_sifive_x280.h"
 #include <stdint.h>
 #include <riscv_vector.h>
 
-#define GEMMTRSM_L(PRECISION_CHAR, T) void bli_##PRECISION_CHAR##gemmtrsm_l_sifive_x280_asm(\
+#define GEMMTRSM_L(PRECISION_CHAR, T) void bli_##PRECISION_CHAR##gemmtrsm_l_sifive_x280_intr(\
           dim_t               m,      \
           dim_t               n,      \
           dim_t               k,      \
@@ -55,7 +55,7 @@
     const cntx_t*    restrict cntx    \
     )
 
-#define GEMMTRSM_U(PRECISION_CHAR, T) void bli_##PRECISION_CHAR##gemmtrsm_u_sifive_x280_asm(\
+#define GEMMTRSM_U(PRECISION_CHAR, T) void bli_##PRECISION_CHAR##gemmtrsm_u_sifive_x280_intr(\
           dim_t               m,      \
           dim_t               n,      \
           dim_t               k,      \
@@ -76,108 +76,83 @@
 // Single precision real
 #define DATATYPE float
 #define PRECISION_CHAR s
+#define PREC 32
+#define LMUL m4
+#define FLT_SIZE sizeof(float)
 #define PACKMR 8
 #define PACKNR 64
-#define VLE "vle32.v"
-#define VSE "vse32.v"
-#define VSSE "vsse32.v"
-#define FLT_LOAD "flw"
-#define FLT_SIZE sizeof(float)
-#define LOG_FLT_SIZE 2
 
-
-#include "./bli_gemmtrsm_l_sifive_x280_asm_real.c"
-#include "./bli_gemmtrsm_u_sifive_x280_asm_real.c"
+#include "./bli_gemmtrsm_sifive_x280_intr_real.c"
 
 #undef DATATYPE
 #undef PRECISION_CHAR
+#undef PREC
+#undef LMUL
+#undef FLT_SIZE
 #undef PACKMR
 #undef PACKNR
-#undef VLE
-#undef VSE
-#undef VSSE
-#undef FLT_LOAD
-#undef FLT_SIZE
-#undef LOG_FLT_SIZE
 
 // Double precision real
 #define DATATYPE double
 #define PRECISION_CHAR d
+#define PREC 64
+#define LMUL m4
+#define FLT_SIZE sizeof(double)
 #define PACKMR 8
 #define PACKNR 32
-#define VLE "vle64.v"
-#define VSE "vse64.v"
-#define VSSE "vsse64.v"
-#define FLT_LOAD "fld"
-#define FLT_SIZE sizeof(double)
-#define LOG_FLT_SIZE 3
 
-#include "./bli_gemmtrsm_l_sifive_x280_asm_real.c"
-#include "./bli_gemmtrsm_u_sifive_x280_asm_real.c"
+#include "./bli_gemmtrsm_sifive_x280_intr_real.c"
 
 #undef DATATYPE
 #undef PRECISION_CHAR
+#undef PREC
+#undef LMUL
+#undef FLT_SIZE
 #undef PACKMR
 #undef PACKNR
-#undef VLE
-#undef VSE
-#undef VSSE
-#undef FLT_LOAD
-#undef FLT_SIZE
-#undef LOG_FLT_SIZE
 
 // Single precision complex
 #define DATATYPE scomplex
+#define BASE_DT float
 #define PRECISION_CHAR c
+#define PREC 32
+#define LMUL m2
+#define FLT_SIZE sizeof(float)
 #define PACKMR 8
 #define PACKNR 32
-#define VLSEG2 "vlseg2e32.v "
-#define VSSEG2 "vsseg2e32.v "
-#define VSSSEG2 "vssseg2e32.v "
-#define FLT_LOAD "flw "
-#define FLT_SIZE sizeof(float)
 
-#include "./bli_gemmtrsm_l_sifive_x280_asm_complex.c"
-#include "./bli_gemmtrsm_u_sifive_x280_asm_complex.c"
+#include "./bli_gemmtrsm_sifive_x280_intr_complex.c"
 
 #undef DATATYPE
+#undef BASE_DT
 #undef PRECISION_CHAR
+#undef PREC
+#undef LMUL
+#undef FLT_SIZE
 #undef PACKMR
 #undef PACKNR
-#undef VLSEG2
-#undef VSSEG2
-#undef VSSSEG2
-#undef FLT_LOAD
-#undef FLT_SIZE
 
 // Double precision complex
 #define DATATYPE dcomplex
+#define BASE_DT double
 #define PRECISION_CHAR z
+#define PREC 64
+#define LMUL m2
+#define FLT_SIZE sizeof(double)
 #define PACKMR 8
 #define PACKNR 16
-#define VLSEG2 "vlseg2e64.v "
-#define VSSEG2 "vsseg2e64.v "
-#define VSSSEG2 "vssseg2e64.v "
-#define FLT_LOAD "fld "
-#define FLT_SIZE sizeof(double)
 
-#include "./bli_gemmtrsm_l_sifive_x280_asm_complex.c"
-#include "./bli_gemmtrsm_u_sifive_x280_asm_complex.c"
+#include "./bli_gemmtrsm_sifive_x280_intr_complex.c"
 
 #undef DATATYPE
+#undef BASE_DT
 #undef PRECISION_CHAR
+#undef PREC
+#undef LMUL
+#undef FLT_SIZE
 #undef PACKMR
 #undef PACKNR
-#undef VLSEG
-#undef VSSEG
-#undef VSSSEG
-#undef FLT_LOAD
-#undef FLT_SIZE
-
-
 
 #undef GEMMTRSM
 #undef GEMMTRSM_L
 #undef GEMMTRSM_U
-
-

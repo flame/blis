@@ -38,8 +38,8 @@
 //
 // Define BLAS-to-BLIS interfaces.
 //
-#undef  GENTFUNCRO
-#define GENTFUNCRO( ftype, ch, blasname, blisname ) \
+#undef  GENTFUNC
+#define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
 void PASTEF77(ch,blasname) \
      ( \
@@ -109,6 +109,12 @@ void PASTEF77(ch,blasname) \
 }
 
 #ifdef BLIS_ENABLE_BLAS
-INSERT_GENTFUNCRO_BLAS( syr2, syr2 )
+GENTFUNC( float,    s, syr2, syr2 )
+GENTFUNC( double,   d, syr2, syr2 )
+#ifndef BLIS_DISABLE_CSYR2
+GENTFUNC( scomplex, c, syr2, syr2 )
 #endif
-
+#ifndef BLIS_DISABLE_ZSYR2
+GENTFUNC( dcomplex, z, syr2, syr2 )
+#endif
+#endif

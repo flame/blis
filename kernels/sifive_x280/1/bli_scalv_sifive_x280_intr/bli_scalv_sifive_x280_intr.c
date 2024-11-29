@@ -49,7 +49,7 @@
 
 #define SCALV(...)  SCALV_(__VA_ARGS__)
 
-#define SETV_(PRECISION_CHAR) bli_##PRECISION_CHAR##setv_sifive_x280_asm
+#define SETV_(PRECISION_CHAR) bli_##PRECISION_CHAR##setv_sifive_x280_intr
 #define SETV(PRECISION_CHAR) SETV_(PRECISION_CHAR)
 
 // Single precision real

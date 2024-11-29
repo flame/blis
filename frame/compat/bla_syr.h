@@ -32,8 +32,6 @@
 
 */
 
-#if 1
-
 //
 // Prototype BLAS-to-BLIS interfaces.
 //
@@ -50,8 +48,12 @@ BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
      );
 
 #ifdef BLIS_ENABLE_BLAS
-INSERT_GENTPROT_BLAS( syr )
+GENTPROT( float,    s, syr )
+GENTPROT( double,   d, syr )
+#ifndef BLIS_DISABLE_CSYR
+GENTPROT( scomplex, c, syr )
 #endif
-
+#ifndef BLIS_DISABLE_ZSYR
+GENTPROT( dcomplex, z, syr )
 #endif
-
+#endif

@@ -45,6 +45,9 @@
 // Enabled kernel sets (kernel_list)
 @kernel_list_defines@
 
+// Disabled symbols (symbol_omit_list)
+@omit_symbol_list_defines@
+
 #define BLIS_VERSION_STRING "@version@"
 
 #if @enable_system@
@@ -108,6 +111,12 @@
 #define BLIS_ENABLE_MEM_TRACING
 #else
 #define BLIS_DISABLE_MEM_TRACING
+#endif
+
+#if @enable_scalapack_compat@
+#define BLIS_ENABLE_SCALAPACK_COMPAT
+#else
+#define BLIS_DISABLE_SCALAPACK_COMPAT
 #endif
 
 #if @int_type_size@ == 64

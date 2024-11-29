@@ -19,6 +19,7 @@ but many others have contributed code, ideas, and feedback, including
   Abhishek Bagusetty       @abagusetty                (Argonne National Laboratory)
   Satish Balay             @balay                     (Argonne National Laboratory)
   Kihiro Bando             @bandokihiro
+  Timo Betcke              @tbetcke                   (University College London)
   Matthew Brett            @matthew-brett             (University of Birmingham)
   Jérémie du Boisberranger @jeremiedbb
   Jed Brown                @jedbrown                  (Argonne National Laboratory)
@@ -57,7 +58,7 @@ but many others have contributed code, ideas, and feedback, including
   Stefan Husmann           @stefanhusmann
   Aaron Hutchinson         @Aaron-Hutchinson          (SiFive)
   Francisco Igual          @figual                    (Universidad Complutense de Madrid)
-  John Mather              @jmather-sesi              (SideFX Software)
+                           @j-bm
   Madeesh Kannan           @shadeMe
   Tony Kelman              @tkelman
   Lee Killough             @leekillough               (Tactical Computing Labs)
@@ -77,6 +78,7 @@ but many others have contributed code, ideas, and feedback, including
   Giorgos Margaritis
   Bryan Marker             @bamarker                  (The University of Texas at Austin)
   Simon Lukas Märtens      @ACSimon33                 (RWTH Aachen University)
+  John Mather              @jmather-sesi              (SideFX Software)
   Devin Matthews           @devinamatthews            (The University of Texas at Austin)
   Stefanos Mavros          @smavros
   Mithun Mohan             @MithunMohanKadavil        (AMD)
@@ -142,6 +144,7 @@ but many others have contributed code, ideas, and feedback, including
   Stefano Zampini          @stefanozampini
   M. Zhou                  @cdluminate
   Igor Zhuravlov           @jip                       (Far Eastern Federal University)
+                           @AngryLoki
 
 BLIS's development was partially funded by grants from industry
 partners, including

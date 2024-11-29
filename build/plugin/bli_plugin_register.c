@@ -34,9 +34,9 @@
 
 #include @PLUGIN_HEADER@
 
-err_t PASTEMAC(plugin_register,BLIS_PNAME_INFIX)
+err_t bli_plugin_register_@plugin_name@
      (
-       PASTECH(plugin,BLIS_PNAME_INFIX,_params)
+       plugin_@plugin_name@_params
      )
 {
 	// ------------------------------------------------------------------------>
@@ -69,9 +69,9 @@ err_t PASTEMAC(plugin_register,BLIS_PNAME_INFIX)
 
 	#undef GENTCONF
 	#define GENTCONF( CONFIG, config ) \
-	PASTEMAC(plugin_init,BLIS_PNAME_INFIX,_,config,BLIS_REF_SUFFIX) \
+	PASTEMAC(plugin_init_@plugin_name@_,config) \
 	( \
-	  PASTECH(plugin,BLIS_PNAME_INFIX,_params_only) \
+	  plugin_@plugin_name@_params_only \
 	);
 
 	INSERT_GENTCONF

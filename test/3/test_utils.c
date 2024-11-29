@@ -38,7 +38,7 @@
 // Global string constants.
 const char* GLOB_DEF_DT_STR    = "d";
 const char* GLOB_DEF_SC_STR    = "ccc";
-const char* GLOB_DEF_IM_STR    = "native";
+const char* GLOB_DEF_IM_STR    = "auto";
 
 const char* GLOB_DEF_PS_STR    = "50 1000 50";
 const char* GLOB_DEF_M_STR     = "-1";
@@ -365,9 +365,10 @@ void parse_cl_params( int argc, char** argv, init_fp fp, params_t* params )
 				}
 				printf( "\n" );
 				printf( "    -i im\n" );
-				printf( "            Use native execution if im is 'native' (or 'nat'). Otherwise,\n" );
-				printf( "            if im is '1m', use the 1m method to induce complex computation\n" );
-				printf( "            using the equivalent real-domain microkernels.\n" );
+				printf( "            Use native execution if im is 'native' (or 'nat'). If im is '1m',\n" );
+				printf( "            use the 1m method to induce complex computation using the\n" );
+				printf( "            equivalent real-domain microkernels. If im is 'auto', do not\n" );
+				printf( "            explicitly set the induced method and instead use the default.\n" );
 				printf( "\n" );
 				printf( "    -p 'lo hi in'\n" );
 				printf( "            Perform a sweep of measurements of problem sizes ranging from \n" );
@@ -609,13 +610,21 @@ void proc_params( params_t* params )
 	bli_param_map_char_to_blis_dt( params->dt_str[0], &params->dt );
 
 	// Parse the induced method to the corresponding ind_t.
-	if      ( strncmp( params->im_str, "native", 6 ) == 0 )
+	if    ( strncmp( params->im_str, "native", 6 ) == 0 ||
+	        strncmp( params->im_str, "nat",    3 ) == 0 )
 	{
-		params->im = BLIS_NAT;
+		params->im         = BLIS_NAT;
+		params->im_is_auto = FALSE;
 	}
 	else if ( strncmp( params->im_str, "1m",     2 ) == 0 )
 	{
-		params->im = BLIS_1M;
+		params->im         = BLIS_1M;
+		params->im_is_auto = FALSE;
+	}
+	else if ( strncmp( params->im_str, "auto",   4 ) == 0 )
+	{
+		params->im         = BLIS_1M;
+		params->im_is_auto = TRUE;
 	}
 	else
 	{

@@ -1,3 +1,65 @@
+Here are the steps to follow to create a new release candidate of BLIS:
+
+If you're creating a new release candidate lineage -- that is, the *first*
+release candidate for a new version (i.e., 2.0-rc0):
+
+1. Use the build/start-new-rc.sh script to create a new rc branch.
+
+   $ ./build/start-new-rc.sh "2.0"
+
+   This will update the version file in BLIS to reflect the new version
+   string (in this case, "2.0"). It also refreshes the contents of the
+   CHANGELOG file with the output of 'git log'. Finally, it creates a
+   new "-rc0" branch (in this case, "2.0-rc0").
+
+   NOTE: This script assumes that you want the new rc branch to be
+   a descendant of the head of 'master'.
+
+2. Make sure the script did what it was supposed to do by inspecting
+   the output of 'git log' and 'git branch'. If everything looks good,
+   you can push the changes via:
+
+   $ git checkout master
+   $ git push
+   $ git push -u origin 2.0-rc0
+
+   At this point, the new release candidate branch is live at origin.
+
+If you're creating a new release candidate for an existing lineage
+-- that is, a follow-up release candidate for a new version that already
+has one or more release candidates -- start by checking out the latest
+release candidate, for example:
+
+1. Start by checking out the latest release candidate:
+
+   $ git checkout 2.0-rc1
+
+2. Then create a new release candidate branch whose name increments the
+   "rc" number:
+
+   $ git checkout -b 2.0-rc2
+
+3. Then cherry-pick one or more bugfixes that were made to 'master':
+
+   $ git cherry-pick -nx <commit>
+
+4. Finally, commit the changes. Be sure to include lines in the commit
+   log entry for each cherry-picked commit that note the commit hash
+   of the *original* commit that is being cherry-picked from. Example:
+
+     Fixed a bug in blahblahblah. (#777)
+    
+     Details:
+     - Fixed a bug in blahblahblah that manifested as blahblahblah. This
+       bug was introduced in commit abc12345. Thanks to John Smith for
+       reporting this bug.
+     - (cherry picked from commit abc0123456789abc0123456789abc0123456789a)
+
+   Note the final line, which was *not* present in the original commit
+   log entry but *should be* present in the commit log entry for the
+   commit that cherry-picks to (in this example) 2.0-rc2.
+
+
 Here are the steps to follow to create a new release (version) of BLIS:
 
 1. Make sure there are no commits that have yet to be pulled into
@@ -7,42 +69,67 @@ Here are the steps to follow to create a new release (version) of BLIS:
 
    If there are any commits upstream, merge them as appropriate.
 
-2. Consider whether the so_version should be updated (via the so_version
+2. Check out the latest release candidate:
+
+   $ git checkout 2.0-rc2
+
+3. Consider whether the so_version should be updated (via the so_version
    file in the 'build' directory) due to any ABI changes since the previous
    version. If so, commit that change now.
 
-3. Verify that the code builds properly.
+4. Verify that the code builds properly.
 
    $ ./configure auto; make
 
-4. Verify that the code passes BLIS and BLAS tests:
+5. Verify that the code passes BLIS and BLAS tests:
 
    $ make check           # BLIS testsuite (fast) + BLAS test drivers
    $ make checkblis       # BLIS testsuite (full ex. mixed-datatype)
    $ make checkblis-md    # BLIS testsuite (mixed-datatype only)
    $ make checkblis-salt  # BLIS testsuite (fast + salt)
 
-5. Draft a new announcement to blis-devel, crediting those who
+6. Draft a new announcement to blis-devel, crediting those who
    contributed towards this version by browsing 'git log'.
 
-6. Update CREDITS file if 'git log' reveals any new contributors.
+7. Update CREDITS file if 'git log' reveals any new contributors.
+   NOTE: This should have already been done prior to the rc cycle.
 
-7. Update docs/ReleaseNotes.md file with body of finalized announcement
+8. Update docs/ReleaseNotes.md file with body of finalized announcement
    and the date of the release.
+   NOTE: This should be a cherry-pick off of 'master' since the release notes
+   need to be committed there anyway as well.
 
-8. Commit changes from steps 5 and 6.
+9. Commit changes from steps 7 and 8.
 
-9. Bump the version number:
+10. Create a final release branch:
 
-   $ ./build/bump-version.sh "0.3.2"
+   $ git checkout -b 2.0-final
 
-   This will result in two new commits: a version file update and a CHANGELOG
-   file update.
+   This will help identify the release commit when browsing the GitHub network
+   graph, since tags don't show up there.
 
-10. Push the new commits and new tag associated with the new version:
+11. Tag the final release commit:
+
+   $ git tag 2.0 2.0-final
+
+   You can also use the actual commit hash instead of "2.0-final".
+
+12. Push the new commits and new tag associated with the new version:
 
    $ git push
    $ git push --tag
 
-11. Send finalized announcement to blis-devel.
+13. Publish a new release via GitHub (https://github.com/flame/blis/releases).
+    Identify the new version by the tag you just created and pushed. You can
+    also identify the previous release.
+
+    Try to use formatting consistent with the prior release. (You can start to
+    edit the previous release, inspect/copy some of the markdown syntax, and
+    then abort the edit.)
+
+14. Update the Wikipedia entry for BLIS to reflect the new latest version.
+
+15. Announce the release on Discord.
+
+16. Send finalized announcement to blis-devel.
 
