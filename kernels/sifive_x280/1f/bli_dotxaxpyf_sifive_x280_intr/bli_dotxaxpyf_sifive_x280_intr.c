@@ -47,7 +47,8 @@
           conj_t           conjx,                     \
           dim_t            m,                         \
           dim_t            b,                         \
-    const T*      restrict alpha_,                    \
+    const T*      restrict alphaw_,                   \
+    const T*      restrict alphax_,                   \
     const T*      restrict a_, inc_t inca, inc_t lda, \
     const T*      restrict w_, inc_t incw,            \
     const T*      restrict x_, inc_t incx,            \
