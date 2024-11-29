@@ -452,7 +452,7 @@ main()
 			d  ) dry_run_flag="1" ;;
 			h  ) hide_flag="1" ;;
 			r  ) recursive_flag="1" ;;
-			i  ) ignore_list="$OPTARG" ;;
+			i  ) ignore_list="${ignore_list} $OPTARG" ;;
 			o  ) output_name=$OPTARG ;;
 			p  ) prefix_flag=$OPTARG ;;
 			v  ) verbose_flag=$OPTARG ;;
