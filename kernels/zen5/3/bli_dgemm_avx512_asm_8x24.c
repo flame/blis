@@ -513,6 +513,7 @@ void bli_dgemm_avx512_asm_8x24(
     LEA(RDX, MEM(R10, R10, 4)) // (RDX)rs_c*5 -> rs_c + rs_c*4
     LEA(R14, MEM(R10, R13, 2)) // (R14)rs_c*7 -> rs_c + rs_c*3*2
 
+    VXORPD(ZMM(2), ZMM(2), ZMM(2)) // set zmm2 to 0, used for comparision with beta
 #ifdef ENABLE_COL_GEN_STORE
     MOV(R12, VAR(cs_c)) // load cs_c
     CMP(R10, IMM(8))
@@ -528,14 +529,13 @@ void bli_dgemm_avx512_asm_8x24(
 
     MOV(RAX, VAR(alpha))
 
-    VXORPD(ZMM(2), ZMM(2), ZMM(2))
-    VBROADCASTSD(ZMM(1), MEM(RBX))
+    VBROADCASTSD(ZMM(1), MEM(RBX)) // broadcast beta
     
-    VCOMISD(XMM(1), XMM(2))
+    VCOMISD(XMM(1), XMM(2)) // if beta == 0
     JZ(BETA_ZERO) // jump to BETA_ZERO if beta == 0
 
     VCOMISD(XMM(1), XMM(3))
-    CMP(RBX, IMM(1))
+    CMP(RBX, IMM(1)) // if beta == 1
     JNZ(BETA_NZ_N1)// jump to BETA_NZ_N1 if beta != 1
 
     // no jumps for beta = 1
