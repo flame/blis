@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, SiFive, Inc.
+   Copyright (C) 2024, SiFive, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,95 +33,147 @@
 */
 
 // clang-format off
-
-#include <stdint.h>
-#include <riscv_vector.h>
-#include "blis.h"
 #include "../../riscv_overloaded_intrinsics.h"
+#include "blis.h"
+#include <limits.h>
+#include <riscv_vector.h>
+#include <stdbool.h>
+#include <stddef.h>
 
-
-#define AXPBYV_(PRECISION_CHAR, T) void bli_##PRECISION_CHAR##axpbyv_sifive_x280_intr(\
-          conj_t           conjx,          \
+#define AMAXV_(PRECISION_CHAR, T) void bli_##PRECISION_CHAR##amaxv_sifive_x280_intr(\
           dim_t            n,              \
-    const T*      restrict alpha_,         \
     const T*      restrict x_, inc_t incx, \
-    const T*      restrict beta_,          \
-          T*      restrict y_, inc_t incy, \
+          dim_t*           index,          \
     const cntx_t*          cntx            \
 )
 
-#define AXPBYV(...)  AXPBYV_(__VA_ARGS__)
+#define AMAXV(...)  AMAXV_(__VA_ARGS__)
 
-#define SETV_(PRECISION_CHAR) bli_##PRECISION_CHAR##setv_sifive_x280_intr
-#define SETV(PRECISION_CHAR) SETV_(PRECISION_CHAR)
-#define SCALV_(PRECISION_CHAR) bli_##PRECISION_CHAR##scalv_sifive_x280_intr
-#define SCALV(PRECISION_CHAR) SCALV_(PRECISION_CHAR)
-#define SCAL2V_(PRECISION_CHAR) bli_##PRECISION_CHAR##scal2v_sifive_x280_intr
-#define SCAL2V(PRECISION_CHAR) SCAL2V_(PRECISION_CHAR)
+// BLIS defines integers to be 32 or 64 bits according to BLIS_INT_TYPE_SIZE.
+// If BLIS_INT_TYPE_SIZE is any other value, integers are defined to be longs.
+#if BLIS_INT_TYPE_SIZE == 32 || BLIS_INT_TYPE_SIZE == 64
+#define AMAXV_SIFIVE_X280_INT_SIZE BLIS_INT_TYPE_SIZE
+#elif LONG_MAX == INT32_MAX
+#define AMAXV_SIFIVE_X280_INT_SIZE 32
+#elif LONG_MAX == INT64_MAX
+#define AMAXV_SIFIVE_X280_INT_SIZE 64
+#else
+#error "Integers must be 32- or 64-bits for bli_?amaxv_sifive_x280_intr."
+#endif
 
 // Single precision real
 #define DATATYPE float
 #define PRECISION_CHAR s
-#define PREC 32
-#define LMUL m8
+#define PREC_X 32
+#define PREC_I AMAXV_SIFIVE_X280_INT_SIZE
+#if PREC_I == 32
+#define LMUL_X m4
+#define LMUL_I m4
+#define RATIO 8
+#elif PREC_I == 64
+#define LMUL_X m4
+#define LMUL_I m8
+#define RATIO 8
+#endif
 #define FLT_SIZE sizeof(float)
 
-#include "./bli_axpbyv_sifive_x280_intr_real.c"
+#include "./bli_amaxv_sifive_x280_intr_real.c"
 
 #undef DATATYPE
 #undef PRECISION_CHAR
-#undef PREC
-#undef LMUL
+#undef PREC_X
+#undef PREC_I
+#undef LMUL_X
+#undef LMUL_I
+#undef RATIO
 #undef FLT_SIZE
 
 // Double precision real
 #define DATATYPE double
 #define PRECISION_CHAR d
-#define PREC 64
-#define LMUL m8
+#define PREC_X 64
+#define PREC_I AMAXV_SIFIVE_X280_INT_SIZE
+#if PREC_I == 32
+#define LMUL_X m8
+#define LMUL_I m4
+#define RATIO 8
+#elif PREC_I == 64
+#define LMUL_X m4
+#define LMUL_I m4
+#define RATIO 16
+#endif
 #define FLT_SIZE sizeof(double)
 
-#include "./bli_axpbyv_sifive_x280_intr_real.c"
+#include "./bli_amaxv_sifive_x280_intr_real.c"
 
 #undef DATATYPE
 #undef PRECISION_CHAR
-#undef PREC
-#undef LMUL
+#undef PREC_X
+#undef PREC_I
+#undef LMUL_X
+#undef LMUL_I
+#undef RATIO
 #undef FLT_SIZE
 
 // Single precision complex
 #define DATATYPE scomplex
 #define BASE_DT float
 #define PRECISION_CHAR c
-#define PREC 32
-#define LMUL m4
+#define PREC_X 32
+#define PREC_I AMAXV_SIFIVE_X280_INT_SIZE
+#if PREC_I == 32
+#define LMUL_X m4
+#define LMUL_I m4
+#define RATIO 8
+#elif PREC_I == 64
+#define LMUL_X m4
+#define LMUL_I m8
+#define RATIO 8
+#endif
 #define FLT_SIZE sizeof(float)
 
-#include "./bli_axpbyv_sifive_x280_intr_complex.c"
+#include "./bli_amaxv_sifive_x280_intr_complex.c"
 
 #undef DATATYPE
 #undef BASE_DT
 #undef PRECISION_CHAR
-#undef PREC
-#undef LMUL
+#undef PREC_X
+#undef PREC_I
+#undef LMUL_X
+#undef LMUL_I
+#undef RATIO
 #undef FLT_SIZE
 
 // Double precision complex
 #define DATATYPE dcomplex
 #define BASE_DT double
 #define PRECISION_CHAR z
-#define PREC 64
-#define LMUL m4
+#define PREC_X 64
+#define PREC_I AMAXV_SIFIVE_X280_INT_SIZE
+#if PREC_I == 32
+#define LMUL_X m8
+#define LMUL_I m4
+#define RATIO 8
+#elif PREC_I == 64
+#define LMUL_X m4
+#define LMUL_I m4
+#define RATIO 16
+#endif
 #define FLT_SIZE sizeof(double)
 
-#include "./bli_axpbyv_sifive_x280_intr_complex.c"
+#include "./bli_amaxv_sifive_x280_intr_complex.c"
 
 #undef DATATYPE
 #undef BASE_DT
 #undef PRECISION_CHAR
-#undef PREC
-#undef LMUL
+#undef PREC_X
+#undef PREC_I
+#undef LMUL_X
+#undef LMUL_I
+#undef RATIO
 #undef FLT_SIZE
 
-#undef AXPBYV
-#undef AXPBYV_
+#undef AMAXV_SIFIVE_X280_INT_SIZE
+
+#undef AMAXV
+#undef AMAXV_

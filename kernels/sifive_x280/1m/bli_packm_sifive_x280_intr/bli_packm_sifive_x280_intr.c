@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, SiFive, Inc.
+   Copyright (C) 2024, SiFive, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,94 +34,135 @@
 
 // clang-format off
 
+#include "../../riscv_cmul_macros_intr.h"
+#include "../../riscv_overloaded_intrinsics.h"
+#include "blis.h"
 #include <stdint.h>
 #include <riscv_vector.h>
-#include "blis.h"
-#include "../../riscv_overloaded_intrinsics.h"
 
-
-#define AXPBYV_(PRECISION_CHAR, T) void bli_##PRECISION_CHAR##axpbyv_sifive_x280_intr(\
-          conj_t           conjx,          \
-          dim_t            n,              \
-    const T*      restrict alpha_,         \
-    const T*      restrict x_, inc_t incx, \
-    const T*      restrict beta_,          \
-          T*      restrict y_, inc_t incy, \
-    const cntx_t*          cntx            \
+#define PACKM_(PRECISION_CHAR, T) void bli_##PRECISION_CHAR##packm_sifive_x280_intr(\
+         conj_t           conja,                     \
+         pack_t           schema,                    \
+         dim_t            cdim,                      \
+         dim_t            cdim_max,                  \
+         dim_t            cdim_bcast,                \
+         dim_t            n,                         \
+         dim_t            n_max,                     \
+   const T*      restrict kappa_,                    \
+   const T*      restrict a_, inc_t inca, inc_t lda, \
+         T*      restrict p_,             inc_t ldp, \
+   const T*      restrict params,                    \
+   const cntx_t*          cntx                       \
 )
 
-#define AXPBYV(...)  AXPBYV_(__VA_ARGS__)
+#define PACKM(...)  PACKM_(__VA_ARGS__)
 
-#define SETV_(PRECISION_CHAR) bli_##PRECISION_CHAR##setv_sifive_x280_intr
-#define SETV(PRECISION_CHAR) SETV_(PRECISION_CHAR)
-#define SCALV_(PRECISION_CHAR) bli_##PRECISION_CHAR##scalv_sifive_x280_intr
-#define SCALV(PRECISION_CHAR) SCALV_(PRECISION_CHAR)
-#define SCAL2V_(PRECISION_CHAR) bli_##PRECISION_CHAR##scal2v_sifive_x280_intr
-#define SCAL2V(PRECISION_CHAR) SCAL2V_(PRECISION_CHAR)
+#define REF_KERNEL_(PRECISION_CHAR) bli_##PRECISION_CHAR##PRECISION_CHAR##packm_sifive_x280_ref
+#define REF_KERNEL(PRECISION_CHAR) REF_KERNEL_(PRECISION_CHAR)
+
+// LMUL is the LMUL used when a is "row major" (lda == 1). Since we use
+// segment stores with more than 4 fields, this is usually m1.
+// LMUL_MR is an LMUL large enough to hold MR floats (for spackm, cpackm)
+// or doubles (for dpackm, zpackm). LMUL_NR is analogous.
 
 // Single precision real
 #define DATATYPE float
 #define PRECISION_CHAR s
 #define PREC 32
-#define LMUL m8
+#define LMUL m1
+#define LMUL_MR m1
+#define LMUL_NR m4
 #define FLT_SIZE sizeof(float)
+#define MR 7
+#define NR 64
 
-#include "./bli_axpbyv_sifive_x280_intr_real.c"
+#include "./bli_packm_sifive_x280_intr_real.c"
 
 #undef DATATYPE
 #undef PRECISION_CHAR
 #undef PREC
 #undef LMUL
+#undef LMUL_MR
+#undef LMUL_NR
 #undef FLT_SIZE
+#undef MR
+#undef NR
 
 // Double precision real
 #define DATATYPE double
 #define PRECISION_CHAR d
 #define PREC 64
-#define LMUL m8
+#define LMUL m1
+#define LMUL_MR m1
+#define LMUL_NR m4
 #define FLT_SIZE sizeof(double)
+#define MR 7
+#define NR 32
 
-#include "./bli_axpbyv_sifive_x280_intr_real.c"
+#include "./bli_packm_sifive_x280_intr_real.c"
 
 #undef DATATYPE
 #undef PRECISION_CHAR
 #undef PREC
 #undef LMUL
+#undef LMUL_MR
+#undef LMUL_NR
 #undef FLT_SIZE
+#undef MR
+#undef NR
 
 // Single precision complex
 #define DATATYPE scomplex
 #define BASE_DT float
 #define PRECISION_CHAR c
 #define PREC 32
-#define LMUL m4
+#define LMUL m1
+#define LMUL_MR m1
+#define LMUL_NR m2
 #define FLT_SIZE sizeof(float)
+#define MR 6
+#define NR 32
 
-#include "./bli_axpbyv_sifive_x280_intr_complex.c"
+#include "./bli_packm_sifive_x280_intr_complex.c"
 
 #undef DATATYPE
 #undef BASE_DT
 #undef PRECISION_CHAR
 #undef PREC
 #undef LMUL
+#undef LMUL_MR
+#undef LMUL_NR
 #undef FLT_SIZE
+#undef MR
+#undef NR
 
 // Double precision complex
 #define DATATYPE dcomplex
 #define BASE_DT double
 #define PRECISION_CHAR z
 #define PREC 64
-#define LMUL m4
+#define LMUL m1
+#define LMUL_MR m1
+#define LMUL_NR m2
 #define FLT_SIZE sizeof(double)
+#define MR 6
+#define NR 16
 
-#include "./bli_axpbyv_sifive_x280_intr_complex.c"
+#include "./bli_packm_sifive_x280_intr_complex.c"
 
 #undef DATATYPE
 #undef BASE_DT
 #undef PRECISION_CHAR
 #undef PREC
 #undef LMUL
+#undef LMUL_MR
+#undef LMUL_NR
 #undef FLT_SIZE
+#undef MR
+#undef NR
 
-#undef AXPBYV
-#undef AXPBYV_
+#undef REF_KERNEL_
+#undef REF_KERNEL
+
+#undef PACKM
+#undef PACKM_

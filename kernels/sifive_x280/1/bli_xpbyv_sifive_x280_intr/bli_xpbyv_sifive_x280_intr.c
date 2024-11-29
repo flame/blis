@@ -51,7 +51,7 @@
 
 #define XPBYV(...)  XPBYV_(__VA_ARGS__)
 
-#define COPYV_(PRECISION_CHAR) bli_##PRECISION_CHAR##copyv_sifive_x280_asm
+#define COPYV_(PRECISION_CHAR) bli_##PRECISION_CHAR##copyv_sifive_x280_intr
 #define COPYV(PRECISION_CHAR) COPYV_(PRECISION_CHAR)
 
 // Single precision real

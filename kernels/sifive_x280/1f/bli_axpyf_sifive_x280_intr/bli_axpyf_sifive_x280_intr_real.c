@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, SiFive, Inc.
+   Copyright (C) 2024, SiFive, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,64 +33,64 @@
 */
 
 // clang-format off
-#ifdef SCAL2V
+#ifdef AXPYF
 
-SCAL2V(PRECISION_CHAR, void)
+AXPYF(PRECISION_CHAR, void)
 {
-    // Computes y = alpha * conjx(x)
+    // Computes y := y + alpha * conja(A) * conjx(x)
+    
+    (void) conja; // Suppress unused parameter warnings
+    (void) conjx;
+    (void) cntx;
     const DATATYPE* restrict alpha = alpha_;
+    const DATATYPE* restrict a = a_;
     const DATATYPE* restrict x = x_;
     DATATYPE* restrict y = y_;
-    
-    if (n <= 0) return;
-    if (alpha->real == 0 && alpha->imag == 0) {
-        SETV(PRECISION_CHAR)(BLIS_NO_CONJUGATE, n, alpha, y, incy, cntx);
-        return;
-    }
 
-    if (alpha->real == 1 && alpha->imag == 0) {
-        COPYV(PRECISION_CHAR)(conjx, n, x, incx, y, incy, cntx);
+    if (m <= 0 || b <= 0 || PASTEMAC(PRECISION_CHAR, eq0)(*alpha))
         return;
-    }
 
-    size_t avl = n;
+    size_t avl = m;
     while (avl) {
         size_t vl = VSETVL(PREC, LMUL)(avl);
-        RVV_TYPE_FX(PREC, LMUL, 2) xvec, yvec;
-        RVV_TYPE_F(PREC, LMUL) xvec_real, xvec_imag, yvec_real, yvec_imag;
+        const DATATYPE* restrict a_tmp = a;
+        const DATATYPE* restrict x_tmp = x;
+        RVV_TYPE_F(PREC, LMUL) ax_vec;
 
-        if (incx == 1)
-            xvec = VLSEG2_V_F(PREC, LMUL, 2)( (BASE_DT*) x, vl);
-        else
-            xvec = VLSSEG2_V_F(PREC, LMUL, 2)((BASE_DT*) x, 2*FLT_SIZE*incx, vl);
+        for (size_t i = 0; i < b; ++i) {
+            RVV_TYPE_F(PREC, LMUL) acol_vec;
+            if (inca == 1)
+                acol_vec = VLE_V_F(PREC, LMUL)(a_tmp, vl);
+            else
+                acol_vec = VLSE_V_F(PREC, LMUL)(a_tmp, FLT_SIZE * inca, vl);
 
-        xvec_real = VGET_V_F(PREC, LMUL, 2)(xvec, 0);
-        xvec_imag = VGET_V_F(PREC, LMUL, 2)(xvec, 1);
+            if (i == 0)
+                ax_vec = VFMUL_VF(PREC, LMUL)(acol_vec, *x_tmp, vl);
+            else
+                ax_vec = VFMACC_VF(PREC, LMUL)(ax_vec, *x_tmp, acol_vec, vl);
 
-        yvec_real = VFMUL_VF(PREC, LMUL)(xvec_real, alpha->real, vl);
-        yvec_imag = VFMUL_VF(PREC, LMUL)(xvec_real, alpha->imag, vl);
-        if (conjx == BLIS_NO_CONJUGATE) {
-            yvec_real = VFNMSAC_VF(PREC, LMUL)(yvec_real, alpha->imag, xvec_imag, vl);
-            yvec_imag = VFMACC_VF( PREC, LMUL)(yvec_imag, alpha->real, xvec_imag, vl);
-        } else {
-            yvec_real = VFMACC_VF( PREC, LMUL)(yvec_real, alpha->imag, xvec_imag, vl);
-            yvec_imag = VFNMSAC_VF(PREC, LMUL)(yvec_imag, alpha->real, xvec_imag, vl);
+            a_tmp += lda;
+            x_tmp += incx;
         }
+        
+        RVV_TYPE_F(PREC, LMUL) yvec;
+        if (incy == 1)
+            yvec = VLE_V_F(PREC, LMUL)(y, vl);
+        else
+            yvec = VLSE_V_F(PREC, LMUL)(y, FLT_SIZE * incy, vl);
 
-        yvec = VUNDEFINED_FX(PREC, LMUL, 2)();
-        yvec = VSET_V_F(PREC, LMUL, 2)(yvec, 0, yvec_real);
-        yvec = VSET_V_F(PREC, LMUL, 2)(yvec, 1, yvec_imag);
+        yvec = VFMACC_VF(PREC, LMUL)(yvec, *alpha, ax_vec, vl);
 
         if (incy == 1)
-            VSSEG2_V_F(PREC, LMUL, 2)( (BASE_DT*) y, yvec, vl);
+            VSE_V_F(PREC, LMUL)(y, yvec, vl);
         else
-            VSSSEG2_V_F(PREC, LMUL, 2)((BASE_DT*) y, 2*FLT_SIZE*incy, yvec, vl);
-        
-        x += vl*incx;
-        y += vl*incy;
+            VSSE_V_F(PREC, LMUL)(y, FLT_SIZE * incy, yvec, vl);
+
+        a += vl * inca;
+        y += vl * incy;
         avl -= vl;
     }
-
+    return;
 }
 
-#endif // SCAL2V
+#endif // AXPYF
