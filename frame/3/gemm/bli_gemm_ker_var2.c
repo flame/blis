@@ -171,15 +171,16 @@ void bli_gemm_ker_var2
 	// function pointer.
 	f = ftypes[dt_exec];
 
-#ifdef BLIS_KERNELS_ZEN5
+#ifdef BLIS_KERNELS_ZEN4
 
 	// Optimized macro kernel is avaible for DGEMM
-	// for ZEN5. Only row major stored C is supported.
+	// for AVX512. Only row major stored C is supported.
 	// TODO: Add macro kernel function pointer in cntx
 	if
 	(
 		 ( bli_obj_dt( c ) == BLIS_DOUBLE ) &&
-		 ( bli_arch_query_id() == BLIS_ARCH_ZEN5 ) &&
+		 ( ( bli_arch_query_id() == BLIS_ARCH_ZEN5 ) ||
+		   ( bli_arch_query_id() == BLIS_ARCH_ZEN4 ) ) &&
 		 ( cs_c == 1 ) && // use this kernel only for row major C
 		 // use generic macro kernel for mixed precision
 		 ( bli_obj_elem_size( a ) == 8 ) && // check if elem_sizeof(a) == sizeof(double)

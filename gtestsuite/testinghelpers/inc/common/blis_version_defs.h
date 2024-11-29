@@ -143,7 +143,7 @@
     #define K_bli_ddotv_zen_int_avx512 1
     #define K_bli_dgemm_haswell_asm_6x8 1
     #define K_bli_dgemm_zen4_asm_32x6 1
-    #define K_bli_dgemm_zen4_asm_8x24 1
+    #define K_bli_dgemm_avx512_asm_8x24 1
     #define K_bli_dgemmsup_rd_haswell_asm_6x8m 1
     #define K_bli_dgemmsup_rd_haswell_asm_6x8n 1
     #define K_bli_dgemmsup_rv_haswell_asm_6x8m 1

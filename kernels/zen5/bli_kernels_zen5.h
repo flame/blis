@@ -32,9 +32,6 @@
 
 */
 
-// native dgemm kernel
-GEMM_UKR_PROT( double,   d, gemm_avx512_asm_8x24 )
-
 // Dgemm sup RV kernels
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen5_asm_24x8m)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen5_asm_24x7m)
@@ -44,18 +41,6 @@ GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen5_asm_24x4m)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen5_asm_24x3m)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen5_asm_24x2m)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen5_asm_24x1m)
-
-void bli_dgemm_avx512_asm_8x24_macro_kernel
-(
-    dim_t   n,
-    dim_t   m,
-    dim_t   k,
-    double* c,
-    double* a,
-    double* b,
-    dim_t   ldc,
-    double* beta
-);
 
 // threshold functions
 bool bli_cntx_gemmsup_thresh_is_met_zen5

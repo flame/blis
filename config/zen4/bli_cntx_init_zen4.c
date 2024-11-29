@@ -41,22 +41,22 @@
 
 #define BLI_CNTX_DEFAULT_BLKSZ_LIST_GENOA(blkszs) \
 	/*                                           s      d      c      z */  \
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    32,     3,    12 );  \
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,     6,     8,     4 );  \
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,   128,   144,    60 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,     8,     3,    12 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    24,     8,     4 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,   120,   144,    60 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   480,   512,   256,   512 );  \
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  4002,  4080,  2004 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  2016,  4080,  2004 );  \
 	                                                                        \
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
 
 #define BLI_CNTX_DEFAULT_BLKSZ_LIST_BERGAMO(blkszs) \
 	/*                                           s      d      c      z */  \
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    32,     3,    12 );  \
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,     6,     8,     4 );  \
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,    64,   144,    60 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,     8,     3,    12 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    24,     8,     4 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,   120,   144,    60 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   480,   512,   256,   512 );  \
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  3600,  4080,  2004 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  2016,  4080,  2004 );  \
 	                                                                        \
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
@@ -78,14 +78,14 @@ void bli_cntx_init_zen4( cntx_t* cntx )
 	  13,
 	  // gemm
 	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_skx_asm_32x12_l2,   FALSE,
-	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_zen4_asm_32x6,      FALSE,
+	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_avx512_asm_8x24,    TRUE,
 	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_haswell_asm_3x8,    TRUE,
 	  /*bli_zgemm_zen4_asm_12x4 is a column preferred kernel*/
 	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_zen4_asm_12x4,      FALSE,
 
 	  // Different  GEMM kernels are used for TRSM for zen4 architecture
 	  BLIS_GEMM_FOR_TRSM_UKR,       BLIS_FLOAT,    bli_sgemm_haswell_asm_6x16,  TRUE,
-	  BLIS_GEMM_FOR_TRSM_UKR,       BLIS_DOUBLE,   bli_dgemm_zen4_asm_8x24,     TRUE,
+	  BLIS_GEMM_FOR_TRSM_UKR,       BLIS_DOUBLE,   bli_dgemm_avx512_asm_8x24,   TRUE,
 	  BLIS_GEMM_FOR_TRSM_UKR,       BLIS_DCOMPLEX, bli_zgemm_zen4_asm_4x12,     TRUE,
 
 	  // gemmtrsm_l

@@ -466,9 +466,9 @@ INSTANTIATE_TEST_SUITE_P(
 );
 #endif
 
-#ifdef K_bli_dgemm_zen4_asm_8x24
+#ifdef K_bli_dgemm_avx512_asm_8x24
 INSTANTIATE_TEST_SUITE_P(
-    bli_dgemm_zen4_asm_8x24,
+    bli_dgemm_avx512_asm_8x24,
     dgemmGenericNat,
     ::testing::Combine(
         ::testing::Range(gtint_t(0), gtint_t(17), 1),   // values of k
@@ -477,7 +477,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values('r', 'c'),                    // storage
         ::testing::Values(8),                           // values of m
         ::testing::Values(24),                          // values of n
-        ::testing::Values(bli_dgemm_zen4_asm_8x24),
+        ::testing::Values(bli_dgemm_avx512_asm_8x24),
         ::testing::Values(true, false)                  // memory test
     ),
     ::dgemmGenericNatPrint()

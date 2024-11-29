@@ -183,12 +183,13 @@ void bli_packm_blk_var1
 		buf_kappa = bli_obj_buffer_for_1x1( dt_p, kappa_p );
 	}
 	
-#ifdef BLIS_KERNELS_ZEN5
-	// For DGEMM in ZEN5, scale by alpha during packing
+#ifdef BLIS_KERNELS_ZEN4
+	// For DGEMM in AVX512, scale by alpha during packing
 	if
 	( 
 		( bli_obj_dt( p ) == BLIS_DOUBLE ) &&
-		( bli_arch_query_id() == BLIS_ARCH_ZEN5 )
+		( ( bli_arch_query_id() == BLIS_ARCH_ZEN5 ) ||
+		  ( bli_arch_query_id() == BLIS_ARCH_ZEN4 ) )
 	)
 	{
 		bli_obj_scalar_detach( p, &kappa );

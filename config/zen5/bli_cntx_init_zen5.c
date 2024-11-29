@@ -87,7 +87,7 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 
 	  // Different  GEMM kernels are used for TRSM for zen4 architecture
 	  BLIS_GEMM_FOR_TRSM_UKR,       BLIS_FLOAT,    bli_sgemm_haswell_asm_6x16,  TRUE,
-	  BLIS_GEMM_FOR_TRSM_UKR,       BLIS_DOUBLE,   bli_dgemm_zen4_asm_8x24,     TRUE,
+	  BLIS_GEMM_FOR_TRSM_UKR,       BLIS_DOUBLE,   bli_dgemm_avx512_asm_8x24,   TRUE,
 	  BLIS_GEMM_FOR_TRSM_UKR,       BLIS_DCOMPLEX, bli_zgemm_zen4_asm_4x12,     TRUE,
 
 	  // gemmtrsm_l
