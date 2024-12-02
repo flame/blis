@@ -1062,11 +1062,34 @@ void bli_dnormfv_unb_var1
     switch ( id )
     {
         case BLIS_ARCH_ZEN5:
+#if defined(BLIS_KERNELS_ZEN4)
+
+        if( n <= 30 )
+            norm_fp = bli_dnorm2fv_unb_var1_avx2;
+        else
+            norm_fp = bli_dnorm2fv_unb_var1_avx512;
+
+    #ifdef __clang__
+        fast_path_thresh = 6000;
+    #else
+        fast_path_thresh = 4500;
+    #endif
+
+    #ifdef BLIS_ENABLE_OPENMP
+        simd_factor = 8;
+    #endif
+
+        break;
+#endif
         case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
 
-        norm_fp = bli_dnorm2fv_unb_var1_avx512;
-        fast_path_thresh = 4500;
+        if( n <= 250 )
+            norm_fp = bli_dnorm2fv_unb_var1_avx2;
+        else
+            norm_fp = bli_dnorm2fv_unb_var1_avx512;
+
+        fast_path_thresh = 4000;
 
     #ifdef BLIS_ENABLE_OPENMP
         simd_factor = 8;
