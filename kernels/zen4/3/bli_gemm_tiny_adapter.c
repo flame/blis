@@ -33,6 +33,77 @@
 */
 #include "blis.h"
 
+#define BLIS_PACK_BUFFER    1U
+
+/**
+ * TODO: Blocking related changes yet to be added.
+ * Which involves, separate call to kernel scaling of C matrix
+ * by actual Beta once for first iteration of K.
+ *
+ * Following K iteration uses Beta=1.0 where we need to call
+ * another set of kernels which instead of using FMAs while
+ * scaling by Beta and adding Alpha*A*B to C matrix, it simply can
+ * use vmuladdpd instruction.
+ */
+
+/**
+ * @brief
+ * 
+ * Here based N dimension, it is decided whether main kernel needs to be invoked
+ * or simply jump straight to edge kernel directly.
+ * All the main kernel + remaining 7 edge kernels are registered in kernel table,
+ * which is nothing but table of function pointer and each index represents N.
+ * 
+ * For N >= 8, main kernel is invoked. Remainder cases of N are handled from within.
+ * For N < 8, direclt N specific edge kernel is invoked for gemm computation.
+ * @note 
+ * N = 0 case never occurs.
+ */
+#define CALL_KERNEL\
+        if(N >= 8)\
+        {\
+            avx512kern_fp[8](   conja,\
+                                conjb,\
+                                M,\
+                                N,\
+                                K,\
+                                (double *)alpha,\
+                                (a_local + (0 * rs_a) + (0 * cs_a)), /*A matrix offset*/\
+                                rs_a,\
+                                cs_a,\
+                                (b_local + (0 * cs_b) + (0 * rs_b)), /*B matrix offset*/\
+                                rs_b,\
+                                cs_b,\
+                                (double *)beta,\
+                                (c_local + 0 * cs_c + 0 * rs_c),     /*C matrix offset*/\
+                                rs_c,\
+                                cs_c,\
+                                &aux,\
+                                NULL\
+                            );\
+        }\
+        else\
+        {\
+            avx512kern_fp[N](   conja,\
+                                conjb,\
+                                M,\
+                                N,\
+                                K,\
+                                (double *)alpha,\
+                                (a_local + (0 * rs_a) + (0 * cs_a)), /*A matrix offset*/\
+                                rs_a,\
+                                cs_a,\
+                                (b_local + (0 * cs_b) + (0 * rs_b)), /*B matrix offset*/\
+                                rs_b,\
+                                cs_b,\
+                                (double *)beta,\
+                                (c_local + 0 * cs_c + 0 * rs_c),     /*C matrix offset*/\
+                                rs_c,\
+                                cs_c,\
+                                &aux,\
+                                NULL\
+                            );\
+        }
 /**
  * @brief bli_dgemmsup_placeholder
  * 
@@ -74,6 +145,23 @@ static dgemmsup_ker_ft avx512kern_fp[] =
     bli_dgemmsup_rv_zen4_asm_24x7m_new,
     bli_dgemmsup_rv_zen4_asm_24x8m_new
 };
+
+#if (BLIS_PACK_BUFFER == 0)
+/**
+ * @brief 
+ * 
+ * packA_buffer holds packed A matrix in column stored storage.
+ * This buffer is used for packing when input is having A matrix
+ * transpose case(CRC, RRC).
+ * Here since our micro kernel is 24x8, we pack A matrix in 24xk tiles.
+ * So based on that the size of the buffer is selected as 24 * 1500(which
+ * is threshold for tiny sizes as of now. Which can eb tuned further).
+ * 
+ * @note 
+ * It has only been validated for inputs where mnk < 100.
+ */
+static double packA_buffer[24 * 1500] = {0};
+#endif
 
 err_t bli_dgemm_tiny_24x8
      (
@@ -131,12 +219,6 @@ err_t bli_dgemm_tiny_24x8
     storage |= ((1 * (rs_c == 1)) << 2); //3rd bit
 
     stor3_t stor_id = (stor3_t) storage;
-
-    //Early return, since we do not support dot product gemm kernels [FOR NOW]
-    if(stor_id == BLIS_CRC || stor_id == BLIS_RRC)
-    {
-        return BLIS_FAILURE;
-    }
 
     const bool is_rrr_rrc_rcr_crr = (
                                     stor_id == BLIS_RRR ||
@@ -197,72 +279,79 @@ err_t bli_dgemm_tiny_24x8
     inc_t ps_a_use = (24 * rs_a);
     bli_auxinfo_set_ps_a( ps_a_use, &aux );
 
-    /**
-     * TODO: Blocking related changes yet to be added.
-     * Which involves, separate call to kernel scaling of C matrix
-     * by actual Beta once for first iteration of K.
-     *
-     * Following K iteration uses Beta=1.0 where we need to call
-     * another set of kernels which instead of using FMAs while
-     * scaling by Beta and adding Alpha*A*B to C matrix, it simply can
-     * use vmuladdpd instruction.
-     */
+    if(stor_id == BLIS_CRC || stor_id == BLIS_RRC)
+    {
+        double *a_pkr = NULL;
 
     /**
      * @brief
-     * 
-     * Here based N dimension, it is decided whether main kernel needs to be invoked
-     * or simply jump straight to edge kernel directly.
-     * All the main kernel + remaining 7 edge kernels are registered in kernel table,
-     * which is nothing but table of function pointer and each index represents N.
-     * 
-     * For N >= 8, main kernel is invoked. Remainder cases of N are handled from within.
-     * For N < 8, direclt N specific edge kernel is invoked for gemm computation.
-     * @note N = 0 case never occurs.
+     * When BLIS_PACK_BUFFER macro is set to 1, we inquire and use buffer
+     * allocated from blis memory pool.
+     * Here the size is given hard-coded, reason behind it is as explain at the defination
+     * of local static packA_buffer.
+     * Once the buffer is acquired and after sanity check, it packs A matrix in column stored fashion
+     * and pass it cv kernel for computation.
+     * Here the macro CALL_KERNEL is final call to the kernel.
+     * Reason for having separate call to CALL_KERNEL inside the if..else.. condition is, when BLIS_PACK_BUFFER
+     * is enabled we acquire packing buffer from blis memory pool, which is also an already allocated static aligned
+     * memory buffer under the hood. So after using it needs to be returned to pool so if do not have separate conditions
+     * It will end up checking for allocated buffer even for the cases, where we do not even allocate a buffer to pack
+     * A matrix. Such as any storage scheme other than CRC and RRC.
      */
-    if(N >= 8)
-    {
-        avx512kern_fp[8](   conja,
-                            conjb,
-                            M,
-                            N,
-                            K,
-                            (double *)alpha,
-                            (a_local + (0 * rs_a) + (0 * cs_a)), /*A matrix offset*/
-                            rs_a,
-                            cs_a,
-                            (b_local + (0 * cs_b) + (0 * rs_b)), /*B matrix offset*/
-                            rs_b,
-                            cs_b,
-                            (double *)beta,
-                            (c_local + 0 * cs_c + 0 * rs_c),     /*C matrix offset*/
-                            rs_c,
-                            cs_c,
-                            &aux,
-                            NULL
-                        );
+#if (BLIS_PACK_BUFFER == 1)
+        mem_t local_mem_buf_A_s;
+        rntm_t rntm;
+        bli_pba_rntm_set_pba( &rntm );
+
+        // Get the buffer from the pool.
+        bli_pba_acquire_m(&rntm,
+                                24 * 1500,
+                                BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
+                                &local_mem_buf_A_s);
+
+        double *packA_buffer = bli_mem_buffer(&local_mem_buf_A_s);
+
+        if(packA_buffer == NULL)
+        {
+            return BLIS_FAILURE;
+        }
+#endif
+        a_pkr = packA_buffer;    
+
+        dim_t m_iter = M /24;
+        dim_t m_left = M % 24;
+
+        double *a_ptr = a_local;
+        double local_one = 1.0;
+
+        for(int i = 0; i < m_iter; i++)
+        {
+            bli_dpackm_zen4_asm_24xk(BLIS_NO_CONJUGATE, BLIS_PACKED_ROWS, 24, k, k, &local_one, a_ptr, rs_a, 1, a_pkr, 24, NULL);
+            a_ptr += 24 * rs_a;
+            a_pkr += 24 * k;
+        }
+
+        if(m_left)
+        {
+            bli_dpackm_zen4_asm_24xk(BLIS_NO_CONJUGATE, BLIS_PACKED_ROWS, m_left, k, k, &local_one, a_ptr, rs_a, 1, a_pkr, 24, NULL);
+        }
+
+        a_local = packA_buffer;
+        rs_a = 1;
+        cs_a = 24;
+        ps_a_use = (24 * k);
+        bli_auxinfo_set_ps_a( ps_a_use, &aux );
+
+        CALL_KERNEL
+
+#if (BLIS_PACK_BUFFER == 1)
+        bli_pba_release(&rntm,
+                            &local_mem_buf_A_s);
+#endif
     }
     else
     {
-        avx512kern_fp[N](   conja,
-                            conjb,
-                            M,
-                            N,
-                            K,
-                            (double *)alpha,
-                            (a_local + (0 * rs_a) + (0 * cs_a)), /*A matrix offset*/
-                            rs_a,
-                            cs_a,
-                            (b_local + (0 * cs_b) + (0 * rs_b)), /*B matrix offset*/
-                            rs_b,
-                            cs_b,
-                            (double *)beta,
-                            (c_local + 0 * cs_c + 0 * rs_c),     /*C matrix offset*/
-                            rs_c,
-                            cs_c,
-                            &aux,
-                            NULL
-                        );
+        CALL_KERNEL
     }
     return BLIS_SUCCESS;
 }
