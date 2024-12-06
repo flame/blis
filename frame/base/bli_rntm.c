@@ -545,7 +545,6 @@ dim_t bli_rntm_calc_num_threads_in
 #endif
 
 
-#ifdef AOCL_DYNAMIC
 // Calculates the optimum number of threads using m, n, k dimensions.
 // This function modifies only the local copy of rntm with optimum threads.
 // tl_rntm will remain unchanged. As a result, num_threads set by
@@ -560,6 +559,9 @@ void bli_nthreads_optimum(
 				 )
 {
 #ifndef BLIS_ENABLE_MULTITHREADING
+	return;
+#endif
+#ifndef AOCL_DYNAMIC
 	return;
 #endif
 
@@ -1495,6 +1497,7 @@ void bli_nthreads_optimum(
 	return;
 }
 
+#ifdef AOCL_DYNAMIC
 // Calculates the optimum number of threads along with the factorization
 // (ic, jc) using m, n, k dimensions. This function modifies only the local
 // copy of rntm with optimum threads. Since tl_rntm remains unchanged the

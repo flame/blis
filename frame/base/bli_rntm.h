@@ -82,7 +82,6 @@ dim_t bli_rntm_calc_num_threads_in
        rntm_t*  restrict rntm
      );
 
-#ifdef AOCL_DYNAMIC
 BLIS_EXPORT_BLIS void bli_nthreads_optimum
      (
        obj_t*  a,
@@ -92,6 +91,7 @@ BLIS_EXPORT_BLIS void bli_nthreads_optimum
        rntm_t* rntm
      );
 
+#ifdef AOCL_DYNAMIC
 err_t bli_smart_threading_sup
      (
        obj_t*  a,
