@@ -560,7 +560,7 @@ static inline float get_s4_to_f32_scale_val
         if ( ( pre_op->b_scl != NULL ) &&
              ( ( pre_op->b_scl )->scale_factor != NULL ) )
         {
-            if( pre_op->b_scl->scale_factor_type == FLOAT )
+            if( pre_op->b_scl->scale_factor_type == AOCL_GEMM_F32 )
             {
                 scale_factor = *( ( float* )( pre_op->b_scl )->scale_factor + j_scale );
             }
@@ -1367,11 +1367,11 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             { \
                 if( ( strcmp( bias_stor_type, "BF16" ) == 0 ) ) \
                 { \
-                    ( post_ops->bias )-> bias_stor_type = BFLOAT16; \
+                    ( post_ops->bias )-> bias_stor_type = AOCL_GEMM_BF16; \
                 } \
                 else if( ( strcmp( bias_stor_type, "F32" ) == 0 ) ) \
                 { \
-                    ( post_ops->bias )-> bias_stor_type = FLOAT; \
+                    ( post_ops->bias )-> bias_stor_type = AOCL_GEMM_F32; \
                 } \
                 else {} \
             } \
@@ -1662,14 +1662,14 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             ( ( post_ops->pre_ops )->b_scl )->scale_factor = malloc( num_groups * scale_factor_len * sizeof( float ) ); \
             if ( ( ( post_ops->pre_ops )->b_scl )->scale_factor == NULL ) { goto err_handler; } \
             GEN_FUNC_NAME(fill_array_,float)( ( ( post_ops->pre_ops )->b_scl )->scale_factor, num_groups * scale_factor_len ); \
-            ((post_ops->pre_ops)->b_scl)->scale_factor_type = FLOAT; \
+            ((post_ops->pre_ops)->b_scl)->scale_factor_type = AOCL_GEMM_F32; \
         } \
         else \
         { \
             ( ( post_ops->pre_ops )->b_scl )->scale_factor = malloc( num_groups * scale_factor_len * sizeof( bfloat16 ) ); \
             if ( ( ( post_ops->pre_ops )->b_scl )->scale_factor == NULL ) { goto err_handler; } \
             GEN_FUNC_NAME(fill_array_,bfloat16)( ( ( post_ops->pre_ops )->b_scl )->scale_factor, num_groups * scale_factor_len ); \
-            ((post_ops->pre_ops)->b_scl)->scale_factor_type = BFLOAT16; \
+            ((post_ops->pre_ops)->b_scl)->scale_factor_type = AOCL_GEMM_BF16; \
         } \
  \
          ( post_ops->pre_ops )->seq_length = 1; \

@@ -62,9 +62,12 @@ typedef enum
 
 typedef enum
 {
-	FLOAT = 0,
-	BFLOAT16 = 1,
-	NULLTYPE = 2,
+	AOCL_GEMM_F32 = 0,
+	AOCL_GEMM_BF16 = 1,
+	AOCL_GEMM_INT8 = 2,
+	AOCL_GEMM_UINT8 = 3,
+	AOCL_GEMM_INT4 = 4,
+	NULLTYPE = 5,
 } AOCL_PARAMS_STORAGE_TYPES;
 
 typedef struct

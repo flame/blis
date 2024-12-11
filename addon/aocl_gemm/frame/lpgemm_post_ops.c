@@ -120,7 +120,7 @@ err_t lpgemm_translate_to_pre_ops_list(
 			(pre_op_unparsed->b_scl)->scale_factor,
 			pre_op_unparsed->b_zp==NULL? 0: (pre_op_unparsed->b_zp)->zero_point_len,
 			(pre_op_unparsed->b_scl)->scale_factor_len,
-			(pre_op_unparsed->b_scl)->scale_factor_type == BFLOAT16 ? BF16 : F32
+			(pre_op_unparsed->b_scl)->scale_factor_type == AOCL_GEMM_BF16 ? BF16 : F32
 		);
 
 		// Simulating linked link using an array.
@@ -292,10 +292,10 @@ err_t lpgemm_translate_to_post_ops_list
 						AOCL_STORAGE_TYPE tmp_bias_stor_type = NONE;
 						switch ( ( post_op_unparsed->bias + b_i )->bias_stor_type )
 						{
-							case FLOAT:
+							case AOCL_GEMM_F32:
 									tmp_bias_stor_type = F32;
 									break;
-							case BFLOAT16:
+							case AOCL_GEMM_BF16:
 									tmp_bias_stor_type = BF16;
 									break;
 							default:

@@ -39,7 +39,6 @@
 #include "aocl_gemm_interface_apis.h"
 #include "aocl_util_interface_apis.h"
 #include "aocl_eltwise_ops_interface_apis.h"
-#include "aocl_bf16_type.h"
 #include "lpgemm_config.h"
 #include "lpgemm_post_ops.h"
 #include "lpgemm_kernels.h"

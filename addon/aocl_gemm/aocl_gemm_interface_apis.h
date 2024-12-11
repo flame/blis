@@ -35,7 +35,7 @@
 #ifndef AOCL_GEMM_INTERFACE_H
 #define AOCL_GEMM_INTERFACE_H
 
-#include "aocl_gemm_post_ops.h"
+#include "lpgemm_types.h"
 #include "aocl_bf16_type.h"
 
 // Returns the size of buffer in bytes required for the reordered matrix.

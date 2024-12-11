@@ -35,7 +35,7 @@
 #ifndef AOCL_ELTWISE_OPS_INTERFACE_H
 #define AOCL_ELTWISE_OPS_INTERFACE_H
 
-#include "aocl_gemm_post_ops.h"
+#include "lpgemm_types.h"
 #include "aocl_bf16_type.h"
 
 #define AOCL_UTIL_ELTWISE_OPS(A_type,B_type,LP_SFX) \

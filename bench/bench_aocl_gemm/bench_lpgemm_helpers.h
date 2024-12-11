@@ -205,7 +205,7 @@ static inline float get_bias_post_op_val_ ## BLAS_SFX \
      ) \
 { \
     float ret_val = 0.0; \
-    if(bais_stor_type == FLOAT) \
+    if(bais_stor_type == AOCL_GEMM_F32) \
     { \
         return *( ( float* )post_op_bias_ptr + j ); \
     } \
@@ -221,7 +221,7 @@ static inline ACCUM_type get_bias_post_op_val_ ## BLAS_SFX \
        AOCL_PARAMS_STORAGE_TYPES bais_stor_type \
      ) \
 { \
-    if(bais_stor_type == BFLOAT16) \
+    if(bais_stor_type == AOCL_GEMM_BF16) \
     { \
        float ret_val = 0.0; \
         bfloat16_to_float( *( ( bfloat16* )post_op_bias_ptr + j ), &ret_val ); \

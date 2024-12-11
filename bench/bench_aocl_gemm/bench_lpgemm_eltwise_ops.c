@@ -739,11 +739,11 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         { \
             if( ( strcmp( bias_stor_type, "BF16" ) == 0 ) ) \
             { \
-                ( post_ops->bias )-> bias_stor_type = BFLOAT16; \
+                ( post_ops->bias )-> bias_stor_type = AOCL_GEMM_BF16; \
             } \
             else if( ( strcmp( bias_stor_type, "F32" ) == 0 ) ) \
             { \
-                ( post_ops->bias )-> bias_stor_type = FLOAT; \
+                ( post_ops->bias )-> bias_stor_type = AOCL_GEMM_F32; \
             } \
             else {} \
         } \
