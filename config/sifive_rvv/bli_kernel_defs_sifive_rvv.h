@@ -47,9 +47,9 @@
 #define BLIS_PACKMR_c   8
 #define BLIS_PACKMR_z   8
 
-#define BLIS_NR_s   ( 4 * __riscv_v_min_vlen / 32 )
-#define BLIS_NR_d   ( 4 * __riscv_v_min_vlen / 64 )
-#define BLIS_NR_c   ( 2 * __riscv_v_min_vlen / 32 )
-#define BLIS_NR_z   ( 2 * __riscv_v_min_vlen / 64 )
+#define BLIS_NR_s   -1
+#define BLIS_NR_d   -1
+#define BLIS_NR_c   -1
+#define BLIS_NR_z   -1
 //#endif
 

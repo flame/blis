@@ -77,7 +77,7 @@
 #define LMUL_NR m4
 #define FLT_SIZE sizeof(float)
 #define MR 7
-#define NR ( 4 * __riscv_v_min_vlen / 32 )
+#define NR ( 4 * __riscv_vlenb() / 4 )
 
 #include "./bli_packm_sifive_rvv_intr_real.c"
 
@@ -100,7 +100,7 @@
 #define LMUL_NR m4
 #define FLT_SIZE sizeof(double)
 #define MR 7
-#define NR ( 4 * __riscv_v_min_vlen / 64 )
+#define NR ( 4 * __riscv_vlenb() / 8 )
 
 #include "./bli_packm_sifive_rvv_intr_real.c"
 
@@ -124,7 +124,7 @@
 #define LMUL_NR m2
 #define FLT_SIZE sizeof(float)
 #define MR 6
-#define NR ( 2 * __riscv_v_min_vlen / 32 )
+#define NR ( 2 * __riscv_vlenb() / 4 )
 
 #include "./bli_packm_sifive_rvv_intr_complex.c"
 
@@ -149,7 +149,7 @@
 #define LMUL_NR m2
 #define FLT_SIZE sizeof(double)
 #define MR 6
-#define NR ( 2 * __riscv_v_min_vlen / 64 )
+#define NR ( 2 * __riscv_vlenb() / 8 )
 
 #include "./bli_packm_sifive_rvv_intr_complex.c"
 

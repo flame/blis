@@ -46,7 +46,7 @@ THIS_CONFIG    := sifive_rvv
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
-CMISCFLAGS_SIFIVE := -mcmodel=medany -march=rv64gcv_zba_zbb_zvl128b -mabi=lp64d
+CMISCFLAGS_SIFIVE := -mcmodel=medany -march=rv64gcv_zba_zbb -mabi=lp64d
 CMISCFLAGS_SIFIVE_OTHER :=
 CPPROCFLAGS    :=
 CMISCFLAGS     := $(CMISCFLAGS_SIFIVE) $(CMISCFLAGS_SIFIVE_OTHER) \
