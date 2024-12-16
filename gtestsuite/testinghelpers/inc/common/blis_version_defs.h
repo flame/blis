@@ -68,6 +68,7 @@
     #define K_bli_daxpbyv_zen_int_avx512 1
     #define K_bli_daxpyf_zen_int_avx512 1
     #define K_bli_dcopyv_zen4_asm_avx512 1
+    #define K_bli_dgemm_avx512_asm_8x24 1
     #define K_bli_dnorm2fv_unb_var1_avx512 1
     #define K_bli_dscal2v_zen_int 1
     #define K_bli_dscal2v_zen_int_avx512 1
@@ -144,7 +145,7 @@
     #define K_bli_ddotv_zen_int_avx512 1
     #define K_bli_dgemm_haswell_asm_6x8 1
     #define K_bli_dgemm_zen4_asm_32x6 1
-    #define K_bli_dgemm_avx512_asm_8x24 1
+    #define K_bli_dgemm_zen4_asm_8x24 1
     #define K_bli_dgemmsup_rd_haswell_asm_6x8m 1
     #define K_bli_dgemmsup_rd_haswell_asm_6x8n 1
     #define K_bli_dgemmsup_rv_haswell_asm_6x8m 1
@@ -239,3 +240,8 @@
 
 #endif
 
+// If kernels have been removed, we need to undefine them here.
+
+#ifdef AOCL_DEV
+    #undef K_bli_dgemm_zen4_asm_8x24
+#endif

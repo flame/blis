@@ -527,6 +527,26 @@ INSTANTIATE_TEST_SUITE_P(
     ::dgemmGenericNatPrint()
 );
 #endif
+
+#ifdef K_bli_dgemm_zen4_asm_8x24
+// Old version of bli_dgemm_avx512_asm_8x24 kernel, removed in 5.1
+INSTANTIATE_TEST_SUITE_P(
+    bli_dgemm_zen4_asm_8x24,
+    dgemmGenericNat,
+    ::testing::Combine(
+        ::testing::Range(gtint_t(0), gtint_t(17), 1),   // values of k
+        ::testing::Values(2.0, 1.0, -1.0),              // alpha value
+        ::testing::Values(1.0, 0.0, -1.0, 2.3),         // beta value
+        ::testing::Values('r', 'c'),                    // storage
+        ::testing::Values(8),                           // values of m
+        ::testing::Values(24),                          // values of n
+        ::testing::Values(bli_dgemm_zen4_asm_8x24),
+        ::testing::Values(true, false)                  // memory test
+    ),
+    ::dgemmGenericNatPrint()
+);
+#endif
+
 #endif // defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
