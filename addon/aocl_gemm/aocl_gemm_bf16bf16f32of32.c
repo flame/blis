@@ -47,14 +47,6 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	trans_t blis_transa;
 	trans_t blis_transb;
 
-    //K must be even for bf16 API's
-    if(k & 0x1)
-    {
-        bli_print_msg(" K Value must be even for BF16 API's \n",
-                      __FILE__, __LINE__);
-        return ;
-    }
-
 	// Check if avx512_vnni ISA is supported, lpgemm matmul only works with it.
 	if ( bli_cpuid_is_avx512bf16_supported() == FALSE )
 	{

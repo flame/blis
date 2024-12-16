@@ -37,36 +37,56 @@
 
 #include "lpgemm_types.h"
 
+void packb_nr64_bf16bf16f32of32_reference
+(
+  bfloat16*       pack_b,
+  const bfloat16* b,
+  const dim_t     rs_b,
+  const dim_t     cs_b,
+  const dim_t     NC,
+  const dim_t     KC,
+  dim_t*          rs_p,
+  dim_t*          cs_p
+);
+
+void reorderb_nr64_bf16bf16f32of32_reference
+(
+    lpgemm_obj_t*  b,
+    lpgemm_obj_t*  b_reorder,
+    rntm_t*        rntm,
+    lpgemm_cntx_t* lcntx
+);
+
 void reorderb_nr64_bf16bf16f32of32
-     (
-       lpgemm_obj_t * b,
-       lpgemm_obj_t * b_reorder,
-       rntm_t*        rntm,
-       lpgemm_cntx_t* lcntx
-     );
+(
+  lpgemm_obj_t * b,
+  lpgemm_obj_t * b_reorder,
+  rntm_t*        rntm,
+  lpgemm_cntx_t* lcntx
+);
 
 void reorderb_nr64_bf16s4f32of32
-     (
-       lpgemm_obj_t * b,
-       lpgemm_obj_t * b_reorder,
-       rntm_t*        rntm,
-       lpgemm_cntx_t* lcntx
-     );
+(
+  lpgemm_obj_t * b,
+  lpgemm_obj_t * b_reorder,
+  rntm_t*        rntm,
+  lpgemm_cntx_t* lcntx
+);
 
 void reorderb_mxp_nr64_f32obf16
-     (
-       lpgemm_obj_t * b,
-       lpgemm_obj_t * b_reorder,
-       rntm_t*        rntm,
-       lpgemm_cntx_t* lcntx
-     );
+(
+  lpgemm_obj_t * b,
+  lpgemm_obj_t * b_reorder,
+  rntm_t*        rntm,
+  lpgemm_cntx_t* lcntx
+);
 
 void unreorderb_nr64_bf16bf16f32of32
-     (
-       lpgemm_obj_t * b,
-       lpgemm_obj_t * b_reorder,
-       rntm_t*        rntm,
-       lpgemm_cntx_t* lcntx
-     );
+(
+  lpgemm_obj_t * b,
+  lpgemm_obj_t * b_reorder,
+  rntm_t*        rntm,
+  lpgemm_cntx_t* lcntx
+);
 
 #endif // LPGEMM_REORDER_H
