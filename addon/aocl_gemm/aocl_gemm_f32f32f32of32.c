@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,9 +41,23 @@
 #include "lpgemm_config.h"
 #include "lpgemm_utils.h"
 #include "lpgemm_5loop_interface_apis.h"
+#include "lpgemm_logger.h"
 
 AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 {
+	LPGEMM_START_LOGGER();
+	LPGEMM_WRITE_LOGGER \
+	(
+	  "f32f32f32of32", \
+	  order, transa, transb, \
+	  m, n, k, \
+	  ( ( float ) alpha ), \
+	  lda, mem_format_a, \
+	  ldb, mem_format_b, \
+	  ( ( float ) beta ), \
+	  ldc, post_op_unparsed \
+	);
+
 	trans_t blis_transa;
 	trans_t blis_transb;
 
@@ -52,7 +66,7 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	{
 		bli_print_msg(" AVX2 ISA not supported by processor, "
 				"cannot perform f32f32f32 gemm.", __FILE__, __LINE__ );
-		return; // Error.
+		goto err_hndl;
 	}
 
 	/* Initialize BLIS. */
@@ -61,11 +75,8 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	// Initialize lpgemm context.
 	aocl_lpgemm_init_global_cntx();
 
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), transa, transb, m, n, k,\
-	      (void*)&alpha, lda, ldb, (void*)&beta, ldc);
-
 	// check for validity of params.
+	int err_no = 0;
 	AOCL_GEMM_CHECK
 	(
 	  "f32f32f32of32",
@@ -73,8 +84,13 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	  m, n, k,
 	  a, lda, mem_format_a,
 	  b, ldb, mem_format_b,
-	  c, ldc
+	  c, ldc,
+	  err_no
 	);
+	if ( err_no != 0 )
+	{
+		goto err_hndl;
+	}
 
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
 	bli_param_map_netlib_to_blis_trans( transa, &blis_transa );
@@ -113,7 +129,7 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	if ( ( is_row_major == TRUE ) && ( mtag_a == REORDERED ) )
 	{
 		bli_print_msg(" Reordering of A matrix is not supported.", __FILE__, __LINE__ );
-		return; // Error.
+		goto err_hndl;
 	}
 
 	// Inputs swapped in column major, A becomes B from kernel point of view.
@@ -121,7 +137,7 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	{
 		bli_print_msg(" Reordering of column major matrices is not supported.", 
 			__FILE__, __LINE__ );
-		return; //Error
+		goto err_hndl;
 	}
 
 	// By default enable packing for B matrix. Before the 5 loop, based on
@@ -159,7 +175,10 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	  m, n
 	);
 
-	if( err != BLIS_SUCCESS ) return;
+	if( err != BLIS_SUCCESS )
+	{
+		goto err_hndl;
+	}
 
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
@@ -233,5 +252,6 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	}
 #endif
 
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+err_hndl:;
+	LPGEMM_STOP_LOGGER();
 }

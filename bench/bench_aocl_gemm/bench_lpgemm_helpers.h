@@ -43,13 +43,14 @@
 #include <float.h>
 #include <math.h>
 #include <omp.h>
+#include <limits.h>
 
 #include "blis.h"
 
 // Used to clip downscaled output, will be set in the main loop based
 // on the accumulation and C data type.
-int64_t DSCALE_CLIP_MIN = 0;
-int64_t DSCALE_CLIP_MAX = 0;
+int64_t DSCALE_CLIP_MIN = INT_MIN;
+int64_t DSCALE_CLIP_MAX = INT_MAX;
 
 // Mode can be one of the follwoing:
 // 1. p - performance, used for benchmarks.
@@ -434,16 +435,16 @@ static inline void mat_mul_get_output_type_valfloatbfloat16
        float* temp_accum
      )
 {
-	/* Fix for rounding bias. */
-	uint32_t inter_temp;
-	memcpy( &inter_temp, temp_accum, sizeof( float ) );
+    /* Fix for rounding bias. */
+    uint32_t inter_temp;
+    memcpy( &inter_temp, temp_accum, sizeof( float ) );
 
-	/* Check if 16th bit is set */
-	uint32_t tlsb = ( inter_temp & ( uint32_t )0x00010000 ) > 16;
+    /* Check if 16th bit is set */
+    uint32_t tlsb = ( inter_temp & ( uint32_t )0x00010000 ) > 16;
 
-	/* Adding rounding bias. */
-	uint32_t rounded = inter_temp + ( uint32_t )0x00007FFF + tlsb;
-	memcpy( temp_accum, &rounded, sizeof( float ) );
+    /* Adding rounding bias. */
+    uint32_t rounded = inter_temp + ( uint32_t )0x00007FFF + tlsb;
+    memcpy( temp_accum, &rounded, sizeof( float ) );
 
     float_to_bf16( temp_accum, out_temp_accum );
 }
@@ -772,6 +773,16 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
                     is_scalar_scale = TRUE; \
                 } \
             } \
+            else if ( strcmp( ops_tok, "zp" ) == 0 ) \
+            { \
+                ops_tok = strtok( NULL, ", " ); \
+                str_tolower( ops_tok ); \
+                if ( ( strcmp( ops_tok, "scalar" ) == 0 ) || \
+                     ( strcmp( ops_tok, "s" ) == 0 ) ) \
+                { \
+                    is_scalar_zp = TRUE; \
+                } \
+            } \
             else if ( strcmp( ops_tok, "matrix_add" ) == 0 ) \
             { \
                 post_ops->seq_vector[cur_op_index] = MATRIX_ADD; \
@@ -812,15 +823,15 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             } \
             else if ( strcmp( ops_tok, "pre_op_zp" ) == 0 ) \
             { \
-               ops_tok = strtok( NULL, ", " ); \
+                ops_tok = strtok( NULL, ", " ); \
                 str_tolower( ops_tok ); \
                 if ( ( strcmp( ops_tok, "scalar" ) == 0 ) || \
                      ( strcmp( ops_tok, "s" ) == 0 ) ) \
                 { \
                     /* set scalar zp */\
                     zp_vec_length = 1; \
-                }else if ( ( strcmp( ops_tok, "vector" ) == 0 ) || \
-                           ( strcmp( ops_tok, "v" ) == 0 ) ) \
+                } \
+                else \
                 { \
                     /* set vector zp */\
                     zp_vec_length = n; \
@@ -835,8 +846,8 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
                 { \
                     /* set scalar scale */\
                     is_pre_op_scale_scalar = TRUE; \
-                }else if ( ( strcmp( ops_tok, "vector" ) == 0 ) || \
-                           ( strcmp( ops_tok, "v" ) == 0 ) ) \
+                } \
+                else \
                 { \
                     /* set vector scale */\
                     is_pre_op_scale_scalar = FALSE; \
@@ -1144,10 +1155,11 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         if ( post_ops->pre_ops == NULL ) { goto err_handler; } \
 \
         dim_t num_groups = 1; \
-        if(quant_group_size == 0) \
+        if (quant_group_size == 0) \
         { \
             post_ops->pre_ops->group_size = k; \
-        }else \
+        } \
+        else \
         { \
             post_ops->pre_ops->group_size = quant_group_size; \
             if(is_group_quant) \
@@ -1157,6 +1169,10 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         } \
 \
         ( post_ops->pre_ops )->b_zp = NULL; \
+        if ( zp_vec_length == 0 ) \
+        { \
+            zp_vec_length = n; \
+        } \
         if( zp_vec_length != 0 ) \
         { \
             ( post_ops->pre_ops )->b_zp = malloc( sizeof( aocl_pre_op_zp ) ); \

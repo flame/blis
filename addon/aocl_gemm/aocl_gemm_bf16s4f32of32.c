@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,9 +41,23 @@
 #include "lpgemm_5loop_interface_apis.h"
 #include "lpgemm_config.h"
 #include "lpgemm_utils.h"
+#include "lpgemm_logger.h"
 
 AOCL_GEMM_MATMUL(bfloat16, int8_t, float, float, bf16s4f32of32)
 {
+	LPGEMM_START_LOGGER();
+	LPGEMM_WRITE_LOGGER \
+	(
+	  "bf16s4f32of32", \
+	  order, transa, transb, \
+	  m, n, k, \
+	  ( ( float ) alpha ), \
+	  lda, mem_format_a, \
+	  ldb, mem_format_b, \
+	  ( ( float ) beta ), \
+	  ldc, post_op_unparsed \
+	);
+
     trans_t blis_transa;
     trans_t blis_transb;
 
@@ -53,7 +67,7 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, float, float, bf16s4f32of32)
         bli_print_msg(" AVX512_BF16 ISA not supported by processor, "
                       "cannot perform bf16bf16f32 gemm.",
                       __FILE__, __LINE__);
-        return; // Error.
+		goto err_hndl;
     }
 
     /* Initialize BLIS. */
@@ -63,13 +77,18 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, float, float, bf16s4f32of32)
     aocl_lpgemm_init_global_cntx();
 
     // check for validity of params.
+	int err_no = 0;
     AOCL_GEMM_CHECK(
         "bf16s4f32of32",
         order, transa, transb,
         m, n, k,
         a, lda, mem_format_a,
         b, ldb, mem_format_b,
-        c, ldc);
+        c, ldc, err_no);
+	if ( err_no != 0 )
+	{
+		goto err_hndl;
+	}
 
     /* Map BLAS chars to their corresponding BLIS enumerated type value. */
     bli_param_map_netlib_to_blis_trans(transa, &blis_transa);
@@ -108,14 +127,14 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, float, float, bf16s4f32of32)
     if ((is_row_major == TRUE) && (mtag_a == REORDERED))
     {
         bli_print_msg(" Reordering of A matrix is not supported in row major case.", __FILE__, __LINE__);
-        return;
+		goto err_hndl;
     }
     // Inputs swapped in column major, A becomes B from kernel point of view.
     // Reorder is not supported for column major matrices.
     else if ((is_column_major == TRUE) && ((mtag_b == REORDERED) || (mtag_a == REORDERED)))
     {
         bli_print_msg(" Reordering of column major matrices is not supported.", __FILE__, __LINE__);
-        return;
+		goto err_hndl;
     }
 
     // From 5-loop function point of view
@@ -155,7 +174,9 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, float, float, bf16s4f32of32)
                     m, n, k
                 );
     if (err != BLIS_SUCCESS)
-        return;
+	{
+		goto err_hndl;
+	}
 
     // Convert post op struct to post op linked list format.
     lpgemm_post_op post_op_list[AOCL_MAX_POST_OPS];
@@ -167,7 +188,9 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, float, float, bf16s4f32of32)
                     m, n
                 );
     if (err != BLIS_SUCCESS)
-        return;
+	{
+		goto err_hndl;
+	}
 
     // Initialize a local runtime with global settings if necessary. Note
     // that in the case that a runtime is passed in, we make a local copy.
@@ -183,7 +206,7 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, float, float, bf16s4f32of32)
     {
         // Swapping inputs not possible in case of mixed precision.
         bli_print_msg(" column major not supported yet in bf16s4f32o<f32/bf16>.", __FILE__, __LINE__);
-        return;
+		goto err_hndl;
     }
     else
     {
@@ -204,7 +227,7 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, float, float, bf16s4f32of32)
     {
         // Swapping inputs not possible in case of mixed precision.
         bli_print_msg(" column major not supported yet in bf16s4f32o<f32/bf16>.", __FILE__, __LINE__);
-        return;
+		goto err_hndl;
     }
     else
     {
@@ -220,10 +243,26 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, float, float, bf16s4f32of32)
         );
     }
 #endif
+
+err_hndl:;
+	LPGEMM_STOP_LOGGER();
 }
 
 AOCL_GEMM_MATMUL(bfloat16, int8_t, bfloat16, float, bf16s4f32obf16)
 {
+	LPGEMM_START_LOGGER();
+	LPGEMM_WRITE_LOGGER \
+	(
+	  "bf16s4f32obf16", \
+	  order, transa, transb, \
+	  m, n, k, \
+	  ( ( float ) alpha ), \
+	  lda, mem_format_a, \
+	  ldb, mem_format_b, \
+	  ( ( float ) beta ), \
+	  ldc, post_op_unparsed \
+	);
+
     trans_t blis_transa;
     trans_t blis_transb;
 
@@ -233,7 +272,7 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, bfloat16, float, bf16s4f32obf16)
         bli_print_msg(" AVX512_BF16 ISA not supported by processor, "
                       "cannot perform bf16bf16f32 gemm.",
                       __FILE__, __LINE__);
-        return; // Error.
+		goto err_hndl;
     }
 
     /* Initialize BLIS. */
@@ -243,13 +282,18 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, bfloat16, float, bf16s4f32obf16)
     aocl_lpgemm_init_global_cntx();
 
     // check for validity of params.
+	int err_no = 0;
     AOCL_GEMM_CHECK(
         "bf16s4f32obf16",
         order, transa, transb,
         m, n, k,
         a, lda, mem_format_a,
         b, ldb, mem_format_b,
-        c, ldc);
+        c, ldc, err_no);
+	if ( err_no != 0 )
+	{
+		goto err_hndl;
+	}
 
     /* Map BLAS chars to their corresponding BLIS enumerated type value. */
     bli_param_map_netlib_to_blis_trans(transa, &blis_transa);
@@ -289,14 +333,14 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, bfloat16, float, bf16s4f32obf16)
     if ((is_row_major == TRUE) && (mtag_a == REORDERED))
     {
         bli_print_msg(" Reordering of A matrix is not supported in row major case.", __FILE__, __LINE__);
-        return;
+		goto err_hndl;
     }
     // Inputs swapped in column major, A becomes B from kernel point of view.
     // Reorder is not supported for column major matrices.
     else if ((is_column_major == TRUE) && ((mtag_b == REORDERED) || (mtag_a == REORDERED)))
     {
         bli_print_msg(" Reordering of column major matrices is not supported.", __FILE__, __LINE__);
-        return;
+		goto err_hndl;
     }
 
     // From 5-loop function point of view
@@ -334,7 +378,9 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, bfloat16, float, bf16s4f32obf16)
         m, n, k);
 
     if (err != BLIS_SUCCESS)
-        return;
+	{
+		goto err_hndl;
+	}
 
     // Convert post op struct to post op linked list format.
     lpgemm_post_op post_op_list[AOCL_MAX_POST_OPS];
@@ -344,7 +390,9 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, bfloat16, float, bf16s4f32obf16)
         m, n);
 
     if (err != BLIS_SUCCESS)
-        return;
+	{
+		goto err_hndl;
+	}
 
     // Initialize a local runtime with global settings if necessary. Note
     // that in the case that a runtime is passed in, we make a local copy.
@@ -360,7 +408,7 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, bfloat16, float, bf16s4f32obf16)
     {
         // Swapping inputs not possible in case of mixed precision.
         bli_print_msg(" column major not supported yet in bf16s4f32o<f32/bf16>.", __FILE__, __LINE__);
-        return;
+		goto err_hndl;
     }
     else
     {
@@ -381,7 +429,7 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, bfloat16, float, bf16s4f32obf16)
     {
         // Swapping inputs not possible in case of mixed precision.
         bli_print_msg(" column major not supported yet in bf16s4f32o<f32/bf16>.", __FILE__, __LINE__);
-        return;
+		goto err_hndl;
     }
     else
     {
@@ -395,4 +443,7 @@ AOCL_GEMM_MATMUL(bfloat16, int8_t, bfloat16, float, bf16s4f32obf16)
             post_op_list, BF16);
     }
 #endif
+
+err_hndl:;
+	LPGEMM_STOP_LOGGER();
 }

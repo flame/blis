@@ -1046,7 +1046,6 @@ GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int8_t,int16_t,float,s8s8s16os8,s8s8s
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(bfloat16,int8_t,float,float,float,bf16s4f32of32,bf16bf16f32obf16)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(bfloat16,int8_t,bfloat16,float,float,bf16s4f32obf16,bf16bf16f32obf16)
 
-
 GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int16_t,float,int16_t,u8s8s16os16)
 GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int32_t,float,int32_t,u8s8s32os32)
 GEN_MAT_MUL_POST_OPS_CREATOR(bfloat16,float,float,bfloat16,bf16bf16f32of32)
@@ -1431,6 +1430,8 @@ int main( int argc, char** argv )
                 strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
                 global_dscale_out = 'n';
                 global_pre_op = 'n';
+                DSCALE_CLIP_MIN = INT_MIN;
+                DSCALE_CLIP_MAX = INT_MAX;
                 GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os32)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
@@ -1462,6 +1463,8 @@ int main( int argc, char** argv )
                 strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
                 global_dscale_out = 'n';
                 global_pre_op = 'n';
+                DSCALE_CLIP_MIN = INT_MIN;
+                DSCALE_CLIP_MAX = INT_MAX;
 
                 if ( ( op_b != 'r' ) && ( op_b != 'R' ) )
                 {
@@ -1492,12 +1495,15 @@ int main( int argc, char** argv )
                   post_ops_str_dest, FALSE
                 );
             }
+#if 0
             if ( ( strcmp( gemm_type_str, "u8s8s16os16" ) == 0 ) ||
                  ( strcmp( gemm_type_str, "*" ) == 0 ) )
             {
                 strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
                 global_dscale_out = 'n';
                 global_pre_op = 'n';
+                DSCALE_CLIP_MIN = SHRT_MIN;
+                DSCALE_CLIP_MAX = SHRT_MAX;
                 GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s16os16)
                 (
                     fin, fout, stor_order, transa, transb, op_a, op_b,
@@ -1535,6 +1541,7 @@ int main( int argc, char** argv )
                     post_ops_str_dest, FALSE
                 );
             }
+#endif
             if ( ( strcmp( gemm_type_str, "bf16bf16f32of32" ) == 0 ) ||
                  ( strcmp( gemm_type_str, "*" ) == 0 ) )
             {
@@ -1609,6 +1616,8 @@ int main( int argc, char** argv )
                 strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
                 global_dscale_out = 'n';
                 global_pre_op = 'n';
+                DSCALE_CLIP_MIN = INT_MIN;
+                DSCALE_CLIP_MAX = INT_MAX;
                 GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32os32)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
@@ -1631,12 +1640,15 @@ int main( int argc, char** argv )
                   post_ops_str_dest, FALSE
                 );
             }
+#if 0
             if ( ( strcmp( gemm_type_str, "s8s8s16os16" ) == 0 ) ||
                  ( strcmp( gemm_type_str, "*" ) == 0 ) )
             {
                 strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
                 global_dscale_out = 'n';
                 global_pre_op = 'n';
+                DSCALE_CLIP_MIN = SHRT_MIN;
+                DSCALE_CLIP_MAX = SHRT_MAX;
                 GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s16os16)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
@@ -1659,6 +1671,7 @@ int main( int argc, char** argv )
                   post_ops_str_dest, FALSE
                 );
             }
+#endif
         }
     }
 

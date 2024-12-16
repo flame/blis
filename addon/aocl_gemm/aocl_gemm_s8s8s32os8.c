@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,9 +41,23 @@
 #include "lpgemm_5loop_interface_apis.h"
 #include "lpgemm_config.h"
 #include "lpgemm_utils_s8.h"
+#include "lpgemm_logger.h"
 
 AOCL_GEMM_MATMUL(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
 {
+	LPGEMM_START_LOGGER();
+	LPGEMM_WRITE_LOGGER \
+	(
+	  "s8s8s32os8", \
+	  order, transa, transb, \
+	  m, n, k, \
+	  ( ( float ) alpha ), \
+	  lda, mem_format_a, \
+	  ldb, mem_format_b, \
+	  ( ( float ) beta ), \
+	  ldc, post_op_unparsed \
+	);
+
 	trans_t blis_transa;
 	trans_t blis_transb;
 
@@ -52,7 +66,7 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
 	{
 		bli_print_msg(" AVX512_VNNI ISA not supported by processor, "
 				"cannot perform s8s8s32 gemm.", __FILE__, __LINE__ );
-		return; // Error.
+		goto err_hndl;
 	}
 
 	/* Initialize BLIS. */
@@ -62,6 +76,7 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
 	aocl_lpgemm_init_global_cntx();
 
 	// check for validity of params.
+	int err_no = 0;
 	AOCL_GEMM_CHECK
 	(
 	  "s8s8s32os8",
@@ -69,8 +84,13 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
 	  m, n, k,
 	  a, lda, mem_format_a,
 	  b, ldb, mem_format_b,
-	  c, ldc
+	  c, ldc,
+	  err_no
 	);
+	if ( err_no != 0 )
+	{
+		goto err_hndl;
+	}
 
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
 	bli_param_map_netlib_to_blis_trans( transa, &blis_transa );
@@ -85,7 +105,7 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
 	{
 		bli_print_msg("Column major inputs not supported with Post-ops.",
 					  __FILE__, __LINE__);
-		return;
+		goto err_hndl;
 	}
 	
 	// The strides are set assuming a row major kernel.
@@ -120,7 +140,7 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
 	{
 		bli_print_msg(" Reordering of A matrix is not supported in " 
 						" row major case.", __FILE__, __LINE__);
-		return;
+		goto err_hndl;
 	}
 	// Inputs swapped in column major, A becomes B from kernel point of view.
 	// Reorder is not supported for column major matrices.
@@ -129,7 +149,7 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
 	{
 		bli_print_msg(" Reordering of column major matrices is " 
 						" not supported.", __FILE__, __LINE__);
-		return;
+		goto err_hndl;
 	}
 
 	// From 5-loop function point of view
@@ -169,7 +189,10 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
 	  m, n
 	);
 
-	if( err != BLIS_SUCCESS ) return;
+	if( err != BLIS_SUCCESS )
+	{
+		goto err_hndl;
+	}
 
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
@@ -235,4 +258,7 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
 		);
 	}
 #endif
+
+err_hndl:;
+	LPGEMM_STOP_LOGGER();
 }

@@ -1,5 +1,4 @@
 c n t n n 32 128 2 32 128 32 bf16bf16f32of32:bias=na,swish
-#
 r n n n r 6 1 4 4 16 16 bf16s4f32of32:pre_op_scale=scalar,pre_op_scale_type=bf16,group_size=2
 r n n n r 6 1 4 4 16 16 bf16s4f32of32:pre_op_zp=vector,pre_op_scale=scalar,pre_op_scale_type=bf16,group_size=2
 r n n n r 6 1 4 4 16 16 bf16s4f32of32:pre_op_zp=scalar,pre_op_scale=scalar,pre_op_scale_type=bf16,group_size=2
