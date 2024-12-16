@@ -1126,8 +1126,9 @@ void dtrsm_blis_impl
         switch(id)
         {
             case BLIS_ARCH_ZEN5:
-#if defined(BLIS_KERNELS_ZEN4)
+#if defined(BLIS_KERNELS_ZEN5)
                 // In native code path, input buffers are packed.
+                // and in Small cpde path there is no packing.
                 // Let's say packed buffers improve the speed of
                 // computation by a factor of 'S' and it takes 'X'
                 // units of time to pack buffers. If a computation
@@ -1149,18 +1150,30 @@ void dtrsm_blis_impl
                 // In order the reduce the possiblity of overflow, taking log on
                 // both sides gives us
                 // 2log(m) + log(n) < 6.8 for left variant
-                if ( ( blis_side == BLIS_LEFT ) &&
-                     ( (log10(n0) + (2*log10(m0)) ) < 6.8 ) )
+                if ( blis_side == BLIS_LEFT )
                 {
-                    ker_ft = bli_trsm_small_AVX512;
+                    if ( m0 <= 88 )
+                    {
+                        ker_ft = bli_trsm_small_AVX512;
+                    }
+                    else if ( (log10(n0) + (0.65*log10(m0)) ) < 4.4 )
+                    {
+                        ker_ft = bli_trsm_small_ZEN5;
+                    }
                 }
-                else if ( ( blis_side == BLIS_RIGHT ) &&
-                     ( (log10(m0) + (2*log10(n0)) ) < 6.8 ) )
+                else //if ( blis_side == BLIS_RIGHT )
                 {
-                    ker_ft = bli_trsm_small_AVX512;
+                    if ( (log10(m0) + (3.2*log10(n0)) ) < 7 )
+                    {
+                        ker_ft = bli_trsm_small_AVX512;
+                    }
+                    else if ( (log10(m0) + (0.85*log10(n0)) ) < 5 )
+                    {
+                        ker_ft = bli_trsm_small_ZEN5;
+                    }
                 }
                 break;
-#endif // BLIS_KERNELS_ZEN4
+#endif // BLIS_KERNELS_ZEN5
             case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
                 if ((!is_parallel && ((dim_a < 1500) && (size_b < 5e6)) ) ||
@@ -1195,22 +1208,34 @@ void dtrsm_blis_impl
         switch(id)
         {
             case BLIS_ARCH_ZEN5:
-#if defined(BLIS_KERNELS_ZEN4)
+#if defined(BLIS_KERNELS_ZEN5)
                 if( (is_parallel) && n0 > 10 && m0 > 10 )
                 {
-                    if ( ( blis_side == BLIS_LEFT ) &&
-                        ( (log10(n0) + (2*log10(m0)) ) < 6.8 ) )
+                    if ( blis_side == BLIS_LEFT )
                     {
-                        ker_ft = bli_trsm_small_mt_AVX512;
+                        if ( m0 <= 88 )
+                        {
+                            ker_ft = bli_trsm_small_mt_AVX512;
+                        }
+                        else if ( (log10(n0) + (0.65*log10(m0)) ) < 4.4 )
+                        {
+                            ker_ft = bli_trsm_small_mt_ZEN5;
+                        }
                     }
-                    else if ( ( blis_side == BLIS_RIGHT ) &&
-                        ( (log10(m0) + (2*log10(n0)) ) < 6.8 ) )
+                    else //if ( blis_side == BLIS_RIGHT )
                     {
-                        ker_ft = bli_trsm_small_mt_AVX512;
+                        if ( (log10(m0) + (3.2*log10(n0)) ) < 7 )
+                        {
+                            ker_ft = bli_trsm_small_mt_AVX512;
+                        }
+                        else if ( (log10(m0) + (0.85*log10(n0)) ) < 5 )
+                        {
+                            ker_ft = bli_trsm_small_mt_ZEN5;
+                        }
                     }
                 }
                 break;
-#endif// BLIS_KERNELS_ZEN4
+#endif// BLIS_KERNELS_ZEN5
             case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
                 if( (ker_ft == NULL) && (is_parallel) &&
