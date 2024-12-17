@@ -1352,7 +1352,7 @@
     vmulpd( zmm30, zmm(d1), zmm(d1) )   /* Multiply zmm(d1) by zmm30(ALPHA) and store the result in zmm(d1) */      \
     vmovupd( mem1, zmm0)                                                                                            \
     vfmadd231pd( zmm0, zmm31, zmm(d1))  /* Fused multiply-add: zmm31 * mem1 + zmm(d1), store result in zmm(d1) */   \
-    vmovupd( zmm(d1), mem1)             /* Store the result from zmm(d1) to memory location mem1 */                 \                
+    vmovupd( zmm(d1), mem1)             /* Store the result from zmm(d1) to memory location mem1 */                 \
                                                                                                                     \
     vmulpd( zmm30, zmm(d2), zmm(d2) )                                                                               \
     vmovupd( mem2, zmm1)                                                                                            \

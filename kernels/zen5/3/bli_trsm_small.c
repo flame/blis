@@ -46,12 +46,19 @@
     *   code compared to unroll(full) when loopCount = 4.
     */
     #define UNROLL_LOOP_FULL() _Pragma("clang loop unroll(full)")
+    #define UNROLL_LOOP_N(n)   UNROLL_LOOP_FULL() // for clang,
+    //full unroll is always more performant
 #elif defined __GNUC__
     #define UNROLL_LOOP()      _Pragma("GCC unroll 4")
     #define UNROLL_LOOP_FULL() _Pragma("GCC unroll 24")
+
+    #define STRINGIFY(x) #x
+    #define TOSTRING(x) STRINGIFY(x)
+    #define UNROLL_LOOP_N(n) _Pragma(TOSTRING(GCC unroll n))
 #else // unknown compiler
     #define UNROLL_LOOP()      // no unroll if compiler is not known
     #define UNROLL_LOOP_FULL()
+    #define UNROLL_LOOP_N(n)
 #endif
 
 #define ENABLE_PACK_A                    // enable pack for A, comment out this line to disable packing
@@ -547,6 +554,10 @@ BLIS_INLINE void runn_n_rem
     auxinfo_t auxinfo;
     __m512d t_reg[1]; /*temporary registers*/
     __m512d c_reg[D_MR_]; /*registers to hold GEMM accumulation*/
+    for(dim_t i = 0; i < D_MR_; ++i)
+    {
+        c_reg[i] = _mm512_setzero_pd(); // initialize c_reg to zero
+    }
 
     __mmask8 mask_m_0, mask_m_1, mask_m_2;
 
@@ -1029,6 +1040,10 @@ err_t bli_dtrsm_small_XAutB_XAlB_ZEN5
     auxinfo_t auxinfo;     /* for dgemm kernel*/                            \
     __m512d t_reg[10];     /*temporary registers*/                          \
     __m512d c_reg[D_MR_]; /*registers to hold GEMM accumulation*/           \
+    for(dim_t i = 0; i < D_MR_; ++i)                                        \
+    {                                                                       \
+        c_reg[i] = _mm512_setzero_pd(); /*initialize c_reg to zero*/        \
+    }                                                                       \
                                                                             \
     __mmask8 mask_m_0 = 0b11111111; /*register to hold mask for load/store*/\
     __mmask8 mask_m_1 = 0b11111111; /*register to hold mask for load/store*/\
@@ -1106,7 +1121,7 @@ err_t bli_dtrsm_small_XAutB_XAlB_ZEN5
             t_reg[0] = _mm512_set1_pd( DIAG_BROADCAST( *(a11 + ii*cs_a) ));              \
             c_reg[ii] = DIAG_DIV_OR_MUL(c_reg[ii], t_reg[0]);               \
         }                                                                 \
-        UNROLL_LOOP_FULL()                                                \
+        UNROLL_LOOP_N(23) /*unroll loop 24 is generating warning in gcc*/ \
         for( dim_t jj = (ii-1); jj >= 0; --jj )                           \
         {                                                                 \
             t_reg[0] = _mm512_set1_pd(*(a11 + jj*cs_a));                  \
@@ -1297,6 +1312,10 @@ BLIS_INLINE void lunn_m_rem
     auxinfo_t auxinfo;
     __m512d t_reg[10]; /*temporary registers*/
     __m512d c_reg[D_MR_]; /*registers to hold GEMM accumulation*/
+    for(dim_t i = 0; i < D_MR_; ++i)
+    {
+        c_reg[i] = _mm512_setzero_pd(); /*initialize c_reg to zero*/
+    }
 
     __mmask8 mask_m_0, mask_m_1, mask_m_2;
     double *a01, *a11, *b01, *b11;
