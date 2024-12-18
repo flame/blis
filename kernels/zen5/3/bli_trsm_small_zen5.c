@@ -589,15 +589,97 @@ BLIS_INLINE void runn_n_rem
             L_ = p;
         }
 #endif
-    for( i = 0; (i+d_mr-1) < m; i += d_mr )
+
+    switch (n_rem)
     {
-        RUNN_FRINGE(D_MR_, n_rem);
+    case 7:
+        for( i = 0; (i+d_mr-1) < m; i += d_mr )
+        {
+            RUNN_FRINGE(D_MR_, 7 );
+        }
+        m_rem = m - i;
+        if( m_rem > 0 )
+        {
+            RUNN_FRINGE( m_rem, 7 );
+        }
+        break;
+
+    case 6:
+        for( i = 0; (i+d_mr-1) < m; i += d_mr )
+        {
+            RUNN_FRINGE(D_MR_, 6 );
+        }
+        m_rem = m - i;
+        if( m_rem > 0 )
+        {
+            RUNN_FRINGE( m_rem, 6 );
+        }
+        break;
+
+    case 5:
+        for( i = 0; (i+d_mr-1) < m; i += d_mr )
+        {
+            RUNN_FRINGE(D_MR_, 5 );
+        }
+        m_rem = m - i;
+        if( m_rem > 0 )
+        {
+            RUNN_FRINGE( m_rem, 5 );
+        }
+        break;
+
+    case 4:
+        for( i = 0; (i+d_mr-1) < m; i += d_mr )
+        {
+            RUNN_FRINGE(D_MR_, 4 );
+        }
+        m_rem = m - i;
+        if( m_rem > 0 )
+        {
+            RUNN_FRINGE( m_rem, 4 );
+        }
+        break;
+
+    case 3:
+        for( i = 0; (i+d_mr-1) < m; i += d_mr )
+        {
+            RUNN_FRINGE(D_MR_, 3 );
+        }
+        m_rem = m - i;
+        if( m_rem > 0 )
+        {
+            RUNN_FRINGE( m_rem, 3 );
+        }
+        break;
+
+    case 2:
+        for( i = 0; (i+d_mr-1) < m; i += d_mr )
+        {
+            RUNN_FRINGE(D_MR_, 2 );
+        }
+        m_rem = m - i;
+        if( m_rem > 0 )
+        {
+            RUNN_FRINGE( m_rem, 2 );
+        }
+        break;
+
+    case 1:
+        for( i = 0; (i+d_mr-1) < m; i += d_mr )
+        {
+            RUNN_FRINGE(D_MR_, 1 );
+        }
+        m_rem = m - i;
+        if( m_rem > 0 )
+        {
+            RUNN_FRINGE( m_rem, 1 );
+        }
+        break;
+    
+    default:
+        break;
     }
-    m_rem = m - i;
-    if( m_rem > 0 )
-    {
-        RUNN_FRINGE( m_rem, n_rem );
-    }
+
 }
 
 /*
@@ -665,21 +747,96 @@ BLIS_INLINE void rlnn_n_rem
             L_ = p;
         }
 #endif
-    for( i = (m - d_mr); (i + 1) > 0; i -= d_mr )
+    switch (n_rem)
     {
-        RLNN_FRINGE(D_MR_, n_rem);
-    }
-    m_rem = i + d_mr;
-    if( m_rem > 0 )
-    {
-        RLNN_FRINGE( m_rem, n_rem );
+    case 7:
+        for( i = (m - d_mr); (i + 1) > 0; i -= d_mr )
+        {
+            RLNN_FRINGE(D_MR_, 7);
+        }
+        m_rem = i + d_mr;
+        if( m_rem > 0 )
+        {
+            RLNN_FRINGE( m_rem, 7);
+        }
+        break;
+
+    case 6:
+        for( i = (m - d_mr); (i + 1) > 0; i -= d_mr )
+        {
+            RLNN_FRINGE(D_MR_, 6);
+        }
+        m_rem = i + d_mr;
+        if( m_rem > 0 )
+        {
+            RLNN_FRINGE( m_rem, 6);
+        }
+        break;
+    
+    case 5:
+        for( i = (m - d_mr); (i + 1) > 0; i -= d_mr )
+        {
+            RLNN_FRINGE(D_MR_, 5);
+        }
+        m_rem = i + d_mr;
+        if( m_rem > 0 )
+        {
+            RLNN_FRINGE( m_rem, 5);
+        }
+        break;
+    case 4:
+        for( i = (m - d_mr); (i + 1) > 0; i -= d_mr )
+        {
+            RLNN_FRINGE(D_MR_, 4);
+        }
+        m_rem = i + d_mr;
+        if( m_rem > 0 )
+        {
+            RLNN_FRINGE( m_rem, 4);
+        }
+        break;
+    case 3:
+        for( i = (m - d_mr); (i + 1) > 0; i -= d_mr )
+        {
+            RLNN_FRINGE(D_MR_, 3);
+        }
+        m_rem = i + d_mr;
+        if( m_rem > 0 )
+        {
+            RLNN_FRINGE( m_rem, 3);
+        }
+        break;
+    case 2:
+        for( i = (m - d_mr); (i + 1) > 0; i -= d_mr )
+        {
+            RLNN_FRINGE(D_MR_, 2);
+        }
+        m_rem = i + d_mr;
+        if( m_rem > 0 )
+        {
+            RLNN_FRINGE( m_rem, 2);
+        }
+        break;
+    case 1:
+        for( i = (m - d_mr); (i + 1) > 0; i -= d_mr )
+        {
+            RLNN_FRINGE(D_MR_, 1);
+        }
+        m_rem = i + d_mr;
+        if( m_rem > 0 )
+        {
+            RLNN_FRINGE( m_rem, 1);
+        }
+        break;
+    
+    default:
+        break;
     }
 }
 
 
 // RUNN - RLTN
-err_t __attribute__((target("tune=znver3")))
-    bli_dtrsm_small_XAltB_XAuB_ZEN5
+err_t bli_dtrsm_small_XAltB_XAuB_ZEN5
       (
         obj_t* AlphaObj,
         obj_t* a,
@@ -1422,9 +1579,7 @@ BLIS_INLINE void lunn_n_rem
 
 
 // LLNN - LUTN
-err_t
-__attribute__((target("tune=skylake-avx512")))
-bli_dtrsm_small_AutXB_AlXB_ZEN5
+err_t bli_dtrsm_small_AutXB_AlXB_ZEN5
       (
         obj_t*   AlphaObj,
         obj_t*   a,
