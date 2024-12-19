@@ -4,6 +4,7 @@
 
 ## Contents
 
+* [Changes in 1.1](ReleaseNotes.md#changes-in-11)
 * [Changes in 1.0](ReleaseNotes.md#changes-in-10)
 * [Changes in 0.9.0](ReleaseNotes.md#changes-in-090)
 * [Changes in 0.8.1](ReleaseNotes.md#changes-in-081)
@@ -40,6 +41,19 @@
 * [Changes in 0.0.3](ReleaseNotes.md#changes-in-003)
 * [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
+
+## Changes in 1.1
+January 15, 2024
+
+Improvements present in 1.1:
+
+Compatibility:
+- Added a ScaLAPACK compatibility mode which disables some conflicting BLAS definitions.
+- Fixed issues with improperly escaped strings in python scripts for compatibility with python 3.12+. (@AngryLoki)
+
+Kernels:
+- Fixed an out-of-bounds read bug in the `haswell` `gemmsup` kernels. (John Mather)
+- Fixed a bug in the complex-domain `gemm` kernels for `piledriver`. (@rmast)
 
 ## Changes in 1.0
 May 6, 2024
@@ -302,7 +316,7 @@ Kernels:
 Build system:
 - Output a pkgconfig file so that CMake users that use BLIS can find and incorporate BLIS build products. (Ajay Panyala)
 - Fixed an issue in the the configure script's kernel-to-config map that caused `skx` kernel flags to be used when compiling kernels from the `zen` kernel set. This issue wasn't really fixed, but rather tweaked in such a way that it happens to now work. A more proper fix would require a serious rethinking of the configuration system. (Devin Matthews)
-- Fixed the shared library build rule in top-level Makefile. The previous rule was incorrectly only linking prerequisites that were newer than the target (`$?`) rather than correctly linking all prerequisites (`$^`). (Devin Matthews) 
+- Fixed the shared library build rule in top-level Makefile. The previous rule was incorrectly only linking prerequisites that were newer than the target (`$?`) rather than correctly linking all prerequisites (`$^`). (Devin Matthews)
 - Fixed `cc_vendor` for crosstool-ng toolchains. (Isuru Fernando)
 - Allow disabling of `trsm` diagonal pre-inversion at compile time via `--disable-trsm-preinversion`.
 
