@@ -115,12 +115,16 @@ release (e.g. `3.0-dev` in the example above).
 3. Update the CREDITS file if `git log` reveals any new contributors.
    NOTE: This should have already been done prior to the rc cycle.
 
-4. Update `docs/ReleaseNotes.md` with the body of finalized announcement
+4. Commit the updated CREDITS file if changed.
+
+5. Update `docs/ReleaseNotes.md` with the body of finalized announcement
    and the date of the release. Developers are encouraged to update
    the release notes on `master` as new changes are made, which simplifies
    preparation of rc0.
 
-5. Use the `build/do-release.sh` script to create a new rc branch and tag.
+6. Commit the updated `docs/ReleaseNotes.md` file.
+
+7. Use the `build/do-release.sh` script to create a new rc branch and tag.
 
    ```
    $ ./build/do-release.sh "2.0-rc<n>"
@@ -129,9 +133,7 @@ release (e.g. `3.0-dev` in the example above).
    Where `<n>` is `0` for the first rc, or one higher than the last rc on this release
    lineage branch.
 
-6. Commit changes from steps 3-5 on the release lineage branch (`r2.x`).
-
-7. Make sure the `do-release` script and other commits did what they were
+8. Make sure the `do-release` script and other commits did what they were
    supposed to do by inspecting the output of `git log`. If everything looks good,
    you can push the changes via:
 
@@ -145,13 +147,13 @@ release (e.g. `3.0-dev` in the example above).
 
    At this point, the new release candidate branch is live at `<origin>`.
 
-8. Announce the rc release on blis-devel, Discord, and/or other appropriate
+9. Announce the rc release on blis-devel, Discord, and/or other appropriate
    venues.
 
-9. Wait for bug reports. Typically an rc should stay live for at least a month
-   in order to give users time to try it out.
+10. Wait for bug reports. Typically an rc should stay live for at least a month
+    in order to give users time to try it out.
 
-10. After the trial period, cherry-pick any bugfixes or other updates:
+11. After the trial period, cherry-pick any bugfixes or other updates:
 
     $ git cherry-pick [-nx] <commit>
 
@@ -173,7 +175,7 @@ release (e.g. `3.0-dev` in the example above).
     log entry (on `master`) but *should be* present in the commit log entry for the
     cherry-picked commit (on the release lineage branch).
 
- 11. If no bugs are reported/found, or if the updated rc is otherwise ready
+ 12. If no bugs are reported/found, or if the updated rc is otherwise ready
      for promotion to full release, continue with the instructions below.
      Otherwise, return to step 2, incrementing `<n>`.
 
@@ -192,20 +194,22 @@ release (e.g. `3.0-dev` in the example above).
 3. Update the CREDITS file if `git log` reveals any new contributors.
    NOTE: This should have already been done prior to the release cycle.
 
-4. Update `docs/ReleaseNotes.md` with the body of finalized announcement
+4. Commit the updated CREDITS file if changed.
+
+5. Update `docs/ReleaseNotes.md` with the body of finalized announcement
    and the date of the release. Developers are encouraged to update
    the release notes on `master` as new changes are made, which simplifies
    preparation of the release.
 
-5. Use the `build/do-release.sh` script to create a new release branch and tag.
+6. Commit the updated `docs/ReleaseNotes.md` file.
+
+7. Use the `build/do-release.sh` script to create a new release branch and tag.
 
    ```
    $ ./build/do-release.sh "2.0"
    ```
 
-6. Commit changes from steps 3-5 on the release lineage branch (`r2.x`).
-
-7. Make sure the `do-release` script and other commits did what they were
+8. Make sure the `do-release` script and other commits did what they were
    supposed to do by inspecting the output of `git log`. If everything looks good,
    you can push the changes via:
 
@@ -219,7 +223,7 @@ release (e.g. `3.0-dev` in the example above).
 
    At this point, the new release branch is live at `<origin>`.
 
-8. Publish a new release via GitHub (https://github.com/flame/blis/releases).
+9. Publish a new release via GitHub (https://github.com/flame/blis/releases).
    Identify the new version by the tag you just created and pushed. You can
    also identify the previous release.
 
@@ -227,10 +231,10 @@ release (e.g. `3.0-dev` in the example above).
    edit the previous release, inspect/copy some of the markdown syntax, and
    then abort the edit.)
 
-9. Announce the rc release on blis-devel, Discord, and/or other appropriate
-   venues.
+10. Announce the rc release on blis-devel, Discord, and/or other appropriate
+    venues.
 
-10. Update the Wikipedia entry for BLIS to reflect the new latest version.
+11. Update the Wikipedia entry for BLIS to reflect the new latest version.
 
 ### Back-porting fixes from `master` to releases
 
@@ -300,18 +304,20 @@ release (e.g. `3.0-dev` in the example above).
 4. Update the CREDITS file if `git log` reveals any new contributors.
    NOTE: This should have already been done prior to the release cycle.
 
-5. Update `docs/ReleaseNotes.md` with the body of finalized announcement
+5. Commit the updated CREDITS file if changed.
+
+6. Update `docs/ReleaseNotes.md` with the body of finalized announcement
    and the date of the release.
 
-6. Use the `build/do-release.sh` script to create a new release branch and tag.
+7. Commit the updated `docs/ReleaseNotes.md` file.
+
+8. Use the `build/do-release.sh` script to create a new release branch and tag.
 
    ```
    $ ./build/do-release.sh "2.1"
    ```
 
-7. Commit changes from steps 4-6 on the release lineage branch (`r2.x`).
-
-8. Make sure the `do-release` script and other commits did what they were
+9. Make sure the `do-release` script and other commits did what they were
    supposed to do by inspecting the output of `git log`. If everything looks good,
    you can push the changes via:
 
@@ -325,16 +331,16 @@ release (e.g. `3.0-dev` in the example above).
 
    At this point, the new release branch is live at `<origin>`.
 
-9. Update the release target branch via GitHub (https://github.com/flame/blis/releases).
-   Identify the new version by the tag you just created and pushed. You can
-   also identify the previous release.
+10. Update the release target branch via GitHub (https://github.com/flame/blis/releases).
+    Identify the new version by the tag you just created and pushed. You can
+    also identify the previous release.
 
-   Try to use formatting consistent with the prior release. (You can start to
-   edit the previous release, inspect/copy some of the markdown syntax, and
-   then abort the edit.)
+    Try to use formatting consistent with the prior release. (You can start to
+    edit the previous release, inspect/copy some of the markdown syntax, and
+    then abort the edit.)
 
-10. Announce the rc release on blis-devel, Discord, and/or other appropriate
+11. Announce the rc release on blis-devel, Discord, and/or other appropriate
     venues.
 
-11. If this point release is for the most recent major release lineage,
+12. If this point release is for the most recent major release lineage,
     update the Wikipedia entry for BLIS to reflect the new latest version.
