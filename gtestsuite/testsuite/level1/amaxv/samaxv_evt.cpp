@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -114,42 +114,46 @@ INSTANTIATE_TEST_SUITE_P(
 
 /*
     Exception value testing on vectors(Zen4) :
-    SAMAXV currently uses the bli_samaxv_zen_int_avx512( ... ) kernel for computation on zen3
-    machines.
+    damaxv currently uses the bli_damaxv_zen_int_avx512( ... ) kernel for computation
+    on zen4 and zen5 machines.
     The sizes and indices given in the instantiator are to ensure code coverage inside
     the kernel.
 
-    Kernel structure for bli_samaxv_zen_int_avx512( ... ) is as follows :
-
+    Kernel structure for bli_damaxv_zen_int( ... ) is as follows :
     For unit strides :
-        Main loop    :  In blocks of 80 --> L80
-        Fringe loops :  In blocks of 16 --> L16
+        Main loop    :  In blocks of 128 --> L128
+        Fringe loops :  In blocks of 64  --> L64
+                        In blocks of 32  --> L32
+                        In blocks of 16  --> L16
+                        In blocks of 8   --> L8
                         Element-wise loop --> LScalar
 
     For non-unit strides : A single loop, to process element wise.
 
     The sizes chosen are as follows :
-    461 - 5*L80 + 3*L16 + 13(LScalar)
+    383 - 5*L128 + L64 + L32 + L16 + 15(LScalar)
 
     The following indices are sufficient to ensure code-coverage of loops :
-    0 <= idx < 400    - In L80
-    400 <= idx < 448  - In L16
-    448 <= idx < 461  - In LScalar
+    0 <= idx < 640    - In L128
+    640 <= idx < 704  - In L64
+    704 <= idx < 736  - In L32
+    736 <= idx < 752  - In L16
+    752 <= idx < 767  - In LScalar
 
-    The testsuite requires 2 indices(and 2 exception values) to set exception values in the vector.
+    The testsuite requires 2 indices(and 2 exception values) to be induced in the vector.
 */
 // Exception value testing with unit strides
 INSTANTIATE_TEST_SUITE_P(
     unitStrides_zen4,
     DISABLED_samaxvEVT,
     ::testing::Combine(
-        ::testing::Values(gtint_t(461)),                                        // n, size of vectors with unit-stride
+        ::testing::Values(gtint_t(767)),                                        // n, size of vectors with unit-stride
         ::testing::Values(gtint_t(1)),                                          // stride size for x
-        ::testing::Values(gtint_t(0), gtint_t(347),
-                          gtint_t(420), gtint_t(459)),                          // xi, index for exval in xi_exval
+        ::testing::Values(gtint_t(0), gtint_t(500), gtint_t(650),
+                          gtint_t(705), gtint_t(749), gtint_t(761)),            // xi, index for exval in xi_exval
         ::testing::Values(NaN, -Inf, Inf, float(2.3)),                          // xi_exval
-        ::testing::Values(gtint_t(101), gtint_t(252),
-                          gtint_t(447), gtint_t(450)),                          // xj, index for exval in xj_exval
+        ::testing::Values(gtint_t(100), gtint_t(621), gtint_t(690),
+                          gtint_t(739), gtint_t(751), gtint_t(766)),            // xj, index for exval in xj_exval
         ::testing::Values(NaN, -Inf, Inf, float(2.3))                           // xj_exval
         ),
         ::amaxvEVTPrint<float>()

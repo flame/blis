@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -145,8 +145,10 @@ INSTANTIATE_TEST_SUITE_P(
     The code structure for bli_damaxv_zen_int_avx512( ... ) is as follows :
 
     For unit strides :
-        Main loop    :  In blocks of 32 --> L32
-        Fringe loops :  In blocks of 8  --> L8
+        Main loop    :  In blocks of 64 --> L64
+        Fringe loops :  In blocks of 32 --> L32
+                        In blocks of 16 --> L16
+                        In blocks of 8  --> L8
                         Element-wise loop --> LScalar
 
     For non-unit strides : A single loop, to process element wise.
@@ -158,14 +160,13 @@ INSTANTIATE_TEST_SUITE_P(
         damaxvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_damaxv_zen_int_avx512),   // kernel address
-            ::testing::Values(gtint_t(32),                  // for size n, L32
-                              gtint_t(16),                  // 2*L8
+            ::testing::Values(gtint_t(64),                  // for size n, L64
+                              gtint_t(32),                  // L32
+                              gtint_t(16),                  // L16
                               gtint_t(8),                   // L8
-                              gtint_t(7),                   // LScalar
-                              gtint_t(160),                 // 5*L32
-                              gtint_t(168),                 // 5*L32 + L8
-                              gtint_t(175),                 // 5*L32 + L8 + 7(LScalar)
-                              gtint_t(191)),                // 5*L32 + 3*L8 + 7(LScalar)
+                              gtint_t(7),                   // 7(LScalar)
+                              gtint_t(192),                 // 3*L64
+                              gtint_t(255)),                // 3*L64 + L32 + L16 + L8 + 7(LScalar)
             ::testing::Values(gtint_t(1)),                  // incx
             ::testing::Values(false, true)                  // is_memory_test
         ),

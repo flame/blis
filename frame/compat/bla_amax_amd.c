@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -139,8 +139,11 @@ f77_int isamax_blis_impl
       return 0;
     }
 
-    /* If n=1, return 1 here to emulate netlib BLAS and avoid touching vector */
-    if ( *n == 1 ) {
+    /* 
+      If n=1 or if the first element is NaN, return 1
+      This emulates the netlib BLAS and avoid touching vector
+    */
+    if ( ( *n == 1 ) || isnan( *x ) ) {
       AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "iamax_: n=1");
       return 1;
     }
@@ -254,20 +257,12 @@ f77_int idamax_blis_impl
       return 0;
     }
 
-    /* If n=1, return 1 here to emulate netlib BLAS and avoid touching vector */
-    if ( *n == 1 ) {
-      AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "iamax_: n=1");
-      return 1;
-    }
-
-    /*
-      When the length of the vector is one it is going to be the element with
-      the maximum absolute value. This early return condition is defined in
-      the BLAS standard.
+    /* 
+      If n=1 or if the first element is NaN, return 1
+      This emulates the netlib BLAS and avoid touching vector
     */
-    if(*n == 1)
-    {
-      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+    if ( ( *n == 1 ) || isnan( *x ) ) {
+      AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "iamax_: n=1");
       return 1;
     }
 
@@ -314,13 +309,18 @@ f77_int idamax_blis_impl
     // Query the architecture ID
     arch_t id = bli_arch_query_id();
 
-    damaxv_ker_ft amaxv_fun_ptr;
+    damaxv_ker_ft amaxv_fun_ptr = NULL;
 
     // Pick the kernel based on the architecture ID
     switch (id)
     {
       case BLIS_ARCH_ZEN5:
       case BLIS_ARCH_ZEN4:
+#if defined(BLIS_KERNELS_ZEN4)
+          // AVX512 Kernel
+          amaxv_fun_ptr = bli_damaxv_zen_int_avx512;
+          break;
+#endif
       case BLIS_ARCH_ZEN:
       case BLIS_ARCH_ZEN2:
       case BLIS_ARCH_ZEN3:

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -162,7 +162,7 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,    bli_samaxv_zen_int_avx512,
-	  BLIS_AMAXV_KER,  BLIS_DOUBLE,   bli_damaxv_zen_int,
+	  BLIS_AMAXV_KER,  BLIS_DOUBLE,   bli_damaxv_zen_int_avx512,
 
 	  // axpbyv
 	  BLIS_AXPBYV_KER, BLIS_FLOAT,    bli_saxpbyv_zen_int10,

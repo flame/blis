@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -65,8 +65,33 @@ using namespace testinghelpers::IIT;
     with the conversion occurring in the amaxv.h header file.
 */
 
-// n < 1, with non-unit stride
-TYPED_TEST(amaxvIIT_ERS, n_lt_one_nonUnitStride)
+// n == 0, with unit stride
+TYPED_TEST(amaxvIIT_ERS, n_eq_zero_unitStride)
+{
+    using T = TypeParam;
+    gtint_t n = 0;
+    gtint_t unit_inc = 1;
+    gtint_t idx = 42;
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    idx = amaxv<T>( n, nullptr, unit_inc );
+
+    // Computing the difference.
+    computediff<gtint_t>( "idx", idx, gtint_t(0) );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize vectors with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
+
+    // Invoking AMAXV with an invalid value of n.
+    idx = amaxv<T>( n, x.data(), unit_inc );
+
+    // Computing the difference.
+    computediff<gtint_t>( "idx", idx, gtint_t(0) );
+}
+
+// n == 0, with non-unit stride
+TYPED_TEST(amaxvIIT_ERS, n_eq_zero_nonUnitStride)
 {
     using T = TypeParam;
     gtint_t n = 0;
@@ -90,35 +115,11 @@ TYPED_TEST(amaxvIIT_ERS, n_lt_one_nonUnitStride)
     computediff<gtint_t>( "idx", idx, gtint_t(0) );
 }
 
-// inc == 0, with non-unit stride
-TYPED_TEST(amaxvIIT_ERS, incx_eq_zero)
+// n < 0, with unit stride
+TYPED_TEST(amaxvIIT_ERS, n_lt_zero_unitStride)
 {
     using T = TypeParam;
-    gtint_t inc = 0;
-    gtint_t idx = 42;
-
-    // Test with nullptr for all suitable arguments that shouldn't be accessed.
-    idx = amaxv<T>( N, nullptr, inc );
-
-    // Computing the difference.
-    computediff<gtint_t>( "idx", idx, gtint_t(0) );
-
-    // Test with all arguments correct except for the value we are choosing to test.
-    // Initialize vectors with random numbers.
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
-
-    // Invoking AMAXV with an invalid value of incx.
-    idx = amaxv<T>( N, x.data(), inc );
-
-    // Computing the difference.
-    computediff<gtint_t>( "idx", idx, gtint_t(0) );
-}
-
-// n < 1, with unit stride
-TYPED_TEST(amaxvIIT_ERS, n_lt_one_unitStride)
-{
-    using T = TypeParam;
-    gtint_t n = 0;
+    gtint_t n = -3;
     gtint_t unit_inc = 1;
     gtint_t idx = 42;
 
@@ -134,6 +135,79 @@ TYPED_TEST(amaxvIIT_ERS, n_lt_one_unitStride)
 
     // Invoking AMAXV with an invalid value of n.
     idx = amaxv<T>( n, x.data(), unit_inc );
+
+    // Computing the difference.
+    computediff<gtint_t>( "idx", idx, gtint_t(0) );
+}
+
+// n < 0, with non-unit stride
+TYPED_TEST(amaxvIIT_ERS, n_lt_zero_nonUnitStride)
+{
+    using T = TypeParam;
+    gtint_t n = -3;
+    gtint_t inc = 5;
+    gtint_t idx = 42;
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    idx = amaxv<T>( n, nullptr, inc );
+
+    // Computing the difference.
+    computediff<gtint_t>( "idx", idx, gtint_t(0) );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize vectors with random numbers.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
+
+    // Invoking AMAXV with an invalid value of n.
+    idx = amaxv<T>( n, x.data(), inc );
+
+    // Computing the difference.
+    computediff<gtint_t>( "idx", idx, gtint_t(0) );
+}
+
+// incx == 0
+TYPED_TEST(amaxvIIT_ERS, incx_eq_zero)
+{
+    using T = TypeParam;
+    gtint_t inc = 0;
+    gtint_t idx = 42;
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    idx = amaxv<T>( N, nullptr, inc );
+
+    // Computing the difference.
+    computediff<gtint_t>( "idx", idx, gtint_t(0) );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize vectors with random numbers, with unit-stride(to allocate memory).
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
+
+    // Invoking AMAXV with an invalid value of incx.
+    idx = amaxv<T>( N, x.data(), inc );
+
+    // Computing the difference.
+    computediff<gtint_t>( "idx", idx, gtint_t(0) );
+}
+
+// incx < 0
+TYPED_TEST(amaxvIIT_ERS, incx_lt_zero)
+{
+    using T = TypeParam;
+    gtint_t inc = -2;
+    gtint_t idx = 42;
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+    idx = amaxv<T>( N, nullptr, inc );
+
+    // Computing the difference.
+    computediff<gtint_t>( "idx", idx, gtint_t(0) );
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    // Initialize vectors with random numbers, with unit-stride(to allocate memory).
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, 1 );
+
+    // Invoking AMAXV with an invalid value of incx.
+    idx = amaxv<T>( N, x.data(), inc );
 
     // Computing the difference.
     computediff<gtint_t>( "idx", idx, gtint_t(0) );
@@ -165,6 +239,7 @@ TYPED_TEST(amaxvIIT_ERS, n_eq_one_unitStride)
 
 }
 
+// n == 1, with non-unit stride
 TYPED_TEST(amaxvIIT_ERS, n_eq_one_nonUnitStrides)
 {
     using T = TypeParam;

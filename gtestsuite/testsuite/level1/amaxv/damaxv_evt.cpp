@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -138,26 +138,30 @@ INSTANTIATE_TEST_SUITE_P(
 
 /*
     Exception value testing on vectors(Zen4) :
-    damaxv currently uses the bli_damaxv_zen_int( ... ) kernel for computation on zen3
-    machines.
+    damaxv currently uses the bli_damaxv_zen_int_avx512( ... ) kernel for computation
+    on zen4 and zen5 machines.
     The sizes and indices given in the instantiator are to ensure code coverage inside
     the kernel.
 
     Kernel structure for bli_damaxv_zen_int( ... ) is as follows :
     For unit strides :
-        Main loop    :  In blocks of 32 --> L32
-        Fringe loops :  In blocks of 8  --> L8
+        Main loop    :  In blocks of 64 --> L64
+        Fringe loops :  In blocks of 32 --> L32
+                        In blocks of 16 --> L16
+                        In blocks of 8  --> L8
                         Element-wise loop --> LScalar
 
     For non-unit strides : A single loop, to process element wise.
 
     The sizes chosen are as follows :
-    367 - 10*L32 + 5*L8 + 7(LScalar)
+    383 - 5*L64 + L32 + L16 + L8 + 7(LScalar)
 
     The following indices are sufficient to ensure code-coverage of loops :
-    0 <= idx < 320    - In L32
-    320 <= idx < 360  - In L8
-    360 <= idx < 367  - In LScalar
+    0 <= idx < 320    - In L64
+    320 <= idx < 352  - In L32
+    352 <= idx < 368  - In L16
+    368 <= idx < 376  - In L8
+    376 <= idx < 383  - In LScalar
 
     The testsuite requires 2 indices(and 2 exception values) to be induced in the vector.
 */
@@ -167,13 +171,13 @@ INSTANTIATE_TEST_SUITE_P(
     unitStrides_zen4,
     DISABLED_damaxvEVT,
     ::testing::Combine(
-        ::testing::Values(gtint_t(367)),                                        // n, size of vectors with unit-stride
+        ::testing::Values(gtint_t(383)),                                        // n, size of vectors with unit-stride
         ::testing::Values(gtint_t(1)),                                          // stride size for x
-        ::testing::Values(gtint_t(0), gtint_t(315),
-                          gtint_t(340), gtint_t(363)),                          // xi, index for exval in xi_exval
+        ::testing::Values(gtint_t(0), gtint_t(300), gtint_t(325),
+                          gtint_t(356), gtint_t(373), gtint_t(380)),            // xi, index for exval in xi_exval
         ::testing::Values(NaN, -Inf, Inf, double(2.3)),                         // xi_exval
-        ::testing::Values(gtint_t(1), gtint_t(300),
-                          gtint_t(327), gtint_t(366)),                          // xj, index for exval in xj_exval
+        ::testing::Values(gtint_t(10), gtint_t(290), gtint_t(347),
+                          gtint_t(361), gtint_t(364), gtint_t(376)),            // xj, index for exval in xj_exval
         ::testing::Values(NaN, -Inf, Inf, double(2.3))                          // xj_exval
         ),
         ::amaxvEVTPrint<double>()

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -124,8 +124,10 @@ INSTANTIATE_TEST_SUITE_P(
     The code structure for bli_samaxv_zen_int_avx512( ... ) is as follows :
 
     For unit strides :
-        Main loop    :  In blocks of 80 --> L80
-        Fringe loops :  In blocks of 16 --> L16
+        Main loop    :  In blocks of 128 --> L128
+        Fringe loops :  In blocks of 64  --> L64
+                        In blocks of 32  --> L32
+                        In blocks of 16  --> L16
                         Element-wise loop --> LScalar
 
     For non-unit strides : A single loop, to process element wise.
@@ -137,11 +139,13 @@ INSTANTIATE_TEST_SUITE_P(
         samaxvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_samaxv_zen_int_avx512),   // kernel address
-            ::testing::Values(gtint_t(80),                  // for size n, L80
-                              gtint_t(48),                  // 3*L16
+            ::testing::Values(gtint_t(128),                 // for size n, L128
+                              gtint_t(64),                  // L64
+                              gtint_t(32),                  // L32
                               gtint_t(16),                  // L16
                               gtint_t(11),                  // 11(LScalar)
-                              gtint_t(317)),                // 3*L80 + 4*L16 + 13(LScalar)
+                              gtint_t(384),                 // 3*L128
+                              gtint_t(521)),                // 3*L128 + L64 + L32 + L16 + 15(LScalar)
             ::testing::Values(gtint_t(1)),                  // incx
             ::testing::Values(false, true)                  // is_memory_test
         ),
