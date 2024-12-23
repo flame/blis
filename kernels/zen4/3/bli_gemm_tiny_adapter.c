@@ -33,7 +33,15 @@
 */
 #include "blis.h"
 
-#define BLIS_PACK_BUFFER    1U
+/**
+ * Currently buffer size is defined in bytes as per
+ * the tiny path threshold.
+ *
+ * TODO: If the threshold for tiny gemm are changed, the buffer size needs
+ * to be updated respectively. Such interface change will be incorporated with light
+ * weight memory pool implementation.
+ */
+#define PACK_BUFFER_SIZE_B 1499 * 1499 * 8
 
 /**
  * TODO: Blocking related changes yet to be added.
@@ -48,15 +56,15 @@
 
 /**
  * @brief
- * 
+ *
  * Here based N dimension, it is decided whether main kernel needs to be invoked
  * or simply jump straight to edge kernel directly.
  * All the main kernel + remaining 7 edge kernels are registered in kernel table,
  * which is nothing but table of function pointer and each index represents N.
- * 
+ *
  * For N >= 8, main kernel is invoked. Remainder cases of N are handled from within.
  * For N < 8, direclt N specific edge kernel is invoked for gemm computation.
- * @note 
+ * @note
  * N = 0 case never occurs.
  */
 #define CALL_KERNEL\
@@ -146,22 +154,6 @@ static dgemmsup_ker_ft avx512kern_fp[] =
     bli_dgemmsup_rv_zen4_asm_24x8m_new
 };
 
-#if (BLIS_PACK_BUFFER == 0)
-/**
- * @brief 
- * 
- * packA_buffer holds packed A matrix in column stored storage.
- * This buffer is used for packing when input is having A matrix
- * transpose case(CRC, RRC).
- * Here since our micro kernel is 24x8, we pack A matrix in 24xk tiles.
- * So based on that the size of the buffer is selected as 24 * 1500(which
- * is threshold for tiny sizes as of now. Which can eb tuned further).
- * 
- * @note 
- * It has only been validated for inputs where mnk < 100.
- */
-static double packA_buffer[24 * 1500] = {0};
-#endif
 
 err_t bli_dgemm_tiny_24x8
      (
@@ -283,29 +275,28 @@ err_t bli_dgemm_tiny_24x8
     {
         double *a_pkr = NULL;
 
-    /**
-     * @brief
-     * When BLIS_PACK_BUFFER macro is set to 1, we inquire and use buffer
-     * allocated from blis memory pool.
-     * Here the size is given hard-coded, reason behind it is as explain at the defination
-     * of local static packA_buffer.
-     * Once the buffer is acquired and after sanity check, it packs A matrix in column stored fashion
-     * and pass it cv kernel for computation.
-     * Here the macro CALL_KERNEL is final call to the kernel.
-     * Reason for having separate call to CALL_KERNEL inside the if..else.. condition is, when BLIS_PACK_BUFFER
-     * is enabled we acquire packing buffer from blis memory pool, which is also an already allocated static aligned
-     * memory buffer under the hood. So after using it needs to be returned to pool so if do not have separate conditions
-     * It will end up checking for allocated buffer even for the cases, where we do not even allocate a buffer to pack
-     * A matrix. Such as any storage scheme other than CRC and RRC.
-     */
-#if (BLIS_PACK_BUFFER == 1)
+	/**
+	 * @brief
+	 * When BLIS_PACK_BUFFER macro is set to 1, we inquire and use buffer
+	 * allocated from blis memory pool.
+	 * Here the size is given hard-coded, reason behind it is as explain at the defination
+	 * of local static packA_buffer.
+	 * Once the buffer is acquired and after sanity check, it packs A matrix in column stored fashion
+	 * and pass it cv kernel for computation.
+	 * Here the macro CALL_KERNEL is final call to the kernel.
+	 * Reason for having separate call to CALL_KERNEL inside the if..else.. condition is, when BLIS_PACK_BUFFER
+	 * is enabled we acquire packing buffer from blis memory pool, which is also an already allocated static aligned
+	 * memory buffer under the hood. So after using it needs to be returned to pool so if do not have separate conditions
+	 * It will end up checking for allocated buffer even for the cases, where we do not even allocate a buffer to pack
+	 * A matrix. Such as any storage scheme other than CRC and RRC.
+	 */
         mem_t local_mem_buf_A_s;
         rntm_t rntm;
         bli_pba_rntm_set_pba( &rntm );
 
         // Get the buffer from the pool.
         bli_pba_acquire_m(&rntm,
-                                24 * 1500,
+                                PACK_BUFFER_SIZE_B,
                                 BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                                 &local_mem_buf_A_s);
 
@@ -315,8 +306,8 @@ err_t bli_dgemm_tiny_24x8
         {
             return BLIS_FAILURE;
         }
-#endif
-        a_pkr = packA_buffer;    
+
+	a_pkr = packA_buffer;
 
         dim_t m_iter = M /24;
         dim_t m_left = M % 24;
@@ -344,10 +335,8 @@ err_t bli_dgemm_tiny_24x8
 
         CALL_KERNEL
 
-#if (BLIS_PACK_BUFFER == 1)
-        bli_pba_release(&rntm,
-                            &local_mem_buf_A_s);
-#endif
+	//Return the allocated memory back to small block allocator
+        bli_pba_release(&rntm, &local_mem_buf_A_s);
     }
     else
     {
@@ -355,3 +344,4 @@ err_t bli_dgemm_tiny_24x8
     }
     return BLIS_SUCCESS;
 }
+
