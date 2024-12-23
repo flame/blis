@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -400,7 +400,8 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
                         alpha, beta0,
                         post_op_list, post_ops_attr);
                     }
-#ifdef BLIS_KERNELS_ZEN4
+/* The check here is to ensure that the bf16 s4 kernel paths are not taken while JIT is enabled. */
+#if (defined(BLIS_KERNELS_ZEN4) && (!defined(LPGEMM_BF16_JIT)))
                     else // mtag_b == UNPACKED
                     {
                         int8_t* b_jr = b_reorder + ( jr * kc0_updated ) / 2;

@@ -93,7 +93,7 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	}
 
 #ifdef LPGEMM_BF16_JIT
-	if( jit_kernels_generated == FALSE )
+	if( get_jit_kernels_generated() == FALSE )
 	{
 		bli_print_msg(" Could not generate bf16bf16f32of32 "
 			" kernels using JIT.", __FILE__, __LINE__ );

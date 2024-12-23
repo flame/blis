@@ -58,10 +58,13 @@ static lpgemm_eltwise_ops_cntx_t
 
 static arch_t global_lpgemm_enable_arch = BLIS_ARCH_ERROR;
 
-
 #ifdef LPGEMM_BF16_JIT
 // This bool indicates whether JIT kernel generation has been successful.
 static bool jit_kernels_generated = FALSE;
+bool get_jit_kernels_generated()
+{
+	return jit_kernels_generated;
+}
 #endif
 
 // This array is to store function pointers to jit generated kernels.
@@ -72,7 +75,30 @@ static void* global_jit_kernels[ LPGEMM_BF16_MR ]
 // Buffer size is chosen in order to accommodate the
 // worst-case scenario for MR=6 and NR=64.
 // The buffersize is chosen using bruteforce method.
-#define JIT_KERNEL_SIZE ( 10 * BLIS_PAGE_SIZE )
+#define JIT_KERNEL_SIZE ( 14 * BLIS_PAGE_SIZE )
+
+#ifdef DUMP_JIT_CODE
+//Funtion to Dump JIT generated kernel
+void dump_jit_code(const void *code, int code_size, const char *code_name, int m, int n) {
+    if (code) {
+        static int counter = 0;
+#define MAX_FNAME_LEN 256
+        char fname[MAX_FNAME_LEN + 1];
+        // TODO (Roma): support prefix for code / linux perf dumps
+        snprintf(fname, MAX_FNAME_LEN, "dnnl_dump_cpu_%s_%dx%d.%d.bin", code_name, m, n,
+                counter);
+        counter++;
+        FILE *fp = fopen(fname, "wb+");
+        // Failure to dump code is not fatal
+        if (fp) {
+            int unused = fwrite(code, code_size, 1, fp);
+            //UNUSED(unused);
+            fclose(fp);
+        }
+    }
+#undef MAX_FNAME_LEN
+}
+#endif
 
 static bli_pthread_once_t once_check_lpgemm_func_map_init = BLIS_PTHREAD_ONCE_INIT;
 
@@ -202,6 +228,10 @@ static void _lpgemm_cntx_init_func_map()
 						                global_jit_kernels[m][n],
 						                JIT_KERNEL_SIZE
 						              );
+					#ifdef DUMP_JIT_CODE
+						dump_jit_code(global_jit_kernels[m][n], JIT_KERNEL_SIZE,
+									"lpgemm", inputs.MR, inputs.NR);
+					#endif
 					}
 					else
 					{

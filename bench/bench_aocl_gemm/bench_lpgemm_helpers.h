@@ -1088,17 +1088,11 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 \
         /* Fill scale factor and zero points.*/ \
         DSCALE_type* temp_dscale_ptr = ( DSCALE_type* )( post_ops->sum )->scale_factor; \
-        for ( dim_t i = 0; i < n_scale; ++i ) \
-        { \
-            temp_dscale_ptr[i] = ( ( DSCALE_type )2 ); \
-        } \
+        GEN_FUNC_NAME(fill_array_,DSCALE_type)(temp_dscale_ptr, n_scale);   \
         ( post_ops->sum )->scale_factor_len = n_scale; \
 \
         C_DSCALE_type* temp_dzero_point_ptr = ( C_DSCALE_type* )( post_ops->sum )->zero_point; \
-        for ( dim_t i = 0; i < n_zp; ++i ) \
-        { \
-            temp_dzero_point_ptr[i] = (C_DSCALE_type)( ( i + 9 ) % 126 ); \
-        } \
+        GEN_FUNC_NAME(fill_array_,C_DSCALE_type)(temp_dzero_point_ptr, n_zp);   \
         ( post_ops->sum )->zero_point_len = n_zp; \
     } \
  \

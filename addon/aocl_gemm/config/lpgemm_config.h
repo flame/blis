@@ -77,6 +77,8 @@ void lpgemm_set_jit_kernel( void* kernel_fp, dim_t m_index, dim_t n_index );
 
 void* lpgemm_get_jit_kernel( dim_t m_index, dim_t n_index );
 
+bool get_jit_kernels_generated();
+
 void lpgemm_mod_block_size_s16
      (
        dim_t  m,

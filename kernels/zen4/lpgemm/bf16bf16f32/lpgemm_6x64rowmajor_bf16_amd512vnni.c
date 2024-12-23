@@ -56,9 +56,18 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 	dim_t m_full_pieces_loop_limit = m_full_pieces * MR;
 	dim_t m_partial_pieces = m0 % MR;
 
-	dim_t k_full_pieces = k0 / 2;
-	dim_t k_partial_pieces = k0 & 1;
+	dim_t k_fringe_pieces = k0 & 1;
 
+#ifdef BPREFETCH_JIT
+	/* This code is for experimental purpose. The prefetch distance is currentlt
+	set to 8 * rs_b. Hence, there would be three loops to cater to the k-dim.
+	The main k-loop, the k-partial pieces which would include the k % 8 pieces
+	(since the unroll factor is 4 here) and the fringe case.*/
+	dim_t k_full_pieces = k0 / 8;
+	dim_t k_partial_pieces = k0 % 8;
+	dim_t b_prefetch =  8 * rs_b;
+#else
+	dim_t k_full_pieces = k0 / 2;
 	dim_t value;
 
 	if(k_full_pieces > 40)
@@ -69,7 +78,7 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 	{
 		value = 0;
 	}
-
+#endif
 	// Fill params_t struct with all the data that will be required
 	// during execution of the JIT kernel.
 	lpgemm_jit_params_t params;
@@ -81,9 +90,15 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 	params.alpha = ( float* )&alpha;
 	params.beta = ( float* )&beta;
 	params.m_iter = m_full_pieces;
+#ifdef BPREFETCH_JIT
+	params.k_iter_before_prefetch = k_full_pieces;
+	params.k_iter_after_prefetch = k_partial_pieces / 2;
+	params.bprefetch_dist = b_prefetch;
+#else
 	params.k_iter_before_prefetch = k_full_pieces - value;
 	params.k_iter_after_prefetch = value;
-	params.k_left = k_partial_pieces;
+#endif
+	params.k_left = k_fringe_pieces;
 	params.a = ( bfloat16* )a; params.b = ( bfloat16* )b; params.c = ( float* )c;
 
 
@@ -242,7 +257,7 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 	dim_t k_partial_pieces = k0 % 2;
 
 	int16_t a_kfringe_buf = 0;
-	
+
 
 	if ( n0 < NR )
 	{
@@ -1489,7 +1504,7 @@ POST_OPS_DOWNSCALE_6x64:
 			__m512 zero_point3 = _mm512_setzero_ps();
 
 			__mmask16 zp_mask = _cvtu32_mask16( 0xFFFF );
-			
+
 			// Need to account for row vs column major swaps. For scalars
 			// scale and zero point, no implications.
 			// Even though different registers are used for scalar in column

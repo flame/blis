@@ -59,7 +59,7 @@ AOCL_BGEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	aocl_lpgemm_init_global_cntx();
 
 #ifdef LPGEMM_BF16_JIT
-	if( jit_kernels_generated == FALSE )
+	if( get_jit_kernels_generated() == FALSE )
 	{
 		bli_print_msg(" Could not generate bf16bf16f32of32 "
 			" kernels using JIT.", __FILE__, __LINE__ );
@@ -277,7 +277,7 @@ AOCL_BGEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 	aocl_lpgemm_init_global_cntx();
 
 #ifdef LPGEMM_BF16_JIT
-	if( jit_kernels_generated == FALSE )
+	if( get_jit_kernels_generated() == FALSE )
 	{
 		bli_print_msg(" Could not generate bf16bf16f32of32 "
 			" kernels using JIT.", __FILE__, __LINE__ );

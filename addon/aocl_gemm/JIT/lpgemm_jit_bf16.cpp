@@ -98,6 +98,68 @@ void bli_lpgemm_jit:: reg_init( dim_t m_dim, dim_t n_dim )
 // This code replicates the existing bf16 kernel.
 // Hence unroll factor is hardcoded to be 2.
 // To-DO: Make unroll factor as an configurable parameter.
+#ifdef BPREFETCH_JIT
+void bli_lpgemm_jit:: kernel_unroll( dim_t m_dim, dim_t n_dim )
+{
+    dim_t reg_num;
+    dim_t cnt = 0;
+    // Broadcast elements of A matrix
+    vpbroadcastd( Zmm( bcst_start_idx ), ptr[ rax ] );
+
+    // load elements of B matrix into registers
+    for( dim_t n = 0; n < num_full_loads; n++ )
+        vmovdqu16( Zmm( load_start_idx + n ), ptr[ rbx + n * 64 ] );
+
+    // In case of last load with fringe part, use mask
+    if( n_rem )
+        vmovdqu16( Zmm( load_start_idx + num_full_loads )
+                        | k3 | T_z, ptr[ rbx + num_full_loads * 64 ] );
+
+    add( rbx, r10 );
+
+    for( dim_t m = 0; m < m_dim; m++ )
+    {
+        // broadcast elements of A matrix.
+        // Using 2 ZMM registers for broadcast.
+        if( m < ( m_dim - 1 ) )
+        {
+            switch ( m + 1 )
+            {
+            case 1:
+            case 4:
+            case 2: vpbroadcastd( Zmm( bcst_start_idx + ( m + 1 ) % 2 ),
+                                  ptr[ rax + r8 * ( m + 1 ) ] );
+                    break;
+            case 3: vpbroadcastd( Zmm( bcst_start_idx + ( m + 1 ) % 2 ),
+                                  ptr[ rax + r13 ] );
+                    break;
+            case 5: vpbroadcastd( Zmm( bcst_start_idx + ( m + 1 ) % 2 ),
+                                  ptr[ rax + r15 ] );
+                    break;
+            default:
+                break;
+            }
+        }
+
+        // move to next column
+        if( m == ( m_dim - 1 ) ) add( rax, r9 );
+        if(cnt < num_full_loads)
+        {
+            prefetcht0( ptr[ rcx + cnt * 64 ] );
+            cnt++;
+        }
+        // Generate FMA instructions.
+        for( dim_t n = 0; n < num_loads; n++ )
+        {
+            reg_num = fma_start_idx + ( m * num_loads ) + n;
+
+            vdpbf16ps( Zmm( reg_num ), Zmm( bcst_start_idx + m % 2 ),
+                       Zmm( load_start_idx + n ) );
+        }
+    }
+    add( rcx, num_full_loads * 64 );
+}
+#else
 void bli_lpgemm_jit:: kernel_unroll( dim_t m_dim, dim_t n_dim )
 {
     dim_t reg_num;
@@ -153,6 +215,7 @@ void bli_lpgemm_jit:: kernel_unroll( dim_t m_dim, dim_t n_dim )
         }
     }
 }
+#endif
 
 void bli_lpgemm_jit:: k_fringe_loop( dim_t m_dim, dim_t n_dim )
 {
@@ -467,7 +530,7 @@ void bli_lpgemm_jit:: bias_row_major( dim_t m_dim, dim_t n_dim )
                    offsetof( lpgemm_post_op_attr, post_op_c_j ) ] );
 
     mov( rcx, ptr[ rsp + stack_off_postop +
-                  offsetof( lpgemm_post_op_attr, c_stor_type ) ] );
+                  offsetof( lpgemm_post_op_attr, bias_stor_type ) ] );
     cmp( rcx, 4 );
     je( "BIAS_BF16_ROW_MAJOR", T_NEAR );
 
@@ -533,7 +596,7 @@ void bli_lpgemm_jit:: bias_col_major( dim_t m_dim, dim_t n_dim )
                    offsetof( lpgemm_post_op_attr, post_op_c_i ) ] );
 
     mov( rcx, ptr[ rsp + stack_off_postop +
-                  offsetof( lpgemm_post_op_attr, c_stor_type ) ] );
+                  offsetof( lpgemm_post_op_attr, bias_stor_type ) ] );
     cmp( rcx, 4 );
     je( "BIAS_BF16_COL_MAJOR", T_NEAR );
 
@@ -599,6 +662,216 @@ void bli_lpgemm_jit:: relu_scale( dim_t m_dim, dim_t n_dim )
     {
         vcmpps( k5, Zmm( m ), Zmm( zero_reg ), 0x02 );
         vmulps( Zmm( m ) | k5, Zmm( m ), Zmm( scale_factor ) );
+    }
+}
+
+void bli_lpgemm_jit:: downscale_row_major( dim_t m_dim, dim_t n_dim )
+{
+    dim_t reg_num;
+    dim_t sf_reg = load_start_idx;
+    dim_t zp_reg = bcst_start_idx;
+
+    mov( rax, ptr[ rdx + offsetof( lpgemm_post_op, scale_factor ) ] );
+
+    mov( rbx, ptr[ rdx + offsetof( lpgemm_post_op, scale_factor_len ) ] );
+    cmp( rbx, 1 );
+    je( "DOWNSCALE_ROW_MAJOR_SF_EQ1");
+
+    //If scale_factor_length > 1 load each element in the register.
+    mov( rbx, ptr[ rsp + stack_off_postop +
+                   offsetof( lpgemm_post_op_attr, post_op_c_j ) ] );  //
+    // post_op_c_j *= sizeof( float )
+    lea( rbx, ptr[ rbx * 4 ] );
+    add( rax, rbx );
+    for( dim_t n = 0; n <  num_full_loads; n++ )
+    {
+        vmovups( Zmm( sf_reg + n ), ptr[ rax + n * 64 ] );
+    }
+    if( n_rem )
+    {
+        vmovups( Zmm( sf_reg + num_full_loads ) | k4,
+                 ptr[ rax + num_full_loads * 64 ] );
+    }
+    jmp( "DOWNSCALE_ZERO_POINT" );
+
+    L( "DOWNSCALE_ROW_MAJOR_SF_EQ1");
+    //Broadcast the scale_factor value. When scale-factor length == 1,
+    //even though different registers are used to hold the scalar value
+    //all those registers would contain the same value.
+    for( dim_t n = 0; n < num_full_loads; n++ )
+        vbroadcastss( Zmm( sf_reg + n ), ptr[ rax ] );
+
+    if(n_rem)
+    {
+        vbroadcastss( Zmm( sf_reg + num_full_loads ), ptr[ rax ] );
+    }
+
+    L( "DOWNSCALE_ZERO_POINT" );
+    mov( rax, ptr[ rdx + offsetof( lpgemm_post_op, op_args1 ) ] );
+
+    mov( rbx, ptr[ rdx + offsetof( lpgemm_post_op, op_args3 ) ] );
+    mov( rbx, ptr[ rbx ] );
+    cmp( rbx, 1 );
+    je( "DOWNSCALE_ROW_MAJOR_ZP_EQ1" );
+
+    // load post_op_c_j and multiply with sizeof(bfloat16)
+    mov( rbx, ptr[ rsp + stack_off_postop +
+                   offsetof( lpgemm_post_op_attr, post_op_c_j ) ] );
+    // post_op_c_j *= sizeof( bfloat16 )
+    lea( rbx, ptr[ rbx * 2 ] );
+    add( rax, rbx );
+    //If zero_point > 1
+    for( dim_t n = 0; n < num_full_loads; n++ )
+    {
+        //Convert from 16 bit elements to 32 bit elements
+        vpmovsxwd( Zmm( zp_reg + n ), ptr[ rax + n * 32 ] );
+
+        //Shift left by 16 bits
+        vpslld( Zmm( zp_reg + n ), Zmm( zp_reg + n ), 0x10 );
+    }
+    if(n_rem)
+    {
+        // load the bf16 elements from the downscale buffer using mask.
+        vmovdqu16( Ymm( zp_reg + num_full_loads ) | k4 | T_z,
+                   ptr[rax + num_full_loads * 32 ] );
+
+        // convert from 16 bit elements to 32 bit elements
+        vpmovsxwd( Zmm( zp_reg + num_full_loads ),
+                   Ymm( zp_reg + num_full_loads ) );
+
+        // Shift left by 16 bits
+        vpslld( Zmm( zp_reg + num_full_loads ),
+                 Zmm( zp_reg + num_full_loads ), 0x10 );
+    }
+    jmp( "POST_SCALAR_ZP" );
+
+    L( "DOWNSCALE_ROW_MAJOR_ZP_EQ1" );
+    for( dim_t n = 0; n < num_full_loads; n++ )
+    {
+        vpbroadcastw( Ymm( zp_reg + n ), ptr[ rax ] );
+        //Convert from 16 bit elements to 32 bit elements
+        vpmovsxwd( Zmm( zp_reg + n ), Ymm( zp_reg + n ) );
+
+        //Shift left by 16 bits
+        vpslld( Zmm( zp_reg + n ), Zmm( zp_reg + n ), 0x10 );
+    }
+
+    if(n_rem)
+    {
+        // load the bf16 elements from the downscale buffer using mask.
+        vpbroadcastw( Ymm( zp_reg + num_full_loads ) | k4 | T_z,
+                   ptr[ rax ] );
+
+        // convert from 16 bit elements to 32 bit elements
+        vpmovsxwd( Zmm( zp_reg + num_full_loads ),
+                   Ymm( zp_reg + num_full_loads ) );
+
+        // Shift left by 16 bits
+        vpslld( Zmm( zp_reg + num_full_loads ),
+                 Zmm( zp_reg + num_full_loads ), 0x10 );
+    }
+
+    L( "POST_SCALAR_ZP" );
+    for( dim_t m = 0; m < m_dim; m++ )
+    {
+        for( dim_t n = 0; n < num_loads; n++ )
+        {
+            reg_num = fma_start_idx + ( m * num_loads ) + n;
+            vmulps( Zmm( reg_num ), Zmm( reg_num ), Zmm( sf_reg + n ) );
+            vaddps( Zmm( reg_num ), Zmm( reg_num ), Zmm( zp_reg + n ) );
+        }
+    }
+}
+
+void bli_lpgemm_jit:: downscale_col_major( dim_t m_dim, dim_t n_dim )
+{
+    dim_t reg_num;
+
+    mov( rax, ptr[ rdx + offsetof( lpgemm_post_op, scale_factor ) ] );
+
+    mov( rbx, ptr[ rdx + offsetof( lpgemm_post_op, scale_factor_len ) ] );
+    cmp( rbx, 1 );
+    je( "DOWNSCALE_COL_MAJOR_SF_EQ1" );
+    // If scale_factor_length > 1, broadcast each element in the register.
+    // In order to save on the registers the scale factor values are
+    // broadcast in all m_dim registers and caluculate the scale values first.
+    mov( rbx, ptr[ rsp + stack_off_postop +
+                   offsetof( lpgemm_post_op_attr, post_op_c_i ) ] );
+    // post_op_c_i *= sizeof( float )
+    lea( rbx, ptr[ rbx * 4 ] );
+    add( rax, rbx );
+    for( dim_t m = 0; m < m_dim; m++ )
+        vbroadcastss( Zmm( load_start_idx + m ), ptr[ rax + m * 4 ] );
+
+    jmp( "DOWNSCALE_COL_SCALE_FACTOR" );
+
+    L( "DOWNSCALE_COL_MAJOR_SF_EQ1");
+    //Broadcast the scale_factor value. When scale-factor length == 1,
+    //even though different registers are used to hold the scalar value
+    //all those registers would contain the same value.
+     for( dim_t m = 0; m < m_dim; m++ )
+        vbroadcastss( Zmm( load_start_idx + m ), ptr[ rax ] );
+
+    L( "DOWNSCALE_COL_SCALE_FACTOR" );
+    //Calculate the scale factor value with the broadcasted scale factor values.
+    for( dim_t m = 0; m < m_dim; m++ )
+    {
+        for( dim_t n = 0; n < num_loads; n++ )
+        {
+            reg_num = fma_start_idx + ( m * num_loads ) + n;
+            vmulps( Zmm( reg_num ), Zmm( reg_num ), Zmm( load_start_idx + m ) );
+        }
+    }
+
+    //Zero-Point
+    mov( rax, ptr[ rdx + offsetof( lpgemm_post_op, op_args1 ) ] );
+
+    mov( rbx, ptr[ rdx + offsetof( lpgemm_post_op, op_args3 ) ] );
+    mov( rbx, ptr[ rbx ] );
+    cmp( rbx, 1 );
+    je( "DOWNSCALE_COL_MAJOR_ZP_EQ1" );
+
+    //If zp_length > 1 broadcast each element in the register.
+    mov( rbx, ptr[ rsp + stack_off_postop +
+                   offsetof( lpgemm_post_op_attr, post_op_c_i ) ] );
+    // post_op_c_i *= sizeof( bfloat16 )
+    lea( rbx, ptr[ rbx * 2 ] );
+    add( rax, rbx );
+    for( dim_t m = 0; m < m_dim; m++ )
+    {
+        //broadcast the bf16 elements from the downscale buffer using mask.
+        vpbroadcastw( Ymm( load_start_idx + m ), ptr[ rax + m * 2 ] );
+
+        //Convert from 16 bit elements to 32 bit elements
+        vpmovsxwd( Zmm( load_start_idx + m ), Ymm( load_start_idx + m ) );
+
+        //Shift left by 16 bits
+        vpslld( Zmm( load_start_idx + m ), Zmm( load_start_idx + m ), 0x10 );
+    }
+
+    jmp( "DOWNSCALE_COL_ZERO_POINT" );
+
+    L( "DOWNSCALE_COL_MAJOR_ZP_EQ1" );
+    for( dim_t m = 0; m < m_dim; m++ )
+    {
+        //Broadcast the bf16 elements from the downscale buffer
+        vpbroadcastw( Ymm( load_start_idx + m ), ptr[ rax ] );
+
+        //Convert from 16 bit elements to 32 bit elements
+        vpmovsxwd( Zmm( load_start_idx + m ), Ymm( load_start_idx + m ) );
+
+        //Shift left by 16 bits
+        vpslld( Zmm( load_start_idx + m ), Zmm( load_start_idx + m ), 0x10 );
+    }
+
+    L( "DOWNSCALE_COL_ZERO_POINT" );
+    for( dim_t m = 0; m < m_dim; m++ )
+    {
+        for( dim_t n = 0; n < num_loads; n++ )
+        {
+            reg_num = fma_start_idx + ( m * num_loads ) + n;
+            vaddps( Zmm( reg_num ), Zmm( reg_num ), Zmm( load_start_idx + m ) );
+        }
     }
 }
 
@@ -935,6 +1208,55 @@ void bli_lpgemm_jit::swish( dim_t m_dim, dim_t n_dim )
     );
 }
 
+void bli_lpgemm_jit::TANHF_AVX512_DEF( dim_t reg )
+{
+    vpxorq( Zmm( x ), Zmm( x ), Zmm( x ) );
+    vmovups( Zmm( x_tanh ), Zmm( reg ) );
+    TANHF_AVX512();
+    vmovups( Zmm( reg ), Zmm( x_tanh ) );
+}
+
+void bli_lpgemm_jit::tanh( dim_t m_dim, dim_t n_dim )
+{
+    apply_post_ops_in_high_reg_pressure
+    (
+      num_gelu_regs,
+      std::bind
+      (
+        &bli_lpgemm_jit::TANHF_AVX512_DEF,
+        this,
+        std::placeholders::_1
+      )
+    );
+}
+
+void bli_lpgemm_jit::SIGMOID_AVX512_DEF( dim_t reg )
+{
+    vbroadcastss( Zmm( const1 ), get_constant(gelu_consts_off, 4) );
+    vmulps( Zmm( x ), Zmm( const1 ), Zmm( reg ) );
+
+    //Input is x, output is q
+    EXPF_AVX512();
+
+    vbroadcastss( Zmm( const1 ), get_constant(gelu_consts_off, 6) );
+    vaddps( Zmm( q ), Zmm( q ), Zmm( const1 ) );
+    vdivps( Zmm( reg ), Zmm( q ), Zmm( const1 ) );
+}
+
+void bli_lpgemm_jit::sigmoid( dim_t m_dim, dim_t n_dim )
+{
+    apply_post_ops_in_high_reg_pressure
+    (
+      num_gelu_regs,
+      std::bind
+      (
+        &bli_lpgemm_jit::SIGMOID_AVX512_DEF,
+        this,
+        std::placeholders::_1
+      )
+    );
+}
+
 void bli_lpgemm_jit:: store_f32( dim_t m_dim, dim_t n_dim )
 {
     dim_t reg_num;
@@ -1045,10 +1367,13 @@ void bli_lpgemm_jit::initialize_params( lpgemm_jit_inputs_t* params )
                                    k_iter_after_prefetch ) ] );
     mov( ptr[ rsp + stack_off_k_iter_after_prefetch ], rbx );
 
-
     mov( rbx, ptr[ rdi + offsetof( lpgemm_jit_params_t, k_left ) ] );
     mov( ptr[ rsp + stack_off_k_left ], rbx );
 
+#ifdef BPREFETCH_JIT
+    mov( rbx, ptr[ rdi + offsetof( lpgemm_jit_params_t, bprefetch_dist ) ] );
+    mov( ptr[ rsp + stack_off_bprefetch_dist ], rbx );
+#endif
     mov( rbx, ptr[ rdi + offsetof( lpgemm_jit_params_t, alpha ) ] );
     mov( ptr[ rsp + stack_off_alpha ], rbx );
 
@@ -1164,6 +1489,10 @@ void bli_lpgemm_jit:: post_op_label_lastk_safe_jump()
     je( "POST_OPS_MATRIX_ADD_6x64", T_NEAR );
     cmp( rax, POST_OPS_SWISH );
     je( "POST_OPS_SWISH_6x64", T_NEAR );
+    cmp( rax, POST_OPS_TANH );
+    je( "POST_OPS_TANH_6x64", T_NEAR );
+    cmp( rax, POST_OPS_SIGMOID );
+    je( "POST_OPS_SIGMOID_6x64", T_NEAR );
 }
 
 // Constructor
@@ -1219,7 +1548,6 @@ void bli_lpgemm_jit::generate_kernel( lpgemm_jit_inputs_t* params )
     // Hence using broadcast register to store beta value.
     beta_reg = bcst_start_idx;
 
-
     preamble();
     // add some spack in stack to store params
     sub( rsp, 512 );
@@ -1270,7 +1598,50 @@ void bli_lpgemm_jit::generate_kernel( lpgemm_jit_inputs_t* params )
 
     // Zero all the registers that will be used for accumulation.
     reg_init( m_dim, n_dim );
+    prefetcht0( ptr[ rbx ] );
 
+#ifdef BPREFETCH_JIT
+    // load k_iter
+    mov( rsi, ptr[ rsp + stack_off_k_iter_before_prefetch ] );
+    test( rsi, rsi );
+    je( "BCONSIDKLEFT", T_NEAR );
+
+    mov( rcx, ptr[ rsp + stack_off_bprefetch_dist ] );
+    add( rcx, rbx );
+
+    L( "BLOOPKITER" );
+    // Main k-unroll loop with 4 kernel unroll
+    kernel_unroll( m_dim, n_dim );
+
+    kernel_unroll( m_dim, n_dim );
+
+    kernel_unroll( m_dim, n_dim );
+
+    kernel_unroll( m_dim, n_dim );
+
+    dec( rsi ); //i -= 1
+    jne("BLOOPKITER", T_NEAR );
+
+    L( "BCONSIDKLEFT" );
+    // load k_left
+    mov( rsi, ptr[ rsp + stack_off_k_iter_after_prefetch ] );
+    test( rsi, rsi );
+    je( "KFRINGE", T_NEAR );
+
+    L( "KPARTIALLOOP" );
+    //Partial k-left loop
+    kernel_unroll( m_dim, n_dim );
+    dec(rsi); //rsi -= 1
+    jne( "KPARTIALLOOP", T_NEAR );
+
+    L( "KFRINGE" );
+    // load k_left
+    mov( rsi, ptr[ rsp + stack_off_k_left ] );
+    test( rsi, rsi );
+    je( "BPOSTACCUM", T_NEAR );
+    // k_fringe
+    k_fringe_loop( m_dim, n_dim );
+#else
     // load k_iter
     mov( rsi, ptr[ rsp + stack_off_k_iter_before_prefetch ] );
     test( rsi, rsi );
@@ -1306,7 +1677,7 @@ void bli_lpgemm_jit::generate_kernel( lpgemm_jit_inputs_t* params )
 
     // k_fringe
     k_fringe_loop( m_dim, n_dim );
-
+#endif
 
     L( "BPOSTACCUM" );
 
@@ -1404,6 +1775,23 @@ void bli_lpgemm_jit::generate_kernel( lpgemm_jit_inputs_t* params )
     post_op_label_lastk_safe_jump_with_next_ptr();
 
     L( "POST_OPS_DOWNSCALE_6x64" );
+    mov( rax, ptr[ rdx + offsetof( lpgemm_post_op, op_args2 ) ] );
+    mov( bl, ptr[ rax ] );
+
+    //check if op_args2 == 'R'
+    cmp( bl, 0x52 );
+    je("DOWNSCALE_ROW_MAJOR", T_NEAR );
+    // check if op_args2 == 'r
+    cmp( bl, 0x72 );
+    je( "DOWNSCALE_ROW_MAJOR", T_NEAR );
+
+    downscale_col_major( m_dim, n_dim );
+    jmp( "POST_DOWNSCALE", T_NEAR );
+
+    L( "DOWNSCALE_ROW_MAJOR" );
+    downscale_row_major( m_dim, n_dim );
+
+    L( "POST_DOWNSCALE" );
     post_op_label_lastk_safe_jump_with_next_ptr();
 
     L( "POST_OPS_MATRIX_ADD_6x64" );
@@ -1422,6 +1810,14 @@ void bli_lpgemm_jit::generate_kernel( lpgemm_jit_inputs_t* params )
 
     L( "POST_OPS_SWISH_6x64" );
     swish( m_dim, n_dim );
+    post_op_label_lastk_safe_jump_with_next_ptr();
+
+    L( "POST_OPS_TANH_6x64" );
+    tanh(m_dim, n_dim);
+    post_op_label_lastk_safe_jump_with_next_ptr();
+
+    L( "POST_OPS_SIGMOID_6x64" );
+    sigmoid( m_dim, n_dim );
     post_op_label_lastk_safe_jump_with_next_ptr();
 
     L( "POST_OPS_6x64_DISABLE" );

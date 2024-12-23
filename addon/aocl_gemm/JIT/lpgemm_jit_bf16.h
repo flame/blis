@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -73,12 +73,18 @@ private :
     void EXPF_AVX512();
     void TANHF_AVX512();
     void GELU_TANH_F32_AVX512_DEF( dim_t reg );
+    void TANHF_AVX512_DEF( dim_t reg );
     void POLY_EVAL_HORNER_16_0_AVX512();
     void ERF_AVX512();
     void GELU_ERF_F32_AVX512_DEF( dim_t reg );
     void gelu_erf( dim_t m_dim, dim_t n_dim );
     void SWISH_F32_AVX512_DEF( dim_t reg );
     void swish( dim_t m, dim_t n );
+    void downscale_row_major( dim_t m_dim, dim_t n_dim );
+    void downscale_col_major( dim_t m_dim, dim_t n_dim );
+    void tanh( dim_t m_dim, dim_t n_dim );
+    void SIGMOID_AVX512_DEF( dim_t reg );
+    void sigmoid( dim_t m_dim, dim_t n_dim );
 
     void apply_post_ops_in_high_reg_pressure
     (
@@ -116,7 +122,7 @@ private :
     const dim_t x_tanh = load_start_idx+7;
     const dim_t q = load_start_idx+8;
 
-        // registers for gelu_erf
+    // registers for gelu_erf
     const dim_t num_erf_regs = 5;
     const dim_t x_erf = load_start_idx+4;
 
@@ -131,6 +137,9 @@ private :
     const dim_t stack_off_beta = 48;
     const dim_t stack_off_b_ptr = 56;
     const dim_t stack_off_postop = 64;
+#ifdef BPREFETCH_JIT
+    const dim_t stack_off_bprefetch_dist = 72;
+#endif
     const dim_t stack_off_buf_downscale = stack_off_postop +
                                           offsetof( lpgemm_post_op_attr,
                                                     buf_downscale );
