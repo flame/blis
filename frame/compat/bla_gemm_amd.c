@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1284,9 +1284,9 @@ void zgemm_blis_impl
             /* Booleans and thresholds to calculate the entry to small path(ST and MT modes)*/
             double c_thresh = (double)m0 * (double)n0;
             double overall_thresh = (double)m0 * (double)n0 * (double)k0;
-            bool entry_to_small_st = (( !is_parallel ) && ((( a_thresh < 600 ) || ( b_thresh < 600 ) ||
-                                      ( c_thresh < 600 )) && ( overall_thresh < 20000 )));
-            bool entry_to_small_mt = (( is_parallel ) && ( overall_thresh < 7500 ));
+            bool mat_based_thresh = (( a_thresh < 600 ) || ( b_thresh < 600 ) || ( c_thresh < 600 ));
+            bool entry_to_small_st = (( !is_parallel ) && mat_based_thresh && ( overall_thresh < 20000 ));
+            bool entry_to_small_mt = (( is_parallel ) && mat_based_thresh && ( overall_thresh < 12500 ));
 
             entry_to_small = entry_to_small_st || entry_to_small_mt;
             break;
