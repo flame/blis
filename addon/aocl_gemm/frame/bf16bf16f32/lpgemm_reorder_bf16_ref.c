@@ -342,7 +342,6 @@ static void   packb_nr64_bf16bf16f32of32_row_major_ref
 	{
 		for ( dim_t kr = 0; kr < k_full_pieces; kr += 2 )
 		{
-			// Rearrange for dpbf16_ps, read 2 rows from B with 64 elements in each row.
 			bfloat16* inp0 = ( b + ( ldb * ( kr + 0 ) ) + jc  );
 			bfloat16* inp1 = ( b + ( ldb * ( kr + 0 ) ) + jc + 32 );
 			bfloat16* inp2 = ( b + ( ldb * ( kr + 1 ) ) + jc );
@@ -471,7 +470,6 @@ static void  packb_nr_mult_16_bf16bf16f32of32_col_major_ref
 	{
 		for( dim_t jr = 0; jr < NR; jr += 16 )
 		{
-			// Rearrange for dpbf16_ps, read 2 rows from B with 64 elements in each row.
 			bfloat16 *inp, *outp;
 			for( dim_t i = 0; i < 16; i++ )
 			{
@@ -490,10 +488,7 @@ static void  packb_nr_mult_16_bf16bf16f32of32_col_major_ref
 	{
 		for( dim_t jr = 0; jr < NR; jr += 16 )
 		{
-			// Rearrange for dpbf16_ps, read 2 rows from B with 64 elements in each row.
-
 			bfloat16 *inp, *outp;
-
 			for( dim_t i = 0; i < 16; i++ )
 			{
 				inp  = (b + ( ldb * ( jr + i ) ) + kr);
@@ -511,9 +506,7 @@ static void  packb_nr_mult_16_bf16bf16f32of32_col_major_ref
 	{
 		for( dim_t jr = 0; jr < NR; jr += 16 )
 		{
-			// Rearrange for dpbf16_ps, read 2 rows from B with 64 elements in each row.
 			bfloat16 *inp, *outp;
-
 			for( dim_t i = 0; i < 16; i++ )
 			{
 				inp  = (b + ( ldb * ( jr + i ) ) + kr);
@@ -531,9 +524,7 @@ static void  packb_nr_mult_16_bf16bf16f32of32_col_major_ref
 	{
 		for( dim_t jr = 0; jr < NR; jr += 16 )
 		{
-			// Rearrange for dpbf16_ps, read 2 rows from B with 64 elements in each row.
 			bfloat16 *inp, *outp;
-
 			for( dim_t i = 0; i < 16; i++ )
 			{
 				inp  = (b + ( ldb * ( jr + i ) ) + kr);
@@ -552,7 +543,6 @@ static void  packb_nr_mult_16_bf16bf16f32of32_col_major_ref
 		for( dim_t jr = 0; jr < NR; jr += 16 )
 		{
 			bfloat16 *inp, *outp;
-
 			for( dim_t i = 0; i < 16; i++ )
 			{
 				inp  = (b + ( ldb * ( jr + i ) ) + kr);
@@ -601,7 +591,6 @@ static void  packb_nrlt16_bf16bf16f32of32_col_major_ref
 	{
 		for( dim_t jr = 0; jr < NR; jr += 16 )
 		{
-			// Rearrange for dpbf16_ps, read 2 rows from B with 64 elements in each row.
 			bfloat16 *inp, *outp;
 			for( dim_t i = 0; i < n0_partial_rem; i++ )
 			{
@@ -620,11 +609,8 @@ static void  packb_nrlt16_bf16bf16f32of32_col_major_ref
 	{
 		for( dim_t jr = 0; jr < NR; jr += 16 )
 		{
-			// Rearrange for dpbf16_ps, read 2 rows from B with 64 elements in each row.
-
 			bfloat16 *inp, *outp;
-
-			for( dim_t i = 0; i < 16; i++ )
+			for( dim_t i = 0; i < n0_partial_rem; i++ )
 			{
 				inp  = (b + ( ldb * ( jr + i ) ) + kr);
 				outp = pack_b_buffer + ( jr * 2 ) + (kr * NR) + i * 2;
@@ -641,9 +627,7 @@ static void  packb_nrlt16_bf16bf16f32of32_col_major_ref
 	{
 		for( dim_t jr = 0; jr < NR; jr += 16 )
 		{
-			// Rearrange for dpbf16_ps, read 2 rows from B with 64 elements in each row.
 			bfloat16 *inp, *outp;
-
 			for( dim_t i = 0; i < n0_partial_rem; i++ )
 			{
 				inp  = (b + ( ldb * ( jr + i ) ) + kr);
@@ -661,9 +645,7 @@ static void  packb_nrlt16_bf16bf16f32of32_col_major_ref
 	{
 		for( dim_t jr = 0; jr < NR; jr += 16 )
 		{
-			// Rearrange for dpbf16_ps, read 2 rows from B with 64 elements in each row.
 			bfloat16 *inp, *outp;
-
 			for( dim_t i = 0; i < n0_partial_rem; i++ )
 			{
 				inp  = (b + ( ldb * ( jr + i ) ) + kr);
@@ -682,7 +664,6 @@ static void  packb_nrlt16_bf16bf16f32of32_col_major_ref
 		for( dim_t jr = 0; jr < NR; jr += 16 )
 		{
 			bfloat16 *inp, *outp;
-
 			for( dim_t i = 0; i < n0_partial_rem; i++ )
 			{
 				inp  = (b + ( ldb * ( jr + i ) ) + kr);
