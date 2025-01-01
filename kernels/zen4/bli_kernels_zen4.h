@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -136,6 +136,17 @@ GEMV_KER_PROT( double,  d, gemv_n_zen_int_32x1n_avx512 )
 GEMV_KER_PROT( double,  d, gemv_n_zen_int_16x1n_avx512 )
 GEMV_KER_PROT( double,  d, gemv_n_zen_int_8x1n_avx512 )
 GEMV_KER_PROT( double,  d, gemv_n_zen_int_m_leftx1n_avx512 )
+
+// dgemv_t kernels for handling op(A) = 't', i.e., transa = 't' cases.
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_avx512 )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_mx8_avx512 )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_mx7_avx512 )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_mx6_avx512 )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_mx5_avx512 )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_mx4_avx512 )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_mx3_avx512 )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_mx2_avx512 )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_mx1_avx512 )
 
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_l_zen_asm_16x14)
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_zen_asm_16x14)

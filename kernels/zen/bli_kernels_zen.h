@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -154,6 +154,16 @@ DOTXAXPYF_KER_PROT( dcomplex, z, dotxaxpyf_zen_int_8 )
 GEMV_KER_PROT( double,   d,  gemv_zen_ref_c )
 GEMV_KER_PROT( scomplex, c,  gemv_zen_int_4x4 )
 GEMV_KER_PROT( dcomplex, z,  gemv_zen_int_4x4 )
+
+// gemv (intrinsics)
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_avx2 )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_mx7_avx2 )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_mx6_avx2 )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_mx5_avx2 )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_mx4_avx2 )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_mx3_avx2 )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_mx2_avx2 )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_mx1_avx2 )
 
 // her (intrinsics)
 HER_KER_PROT( dcomplex, z,  her_zen_int_var1 )

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -342,9 +342,11 @@ void dgemv_blis_impl
     }
 
     /* Call variants based on transpose value. */
-    if(bli_does_notrans(blis_transa))
+    if((bli_does_notrans(blis_transa) && bli_is_col_stored( rs_a, cs_a )) 
+        || (bli_does_trans(blis_transa) && bli_is_row_stored( rs_a, cs_a )))
     {
-        //variant_2 is chosen for column-storage
+        // when op(A) = n and A is column-stored -> var2 will be called
+        // when op(A) = t and A is row-stored    -> var2 will be called
         // and uses axpyf-based implementation
         bli_dgemv_unf_var2
         (
@@ -362,8 +364,8 @@ void dgemv_blis_impl
     }
     else
     {
-        //var_1 is chosen for row-storage
-        //and uses dotxf-based implementation
+        // when op(A) = t and A is column-stored -> var1 will be called
+        // when op(A) = n and A is row-stored    -> var1 will be called
         bli_dgemv_unf_var1
         (
             blis_transa,
@@ -595,8 +597,8 @@ void sgemv_
              float*    y, const f77_int* incy
      )
 {
-  sgemv_blis_impl( transa, m, n, alpha, a, lda, 
-                        x, incx, beta, y, incy ); 
+  sgemv_blis_impl( transa, m, n, alpha, a, lda,
+                        x, incx, beta, y, incy );
 }
 #endif
 void cgemv_blis_impl
@@ -838,8 +840,8 @@ void cgemv_
              scomplex* y, const f77_int* incy
      )
 {
-  cgemv_blis_impl( transa, m, n, alpha, a, lda, 
-                        x, incx, beta, y, incy ); 
+  cgemv_blis_impl( transa, m, n, alpha, a, lda,
+                        x, incx, beta, y, incy );
 }
 #endif
 void zgemv_blis_impl
@@ -1082,8 +1084,8 @@ void zgemv_
              dcomplex* y, const f77_int* incy
      )
 {
-  zgemv_blis_impl( transa, m, n, alpha, a, lda, 
-                        x, incx, beta, y, incy ); 
+  zgemv_blis_impl( transa, m, n, alpha, a, lda,
+                        x, incx, beta, y, incy );
 }
 
 
