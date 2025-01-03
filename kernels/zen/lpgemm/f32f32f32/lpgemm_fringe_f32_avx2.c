@@ -6671,7 +6671,7 @@ POST_OPS_DOWNSCALE_5x2F:
                             post_ops_attr.post_op_c_i + 2 ) );
             zero_point3 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_i + 3 ) );
-            zero_point0 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+            zero_point4 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_i + 4 ) );
           }
           //c[0, 0-3]

@@ -109,7 +109,8 @@
                          m, n, k, \
                          a, lda, mtag_a, \
                          b, ldb, mtag_b, \
-                         c, ldc \
+                         c, ldc, \
+                         err_no \
                        ) \
 { \
     int32_t info = 0; \
@@ -170,7 +171,7 @@
  \
         sprintf( print_msg, "** On entry to %6s, parameter number %2i of problem %ld had an illegal value", op_str, info, gemm_no); \
         bli_print_msg(print_msg, __FILE__, __LINE__); \
-        return; \
+        err_no = info; \
     } \
 }
 

@@ -42,6 +42,9 @@
 
 FILE* lpgemm_start_logger_fn(void);
 void lpgemm_stop_logger_fn( FILE* fd );
+void lpgemm_get_post_ops_str( aocl_post_op* post_ops, char* ops_str );
+void lpgemm_get_pre_ops_str( aocl_post_op* post_ops, char* ops_str );
+bool is_logger_enabled();
 void lpgemm_write_logger_gemm_fn
      (
        FILE*         fd,
@@ -60,6 +63,26 @@ void lpgemm_write_logger_gemm_fn
        const float   beta,
        const dim_t   ldc,
        aocl_post_op* post_op_unparsed
+     );
+void batch_lpgemm_write_logger_gemm_fn
+     (
+       FILE*         fd,
+       char*         op_type,
+       const char*   order,
+       const char*   transa,
+       const char*   transb,
+       const dim_t   batch_size,
+       const dim_t*  m,
+       const dim_t*  n,
+       const dim_t*  k,
+       const float*  alpha,
+       const dim_t*  lda,
+       const char*   mem_format_a,
+       const dim_t*  ldb,
+       const char*   mem_format_b,
+       const float*  beta,
+       const dim_t*  ldc,
+       aocl_post_op** post_op_unparsed
      );
 void lpgemm_write_logger_time_break_fn( FILE* fd, double stime );
 
@@ -81,6 +104,33 @@ void lpgemm_write_logger_time_break_fn( FILE* fd, double stime );
 #define LPGEMM_WRITE_LOGGER(...) \
 	lpgemm_write_logger_gemm_fn( fd, __VA_ARGS__ ); \
 
+#define BATCH_LPGEMM_WRITE_LOGGER( op_type, order, transa, transb, \
+                                   batch_size, m, n, k, \
+                                   alpha, lda, mem_format_a, \
+                                   ldb, mem_format_b, beta, \
+                                   ldc, post_op_unparsed ) \
+{ \
+  if ( ( is_logger_enabled() ) && ( fd != NULL ) ) \
+	{ \
+		char pre_ops_str[1024] = {0}; \
+ \
+		char post_ops_str[2048] = {0}; \
+ \
+		fprintf(fd, "%s:bs=%ld\n", op_type, batch_size); \
+		for( dim_t i = 0; i < batch_size; i++ ) \
+		{ \
+			lpgemm_get_pre_ops_str( post_op_unparsed[i], pre_ops_str ); \
+			lpgemm_get_post_ops_str( post_op_unparsed[i], post_ops_str ); \
+			fprintf( fd, "%c %c %c %c %c %ld %ld %ld %ld %ld %ld "\
+						":pre_ops=[%s]:post_ops=[%s] %f %f\n", \
+					order[i], transa[i], transb[i], mem_format_a[i], mem_format_b[i], \
+					m[i], n[i], k[i], lda[i], ldb[i], ldc[i],  \
+					pre_ops_str, post_ops_str, \
+					(float)(alpha[i]), (float)(beta[i]) ); \
+		} \
+	} \
+}
+
 #else
 
 #define LPGEMM_START_LOGGER(...)
@@ -88,6 +138,12 @@ void lpgemm_write_logger_time_break_fn( FILE* fd, double stime );
 #define LPGEMM_STOP_LOGGER(...)
 
 #define LPGEMM_WRITE_LOGGER(...)
+
+#define BATCH_LPGEMM_WRITE_LOGGER(op_type, order, transa, transb, \
+                                   batch_size, m, n, k, \
+                                   alpha, lda, mem_format_a, \
+                                   ldb, mem_format_b, beta, \
+                                   ldc, post_op_unparsed)
 
 #endif
 

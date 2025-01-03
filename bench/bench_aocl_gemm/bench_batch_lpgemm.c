@@ -111,6 +111,13 @@ void mat_mul_ ## BLAS_SFX \
 
 GEN_BLIS_MAT_MUL_FUNC(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 GEN_BLIS_MAT_MUL_FUNC(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
+GEN_BLIS_MAT_MUL_FUNC(float,float,float,float,f32f32f32of32)
+GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32)
+GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
+GEN_BLIS_MAT_MUL_FUNC(int8_t,int8_t,int32_t,int32_t,s8s8s32os32)
+GEN_BLIS_MAT_MUL_FUNC(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
+GEN_BLIS_MAT_MUL_FUNC(bfloat16,int8_t,float,float,bf16s4f32of32)
+GEN_BLIS_MAT_MUL_FUNC(bfloat16,int8_t,bfloat16,float,bf16s4f32obf16)
 
 double get_gflops
      (
@@ -211,6 +218,13 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
 
 GEN_MAT_MUL_BENCH_DRV_FUNC(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 GEN_MAT_MUL_BENCH_DRV_FUNC(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
+GEN_MAT_MUL_BENCH_DRV_FUNC(float,float,float,float,f32f32f32of32)
+GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32)
+GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
+GEN_MAT_MUL_BENCH_DRV_FUNC(int8_t,int8_t,int32_t,int32_t,s8s8s32os32)
+GEN_MAT_MUL_BENCH_DRV_FUNC(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
+GEN_MAT_MUL_BENCH_DRV_FUNC(bfloat16,int8_t,float,float,bf16s4f32of32)
+GEN_MAT_MUL_BENCH_DRV_FUNC(bfloat16,int8_t,bfloat16,float,bf16s4f32obf16)
 
 #define GEN_MAT_MUL_ACC_CHK_DOWNSCALE(C_type,ACCUM_type,SCALE_type,BLAS_DOWNSCALE_SFX) \
 static inline ACCUM_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX \
@@ -1230,6 +1244,13 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 
 GEN_MAT_MUL_BENCH_MAIN_FUNC(bfloat16,bfloat16,float,float,bf16bf16f32of32,bf16bf16f32of32,bf16s4f32of32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16,bf16bf16f32of32,bf16s4f32of32)
+GEN_MAT_MUL_BENCH_MAIN_FUNC(float,float,float,float,f32f32f32of32,f32f32f32of32,bf16s4f32of32)
+GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32,u8s8s32os32,u8s4s32os32)
+GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8,u8s8s32os32,u8s4s32os32)
+GEN_MAT_MUL_BENCH_MAIN_FUNC(int8_t,int8_t,int32_t,int32_t,s8s8s32os32,s8s8s32os32,u8s4s32os32)
+GEN_MAT_MUL_BENCH_MAIN_FUNC(int8_t,int8_t,int8_t,int32_t,s8s8s32os8,s8s8s32os32,u8s4s32os32)
+GEN_MAT_MUL_BENCH_MAIN_FUNC(bfloat16,int8_t,float,float,bf16s4f32of32,bf16bf16f32of32,bf16s4f32of32)
+GEN_MAT_MUL_BENCH_MAIN_FUNC(bfloat16,int8_t,bfloat16,float,bf16s4f32obf16,bf16bf16f32of32,bf16s4f32of32)
 
 int main( int argc, char** argv )
 {
@@ -1428,6 +1449,148 @@ int main( int argc, char** argv )
                     post_ops_str_dest, FALSE
                 );
             }
+            if ( ( strcmp( gemm_type_str, "f32f32f32of32" ) == 0 ) ||
+                 ( strcmp( gemm_type_str, "*" ) == 0 ) )
+            {
+                for( dim_t i = 0; i < bs; i++ )
+                    strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
+                global_can_dscale = 'y';
+                global_dscale_out = 'n';
+                global_pre_op = 'n';
+                GEN_FUNC_NAME(mat_mul_bench_main_,f32f32f32of32)
+                (
+                  fin, fout, stor_order, transa, transb, op_a, op_b,
+                  bs, m, n, k, stride_a, stride_b, stride_c,
+                  post_ops_str_dest, FALSE
+                );
+            }
+            if ( ( strcmp( gemm_type_str, "u8s8s32os32" ) == 0 ) ||
+                 ( strcmp( gemm_type_str, "*" ) == 0 ) )
+            {
+                // Copy the original post op str to a temp string buffer.
+                // Done so that strtok can be applied on the same (strtok
+                // is a destructive parser.
+                for( dim_t i = 0; i < bs; i++ )
+                    strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
+                global_dscale_out = 'n';
+                global_pre_op = 'n';
+                DSCALE_CLIP_MIN = INT_MIN;
+                DSCALE_CLIP_MAX = INT_MAX;
+                GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os32)
+                (
+                  fin, fout, stor_order, transa, transb, op_a, op_b,
+                  bs, m, n, k, stride_a, stride_b, stride_c,
+                  post_ops_str_dest, FALSE
+                );
+            }
+            if ( ( strcmp( gemm_type_str, "u8s8s32os8" ) == 0 ) ||
+                 ( strcmp( gemm_type_str, "*" ) == 0 ) )
+            {
+                // Copy the original post op str to a temp string buffer.
+                // Done so that strtok can be applied on the same (strtok
+                // is a destructive parser.
+                for( dim_t i = 0; i < bs; i++ )
+                    strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
+                global_dscale_out = 'y';
+                global_pre_op = 'n';
+                DSCALE_CLIP_MIN = -128;
+                DSCALE_CLIP_MAX = +127;
+                GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os8)
+                (
+                  fin, fout, stor_order, transa, transb, op_a, op_b,
+                  bs, m, n, k, stride_a, stride_b, stride_c,
+                  post_ops_str_dest, FALSE
+                );
+            }
+            if ( ( strcmp( gemm_type_str, "s8s8s32os32" ) == 0 ) ||
+                 ( strcmp( gemm_type_str, "*" ) == 0 ) )
+            {
+                // Copy the original post op str to a temp string buffer.
+                // Done so that strtok can be applied on the same (strtok
+                // is a destructive parser.
+                for( dim_t i = 0; i < bs; i++ )
+                    strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
+                global_dscale_out = 'n';
+                global_pre_op = 'n';
+                DSCALE_CLIP_MIN = INT_MIN;
+                DSCALE_CLIP_MAX = INT_MAX;
+                GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32os32)
+                (
+                  fin, fout, stor_order, transa, transb, op_a, op_b,
+                  bs, m, n, k, stride_a, stride_b, stride_c,
+                  post_ops_str_dest, FALSE
+                );
+            }
+            if ( ( strcmp( gemm_type_str, "s8s8s32os8" ) == 0 ) ||
+                 ( strcmp( gemm_type_str, "*" ) == 0 ) )
+            {
+                // Copy the original post op str to a temp string buffer.
+                // Done so that strtok can be applied on the same (strtok
+                // is a destructive parser.
+                for( dim_t i = 0; i < bs; i++ )
+                    strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
+                global_dscale_out = 'y';
+                global_pre_op = 'n';
+                DSCALE_CLIP_MIN = -128;
+                DSCALE_CLIP_MAX = +127;
+                GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32os8)
+                (
+                  fin, fout, stor_order, transa, transb, op_a, op_b,
+                  bs, m, n, k, stride_a, stride_b, stride_c,
+                  post_ops_str_dest, FALSE
+                );
+            }
+            if ( strcmp( gemm_type_str, "bf16s4f32of32" ) == 0 )
+            {
+                // Copy the original post op str to a temp string buffer.
+                // Done so that strtok can be applied on the same (strtok
+                // is a destructive parser.
+                for( dim_t i = 0; i < bs; i++ )
+                {
+                    strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
+                    if ( ( op_b[i] != 'r' ) && ( op_b[i] != 'R' ) )
+                    {
+                        printf("Int4 B matrix only permitted if B reodering "
+                                    "is enabled.\n");
+                        goto skip_exec;
+                    }
+                }
+                global_dscale_out = 'n';
+                global_pre_op = 'y';
+
+                GEN_FUNC_NAME(mat_mul_bench_main_, bf16s4f32of32)
+                (
+                    fin, fout, stor_order, transa, transb, op_a, op_b,
+                    bs, m, n, k, stride_a, stride_b, stride_c,
+                    post_ops_str_dest, TRUE
+                );
+            }
+            if ( strcmp( gemm_type_str, "bf16s4f32obf16" ) == 0 )
+            {
+                // Copy the original post op str to a temp string buffer.
+                // Done so that strtok can be applied on the same (strtok
+                // is a destructive parser.
+                for( dim_t i = 0; i < bs; i++ )
+                {
+                    strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
+                    if ( ( op_b[i] != 'r' ) && ( op_b[i] != 'R' ) )
+                    {
+                        printf("Int4 B matrix only permitted if B reodering "
+                                    "is enabled.\n");
+                        goto skip_exec;
+                    }
+                }
+                global_dscale_out = 'y';
+                global_pre_op = 'y';
+
+                GEN_FUNC_NAME(mat_mul_bench_main_, bf16s4f32obf16)
+                (
+                    fin, fout, stor_order, transa, transb, op_a, op_b,
+                    bs, m, n, k, stride_a, stride_b, stride_c,
+                    post_ops_str_dest, TRUE
+                );
+            }
+            skip_exec:
         }
     }
 

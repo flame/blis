@@ -1,6 +1,17 @@
-bf16bf16f32obf16:bs=5
-r t n n p 83 3847 1930 83 3847 3847 scale=vector,zp=scalar,relu,clip
-c n t n n 50 1297 707 50 1297 50 scale=vector,zp=vector,bias=na,clip
-c n n n n 12 128 1605 12 1605 12 scale=vector,zp=vector
-r n t n r 63 95 1319 1319 1319 95 scale=vector,zp=scalar,relu,clip
-r n n n r 65 2283 911 911 2283 2283 bias=na,swish
+*:bs=5
+r t t n n 92 1479 589 92 589 1479 scale=vector,zp=vector,bias=na,clip
+r n n n r 67 21 1823 1823 21 21 scale=vector,zp=scalar,relu,clip
+r n t n n 43 2240 1553 1553 1553 2240 scale=vector,zp=scalar,relu,clip
+r t n n p 143 1943 730 143 1943 1943 bias=na,swish
+r n n n r 79 2676 1995 1995 2676 2676 bias=na,swish
+bf16s4f32of32:bs=4
+r t n n r 43 1110 271 43 1110 1110 scale=vector,zp=vector,bias=na,clip
+r t n n r 79 1177 1968 79 1177 1177 scale=vector,zp=scalar,relu,clip
+r n t n r 92 2872 1482 1482 1482 2872 scale=vector,zp=vector,bias=na,clip
+r n t n r 88 3397 1130 1130 1130 3397 scale=vector,zp=vector
+bf16s4f32obf16:bs=5
+r n n n r 17 2714 468 468 2714 2714 scale=vector,zp=vector,bias=na,clip
+r n n n r 140 3764 1519 1519 3764 3764 scale=vector,zp=vector
+r n t n r 17 1758 1034 1034 1034 1758 scale=vector,zp=vector,bias=na,clip
+r n n n r 130 1822 1293 1293 1822 1822 scale=vector,zp=vector
+r t t n r 21 2771 1882 21 1882 2771 bias=na,swish

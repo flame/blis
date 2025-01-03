@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -141,7 +141,7 @@ void packb_nr64_s8s8s32os32
     else
     {
         packb_nr64_s8s8s32os32_col_major(pack_b_buffer_s8s8s32o32,
-                                         pack_b_column_sum, b, 
+                                         pack_b_column_sum, b,
                                          cs_b, NC, KC, rs_p, cs_p);
     }
 }
@@ -198,7 +198,7 @@ void packb_nr64_s8s8s32os32_row_major
     {
         //load the temp buffer to compute column sum of B matrix
         sum1 = _mm512_loadu_si512( pack_b_column_sum + jc );
-        sum2 = _mm512_loadu_si512( pack_b_column_sum + 16 + jc );  
+        sum2 = _mm512_loadu_si512( pack_b_column_sum + 16 + jc );
         //offset 16- as 16 int32 elements fit in 1 zmm register
         sum3 = _mm512_loadu_si512( pack_b_column_sum + 32 + jc );
         sum4 = _mm512_loadu_si512( pack_b_column_sum + 48 + jc );
@@ -212,28 +212,28 @@ void packb_nr64_s8s8s32os32_row_major
             d0 = _mm512_loadu_si512( b + ( ldb * ( kr + 3 ) ) + jc );
 
             //add all the columns : sum = add (sum, a0, b0, c0, d0)
-            sum1 = 
+            sum1 =
             _mm512_add_epi32 ( sum1, _mm512_sllv_epi32 (
             _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( a0, 0)),
             _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( b0, 0)),
             _mm512_add_epi32 (_mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( c0, 0)),
             _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( d0, 0))))) , mul_128));
 
-            sum2 = 
+            sum2 =
             _mm512_add_epi32 ( sum2, _mm512_sllv_epi32 (
             _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( a0, 1)),
             _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( b0, 1)),
             _mm512_add_epi32 (_mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( c0, 1)),
             _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( d0, 1))))) , mul_128));
 
-            sum3 = 
+            sum3 =
             _mm512_add_epi32 ( sum3, _mm512_sllv_epi32 (
             _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( a0, 2)),
             _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( b0, 2)),
             _mm512_add_epi32 (_mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( c0, 2)),
             _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( d0, 2))))) , mul_128));
 
-            sum4 = 
+            sum4 =
             _mm512_add_epi32 ( sum4, _mm512_sllv_epi32 (
             _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( a0, 3)),
             _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( b0, 3)),
@@ -262,13 +262,13 @@ void packb_nr64_s8s8s32os32_row_major
             a0 = _mm512_permutex2var_epi64( a0, selector2_1, c0 ); // b[1]
             c0 = _mm512_permutex2var_epi64( b0, selector2_1, d0 ); // b[3]
 
-            _mm512_storeu_si512( pack_b_buffer_s8s8s32o32 + 
+            _mm512_storeu_si512( pack_b_buffer_s8s8s32o32 +
                                 ( ( jc * KC_updated ) + ( ( kr + 0 ) * NR ) ), a01 );
-            _mm512_storeu_si512( pack_b_buffer_s8s8s32o32 + 
+            _mm512_storeu_si512( pack_b_buffer_s8s8s32o32 +
                                 ( ( jc * KC_updated ) + ( ( kr + 1 ) * NR ) ) , a0 );
-            _mm512_storeu_si512( pack_b_buffer_s8s8s32o32 + 
+            _mm512_storeu_si512( pack_b_buffer_s8s8s32o32 +
                                 ( ( jc * KC_updated ) + ( ( kr + 2 ) * NR ) ), c01 );
-            _mm512_storeu_si512( pack_b_buffer_s8s8s32o32 + 
+            _mm512_storeu_si512( pack_b_buffer_s8s8s32o32 +
                                 ( ( jc * KC_updated ) + ( ( kr + 3 ) * NR ) ), c0 );
         }
         // Handle k remainder.
@@ -282,25 +282,25 @@ void packb_nr64_s8s8s32os32_row_major
                 d0 = _mm512_setzero_si512();
 
                 //add all the columns : sum = add (sum, a0, b0, c0)
-                sum1 = 
+                sum1 =
                 _mm512_add_epi32 ( sum1, _mm512_sllv_epi32 (
                 _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( a0, 0)),
                 _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( b0, 0)),
                 _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( c0, 0)))), mul_128));
 
-                sum2 = 
+                sum2 =
                 _mm512_add_epi32 ( sum2, _mm512_sllv_epi32 (
                 _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( a0, 1)),
                 _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( b0, 1)),
                 _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( c0, 1)))), mul_128));
 
-                sum3 = 
+                sum3 =
                 _mm512_add_epi32 ( sum3, _mm512_sllv_epi32 (
                 _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( a0, 2)),
                 _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( b0, 2)),
                 _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( c0, 2)))), mul_128));
 
-                sum4 = 
+                sum4 =
                 _mm512_add_epi32 ( sum4, _mm512_sllv_epi32 (
                 _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( a0, 3)),
                 _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( b0, 3)),
@@ -315,22 +315,22 @@ void packb_nr64_s8s8s32os32_row_major
                 d0 = _mm512_setzero_si512();
 
                         //add all the columns : sum = add (sum, a0, b0)
-                sum1 = 
+                sum1 =
                 _mm512_add_epi32 ( sum1, _mm512_sllv_epi32 (
                 _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( a0, 0)),
                 _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( b0, 0))), mul_128));
 
-                sum2 = 
+                sum2 =
                 _mm512_add_epi32 ( sum2, _mm512_sllv_epi32 (
                 _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( a0, 1)),
                 _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( b0, 1))), mul_128));
 
-                sum3 = 
+                sum3 =
                 _mm512_add_epi32 ( sum3, _mm512_sllv_epi32 (
                 _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( a0, 2)),
                 _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( b0, 2))), mul_128));
 
-                sum4 = 
+                sum4 =
                 _mm512_add_epi32 ( sum4, _mm512_sllv_epi32 (
                 _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( a0, 3)),
                 _mm512_cvtepi8_epi32(_mm512_extracti32x4_epi32 ( b0, 3))), mul_128));
@@ -378,13 +378,13 @@ void packb_nr64_s8s8s32os32_row_major
             a0 = _mm512_permutex2var_epi64( a0, selector2_1, c0 ); // b[1]
             c0 = _mm512_permutex2var_epi64( b0, selector2_1, d0 ); // b[3]
 
-            _mm512_storeu_si512( pack_b_buffer_s8s8s32o32 + 
+            _mm512_storeu_si512( pack_b_buffer_s8s8s32o32 +
                                 ( ( jc * KC_updated ) + ( ( k_full_pieces + 0 ) * NR ) ), a01 );
-            _mm512_storeu_si512( pack_b_buffer_s8s8s32o32 + 
+            _mm512_storeu_si512( pack_b_buffer_s8s8s32o32 +
                                 ( ( jc * KC_updated ) + ( ( k_full_pieces + 1 ) * NR ) ) , a0 );
-            _mm512_storeu_si512( pack_b_buffer_s8s8s32o32 + 
+            _mm512_storeu_si512( pack_b_buffer_s8s8s32o32 +
                                 ( ( jc * KC_updated ) + ( ( k_full_pieces + 2 ) * NR ) ), c01 );
-            _mm512_storeu_si512( pack_b_buffer_s8s8s32o32 + 
+            _mm512_storeu_si512( pack_b_buffer_s8s8s32o32 +
                                 ( ( jc * KC_updated ) + ( ( k_full_pieces + 3 ) * NR ) ), c0 );
         }
             //store the sum column
@@ -506,14 +506,14 @@ void packb_nr48_s8s8s32os32_row_major
         d0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( kr + 3 ) ) );
 
         //add all the columns : sum = add (sum, a0, b0, c0, d0)
-        sum1 = 
+        sum1 =
         _mm512_add_epi32 ( sum1, _mm512_sllv_epi32 (
         _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( a0_32, 0)),
         _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( b0_32, 0)),
         _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( c0_32, 0)),
         _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( d0_32, 0))))) , mul_128));
 
-        sum2 = 
+        sum2 =
         _mm512_add_epi32 ( sum2, _mm512_sllv_epi32 (
         _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( a0_32, 1)),
         _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( b0_32, 1)),
@@ -553,11 +553,11 @@ void packb_nr48_s8s8s32os32_row_major
         d0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( kr + 3 ) ) + ( 32 ) );
 
         //add all the columns : sum = add (sum, a0_32, b0_32, c0_32, d0_32)
-        sum3 = 
-        _mm512_add_epi32 
-        ( sum3, _mm512_sllv_epi32 ( _mm512_add_epi32 ( _mm512_cvtepi8_epi32( a0_16 ), 
-        _mm512_add_epi32 ( _mm512_cvtepi8_epi32( b0_16 ), 
-        _mm512_add_epi32 ( _mm512_cvtepi8_epi32( c0_16 ), 
+        sum3 =
+        _mm512_add_epi32
+        ( sum3, _mm512_sllv_epi32 ( _mm512_add_epi32 ( _mm512_cvtepi8_epi32( a0_16 ),
+        _mm512_add_epi32 ( _mm512_cvtepi8_epi32( b0_16 ),
+        _mm512_add_epi32 ( _mm512_cvtepi8_epi32( c0_16 ),
         _mm512_cvtepi8_epi32( d0_16 )))) , mul_128 )
         );
 
@@ -595,7 +595,7 @@ void packb_nr48_s8s8s32os32_row_major
             d0_32 = _mm256_setzero_si256();
 
             //add all the columns : sum = add (sum, a0, b0, c0)
-            sum1 = 
+            sum1 =
             _mm512_add_epi32 ( sum1, _mm512_sllv_epi32 (
             _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( a0_32, 0)),
             _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( b0_32, 0)),
@@ -612,10 +612,10 @@ void packb_nr48_s8s8s32os32_row_major
             c0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( k_full_pieces + 2 ) ) + ( 32 ) );
             d0_16 = _mm_setzero_si128();
 
-            sum3 = 
-            _mm512_add_epi32 
+            sum3 =
+            _mm512_add_epi32
             ( sum3, _mm512_sllv_epi32 (_mm512_add_epi32 ( _mm512_cvtepi8_epi32( a0_16 ),
-            _mm512_add_epi32 ( _mm512_cvtepi8_epi32( b0_16 ), 
+            _mm512_add_epi32 ( _mm512_cvtepi8_epi32( b0_16 ),
             _mm512_cvtepi8_epi32( c0_16 ))) , mul_128)
             );
         }
@@ -627,12 +627,12 @@ void packb_nr48_s8s8s32os32_row_major
             d0_32 = _mm256_setzero_si256();
 
             //add all the columns : sum = add (sum, a0, b0)
-            sum1 = 
+            sum1 =
             _mm512_add_epi32 ( sum1, _mm512_sllv_epi32 (
             _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( a0_32, 0)),
             _mm512_cvtepi8_epi32( _mm256_extracti32x4_epi32 ( b0_32, 0) )) , mul_128 ));
 
-            sum2 = 
+            sum2 =
             _mm512_add_epi32 ( sum2, _mm512_sllv_epi32 (
             _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( a0_32, 1)),
             _mm512_cvtepi8_epi32( _mm256_extracti32x4_epi32 ( b0_32, 1) )) , mul_128 ));
@@ -643,7 +643,7 @@ void packb_nr48_s8s8s32os32_row_major
             d0_16 = _mm_setzero_si128();
 
             sum3 =
-            _mm512_add_epi32 
+            _mm512_add_epi32
             ( sum3, _mm512_sllv_epi32 ( _mm512_add_epi32 ( _mm512_cvtepi8_epi32( a0_16 ),
             _mm512_cvtepi8_epi32( b0_16 )) , mul_128)
             );
@@ -656,11 +656,11 @@ void packb_nr48_s8s8s32os32_row_major
             d0_32 = _mm256_setzero_si256();
 
             //add all the columns : sum = add (sum, a0, b0)
-            sum1 = 
+            sum1 =
             _mm512_add_epi32 ( sum1, _mm512_sllv_epi32 (
             _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( a0_32, 0)) , mul_128));
 
-            sum2 = 
+            sum2 =
             _mm512_add_epi32 ( sum2, _mm512_sllv_epi32 (
             _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( a0_32, 1)) , mul_128));
 
@@ -669,7 +669,7 @@ void packb_nr48_s8s8s32os32_row_major
             c0_16 = _mm_setzero_si128();
             d0_16 = _mm_setzero_si128();
 
-            sum3 = 
+            sum3 =
             _mm512_add_epi32 ( sum3, _mm512_sllv_epi32 (
             _mm512_cvtepi8_epi32( a0_16 ) , mul_128));
         }
@@ -767,14 +767,14 @@ void packb_nr32_s8s8s32os32_row_major
         d0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( kr + 3 ) ) );
 
         //add all the columns : sum = add (sum, a0, b0, c0, d0)
-        sum1 = 
+        sum1 =
         _mm512_add_epi32 ( sum1, _mm512_sllv_epi32 (
         _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( a0_32, 0)),
         _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( b0_32, 0)),
         _mm512_add_epi32 (_mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( c0_32, 0)),
         _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( d0_32, 0))))) , mul_128));
 
-        sum2 = 
+        sum2 =
         _mm512_add_epi32 ( sum2, _mm512_sllv_epi32 (
         _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( a0_32, 1)),
         _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( b0_32, 1)),
@@ -822,13 +822,13 @@ void packb_nr32_s8s8s32os32_row_major
             d0_32 = _mm256_setzero_si256();
 
             //add all the columns : sum = add (sum, a0, b0, c0)
-            sum1 = 
+            sum1 =
             _mm512_add_epi32 ( sum1, _mm512_sllv_epi32 (
             _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( a0_32, 0)),
             _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( b0_32, 0)),
             _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( c0_32, 0)))) , mul_128));
 
-            sum2 = 
+            sum2 =
             _mm512_add_epi32 ( sum2, _mm512_sllv_epi32 (
             _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( a0_32, 1)),
             _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( b0_32, 1)),
@@ -843,12 +843,12 @@ void packb_nr32_s8s8s32os32_row_major
             d0_32 = _mm256_setzero_si256();
 
             //add all the columns : sum = add (sum, a0, b0)
-            sum1 = 
+            sum1 =
             _mm512_add_epi32 ( sum1, _mm512_sllv_epi32 (
             _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( a0_32, 0)),
             _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( b0_32, 0))) , mul_128));
 
-            sum2 = 
+            sum2 =
             _mm512_add_epi32 ( sum2, _mm512_sllv_epi32 (
             _mm512_add_epi32 ( _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( a0_32, 1)),
             _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( b0_32, 1))) , mul_128));
@@ -861,7 +861,7 @@ void packb_nr32_s8s8s32os32_row_major
             d0_32 = _mm256_setzero_si256();
 
             //add all the columns : sum = add (sum, a0, b0)
-            sum1 = 
+            sum1 =
             _mm512_add_epi32 ( sum1, _mm512_sllv_epi32 (
             _mm512_cvtepi8_epi32(_mm256_extracti32x4_epi32 ( a0_32, 0)) , mul_128));
 
@@ -941,10 +941,10 @@ void packb_nr16_s8s8s32os32_row_major
         d0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( kr + 3 ) ) );
 
         //add all the columns : sum = add (sum, a0, b0, c0, d0)
-        sum1 = 
-        _mm512_add_epi32 
+        sum1 =
+        _mm512_add_epi32
         ( sum1, _mm512_sllv_epi32 ( _mm512_add_epi32 ( _mm512_cvtepi8_epi32( a0_16 ),
-        _mm512_add_epi32 ( _mm512_cvtepi8_epi32( b0_16 ), 
+        _mm512_add_epi32 ( _mm512_cvtepi8_epi32( b0_16 ),
         _mm512_add_epi32 ( _mm512_cvtepi8_epi32( c0_16 ),
         _mm512_cvtepi8_epi32( d0_16 )))) , mul_128 )
         );
@@ -983,9 +983,9 @@ void packb_nr16_s8s8s32os32_row_major
             d0_16 = _mm_setzero_si128();
 
             sum1 =
-             _mm512_add_epi32 
+             _mm512_add_epi32
             ( sum1, _mm512_sllv_epi32 (_mm512_add_epi32 ( _mm512_cvtepi8_epi32( a0_16 ),
-            _mm512_add_epi32 ( _mm512_cvtepi8_epi32( b0_16 ), 
+            _mm512_add_epi32 ( _mm512_cvtepi8_epi32( b0_16 ),
             _mm512_cvtepi8_epi32( c0_16 ))) , mul_128)
             );
         }
@@ -996,8 +996,8 @@ void packb_nr16_s8s8s32os32_row_major
             c0_16 = _mm_setzero_si128();
             d0_16 = _mm_setzero_si128();
 
-            sum1 = 
-            _mm512_add_epi32 
+            sum1 =
+            _mm512_add_epi32
             ( sum1, _mm512_sllv_epi32 ( _mm512_add_epi32 ( _mm512_cvtepi8_epi32( a0_16 ),
             _mm512_cvtepi8_epi32( b0_16 )) , mul_128)
             );
@@ -1009,9 +1009,9 @@ void packb_nr16_s8s8s32os32_row_major
             c0_16 = _mm_setzero_si128();
             d0_16 = _mm_setzero_si128();
 
-            sum1 = 
-            _mm512_add_epi32 
-            ( sum1, 
+            sum1 =
+            _mm512_add_epi32
+            ( sum1,
             _mm512_sllv_epi32 ( _mm512_cvtepi8_epi32( a0_16 ) , mul_128 )
             );
         }
@@ -1090,11 +1090,11 @@ void packb_nrlt16_s8s8s32os32_row_major
         d0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf3 );
 
         //add all the columns : sum = add (sum, a0, b0, c0, d0)
-        sum1 = 
-        _mm512_add_epi32 
+        sum1 =
+        _mm512_add_epi32
         ( sum1,
         _mm512_sllv_epi32 ( _mm512_add_epi32 ( _mm512_cvtepi8_epi32( a0_16 ),
-        _mm512_add_epi32 ( _mm512_cvtepi8_epi32( b0_16 ), 
+        _mm512_add_epi32 ( _mm512_cvtepi8_epi32( b0_16 ),
         _mm512_add_epi32 ( _mm512_cvtepi8_epi32( c0_16 ),
         _mm512_cvtepi8_epi32( d0_16 )))) , mul_128 )
         );
@@ -1118,7 +1118,7 @@ void packb_nrlt16_s8s8s32os32_row_major
         // Last 4x16 elements.
         _mm512_storeu_si512( pack_b_buffer_s8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
 
-        // The 2nd, 3rd, and 4th 16byte chunk will be ignored, since its not part of the 
+        // The 2nd, 3rd, and 4th 16byte chunk will be ignored, since its not part of the
         // original data, but is here due to the packing in 4 16byte chunks format.
         kr_new += 1;
     }
@@ -1138,10 +1138,10 @@ void packb_nrlt16_s8s8s32os32_row_major
             d0_16 = _mm_setzero_si128();
 
             sum1 =
-            _mm512_add_epi32 
-            ( sum1, 
+            _mm512_add_epi32
+            ( sum1,
             _mm512_sllv_epi32 (_mm512_add_epi32 ( _mm512_cvtepi8_epi32( a0_16 ),
-            _mm512_add_epi32 ( _mm512_cvtepi8_epi32( b0_16 ), 
+            _mm512_add_epi32 ( _mm512_cvtepi8_epi32( b0_16 ),
             _mm512_cvtepi8_epi32( c0_16 ))) , mul_128)
             );
 
@@ -1156,8 +1156,8 @@ void packb_nrlt16_s8s8s32os32_row_major
             c0_16 = _mm_setzero_si128();
             d0_16 = _mm_setzero_si128();
 
-            sum1 = 
-            _mm512_add_epi32 
+            sum1 =
+            _mm512_add_epi32
             ( sum1, _mm512_sllv_epi32 ( _mm512_add_epi32 ( _mm512_cvtepi8_epi32( a0_16 ),
             _mm512_cvtepi8_epi32( b0_16 )) , mul_128)
             );
@@ -1171,7 +1171,7 @@ void packb_nrlt16_s8s8s32os32_row_major
             c0_16 = _mm_setzero_si128();
             d0_16 = _mm_setzero_si128();
 
-            sum1 = 
+            sum1 =
             _mm512_add_epi32
             ( sum1,
             _mm512_sllv_epi32 ( _mm512_cvtepi8_epi32( a0_16 ) , mul_128 )
@@ -1399,7 +1399,7 @@ void packb_nr64_s8s8s32os32_col_major
     }
 
     *rs_p = NR * 4;
-    *cs_p = NR / 4;
+    *cs_p = NR;
 }
 
 //Extract 16 8-bit elements from each 128-bit lane of 512-bit register and convert them into
@@ -1891,7 +1891,7 @@ void packb_nrlt16_s8s8s32o32_col_major
     }
 
     // sum/reduce < 16 (max 15) int32 values into one final sum as int.
-    // insert sum of all columns into one 512 bit, multiply with 128 and 
+    // insert sum of all columns into one 512 bit, multiply with 128 and
     // store into pack_b_column_sum
     __m512i sum0, sum1;
     sum0 = _mm512_set_epi32

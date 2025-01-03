@@ -45,6 +45,11 @@ static bli_pthread_once_t once_check_lpgemm_logger_init = BLIS_PTHREAD_ONCE_INIT
 
 static bool lpgemm_logger_enabled = FALSE;
 
+bool is_logger_enabled()
+{
+	return lpgemm_logger_enabled;
+}
+
 FILE* lpgemm_start_logger_fn(void)
 {
 	lpgemm_init_logger();
@@ -83,7 +88,7 @@ void lpgemm_stop_logger_fn( FILE* fd )
 		ops_str_len += c_ops_str_len; \
 	} while ( 0 ); \
 
-static void lpgemm_get_pre_ops_str( aocl_post_op* post_ops, char* ops_str )
+void lpgemm_get_pre_ops_str( aocl_post_op* post_ops, char* ops_str )
 {
 	if ( post_ops == NULL )
 	{
@@ -148,7 +153,7 @@ static void lpgemm_get_pre_ops_str( aocl_post_op* post_ops, char* ops_str )
 	}
 }
 
-static void lpgemm_get_post_ops_str( aocl_post_op* post_ops, char* ops_str )
+void lpgemm_get_post_ops_str( aocl_post_op* post_ops, char* ops_str )
 {
 	if ( ( post_ops == NULL ) || ( post_ops->seq_length <= 0 ) )
 	{
@@ -308,11 +313,54 @@ void lpgemm_write_logger_gemm_fn
 	}
 }
 
+void batch_lpgemm_write_logger_gemm_fn
+     (
+       FILE*         fd,
+       char*         op_type,
+       const char*   order,
+       const char*   transa,
+       const char*   transb,
+	   const dim_t   batch_size,
+       const dim_t*  m,
+       const dim_t*  n,
+       const dim_t*  k,
+       const float*  alpha,
+       const dim_t*  lda,
+       const char*   mem_format_a,
+       const dim_t*  ldb,
+       const char*   mem_format_b,
+       const float*  beta,
+       const dim_t*  ldc,
+       aocl_post_op** post_op_unparsed
+     )
+{
+	if ( ( lpgemm_logger_enabled == TRUE ) && ( fd != NULL ) )
+	{
+		char pre_ops_str[1024] = {0};
+
+		char post_ops_str[2048] = {0};
+
+		fprintf(fd, "%s:bs=%ld\n", op_type, batch_size);
+		for( dim_t i = 0; i < batch_size; i++ )
+		{
+			lpgemm_get_pre_ops_str( post_op_unparsed[i], pre_ops_str );
+			lpgemm_get_post_ops_str( post_op_unparsed[i], post_ops_str );
+			fprintf( fd, "%c %c %c %c %c %ld %ld %ld %ld %ld %ld "\
+						":pre_ops=[%s]:post_ops=[%s] %f %f\n",
+					order[i], transa[i], transb[i], mem_format_a[i], mem_format_b[i],
+					m[i], n[i], k[i], lda[i], ldb[i], ldc[i],
+					pre_ops_str, post_ops_str,
+					(float)(alpha[i]), (float)(beta[i]) );
+		}
+	}
+}
+
+
 void lpgemm_write_logger_time_break_fn( FILE* fd, double stime )
 {
 	if ( ( lpgemm_logger_enabled == TRUE ) && ( fd != NULL ) )
 	{
-		fprintf( fd, "%f \n", stime );
+		fprintf( fd, "time:%f \n", stime );
 	}
 }
 

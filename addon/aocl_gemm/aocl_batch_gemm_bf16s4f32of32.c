@@ -43,12 +43,12 @@
 #include "lpgemm_utils.h"
 #include "lpgemm_logger.h"
 
-AOCL_BGEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
+AOCL_BGEMM_MATMUL(bfloat16,int8_t,float,float,bf16s4f32of32)
 {
 	LPGEMM_START_LOGGER();
 	BATCH_LPGEMM_WRITE_LOGGER \
 	(
-	  "bf16bf16f32of32", \
+	  "bf16s4f32of32", \
 	  order, transa, transb, \
 	  batch_size, m, n, k, \
 	  ( ( float* ) alpha ), \
@@ -70,17 +70,14 @@ AOCL_BGEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	AOCL_MEMORY_TAG mtag_a[batch_size];
 	AOCL_MEMORY_TAG mtag_b[batch_size];
 
-	bfloat16 *a_local[batch_size], *b_local[batch_size];
-	dim_t m_local[batch_size], n_local[batch_size];
-
-	// Convert post op struct to post op linked list format.
 	lpgemm_post_op post_op_list[batch_size][AOCL_MAX_POST_OPS];
+    lpgemm_pre_op pre_op_list[batch_size][AOCL_MAX_PRE_OPS];
 
 	// Check if avx512_vnni ISA is supported, lpgemm matmul only works with it.
 	if ( bli_cpuid_is_avx512bf16_supported() == FALSE )
 	{
 		bli_print_msg(" AVX512_BF16 ISA not supported by processor, "
-				"cannot perform bf16bf16f32 gemm.", __FILE__, __LINE__ );
+				"cannot perform bf16s4f32 gemm.", __FILE__, __LINE__ );
 		goto err_hndl;
 	}
 
@@ -102,13 +99,15 @@ AOCL_BGEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	trans_t blis_transa;
 	trans_t blis_transb;
 
+	// check for validity of params.
 	int err_no = 0;
+
 	for( dim_t bs_i = 0; bs_i < batch_size; bs_i++ )
 	{
 		// check for validity of params.
 		AOCL_BATCH_GEMM_CHECK
 		(
-		  "batch_bf16bf16f32of32",
+		  "batch_bf16s4f32of32",
 		  order[bs_i], transa[bs_i], transb[bs_i],
 		  bs_i,
 		  m[bs_i], n[bs_i], k[bs_i],
@@ -117,6 +116,7 @@ AOCL_BGEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 		  c[bs_i], ldc[bs_i],
 		  err_no
 		);
+
 		if ( err_no != 0 )
 		{
 			goto err_hndl;
@@ -129,50 +129,9 @@ AOCL_BGEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 
 		if( is_column_major == TRUE )
 		{
-			rs_a[bs_i] = ldb[bs_i];
-			cs_a[bs_i] = 1;
-
-			if( bli_is_trans( blis_transb ) )
-			{
-				rs_a[bs_i] = 1;
-				cs_a[bs_i] = ldb[bs_i];
-			}
-
-			rs_b[bs_i] = lda[bs_i];
-			cs_b[bs_i] = 1;
-
-			if( bli_is_trans( blis_transa ) )
-			{
-				rs_b[bs_i] = 1;
-				cs_b[bs_i] = lda[bs_i];
-			}
-
-			bli_param_map_char_to_lpmtag( mem_format_a[bs_i], &(mtag_b[bs_i]) );
-			bli_param_map_char_to_lpmtag( mem_format_b[bs_i], &(mtag_a[bs_i]) );
-
-			// Inputs swapped in column major, A becomes B from kernel point of view.
-			// Reorder is not supported for column major matrices.
-			if ( ( ( mtag_b[bs_i] == REORDERED ) || ( mtag_a[bs_i] == REORDERED ) ) )
-			{
-				bli_print_msg(" Reordering of column major matrices is not supported.", __FILE__, __LINE__ );
-				goto err_hndl;
-			}
-			// From 5-loop function point of view,
-			// A matrix when in column major storage needs to be packed to row-major
-			// storage as kernel expects A matrix to be in row-major format.
-			// Inputs swapped in column major, A becomes B from kernel point of view.
-			if ( bli_is_trans(blis_transb ) )
-			{
-				mtag_a[bs_i] = PACK;
-			}
-
-			// swap m & n in case of col-major matrices
-			m_local[bs_i] = n[bs_i];
-			n_local[bs_i] = m[bs_i];
-
-			// swap a & b pointers in case of col-major matrices
-			a_local[bs_i] = (bfloat16*)(b[bs_i]);
-			b_local[bs_i] = (bfloat16*)(a[bs_i]);
+			bli_print_msg("Column major inputs not supported.",
+					  __FILE__, __LINE__);
+			goto err_hndl;
 		}
 		else // row-major
 		{
@@ -210,14 +169,6 @@ AOCL_BGEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 			{
 				mtag_a[bs_i] = PACK;
 			}
-
-			// copy the values of m & n
-			m_local[bs_i] = m[bs_i];
-			n_local[bs_i] = n[bs_i];
-
-			// copy the values of a & b pointers
-			a_local[bs_i] = (bfloat16*)(a[bs_i]);
-			b_local[bs_i] = (bfloat16*)(b[bs_i]);
 		}
 
 		rs_c[bs_i] = ldc[bs_i];
@@ -233,7 +184,17 @@ AOCL_BGEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 			mtag_b[bs_i] = PACK;
 		}
 
-		err_t err = lpgemm_translate_to_post_ops_list
+		// Convert pre op struct to pre op linked list format.
+		err_t err = lpgemm_translate_to_pre_ops_list
+		            (
+		              post_op_unparsed[bs_i]->pre_ops,
+		              pre_op_list[bs_i],
+		              m[bs_i], n[bs_i], k[bs_i]
+		            );
+		if (err != BLIS_SUCCESS) goto err_hndl;
+
+		// Convert post op struct to post op linked list format.
+		err = lpgemm_translate_to_post_ops_list
 		(
 		post_op_unparsed[bs_i], post_op_list[bs_i],
 		( void* )c[bs_i], ( void* )( (order + bs_i) ),
@@ -250,31 +211,31 @@ AOCL_BGEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	bli_rntm_init_from_global( &rntm_g );
 	bli_pba_rntm_set_pba( &rntm_g );
 
-	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( BF16BF16F32OF32 );
+	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( BF16S4F32OF32 );
 
 #ifdef BLIS_ENABLE_OPENMP
-	batch_lpgemm_bf16bf16f32of32_openmp_thread_decorator
+	batch_lpgemm_bf16s4f32of32_openmp_thread_decorator
 	(
-	  batch_size, m_local, n_local, k,
-	  (const bfloat16**)a_local, rs_a, cs_a, mtag_a,
-	  (const bfloat16**)b_local, rs_b, cs_b, mtag_b,
+	  batch_size, m, n, k,
+	  a, rs_a, cs_a, mtag_a,
+	  b, rs_b, cs_b, mtag_b,
 	  c, rs_c, cs_c,
 	  alpha, beta,
 	  &rntm_g, lcntx_g,
-	  post_op_list, F32
+	  pre_op_list, post_op_list, F32
 	);
 
 
 #else
-	batch_lpgemm_bf16bf16f32of32_thread_decorator
+	batch_lpgemm_bf16s4f32of32_thread_decorator
 	(
-	  batch_size, m_local, n_local, k,
-	  (const bfloat16**)a_local, rs_a, cs_a, mtag_a,
-	  (const bfloat16**)b_local, rs_b, cs_b, mtag_b,
+	  batch_size, m, n, k,
+	  a, rs_a, cs_a, mtag_a,
+	  b, rs_b, cs_b, mtag_b,
 	  c, rs_c, cs_c,
 	  alpha, beta,
 	  &rntm_g, lcntx_g,
-	  post_op_list, F32
+	  pre_op_list, post_op_list, F32
 	);
 #endif
 
@@ -282,12 +243,12 @@ err_hndl:;
 	LPGEMM_STOP_LOGGER();
 }
 
-AOCL_BGEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
+AOCL_BGEMM_MATMUL(bfloat16,int8_t,bfloat16,float,bf16s4f32obf16)
 {
 	LPGEMM_START_LOGGER();
 	BATCH_LPGEMM_WRITE_LOGGER \
 	(
-	  "bf16bf16f32obf16", \
+	  "bf16s4f32obf16", \
 	  order, transa, transb, \
 	  batch_size, m, n, k, \
 	  ( ( float* ) alpha ), \
@@ -309,11 +270,8 @@ AOCL_BGEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 	AOCL_MEMORY_TAG mtag_a[batch_size];
 	AOCL_MEMORY_TAG mtag_b[batch_size];
 
-	bfloat16 *a_local[batch_size], *b_local[batch_size];
-	dim_t m_local[batch_size], n_local[batch_size];
-
-	// Convert post op struct to post op linked list format.
 	lpgemm_post_op post_op_list[batch_size][AOCL_MAX_POST_OPS];
+    lpgemm_pre_op pre_op_list[batch_size][AOCL_MAX_PRE_OPS];
 
 	// Check if avx512_vnni ISA is supported, lpgemm matmul only works with it.
 	if ( bli_cpuid_is_avx512bf16_supported() == FALSE )
@@ -349,7 +307,7 @@ AOCL_BGEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 		// check for validity of params.
 		AOCL_BATCH_GEMM_CHECK
 		(
-		  "batch_bf16bf16f32obf16",
+		  "batch_bf16s4f32obf16",
 		  order[bs_i], transa[bs_i], transb[bs_i],
 		  bs_i,
 		  m[bs_i], n[bs_i], k[bs_i],
@@ -372,50 +330,9 @@ AOCL_BGEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 
 		if( is_column_major == TRUE )
 		{
-			rs_a[bs_i] = ldb[bs_i];
-			cs_a[bs_i] = 1;
-
-			if( bli_is_trans( blis_transb ) )
-			{
-				rs_a[bs_i] = 1;
-				cs_a[bs_i] = ldb[bs_i];
-			}
-
-			rs_b[bs_i] = lda[bs_i];
-			cs_b[bs_i] = 1;
-
-			if( bli_is_trans( blis_transa ) )
-			{
-				rs_b[bs_i] = 1;
-				cs_b[bs_i] = lda[bs_i];
-			}
-
-			bli_param_map_char_to_lpmtag( mem_format_a[bs_i], &(mtag_b[bs_i]) );
-			bli_param_map_char_to_lpmtag( mem_format_b[bs_i], &(mtag_a[bs_i]) );
-
-			// Inputs swapped in column major, A becomes B from kernel point of view.
-			// Reorder is not supported for column major matrices.
-			if ( ( ( mtag_b[bs_i] == REORDERED ) || ( mtag_a[bs_i] == REORDERED ) ) )
-			{
-				bli_print_msg(" Reordering of column major matrices is not supported.", __FILE__, __LINE__ );
-				goto err_hndl;
-			}
-			// From 5-loop function point of view,
-			// A matrix when in column major storage needs to be packed to row-major
-			// storage as kernel expects A matrix to be in row-major format.
-			// Inputs swapped in column major, A becomes B from kernel point of view.
-			if ( bli_is_trans(blis_transb ) )
-			{
-				mtag_a[bs_i] = PACK;
-			}
-
-			// swap m & n in case of col-major matrices
-			m_local[bs_i] = n[bs_i];
-			n_local[bs_i] = m[bs_i];
-
-			// swap a & b pointers in case of col-major matrices
-			a_local[bs_i] = (bfloat16*)(b[bs_i]);
-			b_local[bs_i] = (bfloat16*)(a[bs_i]);
+			bli_print_msg("Column major inputs not supported.",
+					  __FILE__, __LINE__);
+			goto err_hndl;
 		}
 		else // row-major
 		{
@@ -454,13 +371,6 @@ AOCL_BGEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 				mtag_a[bs_i] = PACK;
 			}
 
-			// copy the values of m & n
-			m_local[bs_i] = m[bs_i];
-			n_local[bs_i] = n[bs_i];
-
-			// copy the values of a & b pointers
-			a_local[bs_i] = (bfloat16*)(a[bs_i]);
-			b_local[bs_i] = (bfloat16*)(b[bs_i]);
 		}
 
 		rs_c[bs_i] = ldc[bs_i];
@@ -476,12 +386,22 @@ AOCL_BGEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 			mtag_b[bs_i] = PACK;
 		}
 
-		err_t err = lpgemm_translate_to_post_ops_list
-		(
-		post_op_unparsed[bs_i], post_op_list[bs_i],
-		( void* )c[bs_i], ( void* )( (order + bs_i) ),
-		m[bs_i], n[bs_i]
-		);
+		// Convert pre op struct to pre op linked list format.
+		err_t err = lpgemm_translate_to_pre_ops_list
+		            (
+		              post_op_unparsed[bs_i]->pre_ops,
+		              pre_op_list[bs_i],
+		              m[bs_i], n[bs_i], k[bs_i]
+		            );
+		if (err != BLIS_SUCCESS) goto err_hndl;
+
+		// Convert post op struct to post op linked list format.
+		err = lpgemm_translate_to_post_ops_list
+		      (
+		        post_op_unparsed[bs_i], post_op_list[bs_i],
+		        ( void* )c[bs_i], ( void* )( (order + bs_i) ),
+		        m[bs_i], n[bs_i]
+		      );
 
 		if( err != BLIS_SUCCESS ) goto err_hndl;
 
@@ -493,31 +413,31 @@ AOCL_BGEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 	bli_rntm_init_from_global( &rntm_g );
 	bli_pba_rntm_set_pba( &rntm_g );
 
-	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( BF16BF16F32OF32 );
+	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( BF16S4F32OF32 );
 
 #ifdef BLIS_ENABLE_OPENMP
-	batch_lpgemm_bf16bf16f32of32_openmp_thread_decorator
+	batch_lpgemm_bf16s4f32of32_openmp_thread_decorator
 	(
-	  batch_size, m_local, n_local, k,
-	  (const bfloat16**)a_local, rs_a, cs_a, mtag_a,
-	  (const bfloat16**)b_local, rs_b, cs_b, mtag_b,
+	  batch_size, m, n, k,
+	  a, rs_a, cs_a, mtag_a,
+	  b, rs_b, cs_b, mtag_b,
 	  (float**)c, rs_c, cs_c,
 	  alpha, beta,
 	  &rntm_g, lcntx_g,
-	  post_op_list, BF16
+	  pre_op_list, post_op_list, BF16
 	);
 
 
 #else
-	batch_lpgemm_bf16bf16f32of32_thread_decorator
+	batch_lpgemm_bf16s4f32of32_thread_decorator
 	(
-	  batch_size, m_local, n_local, k,
-	  (const bfloat16**)a_local, rs_a, cs_a, mtag_a,
-	  (const bfloat16**)b_local, rs_b, cs_b, mtag_b,
+	  batch_size, m, n, k,
+	  a, rs_a, cs_a, mtag_a,
+	  b, rs_b, cs_b, mtag_b,
 	  (float**)c, rs_c, cs_c,
 	  alpha, beta,
 	  &rntm_g, lcntx_g,
-	  post_op_list, BF16
+	  pre_op_list, post_op_list, BF16
 	);
 #endif
 
