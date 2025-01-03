@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -49,6 +50,26 @@ BLIS_EXPORT_BLAS void PASTEF770(bli_thread_set_ways)
 BLIS_EXPORT_BLAS void PASTEF770(bli_thread_set_num_threads)
      (
        const f77_int* nt
+     );
+
+BLIS_EXPORT_BLAS f77_int PASTEF770(bli_thread_get_jc_nt)
+     (
+     );
+BLIS_EXPORT_BLAS f77_int PASTEF770(bli_thread_get_pc_nt)
+     (
+     );
+BLIS_EXPORT_BLAS f77_int PASTEF770(bli_thread_get_ic_nt)
+     (
+     );
+BLIS_EXPORT_BLAS f77_int PASTEF770(bli_thread_get_jr_nt)
+     (
+     );
+BLIS_EXPORT_BLAS f77_int PASTEF770(bli_thread_get_ir_nt)
+     (
+     );
+
+BLIS_EXPORT_BLAS f77_int PASTEF770(bli_thread_get_num_threads)
+     (
      );
 
 BLIS_EXPORT_BLAS f77_int PASTEF770(bli_info_get_info_value)
