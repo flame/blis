@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1543,50 +1543,44 @@ dim_t bli_ipow( dim_t base, dim_t power )
 
 dim_t bli_thread_get_jc_nt( void )
 {
-	// We must ensure that tl_rntm has been initialized.
-	bli_init_once();
-
-	return bli_rntm_jc_ways( &tl_rntm );
+	rntm_t rntm_l;
+	bli_rntm_init_from_global( &rntm_l );
+	return bli_rntm_jc_ways( &rntm_l );
 }
 
 dim_t bli_thread_get_pc_nt( void )
 {
-	// We must ensure that tl_rntm has been initialized.
-	bli_init_once();
-
-	return bli_rntm_pc_ways( &tl_rntm );
+	rntm_t rntm_l;
+	bli_rntm_init_from_global( &rntm_l );
+	return bli_rntm_pc_ways( &rntm_l );
 }
 
 dim_t bli_thread_get_ic_nt( void )
 {
-	// We must ensure that tl_rntm has been initialized.
-	bli_init_once();
-
-	return bli_rntm_ic_ways( &tl_rntm );
+	rntm_t rntm_l;
+	bli_rntm_init_from_global( &rntm_l );
+	return bli_rntm_ic_ways( &rntm_l );
 }
 
 dim_t bli_thread_get_jr_nt( void )
 {
-	// We must ensure that tl_rntm has been initialized.
-	bli_init_once();
-
-	return bli_rntm_jr_ways( &tl_rntm );
+	rntm_t rntm_l;
+	bli_rntm_init_from_global( &rntm_l );
+	return bli_rntm_jr_ways( &rntm_l );
 }
 
 dim_t bli_thread_get_ir_nt( void )
 {
-	// We must ensure that tl_rntm has been initialized.
-	bli_init_once();
-
-	return bli_rntm_ir_ways( &tl_rntm );
+	rntm_t rntm_l;
+	bli_rntm_init_from_global( &rntm_l );
+	return bli_rntm_ir_ways( &rntm_l );
 }
 
 dim_t bli_thread_get_num_threads( void )
 {
-	// We must ensure that tl_rntm has been initialized.
-	bli_init_once();
-
-	return bli_rntm_num_threads( &tl_rntm );
+	rntm_t rntm_l;
+	bli_rntm_init_from_global( &rntm_l );
+	return bli_rntm_num_threads( &rntm_l );
 }
 
 bool bli_thread_get_is_parallel( void ) // VK
