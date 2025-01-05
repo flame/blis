@@ -95,18 +95,15 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
 	bli_param_map_netlib_to_blis_trans(transa, &blis_transa);
 	bli_param_map_netlib_to_blis_trans(transb, &blis_transb);
 
-	bool is_row_major = ((order == 'r') || (order == 'R'));
-	bool is_column_major = ((order == 'c') || (order == 'C'));
-
-	// Column major support disabled for int API's till micro-kernel
-	// post-ops are updated to account for column major.
-	if ( (is_column_major == TRUE) && (post_op_unparsed != NULL) )
+	// Column major support disabled for u8s8s32 APIs as we cannot
+	// swap matrices as both A and B are of different types.
+	if ( ( order != 'r' ) && ( order != 'R' ) )
 	{
-		bli_print_msg("Column major inputs not supported with Post-ops.",
+		bli_print_msg("Column major inputs not supported.",
 					  __FILE__, __LINE__);
 		goto err_hndl;
 	}
-	
+
 	inc_t rs_a = lda;
 	inc_t cs_a = 1;
 
@@ -135,20 +132,10 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
 	bli_param_map_char_to_lpmtag(mem_format_b, &mtag_b);
 
 	// Reorder is not supported for A matrix
-	if ((is_row_major == TRUE) && (mtag_a == REORDERED))
+	if (mtag_a == REORDERED)
 	{
 		bli_print_msg(" Reordering of A matrix is not supported "
 					  "in row major case.",
-					  __FILE__, __LINE__);
-		goto err_hndl;
-	}
-	// Inputs swapped in column major, A becomes B from kernel point of view.
-	// Reorder is not supported for column major matrices.
-	else if ((is_column_major == TRUE) &&
-			 ((mtag_b == REORDERED) || (mtag_a == REORDERED)))
-	{
-		bli_print_msg(" Reordering of column major matrices "
-					  "is not supported.",
 					  __FILE__, __LINE__);
 		goto err_hndl;
 	}
@@ -158,27 +145,17 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
 	// and used in bf16 instrution. As such the mtag_b always needs to be either
 	// packed or reordered. B matrix as it is (unpacked) cannot be used, and
 	// the mtag_b is set to packed to enable runtime packing.
-	if ((is_row_major == TRUE) && (mtag_b == UNPACKED))
+	if (mtag_b == UNPACKED)
 	{
 		mtag_b = PACK;
-	}
-	// Inputs swapped in column major, A becomes B from kernel point of view.
-	else if ((is_column_major == TRUE) && (mtag_a == UNPACKED))
-	{
-		mtag_a = PACK;
 	}
 
 	// From 5-loop function point of view,
 	// A matrix when in column major storage needs to be packed to row-major
 	// storage as kernel expects A matrix to be in row-major format.
-	if ((is_row_major == TRUE) && (bli_is_trans(blis_transa)))
+	if (bli_is_trans(blis_transa))
 	{
 		mtag_a = PACK;
-	}
-	// Inputs swapped in column major, A becomes B from kernel point of view.
-	else if ((is_column_major == TRUE) && (bli_is_trans(blis_transb)))
-	{
-		mtag_b = PACK;
 	}
 
 	// Convert post op struct to post op linked list format.
@@ -204,53 +181,23 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
 	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( U8S8S32OS32 );
 
 #ifdef BLIS_ENABLE_OPENMP
-	// Swapping inputs to induce row major computation for column major inputs.
-	if (is_column_major == TRUE)
-	{
-		lpgemm_u8s8s32o32_openmp_thread_decorator(
-			n, m, k,
-			(uint8_t *)b, rs_b, cs_b, mtag_b,
-			(int8_t *)a, rs_a, cs_a, mtag_a,
-			(int32_t *)c, rs_c, cs_c,
-			alpha, beta,
-			&rntm_g, lcntx_g,
-			post_op_list, S8);
-	}
-	else
-	{
-		lpgemm_u8s8s32o32_openmp_thread_decorator(
-			m, n, k,
-			a, rs_a, cs_a, mtag_a,
-			b, rs_b, cs_b, mtag_b,
-			(int32_t *)c, rs_c, cs_c,
-			alpha, beta,
-			&rntm_g, lcntx_g,
-			post_op_list, S8);
-	}
+	lpgemm_u8s8s32o32_openmp_thread_decorator(
+		m, n, k,
+		a, rs_a, cs_a, mtag_a,
+		b, rs_b, cs_b, mtag_b,
+		(int32_t *)c, rs_c, cs_c,
+		alpha, beta,
+		&rntm_g, lcntx_g,
+		post_op_list, S8);
 #else
-	// Swapping inputs to induce row major computation for column major inputs.
-	if (is_column_major == TRUE)
-	{
-		lpgemm_u8s8s32o32_thread_decorator(
-			n, m, k,
-			(uint8_t *)b, rs_b, cs_b, mtag_b,
-			(int8_t *)a, rs_a, cs_a, mtag_a,
-			(int32_t *)c, rs_c, cs_c,
-			alpha, beta,
-			&rntm_g, lcntx_g,
-			post_op_list, S8);
-	}
-	else
-	{
-		lpgemm_u8s8s32o32_thread_decorator(
-			m, n, k,
-			a, rs_a, cs_a, mtag_a,
-			b, rs_b, cs_b, mtag_b,
-			(int32_t *)c, rs_c, cs_c,
-			alpha, beta,
-			&rntm_g, lcntx_g,
-			post_op_list, S8);
-	}
+	lpgemm_u8s8s32o32_thread_decorator(
+		m, n, k,
+		a, rs_a, cs_a, mtag_a,
+		b, rs_b, cs_b, mtag_b,
+		(int32_t *)c, rs_c, cs_c,
+		alpha, beta,
+		&rntm_g, lcntx_g,
+		post_op_list, S8);
 #endif
 
 err_hndl:;
