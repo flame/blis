@@ -181,7 +181,7 @@ void bli_gemm
        obj_t*  a,
        obj_t*  b,
        obj_t*  beta,
-       obj_t*  c,
+       obj_t*  c
      );
 ```
 while the expert interface is:
@@ -706,7 +706,7 @@ Level-1v operations perform various level-1 BLAS-like operations on vectors (hen
 void bli_addv
      (
        obj_t*  x,
-       obj_t*  y,
+       obj_t*  y
      );
 ```
 Perform
