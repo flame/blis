@@ -2204,7 +2204,7 @@ err_t bli_getijv
         obj_t*   x,
         double*  ar,
         double*  ai
-      )
+      );
 ```
 Copy the real and imaginary values at the `i`th element of vector object `x` to `ar` and `ai`. If elements of `x` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `x` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
 If either the element offset `i` is beyond the vector dimension of `x` or less than zero, the function returns `BLIS_FAILURE` without taking any action. Similarly, if `x` is a global scalar constant such as `BLIS_ONE`, the function returns `BLIS_FAILURE`.
@@ -2220,7 +2220,7 @@ err_t bli_getijm
         obj_t*   b,
         double*  ar,
         double*  ai
-      )
+      );
 ```
 Copy the real and imaginary values at the (`i`,`j`) element of object `b` to `ar` and `ai`. If elements of `b` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `b` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
 If either the row offset `i` is beyond the _m_ dimension of `b` or less than zero, or column offset `j` is beyond the _n_ dimension of `b` or less than zero, the function returns `BLIS_FAILURE` without taking any action. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, the function returns `BLIS_FAILURE`.
@@ -2380,11 +2380,11 @@ gint_t bli_info_get_blas_int_type_size( void );
 The following routines allow the caller to obtain a string that identifies the implementation type of each microkernel that is currently active (ie: part of the current active configuration, as identified bi `bli_arch_query_id()`).
 
 ```c
-char* bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt )
-char* bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt )
-char* bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt )
-char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt )
-char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt )
+char* bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt );
+char* bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt );
+char* bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt );
+char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt );
+char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt );
 ```
 
 Possible implementation (ie: the `ind_t method` argument) types are:
@@ -2404,10 +2404,7 @@ Possible microkernel types (ie: the return values for `bli_info_get_*_ukr_impl_s
 
 #### clock
 ```c
-double bli_clock
-     (
-       void
-     );
+double bli_clock( void );
 ```
 Return the amount of time that has elapsed since some fixed time in the past. The return values of `bli_clock()` typically feature nanosecond precision, though this is not guaranteed.
 
