@@ -1903,6 +1903,8 @@ If `transa` indicates a conjugation and/or transposition, then `A` will be conju
 ```c
 void bli_?gemm_*
      (
+       dim_t                m,
+       dim_t                n,
        dim_t                k,
        ctype*      restrict alpha,
        ctype*      restrict a1,
@@ -1959,6 +1961,8 @@ Please see the [Kernel Guide](KernelsHowTo.md) for more information on the `trsm
 ```c
 void bli_?gemmtrsm_l_*
      (
+       dim_t                m,
+       dim_t                n,
        dim_t                k,
        ctype*      restrict alpha,
        ctype*      restrict a10,
@@ -1972,6 +1976,8 @@ void bli_?gemmtrsm_l_*
 
 void bli_?gemmtrsm_u_*
      (
+       dim_t                m,
+       dim_t                n,
        dim_t                k,
        ctype*      restrict alpha,
        ctype*      restrict a12,
