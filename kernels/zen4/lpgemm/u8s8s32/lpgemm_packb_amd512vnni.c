@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -196,7 +196,7 @@ void packb_nr64_u8s8s32o32_row_major
     // Adding int32 wise all4 gives format a4-a5-b4-b5-a6-a7-b6-b7 and a4-a5-a6-a7-b4-b5-b6-b7.
     __m512i selector1 = _mm512_setr_epi64( 0x0, 0x1, 0x8, 0x9, 0x2, 0x3, 0xA, 0xB );
     __m512i selector1_1 = _mm512_setr_epi64( 0x4, 0x5, 0xC, 0xD, 0x6, 0x7, 0xE, 0xF );
-    
+
     __m512i selector2 = _mm512_setr_epi64( 0x0, 0x1, 0x2, 0x3, 0x8, 0x9, 0xA, 0xB );
     __m512i selector2_1 = _mm512_setr_epi64( 0x4, 0x5, 0x6, 0x7, 0xC, 0xD, 0xE, 0xF );
 
@@ -321,13 +321,13 @@ void packb_nr64_u8s8s32o32_row_major
             a0 = _mm512_permutex2var_epi64( a0, selector2_1, c0 ); // b[1]
             c0 = _mm512_permutex2var_epi64( b0, selector2_1, d0 ); // b[3]
 
-            _mm512_storeu_si512( pack_b_buffer + 
+            _mm512_storeu_si512( pack_b_buffer +
                                 ( ( jc * KC_updated ) + ( ( kr + 0 ) * NR ) ), a01 );
-            _mm512_storeu_si512( pack_b_buffer + 
+            _mm512_storeu_si512( pack_b_buffer +
                                 ( ( jc * KC_updated ) + ( ( kr + 1 ) * NR ) ) , a0 );
-            _mm512_storeu_si512( pack_b_buffer + 
+            _mm512_storeu_si512( pack_b_buffer +
                                 ( ( jc * KC_updated ) + ( ( kr + 2 ) * NR ) ), c01 );
-            _mm512_storeu_si512( pack_b_buffer + 
+            _mm512_storeu_si512( pack_b_buffer +
                                 ( ( jc * KC_updated ) + ( ( kr + 3 ) * NR ) ), c0 );
         }
         // Handle k remainder.
@@ -453,17 +453,17 @@ void packb_nr64_u8s8s32o32_row_major
             a0 = _mm512_permutex2var_epi64( a0, selector2_1, c0 ); // b[1]
             c0 = _mm512_permutex2var_epi64( b0, selector2_1, d0 ); // b[3]
 
-            _mm512_storeu_si512( pack_b_buffer + 
+            _mm512_storeu_si512( pack_b_buffer +
                                 ( ( jc * KC_updated ) + ( ( k_full_pieces + 0 ) * NR ) ), a01 );
-            _mm512_storeu_si512( pack_b_buffer + 
+            _mm512_storeu_si512( pack_b_buffer +
                                 ( ( jc * KC_updated ) + ( ( k_full_pieces + 1 ) * NR ) ) , a0 );
             _mm512_storeu_si512( pack_b_buffer +
                                  ( ( jc * KC_updated ) + ( ( k_full_pieces + 2 ) * NR ) ), c01 );
-            _mm512_storeu_si512( pack_b_buffer + 
-                                ( ( jc * KC_updated ) + ( ( k_full_pieces + 3 ) * NR ) ), c0 );    
+            _mm512_storeu_si512( pack_b_buffer +
+                                ( ( jc * KC_updated ) + ( ( k_full_pieces + 3 ) * NR ) ), c0 );
         }
     }
-    
+
     // Contiguous packing of fringe panel (n` < NR).
     if ( n_partial_pieces > 0 )
     {
@@ -1109,7 +1109,7 @@ void packb_nr32_u8s8s32o32_row_major
         _mm512_storeu_si512( pack_b_buffer + ( ( kr_new + 0 ) * NR ), a0_zmm );
         _mm512_storeu_si512( pack_b_buffer + ( ( kr_new + 1 ) * NR ), b0_zmm );
 
-        // The 3rd and 4th 16byte chunk will be ignored, since its not part of 
+        // The 3rd and 4th 16byte chunk will be ignored, since its not part of
         // the original data,but is here due to the packing in 4 16byte chunks format.
         kr_new += 2;
     }
@@ -1120,7 +1120,7 @@ void packb_nr32_u8s8s32o32_row_major
         {
             if ( k_partial_pieces == 3 )
             {
-                a0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, 
+                a0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF,
                                                  b + ( rs_b * ( k_full_pieces + 0 ) ) );
                 b0_32 = _mm256_maskz_loadu_epi8(0xFFFFFFFF,
                                                 b + (rs_b * (k_full_pieces + 1)));
@@ -1637,8 +1637,8 @@ void packb_nrlt16_u8s8s32o32_row_major
         // Last 4x16 elements.
         _mm512_storeu_si512( pack_b_buffer + ( ( kr_new + 0 ) * NR ), a0_zmm );
 
-        // The 2nd, 3rd, and 4th 16byte chunk will be ignored, since its not 
-        // part of the original data, but is here due to the packing in 4 
+        // The 2nd, 3rd, and 4th 16byte chunk will be ignored, since its not
+        // part of the original data, but is here due to the packing in 4
         // 16byte chunks format.
         kr_new += 1;
     }
@@ -1843,7 +1843,7 @@ void packb_nr64_u8s8s32o32_col_major(
     }
 
     *rs_p = NR * 4;
-    *cs_p = NR / 4;
+    *cs_p = NR;
 }
 
 void packb_nr_mult_16_u8s8s32o32_col_major(

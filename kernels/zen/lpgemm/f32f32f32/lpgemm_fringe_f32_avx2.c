@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -2498,12 +2498,12 @@ POST_OPS_DOWNSCALE_1x16F:
         {
           zero_point0 = _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
                                 post_ops_attr.post_op_c_i + 0 ) );
+        }
         //c[0, 0-7]
         F32_SCL_MULRND_AVX2(ymm4, selector1, zero_point0);
 
         //c[0, 8-15]
         F32_SCL_MULRND_AVX2(ymm5, selector1, zero_point0);
-        }
       }
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -9347,21 +9347,21 @@ POST_OPS_DOWNSCALE_3x1F:
       {
         if( post_ops_list_temp->scale_factor_len > 1 )
         {
-          selector0 = _mm_set1_ps( *( float* )post_ops_list_temp->scale_factor +
-                          post_ops_attr.post_op_c_i + 0 );
-          selector1 = _mm_set1_ps( *( float* )post_ops_list_temp->scale_factor +
-                          post_ops_attr.post_op_c_i + 1 );
-          selector2 = _mm_set1_ps( *( float* )post_ops_list_temp->scale_factor +
-                          post_ops_attr.post_op_c_i + 2 );
+          selector0 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                          post_ops_attr.post_op_c_i + 0 ) );
+          selector1 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                          post_ops_attr.post_op_c_i + 1 ) );
+          selector2 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                          post_ops_attr.post_op_c_i + 2 ) );
         }
         if( *( (dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm_set1_ps( *(float* )post_ops_list_temp->op_args1 +
-                          post_ops_attr.post_op_c_i + 0 );
-          zero_point1 = _mm_set1_ps( *(float* )post_ops_list_temp->op_args1 +
-                          post_ops_attr.post_op_c_i + 1 );
-          zero_point2 = _mm_set1_ps( *(float* )post_ops_list_temp->op_args1 +
-                          post_ops_attr.post_op_c_i + 2 );
+          zero_point0 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                          post_ops_attr.post_op_c_i + 0 ) );
+          zero_point1 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                          post_ops_attr.post_op_c_i + 1 ) );
+          zero_point2 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                          post_ops_attr.post_op_c_i + 2 ) );
         }
         //c[0, 0-3]
         F32_SCL_MULRND_SSE(xmm4, selector0, zero_point0);
@@ -9683,17 +9683,17 @@ POST_OPS_DOWNSCALE_2x1F:
       {
         if( post_ops_list_temp->scale_factor_len > 1 )
         {
-          selector0 = _mm_set1_ps( *( float* )post_ops_list_temp->scale_factor +
-                          post_ops_attr.post_op_c_i + 0 );
-          selector1 = _mm_set1_ps( *( float* )post_ops_list_temp->scale_factor +
-                          post_ops_attr.post_op_c_i + 1 );
+          selector0 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                          post_ops_attr.post_op_c_i + 0 ) );
+          selector1 = _mm_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                          post_ops_attr.post_op_c_i + 1 ) );
         }
         if( *( (dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
-          zero_point0 = _mm_set1_ps( *(float* )post_ops_list_temp->op_args1 +
-                          post_ops_attr.post_op_c_i + 0 );
-          zero_point1 = _mm_set1_ps( *(float* )post_ops_list_temp->op_args1 +
-                          post_ops_attr.post_op_c_i + 1 );
+          zero_point0 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                          post_ops_attr.post_op_c_i + 0 ) );
+          zero_point1 = _mm_set1_ps( *( (float* )post_ops_list_temp->op_args1 +
+                          post_ops_attr.post_op_c_i + 1 ) );
         }
         //c[0, 0-3]
         F32_SCL_MULRND_SSE(xmm4, selector0, zero_point0);
