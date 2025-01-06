@@ -315,20 +315,20 @@ Parameters:
 The diagram below shows the packed micropanel operands and how elements of each would be stored when _MR_ = _NR_ = 4. The hex digits indicate the layout and order (but NOT the numeric contents) of the elements in memory. Note that the storage of `C11` is not shown since it is determined by the row and column strides of `C11`.
 
 ```
-         c11:           a1:                        b1:                  
-         _______        ______________________     _______              
-        |       |      |0 4 8 C               |   |0 1 2 3|             
-    MR  |       |      |1 5 9 D . . .         |   |4 5 6 7|             
-        |       |  +=  |2 6 A E               |   |8 9 A B|             
-        |_______|      |3_7_B_F_______________|   |C D E F|             
-                                                  |   .   |             
-            NR                    k               |   .   | k           
-                                                  |   .   |             
-                                                  |       |             
-                                                  |       |             
-                                                  |_______|             
-                                                                        
-                                                      NR                
+         c11:           a1:                        b1:
+         _______        ______________________     _______
+        |       |      |0 4 8 C               |   |0 1 2 3|
+    MR  |       |      |1 5 9 D . . .         |   |4 5 6 7|
+        |       |  +=  |2 6 A E               |   |8 9 A B|
+        |_______|      |3_7_B_F_______________|   |C D E F|
+                                                  |   .   |
+            NR                    k               |   .   | k
+                                                  |   .   |
+                                                  |       |
+                                                  |       |
+                                                  |_______|
+
+                                                      NR
 ```
 
 #### Implementation Notes for gemm
@@ -573,8 +573,8 @@ Parameters:
 The diagram below shows the packed micropanel operands for `trsm_l` and how elements of each would be stored when _MR_ = _NR_ = 4. (The hex digits indicate the layout and order (but NOT the numeric contents) in memory. Here, matrix `A11` (referenced by `a11`) is **lower triangular**. Matrix `A11` **does contain** elements corresponding to the strictly upper triangle, however, they are not guaranteed to contain zeros and thus these elements should not be referenced.
 
 ```
-                                              NR    
-                                            _______ 
+                                              NR
+                                            _______
                                        b01:|0 1 2 3|
                                            |4 5 6 7|
                                            |8 9 A B|
@@ -587,8 +587,8 @@ The diagram below shows the packed micropanel operands for `trsm_l` and how elem
   MR  |1 5 9 D . . .      |  `.    |       |       |
       |2 6 A E            |    `.  |    MR |       |
       |3_7_B_F____________|______`.|       |_______|
-                                                    
-                k             MR                    
+
+                k             MR
 ```
 
 
@@ -597,8 +597,8 @@ The diagram below shows the packed micropanel operands for `trsm_l` and how elem
 The diagram below shows the packed micropanel operands for `trsm_u` and how elements of each would be stored when _MR_ = _NR_ = 4. (The hex digits indicate the layout and order (but NOT the numeric contents) in memory. Here, matrix `A11` (referenced by `a11`) is **upper triangular**. Matrix `A11` **does contain** elements corresponding to the strictly lower triangle, however, they are not guaranteed to contain zeros and thus these elements should not be referenced.
 
 ```
-       a11:     a12:                          NR    
-       ________ ___________________         _______ 
+       a11:     a12:                          NR
+       ________ ___________________         _______
       |`.      |0 4 8              |   b11:|0 1 2 3|
   MR  |  `.    |1 5 9 . . .        |       |4 5 6 7|
       |    `.  |2 6 A              |    MR |8 9 A B|
@@ -611,7 +611,7 @@ The diagram below shows the packed micropanel operands for `trsm_u` and how elem
      starting with a12 to avoid            |       |
      obscuring triangular structure        |       |
      of a11.                               |_______|
-                                                                            
+
 ```
 
 
