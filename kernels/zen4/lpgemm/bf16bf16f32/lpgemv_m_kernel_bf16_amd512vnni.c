@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-  Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+  Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -586,18 +586,76 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 
 			dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+			__m512 scl_fctr1 = _mm512_setzero_ps();
+			__m512 scl_fctr2 = _mm512_setzero_ps();
+			__m512 scl_fctr3 = _mm512_setzero_ps();
+			__m512 scl_fctr4 = _mm512_setzero_ps();
+
+			// Even though different registers are used for scalar in column and
+			// row major case, all those registers will contain the same value.
+			// For column major, if m==1, then it means n=1 and scale_factor_len=1.
+			if ( post_ops_list_temp->scale_factor_len == 1 )
+			{
+				scl_fctr1 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+				scl_fctr2 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+				scl_fctr3 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+				scl_fctr4 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			}
+			else
+			{
+				if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+					 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+				{
+					scl_fctr1 =
+						_mm512_maskz_loadu_ps( k1,
+								( float* )post_ops_list_temp->scale_factor +
+								post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+					scl_fctr2 =
+						_mm512_maskz_loadu_ps( k2,
+								( float* )post_ops_list_temp->scale_factor +
+								post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+					scl_fctr3 =
+						_mm512_maskz_loadu_ps( k3,
+								( float* )post_ops_list_temp->scale_factor +
+								post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+					scl_fctr4 =
+						_mm512_maskz_loadu_ps( k4,
+								( float* )post_ops_list_temp->scale_factor +
+								post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+				}
+			}
+
 			if ( post_ops_attr.c_stor_type == BF16 )
 			{
 				bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
-				BF16_F32_MATRIX_ADD_LOAD
-				            ( k1, selector1, 0, 0 )
-				BF16_F32_MATRIX_ADD_LOAD
-				            ( k2, selector2, 0, 1 )
-				BF16_F32_MATRIX_ADD_LOAD
-				            ( k3, selector3, 0, 2 )
-				BF16_F32_MATRIX_ADD_LOAD
-				            ( k4, selector4, 0, 3 )
+				if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+					 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+				{
+					BF16_F32_MATRIX_ADD_LOAD
+								( k1, selector1, scl_fctr1, 0, 0 )
+					BF16_F32_MATRIX_ADD_LOAD
+								( k2, selector2, scl_fctr2, 0, 1 )
+					BF16_F32_MATRIX_ADD_LOAD
+								( k3, selector3, scl_fctr3, 0, 2 )
+					BF16_F32_MATRIX_ADD_LOAD
+								( k4, selector4, scl_fctr4, 0, 3 )
+				}
+				else
+				{
+					BF16_F32_MATRIX_ADD_LOAD
+								( k1, selector1, scl_fctr1, 0, 0 )
+					BF16_F32_MATRIX_ADD_LOAD
+								( k2, selector2, scl_fctr1, 0, 1 )
+					BF16_F32_MATRIX_ADD_LOAD
+								( k3, selector3, scl_fctr1, 0, 2 )
+					BF16_F32_MATRIX_ADD_LOAD
+								( k4, selector4, scl_fctr1, 0, 3 )
+				}
 
 				zmm8  = _mm512_add_ps( selector1, zmm8  );
 				zmm12 = _mm512_add_ps( selector2, zmm12 );
@@ -608,14 +666,29 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 			{
 				float* matptr = ( float* )post_ops_list_temp->op_args1;
 
-				F32_F32_MATRIX_ADD_LOAD
-				            ( k1, selector1, 0, 0 )
-				F32_F32_MATRIX_ADD_LOAD
-				            ( k2, selector2, 0, 1 )
-				F32_F32_MATRIX_ADD_LOAD
-				            ( k3, selector3, 0, 2 )
-				F32_F32_MATRIX_ADD_LOAD
-				            ( k4, selector4, 0, 3 )
+				if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+					 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+				{
+					F32_F32_MATRIX_ADD_LOAD
+								( k1, selector1, scl_fctr1, 0, 0 )
+					F32_F32_MATRIX_ADD_LOAD
+								( k2, selector2, scl_fctr2, 0, 1 )
+					F32_F32_MATRIX_ADD_LOAD
+								( k3, selector3, scl_fctr3, 0, 2 )
+					F32_F32_MATRIX_ADD_LOAD
+								( k4, selector4, scl_fctr4, 0, 3 )
+				}
+				else
+				{
+					F32_F32_MATRIX_ADD_LOAD
+								( k1, selector1, scl_fctr1, 0, 0 )
+					F32_F32_MATRIX_ADD_LOAD
+								( k2, selector2, scl_fctr1, 0, 1 )
+					F32_F32_MATRIX_ADD_LOAD
+								( k3, selector3, scl_fctr1, 0, 2 )
+					F32_F32_MATRIX_ADD_LOAD
+								( k4, selector4, scl_fctr1, 0, 3 )
+				}
 
 				zmm8  = _mm512_add_ps( selector1, zmm8  );
 				zmm12 = _mm512_add_ps( selector2, zmm12 );
@@ -633,18 +706,76 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 
 			dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+			__m512 scl_fctr1 = _mm512_setzero_ps();
+			__m512 scl_fctr2 = _mm512_setzero_ps();
+			__m512 scl_fctr3 = _mm512_setzero_ps();
+			__m512 scl_fctr4 = _mm512_setzero_ps();
+
+			// Even though different registers are used for scalar in column and
+			// row major case, all those registers will contain the same value.
+			// For column major, if m==1, then it means n=1 and scale_factor_len=1.
+			if ( post_ops_list_temp->scale_factor_len == 1 )
+			{
+				scl_fctr1 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+				scl_fctr2 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+				scl_fctr3 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+				scl_fctr4 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			}
+			else
+			{
+				if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+					 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+				{
+					scl_fctr1 =
+						_mm512_maskz_loadu_ps( k1,
+								( float* )post_ops_list_temp->scale_factor +
+								post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+					scl_fctr2 =
+						_mm512_maskz_loadu_ps( k2,
+								( float* )post_ops_list_temp->scale_factor +
+								post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+					scl_fctr3 =
+						_mm512_maskz_loadu_ps( k3,
+								( float* )post_ops_list_temp->scale_factor +
+								post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+					scl_fctr4 =
+						_mm512_maskz_loadu_ps( k4,
+								( float* )post_ops_list_temp->scale_factor +
+								post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+				}
+			}
+
 			if ( post_ops_attr.c_stor_type == BF16 )
 			{
 				bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
-				BF16_F32_MATRIX_MUL_LOAD
-				            ( k1, selector1, 0, 0 )
-				BF16_F32_MATRIX_MUL_LOAD
-				            ( k2, selector2, 0, 1 )
-				BF16_F32_MATRIX_MUL_LOAD
-				            ( k3, selector3, 0, 2 )
-				BF16_F32_MATRIX_MUL_LOAD
-				            ( k4, selector4, 0, 3 )
+				if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+					 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+				{
+					BF16_F32_MATRIX_MUL_LOAD
+								( k1, selector1, scl_fctr1, 0, 0 )
+					BF16_F32_MATRIX_MUL_LOAD
+								( k2, selector2, scl_fctr2, 0, 1 )
+					BF16_F32_MATRIX_MUL_LOAD
+								( k3, selector3, scl_fctr3, 0, 2 )
+					BF16_F32_MATRIX_MUL_LOAD
+								( k4, selector4, scl_fctr4, 0, 3 )
+				}
+				else
+				{
+					BF16_F32_MATRIX_MUL_LOAD
+								( k1, selector1, scl_fctr1, 0, 0 )
+					BF16_F32_MATRIX_MUL_LOAD
+								( k2, selector2, scl_fctr1, 0, 1 )
+					BF16_F32_MATRIX_MUL_LOAD
+								( k3, selector3, scl_fctr1, 0, 2 )
+					BF16_F32_MATRIX_MUL_LOAD
+								( k4, selector4, scl_fctr1, 0, 3 )
+				}
 
 				zmm8  = _mm512_mul_ps( selector1, zmm8  );
 				zmm12 = _mm512_mul_ps( selector2, zmm12 );
@@ -655,14 +786,29 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 			{
 				float* matptr = ( float* )post_ops_list_temp->op_args1;
 
-				F32_F32_MATRIX_MUL_LOAD
-				            ( k1, selector1, 0, 0 )
-				F32_F32_MATRIX_MUL_LOAD
-				            ( k2, selector2, 0, 1 )
-				F32_F32_MATRIX_MUL_LOAD
-				            ( k3, selector3, 0, 2 )
-				F32_F32_MATRIX_MUL_LOAD
-				            ( k4, selector4, 0, 3 )
+				if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+					 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+				{
+					F32_F32_MATRIX_MUL_LOAD
+								( k1, selector1, scl_fctr1, 0, 0 )
+					F32_F32_MATRIX_MUL_LOAD
+								( k2, selector2, scl_fctr2, 0, 1 )
+					F32_F32_MATRIX_MUL_LOAD
+								( k3, selector3, scl_fctr3, 0, 2 )
+					F32_F32_MATRIX_MUL_LOAD
+								( k4, selector4, scl_fctr4, 0, 3 )
+				}
+				else
+				{
+					F32_F32_MATRIX_MUL_LOAD
+								( k1, selector1, scl_fctr1, 0, 0 )
+					F32_F32_MATRIX_MUL_LOAD
+								( k2, selector2, scl_fctr1, 0, 1 )
+					F32_F32_MATRIX_MUL_LOAD
+								( k3, selector3, scl_fctr1, 0, 2 )
+					F32_F32_MATRIX_MUL_LOAD
+								( k4, selector4, scl_fctr1, 0, 3 )
+				}
 
 				zmm8  = _mm512_mul_ps( selector1, zmm8  );
 				zmm12 = _mm512_mul_ps( selector2, zmm12 );

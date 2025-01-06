@@ -104,13 +104,19 @@ typedef struct
 typedef struct
 {
 	void* matrix;
+	void* scale_factor;
+	dim_t scale_factor_len;
 	dim_t ldm;
+	AOCL_PARAMS_STORAGE_TYPES bias_stor_type;
 } aocl_post_op_matrix_add;
 
 typedef struct
 {
 	void* matrix;
+	void* scale_factor;
+	dim_t scale_factor_len;
 	dim_t ldm;
+	AOCL_PARAMS_STORAGE_TYPES bias_stor_type;
 } aocl_post_op_matrix_mul;
 
 typedef struct

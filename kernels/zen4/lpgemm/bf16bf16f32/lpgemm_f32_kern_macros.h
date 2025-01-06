@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -180,7 +180,7 @@
 	c_float_ ## m_ind ## p2 = _mm512_add_ps( scr2, c_float_ ## m_ind ## p2 ); \
 	c_float_ ## m_ind ## p3 = _mm512_add_ps( scr3, c_float_ ## m_ind ## p3 ); \
 
-#define BF16_F32_MATRIX_ADD_LOAD(mask,scr,m_ind,n_ind) \
+#define BF16_F32_MATRIX_ADD_LOAD(mask,scr,scl_fct,m_ind,n_ind) \
 	scr = (__m512)( _mm512_sllv_epi32 \
 					( \
 					  _mm512_cvtepi16_epi32 \
@@ -194,79 +194,85 @@
 					  ), _mm512_set1_epi32( 16 ) \
 					) \
 				  ); \
+	scr = _mm512_mul_ps( scr, scl_fct ); \
 
-#define BF16_F32_MATRIX_ADD_1COL_PAR(mask,scr0,m_ind) \
-	BF16_F32_MATRIX_ADD_LOAD(mask,scr0,m_ind,0); \
+#define BF16_F32_MATRIX_ADD_1COL_PAR(mask,scr0,scl_fct0,m_ind) \
+	BF16_F32_MATRIX_ADD_LOAD(mask,scr0,scl_fct0,m_ind,0); \
 	F32_MATRIX_ADD_1COL(scr0,m_ind); \
 
-#define BF16_F32_MATRIX_ADD_1COL(scr0,m_ind) \
-	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
+#define BF16_F32_MATRIX_ADD_1COL(scr0,scl_fct0,m_ind) \
+	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,scl_fct0,m_ind,0); \
 	F32_MATRIX_ADD_1COL(scr0,m_ind); \
 
-#define BF16_F32_MATRIX_ADD_2COL(scr0,scr1,m_ind) \
-	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
-	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
+#define BF16_F32_MATRIX_ADD_2COL(scr0,scr1,scl_fct0,scl_fct1,m_ind) \
+	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,scl_fct0,m_ind,0); \
+	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,scl_fct1,m_ind,1); \
 	F32_MATRIX_ADD_2COL(scr0,scr1,m_ind); \
 
-#define BF16_F32_MATRIX_ADD_3COL(scr0,scr1,scr2,m_ind) \
-	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
-	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
-	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,m_ind,2); \
+#define BF16_F32_MATRIX_ADD_3COL(scr0,scr1,scr2,scl_fct0,scl_fct1,scl_fct2,m_ind) \
+	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,scl_fct0,m_ind,0); \
+	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,scl_fct1,m_ind,1); \
+	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,scl_fct2,m_ind,2); \
 	F32_MATRIX_ADD_3COL(scr0,scr1,scr2,m_ind); \
 
-#define BF16_F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3,m_ind) \
-	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
-	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
-	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,m_ind,2); \
-	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr3,m_ind,3); \
+#define BF16_F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3, \
+				scl_fct0,scl_fct1,scl_fct2,scl_fct3,m_ind) \
+	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,scl_fct0,m_ind,0); \
+	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,scl_fct1,m_ind,1); \
+	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,scl_fct2,m_ind,2); \
+	BF16_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr3,scl_fct3,m_ind,3); \
 	F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3,m_ind); \
 
-#define BF16_F32_MATRIX_ADD_4COL_MASK(k0,k1,k2,k3,scr0,scr1,scr2,scr3,m_ind) \
-	BF16_F32_MATRIX_ADD_LOAD(k0,scr0,m_ind,0); \
-	BF16_F32_MATRIX_ADD_LOAD(k1,scr1,m_ind,1); \
-	BF16_F32_MATRIX_ADD_LOAD(k2,scr2,m_ind,2); \
-	BF16_F32_MATRIX_ADD_LOAD(k3,scr3,m_ind,3); \
+#define BF16_F32_MATRIX_ADD_4COL_MASK(k0,k1,k2,k3,scr0,scr1,scr2,scr3, \
+				scl_fct0,scl_fct1,scl_fct2,scl_fct3,m_ind) \
+	BF16_F32_MATRIX_ADD_LOAD(k0,scr0,scl_fct0,m_ind,0); \
+	BF16_F32_MATRIX_ADD_LOAD(k1,scr1,scl_fct1,m_ind,1); \
+	BF16_F32_MATRIX_ADD_LOAD(k2,scr2,scl_fct2,m_ind,2); \
+	BF16_F32_MATRIX_ADD_LOAD(k3,scr3,scl_fct3,m_ind,3); \
 	F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3,m_ind); \
 
-#define F32_F32_MATRIX_ADD_LOAD(mask,scr,m_ind,n_ind) \
+#define F32_F32_MATRIX_ADD_LOAD(mask,scr,scl_fct,m_ind,n_ind) \
 	scr = _mm512_maskz_loadu_ps \
 			( \
 			  mask, \
 			  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
 			  post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
 			); \
+	scr = _mm512_mul_ps( scr, scl_fct ); \
 
-#define F32_F32_MATRIX_ADD_1COL_PAR(mask,scr0,m_ind) \
-	F32_F32_MATRIX_ADD_LOAD(mask,scr0,m_ind,0); \
+#define F32_F32_MATRIX_ADD_1COL_PAR(mask,scr0,scl_fct0,m_ind) \
+	F32_F32_MATRIX_ADD_LOAD(mask,scr0,scl_fct0,m_ind,0); \
 	F32_MATRIX_ADD_1COL(scr0,m_ind); \
 
-#define F32_F32_MATRIX_ADD_1COL(scr0,m_ind) \
-	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
+#define F32_F32_MATRIX_ADD_1COL(scr0,scl_fct0,m_ind) \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,scl_fct0,m_ind,0); \
 	F32_MATRIX_ADD_1COL(scr0,m_ind); \
 
-#define F32_F32_MATRIX_ADD_2COL(scr0,scr1,m_ind) \
-	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
-	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
+#define F32_F32_MATRIX_ADD_2COL(scr0,scr1,scl_fct0,scl_fct1,m_ind) \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,scl_fct0,m_ind,0); \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,scl_fct1,m_ind,1); \
 	F32_MATRIX_ADD_2COL(scr0,scr1,m_ind); \
 
-#define F32_F32_MATRIX_ADD_3COL(scr0,scr1,scr2,m_ind) \
-	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
-	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
-	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,m_ind,2); \
+#define F32_F32_MATRIX_ADD_3COL(scr0,scr1,scr2,scl_fct0,scl_fct1,scl_fct2,m_ind) \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,scl_fct0,m_ind,0); \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,scl_fct1,m_ind,1); \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,scl_fct2,m_ind,2); \
 	F32_MATRIX_ADD_3COL(scr0,scr1,scr2,m_ind); \
 
-#define F32_F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3,m_ind) \
-	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
-	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
-	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,m_ind,2); \
-	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr3,m_ind,3); \
+#define F32_F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3, \
+				scl_fct0,scl_fct1,scl_fct2,scl_fct3,m_ind) \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,scl_fct0,m_ind,0); \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,scl_fct1,m_ind,1); \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,scl_fct2,m_ind,2); \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr3,scl_fct3,m_ind,3); \
 	F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3,m_ind); \
 
-#define F32_F32_MATRIX_ADD_4COL_MASK(k0,k1,k2,k3,scr0,scr1,scr2,scr3,m_ind) \
-	F32_F32_MATRIX_ADD_LOAD(k0,scr0,m_ind,0); \
-	F32_F32_MATRIX_ADD_LOAD(k1,scr1,m_ind,1); \
-	F32_F32_MATRIX_ADD_LOAD(k2,scr2,m_ind,2); \
-	F32_F32_MATRIX_ADD_LOAD(k3,scr3,m_ind,3); \
+#define F32_F32_MATRIX_ADD_4COL_MASK(k0,k1,k2,k3,scr0,scr1,scr2,scr3, \
+				scl_fct0,scl_fct1,scl_fct2,scl_fct3,m_ind) \
+	F32_F32_MATRIX_ADD_LOAD(k0,scr0,scl_fct0,m_ind,0); \
+	F32_F32_MATRIX_ADD_LOAD(k1,scr1,scl_fct1,m_ind,1); \
+	F32_F32_MATRIX_ADD_LOAD(k2,scr2,scl_fct2,m_ind,2); \
+	F32_F32_MATRIX_ADD_LOAD(k3,scr3,scl_fct3,m_ind,3); \
 	F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3,m_ind); \
 
 // Matrix mul post-ops helper macros
@@ -288,93 +294,80 @@
 	c_float_ ## m_ind ## p2 = _mm512_mul_ps( scr2, c_float_ ## m_ind ## p2 ); \
 	c_float_ ## m_ind ## p3 = _mm512_mul_ps( scr3, c_float_ ## m_ind ## p3 ); \
 
-#define BF16_F32_MATRIX_MUL_LOAD(mask,scr,m_ind,n_ind) \
-	scr = (__m512)( _mm512_sllv_epi32 \
-					( \
-					  _mm512_cvtepi16_epi32 \
-					  ( \
-						_mm256_maskz_loadu_epi16 \
-						( \
-						  mask, \
-						  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
-						  post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
-						) \
-					  ), _mm512_set1_epi32( 16 ) \
-					) \
-				  ); \
+#define BF16_F32_MATRIX_MUL_LOAD(mask,scr,scl_fct,m_ind,n_ind) \
+	BF16_F32_MATRIX_ADD_LOAD(mask,scr,scl_fct,m_ind,n_ind); \
 
-#define BF16_F32_MATRIX_MUL_1COL_PAR(mask,scr0,m_ind) \
-	BF16_F32_MATRIX_MUL_LOAD(mask,scr0,m_ind,0); \
+#define BF16_F32_MATRIX_MUL_1COL_PAR(mask,scr0,scl_fct0,m_ind) \
+	BF16_F32_MATRIX_MUL_LOAD(mask,scr0,scl_fct0,m_ind,0); \
 	F32_MATRIX_MUL_1COL(scr0,m_ind); \
 
-#define BF16_F32_MATRIX_MUL_1COL(scr0,m_ind) \
-	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
+#define BF16_F32_MATRIX_MUL_1COL(scr0,scl_fct0,m_ind) \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,scl_fct0,m_ind,0); \
 	F32_MATRIX_MUL_1COL(scr0,m_ind); \
 
-#define BF16_F32_MATRIX_MUL_2COL(scr0,scr1,m_ind) \
-	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
-	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
+#define BF16_F32_MATRIX_MUL_2COL(scr0,scr1,scl_fct0,scl_fct1,m_ind) \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,scl_fct0,m_ind,0); \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,scl_fct1,m_ind,1); \
 	F32_MATRIX_MUL_2COL(scr0,scr1,m_ind); \
 
-#define BF16_F32_MATRIX_MUL_3COL(scr0,scr1,scr2,m_ind) \
-	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
-	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
-	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,m_ind,2); \
+#define BF16_F32_MATRIX_MUL_3COL(scr0,scr1,scr2,scl_fct0,scl_fct1,scl_fct2,m_ind) \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,scl_fct0,m_ind,0); \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,scl_fct1,m_ind,1); \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,scl_fct2,m_ind,2); \
 	F32_MATRIX_MUL_3COL(scr0,scr1,scr2,m_ind); \
 
-#define BF16_F32_MATRIX_MUL_4COL(scr0,scr1,scr2,scr3,m_ind) \
-	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
-	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
-	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,m_ind,2); \
-	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr3,m_ind,3); \
+#define BF16_F32_MATRIX_MUL_4COL(scr0,scr1,scr2,scr3, \
+				scl_fct0,scl_fct1,scl_fct2,scl_fct3,m_ind) \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,scl_fct0,m_ind,0); \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,scl_fct1,m_ind,1); \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,scl_fct2,m_ind,2); \
+	BF16_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr3,scl_fct3,m_ind,3); \
 	F32_MATRIX_MUL_4COL(scr0,scr1,scr2,scr3,m_ind); \
 
-#define BF16_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,scr0,scr1,scr2,scr3,m_ind) \
-	BF16_F32_MATRIX_MUL_LOAD(k0,scr0,m_ind,0); \
-	BF16_F32_MATRIX_MUL_LOAD(k1,scr1,m_ind,1); \
-	BF16_F32_MATRIX_MUL_LOAD(k2,scr2,m_ind,2); \
-	BF16_F32_MATRIX_MUL_LOAD(k3,scr3,m_ind,3); \
+#define BF16_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,scr0,scr1,scr2,scr3, \
+				scl_fct0,scl_fct1,scl_fct2,scl_fct3,m_ind) \
+	BF16_F32_MATRIX_MUL_LOAD(k0,scr0,scl_fct0,m_ind,0); \
+	BF16_F32_MATRIX_MUL_LOAD(k1,scr1,scl_fct1,m_ind,1); \
+	BF16_F32_MATRIX_MUL_LOAD(k2,scr2,scl_fct2,m_ind,2); \
+	BF16_F32_MATRIX_MUL_LOAD(k3,scr3,scl_fct3,m_ind,3); \
 	F32_MATRIX_MUL_4COL(scr0,scr1,scr2,scr3,m_ind); \
 
-#define F32_F32_MATRIX_MUL_LOAD(mask,scr,m_ind,n_ind) \
-	scr = _mm512_maskz_loadu_ps \
-			( \
-			  mask, \
-			  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
-			  post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
-			); \
+#define F32_F32_MATRIX_MUL_LOAD(mask,scr,scl_fct,m_ind,n_ind) \
+	F32_F32_MATRIX_ADD_LOAD(mask,scr,scl_fct,m_ind,n_ind); \
 
-#define F32_F32_MATRIX_MUL_1COL_PAR(mask,scr0,m_ind) \
-	F32_F32_MATRIX_MUL_LOAD(mask,scr0,m_ind,0); \
+#define F32_F32_MATRIX_MUL_1COL_PAR(mask,scr0,scl_fct0,m_ind) \
+	F32_F32_MATRIX_MUL_LOAD(mask,scr0,scl_fct0,m_ind,0); \
 	F32_MATRIX_MUL_1COL(scr0,m_ind); \
 
-#define F32_F32_MATRIX_MUL_1COL(scr0,m_ind) \
-	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
+#define F32_F32_MATRIX_MUL_1COL(scr0,scl_fct0,m_ind) \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,scl_fct0,m_ind,0); \
 	F32_MATRIX_MUL_1COL(scr0,m_ind); \
 
-#define F32_F32_MATRIX_MUL_2COL(scr0,scr1,m_ind) \
-	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
-	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
+#define F32_F32_MATRIX_MUL_2COL(scr0,scr1,scl_fct0,scl_fct1,m_ind) \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,scl_fct0,m_ind,0); \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,scl_fct1,m_ind,1); \
 	F32_MATRIX_MUL_2COL(scr0,scr1,m_ind); \
 
-#define F32_F32_MATRIX_MUL_3COL(scr0,scr1,scr2,m_ind) \
-	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
-	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
-	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,m_ind,2); \
+#define F32_F32_MATRIX_MUL_3COL(scr0,scr1,scr2,scl_fct0,scl_fct1,scl_fct2,m_ind) \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,scl_fct0,m_ind,0); \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,scl_fct1,m_ind,1); \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,scl_fct2,m_ind,2); \
 	F32_MATRIX_MUL_3COL(scr0,scr1,scr2,m_ind); \
 
-#define F32_F32_MATRIX_MUL_4COL(scr0,scr1,scr2,scr3,m_ind) \
-	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
-	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
-	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,m_ind,2); \
-	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr3,m_ind,3); \
+#define F32_F32_MATRIX_MUL_4COL(scr0,scr1,scr2,scr3, \
+				scl_fct0,scl_fct1,scl_fct2,scl_fct3,m_ind) \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,scl_fct0,m_ind,0); \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,scl_fct1,m_ind,1); \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,scl_fct2,m_ind,2); \
+	F32_F32_MATRIX_MUL_LOAD(_cvtu32_mask16( 0xFFFF ),scr3,scl_fct3,m_ind,3); \
 	F32_MATRIX_MUL_4COL(scr0,scr1,scr2,scr3,m_ind); \
 
-#define F32_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,scr0,scr1,scr2,scr3,m_ind) \
-	F32_F32_MATRIX_MUL_LOAD(k0,scr0,m_ind,0); \
-	F32_F32_MATRIX_MUL_LOAD(k1,scr1,m_ind,1); \
-	F32_F32_MATRIX_MUL_LOAD(k2,scr2,m_ind,2); \
-	F32_F32_MATRIX_MUL_LOAD(k3,scr3,m_ind,3); \
+#define F32_F32_MATRIX_MUL_4COL_MASK(k0,k1,k2,k3,scr0,scr1,scr2,scr3, \
+				scl_fct0,scl_fct1,scl_fct2,scl_fct3,m_ind) \
+	F32_F32_MATRIX_MUL_LOAD(k0,scr0,scl_fct0,m_ind,0); \
+	F32_F32_MATRIX_MUL_LOAD(k1,scr1,scl_fct1,m_ind,1); \
+	F32_F32_MATRIX_MUL_LOAD(k2,scr2,scl_fct2,m_ind,2); \
+	F32_F32_MATRIX_MUL_LOAD(k3,scr3,scl_fct3,m_ind,3); \
 	F32_MATRIX_MUL_4COL(scr0,scr1,scr2,scr3,m_ind); \
 
 //Zero-out the given ZMM accumulator registers

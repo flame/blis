@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -370,7 +370,9 @@ err_t lpgemm_translate_to_post_ops_list
 						  ( post_op_list + i ), POST_OPS_MATRIX_ADD,
 						  ( post_op_unparsed->matrix_add + m_i )->matrix,
 						  meta_arg, &( ( post_op_unparsed->matrix_add + m_i )->ldm ),
-						  NULL, 0, FALSE, NONE
+						  ( post_op_unparsed->matrix_add + m_i )->scale_factor,
+						  ( post_op_unparsed->matrix_add + m_i )->scale_factor_len,
+						  FALSE, NONE
 						);
 
 						m_i += 1;
@@ -381,7 +383,7 @@ err_t lpgemm_translate_to_post_ops_list
 						if ( ( ( post_op_unparsed->matrix_mul + mul_i )->matrix == NULL ) ||
 							 ( ( post_op_unparsed->matrix_mul + mul_i )->ldm <= 0 ) )
 						{
-							bli_print_msg(" Post_op.matrix_add attributes are invalid. Exiting..",
+							bli_print_msg(" Post_op.matrix_mul attributes are invalid. Exiting..",
 											__FILE__, __LINE__ );
 							return BLIS_NULL_POINTER;
 						}
@@ -391,7 +393,9 @@ err_t lpgemm_translate_to_post_ops_list
 						  ( post_op_list + i ), POST_OPS_MATRIX_MUL,
 						  ( post_op_unparsed->matrix_mul + mul_i )->matrix,
 						  meta_arg, &( ( post_op_unparsed->matrix_mul + mul_i )->ldm ),
-						  NULL, 0, FALSE, NONE
+						  ( post_op_unparsed->matrix_mul + mul_i )->scale_factor,
+						  ( post_op_unparsed->matrix_mul + mul_i )->scale_factor_len,
+						  FALSE, NONE
 						);
 
 						mul_i += 1;

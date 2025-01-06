@@ -372,9 +372,12 @@ void eltwise_ops_accuracy_check_driver_ ## LP_SFX \
                             cs_m = rs_m; \
                             rs_m = 1; \
                         } \
+                        float* scl_fctr = ( float* )( ( post_op->matrix_add )->scale_factor ); \
+                        dim_t scl_fctr_len = ( post_op->matrix_add )->scale_factor_len; \
                         temp_accum += GEN_FUNC_NAME(get_matrix_add_post_op_val_,LP_SFX) \
                                     ( *( ( B_type* )( post_op->matrix_add )->matrix + \
-                                           ( i * rs_m ) + ( j * cs_m ) ) ); \
+                                           ( i * rs_m ) + ( j * cs_m ) ), \
+                                      j, scl_fctr, scl_fctr_len ); \
                     } \
                     else if ( post_op->seq_vector[op_id] == MATRIX_MUL ) \
                     { \
@@ -385,9 +388,12 @@ void eltwise_ops_accuracy_check_driver_ ## LP_SFX \
                             cs_m = rs_m; \
                             rs_m = 1; \
                         } \
+                        float* scl_fctr = ( float* )( ( post_op->matrix_mul )->scale_factor ); \
+                        dim_t scl_fctr_len = ( post_op->matrix_mul )->scale_factor_len; \
                         temp_accum *= GEN_FUNC_NAME(get_matrix_mul_post_op_val_,LP_SFX) \
                                     ( *( ( B_type* )( post_op->matrix_mul )->matrix + \
-                                           ( i * rs_m ) + ( j * cs_m ) ) ); \
+                                           ( i * rs_m ) + ( j * cs_m ) ), \
+                                      j, scl_fctr, scl_fctr_len ); \
                     } \
                     else \
                     {} \

@@ -958,9 +958,12 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                                 cs_m = rs_m; \
                                 rs_m = 1; \
                             } \
+                            float* scl_fctr = ( float* )( ( post_op[bs_i]->matrix_add )->scale_factor ); \
+                            dim_t scl_fctr_len = ( post_op[bs_i]->matrix_add )->scale_factor_len; \
                             temp_accum += GEN_FUNC_NAME(get_matrix_add_post_op_val_,BLAS_SFX) \
                                         ( *( ( C_type* )( post_op[bs_i]->matrix_add )->matrix + \
-                                            ( i * rs_m ) + ( j * cs_m ) ) ); \
+                                            ( i * rs_m ) + ( j * cs_m ) ), \
+                                          j, scl_fctr, scl_fctr_len ); \
                         } \
                         else if ( post_op[bs_i]->seq_vector[op_id] == MATRIX_MUL ) \
                         { \
@@ -971,9 +974,12 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                                 cs_m = rs_m; \
                                 rs_m = 1; \
                             } \
+                            float* scl_fctr = ( float* )( ( post_op[bs_i]->matrix_mul )->scale_factor ); \
+                            dim_t scl_fctr_len = ( post_op[bs_i]->matrix_mul )->scale_factor_len; \
                             temp_accum *= GEN_FUNC_NAME(get_matrix_mul_post_op_val_,BLAS_SFX) \
                                         ( *( ( C_type* )( post_op[bs_i]->matrix_mul )->matrix + \
-                                            ( i * rs_m ) + ( j * cs_m ) ) ); \
+                                            ( i * rs_m ) + ( j * cs_m ) ), \
+                                          j, scl_fctr, scl_fctr_len ); \
                         } \
                         else \
                         {} \

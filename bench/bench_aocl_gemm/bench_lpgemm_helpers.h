@@ -381,41 +381,68 @@ static inline float SWISH_post_op_ ## BLAS_SFX \
 #define GEN_GET_MATRIX_ADD_POST_OP_VAL_BF16(C_type,BLAS_SFX) \
 static inline float get_matrix_add_post_op_val_ ## BLAS_SFX \
      ( \
-       C_type val \
+       C_type val, \
+       dim_t j, \
+       float* scl_fctr, \
+       dim_t scl_fctr_len \
      ) \
 { \
     float ret_val = 0.0; \
+    dim_t j_scale = j; \
+    if ( scl_fctr_len == 1 ) \
+    { \
+       j_scale = 0; \
+    } \
+ \
     bfloat16_to_float( val, &ret_val ); \
-    return ret_val; \
+    return ( ret_val * *( scl_fctr + j_scale ) ); \
 } \
 
 #define GEN_GET_MATRIX_ADD_POST_OP_VAL(C_type,ACCUM_type,BLAS_SFX) \
 static inline ACCUM_type get_matrix_add_post_op_val_ ## BLAS_SFX \
      ( \
-       C_type val \
+       C_type val, \
+       dim_t j, \
+       float* scl_fctr, \
+       dim_t scl_fctr_len \
      ) \
 { \
-    return (ACCUM_type) val; \
+    dim_t j_scale = j; \
+    if ( scl_fctr_len == 1 ) \
+    { \
+       j_scale = 0; \
+    } \
+    return (ACCUM_type) ( ( float )val * *( scl_fctr + j_scale ) ); \
 } \
 
 #define GEN_GET_MATRIX_MUL_POST_OP_VAL_BF16(C_type,BLAS_SFX) \
 static inline float get_matrix_mul_post_op_val_ ## BLAS_SFX \
      ( \
-       C_type val \
+       C_type val, \
+       dim_t j, \
+       float* scl_fctr, \
+       dim_t scl_fctr_len \
      ) \
 { \
-    float ret_val = 0.0; \
-    bfloat16_to_float( val, &ret_val ); \
-    return ret_val; \
+    return GEN_FUNC_NAME(get_matrix_add_post_op_val_,BLAS_SFX) \
+			( \
+			  val, j, scl_fctr, scl_fctr_len \
+			); \
 } \
 
 #define GEN_GET_MATRIX_MUL_POST_OP_VAL(C_type,ACCUM_type,BLAS_SFX) \
 static inline ACCUM_type get_matrix_mul_post_op_val_ ## BLAS_SFX \
      ( \
-       C_type val \
+       C_type val, \
+       dim_t j, \
+       float* scl_fctr, \
+       dim_t scl_fctr_len \
      ) \
 { \
-    return (ACCUM_type) val; \
+    return GEN_FUNC_NAME(get_matrix_add_post_op_val_,BLAS_SFX) \
+			( \
+			  val, j, scl_fctr, scl_fctr_len \
+			); \
 } \
 
 /* Final output type value getter. */
@@ -1108,6 +1135,21 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         { \
             ( post_ops->matrix_add )->ldm = n; \
         } \
+ \
+        /* Allocate scale buffer. */ \
+        dim_t n_scale = 1; /* Support for vector will be added. */ \
+        ( post_ops->matrix_add )->scale_factor = malloc( n_scale * sizeof( DSCALE_type ) ); \
+        if ( ( post_ops->matrix_add )->scale_factor == NULL ) \
+        { \
+            goto err_handler; \
+        } \
+        /* Fill scale factor. */ \
+        DSCALE_type* temp_dscale_ptr = ( DSCALE_type* )( post_ops->matrix_add )->scale_factor; \
+        for ( dim_t i = 0; i < n_scale; ++i ) \
+        { \
+            temp_dscale_ptr[i] = ( ( DSCALE_type )2 ); \
+        } \
+        ( post_ops->matrix_add )->scale_factor_len = n_scale; \
     } \
  \
     if ( is_matrix_mul == TRUE ) \
@@ -1143,6 +1185,21 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         { \
             ( post_ops->matrix_mul )->ldm = n; \
         } \
+ \
+        /* Allocate scale buffer. */ \
+        dim_t n_scale = 1; /* Support for vector will be added. */ \
+        ( post_ops->matrix_mul )->scale_factor = malloc( n_scale * sizeof( DSCALE_type ) ); \
+        if ( ( post_ops->matrix_mul )->scale_factor == NULL ) \
+        { \
+            goto err_handler; \
+        } \
+        /* Fill scale factor. */ \
+        DSCALE_type* temp_dscale_ptr = ( DSCALE_type* )( post_ops->matrix_mul )->scale_factor; \
+        for ( dim_t i = 0; i < n_scale; ++i ) \
+        { \
+            temp_dscale_ptr[i] = ( ( DSCALE_type )2 ); \
+        } \
+        ( post_ops->matrix_mul )->scale_factor_len = n_scale; \
     } \
  \
     post_ops->seq_length = cur_op_index; \
