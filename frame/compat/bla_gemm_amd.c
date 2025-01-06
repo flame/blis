@@ -1255,10 +1255,8 @@ void zgemm_blis_impl
     /* Setting the thresholds based on the input dimensions.
        The computation is typecasted to double to support corner
        cases, such as the dimensions being INT32_MAX or INT64_MAX */
-    double c_thresh = (double)m0 * (double)n0;
     double a_thresh = (double)m0 * (double)k0;
     double b_thresh = (double)k0 * (double)n0;
-    double overall_thresh = (double)m0 * (double)n0 * (double)k0;
 
     /* The following switch statement evaluates the condition
        to enter the "small" path for the supported ZEN architectures,
@@ -1271,7 +1269,9 @@ void zgemm_blis_impl
     #if defined(BLIS_KERNELS_ZEN4)
         case BLIS_ARCH_ZEN5:
         {
-            /* Booleans to calculate the entry to small path(ST and MT modes)*/
+            /* Booleans and thresholds to calculate the entry to small path(ST and MT modes)*/
+            double c_thresh = (double)m0 * (double)n0;
+            double overall_thresh = (double)m0 * (double)n0 * (double)k0;
             bool mat_based_thresh = (( a_thresh < 500 ) || ( b_thresh < 500 ) || ( c_thresh < 500 ));
             bool entry_to_small_st = (( !is_parallel ) && mat_based_thresh && ( overall_thresh < 7500 ));
             bool entry_to_small_mt = (( is_parallel ) && mat_based_thresh && ( overall_thresh < 5000 ));
@@ -1281,7 +1281,9 @@ void zgemm_blis_impl
         }
         case BLIS_ARCH_ZEN4:
         {
-            /* Booleans to calculate the entry to small path(ST and MT modes)*/
+            /* Booleans and thresholds to calculate the entry to small path(ST and MT modes)*/
+            double c_thresh = (double)m0 * (double)n0;
+            double overall_thresh = (double)m0 * (double)n0 * (double)k0;
             bool entry_to_small_st = (( !is_parallel ) && ((( a_thresh < 600 ) || ( b_thresh < 600 ) ||
                                       ( c_thresh < 600 )) && ( overall_thresh < 20000 )));
             bool entry_to_small_mt = (( is_parallel ) && ( overall_thresh < 7500 ));
