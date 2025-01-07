@@ -910,7 +910,7 @@ July 18, 2013
 - Optional (and very much untested) C99 built-in complex type/arithmetic support.
 
 Note that `bli_config.h` has changed since 0.0.8. Added configuration macros are:
-```
+```c
   #define BLIS_ENABLE_C99_COMPLEX
   #define BLIS_ENABLE_BLAS2BLIS_INT64
   #define PASTEF770(name) // ...
