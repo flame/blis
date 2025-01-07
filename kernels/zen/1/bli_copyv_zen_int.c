@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -205,7 +205,13 @@ void bli_dcopyv_zen_int
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2)
 	const dim_t      num_elem_per_reg = 4;
 	__m256d  xv[16];
+
 	dim_t i = 0;
+	dim_t n_mult_64 = n & (~0x3F);			// n & (~0x3F) = n & 0xFFFFFFC0 -> this mask will be used to find the multiples of 64 nearest to n.
+	dim_t n_mult_32 = n & (~0x1F);			// n & (~0x1F) = n & 0xFFFFFFE0 -> this mask will be used to find the multiples of 32 nearest to n.
+	dim_t n_mult_16 = n & (~0x0F);			// n & (~0x0F) = n & 0xFFFFFFF0 -> this mask will be used to find the multiples of 16 nearest to n.
+	dim_t n_mult_8  = n & (~0x07);			// n & (~0x07) = n & 0xFFFFFFF8 -> this mask will be used to find the multiples of  8 nearest to n.
+	dim_t n_mult_4  = n & (~0x03);			// n & (~0x03) = n & 0xFFFFFFFC -> this mask will be used to find the multiples of  4 nearest to n.
 
 	// If the vector dimension is zero return early.
 	if (bli_zero_dim1(n))
@@ -227,51 +233,64 @@ void bli_dcopyv_zen_int
 		memcpy(y, x, n << 3);
 #endif
 #if 1
-		// n & (~0x3F) = n & 0xFFFFFFC0 -> this masks the numbers less than 64,
-		// the copy operation will be done for the multiples of 64
-		for (i = 0; i < (n & (~0x3F)); i += 64)
+		// Copies blocks of 64 elements in each iteration
+		for (i = 0; i < n_mult_64; i += 64)
 		{
-			xv[0] = _mm256_loadu_pd(x + num_elem_per_reg * 0);
-			xv[1] = _mm256_loadu_pd(x + num_elem_per_reg * 1);
-			xv[2] = _mm256_loadu_pd(x + num_elem_per_reg * 2);
-			xv[3] = _mm256_loadu_pd(x + num_elem_per_reg * 3);
-			xv[4] = _mm256_loadu_pd(x + num_elem_per_reg * 4);
-			xv[5] = _mm256_loadu_pd(x + num_elem_per_reg * 5);
-			xv[6] = _mm256_loadu_pd(x + num_elem_per_reg * 6);
-			xv[7] = _mm256_loadu_pd(x + num_elem_per_reg * 7);
-			xv[8] = _mm256_loadu_pd(x + num_elem_per_reg * 8);
-			xv[9] = _mm256_loadu_pd(x + num_elem_per_reg * 9);
+			xv[0]  = _mm256_loadu_pd(x + num_elem_per_reg * 0);
+			xv[1]  = _mm256_loadu_pd(x + num_elem_per_reg * 1);
+			xv[2]  = _mm256_loadu_pd(x + num_elem_per_reg * 2);
+			xv[3]  = _mm256_loadu_pd(x + num_elem_per_reg * 3);
+
+			xv[4]  = _mm256_loadu_pd(x + num_elem_per_reg * 4);
+			xv[5]  = _mm256_loadu_pd(x + num_elem_per_reg * 5);
+			xv[6]  = _mm256_loadu_pd(x + num_elem_per_reg * 6);
+			xv[7]  = _mm256_loadu_pd(x + num_elem_per_reg * 7);
+
+			xv[8]  = _mm256_loadu_pd(x + num_elem_per_reg * 8);
+			xv[9]  = _mm256_loadu_pd(x + num_elem_per_reg * 9);
 			xv[10] = _mm256_loadu_pd(x + num_elem_per_reg * 10);
 			xv[11] = _mm256_loadu_pd(x + num_elem_per_reg * 11);
+
 			xv[12] = _mm256_loadu_pd(x + num_elem_per_reg * 12);
 			xv[13] = _mm256_loadu_pd(x + num_elem_per_reg * 13);
 			xv[14] = _mm256_loadu_pd(x + num_elem_per_reg * 14);
 			xv[15] = _mm256_loadu_pd(x + num_elem_per_reg * 15);
+
 			_mm256_storeu_pd(y + num_elem_per_reg * 0, xv[0]);
 			_mm256_storeu_pd(y + num_elem_per_reg * 1, xv[1]);
 			_mm256_storeu_pd(y + num_elem_per_reg * 2, xv[2]);
 			_mm256_storeu_pd(y + num_elem_per_reg * 3, xv[3]);
+
 			_mm256_storeu_pd(y + num_elem_per_reg * 4, xv[4]);
 			_mm256_storeu_pd(y + num_elem_per_reg * 5, xv[5]);
 			_mm256_storeu_pd(y + num_elem_per_reg * 6, xv[6]);
 			_mm256_storeu_pd(y + num_elem_per_reg * 7, xv[7]);
+
 			_mm256_storeu_pd(y + num_elem_per_reg * 8, xv[8]);
 			_mm256_storeu_pd(y + num_elem_per_reg * 9, xv[9]);
 			_mm256_storeu_pd(y + num_elem_per_reg * 10, xv[10]);
 			_mm256_storeu_pd(y + num_elem_per_reg * 11, xv[11]);
+
 			_mm256_storeu_pd(y + num_elem_per_reg * 12, xv[12]);
 			_mm256_storeu_pd(y + num_elem_per_reg * 13, xv[13]);
 			_mm256_storeu_pd(y + num_elem_per_reg * 14, xv[14]);
 			_mm256_storeu_pd(y + num_elem_per_reg * 15, xv[15]);
+
 			y += num_elem_per_reg * 16;
 			x += num_elem_per_reg * 16;
 		}
-		for (; i < (n & (~0x1F)); i += 32)
+
+		// Copies a block of 32 elements.
+		// If the remainder is less than the primary unroll factor (64),
+		// the "for" loop is redundant because the subsequent remainder
+		// cases handle the remaining elements in a single iteration.
+		if (i < n_mult_32)
 		{
 			xv[0] = _mm256_loadu_pd(x + num_elem_per_reg * 0);
 			xv[1] = _mm256_loadu_pd(x + num_elem_per_reg * 1);
 			xv[2] = _mm256_loadu_pd(x + num_elem_per_reg * 2);
 			xv[3] = _mm256_loadu_pd(x + num_elem_per_reg * 3);
+
 			xv[4] = _mm256_loadu_pd(x + num_elem_per_reg * 4);
 			xv[5] = _mm256_loadu_pd(x + num_elem_per_reg * 5);
 			xv[6] = _mm256_loadu_pd(x + num_elem_per_reg * 6);
@@ -281,6 +300,7 @@ void bli_dcopyv_zen_int
 			_mm256_storeu_pd(y + num_elem_per_reg * 1, xv[1]);
 			_mm256_storeu_pd(y + num_elem_per_reg * 2, xv[2]);
 			_mm256_storeu_pd(y + num_elem_per_reg * 3, xv[3]);
+
 			_mm256_storeu_pd(y + num_elem_per_reg * 4, xv[4]);
 			_mm256_storeu_pd(y + num_elem_per_reg * 5, xv[5]);
 			_mm256_storeu_pd(y + num_elem_per_reg * 6, xv[6]);
@@ -288,8 +308,11 @@ void bli_dcopyv_zen_int
 
 			y += num_elem_per_reg * 8;
 			x += num_elem_per_reg * 8;
+			i += num_elem_per_reg * 8;
 		}
-		for (; i < (n & (~0xF)); i += 16)
+
+		// Copies a block of 16 elements.
+		if (i < n_mult_16)
 		{
 			xv[0] = _mm256_loadu_pd(x + num_elem_per_reg * 0);
 			xv[1] = _mm256_loadu_pd(x + num_elem_per_reg * 1);
@@ -303,8 +326,11 @@ void bli_dcopyv_zen_int
 
 			y += num_elem_per_reg * 4;
 			x += num_elem_per_reg * 4;
+			i += num_elem_per_reg * 4;
 		}
-		for (; i < (n & (~0x07)); i += 8)
+
+		// Copies a block of 8 elements.
+		if (i < n_mult_8)
 		{
 			xv[0] = _mm256_loadu_pd(x + num_elem_per_reg * 0);
 			xv[1] = _mm256_loadu_pd(x + num_elem_per_reg * 1);
@@ -314,19 +340,27 @@ void bli_dcopyv_zen_int
 
 			y += num_elem_per_reg * 2;
 			x += num_elem_per_reg * 2;
+			i += num_elem_per_reg * 2;
 		}
-		for (; i < (n & (~0x03)); i += 4)
+
+		// Copies a block of 4 elements.
+		if (i < n_mult_4)
 		{
 			xv[0] = _mm256_loadu_pd(x + num_elem_per_reg * 0);
+
 			_mm256_storeu_pd(y + num_elem_per_reg * 0, xv[0]);
+
 			y += num_elem_per_reg;
 			x += num_elem_per_reg;
+			i += num_elem_per_reg;
 		}
+
+		// Handles the remaining elements.
 		for (; i < n; i++)
 		{
 			*y++ = *x++;
 		}
-#endif	
+#endif
 	}
 	else
 	{
