@@ -2280,7 +2280,7 @@ void bli_eqsc
      (
        const obj_t*  chi,
        const obj_t*  psi,
-       const bool*   is_eq
+             bool*   is_eq
      );
 ```
 Perform an element-wise comparison between scalars `chi` and `psi` and store the boolean result in the `bool` pointed to by `is_eq`.
@@ -2296,7 +2296,7 @@ void bli_eqv
      (
        const obj_t*  x,
        const obj_t*  y,
-       const bool*   is_eq
+             bool*   is_eq
      );
 ```
 Perform an element-wise comparison between vectors `x` and `y` and store the boolean result in the `bool` pointed to by `is_eq`.
@@ -2312,7 +2312,7 @@ void bli_eqm
      (
        const obj_t*  a,
        const obj_t*  b,
-       const bool*   is_eq
+             bool*   is_eq
      );
 ```
 Perform an element-wise comparison between matrices `A` and `B` and store the boolean result in the `bool` pointed to by `is_eq`.
