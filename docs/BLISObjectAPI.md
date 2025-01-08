@@ -85,12 +85,12 @@ The following tables list various types used throughout the BLIS object API.
 
 ### Floating-point types
 
-| BLIS fp type      | Type definition                        | Used to represent...              |
-|:------------------|:---------------------------------------|:----------------------------------|
-| `float`           | _N/A_                                  | single-precision real numbers.    |
-| `double`          | _N/A_                                  | double-precision real numbers.    |
-| `scomplex`        | `struct { float real; float imag; }`   | single-precision complex numbers. |
-| `dcomplex`        | `struct { double real; double imag; }` | double-precision complex numbers. |
+| BLIS fp type | Type definition                        | Used to represent...              |
+|:-------------|:---------------------------------------|:----------------------------------|
+| `float`      | _N/A_                                  | single-precision real numbers.    |
+| `double`     | _N/A_                                  | double-precision real numbers.    |
+| `scomplex`   | `struct { float real; float imag; }`   | single-precision complex numbers. |
+| `dcomplex`   | `struct { double real; double imag; }` | double-precision complex numbers. |
 
 ### Enumerated parameter types
 
@@ -113,7 +113,7 @@ The following tables list various types used throughout the BLIS object API.
 | `BLIS_SINGLE_PREC` | contains single-precision elements.        |
 | `BLIS_DOUBLE_PREC` | contains double-precision elements.        |
 
-| `trans_t`                | Semantic meaning: Matrix operand ...            |
+| `trans_t`                | Semantic meaning: Matrix operand...             |
 |:-------------------------|:------------------------------------------------|
 | `BLIS_NO_TRANSPOSE`      | will be used as given.                          |
 | `BLIS_TRANSPOSE`         | will be implicitly transposed.                  |
@@ -143,7 +143,7 @@ The following tables list various types used throughout the BLIS object API.
 | `BLIS_UPPER` | is stored in (and will be accessed only from) the upper triangle. |
 | `BLIS_DENSE` | is stored as a full matrix (ie: in both triangles).               |
 
-| `diag_t`            | Semantic meaning: Matrix operand ...                                       |
+| `diag_t`            | Semantic meaning: Matrix operand...                                        |
 |:--------------------|:---------------------------------------------------------------------------|
 | `BLIS_NONUNIT_DIAG` | has a non-unit diagonal that should be explicitly read from.               |
 | `BLIS_UNIT_DIAG`    | has a unit diagonal that should be implicitly assumed (and not read from). |
@@ -2419,6 +2419,24 @@ Possible microkernel types (ie: the return values for `bli_info_get_*_ukr_impl_s
  * `BLIS_VIRTUAL_UKERNEL` (`"virtual"`): This value is returned when the queried microkernel is driven by a the "virtual" microkernel provided by an induced method. This happens for any `method` value that is not `BLIS_NAT` (ie: native), but only applies to the complex domain.
  * `BLIS_OPTIMIZED_UKERNEL` (`"optimzd"`): This value is returned when the queried microkernel is provided by an implementation that is neither reference nor virtual, and thus we assume the kernel author would deem it to be "optimized". Such a microkernel may not be optimal in the literal sense of the word, but nonetheless is _intended_ to be optimized, at least relative to the reference microkernels.
  * `BLIS_NOTAPPLIC_UKERNEL` (`"notappl"`): This value is returned usually when performing a `gemmtrsm` or `trsm` microkernel type query for any `method` value that is not `BLIS_NAT` (ie: native). That is, induced methods cannot be (purely) used on `trsm`-based microkernels because these microkernels perform more a triangular inversion, which is not matrix multiplication.
+
+
+### Operation implementation type query
+
+The following routines allow the caller to obtain a string that identifies the implementation (`ind_t`) that is currently active (ie: implemented and enabled) for each level-3 operation. Possible implementation types are listed in the section above covering [microkernel implemenation query](BLISTypedAPI.md#microkernel-implementation-type-query).
+```c
+char* bli_info_get_gemm_impl_string( num_t dt );
+char* bli_info_get_gemmt_impl_string( num_t dt );
+char* bli_info_get_hemm_impl_string( num_t dt );
+char* bli_info_get_herk_impl_string( num_t dt );
+char* bli_info_get_her2k_impl_string( num_t dt );
+char* bli_info_get_symm_impl_string( num_t dt );
+char* bli_info_get_syrk_impl_string( num_t dt );
+char* bli_info_get_syr2k_impl_string( num_t dt );
+char* bli_info_get_trmm_impl_string( num_t dt );
+char* bli_info_get_trmm3_impl_string( num_t dt );
+char* bli_info_get_trsm_impl_string( num_t dt );
+```
 
 
 ## Clock functions
