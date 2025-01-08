@@ -1668,11 +1668,11 @@ Print an _m x n_ matrix `A` to file stream `file`, where `file` is a file pointe
 ```c
 void bli_?printv
      (
-       const char*   s1,
-             dim_t   m,
-       const ctype*  x, inc_t incx,
-       const char*   format,
-       const char*   s2
+       const char*  s1,
+             dim_t  m,
+       const void*  x, inc_t incx,
+       const char*  format,
+       const char*  s2
      );
 ```
 Print a vector `x` of length _m_ to standard output. This function call is equivalent to calling `bli_?fprintv()` with `stdout` as the file pointer.
@@ -1683,12 +1683,12 @@ Print a vector `x` of length _m_ to standard output. This function call is equiv
 ```c
 void bli_?printm
      (
-       const char*   s1,
-             dim_t   m,
-             dim_t   n,
-       const ctype*  a, inc_t rs_a, inc_t cs_a,
-       const char*   format,
-       const char*   s2
+       const char*  s1,
+             dim_t  m,
+             dim_t  n,
+       const void*  a, inc_t rs_a, inc_t cs_a,
+       const char*  format,
+       const char*  s2
      );
 ```
 Print an _m x n_ matrix `a` to standard output. This function call is equivalent to calling `bli_?fprintm()` with `stdout` as the file pointer.
@@ -1766,7 +1766,7 @@ Copy the real and imaginary values from the scalar object `chi` to `zeta_r` and 
 err_t bli_?getijv
      (
              dim_t    i,
-       const ctype*   x, inc_t incx,
+       const void*    x, inc_t incx,
              double*  ar,
              double*  ai
      );
@@ -1782,7 +1782,7 @@ err_t bli_?getijm
      (
              dim_t    i,
              dim_t    j,
-       const ctype*   b, inc_t rs_b, inc_t cs_b,
+       const void*    b, inc_t rs_b, inc_t cs_b,
              double*  ar,
              double*  ai
      );
@@ -1812,7 +1812,7 @@ err_t bli_?setijv
        double  ar,
        double  ai,
        dim_t   i,
-       ctype*  x, inc_t incx
+       void*   x, inc_t incx
      );
 ```
 Copy real and imaginary values `ar` and `ai` to the `i`th element of vector object `x`. For real domain invocations, only `ar` is copied and `ai` is ignored. (If `x` contains elements stored in single precision, the corresponding elements are typecast/demoted during the copy.)
@@ -1828,7 +1828,7 @@ err_t bli_?setijm
        double  ai,
        dim_t   i,
        dim_t   j,
-       ctype*  b, inc_t rs_b, inc_t cs_b
+       void*   b, inc_t rs_b, inc_t cs_b
      );
 ```
 Copy real and imaginary values `ar` and `ai` to the (`i`,`j`) element of object `b`. For real domain invocations, only `ar` is copied and `ai` is ignored. (If `b` contains elements stored in single precision, the corresponding elements are typecast/demoted during the copy.)
