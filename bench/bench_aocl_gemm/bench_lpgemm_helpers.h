@@ -228,11 +228,11 @@ static inline float get_bias_post_op_val_ ## BLAS_SFX \
      ( \
        void* post_op_bias_ptr, \
        dim_t j, \
-       AOCL_PARAMS_STORAGE_TYPES bais_stor_type \
+       AOCL_PARAMS_STORAGE_TYPES bias_stor_type \
      ) \
 { \
     float ret_val = 0.0; \
-    if(bais_stor_type == AOCL_GEMM_F32) \
+    if(bias_stor_type == AOCL_GEMM_F32) \
     { \
         return *( ( float* )post_op_bias_ptr + j ); \
     } \
@@ -245,10 +245,10 @@ static inline ACCUM_type get_bias_post_op_val_ ## BLAS_SFX \
      ( \
        void* post_op_bias_ptr, \
        dim_t j, \
-       AOCL_PARAMS_STORAGE_TYPES bais_stor_type \
+       AOCL_PARAMS_STORAGE_TYPES bias_stor_type \
      ) \
 { \
-    if(bais_stor_type == AOCL_GEMM_BF16) \
+    if(bias_stor_type == AOCL_GEMM_BF16) \
     { \
        float ret_val = 0.0; \
         bfloat16_to_float( *( ( bfloat16* )post_op_bias_ptr + j ), &ret_val ); \
@@ -425,9 +425,9 @@ static inline float get_matrix_mul_post_op_val_ ## BLAS_SFX \
      ) \
 { \
     return GEN_FUNC_NAME(get_matrix_add_post_op_val_,BLAS_SFX) \
-			( \
-			  val, j, scl_fctr, scl_fctr_len \
-			); \
+            ( \
+              val, j, scl_fctr, scl_fctr_len \
+            ); \
 } \
 
 #define GEN_GET_MATRIX_MUL_POST_OP_VAL(C_type,ACCUM_type,BLAS_SFX) \
@@ -440,9 +440,9 @@ static inline ACCUM_type get_matrix_mul_post_op_val_ ## BLAS_SFX \
      ) \
 { \
     return GEN_FUNC_NAME(get_matrix_add_post_op_val_,BLAS_SFX) \
-			( \
-			  val, j, scl_fctr, scl_fctr_len \
-			); \
+            ( \
+              val, j, scl_fctr, scl_fctr_len \
+            ); \
 } \
 
 /* Final output type value getter. */
@@ -912,21 +912,24 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             { \
                 if( ( strcmp( bias_stor_type, "BF16" ) == 0 ) ) \
                 { \
-                    ( post_ops->bias )-> bias_stor_type = AOCL_GEMM_BF16; \
+                    ( post_ops->bias )->stor_type = AOCL_GEMM_BF16; \
                     GEN_FUNC_NAME(fill_array_post_ops_,bfloat16)( ( post_ops->bias )->bias, n ); \
                 } \
                 else if( ( strcmp( bias_stor_type, "F32" ) == 0 ) ) \
                 { \
-                    ( post_ops->bias )-> bias_stor_type = AOCL_GEMM_F32; \
+                    ( post_ops->bias )->stor_type = AOCL_GEMM_F32; \
                     GEN_FUNC_NAME(fill_array_post_ops_,float)( ( post_ops->bias )->bias, n ); \
                 } \
                 else {} \
             } \
             else \
             { \
-                ( post_ops->bias )-> bias_stor_type = NULLTYPE; \
+                ( post_ops->bias )->stor_type = NULLTYPE; \
                 if( global_dscale_out == 'y') \
                 { \
+                    if ( strcmp(#BIAS_type, "bfloat16") == 0 ) { \
+                        ( post_ops->bias )->stor_type = AOCL_GEMM_BF16; \
+                    } \
                     GEN_FUNC_NAME(fill_array_post_ops_,BIAS_type)( ( post_ops->bias )->bias, n ); \
                 } \
                 else \
@@ -1144,6 +1147,9 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             temp_dscale_ptr[i] = ( ( DSCALE_type )2 ); \
         } \
         ( post_ops->matrix_add )->scale_factor_len = n_scale; \
+        /* Set buffer type same as c_store type for now.
+         * TODO: Update to cover more data types. */ \
+        ( post_ops->matrix_add )->stor_type = NULLTYPE; \
     } \
  \
     if ( is_matrix_mul == TRUE ) \
@@ -1194,6 +1200,9 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             temp_dscale_ptr[i] = ( ( DSCALE_type )2 ); \
         } \
         ( post_ops->matrix_mul )->scale_factor_len = n_scale; \
+        /* Set buffer type same as c_store type for now.
+         * TODO: Update to cover more data types. */ \
+        ( post_ops->matrix_mul )->stor_type = NULLTYPE; \
     } \
  \
     post_ops->seq_length = cur_op_index; \

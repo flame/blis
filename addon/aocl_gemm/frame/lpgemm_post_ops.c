@@ -142,7 +142,7 @@ BLIS_INLINE void lpgemm_set_node_params(
 	void *scale_factor,
 	dim_t scale_factor_len,
 	bool is_power_of_2,
-	AOCL_STORAGE_TYPE bias_stor_type)
+	AOCL_STORAGE_TYPE stor_type)
 {
 	post_op_node->op_code = op_code;
 	post_op_node->op_args1 = op1;
@@ -151,8 +151,35 @@ BLIS_INLINE void lpgemm_set_node_params(
 	post_op_node->scale_factor = scale_factor;
 	post_op_node->scale_factor_len = scale_factor_len;
 	post_op_node->is_power_of_2 = is_power_of_2;
-	post_op_node->bias_stor_type = bias_stor_type;
+	post_op_node->stor_type = stor_type;
 	post_op_node->next = NULL;
+}
+
+static inline AOCL_STORAGE_TYPE get_stor_type(AOCL_PARAMS_STORAGE_TYPES pstor_type)
+{
+	AOCL_STORAGE_TYPE stor_type = NONE;
+	switch ( pstor_type )
+	{
+		case AOCL_GEMM_F32:
+				stor_type = F32;
+				break;
+		case AOCL_GEMM_BF16:
+				stor_type = BF16;
+				break;
+		case AOCL_GEMM_INT8:
+				stor_type = S8;
+				break;
+		case AOCL_GEMM_UINT8:
+				stor_type = U8;
+				break;
+		case AOCL_GEMM_INT32:
+				stor_type = S32;
+				break;
+		default:
+				break;
+	}
+
+	return stor_type;
 }
 
 err_t lpgemm_translate_to_post_ops_list
@@ -289,23 +316,13 @@ err_t lpgemm_translate_to_post_ops_list
 							bli_print_msg(" Post_op.bias is NULL. Exiting..", __FILE__, __LINE__ );
 							return BLIS_NULL_POINTER;
 						}
-						AOCL_STORAGE_TYPE tmp_bias_stor_type = NONE;
-						switch ( ( post_op_unparsed->bias + b_i )->bias_stor_type )
-						{
-							case AOCL_GEMM_F32:
-									tmp_bias_stor_type = F32;
-									break;
-							case AOCL_GEMM_BF16:
-									tmp_bias_stor_type = BF16;
-									break;
-							default:
-									break;
-						}
+						AOCL_STORAGE_TYPE tmp_stor_type =
+							get_stor_type( ( post_op_unparsed->bias + b_i )->stor_type );
 						lpgemm_set_node_params
 						(
 						  ( post_op_list + i ), POST_OPS_BIAS,
 						  ( post_op_unparsed->bias + b_i )->bias,
-						  meta_arg, NULL, NULL, 0, FALSE, tmp_bias_stor_type
+						  meta_arg, NULL, NULL, 0, FALSE, tmp_stor_type
 						);
 
 						b_i += 1;
@@ -364,6 +381,8 @@ err_t lpgemm_translate_to_post_ops_list
 											__FILE__, __LINE__ );
 							return BLIS_NULL_POINTER;
 						}
+						AOCL_STORAGE_TYPE tmp_stor_type =
+							get_stor_type( ( post_op_unparsed->matrix_add + m_i )->stor_type );
 
 						lpgemm_set_node_params
 						(
@@ -372,7 +391,7 @@ err_t lpgemm_translate_to_post_ops_list
 						  meta_arg, &( ( post_op_unparsed->matrix_add + m_i )->ldm ),
 						  ( post_op_unparsed->matrix_add + m_i )->scale_factor,
 						  ( post_op_unparsed->matrix_add + m_i )->scale_factor_len,
-						  FALSE, NONE
+						  FALSE, tmp_stor_type
 						);
 
 						m_i += 1;
@@ -387,6 +406,8 @@ err_t lpgemm_translate_to_post_ops_list
 											__FILE__, __LINE__ );
 							return BLIS_NULL_POINTER;
 						}
+						AOCL_STORAGE_TYPE tmp_stor_type =
+							get_stor_type( ( post_op_unparsed->matrix_mul + mul_i )->stor_type );
 
 						lpgemm_set_node_params
 						(
@@ -395,7 +416,7 @@ err_t lpgemm_translate_to_post_ops_list
 						  meta_arg, &( ( post_op_unparsed->matrix_mul + mul_i )->ldm ),
 						  ( post_op_unparsed->matrix_mul + mul_i )->scale_factor,
 						  ( post_op_unparsed->matrix_mul + mul_i )->scale_factor_len,
-						  FALSE, NONE
+						  FALSE, tmp_stor_type
 						);
 
 						mul_i += 1;

@@ -577,7 +577,7 @@ POST_OPS_BIAS_5xLT16:
 				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
-				if ( post_ops_attr.bias_stor_type == BF16 )
+				if ( post_ops_list_temp->stor_type == BF16 )
 				{
 					BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
 				}
@@ -612,7 +612,7 @@ POST_OPS_BIAS_5xLT16:
 				__m512 selector3;
 				__m512 selector4;
 				__m512 selector5;
-				if ( post_ops_attr.bias_stor_type == BF16 )
+				if ( post_ops_list_temp->stor_type == BF16 )
 				{
 					__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 					BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -933,6 +933,10 @@ POST_OPS_MATRIX_ADD_5xLT16:
 		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 		__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -986,7 +990,7 @@ POST_OPS_MATRIX_ADD_5xLT16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -1074,6 +1078,10 @@ POST_OPS_MATRIX_MUL_5xLT16:
 		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 		__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -1127,7 +1135,7 @@ POST_OPS_MATRIX_MUL_5xLT16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -1819,7 +1827,7 @@ POST_OPS_BIAS_4xLT16:
 				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
-				if ( post_ops_attr.bias_stor_type == BF16 )
+				if ( post_ops_list_temp->stor_type == BF16 )
 				{
 					BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
 				}
@@ -1850,7 +1858,7 @@ POST_OPS_BIAS_4xLT16:
 			{
 				__m512 selector3;
 				__m512 selector4;
-				if ( post_ops_attr.bias_stor_type == BF16 )
+				if ( post_ops_list_temp->stor_type == BF16 )
 				{
 					__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 					BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -2128,6 +2136,10 @@ POST_OPS_MATRIX_ADD_4xLT16:
 		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 		__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -2175,7 +2187,7 @@ POST_OPS_MATRIX_ADD_4xLT16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -2251,6 +2263,10 @@ POST_OPS_MATRIX_MUL_4xLT16:
 		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 		__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -2298,7 +2314,7 @@ POST_OPS_MATRIX_MUL_4xLT16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -2919,7 +2935,7 @@ POST_OPS_BIAS_3xLT16:
 				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
-				if ( post_ops_attr.bias_stor_type == BF16 )
+				if ( post_ops_list_temp->stor_type == BF16 )
 				{
 					BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
 				}
@@ -2946,7 +2962,7 @@ POST_OPS_BIAS_3xLT16:
 			else
 			{
 				__m512 selector3;
-				if ( post_ops_attr.bias_stor_type == BF16 )
+				if ( post_ops_list_temp->stor_type == BF16 )
 				{
 					__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 					BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -3183,6 +3199,10 @@ POST_OPS_MATRIX_ADD_3xLT16:
 		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 		__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -3224,7 +3244,7 @@ POST_OPS_MATRIX_ADD_3xLT16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -3288,6 +3308,10 @@ POST_OPS_MATRIX_MUL_3xLT16:
 		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 		__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -3329,7 +3353,7 @@ POST_OPS_MATRIX_MUL_3xLT16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -3881,7 +3905,7 @@ POST_OPS_BIAS_2xLT16:
 				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
-				if ( post_ops_attr.bias_stor_type == BF16 )
+				if ( post_ops_list_temp->stor_type == BF16 )
 				{
 					BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
 				}
@@ -3904,7 +3928,7 @@ POST_OPS_BIAS_2xLT16:
 			}
 			else
 			{
-				if ( post_ops_attr.bias_stor_type == BF16 )
+				if ( post_ops_list_temp->stor_type == BF16 )
 				{
 					__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 					BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -4098,6 +4122,10 @@ POST_OPS_MATRIX_ADD_2xLT16:
 		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 
@@ -4133,7 +4161,7 @@ POST_OPS_MATRIX_ADD_2xLT16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -4185,6 +4213,10 @@ POST_OPS_MATRIX_MUL_2xLT16:
 		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 
@@ -4220,7 +4252,7 @@ POST_OPS_MATRIX_MUL_2xLT16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -4701,7 +4733,7 @@ POST_OPS_BIAS_1xLT16:
 				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
-				if ( post_ops_attr.bias_stor_type == BF16 )
+				if ( post_ops_list_temp->stor_type == BF16 )
 				{
 					BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
 				}
@@ -4721,7 +4753,7 @@ POST_OPS_BIAS_1xLT16:
 			}
 			else
 			{
-				if ( post_ops_attr.bias_stor_type == BF16 )
+				if ( post_ops_list_temp->stor_type == BF16 )
 				{
 					__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 					BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -4874,6 +4906,10 @@ POST_OPS_MATRIX_ADD_1xLT16:
 		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 
 		// Even though different registers are used for scalar in column and
@@ -4903,7 +4939,7 @@ POST_OPS_MATRIX_ADD_1xLT16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -4943,6 +4979,10 @@ POST_OPS_MATRIX_MUL_1xLT16:
 		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 
 		// Even though different registers are used for scalar in column and
@@ -4972,7 +5012,7 @@ POST_OPS_MATRIX_MUL_1xLT16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -5587,7 +5627,7 @@ POST_OPS_BIAS_5x16:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -5619,7 +5659,7 @@ POST_OPS_BIAS_5x16:
 			__m512 selector3;
 			__m512 selector4;
 			__m512 selector5;
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -5938,6 +5978,10 @@ POST_OPS_MATRIX_ADD_5x16:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 		__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -5990,7 +6034,7 @@ POST_OPS_MATRIX_ADD_5x16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -6077,6 +6121,10 @@ POST_OPS_MATRIX_MUL_5x16:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 		__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -6129,7 +6177,7 @@ POST_OPS_MATRIX_MUL_5x16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -6810,7 +6858,7 @@ POST_OPS_BIAS_4x16:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -6838,7 +6886,7 @@ POST_OPS_BIAS_4x16:
 		{
 			__m512 selector3;
 			__m512 selector4;
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -7115,6 +7163,10 @@ POST_OPS_MATRIX_ADD_4x16:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 		__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -7161,7 +7213,7 @@ POST_OPS_MATRIX_ADD_4x16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -7236,6 +7288,10 @@ POST_OPS_MATRIX_MUL_4x16:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 		__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -7282,7 +7338,7 @@ POST_OPS_MATRIX_MUL_4x16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -7890,7 +7946,7 @@ POST_OPS_BIAS_3x16:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -7914,7 +7970,7 @@ POST_OPS_BIAS_3x16:
 		else
 		{
 			__m512 selector3;
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -8149,6 +8205,10 @@ POST_OPS_MATRIX_ADD_3x16:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 		__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -8189,7 +8249,7 @@ POST_OPS_MATRIX_ADD_3x16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -8252,6 +8312,10 @@ POST_OPS_MATRIX_MUL_3x16:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 		__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -8292,7 +8356,7 @@ POST_OPS_MATRIX_MUL_3x16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -8830,7 +8894,7 @@ POST_OPS_BIAS_2x16:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -8850,7 +8914,7 @@ POST_OPS_BIAS_2x16:
 		}
 		else
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -9043,6 +9107,10 @@ POST_OPS_MATRIX_ADD_2x16:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 
@@ -9077,7 +9145,7 @@ POST_OPS_MATRIX_ADD_2x16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -9128,6 +9196,10 @@ POST_OPS_MATRIX_MUL_2x16:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 
@@ -9162,7 +9234,7 @@ POST_OPS_MATRIX_MUL_2x16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -9630,7 +9702,7 @@ POST_OPS_BIAS_1x16:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -9647,7 +9719,7 @@ POST_OPS_BIAS_1x16:
 		}
 		else
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -9798,6 +9870,10 @@ POST_OPS_MATRIX_ADD_1x16:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 
 		// Even though different registers are used for scalar in column and
@@ -9826,7 +9902,7 @@ POST_OPS_MATRIX_ADD_1x16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -9865,6 +9941,10 @@ POST_OPS_MATRIX_MUL_1x16:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 
 		// Even though different registers are used for scalar in column and
@@ -9893,7 +9973,7 @@ POST_OPS_MATRIX_MUL_1x16:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -10589,7 +10669,7 @@ POST_OPS_BIAS_5x32:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -10640,7 +10720,7 @@ POST_OPS_BIAS_5x32:
 			__m512 selector3;
 			__m512 selector4;
 			__m512 selector5;
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -11083,6 +11163,10 @@ POST_OPS_MATRIX_ADD_5x32:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 		__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -11138,7 +11222,7 @@ POST_OPS_MATRIX_ADD_5x32:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -11225,6 +11309,10 @@ POST_OPS_MATRIX_MUL_5x32:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 		__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -11280,7 +11368,7 @@ POST_OPS_MATRIX_MUL_5x32:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -12107,7 +12195,7 @@ POST_OPS_BIAS_4x32:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -12151,7 +12239,7 @@ POST_OPS_BIAS_4x32:
 		{
 			__m512 selector3;
 			__m512 selector4;
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -12529,6 +12617,10 @@ POST_OPS_MATRIX_ADD_4x32:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 		__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -12578,7 +12670,7 @@ POST_OPS_MATRIX_ADD_4x32:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -12653,6 +12745,10 @@ POST_OPS_MATRIX_MUL_4x32:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 		__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -12702,7 +12798,7 @@ POST_OPS_MATRIX_MUL_4x32:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -13433,7 +13529,7 @@ POST_OPS_BIAS_3x32:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -13470,7 +13566,7 @@ POST_OPS_BIAS_3x32:
 		else
 		{
 			__m512 selector3;
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -13782,6 +13878,10 @@ POST_OPS_MATRIX_ADD_3x32:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 		__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -13825,7 +13925,7 @@ POST_OPS_MATRIX_ADD_3x32:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -13888,6 +13988,10 @@ POST_OPS_MATRIX_MUL_3x32:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 		__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -13931,7 +14035,7 @@ POST_OPS_MATRIX_MUL_3x32:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -14568,7 +14672,7 @@ POST_OPS_BIAS_2x32:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -14598,7 +14702,7 @@ POST_OPS_BIAS_2x32:
 		}
 		else
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -14843,6 +14947,10 @@ POST_OPS_MATRIX_ADD_2x32:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 
@@ -14880,7 +14988,7 @@ POST_OPS_MATRIX_ADD_2x32:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -14931,6 +15039,10 @@ POST_OPS_MATRIX_MUL_2x32:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 
@@ -14968,7 +15080,7 @@ POST_OPS_MATRIX_MUL_2x32:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -15508,7 +15620,7 @@ POST_OPS_BIAS_1x32:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -15532,7 +15644,7 @@ POST_OPS_BIAS_1x32:
 		}
 		else
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -15718,6 +15830,10 @@ POST_OPS_MATRIX_ADD_1x32:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 
@@ -15752,7 +15868,7 @@ POST_OPS_MATRIX_ADD_1x32:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -15791,6 +15907,10 @@ POST_OPS_MATRIX_MUL_1x32:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 scl_fctr1 = _mm512_setzero_ps();
 		__m512 scl_fctr2 = _mm512_setzero_ps();
 
@@ -15825,7 +15945,7 @@ POST_OPS_MATRIX_MUL_1x32:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -16665,7 +16785,7 @@ POST_OPS_BIAS_5x48:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -16734,7 +16854,7 @@ POST_OPS_BIAS_5x48:
 		{
 			__m512 selector4;
 			__m512 selector5;
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -17305,6 +17425,10 @@ POST_OPS_MATRIX_ADD_5x48:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 selector3 = _mm512_setzero_ps();
 
 		__m512 scl_fctr1 = _mm512_setzero_ps();
@@ -17365,7 +17489,7 @@ POST_OPS_MATRIX_ADD_5x48:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -17472,6 +17596,10 @@ POST_OPS_MATRIX_MUL_5x48:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 selector3 = _mm512_setzero_ps();
 
 		__m512 scl_fctr1 = _mm512_setzero_ps();
@@ -17532,7 +17660,7 @@ POST_OPS_MATRIX_MUL_5x48:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -18569,7 +18697,7 @@ POST_OPS_BIAS_4x48:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -18628,7 +18756,7 @@ POST_OPS_BIAS_4x48:
 		else
 		{
 			__m512 selector4;
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -19108,6 +19236,10 @@ POST_OPS_MATRIX_ADD_4x48:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 selector3 = _mm512_setzero_ps();
 
 		__m512 scl_fctr1 = _mm512_setzero_ps();
@@ -19162,7 +19294,7 @@ POST_OPS_MATRIX_ADD_4x48:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -19253,6 +19385,10 @@ POST_OPS_MATRIX_MUL_4x48:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 selector3 = _mm512_setzero_ps();
 
 		__m512 scl_fctr1 = _mm512_setzero_ps();
@@ -19307,7 +19443,7 @@ POST_OPS_MATRIX_MUL_4x48:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -20219,7 +20355,7 @@ POST_OPS_BIAS_3x48:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -20268,7 +20404,7 @@ POST_OPS_BIAS_3x48:
 		}
 		else
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -20659,6 +20795,10 @@ POST_OPS_MATRIX_ADD_3x48:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 selector3 = _mm512_setzero_ps();
 
 		__m512 scl_fctr1 = _mm512_setzero_ps();
@@ -20707,7 +20847,7 @@ POST_OPS_MATRIX_ADD_3x48:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -20782,6 +20922,10 @@ POST_OPS_MATRIX_MUL_3x48:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 selector3 = _mm512_setzero_ps();
 
 		__m512 scl_fctr1 = _mm512_setzero_ps();
@@ -20830,7 +20974,7 @@ POST_OPS_MATRIX_MUL_3x48:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -21615,7 +21759,7 @@ POST_OPS_BIAS_2x48:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -21655,7 +21799,7 @@ POST_OPS_BIAS_2x48:
 		}
 		else
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -21962,6 +22106,10 @@ POST_OPS_MATRIX_ADD_2x48:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 selector3 = _mm512_setzero_ps();
 
 		__m512 scl_fctr1 = _mm512_setzero_ps();
@@ -22007,7 +22155,7 @@ POST_OPS_MATRIX_ADD_2x48:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -22066,6 +22214,10 @@ POST_OPS_MATRIX_MUL_2x48:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 selector3 = _mm512_setzero_ps();
 
 		__m512 scl_fctr1 = _mm512_setzero_ps();
@@ -22111,7 +22263,7 @@ POST_OPS_MATRIX_MUL_2x48:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -22769,7 +22921,7 @@ POST_OPS_BIAS_1x48:
 		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_LOAD(selector1, bias_mask, 0);
@@ -22800,7 +22952,7 @@ POST_OPS_BIAS_1x48:
 		}
 		else
 		{
-			if ( post_ops_attr.bias_stor_type == BF16 )
+			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -23025,6 +23177,10 @@ POST_OPS_MATRIX_ADD_1x48:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 selector3 = _mm512_setzero_ps();
 
 		__m512 scl_fctr1 = _mm512_setzero_ps();
@@ -23067,7 +23223,7 @@ POST_OPS_MATRIX_ADD_1x48:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -23110,6 +23266,10 @@ POST_OPS_MATRIX_MUL_1x48:
 	{
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+				( ( post_ops_list_temp->stor_type == NONE ) &&
+				  ( post_ops_attr.c_stor_type == BF16 ) );
+
 		__m512 selector3 = _mm512_setzero_ps();
 
 		__m512 scl_fctr1 = _mm512_setzero_ps();
@@ -23152,7 +23312,7 @@ POST_OPS_MATRIX_MUL_1x48:
 
 		// It is expected the post-op matrix arg has the same storage
 		// order as the output C matrix.
-		if ( post_ops_attr.c_stor_type == BF16 )
+		if ( is_bf16 == TRUE )
 		{
 			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 

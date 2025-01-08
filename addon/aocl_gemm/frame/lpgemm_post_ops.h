@@ -66,7 +66,7 @@ typedef struct lpgemm_post_op_t
 	void* scale_factor;
 	dim_t scale_factor_len;
 	bool is_power_of_2;
-	uint64_t bias_stor_type;
+	uint64_t stor_type;
 	struct lpgemm_post_op_t* next;
 } lpgemm_post_op;
 
@@ -94,7 +94,6 @@ typedef struct lpgemm_post_op_attr_t
 	uint64_t is_first_k;
 	uint64_t is_last_k;
 	uint64_t c_stor_type;
-	uint64_t bias_stor_type;
 	uint64_t b_sum_offset;
 	int32_t* b_col_sum_vec;
 	int16_t* b_col_sum_vec_s16;

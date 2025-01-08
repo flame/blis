@@ -872,7 +872,7 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                         if ( post_op[bs_i]->seq_vector[op_id] == BIAS ) \
                         { \
                             temp_accum += GEN_FUNC_NAME(get_bias_post_op_val_,BLAS_SFX) \
-                                ( ( post_op[bs_i]->bias )->bias, j, ( post_op[bs_i]->bias )->bias_stor_type ); \
+                                ( ( post_op[bs_i]->bias )->bias, j, ( post_op[bs_i]->bias )->stor_type ); \
                         } \
                         else if ( post_op[bs_i]->seq_vector[op_id] == ELTWISE ) \
                         { \

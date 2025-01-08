@@ -329,7 +329,7 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 			if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 				( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
-				if ( post_ops_attr.c_stor_type == BF16 )
+				if ( post_ops_list_temp->stor_type == BF16 )
 				{
 					BF16_F32_BIAS_LOAD(selector1, k1, 0);
 					BF16_F32_BIAS_LOAD(selector2, k2, 1);
@@ -363,7 +363,7 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 			}
 			else
 			{
-				if ( post_ops_attr.c_stor_type == BF16 )
+				if ( post_ops_list_temp->stor_type == BF16 )
 				{
 					__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 					BF16_F32_BIAS_BCAST(selector1, bias_mask, 0);
@@ -586,6 +586,10 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 
 			dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+			bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+					( ( post_ops_list_temp->stor_type == NONE ) &&
+					  ( post_ops_attr.c_stor_type == BF16 ) );
+
 			__m512 scl_fctr1 = _mm512_setzero_ps();
 			__m512 scl_fctr2 = _mm512_setzero_ps();
 			__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -629,7 +633,7 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 				}
 			}
 
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( is_bf16 == TRUE )
 			{
 				bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -706,6 +710,10 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 
 			dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+			bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+					( ( post_ops_list_temp->stor_type == NONE ) &&
+					  ( post_ops_attr.c_stor_type == BF16 ) );
+
 			__m512 scl_fctr1 = _mm512_setzero_ps();
 			__m512 scl_fctr2 = _mm512_setzero_ps();
 			__m512 scl_fctr3 = _mm512_setzero_ps();
@@ -749,7 +757,7 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 				}
 			}
 
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( is_bf16 == TRUE )
 			{
 				bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 

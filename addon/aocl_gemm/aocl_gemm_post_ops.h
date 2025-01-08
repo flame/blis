@@ -67,7 +67,8 @@ typedef enum
 	AOCL_GEMM_INT8 = 2,
 	AOCL_GEMM_UINT8 = 3,
 	AOCL_GEMM_INT4 = 4,
-	NULLTYPE = 5,
+	AOCL_GEMM_INT32 = 5,
+	NULLTYPE = 6,
 } AOCL_PARAMS_STORAGE_TYPES;
 
 typedef struct
@@ -98,7 +99,7 @@ typedef struct
 typedef struct
 {
 	void* bias;
-	AOCL_PARAMS_STORAGE_TYPES bias_stor_type;
+	AOCL_PARAMS_STORAGE_TYPES stor_type;
 } aocl_post_op_bias;
 
 typedef struct
@@ -107,7 +108,7 @@ typedef struct
 	void* scale_factor;
 	dim_t scale_factor_len;
 	dim_t ldm;
-	AOCL_PARAMS_STORAGE_TYPES bias_stor_type;
+	AOCL_PARAMS_STORAGE_TYPES stor_type;
 } aocl_post_op_matrix_add;
 
 typedef struct
@@ -116,7 +117,7 @@ typedef struct
 	void* scale_factor;
 	dim_t scale_factor_len;
 	dim_t ldm;
-	AOCL_PARAMS_STORAGE_TYPES bias_stor_type;
+	AOCL_PARAMS_STORAGE_TYPES stor_type;
 } aocl_post_op_matrix_mul;
 
 typedef struct

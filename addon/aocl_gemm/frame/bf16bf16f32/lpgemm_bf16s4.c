@@ -117,9 +117,6 @@ LPGEMM_5LOOP1(bfloat16, int8_t, float, bf16s4f32of32)
     lpgemm_pre_op_attr pre_ops_attr;
 
     post_ops_attr.c_stor_type = c_downscale;
-    post_ops_attr.bias_stor_type = (
-		post_op_list->bias_stor_type != NONE ) ?
-		post_op_list->bias_stor_type : c_downscale;
     if (c_downscale < F32)
     {
         post_ops_attr.buf_downscale = c;

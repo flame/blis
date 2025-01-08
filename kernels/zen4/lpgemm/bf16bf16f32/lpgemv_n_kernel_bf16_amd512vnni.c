@@ -551,7 +551,7 @@ LPGEMV_N_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 			if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			   ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
-				if ( post_ops_attr.c_stor_type == BF16 )
+				if ( post_ops_list_temp->stor_type == BF16 )
 				{
 					selector1 =
 						(__m512)( _mm512_sllv_epi32
@@ -576,7 +576,7 @@ LPGEMV_N_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 			}
 			else
 			{
-				if ( post_ops_attr.c_stor_type == BF16 )
+				if ( post_ops_list_temp->stor_type == BF16 )
 				{
 					selector1 =
 						(__m512)( _mm512_sllv_epi32
@@ -718,6 +718,10 @@ LPGEMV_N_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 		{
 			dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+			bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+					( ( post_ops_list_temp->stor_type == NONE ) &&
+					  ( post_ops_attr.c_stor_type == BF16 ) );
+
 			__m512 scl_fctr1 = _mm512_setzero_ps();
 
 			// Even though different registers are used for scalar in column and
@@ -740,7 +744,7 @@ LPGEMV_N_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 				}
 			}
 
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( is_bf16 == TRUE )
 			{
 				bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
@@ -806,6 +810,10 @@ LPGEMV_N_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 		{
 			dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+			bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+					( ( post_ops_list_temp->stor_type == NONE ) &&
+					  ( post_ops_attr.c_stor_type == BF16 ) );
+
 			__m512 scl_fctr1 = _mm512_setzero_ps();
 
 			// Even though different registers are used for scalar in column and
@@ -828,7 +836,7 @@ LPGEMV_N_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 				}
 			}
 
-			if ( post_ops_attr.c_stor_type == BF16 )
+			if ( is_bf16 == TRUE )
 			{
 				bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 

@@ -286,7 +286,7 @@ void eltwise_ops_accuracy_check_driver_ ## LP_SFX \
                     if ( post_op->seq_vector[op_id] == BIAS ) \
                     { \
                         temp_accum += GEN_FUNC_NAME(get_bias_post_op_val_,LP_SFX) \
-                            ( ( post_op->bias )->bias, j, ( post_op->bias )->bias_stor_type ); \
+                            ( ( post_op->bias )->bias, j, ( post_op->bias )->stor_type ); \
                     } \
                     else if ( post_op->seq_vector[op_id] == ELTWISE ) \
                     { \
@@ -743,17 +743,17 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         { \
             if( ( strcmp( bias_stor_type, "BF16" ) == 0 ) ) \
             { \
-                ( post_ops->bias )-> bias_stor_type = AOCL_GEMM_BF16; \
+                ( post_ops->bias )->stor_type = AOCL_GEMM_BF16; \
             } \
             else if( ( strcmp( bias_stor_type, "F32" ) == 0 ) ) \
             { \
-                ( post_ops->bias )-> bias_stor_type = AOCL_GEMM_F32; \
+                ( post_ops->bias )->stor_type = AOCL_GEMM_F32; \
             } \
             else {} \
         } \
         else \
         { \
-            ( post_ops->bias )-> bias_stor_type = NULLTYPE ; \
+            ( post_ops->bias )->stor_type = NULLTYPE ; \
         } \
         if ( global_dscale_out == 'y' ) \
         { \
