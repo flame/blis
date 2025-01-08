@@ -160,6 +160,9 @@ BLIS defines a handful of scalar objects that conveniently represent various con
 |  `BLIS_ZERO`               | ` 0.0`           |
 |  `BLIS_ONE`                | ` 1.0`           |
 |  `BLIS_TWO`                | ` 2.0`           |
+|  `BLIS_MINUS_ONE_I`        | ` 0.0-1.0*i`     |
+|  `BLIS_ONE_I`              | ` 0.0+1.0*i`     |
+|  `BLIS_NAN`                | ` NaN`           |
 
 These objects are polymorphic; each one contains a `float`, `double`, `scomplex`, `dcomplex`, and `gint_t` representation of the constant value in question. They can be used in place of any `obj_t*` operand in any object API function provided that the following criteria are met:
  * The object parameter requires unit dimensions (1x1). (In other words, the function expects a scalar for the operand in question.)
