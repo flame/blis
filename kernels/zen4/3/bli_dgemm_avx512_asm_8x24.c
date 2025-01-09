@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1106,7 +1106,8 @@ void bli_dgemm_avx512_asm_8x24(
         \
         END_ASM                                                      \
         (                                                            \
-            ::                                                       \
+          : /* output operands */                                    \
+          : /* input operands */                                     \
             [n]       "m" (n),                                       \
             [m]       "m" (m),                                       \
             [k]       "m" (k),                                       \
@@ -1115,7 +1116,7 @@ void bli_dgemm_avx512_asm_8x24(
             [b]       "m" (b),                                       \
             [beta]    "m" (beta),                                    \
             [ldc]     "m" (ldc)                                      \
-            :                                                        \
+          : /* register clobber list */                              \
             "rax", "rbx", "rcx", "rdi", "rdx", "rsi", "r8", "r9",    \
             "r10", "r11", "r12", "r13", "r14", "r15", "xmm1", "xmm2",\
             "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",  \
@@ -1123,7 +1124,7 @@ void bli_dgemm_avx512_asm_8x24(
             "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19",    \
             "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25",    \
             "zmm26", "zmm27", "zmm28", "zmm29", "zmm30", "zmm31", "memory"\
-        ) \
+        )
 
 
 /*

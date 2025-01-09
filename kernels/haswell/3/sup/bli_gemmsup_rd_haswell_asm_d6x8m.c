@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1643,7 +1643,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_U
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "ymm0", "ymm2", "ymm3", "ymm4", "ymm5",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5",
 	  "ymm6", "ymm7", "ymm8", "ymm9", "ymm10", "ymm11",
 	  "ymm12", "ymm13", "ymm14", "ymm15",
 	  "memory"
@@ -1938,7 +1938,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_U
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "ymm0", "ymm2", "ymm3", "ymm4", "ymm5",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5",
 	  "ymm6", "ymm7", "ymm8", "ymm9", "ymm10", "ymm11",
 	  "ymm12", "ymm13", "ymm14", "ymm15",
 	  "memory"
@@ -4212,7 +4212,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "ymm0", "ymm2", "ymm3", "ymm4", "ymm5",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5",
 	  "ymm6", "ymm7", "ymm8", "ymm9", "ymm10",
 	  "ymm11", "ymm12", "ymm13", "ymm14", "ymm15",
 	  "memory"
@@ -4668,7 +4668,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_U
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "ymm0", "ymm2", "ymm3", "ymm4", "ymm5",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5",
 	  "ymm6", "ymm7", "ymm8", "ymm9", "ymm10",
 	  "ymm11", "ymm12", "ymm13", "ymm14", "ymm15",
 	  "memory"
@@ -5551,7 +5551,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "ymm0", "ymm2", "ymm3", "ymm4", "ymm5",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5",
 	  "ymm6", "ymm7", "ymm8", "ymm9", "ymm10",
 	  "ymm11", "ymm12", "ymm13", "ymm14", "ymm15",
 	  "memory"
@@ -6242,7 +6242,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_U
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "ymm0", "ymm2", "ymm3", "ymm4", "ymm5",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5",
 	  "ymm6", "ymm7", "ymm8", "ymm9", "ymm10",
 	  "ymm11", "ymm12", "ymm13", "ymm14", "ymm15",
 	  "memory"
@@ -7930,7 +7930,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "ymm0", "ymm2", "ymm3", "ymm4", "ymm5",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5",
 	  "ymm6", "ymm7", "ymm8", "ymm9", "ymm10",
 	  "ymm11", "ymm12", "ymm13", "ymm14", "ymm15",
 	  "memory"
@@ -8470,7 +8470,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_L
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "ymm0", "ymm2", "ymm3", "ymm4", "ymm5",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5",
 	  "ymm6", "ymm7", "ymm8", "ymm9", "ymm10",
 	  "ymm11", "ymm12", "ymm13", "ymm14", "ymm15",
 	  "memory"
@@ -9339,7 +9339,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "ymm0", "ymm2", "ymm3", "ymm4", "ymm5",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5",
 	  "ymm6", "ymm7", "ymm8", "ymm9", "ymm10",
 	  "ymm11", "ymm12", "ymm13", "ymm14", "ymm15",
 	  "memory"

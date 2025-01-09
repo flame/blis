@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -341,22 +341,24 @@ void bli_scopyv_zen4_asm_avx512
     jmp(.SCALARLOOP)
 
     label(.END)
-    end_asm(
-        :
-        :   [n0]     "m"     (n0),
-            [x0]     "m"     (x0),
-            [incx0]  "m"     (incx0),
-            [y0]     "m"     (y0),
-            [incy0]  "m"     (incy0)
-
-        :   "zmm0",  "zmm1",  "zmm2",  "zmm3",
-            "zmm4",  "zmm5",  "zmm6",  "zmm7",
-            "zmm8",  "zmm9",  "zmm10", "zmm11",
-            "zmm12", "zmm13", "zmm14", "zmm15",
-            "xmm0",  "rsi",   "rdx",   "rcx",   
-            "r8",    "r9",    "r11",   "k2",
-            "memory"
-            )
+    end_asm
+    (
+        : // output operands
+        : // input operands
+          [n0]     "m"     (n0),
+          [x0]     "m"     (x0),
+          [incx0]  "m"     (incx0),
+          [y0]     "m"     (y0),
+          [incy0]  "m"     (incy0)
+        : // register clobber list
+          "zmm0",  "zmm1",  "zmm2",  "zmm3",
+          "zmm4",  "zmm5",  "zmm6",  "zmm7",
+          "zmm8",  "zmm9",  "zmm10", "zmm11",
+          "zmm12", "zmm13", "zmm14", "zmm15",
+          "xmm0",  "rsi",   "rdx",   "rcx",
+          "r8",    "r9",    "r11",   "k2",
+          "memory"
+    )
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)
 }
@@ -682,22 +684,24 @@ void bli_dcopyv_zen4_asm_avx512
     jmp(.SCALARLOOP)
 
     label(.END)
-    end_asm(
-        :
-        :   [n0]     "m"     (n0),
-            [x0]     "m"     (x0),
-            [incx0]  "m"     (incx0),
-            [y0]     "m"     (y0),
-            [incy0]  "m"     (incy0)
-
-        :   "zmm0",  "zmm1",  "zmm2",  "zmm3",
-            "zmm4",  "zmm5",  "zmm6",  "zmm7",
-            "zmm8",  "zmm9",  "zmm10", "zmm11",
-            "zmm12", "zmm13", "zmm14", "zmm15",
-            "rsi",   "rdi",   "rcx",   "r8",
-            "r9",    "r11",   "k2",    "xmm0",
-            "memory"
-            )
+    end_asm
+    (
+        : // output operands
+        : // input operands
+          [n0]     "m"     (n0),
+          [x0]     "m"     (x0),
+          [incx0]  "m"     (incx0),
+          [y0]     "m"     (y0),
+          [incy0]  "m"     (incy0)
+        : // register clobber list
+          "zmm0",  "zmm1",  "zmm2",  "zmm3",
+          "zmm4",  "zmm5",  "zmm6",  "zmm7",
+          "zmm8",  "zmm9",  "zmm10", "zmm11",
+          "zmm12", "zmm13", "zmm14", "zmm15",
+          "rsi",   "rdi",   "rcx",   "r8",
+          "r9",    "r11",   "k2",    "xmm0",
+          "memory"
+    )
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)
 }
@@ -1010,18 +1014,20 @@ void bli_zcopyv_zen4_asm_avx512
             and(imm(0), rsi)
 
             label(.END)
-            end_asm(
-                :
-                :   [n0]     "m"     (n0),
-                    [x0]     "m"     (x0),
-                    [y0]     "m"     (y0)
-
-                :   "zmm0",  "zmm1",  "zmm2",  "zmm3",
-                    "zmm4",  "zmm5",  "zmm6",  "zmm7",
-                    "zmm8",  "zmm9",  "zmm10", "zmm11",
-                    "zmm12", "zmm13", "zmm14", "zmm15",
-                    "zmm16", "rsi",   "rdx",   "rcx",
-                    "r8",    "r9",    "k2",    "memory"
+            end_asm
+            (
+                : // output operands
+                : // input operands
+                  [n0]     "m"     (n0),
+                  [x0]     "m"     (x0),
+                  [y0]     "m"     (y0)
+                : // register clobber list
+                  "zmm0",  "zmm1",  "zmm2",  "zmm3",
+                  "zmm4",  "zmm5",  "zmm6",  "zmm7",
+                  "zmm8",  "zmm9",  "zmm10", "zmm11",
+                  "zmm12", "zmm13", "zmm14", "zmm15",
+                  "zmm16", "rsi",   "rdx",   "rcx",
+                  "r8",    "r9",    "k2",    "memory"
             )
         }
         else
@@ -1515,23 +1521,25 @@ void bli_zcopyv_zen4_asm_avx512
             and(imm(0), rsi)
 
             label(.END)
-            end_asm(
-                :
-                :   [n0]     "m"     (n0),
-                    [x0]     "m"     (x0),
-                    [y0]     "m"     (y0)
-
-                :   "zmm0",  "zmm1",  "zmm2",  "zmm3",
-                    "zmm4",  "zmm5",  "zmm6",  "zmm7",
-                    "zmm8",  "zmm9",  "zmm10", "zmm11",
-                    "zmm12", "zmm13", "zmm14", "zmm15",
-                    "zmm16", "zmm17", "zmm18", "zmm19",
-                    "zmm20", "zmm21", "zmm22", "zmm23",
-                    "zmm24", "zmm25", "zmm26", "zmm27",
-                    "zmm28", "zmm29", "zmm30", "zmm31",
-                    "rsi",   "rdx",   "rcx",   "r8",
-                    "r9",    "k2",    "memory"
-                    )
+            end_asm
+            (
+                : // output operands
+                : // input operands
+                  [n0]     "m"     (n0),
+                  [x0]     "m"     (x0),
+                  [y0]     "m"     (y0)
+                : // register clobber list
+                  "zmm0",  "zmm1",  "zmm2",  "zmm3",
+                  "zmm4",  "zmm5",  "zmm6",  "zmm7",
+                  "zmm8",  "zmm9",  "zmm10", "zmm11",
+                  "zmm12", "zmm13", "zmm14", "zmm15",
+                  "zmm16", "zmm17", "zmm18", "zmm19",
+                  "zmm20", "zmm21", "zmm22", "zmm23",
+                  "zmm24", "zmm25", "zmm26", "zmm27",
+                  "zmm28", "zmm29", "zmm30", "zmm31",
+                  "rsi",   "rdx",   "rcx",   "r8",
+                  "r9",    "k2",    "memory"
+            )
         }
         else
         {

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -2042,7 +2042,7 @@ void bli_sgemmsup_rd_zen_asm_1x64_avx512
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
       "xmm0", "xmm1", "xmm2", "xmm4", "xmm6",
-      "ymm0", "ymm2", "ymm3", "ymm4", "ymm6",
+      "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6",
       "ymm7", "ymm8", "ymm10", "ymm11", "ymm13",
       "ymm14", "ymm17",
       "zmm0", "zmm1", "zmm2", "zmm3",
@@ -4058,7 +4058,7 @@ void bli_sgemmsup_rd_zen_asm_1x48_avx512
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
       "xmm0", "xmm1", "xmm2", "xmm4", "xmm6",
-      "ymm0", "ymm2", "ymm3", "ymm4", "ymm6",
+      "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6",
       "ymm7", "ymm8", "ymm10", "ymm11", "ymm13", "ymm14", "ymm17",
       "zmm0", "zmm1", "zmm2", "zmm3",
       "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
@@ -6071,7 +6071,7 @@ void bli_sgemmsup_rd_zen_asm_1x32_avx512
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
       "xmm0", "xmm1", "xmm2", "xmm4", "xmm6",
-      "ymm0", "ymm2", "ymm3", "ymm4", "ymm6",
+      "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6",
       "ymm7", "ymm8", "ymm10", "ymm11", "ymm13",
       "ymm14", "ymm17",
       "zmm0", "zmm1", "zmm2", "zmm3",

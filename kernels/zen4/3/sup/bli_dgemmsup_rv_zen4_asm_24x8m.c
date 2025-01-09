@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -46600,14 +46600,16 @@ void bli_dgemmsup_rv_zen4_asm_24x1m_new
             : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-            "xmm2", "xmm31",
-            "ymm2",
-            "zmm0", "zmm1", "zmm2", "zmm3",
-            "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
-            "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
-            "zmm16", "zmm17", "zmm18", "zmm19",
-            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
-            "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
+            "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm6", "xmm7",
+            "xmm9", "xmm28", "xmm29", "xmm30", "xmm31",
+            "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6", "ymm7",
+            "ymm9", "ymm28", "ymm29", "ymm30", "ymm31",
+            "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",
+            "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
+            "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19",
+            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25",
+            "zmm26", "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
+            "k2", "k3",
             "memory"
         )
     } //mloop
@@ -46855,14 +46857,18 @@ void bli_dgemmsup_rv_zen4_asm_24x2m_new
             : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-            "xmm2", "xmm31",
-            "ymm2",
-            "zmm0", "zmm1", "zmm2", "zmm3",
-            "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
-            "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
-            "zmm16", "zmm17", "zmm18", "zmm19",
-            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
-            "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
+            "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm6", "xmm7",
+            "xmm8", "xmm9", "xmm11", "xmm12", "xmm13", "xmm14",
+            "xmm15", "xmm28", "xmm29", "xmm30", "xmm31",
+            "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6", "ymm7",
+            "ymm8", "ymm9", "ymm11", "ymm12", "ymm13", "ymm15",
+            "ymm28", "ymm29", "ymm30", "ymm31",
+            "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",
+            "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
+            "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19",
+            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25",
+            "zmm26", "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
+            "k2", "k3",
             "memory"
         )
     } //mloop
@@ -47118,14 +47124,20 @@ void bli_dgemmsup_rv_zen4_asm_24x3m_new
             : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-            "xmm2", "xmm31",
-            "ymm2",
-            "zmm0", "zmm1", "zmm2", "zmm3",
-            "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
-            "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
-            "zmm16", "zmm17", "zmm18", "zmm19",
-            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
-            "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
+            "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm6", "xmm7",
+            "xmm8", "xmm9", "xmm10", "xmm11", "xmm13", "xmm14",
+            "xmm15", "xmm16", "xmm17", "xmm19", "xmm20", "xmm26",
+            "xmm28", "xmm29", "xmm30", "xmm31",
+            "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6", "ymm7",
+            "ymm8", "ymm9", "ymm10", "ymm11", "ymm13", "ymm14",
+            "ymm15", "ymm17", "ymm20", "ymm26", "ymm28", "ymm29",
+            "ymm30", "ymm31",
+            "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",
+            "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
+            "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19",
+            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25",
+            "zmm26", "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
+            "k2", "k3",
             "memory"
         )
     } //mloop
@@ -47392,14 +47404,22 @@ void bli_dgemmsup_rv_zen4_asm_24x4m_new
             : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-            "xmm2", "xmm31",
-            "ymm2",
-            "zmm0", "zmm1", "zmm2", "zmm3",
-            "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
-            "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
-            "zmm16", "zmm17", "zmm18", "zmm19",
-            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
-            "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
+            "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm6", "xmm7",
+            "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13",
+            "xmm15", "xmm16", "xmm17", "xmm18", "xmm19", "xmm21",
+            "xmm22", "xmm24", "xmm25", "xmm26", "xmm27", "xmm28",
+            "xmm29", "xmm30", "xmm31",
+            "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6", "ymm7",
+            "ymm8", "ymm9", "ymm10", "ymm11", "ymm12", "ymm13",
+            "ymm15", "ymm16", "ymm17", "ymm19", "ymm21", "ymm22",
+            "ymm25", "ymm26", "ymm27", "ymm28", "ymm29", "ymm30",
+            "ymm31",
+            "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",
+            "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
+            "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19",
+            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25",
+            "zmm26", "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
+            "k2", "k3",
             "memory"
         )
     } //mloop
@@ -47668,14 +47688,22 @@ void bli_dgemmsup_rv_zen4_asm_24x5m_new
             : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-            "xmm2", "xmm31",
-            "ymm2",
-            "zmm0", "zmm1", "zmm2", "zmm3",
-            "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
-            "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
-            "zmm16", "zmm17", "zmm18", "zmm19",
-            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
-            "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
+            "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm6", "xmm7",
+            "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13",
+            "xmm14", "xmm15", "xmm17", "xmm19", "xmm21", "xmm23",
+            "xmm24", "xmm25", "xmm26", "xmm27", "xmm28", "xmm29",
+            "xmm30", "xmm31",
+            "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6", "ymm7",
+            "ymm8", "ymm9", "ymm10", "ymm11", "ymm12", "ymm13",
+            "ymm14", "ymm15", "ymm17", "ymm19", "ymm21", "ymm23",
+            "ymm24", "ymm25", "ymm26", "ymm27", "ymm28", "ymm29",
+            "ymm30", "ymm31",
+            "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",
+            "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
+            "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19",
+            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25",
+            "zmm26", "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
+            "k2", "k3",
             "memory"
         )
     } //mloop
@@ -47948,14 +47976,22 @@ void bli_dgemmsup_rv_zen4_asm_24x6m_new
             : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-            "xmm2", "xmm31",
-            "ymm2",
-            "zmm0", "zmm1", "zmm2", "zmm3",
-            "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
-            "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
-            "zmm16", "zmm17", "zmm18", "zmm19",
-            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
-            "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
+            "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6",
+            "xmm7", "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13",
+            "xmm14", "xmm15", "xmm16", "xmm17", "xmm19", "xmm21",
+            "xmm23", "xmm24", "xmm25", "xmm26", "xmm27", "xmm28",
+            "xmm29", "xmm30", "xmm31",
+            "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
+            "ymm7", "ymm8", "ymm9", "ymm10", "ymm11", "ymm12", "ymm13",
+            "ymm14", "ymm15", "ymm16", "ymm17", "ymm19", "ymm21",
+            "ymm23", "ymm24", "ymm25", "ymm26", "ymm27", "ymm28",
+            "ymm29", "ymm30", "ymm31",
+            "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",
+            "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
+            "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19",
+            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25",
+            "zmm26", "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
+            "k2", "k3",
             "memory"
         )
     } //mloop
@@ -48237,14 +48273,22 @@ void bli_dgemmsup_rv_zen4_asm_24x7m_new
             : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-            "xmm2", "xmm31",
-            "ymm2",
-            "zmm0", "zmm1", "zmm2", "zmm3",
-            "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
-            "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
-            "zmm16", "zmm17", "zmm18", "zmm19",
-            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
-            "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
+            "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6",
+            "xmm7", "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13",
+            "xmm14", "xmm15", "xmm16", "xmm17", "xmm18", "xmm19",
+            "xmm22", "xmm24", "xmm25", "xmm26", "xmm27", "xmm28",
+            "xmm29", "xmm30", "xmm31",
+            "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
+            "ymm7", "ymm8", "ymm9", "ymm10", "ymm11", "ymm12", "ymm13",
+            "ymm14", "ymm15", "ymm16", "ymm17", "ymm18", "ymm19",
+            "ymm22", "ymm24", "ymm25", "ymm26", "ymm27", "ymm28",
+            "ymm29", "ymm30", "ymm31",
+            "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",
+            "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
+            "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19",
+            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25",
+            "zmm26", "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
+            "k2", "k3",
             "memory"
         )
     } //mloop
@@ -48544,36 +48588,44 @@ void bli_dgemmsup_rv_zen4_asm_24x8m_new
         vzeroupper()
 
         end_asm(
-        : // output operands (none)
-        : // input operands
-        [ps_a8] "m" (ps_a8),
-        [m_iter] "m" (m_iter),
-        [m_left] "m" (m_left),
-        [k_iter] "m" (k_iter),
-        [k_left] "m" (k_left),
-        [a]      "m" (a),
-        [rs_a0]   "m" (rs_a0),
-        [cs_a0]   "m" (cs_a0),
-        [b]      "m" (b),
-        [rs_b0]   "m" (rs_b0),
-        [cs_b0]   "m" (cs_b0),
-        [alpha]  "m" (alpha),
-        [beta]   "m" (beta),
-        [c]      "m" (c),
-        [rs_c0]   "m" (rs_c0),
-        [cs_c0]   "m" (cs_c0)
-        : // register clobber list
-        "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
-        "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-        "xmm2", "xmm31",
-        "ymm2",
-        "zmm0", "zmm1", "zmm2", "zmm3",
-        "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
-        "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
-        "zmm16", "zmm17", "zmm18", "zmm19",
-        "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
-        "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-        "memory"
+          : // output operands (none)
+          : // input operands
+            [ps_a8]  "m" (ps_a8),
+            [m_iter] "m" (m_iter),
+            [m_left] "m" (m_left),
+            [k_iter] "m" (k_iter),
+            [k_left] "m" (k_left),
+            [a]      "m" (a),
+            [rs_a0]  "m" (rs_a0),
+            [cs_a0]  "m" (cs_a0),
+            [b]      "m" (b),
+            [rs_b0]  "m" (rs_b0),
+            [cs_b0]  "m" (cs_b0),
+            [alpha]  "m" (alpha),
+            [beta]   "m" (beta),
+            [c]      "m" (c),
+            [rs_c0]  "m" (rs_c0),
+            [cs_c0]  "m" (cs_c0)
+            : // register clobber list
+            "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
+            "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+            "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6",
+            "xmm7", "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13",
+            "xmm14", "xmm15", "xmm16", "xmm17", "xmm18", "xmm19",
+            "xmm20", "xmm21", "xmm22", "xmm23", "xmm24", "xmm25",
+            "xmm26", "xmm27", "xmm28", "xmm29", "xmm30", "xmm31",
+            "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
+            "ymm7", "ymm8", "ymm9", "ymm10", "ymm11", "ymm12", "ymm13",
+            "ymm14", "ymm15", "ymm16", "ymm17", "ymm18", "ymm19",
+            "ymm20", "ymm21", "ymm22", "ymm23", "ymm24", "ymm25",
+            "ymm26", "ymm27", "ymm28", "ymm29", "ymm30", "ymm31",
+            "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",
+            "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
+            "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19",
+            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25",
+            "zmm26", "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
+            "k2", "k3", "k4",
+            "memory"
         )
     } //mloop
 
@@ -50211,12 +50263,11 @@ void bli_dgemmsup_rv_zen4_asm_24x8m
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
             "xmm2", "xmm31",
             "ymm2",
-            "zmm0", "zmm1", "zmm2", "zmm3",
-            "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
-            "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
-            "zmm16", "zmm17", "zmm18", "zmm19",
-            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
-            "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
+            "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",
+            "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
+            "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19",
+            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25",
+            "zmm26", "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
             "memory"
         )
     } //mloop
@@ -51706,13 +51757,13 @@ void bli_dgemmsup_rv_zen4_asm_24x7m
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
             "xmm2", "xmm31",
             "ymm2",
-            "zmm0", "zmm1", "zmm2", "zmm3",
-            "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
-            "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
-            "zmm16", "zmm17", "zmm18", "zmm19",
-            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
-            "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-            "k2", "memory"
+            "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",
+            "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
+            "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19",
+            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25",
+            "zmm26", "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
+            "k2",
+            "memory"
         )
     } //mloop
 
@@ -53089,13 +53140,13 @@ void bli_dgemmsup_rv_zen4_asm_24x6m
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
             "xmm2", "xmm31",
             "ymm2",
-            "zmm0", "zmm1", "zmm2", "zmm3",
-            "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
-            "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
-            "zmm16", "zmm17", "zmm18", "zmm19",
-            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
-            "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-            "k2", "memory"
+            "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",
+            "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
+            "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm24",
+            "zmm25", "zmm26", "zmm27", "zmm28", "zmm29", "zmm30",
+            "zmm31",
+            "k2",
+            "memory"
         )
     } //mloop
 
@@ -54355,13 +54406,13 @@ void bli_dgemmsup_rv_zen4_asm_24x5m
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
             "xmm2", "xmm31",
             "ymm2",
-            "zmm0", "zmm1", "zmm2", "zmm3",
-            "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
-            "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
-            "zmm16", "zmm17", "zmm18", "zmm19",
-            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
-            "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-            "k2", "memory"
+            "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",
+            "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
+            "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm24",
+            "zmm25", "zmm26", "zmm27", "zmm28", "zmm29", "zmm30",
+            "zmm31",
+            "k2",
+            "memory"
         )
     } //mloop
 
@@ -55491,16 +55542,16 @@ void bli_dgemmsup_rv_zen4_asm_24x4m
             [mask]   "m" (mask)
           : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
-            "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+            "r8", "r9", "r10", "r11", "r12", "r13", "r14",
             "xmm2", "xmm31",
             "ymm2",
-            "zmm0", "zmm1", "zmm2", "zmm3",
-            "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
-            "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
-            "zmm16", "zmm17", "zmm18", "zmm19",
-            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
-            "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-            "k2", "memory"
+            "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",
+            "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
+            "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19",
+            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25",
+            "zmm26", "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
+            "k2",
+            "memory"
         )
     } //mloop
 
@@ -56506,16 +56557,16 @@ void bli_dgemmsup_rv_zen4_asm_24x3m
             [mask]   "m" (mask)
           : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
-            "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+            "r8", "r9", "r10", "r11", "r12", "r13", "r14",
             "xmm2", "xmm31",
             "ymm2",
-            "zmm0", "zmm1", "zmm2", "zmm3",
-            "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
-            "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
-            "zmm16", "zmm17", "zmm18", "zmm19",
-            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
-            "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-            "k2", "memory"
+            "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",
+            "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
+            "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19",
+            "zmm20", "zmm21", "zmm22", "zmm26", "zmm27", "zmm28",
+            "zmm29", "zmm30", "zmm31",
+            "k2",
+            "memory"
         )
     } //mloop
 
@@ -57399,16 +57450,15 @@ void bli_dgemmsup_rv_zen4_asm_24x2m
             [mask]   "m" (mask)
           : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
-            "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+            "r8", "r9", "r10", "r11", "r12", "r13", "r14",
             "xmm2", "xmm31",
             "ymm2",
-            "zmm0", "zmm1", "zmm2", "zmm3",
-            "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
-            "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
-            "zmm16", "zmm17", "zmm18", "zmm19",
-            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
-            "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-            "k2", "memory"
+            "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",
+            "zmm7", "zmm8", "zmm9", "zmm10", "zmm12", "zmm14", "zmm15",
+            "zmm16", "zmm17", "zmm18", "zmm19", "zmm28", "zmm29",
+            "zmm30", "zmm31",
+            "k2",
+            "memory"
         )
     } //mloop
 
@@ -58168,16 +58218,14 @@ void bli_dgemmsup_rv_zen4_asm_24x1m
             [mask]   "m" (mask)
           : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
-            "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+            "r8", "r9", "r10", "r11", "r12", "r13", "r14",
             "xmm2", "xmm31",
             "ymm2",
-            "zmm0", "zmm1", "zmm2", "zmm3",
-            "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
-            "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
-            "zmm16", "zmm17", "zmm18", "zmm19",
-            "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
-            "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-            "k2", "memory"
+            "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",
+            "zmm7", "zmm8", "zmm9", "zmm10", "zmm12", "zmm14", "zmm15",
+            "zmm16", "zmm18", "zmm28", "zmm29", "zmm30", "zmm31",
+            "k2",
+            "memory"
         )
     } //mloop
 
