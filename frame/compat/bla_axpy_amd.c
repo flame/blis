@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -335,6 +335,11 @@ void daxpy_blis_impl
     // Definition of function pointer
     daxpyv_ker_ft axpyv_ker_ptr;
 
+    // Setting the threshold to invoke the fast-path
+    // The fast-path is intended to directly call the kernel
+    // in case the criteria for single threaded execution is met.
+    dim_t fast_path_thresh = 1;
+
     cntx_t *cntx = NULL;
 
     // Query the architecture ID
@@ -344,9 +349,15 @@ void daxpy_blis_impl
     switch (arch_id_local)
     {
       case BLIS_ARCH_ZEN5:
+#if defined(BLIS_KERNELS_ZEN4)
+          axpyv_ker_ptr = bli_daxpyv_zen_int_avx512;
+          fast_path_thresh = 34000;
+          break;
+#endif
       case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
           axpyv_ker_ptr = bli_daxpyv_zen_int_avx512;
+          fast_path_thresh = 11000;
           break;
 #endif
       case BLIS_ARCH_ZEN:
@@ -355,6 +366,7 @@ void daxpy_blis_impl
 
           // AVX2 Kernel
           axpyv_ker_ptr = bli_daxpyv_zen_int10;
+          fast_path_thresh = 4000;
           break;
 
       default:
@@ -367,6 +379,24 @@ void daxpy_blis_impl
     }
 
 #ifdef BLIS_ENABLE_OPENMP
+    #ifdef AOCL_DYNAMIC
+      /* Invoking the fast-path, if the size is ideal for such execution */
+      if( n_elem <= fast_path_thresh )
+      {
+        axpyv_ker_ptr
+        (
+          BLIS_NO_CONJUGATE,
+          n_elem,
+          (double *)alpha,
+          x0, incx0,
+          y0, incy0,
+          cntx
+        );
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+        return;
+      }
+    #endif
     /*
       Initializing the number of thread to one
       to avoid compiler warnings
