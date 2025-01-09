@@ -17,7 +17,11 @@
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#ifdef BLIS_ENABLE_OPENMP
 #include <omp.h>
+#endif
+
 #endif
 
 // BLIS TODO: This is workaround to check if BLIS is built with
@@ -38,8 +42,8 @@
 */
 
 AOCL_TID AOCL_gettid(void) __attribute__((no_instrument_function));
-pid_t  AOCL_getpid(void) __attribute__((no_instrument_function));
-uint64 AOCL_getTimestamp(void) __attribute__((no_instrument_function));
+pid_t    AOCL_getpid(void) __attribute__((no_instrument_function));
+uint64   AOCL_getTimestamp(void) __attribute__((no_instrument_function));
 
 AOCL_TID AOCL_gettid(void)
 {
