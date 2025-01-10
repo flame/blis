@@ -93,7 +93,7 @@ int main(int argc, char** argv)
 
 
         bli_obj_create(dt, 1, 1, 0, 0, &alpha);
-        bli_obj_create(dt, 1, n, 0, 0, &a);
+        bli_obj_create(dt, n, 1, 0, 0, &a);
 
         bli_randm(&a);
         bli_setsc((2.0), 0.0, &alpha);
