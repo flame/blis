@@ -61,7 +61,7 @@ bool bli_cntx_gemmsup_thresh_is_met_zen5( obj_t* a, obj_t* b, obj_t* c, cntx_t* 
 			n = bli_obj_width( c );
 		}
 		// For skinny sizes where one/two dimensions are small
-		if((m < 1000) || (n < 1000)) return TRUE;
+		if((m < 1000) || (n < 1000) || (k < 116)) return TRUE;
 		// // For all combinations in small sizes
 		if((m < 2200) && (n < 2200) && (k < 2200)) return TRUE;
 		return FALSE;
