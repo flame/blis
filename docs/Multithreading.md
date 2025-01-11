@@ -284,7 +284,11 @@ If you want to initialize it as part of the declaration, you may do so via the d
 rntm_t rntm = BLIS_RNTM_INITIALIZER;
 ```
 As of this writing, BLIS treats a default-initialized `rntm_t` as a request for single-threaded execution.
-If your application needs to know the ways of parallelism that were conveyed via environment variables, then there is an another way by copying the global `rntm_t` object:
+If your application needs to know the ways of parallelism that were conveyed via environment variables, then there is an another way by copying the global `rntm_t` object via
+```c
+void bli_rntm_init_from_global( rntm_t* rntm );
+```
+Which may be called as:
 ```c
 bli_rntm_init_from_global( &rntm );
 ```
