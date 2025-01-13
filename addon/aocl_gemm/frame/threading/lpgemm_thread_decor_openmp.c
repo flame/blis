@@ -424,6 +424,10 @@ BLIS_INLINE void lpgemm_s32o32_get_threading
 		dim_t MR = lpgemm_get_block_size_MR_global_cntx( op_type );
 		dim_t mr_blks = ( m + MR - 1 ) / MR;
 		dim_t nr_blks = ( n + NR - 1 ) / NR;
+		dim_t mrxnr_blks = mr_blks * nr_blks;
+		dim_t mr_blks_adj_n_threads = ( ( *n_threads ) / mr_blks ) * mr_blks;
+		dim_t delta_mr_blks_adj = ( *n_threads ) - mr_blks_adj_n_threads;
+		const dim_t low_freq_thres = 6;
 
 		if ( n <= NR )
 		{
@@ -435,6 +439,14 @@ BLIS_INLINE void lpgemm_s32o32_get_threading
 		{
 			( *jc_ways ) = ( *n_threads );
 			( *ic_ways ) = 1;
+			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
+		}
+		else if ( ( ( n % NR ) == 0 ) &&
+				  ( mrxnr_blks <= ( *n_threads ) ) &&
+				  ( delta_mr_blks_adj < low_freq_thres ) )
+		{
+			( *ic_ways ) = mr_blks;
+			( *jc_ways ) = ( *n_threads ) / ( *ic_ways );
 			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
 		}
 		else
@@ -644,6 +656,10 @@ BLIS_INLINE void lpgemm_bf16bf16f32of32_get_threading
 		dim_t MR = lpgemm_get_block_size_MR_global_cntx( BF16BF16F32OF32 );
 		dim_t mr_blks = ( m + MR - 1 ) / MR;
 		dim_t nr_blks = ( n + NR - 1 ) / NR;
+		dim_t mrxnr_blks = mr_blks * nr_blks;
+		dim_t mr_blks_adj_n_threads = ( ( *n_threads ) / mr_blks ) * mr_blks;
+		dim_t delta_mr_blks_adj = ( *n_threads ) - mr_blks_adj_n_threads;
+		const dim_t low_freq_thres = 6;
 
 		if ( n <= NR )
 		{
@@ -655,6 +671,14 @@ BLIS_INLINE void lpgemm_bf16bf16f32of32_get_threading
 		{
 			( *jc_ways ) = ( *n_threads );
 			( *ic_ways ) = 1;
+			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
+		}
+		else if ( ( ( n % NR ) == 0 ) &&
+				  ( mrxnr_blks <= ( *n_threads ) ) &&
+				  ( delta_mr_blks_adj < low_freq_thres ) )
+		{
+			( *ic_ways ) = mr_blks;
+			( *jc_ways ) = ( *n_threads ) / ( *ic_ways );
 			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
 		}
 		else
@@ -789,6 +813,10 @@ BLIS_INLINE void lpgemm_f32f32f32of32_get_threading
 	{
 		dim_t mr_blks = ( m + MR - 1 ) / MR;
 		dim_t nr_blks = ( n + NR - 1 ) / NR;
+		dim_t mrxnr_blks = mr_blks * nr_blks;
+		dim_t mr_blks_adj_n_threads = ( ( *n_threads ) / mr_blks ) * mr_blks;
+		dim_t delta_mr_blks_adj = ( *n_threads ) - mr_blks_adj_n_threads;
+		const dim_t low_freq_thres = 6;
 
 		if ( n <= NR )
 		{
@@ -800,6 +828,14 @@ BLIS_INLINE void lpgemm_f32f32f32of32_get_threading
 		{
 			( *jc_ways ) = ( *n_threads );
 			( *ic_ways ) = 1;
+			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
+		}
+		else if ( ( ( n % NR ) == 0 ) &&
+				  ( mrxnr_blks <= ( *n_threads ) ) &&
+				  ( delta_mr_blks_adj < low_freq_thres ) )
+		{
+			( *ic_ways ) = mr_blks;
+			( *jc_ways ) = ( *n_threads ) / ( *ic_ways );
 			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
 		}
 		else
@@ -957,7 +993,7 @@ BLIS_INLINE AOCL_TID_DISTR_TYPE lpgemm_get_tid_distr_type
 	dim_t nr_blks = ( n + NR - 1 ) / NR;
 	dim_t mr_x_nr_blks = mr_blks * nr_blks;
 
-	dim_t low_util_n_thread_thres = ( 2 * n_threads ) / 3;
+	dim_t low_util_n_thread_thres = n_threads / 2;
 	dim_t mr_x_nr_blks_fringe = mr_x_nr_blks % n_threads;
 
 	lpgemm_thread_attrs_t* thr_attrs = lpgemm_get_thread_attrs();

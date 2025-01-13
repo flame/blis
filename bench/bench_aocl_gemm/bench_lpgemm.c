@@ -1563,7 +1563,7 @@ int main( int argc, char** argv )
     dim_t stride_a, stride_b, stride_c;
 
     const dim_t len_list_omp_cores_for_testing = 2;
-    const dim_t list_omp_cores_for_testing[2] = { 1, 64 };
+    const dim_t list_omp_cores_for_testing[2] = { 128, 1 };
 
     dim_t core_index = 0;
     bool can_run = TRUE;
