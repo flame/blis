@@ -78,10 +78,13 @@ TEST_P( samaxvGeneric, UKR )
     The code structure for bli_samaxv_zen_int( ... ) is as follows :
 
     For unit strides :
-        Main loop    :  In blocks of 8 --> L8
-        Fringe loops :  Element-wise loop --> LScalar
+        Main loop    :  In blocks of 64   --> L64
+        Fringe loops :  In blocks of 32   --> L32
+                        In blocks of 16   --> L16
+                        In blocks of 8    --> L8
+                        Element wise loop --> LScalar
 
-    For non-unit strides : A single loop, to process element wise.
+    For non-unit strides, or when n < 8 : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
 #ifdef K_bli_samaxv_zen_int
@@ -90,10 +93,13 @@ INSTANTIATE_TEST_SUITE_P(
         samaxvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_samaxv_zen_int),   // kernel address
-            ::testing::Values(gtint_t(8),            // for size n, L8
+            ::testing::Values(gtint_t(64),           // for size n, L64
+                              gtint_t(32),           // L32
+                              gtint_t(16),           // L16
+                              gtint_t(8),            // L8
                               gtint_t(7),            // LScalar
-                              gtint_t(40),           // 5*L8
-                              gtint_t(47)),          // 5*L8 + LScalar
+                              gtint_t(192),          // 3*L64
+                              gtint_t(255)),         // 3*L64 + L32 + L16 +  + L8 + 7(LScalar)
             ::testing::Values(gtint_t(1)),           // incx
             ::testing::Values(false, true)           // is_memory_test
         ),

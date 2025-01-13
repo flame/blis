@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_amaxv.h"
 
-class DISABLED_damaxvEVT :
+class damaxvEVT :
         public ::testing::TestWithParam<std::tuple<gtint_t,      // n
                                                    gtint_t,      // incx
                                                    gtint_t,      // xi, index for exval in x
@@ -44,7 +44,7 @@ class DISABLED_damaxvEVT :
                                                    double>> {};  // xj_exval
 
 // Tests using random values as vector elements.
-TEST_P( DISABLED_damaxvEVT, API )
+TEST_P( damaxvEVT, API )
 {
     using T = double;
     //----------------------------------------------------------
@@ -121,7 +121,7 @@ static double Inf = std::numeric_limits<double>::infinity();
 // Exception value testing with unit strides
 INSTANTIATE_TEST_SUITE_P(
     unitStrides_zen3,
-    DISABLED_damaxvEVT,
+    damaxvEVT,
     ::testing::Combine(
         ::testing::Values(gtint_t(175), gtint_t(176)),                          // n, size of vectors with unit-stride
         ::testing::Values(gtint_t(1)),                                          // stride size for x
@@ -169,7 +169,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Exception value testing with unit strides
 INSTANTIATE_TEST_SUITE_P(
     unitStrides_zen4,
-    DISABLED_damaxvEVT,
+    damaxvEVT,
     ::testing::Combine(
         ::testing::Values(gtint_t(383)),                                        // n, size of vectors with unit-stride
         ::testing::Values(gtint_t(1)),                                          // stride size for x
@@ -187,7 +187,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Exception value testing with non-unit strides
 INSTANTIATE_TEST_SUITE_P(
     nonUnitStrides,
-    DISABLED_damaxvEVT,
+    damaxvEVT,
     ::testing::Combine(
         ::testing::Values(gtint_t(10)),                                         // n, size of vectors with unit-stride
         ::testing::Values(gtint_t(3)),                                          // stride size for x
