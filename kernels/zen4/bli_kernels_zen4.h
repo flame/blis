@@ -42,7 +42,7 @@ ADDV_KER_PROT( double,   d, addv_zen_int_avx512 )
 
 // amaxv (intrinsics)
 AMAXV_KER_PROT( float,    s, amaxv_zen_int_avx512 )
-AMAXV_KER_PROT( double,   d, amaxv_zen_int_avx512 )
+BLIS_EXPORT_BLIS AMAXV_KER_PROT( double,   d, amaxv_zen_int_avx512 )
 
 // scalv (AVX512 intrinsics)
 SCALV_KER_PROT( float,     s, scalv_zen_int_avx512 )

@@ -443,7 +443,7 @@ void bli_samaxv_zen_int_avx512(
     }
 
 /*----------------------------------------------------------------------------------------------------*/
-void bli_damaxv_zen_int_avx512
+BLIS_EXPORT_BLIS void bli_damaxv_zen_int_avx512
 (
     dim_t n,
     double *restrict x, inc_t incx,
