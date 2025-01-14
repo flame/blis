@@ -106,6 +106,18 @@ all of which are available for free via the [edX platform](http://www.edx.org/).
 What's New
 ----------
 
+ * **Plugin feature now available!** BLIS addons (see below) provided a way to
+quickly extend BLIS's operation support or define new custom BLIS APIs for your application.
+BLIS plugins extend this support to completely external code, needing only an installed BLIS
+package (no source required). BLIS plugins also allow users to define their own kernels
+and blocksizes, combined with the cross-architecture support provided by the BLIS framework.
+Finally, user plugins can utilize the new API for modifying the BLIS "control tree" which
+defines the mathematical operation to be computed, as well as information controlling packing,
+partitioning, etc. Users can now modify the control tree to implement new linear algebra
+operations not already included in BLIS. See the [documentation](docs/PluginHowTo.md) for
+an overview of these features and a step-by-step guides for creating plugins and modifying
+the control tree to implement an example operation "SYRKD".
+
  * **BLIS selected for the 2023 James H. Wilkinson Prize for Numerical Software!** We
 are thrilled to announce that Field Van Zee and Devin Matthews were chosen to receive
 the [2023 James H. Wilkinson Prize for Numerical Software](https://www.siam.org/prizes-recognition/major-prizes-lectures/detail/james-h-wilkinson-prize-for-numerical-software).
@@ -528,6 +540,13 @@ use the multithreading features of BLIS.
  * **[Mixed-Datatypes](docs/MixedDatatypes.md).** This document provides an
 overview of BLIS's mixed-datatype functionality and provides a brief example
 of how to take advantage of this new code.
+
+ * **[Extending BLIS functionality](docs/PluginHowTo.md).** This document provides an
+overview of BLIS's mechanisms for extending functionality through user-defined code.
+BLIS has a plugin infrastructure which allows users to define their own kernels,
+blocksizes, and kernel preferences which are compiled and managed by the BLIS framework.
+BLIS also provides an API for modifying the "control tree" which can be used to
+implement novel linear algebra operations.
 
  * **[Performance](docs/Performance.md).** This document reports empirically
 measured performance of a representative set of level-3 operations on a variety
