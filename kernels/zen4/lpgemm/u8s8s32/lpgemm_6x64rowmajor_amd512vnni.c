@@ -500,6 +500,24 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 		POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_6x64:
 		{
+			if ( post_ops_list_temp->stor_type == BF16 )
+			{
+				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
+				BF16_S32_BIAS_LOAD(selector1, bias_mask, 0);
+				BF16_S32_BIAS_LOAD(selector2, bias_mask, 1);
+				BF16_S32_BIAS_LOAD(a_int32_0, bias_mask, 2);
+				BF16_S32_BIAS_LOAD(a_int32_1, bias_mask, 3);
+			}
+			else if ( post_ops_list_temp->stor_type == S8 )
+			{
+				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
+				S8_S32_BIAS_LOAD(selector1, bias_mask, 0);
+				S8_S32_BIAS_LOAD(selector2, bias_mask, 1);
+				S8_S32_BIAS_LOAD(a_int32_0, bias_mask, 2);
+				S8_S32_BIAS_LOAD(a_int32_1, bias_mask, 3);
+			}
+			else
+			{
 			selector1 =
 				_mm512_loadu_si512( ( int32_t* )post_ops_list_temp->op_args1 +
 						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
@@ -512,6 +530,7 @@ POST_OPS_BIAS_6x64:
 			a_int32_1 =
 				_mm512_loadu_si512( ( int32_t* )post_ops_list_temp->op_args1 +
 						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			}
 
 			// c[0,0-15]
 			c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );

@@ -328,18 +328,37 @@ LPGEMV_M_EQ1_KERN(int8_t,int8_t,int32_t,s8s8s32os32)
 
 		POST_OPS_BIAS_6x64:
 		{
+			if ( post_ops_list_temp->stor_type == BF16 )
+			{
+				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
+				BF16_S32_BIAS_LOAD(selector1, bias_mask, 0);
+				BF16_S32_BIAS_LOAD(selector2, bias_mask, 1);
+				BF16_S32_BIAS_LOAD(selector3, bias_mask, 2);
+				BF16_S32_BIAS_LOAD(selector4, bias_mask, 3);
+			}
+			else if ( post_ops_list_temp->stor_type == S8 )
+			{
+				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
+				S8_S32_BIAS_LOAD(selector1, bias_mask, 0);
+				S8_S32_BIAS_LOAD(selector2, bias_mask, 1);
+				S8_S32_BIAS_LOAD(selector3, bias_mask, 2);
+				S8_S32_BIAS_LOAD(selector4, bias_mask, 3);
+			}
+			else
+			{
 			selector1 =
 				_mm512_loadu_si512( ( int32_t* )post_ops_list_temp->op_args1 +
-							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			selector2 =
 				_mm512_loadu_si512( ( int32_t* )post_ops_list_temp->op_args1 +
-							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 			selector3 =
 				_mm512_loadu_si512( ( int32_t* )post_ops_list_temp->op_args1 +
-							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 			selector4 =
 				_mm512_loadu_si512( ( int32_t* )post_ops_list_temp->op_args1 +
-							post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			}
 
 			zmm8  = _mm512_add_epi32( selector1, zmm8 );
 			zmm12 = _mm512_add_epi32( selector2, zmm12 );

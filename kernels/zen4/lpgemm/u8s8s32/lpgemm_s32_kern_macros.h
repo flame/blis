@@ -117,6 +117,37 @@
 	); \
 	S32_BETA_FMA(reg,scratch1,scratch2) \
 
+// BF16 bias helper macros.
+#define BF16_S32_BIAS_LOAD(scr,mask,n_ind) \
+	scr = _mm512_cvtps_epi32 \
+				( \
+					( __m512)( _mm512_sllv_epi32 \
+					( \
+					  _mm512_cvtepi16_epi32 \
+					  ( \
+						_mm256_maskz_loadu_epi16 \
+						( \
+						  ( mask ), \
+						  ( ( bfloat16* )post_ops_list_temp->op_args1 ) + \
+						  post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+						) \
+					  ), _mm512_set1_epi32( 16 ) \
+					) \
+				  ) \
+				); \
+
+// S8 bias helper macros.
+#define S8_S32_BIAS_LOAD(scr,mask,n_ind) \
+	scr = _mm512_cvtepi8_epi32 \
+			( \
+			  _mm_maskz_loadu_epi8 \
+			  ( \
+				( mask ), \
+				( ( int8_t* )post_ops_list_temp->op_args1 ) + \
+				post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+			  ) \
+			); \
+
 // ReLU scale (Parametric ReLU):  f(x) = x, when x > 0 and f(x) = a*x when x <= 0
 #define RELU_SCALE_OP_S32_AVX512(reg) \
 	/* Generate indenx of elements <= 0.*/ \

@@ -541,9 +541,39 @@ LPGEMV_N_EQ1_KERN(uint8_t, int8_t, int32_t, u8s8s32os32)
 
 		POST_OPS_BIAS_6x64:
 		{
-			selector1 =
-			      _mm512_set1_epi32(
-			            *( ( int32_t* )post_ops_list_temp->op_args1) );
+			if ( post_ops_list_temp->stor_type == BF16 )
+			{
+				selector1 =
+					( _mm512_sllv_epi32
+						(
+						_mm512_cvtepi16_epi32
+							(
+							_mm256_maskz_loadu_epi16
+								(
+								_cvtu32_mask16( 0xFFFF ),
+								( ( bfloat16* )post_ops_list_temp->op_args1 )
+								)
+							), _mm512_set1_epi32( 16 )
+						)
+					);
+			}
+			else if ( post_ops_list_temp->stor_type == S8 )
+			{
+				selector1 =
+					_mm512_cvtepi8_epi32
+						(
+			 			_mm_maskz_loadu_epi8
+			  				(
+							_cvtu32_mask16( 0xFFFF ),
+							( ( int8_t* )post_ops_list_temp->op_args1 )
+			  				)
+						);
+			}
+			else
+			{
+				selector1 =
+					_mm512_set1_epi32( *( ( int32_t* )post_ops_list_temp->op_args1) );
+			}
 			zmm8 = _mm512_add_epi32( selector1, zmm8 );
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
