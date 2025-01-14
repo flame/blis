@@ -169,7 +169,7 @@
     { \
         char print_msg[ 150 ]; \
  \
-        sprintf( print_msg, "** On entry to %6s, parameter number %2i of problem %ld had an illegal value", op_str, info, gemm_no); \
+        sprintf( print_msg, "** On entry to %6s, parameter number %2i of problem %ld had an illegal value", op_str, info, (long int) gemm_no); \
         bli_print_msg(print_msg, __FILE__, __LINE__); \
         err_no = info; \
     } \

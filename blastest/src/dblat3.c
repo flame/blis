@@ -1,6 +1,6 @@
 /* dblat3.f -- translated by f2c (version 20100827).
 
-	Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+	Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
    
    You must link the resulting object file with libf2c:
 	on Microsoft Windows system, link with libf2c.lib;
@@ -4333,13 +4333,10 @@ logical lde_(doublereal *ri, doublereal *rj, integer *lr)
 /*     .. Array Arguments .. */
 /*     .. Local Scalars .. */
 /*     .. Executable Statements .. */
-    /* Parameter adjustments */
-    --rj;
-    --ri;
 
     /* Function Body */
     i__1 = *lr;
-    for (i__ = 1; i__ <= i__1; ++i__) {
+    for (i__ = 0; i__ < i__1; ++i__) {
 	if (ri[i__] != rj[i__]) {
 	    goto L20;
 	}
