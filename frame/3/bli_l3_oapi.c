@@ -59,6 +59,8 @@ GENFRONT( gemm )
 GENFRONT( gemmt )
 GENFRONT( her2k )
 GENFRONT( syr2k )
+GENFRONT( shr2k )
+GENFRONT( skr2k )
 
 
 #undef  GENFRONT
@@ -81,6 +83,8 @@ void PASTEMAC(opname) \
 
 GENFRONT( hemm )
 GENFRONT( symm )
+GENFRONT( shmm )
+GENFRONT( skmm )
 GENFRONT( trmm3 )
 
 

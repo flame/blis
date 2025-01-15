@@ -132,7 +132,8 @@ typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
              conj_t conjx, \
              dim_t  m, \
              dim_t  b_n, \
-       const ctype* alpha, \
+       const ctype* alphaw, \
+       const ctype* alphax, \
        const ctype* a, inc_t inca, inc_t lda, \
        const ctype* w, inc_t incw, \
        const ctype* x, inc_t incx, \

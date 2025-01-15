@@ -126,6 +126,40 @@ void bli_hemm_check
 	bli_check_error_code( e_val );
 }
 
+void bli_shmm_check
+     (
+             side_t  side,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx
+     )
+{
+	err_t e_val;
+
+	// Perform checks common to hemm/symm/trmm/trsm.
+
+	bli_hemm_basic_check( side, alpha, a, b, beta, c, cntx );
+
+	// Check matrix squareness.
+
+	e_val = bli_check_square_object( a );
+	bli_check_error_code( e_val );
+
+	// Check object structure.
+
+	e_val = bli_check_skew_hermitian_object( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_general_object( b );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_general_object( c );
+	bli_check_error_code( e_val );
+}
+
 void bli_herk_check
      (
        const obj_t*  alpha,
@@ -210,6 +244,49 @@ void bli_her2k_check
 	bli_check_error_code( e_val );
 }
 
+void bli_shr2k_check
+     (
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx
+     )
+{
+	err_t e_val;
+	obj_t ah, bh;
+
+	// Alias A and B to A^H and B^H so we can perform dimension checks.
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, &ah );
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, b, &bh );
+
+	// Check basic properties of the operation.
+
+	bli_her2k_basic_check( alpha, a, &bh, b, &ah, beta, c, cntx );
+
+	// Check matrix squareness.
+
+	e_val = bli_check_square_object( c );
+	bli_check_error_code( e_val );
+
+	// Check matrix structure.
+
+	e_val = bli_check_skew_hermitian_object( c );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_general_object( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_general_object( b );
+	bli_check_error_code( e_val );
+
+	// Check for real-valued beta.
+
+	e_val = bli_check_real_valued_object( beta );
+	bli_check_error_code( e_val );
+}
+
 void bli_symm_check
      (
              side_t  side,
@@ -235,6 +312,40 @@ void bli_symm_check
 	// Check object structure.
 
 	e_val = bli_check_symmetric_object( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_general_object( b );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_general_object( c );
+	bli_check_error_code( e_val );
+}
+
+void bli_skmm_check
+     (
+             side_t  side,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx
+     )
+{
+	err_t e_val;
+
+	// Check basic properties of the operation.
+
+	bli_hemm_basic_check( side, alpha, a, b, beta, c, cntx );
+
+	// Check matrix squareness.
+
+	e_val = bli_check_square_object( a );
+	bli_check_error_code( e_val );
+
+	// Check object structure.
+
+	e_val = bli_check_skew_symmetric_object( a );
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_general_object( b );
@@ -306,6 +417,44 @@ void bli_syr2k_check
 	// Check matrix structure.
 
 	e_val = bli_check_symmetric_object( c );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_general_object( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_general_object( b );
+	bli_check_error_code( e_val );
+}
+
+void bli_skr2k_check
+     (
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx
+     )
+{
+	err_t e_val;
+	obj_t at, bt;
+
+	// Alias A and B to A^T and B^T so we can perform dimension checks.
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, a, &at );
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, b, &bt );
+
+	// Check basic properties of the operation.
+
+	bli_her2k_basic_check( alpha, a, &bt, b, &at, beta, c, cntx );
+
+	// Check matrix squareness.
+
+	e_val = bli_check_square_object( c );
+	bli_check_error_code( e_val );
+
+	// Check matrix structure.
+
+	e_val = bli_check_skew_symmetric_object( c );
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_general_object( a );

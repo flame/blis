@@ -251,6 +251,8 @@ void PASTEMAC(opname,EX_SUF) \
 
 GENFRONT( hemv )
 GENFRONT( symv )
+GENFRONT( shmv )
+GENFRONT( skmv )
 
 
 #undef  GENFRONT
@@ -379,6 +381,8 @@ void PASTEMAC(opname,EX_SUF) \
 
 GENFRONT( her2 )
 GENFRONT( syr2 )
+GENFRONT( shr2 )
+GENFRONT( skr2 )
 
 
 #undef  GENFRONT

@@ -99,6 +99,8 @@ typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
 
 INSERT_GENTDEF( hemv )
 INSERT_GENTDEF( symv )
+INSERT_GENTDEF( shmv )
+INSERT_GENTDEF( skmv )
 
 // her
 
@@ -156,6 +158,8 @@ typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
 
 INSERT_GENTDEF( her2 )
 INSERT_GENTDEF( syr2 )
+INSERT_GENTDEF( shr2 )
+INSERT_GENTDEF( skr2 )
 
 // trmv, trsv
 

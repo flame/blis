@@ -83,6 +83,29 @@ void PASTEMAC(ch,opname) \
 INSERT_GENTFUNC_BASIC( invertsc, inverts )
 
 
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype, ctype_r, ch, chr, opname, kername ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+             conj_t conjchi, \
+       const ctype* chi, \
+             ctype* psi  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	ctype chi_conj; \
+	ctype_r chi_conj_r, chi_conj_i; \
+\
+	PASTEMAC(ch,copycjs)( conjchi, *chi, chi_conj ); \
+	PASTEMAC(ch,gets)( chi_conj, chi_conj_r, chi_conj_i ); \
+	PASTEMAC(ch,sets)( -chi_conj_r, -chi_conj_i, *psi ); \
+}
+
+INSERT_GENTFUNCR_BASIC( negsc, inverts )
+
+
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, kername ) \
 \

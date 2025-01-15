@@ -53,6 +53,8 @@ PASTEMAC(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt ) \
 GENFRONT( asumv )
 GENFRONT( mkherm )
 GENFRONT( mksymm )
+GENFRONT( mkskewherm )
+GENFRONT( mkskewsymm )
 GENFRONT( mktrim )
 GENFRONT( norm1v )
 GENFRONT( normfv )

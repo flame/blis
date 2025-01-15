@@ -88,6 +88,7 @@ void PASTEMAC(opname,_check) \
 GENTPROT( invscald )
 GENTPROT( scald )
 GENTPROT( setd )
+GENTPROT( setrd )
 GENTPROT( setid )
 GENTPROT( shiftd )
 

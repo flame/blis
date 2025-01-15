@@ -88,10 +88,10 @@ INSERT_GENTDEF( ger )
 \
 typedef void (*PASTECH(ch,opname,_unb,tsuf)) \
      ( \
+       struc_t struca, \
        uplo_t  uploa, \
        conj_t  conja, \
        conj_t  conjx, \
-       conj_t  conjh, \
        dim_t   m, \
        ctype*  alpha, \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
@@ -129,10 +129,10 @@ INSERT_GENTDEFR( her )
 \
 typedef void (*PASTECH(ch,opname,_unb,tsuf)) \
      ( \
+       struc_t struca, \
        uplo_t  uploa, \
        conj_t  conjx, \
        conj_t  conjy, \
-       conj_t  conjh, \
        dim_t   m, \
        ctype*  alpha, \
        ctype*  x, inc_t incx, \

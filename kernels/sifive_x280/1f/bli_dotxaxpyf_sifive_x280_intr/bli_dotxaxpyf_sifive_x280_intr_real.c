@@ -118,28 +118,29 @@
         RVV_TYPE_F(PREC, m1) dot##i = VFMV_S_F(PREC, m1)(0., 1);            \
         dot##i = VF_REDUSUM_VS(PREC, LMUL)(yacc##i, dot##i, m);             \
         if (PASTEMAC(PRECISION_CHAR, eq0)(*beta)) {                         \
-            dot##i = VFMUL_VF(PREC, m1)(dot##i, *alpha, 1);                 \
+            dot##i = VFMUL_VF(PREC, m1)(dot##i, *alphaw, 1);                 \
             y[i * incy] = VFMV_F_S(PREC)(dot##i);                           \
         }                                                                   \
         else {                                                              \
             y[i * incy] *= *beta;                                           \
             RVV_TYPE_F(PREC, m1) y##i = VFMV_S_F(PREC, m1)(y[i * incy], 1); \
-            y##i = VFMACC_VF(PREC, m1)(y##i, *alpha, dot##i, 1);            \
+            y##i = VFMACC_VF(PREC, m1)(y##i, *alphaw, dot##i, 1);            \
             y[i * incy] = VFMV_F_S(PREC)(y##i);                             \
         }                                                                   \
     } while (0)
 
 DOTXAXPYF(PRECISION_CHAR, void)
 {
-    // Computes y := beta * y + alpha * conjat(A^T) * conjw(w)
-    //          z :=        z + alpha * conja(A)    * conjx(x)
-    
+    // Computes y := beta * y + alphaw * conjat(A^T) * conjw(w)
+    //          z :=        z + alphax * conja(A)    * conjx(x)
+
     (void) conjat; // Suppress unused parameter warnings
     (void) conja;
     (void) conjw;
     (void) conjx;
     (void) cntx;
-    const DATATYPE* restrict alpha = alpha_;
+    const DATATYPE* restrict alphaw = alphaw_;
+    const DATATYPE* restrict alphax = alphax_;
     const DATATYPE* restrict a = a_;
     const DATATYPE* restrict w = w_;
     const DATATYPE* restrict x = x_;
@@ -148,7 +149,7 @@ DOTXAXPYF(PRECISION_CHAR, void)
     DATATYPE* restrict z = z_;
 
     if (b == 0) return;
-    if (m == 0 || PASTEMAC(PRECISION_CHAR, eq0)(*alpha)) {
+    if (m == 0 || PASTEMAC(PRECISION_CHAR, eq0)(*alphaw)) {
         if (PASTEMAC(PRECISION_CHAR, eq0)(*beta))
             SETV(PRECISION_CHAR)(BLIS_NO_CONJUGATE, b, beta, y, incy, NULL);
         else
@@ -191,12 +192,12 @@ DOTXAXPYF(PRECISION_CHAR, void)
                 zvec = VLE_V_F(PREC, LMUL)(z_tmp, vl);
             else
                 zvec = VLSE_V_F(PREC, LMUL)(z_tmp, FLT_SIZE * incz, vl);
-            zvec = VFMACC_VF(PREC, LMUL)(zvec, *alpha, zacc, vl);
+            zvec = VFMACC_VF(PREC, LMUL)(zvec, *alphax, zacc, vl);
             if (incz == 1)
                 VSE_V_F(PREC, LMUL)(z_tmp, zvec, vl);
             else
                 VSSE_V_F(PREC, LMUL)(z_tmp, FLT_SIZE * incz, zvec, vl);
-              
+
             a_tmp += vl * inca;
             w_tmp += vl * incw;
             z_tmp += vl * incz;
@@ -248,12 +249,12 @@ DOTXAXPYF(PRECISION_CHAR, void)
                 zvec = VLE_V_F(PREC, LMUL)(z_tmp, vl);
             else
                 zvec = VLSE_V_F(PREC, LMUL)(z_tmp, FLT_SIZE * incz, vl);
-            zvec = VFMACC_VF(PREC, LMUL)(zvec, *alpha, zacc, vl);
+            zvec = VFMACC_VF(PREC, LMUL)(zvec, *alphax, zacc, vl);
             if (incz == 1)
                 VSE_V_F(PREC, LMUL)(z_tmp, zvec, vl);
             else
                 VSSE_V_F(PREC, LMUL)(z_tmp, FLT_SIZE * incz, zvec, vl);
-              
+
             a_tmp += vl * inca;
             w_tmp += vl * incw;
             z_tmp += vl * incz;

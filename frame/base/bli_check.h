@@ -83,6 +83,8 @@ err_t bli_check_matrix_strides( dim_t m, dim_t n, inc_t rs, inc_t cs, inc_t is )
 err_t bli_check_general_object( const obj_t* a );
 err_t bli_check_hermitian_object( const obj_t* a );
 err_t bli_check_symmetric_object( const obj_t* a );
+err_t bli_check_skew_hermitian_object( const obj_t* a );
+err_t bli_check_skew_symmetric_object( const obj_t* a );
 err_t bli_check_triangular_object( const obj_t* a );
 err_t bli_check_object_struc( const obj_t* a, struc_t struc );
 

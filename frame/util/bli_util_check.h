@@ -59,6 +59,8 @@ void PASTEMAC(opname,_check) \
 
 GENPROT( mkherm )
 GENPROT( mksymm )
+GENPROT( mkskewherm )
+GENPROT( mkskewsymm )
 GENPROT( mktrim )
 
 

@@ -53,6 +53,7 @@ INSERT_GENTDEF( addsc )
 INSERT_GENTDEF( divsc )
 INSERT_GENTDEF( subsc )
 INSERT_GENTDEF( invertsc )
+INSERT_GENTDEF( negsc )
 
 // mulsc
 

@@ -126,9 +126,9 @@
         RVV_TYPE_F(PREC, m1) y##i##_r, y##i##_i;                                                                   \
         if (PASTEMAC(PRECISION_CHAR, eq0)(*beta)) {                                                                \
             if (bli_is_conj(conjatw))                                                                              \
-                VCMUL_VF_CONJ(PREC, m1, y##i##_r, y##i##_i, dot##i##_r, dot##i##_i, alpha->real, alpha->imag, 1);  \
+                VCMUL_VF_CONJ(PREC, m1, y##i##_r, y##i##_i, dot##i##_r, dot##i##_i, alphaw->real, alphaw->imag, 1);  \
             else                                                                                                   \
-                VCMUL_VF(PREC, m1, y##i##_r, y##i##_i, dot##i##_r, dot##i##_i, alpha->real, alpha->imag, 1);       \
+                VCMUL_VF(PREC, m1, y##i##_r, y##i##_i, dot##i##_r, dot##i##_i, alphaw->real, alphaw->imag, 1);       \
             y[i * incy].real = VFMV_F_S(PREC)(y##i##_r);                                                           \
             y[i * incy].imag = VFMV_F_S(PREC)(y##i##_i);                                                           \
         }                                                                                                          \
@@ -137,9 +137,9 @@
             y##i##_r = VFMV_S_F(PREC, m1)(y[i * incy].real, 1);                                                    \
             y##i##_i = VFMV_S_F(PREC, m1)(y[i * incy].imag, 1);                                                    \
             if (bli_is_conj(conjatw))                                                                              \
-                VCMACC_VF_CONJ(PREC, m1, y##i##_r, y##i##_i, alpha->real, alpha->imag, dot##i##_r, dot##i##_i, 1); \
+                VCMACC_VF_CONJ(PREC, m1, y##i##_r, y##i##_i, alphaw->real, alphaw->imag, dot##i##_r, dot##i##_i, 1); \
             else                                                                                                   \
-                VCMACC_VF(PREC, m1, y##i##_r, y##i##_i, alpha->real, alpha->imag, dot##i##_r, dot##i##_i, 1);      \
+                VCMACC_VF(PREC, m1, y##i##_r, y##i##_i, alphaw->real, alphaw->imag, dot##i##_r, dot##i##_i, 1);      \
             y[i * incy].real = VFMV_F_S(PREC)(y##i##_r);                                                           \
             y[i * incy].imag = VFMV_F_S(PREC)(y##i##_i);                                                           \
         }                                                                                                          \
@@ -147,10 +147,12 @@
 
 DOTXAXPYF(PRECISION_CHAR, void)
 {
-    // Computes y := beta * y + alpha * conjat(A^T) * conjx(x)
-    
+    // Computes y := beta * y + alphaw * conjat(A^T) * conjx(x)
+    //          z :=        z + alphax * conja(A)    * conjx(x)
+
     (void) cntx; // Suppress unused parameter warnings
-    const DATATYPE* restrict alpha = alpha_;
+    const DATATYPE* restrict alphaw = alphaw_;
+    const DATATYPE* restrict alphax = alphax_;
     const DATATYPE* restrict a = a_;
     const DATATYPE* restrict w = w_;
     const DATATYPE* restrict x = x_;
@@ -159,7 +161,7 @@ DOTXAXPYF(PRECISION_CHAR, void)
     DATATYPE* restrict z = z_;
 
     if (b == 0) return;
-    if (m == 0 || PASTEMAC(PRECISION_CHAR, eq0)(*alpha)) {
+    if (m == 0 || PASTEMAC(PRECISION_CHAR, eq0)(*alphaw)) {
         if (PASTEMAC(PRECISION_CHAR, eq0)(*beta))
             SETV(PRECISION_CHAR)(BLIS_NO_CONJUGATE, b, beta, y, incy, NULL);
         else
@@ -262,7 +264,7 @@ DOTXAXPYF(PRECISION_CHAR, void)
                     }
                 }
             }
-              
+
             RVV_TYPE_FX(PREC, LMUL, 2) zvec;
             if (incz == 1)
                 zvec = VLSEG2_V_F(PREC, LMUL, 2)((BASE_DT*) z_tmp, vl);
@@ -271,9 +273,9 @@ DOTXAXPYF(PRECISION_CHAR, void)
             RVV_TYPE_F(PREC, LMUL) zvec_r = VGET_V_F(PREC, LMUL, 2)(zvec, 0);
             RVV_TYPE_F(PREC, LMUL) zvec_i = VGET_V_F(PREC, LMUL, 2)(zvec, 1);
             if (bli_is_conj(conjax))
-                VCMACC_VF_CONJ(PREC, LMUL, zvec_r, zvec_i, alpha->real, alpha->imag, zacc_r, zacc_i, vl);
+                VCMACC_VF_CONJ(PREC, LMUL, zvec_r, zvec_i, alphax->real, alphax->imag, zacc_r, zacc_i, vl);
             else
-                VCMACC_VF(PREC, LMUL, zvec_r, zvec_i, alpha->real, alpha->imag, zacc_r, zacc_i, vl);
+                VCMACC_VF(PREC, LMUL, zvec_r, zvec_i, alphax->real, alphax->imag, zacc_r, zacc_i, vl);
             zvec = VSET_V_F(PREC, LMUL, 2)(zvec, 0, zvec_r);
             zvec = VSET_V_F(PREC, LMUL, 2)(zvec, 1, zvec_i);
             if (incz == 1)
@@ -379,7 +381,7 @@ DOTXAXPYF(PRECISION_CHAR, void)
                     }
                 }
             }
-              
+
             RVV_TYPE_FX(PREC, LMUL, 2) zvec;
             if (incz == 1)
                 zvec = VLSEG2_V_F(PREC, LMUL, 2)((BASE_DT*) z_tmp, vl);
@@ -388,9 +390,9 @@ DOTXAXPYF(PRECISION_CHAR, void)
             RVV_TYPE_F(PREC, LMUL) zvec_r = VGET_V_F(PREC, LMUL, 2)(zvec, 0);
             RVV_TYPE_F(PREC, LMUL) zvec_i = VGET_V_F(PREC, LMUL, 2)(zvec, 1);
             if (bli_is_conj(conjax))
-                VCMACC_VF_CONJ(PREC, LMUL, zvec_r, zvec_i, alpha->real, alpha->imag, zacc_r, zacc_i, vl);
+                VCMACC_VF_CONJ(PREC, LMUL, zvec_r, zvec_i, alphax->real, alphax->imag, zacc_r, zacc_i, vl);
             else
-                VCMACC_VF(PREC, LMUL, zvec_r, zvec_i, alpha->real, alpha->imag, zacc_r, zacc_i, vl);
+                VCMACC_VF(PREC, LMUL, zvec_r, zvec_i, alphax->real, alphax->imag, zacc_r, zacc_i, vl);
             zvec = VSET_V_F(PREC, LMUL, 2)(zvec, 0, zvec_r);
             zvec = VSET_V_F(PREC, LMUL, 2)(zvec, 1, zvec_i);
             if (incz == 1)

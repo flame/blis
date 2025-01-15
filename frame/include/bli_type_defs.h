@@ -273,7 +273,7 @@ typedef void  (*free_ft)  ( void*  p    );
 #define BLIS_PACK_REV_IF_UPPER_NUM_BITS    1
 #define BLIS_PACK_REV_IF_LOWER_NUM_BITS    1
 #define BLIS_PACK_BUFFER_NUM_BITS          2
-#define BLIS_STRUC_NUM_BITS                2
+#define BLIS_STRUC_NUM_BITS                3
 
 
 //
@@ -306,6 +306,10 @@ typedef void  (*free_ft)  ( void*  p    );
 #define   BLIS_SCALAR_PREC_SHIFT         (   BLIS_SCALAR_DOMAIN_SHIFT + BLIS_DOMAIN_NUM_BITS )
 // This is the total number of bits, which should always be <= 32
 #define BLIS_INFO_NUM_BITS               ( BLIS_SCALAR_DT_SHIFT + BLIS_DATATYPE_NUM_BITS )
+
+#if BLIS_INFO_NUM_BITS > 32
+#error "Too many info bits"
+#endif
 
 //
 // -- BLIS info bit field masks ------------------------------------------------
@@ -384,6 +388,8 @@ typedef void  (*free_ft)  ( void*  p    );
 #define BLIS_BITVAL_HERMITIAN           ( 0x1 << BLIS_STRUC_SHIFT )
 #define BLIS_BITVAL_SYMMETRIC           ( 0x2 << BLIS_STRUC_SHIFT )
 #define BLIS_BITVAL_TRIANGULAR          ( 0x3 << BLIS_STRUC_SHIFT )
+#define BLIS_BITVAL_SKEW_HERMITIAN      ( 0x4 << BLIS_STRUC_SHIFT )
+#define BLIS_BITVAL_SKEW_SYMMETRIC      ( 0x5 << BLIS_STRUC_SHIFT )
 
 
 //
@@ -437,7 +443,9 @@ typedef enum
 	BLIS_GENERAL           = BLIS_BITVAL_GENERAL,
 	BLIS_HERMITIAN         = BLIS_BITVAL_HERMITIAN,
 	BLIS_SYMMETRIC         = BLIS_BITVAL_SYMMETRIC,
-	BLIS_TRIANGULAR        = BLIS_BITVAL_TRIANGULAR
+	BLIS_TRIANGULAR        = BLIS_BITVAL_TRIANGULAR,
+	BLIS_SKEW_HERMITIAN    = BLIS_BITVAL_SKEW_HERMITIAN,
+	BLIS_SKEW_SYMMETRIC    = BLIS_BITVAL_SKEW_SYMMETRIC,
 } struc_t;
 
 
@@ -863,11 +871,15 @@ typedef enum
 	BLIS_GEMM = 0,
 	BLIS_GEMMT,
 	BLIS_HEMM,
+	BLIS_SHMM,
 	BLIS_HERK,
 	BLIS_HER2K,
+	BLIS_SHR2K,
 	BLIS_SYMM,
+	BLIS_SKMM,
 	BLIS_SYRK,
 	BLIS_SYR2K,
+	BLIS_SKR2K,
 	BLIS_TRMM3,
 	BLIS_TRMM,
 	BLIS_TRSM,
@@ -1550,6 +1562,8 @@ typedef enum
 	BLIS_EXPECTED_HERMITIAN_OBJECT             = ( -61),
 	BLIS_EXPECTED_SYMMETRIC_OBJECT             = ( -62),
 	BLIS_EXPECTED_TRIANGULAR_OBJECT            = ( -63),
+	BLIS_EXPECTED_SKEW_HERMITIAN_OBJECT        = ( -64),
+	BLIS_EXPECTED_SKEW_SYMMETRIC_OBJECT        = ( -65),
 
 	// Storage-specific errors
 	BLIS_EXPECTED_UPPER_OR_LOWER_OBJECT        = ( -70),

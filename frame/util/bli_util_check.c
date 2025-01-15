@@ -66,6 +66,8 @@ void PASTEMAC(opname,_check) \
 
 GENFRONT( mkherm )
 GENFRONT( mksymm )
+GENFRONT( mkskewherm )
+GENFRONT( mkskewsymm )
 GENFRONT( mktrim )
 
 

@@ -240,6 +240,10 @@
 -1       #   dimensions: m
 ???      #   parameters: uploa conja conjx
 
+1        # shmv
+-1       #   dimensions: m
+???      #   parameters: uploa conja conjx
+
 1        # her
 -1       #   dimensions: m
 ??       #   parameters: uploc conjx
@@ -248,7 +252,15 @@
 -1       #   dimensions: m
 ???      #   parameters: uploc conjx conjy
 
+1        # shr2
+-1       #   dimensions: m
+???      #   parameters: uploc conjx conjy
+
 1        # symv
+-1       #   dimensions: m
+???      #   parameters: uploa conja conjx
+
+1        # skmv
 -1       #   dimensions: m
 ???      #   parameters: uploa conja conjx
 
@@ -257,6 +269,10 @@
 ??       #   parameters: uploc conjx
 
 1        # syr2
+-1       #   dimensions: m
+???      #   parameters: uploc conjx conjy
+
+1        # skr2
 -1       #   dimensions: m
 ???      #   parameters: uploc conjx conjy
 
@@ -296,6 +312,10 @@ nn       #   parameters: transa transb
 -1 -1    #   dimensions: m n
 ??nn     #   parameters: side uploa conja transb
 
+1        # shmm
+-1 -1    #   dimensions: m n
+??nn     #   parameters: side uploa conja transb
+
 1        # herk
 -1 -1    #   dimensions: m k
 ?n       #   parameters: uploc transa
@@ -304,7 +324,15 @@ nn       #   parameters: transa transb
 -1 -1    #   dimensions: m k
 ?nn      #   parameters: uploc transa transb
 
+1        # shr2k
+-1 -1    #   dimensions: m k
+?nn      #   parameters: uploc transa transb
+
 1        # symm
+-1 -1    #   dimensions: m n
+??nn     #   parameters: side uploa conja transb
+
+1        # skmm
 -1 -1    #   dimensions: m n
 ??nn     #   parameters: side uploa conja transb
 
@@ -313,6 +341,10 @@ nn       #   parameters: transa transb
 ?n       #   parameters: uploc transa
 
 1        # syr2k
+-1 -1    #   dimensions: m k
+?nn      #   parameters: uploc transa transb
+
+1        # skr2k
 -1 -1    #   dimensions: m k
 ?nn      #   parameters: uploc transa transb
 
