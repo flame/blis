@@ -579,17 +579,20 @@ LPGEMV_N_EQ1_KERN(int8_t, int8_t, int32_t, s8s8s32os32)
 			if ( post_ops_list_temp->stor_type == BF16 )
 			{
 				selector1 =
-					( _mm512_sllv_epi32
+					_mm512_cvtps_epi32
+					(
+						( __m512)( _mm512_sllv_epi32
 						(
 						_mm512_cvtepi16_epi32
 							(
 							_mm256_maskz_loadu_epi16
-								(
-								_cvtu32_mask16( 0xFFFF ),
-								( ( bfloat16* )post_ops_list_temp->op_args1 )
-								)
+							(
+							_cvtu32_mask16( 0xFFFF ),
+							( ( bfloat16* )post_ops_list_temp->op_args1 )
+							)
 							), _mm512_set1_epi32( 16 )
 						)
+				  		)
 					);
 			}
 			else if ( post_ops_list_temp->stor_type == S8 )
