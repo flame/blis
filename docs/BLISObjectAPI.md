@@ -82,6 +82,7 @@ The following tables list various types used throughout the BLIS object API.
 | `inc_t`           | `gint_t`                 | matrix row/column strides and vector increments.                     |
 | `doff_t`          | `gint_t`                 | matrix diagonal offset: if _k_ < 0, diagonal begins at element (-_k_,0); otherwise diagonal begins at element (0,_k_). |
 | `siz_t`           | `guint_t`                | a byte size or byte offset.                                          |
+| `kerid_t`         | `uint32_t`               | a kernel, block size, operation, or kernel preference ID.        |
 
 ### Floating-point types
 

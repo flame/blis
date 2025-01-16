@@ -41,9 +41,9 @@
 
 #define plugin_@plugin_name@_params \
 \
-       siz_t* bszids, /* <----- Example arguments       */ \
-       siz_t* kerids, /* <----- for plugin registration */ \
-       siz_t* prefids /* <----- and initialization.     */
+       kerid_t* bszids, /* <----- Example arguments       */ \
+       kerid_t* kerids, /* <----- for plugin registration */ \
+       kerid_t* prefids /* <----- and initialization.     */
 
 #define plugin_@plugin_name@_params_only \
 \
