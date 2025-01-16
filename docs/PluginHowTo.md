@@ -722,7 +722,7 @@ void dsyrkd
 ## Registration
 
 ```C++
-err_t bli_gks_register_ukr( siz_t* ukr_id );
+err_t bli_gks_register_ukr( kerid_t* ukr_id );
 ```
 
 Register a new microkernel, which may have a different implementation for each supported data type.
@@ -733,7 +733,7 @@ Register a new microkernel, which may have a different implementation for each s
 </table>
 
 ```C++
-err_t bli_gks_register_ukr2( siz_t* ukr_id );
+err_t bli_gks_register_ukr2( kerid_t* ukr_id );
 ```
 
 Register a new microkernel, which may have a different implementation for each *pair* of supported data types.
@@ -744,7 +744,7 @@ Register a new microkernel, which may have a different implementation for each *
 </table>
 
 ```C++
-err_t bli_gks_register_blksz( siz_t* bs_id );
+err_t bli_gks_register_blksz( kerid_t* bs_id );
 ```
 
 Register a new blocksize, which may have a different integral value for each supported data type.
@@ -755,7 +755,7 @@ Register a new blocksize, which may have a different integral value for each sup
 </table>
 
 ```C++
-err_t bli_gks_register_ukr_pref( siz_t* ukr_pref_id );
+err_t bli_gks_register_ukr_pref( kerid_t* ukr_pref_id );
 ```
 
 Register a new microkernel preference, which may have a different logical value for each supported data type.
@@ -976,73 +976,73 @@ void bli_mbool_free( mbool_t* b );
 ## Context Initialization
 
 ```C++
-err_t bli_cntx_set_ukr( siz_t ukr_id, const func_t* func, cntx_t* cntx );
+err_t bli_cntx_set_ukr( kerid_t ukr_id, const func_t* func, cntx_t* cntx );
 ```
 
 ```C++
-void bli_cntx_set_ukr_dt( void_fp fp, num_t dt, siz_t ukr_id, const func_t* func, cntx_t* cntx );
+void bli_cntx_set_ukr_dt( void_fp fp, num_t dt, kerid_t ukr_id, const func_t* func, cntx_t* cntx );
 ```
 
 ```C++
-err_t bli_cntx_set_ukr2( siz_t ukr_id, const func2_t* func, cntx_t* cntx );
+err_t bli_cntx_set_ukr2( kerid_t ukr_id, const func2_t* func, cntx_t* cntx );
 ```
 
 ```C++
-void bli_cntx_set_ukr2_dt( void_fp fp, num_t dt1, num_t dt2, siz_t ukr_id, const func_t* func, cntx_t* cntx );
+void bli_cntx_set_ukr2_dt( void_fp fp, num_t dt1, num_t dt2, kerid_t ukr_id, const func_t* func, cntx_t* cntx );
 ```
 
 ```C++
-err_t bli_cntx_set_blksz( siz_t bs_id, const blksz_t* blksz, siz_t mult_id, cntx_t* cntx );
+err_t bli_cntx_set_blksz( kerid_t bs_id, const blksz_t* blksz, kerid_t mult_id, cntx_t* cntx );
 ```
 
 ```C++
-void bli_cntx_set_blksz_def_dt( num_t dt, siz_t bs_id, dim_t bs, cntx_t* cntx );
+void bli_cntx_set_blksz_def_dt( num_t dt, kerid_t bs_id, dim_t bs, cntx_t* cntx );
 ```
 
 ```C++
-void bli_cntx_set_blksz_max_dt( num_t dt, siz_t bs_id, dim_t bs, cntx_t* cntx );
+void bli_cntx_set_blksz_max_dt( num_t dt, kerid_t bs_id, dim_t bs, cntx_t* cntx );
 ```
 
 ```C++
-err_t bli_cntx_set_ukr_pref( siz_t ukr_pref_id, const mbool_t* prefs, cntx_t* cntx );
+err_t bli_cntx_set_ukr_pref( kerid_t ukr_pref_id, const mbool_t* prefs, cntx_t* cntx );
 ```
 
 ```C++
-err_t bli_cntx_set_ukr_pref_dt( bool pref, num_t dt, siz_t ukr_pref_id, cntx_t* cntx );
+err_t bli_cntx_set_ukr_pref_dt( bool pref, num_t dt, kerid_t ukr_pref_id, cntx_t* cntx );
 ```
 
 ```C++
 void bli_cntx_set_ukrs( cntx_t* cntx,
-                        siz_t ukr0_id, num_t dt0, void_fp ukr0_fp,
-                        siz_t ukr1_id, num_t dt1, void_fp ukr1_fp,
-                        siz_t ukr2_id, num_t dt2, void_fp ukr2_fp,
+                        kerid_t ukr0_id, num_t dt0, void_fp ukr0_fp,
+                        kerid_t ukr1_id, num_t dt1, void_fp ukr1_fp,
+                        kerid_t ukr2_id, num_t dt2, void_fp ukr2_fp,
                         ...,
                         BLIS_VA_END );
 ```
 
 ```C++
 void bli_cntx_set_ukr2s( cntx_t* cntx,
-                         siz_t ukr0_id, num_t dt1_0, num_t dt2_0, void_fp ukr0_fp,
-                         siz_t ukr1_id, num_t dt1_1, num_t dt2_1, void_fp ukr1_fp,
-                         siz_t ukr2_id, num_t dt1_2, num_t dt2_2, void_fp ukr2_fp,
+                         kerid_t ukr0_id, num_t dt1_0, num_t dt2_0, void_fp ukr0_fp,
+                         kerid_t ukr1_id, num_t dt1_1, num_t dt2_1, void_fp ukr1_fp,
+                         kerid_t ukr2_id, num_t dt1_2, num_t dt2_2, void_fp ukr2_fp,
                          ...,
                          BLIS_VA_END );
 ```
 
 ```C++
 void bli_cntx_set_blksz( cntx_t* cntx,
-                         siz_t bs0_id, const blksz_t* blksz0, siz_t bm0_id,
-                         siz_t bs1_id, const blksz_t* blksz1, siz_t bm1_id,
-                         siz_t bs2_id, const blksz_t* blksz2, siz_t bm2_id,
+                         kerid_t bs0_id, const blksz_t* blksz0, kerid_t bm0_id,
+                         kerid_t bs1_id, const blksz_t* blksz1, kerid_t bm1_id,
+                         kerid_t bs2_id, const blksz_t* blksz2, kerid_t bm2_id,
                          ...,
                          BLIS_VA_END );
 ```
 
 ```C++
 void bli_cntx_set_ukr_prefs( cntx_t* cntx,
-                             siz_t ukr_pref0_id, num_t dt0, bool ukr_pref0,
-                             siz_t ukr_pref1_id, num_t dt1, bool ukr_pref1,
-                             siz_t ukr_pref2_id, num_t dt2, bool ukr_pref2,
+                             kerid_t ukr_pref0_id, num_t dt0, bool ukr_pref0,
+                             kerid_t ukr_pref1_id, num_t dt1, bool ukr_pref1,
+                             kerid_t ukr_pref2_id, num_t dt2, bool ukr_pref2,
                              ...,
                              BLIS_VA_END );
 ```
@@ -1058,51 +1058,51 @@ const cntx_t* bli_gks_lookup_id( arch_t id );
 ```
 
 ```C++
-const func_t* bli_cntx_get_ukrs( siz_t ukr_id, const cntx_t* cntx );
+const func_t* bli_cntx_get_ukrs( kerid_t ukr_id, const cntx_t* cntx );
 ```
 
 ```C++
-void_fp bli_cntx_get_ukr_dt( num_t dt, siz_t ukr_id, const cntx_t* cntx );
+void_fp bli_cntx_get_ukr_dt( num_t dt, kerid_t ukr_id, const cntx_t* cntx );
 ```
 
 ```C++
-const func2_t* bli_cntx_get_ukr2s( siz_t ukr_id, const cntx_t* cntx );
+const func2_t* bli_cntx_get_ukr2s( kerid_t ukr_id, const cntx_t* cntx );
 ```
 
 ```C++
-void_fp bli_cntx_get_ukr2_dt( num_t dt1, num_t dt2, siz_t ukr_id, const cntx_t* cntx );
+void_fp bli_cntx_get_ukr2_dt( num_t dt1, num_t dt2, kerid_t ukr_id, const cntx_t* cntx );
 ```
 
 ```C++
-const blksz_t* bli_cntx_get_blksz( siz_t bs_id, const cntx_t* cntx );
+const blksz_t* bli_cntx_get_blksz( kerid_t bs_id, const cntx_t* cntx );
 ```
 
 ```C++
-dim_t bli_cntx_get_blksz_def_dt( num_t dt, siz_t bs_id, const cntx_t* cntx );
+dim_t bli_cntx_get_blksz_def_dt( num_t dt, kerid_t bs_id, const cntx_t* cntx );
 ```
 
 ```C++
-dim_t bli_cntx_get_blksz_max_dt( num_t dt, siz_t bs_id, const cntx_t* cntx );
+dim_t bli_cntx_get_blksz_max_dt( num_t dt, kerid_t bs_id, const cntx_t* cntx );
 ```
 
 ```C++
-siz_t bli_cntx_get_bmult_id( siz_t bs_id, const cntx_t* cntx );
+kerid_t bli_cntx_get_bmult_id( kerid_t bs_id, const cntx_t* cntx );
 ```
 
 ```C++
-const blksz_t* bli_cntx_get_bmult( siz_t bs_id, const cntx_t* cntx );
+const blksz_t* bli_cntx_get_bmult( kerid_t bs_id, const cntx_t* cntx );
 ```
 
 ```C++
-dim_t bli_cntx_get_bmult_dt( num_t dt, siz_t bs_id, const cntx_t* cntx );
+dim_t bli_cntx_get_bmult_dt( num_t dt, kerid_t bs_id, const cntx_t* cntx );
 ```
 
 ```C++
-const mbool_t* bli_cntx_get_ukr_prefs( siz_t ukr_pref_id, const cntx_t* cntx );
+const mbool_t* bli_cntx_get_ukr_prefs( kerid_t ukr_pref_id, const cntx_t* cntx );
 ```
 
 ```C++
-bool bli_cntx_get_ukr_prefs_dt( num_t dt, siz_t ukr_pref_id, const cntx_t* cntx );
+bool bli_cntx_get_ukr_prefs_dt( num_t dt, kerid_t ukr_pref_id, const cntx_t* cntx );
 ```
 
 ## Control tree modification
