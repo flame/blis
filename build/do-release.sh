@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -41,46 +41,45 @@
 
 print_usage()
 {
-	#local script_name
-	
-	# Get the script name
-	#script_name=${0##*/}
-	
-	# Echo usage info
-	echo " "
-	echo " "$script_name
-	echo " "
-	echo " Field G. Van Zee"
-	echo " "
-	echo " Performs a series of actions needed when creating a new release"
-	echo " candidate branch for BLIS:"
-	echo "   1. Overwrite the version file with the version string passed"
-	echo "      into this script (<new_vers>)."
-	echo "   2. Commit the updated version file."
-	echo "   3. Update the CHANGELOG file."
-	echo "   4. Commit the updated CHANGELOG file."
-	echo "   5. Create a new branch (named '<new_vers>-rc0') which refers to"
-	echo "      the commit created in (4)."
-	echo " "
-	echo " Usage:"
-	echo "   ${script_name} [options] new_vers"
-	echo " "
-	echo " Arguments:"
-	echo " "
-	echo "   new_vers     The new version string."
-	echo " "
-	echo " Options:"
-	echo " "
-	echo "   -d           dry-run"
-	echo "                  Go through all the motions, but don't actually make any"
-	echo "                  changes to files or perform any git commits. Note that"
-	echo "                  this will result in the commits for (2) and (5) above"
-	echo "                  being equal to the initial commit in the script output."
-	echo "   -f VERSFILE  version file name"
-	echo "                  Update VERSFILE with new version string instead of default"
-	echo "                  'version' file."
-	
-	# Exit with non-zero exit status
+	echo <<- EOF
+
+	$script_name
+
+	 Field G. Van Zee
+
+	 Performs a series of actions needed when creating a new release
+	 candidate branch for BLIS:
+	   1. Overwrite the version file with the version string passed
+	      into this script (<new_vers>).
+	   2. Commit the updated version file.
+	   3. Update the CHANGELOG file.
+	   4. Commit the updated CHANGELOG file.
+	   5. Create a new branch (named 'r<new_vers>') which refers to
+	      the commit created in (4).
+	   6. Tag the commit created in (4) with a tage '<new_vers>'.
+
+	 Usage:
+	   ${script_name} [options] new_vers"
+
+	 Arguments:
+
+	   new_vers     The new version string.
+
+	 Options:
+
+	   -b           bare update
+	                  Update the version and CHANGELOG files but do not create
+	                  a release branch or tag.
+	   -d           dry-run
+	                  Go through all the motions, but don't actually make any
+	                  changes to files or perform any git commits. Note that
+	                  this will result in the commits for (2) and (4) above
+	                  being equal to the initial commit in the script output.
+	   -f VERSFILE  version file name
+	                  Update VERSFILE with new version string instead of default
+	                  'version' file.
+	EOF
+
 	exit 1
 }
 
@@ -117,17 +116,21 @@ main()
 
 	# The git directory.
 	gitdir='.git'
-	
+
 	# Whether we are performing a dry run or not.
-	dry_run_flag=""	
+	dry_run_flag=""
+
+	# Whether we are doing a bare update or not.
+	bare_flag=""
 
 	# -- END GLOBAL VARIABLE DECLARATIONS --
 
 
 	# Process our command line options.
-	while getopts ":dhf:" opt; do
+	while getopts ":dhbf:" opt; do
 		case $opt in
 			d  ) dry_run_flag="1" ;;
+			b  ) bare_flag="1" ;;
 			f  ) version_file=$OPTARG ;;
 			h  ) print_usage ;;
 			\? ) print_usage
@@ -152,10 +155,12 @@ main()
 	if [ $# = "1" ]; then
 
 		new_version_str=$1
-		new_rc_str="${new_version_str}-rc0"
+		new_rc_str="r${new_version_str}"
 
 		echo "${script_name}: new version string: '${new_version_str}'."
-		echo "${script_name}: preparing to create release candidate branch '${new_rc_str}'."
+		if [ -z "${bare_flag}" ]; then
+			echo "${script_name}: preparing to create release (candidate) branch '${new_rc_str}'."
+		fi
 
 	else
 		print_usage
@@ -175,10 +180,8 @@ main()
 			echo "${new_version_str}" > ${version_file}
 		fi
 
-		echo "${script_name}: executing: git checkout ${master_br}."
 		echo "${script_name}: executing: git commit -m \"Version file update (${new_version_str})\" ${version_file}."
 		if [ -z "$dry_run_flag" ]; then
-			git checkout ${master_br}
 			git commit -m "Version file update (${new_version_str})" ${version_file}
 		fi
 
@@ -187,13 +190,7 @@ main()
 
 		echo "${script_name}: updating '${changelog_file}'."
 		if [ -z "$dry_run_flag" ]; then
-
-			# If 'make distclean' was run recently, we need to re-run
-			# configure in order for 'make changelog' to work properly.
-			if [ ! -f "${configmk_file}" ]; then
-				./configure auto
-			fi
-			make changelog
+			git log --no-decorate > ${changelog_file}
 		fi
 
 		echo "${script_name}: executing: git commit -m \"CHANGELOG update (${new_version_str})\" ${changelog_file}."
@@ -204,20 +201,28 @@ main()
 		git_commit_str=$(git describe --always)
 		echo "${script_name}: new commit containing CHANGELOG update: ${git_commit_str}."
 
-		echo "${script_name}: executing: git checkout -b ${new_rc_str}."
-		if [ -z "$dry_run_flag" ]; then
-			git checkout -b "${new_rc_str}"
-		fi
+		if [ -z "${bare_flag}" ]; then
 
-		echo "${script_name}: "
-		echo "${script_name}: FINAL STEPS: Check the output of 'git log'. If everything"
-		echo "${script_name}: looks okay, execute these commands manually:"
-		echo "${script_name}: "
-		echo "${script_name}:   git checkout master"
-		echo "${script_name}:   git push"
-		echo "${script_name}:   git push -u origin ${new_rc_str}"
-		echo "${script_name}: "
-		
+			echo "${script_name}: Creating branch ${new_rc_str}."
+			if [ -z "$dry_run_flag" ]; then
+				git branch "${new_rc_str}"
+			fi
+
+			echo "${script_name}: Tagging branch ${new_rc_str} with tag ${new_version_str}."
+			if [ -z "$dry_run_flag" ]; then
+				git tag "${new_version_str}" "${new_rc_str}"
+			fi
+
+			echo "${script_name}: "
+			echo "${script_name}: FINAL STEPS: Check the output of 'git log'. If everything"
+			echo "${script_name}: looks okay, push the new branch manually:"
+			echo "${script_name}: "
+			echo "${script_name}:   git push"
+			echo "${script_name}:   git push --tags"
+			echo "${script_name}:   git push -u origin ${new_rc_str}"
+			echo "${script_name}: "
+
+		fi
 
 	else
 
