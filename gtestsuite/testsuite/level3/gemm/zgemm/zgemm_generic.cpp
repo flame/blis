@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -257,6 +257,31 @@ INSTANTIATE_TEST_SUITE_P(
         ::gemmGenericPrint<dcomplex>()
     );
 
+/* NOTE : The instantiator here defines sizes such that on zen4/zen5 machines,
+          the tiny path is taken. */
+INSTANTIATE_TEST_SUITE_P(
+        Tiny_Matrix_ST,
+        zgemmGeneric,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                                              // storage format
+            ::testing::Values('n', 'c', 't'),                               // transa
+            ::testing::Values('n', 'c', 't'),                               // transb
+            ::testing::Values(gtint_t(2), gtint_t(40), gtint_t(61)),  // m
+            ::testing::Values(gtint_t(2), gtint_t(3), gtint_t(7)),    // n
+            ::testing::Values(gtint_t(10), gtint_t(16), gtint_t(21)), // k
+            ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0}, dcomplex{0, 1.0}, dcomplex{-1.0, -2.0}), // alpha
+            ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0}, dcomplex{0, 1.0}, dcomplex{1.0, 2.0}),   // beta
+            ::testing::Values(gtint_t(0), gtint_t(1)),                      // increment to the leading dim of a
+            ::testing::Values(gtint_t(0), gtint_t(2)),                      // increment to the leading dim of b
+            ::testing::Values(gtint_t(0), gtint_t(3))                       // increment to the leading dim of c
+        ),
+        ::gemmGenericPrint<dcomplex>()
+    );
+
 INSTANTIATE_TEST_SUITE_P(
         SMALL_Matrix_ST,
         zgemmGeneric,
@@ -268,9 +293,9 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('n', 'c', 't'),                               // transa
             ::testing::Values('n', 'c', 't'),                               // transb
-            ::testing::Values(gtint_t(2), gtint_t(3), gtint_t(7), gtint_t(8)), // m
-            ::testing::Values(gtint_t(2), gtint_t(3), gtint_t(7), gtint_t(8)), // n
-            ::testing::Values(gtint_t(2), gtint_t(4), gtint_t(10)),            // k
+            ::testing::Values(gtint_t(201), gtint_t(3), gtint_t(7), gtint_t(8)), // m
+            ::testing::Values(gtint_t(2), gtint_t(3), gtint_t(7), gtint_t(8)),   // n
+            ::testing::Values(gtint_t(2), gtint_t(4), gtint_t(10)),              // k
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0}, dcomplex{0, 1.0}, dcomplex{-1.0, -2.0}), // alpha
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0}, dcomplex{0, 1.0}, dcomplex{1.0, 2.0}),   // beta
             ::testing::Values(gtint_t(0), gtint_t(1)),                      // increment to the leading dim of a

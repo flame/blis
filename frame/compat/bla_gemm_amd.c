@@ -713,11 +713,11 @@ void dgemm_blis_impl
             blis_transa,
             blis_transb,
             m0, n0, k0,
-            alpha,
-            a, rs_a, cs_a,
-            b, rs_b, cs_b,
-            beta,
-            c, rs_c, cs_c
+            (double*)alpha,
+            (double*)a, rs_a, cs_a,
+            (double*)b, rs_b, cs_b,
+            (double*)beta,
+            (double*)c, rs_c, cs_c
             );
 
     if(tiny_ret == BLIS_SUCCESS)
@@ -1243,6 +1243,33 @@ void zgemm_blis_impl
     bli_obj_set_conjtrans( blis_transb, &bo );
 
     bool is_parallel = bli_thread_get_is_parallel(); // Check if parallel zgemm is invoked.
+
+    // Tiny gemm dispatch
+    // NOTE : The tiny gemm interface is intended to be built for zen4/zen5 configurations
+    //        In case of fat-binary build, the optimizations will be used on zen4 and zen5
+    //        machines.
+#if defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_ZEN5) || defined(BLIS_FAMILY_AMDZEN)
+    err_t ret_status = bli_zgemm_tiny
+                       (
+                         blis_transa,
+                         blis_transb,
+                         m0, n0, k0,
+                         (dcomplex*)alpha,
+                         (dcomplex*)a, rs_a, cs_a,
+                         (dcomplex*)b, rs_b, cs_b,
+                         (dcomplex*)beta,
+                         (dcomplex*)c, rs_c, cs_c,
+                         is_parallel
+                       );
+
+    if( ret_status == BLIS_SUCCESS )
+    {
+        AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *m, *n, *k);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+        bli_finalize_auto();
+        return;
+    }
+#endif
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 

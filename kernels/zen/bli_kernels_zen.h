@@ -32,6 +32,10 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+
+// Including the header for tiny gemm kernel signatures
+#include "bli_gemm_tiny_avx2.h"
+
 // -- level-1m --
 // Removed - reference packm kernels are used
 

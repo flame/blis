@@ -4,7 +4,6 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -33,17 +32,20 @@
 
 */
 
-#include "bli_gemm_cntl.h"
-#include "bli_gemm_front.h"
-#include "bli_gemm_int.h"
+#ifndef BLIS_CONFIG_ZEN_H
+#define BLIS_CONFIG_ZEN_H
 
-#include "bli_gemm_var.h"
+/* Thresholds for ZGEMM Tiny code-paths.
+   This is based on the micro-architecture.
+   For now, we are not defining the threshold for ZEN based architectures.
+   Thus, it would take the subsequent paths(small, sup, native) */
+#define zgemm_tiny_zen_avx2( transa, transb, m, n, k, is_parallel ) \
+  ( 0 ) \
 
-#include "bli_gemm_ind_opt.h"
+/* Defining the macro to be used for selecting the kernel at runtime */
+#define ZEN_UKR_SELECTOR( ch, transa, transb, m, n, k, stor_id, ukr_support, gemmtiny_ukr_info, is_parallel ) \
+    if ( PASTECH3( ch, gemm_tiny, _zen, _avx2 )( transa, transb, m, n, k, is_parallel ) ) \
+      LOOKUP_AVX2_UKR( ch, stor_id, ukr_support, gemmtiny_ukr_info ) \
+    break;
 
-#include "bli_tiny_gemm.h"
-
-// Mixed datatype support.
-#ifdef BLIS_ENABLE_GEMM_MD
-#include "bli_gemm_md.h"
 #endif

@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2021 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1031,6 +1031,15 @@ typedef enum
 // This header must be included here (or earlier) because definitions it
 // provides are needed in the pool_t and related structs.
 #include "bli_pthread.h"
+
+// Tiny GEMM ukr info type
+typedef struct
+{
+    void* ukr_fp;            // Generic function pointer for tiny(SUP) kernels
+    bool stor_pref;          // Storage preference of the kernel
+    dim_t MR;                // Blocking dimension MR
+    dim_t NR;                // Blocking dimension NR
+} gemmtiny_ukr_info_t;
 
 // -- Pool block type --
 

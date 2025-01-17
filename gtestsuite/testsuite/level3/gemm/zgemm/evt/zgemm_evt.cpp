@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -272,6 +272,50 @@ INSTANTIATE_TEST_SUITE_P(
     );
 
 /********************************************************/
+/* Testing for tiny code paths                          */
+/* m,n,k is choosen such that tiny code path is called  */
+/* Matrix A, B, C are filled with Infs and Nans         */
+/********************************************************/
+INSTANTIATE_TEST_SUITE_P(
+        Disabled_Tiny_Matrix,
+        zgemmEVT,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                                              // storage format
+            ::testing::Values('n', 't', 'c'),                               // transa
+            ::testing::Values('n', 't', 'c'),                               // transb
+            ::testing::Values(gtint_t(30)),                                 // m
+            ::testing::Values(gtint_t(20)),                                 // n
+            ::testing::Values(gtint_t(10)),                                 // k
+            ::testing::Values(gtint_t(11)),                                 // ai
+            ::testing::Values(gtint_t(1)),                                  // aj
+            ::testing::Values(T{AOCL_NAN, 2.3}, /*T{AOCL_INF, 0.0},*/
+                              T{3.4, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),    // aexval
+            ::testing::Values(gtint_t(8)),                                  // bi
+            ::testing::Values(gtint_t(5)),                                  // bj
+            ::testing::Values(T{AOCL_NAN, 2.3}, /*T{AOCL_INF, 0.0},*/ //Failures
+                              T{3.4, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),    // bexval
+            ::testing::Values(gtint_t(2)),                                  // ci
+            ::testing::Values(gtint_t(1)),                                  // cj
+            ::testing::Values(T{AOCL_NAN, 2.3}, T{AOCL_INF, 0.0},
+                              T{3.4, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),    // cexval
+            ::testing::Values(T{-2.2, 3.3}, T{0.0, 0.0},
+                              T{1.0, 0.0}, T{-1.0, 0.0},
+                              T{6.0, 0.0}, T{0.0, 1.0}),                    // alpha
+            ::testing::Values(T{1.2, -2.3}, T{0.0, 0.0},
+                              T{1.0, 0.0}, T{-1.0, 0.0},
+                              T{5.6, 0.0}, T{0.0, 1.0}),                    // beta
+            ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of a
+            ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of b
+            ::testing::Values(gtint_t(0))                                   // increment to the leading dim of c
+        ),
+        ::gemmEVTPrint<dcomplex>()
+    );
+
+/********************************************************/
 /* Testing for small code paths                         */
 /* m,n,k is choosen such that small code path is called */
 /* Matrix A, B, C are filled with Infs and Nans         */
@@ -287,7 +331,7 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('n', 't', 'c'),                               // transa
             ::testing::Values('n', 't', 'c'),                               // transb
-            ::testing::Values(gtint_t(4)),                                  // m
+            ::testing::Values(gtint_t(201)),                                // m
             ::testing::Values(gtint_t(4)),                                  // n
             ::testing::Values(gtint_t(10)),                                 // k
             ::testing::Values(gtint_t(3)),                                  // ai

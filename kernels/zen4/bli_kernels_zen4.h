@@ -32,6 +32,9 @@
 
 */
 
+// Including the header for tiny gemm kernel signatures
+#include "bli_gemm_tiny_avx512.h"
+
 // -- level-1v --
 
 // addv (intrinsics)

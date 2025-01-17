@@ -4,7 +4,6 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -33,17 +32,24 @@
 
 */
 
-#include "bli_gemm_cntl.h"
-#include "bli_gemm_front.h"
-#include "bli_gemm_int.h"
+#include "blis.h"
 
-#include "bli_gemm_var.h"
+// Function prototypes for the bli_?gemm_tiny() interfaces
+#undef  GENTFUNC
+#define GENTFUNC( ftype, ch, tfuncname ) \
+err_t PASTEMAC( ch, tfuncname ) \
+    ( \
+      trans_t transa, \
+      trans_t transb, \
+      dim_t  m0, \
+      dim_t  n0, \
+      dim_t  k0, \
+      const ftype*    alpha, \
+      const ftype*    a, const inc_t rs_a0, const inc_t cs_a0, \
+      const ftype*    b, const inc_t rs_b0, const inc_t cs_b0, \
+      const ftype*    beta, \
+      ftype*    c, const inc_t rs_c0, const inc_t cs_c0, \
+      bool is_parallel \
+    ); \
 
-#include "bli_gemm_ind_opt.h"
-
-#include "bli_tiny_gemm.h"
-
-// Mixed datatype support.
-#ifdef BLIS_ENABLE_GEMM_MD
-#include "bli_gemm_md.h"
-#endif
+GENTFUNC( dcomplex, z, gemm_tiny )

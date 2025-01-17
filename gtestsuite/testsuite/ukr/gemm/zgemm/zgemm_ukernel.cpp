@@ -56,9 +56,9 @@ class zgemmGenericSUP:
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zgemmGenericSUP);
 
+using T = dcomplex;
 TEST_P( zgemmGenericSUP, UKR )
 {
-    using T = dcomplex;
     gtint_t m                = std::get<0>(GetParam());                     // dimension m
     gtint_t n                = std::get<1>(GetParam());                     // dimension n
     gtint_t k                = std::get<2>(GetParam());                     // dimension k
