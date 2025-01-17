@@ -4,6 +4,8 @@
 
 ## Contents
 
+* [Changes in 3.0](ReleaseNotes.md#changes-in-30)
+* [Changes in 2.0](ReleaseNotes.md#changes-in-20)
 * [Changes in 1.0](ReleaseNotes.md#changes-in-10)
 * [Changes in 0.9.0](ReleaseNotes.md#changes-in-090)
 * [Changes in 0.8.1](ReleaseNotes.md#changes-in-081)
@@ -40,6 +42,66 @@
 * [Changes in 0.0.3](ReleaseNotes.md#changes-in-003)
 * [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
+
+## Changes in 3.0:
+In development
+
+Improvements present in 3.0:
+
+Framework:
+- Fixed an issue which could cause a segfault on x86-64 with `-m32` (and potentially, on other 64-bit setups) stemming from how enum constants are passed to variadic functions. (Igor Zhuravlov)
+
+## Changes in 2.0:
+January 15, 2025
+
+Improvements present in 2.0:
+
+Known Issues:
+- There is a performance regression in the `ztrmm` and `ztrsm` operations. On the Ampere Altra, performance is impacted by up to 30%; it is currently unknown if and how much this bug affects other architectures but the effect should be much smaller in most cases.
+
+Framework:
+- BLIS now supports "plugins", which provide additional functionality through user-defined kernels, blocksizes, and kernel preferences. Users can use an installed copy of BLIS (even a binary-only distribution) to create a plugin outside of the BLIS source tree. User-written reference kernels can then be registered into BLIS, and are compiled by the BLIS build system for all configured architecture. This also means that user-provided kernels participate in run-time kernel selection based on the actual hardware used! Additionally, users can provide and register optimized kernels for specific architectures which are automatically selected as appropriate. See `docs/PluginHowTo.md` for more information.
+- A new API has been added which allows users to modify the default "control tree". This data structure defines the specific algorithmic steps used to implement a level-3 BLAS operation such as `gemm` or `syrk`. Users can start with a predefined control tree for one of the level-3 BLAS operations (except `trsm` currently) and then modify it to produce a custom operation. Users can change kernels for packing and computation, associated blocksizes, and provide additional information (such as external parameters or additional data) which is passed directly to the kernels. See `docs/PluginHowTo.md` for more information and a working example.
+- All level-3 BLAS operations (except `trsm`) now support full mixed-precision mixed-domain computation. The A, B, and C matrices, as well as the alpha and beta scalars, may be provided in any of the supported data types (single/double precision and real/complex domain, currently), and an additionally-provided computational precision controls how the computation is actually performed internally. The computational precision can be set on the `obj_t` structure representing the C matrix.
+- Added a `func2_t` struct for dealing with 2-type kernels (see below). A `func2_t` can be safely cast to `func_t` to refer to only kernels with equal type parameters. (Devin Matthews)
+- The `bli_*_front` functions have been removed.
+- Extensive other back-end changes and improvements.
+
+Compatibility:
+- Added a ScaLAPACK compatibility mode which disables some conflicting BLAS definitions. (Field Van Zee)
+- Fixed issues with improperly escaped strings in python scripts for compatibility with python 3.12+. (@AngryLoki)
+- Added a user-defined macro `BLIS_ENABLE_STD_COMPLEX` which uses `std::complex` typedefs in `blis.h` for C++ code.  (Devin Matthews)
+- Fixed a bug in the definition of some scalar level-0 macros affecting compatibility of `bli_creal` and `bli_zreal`, for example. (Devin Matthews)
+- Fixed improperly-quoted strings in Python scripts which affected compatibility with Python 3.12+. (@AngryLoki)
+- The static initializer macros (`BLIS_*_INITIALIZER`) have been fixed for compatibility with C++. (Devin Matthews)
+- Install "helper" `blis.h` and `cblas.h` headers directly to `INCDIR` (in addition to the full files in `INCDIR/blis`). (Field Van Zee, Jed Brown, Mo Zhou)
+
+Kernels:
+- Fixed an out-of-bounds read bug in the `haswell` `gemmsup` kernels. (John Mather)
+- Fixed a bug in the complex-domain `gemm` kernels for `piledriver`. (@rmast)
+- Kernel, blocksizes, and preference lookup functions now use `siz_t` rather than specific enums. (Devin Matthews)
+- Fixed some issues with run-time kernel detection and add more ARM part numbers/manufacturer codes. (John Mather)
+- Kernels can now be added which have two datatype parameters. Kernel IDs are assigned such that 1-type and 2-type kernels cannot be interchanged accidentally. (Devin Matthews)
+- The packing microkernels and computational microkernels (`gemm` and `gemmtrsm`) now receive offsets into the global matrix. The latter are passed via the `auxinfo_t` struct. (Devin Matthews)
+- The separate "MRxk" and "NRxk" packing kernels have been merged into one generic packing kernel. Packing kernels are now expected to pack any size micropanel, but may optimize for specific shapes. (Devin Matthews)
+- Added explicit packing kernels for diagonal portions of matrices, and for certain mixed-domain/1m cases. (Devin Matthews)
+- Improved support for duplication during packing ("broadcast-B") across all packing kernels.
+
+Build system:
+- The `cblas.h` file is now "flattened" immediately after `blis.h` is (if enabled), rather than later in the build process. (Jeff Diamond, Field Van Zee)
+- Added script to help with preparing release candidate branches. (Field Van Zee)
+- The configure script has been overhauled. In particular, using spaces in `CC`/`CXX` is now supported. (Devin Matthews)
+- Improved support for C++ source files in BLIS or in plugins. (Devin Matthews)
+
+Testing:
+- test/3 drivers now allow using the "default" induced method, rather than forcing native or 1m operation. (Field Van Zee, Leick Robinson)
+- Fix some segfaults in the test/3 drivers. (Field Van Zee, Leick Robinson)
+- The testsuite now tests *all* possible type combinations when requested. (Devin Matthews)
+- Improved detection of problems in `make check-blis` and related targets. (Devin Matthews)
+
+Documentation:
+- Added documentation for the new plugin system and for creating custom operations by modifying the BLIS control tree. (Devin Matthews)
+- Updated documentation for downloading BLIS in `README.md` and instructions for maintainers in `RELEASING`. (Field Van Zee)
 
 ## Changes in 1.0
 May 6, 2024
@@ -302,7 +364,7 @@ Kernels:
 Build system:
 - Output a pkgconfig file so that CMake users that use BLIS can find and incorporate BLIS build products. (Ajay Panyala)
 - Fixed an issue in the the configure script's kernel-to-config map that caused `skx` kernel flags to be used when compiling kernels from the `zen` kernel set. This issue wasn't really fixed, but rather tweaked in such a way that it happens to now work. A more proper fix would require a serious rethinking of the configuration system. (Devin Matthews)
-- Fixed the shared library build rule in top-level Makefile. The previous rule was incorrectly only linking prerequisites that were newer than the target (`$?`) rather than correctly linking all prerequisites (`$^`). (Devin Matthews) 
+- Fixed the shared library build rule in top-level Makefile. The previous rule was incorrectly only linking prerequisites that were newer than the target (`$?`) rather than correctly linking all prerequisites (`$^`). (Devin Matthews)
 - Fixed `cc_vendor` for crosstool-ng toolchains. (Isuru Fernando)
 - Allow disabling of `trsm` diagonal pre-inversion at compile time via `--disable-trsm-preinversion`.
 
