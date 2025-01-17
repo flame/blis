@@ -623,13 +623,17 @@ typedef enum
 #define BLIS_2TYPE_KER       (  1u << BLIS_NTYPE_KER_SHIFT)
 #define BLIS_3TYPE_KER       (  2u << BLIS_NTYPE_KER_SHIFT)
 
-#define bli_ker_idx( ker )	 ((ker) & ~BLIS_NTYPE_KER_BITS)
+#define bli_ker_idx( ker )   ( kerid_t )((ker) & ~BLIS_NTYPE_KER_BITS)
 #define bli_ker_ntype( ker ) ((((ker) & BLIS_NTYPE_KER_BITS) >> BLIS_NTYPE_KER_SHIFT) + 1)
+
+// We have to use a 32-bit type here to avoid problems with passing small enum
+// constants to variadic functions. See https://github.com/flame/blis/issues/839.
+typedef uint32_t kerid_t;
 
 // Sentinel constant used to indicate the end of a variable argument function
 // (See bli_cntx.c)
 
-#define BLIS_VA_END  ((siz_t)-1)
+#define BLIS_VA_END  ((kerid_t)-1)
 
 typedef enum
 {
@@ -710,7 +714,7 @@ typedef enum
 	// BLIS_NUM_UKR2S must come after all kernels!
 	BLIS_NUM_UKR2S_, BLIS_NUM_UKR2S = bli_ker_idx( BLIS_NUM_UKR2S_ ),
 
-	// Force the size of ukr_t values to be as large as siz_t
+	// Force the size of ukr_t values to be as large as kerid_t
 	BLIS_UKRS_END_ = BLIS_VA_END
 } ukr_t;
 
@@ -738,7 +742,7 @@ typedef enum
     // BLIS_NUM_UKR_PREFS must be last!
     BLIS_NUM_UKR_PREFS,
 
-	// Force the size of ukr_pref_t values to be as large as siz_t
+	// Force the size of ukr_pref_t values to be as large as kerid_t
 	BLIS_UKR_PREFS_END_ = BLIS_VA_END
 } ukr_pref_t;
 
@@ -876,7 +880,7 @@ typedef enum
 	BLIS_NOID,
 	BLIS_NUM_LEVEL3_OPS = BLIS_NOID,
 
-	// Force the size of opid_t values to be as large as siz_t
+	// Force the size of opid_t values to be as large as kerid_t
 	BLIS_LEVEL3_OPS_END_ = BLIS_VA_END
 } opid_t;
 
@@ -926,7 +930,7 @@ typedef enum
 	              // such as when characterizing a packm operation.
 	BLIS_NUM_BLKSZS = BLIS_NO_PART,
 
-	// Force the size of bszid_t values to be as large as siz_t
+	// Force the size of bszid_t values to be as large as kerid_t
 	BLIS_BLKSZS_END_ = BLIS_VA_END
 } bszid_t;
 

@@ -482,10 +482,10 @@ kimpl_t bli_gks_l3_ukr_impl_type( ukr_t ukr, ind_t method, num_t dt )
 // -- microkernel and block size registration ----------------------------------
 //
 
-err_t bli_gks_register_blksz( siz_t* bs_id )
+err_t bli_gks_register_blksz( kerid_t* bs_id )
 {
-	siz_t id = 0;
-	siz_t next_id;
+	kerid_t id = 0;
+	kerid_t next_id;
 	cntx_t* cntx;
 	err_t err;
 
@@ -513,10 +513,10 @@ err_t bli_gks_register_blksz( siz_t* bs_id )
 	return BLIS_SUCCESS;
 }
 
-err_t bli_gks_register_ukr( siz_t* ukr_id )
+err_t bli_gks_register_ukr( kerid_t* ukr_id )
 {
-	siz_t id = 0;
-	siz_t next_id;
+	kerid_t id = 0;
+	kerid_t next_id;
 	cntx_t* cntx;
 	err_t err;
 
@@ -544,10 +544,10 @@ err_t bli_gks_register_ukr( siz_t* ukr_id )
 	return BLIS_SUCCESS;
 }
 
-err_t bli_gks_register_ukr2( siz_t* ukr_id )
+err_t bli_gks_register_ukr2( kerid_t* ukr_id )
 {
-	siz_t id = 0;
-	siz_t next_id;
+	kerid_t id = 0;
+	kerid_t next_id;
 	cntx_t* cntx;
 	err_t err;
 
@@ -575,10 +575,10 @@ err_t bli_gks_register_ukr2( siz_t* ukr_id )
 	return BLIS_SUCCESS;
 }
 
-err_t bli_gks_register_ukr_pref( siz_t* ukr_pref_id )
+err_t bli_gks_register_ukr_pref( kerid_t* ukr_pref_id )
 {
-	siz_t id = 0;
-	siz_t next_id;
+	kerid_t id = 0;
+	kerid_t next_id;
 	cntx_t* cntx;
 	err_t err;
 

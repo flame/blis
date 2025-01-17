@@ -69,7 +69,7 @@ void PASTEMAC(plugin_init_@plugin_name@,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
 	// ------------------------------------------------------------------------>
 
 	blksz_t blkszs[ MY_NUM_BLOCK_SIZES ];
-	siz_t   bmults[ MY_NUM_BLOCK_SIZES ];
+	kerid_t bmults[ MY_NUM_BLOCK_SIZES ];
 	func_t  funcs[ MY_NUM_KERNELS ];
 	mbool_t mbools[ MY_NUM_KERNEL_PREFS ];
 
