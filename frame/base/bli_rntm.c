@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2021 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1595,11 +1595,40 @@ BLIS_INLINE void aocl_dscalv_dynamic
 	switch (arch_id)
 	{
 		case BLIS_ARCH_ZEN5:
-		case BLIS_ARCH_ZEN4:
-		case BLIS_ARCH_ZEN:
-		case BLIS_ARCH_ZEN2:
-		case BLIS_ARCH_ZEN3:
+			if ( n_elem <= 63894 )
+				*nt_ideal = 1;
+			else if ( n_elem <= 145165 )
+				*nt_ideal = 4;
+			else if ( n_elem <= 4487626 )
+				*nt_ideal = 8;
+			else if ( n_elem <= 5773817 )
+				*nt_ideal = 32;
+			else if ( n_elem <= 10000000 )
+				*nt_ideal = 64;
+			else
+				*nt_ideal = 96;
 
+			break;
+
+		case BLIS_ARCH_ZEN4:
+			if ( n_elem <= 27500 )
+				*nt_ideal = 1;
+			else if ( n_elem <= 100000 )
+				*nt_ideal = 2;
+			else if ( n_elem <= 145000 )
+				*nt_ideal = 4;
+			else if ( n_elem <= 4944375 )
+				*nt_ideal = 8;
+			else if( n_elem <= 10000000 )
+				*nt_ideal = 32;
+			else
+				*nt_ideal = 64;
+
+			break;
+
+		case BLIS_ARCH_ZEN3:
+		case BLIS_ARCH_ZEN2:
+		case BLIS_ARCH_ZEN:
 			if ( n_elem <= 30000)
 				*nt_ideal = 1;
 			else if (n_elem <= 100000)
