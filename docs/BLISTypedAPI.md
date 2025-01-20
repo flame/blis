@@ -77,41 +77,41 @@ The following tables list various types used throughout the BLIS typed API.
 
 ### Floating-point types
 
-| BLIS type  | BLIS char | Type definition                        | Used to represent...                 |
-|:-----------|:----------|:---------------------------------------|:-------------------------------------|
-| `float`    | `s`       | _N/A_                                  | single-precision real numbers    |
-| `double`   | `d`       | _N/A_                                  | double-precision real numbers    |
-| `scomplex` | `c`       | `struct { float real; float imag; }`   | single-precision complex numbers |
-| `dcomplex` | `z`       | `struct { double real; double imag; }` | double-precision complex numbers |
+| BLIS fp type | BLIS char | Type definition                        | Used to represent...              |
+|:-------------|:----------|:---------------------------------------|:----------------------------------|
+| `float`      | `s`       | _N/A_                                  | single-precision real numbers.    |
+| `double`     | `d`       | _N/A_                                  | double-precision real numbers.    |
+| `scomplex`   | `c`       | `struct { float real; float imag; }`   | single-precision complex numbers. |
+| `dcomplex`   | `z`       | `struct { double real; double imag; }` | double-precision complex numbers. |
 
 ### Enumerated parameter types
 
-| `trans_t`                | Semantic meaning: Corresponding matrix operand... |
-|:-------------------------|:--------------------------------------------------|
-| `BLIS_NO_TRANSPOSE`      | will be used as given.                         |
-| `BLIS_TRANSPOSE`         | will be implicitly transposed.                 |
-| `BLIS_CONJ_NO_TRANSPOSE` | will be implicitly conjugated.                 |
+| `trans_t`                | Semantic meaning: Matrix operand...             |
+|:-------------------------|:------------------------------------------------|
+| `BLIS_NO_TRANSPOSE`      | will be used as given.                          |
+| `BLIS_TRANSPOSE`         | will be implicitly transposed.                  |
+| `BLIS_CONJ_NO_TRANSPOSE` | will be implicitly conjugated.                  |
 | `BLIS_CONJ_TRANSPOSE`    | will be implicitly transposed _and_ conjugated. |
 
-| `conj_t`             | Semantic meaning: Corresponding matrix/vector operand... |
-|:---------------------|:---------------------------------------------------------|
-| `BLIS_NO_CONJUGATE`  | will be used as given.                                |
-| `BLIS_CONJUGATE`     | will be implicitly conjugated.                        |
+| `conj_t`             | Semantic meaning: Matrix/vector operand... |
+|:---------------------|:-------------------------------------------|
+| `BLIS_NO_CONJUGATE`  | will be used as given.                     |
+| `BLIS_CONJUGATE`     | will be implicitly conjugated.             |
 
-| `side_t`     | Semantic meaning: Corresponding matrix operand...  |
-|:-------------|:---------------------------------------------------|
-| `BLIS_LEFT`  | appears on the left.                            |
-| `BLIS_RIGHT` | appears on the right.                           |
+| `side_t`     | Semantic meaning: Matrix operand... |
+|:-------------|:------------------------------------|
+| `BLIS_LEFT`  | appears on the left.                |
+| `BLIS_RIGHT` | appears on the right.               |
 
-| `uplo_t`     | Semantic meaning: Corresponding matrix operand... |
-|:-------------|:--------------------------------------------------|
+| `uplo_t`     | Semantic meaning: Matrix operand...                               |
+|:-------------|:------------------------------------------------------------------|
 | `BLIS_LOWER` | is stored in (and will be accessed only from) the lower triangle. |
 | `BLIS_UPPER` | is stored in (and will be accessed only from) the upper triangle. |
 | `BLIS_DENSE` | is stored as a full matrix (ie: in both triangles).               |
 
-| `diag_t`            | Semantic meaning: Corresponding matrix operand... |
-|:--------------------|:--------------------------------------------------|
-| `BLIS_NONUNIT_DIAG` | has a non-unit diagonal that should be explicitly read from. |
+| `diag_t`            | Semantic meaning: Matrix operand...                                        |
+|:--------------------|:---------------------------------------------------------------------------|
+| `BLIS_NONUNIT_DIAG` | has a non-unit diagonal that should be explicitly read from.               |
 | `BLIS_UNIT_DIAG`    | has a unit diagonal that should be implicitly assumed (and not read from). |
 
 ### Basic vs expert interfaces
@@ -195,7 +195,6 @@ void bli_finalize( void );
 # Computational function reference
 
 Notes for interpreting the following prototypes:
-
   * Any occurrence of `?` should be replaced with `s`, `d`, `c`, or `z` to form an actual function name.
   * Any occurrence of `ctype` should be replaced with the actual C type corresponding to the datatype instance in question, while `rtype` should be replaced by the real projection of `ctype`. For example:
     * If we consider the prototype for `bli_zaxpyv()` below, `ctype` refers to `dcomplex`.
