@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, SiFive, Inc.
+   Copyright (C) 2024, SiFive, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,15 +33,18 @@
 */
 
 #include "blis.h"
+#include <riscv_vector.h>
 
-void bli_cntx_init_sifive_x280( cntx_t* cntx )
+void bli_cntx_init_sifive_rvv( cntx_t* cntx )
 {
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 
 	// Set default kernel blocksizes and functions.
-	bli_cntx_init_sifive_x280_ref( cntx );
+	bli_cntx_init_sifive_rvv_ref( cntx );
 
 	// -------------------------------------------------------------------------
+
+        unsigned vlenb = __riscv_vlenb();
 
 	// Update the context with optimized native kernels.
 	bli_cntx_set_ukrs
@@ -191,10 +194,10 @@ void bli_cntx_init_sifive_x280( cntx_t* cntx )
 	//                                           s      d      c      z
 	bli_blksz_init     ( &blkszs[ BLIS_MR ],     7,     7,     6,     6,
 	                                             8,     8,     8,     8 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    64,    32,    32,    16 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    28,    28,    24,    24 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  1024,  1024,  1024,  1024 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   128,   256,   128 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ], 4 * vlenb / 4, 4 * vlenb / 8, 2 * vlenb / 4, 2 * vlenb / 8 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],     7,     7,     6,     6 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ], 4 * vlenb / 4, 4 * vlenb / 8, 2 * vlenb / 4, 2 * vlenb / 8 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],    64,    64,    64,    64 );
 	// Default BLIS_BBM_s = 1, but set here to ensure it's correct
 	bli_blksz_init_easy( &blkszs[ BLIS_BBM ],    1,     1,     1,     1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_BBN ],    1,     1,     1,     1 );
