@@ -2200,12 +2200,12 @@ Copy the real and imaginary values from the scalar object `chi` to `zeta_r` and 
 #### getijv
 ```c
 err_t bli_getijv
-      (
-        dim_t    i,
-        obj_t*   x,
-        double*  ar,
-        double*  ai
-      );
+     (
+       dim_t    i,
+       obj_t*   x,
+       double*  ar,
+       double*  ai
+     );
 ```
 Copy the real and imaginary values at the `i`th element of vector object `x` to `ar` and `ai`. If elements of `x` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `x` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
 If either the element offset `i` is beyond the vector dimension of `x` or less than zero, the function returns `BLIS_FAILURE` without taking any action. Similarly, if `x` is a global scalar constant such as `BLIS_ONE`, the function returns `BLIS_FAILURE`.
@@ -2215,13 +2215,13 @@ If either the element offset `i` is beyond the vector dimension of `x` or less t
 #### getijm
 ```c
 err_t bli_getijm
-      (
-        dim_t    i,
-        dim_t    j,
-        obj_t*   b,
-        double*  ar,
-        double*  ai
-      );
+     (
+       dim_t    i,
+       dim_t    j,
+       obj_t*   b,
+       double*  ar,
+       double*  ai
+     );
 ```
 Copy the real and imaginary values at the (`i`,`j`) element of object `b` to `ar` and `ai`. If elements of `b` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `b` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
 If either the row offset `i` is beyond the _m_ dimension of `b` or less than zero, or column offset `j` is beyond the _n_ dimension of `b` or less than zero, the function returns `BLIS_FAILURE` without taking any action. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, the function returns `BLIS_FAILURE`.
