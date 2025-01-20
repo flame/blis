@@ -659,7 +659,7 @@ void bli_?axpy2v_<suffix>
        ctype*  restrict y, inc_t incy,
        ctype*  restrict z, inc_t incz,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel performs the following operation:
 ```
@@ -683,7 +683,7 @@ void bli_?dotaxpyv_<suffix>
        ctype*  restrict rho,
        ctype*  restrict z, inc_t incz,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel performs the following operation:
 ```
@@ -707,7 +707,7 @@ void bli_?axpyf_<suffix>
        ctype*  restrict x, inc_t incx,
        ctype*  restrict y, inc_t incy,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel performs the following operation:
 ```
@@ -731,7 +731,7 @@ void bli_?dotxf_<suffix>
        ctype*  restrict beta,
        ctype*  restrict y, inc_t incy,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel performs the following operation:
 ```
@@ -761,7 +761,7 @@ void bli_?dotxaxpyf_<suffix>
        ctype*  restrict y, inc_t incy,
        ctype*  restrict z, inc_t incz,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel performs the following operation:
 ```
@@ -789,7 +789,7 @@ void bli_?addv_<suffix>
        ctype*  restrict x, inc_t incx,
        ctype*  restrict y, inc_t incy,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel performs the following operation:
 ```
@@ -807,7 +807,7 @@ void bli_?amaxv_<suffix>
        ctype*  restrict x, inc_t incx,
        dim_t*  restrict index,
        cntx_t* restrict cntx
-     )
+     );
 ```
 Given a vector of length _n_, this kernel returns the zero-based index `index` of the element of vector `x` that contains the largest absolute value (or, in the complex domain, the largest complex modulus).
 
@@ -825,7 +825,7 @@ void bli_?axpyv_<suffix>
        ctype*  restrict x, inc_t incx,
        ctype*  restrict y, inc_t incy,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel performs the following operation:
 ```
@@ -846,7 +846,7 @@ void bli_?axpbyv_<suffix>
        ctype*  restrict beta,
        ctype*  restrict y, inc_t incy,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel performs the following operation:
 ```
@@ -865,7 +865,7 @@ void bli_?copyv_<suffix>
        ctype*  restrict x, inc_t incx,
        ctype*  restrict y, inc_t incy,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel performs the following operation:
 ```
@@ -886,7 +886,7 @@ void bli_?dotv_<suffix>
        ctype*  restrict y, inc_t incy,
        ctype*  restrict rho,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel performs the following operation:
 ```
@@ -909,7 +909,7 @@ void bli_?dotxv_<suffix>
        ctype*  restrict beta,
        ctype*  restrict rho,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel performs the following operation:
 ```
@@ -926,7 +926,7 @@ void bli_?invertv_<suffix>
        dim_t            n,
        ctype*  restrict x, inc_t incx,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel inverts all elements of an _n_-length vector `x`.
 
@@ -941,7 +941,7 @@ void bli_?invscalv_<suffix>
        ctype*  restrict alpha,
        ctype*  restrict x, inc_t incx,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel performs the following operation:
 ```
@@ -960,7 +960,7 @@ void bli_?scalv_<suffix>
        ctype*  restrict alpha,
        ctype*  restrict x, inc_t incx,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel performs the following operation:
 ```
@@ -980,7 +980,7 @@ void bli_?scal2v_<suffix>
        ctype*  restrict x, inc_t incx,
        ctype*  restrict y, inc_t incy,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel performs the following operation:
 ```
@@ -999,7 +999,7 @@ void bli_?setv_<suffix>
        ctype*  restrict alpha,
        ctype*  restrict x, inc_t incx,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel performs the following operation:
 ```
@@ -1018,7 +1018,7 @@ void bli_?subv_<suffix>
        ctype*  restrict x, inc_t incx,
        ctype*  restrict y, inc_t incy,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel performs the following operation:
 ```
@@ -1036,7 +1036,7 @@ void bli_?swapv_<suffix>
        ctype*  restrict x, inc_t incx,
        ctype*  restrict y, inc_t incy,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel swaps corresponding elements of two _n_-length vectors `x` and `y` stored with strides `incx` and `incy`, respectively.
 
@@ -1052,7 +1052,7 @@ void bli_?xpbyv_<suffix>
        ctype*  restrict beta,
        ctype*  restrict y, inc_t incy,
        cntx_t* restrict cntx
-     )
+     );
 ```
 This kernel performs the following operation:
 ```

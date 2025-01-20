@@ -2067,11 +2067,11 @@ gint_t bli_info_get_blas_int_type_size( void );
 The following routines allow the caller to obtain a string that identifies the implementation type of each microkernel that is currently active (ie: part of the current active configuration, as identified bi `bli_arch_query_id()`).
 
 ```c
-char* bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt )
-char* bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt )
-char* bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt )
-char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt )
-char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt )
+char* bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt );
+char* bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt );
+char* bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt );
+char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt );
+char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt );
 ```
 
 Possible implementation (ie: the `ind_t method` argument) types are:
@@ -2108,10 +2108,7 @@ char* bli_info_get_trsm_impl_string( num_t dt );
 
 #### clock
 ```c
-double bli_clock
-     (
-       void
-     );
+double bli_clock( void );
 ```
 Return the amount of time that has elapsed since some fixed time in the past. The return values of `bli_clock()` typically feature nanosecond precision, though this is not guaranteed.
 
