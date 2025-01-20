@@ -120,34 +120,34 @@ The functions listed in this document belong to the "basic" interface subset of 
 ```c
 void bli_?gemm
      (
-       trans_t  transa,
-       trans_t  transb,
-       dim_t    m,
-       dim_t    n,
-       dim_t    k,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb,
-       ctype*   beta,
-       ctype*   c, inc_t rsc, inc_t csc
+             trans_t  transa,
+             trans_t  transb,
+             dim_t    m,
+             dim_t    n,
+             dim_t    k,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+       const ctype*   b, inc_t rsb, inc_t csb,
+       const ctype*   beta,
+             ctype*   c, inc_t rsc, inc_t csc
      );
 ```
 while the expert interface is:
 ```c
 void bli_?gemm_ex
      (
-       trans_t  transa,
-       trans_t  transb,
-       dim_t    m,
-       dim_t    n,
-       dim_t    k,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb,
-       ctype*   beta,
-       ctype*   c, inc_t rsc, inc_t csc,
-       cntx_t*  cntx,
-       rntm_t*  rntm
+             trans_t  transa,
+             trans_t  transb,
+             dim_t    m,
+             dim_t    n,
+             dim_t    k,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+       const ctype*   b, inc_t rsb, inc_t csb,
+       const ctype*   beta,
+             ctype*   c, inc_t rsc, inc_t csc,
+       const cntx_t*  cntx,
+       const rntm_t*  rntm
      );
 ```
 The expert interface contains two additional parameters: a `cntx_t*` and `rntm_t*`. Note that calling a function from the expert interface with the `cntx_t*` and `rntm_t*` arguments each set to `NULL` is equivalent to calling the corresponding basic interface. Specifically, a `NULL` value passed in for the `cntx_t*` results in a valid context being queried from BLIS, and a `NULL` value passed in for the `rntm_t*` results in the current global settings for multithreading to be used.
@@ -156,7 +156,7 @@ The expert interface contains two additional parameters: a `cntx_t*` and `rntm_t
 
 In general, it is permissible to pass in `NULL` for a `cntx_t*` parameter when calling an expert interface such as `bli_dgemm_ex()`. However, there are cases where `NULL` values are not accepted and may result in a segmentation fault. Specifically, the `cntx_t*` argument appears in the interfaces to the `gemm`, `trsm`, and `gemmtrsm` [level-3 microkernels](KernelsHowTo.md#level-3) along with all [level-1v](KernelsHowTo.md#level-1v) and [level-1f](KernelsHowTo.md#level-1f) kernels. There, as a general rule, a valid pointer must be passed in. Whenever a valid context is needed, the developer may query a default context from the global kernel structure (if a context is not already available in the current scope):
 ```c
-cntx_t* bli_gks_query_cntx( void );
+const cntx_t* bli_gks_query_cntx( void );
 ```
 When BLIS is configured to target a configuration family (e.g. `intel64`, `x86_64`), `bli_gks_query_cntx()` will use `cpuid` or an equivalent heuristic to select and and return the appropriate context. When BLIS is configured to target a singleton sub-configuration (e.g. `haswell`, `skx`), `bli_gks_query_cntx()` will unconditionally return a pointer to the context appropriate for the targeted configuration.
 
@@ -226,10 +226,10 @@ Level-1v operations perform various level-1 BLAS-like operations on vectors (hen
 ```c
 void bli_?addv
      (
-       conj_t  conjx,
-       dim_t   n,
-       ctype*  x, inc_t incx,
-       ctype*  y, inc_t incy
+             conj_t  conjx,
+             dim_t   n,
+       const ctype*  x, inc_t incx,
+             ctype*  y, inc_t incy
      );
 ```
 Perform
@@ -244,9 +244,9 @@ where `x` and `y` are vectors of length _n_.
 ```c
 void bli_?amaxv
      (
-       dim_t   n,
-       ctype*  x, inc_t incx,
-       dim_t*  index
+             dim_t   n,
+       const ctype*  x, inc_t incx,
+             dim_t*  index
      );
 ```
 Given a vector of length _n_, return the zero-based index `index` of the element of vector `x` that contains the largest absolute value (or, in the complex domain, the largest complex modulus).
@@ -261,11 +261,11 @@ If `NaN` is encountered, it is treated as if it were a valid value that was smal
 ```c
 void bli_?axpyv
      (
-       conj_t  conjx,
-       dim_t   n,
-       ctype*  alpha,
-       ctype*  x, inc_t incx,
-       ctype*  y, inc_t incy
+             conj_t  conjx,
+             dim_t   n,
+       const ctype*  alpha,
+       const ctype*  x, inc_t incx,
+             ctype*  y, inc_t incy
      );
 ```
 Perform
@@ -280,12 +280,12 @@ where `x` and `y` are vectors of length _n_, and `alpha` is a scalar.
 ```c
 void bli_?axpbyv
      (
-       conj_t  conjx,
-       dim_t   n,
-       ctype*  alpha,
-       ctype*  x, inc_t incx,
-       ctype*  beta,
-       ctype*  y, inc_t incy
+             conj_t  conjx,
+             dim_t   n,
+       const ctype*  alpha,
+       const ctype*  x, inc_t incx,
+       const ctype*  beta,
+             ctype*  y, inc_t incy
      );
 ```
 Perform
@@ -300,10 +300,10 @@ where `x` and `y` are vectors of length _n_, and `alpha` and `beta` are scalars.
 ```c
 void bli_?copyv
      (
-       conj_t  conjx,
-       dim_t   n,
-       ctype*  x, inc_t incx,
-       ctype*  y, inc_t incy
+             conj_t  conjx,
+             dim_t   n,
+       const ctype*  x, inc_t incx,
+             ctype*  y, inc_t incy
      );
 ```
 Perform
@@ -318,12 +318,12 @@ where `x` and `y` are vectors of length _n_.
 ```c
 void bli_?dotv
      (
-       conj_t  conjx,
-       conj_t  conjy,
-       dim_t   n,
-       ctype*  x, inc_t incx,
-       ctype*  y, inc_t incy,
-       ctype*  rho
+             conj_t  conjx,
+             conj_t  conjy,
+             dim_t   n,
+       const ctype*  x, inc_t incx,
+       const ctype*  y, inc_t incy,
+             ctype*  rho
      );
 ```
 Perform
@@ -338,14 +338,14 @@ where `x` and `y` are vectors of length _n_, and `rho` is a scalar.
 ```c
 void bli_?dotxv
      (
-       conj_t  conjx,
-       conj_t  conjy,
-       dim_t   n,
-       ctype*  alpha,
-       ctype*  x, inc_t incx,
-       ctype*  y, inc_t incy,
-       ctype*  beta,
-       ctype*  rho
+             conj_t  conjx,
+             conj_t  conjy,
+             dim_t   n,
+       const ctype*  alpha,
+       const ctype*  x, inc_t incx,
+       const ctype*  y, inc_t incy,
+       const ctype*  beta,
+             ctype*  rho
      );
 ```
 Perform
@@ -372,10 +372,10 @@ Invert all elements of an _n_-length vector `x`.
 ```c
 void bli_?invscalv
      (
-       conj_t  conjalpha,
-       dim_t   n,
-       ctype*  alpha,
-       ctype*  x, inc_t incx
+             conj_t  conjalpha,
+             dim_t   n,
+       const ctype*  alpha,
+             ctype*  x, inc_t incx
      );
 ```
 Perform
@@ -390,10 +390,10 @@ where `x` is a vector of length _n_, and `alpha` is a scalar.
 ```c
 void bli_?scalv
      (
-       conj_t  conjalpha,
-       dim_t   n,
-       ctype*  alpha,
-       ctype*  x, inc_t incx
+             conj_t  conjalpha,
+             dim_t   n,
+       const ctype*  alpha,
+             ctype*  x, inc_t incx
      );
 ```
 Perform
@@ -408,11 +408,11 @@ where `x` is a vector of length _n_, and `alpha` is a scalar.
 ```c
 void bli_?scal2v
      (
-       conj_t  conjx,
-       dim_t   n,
-       ctype*  alpha,
-       ctype*  x, inc_t incx,
-       ctype*  y, inc_t incy
+             conj_t  conjx,
+             dim_t   n,
+       const ctype*  alpha,
+       const ctype*  x, inc_t incx,
+             ctype*  y, inc_t incy
      );
 ```
 Perform
@@ -427,10 +427,10 @@ where `x` and `y` are vectors of length _n_, and `alpha` is a scalar.
 ```c
 void bli_?setv
      (
-       conj_t  conjalpha,
-       dim_t   n,
-       ctype*  alpha,
-       ctype*  x, inc_t incx
+             conj_t  conjalpha,
+             dim_t   n,
+       const ctype*  alpha,
+             ctype*  x, inc_t incx
      );
 ```
 Perform
@@ -445,10 +445,10 @@ That is, set all elements of an _n_-length vector `x` to scalar `conjalpha(alpha
 ```c
 void bli_?subv
      (
-       conj_t  conjx,
-       dim_t   n,
-       ctype*  x, inc_t incx,
-       ctype*  y, inc_t incy
+             conj_t  conjx,
+             dim_t   n,
+       const ctype*  x, inc_t incx,
+             ctype*  y, inc_t incy
      );
 ```
 Perform
@@ -476,11 +476,11 @@ Swap corresponding elements of two _n_-length vectors `x` and `y`.
 ```c
 void bli_?xpbyv
      (
-       conj_t  conjx,
-       dim_t   n,
-       ctype*  x, inc_t incx,
-       ctype*  beta,
-       ctype*  y, inc_t incy
+             conj_t  conjx,
+             dim_t   n,
+       const ctype*  x, inc_t incx,
+       const ctype*  beta,
+             ctype*  y, inc_t incy
      );
 ```
 Perform
@@ -507,13 +507,13 @@ Most of these operations are similar to level-1m counterparts, except they only 
 ```c
 void bli_?addd
      (
-       doff_t   diagoffa,
-       diag_t   diaga,
-       trans_t  transa,
-       dim_t    m,
-       dim_t    n,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb
+             doff_t   diagoffa,
+             diag_t   diaga,
+             trans_t  transa,
+             dim_t    m,
+             dim_t    n,
+       const ctype*   a, inc_t rsa, inc_t csa,
+             ctype*   b, inc_t rsb, inc_t csb
      );
 ```
 
@@ -523,14 +523,14 @@ void bli_?addd
 ```c
 void bli_?axpyd
      (
-       doff_t   diagoffa,
-       diag_t   diaga,
-       trans_t  transa,
-       dim_t    m,
-       dim_t    n,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb
+             doff_t   diagoffa,
+             diag_t   diaga,
+             trans_t  transa,
+             dim_t    m,
+             dim_t    n,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+             ctype*   b, inc_t rsb, inc_t csb
      );
 ```
 
@@ -540,13 +540,13 @@ void bli_?axpyd
 ```c
 void bli_?copyd
      (
-       doff_t   diagoffa,
-       diag_t   diaga,
-       trans_t  transa,
-       dim_t    m,
-       dim_t    n,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb
+             doff_t   diagoffa,
+             diag_t   diaga,
+             trans_t  transa,
+             dim_t    m,
+             dim_t    n,
+       const ctype*   a, inc_t rsa, inc_t csa,
+             ctype*   b, inc_t rsb, inc_t csb
      );
 ```
 
@@ -569,12 +569,12 @@ void bli_?invertd
 ```c
 void bli_?invscald
      (
-       conj_t  conjalpha,
-       doff_t  diagoffa,
-       dim_t   m,
-       dim_t   n,
-       ctype*  alpha,
-       ctype*  a, inc_t rsa, inc_t csa
+             conj_t  conjalpha,
+             doff_t  diagoffa,
+             dim_t   m,
+             dim_t   n,
+       const ctype*  alpha,
+             ctype*  a, inc_t rsa, inc_t csa
      );
 ```
 
@@ -584,12 +584,12 @@ void bli_?invscald
 ```c
 void bli_?scald
      (
-       conj_t  conjalpha,
-       doff_t  diagoffa,
-       dim_t   m,
-       dim_t   n,
-       ctype*  alpha,
-       ctype*  a, inc_t rsa, inc_t csa
+             conj_t  conjalpha,
+             doff_t  diagoffa,
+             dim_t   m,
+             dim_t   n,
+       const ctype*  alpha,
+             ctype*  a, inc_t rsa, inc_t csa
      );
 ```
 
@@ -599,14 +599,14 @@ void bli_?scald
 ```c
 void bli_?scal2d
      (
-       doff_t   diagoffa,
-       diag_t   diaga,
-       trans_t  transa,
-       dim_t    m,
-       dim_t    n,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb
+             doff_t   diagoffa,
+             diag_t   diaga,
+             trans_t  transa,
+             dim_t    m,
+             dim_t    n,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+             ctype*   b, inc_t rsb, inc_t csb
      );
 ```
 
@@ -616,12 +616,12 @@ void bli_?scal2d
 ```c
 void bli_?setd
      (
-       conj_t  conjalpha,
-       doff_t  diagoffa,
-       dim_t   m,
-       dim_t   n,
-       ctype*  alpha,
-       ctype*  a, inc_t rsa, inc_t csa
+             conj_t  conjalpha,
+             doff_t  diagoffa,
+             dim_t   m,
+             dim_t   n,
+       const ctype*  alpha,
+             ctype*  a, inc_t rsa, inc_t csa
      );
 ```
 
@@ -631,11 +631,11 @@ void bli_?setd
 ```c
 void bli_?setid
      (
-       doff_t    diagoffa,
-       dim_t     m,
-       dim_t     n,
-       ctype_r*  alpha,
-       ctype*    a, inc_t rsa, inc_t csa
+             doff_t    diagoffa,
+             dim_t     m,
+             dim_t     n,
+       const ctype_r*  alpha,
+             ctype*    a, inc_t rsa, inc_t csa
      );
 ```
 Set the imaginary components of every element along the diagonal of `a`, as
@@ -649,11 +649,11 @@ of `a`.
 ```c
 void bli_?shiftd
      (
-       doff_t  diagoffa,
-       dim_t   m,
-       dim_t   n,
-       ctype*  alpha,
-       ctype*  a, inc_t rsa, inc_t csa
+             doff_t  diagoffa,
+             dim_t   m,
+             dim_t   n,
+       const ctype*  alpha,
+             ctype*  a, inc_t rsa, inc_t csa
      );
 ```
 Add a constant value `alpha` to every element along the diagonal of `a`, as
@@ -665,13 +665,13 @@ specified by `diagoffa`.
 ```c
 void bli_?subd
      (
-       doff_t   diagoffa,
-       diag_t   diaga,
-       trans_t  transa,
-       dim_t    m,
-       dim_t    n,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb
+             doff_t   diagoffa,
+             diag_t   diaga,
+             trans_t  transa,
+             dim_t    m,
+             dim_t    n,
+       const ctype*   a, inc_t rsa, inc_t csa,
+             ctype*   b, inc_t rsb, inc_t csb
      );
 ```
 
@@ -681,14 +681,14 @@ void bli_?subd
 ```c
 void bli_?xpbyd
      (
-       doff_t   diagoffa,
-       diag_t   diaga,
-       trans_t  transa,
-       dim_t    m,
-       dim_t    n,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   beta,
-       ctype*   b, inc_t rsb, inc_t csb
+             doff_t   diagoffa,
+             diag_t   diaga,
+             trans_t  transa,
+             dim_t    m,
+             dim_t    n,
+       const ctype*   a, inc_t rsa, inc_t csa,
+       const ctype*   beta,
+             ctype*   b, inc_t rsb, inc_t csb
      );
 ```
 
@@ -706,14 +706,14 @@ Level-1m operations perform various level-1 BLAS-like operations on matrices (he
 ```c
 void bli_?addm
      (
-       doff_t   diagoffa,
-       diag_t   diaga,
-       uplo_t   uploa,
-       trans_t  transa,
-       dim_t    m,
-       dim_t    n,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb
+             doff_t   diagoffa,
+             diag_t   diaga,
+             uplo_t   uploa,
+             trans_t  transa,
+             dim_t    m,
+             dim_t    n,
+       const ctype*   a, inc_t rsa, inc_t csa,
+             ctype*   b, inc_t rsb, inc_t csb
      );
 ```
 Perform
@@ -728,15 +728,15 @@ where `B` is an _m x n_ matrix, `A` is stored as a dense matrix, or lower- or up
 ```c
 void bli_?axpym
      (
-       doff_t   diagoffa,
-       diag_t   diaga,
-       uplo_t   uploa,
-       trans_t  transa,
-       dim_t    m,
-       dim_t    n,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb
+             doff_t   diagoffa,
+             diag_t   diaga,
+             uplo_t   uploa,
+             trans_t  transa,
+             dim_t    m,
+             dim_t    n,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+             ctype*   b, inc_t rsb, inc_t csb
      );
 ```
 Perform
@@ -751,14 +751,14 @@ where `B` is an _m x n_ matrix, `A` is stored as a dense matrix, or lower- or up
 ```c
 void bli_?copym
      (
-       doff_t   diagoffa,
-       diag_t   diaga,
-       uplo_t   uploa,
-       trans_t  transa,
-       dim_t    m,
-       dim_t    n,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb
+             doff_t   diagoffa,
+             diag_t   diaga,
+             uplo_t   uploa,
+             trans_t  transa,
+             dim_t    m,
+             dim_t    n,
+       const ctype*   a, inc_t rsa, inc_t csa,
+             ctype*   b, inc_t rsb, inc_t csb
      );
 ```
 Perform
@@ -773,13 +773,13 @@ where `B` is an _m x n_ matrix, `A` is stored as a dense matrix, or lower- or up
 ```c
 void bli_?invscalm
      (
-       conj_t  conjalpha,
-       doff_t  diagoffa,
-       uplo_t  uploa,
-       dim_t   m,
-       dim_t   n,
-       ctype*  alpha,
-       ctype*  a, inc_t rsa, inc_t csa
+             conj_t  conjalpha,
+             doff_t  diagoffa,
+             uplo_t  uploa,
+             dim_t   m,
+             dim_t   n,
+       const ctype*  alpha,
+             ctype*  a, inc_t rsa, inc_t csa
      );
 ```
 Perform
@@ -794,13 +794,13 @@ where `A` is an _m x n_ matrix stored as a dense matrix, or lower- or upper-tria
 ```c
 void bli_?scalm
      (
-       conj_t  conjalpha,
-       doff_t  diagoffa,
-       uplo_t  uploa,
-       dim_t   m,
-       dim_t   n,
-       ctype*  alpha,
-       ctype*  a, inc_t rsa, inc_t csa
+             conj_t  conjalpha,
+             doff_t  diagoffa,
+             uplo_t  uploa,
+             dim_t   m,
+             dim_t   n,
+       const ctype*  alpha,
+             ctype*  a, inc_t rsa, inc_t csa
      );
 ```
 Perform
@@ -815,15 +815,15 @@ where `A` is an _m x n_ matrix stored as a dense matrix, or lower- or upper-tria
 ```c
 void bli_?scal2m
      (
-       doff_t   diagoffa,
-       diag_t   diaga,
-       uplo_t   uploa,
-       trans_t  transa,
-       dim_t    m,
-       dim_t    n,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb
+             doff_t   diagoffa,
+             diag_t   diaga,
+             uplo_t   uploa,
+             trans_t  transa,
+             dim_t    m,
+             dim_t    n,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+             ctype*   b, inc_t rsb, inc_t csb
      );
 ```
 Perform
@@ -838,14 +838,14 @@ where `B` is an _m x n_ matrix, `A` is stored as a dense matrix, or lower- or up
 ```c
 void bli_?setm
      (
-       conj_t  conjalpha,
-       doff_t  diagoffa,
-       diag_t  diaga,
-       uplo_t  uploa,
-       dim_t   m,
-       dim_t   n,
-       ctype*  alpha,
-       ctype*  a, inc_t rsa, inc_t csa
+             conj_t  conjalpha,
+             doff_t  diagoffa,
+             diag_t  diaga,
+             uplo_t  uploa,
+             dim_t   m,
+             dim_t   n,
+       const ctype*  alpha,
+             ctype*  a, inc_t rsa, inc_t csa
      );
 ```
 Set all elements of an _m x n_ matrix `A` to `conjalpha(alpha)`, where `A` is stored as a dense matrix, or lower- or upper- triangular/trapezoidal matrix, as specified by `uploa`, with the diagonal offset of `A` specified by `diagoffa` and unit/non-unit nature of the diagonal specified by `diaga`. If `uploa` indicates lower or upper storage, only that part of matrix `A` will be updated.
@@ -856,14 +856,14 @@ Set all elements of an _m x n_ matrix `A` to `conjalpha(alpha)`, where `A` is st
 ```c
 void bli_?subm
      (
-       doff_t   diagoffa,
-       diag_t   diaga,
-       uplo_t   uploa,
-       trans_t  transa,
-       dim_t    m,
-       dim_t    n,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb
+             doff_t   diagoffa,
+             diag_t   diaga,
+             uplo_t   uploa,
+             trans_t  transa,
+             dim_t    m,
+             dim_t    n,
+       const ctype*   a, inc_t rsa, inc_t csa,
+             ctype*   b, inc_t rsb, inc_t csb
      );
 ```
 Perform
@@ -892,14 +892,14 @@ Level-1f kernels are employed when optimizing level-2 operations.
 ```c
 void bli_?axpy2v
      (
-       conj_t  conjx,
-       conj_t  conjy,
-       dim_t   m,
-       ctype*  alphax,
-       ctype*  alphay,
-       ctype*  x, inc_t incx,
-       ctype*  y, inc_t incy,
-       ctype*  z, inc_t incz
+             conj_t  conjx,
+             conj_t  conjy,
+             dim_t   m,
+       const ctype*  alphax,
+       const ctype*  alphay,
+       const ctype*  x, inc_t incx,
+       const ctype*  y, inc_t incy,
+             ctype*  z, inc_t incz
      );
 ```
 Perform
@@ -914,15 +914,15 @@ where `x`, `y`, and `z` are vectors of length _m_. The kernel, if optimized, is 
 ```c
 void bli_?dotaxpyv
      (
-       conj_t  conjxt,
-       conj_t  conjx,
-       conj_t  conjy,
-       dim_t   m,
-       ctype*  alpha,
-       ctype*  x, inc_t incx,
-       ctype*  y, inc_t incy,
-       ctype*  rho,
-       ctype*  z, inc_t incz
+             conj_t  conjxt,
+             conj_t  conjx,
+             conj_t  conjy,
+             dim_t   m,
+       const ctype*  alpha,
+       const ctype*  x, inc_t incx,
+       const ctype*  y, inc_t incy,
+             ctype*  rho,
+             ctype*  z, inc_t incz
      );
 ```
 Perform
@@ -938,14 +938,14 @@ where `x`, `y`, and `z` are vectors of length _m_ and `alpha` and `rho` are scal
 ```c
 void bli_?axpyf
      (
-       conj_t  conja,
-       conj_t  conjx,
-       dim_t   m,
-       dim_t   b,
-       ctype*  alpha,
-       ctype*  a, inc_t inca, inc_t lda,
-       ctype*  x, inc_t incx,
-       ctype*  y, inc_t incy
+             conj_t  conja,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b,
+       const ctype*  alpha,
+       const ctype*  a, inc_t inca, inc_t lda,
+       const ctype*  x, inc_t incx,
+             ctype*  y, inc_t incy
      );
 ```
 Perform
@@ -960,15 +960,15 @@ where `A` is an _m x b_ matrix, and `y` and `x` are vectors. The kernel, if opti
 ```c
 void bli_?dotxf
      (
-       conj_t  conjat,
-       conj_t  conjx,
-       dim_t   m,
-       dim_t   b,
-       ctype*  alpha,
-       ctype*  a, inc_t inca, inc_t lda,
-       ctype*  x, inc_t incx,
-       ctype*  beta,
-       ctype*  y, inc_t incy
+             conj_t  conjat,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b,
+       const ctype*  alpha,
+       const ctype*  a, inc_t inca, inc_t lda,
+       const ctype*  x, inc_t incx,
+       const ctype*  beta,
+             ctype*  y, inc_t incy
      );
 ```
 Perform
@@ -983,19 +983,19 @@ where `A` is an _m x b_ matrix, and `y` and `x` are vectors. The kernel, if opti
 ```c
 void bli_?dotxaxpyf
      (
-       conj_t  conjat,
-       conj_t  conja,
-       conj_t  conjw,
-       conj_t  conjx,
-       dim_t   m,
-       dim_t   b,
-       ctype*  alpha,
-       ctype*  a, inc_t inca, inc_t lda,
-       ctype*  w, inc_t incw,
-       ctype*  x, inc_t incx,
-       ctype*  beta,
-       ctype*  y, inc_t incy,
-       ctype*  z, inc_t incz
+             conj_t  conjat,
+             conj_t  conja,
+             conj_t  conjw,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b,
+       const ctype*  alpha,
+       const ctype*  a, inc_t inca, inc_t lda,
+       const ctype*  w, inc_t incw,
+       const ctype*  x, inc_t incx,
+       const ctype*  beta,
+             ctype*  y, inc_t incy,
+             ctype*  z, inc_t incz
      );
 ```
 Perform
@@ -1018,15 +1018,15 @@ Level-2 operations perform various level-2 BLAS-like operations.
 ```c
 void bli_?gemv
      (
-       trans_t  transa,
-       conj_t   conjx,
-       dim_t    m,
-       dim_t    n,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   x, inc_t incx,
-       ctype*   beta,
-       ctype*   y, inc_t incy
+             trans_t  transa,
+             conj_t   conjx,
+             dim_t    m,
+             dim_t    n,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+       const ctype*   x, inc_t incx,
+       const ctype*   beta,
+             ctype*   y, inc_t incy
      );
 ```
 Perform
@@ -1041,14 +1041,14 @@ where `transa(A)` is an _m x n_ matrix, and `y` and `x` are vectors.
 ```c
 void bli_?ger
      (
-       conj_t  conjx,
-       conj_t  conjy,
-       dim_t   m,
-       dim_t   n,
-       ctype*  alpha,
-       ctype*  x, inc_t incx,
-       ctype*  y, inc_t incy,
-       ctype*  a, inc_t rsa, inc_t csa
+             conj_t  conjx,
+             conj_t  conjy,
+             dim_t   m,
+             dim_t   n,
+       const ctype*  alpha,
+       const ctype*  x, inc_t incx,
+       const ctype*  y, inc_t incy,
+             ctype*  a, inc_t rsa, inc_t csa
      );
 ```
 Perform
@@ -1063,15 +1063,15 @@ where `A` is an _m x n_ matrix, and `x` and `y` are vectors of length _m_ and _n
 ```c
 void bli_?hemv
      (
-       uplo_t  uploa,
-       conj_t  conja,
-       conj_t  conjx,
-       dim_t   m,
-       ctype*  alpha,
-       ctype*  a, inc_t rsa, inc_t csa,
-       ctype*  x, inc_t incx,
-       ctype*  beta,
-       ctype*  y, inc_t incy
+             uplo_t  uploa,
+             conj_t  conja,
+             conj_t  conjx,
+             dim_t   m,
+       const ctype*  alpha,
+       const ctype*  a, inc_t rsa, inc_t csa,
+       const ctype*  x, inc_t incx,
+       const ctype*  beta,
+             ctype*  y, inc_t incy
      );
 ```
 Perform
@@ -1086,12 +1086,12 @@ where `A` is an _m x m_ Hermitian matrix stored in the lower or upper triangle a
 ```c
 void bli_?her
      (
-       uplo_t  uploa,
-       conj_t  conjx,
-       dim_t   m,
-       rtype*  alpha,
-       ctype*  x, inc_t incx,
-       ctype*  a, inc_t rsa, inc_t csa
+             uplo_t  uploa,
+             conj_t  conjx,
+             dim_t   m,
+       const rtype*  alpha,
+       const ctype*  x, inc_t incx,
+             ctype*  a, inc_t rsa, inc_t csa
      );
 ```
 Perform
@@ -1108,14 +1108,14 @@ where `A` is an _m x m_ Hermitian matrix stored in the lower or upper triangle a
 ```c
 void bli_?her2
      (
-       uplo_t  uploa,
-       conj_t  conjx,
-       conj_t  conjy,
-       dim_t   m,
-       ctype*  alpha,
-       ctype*  x, inc_t incx,
-       ctype*  y, inc_t incy,
-       ctype*  a, inc_t rsa, inc_t csa
+             uplo_t  uploa,
+             conj_t  conjx,
+             conj_t  conjy,
+             dim_t   m,
+       const ctype*  alpha,
+       const ctype*  x, inc_t incx,
+       const ctype*  y, inc_t incy,
+             ctype*  a, inc_t rsa, inc_t csa
      );
 ```
 Perform
@@ -1130,15 +1130,15 @@ where `A` is an _m x m_ Hermitian matrix stored in the lower or upper triangle a
 ```c
 void bli_?symv
      (
-       uplo_t  uploa,
-       conj_t  conja,
-       conj_t  conjx,
-       dim_t   m,
-       ctype*  alpha,
-       ctype*  a, inc_t rsa, inc_t csa,
-       ctype*  x, inc_t incx,
-       ctype*  beta,
-       ctype*  y, inc_t incy
+             uplo_t  uploa,
+             conj_t  conja,
+             conj_t  conjx,
+             dim_t   m,
+       const ctype*  alpha,
+       const ctype*  a, inc_t rsa, inc_t csa,
+       const ctype*  x, inc_t incx,
+       const ctype*  beta,
+             ctype*  y, inc_t incy
      );
 ```
 Perform
@@ -1153,12 +1153,12 @@ where `A` is an _m x m_ symmetric matrix stored in the lower or upper triangle a
 ```c
 void bli_?syr
      (
-       uplo_t  uploa,
-       conj_t  conjx,
-       dim_t   m,
-       ctype*  alpha,
-       ctype*  x, inc_t incx,
-       ctype*  a, inc_t rsa, inc_t csa
+             uplo_t  uploa,
+             conj_t  conjx,
+             dim_t   m,
+       const ctype*  alpha,
+       const ctype*  x, inc_t incx,
+             ctype*  a, inc_t rsa, inc_t csa
      );
 ```
 Perform
@@ -1173,14 +1173,14 @@ where `A` is an _m x m_ symmetric matrix stored in the lower or upper triangle a
 ```c
 void bli_?syr2
      (
-       uplo_t  uploa,
-       conj_t  conjx,
-       conj_t  conjy,
-       dim_t   m,
-       ctype*  alpha,
-       ctype*  x, inc_t incx,
-       ctype*  y, inc_t incy,
-       ctype*  a, inc_t rsa, inc_t csa
+             uplo_t  uploa,
+             conj_t  conjx,
+             conj_t  conjy,
+             dim_t   m,
+       const ctype*  alpha,
+       const ctype*  x, inc_t incx,
+       const ctype*  y, inc_t incy,
+             ctype*  a, inc_t rsa, inc_t csa
      );
 ```
 Perform
@@ -1195,13 +1195,13 @@ where `A` is an _m x m_ symmetric matrix stored in the lower or upper triangle a
 ```c
 void bli_?trmv
      (
-       uplo_t   uploa,
-       trans_t  transa,
-       diag_t   diaga,
-       dim_t    m,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   x, inc_t incx
+             uplo_t   uploa,
+             trans_t  transa,
+             diag_t   diaga,
+             dim_t    m,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+             ctype*   x, inc_t incx
      );
 ```
 Perform
@@ -1216,13 +1216,13 @@ where `A` is an _m x m_ triangular matrix stored in the lower or upper triangle 
 ```c
 void bli_?trsv
      (
-       uplo_t   uploa,
-       trans_t  transa,
-       diag_t   diaga,
-       dim_t    m,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   y, inc_t incy
+             uplo_t   uploa,
+             trans_t  transa,
+             diag_t   diaga,
+             dim_t    m,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+             ctype*   y, inc_t incy
      );
 ```
 Solve the linear system
@@ -1247,16 +1247,16 @@ Level-3 operations perform various level-3 BLAS-like operations.
 ```c
 void bli_?gemm
      (
-       trans_t  transa,
-       trans_t  transb,
-       dim_t    m,
-       dim_t    n,
-       dim_t    k,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb,
-       ctype*   beta,
-       ctype*   c, inc_t rsc, inc_t csc
+             trans_t  transa,
+             trans_t  transb,
+             dim_t    m,
+             dim_t    n,
+             dim_t    k,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+       const ctype*   b, inc_t rsb, inc_t csb,
+       const ctype*   beta,
+             ctype*   c, inc_t rsc, inc_t csc
      );
 ```
 Perform
@@ -1271,16 +1271,16 @@ where C is an _m x n_ matrix, `transa(A)` is an _m x k_ matrix, and `transb(B)` 
 ```c
 void bli_?gemmt
      (
-       uplo_t   uploc,
-       trans_t  transa,
-       trans_t  transb,
-       dim_t    m,
-       dim_t    k,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb,
-       ctype*   beta,
-       ctype*   c, inc_t rsc, inc_t csc
+             uplo_t   uploc,
+             trans_t  transa,
+             trans_t  transb,
+             dim_t    m,
+             dim_t    k,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+       const ctype*   b, inc_t rsb, inc_t csb,
+       const ctype*   beta,
+             ctype*   c, inc_t rsc, inc_t csc
      );
 ```
 Perform
@@ -1295,17 +1295,17 @@ where C is an _m x m_ matrix, `transa(A)` is an _m x k_ matrix, and `transb(B)` 
 ```c
 void bli_?hemm
      (
-       side_t   sidea,
-       uplo_t   uploa,
-       conj_t   conja,
-       trans_t  transb,
-       dim_t    m,
-       dim_t    n,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb,
-       ctype*   beta,
-       ctype*   c, inc_t rsc, inc_t csc
+             side_t   sidea,
+             uplo_t   uploa,
+             conj_t   conja,
+             trans_t  transb,
+             dim_t    m,
+             dim_t    n,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+       const ctype*   b, inc_t rsb, inc_t csb,
+       const ctype*   beta,
+             ctype*   c, inc_t rsc, inc_t csc
      );
 ```
 Perform
@@ -1324,14 +1324,14 @@ if `sidea` is `BLIS_RIGHT`, where `C` and `B` are _m x n_ matrices and `A` is a 
 ```c
 void bli_?herk
      (
-       uplo_t   uploc,
-       trans_t  transa,
-       dim_t    m,
-       dim_t    k,
-       rtype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       rtype*   beta,
-       ctype*   c, inc_t rsc, inc_t csc
+             uplo_t   uploc,
+             trans_t  transa,
+             dim_t    m,
+             dim_t    k,
+       const rtype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+       const rtype*   beta,
+             ctype*   c, inc_t rsc, inc_t csc
      );
 ```
 Perform
@@ -1348,16 +1348,16 @@ where C is an _m x m_ Hermitian matrix stored in the lower or upper triangle as 
 ```c
 void bli_?her2k
      (
-       uplo_t   uploc,
-       trans_t  transa,
-       trans_t  transb,
-       dim_t    m,
-       dim_t    k,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb,
-       rtype*   beta,
-       ctype*   c, inc_t rsc, inc_t csc
+             uplo_t   uploc,
+             trans_t  transa,
+             trans_t  transb,
+             dim_t    m,
+             dim_t    k,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+       const ctype*   b, inc_t rsb, inc_t csb,
+       const rtype*   beta,
+             ctype*   c, inc_t rsc, inc_t csc
      );
 ```
 Perform
@@ -1374,17 +1374,17 @@ where C is an _m x m_ Hermitian matrix stored in the lower or upper triangle as 
 ```c
 void bli_?symm
      (
-       side_t   sidea,
-       uplo_t   uploa,
-       conj_t   conja,
-       trans_t  transb,
-       dim_t    m,
-       dim_t    n,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb,
-       ctype*   beta,
-       ctype*   c, inc_t rsc, inc_t csc
+             side_t   sidea,
+             uplo_t   uploa,
+             conj_t   conja,
+             trans_t  transb,
+             dim_t    m,
+             dim_t    n,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+       const ctype*   b, inc_t rsb, inc_t csb,
+       const ctype*   beta,
+             ctype*   c, inc_t rsc, inc_t csc
      );
 ```
 Perform
@@ -1403,14 +1403,14 @@ if `sidea` is `BLIS_RIGHT`, where `C` and `B` are _m x n_ matrices and `A` is a 
 ```c
 void bli_?syrk
      (
-       uplo_t   uploc,
-       trans_t  transa,
-       dim_t    m,
-       dim_t    k,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   beta,
-       ctype*   c, inc_t rsc, inc_t csc
+             uplo_t   uploc,
+             trans_t  transa,
+             dim_t    m,
+             dim_t    k,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+       const ctype*   beta,
+             ctype*   c, inc_t rsc, inc_t csc
      );
 ```
 Perform
@@ -1425,16 +1425,16 @@ where C is an _m x m_ symmetric matrix stored in the lower or upper triangle as 
 ```c
 void bli_?syr2k
      (
-       uplo_t   uploc,
-       trans_t  transa,
-       trans_t  transb,
-       dim_t    m,
-       dim_t    k,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb,
-       ctype*   beta,
-       ctype*   c, inc_t rsc, inc_t csc
+             uplo_t   uploc,
+             trans_t  transa,
+             trans_t  transb,
+             dim_t    m,
+             dim_t    k,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+       const ctype*   b, inc_t rsb, inc_t csb,
+       const ctype*   beta,
+             ctype*   c, inc_t rsc, inc_t csc
      );
 ```
 Perform
@@ -1449,15 +1449,15 @@ where C is an _m x m_ symmetric matrix stored in the lower or upper triangle as 
 ```c
 void bli_?trmm
      (
-       side_t   sidea,
-       uplo_t   uploa,
-       trans_t  transa,
-       diag_t   diaga,
-       dim_t    m,
-       dim_t    n,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb
+             side_t   sidea,
+             uplo_t   uploa,
+             trans_t  transa,
+             diag_t   diaga,
+             dim_t    m,
+             dim_t    n,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+             ctype*   b, inc_t rsb, inc_t csb
      );
 ```
 Perform
@@ -1476,18 +1476,18 @@ if `sidea` is `BLIS_RIGHT`, where `B` is an _m x n_ matrix and `A` is a triangul
 ```c
 void bli_?trmm3
      (
-       side_t   sidea,
-       uplo_t   uploa,
-       trans_t  transa,
-       diag_t   diaga,
-       trans_t  transb,
-       dim_t    m,
-       dim_t    n,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb,
-       ctype*   beta,
-       ctype*   c, inc_t rsc, inc_t csc
+             side_t   sidea,
+             uplo_t   uploa,
+             trans_t  transa,
+             diag_t   diaga,
+             trans_t  transb,
+             dim_t    m,
+             dim_t    n,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+       const ctype*   b, inc_t rsb, inc_t csb,
+       const ctype*   beta,
+             ctype*   c, inc_t rsc, inc_t csc
      );
 ```
 Perform
@@ -1506,15 +1506,15 @@ if `sidea` is `BLIS_RIGHT`, where `C` and `transb(B)` are _m x n_ matrices and `
 ```c
 void bli_?trsm
      (
-       side_t   sidea,
-       uplo_t   uploa,
-       trans_t  transa,
-       diag_t   diaga,
-       dim_t    m,
-       dim_t    n,
-       ctype*   alpha,
-       ctype*   a, inc_t rsa, inc_t csa,
-       ctype*   b, inc_t rsb, inc_t csb
+             side_t   sidea,
+             uplo_t   uploa,
+             trans_t  transa,
+             diag_t   diaga,
+             dim_t    m,
+             dim_t    n,
+       const ctype*   alpha,
+       const ctype*   a, inc_t rsa, inc_t csa,
+             ctype*   b, inc_t rsb, inc_t csb
      );
 ```
 Solve the linear system with multiple right-hand sides
@@ -1538,9 +1538,9 @@ if `sidea` is `BLIS_RIGHT`, where `X` and `B` are an _m x n_ matrices and `A` is
 ```c
 void bli_?asumv
      (
-       dim_t   n,
-       ctype*  x, inc_t incx,
-       rtype*  asum
+             dim_t   n,
+       const ctype*  x, inc_t incx,
+             rtype*  asum
      );
 ```
 Compute the sum of the absolute values of the fundamental elements of vector `x`. The resulting sum is stored to `asum`.
@@ -1556,13 +1556,13 @@ Compute the sum of the absolute values of the fundamental elements of vector `x`
 ```c
 void bli_?norm[1fi]m
      (
-       doff_t  diagoffa,
-       doff_t  diaga,
-       uplo_t  uploa,
-       dim_t   m,
-       dim_t   n,
-       ctype*  a, inc_t rs_a, inc_t cs_a,
-       rtype*  norm
+             doff_t  diagoffa,
+             doff_t  diaga,
+             uplo_t  uploa,
+             dim_t   m,
+             dim_t   n,
+       const ctype*  a, inc_t rs_a, inc_t cs_a,
+             rtype*  norm
      );
 ```
 Compute the one-norm (`bli_?norm1m()`), Frobenius norm (`bli_?normfm()`), or infinity norm (`bli_?normim()`) of the elements in an _m x n_ matrix `A`. If `uploa` is `BLIS_LOWER` or `BLIS_UPPER` then `A` is assumed to be lower or upper triangular, respectively, with the main diagonal located at offset `diagoffa`. The resulting norm is stored to `norm`.
@@ -1577,9 +1577,9 @@ Compute the one-norm (`bli_?norm1m()`), Frobenius norm (`bli_?normfm()`), or inf
 ```c
 void bli_?norm[1fi]v
      (
-       dim_t   n,
-       ctype*  x, inc_t incx,
-       rtype*  norm
+             dim_t   n,
+       const ctype*  x, inc_t incx,
+             rtype*  norm
      );
 ```
 Compute the one-norm (`bli_?norm1v()`), Frobenius norm (`bli_?normfv()`), or infinity norm (`bli_?normiv()`) of the elements in a vector `x` of length _n_. The resulting norm is stored to `norm`.
@@ -1631,12 +1631,12 @@ Make an _m x m_ matrix `A` explicitly triangular by preserving the triangle spec
 ```c
 void bli_?fprintv
      (
-       FILE*   file,
-       char*   s1,
-       dim_t   m,
-       ctype*  x, inc_t incx,
-       char*   format,
-       char*   s2
+             FILE*   file,
+       const char*   s1,
+             dim_t   m,
+       const ctype*  x, inc_t incx,
+       const char*   format,
+       const char*   s2
      );
 ```
 Print a vector `x` of length _m_ to file stream `file`, where `file` is a file pointer returned by the standard C library function `fopen()`. The caller may also pass in a global file pointer such as `stdout` or `stderr`. The strings `s1` and `s2` are printed immediately before and after the output (respectively), and the format specifier `format` is used to format the individual elements. For valid format specifiers, please see documentation for the standard C library function `printf()`.
@@ -1649,13 +1649,13 @@ Print a vector `x` of length _m_ to file stream `file`, where `file` is a file p
 ```c
 void bli_?fprintm
      (
-       FILE*   file,
-       char*   s1,
-       dim_t   m,
-       dim_t   n,
-       ctype*  a, inc_t rs_a, inc_t cs_a,
-       char*   format,
-       char*   s2
+             FILE*   file,
+       const char*   s1,
+             dim_t   m,
+             dim_t   n,
+       const ctype*  a, inc_t rs_a, inc_t cs_a,
+       const char*   format,
+       const char*   s2
      );
 ```
 Print an _m x n_ matrix `A` to file stream `file`, where `file` is a file pointer returned by the standard C library function `fopen()`. The caller may also pass in a global file pointer such as `stdout` or `stderr`. The strings `s1` and `s2` are printed immediately before and after the output (respectively), and the format specifier `format` is used to format the individual elements. For valid format specifiers, please see documentation for the standard C library function `printf()`.
@@ -1668,11 +1668,11 @@ Print an _m x n_ matrix `A` to file stream `file`, where `file` is a file pointe
 ```c
 void bli_?printv
      (
-       char*   s1,
-       dim_t   m,
-       ctype*  x, inc_t incx,
-       char*   format,
-       char*   s2
+       const char*   s1,
+             dim_t   m,
+       const ctype*  x, inc_t incx,
+       const char*   format,
+       const char*   s2
      );
 ```
 Print a vector `x` of length _m_ to standard output. This function call is equivalent to calling `bli_?fprintv()` with `stdout` as the file pointer.
@@ -1683,12 +1683,12 @@ Print a vector `x` of length _m_ to standard output. This function call is equiv
 ```c
 void bli_?printm
      (
-       char*   s1,
-       dim_t   m,
-       dim_t   n,
-       ctype*  a, inc_t rs_a, inc_t cs_a,
-       char*   format,
-       char*   s2
+       const char*   s1,
+             dim_t   m,
+             dim_t   n,
+       const ctype*  a, inc_t rs_a, inc_t cs_a,
+       const char*   format,
+       const char*   s2
      );
 ```
 Print an _m x n_ matrix `a` to standard output. This function call is equivalent to calling `bli_?fprintm()` with `stdout` as the file pointer.
@@ -1730,10 +1730,10 @@ Set the elements of an _m x n_ matrix `A` to random values on the interval `[-1,
 ```c
 void bli_?sumsqv
      (
-       dim_t   n,
-       ctype*  x, inc_t incx,
-       rtype*  scale,
-       rtype*  sumsq
+             dim_t   n,
+       const ctype*  x, inc_t incx,
+             rtype*  scale,
+             rtype*  sumsq
      );
 ```
 Compute the sum of the squares of the elements in a vector `x` of length _n_. The result is computed in scaled form, and in such a way that it may be used repeatedly to accumulate the sum of the squares of several vectors.
@@ -1752,9 +1752,9 @@ where, on entry, `scale` and `sumsq` contain `scale_old` and `sumsq_old`, respec
 ```c
 void bli_?getsc
      (
-       ctype*   chi,
-       double*  zeta_r,
-       double*  zeta_i
+       const ctype*   chi,
+             double*  zeta_r,
+             double*  zeta_i
      );
 ```
 Copy the real and imaginary values from the scalar object `chi` to `zeta_r` and `zeta_i`. If `chi` is stored as a real type, then `zeta_i` is set to zero. (If `chi` is stored in single precision, the corresponding elements are typecast/promoted during the copy.)
@@ -1765,10 +1765,10 @@ Copy the real and imaginary values from the scalar object `chi` to `zeta_r` and 
 ```c
 err_t bli_?getijv
      (
-       dim_t    i,
-       ctype*   x, inc_t incx,
-       double*  ar,
-       double*  ai
+             dim_t    i,
+       const ctype*   x, inc_t incx,
+             double*  ar,
+             double*  ai
      );
 ```
 Copy the real and imaginary values at the `i`th element of vector `x` to `ar` and `ai`. For real domain invocations, only `ar` is overwritten and `ai` is left unchanged. (If `x` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
@@ -1780,11 +1780,11 @@ Note that the object-based analogue of [getijv](BLISObjectAPI.md#getijv) does bo
 ```c
 err_t bli_?getijm
      (
-       dim_t    i,
-       dim_t    j,
-       ctype*   b, inc_t rs_b, inc_t cs_b,
-       double*  ar,
-       double*  ai
+             dim_t    i,
+             dim_t    j,
+       const ctype*   b, inc_t rs_b, inc_t cs_b,
+             double*  ar,
+             double*  ai
      );
 ```
 Copy the real and imaginary values at the (`i`,`j`) element of object `b` to `ar` and `ai`. For real domain invocations, only `ar` is overwritten and `ai` is left unchanged. (If `b` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
@@ -1840,10 +1840,10 @@ Note that the object-based analogue of [setijm](BLISObjectAPI.md#setijm) does bo
 ```c
 void bli_?eqsc
      (
-       conj_t  conjchi,
-       ctype*  chi,
-       ctype*  psi,
-       bool*   is_eq
+             conj_t  conjchi,
+       const ctype*  chi,
+       const ctype*  psi,
+             bool*   is_eq
      );
 ```
 Perform an element-wise comparison between scalars `chi` and `psi` and store the boolean result in the `bool` pointed to by `is_eq`.
@@ -1855,11 +1855,11 @@ If `conjchi` indicates a conjugation, `chi` will be implicitly conjugated for pu
 ```c
 void bli_?eqv
      (
-       conj_t  conjx,
-       dim_t   n,
-       ctype*  x, inc_t incx,
-       ctype*  y, inc_t incy,
-       bool*   is_eq
+             conj_t  conjx,
+             dim_t   n,
+       const ctype*  x, inc_t incx,
+       const ctype*  y, inc_t incy,
+             bool*   is_eq
      );
 ```
 Perform an element-wise comparison between length _n_ vectors `x` and `y` and store the boolean result in the `bool` pointed to by `is_eq`.
@@ -1871,15 +1871,15 @@ If `conjx` indicates a conjugation, `x` will be implicitly conjugated for purpos
 ```c
 void bli_?eqm
      (
-       doff_t   diagoffa,
-       diag_t   diaga,
-       uplo_t   uploa,
-       trans_t  transa,
-       dim_t    m,
-       dim_t    n,
-       ctype*   a, inc_t rs_a, inc_t cs_a,
-       ctype*   b, inc_t rs_b, inc_t cs_b,
-       bool*    is_eq
+             doff_t   diagoffa,
+             diag_t   diaga,
+             uplo_t   uploa,
+             trans_t  transa,
+             dim_t    m,
+             dim_t    n,
+       const ctype*   a, inc_t rs_a, inc_t cs_a,
+       const ctype*   b, inc_t rs_b, inc_t cs_b,
+             bool*    is_eq
      );
 ```
 Perform an element-wise comparison between matrices `A` and `B` and store the boolean result in the `bool` pointed to by `is_eq`.
@@ -1902,16 +1902,16 @@ If `transa` indicates a conjugation and/or transposition, then `A` will be conju
 ```c
 void bli_?gemm_*
      (
-       dim_t                m,
-       dim_t                n,
-       dim_t                k,
-       ctype*      restrict alpha,
-       ctype*      restrict a1,
-       ctype*      restrict b1,
-       ctype*      restrict beta,
-       ctype*      restrict c11, inc_t rsc, inc_t csc,
-       auxinfo_t*  restrict data,
-       cntx_t*     restrict cntx
+             dim_t       m,
+             dim_t       n,
+             dim_t       k,
+       const ctype*      alpha,
+       const ctype*      a1,
+       const ctype*      b1,
+       const ctype*      beta,
+             ctype*      c11, inc_t rsc, inc_t csc,
+       const auxinfo_t*  data,
+       const cntx_t*     cntx
      );
 ```
 Perform
@@ -1929,20 +1929,20 @@ Please see the [Kernel Guide](KernelsHowTo.md) for more information on the `gemm
 ```c
 void bli_?trsm_l_*
      (
-       ctype*      restrict a11,
-       ctype*      restrict b11,
-       ctype*      restrict c11, inc_t rsc, inc_t csc
-       auxinfo_t*  restrict data,
-       cntx_t*     restrict cntx
+       const ctype*      a11,
+             ctype*      b11,
+             ctype*      c11, inc_t rsc, inc_t csc
+       const auxinfo_t*  data,
+       const cntx_t*     cntx
      );
 
 void bli_?trsm_u_*
      (
-       ctype*      restrict a11,
-       ctype*      restrict b11,
-       ctype*      restrict c11, inc_t rsc, inc_t csc
-       auxinfo_t*  restrict data,
-       cntx_t*     restrict cntx
+       const ctype*      a11,
+             ctype*      b11,
+             ctype*      c11, inc_t rsc, inc_t csc
+       const auxinfo_t*  data,
+       const cntx_t*     cntx
      );
 ```
 Perform
@@ -1960,32 +1960,32 @@ Please see the [Kernel Guide](KernelsHowTo.md) for more information on the `trsm
 ```c
 void bli_?gemmtrsm_l_*
      (
-       dim_t                m,
-       dim_t                n,
-       dim_t                k,
-       ctype*      restrict alpha,
-       ctype*      restrict a10,
-       ctype*      restrict a11,
-       ctype*      restrict b01,
-       ctype*      restrict b11,
-       ctype*      restrict c11, inc_t rs_c, inc_t cs_c,
-       auxinfo_t*  restrict data,
-       cntx_t*     restrict cntx
+             dim_t       m,
+             dim_t       n,
+             dim_t       k,
+       const ctype*      alpha,
+       const ctype*      a10,
+       const ctype*      a11,
+       const ctype*      b01,
+             ctype*      b11,
+             ctype*      c11, inc_t rs_c, inc_t cs_c,
+       const auxinfo_t*  data,
+       const cntx_t*     cntx
      );
 
 void bli_?gemmtrsm_u_*
      (
-       dim_t                m,
-       dim_t                n,
-       dim_t                k,
-       ctype*      restrict alpha,
-       ctype*      restrict a12,
-       ctype*      restrict a11,
-       ctype*      restrict b21,
-       ctype*      restrict b11,
-       ctype*      restrict c11, inc_t rs_c, inc_t cs_c,
-       auxinfo_t*  restrict data,
-       cntx_t*     restrict cntx
+             dim_t       m,
+             dim_t       n,
+             dim_t       k,
+       const ctype*      alpha,
+       const ctype*      a12,
+       const ctype*      a11,
+       const ctype*      b21,
+             ctype*      b11,
+             ctype*      c11, inc_t rs_c, inc_t cs_c,
+       const auxinfo_t*  data,
+       const cntx_t*     cntx
      );
 ```
 Perform
@@ -2013,7 +2013,7 @@ Please see the [Kernel Guide](KernelsHowTo.md) for more information on the `gemm
 
 BLIS allows applications to query information about how BLIS was configured. The `bli_info_` API provides several categories of query routines. Most values are returned as a `gint_t`, which is a signed integer. The size of this integer can be queried through a special routine that returns the size in a character string:
 ```c
-char* bli_info_get_int_type_size_str( void );
+const char* bli_info_get_int_type_size_str( void );
 ```
 **Note:** All of the `bli_info_` functions are **always** thread-safe, no matter how BLIS was configured.
 
@@ -2021,7 +2021,7 @@ char* bli_info_get_int_type_size_str( void );
 
 The following routine returns the address the full BLIS version string:
 ```c
-char* bli_info_get_version_str( void );
+const char* bli_info_get_version_str( void );
 ```
 
 ## Specific configuration
@@ -2034,7 +2034,7 @@ This is most useful when BLIS is configured with multiple configurations. (When 
 
 Once the configuration's ID is known, it can be used to query a string that contains the name of the configuration:
 ```c
-char* bli_arch_string( arch_t id );
+const char* bli_arch_string( arch_t id );
 ```
 
 ## General configuration
@@ -2089,11 +2089,11 @@ gint_t bli_info_get_enable_sandbox( void );
 The following routines allow the caller to obtain a string that identifies the implementation type of each microkernel that is currently active (ie: part of the current active configuration, as identified bi `bli_arch_query_id()`).
 
 ```c
-char* bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt );
-char* bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt );
-char* bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt );
-char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt );
-char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt );
+const char* bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt );
+const char* bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt );
+const char* bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt );
+const char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt );
+const char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt );
 ```
 
 Possible implementation (ie: the `ind_t method` argument) types are:
@@ -2111,16 +2111,17 @@ Possible microkernel types (ie: the return values for `bli_info_get_*_ukr_impl_s
 
 The following routines allow the caller to obtain a string that identifies the implementation (`ind_t`) that is currently active (ie: implemented and enabled) for each level-3 operation. Possible implementation types are listed in the section above covering [microkernel implemenation query](BLISTypedAPI.md#microkernel-implementation-type-query).
 ```c
-char* bli_info_get_gemm_impl_string( num_t dt );
-char* bli_info_get_hemm_impl_string( num_t dt );
-char* bli_info_get_herk_impl_string( num_t dt );
-char* bli_info_get_her2k_impl_string( num_t dt );
-char* bli_info_get_symm_impl_string( num_t dt );
-char* bli_info_get_syrk_impl_string( num_t dt );
-char* bli_info_get_syr2k_impl_string( num_t dt );
-char* bli_info_get_trmm_impl_string( num_t dt );
-char* bli_info_get_trmm3_impl_string( num_t dt );
-char* bli_info_get_trsm_impl_string( num_t dt );
+const char* bli_info_get_gemm_impl_string( num_t dt );
+const char* bli_info_get_gemmt_impl_string( num_t dt );
+const char* bli_info_get_hemm_impl_string( num_t dt );
+const char* bli_info_get_herk_impl_string( num_t dt );
+const char* bli_info_get_her2k_impl_string( num_t dt );
+const char* bli_info_get_symm_impl_string( num_t dt );
+const char* bli_info_get_syrk_impl_string( num_t dt );
+const char* bli_info_get_syr2k_impl_string( num_t dt );
+const char* bli_info_get_trmm_impl_string( num_t dt );
+const char* bli_info_get_trmm3_impl_string( num_t dt );
+const char* bli_info_get_trsm_impl_string( num_t dt );
 ```
 
 
