@@ -74,15 +74,15 @@ The following tables list various types used throughout the BLIS object API.
 
 ### Integer-based types
 
-| BLIS integer type | Type definition          | Used to represent...                                                 |
-|:------------------|:-------------------------|:---------------------------------------------------------------------|
-| `gint_t`          | `int32_t` or `int64_t`   | general-purpose signed integer; used to define signed integer types. |
-| `guint_t`         | `uint32_t` or `uint64_t` | general-purpose signed integer; used to define signed integer types. |
-| `dim_t`           | `gint_t`                 | matrix and vector dimensions.                                        |
-| `inc_t`           | `gint_t`                 | matrix row/column strides and vector increments.                     |
+| BLIS integer type | Type definition          | Used to represent...                                                     |
+|:------------------|:-------------------------|:-------------------------------------------------------------------------|
+| `gint_t`          | `int32_t` or `int64_t`   | general-purpose signed integer; used to define signed integer types.     |
+| `guint_t`         | `uint32_t` or `uint64_t` | general-purpose unsigned integer; used to define unsigned integer types. |
+| `dim_t`           | `gint_t`                 | matrix and vector dimensions.                                            |
+| `inc_t`           | `gint_t`                 | matrix row/column strides and vector increments.                         |
 | `doff_t`          | `gint_t`                 | matrix diagonal offset: if _k_ < 0, diagonal begins at element (-_k_,0); otherwise diagonal begins at element (0,_k_). |
-| `siz_t`           | `guint_t`                | a byte size or byte offset.                                          |
-| `kerid_t`         | `uint32_t`               | a kernel, block size, operation, or kernel preference ID.        |
+| `siz_t`           | `guint_t`                | a byte size or byte offset, unsigned integer.                            |
+| `kerid_t`         | `uint32_t`               | a kernel, block size, operation, or kernel preference ID.                |
 
 ### Floating-point types
 
@@ -1418,6 +1418,7 @@ Observed object properties: `conj?(alphax)`, `conj?(x)`, `conj?(alphay)`, `conj?
 void bli_dotaxpyv
      (
        obj_t*  alpha,
+       obj_t*  xt,
        obj_t*  x,
        obj_t*  y,
        obj_t*  rho,
@@ -1481,6 +1482,7 @@ Observed object properties: `conj?(alpha)`, `conj?(beta)`, `conj?(A)`, `conj?(x)
 void bli_dotxaxpyf
      (
        obj_t*  alpha,
+       obj_t*  at,
        obj_t*  a,
        obj_t*  w,
        obj_t*  x,
