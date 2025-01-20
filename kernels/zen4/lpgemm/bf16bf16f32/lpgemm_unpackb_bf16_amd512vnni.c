@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -76,7 +76,7 @@ void unpackb_nr48_bf16bf16f32of32_row_major
 		_mm512_storeu_si512( unpack_b_buffer_bf16bf16f32of32 + ( ldb * ( kr + 0 ) ), a01 );
 		_mm512_storeu_si512( unpack_b_buffer_bf16bf16f32of32 + ( ldb * ( kr + 1 ) ), b0 );
 
-		c0 = _mm512_loadu_epi16( b + ( ( kr_new + 2 ) * NR1 ) );
+		c0 = _mm512_loadu_si512( b + ( ( kr_new + 2 ) * NR1 ) );
 		d0 = _mm512_setzero_si512();
 
 		c01 = _mm512_permutex2var_epi16( d0, selector_even, c0 );
@@ -98,7 +98,7 @@ void unpackb_nr48_bf16bf16f32of32_row_major
 
 		_mm512_storeu_si512( unpack_b_buffer_bf16bf16f32of32 + ( ldb * ( k_full_pieces + 0 ) ), a01 );
 
-		c0 = _mm512_loadu_epi16( b + ( ( kr_new + 2 ) * NR1 ) );
+		c0 = _mm512_loadu_si512( b + ( ( kr_new + 2 ) * NR1 ) );
 		c01 = _mm512_permutex2var_epi16( c0, selector_even, c0 );
 
 		_mm512_mask_storeu_epi16( unpack_b_buffer_bf16bf16f32of32 + ( ldb * ( k_full_pieces + 0 ) ) + NR1, 0xFFFF, c01 );

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -38,6 +38,23 @@
 
 #ifdef BLIS_ADDON_LPGEMM
 
+
+#ifdef LPGEMM_BF16_JIT
+void packb_mxp_nr64_f32obf16
+    (
+      bfloat16*       pack_b_buffer_f32obf16,
+      const float     *b,
+      const dim_t     rs_b,
+      const dim_t     cs_b,
+      const dim_t     NC,
+      const dim_t     KC,
+      dim_t*          rs_p,
+      dim_t*          cs_p
+  )
+{
+    // f32obf16 is not supported for gcc<11.2
+}
+#else
 void packb_mxp_nr64_f32obf16_row_major
      (
        bfloat16*       pack_b_buffer_f32obf16,
@@ -1263,4 +1280,5 @@ void packb_mxp_nrlt16_f32obf16_col_major
         _mm512_storeu_si512(pack_b_buffer + (kr * NR), a_reg[0]);
     }
 }
-#endif
+#endif // LPGEMM_BF16_JIT
+#endif // BLIS_ADDON_LPGEMM

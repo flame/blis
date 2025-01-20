@@ -1590,7 +1590,7 @@ int main( int argc, char** argv )
                     post_ops_str_dest, TRUE
                 );
             }
-            skip_exec:
+            skip_exec:;
         }
     }
 

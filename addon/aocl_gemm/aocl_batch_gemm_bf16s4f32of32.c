@@ -88,12 +88,8 @@ AOCL_BGEMM_MATMUL(bfloat16,int8_t,float,float,bf16s4f32of32)
 	aocl_lpgemm_init_global_cntx();
 
 #ifdef LPGEMM_BF16_JIT
-	if( jit_kernels_generated == FALSE )
-	{
-		bli_print_msg(" Could not generate bf16bf16f32of32 "
-			" kernels using JIT.", __FILE__, __LINE__ );
-			goto err_hndl;
-	}
+	bli_print_msg(" WOQ is not supported by JIT kernels.", __FILE__, __LINE__ );
+	return;
 #endif
 
 	trans_t blis_transa;
@@ -288,12 +284,8 @@ AOCL_BGEMM_MATMUL(bfloat16,int8_t,bfloat16,float,bf16s4f32obf16)
 	aocl_lpgemm_init_global_cntx();
 
 #ifdef LPGEMM_BF16_JIT
-	if( jit_kernels_generated == FALSE )
-	{
-		bli_print_msg(" Could not generate bf16bf16f32of32 "
-			" kernels using JIT.", __FILE__, __LINE__ );
-			goto err_hndl;
-	}
+	bli_print_msg(" WOQ is not supported by JIT kernels.", __FILE__, __LINE__ );
+	return;
 #endif
 
 	trans_t blis_transa;

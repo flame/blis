@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,7 +41,7 @@
 
 AOCL_GEMM_REORDER(bfloat16, bf16bf16f32of32_reference)
 {
- 
+
 	trans_t blis_trans;
 
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
@@ -314,6 +314,11 @@ AOCL_GEMM_REORDER(bfloat16, bf16bf16f32of32)
 
 AOCL_GEMM_REORDER_MXP(float, bfloat16, f32obf16)
 {
+
+#ifdef LPGEMM_BF16_JIT
+	bli_print_msg(" f32obf16 is not supported by JIT kernels.", __FILE__, __LINE__ );
+	return;
+#endif
 	trans_t blis_trans;
 
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
