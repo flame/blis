@@ -659,7 +659,7 @@ Modify the properties of `obj` to induce a logical transposition. This function 
 void bli_obj_alias_to( obj_t* a, obj_t* b );
 ```
 Initialize `b` to be a shallow copy, or alias, of `a`. For most people's purposes, this is equivalent to
-```
+```c
   b = a;
 ```
 However, there is at least one field (one that only developers should be concerned with) that is not copied.
@@ -758,7 +758,7 @@ Observed object properties: `conj?(alpha)`, `conj?(x)`.
 ---
 
 #### axpbyv
-```
+```c
 void bli_axpbyv
      (
        obj_t*  alpha,
@@ -986,7 +986,7 @@ Swap corresponding elements of two _n_-length vectors `x` and `y`.
 ---
 
 #### xpbyv
-```
+```c
 void bli_xpbyv
      (
        obj_t*  x,
