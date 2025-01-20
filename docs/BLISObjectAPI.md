@@ -2368,10 +2368,33 @@ gint_t bli_info_get_stack_buf_max_size( void );
 gint_t bli_info_get_stack_buf_align_size( void );
 gint_t bli_info_get_heap_addr_align_size( void );
 gint_t bli_info_get_heap_stride_align_size( void );
-gint_t bli_info_get_pool_addr_align_size( void );
+gint_t bli_info_get_pool_addr_align_size_a( void );
+gint_t bli_info_get_pool_addr_align_size_b( void );
+gint_t bli_info_get_pool_addr_align_size_c( void );
+gint_t bli_info_get_pool_addr_align_size_gen( void );
+gint_t bli_info_get_pool_addr_offset_size_a( void );
+gint_t bli_info_get_pool_addr_offset_size_b( void );
+gint_t bli_info_get_pool_addr_offset_size_c( void );
+gint_t bli_info_get_pool_addr_offset_size_gen( void );
 gint_t bli_info_get_enable_stay_auto_init( void );
 gint_t bli_info_get_enable_blas( void );
+gint_t bli_info_get_enable_cblas( void );
 gint_t bli_info_get_blas_int_type_size( void );
+gint_t bli_info_get_enable_pba_pools( void );
+gint_t bli_info_get_enable_sba_pools( void );
+gint_t bli_info_get_enable_threading( void );
+gint_t bli_info_get_enable_openmp( void );
+gint_t bli_info_get_enable_pthreads( void );
+gint_t bli_info_get_enable_hpx( void );
+gint_t bli_info_get_enable_openmp_as_default( void );
+gint_t bli_info_get_enable_pthreads_as_default( void );
+gint_t bli_info_get_enable_hpx_as_default( void );
+gint_t bli_info_get_thread_jrir_slab( void );
+gint_t bli_info_get_thread_jrir_rr( void );
+gint_t bli_info_get_thread_jrir_tlb( void );
+gint_t bli_info_get_enable_tls( void );
+gint_t bli_info_get_enable_memkind( void );
+gint_t bli_info_get_enable_sandbox( void );
 ```
 
 ## Kernel information
