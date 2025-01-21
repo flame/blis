@@ -211,6 +211,8 @@ LPGEMV(int8_t,int8_t,int32_t,s8s8s32o32)
 	}
 	else
 	{
+		dim_t gemm_MR = lcntx->blksz.MR;
+
 		dim_t jc_start, jc_end;
 		thread_jc.n_way = ( thread_jc.n_way == 1 ) ?
 			( thread->n_threads ) : ( thread_jc.n_way );
@@ -245,6 +247,10 @@ LPGEMV(int8_t,int8_t,int32_t,s8s8s32o32)
 			  ( uint8_t* )a, rs_a, cs_a,
 			  1, k,
 			  &rs_a_use, &cs_a_use
+			);
+			get_packa_strides_mfringe_u8s8s32os32
+			(
+			  &rs_a_use, &cs_a_use, gemm_MR, 1
 			);
 
 			a_use = pack_a_buffer_s8s8s32os32;

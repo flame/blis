@@ -53,12 +53,18 @@ BLIS_INLINE void calculate_n_threads_per_gemm
 	rntm_t* rntm_g
   )
 {
-	*n_threads = bli_rntm_num_threads( rntm_g ); \
-	*n_gemms_in_parallel = -1; \
-	if( *n_threads == 1 ) *n_gemms_in_parallel = 1; \
-	else if( *n_gemms_in_parallel < 1 ) *n_gemms_in_parallel = bli_min(*n_threads, batch_size); \
-	/* ToDo: All the leftover thrads might go under-utilized. Could be optimized further. */ \
-	*n_threads_per_gemm = ( *n_threads ) / *n_gemms_in_parallel;
+	*n_threads = bli_rntm_num_threads( rntm_g );
+	*n_gemms_in_parallel = -1;
+	if( *n_threads == 1 )
+	{
+		( *n_gemms_in_parallel ) = 1;
+	}
+	else if( *n_gemms_in_parallel < 1 )
+	{
+		( *n_gemms_in_parallel ) = bli_min( ( *n_threads ), batch_size );
+	}
+	/* ToDo: All the leftover thrads might go under-utilized. Could be optimized further. */
+	( *n_threads_per_gemm ) = ( *n_threads ) / ( *n_gemms_in_parallel );
 }
 
 BLIS_INLINE dim_t next_factor

@@ -136,6 +136,7 @@ typedef struct
 	dim_t cs;
 
 	AOCL_MEMORY_TAG mtag;
+	AOCL_MATRIX_TYPE mat_type;
 
 	lpgemm_mem_t storage;
 } lpgemm_obj_t;

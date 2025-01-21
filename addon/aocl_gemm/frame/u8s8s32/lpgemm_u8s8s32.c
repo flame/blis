@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -194,6 +194,8 @@ LPGEMV(uint8_t,int8_t,int32_t,u8s8s32os32)
 	}
 	else
 	{
+		dim_t gemm_MR = lcntx->blksz.MR;
+
 		// Compute the JC loop thread range for the current thread.
 		dim_t jc_start, jc_end;
 		thread_jc.n_way = ( thread_jc.n_way == 1 ) ?
@@ -226,6 +228,10 @@ LPGEMV(uint8_t,int8_t,int32_t,u8s8s32os32)
 			  a, rs_a, cs_a,
 			  1, k,
 			  &rs_a_use, &cs_a_use
+			);
+			get_packa_strides_mfringe_u8s8s32os32
+			(
+			  &rs_a_use, &cs_a_use, gemm_MR, 1
 			);
 
 			a_use = pack_a_buffer;
