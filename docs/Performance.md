@@ -503,7 +503,7 @@ The `runthese.m` file will contain example invocations of the function.
     * Multithreaded (64 core) execution requested via `export MKL_NUM_THREADS=64`
     * Multithreaded (128 core) execution requested via `export MKL_NUM_THREADS=128`
 * Affinity:
-  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0-127"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` environment variable was unset. 
+  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0-127"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` environment variable was unset.
   * All executables were run through `numactl --interleave=all`.
 * Frequency throttling (via `cpupower`):
   * Driver: acpi-cpufreq
