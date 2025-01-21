@@ -1668,11 +1668,11 @@ Print an _m x n_ matrix `A` to file stream `file`, where `file` is a file pointe
 ```c
 void bli_?printv
      (
-       const char*  s1,
-             dim_t  m,
-       const void*  x, inc_t incx,
-       const char*  format,
-       const char*  s2
+       const char*   s1,
+             dim_t   m,
+       const ctype*  x, inc_t incx,
+       const char*   format,
+       const char*   s2
      );
 ```
 Print a vector `x` of length _m_ to standard output. This function call is equivalent to calling `bli_?fprintv()` with `stdout` as the file pointer.
@@ -1683,12 +1683,12 @@ Print a vector `x` of length _m_ to standard output. This function call is equiv
 ```c
 void bli_?printm
      (
-       const char*  s1,
-             dim_t  m,
-             dim_t  n,
-       const void*  a, inc_t rs_a, inc_t cs_a,
-       const char*  format,
-       const char*  s2
+       const char*   s1,
+             dim_t   m,
+             dim_t   n,
+       const ctype*  a, inc_t rs_a, inc_t cs_a,
+       const char*   format,
+       const char*   s2
      );
 ```
 Print an _m x n_ matrix `a` to standard output. This function call is equivalent to calling `bli_?fprintm()` with `stdout` as the file pointer.
