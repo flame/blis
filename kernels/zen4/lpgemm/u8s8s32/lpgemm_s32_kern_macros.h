@@ -63,7 +63,7 @@
 	S32_S32_BETA_OP(c_int32_ ## m_ind ## p2,m_ir,m_ind,2,scratch1,scratch2); \
 	S32_S32_BETA_OP(c_int32_ ## m_ind ## p3,m_ir,m_ind,3,scratch1,scratch2); \
 
-// Downscale beta op.
+// Downscale S8 beta op.
 #define S8_S32_BETA_OP(reg,m_ir,m_ind,n_ind,scratch1,scratch2) \
 	scratch1 = \
 	_mm512_cvtepi8_epi32 \
@@ -93,6 +93,72 @@
 	S8_S32_BETA_OP(c_int32_ ## m_ind ## p2,m_ir,m_ind,2,scratch1,scratch2); \
 	S8_S32_BETA_OP(c_int32_ ## m_ind ## p3,m_ir,m_ind,3,scratch1,scratch2); \
 
+// Downscale F32 beta op
+#define F32_S32_BETA_OP(reg,m_ir,m_ind,n_ind,scratch1,scratch2) \
+	scratch1 = \
+	_mm512_cvtps_epi32 \
+    ( \
+		_mm512_maskz_loadu_ps \
+		( \
+			0xFFFF, \
+			( float* )post_ops_attr.buf_downscale + \
+			( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+			post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+		) \
+	); \
+	S32_BETA_FMA(reg,scratch1,scratch2) \
+
+#define F32_S32_BETA_OP2(m_ir,m_ind,scratch1,scratch2) \
+	F32_S32_BETA_OP(c_int32_ ## m_ind ## p0,m_ir,m_ind,0,scratch1,scratch2); \
+	F32_S32_BETA_OP(c_int32_ ## m_ind ## p1,m_ir,m_ind,1,scratch1,scratch2); \
+
+#define F32_S32_BETA_OP3(m_ir,m_ind,scratch1,scratch2) \
+	F32_S32_BETA_OP(c_int32_ ## m_ind ## p0,m_ir,m_ind,0,scratch1,scratch2); \
+	F32_S32_BETA_OP(c_int32_ ## m_ind ## p1,m_ir,m_ind,1,scratch1,scratch2); \
+	F32_S32_BETA_OP(c_int32_ ## m_ind ## p2,m_ir,m_ind,2,scratch1,scratch2); \
+
+#define F32_S32_BETA_OP4(m_ir,m_ind,scratch1,scratch2) \
+	F32_S32_BETA_OP(c_int32_ ## m_ind ## p0,m_ir,m_ind,0,scratch1,scratch2); \
+	F32_S32_BETA_OP(c_int32_ ## m_ind ## p1,m_ir,m_ind,1,scratch1,scratch2); \
+	F32_S32_BETA_OP(c_int32_ ## m_ind ## p2,m_ir,m_ind,2,scratch1,scratch2); \
+	F32_S32_BETA_OP(c_int32_ ## m_ind ## p3,m_ir,m_ind,3,scratch1,scratch2); \
+
+// Downscale BF16 beta op
+#define BF16_S32_BETA_OP(reg,m_ir,m_ind,n_ind,scratch1,scratch2) \
+	scratch1 = \
+	    _mm512_cvtps_epi32 \
+		( \
+			(__m512)_mm512_sllv_epi32 \
+			( \
+				_mm512_cvtepi16_epi32 \
+				( \
+				_mm256_maskz_loadu_epi16 \
+				( \
+					0xFFFF, \
+					( bfloat16* )post_ops_attr.buf_downscale + \
+					( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+					post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+				) \
+				), _mm512_set1_epi32( 16 ) \
+			) \
+		); \
+	S32_BETA_FMA(reg,scratch1,scratch2) \
+
+#define BF16_S32_BETA_OP2(m_ir,m_ind,scratch1,scratch2) \
+	BF16_S32_BETA_OP(c_int32_ ## m_ind ## p0,m_ir,m_ind,0,scratch1,scratch2); \
+	BF16_S32_BETA_OP(c_int32_ ## m_ind ## p1,m_ir,m_ind,1,scratch1,scratch2); \
+
+#define BF16_S32_BETA_OP3(m_ir,m_ind,scratch1,scratch2) \
+	BF16_S32_BETA_OP(c_int32_ ## m_ind ## p0,m_ir,m_ind,0,scratch1,scratch2); \
+	BF16_S32_BETA_OP(c_int32_ ## m_ind ## p1,m_ir,m_ind,1,scratch1,scratch2); \
+	BF16_S32_BETA_OP(c_int32_ ## m_ind ## p2,m_ir,m_ind,2,scratch1,scratch2); \
+
+#define BF16_S32_BETA_OP4(m_ir,m_ind,scratch1,scratch2) \
+	BF16_S32_BETA_OP(c_int32_ ## m_ind ## p0,m_ir,m_ind,0,scratch1,scratch2); \
+	BF16_S32_BETA_OP(c_int32_ ## m_ind ## p1,m_ir,m_ind,1,scratch1,scratch2); \
+	BF16_S32_BETA_OP(c_int32_ ## m_ind ## p2,m_ir,m_ind,2,scratch1,scratch2); \
+	BF16_S32_BETA_OP(c_int32_ ## m_ind ## p3,m_ir,m_ind,3,scratch1,scratch2); \
+
 // Default n < 16 beta macro
 #define S32_S32_BETA_OP_NLT16F(reg,buf_,scratch1,scratch2) \
 	scratch1 = _mm512_loadu_si512( buf_ ); \
@@ -117,6 +183,42 @@
 	); \
 	S32_BETA_FMA(reg,scratch1,scratch2) \
 
+// Downscale n < 16 mask load F32 beta macro
+#define F32_S32_BETA_OP_NLT16F_MASK(lmask,reg,m_ind,n_ind,scratch1,scratch2) \
+	scratch1 = \
+	_mm512_cvtps_epi32 \
+    ( \
+		_mm512_maskz_loadu_ps \
+		( \
+			lmask, \
+			( float* )post_ops_attr.buf_downscale + \
+			( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+			post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+		) \
+	); \
+	S32_BETA_FMA(reg,scratch1,scratch2) \
+
+// Downscale n < 16 mask load BF16 beta macro
+#define BF16_S32_BETA_OP_NLT16F_MASK(lmask,reg,m_ind,n_ind,scratch1,scratch2) \
+	scratch1 = \
+	    _mm512_cvtps_epi32 \
+		( \
+			(__m512)_mm512_sllv_epi32 \
+			( \
+				_mm512_cvtepi16_epi32 \
+				( \
+				_mm256_maskz_loadu_epi16 \
+				( \
+					lmask, \
+					( bfloat16* )post_ops_attr.buf_downscale + \
+					( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+					post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+				) \
+				), _mm512_set1_epi32( 16 ) \
+			) \
+		); \
+	S32_BETA_FMA(reg,scratch1,scratch2) \
+
 // BF16 bias helper macros.
 #define BF16_S32_BIAS_LOAD(scr,mask,n_ind) \
 	scr = _mm512_cvtps_epi32 \
@@ -135,6 +237,18 @@
 					) \
 				  ) \
 				); \
+
+// F32 bias helper macros.
+#define F32_S32_BIAS_LOAD(scr,mask,n_ind) \
+	scr = _mm512_cvtps_epi32 \
+			( \
+				_mm512_maskz_loadu_ps \
+				( \
+				( mask ), \
+				( ( float* ) post_ops_list_temp->op_args1 ) + \
+				post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+				) \
+			); \
 
 // S8 bias helper macros.
 #define S8_S32_BIAS_LOAD(scr,mask,n_ind) \
@@ -170,7 +284,7 @@
 	); \
 	reg = _mm512_add_epi32( reg, _mm512_cvtepi8_epi32( zero_point ) ); \
 
-// Downscale store macro
+// Downscale store s8 macro
 #define CVT_STORE_S32_S8(reg,m_ind,n_ind) \
 	_mm512_mask_cvtsepi32_storeu_epi8 \
 	( \
@@ -178,6 +292,26 @@
 	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
 	  post_ops_attr.post_op_c_j + ( n_ind * 16 ), \
 	  mask_all1, reg \
+	) \
+
+// Downscale store bf16 macro
+#define CVT_STORE_S32_BF16(reg,m_ind,n_ind) \
+	_mm256_mask_storeu_epi16 \
+	( \
+	  ( bfloat16* )post_ops_attr.buf_downscale + \
+	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+	  post_ops_attr.post_op_c_j + ( n_ind * 16 ), \
+	  mask_all1, (__m256i) _mm512_cvtneps_pbh( _mm512_cvtepi32_ps ( reg ) ) \
+	) \
+
+// Downscale store f32 macro
+#define CVT_STORE_S32_F32(reg,m_ind,n_ind) \
+	_mm512_mask_storeu_ps  \
+	( \
+	  ( float* )post_ops_attr.buf_downscale + \
+	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+	  post_ops_attr.post_op_c_j + ( n_ind * 16 ), \
+	  mask_all1, _mm512_cvtepi32_ps ( reg ) \
 	) \
 
 // Downscale n < 16 macro
@@ -774,5 +908,26 @@
     post_ops_attr.post_op_c_j + ( n_ind * 16 ), \
     mask, reg \
   ); \
+
+// Downscale store bf16 macro
+#define CVT_STORE_S32_BF16_MASK(reg,mask,m_ind,n_ind) \
+	_mm256_mask_storeu_epi16 \
+	( \
+	  ( bfloat16* )post_ops_attr.buf_downscale + \
+	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+	  post_ops_attr.post_op_c_j + ( n_ind * 16 ), \
+	  mask, (__m256i) _mm512_cvtneps_pbh( _mm512_cvtepi32_ps ( reg ) ) \
+	) \
+
+// Downscale store f32 macro
+#define CVT_STORE_S32_F32_MASK(reg,mask,m_ind,n_ind) \
+	_mm512_mask_storeu_ps  \
+	( \
+	  ( float* )post_ops_attr.buf_downscale + \
+	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+	  post_ops_attr.post_op_c_j + ( n_ind * 16 ), \
+	  mask, _mm512_cvtepi32_ps ( reg ) \
+	) \
+
 
 #endif // LPGEMM_S32_KERN_MACROS_H

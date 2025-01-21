@@ -300,14 +300,39 @@ LPGEMV_M_EQ1_KERN(int8_t,int8_t,int32_t,s8s8s32os32)
 			// needs to be upscaled to s32 to be used for beta scale.
 			if ( post_ops_attr.buf_downscale != NULL )
 			{
-				S8_S32_BETA_OP_NLT16F_MASK( k1, zmm8,  0, 0,
-				                            selector1, selector2 )
-				S8_S32_BETA_OP_NLT16F_MASK( k2, zmm12, 0, 1,
-				                            selector1, selector2 )
-				S8_S32_BETA_OP_NLT16F_MASK( k3, zmm16, 0, 2,
-				                            selector1, selector2 )
-				S8_S32_BETA_OP_NLT16F_MASK( k4, zmm20, 0, 3,
-				                            selector1, selector2 )
+				if ( post_ops_attr.c_stor_type == S8 )
+				{
+					S8_S32_BETA_OP_NLT16F_MASK( k1, zmm8,  0, 0,
+												selector1, selector2 )
+					S8_S32_BETA_OP_NLT16F_MASK( k2, zmm12, 0, 1,
+												selector1, selector2 )
+					S8_S32_BETA_OP_NLT16F_MASK( k3, zmm16, 0, 2,
+												selector1, selector2 )
+					S8_S32_BETA_OP_NLT16F_MASK( k4, zmm20, 0, 3,
+												selector1, selector2 )
+				}
+				else if ( post_ops_attr.c_stor_type == BF16 )
+				{
+					BF16_S32_BETA_OP_NLT16F_MASK( k1, zmm8,  0, 0,
+												selector1, selector2 )
+					BF16_S32_BETA_OP_NLT16F_MASK( k2, zmm12, 0, 1,
+												selector1, selector2 )
+					BF16_S32_BETA_OP_NLT16F_MASK( k3, zmm16, 0, 2,
+												selector1, selector2 )
+					BF16_S32_BETA_OP_NLT16F_MASK( k4, zmm20, 0, 3,
+												selector1, selector2 )
+				}
+				else if ( post_ops_attr.c_stor_type == F32 )
+				{
+					F32_S32_BETA_OP_NLT16F_MASK( k1, zmm8,  0, 0,
+												selector1, selector2 )
+					F32_S32_BETA_OP_NLT16F_MASK( k2, zmm12, 0, 1,
+												selector1, selector2 )
+					F32_S32_BETA_OP_NLT16F_MASK( k3, zmm16, 0, 2,
+												selector1, selector2 )
+					F32_S32_BETA_OP_NLT16F_MASK( k4, zmm20, 0, 3,
+												selector1, selector2 )
+				}
 			}
 			else
 			{
@@ -328,9 +353,9 @@ LPGEMV_M_EQ1_KERN(int8_t,int8_t,int32_t,s8s8s32os32)
 
 		POST_OPS_BIAS_6x64:
 		{
+			__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 			if ( post_ops_list_temp->stor_type == BF16 )
 			{
-				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_S32_BIAS_LOAD(selector1, bias_mask, 0);
 				BF16_S32_BIAS_LOAD(selector2, bias_mask, 1);
 				BF16_S32_BIAS_LOAD(selector3, bias_mask, 2);
@@ -338,11 +363,17 @@ LPGEMV_M_EQ1_KERN(int8_t,int8_t,int32_t,s8s8s32os32)
 			}
 			else if ( post_ops_list_temp->stor_type == S8 )
 			{
-				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				S8_S32_BIAS_LOAD(selector1, bias_mask, 0);
 				S8_S32_BIAS_LOAD(selector2, bias_mask, 1);
 				S8_S32_BIAS_LOAD(selector3, bias_mask, 2);
 				S8_S32_BIAS_LOAD(selector4, bias_mask, 3);
+			}
+			else if ( post_ops_list_temp->stor_type == F32 )
+			{
+				F32_S32_BIAS_LOAD(selector1, bias_mask, 0);
+				F32_S32_BIAS_LOAD(selector2, bias_mask, 1);
+				F32_S32_BIAS_LOAD(selector3, bias_mask, 2);
+				F32_S32_BIAS_LOAD(selector4, bias_mask, 3);
 			}
 			else
 			{
@@ -1019,10 +1050,27 @@ LPGEMV_M_EQ1_KERN(int8_t,int8_t,int32_t,s8s8s32os32)
 		{
 			if ( post_ops_attr.buf_downscale != NULL )
 			{
-				CVT_STORE_S32_S8_MASK( zmm8,  k1, 0, 0 );
-				CVT_STORE_S32_S8_MASK( zmm12, k2, 0, 1 );
-				CVT_STORE_S32_S8_MASK( zmm16, k3, 0, 2 );
-				CVT_STORE_S32_S8_MASK( zmm20, k4, 0, 3 );
+				if ( post_ops_attr.c_stor_type == S8 )
+				{
+					CVT_STORE_S32_S8_MASK( zmm8,  k1, 0, 0 );
+					CVT_STORE_S32_S8_MASK( zmm12, k2, 0, 1 );
+					CVT_STORE_S32_S8_MASK( zmm16, k3, 0, 2 );
+					CVT_STORE_S32_S8_MASK( zmm20, k4, 0, 3 );
+				}
+				else if ( post_ops_attr.c_stor_type == BF16 )
+				{
+					CVT_STORE_S32_BF16_MASK( zmm8,  k1, 0, 0 );
+					CVT_STORE_S32_BF16_MASK( zmm12, k2, 0, 1 );
+					CVT_STORE_S32_BF16_MASK( zmm16, k3, 0, 2 );
+					CVT_STORE_S32_BF16_MASK( zmm20, k4, 0, 3 );
+				}
+				else if ( post_ops_attr.c_stor_type == F32 )
+				{
+					CVT_STORE_S32_F32_MASK( zmm8,  k1, 0, 0 );
+					CVT_STORE_S32_F32_MASK( zmm12, k2, 0, 1 );
+					CVT_STORE_S32_F32_MASK( zmm16, k3, 0, 2 );
+					CVT_STORE_S32_F32_MASK( zmm20, k4, 0, 3 );
+				}
 			}
 			else
 			{

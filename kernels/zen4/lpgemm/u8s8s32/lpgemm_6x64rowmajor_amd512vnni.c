@@ -450,28 +450,73 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 		// Scale C by beta.
 		if ( beta != 0 )
 		{
-			// For the downscaled api (C-s8), the output C matrix values needs
+			// For the downscaled api (C-s8, bf16, f32), the output C matrix values needs
 			// to be upscaled to s32 to be used for beta scale.
 			if ( ( post_ops_attr.buf_downscale != NULL ) &&
 				 ( post_ops_attr.is_first_k == TRUE ) )
 			{
-				// c[0:0-15,16-31,32-47,48-63]
-				S8_S32_BETA_OP4(ir,0,selector1,selector2);
+				if ( post_ops_attr.c_stor_type == S8 )
+				{
+					// c[0:0-15,16-31,32-47,48-63]
+					S8_S32_BETA_OP4(ir,0,selector1,selector2);
 
-				// c[1:0-15,16-31,32-47,48-63]
-				S8_S32_BETA_OP4(ir,1,selector1,selector2);
+					// c[1:0-15,16-31,32-47,48-63]
+					S8_S32_BETA_OP4(ir,1,selector1,selector2);
 
-				// c[2:0-15,16-31,32-47,48-63]
-				S8_S32_BETA_OP4(ir,2,selector1,selector2);
+					// c[2:0-15,16-31,32-47,48-63]
+					S8_S32_BETA_OP4(ir,2,selector1,selector2);
 
-				// c[3:0-15,16-31,32-47,48-63]
-				S8_S32_BETA_OP4(ir,3,selector1,selector2);
+					// c[3:0-15,16-31,32-47,48-63]
+					S8_S32_BETA_OP4(ir,3,selector1,selector2);
 
-				// c[4:0-15,16-31,32-47,48-63]
-				S8_S32_BETA_OP4(ir,4,selector1,selector2);
+					// c[4:0-15,16-31,32-47,48-63]
+					S8_S32_BETA_OP4(ir,4,selector1,selector2);
 
-				// c[5:0-15,16-31,32-47,48-63]
-				S8_S32_BETA_OP4(ir,5,selector1,selector2);
+					// c[5:0-15,16-31,32-47,48-63]
+					S8_S32_BETA_OP4(ir,5,selector1,selector2);
+				}
+				else if ( post_ops_attr.c_stor_type == BF16 )
+				{
+					// c[0:0-15,16-31,32-47,48-63]
+					BF16_S32_BETA_OP4(ir,0,selector1,selector2);
+
+					// c[1:0-15,16-31,32-47,48-63]
+					BF16_S32_BETA_OP4(ir,1,selector1,selector2);
+
+					// c[2:0-15,16-31,32-47,48-63]
+					BF16_S32_BETA_OP4(ir,2,selector1,selector2);
+
+					// c[3:0-15,16-31,32-47,48-63]
+					BF16_S32_BETA_OP4(ir,3,selector1,selector2);
+
+					// c[4:0-15,16-31,32-47,48-63]
+					BF16_S32_BETA_OP4(ir,4,selector1,selector2);
+
+					// c[5:0-15,16-31,32-47,48-63]
+					BF16_S32_BETA_OP4(ir,5,selector1,selector2);
+				}
+				else if ( post_ops_attr.c_stor_type == F32 )
+				{
+
+					// c[0:0-15,16-31,32-47,48-63]
+					F32_S32_BETA_OP4(ir,0,selector1,selector2);
+
+					// c[1:0-15,16-31,32-47,48-63]
+					F32_S32_BETA_OP4(ir,1,selector1,selector2);
+
+					// c[2:0-15,16-31,32-47,48-63]
+					F32_S32_BETA_OP4(ir,2,selector1,selector2);
+
+					// c[3:0-15,16-31,32-47,48-63]
+					F32_S32_BETA_OP4(ir,3,selector1,selector2);
+
+					// c[4:0-15,16-31,32-47,48-63]
+					F32_S32_BETA_OP4(ir,4,selector1,selector2);
+
+					// c[5:0-15,16-31,32-47,48-63]
+					F32_S32_BETA_OP4(ir,5,selector1,selector2);
+				}
+
 			}
 			else
 			{
@@ -500,9 +545,9 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 		POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_6x64:
 		{
+			__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 			if ( post_ops_list_temp->stor_type == BF16 )
 			{
-				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				BF16_S32_BIAS_LOAD(selector1, bias_mask, 0);
 				BF16_S32_BIAS_LOAD(selector2, bias_mask, 1);
 				BF16_S32_BIAS_LOAD(a_int32_0, bias_mask, 2);
@@ -510,11 +555,17 @@ POST_OPS_BIAS_6x64:
 			}
 			else if ( post_ops_list_temp->stor_type == S8 )
 			{
-				__mmask16 bias_mask = _cvtu32_mask16( 0xFFFF );
 				S8_S32_BIAS_LOAD(selector1, bias_mask, 0);
 				S8_S32_BIAS_LOAD(selector2, bias_mask, 1);
 				S8_S32_BIAS_LOAD(a_int32_0, bias_mask, 2);
 				S8_S32_BIAS_LOAD(a_int32_1, bias_mask, 3);
+			}
+			else if ( post_ops_list_temp->stor_type == F32 )
+			{
+				F32_S32_BIAS_LOAD(selector1, bias_mask, 0);
+				F32_S32_BIAS_LOAD(selector2, bias_mask, 1);
+				F32_S32_BIAS_LOAD(a_int32_0, bias_mask, 2);
+				F32_S32_BIAS_LOAD(a_int32_1, bias_mask, 3);
 			}
 			else
 			{
@@ -1922,78 +1973,232 @@ POST_OPS_6x64_DISABLE:
 			selector2 = _mm512_set1_epi32( 10 );
 			__mmask16 mask_all1 = _mm512_cmplt_epi32_mask( selector1, selector2 );
 
-			// Store the results in downscaled type (int8 instead of int32).
-			// c[0,0-15]
-			CVT_STORE_S32_S8(c_int32_0p0,0,0);
+            if ( post_ops_attr.c_stor_type == S8)
+			{
+				// Store the results in downscaled type (int8 instead of int32).
+				// c[0,0-15]
+				CVT_STORE_S32_S8(c_int32_0p0,0,0);
 
-			// c[0,16-31]
-			CVT_STORE_S32_S8(c_int32_0p1,0,1);
+				// c[0,16-31]
+				CVT_STORE_S32_S8(c_int32_0p1,0,1);
 
-			// c[0,32-47]
-			CVT_STORE_S32_S8(c_int32_0p2,0,2);
+				// c[0,32-47]
+				CVT_STORE_S32_S8(c_int32_0p2,0,2);
 
-			// c[0,48-63]
-			CVT_STORE_S32_S8(c_int32_0p3,0,3);
+				// c[0,48-63]
+				CVT_STORE_S32_S8(c_int32_0p3,0,3);
 
-			// c[1,0-15]
-			CVT_STORE_S32_S8(c_int32_1p0,1,0);
+				// c[1,0-15]
+				CVT_STORE_S32_S8(c_int32_1p0,1,0);
 
-			// c[1,16-31]
-			CVT_STORE_S32_S8(c_int32_1p1,1,1);
+				// c[1,16-31]
+				CVT_STORE_S32_S8(c_int32_1p1,1,1);
 
-			// c[1,32-47]
-			CVT_STORE_S32_S8(c_int32_1p2,1,2);
+				// c[1,32-47]
+				CVT_STORE_S32_S8(c_int32_1p2,1,2);
 
-			// c[1,48-63]
-			CVT_STORE_S32_S8(c_int32_1p3,1,3);
+				// c[1,48-63]
+				CVT_STORE_S32_S8(c_int32_1p3,1,3);
 
-			// c[2,0-15]
-			CVT_STORE_S32_S8(c_int32_2p0,2,0);
+				// c[2,0-15]
+				CVT_STORE_S32_S8(c_int32_2p0,2,0);
 
-			// c[2,16-31]
-			CVT_STORE_S32_S8(c_int32_2p1,2,1);
+				// c[2,16-31]
+				CVT_STORE_S32_S8(c_int32_2p1,2,1);
 
-			// c[2,32-47]
-			CVT_STORE_S32_S8(c_int32_2p2,2,2);
+				// c[2,32-47]
+				CVT_STORE_S32_S8(c_int32_2p2,2,2);
 
-			// c[2,48-63]
-			CVT_STORE_S32_S8(c_int32_2p3,2,3);
+				// c[2,48-63]
+				CVT_STORE_S32_S8(c_int32_2p3,2,3);
 
-			// c[3,0-15]
-			CVT_STORE_S32_S8(c_int32_3p0,3,0);
+				// c[3,0-15]
+				CVT_STORE_S32_S8(c_int32_3p0,3,0);
 
-			// c[3,16-31]
-			CVT_STORE_S32_S8(c_int32_3p1,3,1);
+				// c[3,16-31]
+				CVT_STORE_S32_S8(c_int32_3p1,3,1);
 
-			// c[3,32-47]
-			CVT_STORE_S32_S8(c_int32_3p2,3,2);
+				// c[3,32-47]
+				CVT_STORE_S32_S8(c_int32_3p2,3,2);
 
-			// c[3,48-63]
-			CVT_STORE_S32_S8(c_int32_3p3,3,3);
+				// c[3,48-63]
+				CVT_STORE_S32_S8(c_int32_3p3,3,3);
 
-			// c[4,0-15]
-			CVT_STORE_S32_S8(c_int32_4p0,4,0);
+				// c[4,0-15]
+				CVT_STORE_S32_S8(c_int32_4p0,4,0);
 
-			// c[4,16-31]
-			CVT_STORE_S32_S8(c_int32_4p1,4,1);
+				// c[4,16-31]
+				CVT_STORE_S32_S8(c_int32_4p1,4,1);
 
-			// c[4,32-47]
-			CVT_STORE_S32_S8(c_int32_4p2,4,2);
+				// c[4,32-47]
+				CVT_STORE_S32_S8(c_int32_4p2,4,2);
 
-			// c[4,48-63]
-			CVT_STORE_S32_S8(c_int32_4p3,4,3);
+				// c[4,48-63]
+				CVT_STORE_S32_S8(c_int32_4p3,4,3);
 
-			// c[5,0-15]
-			CVT_STORE_S32_S8(c_int32_5p0,5,0);
+				// c[5,0-15]
+				CVT_STORE_S32_S8(c_int32_5p0,5,0);
 
-			// c[5,16-31]
-			CVT_STORE_S32_S8(c_int32_5p1,5,1);
+				// c[5,16-31]
+				CVT_STORE_S32_S8(c_int32_5p1,5,1);
 
-			// c[5,32-47]
-			CVT_STORE_S32_S8(c_int32_5p2,5,2);
+				// c[5,32-47]
+				CVT_STORE_S32_S8(c_int32_5p2,5,2);
 
-			// c[5,48-63]
-			CVT_STORE_S32_S8(c_int32_5p3,5,3);
+				// c[5,48-63]
+				CVT_STORE_S32_S8(c_int32_5p3,5,3);
+			}
+			else if ( post_ops_attr.c_stor_type == BF16)
+			{
+				// Store the results in downscaled type (bfloat16 instead of int32).
+				// c[0,0-15]
+				CVT_STORE_S32_BF16(c_int32_0p0,0,0);
+
+				// c[0,16-31]
+				CVT_STORE_S32_BF16(c_int32_0p1,0,1);
+
+				// c[0,32-47]
+				CVT_STORE_S32_BF16(c_int32_0p2,0,2);
+
+				// c[0,48-63]
+				CVT_STORE_S32_BF16(c_int32_0p3,0,3);
+
+				// c[1,0-15]
+				CVT_STORE_S32_BF16(c_int32_1p0,1,0);
+
+				// c[1,16-31]
+				CVT_STORE_S32_BF16(c_int32_1p1,1,1);
+
+				// c[1,32-47]
+				CVT_STORE_S32_BF16(c_int32_1p2,1,2);
+
+				// c[1,48-63]
+				CVT_STORE_S32_BF16(c_int32_1p3,1,3);
+
+				// c[2,0-15]
+				CVT_STORE_S32_BF16(c_int32_2p0,2,0);
+
+				// c[2,16-31]
+				CVT_STORE_S32_BF16(c_int32_2p1,2,1);
+
+				// c[2,32-47]
+				CVT_STORE_S32_BF16(c_int32_2p2,2,2);
+
+				// c[2,48-63]
+				CVT_STORE_S32_BF16(c_int32_2p3,2,3);
+
+				// c[3,0-15]
+				CVT_STORE_S32_BF16(c_int32_3p0,3,0);
+
+				// c[3,16-31]
+				CVT_STORE_S32_BF16(c_int32_3p1,3,1);
+
+				// c[3,32-47]
+				CVT_STORE_S32_BF16(c_int32_3p2,3,2);
+
+				// c[3,48-63]
+				CVT_STORE_S32_BF16(c_int32_3p3,3,3);
+
+				// c[4,0-15]
+				CVT_STORE_S32_BF16(c_int32_4p0,4,0);
+
+				// c[4,16-31]
+				CVT_STORE_S32_BF16(c_int32_4p1,4,1);
+
+				// c[4,32-47]
+				CVT_STORE_S32_BF16(c_int32_4p2,4,2);
+
+				// c[4,48-63]
+				CVT_STORE_S32_BF16(c_int32_4p3,4,3);
+
+				// c[5,0-15]
+				CVT_STORE_S32_BF16(c_int32_5p0,5,0);
+
+				// c[5,16-31]
+				CVT_STORE_S32_BF16(c_int32_5p1,5,1);
+
+				// c[5,32-47]
+				CVT_STORE_S32_BF16(c_int32_5p2,5,2);
+
+				// c[5,48-63]
+				CVT_STORE_S32_BF16(c_int32_5p3,5,3);
+			}
+			else if ( post_ops_attr.c_stor_type == F32)
+			{
+				// Store the results in downscaled type (float instead of int32).
+				// c[0,0-15]
+				CVT_STORE_S32_F32(c_int32_0p0,0,0);
+
+				// c[0,16-31]
+				CVT_STORE_S32_F32(c_int32_0p1,0,1);
+
+				// c[0,32-47]
+				CVT_STORE_S32_F32(c_int32_0p2,0,2);
+
+				// c[0,48-63]
+				CVT_STORE_S32_F32(c_int32_0p3,0,3);
+
+				// c[1,0-15]
+				CVT_STORE_S32_F32(c_int32_1p0,1,0);
+
+				// c[1,16-31]
+				CVT_STORE_S32_F32(c_int32_1p1,1,1);
+
+				// c[1,32-47]
+				CVT_STORE_S32_F32(c_int32_1p2,1,2);
+
+				// c[1,48-63]
+				CVT_STORE_S32_F32(c_int32_1p3,1,3);
+
+				// c[2,0-15]
+				CVT_STORE_S32_F32(c_int32_2p0,2,0);
+
+				// c[2,16-31]
+				CVT_STORE_S32_F32(c_int32_2p1,2,1);
+
+				// c[2,32-47]
+				CVT_STORE_S32_F32(c_int32_2p2,2,2);
+
+				// c[2,48-63]
+				CVT_STORE_S32_F32(c_int32_2p3,2,3);
+
+				// c[3,0-15]
+				CVT_STORE_S32_F32(c_int32_3p0,3,0);
+
+				// c[3,16-31]
+				CVT_STORE_S32_F32(c_int32_3p1,3,1);
+
+				// c[3,32-47]
+				CVT_STORE_S32_F32(c_int32_3p2,3,2);
+
+				// c[3,48-63]
+				CVT_STORE_S32_F32(c_int32_3p3,3,3);
+
+				// c[4,0-15]
+				CVT_STORE_S32_F32(c_int32_4p0,4,0);
+
+				// c[4,16-31]
+				CVT_STORE_S32_F32(c_int32_4p1,4,1);
+
+				// c[4,32-47]
+				CVT_STORE_S32_F32(c_int32_4p2,4,2);
+
+				// c[4,48-63]
+				CVT_STORE_S32_F32(c_int32_4p3,4,3);
+
+				// c[5,0-15]
+				CVT_STORE_S32_F32(c_int32_5p0,5,0);
+
+				// c[5,16-31]
+				CVT_STORE_S32_F32(c_int32_5p1,5,1);
+
+				// c[5,32-47]
+				CVT_STORE_S32_F32(c_int32_5p2,5,2);
+
+				// c[5,48-63]
+				CVT_STORE_S32_F32(c_int32_5p3,5,3);
+			}
+
 		}
 		// Case where the output C matrix is s32 or is the temp buffer used to
 		// store intermediate s32 accumulated values for downscaled (C-s8) api.

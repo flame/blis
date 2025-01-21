@@ -102,12 +102,14 @@ static inline void bfloat16_to_int32_t( bfloat16 bf16_val, int32_t*  int_val )
 {
     int32_t inter_temp = *( ( int16_t* ) &bf16_val );
     inter_temp = inter_temp << 16;
-    memcpy( int_val, &inter_temp, sizeof( int32_t ) );
+    float float_val = 0.0;
+    memcpy(&float_val, &inter_temp, sizeof(float));
+    *int_val = ( int32_t )float_val;
 }
 
 static inline void int8_t_to_int32_t( int8_t int8_t_val, int32_t*  int_val )
 {
-   *int_val = (int32_t)int8_t_val;
+   *int_val = ( int32_t )int8_t_val;
 }
 
 static inline void convert_float_arr_to_bf16( float* array, bfloat16* array_bf16, dim_t size )
@@ -288,6 +290,12 @@ static inline ACCUM_type get_bias_post_op_val_ ## BLAS_SFX \
     { \
         int32_t ret_val = 0.0; \
         int8_t_to_int32_t( *( ( int8_t* )post_op_bias_ptr + j ), &ret_val ); \
+        return ret_val; \
+    } \
+    if(bias_stor_type == AOCL_GEMM_F32) \
+    { \
+        int32_t ret_val = 0.0; \
+        ret_val = (int32_t) *( ( float* )post_op_bias_ptr + j ); \
         return ret_val; \
     } \
     return *( ( ACCUM_type* )post_op_bias_ptr + j ); \
@@ -512,6 +520,38 @@ static inline void mat_mul_get_output_type_valfloatbfloat16
     float_to_bf16( temp_accum, out_temp_accum );
 }
 
+static inline void mat_mul_get_output_type_valint32_tfloat
+     (
+       float* out_temp_accum,
+       int32_t* temp_accum
+     )
+{
+    ( *out_temp_accum ) = ( float )( *temp_accum );
+}
+
+static inline void mat_mul_get_output_type_valint32_tbfloat16
+     (
+       bfloat16* out_temp_accum,
+       int32_t* temp_accum
+     )
+{
+
+    float float_temp_accum = ( float )( *temp_accum );
+
+     /* Fix for rounding bias. */
+    uint32_t inter_temp;
+    memcpy( &inter_temp, &float_temp_accum, sizeof( float ) );
+
+    /* Check if 16th bit is set */
+    uint32_t tlsb = ( inter_temp & ( uint32_t )0x00010000 ) > 16;
+
+    /* Adding rounding bias. */
+    uint32_t rounded = inter_temp + ( uint32_t )0x00007FFF + tlsb;
+    memcpy( &float_temp_accum, &rounded, sizeof( float ) );
+
+    float_to_bf16( &float_temp_accum, out_temp_accum );
+}
+
 #ifndef WIN32
 static inline int max (int a, int b)
 {
@@ -616,7 +656,6 @@ void print_matrix_bfloat16
         {
             float temp;
             bfloat16_to_float(*(a + i*(rs_a) + j *cs_a), &temp);
-            printf("%3d ",  (int)temp);
         }
         printf("\n");
     }

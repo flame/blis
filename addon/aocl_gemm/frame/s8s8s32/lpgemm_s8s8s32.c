@@ -88,7 +88,7 @@ LPGEMV(int8_t,int8_t,int32_t,s8s8s32o32)
 
 	lpgemm_post_op_attr post_ops_attr;
 	post_ops_attr.c_stor_type = c_downscale;
-	if (c_downscale < S32) post_ops_attr.buf_downscale = c;
+	if (c_downscale < S32 || c_downscale == F32) post_ops_attr.buf_downscale = c;
 	else  post_ops_attr.buf_downscale = NULL;
 
 	siz_t mem_a_size_req = 0;
@@ -445,7 +445,7 @@ LPGEMM_5LOOP(int8_t,int8_t,int32_t,s8s8s32o32)
 
 	lpgemm_post_op_attr post_ops_attr;
 	post_ops_attr.c_stor_type = c_downscale;
-	if ( c_downscale < S32 )
+	if ( c_downscale < S32 || c_downscale == F32 )
 	{
 		post_ops_attr.buf_downscale = c;
 	}
@@ -490,7 +490,7 @@ LPGEMM_5LOOP(int8_t,int8_t,int32_t,s8s8s32o32)
 			c_use_jc = c + jc;
 		}
 		// Temp accumulaton buffer for C allocation.
-		else if ( c_downscale < S32 )
+		else if ( c_downscale < S32 || c_downscale == F32 )
 		{
 			// Buffer memory is only required if output needs to be
 			// persisted across iterations of the pc/KC loop.
@@ -660,7 +660,7 @@ LPGEMM_5LOOP(int8_t,int8_t,int32_t,s8s8s32o32)
 
 				// Only per thread C matrix is stored in temp buffer, so both
 				// per thread jc and ic start should be normalized to zero.
-				if ( c_downscale < S32 )
+				if ( c_downscale < S32 || c_downscale == F32 )
 				{
 					c_use_ic = c_use_jc + ( rs_c_use * ( ic - ic_start ) );
 				}
@@ -770,7 +770,7 @@ LPGEMM_5LOOP(int8_t,int8_t,int32_t,s8s8s32o32)
 			bli_pba_release( rntm, &mem_a );
 		}
 	}
-	if ( c_downscale < S32 )
+	if ( c_downscale < S32 || c_downscale == F32 )
 	{
 		if ( bli_mem_is_alloc( &mem_scale_c ) )
 		{
