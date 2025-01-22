@@ -90,17 +90,17 @@ void bli_sdotxv_zen_int
 
 	// If beta is zero, initialize rho1 to zero instead of scaling
 	// rho by beta (in case rho contains NaN or Inf).
-	if ( bli_teq0s( s, *beta ) )
+	if ( PASTEMAC(s,eq0)( *beta ) )
 	{
-		bli_tset0s( s, *rho );
+		PASTEMAC(s,set0s)( *rho );
 	}
 	else
 	{
-		bli_tscals( s,s,s, *beta, *rho );
+		PASTEMAC(s,scals)( *beta, *rho );
 	}
 
 	// If the vector dimension is zero, output rho and return early.
-	if ( bli_zero_dim1( n ) || bli_teq0s( s, *alpha ) ) return;
+	if ( bli_zero_dim1( n ) || PASTEMAC(s,eq0)( *alpha ) ) return;
 
 	// Use the unrolling factor and the number of elements per register
 	// to compute the number of vectorized and leftover iterations.
@@ -181,7 +181,7 @@ void bli_sdotxv_zen_int
 	}
 
 	// Accumulate the final result into the output variable.
-	bli_taxpys( s,s,s,s, *alpha, rho_l, *rho );
+	PASTEMAC(s,axpys)( *alpha, rho_l, *rho );
 }
 
 // -----------------------------------------------------------------------------
@@ -222,17 +222,17 @@ void bli_ddotxv_zen_int
 
 	// If beta is zero, initialize rho1 to zero instead of scaling
 	// rho by beta (in case rho contains NaN or Inf).
-	if ( bli_teq0s( d, *beta ) )
+	if ( PASTEMAC(d,eq0)( *beta ) )
 	{
-		bli_tset0s( d, *rho );
+		PASTEMAC(d,set0s)( *rho );
 	}
 	else
 	{
-		bli_tscals( d,d,d, *beta, *rho );
+		PASTEMAC(d,scals)( *beta, *rho );
 	}
 
 	// If the vector dimension is zero, output rho and return early.
-	if ( bli_zero_dim1( n ) || bli_teq0s( d, *alpha ) ) return;
+	if ( bli_zero_dim1( n ) || PASTEMAC(d,eq0)( *alpha ) ) return;
 
 	// Use the unrolling factor and the number of elements per register
 	// to compute the number of vectorized and leftover iterations.
@@ -312,6 +312,6 @@ void bli_ddotxv_zen_int
 	}
 
 	// Accumulate the final result into the output variable.
-	bli_taxpys( d,d,d,d, *alpha, rho_l, *rho );
+	PASTEMAC(d,axpys)( *alpha, rho_l, *rho );
 }
 

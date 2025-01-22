@@ -1586,7 +1586,7 @@ static err_t bli_sgemmt_small
         }
 
         //copy/compute sryk values back to C using SIMD
-        if ( bli_teq0s( s, *beta_cast ) )
+        if ( bli_seq0( *beta_cast ) )
         {//just copy in case of beta = 0
             dim_t _i, _j, k, _l;
             if(bli_obj_is_lower(c)) // c is lower
@@ -1603,7 +1603,7 @@ static err_t bli_sgemmt_small
                 }
                 while (_i < M )
                 {
-                    bli_tcopys( s,s, *(C + _i*rsc + _j*ldc),
+                    bli_sscopys( *(C + _i*rsc + _j*ldc),
                                  *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                     _i++;
                 }
@@ -1616,7 +1616,7 @@ static err_t bli_sgemmt_small
                     k = (k <= M) ? k : M;
                     for ( _i = _j; _i < k; ++_i )
                     {
-                        bli_tcopys( s,s, *(C + _i*rsc + _j*ldc),
+                        bli_sscopys( *(C + _i*rsc + _j*ldc),
                                      *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                     }
                     k = (M - _i) >> 3;
@@ -1631,7 +1631,7 @@ static err_t bli_sgemmt_small
                     }
                     while (_i < M )
                     {
-                        bli_tcopys( s,s, *(C + _i*rsc + _j*ldc),
+                        bli_sscopys( *(C + _i*rsc + _j*ldc),
                                  *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                         _i++;
                     }
@@ -1654,7 +1654,7 @@ static err_t bli_sgemmt_small
                     }
                     while (_i <= _j )
                     {
-                        bli_tcopys( s,s, *(C + _i*rsc + _j*ldc),
+                        bli_sscopys( *(C + _i*rsc + _j*ldc),
                                      *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                         ++_i;
                     }
@@ -1681,7 +1681,7 @@ static err_t bli_sgemmt_small
                 }
                 while (_i < M )
                 {
-                    bli_txpbys( s,s,s,s, *(C + _i*rsc + _j*ldc),
+                    bli_sssxpbys( *(C + _i*rsc + _j*ldc),
                                   *(beta_cast),
                                   *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                     _i++;
@@ -1695,7 +1695,7 @@ static err_t bli_sgemmt_small
                     k = (k <= M) ? k : M;
                     for ( _i = _j; _i < k; ++_i )
                     {
-                        bli_txpbys( s,s,s,s, *(C + _i*rsc + _j*ldc),
+                        bli_sssxpbys( *(C + _i*rsc + _j*ldc),
                                           *(beta_cast),
                                           *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                     }
@@ -1713,7 +1713,7 @@ static err_t bli_sgemmt_small
                     }
                     while (_i < M )
                     {
-                        bli_txpbys( s,s,s,s, *(C + _i*rsc + _j*ldc),
+                        bli_sssxpbys( *(C + _i*rsc + _j*ldc),
                                       *(beta_cast),
                                       *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                         _i++;
@@ -1739,7 +1739,7 @@ static err_t bli_sgemmt_small
                     }
                     while (_i <= _j )
                     {
-                        bli_txpbys( s,s,s,s, *(C + _i*rsc + _j*ldc),
+                        bli_sssxpbys( *(C + _i*rsc + _j*ldc),
                                       *(beta_cast),
                                       *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                         ++_i;
@@ -3156,7 +3156,7 @@ static err_t bli_dgemmt_small
         }
 
         //copy/compute sryk values back to C using SIMD
-        if ( bli_teq0s( s, *beta_cast ) )
+        if ( bli_seq0( *beta_cast ) )
         {//just copy for beta = 0
             dim_t _i, _j, k, _l;
             if(bli_obj_is_lower(c)) //c is lower
@@ -3173,7 +3173,7 @@ static err_t bli_dgemmt_small
                 }
                 while (_i < M )
                 {
-                    bli_tcopys( d,d, *(C + _i*rsc + _j*ldc),
+                    bli_ddcopys( *(C + _i*rsc + _j*ldc),
                                  *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                     _i++;
                 }
@@ -3186,7 +3186,7 @@ static err_t bli_dgemmt_small
                     k = (k <= M) ? k : M;
                     for ( _i = _j; _i < k; ++_i )
                     {
-                        bli_tcopys( d,d, *(C + _i*rsc + _j*ldc),
+                        bli_ddcopys( *(C + _i*rsc + _j*ldc),
                                      *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                     }
                     k = (M - _i) >> 2;
@@ -3201,7 +3201,7 @@ static err_t bli_dgemmt_small
                     }
                     while (_i < M )
                     {
-                        bli_tcopys( d,d, *(C + _i*rsc + _j*ldc),
+                        bli_ddcopys( *(C + _i*rsc + _j*ldc),
                                  *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                         _i++;
                     }
@@ -3224,7 +3224,7 @@ static err_t bli_dgemmt_small
                     }
                     while (_i <= _j )
                     {
-                        bli_tcopys( d,d, *(C + _i*rsc + _j*ldc),
+                        bli_ddcopys( *(C + _i*rsc + _j*ldc),
                                      *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                         ++_i;
                     }
@@ -3251,7 +3251,7 @@ static err_t bli_dgemmt_small
                 }
                 while (_i < M )
                 {
-                    bli_txpbys( d,d,d,d, *(C + _i*rsc + _j*ldc),
+                    bli_dddxpbys( *(C + _i*rsc + _j*ldc),
                                   *(beta_cast),
                                   *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                     _i++;
@@ -3265,7 +3265,7 @@ static err_t bli_dgemmt_small
                     k = (k <= M) ? k : M;
                     for ( _i = _j; _i < k; ++_i )
                     {
-                        bli_txpbys( d,d,d,d, *(C + _i*rsc + _j*ldc),
+                        bli_dddxpbys( *(C + _i*rsc + _j*ldc),
                                       *(beta_cast),
                                       *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                     }
@@ -3283,7 +3283,7 @@ static err_t bli_dgemmt_small
                     }
                     while (_i < M )
                     {
-                        bli_txpbys( d,d,d,d, *(C + _i*rsc + _j*ldc),
+                        bli_dddxpbys( *(C + _i*rsc + _j*ldc),
                                       *(beta_cast),
                                       *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                         _i++;
@@ -3309,7 +3309,7 @@ static err_t bli_dgemmt_small
                     }
                     while (_i <= _j )
                     {
-                        bli_txpbys( d,d,d,d, *(C + _i*rsc + _j*ldc),
+                        bli_dddxpbys( *(C + _i*rsc + _j*ldc),
                                       *(beta_cast),
                                       *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                         ++_i;
@@ -3717,7 +3717,7 @@ static err_t bli_sgemmt_small_atbn
         }
 
         //copy/compute sryk values back to C
-        if ( bli_teq0s( s, *beta_cast ) ) //when beta is 0, just copy result to C
+        if ( bli_seq0( *beta_cast ) ) //when beta is 0, just copy result to C
         {
             dim_t _i, _j;
             if(bli_obj_is_lower(c)) //c is lower
@@ -3726,7 +3726,7 @@ static err_t bli_sgemmt_small_atbn
                     for ( _i = 0; _i < M; ++_i )
                         if ( (doff_t)_j - (doff_t)_i <= 0 )
                         {
-                            bli_tcopys( s,s, *(C + _i*rsc + _j*ldc),
+                            bli_sscopys( *(C + _i*rsc + _j*ldc),
                                          *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                         }
             }
@@ -3736,7 +3736,7 @@ static err_t bli_sgemmt_small_atbn
                     for ( _i = 0; _i < M; ++_i )
                         if ( (doff_t)_j - (doff_t)_i >= 0 )
                         {
-                            bli_tcopys( s,s, *(C + _i*rsc + _j*ldc),
+                            bli_sscopys( *(C + _i*rsc + _j*ldc),
                                          *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                         }
             }
@@ -3750,7 +3750,7 @@ static err_t bli_sgemmt_small_atbn
                     for ( _i = 0; _i < M; ++_i )
                         if ( (doff_t)_j - (doff_t)_i <= 0 )
                         {
-                            bli_txpbys( s,s,s,s, *(C + _i*rsc + _j*ldc),
+                            bli_sssxpbys( *(C + _i*rsc + _j*ldc),
                                           *(beta_cast),
                                           *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                         }
@@ -3761,7 +3761,7 @@ static err_t bli_sgemmt_small_atbn
                     for ( _i = 0; _i < M; ++_i )
                         if ( (doff_t)_j - (doff_t)_i >= 0 )
                         {
-                            bli_txpbys( s,s,s,s, *(C + _i*rsc + _j*ldc),
+                            bli_sssxpbys( *(C + _i*rsc + _j*ldc),
                                           *(beta_cast),
                                           *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                 }
@@ -4149,7 +4149,7 @@ static err_t bli_dgemmt_small_atbn
         }
 
 		//copy/compute sryk values back to C
-        if ( bli_teq0s( s, *beta_cast ) ) //when beta is 0, just copy result to C
+        if ( bli_seq0( *beta_cast ) ) //when beta is 0, just copy result to C
         {
             dim_t _i, _j;
             if(bli_obj_is_lower(c)) //c is lower
@@ -4158,7 +4158,7 @@ static err_t bli_dgemmt_small_atbn
                     for ( _i = 0; _i < M; ++_i )
                         if ( (doff_t)_j - (doff_t)_i <= 0 )
                         {
-                            bli_tcopys( d,d, *(C + _i*rsc + _j*ldc),
+                            bli_ddcopys( *(C + _i*rsc + _j*ldc),
                                          *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                         }
             }
@@ -4168,7 +4168,7 @@ static err_t bli_dgemmt_small_atbn
                     for ( _i = 0; _i < M; ++_i )
                         if ( (doff_t)_j - (doff_t)_i >= 0 )
                         {
-                            bli_tcopys( d,d, *(C + _i*rsc + _j*ldc),
+                            bli_ddcopys( *(C + _i*rsc + _j*ldc),
                                          *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                         }
             }
@@ -4182,7 +4182,7 @@ static err_t bli_dgemmt_small_atbn
                     for ( _i = 0; _i < M; ++_i )
                         if ( (doff_t)_j - (doff_t)_i <= 0 )
                         {
-                            bli_txpbys( d,d,d,d, *(C + _i*rsc + _j*ldc),
+                            bli_dddxpbys( *(C + _i*rsc + _j*ldc),
                                           *(beta_cast),
                                           *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                         }
@@ -4193,7 +4193,7 @@ static err_t bli_dgemmt_small_atbn
                     for ( _i = 0; _i < M; ++_i )
                         if ( (doff_t)_j - (doff_t)_i >= 0 )
                         {
-                            bli_txpbys( d,d,d,d, *(C + _i*rsc + _j*ldc),
+                            bli_dddxpbys( *(C + _i*rsc + _j*ldc),
                                           *(beta_cast),
                                           *(matCbuf + _i*rs_matC + _j*ldc_matC) );
                 }

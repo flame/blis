@@ -91,7 +91,7 @@ void bli_spackm_haswell_asm_6x16
 
 	// NOTE: If/when this kernel ever supports scaling by kappa within the
 	// assembly region, this constraint should be lifted.
-	const bool     unitk  = bli_teq1s( s, *(( float* )kappa) );
+	const bool     unitk  = bli_seq1( *(( float* )kappa) );
 
 
 	// -------------------------------------------------------------------------
@@ -789,9 +789,8 @@ void bli_spackm_haswell_asm_6x16
 	}
 	else
 	{
-		bli_tscal2bbs_mxn
+		bli_sscal2bbs_mxn
 		(
-		  s,s,s,s,
 		  conja,
 		  cdim0,
 		  k0,
@@ -801,12 +800,11 @@ void bli_spackm_haswell_asm_6x16
 		);
 	}
 
-	bli_tset0s_edge
+	bli_sset0s_edge
 	(
-	  s,
 	  cdim0*cdim_bcast, cdim_max*cdim_bcast,
 	  k0, k0_max,
-	  (float*)p, ldp
+	  p, ldp
 	);
 }
 

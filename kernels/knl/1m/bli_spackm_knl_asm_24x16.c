@@ -561,9 +561,8 @@ void bli_spackm_knl_asm_24x16
 	}
 	else
 	{
-		bli_tscal2bbs_mxn
+		bli_sscal2bbs_mxn
 		(
-		  s,s,s,s,
 		  BLIS_NO_CONJUGATE,
 		  cdim,
 		  n,
@@ -573,11 +572,10 @@ void bli_spackm_knl_asm_24x16
 		);
 	}
 
-	bli_tset0s_edge
+	bli_sset0s_edge
 	(
-	  s,
 	  cdim*cdim_bcast, cdim_max*cdim_bcast,
 	  n, n_max,
-	  (float*)p, ldp
+	  p, ldp
 	);
 }

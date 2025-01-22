@@ -79,7 +79,7 @@ void bli_ddotaxpyv_penryn_int
 	// If the vector lengths are zero, set rho to zero and return.
 	if ( bli_zero_dim1( n ) )
 	{
-		bli_tset0s( d, *rho_cast );
+		PASTEMAC(d,set0s)( *rho_cast );
 		return;
 	}
 
@@ -138,7 +138,7 @@ void bli_ddotaxpyv_penryn_int
 	//stepy       = 2 * incy;
 	//stepz       = 2 * incz;
 
-	bli_tset0s( d, rho1c );
+	PASTEMAC(d,set0s)( rho1c );
 
 	alpha1c = *alpha_cast;
 

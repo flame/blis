@@ -82,7 +82,7 @@ void PASTEMAC(ch,varname) \
 	); \
 \
 	/* If alpha == 0, then we are done. */ \
-	if ( bli_teq0s( ch, *alpha ) ) return; \
+	if ( PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
 	/* Query the context for the kernel function pointer and fusing factor. */ \
 	/*axpyf_ker_ft kfp_af = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx );*/ \
@@ -158,7 +158,7 @@ void PASTEMAC(ch,varname) \
 	conja = bli_extract_conj( transa ); \
 \
 	/* If beta is zero, use setv. Otherwise, scale by beta. */ \
-	if ( bli_teq0s( ch, *beta ) ) \
+	if ( PASTEMAC(ch,eq0)( *beta ) ) \
 	{ \
 		/* y = 0; */ \
 		PASTEMAC(ch,setv,BLIS_TAPI_EX_SUF) \

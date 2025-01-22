@@ -99,7 +99,7 @@ void bli_saxpyf_zen_int_5
     float           chi4;
 
     // If either dimension is zero, or if alpha is zero, return early.
-    if ( bli_zero_dim2( m, b_n ) || bli_teq0s( s, *alpha ) ) return;
+    if ( bli_zero_dim2( m, b_n ) || bli_seq0( *alpha ) ) return;
 
     // If b_n is not equal to the fusing factor, then perform the entire
     // operation as a loop over axpyv.
@@ -116,8 +116,8 @@ void bli_saxpyf_zen_int_5
                   float* restrict y1   = y + (0  )*incy;
                   float           alpha_chi1;
 
-            bli_tcopycjs( s,s, conjx, *chi1, alpha_chi1 );
-            bli_tscals( s,s,s, *alpha, alpha_chi1 );
+            bli_scopycjs( conjx, *chi1, alpha_chi1 );
+            bli_sscals( *alpha, alpha_chi1 );
 
             f
             (
@@ -150,11 +150,11 @@ void bli_saxpyf_zen_int_5
 
 
     // Scale each chi scalar by alpha.
-    bli_tscals( s,s,s, *alpha, chi0 );
-    bli_tscals( s,s,s, *alpha, chi1 );
-    bli_tscals( s,s,s, *alpha, chi2 );
-    bli_tscals( s,s,s, *alpha, chi3 );
-    bli_tscals( s,s,s, *alpha, chi4 );
+    bli_sscals( *alpha, chi0 );
+    bli_sscals( *alpha, chi1 );
+    bli_sscals( *alpha, chi2 );
+    bli_sscals( *alpha, chi3 );
+    bli_sscals( *alpha, chi4 );
 
     // Broadcast the (alpha*chi?) scalars to all elements of vector registers.
     chi0v.v = _mm256_broadcast_ss( &chi0 );
@@ -348,7 +348,7 @@ void bli_daxpyf_zen_int_5
     double           chi4;
 
     // If either dimension is zero, or if alpha is zero, return early.
-    if ( bli_zero_dim2( m, b_n ) || bli_teq0s( d, *alpha ) ) return;
+    if ( bli_zero_dim2( m, b_n ) || bli_deq0( *alpha ) ) return;
 
     // If b_n is not equal to the fusing factor, then perform the entire
     // operation as a loop over axpyv.
@@ -365,8 +365,8 @@ void bli_daxpyf_zen_int_5
                   double* restrict y1   = y + (0  )*incy;
                   double           alpha_chi1;
 
-            bli_tcopycjs( d,d, conjx, *chi1, alpha_chi1 );
-            bli_tscals( d,d,d, *alpha, alpha_chi1 );
+            bli_dcopycjs( conjx, *chi1, alpha_chi1 );
+            bli_dscals( *alpha, alpha_chi1 );
 
             f
             (
@@ -399,11 +399,11 @@ void bli_daxpyf_zen_int_5
 
 
     // Scale each chi scalar by alpha.
-    bli_tscals( d,d,d, *alpha, chi0 );
-    bli_tscals( d,d,d, *alpha, chi1 );
-    bli_tscals( d,d,d, *alpha, chi2 );
-    bli_tscals( d,d,d, *alpha, chi3 );
-    bli_tscals( d,d,d, *alpha, chi4 );
+    bli_dscals( *alpha, chi0 );
+    bli_dscals( *alpha, chi1 );
+    bli_dscals( *alpha, chi2 );
+    bli_dscals( *alpha, chi3 );
+    bli_dscals( *alpha, chi4 );
 
     // Broadcast the (alpha*chi?) scalars to all elements of vector registers.
     chi0v.v = _mm256_broadcast_sd( &chi0 );
@@ -597,10 +597,10 @@ void bli_daxpyf_zen_int_16x2
 
     v2df_t           a40v, a41v;
 
-    v2df_t           y4v;
+    v2df_t           y4v; 
 
     // If either dimension is zero, or if alpha is zero, return early.
-    if ( bli_zero_dim2( m, b_n ) || bli_teq0s( d, *alpha ) ) return;
+    if ( bli_zero_dim2( m, b_n ) || bli_deq0( *alpha ) ) return;
 
     // If b_n is not equal to the fusing factor, then perform the entire
     // operation as a loop over axpyv.
@@ -617,8 +617,8 @@ void bli_daxpyf_zen_int_16x2
                   double* restrict y1   = y + (0  )*incy;
                   double           alpha_chi1;
 
-            bli_tcopycjs( d,d, conjx, *chi1, alpha_chi1 );
-            bli_tscals( d,d,d, *alpha, alpha_chi1 );
+            bli_dcopycjs( conjx, *chi1, alpha_chi1 );
+            bli_dscals( *alpha, alpha_chi1 );
 
             f
             (
@@ -646,8 +646,8 @@ void bli_daxpyf_zen_int_16x2
 
 
     // Scale each chi scalar by alpha.
-    bli_tscals( d,d,d, *alpha, chi0 );
-    bli_tscals( d,d,d, *alpha, chi1 );
+    bli_dscals( *alpha, chi0 );
+    bli_dscals( *alpha, chi1 );
 
     // Broadcast the (alpha*chi?) scalars to all elements of vector registers.
     chi0v.v = _mm256_broadcast_sd( &chi0 );
@@ -888,7 +888,7 @@ void bli_daxpyf_zen_int_16x4
     v2df_t           a40v, a41v, a42v, a43v;
 
     // If either dimension is zero, or if alpha is zero, return early.
-    if ( bli_zero_dim2( m, b_n ) || bli_teq0s( d, *alpha ) ) return;
+    if ( bli_zero_dim2( m, b_n ) || bli_deq0( *alpha ) ) return;
 
     // If b_n is not equal to the fusing factor, then perform the entire
     // operation as a loop over axpyv.
@@ -905,8 +905,8 @@ void bli_daxpyf_zen_int_16x4
                   double* restrict y1   = y + (0  )*incy;
                   double           alpha_chi1;
 
-            bli_tcopycjs( d,d, conjx, *chi1, alpha_chi1 );
-            bli_tscals( d,d,d, *alpha, alpha_chi1 );
+            bli_dcopycjs( conjx, *chi1, alpha_chi1 );
+            bli_dscals( *alpha, alpha_chi1 );
 
             f
             (
@@ -937,10 +937,10 @@ void bli_daxpyf_zen_int_16x4
     chi3 = *( x + 3*incx );
 
     // Scale each chi scalar by alpha.
-    bli_tscals( d,d,d, *alpha, chi0 );
-    bli_tscals( d,d,d, *alpha, chi1 );
-    bli_tscals( d,d,d, *alpha, chi2 );
-    bli_tscals( d,d,d, *alpha, chi3 );
+    bli_dscals( *alpha, chi0 );
+    bli_dscals( *alpha, chi1 );
+    bli_dscals( *alpha, chi2 );
+    bli_dscals( *alpha, chi3 );
 
     // Broadcast the (alpha*chi?) scalars to all elements of vector registers.
     chi0v.v = _mm256_broadcast_sd( &chi0 );

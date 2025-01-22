@@ -78,10 +78,10 @@ void bli_sscalv_zen_int10
 	__m256           zv[10];
 
 	// If the vector dimension is zero, or if alpha is unit, return early.
-	if ( bli_zero_dim1( n ) || bli_teq1s( s, *alpha ) ) return;
+	if ( bli_zero_dim1( n ) || PASTEMAC(s,eq1)( *alpha ) ) return;
 
 	// If alpha is zero, use setv.
-	if ( bli_teq0s( s, *alpha ) )
+	if ( PASTEMAC(s,eq0)( *alpha ) )
 	{
 		if ( cntx == NULL ) cntx = ( cntx_t* )bli_gks_query_cntx();
 
@@ -274,10 +274,10 @@ void bli_dscalv_zen_int10
 	__m256d          zv[10];
 
 	// If the vector dimension is zero, or if alpha is unit, return early.
-	if ( bli_zero_dim1( n ) || bli_teq1s( d, *alpha ) ) return;
+	if ( bli_zero_dim1( n ) || PASTEMAC(d,eq1)( *alpha ) ) return;
 
 	// If alpha is zero, use setv.
-	if ( bli_teq0s( d, *alpha ) )
+	if ( PASTEMAC(d,eq0)( *alpha ) )
 	{
 		if ( cntx == NULL ) cntx = ( cntx_t* )bli_gks_query_cntx();
 

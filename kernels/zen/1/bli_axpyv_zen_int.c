@@ -81,7 +81,7 @@ void bli_saxpyv_zen_int
 	v8sf_t           y0v, y1v, y2v, y3v;
 
 	// If the vector dimension is zero, or if alpha is zero, return early.
-	if ( bli_zero_dim1( n ) || bli_teq0s( s, *alpha ) ) return;
+	if ( bli_zero_dim1( n ) || PASTEMAC(s,eq0)( *alpha ) ) return;
 
 	// Use the unrolling factor and the number of elements per register
 	// to compute the number of vectorized and leftover iterations.
@@ -186,7 +186,7 @@ void bli_daxpyv_zen_int
 	v4df_t            y0v, y1v, y2v, y3v;
 
 	// If the vector dimension is zero, or if alpha is zero, return early.
-	if ( bli_zero_dim1( n ) || bli_teq0s( d, *alpha ) ) return;
+	if ( bli_zero_dim1( n ) || PASTEMAC(d,eq0)( *alpha ) ) return;
 
 	// Use the unrolling factor and the number of elements per register
 	// to compute the number of vectorized and leftover iterations.

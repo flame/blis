@@ -544,9 +544,8 @@ void bli_dpackm_knl_asm_24x8
 	}
 	else
 	{
-		bli_tscal2bbs_mxn
+		bli_dscal2bbs_mxn
 		(
-		  d,d,d,d,
 		  BLIS_NO_CONJUGATE,
 		  cdim,
 		  n,
@@ -556,11 +555,10 @@ void bli_dpackm_knl_asm_24x8
 		);
 	}
 
-	bli_tset0s_edge
+	bli_dset0s_edge
 	(
-	  d,
 	  cdim*cdim_bcast, cdim_max*cdim_bcast,
 	  n, n_max,
-	  (double*)p, ldp
+	  p, ldp
 	);
 }

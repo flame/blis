@@ -116,7 +116,7 @@ void PASTEF77(ch,blasname) \
 	bli_convert_blas_incv( m_y, (ftype*)y, *incy, y0, incy0 ); \
 \
 	/* If alpha is zero, scale y by beta and return early. */ \
-	if ( bli_teq0s( ch, *alpha ) ) \
+	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
 		PASTEMAC(ch,scalv,BLIS_TAPI_EX_SUF) \
 		( \

@@ -91,7 +91,7 @@ void bli_dpackm_armv8a_int_6x8
 
   // NOTE: If/when this kernel ever supports scaling by kappa within the
   // assembly region, this constraint should be lifted.
-  const bool     unitk  = bli_teq1s( d, *(( double* )kappa) );
+  const bool     unitk  = bli_deq1( *(( double* )kappa) );
 
 
   // -------------------------------------------------------------------------
@@ -478,9 +478,8 @@ void bli_dpackm_armv8a_int_6x8
   }
 	else
 	{
-		bli_tscal2bbs_mxn
+		bli_dscal2bbs_mxn
 		(
-		  d,d,d,d,
 		  conja,
 		  cdim0,
 		  k0,
@@ -490,12 +489,11 @@ void bli_dpackm_armv8a_int_6x8
 		);
 	}
 
-	bli_tset0s_edge
+	bli_dset0s_edge
 	(
-	  d,
 	  cdim0*cdim_bcast, cdim_max*cdim_bcast,
 	  k0, k0_max,
-	  (double*)p, ldp
+	  p, ldp
 	);
 }
 
