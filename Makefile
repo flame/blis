@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -337,8 +337,6 @@ HEADERS_TO_INSTALL += $(wildcard $(VEND_CPP_PATH)/*.hh)
 FRAGS_TO_INSTALL := $(CONFIG_MK_FILE) \
                     $(COMMON_MK_FILE)
 
-PC_IN_FILE  := blis.pc.in
-PC_OUT_FILE := blis.pc
 
 
 #
@@ -1125,8 +1123,12 @@ endif
 # BLIS library in pkg-configure blis.pc.in file.
 ifeq ($(THREADING_MODEL),off)
 AOCLLIB            := blis
+PC_IN_FILE         := blis.pc.in
+PC_OUT_FILE        := blis.pc
 else
 AOCLLIB            := blis-mt
+PC_IN_FILE         := blis-mt.pc.in
+PC_OUT_FILE        := blis-mt.pc
 endif
 
 $(PC_SHARE_DIR_INST):  $(PC_IN_FILE)
