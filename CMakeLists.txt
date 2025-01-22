@@ -1007,6 +1007,9 @@ if(NOT WIN32)
     endif()
 endif()
 
+# Macro to remove/replace absolute path within library
+list(APPEND BUILD_SYMFLAGS "-fmacro-prefix-map=${CMAKE_SOURCE_DIR}/=")
+
 # --- C Preprocessor flags ---
 # Enable clock_gettime() in time.h.
 set(CPPROCFLAGS -D_POSIX_C_SOURCE=200112L)

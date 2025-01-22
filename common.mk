@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -814,6 +814,9 @@ endif
 endif
 endif
 
+# Macro to remove/replace absolute path within library
+BUILD_SYMFLAGS += -fmacro-prefix-map=${DIST_PATH}=.
+
 # --- Language flags ---
 
 # Enable C99.
@@ -1213,4 +1216,3 @@ BUILD_CPPFLAGS := -DBLIS_IS_BUILDING_LIBRARY
 
 # end of ifndef COMMON_MK_INCLUDED conditional block
 endif
-
