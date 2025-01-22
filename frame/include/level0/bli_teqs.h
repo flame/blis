@@ -148,6 +148,23 @@
 
 // -- Higher-level static functions --------------------------------------------
 
+// -- Legacy macros ------------------------------------------------------------
+
+#define bli_seqs( x, y ) bli_teqs( s,s,s, x, y )
+#define bli_deqs( x, y ) bli_teqs( d,d,d, x, y )
+#define bli_ceqs( x, y ) bli_teqs( c,c,c, x, y )
+#define bli_zeqs( x, y ) bli_teqs( z,z,z, x, y )
+
+#define bli_seq1( x ) bli_teq1s( s, x )
+#define bli_deq1( x ) bli_teq1s( d, x )
+#define bli_ceq1( x ) bli_teq1s( c, x )
+#define bli_zeq1( x ) bli_teq1s( z, x )
+
+#define bli_seq0( x ) bli_teq0s( s, x )
+#define bli_deq0( x ) bli_teq0s( d, x )
+#define bli_ceq0( x ) bli_teq0s( c, x )
+#define bli_zeq0( x ) bli_teq0s( z, x )
+
 // -- Notes --------------------------------------------------------------------
 
 #endif

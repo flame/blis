@@ -561,6 +561,52 @@ PASTECH(bli_tscal2bbs_mxn_,PASTEMAC(chy,dom)) \
 	} \
 }
 
+// -- Legacy macros ------------------------------------------------------------
+
+#define bli_sscal2bbs_mxn( conjx, m, n, alpha, x, incx, ldx, y, incy, ldy ) \
+  bli_tscal2bbs_mxn( \
+                     s,s,s,s, \
+                     conjx, \
+                     m, \
+                     n, \
+                     alpha, \
+                     x, incx, ldx, \
+                     y, incy, ldy  \
+                   ) \
+
+#define bli_dscal2bbs_mxn( conjx, m, n, alpha, x, incx, ldx, y, incy, ldy ) \
+  bli_tscal2bbs_mxn( \
+                     d,d,d,d, \
+                     conjx, \
+                     m, \
+                     n, \
+                     alpha, \
+                     x, incx, ldx, \
+                     y, incy, ldy  \
+                   ) \
+
+#define bli_cscal2bbs_mxn( conjx, m, n, alpha, x, incx, ldx, y, incy, ldy ) \
+  bli_tscal2bbs_mxn( \
+                     c,c,c,c, \
+                     conjx, \
+                     m, \
+                     n, \
+                     alpha, \
+                     x, incx, ldx, \
+                     y, incy, ldy  \
+                   ) \
+
+#define bli_zscal2bbs_mxn( conjx, m, n, alpha, x, incx, ldx, y, incy, ldy ) \
+  bli_tscal2bbs_mxn( \
+                     z,z,z,z, \
+                     conjx, \
+                     m, \
+                     n, \
+                     alpha, \
+                     x, incx, ldx, \
+                     y, incy, ldy  \
+                   ) \
+
 // -- Notes --------------------------------------------------------------------
 
 // -- Domain cases --
