@@ -254,12 +254,62 @@ err_t bli_dgemm_tiny
 )
 {
     // Query the architecture ID
-    arch_t id = bli_arch_query_id();
+    arch_t arch_id = bli_arch_query_id();
+    //for the below tiny sizes of matrix, we force it to be ST compute.
+    if(m <= 24 && n <= 24 && k <= 20)
+    {
+        switch (arch_id)
+        {
+          case BLIS_ARCH_ZEN5:
+	  case BLIS_ARCH_ZEN4:
+#if defined(BLIS_FAMILY_ZEN5) || defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64)
+		return bli_dgemm_tiny_24x8
+			(
+			 1 * (transa == BLIS_CONJ_NO_TRANSPOSE),
+			 1 * (transb == BLIS_CONJ_NO_TRANSPOSE),
+			 transa,
+			 transb,
+			 m,
+			 n,
+			 k,
+			 alpha,
+			 a, rs_a0, cs_a0,
+			 b, rs_b0, cs_b0,
+			 beta,
+			 c, rs_c0, cs_c0
+			);
+#endif
+		break;
 
-    if(FALSE == bli_thread_get_is_parallel())
+          case BLIS_ARCH_ZEN:
+          case BLIS_ARCH_ZEN2:
+          case BLIS_ARCH_ZEN3:
+	      return bli_dgemm_tiny_6x8
+		      (
+		       1 * (transa == BLIS_CONJ_NO_TRANSPOSE),
+		       1 * (transb == BLIS_CONJ_NO_TRANSPOSE),
+		       transa,
+		       transb,
+		       m,
+		       n,
+		       k,
+		       alpha,
+		       a, rs_a0, cs_a0,
+		       b, rs_b0, cs_b0,
+		       beta,
+		       c, rs_c0, cs_c0
+		      );
+	      break;
+          default:
+              return BLIS_FAILURE;
+        }
+
+    }
+
+    if( FALSE == bli_thread_get_is_parallel() )
     {
         // Pick the kernel based on the architecture ID
-        switch (id)
+        switch (arch_id)
         {
           case BLIS_ARCH_ZEN5:
           case BLIS_ARCH_ZEN4:
