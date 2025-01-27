@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1152,7 +1152,7 @@ void dtrsm_blis_impl
                 // 2log(m) + log(n) < 6.8 for left variant
                 if ( blis_side == BLIS_LEFT )
                 {
-                    if ( m0 <= 88 )
+                    if ( m0 <= 120 )
                     {
                         ker_ft = bli_trsm_small_AVX512;
                     }
@@ -1209,28 +1209,28 @@ void dtrsm_blis_impl
         {
             case BLIS_ARCH_ZEN5:
 #if defined(BLIS_KERNELS_ZEN5)
-                if( (is_parallel) && n0 > 10 && m0 > 10 )
+                if( (is_parallel) && (((m0 > 58 ) || (n0 > 138)) && ((m0 > 1020) || (n0 > 12))))
                 {
                     if ( blis_side == BLIS_LEFT )
                     {
-                        if ( m0 <= 88 )
-                        {
-                            ker_ft = bli_trsm_small_mt_AVX512;
-                        }
-                        else if ( (log10(n0) + (0.65*log10(m0)) ) < 4.4 )
+                        if ( n0 < 4300 )
                         {
                             ker_ft = bli_trsm_small_mt_ZEN5;
+                        }
+                        else
+                        {
+                            ker_ft = NULL; //native code path
                         }
                     }
                     else //if ( blis_side == BLIS_RIGHT )
                     {
-                        if ( (log10(m0) + (3.2*log10(n0)) ) < 7 )
-                        {
-                            ker_ft = bli_trsm_small_mt_AVX512;
-                        }
-                        else if ( (log10(m0) + (0.85*log10(n0)) ) < 5 )
+                        if ( n0 < 1812 || m0 < 3220 )
                         {
                             ker_ft = bli_trsm_small_mt_ZEN5;
+                        }
+                        else
+                        {
+                            ker_ft = NULL; //native code path
                         }
                     }
                 }
