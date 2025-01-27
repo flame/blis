@@ -194,7 +194,8 @@ blis: \
        bench_swapv_blis.x \
        bench_axpbyv_blis.x \
        bench_axpyv_blis.x \
-       bench_gemm_pack_compute_blis.x
+       bench_gemm_pack_compute_blis.x \
+       bench_asumv_blis.x
 
 openblas: \
       bench_gemm_openblas.x \
@@ -211,7 +212,8 @@ openblas: \
       bench_copyv_openblas.x \
       bench_swapv_openblas.x \
       bench_axpbyv_openblas.x \
-      bench_axpyv_openblas.x
+      bench_axpyv_openblas.x \
+      bench_asumv_openblas.x
 
 atlas: \
       bench_gemm_atlas.x \
@@ -245,7 +247,8 @@ mkl:  \
       bench_swapv_mkl.x \
       bench_axpbyv_mkl.x \
       bench_axpyv_mkl.x \
-      bench_gemm_pack_compute_mkl.x
+      bench_gemm_pack_compute_mkl.x \
+      bench_asumv_mkl.x
 
 
 # --Object file rules --
