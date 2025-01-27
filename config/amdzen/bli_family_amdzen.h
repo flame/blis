@@ -32,12 +32,12 @@
 
 */
 
+#ifndef BLIS_FAMILY_AMDZEN_H
+#define BLIS_FAMILY_AMDZEN_H
+
 #include "bli_config_zen.h"
 #include "bli_config_zen4.h"
 #include "bli_config_zen5.h"
-
-#ifndef BLIS_FAMILY_AMDZEN_H
-#define BLIS_FAMILY_AMDZEN_H
 
 // By default, it is effective to parallelize the outer loops.
 // Setting these macros to 1 will force JR and IR inner loops

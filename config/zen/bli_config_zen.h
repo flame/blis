@@ -39,12 +39,12 @@
    This is based on the micro-architecture.
    For now, we are not defining the threshold for ZEN based architectures.
    Thus, it would take the subsequent paths(small, sup, native) */
-#define zgemm_tiny_zen_avx2( transa, transb, m, n, k, is_parallel ) \
+#define zgemm_tiny_zen_thresh_avx2( transa, transb, m, n, k, is_parallel ) \
   ( 0 ) \
 
 /* Defining the macro to be used for selecting the kernel at runtime */
 #define ZEN_UKR_SELECTOR( ch, transa, transb, m, n, k, stor_id, ukr_support, gemmtiny_ukr_info, is_parallel ) \
-    if ( PASTECH3( ch, gemm_tiny, _zen, _avx2 )( transa, transb, m, n, k, is_parallel ) ) \
+    if ( PASTECH3( ch, gemm_tiny, _zen_thresh, _avx2 )( transa, transb, m, n, k, is_parallel ) ) \
       LOOKUP_AVX2_UKR( ch, stor_id, ukr_support, gemmtiny_ukr_info ) \
     break;
 

@@ -39,7 +39,7 @@
 // This is specific to the micro-architecture
 // The macros take the input dimensions and the transpose values for the GEMM API
 // and define a condition that checks for entry based on these parameters
-#define zgemm_tiny_zen4_avx2( transa, transb, m, n, k, is_parallel ) \
+#define zgemm_tiny_zen4_thresh_avx2( transa, transb, m, n, k, is_parallel ) \
   /* In case of single-threaded request */ \
   ( ( !is_parallel ) && \
     /* Separate thresholds based on transpose value of A */ \
@@ -48,7 +48,7 @@
   /* In case of multi-threaded request */ \
   ( ( is_parallel ) && ( ( m * n * k ) < 12500 ) )
 
-#define zgemm_tiny_zen4_avx512( transa, transb, m, n, k, is_parallel ) \
+#define zgemm_tiny_zen4_thresh_avx512( transa, transb, m, n, k, is_parallel ) \
   /* In case of single-threaded request */ \
   ( ( !is_parallel ) && \
     /* Separate thresholds based on transpose value of A */ \
@@ -60,9 +60,9 @@
 
 /* Defining the macro to be used for selecting the kernel at runtime */
 #define ZEN4_UKR_SELECTOR( ch, transa, transb, m, n, k, stor_id, ukr_support, gemmtiny_ukr_info, is_parallel ) \
-    if ( PASTECH3( ch, gemm_tiny, _zen4, _avx2 )( transa, transb, m, n, k, is_parallel ) ) \
+    if ( PASTECH3( ch, gemm_tiny, _zen4_thresh, _avx2 )( transa, transb, m, n, k, is_parallel ) ) \
       LOOKUP_AVX2_UKR( ch, stor_id, ukr_support, gemmtiny_ukr_info ) \
-    else if ( PASTECH3( ch, gemm_tiny, _zen4, _avx512 )( transa, transb, m, n, k, is_parallel ) ) \
+    else if ( PASTECH3( ch, gemm_tiny, _zen4_thresh, _avx512 )( transa, transb, m, n, k, is_parallel ) ) \
       LOOKUP_AVX512_UKR( ch, stor_id, ukr_support, gemmtiny_ukr_info ) \
     break;
 

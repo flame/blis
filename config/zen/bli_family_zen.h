@@ -33,10 +33,10 @@
 
 */
 
-#include "bli_config_zen.h"
-
 #ifndef BLIS_FAMILY_ZEN_H
 #define BLIS_FAMILY_ZEN_H
+
+#include "bli_config_zen.h"
 
 // By default, it is effective to parallelize the outer loops.
 // Setting these macros to 1 will force JR and IR inner loops
