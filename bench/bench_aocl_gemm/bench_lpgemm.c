@@ -111,6 +111,7 @@ GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int8_t,int16_t,u8s8s16os8)
 GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,uint8_t,int16_t,u8s8s16ou8)
 GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32)
 GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
+GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,uint8_t,int32_t,u8s8s32ou8)
 GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,bfloat16,int32_t,u8s8s32obf16)
 GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,float,int32_t,u8s8s32of32)
 GEN_BLIS_MAT_MUL_FUNC(bfloat16,bfloat16,float,float,bf16bf16f32of32)
@@ -211,6 +212,7 @@ GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int8_t,int16_t,u8s8s16os8)
 GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,uint8_t,int16_t,u8s8s16ou8)
 GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32)
 GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
+GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,uint8_t,int32_t,u8s8s32ou8)
 GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,bfloat16,int32_t,u8s8s32obf16)
 GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,float,int32_t,u8s8s32of32)
 GEN_MAT_MUL_BENCH_DRV_FUNC(bfloat16,bfloat16,float,float,bf16bf16f32of32)
@@ -260,14 +262,13 @@ GEN_MAT_MUL_ACC_CHK_DOWNSCALE(uint8_t,int16_t,float,u8s8s16ou8)
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int16_t,float,s8s8s16os8)
 
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int32_t,float,u8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(uint8_t,int32_t,float,u8s8s32ou8)
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(float,int32_t,float,u8s8s32of32)
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(bfloat16,int32_t,float,u8s8s32obf16)
 
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int32_t,float,s8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(float,int32_t,float,s8s8s32of32)
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(bfloat16,int32_t,float,s8s8s32obf16)
-
-
 
 
 static inline float mat_mul_accuracy_check_downscale_bf16bf16f32obf16
@@ -340,12 +341,11 @@ static inline ACCUM_type mat_mul_accuracy_check_accum_ ## BLAS_SFX \
        dim_t j, \
        dim_t k, \
        dim_t pre_op_ld, /* Ignored */ \
-       bool int4_testing, /* Workaround to enable int4 B matrix testing. */\
        aocl_pre_op* pre_op /* Workaround to enable B pre-ops. */ \
      ) \
 { \
-    ( void )int4_testing; \
     ( void ) pre_op; \
+    temp_accum = (ACCUM_type) 0; \
     for ( dim_t p = 0; p < k; ++p) \
     { \
         temp_accum += ( *( a + ( i * rs_a ) + ( cs_a * p ) ) * \
@@ -360,13 +360,17 @@ static inline ACCUM_type mat_mul_accuracy_check_accum_ ## BLAS_SFX \
 GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,int8_t,int16_t,u8s8s16os8)
 GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,uint8_t,int16_t,u8s8s16ou8)
 GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,int16_t,int16_t,u8s8s16os16)
+GEN_MAT_MUL_ACC_CHK_ACCUM(int8_t,int8_t,int8_t,int16_t,s8s8s16os8)
+GEN_MAT_MUL_ACC_CHK_ACCUM(int8_t,int8_t,int16_t,int16_t,s8s8s16os16)
 
 GEN_MAT_MUL_ACC_CHK_ACCUM(float,float,float,float,f32f32f32of32)
 
 GEN_MAT_MUL_ACC_CHK_ACCUM(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
-GEN_MAT_MUL_ACC_CHK_ACCUM(int8_t,int8_t,int8_t,int16_t,s8s8s16os8)
-GEN_MAT_MUL_ACC_CHK_ACCUM(int8_t,int8_t,int16_t,int16_t,s8s8s16os16)
 GEN_MAT_MUL_ACC_CHK_ACCUM(int8_t,int8_t,int32_t,int32_t,s8s8s32os32)
+
+GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,uint8_t,int32_t,u8s8s32ou8)
+GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32)
 
 static inline int32_t mat_mul_accuracy_check_accum_u8s8s32obf16
      (
@@ -386,11 +390,9 @@ static inline int32_t mat_mul_accuracy_check_accum_u8s8s32obf16
        dim_t j,
        dim_t k,
        dim_t pre_op_ld, /* Ignored */
-       bool int4_testing, /* Workaround to enable int4 B matrix testing. */
        aocl_pre_op* pre_op /* Workaround to enable B pre-ops. */
      )
 {
-    ( void )int4_testing;
     ( void ) pre_op;
     for ( dim_t p = 0; p < k; ++p)
     {
@@ -421,11 +423,9 @@ static inline int32_t mat_mul_accuracy_check_accum_s8s8s32obf16
        dim_t j,
        dim_t k,
        dim_t pre_op_ld, /* Ignored */
-       bool int4_testing, /* Workaround to enable int4 B matrix testing. */
        aocl_pre_op* pre_op /* Workaround to enable B pre-ops. */
      )
 {
-    ( void )int4_testing;
     ( void ) pre_op;
     for ( dim_t p = 0; p < k; ++p)
     {
@@ -457,11 +457,9 @@ static inline int32_t mat_mul_accuracy_check_accum_u8s8s32of32
        dim_t j,
        dim_t k,
        dim_t pre_op_ld, /* Ignored */
-       bool int4_testing, /* Workaround to enable int4 B matrix testing. */
        aocl_pre_op* pre_op /* Workaround to enable B pre-ops. */
      )
 {
-    ( void )int4_testing;
     ( void ) pre_op;
     for ( dim_t p = 0; p < k; ++p)
     {
@@ -492,11 +490,9 @@ static inline int32_t mat_mul_accuracy_check_accum_s8s8s32of32
        dim_t j,
        dim_t k,
        dim_t pre_op_ld, /* Ignored */
-       bool int4_testing, /* Workaround to enable int4 B matrix testing. */
        aocl_pre_op* pre_op /* Workaround to enable B pre-ops. */
      )
 {
-    ( void )int4_testing;
     ( void ) pre_op;
     for ( dim_t p = 0; p < k; ++p)
     {
@@ -508,74 +504,6 @@ static inline int32_t mat_mul_accuracy_check_accum_s8s8s32of32
     temp_accum = ( beta * c_ref_float ) + ( alpha * temp_accum );
     return temp_accum;
   }
-
-#define GEN_MAT_MUL_ACC_CHK_ACCUM_INT4(A_type, B_type, C_type,ACCUM_type,BLAS_SFX) \
-static inline ACCUM_type mat_mul_accuracy_check_accum_ ## BLAS_SFX \
-     (\
-       A_type* a, \
-       B_type* b, \
-       C_type* c_ref, \
-       ACCUM_type temp_accum,\
-       ACCUM_type  alpha, \
-       ACCUM_type beta, \
-       dim_t rs_a, \
-       dim_t rs_b, \
-       dim_t cs_a, \
-       dim_t cs_b, \
-       dim_t rs_c_ref, \
-       dim_t cs_c_ref, \
-       dim_t i, \
-       dim_t j, \
-       dim_t k, \
-       dim_t pre_op_ld, /* Ignored */ \
-       bool int4_testing, /* Workaround to enable int4 B matrix testing. */\
-       aocl_pre_op* pre_op /* Workaround to enable B pre-ops. */ \
-     ) \
-{ \
-    ( void ) pre_op; \
-    if ( int4_testing == FALSE ) \
-    { \
-        for ( dim_t p = 0; p < k; ++p) \
-        { \
-            temp_accum += ( *( a + ( i * rs_a ) + ( cs_a * p ) ) * \
-                             *( b + ( rs_b * p ) + ( cs_b * j ) ) ); \
-        } \
-    } \
-    else \
-    { \
-        for ( dim_t p = 0; p < k; ++p) \
-        { \
-            /* Get B matrix int4_t value and upscale it to int8_t. */ \
-            dim_t b_inc = ( rs_b * p ) + ( cs_b * j ); \
-            int8_t b_val = 0; \
-            /* Even index will have data at low 4 bits, and odd at hi 4 bits.
-             * B matrix increments has to be halved to account for 4 bit
-             * traversal. */ \
-            if ( ( b_inc % 2 ) != 0 ) \
-            { \
-                b_val = ( ( *( b + ( b_inc / 2 ) ) ) >> 4 ) & 0x0F; \
-            } \
-            else \
-            { \
-                b_val = ( *( b + ( b_inc / 2 ) ) ) & 0x0F; \
-            } \
-            /* Signed scale. */ \
-            if ( b_val & 0x08 ) \
-            { \
-                 b_val = b_val | 0xF0; \
-            } \
-            temp_accum += ( *( a + ( i * rs_a ) + ( cs_a * p ) ) * b_val ); \
-        } \
-    } \
- \
-    temp_accum = ( beta * ( * (c_ref + ( rs_c_ref * i ) + ( cs_c_ref * j ) ) ) ) \
-                         + ( alpha * temp_accum ); \
-    return temp_accum; \
-} \
-
-GEN_MAT_MUL_ACC_CHK_ACCUM_INT4(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
-GEN_MAT_MUL_ACC_CHK_ACCUM_INT4(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32)
-
 
 static inline float mat_mul_accuracy_check_accum_bf16bf16f32of32
      (
@@ -595,11 +523,9 @@ static inline float mat_mul_accuracy_check_accum_bf16bf16f32of32
        dim_t j,
        dim_t k,
        dim_t pre_op_ld, /* Ignored */ \
-       bool int4_testing, /* Ignored for bf16 testing */\
        aocl_pre_op* pre_op /* Workaround to enable B pre-ops. */ \
      )
 {
-    ( void )int4_testing;
     ( void ) pre_op;
     for ( dim_t p = 0; p < k; ++p)
     {
@@ -631,11 +557,9 @@ static inline float mat_mul_accuracy_check_accum_bf16bf16f32obf16
        dim_t j,
        dim_t k,
        dim_t pre_op_ld, /* Ignored */
-       bool int4_testing, /* Ignored for bf16 testing */\
        aocl_pre_op* pre_op /* Workaround to enable B pre-ops. */ \
      )
 {
-    ( void )int4_testing;
     ( void ) pre_op;
     for ( dim_t p = 0; p < k; ++p)
     {
@@ -754,11 +678,9 @@ static inline float mat_mul_accuracy_check_accum_bf16s4f32of32
        dim_t j,
        dim_t k,
        dim_t pre_op_ld,
-       bool int4_testing, /* Ignored s4 implies int4 testing. */\
        aocl_pre_op* pre_op /* Workaround to enable B pre-ops. */ \
      )
 {
-    ( void )int4_testing;
     for ( dim_t p = 0; p < k; ++p)
     {
         float a_float, b_float;
@@ -793,11 +715,9 @@ static inline float mat_mul_accuracy_check_accum_bf16s4f32obf16
        dim_t j,
        dim_t k,
        dim_t pre_op_ld,
-       bool int4_testing, /* Ignored for bf16 testing */\
        aocl_pre_op* pre_op /* Workaround to enable B pre-ops. */ \
      )
 {
-    ( void )int4_testing;
     for ( dim_t p = 0; p < k; ++p)
     {
         float a_float, b_float;
@@ -820,6 +740,7 @@ GEN_GELU_TANH_POSTOP_INT(int16_t,u8s8s16os8)
 GEN_GELU_TANH_POSTOP_INT(int16_t,u8s8s16ou8)
 GEN_GELU_TANH_POSTOP_INT(int16_t,u8s8s16os16)
 GEN_GELU_TANH_POSTOP_INT(int32_t,u8s8s32os8)
+GEN_GELU_TANH_POSTOP_INT(int32_t,u8s8s32ou8)
 GEN_GELU_TANH_POSTOP_INT(int32_t,u8s8s32os32)
 GEN_GELU_TANH_POSTOP_INT(int32_t,u8s8s32obf16)
 GEN_GELU_TANH_POSTOP_INT(int32_t,u8s8s32of32)
@@ -840,6 +761,7 @@ GEN_TANH_POSTOP_INT(int16_t,u8s8s16os8)
 GEN_TANH_POSTOP_INT(int16_t,u8s8s16ou8)
 GEN_TANH_POSTOP_INT(int16_t,u8s8s16os16)
 GEN_TANH_POSTOP_INT(int32_t,u8s8s32os8)
+GEN_TANH_POSTOP_INT(int32_t,u8s8s32ou8)
 GEN_TANH_POSTOP_INT(int32_t,u8s8s32os32)
 GEN_TANH_POSTOP_INT(int32_t,u8s8s32obf16)
 GEN_TANH_POSTOP_INT(int32_t,u8s8s32of32)
@@ -860,6 +782,7 @@ GEN_GELU_ERF_POSTOP_INT(int16_t,u8s8s16os8)
 GEN_GELU_ERF_POSTOP_INT(int16_t,u8s8s16ou8)
 GEN_GELU_ERF_POSTOP_INT(int16_t,u8s8s16os16)
 GEN_GELU_ERF_POSTOP_INT(int32_t,u8s8s32os8)
+GEN_GELU_ERF_POSTOP_INT(int32_t,u8s8s32ou8)
 GEN_GELU_ERF_POSTOP_INT(int32_t,u8s8s32os32)
 GEN_GELU_ERF_POSTOP_INT(int32_t,u8s8s32obf16)
 GEN_GELU_ERF_POSTOP_INT(int32_t,u8s8s32of32)
@@ -880,6 +803,7 @@ GEN_SWISH_POSTOP_INT(int16_t,u8s8s16os8)
 GEN_SWISH_POSTOP_INT(int16_t,u8s8s16ou8)
 GEN_SWISH_POSTOP_INT(int16_t,u8s8s16os16)
 GEN_SWISH_POSTOP_INT(int32_t,u8s8s32os8)
+GEN_SWISH_POSTOP_INT(int32_t,u8s8s32ou8)
 GEN_SWISH_POSTOP_INT(int32_t,u8s8s32os32)
 GEN_SWISH_POSTOP_INT(int32_t,u8s8s32obf16)
 GEN_SWISH_POSTOP_INT(int32_t,u8s8s32of32)
@@ -900,6 +824,7 @@ GEN_SIGMOID_POSTOP_INT(int16_t,u8s8s16os8)
 GEN_SIGMOID_POSTOP_INT(int16_t,u8s8s16ou8)
 GEN_SIGMOID_POSTOP_INT(int16_t,u8s8s16os16)
 GEN_SIGMOID_POSTOP_INT(int32_t,u8s8s32os8)
+GEN_SIGMOID_POSTOP_INT(int32_t,u8s8s32ou8)
 GEN_SIGMOID_POSTOP_INT(int32_t,u8s8s32os32)
 GEN_SIGMOID_POSTOP_INT(int32_t,u8s8s32obf16)
 GEN_SIGMOID_POSTOP_INT(int32_t,u8s8s32of32)
@@ -920,6 +845,7 @@ GEN_GET_MATRIX_ADD_POST_OP_VAL_BF16(bfloat16,bf16bf16f32obf16)
 GEN_GET_MATRIX_ADD_POST_OP_VAL_BF16(bfloat16,bf16s4f32obf16)
 
 GEN_GET_MATRIX_ADD_POST_OP_VAL(int8_t,int32_t,u8s8s32os8)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(uint8_t,int32_t,u8s8s32ou8)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(int32_t,int32_t,u8s8s32os32)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(bfloat16,int32_t,u8s8s32obf16)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(float,int32_t,u8s8s32of32)
@@ -940,6 +866,7 @@ GEN_GET_MATRIX_MUL_POST_OP_VAL_BF16(bfloat16,bf16bf16f32obf16)
 GEN_GET_MATRIX_MUL_POST_OP_VAL_BF16(bfloat16,bf16s4f32obf16)
 
 GEN_GET_MATRIX_MUL_POST_OP_VAL(int8_t,int32_t,u8s8s32os8)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(uint8_t,int32_t,u8s8s32ou8)
 GEN_GET_MATRIX_MUL_POST_OP_VAL(int32_t,int32_t,u8s8s32os32)
 GEN_GET_MATRIX_MUL_POST_OP_VAL(bfloat16,int32_t,u8s8s32obf16)
 GEN_GET_MATRIX_MUL_POST_OP_VAL(float,int32_t,u8s8s32of32)
@@ -960,6 +887,7 @@ GEN_GET_BIAS_POST_OP_VAL_BF16(bf16bf16f32obf16)
 GEN_GET_BIAS_POST_OP_VAL_BF16(bf16s4f32obf16)
 
 GEN_GET_BIAS_POST_OP_VAL(int32_t,u8s8s32os8)
+GEN_GET_BIAS_POST_OP_VAL(int32_t,u8s8s32ou8)
 GEN_GET_BIAS_POST_OP_VAL(int32_t,u8s8s32os32)
 GEN_GET_BIAS_POST_OP_VAL(int32_t,u8s8s32obf16)
 GEN_GET_BIAS_POST_OP_VAL(int32_t,u8s8s32of32)
@@ -978,6 +906,7 @@ GEN_GET_BIAS_POST_OP_VAL_f32(bf16s4f32of32)
 
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int32_t,int32_t)
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int8_t,int32_t)
+GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(uint8_t,int32_t)
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int16_t,int16_t)
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int8_t,int16_t)
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(uint8_t,int16_t)
@@ -1003,8 +932,7 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
        dim_t   ldc, \
        C_type* c_ref, \
        dim_t   ldc_ref, \
-       aocl_post_op*  post_op, \
-       bool    int4_testing /* Workaround to enable int4 B matrix testing. */ \
+       aocl_post_op*  post_op \
      ) \
 { \
     dim_t rs_a, cs_a; \
@@ -1077,7 +1005,7 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
             temp_accum = GEN_FUNC_NAME(mat_mul_accuracy_check_accum_,BLAS_SFX) \
                 (a, b, c_ref, temp_accum, alpha, beta,\
                  rs_a, rs_b, cs_a, cs_b, rs_c_ref, cs_c_ref, i, j, k, n, \
-                 int4_testing, a_pre_op); \
+                 a_pre_op); \
 \
             if ( post_op != NULL ) \
             { \
@@ -1261,6 +1189,7 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                 } \
                     printf("failure, m_index: %ld, n_index: %ld, k: %ld, computed:%f, ref:%f," \
                             "diff:%f\n", i, j, k, comp_float, ref_float, comp_float-ref_float); \
+                fflush(stdout); \
                 goto cleanup_acc; \
             } \
         } \
@@ -1272,28 +1201,45 @@ cleanup_acc: \
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int16_t,int16_t,float,u8s8s16os16,u8s8s16os8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int8_t,int16_t,float,u8s8s16os8,u8s8s16os8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,uint8_t,int16_t,float,u8s8s16ou8,u8s8s16ou8)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int16_t,int16_t,float,s8s8s16os16,s8s8s16os8)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int8_t,int16_t,float,s8s8s16os8,s8s8s16os8)
+
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int32_t,int32_t,float,u8s8s32os32,u8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int8_t,int32_t,float,u8s8s32os8,u8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,uint8_t,int32_t,float,u8s8s32ou8,u8s8s32ou8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,bfloat16,int32_t,float,u8s8s32obf16,u8s8s32obf16)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,float,int32_t,float,u8s8s32of32,u8s8s32of32)
+
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(bfloat16,int8_t,float,float,float,bf16s4f32of32,bf16bf16f32obf16)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(bfloat16,int8_t,bfloat16,float,float,bf16s4f32obf16,bf16bf16f32obf16)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(bfloat16,bfloat16,float,float,float,bf16bf16f32of32,bf16bf16f32obf16)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(bfloat16,bfloat16,bfloat16,float,float,bf16bf16f32obf16,bf16bf16f32obf16)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(float,float,float,float,float,f32f32f32of32,f32f32f32of32)
+
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int32_t,int32_t,float,s8s8s32os32,s8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int8_t,int32_t,float,s8s8s32os8,s8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,bfloat16,int32_t,float,s8s8s32obf16,s8s8s32obf16)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,float,int32_t,float,s8s8s32of32,s8s8s32of32)
-GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int16_t,int16_t,float,s8s8s16os16,s8s8s16os8)
-GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int8_t,int16_t,float,s8s8s16os8,s8s8s16os8)
-GEN_MAT_MUL_ACC_CHK_DRV_FUNC(bfloat16,int8_t,float,float,float,bf16s4f32of32,bf16bf16f32obf16)
-GEN_MAT_MUL_ACC_CHK_DRV_FUNC(bfloat16,int8_t,bfloat16,float,float,bf16s4f32obf16,bf16bf16f32obf16)
 
 GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int16_t,float,int16_t,u8s8s16os16)
+GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int16_t,float,int16_t,s8s8s16os16)
+
 GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int32_t,float,int32_t,u8s8s32os32)
+GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int8_t,float,int32_t,u8s8s32os8)
+GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,uint8_t,float,int32_t,u8s8s32ou8)
+GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,float,float,int32_t,u8s8s32of32)
+GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,bfloat16,float,int32_t,u8s8s32obf16)
+
+GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int32_t,float,int32_t,s8s8s32os32)
+GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int32_t,float,int32_t,s8s8s32os8)
+//GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int32_t,float,int32_t,s8s8s32of32)
+//GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int32_t,float,int32_t,s8s8s32obf16)
+//GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int32_t,float,int32_t,s8s8s32ou8)
+
 GEN_MAT_MUL_POST_OPS_CREATOR(bfloat16,float,float,bfloat16,bf16bf16f32of32)
 GEN_MAT_MUL_POST_OPS_CREATOR(float,float,float,float,f32f32f32of32)
-GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int32_t,float,int32_t,s8s8s32os32)
-GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int16_t,float,int16_t,s8s8s16os16)
+
+
 
 // Hack to fix compiler errors.
 #define GET_B_TYPE_bf16bf16f32of32 bfloat16
@@ -1319,8 +1265,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
        dim_t stride_a, \
        dim_t stride_b, \
        dim_t stride_c, \
-       char*   post_ops_str, \
-       bool    int4_testing /* Workaround to enable int4 B matrix testing. */\
+       char*   post_ops_str \
      ) \
 { \
     int32_t n_repeats = bli_max( 30, bli_min(( 3e10 / ( ( int64_t )m * n * k )), 1000 )); \
@@ -1346,9 +1291,10 @@ void mat_mul_bench_main_ ## BLAS_SFX \
     } \
     A_type* a = ( A_type* ) lpgemm_malloc( sizeof( A_type ) * size_A ); \
     GEN_FUNC_NAME(fill_array_,A_type)(a, size_A ); \
+    bool int4_testing = ( strcmp(#BLAS_SFX,"bf16s4f32of32") | strcmp(#BLAS_SFX,"bf16s4f32obf16") ); \
  \
     B_type* b = ( B_type* ) lpgemm_malloc( sizeof( B_type ) * size_B ); \
-    if ( int4_testing == FALSE ) \
+    if ( int4_testing != FALSE ) \
     { \
         GEN_FUNC_NAME(fill_array_,B_type)(b, size_B ); \
     } \
@@ -1417,7 +1363,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
     { \
         B_type* b_reorder = NULL; \
         /* Reorder B.*/ \
-        if ( int4_testing == FALSE ) \
+        if ( int4_testing != FALSE ) \
         { \
             siz_t b_reorder_buf_siz_req = \
                 GEN_FUNC_NAME(aocl_get_reorder_buf_size_,REORDER_SFX)( stor_order, transb, 'B', k, n ); \
@@ -1466,7 +1412,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
           beta, \
           c, stride_c, \
           c_ref, stride_c, \
-          post_op, int4_testing \
+          post_op \
         ); \
     } \
  \
@@ -1485,6 +1431,7 @@ GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int8_t,int16_t,u8s8s16os8,u8s8s16os16
 GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,uint8_t,int16_t,u8s8s16ou8,u8s8s16os16,u8s4s32os32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32,u8s8s32os32,u8s4s32os32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8,u8s8s32os32,u8s4s32os32)
+GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,uint8_t,int32_t,u8s8s32ou8,u8s8s32os32,u8s4s32os32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,bfloat16,int32_t,u8s8s32obf16,u8s8s32os32,u8s4s32os32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,float,int32_t,u8s8s32of32,u8s8s32os32,u8s4s32os32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(float,float,float,float,f32f32f32of32,f32f32f32of32,bf16s4f32of32)
@@ -1528,15 +1475,17 @@ int main( int argc, char** argv )
           "  Downscaled api's are used to enable quantization workflows.\n" \
           "  Following downscaled api's are supported:\n" \
           "    1. u8s8s32os32 -d s8 = u8s8s32os8.\n" \
-          "    2. u8s8s16os16 -d s8 = u8s8s16os8.\n" \
-          "    3. u8s8s16os16 -d u8 = u8s8s16ou8.\n" \
-          "    4. bf16bf16f32of32 -d bf16 = bf16bf16f32obf16.\n" \
+          "    2. u8s8s32os32 -d u8 = u8s8s32ou8.\n" \
+          "    3. u8s8s32os32 -d f32 = u8s8s32of32.\n" \
+          "    4. u8s8s32os32 -d bf16 = u8s8s32obf16.\n" \
           "    5. s8s8s32os32 -d s8 = s8s8s32os8.\n" \
-          "    6. s8s8s16os16 -d s8 = s8s8s16os8.\n" \
-          "    7. u8s8s32os32 -d bf16 = s8s8s16obf16.\n" \
-          "    8. u8s8s32os32 -d f32 = s8s8s16of32.\n" \
-          "    9. s8s8s32os32 -d bf16 = s8s8s16obf16.\n" \
-          "    10. s8s8s32os32 -d f32 = s8s8s16of32.\n" \
+          "    6. s8s8s32os32 -d f32 = s8s8s32of32.\n" \
+          "    7. s8s8s32os32 -d bf16 = s8s8s32obf16.\n" \
+          "    8. s8s8s16os16 -d s8 = s8s8s16os8.\n" \
+          "    9. s8s8s16os16 -d u8 = u8s8s16ou8.\n" \
+          "    10. u8s8s16os16 -d s8 = u8s8s16os8.\n" \
+          "    11. u8s8s16os16 -d u8 = u8s8s16ou8.\n" \
+          "    12. bf16bf16f32of32 -d bf16 = bf16bf16f32obf16.\n" \
           "  Example: ./bench_lpgemm -m a -n 2 -o bias,relu -d bf16 -i input.txt\n" \
         );
         exit( 1 );
@@ -1671,6 +1620,21 @@ int main( int argc, char** argv )
                             ( stor_order == 'c' ) || ( stor_order == 'C' ) ) ?
                             stor_order : 'r';
 
+            if ( ( strcmp( gemm_type_str, "u8s8s32os8" ) == 0 ) ||
+                 ( strcmp( gemm_type_str, "*" ) == 0 ) )
+            {
+                strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
+                global_dscale_out = 'y';
+                global_pre_op = 'n';
+                DSCALE_CLIP_MIN = -128;
+                DSCALE_CLIP_MAX = +127;
+                GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os8)
+                (
+                  fin, fout, stor_order, transa, transb, op_a, op_b,
+                  m, n, k, stride_a, stride_b, stride_c,
+                  post_ops_str_dest
+                );
+            }
             if ( ( strcmp( gemm_type_str, "u8s8s32os32" ) == 0 ) ||
                  ( strcmp( gemm_type_str, "*" ) == 0 ) )
             {
@@ -1686,22 +1650,22 @@ int main( int argc, char** argv )
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
                   m, n, k, stride_a, stride_b, stride_c,
-                  post_ops_str_dest, FALSE
+                  post_ops_str_dest
                 );
             }
-            if ( ( strcmp( gemm_type_str, "u8s8s32os8" ) == 0 ) ||
+            if ( ( strcmp( gemm_type_str, "u8s8s32ou8" ) == 0 ) ||
                  ( strcmp( gemm_type_str, "*" ) == 0 ) )
             {
                 strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
                 global_dscale_out = 'y';
                 global_pre_op = 'n';
-                DSCALE_CLIP_MIN = -128;
-                DSCALE_CLIP_MAX = +127;
-                GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os8)
+                DSCALE_CLIP_MIN = 0;
+                DSCALE_CLIP_MAX = +255;
+                GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32ou8)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
                   m, n, k, stride_a, stride_b, stride_c,
-                  post_ops_str_dest, FALSE
+                  post_ops_str_dest
                 );
             }
             if ( ( strcmp( gemm_type_str, "u8s4s32os32" ) == 0 ) ||
@@ -1727,7 +1691,7 @@ int main( int argc, char** argv )
                     (
                       fin, fout, stor_order, transa, transb, op_a, op_b,
                       m, n, k, stride_a, stride_b, stride_c,
-                      post_ops_str_dest, TRUE
+                      post_ops_str_dest
                     );
                 }
             }
@@ -1741,7 +1705,7 @@ int main( int argc, char** argv )
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
                   m, n, k, stride_a, stride_b, stride_c,
-                  post_ops_str_dest, FALSE
+                  post_ops_str_dest
                 );
             }
             if ( ( strcmp( gemm_type_str, "u8s8s32obf16" ) == 0 ) ||
@@ -1754,7 +1718,7 @@ int main( int argc, char** argv )
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
                   m, n, k, stride_a, stride_b, stride_c,
-                  post_ops_str_dest, FALSE
+                  post_ops_str_dest
                 );
             }
             if ( ( strcmp( gemm_type_str, "f32f32f32of32" ) == 0 ) ||
@@ -1768,7 +1732,7 @@ int main( int argc, char** argv )
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
                   m, n, k, stride_a, stride_b, stride_c,
-                  post_ops_str_dest, FALSE
+                  post_ops_str_dest
                 );
             }
 #if 0
@@ -1784,7 +1748,7 @@ int main( int argc, char** argv )
                 (
                     fin, fout, stor_order, transa, transb, op_a, op_b,
                     m, n, k, stride_a, stride_b, stride_c,
-                    post_ops_str_dest, FALSE
+                    post_ops_str_dest
                 );
             }
             if ( ( strcmp( gemm_type_str, "u8s8s16os8" ) == 0 ) ||
@@ -1799,7 +1763,7 @@ int main( int argc, char** argv )
                 (
                     fin, fout, stor_order, transa, transb, op_a, op_b,
                     m, n, k, stride_a, stride_b, stride_c,
-                    post_ops_str_dest, FALSE
+                    post_ops_str_dest
                 );
             }
             if ( ( strcmp( gemm_type_str, "u8s8s16ou8" ) == 0 ) ||
@@ -1814,7 +1778,7 @@ int main( int argc, char** argv )
                 (
                     fin, fout, stor_order, transa, transb, op_a, op_b,
                     m, n, k, stride_a, stride_b, stride_c,
-                    post_ops_str_dest, FALSE
+                    post_ops_str_dest
                 );
             }
 #endif
@@ -1828,7 +1792,7 @@ int main( int argc, char** argv )
                 (
                     fin, fout, stor_order, transa, transb, op_a, op_b,
                     m, n, k, stride_a, stride_b, stride_c,
-                    post_ops_str_dest, FALSE
+                    post_ops_str_dest
                 );
             }
             if ( ( strcmp( gemm_type_str, "bf16bf16f32obf16" ) == 0 ) ||
@@ -1841,7 +1805,7 @@ int main( int argc, char** argv )
                 (
                     fin, fout, stor_order, transa, transb, op_a, op_b,
                     m, n, k, stride_a, stride_b, stride_c,
-                    post_ops_str_dest, FALSE
+                    post_ops_str_dest
                 );
             }
             if ( strcmp( gemm_type_str, "bf16s4f32of32" ) == 0 )
@@ -1861,7 +1825,7 @@ int main( int argc, char** argv )
                     (
                         fin, fout, stor_order, transa, transb, op_a, op_b,
                         m, n, k, stride_a, stride_b, stride_c,
-                        post_ops_str_dest, TRUE
+                        post_ops_str_dest
                     );
                 }
             }
@@ -1882,7 +1846,7 @@ int main( int argc, char** argv )
                     (
                         fin, fout, stor_order, transa, transb, op_a, op_b,
                         m, n, k, stride_a, stride_b, stride_c,
-                        post_ops_str_dest, TRUE
+                        post_ops_str_dest
                     );
                 }
             }
@@ -1898,7 +1862,7 @@ int main( int argc, char** argv )
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
                   m, n, k, stride_a, stride_b, stride_c,
-                  post_ops_str_dest, FALSE
+                  post_ops_str_dest
                 );
             }
             if ( ( strcmp( gemm_type_str, "s8s8s32os8" ) == 0 ) ||
@@ -1913,7 +1877,7 @@ int main( int argc, char** argv )
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
                   m, n, k, stride_a, stride_b, stride_c,
-                  post_ops_str_dest, FALSE
+                  post_ops_str_dest
                 );
             }
             if ( ( strcmp( gemm_type_str, "s8s8s32obf16" ) == 0 ) ||
@@ -1926,7 +1890,7 @@ int main( int argc, char** argv )
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
                   m, n, k, stride_a, stride_b, stride_c,
-                  post_ops_str_dest, FALSE
+                  post_ops_str_dest
                 );
             }
             if ( ( strcmp( gemm_type_str, "s8s8s32of32" ) == 0 ) ||
@@ -1939,7 +1903,7 @@ int main( int argc, char** argv )
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
                   m, n, k, stride_a, stride_b, stride_c,
-                  post_ops_str_dest, FALSE
+                  post_ops_str_dest
                 );
             }
 #if 0
@@ -1955,7 +1919,7 @@ int main( int argc, char** argv )
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
                   m, n, k, stride_a, stride_b, stride_c,
-                  post_ops_str_dest, FALSE
+                  post_ops_str_dest
                 );
             }
             if ( ( strcmp( gemm_type_str, "s8s8s16os8" ) == 0 ) ||
@@ -1970,7 +1934,7 @@ int main( int argc, char** argv )
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
                   m, n, k, stride_a, stride_b, stride_c,
-                  post_ops_str_dest, FALSE
+                  post_ops_str_dest
                 );
             }
 #endif

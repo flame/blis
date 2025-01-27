@@ -500,6 +500,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     { \
         return NULL; \
     } \
+    post_ops->eltwise = NULL; \
  \
     /* Only supporting 8 post ops at max for now.*/ \
     dim_t max_post_ops_seq_length = 8; \
@@ -518,7 +519,6 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     /* Parse post ops list.*/ \
     dim_t cur_op_index = 0; \
     /* Ensure the buffers that use NULL check in deinit code is properly set to NULL.*/ \
-    post_ops->eltwise = NULL; \
  \
     /* Bench limitation: can only support 1 bias, but LPGEMM can support
      * multiple scale post-ops. */ \

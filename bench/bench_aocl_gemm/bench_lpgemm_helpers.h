@@ -229,6 +229,7 @@ GEN_FILL_ARRAY_POST_OPS_FUNC(int8_t)
 GEN_FILL_ARRAY_POST_OPS_FUNC(int16_t)
 GEN_FILL_ARRAY_POST_OPS_FUNC(int32_t)
 GEN_FILL_ARRAY_POST_OPS_FUNC(float)
+GEN_FILL_ARRAY_POST_OPS_FUNC(uint8_t)
 
 static inline void fill_array_post_ops_bfloat16( void* arr, dim_t size )
 {
@@ -686,6 +687,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     { \
         return NULL; \
     } \
+    post_ops->eltwise = NULL; \
  \
     /* Only supporting 8 post ops at max for now.*/ \
     dim_t max_post_ops_seq_length = 8; \
@@ -704,7 +706,6 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     /* Parse post ops list.*/ \
     dim_t cur_op_index = 0; \
     /* Ensure the buffers that use NULL check in deinit code is properly set to NULL.*/ \
-    post_ops->eltwise = NULL; \
  \
     /* Bench limitation: can only support 1 bias, but LPGEMM can support
      * multiple bias post-ops. */ \
@@ -1188,10 +1189,12 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         DSCALE_type* temp_dscale_ptr = ( DSCALE_type* )( post_ops->sum )->scale_factor; \
         GEN_FUNC_NAME(fill_array_,DSCALE_type)(temp_dscale_ptr, n_scale);   \
         ( post_ops->sum )->scale_factor_len = n_scale; \
+        if(strcmp(#BLAS_SFX, "u8s8s32ou8")) for(dim_t i=0;i<n_scale;i++) temp_dscale_ptr[i] = abs(temp_dscale_ptr[i]);\
 \
         C_DSCALE_type* temp_dzero_point_ptr = ( C_DSCALE_type* )( post_ops->sum )->zero_point; \
         GEN_FUNC_NAME(fill_array_,C_DSCALE_type)(temp_dzero_point_ptr, n_zp);   \
         ( post_ops->sum )->zero_point_len = n_zp; \
+        if(strcmp(#BLAS_SFX, "u8s8s32ou8")) for(dim_t i=0;i<n_zp;i++) temp_dzero_point_ptr[i] = abs(temp_dzero_point_ptr[i]);\
     } \
  \
     if ( is_matrix_add == TRUE ) \
