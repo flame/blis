@@ -334,6 +334,14 @@ else()
     # Version strings that get returned have this form: AOCL-BLAS 5.0.1 Build 20241111
     # We do not need anything after 5.0.1 for testing so we create a list and then keep
     # only the first two elements.
+    string(FIND ${TEST_BLIS_VERSION} "error" FAILED_AT_RUNTIME)
+    if(NOT (${FAILED_AT_RUNTIME} STREQUAL "-1"))
+       message(FATAL_ERROR "Running get_version.cpp failed with the following error " ${TEST_BLIS_VERSION})
+    endif()
+    string(FIND ${TEST_BLIS_VERSION} "fault" FAILED_AT_RUNTIME)
+    if(NOT (${FAILED_AT_RUNTIME} STREQUAL "-1"))
+       message(FATAL_ERROR "Running get_version.cpp failed with the following error " ${TEST_BLIS_VERSION})
+    endif()
     string(REPLACE " " ";" TEST_BLIS_VERSION ${TEST_BLIS_VERSION})
     # After this TEST_BLIS_VERSION looks like 5.0.1
     list(GET TEST_BLIS_VERSION 1 TEST_BLIS_VERSION)
@@ -350,7 +358,7 @@ else()
             set(TEST_BLIS_VERSION DEV)
         endif()
     endif()
-    if(${TEST_BLIS_VERSION} EQUAL 41)
+    if(${TEST_BLIS_VERSION} LESS_EQUAL 41)
         set(CAN_TEST_INFO_VALUE OFF)
     endif()
     string(PREPEND TEST_BLIS_VERSION AOCL_)
