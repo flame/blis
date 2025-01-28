@@ -95,8 +95,8 @@ void PASTEMAC(chc,chp,varname) \
 	{ \
 		ctypep_r kappa_r, kappa_i; \
 		( void )kappa_r; \
-		PASTEMAC(chp,gets)( *( ctypep* )kappa, kappa_r, kappa_i ); \
-		if ( PASTEMAC(chp_r,eq0)( kappa_i ) ) \
+		bli_tgets( chp,chp, *( ctypep* )kappa, kappa_r, kappa_i ); \
+		if ( bli_teq0s( chp_r, kappa_i ) ) \
 		{ \
 			/* Treat the matrix as real with doubled strides. */ \
 			dt_c = bli_dt_proj_to_real( dt_c ); \

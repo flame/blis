@@ -51,21 +51,21 @@ void PASTEMAC(ch,opname,arch,suf) \
 	const ctype* alpha = alpha0; \
 	      ctype* x     = x0; \
 \
-	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
+	if ( bli_teq0s( ch, *alpha ) ) \
 	{ \
 		if ( incx == 1 ) \
 		{ \
 			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,set0s)( x[i] ); \
+				bli_tset0s( ch, x[i] ); \
 			} \
 		} \
 		else \
 		{ \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,set0s)( *x ); \
+				bli_tset0s( ch, *x ); \
 \
 				x += incx; \
 			} \
@@ -75,21 +75,21 @@ void PASTEMAC(ch,opname,arch,suf) \
 	{ \
 		ctype alpha_conj; \
 \
-		PASTEMAC(ch,copycjs)( conjalpha, *alpha, alpha_conj ); \
+		bli_tcopycjs( ch,ch, conjalpha, *alpha, alpha_conj ); \
 \
 		if ( incx == 1 ) \
 		{ \
 			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,copys)( alpha_conj, x[i] ); \
+				bli_tcopys( ch,ch, alpha_conj, x[i] ); \
 			} \
 		} \
 		else \
 		{ \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,copys)( alpha_conj, *x ); \
+				bli_tcopys( ch,ch, alpha_conj, *x ); \
 \
 				x += incx; \
 			} \

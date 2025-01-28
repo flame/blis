@@ -154,9 +154,9 @@ GENPROT( eqsc )
 GENPROT( eqv )
 GENPROT( eqm )
 GENPROT( ltsc )
-GENPROT( ltesc )
+GENPROT( lesc )
 GENPROT( gtsc )
-GENPROT( gtesc )
+GENPROT( gesc )
 
 
 #undef  GENPROT

@@ -75,33 +75,33 @@ void PASTEMAC(ch,opname,arch,suf) \
 		ctype ax[ ff ]; \
 \
 		/* If beta is zero, clear y. Otherwise, scale by beta. */ \
-		if ( PASTEMAC(ch,eq0)( *beta ) ) \
+		if ( bli_teq0s( ch, *beta ) ) \
 		{ \
-			for ( dim_t i = 0; i < ff; ++i ) PASTEMAC(ch,set0s)( y[i] ); \
+			for ( dim_t i = 0; i < ff; ++i ) bli_tset0s( ch, y[i] ); \
 		} \
 		else \
 		{ \
-			for ( dim_t i = 0; i < ff; ++i ) PASTEMAC(ch,scals)( *beta, y[i] ); \
+			for ( dim_t i = 0; i < ff; ++i ) bli_tscals( ch,ch,ch, *beta, y[i] ); \
 		} \
 \
 		/* If the vectors are empty or if alpha is zero, return early. */ \
-		if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
+		if ( bli_zero_dim1( m ) || bli_teq0s( ch, *alpha ) ) return; \
 \
 		/* Initialize r vector to 0. */ \
-		for ( dim_t i = 0; i < ff; ++i ) PASTEMAC(ch,set0s)( r[i] ); \
+		for ( dim_t i = 0; i < ff; ++i ) bli_tset0s( ch, r[i] ); \
 \
 		/* Scale x by alpha, storing to a temporary array ax. */ \
 		if ( bli_is_conj( conjx ) ) \
 		{ \
 			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < ff; ++i ) \
-				PASTEMAC(ch,scal2js)( *alpha, x[i], ax[i] ); \
+				bli_tscal2js( ch,ch,ch,ch, *alpha, x[i], ax[i] ); \
 		} \
 		else \
 		{ \
 			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < ff; ++i ) \
-				PASTEMAC(ch,scal2s)( *alpha, x[i], ax[i] ); \
+				bli_tscal2s( ch,ch,ch,ch, *alpha, x[i], ax[i] ); \
 		} \
 \
 		/* If a must be conjugated, we do so indirectly by first toggling the
@@ -120,8 +120,8 @@ void PASTEMAC(ch,opname,arch,suf) \
 				for ( dim_t p = 0; p < m; ++p ) \
 				for ( dim_t i = 0; i < ff; ++i ) \
 				{ \
-					PASTEMAC(ch,axpys)( a[p + i*lda], w[p], r[i] ); \
-					PASTEMAC(ch,axpys)( ax[i], a[p + i*lda], z[p] ); \
+					bli_taxpys( ch,ch,ch,ch, a[p + i*lda], w[p], r[i] ); \
+					bli_taxpys( ch,ch,ch,ch, ax[i], a[p + i*lda], z[p] ); \
 				} \
 			} \
 			else \
@@ -130,8 +130,8 @@ void PASTEMAC(ch,opname,arch,suf) \
 				for ( dim_t p = 0; p < m; ++p ) \
 				for ( dim_t i = 0; i < ff; ++i ) \
 				{ \
-					PASTEMAC(ch,axpys)( a[p + i*lda], w[p], r[i] ); \
-					PASTEMAC(ch,axpyjs)( ax[i], a[p + i*lda], z[p] ); \
+					bli_taxpys( ch,ch,ch,ch, a[p + i*lda], w[p], r[i] ); \
+					bli_taxpyjs( ch,ch,ch,ch, ax[i], a[p + i*lda], z[p] ); \
 				} \
 			} \
 		} \
@@ -143,8 +143,8 @@ void PASTEMAC(ch,opname,arch,suf) \
 				for ( dim_t p = 0; p < m; ++p ) \
 				for ( dim_t i = 0; i < ff; ++i ) \
 				{ \
-					PASTEMAC(ch,axpyjs)( a[p + i*lda], w[p], r[i] ); \
-					PASTEMAC(ch,axpys)( ax[i], a[p + i*lda], z[p] ); \
+					bli_taxpyjs( ch,ch,ch,ch, a[p + i*lda], w[p], r[i] ); \
+					bli_taxpys( ch,ch,ch,ch, ax[i], a[p + i*lda], z[p] ); \
 				} \
 			} \
 			else \
@@ -153,18 +153,18 @@ void PASTEMAC(ch,opname,arch,suf) \
 				for ( dim_t p = 0; p < m; ++p ) \
 				for ( dim_t i = 0; i < ff; ++i ) \
 				{ \
-					PASTEMAC(ch,axpyjs)( a[p + i*lda], w[p], r[i] ); \
-					PASTEMAC(ch,axpyjs)( ax[i], a[p + i*lda], z[p] ); \
+					bli_taxpyjs( ch,ch,ch,ch, a[p + i*lda], w[p], r[i] ); \
+					bli_taxpyjs( ch,ch,ch,ch, ax[i], a[p + i*lda], z[p] ); \
 				} \
 			} \
 		} \
 \
 		if ( bli_is_conj( conjat ) ) \
-			for ( dim_t i = 0; i < ff; ++i ) PASTEMAC(ch,conjs)( r[i] ); \
+			for ( dim_t i = 0; i < ff; ++i ) bli_tconjs( ch, r[i] ); \
 \
 		for ( dim_t i = 0; i < ff; ++i ) \
 		{ \
-			PASTEMAC(ch,axpys)( *alpha, r[i], y[i] ); \
+			bli_taxpys( ch,ch,ch,ch, *alpha, r[i], y[i] ); \
 		} \
 	} \
 	else \

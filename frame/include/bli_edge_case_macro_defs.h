@@ -56,7 +56,7 @@
 #define GEMM_UKR_SETUP_CT_POST(ch) \
 \
 	PASTEMAC(ch,ctype) _zero; \
-	PASTEMAC(ch,set0s)( _zero ); \
+	bli_tset0s( ch, _zero ); \
 	\
 	if ( _use_ct ) \
 	{ \
@@ -117,8 +117,9 @@
 	   microtile. */ \
 	if ( _use_ct ) \
 	{ \
-		PASTEMAC(ch,xpbys_mxn) \
+		bli_txpbys_mxn \
 		( \
+		  ch,ch,ch,ch, \
 		  m, n, \
 		  _ct, _rs_ct, _cs_ct, \
 		  _beta, \
@@ -204,8 +205,9 @@
 	   output microtile. Used by trsm. */ \
 	if ( _use_ct ) \
 	{ \
-		PASTEMAC(ch,copys_mxn) \
+		PASTEMAC(t,copys_mxn) \
 		( \
+		  ch,ch, \
 		  m, n, \
 		  _ct, _rs_ct, _cs_ct, \
 		  _c,  _rs_c,  _cs_c \

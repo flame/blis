@@ -121,7 +121,7 @@ bli_cger_ex
 bli_cgetijm
 bli_cgetijv
 bli_cgetsc
-bli_cgtesc
+bli_cgesc
 bli_cgtsc
 bli_check_error_code_helper
 bli_chemm
@@ -149,7 +149,7 @@ bli_cinvscalv
 bli_cinvscalv_ex
 bli_clock
 bli_clock_min_diff
-bli_cltesc
+bli_clesc
 bli_cltsc
 bli_cmachval
 bli_cmkherm
@@ -351,7 +351,7 @@ bli_dger_ex
 bli_dgetijm
 bli_dgetijv
 bli_dgetsc
-bli_dgtesc
+bli_dgesc
 bli_dgtsc
 bli_dhemm
 bli_dhemm_ex
@@ -377,7 +377,7 @@ bli_dinvscalm_ex
 bli_dinvscalv
 bli_dinvscalv_ex
 bli_divsc
-bli_dltesc
+bli_dlesc
 bli_dltsc
 bli_dmachval
 bli_dmkherm
@@ -532,7 +532,7 @@ bli_gks_l3_ukr_impl_type
 bli_gks_query_cntx
 bli_gks_query_ind_cntx
 bli_gks_query_nat_cntx
-bli_gtesc
+bli_gesc
 bli_gtsc
 bli_hemm
 bli_hemm_ex
@@ -630,7 +630,7 @@ bli_iprintm
 bli_iprintv
 bli_isetsc
 bli_l3_thrinfo_create
-bli_ltesc
+bli_lesc
 bli_ltsc
 bli_machval
 bli_malloc_user
@@ -824,7 +824,7 @@ bli_sger_ex
 bli_sgetijm
 bli_sgetijv
 bli_sgetsc
-bli_sgtesc
+bli_sgesc
 bli_sgtsc
 bli_shemm
 bli_shemm_ex
@@ -852,7 +852,7 @@ bli_sinvscalm_ex
 bli_sinvscalv
 bli_sinvscalv_ex
 bli_sleep
-bli_sltesc
+bli_slesc
 bli_sltsc
 bli_smachval
 bli_smkherm
@@ -1097,7 +1097,7 @@ bli_zger_ex
 bli_zgetijm
 bli_zgetijv
 bli_zgetsc
-bli_zgtesc
+bli_zgesc
 bli_zgtsc
 bli_zhemm
 bli_zhemm_ex
@@ -1123,7 +1123,7 @@ bli_zinvscalm_ex
 bli_zinvscalv
 bli_zinvscalv_ex
 bli_zipsc
-bli_zltesc
+bli_zlesc
 bli_zltsc
 bli_zmachval
 bli_zmkherm

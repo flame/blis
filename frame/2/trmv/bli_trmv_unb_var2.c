@@ -96,7 +96,7 @@ void PASTEMAC(ch,varname) \
 			x0       = x + (0  )*incx; \
 \
 			/* x0 = x0 + alpha * chi1 * a01; */ \
-			PASTEMAC(ch,scal2s)( *alpha, *chi1, alpha_chi1 ); \
+			bli_tscal2s( ch,ch,ch,ch, *alpha, *chi1, alpha_chi1 ); \
 			kfp_av \
 			( \
 			  conja, \
@@ -108,10 +108,10 @@ void PASTEMAC(ch,varname) \
 			); \
 \
 			/* chi1 = alpha * alpha11 * chi1; */ \
-			PASTEMAC(ch,copys)( *alpha, alpha_alpha11_conj ); \
+			bli_tcopys( ch,ch, *alpha, alpha_alpha11_conj ); \
 			if ( bli_is_nonunit_diag( diaga ) ) \
-				PASTEMAC(ch,scalcjs)( conja, *alpha11, alpha_alpha11_conj ); \
-			PASTEMAC(ch,scals)( alpha_alpha11_conj, *chi1 ); \
+				bli_tscalcjs( ch,ch,ch, conja, *alpha11, alpha_alpha11_conj ); \
+			bli_tscals( ch,ch,ch, alpha_alpha11_conj, *chi1 ); \
 		} \
 	} \
 	else /* if ( bli_is_lower( uploa_trans ) ) */ \
@@ -126,7 +126,7 @@ void PASTEMAC(ch,varname) \
 			x2       = x + (i+1)*incx; \
 \
 			/* x2 = x2 + alpha * chi1 * a21; */ \
-			PASTEMAC(ch,scal2s)( *alpha, *chi1, alpha_chi1 ); \
+			bli_tscal2s( ch,ch,ch,ch, *alpha, *chi1, alpha_chi1 ); \
 			kfp_av \
 			( \
 			  conja, \
@@ -138,10 +138,10 @@ void PASTEMAC(ch,varname) \
 			); \
 \
 			/* chi1 = alpha * alpha11 * chi1; */ \
-			PASTEMAC(ch,copys)( *alpha, alpha_alpha11_conj ); \
+			bli_tcopys( ch,ch, *alpha, alpha_alpha11_conj ); \
 			if ( bli_is_nonunit_diag( diaga ) ) \
-				PASTEMAC(ch,scalcjs)( conja, *alpha11, alpha_alpha11_conj ); \
-			PASTEMAC(ch,scals)( alpha_alpha11_conj, *chi1 ); \
+				bli_tscalcjs( ch,ch,ch, conja, *alpha11, alpha_alpha11_conj ); \
+			bli_tscals( ch,ch,ch, alpha_alpha11_conj, *chi1 ); \
 		} \
 	} \
 }

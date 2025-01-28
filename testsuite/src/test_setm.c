@@ -181,7 +181,7 @@ void libblis_test_setm_experiment
 	// Randomize x.
 	libblis_test_mobj_randomize( params, FALSE, &x );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		time = bli_clock();
@@ -295,7 +295,7 @@ void libblis_test_setm_check
 			{
 				chi1 = buf_x_cast + (i  )*rs_x + (j  )*cs_x;
 
-				if ( !bli_ceq( *chi1, *beta_cast ) ) { *resid = 1.0; return; }
+				if ( !bli_teqs( c,c,c, *chi1, *beta_cast ) ) { *resid = 1.0; return; }
 			}
 		}
 	}
@@ -311,7 +311,7 @@ void libblis_test_setm_check
 			{
 				chi1 = buf_x_cast + (i  )*rs_x + (j  )*cs_x;
 
-				if ( !bli_zeq( *chi1, *beta_cast ) ) { *resid = 1.0; return; }
+				if ( !bli_teqs( z,z,z, *chi1, *beta_cast ) ) { *resid = 1.0; return; }
 			}
 		}
 	}

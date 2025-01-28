@@ -151,10 +151,33 @@ void PASTEMAC(opname,_check) \
 }
 
 GENFRONT( eqsc )
+
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       const obj_t* chi, \
+       const obj_t* psi, \
+       const bool*  is  \
+     ) \
+{ \
+	bli_l0_xxbsc_check( chi, psi, is ); \
+\
+	err_t e_val; \
+\
+	e_val = bli_check_real_datatype( bli_obj_dt( chi ) ); \
+	bli_check_error_code( e_val ); \
+\
+	e_val = bli_check_real_datatype( bli_obj_dt( psi ) ); \
+	bli_check_error_code( e_val ); \
+}
+
 GENFRONT( ltsc )
-GENFRONT( ltesc )
+GENFRONT( lesc )
 GENFRONT( gtsc )
-GENFRONT( gtesc )
+GENFRONT( gesc )
 
 
 #undef  GENFRONT

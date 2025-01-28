@@ -67,7 +67,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 			conj_t conjxt_use = conjxt; \
 			ctype  dotxy; \
 \
-			PASTEMAC(ch,set0s)( dotxy ); \
+			bli_tset0s( ch, dotxy ); \
 \
 			if ( bli_is_conj( conjy ) ) \
 				bli_toggle_conj( &conjxt_use ); \
@@ -77,8 +77,8 @@ void PASTEMAC(ch,opname,arch,suf) \
 				PRAGMA_SIMD \
 				for ( dim_t i = 0; i < m; ++i ) \
 				{ \
-					PASTEMAC(ch,dots)( x[i], y[i], dotxy ); \
-					PASTEMAC(ch,axpys)( *alpha, x[i], z[i] ); \
+					bli_tdots( ch,ch,ch,ch, x[i], y[i], dotxy ); \
+					bli_taxpys( ch,ch,ch,ch, *alpha, x[i], z[i] ); \
 				} \
 			} \
 			else /* bli_is_conj( conjxt_use ) ) */ \
@@ -86,22 +86,22 @@ void PASTEMAC(ch,opname,arch,suf) \
 				PRAGMA_SIMD \
 				for ( dim_t i = 0; i < m; ++i ) \
 				{ \
-					PASTEMAC(ch,dotjs)( x[i], y[i], dotxy ); \
-					PASTEMAC(ch,axpys)( *alpha, x[i], z[i] ); \
+					bli_tdotjs( ch,ch,ch,ch, x[i], y[i], dotxy ); \
+					bli_taxpys( ch,ch,ch,ch, *alpha, x[i], z[i] ); \
 				} \
 			} \
 \
 			if ( bli_is_conj( conjy ) ) \
-				PASTEMAC(ch,conjs)( dotxy ); \
+				bli_tconjs( ch, dotxy ); \
 \
-			PASTEMAC(ch,copys)( dotxy, *rho ); \
+			bli_tcopys( ch,ch, dotxy, *rho ); \
 		} \
 		else /* bli_is_conj( conjx ) ) */ \
 		{ \
 			conj_t conjxt_use = conjxt; \
 			ctype  dotxy; \
 \
-			PASTEMAC(ch,set0s)( dotxy ); \
+			bli_tset0s( ch, dotxy ); \
 \
 			if ( bli_is_conj( conjy ) ) \
 				bli_toggle_conj( &conjxt_use ); \
@@ -111,8 +111,8 @@ void PASTEMAC(ch,opname,arch,suf) \
 				PRAGMA_SIMD \
 				for ( dim_t i = 0; i < m; ++i ) \
 				{ \
-					PASTEMAC(ch,dots)( x[i], y[i], dotxy ); \
-					PASTEMAC(ch,axpyjs)( *alpha, x[i], z[i] ); \
+					bli_tdots( ch,ch,ch,ch, x[i], y[i], dotxy ); \
+					bli_taxpyjs( ch,ch,ch,ch, *alpha, x[i], z[i] ); \
 				} \
 			} \
 			else /* bli_is_conj( conjxt_use ) ) */ \
@@ -120,15 +120,15 @@ void PASTEMAC(ch,opname,arch,suf) \
 				PRAGMA_SIMD \
 				for ( dim_t i = 0; i < m; ++i ) \
 				{ \
-					PASTEMAC(ch,dotjs)( x[i], y[i], dotxy ); \
-					PASTEMAC(ch,axpyjs)( *alpha, x[i], z[i] ); \
+					bli_tdotjs( ch,ch,ch,ch, x[i], y[i], dotxy ); \
+					bli_taxpyjs( ch,ch,ch,ch, *alpha, x[i], z[i] ); \
 				} \
 			} \
 \
 			if ( bli_is_conj( conjy ) ) \
-				PASTEMAC(ch,conjs)( dotxy ); \
+				bli_tconjs( ch, dotxy ); \
 \
-			PASTEMAC(ch,copys)( dotxy, *rho ); \
+			bli_tcopys( ch,ch, dotxy, *rho ); \
 		} \
 	} \
 	else \

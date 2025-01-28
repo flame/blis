@@ -123,14 +123,14 @@ void PASTEMAC(chx,chy,opname) \
 		{ \
 			for ( i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(chx,chy,copyjs)( x1[i], y1[i] ); \
+				bli_tcopyjs( chx,chy, x1[i], y1[i] ); \
 			} \
 		} \
 		else \
 		{ \
 			for ( i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(chx,chy,copyjs)( *x1, *y1 ); \
+				bli_tcopyjs( chx,chy, *x1, *y1 ); \
 \
 				x1 += incx; \
 				y1 += incy; \
@@ -143,14 +143,14 @@ void PASTEMAC(chx,chy,opname) \
 		{ \
 			for ( i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(chx,chy,copys)( x1[i], y1[i] ); \
+				bli_tcopys( chx,chy, x1[i], y1[i] ); \
 			} \
 		} \
 		else \
 		{ \
 			for ( i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(chx,chy,copys)( *x1, *y1 ); \
+				bli_tcopys( chx,chy, *x1, *y1 ); \
 \
 				x1 += incx; \
 				y1 += incy; \

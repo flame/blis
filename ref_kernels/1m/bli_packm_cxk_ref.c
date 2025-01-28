@@ -34,8 +34,17 @@
 
 #include "blis.h"
 
+// Apparently gcc 11 and older have a bug where the _Pragma
+// erroneously moves to the beginning of the entire macro
+// body (e.g. just before "do")
+#ifdef __GNUC__
+#if __GNUC__ < 12
+#undef PRAGMA_SIMD
+#define PRAGMA_SIMD
+#endif
+#endif
 
-#define PACKM_BODY( ctypea, ctypep, cha, chp, pragma, cdim, dfac, inca, op ) \
+#define PACKM_BODY_r( ctypea, ctypep, cha, chp, pragma, cdim, dfac, inca, op ) \
 \
 do \
 { \
@@ -44,17 +53,52 @@ do \
 		pragma \
 		for ( dim_t mn = 0; mn < cdim; mn++ ) \
 		{ \
-			ctypep alpha_cast, kappa_alpha; \
-			PASTEMAC(cha,chp,copys)( *(alpha1 + mn*inca), alpha_cast ); \
-			PASTEMAC(chp,op)( kappa_cast, alpha_cast, kappa_alpha ); \
+			ctypep kappa_alpha; \
+			PASTEMAC(t,op)( chp,cha,chp,chp, kappa_cast, *(alpha1 + mn*inca), kappa_alpha ); \
 			for ( dim_t d = 0; d < dfac; d++ ) \
-				PASTEMAC(chp,copys)( kappa_alpha, *(pi1 + mn*dfac + d) ); \
+				bli_tcopys( chp,chp, kappa_alpha, *(pi1 + mn*dfac + d) ); \
 		} \
 \
 		alpha1 += lda; \
 		pi1    += ldp; \
 	} \
 } while(0)
+
+
+#define PACKM_BODY_c_( ctypea, ctypep, ctypep_r, cha, chp, chp_r, pragma, cdim, dfac, inca, op ) \
+\
+do \
+{ \
+	for ( dim_t k = n; k != 0; --k ) \
+	{ \
+		pragma \
+		for ( dim_t mn = 0; mn < cdim; mn++ ) \
+		{ \
+			ctypep kappa_alpha; \
+			PASTEMAC(t,op)( chp,cha,chp,chp, kappa_cast, *(alpha1 + mn*inca), kappa_alpha ); \
+			ctypep_r kar, kai; \
+			bli_tgets( chp,chp, kappa_alpha, kar, kai ); \
+			ctypep_r* pi1r = (ctypep_r*)pi1; \
+			ctypep_r* pi1i = (ctypep_r*)pi1 + dfac; \
+			for ( dim_t d = 0; d < dfac; d++ ) \
+			{ \
+				bli_tcopys( chp_r,chp_r, kar, *(pi1r + mn*dfac*2 + d) ); \
+				bli_tcopys( chp_r,chp_r, kai, *(pi1i + mn*dfac*2 + d) ); \
+			} \
+		} \
+\
+		alpha1 += lda; \
+		pi1    += ldp; \
+	} \
+} while(0)
+
+
+#define PACKM_BODY_c( ctypea, ctypep, cha, chp, pragma, cdim, dfac, inca, op ) \
+PACKM_BODY_c_( ctypea, ctypep, PASTEMAC(chp,ctyper), cha, chp, PASTEMAC(chp,prec), pragma, cdim, dfac, inca, op )
+
+
+#define PACKM_BODY( ctypea, ctypep, cha, chp, pragma, cdim, dfac, inca, op ) \
+PASTECH(PACKM_BODY_,PASTEMAC(chp,dom))( ctypea, ctypep, cha, chp, pragma, cdim, dfac, inca, op )
 
 
 #undef  GENTFUNC2
@@ -117,11 +161,12 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
 		else                        PACKM_BODY( ctypea, ctypep, cha, chp, , cdim, cdim_bcast, inca, scal2s ); \
 	} \
 \
-	PASTEMAC(chp,set0s_edge) \
+	bli_tset0s_edge \
 	( \
+	  chp, \
 	  cdim*cdim_bcast, cdim_max*cdim_bcast, \
 	  n, n_max, \
-	  p, ldp  \
+	  ( ctypep* )p, ldp  \
 	); \
 }
 

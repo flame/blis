@@ -532,7 +532,7 @@ void PASTEMAC(chx,chy,opname) \
 	/*conjx = bli_extract_conj( transx );*/ \
 \
 	/* Handle dense and upper/lower storage cases separately. */ \
-	if ( PASTEMAC(chy,eq1)( *beta ) ) \
+	if ( bli_teq1s( chy, *beta ) ) \
 	{ \
 		if ( incx == 1 && incy == 1 ) \
 		{ \
@@ -545,7 +545,7 @@ void PASTEMAC(chx,chy,opname) \
 \
 				for ( dim_t i = 0; i < n_elem; ++i ) \
 				{ \
-					PASTEMAC(chx,chy,adds)( x1[i], y1[i] ); \
+					bli_tadds( chx,chy,chy, x1[i], y1[i] ); \
 				} \
 			} \
 		} \
@@ -563,7 +563,7 @@ void PASTEMAC(chx,chy,opname) \
 \
 				for ( dim_t i = 0; i < n_elem; ++i ) \
 				{ \
-					PASTEMAC(chx,chy,adds)( *chi1, *psi1 ); \
+					bli_tadds( chx,chy,chy, *chi1, *psi1 ); \
 \
 					chi1 += incx; \
 					psi1 += incy; \
@@ -571,7 +571,7 @@ void PASTEMAC(chx,chy,opname) \
 			} \
 		} \
 	} \
-	else /* ( !PASTEMAC(chy,eq1)( *beta ) ) */ \
+	else /* ( !bli_teq1s( chy, *beta ) ) */ \
 	{ \
 		if ( incx == 1 && incy == 1 ) \
 		{ \
@@ -584,7 +584,7 @@ void PASTEMAC(chx,chy,opname) \
 \
 				for ( dim_t i = 0; i < n_elem; ++i ) \
 				{ \
-					PASTEMAC(chx,chy,chy,xpbys)( x1[i], *beta, y1[i] ); \
+					bli_txpbys( chx,chy,chy,chy, x1[i], *beta, y1[i] ); \
 				} \
 			} \
 		} \
@@ -602,7 +602,7 @@ void PASTEMAC(chx,chy,opname) \
 \
 				for ( dim_t i = 0; i < n_elem; ++i ) \
 				{ \
-					PASTEMAC(chx,chy,chy,xpbys)( *chi1, *beta, *psi1 ); \
+					bli_txpbys( chx,chy,chy,chy, *chi1, *beta, *psi1 ); \
 \
 					chi1 += incx; \
 					psi1 += incy; \

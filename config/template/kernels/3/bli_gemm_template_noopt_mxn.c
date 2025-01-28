@@ -98,7 +98,7 @@ void bli_zgemm_template_noopt
 	/* Initialize the accumulator elements in ab to zero. */
 	for ( i = 0; i < mr * nr; ++i )
 	{
-		bli_zset0s( *(ab + i) );
+		bli_tset0s( z, *(ab + i) );
 	}
 
 	/* Perform a series of k rank-1 updates into ab. */
@@ -116,7 +116,7 @@ void bli_zgemm_template_noopt
 			{
 				ai = *(a1 + i);
 
-				bli_zdots( ai, bj, *abij );
+				bli_tdots( z,z,z,z, ai, bj, *abij );
 
 				abij += rs_ab;
 			}
@@ -129,16 +129,17 @@ void bli_zgemm_template_noopt
 	/* Scale each element of ab by alpha. */
 	for ( i = 0; i < mr * nr; ++i )
 	{
-		bli_zscals( *alpha, *(ab + i) );
+		bli_tscals( z,z,z, *alpha, *(ab + i) );
 	}
 
 	/* If beta is zero, overwrite c11 with the scaled result in ab.
 	   Otherwise, scale c11 by beta and then add the scaled result in
 	   ab. */
-	if ( bli_zeq0( *beta ) )
+	if ( bli_teq0s( z, *beta ) )
 	{
 		/* c11 := ab */
-		bli_zcopys_mxn( m,
+		bli_tcopys_mxn( z,z,
+		                m,
 		                n,
 		                ab,  rs_ab, cs_ab,
 		                c11, rs_c,  cs_c );
@@ -146,7 +147,8 @@ void bli_zgemm_template_noopt
 	else
 	{
 		/* c11 := beta * c11 + ab */
-		bli_zxpbys_mxn( m,
+		bli_txpbys_mxn( z,z,z,z,
+		                m,
 		                n,
 		                ab,  rs_ab, cs_ab,
 		                beta,

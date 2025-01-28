@@ -139,7 +139,7 @@ void bls_packm_var1
 			//  			ctype* cli = c_cast + (l  )*ldc + (i  )*incc;
 			//  			ctype* pli = p_cast + (l  )*ldp + (i  )*1;
 			//
-			//  			PASTEMAC(ch,axpyjs)( kappa_cast, *cli, *pli );
+			//  			bli_taxpyjs( ch,ch,ch,ch, kappa_cast, *cli, *pli );
 			//  		}
 			//  	}
 			//  }
@@ -152,7 +152,7 @@ void bls_packm_var1
 			//  			ctype* cli = c_cast + (l  )*ldc + (i  )*incc;
 			//  			ctype* pli = p_cast + (l  )*ldp + (i  )*1;
 			//
-			//  			PASTEMAC(ch,axpys)( kappa_cast, *cli, *pli );
+			//  			bli_taxpys( ch,ch,ch,ch, kappa_cast, *cli, *pli );
 			//  		}
 			//  	}
 			//  }

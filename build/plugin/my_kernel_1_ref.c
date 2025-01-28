@@ -48,7 +48,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 \
 	for ( dim_t i = 0; i < n; ++i ) \
 	{ \
-		PASTEMAC(ch,copys)( *a, x[ i ] ); \
+		bli_tcopys( ch,ch, *a, x[ i ] ); \
 	} \
 }
 

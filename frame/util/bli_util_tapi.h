@@ -202,8 +202,8 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
 INSERT_GENTPROT_BASIC( eqm )
 
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
+#undef  GENTPROTRO
+#define GENTPROTRO( ctype, ch, opname ) \
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
@@ -212,10 +212,10 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
              bool*  is  \
      );
 
-INSERT_GENTPROT_BASIC( ltsc )
-INSERT_GENTPROT_BASIC( ltesc )
-INSERT_GENTPROT_BASIC( gtsc )
-INSERT_GENTPROT_BASIC( gtesc )
+INSERT_GENTPROTRO_BASIC( ltsc )
+INSERT_GENTPROTRO_BASIC( lesc )
+INSERT_GENTPROTRO_BASIC( gtsc )
+INSERT_GENTPROTRO_BASIC( gesc )
 
 
 #undef  GENTPROT

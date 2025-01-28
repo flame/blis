@@ -74,7 +74,7 @@ void PASTEMAC(ch,opname,EX_SUF) \
 \
 	/* If x has zero elements, or if alpha is zero, scale y by beta and
 	   return early. */ \
-	if ( bli_zero_dim1( n_x ) || PASTEMAC(ch,eq0)( *alpha ) ) \
+	if ( bli_zero_dim1( n_x ) || bli_teq0s( ch, *alpha ) ) \
 	{ \
 		PASTEMAC(ch,scalv,BLIS_TAPI_EX_SUF) \
 		( \
@@ -144,7 +144,7 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	BLIS_TAPI_EX_DECLS \
 \
 	/* If x or y has zero elements, or if alpha is zero, return early. */ \
-	if ( bli_zero_dim2( m, n ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
+	if ( bli_zero_dim2( m, n ) || bli_teq0s( ch, *alpha ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
@@ -201,7 +201,7 @@ void PASTEMAC(ch,opname,EX_SUF) \
 \
 	/* If x has zero elements, or if alpha is zero, scale y by beta and
 	   return early. */ \
-	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) \
+	if ( bli_zero_dim1( m ) || bli_teq0s( ch, *alpha ) ) \
 	{ \
 		PASTEMAC(ch,scalv,BLIS_TAPI_EX_SUF) \
 		( \
@@ -273,12 +273,12 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	ctype alpha_local; \
 \
 	/* If x has zero elements, or if alpha is zero, return early. */ \
-	if ( bli_zero_dim1( m ) || PASTEMAC(chr,eq0)( *alpha ) ) return; \
+	if ( bli_zero_dim1( m ) || bli_teq0s( chr, *alpha ) ) return; \
 \
 	/* Make a local copy of alpha, cast into the complex domain. This
 	   allows us to use the same underlying her variants to implement
 	   both her and syr operations. */ \
-	PASTEMAC(chr,ch,copys)( *alpha, alpha_local ); \
+	bli_tcopys( chr,ch, *alpha, alpha_local ); \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
@@ -335,7 +335,7 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	BLIS_TAPI_EX_DECLS \
 \
 	/* If x has zero elements, or if alpha is zero, return early. */ \
-	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
+	if ( bli_zero_dim1( m ) || bli_teq0s( ch, *alpha ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
@@ -394,7 +394,7 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	BLIS_TAPI_EX_DECLS \
 \
 	/* If x has zero elements, or if alpha is zero, return early. */ \
-	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
+	if ( bli_zero_dim1( m ) || bli_teq0s( ch, *alpha ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
@@ -461,7 +461,7 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* If alpha is zero, set x to zero and return early. */ \
-	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
+	if ( bli_teq0s( ch, *alpha ) ) \
 	{ \
 		PASTEMAC(ch,setv,BLIS_TAPI_EX_SUF) \
 		( \

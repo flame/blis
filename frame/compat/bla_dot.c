@@ -207,8 +207,8 @@ double PASTEF77(d,sdot)
 		float* chi1 = x0 + (i  )*incx0;
 		float* psi1 = y0 + (i  )*incy0;
 
-		bli_ddots( (( double )(*chi1)),
-		           (( double )(*psi1)), rho );
+		bli_tdots( d,d,d,d, (( double )(*chi1)),
+		                    (( double )(*psi1)), rho );
 	}
 
 	/* Finalization of BLIS is not required, because initialization was

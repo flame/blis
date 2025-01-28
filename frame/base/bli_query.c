@@ -77,7 +77,7 @@ bool bli_obj_equals( const obj_t* a, const obj_t* b )
 		else if ( dt == BLIS_DOUBLE )   r_val = bli_deqa( buf_a, buf_b );
 		else if ( dt == BLIS_SCOMPLEX ) r_val = bli_ceqa( buf_a, buf_b );
 		else if ( dt == BLIS_DCOMPLEX ) r_val = bli_zeqa( buf_a, buf_b );
-		else if ( dt == BLIS_INT )      r_val = bli_ieqa( buf_a, buf_b );
+		else if ( dt == BLIS_INT )      r_val = bli_ieq( buf_a, buf_b );
 	}
 
 	return r_val;
@@ -181,7 +181,7 @@ bool bli_obj_imag_is_zero( const obj_t* a )
 		bli_getsc( a, &a_r, &a_i );
 
 		// Compare the imaginary part of a to double-precision zero.
-		if ( !bli_deq0( a_i ) ) r_val = FALSE;
+		if ( !bli_teq0s( d, a_i ) ) r_val = FALSE;
 	}
 
 	return r_val;

@@ -325,7 +325,7 @@ void PASTEMAC(ch,varname)( \
 	ctype_r  sum; \
 	dim_t    i, j; \
 \
-	PASTEMAC(chr,set0s)( sum ); \
+	bli_tset0s( chr, sum ); \
 \
 	for ( j = 0; j < n; j++ ) \
 	{ \
@@ -333,12 +333,12 @@ void PASTEMAC(ch,varname)( \
 		{ \
 			ctype* chi1 = x_cast + (i  )*rs_x + (j  )*cs_x; \
 \
-			PASTEMAC(ch,chr,abval2s)( *chi1, abs_chi1 ); \
-			PASTEMAC(chr,chr,adds)( abs_chi1, sum ); \
+			bli_tabval2s( ch,chr,chr, *chi1, abs_chi1 ); \
+			bli_tadds( chr,chr,chr, abs_chi1, sum ); \
 		} \
 	} \
 \
-	PASTEMAC(chr,chr,copys)( sum, *sum_x_cast ); \
+	bli_tcopys( chr,chr, sum, *sum_x_cast ); \
 }
 
 INSERT_GENTFUNCR_BASIC( absumm )

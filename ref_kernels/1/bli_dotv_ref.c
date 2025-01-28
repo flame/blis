@@ -56,11 +56,11 @@ void PASTEMAC(ch,opname,arch,suf) \
 \
 	if ( bli_zero_dim1( n ) ) \
 	{ \
-		PASTEMAC(ch,set0s)( *rho ); \
+		bli_tset0s( ch, *rho ); \
 		return; \
 	} \
 \
-	PASTEMAC(ch,set0s)( dotxy ); \
+	bli_tset0s( ch, dotxy ); \
 \
 	conj_t conjx_use = conjx; \
 \
@@ -77,14 +77,14 @@ void PASTEMAC(ch,opname,arch,suf) \
 			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,dotjs)( x[i], y[i], dotxy ); \
+				bli_tdotjs( ch,ch,ch,ch, x[i], y[i], dotxy ); \
 			} \
 		} \
 		else \
 		{ \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,dotjs)( *x, *y, dotxy ); \
+				bli_tdotjs( ch,ch,ch,ch, *x, *y, dotxy ); \
 \
 				x += incx; \
 				y += incy; \
@@ -98,14 +98,14 @@ void PASTEMAC(ch,opname,arch,suf) \
 			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,dots)( x[i], y[i], dotxy ); \
+				bli_tdots( ch,ch,ch,ch, x[i], y[i], dotxy ); \
 			} \
 		} \
 		else \
 		{ \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,dots)( *x, *y, dotxy ); \
+				bli_tdots( ch,ch,ch,ch, *x, *y, dotxy ); \
 \
 				x += incx; \
 				y += incy; \
@@ -114,9 +114,9 @@ void PASTEMAC(ch,opname,arch,suf) \
 	} \
 \
 	if ( bli_is_conj( conjy ) ) \
-		PASTEMAC(ch,conjs)( dotxy ); \
+		bli_tconjs( ch, dotxy ); \
 \
-	PASTEMAC(ch,copys)( dotxy, *rho ); \
+	bli_tcopys( ch,ch, dotxy, *rho ); \
 }
 
 INSERT_GENTFUNC_BASIC( dotv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )

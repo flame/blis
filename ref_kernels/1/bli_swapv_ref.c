@@ -55,14 +55,14 @@ void PASTEMAC(ch,opname,arch,suf) \
 		PRAGMA_SIMD \
 		for ( dim_t i = 0; i < n; ++i ) \
 		{ \
-			PASTEMAC(ch,swaps)( x[i], y[i] ); \
+			bli_tswaps( ch,ch, x[i], y[i] ); \
 		} \
 	} \
 	else \
 	{ \
 		for ( dim_t i = 0; i < n; ++i ) \
 		{ \
-			PASTEMAC(ch,swaps)( *x, *y ); \
+			bli_tswaps( ch,ch, *x, *y ); \
 \
 			x += incx; \
 			y += incy; \

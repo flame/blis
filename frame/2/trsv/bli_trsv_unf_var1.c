@@ -143,24 +143,24 @@ void PASTEMAC(ch,varname) \
 				x21      = x1  + (l+1)*incx; \
 \
 				/* chi11 = chi11 - a12t * x21; */ \
-				PASTEMAC(ch,set0s)( rho1 ); \
+				bli_tset0s( ch, rho1 ); \
 				if ( bli_is_conj( conja ) ) \
 				{ \
 					for ( j = 0; j < f_behind; ++j ) \
-						PASTEMAC(ch,dotjs)( *(a12t + j*cs_at), *(x21 + j*incx), rho1 ); \
+						bli_tdotjs( ch,ch,ch,ch, *(a12t + j*cs_at), *(x21 + j*incx), rho1 ); \
 				} \
 				else \
 				{ \
 					for ( j = 0; j < f_behind; ++j ) \
-						PASTEMAC(ch,dots)( *(a12t + j*cs_at), *(x21 + j*incx), rho1 ); \
+						bli_tdots( ch,ch,ch,ch, *(a12t + j*cs_at), *(x21 + j*incx), rho1 ); \
 				} \
-				PASTEMAC(ch,subs)( rho1, *chi11 ); \
+				bli_tsubs( ch,ch,ch, rho1, *chi11 ); \
 \
 				/* chi11 = chi11 / alpha11; */ \
 				if ( bli_is_nonunit_diag( diaga ) ) \
 				{ \
-					PASTEMAC(ch,copycjs)( conja, *alpha11, alpha11_conj ); \
-					PASTEMAC(ch,invscals)( alpha11_conj, *chi11 ); \
+					bli_tcopycjs( ch,ch, conja, *alpha11, alpha11_conj ); \
+					bli_tinvscals( ch,ch,ch, alpha11_conj, *chi11 ); \
 				} \
 			} \
 		} \
@@ -203,24 +203,24 @@ void PASTEMAC(ch,varname) \
 				x01      = x1  + (0  )*incx; \
 \
 				/* chi11 = chi11 - a10t * x01; */ \
-				PASTEMAC(ch,set0s)( rho1 ); \
+				bli_tset0s( ch, rho1 ); \
 				if ( bli_is_conj( conja ) ) \
 				{ \
 					for ( j = 0; j < f_behind; ++j ) \
-						PASTEMAC(ch,dotjs)( *(a10t + j*cs_at), *(x01 + j*incx), rho1 ); \
+						bli_tdotjs( ch,ch,ch,ch, *(a10t + j*cs_at), *(x01 + j*incx), rho1 ); \
 				} \
 				else \
 				{ \
 					for ( j = 0; j < f_behind; ++j ) \
-						PASTEMAC(ch,dots)( *(a10t + j*cs_at), *(x01 + j*incx), rho1 ); \
+						bli_tdots( ch,ch,ch,ch, *(a10t + j*cs_at), *(x01 + j*incx), rho1 ); \
 				} \
-				PASTEMAC(ch,subs)( rho1, *chi11 ); \
+				bli_tsubs( ch,ch,ch, rho1, *chi11 ); \
 \
 				/* chi11 = chi11 / alpha11; */ \
 				if ( bli_is_nonunit_diag( diaga ) ) \
 				{ \
-					PASTEMAC(ch,copycjs)( conja, *alpha11, alpha11_conj ); \
-					PASTEMAC(ch,invscals)( alpha11_conj, *chi11 ); \
+					bli_tcopycjs( ch,ch, conja, *alpha11, alpha11_conj ); \
+					bli_tinvscals( ch,ch,ch, alpha11_conj, *chi11 ); \
 				} \
 			} \
 		} \

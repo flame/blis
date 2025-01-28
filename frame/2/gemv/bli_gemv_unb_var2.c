@@ -70,7 +70,7 @@ void PASTEMAC(ch,varname) \
 	conja = bli_extract_conj( transa ); \
 \
 	/* If beta is zero, use setv. Otherwise, scale by beta. */ \
-	if ( PASTEMAC(ch,eq0)( *beta ) ) \
+	if ( bli_teq0s( ch, *beta ) ) \
 	{ \
 		/* y = 0; */ \
 		PASTEMAC(ch,setv,BLIS_TAPI_EX_SUF) \
@@ -107,8 +107,8 @@ void PASTEMAC(ch,varname) \
 		y1   = y + (0  )*incy; \
 \
 		/* y = y + alpha * chi1 * a1; */ \
-		PASTEMAC(ch,copycjs)( conjx, *chi1, alpha_chi1 ); \
-		PASTEMAC(ch,scals)( *alpha, alpha_chi1 ); \
+		bli_tcopycjs( ch,ch, conjx, *chi1, alpha_chi1 ); \
+		bli_tscals( ch,ch,ch, *alpha, alpha_chi1 ); \
 \
 		kfp_av \
 		( \

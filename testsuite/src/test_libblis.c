@@ -1345,10 +1345,10 @@ char* libblis_test_get_string_for_result( double    resid,
 	char* r_val;
 
 	// Before checking against the thresholds, make sure the residual is
-	// neither NaN nor Inf. (Note that bli_isnan() and bli_isinf() are
+	// neither NaN nor Inf. (Note that bli_disnan() and bli_disinf() are
 	// both simply wrappers to the isnan() and isinf() macros defined
 	// defined in math.h.)
-	if ( bli_isnan( resid ) || bli_isinf( resid ) )
+	if ( bli_disnan( resid ) || bli_disinf( resid ) )
 	{
 		r_val = libblis_test_fail_string;
 	}

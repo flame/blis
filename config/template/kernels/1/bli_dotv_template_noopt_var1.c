@@ -127,7 +127,7 @@ void bli_zdotv_template_noopt
 	// If the vector lengths are zero, set rho to zero and return.
 	if ( bli_zero_dim1( n ) )
 	{
-		bli_zset0s( *rho );
+		bli_tset0s( z, *rho );
 		return;
 	}
 
@@ -185,7 +185,7 @@ void bli_zdotv_template_noopt
 
 
 	// Initialize accumulator to zero.
-	bli_zset0s( dotxy );
+	bli_tset0s( z, dotxy );
 
 
 	conjx_use = conjx;
@@ -204,7 +204,7 @@ void bli_zdotv_template_noopt
 		// Compute front edge cases if x and y were unaligned.
 		for ( i = 0; i < n_pre; ++i )
 		{
-			bli_zdots( *xp, *yp, dotxy );
+			bli_tdots( z,z,z,z, *xp, *yp, dotxy );
 
 			xp += 1; yp += 1;
 		}
@@ -213,7 +213,7 @@ void bli_zdotv_template_noopt
 		// yp are guaranteed to be aligned to BLIS_SIMD_ALIGN_SIZE.
 		for ( i = 0; i < n_iter; ++i )
 		{
-			bli_zdots( *xp, *yp, dotxy );
+			bli_tdots( z,z,z,z, *xp, *yp, dotxy );
 
 			xp += n_elem_per_iter;
 			yp += n_elem_per_iter;
@@ -222,7 +222,7 @@ void bli_zdotv_template_noopt
 		// Compute tail edge cases, if applicable.
 		for ( i = 0; i < n_left; ++i )
 		{
-			bli_zdots( *xp, *yp, dotxy );
+			bli_tdots( z,z,z,z, *xp, *yp, dotxy );
 
 			xp += 1; yp += 1;
 		}
@@ -232,7 +232,7 @@ void bli_zdotv_template_noopt
 		// Compute front edge cases if x and y were unaligned.
 		for ( i = 0; i < n_pre; ++i )
 		{
-			bli_zdotjs( *xp, *yp, dotxy );
+			bli_tdotjs( z,z,z,z, *xp, *yp, dotxy );
 
 			xp += 1; yp += 1;
 		}
@@ -241,7 +241,7 @@ void bli_zdotv_template_noopt
 		// yp are guaranteed to be aligned to BLIS_SIMD_ALIGN_SIZE.
 		for ( i = 0; i < n_iter; ++i )
 		{
-			bli_zdotjs( *xp, *yp, dotxy );
+			bli_tdotjs( z,z,z,z, *xp, *yp, dotxy );
 
 			xp += n_elem_per_iter;
 			yp += n_elem_per_iter;
@@ -250,7 +250,7 @@ void bli_zdotv_template_noopt
 		// Compute tail edge cases, if applicable.
 		for ( i = 0; i < n_left; ++i )
 		{
-			bli_zdotjs( *xp, *yp, dotxy );
+			bli_tdotjs( z,z,z,z, *xp, *yp, dotxy );
 
 			xp += 1; yp += 1;
 		}
@@ -259,8 +259,8 @@ void bli_zdotv_template_noopt
 	// If conjugation on y was requested, we induce it by conjugating
 	// the contents of dotxy.
 	if ( bli_is_conj( conjy ) )
-		bli_zconjs( dotxy );
+		bli_tconjs( z, dotxy );
 
-	bli_zcopys( dotxy, *rho );
+	bli_tcopys( z,z, dotxy, *rho );
 }
 

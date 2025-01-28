@@ -113,7 +113,7 @@ void PASTEMAC(chv,opname) \
 \
 	/* Copy the requested parameter value to the output buffer, which
 	   may involve a demotion from the complex to real domain. */ \
-	PASTEMAC(chvr,chv,copys)( pvals[ val_i ], *v_cast ); \
+	bli_tcopys( chvr,chv, pvals[ val_i ], *v_cast ); \
 }
 
 INSERT_GENTFUNCR_BASIC( machval, lamch )

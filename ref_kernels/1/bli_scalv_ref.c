@@ -52,10 +52,10 @@ void PASTEMAC(ch,opname,arch,suf) \
 	      ctype* x     = x0; \
 \
 	/* If alpha is one, return. */ \
-	if ( PASTEMAC(ch,eq1)( *alpha ) ) return; \
+	if ( bli_teq1s( ch, *alpha ) ) return; \
 \
 	/* If alpha is zero, use setv. */ \
-	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
+	if ( bli_teq0s( ch, *alpha ) ) \
 	{ \
 		const ctype* zero = PASTEMAC(ch,0); \
 \
@@ -76,21 +76,21 @@ void PASTEMAC(ch,opname,arch,suf) \
 \
 	ctype alpha_conj; \
 \
-	PASTEMAC(ch,copycjs)( conjalpha, *alpha, alpha_conj ); \
+	bli_tcopycjs( ch,ch, conjalpha, *alpha, alpha_conj ); \
 \
 	if ( incx == 1 ) \
 	{ \
 		PRAGMA_SIMD \
 		for ( dim_t i = 0; i < n; ++i ) \
 		{ \
-			PASTEMAC(ch,scals)( alpha_conj, x[i] ); \
+			bli_tscals( ch,ch,ch, alpha_conj, x[i] ); \
 		} \
 	} \
 	else \
 	{ \
 		for ( dim_t i = 0; i < n; ++i ) \
 		{ \
-			PASTEMAC(ch,scals)( alpha_conj, *x ); \
+			bli_tscals( ch,ch,ch, alpha_conj, *x ); \
 \
 			x += incx; \
 		} \

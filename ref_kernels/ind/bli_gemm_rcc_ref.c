@@ -99,8 +99,9 @@ void PASTEMAC(chab,chc,opname,arch,suf) \
 		  cntx  \
 		); \
 \
-		PASTEMAC(chab,chc,chc,xpbys_mxn) \
+		bli_txpbys_mxn \
 		( \
+		  chab,chc,chc,chc, \
 		  m, n, \
 		  ct, rs_ct, cs_ct, \
 		  beta, \

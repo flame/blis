@@ -363,7 +363,7 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	{ \
 		ctype* chi11 = x1 + (i  )*incx; \
 \
-		PASTEMAC(ch,setis)( *alpha, *chi11 ); \
+		bli_tsetis( ch,ch, *alpha, *chi11 ); \
 	} */ \
 \
 	/* Acquire the address of the imaginary component of the first element,

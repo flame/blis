@@ -70,7 +70,7 @@ void PASTEMAC(ch,varname) \
 	conja = bli_extract_conj( transa ); \
 \
 	/* If beta is zero, use setv. Otherwise, scale by beta. */ \
-	if ( PASTEMAC(ch,eq0)( *beta ) ) \
+	if ( bli_teq0s( ch, *beta ) ) \
 	{ \
 		/* y = 0; */ \
 		PASTEMAC(ch,setv,BLIS_TAPI_EX_SUF) \

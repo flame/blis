@@ -53,14 +53,14 @@ void PASTEMAC(ch,opname,arch,suf) \
 		PRAGMA_SIMD \
 		for ( dim_t i = 0; i < n; ++i ) \
 		{ \
-			PASTEMAC(ch,inverts)( x[i] ); \
+			bli_tinverts( ch,ch, x[i] ); \
 		} \
 	} \
 	else \
 	{ \
 		for ( dim_t i = 0; i < n; ++i ) \
 		{ \
-			PASTEMAC(ch,inverts)( *x ); \
+			bli_tinverts( ch,ch, *x ); \
 \
 			x += incx; \
 		} \

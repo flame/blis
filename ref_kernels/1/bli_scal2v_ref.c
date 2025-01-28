@@ -53,7 +53,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 	const ctype* x     = x0; \
 	      ctype* y     = y0; \
 \
-	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
+	if ( bli_teq0s( ch, *alpha ) ) \
 	{ \
 		/* If alpha is zero, use setv. */ \
 \
@@ -73,7 +73,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 		); \
 		return; \
 	} \
-	else if ( PASTEMAC(ch,eq1)( *alpha ) ) \
+	else if ( bli_teq1s( ch, *alpha ) ) \
 	{ \
 		/* If alpha is one, use copyv. */ \
 \
@@ -99,14 +99,14 @@ void PASTEMAC(ch,opname,arch,suf) \
 			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,scal2js)( *alpha, x[i], y[i] ); \
+				bli_tscal2js( ch,ch,ch,ch, *alpha, x[i], y[i] ); \
 			} \
 		} \
 		else \
 		{ \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,scal2js)( *alpha, *x, *y ); \
+				bli_tscal2js( ch,ch,ch,ch, *alpha, *x, *y ); \
 \
 				x += incx; \
 				y += incy; \
@@ -120,14 +120,14 @@ void PASTEMAC(ch,opname,arch,suf) \
 			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,scal2s)( *alpha, x[i], y[i] ); \
+				bli_tscal2s( ch,ch,ch,ch, *alpha, x[i], y[i] ); \
 			} \
 		} \
 		else \
 		{ \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,scal2s)( *alpha, *x, *y ); \
+				bli_tscal2s( ch,ch,ch,ch, *alpha, *x, *y ); \
 \
 				x += incx; \
 				y += incy; \

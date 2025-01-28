@@ -413,17 +413,17 @@ void PASTEMAC(ch,varname) \
 	   the behavior of netlib BLAS's i?amax() routines. */ \
 	if ( bli_zero_dim1( n ) ) \
 	{ \
-		PASTEMAC(i,copys)( *zero_i, *index ); \
+		bli_tcopys( i,i, *zero_i, *index ); \
 		return; \
 	} \
 \
 	/* Initialize the index of the maximum absolute value to zero. */ \
-	PASTEMAC(i,copys)( *zero_i, index_l ); \
+	bli_tcopys( i,i, *zero_i, index_l ); \
 \
 	/* Initialize the maximum absolute value search candidate with
 	   -1, which is guaranteed to be less than all values we will
 	   compute. */ \
-	PASTEMAC(chr,copys)( *minus_one, abs_chi1_max ); \
+	bli_tcopys( chr,chr, *minus_one, abs_chi1_max ); \
 \
 	{ \
 		for ( i = 0; i < n; ++i ) \
@@ -431,23 +431,23 @@ void PASTEMAC(ch,varname) \
 			ctype* chi1 = x + (i  )*incx; \
 \
 			/* Get the real and imaginary components of chi1. */ \
-			PASTEMAC(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
+			bli_tgets( ch,chr, *chi1, chi1_r, chi1_i ); \
 \
 			/* Replace chi1_r and chi1_i with their absolute values. */ \
-			PASTEMAC(chr,abval2s)( chi1_r, chi1_r ); \
-			PASTEMAC(chr,abval2s)( chi1_i, chi1_i ); \
+			bli_tabval2s( chr,chr,chr, chi1_r, chi1_r ); \
+			bli_tabval2s( chr,chr,chr, chi1_i, chi1_i ); \
 \
 			/* Add the real and imaginary absolute values together. */ \
-			PASTEMAC(chr,set0s)( abs_chi1 ); \
-			PASTEMAC(chr,adds)( chi1_r, abs_chi1 ); \
-			PASTEMAC(chr,adds)( chi1_i, abs_chi1 ); \
+			bli_tset0s( chr, abs_chi1 ); \
+			bli_tadds( chr,chr,chr, chi1_r, abs_chi1 ); \
+			bli_tadds( chr,chr,chr, chi1_i, abs_chi1 ); \
 \
 			/* If the absolute value of the current element exceeds that of
 			   the previous largest, save it and its index. If NaN is
 			   encountered, then treat it the same as if it were a valid
 			   value that was smaller than any previously seen. This
 			   behavior mimics that of LAPACK's ?lange(). */ \
-			if ( abs_chi1_max < abs_chi1 || bli_isnan( abs_chi1 ) ) \
+			if ( abs_chi1_max < abs_chi1 || PASTEMAC(chr,isnan)( abs_chi1 ) ) \
 			{ \
 				abs_chi1_max = abs_chi1; \
 				index_l       = i; \
@@ -456,7 +456,7 @@ void PASTEMAC(ch,varname) \
 	} \
 \
 	/* Store the final index to the output variable. */ \
-	PASTEMAC(i,copys)( index_l, *index ); \
+	bli_tcopys( i,i, index_l, *index ); \
 }
 
 INSERT_GENTFUNCR_BASIC( amaxv_test )

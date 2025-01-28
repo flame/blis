@@ -117,7 +117,7 @@ void bli_zaxpyv_template_noopt
 
 	if ( bli_zero_dim1( n ) ) return;
 
-	if ( bli_zeq0( *alpha ) ) return;
+	if ( bli_teq0s( z, *alpha ) ) return;
 
 
 	// If there is anything that would interfere with our use of aligned
@@ -179,7 +179,7 @@ void bli_zaxpyv_template_noopt
 		// Compute front edge cases if x and y were unaligned.
 		for ( i = 0; i < n_pre; ++i )
 		{
-			bli_zaxpys( *alpha, *xp, *yp );
+			bli_taxpys( z,z,z,z, *alpha, *xp, *yp );
 
 			xp += 1; yp += 1;
 		}
@@ -188,7 +188,7 @@ void bli_zaxpyv_template_noopt
 		// yp are guaranteed to be aligned to BLIS_SIMD_ALIGN_SIZE.
 		for ( i = 0; i < n_iter; ++i )
 		{
-			bli_zaxpys( *alpha, *xp, *yp );
+			bli_taxpys( z,z,z,z, *alpha, *xp, *yp );
 
 			xp += n_elem_per_iter;
 			yp += n_elem_per_iter;
@@ -197,7 +197,7 @@ void bli_zaxpyv_template_noopt
 		// Compute tail edge cases, if applicable.
 		for ( i = 0; i < n_left; ++i )
 		{
-			bli_zaxpys( *alpha, *xp, *yp );
+			bli_taxpys( z,z,z,z, *alpha, *xp, *yp );
 
 			xp += 1; yp += 1;
 		}
@@ -207,7 +207,7 @@ void bli_zaxpyv_template_noopt
 		// Compute front edge cases if x and y were unaligned.
 		for ( i = 0; i < n_pre; ++i )
 		{
-			bli_zaxpyjs( *alpha, *xp, *yp );
+			bli_taxpyjs( z,z,z,z, *alpha, *xp, *yp );
 
 			xp += 1; yp += 1;
 		}
@@ -216,7 +216,7 @@ void bli_zaxpyv_template_noopt
 		// yp are guaranteed to be aligned to BLIS_SIMD_ALIGN_SIZE.
 		for ( i = 0; i < n_iter; ++i )
 		{
-			bli_zaxpyjs( *alpha, *xp, *yp );
+			bli_taxpyjs( z,z,z,z, *alpha, *xp, *yp );
 
 			xp += n_elem_per_iter;
 			yp += n_elem_per_iter;
@@ -225,7 +225,7 @@ void bli_zaxpyv_template_noopt
 		// Compute tail edge cases, if applicable.
 		for ( i = 0; i < n_left; ++i )
 		{
-			bli_zaxpyjs( *alpha, *xp, *yp );
+			bli_taxpyjs( z,z,z,z, *alpha, *xp, *yp );
 
 			xp += 1; yp += 1;
 		}

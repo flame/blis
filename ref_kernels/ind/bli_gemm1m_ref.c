@@ -90,8 +90,8 @@ void PASTEMAC(chabr,chcr,opname,arch,suf) \
 	auxinfo_t auxinfo_r = *auxinfo; \
 	bli_auxinfo_set_params( params_r, &auxinfo_r ); \
 \
-	if ( !PASTEMAC(chabr,eq0)( *alpha_i ) || \
-	     !PASTEMAC(chcr,eq0)( *beta_i ) || \
+	if ( !bli_teq0s( chabr, *alpha_i ) || \
+	     !bli_teq0s( chcr, *beta_i ) || \
 	     !bli_is_preferentially_stored( rs_c, cs_c, row_pref ) || \
 	     !PASTEMAC(chabr,chcr,same) ) \
 	{ \
@@ -134,8 +134,9 @@ void PASTEMAC(chabr,chcr,opname,arch,suf) \
 		  cntx  \
 		); \
 \
-		PASTEMAC(chab,chab,chc,chc,axpbys_mxn) \
+		bli_taxpbys_mxn \
 		( \
+		  chab,chab,chc,chc,chc, \
 		  m, n, \
 		  alpha, \
 		  ct, rs_ct, cs_ct, \

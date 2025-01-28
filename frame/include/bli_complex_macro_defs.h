@@ -43,6 +43,8 @@
 #define bli_simag( x )  ( 0.0F )
 #define bli_dreal( x )  ( x )
 #define bli_dimag( x )  ( 0.0 )
+#define bli_ireal( x )  ( x )
+#define bli_iimag( x )  ( 0 )
 
 
 #if defined(__cplusplus) && defined(BLIS_ENABLE_STD_COMPLEX)

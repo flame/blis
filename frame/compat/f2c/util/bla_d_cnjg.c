@@ -38,7 +38,7 @@
 
 void bla_d_cnjg(bla_dcomplex *dest, const bla_dcomplex *src)
 {
-	bli_zcopyjs( *src, *dest );
+	bli_tcopyjs( z,z, *src, *dest );
 }
 
 #endif

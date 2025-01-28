@@ -43,11 +43,7 @@ do \
 	{ \
 		pragma \
 		for ( dim_t mn = 0; mn < cdim; mn++ ) \
-		{ \
-			ctypep kappa_pi; \
-			PASTEMAC(chp,op)( *kappa_cast, *(pi1 + mn*dfac), kappa_pi ); \
-			PASTEMAC(chp,cha,copys)( kappa_pi, *(alpha1 + mn*inca) ); \
-		} \
+			PASTEMAC(t,op)( chp,chp,cha,chp, *kappa_cast, *(pi1 + mn*dfac), *(alpha1 + mn*inca) ); \
 \
 		alpha1 += lda; \
 		pi1    += ldp; \

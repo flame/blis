@@ -55,9 +55,9 @@ void PASTEMAC(ch,opname,arch,suf) \
 	const ctype* beta  = beta0; \
 	      ctype* y     = y0; \
 \
-	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
+	if ( bli_teq0s( ch, *alpha ) ) \
 	{ \
-		if ( PASTEMAC(ch,eq0)( *beta ) ) \
+		if ( bli_teq0s( ch, *beta ) ) \
 		{ \
 			/* If alpha is zero and beta is zero, set to zero. */ \
 \
@@ -77,7 +77,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 			); \
 			return; \
 		} \
-		else if ( PASTEMAC(ch,eq1)( *beta ) ) \
+		else if ( bli_teq1s( ch, *beta ) ) \
 		{ \
 			/* If alpha is zero and beta is one, return. */ \
 			return; \
@@ -102,9 +102,9 @@ void PASTEMAC(ch,opname,arch,suf) \
 		} \
 \
 	} \
-	else if ( PASTEMAC(ch,eq1)( *alpha ) ) \
+	else if ( bli_teq1s( ch, *alpha ) ) \
 	{ \
-		if ( PASTEMAC(ch,eq0)( *beta ) ) \
+		if ( bli_teq0s( ch, *beta ) ) \
 		{ \
 			/* If alpha is one and beta is zero, use copyv. */ \
 \
@@ -122,7 +122,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 			); \
 			return; \
 		} \
-		else if ( PASTEMAC(ch,eq1)( *beta ) ) \
+		else if ( bli_teq1s( ch, *beta ) ) \
 		{ \
 			/* If alpha is one and beta is one, use addv. */ \
 \
@@ -162,7 +162,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 	} \
 	else \
 	{ \
-		if ( PASTEMAC(ch,eq0)( *beta ) ) \
+		if ( bli_teq0s( ch, *beta ) ) \
 		{ \
 			/* If alpha is something else and beta is zero, use scal2v. */ \
 \
@@ -181,7 +181,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 			); \
 			return; \
 		} \
-		else if ( PASTEMAC(ch,eq1)( *beta ) ) \
+		else if ( bli_teq1s( ch, *beta ) ) \
 		{ \
 			/* If alpha is something else and beta is one, use axpyv. */ \
 \
@@ -211,14 +211,14 @@ void PASTEMAC(ch,opname,arch,suf) \
 			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,axpbyjs)( *alpha, x[i], *beta, y[i] ); \
+				bli_taxpbyjs( ch,ch,ch,ch,ch, *alpha, x[i], *beta, y[i] ); \
 			} \
 		} \
 		else \
 		{ \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,axpbyjs)( *alpha, *x, *beta, *y ); \
+				bli_taxpbyjs( ch,ch,ch,ch,ch, *alpha, *x, *beta, *y ); \
 \
 				x += incx; \
 				y += incy; \
@@ -232,14 +232,14 @@ void PASTEMAC(ch,opname,arch,suf) \
 			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,axpbys)( *alpha, x[i], *beta, y[i] ); \
+				bli_taxpbys( ch,ch,ch,ch,ch, *alpha, x[i], *beta, y[i] ); \
 			} \
 		} \
 		else \
 		{ \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,axpbys)( *alpha, *x, *beta, *y ); \
+				bli_taxpbys( ch,ch,ch,ch,ch, *alpha, *x, *beta, *y ); \
 \
 				x += incx; \
 				y += incy; \

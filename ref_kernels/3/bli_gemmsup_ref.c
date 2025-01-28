@@ -80,7 +80,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 				const ctype* restrict bj  = &b [ j*cs_b ]; \
 				      ctype           ab; \
 \
-				PASTEMAC(ch,set0s)( ab ); \
+				bli_tset0s( ch, ab ); \
 \
 				/* Perform a dot product to update the (i,j) element of c. */ \
 				for ( dim_t l = 0; l < k; ++l ) \
@@ -88,23 +88,23 @@ void PASTEMAC(ch,opname,arch,suf) \
 					const ctype* restrict aij = &ai[ l*cs_a ]; \
 					const ctype* restrict bij = &bj[ l*rs_b ]; \
 \
-					PASTEMAC(ch,dots)( *aij, *bij, ab ); \
+					bli_tdots( ch,ch,ch,ch, *aij, *bij, ab ); \
 				} \
 \
 				/* If beta is one, add ab into c. If beta is zero, overwrite c
 				   with the result in ab. Otherwise, scale by beta and accumulate
 				   ab to c. */ \
-				if ( PASTEMAC(ch,eq1)( *beta ) ) \
+				if ( bli_teq1s( ch, *beta ) ) \
 				{ \
-					PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
+					bli_taxpys( ch,ch,ch,ch, *alpha, ab, *cij ); \
 				} \
-				else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+				else if ( bli_teq0s( ch, *beta ) ) \
 				{ \
-					PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
+					bli_tscal2s( ch,ch,ch,ch, *alpha, ab, *cij ); \
 				} \
 				else \
 				{ \
-					PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
+					bli_taxpbys( ch,ch,ch,ch,ch, *alpha, ab, *beta, *cij ); \
 				} \
 			} \
 		} \
@@ -123,7 +123,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 				const ctype* restrict bj  = &b [ j*cs_b ]; \
 				      ctype           ab; \
 \
-				PASTEMAC(ch,set0s)( ab ); \
+				bli_tset0s( ch, ab ); \
 \
 				/* Perform a dot product to update the (i,j) element of c. */ \
 				for ( dim_t l = 0; l < k; ++l ) \
@@ -131,23 +131,23 @@ void PASTEMAC(ch,opname,arch,suf) \
 					const ctype* restrict aij = &ai[ l*cs_a ]; \
 					const ctype* restrict bij = &bj[ l*rs_b ]; \
 \
-					PASTEMAC(ch,axpyjs)( *aij, *bij, ab ); \
+					bli_taxpyjs( ch,ch,ch,ch, *aij, *bij, ab ); \
 				} \
 \
 				/* If beta is one, add ab into c. If beta is zero, overwrite c
 				   with the result in ab. Otherwise, scale by beta and accumulate
 				   ab to c. */ \
-				if ( PASTEMAC(ch,eq1)( *beta ) ) \
+				if ( bli_teq1s( ch, *beta ) ) \
 				{ \
-					PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
+					bli_taxpys( ch,ch,ch,ch, *alpha, ab, *cij ); \
 				} \
-				else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+				else if ( bli_teq0s( ch, *beta ) ) \
 				{ \
-					PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
+					bli_tscal2s( ch,ch,ch,ch, *alpha, ab, *cij ); \
 				} \
 				else \
 				{ \
-					PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
+					bli_taxpbys( ch,ch,ch,ch,ch, *alpha, ab, *beta, *cij ); \
 				} \
 			} \
 		} \
@@ -166,7 +166,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 				const ctype* restrict bj  = &b [ j*cs_b ]; \
 				      ctype           ab; \
 \
-				PASTEMAC(ch,set0s)( ab ); \
+				bli_tset0s( ch, ab ); \
 \
 				/* Perform a dot product to update the (i,j) element of c. */ \
 				for ( dim_t l = 0; l < k; ++l ) \
@@ -174,23 +174,23 @@ void PASTEMAC(ch,opname,arch,suf) \
 					const ctype* restrict aij = &ai[ l*cs_a ]; \
 					const ctype* restrict bij = &bj[ l*rs_b ]; \
 \
-					PASTEMAC(ch,dotjs)( *aij, *bij, ab ); \
+					bli_tdotjs( ch,ch,ch,ch, *aij, *bij, ab ); \
 				} \
 \
 				/* If beta is one, add ab into c. If beta is zero, overwrite c
 				   with the result in ab. Otherwise, scale by beta and accumulate
 				   ab to c. */ \
-				if ( PASTEMAC(ch,eq1)( *beta ) ) \
+				if ( bli_teq1s( ch, *beta ) ) \
 				{ \
-					PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
+					bli_taxpys( ch,ch,ch,ch, *alpha, ab, *cij ); \
 				} \
-				else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+				else if ( bli_teq0s( ch, *beta ) ) \
 				{ \
-					PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
+					bli_tscal2s( ch,ch,ch,ch, *alpha, ab, *cij ); \
 				} \
 				else \
 				{ \
-					PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
+					bli_taxpbys( ch,ch,ch,ch,ch, *alpha, ab, *beta, *cij ); \
 				} \
 			} \
 		} \
@@ -209,7 +209,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 				const ctype* restrict bj  = &b [ j*cs_b ]; \
 				      ctype           ab; \
 \
-				PASTEMAC(ch,set0s)( ab ); \
+				bli_tset0s( ch, ab ); \
 \
 				/* Perform a dot product to update the (i,j) element of c. */ \
 				for ( dim_t l = 0; l < k; ++l ) \
@@ -217,26 +217,26 @@ void PASTEMAC(ch,opname,arch,suf) \
 					const ctype* restrict aij = &ai[ l*cs_a ]; \
 					const ctype* restrict bij = &bj[ l*rs_b ]; \
 \
-					PASTEMAC(ch,dots)( *aij, *bij, ab ); \
+					bli_tdots( ch,ch,ch,ch, *aij, *bij, ab ); \
 				} \
 \
 				/* Conjugate the result to simulate conj(a^T) * conj(b). */ \
-				PASTEMAC(ch,conjs)( ab ); \
+				bli_tconjs( ch, ab ); \
 \
 				/* If beta is one, add ab into c. If beta is zero, overwrite c
 				   with the result in ab. Otherwise, scale by beta and accumulate
 				   ab to c. */ \
-				if ( PASTEMAC(ch,eq1)( *beta ) ) \
+				if ( bli_teq1s( ch, *beta ) ) \
 				{ \
-					PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
+					bli_taxpys( ch,ch,ch,ch, *alpha, ab, *cij ); \
 				} \
-				else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+				else if ( bli_teq0s( ch, *beta ) ) \
 				{ \
-					PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
+					bli_tscal2s( ch,ch,ch,ch, *alpha, ab, *cij ); \
 				} \
 				else \
 				{ \
-					PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
+					bli_taxpbys( ch,ch,ch,ch,ch, *alpha, ab, *beta, *cij ); \
 				} \
 			} \
 		} \
@@ -291,7 +291,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 				const ctype* restrict ai  = &a [ i*rs_a ]; \
 				      ctype           ab; \
 \
-				PASTEMAC(ch,set0s)( ab ); \
+				bli_tset0s( ch, ab ); \
 \
 				/* Perform a dot product to update the (i,j) element of c. */ \
 				for ( dim_t l = 0; l < k; ++l ) \
@@ -299,23 +299,23 @@ void PASTEMAC(ch,opname,arch,suf) \
 					const ctype* restrict aij = &ai[ l*cs_a ]; \
 					const ctype* restrict bij = &bj[ l*rs_b ]; \
 \
-					PASTEMAC(ch,dots)( *aij, *bij, ab ); \
+					bli_tdots( ch,ch,ch,ch, *aij, *bij, ab ); \
 				} \
 \
 				/* If beta is one, add ab into c. If beta is zero, overwrite c
 				   with the result in ab. Otherwise, scale by beta and accumulate
 				   ab to c. */ \
-				if ( PASTEMAC(ch,eq1)( *beta ) ) \
+				if ( bli_teq1s( ch, *beta ) ) \
 				{ \
-					PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
+					bli_taxpys( ch,ch,ch,ch, *alpha, ab, *cij ); \
 				} \
-				else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+				else if ( bli_teq0s( ch, *beta ) ) \
 				{ \
-					PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
+					bli_tscal2s( ch,ch,ch,ch, *alpha, ab, *cij ); \
 				} \
 				else \
 				{ \
-					PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
+					bli_taxpbys( ch,ch,ch,ch,ch, *alpha, ab, *beta, *cij ); \
 				} \
 			} \
 		} \
@@ -334,7 +334,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 				const ctype* restrict ai  = &a [ i*rs_a ]; \
 				      ctype           ab; \
 \
-				PASTEMAC(ch,set0s)( ab ); \
+				bli_tset0s( ch, ab ); \
 \
 				/* Perform a dot product to update the (i,j) element of c. */ \
 				for ( dim_t l = 0; l < k; ++l ) \
@@ -342,23 +342,23 @@ void PASTEMAC(ch,opname,arch,suf) \
 					const ctype* restrict aij = &ai[ l*cs_a ]; \
 					const ctype* restrict bij = &bj[ l*rs_b ]; \
 \
-					PASTEMAC(ch,axpyjs)( *aij, *bij, ab ); \
+					bli_taxpyjs( ch,ch,ch,ch, *aij, *bij, ab ); \
 				} \
 \
 				/* If beta is one, add ab into c. If beta is zero, overwrite c
 				   with the result in ab. Otherwise, scale by beta and accumulate
 				   ab to c. */ \
-				if ( PASTEMAC(ch,eq1)( *beta ) ) \
+				if ( bli_teq1s( ch, *beta ) ) \
 				{ \
-					PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
+					bli_taxpys( ch,ch,ch,ch, *alpha, ab, *cij ); \
 				} \
-				else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+				else if ( bli_teq0s( ch, *beta ) ) \
 				{ \
-					PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
+					bli_tscal2s( ch,ch,ch,ch, *alpha, ab, *cij ); \
 				} \
 				else \
 				{ \
-					PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
+					bli_taxpbys( ch,ch,ch,ch,ch, *alpha, ab, *beta, *cij ); \
 				} \
 			} \
 		} \
@@ -377,7 +377,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 				const ctype* restrict ai  = &a [ i*rs_a ]; \
 				      ctype           ab; \
 \
-				PASTEMAC(ch,set0s)( ab ); \
+				bli_tset0s( ch, ab ); \
 \
 				/* Perform a dot product to update the (i,j) element of c. */ \
 				for ( dim_t l = 0; l < k; ++l ) \
@@ -385,23 +385,23 @@ void PASTEMAC(ch,opname,arch,suf) \
 					const ctype* restrict aij = &ai[ l*cs_a ]; \
 					const ctype* restrict bij = &bj[ l*rs_b ]; \
 \
-					PASTEMAC(ch,dotjs)( *aij, *bij, ab ); \
+					bli_tdotjs( ch,ch,ch,ch, *aij, *bij, ab ); \
 				} \
 \
 				/* If beta is one, add ab into c. If beta is zero, overwrite c
 				   with the result in ab. Otherwise, scale by beta and accumulate
 				   ab to c. */ \
-				if ( PASTEMAC(ch,eq1)( *beta ) ) \
+				if ( bli_teq1s( ch, *beta ) ) \
 				{ \
-					PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
+					bli_taxpys( ch,ch,ch,ch, *alpha, ab, *cij ); \
 				} \
-				else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+				else if ( bli_teq0s( ch, *beta ) ) \
 				{ \
-					PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
+					bli_tscal2s( ch,ch,ch,ch, *alpha, ab, *cij ); \
 				} \
 				else \
 				{ \
-					PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
+					bli_taxpbys( ch,ch,ch,ch,ch, *alpha, ab, *beta, *cij ); \
 				} \
 			} \
 		} \
@@ -420,7 +420,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 				const ctype* restrict ai  = &a [ i*rs_a ]; \
 				      ctype           ab; \
 \
-				PASTEMAC(ch,set0s)( ab ); \
+				bli_tset0s( ch, ab ); \
 \
 				/* Perform a dot product to update the (i,j) element of c. */ \
 				for ( dim_t l = 0; l < k; ++l ) \
@@ -428,26 +428,26 @@ void PASTEMAC(ch,opname,arch,suf) \
 					const ctype* restrict aij = &ai[ l*cs_a ]; \
 					const ctype* restrict bij = &bj[ l*rs_b ]; \
 \
-					PASTEMAC(ch,dots)( *aij, *bij, ab ); \
+					bli_tdots( ch,ch,ch,ch, *aij, *bij, ab ); \
 				} \
 \
 				/* Conjugate the result to simulate conj(a^T) * conj(b). */ \
-				PASTEMAC(ch,conjs)( ab ); \
+				bli_tconjs( ch, ab ); \
 \
 				/* If beta is one, add ab into c. If beta is zero, overwrite c
 				   with the result in ab. Otherwise, scale by beta and accumulate
 				   ab to c. */ \
-				if ( PASTEMAC(ch,eq1)( *beta ) ) \
+				if ( bli_teq1s( ch, *beta ) ) \
 				{ \
-					PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
+					bli_taxpys( ch,ch,ch,ch, *alpha, ab, *cij ); \
 				} \
-				else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+				else if ( bli_teq0s( ch, *beta ) ) \
 				{ \
-					PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
+					bli_tscal2s( ch,ch,ch,ch, *alpha, ab, *cij ); \
 				} \
 				else \
 				{ \
-					PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
+					bli_taxpbys( ch,ch,ch,ch,ch, *alpha, ab, *beta, *cij ); \
 				} \
 			} \
 		} \
