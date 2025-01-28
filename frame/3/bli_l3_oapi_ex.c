@@ -35,6 +35,9 @@
 #include "blis.h"
 
 
+static packm_ker_ft GENARRAY2_MIXP(packmd_struc_cxk,packmd_struc_cxk);
+
+
 //
 // Define object-based interfaces (expert).
 //
@@ -147,6 +150,84 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 }
 
 
+void PASTEMAC(gemdm,BLIS_OAPI_EX_SUF)
+     (
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  d,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+       const rntm_t* rntm
+     )
+{
+	bli_init_once();
+
+	// Check the operands.
+	if ( bli_error_checking_is_enabled() )
+		bli_gemdm_check( alpha, a, d, b, beta, c, cntx );
+
+	// Check for zero dimensions, alpha == 0, or other conditions which
+	// mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS )
+		return;
+
+	// Default to using native execution.
+	ind_t im = BLIS_NAT;
+
+	// If necessary, obtain a valid context from the gks using the induced
+	// method id determined above.
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+
+	// Alias A, B, and C in case we need to apply transformations.
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+	bli_obj_alias_submatrix( a, &a_local );
+	bli_obj_alias_submatrix( b, &b_local );
+	bli_obj_alias_submatrix( c, &c_local );
+
+	gemm_cntl_t cntl;
+	bli_gemm_cntl_init
+	(
+	  im,
+	  BLIS_GEMM,
+	  alpha,
+	  &a_local,
+	  &b_local,
+	  beta,
+	  &c_local,
+	  cntx,
+	  &cntl
+	);
+
+	gemmd_params params;
+	params.d    = bli_obj_buffer_at_off( d );
+	params.incd = bli_obj_vector_inc( d );
+
+	func_t packmd;
+	bli_func_set_dt( packmd_struc_cxk[BLIS_FLOAT   ][BLIS_FLOAT   ], BLIS_FLOAT,    &packmd );
+	bli_func_set_dt( packmd_struc_cxk[BLIS_DOUBLE  ][BLIS_DOUBLE  ], BLIS_DOUBLE,   &packmd );
+	bli_func_set_dt( packmd_struc_cxk[BLIS_SCOMPLEX][BLIS_SCOMPLEX], BLIS_SCOMPLEX, &packmd );
+	bli_func_set_dt( packmd_struc_cxk[BLIS_DCOMPLEX][BLIS_DCOMPLEX], BLIS_DCOMPLEX, &packmd );
+
+	bli_gemm_cntl_set_packb_ukr_simple( &packmd, &cntl );
+	bli_gemm_cntl_set_packb_params( &params, &cntl );
+
+	// Invoke the internal back-end via the thread handler.
+	bli_l3_thread_decorator
+	(
+	  &a_local,
+	  &b_local,
+	  &c_local,
+	  cntx,
+	  ( cntl_t* )&cntl,
+	  rntm
+	);
+}
+
+
 void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
      (
        const obj_t*  alpha,
@@ -211,6 +292,84 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 	  cntx,
 	  &cntl
 	);
+
+	// Invoke the internal back-end via the thread handler.
+	bli_l3_thread_decorator
+	(
+	  &a_local,
+	  &b_local,
+	  &c_local,
+	  cntx,
+	  ( cntl_t* )&cntl,
+	  rntm
+	);
+}
+
+
+void PASTEMAC(gemdmt,BLIS_OAPI_EX_SUF)
+     (
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  d,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+       const rntm_t* rntm
+     )
+{
+	bli_init_once();
+
+	// Check the operands.
+	if ( bli_error_checking_is_enabled() )
+		bli_gemdmt_check( alpha, a, d, b, beta, c, cntx );
+
+	// Check for zero dimensions, alpha == 0, or other conditions which
+	// mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS )
+		return;
+
+	// Default to using native execution.
+	ind_t im = BLIS_NAT;
+
+	// If necessary, obtain a valid context from the gks using the induced
+	// method id determined above.
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+
+	// Alias A, B, and C in case we need to apply transformations.
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+	bli_obj_alias_submatrix( a, &a_local );
+	bli_obj_alias_submatrix( b, &b_local );
+	bli_obj_alias_submatrix( c, &c_local );
+
+	gemm_cntl_t cntl;
+	bli_gemm_cntl_init
+	(
+	  im,
+	  BLIS_GEMMT,
+	  alpha,
+	  &a_local,
+	  &b_local,
+	  beta,
+	  &c_local,
+	  cntx,
+	  &cntl
+	);
+
+	gemmd_params params;
+	params.d    = bli_obj_buffer_at_off( d );
+	params.incd = bli_obj_vector_inc( d );
+
+	func_t packmd;
+	bli_func_set_dt( packmd_struc_cxk[BLIS_FLOAT   ][BLIS_FLOAT   ], BLIS_FLOAT,    &packmd );
+	bli_func_set_dt( packmd_struc_cxk[BLIS_DOUBLE  ][BLIS_DOUBLE  ], BLIS_DOUBLE,   &packmd );
+	bli_func_set_dt( packmd_struc_cxk[BLIS_SCOMPLEX][BLIS_SCOMPLEX], BLIS_SCOMPLEX, &packmd );
+	bli_func_set_dt( packmd_struc_cxk[BLIS_DCOMPLEX][BLIS_DCOMPLEX], BLIS_DCOMPLEX, &packmd );
+
+	bli_gemm_cntl_set_packb_ukr_simple( &packmd, &cntl );
+	bli_gemm_cntl_set_packb_params( &params, &cntl );
 
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator
@@ -342,6 +501,132 @@ void PASTEMAC(syrk,BLIS_OAPI_EX_SUF)
 	bli_obj_alias_with_trans( BLIS_TRANSPOSE, a, &at );
 
 	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, a, &at, beta, c, cntx, rntm );
+}
+
+
+void PASTEMAC(her2kd,BLIS_OAPI_EX_SUF)
+     (
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  d,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+       const rntm_t* rntm
+     )
+{
+	bli_init_once();
+
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_her2k_check( alpha, a, b, beta, c, cntx );
+
+	obj_t alphah;
+	obj_t ah;
+	obj_t dh;
+	obj_t bh;
+	bli_obj_alias_with_conj( BLIS_CONJUGATE, alpha, &alphah );
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, &ah );
+	bli_obj_alias_with_conj( BLIS_CONJUGATE, d, &dh );
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, b, &bh );
+
+	// Invoke gemmt twice, using beta only the first time.
+	PASTEMAC(gemdmt,BLIS_OAPI_EX_SUF)(   alpha, a, d,   &bh,      beta, c, cntx, rntm );
+	PASTEMAC(gemdmt,BLIS_OAPI_EX_SUF)( &alphah, b, &dh, &ah, &BLIS_ONE, c, cntx, rntm );
+
+	// The Hermitian rank-2k product was computed as alpha*A*B'+alpha'*B*A', even for
+	// the diagonal elements. Mathematically, the imaginary components of
+	// diagonal elements of a Hermitian rank-2k product should always be
+	// zero. However, in practice, they sometimes accumulate meaningless
+	// non-zero values. To prevent this, we explicitly set those values
+	// to zero before returning.
+	bli_setid( &BLIS_ZERO, c );
+}
+
+
+void PASTEMAC(syr2kd,BLIS_OAPI_EX_SUF)
+     (
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  d,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+       const rntm_t* rntm
+     )
+{
+	bli_init_once();
+
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_syr2k_check( alpha, a, b, beta, c, cntx );
+
+	obj_t at;
+	obj_t bt;
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, a, &at );
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, b, &bt );
+
+	// Invoke gemmt twice, using beta only the first time.
+	PASTEMAC(gemdmt,BLIS_OAPI_EX_SUF)( alpha, a, d, &bt,      beta, c, cntx, rntm );
+	PASTEMAC(gemdmt,BLIS_OAPI_EX_SUF)( alpha, b, d, &at, &BLIS_ONE, c, cntx, rntm );
+}
+
+
+void PASTEMAC(herkd,BLIS_OAPI_EX_SUF)
+     (
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  d,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+       const rntm_t* rntm
+     )
+{
+	bli_init_once();
+
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_herk_check( alpha, a, beta, c, cntx );
+
+	obj_t ah;
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, &ah );
+
+	PASTEMAC(gemdmt,BLIS_OAPI_EX_SUF)( alpha, a, d, &ah, beta, c, cntx, rntm );
+
+	// The Hermitian rank-k product was computed as Re(alpha)*A*A', even for the
+	// diagonal elements. Mathematically, the imaginary components of
+	// diagonal elements of a Hermitian rank-k product should always be
+	// zero. However, in practice, they sometimes accumulate meaningless
+	// non-zero values. To prevent this, we explicitly set those values
+	// to zero before returning.
+	bli_setid( &BLIS_ZERO, c );
+}
+
+
+void PASTEMAC(syrkd,BLIS_OAPI_EX_SUF)
+     (
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  d,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+       const rntm_t* rntm
+     )
+{
+	bli_init_once();
+
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_syrk_check( alpha, a, beta, c, cntx );
+
+	obj_t at;
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, a, &at );
+
+	PASTEMAC(gemdmt,BLIS_OAPI_EX_SUF)( alpha, a, d, &at, beta, c, cntx, rntm );
 }
 
 
