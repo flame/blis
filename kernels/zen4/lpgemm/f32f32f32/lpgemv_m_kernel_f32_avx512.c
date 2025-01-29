@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-  Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+  Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -480,29 +480,183 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32 )
 	}
 	POST_OPS_MATRIX_ADD_6x64F:
 	{
-		float *matptr = (float *)post_ops_list_temp->op_args1;
-		zmm0 = _mm512_maskz_loadu_ps(k1, (matptr + post_ops_attr.post_op_c_j));
-		zmm8 = _mm512_add_ps(zmm8, zmm0);
-		zmm0 = _mm512_maskz_loadu_ps(k2, (matptr + post_ops_attr.post_op_c_j + 16));
-		zmm12 = _mm512_add_ps(zmm12, zmm0);
-		zmm0 = _mm512_maskz_loadu_ps(k3, (matptr + post_ops_attr.post_op_c_j + 32));
-		zmm16 = _mm512_add_ps(zmm16, zmm0);
-		zmm0 = _mm512_maskz_loadu_ps(k4, (matptr + post_ops_attr.post_op_c_j + 48));
-		zmm20 = _mm512_add_ps(zmm20, zmm0);
+		__m512 selector1;
+		__m512 selector2;
+		__m512 selector3;
+		__m512 selector4;
+
+		__m512 scl_fctr1 = _mm512_setzero_ps();
+		__m512 scl_fctr2 = _mm512_setzero_ps();
+		__m512 scl_fctr3 = _mm512_setzero_ps();
+		__m512 scl_fctr4 = _mm512_setzero_ps();
+
+		// Even though different registers are used for scalar in column and
+		// row major case, all those registers will contain the same value.
+		// For column major, if m==1, then it means n=1 and scale_factor_len=1.
+		if ( post_ops_list_temp->scale_factor_len == 1 )
+		{
+			scl_fctr1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			scl_fctr2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			scl_fctr3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			scl_fctr4 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+		}
+		else
+		{
+			if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+					( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+			{
+				scl_fctr1 =
+					_mm512_maskz_loadu_ps( k1,
+							( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				scl_fctr2 =
+					_mm512_maskz_loadu_ps( k2,
+							( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+				scl_fctr3 =
+					_mm512_maskz_loadu_ps( k3,
+							( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+				scl_fctr4 =
+					_mm512_maskz_loadu_ps( k4,
+							( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			}
+		}
+
+		float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+				( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
+				_mm512_maskz_loadu_ps(k1, (matptr + post_ops_attr.post_op_c_j ) );
+			selector1 = _mm512_mul_ps( selector1, scl_fctr1 );
+			selector2 =
+				_mm512_maskz_loadu_ps(k2, (matptr + post_ops_attr.post_op_c_j + 16 ) );
+			selector2 = _mm512_mul_ps( selector2, scl_fctr2 );
+			selector3 =
+				_mm512_maskz_loadu_ps(k3, (matptr + post_ops_attr.post_op_c_j + 32 ) );
+			selector3 = _mm512_mul_ps( selector3, scl_fctr3 );
+			selector4 =
+				_mm512_maskz_loadu_ps(k4, (matptr + post_ops_attr.post_op_c_j + 48 ) );
+			selector4 = _mm512_mul_ps( selector4, scl_fctr4 );
+		}
+		else
+		{
+			selector1 =
+				_mm512_maskz_loadu_ps(k1, (matptr + post_ops_attr.post_op_c_j ) );
+			selector1 = _mm512_mul_ps( selector1, scl_fctr1 );
+			selector2 =
+				_mm512_maskz_loadu_ps(k2, (matptr + post_ops_attr.post_op_c_j + 16 ) );
+			selector2 = _mm512_mul_ps( selector2, scl_fctr1 );
+			selector3 =
+				_mm512_maskz_loadu_ps(k3, (matptr + post_ops_attr.post_op_c_j + 32 ) );
+			selector3 = _mm512_mul_ps( selector3, scl_fctr1 );
+			selector4 =
+				_mm512_maskz_loadu_ps(k4, (matptr + post_ops_attr.post_op_c_j + 48 ) );
+			selector4 = _mm512_mul_ps( selector4, scl_fctr1 );
+		}
+		zmm8  = _mm512_add_ps( selector1, zmm8  );
+		zmm12 = _mm512_add_ps( selector2, zmm12 );
+		zmm16 = _mm512_add_ps( selector3, zmm16 );
+		zmm20 = _mm512_add_ps( selector4, zmm20 );
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
 	POST_OPS_MATRIX_MUL_6x64F:
 	{
-		float *matptr = (float *)post_ops_list_temp->op_args1;
-		zmm0 = _mm512_maskz_loadu_ps(k1, (matptr + post_ops_attr.post_op_c_j));
-		zmm8 = _mm512_mul_ps(zmm8, zmm0);
-		zmm0 = _mm512_maskz_loadu_ps(k2, (matptr + post_ops_attr.post_op_c_j + 16));
-		zmm12 = _mm512_mul_ps(zmm12, zmm0);
-		zmm0 = _mm512_maskz_loadu_ps(k3, (matptr + post_ops_attr.post_op_c_j + 32));
-		zmm16 = _mm512_mul_ps(zmm16, zmm0);
-		zmm0 = _mm512_maskz_loadu_ps(k4, (matptr + post_ops_attr.post_op_c_j + 48));
-		zmm20 = _mm512_mul_ps(zmm20, zmm0);
+		__m512 selector1;
+		__m512 selector2;
+		__m512 selector3;
+		__m512 selector4;
+
+
+		__m512 scl_fctr1 = _mm512_setzero_ps();
+		__m512 scl_fctr2 = _mm512_setzero_ps();
+		__m512 scl_fctr3 = _mm512_setzero_ps();
+		__m512 scl_fctr4 = _mm512_setzero_ps();
+
+		// Even though different registers are used for scalar in column and
+		// row major case, all those registers will contain the same value.
+		// For column major, if m==1, then it means n=1 and scale_factor_len=1.
+		if ( post_ops_list_temp->scale_factor_len == 1 )
+		{
+			scl_fctr1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			scl_fctr2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			scl_fctr3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			scl_fctr4 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+		}
+		else
+		{
+			if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+					( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+			{
+				scl_fctr1 =
+					_mm512_maskz_loadu_ps( k1,
+							( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				scl_fctr2 =
+					_mm512_maskz_loadu_ps( k2,
+							( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+				scl_fctr3 =
+					_mm512_maskz_loadu_ps( k3,
+							( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+				scl_fctr4 =
+					_mm512_maskz_loadu_ps( k4,
+							( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			}
+		}
+
+		float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+				( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
+				_mm512_maskz_loadu_ps(k1, (matptr + post_ops_attr.post_op_c_j ) );
+			selector1 = _mm512_mul_ps( selector1, scl_fctr1 );
+			selector2 =
+				_mm512_maskz_loadu_ps(k2, (matptr + post_ops_attr.post_op_c_j + 16 ) );
+			selector2 = _mm512_mul_ps( selector2, scl_fctr2 );
+			selector3 =
+				_mm512_maskz_loadu_ps(k3, (matptr + post_ops_attr.post_op_c_j + 32 ) );
+			selector3 = _mm512_mul_ps( selector3, scl_fctr3 );
+			selector4 =
+				_mm512_maskz_loadu_ps(k4, (matptr + post_ops_attr.post_op_c_j + 48 ) );
+			selector4 = _mm512_mul_ps( selector4, scl_fctr4 );
+		}
+		else
+		{
+			selector1 =
+				_mm512_maskz_loadu_ps(k1, (matptr + post_ops_attr.post_op_c_j ) );
+			selector1 = _mm512_mul_ps( selector1, scl_fctr1 );
+			selector2 =
+				_mm512_maskz_loadu_ps(k2, (matptr + post_ops_attr.post_op_c_j + 16 ) );
+			selector2 = _mm512_mul_ps( selector2, scl_fctr1 );
+			selector3 =
+				_mm512_maskz_loadu_ps(k3, (matptr + post_ops_attr.post_op_c_j + 32 ) );
+			selector3 = _mm512_mul_ps( selector3, scl_fctr1 );
+			selector4 =
+				_mm512_maskz_loadu_ps(k4, (matptr + post_ops_attr.post_op_c_j + 48 ) );
+			selector4 = _mm512_mul_ps( selector4, scl_fctr1 );
+		}
+
+		zmm8  = _mm512_mul_ps( selector1, zmm8  );
+		zmm12 = _mm512_mul_ps( selector2, zmm12 );
+		zmm16 = _mm512_mul_ps( selector3, zmm16 );
+		zmm20 = _mm512_mul_ps( selector4, zmm20 );
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}

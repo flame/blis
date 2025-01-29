@@ -1212,49 +1212,263 @@ POST_OPS_DOWNSCALE_6x64F:
 POST_OPS_MATRIX_ADD_6x64F:
       {
           dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+
+          __m512 selector1 = _mm512_setzero_ps();
+          __m512 selector2 = _mm512_setzero_ps();
+          __m512 selector3 = _mm512_setzero_ps();
+          __m512 selector4 = _mm512_setzero_ps();
+
+          __m512 scl_fctr1 = _mm512_setzero_ps();
+          __m512 scl_fctr2 = _mm512_setzero_ps();
+          __m512 scl_fctr3 = _mm512_setzero_ps();
+          __m512 scl_fctr4 = _mm512_setzero_ps();
+          __m512 scl_fctr5 = _mm512_setzero_ps();
+          __m512 scl_fctr6 = _mm512_setzero_ps();
+
+          // Even though different registers are used for scalar in column and
+          // row major case, all those registers will contain the same value.
+          if ( post_ops_list_temp->scale_factor_len == 1 )
+          {
+            scl_fctr1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+            scl_fctr2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+            scl_fctr3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+            scl_fctr4 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+            scl_fctr5 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+            scl_fctr6 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          }
+          else
+          {
+            if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+              ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+            {
+              scl_fctr1 =
+                _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+              scl_fctr2 =
+                _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+              scl_fctr3 =
+                _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+              scl_fctr4 =
+                _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+            }
+            else
+            {
+              scl_fctr1 =
+                _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_i + 0 ) );
+              scl_fctr2 =
+                _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_i + 1 ) );
+              scl_fctr3 =
+                _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_i + 2 ) );
+              scl_fctr4 =
+                _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_i + 3 ) );
+              scl_fctr5 =
+                _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_i + 4 ) );
+              scl_fctr6 =
+                _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_i + 5 ) );
+            }
+          }
+
           float* matptr = ( float* )post_ops_list_temp->op_args1;
 
-          // c[0:0-15,16-31,32-47,48-63]
-          F32_F32_MATRIX_ADD_4COL(zmm1,zmm2,zmm3,zmm4,0,8,9,10,11);
+          if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+            ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+          {
+            // c[0:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_ADD_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr1,scl_fctr2,scl_fctr3,scl_fctr4,0,8,9,10,11);
 
-          // c[1:0-15,16-31,32-47,48-63]
-          F32_F32_MATRIX_ADD_4COL(zmm1,zmm2,zmm3,zmm4,1,12,13,14,15);
+            // c[1:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_ADD_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr1,scl_fctr2,scl_fctr3,scl_fctr4,1,12,13,14,15);
 
-          // c[2:0-15,16-31,32-47,48-63]
-          F32_F32_MATRIX_ADD_4COL(zmm1,zmm2,zmm3,zmm4,2,16,17,18,19);
+            // c[2:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_ADD_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr1,scl_fctr2,scl_fctr3,scl_fctr4,2,16,17,18,19);
 
-          // c[3:0-15,16-31,32-47,48-63]
-          F32_F32_MATRIX_ADD_4COL(zmm1,zmm2,zmm3,zmm4,3,20,21,22,23);
+            // c[3:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_ADD_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr1,scl_fctr2,scl_fctr3,scl_fctr4,3,20,21,22,23);
 
-          // c[4:0-15,16-31,32-47,48-63]
-          F32_F32_MATRIX_ADD_4COL(zmm1,zmm2,zmm3,zmm4,4,24,25,26,27);
+            // c[4:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_ADD_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr1,scl_fctr2,scl_fctr3,scl_fctr4,4,24,25,26,27);
 
-          // c[5:0-15,16-31,32-47,48-63]
-          F32_F32_MATRIX_ADD_4COL(zmm1,zmm2,zmm3,zmm4,5,28,29,30,31);
+            // c[5:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_ADD_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr1,scl_fctr2,scl_fctr3,scl_fctr4,5,28,29,30,31);
+          }
+          else
+          {
+            // c[0:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_ADD_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr1,scl_fctr1,scl_fctr1,scl_fctr1,0,8,9,10,11);
 
+            // c[1:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_ADD_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr2,scl_fctr2,scl_fctr2,scl_fctr2,1,12,13,14,15);
+
+            // c[2:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_ADD_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr3,scl_fctr3,scl_fctr3,scl_fctr3,2,16,17,18,19);
+
+            // c[3:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_ADD_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr4,scl_fctr4,scl_fctr4,scl_fctr4,3,20,21,22,23);
+
+            // c[4:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_ADD_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr5,scl_fctr5,scl_fctr5,scl_fctr5,4,24,25,26,27);
+
+            // c[5:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_ADD_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr6,scl_fctr6,scl_fctr6,scl_fctr6,5,28,29,30,31);
+          }
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
 POST_OPS_MATRIX_MUL_6x64F:
       {
           dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+
+          __m512 selector1 = _mm512_setzero_ps();
+          __m512 selector2 = _mm512_setzero_ps();
+          __m512 selector3 = _mm512_setzero_ps();
+          __m512 selector4 = _mm512_setzero_ps();
+
+          __m512 scl_fctr1 = _mm512_setzero_ps();
+          __m512 scl_fctr2 = _mm512_setzero_ps();
+          __m512 scl_fctr3 = _mm512_setzero_ps();
+          __m512 scl_fctr4 = _mm512_setzero_ps();
+          __m512 scl_fctr5 = _mm512_setzero_ps();
+          __m512 scl_fctr6 = _mm512_setzero_ps();
+
+          // Even though different registers are used for scalar in column and
+          // row major case, all those registers will contain the same value.
+          if ( post_ops_list_temp->scale_factor_len == 1 )
+          {
+            scl_fctr1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+            scl_fctr2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+            scl_fctr3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+            scl_fctr4 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+            scl_fctr5 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+            scl_fctr6 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          }
+          else
+          {
+            if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+              ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+            {
+              scl_fctr1 =
+                _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+              scl_fctr2 =
+                _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+              scl_fctr3 =
+                _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+              scl_fctr4 =
+                _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+            }
+            else
+            {
+              scl_fctr1 =
+                _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_i + 0 ) );
+              scl_fctr2 =
+                _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_i + 1 ) );
+              scl_fctr3 =
+                _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_i + 2 ) );
+              scl_fctr4 =
+                _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_i + 3 ) );
+              scl_fctr5 =
+                _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_i + 4 ) );
+              scl_fctr6 =
+                _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_i + 5 ) );
+            }
+          }
+
           float* matptr = ( float* )post_ops_list_temp->op_args1;
-          // c[0:0-15,16-31,32-47,48-63]
-          F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,0,8,9,10,11);
 
-          // c[1:0-15,16-31,32-47,48-63]
-          F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,1,12,13,14,15);
+          if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+					 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+          {
+            // c[0:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_MUL_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr1,scl_fctr2,scl_fctr3,scl_fctr4,0,8,9,10,11);
 
-          // c[2:0-15,16-31,32-47,48-63]
-          F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,2,16,17,18,19);
+            // c[1:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_MUL_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr1,scl_fctr2,scl_fctr3,scl_fctr4,1,12,13,14,15);
 
-          // c[3:0-15,16-31,32-47,48-63]
-          F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,3,20,21,22,23);
+            // c[2:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_MUL_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr1,scl_fctr2,scl_fctr3,scl_fctr4,2,16,17,18,19);
 
-          // c[4:0-15,16-31,32-47,48-63]
-          F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,4,24,25,26,27);
+            // c[3:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_MUL_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr1,scl_fctr2,scl_fctr3,scl_fctr4,3,20,21,22,23);
 
-          // c[5:0-15,16-31,32-47,48-63]
-          F32_F32_MATRIX_MUL_4COL(zmm1,zmm2,zmm3,zmm4,5,28,29,30,31);
+            // c[4:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_MUL_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr1,scl_fctr2,scl_fctr3,scl_fctr4,4,24,25,26,27);
+
+            // c[5:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_MUL_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr1,scl_fctr2,scl_fctr3,scl_fctr4,5,28,29,30,31);
+          }
+          else
+          {
+            // c[0:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_MUL_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr1,scl_fctr1,scl_fctr1,scl_fctr1,0,8,9,10,11);
+
+            // c[1:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_MUL_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr2,scl_fctr2,scl_fctr2,scl_fctr2,1,12,13,14,15);
+
+            // c[2:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_MUL_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr3,scl_fctr3,scl_fctr3,scl_fctr3,2,16,17,18,19);
+
+            // c[3:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_MUL_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr4,scl_fctr4,scl_fctr4,scl_fctr4,3,20,21,22,23);
+
+            // c[4:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_MUL_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr5,scl_fctr5,scl_fctr5,scl_fctr5,4,24,25,26,27);
+
+            // c[5:0-15,16-31,32-47,48-63]
+            F32_F32_MATRIX_MUL_4COL(selector1,selector2,selector3,selector4,\
+                scl_fctr6,scl_fctr6,scl_fctr6,scl_fctr6,5,28,29,30,31);
+          }
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
@@ -2415,53 +2629,257 @@ POST_OPS_DOWNSCALE_6x48F:
       }
 POST_OPS_MATRIX_ADD_6x48F:
       {
-          dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
-          float* matptr = ( float* )post_ops_list_temp->op_args1;
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+        __m512 selector1 = _mm512_setzero_ps();
+        __m512 selector2 = _mm512_setzero_ps();
+        __m512 selector3 = _mm512_setzero_ps();
+
+        __m512 scl_fctr1 = _mm512_setzero_ps();
+        __m512 scl_fctr2 = _mm512_setzero_ps();
+        __m512 scl_fctr3 = _mm512_setzero_ps();
+        __m512 scl_fctr4 = _mm512_setzero_ps();
+        __m512 scl_fctr5 = _mm512_setzero_ps();
+        __m512 scl_fctr6 = _mm512_setzero_ps();
+
+        // Even though different registers are used for scalar in column and
+        // row major case, all those registers will contain the same value.
+        if ( post_ops_list_temp->scale_factor_len == 1 )
+        {
+          scl_fctr1 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr2 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr3 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr4 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr5 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr6 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        }
+        else
+        {
+          if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+            ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+          {
+            scl_fctr1 =
+              _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+            scl_fctr2 =
+              _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+            scl_fctr3 =
+              _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+          }
+          else
+          {
+            scl_fctr1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 0 ) );
+            scl_fctr2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 1 ) );
+            scl_fctr3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 2 ) );
+            scl_fctr4 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 3 ) );
+            scl_fctr5 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 4 ) );
+            scl_fctr6 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 5 ) );
+          }
+        }
+
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+        if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+        {
           // c[0:0-15,16-31,32-47]
-          F32_F32_MATRIX_ADD_3COL(zmm1,zmm2,zmm3,0,8,9,10);
+          F32_F32_MATRIX_ADD_3COL(selector1,selector2,selector3,\
+              scl_fctr1,scl_fctr2,scl_fctr3,0,8,9,10);
 
           // c[1:0-15,16-31,32-47]
-          F32_F32_MATRIX_ADD_3COL(zmm1,zmm2,zmm3,1,12,13,14);
+          F32_F32_MATRIX_ADD_3COL(selector1,selector2,selector3,\
+              scl_fctr1,scl_fctr2,scl_fctr3,1,12,13,14);
 
           // c[2:0-15,16-31,32-47]
-          F32_F32_MATRIX_ADD_3COL(zmm1,zmm2,zmm3,2,16,17,18);
+          F32_F32_MATRIX_ADD_3COL(selector1,selector2,selector3,\
+              scl_fctr1,scl_fctr2,scl_fctr3,2,16,17,18);
 
           // c[3:0-15,16-31,32-47]
-          F32_F32_MATRIX_ADD_3COL(zmm1,zmm2,zmm3,3,20,21,22);
+          F32_F32_MATRIX_ADD_3COL(selector1,selector2,selector3,\
+              scl_fctr1,scl_fctr2,scl_fctr3,3,20,21,22);
 
           // c[4:0-15,16-31,32-47]
-          F32_F32_MATRIX_ADD_3COL(zmm1,zmm2,zmm3,4,24,25,26);
+          F32_F32_MATRIX_ADD_3COL(selector1,selector2,selector3,\
+              scl_fctr1,scl_fctr2,scl_fctr3,4,24,25,26);
 
           // c[5:0-15,16-31,32-47]
-          F32_F32_MATRIX_ADD_3COL(zmm1,zmm2,zmm3,5,28,29,30);
+          F32_F32_MATRIX_ADD_3COL(selector1,selector2,selector3,\
+              scl_fctr1,scl_fctr2,scl_fctr3,5,28,29,30);
+        }
+        else
+        {
+          // c[0:0-15,16-31,32-47]
+          F32_F32_MATRIX_ADD_3COL(selector1,selector2,selector3,\
+              scl_fctr1,scl_fctr1,scl_fctr1,0,8,9,10);
 
-          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+          // c[1:0-15,16-31,32-47]
+          F32_F32_MATRIX_ADD_3COL(selector1,selector2,selector3,\
+              scl_fctr2,scl_fctr2,scl_fctr2,1,12,13,14);
+
+          // c[2:0-15,16-31,32-47]
+          F32_F32_MATRIX_ADD_3COL(selector1,selector2,selector3,\
+              scl_fctr3,scl_fctr3,scl_fctr3,2,16,17,18);
+
+          // c[3:0-15,16-31,32-47]
+          F32_F32_MATRIX_ADD_3COL(selector1,selector2,selector3,\
+              scl_fctr4,scl_fctr4,scl_fctr4,3,20,21,22);
+
+          // c[4:0-15,16-31,32-47]
+          F32_F32_MATRIX_ADD_3COL(selector1,selector2,selector3,\
+              scl_fctr5,scl_fctr5,scl_fctr5,4,24,25,26);
+
+          // c[5:0-15,16-31,32-47]
+          F32_F32_MATRIX_ADD_3COL(selector1,selector2,selector3,\
+              scl_fctr6,scl_fctr6,scl_fctr6,5,28,29,30);
+        }
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
 POST_OPS_MATRIX_MUL_6x48F:
       {
-          dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
-          float* matptr = ( float* )post_ops_list_temp->op_args1;
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
+        __m512 selector1 = _mm512_setzero_ps();
+        __m512 selector2 = _mm512_setzero_ps();
+        __m512 selector3 = _mm512_setzero_ps();
+
+        __m512 scl_fctr1 = _mm512_setzero_ps();
+        __m512 scl_fctr2 = _mm512_setzero_ps();
+        __m512 scl_fctr3 = _mm512_setzero_ps();
+        __m512 scl_fctr4 = _mm512_setzero_ps();
+        __m512 scl_fctr5 = _mm512_setzero_ps();
+        __m512 scl_fctr6 = _mm512_setzero_ps();
+
+        // Even though different registers are used for scalar in column and
+        // row major case, all those registers will contain the same value.
+        if ( post_ops_list_temp->scale_factor_len == 1 )
+        {
+          scl_fctr1 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr2 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr3 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr4 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr5 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr6 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        }
+        else
+        {
+          if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+            ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+          {
+            scl_fctr1 =
+              _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+            scl_fctr2 =
+              _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+            scl_fctr3 =
+              _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+          }
+          else
+          {
+            scl_fctr1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 0 ) );
+            scl_fctr2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 1 ) );
+            scl_fctr3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 2 ) );
+            scl_fctr4 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 3 ) );
+            scl_fctr5 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 4 ) );
+            scl_fctr6 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 5 ) );
+          }
+        }
+
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+        if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+        {
           // c[0:0-15,16-31,32-47]
-          F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,0,8,9,10);
+          F32_F32_MATRIX_MUL_3COL(selector1,selector2,selector3,\
+              scl_fctr1,scl_fctr2,scl_fctr3,0,8,9,10);
 
           // c[1:0-15,16-31,32-47]
-          F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,1,12,13,14);
+          F32_F32_MATRIX_MUL_3COL(selector1,selector2,selector3,\
+              scl_fctr1,scl_fctr2,scl_fctr3,1,12,13,14);
 
           // c[2:0-15,16-31,32-47]
-          F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,2,16,17,18);
+          F32_F32_MATRIX_MUL_3COL(selector1,selector2,selector3,\
+              scl_fctr1,scl_fctr2,scl_fctr3,2,16,17,18);
 
           // c[3:0-15,16-31,32-47]
-          F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,3,20,21,22);
+          F32_F32_MATRIX_MUL_3COL(selector1,selector2,selector3,\
+              scl_fctr1,scl_fctr2,scl_fctr3,3,20,21,22);
 
           // c[4:0-15,16-31,32-47]
-          F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,4,24,25,26);
+          F32_F32_MATRIX_MUL_3COL(selector1,selector2,selector3,\
+              scl_fctr1,scl_fctr2,scl_fctr3,4,24,25,26);
 
           // c[5:0-15,16-31,32-47]
-          F32_F32_MATRIX_MUL_3COL(zmm1,zmm2,zmm3,5,28,29,30);
+          F32_F32_MATRIX_MUL_3COL(selector1,selector2,selector3,\
+              scl_fctr1,scl_fctr2,scl_fctr3,5,28,29,30);
+        }
+        else
+        {
+          // c[0:0-15,16-31,32-47]
+          F32_F32_MATRIX_MUL_3COL(selector1,selector2,selector3,\
+              scl_fctr1,scl_fctr1,scl_fctr1,0,8,9,10);
 
-          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+          // c[1:0-15,16-31,32-47]
+          F32_F32_MATRIX_MUL_3COL(selector1,selector2,selector3,\
+              scl_fctr2,scl_fctr2,scl_fctr2,1,12,13,14);
+
+          // c[2:0-15,16-31,32-47]
+          F32_F32_MATRIX_MUL_3COL(selector1,selector2,selector3,\
+              scl_fctr3,scl_fctr3,scl_fctr3,2,16,17,18);
+
+          // c[3:0-15,16-31,32-47]
+          F32_F32_MATRIX_MUL_3COL(selector1,selector2,selector3,\
+              scl_fctr4,scl_fctr4,scl_fctr4,3,20,21,22);
+
+          // c[4:0-15,16-31,32-47]
+          F32_F32_MATRIX_MUL_3COL(selector1,selector2,selector3,\
+              scl_fctr5,scl_fctr5,scl_fctr5,4,24,25,26);
+
+          // c[5:0-15,16-31,32-47]
+          F32_F32_MATRIX_MUL_3COL(selector1,selector2,selector3,\
+              scl_fctr6,scl_fctr6,scl_fctr6,5,28,29,30);
+        }
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
 POST_OPS_SWISH_6x48F:
       {
@@ -3366,53 +3784,249 @@ POST_OPS_DOWNSCALE_6x32F:
       }
 POST_OPS_MATRIX_ADD_6x32F:
       {
-          dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
-          float* matptr = ( float* )post_ops_list_temp->op_args1;
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
-          // c[0:0-15,16-31]
-          F32_F32_MATRIX_ADD_2COL(zmm1,zmm2,0,8,9);
+        __m512 selector1 = _mm512_setzero_ps();
+        __m512 selector2 = _mm512_setzero_ps();
 
-          // c[1:0-15,16-31]
-          F32_F32_MATRIX_ADD_2COL(zmm1,zmm2,1,12,13);
+        __m512 scl_fctr1 = _mm512_setzero_ps();
+        __m512 scl_fctr2 = _mm512_setzero_ps();
+        __m512 scl_fctr3 = _mm512_setzero_ps();
+        __m512 scl_fctr4 = _mm512_setzero_ps();
+        __m512 scl_fctr5 = _mm512_setzero_ps();
+        __m512 scl_fctr6 = _mm512_setzero_ps();
 
-          // c[2:0-15,16-31]
-          F32_F32_MATRIX_ADD_2COL(zmm1,zmm2,2,16,17);
+        // Even though different registers are used for scalar in column and
+        // row major case, all those registers will contain the same value.
+        if ( post_ops_list_temp->scale_factor_len == 1 )
+        {
+          scl_fctr1 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr2 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr3 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr4 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr5 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr6 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        }
+        else
+        {
+          if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+            ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+          {
+            scl_fctr1 =
+              _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+            scl_fctr2 =
+              _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          }
+          else
+          {
+            scl_fctr1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 0 ) );
+            scl_fctr2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 1 ) );
+            scl_fctr3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 2 ) );
+            scl_fctr4 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 3 ) );
+            scl_fctr5 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 4 ) );
+            scl_fctr6 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 5 ) );
+          }
+        }
 
-          // c[3:0-15,16-31]
-          F32_F32_MATRIX_ADD_2COL(zmm1,zmm2,3,20,21);
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
 
-          // c[4:0-15,16-31]
-          F32_F32_MATRIX_ADD_2COL(zmm1,zmm2,4,24,25);
+        if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+        {
+          // c[0:0-15,16-31,32-47]
+          F32_F32_MATRIX_ADD_2COL(selector1,selector2,\
+              scl_fctr1,scl_fctr2,0,8,9);
 
-          // c[5:0-15,16-31]
-          F32_F32_MATRIX_ADD_2COL(zmm1,zmm2,5,28,29);
+          // c[1:0-15,16-31,32-47]
+          F32_F32_MATRIX_ADD_2COL(selector1,selector2,\
+              scl_fctr1,scl_fctr2,1,12,13);
 
-          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+          // c[2:0-15,16-31,32-47]
+          F32_F32_MATRIX_ADD_2COL(selector1,selector2,\
+              scl_fctr1,scl_fctr2,2,16,17);
+
+          // c[3:0-15,16-31,32-47]
+          F32_F32_MATRIX_ADD_2COL(selector1,selector2,\
+              scl_fctr1,scl_fctr2,3,20,21);
+
+          // c[4:0-15,16-31,32-47]
+          F32_F32_MATRIX_ADD_2COL(selector1,selector2,\
+              scl_fctr1,scl_fctr2,4,24,25);
+
+          // c[5:0-15,16-31,32-47]
+          F32_F32_MATRIX_ADD_2COL(selector1,selector2,\
+              scl_fctr1,scl_fctr2,5,28,29);
+        }
+        else
+        {
+          // c[0:0-15,16-31,32-47]
+          F32_F32_MATRIX_ADD_2COL(selector1,selector2,\
+              scl_fctr1,scl_fctr1,0,8,9);
+
+          // c[1:0-15,16-31,32-47]
+          F32_F32_MATRIX_ADD_2COL(selector1,selector2,\
+              scl_fctr2,scl_fctr2,1,12,13);
+
+          // c[2:0-15,16-31,32-47]
+          F32_F32_MATRIX_ADD_2COL(selector1,selector2,\
+              scl_fctr3,scl_fctr3,2,16,17);
+
+          // c[3:0-15,16-31,32-47]
+          F32_F32_MATRIX_ADD_2COL(selector1,selector2,\
+              scl_fctr4,scl_fctr4,3,20,21);
+
+          // c[4:0-15,16-31,32-47]
+          F32_F32_MATRIX_ADD_2COL(selector1,selector2,\
+              scl_fctr5,scl_fctr5,4,24,25);
+
+          // c[5:0-15,16-31,32-47]
+          F32_F32_MATRIX_ADD_2COL(selector1,selector2,\
+              scl_fctr6,scl_fctr6,5,28,29);
+        }
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
 POST_OPS_MATRIX_MUL_6x32F:
       {
-          dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
-          float* matptr = ( float* )post_ops_list_temp->op_args1;
+        dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
-          // c[0:0-15,16-31]
-          F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,0,8,9);
+        __m512 selector1 = _mm512_setzero_ps();
+        __m512 selector2 = _mm512_setzero_ps();
 
-          // c[1:0-15,16-31]
-          F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,1,12,13);
+        __m512 scl_fctr1 = _mm512_setzero_ps();
+        __m512 scl_fctr2 = _mm512_setzero_ps();
+        __m512 scl_fctr3 = _mm512_setzero_ps();
+        __m512 scl_fctr4 = _mm512_setzero_ps();
+        __m512 scl_fctr5 = _mm512_setzero_ps();
+        __m512 scl_fctr6 = _mm512_setzero_ps();
 
-          // c[2:0-15,16-31]
-          F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,2,16,17);
+        // Even though different registers are used for scalar in column and
+        // row major case, all those registers will contain the same value.
+        if ( post_ops_list_temp->scale_factor_len == 1 )
+        {
+          scl_fctr1 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr2 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr3 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr4 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr5 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          scl_fctr6 =
+            _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+        }
+        else
+        {
+          if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+            ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+          {
+            scl_fctr1 =
+              _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+            scl_fctr2 =
+              _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+          }
+          else
+          {
+            scl_fctr1 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 0 ) );
+            scl_fctr2 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 1 ) );
+            scl_fctr3 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 2 ) );
+            scl_fctr4 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 3 ) );
+            scl_fctr5 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 4 ) );
+            scl_fctr6 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor +
+                  post_ops_attr.post_op_c_i + 5 ) );
+          }
+        }
 
-          // c[3:0-15,16-31]
-          F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,3,20,21);
+        float* matptr = ( float* )post_ops_list_temp->op_args1;
 
-          // c[4:0-15,16-31]
-          F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,4,24,25);
+        if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+          ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+        {
+          // c[0:0-15,16-31,32-47]
+          F32_F32_MATRIX_MUL_2COL(selector1,selector2,\
+              scl_fctr1,scl_fctr2,0,8,9);
 
-          // c[5:0-15,16-31]
-          F32_F32_MATRIX_MUL_2COL(zmm1,zmm2,5,28,29);
+          // c[1:0-15,16-31,32-47]
+          F32_F32_MATRIX_MUL_2COL(selector1,selector2,\
+              scl_fctr1,scl_fctr2,1,12,13);
 
-          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+          // c[2:0-15,16-31,32-47]
+          F32_F32_MATRIX_MUL_2COL(selector1,selector2,\
+              scl_fctr1,scl_fctr2,2,16,17);
+
+          // c[3:0-15,16-31,32-47]
+          F32_F32_MATRIX_MUL_2COL(selector1,selector2,\
+              scl_fctr1,scl_fctr2,3,20,21);
+
+          // c[4:0-15,16-31,32-47]
+          F32_F32_MATRIX_MUL_2COL(selector1,selector2,\
+              scl_fctr1,scl_fctr2,4,24,25);
+
+          // c[5:0-15,16-31,32-47]
+          F32_F32_MATRIX_MUL_2COL(selector1,selector2,\
+              scl_fctr1,scl_fctr2,5,28,29);
+        }
+        else
+        {
+          // c[0:0-15,16-31,32-47]
+          F32_F32_MATRIX_MUL_2COL(selector1,selector2,\
+              scl_fctr1,scl_fctr1,0,8,9);
+
+          // c[1:0-15,16-31,32-47]
+          F32_F32_MATRIX_MUL_2COL(selector1,selector2,\
+              scl_fctr2,scl_fctr2,1,12,13);
+
+          // c[2:0-15,16-31,32-47]
+          F32_F32_MATRIX_MUL_2COL(selector1,selector2,\
+              scl_fctr3,scl_fctr3,2,16,17);
+
+          // c[3:0-15,16-31,32-47]
+          F32_F32_MATRIX_MUL_2COL(selector1,selector2,\
+              scl_fctr4,scl_fctr4,3,20,21);
+
+          // c[4:0-15,16-31,32-47]
+          F32_F32_MATRIX_MUL_2COL(selector1,selector2,\
+              scl_fctr5,scl_fctr5,4,24,25);
+
+          // c[5:0-15,16-31,32-47]
+          F32_F32_MATRIX_MUL_2COL(selector1,selector2,\
+              scl_fctr6,scl_fctr6,5,28,29);
+        }
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
 POST_OPS_SWISH_6x32F:
       {

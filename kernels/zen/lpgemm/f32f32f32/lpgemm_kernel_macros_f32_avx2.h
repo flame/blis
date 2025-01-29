@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -151,53 +151,57 @@
 	ymm ## r_ind0 = _mm256_add_ps( scr0, ymm ## r_ind0 ); \
 	ymm ## r_ind1 = _mm256_add_ps( scr1, ymm ## r_ind1 ); \
 
-#define F32_F32_MATRIX_ADD_LOAD_XMM_1ELE(scr,m_ind,n_ind) \
+#define F32_F32_MATRIX_ADD_LOAD_XMM_1ELE(scr,scl_fct,m_ind,n_ind) \
 	scr = ( __m128 )_mm_load_ss \
 			( \
 			  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
 			  post_ops_attr.post_op_c_j + ( n_ind * 2 ) \
 			); \
+	scr = _mm_mul_ps( scr, scl_fct ); \
 
-#define F32_F32_MATRIX_ADD_1COL_XMM_1ELE(scr0,m_ind,r_ind0) \
-	F32_F32_MATRIX_ADD_LOAD_XMM_1ELE(scr0,m_ind,0); \
+#define F32_F32_MATRIX_ADD_1COL_XMM_1ELE(scr0,scl_fct0,m_ind,r_ind0) \
+	F32_F32_MATRIX_ADD_LOAD_XMM_1ELE(scr0,scl_fct0,m_ind,0); \
 	F32_MATRIX_ADD_1COL_XMM(scr0,m_ind,r_ind0); \
 
-#define F32_F32_MATRIX_ADD_LOAD_XMM_2ELE(scr,m_ind,n_ind) \
+#define F32_F32_MATRIX_ADD_LOAD_XMM_2ELE(scr,scl_fct,m_ind,n_ind) \
 	scr = ( __m128 )_mm_load_sd \
 			( \
 			  (double*)(matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
 			  post_ops_attr.post_op_c_j + ( n_ind * 2 )) \
 			); \
+	scr = _mm_mul_ps( scr, scl_fct ); \
 
-#define F32_F32_MATRIX_ADD_1COL_XMM_2ELE(scr0,m_ind,r_ind0) \
-	F32_F32_MATRIX_ADD_LOAD_XMM_2ELE(scr0,m_ind,0); \
+#define F32_F32_MATRIX_ADD_1COL_XMM_2ELE(scr0,scl_fct0,m_ind,r_ind0) \
+	F32_F32_MATRIX_ADD_LOAD_XMM_2ELE(scr0,scl_fct0,m_ind,0); \
 	F32_MATRIX_ADD_1COL_XMM(scr0,m_ind,r_ind0); \
 
-#define F32_F32_MATRIX_ADD_LOAD_XMM(scr,m_ind,n_ind) \
+#define F32_F32_MATRIX_ADD_LOAD_XMM(scr,scl_fct,m_ind,n_ind) \
 	scr = _mm_loadu_ps \
 			( \
 			  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
 			  post_ops_attr.post_op_c_j + ( n_ind * 4 ) \
 			); \
+	scr = _mm_mul_ps( scr, scl_fct ); \
 
-#define F32_F32_MATRIX_ADD_1COL_XMM(scr0,m_ind,r_ind0) \
-	F32_F32_MATRIX_ADD_LOAD_XMM(scr0,m_ind,0); \
+#define F32_F32_MATRIX_ADD_1COL_XMM(scr0,scl_fct0,m_ind,r_ind0) \
+	F32_F32_MATRIX_ADD_LOAD_XMM(scr0,scl_fct0,m_ind,0); \
 	F32_MATRIX_ADD_1COL_XMM(scr0,m_ind,r_ind0); \
 
-#define F32_F32_MATRIX_ADD_LOAD_YMM(scr,m_ind,n_ind) \
+#define F32_F32_MATRIX_ADD_LOAD_YMM(scr,scl_fct,m_ind,n_ind) \
 	scr = _mm256_loadu_ps \
 			( \
 			  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
 			  post_ops_attr.post_op_c_j + ( n_ind * 8 ) \
 			); \
+	scr = _mm256_mul_ps( scr, scl_fct ); \
 
-#define F32_F32_MATRIX_ADD_1COL(scr0,m_ind,r_ind0) \
-	F32_F32_MATRIX_ADD_LOAD_YMM(scr0,m_ind,0); \
+#define F32_F32_MATRIX_ADD_1COL(scr0,scl_fct0,m_ind,r_ind0) \
+	F32_F32_MATRIX_ADD_LOAD_YMM(scr0,scl_fct0,m_ind,0); \
 	F32_MATRIX_ADD_1COL_YMM(scr0,m_ind,r_ind0); \
 
-#define F32_F32_MATRIX_ADD_2COL(scr0,scr1,m_ind,r_ind0,r_ind1) \
-	F32_F32_MATRIX_ADD_LOAD_YMM(scr0,m_ind,0); \
-	F32_F32_MATRIX_ADD_LOAD_YMM(scr1,m_ind,1); \
+#define F32_F32_MATRIX_ADD_2COL(scr0,scr1,scl_fct0,scl_fct1,m_ind,r_ind0,r_ind1) \
+	F32_F32_MATRIX_ADD_LOAD_YMM(scr0,scl_fct0,m_ind,0); \
+	F32_F32_MATRIX_ADD_LOAD_YMM(scr1,scl_fct1,m_ind,1); \
 	F32_MATRIX_ADD_2COL_YMM(scr0,scr1,m_ind,r_ind0,r_ind1); \
 
 // Matrix Mul post-ops helper macros
@@ -211,53 +215,57 @@
 	ymm ## r_ind0 = _mm256_mul_ps( scr0, ymm ## r_ind0 ); \
 	ymm ## r_ind1 = _mm256_mul_ps( scr1, ymm ## r_ind1 ); \
 
-#define F32_F32_MATRIX_MUL_LOAD_XMM_1ELE(scr,m_ind,n_ind) \
+#define F32_F32_MATRIX_MUL_LOAD_XMM_1ELE(scr,scl_fct,m_ind,n_ind) \
 	scr = ( __m128 )_mm_load_ss \
 			( \
 			  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
 			  post_ops_attr.post_op_c_j + ( n_ind * 2 ) \
 			); \
+	scr = _mm_mul_ps( scr, scl_fct ); \
 
-#define F32_F32_MATRIX_MUL_1COL_XMM_1ELE(scr0,m_ind,r_ind0) \
-	F32_F32_MATRIX_MUL_LOAD_XMM_1ELE(scr0,m_ind,0); \
+#define F32_F32_MATRIX_MUL_1COL_XMM_1ELE(scr0,scl_fct0,m_ind,r_ind0) \
+	F32_F32_MATRIX_MUL_LOAD_XMM_1ELE(scr0,scl_fct0,m_ind,0); \
 	F32_MATRIX_MUL_1COL_XMM(scr0,m_ind,r_ind0); \
 
-#define F32_F32_MATRIX_MUL_LOAD_XMM_2ELE(scr,m_ind,n_ind) \
+#define F32_F32_MATRIX_MUL_LOAD_XMM_2ELE(scr,scl_fct,m_ind,n_ind) \
 	scr = ( __m128 )_mm_load_sd \
 			( \
 			  (double*)(matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
 			  post_ops_attr.post_op_c_j + ( n_ind * 2 )) \
 			); \
+	scr = _mm_mul_ps( scr, scl_fct ); \
 
-#define F32_F32_MATRIX_MUL_1COL_XMM_2ELE(scr0,m_ind,r_ind0) \
-	F32_F32_MATRIX_MUL_LOAD_XMM_2ELE(scr0,m_ind,0); \
+#define F32_F32_MATRIX_MUL_1COL_XMM_2ELE(scr0,scl_fct0,m_ind,r_ind0) \
+	F32_F32_MATRIX_MUL_LOAD_XMM_2ELE(scr0,scl_fct0,m_ind,0); \
 	F32_MATRIX_MUL_1COL_XMM(scr0,m_ind,r_ind0); \
 
-#define F32_F32_MATRIX_MUL_LOAD_XMM(scr,m_ind,n_ind) \
+#define F32_F32_MATRIX_MUL_LOAD_XMM(scr,scl_fct,m_ind,n_ind) \
 	scr = _mm_loadu_ps \
 			( \
 			  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
 			  post_ops_attr.post_op_c_j + ( n_ind * 4 ) \
 			); \
+	scr = _mm_mul_ps( scr, scl_fct ); \
 
-#define F32_F32_MATRIX_MUL_1COL_XMM(scr0,m_ind,r_ind0) \
-	F32_F32_MATRIX_MUL_LOAD_XMM(scr0,m_ind,0); \
+#define F32_F32_MATRIX_MUL_1COL_XMM(scr0,scl_fct0,m_ind,r_ind0) \
+	F32_F32_MATRIX_MUL_LOAD_XMM(scr0,scl_fct0,m_ind,0); \
 	F32_MATRIX_MUL_1COL_XMM(scr0,m_ind,r_ind0); \
 
-#define F32_F32_MATRIX_MUL_LOAD_YMM(scr,m_ind,n_ind) \
+#define F32_F32_MATRIX_MUL_LOAD_YMM(scr,scl_fct,m_ind,n_ind) \
 	scr = _mm256_loadu_ps \
 			( \
 			  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
 			  post_ops_attr.post_op_c_j + ( n_ind * 8 ) \
 			); \
+	scr = _mm256_mul_ps( scr, scl_fct ); \
 
-#define F32_F32_MATRIX_MUL_1COL(scr0,m_ind,r_ind0) \
-	F32_F32_MATRIX_MUL_LOAD_YMM(scr0,m_ind,0); \
+#define F32_F32_MATRIX_MUL_1COL(scr0,scl_fct0,m_ind,r_ind0) \
+	F32_F32_MATRIX_MUL_LOAD_YMM(scr0,scl_fct0,m_ind,0); \
 	F32_MATRIX_MUL_1COL_YMM(scr0,m_ind,r_ind0); \
 
-#define F32_F32_MATRIX_MUL_2COL(scr0,scr1,m_ind,r_ind0,r_ind1) \
-	F32_F32_MATRIX_MUL_LOAD_YMM(scr0,m_ind,0); \
-	F32_F32_MATRIX_MUL_LOAD_YMM(scr1,m_ind,1); \
+#define F32_F32_MATRIX_MUL_2COL(scr0,scr1,scl_fct0,scl_fct1,m_ind,r_ind0,r_ind1) \
+	F32_F32_MATRIX_MUL_LOAD_YMM(scr0,scl_fct0,m_ind,0); \
+	F32_F32_MATRIX_MUL_LOAD_YMM(scr1,scl_fct1,m_ind,1); \
 	F32_MATRIX_MUL_2COL_YMM(scr0,scr1,m_ind,r_ind0,r_ind1); \
 
 // TANH
