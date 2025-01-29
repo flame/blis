@@ -86,10 +86,11 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	trans_t blis_transa;
 	trans_t blis_transb;
 
-	// Check if avx512_vnni ISA is supported, lpgemm matmul only works with it.
-	if ( bli_cpuid_is_avx512bf16_supported() == FALSE )
+	/*BF16 API can still work with AVX2 ISA, where the input data would
+	 be converted to F32 and then call the F32 kernels*/
+	if ( bli_cpuid_is_avx2fma3_supported() == FALSE )
 	{
-		bli_print_msg(" AVX512_BF16 ISA not supported by processor, "
+		bli_print_msg(" AVX2 ISA not supported by processor, "
 				"cannot perform bf16bf16f32 gemm.", __FILE__, __LINE__ );
 		goto err_hndl;
 	}
@@ -116,7 +117,7 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	{
 		goto err_hndl;
 	}
-
+	
 #ifdef LPGEMM_BF16_JIT
 	if( get_jit_kernels_generated() == FALSE )
 	{
@@ -225,7 +226,7 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 
 	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( BF16BF16F32OF32 );
 
-	if ( ( is_tiny_input_bf16of32( m, n, k, lcntx_g ) == TRUE ) &&
+	if (( bli_arch_query_id() == BLIS_ARCH_ZEN4 ) && ( is_tiny_input_bf16of32( m, n, k, lcntx_g ) == TRUE ) &&
 		 ( is_single_thread( &rntm_g ) == TRUE) &&
 	  	 ( is_row_major == TRUE ) )
 	{

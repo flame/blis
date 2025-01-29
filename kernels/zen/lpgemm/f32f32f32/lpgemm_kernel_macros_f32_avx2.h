@@ -278,4 +278,73 @@
 \
 	TANHF_SSE(reg, r, r2, x, z, dn, q);
 
+//BF16 -> F32 helper
+#define CVT_BF16_F32_SHIFT_AVX2(in) \
+	(__m256)((__m256i)_mm256_sllv_epi32( _mm256_cvtepi16_epi32 (in),\
+			_mm256_set1_epi32( 16 ) ) );
+
+//BF16->F32 BIAS helpers
+#define BF16_F32_BIAS_LOAD_AVX2(scr,n_ind) \
+	scr = (__m256)( _mm256_sllv_epi32  \
+					(  \
+						_mm256_cvtepi16_epi32  \
+						( \
+							_mm_load_si128  \
+							(  \
+								( __m128i const* )( \
+								( ( bfloat16* )post_ops_list_temp->op_args1 ) + \
+								post_ops_attr.post_op_c_j + ( n_ind * 8 ) ) \
+							)  \
+						), _mm256_set1_epi32( 16 )  \
+					) \
+				); \
+
+#define BF16_F32_BIAS_BCAST_AVX2(scr,m_ind)  \
+	scr = (__m256)( _mm256_sllv_epi32  \
+				(  \
+					_mm256_cvtepi16_epi32 \
+					( \
+						_mm_set1_epi16 \
+						(  \
+							*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +  \
+							post_ops_attr.post_op_c_i + m_ind )   \
+						) \
+					), _mm256_set1_epi32( 16 )  \
+				) \
+			);
+
+#define BF16_F32_BIAS_LOAD_LT4BF16_AVX2(scr, idx) \
+{  \
+	int16_t data_feeder[8] = {0};   \
+	bfloat16 *post_op_ptr = ( ( bfloat16* )post_ops_list_temp->op_args1 ) + \
+										post_ops_attr.post_op_c_j ;   \
+	for( dim_t i = 0; i < idx; i++) data_feeder[i] = *(post_op_ptr + i);  \
+	scr =	(__m128)_mm_sllv_epi32  \
+			( \
+				_mm_cvtepi16_epi32  \
+				( \
+					_mm_loadu_si128( (__m128i const*)data_feeder)  \
+				), 	_mm_set1_epi32(16) \
+			); \
+}
+
+#define BF16_F32_BIAS_BCAST_LT4BF16_AVX2(scr,m_ind, idx)  \
+{ \
+	int16_t data_feeder[8] = {0};   \
+	bfloat16 *post_op_ptr = ( ( bfloat16* )post_ops_list_temp->op_args1 ) + \
+									post_ops_attr.post_op_c_i + m_ind ;   \
+	for( dim_t i = 0; i < idx; i++) data_feeder[i] = *(post_op_ptr);  \
+	scr = (__m128)_mm_sllv_epi32  \
+						(  \
+							_mm_cvtepi16_epi32 \
+							( \
+								_mm_set1_epi16 \
+								(  \
+									*( data_feeder )   \
+								) \
+							), _mm_set1_epi32( 16 )  \
+						);   \
+}
+
+
 #endif //LPGEMM_F32_SGEMM_AVX2_KERN_MACROS_H

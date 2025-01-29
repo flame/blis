@@ -42,9 +42,10 @@
 // features except BF16 ISA.
 #if ( defined( BLIS_GCC ) && ( ( __GNUC__ < 11 ) || \
 	  ( ( __GNUC__ == 11 ) && ( __GNUC_MINOR__ < 2 ) ) ) )
-#define LPGEMM_BF16_JIT
-#define BPREFETCH_JIT
-#define DUMP_JIT_CODE
+//Commenting the JIT definition, to enable the BF16 -> F32 path
+//#define LPGEMM_BF16_JIT
+//#define BPREFETCH_JIT
+//#define DUMP_JIT_CODE
 #endif
 
 typedef void (*lpgemm_m_fringe_f32_ker_ft)

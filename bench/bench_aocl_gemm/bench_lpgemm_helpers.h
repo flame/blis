@@ -261,7 +261,7 @@ static inline void fill_array_bfloat16( void* arr, dim_t size )
 #endif
     for ( dim_t i = 0; i < size; ++i )
     {
-        c_float[i] = (i % 5 );
+        c_float[i] = (float)(i % 5);
     }
     convert_float_arr_to_bf16( c_float, arr, size );
     if ( c_float != NULL )

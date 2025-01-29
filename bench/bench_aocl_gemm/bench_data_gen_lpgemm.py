@@ -49,7 +49,7 @@ for stor in ["r"]:
                                 chars = " ".join([stor, transa, transb, packa, packb])
                                 for inputtypes in ops:
                                     for output_type in ops[inputtypes]:
-                                        op = "u8s8s32o" + output_type
+                                        op = inputtypes + "o" + output_type
                                         for post_op in post_ops:
                                             if post_op == "bias" or post_op == "matrix_add" or post_op == "matrix_mul":
                                                 if( output_type == "u8"):

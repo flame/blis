@@ -331,8 +331,6 @@ LPGEMV(bfloat16, bfloat16, float, bf16bf16f32of32)
 		}
 	}
 }
-#endif
-
 
 // B should always be packed.
 LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
@@ -702,3 +700,398 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 		}
 	}
 }
+#else
+LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
+{
+	//BF16 Contexts
+	dim_t NC = lcntx->blksz.NC;
+	dim_t KC = lcntx->blksz.KC;
+	dim_t MC = lcntx->blksz.MC;
+	dim_t NR = lcntx->blksz.NR;
+	dim_t MR = lcntx->blksz.MR;
+
+	//F32 contexts for the GEMM
+	lpgemm_cntx_t* lcntx_f32 = lpgemm_get_global_cntx_obj( F32F32F32OF32 );
+	dim_t f32_MR = lcntx_f32->blksz.MR;
+	dim_t f32_NR = lcntx_f32->blksz.NR;
+
+	const float* a_use = NULL;
+	dim_t cs_a_use = cs_a;
+	dim_t rs_a_use = rs_a;
+	dim_t a_block_stride = 0;
+
+	const float* b_use = NULL;
+	dim_t rs_b_use = rs_b;
+	dim_t cs_b_use = cs_b;
+
+	float* c_use_jc = NULL;
+	float* c_use_ic = NULL;
+	dim_t rs_c_use = rs_c;
+	dim_t rs_c_downscale = rs_c;
+
+	// Pack buffer for B.
+	float* pack_b_buffer_bf16 = NULL;
+	float* pack_a_buffer_bf16 = NULL;
+	mem_t mem_b = BLIS_MEM_INITIALIZER;
+	mem_t mem_a = BLIS_MEM_INITIALIZER;
+	siz_t mem_b_size_req = 0;
+	siz_t mem_a_size_req = 0;
+	dim_t packb_min_NR = 16;
+
+	// Temporary buffer for C accumulation when downscaling is required.
+	float* temp_scal_c_buffer_bf16;
+	mem_t mem_scale_c = BLIS_MEM_INITIALIZER;
+	siz_t mem_scale_c_size_req = 0;
+
+	// kc needs to be a multiple of 2 so that it can be used with dpbf16_ps
+	// instruction. Padding is added in cases this condition is not
+	// satisfied, and therefore the k offset used for packed/reordered
+	// buffer needs to be updated.
+	dim_t k_updated = k;
+	k_updated += (k_updated & 0x1);
+
+	// To decide whether to apply post ops or not.
+	bool is_last_k = FALSE;
+
+	// To decide whether to use original s8 C or temp buffer for beta scale.
+	bool is_first_k = FALSE;
+
+	lpgemm_post_op_attr post_ops_attr;
+	post_ops_attr.c_stor_type = c_downscale;
+	if ( c_downscale < F32 )
+	{
+		post_ops_attr.buf_downscale = c;
+	}
+	else
+	{
+		post_ops_attr.buf_downscale = NULL;
+	}
+
+	/* The thread calculations would still follow BF16 dimensions*/
+	// Generate thrinfo objects for jc and ic loops from lpgemm_thrinfo_t.
+	thrinfo_t thread_jc;
+	thrinfo_t thread_ic;
+
+	lpgemm_gen_thrinfo( thread, &thread_jc, &thread_ic );
+
+	// Compute the JC, IC loop thread range for the current thread.
+	dim_t jc_start, jc_end;
+	bli_thread_range_sub( &thread_jc, n, NR, FALSE, &jc_start, &jc_end );
+
+	dim_t ic_start, ic_end;
+	bli_thread_range_sub( &thread_ic, m, MR, FALSE, &ic_start, &ic_end );
+
+	for ( dim_t jc = jc_start; jc < jc_end; jc += NC )
+	{
+		dim_t nc0 = bli_min( ( jc_end - jc ), NC );
+
+		dim_t jc_cur_loop = jc;
+		dim_t jc_cur_loop_rem = 0;
+		dim_t n_sub_updated = 0;
+
+		if ( mtag_b == REORDERED )
+		{
+			get_B_panel_reordered_start_offset_width
+			(
+			  jc, n, NC, packb_min_NR,
+			  &jc_cur_loop, &jc_cur_loop_rem,
+			  &nc0, &n_sub_updated
+			);
+		}
+
+		if ( c_downscale == F32 )
+		{
+			c_use_jc = c + jc;
+		}
+		// Temp accumulaton buffer for C allocation.
+		else if ( c_downscale < F32 )
+		{
+			// Buffer memory is only required if output needs to be
+			// persisted across iterations of the pc/KC loop.
+			// It was observed that the locks used while checking out
+			// a buffer from memory pool had an impact on performance
+			// and is better to not checkout if k <= KC.
+			if ( k > KC )
+			{
+				mem_scale_c_size_req = sizeof( float ) * nc0 * ( ic_end - ic_start );
+
+				lpgemm_alloc_mem_panel
+				(
+			  	 mem_scale_c_size_req, BLIS_BUFFER_FOR_GEN_USE,
+			  	 &mem_scale_c, rntm
+				);
+
+				temp_scal_c_buffer_bf16 = bli_mem_buffer( &mem_scale_c );
+
+				c_use_jc = ( float* )temp_scal_c_buffer_bf16;
+			}
+
+			// The temp c buffer stride is modified as opposed to original C matrix.
+			rs_c_use = nc0;
+		}
+
+		for ( dim_t pc = 0; pc < k; pc += KC )
+		{
+			float beta0 = ( pc == 0 ) ? beta : 1;
+			dim_t kc0 = bli_min( ( k - pc ), KC );
+
+			// No parallelization in k dim, k always starts at 0.
+			is_first_k = ( pc == 0 ) ? ( TRUE ) : ( FALSE );
+			post_ops_attr.is_first_k = is_first_k;
+
+			is_last_k = ( ( pc + KC ) >= k ) ? ( TRUE ) : ( FALSE );
+			post_ops_attr.is_last_k = is_last_k;
+
+			// kc0 needs to be a multiple of 2 so that it can be
+			// used with dpbf16_ps instruction. Padding is added in
+			// cases this condition is not satisfied, and therefore
+			// the kc0 offsets used for packed/reordered buffers
+			// needs to be updated.
+			dim_t kc0_updated = kc0;
+			kc0_updated += (kc0_updated & 0x1);
+
+			// Pack B chunks are based on jc work id.
+			dim_t jc_work_id = bli_thread_work_id( &thread_jc );
+
+			// Using child thrinfo (thread_ic) tid to decide chief thread
+			// per B matrix chunk (jc work id group)
+			if ( bli_thread_am_ochief( &thread_ic ) )
+			{
+				// nc0 needs to be a multiple of 16 since this gives maximum
+				// vectorization. Packing B always results in buffers with width
+				// which is a multiple of 16. Subsequently the nc0 offsets used
+				// for packed/reordered buffers needs to be updated.
+				dim_t nc0_updated = make_multiple_of_n( nc0, packb_min_NR );
+				mem_b_size_req = sizeof( float ) * nc0_updated * kc0_updated;
+
+				lpgemm_alloc_mem_panel
+				(
+					mem_b_size_req, BLIS_BUFFER_FOR_B_PANEL,
+					&mem_b, rntm
+				);
+
+				thread->comm[jc_work_id].sent_object =
+						bli_mem_buffer( &mem_b );
+			}
+			// All threads in work group should wait till chief thread has
+			// finished allocating the packing buffers.
+			bli_thrcomm_barrier
+			(
+				bli_thread_ocomm_id( &thread_ic ),
+				&thread->comm[jc_work_id]
+			);
+
+			if ( mtag_b == PACK )
+			{
+				pack_b_buffer_bf16 =
+						( float* ) thread->comm[jc_work_id].sent_object;
+
+				// Compute the B panel per thread loop range for parallel
+				// packing using ic_ways number of threads. Since atmost only
+				// ic_ways threads can be used, the thread_ic attributes are
+				// used to split the loop range.
+				dim_t jc_packb_start, jc_packb_end;
+				bli_thread_range_sub
+				(
+				  &thread_ic, nc0, NR, FALSE,
+				  &jc_packb_start, &jc_packb_end
+				);
+
+				// Ensure thread ranges are valid, especially cases where no:
+				// of threads available for parallelization are greater than
+				// no: of B panel NR chunks.
+				if ( ( jc_packb_end > jc_packb_start ) &&
+					 ( jc_packb_start < ( jc + nc0 ) ) )
+				{
+					cvt_pack_bf16_f32
+					(
+					  pack_b_buffer_bf16 + ( jc_packb_start * kc0_updated ),
+					  ( b + ( rs_b * pc ) + ( cs_b * jc ) +
+					    ( cs_b * jc_packb_start ) ), rs_b, cs_b,
+					   kc0, ( jc_packb_end - jc_packb_start ),
+					  &rs_b_use, &cs_b_use
+					);
+					rs_b_use = nc0;
+					cs_b_use = 1;
+				}
+				else
+				{
+					//lpgemm_get_packb_strides( lcntx, &rs_b_use, &cs_b_use );
+					rs_b_use = nc0;
+					cs_b_use = 1;
+				}
+
+				// All threads in work group should wait till B matrix packing
+				// is completed by the participating threads.
+				bli_thrcomm_barrier
+				(
+				  bli_thread_ocomm_id( &thread_ic ),
+				  &thread->comm[jc_work_id]
+				);
+				b_use = pack_b_buffer_bf16;
+			}
+			// B part getting processed
+			else if ( mtag_b == REORDERED )
+			{
+				// In multi-threaded scenarios, an extra offset into a given
+				// packed B panel is required, since the jc loop split can
+				// result in per thread start offset inside the panel, instead
+				// of panel boundaries.
+				// If B is re-ordered, for F32 input, the BF16 data has to be
+				// unreordered and coverted to F32.
+
+				float *b_unreorder = ( float* ) thread->comm[jc_work_id].sent_object;
+				dim_t jc_packb_start, jc_packb_end;
+
+				bli_thread_range_sub
+				(
+				  &thread_ic, nc0, NR, FALSE,
+				  &jc_packb_start, &jc_packb_end
+				);
+
+				rs_b_use = nc0;
+				cs_b_use = 1;
+				if ( ( jc_packb_end > jc_packb_start ) &&
+					 ( jc_packb_start < ( jc + nc0 ) ) )
+				{
+					unpackb_nr64_bf16_f32
+						(
+							b + ( jc_cur_loop * k_updated ) +
+							( n_sub_updated * pc ) +
+							( ( jc_cur_loop_rem + jc_packb_start ) * kc0_updated ) ,
+							(b_unreorder +  jc_packb_start), kc0,  ( jc_packb_end - jc_packb_start ) ,
+							rs_b_use, cs_b_use
+							);
+				}
+
+				// All threads in work group should wait till B matrix packing
+				// is completed by the participating threads.
+				bli_thrcomm_barrier
+				(
+				  bli_thread_ocomm_id( &thread_ic ),
+				  &thread->comm[jc_work_id]
+				);
+				b_use = b_unreorder;
+			}
+
+			for ( dim_t ic = ic_start; ic < ic_end; ic += MC )
+			{
+				dim_t mc0 = bli_min( ( ic_end - ic ), MC );
+
+				// Only per thread C matrix is stored in temp buffer, so both
+				// per thread jc and ic start should be normalized to zero.
+				if ( c_downscale < F32 )
+				{
+					c_use_ic = c_use_jc + ( rs_c_use * ( ic - ic_start ) );
+				}
+				else
+				{
+					c_use_ic = c_use_jc + ( rs_c_use * ic );
+				}
+
+				mem_a_size_req = sizeof( float ) * mc0 * kc0;
+
+				lpgemm_alloc_mem_panel
+					(
+						mem_a_size_req, BLIS_BUFFER_FOR_GEN_USE,
+						&mem_a, rntm
+					);
+				// For packed or unpacked data, the mc0 * kc0
+				// block is converted to contain F32 data.
+				if ( mtag_a == UNPACKED )
+				{
+					float *cvta_bf16_f32 = ( float* ) bli_mem_buffer( &mem_a );
+
+					cvt_pack_bf16_f32
+					(
+					  (cvta_bf16_f32 ),
+					  ( a + ( rs_a * ic ) + ( cs_a * pc ) ), rs_a, cs_a,
+					  	mc0, kc0,
+						&rs_a_use, &cs_a_use
+					);
+					a_use = cvta_bf16_f32;
+
+					// Since F32 kernels are called, a_stride would be
+					// f32's MR * kc0
+					a_block_stride = f32_MR * kc0;
+				}
+				else if ( mtag_a == PACK )
+				{
+					pack_a_buffer_bf16 =
+					( float* ) bli_mem_buffer( &mem_a );
+
+					cvt_pack_bf16_f32
+					(
+					  (pack_a_buffer_bf16 ),
+					  ( a + ( rs_a * ic ) + ( cs_a * pc ) ), rs_a, cs_a,
+					  	mc0, kc0,
+						&rs_a_use, &cs_a_use
+					);
+					a_use = pack_a_buffer_bf16;
+					a_block_stride =  f32_MR * kc0;
+				}
+
+				/*The NR loop should use the F32 kernel dimesnions*/
+				for ( dim_t jr = 0; jr < nc0; jr += f32_NR )
+				{
+					dim_t nr0 = bli_min( ( nc0 - jr ), f32_NR );
+
+					// Post ops meta attributes.
+					post_ops_attr.post_op_c_i = ic;
+					post_ops_attr.post_op_c_j = ( jc + jr );
+					post_ops_attr.rs_c_downscale = rs_c_downscale;
+
+					/*To support AVX2, the F32 kernels are called.*/
+					lpgemm_rowvar_f32f32f32of32_6x16m
+					( mc0, nr0, kc0,
+						a_use, rs_a_use, cs_a_use, a_block_stride,
+						( b_use + jr ), rs_b_use, cs_b_use,
+						( c_use_ic + jr ), rs_c_use, 1,
+						alpha, beta0,
+						post_op_list, post_ops_attr
+					);
+				}
+			}
+		}
+		if ( mtag_b == REORDERED )
+		{
+			adjust_B_panel_reordered_jc( &jc, jc_cur_loop );
+		}
+	}
+
+	// Release pack buffers.
+	if ( ( mtag_b == PACK ) || ( mtag_b == REORDERED) )
+	{
+		// All threads in work group should wait till B matrix usage is
+		// completed by the participating threads.
+		bli_thrcomm_barrier
+		(
+		  bli_thread_ocomm_id( &thread_jc ),
+		  &thread->comm[bli_thread_work_id( &thread_jc)]
+		);
+
+		if ( bli_thread_am_ochief( &thread_ic ) )
+		{
+			if ( bli_mem_is_alloc( &mem_b ) )
+			{
+				bli_pba_release( rntm, &mem_b );
+			}
+		}
+	}
+
+	if( mtag_a == PACK  || mtag_a == UNPACKED )
+	{
+		if ( bli_mem_is_alloc( &mem_a ) )
+		{
+			bli_pba_release(rntm, &mem_a);
+		}
+	}
+	if ( c_downscale < F32 )
+	{
+		if ( bli_mem_is_alloc( &mem_scale_c ) )
+		{
+			bli_pba_release( rntm, &mem_scale_c );
+		}
+	}
+}
+#endif

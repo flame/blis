@@ -248,10 +248,18 @@ POST_OPS_BIAS_6x16F:
         if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
              ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
         {
-          ymm0 = _mm256_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_j + ( 0 * 8 ) );
-          ymm1 = _mm256_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_j + ( 1 * 8 ) );
+          if( post_ops_list_temp->stor_type == BF16 )
+          {
+            BF16_F32_BIAS_LOAD_AVX2( ymm0, 0 );
+            BF16_F32_BIAS_LOAD_AVX2( ymm1, 1 );
+          }
+          else
+          {
+            ymm0 = _mm256_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+                      post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+            ymm1 = _mm256_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+                      post_ops_attr.post_op_c_j + ( 1 * 8 ) );
+          }
 
           // c[0,0-7]
           ymm4 = _mm256_add_ps( ymm4, ymm0 );
@@ -297,14 +305,24 @@ POST_OPS_BIAS_6x16F:
           // the ic index, and each bias element corresponds to an
           // entire row of the transposed output array, instead of an
           // entire column.
-          ymm0 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+          if( post_ops_list_temp->stor_type == BF16 )
+          {
+            BF16_F32_BIAS_BCAST_AVX2(ymm0,0);
+            BF16_F32_BIAS_BCAST_AVX2(ymm1,1);
+            BF16_F32_BIAS_BCAST_AVX2(ymm2,2);
+            BF16_F32_BIAS_BCAST_AVX2(ymm3,3);
+          }
+          else
+          {
+            ymm0 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
               post_ops_attr.post_op_c_i + 0 );
-          ymm1 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 1 );
-          ymm2 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 2 );
-          ymm3 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 3 );
+            ymm1 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                post_ops_attr.post_op_c_i + 1 );
+            ymm2 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                post_ops_attr.post_op_c_i + 2 );
+            ymm3 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                post_ops_attr.post_op_c_i + 3 );
+          }
 
           // c[0,0-7]
           ymm4 = _mm256_add_ps( ymm4, ymm0 );
@@ -330,10 +348,18 @@ POST_OPS_BIAS_6x16F:
           // c[3,8-15]
           ymm11 = _mm256_add_ps( ymm11, ymm3 );
 
-          ymm0 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 4 );
-          ymm1 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+          if( post_ops_list_temp->stor_type == BF16 )
+          {
+            BF16_F32_BIAS_BCAST_AVX2(ymm0,4);
+            BF16_F32_BIAS_BCAST_AVX2(ymm1,5);
+          }
+          else
+          {
+            ymm0 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                post_ops_attr.post_op_c_i + 4 );
+            ymm1 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
               post_ops_attr.post_op_c_i + 5 );
+          }
 
           // c[4,0-7]
           ymm12 = _mm256_add_ps( ymm12, ymm0 );
@@ -1262,9 +1288,15 @@ POST_OPS_BIAS_6x8F:
         if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
              ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
         {
-          ymm0 = _mm256_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_j + ( 0 * 8 ) );
-
+          if( post_ops_list_temp->stor_type == BF16 )
+          {
+            BF16_F32_BIAS_LOAD_AVX2( ymm0, 0 );
+          }
+          else
+          {
+            ymm0 = _mm256_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+                      post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+          }
           // c[0,0-7]
           ymm4 = _mm256_add_ps( ymm4, ymm0 );
 
@@ -1291,14 +1323,24 @@ POST_OPS_BIAS_6x8F:
           // the ic index, and each bias element corresponds to an
           // entire row of the transposed output array, instead of an
           // entire column.
-          ymm0 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+          if( post_ops_list_temp->stor_type == BF16 )
+          {
+            BF16_F32_BIAS_BCAST_AVX2(ymm0,0);
+            BF16_F32_BIAS_BCAST_AVX2(ymm1,1);
+            BF16_F32_BIAS_BCAST_AVX2(ymm2,2);
+            BF16_F32_BIAS_BCAST_AVX2(ymm3,3);
+          }
+          else
+          {
+            ymm0 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
               post_ops_attr.post_op_c_i + 0 );
-          ymm1 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 1 );
-          ymm2 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 2 );
-          ymm3 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+            ymm1 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                post_ops_attr.post_op_c_i + 1 );
+            ymm2 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                post_ops_attr.post_op_c_i + 2 );
+            ymm3 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
               post_ops_attr.post_op_c_i + 3 );
+          }
 
           // c[0,0-7]
           ymm4 = _mm256_add_ps( ymm4, ymm0 );
@@ -1312,10 +1354,18 @@ POST_OPS_BIAS_6x8F:
           // c[3,0-7]
           ymm10 = _mm256_add_ps( ymm10, ymm3 );
 
-          ymm0 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 4 );
-          ymm1 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 5 );
+          if( post_ops_list_temp->stor_type == BF16 )
+          {
+            BF16_F32_BIAS_BCAST_AVX2(ymm0,4);
+            BF16_F32_BIAS_BCAST_AVX2(ymm1,5);
+          }
+          else
+          {
+            ymm0 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                    post_ops_attr.post_op_c_i + 4 );
+            ymm1 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                    post_ops_attr.post_op_c_i + 5 );
+          }
 
           // c[4,0-7]
           ymm12 = _mm256_add_ps( ymm12, ymm0 );
@@ -2039,8 +2089,16 @@ POST_OPS_BIAS_6x4F:
         if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
              ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
         {
-          xmm0 = _mm_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+
+          if( post_ops_list_temp->stor_type == BF16 )
+          {
+            BF16_F32_BIAS_LOAD_LT4BF16_AVX2(xmm0, 4);
+          }
+          else
+          {
+            xmm0 = _mm_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+                      post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+          }
 
           // c[0,0-3]
           xmm4 = _mm_add_ps( xmm4, xmm0 );
@@ -2068,14 +2126,24 @@ POST_OPS_BIAS_6x4F:
           // the ic index, and each bias element corresponds to an
           // entire row of the transposed output array, instead of an
           // entire column.
-          xmm0 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 0 );
-          xmm1 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 1 );
-          xmm2 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 2 );
-          xmm3 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 3 );
+          if( post_ops_list_temp->stor_type == BF16 )
+          {
+            BF16_F32_BIAS_BCAST_LT4BF16_AVX2(xmm0, 0, 4);
+            BF16_F32_BIAS_BCAST_LT4BF16_AVX2(xmm1, 1, 4);
+            BF16_F32_BIAS_BCAST_LT4BF16_AVX2(xmm2, 2, 4);
+            BF16_F32_BIAS_BCAST_LT4BF16_AVX2(xmm3, 3, 4);
+          }
+          else
+          {
+            xmm0 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                      post_ops_attr.post_op_c_i + 0 );
+            xmm1 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                      post_ops_attr.post_op_c_i + 1 );
+            xmm2 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                      post_ops_attr.post_op_c_i + 2 );
+            xmm3 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                      post_ops_attr.post_op_c_i + 3 );
+          }
 
           // c[0,0-3]
           xmm4 = _mm_add_ps( xmm4, xmm0 );
@@ -2088,11 +2156,18 @@ POST_OPS_BIAS_6x4F:
 
           // c[3,0-3]
           xmm7 = _mm_add_ps( xmm7, xmm3 );
-
-          xmm0 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+          if( post_ops_list_temp->stor_type == BF16 )
+          {
+            BF16_F32_BIAS_BCAST_LT4BF16_AVX2(xmm0, 4, 4);
+            BF16_F32_BIAS_BCAST_LT4BF16_AVX2(xmm1, 5, 4);
+          }
+          else
+          {
+            xmm0 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
               post_ops_attr.post_op_c_i + 4 );
-          xmm1 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+            xmm1 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
               post_ops_attr.post_op_c_i + 5 );
+          }
 
           // c[4,0-3]
           xmm8 = _mm_add_ps( xmm8, xmm0 );
@@ -2797,9 +2872,16 @@ POST_OPS_BIAS_6x2F:
         if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
              ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
         {
-          xmm0 = ( __m128 )_mm_load_sd( (const double*)
+          if( post_ops_list_temp->stor_type == BF16 )
+          {
+            BF16_F32_BIAS_LOAD_LT4BF16_AVX2(xmm0, 2);
+          }
+          else
+          {
+            xmm0 = ( __m128 )_mm_load_sd( (const double*)
                   (( float* )post_ops_list_temp->op_args1 +
                   post_ops_attr.post_op_c_j + ( 0 * 8 ) ));
+          }
 
           // c[0,0-3]
           xmm4 = _mm_add_ps( xmm4, xmm0 );
@@ -2827,14 +2909,24 @@ POST_OPS_BIAS_6x2F:
           // the ic index, and each bias element corresponds to an
           // entire row of the transposed output array, instead of an
           // entire column.
-          xmm0 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 0 );
-          xmm1 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 1 );
-          xmm2 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 2 );
-          xmm3 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 3 );
+          if( post_ops_list_temp->stor_type == BF16 )
+          {
+            BF16_F32_BIAS_BCAST_LT4BF16_AVX2(xmm0, 0, 2);
+            BF16_F32_BIAS_BCAST_LT4BF16_AVX2(xmm1, 1, 2);
+            BF16_F32_BIAS_BCAST_LT4BF16_AVX2(xmm2, 2, 2);
+            BF16_F32_BIAS_BCAST_LT4BF16_AVX2(xmm3, 3, 2);
+          }
+          else
+          {
+            xmm0 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                post_ops_attr.post_op_c_i + 0 );
+            xmm1 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                post_ops_attr.post_op_c_i + 1 );
+            xmm2 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                post_ops_attr.post_op_c_i + 2 );
+            xmm3 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                post_ops_attr.post_op_c_i + 3 );
+          }
 
           // c[0,0-3]
           xmm4 = _mm_add_ps( xmm4, xmm0 );
@@ -2848,10 +2940,18 @@ POST_OPS_BIAS_6x2F:
           // c[3,0-3]
           xmm7 = _mm_add_ps( xmm7, xmm3 );
 
-          xmm0 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 4 );
-          xmm1 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 5 );
+          if( post_ops_list_temp->stor_type == BF16 )
+          {
+            BF16_F32_BIAS_BCAST_LT4BF16_AVX2(xmm0, 4, 2);
+            BF16_F32_BIAS_BCAST_LT4BF16_AVX2(xmm1, 5, 2);
+          }
+          else
+          {
+            xmm0 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                post_ops_attr.post_op_c_i + 4 );
+            xmm1 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                post_ops_attr.post_op_c_i + 5 );
+          }
 
           // c[4,0-3]
           xmm8 = _mm_add_ps( xmm8, xmm0 );
@@ -3556,8 +3656,15 @@ POST_OPS_BIAS_6x1F:
         if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
              ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
         {
-          xmm0 = ( __m128 )_mm_load_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+          if( post_ops_list_temp->stor_type == BF16 )
+          {
+            BF16_F32_BIAS_LOAD_LT4BF16_AVX2(xmm0, 1);
+          }
+          else
+          {
+            xmm0 = ( __m128 )_mm_load_ss( ( float* )post_ops_list_temp->op_args1 +
+                    post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+          }
 
           // c[0,0-3]
           xmm4 = _mm_add_ps( xmm4, xmm0 );
@@ -3585,14 +3692,24 @@ POST_OPS_BIAS_6x1F:
           // the ic index, and each bias element corresponds to an
           // entire row of the transposed output array, instead of an
           // entire column.
-          xmm0 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 0 );
-          xmm1 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 1 );
-          xmm2 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 2 );
-          xmm3 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 3 );
+          if( post_ops_list_temp->stor_type == BF16 )
+          {
+            BF16_F32_BIAS_BCAST_LT4BF16_AVX2(xmm0, 0, 2);
+            BF16_F32_BIAS_BCAST_LT4BF16_AVX2(xmm1, 1, 2);
+            BF16_F32_BIAS_BCAST_LT4BF16_AVX2(xmm2, 2, 2);
+            BF16_F32_BIAS_BCAST_LT4BF16_AVX2(xmm3, 3, 2);
+          }
+          else
+          {
+            xmm0 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                post_ops_attr.post_op_c_i + 0 );
+            xmm1 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                post_ops_attr.post_op_c_i + 1 );
+            xmm2 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                post_ops_attr.post_op_c_i + 2 );
+            xmm3 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                post_ops_attr.post_op_c_i + 3 );
+          }
 
           // c[0,0-3]
           xmm4 = _mm_add_ps( xmm4, xmm0 );
@@ -3606,10 +3723,18 @@ POST_OPS_BIAS_6x1F:
           // c[3,0-3]
           xmm7 = _mm_add_ps( xmm7, xmm3 );
 
-          xmm0 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 4 );
-          xmm1 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
-              post_ops_attr.post_op_c_i + 5 );
+          if( post_ops_list_temp->stor_type == BF16 )
+          {
+            BF16_F32_BIAS_BCAST_LT4BF16_AVX2(xmm0, 4, 2);
+            BF16_F32_BIAS_BCAST_LT4BF16_AVX2(xmm1, 5, 2);
+          }
+          else
+          {
+            xmm0 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                post_ops_attr.post_op_c_i + 4 );
+            xmm1 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+                post_ops_attr.post_op_c_i + 5 );
+          }
 
           // c[4,0-3]
           xmm8 = _mm_add_ps( xmm8, xmm0 );

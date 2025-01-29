@@ -147,14 +147,6 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(bf16bf16f32of32)
 		return 0; // Error.
 	}
 
-	// Check if avx512_bf16 ISA is supported, lpgemm matmul only works with it.
-	if ( bli_cpuid_is_avx512bf16_supported() == FALSE )
-	{
-		bli_print_msg(" AVX512_BF16 ISA not supported by processor, "
-				"cannot perform bf16bf16f32 gemm.", __FILE__, __LINE__ );
-		return 0; // Error.
-	}
-
 	/* Initialize BLIS. */
 	bli_init_auto();
 
@@ -250,12 +242,20 @@ AOCL_GEMM_REORDER(bfloat16, bf16bf16f32of32)
 		return; // Error
 	}
 
-	// Check if avx512_bf16 ISA is supported, lpgemm matmul only works with it.
+	// Check if avx-2 or avx512_bf16 ISA is supported, lpgemm matmul only works with it.
 	if ( bli_cpuid_is_avx512bf16_supported() == FALSE )
 	{
-		bli_print_msg(" AVX512_BF16 ISA not supported by processor, "
-				"cannot perform bf16bf16f32 gemm.", __FILE__, __LINE__ );
-		return; // Error.
+		if ( bli_cpuid_is_avx2fma3_supported() == FALSE )
+		{
+			bli_print_msg(" AVX512_BF16 ISA  and AVX2 ISA not supported by processor, "
+				"cannot perform bf16bf16f32/f32f32f32 gemm.", __FILE__, __LINE__ );
+			return; // Error.
+		}
+
+		aocl_reorder_bf16bf16f32of32_reference( order,trans ,mat_type, input_buf_addr,
+								reorder_buf_addr, k, n, ldb );
+
+		return;
 	}
 
 	/* Initialize BLIS. */
