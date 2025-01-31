@@ -116,32 +116,22 @@ void bli_dynamic_blkszs_zen5( dim_t n_threads, cntx_t* cntx, num_t dt )
 		{
 			mc = 88, kc = 384, nc = 4032;
 		}
-		else if (n_threads <= 48) // more than one node
-		{
-			mc = 72, kc = 448, nc = 1008;
-		}
-		else if (n_threads <= 128)
-		{
-			mc = 80, kc = 576, nc = 2016;
-		}
 		else
 		{
-			mc = 128, kc = 576, nc = 2016;
+			// these blocksizes are tuned for M >> K, N >> K and K < 500
+			mc = 120, kc = 576, nc = 4008;
 		}
 	}
 	else // BLIS_MODEL_TURIN
 	{
-		if (n_threads <= 24) // one node
+		if (n_threads == 1)
 		{
 			mc = 80, kc = 384, nc = 4032;
 		}
-		else if (n_threads <= 64)
-		{
-			mc = 112, kc = 512, nc = 4032;
-		}
 		else
 		{
-			mc = 112, kc = 512, nc = 2016;
+			// these blocksizes are tuned for M >> K, N >> K and K < 500
+			mc = 120, kc = 512, nc = 2016;
 		}
 	}
 
