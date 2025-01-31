@@ -610,4 +610,543 @@ INSTANTIATE_TEST_SUITE_P(
     (::gemvUKRPrint<double, dgemv_ker_ft>())
 );
 #endif
+
+// -------------------------------
+// DGEMV NO_TRANSPOSE Kernel Tests
+// -------------------------------
+static dgemv_ker_ft m_ker_fp[8] =
+{
+    bli_dgemv_n_zen_int_16mx1_avx512,   // n = 1
+    bli_dgemv_n_zen_int_16mx2_avx512,   // n = 2
+    bli_dgemv_n_zen_int_16mx3_avx512,   // n = 3
+    bli_dgemv_n_zen_int_16mx4_avx512,   // n = 4
+    bli_dgemv_n_zen_int_16mx5_avx512,   // n = 5
+    bli_dgemv_n_zen_int_16mx6_avx512,   // n = 6
+    bli_dgemv_n_zen_int_16mx7_avx512,   // n = 7
+    bli_dgemv_n_zen_int_16mx8_avx512,   // n = 8; base kernel
+};
+
+#define DGEMV_TEST_M(N) \
+    INSTANTIATE_TEST_SUITE_P( \
+        dgemv_n_avx512_16mx##N, \
+        dgemvGeneric, \
+        ::testing::Combine( \
+            ::testing::Values(m_ker_fp[N-1]), \
+            ::testing::Values( 'c' ), \
+            ::testing::Values( 'n' ), \
+            ::testing::Values( 'n' ), \
+            ::testing::Values( \
+                               gtint_t(16), \
+                               gtint_t(8), \
+                               gtint_t(7), \
+                               gtint_t(63) ), \
+            ::testing::Values( gtint_t(N) ), \
+            ::testing::Values( double(0.0), double(1.0), double(2.0) ), \
+            ::testing::Values( double(1.0) ), \
+            ::testing::Values( gtint_t(1), gtint_t(3) ), \
+            ::testing::Values( gtint_t(1) ), \
+            ::testing::Values( gtint_t(0), gtint_t(7) ), \
+            ::testing::Values( false, true) \
+        ), \
+        (::gemvUKRPrint<double, dgemv_ker_ft>()) \
+    );
+#ifdef K_bli_dgemv_n_zen_int_16mx8_avx512
+DGEMV_TEST_M(8)
+#endif
+
+#ifdef K_bli_dgemv_n_zen_int_16mx7_avx512
+DGEMV_TEST_M(7)
+#endif
+
+#ifdef K_bli_dgemv_n_zen_int_16mx6_avx512
+DGEMV_TEST_M(6)
+#endif
+
+#ifdef K_bli_dgemv_n_zen_int_16mx5_avx512
+DGEMV_TEST_M(5)
+#endif
+
+#ifdef K_bli_dgemv_n_zen_int_16mx4_avx512
+DGEMV_TEST_M(4)
+#endif
+
+#ifdef K_bli_dgemv_n_zen_int_16mx3_avx512
+DGEMV_TEST_M(3)
+#endif
+
+#ifdef K_bli_dgemv_n_zen_int_16mx2_avx512
+DGEMV_TEST_M(2)
+#endif
+
+#ifdef K_bli_dgemv_n_zen_int_16mx1_avx512
+DGEMV_TEST_M(1)
+#endif
+
+// 32x8n kernel will handle case where m >= 32.
+#ifdef K_bli_dgemv_n_zen_int_32x8n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_32x8n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_32x8n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(95), gtint_t(32), gtint_t(16),
+                           gtint_t(8),  gtint_t(7) ),                   // m
+        ::testing::Values( gtint_t(15), gtint_t(8), gtint_t(4) ),       // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// 16x8n kernel will handle case where m = [16, 32).
+#ifdef K_bli_dgemv_n_zen_int_16x8n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_16x8n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_16x8n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(16), gtint_t(27) ),                  // m
+        ::testing::Values( gtint_t(31), gtint_t(16), gtint_t(4),
+                           gtint_t(3),  gtint_t(2),  gtint_t(1) ),      // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// 8x8n kernel will handle case where m = [8, 15).
+#ifdef K_bli_dgemv_n_zen_int_8x8n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_8x8n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_8x8n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(8), gtint_t(11) ),                   // m
+        ::testing::Values( gtint_t(31), gtint_t(16), gtint_t(4),
+                           gtint_t(3),  gtint_t(2),  gtint_t(1) ),      // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// m_leftx8n kernel will handle case where m = [1, 7).
+#ifdef K_bli_dgemv_n_zen_int_m_leftx8n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_m_leftx8n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_m_leftx8n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Range ( gtint_t(1), gtint_t(8), gtint_t(1) ),        // m
+        ::testing::Values( gtint_t(31), gtint_t(16), gtint_t(4),
+                           gtint_t(3),  gtint_t(2),  gtint_t(1) ),      // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// 32x4n kernel will handle case where m >= 32 and n = 4.
+#ifdef K_bli_dgemv_n_zen_int_32x4n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_32x4n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_32x4n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(95), gtint_t(32), gtint_t(16),
+                           gtint_t(8),  gtint_t(7) ),                   // m
+        ::testing::Values( gtint_t(4) ),                                // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// 16x4n kernel will handle case where m = [16, 32) and n = 4.
+#ifdef K_bli_dgemv_n_zen_int_16x4n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_16x4n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_16x4n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(16), gtint_t(27) ),                  // m
+        ::testing::Values( gtint_t(4) ),                                // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// 8x4n kernel will handle case where m = [8, 15) and n = 4.
+#ifdef K_bli_dgemv_n_zen_int_8x4n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_8x4n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_8x4n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(8), gtint_t(11) ),                   // m
+        ::testing::Values( gtint_t(4) ),                                // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// m_leftx4n kernel will handle case where m = [1, 7) and n = 4.
+#ifdef K_bli_dgemv_n_zen_int_m_leftx4n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_m_leftx4n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_m_leftx4n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Range ( gtint_t(1), gtint_t(8), gtint_t(1) ),        // m
+        ::testing::Values( gtint_t(4) ),                                // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// 32x3n kernel will handle case where m >= 32 and n = 3.
+#ifdef K_bli_dgemv_n_zen_int_32x3n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_32x3n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_32x3n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(95), gtint_t(32), gtint_t(16),
+                           gtint_t(8),  gtint_t(7) ),                   // m
+        ::testing::Values( gtint_t(3) ),                                // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// 16x3n kernel will handle case where m = [16, 32) and n = 3.
+#ifdef K_bli_dgemv_n_zen_int_16x3n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_16x3n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_16x3n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(16), gtint_t(27) ),                  // m
+        ::testing::Values( gtint_t(3) ),                                // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// 8x3n kernel will handle case where m = [8, 15) and n = 3.
+#ifdef K_bli_dgemv_n_zen_int_8x3n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_8x3n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_8x3n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(8), gtint_t(11) ),                   // m
+        ::testing::Values( gtint_t(3) ),                                // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// m_leftx3n kernel will handle case where m = [1, 7) and n = 3.
+#ifdef K_bli_dgemv_n_zen_int_m_leftx3n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_m_leftx3n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_m_leftx3n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Range ( gtint_t(1), gtint_t(8), gtint_t(1) ),        // m
+        ::testing::Values( gtint_t(3) ),                                // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// 32x2n kernel will handle case where m >= 32 and n = 2.
+#ifdef K_bli_dgemv_n_zen_int_32x2n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_32x2n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_32x2n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(95), gtint_t(32), gtint_t(16),
+                           gtint_t(8),  gtint_t(7) ),                   // m
+        ::testing::Values( gtint_t(2) ),                                // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// 16x2n kernel will handle case where m = [16, 32) and n = 2.
+#ifdef K_bli_dgemv_n_zen_int_16x2n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_16x2n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_16x2n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(16), gtint_t(27) ),                  // m
+        ::testing::Values( gtint_t(2) ),                                // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// 8x2n kernel will handle case where m = [8, 15) and n = 2.
+#ifdef K_bli_dgemv_n_zen_int_8x2n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_8x2n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_8x2n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(8), gtint_t(11) ),                   // m
+        ::testing::Values( gtint_t(2) ),                                // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// m_leftx2n kernel will handle case where m = [1, 7) and n = 2.
+#ifdef K_bli_dgemv_n_zen_int_m_leftx2n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_m_leftx2n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_m_leftx2n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Range ( gtint_t(1), gtint_t(8), gtint_t(1) ),        // m
+        ::testing::Values( gtint_t(2) ),                                // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// 32x1n kernel will handle case where m >= 32 and n = 1.
+#ifdef K_bli_dgemv_n_zen_int_32x1n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_32x1n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_32x1n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(95), gtint_t(32), gtint_t(16),
+                           gtint_t(8),  gtint_t(7) ),                   // m
+        ::testing::Values( gtint_t(1) ),                                // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// 16x1n kernel will handle case where m = [16, 32) and n = 1.
+#ifdef K_bli_dgemv_n_zen_int_16x1n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_16x1n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_16x1n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(16), gtint_t(27) ),                  // m
+        ::testing::Values( gtint_t(1) ),                                // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// 8x1n kernel will handle case where m = [8, 15) and n = 1.
+#ifdef K_bli_dgemv_n_zen_int_8x1n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_8x1n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_8x1n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(8), gtint_t(11) ),                   // m
+        ::testing::Values( gtint_t(1) ),                                // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
+
+// m_leftx1n kernel will handle case where m = [1, 7) and n = 1.
+#ifdef K_bli_dgemv_n_zen_int_m_leftx1n_avx512
+INSTANTIATE_TEST_SUITE_P(
+    dgemv_n_m_leftx1n_avx512,
+    dgemvGeneric,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen_int_m_leftx1n_avx512),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Range ( gtint_t(1), gtint_t(8), gtint_t(1) ),        // m
+        ::testing::Values( gtint_t(1) ),                                // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft>())
+);
+#endif
 #endif

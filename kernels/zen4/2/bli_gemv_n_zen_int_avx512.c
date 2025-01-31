@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -46,17 +46,32 @@
  */
 
 // Function pointers for n-biased kernels.
-static dgemv_ker_ft n_ker_fp[] =
+static dgemv_ker_ft n_ker_fp[5][4] =
 {
-    bli_dgemv_n_zen_int_32x8n_avx512,   // base kernel
-    bli_dgemv_n_zen_int_32x1n_avx512,   // n = 1
-    bli_dgemv_n_zen_int_32x2n_avx512,   // n = 2
-    bli_dgemv_n_zen_int_32x8n_avx512,   // n = 3; uses base kernel
-    bli_dgemv_n_zen_int_32x4n_avx512    // n = 4
+    { bli_dgemv_n_zen_int_32x8n_avx512,
+      bli_dgemv_n_zen_int_16x8n_avx512,
+      bli_dgemv_n_zen_int_8x8n_avx512,
+      bli_dgemv_n_zen_int_m_leftx8n_avx512 },
+    { bli_dgemv_n_zen_int_32x1n_avx512,
+      bli_dgemv_n_zen_int_16x1n_avx512,
+      bli_dgemv_n_zen_int_8x1n_avx512,
+      bli_dgemv_n_zen_int_m_leftx1n_avx512 },
+    { bli_dgemv_n_zen_int_32x2n_avx512,
+      bli_dgemv_n_zen_int_16x2n_avx512,
+      bli_dgemv_n_zen_int_8x2n_avx512,
+      bli_dgemv_n_zen_int_m_leftx2n_avx512 },
+    { bli_dgemv_n_zen_int_32x3n_avx512,
+      bli_dgemv_n_zen_int_16x3n_avx512,
+      bli_dgemv_n_zen_int_8x3n_avx512,
+      bli_dgemv_n_zen_int_m_leftx3n_avx512 },
+    { bli_dgemv_n_zen_int_32x4n_avx512,
+      bli_dgemv_n_zen_int_16x4n_avx512,
+      bli_dgemv_n_zen_int_8x4n_avx512,
+      bli_dgemv_n_zen_int_m_leftx4n_avx512 }
 };
 
 // Function pointers for m-biased kernels.
-static dgemv_ker_ft m_ker_fp[] =
+static dgemv_ker_ft m_ker_fp[8] =
 {
     bli_dgemv_n_zen_int_16mx8_avx512,   // base kernel
     bli_dgemv_n_zen_int_16mx1_avx512,   // n = 1
@@ -122,8 +137,13 @@ void bli_dgemv_n_avx512
     // kernels which handle beta scaling of y vector.
     if ( n0 < 5 && incy == 1 )
     {
+        dim_t m_idx = 0;    // 32x8n kernel
+        if      ( 32 > m0 && m0 > 15 ) m_idx = 1;   // 16x8n kernel; [16,31)
+        else if ( 16 > m0 && m0 > 7  ) m_idx = 2;   // 8x8n kernel; [8,15)
+        else if (  8 > m0 && m0 > 0  ) m_idx = 3;   // m_leftx8n kernel; [1,7)
+
         // Invoke respective kernel based on n dimension.
-        n_ker_fp[n0]
+        n_ker_fp[n0][m_idx]
         (
           conja,
           conjx,
@@ -172,8 +192,9 @@ void bli_dgemv_n_avx512
         // Calculate the size required for m0 double elements in vector Y.
         size_t buffer_size = m0 * sizeof( double );
 
-        #ifdef BLIS_ENABLE_MEM_TRACING
-        #endif
+#ifdef BLIS_ENABLE_MEM_TRACING
+        printf("bli_dgemv_n_avx512(): get mem pool block\n");
+#endif
 
         /**
          * Acquire a Buffer(m0*size(double)) from the memory broker and save the
@@ -241,40 +262,23 @@ void bli_dgemv_n_avx512
      * If n0 is less than 8, we directly invoke the respective fringe kernels,
      * else the base kernel is invoked.
      */
-    if ( n0 < 8 )
-    {
-        // Invoke respective fringe kernel.
-        m_ker_fp[n0]
-        (
-          conja,
-          conjx,
-          m0,
-          n0,
-          alpha,
-          a, rs_at, cs_at,
-          x, incx,
-          beta,
-          y_temp, temp_incy,
-          cntx
-        );
-    }
-    else
-    {
-        // Invoke the base kernel.
-        m_ker_fp[0]
-        (
-          conja,
-          conjx,
-          m0,
-          n0,
-          alpha,
-          a, rs_at, cs_at,
-          x, incx,
-          beta,
-          y_temp, temp_incy,
-          cntx
-        );
-    }
+    dim_t n_idx = 0;
+    if ( n0 < 8 ) n_idx = n0;
+
+    // Invoke respective m_kernel
+    m_ker_fp[n_idx]
+    (
+      conja,
+      conjx,
+      m0,
+      n0,
+      alpha,
+      a, rs_at, cs_at,
+      x, incx,
+      beta,
+      y_temp, temp_incy,
+      cntx
+    );
 
     // If y was packed into y_temp, copy the contents back to y and free memory.
     if (is_y_temp_buf_created)
@@ -293,6 +297,7 @@ void bli_dgemv_n_avx512
         );
 
 #ifdef BLIS_ENABLE_MEM_TRACING
+        printf( "bli_dgemv_n_avx512(): releasing mem pool block\n" );
 #endif
         // Return the buffer to pool.
         bli_pba_release( &rntm , &mem_bufY );
@@ -300,7 +305,6 @@ void bli_dgemv_n_avx512
 
     AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_4 );
 }
-
 
 /**
  * ----------------------------------------------------------------------------
@@ -620,7 +624,7 @@ void bli_dgemv_n_zen_int_16mx8_avx512
         xbuf += 8*incx;     // Move xbuf to the next block of 8 elements.
     }   // End of i-loop, n-iters.
 
-    // Move abuf to the beginning of the next block of columns.
+    // Move a to the beginning of the next block of columns.
     a = a + 8*n8_iter*cs_a;
     // Move xbuf to the beginning of the next block of elements.
     x = x + 8*n8_iter*incx;
@@ -679,7 +683,7 @@ void bli_dgemv_n_zen_int_16mx7_avx512
       cntx
     );
 
-    a = a + 4*cs;   // Move abuf to the beginning of the next block of columns.
+    a = a + 4*cs;   // Move a to the beginning of the next block of columns.
     x = x + 4*incx; // Move xbuf to the beginning of the next block of elements.
 
     bli_dgemv_n_zen_int_16mx2_avx512
@@ -696,7 +700,7 @@ void bli_dgemv_n_zen_int_16mx7_avx512
       cntx
     );
 
-    a = a + 2*cs;   // Move abuf to the beginning of the next block of columns.
+    a = a + 2*cs;   // Move a to the beginning of the next block of columns.
     x = x + 2*incx; // Move xbuf to the beginning of the next block of elements.
 
     bli_dgemv_n_zen_int_16mx1_avx512
@@ -748,7 +752,7 @@ void bli_dgemv_n_zen_int_16mx6_avx512
       cntx
     );
 
-    a = a + 4*cs;   // Move abuf to the beginning of the next block of columns.
+    a = a + 4*cs;   // Move a to the beginning of the next block of columns.
     x = x + 4*incx; // Move xbuf to the beginning of the next block of elements.
 
     bli_dgemv_n_zen_int_16mx2_avx512
@@ -800,7 +804,7 @@ void bli_dgemv_n_zen_int_16mx5_avx512
       cntx
     );
 
-    a = a + 4*cs;   // Move abuf to the beginning of the next block of columns.
+    a = a + 4*cs;   // Move a to the beginning of the next block of columns.
     x = x + 4*incx; // Move xbuf to the beginning of the next block of elements.
 
     bli_dgemv_n_zen_int_16mx1_avx512
@@ -1008,7 +1012,7 @@ void bli_dgemv_n_zen_int_16mx3_avx512
       cntx
     );
 
-    a = a + 2*cs;   // Move abuf to the beginning of the next block of columns.
+    a = a + 2*cs;   // Move a to the beginning of the next block of columns.
     x = x + 2*incx; // Move xbuf to the beginning of the next block of elements.
 
     bli_dgemv_n_zen_int_16mx1_avx512
@@ -1441,7 +1445,7 @@ void bli_dgemv_n_zen_int_32x8n_avx512
           cntx
         );
 
-        // Move abuf to the beginning of the next block of rows.
+        // Move a to the beginning of the next block of rows.
         a    += 16*m16_iter*rs_a;
         // Move ybuf to the beginning of the next block of elements.
         ybuf += 16*m16_iter*incy;
@@ -1465,7 +1469,7 @@ void bli_dgemv_n_zen_int_32x8n_avx512
           cntx
         );
 
-        // Move abuf to the beginning of the next block of rows.
+        // Move a to the beginning of the next block of rows.
         a    += 8*m8_iter*rs_a;
         // Move ybuf to the beginning of the next block of elements.
         ybuf += 8*m8_iter*incy;
@@ -1488,7 +1492,7 @@ void bli_dgemv_n_zen_int_32x8n_avx512
           cntx
         );
 
-        // Move abuf to the beginning of the next block of rows.
+        // Move a to the beginning of the next block of rows.
         a    += m_left*rs_a;
         // Move ybuf to the beginning of the next block of elements.
         ybuf += m_left*incy;
@@ -1893,6 +1897,9 @@ void bli_dgemv_n_zen_int_16x8n_avx512
     dim_t n4_iter = n_left / 4;
           n_left  = n_left % 4;
 
+    // This kernel will handle sizes where m = [16, 32).
+    dim_t m_left   = m % 16;
+
     // intermediate registers
     __m512d zmm0, zmm1;
 
@@ -2111,6 +2118,57 @@ void bli_dgemv_n_zen_int_16x8n_avx512
     // Store the final result to y buffer.
     _mm512_storeu_pd( ybuf +  0*incy, zmm0 );                   // ybuf[  0:7] = zmm0
     _mm512_storeu_pd( ybuf +  8*incy, zmm1 );                   // ybuf[ 8:15] = zmm1
+
+    if ( m_left )
+    {
+        // Move a to the beginning of the next block of rows.
+        a    += 16*rs_a;
+        // Move ybuf to the beginning of the next block of elements.
+        ybuf += 16*incy;
+
+        dim_t m8_iter = m_left / 8;
+              m_left  = m_left % 8;
+
+        if ( m8_iter )
+        {
+            bli_dgemv_n_zen_int_8x8n_avx512
+            (
+              conja,
+              conjx,
+              8,    // Passing m as 8 since we only want to handle 8 rows.
+              n,
+              alpha,
+              a, rs_a, cs_a,
+              x, incx,
+              beta,
+              ybuf, incy,
+              cntx
+            );
+
+            // Move a to the beginning of the next block of rows.
+            a    += 8*rs_a;
+            // Move ybuf to the beginning of the next block of elements.
+            ybuf += 8*incy;
+        }
+
+        // If m_left is non-zero, calculate the result for the remaining rows.
+        if ( m_left )
+        {
+            bli_dgemv_n_zen_int_m_leftx8n_avx512
+            (
+              conja,
+              conjx,
+              m_left,   // Passing m as m_left since we only want to handle m_left rows.
+              n,
+              alpha,
+              a, rs_a, cs_a,
+              x, incx,
+              beta,
+              ybuf, incy,
+              cntx
+            );
+        }
+    }
 }
 
 /**
@@ -2151,6 +2209,9 @@ void bli_dgemv_n_zen_int_8x8n_avx512
     dim_t n_left  = n % 8;
     dim_t n4_iter = n_left / 4;
           n_left  = n_left % 4;
+
+    // This kernel will handle sizes where m = [8, 16).
+    dim_t m_left = m % 8;
 
     // intermediate registers
     __m512d zmm0;
@@ -2330,6 +2391,28 @@ void bli_dgemv_n_zen_int_8x8n_avx512
 
     // Store the final result to y buffer.
     _mm512_storeu_pd( ybuf +  0*incy, zmm0 );                   // ybuf[  0:7] = zmm0
+
+    if ( m_left )
+    {
+        // Move a to the beginning of the next block of rows.
+        a    += 8*rs_a;
+        // Move ybuf to the beginning of the next block of elements.
+        ybuf += 8*incy;
+
+        bli_dgemv_n_zen_int_m_leftx8n_avx512
+        (
+          conja,
+          conjx,
+          m_left,   // Passing m as m_left since we only want to handle m_left rows.
+          n,
+          alpha,
+          a, rs_a, cs_a,
+          x, incx,
+          beta,
+          ybuf, incy,
+          cntx
+        );
+    }
 }
 
 /**
@@ -2429,8 +2512,8 @@ void bli_dgemv_n_zen_int_m_leftx8n_avx512
         zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm8,  zmm12, zmm0 ); // ybuf[0:m_left] += abuf[0:m_left, 2] * (alpha*x[6])
         zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm9,  zmm13, zmm0 ); // ybuf[0:m_left] += abuf[0:m_left, 3] * (alpha*x[7])
 
-        xbuf += 8*incx;     // Move abuf to the next block of 8 columns.
-        abuf += 8*cs_a;     // Move xbuf to the next block of 8 elements.
+        xbuf += 8*incx;     // Move xbuf to the next block of 8 columns.
+        abuf += 8*cs_a;     // Move abuf to the next block of 8 elements.
     }
 
     // If n4_iter is non-zero, handle the remaining 4 columns.
@@ -2455,8 +2538,8 @@ void bli_dgemv_n_zen_int_m_leftx8n_avx512
         zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm22, zmm12, zmm0 ); // ybuf[0:m_left] += abuf[0:m_left, 2] * (alpha*x[2])
         zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm23, zmm13, zmm0 ); // ybuf[0:m_left] += abuf[0:m_left, 3] * (alpha*x[3])
 
-        xbuf += 4*incx;     // Move abuf to the next block of 4 columns.
-        abuf += 4*cs_a;     // Move xbuf to the next block of 4 elements.
+        xbuf += 4*incx;     // Move xbuf to the next block of 4 columns.
+        abuf += 4*cs_a;     // Move abuf to the next block of 4 elements.
     }
 
     // If n_left is non-zero, handle the remaining columns.
@@ -2587,7 +2670,7 @@ void bli_dgemv_n_zen_int_32x4n_avx512
           cntx
         );
 
-        // Move abuf to the beginning of the next block of rows.
+        // Move a to the beginning of the next block of rows.
         a    += 16*m16_iter*rs_a;
         // Move ybuf to the beginning of the next block of elements.
         ybuf += 16*m16_iter*incy;
@@ -2611,7 +2694,7 @@ void bli_dgemv_n_zen_int_32x4n_avx512
           cntx
         );
 
-        // Move abuf to the beginning of the next block of rows.
+        // Move a to the beginning of the next block of rows.
         a    += 8*m8_iter*rs_a;
         // Move ybuf to the beginning of the next block of elements.
         ybuf += 8*m8_iter*incy;
@@ -2634,7 +2717,7 @@ void bli_dgemv_n_zen_int_32x4n_avx512
           cntx
         );
 
-        // Move abuf to the beginning of the next block of rows.
+        // Move a to the beginning of the next block of rows.
         a    += m_left*rs_a;
         // Move ybuf to the beginning of the next block of elements.
         ybuf += m_left*incy;
@@ -2780,14 +2863,8 @@ void bli_dgemv_n_zen_int_16x4n_avx512
     const dim_t rs_a = rs;
     const dim_t cs_a = cs;
 
-    dim_t j;
-
-    /**
-     * n4_iter: Number of iterations while handling 4 columns at once.
-     * n_left : Number of leftover columns.
-     */
-    dim_t n4_iter  = n / 4;
-    dim_t n_left   = n % 4;
+    // This kernel will handle sizes where m = [16, 32).
+    dim_t m_left = m % 16;
 
     // intermediate registers
     __m512d zmm0, zmm1;
@@ -2812,111 +2889,38 @@ void bli_dgemv_n_zen_int_16x4n_avx512
     zmm0 = _mm512_setzero_pd();     // ybuf[  0:7]
     zmm1 = _mm512_setzero_pd();     // ybuf[ 8:15]
 
-    // Loop over the n dimension, i.e., columns of A matrix and the
-    // elements in x vector.
-    for ( j = 0; j < n4_iter; ++j )
-    {
-        // Scale by alpha and broadcast 4 elements from x vector.
-        zmm26 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx)) );  // zmm26 = alpha*x[0*incx]
-        zmm27 = _mm512_set1_pd( *alpha * (*(xbuf + 1*incx)) );  // zmm27 = alpha*x[1*incx]
-        zmm28 = _mm512_set1_pd( *alpha * (*(xbuf + 2*incx)) );  // zmm28 = alpha*x[2*incx]
-        zmm29 = _mm512_set1_pd( *alpha * (*(xbuf + 3*incx)) );  // zmm29 = alpha*x[3*incx]
+    // Scale by alpha and broadcast 4 elements from x vector.
+    zmm26 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx)) );  // zmm26 = alpha*x[0*incx]
+    zmm27 = _mm512_set1_pd( *alpha * (*(xbuf + 1*incx)) );  // zmm27 = alpha*x[1*incx]
+    zmm28 = _mm512_set1_pd( *alpha * (*(xbuf + 2*incx)) );  // zmm28 = alpha*x[2*incx]
+    zmm29 = _mm512_set1_pd( *alpha * (*(xbuf + 3*incx)) );  // zmm29 = alpha*x[3*incx]
 
-        // Load 16 rows and 4 columns from A.
-        zmm10 = _mm512_loadu_pd( abuf +  0*rs_a + 0*cs_a );     // zmm10 = abuf[  0:7, 0]
-        zmm11 = _mm512_loadu_pd( abuf +  8*rs_a + 0*cs_a );     // zmm11 = abuf[ 8:15, 0]
+    // Load 16 rows and 4 columns from A.
+    zmm10 = _mm512_loadu_pd( abuf +  0*rs_a + 0*cs_a );     // zmm10 = abuf[  0:7, 0]
+    zmm11 = _mm512_loadu_pd( abuf +  8*rs_a + 0*cs_a );     // zmm11 = abuf[ 8:15, 0]
 
-        // Performing the operation intermediate_register += A * (alpha * x)
-        // and storing the result back to the intermediate registers.
-        zmm0 = _mm512_fmadd_pd( zmm26, zmm10, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 0] * (alpha*x[0])
-        zmm1 = _mm512_fmadd_pd( zmm26, zmm11, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 0] * (alpha*x[0])
+    // Performing the operation intermediate_register += A * (alpha * x)
+    // and storing the result back to the intermediate registers.
+    zmm0 = _mm512_fmadd_pd( zmm26, zmm10, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 0] * (alpha*x[0])
+    zmm1 = _mm512_fmadd_pd( zmm26, zmm11, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 0] * (alpha*x[0])
 
-        zmm14 = _mm512_loadu_pd( abuf +  0*rs_a + 1*cs_a );     // zmm14 = abuf[  0:7, 1]
-        zmm15 = _mm512_loadu_pd( abuf +  8*rs_a + 1*cs_a );     // zmm15 = abuf[ 8:15, 1]
+    zmm14 = _mm512_loadu_pd( abuf +  0*rs_a + 1*cs_a );     // zmm14 = abuf[  0:7, 1]
+    zmm15 = _mm512_loadu_pd( abuf +  8*rs_a + 1*cs_a );     // zmm15 = abuf[ 8:15, 1]
 
-        zmm0 = _mm512_fmadd_pd( zmm27, zmm14, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 1] * (alpha*x[1])
-        zmm1 = _mm512_fmadd_pd( zmm27, zmm15, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 1] * (alpha*x[1])
+    zmm0 = _mm512_fmadd_pd( zmm27, zmm14, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 1] * (alpha*x[1])
+    zmm1 = _mm512_fmadd_pd( zmm27, zmm15, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 1] * (alpha*x[1])
 
-        zmm18 = _mm512_loadu_pd( abuf +  0*rs_a + 2*cs_a );     // zmm18 = abuf[  0:7, 2]
-        zmm19 = _mm512_loadu_pd( abuf +  8*rs_a + 2*cs_a );     // zmm19 = abuf[ 8:15, 2]
+    zmm18 = _mm512_loadu_pd( abuf +  0*rs_a + 2*cs_a );     // zmm18 = abuf[  0:7, 2]
+    zmm19 = _mm512_loadu_pd( abuf +  8*rs_a + 2*cs_a );     // zmm19 = abuf[ 8:15, 2]
 
-        zmm0 = _mm512_fmadd_pd( zmm28, zmm18, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 2] * (alpha*x[2])
-        zmm1 = _mm512_fmadd_pd( zmm28, zmm19, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 2] * (alpha*x[2])
+    zmm0 = _mm512_fmadd_pd( zmm28, zmm18, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 2] * (alpha*x[2])
+    zmm1 = _mm512_fmadd_pd( zmm28, zmm19, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 2] * (alpha*x[2])
 
-        zmm22 = _mm512_loadu_pd( abuf +  0*rs_a + 3*cs_a );     // zmm22 = abuf[  0:7, 3]
-        zmm23 = _mm512_loadu_pd( abuf +  8*rs_a + 3*cs_a );     // zmm23 = abuf[ 8:15, 3]
+    zmm22 = _mm512_loadu_pd( abuf +  0*rs_a + 3*cs_a );     // zmm22 = abuf[  0:7, 3]
+    zmm23 = _mm512_loadu_pd( abuf +  8*rs_a + 3*cs_a );     // zmm23 = abuf[ 8:15, 3]
 
-        zmm0 = _mm512_fmadd_pd( zmm29, zmm22, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 3] * (alpha*x[3])
-        zmm1 = _mm512_fmadd_pd( zmm29, zmm23, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 3] * (alpha*x[3])
-
-        abuf += 4*cs_a;     // Move abuf to the next block of 4 columns.
-        xbuf += 4*incx;     // Move xbuf to the next block of 4 elements.
-    }
-
-    // If n_left is non-zero, handle the remaining columns.
-    if ( n_left == 3 )      // Performing GEMV in blocks of 16x3.
-    {
-        // Scale by alpha and broadcast 3 elements from x vector.
-        zmm26 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx)) );  // zmm26 = alpha*x[0*incx]
-        zmm27 = _mm512_set1_pd( *alpha * (*(xbuf + 1*incx)) );  // zmm27 = alpha*x[1*incx]
-        zmm28 = _mm512_set1_pd( *alpha * (*(xbuf + 2*incx)) );  // zmm28 = alpha*x[2*incx]
-
-        // Load 16 rows and 3 columns from A.
-        zmm10 = _mm512_loadu_pd( abuf +  0*rs_a + 0*cs_a );     // zmm10 = abuf[  0:7, 0]
-        zmm11 = _mm512_loadu_pd( abuf +  8*rs_a + 0*cs_a );     // zmm11 = abuf[ 8:15, 0]
-
-        // Performing the operation intermediate_register += A * (alpha * x)
-        // and storing the result back to the intermediate registers.
-        zmm0 = _mm512_fmadd_pd( zmm26, zmm10, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 0] * (alpha*x[0])
-        zmm1 = _mm512_fmadd_pd( zmm26, zmm11, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 0] * (alpha*x[0])
-
-        zmm14 = _mm512_loadu_pd( abuf +  0*rs_a + 1*cs_a );     // zmm14 = abuf[  0:7, 1]
-        zmm15 = _mm512_loadu_pd( abuf +  8*rs_a + 1*cs_a );     // zmm15 = abuf[ 8:15, 1]
-
-        zmm0 = _mm512_fmadd_pd( zmm27, zmm14, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 1] * (alpha*x[1])
-        zmm1 = _mm512_fmadd_pd( zmm27, zmm15, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 1] * (alpha*x[1])
-
-        zmm18 = _mm512_loadu_pd( abuf +  0*rs_a + 2*cs_a );     // zmm18 = abuf[  0:7, 2]
-        zmm19 = _mm512_loadu_pd( abuf +  8*rs_a + 2*cs_a );     // zmm19 = abuf[ 8:15, 2]
-
-        zmm0 = _mm512_fmadd_pd( zmm28, zmm18, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 2] * (alpha*x[2])
-        zmm1 = _mm512_fmadd_pd( zmm28, zmm19, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 2] * (alpha*x[2])
-    }
-    else if ( n_left == 2 )     // Performing GEMV in blocks of 16x2.
-    {
-        // Scale by alpha and broadcast 2 elements from x vector.
-        zmm26 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx)) );  // zmm26 = alpha*x[0*incx]
-        zmm27 = _mm512_set1_pd( *alpha * (*(xbuf + 1*incx)) );  // zmm27 = alpha*x[1*incx]
-
-        // Load 16 rows and 2 columns from A.
-        zmm10 = _mm512_loadu_pd( abuf +  0*rs_a + 0*cs_a );     // zmm10 = abuf[  0:7, 0]
-        zmm11 = _mm512_loadu_pd( abuf +  8*rs_a + 0*cs_a );     // zmm11 = abuf[ 8:15, 0]
-
-        // Performing the operation intermediate_register += A * (alpha * x)
-        // and storing the result back to the intermediate registers.
-        zmm0 = _mm512_fmadd_pd( zmm26, zmm10, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 0] * (alpha*x[0])
-        zmm1 = _mm512_fmadd_pd( zmm26, zmm11, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 0] * (alpha*x[0])
-
-        zmm14 = _mm512_loadu_pd( abuf +  0*rs_a + 1*cs_a );     // zmm14 = abuf[  0:7, 1]
-        zmm15 = _mm512_loadu_pd( abuf +  8*rs_a + 1*cs_a );     // zmm15 = abuf[ 8:15, 1]
-
-        zmm0 = _mm512_fmadd_pd( zmm27, zmm14, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 1] * (alpha*x[1])
-        zmm1 = _mm512_fmadd_pd( zmm27, zmm15, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 1] * (alpha*x[1])
-    }
-    else if ( n_left == 1 )     // Performing GEMV in blocks of 16x1.
-    {
-        // Scale by alpha and broadcast 1 elements from x vector.
-        zmm26 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx)) );  // zmm26 = alpha*x[0*incx]
-
-        // Load 16 rows and 1 column from A.
-        zmm10 = _mm512_loadu_pd( abuf +  0*rs_a + 0*cs_a );     // zmm10 = abuf[  0:7, 0]
-        zmm11 = _mm512_loadu_pd( abuf +  8*rs_a + 0*cs_a );     // zmm11 = abuf[ 8:15, 0]
-
-        // Performing the operation intermediate_register += A * (alpha * x)
-        // and storing the result back to the intermediate registers.
-        zmm0 = _mm512_fmadd_pd( zmm26, zmm10, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 0] * (alpha*x[0])
-        zmm1 = _mm512_fmadd_pd( zmm26, zmm11, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 0] * (alpha*x[0])
-    }
+    zmm0 = _mm512_fmadd_pd( zmm29, zmm22, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 3] * (alpha*x[3])
+    zmm1 = _mm512_fmadd_pd( zmm29, zmm23, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 3] * (alpha*x[3])
 
     /**
      * If beta = 0, then y vector should not be read, only set.
@@ -2938,6 +2942,57 @@ void bli_dgemv_n_zen_int_16x4n_avx512
     // Store the final result to y buffer.
     _mm512_storeu_pd( ybuf +  0*incy, zmm0 );                   // ybuf[  0:7] = zmm0
     _mm512_storeu_pd( ybuf +  8*incy, zmm1 );                   // ybuf[ 8:15] = zmm1
+
+    if ( m_left )
+    {
+        // Move a to the beginning of the next block of rows.
+        a    += 16*rs_a;
+        // Move ybuf to the beginning of the next block of elements.
+        ybuf += 16*incy;
+
+        dim_t m8_iter = m_left / 8;
+              m_left  = m_left % 8;
+
+        if ( m8_iter )
+        {
+            bli_dgemv_n_zen_int_8x4n_avx512
+            (
+              conja,
+              conjx,
+              8,    // Passing m as 8 since we only want to handle 8 rows.
+              n,
+              alpha,
+              a, rs_a, cs_a,
+              x, incx,
+              beta,
+              ybuf, incy,
+              cntx
+            );
+
+            // Move a to the beginning of the next block of rows.
+            a    += 8*rs_a;
+            // Move ybuf to the beginning of the next block of elements.
+            ybuf += 8*incy;
+        }
+
+        // If m_left is non-zero, calculate the result for the remaining rows.
+        if ( m_left )
+        {
+            bli_dgemv_n_zen_int_m_leftx4n_avx512
+            (
+              conja,
+              conjx,
+              m_left,   // Passing m as m_left since we only want to handle m_left rows.
+              n,
+              alpha,
+              a, rs_a, cs_a,
+              x, incx,
+              beta,
+              ybuf, incy,
+              cntx
+            );
+        }
+    }
 }
 
 /**
@@ -2966,14 +3021,8 @@ void bli_dgemv_n_zen_int_8x4n_avx512
     const dim_t rs_a = rs;
     const dim_t cs_a = cs;
 
-    dim_t j;
-
-    /**
-     * n4_iter: Number of iterations while handling 4 columns at once.
-     * n_left : Number of leftover columns.
-     */
-    dim_t n4_iter  = n / 4;
-    dim_t n_left   = n % 4;
+    // This kernel will handle sizes where m = [8, 16).
+    dim_t m_left = m % 8;
 
     // intermediate registers
     __m512d zmm0;
@@ -2997,91 +3046,30 @@ void bli_dgemv_n_zen_int_8x4n_avx512
     // Initialize the intermediate registers to zero.
     zmm0 = _mm512_setzero_pd();     // ybuf[  0:7]
 
-    // Loop over the n dimension, i.e., columns of A matrix and the
-    // elements in x vector.
-    for ( j = 0; j < n4_iter; ++j )
-    {
-        // Scale by alpha and broadcast 4 elements from x vector.
-        zmm26 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx)) );  // zmm26 = alpha*x[0*incx]
-        zmm27 = _mm512_set1_pd( *alpha * (*(xbuf + 1*incx)) );  // zmm27 = alpha*x[1*incx]
-        zmm28 = _mm512_set1_pd( *alpha * (*(xbuf + 2*incx)) );  // zmm28 = alpha*x[2*incx]
-        zmm29 = _mm512_set1_pd( *alpha * (*(xbuf + 3*incx)) );  // zmm29 = alpha*x[3*incx]
+    // Scale by alpha and broadcast 4 elements from x vector.
+    zmm26 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx)) );  // zmm26 = alpha*x[0*incx]
+    zmm27 = _mm512_set1_pd( *alpha * (*(xbuf + 1*incx)) );  // zmm27 = alpha*x[1*incx]
+    zmm28 = _mm512_set1_pd( *alpha * (*(xbuf + 2*incx)) );  // zmm28 = alpha*x[2*incx]
+    zmm29 = _mm512_set1_pd( *alpha * (*(xbuf + 3*incx)) );  // zmm29 = alpha*x[3*incx]
 
-        // Load 8 rows and 4 columns from A.
-        zmm10 = _mm512_loadu_pd( abuf +  0*rs_a + 0*cs_a );     // zmm10 = abuf[  0:7, 0]
+    // Load 8 rows and 4 columns from A.
+    zmm10 = _mm512_loadu_pd( abuf +  0*rs_a + 0*cs_a );     // zmm10 = abuf[  0:7, 0]
 
-        // Performing the operation intermediate_register += A * (alpha * x)
-        // and storing the result back to the intermediate registers.
-        zmm0 = _mm512_fmadd_pd( zmm26, zmm10, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 0] * (alpha*x[0])
+    // Performing the operation intermediate_register += A * (alpha * x)
+    // and storing the result back to the intermediate registers.
+    zmm0 = _mm512_fmadd_pd( zmm26, zmm10, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 0] * (alpha*x[0])
 
-        zmm14 = _mm512_loadu_pd( abuf +  0*rs_a + 1*cs_a );     // zmm14 = abuf[  0:7, 1]
+    zmm14 = _mm512_loadu_pd( abuf +  0*rs_a + 1*cs_a );     // zmm14 = abuf[  0:7, 1]
 
-        zmm0 = _mm512_fmadd_pd( zmm27, zmm14, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 1] * (alpha*x[1])
+    zmm0 = _mm512_fmadd_pd( zmm27, zmm14, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 1] * (alpha*x[1])
 
-        zmm18 = _mm512_loadu_pd( abuf +  0*rs_a + 2*cs_a );     // zmm18 = abuf[  0:7, 2]
+    zmm18 = _mm512_loadu_pd( abuf +  0*rs_a + 2*cs_a );     // zmm18 = abuf[  0:7, 2]
 
-        zmm0 = _mm512_fmadd_pd( zmm28, zmm18, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 2] * (alpha*x[2])
+    zmm0 = _mm512_fmadd_pd( zmm28, zmm18, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 2] * (alpha*x[2])
 
-        zmm22 = _mm512_loadu_pd( abuf +  0*rs_a + 3*cs_a );     // zmm22 = abuf[  0:7, 3]
+    zmm22 = _mm512_loadu_pd( abuf +  0*rs_a + 3*cs_a );     // zmm22 = abuf[  0:7, 3]
 
-        zmm0 = _mm512_fmadd_pd( zmm29, zmm22, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 3] * (alpha*x[3])
-
-        abuf += 4*cs_a;     // Move abuf to the next block of 4 columns.
-        xbuf += 4*incx;     // Move xbuf to the next block of 4 elements.
-    }
-
-    // If n_left is non-zero, handle the remaining columns.
-    if ( n_left == 3 )      // Performing GEMV in blocks of 8x3.
-    {
-        // Scale by alpha and broadcast 3 elements from x vector.
-        zmm26 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx)) );  // zmm26 = alpha*x[0*incx]
-        zmm27 = _mm512_set1_pd( *alpha * (*(xbuf + 1*incx)) );  // zmm27 = alpha*x[1*incx]
-        zmm28 = _mm512_set1_pd( *alpha * (*(xbuf + 2*incx)) );  // zmm28 = alpha*x[2*incx]
-
-        // Load 8 rows and 3 columns from A.
-        zmm10 = _mm512_loadu_pd( abuf +  0*rs_a + 0*cs_a );     // zmm10 = abuf[  0:7, 0]
-
-        // Performing the operation intermediate_register += A * (alpha * x)
-        // and storing the result back to the intermediate registers.
-        zmm0 = _mm512_fmadd_pd( zmm26, zmm10, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 0] * (alpha*x[0])
-
-        zmm14 = _mm512_loadu_pd( abuf +  0*rs_a + 1*cs_a );     // zmm14 = abuf[  0:7, 1]
-
-        zmm0 = _mm512_fmadd_pd( zmm27, zmm14, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 1] * (alpha*x[1])
-
-        zmm18 = _mm512_loadu_pd( abuf +  0*rs_a + 2*cs_a );     // zmm18 = abuf[  0:7, 2]
-
-        zmm0 = _mm512_fmadd_pd( zmm28, zmm18, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 2] * (alpha*x[2])
-    }
-    else if ( n_left == 2 )     // Performing GEMV in blocks of 16x2.
-    {
-        // Scale by alpha and broadcast 2 elements from x vector.
-        zmm26 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx)) );  // zmm26 = alpha*x[0*incx]
-        zmm27 = _mm512_set1_pd( *alpha * (*(xbuf + 1*incx)) );  // zmm27 = alpha*x[1*incx]
-
-        // Load 8 rows and 2 columns from A.
-        zmm10 = _mm512_loadu_pd( abuf +  0*rs_a + 0*cs_a );     // zmm10 = abuf[  0:7, 0]
-
-        // Performing the operation intermediate_register += A * (alpha * x)
-        // and storing the result back to the intermediate registers.
-        zmm0 = _mm512_fmadd_pd( zmm26, zmm10, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 0] * (alpha*x[0])
-
-        zmm14 = _mm512_loadu_pd( abuf +  0*rs_a + 1*cs_a );     // zmm14 = abuf[  0:7, 1]
-
-        zmm0 = _mm512_fmadd_pd( zmm27, zmm14, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 1] * (alpha*x[1])
-    }
-    else if ( n_left == 1 )     // Performing GEMV in blocks of 16x1.
-    {
-        // Scale by alpha and broadcast 1 elements from x vector.
-        zmm26 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx)) );  // zmm26 = alpha*x[0*incx]
-
-        // Load 8 rows and 1 column from A.
-        zmm10 = _mm512_loadu_pd( abuf +  0*rs_a + 0*cs_a );     // zmm10 = abuf[  0:7, 0]
-
-        // Performing the operation intermediate_register += A * (alpha * x)
-        // and storing the result back to the intermediate registers.
-        zmm0 = _mm512_fmadd_pd( zmm26, zmm10, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 0] * (alpha*x[0])
-    }
+    zmm0 = _mm512_fmadd_pd( zmm29, zmm22, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 3] * (alpha*x[3])
 
     /**
      * If beta = 0, then y vector should not be read, only set.
@@ -3100,6 +3088,28 @@ void bli_dgemv_n_zen_int_8x4n_avx512
 
     // Store the final result to y buffer.
     _mm512_storeu_pd( ybuf +  0*incy, zmm0 );                   // ybuf[  0:7] = zmm0
+
+    if ( m_left )
+    {
+        // Move a to the beginning of the next block of rows.
+        a    += 8*rs_a;
+        // Move ybuf to the beginning of the next block of elements.
+        ybuf += 8*incy;
+
+        bli_dgemv_n_zen_int_m_leftx4n_avx512
+        (
+          conja,
+          conjx,
+          m_left,   // Passing m as m_left since we only want to handle m_left rows.
+          n,
+          alpha,
+          a, rs_a, cs_a,
+          x, incx,
+          beta,
+          ybuf, incy,
+          cntx
+        );
+    }
 }
 
 /**
@@ -3127,15 +3137,6 @@ void bli_dgemv_n_zen_int_m_leftx4n_avx512
 
     const dim_t cs_a = cs;
 
-    /**
-     * n4_iter: Number of iterations while handling 4 columns at once.
-     * n_left : Number of leftover columns.
-     */
-    dim_t n4_iter = n / 4;
-    dim_t n_left  = n % 4;
-
-    dim_t j;
-
     // intermediate registers
     __m512d zmm0;
 
@@ -3157,81 +3158,584 @@ void bli_dgemv_n_zen_int_m_leftx4n_avx512
     // Initialize the intermediate register to zero.
     zmm0 = _mm512_setzero_pd();     // ybuf[0:m_left]
 
-    xbuf = x;
+    // Scale by alpha and broadcast 4 elements from x vector.
+    zmm20 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx) ) );     // zmm20 = alpha*x[0*incx]
+    zmm21 = _mm512_set1_pd( *alpha * (*(xbuf + 1*incx) ) );     // zmm21 = alpha*x[1*incx]
+    zmm22 = _mm512_set1_pd( *alpha * (*(xbuf + 2*incx) ) );     // zmm22 = alpha*x[2*incx]
+    zmm23 = _mm512_set1_pd( *alpha * (*(xbuf + 3*incx) ) );     // zmm23 = alpha*x[3*incx]
 
-    // Loop over the n dimension, i.e., columns of A matrix and the
-    // elements in x vector.
-    for ( j = 0; j < n4_iter; ++j )
+    // Load masked rows and 4 columns from A.
+    zmm10 = _mm512_maskz_loadu_pd( m_mask, abuf + 0*cs_a );     // zmm10 = abuf[0:m_left, 0]
+    zmm11 = _mm512_maskz_loadu_pd( m_mask, abuf + 1*cs_a );     // zmm11 = abuf[0:m_left, 1]
+    zmm12 = _mm512_maskz_loadu_pd( m_mask, abuf + 2*cs_a );     // zmm12 = abuf[0:m_left, 2]
+    zmm13 = _mm512_maskz_loadu_pd( m_mask, abuf + 3*cs_a );     // zmm13 = abuf[0:m_left, 3]
+
+    // Performing the operation intermediate_register += A * (alpha * x)
+    // and storing the result back to the intermediate registers.
+    zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm20, zmm10, zmm0 ); // ybuf[0:m_left] += abuf[0:m_left, 0] * (alpha*x[0])
+    zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm21, zmm11, zmm0 ); // ybuf[0:m_left] += abuf[0:m_left, 1] * (alpha*x[1])
+    zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm22, zmm12, zmm0 ); // ybuf[0:m_left] += abuf[0:m_left, 2] * (alpha*x[2])
+    zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm23, zmm13, zmm0 ); // ybuf[0:m_left] += abuf[0:m_left, 3] * (alpha*x[3])
+
+    /**
+     * If beta = 0, then y vector should not be read, only set.
+     * Else, load y, scale by beta, add the intermediate results and store
+     * the final result back to y buffer.
+     */
+    if ( !bli_deq0( *beta ) )
     {
-        // Scale by alpha and broadcast 4 elements from x vector.
-        zmm20 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx) ) );     // zmm20 = alpha*x[0*incx]
-        zmm21 = _mm512_set1_pd( *alpha * (*(xbuf + 1*incx) ) );     // zmm21 = alpha*x[1*incx]
-        zmm22 = _mm512_set1_pd( *alpha * (*(xbuf + 2*incx) ) );     // zmm22 = alpha*x[2*incx]
-        zmm23 = _mm512_set1_pd( *alpha * (*(xbuf + 3*incx) ) );     // zmm23 = alpha*x[3*incx]
+        // Broadcast beta to a register.
+        zmm8 = _mm512_set1_pd( *beta );                             // zmm8 = beta, beta, beta, beta, ...
 
-        // Load masked rows and 4 columns from A.
-        zmm10 = _mm512_maskz_loadu_pd( m_mask, abuf + 0*cs_a );     // zmm10 = abuf[0:m_left, 0]
-        zmm11 = _mm512_maskz_loadu_pd( m_mask, abuf + 1*cs_a );     // zmm11 = abuf[0:m_left, 1]
-        zmm12 = _mm512_maskz_loadu_pd( m_mask, abuf + 2*cs_a );     // zmm12 = abuf[0:m_left, 2]
-        zmm13 = _mm512_maskz_loadu_pd( m_mask, abuf + 3*cs_a );     // zmm13 = abuf[0:m_left, 3]
+        // Load m_left elements from y vector.
+        zmm30 = _mm512_maskz_loadu_pd( m_mask, ybuf + 0*incy );     // zmm4 = ybuf[0:m_left]
 
-        // Performing the operation intermediate_register += A * (alpha * x)
-        // and storing the result back to the intermediate registers.
-        zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm20, zmm10, zmm0 ); // ybuf[0:m_left] += abuf[0:m_left, 0] * (alpha*x[0])
-        zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm21, zmm11, zmm0 ); // ybuf[0:m_left] += abuf[0:m_left, 1] * (alpha*x[1])
-        zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm22, zmm12, zmm0 ); // ybuf[0:m_left] += abuf[0:m_left, 2] * (alpha*x[2])
-        zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm23, zmm13, zmm0 ); // ybuf[0:m_left] += abuf[0:m_left, 3] * (alpha*x[3])
-
-        xbuf += 4*incx;      // Move abuf to the next block of 4 columns.
-        abuf += 4*cs_a;      // Move xbuf to the next block of 4 elements.
+        // Performing the operation y := beta*y + A * (alpha * x).
+        zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm8, zmm30, zmm0 );  // ybuf[0:m_left] = beta*ybuf[0:m_left] + (abuf[0:m_left, 0] * (alpha*x[0]))
     }
 
-    // If n_left is non-zero, handle the remaining columns.
-    if ( n_left == 3 )      // Performing GEMV in blocks of m_leftx3.
+    // Store the final result to y buffer.
+    _mm512_mask_storeu_pd( ybuf + 0*incy, m_mask, zmm0 );           // ybuf[0:m_left] = zmm0
+}
+
+/**
+ * The bli_dgemv_n_zen_int_32x3n_avx512(...) kernel handles the DGEMV operation
+ * by breaking the A matrix into blocks of 32x3, i.e., 32 rows and 3 columns,
+ * and traversing in the n dimension keeping m(32) fixed.
+ */
+void bli_dgemv_n_zen_int_32x3n_avx512
+     (
+       conj_t           conja,
+       conj_t           conjx,
+       dim_t            m,
+       dim_t            n,
+       double* restrict alpha,
+       double* restrict a, inc_t rs, inc_t cs,
+       double* restrict x, inc_t incx,
+       double* restrict beta,
+       double* restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     )
+{
+    double* restrict abuf = a;
+    double* restrict xbuf = x;
+    double* restrict ybuf = y;
+
+    const dim_t rs_a = rs;
+    const dim_t cs_a = cs;
+
+    dim_t i;
+
+    /**
+     * m32_iter: Number of iterations while handling 32 rows at once.
+     * m16_iter: Number of iterations while handling 16 rows at once. Can only
+     *           be either 0 or 1.
+     * m8_iter : Number of iterations while handling 8 rows at once. Can only be
+     *           either 0 or 1.
+     * m_left  : Number of leftover rows.
+     */
+    dim_t m32_iter = m / 32;
+    dim_t m_left   = m % 32;
+    dim_t m16_iter = m_left / 16;
+          m_left   = m_left % 16;
+    dim_t m8_iter  = m_left / 8;
+          m_left   = m_left % 8;
+
+    // If m16_iter is non-zero, calculate the result for the 16x2 block and
+    // update a and ybuf pointers accordingly, to point to the next block.
+    if ( m16_iter )
     {
+        bli_dgemv_n_zen_int_16x3n_avx512
+        (
+          conja,
+          conjx,
+          16,   // Passing m as 16 since we only want to handle 16 rows.
+          n,
+          alpha,
+          a, rs_a, cs_a,
+          x, incx,
+          beta,
+          ybuf, incy,
+          cntx
+        );
+
+        // Move a to the beginning of the next block of rows.
+        a    += 16*m16_iter*rs_a;
+        // Move ybuf to the beginning of the next block of elements.
+        ybuf += 16*m16_iter*incy;
+    }
+
+    // If m8_iter is non-zero, calculate the result for the 8x4 block and
+    // update a and ybuf pointers accordingly, to point to the next block.
+    if ( m8_iter )
+    {
+        bli_dgemv_n_zen_int_8x3n_avx512
+        (
+          conja,
+          conjx,
+          8,    // Passing m as 8 since we only want to handle 8 rows.
+          n,
+          alpha,
+          a, rs_a, cs_a,
+          x, incx,
+          beta,
+          ybuf, incy,
+          cntx
+        );
+
+        // Move a to the beginning of the next block of rows.
+        a    += 8*m8_iter*rs_a;
+        // Move ybuf to the beginning of the next block of elements.
+        ybuf += 8*m8_iter*incy;
+    }
+
+    // If m_left is non-zero, calculate the result for the remaining rows.
+    if ( m_left )
+    {
+        bli_dgemv_n_zen_int_m_leftx3n_avx512
+        (
+          conja,
+          conjx,
+          m_left,   // Passing m as m_left since we only want to handle m_left rows.
+          n,
+          alpha,
+          a, rs_a, cs_a,
+          x, incx,
+          beta,
+          ybuf, incy,
+          cntx
+        );
+
+        // Move a to the beginning of the next block of rows.
+        a    += m_left*rs_a;
+        // Move ybuf to the beginning of the next block of elements.
+        ybuf += m_left*incy;
+    }
+
+    // intermediate registers
+    __m512d zmm0, zmm1, zmm2, zmm3;
+
+    // y
+    __m512d zmm4, zmm5, zmm6, zmm7;
+
+    // x
+    __m512d zmm26, zmm27, zmm28;
+
+    // A
+    __m512d zmm10, zmm11, zmm12, zmm13;
+    __m512d zmm14, zmm15, zmm16, zmm17;
+    __m512d zmm18, zmm19, zmm20, zmm21;
+
+    // beta
+    // Broadcast beta to a register.
+    __m512d zmm30 = _mm512_set1_pd( *beta );    // zmm30 = beta, beta, beta, beta, ...
+
+    // Loop over the m dimension, i.e., rows of A matrix and the elements
+    // in y vector.
+    for ( i = 0; i < m32_iter; ++i )
+    {
+        // Initialize the intermediate registers to zero for every m iteration.
+        zmm0 = _mm512_setzero_pd();     // ybuf[  0:7]
+        zmm1 = _mm512_setzero_pd();     // ybuf[ 8:15]
+        zmm2 = _mm512_setzero_pd();     // ybuf[16:23]
+        zmm3 = _mm512_setzero_pd();     // ybuf[24:31]
+
+        // Move abuf to the beginning of the next block of rows.
+        abuf = a + 32*i*rs_a;
+        // Initialize xbuf to the beginning of x vector for every iteration.
+        xbuf = x;
+
         // Scale by alpha and broadcast 3 elements from x vector.
-        zmm20 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx) ) );     // zmm20 = alpha*x[0*incx]
-        zmm21 = _mm512_set1_pd( *alpha * (*(xbuf + 1*incx) ) );     // zmm21 = alpha*x[1*incx]
-        zmm22 = _mm512_set1_pd( *alpha * (*(xbuf + 2*incx) ) );     // zmm22 = alpha*x[2*incx]
+        zmm26 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx)) );  // zmm26 = alpha*x[0*incx]
+        zmm27 = _mm512_set1_pd( *alpha * (*(xbuf + 1*incx)) );  // zmm27 = alpha*x[1*incx]
+        zmm28 = _mm512_set1_pd( *alpha * (*(xbuf + 2*incx)) );  // zmm28 = alpha*x[2*incx]
 
-        // Load masked rows and 3 columns from A.
-        zmm10 = _mm512_maskz_loadu_pd( m_mask, abuf + 0*cs_a );     // zmm10 = abuf[0:m_left, 0]
-        zmm11 = _mm512_maskz_loadu_pd( m_mask, abuf + 1*cs_a );     // zmm11 = abuf[0:m_left, 1]
-        zmm12 = _mm512_maskz_loadu_pd( m_mask, abuf + 2*cs_a );     // zmm12 = abuf[0:m_left, 2]
+        // Load 32 rows and 3 columns from A.
+        zmm10 = _mm512_loadu_pd( abuf +  0*rs_a + 0*cs_a );     // zmm10 = abuf[  0:7, 0]
+        zmm11 = _mm512_loadu_pd( abuf +  8*rs_a + 0*cs_a );     // zmm11 = abuf[ 8:15, 0]
+        zmm12 = _mm512_loadu_pd( abuf + 16*rs_a + 0*cs_a );     // zmm12 = abuf[16:23, 0]
+        zmm13 = _mm512_loadu_pd( abuf + 24*rs_a + 0*cs_a );     // zmm13 = abuf[24:31, 0]
 
         // Performing the operation intermediate_register += A * (alpha * x)
         // and storing the result back to the intermediate registers.
-        zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm20, zmm10, zmm0 ); // ybuf[0:m_left] += abuf[0:m_left, 0] * (alpha*x[0])
-        zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm21, zmm11, zmm0 ); // ybuf[0:m_left] += abuf[0:m_left, 1] * (alpha*x[1])
-        zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm22, zmm12, zmm0 ); // ybuf[0:m_left] += abuf[0:m_left, 2] * (alpha*x[2])
+        zmm0 = _mm512_fmadd_pd( zmm26, zmm10, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 0] * (alpha*x[0])
+        zmm1 = _mm512_fmadd_pd( zmm26, zmm11, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 0] * (alpha*x[0])
+        zmm2 = _mm512_fmadd_pd( zmm26, zmm12, zmm2 );           // ybuf[16:23] += abuf[16:23, 0] * (alpha*x[0])
+        zmm3 = _mm512_fmadd_pd( zmm26, zmm13, zmm3 );           // ybuf[24:31] += abuf[24:31, 0] * (alpha*x[0])
+
+        zmm14 = _mm512_loadu_pd( abuf +  0*rs_a + 1*cs_a );     // zmm14 = abuf[  0:7, 1]
+        zmm15 = _mm512_loadu_pd( abuf +  8*rs_a + 1*cs_a );     // zmm15 = abuf[ 8:15, 1]
+        zmm16 = _mm512_loadu_pd( abuf + 16*rs_a + 1*cs_a );     // zmm16 = abuf[16:23, 1]
+        zmm17 = _mm512_loadu_pd( abuf + 24*rs_a + 1*cs_a );     // zmm17 = abuf[24:31, 1]
+
+        zmm0 = _mm512_fmadd_pd( zmm27, zmm14, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 1] * (alpha*x[1])
+        zmm1 = _mm512_fmadd_pd( zmm27, zmm15, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 1] * (alpha*x[1])
+        zmm2 = _mm512_fmadd_pd( zmm27, zmm16, zmm2 );           // ybuf[16:23] += abuf[16:23, 1] * (alpha*x[1])
+        zmm3 = _mm512_fmadd_pd( zmm27, zmm17, zmm3 );           // ybuf[24:31] += abuf[24:31, 1] * (alpha*x[1])
+
+        zmm18 = _mm512_loadu_pd( abuf +  0*rs_a + 2*cs_a );     // zmm18 = abuf[  0:7, 2]
+        zmm19 = _mm512_loadu_pd( abuf +  8*rs_a + 2*cs_a );     // zmm19 = abuf[ 8:15, 2]
+        zmm20 = _mm512_loadu_pd( abuf + 16*rs_a + 2*cs_a );     // zmm20 = abuf[16:23, 2]
+        zmm21 = _mm512_loadu_pd( abuf + 24*rs_a + 2*cs_a );     // zmm21 = abuf[24:31, 2]
+
+        zmm0 = _mm512_fmadd_pd( zmm28, zmm18, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 2] * (alpha*x[2])
+        zmm1 = _mm512_fmadd_pd( zmm28, zmm19, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 2] * (alpha*x[2])
+        zmm2 = _mm512_fmadd_pd( zmm28, zmm20, zmm2 );           // ybuf[16:23] += abuf[16:23, 2] * (alpha*x[2])
+        zmm3 = _mm512_fmadd_pd( zmm28, zmm21, zmm3 );           // ybuf[24:31] += abuf[24:31, 2] * (alpha*x[2])
+
+        /**
+         * If beta = 0, then y vector should not be read, only set.
+         * Else, load y, scale by beta, add the intermediate results and store
+         * the final result back to y buffer.
+         */
+        if ( !bli_deq0( *beta ) )
+        {
+            // Load 32 elements from y vector.
+            zmm4 = _mm512_loadu_pd( ybuf +  0*incy );           // zmm4 = ybuf[  0:7]
+            zmm5 = _mm512_loadu_pd( ybuf +  8*incy );           // zmm5 = ybuf[ 8:15]
+            zmm6 = _mm512_loadu_pd( ybuf + 16*incy );           // zmm6 = ybuf[16:23]
+            zmm7 = _mm512_loadu_pd( ybuf + 24*incy );           // zmm7 = ybuf[24:31]
+
+            // Performing the operation y := beta*y + A * (alpha * x).
+            // zmm30 = _mm512_set1_pd( *beta );
+            zmm0 = _mm512_fmadd_pd( zmm30, zmm4, zmm0 );        // ybuf[  0:7] = beta*ybuf[  0:7] + (abuf[  0:7, 0] * (alpha*x[0]))
+            zmm1 = _mm512_fmadd_pd( zmm30, zmm5, zmm1 );        // ybuf[ 8:15] = beta*ybuf[ 8:15] + (abuf[ 8:15, 0] * (alpha*x[0]))
+            zmm2 = _mm512_fmadd_pd( zmm30, zmm6, zmm2 );        // ybuf[16:23] = beta*ybuf[16:23] + (abuf[16:23, 0] * (alpha*x[0]))
+            zmm3 = _mm512_fmadd_pd( zmm30, zmm7, zmm3 );        // ybuf[24:31] = beta*ybuf[24:31] + (abuf[24:31, 0] * (alpha*x[0]))
+        }
+
+        // Store the final result to y buffer.
+        _mm512_storeu_pd( ybuf +  0*incy, zmm0 );               // ybuf[  0:7] = zmm0
+        _mm512_storeu_pd( ybuf +  8*incy, zmm1 );               // ybuf[ 8:15] = zmm1
+        _mm512_storeu_pd( ybuf + 16*incy, zmm2 );               // ybuf[16:23] = zmm2
+        _mm512_storeu_pd( ybuf + 24*incy, zmm3 );               // ybuf[24:31] = zmm3
+
+        ybuf += 32*incy;    // Move ybuf to the next block of 32 elements.
     }
-    else if ( n_left == 2 )     // Performing GEMV in blocks of m_leftx2.
+}
+
+/**
+ * The bli_dgemv_n_zen_int_16x3n_avx512(...) kernel handles the DGEMV operation
+ * by breaking the A matrix into blocks of 16x3, i.e., 16 rows and 3 columns,
+ * and traversing in the n dimension keeping m(16) fixed.
+ */
+void bli_dgemv_n_zen_int_16x3n_avx512
+     (
+       conj_t           conja,
+       conj_t           conjx,
+       dim_t            m,
+       dim_t            n,
+       double* restrict alpha,
+       double* restrict a, inc_t rs, inc_t cs,
+       double* restrict x, inc_t incx,
+       double* restrict beta,
+       double* restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     )
+{
+    double* restrict abuf = a;
+    double* restrict xbuf = x;
+    double* restrict ybuf = y;
+
+    const dim_t rs_a = rs;
+    const dim_t cs_a = cs;
+
+    // This kernel will handle sizes where m = [16, 32).
+    dim_t m_left = m % 16;
+
+    // intermediate registers
+    __m512d zmm0, zmm1;
+
+    // y
+    __m512d zmm4, zmm5;
+
+    // x
+    __m512d zmm26, zmm27, zmm28;
+
+    // A
+    __m512d zmm10, zmm11;
+    __m512d zmm14, zmm15;
+    __m512d zmm18, zmm19;
+
+    // beta
+    // Broadcast beta to a register.
+    __m512d zmm30 = _mm512_set1_pd( *beta );                // zmm30 = beta, beta, beta, beta, ...
+
+    // Initialize the intermediate registers to zero.
+    zmm0 = _mm512_setzero_pd();                             // ybuf[  0:7]
+    zmm1 = _mm512_setzero_pd();                             // ybuf[ 8:15]
+
+    // Scale by alpha and broadcast 3 elements from x vector.
+    zmm26 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx)) );  // zmm26 = alpha*x[0*incx]
+    zmm27 = _mm512_set1_pd( *alpha * (*(xbuf + 1*incx)) );  // zmm27 = alpha*x[1*incx]
+    zmm28 = _mm512_set1_pd( *alpha * (*(xbuf + 2*incx)) );  // zmm28 = alpha*x[2*incx]
+
+    // Load 16 rows and 3 columns from A.
+    zmm10 = _mm512_loadu_pd( abuf +  0*rs_a + 0*cs_a );     // zmm10 = abuf[  0:7, 0]
+    zmm11 = _mm512_loadu_pd( abuf +  8*rs_a + 0*cs_a );     // zmm11 = abuf[ 8:15, 0]
+
+    // Performing the operation intermediate_register += A * (alpha * x)
+    // and storing the result back to the intermediate registers.
+    zmm0 = _mm512_fmadd_pd( zmm26, zmm10, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 0] * (alpha*x[0])
+    zmm1 = _mm512_fmadd_pd( zmm26, zmm11, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 0] * (alpha*x[0])
+
+    zmm14 = _mm512_loadu_pd( abuf +  0*rs_a + 1*cs_a );     // zmm14 = abuf[  0:7, 1]
+    zmm15 = _mm512_loadu_pd( abuf +  8*rs_a + 1*cs_a );     // zmm15 = abuf[ 8:15, 1]
+
+    zmm0 = _mm512_fmadd_pd( zmm27, zmm14, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 1] * (alpha*x[1])
+    zmm1 = _mm512_fmadd_pd( zmm27, zmm15, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 1] * (alpha*x[1])
+
+    zmm18 = _mm512_loadu_pd( abuf +  0*rs_a + 2*cs_a );     // zmm18 = abuf[  0:7, 2]
+    zmm19 = _mm512_loadu_pd( abuf +  8*rs_a + 2*cs_a );     // zmm19 = abuf[ 8:15, 2]
+
+    zmm0 = _mm512_fmadd_pd( zmm28, zmm18, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 2] * (alpha*x[2])
+    zmm1 = _mm512_fmadd_pd( zmm28, zmm19, zmm1 );           // ybuf[ 8:15] += abuf[ 8:15, 2] * (alpha*x[2])
+
+    /**
+     * If beta = 0, then y vector should not be read, only set.
+     * Else, load y, scale by beta, add the intermediate results and store
+     * the final result back to y buffer.
+     */
+    if ( !bli_deq0( *beta ) )
     {
-        // Scale by alpha and broadcast 2 elements from x vector.
-        zmm20 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx) ) );     // zmm20 = alpha*x[0*incx]
-        zmm21 = _mm512_set1_pd( *alpha * (*(xbuf + 1*incx) ) );     // zmm21 = alpha*x[1*incx]
+        // Load 16 elements from y vector.
+        zmm4 = _mm512_loadu_pd( ybuf +  0*incy );           // zmm4 = ybuf[  0:7]
+        zmm5 = _mm512_loadu_pd( ybuf +  8*incy );           // zmm5 = ybuf[ 8:15]
 
-        // Load masked rows and 2 columns from A.
-        zmm10 = _mm512_maskz_loadu_pd( m_mask, abuf + 0*cs_a );     // zmm10 = abuf[0:m_left, 0]
-        zmm11 = _mm512_maskz_loadu_pd( m_mask, abuf + 1*cs_a );     // zmm11 = abuf[0:m_left, 1]
-
-        // Performing the operation intermediate_register += A * (alpha * x)
-        // and storing the result back to the intermediate registers.
-        zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm20, zmm10, zmm0 ); // ybuf[0:m_left] += abuf[0:m_left, 0] * (alpha*x[0])
-        zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm21, zmm11, zmm0 ); // ybuf[0:m_left] += abuf[0:m_left, 1] * (alpha*x[1])
+        // Performing the operation y := beta*y + A * (alpha * x).
+        // zmm30 = _mm512_set1_pd( *beta );
+        zmm0 = _mm512_fmadd_pd( zmm30, zmm4, zmm0 );        // ybuf[  0:7] = beta*ybuf[  0:7] + (abuf[  0:7, 0] * (alpha*x[0]))
+        zmm1 = _mm512_fmadd_pd( zmm30, zmm5, zmm1 );        // ybuf[ 8:15] = beta*ybuf[ 8:15] + (abuf[ 8:15, 0] * (alpha*x[0]))
     }
-    else if ( n_left == 1 )     // Performing GEMV in blocks of m_leftx1.
+
+    // Store the final result to y buffer.
+    _mm512_storeu_pd( ybuf +  0*incy, zmm0 );               // ybuf[  0:7] = zmm0
+    _mm512_storeu_pd( ybuf +  8*incy, zmm1 );               // ybuf[ 8:15] = zmm1
+
+    if ( m_left )
     {
-        // Scale by alpha and broadcast 1 elements from x vector.
-        zmm20 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx) ) );     // zmm20 = alpha*x[0*incx]
+        // Move a to the beginning of the next block of rows.
+        a    += 16*rs_a;
+        // Move ybuf to the beginning of the next block of elements.
+        ybuf += 16*incy;
 
-        // Load masked rows and 1 columns from A.
-        zmm10 = _mm512_maskz_loadu_pd( m_mask, abuf + 0*cs_a );     // zmm10 = abuf[0:m_left, 0]
+        dim_t m8_iter = m_left / 8;
+              m_left  = m_left % 8;
 
-        // Performing the operation intermediate_register += A * (alpha * x)
-        // and storing the result back to the intermediate registers.
-        zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm20, zmm10, zmm0 ); // ybuf[0:m_left] += abuf[0:m_left, 0] * (alpha*x[0])
+        if ( m8_iter )
+        {
+            bli_dgemv_n_zen_int_8x3n_avx512
+            (
+              conja,
+              conjx,
+              8,    // Passing m as 8 since we only want to handle 8 rows.
+              n,
+              alpha,
+              a, rs_a, cs_a,
+              x, incx,
+              beta,
+              ybuf, incy,
+              cntx
+            );
+
+            // Move a to the beginning of the next block of rows.
+            a    += 8*m8_iter*rs_a;
+            // Move ybuf to the beginning of the next block of elements.
+            ybuf += 8*m8_iter*incy;
+        }
+
+        // If m_left is non-zero, calculate the result for the remaining rows.
+        if ( m_left )
+        {
+            bli_dgemv_n_zen_int_m_leftx3n_avx512
+            (
+              conja,
+              conjx,
+              m_left,   // Passing m as m_left since we only want to handle m_left rows.
+              n,
+              alpha,
+              a, rs_a, cs_a,
+              x, incx,
+              beta,
+              ybuf, incy,
+              cntx
+            );
+        }
     }
+}
+
+/**
+ * The bli_dgemv_n_zen_int_8x3n_avx512(...) kernel handles the DGEMV operation
+ * by breaking the A matrix into blocks of 8x3, i.e., 8 rows and 3 columns,
+ * and traversing in the n dimension keeping m(8) fixed.
+ */
+void bli_dgemv_n_zen_int_8x3n_avx512
+     (
+       conj_t           conja,
+       conj_t           conjx,
+       dim_t            m,
+       dim_t            n,
+       double* restrict alpha,
+       double* restrict a, inc_t rs, inc_t cs,
+       double* restrict x, inc_t incx,
+       double* restrict beta,
+       double* restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     )
+{
+    double* restrict abuf = a;
+    double* restrict xbuf = x;
+    double* restrict ybuf = y;
+
+    const dim_t rs_a = rs;
+    const dim_t cs_a = cs;
+
+    // This kernel will handle sizes where m = [8, 16).
+    dim_t m_left = m % 8;
+
+    // intermediate registers
+    __m512d zmm0;
+
+    // y
+    __m512d zmm4;
+
+    // x
+    __m512d zmm26, zmm27, zmm28;
+
+    // A
+    __m512d zmm10;
+    __m512d zmm14;
+    __m512d zmm18;
+
+    // beta
+    // Broadcast beta to a register.
+    __m512d zmm30 = _mm512_set1_pd( *beta );                // zmm30 = beta, beta, beta, beta, ...
+
+    // Initialize the intermediate register to zero.
+    zmm0 = _mm512_setzero_pd();                             // ybuf[  0:7]
+
+    // Scale by alpha and broadcast 3 elements from x vector.
+    zmm26 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx)) );  // zmm26 = alpha*x[0*incx]
+    zmm27 = _mm512_set1_pd( *alpha * (*(xbuf + 1*incx)) );  // zmm27 = alpha*x[1*incx]
+    zmm28 = _mm512_set1_pd( *alpha * (*(xbuf + 2*incx)) );  // zmm28 = alpha*x[2*incx]
+
+    // Load 8 rows and 3 columns from A.
+    zmm10 = _mm512_loadu_pd( abuf +  0*rs_a + 0*cs_a );     // zmm10 = abuf[  0:7, 0]
+
+    // Performing the operation intermediate_register += A * (alpha * x)
+    // and storing the result back to the intermediate registers.
+    zmm0 = _mm512_fmadd_pd( zmm26, zmm10, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 0] * (alpha*x[0])
+
+    zmm14 = _mm512_loadu_pd( abuf +  0*rs_a + 1*cs_a );     // zmm14 = abuf[  0:7, 1]
+
+    zmm0 = _mm512_fmadd_pd( zmm27, zmm14, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 1] * (alpha*x[1])
+
+    zmm18 = _mm512_loadu_pd( abuf +  0*rs_a + 2*cs_a );     // zmm18 = abuf[  0:7, 2]
+
+    zmm0 = _mm512_fmadd_pd( zmm28, zmm18, zmm0 );           // ybuf[  0:7] += abuf[  0:7, 2] * (alpha*x[2])
+
+    /**
+     * If beta = 0, then y vector should not be read, only set.
+     * Else, load y, scale by beta, add the intermediate results and store
+     * the final result back to y buffer.
+     */
+    if ( !bli_deq0( *beta ) )
+    {
+        // Load 8 elements from y vector.
+        zmm4 = _mm512_loadu_pd( ybuf +  0*incy );           // zmm4 = ybuf[  0:7]
+
+        // Performing the operation y := beta*y + A * (alpha * x).
+        // zmm30 = _mm512_set1_pd( *beta );
+        zmm0 = _mm512_fmadd_pd( zmm30, zmm4, zmm0 );        // ybuf[  0:7] = beta*ybuf[  0:7] + (abuf[  0:7, 0] * (alpha*x[0]))
+    }
+
+    // Store the final result to y buffer.
+    _mm512_storeu_pd( ybuf +  0*incy, zmm0 );               // ybuf[  0:7] = zmm0
+
+    if ( m_left )
+    {
+        // Move a to the beginning of the next block of rows.
+        a    += 8*rs_a;
+        // Move ybuf to the beginning of the next block of elements.
+        ybuf += 8*incy;
+
+        bli_dgemv_n_zen_int_m_leftx3n_avx512
+        (
+          conja,
+          conjx,
+          m_left,   // Passing m as m_left since we only want to handle m_left rows.
+          n,
+          alpha,
+          a, rs_a, cs_a,
+          x, incx,
+          beta,
+          ybuf, incy,
+          cntx
+        );
+    }
+}
+
+/**
+ * The bli_dgemv_n_zen_int_m_leftx4n_avx512(...) kernel handles the DGEMV operation
+ * by breaking the A matrix into blocks of m_leftx3, i.e., m_left rows and 3 columns,
+ * and traversing in the n dimension keeping m(m_left) fixed.
+ */
+void bli_dgemv_n_zen_int_m_leftx3n_avx512
+     (
+       conj_t           conja,
+       conj_t           conjx,
+       dim_t            m_left,
+       dim_t            n,
+       double* restrict alpha,
+       double* restrict a, inc_t rs, inc_t cs,
+       double* restrict x, inc_t incx,
+       double* restrict beta,
+       double* restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     )
+{
+    double* restrict abuf = a;
+    double* restrict xbuf = x;
+    double* restrict ybuf = y;
+
+    const dim_t cs_a = cs;
+
+    // intermediate registers
+    __m512d zmm0;
+
+    // x
+    __m512d zmm20, zmm21, zmm22;
+
+    // A
+    __m512d zmm10, zmm11, zmm12;
+
+    // y
+    __m512d zmm30;
+
+    // beta
+    __m512d zmm8;
+
+    // Generate the mask based on the value of m_left.
+    __mmask8 m_mask = (1 << m_left) - 1;
+
+    // Initialize the intermediate register to zero.
+    zmm0 = _mm512_setzero_pd();                                     // ybuf[0:m_left]
+
+    // Scale by alpha and broadcast 3 elements from x vector.
+    zmm20 = _mm512_set1_pd( *alpha * (*(xbuf + 0*incx) ) );         // zmm20 = alpha*x[0*incx]
+    zmm21 = _mm512_set1_pd( *alpha * (*(xbuf + 1*incx) ) );         // zmm21 = alpha*x[1*incx]
+    zmm22 = _mm512_set1_pd( *alpha * (*(xbuf + 2*incx) ) );         // zmm22 = alpha*x[2*incx]
+
+    // Load masked rows and 3 columns from A.
+    zmm10 = _mm512_maskz_loadu_pd( m_mask, abuf + 0*cs_a );         // zmm10 = abuf[0:m_left, 0]
+    zmm11 = _mm512_maskz_loadu_pd( m_mask, abuf + 1*cs_a );         // zmm11 = abuf[0:m_left, 1]
+    zmm12 = _mm512_maskz_loadu_pd( m_mask, abuf + 2*cs_a );         // zmm12 = abuf[0:m_left, 2]
+
+    // Performing the operation intermediate_register += A * (alpha * x)
+    // and storing the result back to the intermediate registers.
+    zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm20, zmm10, zmm0 );     // ybuf[0:m_left] += abuf[0:m_left, 0] * (alpha*x[0])
+    zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm21, zmm11, zmm0 );     // ybuf[0:m_left] += abuf[0:m_left, 1] * (alpha*x[1])
+    zmm0 = _mm512_maskz_fmadd_pd( m_mask, zmm22, zmm12, zmm0 );     // ybuf[0:m_left] += abuf[0:m_left, 2] * (alpha*x[2])
 
     /**
      * If beta = 0, then y vector should not be read, only set.
@@ -3315,7 +3819,7 @@ void bli_dgemv_n_zen_int_32x2n_avx512
           cntx
         );
 
-        // Move abuf to the beginning of the next block of rows.
+        // Move a to the beginning of the next block of rows.
         a    += 16*m16_iter*rs_a;
         // Move ybuf to the beginning of the next block of elements.
         ybuf += 16*m16_iter*incy;
@@ -3339,7 +3843,7 @@ void bli_dgemv_n_zen_int_32x2n_avx512
           cntx
         );
 
-        // Move abuf to the beginning of the next block of rows.
+        // Move a to the beginning of the next block of rows.
         a    += 8*m8_iter*rs_a;
         // Move ybuf to the beginning of the next block of elements.
         ybuf += 8*m8_iter*incy;
@@ -3362,7 +3866,7 @@ void bli_dgemv_n_zen_int_32x2n_avx512
           cntx
         );
 
-        // Move abuf to the beginning of the next block of rows.
+        // Move a to the beginning of the next block of rows.
         a    += m_left*rs_a;
         // Move ybuf to the beginning of the next block of elements.
         ybuf += m_left*incy;
@@ -3484,6 +3988,9 @@ void bli_dgemv_n_zen_int_16x2n_avx512
     const dim_t rs_a = rs;
     const dim_t cs_a = cs;
 
+    // This kernel will handle sizes where m = [16, 32).
+    dim_t m_left = m % 16;
+
     // intermediate registers
     __m512d zmm0, zmm1;
 
@@ -3544,6 +4051,57 @@ void bli_dgemv_n_zen_int_16x2n_avx512
     // Store the final result to y buffer.
     _mm512_storeu_pd( ybuf +  0*incy, zmm0 );               // ybuf[  0:7] = zmm0
     _mm512_storeu_pd( ybuf +  8*incy, zmm1 );               // ybuf[ 8:15] = zmm1
+
+    if ( m_left )
+    {
+        // Move a to the beginning of the next block of rows.
+        a    += 16*rs_a;
+        // Move ybuf to the beginning of the next block of elements.
+        ybuf += 16*incy;
+
+        dim_t m8_iter = m_left / 8;
+              m_left  = m_left % 8;
+
+        if ( m8_iter )
+        {
+            bli_dgemv_n_zen_int_8x2n_avx512
+            (
+              conja,
+              conjx,
+              8,    // Passing m as 8 since we only want to handle 8 rows.
+              n,
+              alpha,
+              a, rs_a, cs_a,
+              x, incx,
+              beta,
+              ybuf, incy,
+              cntx
+            );
+
+            // Move a to the beginning of the next block of rows.
+            a    += 8*m8_iter*rs_a;
+            // Move ybuf to the beginning of the next block of elements.
+            ybuf += 8*m8_iter*incy;
+        }
+
+        // If m_left is non-zero, calculate the result for the remaining rows.
+        if ( m_left )
+        {
+            bli_dgemv_n_zen_int_m_leftx2n_avx512
+            (
+              conja,
+              conjx,
+              m_left,   // Passing m as m_left since we only want to handle m_left rows.
+              n,
+              alpha,
+              a, rs_a, cs_a,
+              x, incx,
+              beta,
+              ybuf, incy,
+              cntx
+            );
+        }
+    }
 }
 
 /**
@@ -3571,6 +4129,9 @@ void bli_dgemv_n_zen_int_8x2n_avx512
 
     const dim_t rs_a = rs;
     const dim_t cs_a = cs;
+
+    // This kernel will handle sizes where m = [8, 16).
+    dim_t m_left = m % 8;
 
     // intermediate registers
     __m512d zmm0;
@@ -3624,6 +4185,28 @@ void bli_dgemv_n_zen_int_8x2n_avx512
 
     // Store the final result to y buffer.
     _mm512_storeu_pd( ybuf +  0*incy, zmm0 );               // ybuf[  0:7] = zmm0
+
+    if ( m_left )
+    {
+        // Move a to the beginning of the next block of rows.
+        a    += 8*rs_a;
+        // Move ybuf to the beginning of the next block of elements.
+        ybuf += 8*incy;
+
+        bli_dgemv_n_zen_int_m_leftx2n_avx512
+        (
+          conja,
+          conjx,
+          m_left,   // Passing m as m_left since we only want to handle m_left rows.
+          n,
+          alpha,
+          a, rs_a, cs_a,
+          x, incx,
+          beta,
+          ybuf, incy,
+          cntx
+        );
+    }
 }
 
 /**
@@ -3767,7 +4350,7 @@ void bli_dgemv_n_zen_int_32x1n_avx512
           cntx
         );
 
-        // Move abuf to the beginning of the next block of rows.
+        // Move a to the beginning of the next block of rows.
         a    += 16*m16_iter*rs_a;
         // Move ybuf to the beginning of the next block of elements.
         ybuf += 16*m16_iter*incy;
@@ -3791,7 +4374,7 @@ void bli_dgemv_n_zen_int_32x1n_avx512
           cntx
         );
 
-        // Move abuf to the beginning of the next block of rows.
+        // Move a to the beginning of the next block of rows.
         a    += 8*m8_iter*rs_a;
         // Move ybuf to the beginning of the next block of elements.
         ybuf += 8*m8_iter*incy;
@@ -3814,7 +4397,7 @@ void bli_dgemv_n_zen_int_32x1n_avx512
           cntx
         );
 
-        // Move abuf to the beginning of the next block of rows.
+        // Move a to the beginning of the next block of rows.
         a    += m_left*rs_a;
         // Move ybuf to the beginning of the next block of elements.
         ybuf += m_left*incy;
@@ -3924,6 +4507,9 @@ void bli_dgemv_n_zen_int_16x1n_avx512
     const dim_t rs_a = rs;
     const dim_t cs_a = cs;
 
+    // This kernel will handle sizes where m = [16, 32).
+    dim_t m_left = m % 16;
+
     // intermediate registers
     __m512d zmm0, zmm1;
 
@@ -3976,6 +4562,57 @@ void bli_dgemv_n_zen_int_16x1n_avx512
     // Store the final result to y buffer.
     _mm512_storeu_pd( ybuf +  0*incy, zmm0 );               // ybuf[  0:7] = zmm0
     _mm512_storeu_pd( ybuf +  8*incy, zmm1 );               // ybuf[ 8:15] = zmm1
+
+    if ( m_left )
+    {
+        // Move a to the beginning of the next block of rows.
+        a    += 16*rs_a;
+        // Move ybuf to the beginning of the next block of elements.
+        ybuf += 16*incy;
+
+        dim_t m8_iter = m_left / 8;
+              m_left  = m_left % 8;
+
+        if ( m8_iter )
+        {
+            bli_dgemv_n_zen_int_8x1n_avx512
+            (
+              conja,
+              conjx,
+              8,    // Passing m as 8 since we only want to handle 8 rows.
+              n,
+              alpha,
+              a, rs_a, cs_a,
+              x, incx,
+              beta,
+              ybuf, incy,
+              cntx
+            );
+
+            // Move a to the beginning of the next block of rows.
+            a    += 8*rs_a;
+            // Move ybuf to the beginning of the next block of elements.
+            ybuf += 8*incy;
+        }
+
+        // If m_left is non-zero, calculate the result for the remaining rows.
+        if ( m_left )
+        {
+            bli_dgemv_n_zen_int_m_leftx1n_avx512
+            (
+              conja,
+              conjx,
+              m_left,   // Passing m as m_left since we only want to handle m_left rows.
+              n,
+              alpha,
+              a, rs_a, cs_a,
+              x, incx,
+              beta,
+              ybuf, incy,
+              cntx
+            );
+        }
+    }
 }
 
 /**
@@ -4003,6 +4640,9 @@ void bli_dgemv_n_zen_int_8x1n_avx512
 
     const dim_t rs_a = rs;
     const dim_t cs_a = cs;
+
+    // This kernel will handle sizes where m = [8, 16).
+    dim_t m_left = m % 8;
 
     // intermediate registers
     __m512d zmm0;
@@ -4050,6 +4690,28 @@ void bli_dgemv_n_zen_int_8x1n_avx512
 
     // Store the final result to y buffer.
     _mm512_storeu_pd( ybuf +  0*incy, zmm0 );               // ybuf[  0:7] = zmm0
+
+    if ( m_left )
+    {
+        // Move a to the beginning of the next block of rows.
+        a    += 8*rs_a;
+        // Move ybuf to the beginning of the next block of elements.
+        ybuf += 8*incy;
+
+        bli_dgemv_n_zen_int_m_leftx1n_avx512
+        (
+          conja,
+          conjx,
+          m_left,   // Passing m as m_left since we only want to handle m_left rows.
+          n,
+          alpha,
+          a, rs_a, cs_a,
+          x, incx,
+          beta,
+          ybuf, incy,
+          cntx
+        );
+    }
 }
 
 /**
