@@ -39,6 +39,8 @@
 //
 // Define BLAS-to-BLIS interfaces.
 //
+#define STRINGIFY( name ) #name
+#define EXPAND_AND_STRINGIFY( name ) STRINGIFY( name )
 
 #ifdef BLIS_BLAS3_CALLS_TAPI
 
@@ -118,7 +120,9 @@ void PASTEF77(ch,blasname) \
 \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
-}
+}; \
+void PASTEF77 (ch, blasname ## r )() \
+	__attribute__ ((alias(EXPAND_AND_STRINGIFY(PASTEF77(ch,blasname)))));
 
 #else
 
@@ -221,7 +225,9 @@ void PASTEF77(ch,blasname) \
 \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
-}
+}; \
+void PASTEF77 (ch, blasname ## r )() \
+	__attribute__ ((alias(EXPAND_AND_STRINGIFY(PASTEF77(ch,blasname)))));
 
 #endif
 

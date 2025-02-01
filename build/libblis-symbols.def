@@ -1248,6 +1248,7 @@ cblas_cgemm
 cblas_cgemm3m
 cblas_cgemm_batch
 cblas_cgemmt
+cblas_cgemmtr
 cblas_cgemv
 cblas_cgerc
 cblas_cgeru
@@ -1284,6 +1285,7 @@ cblas_dgbmv
 cblas_dgemm
 cblas_dgemm_batch
 cblas_dgemmt
+cblas_dgemmtr
 cblas_dgemv
 cblas_dger
 cblas_dnrm2
@@ -1330,6 +1332,7 @@ cblas_sgbmv
 cblas_sgemm
 cblas_sgemm_batch
 cblas_sgemmt
+cblas_sgemmtr
 cblas_sgemv
 cblas_sger
 cblas_snrm2
@@ -1369,6 +1372,7 @@ cblas_zgemm
 cblas_zgemm3m
 cblas_zgemm_batch
 cblas_zgemmt
+cblas_zgemmtr
 cblas_zgemv
 cblas_zgerc
 cblas_zgeru
@@ -1405,6 +1409,7 @@ cgemm3m_
 cgemm_
 cgemm_batch_
 cgemmt_
+cgemmtr_
 cgemv_
 cgerc_
 cgeru_
@@ -1446,6 +1451,7 @@ dgbmv_
 dgemm_
 dgemm_batch_
 dgemmt_
+dgemmtr_
 dgemv_
 dger_
 dnrm2_
@@ -1507,6 +1513,7 @@ sgbmv_
 sgemm_
 sgemm_batch_
 sgemmt_
+sgemmtr_
 sgemv_
 sger_
 snrm2_
@@ -1551,6 +1558,7 @@ zgemm3m_
 zgemm_
 zgemm_batch_
 zgemmt_
+zgemmtr_
 zgemv_
 zgerc_
 zgeru_
