@@ -163,4 +163,6 @@ void cblas_sgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
    RowMajorStrg = 0;
    return;
 }
+
+void cblas_sgemmtr() __attribute__((alias("cblas_sgemmt")));
 #endif
