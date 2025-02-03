@@ -335,10 +335,12 @@ void daxpy_blis_impl
     // Definition of function pointer
     daxpyv_ker_ft axpyv_ker_ptr;
 
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
     // Setting the threshold to invoke the fast-path
     // The fast-path is intended to directly call the kernel
     // in case the criteria for single threaded execution is met.
     dim_t fast_path_thresh = 1;
+#endif
 
     cntx_t *cntx = NULL;
 
@@ -351,13 +353,17 @@ void daxpy_blis_impl
       case BLIS_ARCH_ZEN5:
 #if defined(BLIS_KERNELS_ZEN4)
           axpyv_ker_ptr = bli_daxpyv_zen_int_avx512;
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
           fast_path_thresh = 34000;
+#endif
           break;
 #endif
       case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
           axpyv_ker_ptr = bli_daxpyv_zen_int_avx512;
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
           fast_path_thresh = 11000;
+#endif
           break;
 #endif
       case BLIS_ARCH_ZEN:
@@ -366,7 +372,9 @@ void daxpy_blis_impl
 
           // AVX2 Kernel
           axpyv_ker_ptr = bli_daxpyv_zen_int10;
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
           fast_path_thresh = 4000;
+#endif
           break;
 
       default:

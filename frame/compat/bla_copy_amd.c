@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -296,14 +296,32 @@ void dcopy_blis_impl
 	// that will be used by this API
 	dcopyv_ker_ft copyv_ker_ptr; // DCOPYV
 
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
+	// Setting the threshold to invoke the fast-path
+	// The fast-path is intended to directly call the kernel
+	// in case the criteria for single threaded execution is met.
+	dim_t fast_path_thresh = 0;
+#endif
+
 	// Pick the kernel based on the architecture ID
 	switch (id)
 	{
 		case BLIS_ARCH_ZEN5:
+#if defined(BLIS_KERNELS_ZEN5)
+			// For Zen4 and Zen5, kernel implemented in AVX512 is used
+			copyv_ker_ptr = bli_dcopyv_zen4_asm_avx512;
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
+			fast_path_thresh = 39000;
+#endif
+			break;
+#endif
 		case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
 			// For Zen4 and Zen5, kernel implemented in AVX512 is used
 			copyv_ker_ptr = bli_dcopyv_zen4_asm_avx512;
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
+			fast_path_thresh = 17000;
+#endif
 			break;
 #endif
 		case BLIS_ARCH_ZEN:
@@ -311,6 +329,9 @@ void dcopy_blis_impl
 		case BLIS_ARCH_ZEN3:
 			// For Zen1, Zen2 and Zen3 architectures, kernel implemented in AVX2 is used.
 			copyv_ker_ptr = bli_dcopyv_zen_int;
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
+			fast_path_thresh = 17000;
+#endif
 			break;
 		default:
 			// For non-Zen architectures, query the context
@@ -320,6 +341,26 @@ void dcopy_blis_impl
 	}
 
 #ifdef BLIS_ENABLE_OPENMP
+    #ifdef AOCL_DYNAMIC
+
+	/* Invoking the fast-path, if the size is ideal for such execution */
+	if (n0 <= fast_path_thresh )
+	{
+		copyv_ker_ptr
+		(
+			BLIS_NO_CONJUGATE,
+			n0,
+			x0, incx0,
+			y0, incy0,
+			cntx
+		);
+
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+		return;
+	}
+
+	#endif
+
 	/*
 		Initializing the number of thread to one
 		to avoid compiler warnings
@@ -348,18 +389,17 @@ void dcopy_blis_impl
 	if (nt == 1)
 	{
 #endif
+		copyv_ker_ptr
+		(
+			BLIS_NO_CONJUGATE,
+			n0,
+			x0, incx0,
+			y0, incy0,
+			cntx
+		);
 
-	copyv_ker_ptr
-	(
-		BLIS_NO_CONJUGATE,
-		n0,
-		x0, incx0,
-		y0, incy0,
-		cntx
-	);
-
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-	return;
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+		return;
 
 #ifdef BLIS_ENABLE_OPENMP
 	}
@@ -369,7 +409,7 @@ void dcopy_blis_impl
 		dim_t start, end, length;
 		thrinfo_t thread;
 
-		// The factor by which the size should be a multiple during thread partition. 
+		// The factor by which the size should be a multiple during thread partition.
 		// The main loop of the kernel can handle 32 elements at a time hence 32 is selected for block_size.
 		dim_t block_size = 32;
 
