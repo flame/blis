@@ -36,8 +36,6 @@
 
 GEN_FILL_ARRAY_FUNC(float)
 
-CONVERT_TO_FLOAT(float)
-
 void print_result
      (
        const char* msg,
@@ -195,13 +193,13 @@ static inline float eltwise_ops_accuracy_check_downscale_f32of32
     return out_temp_accum;
 }
 
-GEN_GET_MATRIX_ADD_POST_OP_VAL(float,float,bf16of32)
-GEN_GET_MATRIX_ADD_POST_OP_VAL_BF16(bfloat16,bf16obf16)
-GEN_GET_MATRIX_ADD_POST_OP_VAL(float,float,f32of32)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(float,bf16of32)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(float,bf16obf16)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(float,f32of32)
 
-GEN_GET_MATRIX_MUL_POST_OP_VAL(float,float,bf16of32)
-GEN_GET_MATRIX_MUL_POST_OP_VAL_BF16(bfloat16,bf16obf16)
-GEN_GET_MATRIX_MUL_POST_OP_VAL(float,float,f32of32)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(float,bf16of32)
+GEN_GET_MATRIX_MUL_POST_OP_VAL_BF16(bf16obf16)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(float,f32of32)
 
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(float,float)
 
@@ -316,8 +314,7 @@ void eltwise_ops_accuracy_check_driver_ ## LP_SFX \
                         { \
                             temp_accum = GEN_FUNC_NAME(SWISH_post_op_,LP_SFX) \
                                 (temp_accum, \
-                                 *( ( ACCUM_type* ) \
-                                    ( post_op->eltwise + ele_i )->algo.alpha ) );\
+                                 ( post_op->eltwise + ele_i )->algo.alpha );\
                             ele_i += 1; \
                         } \
                         else if ( ( post_op->eltwise + ele_i )->algo.algo_type == \
@@ -375,9 +372,8 @@ void eltwise_ops_accuracy_check_driver_ ## LP_SFX \
                         float* scl_fctr = ( float* )( ( post_op->matrix_add )->scale_factor ); \
                         dim_t scl_fctr_len = ( post_op->matrix_add )->scale_factor_len; \
                         temp_accum += GEN_FUNC_NAME(get_matrix_add_post_op_val_,LP_SFX) \
-                                    ( *( ( B_type* )( post_op->matrix_add )->matrix + \
-                                           ( i * rs_m ) + ( j * cs_m ) ), \
-                                      j, scl_fctr, scl_fctr_len ); \
+                                    ( ( post_op->matrix_add )->matrix, i, \
+                                      j, rs_m, cs_m, scl_fctr, scl_fctr_len,( post_op->matrix_add )->stor_type ); \
                     } \
                     else if ( post_op->seq_vector[op_id] == MATRIX_MUL ) \
                     { \
@@ -391,9 +387,8 @@ void eltwise_ops_accuracy_check_driver_ ## LP_SFX \
                         float* scl_fctr = ( float* )( ( post_op->matrix_mul )->scale_factor ); \
                         dim_t scl_fctr_len = ( post_op->matrix_mul )->scale_factor_len; \
                         temp_accum *= GEN_FUNC_NAME(get_matrix_mul_post_op_val_,LP_SFX) \
-                                    ( *( ( B_type* )( post_op->matrix_mul )->matrix + \
-                                           ( i * rs_m ) + ( j * cs_m ) ), \
-                                      j, scl_fctr, scl_fctr_len ); \
+                                    ( ( post_op->matrix_mul )->matrix, i, \
+                                      j, rs_m, cs_m, scl_fctr, scl_fctr_len, ( post_op->matrix_add )->stor_type ); \
                     } \
                     else \
                     {} \

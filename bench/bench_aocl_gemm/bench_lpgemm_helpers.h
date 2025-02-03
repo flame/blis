@@ -69,7 +69,7 @@ char global_pre_op = 'n';
 #define XSTR(str) _XSTR(str)
 
 #define GEN_FUNC_NAME(prototype,ctype) prototype ## ctype
-
+#define CVT_FUNC_NAME(stype, dtype) stype ## _to_ ## dtype
 // Inplace to lower func.
 static inline void str_tolower( char* str )
 {
@@ -82,6 +82,22 @@ static inline void GEN_FUNC_NAME(ctype,_to_float) ( ctype val, float* float_val 
 { \
     *float_val = (float) val; \
 } \
+
+CONVERT_TO_FLOAT(uint8_t)
+CONVERT_TO_FLOAT(int8_t)
+CONVERT_TO_FLOAT(int16_t)
+CONVERT_TO_FLOAT(float)
+CONVERT_TO_FLOAT(int32_t)
+
+
+#define CONVERT_ITSELF(ctype) \
+static inline void GEN_FUNC_NAME(ctype,_to_ ## ctype) ( ctype val, ctype* ctype_val ) \
+{ \
+    *ctype_val = val; \
+}
+
+CONVERT_ITSELF(int16_t)
+CONVERT_ITSELF(int32_t)
 
 static inline void float_to_bf16( float* float_value, bfloat16* bf16_val )
 {
@@ -169,6 +185,43 @@ static inline void lpgemm_free( void* p )
     }
 }
 
+bool is_integerAPI_avx512( char* api_name )
+{
+    if ( ( strcmp( api_name, "u8s8s32of32" ) == 0) || ( strcmp( api_name, "u8s8s32os8" ) == 0) \
+    || ( strcmp( api_name, "u8s8s32obf16" ) == 0) || ( strcmp( api_name, "u8s8s32os32" ) == 0) \
+    || ( strcmp( api_name, "u8s8s32ou8" ) == 0) ) \
+    { \
+        return TRUE; \
+    } \
+    else \
+    { \
+        return FALSE; \
+    }
+}
+bool is_integer( char* type )
+{
+    if ( ( strcmp( type, "int8_t" ) == 0 ) || ( strcmp( type, "int16_t" ) == 0 ) \
+    || ( strcmp( type, "int32_t" ) == 0 ) || ( strcmp( type, "uint8_t" ) == 0 ) ) \
+    { \
+        return TRUE; \
+    } \
+    else \
+    { \
+        return FALSE; \
+    }
+}
+bool is_bf16API_avx512( char* api_name )
+{
+    if ( ( strcmp( api_name, "bf16bf16f32of32" ) == 0) || ( strcmp( api_name, "bf16bf16f32obf16" ) == 0) \
+    || ( strcmp( api_name, "bf16s4f32of32" ) == 0) || strcmp( api_name, "bf16s4f32obf16")) \
+    { \
+        return TRUE; \
+    } \
+    else \
+    { \
+        return FALSE; \
+    }
+}
 #ifdef BLIS_ENABLE_OPENMP
 /* Matrix fill helper macros. */
 #define GEN_FILL_ARRAY_FUNC(ctype) \
@@ -237,6 +290,61 @@ static inline void fill_array_post_ops_bfloat16( void* arr, dim_t size )
 }
 
 /* POST-OPS Helper macros. */
+/* CLIP */
+#define GEN_CLIP_POST_OP_VAL_INT(BLAS_SFX) \
+static inline float get_clip_post_op_val_ ## BLAS_SFX \
+     ( \
+       float post_temp_accum, \
+       void* post_op_alpha_ptr, \
+       void* post_op_beta_ptr \
+     ) \
+{ \
+    float alpha, beta; \
+    int32_t_to_float(*( ( int32_t* )post_op_alpha_ptr), &alpha); \
+    int32_t_to_float(*( ( int32_t* )post_op_beta_ptr), &beta); \
+    return min( max( post_temp_accum, alpha),beta); \
+}
+
+#define GEN_CLIP_POST_OP_VAL_FLOAT(BLAS_SFX) \
+static inline float get_clip_post_op_val_ ## BLAS_SFX \
+     ( \
+       float post_temp_accum, \
+       void* post_op_alpha_ptr, \
+       void* post_op_beta_ptr \
+     ) \
+{ \
+    return min( max( post_temp_accum, *( ( float* )post_op_alpha_ptr ) ), \
+                *( ( float* )post_op_beta_ptr ) ); \
+}
+
+/* PRELU */
+#define GEN_PRELU_POST_OP_VAL_FLOAT(BLAS_SFX) \
+static inline float get_prelu_post_op_val_ ## BLAS_SFX \
+     ( \
+       float post_temp_accum, \
+       void* post_op_alpha_ptr \
+     ) \
+{ \
+    return (( post_temp_accum > 0 ) ? \
+                                post_temp_accum : \
+                                ( post_temp_accum * \
+                                (*( float* )post_op_alpha_ptr) )); \
+}
+
+#define GEN_PRELU_POST_OP_VAL_INT(BLAS_SFX) \
+static inline float get_prelu_post_op_val_ ## BLAS_SFX \
+     ( \
+       float post_temp_accum, \
+       void* post_op_alpha_ptr \
+     ) \
+{ \
+    float ret_val; \
+    int32_t_to_float(*( ( int32_t* )post_op_alpha_ptr), &ret_val); \
+ \
+    return ( post_temp_accum > 0 ) ? \
+                                post_temp_accum : \
+                                ( post_temp_accum * ret_val ); \
+}
 
 /* Bias. */
 #define GEN_GET_BIAS_POST_OP_VAL_BF16(BLAS_SFX) \
@@ -283,37 +391,23 @@ static inline ACCUM_type get_bias_post_op_val_ ## BLAS_SFX \
 { \
     if(bias_stor_type == AOCL_GEMM_BF16) \
     { \
-        int32_t ret_val = 0.0; \
-        bfloat16_to_int32_t( *( ( bfloat16* )post_op_bias_ptr + j ), &ret_val ); \
+        float ret_val = 0.0; \
+        bfloat16_to_float( *( ( bfloat16* )post_op_bias_ptr + j ), &ret_val ); \
         return ret_val; \
     } \
     if(bias_stor_type == AOCL_GEMM_INT8) \
     { \
-        int32_t ret_val = 0.0; \
-        int8_t_to_int32_t( *( ( int8_t* )post_op_bias_ptr + j ), &ret_val ); \
+        float ret_val = 0.0; \
+        int8_t_to_float( *( ( int8_t* )post_op_bias_ptr + j ), &ret_val ); \
         return ret_val; \
     } \
-    if(bias_stor_type == AOCL_GEMM_F32) \
+    if(bias_stor_type == AOCL_GEMM_INT32) \
     { \
-        int32_t ret_val = 0.0; \
-        ret_val = (int32_t) *( ( float* )post_op_bias_ptr + j ); \
+        float ret_val = 0.0; \
+        int32_t_to_float( *( ( int32_t* )post_op_bias_ptr + j ), &ret_val ); \
         return ret_val; \
     } \
     return *( ( ACCUM_type* )post_op_bias_ptr + j ); \
-} \
-
-/* GELU Tanh. */
-#define GEN_GELU_TANH_POSTOP_INT(ACCUM_type,BLAS_SFX) \
-static inline ACCUM_type GELU_TANH_post_op_ ## BLAS_SFX \
-     ( \
-       ACCUM_type temp_accum \
-     ) \
-{ \
-    float gelu_reference = 0.5 *(double)temp_accum * (1 + tanhf( 0.797884 * ( (double)temp_accum + \
-                    ( 0.044715 * ((double)temp_accum * (double)temp_accum * \
-                    (double)temp_accum ) ) ) ) ); \
-    temp_accum = round (gelu_reference); \
-    return temp_accum; \
 } \
 
 #define GEN_GELU_TANH_POSTOP_FLOAT(BLAS_SFX) \
@@ -329,17 +423,6 @@ static inline float GELU_TANH_post_op_ ## BLAS_SFX \
 } \
 
 /* GELU Erf. */
-#define GEN_GELU_ERF_POSTOP_INT(ACCUM_type,BLAS_SFX) \
-static inline ACCUM_type GELU_ERF_post_op_ ## BLAS_SFX \
-     ( \
-       ACCUM_type temp_accum \
-     ) \
-{ \
-    float gelu_reference = 0.5 *(double)temp_accum * (1 + erff( (double)temp_accum * 0.707107 )); \
-    temp_accum = round (gelu_reference); \
-    return temp_accum; \
-} \
-
 #define GEN_GELU_ERF_POSTOP_FLOAT(BLAS_SFX) \
 static inline float GELU_ERF_post_op_ ## BLAS_SFX \
      ( \
@@ -351,17 +434,6 @@ static inline float GELU_ERF_post_op_ ## BLAS_SFX \
 } \
 
 /* TANH. */
-#define GEN_TANH_POSTOP_INT(ACCUM_type,BLAS_SFX) \
-static inline ACCUM_type TANH_post_op_ ## BLAS_SFX \
-     ( \
-       ACCUM_type temp_accum \
-     ) \
-{ \
-    float tanh_reference = tanhf( ( double )temp_accum ); \
-    temp_accum = round( tanh_reference ); \
-    return temp_accum; \
-} \
-
 #define GEN_TANH_POSTOP_FLOAT(BLAS_SFX) \
 static inline float TANH_post_op_ ## BLAS_SFX \
      ( \
@@ -373,18 +445,6 @@ static inline float TANH_post_op_ ## BLAS_SFX \
 } \
 
 /* SIGMOID. */
-#define GEN_SIGMOID_POSTOP_INT(ACCUM_type,BLAS_SFX) \
-static inline ACCUM_type SIGMOID_post_op_ ## BLAS_SFX \
-     ( \
-       ACCUM_type temp_accum \
-     ) \
-{ \
-    float sigmoid_reference = ( 1 / ( 1 + \
-                            (dim_t) round( expf( temp_accum * -1 ) ) ) ); \
-    temp_accum = round (sigmoid_reference); \
-    return temp_accum; \
-} \
-
 #define GEN_SIGMOID_POSTOP_FLOAT(BLAS_SFX) \
 static inline float SIGMOID_post_op_ ## BLAS_SFX \
      ( \
@@ -401,11 +461,13 @@ static inline float SIGMOID_post_op_ ## BLAS_SFX \
 static inline ACCUM_type SWISH_post_op_ ## BLAS_SFX \
      ( \
        ACCUM_type temp_accum, \
-       ACCUM_type alpha \
+       void* alpha \
      ) \
 { \
+    float alpha_val; \
+    int32_t_to_float(*( ( int32_t* )alpha), &alpha_val); \
     float swish_reference = ( temp_accum / ( 1 + \
-                            expf( ( double )alpha * temp_accum * -1 ) ) ); \
+                            expf( ( double )(alpha_val) * temp_accum * -1 ) ) ); \
     temp_accum = round (swish_reference); \
     return temp_accum; \
 } \
@@ -414,42 +476,25 @@ static inline ACCUM_type SWISH_post_op_ ## BLAS_SFX \
 static inline float SWISH_post_op_ ## BLAS_SFX \
      ( \
        float temp_accum, \
-       float alpha \
+       void* alpha \
      ) \
 { \
     temp_accum = ( temp_accum / ( 1 + \
-                  expf( ( double )alpha * temp_accum * -1 ) ) ); \
+                  expf( ( double )(*((float*)alpha) * temp_accum * -1 ) ) )); \
     return temp_accum; \
 } \
 
-/* Matrix Add. */
-#define GEN_GET_MATRIX_ADD_POST_OP_VAL_BF16(C_type,BLAS_SFX) \
-static inline float get_matrix_add_post_op_val_ ## BLAS_SFX \
-     ( \
-       C_type val, \
-       dim_t j, \
-       float* scl_fctr, \
-       dim_t scl_fctr_len \
-     ) \
-{ \
-    float ret_val = 0.0; \
-    dim_t j_scale = j; \
-    if ( scl_fctr_len == 1 ) \
-    { \
-       j_scale = 0; \
-    } \
- \
-    bfloat16_to_float( val, &ret_val ); \
-    return ( ret_val * *( scl_fctr + j_scale ) ); \
-} \
-
-#define GEN_GET_MATRIX_ADD_POST_OP_VAL(C_type,ACCUM_type,BLAS_SFX) \
+#define GEN_GET_MATRIX_ADD_POST_OP_VAL(ACCUM_type,BLAS_SFX) \
 static inline ACCUM_type get_matrix_add_post_op_val_ ## BLAS_SFX \
      ( \
-       C_type val, \
+       void* mat_add_ptr, \
+       dim_t i, \
        dim_t j, \
+       dim_t rs_m, \
+       dim_t cs_m, \
        float* scl_fctr, \
-       dim_t scl_fctr_len \
+       dim_t scl_fctr_len, \
+       AOCL_PARAMS_STORAGE_TYPES matadd_stor_type \
      ) \
 { \
     dim_t j_scale = j; \
@@ -457,36 +502,94 @@ static inline ACCUM_type get_matrix_add_post_op_val_ ## BLAS_SFX \
     { \
        j_scale = 0; \
     } \
-    return (ACCUM_type) ( ( float )val * *( scl_fctr + j_scale ) ); \
+    if( matadd_stor_type == AOCL_GEMM_BF16 ) \
+    { \
+        float ret_val = 0.0; \
+        bfloat16 val = *( ( bfloat16* )mat_add_ptr + ( i * rs_m ) + ( j * cs_m ) ); \
+        bfloat16_to_float( val, &ret_val ); \
+        return ( ( float )ret_val * *( scl_fctr + j_scale ) ); \
+    } \
+    if( matadd_stor_type == AOCL_GEMM_INT8 ) \
+    { \
+        float ret_val = 0.0; \
+        int8_t_to_float( *( ( int8_t* )mat_add_ptr + ( i * rs_m ) + ( j * cs_m ) ), &ret_val ); \
+        return ( ( float )ret_val * *( scl_fctr + j_scale ) ); \
+    } \
+    if( matadd_stor_type == AOCL_GEMM_INT32 ) \
+    { \
+        float ret_val = 0.0; \
+        int32_t_to_float( *( ( int32_t* )mat_add_ptr + ( i * rs_m ) + ( j * cs_m ) ), &ret_val ); \
+        return ( ( float )ret_val * *( scl_fctr + j_scale ) ); \
+    } \
+    if( matadd_stor_type == AOCL_GEMM_F32 ) \
+    { \
+        float ret_val = 0.0; \
+        ret_val = *( ( float* )mat_add_ptr + ( i * rs_m ) + ( j * cs_m ) ); \
+        return ( ( float )ret_val * *( scl_fctr + j_scale ) ); \
+    } \
+    /* default case */ \
+    if( is_integerAPI_avx512(#BLAS_SFX) ) \
+    { \
+        if( strcmp( #BLAS_SFX, "u8s8s32os8" ) == 0 ) \
+        { \
+            float ret_val = 0.0; \
+            int8_t_to_float( *( ( int8_t* )mat_add_ptr + ( i * rs_m ) + ( j * cs_m ) ), &ret_val ); \
+            return ( ( float )ret_val * *( scl_fctr + j_scale ) ); \
+        } \
+        float ret_val = 0.0; \
+        int32_t_to_float( *( ( int32_t* )mat_add_ptr + ( i * rs_m ) + ( j * cs_m ) ), &ret_val ); \
+        return ( ( float )ret_val * *( scl_fctr + j_scale ) ); \
+    } \
+    else \
+    { \
+        if( global_dscale_out == 'y' ) \
+        { \
+            float ret_val = 0.0; \
+            bfloat16 val = *( ( bfloat16* )mat_add_ptr + ( i * rs_m ) + ( j * cs_m ) ); \
+            bfloat16_to_float( val, &ret_val ); \
+            return ( ( float )ret_val * *( scl_fctr + j_scale ) ); \
+        } \
+        float ret_val = 0.0; \
+        ret_val = *( ( float* )mat_add_ptr + ( i * rs_m ) + ( j * cs_m ) ); \
+        return ( ( float )ret_val * *( scl_fctr + j_scale ) ); \
+    } \
 } \
 
-#define GEN_GET_MATRIX_MUL_POST_OP_VAL_BF16(C_type,BLAS_SFX) \
+#define GEN_GET_MATRIX_MUL_POST_OP_VAL_BF16(BLAS_SFX) \
 static inline float get_matrix_mul_post_op_val_ ## BLAS_SFX \
      ( \
-       C_type val, \
+       void* mat_add_ptr, \
+       dim_t i, \
        dim_t j, \
+       dim_t rs_m, \
+       dim_t cs_m, \
        float* scl_fctr, \
-       dim_t scl_fctr_len \
+       dim_t scl_fctr_len, \
+       AOCL_PARAMS_STORAGE_TYPES matadd_stor_type \
      ) \
 { \
     return GEN_FUNC_NAME(get_matrix_add_post_op_val_,BLAS_SFX) \
             ( \
-              val, j, scl_fctr, scl_fctr_len \
+              mat_add_ptr, i, j, rs_m, cs_m, scl_fctr, scl_fctr_len, matadd_stor_type \
             ); \
 } \
 
-#define GEN_GET_MATRIX_MUL_POST_OP_VAL(C_type,ACCUM_type,BLAS_SFX) \
+#define GEN_GET_MATRIX_MUL_POST_OP_VAL(ACCUM_type,BLAS_SFX) \
 static inline ACCUM_type get_matrix_mul_post_op_val_ ## BLAS_SFX \
      ( \
-       C_type val, \
+       void* mat_add_ptr, \
+       dim_t i, \
        dim_t j, \
+       dim_t rs_m, \
+       dim_t cs_m, \
        float* scl_fctr, \
-       dim_t scl_fctr_len \
+       dim_t scl_fctr_len, \
+       AOCL_PARAMS_STORAGE_TYPES matadd_stor_type \
      ) \
 { \
     return GEN_FUNC_NAME(get_matrix_add_post_op_val_,BLAS_SFX) \
             ( \
-              val, j, scl_fctr, scl_fctr_len \
+              mat_add_ptr, i, j, rs_m, cs_m, scl_fctr, scl_fctr_len, matadd_stor_type \
             ); \
 } \
 
@@ -586,6 +689,7 @@ static inline void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
     if ( post_ops->matrix_add != NULL )
     {
         free( ( post_ops->matrix_add )->matrix );
+        //free( ( post_ops->matrix_add )->scale_factor );
         free( post_ops->matrix_add );
     }
 
@@ -599,6 +703,7 @@ static inline void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
     if ( post_ops->matrix_mul != NULL )
     {
         free( ( post_ops->matrix_mul )->matrix );
+        //free( ( post_ops->matrix_mul )->scale_factor );
         free( post_ops->matrix_mul );
     }
 
@@ -770,6 +875,10 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     dim_t activator_idx = 0; \
     dim_t clip_idx = 0; \
     char * bias_stor_type = ""; \
+    bool is_matadd_stor_type = FALSE; \
+    char* matadd_stor_type = ""; \
+    bool is_matmul_stor_type = FALSE; \
+    char* matmul_stor_type = ""; \
     bool is_group_quant = FALSE; \
     bool is_pre_op_scale_scalar = FALSE; \
     bool is_pre_op_scale_f32 = TRUE; \
@@ -899,12 +1008,62 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             else if ( strcmp( ops_tok, "matrix_add" ) == 0 ) \
             { \
                 post_ops->seq_vector[cur_op_index] = MATRIX_ADD; \
+                ops_tok = strtok( NULL, ", " ); \
+                if( ( strcmp( ops_tok, "na" ) == 0 ) ) \
+                { \
+                    is_matadd_stor_type = FALSE; \
+                } \
+                else if ( ( strcmp( ops_tok, "f32" ) == 0 ) ) \
+                { \
+                    is_matadd_stor_type = TRUE; \
+                    matadd_stor_type = "F32"; \
+                } \
+                else if ( ( strcmp( ops_tok, "bf16" ) == 0 ) ) \
+                { \
+                    is_matadd_stor_type = TRUE; \
+                    matadd_stor_type = "BF16"; \
+                } \
+                else if ( ( strcmp( ops_tok, "s32" ) == 0 ) ) \
+                { \
+                    is_matadd_stor_type = TRUE; \
+                    matadd_stor_type = "S32"; \
+                } \
+                else if ( ( strcmp( ops_tok, "s8" ) == 0 ) ) \
+                { \
+                    is_matadd_stor_type = TRUE; \
+                    matadd_stor_type = "S8"; \
+                } \
                 is_matrix_add = TRUE; \
                 cur_op_index++; \
             } \
             else if ( strcmp( ops_tok, "matrix_mul" ) == 0 ) \
             { \
                 post_ops->seq_vector[cur_op_index] = MATRIX_MUL; \
+                ops_tok = strtok( NULL, ", " ); \
+                if( ( strcmp( ops_tok, "na" ) == 0 ) ) \
+                { \
+                    is_matmul_stor_type = FALSE; \
+                } \
+                else if ( ( strcmp( ops_tok, "f32" ) == 0 ) ) \
+                { \
+                    is_matmul_stor_type = TRUE; \
+                    matmul_stor_type = "F32"; \
+                } \
+                else if ( ( strcmp( ops_tok, "bf16" ) == 0 ) ) \
+                { \
+                    is_matmul_stor_type = TRUE; \
+                    matmul_stor_type = "BF16"; \
+                } \
+                else if ( ( strcmp( ops_tok, "s32" ) == 0 ) ) \
+                { \
+                    is_matmul_stor_type = TRUE; \
+                    matmul_stor_type = "S32"; \
+                } \
+                else if ( ( strcmp( ops_tok, "s8" ) == 0 ) ) \
+                { \
+                    is_matmul_stor_type = TRUE; \
+                    matmul_stor_type = "S8"; \
+                } \
                 is_matrix_mul = TRUE; \
                 cur_op_index++; \
             } \
@@ -988,32 +1147,50 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
  \
         if ( is_bias == TRUE ) \
         { \
-            /* Allocate bias buffer, return early if alloc fails.*/ \
-            ( post_ops->bias )->bias = malloc( n * sizeof( C_type ) ); \
-            if ( ( post_ops->bias )->bias == NULL ) \
-                { \
-                    goto err_handler; \
-                } \
             if(is_bias_stor_type == TRUE) \
             { \
                 if( ( strcmp( bias_stor_type, "BF16" ) == 0 ) ) \
                 { \
                     ( post_ops->bias )->stor_type = AOCL_GEMM_BF16; \
+                    /* Allocate bias buffer, return early if alloc fails.*/ \
+                    ( post_ops->bias )->bias = malloc( n * sizeof( bfloat16 ) ); \
+                    if ( ( post_ops->bias )->bias == NULL ) \
+                    { \
+                        goto err_handler; \
+                    } \
                     GEN_FUNC_NAME(fill_array_post_ops_,bfloat16)( ( post_ops->bias )->bias, n ); \
                 } \
                 else if( ( strcmp( bias_stor_type, "F32" ) == 0 ) ) \
                 { \
                     ( post_ops->bias )->stor_type = AOCL_GEMM_F32; \
+                    /* Allocate bias buffer, return early if alloc fails.*/ \
+                    ( post_ops->bias )->bias = malloc( n * sizeof( float ) ); \
+                    if ( ( post_ops->bias )->bias == NULL ) \
+                    { \
+                        goto err_handler; \
+                    } \
                     GEN_FUNC_NAME(fill_array_post_ops_,float)( ( post_ops->bias )->bias, n ); \
                 } \
                 else if( ( strcmp( bias_stor_type, "S8" ) == 0 ) ) \
                 { \
                     ( post_ops->bias )->stor_type = AOCL_GEMM_INT8; \
+                    /* Allocate bias buffer, return early if alloc fails.*/ \
+                    ( post_ops->bias )->bias = malloc( n * sizeof( int8_t ) ); \
+                    if ( ( post_ops->bias )->bias == NULL ) \
+                    { \
+                        goto err_handler; \
+                    } \
                     GEN_FUNC_NAME(fill_array_post_ops_,int8_t)( ( post_ops->bias )->bias, n ); \
                 } \
                 else if( ( strcmp( bias_stor_type, "S32" ) == 0 ) ) \
                 { \
                     ( post_ops->bias )->stor_type = AOCL_GEMM_INT32; \
+                    /* Allocate bias buffer, return early if alloc fails.*/ \
+                    ( post_ops->bias )->bias = malloc( n * sizeof( int32_t ) ); \
+                    if ( ( post_ops->bias )->bias == NULL ) \
+                    { \
+                        goto err_handler; \
+                    } \
                     GEN_FUNC_NAME(fill_array_post_ops_,int32_t)( ( post_ops->bias )->bias, n ); \
                 } \
                 else {} \
@@ -1021,17 +1198,13 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             else \
             { \
                 ( post_ops->bias )->stor_type = NULLTYPE; \
-                if( global_dscale_out == 'y') \
+                /* Allocate bias buffer, return early if alloc fails.*/ \
+                ( post_ops->bias )->bias = malloc( n * sizeof( BIAS_type ) ); \
+                if ( ( post_ops->bias )->bias == NULL ) \
                 { \
-                    if ( strcmp(#BIAS_type, "bfloat16") == 0 ) { \
-                        ( post_ops->bias )->stor_type = AOCL_GEMM_BF16; \
-                    } \
-                    GEN_FUNC_NAME(fill_array_post_ops_,BIAS_type)( ( post_ops->bias )->bias, n ); \
+                    goto err_handler; \
                 } \
-                else \
-                { \
-                    GEN_FUNC_NAME(fill_array_post_ops_,C_type)( ( post_ops->bias )->bias, n ); \
-                } \
+                GEN_FUNC_NAME(fill_array_post_ops_,BIAS_type)( ( post_ops->bias )->bias, n ); \
             } \
         } \
  \
@@ -1078,12 +1251,27 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             ( post_ops->eltwise + activator_idx )->is_power_of_2 = FALSE; \
             ( post_ops->eltwise + activator_idx )->scale_factor = NULL; \
             ( post_ops->eltwise + activator_idx )->algo.alpha = NULL; \
-            ( post_ops->eltwise + activator_idx )->algo.alpha = malloc( sizeof( C_type ) ); \
-            if ( ( post_ops->eltwise + activator_idx )->algo.alpha == NULL ) \
+            /* If output is float/bfloat16, param type will be float otherwise s32 */ \
+            if( is_integer(#C_type) ) \
             { \
-                goto err_handler; \
+                ( post_ops->eltwise + activator_idx )->algo.alpha = malloc( sizeof( int32_t ) ); \
+                if ( ( post_ops->eltwise + activator_idx )->algo.alpha == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                *( ( int32_t* ) ( post_ops->eltwise + activator_idx )->algo.alpha ) = ( int32_t )6; \
             } \
-            *( ( C_type* ) ( post_ops->eltwise + activator_idx )->algo.alpha ) = ( C_type )6; \
+            else \
+            { \
+                ( post_ops->eltwise + activator_idx )->algo.alpha = malloc( sizeof( float ) ); \
+                if ( ( post_ops->eltwise + activator_idx )->algo.alpha == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                *( ( float* ) ( post_ops->eltwise + activator_idx )->algo.alpha ) = ( float )6; \
+            } \
+            ( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.algo_type = PRELU; \
             ( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
             ( post_ops->eltwise + activator_idx )->algo.algo_type = PRELU; \
         } \
@@ -1092,12 +1280,25 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             ( post_ops->eltwise + activator_idx )->is_power_of_2 = FALSE; \
             ( post_ops->eltwise + activator_idx )->scale_factor = NULL; \
             ( post_ops->eltwise + activator_idx )->algo.alpha = NULL; \
-            ( post_ops->eltwise + activator_idx )->algo.alpha = malloc( sizeof( C_type ) ); \
-            if ( ( post_ops->eltwise + activator_idx )->algo.alpha == NULL ) \
+            /* If output is float/bfloat16, params type will be float otherwise s32 */ \
+            if( is_integer(#C_type) ) \
             { \
-                goto err_handler; \
+                ( post_ops->eltwise + activator_idx )->algo.alpha = malloc( sizeof( int32_t ) ); \
+                if ( ( post_ops->eltwise + activator_idx )->algo.alpha == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                *( ( int32_t* ) ( post_ops->eltwise + activator_idx )->algo.alpha ) = ( int32_t )2; \
             } \
-            *( ( C_type* ) ( post_ops->eltwise + activator_idx )->algo.alpha ) = ( C_type )2; \
+            else \
+            { \
+                ( post_ops->eltwise + activator_idx )->algo.alpha = malloc( sizeof( float ) ); \
+                if ( ( post_ops->eltwise + activator_idx )->algo.alpha == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                *( ( float* ) ( post_ops->eltwise + activator_idx )->algo.alpha ) = ( float )2; \
+            } \
             ( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
             ( post_ops->eltwise + activator_idx )->algo.algo_type = SWISH; \
         } \
@@ -1123,18 +1324,37 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             ( post_ops->eltwise + clip_idx )->scale_factor = NULL; \
             ( post_ops->eltwise + clip_idx )->algo.alpha = NULL; \
             ( post_ops->eltwise + clip_idx )->algo.beta = NULL; \
-            ( post_ops->eltwise + clip_idx )->algo.alpha = malloc( sizeof( C_type ) ); \
-            if ( ( post_ops->eltwise + clip_idx )->algo.alpha == NULL ) \
+            /* If output is float/bfloat16, params type will be float otherwise s32 */ \
+            if( is_integer(#C_type) ) \
             { \
-                goto err_handler; \
+                ( post_ops->eltwise + clip_idx )->algo.alpha = malloc( sizeof( int32_t ) ); \
+                if ( ( post_ops->eltwise + clip_idx )->algo.alpha == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                ( post_ops->eltwise + clip_idx )->algo.beta = malloc( sizeof( int32_t ) ); \
+                if ( ( post_ops->eltwise + clip_idx )->algo.beta == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                *( ( int32_t* ) ( post_ops->eltwise + clip_idx )->algo.alpha ) = ( int32_t ) ( -64 ); \
+                *( ( int32_t* ) ( post_ops->eltwise + clip_idx )->algo.beta ) = ( int32_t ) ( 23 ); \
             } \
-            ( post_ops->eltwise + clip_idx )->algo.beta = malloc( sizeof( C_type ) ); \
-            if ( ( post_ops->eltwise + clip_idx )->algo.beta == NULL ) \
+            else \
             { \
-                goto err_handler; \
+                ( post_ops->eltwise + clip_idx )->algo.alpha = malloc( sizeof( float ) ); \
+                if ( ( post_ops->eltwise + clip_idx )->algo.alpha == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                ( post_ops->eltwise + clip_idx )->algo.beta = malloc( sizeof( float ) ); \
+                if ( ( post_ops->eltwise + clip_idx )->algo.beta == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                *( ( float* ) ( post_ops->eltwise + clip_idx )->algo.alpha ) = ( float ) ( -64 ); \
+                *( ( float* ) ( post_ops->eltwise + clip_idx )->algo.beta ) = ( float ) ( 23 ); \
             } \
-            *( ( C_type* ) ( post_ops->eltwise + clip_idx )->algo.alpha ) = ( C_type ) ( -64 ); \
-            *( ( C_type* ) ( post_ops->eltwise + clip_idx )->algo.beta ) = ( C_type ) ( 23 ); \
             ( post_ops->eltwise + clip_idx )->algo.algo_type = CLIP; \
         } \
         else if ( is_tanh == TRUE ) \
@@ -1199,28 +1419,99 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
  \
     if ( is_matrix_add == TRUE ) \
     { \
-        /* Allocate add matrix buffer, return early if alloc fails.*/ \
-        dim_t ele_dsize = 0; \
-        if ( global_dscale_out == 'y' ) \
+        if( is_matadd_stor_type == TRUE) \
         { \
-            ele_dsize = sizeof( C_DSCALE_type ); \
+            if( ( strcmp( matadd_stor_type, "BF16" ) == 0 ) ) \
+            { \
+                ( post_ops->matrix_add )->stor_type = AOCL_GEMM_BF16; \
+                ( post_ops->matrix_add )->matrix = malloc( m * n * sizeof(bfloat16) ); \
+                if ( ( post_ops->matrix_add )->matrix == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                GEN_FUNC_NAME(fill_array_,bfloat16)( ( post_ops->matrix_add )->matrix, ( m * n ) ); \
+            } \
+            else if( ( strcmp( matadd_stor_type, "F32" ) == 0 ) ) \
+            { \
+                ( post_ops->matrix_add )->stor_type = AOCL_GEMM_F32; \
+                ( post_ops->matrix_add )->matrix = malloc( m * n * sizeof(float) ); \
+                if ( ( post_ops->matrix_add )->matrix == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                GEN_FUNC_NAME(fill_array_,float)( ( post_ops->matrix_add )->matrix, ( m * n ) ); \
+            } \
+            else if( ( strcmp( matadd_stor_type, "S32" ) == 0 ) ) \
+            { \
+                ( post_ops->matrix_add )->stor_type = AOCL_GEMM_INT32; \
+                ( post_ops->matrix_add )->matrix = malloc( m * n * sizeof(int32_t) ); \
+                if ( ( post_ops->matrix_add )->matrix == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                GEN_FUNC_NAME(fill_array_,int32_t)( ( post_ops->matrix_add )->matrix, ( m * n ) ); \
+            } \
+            else if( ( strcmp( matadd_stor_type, "S8" ) == 0 ) ) \
+            { \
+                ( post_ops->matrix_add )->stor_type = AOCL_GEMM_INT8; \
+                ( post_ops->matrix_add )->matrix = malloc( m * n * sizeof(int8_t) ); \
+                if ( ( post_ops->matrix_add )->matrix == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                GEN_FUNC_NAME(fill_array_,int8_t)( ( post_ops->matrix_add )->matrix, ( m * n ) ); \
+            } \
+            else {} \
         } \
         else \
         { \
-            ele_dsize = sizeof( C_type ); \
-        } \
-        ( post_ops->matrix_add )->matrix = malloc( m * n * ele_dsize ); \
-        if ( ( post_ops->matrix_add )->matrix == NULL ) \
-        { \
-            goto err_handler; \
-        } \
-        if ( global_dscale_out == 'y' ) \
-        { \
-            GEN_FUNC_NAME(fill_array_,C_DSCALE_type)( ( post_ops->matrix_add )->matrix, ( m * n ) ); \
-        } \
-        else \
-        { \
-            GEN_FUNC_NAME(fill_array_,C_type)( ( post_ops->matrix_add )->matrix, ( m * n ) ); \
+            /*  default is int32_t for integer APIs and float for others */ \
+            if( is_integerAPI_avx512(#BLAS_SFX)) \
+            { \
+                if( strcmp(#C_type, "int8_t") == 0 ) \
+                { \
+                    ( post_ops->matrix_add )->stor_type = NULLTYPE; \
+                    ( post_ops->matrix_add )->matrix = malloc( m * n * sizeof(int8_t) ); \
+                    if ( ( post_ops->matrix_add )->matrix == NULL ) \
+                    { \
+                        goto err_handler; \
+                    } \
+                    GEN_FUNC_NAME(fill_array_,int8_t)( ( post_ops->matrix_add )->matrix, ( m * n ) ); \
+                } \
+                else \
+                { \
+                    ( post_ops->matrix_add )->stor_type = NULLTYPE; \
+                    ( post_ops->matrix_add )->matrix = malloc( m * n * sizeof(int32_t) ); \
+                    if ( ( post_ops->matrix_add )->matrix == NULL ) \
+                    { \
+                        goto err_handler; \
+                    } \
+                    GEN_FUNC_NAME(fill_array_,int32_t)( ( post_ops->matrix_add )->matrix, ( m * n ) ); \
+                } \
+            } \
+            else \
+            { \
+                if( global_dscale_out == 'y' ) \
+                { \
+                    ( post_ops->matrix_add )->stor_type = NULLTYPE; \
+                    ( post_ops->matrix_add )->matrix = malloc( m * n * sizeof(C_DSCALE_type) ); \
+                    if ( ( post_ops->matrix_add )->matrix == NULL ) \
+                    { \
+                        goto err_handler; \
+                    } \
+                    GEN_FUNC_NAME(fill_array_,C_DSCALE_type)( ( post_ops->matrix_add )->matrix, ( m * n ) ); \
+                } \
+                else \
+                { \
+                    ( post_ops->matrix_add )->stor_type = NULLTYPE; \
+                    ( post_ops->matrix_add )->matrix = malloc( m * n * sizeof(float) ); \
+                    if ( ( post_ops->matrix_add )->matrix == NULL ) \
+                    { \
+                        goto err_handler; \
+                    } \
+                    GEN_FUNC_NAME(fill_array_,float)( ( post_ops->matrix_add )->matrix, ( m * n ) ); \
+                } \
+            } \
         } \
         if ( ( stor_order == 'C' ) || ( stor_order == 'c' ) ) \
         { \
@@ -1245,35 +1536,76 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             temp_dscale_ptr[i] = ( ( DSCALE_type )2 ); \
         } \
         ( post_ops->matrix_add )->scale_factor_len = n_scale; \
-        /* Set buffer type same as c_store type for now.
-         * TODO: Update to cover more data types. */ \
-        ( post_ops->matrix_add )->stor_type = NULLTYPE; \
     } \
  \
     if ( is_matrix_mul == TRUE ) \
     { \
-        /* Allocate mul matrix buffer, return early if alloc fails.*/ \
-        dim_t ele_dsize = 0; \
-        if ( global_dscale_out == 'y' ) \
+        if( is_matmul_stor_type == TRUE) \
         { \
-            ele_dsize = sizeof( C_DSCALE_type ); \
+            if( ( strcmp( matmul_stor_type, "BF16" ) == 0 ) ) \
+            { \
+                ( post_ops->matrix_mul )->stor_type = AOCL_GEMM_BF16; \
+                ( post_ops->matrix_mul )->matrix = malloc( m * n * sizeof(bfloat16) ); \
+                if ( ( post_ops->matrix_mul )->matrix == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                GEN_FUNC_NAME(fill_array_,bfloat16)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
+            } \
+            else if( ( strcmp( matmul_stor_type, "F32" ) == 0 ) ) \
+            { \
+                ( post_ops->matrix_mul )->stor_type = AOCL_GEMM_F32; \
+                ( post_ops->matrix_mul )->matrix = malloc( m * n * sizeof(float) ); \
+                if ( ( post_ops->matrix_mul )->matrix == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                GEN_FUNC_NAME(fill_array_,float)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
+            } \
+            else if( ( strcmp( matmul_stor_type, "S32" ) == 0 ) ) \
+            { \
+                ( post_ops->matrix_mul )->stor_type = AOCL_GEMM_INT32; \
+                ( post_ops->matrix_mul )->matrix = malloc( m * n * sizeof(int32_t) ); \
+                if ( ( post_ops->matrix_mul )->matrix == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                GEN_FUNC_NAME(fill_array_,int32_t)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
+            } \
+            else if( ( strcmp( matmul_stor_type, "S8" ) == 0 ) ) \
+            { \
+                ( post_ops->matrix_mul )->stor_type = AOCL_GEMM_INT8; \
+                ( post_ops->matrix_mul )->matrix = malloc( m * n * sizeof(int8_t) ); \
+                if ( ( post_ops->matrix_mul )->matrix == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                GEN_FUNC_NAME(fill_array_,int8_t)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
+            } \
+            else {} \
         } \
         else \
         { \
-            ele_dsize = sizeof( C_type ); \
-        } \
-        ( post_ops->matrix_mul )->matrix = malloc( m * n * ele_dsize ); \
-        if ( ( post_ops->matrix_mul )->matrix == NULL ) \
-        { \
-            goto err_handler; \
-        } \
-        if ( global_dscale_out == 'y' ) \
-        { \
-            GEN_FUNC_NAME(fill_array_,C_DSCALE_type)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
-        } \
-        else \
-        { \
-            GEN_FUNC_NAME(fill_array_,C_type)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
+            if( global_dscale_out == 'y' ) \
+                { \
+                    ( post_ops->matrix_mul )->stor_type = NULLTYPE; \
+                    ( post_ops->matrix_mul )->matrix = malloc( m * n * sizeof(C_DSCALE_type) ); \
+                    if ( ( post_ops->matrix_mul )->matrix == NULL ) \
+                    { \
+                        goto err_handler; \
+                    } \
+                    GEN_FUNC_NAME(fill_array_,C_DSCALE_type)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
+                } \
+                else \
+                { \
+                    ( post_ops->matrix_mul )->stor_type = NULLTYPE; \
+                    ( post_ops->matrix_mul )->matrix = malloc( m * n * sizeof(float) ); \
+                    if ( ( post_ops->matrix_mul )->matrix == NULL ) \
+                    { \
+                        goto err_handler; \
+                    } \
+                    GEN_FUNC_NAME(fill_array_,float)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
+                } \
         } \
         if ( ( stor_order == 'C' ) || ( stor_order == 'c' ) ) \
         { \

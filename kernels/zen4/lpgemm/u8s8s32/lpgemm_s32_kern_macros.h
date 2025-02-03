@@ -1200,8 +1200,7 @@
 
 // BF16 buffer for matrix add/mul in u8s8s32.
 #define BF16_F32_MATRIX_ADD_LOAD(mask,scr,scl_fct,m_ind,n_ind) \
-	scr = _mm512_cvtepi32_ps( \
-		  _mm512_sllv_epi32 \
+	scr =(__m512)(_mm512_sllv_epi32 \
 			( \
 			  _mm512_cvtepi16_epi32 \
 			  ( \
@@ -1212,8 +1211,7 @@
 				  post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
 				) \
 			  ), _mm512_set1_epi32( 16 ) \
-			) \
-			); \
+			) );\
 	scr = _mm512_mul_ps(scr, scl_fct ); \
 
 #define BF16_MATRIX_ADD_1COL_PAR(mask,scr0,scl_fct0,m_ind) \
