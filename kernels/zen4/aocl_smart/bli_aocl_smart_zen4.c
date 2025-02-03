@@ -112,24 +112,24 @@ void bli_dynamic_blkszs_zen4( dim_t n_threads, cntx_t* cntx, num_t dt )
 	// determine ideal blocksize
 	if ( model == BLIS_MODEL_GENOA)
 	{
-		if (n_threads < 32 )
+		if (n_threads < 4 )
 		{
 			mc = 80, kc = 512, nc = 4032;
 		}
 		else
 		{
-			mc = 80, kc = 512, nc = 1008;
+			mc = 144, kc = 512, nc = 2016;
 		}
 	}
 	else // BLIS_MODEL_BERGAMO
 	{
-		if (n_threads < 32 )
+		if (n_threads < 4 )
 		{
 			mc = 80, kc = 512, nc = 4032;
 		}
 		else
 		{
-			mc = 80, kc = 512, nc = 1008;
+			mc = 144, kc = 512, nc = 2016;
 		}
 	}
 	
