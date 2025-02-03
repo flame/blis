@@ -1995,45 +1995,7 @@ BLIS_INLINE void aocl_ddotv_dynamic
 	switch (arch_id)
 	{
 		case BLIS_ARCH_ZEN5:
-
-			if ( n_elem <= 6600 )
-				*nt_ideal = 1;
-			else if (n_elem <= 16000)
-				*nt_ideal = 4;
-			else if (n_elem <= 330000)
-				*nt_ideal = 8;
-			else if (n_elem <= 810000)
-				*nt_ideal = 16;
-			else if (n_elem <= 2300000)
-				*nt_ideal = 32;
-			else if (n_elem <= 10000000)
-				*nt_ideal = 64;
-			else
-				// For sizes in this range, AOCL dynamic does not make any change
-				*nt_ideal = -1;
-
-			break;
-
 		case BLIS_ARCH_ZEN4:
-
-			if ( n_elem <= 5600 )
-				*nt_ideal = 1;
-			else if (n_elem <= 13000)
-				*nt_ideal = 4;
-			else if (n_elem <= 380000)
-				*nt_ideal = 8;
-			else if (n_elem <= 1200000)
-				*nt_ideal = 16;
-			else if (n_elem <= 2800000)
-				*nt_ideal = 32;
-			else if (n_elem <=	7600000)
-				*nt_ideal = 64;
-			else
-				// For sizes in this range, AOCL dynamic does not make any change
-				*nt_ideal = -1;
-
-			break;
-
 		case BLIS_ARCH_ZEN:
 		case BLIS_ARCH_ZEN2:
 		case BLIS_ARCH_ZEN3:
