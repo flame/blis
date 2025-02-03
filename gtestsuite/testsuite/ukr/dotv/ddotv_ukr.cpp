@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024-2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -166,9 +166,8 @@ INSTANTIATE_TEST_SUITE_P(
 // Tests for bli_ddotv_zen_int10 (AVX2) kernel.
 /**
  * Loops:
- * L40     - Main loop, handles 40 elements
- * L20     - handles 20 elements
- * L16     - handles 16 elements
+ * L20     - Main loop, handles 20 elements
+ * L12     - handles 12 elements
  * L8      - handles 8 elements
  * L4      - handles 4 elements
  * LScalar - leftover loop
@@ -188,26 +187,23 @@ INSTANTIATE_TEST_SUITE_P(
             // m: size of vector.
             ::testing::Values(
                                // testing each loop individually.
-                               gtint_t(80),     // L40, executed twice
-                               gtint_t(40),     // L40
+                               gtint_t(40),     // L20, executed twice
                                gtint_t(20),     // L20
-                               gtint_t(16),     // L16
+                               gtint_t(12),     // L12
                                gtint_t( 8),     // L8
                                gtint_t( 4),     // L4
                                gtint_t( 2),     // LScalar
                                gtint_t( 1),     // LScalar
 
                                // testing entire set of loops starting from loop m to n.
-                               gtint_t(73),     // L40 through LScalar, excludes L16
-                               gtint_t(33),     // L20 through LScalar, excludes L16
-                               gtint_t(13),     // L8 through LScalar
-                               gtint_t( 5),     // L4 through LScalar
+                               gtint_t(25),     // L20 + L4 + LScalar
+                               gtint_t( 9),     // L8 + LScalar
+                               gtint_t( 5),     // L4 + LScalar
 
-                               // testing few combinations including L16.
-                               gtint_t(77),     // L40 + L20 + L16 + LScalar
-                               gtint_t(76),     // L40 + L20 + L16
-                               gtint_t(57),     // L40 + L16 + LScalar
-                               gtint_t(37)      // L20 + L16 + LScalar
+                               // testing few combinations including L12.
+                               gtint_t(37),     // L20 + L12 + L4 + LScalar
+                               gtint_t(36),     // L20 + L12 + L4
+                               gtint_t(17)      // L12 + L4 + LScalar
             ),
             // incx: stride of x vector.
             ::testing::Values(

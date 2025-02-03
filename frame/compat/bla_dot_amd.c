@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -323,6 +323,13 @@ double ddot_blis_impl
 
     cntx_t *cntx = NULL;
 
+ #if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
+    // Setting the threshold to invoke the fast-path
+    // The fast-path is intended to directly call the kernel
+    // in case the criteria for single threaded execution is met.
+    dim_t fast_path_thresh = 0;
+#endif
+
     // Query the architecture ID
     arch_t arch_id_local = bli_arch_query_id();
 
@@ -330,19 +337,36 @@ double ddot_blis_impl
     switch (arch_id_local)
     {
       case BLIS_ARCH_ZEN5:
-      case BLIS_ARCH_ZEN4:
-#if defined(BLIS_KERNELS_ZEN4)
 
-        // AVX-512 Kernel
-        dotv_ker_ptr = bli_ddotv_zen_int_avx512;
-        break;
+#if defined(BLIS_KERNELS_ZEN5)
+          // AVX-512 Kernel
+          dotv_ker_ptr = bli_ddotv_zen_int_avx512;
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
+          fast_path_thresh = 6600;
 #endif
+          break;
+#endif
+
+      case BLIS_ARCH_ZEN4:
+
+#if defined(BLIS_KERNELS_ZEN4)
+          // AVX-512 Kernel
+          dotv_ker_ptr = bli_ddotv_zen_int_avx512;
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
+          fast_path_thresh = 5600;
+#endif
+          break;
+#endif
+
       case BLIS_ARCH_ZEN:
       case BLIS_ARCH_ZEN2:
       case BLIS_ARCH_ZEN3:
 
           // AVX2 Kernel
           dotv_ker_ptr = bli_ddotv_zen_int10;
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
+          fast_path_thresh = 2500;
+#endif
           break;
 
       default:
@@ -355,6 +379,33 @@ double ddot_blis_impl
     }
 
 #ifdef BLIS_ENABLE_OPENMP
+  #ifdef AOCL_DYNAMIC
+
+    /*
+      If the input size is less than ST_THRESH, the OpenMP and
+      'bli_nthreads_l1' overheads are avoided by invoking the
+      function directly. This ensures that performance of ddotv
+      does not drop for single  thread when OpenMP is enabled.
+    */
+    if (n_elem <= fast_path_thresh)
+    {
+        dotv_ker_ptr
+        (
+          BLIS_NO_CONJUGATE,
+          BLIS_NO_CONJUGATE,
+          n_elem,
+          x0, incx0,
+          y0, incy0,
+          &rho,
+          cntx
+        );
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+        return rho;
+    }
+
+    #endif
+
     /*
       Initializing the number of thread to one
       to avoid compiler warnings
@@ -395,9 +446,9 @@ double ddot_blis_impl
         );
 
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-
         return rho;
-#ifdef BLIS_ENABLE_OPENMP
+  
+  #ifdef BLIS_ENABLE_OPENMP
     }
 
     /*
