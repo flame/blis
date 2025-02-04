@@ -18,192 +18,163 @@ executors:
 workflows:
   build:
     jobs:
+      # Default:
+      # - build:
+      #     parameters:
+      #       os: linux
+      #       CC: gcc
+      #       OOT: 0
+      #       TEST: FAST
+      #       SDE: 0
+      #       THR: none
+      #       CONF: auto
+      #       BLD: ''
+      #       LDFLAGS: ''
+      #       TESTSUITE_WRAPPER: ''
+      #       PACKAGES: ''
+
       # full testsuite (all tests + mixed datatype (gemm_nn only) + salt + SDE + OOT)
       - build:
-          parameters:
-            os: 'linux'
-          environment:
-            CC: 'gcc'
-            OOT: 1
-            TEST: 'ALL'
-            SDE: 1
-            THR: 'none'
-            CONF: 'x86_64'
-            PACKAGES: ''
+          OOT: 1
+          TEST: ALL
+          SDE: 1
+          CONF: x86_64
+
       # openmp build
       - build:
-          parameters:
-            os: 'linux'
-          environment:
-            CC: 'gcc'
-            OOT: 0
-            TEST: 'FAST'
-            SDE: 0
-            THR: 'openmp'
-            CONF: 'auto'
-            PACKAGES: ''
+          THR: openmp
+
       # pthreads build
       - build:
-          parameters:
-            os: 'linux'
-          environment:
-            CC: 'gcc'
-            OOT: 0
-            TEST: 'FAST'
-            SDE: 0
-            THR: 'pthreads'
-            CONF: 'auto'
-            PACKAGES: ''
+          THR: pthreads
+
       # clang build
       - build:
-          parameters:
-            os: 'linux'
-          environment:
-            CC: 'clang'
-            OOT: 0
-            TEST: 'FAST'
-            SDE: 0
-            THR: 'none'
-            CONF: 'auto'
-            PACKAGES: ''
+          CC: clang
+
       # macOS with system compiler (clang)
       - build:
-          parameters:
-            os: 'macos'
-          environment:
-            CC: 'clang'
-            OOT: 0
-            TEST: 'FAST'
-            SDE: 0
-            THR: 'none'
-            CONF: 'auto'
-            PACKAGES: ''
+          os: macos
+          CC: clang
+
       # cortexa15 build and fast testsuite (qemu)
       - build:
-          parameters:
-            os: 'linux'
-          environment:
-            CC: 'arm-linux-gnueabihf-gcc'
-            OOT: 0
-            TEST: 'FAST'
-            SDE: 0
-            THR: 'none'
-            CONF: 'cortexa15'
-            PACKAGES: 'gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libc6-dev-armhf-cross qemu-system-arm qemu-user'
-            TESTSUITE_WRAPPER: 'qemu-arm -cpu cortex-a15 -L /usr/arm-linux-gnueabihf/'
+          CC: arm-linux-gnueabihf-gcc
+          CONF: cortexa15
+          PACKAGES: 'gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libc6-dev-armhf-cross qemu-system-arm qemu-user'
+          TESTSUITE_WRAPPER: 'qemu-arm -cpu cortex-a15 -L /usr/arm-linux-gnueabihf/'
+
       # cortexa57 build and fast testsuite (qemu)
       - build:
-          parameters:
-            os: 'linux'
-          environment:
-            CC: 'aarch64-linux-gnu-gcc'
-            OOT: 0
-            TEST: 'FAST'
-            SDE: 0
-            THR: 'none'
-            CONF: 'cortexa57'
-            PACKAGES: 'gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
-            TESTSUITE_WRAPPER: 'qemu-aarch64 -L /usr/aarch64-linux-gnu/'
+          CC: aarch64-linux-gnu-gcc
+          CONF: cortexa57
+          PACKAGES: 'gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
+          TESTSUITE_WRAPPER: 'qemu-aarch64 -L /usr/aarch64-linux-gnu/'
+
       # Apple M1 (firestorm) build and fast testsuite (qemu)
       - build:
-          parameters:
-            os: 'linux'
-          environment:
-            CC: 'aarch64-linux-gnu-gcc'
-            OOT: 0
-            TEST: 'FAST'
-            SDE: 0
-            THR: 'none'
-            CONF: 'firestorm'
-            PACKAGES: 'gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
-            TESTSUITE_WRAPPER: 'qemu-aarch64 -L /usr/aarch64-linux-gnu/'
+          CC: aarch64-linux-gnu-gcc
+          CONF: firestorm
+          PACKAGES: 'gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
+          TESTSUITE_WRAPPER: 'qemu-aarch64 -L /usr/aarch64-linux-gnu/'
+
       # armsve build and fast testsuite (qemu)
       - build:
-          parameters:
-            os: 'linux'
-          environment:
-            CC: 'aarch64-linux-gnu-gcc-10'
-            OOT: 0
-            TEST: 'FAST'
-            SDE: 0
-            THR: 'none'
-            CONF: 'firestorm'
-            PACKAGES: 'gcc-10-aarch64-linux-gnu g++-10-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
-            TESTSUITE_WRAPPER: 'qemu-aarch64 -cpu max,sve=true,sve512=true -L /usr/aarch64-linux-gnu/'
+          CC: aarch64-linux-gnu-gcc-10
+          CONF: armsve
+          PACKAGES: 'gcc-10-aarch64-linux-gnu g++-10-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
+          TESTSUITE_WRAPPER: 'qemu-aarch64 -cpu max,sve=true,sve512=true -L /usr/aarch64-linux-gnu/'
+
       # arm64 build and fast testsuite (qemu)
       # NOTE: This entry omits the -cpu flag so that while both NEON and SVE kernels
       # are compiled, only NEON kernels will be tested. (h/t to RuQing Xu)
       - build:
-          parameters:
-            os: 'linux'
-          environment:
-            CC: 'aarch64-linux-gnu-gcc-10'
-            OOT: 0
-            TEST: 'FAST'
-            SDE: 0
-            THR: 'none'
-            CONF: 'arm64'
-            PACKAGES: 'gcc-10-aarch64-linux-gnu g++-10-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
-            TESTSUITE_WRAPPER: 'qemu-aarch64 -L /usr/aarch64-linux-gnu/'
+          CC: aarch64-linux-gnu-gcc-10
+          CONF: arm64
+          PACKAGES: 'gcc-10-aarch64-linux-gnu g++-10-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
+          TESTSUITE_WRAPPER: 'qemu-aarch64 -L /usr/aarch64-linux-gnu/'
+
       # The RISC-V targets require the qemu version available in jammy or newer.
       # When CI is upgraded, the packages should be activated and do_script.sh
       # cleaned up.
       # PACKAGES="qemu-user qemu-user-binfmt"
       - build:
-          parameters:
-            os: 'linux'
-          environment:
-            CC: 'riscv64-unknown-linux-gcc'
-            OOT: 0
-            TEST: 'FAST'
-            SDE: 0
-            THR: 'none'
-            CONF: 'rv64iv'
-            BLD: '--disable-shared'
-            LDFLAGS: '-static'
+          CC: riscv64-unknown-linux-gcc
+          CONF: rv64iv
+          BLD: --disable-shared
+          LDFLAGS: -static
       - build:
-          parameters:
-            os: 'linux'
-          environment:
-            CC: 'riscv32-unknown-linux-gcc'
-            OOT: 0
-            TEST: 'FAST'
-            SDE: 0
-            THR: 'none'
-            CONF: 'rv32iv'
-            BLD: '--disable-shared'
-            LDFLAGS: '-static'
+          CC: riscv32-unknown-linux-gcc
+          CONF: rv32iv
+          BLD: --disable-shared
+          LDFLAGS: -static
       - build:
-          parameters:
-            os: 'linux'
-          environment:
-            CC: 'clang'
-            OOT: 0
-            TEST: 'FAST'
-            SDE: 0
-            THR: 'none'
-            CONF: 'sifive_x280'
-            BLD: '--disable-shared'
-            LDFLAGS: '-static'
+          CC: clang
+          CONF: sifive_x280
+          BLD: --disable-shared
+          LDFLAGS: -static
 
 jobs:
   build:
     parameters:
       os:
         type: executor
+        default: linux
+      CC:
+        type: string
+        default: gcc
+      OOT:
+        type: integer
+        default: 0
+      TEST:
+        type: string
+        default: FAST
+      SDE:
+        type: integer
+        default: 0
+      THR:
+        type: string
+        default: none
+      CONF:
+        type: string
+        default: auto
+      BLD:
+        type: string
+        default: ''
+      LDFLAGS:
+        type: string
+        default: ''
+      TESTSUITE_WRAPPER:
+        type: string
+        default: ''
+      PACKAGES:
+        type: string
+        default: ''
     executor: << parameters.os >>
     steps:
       - checkout
       - run:
           name: Installing Dependencies
-          command: 'sudo apt-get update && sudo apt-get install -y clang make python3 $PACKAGES'
+          command:
+            sudo apt-get update && sudo apt-get install -y clang make python3 << parameters.PACKAGES >>
       - run:
           name: Configuring
           command: |
             export DIST_PATH=.
+            export CC=<< parameters.CC >>
+            export OOT=<< parameters.OOT >>
+            export CONF=<< parameters.CONF >>
+            export TEST=<< parameters.TEST >>
+            export BLD=<< parameters.BLD >>
+            export LDFLAGS=<< parameters.LDFLAGS >>
+            export SDE=<< parameters.SDE >>
+            export THR=<< parameters.THR >>
+            export TESTSUITE_WRAPPER=<< parameters.TESTSUITE_WRAPPER >>
+
             pwd
             if [ $OOT -eq 1 ]; then export DIST_PATH=`pwd`; mkdir ../oot; cd ../oot; chmod -R a-w $DIST_PATH; fi
             pwd
+
             if [ "$CONF" = "rv64iv" ]; then
               $DIST_PATH/travis/do_riscv.sh "$CONF";
               export CC=$DIST_PATH/../toolchain/riscv/bin/riscv64-unknown-linux-gnu-gcc;
@@ -222,6 +193,19 @@ jobs:
               export CXX=$DIST_PATH/../toolchain/riscv/bin/clang++;
               export TESTSUITE_WRAPPER="$DIST_PATH/../toolchain/qemu-riscv64 -cpu rv64,vext_spec=v1.0,v=true,vlen=512 -B 0x100000";
             fi
+
+            echo "Configuration:"
+            echo "CC                = $CC"
+            echo "OOT               = $OOT"
+            echo "CONF              = $CONF"
+            echo "THR               = $THR"
+            echo "TEST              = $TEST"
+            echo "BLD               = $BLD"
+            echo "SDE               = $SDE"
+            echo "DIST_PATH         = $DIST_PATH"
+            echo "LDFLAGS           = $LDFLAGS"
+            echo "TESTSUITE_WRAPPER = $TESTSUITE_WRAPPER"
+
             $DIST_PATH/configure -p `pwd`/../install -t $THR $BLD CC=$CC $CONF
             pwd
             ls -l
