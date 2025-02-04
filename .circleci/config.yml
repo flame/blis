@@ -11,7 +11,7 @@ executors:
   linux: # Docker using the Base Convenience Image
     docker:
       - image: 'cimg/base:2024.10'
-  macos: # macos executor running Xcode
+  macos: &macos-executor # macos executor running Xcode
     macos:
       xcode: 14.2.0
 
@@ -153,23 +153,30 @@ jobs:
     executor: << parameters.os >>
     steps:
       - checkout
-      - run:
-          name: Installing Dependencies
-          command:
-            sudo apt-get update && sudo apt-get install -y clang make python3 << parameters.PACKAGES >>
+
+      - when:
+          condition:
+            not:
+              equal: [ *macos-executor, << parameters.os >> ]
+          steps:
+            - run:
+                name: Installing Dependencies
+                command:
+                  sudo apt-get update && sudo apt-get install -y clang make python3 << parameters.PACKAGES >>
+
       - run:
           name: Configuring, Building, Testing
           command: |
             export DIST_PATH=.
-            export CC=<< parameters.CC >>
-            export OOT=<< parameters.OOT >>
-            export CONF=<< parameters.CONF >>
-            export TEST=<< parameters.TEST >>
-            export BLD=<< parameters.BLD >>
-            export LDFLAGS=<< parameters.LDFLAGS >>
-            export SDE=<< parameters.SDE >>
-            export THR=<< parameters.THR >>
-            export TESTSUITE_WRAPPER=<< parameters.TESTSUITE_WRAPPER >>
+            export CC="<< parameters.CC >>"
+            export OOT="<< parameters.OOT >>"
+            export CONF="<< parameters.CONF >>"
+            export TEST="<< parameters.TEST >>"
+            export BLD="<< parameters.BLD >>"
+            export LDFLAGS="<< parameters.LDFLAGS >>"
+            export SDE="<< parameters.SDE >>"
+            export THR="<< parameters.THR >>"
+            export TESTSUITE_WRAPPER="<< parameters.TESTSUITE_WRAPPER >>"
 
             pwd
             if [ $OOT -eq 1 ]; then export DIST_PATH=`pwd`; mkdir ../oot; cd ../oot; chmod -R a-w $DIST_PATH; fi
