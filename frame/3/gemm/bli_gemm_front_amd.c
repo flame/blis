@@ -305,27 +305,32 @@ void bli_gemm_front
 	cntx_t cntx_copy;
 	dim_t n_threads = bli_rntm_num_threads( rntm );
 
-	switch (bli_arch_query_id() )
+	// dynamic blocksizes are not enabled for mixed precision
+	if ( bli_obj_dt( &c_local ) == bli_obj_dt( &a_local ) &&
+		 bli_obj_dt( &c_local ) == bli_obj_dt( &b_local ) )
 	{
-	case BLIS_ARCH_ZEN5:;
-        #if defined(BLIS_KERNELS_ZEN5)
-		cntx_copy = *cntx; // create a copy of cntx.
-		cntx_dynamic = &cntx_copy; // use local copy of cntx for GEMM
-		// dynamically set blocksizes according to num threads
-		bli_dynamic_blkszs_zen5(n_threads, cntx_dynamic, bli_obj_dt(c));
-		break;
-        #endif //BLIS_KERNELS_ZEN5
+		switch (bli_arch_query_id() )
+		{
+		case BLIS_ARCH_ZEN5:
+		#if defined(BLIS_KERNELS_ZEN5)
+			cntx_copy = *cntx; // create a copy of cntx.
+			cntx_dynamic = &cntx_copy; // use local copy of cntx for GEMM
+			// dynamically set blocksizes according to num threads
+			bli_dynamic_blkszs_zen5(n_threads, cntx_dynamic, bli_obj_dt(c));
+			break;
+		#endif //BLIS_KERNELS_ZEN5
 
-	case BLIS_ARCH_ZEN4:;
-		cntx_copy = *cntx; // create a copy of cntx.
-		cntx_dynamic = &cntx_copy; // use local copy of cntx for GEMM
-		// dynamically set blocksizes according to num threads
-		bli_dynamic_blkszs_zen4(n_threads, cntx_dynamic, bli_obj_dt(c));
-		break;
+		case BLIS_ARCH_ZEN4:
+			cntx_copy = *cntx; // create a copy of cntx.
+			cntx_dynamic = &cntx_copy; // use local copy of cntx for GEMM
+			// dynamically set blocksizes according to num threads
+			bli_dynamic_blkszs_zen4(n_threads, cntx_dynamic, bli_obj_dt(c));
+			break;
 
-	default:
-		// use default blocksizes for other architectures.
-		break;
+		default:
+			// use default blocksizes for other architectures.
+			break;
+		}
 	}
 #endif
 
