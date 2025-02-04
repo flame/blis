@@ -219,5 +219,5 @@ jobs:
             # Qemu SVE is failing sgemmt in some cases. Skip as this issue is not observed
             # on real chip (A64fx).
             if [ "$CONF" = "armsve" ]; then sed -i 's/.*\<gemmt\>.*/0/' $DIST_PATH/testsuite/input.operations.fast; fi
-            if [ "$TEST" != "0" ]; then travis_wait 30 $DIST_PATH/travis/do_testsuite.sh; fi
-            if [ "$SDE" = "1" ]; then travis_wait 30 $DIST_PATH/travis/do_sde.sh; fi
+            if [ "$TEST" != "0" ]; then $DIST_PATH/travis/do_testsuite.sh; fi
+            if [ "$SDE" = "1" ]; then $DIST_PATH/travis/do_sde.sh; fi
