@@ -158,7 +158,7 @@ jobs:
           command:
             sudo apt-get update && sudo apt-get install -y clang make python3 << parameters.PACKAGES >>
       - run:
-          name: Configuring
+          name: Configuring, Building, Testing
           command: |
             export DIST_PATH=.
             export CC=<< parameters.CC >>
@@ -211,14 +211,10 @@ jobs:
             ls -l
             $CC --version
             $CC -v
-      - run:
-          name: Building
-          command: |
+
             make -j2
             make install
-      - run:
-          name: Testing
-          command: |
+
             if [ "$BLD" = "" ]; then $DIST_PATH/travis/cxx/cxx-test.sh $DIST_PATH $(ls -1 include); fi
             # Qemu SVE is failing sgemmt in some cases. Skip as this issue is not observed
             # on real chip (A64fx).
