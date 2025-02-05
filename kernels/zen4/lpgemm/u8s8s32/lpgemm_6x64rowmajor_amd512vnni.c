@@ -612,29 +612,76 @@ POST_OPS_BIAS_6x64:
 							post_ops_attr.post_op_c_j + ( 3 * 16 ) );
 			}
 
+			// c[0,0-15]
 			acc_00 = _mm512_add_ps( b0, acc_00 );
+
+			// c[0,16-31]
 			acc_01 = _mm512_add_ps( b1, acc_01 );
+
+			// c[0,32-47]
 			acc_02 = _mm512_add_ps( b2, acc_02 );
+
+			// c[0,48-63]
 			acc_03 = _mm512_add_ps( b3, acc_03 );
+
+			// c[1,0-15]
 			acc_10 = _mm512_add_ps( b0, acc_10 );
+
+			// c[1,16-31]
 			acc_11 = _mm512_add_ps( b1, acc_11 );
+
+			// c[1,32-47]
 			acc_12 = _mm512_add_ps( b2, acc_12 );
+
+			// c[1,48-63]
 			acc_13 = _mm512_add_ps( b3, acc_13 );
+
+			// c[2,0-15]
 			acc_20 = _mm512_add_ps( b0, acc_20 );
+
+			// c[2,16-31]
 			acc_21 = _mm512_add_ps( b1, acc_21 );
+
+			// c[2,32-47]
 			acc_22 = _mm512_add_ps( b2, acc_22 );
+
+			// c[2,48-63]
 			acc_23 = _mm512_add_ps( b3, acc_23 );
+
+			// c[3,0-15]
 			acc_30 = _mm512_add_ps( b0, acc_30 );
+
+			// c[3,16-31]
 			acc_31 = _mm512_add_ps( b1, acc_31 );
+
+			// c[3,32-47]
 			acc_32 = _mm512_add_ps( b2, acc_32 );
+
+			// c[3,48-63]
 			acc_33 = _mm512_add_ps( b3, acc_33 );
+
+			// c[4,0-15]
 			acc_40 = _mm512_add_ps( b0, acc_40 );
+
+			// c[4,16-31]
 			acc_41 = _mm512_add_ps( b1, acc_41 );
+
+			// c[4,32-47]
 			acc_42 = _mm512_add_ps( b2, acc_42 );
+
+			// c[4,48-63]
 			acc_43 = _mm512_add_ps( b3, acc_43 );
+
+			// c[5,0-15]
 			acc_50 = _mm512_add_ps( b0, acc_50 );
+
+			// c[5,16-31]
 			acc_51 = _mm512_add_ps( b1, acc_51 );
+			
+			// c[5,32-47]
 			acc_52 = _mm512_add_ps( b2, acc_52 );
+
+			// c[5,48-63]
 			acc_53 = _mm512_add_ps( b3, acc_53 );
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
@@ -643,29 +690,76 @@ POST_OPS_RELU_6x64:
 		{
 			__m512 zero = _mm512_setzero_ps();
 
+			// c[0,0-15]
 			acc_00 = _mm512_max_ps( zero, acc_00 );
+
+			// c[0,16-31]
 			acc_01 = _mm512_max_ps( zero, acc_01 );
+
+			// c[0,32-47]
 			acc_02 = _mm512_max_ps( zero, acc_02 );
+
+			// c[0,48-63]
 			acc_03 = _mm512_max_ps( zero, acc_03 );
+
+			// c[1,0-15]
 			acc_10 = _mm512_max_ps( zero, acc_10 );
+
+			// c[1,16-31]
 			acc_11 = _mm512_max_ps( zero, acc_11 );
+
+			// c[1,32-47]
 			acc_12 = _mm512_max_ps( zero, acc_12 );
+
+			// c[1,48-63]
 			acc_13 = _mm512_max_ps( zero, acc_13 );
+
+			// c[2,0-15]
 			acc_20 = _mm512_max_ps( zero, acc_20 );
+
+			// c[2,16-31]
 			acc_21 = _mm512_max_ps( zero, acc_21 );
+
+			// c[2,32-47]
 			acc_22 = _mm512_max_ps( zero, acc_22 );
+
+			// c[2,48-63]
 			acc_23 = _mm512_max_ps( zero, acc_23 );
+
+			// c[3,0-15]
 			acc_30 = _mm512_max_ps( zero, acc_30 );
+
+			// c[3,16-31]
 			acc_31 = _mm512_max_ps( zero, acc_31 );
+
+			// c[3,32-47]
 			acc_32 = _mm512_max_ps( zero, acc_32 );
+
+			// c[3,48-63]
 			acc_33 = _mm512_max_ps( zero, acc_33 );
+
+			// c[4,0-15]
 			acc_40 = _mm512_max_ps( zero, acc_40 );
+
+			// c[4,16-31]
 			acc_41 = _mm512_max_ps( zero, acc_41 );
+
+			// c[4,32-47]
 			acc_42 = _mm512_max_ps( zero, acc_42 );
+
+			// c[4,48-63]
 			acc_43 = _mm512_max_ps( zero, acc_43 );
+
+			// c[5,0-15]
 			acc_50 = _mm512_max_ps( zero, acc_50 );
+
+			// c[5,16-31]
 			acc_51 = _mm512_max_ps( zero, acc_51 );
+
+			// c[5,32-47]
 			acc_52 = _mm512_max_ps( zero, acc_52 );
+
+			// c[5,48-63]
 			acc_53 = _mm512_max_ps( zero, acc_53 );
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
@@ -770,29 +864,76 @@ POST_OPS_GELU_TANH_6x64:
 			__m512 dn, z, x, r2, r, y;
 			__m512i tmpout;
 
+			// c[0, 0-15]
 			GELU_TANH_F32_AVX512_DEF(acc_00, y, r, r2, x, z, dn, tmpout)
+
+			// c[0, 16-31]
 			GELU_TANH_F32_AVX512_DEF(acc_01, y, r, r2, x, z, dn, tmpout)
+
+			// c[0, 32-47]
 			GELU_TANH_F32_AVX512_DEF(acc_02, y, r, r2, x, z, dn, tmpout)
+
+			// c[0, 48-63]
 			GELU_TANH_F32_AVX512_DEF(acc_03, y, r, r2, x, z, dn, tmpout)
+
+			// c[1, 0-15]
 			GELU_TANH_F32_AVX512_DEF(acc_10, y, r, r2, x, z, dn, tmpout)
+
+			// c[1, 16-31]
 			GELU_TANH_F32_AVX512_DEF(acc_11, y, r, r2, x, z, dn, tmpout)
+
+			// c[1, 32-47]
 			GELU_TANH_F32_AVX512_DEF(acc_12, y, r, r2, x, z, dn, tmpout)
+
+			// c[1, 48-63]
 			GELU_TANH_F32_AVX512_DEF(acc_13, y, r, r2, x, z, dn, tmpout)
+
+			// c[2, 0-15]
 			GELU_TANH_F32_AVX512_DEF(acc_20, y, r, r2, x, z, dn, tmpout)
+
+			// c[2, 16-31]
 			GELU_TANH_F32_AVX512_DEF(acc_21, y, r, r2, x, z, dn, tmpout)
+
+			// c[2, 32-47]
 			GELU_TANH_F32_AVX512_DEF(acc_22, y, r, r2, x, z, dn, tmpout)
+
+			// c[2, 48-63]
 			GELU_TANH_F32_AVX512_DEF(acc_23, y, r, r2, x, z, dn, tmpout)
+
+			// c[3, 0-15]
 			GELU_TANH_F32_AVX512_DEF(acc_30, y, r, r2, x, z, dn, tmpout)
+
+			// c[3, 16-31]
 			GELU_TANH_F32_AVX512_DEF(acc_31, y, r, r2, x, z, dn, tmpout)
+
+			// c[3, 32-47]
 			GELU_TANH_F32_AVX512_DEF(acc_32, y, r, r2, x, z, dn, tmpout)
+
+			// c[3, 48-63]
 			GELU_TANH_F32_AVX512_DEF(acc_33, y, r, r2, x, z, dn, tmpout)
+
+			// c[4, 0-15]
 			GELU_TANH_F32_AVX512_DEF(acc_40, y, r, r2, x, z, dn, tmpout)
+
+			// c[4, 16-31]
 			GELU_TANH_F32_AVX512_DEF(acc_41, y, r, r2, x, z, dn, tmpout)
+
+			// c[4, 32-47]
 			GELU_TANH_F32_AVX512_DEF(acc_42, y, r, r2, x, z, dn, tmpout)
+
+			// c[4, 48-63]
 			GELU_TANH_F32_AVX512_DEF(acc_43, y, r, r2, x, z, dn, tmpout)
+
+			// c[5, 0-15]
 			GELU_TANH_F32_AVX512_DEF(acc_50, y, r, r2, x, z, dn, tmpout)
+
+			// c[5, 16-31]
 			GELU_TANH_F32_AVX512_DEF(acc_51, y, r, r2, x, z, dn, tmpout)
+
+			// c[5, 32-47]
 			GELU_TANH_F32_AVX512_DEF(acc_52, y, r, r2, x, z, dn, tmpout)
+
+			// c[5, 48-63]
 			GELU_TANH_F32_AVX512_DEF(acc_53, y, r, r2, x, z, dn, tmpout)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
@@ -801,29 +942,76 @@ POST_OPS_GELU_ERF_6x64:
 		{
 			__m512 y, r, r2;
 
+			// c[0, 0-15]
 			GELU_ERF_F32_AVX512_DEF(acc_00, y, r, r2)
+
+			// c[0, 16-31]
 			GELU_ERF_F32_AVX512_DEF(acc_01, y, r, r2)
+
+			// c[0, 32-47]
 			GELU_ERF_F32_AVX512_DEF(acc_02, y, r, r2)
+
+			// c[0, 48-63]
 			GELU_ERF_F32_AVX512_DEF(acc_03, y, r, r2)
+
+			// c[1, 0-15]
 			GELU_ERF_F32_AVX512_DEF(acc_10, y, r, r2)
+
+			// c[1, 16-31]
 			GELU_ERF_F32_AVX512_DEF(acc_11, y, r, r2)
+
+			// c[1, 32-47]
 			GELU_ERF_F32_AVX512_DEF(acc_12, y, r, r2)
+
+			// c[1, 48-63]
 			GELU_ERF_F32_AVX512_DEF(acc_13, y, r, r2)
+
+			// c[2, 0-15]
 			GELU_ERF_F32_AVX512_DEF(acc_20, y, r, r2)
+
+			// c[2, 16-31]
 			GELU_ERF_F32_AVX512_DEF(acc_21, y, r, r2)
+
+			// c[2, 32-47]
 			GELU_ERF_F32_AVX512_DEF(acc_22, y, r, r2)
+
+			// c[2, 48-63]
 			GELU_ERF_F32_AVX512_DEF(acc_23, y, r, r2)
+
+			// c[3, 0-15]
 			GELU_ERF_F32_AVX512_DEF(acc_30, y, r, r2)
+
+			// c[3, 16-31]
 			GELU_ERF_F32_AVX512_DEF(acc_31, y, r, r2)
+
+			// c[3, 32-47]
 			GELU_ERF_F32_AVX512_DEF(acc_32, y, r, r2)
+
+			// c[3, 48-63]
 			GELU_ERF_F32_AVX512_DEF(acc_33, y, r, r2)
+
+			// c[4, 0-15]
 			GELU_ERF_F32_AVX512_DEF(acc_40, y, r, r2)
+
+			// c[4, 16-31]
 			GELU_ERF_F32_AVX512_DEF(acc_41, y, r, r2)
+
+			// c[4, 32-47]
 			GELU_ERF_F32_AVX512_DEF(acc_42, y, r, r2)
+
+			// c[4, 48-63]
 			GELU_ERF_F32_AVX512_DEF(acc_43, y, r, r2)
+
+			// c[5, 0-15]
 			GELU_ERF_F32_AVX512_DEF(acc_50, y, r, r2)
+
+			// c[5, 16-31]
 			GELU_ERF_F32_AVX512_DEF(acc_51, y, r, r2)
+
+			// c[5, 32-47]
 			GELU_ERF_F32_AVX512_DEF(acc_52, y, r, r2)
+
+			// c[5, 48-63]
 			GELU_ERF_F32_AVX512_DEF(acc_53, y, r, r2)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR

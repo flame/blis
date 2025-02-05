@@ -108,6 +108,7 @@ GEN_BLIS_MAT_MUL_FUNC(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 GEN_BLIS_MAT_MUL_FUNC(float,float,float,float,f32f32f32of32)
 GEN_BLIS_MAT_MUL_FUNC(int8_t,int8_t,int32_t,int32_t,s8s8s32os32)
 GEN_BLIS_MAT_MUL_FUNC(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
+GEN_BLIS_MAT_MUL_FUNC(int8_t,int8_t,uint8_t,int32_t,s8s8s32ou8)
 GEN_BLIS_MAT_MUL_FUNC(int8_t,int8_t,bfloat16,int32_t,s8s8s32obf16)
 GEN_BLIS_MAT_MUL_FUNC(int8_t,int8_t,float,int32_t,s8s8s32of32)
 GEN_BLIS_MAT_MUL_FUNC(bfloat16,int8_t,float,float,bf16s4f32of32)
@@ -204,6 +205,7 @@ GEN_MAT_MUL_BENCH_DRV_FUNC(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 GEN_MAT_MUL_BENCH_DRV_FUNC(float,float,float,float,f32f32f32of32)
 GEN_MAT_MUL_BENCH_DRV_FUNC(int8_t,int8_t,int32_t,int32_t,s8s8s32os32)
 GEN_MAT_MUL_BENCH_DRV_FUNC(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
+GEN_MAT_MUL_BENCH_DRV_FUNC(int8_t,int8_t,uint8_t,int32_t,s8s8s32ou8)
 GEN_MAT_MUL_BENCH_DRV_FUNC(int8_t,int8_t,bfloat16,int32_t,s8s8s32obf16)
 GEN_MAT_MUL_BENCH_DRV_FUNC(int8_t,int8_t,float,int32_t,s8s8s32of32)
 GEN_MAT_MUL_BENCH_DRV_FUNC(bfloat16,int8_t,float,float,bf16s4f32of32)
@@ -246,6 +248,7 @@ GEN_MAT_MUL_ACC_CHK_DOWNSCALE(float,int32_t,float,u8s8s32of32)
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(bfloat16,int32_t,float,u8s8s32obf16)
 
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int32_t,float,s8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(uint8_t,int32_t,float,s8s8s32ou8)
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(float,int32_t,float,s8s8s32of32)
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(bfloat16,int32_t,float,s8s8s32obf16)
 
@@ -339,6 +342,7 @@ static inline ACCUM_type mat_mul_accuracy_check_accum_ ## BLAS_SFX \
 GEN_MAT_MUL_ACC_CHK_ACCUM(float,float,float,float,f32f32f32of32)
 
 GEN_MAT_MUL_ACC_CHK_ACCUM(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_ACCUM(int8_t,int8_t,uint8_t,int32_t,s8s8s32ou8)
 GEN_MAT_MUL_ACC_CHK_ACCUM(int8_t,int8_t,int32_t,int32_t,s8s8s32os32)
 
 GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
@@ -715,6 +719,7 @@ GEN_GELU_TANH_POSTOP_FLOAT(u8s8s32os32)
 GEN_GELU_TANH_POSTOP_FLOAT(u8s8s32obf16)
 GEN_GELU_TANH_POSTOP_FLOAT(u8s8s32of32)
 GEN_GELU_TANH_POSTOP_FLOAT(s8s8s32os8)
+GEN_GELU_TANH_POSTOP_FLOAT(s8s8s32ou8)
 GEN_GELU_TANH_POSTOP_FLOAT(s8s8s32os32)
 GEN_GELU_TANH_POSTOP_FLOAT(s8s8s32obf16)
 GEN_GELU_TANH_POSTOP_FLOAT(s8s8s32of32)
@@ -731,6 +736,7 @@ GEN_TANH_POSTOP_FLOAT(u8s8s32os32)
 GEN_TANH_POSTOP_FLOAT(u8s8s32obf16)
 GEN_TANH_POSTOP_FLOAT(u8s8s32of32)
 GEN_TANH_POSTOP_FLOAT(s8s8s32os8)
+GEN_TANH_POSTOP_FLOAT(s8s8s32ou8)
 GEN_TANH_POSTOP_FLOAT(s8s8s32obf16)
 GEN_TANH_POSTOP_FLOAT(s8s8s32of32)
 GEN_TANH_POSTOP_FLOAT(s8s8s32os32)
@@ -747,6 +753,7 @@ GEN_GELU_ERF_POSTOP_FLOAT(u8s8s32os32)
 GEN_GELU_ERF_POSTOP_FLOAT(u8s8s32obf16)
 GEN_GELU_ERF_POSTOP_FLOAT(u8s8s32of32)
 GEN_GELU_ERF_POSTOP_FLOAT(s8s8s32os8)
+GEN_GELU_ERF_POSTOP_FLOAT(s8s8s32ou8)
 GEN_GELU_ERF_POSTOP_FLOAT(s8s8s32os32)
 GEN_GELU_ERF_POSTOP_FLOAT(s8s8s32obf16)
 GEN_GELU_ERF_POSTOP_FLOAT(s8s8s32of32)
@@ -763,6 +770,7 @@ GEN_SWISH_POSTOP_INT(float,u8s8s32os32)
 GEN_SWISH_POSTOP_FLOAT(u8s8s32obf16)
 GEN_SWISH_POSTOP_FLOAT(u8s8s32of32)
 GEN_SWISH_POSTOP_INT(float,s8s8s32os8)
+GEN_SWISH_POSTOP_INT(float,s8s8s32ou8)
 GEN_SWISH_POSTOP_INT(float,s8s8s32os32)
 GEN_SWISH_POSTOP_FLOAT(s8s8s32obf16)
 GEN_SWISH_POSTOP_FLOAT(s8s8s32of32)
@@ -779,6 +787,7 @@ GEN_SIGMOID_POSTOP_FLOAT(u8s8s32os32)
 GEN_SIGMOID_POSTOP_FLOAT(u8s8s32obf16)
 GEN_SIGMOID_POSTOP_FLOAT(u8s8s32of32)
 GEN_SIGMOID_POSTOP_FLOAT(s8s8s32os8)
+GEN_SIGMOID_POSTOP_FLOAT(s8s8s32ou8)
 GEN_SIGMOID_POSTOP_FLOAT(s8s8s32os32)
 GEN_SIGMOID_POSTOP_FLOAT(s8s8s32obf16)
 GEN_SIGMOID_POSTOP_FLOAT(s8s8s32of32)
@@ -797,10 +806,11 @@ GEN_GET_MATRIX_ADD_POST_OP_VAL(float,u8s8s32ou8)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(float,u8s8s32os32)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(float,u8s8s32obf16)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(float,u8s8s32of32)
-GEN_GET_MATRIX_ADD_POST_OP_VAL(int32_t,s8s8s32os8)
-GEN_GET_MATRIX_ADD_POST_OP_VAL(int32_t,s8s8s32os32)
-GEN_GET_MATRIX_ADD_POST_OP_VAL(int32_t,s8s8s32obf16)
-GEN_GET_MATRIX_ADD_POST_OP_VAL(int32_t,s8s8s32of32)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(float,s8s8s32os8)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(float,s8s8s32ou8)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(float,s8s8s32os32)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(float,s8s8s32obf16)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(float,s8s8s32of32)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(float,f32f32f32of32)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(float,bf16bf16f32of32)
 GEN_GET_MATRIX_ADD_POST_OP_VAL(float,bf16s4f32of32)
@@ -813,10 +823,11 @@ GEN_GET_MATRIX_MUL_POST_OP_VAL(float,u8s8s32ou8)
 GEN_GET_MATRIX_MUL_POST_OP_VAL(float,u8s8s32os32)
 GEN_GET_MATRIX_MUL_POST_OP_VAL(float,u8s8s32obf16)
 GEN_GET_MATRIX_MUL_POST_OP_VAL(float,u8s8s32of32)
-GEN_GET_MATRIX_MUL_POST_OP_VAL(int32_t,s8s8s32os8)
-GEN_GET_MATRIX_MUL_POST_OP_VAL(int32_t,s8s8s32os32)
-GEN_GET_MATRIX_MUL_POST_OP_VAL(int32_t,s8s8s32obf16)
-GEN_GET_MATRIX_MUL_POST_OP_VAL(int32_t,s8s8s32of32)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(float,s8s8s32os8)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(float,s8s8s32ou8)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(float,s8s8s32os32)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(float,s8s8s32obf16)
+GEN_GET_MATRIX_MUL_POST_OP_VAL(float,s8s8s32of32)
 GEN_GET_MATRIX_MUL_POST_OP_VAL(float,f32f32f32of32)
 GEN_GET_MATRIX_MUL_POST_OP_VAL(float,bf16bf16f32of32)
 GEN_GET_MATRIX_MUL_POST_OP_VAL(float,bf16s4f32of32)
@@ -836,6 +847,7 @@ GEN_PRELU_POST_OP_VAL_INT(u8s8s32os8)
 GEN_PRELU_POST_OP_VAL_INT(u8s8s32ou8)
 GEN_PRELU_POST_OP_VAL_INT(u8s8s32os32)
 GEN_PRELU_POST_OP_VAL_INT(s8s8s32os8)
+GEN_PRELU_POST_OP_VAL_INT(s8s8s32ou8)
 GEN_PRELU_POST_OP_VAL_INT(s8s8s32os32)
 
 
@@ -853,6 +865,7 @@ GEN_CLIP_POST_OP_VAL_INT(u8s8s32os8)
 GEN_CLIP_POST_OP_VAL_INT(u8s8s32ou8)
 GEN_CLIP_POST_OP_VAL_INT(u8s8s32os32)
 GEN_CLIP_POST_OP_VAL_INT(s8s8s32os8)
+GEN_CLIP_POST_OP_VAL_INT(s8s8s32ou8)
 GEN_CLIP_POST_OP_VAL_INT(s8s8s32os32)
 
 
@@ -864,10 +877,11 @@ GEN_GET_BIAS_POST_OP_VAL(float,u8s8s32ou8)
 GEN_GET_BIAS_POST_OP_VAL(float,u8s8s32os32)
 GEN_GET_BIAS_POST_OP_VAL(float,u8s8s32obf16)
 GEN_GET_BIAS_POST_OP_VAL(float,u8s8s32of32)
-GEN_GET_BIAS_POST_OP_VAL(int32_t,s8s8s32os8)
-GEN_GET_BIAS_POST_OP_VAL(int32_t,s8s8s32os32)
-GEN_GET_BIAS_POST_OP_VAL(int32_t,s8s8s32obf16)
-GEN_GET_BIAS_POST_OP_VAL(int32_t,s8s8s32of32)
+GEN_GET_BIAS_POST_OP_VAL(float,s8s8s32os8)
+GEN_GET_BIAS_POST_OP_VAL(float,s8s8s32ou8)
+GEN_GET_BIAS_POST_OP_VAL(float,s8s8s32os32)
+GEN_GET_BIAS_POST_OP_VAL(float,s8s8s32obf16)
+GEN_GET_BIAS_POST_OP_VAL(float,s8s8s32of32)
 GEN_GET_BIAS_POST_OP_VAL_f32(f32f32f32of32)
 GEN_GET_BIAS_POST_OP_VAL_f32(bf16bf16f32of32)
 GEN_GET_BIAS_POST_OP_VAL_f32(bf16s4f32of32)
@@ -1141,6 +1155,7 @@ GEN_MAT_MUL_ACC_CHK_DRV_FUNC(float,float,float,float,float,float,f32f32f32of32,f
 
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int32_t,int32_t,int32_t,float,s8s8s32os32,s8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int8_t,int32_t,int32_t,float,s8s8s32os8,s8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,uint8_t,int32_t,int32_t,float,s8s8s32ou8,s8s8s32ou8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,bfloat16,int32_t,int32_t,float,s8s8s32obf16,s8s8s32obf16)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,float,int32_t,float,int32_t,s8s8s32of32,s8s8s32of32)
 
@@ -1152,9 +1167,9 @@ GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,bfloat16,float,float,u8s8s32obf16)
 
 GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int32_t,float,int32_t,s8s8s32os32)
 GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int8_t,float,int32_t,s8s8s32os8)
+GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,uint8_t,float,int32_t,s8s8s32ou8)
 GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,float,float,int32_t,s8s8s32of32)
 GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,bfloat16,float,int32_t,s8s8s32obf16)
-GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,uint8_t,float,int32_t,s8s8s32ou8)
 
 GEN_MAT_MUL_POST_OPS_CREATOR(bfloat16,float,float,bfloat16,bf16bf16f32of32)
 GEN_MAT_MUL_POST_OPS_CREATOR(bfloat16,bfloat16,float,bfloat16,bf16bf16f32obf16)
@@ -1358,6 +1373,7 @@ GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,float,int32_t,u8s8s32of32,u8s8s32os32
 GEN_MAT_MUL_BENCH_MAIN_FUNC(float,float,float,float,f32f32f32of32,f32f32f32of32,bf16s4f32of32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(int8_t,int8_t,int32_t,int32_t,s8s8s32os32,s8s8s32os32,u8s4s32os32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(int8_t,int8_t,int8_t,int32_t,s8s8s32os8,s8s8s32os32,u8s4s32os32)
+GEN_MAT_MUL_BENCH_MAIN_FUNC(int8_t,int8_t,uint8_t,int32_t,s8s8s32ou8,s8s8s32os32,u8s4s32os32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(int8_t,int8_t,bfloat16,int32_t,s8s8s32obf16,s8s8s32os32,u8s4s32os32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(int8_t,int8_t,float,int32_t,s8s8s32of32,s8s8s32os32,u8s4s32os32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(bfloat16,int8_t,float,float,bf16s4f32of32,bf16bf16f32of32,bf16s4f32of32)
@@ -1398,9 +1414,10 @@ int main( int argc, char** argv )
           "    3. u8s8s32os32 -d f32 = u8s8s32of32.\n" \
           "    4. u8s8s32os32 -d bf16 = u8s8s32obf16.\n" \
           "    5. s8s8s32os32 -d s8 = s8s8s32os8.\n" \
-          "    6. s8s8s32os32 -d f32 = s8s8s32of32.\n" \
-          "    7. s8s8s32os32 -d bf16 = s8s8s32obf16.\n" \
-          "    8. bf16bf16f32of32 -d bf16 = bf16bf16f32obf16.\n" \
+          "    6. s8s8s32os32 -d u8 = s8s8s32ou8.\n" \
+          "    7. s8s8s32os32 -d f32 = s8s8s32of32.\n" \
+          "    8. s8s8s32os32 -d bf16 = s8s8s32obf16.\n" \
+          "    9. bf16bf16f32of32 -d bf16 = bf16bf16f32obf16.\n" \
           "  Example: ./bench_lpgemm -m a -n 2 -o bias,relu -d bf16 -i input.txt\n" \
         );
         exit( 1 );
@@ -1742,6 +1759,21 @@ int main( int argc, char** argv )
                 DSCALE_CLIP_MIN = -128;
                 DSCALE_CLIP_MAX = +127;
                 GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32os8)
+                (
+                  fin, fout, stor_order, transa, transb, op_a, op_b,
+                  m, n, k, stride_a, stride_b, stride_c,
+                  post_ops_str_dest
+                );
+            }
+            if ( ( strcmp( gemm_type_str, "s8s8s32ou8" ) == 0 ) ||
+                 ( strcmp( gemm_type_str, "*" ) == 0 ) )
+            {
+                strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
+                global_dscale_out = 'y';
+                global_pre_op = 'n';
+                DSCALE_CLIP_MIN = 0;
+                DSCALE_CLIP_MAX = +255;
+                GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32ou8)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
                   m, n, k, stride_a, stride_b, stride_c,
