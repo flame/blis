@@ -826,7 +826,9 @@ err_t bli_check_sufficient_stack_buf_size( const cntx_t* cntx )
 	{
 		dim_t mr      = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
 		dim_t nr      = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
-		siz_t dt_size = bli_dt_size( dt );
+		// Always use the size of the largest data type to account for
+		// conversions during mixed-domain/mixed-precision computation.
+		siz_t dt_size = bli_dt_size( BLIS_DCOMPLEX );
 
 		// NOTE: For induced methods, we use the size of the complex datatypes
 		// (rather than the size of the native micro-kernels' datatype) because
