@@ -51,15 +51,18 @@ workflows:
       # clang build
       - build:
           CC: clang
+          CXX: clang++
 
       # macOS with system compiler (clang)
       - build:
           os: macos
           CC: clang
+          CXX: clang++
 
       # cortexa15 build and fast testsuite (qemu)
       - build:
           CC: arm-linux-gnueabihf-gcc
+          CXX: arm-linux-gnueabihf-g++
           CONF: cortexa15
           PACKAGES: 'gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libc6-dev-armhf-cross qemu-system-arm qemu-user'
           TESTSUITE_WRAPPER: 'qemu-arm -cpu cortex-a15 -L /usr/arm-linux-gnueabihf/'
@@ -67,6 +70,7 @@ workflows:
       # cortexa57 build and fast testsuite (qemu)
       - build:
           CC: aarch64-linux-gnu-gcc
+          CXX: aarch64-linux-gnu-g++
           CONF: cortexa57
           PACKAGES: 'gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
           TESTSUITE_WRAPPER: 'qemu-aarch64 -L /usr/aarch64-linux-gnu/'
@@ -74,6 +78,7 @@ workflows:
       # Apple M1 (firestorm) build and fast testsuite (qemu)
       - build:
           CC: aarch64-linux-gnu-gcc
+          CXX: aarch64-linux-gnu-g++
           CONF: firestorm
           PACKAGES: 'gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
           TESTSUITE_WRAPPER: 'qemu-aarch64 -L /usr/aarch64-linux-gnu/'
@@ -81,6 +86,7 @@ workflows:
       # armsve build and fast testsuite (qemu)
       - build:
           CC: aarch64-linux-gnu-gcc-10
+          CXX: aarch64-linux-gnu-g++-10
           CONF: armsve
           PACKAGES: 'gcc-10-aarch64-linux-gnu g++-10-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
           TESTSUITE_WRAPPER: 'qemu-aarch64 -cpu max,sve=true,sve512=true -L /usr/aarch64-linux-gnu/'
@@ -90,6 +96,7 @@ workflows:
       # are compiled, only NEON kernels will be tested. (h/t to RuQing Xu)
       - build:
           CC: aarch64-linux-gnu-gcc-10
+          CXX: aarch64-linux-gnu-g++-10
           CONF: arm64
           PACKAGES: 'gcc-10-aarch64-linux-gnu g++-10-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
           TESTSUITE_WRAPPER: 'qemu-aarch64 -L /usr/aarch64-linux-gnu/'
@@ -99,17 +106,14 @@ workflows:
       # cleaned up.
       # PACKAGES="qemu-user qemu-user-binfmt"
       - build:
-          CC: riscv64-unknown-linux-gcc
           CONF: rv64iv
           BLD: --disable-shared
           LDFLAGS: -static
       - build:
-          CC: riscv32-unknown-linux-gcc
           CONF: rv32iv
           BLD: --disable-shared
           LDFLAGS: -static
       - build:
-          CC: clang
           CONF: sifive_x280
           BLD: --disable-shared
           LDFLAGS: -static
@@ -123,6 +127,9 @@ jobs:
       CC:
         type: string
         default: gcc
+      CXX:
+        type: string
+        default: g++
       OOT:
         type: integer
         default: 0
@@ -169,6 +176,7 @@ jobs:
           command: |
             export DIST_PATH=.
             export CC="<< parameters.CC >>"
+            export CXX="<< parameters.CXX >>"
             export OOT="<< parameters.OOT >>"
             export CONF="<< parameters.CONF >>"
             export TEST="<< parameters.TEST >>"
@@ -203,6 +211,7 @@ jobs:
 
             echo "Configuration:"
             echo "CC                = $CC"
+            echo "CXX               = $CXX"
             echo "OOT               = $OOT"
             echo "CONF              = $CONF"
             echo "THR               = $THR"
@@ -222,7 +231,7 @@ jobs:
             make -j2
             make install
 
-            if [ "$BLD" = "" ]; then $DIST_PATH/travis/cxx/cxx-test.sh $DIST_PATH $(ls -1 include); fi
+            if [ "$BLD" = "" ] && [ "$TESTSUITE_WRAPPER" = "" ] ; then $DIST_PATH/travis/cxx/cxx-test.sh $DIST_PATH $(ls -1 include); fi
             # Qemu SVE is failing sgemmt in some cases. Skip as this issue is not observed
             # on real chip (A64fx).
             if [ "$CONF" = "armsve" ]; then sed -i 's/.*\<gemmt\>.*/0/' $DIST_PATH/testsuite/input.operations.fast; fi
