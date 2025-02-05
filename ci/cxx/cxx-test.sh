@@ -50,9 +50,9 @@ if [ ! -e $INCLUDE_DIR/blis.h ]; then
     exit 1
 fi
 
-if [ ! -e $SOURCE_DIR/travis/cxx/Makefile ]; then
+if [ ! -e $SOURCE_DIR/ci/cxx/Makefile ]; then
     echo "could not find cxx-test Makefile"
     exit 1
 fi
 
-make -C $SOURCE_DIR/travis/cxx INCLUDE_DIR=$INCLUDE_DIR LIB_DIR=$LIB_DIR BUILD_DIR=$BUILD_DIR
+make -C $SOURCE_DIR/ci/cxx INCLUDE_DIR=$INCLUDE_DIR LIB_DIR=$LIB_DIR BUILD_DIR=$BUILD_DIR

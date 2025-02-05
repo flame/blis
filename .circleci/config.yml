@@ -191,19 +191,19 @@ jobs:
             pwd
 
             if [ "$CONF" = "rv64iv" ]; then
-              $DIST_PATH/travis/do_riscv.sh "$CONF";
+              $DIST_PATH/ci/do_riscv.sh "$CONF";
               export CC=$DIST_PATH/../toolchain/riscv/bin/riscv64-unknown-linux-gnu-gcc;
               export CXX=$DIST_PATH/../toolchain/riscv/bin/riscv64-unknown-linux-gnu-g++;
               export TESTSUITE_WRAPPER="$DIST_PATH/../toolchain/qemu-riscv64 -cpu rv64,vext_spec=v1.0,v=true,vlen=128 -B 0x100000";
             fi
             if [ "$CONF" = "rv32iv" ]; then
-              $DIST_PATH/travis/do_riscv.sh "$CONF";
+              $DIST_PATH/ci/do_riscv.sh "$CONF";
               export CC=$DIST_PATH/../toolchain/riscv/bin/riscv32-unknown-linux-gnu-gcc;
               export CXX=$DIST_PATH/../toolchain/riscv/bin/riscv32-unknown-linux-gnu-g++;
               export TESTSUITE_WRAPPER="$DIST_PATH/../toolchain/qemu-riscv32 -cpu rv32,vext_spec=v1.0,v=true,vlen=128 -B 0x100000";
             fi
             if [ "$CONF" = "sifive_x280" ]; then
-              $DIST_PATH/travis/do_riscv.sh "$CONF";
+              $DIST_PATH/ci/do_riscv.sh "$CONF";
               export CC=$DIST_PATH/../toolchain/riscv/bin/clang;
               export CXX=$DIST_PATH/../toolchain/riscv/bin/clang++;
               export TESTSUITE_WRAPPER="$DIST_PATH/../toolchain/qemu-riscv64 -cpu rv64,vext_spec=v1.0,v=true,vlen=512 -B 0x100000";
@@ -231,9 +231,9 @@ jobs:
             make -j2
             make install
 
-            if [ "$BLD" = "" ] && [ "$TESTSUITE_WRAPPER" = "" ] ; then $DIST_PATH/travis/cxx/cxx-test.sh $DIST_PATH $(ls -1 include); fi
+            if [ "$BLD" = "" ] && [ "$TESTSUITE_WRAPPER" = "" ] ; then $DIST_PATH/ci/cxx/cxx-test.sh $DIST_PATH $(ls -1 include); fi
             # Qemu SVE is failing sgemmt in some cases. Skip as this issue is not observed
             # on real chip (A64fx).
             if [ "$CONF" = "armsve" ]; then sed -i 's/.*\<gemmt\>.*/0/' $DIST_PATH/testsuite/input.operations.fast; fi
-            if [ "$TEST" != "0" ]; then $DIST_PATH/travis/do_testsuite.sh; fi
-            if [ "$SDE" = "1" ]; then $DIST_PATH/travis/do_sde.sh; fi
+            if [ "$TEST" != "0" ]; then $DIST_PATH/ci/do_testsuite.sh; fi
+            if [ "$SDE" = "1" ]; then $DIST_PATH/ci/do_sde.sh; fi

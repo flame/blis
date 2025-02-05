@@ -38,7 +38,7 @@ LIBC_SO=${TMP%% *}
 TMP=`ldd ./test_libblis.x | grep libm | sed 's/^.*=> //'`
 LIBM_SO=${TMP%% *}
 for LIB in $LD_SO $LIBC_SO $LIBM_SO; do
-    $DIST_PATH/travis/patch-ld-so.py $LIB .tmp
+    $DIST_PATH/ci/patch-ld-so.py $LIB .tmp
     chmod a+x .tmp
     sudo mv .tmp $LIB
 done
@@ -47,7 +47,7 @@ for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator 
     if [ "$ARCH" = "knl" ]; then
         TESTSUITE_WRAPPER="$SDE -knl --"
     else
-        TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/travis/cpuid/$ARCH.def --"
+        TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/$ARCH.def --"
     fi
 
     make TESTSUITE_WRAPPER="$TESTSUITE_WRAPPER" check
