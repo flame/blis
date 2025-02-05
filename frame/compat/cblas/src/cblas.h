@@ -608,21 +608,25 @@ void BLIS_EXPORT_BLAS cblas_sgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
                  f77_int N, f77_int K, float alpha, const float *A,
                  f77_int lda, const float *B, f77_int ldb,
                  float beta, float *C, f77_int ldc);
+void BLIS_EXPORT_BLAS cblas_sgemmtr();  // alias to cblas_sgemmt
 void BLIS_EXPORT_BLAS cblas_dgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
                  enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
                  f77_int N, f77_int K, double alpha, const double *A,
                  f77_int lda, const double *B, f77_int ldb,
                  double beta, double *C, f77_int ldc);
+void BLIS_EXPORT_BLAS cblas_dgemmtr();  // alias to cblas_dgemmt
 void BLIS_EXPORT_BLAS cblas_cgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
                  enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
                  f77_int N, f77_int K, const void *alpha, const void *A,
                  f77_int lda, const void *B, f77_int ldb,
                  const void *beta, void *C, f77_int ldc);
+void BLIS_EXPORT_BLAS cblas_cgemmtr();  // alias to cblas_cgemmt
 void BLIS_EXPORT_BLAS cblas_zgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
                  enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
                  f77_int N, f77_int K, const void *alpha, const void *A,
                  f77_int lda, const void *B, f77_int ldb,
                  const void *beta, void *C, f77_int ldc);
+void BLIS_EXPORT_BLAS cblas_zgemmtr();  // alias to cblas_zgemmt
 
 // -- Batch APIs --
 
