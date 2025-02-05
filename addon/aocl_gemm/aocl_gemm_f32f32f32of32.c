@@ -43,6 +43,50 @@
 #include "lpgemm_5loop_interface_apis.h"
 #include "lpgemm_logger.h"
 
+static inline bool is_tiny_input_f32
+     (
+       dim_t m,
+       dim_t n,
+       dim_t k,
+       lpgemm_cntx_t* lcntx
+     )
+{
+	bool is_tiny = FALSE;
+
+    const dim_t NC = lcntx->blksz.NC;
+    const dim_t MC = lcntx->blksz.MC;
+
+	// Need to explicitly check for MC, NC boundaries for safety.
+	if ( ( k < 128 ) && ( m <= MC ) && ( n < NC ) &&
+		 ( ( ( m <= 36 ) && ( n <= 64 ) ) ||
+		   ( ( m <= 12 ) && ( n <= 128 ) ) ) )
+	{
+		is_tiny = TRUE;
+	}
+
+	return is_tiny;
+}
+
+static inline bool is_single_thread( rntm_t* rntm_g )
+{
+	bool is_st = FALSE;
+
+	dim_t n_threads = bli_rntm_num_threads( rntm_g );
+	dim_t jc_ways = bli_rntm_jc_ways( rntm_g );
+	dim_t ic_ways = bli_rntm_ic_ways( rntm_g );
+
+	ic_ways = ( ic_ways > 0 ) ? ic_ways : 1;
+	jc_ways = ( jc_ways > 0 ) ? jc_ways : 1;
+
+	if ( ( n_threads == 1 ) ||
+		 ( ( ic_ways * jc_ways ) == 1 ) )
+	{
+		is_st = TRUE;
+	}
+
+	return is_st;
+}
+
 AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 {
 	LPGEMM_START_LOGGER();
@@ -187,6 +231,23 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	bli_pba_rntm_set_pba( &rntm_g );
 
 	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( F32F32F32OF32 );
+
+	if ( ( is_tiny_input_f32( m, n, k, lcntx_g ) == TRUE ) &&
+		 ( is_single_thread( &rntm_g ) == TRUE) )
+	{
+		lpgemm_rowvar_tiny_f32f32f32of32
+		(
+		  m, n, k,
+		  a, rs_a, cs_a, mtag_a,
+		  b, rs_b, cs_b, mtag_b,
+		  c, rs_c, cs_c,
+		  alpha, beta,
+		  lcntx_g,
+		  post_op_list, F32
+		);
+		return;
+	}
+
 #ifdef BLIS_ENABLE_OPENMP
 	// The lpgemm_cntx_t argument will be NULL for f32 since it still uses
 	// BLIS cntx_t internally. Its a workaround for now and will be replaced

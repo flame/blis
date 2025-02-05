@@ -141,6 +141,7 @@ LPGEMV(float, float, float, f32f32f32of32)
       rs_b_use = 1;
       cs_b_use = 1;
     }
+    post_ops_attr.post_op_c_j = 0;
 
     // Compute the IC loop thread range for the current thread.
     dim_t ic_start, ic_end;
@@ -230,6 +231,7 @@ LPGEMV(float, float, float, f32f32f32of32)
 
       a_use = pack_a_buffer_f32f32f32of32;
     }
+    post_ops_attr.post_op_c_i = 0;
 
     for (dim_t jc = jc_start; jc < jc_end; jc += NC)
     {
