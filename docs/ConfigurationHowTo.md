@@ -215,9 +215,9 @@ _**SIMD register file.**_ BLIS allows you to specify the _maximum_ number of SIM
 #define BLIS_SIMD_MAX_NUM_REGISTERS  32
 #define BLIS_SIMD_MAX_SIZE           64
 ```
-These macros are used in computing the maximum amount of temporary storage (typically allocated statically, on the function stack) that will be needed to hold a single micro-tile of any datatype (and for any induced method):
+These macros are used in computing the maximum amount of temporary storage (typically allocated statically, on the function stack) that will be needed to hold a single micro-tile of any datatype (and for any induced method or mixed-precision computation):
 ```c
-#define BLIS_STACK_BUF_MAX_SIZE  ( BLIS_SIMD_MAX_NUM_REGISTERS * BLIS_SIMD_MAX_SIZE * 2 )
+#define BLIS_STACK_BUF_MAX_SIZE  ( BLIS_SIMD_MAX_NUM_REGISTERS * BLIS_SIMD_MAX_SIZE * 4 )
 ```
 These temporary buffers are used when handling edge cases (m % _MR_ != 0 || n % _NR_ != 0) within the level-3 macrokernels, and also in the virtual microkernels of various implementations of induced methods for complex matrix multiplication. It is **very important** that these values be set correctly; otherwise, you may experience undefined behavior as stack data is overwritten at run-time. A kernel developer may set `BLIS_SIMD_MAX_NUM_REGISTERS` and `BLIS_SIMD_MAX_SIZE`, which will indirectly affect `BLIS_STACK_BUF_MAX_SIZE`, or he may set `BLIS_STACK_BUF_MAX_SIZE` directly. Notice that the default values are already set to work with modern x86_64 systems.
 
