@@ -189,7 +189,9 @@ bool is_integerAPI_avx512( char* api_name )
 {
     if ( ( strcmp( api_name, "u8s8s32of32" ) == 0) || ( strcmp( api_name, "u8s8s32os8" ) == 0) \
     || ( strcmp( api_name, "u8s8s32obf16" ) == 0) || ( strcmp( api_name, "u8s8s32os32" ) == 0) \
-    || ( strcmp( api_name, "u8s8s32ou8" ) == 0) ) \
+    || ( strcmp( api_name, "u8s8s32ou8" ) == 0) || ( strcmp( api_name, "s8s8s32of32" ) == 0) \
+    || ( strcmp( api_name, "s8s8s32os8" ) == 0) || ( strcmp( api_name, "s8s8s32obf16" ) == 0) \
+    || ( strcmp( api_name, "s8s8s32os32" ) == 0) || ( strcmp( api_name, "s8s8s32ou8" ) == 0)) \
     { \
         return TRUE; \
     } \
@@ -683,34 +685,29 @@ static inline void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
             free( ( post_ops->eltwise + i )->algo.alpha );
             free( ( post_ops->eltwise + i )->algo.beta );
         }
-        free( post_ops->eltwise );
     }
 
     if ( post_ops->matrix_add != NULL )
     {
         free( ( post_ops->matrix_add )->matrix );
-        //free( ( post_ops->matrix_add )->scale_factor );
-        free( post_ops->matrix_add );
+        free( ( post_ops->matrix_add )->scale_factor );
     }
 
     if ( post_ops->sum != NULL )
     {
         free( ( post_ops->sum )->scale_factor );
         free( ( post_ops->sum )->zero_point );
-        free( post_ops->sum );
     }
 
     if ( post_ops->matrix_mul != NULL )
     {
         free( ( post_ops->matrix_mul )->matrix );
-        //free( ( post_ops->matrix_mul )->scale_factor );
-        free( post_ops->matrix_mul );
+        free( ( post_ops->matrix_mul )->scale_factor );
     }
 
     if ( post_ops->bias != NULL )
     {
         free( ( post_ops->bias )->bias );
-        free( post_ops->bias );
     }
 
     if ( post_ops->pre_ops != NULL )
@@ -725,8 +722,15 @@ static inline void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
             free( ( ( post_ops->pre_ops )->b_scl )->scale_factor );
             free( ( post_ops->pre_ops )->b_scl );
         }
-        free( post_ops->pre_ops );
     }
+
+    /* Freeing all the structs */
+    free( post_ops->eltwise );
+    free( post_ops->pre_ops );
+    free( post_ops->matrix_add );
+    free( post_ops->sum );
+    free( post_ops->matrix_mul );
+    free( post_ops->bias );
 
     free( post_ops->seq_vector );
     free( post_ops );
@@ -793,6 +797,11 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         return NULL; \
     } \
     post_ops->eltwise = NULL; \
+    post_ops->bias = NULL; \
+    post_ops->sum = NULL; \
+    post_ops->matrix_add = NULL; \
+    post_ops->matrix_mul = NULL; \
+    post_ops->pre_ops = NULL; \
  \
     /* Only supporting 8 post ops at max for now.*/ \
     dim_t max_post_ops_seq_length = 8; \
@@ -810,53 +819,6 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
  \
     /* Parse post ops list.*/ \
     dim_t cur_op_index = 0; \
-    /* Ensure the buffers that use NULL check in deinit code is properly set to NULL.*/ \
- \
-    /* Bench limitation: can only support 1 bias, but LPGEMM can support
-     * multiple bias post-ops. */ \
-    post_ops->bias = NULL; \
-    post_ops->bias = malloc( sizeof( aocl_post_op_bias ) ); \
-    if ( post_ops->bias == NULL ) \
-    { \
-        goto err_handler; \
-    } \
-    ( post_ops->bias )->bias = NULL; \
- \
-    /* Bench limitation: can only support 1 scale, but LPGEMM can support
-     * multiple scale post-ops. */ \
-    post_ops->sum = NULL; \
-    post_ops->sum = malloc( sizeof( aocl_post_op_sum ) ); \
-    if ( post_ops->sum == NULL ) \
-    { \
-        goto err_handler; \
-    } \
-    ( post_ops->sum )->scale_factor = NULL; \
-    ( post_ops->sum )->buff = NULL; \
-    ( post_ops->sum )->zero_point = NULL; \
-    ( post_ops->sum )->scale_factor_len = 0; \
-    ( post_ops->sum )->zero_point_len = 0; \
- \
-    /* Bench limitation: can only support 1 matrix add, but LPGEMM can support
-     * multiple scale post-ops. */ \
-    post_ops->matrix_add = NULL; \
-    post_ops->matrix_add = malloc( sizeof( aocl_post_op_matrix_add ) ); \
-    if ( post_ops->matrix_add == NULL ) \
-    { \
-        goto err_handler; \
-    } \
-    ( post_ops->matrix_add )->matrix = NULL; \
-    ( post_ops->matrix_add )->ldm = 0; \
-\
-    /* Bench limitation: can only support 1 matrix mul, but LPGEMM can support
-     * multiple scale post-ops. */ \
-    post_ops->matrix_mul = NULL; \
-    post_ops->matrix_mul = malloc( sizeof( aocl_post_op_matrix_mul ) ); \
-    if ( post_ops->matrix_mul == NULL ) \
-    { \
-        goto err_handler; \
-    } \
-    ( post_ops->matrix_mul )->matrix = NULL; \
-    ( post_ops->matrix_mul )->ldm = 0; \
  \
     bool is_bias = FALSE; \
     bool is_relu = FALSE; \
@@ -1147,6 +1109,14 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
  \
         if ( is_bias == TRUE ) \
         { \
+            /* Bench limitation: can only support 1 bias, but LPGEMM can support
+            * multiple bias post-ops. */ \
+            post_ops->bias = malloc( sizeof( aocl_post_op_bias ) ); \
+            if ( post_ops->bias == NULL ) \
+            { \
+                goto err_handler; \
+            } \
+ \
             if(is_bias_stor_type == TRUE) \
             { \
                 if( ( strcmp( bias_stor_type, "BF16" ) == 0 ) ) \
@@ -1377,6 +1347,19 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
  \
     if ( ( global_dscale_out == 'y' ) || ( global_can_dscale == 'y' ) ) \
     { \
+        /* Bench limitation: can only support 1 scale, but LPGEMM can support
+        * multiple scale post-ops. */ \
+        post_ops->sum = malloc( sizeof( aocl_post_op_sum ) ); \
+        if ( post_ops->sum == NULL ) \
+        { \
+            goto err_handler; \
+        } \
+        ( post_ops->sum )->scale_factor = NULL; \
+        ( post_ops->sum )->buff = NULL; \
+        ( post_ops->sum )->zero_point = NULL; \
+        ( post_ops->sum )->scale_factor_len = 0; \
+        ( post_ops->sum )->zero_point_len = 0; \
+ \
         post_ops->seq_vector[cur_op_index] = SCALE; \
         cur_op_index++; \
  \
@@ -1419,6 +1402,14 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
  \
     if ( is_matrix_add == TRUE ) \
     { \
+        /* Bench limitation: can only support 1 matrix add, but LPGEMM can support
+        * multiple scale post-ops. */ \
+        post_ops->matrix_add = malloc( sizeof( aocl_post_op_matrix_add ) ); \
+        if ( post_ops->matrix_add == NULL ) \
+        { \
+            goto err_handler; \
+        } \
+ \
         if( is_matadd_stor_type == TRUE) \
         { \
             if( ( strcmp( matadd_stor_type, "BF16" ) == 0 ) ) \
@@ -1540,6 +1531,13 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
  \
     if ( is_matrix_mul == TRUE ) \
     { \
+        /* Bench limitation: can only support 1 matrix mul, but LPGEMM can support
+        * multiple scale post-ops. */ \
+        post_ops->matrix_mul = malloc( sizeof( aocl_post_op_matrix_mul ) ); \
+        if ( post_ops->matrix_mul == NULL ) \
+        { \
+            goto err_handler; \
+        } \
         if( is_matmul_stor_type == TRUE) \
         { \
             if( ( strcmp( matmul_stor_type, "BF16" ) == 0 ) ) \
@@ -1586,7 +1584,33 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         } \
         else \
         { \
-            if( global_dscale_out == 'y' ) \
+            /*  default is int32_t for integer APIs and float for others */ \
+            if( is_integerAPI_avx512(#BLAS_SFX)) \
+            { \
+                if( strcmp(#C_type, "int8_t") == 0 ) \
+                { \
+                    ( post_ops->matrix_mul )->stor_type = NULLTYPE; \
+                    ( post_ops->matrix_mul )->matrix = malloc( m * n * sizeof(int8_t) ); \
+                    if ( ( post_ops->matrix_mul )->matrix == NULL ) \
+                    { \
+                        goto err_handler; \
+                    } \
+                    GEN_FUNC_NAME(fill_array_,int8_t)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
+                } \
+                else \
+                { \
+                    ( post_ops->matrix_mul )->stor_type = NULLTYPE; \
+                    ( post_ops->matrix_mul )->matrix = malloc( m * n * sizeof(int32_t) ); \
+                    if ( ( post_ops->matrix_mul )->matrix == NULL ) \
+                    { \
+                        goto err_handler; \
+                    } \
+                    GEN_FUNC_NAME(fill_array_,int32_t)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
+                } \
+            } \
+            else \
+            { \
+                if( global_dscale_out == 'y' ) \
                 { \
                     ( post_ops->matrix_mul )->stor_type = NULLTYPE; \
                     ( post_ops->matrix_mul )->matrix = malloc( m * n * sizeof(C_DSCALE_type) ); \
@@ -1606,6 +1630,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
                     } \
                     GEN_FUNC_NAME(fill_array_,float)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
                 } \
+            } \
         } \
         if ( ( stor_order == 'C' ) || ( stor_order == 'c' ) ) \
         { \
@@ -1630,9 +1655,6 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             temp_dscale_ptr[i] = ( ( DSCALE_type )2 ); \
         } \
         ( post_ops->matrix_mul )->scale_factor_len = n_scale; \
-        /* Set buffer type same as c_store type for now.
-         * TODO: Update to cover more data types. */ \
-        ( post_ops->matrix_mul )->stor_type = NULLTYPE; \
     } \
  \
     post_ops->seq_length = cur_op_index; \

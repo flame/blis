@@ -34,6 +34,8 @@
 
 #include "bench_lpgemm_helpers.h"
 
+#define POST_OPS_STR_LEN 104
+
 PRINT_MATRIX(uint8_t)
 PRINT_MATRIX(int8_t)
 PRINT_MATRIX(float)
@@ -137,13 +139,14 @@ void print_result
        dim_t       lda,
        dim_t       ldb,
        dim_t       ldc,
-       double      gflops
+       double      gflops,
+       char*       post_ops_str
      )
 {
     //double gflops = get_gflops( m, n, k, runtime );
-    printf("%s transa:%c, transb:%c, m: %ld, n: %ld, k: %ld, lda: %ld, ldb: %ld, ldc: %ld," \
+    printf("%s transa:%c, transb:%c, m: %ld, n: %ld, k: %ld, lda: %ld, ldb: %ld, ldc: %ld, post_ops:%s," \
                     " Gops: %f, n_repeats: %d\n",
-            msg, transa, transb, m, n, k, lda, ldb, ldc, gflops, n_repeats);
+            msg, transa, transb, m, n, k, lda, ldb, ldc, post_ops_str, gflops, n_repeats);
 }
 
 #define GEN_MAT_MUL_BENCH_DRV_FUNC(A_type,B_type,C_type,ACCUM_type,BLAS_SFX) \
@@ -166,7 +169,8 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
        ACCUM_type  beta, \
        C_type* c, \
        dim_t   ldc, \
-       aocl_post_op*  post_op\
+       aocl_post_op*  post_op, \
+       char* post_ops_str \
      ) \
 { \
     double   dtime;                 \
@@ -192,7 +196,7 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
     } \
     double gflops = ( 2.0 * m * k * n ) / ( dtime_save * 1.0e9 ); \
  \
-    print_result( XSTR(BLAS_SFX), n_repeats, transa, transb, m, n, k, lda, ldb, ldc, gflops); \
+    print_result( XSTR(BLAS_SFX), n_repeats, transa, transb, m, n, k, lda, ldb, ldc, gflops, post_ops_str); \
 } \
 
 GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32)
@@ -916,7 +920,8 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
        dim_t   ldc, \
        C_type* c_ref, \
        dim_t   ldc_ref, \
-       aocl_post_op*  post_op \
+       aocl_post_op*  post_op, \
+       char* post_ops_str \
      ) \
 { \
     dim_t rs_a, cs_a; \
@@ -1125,13 +1130,13 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                 if ( fout ) \
                 { \
                     fprintf( fout, "%s Failure input m: %ld, n: %ld, k: %ld," \
-                                    " lda: %ld, ldb: %ld, ldc: %ld, computed:%f, ref:%f, diff:%f\n", \
+                                    " lda: %ld, ldb: %ld, ldc: %ld, computed:%f, ref:%f, diff:%f, post_ops:%s\n", \
                                     XSTR(BLAS_SFX), m, n, k, lda, ldb, ldc, comp_float, \
-                                    ref_float, comp_float - ref_float); \
+                                    ref_float, comp_float - ref_float, post_ops_str); \
                     fflush( fout ); \
                 } \
                     printf("failure, m_index: %ld, n_index: %ld, k: %ld, computed:%f, ref:%f," \
-                            "diff:%f\n", i, j, k, comp_float, ref_float, comp_float-ref_float); \
+                            "diff:%f, post_ops:%s\n", i, j, k, comp_float, ref_float, comp_float-ref_float, post_ops_str); \
                 fflush(stdout); \
                 goto cleanup_acc; \
             } \
@@ -1203,9 +1208,11 @@ void mat_mul_bench_main_ ## BLAS_SFX \
        dim_t stride_a, \
        dim_t stride_b, \
        dim_t stride_c, \
-       char*   post_ops_str \
+       char* post_ops_str \
      ) \
 { \
+    char post_ops_str_copy[POST_OPS_STR_LEN]; \
+    strncpy( post_ops_str_copy, post_ops_str, POST_OPS_STR_LEN-1 ); \
     int32_t n_repeats = bli_max( 30, bli_min(( 3e10 / ( ( int64_t )m * n * k )), 1000 )); \
     if ( global_n_repeat > 0 ) \
     { \
@@ -1294,7 +1301,8 @@ void mat_mul_bench_main_ ## BLAS_SFX \
           b, stride_b, \
           beta, \
           c, stride_c, \
-          post_op \
+          post_op, \
+          post_ops_str_copy \
         ); \
     } \
     else if ( ( op_b == 'r' ) || ( op_b == 'R' ) ) \
@@ -1331,7 +1339,8 @@ void mat_mul_bench_main_ ## BLAS_SFX \
           b_reorder, stride_b, \
           beta, \
           c, stride_c, \
-          post_op \
+          post_op, \
+          post_ops_str_copy \
         ); \
  \
         /* Free the reorder buffer */ \
@@ -1351,7 +1360,8 @@ void mat_mul_bench_main_ ## BLAS_SFX \
           beta, \
           c, stride_c, \
           c_ref, stride_c, \
-          post_op \
+          post_op, \
+          post_ops_str_copy \
         ); \
     } \
  \
@@ -1428,7 +1438,6 @@ int main( int argc, char** argv )
 #define GEMM_TYPE_STR_LEN 24
     char gemm_type_str[GEMM_TYPE_STR_LEN];
 
-#define POST_OPS_STR_LEN 104
     char post_ops_str[POST_OPS_STR_LEN];
     char post_ops_str_dest[POST_OPS_STR_LEN]; //Strtok is used to parse, need to maintain a copy.
 
