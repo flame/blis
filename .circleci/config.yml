@@ -14,6 +14,9 @@ executors:
   macos: &macos-executor # macos executor running Xcode
     macos:
       xcode: 14.2.0
+  linuxvm: # executor type
+    machine:
+      image: ubuntu-2204:current
 
 workflows:
   build:
@@ -42,6 +45,7 @@ workflows:
 
       # SDE testing for x86_64
       - build:
+          os: linuxvm
           OOT: 0
           TEST: FAST
           SDE: 1
