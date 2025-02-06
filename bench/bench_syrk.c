@@ -413,7 +413,7 @@ int main( int argc, char** argv )
                 ( unsigned long )n,
                 ( unsigned long )k, gflops );
 
-        fprintf(fout, "%s %c %c %c " INT_FS INT_FS " %lf %lf " UINT_FS " %lf %lf " UINT_FS " %6.3f\n", \
+        fprintf(fout, "%s %c %c %c" INT_FS INT_FS " %lf %lf" UINT_FS " %lf %lf" UINT_FS " %6.3f\n", \
                 tmp, dt_ch, uplo_c, transA_c, n, k,
                 alpha_r, alpha_i,
                 lda, beta_r, beta_i,

@@ -384,7 +384,7 @@ int main( int argc, char** argv )
                 ( unsigned long )p_inc,
                 ( unsigned long )m, gflops );
 
-        fprintf (fout, "%s %c %c %c %c " INT_FS INT_FS INT_FS "%6.3f\n",
+        fprintf (fout, "%s %c %c %c %c" INT_FS INT_FS INT_FS " %6.3f\n",
                         tmp, dt_ch, uploa_c, transA, diaga_c, m, lda, incx, gflops);
 
         fflush(fout);

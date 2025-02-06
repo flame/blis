@@ -465,7 +465,7 @@ int main( int argc, char** argv )
                 ( unsigned long )n,
                 ( unsigned long )k, gflops );
 
-        fprintf(fout, "%s %c %c" INT_FS INT_FS UINT_FS UINT_FS UINT_FS "%c %c %lf %lf %lf %lf %6.3f\n", \
+        fprintf(fout, "%s %c %c" INT_FS INT_FS UINT_FS UINT_FS UINT_FS " %c %c %lf %lf %lf %lf %6.3f\n", \
                 tmp, dt_ch, uplo_c, n, k, lda, ldb, ldc, 
                 transA_c,
                 transB_c,

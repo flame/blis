@@ -36,9 +36,9 @@
 // NOTE : When blis-int-size is not explicitly specified, the underlying
 //        hardware is detected at compile time and the width is set.
 #if BLIS_INT_TYPE_SIZE == 32
-  #define INT_FS "%d"
-  #define UINT_FS "%u"
+  #define INT_FS " %d"
+  #define UINT_FS " %u"
 #else
-  #define INT_FS "%ld"
-  #define UINT_FS "%lu"
+  #define INT_FS " %ld"
+  #define UINT_FS " %lu"
 #endif

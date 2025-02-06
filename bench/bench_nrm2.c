@@ -226,7 +226,7 @@ int main( int argc, char** argv )
                (unsigned long)n,
                 gflops);
 
-        fprintf (fout, "%s %c" INT_FS INT_FS "%6.3f\n",
+        fprintf (fout, "%s %c" INT_FS INT_FS " %6.3f\n",
                  tmp, dt_ch, n, incx, gflops);
 
         fflush(fout);

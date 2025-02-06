@@ -397,7 +397,7 @@ int main( int argc, char** argv )
                (unsigned long)n,
                 gflops);
 
-        fprintf (fout, "%s %c %c " INT_FS INT_FS " %lf %lf "  INT_FS INT_FS  " %lf %lf " INT_FS " %6.3f\n",
+        fprintf (fout, "%s %c %c" INT_FS INT_FS " %lf %lf"  INT_FS INT_FS  " %lf %lf " INT_FS " %6.3f\n",
                    tmp, dt_ch, transA, m, n,  alpha_r, alpha_i, lda,\
                     incx, beta_r, beta_i, incy, gflops);
 

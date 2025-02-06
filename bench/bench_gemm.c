@@ -483,7 +483,7 @@ int main( int argc, char** argv )
                (unsigned long)n,
                (unsigned long)k, gflops);
 
-        fprintf (fout, "%s %c %c %c" INT_FS INT_FS INT_FS "%lf %lf" INT_FS INT_FS "%lf %lf" INT_FS "%6.3f\n", \
+        fprintf (fout, "%s %c %c %c" INT_FS INT_FS INT_FS " %lf %lf" INT_FS INT_FS " %lf %lf" INT_FS " %6.3f\n", \
                  api_name, dt_ch, transA_c, transB_c, m, n, k, alpha_r, alpha_i, lda, ldb, beta_r, beta_i, ldc, gflops);
 
         fflush(fout);
