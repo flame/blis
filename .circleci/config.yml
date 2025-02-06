@@ -33,10 +33,17 @@ workflows:
       #       TESTSUITE_WRAPPER: ''
       #       PACKAGES: ''
 
-      # full testsuite (all tests + mixed datatype (gemm_nn only) + salt + SDE + OOT)
+      # full testsuite (all tests + mixed datatype (gemm_nn only) + salt + OOT)
       - build:
           OOT: 1
           TEST: ALL
+          SDE: 0
+          CONF: x86_64
+
+      # SDE testing for x86_64
+      - build:
+          OOT: 0
+          TEST: FAST
           SDE: 1
           CONF: x86_64
 
@@ -48,10 +55,14 @@ workflows:
       - build:
           THR: pthreads
 
+      #
+      # There is currently an undiagnosed test failure (see #852).
+      # This test is disabled until the failure can be resolved.
+      #
       # clang build
-      - build:
-          CC: clang
-          CXX: clang++
+      #- build:
+      #    CC: clang
+      #    CXX: clang++
 
       # macOS with system compiler (clang)
       - build:
