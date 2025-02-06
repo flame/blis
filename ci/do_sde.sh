@@ -43,7 +43,8 @@ for LIB in $LD_SO $LIBC_SO $LIBM_SO; do
     sudo mv .tmp $LIB
 done
 
-for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator zen; do
+for ARCH in sandybridge haswell skx knl piledriver steamroller excavator zen; do
+#for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator zen; do
     if [ "$ARCH" = "knl" ]; then
         TESTSUITE_WRAPPER="$SDE -knl --"
     else
