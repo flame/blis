@@ -49,6 +49,24 @@ void packb_nr64_bf16bf16f32of32_reference
   dim_t*          cs_p
 );
 
+void unpackb_nr64_bf16bf16f32of32_reference
+(
+  bfloat16*       b,
+  bfloat16*       unpack_b_buffer,
+  const dim_t	    NC,
+  const dim_t     KC,
+  dim_t           rs_b,
+  dim_t           cs_b
+);
+
+void unreorderb_nr64_bf16bf16f32of32_reference
+(
+    lpgemm_obj_t*  b_reorder,
+    lpgemm_obj_t*  b_unreorder,
+    rntm_t*        rntm,
+    lpgemm_cntx_t* lcntx
+);
+
 void reorderb_nr64_bf16bf16f32of32_reference
 (
     lpgemm_obj_t*  b,
