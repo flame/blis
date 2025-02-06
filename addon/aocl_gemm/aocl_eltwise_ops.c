@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -182,17 +182,21 @@ AOCL_UTIL_ELTWISE_OPS(bfloat16,bfloat16,bf16obf16)
 	);
 }
 
-AOCL_UTIL_ELTWISE_OPS(float,float,f32of32)
+BLIS_INLINE void aocl_eltwise_ops_f32of32_base
+     (
+       const char        order,
+       const char        transa,
+       const char        transb,
+       const dim_t       m,
+       const dim_t       n,
+       const float*   a,
+       const dim_t       lda,
+       float*            b,
+       const dim_t       ldb,
+       aocl_post_op*     post_op_unparsed,
+       AOCL_STORAGE_TYPE c_downscale
+     )
 {
-	AOCL_UTIL_ELTWISE_OPS_CHECK
-	(
-	  "f32of32",
-	  order, transa, transb,
-	  m, n,
-	  a, lda,
-	  b, ldb
-	);
-
 	trans_t blis_transa;
 	trans_t blis_transb;
 
@@ -260,7 +264,7 @@ AOCL_UTIL_ELTWISE_OPS(float,float,f32of32)
 	  a, rs_a, cs_a,
 	  b, rs_b, cs_b,
 	  &rntm_g, lcntx_g,
-	  post_op_list, F32
+	  post_op_list, c_downscale
 	);
 #else
 	lpgemm_eltwise_ops_f32of32_thread_decorator
@@ -269,7 +273,112 @@ AOCL_UTIL_ELTWISE_OPS(float,float,f32of32)
 	  a, rs_a, cs_a,
 	  b, rs_b, cs_b,
 	  &rntm_g, lcntx_g,
-	  post_op_list, F32
+	  post_op_list, c_downscale
 	);
 #endif
+}
+
+AOCL_UTIL_ELTWISE_OPS(float,float,f32of32)
+{
+	AOCL_UTIL_ELTWISE_OPS_CHECK
+	(
+	  "f32of32",
+	  order, transa, transb,
+	  m, n,
+	  a, lda,
+	  b, ldb
+	);
+
+	aocl_eltwise_ops_f32of32_base
+	(
+	  order, transa, transb,
+	  m, n,
+	  a, lda,
+	  b, ldb,
+	  post_op_unparsed, F32
+	);
+}
+
+AOCL_UTIL_ELTWISE_OPS(float,bfloat16,f32obf16)
+{
+	AOCL_UTIL_ELTWISE_OPS_CHECK
+	(
+	  "f32obf16",
+	  order, transa, transb,
+	  m, n,
+	  a, lda,
+	  b, ldb
+	);
+
+	aocl_eltwise_ops_f32of32_base
+	(
+	  order, transa, transb,
+	  m, n,
+	  a, lda,
+	  (float*)b, ldb,
+	  post_op_unparsed, BF16
+	);
+}
+
+AOCL_UTIL_ELTWISE_OPS(float,int32_t,f32os32)
+{
+	AOCL_UTIL_ELTWISE_OPS_CHECK
+	(
+	  "f32os32",
+	  order, transa, transb,
+	  m, n,
+	  a, lda,
+	  b, ldb
+	);
+
+	aocl_eltwise_ops_f32of32_base
+	(
+	  order, transa, transb,
+	  m, n,
+	  a, lda,
+	  (float*)b, ldb,
+	  post_op_unparsed, S32
+	);
+}
+
+AOCL_UTIL_ELTWISE_OPS(float,int8_t,f32os8)
+{
+	AOCL_UTIL_ELTWISE_OPS_CHECK
+	(
+	  "f32os8",
+	  order, transa, transb,
+	  m, n,
+	  a, lda,
+	  b, ldb
+	);
+
+	aocl_eltwise_ops_f32of32_base
+	(
+	  order, transa, transb,
+	  m, n,
+	  a, lda,
+	  (float*)b, ldb,
+	  post_op_unparsed, S8
+	);
+}
+
+AOCL_UTIL_ELTWISE_OPS(float,uint8_t,f32ou8)
+{
+	AOCL_UTIL_ELTWISE_OPS_CHECK
+	(
+	  "f32ou8",
+	  order, transa, transb,
+	  m, n,
+	  a, lda,
+	  b, ldb
+	);
+
+	aocl_eltwise_ops_f32of32_base
+	(
+	  order, transa, transb,
+	  m, n,
+	  a, lda,
+	  (float*)b, ldb,
+	  post_op_unparsed, U8
+	);
 }

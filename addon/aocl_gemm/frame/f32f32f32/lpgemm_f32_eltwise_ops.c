@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -84,10 +84,18 @@ LPGEMM_ELTWISE_OPS_IFACE(float,float,f32of32)
 	post_ops_attr.is_last_k = TRUE; // Should always be TRUE here.
 
 	// Advance the matrix to the right positions based on thread id.
-	// To note that float and bfloat16 are both handled using this same
-	// frame, so the strides needs to be updated on the actual b matrix
-	// datatype or the c_downscale value.
+	// To note that float, bfloat16, int32_t, int8_t and uint8_t are
+	// handled using this same frame, so the strides needs to be
+	// updated on the actual b matrix datatype or the c_downscale value.
 	dim_t dsize = sizeof( float );
+  if ( post_ops_attr.c_stor_type == BF16 )
+	{
+		dsize = sizeof( bfloat16 );
+	}
+  if ( post_ops_attr.c_stor_type == S8 || post_ops_attr.c_stor_type == U8 )
+	{
+		dsize = sizeof( int8_t );
+	}
 	int8_t* b_i = ( int8_t* )b;
 
 	( ( lpgemm_util_post_ops_kernel_f32 )( lcntx->eltwise_ops_kern_fun_ptr ) )
