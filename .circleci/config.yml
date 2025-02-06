@@ -68,9 +68,9 @@ workflows:
       #
       # clang build
       - build:
-          os: linuxnew
-          CC: clang
-          CXX: clang++
+          CC: clang-15
+          CXX: clang++-15
+          PACKAGES: clang-15
 
       # macOS with system compiler (clang)
       - build:
@@ -188,7 +188,7 @@ jobs:
             - run:
                 name: Installing Dependencies
                 command:
-                  sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get install -y clang make python3 << parameters.PACKAGES >>
+                  sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get install -y make python3 << parameters.PACKAGES >>
 
       - run:
           name: Configuring, Building, Testing
