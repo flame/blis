@@ -75,6 +75,11 @@ TRSMSMALL_KER_PROT( d, trsm_small_XAutB_XAlB_ZEN5 )
 TRSMSMALL_KER_PROT( d, trsm_small_AltXB_AuXB_ZEN5 )
 TRSMSMALL_KER_PROT( d, trsm_small_AutXB_AlXB_ZEN5 )
 
+TRSMSMALL_KER_PROT( z, trsm_small_XAltB_XAuB_ZEN5 )
+TRSMSMALL_KER_PROT( z, trsm_small_XAutB_XAlB_ZEN5 )
+TRSMSMALL_KER_PROT( z, trsm_small_AltXB_AuXB_ZEN5 )
+TRSMSMALL_KER_PROT( z, trsm_small_AutXB_AlXB_ZEN5 )
+
 #ifdef BLIS_ENABLE_OPENMP
 err_t bli_trsm_small_mt_ZEN5
       (

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -159,6 +159,52 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('l','r'),                                      // side  l:left, r:right
             ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
             ::testing::Values('n', 'c', 't'),                                // transa
+            ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
+            ::testing::Values(17, 500),                                      // m
+            ::testing::Values(48, 500),                                      // n
+            ::testing::Values(dcomplex{2.0,-3.4}),                           // alpha
+            ::testing::Values(gtint_t(54)),                                  // increment to the leading dim of a
+            ::testing::Values(gtint_t(37))                                   // increment to the leading dim of b
+        ),
+        ::trsmGenericPrint<dcomplex>()
+    );
+
+
+/**
+ * @brief Test ZTRSM small avx512 path all fringe cases
+ *        Kernel size for avx512 small path is 4x4 and 12x4, testing in range of
+ *        1 to 24 ensures all finge cases are being tested (1 to 12 for trsm and 12 to 24 for gemm subproblem).
+ */
+INSTANTIATE_TEST_SUITE_P(
+        Small_AVX512_fringe,
+        ztrsmGeneric,
+        ::testing::Combine(
+            ::testing::Values('c'),                                          // storage format
+            ::testing::Values('l','r'),                                      // side  l:left, r:right
+            ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
+            ::testing::Values('n', 't'),                                     // transa
+            ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
+            ::testing::Range(gtint_t(1), gtint_t(25), 2),                    // m
+            ::testing::Range(gtint_t(1), gtint_t(25), 2),                    // n
+            ::testing::Values(dcomplex{2.0,-3.4}),                           // alpha
+            ::testing::Values(gtint_t(56)),                                  // increment to the leading dim of a
+            ::testing::Values(gtint_t(33))                                   // increment to the leading dim of b
+        ),
+        ::trsmGenericPrint<dcomplex>()
+    );
+
+/**
+ * @brief Test ZTRSM small avx512 path, Same test also covers small_zen5 kernels when run with
+ *        BLIS_ARCH_TYPE=zen5
+ */
+INSTANTIATE_TEST_SUITE_P(
+        Small_AVX512,
+        ztrsmGeneric,
+        ::testing::Combine(
+            ::testing::Values('c'),                                          // storage format
+            ::testing::Values('l','r'),                                      // side  l:left, r:right
+            ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
+            ::testing::Values('n', 't'),                                     // transa
             ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
             ::testing::Values(17, 500),                                      // m
             ::testing::Values(48, 500),                                      // n

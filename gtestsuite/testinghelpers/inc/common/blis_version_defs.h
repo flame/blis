@@ -65,6 +65,7 @@
     #define K_bli_dgemv_t_zen_int_mx3_avx512 1
     #define K_bli_dgemv_t_zen_int_mx2_avx512 1
     #define K_bli_dgemv_t_zen_int_mx1_avx512 1
+    #define K_bli_ztrsm_small_ZEN5 1
 
     #define AOCL_50
 

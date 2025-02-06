@@ -1666,51 +1666,103 @@ void ztrsm_blis_impl
 
         // trsm small kernel function pointer definition
         ztrsm_small_ker_ft ker_ft = NULL;
-        arch_t id = bli_arch_query_id();
-        bool is_parallel = bli_thread_get_is_parallel();
-        dim_t dim_a = n0;
+        arch_t id                 = bli_arch_query_id();
+        bool is_parallel          = bli_thread_get_is_parallel();
+        dim_t dim_a               = n0;
+        (void) dim_a; //avoid unused warning for zen2/3
         if (blis_side == BLIS_LEFT)
             dim_a = m0;
 
         // size of output matrix(B)
         dim_t size_b = m0*n0;
-#if defined(BLIS_ENABLE_OPENMP) && defined(BLIS_KERNELS_ZEN4)
-        if (( is_parallel ) &&
-            ( (dim_a > 10) && (dim_a < 2500) && (size_b > 500) && (size_b < 5e5) ) &&
-            ( id == BLIS_ARCH_ZEN4 ))
+#if defined(BLIS_ENABLE_OPENMP)
+        switch (id)
         {
-            if (!bli_obj_has_conj(&ao))
+        case BLIS_ARCH_ZEN5:
+#if defined(BLIS_KERNELS_ZEN5)
+            if (( is_parallel ) &&
+                ( (dim_a > 10) && (dim_a < 2500) && (size_b > 500) && (size_b < 5e5) ))
             {
-                ker_ft = bli_trsm_small_mt_AVX512;
+                if (!bli_obj_has_conj(&ao)) // if transa == 'C', go to native code path
+                {
+                    ker_ft = bli_trsm_small_mt_ZEN5; // 12x4 non fused kernel for ZEN5
+                }
             }
-            else
+            break;
+#endif //BLIS_KERNELS_ZEN5
+        case BLIS_ARCH_ZEN4:
+#if defined(BLIS_KERNELS_ZEN4)
+            if (( is_parallel ) &&
+                ( (dim_a > 10) && (dim_a < 2500) && (size_b > 500) && (size_b < 5e5) ))
             {
-                ker_ft = bli_trsm_small_mt;
+                if (!bli_obj_has_conj(&ao))
+                {
+                    ker_ft = bli_trsm_small_mt_AVX512; // 4x4 fused kernel for ZEN4
+                }
+                else
+                {
+                    ker_ft = bli_trsm_small_mt;
+                }
             }
+            break;
+#endif //BLIS_KERNELS_ZEN4
+        default:
+            break;
         }
 #endif
         if( ( ker_ft == NULL ) &&
-            ( ( ( !is_parallel ) && 
-                ( (( m0 <= 500 ) && ( n0 <= 500 )) || ( (dim_a < 75) && (size_b < 3.2e5)))) ||
-              ( ( is_parallel ) && 
-                ( (m0 + n0 < 180) || (size_b < 5000) ) )
+                ( ( !is_parallel ) ||
+                  ( ( is_parallel ) &&
+                    ( (m0 + n0 < 180) || (size_b < 5000) ) )
             )
           )
         {
             switch (id)
             {
                 case BLIS_ARCH_ZEN5:
+#if defined(BLIS_KERNELS_ZEN5)
+                    if (bli_obj_has_conj(&ao))
+                        break; // conjugate not supported in AVX512 small code path
+
+                    // Decision logic tuned using Powell optimizer from scikit-learn
+                    if ( blis_side == BLIS_LEFT )
+                    {
+                        if ( m0 <= 88 )
+                        {
+                            ker_ft = bli_trsm_small_AVX512;
+                        }
+                        else if ( (log10(n0) + (0.15*log10(m0)) ) < 2.924 )
+                        {
+                            ker_ft = bli_trsm_small_ZEN5;
+                        }
+                    }
+                    else //if ( blis_side == BLIS_RIGHT )
+                    {
+                        if ( (log10(m0) + (2.8*log10(n0)) ) < 6 )
+                        {
+                            ker_ft = bli_trsm_small_AVX512;
+                        }
+                        else if ( (log10(m0) + (1.058*log10(n0)) ) < 5.373 )
+                        {
+                            ker_ft = bli_trsm_small_ZEN5;
+                        }
+                    }
+                    break;
+#endif //BLIS_KERNELS_ZEN5
                 case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
-                    // ZTRSM AVX512 code path do not support
-                    // conjugate
-                    if (!bli_obj_has_conj(&ao))
+                    if ((( m0 <= 500 ) && ( n0 <= 500 )) || ( (dim_a < 75) && (size_b < 3.2e5)))
                     {
-                        ker_ft = bli_trsm_small_AVX512;
-                    }
-                    else
-                    {
-                        ker_ft = bli_trsm_small;
+                        // ZTRSM AVX512 code path do not support
+                        // conjugate
+                        if (!bli_obj_has_conj(&ao))
+                        {
+                            ker_ft = bli_trsm_small_AVX512;
+                        }
+                        else
+                        {
+                            ker_ft = bli_trsm_small;
+                        }
                     }
                     break;
 #endif // BLIS_KERNELS_ZEN4
