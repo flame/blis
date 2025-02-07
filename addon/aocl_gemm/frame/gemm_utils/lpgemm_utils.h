@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -221,6 +221,26 @@ BLIS_INLINE void adjust_B_panel_reordered_jc( dim_t* jc, dim_t panel_start )
 	// following panel belonging to the B chunk is accessed. This
 	// ensures that jr loop does not cross panel boundaries.
 	( *jc ) = panel_start;
+}
+
+static inline bool is_single_thread( rntm_t* rntm_g )
+{
+	bool is_st = FALSE;
+
+	dim_t n_threads = bli_rntm_num_threads( rntm_g );
+	dim_t jc_ways = bli_rntm_jc_ways( rntm_g );
+	dim_t ic_ways = bli_rntm_ic_ways( rntm_g );
+
+	ic_ways = ( ic_ways > 0 ) ? ic_ways : 1;
+	jc_ways = ( jc_ways > 0 ) ? jc_ways : 1;
+
+	if ( ( n_threads == 1 ) ||
+		 ( ( ic_ways * jc_ways ) == 1 ) )
+	{
+		is_st = TRUE;
+	}
+
+	return is_st;
 }
 
 #endif //LPGEMM_UTILS_H

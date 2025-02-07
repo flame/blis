@@ -1,7 +1,9 @@
 r n n n r 121 1 1601 1601 1 1 f32f32f32of32:bias=na,matrix_mul=na
-r n n n r 13 1 16 16 1 1 f32f32f32of32:bias=na,matrix_mul=na
-r n n n r 36 64 16 16 64 64 f32f32f32of32:none
-r n n n r 1 48 16 16 48 48 f32f32f32of32:bias=na,matrix_mul=na
+r n n n r 121 1 1601 1601 1 1 bf16bf16f32obf16:bias=bf16,matrix_mul=bf16
+r n n n r 12 108 16 16 108 108 f32f32f32of32:bias=na,matrix_mul=na
+r n n n r 12 108 16 16 108 108 bf16bf16f32of32:bias=na,matrix_mul=na
+r n n n r 12 108 16 16 108 108 bf16bf16f32obf16:bias=bf16,matrix_mul=bf16
+r n n n r 36 54 16 16 64 64 f32f32f32of32:none
 r t n n r 1 128 64 1 128 128 *:none
 c n t n n 32 128 2 32 128 32 bf16bf16f32of32:bias=na,swish
 r n n n r 6 1 4 4 16 16 bf16s4f32of32:pre_op_scale=scalar,pre_op_scale_type=bf16,group_size=2

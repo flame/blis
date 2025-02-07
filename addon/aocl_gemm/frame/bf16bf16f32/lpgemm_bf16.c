@@ -83,7 +83,7 @@ LPGEMV(bfloat16, bfloat16, float, bf16bf16f32of32)
 
 
 	float *c_use = NULL;
-	bfloat16* pack_a_buffer_bf16;
+	bfloat16* pack_a_buffer_bf16 = NULL;
 
 	lpgemm_post_op_attr post_ops_attr;
 	post_ops_attr.c_stor_type = c_downscale;
@@ -96,7 +96,7 @@ LPGEMV(bfloat16, bfloat16, float, bf16bf16f32of32)
 	mem_t mem_a = BLIS_MEM_INITIALIZER;
 	mem_t mem_b = BLIS_MEM_INITIALIZER;
 
-	bfloat16* pack_b_buffer_bf16;
+	bfloat16* pack_b_buffer_bf16 = NULL;
 
 	// Generate thrinfo objects for jc and ic loops from lpgemm_thrinfo_t.
 	thrinfo_t thread_jc;
@@ -379,8 +379,8 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 	dim_t rs_c_downscale = rs_c;
 
 	// Pack buffer for B.
-	bfloat16* pack_b_buffer_bf16;
-	bfloat16* pack_a_buffer_bf16;
+	bfloat16* pack_b_buffer_bf16 = NULL;
+	bfloat16* pack_a_buffer_bf16 = NULL;
 	mem_t mem_b = BLIS_MEM_INITIALIZER;
 	mem_t mem_a = BLIS_MEM_INITIALIZER;
 	siz_t mem_b_size_req = 0;

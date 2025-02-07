@@ -67,26 +67,6 @@ static inline bool is_tiny_input_f32
 	return is_tiny;
 }
 
-static inline bool is_single_thread( rntm_t* rntm_g )
-{
-	bool is_st = FALSE;
-
-	dim_t n_threads = bli_rntm_num_threads( rntm_g );
-	dim_t jc_ways = bli_rntm_jc_ways( rntm_g );
-	dim_t ic_ways = bli_rntm_ic_ways( rntm_g );
-
-	ic_ways = ( ic_ways > 0 ) ? ic_ways : 1;
-	jc_ways = ( jc_ways > 0 ) ? jc_ways : 1;
-
-	if ( ( n_threads == 1 ) ||
-		 ( ( ic_ways * jc_ways ) == 1 ) )
-	{
-		is_st = TRUE;
-	}
-
-	return is_st;
-}
-
 AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 {
 	LPGEMM_START_LOGGER();
@@ -233,7 +213,8 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( F32F32F32OF32 );
 
 	if ( ( is_tiny_input_f32( m, n, k, lcntx_g ) == TRUE ) &&
-		 ( is_single_thread( &rntm_g ) == TRUE) )
+		 ( is_single_thread( &rntm_g ) == TRUE) &&
+	  	 ( is_row_major == TRUE ) )
 	{
 		lpgemm_rowvar_tiny_f32f32f32of32
 		(

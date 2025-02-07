@@ -73,9 +73,6 @@ LPGEMV_TINY(float, float, float, f32f32f32of32)
     inc_t rs_b_use = rs_b;
     inc_t cs_b_use = cs_b;
 
-    // Strides are updated based on matrix packing/reordering.
-    float *c_use = ( float* )c;
-
     lpgemm_post_op_attr post_ops_attr;
     post_ops_attr.c_stor_type = c_downscale;
     if (c_downscale < F32) post_ops_attr.buf_downscale = c;
@@ -131,7 +128,7 @@ LPGEMV_TINY(float, float, float, f32f32f32of32)
           m, k,
           a_use, rs_a_use, cs_a_use, mtag_a,
           b_use, rs_b_use, cs_b_use, mtag_b,
-          c_use, rs_c, cs_c,
+          c, rs_c, cs_c,
           alpha, beta,
           MR, k,
           post_op_list,

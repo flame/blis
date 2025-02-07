@@ -64,6 +64,7 @@ void lpgemm_rowvar_tiny_ ## LP_SFX \
      ) \
 
 LPGEMM_TINY(float,float,float,f32f32f32of32);
+LPGEMM_TINY(bfloat16,bfloat16,float,bf16bf16f32of32);
 
 #define LPGEMM_5LOOP(A_type,B_type,C_type,LP_SFX) \
 void lpgemm_rowvar_ ## LP_SFX \
@@ -152,6 +153,7 @@ void lpgemv_rowvar_tiny_ ## LP_SFX \
     ) \
 
 LPGEMV_TINY(float, float, float, f32f32f32of32);
+LPGEMV_TINY(bfloat16,bfloat16,float,bf16bf16f32of32);
 
 #define LPGEMV(A_type, B_type, C_type, LP_SFX) \
 void lpgemv_rowvar_ ## LP_SFX \

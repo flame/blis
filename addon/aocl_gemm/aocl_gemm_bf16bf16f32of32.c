@@ -43,6 +43,31 @@
 #include "lpgemm_utils.h"
 #include "lpgemm_logger.h"
 
+static inline bool is_tiny_input_bf16of32
+     (
+       dim_t m,
+       dim_t n,
+       dim_t k,
+       lpgemm_cntx_t* lcntx
+     )
+{
+	bool is_tiny = FALSE;
+
+    const dim_t NC = lcntx->blksz.NC;
+    const dim_t MC = lcntx->blksz.MC;
+    const dim_t KC = lcntx->blksz.KC;
+
+	// Need to explicitly check for MC, NC boundaries for safety.
+	if ( ( k < 256 ) && ( m <= MC ) && ( n < NC ) && ( k < KC ) &&
+		 ( ( ( m <= 36 ) && ( n <= 64 ) ) ||
+		   ( ( m <= 12 ) && ( n <= 128 ) ) ) )
+	{
+		is_tiny = TRUE;
+	}
+
+	return is_tiny;
+}
+
 AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 {
 	LPGEMM_START_LOGGER();
@@ -199,6 +224,23 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	bli_pba_rntm_set_pba( &rntm_g );
 
 	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( BF16BF16F32OF32 );
+
+	if ( ( is_tiny_input_bf16of32( m, n, k, lcntx_g ) == TRUE ) &&
+		 ( is_single_thread( &rntm_g ) == TRUE) &&
+	  	 ( is_row_major == TRUE ) )
+	{
+		lpgemm_rowvar_tiny_bf16bf16f32of32
+		(
+		  m, n, k,
+		  a, rs_a, cs_a, mtag_a,
+		  b, rs_b, cs_b, mtag_b,
+		  c, rs_c, cs_c,
+		  alpha, beta,
+		  lcntx_g,
+		  post_op_list, F32
+		);
+		return;
+	}
 
 #ifdef BLIS_ENABLE_OPENMP
 	// Swapping inputs to induce row major computation for column major inputs.
