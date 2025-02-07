@@ -3,7 +3,7 @@
 set -e
 set -x
 
-SDE_VERSION=sde-external-9.48.0-2024-11-25-lin
+SDE_VERSION=sde-external-8.69.1-2021-07-18-lin
 SDE_TARBALL=$SDE_VERSION.tar.bz2
 SDE=$SDE_VERSION/sde64
 
