@@ -46,6 +46,12 @@ done
 for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator zen; do
     if [ "$ARCH" = "knl" ]; then
         TESTSUITE_WRAPPER="$SDE -knl --"
+    elif [ "$ARCH" = "sandybridge" ]; then
+        # The sandybridge.def file causes a segfault in SDE on some systems.
+        # Instead, use the CPUID values for haswell, but force BLIS to use the
+        # sandybridge configuration.
+        TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/haswell.def --"
+        export BLIS_ARCH_TYPE=4
     else
         TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/$ARCH.def --"
     fi
