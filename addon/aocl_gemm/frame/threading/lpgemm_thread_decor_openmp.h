@@ -66,12 +66,10 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
        AOCL_STORAGE_TYPE     c_downscale \
      ); \
 
-GEN_LPGEMM_OPENMP_DECORATOR_FN(uint8_t,int8_t,int16_t,u8s8s16o16)
 GEN_LPGEMM_OPENMP_DECORATOR_FN(uint8_t,int8_t,int32_t,u8s8s32o32)
 GEN_LPGEMM_OPENMP_DECORATOR_FN(bfloat16,bfloat16,float,bf16bf16f32of32)
 GEN_LPGEMM_OPENMP_DECORATOR_FN(float,float,float,f32f32f32of32)
 GEN_LPGEMM_OPENMP_DECORATOR_FN(int8_t,int8_t,int32_t,s8s8s32o32)
-GEN_LPGEMM_OPENMP_DECORATOR_FN(int8_t,int8_t,int16_t,s8s8s16o16)
 
 
 #define GEN_BATCH_LPGEMM_OPENMP_DECORATOR_FN(A_type,B_type,C_type,LPGEMM_SFX) \
@@ -211,12 +209,10 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
        AOCL_STORAGE_TYPE     c_downscale \
      ); \
 
-GEN_LPGEMM_DECORATOR_FN(uint8_t,int8_t,int16_t,u8s8s16o16)
 GEN_LPGEMM_DECORATOR_FN(uint8_t,int8_t,int32_t,u8s8s32o32)
 GEN_LPGEMM_DECORATOR_FN(bfloat16,bfloat16,float,bf16bf16f32of32)
 GEN_LPGEMM_DECORATOR_FN(float,float,float,f32f32f32of32)
 GEN_LPGEMM_DECORATOR_FN(int8_t,int8_t,int32_t,s8s8s32o32)
-GEN_LPGEMM_DECORATOR_FN(int8_t,int8_t,int16_t,s8s8s16o16)
 
 
 #define GEN_BATCH_LPGEMM_DECORATOR_FN(A_type,B_type,C_type,LPGEMM_SFX) \

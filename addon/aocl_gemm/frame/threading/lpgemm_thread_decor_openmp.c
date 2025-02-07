@@ -293,105 +293,6 @@ BLIS_INLINE void lpgemm_adjust_ic_jc_ways
 	}
 }
 
-BLIS_INLINE void lpgemm_s16o16_get_threading
-     (
-       dim_t*  n_threads,
-       dim_t*  ic_ways,
-       dim_t*  jc_ways,
-       dim_t   m,
-       dim_t   n,
-       dim_t   k,
-       rntm_t* rntm_g,
-       AOCL_OPERATION_TYPE op_type
-     )
-{
-	*n_threads = bli_rntm_num_threads( rntm_g );
-	*jc_ways = bli_rntm_jc_ways( rntm_g );
-	*ic_ways = bli_rntm_ic_ways( rntm_g );
-
-	if ( ( ( *ic_ways ) > 0 ) || ( ( *jc_ways ) > 0 ) )
-	{
-		// If BLIS_IC_NT or JC_NT are set.
-		// Default cases.
- 		*ic_ways = ( ( *ic_ways ) > 0 ) ? ( *ic_ways ) : 1;
-		*jc_ways = ( ( *jc_ways ) > 0 ) ? ( *jc_ways ) : 1;
-
-		*n_threads = ( *jc_ways ) * ( *ic_ways );
-	}
-	else if ( ( *n_threads ) > 1 )
-	{
-
-		dim_t NR = lpgemm_get_block_size_NR_global_cntx( op_type );
-		dim_t MR = lpgemm_get_block_size_MR_global_cntx( op_type );
-
-		if ( n <= NR )
-		{
-			( *ic_ways ) = ( *n_threads );
-			( *jc_ways ) = 1;
-			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
-		}
-		else if ( m <= MR )
-		{
-			( *jc_ways ) = ( *n_threads );
-			( *ic_ways ) = 1;
-			( *n_threads ) = ( *ic_ways ) * ( *jc_ways );
-		}
-		else
-		{
-			// If BLIS_NUM_THREADS are set, generate jc,ic from the same.
-			bli_thread_partition_2x2( ( *n_threads ), m, n, ic_ways, jc_ways );
-		}
-	}
-	else
-	{
-		// Setting all the values to 1 in case n_threads <= 1. This ensures
-		// the threading parameters are valid.
-		*n_threads = 1;
-		*jc_ways = 1;
-		*ic_ways = 1;
-	}
-}
-
-BLIS_INLINE void lpgemm_u8s8s16o16_get_threading
-     (
-       dim_t*  n_threads,
-       dim_t*  ic_ways,
-       dim_t*  jc_ways,
-       dim_t   m,
-       dim_t   n,
-       dim_t   k,
-       rntm_t* rntm_g
-     )
-{
-	lpgemm_s16o16_get_threading
-	(
-	  n_threads,
-	  ic_ways, jc_ways,
-	  m, n, k, rntm_g,
-	  U8S8S16OS16
-	);
-}
-
-BLIS_INLINE void lpgemm_s8s8s16o16_get_threading
-     (
-       dim_t*  n_threads,
-       dim_t*  ic_ways,
-       dim_t*  jc_ways,
-       dim_t   m,
-       dim_t   n,
-       dim_t   k,
-       rntm_t* rntm_g
-     )
-{
-	lpgemm_s16o16_get_threading
-	(
-	  n_threads,
-	  ic_ways, jc_ways,
-	  m, n, k, rntm_g,
-	  S8S8S16OS16
-	);
-}
-
 BLIS_INLINE void lpgemm_s32o32_get_threading
      (
        dim_t*  n_threads,
@@ -1162,12 +1063,10 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
 	} \
 } \
 
-GEN_LPGEMM_OPENMP_DECORATOR(uint8_t,int8_t,int16_t,u8s8s16o16)
 GEN_LPGEMM_OPENMP_DECORATOR(uint8_t,int8_t,int32_t,u8s8s32o32)
 GEN_LPGEMM_OPENMP_DECORATOR(bfloat16,bfloat16,float,bf16bf16f32of32)
 GEN_LPGEMM_OPENMP_DECORATOR(float,float,float,f32f32f32of32)
 GEN_LPGEMM_OPENMP_DECORATOR(int8_t,int8_t,int32_t,s8s8s32o32)
-GEN_LPGEMM_OPENMP_DECORATOR(int8_t,int8_t,int16_t,s8s8s16o16)
 
 
 #define GEN_BATCH_LPGEMM_OPENMP_DECORATOR(A_type,B_type,C_type,LPGEMM_SFX) \
@@ -1807,12 +1706,10 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
 	); \
 } \
 
-GEN_LPGEMM_DECORATOR(uint8_t,int8_t,int16_t,u8s8s16o16)
 GEN_LPGEMM_DECORATOR(uint8_t,int8_t,int32_t,u8s8s32o32)
 GEN_LPGEMM_DECORATOR(bfloat16,bfloat16,float,bf16bf16f32of32)
 GEN_LPGEMM_DECORATOR(float,float,float,f32f32f32of32)
 GEN_LPGEMM_DECORATOR(int8_t,int8_t,int32_t,s8s8s32o32)
-GEN_LPGEMM_DECORATOR(int8_t,int8_t,int16_t,s8s8s16o16)
 
 #define GEN_LPGEMM_DECORATOR1(A_type,B_type,C_type,LPGEMM_SFX) \
 void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \

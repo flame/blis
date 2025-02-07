@@ -45,13 +45,10 @@
 #include "lpgemm_eltwise_ops_kernels.h"
 #include "lpgemm_utils_kernels.h"
 #include "lpgemm_pack_bf16.h"
-#include "lpgemm_packb_s16.h"
-#include "lpgemm_packa_s16.h"
 #include "lpgemm_packa.h"
 #include "lpgemm_packb.h"
 #include "lpgemm_packa_s8.h"
 #include "lpgemm_packb_s8.h"
-#include "lpgemm_packb_s8s16.h"
 #include "lpgemm_pack_f32.h"
 #include "lpgemm_jit_typedefs.h"
 #ifdef LPGEMM_BF16_JIT
