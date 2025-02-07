@@ -194,16 +194,15 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		return; \
 	} \
 \
-	      ctype ab[ BLIS_STACK_BUF_MAX_SIZE \
-	                / sizeof( ctype ) ] \
-	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const inc_t rs_ab  = nr; \
-	const inc_t cs_ab  = 1; \
+	      char   ab_[ BLIS_STACK_BUF_MAX_SIZE ] __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))) = { 0 }; \
+	      ctype* ab    = (ctype*)ab_; \
+	const inc_t  rs_ab = nr; \
+	const inc_t  cs_ab = 1; \
 \
-	const inc_t rs_a   = PASTECH(BLIS_BBM_,ch); \
-	const inc_t cs_a   = PASTECH(BLIS_PACKMR_,ch); \
-	const inc_t rs_b   = PASTECH(BLIS_PACKNR_,ch); \
-	const inc_t cs_b   = PASTECH(BLIS_BBN_,ch); \
+	const inc_t  rs_a  = PASTECH(BLIS_BBM_,ch); \
+	const inc_t  cs_a  = PASTECH(BLIS_PACKMR_,ch); \
+	const inc_t  rs_b  = PASTECH(BLIS_PACKNR_,ch); \
+	const inc_t  cs_b  = PASTECH(BLIS_BBN_,ch); \
 \
 \
 	/* Initialize the accumulator elements in ab to zero. */ \
