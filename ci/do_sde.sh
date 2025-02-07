@@ -44,6 +44,8 @@ for LIB in $LD_SO $LIBC_SO $LIBM_SO; do
 done
 
 for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator zen; do
+    export BLIS_ARCH_TYPE=-1
+
     if [ "$ARCH" = "knl" ]; then
         TESTSUITE_WRAPPER="$SDE -knl --"
     elif [ "$ARCH" = "sandybridge" ]; then
