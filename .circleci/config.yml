@@ -5,7 +5,6 @@ branches:
     - master
     - dev
     - amd
-    - circleci
 
 executors:
   linux: # Docker using the Base Convenience Image
