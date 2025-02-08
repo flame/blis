@@ -25,18 +25,17 @@ workflows:
     jobs:
       # Default:
       # - build:
-      #     parameters:
-      #       os: linux
-      #       CC: gcc
-      #       OOT: 0
-      #       TEST: FAST
-      #       SDE: 0
-      #       THR: none
-      #       CONF: auto
-      #       BLD: ''
-      #       LDFLAGS: ''
-      #       TESTSUITE_WRAPPER: ''
-      #       PACKAGES: ''
+      #     os: linux
+      #     CC: gcc
+      #     OOT: 0
+      #     TEST: FAST
+      #     SDE: 0
+      #     THR: none
+      #     CONF: auto
+      #     BLD: ''
+      #     LDFLAGS: ''
+      #     TESTSUITE_WRAPPER: ''
+      #     PACKAGES: ''
 
       # full testsuite (all tests + mixed datatype (gemm_nn only) + salt + OOT)
       - build:
@@ -47,6 +46,7 @@ workflows:
 
       # SDE testing for x86_64
       - build:
+          # linuxvm must be used because it provides 8G RAM and SDE fails with 4G RAM
           os: linuxvm
           OOT: 0
           TEST: FAST
