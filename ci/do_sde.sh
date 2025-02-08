@@ -31,23 +31,32 @@ tar xvf $SDE_TARBALL
 
 make -j2 testsuite-bin blastest-bin
 
-TMP=`ldd ./test_libblis.x | grep ld | sed 's/^.*=> //'`
-LD_SO=${TMP%% *}
-TMP=`ldd ./test_libblis.x | grep libc | sed 's/^.*=> //'`
-LIBC_SO=${TMP%% *}
-TMP=`ldd ./test_libblis.x | grep libm | sed 's/^.*=> //'`
-LIBM_SO=${TMP%% *}
-for LIB in $LD_SO $LIBC_SO $LIBM_SO; do
-    $DIST_PATH/travis/patch-ld-so.py $LIB .tmp
-    chmod a+x .tmp
-    sudo mv .tmp $LIB
-done
-
 for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator zen; do
+    export BLIS_ARCH_TYPE=-1
+
     if [ "$ARCH" = "knl" ]; then
         TESTSUITE_WRAPPER="$SDE -knl --"
+    elif [ "$ARCH" = "sandybridge" ]; then
+        # The sandybridge.def file causes a segfault in SDE on some systems.
+        # Instead, use the CPUID values for haswell, but force BLIS to use the
+        # sandybridge configuration.
+        TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/haswell.def --"
+        export BLIS_ARCH_TYPE=4
+    elif [ "$ARCH" = "piledriver" ]; then
+        # We used to "patch" ld.so and libm to remove CPUID checks so that glibc
+        # wouldn't try to use instructions not supported by SDE (FMA4). That no
+        # longer works, so test Piledriver/Steamroller/Excavator as haswell
+        # but with the configuration forced via environment variable.
+        TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/haswell.def --"
+        export BLIS_ARCH_TYPE=11
+    elif [ "$ARCH" = "steamroller" ]; then
+        TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/haswell.def --"
+        export BLIS_ARCH_TYPE=10
+    elif [ "$ARCH" = "excavator" ]; then
+        TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/haswell.def --"
+        export BLIS_ARCH_TYPE=9
     else
-        TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/travis/cpuid/$ARCH.def --"
+        TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/$ARCH.def --"
     fi
 
     make TESTSUITE_WRAPPER="$TESTSUITE_WRAPPER" check
