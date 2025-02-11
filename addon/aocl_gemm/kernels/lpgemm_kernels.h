@@ -41,11 +41,10 @@
 // Disable BF16 kernel in cases where compilers support other avx 512
 // features except BF16 ISA.
 #if ( defined( BLIS_GCC ) && ( ( __GNUC__ < 11 ) || \
-	  ( ( __GNUC__ == 11 ) && ( __GNUC_MINOR__ < 2 ) ) ) )
-//Commenting the JIT definition, to enable the BF16 -> F32 path
-//#define LPGEMM_BF16_JIT
-//#define BPREFETCH_JIT
-//#define DUMP_JIT_CODE
+	  ( ( __GNUC__ == 11 ) && ( __GNUC_MINOR__ < 2 ) ) ) && defined(BLIS_KERNELS_ZEN4) )
+#define LPGEMM_BF16_JIT
+#define BPREFETCH_JIT
+#define DUMP_JIT_CODE
 #endif
 
 typedef void (*lpgemm_m_fringe_f32_ker_ft)
