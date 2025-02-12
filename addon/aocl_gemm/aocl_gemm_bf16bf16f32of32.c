@@ -234,7 +234,9 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 
 	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( BF16BF16F32OF32 );
 
-	if ( ( arch_id == BLIS_ARCH_ZEN4 ) && ( is_tiny_input_bf16of32( m, n, k, lcntx_g ) == TRUE ) &&
+#if (defined(BLIS_KERNELS_ZEN4) && (!defined(LPGEMM_BF16_JIT)))
+	if ( ( ( arch_id == BLIS_ARCH_ZEN4 ) || ( arch_id == BLIS_ARCH_ZEN5 ) ) &&
+		 ( is_tiny_input_bf16of32( m, n, k, lcntx_g ) == TRUE ) &&
 		 ( is_single_thread( &rntm_g ) == TRUE) &&
 	  	 ( is_row_major == TRUE ) )
 	{
@@ -250,6 +252,7 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 		);
 		return;
 	}
+#endif
 
 #ifdef BLIS_ENABLE_OPENMP
 	// Swapping inputs to induce row major computation for column major inputs.

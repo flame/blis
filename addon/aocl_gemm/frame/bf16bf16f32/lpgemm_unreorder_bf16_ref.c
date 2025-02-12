@@ -240,16 +240,15 @@ void unpackb_nr16_bf16bf16f32of32_row_major_ref
 }
 
 void unpackb_nrlt16_bf16bf16f32of32_row_major_ref
-	(
-	  bfloat16* b,
-	  bfloat16*       unpack_b,
-	  const dim_t     KC,
-	  dim_t           ldb,
-	  dim_t           n0_partial_rem
-	)
+    (
+      bfloat16*    b,
+      bfloat16*    unpack_b,
+      const dim_t  KC,
+      dim_t        ldb,
+      dim_t        n0_partial_rem
+    )
 {
 	dim_t NR = 16;
-	dim_t NRBY2 = 8;
 
 	dim_t k_full_pieces_blks = KC / 2;
 	dim_t k_full_pieces = k_full_pieces_blks * 2;
@@ -261,18 +260,13 @@ void unpackb_nrlt16_bf16bf16f32of32_row_major_ref
 	{
 		bfloat16* outp0 = ( unpack_b + ( ldb * ( kr + 0 ) ));
 		bfloat16* outp1 = ( unpack_b + ( ldb * ( kr + 1 ) ));
-		bfloat16* outp2 = ( unpack_b + ( ldb * ( kr + 0 ) ) + NRBY2);
-		bfloat16* outp3 = ( unpack_b + ( ldb * ( kr + 1 ) ) + NRBY2);
 
 		bfloat16* inp0 = ( b + ( ( kr_new + 0 ) * NR ));
-		bfloat16* inp1 = ( b + ( ( kr_new + 1 ) * NR ));
 
-		for(dim_t i = 0; i < (n0_partial_rem/2); i++)
+		for(dim_t i = 0; i < n0_partial_rem; i++)
 		{
 			*outp0++ = *inp0++;
 			*outp1++ = *inp0++;
-			*outp2++ = *inp1++;
-			*outp3++ = *inp1++;
 		}
 		kr_new += 2;
 	}
@@ -281,15 +275,12 @@ void unpackb_nrlt16_bf16bf16f32of32_row_major_ref
 	if ( k_partial_pieces > 0 )
 	{
 		bfloat16* outp0 = ( unpack_b + ( ldb * ( k_full_pieces + 0 ) ));
-		bfloat16* outp2 = ( unpack_b + ( ldb * ( k_full_pieces + 0 ) ) + NRBY2);
 
 		bfloat16* inp0 = ( b + ( ( kr_new + 0 ) * NR ));
-		bfloat16* inp1 = ( b + ( ( kr_new + 1 ) * NR ));
 
-		for(dim_t i = 0; i < (n0_partial_rem/2); i++)
+		for(dim_t i = 0; i < n0_partial_rem; i++)
 		{
 			*outp0++ = *inp0++;
-			*outp2++ = *inp1++;
 		}
 	}
 }
