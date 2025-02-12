@@ -515,14 +515,17 @@
 	reg = _mm512_mul_ps( reg, selector ); \
 	reg = _mm512_add_ps( reg, zero_point ); \
 
+#ifdef LPGEMM_BF16_JIT
+#define CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,reg,mask,m_ind,n_ind)
+#else
 // Downscale store bf16 macro
-#define CVT_STORE_F32_BF16_POST_OPS_MASK(reg,mask,m_ind,n_ind) \
+#define CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,reg,mask,m_ind,n_ind) \
 	_mm256_mask_storeu_epi16 \
 	( \
-	  b_q + ( rs_b * ( ir + m_ind ) ) + ( cs_b * ( jr + n_ind ) ), \
+	  ((bfloat16*)b) + ( rs_b * ( ir + m_ind ) ) + ( cs_b * ( jr + n_ind ) ), \
 	  mask, (__m256i) _mm512_cvtneps_pbh( reg ) \
-	) \
-
+	)
+#endif
 
 // Downscale store s8 macro
 #define CVT_STORE_F32_S8_POST_OPS_MASK(reg,mask,m_ind,n_ind) \

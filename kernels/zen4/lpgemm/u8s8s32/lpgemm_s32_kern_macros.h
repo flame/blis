@@ -433,16 +433,10 @@
 #define CVT_STORE_F32_U8(reg,m_ind,n_ind) \
 	CVT_STORE_F32_U8_MASK(mask_all1,reg,m_ind,n_ind) \
 
-// Downscale store bf16 macro
-#define CVT_STORE_S32_BF16(reg,m_ind,n_ind) \
-	_mm256_mask_storeu_epi16 \
-	( \
-	  ( bfloat16* )post_ops_attr.buf_downscale + \
-	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
-	  post_ops_attr.post_op_c_j + ( n_ind * 16 ), \
-	  mask_all1, (__m256i) _mm512_cvtneps_pbh( _mm512_cvtepi32_ps ( reg ) ) \
-	) \
-
+#ifdef LPGEMM_BF16_JIT
+#define CVT_STORE_F32_BF16_MASK(mask,reg,m_ind,n_ind)
+#define CVT_STORE_F32_BF16_MASK_AVX2(reg,mask, ptr)
+#else
 // Downscale store bf16 macro
 #define CVT_STORE_F32_BF16_MASK(mask,reg,m_ind,n_ind) \
 	_mm256_mask_storeu_epi16 \
@@ -452,6 +446,12 @@
 	  post_ops_attr.post_op_c_j + ( n_ind * 16 ), \
 	  mask, (__m256i) _mm512_cvtneps_pbh( ( reg ) ) \
 	); \
+
+#define CVT_STORE_F32_BF16_MASK_AVX2(reg,mask, ptr) \
+	_mm256_mask_storeu_epi16( ptr, mask, \
+		(__m256i)_mm512_cvtneps_pbh( reg ) );
+#endif
+
 
 #define CVT_STORE_F32_BF16(reg,m_ind,n_ind) \
 	CVT_STORE_F32_BF16_MASK(mask_all1,reg,m_ind,n_ind); \
@@ -1078,17 +1078,7 @@
     mask, reg \
   ); \
 
-// Downscale store bf16 macro
-#define CVT_STORE_S32_BF16_MASK(reg,mask,m_ind,n_ind) \
-	_mm256_mask_storeu_epi16 \
-	( \
-	  ( bfloat16* )post_ops_attr.buf_downscale + \
-	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
-	  post_ops_attr.post_op_c_j + ( n_ind * 16 ), \
-	  mask, (__m256i) _mm512_cvtneps_pbh( _mm512_cvtepi32_ps ( reg ) ) \
-	) \
-
-// Downscale store f32 macro
+  // Downscale store f32 macro
 #define CVT_STORE_S32_F32_MASK(reg,mask,m_ind,n_ind) \
 	_mm512_mask_storeu_ps  \
 	( \

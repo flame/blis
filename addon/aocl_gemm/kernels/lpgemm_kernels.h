@@ -44,7 +44,7 @@
 	  ( ( __GNUC__ == 11 ) && ( __GNUC_MINOR__ < 2 ) ) ) && defined(BLIS_KERNELS_ZEN4) )
 #define LPGEMM_BF16_JIT
 #define BPREFETCH_JIT
-#define DUMP_JIT_CODE
+//#define DUMP_JIT_CODE
 #endif
 
 typedef void (*lpgemm_m_fringe_f32_ker_ft)

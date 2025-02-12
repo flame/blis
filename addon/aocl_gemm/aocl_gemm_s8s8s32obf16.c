@@ -69,6 +69,13 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,bfloat16,int32_t,s8s8s32obf16)
 		goto err_hndl;
 	}
 
+#ifdef LPGEMM_BF16_JIT
+	bli_print_msg("cannot perform s8s8s32obf16 gemm with gcc < 11.2",
+			__FILE__, __LINE__ );
+	goto err_hndl;
+#endif
+
+
 	/* Initialize BLIS. */
 	bli_init_auto();
 
@@ -107,7 +114,7 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,bfloat16,int32_t,s8s8s32obf16)
 					  __FILE__, __LINE__);
 		goto err_hndl;
 	}
-	
+
 	// The strides are set assuming a row major kernel.
 	inc_t rs_a = lda;
 	inc_t cs_a = 1;
@@ -138,16 +145,16 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,bfloat16,int32_t,s8s8s32obf16)
 	// Reorder is not supported for A matrix
 	if ((is_row_major == TRUE) && (mtag_a == REORDERED))
 	{
-		bli_print_msg(" Reordering of A matrix is not supported in " 
+		bli_print_msg(" Reordering of A matrix is not supported in "
 						" row major case.", __FILE__, __LINE__);
 		goto err_hndl;
 	}
 	// Inputs swapped in column major, A becomes B from kernel point of view.
 	// Reorder is not supported for column major matrices.
-	else if ((is_column_major == TRUE) && 
+	else if ((is_column_major == TRUE) &&
 			((mtag_b == REORDERED) || (mtag_a == REORDERED)))
 	{
-		bli_print_msg(" Reordering of column major matrices is " 
+		bli_print_msg(" Reordering of column major matrices is "
 						" not supported.", __FILE__, __LINE__);
 		goto err_hndl;
 	}

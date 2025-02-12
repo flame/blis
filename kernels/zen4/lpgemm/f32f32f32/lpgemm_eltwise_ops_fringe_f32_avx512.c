@@ -1697,57 +1697,52 @@ POST_OPS_5x64_OPS_DISABLE:
 			// final write for a given block within C.
 			if ( post_ops_attr.c_stor_type == BF16 )
 			{
-				// Actually the b matrix is of type bfloat16. However
-				// in order to reuse this kernel for f32, the output
-				// matrix type in kernel function signature is set to
-				// f32 irrespective of original output matrix type.
-				bfloat16* b_q = ( bfloat16* )b;
-				dim_t ir = 0;
+
 				// Store the results in downscaled type (bf16 instead of float).
 				// c[0, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm8,k0,0,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm8,k0,0,0);
 				// c[0, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm9,k1,0,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm9,k1,0,16);
 				// c[0, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm10,k2,0,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm10,k2,0,32);
 				// c[0, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm11,k3,0,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm11,k3,0,48);
 
 				// c[1, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm12,k0,1,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm12,k0,1,0);
 				// c[1, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm13,k1,1,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm13,k1,1,16);
 				// c[1, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm14,k2,1,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm14,k2,1,32);
 				// c[1, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm15,k3,1,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm15,k3,1,48);
 
 				// c[2, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm16,k0,2,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm16,k0,2,0);
 				// c[2, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm17,k1,2,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm17,k1,2,16);
 				// c[2, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm18,k2,2,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm18,k2,2,32);
 				// c[2, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm19,k3,2,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm19,k3,2,48);
 
 				// c[3, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm20,k0,3,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm20,k0,3,0);
 				// c[3, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm21,k1,3,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm21,k1,3,16);
 				// c[3, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm22,k2,3,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm22,k2,3,32);
 				// c[3, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm23,k3,3,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm23,k3,3,48);
 
 				// c[4, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm24,k0,4,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm24,k0,4,0);
 				// c[4, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm25,k1,4,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm25,k1,4,16);
 				// c[4, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm26,k2,4,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm26,k2,4,32);
 				// c[4, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm27,k3,4,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm27,k3,4,48);
 			}
 			else if ( post_ops_attr.c_stor_type == S32 )
 			{
@@ -3411,48 +3406,43 @@ POST_OPS_4x64_OPS_DISABLE:
 			// final write for a given block within C.
 			if ( post_ops_attr.c_stor_type == BF16 )
 			{
-				// Actually the b matrix is of type bfloat16. However
-				// in order to reuse this kernel for f32, the output
-				// matrix type in kernel function signature is set to
-				// f32 irrespective of original output matrix type.
-				bfloat16* b_q = ( bfloat16* )b;
-				dim_t ir = 0;
+
 				// Store the results in downscaled type (bf16 instead of float).
 				// c[0, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm8,k0,0,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm8,k0,0,0);
 				// c[0, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm9,k1,0,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm9,k1,0,16);
 				// c[0, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm10,k2,0,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm10,k2,0,32);
 				// c[0, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm11,k3,0,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm11,k3,0,48);
 
 				// c[1, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm12,k0,1,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm12,k0,1,0);
 				// c[1, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm13,k1,1,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm13,k1,1,16);
 				// c[1, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm14,k2,1,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm14,k2,1,32);
 				// c[1, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm15,k3,1,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm15,k3,1,48);
 
 				// c[2, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm16,k0,2,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm16,k0,2,0);
 				// c[2, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm17,k1,2,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm17,k1,2,16);
 				// c[2, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm18,k2,2,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm18,k2,2,32);
 				// c[2, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm19,k3,2,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm19,k3,2,48);
 
 				// c[3, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm20,k0,3,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm20,k0,3,0);
 				// c[3, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm21,k1,3,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm21,k1,3,16);
 				// c[3, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm22,k2,3,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm22,k2,3,32);
 				// c[3, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm23,k3,3,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm23,k3,3,48);
 			}
 			else if ( post_ops_attr.c_stor_type == S32 )
 			{
@@ -4836,39 +4826,34 @@ POST_OPS_3x64_OPS_DISABLE:
 			// final write for a given block within C.
 			if ( post_ops_attr.c_stor_type == BF16 )
 			{
-				// Actually the b matrix is of type bfloat16. However
-				// in order to reuse this kernel for f32, the output
-				// matrix type in kernel function signature is set to
-				// f32 irrespective of original output matrix type.
-				bfloat16* b_q = ( bfloat16* )b;
-				dim_t ir = 0;
+
 				// Store the results in downscaled type (bf16 instead of float).
 				// c[0, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm8,k0,0,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm8,k0,0,0);
 				// c[0, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm9,k1,0,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm9,k1,0,16);
 				// c[0, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm10,k2,0,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm10,k2,0,32);
 				// c[0, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm11,k3,0,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm11,k3,0,48);
 
 				// c[1, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm12,k0,1,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm12,k0,1,0);
 				// c[1, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm13,k1,1,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm13,k1,1,16);
 				// c[1, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm14,k2,1,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm14,k2,1,32);
 				// c[1, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm15,k3,1,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm15,k3,1,48);
 
 				// c[2, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm16,k0,2,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm16,k0,2,0);
 				// c[2, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm17,k1,2,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm17,k1,2,16);
 				// c[2, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm18,k2,2,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm18,k2,2,32);
 				// c[2, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm19,k3,2,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm19,k3,2,48);
 			}
 			else if ( post_ops_attr.c_stor_type == S32 )
 			{
@@ -5972,30 +5957,25 @@ POST_OPS_2x64_OPS_DISABLE:
 			// final write for a given block within C.
 			if ( post_ops_attr.c_stor_type == BF16 )
 			{
-				// Actually the b matrix is of type bfloat16. However
-				// in order to reuse this kernel for f32, the output
-				// matrix type in kernel function signature is set to
-				// f32 irrespective of original output matrix type.
-				bfloat16* b_q = ( bfloat16* )b;
-				dim_t ir = 0;
+
 				// Store the results in downscaled type (bf16 instead of float).
 				// c[0, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm8,k0,0,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm8,k0,0,0);
 				// c[0, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm9,k1,0,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm9,k1,0,16);
 				// c[0, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm10,k2,0,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm10,k2,0,32);
 				// c[0, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm11,k3,0,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm11,k3,0,48);
 
 				// c[1, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm12,k0,1,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm12,k0,1,0);
 				// c[1, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm13,k1,1,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm13,k1,1,16);
 				// c[1, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm14,k2,1,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm14,k2,1,32);
 				// c[1, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm15,k3,1,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm15,k3,1,48);
 			}
 			else if ( post_ops_attr.c_stor_type == S32 )
 			{
@@ -6819,21 +6799,16 @@ POST_OPS_1x64_OPS_DISABLE:
 			// final write for a given block within C.
 			if ( post_ops_attr.c_stor_type == BF16 )
 			{
-				// Actually the b matrix is of type bfloat16. However
-				// in order to reuse this kernel for f32, the output
-				// matrix type in kernel function signature is set to
-				// f32 irrespective of original output matrix type.
-				bfloat16* b_q = ( bfloat16* )b;
-				dim_t ir = 0;
+
 				// Store the results in downscaled type (bf16 instead of float).
 				// c[0, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm8,k0,0,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm8,k0,0,0);
 				// c[0, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm9,k1,0,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm9,k1,0,16);
 				// c[0, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm10,k2,0,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm10,k2,0,32);
 				// c[0, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm11,k3,0,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(0,jr,zmm11,k3,0,48);
 			}
 			else if ( post_ops_attr.c_stor_type == S32 )
 			{

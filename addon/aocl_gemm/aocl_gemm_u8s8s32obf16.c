@@ -67,6 +67,11 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,bfloat16,int32_t,u8s8s32obf16)
 				"cannot perform u8s8s32 gemm.", __FILE__, __LINE__ );
 		goto err_hndl;
 	}
+#ifdef LPGEMM_BF16_JIT
+	bli_print_msg("cannot perform u8s8s32obf16 gemm with gcc < 11.2",
+			__FILE__, __LINE__ );
+	goto err_hndl;
+#endif
 
 	/* Initialize BLIS. */
 	bli_init_auto();

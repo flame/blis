@@ -1167,8 +1167,7 @@ LPGEMV_N_EQ1_KERN(int8_t, int8_t, int32_t, s8s8s32os32)
 					{
 						bfloat16 ctemp[16];
 
-						_mm256_mask_storeu_epi16( ctemp, k2,
-								(__m256i)_mm512_cvtneps_pbh( acc_8 ) );
+						CVT_STORE_F32_BF16_MASK_AVX2(acc_8, k2, ctemp);
 
 						for (dim_t i = 0; i < mr0; i++)
 						{

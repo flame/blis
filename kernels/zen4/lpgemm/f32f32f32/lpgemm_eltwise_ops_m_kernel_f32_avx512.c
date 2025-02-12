@@ -99,7 +99,7 @@ LPGEMM_ELTWISE_OPS_KERNEL(float,float,f32of32_6x64)
 	__m512 zmm2 = _mm512_setzero_ps();
 	__m512 zmm3 = _mm512_setzero_ps();
 	__m512 zmm4 = _mm512_setzero_ps();
-    
+
 	uint64_t orig_post_op_c_j = post_ops_attr.post_op_c_j;
 	for ( dim_t ir = 0; ir < m_full_pieces_loop_limit; ir += MR )
 	{
@@ -1973,66 +1973,60 @@ POST_OPS_6x64_OPS_DISABLE:
 			// final write for a given block within C.
 			if ( post_ops_attr.c_stor_type == BF16 )
 			{
-				// Actually the b matrix is of type bfloat16. However
-				// in order to reuse this kernel for f32, the output
-				// matrix type in kernel function signature is set to
-				// f32 irrespective of original output matrix type.
-				bfloat16* b_q = ( bfloat16* )b;
-
 				// Store the results in downscaled type (bf16 instead of float).
 				// c[0, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm8,k0,0,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm8,k0,0,0);
 				// c[0, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm9,k1,0,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm9,k1,0,16);
 				// c[0, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm10,k2,0,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm10,k2,0,32);
 				// c[0, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm11,k3,0,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm11,k3,0,48);
 
 				// c[1, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm12,k0,1,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm12,k0,1,0);
 				// c[1, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm13,k1,1,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm13,k1,1,16);
 				// c[1, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm14,k2,1,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm14,k2,1,32);
 				// c[1, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm15,k3,1,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm15,k3,1,48);
 
 				// c[2, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm16,k0,2,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm16,k0,2,0);
 				// c[2, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm17,k1,2,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm17,k1,2,16);
 				// c[2, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm18,k2,2,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm18,k2,2,32);
 				// c[2, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm19,k3,2,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm19,k3,2,48);
 
 				// c[3, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm20,k0,3,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm20,k0,3,0);
 				// c[3, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm21,k1,3,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm21,k1,3,16);
 				// c[3, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm22,k2,3,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm22,k2,3,32);
 				// c[3, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm23,k3,3,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm23,k3,3,48);
 
 				// c[4, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm24,k0,4,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm24,k0,4,0);
 				// c[4, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm25,k1,4,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm25,k1,4,16);
 				// c[4, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm26,k2,4,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm26,k2,4,32);
 				// c[4, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm27,k3,4,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm27,k3,4,48);
 
 				// c[5, 0-15]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm28,k0,5,0);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm28,k0,5,0);
 				// c[5, 16-31]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm29,k1,5,16);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm29,k1,5,16);
 				// c[5, 32-47]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm30,k2,5,32);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm30,k2,5,32);
 				// c[5, 48-63]
-				CVT_STORE_F32_BF16_POST_OPS_MASK(zmm31,k3,5,48);
+				CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,zmm31,k3,5,48);
 			}
 			else if ( post_ops_attr.c_stor_type == S32 )
 			{

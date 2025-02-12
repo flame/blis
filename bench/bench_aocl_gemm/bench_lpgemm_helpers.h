@@ -231,7 +231,7 @@ static inline void fill_array_ ## ctype ( void* arr, dim_t size ) \
 { \
     if( size < 0 ) return; \
     ctype* temp_arr = ( ctype* ) arr; \
-    _Pragma( "omp parallel " ) \
+    _Pragma( "omp parallel for" ) \
     for ( dim_t i = 0; i < size; ++i ) \
     { \
         temp_arr[i] = ( ctype )( ( i % 11 ) - 5 ); \

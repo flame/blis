@@ -169,6 +169,13 @@ AOCL_UTIL_ELTWISE_OPS(bfloat16,bfloat16,bf16obf16)
 	  b, ldb
 	);
 
+#ifdef LPGEMM_BF16_JIT
+	bli_print_msg("cannot perform the operation with gcc < 11.2",
+			__FILE__, __LINE__ );
+	return;
+#endif
+
+
 	// Even though b matrix is typecasted to float*, actual load/store
 	// and matrix traversal will happen as bfloat16* type. This typecast
 	// is only to ensure code is reused.
@@ -309,6 +316,13 @@ AOCL_UTIL_ELTWISE_OPS(float,bfloat16,f32obf16)
 	  a, lda,
 	  b, ldb
 	);
+
+#ifdef LPGEMM_BF16_JIT
+	bli_print_msg("cannot perform the operation with gcc < 11.2",
+			__FILE__, __LINE__ );
+	return;
+#endif
+
 
 	aocl_eltwise_ops_f32of32_base
 	(
