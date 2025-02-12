@@ -40,10 +40,6 @@
 // BF16 -> F32 convert helpers. reg: __m256 - CVT_BF16_F32_SHIFT_AVX2
 #include "lpgemm_kernel_macros_f32_avx2.h"
 
-#define GET_STORE_MASK(mask,store_mask,mask_vec)   \
-	for( dim_t i = 0; i < mask; i++ ) mask_vec[i] = -1;  \
-	store_mask = _mm256_loadu_si256((__m256i const *)mask_vec);
-
 #define LOAD_AND_CONVERT_FIRST32_NR64_BF16_NR32_AVX2(k)  \
 	a_reg[0] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
 		(__m128i const*)(b + ( ( jc * KC_updated ) + ( k + 0 ) * NR ) + 0 ) ) );	\
@@ -368,7 +364,6 @@ void unpackb_nrlt16_bf16_f32_row_major
 	*/
 
 	dim_t mask1, mask2;
-	int32_t mask_vec1[8]  = {0}, mask_vec2[8] = {0};
 	__m256i store_mask1, store_mask2;
 
 	if( n0_partial_rem > 7 )
@@ -382,8 +377,8 @@ void unpackb_nrlt16_bf16_f32_row_major
 		mask2 = 0;
 	}
 
-	GET_STORE_MASK(mask1,store_mask1, mask_vec1);
-	GET_STORE_MASK(mask2,store_mask2, mask_vec2);
+	GET_STORE_MASK(mask1,store_mask1);
+	GET_STORE_MASK(mask2,store_mask2);
 
 	dim_t k_full_pieces_blks = KC / 2;
 	dim_t k_full_pieces = k_full_pieces_blks * 2;
@@ -589,196 +584,6 @@ void unpackb_nr64_bf16_f32_row_major
 
 }
 
-//ToDo: Column Major Support is WIP
-#if 0
-#define UNPACKLOHI16_AVX2  \
-	b_reg[0] = (__m256)_mm256_unpacklo_epi64( (__m256i)a_reg[0], (__m256i)a_reg[2] );  \
-	b_reg[1] = (__m256)_mm256_unpacklo_epi64( (__m256i)a_reg[4], (__m256i)a_reg[6] ); \
-	b_reg[2] = (__m256)_mm256_unpacklo_epi64( (__m256i)a_reg[8], (__m256i)a_reg[10] );  \
-	b_reg[3] = (__m256)_mm256_unpacklo_epi64( (__m256i)a_reg[12], (__m256i)a_reg[14] );  \
-	b_reg[8] = (__m256)_mm256_unpacklo_epi64( (__m256i)a_reg[1], (__m256i)a_reg[3] );  \
-	b_reg[9] = (__m256)_mm256_unpacklo_epi64( (__m256i)a_reg[5], (__m256i)a_reg[7] ); \
-	b_reg[10] = (__m256)_mm256_unpacklo_epi64( (__m256i)a_reg[9], (__m256i)a_reg[11] );  \
-	b_reg[11] = (__m256)_mm256_unpacklo_epi64( (__m256i)a_reg[13], (__m256i)a_reg[15] );  \
-	\
-	b_reg[4] = (__m256)_mm256_unpackhi_epi64( (__m256i)a_reg[0], (__m256i)a_reg[2] );  \
-	b_reg[5] = (__m256)_mm256_unpackhi_epi64( (__m256i)a_reg[4], (__m256i)a_reg[6] ); \
-	b_reg[6] = (__m256)_mm256_unpackhi_epi64( (__m256i)a_reg[8], (__m256i)a_reg[10] );  \
-	b_reg[7] = (__m256)_mm256_unpackhi_epi64( (__m256i)a_reg[12], (__m256i)a_reg[14] );  \
-	b_reg[12] = (__m256)_mm256_unpackhi_epi64( (__m256i)a_reg[1], (__m256i)a_reg[3] );  \
-	b_reg[13] = (__m256)_mm256_unpackhi_epi64( (__m256i)a_reg[5], (__m256i)a_reg[7] ); \
-	b_reg[14] = (__m256)_mm256_unpackhi_epi64( (__m256i)a_reg[9], (__m256i)a_reg[11] );  \
-	b_reg[15] = (__m256)_mm256_unpackhi_epi64( (__m256i)a_reg[13], (__m256i)a_reg[15] );
-
-#define PERMUTE2f128_16_AVX2  \
-	a_reg[0] = (__m256)_mm256_permute2f128_si256( (__m256i)b_reg[0], (__m256i)b_reg[1], 0x20 );  \
-	a_reg[1] = (__m256)_mm256_permute2f128_si256( (__m256i)b_reg[2], (__m256i)b_reg[3], 0x20 );  \
-	a_reg[2] = (__m256)_mm256_permute2f128_si256( (__m256i)b_reg[4], (__m256i)b_reg[5], 0x20 );  \
-	a_reg[3] = (__m256)_mm256_permute2f128_si256( (__m256i)b_reg[6], (__m256i)b_reg[7], 0x20 );  \
-	a_reg[4] = (__m256)_mm256_permute2f128_si256( (__m256i)b_reg[0], (__m256i)b_reg[1], 0x31 );  \
-	a_reg[5] = (__m256)_mm256_permute2f128_si256( (__m256i)b_reg[2], (__m256i)b_reg[3], 0x31 );  \
-	a_reg[6] = (__m256)_mm256_permute2f128_si256( (__m256i)b_reg[4], (__m256i)b_reg[5], 0x31 );  \
-	a_reg[7] = (__m256)_mm256_permute2f128_si256( (__m256i)b_reg[6], (__m256i)b_reg[7], 0x31 );  \
-	a_reg[8] = (__m256)_mm256_permute2f128_si256( (__m256i)b_reg[8], (__m256i)b_reg[9], 0x20 );  \
-	a_reg[9] = (__m256)_mm256_permute2f128_si256( (__m256i)b_reg[10], (__m256i)b_reg[11], 0x20 );  \
-	a_reg[10] = (__m256)_mm256_permute2f128_si256( (__m256i)b_reg[12], (__m256i)b_reg[13], 0x20 );  \
-	a_reg[11] = (__m256)_mm256_permute2f128_si256( (__m256i)b_reg[14], (__m256i)b_reg[15], 0x20 );  \
-	a_reg[12] = (__m256)_mm256_permute2f128_si256( (__m256i)b_reg[8], (__m256i)b_reg[9], 0x31 );  \
-	a_reg[13] = (__m256)_mm256_permute2f128_si256( (__m256i)b_reg[10], (__m256i)b_reg[11], 0x31 );  \
-	a_reg[14] = (__m256)_mm256_permute2f128_si256( (__m256i)b_reg[12], (__m256i)b_reg[13], 0x31 );  \
-	a_reg[15] = (__m256)_mm256_permute2f128_si256( (__m256i)b_reg[14], (__m256i)b_reg[15], 0x31 );  \
-
-void unpackb_nr_mult_16_bf16_f32_col_major
-	(
-	  const bfloat16* b,
-	  float*       unpack_b_buffer,
-	  const dim_t     NR,
-	  const dim_t     KC,
-	  dim_t           ldb_unpack
-	)
-{
-	__m256 a_reg[16], b_reg[16];
-
-	dim_t kr = 0;
-	for ( kr = 0; ( kr + 15 ) < KC; kr += 16 )
-	{
-		for( dim_t jr = 0; jr < NR; jr += 8 )
-		{
-			a_reg[0] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 0 ) * NR ) + 0 ) ) );
-			a_reg[1] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 0 ) * NR ) + 8 ) ) );
-			a_reg[2] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 2 ) * NR ) + 0 ) ) );
-			a_reg[3] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 2 ) * NR ) + 8 ) ) );
-			a_reg[4] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 4 ) * NR ) + 0 ) ) );
-			a_reg[5] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 4 ) * NR ) + 8 ) ) );
-			a_reg[6] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 6 ) * NR ) + 0 ) ) );
-			a_reg[7] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 6 ) * NR ) + 8 ) ) );
-			a_reg[8] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 8 ) * NR ) + 0 ) ) );
-			a_reg[9] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 8 ) * NR ) + 8 ) ) );
-			a_reg[10] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 10 ) * NR ) + 0 ) ) );
-			a_reg[11] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 10 ) * NR ) + 8 ) ) );
-			a_reg[12] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 12 ) * NR ) + 0 ) ) );
-			a_reg[13] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 12 ) * NR ) + 8 ) ) );
-			a_reg[14] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 14 ) * NR ) + 0 ) ) );
-			a_reg[15] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 14 ) * NR ) + 8 ) ) );
-			printf("After Load\n");
-			for( dim_t i = 0; i < 16; i++ )
-				print_Arr(a_reg[i]);
-			UNPACKLOHI16_AVX2
-			printf("After Unpapck\n");
-			for( dim_t i = 0; i < 16; i++ )
-				print_Arr(b_reg[i]);
-			PERMUTE2f128_16_AVX2
-			printf("After permute\n");
-			for( dim_t i = 0; i < 16; i++ )
-				print_Arr(a_reg[i]);
-
-			_mm256_storeu_ps( unpack_b_buffer + ( ldb_unpack * ( jr + 0 ) ) + kr, a_reg[0] );
-			_mm256_storeu_ps( unpack_b_buffer + ( ldb_unpack * ( jr + 0 ) + 8 ) + kr, a_reg[1] );
-
-		}
-	}
-	for ( ; ( kr + 7 ) < KC; kr += 8 )
-	{
-		for( dim_t jr = 0; jr < NR; jr += 8 )
-		{
-			a_reg[0] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 0 ) * NR ) + 0 ) ) );
-			a_reg[1] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 0 ) * NR ) + 8 ) ) );
-			a_reg[2] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 2 ) * NR ) + 0 ) ) );
-			a_reg[3] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 2 ) * NR ) + 8 ) ) );
-			a_reg[4] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 4 ) * NR ) + 0 ) ) );
-			a_reg[5] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 4 ) * NR ) + 8 ) ) );
-			a_reg[6] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 6 ) * NR ) + 0 ) ) );
-			a_reg[7] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( (__m128i const*)(b + ( jr * 2 ) + ( ( kr + 6 ) * NR ) + 8 ) ) );
-
-			printf("After Load\n");
-			for( dim_t i = 0; i < 8; i++ )
-				print_Arr(a_reg[i]);
-			// UNPACKLOHI16_AVX2
-			// printf("After Unpapck\n");
-			// for( dim_t i = 0; i < 16; i++ )
-			// 	print_Arr(b_reg[i]);
-			// PERMUTE2f128_16_AVX2
-			// printf("After permute\n");
-			// for( dim_t i = 0; i < 16; i++ )
-			// 	print_Arr(a_reg[i]);
-		}
-	}
-}
-void unpackb_nr64_bf16_f32_col_major
-	(
-	  const bfloat16* b,
-	  float*       unpack_b_buffer,
-	  const dim_t     NC,
-	  const dim_t     KC,
-	  dim_t           ldb_unpack
-	)
-{
-	dim_t NR = 64;
-
-	dim_t n_full_pieces = NC / NR;
-	dim_t n_full_pieces_loop_limit = n_full_pieces * NR;
-	dim_t n_partial_pieces = NC % NR;
-
-	dim_t k_partial_pieces = KC % 2;
-
-	dim_t KC_updated = KC;
-	if ( k_partial_pieces > 0 )
-	{
-		KC_updated += ( 2 - k_partial_pieces );
-	}
-	printf(" NC = %ld, KC = %ld\n", NC, KC);
-	for ( dim_t jc = 0; jc < n_full_pieces_loop_limit; jc += NR )
-	{
-		unpackb_nr_mult_16_bf16_f32_col_major
-			( b + (jc * KC_updated),
-			  unpack_b_buffer + (jc * ldb_unpack), 64, KC, ldb_unpack
-			);
-	}
-	if(n_partial_pieces > 0)
-	{
-		dim_t n0_partial_rem = n_partial_pieces % 16;
-		dim_t n0_partial_pack = 0;
-
-		// Split into multiple smaller fringe kernels, so as to maximize
-		// vectorization after packing. Any n0 < NR(64) can be expressed
-		// as n0 = 48 + n` / n0 = 32 + n` / n0 = 16 + n`, where n` < 16.
-		dim_t n0_48 = n_partial_pieces / 48;
-		dim_t n0_32 = n_partial_pieces / 32;
-		dim_t n0_16 = n_partial_pieces / 16;
-
-		if ( n0_48 == 1 )
-		{
-			unpackb_nr_mult_16_bf16_f32_col_major
-				(
-				 ( b + ( n_full_pieces_loop_limit * KC_updated ) ),
-				 ( unpack_b_buffer + n_full_pieces_loop_limit * ldb_unpack ), 48, KC, ldb_unpack
-				);
-
-			n0_partial_pack = 48;
-		}
-		else if ( n0_32 == 1 )
-		{
-			unpackb_nr_mult_16_bf16_f32_col_major
-				(
-				 ( b + ( n_full_pieces_loop_limit * KC_updated ) ),
-				 ( unpack_b_buffer + n_full_pieces_loop_limit * ldb_unpack ), 32, KC, ldb_unpack
-				);
-
-			n0_partial_pack = 32;
-		}
-		else if ( n0_16 == 1 )
-		{
-			unpackb_nr_mult_16_bf16_f32_col_major
-				(
-				 ( b + ( n_full_pieces_loop_limit * KC_updated ) ),
-				 ( unpack_b_buffer + n_full_pieces_loop_limit * ldb_unpack ), 16, KC, ldb_unpack
-				);
-
-			n0_partial_pack = 16;
-		}
-	}
-}
-#endif
 void unpackb_nr64_bf16_f32
 	(
 	  const bfloat16* b,
@@ -792,10 +597,6 @@ void unpackb_nr64_bf16_f32
 	if( cs_b == 1 )
 	{
 		unpackb_nr64_bf16_f32_row_major( b, unpack_b_buffer, NC, KC, rs_b );
-	}
-	else
-	{
-		//unpackb_nr64_bf16_f32_col_major( b, unpack_b_buffer, NC, KC, cs_b );
 	}
 }
 #endif

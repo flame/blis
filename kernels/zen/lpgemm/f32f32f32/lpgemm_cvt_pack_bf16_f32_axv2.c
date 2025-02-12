@@ -40,13 +40,6 @@
 
 #include "lpgemm_kernel_macros_f32_avx2.h"
 
-static inline void get_store_mask( __m256i *mask, dim_t k )
-{
-    int32_t mask_vec[8] = {0};
-    for( dim_t i = 0; i < k; i++ ) mask_vec[i] = -1;
-    *mask = _mm256_loadu_si256((__m256i const *)mask_vec);
-}
-
 #define CVT_BF16_F32_SHIFT_AVX2_lt8( reg, k_left, ic, kr) { \
         int16_t data_feeder[8] = {0};  \
         for( dim_t i = 0; i < k_left; i++) \
@@ -61,16 +54,16 @@ static inline void get_store_mask( __m256i *mask, dim_t k )
         reg = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
                 (const __m128i*)( a + ( ic * rs_a ) + ( kr * cs_a ) ) ) );
 
-void cvt_pack_bf16_f32_row_major
+void cvt_bf16_f32_row_major
     (
-      float*	      pack_a_buffer,
+      float*	      cvt_buffer,
       const bfloat16* a,
       const dim_t     rs_a,
       const dim_t     cs_a,
       const dim_t     MC,
       const dim_t     KC,
-      dim_t*          rs_p,
-      dim_t*          cs_p
+      const dim_t     rs_p,
+      const dim_t     cs_p
     )
 {
     dim_t MR = 16;
@@ -105,22 +98,22 @@ void cvt_pack_bf16_f32_row_major
             LOAD_AND_CONVERT_BF16_F32(a_reg[15], ( ic + 15 ) );
 
             /*Store 8 F32 elements each in 16 rows */
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 0 ) * KC ) + kr , a_reg[0] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 1 ) * KC ) + kr , a_reg[1] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 2 ) * KC ) + kr , a_reg[2] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 3 ) * KC ) + kr , a_reg[3] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 4 ) * KC ) + kr , a_reg[4] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 5 ) * KC ) + kr , a_reg[5] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 6 ) * KC ) + kr , a_reg[6] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 7 ) * KC ) + kr , a_reg[7] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 8 ) * KC ) + kr , a_reg[8] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 9 ) * KC ) + kr , a_reg[9] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 10 ) * KC ) + kr , a_reg[10] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 11 ) * KC ) + kr , a_reg[11] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 12 ) * KC ) + kr , a_reg[12] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 13 ) * KC ) + kr , a_reg[13] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 14 ) * KC ) + kr , a_reg[14] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 15 ) * KC ) + kr , a_reg[15] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr , a_reg[0] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 1 ) * rs_p ) + kr , a_reg[1] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 2 ) * rs_p ) + kr , a_reg[2] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 3 ) * rs_p ) + kr , a_reg[3] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 4 ) * rs_p ) + kr , a_reg[4] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 5 ) * rs_p ) + kr , a_reg[5] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 6 ) * rs_p ) + kr , a_reg[6] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 7 ) * rs_p ) + kr , a_reg[7] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 8 ) * rs_p ) + kr , a_reg[8] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 9 ) * rs_p ) + kr , a_reg[9] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 10 ) * rs_p ) + kr , a_reg[10] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 11 ) * rs_p ) + kr , a_reg[11] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 12 ) * rs_p ) + kr , a_reg[12] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 13 ) * rs_p ) + kr , a_reg[13] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 14 ) * rs_p ) + kr , a_reg[14] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 15 ) * rs_p ) + kr , a_reg[15] );
         }
         if( k_left > 0)
         {
@@ -143,24 +136,24 @@ void cvt_pack_bf16_f32_row_major
             CVT_BF16_F32_SHIFT_AVX2_lt8(a_reg[14],k_left,( ic + 14 ), kr);
             CVT_BF16_F32_SHIFT_AVX2_lt8(a_reg[15],k_left,( ic + 15 ), kr);
 
-            get_store_mask(&store_mask, k_left);
+            GET_STORE_MASK(k_left, store_mask);
 
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 0 ) * KC ) + kr, store_mask, a_reg[0] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 1 ) * KC ) + kr, store_mask, a_reg[1] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 2 ) * KC ) + kr, store_mask, a_reg[2] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 3 ) * KC ) + kr, store_mask, a_reg[3] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 4 ) * KC ) + kr, store_mask, a_reg[4] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 5 ) * KC ) + kr, store_mask, a_reg[5] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 6 ) * KC ) + kr, store_mask, a_reg[6] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 7 ) * KC ) + kr, store_mask, a_reg[7] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 8 ) * KC ) + kr, store_mask, a_reg[8] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 9 ) * KC ) + kr, store_mask, a_reg[9] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 10 ) * KC ) + kr, store_mask, a_reg[10] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 11 ) * KC ) + kr, store_mask, a_reg[11] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 12 ) * KC ) + kr, store_mask, a_reg[12] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 13 ) * KC ) + kr, store_mask, a_reg[13] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 14 ) * KC ) + kr, store_mask, a_reg[14] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 15 ) * KC ) + kr, store_mask, a_reg[15] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr, store_mask, a_reg[0] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 1 ) * rs_p ) + kr, store_mask, a_reg[1] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 2 ) * rs_p ) + kr, store_mask, a_reg[2] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 3 ) * rs_p ) + kr, store_mask, a_reg[3] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 4 ) * rs_p ) + kr, store_mask, a_reg[4] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 5 ) * rs_p ) + kr, store_mask, a_reg[5] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 6 ) * rs_p ) + kr, store_mask, a_reg[6] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 7 ) * rs_p ) + kr, store_mask, a_reg[7] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 8 ) * rs_p ) + kr, store_mask, a_reg[8] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 9 ) * rs_p ) + kr, store_mask, a_reg[9] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 10 ) * rs_p ) + kr, store_mask, a_reg[10] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 11 ) * rs_p ) + kr, store_mask, a_reg[11] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 12 ) * rs_p ) + kr, store_mask, a_reg[12] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 13 ) * rs_p ) + kr, store_mask, a_reg[13] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 14 ) * rs_p ) + kr, store_mask, a_reg[14] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 15 ) * rs_p ) + kr, store_mask, a_reg[15] );
         }
     }
     for( ; ( ic + 8 - 1 ) < MC; ic += 8 )
@@ -176,14 +169,14 @@ void cvt_pack_bf16_f32_row_major
             LOAD_AND_CONVERT_BF16_F32(a_reg[6], ( ic + 6 ) );
             LOAD_AND_CONVERT_BF16_F32(a_reg[7], ( ic + 7 ) );
 
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 0 ) * KC ) + kr , a_reg[0] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 1 ) * KC ) + kr , a_reg[1] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 2 ) * KC ) + kr , a_reg[2] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 3 ) * KC ) + kr , a_reg[3] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 4 ) * KC ) + kr , a_reg[4] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 5 ) * KC ) + kr , a_reg[5] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 6 ) * KC ) + kr , a_reg[6] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 7 ) * KC ) + kr , a_reg[7] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr , a_reg[0] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 1 ) * rs_p ) + kr , a_reg[1] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 2 ) * rs_p ) + kr , a_reg[2] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 3 ) * rs_p ) + kr , a_reg[3] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 4 ) * rs_p ) + kr , a_reg[4] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 5 ) * rs_p ) + kr , a_reg[5] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 6 ) * rs_p ) + kr , a_reg[6] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 7 ) * rs_p ) + kr , a_reg[7] );
         }
         if(k_left)
         {
@@ -196,16 +189,16 @@ void cvt_pack_bf16_f32_row_major
             CVT_BF16_F32_SHIFT_AVX2_lt8(a_reg[6],k_left,( ic + 6 ), kr);
             CVT_BF16_F32_SHIFT_AVX2_lt8(a_reg[7],k_left,( ic + 7 ), kr);
 
-            get_store_mask(&store_mask, k_left);
+            GET_STORE_MASK(k_left, store_mask);
 
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 0 ) * KC ) + kr, store_mask, a_reg[0] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 1 ) * KC ) + kr, store_mask, a_reg[1] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 2 ) * KC ) + kr, store_mask , a_reg[2] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 3 ) * KC ) + kr, store_mask , a_reg[3] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 4 ) * KC ) + kr, store_mask , a_reg[4] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 5 ) * KC ) + kr, store_mask , a_reg[5] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 6 ) * KC ) + kr, store_mask , a_reg[6] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 7 ) * KC ) + kr, store_mask , a_reg[7] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr, store_mask, a_reg[0] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 1 ) * rs_p ) + kr, store_mask, a_reg[1] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 2 ) * rs_p ) + kr, store_mask , a_reg[2] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 3 ) * rs_p ) + kr, store_mask , a_reg[3] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 4 ) * rs_p ) + kr, store_mask , a_reg[4] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 5 ) * rs_p ) + kr, store_mask , a_reg[5] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 6 ) * rs_p ) + kr, store_mask , a_reg[6] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 7 ) * rs_p ) + kr, store_mask , a_reg[7] );
         }
     }
     for( ; ( ic + 4 - 1 ) < MC; ic += 4 )
@@ -217,10 +210,10 @@ void cvt_pack_bf16_f32_row_major
             LOAD_AND_CONVERT_BF16_F32(a_reg[2], ( ic + 2 ) );
             LOAD_AND_CONVERT_BF16_F32(a_reg[3], ( ic + 3 ) );
 
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 0 ) * KC ) + kr , a_reg[0] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 1 ) * KC ) + kr , a_reg[1] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 2 ) * KC ) + kr , a_reg[2] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 3 ) * KC ) + kr , a_reg[3] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr , a_reg[0] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 1 ) * rs_p ) + kr , a_reg[1] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 2 ) * rs_p ) + kr , a_reg[2] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 3 ) * rs_p ) + kr , a_reg[3] );
         }
 
         if( k_left > 0 )
@@ -230,12 +223,12 @@ void cvt_pack_bf16_f32_row_major
             CVT_BF16_F32_SHIFT_AVX2_lt8(a_reg[2],k_left,( ic + 2 ), kr);
             CVT_BF16_F32_SHIFT_AVX2_lt8(a_reg[3],k_left,( ic + 3 ), kr);
 
-            get_store_mask(&store_mask, k_left);
+            GET_STORE_MASK(k_left, store_mask);
 
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 0 ) * KC ) + kr, store_mask, a_reg[0] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 1 ) * KC ) + kr, store_mask, a_reg[1] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 2 ) * KC ) + kr, store_mask , a_reg[2] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 3 ) * KC ) + kr, store_mask , a_reg[3] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr, store_mask, a_reg[0] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 1 ) * rs_p ) + kr, store_mask, a_reg[1] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 2 ) * rs_p ) + kr, store_mask , a_reg[2] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 3 ) * rs_p ) + kr, store_mask , a_reg[3] );
         }
     }
     for( ; ( ic + 2 - 1 ) < MC; ic += 2 )
@@ -245,8 +238,8 @@ void cvt_pack_bf16_f32_row_major
             LOAD_AND_CONVERT_BF16_F32(a_reg[0], ( ic + 0 ) );
             LOAD_AND_CONVERT_BF16_F32(a_reg[1], ( ic + 1 ) );
 
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 0 ) * KC ) + kr , a_reg[0] );
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 1 ) * KC ) + kr , a_reg[1] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr , a_reg[0] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 1 ) * rs_p ) + kr , a_reg[1] );
         }
 
         if( k_left > 0 )
@@ -254,10 +247,10 @@ void cvt_pack_bf16_f32_row_major
             CVT_BF16_F32_SHIFT_AVX2_lt8(a_reg[0],k_left,( ic + 0 ), kr);
             CVT_BF16_F32_SHIFT_AVX2_lt8(a_reg[1],k_left,( ic + 1 ), kr);
 
-            get_store_mask(&store_mask, k_left);
+            GET_STORE_MASK(k_left, store_mask);
 
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 0 ) * KC ) + kr, store_mask, a_reg[0] );
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 1 ) * KC ) + kr, store_mask, a_reg[1] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr, store_mask, a_reg[0] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 1 ) * rs_p ) + kr, store_mask, a_reg[1] );
         }
     }
     for( ; ( ic ) < MC; ic += 1 )
@@ -266,56 +259,464 @@ void cvt_pack_bf16_f32_row_major
         {
             LOAD_AND_CONVERT_BF16_F32(a_reg[0], ( ic + 0 ) );
 
-            _mm256_storeu_ps( pack_a_buffer + ( ( ic + 0 ) * KC ) + kr , a_reg[0] );
+            _mm256_storeu_ps( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr , a_reg[0] );
         }
         for( ; ( kr + 4 - 1 ) < KC; kr += 4 )
         {
             CVT_BF16_F32_SHIFT_AVX2_lt8(a_reg[0],4,( ic + 0 ), kr);
 
-            get_store_mask(&store_mask, 4);
+            GET_STORE_MASK(4, store_mask);
 
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 0 ) * KC ) + kr , store_mask, a_reg[0] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr , store_mask, a_reg[0] );
         }
         for( ; ( kr + 2 - 1 ) < KC; kr += 2 )
         {
             CVT_BF16_F32_SHIFT_AVX2_lt8(a_reg[0],2,( ic + 0 ), kr);
 
-            get_store_mask(&store_mask, 2);
+            GET_STORE_MASK(2, store_mask);
 
-            _mm256_maskstore_ps ( pack_a_buffer + ( ( ic + 0 ) * KC ) + kr , store_mask, a_reg[0] );
+            _mm256_maskstore_ps ( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr , store_mask, a_reg[0] );
         }
         for( ; ( kr ) < KC; kr += 1 )
         {
             CVT_BF16_F32_SHIFT_AVX2_lt8(a_reg[0],1,( ic + 0 ), kr);
 
-            get_store_mask(&store_mask, 1);
+            GET_STORE_MASK(2, store_mask);
 
-            _mm256_maskstore_ps( pack_a_buffer + ( ( ic + 0 ) * KC ) + kr , store_mask, a_reg[0] );
+            _mm256_maskstore_ps( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr , store_mask, a_reg[0] );
         }
     }
-    *rs_p = KC;
-    *cs_p = 1;
 }
 
-void cvt_pack_bf16_f32(
-      float*	      pack_a_buffer,
+#define LOAD_1BF16_ELEMENT(a_ptr,kr,reg)   \
+{    \
+    bfloat16 buff[8] = {0};  \
+    for( dim_t i = 0; i < 1; i++ ) buff[i] = *(a_ptr + ( kr * cs_a ) + i);  \
+    reg = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
+                (const __m128i*)buff) );  \
+}
+
+#define LOAD_AND_CONVERT_8COLS_BF16_F32(kr)    \
+{   \
+    bfloat16 *a_ptr = (bfloat16*)( a + ( ic * rs_a ) );   \
+    a_reg[0] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
+                (const __m128i*)(a_ptr + ( ( kr + 0 ) * cs_a ) ) ) ); \
+    a_reg[1] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
+                (const __m128i*)(a_ptr + ( ( kr + 1 ) * cs_a ) ) ) );  \
+    a_reg[2] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
+                (const __m128i*)(a_ptr + ( ( kr + 2 ) * cs_a ) ) ) );  \
+    a_reg[3] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
+                (const __m128i*)(a_ptr + ( ( kr + 3 ) * cs_a ) ) ) );  \
+    a_reg[4] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
+                (const __m128i*)(a_ptr + ( ( kr + 4 ) * cs_a ) ) ) ); \
+    a_reg[5] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
+                (const __m128i*)(a_ptr + ( ( kr + 5 ) * cs_a ) ) ) );  \
+    a_reg[6] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
+                (const __m128i*)(a_ptr + ( ( kr + 6 ) * cs_a ) ) ) );  \
+    a_reg[7] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
+                (const __m128i*)(a_ptr + ( ( kr + 7 ) * cs_a ) ) ) );  \
+}
+
+#define MASKED_LOAD_AND_CONVERT_8COLS_BF16_F32(kr, mask)    \
+{   \
+    bfloat16 *a_ptr = (bfloat16*)( a + ( ic * rs_a ) );   \
+    a_reg[0] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_maskload_epi32( \
+        (int const*)(a_ptr + ( ( kr + 0 ) * cs_a ) ), mask ) ); \
+    a_reg[1] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_maskload_epi32( \
+        (int const*)(a_ptr + ( ( kr + 1 ) * cs_a ) ), mask ) );  \
+    a_reg[2] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_maskload_epi32( \
+        (int const*)(a_ptr + ( ( kr + 2 ) * cs_a ) ), mask ) );  \
+    a_reg[3] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_maskload_epi32( \
+        (int const*)(a_ptr + ( ( kr + 3 ) * cs_a ) ), mask ) );  \
+    a_reg[4] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_maskload_epi32( \
+        (int const*)(a_ptr + ( ( kr + 4 ) * cs_a ) ), mask ) ); \
+    a_reg[5] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_maskload_epi32( \
+        (int const*)(a_ptr + ( ( kr + 5 ) * cs_a ) ), mask ) );  \
+    a_reg[6] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_maskload_epi32( \
+        (int const*)(a_ptr + ( ( kr + 6 ) * cs_a ) ), mask ) );  \
+    a_reg[7] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_maskload_epi32( \
+        (int const*)(a_ptr + ( ( kr + 7 ) * cs_a ) ), mask ) );  \
+}
+
+#define LOAD_AND_CONVERT_8COLS_1ELE_BF16_F32(kr)    \
+{   \
+    bfloat16 *a_ptr = (bfloat16*)( a + ( ic * rs_a ) );   \
+    LOAD_1BF16_ELEMENT(a_ptr, ( kr + 0 ), a_reg[0] );   \
+    LOAD_1BF16_ELEMENT(a_ptr, ( kr + 1 ), a_reg[1] );   \
+    LOAD_1BF16_ELEMENT(a_ptr, ( kr + 2 ), a_reg[2] );   \
+    LOAD_1BF16_ELEMENT(a_ptr, ( kr + 3 ), a_reg[3] );   \
+    LOAD_1BF16_ELEMENT(a_ptr, ( kr + 4 ), a_reg[4] );   \
+    LOAD_1BF16_ELEMENT(a_ptr, ( kr + 5 ), a_reg[5] );   \
+    LOAD_1BF16_ELEMENT(a_ptr, ( kr + 6 ), a_reg[6] );   \
+    LOAD_1BF16_ELEMENT(a_ptr, ( kr + 7 ), a_reg[7] );   \
+}
+
+#define LOAD_AND_CONVERT_4COLS_BF16_F32(kr)    \
+{   \
+    bfloat16 *a_ptr = (bfloat16*)( a + ( ic * rs_a ) );   \
+    a_reg[0] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
+                (const __m128i*)(a_ptr + ( ( kr + 0 ) * cs_a ) ) ) ); \
+    a_reg[1] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
+                (const __m128i*)(a_ptr + ( ( kr + 1 ) * cs_a ) ) ) );  \
+    a_reg[2] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
+                (const __m128i*)(a_ptr + ( ( kr + 2 ) * cs_a ) ) ) );  \
+    a_reg[3] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
+                (const __m128i*)(a_ptr + ( ( kr + 3 ) * cs_a ) ) ) );  \
+}
+
+#define MASKED_LOAD_AND_CONVERT_4COLS_BF16_F32(kr, mask)    \
+{   \
+    bfloat16 *a_ptr = (bfloat16*)( a + ( ic * rs_a ) );   \
+    a_reg[0] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_maskload_epi32( \
+                (int const*)(a_ptr + ( ( kr + 0 ) * cs_a ) ), mask ) ); \
+    a_reg[1] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_maskload_epi32( \
+                (int const*)(a_ptr + ( ( kr + 1 ) * cs_a ) ), mask ) );  \
+    a_reg[2] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_maskload_epi32( \
+                (int const*)(a_ptr + ( ( kr + 2 ) * cs_a ) ), mask ) );  \
+    a_reg[3] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_maskload_epi32( \
+                (int const*)(a_ptr + ( ( kr + 3 ) * cs_a ) ), mask ) );  \
+}
+
+#define LOAD_AND_CONVERT_4COLS_1ELE_BF16_F32(kr)    \
+{   \
+    bfloat16 *a_ptr = (bfloat16*)( a + ( ic * rs_a ) );   \
+    LOAD_1BF16_ELEMENT(a_ptr, ( kr + 0 ), a_reg[0] );   \
+    LOAD_1BF16_ELEMENT(a_ptr, ( kr + 1 ), a_reg[1] );   \
+    LOAD_1BF16_ELEMENT(a_ptr, ( kr + 2 ), a_reg[2] );   \
+    LOAD_1BF16_ELEMENT(a_ptr, ( kr + 3 ), a_reg[3] );   \
+}
+
+#define MASKED_LOAD_AND_CONVERT_2COLS_BF16_F32(kr, mask)    \
+{   \
+    bfloat16 *a_ptr = (bfloat16*)( a + ( ic * rs_a ) );   \
+    a_reg[0] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_maskload_epi32( \
+                (int const*)(a_ptr + ( ( kr + 0 ) * cs_a ) ), mask ) ); \
+    a_reg[1] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_maskload_epi32( \
+                (int const*)(a_ptr + ( ( kr + 1 ) * cs_a ) ), mask ) );  \
+}
+
+#define UNPACKLO8x8_AVX2  \
+	b_reg[0] =_mm256_unpacklo_ps( a_reg[0], a_reg[1] );  \
+	b_reg[1] =_mm256_unpacklo_ps( a_reg[2], a_reg[3] ); \
+	b_reg[2] =_mm256_unpacklo_ps( a_reg[4], a_reg[5] );  \
+	b_reg[3] =_mm256_unpacklo_ps( a_reg[6], a_reg[7] ); \
+
+#define UNPACKHI8x8_AVX2  \
+	b_reg[4] = _mm256_unpackhi_ps( a_reg[0], a_reg[1] );  \
+	b_reg[5] = _mm256_unpackhi_ps( a_reg[2], a_reg[3] ); \
+	b_reg[6] = _mm256_unpackhi_ps( a_reg[4], a_reg[5] );  \
+	b_reg[7] = _mm256_unpackhi_ps( a_reg[6], a_reg[7] );
+
+#define SHUFFLE_8x8_AVX2  \
+    a_reg[0] = _mm256_shuffle_ps( b_reg[0], b_reg[1], 0x44 );  \
+    a_reg[1] = _mm256_shuffle_ps( b_reg[0], b_reg[1], 0xEE );  \
+    a_reg[2] = _mm256_shuffle_ps( b_reg[2], b_reg[3], 0x44 );  \
+    a_reg[3] = _mm256_shuffle_ps( b_reg[2], b_reg[3], 0xEE );  \
+\
+    a_reg[4] = _mm256_shuffle_ps( b_reg[4], b_reg[5], 0x44 );  \
+    a_reg[5] = _mm256_shuffle_ps( b_reg[4], b_reg[5], 0xEE );  \
+    a_reg[6] = _mm256_shuffle_ps( b_reg[6], b_reg[7], 0x44 );  \
+    a_reg[7] = _mm256_shuffle_ps( b_reg[6], b_reg[7], 0xEE );  \
+
+#define PERMUTE_8x8_AVX2  \
+    b_reg[0] = _mm256_permute2f128_ps( a_reg[0], a_reg[2], 0x20 );  \
+    b_reg[1] = _mm256_permute2f128_ps( a_reg[1], a_reg[3], 0x20 );  \
+    b_reg[2] = _mm256_permute2f128_ps( a_reg[4], a_reg[6], 0x20 );  \
+    b_reg[3] = _mm256_permute2f128_ps( a_reg[5], a_reg[7], 0x20 );  \
+\
+    b_reg[4] = _mm256_permute2f128_ps( a_reg[0], a_reg[2], 0x31 );  \
+    b_reg[5] = _mm256_permute2f128_ps( a_reg[1], a_reg[3], 0x31 );  \
+    b_reg[6] = _mm256_permute2f128_ps( a_reg[4], a_reg[6], 0x31 );  \
+    b_reg[7] = _mm256_permute2f128_ps( a_reg[5], a_reg[7], 0x31 );  \
+
+#define STORE_8COLS_AVX2 \
+    _mm256_storeu_ps( ( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr ), b_reg[0] );    \
+    _mm256_storeu_ps( ( cvt_buffer + ( ( ic + 1 ) * rs_p ) + kr ), b_reg[1] );    \
+    _mm256_storeu_ps( ( cvt_buffer + ( ( ic + 2 ) * rs_p ) + kr ), b_reg[2] );    \
+    _mm256_storeu_ps( ( cvt_buffer + ( ( ic + 3 ) * rs_p ) + kr ), b_reg[3] );    \
+    _mm256_storeu_ps( ( cvt_buffer + ( ( ic + 4 ) * rs_p ) + kr ), b_reg[4] );    \
+    _mm256_storeu_ps( ( cvt_buffer + ( ( ic + 5 ) * rs_p ) + kr ), b_reg[5] );    \
+    _mm256_storeu_ps( ( cvt_buffer + ( ( ic + 6 ) * rs_p ) + kr ), b_reg[6] );    \
+    _mm256_storeu_ps( ( cvt_buffer + ( ( ic + 7 ) * rs_p ) + kr ), b_reg[7] );    \
+
+#define STORE_4COLS_AVX2 \
+    _mm256_storeu_ps( ( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr ), b_reg[0] );    \
+    _mm256_storeu_ps( ( cvt_buffer + ( ( ic + 1 ) * rs_p ) + kr ), b_reg[1] );    \
+    _mm256_storeu_ps( ( cvt_buffer + ( ( ic + 2 ) * rs_p ) + kr ), b_reg[2] );    \
+    _mm256_storeu_ps( ( cvt_buffer + ( ( ic + 3 ) * rs_p ) + kr ), b_reg[3] );    \
+
+#define STORE_2COLS_AVX2 \
+    _mm256_storeu_ps( ( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr ), b_reg[0] );    \
+    _mm256_storeu_ps( ( cvt_buffer + ( ( ic + 1 ) * rs_p ) + kr ), b_reg[1] );
+
+    #define MASKED_STORE_F32COLS_AVX2(mask)  \
+    _mm256_maskstore_ps( ( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr ), mask, b_reg[0] );    \
+    _mm256_maskstore_ps( ( cvt_buffer + ( ( ic + 1 ) * rs_p ) + kr ), mask, b_reg[1] );  \
+    _mm256_maskstore_ps( ( cvt_buffer + ( ( ic + 2 ) * rs_p ) + kr ), mask, b_reg[2] );    \
+    _mm256_maskstore_ps( ( cvt_buffer + ( ( ic + 3 ) * rs_p ) + kr ), mask, b_reg[3] );  \
+    _mm256_maskstore_ps( ( cvt_buffer + ( ( ic + 4 ) * rs_p ) + kr ), mask, b_reg[4] );    \
+    _mm256_maskstore_ps( ( cvt_buffer + ( ( ic + 5 ) * rs_p ) + kr ), mask, b_reg[5] );  \
+    _mm256_maskstore_ps( ( cvt_buffer + ( ( ic + 6 ) * rs_p ) + kr ), mask, b_reg[6] );    \
+    _mm256_maskstore_ps( ( cvt_buffer + ( ( ic + 7 ) * rs_p ) + kr ), mask, b_reg[7] );
+
+#define MASKED_STORE_4COLS_AVX2(mask) \
+    _mm256_maskstore_ps( ( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr ), mask, b_reg[0] );    \
+    _mm256_maskstore_ps( ( cvt_buffer + ( ( ic + 1 ) * rs_p ) + kr ), mask, b_reg[1] );    \
+    _mm256_maskstore_ps( ( cvt_buffer + ( ( ic + 2 ) * rs_p ) + kr ), mask, b_reg[2] );    \
+    _mm256_maskstore_ps( ( cvt_buffer + ( ( ic + 3 ) * rs_p ) + kr ), mask, b_reg[3] );    \
+
+ #define MASKED_STORE_2COLS_AVX2(mask) \
+    _mm256_maskstore_ps( ( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr ), mask, b_reg[0] );    \
+    _mm256_maskstore_ps( ( cvt_buffer + ( ( ic + 1 ) * rs_p ) + kr ), mask, b_reg[1] );    \
+
+void cvt_bf16_f32_col_major
+(
+    float*	      cvt_buffer,
+    const bfloat16* a,
+    const dim_t     rs_a,
+    const dim_t     cs_a,
+    const dim_t     MC,
+    const dim_t     KC,
+    const dim_t     rs_p,
+    const dim_t     cs_p
+)
+{
+    dim_t MR = 8;
+    dim_t ic, kr;
+
+    __m256 a_reg[8], b_reg[8];
+    a_reg[0] = _mm256_setzero_ps();
+    a_reg[1] = _mm256_setzero_ps();
+    a_reg[2] = _mm256_setzero_ps();
+    a_reg[3] = _mm256_setzero_ps();
+    a_reg[4] = _mm256_setzero_ps();
+    a_reg[5] = _mm256_setzero_ps();
+    a_reg[6] = _mm256_setzero_ps();
+    a_reg[7] = _mm256_setzero_ps();
+
+    for( ic = 0; ( ic + MR - 1 ) < MC; ic += MR )
+    {
+        for( kr = 0; ( kr + 7 ) < KC; kr += 8)
+        {
+            LOAD_AND_CONVERT_8COLS_BF16_F32(kr)
+            UNPACKLO8x8_AVX2
+            UNPACKHI8x8_AVX2
+            SHUFFLE_8x8_AVX2
+            PERMUTE_8x8_AVX2
+
+            STORE_8COLS_AVX2;
+        }
+        for( ; ( kr + 3 ) < KC; kr += 4 )
+        {
+            __m256i store_mask;
+
+            LOAD_AND_CONVERT_4COLS_BF16_F32(kr)
+            UNPACKLO8x8_AVX2
+            UNPACKHI8x8_AVX2
+            SHUFFLE_8x8_AVX2
+            PERMUTE_8x8_AVX2
+
+            GET_STORE_MASK(4, store_mask);
+            MASKED_STORE_F32COLS_AVX2(store_mask)
+
+        }
+        for( ; ( kr + 1 ) < KC; kr += 2 )
+        {
+            __m256i store_mask;
+            a_reg[0] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
+                (const __m128i*)(( a + ( ic * rs_a ) ) + ( ( kr + 0 ) * cs_a ) ) ) ); \
+            a_reg[1] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
+                (const __m128i*)(( a + ( ic * rs_a ) ) + ( ( kr + 1 ) * cs_a ) ) ) );  \
+            UNPACKLO8x8_AVX2
+            UNPACKHI8x8_AVX2
+            SHUFFLE_8x8_AVX2
+            PERMUTE_8x8_AVX2
+
+            GET_STORE_MASK(2, store_mask);
+            MASKED_STORE_F32COLS_AVX2(store_mask)
+        }
+        for( ; kr < KC; kr += 1 )
+        {
+            __m256i store_mask;
+            a_reg[0] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
+                (const __m128i*)(( a + ( ic * rs_a ) ) + ( ( kr + 0 ) * cs_a ) ) ) ); \
+
+            UNPACKLO8x8_AVX2
+            UNPACKHI8x8_AVX2
+            SHUFFLE_8x8_AVX2
+            PERMUTE_8x8_AVX2
+
+            GET_STORE_MASK(1, store_mask);
+            MASKED_STORE_F32COLS_AVX2(store_mask)
+        }
+    }
+    for( ; ( ic + 3 ) < MC; ic += 4 )
+    {
+        __m128i load_mask = _mm_set_epi16(0, 0, 0, 0, -1, -1, -1, -1);
+        for( kr = 0; ( kr + 7 ) < KC; kr += 8 )
+        {
+            MASKED_LOAD_AND_CONVERT_8COLS_BF16_F32( kr, load_mask );
+
+            UNPACKLO8x8_AVX2
+            UNPACKHI8x8_AVX2
+            SHUFFLE_8x8_AVX2
+            PERMUTE_8x8_AVX2
+            STORE_4COLS_AVX2
+        }
+        for( ; ( kr + 3 ) < KC; kr += 4 )
+        {
+            __m256i store_mask;
+
+            MASKED_LOAD_AND_CONVERT_4COLS_BF16_F32( kr, load_mask );
+
+            UNPACKLO8x8_AVX2
+            UNPACKHI8x8_AVX2
+            SHUFFLE_8x8_AVX2
+            PERMUTE_8x8_AVX2
+            GET_STORE_MASK(4, store_mask)
+            MASKED_STORE_4COLS_AVX2(store_mask);
+        }
+        for( ; ( kr + 1 ) < KC; kr += 2 )
+        {
+            __m256i store_mask;
+
+            MASKED_LOAD_AND_CONVERT_2COLS_BF16_F32(kr, load_mask);
+            UNPACKLO8x8_AVX2
+            UNPACKHI8x8_AVX2
+            SHUFFLE_8x8_AVX2
+            PERMUTE_8x8_AVX2
+            GET_STORE_MASK(2, store_mask)
+            MASKED_STORE_4COLS_AVX2(store_mask);
+        }
+        for( ; kr < KC ; kr += 1 )
+        {
+            __m256i store_mask;
+
+            a_reg[0] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_maskload_epi32(
+                (int const*)(( a + ( ic * rs_a ) ) + ( ( kr + 0 ) * cs_a ) ), load_mask ) );
+            UNPACKLO8x8_AVX2
+            UNPACKHI8x8_AVX2
+            SHUFFLE_8x8_AVX2
+            PERMUTE_8x8_AVX2
+            GET_STORE_MASK(1, store_mask)
+            MASKED_STORE_4COLS_AVX2(store_mask);
+        }
+    }
+    for( ; ( ic + 1 ) < MC; ic += 2 )
+    {
+        __m128i load_mask = _mm_set_epi16(0, 0, 0, 0, -0, 0, -1, -1);
+        for( kr = 0; ( kr + 7 ) < KC; kr += 8 )
+        {
+            MASKED_LOAD_AND_CONVERT_8COLS_BF16_F32( kr, load_mask );
+            UNPACKLO8x8_AVX2
+            UNPACKHI8x8_AVX2
+            SHUFFLE_8x8_AVX2
+            PERMUTE_8x8_AVX2
+            STORE_2COLS_AVX2
+        }
+        for( ; ( kr + 3 ) < KC; kr += 4 )
+        {
+            __m256i store_mask;
+            MASKED_LOAD_AND_CONVERT_4COLS_BF16_F32(kr, load_mask);
+            UNPACKLO8x8_AVX2
+            UNPACKHI8x8_AVX2
+            SHUFFLE_8x8_AVX2
+            PERMUTE_8x8_AVX2
+            GET_STORE_MASK(4, store_mask);
+            MASKED_STORE_2COLS_AVX2(store_mask);
+        }
+        for( ; ( kr + 1 ) < KC; kr += 2 )
+        {
+            __m256i store_mask;
+            MASKED_LOAD_AND_CONVERT_2COLS_BF16_F32(kr, load_mask);
+            UNPACKLO8x8_AVX2
+            UNPACKHI8x8_AVX2
+            SHUFFLE_8x8_AVX2
+            PERMUTE_8x8_AVX2
+            GET_STORE_MASK(2, store_mask);
+            MASKED_STORE_2COLS_AVX2(store_mask);
+        }
+        for( ; kr < KC; kr += 1 )
+        {
+            __m256i store_mask;
+            a_reg[0] = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_maskload_epi32(
+                (int const*)(( a + ( ic * rs_a ) ) + ( ( kr + 0 ) * cs_a ) ), load_mask ) );
+            UNPACKLO8x8_AVX2
+            UNPACKHI8x8_AVX2
+            SHUFFLE_8x8_AVX2
+            PERMUTE_8x8_AVX2
+            GET_STORE_MASK(1, store_mask);
+            MASKED_STORE_2COLS_AVX2(store_mask);
+        }
+    }
+    for( ; ( ic ) < MC; ic += 1 )
+    {
+        for( kr = 0; ( kr + 7 ) < KC; kr += 8 )
+        {
+            LOAD_AND_CONVERT_8COLS_1ELE_BF16_F32(kr)
+            UNPACKLO8x8_AVX2
+            UNPACKHI8x8_AVX2
+            SHUFFLE_8x8_AVX2
+            PERMUTE_8x8_AVX2
+            _mm256_storeu_ps( ( cvt_buffer + ( ( ic + 0 ) * KC ) + kr ), b_reg[0] );
+        }
+        for( ; ( kr + 3 ) < KC; kr += 4 )
+        {
+            __m256i store_mask;
+            LOAD_AND_CONVERT_4COLS_1ELE_BF16_F32(kr)
+            UNPACKLO8x8_AVX2
+            UNPACKHI8x8_AVX2
+            SHUFFLE_8x8_AVX2
+            PERMUTE_8x8_AVX2
+            GET_STORE_MASK(4, store_mask);
+            MASKED_STORE_2COLS_AVX2(store_mask);
+        }
+        for( ; ( kr + 1 ) < KC; kr += 2 )
+        {
+            __m256i store_mask;
+
+            LOAD_1BF16_ELEMENT( (bfloat16*)( a + ( ic * rs_a ) ), ( kr + 0 ), a_reg[0] );
+            LOAD_1BF16_ELEMENT( (bfloat16*)( a + ( ic * rs_a ) ), ( kr + 1 ), a_reg[1] );
+
+            UNPACKLO8x8_AVX2
+            UNPACKHI8x8_AVX2
+            SHUFFLE_8x8_AVX2
+            PERMUTE_8x8_AVX2
+            GET_STORE_MASK(2, store_mask);
+            MASKED_STORE_2COLS_AVX2(store_mask);
+        }
+        for( ; kr < KC; kr += 1 )
+        {
+            __m256i store_mask;
+
+            LOAD_1BF16_ELEMENT( (bfloat16*)( a + ( ic * rs_a ) ), ( kr + 0 ), a_reg[0] );
+            UNPACKLO8x8_AVX2
+            UNPACKHI8x8_AVX2
+            SHUFFLE_8x8_AVX2
+            PERMUTE_8x8_AVX2
+            GET_STORE_MASK(1, store_mask);
+            MASKED_STORE_2COLS_AVX2(store_mask);
+        }
+    }
+}
+void cvt_bf16_f32(
+      float*	      cvt_buffer,
       const bfloat16* a,
       const dim_t     rs_a,
       const dim_t     cs_a,
       const dim_t     MC,
       const dim_t     KC,
-      dim_t*          rs_p,
-      dim_t*          cs_p
+      const dim_t     rs_p,
+      const dim_t     cs_p
     )
 {
     if( cs_a == 1 )
     {
-        cvt_pack_bf16_f32_row_major( pack_a_buffer, a, rs_a, cs_a, MC, KC, rs_p, cs_p );
+        cvt_bf16_f32_row_major( cvt_buffer, a, rs_a, cs_a, MC, KC, rs_p, cs_p );
     }
     else
     {
-        /*ToDo: WIP*/
-        //cvt_pack_bf16_f32_col_major( pack_a_buffer, a, rs_a, cs_a, MC, KC );
+        cvt_bf16_f32_col_major( cvt_buffer, a, rs_a, cs_a, MC, KC, rs_p, cs_p );
     }
 }
 #endif

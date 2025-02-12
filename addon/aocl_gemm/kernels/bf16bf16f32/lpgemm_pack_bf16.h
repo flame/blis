@@ -198,15 +198,15 @@ void unpackb_nr64_bf16_f32
       dim_t           cs_b
     );
 
-void cvt_pack_bf16_f32(
-    float*	      pack_a_buffer,
+void cvt_bf16_f32(
+    float*	      cvt_buffer,
     const bfloat16* a,
     const dim_t     rs_a,
     const dim_t     cs_a,
     const dim_t     MC,
     const dim_t     KC,
-    dim_t*          rs_p,
-    dim_t*          cs_p
+    const dim_t      rs_p,
+    const dim_t      cs_p
   );
 
 #endif //BLIS_GEMM_BF16_PACKB

@@ -140,6 +140,73 @@
       xmm0 = _mm_load_ss(cbuf); \
       xmm2 = _mm_fmadd_ps(xmm0, beta, xmm2); \
 
+/*Load C from buf_downscale and convert to F32,
+multiply with Beta, and add to alpha*A*B*/
+#define BF16_F32_C_BNZ_8(m_ind,n_ind,ymm0,beta,ymm2) \
+	ymm0 = (__m256)_mm256_sllv_epi32  \
+			(  \
+				_mm256_cvtepi16_epi32  \
+				( \
+					_mm_load_si128  \
+					(  \
+						( __m128i const* )( \
+						( bfloat16* )post_ops_attr.buf_downscale + \
+						( post_ops_attr.rs_c_downscale * \
+							( post_ops_attr.post_op_c_i + m_ind ) ) + \
+						post_ops_attr.post_op_c_j + ( n_ind * 8 ) ) \
+					)  \
+				), _mm256_set1_epi32( 16 )  \
+			); \
+	ymm2 = _mm256_fmadd_ps(ymm0, beta, ymm2); \
+
+/*Load C from buf_downscale and convert to F32,
+multiply with Beta, and add to alpha*A*B*/
+#define BF16_F32_C_BNZ_4(m_ind,n_ind,xmm0,beta,xmm2) \
+	xmm0 =	(__m128)_mm_sllv_epi32  \
+			( \
+				_mm_cvtepi16_epi32  \
+				( \
+					_mm_loadu_si128( (__m128i const*)( \
+						( bfloat16* )post_ops_attr.buf_downscale + \
+						( post_ops_attr.rs_c_downscale * \
+							( post_ops_attr.post_op_c_i + m_ind ) ) + \
+						post_ops_attr.post_op_c_j + ( n_ind * 8 ) ))  \
+				), 	_mm_set1_epi32(16) \
+			); \
+	xmm2 = _mm_fmadd_ps(xmm0, beta, xmm2); \
+
+/*Load C from buf_downscale and convert to F32,
+multiply with Beta, and add to alpha*A*B and strore*/
+#define BF16_F32_C_BNZ_2(m_ind,n_ind,xmm0,beta,xmm2) \
+	xmm0 =	(__m128)_mm_sllv_epi32  \
+			( \
+				_mm_cvtepi16_epi32  \
+				( \
+					( __m128i )_mm_load_sd( (double const*)( \
+						( bfloat16* )post_ops_attr.buf_downscale + \
+						( post_ops_attr.rs_c_downscale * \
+						( post_ops_attr.post_op_c_i + m_ind ) ) + \
+						post_ops_attr.post_op_c_j + ( n_ind * 8 ) ))  \
+				), 	_mm_set1_epi32(16) \
+			); \
+	xmm2 = _mm_fmadd_ps(xmm0, beta, xmm2); \
+
+/*Load C from buf_downscale and convert to F32,
+multiply with Beta, and add to alpha*A*B*/
+#define BF16_F32_C_BNZ_1(m_ind,n_ind,xmm0,beta,xmm2) \
+	xmm0 =	(__m128)_mm_sllv_epi32  \
+			( \
+				_mm_cvtepi16_epi32  \
+				( \
+					( __m128i )_mm_load_ss( (float const*)( \
+							( bfloat16* )post_ops_attr.buf_downscale + \
+							( post_ops_attr.rs_c_downscale * \
+							( post_ops_attr.post_op_c_i + m_ind ) ) + \
+							post_ops_attr.post_op_c_j + ( n_ind * 8 ) ))  \
+				), 	_mm_set1_epi32(16) \
+			); \
+	xmm2 = _mm_fmadd_ps(xmm0, beta, xmm2); \
+
 // Matrix Add post-ops helper macros
 #define F32_MATRIX_ADD_1COL_XMM(scr0,m_ind,r_ind0) \
 	xmm ## r_ind0 = _mm_add_ps( scr0, xmm ## r_ind0 ); \
@@ -203,6 +270,94 @@
 	F32_F32_MATRIX_ADD_LOAD_YMM(scr0,scl_fct0,m_ind,0); \
 	F32_F32_MATRIX_ADD_LOAD_YMM(scr1,scl_fct1,m_ind,1); \
 	F32_MATRIX_ADD_2COL_YMM(scr0,scr1,m_ind,r_ind0,r_ind1); \
+
+//Matrix-Add helpers for BF16 input.
+#define BF16_F32_MATRIX_ADD_LOAD_YMM(scr,scl_fct,m_ind,n_ind) \
+	scr =	(__m256)( _mm256_sllv_epi32  \
+				(  \
+					_mm256_cvtepi16_epi32  \
+					( \
+						_mm_loadu_si128 \
+						( ( __m128i const* )( matptr + \
+						( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+						post_ops_attr.post_op_c_j + ( n_ind * 8 ) )  \
+						) \
+					), _mm256_set1_epi32( 16 )  \
+				)  \
+			); \
+	scr = _mm256_mul_ps( scr, scl_fct ); \
+
+#define BF16_F32_MATRIX_ADD_2COL(scr0,scr1,scl_fct0,scl_fct1,m_ind,r_ind0,r_ind1) \
+	BF16_F32_MATRIX_ADD_LOAD_YMM(scr0,scl_fct0,m_ind,0); \
+	BF16_F32_MATRIX_ADD_LOAD_YMM(scr1,scl_fct1,m_ind,1); \
+	F32_MATRIX_ADD_2COL_YMM(scr0,scr1,m_ind,r_ind0,r_ind1); \
+
+#define BF16_F32_MATRIX_ADD_1COL(scr0,scl_fct0,m_ind,r_ind0) \
+	BF16_F32_MATRIX_ADD_LOAD_YMM(scr0,scl_fct0,m_ind,0); \
+	F32_MATRIX_ADD_1COL_YMM(scr0,m_ind,r_ind0); \
+
+#define BF16_F32_MATRIX_ADD_LOAD_XMM(scr,scl_fct,m_ind,n_ind) \
+	scr =	(__m128)_mm_sllv_epi32  \
+			(  \
+				_mm_cvtepi16_epi32  \
+				( \
+					( __m128i )_mm_load_sd \
+					( \
+						(double const*)( matptr + \
+						( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+						post_ops_attr.post_op_c_j + ( n_ind * 4 ) ) \
+					)  \
+				) , _mm_set1_epi32( 16 )  \
+			);  \
+	scr = _mm_mul_ps( scr, scl_fct ); \
+
+#define BF16_F32_MATRIX_ADD_1COL_XMM(scr0,scl_fct0,m_ind,r_ind0) \
+	BF16_F32_MATRIX_ADD_LOAD_XMM(scr0,scl_fct0,m_ind,0); \
+	F32_MATRIX_ADD_1COL_XMM(scr0,m_ind,r_ind0); \
+
+#define BF16_F32_MATRIX_ADD_LOAD_XMM_2ELE(scr,scl_fct,m_ind,n_ind) \
+	scr =	(__m128) _mm_sllv_epi32  \
+			(  \
+				_mm_cvtepi16_epi32  \
+				( \
+					( __m128i )_mm_load_ss \
+					( \
+						(float const*)(matptr + \
+						( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+						post_ops_attr.post_op_c_j + ( n_ind * 2 ) ) \
+					) \
+				), _mm_set1_epi32( 16 )  \
+			); \
+	scr = _mm_mul_ps( scr, scl_fct ); \
+
+#define BF16_F32_MATRIX_ADD_1COL_XMM_2ELE(scr0,scl_fct0,m_ind,r_ind0) \
+	BF16_F32_MATRIX_ADD_LOAD_XMM_2ELE(scr0,scl_fct0,m_ind,0); \
+	F32_MATRIX_ADD_1COL_XMM(scr0,m_ind,r_ind0); \
+
+#define BF16_F32_MATRIX_ADD_LOAD_XMM_1ELE(scr,scl_fct,m_ind,n_ind) \
+	{   \
+		int16_t data_feeder[8] = {0};   \
+		bfloat16 *post_op_ptr = ( bfloat16* )( matptr + \
+						( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+						post_ops_attr.post_op_c_j );   \
+		\
+		for( dim_t i = 0; i < 1; i++ ) data_feeder[i] = *(post_op_ptr + i );  \
+		scr = 	(__m128) _mm_sllv_epi32  \
+				(  \
+					_mm_cvtepi16_epi32  \
+					( \
+						( __m128i )_mm_loadu_si128 \
+						( \
+							( __m128i const* )( data_feeder ) \
+						) \
+					), _mm_set1_epi32( 16 )  \
+				); \
+		scr = _mm_mul_ps( scr, scl_fct ); \
+	} \
+
+#define BF16_F32_MATRIX_ADD_1COL_XMM_1ELE(scr0,scl_fct0,m_ind,r_ind0) \
+	BF16_F32_MATRIX_ADD_LOAD_XMM_1ELE(scr0,scl_fct0,m_ind,0); \
+	F32_MATRIX_ADD_1COL_XMM(scr0,m_ind,r_ind0); \
 
 // Matrix Mul post-ops helper macros
 #define F32_MATRIX_MUL_1COL_XMM(scr0,m_ind,r_ind0) \
@@ -268,6 +423,40 @@
 	F32_F32_MATRIX_MUL_LOAD_YMM(scr1,scl_fct1,m_ind,1); \
 	F32_MATRIX_MUL_2COL_YMM(scr0,scr1,m_ind,r_ind0,r_ind1); \
 
+//BF16->F32 Matrix Mul Helpers
+#define BF16_F32_MATRIX_MUL_LOAD_XMM_1ELE(scr,scl_fct,m_ind,n_ind) \
+	BF16_F32_MATRIX_ADD_LOAD_XMM_1ELE(scr,scl_fct,m_ind,n_ind) \
+
+#define BF16_F32_MATRIX_MUL_1COL_XMM_1ELE(scr0,scl_fct0,m_ind,r_ind0) \
+	BF16_F32_MATRIX_MUL_LOAD_XMM_1ELE(scr0,scl_fct0,m_ind,0); \
+	F32_MATRIX_MUL_1COL_XMM(scr0,m_ind,r_ind0); \
+
+#define BF16_F32_MATRIX_MUL_LOAD_XMM_2ELE(scr,scl_fct,m_ind,n_ind) \
+	BF16_F32_MATRIX_ADD_LOAD_XMM_2ELE(scr,scl_fct,m_ind,n_ind) \
+
+#define BF16_F32_MATRIX_MUL_1COL_XMM_2ELE(scr0,scl_fct0,m_ind,r_ind0) \
+	BF16_F32_MATRIX_MUL_LOAD_XMM_2ELE(scr0,scl_fct0,m_ind,0); \
+	F32_MATRIX_MUL_1COL_XMM(scr0,m_ind,r_ind0); \
+
+#define BF16_F32_MATRIX_MUL_LOAD_XMM(scr,scl_fct,m_ind,n_ind) \
+	BF16_F32_MATRIX_ADD_LOAD_XMM(scr,scl_fct,m_ind,n_ind) \
+
+#define BF16_F32_MATRIX_MUL_1COL_XMM(scr0,scl_fct0,m_ind,r_ind0) \
+	BF16_F32_MATRIX_MUL_LOAD_XMM(scr0,scl_fct0,m_ind,0); \
+	F32_MATRIX_MUL_1COL_XMM(scr0,m_ind,r_ind0); \
+
+#define BF16_F32_MATRIX_MUL_LOAD_YMM(scr0,scl_fct0,m_ind,n_ind) \
+	BF16_F32_MATRIX_ADD_LOAD_YMM(scr0,scl_fct0,m_ind,n_ind); \
+
+#define BF16_F32_MATRIX_MUL_1COL(scr0,scl_fct0,m_ind,r_ind0) \
+	BF16_F32_MATRIX_MUL_LOAD_YMM(scr0,scl_fct0,m_ind,0); \
+	F32_MATRIX_MUL_1COL_YMM(scr0,m_ind,r_ind0); \
+
+#define BF16_F32_MATRIX_MUL_2COL(scr0,scr1,scl_fct0,scl_fct1,m_ind,r_ind0,r_ind1) \
+	BF16_F32_MATRIX_MUL_LOAD_YMM(scr0,scl_fct0,m_ind,0); \
+	BF16_F32_MATRIX_MUL_LOAD_YMM(scr1,scl_fct1,m_ind,1); \
+	F32_MATRIX_MUL_2COL_YMM(scr0,scr1,m_ind,r_ind0,r_ind1); \
+
 // TANH
 #define TANH_F32S_AVX2(reg, r, r2, x, z, dn, q) \
 \
@@ -313,38 +502,169 @@
 				) \
 			);
 
-#define BF16_F32_BIAS_LOAD_LT4BF16_AVX2(scr, idx) \
+#define BF16_F32_BIAS_LOAD_4BF16_AVX2(scr, idx) \
 {  \
-	int16_t data_feeder[8] = {0};   \
-	bfloat16 *post_op_ptr = ( ( bfloat16* )post_ops_list_temp->op_args1 ) + \
-										post_ops_attr.post_op_c_j ;   \
-	for( dim_t i = 0; i < idx; i++) data_feeder[i] = *(post_op_ptr + i);  \
 	scr =	(__m128)_mm_sllv_epi32  \
 			( \
 				_mm_cvtepi16_epi32  \
 				( \
-					_mm_loadu_si128( (__m128i const*)data_feeder)  \
+					(__m128i)_mm_load_sd( (double const*) \
+						(  ( bfloat16* )post_ops_list_temp->op_args1 + \
+						post_ops_attr.post_op_c_j + ( idx * 4) ) )  \
 				), 	_mm_set1_epi32(16) \
 			); \
 }
 
-#define BF16_F32_BIAS_BCAST_LT4BF16_AVX2(scr,m_ind, idx)  \
-{ \
-	int16_t data_feeder[8] = {0};   \
-	bfloat16 *post_op_ptr = ( ( bfloat16* )post_ops_list_temp->op_args1 ) + \
-									post_ops_attr.post_op_c_i + m_ind ;   \
-	for( dim_t i = 0; i < idx; i++) data_feeder[i] = *(post_op_ptr);  \
-	scr = (__m128)_mm_sllv_epi32  \
-						(  \
-							_mm_cvtepi16_epi32 \
-							( \
-								_mm_set1_epi16 \
-								(  \
-									*( data_feeder )   \
-								) \
-							), _mm_set1_epi32( 16 )  \
-						);   \
+#define BF16_F32_BIAS_LOAD_2BF16_AVX2(scr, idx) \
+{  \
+	scr =	(__m128)_mm_sllv_epi32  \
+			( \
+				_mm_cvtepi16_epi32  \
+				( \
+					(__m128i)_mm_load_ss( (float const*) \
+						( ( bfloat16* )post_ops_list_temp->op_args1 + \
+						post_ops_attr.post_op_c_j + ( idx * 2) )  )\
+				), 	_mm_set1_epi32(16) \
+			); \
 }
 
+#define BF16_F32_BIAS_LOAD_1BF16_AVX2(scr, idx) \
+{  \
+	bfloat16 data_feeder[8] = {0};  \
+	memcpy( data_feeder, (bfloat16* )post_ops_list_temp->op_args1 + \
+			post_ops_attr.post_op_c_j + ( idx * 1 ) , \
+			sizeof( bfloat16 ) );  \
+	scr =	(__m128)_mm_sllv_epi32  \
+			( \
+				_mm_cvtepi16_epi32  \
+				( \
+					(__m128i)_mm_loadu_si128( (__m128i const*)data_feeder )  \
+				), 	_mm_set1_epi32(16) \
+			); \
+}
+
+#define BF16_F32_BIAS_BCAST_LT4BF16_AVX2(scr,m_ind)  \
+{ \
+    scr = (__m128)_mm_sllv_epi32  \
+            (  \
+                _mm_cvtepi16_epi32 \
+                ( \
+                    _mm_set1_epi16 \
+                    (  \
+                        *( ( ( bfloat16* )post_ops_list_temp->op_args1 ) + \
+                            post_ops_attr.post_op_c_i + m_ind )   \
+                    ) \
+                ), _mm_set1_epi32( 16 )  \
+            );   \
+}
+
+
+#define STORE_F32_BF16_YMM( reg, m_ind, n_ind ) \
+{ \
+	_mm256_storeu_ps((float*)temp, reg); \
+	dest = ( bfloat16* )post_ops_attr.buf_downscale + \
+		( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+		post_ops_attr.post_op_c_j + ( n_ind * 8 ); \
+	for(i = 0; i < 8; i++) \
+	{ \
+		tlsb = ( temp[i] & ( uint32_t )0x00010000 ) > 16; \
+		rounded = temp[i] + ( uint32_t )0x00007FFF + tlsb; \
+		memcpy( (dest+i), ((char *)(&rounded))+2, sizeof(bfloat16)); \
+	} \
+}
+
+#define STORE_F32_BF16_4XMM( reg, m_ind, n_ind ) \
+{ \
+	_mm_storeu_ps((float*)temp, reg); \
+	dest = ( bfloat16* )post_ops_attr.buf_downscale + \
+		( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+		post_ops_attr.post_op_c_j + ( n_ind * 4 ); \
+	for(i = 0; i < 4; i++) \
+	{ \
+		tlsb = ( temp[i] & ( uint32_t )0x00010000 ) > 16; \
+		rounded = temp[i] + ( uint32_t )0x00007FFF + tlsb; \
+		memcpy( (dest+i), ((char *)(&rounded))+2, sizeof(bfloat16)); \
+	} \
+}
+
+#define STORE_F32_BF16_2XMM( reg, m_ind, n_ind ) \
+{ \
+	_mm_store_sd((double*)temp,  ( __m128d )reg); \
+	dest = ( bfloat16* )post_ops_attr.buf_downscale + \
+		( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+		post_ops_attr.post_op_c_j + ( n_ind * 2 ); \
+	for(i = 0; i < 2; i++) \
+	{ \
+		tlsb = ( temp[i] & ( uint32_t )0x00010000 ) > 16; \
+		rounded = temp[i] + ( uint32_t )0x00007FFF + tlsb; \
+		memcpy( (dest+i), ((char *)(&rounded))+2, sizeof(bfloat16)); \
+	} \
+}
+
+#define STORE_F32_BF16_1XMM( reg, m_ind, n_ind ) \
+{ \
+	_mm_store_ss((float*)temp, reg); \
+	dest = ( bfloat16* )post_ops_attr.buf_downscale + \
+		( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+		post_ops_attr.post_op_c_j + ( n_ind * 8 ); \
+	for(i = 0; i < 1; i++) \
+	{ \
+		tlsb = ( temp[i] & ( uint32_t )0x00010000 ) > 16; \
+		rounded = temp[i] + ( uint32_t )0x00007FFF + tlsb; \
+		memcpy( (dest+i), ((char *)(&rounded))+2, sizeof(bfloat16)); \
+	} \
+}
+
+/*Downscale Zeropoint BF16->F32 Helpers*/
+#define BF16_F32_ZP_SCALAR_BCAST_AVX2(scr)  \
+	scr = (__m256)( _mm256_sllv_epi32  \
+				(  \
+					_mm256_cvtepi16_epi32 \
+					( \
+						_mm_set1_epi16 \
+						(  \
+							*( ( bfloat16* )post_ops_list_temp->op_args1 )  \
+						) \
+					), _mm256_set1_epi32( 16 )  \
+				) \
+			);
+
+#define BF16_F32_ZP_VECTOR_BCAST_AVX2(scr, m_ind)  \
+	BF16_F32_BIAS_BCAST_AVX2(scr,m_ind);
+
+#define BF16_F32_ZP_VECTOR_LOAD_AVX2(scr,n_ind)  \
+	BF16_F32_BIAS_LOAD_AVX2(scr,n_ind)
+
+#define BF16_F32_ZP_SCALAR_BCAST_SSE(scr)  \
+	scr = (__m128)_mm_sllv_epi32  \
+			(  \
+				_mm_cvtepi16_epi32 \
+				( \
+					_mm_set1_epi16 \
+					(  \
+						*( ( ( bfloat16* )post_ops_list_temp->op_args1 ) )   \
+					) \
+				), _mm_set1_epi32( 16 )  \
+			);   \
+
+#define BF16_F32_ZP_VECTOR_BCAST_SSE(scr, m_ind)  \
+	BF16_F32_BIAS_BCAST_LT4BF16_AVX2(scr,m_ind);
+
+#define BF16_F32_ZP_VECTOR_4LOAD_SSE(scr,idx) \
+	BF16_F32_BIAS_LOAD_4BF16_AVX2(scr,idx); \
+
+#define BF16_F32_ZP_VECTOR_2LOAD_SSE(scr,idx) \
+	BF16_F32_BIAS_LOAD_2BF16_AVX2(scr, idx) \
+
+#define BF16_F32_ZP_VECTOR_1LOAD_SSE(scr,idx) \
+	BF16_F32_BIAS_LOAD_1BF16_AVX2(scr, idx) \
+
+// BF16->F32 Store mask helper
+#define GET_STORE_MASK(mask,store_mask)   \
+{  \
+	int32_t mask_vec[8] = {0}; \
+	for( dim_t i = 0; i < mask; i++ ) mask_vec[i] = -1;  \
+	store_mask = _mm256_loadu_si256((__m256i const *)mask_vec); \
+}
 
 #endif //LPGEMM_F32_SGEMM_AVX2_KERN_MACROS_H

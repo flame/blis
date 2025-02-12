@@ -134,7 +134,7 @@ LPGEMV_TINY(float, float, float, f32f32f32of32)
           post_op_list,
           &post_ops_attr
         );
- 
+
         if ( pack_a_buffer_f32f32f32of32 != NULL )
         {
             bli_free_user( pack_a_buffer_f32f32f32of32 );
@@ -194,6 +194,15 @@ LPGEMM_TINY(float,float,float,f32f32f32of32)
 
     lpgemm_post_op_attr post_ops_attr;
     post_ops_attr.c_stor_type = c_downscale;
+
+    if ( c_downscale < F32 )
+    {
+        post_ops_attr.buf_downscale = c;
+    }
+    else
+    {
+        post_ops_attr.buf_downscale = NULL;
+    }
 
     bool is_first_k = TRUE;
     post_ops_attr.is_first_k = is_first_k;
@@ -270,7 +279,7 @@ LPGEMM_TINY(float,float,float,f32f32f32of32)
           post_op_list, post_ops_attr
         );
     }
- 
+
     if ( pack_b_buffer_f32f32f32of32 != NULL )
     {
         bli_free_user( pack_b_buffer_f32f32f32of32 );

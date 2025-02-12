@@ -87,9 +87,9 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 	trans_t blis_transb;
 
 	// Check if avx512_vnni ISA is supported, lpgemm matmul only works with it.
-	if ( bli_cpuid_is_avx512bf16_supported() == FALSE )
+	if ( bli_cpuid_is_avx2fma3_supported() == FALSE )
 	{
-		bli_print_msg(" AVX512_BF16 ISA not supported by processor, "
+		bli_print_msg(" AVX2 ISA not supported by processor, "
 				"cannot perform bf16bf16f32 gemm.", __FILE__, __LINE__ );
 		goto err_hndl;
 	}
@@ -223,11 +223,12 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 	bli_pba_rntm_set_pba( &rntm_g );
 
 	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( BF16BF16F32OF32 );
-
 #if (defined(BLIS_KERNELS_ZEN4) && (!defined(LPGEMM_BF16_JIT)))
-	if ( ( is_tiny_input_bf16obf16( m, n, k, lcntx_g ) == TRUE ) &&
-		 ( is_single_thread( &rntm_g ) == TRUE) &&
-	  	 ( is_row_major == TRUE ) )
+	arch_t arch_id =  bli_arch_query_id();
+	if( ( ( arch_id == BLIS_ARCH_ZEN4 ) || ( arch_id == BLIS_ARCH_ZEN5 ) ) &&
+		( is_tiny_input_bf16obf16( m, n, k, lcntx_g ) == TRUE ) &&
+		( is_single_thread( &rntm_g ) == TRUE) &&
+	  	( is_row_major == TRUE ) )
 	{
 		lpgemm_rowvar_tiny_bf16bf16f32of32
 		(
@@ -242,7 +243,6 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 		return;
 	}
 #endif
-
 #ifdef BLIS_ENABLE_OPENMP
 	// Swapping inputs to induce row major computation for column major inputs.
 	if ( is_column_major == TRUE )
