@@ -478,7 +478,7 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
 
                     lpgemm_alloc_mem_panel
                     (
-                      mem_b_size_req, BLIS_BUFFER_FOR_B_PANEL,
+                      mem_b_size_req, BLIS_BUFFER_FOR_GEN_USE,
                       &mem_b, rntm
                     );
 
@@ -522,8 +522,13 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
                       pack_b_buffer_f32f32f32of32 + ( jc_packb_start * kc0 ),
                       b + ( rs_b * pc ) + ( cs_b * jc ) +
                           ( cs_b * jc_packb_start ),
-                      rs_b, cs_b, nc0, kc0, &rs_b_use, &cs_b_use
+                      rs_b, cs_b, ( jc_packb_end - jc_packb_start ),
+                      kc0, &rs_b_use, &cs_b_use
                     );
+                }
+                else
+                {
+                    lpgemm_get_packb_strides( lcntx, &rs_b_use, &cs_b_use );
                 }
 
                 // All threads in work group should wait till B matrix packing
@@ -580,7 +585,7 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
 
                     lpgemm_alloc_mem_panel
                     (
-                      mem_a_size_req, BLIS_BUFFER_FOR_A_BLOCK,
+                      mem_a_size_req, BLIS_BUFFER_FOR_GEN_USE,
                       &mem_a, rntm
                     );
                     pack_a_buffer_f32f32f32of32 = ( float* )bli_mem_buffer( &mem_a );

@@ -780,6 +780,7 @@ BLIS_INLINE void lpgemm_f32f32f32of32_get_threading
 		}
 	}
 }
+
 BLIS_INLINE void batch_lpgemm_f32f32f32of32_get_threading
      (
        dim_t   batch_size,

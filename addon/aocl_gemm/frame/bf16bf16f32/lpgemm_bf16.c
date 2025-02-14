@@ -514,7 +514,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 
 					lpgemm_alloc_mem_panel
 					(
-					  mem_b_size_req, BLIS_BUFFER_FOR_B_PANEL,
+					  mem_b_size_req, BLIS_BUFFER_FOR_GEN_USE,
 					  &mem_b, rntm
 					);
 
@@ -619,10 +619,10 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 					mem_a_size_req = sizeof( bfloat16 ) * mc0 * kc0;
 
 					lpgemm_alloc_mem_panel
-						(
-						mem_a_size_req, BLIS_BUFFER_FOR_GEN_USE,
-						&mem_a, rntm
-						);
+					(
+					  mem_a_size_req, BLIS_BUFFER_FOR_GEN_USE,
+					  &mem_a, rntm
+					);
 
 					pack_a_buffer_bf16 =
 						( bfloat16* ) bli_mem_buffer( &mem_a );
@@ -992,10 +992,10 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 				mem_a_size_req = sizeof( float ) * mc0 * kc0;
 
 				lpgemm_alloc_mem_panel
-					(
-						mem_a_size_req, BLIS_BUFFER_FOR_GEN_USE,
-						&mem_a, rntm
-					);
+				(
+				  mem_a_size_req, BLIS_BUFFER_FOR_GEN_USE,
+				  &mem_a, rntm
+				);
 				// For packed or unpacked data, the mc0 * kc0
 				// block is converted to contain F32 data.
 				if ( mtag_a == UNPACKED )
