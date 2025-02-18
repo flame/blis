@@ -1105,8 +1105,8 @@ void packb_mxp_nrlt16_f32obf16_col_major
             // Rearrange for dpbf16_ps, read 2 rows from B with 64 elements in each row.
             a_reg[jr] = (__m512i)_mm512_cvtne2ps_pbh
                         (
-                            _mm512_loadu_ps(b + (ldb * (jr + 0)) + 16),
-                            _mm512_loadu_ps(b + (ldb * (jr + 0)))
+                            _mm512_loadu_ps(b + ((ldb * jr) + kr + 16)),
+                            _mm512_loadu_ps(b + (ldb * jr) + kr)
                         );
         }
 

@@ -46,10 +46,10 @@
 
 void unpackb_nr48_bf16bf16f32of32_row_major_ref
 	(
-	  bfloat16* 	b,
-	  bfloat16*     unpack_b,
-	  const dim_t   KC,
-	  dim_t         ldb
+	  bfloat16*    b,
+	  bfloat16*    unpack_b,
+	  const dim_t  KC,
+	  dim_t        ldb
 	)
 {
 	dim_t NR1 = 32;
@@ -132,10 +132,10 @@ void unpackb_nr48_bf16bf16f32of32_row_major_ref
 
 void unpackb_nr32_bf16bf16f32of32_row_major_ref
 	(
-	  bfloat16* b,
-	  bfloat16*       unpack_b,
-	  const dim_t     KC,
-	  dim_t           ldb
+	  bfloat16*    b,
+	  bfloat16*    unpack_b,
+	  const dim_t  KC,
+	  dim_t        ldb
 	)
 {
 	dim_t NR = 32;
@@ -187,10 +187,10 @@ void unpackb_nr32_bf16bf16f32of32_row_major_ref
 
 void unpackb_nr16_bf16bf16f32of32_row_major_ref
 	(
-	  bfloat16* b,
-	  bfloat16*       unpack_b,
-	  const dim_t     KC,
-	  dim_t           ldb
+	  bfloat16*    b,
+	  bfloat16*    unpack_b,
+	  const dim_t  KC,
+	  dim_t        ldb
 	)
 {
 	dim_t NR = 16;
@@ -287,11 +287,11 @@ void unpackb_nrlt16_bf16bf16f32of32_row_major_ref
 
 void unpackb_nr64_bf16bf16f32of32_row_major_ref
 	(
-	  bfloat16*       b,
-	  bfloat16*       unpack_b,
-	  const dim_t     NC,
-	  const dim_t     KC,
-	  dim_t           ldb
+	  bfloat16*     b,
+	  bfloat16*     unpack_b,
+	  const dim_t   NC,
+	  const dim_t   KC,
+	  dim_t         ldb
 	)
 {
 	dim_t NR = 64;
@@ -413,25 +413,25 @@ void unpackb_nrlt16_bf16bf16f32of32_col_major_ref
 	  bfloat16* 	b,
 	  bfloat16*     unpack_b,
 	  const dim_t   KC,
-	  dim_t         NR,
-	  dim_t         ldb
+	  dim_t         ldb,
+	  dim_t         n0_partial_rem
 	)
 {
-	// Used for permuting the mm512i elements for use in dpbf16_ps instruction.
 	dim_t kr = 0;
+	dim_t NR = 16;
+
 	for ( kr = 0; ( kr + 31 ) < KC; kr += 32 )
 	{
-		for( dim_t jr = 0; jr < NR; jr += 16 )
+		bfloat16 *inp, *outp;
 		{
-			bfloat16 *inp, *outp;
 			for( dim_t i = 0; i < 16; i++ )
 			{
-				outp  = (unpack_b + ( ldb * ( jr + i ) ) + kr);
-				inp = b + ( jr * 2 ) + (kr * NR) + i * 2;
-				for( dim_t j = 0; j < 16; j++ )
+				inp = ( b +  ( ( kr +  i * 2 ) * NR ) );
+				outp = ( unpack_b + kr + i * 2 );
+				for( dim_t j = 0; j < n0_partial_rem; j++ )
 				{
-					*(outp + ( j * 2 * NR)) = *inp++;
-					*(outp + (( j * 2 * NR) + 1)) = *inp++;
+					*(outp +  j * ldb)  = *inp++;
+					*(outp +  j * ldb + 1) = *inp++;
 				}
 			}
 		}
@@ -439,118 +439,114 @@ void unpackb_nrlt16_bf16bf16f32of32_col_major_ref
 
 	for ( ; ( kr + 15 ) < KC; kr += 16 )
 	{
-		for( dim_t jr = 0; jr < NR; jr += 16 )
+		bfloat16 *inp, *outp;
 		{
-			bfloat16 *inp, *outp;
-			for( dim_t i = 0; i < 16; i++ )
+			for( dim_t i = 0; i < 8; i++)
 			{
-				outp  = (unpack_b + ( ldb * ( jr + i ) ) + kr);
-				inp = b + ( jr * 2 ) + (kr * NR) + i * 2;
-				for( dim_t j = 0; j < 8; j++ )
+				inp = ( b +  ( ( kr + i * 2 ) * NR ));
+				outp = ( unpack_b + kr + i * 2);
+				for( dim_t j = 0; j < n0_partial_rem; j++ )
 				{
-					*(outp + ( j * 2 * NR)) = *inp++;
-					*(outp + (( j * 2 * NR) + 1)) = *inp++;
+					*(outp +  j*ldb)  = *inp++;
+					*(outp +  j*ldb + 1) = *inp++;
 				}
 			}
 		}
 	}
 
-	for( ; ( kr +7 ) < KC; kr += 8 )
+	for ( ; ( kr + 7 ) < KC; kr += 8 )
 	{
-		for( dim_t jr = 0; jr < NR; jr += 16 )
+		bfloat16 *inp, *outp;
 		{
-			bfloat16 *inp, *outp;
-			for( dim_t i = 0; i < 16; i++ )
+			for( dim_t i = 0; i < 4; i++)
 			{
-				outp  = (unpack_b + ( ldb * ( jr + i ) ) + kr);
-				inp = b + ( jr * 2 ) + (kr * NR) + i * 2;
-				for( dim_t j = 0; j < 4; j++ )
+				inp = ( b +  ( ( kr + i * 2 ) * NR ));
+				outp = ( unpack_b + kr + i * 2);
+				for( dim_t j = 0; j < n0_partial_rem; j++ )
 				{
-					*(outp + ( j * 2 * NR)) = *inp++;
-					*(outp + (( j * 2 * NR) + 1)) = *inp++;
+					*(outp +  j*ldb)  = *inp++;
+					*(outp +  j*ldb + 1) = *inp++;
 				}
 			}
 		}
 	}
 
-	for( ; ( kr +3 ) < KC; kr += 4 )
+	for ( ; ( kr + 3 ) < KC; kr += 4 )
 	{
-		for( dim_t jr = 0; jr < NR; jr += 16 )
+		bfloat16 *inp, *outp;
 		{
-			bfloat16 *inp, *outp;
-			for( dim_t i = 0; i < 16; i++ )
+			for( dim_t i = 0; i < 2; i++)
 			{
-				outp = (unpack_b + ( ldb * ( jr + i ) ) + kr);
-				inp = b + ( jr * 2 ) + (kr * NR) + i * 2;
-				for( dim_t j = 0; j < 2; j++ )
+				inp = ( b +  ( ( kr + i * 2 ) * NR ));
+				outp = ( unpack_b + kr + i * 2);
+				for( dim_t j = 0; j < n0_partial_rem; j++ )
 				{
-					*(outp + ( j * 2 * NR)) = *inp++;
-					*(outp + (( j * 2 * NR) + 1)) = *inp++;
+					*(outp +  j*ldb)  = *inp++;
+					*(outp +  j*ldb + 1) = *inp++;
 				}
 			}
 		}
 	}
 
-	for( ; ( kr +1 ) < KC; kr += 2 )
+	for ( ; ( kr + 1 ) < KC; kr += 2 )
 	{
-		for( dim_t jr = 0; jr < NR; jr += 16 )
+		bfloat16 *inp, *outp;
 		{
-			bfloat16 *inp, *outp;
-			for( dim_t i = 0; i < 16; i++ )
+			for( dim_t i = 0; i < 1; i++)
 			{
-				outp = (unpack_b + ( ldb * ( jr + i ) ) + kr);
-				inp = b + ( jr * 2 ) + (kr * NR) + i * 2;
-				for( dim_t j = 0; j < 1; j++ )
+				inp = ( b +  ( ( kr + i * 2 ) * NR ));
+				outp = ( unpack_b + kr + i * 2);
+				for( dim_t j = 0; j < n0_partial_rem; j++ )
 				{
-					*(outp + ( j * 2 * NR)) = *inp++;
-					*(outp + (( j * 2 * NR) + 1)) = *inp++;
+					*(outp +  j*ldb)  = *inp++;
+					*(outp +  j*ldb + 1) = *inp++;
 				}
 			}
 		}
 	}
 
-	for( ; kr < KC; kr += 1 )
+	for ( ;  kr < KC; kr += 1 )
 	{
-		for( dim_t jr = 0; jr < NR; jr += 16 )
+		bfloat16 *inp, *outp;
 		{
-			bfloat16 *inp, *outp;
-			for( dim_t i = 0; i < 16; i++ )
+			for( dim_t i = 0; i < 1; i++)
 			{
-				outp = (unpack_b + ( ldb * ( jr + i ) ) + kr);
-				inp = b + ( jr * 2 ) + (kr * NR) + i * 2;
-				for( dim_t j = 0; j < 1; j++ )
+				inp = ( b +  ( ( kr + i * 2 ) * NR ));
+				outp = ( unpack_b + kr + i * 2);
+				for( dim_t j = 0; j < n0_partial_rem; j++ )
 				{
-					*(outp + ( j * 2 * NR)) = *inp++;
-					*(outp + (( j * 2 * NR) + 1)) = 0;
+					*(outp +  j*ldb)  = *inp++;
+					inp++;
 				}
 			}
 		}
 	}
 }
 
+
 void unpackb_nr_mult_16_bf16bf16f32of32_col_major_ref
 	(
-	  bfloat16*       b,
-	  bfloat16*       unpack_b,
-	  const dim_t     NR,
-	  const dim_t     KC,
-	  dim_t           ldb
+	  bfloat16*    b,
+	  bfloat16*    unpack_b,
+	  const dim_t  NR,
+	  const dim_t  KC,
+	  dim_t        ldb
 	)
 {
 	dim_t kr = 0;
 	for ( kr = 0; ( kr + 31 ) < KC; kr += 32 )
 	{
-		for( dim_t i = 0; i < 16; i++ )
+		bfloat16 *inp, *outp;
+		for( dim_t jr = 0; jr < NR; jr += 16 )
 		{
-			bfloat16 *inp, *outp;
-			for( dim_t jr = 0; jr < NR; jr += 16 )
+			for( dim_t i = 0; i < 16; i++)
 			{
-				outp = (unpack_b + ( ldb * ( jr + i ) ) + kr);
-				inp = ( b + ( jr * KC ) + ( ( kr + 0 ) * NR ));
+				inp = ( b + ( jr * 2 ) + ( ( kr + i * 2 ) * NR ));
+				outp = ( unpack_b + i * 2 + ( ldb * jr ) + kr);
 				for( dim_t j = 0; j < 16; j++ )
 				{
-					*(outp + ( j * 2 * NR)) = *inp++;
-					*(outp + (( j * 2 * NR) + 1)) = *inp++;
+					*(outp +  j*ldb)  = *inp++;
+					*(outp +  j*ldb + 1) = *inp++;
 				}
 			}
 		}
@@ -561,14 +557,14 @@ void unpackb_nr_mult_16_bf16bf16f32of32_col_major_ref
 		for( dim_t jr = 0; jr < NR; jr += 16 )
 		{
 			bfloat16 *inp, *outp;
-			for( dim_t i = 0; i < 16; i++ )
+			for( dim_t i = 0; i < 8; i++)
 			{
-				outp = (unpack_b + ( ldb * ( jr + i ) ) + kr);
-				inp = b + ( jr * 2 ) + (kr * NR) + i * 2;
-				for( dim_t j = 0; j < 8; j++ )
+				inp = ( b + ( jr * 2 ) + ( ( kr + i * 2 ) * NR ));
+				outp = ( unpack_b + i * 2 + ( ldb * jr ) + kr);
+				for( dim_t j = 0; j < 16; j++ )
 				{
-					*(outp + ( j * 2 * NR)) = *inp++;
-					*(outp + (( j * 2 * NR) + 1)) = *inp++;
+					*(outp +  j*ldb)  = *inp++;
+					*(outp +  j*ldb + 1) = *inp++;
 				}
 			}
 		}
@@ -579,14 +575,14 @@ void unpackb_nr_mult_16_bf16bf16f32of32_col_major_ref
 		for( dim_t jr = 0; jr < NR; jr += 16 )
 		{
 			bfloat16 *inp, *outp;
-			for( dim_t i = 0; i < 16; i++ )
+			for( dim_t i = 0; i < 4; i++)
 			{
-				outp = (unpack_b + ( ldb * ( jr + i ) ) + kr);
-				inp = b + ( jr * 2 ) + (kr * NR) + i * 2;
-				for( dim_t j = 0; j < 4; j++ )
+				inp = ( b + ( jr * 2 ) + ( ( kr + i * 2 ) * NR ));
+				outp = ( unpack_b + i * 2 + ( ldb * jr ) + kr);
+				for( dim_t j = 0; j < 16; j++ )
 				{
-					*(outp + ( j * 2 * NR)) = *inp++;
-					*(outp + (( j * 2 * NR) + 1)) = *inp++;
+					*(outp +  j*ldb)  = *inp++;
+					*(outp +  j*ldb + 1) = *inp++;
 				}
 			}
 		}
@@ -597,14 +593,14 @@ void unpackb_nr_mult_16_bf16bf16f32of32_col_major_ref
 		for( dim_t jr = 0; jr < NR; jr += 16 )
 		{
 			bfloat16 *inp, *outp;
-			for( dim_t i = 0; i < 16; i++ )
+			for( dim_t i = 0; i < 2; i++)
 			{
-				outp = (unpack_b + ( ldb * ( jr + i ) ) + kr);
-				inp = b + ( jr * 2 ) + (kr * NR) + i * 2;
-				for( dim_t j = 0; j < 2; j++ )
+				inp = ( b + ( jr * 2 ) + ( ( kr + i * 2 ) * NR ));
+				outp = ( unpack_b + i * 2 + ( ldb * jr ) + kr);
+				for( dim_t j = 0; j < 16; j++ )
 				{
-					*(outp + ( j * 2 * NR)) = *inp++;
-					*(outp + (( j * 2 * NR) + 1)) = *inp++;
+					*(outp +  j*ldb)  = *inp++;
+					*(outp +  j*ldb + 1) = *inp++;
 				}
 			}
 		}
@@ -615,15 +611,15 @@ void unpackb_nr_mult_16_bf16bf16f32of32_col_major_ref
 		for( dim_t jr = 0; jr < NR; jr += 16 )
 		{
 			bfloat16 *inp, *outp;
-			for( dim_t i = 0; i < 16; i++ )
+			for( dim_t i = 0; i < 1; i++)
 			{
-				outp = (unpack_b + ( ldb * ( jr + i ) ) + kr);
-				inp = b + ( jr * 2 ) + (kr * NR) + i * 2;
-				for( dim_t j = 0; j < 1; j++ )
+				inp = (b + ( jr * 2 ) + ( ( kr + i * 2 ) * NR ));
+				outp = (unpack_b + i * 2 + ( ldb * jr ) + kr);
+				for( dim_t j = 0; j < 16; j++ )
 				{
-					*(outp + ( j * 2 * NR)) = *inp++;
-					*(outp + (( j * 2 * NR) + 1)) = *inp++;
-				}
+					*(outp +  j*ldb)  = *inp++;
+					*(outp +  j*ldb + 1) = *inp++;
+				}		
 			}
 		}
 	}
@@ -633,27 +629,27 @@ void unpackb_nr_mult_16_bf16bf16f32of32_col_major_ref
 		for( dim_t jr = 0; jr < NR; jr += 16 )
 		{
 			bfloat16 *inp, *outp;
-			for( dim_t i = 0; i < 16; i++ )
+			for( dim_t i = 0; i < 1; i++)
 			{
-				outp = (unpack_b + ( ldb * ( jr + i ) ) + kr);
-				inp = b + ( jr * 2 ) + (kr * NR) + i * 2;
-				for( dim_t j = 0; j < 1; j++ )
+				inp = ( b + ( jr * 2 ) + ( ( kr + i * 2 ) * NR ));
+				outp = ( unpack_b + i * 2 + ( ldb * jr ) + kr);
+				for( dim_t j = 0; j < 16; j++ )
 				{
-					*(outp + ( j * 2 * NR)) = *inp++;
-					*(outp + (( j * 2 * NR) + 1)) = 0;
+					*(outp +  j * ldb)  = *inp++;
+					inp++;
 				}
 			}
 		}
 	}
-};
+}
 
 void unpackb_nr64_bf16bf16f32of32_col_major_ref
 	(
-	  bfloat16* b,
-	  bfloat16*       unpack_b,
-	  const dim_t     NC,
-	  const dim_t     KC,
-	  dim_t           ldb
+	  bfloat16*    b,
+	  bfloat16*    unpack_b,
+	  const dim_t  NC,
+	  const dim_t  KC,
+	  dim_t        ldb
 	)
 {
 	dim_t NR = 64;
@@ -673,9 +669,10 @@ void unpackb_nr64_bf16bf16f32of32_col_major_ref
 	for ( dim_t jc = 0; jc < n_full_pieces_loop_limit; jc += NR )
 	{
 		unpackb_nr_mult_16_bf16bf16f32of32_col_major_ref
-			( b + (jc * KC_updated),
-			  unpack_b + (jc * ldb), 64, KC, ldb
-			);
+		( 
+			b + (jc * KC_updated),
+			unpack_b + (jc * ldb), 64, KC, ldb
+		);
 	}
 
 	if(n_partial_pieces > 0)
@@ -693,30 +690,30 @@ void unpackb_nr64_bf16bf16f32of32_col_major_ref
 		if ( n0_48 == 1 )
 		{
 			unpackb_nr_mult_16_bf16bf16f32of32_col_major_ref
-				(
-				 ( b + ( n_full_pieces_loop_limit * KC_updated ) ),
-				 ( unpack_b + n_full_pieces_loop_limit * ldb ), 48, KC, ldb
-				);
+			(
+				( b + ( n_full_pieces_loop_limit * KC_updated ) ),
+				( unpack_b + n_full_pieces_loop_limit * ldb ), 48, KC, ldb
+			);
 
 			n0_partial_pack = 48;
 		}
 		else if ( n0_32 == 1 )
 		{
 			unpackb_nr_mult_16_bf16bf16f32of32_col_major_ref
-				(
-				 ( b + ( n_full_pieces_loop_limit * KC_updated ) ),
-				 ( unpack_b + n_full_pieces_loop_limit * ldb ), 32, KC, ldb
-				);
+			(
+				( b + ( n_full_pieces_loop_limit * KC_updated ) ),
+				( unpack_b + n_full_pieces_loop_limit * ldb ), 32, KC, ldb
+			);
 
 			n0_partial_pack = 32;
 		}
 		else if ( n0_16 == 1 )
 		{
 			unpackb_nr_mult_16_bf16bf16f32of32_col_major_ref
-				(
-				 ( b + ( n_full_pieces_loop_limit * KC_updated ) ),
-				 ( unpack_b + n_full_pieces_loop_limit * ldb ), 16, KC, ldb
-				);
+			(
+				( b + ( n_full_pieces_loop_limit * KC_updated ) ),
+				( unpack_b + n_full_pieces_loop_limit * ldb ), 16, KC, ldb
+			);
 
 			n0_partial_pack = 16;
 		}
@@ -724,24 +721,24 @@ void unpackb_nr64_bf16bf16f32of32_col_major_ref
 		if ( n0_partial_rem > 0 )
 		{
 			unpackb_nrlt16_bf16bf16f32of32_col_major_ref
-				(
-				 ( b + ( n_full_pieces_loop_limit * KC_updated ) +
-				   ( n0_partial_pack * KC_updated ) ),
-				 ( unpack_b + ( n_full_pieces_loop_limit + n0_partial_pack ) * ldb ), KC, ldb,
-				 n0_partial_rem
-				);
+			(
+				( b + ( n_full_pieces_loop_limit * KC_updated ) + 
+				  ( n0_partial_pack * KC_updated ) ),
+				( unpack_b + ( n_full_pieces_loop_limit + n0_partial_pack ) * ldb ), 
+				KC, ldb, n0_partial_rem
+			);
 		}
 	}
 };
 
 void unpackb_nr64_bf16bf16f32of32_reference
 	(
-	  bfloat16*       b,
-	  bfloat16*       unpack_b,
-	  const dim_t	  NC,
-	  const dim_t     KC,
-	  dim_t           rs_b,
-	  dim_t           cs_b
+	  bfloat16*    b,
+	  bfloat16*    unpack_b,
+	  const dim_t  NC,
+	  const dim_t  KC,
+	  dim_t        rs_b,
+	  dim_t        cs_b
 	)
 {
 	if( cs_b == 1 )
@@ -750,9 +747,7 @@ void unpackb_nr64_bf16bf16f32of32_reference
 	}
 	else
 	{
-		return;
-		//TODO: Implement column major unpacking
-		//unpackb_nr64_bf16bf16f32of32_col_major_ref( b, unpack_b, NC, KC, cs_b );
+		unpackb_nr64_bf16bf16f32of32_col_major_ref( b, unpack_b, NC, KC, cs_b );
 	}
 }
 
