@@ -40,6 +40,8 @@
 
 #ifdef AOCL_DEV
 
+    #define K_bli_cgemm_zen4_asm_24x4 1
+    #define K_bli_cgemm_zen4_asm_4x24 1
     #define K_bli_zgemmsup_cd_zen4_asm_12x2m 1
     #define K_bli_zgemmsup_cd_zen4_asm_12x4m 1
     #define K_bli_zgemmsup_cd_zen4_asm_2x2 1

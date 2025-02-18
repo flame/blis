@@ -44,10 +44,10 @@
 // function bli_dynamic_blkszs_zen5
 #define BLI_CNTX_DEFAULT_BLKSZ_LIST_TURIN(blkszs) \
 	/*                                           s      d      c      z */  \
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,     8,     3,    12 );  \
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    24,     8,     4 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,     8,    24,    12 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    24,     4,     4 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,    80,   144,    60 );  \
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   480,   384,   256,   512 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   480,   384,   512,   512 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  4032,  4080,  2004 );  \
 	                                                                        \
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );  \
@@ -56,10 +56,10 @@
 /* Blocksizes for double(d) datetype are tuned for Turin, rest are copied from Bergamo */
 #define BLI_CNTX_DEFAULT_BLKSZ_LIST_TURIN_DENSE(blkszs) \
 	/*                                           s      d      c      z */  \
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,     8,     3,    12 );  \
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    24,     8,     4 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,     8,    24,    12 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    24,     4,     4 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,    88,   144,    60 );  \
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   480,   384,   256,   512 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   480,   384,   512,   512 );  \
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  4032,  4080,  2004 );  \
 	                                                                        \
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );  \
@@ -83,7 +83,7 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 	  // gemm
 	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_skx_asm_32x12_l2,   FALSE,
 	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_avx512_asm_8x24,    TRUE,
-	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_haswell_asm_3x8,    TRUE,
+	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_zen4_asm_24x4,      FALSE,
 	  /*bli_zgemm_zen4_asm_12x4 is a column preferred kernel*/
 	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_zen4_asm_12x4,      FALSE,
 
@@ -126,8 +126,8 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 	  BLIS_PACKM_8XK_KER,  BLIS_DOUBLE,   bli_dpackm_zen4_asm_8xk,
 	  BLIS_PACKM_24XK_KER, BLIS_DOUBLE,   bli_dpackm_zen4_asm_24xk,
 	  BLIS_PACKM_32XK_KER, BLIS_DOUBLE,   bli_dpackm_zen4_asm_32xk,
-	  BLIS_PACKM_3XK_KER,  BLIS_SCOMPLEX, bli_cpackm_haswell_asm_3xk,
-	  BLIS_PACKM_8XK_KER,  BLIS_SCOMPLEX, bli_cpackm_haswell_asm_8xk,
+	  BLIS_PACKM_4XK_KER,  BLIS_SCOMPLEX, bli_cpackm_zen4_asm_4xk,
+	  BLIS_PACKM_24XK_KER, BLIS_SCOMPLEX, bli_cpackm_zen4_asm_24xk,
 	  BLIS_PACKM_3XK_KER,  BLIS_DCOMPLEX, bli_zpackm_haswell_asm_3xk,
 	  BLIS_PACKM_12XK_KER, BLIS_DCOMPLEX, bli_zpackm_zen4_asm_12xk,
 	  BLIS_PACKM_4XK_KER,  BLIS_DCOMPLEX, bli_zpackm_zen4_asm_4xk,
@@ -250,8 +250,8 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 	// Using different cache block sizes for TRSM instead of common level-3 block sizes.
 	// Tuning is done for double-precision only.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,     8,     3,     4 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,    24,     8,    12 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,     8,    24,     4 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,    24,     4,    12 );
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,   120,   144,    40 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   512,   256,   512 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4008,  4080,  2004 );

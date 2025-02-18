@@ -168,6 +168,8 @@ PACKM_KER_PROT( double,   d, packm_zen4_asm_8xk )
 PACKM_KER_PROT( double,   d, packm_zen4_asm_24xk )
 PACKM_KER_PROT( double,   d, packm_zen4_asm_32xk )
 PACKM_KER_PROT( double,   d, packm_32xk_zen4_ref )
+PACKM_KER_PROT( scomplex, c, packm_zen4_asm_24xk )
+PACKM_KER_PROT( scomplex, c, packm_zen4_asm_4xk )
 PACKM_KER_PROT( dcomplex, z, packm_zen4_asm_12xk )
 PACKM_KER_PROT( dcomplex, z, packm_zen4_asm_4xk )
 
@@ -176,6 +178,8 @@ GEMM_UKR_PROT( double,   d, gemm_avx512_asm_8x24 )
 GEMM_UKR_PROT( double,   d, gemm_zen4_asm_32x6 )
 GEMM_UKR_PROT( dcomplex, z, gemm_zen4_asm_12x4 )
 GEMM_UKR_PROT( dcomplex, z, gemm_zen4_asm_4x12 )
+GEMM_UKR_PROT( scomplex, c, gemm_zen4_asm_24x4 )
+GEMM_UKR_PROT( scomplex, c, gemm_zen4_asm_4x24 )
 
 // dgemm native macro kernel
 void bli_dgemm_avx512_asm_8x24_macro_kernel

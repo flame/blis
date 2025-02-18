@@ -259,12 +259,7 @@ static void test_gemmnat_ukr( char storage, gtint_t m, gtint_t n, gtint_t k, T a
     /* allocation of extra memory is must                       */
     /************************************************************/
 
-    obj_t a, b;
-    num_t dt = BLIS_DCOMPLEX;
     gtint_t maxmn = (std::max)(m,n);
-    bli_obj_create(dt, m, k, 1, m, &a);
-    bli_obj_create(dt, k, n, n, 1, &b);
-
     // Create test operands
     // matrix A will be in col-storage
     // matrix B will be in row-storage

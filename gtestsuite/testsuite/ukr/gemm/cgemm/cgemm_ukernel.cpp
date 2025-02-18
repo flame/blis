@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -787,6 +787,44 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(3),                                               // values of m
         ::testing::Values(8),                                               // values of n
         ::testing::Values(bli_cgemm_haswell_asm_3x8),                       // cgemm_nat kernel
+        ::testing::Values(false, true)                                      // is_memory_test
+    ),
+    ::cgemmGenericNatPrint()
+);
+#endif
+#endif
+
+#if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
+#ifdef K_bli_cgemm_zen4_asm_24x4
+INSTANTIATE_TEST_SUITE_P(
+    bli_cgemm_zen4_asm_24x4,
+    cgemmGenericNat,
+    ::testing::Combine(
+        ::testing::Range(gtint_t(1), gtint_t(20), 1),                       // values of k
+        ::testing::Values(scomplex{0.0, 0.0}, scomplex{1.0, 0.0}, scomplex{-1.0, 0.0}, scomplex{4.0, 0.0}, scomplex{0.0, -0.2}, scomplex{3.2, 4.5}),   // alpha value
+        ::testing::Values(scomplex{0.0, 0.0}, scomplex{1.0, 0.0}, scomplex{-1.0, 0.0}, scomplex{-5.0, 0.0}, scomplex{0.0, -2.1}, scomplex{-7.3, 6.7}), // beta value
+        ::testing::Values('r', 'c'),                                        // storage
+        ::testing::Values(24),                                              // values of m
+        ::testing::Values(4),                                               // values of n
+        ::testing::Values(bli_cgemm_zen4_asm_24x4),                         // cgemm_nat kernel
+        ::testing::Values(false, true)                                      // is_memory_test
+    ),
+    ::cgemmGenericNatPrint()
+);
+#endif
+
+#ifdef K_bli_cgemm_zen4_asm_4x24
+INSTANTIATE_TEST_SUITE_P(
+    bli_cgemm_zen4_asm_4x24,
+    cgemmGenericNat,
+    ::testing::Combine(
+        ::testing::Range(gtint_t(1), gtint_t(20), 1),                       // values of k
+        ::testing::Values(scomplex{0.0, 0.0}, scomplex{1.0, 0.0}, scomplex{-1.0, 0.0}, scomplex{4.0, 0.0}, scomplex{0.0, -0.2}, scomplex{3.2, 4.5}),   // alpha value
+        ::testing::Values(scomplex{0.0, 0.0}, scomplex{1.0, 0.0}, scomplex{-1.0, 0.0}, scomplex{-5.0, 0.0}, scomplex{0.0, -2.1}, scomplex{-7.3, 6.7}), // beta value
+        ::testing::Values('r', 'c'),                                        // storage
+        ::testing::Values(4),                                               // values of m
+        ::testing::Values(24),                                              // values of n
+        ::testing::Values(bli_cgemm_zen4_asm_4x24),                         // cgemm_nat kernel
         ::testing::Values(false, true)                                      // is_memory_test
     ),
     ::cgemmGenericNatPrint()
