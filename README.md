@@ -5,8 +5,9 @@ _Recipient of the **[2020 SIAM Activity Group on Supercomputing Best Paper Prize
 
 ![The BLIS cat is sleeping.](http://www.cs.utexas.edu/users/field/blis_cat.png)
 
-[![Build Status](https://api.travis-ci.com/flame/blis.svg?branch=master)](https://app.travis-ci.com/github/flame/blis)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/flame/blis?branch=master&svg=true)](https://ci.appveyor.com/project/shpc/blis/branch/master)
+[![Build Status (CircleCI)](https://dl.circleci.com/status-badge/img/gh/flame/blis/tree/master.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/flame/blis/tree/master)
+[![Build Status (TravisCI)](https://api.travis-ci.com/flame/blis.svg?branch=master)](https://app.travis-ci.com/github/flame/blis)
+[![Build Status (Appveyor)](https://ci.appveyor.com/api/projects/status/github/flame/blis?branch=master&svg=true)](https://ci.appveyor.com/project/shpc/blis/branch/master)
 
 [<img alt="Discord logo" title="Join us on Discord!" height="32px" src="docs/images/discord.svg" />](docs/Discord.md)
 
