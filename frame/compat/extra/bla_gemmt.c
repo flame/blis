@@ -39,8 +39,6 @@
 //
 // Define BLAS-to-BLIS interfaces.
 //
-#define STRINGIFY( name ) #name
-#define EXPAND_AND_STRINGIFY( name ) STRINGIFY( name )
 
 #ifdef BLIS_BLAS3_CALLS_TAPI
 
@@ -120,9 +118,7 @@ void PASTEF77(ch,blasname) \
 \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
-}; \
-void PASTEF77 (ch, blasname ## r )() \
-	__attribute__ ((alias(EXPAND_AND_STRINGIFY(PASTEF77(ch,blasname)))));
+};
 
 #else
 
@@ -225,9 +221,66 @@ void PASTEF77(ch,blasname) \
 \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
-}; \
-void PASTEF77 (ch, blasname ## r )() \
-	__attribute__ ((alias(EXPAND_AND_STRINGIFY(PASTEF77(ch,blasname)))));
+};
+
+#endif
+
+#ifdef BLIS_ENABLE_BLAS
+INSERT_GENTFUNC_BLAS( gemmt, gemmt )
+#endif
+
+#ifdef BLIS_OS_OSX
+
+#undef  GENTFUNC
+#define GENTFUNC( ftype, ch, blasname, blisname ) \
+\
+void PASTEF77(ch,blasname##r) \
+     ( \
+       const f77_char* uploc, \
+       const f77_char* transa, \
+       const f77_char* transb, \
+       const f77_int*  m, \
+       const f77_int*  k, \
+       const ftype*    alpha, \
+       const ftype*    a, const f77_int* lda, \
+       const ftype*    b, const f77_int* ldb, \
+       const ftype*    beta, \
+             ftype*    c, const f77_int* ldc  \
+     ) \
+{ \
+	PASTEF77(ch,blasname) \
+	( \
+	  uploc, \
+	  transa, \
+	  transb, \
+	  m, \
+	  k, \
+	  alpha, \
+	  a, lda, \
+	  b, ldb, \
+	  beta, \
+	  c, ldc  \
+	); \
+}
+
+#else
+
+#undef  GENTFUNC
+#define GENTFUNC( ftype, ch, blasname, blisname ) \
+\
+void PASTEF77(ch,blasname##r) \
+     ( \
+       const f77_char* uploc, \
+       const f77_char* transa, \
+       const f77_char* transb, \
+       const f77_int*  m, \
+       const f77_int*  k, \
+       const ftype*    alpha, \
+       const ftype*    a, const f77_int* lda, \
+       const ftype*    b, const f77_int* ldb, \
+       const ftype*    beta, \
+             ftype*    c, const f77_int* ldc  \
+     ) __attribute__ ((alias(STRINGIFY_INT(PASTEF77(ch,blasname)))));
 
 #endif
 
