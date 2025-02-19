@@ -135,7 +135,7 @@ void reorderb_nr64_s8s8s32o32
 	dim_t NC = lcntx->blksz.NC;
 	dim_t KC = lcntx->blksz.KC;
 	dim_t NR = lcntx->blksz.NR;
-	
+
 	dim_t rs_b = b->rs;
 	dim_t cs_b = b->cs;
 	dim_t rs_b_reorder;
@@ -154,8 +154,8 @@ void reorderb_nr64_s8s8s32o32
 	dim_t n_threads = bli_rntm_num_threads( rntm );
 	n_threads = ( n_threads > 0 ) ? n_threads : 1;
 
-	int32_t* pack_b_column_sum = 
-	( int32_t* ) ( b_reorder->storage.aligned_buffer + 
+	int32_t* pack_b_column_sum =
+	( int32_t* ) ( b_reorder->storage.aligned_buffer +
 	( sizeof( int8_t ) * n_updated * k_updated ));
 
 	for ( dim_t idx = 0; idx < n_updated; idx++ )
@@ -251,6 +251,150 @@ void reorderb_nr64_s8s8s32o32
 					( rs_b * pc ) + jc * cs_b),
 				  rs_b, cs_b, nc0, kc0, &rs_b_reorder, &cs_b_reorder
 				);
+			}
+			adjust_B_panel_reordered_jc( &jc, jc_cur_loop );
+		}
+	}
+
+	b_reorder->rs = rs_b_reorder;
+	b_reorder->cs = cs_b_reorder;
+	b_reorder->mtag = REORDERED;
+}
+
+
+void reorderb_nr64_s8s8s32o32_sym_quant
+     (
+       lpgemm_obj_t*  b,
+       lpgemm_obj_t*  b_reorder,
+       rntm_t*        rntm,
+       lpgemm_cntx_t* lcntx,
+	   dim_t          group_size
+     )
+{
+
+	dim_t NC = lcntx->blksz.NC;
+	dim_t KC = lcntx->blksz.KC;
+	dim_t NR = lcntx->blksz.NR;
+
+	// Group size should always be <= KC to make sure that entire group is processed
+	// within one micro-kernel call.
+	// If group size is greater than KC, then KC will be updated to group size.
+	// This same change will be done in GEMM 5-loop to maintain consistency between
+	// reorder and GEMM execution.
+	if( group_size > KC )
+	{
+		KC = group_size;
+	}
+
+	dim_t rs_b = b->rs;
+	dim_t cs_b = b->cs;
+	dim_t rs_b_reorder;
+	dim_t cs_b_reorder;
+
+	dim_t n = b->width;
+	dim_t k = b->length;
+
+	dim_t num_groups = (k + group_size - 1) / group_size;
+
+	// k needs to be a multiple of 4 so that it can be used with vpdpbusd
+	// instruction. Padding is added in cases this condition is not
+	// satisfied, and therefore the k offset used for packed/reordered
+	// buffer needs to be updated.
+	dim_t k_updated = make_multiple_of_n( k, 4 );
+	dim_t n_updated = make_multiple_of_n( n, 16 );
+
+	dim_t n_threads = bli_rntm_num_threads( rntm );
+	n_threads = ( n_threads > 0 ) ? n_threads : 1;
+
+	int32_t* pack_b_column_sum =
+	( int32_t* ) ( b_reorder->storage.aligned_buffer +
+	( sizeof( int8_t ) * n_updated * k_updated ));
+
+	for ( dim_t idx = 0; idx < num_groups * n_updated; idx++ )
+	{
+		*( pack_b_column_sum + idx ) =  0;
+	}
+
+#ifdef BLIS_ENABLE_OPENMP
+	_Pragma( "omp parallel num_threads(n_threads)" )
+	{
+		// Initialise a local thrinfo obj for work split across threads.
+		thrinfo_t thread_jc;
+		bli_thrinfo_set_n_way( n_threads, &thread_jc );
+		bli_thrinfo_set_work_id( omp_get_thread_num(), &thread_jc );
+#else
+	{
+		// Initialise a local thrinfo obj for work split across threads.
+		thrinfo_t thread_jc;
+		bli_thrinfo_set_n_way( 1, &thread_jc );
+		bli_thrinfo_set_work_id( 0, &thread_jc );
+#endif
+		// Compute the JC loop thread range for the current thread.
+		dim_t jc_start, jc_end;
+		bli_thread_range_sub( &thread_jc, n, NR, FALSE, &jc_start, &jc_end );
+
+		for ( dim_t jc = jc_start; jc < jc_end; jc += NC )
+		{
+			dim_t nc0 = bli_min( ( jc_end - jc ), NC );
+
+			dim_t jc_cur_loop = jc;
+			dim_t jc_cur_loop_rem = 0;
+			dim_t n_sub_updated;
+
+			get_B_panel_reordered_start_offset_width
+			(
+			  jc, n, NC, get_packb_s8s8s32o32_min_NR(),
+			  &jc_cur_loop, &jc_cur_loop_rem,
+			  &nc0, &n_sub_updated
+			);
+
+			for ( dim_t pc = 0; pc < k; pc += KC )
+			{
+				dim_t kc0 = bli_min( ( k - pc ), KC );
+
+				dim_t group_start = pc / group_size;
+				dim_t group_end = ( pc + kc0 - 1 ) / group_size;
+
+				// kc0 needs to be a multiple of 4 so that it can be used with
+				// vpdpbusd instruction. Padding is added in cases this
+				// condition is not satisfied, and therefore the kc0 offsets
+				// used for packed/reordered buffers needs to be updated.
+				dim_t kc0_updated = make_multiple_of_n( kc0, 4 );
+
+				// packing kernels are designed in such a way assuming that entire KCxNC
+				// block is packed at once and strides are set based on KC value.
+				// In current scenario, we call kernel with blocks of group_size x NC
+				// so kernel assumes that KC is group_size and strides are set based on group_size.
+				// To avoid this, we are calling kernel with blocks of group_size x NR, so that
+				// we can take care of the pointer movement across the reorder buffer in the framework
+				// itself.
+				for( dim_t jr = 0; jr < nc0; jr += NR )
+				{
+					dim_t nr0 = bli_min( ( nc0 - jr ), NR );
+
+					dim_t nr0_updated = make_multiple_of_n( nr0, 16 );
+
+					// group loop
+					for( dim_t group = group_start; group <= group_end; group++ )
+					{
+						dim_t k_start = bli_max( group * group_size, pc );
+						dim_t k_end = bli_min( ( ( group + 1 ) * group_size - 1 ),
+											pc + kc0 - 1);
+						dim_t kg0 = k_end - k_start + 1;
+
+						( ( packb_s32_s8 )lcntx->packb_fun_ptr )
+						(
+						( ( ( int8_t* )b_reorder->storage.aligned_buffer ) +
+							( jc_cur_loop * k_updated ) + ( n_sub_updated * pc ) +
+							(( jc_cur_loop_rem + jr) * kc0_updated ) + ( (group * group_size) - pc) * nr0_updated ),
+							pack_b_column_sum + (group * n) + jc + jr,
+						( ( ( int8_t* )b->storage.aligned_buffer ) +
+							( rs_b * k_start ) + (jc + jr) * cs_b),
+						rs_b, cs_b, nr0, kg0, &rs_b_reorder, &cs_b_reorder
+						);
+					}
+				}
+
 			}
 			adjust_B_panel_reordered_jc( &jc, jc_cur_loop );
 		}

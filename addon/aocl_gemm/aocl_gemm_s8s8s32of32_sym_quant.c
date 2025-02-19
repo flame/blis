@@ -43,12 +43,12 @@
 #include "lpgemm_utils_s8.h"
 #include "lpgemm_logger.h"
 
-AOCL_GEMM_MATMUL(int8_t,int8_t,bfloat16,int32_t,s8s8s32obf16)
+AOCL_GEMM_MATMUL(int8_t,int8_t,float,int32_t,s8s8s32of32_sym_quant)
 {
 	LPGEMM_START_LOGGER();
 	LPGEMM_WRITE_LOGGER \
 	(
-	  "s8s8s32obf16", \
+	  "s8s8s32of32_sym_quant", \
 	  order, transa, transb, \
 	  m, n, k, \
 	  ( ( float ) alpha ), \
@@ -69,13 +69,6 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,bfloat16,int32_t,s8s8s32obf16)
 		goto err_hndl;
 	}
 
-#ifdef LPGEMM_BF16_JIT
-	bli_print_msg("cannot perform s8s8s32obf16 gemm with gcc < 11.2",
-			__FILE__, __LINE__ );
-	goto err_hndl;
-#endif
-
-
 	/* Initialize BLIS. */
 	bli_init_auto();
 
@@ -86,7 +79,7 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,bfloat16,int32_t,s8s8s32obf16)
 	int err_no = 0;
 	AOCL_GEMM_CHECK
 	(
-	  "s8s8s32obf16",
+	  "s8s8s32of32_sym_quant",
 	  order, transa, transb,
 	  m, n, k,
 	  a, lda, mem_format_a,
@@ -187,9 +180,22 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,bfloat16,int32_t,s8s8s32obf16)
 		mtag_b = PACK;
 	}
 
+	// convert group-level post-op struct to linked list format.
+	lpgemm_group_post_op grp_post_op_list[AOCL_MAX_POST_OPS];
+	err_t err = lpgemm_translate_to_group_postops_list
+	(
+	  post_op_unparsed->post_op_grp, grp_post_op_list,
+	  m, n, k
+	);
+
+	if( err != BLIS_SUCCESS )
+	{
+		goto err_hndl;
+	}
+
 	// Convert post op struct to post op linked list format.
 	lpgemm_post_op post_op_list[AOCL_MAX_POST_OPS];
-	err_t err = lpgemm_translate_to_post_ops_list
+	err = lpgemm_translate_to_post_ops_list
 	(
 	  post_op_unparsed, post_op_list,
 	  ( void* )c, ( void* )( &order ),
@@ -213,55 +219,55 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,bfloat16,int32_t,s8s8s32obf16)
 	// Swapping inputs to induce row major computation for column major inputs.
 	if (is_column_major == TRUE)
 	{
-		lpgemm_s8s8s32o32_openmp_thread_decorator
+		lpgemm_s8s8s32o32_sym_quant_openmp_thread_decorator
 		(
 			n, m, k,
 			b, rs_b, cs_b, mtag_b,
 			a, rs_a, cs_a, mtag_a,
-			(int32_t *)c, rs_c, cs_c,
+			(float *)c, rs_c, cs_c,
 			alpha, beta,
-			&rntm_g, lcntx_g,
-			post_op_list, BF16
+			&rntm_g, lcntx_g, grp_post_op_list,
+			post_op_list, F32
 		);
 	}
 	else
 	{
-		lpgemm_s8s8s32o32_openmp_thread_decorator
+		lpgemm_s8s8s32o32_sym_quant_openmp_thread_decorator
 		(
 			m, n, k,
 			a, rs_a, cs_a, mtag_a,
 			b, rs_b, cs_b, mtag_b,
-			(int32_t *)c, rs_c, cs_c,
+			(float *)c, rs_c, cs_c,
 			alpha, beta,
-			&rntm_g, lcntx_g,
-			post_op_list, BF16
+			&rntm_g, lcntx_g, grp_post_op_list,
+			post_op_list, F32
 		);
 	}
 #else
 	// Swapping inputs to induce row major computation for column major inputs.
 	if (is_column_major == TRUE)
 	{
-		lpgemm_s8s8s32o32_thread_decorator
+		lpgemm_s8s8s32o32_sym_quant_thread_decorator
 		(
 			n, m, k,
 			b, rs_b, cs_b, mtag_b,
 			a, rs_a, cs_a, mtag_a,
-			(int32_t *)c, rs_c, cs_c,
+			(float *)c, rs_c, cs_c,
 			alpha, beta,
-			&rntm_g, lcntx_g,
-			post_op_list, BF16);
+			&rntm_g, lcntx_g, grp_post_op_list,
+			post_op_list, F32);
 	}
 	else
 	{
-		lpgemm_s8s8s32o32_thread_decorator
+		lpgemm_s8s8s32o32_sym_quant_thread_decorator
 		(
 			m, n, k,
 			a, rs_a, cs_a, mtag_a,
 			b, rs_b, cs_b, mtag_b,
-			(int32_t *)c, rs_c, cs_c,
+			(float *)c, rs_c, cs_c,
 			alpha, beta,
-			&rntm_g, lcntx_g,
-			post_op_list, BF16
+			&rntm_g, lcntx_g, grp_post_op_list,
+			post_op_list, F32
 		);
 	}
 #endif
@@ -269,4 +275,3 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,bfloat16,int32_t,s8s8s32obf16)
 err_hndl:;
 	LPGEMM_STOP_LOGGER();
 }
-

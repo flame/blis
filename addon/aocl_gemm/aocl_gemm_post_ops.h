@@ -125,15 +125,16 @@ typedef struct
 {
 	void* zero_point;
 	//len should be one which is one or n i.e., one zp
-    //per tensor or one zp per channel respectively
+	//per tensor or one zp per channel respectively
 	dim_t zero_point_len;
+	AOCL_PARAMS_STORAGE_TYPES zero_point_type;
 } aocl_pre_op_zp;
 
 typedef struct
 {
 	void* scale_factor;
 	//len should be one which is one or n i.e., one sf
-    //per tensor or one sf per channel respectively
+	//per tensor or one sf per channel respectively
 	dim_t scale_factor_len;
 	AOCL_PARAMS_STORAGE_TYPES scale_factor_type;
 } aocl_pre_op_sf;
@@ -145,6 +146,21 @@ typedef struct
 	dim_t seq_length;
 	dim_t group_size;
 } aocl_pre_op;
+
+typedef struct
+{
+	dim_t group_size;
+	dim_t seq_length;
+	aocl_pre_op_sf *a_scl;
+	aocl_pre_op_sf *b_scl;
+	aocl_pre_op_zp *a_zp;
+	aocl_pre_op_zp *b_zp;
+} aocl_group_post_op;
+
+typedef struct
+{
+	dim_t group_size;
+} AOCL_SYMM_STAT_QUANT;
 
 typedef struct
 {
@@ -164,6 +180,7 @@ typedef struct
 	//Pass pre-op structure also through post-ops
 	aocl_pre_op  *pre_ops;
 
+	aocl_group_post_op *post_op_grp;
 	// To keep track of eltwise operations.
 	dim_t num_eltwise;
 

@@ -108,6 +108,7 @@ all: blis
 
 blis: \
        bench_lpgemm_blis.x \
+       bench_lpgemm_sym_quant_blis.x \
        bench_batch_lpgemm_blis.x \
        bench_lpgemm_utils_blis.x \
        bench_lpgemm_unpack_blis.x \

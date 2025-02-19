@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -62,6 +62,15 @@ void reorderb_nr64_s8s8s32o32
   rntm_t*        rntm,
   lpgemm_cntx_t* lcntx
 );
+
+void reorderb_nr64_s8s8s32o32_sym_quant
+     (
+       lpgemm_obj_t*  b,
+       lpgemm_obj_t*  b_reorder,
+       rntm_t*        rntm,
+       lpgemm_cntx_t* lcntx,
+       dim_t          group_size
+     );
 
 void reordera_mr6_s8s8s32o32
 (

@@ -1,0 +1,13 @@
+r n n n r 5 10 128 128 10 10 s8s8s32of32:group_size=64,sym_quant_sf=f32
+r n n n r 4 10 127 127 10 10 s8s8s32of32:group_size=64,sym_quant_sf=f32
+r n n n r 3 10 127 127 10 10 s8s8s32of32:group_size=64,sym_quant_sf=f32
+r n n n r 2 10 127 127 10 10 s8s8s32of32:group_size=64,sym_quant_sf=f32
+r n n n r 1 10 127 127 10 10 s8s8s32of32:group_size=64,sym_quant_sf=f32
+r n n n r 293 4105 127 127 4105 4105 s8s8s32of32:group_size=64,sym_quant_sf=f32
+r n n n r 292 4105 127 127 4105 4105 s8s8s32of32:group_size=64,sym_quant_sf=f32
+r n n n r 291 4105 127 127 4105 4105 s8s8s32of32:group_size=64,sym_quant_sf=f32
+r n n n r 290 4105 127 127 4105 4105 s8s8s32of32:group_size=64,sym_quant_sf=f32
+r n n n r 289 4105 127 127 4105 4105 s8s8s32of32:group_size=64,sym_quant_sf=f32
+r n n n r 288 4096 4096 4096 4096 4096 s8s8s32of32:group_size=64,sym_quant_sf=f32
+r n n n r 6 64 64 64 64 64 s8s8s32of32:group_size=4,sym_quant_sf=bf16
+r n n n r 6 128 64 64 128 128 s8s8s32of32:group_size=4,sym_quant_sf=bf16

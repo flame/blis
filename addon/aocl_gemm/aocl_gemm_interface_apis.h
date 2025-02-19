@@ -56,6 +56,20 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(s8s8s32os32);
 AOCL_GEMM_GET_REORDER_BUF_SIZE(u8s4s32os32);
 AOCL_GEMM_GET_REORDER_BUF_SIZE(bf16s4f32of32);
 
+// Returns the size of buffer in bytes required for the reordered matrix.
+#define AOCL_GEMM_GET_REORDER_BUF_SIZE_SYM_QUANT(LP_SFX) \
+BLIS_EXPORT_ADDON siz_t aocl_get_reorder_buf_size_ ## LP_SFX \
+     ( \
+       const char  order, \
+       const char  trans, \
+       const char  mat_type, \
+       const dim_t k, \
+       const dim_t n, \
+       AOCL_SYMM_STAT_QUANT* meta_data \
+     ) \
+
+AOCL_GEMM_GET_REORDER_BUF_SIZE_SYM_QUANT(s8s8s32os32_sym_quant);
+
 // Performs reordering of input matrix. Reordering is the process of packing
 // the entire matrix upfront, so that the benefits of packed matrix is obtained
 // without incurring the packing costs during matmul computation.
@@ -79,6 +93,22 @@ AOCL_GEMM_REORDER(bfloat16,bf16bf16f32of32_reference);
 AOCL_GEMM_REORDER(int8_t,s8s8s32os32);
 AOCL_GEMM_REORDER(int8_t,u8s4s32os32);
 AOCL_GEMM_REORDER(int8_t, bf16s4f32of32);
+
+#define AOCL_GEMM_REORDER_SYM_QUANT(B_type,LP_SFX) \
+BLIS_EXPORT_ADDON void aocl_reorder_ ## LP_SFX \
+     ( \
+       const char    order, \
+       const char    trans, \
+       const char    mat_type, \
+       const B_type* input_buf_addr, \
+       B_type*       reorder_buf_addr, \
+       const dim_t   k, \
+       const dim_t   n, \
+       const dim_t   ldb, \
+       AOCL_SYMM_STAT_QUANT* meta_data \
+     ) \
+
+AOCL_GEMM_REORDER_SYM_QUANT(int8_t,s8s8s32os32_sym_quant);
 
 #define AOCL_GEMM_REORDER_MXP(A_type,B_type,LP_SFX) \
 BLIS_EXPORT_ADDON void aocl_reorder_ ## LP_SFX \
@@ -144,6 +174,10 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,int8_t,int32_t,s8s8s32os8);
 AOCL_GEMM_MATMUL(int8_t,int8_t,bfloat16,int32_t,s8s8s32obf16);
 AOCL_GEMM_MATMUL(int8_t,int8_t,float,int32_t,s8s8s32of32);
 AOCL_GEMM_MATMUL(int8_t,int8_t,uint8_t,int32_t,s8s8s32ou8);
+
+// Symmetric static quantization GEMM API
+AOCL_GEMM_MATMUL(int8_t,int8_t,float,int32_t,s8s8s32of32_sym_quant);
+AOCL_GEMM_MATMUL(int8_t,int8_t,bfloat16,int32_t,s8s8s32obf16_sym_quant);
 
 AOCL_GEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16);
 AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32);

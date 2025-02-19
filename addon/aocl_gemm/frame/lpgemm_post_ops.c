@@ -36,6 +36,35 @@
 #include "lpgemm_post_ops.h"
 #include "lpgemm_types.h"
 
+
+static inline AOCL_STORAGE_TYPE get_stor_type(AOCL_PARAMS_STORAGE_TYPES pstor_type)
+{
+	AOCL_STORAGE_TYPE stor_type = NONE;
+	switch ( pstor_type )
+	{
+		case AOCL_GEMM_F32:
+				stor_type = F32;
+				break;
+		case AOCL_GEMM_BF16:
+				stor_type = BF16;
+				break;
+		case AOCL_GEMM_INT8:
+				stor_type = S8;
+				break;
+		case AOCL_GEMM_UINT8:
+				stor_type = U8;
+				break;
+		case AOCL_GEMM_INT32:
+				stor_type = S32;
+				break;
+		default:
+				break;
+	}
+
+	return stor_type;
+}
+
+
 BLIS_INLINE void lpgemm_set_pre_ops_node_params
      (
        lpgemm_pre_op* pre_op_node,
@@ -56,12 +85,149 @@ BLIS_INLINE void lpgemm_set_pre_ops_node_params
 	pre_op_node->next = NULL;
 }
 
-err_t lpgemm_translate_to_pre_ops_list(
-	aocl_pre_op *pre_op_unparsed,
-	lpgemm_pre_op *pre_op_list,
-	dim_t m,
-	dim_t n,
-	dim_t k)
+BLIS_INLINE void lpgemm_set_group_post_ops_node_params
+     (
+       lpgemm_group_post_op* post_op_node,
+       dim_t group_size,
+       void* a_zero_point,
+       void* a_scale_factor,
+       dim_t a_zero_point_len,
+       dim_t a_scale_factor_len,
+       void* b_zero_point,
+       void* b_scale_factor,
+       dim_t b_zero_point_len,
+       dim_t b_scale_factor_len,
+	   AOCL_STORAGE_TYPE sf_stor_type,
+	   AOCL_STORAGE_TYPE zp_stor_type
+     )
+{
+	post_op_node->group_size = group_size;
+	post_op_node->a_zp = a_zero_point;
+	post_op_node->a_zp_len = a_zero_point_len;
+	post_op_node->a_scale_factor = a_scale_factor;
+	post_op_node->a_scale_factor_len = a_scale_factor_len;
+	post_op_node->b_zp = b_zero_point;
+	post_op_node->b_zp_len = b_zero_point_len;
+	post_op_node->b_scale_factor = b_scale_factor;
+	post_op_node->b_scale_factor_len = b_scale_factor_len;
+	post_op_node->sf_stor_type = sf_stor_type;
+	post_op_node->zp_stor_type = zp_stor_type;
+	post_op_node->next = NULL;
+}
+
+err_t lpgemm_translate_to_group_postops_list
+	(
+	  aocl_group_post_op *post_op_unparsed,
+	  lpgemm_group_post_op *post_op_list,
+	  dim_t m,
+	  dim_t n,
+	  dim_t k
+    )
+{
+	if( ( post_op_unparsed == NULL ) || ( post_op_unparsed->seq_length <= 0 ) )
+	{
+		lpgemm_set_group_post_ops_node_params
+		(
+			post_op_list, 0,
+			NULL, NULL, 0, 0, NULL, NULL, 0, 0, NONE, NONE
+		);
+
+		return BLIS_SUCCESS;
+	}
+
+	for ( dim_t i = 0; i < post_op_unparsed->seq_length; ++i )
+	{
+		/* group_size that is non-multiple of 4 is supported only when group_size == k */
+		dim_t group_size = post_op_unparsed->group_size;
+		if( ( group_size == 0 ) || ( group_size > k ) || ( group_size == k ) ) group_size = k;
+		else if(post_op_unparsed->group_size % 4  > 0 ) return BLIS_FAILURE;
+
+		if ( post_op_unparsed->a_zp != NULL )
+		{
+			/* check for validity of pre-ops */
+			if( ( ( post_op_unparsed->a_zp)->zero_point_len > 0 ) &&
+			    ( ( post_op_unparsed->a_zp)->zero_point == NULL ) ) return BLIS_FAILURE;
+		}
+
+		if ( post_op_unparsed->a_scl != NULL )
+		{
+			if( ( ( post_op_unparsed->a_scl)->scale_factor_len > 0 ) &&
+			    ( ( post_op_unparsed->a_scl)->scale_factor == NULL ) ) return BLIS_FAILURE;
+		}
+
+		if ( post_op_unparsed->b_zp != NULL )
+		{
+			/* check for validity of pre-ops */
+			if( ( ( post_op_unparsed->b_zp)->zero_point_len > 0 ) &&
+			    ( ( post_op_unparsed->b_zp)->zero_point == NULL ) ) return BLIS_FAILURE;
+		}
+
+		if ( post_op_unparsed->b_scl != NULL )
+		{
+			if( ( ( post_op_unparsed->b_scl)->scale_factor_len > 0 ) &&
+			    ( ( post_op_unparsed->b_scl)->scale_factor == NULL ) ) return BLIS_FAILURE;
+		}
+
+		if( ( ( post_op_unparsed->a_scl )->scale_factor_type ) != ( ( post_op_unparsed->b_scl )->scale_factor_type ) )
+		{
+			bli_print_msg(" A and B scale factor type mismatch. Exiting..", __FILE__, __LINE__ );
+			return BLIS_FAILURE;
+		}
+
+		// Not supporting zero-point for now.
+		// if( ( ( post_op_unparsed->a_zp )->zero_point_type ) != ( ( post_op_unparsed->b_zp )->zero_point_type ) )
+		// {
+		// 	bli_print_msg(" A and B zero point type mismatch. Exiting..", __FILE__, __LINE__ );
+		// 	return BLIS_FAILURE;
+		// }
+
+		AOCL_STORAGE_TYPE tmp_zp_stor_type = NONE; //get_stor_type( ( post_op_unparsed->a_zp )->zero_point_type );
+
+		// At this point we are sure that sf and zp types of both matrices match.
+		AOCL_STORAGE_TYPE tmp_sf_stor_type = get_stor_type( ( post_op_unparsed->a_scl )->scale_factor_type );
+
+		lpgemm_set_group_post_ops_node_params
+		(
+			post_op_list,
+			group_size,
+			// A zero-point
+			post_op_unparsed->a_zp == NULL ? NULL : ( post_op_unparsed->a_zp )->zero_point,
+			// A scale factor
+			( post_op_unparsed->a_scl )->scale_factor,
+			// A zero-point length
+			post_op_unparsed->a_zp == NULL ? 0 : ( post_op_unparsed->a_zp )->zero_point_len,
+			// A scale factor length
+			( post_op_unparsed->a_scl )->scale_factor_len,
+			// B zero-point
+			post_op_unparsed->b_zp == NULL ? NULL : ( post_op_unparsed->b_zp )->zero_point,
+			// B scale factor
+			( post_op_unparsed->b_scl )->scale_factor,
+			// B zero-point length
+			post_op_unparsed->b_zp == NULL ? 0 : ( post_op_unparsed->b_zp )->zero_point_len,
+			// B scale factor length
+			( post_op_unparsed->b_scl )->scale_factor_len,
+			tmp_sf_stor_type,
+			tmp_zp_stor_type
+		);
+
+		// Simulating linked link using an array.
+		if ( i < ( post_op_unparsed->seq_length - 1 ) )
+		{
+			( post_op_list + i )->next = ( post_op_list + i + 1 );
+		}
+	}
+
+	return BLIS_SUCCESS;
+}
+
+err_t lpgemm_translate_to_pre_ops_list
+	(
+	  aocl_pre_op *pre_op_unparsed,
+	  lpgemm_pre_op *pre_op_list,
+	  dim_t m,
+	  dim_t n,
+	  dim_t k
+	)
 {
 	(void)(m);			  // Unused for now, potential to be used later.
 	(void)(k);			  // Unused for now, potential to be used later.
@@ -155,33 +321,6 @@ BLIS_INLINE void lpgemm_set_node_params(
 	post_op_node->stor_type = stor_type;
 	post_op_node->zp_stor_type = zp_stor_type;
 	post_op_node->next = NULL;
-}
-
-static inline AOCL_STORAGE_TYPE get_stor_type(AOCL_PARAMS_STORAGE_TYPES pstor_type)
-{
-	AOCL_STORAGE_TYPE stor_type = NONE;
-	switch ( pstor_type )
-	{
-		case AOCL_GEMM_F32:
-				stor_type = F32;
-				break;
-		case AOCL_GEMM_BF16:
-				stor_type = BF16;
-				break;
-		case AOCL_GEMM_INT8:
-				stor_type = S8;
-				break;
-		case AOCL_GEMM_UINT8:
-				stor_type = U8;
-				break;
-		case AOCL_GEMM_INT32:
-				stor_type = S32;
-				break;
-		default:
-				break;
-	}
-
-	return stor_type;
 }
 
 err_t lpgemm_translate_to_post_ops_list

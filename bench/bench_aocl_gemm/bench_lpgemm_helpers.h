@@ -723,6 +723,33 @@ static inline void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
         }
     }
 
+    if( ( post_ops->post_op_grp != NULL ) )
+    {
+        if( ( post_ops->post_op_grp ) -> a_scl != NULL )
+        {
+            free( ( ( post_ops->post_op_grp ) -> a_scl )->scale_factor );
+            free( ( post_ops->post_op_grp ) -> a_scl );
+        }
+
+        if( ( post_ops->post_op_grp ) -> a_zp != NULL )
+        {
+            free( ( ( post_ops->post_op_grp ) -> a_zp )->zero_point );
+            free( ( post_ops->post_op_grp ) -> a_zp );
+        }
+
+        if( ( post_ops->post_op_grp ) -> b_scl != NULL )
+        {
+            free( ( ( post_ops->post_op_grp ) -> b_scl )->scale_factor );
+            free( ( post_ops->post_op_grp ) -> b_scl );
+        }
+
+        if( ( post_ops->post_op_grp ) -> b_zp != NULL )
+        {
+            free( ( ( post_ops->post_op_grp ) -> b_zp )->zero_point );
+            free( ( post_ops->post_op_grp ) -> b_zp );
+        }
+    }
+
     /* Freeing all the structs */
     free( post_ops->eltwise );
     free( post_ops->pre_ops );
@@ -730,6 +757,7 @@ static inline void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
     free( post_ops->sum );
     free( post_ops->matrix_mul );
     free( post_ops->bias );
+    free( post_ops->post_op_grp );
 
     free( post_ops->seq_vector );
     free( post_ops );
@@ -743,7 +771,7 @@ void print_matrix_## ctype ( ctype* a, dim_t m, dim_t n, dim_t rs, dim_t cs) \
     { \
         for(dim_t j = 0; j < n; j++) \
         { \
-            printf("%f ", (float) (*(a + i * ( rs ) + j * cs ) ) ); \
+            printf("%d ", (int) (*(a + i * ( rs ) + j * cs ) ) ); \
         } \
         printf("\n"); \
     } \
@@ -765,7 +793,7 @@ void print_matrix_bfloat16
         {
             float temp;
             bfloat16_to_float(*(a + i*(rs_a) + j *cs_a), &temp);
-            printf("%f ", temp);
+            printf("%d ", (int)temp);
         }
         printf("\n");
     }
@@ -887,6 +915,71 @@ static inline ACCUM_type mat_mul_accuracy_check_accum_ ## BLAS_SFX \
                   + ( alpha * temp_accum ); \
     return temp_accum; \
  } \
+
+ #define GEN_MAT_MUL_ACC_CHK_ACCUM_SYM_QUANT(A_type, B_type, C_type,ACCUM_type,BLAS_SFX) \
+static inline float mat_mul_accuracy_check_accum_ ## BLAS_SFX \
+     (\
+       A_type* a, \
+       B_type* b, \
+       C_type* c_ref, \
+       ACCUM_type temp_accum,\
+       ACCUM_type  alpha, \
+       ACCUM_type beta, \
+       dim_t rs_a, \
+       dim_t rs_b, \
+       dim_t cs_a, \
+       dim_t cs_b, \
+       dim_t rs_c_ref, \
+       dim_t cs_c_ref, \
+       dim_t i, \
+       dim_t j, \
+       dim_t k, \
+       dim_t n, \
+       aocl_group_post_op* grp_post_op /* Workaround to enable B pre-ops. */ \
+     ) \
+{ \
+    float temp_accum_float = (float) 0; \
+    float float_accum = (float) 0; \
+    dim_t group_size = grp_post_op->group_size; \
+    dim_t num_groups = ( k + group_size - 1 ) / group_size; \
+    for( dim_t p_g = 0; p_g < k; p_g += group_size ) \
+    { \
+        dim_t gs = bli_min( group_size, k - p_g ); \
+        dim_t group_num = p_g / group_size; \
+        float a_scl, b_scl; \
+        if( (grp_post_op->a_scl)->scale_factor_type == AOCL_GEMM_BF16 ) \
+        { \
+            bfloat16_to_float( *( ( bfloat16* )( ( grp_post_op->a_scl )->scale_factor ) + ( i * num_groups ) + group_num ), &a_scl ); \
+        } \
+        else \
+        { \
+            a_scl = *( ( float* )( ( grp_post_op->a_scl )->scale_factor ) + ( i * num_groups ) + group_num ); \
+        } \
+        if( ( grp_post_op->b_scl )->scale_factor_type == AOCL_GEMM_BF16 ) \
+        { \
+            bfloat16_to_float( *( ( bfloat16* )( ( grp_post_op->b_scl )->scale_factor ) + ( group_num * n ) + j ), &b_scl ); \
+        } \
+        else \
+        { \
+            b_scl = *( ( float* )( ( grp_post_op->b_scl )->scale_factor ) + ( group_num * n ) + j ); \
+        } \
+        temp_accum = (ACCUM_type) 0; \
+        for( dim_t p = p_g; p < p_g + gs; ++p) \
+        { \
+            temp_accum += ( *( a + ( i * rs_a ) + ( cs_a * p ) ) * \
+                             *( b + ( rs_b * p ) + ( cs_b * j ) )); \
+        } \
+        temp_accum_float = (float)temp_accum; \
+        temp_accum_float *= a_scl; \
+        temp_accum_float *= b_scl; \
+        float_accum += temp_accum_float; \
+    } \
+    float c_ref_float = 0.0; \
+    GEN_FUNC_NAME(C_type,_to_float)( *( c_ref + ( rs_c_ref * i ) + ( cs_c_ref * j ) ), &c_ref_float ); \
+    float_accum = ( (float)beta * c_ref_float ) \
+                  + ( (float)alpha * float_accum ); \
+    return float_accum; \
+} \
 
 static inline int32_t mat_mul_accuracy_check_accum_u8s8s32obf16
      (
@@ -1017,7 +1110,7 @@ static inline int32_t mat_mul_accuracy_check_accum_s8s8s32of32
     }
 
     float c_ref_float =  *(c_ref + ( rs_c_ref * i ) + ( cs_c_ref * j ) );
-    temp_accum = ( beta * c_ref_float ) + ( alpha * temp_accum );
+    temp_accum = ( beta * ((int32_t)c_ref_float) ) + ( alpha * temp_accum );
     return temp_accum;
   }
 
@@ -1253,6 +1346,7 @@ static inline float mat_mul_accuracy_check_accum_bf16s4f32obf16
     return temp_accum;
 }
 
+
 #define GEN_MAT_MUL_POST_OPS_CREATOR(C_DSCALE_type,C_type,DSCALE_type,BIAS_type,BLAS_SFX) \
 static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
      ( \
@@ -1327,6 +1421,8 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     bool is_group_quant = FALSE; \
     bool is_pre_op_scale_scalar = FALSE; \
     bool is_pre_op_scale_f32 = TRUE; \
+    bool is_sym_quant = FALSE; \
+    char* sym_quant_sf_type = ""; \
     dim_t zp_vec_length = 0; \
     dim_t quant_group_size = 0; \
  \
@@ -1615,6 +1711,23 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
                 { \
                     /* set vector scale */\
                     is_pre_op_scale_f32 = TRUE; \
+                } \
+            } \
+            else if ( strcmp( ops_tok, "sym_quant_sf" ) == 0 ) \
+            { \
+                ops_tok = strtok( NULL, ", " ); \
+                str_tolower( ops_tok ); \
+                if ( ( strcmp( ops_tok, "bf16" ) == 0 ) ) \
+                { \
+                    /* set bf16 scale */\
+                    is_sym_quant = TRUE; \
+                    sym_quant_sf_type = "BF16"; \
+                } \
+                else if ( ( strcmp( ops_tok, "f32" ) == 0 ) ) \
+                { \
+                    /* set f32 scale */\
+                    is_sym_quant = TRUE; \
+                    sym_quant_sf_type = "F32"; \
                 } \
             } \
             else{} \
@@ -2237,7 +2350,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
  \
     post_ops->seq_length = cur_op_index; \
  \
-     /* Setup the pre_ops struct */ \
+     /* ---------------- Setup the pre_ops struct ----------------------------- */ \
     post_ops->pre_ops = NULL; \
     if ( global_pre_op == 'y' ) \
     { \
@@ -2298,6 +2411,73 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
          ( post_ops->pre_ops )->seq_length = 1; \
     } \
  \
+    /* ------------------------ Setup group level post ops ---------------------*/ \
+    bool is_symm = ( strcmp(#BLAS_SFX, "s8s8s32of32_sym_quant") == 0 ) || ( strcmp(#BLAS_SFX, "s8s8s32obf16_sym_quant") == 0); \
+    if( is_symm && is_sym_quant ) \
+    { \
+        post_ops->post_op_grp = malloc(sizeof(aocl_group_post_op)); \
+        if( post_ops->post_op_grp == NULL ) { goto err_handler; } \
+        /* Initializing both zero_points to NULL */ \
+        /* They'll be initialized  in asymm section */ \
+        post_ops->post_op_grp->a_zp = NULL; \
+        post_ops->post_op_grp->b_zp = NULL; \
+        dim_t num_groups = 1; \
+        if( quant_group_size == 0 ) \
+        { \
+            post_ops->post_op_grp->group_size = k; \
+        } \
+        else \
+        { \
+            post_ops->post_op_grp->group_size = quant_group_size; \
+            if(is_group_quant) \
+            { \
+                num_groups = ( k + post_ops->post_op_grp->group_size - 1 ) / post_ops->post_op_grp->group_size; \
+            } \
+        } \
+ \
+        /* Assuming that scale factors and zero points are always vectors */ \
+        /* A sf & zp are of size m x num_groups */ \
+        /* B sf and zp are of size num_groups * n */ \
+        /* All the above as assumed to be row-major matrices of respective sizes */ \
+        /* All the above are of bfloat16 type by default */ \
+ \
+        /* Filling scale_factor for A & B matrices */ \
+        post_ops->post_op_grp->a_scl = malloc(sizeof(aocl_pre_op_sf)); \
+        if( post_ops->post_op_grp->a_scl == NULL ) { goto err_handler; } \
+        post_ops->post_op_grp->b_scl = malloc(sizeof(aocl_pre_op_sf)); \
+        if( post_ops->post_op_grp->b_scl == NULL ) { goto err_handler; } \
+        if( strcmp( sym_quant_sf_type, "BF16" ) == 0 ) \
+        { \
+            post_ops->post_op_grp->a_scl->scale_factor = malloc(m * num_groups * sizeof(bfloat16)); \
+            if( post_ops->post_op_grp->a_scl->scale_factor == NULL ) { goto err_handler; } \
+            GEN_FUNC_NAME(fill_array_,bfloat16)(post_ops->post_op_grp->a_scl->scale_factor, m * num_groups); \
+            post_ops->post_op_grp->a_scl->scale_factor_type = AOCL_GEMM_BF16; \
+            post_ops->post_op_grp->b_scl->scale_factor = malloc(n * num_groups * sizeof(bfloat16)); \
+            if( post_ops->post_op_grp->b_scl->scale_factor == NULL ) { goto err_handler; } \
+            GEN_FUNC_NAME(fill_array_,bfloat16)(post_ops->post_op_grp->b_scl->scale_factor, num_groups * n); \
+            post_ops->post_op_grp->b_scl->scale_factor_type = AOCL_GEMM_BF16; \
+        } \
+        else \
+        { \
+            post_ops->post_op_grp->a_scl->scale_factor = malloc(m * num_groups * sizeof(float)); \
+            if( post_ops->post_op_grp->a_scl->scale_factor == NULL ) { goto err_handler; } \
+            GEN_FUNC_NAME(fill_array_,float)(post_ops->post_op_grp->a_scl->scale_factor, m * num_groups); \
+            /* for( dim_t i = 0; i < num_groups * m; i++) { \
+                ((float*)post_ops->post_op_grp->a_scl->scale_factor)[i] = 1.0; \
+            }  */\
+            post_ops->post_op_grp->a_scl->scale_factor_type = AOCL_GEMM_F32; \
+            post_ops->post_op_grp->b_scl->scale_factor = malloc(n * num_groups * sizeof(float)); \
+            if( post_ops->post_op_grp->b_scl->scale_factor == NULL ) { goto err_handler; } \
+            GEN_FUNC_NAME(fill_array_,float)(post_ops->post_op_grp->b_scl->scale_factor, num_groups * n); \
+            /*for( dim_t i = 0; i < num_groups * n; i++) { \
+                ((float*)post_ops->post_op_grp->b_scl->scale_factor)[i] = 1.0; \
+            } */\
+            post_ops->post_op_grp->b_scl->scale_factor_type = AOCL_GEMM_F32; \
+        } \
+        post_ops->post_op_grp->a_scl->scale_factor_len = m; \
+        post_ops->post_op_grp->b_scl->scale_factor_len = n; \
+        ( post_ops->post_op_grp )->seq_length = 1; \
+    } \
     return post_ops; \
  \
     err_handler: \

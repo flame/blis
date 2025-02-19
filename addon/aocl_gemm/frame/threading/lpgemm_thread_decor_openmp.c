@@ -1308,6 +1308,115 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
 
 GEN_LPGEMM_OPENMP_DECORATOR_MP(bfloat16, int8_t, float, bf16s4f32of32)
 
+#define GEN_LPGEMM_OPENMP_DECORATOR_GRP(A_type,B_type,C_type,LPGEMM_SFX) \
+void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
+     ( \
+	   const dim_t           m, \
+       const dim_t           n, \
+       const dim_t           k, \
+       const A_type*         a, \
+       const dim_t           rs_a, \
+       const dim_t           cs_a, \
+       const AOCL_MEMORY_TAG mtag_a, \
+       const B_type*         b, \
+       const dim_t           rs_b, \
+       const dim_t           cs_b, \
+       AOCL_MEMORY_TAG       mtag_b, \
+       float*               c, \
+       const dim_t           rs_c, \
+       const dim_t           cs_c, \
+       const C_type          alpha, \
+       const C_type          beta, \
+       rntm_t*               rntm_g, \
+       lpgemm_cntx_t*        lcntx, \
+       lpgemm_group_post_op* grp_post_op_list, \
+       lpgemm_post_op*       post_op_list, \
+       AOCL_STORAGE_TYPE     c_downscale \
+     ) \
+{ \
+	dim_t n_threads; \
+ \
+	/* Factorization of threads along m and n dimension respectively.*/ \
+	dim_t ic_ways; \
+	dim_t jc_ways; \
+ \
+	lpgemm_s8s8s32o32_get_threading \
+	( \
+	  &n_threads, \
+	  &ic_ways, &jc_ways, \
+	  m, n, k, rntm_g \
+	); \
+ \
+	AOCL_TID_DISTR_TYPE tid_distr = \
+				lpgemm_get_tid_distr_type\
+				( \
+				  m, n, k, \
+				  n_threads, ic_ways, jc_ways, \
+				  lcntx \
+				); \
+ \
+	/* Set the packing block allocator field of the rntm. This will be
+	 * inherited by all of the child threads when they make local copies of
+	 * the rntm below.*/ \
+	bli_pba_rntm_set_pba( rntm_g ); \
+ \
+	thrcomm_t static_lpgemm_comms[BLIS_LPGEMM_NUM_STATIC_COMMS]; \
+	thrcomm_t* cur_lpgemm_comms = static_lpgemm_comms; \
+	err_t bli_errors = BLIS_SUCCESS; \
+ \
+	if ( jc_ways > BLIS_LPGEMM_NUM_STATIC_COMMS ) \
+	{ \
+		cur_lpgemm_comms = bli_malloc_intl( jc_ways * sizeof( thrcomm_t ), &bli_errors ); \
+	} \
+	for ( dim_t i = 0; i < jc_ways; ++i ) \
+	{ \
+		bli_thrcomm_init( ic_ways, &cur_lpgemm_comms[i] ); \
+	} \
+ \
+	_Pragma( "omp parallel num_threads(n_threads)" ) \
+	{ \
+		/* Create a thread-local copy of the master thread's rntm_t. This is
+		 * necessary since we want each thread to be able to track its own
+		 * small block pool_t as it executes down the function stack.*/ \
+		rntm_t rntm_l = *rntm_g; \
+ \
+		/* lpgemm_thrinfo_t object will be used to generate thrinfo_t objects
+		 * for use in blis mt framework inside the respective mat mul driver
+		 * functions.*/ \
+		lpgemm_thrinfo_t thread; \
+		thread.n_threads = n_threads; \
+		thread.tid = omp_get_thread_num(); \
+		if ( mtag_b == REORDERED ) { \
+			lpgemm_modify_tid_on_distr_type(&thread.tid, n_threads, tid_distr); \
+		} \
+ \
+		thread.ic_ways = ic_ways; \
+		thread.jc_ways = jc_ways; \
+		thread.comm = cur_lpgemm_comms; \
+ \
+		lpgemm_rowvar_ ## LPGEMM_SFX \
+		( \
+		  m, n, k, \
+		  a, rs_a, cs_a, mtag_a, \
+		  b, rs_b, cs_b, mtag_b, \
+		  c, rs_c, cs_c,\
+		  alpha, \
+		  beta, \
+		  &rntm_l, \
+		  &thread, \
+		  lcntx, \
+	      grp_post_op_list, \
+		  post_op_list, c_downscale \
+		); \
+	} \
+	if ( jc_ways > BLIS_LPGEMM_NUM_STATIC_COMMS ) \
+	{ \
+		bli_free_intl( cur_lpgemm_comms ); \
+	} \
+} \
+
+GEN_LPGEMM_OPENMP_DECORATOR_GRP(int8_t, int8_t, int32_t, s8s8s32o32_sym_quant)
+
 #define GEN_BATCH_LPGEMM_OPENMP_DECORATOR_MP(A_type,B_type,C_type,LPGEMM_SFX, LPGEMM_PARENT_SFX) \
 void batch_lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
      ( \
@@ -1789,6 +1898,77 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
 GEN_LPGEMM_DECORATOR1(bfloat16, int8_t, float, bf16s4f32of32)
 
 
+#define GEN_LPGEMM_DECORATOR2(A_type,B_type,C_type,LPGEMM_SFX) \
+void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
+     ( \
+       const dim_t           m, \
+       const dim_t           n, \
+       const dim_t           k, \
+       const A_type*         a, \
+       const dim_t           rs_a, \
+       const dim_t           cs_a, \
+       const AOCL_MEMORY_TAG mtag_a, \
+       const B_type*         b, \
+       const dim_t           rs_b, \
+       const dim_t           cs_b, \
+       AOCL_MEMORY_TAG       mtag_b, \
+       float*               c, \
+       const dim_t           rs_c, \
+       const dim_t           cs_c, \
+       const C_type          alpha, \
+       const C_type          beta, \
+       rntm_t*               rntm_g, \
+       lpgemm_cntx_t*        lcntx, \
+       lpgemm_group_post_op* grp_post_op_list, \
+	   lpgemm_post_op*       post_op_list, \
+       AOCL_STORAGE_TYPE     c_downscale \
+     ) \
+{ \
+	dim_t n_threads = 1; \
+ \
+	/* Factorization of threads along m and n dimension respectively.*/ \
+	dim_t ic_ways = 1; \
+	dim_t jc_ways = 1; \
+ \
+	/* Set the packing block allocator field of the rntm. This will be
+	 * inherited by all of the child threads when they make local copies of
+	 * the rntm below.*/ \
+	bli_pba_rntm_set_pba( rntm_g ); \
+ \
+	thrcomm_t static_lpgemm_comm; \
+	thrcomm_t* cur_lpgemm_comm = &static_lpgemm_comm; \
+ \
+	bli_thrcomm_init( ic_ways, cur_lpgemm_comm ); \
+ \
+	/* lpgemm_thrinfo_t object will be used to generate thrinfo_t objects
+	 * for use in blis mt framework inside the respective mat mul driver
+	 * functions.*/ \
+	lpgemm_thrinfo_t thread; \
+	thread.n_threads = n_threads; \
+	thread.tid = 0; \
+	thread.ic_ways = ic_ways; \
+	thread.jc_ways = jc_ways; \
+	thread.comm = cur_lpgemm_comm; \
+ \
+	lpgemm_rowvar_ ## LPGEMM_SFX \
+	( \
+	  m, n, k, \
+	  a, rs_a, cs_a, mtag_a, \
+	  b, rs_b, cs_b, mtag_b, \
+	  c, rs_c, cs_c, \
+	  alpha, \
+	  beta, \
+	  rntm_g, \
+	  &thread, \
+	  lcntx, \
+	  grp_post_op_list, \
+	  post_op_list, c_downscale \
+	); \
+}
+
+GEN_LPGEMM_DECORATOR2(int8_t, int8_t, int32_t, s8s8s32o32_sym_quant)
+
+
 #define GEN_BATCH_LPGEMM_OPENMP_DECORATOR(A_type,B_type,C_type,LPGEMM_SFX) \
 void batch_lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
      ( \
@@ -1811,7 +1991,7 @@ void batch_lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
        const C_type*          beta, \
        rntm_t*                rntm_g, \
        lpgemm_cntx_t*         lcntx, \
-       lpgemm_post_op(*post_op_list)[AOCL_MAX_POST_OPS], \
+	   lpgemm_post_op(*post_op_list)[AOCL_MAX_POST_OPS], \
        AOCL_STORAGE_TYPE      c_downscale \
      ) \
 { \

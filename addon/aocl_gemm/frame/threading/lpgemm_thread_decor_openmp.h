@@ -162,6 +162,34 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
 
 GEN_LPGEMM_OPENMP_DECORATOR_FN1(bfloat16, int8_t, float, bf16s4f32of32)
 
+#define GEN_LPGEMM_OPENMP_DECORATOR_FN2(A_type,B_type,C_type,LPGEMM_SFX) \
+void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
+     ( \
+       const dim_t           m, \
+       const dim_t           n, \
+       const dim_t           k, \
+       const A_type*         a, \
+       const dim_t           rs_a, \
+       const dim_t           cs_a, \
+       const AOCL_MEMORY_TAG mtag_a, \
+       const B_type*         b, \
+       const dim_t           rs_b, \
+       const dim_t           cs_b, \
+      AOCL_MEMORY_TAG        mtag_b, \
+       float*               c, \
+       const dim_t           rs_c, \
+       const dim_t           cs_c, \
+       const C_type          alpha, \
+       const C_type          beta, \
+       rntm_t*               rntm_g, \
+       lpgemm_cntx_t*        lcntx, \
+       lpgemm_group_post_op* grp_post_op_list, \
+       lpgemm_post_op*       post_op_list, \
+       AOCL_STORAGE_TYPE     c_downscale \
+     ); \
+
+GEN_LPGEMM_OPENMP_DECORATOR_FN2(int8_t, int8_t, int32_t, s8s8s32o32_sym_quant)
+
 #define GEN_UTIL_ELTWISE_OPS_OPENMP_DECORATOR_FN(A_type,B_type,LPGEMM_SFX) \
 void lpgemm_eltwise_ops_ ## LPGEMM_SFX ## _openmp_thread_decorator \
      ( \
@@ -303,6 +331,34 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
      ); \
 
 GEN_LPGEMM_DECORATOR_FN1(bfloat16, int8_t, float, bf16s4f32of32)
+
+#define GEN_LPGEMM_OPENMP_DECORATOR_FN2(A_type,B_type,C_type,LPGEMM_SFX) \
+void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
+     ( \
+       const dim_t           m, \
+       const dim_t           n, \
+       const dim_t           k, \
+       const A_type*         a, \
+       const dim_t           rs_a, \
+       const dim_t           cs_a, \
+       const AOCL_MEMORY_TAG mtag_a, \
+       const B_type*         b, \
+       const dim_t           rs_b, \
+       const dim_t           cs_b, \
+      AOCL_MEMORY_TAG        mtag_b, \
+       float*               c, \
+       const dim_t           rs_c, \
+       const dim_t           cs_c, \
+       const C_type          alpha, \
+       const C_type          beta, \
+       rntm_t*               rntm_g, \
+       lpgemm_cntx_t*        lcntx, \
+       lpgemm_group_post_op* grp_post_op_list, \
+       lpgemm_post_op*       post_op_list, \
+       AOCL_STORAGE_TYPE     c_downscale \
+     ); \
+
+GEN_LPGEMM_OPENMP_DECORATOR_FN2(int8_t, int8_t, int32_t, s8s8s32o32_sym_quant)
 
 #define GEN_UTIL_ELTWISE_OPS_DECORATOR_FN(A_type,B_type,LPGEMM_SFX) \
 void lpgemm_eltwise_ops_ ## LPGEMM_SFX ## _thread_decorator \
