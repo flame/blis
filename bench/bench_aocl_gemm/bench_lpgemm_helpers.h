@@ -771,7 +771,7 @@ void print_matrix_bfloat16
     }
 }
 
-#define GEN_MAT_MUL_ACC_CHK_DOWNSCALE(C_type,ACCUM_type,SCALE_type,BLAS_DOWNSCALE_SFX) \
+#define GEN_MAT_MUL_ACC_CHK_DOWNSCALE(ZP_type,C_type,ACCUM_type,SCALE_type,BLAS_DOWNSCALE_SFX) \
 static inline ACCUM_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX \
      (\
        ACCUM_type temp_accum,\
@@ -795,7 +795,7 @@ static inline ACCUM_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX
         ( ACCUM_type )min( \
                         max( nearbyintf( ( SCALE_type )( temp_accum ) * \
                             ( *( ( SCALE_type* )( post_op->sum )->scale_factor + j_scale ) ) ) + \
-                            *( ( C_type* )( post_op->sum )->zero_point + j_zp ), \
+                            *( ( ZP_type* )( post_op->sum )->zero_point + j_zp ), \
                             DSCALE_CLIP_MIN ), \
                         DSCALE_CLIP_MAX ); \
     return out_temp_accum; \

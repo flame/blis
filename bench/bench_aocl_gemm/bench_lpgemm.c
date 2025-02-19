@@ -216,15 +216,15 @@ GEN_MAT_MUL_BENCH_DRV_FUNC(bfloat16,int8_t,float,float,bf16s4f32of32)
 GEN_MAT_MUL_BENCH_DRV_FUNC(bfloat16,int8_t,bfloat16,float,bf16s4f32obf16)
 
 
-GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int32_t,float,u8s8s32os8)
-GEN_MAT_MUL_ACC_CHK_DOWNSCALE(uint8_t,int32_t,float,u8s8s32ou8)
-GEN_MAT_MUL_ACC_CHK_DOWNSCALE(float,int32_t,float,u8s8s32of32)
-GEN_MAT_MUL_ACC_CHK_DOWNSCALE(bfloat16,int32_t,float,u8s8s32obf16)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int8_t,int32_t,float,u8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(uint8_t,uint8_t,int32_t,float,u8s8s32ou8)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,float,int32_t,float,u8s8s32of32)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,bfloat16,int32_t,float,u8s8s32obf16)
 
-GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int32_t,float,s8s8s32os8)
-GEN_MAT_MUL_ACC_CHK_DOWNSCALE(uint8_t,int32_t,float,s8s8s32ou8)
-GEN_MAT_MUL_ACC_CHK_DOWNSCALE(float,int32_t,float,s8s8s32of32)
-GEN_MAT_MUL_ACC_CHK_DOWNSCALE(bfloat16,int32_t,float,s8s8s32obf16)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int8_t,int32_t,float,s8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(uint8_t,uint8_t,int32_t,float,s8s8s32ou8)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,float,int32_t,float,s8s8s32of32)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,bfloat16,int32_t,float,s8s8s32obf16)
 
 
 GEN_MAT_MUL_ACC_CHK_ACCUM(float,float,float,float,f32f32f32of32)
@@ -1162,6 +1162,8 @@ int main( int argc, char** argv )
                 strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
                 global_dscale_out = 'n';
                 global_pre_op = 'n';
+                DSCALE_CLIP_MIN = INT_MIN;
+                DSCALE_CLIP_MAX = INT_MAX;
                 GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32of32)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
@@ -1175,6 +1177,8 @@ int main( int argc, char** argv )
                 strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
                 global_dscale_out = 'n';
                 global_pre_op = 'n';
+                DSCALE_CLIP_MIN = INT_MIN;
+                DSCALE_CLIP_MAX = INT_MAX;
                 GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32obf16)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
@@ -1315,6 +1319,8 @@ int main( int argc, char** argv )
                 strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
                 global_dscale_out = 'n';
                 global_pre_op = 'n';
+                DSCALE_CLIP_MIN = INT_MIN;
+                DSCALE_CLIP_MAX = INT_MAX;
                 GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32obf16)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
@@ -1328,6 +1334,8 @@ int main( int argc, char** argv )
                 strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
                 global_dscale_out = 'n';
                 global_pre_op = 'n';
+                DSCALE_CLIP_MIN = INT_MIN;
+                DSCALE_CLIP_MAX = INT_MAX;
                 GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32of32)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
