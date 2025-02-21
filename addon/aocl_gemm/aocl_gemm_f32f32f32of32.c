@@ -55,11 +55,20 @@ static inline bool is_tiny_input_f32
 
     const dim_t NC = lcntx->blksz.NC;
     const dim_t MC = lcntx->blksz.MC;
+    const dim_t KC = lcntx->blksz.KC;
+    const dim_t MR = lcntx->blksz.MR;
+    const dim_t NR = lcntx->blksz.NR;
+
+	dim_t mnk = m * n * k;
+	const dim_t mnk_magic_num = 12 * 64 * 496;
+	const dim_t m_thresh = 6 * MR;
+	const dim_t n_thresh = 2 * NR;
+	const dim_t k_thresh = 480;
 
 	// Need to explicitly check for MC, NC boundaries for safety.
-	if ( ( k < 128 ) && ( m <= MC ) && ( n < NC ) &&
-		 ( ( ( m <= 36 ) && ( n <= 64 ) ) ||
-		   ( ( m <= 12 ) && ( n <= 128 ) ) ) )
+	if ( ( k < KC ) && ( m <= MC ) && ( n < NC ) &&
+		 ( ( m <= m_thresh ) && ( n <= n_thresh ) && ( k <= k_thresh ) &&
+		   ( mnk < mnk_magic_num ) ) )
 	{
 		is_tiny = TRUE;
 	}

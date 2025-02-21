@@ -759,4 +759,408 @@ void packa_mr16_f32f32f32of32_col_major
   *rs_p = KC;
   *cs_p = 1;
 }
+
+#define F32_ROW_MAJOR_K_PACK_LOOP(pack_a_buf, KC, kr) \
+	a01 = _mm512_unpacklo_ps( a0, b0 ); \
+	a0 = _mm512_unpackhi_ps( a0, b0 ); \
+ \
+	c01 = _mm512_unpacklo_ps( c0, d0 ); \
+	c0 = _mm512_unpackhi_ps( c0, d0 ); \
+ \
+	e01 = _mm512_unpacklo_ps( e0, f0 ); /* Elem 4 */ \
+	e0 = _mm512_unpackhi_ps( e0, f0 ); /* Elem 5 */ \
+ \
+	b0 = _mm512_castpd_ps( _mm512_unpacklo_pd( _mm512_castps_pd( a01 ), \
+			_mm512_castps_pd( c01 ) ) ); \
+	a01 = _mm512_castpd_ps( _mm512_unpackhi_pd( _mm512_castps_pd( a01 ), \
+			_mm512_castps_pd( c01 ) ) ); \
+ \
+	d0 = _mm512_castpd_ps( _mm512_unpacklo_pd( _mm512_castps_pd( a0 ), \
+			_mm512_castps_pd( c0 ) ) ); \
+	c01 = _mm512_castpd_ps( _mm512_unpackhi_pd( _mm512_castps_pd( a0 ), \
+			_mm512_castps_pd( c0 ) ) ); \
+ \
+	a0 = _mm512_castpd_ps( _mm512_permutex2var_pd( _mm512_castps_pd( b0 ), \
+			selector1, _mm512_castps_pd( a01 ) ) ); \
+	c0 = _mm512_castpd_ps( _mm512_permutex2var_pd( _mm512_castps_pd( d0 ), \
+			selector1, _mm512_castps_pd( c01 ) ) ); \
+	b0 = _mm512_castpd_ps( _mm512_permutex2var_pd( _mm512_castps_pd( b0 ), \
+			selector1_1, _mm512_castps_pd( a01 ) ) ); \
+	d0 = _mm512_castpd_ps( _mm512_permutex2var_pd( _mm512_castps_pd( d0 ), \
+			selector1_1, _mm512_castps_pd( c01 ) ) ); \
+ \
+	a01 = _mm512_castpd_ps( _mm512_permutex2var_pd( _mm512_castps_pd( a0 ), \
+			selector2, _mm512_castps_pd( c0 ) ) ); /* a[0] */ \
+	c01 = _mm512_castpd_ps( _mm512_permutex2var_pd( _mm512_castps_pd( b0 ), \
+			selector2, _mm512_castps_pd( d0 ) ) ); /* a[2] */ \
+	a0 = _mm512_castpd_ps( _mm512_permutex2var_pd( _mm512_castps_pd( a0 ), \
+			selector2_1, _mm512_castps_pd( c0 ) ) ); /* a[1] */ \
+	c0 = _mm512_castpd_ps( _mm512_permutex2var_pd( _mm512_castps_pd( b0 ), \
+			selector2_1, _mm512_castps_pd( d0 ) ) ); /* a[3] */ \
+ \
+	/* First half */ \
+	b0 = _mm512_castpd_ps( _mm512_permutex2var_pd( _mm512_castps_pd( a01 ), \
+			selector3, _mm512_castps_pd( e01 ) ) ); /* 1st 16 */ \
+	a01 = _mm512_castpd_ps( _mm512_permutex2var_pd( _mm512_castps_pd( a01 ), \
+			selector4, _mm512_castps_pd( e0 ) ) ); /* 1st 8 */ \
+	d0 = _mm512_castpd_ps( _mm512_permutex2var_pd( _mm512_castps_pd( a0 ), \
+			selector5, _mm512_castps_pd( e01 ) ) ); /* 2nd 16 */ \
+	a0 = _mm512_castpd_ps( _mm512_permutex2var_pd( _mm512_castps_pd( a0 ), \
+			selector6, _mm512_castps_pd( e0 ) ) ); /* 2nd 4 */ \
+ \
+	_mm512_storeu_ps( pack_a_buf + ( ( ic * KC ) + ( ( kr * MR ) + ( 0 ) ) ), b0 ); \
+	_mm512_storeu_ps( pack_a_buf + ( ( ic * KC ) + ( ( kr * MR ) + ( 16 ) ) ) , a01 ); \
+	_mm512_storeu_ps( pack_a_buf + ( ( ic * KC ) + ( ( kr * MR ) + ( 24 ) ) ), d0 ); \
+	/* Last piece */ \
+	last_piece = _mm512_castps512_ps256( a0 ); \
+	_mm256_mask_storeu_ps \
+	( \
+	  pack_a_buf + ( ( ic * KC ) + ( ( kr * MR ) + ( 40 ) ) ), \
+	  _cvtu32_mask16( 0xFFFF), \
+	  last_piece \
+	); \
+ \
+	/* Second half */ \
+	b0 = _mm512_castpd_ps( _mm512_permutex2var_pd( _mm512_castps_pd( c01 ), \
+			selector7, _mm512_castps_pd( e01 ) ) ); /* 3rd 16 */ \
+	c01 = _mm512_castpd_ps( _mm512_permutex2var_pd( _mm512_castps_pd( c01 ), \
+			selector8, _mm512_castps_pd( e0 ) ) ); /* 3rd 8 */ \
+	d0 = _mm512_castpd_ps( _mm512_permutex2var_pd( _mm512_castps_pd( c0 ), \
+			selector9, _mm512_castps_pd( e01 ) ) ); /* 4th 16 */ \
+	c0 = _mm512_castpd_ps( _mm512_permutex2var_pd( _mm512_castps_pd( c0 ), \
+			selector10, _mm512_castps_pd( e0 ) ) ); /* 4th 8 */ \
+ \
+	_mm512_storeu_ps( pack_a_buf + ( ( ic * KC ) + ( ( kr * MR ) + ( 48 ) ) ), b0 ); \
+	_mm512_storeu_ps( pack_a_buf + ( ( ic * KC ) + ( ( kr * MR ) + ( 64 ) ) ) , c01 ); \
+	_mm512_storeu_ps( pack_a_buf + ( ( ic * KC ) + ( ( kr * MR ) + ( 72 ) ) ), d0 ); \
+	/* Last piece */ \
+	last_piece = _mm512_castps512_ps256( c0 ); \
+	_mm256_mask_storeu_ps \
+	( \
+	  pack_a_buf + ( ( ic * KC ) + ( ( kr * MR ) + ( 88 ) ) ), \
+	  _cvtu32_mask16( 0xFFFF), \
+	  last_piece \
+	); \
+
+// Row Major Packing in blocks of MRxKC
+void packa_f32f32f32of32_row_major_avx512
+     (
+       float*       pack_a_buf,
+       const float* a,
+       const dim_t  lda,
+       const dim_t  MC,
+       const dim_t  KC,
+       dim_t*       rs_a,
+       dim_t*       cs_a
+     )
+{
+	const dim_t MR = 6;
+	const dim_t KR_NDIM = 16;
+
+	// Used for permuting the mm512i elements for use in vpdpbusd instruction.
+	// These are indexes of the format a0-a1-b0-b1-a2-a3-b2-b3 and a0-a1-a2-a3-b0-b1-b2-b3.
+	// Adding 4 int32 wise gives format a4-a5-b4-b5-a6-a7-b6-b7 and a4-a5-a6-a7-b4-b5-b6-b7.
+	__m512i selector1 = _mm512_setr_epi64( 0x0, 0x1, 0x8, 0x9, 0x2, 0x3, 0xA, 0xB );
+	__m512i selector1_1 = _mm512_setr_epi64( 0x4, 0x5, 0xC, 0xD, 0x6, 0x7, 0xE, 0xF );
+	__m512i selector2 = _mm512_setr_epi64( 0x0, 0x1, 0x2, 0x3, 0x8, 0x9, 0xA, 0xB );
+	__m512i selector2_1 = _mm512_setr_epi64( 0x4, 0x5, 0x6, 0x7, 0xC, 0xD, 0xE, 0xF );
+
+	// First half.
+	__m512i selector3 = _mm512_setr_epi64( 0x0, 0x1, 0x8, 0x2, 0x3, 0x9, 0x4, 0x5 ); // 64 elems
+	__m512i selector4 = _mm512_setr_epi64( 0x8, 0x6, 0x7, 0x9, 0x0, 0x0, 0x0, 0x0 ); // 32 elems
+	__m512i selector5 = _mm512_setr_epi64( 0x0, 0x1, 0xA, 0x2, 0x3, 0xB, 0x4, 0x5 ); // 64 elems
+	__m512i selector6 = _mm512_setr_epi64( 0xA, 0x6, 0x7, 0xB, 0x0, 0x0, 0x0, 0x0 ); // 32 elems
+
+	// Second half.
+	__m512i selector7 = _mm512_setr_epi64( 0x0, 0x1, 0xC, 0x2, 0x3, 0xD, 0x4, 0x5 ); // 64 elems
+	__m512i selector8 = _mm512_setr_epi64( 0xC, 0x6, 0x7, 0xD, 0x0, 0x0, 0x0, 0x0 ); // 32 elems
+	__m512i selector9 = _mm512_setr_epi64( 0x0, 0x1, 0xE, 0x2, 0x3, 0xF, 0x4, 0x5 ); // 64 elems
+	__m512i selector10 = _mm512_setr_epi64( 0xE, 0x6, 0x7, 0xF, 0x0, 0x0, 0x0, 0x0 ); // 32 elems
+
+	dim_t m_full_pieces = MC / MR;
+	dim_t m_full_pieces_loop_limit = m_full_pieces * MR;
+	dim_t m_partial_pieces = MC % MR;
+
+	dim_t kr_full_pieces = KC / KR_NDIM;
+	dim_t kr_full_pieces_loop_limit = kr_full_pieces * KR_NDIM;
+	dim_t kr_partial_pieces = KC % KR_NDIM;
+
+	__m512 a0;
+	__m512 b0;
+	__m512 c0;
+	__m512 d0;
+	__m512 e0;
+	__m512 f0;
+	__m512 a01;
+	__m512 c01;
+	__m512 e01;
+	__m256 last_piece;
+
+	__mmask16 mmask[6];
+	for ( dim_t ic = 0; ic < MC; ic += MR )
+	{
+		if ( ic == m_full_pieces_loop_limit )
+		{
+			for ( int ii = 0; ii < m_partial_pieces; ++ii )
+			{
+				mmask[ii] = _cvtu32_mask16( 0xFFFF );
+			}
+			for ( int ii = m_partial_pieces; ii < MR; ++ii )
+			{
+				mmask[ii] = _cvtu32_mask16( 0x0 );
+			}
+		}
+		else
+		{
+			for ( int ii = 0; ii < MR; ++ii )
+			{
+				mmask[ii] = _cvtu32_mask16( 0xFFFF );
+			}
+		}
+		for ( dim_t kr = 0; kr < kr_full_pieces_loop_limit; kr += KR_NDIM )
+		{
+			a0 = _mm512_maskz_loadu_ps( mmask[0], a + ( lda * ( ic + 0 ) ) + kr );
+			b0 = _mm512_maskz_loadu_ps( mmask[1], a + ( lda * ( ic + 1 ) ) + kr );
+			c0 = _mm512_maskz_loadu_ps( mmask[2], a + ( lda * ( ic + 2 ) ) + kr );
+			d0 = _mm512_maskz_loadu_ps( mmask[3], a + ( lda * ( ic + 3 ) ) + kr );
+			e0 = _mm512_maskz_loadu_ps( mmask[4], a + ( lda * ( ic + 4 ) ) + kr );
+			f0 = _mm512_maskz_loadu_ps( mmask[5], a + ( lda * ( ic + 5 ) ) + kr );
+
+			F32_ROW_MAJOR_K_PACK_LOOP(pack_a_buf, KC, kr);
+		}
+		if ( kr_partial_pieces > 0 )
+		{
+			err_t r_val;
+			size_t temp_size = MR * KR_NDIM * sizeof( float );
+			float* temp_pack_a_buf = bli_malloc_user( temp_size, &r_val );
+
+			__mmask16 lmask = _cvtu32_mask16( 0xFFFF >> ( 16 - kr_partial_pieces ) );
+			for ( int ii = 0; ii < MR; ++ii )
+			{
+				mmask[ii] = _mm512_kand( mmask[ii], lmask );
+			}
+
+			a0 = _mm512_maskz_loadu_ps( mmask[0], a + ( lda * ( ic + 0 ) ) +
+							kr_full_pieces_loop_limit );
+			b0 = _mm512_maskz_loadu_ps( mmask[1], a + ( lda * ( ic + 1 ) ) +
+							kr_full_pieces_loop_limit );
+			c0 = _mm512_maskz_loadu_ps( mmask[2], a + ( lda * ( ic + 2 ) ) +
+							kr_full_pieces_loop_limit );
+			d0 = _mm512_maskz_loadu_ps( mmask[3], a + ( lda * ( ic + 3 ) ) +
+							kr_full_pieces_loop_limit );
+			e0 = _mm512_maskz_loadu_ps( mmask[4], a + ( lda * ( ic + 4 ) ) +
+							kr_full_pieces_loop_limit );
+			f0 = _mm512_maskz_loadu_ps( mmask[5], a + ( lda * ( ic + 5 ) ) +
+							kr_full_pieces_loop_limit );
+
+			F32_ROW_MAJOR_K_PACK_LOOP(temp_pack_a_buf, 0, 0);
+
+			memcpy
+			(
+			  pack_a_buf + ( ic * KC ) + ( kr_full_pieces_loop_limit * MR ),
+			  temp_pack_a_buf,
+			  kr_partial_pieces * MR * sizeof( float )
+			);
+
+			bli_free_user( temp_pack_a_buf );
+		}
+	}
+
+	*rs_a = 1;
+	*cs_a = 6;
+}
+
+void packa_f32f32f32of32_col_major_avx512
+     (
+       float*       pack_a_buf,
+       const float* a,
+       const dim_t  lda,
+       const dim_t  MC,
+       const dim_t  KC,
+       dim_t*       rs_a,
+       dim_t*       cs_a
+     )
+{
+	const dim_t MR = 6;
+	const dim_t KR_NDIM = 16;
+
+	dim_t m_full_pieces = MC / MR;
+	dim_t m_full_pieces_loop_limit = m_full_pieces * MR;
+	dim_t m_partial_pieces = MC % MR;
+
+	dim_t kr_full_pieces = KC / KR_NDIM;
+	dim_t kr_full_pieces_loop_limit = kr_full_pieces * KR_NDIM;
+	dim_t kr_partial_pieces = KC % KR_NDIM;
+
+	__m256 a0;
+	__m256 b0;
+	__m256 c0;
+	__m256 d0;
+	__m256 e0;
+	__m256 f0;
+	__m256 g0;
+	__m256 h0;
+	__m256 i0;
+	__m256 j0;
+	__m256 k0;
+	__m256 l0;
+	__m256 m0;
+	__m256 n0;
+	__m256 o0;
+	__m256 p0;
+
+	__mmask16 mmask[16];
+
+	for ( dim_t ic = 0; ic < MC; ic += MR )
+	{
+		if ( ic == m_full_pieces_loop_limit )
+		{
+			for ( int ii = 0; ii < 16; ++ii )
+			{
+				mmask[ii] = _cvtu32_mask16( 0x3F >> ( MR - m_partial_pieces ) );
+			}
+		}
+		/* Inside the kr loop, the mmask is modified. Need to reset it
+		 * at beginning of each ic loop iteration. */
+		else
+		{
+			for ( int ii = 0; ii < 16; ++ii )
+			{
+				mmask[ii] = _cvtu32_mask16( 0x3F );
+			}
+		}
+		for ( dim_t kr = 0; kr < KC; kr += KR_NDIM )
+		{
+			if ( kr == kr_full_pieces_loop_limit )
+			{
+				for ( int ii = kr_partial_pieces; ii < 16; ++ii )
+				{
+					mmask[ii] = _cvtu32_mask16( 0x0 );
+				}
+			}
+			a0 = _mm256_maskz_loadu_ps( mmask[0], a + ic + ( lda * ( kr + 0 ) ) );
+			b0 = _mm256_maskz_loadu_ps( mmask[1], a + ic + ( lda * ( kr + 1 ) ) );
+			c0 = _mm256_maskz_loadu_ps( mmask[2], a + ic + ( lda * ( kr + 2 ) ) );
+			d0 = _mm256_maskz_loadu_ps( mmask[3], a + ic + ( lda * ( kr + 3 ) ) );
+			e0 = _mm256_maskz_loadu_ps( mmask[4], a + ic + ( lda * ( kr + 4 ) ) );
+			f0 = _mm256_maskz_loadu_ps( mmask[5], a + ic + ( lda * ( kr + 5 ) ) );
+			g0 = _mm256_maskz_loadu_ps( mmask[6], a + ic + ( lda * ( kr + 6 ) ) );
+			h0 = _mm256_maskz_loadu_ps( mmask[7], a + ic + ( lda * ( kr + 7 ) ) );
+			i0 = _mm256_maskz_loadu_ps( mmask[8], a + ic + ( lda * ( kr + 8 ) ) );
+			j0 = _mm256_maskz_loadu_ps( mmask[9], a + ic + ( lda * ( kr + 9 ) ) );
+			k0 = _mm256_maskz_loadu_ps( mmask[10], a + ic + ( lda * ( kr + 10 ) ) );
+			l0 = _mm256_maskz_loadu_ps( mmask[11], a + ic + ( lda * ( kr + 11 ) ) );
+			m0 = _mm256_maskz_loadu_ps( mmask[12], a + ic + ( lda * ( kr + 12 ) ) );
+			n0 = _mm256_maskz_loadu_ps( mmask[13], a + ic + ( lda * ( kr + 13 ) ) );
+			o0 = _mm256_maskz_loadu_ps( mmask[14], a + ic + ( lda * ( kr + 14 ) ) );
+			p0 = _mm256_maskz_loadu_ps( mmask[15], a + ic + ( lda * ( kr + 15 ) ) );
+
+			_mm256_mask_storeu_ps
+			(
+			  pack_a_buf + ( ic * KC ) + ( ( kr * MR ) + ( MR * 0 ) ),
+			  mmask[0], a0
+			);
+			_mm256_mask_storeu_ps
+			(
+			  pack_a_buf + ( ic * KC ) + ( ( kr * MR ) + ( MR * 1 ) ),
+			  mmask[1], b0
+			);
+			_mm256_mask_storeu_ps
+			(
+			  pack_a_buf + ( ic * KC ) + ( ( kr * MR ) + ( MR * 2 ) ),
+			  mmask[2], c0
+			);
+			_mm256_mask_storeu_ps
+			(
+			  pack_a_buf + ( ic * KC ) + ( ( kr * MR ) + ( MR * 3 ) ),
+			  mmask[3], d0
+			);
+			_mm256_mask_storeu_ps
+			(
+			  pack_a_buf + ( ic * KC ) + ( ( kr * MR ) + ( MR * 4 ) ),
+			  mmask[4], e0
+			);
+			_mm256_mask_storeu_ps
+			(
+			  pack_a_buf + ( ic * KC ) + ( ( kr * MR ) + ( MR * 5 ) ),
+			  mmask[5], f0
+			);
+			_mm256_mask_storeu_ps
+			(
+			  pack_a_buf + ( ic * KC ) + ( ( kr * MR ) + ( MR * 6 ) ),
+			  mmask[6], g0
+			);
+			_mm256_mask_storeu_ps
+			(
+			  pack_a_buf + ( ic * KC ) + ( ( kr * MR ) + ( MR * 7 ) ),
+			  mmask[7], h0
+			);
+			_mm256_mask_storeu_ps
+			(
+			  pack_a_buf + ( ic * KC ) + ( ( kr * MR ) + ( MR * 8 ) ),
+			  mmask[8], i0
+			);
+			_mm256_mask_storeu_ps
+			(
+			  pack_a_buf + ( ic * KC ) + ( ( kr * MR ) + ( MR * 9 ) ),
+			  mmask[9], j0
+			);
+			_mm256_mask_storeu_ps
+			(
+			  pack_a_buf + ( ic * KC ) + ( ( kr * MR ) + ( MR * 10 ) ),
+			  mmask[10], k0
+			);
+			_mm256_mask_storeu_ps
+			(
+			  pack_a_buf + ( ic * KC ) + ( ( kr * MR ) + ( MR * 11 ) ),
+			  mmask[11], l0
+			);
+			_mm256_mask_storeu_ps
+			(
+			  pack_a_buf + ( ic * KC ) + ( ( kr * MR ) + ( MR * 12 ) ),
+			  mmask[12], m0
+			);
+			_mm256_mask_storeu_ps
+			(
+			  pack_a_buf + ( ic * KC ) + ( ( kr * MR ) + ( MR * 13 ) ),
+			  mmask[13], n0
+			);
+			_mm256_mask_storeu_ps
+			(
+			  pack_a_buf + ( ic * KC ) + ( ( kr * MR ) + ( MR * 14 ) ),
+			  mmask[14], o0
+			);
+			_mm256_mask_storeu_ps
+			(
+			  pack_a_buf + ( ic * KC ) + ( ( kr * MR ) + ( MR * 15 ) ),
+			  mmask[15], p0
+			);
+		}
+	}
+}
+
+void packa_mr6_f32f32f32of32_avx512
+     (
+       float*       pack_a_buf,
+       const float* a,
+       const dim_t  rs,
+       const dim_t  cs,
+       const dim_t  MC,
+       const dim_t  KC,
+       dim_t*       rs_a,
+       dim_t*       cs_a
+     )
+{
+	if( cs == 1 )
+	{
+		packa_f32f32f32of32_row_major_avx512
+		( pack_a_buf, a, rs, MC, KC, rs_a, cs_a );
+	}
+	else
+	{
+		packa_f32f32f32of32_col_major_avx512
+		( pack_a_buf, a, cs, MC, KC, rs_a, cs_a );
+	}
+}
+
 #endif

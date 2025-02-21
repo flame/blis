@@ -115,15 +115,15 @@ void packa_u8s8s32os32
        dim_t*         cs_a
      )
 {
-	if( cs == 1 )
-	{
-		packa_k64_u8s8s32o32
-		( pack_a_buffer_u8s8s32o32, a, rs, MC, KC, rs_a, cs_a );
-	}
-	else
+	if ( rs == 1 )
 	{
 		packa_mr16_u8s8s32o32_col_major
 		( pack_a_buffer_u8s8s32o32, a, rs, cs, MC, KC, rs_a, cs_a );
+	}
+	else
+	{
+		packa_k64_u8s8s32o32
+		( pack_a_buffer_u8s8s32o32, a, rs, MC, KC, rs_a, cs_a );
 	}
 }
 

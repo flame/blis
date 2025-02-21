@@ -46,6 +46,30 @@ void packa_mr16_f32f32f32of32_col_major
       dim_t*          cs_p
     );
 
+void packa_mr6_f32f32f32of32_avx512
+     (
+       float*       pack_a_buf,
+       const float* a,
+       const dim_t  rs,
+       const dim_t  cs,
+       const dim_t  MC,
+       const dim_t  KC,
+       dim_t*       rs_a,
+       dim_t*       cs_a
+     );
+
+void packa_mr6_f32f32f32of32_avx2
+     (
+       float*       pack_a_buf,
+       const float* a,
+       const dim_t  rs,
+       const dim_t  cs,
+       const dim_t  MC,
+       const dim_t  KC,
+       dim_t*       rs_a,
+       dim_t*       cs_a
+     );
+
 typedef void (*lpgemm_pack_f32)
      (
        float*,

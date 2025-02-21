@@ -245,6 +245,7 @@ static void _lpgemm_cntx_init_func_map()
 		if ( global_lpgemm_enable_arch == BLIS_ARCH_ZEN3 )
 		{
 			LPGEMM_KERN_FUNC_UPD_MAP_AVX512_VNNI_BF16_TO_AVX2;
+			LPGEMM_PACKA_FUNC_UPD_MAP_AVX512_VNNI_BF16_TO_AVX2;
 			LPGEMM_PACKB_FUNC_UPD_MAP_AVX512_VNNI_BF16_TO_AVX2;
 		}
 	}
@@ -260,6 +261,7 @@ static void _lpgemm_cntx_init_func_map()
 		if ( global_lpgemm_enable_arch == BLIS_ARCH_ZEN3 )
 		{
 			LPGEMM_KERN_FUNC_UPD_MAP_AVX512_VNNI_TO_AVX2
+			LPGEMM_PACKA_FUNC_UPD_MAP_AVX512_VNNI_TO_AVX2;
 			LPGEMM_PACKB_FUNC_UPD_MAP_AVX512_VNNI_TO_AVX2;
 		}
 	}

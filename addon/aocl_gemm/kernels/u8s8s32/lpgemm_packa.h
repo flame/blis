@@ -39,14 +39,20 @@
 // for different schemas used to pack A fringe cases.
 BLIS_INLINE void get_packa_strides_mfringe_u8s8s32os32
      (
-       dim_t* rs,
-       dim_t* cs,
+       const dim_t rs,
+       const dim_t cs,
+       dim_t* rs_use,
+       dim_t* cs_use,
        dim_t MR,
        dim_t m_fringe
      )
 {
-	( *rs ) = 4;
-	( *cs ) = ( ( *cs ) / MR ) * m_fringe;
+	// Only applicable for row major packing.
+	if ( ( rs != 1 ) && ( cs == 1 ) && ( ( *cs_use ) > MR ))
+	{
+		( *rs_use ) = 4;
+		( *cs_use ) = ( ( *cs_use ) / MR ) * m_fringe;
+	}
 }
 
 typedef void (*packa_s32)

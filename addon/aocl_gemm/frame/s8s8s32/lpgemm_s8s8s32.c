@@ -250,7 +250,7 @@ LPGEMV(int8_t,int8_t,int32_t,s8s8s32o32)
 			);
 			get_packa_strides_mfringe_u8s8s32os32
 			(
-			  &rs_a_use, &cs_a_use, gemm_MR, 1
+			  rs_a, cs_a, &rs_a_use, &cs_a_use, gemm_MR, 1
 			);
 
 			a_use = pack_a_buffer_s8s8s32os32;

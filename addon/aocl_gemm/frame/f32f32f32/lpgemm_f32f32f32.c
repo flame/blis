@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -60,19 +60,6 @@ typedef void (*lpgemm_rowvar_f32)
        const float,
        lpgemm_post_op*,
        lpgemm_post_op_attr
-     );
-
-void lpgemm_pack_a_f32f32f32of32
-     (
-       const float* input_buf_addr_a,
-       float*       reorder_buf_addr_a,
-       const dim_t  m,
-       const dim_t  k,
-       const dim_t  rs_a,
-       const dim_t  cs_a,
-       const dim_t  ps_p,
-       const dim_t  MR,
-       cntx_t*      cntx
      );
 
 #ifdef BLIS_KERNELS_ZEN4
@@ -352,8 +339,6 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
     return;
   }
 #endif
-    // Query the global cntx.
-    cntx_t* cntx = bli_gks_query_cntx();
 
     // Query the context for various blocksizes.
     const dim_t NC = lcntx->blksz.NC;
@@ -385,6 +370,7 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
     auxinfo_t aux;
 
     // Check if packing of A is required.
+	// TODO: mtag_a for tranpose needs to be honored.
     bool should_pack_A = bli_rntm_pack_a( rntm );
 
     // Pack buffer for A.
@@ -594,13 +580,13 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
                     cs_a_use = MR;
                     ps_a_use = MR * kc0;
 
-                    lpgemm_pack_a_f32f32f32of32
+                    ( ( lpgemm_pack_f32 )lcntx->packa_fun_ptr )
                     (
-                      ( a + ( rs_a * ic ) + ( pc * cs_a) ),
                       pack_a_buffer_f32f32f32of32,
+                      ( a + ( rs_a * ic ) + ( pc * cs_a) ),
+					  rs_a, cs_a,
                       mc0, kc0,
-                      rs_a, cs_a, ps_a_use, MR,
-                      cntx
+                      &rs_a_use, &cs_a_use
                     );
 
                     a_use = pack_a_buffer_f32f32f32of32;
@@ -669,60 +655,5 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
         {
             bli_pba_release( rntm, &mem_a );
         }
-    }
-}
-
-void lpgemm_pack_a_f32f32f32of32
-     (
-       const float* input_buf_addr_a,
-       float*       reorder_buf_addr_a,
-       const dim_t  m,
-       const dim_t  k,
-       const dim_t  rs_a,
-       const dim_t  cs_a,
-       const dim_t  ps_p,
-       const dim_t  MR,
-       cntx_t*      cntx
-     )
-{
-    float one_local  = *PASTEMAC(s,1);
-    float* restrict kappa_cast = &one_local;
-
-    // Set the schema to "column stored row panels" to indicate packing to conventional
-    // column-stored row panels.
-    pack_t schema = BLIS_PACKED_ROW_PANELS;
-    trans_t transc = BLIS_NO_TRANSPOSE;
-    conj_t conjc = bli_extract_conj( transc );
-    // Compute the total number of iterations we'll need.
-    dim_t m_iter = ( m + MR - 1 ) / MR;
-
-    inc_t cs_p = MR;
-
-    float* p_temp = reorder_buf_addr_a;
-
-    dim_t ir, it;
-    // Iterate over every logical micropanel in the source mmatrix.
-    for ( ir = 0, it = 0; it < m_iter; ir += MR, it += 1 )
-    {
-        dim_t panel_dim_i = bli_min( MR, m - ir );
-
-        const float* a_use = input_buf_addr_a + ( ir * rs_a );
-        float* p_use = p_temp;
-
-        PASTEMAC(s,packm_cxk)
-        (
-          conjc,
-          schema,
-          panel_dim_i,
-          MR,
-          k,
-          k,
-          kappa_cast,
-          ( float* )a_use, rs_a, cs_a,
-          p_use, cs_p,
-          cntx
-        );
-
-        p_temp += ps_p;
     }
 }
