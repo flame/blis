@@ -882,10 +882,45 @@ POST_OPS_DOWNSCALE_6x64_OPS:
         }
         if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
         {
-          zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
-          zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
-          zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
-          zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          if ( post_ops_list_temp->zp_stor_type == BF16 )
+          {
+            __mmask16 zp_mask = _cvtu32_mask16( 0xFFFF );
+            BF16_F32_SCALAR_ZP_BCAST(zero_point0, zp_mask);
+            BF16_F32_SCALAR_ZP_BCAST(zero_point1, zp_mask);
+            BF16_F32_SCALAR_ZP_BCAST(zero_point2, zp_mask);
+            BF16_F32_SCALAR_ZP_BCAST(zero_point3, zp_mask);
+          }
+          else if ( post_ops_list_temp->zp_stor_type == S32 )
+          {
+            __mmask16 zp_mask = _cvtu32_mask16( 0xFFFF );
+            S32_F32_SCALAR_ZP_BCAST(zero_point0, zp_mask);
+            S32_F32_SCALAR_ZP_BCAST(zero_point1, zp_mask);
+            S32_F32_SCALAR_ZP_BCAST(zero_point2, zp_mask);
+            S32_F32_SCALAR_ZP_BCAST(zero_point3, zp_mask);
+          }
+          else if ( post_ops_list_temp->zp_stor_type == S8 )
+          {
+            __mmask16 zp_mask = _cvtu32_mask16( 0xFFFF );
+            S8_F32_SCALAR_ZP_BCAST(zero_point0, zp_mask);
+            S8_F32_SCALAR_ZP_BCAST(zero_point1, zp_mask);
+            S8_F32_SCALAR_ZP_BCAST(zero_point2, zp_mask);
+            S8_F32_SCALAR_ZP_BCAST(zero_point3, zp_mask);
+          }
+		  else if ( post_ops_list_temp->zp_stor_type == U8 )
+          {
+            __mmask16 zp_mask = _cvtu32_mask16( 0xFFFF );
+            U8_F32_SCALAR_ZP_BCAST(zero_point0, zp_mask);
+            U8_F32_SCALAR_ZP_BCAST(zero_point1, zp_mask);
+            U8_F32_SCALAR_ZP_BCAST(zero_point2, zp_mask);
+            U8_F32_SCALAR_ZP_BCAST(zero_point3, zp_mask);
+          }
+          else
+          {
+            zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+            zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+            zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+            zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+          }
         }
 
         if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
@@ -904,14 +939,45 @@ POST_OPS_DOWNSCALE_6x64_OPS:
           }
           if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
           {
-            zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
-                          post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-            zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
-                          post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-            zero_point2 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
-                          post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-            zero_point3 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
-                          post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+            if ( post_ops_list_temp->zp_stor_type == BF16 )
+            {
+              BF16_F32_ZP_LOAD(zero_point0, k0, 0);
+              BF16_F32_ZP_LOAD(zero_point1, k1, 1);
+              BF16_F32_ZP_LOAD(zero_point2, k2, 2);
+              BF16_F32_ZP_LOAD(zero_point3, k3, 3);
+            }
+            else if ( post_ops_list_temp->zp_stor_type == S32 )
+            {
+              S32_F32_ZP_LOAD(zero_point0, k0, 0);
+              S32_F32_ZP_LOAD(zero_point1, k1, 1);
+              S32_F32_ZP_LOAD(zero_point2, k2, 2);
+              S32_F32_ZP_LOAD(zero_point3, k3, 3);
+            }
+            else if ( post_ops_list_temp->zp_stor_type == S8 )
+            {
+              S8_F32_ZP_LOAD(zero_point0, k0, 0);
+              S8_F32_ZP_LOAD(zero_point1, k1, 1);
+              S8_F32_ZP_LOAD(zero_point2, k2, 2);
+              S8_F32_ZP_LOAD(zero_point3, k3, 3);
+            }
+			else if ( post_ops_list_temp->zp_stor_type == U8 )
+            {
+              U8_F32_ZP_LOAD(zero_point0, k0, 0);
+              U8_F32_ZP_LOAD(zero_point1, k1, 1);
+              U8_F32_ZP_LOAD(zero_point2, k2, 2);
+              U8_F32_ZP_LOAD(zero_point3, k3, 3);
+            }
+            else
+            {
+              zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                              post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+              zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                              post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+              zero_point2 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                              post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+              zero_point3 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                              post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+            }
           }
           //c[0, 0-15]
           F32_SCL_MULRND(zmm8, selector1, zero_point0);
@@ -1010,14 +1076,49 @@ POST_OPS_DOWNSCALE_6x64_OPS:
           }
           if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
           {
-            zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
-                                  post_ops_attr.post_op_c_i + 0 ) );
-            zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
-                                  post_ops_attr.post_op_c_i + 1 ) );
-            zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
-                                  post_ops_attr.post_op_c_i + 2 ) );
-            zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
-                                  post_ops_attr.post_op_c_i + 3 ) );
+            if ( post_ops_list_temp->zp_stor_type == BF16 )
+            {
+              __mmask16 zp_mask = _cvtu32_mask16( 0xFFFF );
+              BF16_F32_ZP_BCAST(zero_point0, zp_mask, 0);
+              BF16_F32_ZP_BCAST(zero_point1, zp_mask, 1);
+              BF16_F32_ZP_BCAST(zero_point2, zp_mask, 2);
+              BF16_F32_ZP_BCAST(zero_point3, zp_mask, 3);
+            }
+            else if ( post_ops_list_temp->zp_stor_type == S32 )
+            {
+              __mmask16 zp_mask = _cvtu32_mask16( 0xFFFF );
+              S32_F32_ZP_BCAST(zero_point0, zp_mask, 0);
+              S32_F32_ZP_BCAST(zero_point1, zp_mask, 1);
+              S32_F32_ZP_BCAST(zero_point2, zp_mask, 2);
+              S32_F32_ZP_BCAST(zero_point3, zp_mask, 3);
+            }
+            else if ( post_ops_list_temp->zp_stor_type == S8 )
+            {
+              __mmask16 zp_mask = _cvtu32_mask16( 0xFFFF );
+              S8_F32_ZP_BCAST(zero_point0, zp_mask, 0);
+              S8_F32_ZP_BCAST(zero_point1, zp_mask, 1);
+              S8_F32_ZP_BCAST(zero_point2, zp_mask, 2);
+              S8_F32_ZP_BCAST(zero_point3, zp_mask, 3);
+            }
+			else if ( post_ops_list_temp->zp_stor_type == U8 )
+            {
+              __mmask16 zp_mask = _cvtu32_mask16( 0xFFFF );
+              U8_F32_ZP_BCAST(zero_point0, zp_mask, 0);
+              U8_F32_ZP_BCAST(zero_point1, zp_mask, 1);
+              U8_F32_ZP_BCAST(zero_point2, zp_mask, 2);
+              U8_F32_ZP_BCAST(zero_point3, zp_mask, 3);
+            }
+            else
+            {
+              zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                              post_ops_attr.post_op_c_i + 0 ) );
+              zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                              post_ops_attr.post_op_c_i + 1 ) );
+              zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                              post_ops_attr.post_op_c_i + 2 ) );
+              zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                              post_ops_attr.post_op_c_i + 3 ) );
+            }
           }
 
           //c[0, 0-15]
@@ -1077,10 +1178,37 @@ POST_OPS_DOWNSCALE_6x64_OPS:
           }
           if( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
           {
-            zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
-                                  post_ops_attr.post_op_c_i + 4 ) );
-            zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
-                                  post_ops_attr.post_op_c_i + 5 ) );
+            if ( post_ops_list_temp->zp_stor_type == BF16 )
+            {
+                __mmask16 zp_mask = _cvtu32_mask16( 0xFFFF );
+                BF16_F32_ZP_BCAST(zero_point0, zp_mask, 0);
+                BF16_F32_ZP_BCAST(zero_point1, zp_mask, 1);
+            }
+            else if ( post_ops_list_temp->zp_stor_type == S32 )
+            {
+                __mmask16 zp_mask = _cvtu32_mask16( 0xFFFF );
+                S32_F32_ZP_BCAST(zero_point0, zp_mask, 0);
+                S32_F32_ZP_BCAST(zero_point1, zp_mask, 1);
+            }
+            else if ( post_ops_list_temp->zp_stor_type == S8 )
+            {
+                __mmask16 zp_mask = _cvtu32_mask16( 0xFFFF );
+                S8_F32_ZP_BCAST(zero_point0, zp_mask, 0);
+                S8_F32_ZP_BCAST(zero_point1, zp_mask, 1);
+            }
+			else if ( post_ops_list_temp->zp_stor_type == U8 )
+            {
+                __mmask16 zp_mask = _cvtu32_mask16( 0xFFFF );
+                U8_F32_ZP_BCAST(zero_point0, zp_mask, 0);
+                U8_F32_ZP_BCAST(zero_point1, zp_mask, 1);
+            }
+            else
+            {
+                zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                    post_ops_attr.post_op_c_i + 4 ) );
+                zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+                                    post_ops_attr.post_op_c_i + 5 ) );
+            }
           }
           //c[4, 0-15]
           F32_SCL_MULRND(zmm24, selector1, zero_point0);

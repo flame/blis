@@ -157,7 +157,8 @@ static inline float eltwise_ops_accuracy_check_downscale_bf16of32
      (
        float temp_accum,
        aocl_post_op*  post_op,
-       dim_t j
+       dim_t j,
+       AOCL_PARAMS_STORAGE_TYPES zp_stor_type
      )
 {
     dim_t j_scale = j;
@@ -183,7 +184,8 @@ static inline float eltwise_ops_accuracy_check_downscale_bf16obf16
      (
        float temp_accum,
        aocl_post_op*  post_op,
-       dim_t j
+       dim_t j,
+       AOCL_PARAMS_STORAGE_TYPES zp_stor_type
      )
 {
     dim_t j_scale = j;
@@ -207,11 +209,48 @@ static inline float eltwise_ops_accuracy_check_downscale_bf16obf16
     return out_temp_accum;
 }
 
+static inline float convert_zp_store_type_to_float
+     (
+       aocl_post_op*  post_op,
+       AOCL_PARAMS_STORAGE_TYPES zp_stor_type,
+       dim_t j_zp
+     )
+{
+    float zp_float = 0.0;
+    if(zp_stor_type == AOCL_GEMM_BF16)
+    {
+        bfloat16_to_float( *( ( bfloat16* )( post_op->sum )->zero_point + j_zp ),
+                            &zp_float );
+    }
+    else if(zp_stor_type == AOCL_GEMM_INT32)
+    {
+        int32_t_to_float( *( ( int32_t* )( post_op->sum )->zero_point + j_zp ),
+                            &zp_float );
+    }
+    else if(zp_stor_type == AOCL_GEMM_INT8)
+    {
+        int8_t_to_float( *( ( int8_t* )( post_op->sum )->zero_point + j_zp ),
+                            &zp_float );
+    }
+    else if(zp_stor_type == AOCL_GEMM_UINT8)
+    {
+        uint8_t_to_float( *( ( uint8_t* )( post_op->sum )->zero_point + j_zp ),
+                            &zp_float );
+    }
+    else
+    {
+        zp_float = *( ( float* )( post_op->sum )->zero_point + j_zp );
+    }
+    return zp_float;
+}
+
+
 static inline float eltwise_ops_accuracy_check_downscale_f32of32
      (
        float temp_accum,
        aocl_post_op*  post_op,
-       dim_t j
+       dim_t j,
+       AOCL_PARAMS_STORAGE_TYPES zp_stor_type
      )
 {
     dim_t j_scale = j;
@@ -225,8 +264,9 @@ static inline float eltwise_ops_accuracy_check_downscale_f32of32
     {
        j_zp = 0;
     }
+    float zp_float = convert_zp_store_type_to_float(
+                            post_op, zp_stor_type, j_zp );
 
-    float zp_float = *( ( float* )( post_op->sum )->zero_point + j_zp );
     float out_temp_accum = ( temp_accum *
                 ( *( ( float* )( post_op->sum )->scale_factor + j_scale ) ) +
                 zp_float );
@@ -237,7 +277,8 @@ static inline float eltwise_ops_accuracy_check_downscale_f32os32
      (
        float temp_accum,
        aocl_post_op*  post_op,
-       dim_t j
+       dim_t j,
+       AOCL_PARAMS_STORAGE_TYPES zp_stor_type
      )
 {
     dim_t j_scale = j;
@@ -252,7 +293,9 @@ static inline float eltwise_ops_accuracy_check_downscale_f32os32
        j_zp = 0;
     }
 
-    float zp_float = *( ( float* )( post_op->sum )->zero_point + j_zp );
+    float zp_float = convert_zp_store_type_to_float(
+                            post_op, zp_stor_type, j_zp );
+
     float out_temp_accum = ( temp_accum *
                 ( *( ( float* )( post_op->sum )->scale_factor + j_scale ) ) +
                 zp_float );
@@ -263,7 +306,8 @@ static inline float eltwise_ops_accuracy_check_downscale_f32os8
      (
        float temp_accum,
        aocl_post_op*  post_op,
-       dim_t j
+       dim_t j,
+       AOCL_PARAMS_STORAGE_TYPES zp_stor_type
      )
 {
     dim_t j_scale = j;
@@ -278,12 +322,14 @@ static inline float eltwise_ops_accuracy_check_downscale_f32os8
        j_zp = 0;
     }
 
+    float zp_float = convert_zp_store_type_to_float(
+                            post_op, zp_stor_type, j_zp );
+
     float out_temp_accum = \
         ( float )min( \
                         max( nearbyintf( ( float )( temp_accum ) * \
                             ( *( ( float* )( post_op->sum )->scale_factor + j_scale ) ) ) + \
-                            *( ( float* )( post_op->sum )->zero_point + j_zp ), \
-                            DSCALE_CLIP_MIN ), \
+                            zp_float, DSCALE_CLIP_MIN ), \
                         DSCALE_CLIP_MAX ); \
     return out_temp_accum;
 }
@@ -292,7 +338,8 @@ static inline float eltwise_ops_accuracy_check_downscale_f32ou8
      (
        float temp_accum,
        aocl_post_op*  post_op,
-       dim_t j
+       dim_t j,
+       AOCL_PARAMS_STORAGE_TYPES zp_stor_type
      )
 {
     dim_t j_scale = j;
@@ -307,12 +354,14 @@ static inline float eltwise_ops_accuracy_check_downscale_f32ou8
        j_zp = 0;
     }
 
+    float zp_float = convert_zp_store_type_to_float(
+                            post_op, zp_stor_type, j_zp );
+
     float out_temp_accum = \
         ( float )min( \
                         max( nearbyintf( ( float )( temp_accum ) * \
                             ( *( ( float* )( post_op->sum )->scale_factor + j_scale ) ) ) + \
-                            *( ( float* )( post_op->sum )->zero_point + j_zp ), \
-                            DSCALE_CLIP_MIN ), \
+                            zp_float, DSCALE_CLIP_MIN ), \
                         DSCALE_CLIP_MAX ); \
 
     return out_temp_accum;
@@ -322,7 +371,8 @@ static inline float eltwise_ops_accuracy_check_downscale_f32obf16
      (
        float temp_accum,
        aocl_post_op*  post_op,
-       dim_t j
+       dim_t j,
+       AOCL_PARAMS_STORAGE_TYPES zp_stor_type
      )
 {
     dim_t j_scale = j;
@@ -337,7 +387,9 @@ static inline float eltwise_ops_accuracy_check_downscale_f32obf16
        j_zp = 0;
     }
 
-    float zp_float = *( ( float* )( post_op->sum )->zero_point + j_zp );
+    float zp_float = convert_zp_store_type_to_float(
+                            post_op, zp_stor_type, j_zp );
+
     float out_temp_accum = ( temp_accum *
                 ( *( ( float* )( post_op->sum )->scale_factor + j_scale ) ) +
                 zp_float );
@@ -381,7 +433,8 @@ void eltwise_ops_accuracy_check_driver_ ## LP_SFX \
        dim_t   lda, \
        B_type* b, \
        dim_t   ldb, \
-       aocl_post_op*  post_op \
+       aocl_post_op*  post_op, \
+       char* post_ops_str \
      ) \
 { \
     dim_t rs_a, cs_a; \
@@ -523,7 +576,7 @@ void eltwise_ops_accuracy_check_driver_ ## LP_SFX \
                     else if ( post_op->seq_vector[op_id] == SCALE ) \
                     { \
                         temp_accum = GEN_FUNC_NAME(eltwise_ops_accuracy_check_downscale_,LP_SFX) \
-                            (temp_accum, post_op, j); \
+                            (temp_accum, post_op, j, ( post_op->sum )->zp_stor_type); \
                     } \
                     else if ( post_op->seq_vector[op_id] == MATRIX_ADD ) \
                     { \
@@ -575,13 +628,13 @@ void eltwise_ops_accuracy_check_driver_ ## LP_SFX \
                 if ( fout ) \
                 { \
                     fprintf( fout, "%s Failure input m: %ld, n: %ld," \
-                                    " lda: %ld, ldb: %ld, computed:%f, ref:%f, diff:%f\n", \
+                                    " lda: %ld, ldb: %ld, computed:%f, ref:%f, diff:%f, post_ops:%s\n", \
                                     XSTR(LP_SFX), m, n, lda, ldb, comp_float, \
-                                    ref_float, comp_float - ref_float); \
+                                    ref_float, comp_float - ref_float,  post_ops_str); \
                     fflush( fout ); \
                 } \
-                    printf("failure, m: %ld, n: %ld, computed:%f, ref:%f, diff:%f\n", i, j, \
-                            comp_float, ref_float, comp_float-ref_float); \
+                    printf("failure, m: %ld, n: %ld, computed:%f, ref:%f, diff:%f, post_ops:%s\n", i, j, \
+                            comp_float, ref_float, comp_float-ref_float, post_ops_str); \
                 goto cleanup_acc; \
             } \
         } \
@@ -730,7 +783,8 @@ void eltwise_ops_bench_main_ ## LP_SFX \
           m, n,\
           a, stride_a, \
           b, stride_b, \
-          post_op \
+          post_op, \
+          post_ops_str \
         ); \
     } \
  \
@@ -934,7 +988,7 @@ int main( int argc, char** argv )
                  ( strcmp( eltwise_ops_type_str, "*" ) == 0 ) )
             {
                 strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
-                global_dscale_out = 'n';
+                global_dscale_out = 'y';
                 GEN_FUNC_NAME(eltwise_ops_bench_main_, f32of32)
                 (
                     fout, stor_order, transa, transb,
@@ -958,7 +1012,7 @@ int main( int argc, char** argv )
                  ( strcmp( eltwise_ops_type_str, "*" ) == 0 ) )
             {
                 strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
-                global_dscale_out = 'n';
+                global_dscale_out = 'y';
                 DSCALE_CLIP_MIN = INT_MIN;
                 DSCALE_CLIP_MAX = INT_MAX;
                 GEN_FUNC_NAME(eltwise_ops_bench_main_, f32os32)

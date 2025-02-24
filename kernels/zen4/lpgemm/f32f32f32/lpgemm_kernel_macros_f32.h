@@ -515,6 +515,176 @@
 	reg = _mm512_mul_ps( reg, selector ); \
 	reg = _mm512_add_ps( reg, zero_point ); \
 
+//u8 zero point helper macros
+#define U8_F32_ZP_LOAD(scr,mask,n_ind) \
+	scr = _mm512_cvtepi32_ps \
+				( \
+				_mm512_cvtepu8_epi32 \
+				( \
+				_mm_maskz_loadu_epi8 \
+				( \
+					( mask ), \
+					( ( int8_t* )post_ops_list_temp->op_args1 ) + \
+					post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+				) \
+				) \
+				); \
+
+//s8 zero point helper macros
+#define S8_F32_ZP_LOAD(scr,mask,n_ind) \
+	scr = _mm512_cvtepi32_ps \
+				( \
+				_mm512_cvtepi8_epi32 \
+				( \
+				_mm_maskz_loadu_epi8 \
+				( \
+					( mask ), \
+					( ( int8_t* )post_ops_list_temp->op_args1 ) + \
+					post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+				) \
+				) \
+				); \
+
+//bf16 zero point helper macros
+#define BF16_F32_ZP_LOAD(scr,mask,n_ind) \
+	scr = ( __m512)( _mm512_sllv_epi32 \
+					( \
+					  _mm512_cvtepi16_epi32 \
+					  ( \
+						_mm256_maskz_loadu_epi16 \
+						( \
+						  ( mask ), \
+						  ( ( bfloat16* )post_ops_list_temp->op_args1 ) + \
+						  post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+						) \
+					  ), _mm512_set1_epi32( 16 ) \
+					) \
+		  ); \
+
+//s32 zero point helper macros
+#define S32_F32_ZP_LOAD(scr,mask,n_ind) \
+	scr = 	_mm512_cvtepi32_ps \
+			( \
+				_mm512_maskz_loadu_epi32 \
+				( \
+					( mask ), \
+					( ( int32_t* ) post_ops_list_temp->op_args1 ) + \
+					post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+				) \
+			); \
+
+//u8 zero point helper macros
+#define U8_F32_ZP_BCAST(scr,mask,m_ind) \
+	scr = _mm512_cvtepi32_ps \
+			( \
+			_mm512_cvtepu8_epi32 \
+			( \
+			  _mm_maskz_set1_epi8 \
+			  ( \
+				( mask ), \
+				*( ( ( int8_t* )post_ops_list_temp->op_args1 ) + \
+				post_ops_attr.post_op_c_i + m_ind ) \
+			  ) \
+			) \
+			); \
+
+//s8 zero point helper macros
+#define S8_F32_ZP_BCAST(scr,mask,m_ind) \
+	scr = _mm512_cvtepi32_ps \
+			( \
+			_mm512_cvtepi8_epi32 \
+			( \
+			  _mm_maskz_set1_epi8 \
+			  ( \
+				( mask ), \
+				*( ( ( int8_t* )post_ops_list_temp->op_args1 ) + \
+				post_ops_attr.post_op_c_i + m_ind ) \
+			  ) \
+			) \
+			); \
+
+//bf16 zero point helper macros
+#define BF16_F32_ZP_BCAST(scr,mask,m_ind) \
+	scr = ( __m512)( _mm512_sllv_epi32 \
+					( \
+					  _mm512_cvtepi16_epi32 \
+					  ( \
+						_mm256_maskz_set1_epi16 \
+						( \
+						  ( mask ), \
+						  *( ( ( bfloat16* )post_ops_list_temp->op_args1 ) + \
+						  post_ops_attr.post_op_c_i +  m_ind ) \
+						) \
+					  ), _mm512_set1_epi32( 16 ) \
+					) \
+		  ); \
+
+//s32 zero point helper macros
+#define S32_F32_ZP_BCAST(scr,mask,m_ind) \
+	scr = 	_mm512_cvtepi32_ps \
+			( \
+				_mm512_maskz_set1_epi32 \
+				( \
+					( mask ), \
+					*( ( ( int32_t* ) post_ops_list_temp->op_args1 ) + \
+					post_ops_attr.post_op_c_i + m_ind ) \
+				) \
+			); \
+
+//u8 zero point helper macros
+#define U8_F32_SCALAR_ZP_BCAST(scr,mask) \
+	scr = _mm512_cvtepi32_ps \
+			( \
+			_mm512_cvtepu8_epi32 \
+			( \
+			  _mm_maskz_set1_epi8 \
+			  ( \
+				( mask ), \
+				*( ( int8_t* )post_ops_list_temp->op_args1 ) \
+			  ) \
+			) \
+			); \
+
+//s8 zero point helper macros
+#define S8_F32_SCALAR_ZP_BCAST(scr,mask) \
+	scr = _mm512_cvtepi32_ps \
+			( \
+			_mm512_cvtepi8_epi32 \
+			( \
+			  _mm_maskz_set1_epi8 \
+			  ( \
+				( mask ), \
+				*( ( int8_t* )post_ops_list_temp->op_args1 ) \
+			  ) \
+			) \
+			); \
+
+//bf16 zero point helper macros
+#define BF16_F32_SCALAR_ZP_BCAST(scr,mask) \
+	scr = ( __m512)( _mm512_sllv_epi32 \
+				( \
+					_mm512_cvtepi16_epi32 \
+					( \
+					_mm256_maskz_set1_epi16 \
+					( \
+						( mask ), \
+						*( ( bfloat16* )post_ops_list_temp->op_args1 ) \
+					) \
+					), _mm512_set1_epi32( 16 ) \
+				) \
+		  	); \
+
+//s32 zero point helper macros
+#define S32_F32_SCALAR_ZP_BCAST(scr,mask) \
+	scr = 	_mm512_cvtepi32_ps \
+			( \
+			_mm512_maskz_set1_epi32 \
+			( \
+				( mask ), \
+				*( ( int32_t* ) post_ops_list_temp->op_args1 ) \
+			) \
+			); \
+
 #ifdef LPGEMM_BF16_JIT
 #define CVT_STORE_F32_BF16_POST_OPS_MASK(ir,jr,reg,mask,m_ind,n_ind)
 #else

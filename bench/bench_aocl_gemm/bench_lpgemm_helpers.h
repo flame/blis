@@ -1318,6 +1318,8 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     dim_t activator_idx = 0; \
     dim_t clip_idx = 0; \
     char * bias_stor_type = ""; \
+    bool is_zp_stor_type = FALSE; \
+    char* zp_stor_type = ""; \
     bool is_matadd_stor_type = FALSE; \
     char* matadd_stor_type = ""; \
     bool is_matmul_stor_type = FALSE; \
@@ -1446,6 +1448,39 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
                      ( strcmp( ops_tok, "s" ) == 0 ) ) \
                 { \
                     is_scalar_zp = TRUE; \
+                } \
+            } \
+            else if ( strcmp( ops_tok, "zp_stor_type" ) == 0) \
+            { \
+                 ops_tok = strtok( NULL, ", " ); \
+                if( ( strcmp( ops_tok, "na" ) == 0 ) ) \
+                { \
+                    is_zp_stor_type = FALSE; \
+                } \
+                else if ( ( strcmp( ops_tok, "f32" ) == 0 ) ) \
+                { \
+                    is_zp_stor_type = TRUE; \
+                    zp_stor_type = "F32"; \
+                } \
+                else if ( ( strcmp( ops_tok, "bf16" ) == 0 ) ) \
+                { \
+                    is_zp_stor_type = TRUE; \
+                    zp_stor_type = "BF16"; \
+                } \
+                else if ( ( strcmp( ops_tok, "s32" ) == 0 ) ) \
+                { \
+                    is_zp_stor_type = TRUE; \
+                    zp_stor_type = "S32"; \
+                } \
+                else if ( ( strcmp( ops_tok, "s8" ) == 0 ) ) \
+                { \
+                    is_zp_stor_type = TRUE; \
+                    zp_stor_type = "S8"; \
+                } \
+                else if ( ( strcmp( ops_tok, "u8" ) == 0 ) ) \
+                { \
+                    is_zp_stor_type = TRUE; \
+                    zp_stor_type = "U8"; \
                 } \
             } \
             else if ( strcmp( ops_tok, "matrix_add" ) == 0 ) \
@@ -1863,22 +1898,84 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         { \
             goto err_handler; \
         } \
-        ( post_ops->sum )->zero_point = malloc( n_zp * sizeof( C_DSCALE_type ) ); \
-        if ( ( post_ops->sum )->zero_point == NULL ) \
-        { \
-            goto err_handler; \
-        } \
-\
-        /* Fill scale factor and zero points.*/ \
+        /* Fill scale factor */ \
         DSCALE_type* temp_dscale_ptr = ( DSCALE_type* )( post_ops->sum )->scale_factor; \
         GEN_FUNC_NAME(fill_array_,DSCALE_type)(temp_dscale_ptr, n_scale);   \
         ( post_ops->sum )->scale_factor_len = n_scale; \
         if(strcmp(#BLAS_SFX, "u8s8s32ou8")) for(dim_t i=0;i<n_scale;i++) temp_dscale_ptr[i] = abs(temp_dscale_ptr[i]);\
 \
-        C_DSCALE_type* temp_dzero_point_ptr = ( C_DSCALE_type* )( post_ops->sum )->zero_point; \
-        GEN_FUNC_NAME(fill_array_,C_DSCALE_type)(temp_dzero_point_ptr, n_zp);   \
-        ( post_ops->sum )->zero_point_len = n_zp; \
-        if(strcmp(#BLAS_SFX, "u8s8s32ou8")) for(dim_t i=0;i<n_zp;i++) temp_dzero_point_ptr[i] = abs(temp_dzero_point_ptr[i]);\
+        if(is_zp_stor_type == TRUE) \
+        { \
+            if( ( strcmp( zp_stor_type, "BF16" ) == 0 ) ) \
+            { \
+                ( post_ops->sum )->zp_stor_type = AOCL_GEMM_BF16; \
+                ( post_ops->sum )->zero_point = malloc( n_zp * sizeof( bfloat16 ) ); \
+                if ( ( post_ops->sum )->zero_point == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                GEN_FUNC_NAME(fill_array_,bfloat16)( ( post_ops->sum )->zero_point, n_zp ); \
+                ( post_ops->sum )->zero_point_len = n_zp; \
+            } \
+            else if( ( strcmp( zp_stor_type, "F32" ) == 0 ) ) \
+            { \
+                ( post_ops->sum )->zp_stor_type = AOCL_GEMM_F32; \
+                ( post_ops->sum )->zero_point = malloc( n_zp * sizeof( float ) ); \
+                if ( ( post_ops->sum )->zero_point == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                GEN_FUNC_NAME(fill_array_,float)( ( post_ops->sum )->zero_point, n_zp ); \
+                ( post_ops->sum )->zero_point_len = n_zp; \
+            } \
+            else if( ( strcmp( zp_stor_type, "S32" ) == 0 ) ) \
+            { \
+                ( post_ops->sum )->zp_stor_type = AOCL_GEMM_INT32; \
+                ( post_ops->sum )->zero_point = malloc( n_zp * sizeof( int32_t ) ); \
+                if ( ( post_ops->sum )->zero_point == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                GEN_FUNC_NAME(fill_array_,int32_t)( ( post_ops->sum )->zero_point, n_zp ); \
+                ( post_ops->sum )->zero_point_len = n_zp; \
+            } \
+            else if( ( strcmp( zp_stor_type, "S8" ) == 0 ) ) \
+            { \
+                ( post_ops->sum )->zp_stor_type = AOCL_GEMM_INT8; \
+                ( post_ops->sum )->zero_point = malloc( n_zp * sizeof( int8_t ) ); \
+                if ( ( post_ops->sum )->zero_point == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                GEN_FUNC_NAME(fill_array_,int8_t)( ( post_ops->sum )->zero_point, n_zp ); \
+                ( post_ops->sum )->zero_point_len = n_zp; \
+            } \
+            else if( ( strcmp( zp_stor_type, "U8" ) == 0 ) ) \
+            { \
+                ( post_ops->sum )->zp_stor_type = AOCL_GEMM_UINT8; \
+                ( post_ops->sum )->zero_point = malloc( n_zp * sizeof( uint8_t ) ); \
+                if ( ( post_ops->sum )->zero_point == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                GEN_FUNC_NAME(fill_array_,uint8_t)( ( post_ops->sum )->zero_point, n_zp ); \
+                ( post_ops->sum )->zero_point_len = n_zp; \
+            } \
+            else {} \
+        } \
+        else \
+        { \
+            ( post_ops->sum )->zp_stor_type = NULLTYPE; \
+            ( post_ops->sum )->zero_point = malloc( n_zp * sizeof( C_DSCALE_type ) ); \
+            if ( ( post_ops->sum )->zero_point == NULL ) \
+            { \
+                goto err_handler; \
+            } \
+            C_DSCALE_type* temp_dzero_point_ptr = ( C_DSCALE_type* )( post_ops->sum )->zero_point; \
+            GEN_FUNC_NAME(fill_array_,C_DSCALE_type)(temp_dzero_point_ptr, n_zp);   \
+            ( post_ops->sum )->zero_point_len = n_zp; \
+            if(strcmp(#BLAS_SFX, "u8s8s32ou8")) for(dim_t i=0;i<n_zp;i++) temp_dzero_point_ptr[i] = abs(temp_dzero_point_ptr[i]);\
+        } \
     } \
  \
     if ( is_matrix_add == TRUE ) \

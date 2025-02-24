@@ -142,7 +142,8 @@ BLIS_INLINE void lpgemm_set_node_params(
 	void *scale_factor,
 	dim_t scale_factor_len,
 	bool is_power_of_2,
-	AOCL_STORAGE_TYPE stor_type)
+	AOCL_STORAGE_TYPE stor_type,
+	AOCL_STORAGE_TYPE zp_stor_type)
 {
 	post_op_node->op_code = op_code;
 	post_op_node->op_args1 = op1;
@@ -152,6 +153,7 @@ BLIS_INLINE void lpgemm_set_node_params(
 	post_op_node->scale_factor_len = scale_factor_len;
 	post_op_node->is_power_of_2 = is_power_of_2;
 	post_op_node->stor_type = stor_type;
+	post_op_node->zp_stor_type = zp_stor_type;
 	post_op_node->next = NULL;
 }
 
@@ -200,7 +202,7 @@ err_t lpgemm_translate_to_post_ops_list
 		lpgemm_set_node_params
 		(
 		  post_op_list, POST_OPS_DISABLE,
-		  NULL, NULL, NULL, NULL, 0, FALSE, NONE
+		  NULL, NULL, NULL, NULL, 0, FALSE, NONE, NONE
 		);
 
 		return BLIS_SUCCESS;
@@ -211,7 +213,7 @@ err_t lpgemm_translate_to_post_ops_list
 		lpgemm_set_node_params
 		(
 		  post_op_list, POST_OPS_DISABLE,
-		  NULL, NULL, NULL, NULL, 0, FALSE, NONE
+		  NULL, NULL, NULL, NULL, 0, FALSE, NONE, NONE
 		);
 
 		bli_print_msg(" Max supported post-ops is 5, supplied input post-ops" \
@@ -240,7 +242,7 @@ err_t lpgemm_translate_to_post_ops_list
 						  ( post_op_unparsed->sum + s_i )->scale_factor,
 						  ( post_op_unparsed->sum + s_i )->scale_factor_len,
 						  ( post_op_unparsed->sum + s_i )->is_power_of_2,
-						  NONE
+						  NONE, NONE
 						);
 
 						s_i += 1;
@@ -304,7 +306,7 @@ err_t lpgemm_translate_to_post_ops_list
 						  ( post_op_unparsed->eltwise + e_i )->scale_factor,
 						  ( post_op_unparsed->eltwise + e_i )->scale_factor_len,
 						  ( post_op_unparsed->eltwise + e_i )->is_power_of_2,
-						  NONE
+						  NONE, NONE
 						);
 						e_i += 1;
 					}
@@ -322,7 +324,7 @@ err_t lpgemm_translate_to_post_ops_list
 						(
 						  ( post_op_list + i ), POST_OPS_BIAS,
 						  ( post_op_unparsed->bias + b_i )->bias,
-						  meta_arg, NULL, NULL, 0, FALSE, tmp_stor_type
+						  meta_arg, NULL, NULL, 0, FALSE, tmp_stor_type, NONE
 						);
 
 						b_i += 1;
@@ -359,6 +361,9 @@ err_t lpgemm_translate_to_post_ops_list
 							return BLIS_NULL_POINTER;
 						}
 
+						AOCL_STORAGE_TYPE tmp_zp_stor_type  =
+							get_stor_type( ( post_op_unparsed->sum + s_i )->zp_stor_type );
+
 						lpgemm_set_node_params
 						(
 						  ( post_op_list + i ), POST_OPS_DOWNSCALE,
@@ -366,7 +371,7 @@ err_t lpgemm_translate_to_post_ops_list
 						  meta_arg, &( ( post_op_unparsed->sum + s_i )->zero_point_len ),
 						  ( post_op_unparsed->sum + s_i )->scale_factor,
 						  ( post_op_unparsed->sum + s_i )->scale_factor_len,
-						  FALSE, NONE
+						  FALSE, NONE, tmp_zp_stor_type 
 						);
 
 						s_i += 1;
@@ -391,7 +396,7 @@ err_t lpgemm_translate_to_post_ops_list
 						  meta_arg, &( ( post_op_unparsed->matrix_add + m_i )->ldm ),
 						  ( post_op_unparsed->matrix_add + m_i )->scale_factor,
 						  ( post_op_unparsed->matrix_add + m_i )->scale_factor_len,
-						  FALSE, tmp_stor_type
+						  FALSE, tmp_stor_type, NONE
 						);
 
 						m_i += 1;
@@ -416,7 +421,7 @@ err_t lpgemm_translate_to_post_ops_list
 						  meta_arg, &( ( post_op_unparsed->matrix_mul + mul_i )->ldm ),
 						  ( post_op_unparsed->matrix_mul + mul_i )->scale_factor,
 						  ( post_op_unparsed->matrix_mul + mul_i )->scale_factor_len,
-						  FALSE, tmp_stor_type
+						  FALSE, tmp_stor_type, NONE
 						);
 
 						mul_i += 1;

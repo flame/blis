@@ -67,6 +67,7 @@ typedef struct lpgemm_post_op_t
 	dim_t scale_factor_len;
 	bool is_power_of_2;
 	uint64_t stor_type;
+	uint64_t zp_stor_type;
 	struct lpgemm_post_op_t* next;
 } lpgemm_post_op;
 
