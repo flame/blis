@@ -174,14 +174,6 @@ AOCL_GEMM_UNREORDER(bfloat16, bf16bf16f32of32_reference)
 		return; // Error.
 	}
 
-	// Check if avx512_bf16 ISA is supported, lpgemm matmul only works with it.
-	if ( bli_cpuid_is_avx512bf16_supported() == FALSE )
-	{
-		bli_print_msg(" AVX512_BF16 ISA not supported by processor, "
-				"cannot perform bf16bf16f32 gemm.", __FILE__, __LINE__ );
-		return; // Error.
-	}
-
 	/* Initialize BLIS. */
 	bli_init_auto();
 
@@ -213,6 +205,7 @@ AOCL_GEMM_UNREORDER(bfloat16, bf16bf16f32of32_reference)
 		return;
 	}
 #endif
+
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_g;

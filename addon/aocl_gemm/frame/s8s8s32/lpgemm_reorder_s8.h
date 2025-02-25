@@ -37,21 +37,39 @@
 
 #include "lpgemm_types.h"
 
+void unpackb_nr64_s8_reference
+(
+  int8_t*       b,
+  int8_t*       unpack_b_buffer,
+  const dim_t	  NC,
+  const dim_t   KC,
+  dim_t         rs_b,
+  dim_t         cs_b
+);
+
+void unreorderb_nr64_s8s8s32os32_reference
+(
+  lpgemm_obj_t*  b,
+  lpgemm_obj_t*  b_reorder,
+  rntm_t*        rntm,
+  lpgemm_cntx_t* lcntx
+);
+
 void reorderb_nr64_s8s8s32o32
-     (
-       lpgemm_obj_t*  b,
-       lpgemm_obj_t*  b_reorder,
-       rntm_t*        rntm,
-       lpgemm_cntx_t* lcntx
-     );
+(
+  lpgemm_obj_t*  b,
+  lpgemm_obj_t*  b_reorder,
+  rntm_t*        rntm,
+  lpgemm_cntx_t* lcntx
+);
 
 void reordera_mr6_s8s8s32o32
-     (
-       lpgemm_obj_t*  a,
-       lpgemm_obj_t*  a_reorder,
-       rntm_t*        rntm,
-       lpgemm_cntx_t* lcntx
-     );
+(
+  lpgemm_obj_t*  a,
+  lpgemm_obj_t*  a_reorder,
+  rntm_t*        rntm,
+  lpgemm_cntx_t* lcntx
+);
 
 #endif //LPGEMM_REORDER_H_S8
 
