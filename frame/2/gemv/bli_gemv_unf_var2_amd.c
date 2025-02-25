@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -303,6 +303,8 @@ void bli_dgemv_unf_var2
                 y, incy,
                 cntx
             );
+
+            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
             return;
 #endif
         case BLIS_ARCH_ZEN:
@@ -320,6 +322,8 @@ void bli_dgemv_unf_var2
                 y, incy,
                 cntx
             );
+
+            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
             return;
 
         default:

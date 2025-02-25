@@ -104,6 +104,26 @@ void bli_dgemv_n_avx512
 {
     AOCL_DTL_TRACE_ENTRY( AOCL_DTL_LEVEL_TRACE_4 );
 
+    // Invoking the reference kernel to handle general stride.
+    if ( ( rs_a != 1 ) && ( cs_a != 1 ) )
+    {
+        bli_dgemv_zen_ref
+        (
+          transa,
+          m,
+          n,
+          alpha,
+          a, rs_a, cs_a,
+          x, incx,
+          beta,
+          y, incy,
+          NULL
+        );
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
+        return;
+    }
+
     dim_t   m0, n0;
     inc_t   rs_at, cs_at;
     conj_t  conja;

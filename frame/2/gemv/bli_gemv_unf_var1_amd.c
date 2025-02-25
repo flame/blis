@@ -208,6 +208,8 @@ void bli_dgemv_unf_var1
        cntx_t* cntx
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3)
+
     dim_t i;
     dim_t f;
     dim_t m0 = m, n0 = n;
@@ -232,6 +234,26 @@ void bli_dgemv_unf_var1
     //                    m0   = m;
     //                    n0   = n;
     //
+
+    // Invoking the reference kernel to handle general stride.
+    if ( ( rs_a != 1 ) && ( cs_a != 1 ) )
+    {
+        bli_dgemv_zen_ref
+        (
+          transa,
+          m,
+          n,
+          alpha,
+          a, rs_a, cs_a,
+          x, incx,
+          beta,
+          y, incy,
+          NULL
+        );
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
+        return;
+    }
 
     bli_set_dims_incs_with_trans(transa,
                                 m, n, rs_a, cs_a,
