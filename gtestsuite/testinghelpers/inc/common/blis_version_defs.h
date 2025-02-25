@@ -52,21 +52,21 @@
     #define K_bli_zgemmsup_cd_zen4_asm_8x4 1
     #define K_bli_dgemmsup_rv_zen4_asm_24x8m_new 1
     #define K_bli_dgemv_t_zen_int_avx2 1
-    #define K_bli_dgemv_t_zen_int_mx7_avx2 1
-    #define K_bli_dgemv_t_zen_int_mx6_avx2 1
-    #define K_bli_dgemv_t_zen_int_mx5_avx2 1
-    #define K_bli_dgemv_t_zen_int_mx4_avx2 1
-    #define K_bli_dgemv_t_zen_int_mx3_avx2 1
-    #define K_bli_dgemv_t_zen_int_mx2_avx2 1
-    #define K_bli_dgemv_t_zen_int_mx1_avx2 1
+    #define K_bli_dgemv_t_zen_int_16x7m_avx2 1
+    #define K_bli_dgemv_t_zen_int_16x6m_avx2 1
+    #define K_bli_dgemv_t_zen_int_16x5m_avx2 1
+    #define K_bli_dgemv_t_zen_int_16x4m_avx2 1
+    #define K_bli_dgemv_t_zen_int_16x3m_avx2 1
+    #define K_bli_dgemv_t_zen_int_16x2m_avx2 1
+    #define K_bli_dgemv_t_zen_int_16x1m_avx2 1
     #define K_bli_dgemv_t_zen_int_avx512 1
-    #define K_bli_dgemv_t_zen_int_mx7_avx512 1
-    #define K_bli_dgemv_t_zen_int_mx6_avx512 1
-    #define K_bli_dgemv_t_zen_int_mx5_avx512 1
-    #define K_bli_dgemv_t_zen_int_mx4_avx512 1
-    #define K_bli_dgemv_t_zen_int_mx3_avx512 1
-    #define K_bli_dgemv_t_zen_int_mx2_avx512 1
-    #define K_bli_dgemv_t_zen_int_mx1_avx512 1
+    #define K_bli_dgemv_t_zen_int_32x7m_avx512 1
+    #define K_bli_dgemv_t_zen_int_32x6m_avx512 1
+    #define K_bli_dgemv_t_zen_int_32x5m_avx512 1
+    #define K_bli_dgemv_t_zen_int_32x4m_avx512 1
+    #define K_bli_dgemv_t_zen_int_32x3m_avx512 1
+    #define K_bli_dgemv_t_zen_int_32x2m_avx512 1
+    #define K_bli_dgemv_t_zen_int_32x1m_avx512 1
     #define K_bli_ztrsm_small_ZEN5 1
     #define K_bli_dgemv_n_zen_int_16mx8_avx512 1
     #define K_bli_dgemv_n_zen_int_16mx7_avx512 1

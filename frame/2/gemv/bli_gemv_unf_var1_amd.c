@@ -216,6 +216,12 @@ void bli_dgemv_unf_var1
     inc_t lda = cs_a, inca = rs_a;
     conj_t conja;
 
+    double *x_buf = x;
+    double *y_buf = y;
+
+    inc_t buf_incx = incx;
+    inc_t buf_incy = incy;
+
     // 'bli_dgemv_unf_var1' is dot-based kernel. This kernel is called for the following cases:
     //
     // When op(A) = n and row-storage( lda = rs_a ), we compute dot product as y[i] = <A(i,:), x>, i = 0:m-1.
@@ -261,11 +267,19 @@ void bli_dgemv_unf_var1
 
     conja = bli_extract_conj(transa);
 
-    //memory pool declarations for packing vector X.
+    //memory pool declarations for packing vector X and Y.
     mem_t mem_bufX;
+    mem_t mem_bufY;
     rntm_t rntm;
-    double *x_buf = x;
-    inc_t buf_incx = incx;
+
+    // Boolean to check if x and y vectors are packed and memory needs to be freed.
+    bool is_x_temp_buf_created = FALSE;
+    bool is_y_temp_buf_created = FALSE;
+
+    // Function pointer declaration for the functions that will be used.
+    dgemv_ker_ft   gemv_kr_ptr;         // DGEMV
+    dscalv_ker_ft  scalv_kr_ptr;        // DSCALV
+    dcopyv_ker_ft  copyv_kr_ptr;        // DCOPYV
 
     /*
       Fatbinary config amdzen when run on non-AMD X86 will query for
@@ -273,72 +287,164 @@ void bli_dgemv_unf_var1
       and zen5 or for AVX2 it will be zen3.
     */
     arch_t id = bli_arch_query_id();
-    dgemv_ker_ft   gemv_kr_ptr;
 
     switch (id)
     {
-        case BLIS_ARCH_ZEN5:
-        case BLIS_ARCH_ZEN4:
+      case BLIS_ARCH_ZEN5:
+      case BLIS_ARCH_ZEN4:
 
 #if defined(BLIS_KERNELS_ZEN4)
-          gemv_kr_ptr = bli_dgemv_t_zen_int_avx512;
-          break;
+        gemv_kr_ptr = bli_dgemv_t_zen_int_avx512;
+        scalv_kr_ptr  = bli_dscalv_zen_int_avx512;      // DSCALV
+        copyv_kr_ptr  = bli_dcopyv_zen4_asm_avx512;     // DCOPYV
+        break;
 #endif
 
-        case BLIS_ARCH_ZEN:
-        case BLIS_ARCH_ZEN2:
-        case BLIS_ARCH_ZEN3:
+      case BLIS_ARCH_ZEN:
+      case BLIS_ARCH_ZEN2:
+      case BLIS_ARCH_ZEN3:
 
-          gemv_kr_ptr = bli_dgemv_t_zen_int_avx2;
-          break;
+        gemv_kr_ptr = bli_dgemv_t_zen_int_avx2;
+        scalv_kr_ptr  = bli_dscalv_zen_int;             // DSCALV
+        copyv_kr_ptr  = bli_dcopyv_zen_int;             // DCOPYV
+        break;
 
-        default:
-          // This function is invoked on all architectures including 'generic'.
-          // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
-          if ( cntx == NULL )
+      default:
+        // This function is invoked on all architectures including 'generic'.
+        // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+        if ( cntx == NULL )
             cntx = bli_gks_query_cntx();
 
-          const num_t dt = PASTEMAC(d,type);
+        const num_t dt = PASTEMAC(d,type);
 
-          double*  x1;
-          double*  y1;
-          double*  A1;
+        double*  x1;
+        double*  y1;
+        double*  A1;
 
-          PASTECH(d,dotxf_ker_ft) kfp_df;
+        PASTECH(d,dotxf_ker_ft) kfp_df;
 
-          /* Query the context for the kernel function pointer and fusing factor. */
-          kfp_df = bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx );
+        // Query the context for the kernel function pointer and fusing factor.
+        kfp_df = bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx );
 
-          dim_t b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_DF, cntx );
+        dim_t b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_DF, cntx );
 
-          for ( i = 0; i < n0; i += f )
-          {
-              f  = bli_determine_blocksize_dim_f( i, n0, b_fuse );
+        for ( i = 0; i < n0; i += f )
+        {
+            f  = bli_determine_blocksize_dim_f( i, n0, b_fuse );
 
-              A1 = a + ( i * lda ) + ( 0 * inca );
-              x1 = x_buf;
-              y1 = y + ( i * incy );
+            A1 = a + ( i * lda ) + ( 0 * inca );
+            x1 = x_buf;
+            y1 = y + ( i * incy );
 
-              /* y1 = beta * y1 + alpha * A1 * x; */
-              kfp_df(
-                  conja,
-                  conjx,
-                  m0,
-                  f,
-                  alpha,
-                  A1,   inca, lda,
-                  x1,   incx,
-                  beta,
-                  y1,   incy,
-                  cntx
-              );
-
-            }
+            // y1 = beta * y1 + alpha * A1 * x;
+            kfp_df
+            (
+                conja,
+                conjx,
+                m0,
+                f,
+                alpha,
+                A1,   inca, lda,
+                x1,   incx,
+                beta,
+                y1,   incy,
+                cntx
+            );
+          }
 
           AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
           return;
     }
 
+    /*  If y has non-unit increments and alpha is non-zero, y is packed and
+        scaled by beta. The scaled contents are copied to a temp buffer (y_buf)
+        and passed to the kernels. At the end, the contents of y_buf are copied
+        back to y and memory is freed.
+
+        If alpha is zero, the GEMV operation is reduced to y := beta * y, thus,
+        packing of y is unnecessary so y is only scaled by beta and returned.
+    */
+
+    if ( (incy != 1) && (!bli_deq0( *alpha )))
+    {
+        /*  Initialize mem pool buffer to NULL and size to 0.
+            "buf" and "size" fields are assigned once memory is allocated from
+            the pool in bli_pba_acquire_m().
+
+            This will ensure bli_mem_is_alloc() will be passed on an allocated
+            memory if created or a NULL.
+        */
+        mem_bufY.pblk.buf = NULL;   mem_bufY.pblk.block_size = 0;
+        mem_bufY.buf_type = 0;      mem_bufY.size = 0;
+        mem_bufY.pool = NULL;
+
+        // In order to get the buffer from pool via rntm access to memory broker
+        // is needed.Following are initializations for rntm.
+        bli_rntm_init_from_global( &rntm );
+        bli_rntm_set_num_threads_only( 1, &rntm );
+        bli_pba_rntm_set_pba( &rntm );
+
+        // Calculate the size required for n0 double elements in vector Y.
+        size_t buffer_size = n0 * sizeof( double );
+
+        #ifdef BLIS_ENABLE_MEM_TRACING
+        printf("bli_dgemv_unf_var1(): get mem pool block for vector y\n");
+        #endif
+
+        // Acquire a Buffer(n0*size(double)) from the memory broker and save the
+        // associated mem_t entry to mem_bufY.
+        bli_pba_acquire_m
+        (
+          &rntm,
+          buffer_size,
+          BLIS_BUFFER_FOR_B_PANEL,
+          &mem_bufY
+        );
+
+        // Continue packing Y if buffer memory is allocated.
+        if ( bli_mem_is_alloc( &mem_bufY ) )
+        {
+            y_buf = bli_mem_buffer( &mem_bufY );
+
+            // Using unit-stride for y_temp vector.
+            buf_incy = 1;
+
+            // Invoke the SCAL2V function using the function pointer.
+            copyv_kr_ptr
+            (
+              BLIS_NO_CONJUGATE,
+              n0,
+              y, incy,
+              y_buf, buf_incy,
+              cntx
+            );
+
+            // Set y is packed as the memory allocation was successful
+            // and contents have been scaled and copied to a temp buffer.
+            is_y_temp_buf_created = TRUE;
+        }
+    }
+
+    // If alpha is zero, the GEMV operation is reduced to y := beta * y, thus,
+    // y is only scaled by beta and returned.
+    if( bli_deq0( *alpha ) )
+    {
+        // Invoke the SCALV function using the function pointer
+        scalv_kr_ptr
+        (
+          BLIS_NO_CONJUGATE,
+          n0,
+          beta,
+          y_buf, buf_incy,
+          cntx
+        );
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
+        return;
+    }
+
+    // If x has non-unit increments , x is packed and copied to a temp buffer (x_buf)
+    // and passed to the kernels. At the end, the memory is freed.
     if ( incx != 1 )
     {
         /*
@@ -349,69 +455,113 @@ void bli_dgemv_unf_var1
               an allocated memory if created or a NULL .
         */
 
-        mem_bufX.pblk.buf = NULL;
-        mem_bufX.pblk.block_size = 0;
-        mem_bufX.buf_type = 0;
-        mem_bufX.size = 0;
+        mem_bufX.pblk.buf = NULL;         mem_bufX.pblk.block_size = 0;
+        mem_bufX.buf_type = 0;            mem_bufX.size = 0;
         mem_bufX.pool = NULL;
 
-        /* In order to get the buffer from pool via rntm access to memory broker
-            is needed.Following are initializations for rntm */
-
+        // In order to get the buffer from pool via rntm access to memory broker
+        // is needed.Following are initializations for rntm.
         bli_rntm_init_from_global(&rntm);
         bli_rntm_set_num_threads_only(1, &rntm);
         bli_pba_rntm_set_pba(&rntm);
 
-        //calculate the size required for n_elem double elements in vector X.
+        //calculate the size required for m0 double elements in vector X.
         size_t buffer_size = m0 * sizeof(double);
 
 #ifdef BLIS_ENABLE_MEM_TRACING
-        printf("bli_dgemv_unf_var1(): get mem pool block\n");
+        printf("bli_dgemv_unf_var1(): get mem pool block for vector x\n");
 #endif
 
-        /*acquire a Buffer(n_elem*size(double)) from the memory broker
-          and save the associated mem_t entry to mem_bufX.*/
+        // acquire a Buffer(m0*size(double)) from the memory broker
+        // and save the associated mem_t entry to mem_bufX.
         bli_pba_acquire_m(&rntm,
                             buffer_size,
                             BLIS_BUFFER_FOR_B_PANEL,
                             &mem_bufX);
 
-        /*Continue packing X if buffer memory is allocated*/
+        // Continue packing X if buffer memory is allocated.
         if ((bli_mem_is_alloc(&mem_bufX)))
         {
-          x_buf = bli_mem_buffer(&mem_bufX);
+            x_buf = bli_mem_buffer(&mem_bufX);
 
-          //pack X vector with non-unit stride to a temp buffer x_buf with unit stride
-          for (dim_t x_index = 0; x_index < m0; x_index++)
-          {
-            *(x_buf + x_index) = *(x + (x_index * incx));
-          }
-          // stride of vector x_buf =1
-          buf_incx = 1;
+            // stride of vector x_buf =1
+            buf_incx = 1;
+
+            copyv_kr_ptr
+            (
+                BLIS_NO_CONJUGATE,
+                m0,
+                x, incx,
+                x_buf, buf_incx,
+                cntx
+            );
+
+            is_x_temp_buf_created = TRUE;
         }
     }
 
     // Calling the selected kernel for the API
-    gemv_kr_ptr(
-        conja,
-        conjx,
-        m0,
-        n0,
-        alpha,
-        a, inca, lda,
-        x_buf, buf_incx,
-        beta,
-        y, incy,
-        cntx
-    );
-
-    if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
+    if ( buf_incx == 1 && buf_incy == 1 )
     {
-#ifdef BLIS_ENABLE_MEM_TRACING
-        printf("bli_dgemv_unf_var1(): releasing mem pool block\n");
-#endif
+      gemv_kr_ptr
+      (
+          conja,
+          conjx,
+          m0,
+          n0,
+          alpha,
+          a, inca, lda,
+          x_buf, buf_incx,
+          beta,
+          y_buf, buf_incy,
+          cntx
+      );
+    }
+    else
+    {
+      bli_dgemv_zen_ref
+        (
+          transa,
+          m,
+          n,
+          alpha,
+          a, rs_a, cs_a,
+          x, incx,
+          beta,
+          y, incy,
+          NULL
+        );
+    }
+
+    // If x was packed into x_temp, free the memory.
+    if (is_x_temp_buf_created)
+    {
+ #ifdef BLIS_ENABLE_MEM_TRACING
+        printf("bli_dgemv_unf_var1(): releasing mem pool block for vector x\n");
+ #endif
         // Return the buffer to pool
         bli_pba_release(&rntm, &mem_bufX);
+    }
+
+    // If y was packed into y_temp, copy the contents back to y and free memory.
+    if (is_y_temp_buf_created)
+    {
+        // Invoke COPYV to store the result from unit-strided y_buf to non-unit
+        // strided y.
+        copyv_kr_ptr
+        (
+          BLIS_NO_CONJUGATE,
+          n0,
+          y_buf, buf_incy,
+          y, incy,
+          cntx
+        );
+
+ #ifdef BLIS_ENABLE_MEM_TRACING
+        printf("bli_dgemv_unf_var1(): releasing mem pool block for vector y\n");
+ #endif
+        // Return the buffer to pool.
+        bli_pba_release( &rntm , &mem_bufY );
     }
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
