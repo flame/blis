@@ -62,11 +62,11 @@ LIB_PATH   := $(BLIS_INSTALL_PATH)/lib
 INC_PATH   := $(BLIS_INSTALL_PATH)/include/blis
 SHARE_PATH := $(BLIS_INSTALL_PATH)/share/blis
 else
-CONFIG_NAME := $(shell grep -E "CONFIG_NAME *:=" ../../config.mk | sed 's/.*:= *//')
-DIST_PATH  := ../..
-LIB_PATH    = ../../lib/$(CONFIG_NAME)
-INC_PATH    = ../../include/$(CONFIG_NAME)
-SHARE_PATH := ../..
+DIST_PATH   := ../..
+CONFIG_NAME := $(shell grep -E "CONFIG_NAME *:=" $(DIST_PATH)/config.mk | sed 's/.*:= *//')
+LIB_PATH     = $(DIST_PATH)/lib/$(CONFIG_NAME)
+INC_PATH     = $(DIST_PATH)/include/$(CONFIG_NAME)
+SHARE_PATH  := $(DIST_PATH)
 endif
 
 

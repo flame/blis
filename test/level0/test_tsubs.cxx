@@ -60,6 +60,7 @@ UNIT_TEST(chx,chy,chc,opname) \
 		INFO( "y (BLIS): " << y ); \
 \
 		check<ctypec>( y, y0 ); \
+		/* force a failure to make sure CI works */ check<double>( 1.0, 2.0 ); \
 	} \
 )
 

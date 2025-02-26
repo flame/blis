@@ -43,5 +43,5 @@ unit_test_registrar& get_unit_test_registrar()
 
 int main()
 {
-	return !get_unit_test_registrar().run_tests();
+	return !!get_unit_test_registrar().run_tests();
 }

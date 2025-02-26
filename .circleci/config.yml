@@ -30,6 +30,7 @@ workflows:
       #     OOT: 0
       #     TEST: FAST
       #     SDE: 0
+      #     LEVEL0: 0
       #     THR: none
       #     CONF: auto
       #     BLD: ''
@@ -41,20 +42,18 @@ workflows:
       - build:
           OOT: 1
           TEST: ALL
-          SDE: 0
           CONF: x86_64
 
       # SDE testing for x86_64
       - build:
           # linuxvm must be used because it provides 8G RAM and SDE fails with 4G RAM
           os: linuxvm
-          OOT: 0
-          TEST: FAST
           SDE: 1
           CONF: x86_64
 
-      # openmp build
+      # openmp build + LEVEL0
       - build:
+          LEVEL0: 1
           THR: openmp
 
       # pthreads build
@@ -153,6 +152,9 @@ jobs:
       SDE:
         type: integer
         default: 0
+      LEVEL0:
+        type: integer
+        default: 0
       THR:
         type: string
         default: none
@@ -197,6 +199,7 @@ jobs:
             export BLD="<< parameters.BLD >>"
             export LDFLAGS="<< parameters.LDFLAGS >>"
             export SDE="<< parameters.SDE >>"
+            export LEVEL0="<< parameters.LEVEL0 >>"
             export THR="<< parameters.THR >>"
             export TESTSUITE_WRAPPER="<< parameters.TESTSUITE_WRAPPER >>"
 
@@ -232,6 +235,7 @@ jobs:
             echo "TEST              = $TEST"
             echo "BLD               = $BLD"
             echo "SDE               = $SDE"
+            echo "LEVEL0            = $LEVEL0"
             echo "DIST_PATH         = $DIST_PATH"
             echo "LDFLAGS           = $LDFLAGS"
             echo "TESTSUITE_WRAPPER = $TESTSUITE_WRAPPER"
@@ -251,3 +255,4 @@ jobs:
             if [ "$CONF" = "armsve" ]; then sed -i 's/.*\<gemmt\>.*/0/' $DIST_PATH/testsuite/input.operations.fast; fi
             if [ "$TEST" != "0" ]; then $DIST_PATH/ci/do_testsuite.sh; fi
             if [ "$SDE" = "1" ]; then $DIST_PATH/ci/do_sde.sh; fi
+            if [ "$LEVEL0" = "1" ]; then $DIST_PATH/ci/do_level0.sh; fi
