@@ -45,7 +45,7 @@
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(chx,chy,chc,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( absolute( convert_prec<ctypec>( x ) ) ); \
 \
@@ -66,7 +66,7 @@ INSERT_GENTFUNC_MIX3( RC, RC, R, abval2s )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(chx,chy,chc,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( absolute( convert_prec<ctypec>( x ) ) ); \
 \
@@ -84,26 +84,3 @@ UNIT_TEST(chx,chy,chc,opname) \
 )
 
 INSERT_GENTFUNC_MIX3( RC, RC, R, abval2ris )
-
-#undef GENTFUNC
-#define GENTFUNC( opname, ctypex, chx, ctypey, chy, ctypez, chz, ctypec, chc ) \
-UNIT_TEST(chx,chy,chz,chc,opname) \
-( \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto y : test_values<ctypey>() ) \
-	{ \
-		auto z0 = convert<ctypez>( convert_prec<ctypec>( x ) + \
-		                           convert_prec<ctypec>( y ) ); \
-\
-		INFO( "x: " << x ); \
-		INFO( "y: " << y ); \
-\
-		ctypez z; \
-		bli_tadd3s( chx,chy,chz,chc, x, y, z ); \
-\
-		INFO( "z (C++):  " << z0 ); \
-		INFO( "z (BLIS): " << z ); \
-\
-		check<ctypec>( z, z0 ); \
-	} \
-)

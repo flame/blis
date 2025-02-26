@@ -45,7 +45,7 @@
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( x ); \
 \
@@ -67,8 +67,8 @@ INSERT_GENTFUNC_MIX2( RC, RC, sets )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for (       auto y : test_values<ctypey>() ) \
 	{ \
 		auto y0 = y; \
 		real( y0 ) = convert_prec<ctypey>( real( x ) ); \
@@ -90,8 +90,8 @@ INSERT_GENTFUNC_MIX2( RC, RC, setrs )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for (       auto y : test_values<ctypey>() ) \
 	{ \
 		auto y0 = y; \
 		imag( y0 ) = convert_prec<ctypey>( imag( x ) ); \
@@ -113,7 +113,7 @@ INSERT_GENTFUNC_MIX2( RC, RC, setis )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( x ); \
 \
@@ -245,7 +245,7 @@ UNIT_TEST(chy,opname) \
 	constexpr auto M = 4; \
 	constexpr auto N = 4; \
   \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto y : test_values<ctypey>() ) \
 	{ \
 		auto ymn = tile<M,N>( y ); \
 \
@@ -263,7 +263,7 @@ UNIT_TEST(chy,opname) \
 		check<ctypey>( ymn, ymn0 ); \
 	} \
   \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto y : test_values<ctypey>() ) \
 	{ \
 		auto ymn = tile<M,N>( y ); \
 \
@@ -297,7 +297,7 @@ UNIT_TEST(chy,PASTECH(opname,_,D)) \
 	constexpr auto M = 4; \
 	constexpr auto N = 4; \
   \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto y : test_values<ctypey>() ) \
 	{ \
 		auto ymn = tile<M,D*N>( y ); \
 \
@@ -336,7 +336,7 @@ UNIT_TEST(chy,PASTECH(opname,_,M,_,N)) \
 	constexpr auto M0 = 10; \
 	constexpr auto N0 = 10; \
   \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto y : test_values<ctypey>() ) \
 	{ \
 		auto ymn = tile<M0,N0>( y ); \
 \

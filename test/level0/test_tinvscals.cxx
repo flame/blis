@@ -45,8 +45,8 @@
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypec, chc ) \
 UNIT_TEST(cha,chx,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypex>( convert_prec<ctypec>( x ) / \
 		                           convert_prec<ctypec>( a ) ); \
@@ -70,8 +70,8 @@ INSERT_GENTFUNC_MIX3( RC, RC, R, invscals )
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypec, chc ) \
 UNIT_TEST(cha,chx,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypex>( convert_prec<ctypec>( x ) / \
 		                           convert_prec<ctypec>( conj( a ) ) ); \
@@ -95,8 +95,8 @@ INSERT_GENTFUNC_MIX3( RC, RC, R, invscaljs )
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypec, chc ) \
 UNIT_TEST(cha,chx,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypex>( convert_prec<ctypec>( x ) / \
 		                           convert_prec<ctypec>( a ) ); \
@@ -122,8 +122,8 @@ INSERT_GENTFUNC_MIX3( RC, RC, R, invscalris )
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypec, chc ) \
 UNIT_TEST(cha,chx,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypex>( convert_prec<ctypec>( x ) / \
 		                           convert_prec<ctypec>( conj( a ) ) ); \

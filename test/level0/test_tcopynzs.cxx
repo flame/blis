@@ -45,8 +45,8 @@
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for (       auto y : test_values<ctypey>() ) \
 	{ \
 		auto y0 = y; \
 		real( y0 ) = convert_prec<ctypey>( real( x ) ); \
@@ -71,8 +71,8 @@ INSERT_GENTFUNC_MIX2( RC, RC, copynzs )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for (       auto y : test_values<ctypey>() ) \
 	{ \
 		auto y0 = y; \
 		real( y0 ) = convert_prec<ctypey>( real( x ) ); \
@@ -97,8 +97,8 @@ INSERT_GENTFUNC_MIX2( RC, RC, copyjnzs )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for (       auto y : test_values<ctypey>() ) \
 	{ \
 		auto y0 = y; \
 		real( y0 ) = convert_prec<ctypey>( real( x ) ); \
@@ -125,8 +125,8 @@ INSERT_GENTFUNC_MIX2( RC, RC, copynzris )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for (       auto y : test_values<ctypey>() ) \
 	{ \
 		auto y0 = y; \
 		real( y0 ) = convert_prec<ctypey>( real( x ) ); \

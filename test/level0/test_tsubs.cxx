@@ -45,8 +45,8 @@
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(chx,chy,chc,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for (       auto y : test_values<ctypey>() ) \
 	{ \
 		auto y0 = convert<ctypey>( convert_prec<ctypec>( y ) - \
 		                           convert_prec<ctypec>( x ) ); \
@@ -66,11 +66,33 @@ UNIT_TEST(chx,chy,chc,opname) \
 INSERT_GENTFUNC_MIX3( RC, RC, R, subs )
 
 #undef GENTFUNC
-#define GENTFUNC( opname, ctypex, chx, ctypey, chy, ctypec, chc ) \
+#define GENTFUNC( opname, ctypex, chx, ctypec, chc ) \
 UNIT_TEST(chx,chy,chc,opname) \
 ( \
 	for ( auto x : test_values<ctypex>() ) \
-	for ( auto y : test_values<ctypey>() ) \
+	{ \
+		auto x0 = convert<ctypex>( convert_prec<ctypec>( x ) - \
+		                           convert_prec<ctypec>( x ) ); \
+\
+		INFO( "x:        " << x ); \
+\
+		bli_tsubs( chx,chx,chc, x, x ); \
+\
+		INFO( "x (C++):  " << x0 ); \
+		INFO( "x (BLIS): " << x ); \
+\
+		check<ctypec>( x, x0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX2( RC, R, subs_inplace )
+
+#undef GENTFUNC
+#define GENTFUNC( opname, ctypex, chx, ctypey, chy, ctypec, chc ) \
+UNIT_TEST(chx,chy,chc,opname) \
+( \
+	for ( const auto x : test_values<ctypex>() ) \
+	for (       auto y : test_values<ctypey>() ) \
 	{ \
 		auto y0 = convert<ctypey>(       convert_prec<ctypec>( y ) - \
 		                           conj( convert_prec<ctypec>( x ) ) ); \
@@ -93,8 +115,8 @@ INSERT_GENTFUNC_MIX3( RC, RC, R, subjs )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(chx,chy,chc,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for (       auto y : test_values<ctypey>() ) \
 	{ \
 		auto y0 = convert<ctypey>( convert_prec<ctypec>( y ) - \
 		                           convert_prec<ctypec>( x ) ); \
@@ -119,8 +141,8 @@ INSERT_GENTFUNC_MIX3( RC, RC, R, subris )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(chx,chy,chc,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for (       auto y : test_values<ctypey>() ) \
 	{ \
 		auto y0 = convert<ctypey>(       convert_prec<ctypec>( y ) - \
 		                           conj( convert_prec<ctypec>( x ) ) ); \

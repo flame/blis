@@ -45,8 +45,8 @@
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(chx,chy,chc,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for ( const auto y : test_values<ctypey>() ) \
 	{ \
 		auto expected = convert_prec<ctypec>( x ) == \
 		                convert_prec<ctypec>( y ); \
@@ -69,8 +69,8 @@ INSERT_GENTFUNC_MIX3( RC, RC, R, eqs )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(chx,chy,chc,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for ( const auto y : test_values<ctypey>() ) \
 	{ \
 		auto expected = convert_prec<ctypec>( x ) == \
 		                convert_prec<ctypec>( y ); \
@@ -95,7 +95,7 @@ INSERT_GENTFUNC_MIX3( RC, RC, R, eqris )
 #define GENTFUNC( opname, ctypex, chx ) \
 UNIT_TEST(chx,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto expected = x == convert_prec<ctypex>( 1.0 ); \
 \
@@ -116,7 +116,7 @@ INSERT_GENTFUNC_MIX1( RC, eq1ris )
 #define GENTFUNC( opname, ctypex, chx ) \
 UNIT_TEST(chx,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto expected = x == convert_prec<ctypex>( 0.0 ); \
 \
@@ -137,7 +137,7 @@ INSERT_GENTFUNC_MIX1( RC, eq0ris )
 #define GENTFUNC( opname, ctypex, chx ) \
 UNIT_TEST(chx,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto expected = x == convert_prec<ctypex>( -1.0 ); \
 \
@@ -158,7 +158,7 @@ INSERT_GENTFUNC_MIX1( RC, eqm1ris )
 #define GENTFUNC( opname, ctypex, chx ) \
 UNIT_TEST(chx,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto expected = x == convert_prec<ctypex>( 1.0 ); \
 \
@@ -179,7 +179,7 @@ INSERT_GENTFUNC_MIX1( RC, eq1s )
 #define GENTFUNC( opname, ctypex, chx ) \
 UNIT_TEST(chx,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto expected = x == convert_prec<ctypex>( 0.0 ); \
 \
@@ -200,7 +200,7 @@ INSERT_GENTFUNC_MIX1( RC, eq0s )
 #define GENTFUNC( opname, ctypex, chx ) \
 UNIT_TEST(chx,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto expected = x == convert_prec<ctypex>( -1.0 ); \
 \

@@ -45,8 +45,8 @@
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( bli_is_conj( conjx ) ? conj( x ) : x ); \
 \
@@ -69,8 +69,8 @@ INSERT_GENTFUNC_MIX2( RC, RC, copycjs )
 #define GENTFUNC( opname, ctypex, chx ) \
 UNIT_TEST(chx,opname) \
 ( \
-	for ( auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
+	for (       auto x : test_values<ctypex>() ) \
 	{ \
 		auto x0 = convert<ctypex>( bli_is_conj( conjx ) ? conj( x ) : x ); \
 \
@@ -92,8 +92,8 @@ INSERT_GENTFUNC_MIX1( RC, copycjs_inplace )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( bli_is_conj( conjx ) ? conj( x ) : x ); \
 \

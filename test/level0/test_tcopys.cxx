@@ -45,7 +45,7 @@
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( x ); \
 \
@@ -67,7 +67,7 @@ INSERT_GENTFUNC_MIX2( RC, RC, copys )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( conj( x ) ); \
 \
@@ -110,7 +110,7 @@ INSERT_GENTFUNC_MIX1( RC, copyjs_inplace )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( x ); \
 \
@@ -134,7 +134,7 @@ INSERT_GENTFUNC_MIX2( RC, RC, copyris )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( conj( x ) ); \
 \
@@ -158,7 +158,7 @@ INSERT_GENTFUNC_MIX2( RC, RC, copyjris )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto yri0 = convert<ctypey>( x ); \
 		auto yir0 = convert<ctypey>( swapri( conj( x ) ) ); \
@@ -184,7 +184,7 @@ INSERT_GENTFUNC_MIX2( C, C, copy1es )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto yri0 = convert<ctypey>( conj( x ) ); \
 		auto yir0 = convert<ctypey>( swapri( x ) ); \
@@ -210,7 +210,7 @@ INSERT_GENTFUNC_MIX2( C, C, copyj1es )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( x ); \
 \
@@ -232,7 +232,7 @@ INSERT_GENTFUNC_MIX2( C, C, copy1rs )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( conj( x ) ); \
 \
@@ -257,10 +257,10 @@ UNIT_TEST(chx,chy,opname) \
 	constexpr auto M = 4; \
 	constexpr auto N = 4; \
 \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
-		auto xmn = tile<M,N>( x ); \
-		auto ymn = tile<M,N,ctypey>(); \
+		const auto xmn = tile<M,N>( x ); \
+		      auto ymn = tile<M,N,ctypey>(); \
 \
 		INFO( "row-major" ); \
 \
@@ -277,10 +277,10 @@ UNIT_TEST(chx,chy,opname) \
 		check<ctypey>( ymn, ymn0 ); \
 	} \
 \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
-		auto xmn = tile<M,N>( x ); \
-		auto ymn = tile<M,N,ctypey>(); \
+		const auto xmn = tile<M,N>( x ); \
+		      auto ymn = tile<M,N,ctypey>(); \
 \
 		INFO( "column-major" ); \
 \

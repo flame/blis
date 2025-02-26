@@ -45,7 +45,7 @@
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(chx,chy,chc,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( norm( convert_prec<ctypec>( x ) ) ); \
 \
@@ -66,7 +66,7 @@ INSERT_GENTFUNC_MIX3( RC, RC, R, absq2s )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(chx,chy,chc,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( norm( convert_prec<ctypec>( x ) ) ); \
 \

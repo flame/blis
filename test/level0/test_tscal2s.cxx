@@ -45,8 +45,8 @@
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(cha,chx,chy,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( convert_prec<ctypec>( a ) * \
 		                           convert_prec<ctypec>( x ) ); \
@@ -70,8 +70,8 @@ INSERT_GENTFUNC_MIX4( RC, RC, RC, R, scal2s )
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypec, chc ) \
 UNIT_TEST(cha,chx,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for (       auto x : test_values<ctypex>() ) \
 	{ \
 		auto x0 = convert<ctypex>( convert_prec<ctypec>( a ) * \
 		                           convert_prec<ctypec>( x ) ); \
@@ -94,8 +94,8 @@ INSERT_GENTFUNC_MIX3( RC, RC, R, scal2s_inplace )
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(cha,chx,chy,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( convert_prec<ctypec>( a ) * \
 		                           convert_prec<ctypec>( conj( x ) ) ); \
@@ -119,8 +119,8 @@ INSERT_GENTFUNC_MIX4( RC, RC, RC, R, scal2js )
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(cha,chx,chy,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( convert_prec<ctypec>( a ) * \
 		                           convert_prec<ctypec>( x ) ); \
@@ -147,8 +147,8 @@ INSERT_GENTFUNC_MIX4( RC, RC, RC, R, scal2ris )
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(cha,chx,chy,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( convert_prec<ctypec>( a ) * \
 		                           convert_prec<ctypec>( conj( x ) ) ); \
@@ -175,8 +175,8 @@ INSERT_GENTFUNC_MIX4( RC, RC, RC, R, scal2jris )
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(cha,chx,chy,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto yri0 = convert<ctypey>( convert_prec<ctypec>( a ) * \
 		                             convert_prec<ctypec>( x ) ); \
@@ -204,8 +204,8 @@ INSERT_GENTFUNC_MIX4( RC, C, C, R, scal21es )
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(cha,chx,chy,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto yri0 = convert<ctypey>( convert_prec<ctypec>( a ) * \
 		                             convert_prec<ctypec>( conj( x ) ) ); \
@@ -233,8 +233,8 @@ INSERT_GENTFUNC_MIX4( RC, C, C, R, scal2j1es )
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(cha,chx,chy,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( convert_prec<ctypec>( a ) * \
 		                           convert_prec<ctypec>( x ) ); \
@@ -258,8 +258,8 @@ INSERT_GENTFUNC_MIX4( RC, C, C, R, scal21rs )
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(cha,chx,chy,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( convert_prec<ctypec>( a ) * \
 		                           convert_prec<ctypec>( conj( x ) ) ); \
@@ -292,13 +292,13 @@ UNIT_TEST(cha,chx,chy,chc,PASTECH(opname,_,D)) \
 	constexpr auto M = 4; \
 	constexpr auto N = 4; \
 \
-	for ( auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
-		auto xmn = tile<M,N>( x ); \
-		auto ymn00 = tile<M,N,ctypey>(); \
-		auto ymn = tile<M,D*N,ctypey>(); \
+		const auto xmn = tile<M,N>( x ); \
+		      auto ymn00 = tile<M,N,ctypey>(); \
+		      auto ymn = tile<M,D*N,ctypey>(); \
 \
 		INFO("column-major"); \
 \
@@ -327,12 +327,12 @@ UNIT_TEST(cha,chx,chy,chc,opname) \
 	constexpr auto M = 4; \
 	constexpr auto N = 4; \
 \
-	for ( auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
-		auto xmn = tile<M,N>( x ); \
-		auto ymn = tile<M,N,ctypey>(); \
+		const auto xmn = tile<M,N>( x ); \
+		      auto ymn = tile<M,N,ctypey>(); \
 \
 		INFO( "row-major" ); \
 \
@@ -351,12 +351,12 @@ UNIT_TEST(cha,chx,chy,chc,opname) \
 		check<ctypec>( ymn, ymn0 ); \
 	} \
 \
-	for ( auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
-		auto xmn = tile<M,N>( x ); \
-		auto ymn = tile<M,N,ctypey>(); \
+		const auto xmn = tile<M,N>( x ); \
+		      auto ymn = tile<M,N,ctypey>(); \
 \
 		INFO("column-major"); \
 \
@@ -385,12 +385,12 @@ UNIT_TEST(cha,chx,chy,chc,opname) \
 	constexpr auto M = 4; \
 	constexpr auto N = 4; \
 \
-	for ( auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
-		auto xmn = tile<M,N>( x ); \
-		auto ymn = tile<M,N,ctypey>(); \
+		const auto xmn = tile<M,N>( x ); \
+		      auto ymn = tile<M,N,ctypey>(); \
 \
 		INFO( "row-major" ); \
 \
@@ -415,12 +415,12 @@ UNIT_TEST(cha,chx,chy,chc,opname) \
 		check<ctypec>( ymn, ymn0 ); \
 	} \
 \
-	for ( auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
-		auto xmn = tile<M,N>( x ); \
-		auto ymn = tile<M,N,ctypey>(); \
+		const auto xmn = tile<M,N>( x ); \
+		      auto ymn = tile<M,N,ctypey>(); \
 \
 		INFO( "column-major" ); \
 \
@@ -457,13 +457,13 @@ UNIT_TEST(cha,chx,chy,chc,opname) \
 \
 	using ctypeyr = make_real_t<ctypey>; \
 \
-	for ( auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
-		auto xmn = tile<M,N>( x ); \
-		auto yrmn = tile<M,N,ctypeyr>(); \
-		auto yimn = tile<M,N,ctypeyr>(); \
+		const auto xmn = tile<M,N>( x ); \
+		      auto yrmn = tile<M,N,ctypeyr>(); \
+		      auto yimn = tile<M,N,ctypeyr>(); \
 \
 		INFO( "row-major" ); \
 \
@@ -494,13 +494,13 @@ UNIT_TEST(cha,chx,chy,chc,opname) \
 		check<ctypec>( yimn, yimn0 ); \
 	} \
 \
-	for ( auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
-		auto xmn = tile<M,N>( x ); \
-		auto yrmn = tile<M,N,ctypeyr>(); \
-		auto yimn = tile<M,N,ctypeyr>(); \
+		const auto xmn = tile<M,N>( x ); \
+		      auto yrmn = tile<M,N,ctypeyr>(); \
+		      auto yimn = tile<M,N,ctypeyr>(); \
 \
 		INFO( "column-major" ); \
 \

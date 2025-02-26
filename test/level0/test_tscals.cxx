@@ -45,8 +45,8 @@
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypec, chc ) \
 UNIT_TEST(cha,chx,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypex>( convert_prec<ctypec>( a ) * \
 		                           convert_prec<ctypec>( x ) ); \
@@ -70,8 +70,8 @@ INSERT_GENTFUNC_MIX3( RC, RC, R, scals )
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypec, chc ) \
 UNIT_TEST(cha,chx,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypex>( convert_prec<ctypec>( conj( a ) ) * \
 		                           convert_prec<ctypec>( x ) ); \
@@ -95,8 +95,8 @@ INSERT_GENTFUNC_MIX3( RC, RC, R, scaljs )
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypec, chc ) \
 UNIT_TEST(cha,chx,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypex>( convert_prec<ctypec>( a ) * \
 		                           convert_prec<ctypec>( x ) ); \
@@ -122,8 +122,8 @@ INSERT_GENTFUNC_MIX3( RC, RC, R, scalris )
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypec, chc ) \
 UNIT_TEST(cha,chx,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypex>( convert_prec<ctypec>( conj( a ) ) * \
 		                           convert_prec<ctypec>( x ) ); \
@@ -149,8 +149,8 @@ INSERT_GENTFUNC_MIX3( RC, RC, R, scaljris )
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypec, chc ) \
 UNIT_TEST(cha,chx,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto xri = x; \
 		auto xir = swapri( conj( x ) ); \
@@ -182,8 +182,8 @@ INSERT_GENTFUNC_MIX3( RC, C, R, scal1es )
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypec, chc ) \
 UNIT_TEST(cha,chx,chc,opname) \
 ( \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for (       auto x : test_values<ctypex>() ) \
 	{ \
 		auto x0 = convert<ctypex>( convert_prec<ctypec>( a ) * \
 		                           convert_prec<ctypec>( x ) ); \
@@ -209,10 +209,10 @@ UNIT_TEST(cha,chx,chc,opname) \
 	constexpr auto M = 4; \
 	constexpr auto N = 4; \
 \
-	for ( uplo_t uplo : { BLIS_UPPER, BLIS_LOWER } ) \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto diagoff : { -1, 0, 1 } ) \
+	for ( const uplo_t uplo : { BLIS_UPPER, BLIS_LOWER } ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for ( const auto diagoff : { -1, 0, 1 } ) \
 	{ \
 		auto xmn = tile<M,N>( x ); \
 \
@@ -241,10 +241,10 @@ UNIT_TEST(cha,chx,chc,opname) \
 		check<ctypec>( xmn, xmn0 ); \
 	} \
 \
-	for ( uplo_t uplo : { BLIS_UPPER, BLIS_LOWER } ) \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto diagoff : { -1, 0, 1 } ) \
+	for ( const uplo_t uplo : { BLIS_UPPER, BLIS_LOWER } ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for ( const auto diagoff : { -1, 0, 1 } ) \
 	{ \
 		auto xmn = tile<M,N>( x ); \
 \

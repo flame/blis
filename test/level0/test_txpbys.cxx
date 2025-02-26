@@ -45,9 +45,9 @@
 #define GENTFUNC( opname, ctypex, chx, ctypeb, chb, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(chx,chb,chy,chc,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto b : test_values<ctypeb>() ) \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for ( const auto b : test_values<ctypeb>() ) \
+	for (       auto y : test_values<ctypey>() ) \
 	{ \
 		auto y0 = convert<ctypey>( convert_prec<ctypec>( x ) + \
 		                           convert_prec<ctypec>( b ) * \
@@ -69,12 +69,37 @@ UNIT_TEST(chx,chb,chy,chc,opname) \
 INSERT_GENTFUNC_MIX4( RC, RC, RC, R, xpbys )
 
 #undef GENTFUNC
+#define GENTFUNC( opname, ctypex, chx, ctypeb, chb, ctypec, chc ) \
+UNIT_TEST(chx,chb,chy,chc,opname) \
+( \
+	for (       auto x : test_values<ctypex>() ) \
+	for ( const auto b : test_values<ctypeb>() ) \
+	{ \
+		auto x0 = convert<ctypex>( convert_prec<ctypec>( x ) + \
+		                           convert_prec<ctypec>( b ) * \
+		                           convert_prec<ctypec>( x ) ); \
+\
+		INFO( "x:        " << x ); \
+		INFO( "b:        " << b ); \
+\
+		bli_txpbys( chx,chb,chx,chc, x, b, x ); \
+\
+		INFO( "x (C++):  " << x0 ); \
+		INFO( "x (BLIS): " << x ); \
+\
+		check<ctypec>( x, x0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX3( RC, RC, R, xpbys_inplace )
+
+#undef GENTFUNC
 #define GENTFUNC( opname, ctypex, chx, ctypeb, chb, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(chx,chb,chy,chc,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto b : test_values<ctypeb>() ) \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for ( const auto b : test_values<ctypeb>() ) \
+	for (       auto y : test_values<ctypey>() ) \
 	{ \
 		auto y0 = convert<ctypey>( conj( convert_prec<ctypec>( x ) ) + \
 		                                 convert_prec<ctypec>( b ) * \
@@ -99,9 +124,9 @@ INSERT_GENTFUNC_MIX4( RC, RC, RC, R, xpbyjs )
 #define GENTFUNC( opname, ctypex, chx, ctypeb, chb, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(chx,chb,chy,chc,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto b : test_values<ctypeb>() ) \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for ( const auto b : test_values<ctypeb>() ) \
+	for (       auto y : test_values<ctypey>() ) \
 	{ \
 		auto y0 = convert<ctypey>( convert_prec<ctypec>( x ) + \
 		                           convert_prec<ctypec>( b ) * \
@@ -130,9 +155,9 @@ INSERT_GENTFUNC_MIX4( RC, RC, RC, R, xpbyris )
 #define GENTFUNC( opname, ctypex, chx, ctypeb, chb, ctypey, chy, ctypec, chc ) \
 UNIT_TEST(chx,chb,chy,chc,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto b : test_values<ctypeb>() ) \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for ( const auto b : test_values<ctypeb>() ) \
+	for (       auto y : test_values<ctypey>() ) \
 	{ \
 		auto y0 = convert<ctypey>( conj( convert_prec<ctypec>( x ) ) + \
 		                                 convert_prec<ctypec>( b ) * \
@@ -163,12 +188,12 @@ UNIT_TEST(chx,chb,chy,chc,opname) \
 	constexpr auto M = 4; \
 	constexpr auto N = 4; \
 \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto b : test_values<ctypeb>() ) \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for ( const auto b : test_values<ctypeb>() ) \
+	for ( const auto y : test_values<ctypey>() ) \
 	{ \
-		auto xmn = tile<M,N>( x ); \
-		auto ymn = tile<M,N>( y ); \
+		const auto xmn = tile<M,N>( x ); \
+		      auto ymn = tile<M,N>( y ); \
 \
 		INFO( "row-major" ); \
 \
@@ -187,12 +212,12 @@ UNIT_TEST(chx,chb,chy,chc,opname) \
 		check<ctypec>( ymn, ymn0 ); \
 	} \
 \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto b : test_values<ctypeb>() ) \
-	for ( auto y : test_values<ctypey>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for ( const auto b : test_values<ctypeb>() ) \
+	for ( const auto y : test_values<ctypey>() ) \
 	{ \
-		auto xmn = tile<M,N>( x ); \
-		auto ymn = tile<M,N>( y ); \
+		const auto xmn = tile<M,N>( x ); \
+		      auto ymn = tile<M,N>( y ); \
 \
 		INFO( "column-major" ); \
 \
@@ -220,14 +245,14 @@ UNIT_TEST(chx,chb,chy,chc,opname) \
 	constexpr auto M = 4; \
 	constexpr auto N = 4; \
 \
-	for ( uplo_t uplo : { BLIS_UPPER, BLIS_LOWER } ) \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto b : test_values<ctypeb>() ) \
-	for ( auto y : test_values<ctypey>() ) \
-	for ( auto diagoff : { -1, 0, 1 } ) \
+	for ( const uplo_t uplo : { BLIS_UPPER, BLIS_LOWER } ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for ( const auto b : test_values<ctypeb>() ) \
+	for ( const auto y : test_values<ctypey>() ) \
+	for ( const auto diagoff : { -1, 0, 1 } ) \
 	{ \
-		auto xmn = tile<M,N>( x ); \
-		auto ymn = tile<M,N>( y ); \
+		const auto xmn = tile<M,N>( x ); \
+		      auto ymn = tile<M,N>( y ); \
 \
 		INFO( "row-major" ); \
 \
@@ -251,14 +276,14 @@ UNIT_TEST(chx,chb,chy,chc,opname) \
 		check<ctypec>( ymn, ymn0 ); \
 	} \
 \
-	for ( uplo_t uplo : { BLIS_UPPER, BLIS_LOWER } ) \
-	for ( auto x : test_values<ctypex>() ) \
-	for ( auto b : test_values<ctypeb>() ) \
-	for ( auto y : test_values<ctypey>() ) \
-	for ( auto diagoff : { -1, 0, 1 } ) \
+	for ( const uplo_t uplo : { BLIS_UPPER, BLIS_LOWER } ) \
+	for ( const auto x : test_values<ctypex>() ) \
+	for ( const auto b : test_values<ctypeb>() ) \
+	for ( const auto y : test_values<ctypey>() ) \
+	for ( const auto diagoff : { -1, 0, 1 } ) \
 	{ \
-		auto xmn = tile<M,N>( x ); \
-		auto ymn = tile<M,N>( y ); \
+		const auto xmn = tile<M,N>( x ); \
+		      auto ymn = tile<M,N>( y ); \
 \
 		INFO( "column-major" ); \
 \

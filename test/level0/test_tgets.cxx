@@ -49,7 +49,7 @@ UNIT_TEST(chx,chy,opname) \
 	using ctypeyr = make_real_t<ctypey>; \
 	using ctypeyc = make_complex_t<ctypey>; \
 \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypeyc>( x ); \
 \

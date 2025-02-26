@@ -45,7 +45,7 @@
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( -x ); \
 \
@@ -88,7 +88,7 @@ INSERT_GENTFUNC_MIX1( RC, neg2s_inplace )
 #define GENTFUNC( opname, ctypex, chx, ctypey, chy ) \
 UNIT_TEST(chx,chy,opname) \
 ( \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypey>( -x ); \
 \

@@ -45,9 +45,9 @@
 #define GENTFUNC( opname, ctypea, cha, ctypex, chx, ctypec, chc ) \
 UNIT_TEST(cha,chx,chc,opname) \
 ( \
-	for ( auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
-	for ( auto a : test_values<ctypea>() ) \
-	for ( auto x : test_values<ctypex>() ) \
+	for ( const auto conjx : { BLIS_CONJUGATE, BLIS_NO_CONJUGATE } ) \
+	for ( const auto a : test_values<ctypea>() ) \
+	for ( const auto x : test_values<ctypex>() ) \
 	{ \
 		auto y0 = convert<ctypex>( convert_prec<ctypec>( bli_is_conj( conjx ) ? conj( a ) : a ) * \
 		                           convert_prec<ctypec>( x ) ); \
