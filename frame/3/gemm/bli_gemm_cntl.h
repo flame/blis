@@ -200,7 +200,7 @@ typedef struct gemm_cntl_s gemm_cntl_t;
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS void bli_gemm_cntl_init
+BLIS_EXPORT_BLIS bool bli_gemm_cntl_init
      (
              ind_t        im,
              opid_t       family,

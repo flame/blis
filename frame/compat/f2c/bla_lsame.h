@@ -32,7 +32,13 @@
 
 */
 
-#if 1
+// NOTE: We prototype lsame_() and xerbla_() even when those symbols are
+// omitted via the --omit-symbols=LIST configure option. This is done because
+// the BLAS compatibility layer calls lsame_() and xerbla_() within its _check()
+// functions, and we prefer to give the compiler a chance to do type checking
+// against a function prototype (and *not* output a warning) even if those
+// routines are not going to be compiled within BLIS.
+//#ifndef BLIS_DISABLE_LSAME
 
 #ifdef LAPACK_ILP64
 long PASTEF77(lsame)(const char *ca, const char *cb, long ca_len, long cb_len);
@@ -40,4 +46,4 @@ long PASTEF77(lsame)(const char *ca, const char *cb, long ca_len, long cb_len);
 BLIS_EXPORT_BLAS int PASTEF77(lsame)(const char *ca, const char *cb, int ca_len, int cb_len);
 #endif
 
-#endif
+//#endif

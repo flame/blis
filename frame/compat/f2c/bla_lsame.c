@@ -41,6 +41,7 @@
 	-lf2c -lm   (in that order)
 */
 
+#ifndef BLIS_DISABLE_LSAME
 
 #ifdef LAPACK_ILP64
 long PASTEF77(lsame)(const char *ca, const char *cb, long ca_len, long cb_len)
@@ -150,5 +151,6 @@ int PASTEF77(lsame)(const char *ca, const char *cb, int ca_len, int cb_len)
     return ret_val;
 } /* lsame */
 
+#endif
 #endif
 

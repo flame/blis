@@ -211,11 +211,10 @@ void PASTEMAC(ch,ch,opname,arch,suf) \
 		return; \
 	} \
 \
-	      ctype ab[ BLIS_STACK_BUF_MAX_SIZE \
-	                / sizeof( ctype ) ] \
-	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const inc_t rs_ab  = nr; \
-	const inc_t cs_ab  = 1; \
+	      char   ab_[ BLIS_STACK_BUF_MAX_SIZE ] __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))) = { 0 }; \
+	      ctype* ab    = (ctype*)ab_; \
+	const inc_t  rs_ab = nr; \
+	const inc_t  cs_ab = 1; \
 \
 \
 	/* Initialize the accumulator elements in ab to zero. */ \

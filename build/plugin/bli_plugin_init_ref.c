@@ -56,9 +56,9 @@ do { \
 
 // -----------------------------------------------------------------------------
 
-void PASTEMAC(plugin_init,BLIS_PNAME_INFIX,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
+void PASTEMAC(plugin_init_@plugin_name@,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
      (
-       PASTECH(plugin,BLIS_PNAME_INFIX,_params)
+       plugin_@plugin_name@_params
      )
 {
 	cntx_t* cntx = ( cntx_t* )bli_gks_lookup_id( PASTECH(BLIS_ARCH,BLIS_CNAME_UPPER_INFIX) );
@@ -69,7 +69,7 @@ void PASTEMAC(plugin_init,BLIS_PNAME_INFIX,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
 	// ------------------------------------------------------------------------>
 
 	blksz_t blkszs[ MY_NUM_BLOCK_SIZES ];
-	siz_t   bmults[ MY_NUM_BLOCK_SIZES ];
+	kerid_t bmults[ MY_NUM_BLOCK_SIZES ];
 	func_t  funcs[ MY_NUM_KERNELS ];
 	mbool_t mbools[ MY_NUM_KERNEL_PREFS ];
 

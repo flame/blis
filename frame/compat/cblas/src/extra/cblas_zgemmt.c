@@ -48,13 +48,13 @@ void cblas_zgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
                   f77_int lda, const void  *B, f77_int ldb,
                   const void *beta, void  *C, f77_int ldc)
 {
-   char UL, TA, TB;   
+   char UL, TA, TB;
 #ifdef F77_CHAR
    F77_CHAR F77_UL, F77_TA, F77_TB;
 #else
-   #define F77_UL &UL  
-   #define F77_TA &TA  
-   #define F77_TB &TB  
+   #define F77_UL &UL
+   #define F77_TA &TA
+   #define F77_TB &TB
 #endif
 
 #ifdef F77_INT
@@ -78,7 +78,7 @@ void cblas_zgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
 
       if( Uplo == CblasUpper) UL='U';
       else if ( Uplo == CblasLower ) UL='L';
-      else 
+      else
       {
          cblas_xerbla(2, "cblas_zgemmt","Illegal Uplo setting, %d\n", Uplo);
          CBLAS_CallFromC = 0;
@@ -89,7 +89,7 @@ void cblas_zgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
       if(TransA == CblasTrans) TA='T';
       else if ( TransA == CblasConjTrans ) TA='C';
       else if ( TransA == CblasNoTrans )   TA='N';
-      else 
+      else
       {
          cblas_xerbla(3, "cblas_zgemmt","Illegal TransA setting, %d\n", TransA);
          CBLAS_CallFromC = 0;
@@ -100,7 +100,7 @@ void cblas_zgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
       if(TransB == CblasTrans) TB='T';
       else if ( TransB == CblasConjTrans ) TB='C';
       else if ( TransB == CblasNoTrans )   TB='N';
-      else 
+      else
       {
          cblas_xerbla(4, "cblas_zgemmt","Illegal TransB setting, %d\n", TransB);
          CBLAS_CallFromC = 0;
@@ -121,7 +121,7 @@ void cblas_zgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
       RowMajorStrg = 1;
       if( Uplo == CblasUpper) UL='L';
       else if ( Uplo == CblasLower ) UL='U';
-      else 
+      else
       {
          cblas_xerbla(2, "cblas_zgemmt","Illegal Uplo setting, %d\n", Uplo);
          CBLAS_CallFromC = 0;
@@ -132,7 +132,7 @@ void cblas_zgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
       if(TransA == CblasTrans) TB='T';
       else if ( TransA == CblasConjTrans ) TB='C';
       else if ( TransA == CblasNoTrans )   TB='N';
-      else 
+      else
       {
          cblas_xerbla(3, "cblas_zgemmt","Illegal TransA setting, %d\n", TransA);
          CBLAS_CallFromC = 0;
@@ -142,7 +142,7 @@ void cblas_zgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
       if(TransB == CblasTrans) TA='T';
       else if ( TransB == CblasConjTrans ) TA='C';
       else if ( TransB == CblasNoTrans )   TA='N';
-      else 
+      else
       {
          cblas_xerbla(4, "cblas_zgemmt","Illegal TransB setting, %d\n", TransB);
          CBLAS_CallFromC = 0;
@@ -157,10 +157,23 @@ void cblas_zgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
 
       F77_zgemmt(F77_UL, F77_TA, F77_TB, &F77_M, &F77_K, (dcomplex*)alpha, (dcomplex*)B,
                   &F77_ldb, (dcomplex*)A, &F77_lda, (dcomplex*)beta, (dcomplex*)C, &F77_ldc);
-   } 
+   }
    else  cblas_xerbla(1, "cblas_zgemmt", "Illegal Order setting, %d\n", Order);
    CBLAS_CallFromC = 0;
    RowMajorStrg = 0;
    return;
 }
+
+void cblas_zgemmtr(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
+                  enum CBLAS_TRANSPOSE TransA,
+                  enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int K,
+                  const void* alpha, const void  *A,
+                  f77_int lda, const void  *B, f77_int ldb,
+                  const void* beta, void  *C, f77_int ldc)
+#ifdef BLIS_OS_OSX
+{ cblas_zgemmt(Order, Uplo, TransA, TransB, M, K, alpha, A, lda, B, ldb, beta, C, ldc); }
+#else
+__attribute__((alias("cblas_zgemmt")));
+#endif
+
 #endif

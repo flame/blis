@@ -32,8 +32,14 @@
 
 */
 
-#if 1
+// NOTE: We prototype lsame_() and xerbla_() even when those symbols are
+// omitted via the --omit-symbols=LIST configure option. This is done because
+// the BLAS compatibility layer calls lsame_() and xerbla_() within its _check()
+// functions, and we prefer to give the compiler a chance to do type checking
+// against a function prototype (and *not* output a warning) even if those
+// routines are not going to be compiled within BLIS.
+//#ifndef BLIS_DISABLE_XERBLA
 
 BLIS_EXPORT_BLAS BLIS_OVERRIDABLE int PASTEF77(xerbla)(const bla_character *srname, const bla_integer *info, ftnlen srname_len);
 
-#endif
+//#endif

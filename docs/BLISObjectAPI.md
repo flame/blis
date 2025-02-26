@@ -74,23 +74,24 @@ The following tables list various types used throughout the BLIS object API.
 
 ### Integer-based types
 
-| BLIS integer type | Type definition          | Used to represent...                                                 |
-|:------------------|:-------------------------|:---------------------------------------------------------------------|
-| `gint_t`          | `int32_t` or `int64_t`   | general-purpose signed integer; used to define signed integer types. |
-| `guint_t`         | `uint32_t` or `uint64_t` | general-purpose signed integer; used to define signed integer types. |
-| `dim_t`           | `gint_t`                 | matrix and vector dimensions.                                        |
-| `inc_t`           | `gint_t`                 | matrix row/column strides and vector increments.                     |
+| BLIS integer type | Type definition          | Used to represent...                                                     |
+|:------------------|:-------------------------|:-------------------------------------------------------------------------|
+| `gint_t`          | `int32_t` or `int64_t`   | general-purpose signed integer; used to define signed integer types.     |
+| `guint_t`         | `uint32_t` or `uint64_t` | general-purpose unsigned integer; used to define unsigned integer types. |
+| `dim_t`           | `gint_t`                 | matrix and vector dimensions.                                            |
+| `inc_t`           | `gint_t`                 | matrix row/column strides and vector increments.                         |
 | `doff_t`          | `gint_t`                 | matrix diagonal offset: if _k_ < 0, diagonal begins at element (-_k_,0); otherwise diagonal begins at element (0,_k_). |
-| `siz_t`           | `guint_t`                | a byte size or byte offset.                                          |
+| `siz_t`           | `guint_t`                | a byte size or byte offset, unsigned integer.                            |
+| `kerid_t`         | `uint32_t`               | a kernel, block size, operation, or kernel preference ID.                |
 
 ### Floating-point types
 
-| BLIS fp type      | Type definition                        | Used to represent...              |
-|:------------------|:---------------------------------------|:----------------------------------|
-| `float`           | _N/A_                                  | single-precision real numbers.    |
-| `double`          | _N/A_                                  | double-precision real numbers.    |
-| `scomplex`        | `struct { float real; float imag; }`   | single-precision complex numbers. |
-| `dcomplex`        | `struct { double real; double imag; }` | double-precision complex numbers. |
+| BLIS fp type | Type definition                        | Used to represent...              |
+|:-------------|:---------------------------------------|:----------------------------------|
+| `float`      | _N/A_                                  | single-precision real numbers.    |
+| `double`     | _N/A_                                  | double-precision real numbers.    |
+| `scomplex`   | `struct { float real; float imag; }`   | single-precision complex numbers. |
+| `dcomplex`   | `struct { double real; double imag; }` | double-precision complex numbers. |
 
 ### Enumerated parameter types
 
@@ -113,7 +114,7 @@ The following tables list various types used throughout the BLIS object API.
 | `BLIS_SINGLE_PREC` | contains single-precision elements.        |
 | `BLIS_DOUBLE_PREC` | contains double-precision elements.        |
 
-| `trans_t`                | Semantic meaning: Matrix operand ...            |
+| `trans_t`                | Semantic meaning: Matrix operand...             |
 |:-------------------------|:------------------------------------------------|
 | `BLIS_NO_TRANSPOSE`      | will be used as given.                          |
 | `BLIS_TRANSPOSE`         | will be implicitly transposed.                  |
@@ -143,7 +144,7 @@ The following tables list various types used throughout the BLIS object API.
 | `BLIS_UPPER` | is stored in (and will be accessed only from) the upper triangle. |
 | `BLIS_DENSE` | is stored as a full matrix (ie: in both triangles).               |
 
-| `diag_t`            | Semantic meaning: Matrix operand ...                                       |
+| `diag_t`            | Semantic meaning: Matrix operand...                                        |
 |:--------------------|:---------------------------------------------------------------------------|
 | `BLIS_NONUNIT_DIAG` | has a non-unit diagonal that should be explicitly read from.               |
 | `BLIS_UNIT_DIAG`    | has a unit diagonal that should be implicitly assumed (and not read from). |
@@ -160,6 +161,9 @@ BLIS defines a handful of scalar objects that conveniently represent various con
 |  `BLIS_ZERO`               | ` 0.0`           |
 |  `BLIS_ONE`                | ` 1.0`           |
 |  `BLIS_TWO`                | ` 2.0`           |
+|  `BLIS_MINUS_ONE_I`        | ` 0.0-1.0*i`     |
+|  `BLIS_ONE_I`              | ` 0.0+1.0*i`     |
+|  `BLIS_NAN`                | ` NaN`           |
 
 These objects are polymorphic; each one contains a `float`, `double`, `scomplex`, `dcomplex`, and `gint_t` representation of the constant value in question. They can be used in place of any `obj_t*` operand in any object API function provided that the following criteria are met:
  * The object parameter requires unit dimensions (1x1). (In other words, the function expects a scalar for the operand in question.)
@@ -177,24 +181,24 @@ The functions listed in this document belong to the "basic" interface subset of 
 ```c
 void bli_gemm
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c
      );
 ```
 while the expert interface is:
 ```c
 void bli_gemm_ex
      (
-       obj_t*   alpha,
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   beta,
-       obj_t*   c,
-       cntx_t*  cntx,
-       rntm_t*  rntm
+       const obj_t*   alpha,
+       const obj_t*   a,
+       const obj_t*   b,
+       const obj_t*   beta,
+       const obj_t*   c,
+       const cntx_t*  cntx,
+       const rntm_t*  rntm
      );
 ```
 The expert interface contains two additional parameters: a `cntx_t*` and `rntm_t*`. Note that calling a function from the expert interface with the `cntx_t*` and `rntm_t*` arguments each set to `NULL` is equivalent to calling the corresponding basic interface. Specifically, a `NULL` value passed in for the `cntx_t*` results in a valid context being queried from BLIS, and a `NULL` value passed in for the `rntm_t*` results in the current global settings for multithreading to be used.
@@ -203,7 +207,7 @@ The expert interface contains two additional parameters: a `cntx_t*` and `rntm_t
 
 In general, it is permissible to pass in `NULL` for a `cntx_t*` parameter when calling an expert interface such as `bli_gemm_ex()`. However, there are cases where `NULL` values are not accepted and may result in a segmentation fault. Specifically, the `cntx_t*` argument appears in the interfaces to the `gemm`, `trsm`, and `gemmtrsm` [level-3 microkernels](KernelsHowTo.md#level-3) along with all [level-1v](KernelsHowTo.md#level-1v) and [level-1f](KernelsHowTo.md#level-1f) kernels. There, as a general rule, a valid pointer must be passed in. Whenever a valid context is needed, the developer may query a default context from the global kernel structure (if a context is not already available in the current scope):
 ```c
-cntx_t* bli_gks_query_cntx( void );
+const cntx_t* bli_gks_query_cntx( void );
 ```
 When BLIS is configured to target a configuration family (e.g. `intel64`, `x86_64`), `bli_gks_query_cntx()` will use `cpuid` or an equivalent heuristic to select and and return the appropriate context. When BLIS is configured to target a singleton sub-configuration (e.g. `haswell`, `skx`), `bli_gks_query_cntx()` will unconditionally return a pointer to the context appropriate for the targeted configuration.
 
@@ -385,8 +389,8 @@ Objects initialized via this function should generally not be passed to `bli_obj
 ```c
 void bli_obj_create_conf_to
      (
-       obj_t*  s,
-       obj_t*  d
+       const obj_t*  s,
+             obj_t*  d
      );
 ```
 Initialize an object `d` with dimensions conformal to those of an existing object `s`. Object `d` is initialized with the same row and column strides as those of `s`. However, the structure, uplo, conjugation, and transposition properties of `s` are **not** inherited by `d`.
@@ -426,35 +430,35 @@ Notes for interpreting function descriptions:
 ---
 
 ```c
-num_t bli_obj_dt( obj_t* obj );
+num_t bli_obj_dt( const obj_t* obj );
 ```
 Return the storage datatype property of `obj`.
 
 ---
 
 ```c
-dom_t bli_obj_domain( obj_t* obj );
+dom_t bli_obj_domain( const obj_t* obj );
 ```
 Return the domain component of the storage datatype property of `obj`.
 
 ---
 
 ```c
-prec_t bli_obj_prec( obj_t* obj );
+prec_t bli_obj_prec( const obj_t* obj );
 ```
 Return the precision component of the storage datatype property of `obj`.
 
 ---
 
 ```c
-trans_t bli_obj_conjtrans_status( obj_t* obj );
+trans_t bli_obj_conjtrans_status( const obj_t* obj );
 ```
 Return the `trans_t` property of `obj`, which may indicate transposition, conjugation, both, or neither. Thus, possible return values are `BLIS_NO_TRANSPOSE`, `BLIS_CONJ_NO_TRANSPOSE`, `BLIS_TRANSPOSE`, or `BLIS_CONJ_TRANSPOSE`.
 
 ---
 
 ```c
-trans_t bli_obj_onlytrans_status( obj_t* obj );
+trans_t bli_obj_onlytrans_status( const obj_t* obj );
 ```
 Return the transposition component of the `trans_t` property of `obj`, which may indicate transposition or no transposition.
 Thus, possible return values are `BLIS_NO_TRANSPOSE` or `BLIS_TRANSPOSE`.
@@ -462,7 +466,7 @@ Thus, possible return values are `BLIS_NO_TRANSPOSE` or `BLIS_TRANSPOSE`.
 ---
 
 ```c
-conj_t bli_obj_conj_status( obj_t* obj );
+conj_t bli_obj_conj_status( const obj_t* obj );
 ```
 Return the conjugation component of the `trans_t` property of `obj`, which may indicate conjugation or no conjugation.
 Thus, possible return values are `BLIS_NO_CONJUGATE` or `BLIS_CONJUGATE`.
@@ -470,77 +474,77 @@ Thus, possible return values are `BLIS_NO_CONJUGATE` or `BLIS_CONJUGATE`.
 ---
 
 ```c
-struc_t bli_obj_struc( obj_t* obj );
+struc_t bli_obj_struc( const obj_t* obj );
 ```
 Return the structure property of `obj`.
 
 ---
 
 ```c
-uplo_t bli_obj_uplo( obj_t* obj );
+uplo_t bli_obj_uplo( const obj_t* obj );
 ```
 Return the uplo (i.e., storage) property of `obj`.
 
 ---
 
 ```c
-diag_t bli_obj_diag( obj_t* obj );
+diag_t bli_obj_diag( const obj_t* obj );
 ```
 Return the diagonal property of `obj`.
 
 ---
 
 ```c
-doff_t bli_obj_diag_offset( obj_t* obj );
+doff_t bli_obj_diag_offset( const obj_t* obj );
 ```
 Return the diagonal offset of `obj`. Note that the diagonal offset will be negative, `-i`, if the diagonal begins at element `(-i,0)` and positive `j` if the diagonal begins at element `(0,j)`.
 
 ---
 
 ```c
-dim_t bli_obj_length( obj_t* obj );
+dim_t bli_obj_length( const obj_t* obj );
 ```
 Return the number of rows (or _m_ dimension) of `obj`. This value is the _m_ dimension **before** taking into account the transposition property as indicated by `bli_obj_onlytrans_status()` or `bli_obj_conjtrans_status()`.
 
 ---
 
 ```c
-dim_t bli_obj_width( obj_t* obj );
+dim_t bli_obj_width( const obj_t* obj );
 ```
 Return the number of columns (or _n_ dimension) of `obj`. This value is the _n_ dimension **before** taking into account the transposition property as indicated by `bli_obj_onlytrans_status()` or `bli_obj_conjtrans_status()`.
 
 ---
 
 ```c
-dim_t bli_obj_length_after_trans( obj_t* obj );
+dim_t bli_obj_length_after_trans( const obj_t* obj );
 ```
 Return the number of rows (or _m_ dimension) of `obj` after taking into account the transposition property as indicated by `bli_obj_onlytrans_status()` or `bli_obj_conjtrans_status()`.
 
 ---
 
 ```c
-dim_t bli_obj_width_after_trans( obj_t* obj );
+dim_t bli_obj_width_after_trans( const obj_t* obj );
 ```
 Return the number of columns (or _n_ dimension) of `obj` after taking into account the transposition property as indicated by `bli_obj_onlytrans_status()` or `bli_obj_conjtrans_status()`.
 
 ---
 
 ```c
-inc_t bli_obj_row_stride( obj_t* obj );
+inc_t bli_obj_row_stride( const obj_t* obj );
 ```
 Return the row stride property of `obj`. When storing by columns, the row stride is 1. When storing by rows, the row stride is also sometimes called the _leading dimension_.
 
 ---
 
 ```c
-inc_t bli_obj_col_stride( obj_t* obj );
+inc_t bli_obj_col_stride( const obj_t* obj );
 ```
 Return the column stride property of `obj`. When storing by rows, the column stride is 1. When storing by columns, the column stride is also sometimes called the _leading dimension_.
 
 ---
 
 ```c
-dim_t bli_obj_vector_dim( obj_t* obj );
+dim_t bli_obj_vector_dim( const obj_t* obj );
 ```
 Return the number of elements in a vector object `obj`.
 This function assumes that at least one dimension of `obj` is unit, and that it therefore represents a vector.
@@ -548,7 +552,7 @@ This function assumes that at least one dimension of `obj` is unit, and that it 
 ---
 
 ```c
-inc_t bli_obj_vector_inc( obj_t* obj );
+inc_t bli_obj_vector_inc( const obj_t* obj );
 ```
 Return the storage increment of a vector object `obj`.
 This function assumes that at least one dimension of `obj` is unit, and that it therefore represents a vector.
@@ -556,7 +560,7 @@ This function assumes that at least one dimension of `obj` is unit, and that it 
 ---
 
 ```c
-void* bli_obj_buffer( obj_t* obj );
+void* bli_obj_buffer( const obj_t* obj );
 ```
 Return the address to the data buffer associated with object `obj`.
 **Note**: The address returned by this buffer will not take into account any subpartitioning. However, this will not be a problem for most casual users.
@@ -564,7 +568,7 @@ Return the address to the data buffer associated with object `obj`.
 ---
 
 ```c
-siz_t bli_obj_elem_size( obj_t* obj );
+siz_t bli_obj_elem_size( const obj_t* obj );
 ```
 Return the size, in bytes, of the storage datatype as indicated by `bli_obj_dt()`.
 
@@ -655,10 +659,10 @@ Modify the properties of `obj` to induce a logical transposition. This function 
 ---
 
 ```c
-void bli_obj_alias_to( obj_t* a, obj_t* b );
+void bli_obj_alias_to( const obj_t* a, obj_t* b );
 ```
 Initialize `b` to be a shallow copy, or alias, of `a`. For most people's purposes, this is equivalent to
-```
+```c
   b = a;
 ```
 However, there is at least one field (one that only developers should be concerned with) that is not copied.
@@ -666,14 +670,14 @@ However, there is at least one field (one that only developers should be concern
 ---
 
 ```c
-void bli_obj_real_part( obj_t* c, obj_t* r );
+void bli_obj_real_part( const obj_t* c, obj_t* r );
 ```
 Initialize `r` to be a modified shallow copy of `c` that refers only to the real part of `c`.
 
 ---
 
 ```c
-void bli_obj_imag_part( obj_t* c, obj_t* i );
+void bli_obj_imag_part( const obj_t* c, obj_t* i );
 ```
 Initialize `i` to be a modified shallow copy of `c` that refers only to the imaginary part of `c`.
 
@@ -705,8 +709,8 @@ Level-1v operations perform various level-1 BLAS-like operations on vectors (hen
 ```c
 void bli_addv
      (
-       obj_t*  x,
-       obj_t*  y,
+       const obj_t*  x,
+       const obj_t*  y
      );
 ```
 Perform
@@ -723,8 +727,8 @@ Observed object properties: `conj?(x)`.
 ```c
 void bli_amaxv
      (
-       obj_t*  x,
-       obj_t*  index
+       const obj_t*  x,
+       const obj_t*  index
      );
 ```
 Given a vector of length _n_, return the zero-based index of the element of vector `x` that contains the largest absolute value (or, in the complex domain, the largest complex modulus). The object `index` must be created of type `BLIS_INT`.
@@ -741,9 +745,9 @@ Observed object properties: none.
 ```c
 void bli_axpyv
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y
+       const obj_t*  alpha,
+       const obj_t*  x,
+       const obj_t*  y
      );
 ```
 Perform
@@ -757,13 +761,13 @@ Observed object properties: `conj?(alpha)`, `conj?(x)`.
 ---
 
 #### axpbyv
-```
+```c
 void bli_axpbyv
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  beta,
-       obj_t*  y
+       const obj_t*  alpha,
+       const obj_t*  x,
+       const obj_t*  beta,
+       const obj_t*  y
      );
 ```
 Perform
@@ -780,8 +784,8 @@ Observed object properties: `conj?(alpha)`, `conj?(x)`.
 ```c
 void bli_copyv
      (
-       obj_t*  x,
-       obj_t*  y
+       const obj_t*  x,
+       const obj_t*  y
      );
 ```
 Perform
@@ -798,9 +802,9 @@ Observed object properties: `conj?(x)`.
 ```c
 void bli_dotv
      (
-       obj_t*  x,
-       obj_t*  y,
-       obj_t*  rho
+       const obj_t*  x,
+       const obj_t*  y,
+       const obj_t*  rho
      );
 ```
 Perform
@@ -817,11 +821,11 @@ Observed object properties: `conj?(x)`, `conj?(y)`.
 ```c
 void bli_dotxv
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y,
-       obj_t*  beta,
-       obj_t*  rho
+       const obj_t*  alpha,
+       const obj_t*  x,
+       const obj_t*  y,
+       const obj_t*  beta,
+       const obj_t*  rho
      );
 ```
 Perform
@@ -838,7 +842,7 @@ Observed object properties: `conj?(alpha)`, `conj?(beta)`, `conj?(x)`, `conj?(y)
 ```c
 void bli_invertv
      (
-       obj_t*  x
+       const obj_t*  x
      );
 ```
 Invert all elements of an _n_-length vector `x`.
@@ -849,8 +853,8 @@ Invert all elements of an _n_-length vector `x`.
 ```c
 void bli_invscalv
      (
-       obj_t*  alpha,
-       obj_t*  x
+       const obj_t*  alpha,
+       const obj_t*  x
      );
 ```
 Perform
@@ -867,8 +871,8 @@ Observed object properties: `conj?(alpha)`.
 ```c
 void bli_scalv
      (
-       obj_t*  alpha,
-       obj_t*  x
+       const obj_t*  alpha,
+       const obj_t*  x
      );
 ```
 Perform
@@ -885,9 +889,9 @@ Observed object properties: `conj?(alpha)`.
 ```c
 void bli_scal2v
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y
+       const obj_t*  alpha,
+       const obj_t*  x,
+       const obj_t*  y
      );
 ```
 Perform
@@ -904,8 +908,8 @@ Observed object properties: `conj?(alpha)`, `conj?(x)`.
 ```c
 void bli_setv
      (
-       obj_t*  alpha,
-       obj_t*  x
+       const obj_t*  alpha,
+       const obj_t*  x
      );
 ```
 Perform
@@ -922,8 +926,8 @@ Observed object properties: `conj?(alpha)`.
 ```c
 void bli_setrv
      (
-       obj_t*  alpha,
-       obj_t*  x
+       const obj_t*  alpha,
+       const obj_t*  x
      );
 ```
 Perform
@@ -940,8 +944,8 @@ If `x` is real, this operation is equivalent to performing `setv` on `x` with th
 ```c
 void bli_setiv
      (
-       obj_t*  alpha,
-       obj_t*  x
+       const obj_t*  alpha,
+       const obj_t*  x
      );
 ```
 Perform
@@ -958,8 +962,8 @@ If `x` is real, this operation is equivalent to a no-op.
 ```c
 void bli_subv
      (
-       obj_t*  x,
-       obj_t*  y
+       const obj_t*  x,
+       const obj_t*  y
      );
 ```
 Perform
@@ -976,8 +980,8 @@ Observed object properties: `conj?(x)`.
 ```c
 void bli_swapv
      (
-       obj_t*  x,
-       obj_t*  y
+       const obj_t*  x,
+       const obj_t*  y
      );
 ```
 Swap corresponding elements of two _n_-length vectors `x` and `y`.
@@ -985,12 +989,12 @@ Swap corresponding elements of two _n_-length vectors `x` and `y`.
 ---
 
 #### xpbyv
-```
+```c
 void bli_xpbyv
      (
-       obj_t*  x,
-       obj_t*  beta,
-       obj_t*  y
+       const obj_t*  x,
+       const obj_t*  beta,
+       const obj_t*  y
      );
 ```
 Perform
@@ -1019,8 +1023,8 @@ These operations are similar to their level-1m counterparts, except they only re
 ```c
 void bli_addd
      (
-       obj_t*  a,
-       obj_t*  b
+       const obj_t*  a,
+       const obj_t*  b
      );
 ```
 
@@ -1032,9 +1036,9 @@ Observed object properties: `diagoff(A)`, `diag(A)`, `trans?(A)`.
 ```c
 void bli_axpyd
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b
      );
 ```
 
@@ -1046,8 +1050,8 @@ Observed object properties: `conj?(alpha)`, `diagoff(A)`, `diag(A)`, `trans?(A)`
 ```c
 void bli_copyd
      (
-       obj_t*  a,
-       obj_t*  b
+       const obj_t*  a,
+       const obj_t*  b
      );
 ```
 
@@ -1059,7 +1063,7 @@ Observed object properties: `diagoff(A)`, `diag(A)`, `trans?(A)`.
 ```c
 void bli_invertd
      (
-       obj_t*  a
+       const obj_t*  a
      );
 ```
 
@@ -1071,8 +1075,8 @@ Observed object properties: `diagoff(A)`.
 ```c
 void bli_invscald
      (
-       obj_t*  alpha,
-       obj_t*  a
+       const obj_t*  alpha,
+       const obj_t*  a
      );
 ```
 
@@ -1084,8 +1088,8 @@ Observed object properties: `conj?(alpha)`, `diagoff(A)`.
 ```c
 void bli_scald
      (
-       obj_t*  alpha,
-       obj_t*  a
+       const obj_t*  alpha,
+       const obj_t*  a
      );
 ```
 
@@ -1097,9 +1101,9 @@ Observed object properties: `conj?(alpha)`, `diagoff(A)`.
 ```c
 void bli_scal2d
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b
      );
 ```
 
@@ -1111,8 +1115,8 @@ Observed object properties: `conj?(alpha)`, `diagoff(A)`, `diag(A)`, `trans?(A)`
 ```c
 void bli_setd
      (
-       obj_t*  alpha,
-       obj_t*  a
+       const obj_t*  alpha,
+       const obj_t*  a
      );
 ```
 
@@ -1124,8 +1128,8 @@ Observed object properties: `conj?(alpha)`, `diagoff(A)`.
 ```c
 void bli_setid
      (
-       obj_t*  alpha,
-       obj_t*  a
+       const obj_t*  alpha,
+       const obj_t*  a
      );
 ```
 Set the imaginary components of every element along the diagonal of `a`
@@ -1141,8 +1145,8 @@ Observed object properties: `diagoff(A)`.
 ```c
 void bli_shiftd
      (
-       obj_t*  alpha,
-       obj_t*  a
+       const obj_t*  alpha,
+       const obj_t*  a
      );
 ```
 Add a constant value `alpha` to every element along the diagonal of `a`.
@@ -1155,8 +1159,8 @@ Observed object properties: `diagoff(A)`.
 ```c
 void bli_subd
      (
-       obj_t*  a,
-       obj_t*  b
+       const obj_t*  a,
+       const obj_t*  b
      );
 ```
 
@@ -1168,9 +1172,9 @@ Observed object properties: `diagoff(A)`, `diag(A)`, `trans?(A)`.
 ```c
 void bli_xpbyd
      (
-       obj_t*  a,
-       obj_t*  beta,
-       obj_t*  b
+       const obj_t*  a,
+       const obj_t*  beta,
+       const obj_t*  b
      );
 ```
 
@@ -1190,8 +1194,8 @@ Level-1m operations perform various level-1 BLAS-like operations on matrices (he
 ```c
 void bli_addm
      (
-       obj_t*  a,
-       obj_t*  b
+       const obj_t*  a,
+       const obj_t*  b
      );
 ```
 Perform
@@ -1209,9 +1213,9 @@ Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`, `trans?(A)`.
 ```c
 void bli_axpym
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b
      );
 ```
 Perform
@@ -1229,8 +1233,8 @@ Observed object properties: `conj?(alpha)`, `diagoff(A)`, `diag(A)`, `uplo(A)`, 
 ```c
 void bli_copym
      (
-       obj_t*  a,
-       obj_t*  b
+       const obj_t*  a,
+       const obj_t*  b
      );
 ```
 Perform
@@ -1248,8 +1252,8 @@ Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`, `trans?(A)`.
 ```c
 void bli_invscalm
      (
-       obj_t*  alpha,
-       obj_t*  a
+       const obj_t*  alpha,
+       const obj_t*  a
      );
 ```
 Perform
@@ -1266,8 +1270,8 @@ Observed object properties: `conj?(alpha)`, `diagoff(A)`, `uplo(A)`.
 ```c
 void bli_scalm
      (
-       obj_t*  alpha,
-       obj_t*  a
+       const obj_t*  alpha,
+       const obj_t*  a
      );
 ```
 Perform
@@ -1284,9 +1288,9 @@ Observed object properties: `conj?(alpha)`, `diagoff(A)`, `uplo(A)`.
 ```c
 void bli_scal2m
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b
      );
 ```
 Perform
@@ -1304,8 +1308,8 @@ Observed object properties: `conj?(alpha)`, `diagoff(A)`, `diag(A)`, `uplo(A)`, 
 ```c
 void bli_setm
      (
-       obj_t*  alpha,
-       obj_t*  a
+       const obj_t*  alpha,
+       const obj_t*  a
      );
 ```
 Perform
@@ -1322,8 +1326,8 @@ Observed object properties: `conj?(alpha)`, `diagoff(A)`, `diag(A)`, `uplo(A)`.
 ```c
 void bli_setrm
      (
-       obj_t*  alpha,
-       obj_t*  a
+       const obj_t*  alpha,
+       const obj_t*  a
      );
 ```
 Perform
@@ -1342,8 +1346,8 @@ Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`.
 ```c
 void bli_setim
      (
-       obj_t*  alpha,
-       obj_t*  a
+       const obj_t*  alpha,
+       const obj_t*  a
      );
 ```
 Perform
@@ -1362,8 +1366,8 @@ Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`.
 ```c
 void bli_subm
      (
-       obj_t*  a,
-       obj_t*  b
+       const obj_t*  a,
+       const obj_t*  b
      );
 ```
 Perform
@@ -1395,11 +1399,11 @@ Level-1f kernels are employed when optimizing level-2 operations.
 ```c
 void bli_axpy2v
      (
-       obj_t*  alphax,
-       obj_t*  alphay,
-       obj_t*  x,
-       obj_t*  y,
-       obj_t*  z
+       const obj_t*  alphax,
+       const obj_t*  alphay,
+       const obj_t*  x,
+       const obj_t*  y,
+       const obj_t*  z
      );
 ```
 Perform
@@ -1416,11 +1420,12 @@ Observed object properties: `conj?(alphax)`, `conj?(x)`, `conj?(alphay)`, `conj?
 ```c
 void bli_dotaxpyv
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y,
-       obj_t*  rho,
-       obj_t*  z
+       const obj_t*  alpha,
+       const obj_t*  xt,
+       const obj_t*  x,
+       const obj_t*  y,
+       const obj_t*  rho,
+       const obj_t*  z
      );
 ```
 Perform
@@ -1438,10 +1443,10 @@ Observed object properties: `conj?(x)`, `conj?(y)`, `conj?(alpha)`.
 ```c
 void bli_axpyf
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  x,
-       obj_t*  y
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  x,
+       const obj_t*  y
      );
 ```
 Perform
@@ -1458,11 +1463,11 @@ Observed object properties: `conj?(alpha)`, `conj?(A)`, `conj?(x)`.
 ```c
 void bli_dotxf
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  x,
-       obj_t*  beta,
-       obj_t*  y
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  x,
+       const obj_t*  beta,
+       const obj_t*  y
      );
 ```
 Perform
@@ -1479,13 +1484,14 @@ Observed object properties: `conj?(alpha)`, `conj?(beta)`, `conj?(A)`, `conj?(x)
 ```c
 void bli_dotxaxpyf
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  w,
-       obj_t*  x,
-       obj_t*  beta,
-       obj_t*  y,
-       obj_t*  z
+       const obj_t*  alpha,
+       const obj_t*  at,
+       const obj_t*  a,
+       const obj_t*  w,
+       const obj_t*  x,
+       const obj_t*  beta,
+       const obj_t*  y,
+       const obj_t*  z
      );
 ```
 Perform
@@ -1510,11 +1516,11 @@ Level-2 operations perform various level-2 BLAS-like operations.
 ```c
 void bli_gemv
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  x,
-       obj_t*  beta,
-       obj_t*  y
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  x,
+       const obj_t*  beta,
+       const obj_t*  y
      );
 ```
 Perform
@@ -1531,10 +1537,10 @@ Observed object properties: `conj?(alpha)`, `conj?(beta)`, `trans?(A)`, `conj?(x
 ```c
 void bli_ger
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y,
-       obj_t*  a
+       const obj_t*  alpha,
+       const obj_t*  x,
+       const obj_t*  y,
+       const obj_t*  a
      );
 ```
 Perform
@@ -1551,11 +1557,11 @@ Observed object properties: `conj?(alpha)`, `conj?(x)`, `conj?(y)`.
 ```c
 void bli_hemv
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  x,
-       obj_t*  beta,
-       obj_t*  y
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  x,
+       const obj_t*  beta,
+       const obj_t*  y
      );
 ```
 Perform
@@ -1572,9 +1578,9 @@ Observed object properties: `conj?(alpha)`, `conj?(beta)`, `conj?(A)`, `uplo(A)`
 ```c
 void bli_her
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  a
+       const obj_t*  alpha,
+       const obj_t*  x,
+       const obj_t*  a
      );
 ```
 Perform
@@ -1593,10 +1599,10 @@ Observed object properties: `conj?(alpha)`, `uplo(A)`, `conj?(x)`.
 ```c
 void bli_her2
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y,
-       obj_t*  a
+       const obj_t*  alpha,
+       const obj_t*  x,
+       const obj_t*  y,
+       const obj_t*  a
      );
 ```
 Perform
@@ -1613,11 +1619,11 @@ Observed object properties: `uplo(A)`, `conj?(x)`, `conj?(y)`.
 ```c
 void bli_symv
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  x,
-       obj_t*  beta,
-       obj_t*  y
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  x,
+       const obj_t*  beta,
+       const obj_t*  y
      );
 ```
 Perform
@@ -1634,9 +1640,9 @@ Observed object properties: `conj?(alpha)`, `conj?(beta)`, `conj?(A)`, `uplo(A)`
 ```c
 void bli_syr
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  a
+       const obj_t*  alpha,
+       const obj_t*  x,
+       const obj_t*  a
      );
 ```
 Perform
@@ -1653,10 +1659,10 @@ Observed object properties: `conj?(alpha)`, `conj?(x)`.
 ```c
 void bli_syr2
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y,
-       obj_t*  a
+       const obj_t*  alpha,
+       const obj_t*  x,
+       const obj_t*  y,
+       const obj_t*  a
      );
 ```
 Perform
@@ -1673,9 +1679,9 @@ Observed object properties: `uplo(A)`, `conj?(x)`, `conj?(y)`.
 ```c
 void bli_trmv
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  x
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  x
      );
 ```
 Perform
@@ -1692,9 +1698,9 @@ Observed object properties: `conj?(alpha)`, `uplo(A)`, `trans?(A)`, `diag(A)`.
 ```c
 void bli_trsv
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  y
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  y
      );
 ```
 Solve the linear system
@@ -1721,11 +1727,11 @@ Level-3 operations perform various level-3 BLAS-like operations.
 ```c
 void bli_gemm
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c
      );
 ```
 Perform
@@ -1742,11 +1748,11 @@ Observed object properties: `trans?(A)`, `trans?(B)`.
 ```c
 void bli_gemmt
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c
      );
 ```
 Perform
@@ -1763,12 +1769,12 @@ Observed object properties: `trans?(A)`, `trans?(B)`, `uplo(C)`.
 ```c
 void bli_hemm
      (
-       side_t  sidea,
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c
+             side_t  sidea,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c
      );
 ```
 Perform
@@ -1789,10 +1795,10 @@ Observed object properties: `uplo(A)`, `conj?(A)`, `trans?(B)`.
 ```c
 void bli_herk
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  beta,
-       obj_t*  c
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  beta,
+       const obj_t*  c
      );
 ```
 Perform
@@ -1811,11 +1817,11 @@ Observed object properties: `trans?(A)`, `uplo(C)`.
 ```c
 void bli_her2k
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c
      );
 ```
 Perform
@@ -1834,12 +1840,12 @@ Observed object properties: `trans?(A)`, `trans?(B)`, `uplo(C)`.
 ```c
 void bli_symm
      (
-       side_t  sidea,
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c
+             side_t  sidea,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c
      );
 ```
 Perform
@@ -1860,10 +1866,10 @@ Observed object properties: `uplo(A)`, `conj?(A)`, `trans?(B)`.
 ```c
 void bli_syrk
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  beta,
-       obj_t*  c
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  beta,
+       const obj_t*  c
      );
 ```
 Perform
@@ -1880,11 +1886,11 @@ Observed object properties: `trans?(A)`, `uplo(C)`.
 ```c
 void bli_syr2k
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c
      );
 ```
 Perform
@@ -1901,10 +1907,10 @@ Observed object properties: `trans?(A)`, `trans?(B)`, `uplo(C)`.
 ```c
 void bli_trmm
      (
-       side_t  sidea,
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b
+             side_t  sidea,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b
      );
 ```
 Perform
@@ -1925,12 +1931,12 @@ Observed object properties: `uplo(A)`, `trans?(A)`, `diag(A)`.
 ```c
 void bli_trmm3
      (
-       side_t  sidea,
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c
+             side_t  sidea,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c
      );
 ```
 Perform
@@ -1951,10 +1957,10 @@ Observed object properties: `uplo(A)`, `trans?(A)`, `diag(A)`, `trans?(B)`.
 ```c
 void bli_trsm
      (
-       side_t  sidea,
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b
+             side_t  sidea,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b
      );
 ```
 Solve the linear system with multiple right-hand sides
@@ -1980,8 +1986,8 @@ Observed object properties: `uplo(A)`, `trans?(A)`, `diag(A)`.
 ```c
 void bli_asumv
      (
-       obj_t*  x,
-       obj_t*  asum
+       const obj_t*  x,
+       const obj_t*  asum
      );
 ```
 Compute the sum of the absolute values of the fundamental elements of vector `x`. The resulting sum is stored to `asum`.
@@ -1999,8 +2005,8 @@ Observed object properties: none.
 ```c
 void bli_norm[1fi]m
      (
-       obj_t*  a,
-       obj_t*  norm
+       const obj_t*  a,
+       const obj_t*  norm
      );
 ```
 Compute the one-norm (`bli_norm1m()`), Frobenius norm (`bli_normfm()`), or infinity norm (`bli_normim()`) of the elements in an _m x n_ matrix `A`. If `uplo(A)` is `BLIS_LOWER` or `BLIS_UPPER` then `A` is assumed to be lower or upper triangular, respectively, with the main diagonal located at offset `diagoff(A)`. The resulting norm is stored to `norm`.
@@ -2017,8 +2023,8 @@ Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`.
 ```c
 void bli_norm[1fi]v
      (
-       obj_t*  x,
-       obj_t*  norm
+       const obj_t*  x,
+       const obj_t*  norm
      );
 ```
 Compute the one-norm (`bli_norm1v()`), Frobenius norm (`bli_normfv()`), or infinity norm (`bli_normiv()`) of the elements in a vector `x` of length _n_. The resulting norm is stored to `norm`.
@@ -2033,7 +2039,7 @@ Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`.
 ```c
 void bli_mkherm
      (
-       obj_t*  a
+       const obj_t*  a
      );
 ```
 Make an _m x m_ matrix `A` explicitly Hermitian by copying the conjugate of the triangle specified by `uplo(A)` to the opposite triangle. Imaginary components of diagonal elements are explicitly set to zero. It is assumed that the diagonal offset of `A` is zero.
@@ -2046,7 +2052,7 @@ Observed object properties: `uplo(A)`.
 ```c
 void bli_mksymm
      (
-       obj_t*  a
+       const obj_t*  a
      );
 ```
 Make an _m x m_ matrix `A` explicitly symmetric by copying the triangle specified by `uplo(A)` to the opposite triangle. It is assumed that the diagonal offset of `A` is zero.
@@ -2059,7 +2065,7 @@ Observed object properties: `uplo(A)`.
 ```c
 void bli_mktrim
      (
-       obj_t*  a
+       const obj_t*  a
      );
 ```
 Make an _m x m_ matrix `A` explicitly triangular by preserving the triangle specified by `uplo(A)` and zeroing the elements in the opposite triangle. It is assumed that the diagonal offset of `A` is zero.
@@ -2072,11 +2078,11 @@ Observed object properties: `uplo(A)`.
 ```c
 void bli_fprintv
      (
-       FILE*   file,
-       char*   s1,
-       obj_t*  x,
-       char*   format,
-       char*   s2
+             FILE*   file,
+       const char*   s1,
+       const obj_t*  x,
+       const char*   format,
+       const char*   s2
      );
 ```
 Print a vector `x` of length _m_ to file stream `file`, where `file` is a file pointer returned by the standard C library function `fopen()`. The caller may also pass in a global file pointer such as `stdout` or `stderr`. The strings `s1` and `s2` are printed immediately before and after the output (respectively), and the format specifier `format` is used to format the individual elements. For valid format specifiers, please see documentation for the standard C library function `printf()`.
@@ -2089,11 +2095,11 @@ Print a vector `x` of length _m_ to file stream `file`, where `file` is a file p
 ```c
 void bli_fprintm
      (
-       FILE*   file,
-       char*   s1,
-       obj_t*  a,
-       char*   format,
-       char*   s2
+             FILE*   file,
+       const char*   s1,
+       const obj_t*  a,
+       const char*   format,
+       const char*   s2
      );
 ```
 Print an _m x n_ matrix `A` to file stream `file`, where `file` is a file pointer returned by the standard C library function `fopen()`. The caller may also pass in a global file pointer such as `stdout` or `stderr`. The strings `s1` and `s2` are printed immediately before and after the output (respectively), and the format specifier `format` is used to format the individual elements. For valid format specifiers, please see documentation for the standard C library function `printf()`.
@@ -2106,10 +2112,10 @@ Print an _m x n_ matrix `A` to file stream `file`, where `file` is a file pointe
 ```c
 void bli_printv
      (
-       char*   s1,
-       obj_t*  x,
-       char*   format,
-       char*   s2
+       const char*   s1,
+       const obj_t*  x,
+       const char*   format,
+       const char*   s2
      );
 ```
 Print a vector `x` of length _m_ to standard output. This function call is equivalent to calling `bli_fprintv()` with `stdout` as the file pointer.
@@ -2120,10 +2126,10 @@ Print a vector `x` of length _m_ to standard output. This function call is equiv
 ```c
 void bli_printm
      (
-       char*   s1,
-       obj_t*  a,
-       char*   format,
-       char*   s2
+       const char*   s1,
+       const obj_t*  a,
+       const char*   format,
+       const char*   s2
      );
 ```
 Print an _m x n_ matrix `a` to standard output. This function call is equivalent to calling `bli_fprintm()` with `stdout` as the file pointer.
@@ -2134,7 +2140,7 @@ Print an _m x n_ matrix `a` to standard output. This function call is equivalent
 ```c
 void bli_randv
      (
-       obj_t*  x
+       const obj_t*  x
      );
 ```
 Set the elements of a vector `x` of length _n_ to random values on the interval `[-1,1)`.
@@ -2147,7 +2153,7 @@ Set the elements of a vector `x` of length _n_ to random values on the interval 
 ```c
 void bli_randm
      (
-       obj_t*  a
+       const obj_t*  a
      );
 ```
 Set the elements of an _m x n_ matrix `A` to random values on the interval `[-1,1)`. Off-diagonal elements (in the triangle specified by `uplo(A)`) are scaled by `1.0/max(m,n)`.
@@ -2163,9 +2169,9 @@ Observed object properties: `diagoff(A)`, `uplo(A)`.
 ```c
 void bli_sumsqv
      (
-       obj_t*  x,
-       obj_t*  scale,
-       obj_t*  sumsq
+       const obj_t*  x,
+       const obj_t*  scale,
+       const obj_t*  sumsq
      );
 ```
 Compute the sum of the squares of the elements in a vector `x` of length _n_. The result is computed in scaled form, and in such a way that it may be used repeatedly to accumulate the sum of the squares of several vectors.
@@ -2185,9 +2191,9 @@ where, on entry, `scale` and `sumsq` contain `scale_old` and `sumsq_old`, respec
 ```c
 void bli_getsc
      (
-       obj_t*   chi,
-       double*  zeta_r,
-       double*  zeta_i
+       const obj_t*   chi,
+             double*  zeta_r,
+             double*  zeta_i
      );
 ```
 Copy the real and imaginary values from the scalar object `chi` to `zeta_r` and `zeta_i`. If `chi` is stored as a real type, then `zeta_i` is set to zero. (If `chi` is stored in single precision, the corresponding elements are typecast/promoted during the copy.)
@@ -2197,12 +2203,12 @@ Copy the real and imaginary values from the scalar object `chi` to `zeta_r` and 
 #### getijv
 ```c
 err_t bli_getijv
-      (
-        dim_t    i,
-        obj_t*   x,
-        double*  ar,
-        double*  ai
-      )
+     (
+             dim_t    i,
+       const obj_t*   x,
+             double*  ar,
+             double*  ai
+     );
 ```
 Copy the real and imaginary values at the `i`th element of vector object `x` to `ar` and `ai`. If elements of `x` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `x` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
 If either the element offset `i` is beyond the vector dimension of `x` or less than zero, the function returns `BLIS_FAILURE` without taking any action. Similarly, if `x` is a global scalar constant such as `BLIS_ONE`, the function returns `BLIS_FAILURE`.
@@ -2212,13 +2218,13 @@ If either the element offset `i` is beyond the vector dimension of `x` or less t
 #### getijm
 ```c
 err_t bli_getijm
-      (
-        dim_t    i,
-        dim_t    j,
-        obj_t*   b,
-        double*  ar,
-        double*  ai
-      )
+     (
+             dim_t    i,
+             dim_t    j,
+       const obj_t*   b,
+             double*  ar,
+             double*  ai
+     );
 ```
 Copy the real and imaginary values at the (`i`,`j`) element of object `b` to `ar` and `ai`. If elements of `b` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `b` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
 If either the row offset `i` is beyond the _m_ dimension of `b` or less than zero, or column offset `j` is beyond the _n_ dimension of `b` or less than zero, the function returns `BLIS_FAILURE` without taking any action. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, the function returns `BLIS_FAILURE`.
@@ -2229,9 +2235,9 @@ If either the row offset `i` is beyond the _m_ dimension of `b` or less than zer
 ```c
 void bli_setsc
      (
-       double  zeta_r,
-       double  zeta_i,
-       obj_t*  chi
+             double  zeta_r,
+             double  zeta_i,
+       const obj_t*  chi
      );
 ```
 Copy real and imaginary values `zeta_r` and `zeta_i` to the scalar object `chi`. If `chi` is stored as a real type, then `zeta_i` is ignored. (If `chi` is stored in single precision, the contents are typecast/demoted during the copy.)
@@ -2242,10 +2248,10 @@ Copy real and imaginary values `zeta_r` and `zeta_i` to the scalar object `chi`.
 ```c
 err_t bli_setijv
      (
-       double  ar,
-       double  ai,
-       dim_t   i,
-       obj_t*  x
+             double  ar,
+             double  ai,
+             dim_t   i,
+       const obj_t*  x
      );
 ```
 Copy real and imaginary values `ar` and `ai` to the `i`th element of vector object `x`. If elements of `x` are stored as real types, then only `ar` is copied and `ai` is ignored. (If `x` contains elements stored in single precision, the corresponding elements are typecast/demoted during the copy.)
@@ -2257,11 +2263,11 @@ If the element offset `i` is beyond the vector dimension of `x` or less than zer
 ```c
 err_t bli_setijm
      (
-       double  ar,
-       double  ai,
-       dim_t   i,
-       dim_t   j,
-       obj_t*  b
+             double  ar,
+             double  ai,
+             dim_t   i,
+             dim_t   j,
+       const obj_t*  b
      );
 ```
 Copy real and imaginary values `ar` and `ai` to the (`i`,`j`) element of object `b`. If elements of `b` are stored as real types, then only `ar` is copied and `ai` is ignored. (If `b` contains elements stored in single precision, the corresponding elements are typecast/demoted during the copy.)
@@ -2273,9 +2279,9 @@ If either the row offset `i` is beyond the _m_ dimension of `b` or less than zer
 ```c
 void bli_eqsc
      (
-       obj_t*  chi,
-       obj_t*  psi,
-       bool*   is_eq
+       const obj_t*  chi,
+       const obj_t*  psi,
+             bool*   is_eq
      );
 ```
 Perform an element-wise comparison between scalars `chi` and `psi` and store the boolean result in the `bool` pointed to by `is_eq`.
@@ -2289,9 +2295,9 @@ Observed object properties: `conj?(chi)`, `conj?(psi)`.
 ```c
 void bli_eqv
      (
-       obj_t*  x,
-       obj_t*  y,
-       bool*   is_eq
+       const obj_t*  x,
+       const obj_t*  y,
+             bool*   is_eq
      );
 ```
 Perform an element-wise comparison between vectors `x` and `y` and store the boolean result in the `bool` pointed to by `is_eq`.
@@ -2305,9 +2311,9 @@ Observed object properties: `conj?(x)`, `conj?(y)`.
 ```c
 void bli_eqm
      (
-       obj_t*  a,
-       obj_t*  b,
-       bool*   is_eq
+       const obj_t*  a,
+       const obj_t*  b,
+             bool*   is_eq
      );
 ```
 Perform an element-wise comparison between matrices `A` and `B` and store the boolean result in the `bool` pointed to by `is_eq`.
@@ -2325,7 +2331,7 @@ Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`, `trans?(A)`, `tr
 
 BLIS allows applications to query information about how BLIS was configured. The `bli_info_` API provides several categories of query routines. Most values are returned as a `gint_t`, which is a signed integer. The size of this integer can be queried through a special routine that returns the size in a character string:
 ```c
-char* bli_info_get_int_type_size_str( void );
+const char* bli_info_get_int_type_size_str( void );
 ```
 **Note:** All of the `bli_info_` functions are **always** thread-safe, no matter how BLIS was configured.
 
@@ -2333,7 +2339,7 @@ char* bli_info_get_int_type_size_str( void );
 
 The following routine returns the address the full BLIS version string:
 ```c
-char* bli_info_get_version_str( void );
+const char* bli_info_get_version_str( void );
 ```
 
 ## Specific configuration
@@ -2346,7 +2352,7 @@ This is most useful when BLIS is configured with multiple configurations. (When 
 
 Once the configuration's ID is known, it can be used to query a string that contains the name of the configuration:
 ```c
-char* bli_arch_string( arch_t id );
+const char* bli_arch_string( arch_t id );
 ```
 
 ## General configuration
@@ -2365,10 +2371,33 @@ gint_t bli_info_get_stack_buf_max_size( void );
 gint_t bli_info_get_stack_buf_align_size( void );
 gint_t bli_info_get_heap_addr_align_size( void );
 gint_t bli_info_get_heap_stride_align_size( void );
-gint_t bli_info_get_pool_addr_align_size( void );
+gint_t bli_info_get_pool_addr_align_size_a( void );
+gint_t bli_info_get_pool_addr_align_size_b( void );
+gint_t bli_info_get_pool_addr_align_size_c( void );
+gint_t bli_info_get_pool_addr_align_size_gen( void );
+gint_t bli_info_get_pool_addr_offset_size_a( void );
+gint_t bli_info_get_pool_addr_offset_size_b( void );
+gint_t bli_info_get_pool_addr_offset_size_c( void );
+gint_t bli_info_get_pool_addr_offset_size_gen( void );
 gint_t bli_info_get_enable_stay_auto_init( void );
 gint_t bli_info_get_enable_blas( void );
+gint_t bli_info_get_enable_cblas( void );
 gint_t bli_info_get_blas_int_type_size( void );
+gint_t bli_info_get_enable_pba_pools( void );
+gint_t bli_info_get_enable_sba_pools( void );
+gint_t bli_info_get_enable_threading( void );
+gint_t bli_info_get_enable_openmp( void );
+gint_t bli_info_get_enable_pthreads( void );
+gint_t bli_info_get_enable_hpx( void );
+gint_t bli_info_get_enable_openmp_as_default( void );
+gint_t bli_info_get_enable_pthreads_as_default( void );
+gint_t bli_info_get_enable_hpx_as_default( void );
+gint_t bli_info_get_thread_jrir_slab( void );
+gint_t bli_info_get_thread_jrir_rr( void );
+gint_t bli_info_get_thread_jrir_tlb( void );
+gint_t bli_info_get_enable_tls( void );
+gint_t bli_info_get_enable_memkind( void );
+gint_t bli_info_get_enable_sandbox( void );
 ```
 
 ## Kernel information
@@ -2378,11 +2407,11 @@ gint_t bli_info_get_blas_int_type_size( void );
 The following routines allow the caller to obtain a string that identifies the implementation type of each microkernel that is currently active (ie: part of the current active configuration, as identified bi `bli_arch_query_id()`).
 
 ```c
-char* bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt )
-char* bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt )
-char* bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt )
-char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt )
-char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt )
+const char* bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt );
+const char* bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt );
+const char* bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt );
+const char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt );
+const char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt );
 ```
 
 Possible implementation (ie: the `ind_t method` argument) types are:
@@ -2396,16 +2425,31 @@ Possible microkernel types (ie: the return values for `bli_info_get_*_ukr_impl_s
  * `BLIS_NOTAPPLIC_UKERNEL` (`"notappl"`): This value is returned usually when performing a `gemmtrsm` or `trsm` microkernel type query for any `method` value that is not `BLIS_NAT` (ie: native). That is, induced methods cannot be (purely) used on `trsm`-based microkernels because these microkernels perform more a triangular inversion, which is not matrix multiplication.
 
 
+### Operation implementation type query
+
+The following routines allow the caller to obtain a string that identifies the implementation (`ind_t`) that is currently active (ie: implemented and enabled) for each level-3 operation. Possible implementation types are listed in the section above covering [microkernel implemenation query](BLISTypedAPI.md#microkernel-implementation-type-query).
+```c
+const char* bli_info_get_gemm_impl_string( num_t dt );
+const char* bli_info_get_gemmt_impl_string( num_t dt );
+const char* bli_info_get_hemm_impl_string( num_t dt );
+const char* bli_info_get_herk_impl_string( num_t dt );
+const char* bli_info_get_her2k_impl_string( num_t dt );
+const char* bli_info_get_symm_impl_string( num_t dt );
+const char* bli_info_get_syrk_impl_string( num_t dt );
+const char* bli_info_get_syr2k_impl_string( num_t dt );
+const char* bli_info_get_trmm_impl_string( num_t dt );
+const char* bli_info_get_trmm3_impl_string( num_t dt );
+const char* bli_info_get_trsm_impl_string( num_t dt );
+```
+
+
 ## Clock functions
 
 ---
 
 #### clock
 ```c
-double bli_clock
-     (
-       void
-     );
+double bli_clock( void );
 ```
 Return the amount of time that has elapsed since some fixed time in the past. The return values of `bli_clock()` typically feature nanosecond precision, though this is not guaranteed.
 

@@ -147,7 +147,14 @@ $ GOMP_CPU_AFFINITY="0-15" BLIS_NUM_THREADS=16 ./my_blis_program
 ```
 Either of these approaches causes BLIS to automatically determine a reasonable threading strategy based on what is known about the operation and problem size. If `BLIS_NUM_THREADS` is not set, BLIS will attempt to query the value of `BLIS_NT` (a shorthand alternative to `BLIS_NUM_THREADS`). If neither variable is defined, then BLIS will attempt to read `OMP_NUM_THREADS`. If none of these variables is set, the default number of threads is 1.
 
-**Note**: We *highly* discourage use of the `OMP_NUM_THREADS` environment variable to specify multithreading within BLIS and may remove support for it in the future. If you wish to set parallelism globally via environment variables, please use `BLIS_NUM_THREADS`.
+**Note**: If none of `BLIS_NT`/`BLIS_NUM_THREADS` are defined, BLIS will fall back to use
+the standardized `OMP_NUM_THREADS` environment variable.
+By having an application specific environment variable one can fine-tune the thread
+utilization, e.g. to run OpenMP constructs using 4 threads, and BLIS with 2 threads:
+```
+$ OMP_NUM_THREADS=4 BLIS_NUM_THREADS=2 ./my_omp_blis_program
+```
+
 
 ### Environment variables: the manual way
 
@@ -284,6 +291,15 @@ If you want to initialize it as part of the declaration, you may do so via the d
 rntm_t rntm = BLIS_RNTM_INITIALIZER;
 ```
 As of this writing, BLIS treats a default-initialized `rntm_t` as a request for single-threaded execution.
+If your application needs to know the ways of parallelism that were conveyed via environment variables, then there is an another way by copying the global `rntm_t` object via
+```c
+void bli_rntm_init_from_global( rntm_t* rntm );
+```
+Which may be called as:
+```c
+bli_rntm_init_from_global( &rntm );
+```
+This way is necessary when running application with multiple BLIS threads.
 
 **Note**: If you choose to **not** initialize the `rntm_t` object and then pass it into a level-3 operation, **you will almost surely observe undefined behavior!** Please don't do this!
 

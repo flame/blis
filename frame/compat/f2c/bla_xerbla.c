@@ -43,6 +43,7 @@
 
 /* Table of constant values */
 
+#ifndef BLIS_DISABLE_XERBLA
 /* Subroutine */ int PASTEF77(xerbla)(const bla_character *srname, const bla_integer *info, ftnlen srname_len)
 {
 /*  -- LAPACK auxiliary routine (preliminary version) -- */
@@ -87,5 +88,6 @@
     return 0;
 } /* xerbla */
 
+#endif
 #endif
 

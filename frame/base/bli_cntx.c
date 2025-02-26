@@ -46,7 +46,7 @@ BLIS_EXPORT_BLIS err_t bli_cntx_init( cntx_t* cntx )
 	if ( error != BLIS_SUCCESS )
 		return error;
 
-	error = bli_stack_init( sizeof( bszid_t ), 32, 32, BLIS_NUM_BLKSZS, &cntx->bmults );
+	error = bli_stack_init( sizeof( kerid_t ), 32, 32, BLIS_NUM_BLKSZS, &cntx->bmults );
 	if ( error != BLIS_SUCCESS )
 		return error;
 
@@ -118,9 +118,9 @@ void bli_cntx_set_blkszs( cntx_t* cntx, ... )
 	   void bli_cntx_set_blkszs
 	   (
 	     cntx_t* cntx,
-	     bszid_t bs0_id, blksz_t* blksz0, bszid_t bm0_id,
-	     bszid_t bs1_id, blksz_t* blksz1, bszid_t bm1_id,
-	     bszid_t bs2_id, blksz_t* blksz2, bszid_t bm2_id,
+	     kerid_t bs0_id, blksz_t* blksz0, kerid_t bm0_id,
+	     kerid_t bs1_id, blksz_t* blksz1, kerid_t bm1_id,
+	     kerid_t bs2_id, blksz_t* blksz2, kerid_t bm2_id,
 	     ...,
 	     BLIS_VA_END
 	   );
@@ -133,19 +133,18 @@ void bli_cntx_set_blkszs( cntx_t* cntx, ... )
 	// Process blocksizes until we get a BLIS_VA_END.
 	while ( true )
 	{
-		int bs_id0 = va_arg( args, int );
+		kerid_t bs_id = ( kerid_t )va_arg( args, kerid_t );
 
-		// If we find a bszid_t id of BLIS_VA_END, then we are done.
-		if ( bs_id0 == BLIS_VA_END ) break;
+		// If we find a block size id of BLIS_VA_END, then we are done.
+		if ( bs_id == BLIS_VA_END ) break;
 
 		// Here, we query the variable argument list for:
-		// - the bszid_t of the blocksize we're about to process (already done),
+		// - the kerid_t of the blocksize we're about to process (already done),
 		// - the address of the blksz_t object,
-		// - the bszid_t of the multiple we need to associate with
+		// - the kerid_t of the multiple we need to associate with
 		//   the blksz_t object.
-		bszid_t  bs_id = ( bszid_t  )bs_id0;
 		blksz_t* blksz = ( blksz_t* )va_arg( args, blksz_t* );
-		bszid_t  bm_id = ( bszid_t  )va_arg( args, bszid_t  );
+		kerid_t  bm_id = ( kerid_t  )va_arg( args, kerid_t );
 
 		// Copy the blksz_t object contents into the appropriate
 		// location within the context's blksz_t array. Do the same
@@ -172,9 +171,9 @@ void bli_cntx_set_ukrs( cntx_t* cntx , ... )
 	   void bli_cntx_set_ukrs
 	   (
 	     cntx_t* cntx,
-	     ukr_t ukr0_id, num_t dt0, void_fp ukr0_fp,
-	     ukr_t ukr1_id, num_t dt1, void_fp ukr1_fp,
-	     ukr_t ukr2_id, num_t dt2, void_fp ukr2_fp,
+	     kerid_t ukr0_id, num_t dt0, void_fp ukr0_fp,
+	     kerid_t ukr1_id, num_t dt1, void_fp ukr1_fp,
+	     kerid_t ukr2_id, num_t dt2, void_fp ukr2_fp,
 	     ...,
 	     BLIS_VA_END
 	   );
@@ -187,18 +186,17 @@ void bli_cntx_set_ukrs( cntx_t* cntx , ... )
 	// Process ukernels until BLIS_VA_END is reached.
 	while ( true )
 	{
-		const int ukr_id0 = va_arg( args, int );
+		kerid_t ukr_id = ( kerid_t )va_arg( args, kerid_t );
 
 		// If we find a ukernel id of BLIS_VA_END, then we are done.
-		if ( ukr_id0 == BLIS_VA_END ) break;
+		if ( ukr_id == BLIS_VA_END ) break;
 
 		// Here, we query the variable argument list for:
-		// - the ukr_t of the kernel we're about to process (already done),
+		// - the kerid_t of the kernel we're about to process (already done),
 		// - the datatype of the kernel, and
 		// - the kernel function pointer
-		const ukr_t   ukr_id = ( ukr_t   )ukr_id0;
-		const num_t   ukr_dt = ( num_t   )va_arg( args, num_t   );
-		      void_fp ukr_fp = ( void_fp )va_arg( args, void_fp );
+		num_t   ukr_dt = ( num_t   )va_arg( args, num_t   );
+		void_fp ukr_fp = ( void_fp )va_arg( args, void_fp );
 
 		// Store the ukernel function pointer into the context.
 		bli_cntx_set_ukr_dt( ukr_fp, ukr_dt, ukr_id, cntx );
@@ -223,9 +221,9 @@ void bli_cntx_set_ukr2s( cntx_t* cntx , ... )
 	   void bli_cntx_set_ukr2s
 	   (
 	     cntx_t* cntx,
-	     ukr_t ukr0_id, num_t dt1_0, num_t dt2_0, void_fp ukr0_fp,
-	     ukr_t ukr1_id, num_t dt1_1, num_t dt2_1, void_fp ukr1_fp,
-	     ukr_t ukr2_id, num_t dt1_2, num_t dt2_2, void_fp ukr2_fp,
+	     kerid_t ukr0_id, num_t dt1_0, num_t dt2_0, void_fp ukr0_fp,
+	     kerid_t ukr1_id, num_t dt1_1, num_t dt2_1, void_fp ukr1_fp,
+	     kerid_t ukr2_id, num_t dt1_2, num_t dt2_2, void_fp ukr2_fp,
 	     ...,
 	     BLIS_VA_END
 	   );
@@ -238,19 +236,18 @@ void bli_cntx_set_ukr2s( cntx_t* cntx , ... )
 	// Process ukernels until BLIS_VA_END is reached.
 	while ( true )
 	{
-		const int ukr_id0 = va_arg( args, int );
+		kerid_t ukr_id = ( kerid_t )va_arg( args, kerid_t );
 
 		// If we find a ukernel id of BLIS_VA_END, then we are done.
-		if ( ukr_id0 == BLIS_VA_END ) break;
+		if ( ukr_id == BLIS_VA_END ) break;
 
 		// Here, we query the variable argument list for:
-		// - the ukr_t of the kernel we're about to process (already done),
+		// - the kerid_t of the kernel we're about to process (already done),
 		// - the datatype of the kernel, and
 		// - the kernel function pointer
-		const ukr_t   ukr_id  = ( ukr_t  )ukr_id0;
-		const num_t   ukr_dt1 = ( num_t   )va_arg( args, num_t   );
-		const num_t   ukr_dt2 = ( num_t   )va_arg( args, num_t   );
-		      void_fp ukr_fp  = ( void_fp )va_arg( args, void_fp );
+		num_t   ukr_dt1 = ( num_t   )va_arg( args, num_t   );
+		num_t   ukr_dt2 = ( num_t   )va_arg( args, num_t   );
+		void_fp ukr_fp  = ( void_fp )va_arg( args, void_fp );
 
 		// Store the ukernel function pointer into the context.
 		bli_cntx_set_ukr2_dt( ukr_fp, ukr_dt1, ukr_dt2, ukr_id, cntx );
@@ -275,9 +272,9 @@ void bli_cntx_set_ukr_prefs( cntx_t* cntx , ... )
 	   void bli_cntx_set_ukr_prefs
 	   (
 	     cntx_t* cntx,
-	     ukr_pref_t ukr_pref0_id, num_t dt0, bool ukr_pref0,
-	     ukr_pref_t ukr_pref1_id, num_t dt1, bool ukr_pref1,
-	     ukr_pref_t ukr_pref2_id, num_t dt2, bool ukr_pref2,
+	     kerid_t ukr_pref0_id, num_t dt0, bool ukr_pref0,
+	     kerid_t ukr_pref1_id, num_t dt1, bool ukr_pref1,
+	     kerid_t ukr_pref2_id, num_t dt2, bool ukr_pref2,
 	     ...,
 	     BLIS_VA_END
 	   );
@@ -290,18 +287,17 @@ void bli_cntx_set_ukr_prefs( cntx_t* cntx , ... )
 	// Process ukernel preferences until BLIS_VA_END is reached.
 	while ( true )
 	{
-		const int ukr_pref_id0 = va_arg( args, int );
+		kerid_t ukr_pref_id = ( kerid_t )va_arg( args, kerid_t );
 
 		// If we find a ukernel pref id of BLIS_VA_END, then we are done.
-		if ( ukr_pref_id0 == BLIS_VA_END ) break;
+		if ( ukr_pref_id == BLIS_VA_END ) break;
 
 		// Here, we query the variable argument list for:
-		// - the ukr_t of the kernel we're about to process (already done),
+		// - the kerid_t of the kernel we're about to process (already done),
 		// - the datatype of the kernel, and
 		// - the kernel function pointer
-		const ukr_pref_t ukr_pref_id = ( ukr_pref_t )ukr_pref_id0;
-		const num_t      ukr_pref_dt = ( num_t      )va_arg( args, num_t );
-		const bool       ukr_pref    = ( bool       )va_arg( args, int );
+		num_t ukr_pref_dt = ( num_t )va_arg( args, num_t );
+		bool  ukr_pref    = ( bool  )va_arg( args, int );
 
 		// Store the ukernel preference value into the context.
 		bli_cntx_set_ukr_pref_dt( ukr_pref, ukr_pref_dt, ukr_pref_id, cntx );
@@ -341,15 +337,14 @@ void bli_cntx_set_l3_sup_handlers( cntx_t* cntx, ... )
 	// Process sup handlers until BLIS_VA_END is reached.
 	while ( true )
 	{
-		const int op_id0 = va_arg( args, int );
+		kerid_t op_id = ( kerid_t )va_arg( args, kerid_t );
 
 		// If we find an operation id of BLIS_VA_END, then we are done.
-		if ( op_id0 == BLIS_VA_END ) break;
+		if ( op_id == BLIS_VA_END ) break;
 
 		// Here, we query the variable argument list for:
 		// - the opid_t of the operation we're about to process,
 		// - the sup handler function pointer
-		const opid_t  op_id = ( opid_t  )op_id0;
 		      void_fp op_fp = ( void_fp )va_arg( args, void_fp );
 
 		if ( op_id >= BLIS_NUM_LEVEL3_OPS )
@@ -368,7 +363,7 @@ void bli_cntx_set_l3_sup_handlers( cntx_t* cntx, ... )
 
 // -----------------------------------------------------------------------------
 
-err_t bli_cntx_register_blksz( siz_t* bs_id, const blksz_t* blksz, bszid_t bmult_id, cntx_t* cntx )
+err_t bli_cntx_register_blksz( kerid_t* bs_id, const blksz_t* blksz, kerid_t bmult_id, cntx_t* cntx )
 {
 	siz_t id_blksz;
 	err_t error = bli_stack_push( &id_blksz, &cntx->blkszs );
@@ -395,11 +390,14 @@ err_t bli_cntx_register_blksz( siz_t* bs_id, const blksz_t* blksz, bszid_t bmult
 	}
 }
 
-err_t bli_cntx_register_ukr( siz_t* ukr_id, const func_t* ukr, cntx_t* cntx )
+err_t bli_cntx_register_ukr( kerid_t* ukr_id, const func_t* ukr, cntx_t* cntx )
 {
-	err_t error = bli_stack_push( ukr_id, &cntx->ukrs );
+	siz_t new_ukr_id;
+	err_t error = bli_stack_push( &new_ukr_id, &cntx->ukrs );
 	if ( error != BLIS_SUCCESS )
 		return error;
+
+	*ukr_id = new_ukr_id;
 
 	if ( ukr )
 	{
@@ -411,11 +409,14 @@ err_t bli_cntx_register_ukr( siz_t* ukr_id, const func_t* ukr, cntx_t* cntx )
 	}
 }
 
-err_t bli_cntx_register_ukr2( siz_t* ukr_id, const func2_t* ukr, cntx_t* cntx )
+err_t bli_cntx_register_ukr2( kerid_t* ukr_id, const func2_t* ukr, cntx_t* cntx )
 {
-	err_t error = bli_stack_push( ukr_id, &cntx->ukr2s );
+	siz_t new_ukr_id;
+	err_t error = bli_stack_push( &new_ukr_id, &cntx->ukr2s );
 	if ( error != BLIS_SUCCESS )
 		return error;
+
+	*ukr_id = new_ukr_id;
 
 	if ( ukr )
 	{
@@ -427,11 +428,14 @@ err_t bli_cntx_register_ukr2( siz_t* ukr_id, const func2_t* ukr, cntx_t* cntx )
 	}
 }
 
-err_t bli_cntx_register_ukr_pref( siz_t* ukr_pref_id, const mbool_t* ukr_pref, cntx_t* cntx )
+err_t bli_cntx_register_ukr_pref( kerid_t* ukr_pref_id, const mbool_t* ukr_pref, cntx_t* cntx )
 {
-	err_t error = bli_stack_push( ukr_pref_id, &cntx->ukr_prefs );
+	siz_t new_ukr_pref_id;
+	err_t error = bli_stack_push( &new_ukr_pref_id, &cntx->ukr_prefs );
 	if ( error != BLIS_SUCCESS )
 		return error;
+
+	*ukr_pref_id = new_ukr_pref_id;
 
 	if ( ukr_pref )
 	{

@@ -144,6 +144,50 @@ print_usage()
                  library. If the shared library build is disabled, the
                  static library build must remain enabled.
 
+   --omit-symbols=LIST
+
+                 Omit a custom set of compatibility symbols when building
+                 BLIS. When given, LIST is parsed as a comma-separated
+                 list of symbol names (excluding any trailing underscore).
+                 This option is useful when (1) the user is planning to
+                 link BLIS with another library that provides conflicting
+                 symbols, and (2) the user wishes the symbols in this
+                 other library to prevail at link time without relying on
+                 weak/strong symbol semantics. Note that currently ONLY
+                 the following symbols are supported for omission:
+
+                           crot    zrot    lsame
+                           csymv   zsymv   xerbla
+                           csyr    zsyr    xerbla_array
+                           csyr2   zsyr2
+
+   --enable-lapack-compat, --disable-lapack-compat
+
+                 Enable strict compatibility with LAPACK. This option
+                 causes BLIS to be built without some routines that we
+                 consider to be BLAS compatibility routines but that
+                 also happen to be provided by LAPACK. This option is
+                 equivalent to using the --omit-symbols=LIST option
+                 where LIST contains the following symbols:
+
+                           crot    zrot    lsame
+                           csymv   zsymv   xerbla
+                           csyr    zsyr    xerbla_array
+                           csyr2   zsyr2
+
+   --enable-scalapack-compat, --disable-scalapack-compat
+
+                 Enable strict compatibility with ScaLAPACK. This option
+                 causes BLIS to be built without some routines that we
+                 consider to be BLAS compatibility routines but that
+                 also happen to be provided by ScaLAPACK. This option is
+                 equivalent to using the --omit-symbols=LIST option
+                 where LIST contains the following symbols:
+
+                           csymv   zsymv
+                           csyr    zsyr
+                           csyr2   zsyr2
+
    --enable-rpath, --disable-rpath
 
                  Enable (disabled by default) setting an install_name for
@@ -302,12 +346,6 @@ print_usage()
                  option is NOT to be confused with enabling AMD *kernels*,
                  which are determined by the BLIS subconfiguration used at
                  runtime.) By default, these customized files are disabled.
-
-   --enable-scalapack-compat, --disable-scalapack-compat
-
-                 Enable strict compatibility with ScaLAPACK, which may
-                 requiring disabling certain conflicting functionality
-                 available through the BLAS and/or CBLAS interfaces.
 
    -a NAME --enable-addon=NAME
 
@@ -1183,7 +1221,7 @@ get_fc_search_list()
 {
 	local list
 
-	list="gfortran ifort"
+	list="gfortran ifort ifx nvfortran"
 
 	echo "${list}"
 }
@@ -1734,7 +1772,7 @@ check_compiler()
 	# Specific:
 	#
 	#   skx: icc 15.0.1+, gcc 6.0+, clang 3.9+
-	#   knl: icc 14.0.1+, gcc 5.0+, clang 3.9+
+	#   knl: icc 14.0.1+, gcc 5.0-14, clang 3.9+
 	#   haswell: any
 	#   sandybridge: any
 	#   penryn: any
@@ -1786,7 +1824,7 @@ check_compiler()
 				blacklistcc_add "zen"
 			fi
 		fi
-		if [[ ${cc_major} -lt 5 ]]; then
+		if [[ ${cc_major} -lt 5 ]] || [[ ${cc_major} -gt 14 ]]; then
 			blacklistcc_add "knl"
 		fi
 		if [[ ${cc_major} -lt 6 ]]; then
@@ -3015,9 +3053,13 @@ blis_main()
 	enable_amd_frame_tweaks='no'
 	enable_memkind='' # The default memkind value is determined later on.
 	enable_trsm_preinversion='yes'
+	enable_lapack_compat='no'
 	enable_scalapack_compat='no'
 	force_version='no'
 	complex_return='default'
+
+	# The symbol omission list.
+	omit_symbol_list=''
 
 	# The addon flag and names.
 	addon_flag=''
@@ -3155,6 +3197,10 @@ blis_main()
 							enable_shared='no'
 							;;
 
+						omit-symbols=*)
+							omit_symbol_list=${OPTARG#*=}
+							;;
+
 						enable-rpath)
 							enable_rpath='yes'
 							;;
@@ -3270,6 +3316,13 @@ blis_main()
 							;;
 						disable-amd-frame-tweaks)
 							enable_amd_frame_tweaks='no'
+							;;
+
+						enable-lapack-compat)
+							enable_lapack_compat='yes'
+							;;
+						disable-lapack-compat)
+							enable_lapack_compat='no'
 							;;
 
 						enable-scalapack-compat)
@@ -3675,6 +3728,54 @@ blis_main()
 		exit 1
 	fi
 
+	# Check for the LAPACK compatibility option before the option for symbol
+	# omission since the former can imply/augment the latter.
+	if [[ ${enable_lapack_compat} = yes ]]; then
+		echo "${script_name}: LAPACK compatibility is enabled."
+		enable_lapack_compat_01=1
+		problematic_symbols="crot,zrot,csymv,zsymv,csyr,zsyr,csyr2,zsyr2,lsame,xerbla,xerbla_array"
+		omit_symbol_list="${omit_symbol_list},${problematic_symbols}"
+	else
+		echo "${script_name}: LAPACK compatibility is disabled."
+		enable_lapack_compat_01=0
+	fi
+
+	# Check for the ScaLAPACK compatibility option before the option for symbol
+	# omission since the former can imply/augment the latter.
+	if [[ ${enable_scalapack_compat} = yes ]]; then
+		echo "${script_name}: ScaLAPACK compatibility is enabled."
+		enable_scalapack_compat_01=1
+		problematic_symbols="csymv,zsymv,csyr,zsyr,csyr2,zsyr2"
+		omit_symbol_list="${omit_symbol_list},${problematic_symbols}"
+	else
+		echo "${script_name}: ScaLAPACK compatibility is disabled."
+		enable_scalapack_compat_01=0
+	fi
+
+	# Check if we are omitting any symbols.
+	if [[ ${omit_symbol_list} != "" ]]; then
+
+		# Create a list of #defines, one for each symbol the user requested
+		# that we omit. Note that first we convert the list's commas into
+		# spaces.
+
+		# Start by changing the comma-separated list to a space-separated list.
+		omit_symbol_list=$(echo "${omit_symbol_list}" | sed -e "s/,/ /g")
+
+		# Remove duplicates.
+		#omit_symbol_list=$(rm_duplicate_words_simple "${omit_symbol_list}")
+
+		# Sort the list, removing duplicates (via -u).
+		omit_symbol_list=$(echo "${omit_symbol_list}" | xargs -n1 | sort -u)
+
+		echo "${script_name}: omitting the following symbols from BLIS:"
+		for omit_symbol_name in ${omit_symbol_list}; do
+			echo "${script_name}:   ${omit_symbol_name}"
+		done
+	else
+		echo "${script_name}: no symbols will be omitted."
+	fi
+
 	# Check if we are building with or without operating system support.
 	if [[ ${enable_system} = yes ]]; then
 		echo "${script_name}: enabling operating system support."
@@ -3947,13 +4048,6 @@ blis_main()
 		echo "${script_name}: memory tracing output is disabled."
 		enable_mem_tracing_01=0
 	fi
-	if [[ ${enable_scalapack_compat} = yes ]]; then
-		echo "${script_name}: ScaLAPACK compatibility is enabled."
-		enable_scalapack_compat_01=1
-	else
-		echo "${script_name}: ScaLAPACK compatibility is disabled."
-		enable_scalapack_compat_01=0
-	fi
 	if [[ ${has_memkind} = yes ]]; then
 		if [[ -z ${enable_memkind} ]]; then
 			# If no explicit option was given for libmemkind one way or the other,
@@ -4135,11 +4229,37 @@ blis_main()
 			# Query the compiler "vendor" (ie: the compiler's simple name).
 			# The last part ({ read first rest ; echo $first ; }) is a workaround
 			# to OS X's egrep only returning the first match.
-			fc_vendor=$(echo "${vendor_string}" | grep -oE 'IFORT|GNU' |
+			fc_vendor=$(echo "${vendor_string}" | grep -oE 'IFORT|IFX|GNU|NVIDIA|PGI' |
 			            { read -r first rest ; echo "${first}"; })
 
-			if [[ ${fc_vendor} = IFORT ]]; then
+			if [[ ${fc_vendor} = IFORT || ${fc_vendor} = IFX ]]; then
 				complex_return='intel'
+			elif [[ ${fc_vendor} = NVIDIA || ${fc_vendor} = PGI ]]; then
+				# On x86_64 and aarch64 prior to 23.9, nvfortran
+				# uses the 'intel' convention.
+                                # On and ppc64le and aarch64 starting with 23.9,
+                                # the convention is 'gnu'.
+				if [[ "$(uname -m)" = "aarch64" ]]; then
+					fc_version=$(echo "${vendor_string}" \
+					             | grep -oE '[0-9]+\.[0-9]+\.?[0-9]*' \
+					             | { read -r first rest ; echo "${first}"; })
+					if [[ ${fc_version:0:2} -lt 23 ]]; then
+						complex_return='intel'
+					elif [[ ${fc_version:0:2} -eq 23 ]]; then
+						# Use 3:5 because minor version numbers include 1 and 11.
+						if [[ ${fc_version:3:5} -lt 9 ]]; then
+							complex_return='intel'
+						else
+							complex_return='gnu'
+						fi
+					else
+						complex_return='gnu'
+					fi
+				elif [[ "$(uname -m)" = "ppc64le" ]]; then
+					complex_return='gnu'
+				else
+					complex_return='intel'
+				fi
 			elif [[ ${fc_vendor} = GNU ]]; then
 				complex_return='gnu'
 			else
@@ -4214,6 +4334,28 @@ blis_main()
 		# Create a #define and add it to the running list.
 		addon_header="\"${addon}.h\""
 		addon_list_includes="${addon_list_includes}#include ${addon_header}\n"
+	done
+
+	# Make sure that omit_symbol_list only contains lowercase letters, digits,
+	# underscores, and commas.
+	omit_symbol_list_check=$(echo "${omit_symbol_list}" | sed -e "s/[a-z0-9_, ]//g")
+
+	if [[ "${omit_symbol_list_check}" != "" ]]; then
+		echo "${script_name}: --omit-symbol=LIST option contains unexpected characters: ${omit_symbol_list_check}"
+		exit 1
+	fi
+
+	# Create a list of #defines, one for each symbol the user requested that we
+	# omit. Note that first we convert the list's commas into spaces.
+	omit_symbol_list=$(echo "${omit_symbol_list}" | sed -e "s/,/ /g")
+	for sym in ${omit_symbol_list}; do
+
+		# Convert the current config name to uppercase.
+		sym=$(echo "${sym}" | tr '[:lower:]' '[:upper:]')
+
+		# Create a #define and add it to the running list.
+		omit_define="BLIS_DISABLE_${sym}"
+		omit_symbol_list_defines="${omit_symbol_list_defines}#define ${omit_define}\n"
 	done
 
 
@@ -4310,6 +4452,7 @@ blis_main()
 	add_config_var config_name_define
 	add_config_var config_list_defines
 	add_config_var kernel_list_defines
+	add_config_var omit_symbol_list_defines
 	add_config_var enable_tls                enable_tls_01
 	add_config_var enable_openmp             enable_openmp_01
 	add_config_var enable_openmp_as_def      enable_openmp_as_def_01
@@ -5243,7 +5386,7 @@ plugin_main()
 			else
 				strip_examples ${sharedir}/blis/plugin/bli_plugin_register.c bli_plugin_register.c
 			fi
-			perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|" bli_plugin_register.c
+			perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|;" -e "s|\@plugin_name\@|${plugin_name}|;" bli_plugin_register.c
 			maybe_echo "done"
 		fi
 
@@ -5279,7 +5422,7 @@ plugin_main()
 				else
 					strip_examples ${sharedir}/blis/plugin/${file} ref_kernels/${file}
 				fi
-				perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|" ref_kernels/${file}
+				perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|;" -e "s|\@plugin_name\@|${plugin_name}|;" ref_kernels/${file}
 				done="false"
 			fi
 		done
@@ -5314,7 +5457,7 @@ plugin_main()
 				else
 					cp ${sharedir}/blis/plugin/bli_plugin_init_zen3.c config/${config}/bli_plugin_init_${config}.c
 				fi
-				perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|" config/${config}/bli_plugin_init_${config}.c
+				perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|;" -e "s|\@plugin_name\@|${plugin_name}|;" config/${config}/bli_plugin_init_${config}.c
 			fi
 
 			if [ ! -e config/${config}/bli_kernel_defs_${config}.h ] || [ ${force_flag} == '1' ]; then
@@ -5340,7 +5483,7 @@ plugin_main()
 		if [ ${examples_flag} == '1' ]; then
 			if [ ! -e kernels/zen3/my_kernel_1_zen3.c ] || [ ${force_flag} == '1' ]; then
 				cp ${sharedir}/blis/plugin/my_kernel_1_zen3.c kernels/zen3
-				perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|" kernels/zen3/my_kernel_1_zen3.c
+				perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|;" -e "s|\@plugin_name\@|${plugin_name}|;" kernels/zen3/my_kernel_1_zen3.c
 			fi
 		fi
 

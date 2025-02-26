@@ -623,8 +623,17 @@ typedef enum
 #define BLIS_2TYPE_KER       (  1u << BLIS_NTYPE_KER_SHIFT)
 #define BLIS_3TYPE_KER       (  2u << BLIS_NTYPE_KER_SHIFT)
 
-#define bli_ker_idx( ker )	 ((ker) & ~BLIS_NTYPE_KER_BITS)
+#define bli_ker_idx( ker )   ( kerid_t )((ker) & ~BLIS_NTYPE_KER_BITS)
 #define bli_ker_ntype( ker ) ((((ker) & BLIS_NTYPE_KER_BITS) >> BLIS_NTYPE_KER_SHIFT) + 1)
+
+// We have to use a 32-bit type here to avoid problems with passing small enum
+// constants to variadic functions. See https://github.com/flame/blis/issues/839.
+typedef uint32_t kerid_t;
+
+// Sentinel constant used to indicate the end of a variable argument function
+// (See bli_cntx.c)
+
+#define BLIS_VA_END  ((kerid_t)-1)
 
 typedef enum
 {
@@ -675,7 +684,7 @@ typedef enum
 	BLIS_GEMMSUP_CCC_UKR,
 	BLIS_GEMMSUP_XXX_UKR,
 
-	// BLIS_NUM_UKRS must be last!
+	// BLIS_NUM_UKRS must after all 1-type kernels and before 2-type kernels!
 	BLIS_NUM_UKRS_, BLIS_NUM_UKRS = bli_ker_idx( BLIS_NUM_UKRS_ ),
 
 	// -- Two-type kernels --
@@ -702,8 +711,11 @@ typedef enum
 	BLIS_GEMM_RCC_UKR,
 	BLIS_GEMM_CRR_UKR,
 
-	// BLIS_NUM_UKR2S must be last!
-	BLIS_NUM_UKR2S_, BLIS_NUM_UKR2S = bli_ker_idx( BLIS_NUM_UKR2S_ )
+	// BLIS_NUM_UKR2S must come after all kernels!
+	BLIS_NUM_UKR2S_, BLIS_NUM_UKR2S = bli_ker_idx( BLIS_NUM_UKR2S_ ),
+
+	// Force the size of ukr_t values to be as large as kerid_t
+	BLIS_UKRS_END_ = BLIS_VA_END
 } ukr_t;
 
 
@@ -728,9 +740,11 @@ typedef enum
 	BLIS_GEMMSUP_XXX_UKR_ROW_PREF,
 
     // BLIS_NUM_UKR_PREFS must be last!
-    BLIS_NUM_UKR_PREFS
-} ukr_pref_t;
+    BLIS_NUM_UKR_PREFS,
 
+	// Force the size of ukr_pref_t values to be as large as kerid_t
+	BLIS_UKR_PREFS_END_ = BLIS_VA_END
+} ukr_pref_t;
 
 typedef enum
 {
@@ -864,7 +878,10 @@ typedef enum
 
 	// BLIS_NOID (= BLIS_NUM_LEVEL3_OPS) must be last!
 	BLIS_NOID,
-	BLIS_NUM_LEVEL3_OPS = BLIS_NOID
+	BLIS_NUM_LEVEL3_OPS = BLIS_NOID,
+
+	// Force the size of opid_t values to be as large as kerid_t
+	BLIS_LEVEL3_OPS_END_ = BLIS_VA_END
 } opid_t;
 
 
@@ -911,7 +928,10 @@ typedef enum
 	// BLIS_NO_PART (= BLIS_NUM_BLKSZS) must be last!
 	BLIS_NO_PART, // used as a placeholder when blocksizes are not applicable,
 	              // such as when characterizing a packm operation.
-	BLIS_NUM_BLKSZS = BLIS_NO_PART
+	BLIS_NUM_BLKSZS = BLIS_NO_PART,
+
+	// Force the size of bszid_t values to be as large as kerid_t
+	BLIS_BLKSZS_END_ = BLIS_VA_END
 } bszid_t;
 
 
@@ -987,6 +1007,7 @@ typedef enum
 	BLIS_ARCH_RV64IV,
 
 	// SiFive
+	BLIS_ARCH_SIFIVE_RVV,
 	BLIS_ARCH_SIFIVE_X280,
 
 	// Generic architecture/configuration

@@ -1037,9 +1037,8 @@ endif
 
 ifeq ($(OS_NAME),Linux)
 # Exclude -lrt on Android by detecting Bionic.
-# $(CC) -E bionic.h returns a "bionic" substring iff Bionic is detected.
-BIONIC_H_PATH := $(DIST_PATH)/build/detect/android/bionic.h
-BIONIC := $(findstring bionic,$(shell $(CC) -E $(BIONIC_H_PATH)))
+# printf *must* be used here rather than echo -e
+BIONIC := $(findstring bionic,$(shell printf "\#ifdef __BIONIC__\nbionic\n\#endif" | $(CC) -E -))
 ifeq (,$(BIONIC))
 LDFLAGS += -lrt
 endif

@@ -47,8 +47,10 @@ THIS_CONFIG    := sifive_x280
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
 CMISCFLAGS_SIFIVE := -mcmodel=medany -march=rv64gcv_zba_zbb_zvl512b -mabi=lp64d
+CMISCFLAGS_SIFIVE_OTHER :=
 CPPROCFLAGS    :=
-CMISCFLAGS     := $(CMISCFLAGS_SIFIVE) -fdata-sections -ffunction-sections \
+CMISCFLAGS     := $(CMISCFLAGS_SIFIVE) $(CMISCFLAGS_SIFIVE_OTHER) \
+                  -fdata-sections -ffunction-sections \
                   -fdiagnostics-color=always -fno-rtti -fno-exceptions
 CPICFLAGS      := -fPIC
 CWARNFLAGS     := -Wall -Wextra -Wno-unused-function -Wno-unused-parameter \
@@ -61,7 +63,7 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -Ofast
+COPTFLAGS      := -O3
 endif
 
 # Flags specific to optimized kernels.

@@ -183,14 +183,15 @@
 
 // The maximum size in bytes of local stack buffers within macro-kernel
 // functions. These buffers are usually used to store a temporary copy
-// of a single microtile. The reason we multiply by 2 is to handle induced
+// of a single microtile. The reason we multiply by 4 is to handle induced
 // methods, where we use real domain register blocksizes in units of
-// complex elements. Specifically, the macro-kernels will need this larger
+// complex elements, as well as mixed-precision, where data may be
+// converted to a wider type. Specifically, the macro-kernels will need this larger
 // micro-tile footprint, even though the virtual micro-kernels will only
 // ever be writing to half (real or imaginary part) at a time.
 #ifndef BLIS_STACK_BUF_MAX_SIZE
 #define BLIS_STACK_BUF_MAX_SIZE          ( BLIS_SIMD_MAX_NUM_REGISTERS * \
-                                           BLIS_SIMD_MAX_SIZE * 2 )
+                                           BLIS_SIMD_MAX_SIZE * 4 )
 #endif
 
 // Alignment size used to align local stack buffers within macro-kernel

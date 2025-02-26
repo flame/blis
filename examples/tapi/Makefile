@@ -1,6 +1,6 @@
 #
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -75,6 +75,15 @@ endif
 
 # Include the common makefile fragment.
 -include $(SHARE_PATH)/common.mk
+
+# Detect whether we actually got the configuration file. If we didn't, then
+# we may be building from an installed version and need BLIS_INSTALL_PATH.
+ifeq ($(strip $(COMMON_MK_INCLUDED)),yes)
+COMMON_MK_PRESENT := yes
+else
+COMMON_MK_PRESENT := no
+$(error common.mk not found, you may need to specify BLIS_INSTALL_PATH)
+endif
 
 
 
