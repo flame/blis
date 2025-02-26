@@ -491,8 +491,8 @@ PASTECH(bli_tscal2bbs_mxn_,PASTEMAC(chy,dom)) \
 		for ( dim_t jj = 0; jj < (n); ++jj ) \
 		for ( dim_t ii = 0; ii < (m); ++ii ) \
 		{ \
-			PASTEMAC(chx,ctype)* restrict xij = (x) + ii*(rs_x) + jj*(cs_x); \
-			PASTEMAC(chy,ctype)* restrict yij = (y) + ii*(rs_y) + jj*(cs_y); \
+			PASTEMAC(chx,ctype)* restrict xij = ( PASTEMAC(chx,ctype)* )(x) + ii*(rs_x) + jj*(cs_x); \
+			PASTEMAC(chy,ctype)* restrict yij = ( PASTEMAC(chy,ctype)* )(y) + ii*(rs_y) + jj*(cs_y); \
 \
 			bli_tscal2js( cha,chx,chy,chc, *(alpha), *xij, *yij ); \
 		} \
@@ -502,8 +502,8 @@ PASTECH(bli_tscal2bbs_mxn_,PASTEMAC(chy,dom)) \
 		for ( dim_t jj = 0; jj < (n); ++jj ) \
 		for ( dim_t ii = 0; ii < (m); ++ii ) \
 		{ \
-			PASTEMAC(chx,ctype)* restrict xij = (x) + ii*(rs_x) + jj*(cs_x); \
-			PASTEMAC(chy,ctype)* restrict yij = (y) + ii*(rs_y) + jj*(cs_y); \
+			PASTEMAC(chx,ctype)* restrict xij = ( PASTEMAC(chx,ctype)* )(x) + ii*(rs_x) + jj*(cs_x); \
+			PASTEMAC(chy,ctype)* restrict yij = ( PASTEMAC(chy,ctype)* )(y) + ii*(rs_y) + jj*(cs_y); \
 \
 			bli_tscal2s( cha,chx,chy,chc, *(alpha), *xij, *yij ); \
 		} \
