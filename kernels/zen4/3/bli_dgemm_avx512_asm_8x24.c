@@ -371,12 +371,23 @@
     ADD(RBX, IMM( 0+B_ADDITION )) /* A += A_ADDITION */ \
     ADD(RAX, IMM( 0+A_ADDITION )) /* B += B_ADDITION */ \
     \
-    MOV(R13, RDX)    /* R14 = k */                           \
-    MOV(R14, RDX)    /* R14 = k */                           \
+    MOV(R13, VAR(k)) /* R13 = k */                           \
+    MOV(R14, R13)    /* R14 = k */                           \
     AND(R14, IMM(3)) /* R14(k_left) = k & 3, R14 = k % 4  */ \
     SAR(R13, IMM(2)) /* R13(k_iter) = k >> 2, R13 = k / 4 */ \
     \
-    SUB(R13, IMM(8+TAIL_NITER)) /* k/4 - MR - TAIL_NITER, MR = 8 */ \
+    MOV(RDX, IMM(8))  /* Prefetch loop count (8 for row major C)*/  \
+    /* MOV(R10, var(rs_c))  stride from C prefetch */               \
+    MOV(RDI, IMM(64)) /* Prefetch offset for C */                   \
+    \
+    CMP(R10, IMM(8)) /*r10=cs_c == 1 (8bytes) => C is row major*/   \
+    JNZ(POST_STRIDE)                                                \
+        MOV(RDX, IMM(24))/*Prefetch loop count (24 for col major)*/ \
+        MOV(RDI, IMM(0)) /* Prefetch offset for C, 0 for col major*/\
+        MOV(R10, var(cs_c)) /*stride for C prefetch */              \
+    LABEL(POST_STRIDE)                                              \
+    SUB(R13, RDX)     /*subtract Prefetch loop count   */           \
+    SUB(R13, IMM(0+TAIL_NITER)) /* k/4 - [MR or NR] - TAIL_NITER*/  \
     JLE(K_PREFETCH)   /* jump to C prefetch loop if k_iter <= 0 */  \
     /* LABEL(K_MAIN)*/ \
         \
@@ -396,20 +407,20 @@
         \
     LABEL(K_PREFETCH) \
     \
-    ADD(R13, IMM(8)) /* add prefetch loop count ( R13(k_iter) += MR ) */ \
+    ADD(R13, RDX) /*add prefetch loop count k_iter += [NR or MR] )*/     \
     JLE(K_TAIL) /* jump to tail iteration if k_iter <= 0 */              \
         \
         LOOP_ALIGN                             \
         /* MR * 24 block of c is prefetched */ \
         LABEL(LOOP2)                           \
             \
-            PREFETCHW0(MEM(R12))      /* prefetch row - C[k, 0:7] */   \
-            SUBITER_0(0)              /* k=0 */                        \
-            PREFETCHW0(MEM(R12,8*8))  /* prefetch row - C[k, 8:15] */  \
-            SUBITER_1(1)              /* k=1 */                        \
-            PREFETCHW0(MEM(R12,16*8)) /* prefetch row - C[k, 16:23] */ \
-            SUBITER_0(2)              /* k=2 */                        \
-            SUBITER_1(3)              /* k=3 */                        \
+            PREFETCHW0(MEM(R12))       /* prefetch row - C[k, 0:7] */   \
+            SUBITER_0(0)               /* k=0 */                        \
+            PREFETCHW0(MEM(R12,RDI,1)) /* prefetch row - C[k, 8:15] */  \
+            SUBITER_1(1)               /* k=1 */                        \
+            PREFETCHW0(MEM(R12,RDI,2)) /* prefetch row - C[k, 16:23] */ \
+            SUBITER_0(2)               /* k=2 */                        \
+            SUBITER_1(3)               /* k=3 */                        \
             \
             LEA(RAX, MEM(RAX,4*8*8))  /* rax -> (UNROLL_FACTOR * MR * sizeof(double)) next 4th col of a */ \
             LEA(RBX, MEM(RBX,4*24*8)) /* rbx -> (UNROLL_FACTOR * NR * sizeof(double)) next 4th row of b */ \
@@ -454,7 +465,9 @@
             LEA(RBX, MEM(RBX,24*8)) /* rbx -> (UNROLL_FACTOR(1) * NR * sizeof(double)) next row of b */ \
             DEC(R14) \
             \
-        JNZ(LOOP4)
+        JNZ(LOOP4)                             \
+    LABEL(POSTACCUM)                           \
+    MOV(R10, VAR(rs_c)) /* load ldc into R10*/ \
 
 
 //This is an array used for the scatter/gather instructions.
@@ -492,7 +505,6 @@ void bli_dgemm_avx512_asm_8x24(
     BEGIN_ASM()
 
     ZERO_REGISTERS()
-    MOV(RDX, VAR(k))   // loop index
     MOV(RAX, VAR(a))   // load address of a
     MOV(RBX, VAR(b))   // load address of b
     MOV(RCX, VAR(c))   // load address of c
@@ -502,13 +514,10 @@ void bli_dgemm_avx512_asm_8x24(
 
     K_LOOP()
 
-    LABEL(POSTACCUM)
-
     MOV(RAX, VAR(alpha))
     MOV(RBX, VAR(beta))
     VBROADCASTSD(ZMM(0), MEM(RAX)) // broadcast alpha into zmm0
 
-    // R10 = rs_c
     LEA(R13, MEM(R10, R10, 2)) // (R13)rs_c*3 -> rs_c + rs_c*2
     LEA(RDX, MEM(R10, R10, 4)) // (RDX)rs_c*5 -> rs_c + rs_c*4
     LEA(R14, MEM(R10, R13, 2)) // (R14)rs_c*7 -> rs_c + rs_c*3*2
@@ -981,7 +990,7 @@ void bli_dgemm_avx512_asm_8x24(
           [cs_c]      "m" (cs_c),
           [offsetPtr] "m" (offsetPtr)
         : // register clobber list
-          "rax", "rbx", "rcx", "rdx", "r10", "r12", "r13", "r14",
+          "rax", "rbx", "rcx", "rdx", "rdi", "r10", "r12", "r13", "r14",
           "k0", "k1", "k2", "k3", "xmm1", "xmm2", "xmm3",
           "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6",
           "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
@@ -1045,7 +1054,8 @@ void bli_dgemm_avx512_asm_8x24(
         const int64_t n   = n0;                  \
         const int64_t m   = m0;                  \
         const int64_t k   = k0;                  \
-        const int64_t ldc = ldc0;                \
+        const int64_t rs_c= ldc0 * 8;            \
+        const int64_t cs_c= 8;                   \
         BEGIN_ASM()  \
         \
         MOV(RDI, VAR(n))   /* load N into RDI */ \
@@ -1054,9 +1064,8 @@ void bli_dgemm_avx512_asm_8x24(
         MOV(RCX, VAR(c))   /* load C macro panel pointer into RCX*/ \
         MOV(R8 , VAR(a))   /* load A macro panel pointer into R8 */ \
         MOV(R9 , VAR(b))   /* load B macro panel pointer into R9 */ \
-        MOV(R10, VAR(ldc)) /* load ldc into R10*/                   \
+        MOV(R10, VAR(rs_c))/* load ldc into R10*/                   \
         \
-        SAL(R10, IMM(3)) /* ldc *= 8 */                             \
         SAR(RSI, IMM(3)) /* m_iter = M/8 */                         \
         \
         ZERO_REGISTERS() /* zero accumulation registers */          \
@@ -1071,6 +1080,7 @@ void bli_dgemm_avx512_asm_8x24(
     LOOP_ALIGN \
     LABEL(LOOPJR) /* JR loop */                                     \
         \
+        MOV(VAR(n), RDI)                                            \
         MOV(R8, R15) /* restore A macro panel pointer */            \
         MOV(RSI, VAR(m)) /* copy m_iter to RSI */                   \
         MOV(RCX, R11) /* restore pointer to C macro panel pointer */\
@@ -1086,7 +1096,7 @@ void bli_dgemm_avx512_asm_8x24(
 #define POST_K_LOOP() \
             LABEL(END_MICRO_KER)                                     \
             \
-            MOV(R13, RDX) /* move k_iter into R13 */                 \
+            MOV(R13, VAR(k)) /* move k_iter into R13 */              \
             IMUL(R13, IMM(8)) /* k_iter *= 8 */                      \
             LEA(R8, MEM(R8, R13, 8)) /* a_next_upanel = A + (k*8) */ \
             \
@@ -1095,10 +1105,11 @@ void bli_dgemm_avx512_asm_8x24(
             \
         LABEL(ENDIR)                                                 \
         \
-        MOV(R14, RDX) /* move k_iter into R14 */                     \
+        MOV(R14, VAR(k)) /* move k_iter into R14 */                  \
         IMUL(R14, IMM(24)) /* k_iter *= 24 */                        \
         LEA(R9, MEM(R9, R14, 8)) /* b_next_upanel = B + (k*24) */    \
         LEA(R11, MEM(R11, 24*8)) /* c_next_upanel = C + (24*8) */    \
+        MOV(RDI, VAR(n))                                             \
         SUB(RDI, IMM(24))        /* subtract NR(24) from N */        \
         JNZ(LOOPJR)                                                  \
         \
@@ -1115,7 +1126,8 @@ void bli_dgemm_avx512_asm_8x24(
             [a]       "m" (a),                                       \
             [b]       "m" (b),                                       \
             [beta]    "m" (beta),                                    \
-            [ldc]     "m" (ldc)                                      \
+            [rs_c]    "m" (rs_c),                                    \
+            [cs_c]    "m" (cs_c)                                     \
           : /* register clobber list */                              \
             "rax", "rbx", "rcx", "rdi", "rdx", "rsi", "r8", "r9",    \
             "r10", "r11", "r12", "r13", "r14", "r15", "xmm1", "xmm2",\
@@ -1145,7 +1157,6 @@ BLIS_INLINE void bli_dgemm_avx512_asm_8x24_macro_kernel_b0
 {
     PRE_K_LOOP()
     K_LOOP()
-    LABEL(POSTACCUM)
     UPDATE_C_BETA_0( 8,  9, 10)
     UPDATE_C_BETA_0(11, 12, 13)
     UPDATE_C_BETA_0(14, 15, 16)
@@ -1176,7 +1187,6 @@ BLIS_INLINE void bli_dgemm_avx512_asm_8x24_macro_kernel_b1
 {
     PRE_K_LOOP()
     K_LOOP()
-    LABEL(POSTACCUM)
     UPDATE_C_BETA_1( 8,  9, 10)
     UPDATE_C_BETA_1(11, 12, 13)
     UPDATE_C_BETA_1(14, 15, 16)
@@ -1207,7 +1217,6 @@ BLIS_INLINE void bli_dgemm_avx512_asm_8x24_macro_kernel_bm1
 {
     PRE_K_LOOP()
     K_LOOP()
-    LABEL(POSTACCUM)
     MOV(RBX, VAR(beta))
     VBROADCASTSD(ZMM(1), MEM(RBX))
     UPDATE_C_BETA_M1( 8,  9, 10)
@@ -1240,7 +1249,6 @@ BLIS_INLINE void bli_dgemm_avx512_asm_8x24_macro_kernel_bn
 {
     PRE_K_LOOP()
     K_LOOP()
-    LABEL(POSTACCUM)
     MOV(RBX, VAR(beta))
     VBROADCASTSD(ZMM(1), MEM(RBX))
     UPDATE_C_BETA_N( 8,  9, 10)
