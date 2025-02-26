@@ -775,6 +775,11 @@ endif
 
 CWARNFLAGS :=
 
+# Do not allow functions with implicit definitions to be called
+ifneq ($(CC_VENDOR),ibm)
+CWARNFLAGS += -Werror=implicit-function-declaration
+endif
+
 # Disable unused function warnings and stop compiling on first error for
 # all compilers that accept such options: gcc, clang, and icc.
 ifneq ($(CC_VENDOR),ibm)
