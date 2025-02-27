@@ -106,6 +106,14 @@
 
 // -- Higher-level static functions --------------------------------------------
 
+// -- Legacy macros ------------------------------------------------------------
+
+
+#define bli_sswaps( x, y ) bli_tswaps( s,s, x, y )
+#define bli_dswaps( x, y ) bli_tswaps( d,d, x, y )
+#define bli_cswaps( x, y ) bli_tswaps( c,c, x, y )
+#define bli_zswaps( x, y ) bli_tswaps( z,z, x, y )
+
 // -- Notes --------------------------------------------------------------------
 
 // -- Domain cases --

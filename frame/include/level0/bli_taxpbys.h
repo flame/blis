@@ -265,6 +265,13 @@
 	} \
 }
 
+// -- Legacy macros ------------------------------------------------------------
+
+#define bli_saxpbys( a, x, b, y ) bli_taxpbys( s,s,s,s,s, a, x, b, y )
+#define bli_daxpbys( a, x, b, y ) bli_taxpbys( d,d,d,d,d, a, x, b, y )
+#define bli_caxpbys( a, x, b, y ) bli_taxpbys( c,c,c,c,s, a, x, b, y )
+#define bli_zaxpbys( a, x, b, y ) bli_taxpbys( z,z,z,z,d, a, x, b, y )
+
 // -- Notes --------------------------------------------------------------------
 
 #endif

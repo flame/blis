@@ -194,6 +194,13 @@
 
 // -- Higher-level static functions --------------------------------------------
 
+// -- Legacy macros ------------------------------------------------------------
+
+#define bli_saxpys( a, x, y ) bli_taxpys( s,s,s,s, a, x, y )
+#define bli_daxpys( a, x, y ) bli_taxpys( d,d,d,d, a, x, y )
+#define bli_caxpys( a, x, y ) bli_taxpys( c,c,c,s, a, x, y )
+#define bli_zaxpys( a, x, y ) bli_taxpys( z,z,z,d, a, x, y )
+
 // -- Notes --------------------------------------------------------------------
 
 // -- Domain cases --

@@ -293,6 +293,11 @@
 
 // -- Legacy macros ------------------------------------------------------------
 
+#define bli_sset0s( x ) bli_tset0s( s, x )
+#define bli_dset0s( x ) bli_tset0s( d, x )
+#define bli_cset0s( x ) bli_tset0s( c, x )
+#define bli_zset0s( x ) bli_tset0s( z, x )
+
 #define bli_sset0s_edge( i, m, j, n, p, ldp ) bli_tset0s_edge( s, i, m, j, n, (float   *)(p), ldp )
 #define bli_dset0s_edge( i, m, j, n, p, ldp ) bli_tset0s_edge( d, i, m, j, n, (double  *)(p), ldp )
 #define bli_cset0s_edge( i, m, j, n, p, ldp ) bli_tset0s_edge( c, i, m, j, n, (scomplex*)(p), ldp )

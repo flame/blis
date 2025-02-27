@@ -248,6 +248,18 @@
 	} \
 }
 
+// -- Legacy macros ------------------------------------------------------------
+
+#define bli_sscals( a, x ) bli_tscals( s,s,s, a, x )
+#define bli_dscals( a, x ) bli_tscals( d,d,d, a, x )
+#define bli_cscals( a, x ) bli_tscals( c,c,s, a, x )
+#define bli_zscals( a, x ) bli_tscals( z,z,d, a, x )
+
+#define bli_ssscals( a, x ) bli_tscals( s,s,s, a, x )
+#define bli_ddscals( a, x ) bli_tscals( d,d,d, a, x )
+#define bli_ccscals( a, x ) bli_tscals( c,c,s, a, x )
+#define bli_zzscals( a, x ) bli_tscals( z,z,d, a, x )
+
 // -- Notes --------------------------------------------------------------------
 
 // -- Domain cases --

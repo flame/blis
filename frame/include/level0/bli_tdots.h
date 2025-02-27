@@ -73,6 +73,13 @@
 
 // -- Higher-level static functions --------------------------------------------
 
+// -- Legacy macros ------------------------------------------------------------
+
+#define bli_sdots( x, y, a ) bli_tdots( s,s,s,s, x, y, a )
+#define bli_ddots( x, y, a ) bli_tdots( d,d,d,d, x, y, a )
+#define bli_cdots( x, y, a ) bli_tdots( c,c,c,s, x, y, a )
+#define bli_zdots( x, y, a ) bli_tdots( z,z,z,d, x, y, a )
+
 // -- Notes --------------------------------------------------------------------
 
 // -- Domain cases --

@@ -222,6 +222,14 @@
 	} \
 }
 
+// -- Legacy macros ------------------------------------------------------------
+
+#define bli_scopys( x, y ) bli_tcopys( s,s, x, y )
+#define bli_dcopys( x, y ) bli_tcopys( d,d, x, y )
+#define bli_ccopys( x, y ) bli_tcopys( c,c, x, y )
+#define bli_zcopys( x, y ) bli_tcopys( z,z, x, y )
+#define bli_icopys( x, y ) bli_tcopys( i,i, x, y )
+
 // -- Notes --------------------------------------------------------------------
 
 // -- Domain cases --

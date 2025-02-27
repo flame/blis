@@ -98,6 +98,13 @@
 
 // -- Higher-level static functions --------------------------------------------
 
+// -- Legacy macros ------------------------------------------------------------
+
+#define bli_scopycjs( conj, x, y ) bli_tcopycjs( s,s, conj, x, y )
+#define bli_dcopycjs( conj, x, y ) bli_tcopycjs( d,d, conj, x, y )
+#define bli_ccopycjs( conj, x, y ) bli_tcopycjs( c,c, conj, x, y )
+#define bli_zcopycjs( conj, x, y ) bli_tcopycjs( z,z, conj, x, y )
+
 // -- Notes --------------------------------------------------------------------
 
 // -- Domain cases --

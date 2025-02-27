@@ -607,6 +607,13 @@ PASTECH(bli_tscal2bbs_mxn_,PASTEMAC(chy,dom)) \
                      y, incy, ldy  \
                    ) \
 
+// -- Legacy macros ------------------------------------------------------------
+
+#define bli_sscal2s( a, x, y ) bli_tscal2s( s,s,s,s, a, x, y )
+#define bli_dscal2s( a, x, y ) bli_tscal2s( d,d,d,d, a, x, y )
+#define bli_cscal2s( a, x, y ) bli_tscal2s( c,c,c,s, a, x, y )
+#define bli_zscal2s( a, x, y ) bli_tscal2s( z,z,z,d, a, x, y )
+
 // -- Notes --------------------------------------------------------------------
 
 // -- Domain cases --
