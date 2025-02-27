@@ -213,6 +213,13 @@
 
 // -- Higher-level static functions --------------------------------------------
 
+// -- Legacy macros ------------------------------------------------------------
+
+#define bli_sinverts( x ) bli_tinverts( s,s, x )
+#define bli_dinverts( x ) bli_tinverts( d,d, x )
+#define bli_cinverts( x ) bli_tinverts( c,c, x )
+#define bli_zinverts( x ) bli_tinverts( z,z, x )
+
 // -- Notes --------------------------------------------------------------------
 
 #endif
