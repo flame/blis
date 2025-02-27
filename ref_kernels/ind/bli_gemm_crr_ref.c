@@ -99,35 +99,16 @@ void PASTEMAC(chabr,chcr,opname,arch,suf) \
 	  cntx  \
 	); \
 \
-	ctype_abr ar, ai; \
-	PASTEMAC(chab,gets)( *alpha, ar, ai ); \
-\
-	if ( PASTEMAC(chc,eq0)( *beta ) ) \
-	{ \
-		for ( dim_t jj = 0; jj < n; ++jj ) \
-		for ( dim_t ii = 0; ii < m; ++ii ) \
-		{ \
-			ctype_abr axr, axi; \
-			ctype_ab ax; \
-			PASTEMAC(chabr,scal2s)( ar, *(ct + ii*rs_ct + jj*cs_ct), axr ); \
-			PASTEMAC(chabr,scal2s)( ai, *(ct + ii*rs_ct + jj*cs_ct), axi ); \
-			PASTEMAC(chab,sets)( axr, axi, ax ); \
-			PASTEMAC(chab,chc,copys)( ax, *(c + ii*rs_c + jj*cs_c) ); \
-		} \
-	} \
-	else \
-	{ \
-		for ( dim_t jj = 0; jj < n; ++jj ) \
-		for ( dim_t ii = 0; ii < m; ++ii ) \
-		{ \
-			ctype_abr axr, axi; \
-			ctype_ab ax; \
-			PASTEMAC(chabr,scal2s)( ar, *(ct + ii*rs_ct + jj*cs_ct), axr ); \
-			PASTEMAC(chabr,scal2s)( ai, *(ct + ii*rs_ct + jj*cs_ct), axi ); \
-			PASTEMAC(chab,sets)( axr, axi, ax ); \
-			PASTEMAC(chab,chc,chc,xpbys)( ax, *beta, *(c + ii*rs_c + jj*cs_c) ); \
-		} \
-	} \
+	bli_taxpbys_mxn \
+	( \
+	  chab,chabr,chc,chc,chc, \
+	  m, \
+	  n, \
+	  alpha, \
+	  ct, rs_ct, cs_ct, \
+	  beta, \
+	  c, rs_c, cs_c \
+	); \
 }
 
 INSERT_GENTFUNC2RO( gemm_crr, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )

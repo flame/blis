@@ -70,8 +70,8 @@ void PASTEMAC(ch,opname,arch,suf) \
 				PRAGMA_SIMD \
 				for ( dim_t i = 0; i < n; ++i ) \
 				{ \
-					PASTEMAC(ch,axpys)( *alphax, x[i], z[i] ); \
-					PASTEMAC(ch,axpys)( *alphay, y[i], z[i] ); \
+					bli_taxpys( ch,ch,ch,ch, *alphax, x[i], z[i] ); \
+					bli_taxpys( ch,ch,ch,ch, *alphay, y[i], z[i] ); \
 				} \
 			} \
 			else /* if ( bli_is_conj( conjy ) ) */ \
@@ -79,9 +79,9 @@ void PASTEMAC(ch,opname,arch,suf) \
 				PRAGMA_SIMD \
 				for ( dim_t i = 0; i < n; ++i ) \
 				{ \
-					PASTEMAC(ch,axpys)( *alphax, x[i], z[i] ); \
-					PASTEMAC(ch,copyjs)( y[i], psic ); \
-					PASTEMAC(ch,axpys)( *alphay, psic, z[i] ); \
+					bli_taxpys( ch,ch,ch,ch, *alphax, x[i], z[i] ); \
+					bli_tcopyjs( ch,ch, y[i], psic ); \
+					bli_taxpys( ch,ch,ch,ch, *alphay, psic, z[i] ); \
 				} \
 			} \
 		} \
@@ -92,9 +92,9 @@ void PASTEMAC(ch,opname,arch,suf) \
 				PRAGMA_SIMD \
 				for ( dim_t i = 0; i < n; ++i ) \
 				{ \
-					PASTEMAC(ch,copyjs)( x[i], chic ); \
-					PASTEMAC(ch,axpys)( *alphax, chic, z[i] ); \
-					PASTEMAC(ch,axpys)( *alphay, y[i], z[i] ); \
+					bli_tcopyjs( ch,ch, x[i], chic ); \
+					bli_taxpys( ch,ch,ch,ch, *alphax, chic, z[i] ); \
+					bli_taxpys( ch,ch,ch,ch, *alphay, y[i], z[i] ); \
 				} \
 			} \
 			else /* if ( bli_is_conj( conjy ) ) */ \
@@ -102,10 +102,10 @@ void PASTEMAC(ch,opname,arch,suf) \
 				PRAGMA_SIMD \
 				for ( dim_t i = 0; i < n; ++i ) \
 				{ \
-					PASTEMAC(ch,copyjs)( x[i], chic ); \
-					PASTEMAC(ch,axpys)( *alphax, chic, z[i] ); \
-					PASTEMAC(ch,copyjs)( y[i], psic ); \
-					PASTEMAC(ch,axpys)( *alphay, psic, z[i] ); \
+					bli_tcopyjs( ch,ch, x[i], chic ); \
+					bli_taxpys( ch,ch,ch,ch, *alphax, chic, z[i] ); \
+					bli_tcopyjs( ch,ch, y[i], psic ); \
+					bli_taxpys( ch,ch,ch,ch, *alphay, psic, z[i] ); \
 				} \
 			} \
 		} \

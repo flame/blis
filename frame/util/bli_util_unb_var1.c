@@ -59,26 +59,26 @@ void PASTEMAC(ch,varname) \
 	dim_t   i; \
 \
 	/* Initialize the absolute sum accumulator to zero. */ \
-	PASTEMAC(chr,set0s)( absum ); \
+	bli_tset0s( chr, absum ); \
 \
 	for ( i = 0; i < n; ++i ) \
 	{ \
 		chi1 = x + (i  )*incx; \
 \
 		/* Get the real and imaginary components of chi1. */ \
-		PASTEMAC(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
+		bli_tgets( ch,chr, *chi1, chi1_r, chi1_i ); \
 \
 		/* Replace chi1_r and chi1_i with their absolute values. */ \
 		chi1_r = bli_fabs( chi1_r ); \
 		chi1_i = bli_fabs( chi1_i ); \
 \
 		/* Accumulate the real and imaginary components into absum. */ \
-		PASTEMAC(chr,adds)( chi1_r, absum ); \
-		PASTEMAC(chr,adds)( chi1_i, absum ); \
+		bli_tadds( chr,chr,chr, chi1_r, absum ); \
+		bli_tadds( chr,chr,chr, chi1_i, absum ); \
 	} \
 \
 	/* Store the final value of absum to the output variable. */ \
-	PASTEMAC(chr,copys)( absum, *asum ); \
+	bli_tcopys( chr,chr, absum, *asum ); \
 }
 
 INSERT_GENTFUNCR_BASIC( asumv_unb_var1 )
@@ -245,21 +245,21 @@ void PASTEMAC(ch,varname) \
 	dim_t   i; \
 \
 	/* Initialize the absolute sum accumulator to zero. */ \
-	PASTEMAC(chr,set0s)( absum ); \
+	bli_tset0s( chr, absum ); \
 \
 	for ( i = 0; i < n; ++i ) \
 	{ \
 		chi1 = x + (i  )*incx; \
 \
 		/* Compute the absolute value (or complex magnitude) of chi1. */ \
-		PASTEMAC(ch,chr,abval2s)( *chi1, abs_chi1 ); \
+		bli_tabval2s( ch,chr,chr, *chi1, abs_chi1 ); \
 \
 		/* Accumulate the absolute value of chi1 into absum. */ \
-		PASTEMAC(chr,adds)( abs_chi1, absum ); \
+		bli_tadds( chr,chr,chr, abs_chi1, absum ); \
 	} \
 \
 	/* Store final value of absum to the output variable. */ \
-	PASTEMAC(chr,copys)( absum, *norm ); \
+	bli_tcopys( chr,chr, absum, *norm ); \
 }
 
 INSERT_GENTFUNCR_BASIC( norm1v_unb_var1 )
@@ -284,8 +284,8 @@ void PASTEMAC(ch,varname) \
 	ctype_r  sqrt_sumsq; \
 \
 	/* Initialize scale and sumsq to begin the summation. */ \
-	PASTEMAC(chr,copys)( *zero, scale ); \
-	PASTEMAC(chr,copys)( *one,  sumsq ); \
+	bli_tcopys( chr,chr, *zero, scale ); \
+	bli_tcopys( chr,chr, *one,  sumsq ); \
 \
 	/* Compute the sum of the squares of the vector. */ \
 	PASTEMAC(ch,kername) \
@@ -299,11 +299,11 @@ void PASTEMAC(ch,varname) \
 	); \
 \
 	/* Compute: norm = scale * sqrt( sumsq ) */ \
-	PASTEMAC(chr,sqrt2s)( sumsq, sqrt_sumsq ); \
-	PASTEMAC(chr,scals)( scale, sqrt_sumsq ); \
+	bli_tsqrt2s( chr,chr,chr, sumsq, sqrt_sumsq ); \
+	bli_tscals( chr,chr,chr, scale, sqrt_sumsq ); \
 \
 	/* Store the final value to the output variable. */ \
-	PASTEMAC(chr,copys)( sqrt_sumsq, *norm ); \
+	bli_tcopys( chr,chr, sqrt_sumsq, *norm ); \
 }
 
 //INSERT_GENTFUNCR_BASIC( normfv_unb_var1, sumsqv_unb_var1 )
@@ -337,8 +337,8 @@ void PASTEMAC(ch,varname) \
 	ctype_r  sqrt_sumsq; \
 \
 	/* Initialize scale and sumsq to begin the summation. */ \
-	PASTEMAC(chr,copys)( *zero, scale ); \
-	PASTEMAC(chr,copys)( *one,  sumsq ); \
+	bli_tcopys( chr, *zero, scale ); \
+	bli_tcopys( chr, *one,  sumsq ); \
 \
 	/* An optimization: first try to use dotv to compute the sum of
 	   the squares of the vector. If no floating-point exceptions
@@ -368,13 +368,13 @@ void PASTEMAC(ch,varname) \
 		  rntm  \
 		); \
 \
-		PASTEMAC(ch,chr,copys)( sumsqc, sumsq ); \
+		bli_tcopys( ch,chr, sumsqc, sumsq ); \
 \
 		f_exp_raised = fetestexcept( FE_OVERFLOW | FE_INVALID );\
 \
 		if ( !f_exp_raised ) \
 		{ \
-		    PASTEMAC(chr,sqrt2s)( sumsq, *norm ); \
+		    tsqrt2s( chr, sumsq, *norm ); \
 		    return; \
 		} \
 	} \
@@ -391,11 +391,11 @@ void PASTEMAC(ch,varname) \
 	); \
 \
 	/* Compute: norm = scale * sqrt( sumsq ) */ \
-	PASTEMAC(chr,sqrt2s)( sumsq, sqrt_sumsq ); \
-	PASTEMAC(chr,scals)( scale, sqrt_sumsq ); \
+	tsqrt2s( chr, sumsq, sqrt_sumsq ); \
+	bli_tscals( chr, scale, sqrt_sumsq ); \
 \
 	/* Store the final value to the output variable. */ \
-	PASTEMAC(chr,copys)( sqrt_sumsq, *norm ); \
+	bli_tcopys( chr, sqrt_sumsq, *norm ); \
 }
 #else
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
@@ -416,8 +416,8 @@ void PASTEMAC(ch,varname) \
 	ctype_r  sqrt_sumsq; \
 \
 	/* Initialize scale and sumsq to begin the summation. */ \
-	PASTEMAC(chr,copys)( *zero, scale ); \
-	PASTEMAC(chr,copys)( *one,  sumsq ); \
+	bli_tcopys( chr,chr, *zero, scale ); \
+	bli_tcopys( chr,chr, *one,  sumsq ); \
 \
 	/* Compute the sum of the squares of the vector. */ \
 \
@@ -432,11 +432,11 @@ void PASTEMAC(ch,varname) \
 	); \
 \
 	/* Compute: norm = scale * sqrt( sumsq ) */ \
-	PASTEMAC(chr,sqrt2s)( sumsq, sqrt_sumsq ); \
-	PASTEMAC(chr,scals)( scale, sqrt_sumsq ); \
+	bli_tsqrt2s( chr,chr,chr, sumsq, sqrt_sumsq ); \
+	bli_tscals( chr,chr,chr, scale, sqrt_sumsq ); \
 \
 	/* Store the final value to the output variable. */ \
-	PASTEMAC(chr,copys)( sqrt_sumsq, *norm ); \
+	bli_tcopys( chr,chr, sqrt_sumsq, *norm ); \
 }
 #endif
 GENTFUNCR( float,   float,  s, s, normfv_unb_var1, sumsqv_unb_var1 )
@@ -461,28 +461,28 @@ void PASTEMAC(ch,varname) \
 	dim_t   i; \
 \
 	/* Initialize the maximum absolute value to zero. */ \
-	PASTEMAC(chr,set0s)( abs_chi1_max ); \
+	bli_tset0s( chr, abs_chi1_max ); \
 \
 	for ( i = 0; i < n; ++i ) \
 	{ \
 		chi1 = x + (i  )*incx; \
 \
 		/* Compute the absolute value (or complex magnitude) of chi1. */ \
-		PASTEMAC(ch,chr,abval2s)( *chi1, abs_chi1 ); \
+		bli_tabval2s( ch,chr,chr, *chi1, abs_chi1 ); \
 \
 		/* If the absolute value of the current element exceeds that of
 		   the previous largest, save it and its index. If NaN is
 		   encountered, then treat it the same as if it were a valid
 		   value that was larger than any previously seen. This
 		   behavior mimics that of LAPACK's ?lange(). */ \
-		if ( abs_chi1_max < abs_chi1 || bli_isnan( abs_chi1 ) ) \
+		if ( abs_chi1_max < abs_chi1 || PASTEMAC(chr,isnan)( abs_chi1 ) ) \
 		{ \
-			PASTEMAC(chr,copys)( abs_chi1, abs_chi1_max ); \
+			bli_tcopys( chr,chr, abs_chi1, abs_chi1_max ); \
 		} \
 	} \
 \
 	/* Store the final value to the output variable. */ \
-	PASTEMAC(chr,copys)( abs_chi1_max, *norm ); \
+	bli_tcopys( chr,chr, abs_chi1_max, *norm ); \
 }
 
 INSERT_GENTFUNCR_BASIC( normiv_unb_var1 )
@@ -520,12 +520,12 @@ void PASTEMAC(ch,varname) \
 	dim_t   ij0, n_shift; \
 \
 	/* Initialize the maximum absolute column sum to zero. */ \
-	PASTEMAC(chr,set0s)( absum_max ); \
+	bli_tset0s( chr, absum_max ); \
 \
 	/* If either dimension is zero, return with absum_max equal to zero. */ \
 	if ( bli_zero_dim2( m, n ) ) \
 	{ \
-		PASTEMAC(chr,copys)( absum_max, *norm ); \
+		bli_tcopys( chr,chr, absum_max, *norm ); \
 		return; \
 	} \
 \
@@ -541,7 +541,7 @@ void PASTEMAC(ch,varname) \
 	/* If the matrix is zeros, return with absum_max equal to zero. */ \
 	if ( bli_is_zeros( uplox_eff ) ) \
 	{ \
-		PASTEMAC(chr,copys)( absum_max, *norm ); \
+		bli_tcopys( chr,chr, absum_max, *norm ); \
 		return; \
 	} \
 \
@@ -567,9 +567,9 @@ void PASTEMAC(ch,varname) \
 \
 			/* If absum_j is greater than the previous maximum value,
 			   then save it. */ \
-			if ( absum_max < absum_j || bli_isnan( absum_j ) ) \
+			if ( absum_max < absum_j || PASTEMAC(chr,isnan)( absum_j ) ) \
 			{ \
-				PASTEMAC(chr,copys)( absum_j, absum_max ); \
+				bli_tcopys( chr,chr, absum_j, absum_max ); \
 			} \
 		} \
 	} \
@@ -598,14 +598,14 @@ void PASTEMAC(ch,varname) \
 \
 				/* Handle the diagonal element separately in case it's
 				   unit. */ \
-				PASTEMAC(ch,chr,abval2s)( *chi1, abval_chi1 ); \
-				PASTEMAC(chr,adds)( abval_chi1, absum_j ); \
+				bli_tabval2s( ch,chr,chr, *chi1, abval_chi1 ); \
+				bli_tadds( chr,chr,chr, abval_chi1, absum_j ); \
 \
 				/* If absum_j is greater than the previous maximum value,
 				   then save it. */ \
-				if ( absum_max < absum_j || bli_isnan( absum_j ) ) \
+				if ( absum_max < absum_j || PASTEMAC(chr,isnan)( absum_j ) ) \
 				{ \
-					PASTEMAC(chr,copys)( absum_j, absum_max ); \
+					bli_tcopys( chr,chr, absum_j, absum_max ); \
 				} \
 			} \
 		} \
@@ -633,21 +633,21 @@ void PASTEMAC(ch,varname) \
 \
 				/* Handle the diagonal element separately in case it's
 				   unit. */ \
-				PASTEMAC(ch,chr,abval2s)( *chi1, abval_chi1 ); \
-				PASTEMAC(chr,adds)( abval_chi1, absum_j ); \
+				bli_tabval2s( ch,chr,chr, *chi1, abval_chi1 ); \
+				bli_tadds( chr,chr,chr, abval_chi1, absum_j ); \
 \
 				/* If absum_j is greater than the previous maximum value,
 				   then save it. */ \
-				if ( absum_max < absum_j || bli_isnan( absum_j ) ) \
+				if ( absum_max < absum_j || PASTEMAC(chr,isnan)( absum_j ) ) \
 				{ \
-					PASTEMAC(chr,copys)( absum_j, absum_max ); \
+					bli_tcopys( chr,chr, absum_j, absum_max ); \
 				} \
 			} \
 		} \
 	} \
 \
 	/* Store final value of absum_max to the output variable. */ \
-	PASTEMAC(chr,copys)( absum_max, *norm ); \
+	bli_tcopys( chr,chr, absum_max, *norm ); \
 }
 
 INSERT_GENTFUNCR_BASIC( norm1m_unb_var1, norm1v_unb_var1 )
@@ -688,7 +688,7 @@ void PASTEMAC(ch,varname) \
 	/* Return a norm of zero if either dimension is zero. */ \
 	if ( bli_zero_dim2( m, n ) ) \
 	{ \
-		PASTEMAC(chr,set0s)( *norm ); \
+		bli_tset0s( chr, *norm ); \
 		return; \
 	} \
 \
@@ -705,13 +705,13 @@ void PASTEMAC(ch,varname) \
 	/* Check the effective uplo; if it's zeros, then our norm is zero. */ \
 	if ( bli_is_zeros( uplox_eff ) ) \
 	{ \
-		PASTEMAC(chr,set0s)( *norm ); \
+		bli_tset0s( chr, *norm ); \
 		return; \
 	} \
 \
 	/* Initialize scale and sumsq to begin the summation. */ \
-	PASTEMAC(chr,copys)( *zero_r, scale ); \
-	PASTEMAC(chr,copys)( *one_r,  sumsq ); \
+	bli_tcopys( chr,chr, *zero_r, scale ); \
+	bli_tcopys( chr,chr, *one_r,  sumsq ); \
 \
 	/* Handle dense and upper/lower storage cases separately. */ \
 	if ( bli_is_dense( uplox_eff ) ) \
@@ -810,11 +810,11 @@ void PASTEMAC(ch,varname) \
 	} \
 \
 	/* Compute: norm = scale * sqrt( sumsq ) */ \
-	PASTEMAC(chr,sqrt2s)( sumsq, sqrt_sumsq ); \
-	PASTEMAC(chr,scals)( scale, sqrt_sumsq ); \
+	bli_tsqrt2s( chr,chr,chr, sumsq, sqrt_sumsq ); \
+	bli_tscals( chr,chr,chr, scale, sqrt_sumsq ); \
 \
 	/* Store the final value to the output variable. */ \
-	PASTEMAC(chr,copys)( sqrt_sumsq, *norm ); \
+	bli_tcopys( chr,chr, sqrt_sumsq, *norm ); \
 }
 
 INSERT_GENTFUNCR_BASIC( normfm_unb_var1, sumsqv_unb_var1 )
@@ -880,7 +880,7 @@ void PASTEMAC(ch,varname) \
 \
 	for ( i = 0; i < n; ++i ) \
 	{ \
-		PASTEMAC(ch,randmac)( *chi1 ); \
+		PASTEMAC(t,randmac)( ch, *chi1 ); \
 \
 		chi1 += incx; \
 	} \
@@ -954,9 +954,9 @@ void PASTEMAC(ch,varname) \
 	{ \
 		max_m_n = bli_max( m, n ); \
 \
-		PASTEMAC(d,ch,sets)( max_m_n, 0.0, omega ); \
-		PASTEMAC(ch,copys)( *one, beta ); \
-		PASTEMAC(ch,invscals)( omega, beta ); \
+		bli_tsets( d,ch, max_m_n, 0.0, omega ); \
+		bli_tcopys( ch,ch, *one, beta ); \
+		bli_tinvscals( ch,ch,ch, omega, beta ); \
 \
 		if ( bli_is_upper( uplox_eff ) ) \
 		{ \
@@ -981,8 +981,8 @@ void PASTEMAC(ch,varname) \
 				( void )chi1; \
 				/* We want positive diagonal elements between 1 and 2. */ \
 /*
-				PASTEMAC(ch,abval2s)( *chi1, *chi1 ); \
-				PASTEMAC(ch,adds)( *one, *chi1 ); \
+				bli_tabval2s( ch,ch,ch, *chi1, *chi1 ); \
+				bli_tadds( ch,ch,ch, *one, *chi1 ); \
 */ \
 \
 				/* Scale the super-diagonal elements by 1/max(m,n). */ \
@@ -1022,8 +1022,8 @@ void PASTEMAC(ch,varname) \
 				( void )chi1; \
 				/* We want positive diagonal elements between 1 and 2. */ \
 /*
-				PASTEMAC(ch,abval2s)( *chi1, *chi1 ); \
-				PASTEMAC(ch,adds)( *one, *chi1 ); \
+				bli_tabval2s( ch,ch,ch, *chi1, *chi1 ); \
+				bli_tadds( ch,ch,ch, *one, *chi1 ); \
 */ \
 \
 				/* Scale the sub-diagonal elements by 1/max(m,n). */ \
@@ -1075,50 +1075,50 @@ void PASTEMAC(ch,varname) \
 	   the Frobenius norm in netlib LAPACK's ?lassq(). */ \
 \
 	/* Copy scale and sumsq to local variables. */ \
-	PASTEMAC(chr,copys)( *scale, scale_r ); \
-	PASTEMAC(chr,copys)( *sumsq, sumsq_r ); \
+	bli_tcopys( chr,chr, *scale, scale_r ); \
+	bli_tcopys( chr,chr, *sumsq, sumsq_r ); \
 \
 	chi1 = x; \
 \
 	for ( i = 0; i < n; ++i ) \
 	{ \
 		/* Get the real and imaginary components of chi1. */ \
-		PASTEMAC(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
+		bli_tgets( ch,chr, *chi1, chi1_r, chi1_i ); \
 \
 		abs_chi1_r = bli_fabs( chi1_r ); \
 		abs_chi1_i = bli_fabs( chi1_i ); \
 \
-		if ( bli_isnan( abs_chi1_r ) ) \
+		if ( PASTEMAC(chr,isnan)( abs_chi1_r ) ) \
 		{ \
 			sumsq_r = abs_chi1_r; \
 			scale_r = one_r; \
 		} \
 \
-		if ( bli_isnan( abs_chi1_i ) ) \
+		if ( PASTEMAC(chr,isnan)( abs_chi1_i ) ) \
 		{ \
 			sumsq_r = abs_chi1_i; \
 			scale_r = one_r; \
 		} \
 \
-		if ( bli_isnan( sumsq_r ) ) \
+		if ( PASTEMAC(chr,isnan)( sumsq_r ) ) \
 		{ \
 			chi1 += incx; \
 			continue; \
 		} \
 \
-		if ( bli_isinf( abs_chi1_r ) ) \
+		if ( PASTEMAC(chr,isinf)( abs_chi1_r ) ) \
 		{ \
 			sumsq_r = abs_chi1_r; \
 			scale_r = one_r; \
 		} \
 \
-		if ( bli_isinf( abs_chi1_i ) ) \
+		if ( PASTEMAC(chr,isinf)( abs_chi1_i ) ) \
 		{ \
 			sumsq_r = abs_chi1_i; \
 			scale_r = one_r; \
 		} \
 \
-		if ( bli_isinf( sumsq_r ) ) \
+		if ( PASTEMAC(chr,isinf)( sumsq_r ) ) \
 		{ \
 			chi1 += incx; \
 			continue; \
@@ -1134,7 +1134,7 @@ void PASTEMAC(ch,varname) \
 				          sumsq_r * ( scale_r / abs_chi1_r ) * \
 				                    ( scale_r / abs_chi1_r );  \
 \
-				PASTEMAC(chr,copys)( abs_chi1_r, scale_r ); \
+				bli_tcopys( chr,chr, abs_chi1_r, scale_r ); \
 			} \
 			else \
 			{ \
@@ -1153,7 +1153,7 @@ void PASTEMAC(ch,varname) \
 				          sumsq_r * ( scale_r / abs_chi1_i ) * \
 				                    ( scale_r / abs_chi1_i );  \
 \
-				PASTEMAC(chr,copys)( abs_chi1_i, scale_r ); \
+				bli_tcopys( chr,chr, abs_chi1_i, scale_r ); \
 			} \
 			else \
 			{ \
@@ -1166,8 +1166,8 @@ void PASTEMAC(ch,varname) \
 	} \
 \
 	/* Store final values of scale and sumsq to output variables. */ \
-	PASTEMAC(chr,copys)( scale_r, *scale ); \
-	PASTEMAC(chr,copys)( sumsq_r, *sumsq ); \
+	bli_tcopys( chr,chr, scale_r, *scale ); \
+	bli_tcopys( chr,chr, sumsq_r, *sumsq ); \
 }
 
 INSERT_GENTFUNCR_BASIC( sumsqv_unb_var1 )
@@ -1192,10 +1192,10 @@ bool PASTEMAC(ch,opname) \
 \
 		ctype chi1c; \
 \
-		if ( bli_is_conj( conjx ) ) { PASTEMAC(ch,copyjs)( *chi1, chi1c ); } \
-		else                        { PASTEMAC(ch,copys)( *chi1, chi1c ); } \
+		if ( bli_is_conj( conjx ) ) { bli_tcopyjs( ch,ch, *chi1, chi1c ); } \
+		else                        { bli_tcopys( ch,ch, *chi1, chi1c ); } \
 \
-		if ( !PASTEMAC(ch,eq)( chi1c, *psi1 ) ) \
+		if ( !PASTEMAC(t,eqs)( ch,ch,ch, chi1c, *psi1 ) ) \
 			return FALSE; \
 	} \
 \
@@ -1264,10 +1264,10 @@ bool PASTEMAC(ch,opname) \
 				ctype* y11 = y1 + (i  )*incy; \
 				ctype  x11c; \
 \
-				if ( bli_is_conj( conjx ) ) { PASTEMAC(ch,copyjs)( *x11, x11c ); } \
-				else                        { PASTEMAC(ch,copys)( *x11, x11c ); } \
+				if ( bli_is_conj( conjx ) ) { bli_tcopyjs( ch,ch, *x11, x11c ); } \
+				else                        { bli_tcopys( ch,ch, *x11, x11c ); } \
 \
-				if ( !PASTEMAC(ch,eq)( x11c, *y11 ) ) \
+				if ( !PASTEMAC(t,eqs)( ch,ch,ch, x11c, *y11 ) ) \
 					return FALSE; \
 			} \
 		} \
@@ -1289,10 +1289,10 @@ bool PASTEMAC(ch,opname) \
 					ctype* y11 = y1 + (i  )*incy; \
 					ctype  x11c; \
 \
-					if ( bli_is_conj( conjx ) ) { PASTEMAC(ch,copyjs)( *x11, x11c ); } \
-					else                        { PASTEMAC(ch,copys)( *x11, x11c ); } \
+					if ( bli_is_conj( conjx ) ) { bli_tcopyjs( ch,ch, *x11, x11c ); } \
+					else                        { bli_tcopys( ch,ch, *x11, x11c ); } \
 \
-					if ( !PASTEMAC(ch,eq)( x11c, *y11 ) ) \
+					if ( !PASTEMAC(t,eqs)( ch,ch,ch, x11c, *y11 ) ) \
 						return FALSE; \
 				} \
 			} \
@@ -1313,10 +1313,10 @@ bool PASTEMAC(ch,opname) \
 					ctype* y11 = y1 + (i  )*incy; \
 					ctype  x11c; \
 \
-					if ( bli_is_conj( conjx ) ) { PASTEMAC(ch,copyjs)( *x11, x11c ); } \
-					else                        { PASTEMAC(ch,copys)( *x11, x11c ); } \
+					if ( bli_is_conj( conjx ) ) { bli_tcopyjs( ch,ch, *x11, x11c ); } \
+					else                        { bli_tcopys( ch,ch, *x11, x11c ); } \
 \
-					if ( !PASTEMAC(ch,eq)( x11c, *y11 ) ) \
+					if ( !PASTEMAC(t,eqs)( ch,ch,ch, x11c, *y11 ) ) \
 						return FALSE; \
 				} \
 			} \
@@ -1352,7 +1352,7 @@ void PASTEMAC(ch,opname) \
 \
 	for ( dim_t i = 0; i < n; ++i ) \
 	{ \
-		PASTEMAC(ch,fprints)( file, format, *chi1 ); \
+		bli_tfprints( ch, file, format, *chi1 ); \
 		fprintf( file, "\n" ); \
 \
 		chi1 += incx; \
@@ -1390,7 +1390,7 @@ void PASTEMAC(ch,opname) \
 		{ \
 			const ctype* chi1 = (( ctype* ) x) + i*rs_x + j*cs_x; \
 \
-			PASTEMAC(ch,fprints)( file, format, *chi1 ); \
+			bli_tfprints( ch, file, format, *chi1 ); \
 			fprintf( file, " " ); \
 		} \
 \

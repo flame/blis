@@ -63,20 +63,20 @@ void PASTEMAC(ch,opname,arch,suf) \
 		ctype r[ ff ]; \
 \
 		/* If beta is zero, clear y. Otherwise, scale by beta. */ \
-		if ( PASTEMAC(ch,eq0)( *beta ) ) \
+		if ( bli_teq0s( ch, *beta ) ) \
 		{ \
-			for ( dim_t i = 0; i < ff; ++i ) PASTEMAC(ch,set0s)( y[i] ); \
+			for ( dim_t i = 0; i < ff; ++i ) bli_tset0s( ch, y[i] ); \
 		} \
 		else \
 		{ \
-			for ( dim_t i = 0; i < ff; ++i ) PASTEMAC(ch,scals)( *beta, y[i] ); \
+			for ( dim_t i = 0; i < ff; ++i ) bli_tscals( ch,ch,ch, *beta, y[i] ); \
 		} \
 \
 		/* If the vectors are empty or if alpha is zero, return early. */ \
-		if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
+		if ( bli_zero_dim1( m ) || bli_teq0s( ch, *alpha ) ) return; \
 \
 		/* Initialize r vector to 0. */ \
-		for ( dim_t i = 0; i < ff; ++i ) PASTEMAC(ch,set0s)( r[i] ); \
+		for ( dim_t i = 0; i < ff; ++i ) bli_tset0s( ch, r[i] ); \
 \
 		/* If a must be conjugated, we do so indirectly by first toggling the
 		   effective conjugation of x and then conjugating the resulting dot
@@ -92,7 +92,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 			for ( dim_t p = 0; p < m; ++p ) \
 			for ( dim_t i = 0; i < ff; ++i ) \
 			{ \
-				PASTEMAC(ch,axpys)( a[p + i*lda], x[p], r[i] ); \
+				bli_taxpys( ch,ch,ch,ch, a[p + i*lda], x[p], r[i] ); \
 			} \
 		} \
 		else \
@@ -101,16 +101,16 @@ void PASTEMAC(ch,opname,arch,suf) \
 			for ( dim_t p = 0; p < m; ++p ) \
 			for ( dim_t i = 0; i < ff; ++i ) \
 			{ \
-				PASTEMAC(ch,axpyjs)( a[p + i*lda], x[p], r[i] ); \
+				bli_taxpyjs( ch,ch,ch,ch, a[p + i*lda], x[p], r[i] ); \
 			} \
 		} \
 \
 		if ( bli_is_conj( conjat ) ) \
-			for ( dim_t i = 0; i < ff; ++i ) PASTEMAC(ch,conjs)( r[i] ); \
+			for ( dim_t i = 0; i < ff; ++i ) bli_tconjs( ch, r[i] ); \
 \
 		for ( dim_t i = 0; i < ff; ++i ) \
 		{ \
-			PASTEMAC(ch,axpys)( *alpha, r[i], y[i] ); \
+			bli_taxpys( ch,ch,ch,ch, *alpha, r[i], y[i] ); \
 		} \
 	} \
 	else \

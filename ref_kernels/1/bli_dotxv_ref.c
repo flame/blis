@@ -59,19 +59,19 @@ void PASTEMAC(ch,opname,arch,suf) \
 	ctype dotxy; \
 \
 	/* If beta is zero, clear rho. Otherwise, scale by beta. */ \
-	if ( PASTEMAC(ch,eq0)( *beta ) ) \
+	if ( bli_teq0s( ch, *beta ) ) \
 	{ \
-		PASTEMAC(ch,set0s)( *rho ); \
+		bli_tset0s( ch, *rho ); \
 	} \
 	else \
 	{ \
-		PASTEMAC(ch,scals)( *beta, *rho ); \
+		bli_tscals( ch,ch,ch, *beta, *rho ); \
 	} \
 \
 	/* If the vectors are empty or if alpha is zero, return early. */ \
-	if ( bli_zero_dim1( n ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
+	if ( bli_zero_dim1( n ) || bli_teq0s( ch, *alpha ) ) return; \
 \
-	PASTEMAC(ch,set0s)( dotxy ); \
+	bli_tset0s( ch, dotxy ); \
 \
 	/* If y must be conjugated, we do so indirectly by first toggling the
 	   effective conjugation of x and then conjugating the resulting dot
@@ -88,14 +88,14 @@ void PASTEMAC(ch,opname,arch,suf) \
 			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,dotjs)( x[i], y[i], dotxy ); \
+				bli_tdotjs( ch,ch,ch,ch, x[i], y[i], dotxy ); \
 			} \
 		} \
 		else \
 		{ \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,dotjs)( *x, *y, dotxy ); \
+				bli_tdotjs( ch,ch,ch,ch, *x, *y, dotxy ); \
 \
 				x += incx; \
 				y += incy; \
@@ -109,14 +109,14 @@ void PASTEMAC(ch,opname,arch,suf) \
 			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,dots)( x[i], y[i], dotxy ); \
+				bli_tdots( ch,ch,ch,ch, x[i], y[i], dotxy ); \
 			} \
 		} \
 		else \
 		{ \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,dots)( *x, *y, dotxy ); \
+				bli_tdots( ch,ch,ch,ch, *x, *y, dotxy ); \
 \
 				x += incx; \
 				y += incy; \
@@ -125,9 +125,9 @@ void PASTEMAC(ch,opname,arch,suf) \
 	} \
 \
 	if ( bli_is_conj( conjy ) ) \
-		PASTEMAC(ch,conjs)( dotxy ); \
+		bli_tconjs( ch, dotxy ); \
 \
-	PASTEMAC(ch,axpys)( *alpha, dotxy, *rho ); \
+	bli_taxpys( ch,ch,ch,ch, *alpha, dotxy, *rho ); \
 }
 
 INSERT_GENTFUNC_BASIC( dotxv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )

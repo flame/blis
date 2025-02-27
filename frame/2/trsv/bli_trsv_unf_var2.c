@@ -129,21 +129,21 @@ void PASTEMAC(ch,varname) \
 				/* chi11 = chi11 / alpha11; */ \
 				if ( bli_is_nonunit_diag( diaga ) ) \
 				{ \
-					PASTEMAC(ch,copycjs)( conja, *alpha11, alpha11_conj ); \
-					PASTEMAC(ch,invscals)( alpha11_conj, *chi11 ); \
+					bli_tcopycjs( ch,ch, conja, *alpha11, alpha11_conj ); \
+					bli_tinvscals( ch,ch,ch, alpha11_conj, *chi11 ); \
 				} \
 \
 				/* x01 = x01 - chi11 * a01; */ \
-				PASTEMAC(ch,neg2s)( *chi11, minus_chi11 ); \
+				bli_tneg2s( ch,ch, *chi11, minus_chi11 ); \
 				if ( bli_is_conj( conja ) ) \
 				{ \
 					for ( j = 0; j < f_ahead; ++j ) \
-						PASTEMAC(ch,axpyjs)( minus_chi11, *(a01 + j*rs_at), *(x01 + j*incx) ); \
+						bli_taxpyjs( ch,ch,ch,ch, minus_chi11, *(a01 + j*rs_at), *(x01 + j*incx) ); \
 				} \
 				else \
 				{ \
 					for ( j = 0; j < f_ahead; ++j ) \
-						PASTEMAC(ch,axpys)( minus_chi11, *(a01 + j*rs_at), *(x01 + j*incx) ); \
+						bli_taxpys( ch,ch,ch,ch, minus_chi11, *(a01 + j*rs_at), *(x01 + j*incx) ); \
 				} \
 			} \
 \
@@ -187,21 +187,21 @@ void PASTEMAC(ch,varname) \
 				/* chi11 = chi11 / alpha11; */ \
 				if ( bli_is_nonunit_diag( diaga ) ) \
 				{ \
-					PASTEMAC(ch,copycjs)( conja, *alpha11, alpha11_conj ); \
-					PASTEMAC(ch,invscals)( alpha11_conj, *chi11 ); \
+					bli_tcopycjs( ch,ch, conja, *alpha11, alpha11_conj ); \
+					bli_tinvscals( ch,ch,ch, alpha11_conj, *chi11 ); \
 				} \
 \
 				/* x21 = x21 - chi11 * a21; */ \
-				PASTEMAC(ch,neg2s)( *chi11, minus_chi11 ); \
+				bli_tneg2s( ch,ch, *chi11, minus_chi11 ); \
 				if ( bli_is_conj( conja ) ) \
 				{ \
 					for ( j = 0; j < f_ahead; ++j ) \
-						PASTEMAC(ch,axpyjs)( minus_chi11, *(a21 + j*rs_at), *(x21 + j*incx) ); \
+						bli_taxpyjs( ch,ch,ch,ch, minus_chi11, *(a21 + j*rs_at), *(x21 + j*incx) ); \
 				} \
 				else \
 				{ \
 					for ( j = 0; j < f_ahead; ++j ) \
-						PASTEMAC(ch,axpys)( minus_chi11, *(a21 + j*rs_at), *(x21 + j*incx) ); \
+						bli_taxpys( ch,ch,ch,ch, minus_chi11, *(a21 + j*rs_at), *(x21 + j*incx) ); \
 				} \
 			} \
 \

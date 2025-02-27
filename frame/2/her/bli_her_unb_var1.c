@@ -70,10 +70,10 @@ void PASTEMAC(ch,varname) \
 \
 	/* Make a local copy of alpha and zero out the imaginary component if
 	   we are being invoked as her, since her requires alpha to be real. */ \
-	PASTEMAC(ch,copys)( *alpha, alpha_local ); \
+	bli_tcopys( ch,ch, *alpha, alpha_local ); \
 	if ( bli_is_conj( conjh ) ) \
 	{ \
-		PASTEMAC(ch,seti0s)( alpha_local ); \
+		bli_tseti0s( ch, alpha_local ); \
 	} \
 \
 	/* The algorithm will be expressed in terms of the lower triangular case;
@@ -112,15 +112,15 @@ void PASTEMAC(ch,varname) \
 		gamma11  = c + (i  )*rs_ct + (i  )*cs_ct; \
 \
 		/* Apply conjx to chi1. */ \
-		PASTEMAC(ch,copycjs)( conj0, *chi1, conjx0_chi1 ); \
-		PASTEMAC(ch,copycjs)( conj1, *chi1, conjx1_chi1 ); \
+		bli_tcopycjs( ch,ch, conj0, *chi1, conjx0_chi1 ); \
+		bli_tcopycjs( ch,ch, conj1, *chi1, conjx1_chi1 ); \
 \
 		/* Compute scalar for vector subproblem. */ \
-		PASTEMAC(ch,scal2s)( alpha_local, conjx0_chi1, alpha_chi1 ); \
+		bli_tscal2s( ch,ch,ch,ch, alpha_local, conjx0_chi1, alpha_chi1 ); \
 \
 		/* Compute alpha * chi1 * conj(chi1) after chi1 has already been
 		   conjugated, if needed, by conjx. */ \
-		PASTEMAC(ch,scal2s)( alpha_chi1, conjx1_chi1, alpha_chi1_chi1 ); \
+		bli_tscal2s( ch,ch,ch,ch, alpha_chi1, conjx1_chi1, alpha_chi1_chi1 ); \
 \
 		/* c10t = c10t + alpha * chi1 * x0'; */ \
 		kfp_av \
@@ -134,12 +134,12 @@ void PASTEMAC(ch,varname) \
 		); \
 \
 		/* gamma11 = gamma11 + alpha * chi1 * conj(chi1); */ \
-		PASTEMAC(ch,adds)( alpha_chi1_chi1, *gamma11 ); \
+		bli_tadds( ch,ch,ch, alpha_chi1_chi1, *gamma11 ); \
 \
 		/* For her2, explicitly set the imaginary component of gamma11 to
 		   zero. */ \
 		if ( bli_is_conj( conjh ) ) \
-			PASTEMAC(ch,seti0s)( *gamma11 ); \
+			bli_tseti0s( ch, *gamma11 ); \
 	} \
 }
 

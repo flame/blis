@@ -165,6 +165,15 @@ GENTPROTR( dcomplex, double, z, d, __VA_ARGS__ )
 
 
 
+// -- Basic one-operand macro with real domain only --
+
+#define INSERT_GENTPROTRO_BASIC( ... ) \
+\
+GENTPROTRO( float,  s, __VA_ARGS__ ) \
+GENTPROTRO( double, d, __VA_ARGS__ )
+
+
+
 // -- Basic one-operand macro with complex domain only and real projection --
 
 #define INSERT_GENTPROTCO_BASIC( ... ) \

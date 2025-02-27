@@ -44,12 +44,14 @@ do \
 		pragma \
 		for ( dim_t mn = 0; mn < cdim; ++mn ) \
 		{ \
-			ctypep_r alpha_r, alpha_i, ka_r, ka_i; \
+			ctypep_r ka_r, ka_i; \
 			( void )ka_i; \
-			PASTEMAC(cha,chp,copyris)( *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), alpha_r, alpha_i ); \
-			PASTEMAC(chp,op)( kappa_r, kappa_i, alpha_r, alpha_i, ka_r, ka_i ); \
+			PASTEMAC(t,op)( chp,cha,chp,chp, \
+			                kappa_r, kappa_i, \
+			                *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), \
+			                ka_r, ka_i ); \
 			for ( dim_t d = 0; d < dfac; ++d ) \
-				PASTEMAC(chp_r,copys)( ka_r, *(pi1_r + mn*dfac + d) ); \
+				bli_tcopys( chp_r,chp_r, ka_r, *(pi1_r + mn*dfac + d) ); \
 		} \
 \
 		alpha1 += lda2; \
@@ -122,8 +124,9 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
 		else                        PACKM_RO_BODY( ctypep_r, cha, chp, chp_r, , cdim, cdim_bcast, inca2, scal2ris ); \
 	} \
 \
-	PASTEMAC(chp_r,set0s_edge) \
+	bli_tset0s_edge \
 	( \
+	  chp_r, \
 	  cdim*cdim_bcast, cdim_max*cdim_bcast, \
 	  n, n_max, \
 	  ( ctypep_r* )p, ldp  \

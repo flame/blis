@@ -56,7 +56,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 		{ \
 			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
-				PASTEMAC(ch,seti0s)( a[ i*n + j ] ); \
+				bli_tseti0s( ch, a[ i*n + j ] ); \
 			} \
 		} \
 	} \
@@ -66,7 +66,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 		{ \
 			for ( dim_t j = 0; j < n; ++j ) \
 			{ \
-				PASTEMAC(ch,seti0s)( a[ i + j*m ] ); \
+				bli_tseti0s( ch, a[ i + j*m ] ); \
 			} \
 		} \
 	} \

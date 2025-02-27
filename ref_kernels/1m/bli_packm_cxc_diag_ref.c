@@ -42,11 +42,10 @@ do \
 	for ( dim_t k = 0; k < cdim; k++ ) \
 	for ( dim_t mn = mn_min; mn < mn_max; mn++ ) \
 	{ \
-		ctypep alpha_cast, kappa_alpha; \
-		PASTEMAC(cha,chp,copys)( *(alpha1 + mn*inca + k*lda), alpha_cast ); \
-		PASTEMAC(chp,op)( kappa_cast, alpha_cast, kappa_alpha ); \
+		ctypep kappa_alpha; \
+		PASTEMAC(t,op)( chp,cha,chp,chp, kappa_cast, *(alpha1 + mn*inca + k*lda), kappa_alpha ); \
 		for ( dim_t d = 0; d < dfac; d++ ) \
-			PASTEMAC(chp,copys)( kappa_alpha, *(pi1 + mn*dfac + d + k*ldp) ); \
+			bli_tcopys( chp,chp, kappa_alpha, *(pi1 + mn*dfac + d + k*ldp) ); \
 	} \
 } while(0)
 
@@ -81,11 +80,12 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
      ) \
 { \
 	/* start by zeroing out the whole block */ \
-	PASTEMAC(chp,set0s_mxn) \
+	bli_tset0s_mxn \
 	( \
+	  chp, \
 	  cdim_max, \
 	  n_max, \
-	  p, 1, ldp  \
+	  ( ctypep* )p, 1, ldp  \
 	); \
 \
 	      ctypep           kappa_cast = *( ctypep* )kappa; \
@@ -134,40 +134,38 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
 	{ \
 		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
 		for ( dim_t d = 0; d < cdim_bcast; ++d ) \
-			PASTEMAC(chp,copys)( kappa_cast, *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
+			bli_tcopys( chp,chp, kappa_cast, *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
 	} \
 	else if ( bli_is_hermitian( struca ) ) \
 	{ \
 		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
 		{ \
 			ctypep alpha_cast, kappa_alpha; \
-			PASTEMAC(cha,chp,copys)( *(alpha1 + mnk*(inca + lda)), alpha_cast ); \
-			PASTEMAC(chp,seti0s)( alpha_cast ); \
-			PASTEMAC(chp,scal2s)( kappa_cast, alpha_cast, kappa_alpha ); \
+			bli_tcopys( cha,chp, *(alpha1 + mnk*(inca + lda)), alpha_cast ); \
+			bli_tseti0s( chp, alpha_cast ); \
+			bli_tscal2s( chp,chp,chp,chp, kappa_cast, alpha_cast, kappa_alpha ); \
 			for ( dim_t d = 0; d < cdim_bcast; ++d ) \
-				PASTEMAC(chp,copys)( kappa_alpha, *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
+				bli_tcopys( chp,chp, kappa_alpha, *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
 		} \
 	} \
 	else if ( bli_is_conj( conja )) \
 	{ \
 		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
 		{ \
-			ctypep alpha_cast, kappa_alpha; \
-			PASTEMAC(cha,chp,copys)( *(alpha1 + mnk*(inca + lda)), alpha_cast ); \
-			PASTEMAC(chp,scal2js)( kappa_cast, alpha_cast, kappa_alpha ); \
+			ctypep kappa_alpha; \
+			bli_tscal2js( chp,cha,chp,chp, kappa_cast, *(alpha1 + mnk*(inca + lda)), kappa_alpha ); \
 			for ( dim_t d = 0; d < cdim_bcast; ++d ) \
-				PASTEMAC(chp,copys)( kappa_alpha, *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
+				bli_tcopys( chp,chp, kappa_alpha, *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
 		} \
 	} \
 	else \
 	{ \
 		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
 		{ \
-			ctypep alpha_cast, kappa_alpha; \
-			PASTEMAC(cha,chp,copys)( *(alpha1 + mnk*(inca + lda)), alpha_cast ); \
-			PASTEMAC(chp,scal2s)( kappa_cast, alpha_cast, kappa_alpha ); \
+			ctypep kappa_alpha; \
+			bli_tscal2s( chp,cha,chp,chp, kappa_cast, *(alpha1 + mnk*(inca + lda)), kappa_alpha ); \
 			for ( dim_t d = 0; d < cdim_bcast; ++d ) \
-				PASTEMAC(chp,copys)( kappa_alpha, *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
+				bli_tcopys( chp,chp, kappa_alpha, *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
 		} \
 	} \
 \
@@ -176,13 +174,13 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
 	{ \
 		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
 		for ( dim_t d = 0; d < cdim_bcast; ++d ) \
-			PASTEMAC(chp,inverts)( *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
+			bli_tinverts( chp,chp, *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
 	} \
 \
 	/* if this an edge case in both directions, extend the diagonal with ones */ \
 	for ( dim_t mnk = cdim; mnk < bli_min( cdim_max, n_max ); ++mnk ) \
 	for ( dim_t d = 0; d < cdim_bcast; ++d ) \
-		PASTEMAC(chp,set1s)( *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
+		bli_tset1s( chp, *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
 }
 
 INSERT_GENTFUNC2_BASIC( packm_diag, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )

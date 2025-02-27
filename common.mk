@@ -63,7 +63,6 @@ $(eval $(call store-var-for,CC,         $(1)))
 $(eval $(call store-var-for,CC_VENDOR,  $(1)))
 $(eval $(call store-var-for,CPPROCFLAGS,$(1)))
 $(eval $(call store-var-for,CLANGFLAGS, $(1)))
-$(eval $(call store-var-for,CXXLANGFLAGS,$(1)))
 $(eval $(call store-var-for,CMISCFLAGS, $(1)))
 $(eval $(call store-var-for,CPICFLAGS,  $(1)))
 $(eval $(call store-var-for,CWARNFLAGS, $(1)))
@@ -109,8 +108,8 @@ get-noopt-cxxflags-for   = $(strip $(CXXFLAGS_PRESET) \
                                    $(call load-var-for,CWARNFLAGS,$(1)) \
                                    $(call load-var-for,CPICFLAGS,$(1)) \
                                    $(call load-var-for,CMISCFLAGS,$(1)) \
-                                   $(call load-var-for,CXXLANGFLAGS,$(1)) \
                                    $(call load-var-for,CPPROCFLAGS,$(1)) \
+                                   $(CXXLANGFLAGS) \
                                    $(CTHREADFLAGS) \
                                    $(CXXTHREADFLAGS) \
                                    $(CINCFLAGS) \
@@ -776,6 +775,11 @@ endif
 
 CWARNFLAGS :=
 
+# Do not allow functions with implicit definitions to be called
+ifneq ($(CC_VENDOR),ibm)
+CWARNFLAGS += -Werror=implicit-function-declaration
+endif
+
 # Disable unused function warnings and stop compiling on first error for
 # all compilers that accept such options: gcc, clang, and icc.
 ifneq ($(CC_VENDOR),ibm)
@@ -914,7 +918,6 @@ endif
 else
 CXXLANGFLAGS :=
 endif
-$(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CXXLANGFLAGS,$(c))))
 
 # --- C Preprocessor flags ---
 

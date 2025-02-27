@@ -248,7 +248,7 @@ typedef void (*PASTECH(ch,opname,tsuf)) \
 
 INSERT_GENTDEF( eqm )
 
-// ltsc, ltesc, gtsc, gtesc
+// ltsc, lesc, gtsc, gesc
 
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
@@ -261,9 +261,9 @@ typedef void (*PASTECH(ch,opname,tsuf)) \
      );
 
 INSERT_GENTDEF( ltsc )
-INSERT_GENTDEF( ltesc )
+INSERT_GENTDEF( lesc )
 INSERT_GENTDEF( gtsc )
-INSERT_GENTDEF( gtesc )
+INSERT_GENTDEF( gesc )
 
 #endif // #ifdef BLIS_OAPI_BASIC
 

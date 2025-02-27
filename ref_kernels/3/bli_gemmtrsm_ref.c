@@ -138,11 +138,12 @@ PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11 after gemm", mr, 2*nr, \
 \
 	/* Broadcast the elements of the updated b11 submatrix to their
 	   duplicated neighbors. */ \
-	PASTEMAC(ch,bcastbbs_mxn) \
+	bli_tbcastbbs_mxn \
 	( \
-	  m, \
+	  ch, \
 	  n, \
-	  b11, rs_b, cs_b  \
+	  m, \
+	  b11, cs_b, rs_b  \
 	); \
 \
 	/* b11 = inv(a11) * b11;
@@ -162,8 +163,9 @@ PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11 after trsm", mr, 2*nr, \
 \
 	if ( use_ct ) \
 	{ \
-		PASTEMAC(ch,copys_mxn) \
+		bli_tcopys_mxn \
 		( \
+		  ch,ch, \
 		  m, n, \
 		  ct,  rs_ct, cs_ct, \
 		  c11, rs_c,  cs_c  \
