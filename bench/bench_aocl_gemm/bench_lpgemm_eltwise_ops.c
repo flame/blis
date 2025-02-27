@@ -903,8 +903,8 @@ int main( int argc, char** argv )
     int32_t m, n;
     int32_t stride_a, stride_b;
 
-    const dim_t len_list_omp_cores_for_testing = 1;
-    const dim_t list_omp_cores_for_testing[1] = { 1 };
+    const dim_t len_list_omp_cores_for_testing = 2;
+    const dim_t list_omp_cores_for_testing[2] = { 128, 1 };
 
     dim_t core_index = 0;
     bool can_run = TRUE;

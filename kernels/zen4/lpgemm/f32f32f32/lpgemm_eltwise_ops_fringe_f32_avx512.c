@@ -791,13 +791,13 @@ POST_OPS_DOWNSCALE_5x64_OPS:
       {
         if( post_ops_list_temp->scale_factor_len > 1 )
         {
-          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector1 = _mm512_maskz_loadu_ps( k0, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector2 = _mm512_maskz_loadu_ps( k1, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-          selector3 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector3 = _mm512_maskz_loadu_ps( k2, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-          selector4 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector4 = _mm512_maskz_loadu_ps( k3, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 3 * 16 ) );
         }
         if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
@@ -832,13 +832,13 @@ POST_OPS_DOWNSCALE_5x64_OPS:
           }
           else
           {
-            zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point0 = _mm512_maskz_loadu_ps( k0, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-            zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point1 = _mm512_maskz_loadu_ps( k1, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-            zero_point2 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point2 = _mm512_maskz_loadu_ps( k2, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-            zero_point3 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point3 = _mm512_maskz_loadu_ps( k3, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 3 * 16 ) );
           }
         }
@@ -1104,16 +1104,16 @@ POST_OPS_MATRIX_ADD_5x64_OPS:
 					( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 				{
 					scl_fctr1 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k0, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 					scl_fctr2 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k1, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 					scl_fctr3 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k2, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 					scl_fctr4 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k3, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
 				}
 				else
@@ -1376,16 +1376,16 @@ POST_OPS_MATRIX_MUL_5x64_OPS:
 				( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 				{
 				scl_fctr1 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k0, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 				scl_fctr2 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k1, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 				scl_fctr3 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k2, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 				scl_fctr4 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k3, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
 				}
 				else
@@ -2771,13 +2771,13 @@ POST_OPS_DOWNSCALE_4x64_OPS:
       {
         if( post_ops_list_temp->scale_factor_len > 1 )
         {
-          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector1 = _mm512_maskz_loadu_ps( k0, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector2 = _mm512_maskz_loadu_ps( k1, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-          selector3 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector3 = _mm512_maskz_loadu_ps( k2, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-          selector4 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector4 = _mm512_maskz_loadu_ps( k3, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 3 * 16 ) );
         }
         if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
@@ -2812,13 +2812,13 @@ POST_OPS_DOWNSCALE_4x64_OPS:
           }
           else
           {
-            zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point0 = _mm512_maskz_loadu_ps( k0, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-            zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point1 = _mm512_maskz_loadu_ps( k1, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-            zero_point2 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point2 = _mm512_maskz_loadu_ps( k2, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-            zero_point3 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point3 = _mm512_maskz_loadu_ps( k3, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 3 * 16 ) );
           }
         }
@@ -3023,16 +3023,16 @@ POST_OPS_MATRIX_ADD_4x64_OPS:
 					( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 				{
 					scl_fctr1 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k0, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 					scl_fctr2 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k1, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 					scl_fctr3 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k2, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 					scl_fctr4 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k3, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
 				}
 				else
@@ -3257,16 +3257,16 @@ POST_OPS_MATRIX_MUL_4x64_OPS:
 				( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 				{
 				scl_fctr1 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k0, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 				scl_fctr2 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k1, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 				scl_fctr3 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k2, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 				scl_fctr4 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k3, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
 				}
 				else
@@ -4427,13 +4427,13 @@ POST_OPS_DOWNSCALE_3x64_OPS:
       {
         if( post_ops_list_temp->scale_factor_len > 1 )
         {
-          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector1 = _mm512_maskz_loadu_ps( k0, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector2 = _mm512_maskz_loadu_ps( k1, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-          selector3 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector3 = _mm512_maskz_loadu_ps( k2, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-          selector4 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector4 = _mm512_maskz_loadu_ps( k3, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 3 * 16 ) );
         }
         if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
@@ -4468,13 +4468,13 @@ POST_OPS_DOWNSCALE_3x64_OPS:
           }
           else
           {
-            zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point0 = _mm512_maskz_loadu_ps( k0, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-            zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point1 = _mm512_maskz_loadu_ps( k1, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-            zero_point2 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point2 = _mm512_maskz_loadu_ps( k2, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-            zero_point3 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point3 = _mm512_maskz_loadu_ps( k3, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 3 * 16 ) );
           }
         }
@@ -4646,16 +4646,16 @@ POST_OPS_MATRIX_ADD_3x64_OPS:
 					( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 				{
 					scl_fctr1 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k0, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 					scl_fctr2 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k1, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 					scl_fctr3 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k2, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 					scl_fctr4 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k3, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
 				}
 				else
@@ -4845,16 +4845,16 @@ POST_OPS_MATRIX_MUL_3x64_OPS:
 				( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 				{
 				scl_fctr1 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k0, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 				scl_fctr2 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k1, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 				scl_fctr3 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k2, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 				scl_fctr4 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k3, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
 				}
 				else
@@ -5790,13 +5790,13 @@ POST_OPS_DOWNSCALE_2x64_OPS:
       {
         if( post_ops_list_temp->scale_factor_len > 1 )
         {
-          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector1 = _mm512_maskz_loadu_ps( k0, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector2 = _mm512_maskz_loadu_ps( k1, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-          selector3 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector3 = _mm512_maskz_loadu_ps( k2, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-          selector4 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector4 = _mm512_maskz_loadu_ps( k3, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 3 * 16 ) );
         }
         if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
@@ -5831,13 +5831,13 @@ POST_OPS_DOWNSCALE_2x64_OPS:
           }
           else
           {
-            zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point0 = _mm512_maskz_loadu_ps( k0, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-            zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point1 = _mm512_maskz_loadu_ps( k1, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-            zero_point2 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point2 = _mm512_maskz_loadu_ps( k2, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-            zero_point3 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point3 = _mm512_maskz_loadu_ps( k3, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 3 * 16 ) );
           }
         }
@@ -5976,16 +5976,16 @@ POST_OPS_MATRIX_ADD_2x64_OPS:
 					( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 				{
 					scl_fctr1 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k0, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 					scl_fctr2 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k1, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 					scl_fctr3 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k2, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 					scl_fctr4 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k3, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
 				}
 				else
@@ -6140,16 +6140,16 @@ POST_OPS_MATRIX_MUL_2x64_OPS:
 				( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 				{
 				scl_fctr1 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k0, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 				scl_fctr2 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k1, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 				scl_fctr3 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k2, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 				scl_fctr4 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k3, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
 				}
 				else
@@ -6860,13 +6860,13 @@ POST_OPS_DOWNSCALE_1x64_OPS:
       {
         if( post_ops_list_temp->scale_factor_len > 1 )
         {
-          selector1 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector1 = _mm512_maskz_loadu_ps( k0, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-          selector2 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector2 = _mm512_maskz_loadu_ps( k1, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-          selector3 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector3 = _mm512_maskz_loadu_ps( k2, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-          selector4 = _mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+          selector4 = _mm512_maskz_loadu_ps( k3, ( float* )post_ops_list_temp->scale_factor +
                         post_ops_attr.post_op_c_j + ( 3 * 16 ) );
         }
         if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
@@ -6901,13 +6901,13 @@ POST_OPS_DOWNSCALE_1x64_OPS:
           }
           else
           {
-            zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point0 = _mm512_maskz_loadu_ps( k0, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-            zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point1 = _mm512_maskz_loadu_ps( k1, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-            zero_point2 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point2 = _mm512_maskz_loadu_ps( k2, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-            zero_point3 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+            zero_point3 = _mm512_maskz_loadu_ps( k3, (float* )post_ops_list_temp->op_args1 +
                             post_ops_attr.post_op_c_j + ( 3 * 16 ) );
           }
         }
@@ -7013,16 +7013,16 @@ POST_OPS_MATRIX_ADD_1x64_OPS:
 					( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 				{
 					scl_fctr1 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k0, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 					scl_fctr2 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k1, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 					scl_fctr3 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k2, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 					scl_fctr4 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k3, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
 				}
 				else
@@ -7142,16 +7142,16 @@ POST_OPS_MATRIX_MUL_1x64_OPS:
 				( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 				{
 				scl_fctr1 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k0, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 				scl_fctr2 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k1, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 				scl_fctr3 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k2, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 				scl_fctr4 =
-					_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
+					_mm512_maskz_loadu_ps( k3, ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
 				}
 				else

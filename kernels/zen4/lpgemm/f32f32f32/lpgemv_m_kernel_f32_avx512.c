@@ -415,31 +415,31 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32 )
 		{
 			if( post_ops_list_temp->scale_factor_len > 1 )
 			{
-				selector1 = _mm512_loadu_ps( ( float* )
+				selector1 = _mm512_maskz_loadu_ps( k1, ( float* )
 								post_ops_list_temp->scale_factor +
 								post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-				selector2 = _mm512_loadu_ps( ( float* )
+				selector2 = _mm512_maskz_loadu_ps( k2, ( float* )
 								post_ops_list_temp->scale_factor +
 								post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-				selector3 = _mm512_loadu_ps( ( float* )
+				selector3 = _mm512_maskz_loadu_ps( k3, ( float* )
 								post_ops_list_temp->scale_factor +
 								post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-				selector4 = _mm512_loadu_ps( ( float* )
+				selector4 = _mm512_maskz_loadu_ps( k4, ( float* )
 								post_ops_list_temp->scale_factor +
 								post_ops_attr.post_op_c_j + ( 3 * 16 ) );
 			}
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_loadu_ps( (float* )
+				zero_point0 = _mm512_maskz_loadu_ps( k1, (float* )
 								post_ops_list_temp->op_args1 +
 								post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-				zero_point1 = _mm512_loadu_ps( (float* )
+				zero_point1 = _mm512_maskz_loadu_ps( k2, (float* )
 								post_ops_list_temp->op_args1 +
 								post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-				zero_point2 = _mm512_loadu_ps( (float* )
+				zero_point2 = _mm512_maskz_loadu_ps( k3, (float* )
 								post_ops_list_temp->op_args1 +
 								post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-				zero_point3 = _mm512_loadu_ps( (float* )
+				zero_point3 = _mm512_maskz_loadu_ps( k4, (float* )
 								post_ops_list_temp->op_args1 +
 								post_ops_attr.post_op_c_j + ( 3 * 16 ) );
 			}
@@ -454,9 +454,9 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32 )
 
 			//c[0, 48-63]
 			F32_SCL_MULRND(zmm20, selector4, zero_point3);
-			}
-			else
-			{
+		}
+		else
+		{
 			// If original output was columns major, then by the time
 			// kernel sees it, the matrix would be accessed as if it were
 			// transposed. Due to this the scale as well as zp array will
