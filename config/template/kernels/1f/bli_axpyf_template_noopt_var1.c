@@ -209,16 +209,16 @@ void bli_zaxpyf_template_noopt
 	{
 		for ( j = 0; j < b_n; ++j )
 		{
-			bli_zcopys( *xp[ j ], alpha_x[ j ] );
-			bli_zscals( *alpha, alpha_x[ j ] );
+			bli_tcopys( z,z, *xp[ j ], alpha_x[ j ] );
+			bli_tscals( z,z,z, *alpha, alpha_x[ j ] );
 		}
 	}
 	else // if ( bli_is_conj( conjx ) )
 	{
 		for ( j = 0; j < b_n; ++j )
 		{
-			bli_zcopyjs( *xp[ j ], alpha_x[ j ] );
-			bli_zscals( *alpha, alpha_x[ j ] );
+			bli_tcopyjs( z,z, *xp[ j ], alpha_x[ j ] );
+			bli_tscals( z,z,z, *alpha, alpha_x[ j ] );
 		}
 	}
 
@@ -231,7 +231,7 @@ void bli_zaxpyf_template_noopt
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zaxpys( alpha_x[ j ], *ap[ j ], *yp );
+				bli_taxpys( z,z,z,z, alpha_x[ j ], *ap[ j ], *yp );
 
 				ap[ j ] += 1;
 			}
@@ -247,7 +247,7 @@ void bli_zaxpyf_template_noopt
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zaxpys( alpha_x[ j ], *ap[ j ], *yp );
+				bli_taxpys( z,z,z,z, alpha_x[ j ], *ap[ j ], *yp );
 
 				ap[ j ] += n_elem_per_iter;
 			}
@@ -259,7 +259,7 @@ void bli_zaxpyf_template_noopt
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zaxpys( alpha_x[ j ], *ap[ j ], *yp );
+				bli_taxpys( z,z,z,z, alpha_x[ j ], *ap[ j ], *yp );
 
 				ap[ j ] += 1;
 			}
@@ -273,7 +273,7 @@ void bli_zaxpyf_template_noopt
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zaxpyjs( alpha_x[ j ], *ap[ j ], *yp );
+				bli_taxpyjs( z,z,z,z, alpha_x[ j ], *ap[ j ], *yp );
 
 				ap[ j ] += 1;
 			}
@@ -289,7 +289,7 @@ void bli_zaxpyf_template_noopt
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zaxpyjs( alpha_x[ j ], *ap[ j ], *yp );
+				bli_taxpyjs( z,z,z,z, alpha_x[ j ], *ap[ j ], *yp );
 
 				ap[ j ] += n_elem_per_iter;
 			}
@@ -301,7 +301,7 @@ void bli_zaxpyf_template_noopt
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zaxpyjs( alpha_x[ j ], *ap[ j ], *yp );
+				bli_taxpyjs( z,z,z,z, alpha_x[ j ], *ap[ j ], *yp );
 
 				ap[ j ] += 1;
 			}

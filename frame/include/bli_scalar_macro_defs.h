@@ -36,6 +36,10 @@
 #define BLIS_SCALAR_MACRO_DEFS_H
 
 
+#include "bli_assigns.h"
+#include "bli_complex_terms.h"
+#include "bli_constants.h"
+#include "bli_declinits.h"
 
 // -- Assignment/Accessor macros --
 
@@ -44,210 +48,42 @@
 // whether fields of a struct are set directly or whether native C99
 // assignment is used).
 
-#include "bli_sets.h"    // sets both real and imaginary components
-
-// NOTE: These macros are not used by other scalar macros, but they are
-// related to those defined in bli_sets.h, and so we #include them here.
-
-#include "bli_setrs.h"   // sets real component only
-#include "bli_setis.h"   // sets imaginary component only
+#include "bli_tsets.h"    // sets both real and imaginary components
 
 // NOTE: This macro also needs to be defined early on since it determines
 // how real and imaginary components are accessed (ie: whether the fields
 // of a struct are read directly or whether native C99 functions are used.)
 
-#include "bli_gets.h"
-
-
-// -- Scalar constant initialization macros --
-
-#include "bli_constants.h"
-
-
-// -- Separated scalar macros (separated real/imaginary values) --
-
-#include "bli_absq2ris.h"
-
-#include "bli_abval2ris.h"
-
-#include "bli_addris.h"
-#include "bli_addjris.h"
-
-#include "bli_add3ris.h"
-
-#include "bli_axpbyris.h"
-#include "bli_axpbyjris.h"
-
-#include "bli_axpyris.h"
-#include "bli_axpyjris.h"
-
-#include "bli_axmyris.h"
-
-#include "bli_conjris.h"
-
-#include "bli_copyris.h"
-#include "bli_copyjris.h"
-#include "bli_copycjris.h"
-
-#include "bli_eqris.h"
-
-#include "bli_invertris.h"
-
-#include "bli_invscalris.h"
-#include "bli_invscaljris.h"
-
-#include "bli_neg2ris.h"
-
-#include "bli_scalris.h"
-#include "bli_scaljris.h"
-#include "bli_scalcjris.h"
-
-#include "bli_scal2ris.h"
-#include "bli_scal2jris.h"
-
-#include "bli_set0ris.h"
-
-#include "bli_sqrt2ris.h"
-
-#include "bli_subris.h"
-#include "bli_subjris.h"
-
-#include "bli_swapris.h"
-
-#include "bli_xpbyris.h"
-#include "bli_xpbyjris.h"
-
-// Inlined scalar macros in loops
-#include "bli_scal2ris_mxn.h"
-#include "bli_scalris_mxn_uplo.h"
-
-
-// -- Conventional scalar macros (paired real/imaginary values) --
-
-#include "bli_absq2s.h"
-
-#include "bli_abval2s.h"
-
-#include "bli_adds.h"
-#include "bli_addjs.h"
-
-#include "bli_add3s.h"
-
-#include "bli_axpbys.h"
-#include "bli_axpbyjs.h"
-
-#include "bli_axpys.h"
-#include "bli_axpyjs.h"
-
-#include "bli_axmys.h"
-
-#include "bli_conjs.h"
-
-#include "bli_copys.h"
-#include "bli_copyjs.h"
-#include "bli_copycjs.h"
-
-#include "bli_copynzs.h"
-#include "bli_copyjnzs.h"
-
-#include "bli_dots.h"
-#include "bli_dotjs.h"
-
-#include "bli_eq.h"
-#include "bli_lt.h"
-#include "bli_lte.h"
-
-#include "bli_fprints.h"
-
-#include "bli_inverts.h"
-
-#include "bli_invscals.h"
-#include "bli_invscaljs.h"
-
-#include "bli_neg2s.h"
-
-#include "bli_rands.h"
-#include "bli_randnp2s.h"
-
-#include "bli_scals.h"
-#include "bli_scaljs.h"
-#include "bli_scalcjs.h"
-
-#include "bli_scal2s.h"
-#include "bli_scal2js.h"
-
-#include "bli_set0s.h"
-
-#include "bli_set1s.h"
-
-#include "bli_seti0s.h"
-
-#include "bli_sqrt2s.h"
-
-#include "bli_subs.h"
-#include "bli_subjs.h"
-
-#include "bli_swaps.h"
-
-#include "bli_xpbys.h"
-#include "bli_xpbyjs.h"
-
-// Inlined scalar macros in loops
-#include "bli_adds_mxn.h"
-#include "bli_adds_mxn_uplo.h"
-#include "bli_set0s_mxn.h"
-#include "bli_set0s_edge.h"
-#include "bli_copys_mxn.h"
-#include "bli_scal2s_mxn.h"
-
-#include "bli_axpbys_mxn.h"
-#include "bli_xpbys_mxn.h"
-#include "bli_xpbys_mxn_uplo.h"
-
-// -- "broadcast B" scalar macros --
-
-#include "bli_bcastbbs_mxn.h"
-#include "bli_scal2bbs_mxn.h"
-#include "bli_set0bbs_mxn.h"
-
-
-// -- 1m-specific scalar macros --
-
-// 1e
-#include "bli_copy1es.h"
-#include "bli_copyj1es.h"
-
-#include "bli_invert1es.h"
-
-#include "bli_scal1es.h"
-
-#include "bli_scal21es.h"
-#include "bli_scal2j1es.h"
-
-// 1r
-#include "bli_copy1rs.h"
-#include "bli_copyj1rs.h"
-
-#include "bli_invert1rs.h"
-
-#include "bli_scal1rs.h"
-
-#include "bli_scal21rs.h"
-#include "bli_scal2j1rs.h"
-
-// 1m (1e or 1r)
-#include "bli_invert1ms_mxn_diag.h"
-
-#include "bli_scal1ms_mxn.h"
-
-#include "bli_scal21ms_mxn.h"
-#include "bli_scal21ms_mxn_diag.h"
-#include "bli_scal21ms_mxn_uplo.h"
-
-#include "bli_set1ms_mxn.h"
-#include "bli_set1ms_mxn_diag.h"
-#include "bli_set1ms_mxn_uplo.h"
-#include "bli_seti01ms_mxn_diag.h"
+#include "bli_tgets.h"
+
+// -- Scalar macros --
+
+#include "bli_tabsq2s.h"
+#include "bli_tabval2s.h"
+#include "bli_tadd3s.h"
+#include "bli_tadds.h"
+#include "bli_taxpbys.h"
+#include "bli_taxpys.h"
+#include "bli_tconjs.h"
+#include "bli_tcopycjs.h"
+#include "bli_tcopynzs.h"
+#include "bli_tcopys.h"
+#include "bli_tdots.h"
+#include "bli_teqs.h"
+#include "bli_tfprints.h"
+#include "bli_tinverts.h"
+#include "bli_tinvscals.h"
+#include "bli_tneg2s.h"
+#include "bli_trandnp2s.h"
+#include "bli_trands.h"
+#include "bli_tscalcjs.h"
+#include "bli_tscal2s.h"
+#include "bli_tscals.h"
+#include "bli_tsets.h"
+#include "bli_tsqrt2s.h"
+#include "bli_tsubs.h"
+#include "bli_tswaps.h"
+#include "bli_txpbys.h"
 
 
 #endif

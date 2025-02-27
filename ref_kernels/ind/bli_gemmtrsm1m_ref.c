@@ -93,7 +93,7 @@ static void PASTEMAC(chr,opname,arch,suf) \
 				ctype_r           rho11_i; \
 \
 				/* beta11 = beta11 - a10t * b01; */ \
-				PASTEMAC(ch,set0ris)( rho11_r, \
+				bli_tset0ris( ch, rho11_r, \
 				                      rho11_i ); \
 				for ( dim_t l = 0; l < n_behind; ++l ) \
 				{ \
@@ -102,36 +102,36 @@ static void PASTEMAC(chr,opname,arch,suf) \
 					ctype_r* restrict beta01_r  = b01_ri  + (l  )*rs_b2 + 0*cs_b; \
 					ctype_r* restrict beta01_i  = b01_ri  + (l  )*rs_b2 + 1*cs_b; \
 \
-					PASTEMAC(ch,axpyris)( *alpha10_r, \
-					                      *alpha10_i, \
-					                      *beta01_r, \
-					                      *beta01_i, \
-					                      rho11_r, \
-					                      rho11_i ); \
+					bli_taxpyris( ch,ch,ch,ch, *alpha10_r, \
+					                           *alpha10_i, \
+					                           *beta01_r, \
+					                           *beta01_i, \
+					                           rho11_r, \
+					                           rho11_i ); \
 				} \
-				PASTEMAC(ch,subris)( rho11_r, \
-				                     rho11_i, \
-				                     beta11c_r, \
-				                     beta11c_i ); \
+				bli_tsubris( ch,ch,ch, rho11_r, \
+				                       rho11_i, \
+				                       beta11c_r, \
+				                       beta11c_i ); \
 \
 				/* beta11 = beta11 / alpha11; */ \
 				/* NOTE: When preinversion is enabled, the INVERSE of alpha11
 				   (1.0/alpha11) is stored during packing instead alpha11 so we
 				   can multiply rather than divide. When preinversion is disabled,
 				   alpha11 is stored and division happens below explicitly. */ \
-				PASTEMAC(ch,diagop)( *alpha11_r, \
-				                     *alpha11_i, \
-				                     beta11c_r, \
-				                     beta11c_i ); \
+				PASTEMAC(t,diagop)( ch,ch,ch, *alpha11_r, \
+				                              *alpha11_i, \
+				                              beta11c_r, \
+				                              beta11c_i ); \
 \
 				/* Output final result to matrix c. */ \
-				PASTEMAC(ch,sets)(  beta11c_r, beta11c_i, *gamma11 ); \
+				bli_tsets( ch,ch,  beta11c_r, beta11c_i, *gamma11 ); \
 \
 				/* Store the local values back to b11. */ \
 				for ( dim_t d = 0; d < cs_b; ++d ) \
 				{ \
-					PASTEMAC(ch,copyris)(  beta11c_r, beta11c_i, *(beta11_ri_r + d), *(beta11_ri_i + d) ); \
-					PASTEMAC(ch,copyris)( -beta11c_i, beta11c_r, *(beta11_ir_r + d), *(beta11_ir_i + d) ); \
+					bli_tcopyris( ch,ch,  beta11c_r, beta11c_i, *(beta11_ri_r + d), *(beta11_ri_i + d) ); \
+					bli_tcopyris( ch,ch, -beta11c_i, beta11c_r, *(beta11_ir_r + d), *(beta11_ir_i + d) ); \
                 } \
 			} \
 		} \
@@ -176,8 +176,8 @@ static void PASTEMAC(chr,opname,arch,suf) \
 				ctype_r           rho11_i; \
 \
 				/* beta11 = beta11 - a10t * b01; */ \
-				PASTEMAC(ch,set0ris)( rho11_r, \
-				                      rho11_i ); \
+				bli_tset0ris( ch, rho11_r, \
+				                  rho11_i ); \
 				for ( dim_t l = 0; l < n_behind; ++l ) \
 				{ \
 					ctype*   restrict alpha10_ri = a10t_ri + (l  )*cs_a; \
@@ -186,38 +186,38 @@ static void PASTEMAC(chr,opname,arch,suf) \
 					ctype_r* restrict beta01_r   = b01_r   + (l  )*rs_b2; \
 					ctype_r* restrict beta01_i   = b01_i   + (l  )*rs_b2; \
 \
-					PASTEMAC(ch,axpyris)( *alpha10_r, \
-					                      *alpha10_i, \
-					                      *beta01_r, \
-					                      *beta01_i, \
-					                      rho11_r, \
-					                      rho11_i ); \
+					bli_taxpyris( ch,ch,ch,ch, *alpha10_r, \
+					                           *alpha10_i, \
+					                           *beta01_r, \
+					                           *beta01_i, \
+					                           rho11_r, \
+					                           rho11_i ); \
 				} \
-				PASTEMAC(ch,subris)( rho11_r, \
-				                     rho11_i, \
-				                     beta11c_r, \
-				                     beta11c_i ); \
+				bli_tsubris( ch,ch,ch, rho11_r, \
+				                       rho11_i, \
+				                       beta11c_r, \
+				                       beta11c_i ); \
 \
 				/* beta11 = beta11 / alpha11; */ \
 				/* NOTE: When preinversion is enabled, the INVERSE of alpha11
 				   (1.0/alpha11) is stored during packing instead alpha11 so we
 				   can multiply rather than divide. When preinversion is disabled,
 				   alpha11 is stored and division happens below explicitly. */ \
-				PASTEMAC(ch,diagop)( *alpha11_r, \
-				                     *alpha11_i, \
-				                     beta11c_r, \
-				                     beta11c_i ); \
+				PASTEMAC(t,diagop)( ch,ch,ch, *alpha11_r, \
+				                              *alpha11_i, \
+				                              beta11c_r, \
+				                              beta11c_i ); \
 \
 				/* Output final result to matrix c. */ \
-				PASTEMAC(ch,sets)( beta11c_r, \
-				                   beta11c_i, *gamma11 ); \
+				bli_tsets( ch,ch, beta11c_r, \
+				                  beta11c_i, *gamma11 ); \
 \
 				/* Store the local values back to b11. */ \
 				for ( dim_t d = 0; d < cs_b; ++d ) \
-					PASTEMAC(ch,copyris)( beta11c_r, \
-					                      beta11c_i, \
-					                      *(beta11_r + d), \
-					                      *(beta11_i + d) ); \
+					bli_tcopyris( ch,ch, beta11c_r, \
+					                     beta11c_i, \
+					                     *(beta11_r + d), \
+					                     *(beta11_i + d) ); \
 			} \
 		} \
 	} \
@@ -288,7 +288,7 @@ static void PASTEMAC(chr,opname,arch,suf) \
 				ctype_r           rho11_i; \
 \
 				/* beta11 = beta11 - a10t * b01; */ \
-				PASTEMAC(ch,set0ris)( rho11_r, \
+				bli_tset0ris( ch, rho11_r, \
 				                      rho11_i ); \
 				for ( dim_t l = 0; l < n_behind; ++l ) \
 				{ \
@@ -297,36 +297,36 @@ static void PASTEMAC(chr,opname,arch,suf) \
 					ctype_r* restrict beta21_r  = b21_ri + (l  )*rs_b2 + 0*cs_b; \
 					ctype_r* restrict beta21_i  = b21_ri + (l  )*rs_b2 + 1*cs_b; \
 \
-					PASTEMAC(ch,axpyris)( *alpha12_r, \
-					                      *alpha12_i, \
-					                      *beta21_r, \
-					                      *beta21_i, \
-					                      rho11_r, \
-					                      rho11_i ); \
+					bli_taxpyris( ch,ch,ch,ch, *alpha12_r, \
+					                           *alpha12_i, \
+					                           *beta21_r, \
+					                           *beta21_i, \
+					                           rho11_r, \
+					                           rho11_i ); \
 				} \
-				PASTEMAC(ch,subris)( rho11_r, \
-				                     rho11_i, \
-				                     beta11c_r, \
-				                     beta11c_i ); \
+				bli_tsubris( ch,ch,ch, rho11_r, \
+				                       rho11_i, \
+				                       beta11c_r, \
+				                       beta11c_i ); \
 \
 				/* beta11 = beta11 / alpha11; */ \
 				/* NOTE: When preinversion is enabled, the INVERSE of alpha11
 				   (1.0/alpha11) is stored during packing instead alpha11 so we
 				   can multiply rather than divide. When preinversion is disabled,
 				   alpha11 is stored and division happens below explicitly. */ \
-				PASTEMAC(ch,diagop)( *alpha11_r, \
-				                     *alpha11_i, \
-				                     beta11c_r, \
-				                     beta11c_i ); \
+				PASTEMAC(t,diagop)( ch,ch,ch, *alpha11_r, \
+				                              *alpha11_i, \
+				                              beta11c_r, \
+				                              beta11c_i ); \
 \
 				/* Output final result to matrix c. */ \
-				PASTEMAC(ch,sets)(  beta11c_r, beta11c_i, *gamma11 ); \
+				bli_tsets( ch,ch, beta11c_r, beta11c_i, *gamma11 ); \
 \
 				/* Store the local values back to b11. */ \
 				for ( dim_t d = 0; d < cs_b; ++d ) \
 				{ \
-					PASTEMAC(ch,copyris)(  beta11c_r, beta11c_i, *(beta11_ri_r + d), *(beta11_ri_i + d) ); \
-					PASTEMAC(ch,copyris)( -beta11c_i, beta11c_r, *(beta11_ir_r + d), *(beta11_ir_i + d) ); \
+					bli_tcopyris( ch,ch,  beta11c_r, beta11c_i, *(beta11_ri_r + d), *(beta11_ri_i + d) ); \
+					bli_tcopyris( ch,ch, -beta11c_i, beta11c_r, *(beta11_ir_r + d), *(beta11_ir_i + d) ); \
                 } \
 			} \
 		} \
@@ -371,7 +371,7 @@ static void PASTEMAC(chr,opname,arch,suf) \
 				ctype_r           rho11_i; \
 \
 				/* beta11 = beta11 - a10t * b01; */ \
-				PASTEMAC(ch,set0ris)( rho11_r, \
+				bli_tset0ris( ch, rho11_r, \
 				                      rho11_i ); \
 				for ( dim_t l = 0; l < n_behind; ++l ) \
 				{ \
@@ -381,38 +381,38 @@ static void PASTEMAC(chr,opname,arch,suf) \
 					ctype_r* restrict beta21_r   = b21_r   + (l  )*rs_b2; \
 					ctype_r* restrict beta21_i   = b21_i   + (l  )*rs_b2; \
 \
-					PASTEMAC(ch,axpyris)( *alpha12_r, \
-					                      *alpha12_i, \
-					                      *beta21_r, \
-					                      *beta21_i, \
-					                      rho11_r, \
-					                      rho11_i ); \
+					bli_taxpyris( ch,ch,ch,ch, *alpha12_r, \
+					                           *alpha12_i, \
+					                           *beta21_r, \
+					                           *beta21_i, \
+					                           rho11_r, \
+					                           rho11_i ); \
 				} \
-				PASTEMAC(ch,subris)( rho11_r, \
-				                     rho11_i, \
-				                     beta11c_r, \
-				                     beta11c_i ); \
+				bli_tsubris( ch,ch,ch, rho11_r, \
+				                       rho11_i, \
+				                       beta11c_r, \
+				                       beta11c_i ); \
 \
 				/* beta11 = beta11 / alpha11; */ \
 				/* NOTE: When preinversion is enabled, the INVERSE of alpha11
 				   (1.0/alpha11) is stored during packing instead alpha11 so we
 				   can multiply rather than divide. When preinversion is disabled,
 				   alpha11 is stored and division happens below explicitly. */ \
-				PASTEMAC(ch,diagop)( *alpha11_r, \
-				                     *alpha11_i, \
-				                     beta11c_r, \
-				                     beta11c_i ); \
+				PASTEMAC(t,diagop)( ch,ch,ch, *alpha11_r, \
+				                              *alpha11_i, \
+				                              beta11c_r, \
+				                              beta11c_i ); \
 \
 				/* Output final result to matrix c. */ \
-				PASTEMAC(ch,sets)( beta11c_r, \
-				                   beta11c_i, *gamma11 ); \
+				bli_tsets( ch,ch, beta11c_r, \
+				                  beta11c_i, *gamma11 ); \
 \
 				/* Store the local values back to b11. */ \
 				for ( dim_t d = 0; d < cs_b; ++d ) \
-					PASTEMAC(ch,copyris)( beta11c_r, \
-					                      beta11c_i, \
-					                      *(beta11_r + d), \
-					                      *(beta11_i + d) ); \
+					bli_tcopyris( ch,ch, beta11c_r, \
+					                     beta11c_i, \
+					                     *(beta11_r + d), \
+					                     *(beta11_i + d) ); \
 			} \
 		} \
 	} \
@@ -540,8 +540,9 @@ void PASTEMAC(chr,opname,arch,suf) \
 			ctype_r* restrict beta11_ir_r = b11_ir + i*rs_b2 + j*cs_b2 + 0*cs_b + d; \
 			ctype_r* restrict beta11_ir_i = b11_ir + i*rs_b2 + j*cs_b2 + 1*cs_b + d; \
 \
-			PASTEMAC(ch,chr,ch,xpbyris) \
+			bli_txpbyris \
 			( \
+			  ch,chr,ch,chr, \
 			  *beta11t_r, \
 			  *beta11t_i, \
 			  alpha_r, \
@@ -550,8 +551,8 @@ void PASTEMAC(chr,opname,arch,suf) \
 			  *beta11_ri_i  \
 			); \
 \
-			PASTEMAC(ch,copyris)( -*beta11_ri_i, *beta11_ri_r, \
-			                       *beta11_ir_r, *beta11_ir_i ); \
+			bli_tcopyris( ch,ch, -*beta11_ri_i, *beta11_ri_r, \
+			                      *beta11_ir_r, *beta11_ir_i ); \
 		} \
 	} \
 	else /* if ( bli_is_1r_packed( schema_b ) ) */ \
@@ -575,8 +576,9 @@ void PASTEMAC(chr,opname,arch,suf) \
 			ctype_r* restrict beta11_r  = b11_r + i*rs_b2 + j*cs_b2 + d; \
 			ctype_r* restrict beta11_i  = b11_i + i*rs_b2 + j*cs_b2 + d; \
 \
-			PASTEMAC(ch,chr,ch,xpbyris) \
+			bli_txpbyris \
 			( \
+			  ch,chr,ch,chr, \
 			  *beta11t_r, \
 			  *beta11t_i, \
 			  alpha_r, \

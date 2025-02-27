@@ -68,8 +68,8 @@ void PASTEMAC(ch,varname) \
 		y1   = y + (0  )*incy; \
 \
 		/* a1t = a1t + alpha * chi1 * y; */ \
-		PASTEMAC(ch,copycjs)( conjx, *chi1, alpha_chi1 ); \
-		PASTEMAC(ch,scals)( *alpha, alpha_chi1 ); \
+		bli_tcopycjs( ch,ch, conjx, *chi1, alpha_chi1 ); \
+		bli_tscals( ch,ch,ch, *alpha, alpha_chi1 ); \
 \
 		kfp_av \
 		( \

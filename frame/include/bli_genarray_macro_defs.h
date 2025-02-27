@@ -50,6 +50,16 @@ static tname PASTECH(opname,_fpa)[BLIS_NUM_FP_TYPES] = \
 	( tname )PASTEMAC(z,opname)  \
 }
 
+#define GENARRAYRO_FPA(tname,opname) \
+\
+static tname PASTECH(opname,_fpa)[BLIS_NUM_FP_TYPES] = \
+{ \
+	( tname )PASTEMAC(s,opname), \
+	( tname )PASTEMAC(d,opname), \
+	NULL, \
+	NULL \
+}
+
 // -- "Smart" one-operand macro (with integer support) --
 
 #define GENARRAY_FPA_I(tname,opname) \

@@ -93,8 +93,8 @@ void PASTEF77(ch,blasname) \
 	   - the rank-2k product is empty (either because alpha is zero or k
 	     is zero) AND matrix C is not scaled. */ \
 	if ( m0 == 0 || \
-	     ( ( PASTEMAC(ch,eq0)( *alpha ) || k0 == 0 ) \
-	       && PASTEMAC(chr,eq1)( *beta ) \
+	     ( ( bli_teq0s( ch, *alpha ) || k0 == 0 ) \
+	       && bli_teq1s( chr, *beta ) \
          ) \
 	   ) \
 	{ \
@@ -186,8 +186,8 @@ void PASTEF77(ch,blasname) \
 	   - the rank-2k product is empty (either because alpha is zero or k
 	     is zero) AND matrix C is not scaled. */ \
 	if ( m0 == 0 || \
-	     ( ( PASTEMAC(ch,eq0)( *alpha ) || k0 == 0 ) \
-	       && PASTEMAC(chr,eq1)( *beta ) \
+	     ( ( bli_teq0s( ch, *alpha ) || k0 == 0 ) \
+	       && bli_teq1s( chr, *beta ) \
          ) \
 	   ) \
 	{ \

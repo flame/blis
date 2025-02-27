@@ -54,7 +54,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 	      ctype* y    = y0; \
 \
 	/* If beta is zero, use copyv. */ \
-	if ( PASTEMAC(ch,eq0)( *beta ) ) \
+	if ( bli_teq0s( ch, *beta ) ) \
 	{ \
 		/* Query the context for the kernel function pointer. */ \
 		const num_t  dt      = PASTEMAC(ch,type); \
@@ -71,7 +71,7 @@ void PASTEMAC(ch,opname,arch,suf) \
 		return; \
 	} \
 	/* If alpha is one, use addv. */ \
-	else if ( PASTEMAC(ch,eq1)( *beta ) ) \
+	else if ( bli_teq1s( ch, *beta ) ) \
 	{ \
 		/* Query the context for the kernel function pointer. */ \
 		const num_t dt     = PASTEMAC(ch,type); \
@@ -95,14 +95,14 @@ void PASTEMAC(ch,opname,arch,suf) \
 			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,xpbyjs)( x[i], *beta, y[i] ); \
+				bli_txpbyjs( ch,ch,ch,ch, x[i], *beta, y[i] ); \
 			} \
 		} \
 		else \
 		{ \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,xpbyjs)( *x, *beta, *y ); \
+				bli_txpbyjs( ch,ch,ch,ch, *x, *beta, *y ); \
 \
 				x += incx; \
 				y += incy; \
@@ -116,14 +116,14 @@ void PASTEMAC(ch,opname,arch,suf) \
 			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,xpbys)( x[i], *beta, y[i] ); \
+				bli_txpbys( ch,ch,ch,ch, x[i], *beta, y[i] ); \
 			} \
 		} \
 		else \
 		{ \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,xpbys)( *x, *beta, *y ); \
+				bli_txpbys( ch,ch,ch,ch, *x, *beta, *y ); \
 \
 				x += incx; \
 				y += incy; \

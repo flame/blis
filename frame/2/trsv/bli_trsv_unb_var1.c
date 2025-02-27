@@ -117,13 +117,13 @@ void PASTEMAC(ch,varname) \
 			  &rho, \
 			  cntx  \
 			); \
-			PASTEMAC(ch,subs)( rho, *chi1 ); \
+			bli_tsubs( ch,ch,ch, rho, *chi1 ); \
 \
 			/* chi1 = chi1 / alpha11; */ \
 			if ( bli_is_nonunit_diag( diaga ) ) \
 			{ \
-				PASTEMAC(ch,copycjs)( conja, *alpha11, alpha11_conj ); \
-				PASTEMAC(ch,invscals)( alpha11_conj, *chi1 ); \
+				bli_tcopycjs( ch,ch, conja, *alpha11, alpha11_conj ); \
+				bli_tinvscals( ch,ch,ch, alpha11_conj, *chi1 ); \
 			} \
 		} \
 	} \
@@ -149,13 +149,13 @@ void PASTEMAC(ch,varname) \
 			  &rho, \
 			  cntx  \
 			); \
-			PASTEMAC(ch,subs)( rho, *chi1 ); \
+			bli_tsubs( ch,ch,ch, rho, *chi1 ); \
 \
 			/* chi1 = chi1 / alpha11; */ \
 			if ( bli_is_nonunit_diag( diaga ) ) \
 			{ \
-				PASTEMAC(ch,copycjs)( conja, *alpha11, alpha11_conj ); \
-				PASTEMAC(ch,invscals)( alpha11_conj, *chi1 ); \
+				bli_tcopycjs( ch,ch, conja, *alpha11, alpha11_conj ); \
+				bli_tinvscals( ch,ch,ch, alpha11_conj, *chi1 ); \
 			} \
 		} \
 	} \

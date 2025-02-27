@@ -116,25 +116,25 @@ void bli_ztrsm_l_template_noopt
 			gamma11 = c11 + (i  )*rs_c + (j  )*cs_c;
 
 			/* chi11 = chi11 - a10t * x01; */
-			bli_zset0s( rho11 );
+			bli_tset0s( z, rho11 );
 			for ( l = 0; l < n_behind; ++l )
 			{
 				alpha10 = a10t + (l  )*cs_a;
 				chi01   = x01  + (l  )*rs_b;
 
-				bli_zaxpys( *alpha10, *chi01, rho11 );
+				bli_taxpys( z,z,z,z, *alpha10, *chi01, rho11 );
 			}
-			bli_zsubs( rho11, *chi11 );
+			bli_tsubs( z,z,z, rho11, *chi11 );
 
 			/* chi11 = chi11 / alpha11; */
 			/* NOTE: The INVERSE of alpha11 (1.0/alpha11) is stored instead
 			   of alpha11, so we can multiply rather than divide. We store
 			   the inverse of alpha11 intentionally to avoid expensive
 			   division instructions within the micro-kernel. */
-			bli_zscals( *alpha11, *chi11 );
+			bli_tscals( z,z,z, *alpha11, *chi11 );
 
 			/* Output final result to matrix C. */
-			bli_zcopys( *chi11, *gamma11 );
+			bli_tcopys( z,z, *chi11, *gamma11 );
 		}
 	}
 }

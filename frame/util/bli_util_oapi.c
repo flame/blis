@@ -395,7 +395,7 @@ void PASTEMAC(opname) \
 	/* Integer objects are handled separately. */ \
 	if ( bli_is_int( dt ) ) \
 	{ \
-		*is_eq = bli_ieqa( buf_chi, buf_psi ); \
+		*is_eq = bli_ieq( buf_chi, buf_psi ); \
 		return; \
 	} \
 \
@@ -571,9 +571,9 @@ void PASTEMAC(opname) \
 }
 
 GENFRONT( ltsc )
-GENFRONT( ltesc )
+GENFRONT( lesc )
 GENFRONT( gtsc )
-GENFRONT( gtesc )
+GENFRONT( gesc )
 
 
 #undef  GENFRONT

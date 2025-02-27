@@ -37,43 +37,45 @@
 
 #define PACKM_SET_1E( chp_r, val_r, val_i, mnk ) \
 do { \
-	PASTEMAC(chp_r,copys)(  val_r, *(pi1_ri + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2) ); \
-	PASTEMAC(chp_r,copys)(  val_i, *(pi1_ri + (mnk*2 + 1)*cdim_bcast + d + mnk*ldp2) ); \
-	PASTEMAC(chp_r,copys)( -val_i, *(pi1_ir + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2) ); \
-	PASTEMAC(chp_r,copys)(  val_r, *(pi1_ir + (mnk*2 + 1)*cdim_bcast + d + mnk*ldp2) ); \
+	bli_tcopys( chp_r,chp_r,  val_r, *(pi1_ri + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2) ); \
+	bli_tcopys( chp_r,chp_r,  val_i, *(pi1_ri + (mnk*2 + 1)*cdim_bcast + d + mnk*ldp2) ); \
+	bli_tcopys( chp_r,chp_r, -val_i, *(pi1_ir + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2) ); \
+	bli_tcopys( chp_r,chp_r,  val_r, *(pi1_ir + (mnk*2 + 1)*cdim_bcast + d + mnk*ldp2) ); \
 } while (0)
 
 
 #define PACKM_SET_1R( chp_r, val_r, val_i, mnk ) \
 do { \
-	PASTEMAC(chp_r,copys)( val_r, *(pi1_r + mnk*cdim_bcast + d + mnk*ldp2) ); \
-	PASTEMAC(chp_r,copys)( val_i, *(pi1_i + mnk*cdim_bcast + d + mnk*ldp2) ); \
+	bli_tcopys( chp_r,chp_r, val_r, *(pi1_r + mnk*cdim_bcast + d + mnk*ldp2) ); \
+	bli_tcopys( chp_r,chp_r, val_i, *(pi1_i + mnk*cdim_bcast + d + mnk*ldp2) ); \
 } while (0)
 
 
 #define PACKM_SCAL_1E( ctypep_r, cha, chp, mn, k, op ) \
 do { \
-	ctypep_r alpha_r, alpha_i, ka_r, ka_i; \
-	PASTEMAC(cha,chp,copyris)( *(alpha1 +  mn       *inca2       + 0 + k*lda2), \
-	                            *(alpha1 +  mn       *inca2       + 1 + k*lda2), \
-	                            alpha_r, alpha_i ); \
-	PASTEMAC(chp,op)( kappa_r, kappa_i, alpha_r, alpha_i, ka_r, ka_i ); \
-	PASTEMAC(chp,copyris)(  ka_r, ka_i, *(pi1_ri + (mn*2 + 0)*cdim_bcast  + d + k*ldp2), \
-	                                    *(pi1_ri + (mn*2 + 1)*cdim_bcast  + d + k*ldp2) ); \
-	PASTEMAC(chp,copyris)( -ka_i, ka_r, *(pi1_ir + (mn*2 + 0)*cdim_bcast  + d + k*ldp2), \
-	                                    *(pi1_ir + (mn*2 + 1)*cdim_bcast  + d + k*ldp2) ); \
+	ctypep_r ka_r, ka_i; \
+	PASTEMAC(t,op)( chp,cha,chp,chp, \
+	                kappa_r, kappa_i, \
+	                *(alpha1 +  mn*inca2 + 0 + k*lda2), \
+	                *(alpha1 +  mn*inca2 + 1 + k*lda2), \
+	                ka_r, ka_i ); \
+	bli_tcopyris( chp,chp,  ka_r, ka_i, *(pi1_ri + (mn*2 + 0)*cdim_bcast + d + k*ldp2), \
+	                                    *(pi1_ri + (mn*2 + 1)*cdim_bcast + d + k*ldp2) ); \
+	bli_tcopyris( chp,chp, -ka_i, ka_r, *(pi1_ir + (mn*2 + 0)*cdim_bcast + d + k*ldp2), \
+	                                    *(pi1_ir + (mn*2 + 1)*cdim_bcast + d + k*ldp2) ); \
 } while (0)
 
 
 #define PACKM_SCAL_1R( ctypep_r, cha, chp, mn, k, op ) \
 do { \
-	ctypep_r alpha_r, alpha_i, ka_r, ka_i; \
-	PASTEMAC(cha,chp,copyris)( *(alpha1 +  mn       *inca2       + 0 + k*lda2), \
-	                            *(alpha1 +  mn       *inca2       + 1 + k*lda2), \
-	                            alpha_r, alpha_i ); \
-	PASTEMAC(chp,op)( kappa_r, kappa_i, alpha_r, alpha_i, ka_r, ka_i ); \
-	PASTEMAC(chp,copyris)( ka_r, ka_i, *(pi1_r  + mn*cdim_bcast  + d + k*ldp2), \
-	                                   *(pi1_i  + mn*cdim_bcast  + d + k*ldp2) ); \
+	ctypep_r ka_r, ka_i; \
+	PASTEMAC(t,op)( chp,cha,chp,chp, \
+	                kappa_r, kappa_i, \
+	                *(alpha1 +  mn*inca2 + 0 + k*lda2), \
+	                *(alpha1 +  mn*inca2 + 1 + k*lda2), \
+	                ka_r, ka_i ); \
+	bli_tcopyris( chp,chp, ka_r, ka_i, *(pi1_r + mn*cdim_bcast + d + k*ldp2), \
+	                                   *(pi1_i + mn*cdim_bcast + d + k*ldp2) ); \
 } while (0)
 
 
@@ -154,8 +156,9 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
 	if ( bli_is_1e_packed( schema ) ) \
 	{ \
 		/* start by zeroing out the whole block */ \
-		PASTEMAC(chp_r,set0s_mxn) \
+		bli_tset0s_mxn \
 		( \
+		  chp_r, \
 		  2*cdim_max, \
 		  2*n_max, \
 		  ( ctypep_r* )p, 1, ldp  \
@@ -214,11 +217,11 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
 			for ( dim_t d = 0; d < cdim_bcast; ++d ) \
 			{ \
 				ctypep_r alpha_r; \
-				PASTEMAC(cha_r,chp_r,copys)( *(alpha1 + mnk*(inca2 + lda2)), alpha_r ); \
-				PASTEMAC(chp_r,scal2s)(  kappa_r, alpha_r, *(pi1_ri + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2) ); \
-				PASTEMAC(chp_r,scal2s)(  kappa_i, alpha_r, *(pi1_ri + (mnk*2 + 1)*cdim_bcast + d + mnk*ldp2) ); \
-				PASTEMAC(chp_r,scal2s)( -kappa_i, alpha_r, *(pi1_ir + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2) ); \
-				PASTEMAC(chp_r,scal2s)(  kappa_r, alpha_r, *(pi1_ir + (mnk*2 + 1)*cdim_bcast + d + mnk*ldp2) ); \
+				bli_tcopys( cha_r,chp_r, *(alpha1 + mnk*(inca2 + lda2)), alpha_r ); \
+				bli_tscal2s( chp_r,chp_r,chp_r,chp_r,  kappa_r, alpha_r, *(pi1_ri + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2) ); \
+				bli_tscal2s( chp_r,chp_r,chp_r,chp_r,  kappa_i, alpha_r, *(pi1_ri + (mnk*2 + 1)*cdim_bcast + d + mnk*ldp2) ); \
+				bli_tscal2s( chp_r,chp_r,chp_r,chp_r, -kappa_i, alpha_r, *(pi1_ir + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2) ); \
+				bli_tscal2s( chp_r,chp_r,chp_r,chp_r,  kappa_r, alpha_r, *(pi1_ir + (mnk*2 + 1)*cdim_bcast + d + mnk*ldp2) ); \
 			} \
 		} \
 		else if ( bli_is_conj( conja )) \
@@ -240,9 +243,9 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
 			for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
 			for ( dim_t d = 0; d < cdim_bcast; ++d ) \
 			{ \
-				PASTEMAC(chp,invertris)( *(pi1_ri + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2), \
+				bli_tinvertris( chp,chp, *(pi1_ri + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2), \
 				                         *(pi1_ri + (mnk*2 + 1)*cdim_bcast + d + mnk*ldp2) ); \
-				PASTEMAC(chp,copyjris)( *(pi1_ri + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2), \
+				bli_tcopyjris( chp,chp, *(pi1_ri + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2), \
 				                        *(pi1_ri + (mnk*2 + 1)*cdim_bcast + d + mnk*ldp2), \
 				                        *(pi1_ir + (mnk*2 + 1)*cdim_bcast + d + mnk*ldp2), \
 				                        *(pi1_ir + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2) ); \
@@ -257,8 +260,9 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
 	else /* bli_is_1r_packed( schema ) */ \
 	{ \
 		/* start by zeroing out the whole block */ \
-		PASTEMAC(chp_r,set0s_mxn) \
+		bli_tset0s_mxn \
 		( \
+		  chp_r, \
 		  cdim_max, \
 		  2*n_max, \
 		  ( ctypep_r* )p, 1, ldp  \
@@ -317,9 +321,9 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
 			for ( dim_t d = 0; d < cdim_bcast; ++d ) \
 			{ \
 				ctypep_r alpha_r; \
-				PASTEMAC(cha_r,chp_r,copys)( *(alpha1 + mnk*(inca2 + lda2)), alpha_r ); \
-				PASTEMAC(chp_r,scal2s)( kappa_r, alpha_r, *(pi1_r + mnk*(cdim_bcast + ldp2) + d) ); \
-				PASTEMAC(chp_r,scal2s)( kappa_i, alpha_r, *(pi1_i + mnk*(cdim_bcast + ldp2) + d) ); \
+				bli_tcopys( cha_r,chp_r, *(alpha1 + mnk*(inca2 + lda2)), alpha_r ); \
+				bli_tscal2s( chp_r,chp_r,chp_r,chp_r, kappa_r, alpha_r, *(pi1_r + mnk*(cdim_bcast + ldp2) + d) ); \
+				bli_tscal2s( chp_r,chp_r,chp_r,chp_r, kappa_i, alpha_r, *(pi1_i + mnk*(cdim_bcast + ldp2) + d) ); \
 			} \
 		} \
 		else if ( bli_is_conj( conja ) ) \
@@ -340,7 +344,7 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
 		{ \
 			for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
 			for ( dim_t d = 0; d < cdim_bcast; ++d ) \
-				PASTEMAC(chp,invertris)( *(pi1_r + mnk*(cdim_bcast + ldp2) + d), \
+				bli_tinvertris( chp,chp, *(pi1_r + mnk*(cdim_bcast + ldp2) + d), \
 				                         *(pi1_i + mnk*(cdim_bcast + ldp2) + d) ); \
 		} \
 \

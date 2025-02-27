@@ -117,11 +117,11 @@ void PASTEMAC(chx,chy,varname) \
 \
 	if ( bli_is_conj( conjchi ) ) \
 	{ \
-		PASTEMAC(chx,chy,copyjs)( *chi_cast, *psi_cast ); \
+		bli_tcopyjs( chx,chy, *chi_cast, *psi_cast ); \
 	} \
 	else \
 	{ \
-		PASTEMAC(chx,chy,copys)( *chi_cast, *psi_cast ); \
+		bli_tcopys( chx,chy, *chi_cast, *psi_cast ); \
 	} \
 }
 

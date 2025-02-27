@@ -91,7 +91,7 @@ void PASTEMAC(ch,varname) \
 	} \
 \
 	/* If beta is zero, use setv. Otherwise, scale by beta. */ \
-	if ( PASTEMAC(ch,eq0)( *beta ) ) \
+	if ( bli_teq0s( ch, *beta ) ) \
 	{ \
 		/* y = 0; */ \
 		PASTEMAC(ch,setv,BLIS_TAPI_EX_SUF) \
@@ -133,16 +133,16 @@ void PASTEMAC(ch,varname) \
 \
 		/* For hemv, explicitly set the imaginary component of alpha11 to
 		   zero. */ \
-		PASTEMAC(ch,copycjs)( conja, *alpha11, alpha11_temp ); \
+		bli_tcopycjs( ch,ch, conja, *alpha11, alpha11_temp ); \
 		if ( bli_is_conj( conjh ) ) \
-			PASTEMAC(ch,seti0s)( alpha11_temp ); \
+			bli_tseti0s( ch, alpha11_temp ); \
 \
 		/* Apply conjx to chi1 and and scale by alpha. */ \
-		PASTEMAC(ch,copycjs)( conjx, *chi1, conjx_chi1 ); \
-		PASTEMAC(ch,scal2s)( *alpha, conjx_chi1, alpha_chi1 ); \
+		bli_tcopycjs( ch,ch, conjx, *chi1, conjx_chi1 ); \
+		bli_tscal2s( ch,ch,ch,ch, *alpha, conjx_chi1, alpha_chi1 ); \
 \
 		/* psi1 = psi1 + alpha * alpha11 * chi1; */ \
-		PASTEMAC(ch,axpys)( alpha_chi1, alpha11_temp, *psi1 ); \
+		bli_taxpys( ch,ch,ch,ch, alpha_chi1, alpha11_temp, *psi1 ); \
 \
 		/* psi1 = psi1 + alpha * a21' * x2;   (dotv) */ \
 		/* y2   = y2   + alpha * a21 * chi1;  (axpyv) */ \
@@ -159,7 +159,7 @@ void PASTEMAC(ch,varname) \
 		  y2,  incy, \
 		  cntx  \
 		); \
-		PASTEMAC(ch,axpys)( *alpha, rho, *psi1 ); \
+		bli_taxpys( ch,ch,ch,ch, *alpha, rho, *psi1 ); \
 	} \
 }
 
