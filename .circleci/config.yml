@@ -62,7 +62,7 @@ workflows:
           CC: clang
           THR: openmp,pthreads
           CXX: clang++
-          PACKAGES: clang
+          PACKAGES: clang libomp-dev
 
       # macOS with system compiler (clang)
       - build:
