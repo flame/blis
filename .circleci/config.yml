@@ -251,7 +251,7 @@ jobs:
             $CC --version
             $CC -v
 
-            make -j2
+            make V=1 -j2
             make install
 
             if [ "$BLD" = "" ] && [ "$TESTSUITE_WRAPPER" = "" ] ; then $DIST_PATH/ci/cxx/cxx-test.sh $DIST_PATH $(ls -1 include); fi
