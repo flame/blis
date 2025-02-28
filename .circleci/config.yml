@@ -42,6 +42,7 @@ workflows:
       - build:
           OOT: 1
           TEST: ALL
+          THR: openmp,pthreads
           CONF: x86_64
 
       # SDE testing for x86_64
@@ -51,24 +52,22 @@ workflows:
           SDE: 1
           CONF: x86_64
 
-      # openmp build + LEVEL0
+      # some other random tests
       - build:
           LEVEL0: 1
-          THR: openmp
-
-      # pthreads build
-      - build:
-          THR: pthreads
+          CONF: generic_broadcast
 
       # clang build
       - build:
           CC: clang
+          THR: openmp,pthreads
           CXX: clang++
           PACKAGES: clang
 
       # macOS with system compiler (clang)
       - build:
           os: macos
+          THR: pthreads
           CC: clang
           CXX: clang++
 
@@ -226,6 +225,11 @@ jobs:
               export TESTSUITE_WRAPPER="$DIST_PATH/../toolchain/qemu-riscv64 -cpu rv64,vext_spec=v1.0,v=true,vlen=512 -B 0x100000";
             fi
 
+            if [ "$CONF" = "generic_broadcast" ]; then
+              export CONF=generic
+              export CFLAGS="-DBLIS_BBM_s=2 -DBLIS_BBM_d=2 -DBLIS_BBM_c=2 -DBLIS_BBM_z=2 -DBLIS_BBN_s=4 -DBLIS_BBN_d=4 -DBLIS_BBN_c=4 -DBLIS_BBN_z=4"
+            fi
+
             echo "Configuration:"
             echo "CC                = $CC"
             echo "CXX               = $CXX"
@@ -237,6 +241,7 @@ jobs:
             echo "SDE               = $SDE"
             echo "LEVEL0            = $LEVEL0"
             echo "DIST_PATH         = $DIST_PATH"
+            echo "CFLAGS            = $CFLAGS"
             echo "LDFLAGS           = $LDFLAGS"
             echo "TESTSUITE_WRAPPER = $TESTSUITE_WRAPPER"
 
