@@ -553,16 +553,13 @@ void packb_nrlt16_bf16bf16f32of32_row_major
 
 	dim_t kr_new = 0;
 
-	bfloat16 buf0[16];
-	bfloat16 buf1[16];
+	__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_partial_rem ) );
 
 	for ( int kr = 0; kr < k_full_pieces; kr += 2 )
 	{
-		memcpy( buf0, ( b + ( ldb * ( kr + 0 ) ) ), ( n0_partial_rem * sizeof( bfloat16 ) ) );
-		memcpy( buf1, ( b + ( ldb * ( kr + 1 ) ) ), ( n0_partial_rem * sizeof( bfloat16 ) ) );
 		// Rearrange for dpbf16_ps, read 2 rows from B with next 16 elements in each row.
-		a0 = _mm256_maskz_loadu_epi16( 0xFFFF, buf0 );
-		c0 = _mm256_maskz_loadu_epi16( 0xFFFF, buf1 );
+		a0 = _mm256_maskz_loadu_epi16( load_mask, b + ( ldb * ( kr + 0 ) ) );
+		c0 = _mm256_maskz_loadu_epi16( load_mask, b + ( ldb * ( kr + 1 ) ) );
 
 		a01 = _mm256_unpacklo_epi16( a0, c0 );
 		a0 = _mm256_unpackhi_epi16( a0, c0 );
@@ -587,8 +584,7 @@ void packb_nrlt16_bf16bf16f32of32_row_major
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
-		memcpy( buf0, ( b + ( ldb * ( k_full_pieces + 0 ) ) ), ( n0_partial_rem * sizeof( bfloat16 ) ) );
-		a0 = _mm256_maskz_loadu_epi16( 0xFFFF, buf0 );
+		a0 = _mm256_maskz_loadu_epi16( load_mask, b + ( ldb * ( k_full_pieces + 0 ) ) );
 		c0 = _mm256_setzero_si256();
 
 		a01 = _mm256_unpacklo_epi16( a0, c0 );

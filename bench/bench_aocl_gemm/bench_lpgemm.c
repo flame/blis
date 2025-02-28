@@ -756,10 +756,10 @@ void mat_mul_bench_main_ ## BLAS_SFX \
     } \
     A_type* a = ( A_type* ) lpgemm_malloc( sizeof( A_type ) * size_A ); \
     GEN_FUNC_NAME(fill_array_,A_type)(a, size_A ); \
-    bool int4_testing = ( strcmp(#BLAS_SFX,"bf16s4f32of32") | strcmp(#BLAS_SFX,"bf16s4f32obf16") ); \
+    bool int4_testing = ( ( strcmp(#BLAS_SFX,"bf16s4f32of32") == 0 ) || (strcmp(#BLAS_SFX,"bf16s4f32obf16") == 0 ) ); \
  \
     B_type* b = ( B_type* ) lpgemm_malloc( sizeof( B_type ) * size_B ); \
-    if ( int4_testing != FALSE ) \
+    if ( int4_testing == FALSE ) \
     { \
         GEN_FUNC_NAME(fill_array_,B_type)(b, size_B ); \
     } \
@@ -829,7 +829,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
     { \
         B_type* b_reorder = NULL; \
         /* Reorder B.*/ \
-        if ( int4_testing != FALSE ) \
+        if ( int4_testing == FALSE ) \
         { \
             siz_t b_reorder_buf_siz_req = \
                 GEN_FUNC_NAME(aocl_get_reorder_buf_size_,REORDER_SFX)( stor_order, transb, 'B', k, n ); \

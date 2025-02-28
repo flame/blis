@@ -1050,11 +1050,6 @@ void packb_nrlt16_s8s8s32os32_row_major
      )
 {
     dim_t NR = 64;
-    int8_t buf0[16];
-    int8_t buf1[16];
-    int8_t buf2[16];
-    int8_t buf3[16];
-
     dim_t kr_new = 0;
 
     dim_t k_full_pieces_blks = KC / 4;
@@ -1076,18 +1071,15 @@ void packb_nrlt16_s8s8s32os32_row_major
     //load the temp buffer to compute column sum of B matrix
     sum1 = _mm512_loadu_si512( pack_b_column_sum );
 
+    __mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_partial_rem ) );
+
     for ( dim_t kr = 0; kr < k_full_pieces; kr += 4 )
     {
-        memcpy( buf0, ( b + ( ldb * ( kr + 0 ) ) ), ( n0_partial_rem * sizeof( int8_t ) ) );
-        memcpy( buf1, ( b + ( ldb * ( kr + 1 ) ) ), ( n0_partial_rem * sizeof( int8_t ) ) );
-        memcpy( buf2, ( b + ( ldb * ( kr + 2 ) ) ), ( n0_partial_rem * sizeof( int8_t ) ) );
-        memcpy( buf3, ( b + ( ldb * ( kr + 3 ) ) ), ( n0_partial_rem * sizeof( int8_t ) ) );
-
         // Rearrange for vpdpbusd, read 4 rows from B with next 16 elements in each row.
-        a0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf0 );
-        b0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf1 );
-        c0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf2 );
-        d0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf3 );
+        a0_16 = _mm_maskz_loadu_epi8( load_mask,  b + ( ldb * ( kr + 0 ) ) );
+        b0_16 = _mm_maskz_loadu_epi8( load_mask,  b + ( ldb * ( kr + 1 ) ) );
+        c0_16 = _mm_maskz_loadu_epi8( load_mask,  b + ( ldb * ( kr + 2 ) ) );
+        d0_16 = _mm_maskz_loadu_epi8( load_mask,  b + ( ldb * ( kr + 3 ) ) );
 
         //add all the columns : sum = add (sum, a0, b0, c0, d0)
         sum1 =
@@ -1128,13 +1120,9 @@ void packb_nrlt16_s8s8s32os32_row_major
     {
         if ( k_partial_pieces == 3 )
         {
-            memcpy( buf0, ( b + ( ldb * ( k_full_pieces + 0 ) ) ), ( n0_partial_rem * sizeof( int8_t ) ) );
-            memcpy( buf1, ( b + ( ldb * ( k_full_pieces + 1 ) ) ), ( n0_partial_rem * sizeof( int8_t ) ) );
-            memcpy( buf2, ( b + ( ldb * ( k_full_pieces + 2 ) ) ), ( n0_partial_rem * sizeof( int8_t ) ) );
-
-            a0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf0 );
-            b0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf1 );
-            c0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf2 );
+            a0_16 = _mm_maskz_loadu_epi8( load_mask, b + ( ldb * ( k_full_pieces + 0 ) ) );
+            b0_16 = _mm_maskz_loadu_epi8( load_mask, b + ( ldb * ( k_full_pieces + 1 ) ) );
+            c0_16 = _mm_maskz_loadu_epi8( load_mask, b + ( ldb * ( k_full_pieces + 2 ) ) );
             d0_16 = _mm_setzero_si128();
 
             sum1 =
@@ -1148,11 +1136,8 @@ void packb_nrlt16_s8s8s32os32_row_major
         }
         else if( k_partial_pieces == 2 )
         {
-            memcpy( buf0, ( b + ( ldb * ( k_full_pieces + 0 ) ) ), ( n0_partial_rem * sizeof( int8_t ) ) );
-            memcpy( buf1, ( b + ( ldb * ( k_full_pieces + 1 ) ) ), ( n0_partial_rem * sizeof( int8_t ) ) );
-
-            a0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf0 );
-            b0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf1 );
+            a0_16 = _mm_maskz_loadu_epi8( load_mask, b + ( ldb * ( k_full_pieces + 0 ) ) );
+            b0_16 = _mm_maskz_loadu_epi8( load_mask, b + ( ldb * ( k_full_pieces + 1 ) ) );
             c0_16 = _mm_setzero_si128();
             d0_16 = _mm_setzero_si128();
 
@@ -1164,9 +1149,7 @@ void packb_nrlt16_s8s8s32os32_row_major
         }
         else //k_partial_pieces == 1
         {
-            memcpy( buf0, ( b + ( ldb * ( k_full_pieces + 0 ) ) ), ( n0_partial_rem * sizeof( int8_t ) ) );
-
-            a0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf0 );
+            a0_16 = _mm_maskz_loadu_epi8( load_mask, b + ( ldb * ( k_full_pieces + 0 ) ) );
             b0_16 = _mm_setzero_si128();
             c0_16 = _mm_setzero_si128();
             d0_16 = _mm_setzero_si128();

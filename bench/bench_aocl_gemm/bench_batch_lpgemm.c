@@ -432,261 +432,6 @@ GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int32_t,float)
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int8_t,float)
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(uint8_t,float)
 
-#if 0
-#define GEN_MAT_MUL_ACC_CHK_DRV_FUNC(A_type,B_type,C_type,ACCUM_type,SCALE_type,BLAS_SFX,BLAS_DOWNSCALE_SFX) \
-void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
-     ( \
-       FILE*   fout, \
-       const char* stor_order, \
-       char*   transa, \
-       char*   transb, \
-       dim_t   bs, \
-       dim_t*  m, \
-       dim_t*  n, \
-       dim_t*  k, \
-       ACCUM_type* alpha, \
-       A_type** a, \
-       dim_t*  lda, \
-       B_type** b, \
-       dim_t*  ldb, \
-       ACCUM_type* beta, \
-       C_type** c, \
-       dim_t*  ldc, \
-       C_type** c_ref, \
-       dim_t*  ldc_ref, \
-       aocl_post_op**  post_op, \
-       bool    int4_testing /* Workaround to enable int4 B matrix testing. */ \
-     ) \
-{ \
-    dim_t rs_a, cs_a; \
-    dim_t rs_b, cs_b; \
-    dim_t rs_c, cs_c; \
-    dim_t rs_c_ref; \
-    dim_t cs_c_ref; \
-    for( dim_t bs_i = 0; bs_i < bs; bs_i++ ) \
-    { \
-        if( stor_order[bs_i] == 'r' || stor_order[bs_i] == 'R' ) \
-        { \
-            if( ( transa[bs_i] == 'n' ) || ( transa[bs_i] == 'N' ) ) \
-            { \
-                rs_a = lda[bs_i]; \
-                cs_a = 1; \
-            } \
-            else \
-            { \
-                rs_a = 1; \
-                cs_a = lda[bs_i]; \
-            } \
-            if( ( transb[bs_i] == 'n' ) || ( transb[bs_i] == 'N' ) ) \
-            { \
-                rs_b = ldb[bs_i]; \
-                cs_b = 1; \
-            } \
-            else \
-            { \
-                rs_b = 1; \
-                cs_b = ldb[bs_i]; \
-            } \
-            rs_c = ldc[bs_i]; \
-            cs_c = 1; \
-            rs_c_ref = ldc_ref[bs_i]; \
-            cs_c_ref = 1; \
-        } \
-        else /* column storage */ \
-        { \
-            if( transa[bs_i] == 'n' || transa[bs_i] == 'N') \
-            { \
-                rs_a = 1; \
-                cs_a = lda[bs_i]; \
-            } \
-            else \
-            { \
-                rs_a= lda[bs_i]; \
-                cs_a = 1; \
-            } \
-            if( ( transb[bs_i] == 'n' ) || ( transb[bs_i] == 'N' ) ) \
-            { \
-                rs_b = 1; \
-                cs_b = ldb[bs_i]; \
-            } \
-            else \
-            { \
-                rs_b = ldb[bs_i]; \
-                cs_b = 1; \
-            } \
-            rs_c = 1; \
-            cs_c = ldc[bs_i]; \
-            rs_c_ref = 1; \
-            cs_c_ref = ldc_ref[bs_i]; \
-        } \
-        aocl_pre_op* a_pre_op = NULL; \
-        if ( post_op[bs_i] != NULL ) \
-        { \
-            a_pre_op = post_op[bs_i]->pre_ops; \
-        } \
-        for ( dim_t i = 0; i < m[bs_i]; ++i ) \
-        { \
-            for ( dim_t j = 0; j < n[bs_i]; ++j ) \
-            { \
-                ACCUM_type temp_accum = 0; \
-                C_type out_temp_accum = 0; \
-    \
-                temp_accum = GEN_FUNC_NAME(mat_mul_accuracy_check_accum_,BLAS_SFX) \
-                    (a[bs_i], b[bs_i], c_ref[bs_i], temp_accum, alpha[bs_i], beta[bs_i],\
-                    rs_a, rs_b, cs_a, cs_b, rs_c_ref, cs_c_ref, i, j, k[bs_i], \
-                    int4_testing, a_pre_op); \
-    \
-                if ( post_op[bs_i] != NULL ) \
-                { \
-                    dim_t ele_i = 0; \
-                    for ( dim_t op_id = 0; op_id < post_op[bs_i]->seq_length; ++op_id ) \
-                    { \
-                        if ( post_op[bs_i]->seq_vector[op_id] == BIAS ) \
-                        { \
-                            temp_accum += GEN_FUNC_NAME(get_bias_post_op_val_,BLAS_SFX) \
-                                ( ( post_op[bs_i]->bias )->bias, j, ( post_op[bs_i]->bias )->stor_type ); \
-                        } \
-                        else if ( post_op[bs_i]->seq_vector[op_id] == ELTWISE ) \
-                        { \
-                            if ( ( post_op[bs_i]->eltwise + ele_i )->algo.algo_type == \
-                                    PRELU ) /* PReLU*/ \
-                            { \
-                                temp_accum = ( temp_accum > 0 ) ? \
-                                    temp_accum : \
-                                    ( temp_accum * \
-                                    *( ( ACCUM_type* ) ( post_op[bs_i]->eltwise + ele_i )->algo.alpha ) ); \
-                                ele_i += 1; \
-                            } \
-                            else if ( ( post_op[bs_i]->eltwise + ele_i )->algo.algo_type == \
-                                    GELU_TANH ) /* TANH GeLU*/ \
-                            { \
-                                temp_accum = GEN_FUNC_NAME(GELU_TANH_post_op_,BLAS_SFX) (temp_accum);\
-                                ele_i += 1; \
-                            } \
-                            else if ( ( post_op[bs_i]->eltwise + ele_i )->algo.algo_type == \
-                                    GELU_ERF ) /* ERF GeLU*/ \
-                            { \
-                                temp_accum = GEN_FUNC_NAME(GELU_ERF_post_op_,BLAS_SFX) (temp_accum);\
-                                ele_i += 1; \
-                            } \
-                            else if ( ( post_op[bs_i]->eltwise + ele_i )->algo.algo_type == \
-                                    SWISH ) /* SiLU*/ \
-                            { \
-                                temp_accum = GEN_FUNC_NAME(SWISH_post_op_,BLAS_SFX) \
-                                    (temp_accum, \
-                                    ( post_op[bs_i]->eltwise + ele_i )->algo.alpha );\
-                                ele_i += 1; \
-                            } \
-                            else if ( ( post_op[bs_i]->eltwise + ele_i )->algo.algo_type == \
-                                    RELU ) /* ReLU*/ \
-                            { \
-                                temp_accum = ( temp_accum > 0 ) ? temp_accum : 0 ; \
-                                ele_i += 1; \
-                            } \
-                            else if ( ( post_op[bs_i]->eltwise + ele_i )->algo.algo_type == \
-                                    TANH ) /* TANH*/ \
-                            { \
-                                temp_accum = GEN_FUNC_NAME(TANH_post_op_,BLAS_SFX) (temp_accum);\
-                                ele_i += 1; \
-                            } \
-                            else if ( ( post_op[bs_i]->eltwise + ele_i )->algo.algo_type == \
-                                    SIGMOID ) /* Sigmoid*/ \
-                            { \
-                                temp_accum = GEN_FUNC_NAME(SIGMOID_post_op_,BLAS_SFX) (temp_accum);\
-                                ele_i += 1; \
-                            } \
-                            else if ( ( post_op[bs_i]->eltwise + ele_i )->algo.algo_type == \
-                                    CLIP ) /* CLIP*/ \
-                            { \
-                                temp_accum = \
-                                    min \
-                                    ( \
-                                    max \
-                                    ( \
-                                        temp_accum, \
-                                        *( ( ACCUM_type* ) \
-                                        ( post_op[bs_i]->eltwise + ele_i )->algo.alpha ) \
-                                    ), \
-                                    *( ( ACCUM_type* ) \
-                                        ( post_op[bs_i]->eltwise + ele_i )->algo.beta) \
-                                    ); \
-                                ele_i += 1; \
-                            } \
-                            else \
-                            {} \
-                        } \
-                        else if ( post_op[bs_i]->seq_vector[op_id] == SCALE ) \
-                        { \
-                            temp_accum = GEN_FUNC_NAME(mat_mul_accuracy_check_downscale_,BLAS_DOWNSCALE_SFX) \
-                                (temp_accum, post_op[bs_i], j); \
-                        } \
-                        else if ( post_op[bs_i]->seq_vector[op_id] == MATRIX_ADD ) \
-                        { \
-                            dim_t rs_m = ( post_op[bs_i]->matrix_add )->ldm; \
-                            dim_t cs_m = 1; \
-                            if ( ( stor_order[bs_i] == 'C' ) || ( stor_order[bs_i] == 'c' ) ) \
-                            { \
-                                cs_m = rs_m; \
-                                rs_m = 1; \
-                            } \
-                            float* scl_fctr = ( float* )( ( post_op[bs_i]->matrix_add )->scale_factor ); \
-                            dim_t scl_fctr_len = ( post_op[bs_i]->matrix_add )->scale_factor_len; \
-                            temp_accum += GEN_FUNC_NAME(get_matrix_add_post_op_val_,BLAS_SFX) \
-                                        ( ( post_op[bs_i]->matrix_add )->matrix, i, \
-                                          j, rs_m, cs_m, scl_fctr, scl_fctr_len, ( post_op[bs_i]->matrix_add)->stor_type ); \
-                        } \
-                        else if ( post_op[bs_i]->seq_vector[op_id] == MATRIX_MUL ) \
-                        { \
-                            dim_t rs_m = ( post_op[bs_i]->matrix_mul )->ldm; \
-                            dim_t cs_m = 1; \
-                            if ( ( stor_order[bs_i] == 'C' ) || ( stor_order[bs_i] == 'c' ) ) \
-                            { \
-                                cs_m = rs_m; \
-                                rs_m = 1; \
-                            } \
-                            float* scl_fctr = ( float* )( ( post_op[bs_i]->matrix_mul )->scale_factor ); \
-                            dim_t scl_fctr_len = ( post_op[bs_i]->matrix_mul )->scale_factor_len; \
-                            temp_accum *= GEN_FUNC_NAME(get_matrix_mul_post_op_val_,BLAS_SFX) \
-                                        (( post_op[bs_i]->matrix_mul )->matrix, i, \
-                                          j, rs_m, cs_m, scl_fctr, scl_fctr_len, ( post_op[bs_i]->matrix_mul)->stor_type ); \
-                        } \
-                        else \
-                        {} \
-                    } \
-                } \
-                /* Need to convert to downscaled type if required.*/ \
-                mat_mul_get_output_type_val ## ACCUM_type ## C_type \
-                ( \
-                &out_temp_accum, &temp_accum \
-                ); \
-    \
-                float comp_float, ref_float; \
-                GEN_FUNC_NAME(C_type,_to_float)(*( c[bs_i] + ( rs_c * i ) + ( cs_c * j ) ), &comp_float); \
-                GEN_FUNC_NAME(C_type,_to_float)(out_temp_accum, &ref_float); \
- \
-                if ( ( ( comp_float - ref_float ) > 1.0E-5 ) || \
-                    ( ( ref_float - comp_float ) > 1.0E-5 ) ) \
-                { \
-                    if ( fout ) \
-                    { \
-                        fprintf( fout, "%s Failure input gemm:%ld, m: %ld, n: %ld, k: %ld," \
-                                        " lda: %ld, ldb: %ld, ldc: %ld, computed:%f, ref:%f, diff:%f\n", \
-                                        XSTR(BLAS_SFX), bs_i, m[bs_i], n[bs_i], k[bs_i], lda[bs_i], ldb[bs_i], ldc[bs_i], comp_float, \
-                                        ref_float, comp_float - ref_float); \
-                        fflush( fout ); \
-                    } \
-                        printf("failure, gemm:%ld, m_index: %ld, n_index: %ld, k: %ld, computed:%f, ref:%f," \
-                                "diff:%f\n", bs_i, i, j, k[bs_i], comp_float, ref_float, comp_float-ref_float); \
-                    goto cleanup_acc; \
-                } \
-            } \
-        } \
-    } \
-cleanup_acc: \
-    return; \
-} \
-
-#else
 #define GEN_MAT_MUL_ACC_CHK_DRV_FUNC(A_type,B_type,C_type,ACCUM_type,POST_ACCUM_type,SCALE_type,BLAS_SFX,BLAS_DOWNSCALE_SFX) \
 void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
      ( \
@@ -941,7 +686,6 @@ cleanup_acc: \
     return; \
 } \
 
-#endif
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int32_t,int32_t,float,float,u8s8s32os32,u8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int8_t,int32_t,float,float,u8s8s32os8,u8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,uint8_t,int32_t,float,float,u8s8s32ou8,u8s8s32ou8)
@@ -1021,7 +765,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
     Sum_type alpha[bs]; \
     Sum_type beta[bs]; \
     aocl_post_op** post_op = (aocl_post_op**)lpgemm_malloc(sizeof(aocl_post_op*) * bs); \
-    bool int4_testing = ( strcmp(#BLAS_SFX,"bf16s4f32of32") | strcmp(#BLAS_SFX,"bf16s4f32obf16") ); \
+    bool int4_testing = ( ( strcmp(#BLAS_SFX,"bf16s4f32of32") == 0 ) || ( strcmp(#BLAS_SFX,"bf16s4f32obf16") == 0 ) ); \
     for( dim_t i = 0; i < bs; i++ ) \
     { \
         dim_t size_A = 0; \
@@ -1042,7 +786,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
         a[i] = ( A_type* ) lpgemm_malloc( sizeof( A_type ) * size_A ); \
         GEN_FUNC_NAME(fill_array_,A_type)(a[i], size_A ); \
          b[i] = ( B_type* ) lpgemm_malloc( sizeof( B_type ) * size_B ); \
-        if ( int4_testing != FALSE ) \
+        if ( int4_testing == FALSE ) \
         { \
             GEN_FUNC_NAME(fill_array_,B_type)(b[i], size_B ); \
         } \
@@ -1095,7 +839,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
         } \
         else if ( ( op_b[i] == 'r' ) || ( op_b[i] == 'R' ) ) \
         { \
-            if ( int4_testing != FALSE ) \
+            if ( int4_testing == FALSE ) \
             { \
                 siz_t b_reorder_buf_siz_req = \
                 GEN_FUNC_NAME(aocl_get_reorder_buf_size_,REORDER_SFX)( stor_order[i], transb[i], 'B', k[i], n[i] ); \
