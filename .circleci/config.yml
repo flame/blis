@@ -46,15 +46,16 @@ workflows:
           CONF: x86_64
 
       # SDE testing for x86_64
+      # Also test LEVEL0 here because g++ uses tons of memory for test_taxpbys.cxx
       - build:
           # linuxvm must be used because it provides 8G RAM and SDE fails with 4G RAM
           os: linuxvm
           SDE: 1
+          LEVEL0: 1
           CONF: x86_64
 
-      # some other random tests
+      # test generic kernels
       - build:
-          LEVEL0: 1
           CONF: generic_broadcast
 
       # clang build
