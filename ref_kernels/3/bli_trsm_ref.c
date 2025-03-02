@@ -37,8 +37,8 @@
 // An implementation that indexes through B with the assumption that all
 // elements were broadcast (duplicated) by a factor of NP/NR.
 
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, arch, suf, diagop ) \
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype, ctype_r, ch, chr, opname, arch, suf, diagop ) \
 \
 void PASTEMAC(ch,opname,arch,suf) \
      ( \
@@ -75,58 +75,66 @@ void PASTEMAC(ch,opname,arch,suf) \
 		dim_t i        = iter; \
 		dim_t n_behind = i; \
 \
-		const ctype* restrict alpha11 = a + (i  )*rs_a + (i  )*cs_a; \
-		const ctype* restrict a10t    = a + (i  )*rs_a + (0  )*cs_a; \
-		      ctype* restrict B0      = b + (0  )*rs_b + (0  )*cs_b; \
-		      ctype* restrict b1      = b + (i  )*rs_b + (0  )*cs_b; \
+		const ctype_r* restrict alpha11r = ( ctype_r* )( a + (i  )*rs_a + (i  )*cs_a ); \
+		const ctype_r* restrict alpha11i = alpha11r + rs_a; \
+		const ctype*   restrict a10t     = a + (i  )*rs_a + (0  )*cs_a; \
+		      ctype*   restrict B0       = b + (0  )*rs_b + (0  )*cs_b; \
+		      ctype*   restrict b1       = b + (i  )*rs_b + (0  )*cs_b; \
 \
 		/* b1 = b1 - a10t * B0; */ \
 		/* b1 = b1 / alpha11; */ \
 		for ( dim_t j = 0; j < n; ++j ) \
 		{ \
-			ctype* restrict b01     = B0 + (0  )*rs_b + (j  )*cs_b; \
-			ctype* restrict beta11  = b1 + (0  )*rs_b + (j  )*cs_b; \
-			ctype* restrict gamma11 = c  + (i  )*rs_c + (j  )*cs_c; \
-			ctype           beta11c = *beta11; \
-			ctype           rho11; \
+			ctype*   restrict b01      = B0 + (0  )*rs_b + (j  )*cs_b; \
+			ctype_r* restrict beta11r  = ( ctype_r* )( b1 + (0  )*rs_b + (j  )*cs_b ); \
+			ctype_r* restrict beta11i  = beta11r + cs_b; \
+			ctype_r* restrict gamma11r = ( ctype_r* )( c  + (i  )*rs_c + (j  )*cs_c ); \
+			ctype_r* restrict gamma11i = gamma11r + 1; \
+			ctype_r           beta11cr = *beta11r; \
+			ctype_r           beta11ci = *beta11i; \
+			ctype_r           rho11r; \
+			ctype_r           rho11i; \
 \
 			/* beta11 = beta11 - a10t * b01; */ \
-			bli_tset0s( ch, rho11 ); \
+			bli_tset0s( chr, rho11r ); \
+			bli_tset0s( chr, rho11i ); \
 			for ( dim_t l = 0; l < n_behind; ++l ) \
 			{ \
-				const ctype* restrict alpha10 = a10t + (l  )*cs_a; \
-				      ctype* restrict beta01  = b01  + (l  )*rs_b; \
+				const ctype_r* restrict alpha10r = ( ctype_r* )( a10t + (l  )*cs_a ); \
+				const ctype_r* restrict alpha10i = alpha10r + rs_a; \
+				      ctype_r* restrict beta01r  = ( ctype_r* )( b01  + (l  )*rs_b ); \
+				      ctype_r* restrict beta01i  = beta01r + cs_b; \
 \
-				bli_taxpys( ch,ch,ch,ch, *alpha10, *beta01, rho11 ); \
+				bli_taxpyris( ch,ch,ch,ch, *alpha10r, *alpha10i, *beta01r, *beta01i, rho11r, rho11i ); \
 			} \
-			bli_tsubs( ch,ch,ch, rho11, beta11c ); \
+			bli_tsubris( ch,ch,ch, rho11r, rho11i, beta11cr, beta11ci ); \
 \
 			/* beta11 = beta11 / alpha11; */ \
 			/* NOTE: When preinversion is enabled, the INVERSE of alpha11
 			   (1.0/alpha11) is stored during packing instead alpha11 so we
 			   can multiply rather than divide. When preinversion is disabled,
 			   alpha11 is stored and division happens below explicitly. */ \
-			PASTEMAC(t,diagop)( ch,ch,ch, *alpha11, beta11c ); \
+			PASTEMAC(t,diagop)( ch,ch,ch, *alpha11r, *alpha11i, beta11cr, beta11ci ); \
 \
 			/* Output final result to matrix c. */ \
-			bli_tcopys( ch,ch, beta11c, *gamma11 ); \
+			bli_tcopyris( ch,ch, beta11cr, beta11ci, *gamma11r, *gamma11i ); \
 \
 			/* Store the local value back to b11. */ \
 			for ( dim_t d = 0; d < cs_b; ++d ) \
-				bli_tcopys( ch,ch, beta11c, *(beta11 + d) ); \
+				bli_tcopyris( ch,ch, beta11cr, beta11ci, *(beta11r + d), *(beta11i + d) ); \
 		} \
 	} \
 }
 
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
-INSERT_GENTFUNC_BASIC( trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, scals )
+INSERT_GENTFUNCR_BASIC( trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, scalris )
 #else
-INSERT_GENTFUNC_BASIC( trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscals )
+INSERT_GENTFUNCR_BASIC( trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscalris )
 #endif
 
 
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, arch, suf, diagop ) \
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype, ctype_r, ch, chr, opname, arch, suf, diagop ) \
 \
 void PASTEMAC(ch,opname,arch,suf) \
      ( \
@@ -163,52 +171,60 @@ void PASTEMAC(ch,opname,arch,suf) \
 		dim_t i        = m - iter - 1; \
 		dim_t n_behind = iter; \
 \
-		const ctype* restrict alpha11 = a + (i  )*rs_a + (i  )*cs_a; \
-		const ctype* restrict a12t    = a + (i  )*rs_a + (i+1)*cs_a; \
-		      ctype* restrict b1      = b + (i  )*rs_b + (0  )*cs_b; \
-		      ctype* restrict B2      = b + (i+1)*rs_b + (0  )*cs_b; \
+		const ctype_r* restrict alpha11r = ( ctype_r* )( a + (i  )*rs_a + (i  )*cs_a ); \
+		const ctype_r* restrict alpha11i = alpha11r + rs_a; \
+		const ctype*   restrict a12t     = a + (i  )*rs_a + (i+1)*cs_a; \
+		      ctype*   restrict b1       = b + (i  )*rs_b + (0  )*cs_b; \
+		      ctype*   restrict B2       = b + (i+1)*rs_b + (0  )*cs_b; \
 \
 		/* b1 = b1 - a12t * B2; */ \
 		/* b1 = b1 / alpha11; */ \
 		for ( dim_t j = 0; j < n; ++j ) \
 		{ \
-			ctype* restrict beta11  = b1 + (0  )*rs_b + (j  )*cs_b; \
-			ctype* restrict b21     = B2 + (0  )*rs_b + (j  )*cs_b; \
-			ctype* restrict gamma11 = c  + (i  )*rs_c + (j  )*cs_c; \
-			ctype           beta11c = *beta11; \
-			ctype           rho11; \
+			ctype_r* restrict beta11r  = ( ctype_r* )( b1 + (0  )*rs_b + (j  )*cs_b ); \
+			ctype_r* restrict beta11i  = beta11r + cs_b; \
+			ctype*   restrict b21      = B2 + (0  )*rs_b + (j  )*cs_b; \
+			ctype_r* restrict gamma11r = ( ctype_r* )( c  + (i  )*rs_c + (j  )*cs_c ); \
+			ctype_r* restrict gamma11i = gamma11r + 1; \
+			ctype_r           beta11cr = *beta11r; \
+			ctype_r           beta11ci = *beta11i; \
+			ctype_r           rho11r; \
+			ctype_r           rho11i; \
 \
 			/* beta11 = beta11 - a12t * b21; */ \
-			bli_tset0s( ch, rho11 ); \
+			bli_tset0s( chr, rho11r ); \
+			bli_tset0s( chr, rho11i ); \
 			for ( dim_t l = 0; l < n_behind; ++l ) \
 			{ \
-				const ctype* restrict alpha12 = a12t + (l  )*cs_a; \
-				      ctype* restrict beta21  = b21  + (l  )*rs_b; \
+				const ctype_r* restrict alpha12r = ( ctype_r* )( a12t + (l  )*cs_a ); \
+				const ctype_r* restrict alpha12i = alpha12r + rs_a; \
+				      ctype_r* restrict beta21r  = ( ctype_r* )( b21  + (l  )*rs_b ); \
+				      ctype_r* restrict beta21i  = beta21r + cs_b; \
 \
-				bli_taxpys( ch,ch,ch,ch, *alpha12, *beta21, rho11 ); \
+				bli_taxpyris( ch,ch,ch,ch, *alpha12r, *alpha12i, *beta21r, *beta21i, rho11r, rho11i ); \
 			} \
-			bli_tsubs( ch,ch,ch, rho11, beta11c ); \
+			bli_tsubris( ch,ch,ch, rho11r, rho11i, beta11cr, beta11ci ); \
 \
 			/* beta11 = beta11 / alpha11; */ \
 			/* NOTE: When preinversion is enabled, the INVERSE of alpha11
 			   (1.0/alpha11) is stored during packing instead alpha11 so we
 			   can multiply rather than divide. When preinversion is disabled,
 			   alpha11 is stored and division happens below explicitly. */ \
-			PASTEMAC(t,diagop)( ch,ch,ch, *alpha11, beta11c ); \
+			PASTEMAC(t,diagop)( ch,ch,ch, *alpha11r, *alpha11i, beta11cr, beta11ci ); \
 \
 			/* Output final result to matrix c. */ \
-			bli_tcopys( ch,ch, beta11c, *gamma11 ); \
+			bli_tcopyris( ch,ch, beta11cr, beta11ci, *gamma11r, *gamma11i ); \
 \
 			/* Store the local value back to b11. */ \
 			for ( dim_t d = 0; d < cs_b; ++d ) \
-				bli_tcopys( ch,ch, beta11c, *(beta11 + d) ); \
+				bli_tcopyris( ch,ch, beta11cr, beta11ci, *(beta11r + d), *(beta11i + d) ); \
 		} \
 	} \
 }
 
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
-INSERT_GENTFUNC_BASIC( trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, scals )
+INSERT_GENTFUNCR_BASIC( trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, scalris )
 #else
-INSERT_GENTFUNC_BASIC( trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscals )
+INSERT_GENTFUNCR_BASIC( trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscalris )
 #endif
 
