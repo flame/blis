@@ -1462,7 +1462,7 @@ BLIS_INLINE void bli_obj_imag_part( const obj_t* c, obj_t* i )
 
 		// Update the buffer.
 		inc_t is_c = bli_obj_imag_stride( c );
-		char* p    = ( char* )bli_obj_buffer_at_off( c );
+		char* p    = ( char* )bli_obj_buffer( c );
 		bli_obj_set_buffer( p + is_c * es_c/2, i );
 	}
 }
