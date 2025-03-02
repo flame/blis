@@ -41,35 +41,28 @@ workflows:
       - build:
           OOT: 1
           TEST: ALL
-          SDE: 0
+          THR: openmp,pthreads
           CONF: x86_64
 
       # SDE testing for x86_64
+      # Also test LEVEL0 here because g++ uses tons of memory for test_taxpbys.cxx
       - build:
           # linuxvm must be used because it provides 8G RAM and SDE fails with 4G RAM
           os: linuxvm
-          OOT: 0
-          TEST: FAST
           SDE: 1
           CONF: x86_64
-
-      # openmp build
-      - build:
-          THR: openmp
-
-      # pthreads build
-      - build:
-          THR: pthreads
 
       # clang build
       - build:
           CC: clang
+          THR: openmp,pthreads
           CXX: clang++
-          PACKAGES: clang
+          PACKAGES: clang libomp-dev
 
       # macOS with system compiler (clang)
       - build:
           os: macos
+          THR: pthreads
           CC: clang
           CXX: clang++
 
@@ -197,6 +190,7 @@ jobs:
             export BLD="<< parameters.BLD >>"
             export LDFLAGS="<< parameters.LDFLAGS >>"
             export SDE="<< parameters.SDE >>"
+            export LEVEL0="<< parameters.LEVEL0 >>"
             export THR="<< parameters.THR >>"
             export TESTSUITE_WRAPPER="<< parameters.TESTSUITE_WRAPPER >>"
 
@@ -233,6 +227,7 @@ jobs:
             echo "BLD               = $BLD"
             echo "SDE               = $SDE"
             echo "DIST_PATH         = $DIST_PATH"
+            echo "CFLAGS            = $CFLAGS"
             echo "LDFLAGS           = $LDFLAGS"
             echo "TESTSUITE_WRAPPER = $TESTSUITE_WRAPPER"
 
@@ -242,7 +237,7 @@ jobs:
             $CC --version
             $CC -v
 
-            make -j2
+            make V=1 -j2
             make install
 
             if [ "$BLD" = "" ] && [ "$TESTSUITE_WRAPPER" = "" ] ; then $DIST_PATH/ci/cxx/cxx-test.sh $DIST_PATH $(ls -1 include); fi

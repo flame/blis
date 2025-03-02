@@ -343,6 +343,7 @@ void libblis_test_read_op_info( test_ops_t*  ops,
 void libblis_test_output_section_overrides( FILE* os, test_ops_t* ops );
 void libblis_test_output_params_struct( FILE* os, test_params_t* params );
 void libblis_test_output_op_struct( FILE* os, test_op_t* op, char* op_str );
+void libblis_test_output_term_tag( void );
 
 // --- Mapping ---
 
