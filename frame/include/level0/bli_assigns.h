@@ -43,9 +43,9 @@
 //   when that output exists only in the real domain (i.e. has no imaginary
 //   part to begin with).
 
-#define bli_rassigns( xr, xi, yr, yi ) { yr = xr;          }
-#define bli_cassigns( xr, xi, yr, yi ) { yr = xr; yi = xi; }
-#define bli_jassigns( xr, xi, yr, yi ) {          yi = xi; }
+#define bli_rassigns( xr, xi, yr, yi ) { yr = xr;          (void)(xi); (void)(yi); }
+#define bli_cassigns( xr, xi, yr, yi ) { yr = xr; yi = xi;                         }
+#define bli_jassigns( xr, xi, yr, yi ) {          yi = xi; (void)(xr); (void)(yr); }
 
 
 #endif
