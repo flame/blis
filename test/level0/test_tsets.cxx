@@ -332,14 +332,25 @@ UNIT_TEST(chy,PASTECH(opname,_,D)) \
 		INFO( "column-major" ); \
 \
 		auto ymn0 = tile<M,D*N>( y ); \
-		auto& ymn0_ = reinterpret_cast<decltype(tile<M,2*D*N>(real(y)))&>( ymn0 ); \
+\
+		if constexpr ( is_complex<ctypey>::value ) \
+		{ \
+			for ( auto i = 0;i < M;i++ ) \
+			for ( auto j = 0;j < N;j++ ) \
+			{ \
+				auto ymnij = &real( ymn0[i][j*D] ); \
+				for ( auto d = 0;d < D;d++ ) \
+				{ \
+					ymnij[  d] = real( y ); \
+					ymnij[D+d] = imag( y ); \
+				} \
+			} \
+		} \
+\
 		for ( auto i = 0;i < M;i++ ) \
 		for ( auto j = 0;j < N;j++ ) \
-		for ( auto d = 0;d < D;d++ ) \
-		{ \
-			ymn0_[i][j*2*D     + d] = real( y ); \
-			ymn0_[i][j*2*D + D + d] = imag( y ); \
-		} \
+		for ( auto d = 1;d < D;d++ ) \
+			ymn[i][j*D + d] = ctypey{}; \
 \
 		INFO( "y (init):\n" << ymn ); \
 \
