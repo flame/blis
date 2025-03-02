@@ -2104,7 +2104,7 @@ check_assembler()
 
 check_os()
 {
-	if [[ "$(uname -s)" == "Darwin" && "$(uname -m)" == "arm64" ]]; then
+	if [[ ( "$(uname -s)" == "Darwin" || "$is_win" == "yes" ) && "$(uname -m)" == "arm64" ]]; then
 		blacklistos_add "armsve"
 	fi
 }
