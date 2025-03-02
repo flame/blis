@@ -42,33 +42,33 @@ workflows:
       - build:
           OOT: 1
           TEST: ALL
+          THR: openmp,pthreads
           CONF: x86_64
 
       # SDE testing for x86_64
+      # Also test LEVEL0 here because g++ uses tons of memory for test_taxpbys.cxx
       - build:
           # linuxvm must be used because it provides 8G RAM and SDE fails with 4G RAM
           os: linuxvm
           SDE: 1
+          LEVEL0: 1
           CONF: x86_64
 
-      # openmp build + LEVEL0
+      # test generic kernels
       - build:
-          LEVEL0: 1
-          THR: openmp
-
-      # pthreads build
-      - build:
-          THR: pthreads
+          CONF: generic_broadcast
 
       # clang build
       - build:
           CC: clang
+          THR: openmp,pthreads
           CXX: clang++
-          PACKAGES: clang
+          PACKAGES: clang libomp-dev
 
       # macOS with system compiler (clang)
       - build:
           os: macos
+          THR: pthreads
           CC: clang
           CXX: clang++
 
@@ -226,6 +226,11 @@ jobs:
               export TESTSUITE_WRAPPER="$DIST_PATH/../toolchain/qemu-riscv64 -cpu rv64,vext_spec=v1.0,v=true,vlen=512 -B 0x100000";
             fi
 
+            if [ "$CONF" = "generic_broadcast" ]; then
+              export CONF=generic
+              export CFLAGS="-DBLIS_BBM_s=2 -DBLIS_BBM_d=2 -DBLIS_BBM_c=2 -DBLIS_BBM_z=2 -DBLIS_BBN_s=4 -DBLIS_BBN_d=4 -DBLIS_BBN_c=4 -DBLIS_BBN_z=4"
+            fi
+
             echo "Configuration:"
             echo "CC                = $CC"
             echo "CXX               = $CXX"
@@ -237,6 +242,7 @@ jobs:
             echo "SDE               = $SDE"
             echo "LEVEL0            = $LEVEL0"
             echo "DIST_PATH         = $DIST_PATH"
+            echo "CFLAGS            = $CFLAGS"
             echo "LDFLAGS           = $LDFLAGS"
             echo "TESTSUITE_WRAPPER = $TESTSUITE_WRAPPER"
 
@@ -246,7 +252,7 @@ jobs:
             $CC --version
             $CC -v
 
-            make -j2
+            make V=1 -j2
             make install
 
             if [ "$BLD" = "" ] && [ "$TESTSUITE_WRAPPER" = "" ] ; then $DIST_PATH/ci/cxx/cxx-test.sh $DIST_PATH $(ls -1 include); fi

@@ -2418,7 +2418,7 @@ void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, c
 }
 
 
-thrinfo_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx )
+thrinfo_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, bszid_t bcast_id_m, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx )
 {
 	static packm_ker_ft GENARRAY2_MIXP(packm_struc_cxk,packm_struc_cxk);
 
@@ -2441,7 +2441,7 @@ thrinfo_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, inv
 	  packm_struc_cxk[ dt ][ dt ],
 	  bli_cntx_get_blksz_def_dt( dt, bmult_id_m, cntx ),
 	  bli_cntx_get_blksz_max_dt( dt, bmult_id_m, cntx ),
-	  1,
+	  bli_cntx_get_blksz_def_dt( dt, bcast_id_m, cntx ),
 	  1,
 	  1,
 	  bli_cntx_get_blksz_def_dt( dt, bmult_id_n, cntx ),

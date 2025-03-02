@@ -190,8 +190,8 @@ void libblis_test_gemm_ukr_experiment
 	k = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
 
 	// Fix m and n to MR and NR, respectively.
-	m = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, cntx );
-	n = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, cntx );
+	m   = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, cntx );
+	n   = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, cntx );
 
 	// Store the register blocksizes so that the driver can retrieve the
 	// values later when printing results.
@@ -240,6 +240,7 @@ void libblis_test_gemm_ukr_experiment
 	(
 	  BLIS_MR,
 	  BLIS_KR,
+	  BLIS_BBM,
 	  BLIS_NO_INVERT_DIAG,
 	  BLIS_PACKED_PANELS,
 	  BLIS_BUFFER_FOR_A_BLOCK,
@@ -250,6 +251,7 @@ void libblis_test_gemm_ukr_experiment
 	(
 	  BLIS_NR,
 	  BLIS_KR,
+	  BLIS_BBN,
 	  BLIS_NO_INVERT_DIAG,
 	  BLIS_PACKED_PANELS,
 	  BLIS_BUFFER_FOR_B_PANEL,

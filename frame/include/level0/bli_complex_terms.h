@@ -50,21 +50,21 @@
 #define bli_cctermrr( pab, ab )  ab
 
 // ai * bi term
-#define bli_rrtermii( pab, ab )  PASTEMAC(pab,zero)
-#define bli_rctermii( pab, ab )  PASTEMAC(pab,zero)
-#define bli_crtermii( pab, ab )  PASTEMAC(pab,zero)
+#define bli_rrtermii( pab, ab )  ( (void)(ab), PASTEMAC(pab,zero) )
+#define bli_rctermii( pab, ab )  ( (void)(ab), PASTEMAC(pab,zero) )
+#define bli_crtermii( pab, ab )  ( (void)(ab), PASTEMAC(pab,zero) )
 #define bli_cctermii( pab, ab )  ab
 
 // ai * br term
-#define bli_rrtermir( pab, ab )  PASTEMAC(pab,zero)
-#define bli_rctermir( pab, ab )  PASTEMAC(pab,zero)
+#define bli_rrtermir( pab, ab )  ( (void)(ab), PASTEMAC(pab,zero) )
+#define bli_rctermir( pab, ab )  ( (void)(ab), PASTEMAC(pab,zero) )
 #define bli_crtermir( pab, ab )  ab
 #define bli_cctermir( pab, ab )  ab
 
 // ar * bi term
-#define bli_rrtermri( pab, ab )  PASTEMAC(pab,zero)
+#define bli_rrtermri( pab, ab )  ( (void)(ab), PASTEMAC(pab,zero) )
 #define bli_rctermri( pab, ab )  ab
-#define bli_crtermri( pab, ab )  PASTEMAC(pab,zero)
+#define bli_crtermri( pab, ab )  ( (void)(ab), PASTEMAC(pab,zero) )
 #define bli_cctermri( pab, ab )  ab
 
 

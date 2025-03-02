@@ -116,6 +116,19 @@ PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11", mr, 2*nr, \
 		cs_c_use = cs_ct; \
 	} \
 \
+	/* If b11 is stored in broacasted format, the real and imaginary components
+	   will be too widely separated (an imaginary stride > 1). Recompress b11 so
+	   that the imaginary stride is 1 as expected (the duplicated elements aren't needed
+	   here so they are left untouched). */ \
+	if ( cs_b > 1 ) \
+	bli_tcompressbbs_mxn \
+	( \
+	  ch, \
+	  n, \
+	  m, \
+	  b11, cs_b, rs_b  \
+	); \
+\
 	/* lower: b11 = alpha * b11 - a10 * b01; */ \
 	/* upper: b11 = alpha * b11 - a12 * b21; */ \
 	gemm_ukr \
@@ -138,6 +151,7 @@ PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11 after gemm", mr, 2*nr, \
 \
 	/* Broadcast the elements of the updated b11 submatrix to their
 	   duplicated neighbors. */ \
+	if ( cs_b > 1 ) \
 	bli_tbcastbbs_mxn \
 	( \
 	  ch, \
@@ -156,6 +170,7 @@ PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11 after gemm", mr, 2*nr, \
 	  data, \
 	  cntx  \
 	); \
+	\
 /*
 PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11 after trsm", mr, 2*nr, \
                      (double*)b11, rs_b, 1, "%5.2f", "" ); \
