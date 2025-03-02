@@ -33,21 +33,24 @@
 */
 
 #include "blis.h"
-#include <sys/auxv.h>
-
-#ifndef HWCAP_SVE
-#define HWCAP_SVE (1 << 22)
-#endif
 
 void bli_cntx_init_armsve( cntx_t* cntx )
 {
-	if (!(getauxval( AT_HWCAP ) & HWCAP_SVE))
-		return;
-
-	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
-
 	// Set default kernel blocksizes and functions.
 	bli_cntx_init_armsve_ref( cntx );
+
+	// If we are autodetecting the correct aarch64 config, then we have to make sure
+	// that SVE instructions are actually available since these are used in determining
+	// the register blocksizes.
+	#ifdef BLIS_FAMILY_ARM64
+	uint32_t family, model, features = 0;
+	bli_cpuid_query( &family, &model, &features );
+
+	if ( ! bli_cpuid_has_features( features, FEATURE_SVE ) )
+		return;
+	#endif
+
+	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 
 	// -------------------------------------------------------------------------
 
