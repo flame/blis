@@ -42,6 +42,7 @@ if [ "$TEST" = "1" -o "$TEST" = "ALL" ]; then
 	$DIST_PATH/testsuite/check-blistest.sh ./output.testsuite
 fi
 
+export BLIS_THREAD_IMPL="single"
 make testblas
 cat ./output.testsuite
 $DIST_PATH/blastest/check-blastest.sh
