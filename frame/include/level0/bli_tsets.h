@@ -241,25 +241,47 @@
 #define bli_tbcastbbs_mxn( chy, m, n, y, incy, ldy ) \
 { \
 	/* Assume that the duplication factor is the row stride of y. */ \
-	const dim_t _d    = incy; \
-	const dim_t _ds_y = 1; \
+	const dim_t _d = incy; \
 \
 	for ( dim_t _j = 0; _j < (n); ++_j ) \
 	{ \
-		PASTEMAC(chy,ctype)* restrict _yj = (PASTEMAC(chy,ctype)*)(y) + _j*(ldy); \
+		PASTEMAC(chy,ctype)* _yj = (PASTEMAC(chy,ctype)*)(y) + _j*(ldy); \
 \
 		for ( dim_t _i = 0; _i < (m); ++_i ) \
 		{ \
-			PASTEMAC(chy,ctyper)* restrict _yij_r = (PASTEMAC(chy,ctyper)*)( _yj + _i*(incy) ); \
-			PASTEMAC(chy,ctyper)* restrict _yij_i = _yij_r + (incy); \
+			PASTEMAC(chy,ctype)* _yij = _yj + _i*(incy); \
+			PASTEMAC(chy,ctyper) _yij_r, _yij_i; \
 \
-			for ( dim_t _p = 1; _p < _d; ++_p ) \
+			bli_tgets( chy,chy, *_yij, _yij_r, _yij_i ); \
+\
+			for ( dim_t _p = 0; _p < _d; ++_p ) \
 			{ \
-				PASTEMAC(chy,ctyper)* restrict _yijd_r = _yij_r + _p*_ds_y; \
-				PASTEMAC(chy,ctyper)* restrict _yijd_i = _yij_i + _p*_ds_y; (void)_yijd_i; \
+				PASTEMAC(chy,ctyper)* _yijd_r = (PASTEMAC(chy,ctyper)*)_yij      + _p; \
+				PASTEMAC(chy,ctyper)* _yijd_i = (PASTEMAC(chy,ctyper)*)_yij + _d + _p; \
 \
-				bli_tcopyris( chy,chy, *_yij_r, *_yij_i, *_yijd_r, *_yijd_i ); \
+				bli_tcopyris( chy,chy, _yij_r, _yij_i, *_yijd_r, *_yijd_i ); \
 			} \
+		} \
+	} \
+}
+
+// bcastbbs_mxn
+#define bli_tcompressbbs_mxn( chy, m, n, y, incy, ldy ) \
+{ \
+	/* Assume that the duplication factor is the row stride of y. */ \
+	const dim_t _d = incy; \
+\
+	for ( dim_t _j = 0; _j < (n); ++_j ) \
+	{ \
+		PASTEMAC(chy,ctype)* _yj = (PASTEMAC(chy,ctype)*)(y) + _j*(ldy); \
+\
+		for ( dim_t _i = 0; _i < (m); ++_i ) \
+		{ \
+			PASTEMAC(chy,ctype)* _yij = _yj + _i*(incy); \
+			PASTEMAC(chy,ctyper)* _yij_r = (PASTEMAC(chy,ctyper)*)_yij; \
+			PASTEMAC(chy,ctyper)* _yij_i = (PASTEMAC(chy,ctyper)*)_yij + _d; \
+\
+			bli_tsets( chy,chy, *_yij_r, *_yij_i, *_yij ); \
 		} \
 	} \
 }

@@ -318,6 +318,76 @@ UNIT_TEST(chy,PASTECH(opname,_,D)) \
 
 INSERT_GENTFUNC_MIX1( RC, set0bbs_mxn )
 
+#undef GENTFUNC0
+#define GENTFUNC0( opname, D, ctypey, chy ) \
+UNIT_TEST(chy,PASTECH(opname,_,D)) \
+( \
+	constexpr auto M = 4; \
+	constexpr auto N = 4; \
+  \
+	for ( const auto y : test_values<ctypey>() ) \
+	{ \
+		auto ymn = tile<M,D*N>( y ); \
+\
+		INFO( "column-major" ); \
+\
+		auto ymn0 = tile<M,D*N>( y ); \
+		auto& ymn0_ = reinterpret_cast<decltype(tile<M,2*D*N>(real(y)))&>( ymn0 ); \
+		for ( auto i = 0;i < M;i++ ) \
+		for ( auto j = 0;j < N;j++ ) \
+		for ( auto d = 0;d < D;d++ ) \
+		{ \
+			ymn0_[i][j*2*D     + d] = real( y ); \
+			ymn0_[i][j*2*D + D + d] = imag( y ); \
+		} \
+\
+		INFO( "y (init):\n" << ymn ); \
+\
+		bli_tbcastbbs_mxn( chy, N, M, &ymn[0][0], D, D*N ); \
+\
+		INFO( "y (C++):\n" << ymn0 ); \
+		INFO( "y (BLIS):\n" << ymn ); \
+\
+		check<ctypey>( ymn, ymn0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX1( RC, bcastbbs_mxn )
+
+#undef GENTFUNC0
+#define GENTFUNC0( opname, D, ctypey, chy ) \
+UNIT_TEST(chy,PASTECH(opname,_,D)) \
+( \
+	constexpr auto M = 4; \
+	constexpr auto N = 4; \
+  \
+	for ( const auto y : test_values<ctypey>() ) \
+	{ \
+		auto ymn = tile<M,D*N>( y ); \
+\
+		INFO( "column-major" ); \
+\
+		auto ymn0 = tile<M,D*N>( y ); \
+\
+		INFO( "y (init):\n" << ymn ); \
+\
+		bli_tbcastbbs_mxn( chy, N, M, &ymn[0][0], D, D*N ); \
+		bli_tcompressbbs_mxn( chy, N, M, &ymn[0][0], D, D*N ); \
+\
+		for ( auto i = 0;i < M;i++ ) \
+		for ( auto j = 0;j < N;j++ ) \
+		for ( auto d = 1;d < D;d++ ) \
+			ymn[i][j*D+d] = ymn0[i][j*D+d]; \
+\
+		INFO( "y (C++):\n" << ymn0 ); \
+		INFO( "y (BLIS):\n" << ymn ); \
+\
+		check<ctypey>( ymn, ymn0 ); \
+	} \
+)
+
+INSERT_GENTFUNC_MIX1( RC, compressbbs_mxn )
+
 #undef GENTFUNC
 #define GENTFUNC( opname, ctypey, chy ) \
 GENTFUNC0( opname, 10, 10, ctypey, chy ) \
