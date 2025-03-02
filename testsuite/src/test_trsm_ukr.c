@@ -238,6 +238,7 @@ void libblis_test_trsm_ukr_experiment
 	(
 	  BLIS_MR,
 	  BLIS_MR,
+	  BLIS_BBM,
 	  BLIS_INVERT_DIAG,
 	  BLIS_PACKED_PANELS,
 	  BLIS_BUFFER_FOR_A_BLOCK,
@@ -270,6 +271,7 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 		(
 		  BLIS_NR,
 		  BLIS_MR,
+		  BLIS_BBN,
 		  BLIS_NO_INVERT_DIAG,
 		  BLIS_PACKED_PANELS,
 		  BLIS_BUFFER_FOR_B_PANEL,
