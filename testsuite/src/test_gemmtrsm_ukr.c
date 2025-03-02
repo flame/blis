@@ -90,7 +90,6 @@ void libblis_test_gemmtrsm_ukr_check
        obj_t*         bx1,
        obj_t*         b11,
        obj_t*         c11,
-       obj_t*         c11_save,
        double*        resid
      );
 
@@ -188,7 +187,6 @@ void libblis_test_gemmtrsm_ukr_experiment
 	num_t        datatype;
 
 	dim_t        m, n, k;
-	inc_t        ldap, ldbp;
 
 	char         sc_a = 'c';
 	char         sc_b = 'r';
@@ -198,7 +196,7 @@ void libblis_test_gemmtrsm_ukr_experiment
 
 	obj_t        alpha;
 	obj_t        a_big, a, b;
-	obj_t        b11, c11;
+	obj_t        a11, a1x, b11, bx1, c11;
 	obj_t        ap, bp;
 	obj_t        a1xp, a11p, bx1p, b11p;
 	obj_t        c11_save;
@@ -218,11 +216,6 @@ void libblis_test_gemmtrsm_ukr_experiment
 	// Fix m and n to MR and NR, respectively.
 	m = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, cntx );
 	n = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, cntx );
-
-	// Also query PACKMR and PACKNR as the leading dimensions to ap and bp,
-	// respectively.
-	ldap = bli_cntx_get_blksz_max_dt( datatype, BLIS_MR, cntx );
-	ldbp = bli_cntx_get_blksz_max_dt( datatype, BLIS_NR, cntx );
 
 	// Store the register blocksizes so that the driver can retrieve the
 	// values later when printing results.
@@ -271,13 +264,21 @@ void libblis_test_gemmtrsm_ukr_experiment
 	if ( bli_obj_is_lower( &a_big ) )
 	{
 		bli_acquire_mpart_t2b( BLIS_SUBPART1, k, m, &a_big, &a );
+		bli_acquire_mpart_l2r( BLIS_SUBPART0, k, m, &a, &a1x );
+		bli_acquire_mpart_l2r( BLIS_SUBPART1, k, m, &a, &a11 );
+		bli_acquire_mpart_t2b( BLIS_SUBPART0, k, m, &b, &bx1 );
 		bli_acquire_mpart_t2b( BLIS_SUBPART1, k, m, &b, &b11 );
 	}
 	else
 	{
 		bli_acquire_mpart_t2b( BLIS_SUBPART1, 0, m, &a_big, &a );
+		bli_acquire_mpart_l2r( BLIS_SUBPART1, 0, m, &a, &a11 );
+		bli_acquire_mpart_l2r( BLIS_SUBPART2, 0, m, &a, &a1x );
 		bli_acquire_mpart_t2b( BLIS_SUBPART1, 0, m, &b, &b11 );
+		bli_acquire_mpart_t2b( BLIS_SUBPART2, 0, m, &b, &bx1 );
 	}
+
+	bli_obj_set_struc( BLIS_GENERAL, &a1x );
 
 	// Copy B11 to C11, and save.
 	bli_copym( &b11, &c11 );
@@ -289,6 +290,7 @@ void libblis_test_gemmtrsm_ukr_experiment
 	(
 	  BLIS_MR,
 	  BLIS_MR,
+	  BLIS_BBM,
 	  BLIS_INVERT_DIAG,
 	  BLIS_PACKED_PANELS,
 	  BLIS_BUFFER_FOR_A_BLOCK,
@@ -324,6 +326,7 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 		(
 		  BLIS_NR,
 		  BLIS_MR,
+		  BLIS_BBN,
 		  BLIS_NO_INVERT_DIAG,
 		  BLIS_PACKED_PANELS,
 		  BLIS_BUFFER_FOR_B_PANEL,
@@ -366,31 +369,9 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 	*perf = ( 2.0 * m * n * k + 1.0 * m * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
 	if ( bli_obj_is_complex( &b ) ) *perf *= 4.0;
 
-	// A hack to support subconfigs such as power9, which duplicate/broadcast
-	// more than one stored element per logical element in the packed copy of
-	// B. We assume that the ratio ldbp/n gives us the duplication factor used
-	// within B while the ratio ldap/m gives us the duplication factor used
-	// within A (not entirely a safe assumption, though I think it holds for
-	// all gemm ukernels currently supported within BLIS). This duplication
-	// factor must be used as the column stride of B (or the row stride of A)
-	// in order for the bli_gemmv() operation (called within the
-	// libblis_test_gemmtrsm_ukr_check()) to operate properly.
-	if ( ldbp / n > 1 )
-	{
-		const dim_t bfac = ldbp / n;
-		bli_obj_set_col_stride( bfac, &b11p );
-		bli_obj_set_col_stride( bfac, &bx1p );
-	}
-	if ( ldap / m > 1 )
-	{
-		const dim_t bfac = ldap / m;
-		bli_obj_set_row_stride( bfac, &a11p );
-		bli_obj_set_row_stride( bfac, &a1xp );
-	}
-
 	// Perform checks.
 	libblis_test_gemmtrsm_ukr_check( params, side, &alpha,
-	                                 &a1xp, &a11p, &bx1p, &b11p, &c11, &c11_save, resid );
+	                                 &a1x, &a11, &bx1, &b11, &c11, resid );
 
 	// Zero out performance and residual if output matrix is empty.
 	//libblis_test_check_empty_problem( &c11, perf, resid );
@@ -446,15 +427,14 @@ void libblis_test_gemmtrsm_ukr_check
        obj_t*         bx1,
        obj_t*         b11,
        obj_t*         c11,
-       obj_t*         c11_orig,
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_dt( b11 );
-	num_t  dt_real = bli_obj_dt_proj_to_real( b11 );
+	num_t  dt      = bli_obj_dt( c11 );
+	num_t  dt_real = bli_obj_dt_proj_to_real( c11 );
 
-	dim_t  m       = bli_obj_length( b11 );
-	dim_t  n       = bli_obj_width( b11 );
+	dim_t  m       = bli_obj_length( c11 );
+	dim_t  n       = bli_obj_width( c11 );
 	dim_t  k       = bli_obj_width( a1x );
 
 	obj_t  norm;
@@ -464,13 +444,12 @@ void libblis_test_gemmtrsm_ukr_check
 
 	//
 	// Pre-conditions:
-	// - a1x, a11, bx1, c11_orig are randomized; a11 is triangular.
-	// - contents of b11 == contents of c11.
+	// - a1x, a11, bx1, b11 are randomized; a11 is triangular.
 	// - side == BLIS_LEFT.
 	//
 	// Under these conditions, we assume that the implementation for
 	//
-	//   B := inv(A11) * ( alpha * B11 - A1x * Bx1 )       (side = left)
+	//   C11 := inv(A11) * ( alpha * B11 - A1x * Bx1 )       (side = left)
 	//
 	// is functioning correctly if
 	//
@@ -478,11 +457,11 @@ void libblis_test_gemmtrsm_ukr_check
 	//
 	// is negligible, where
 	//
-	//   v = B11 * t
+	//   v = C11 * t
 	//
-	//   z = ( inv(A11) * ( alpha * B11_orig - A1x * Bx1 ) ) * t
-	//     = inv(A11) * ( alpha * B11_orig * t - A1x * Bx1 * t )
-	//     = inv(A11) * ( alpha * B11_orig * t - A1x * w )
+	//   z = ( inv(A11) * ( alpha * B11 - A1x * Bx1 ) ) * t
+	//     = inv(A11) * ( alpha * B11 * t - A1x * Bx1 * t )
+	//     = inv(A11) * ( alpha * B11 * t - A1x * w )
 	//
 
 	bli_obj_scalar_init_detached( dt_real, &norm );
@@ -502,20 +481,16 @@ void libblis_test_gemmtrsm_ukr_check
 
 	libblis_test_vobj_randomize( params, TRUE, &t );
 
-	bli_gemv( &BLIS_ONE, b11, &t, &BLIS_ZERO, &v );
+	bli_gemv( &BLIS_ONE, c11, &t, &BLIS_ZERO, &v );
 
 #if 0
 bli_printm( "a11", a11, "%5.2f", "" );
 #endif
 
-	// Restore the diagonal of a11 to its original, un-inverted state
-	// (needed for trsv).
-	bli_invertd( a11 );
-
 	if ( bli_is_left( side ) )
 	{
 		bli_gemv( &BLIS_ONE, bx1, &t, &BLIS_ZERO, &w );
-		bli_gemv( alpha, c11_orig, &t, &BLIS_ZERO, &z );
+		bli_gemv( alpha, b11, &t, &BLIS_ZERO, &z );
 		bli_gemv( &BLIS_MINUS_ONE, a1x, &w, &BLIS_ONE, &z );
 		bli_trsv( &BLIS_ONE, a11, &z );
 	}

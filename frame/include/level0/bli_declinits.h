@@ -45,13 +45,14 @@
 //   to the real and imaginary parts of (presumably) temporary variables.
 //   If the domain is real, only the real part is declared and initialized.
 
-#define bli_rdeclinits( pxy, xr, xi, yr, yi ) PASTEMAC(pxy,ctype) yr = xr; (void)yr;
+#define bli_rdeclinits( pxy, xr, xi, yr, yi ) PASTEMAC(pxy,ctype) yr = xr; (void)yr; \
+                                              PASTEMAC(pxy,ctype) yi;      (void)yi;
 #define bli_cdeclinits( pxy, xr, xi, yr, yi ) PASTEMAC(pxy,ctype) yr = xr; (void)yr; \
                                               PASTEMAC(pxy,ctype) yi = xi; (void)yi;
 
 // An extra definition for situations where we only need a real value declared
 // and initialized (e.g. when explicitly implementing in the complex domain).
-#define bli_rodeclinits( pxy, xr, yr ) bli_rdeclinits( pxy, xr, /*xi*/, yr, /*yi*/ )
+#define bli_rodeclinits( pxy, xr, yr ) PASTEMAC(pxy,ctype) yr = xr; (void)yr;
 
 
 #endif

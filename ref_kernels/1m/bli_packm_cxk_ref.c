@@ -44,28 +44,7 @@
 #endif
 #endif
 
-#define PACKM_BODY_r( ctypea, ctypep, cha, chp, pragma, cdim, dfac, inca, op ) \
-\
-do \
-{ \
-	for ( dim_t k = n; k != 0; --k ) \
-	{ \
-		pragma \
-		for ( dim_t mn = 0; mn < cdim; mn++ ) \
-		{ \
-			ctypep kappa_alpha; \
-			PASTEMAC(t,op)( chp,cha,chp,chp, kappa_cast, *(alpha1 + mn*inca), kappa_alpha ); \
-			for ( dim_t d = 0; d < dfac; d++ ) \
-				bli_tcopys( chp,chp, kappa_alpha, *(pi1 + mn*dfac + d) ); \
-		} \
-\
-		alpha1 += lda; \
-		pi1    += ldp; \
-	} \
-} while(0)
-
-
-#define PACKM_BODY_c_( ctypea, ctypep, ctypep_r, cha, chp, chp_r, pragma, cdim, dfac, inca, op ) \
+#define PACKM_BODY_( ctypea, ctypep, ctypep_r, cha, chp, chp_r, pragma, cdim, dfac, inca, op ) \
 \
 do \
 { \
@@ -78,13 +57,10 @@ do \
 			PASTEMAC(t,op)( chp,cha,chp,chp, kappa_cast, *(alpha1 + mn*inca), kappa_alpha ); \
 			ctypep_r kar, kai; \
 			bli_tgets( chp,chp, kappa_alpha, kar, kai ); \
-			ctypep_r* pi1r = (ctypep_r*)pi1; \
-			ctypep_r* pi1i = (ctypep_r*)pi1 + dfac; \
+			ctypep_r* pi1r = (ctypep_r*)( pi1 + mn*dfac ); \
+			ctypep_r* pi1i = pi1r + dfac; \
 			for ( dim_t d = 0; d < dfac; d++ ) \
-			{ \
-				bli_tcopys( chp_r,chp_r, kar, *(pi1r + mn*dfac*2 + d) ); \
-				bli_tcopys( chp_r,chp_r, kai, *(pi1i + mn*dfac*2 + d) ); \
-			} \
+				bli_tcopyris( chp,chp, kar, kai, *(pi1r + d), *(pi1i + d) ); \
 		} \
 \
 		alpha1 += lda; \
@@ -93,12 +69,8 @@ do \
 } while(0)
 
 
-#define PACKM_BODY_c( ctypea, ctypep, cha, chp, pragma, cdim, dfac, inca, op ) \
-PACKM_BODY_c_( ctypea, ctypep, PASTEMAC(chp,ctyper), cha, chp, PASTEMAC(chp,prec), pragma, cdim, dfac, inca, op )
-
-
 #define PACKM_BODY( ctypea, ctypep, cha, chp, pragma, cdim, dfac, inca, op ) \
-PASTECH(PACKM_BODY_,PASTEMAC(chp,dom))( ctypea, ctypep, cha, chp, pragma, cdim, dfac, inca, op )
+PACKM_BODY_( ctypea, ctypep, PASTEMAC(chp,ctyper), cha, chp, PASTEMAC(chp,prec), pragma, cdim, dfac, inca, op )
 
 
 #undef  GENTFUNC2

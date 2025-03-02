@@ -159,7 +159,7 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
 		bli_tset0s_mxn \
 		( \
 		  chp_r, \
-		  2*cdim_max, \
+		  2*cdim_max*cdim_bcast, \
 		  2*n_max, \
 		  ( ctypep_r* )p, 1, ldp  \
 		); \
@@ -263,7 +263,7 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
 		bli_tset0s_mxn \
 		( \
 		  chp_r, \
-		  cdim_max, \
+		  cdim_max*cdim_bcast, \
 		  2*n_max, \
 		  ( ctypep_r* )p, 1, ldp  \
 		); \

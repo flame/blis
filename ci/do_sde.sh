@@ -31,7 +31,7 @@ tar xvf $SDE_TARBALL
 
 make -j2 testsuite-bin blastest-bin
 
-for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator zen; do
+for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator zen generic; do
     export BLIS_ARCH_TYPE=-1
 
     if [ "$ARCH" = "knl" ]; then
@@ -55,6 +55,9 @@ for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator 
     elif [ "$ARCH" = "excavator" ]; then
         TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/haswell.def --"
         export BLIS_ARCH_TYPE=9
+    elif [ "$ARCH" = "generic" ]; then
+        TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/haswell.def --"
+        export BLIS_ARCH_TYPE=33
     else
         TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/$ARCH.def --"
     fi

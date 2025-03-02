@@ -69,6 +69,7 @@ siz_t bli_packm_init
 	dim_t   bmult_m_def  = bli_packm_def_cntl_bmult_m_def( cntl );
 	dim_t   bmult_m_pack = bli_packm_def_cntl_bmult_m_pack( cntl );
 	dim_t   bmult_n_def  = bli_packm_def_cntl_bmult_n_def( cntl );
+	dim_t   bcast_p      = bli_packm_def_cntl_bmult_m_bcast( cntl );
 
 	// Typecast the internal scalar value to the target datatype.
 	// Note that if the typecasting is needed, this must happen BEFORE we
@@ -136,8 +137,9 @@ siz_t bli_packm_init
 	inc_t cs_p = bmult_m_pack;
 
 	// The "row stride" of a row-micropanel packed object is interpreted
-	// as the row stride WITHIN a micropanel. Thus, it is unit.
-	inc_t rs_p = 1;
+	// as the row stride WITHIN a micropanel. Thus, it is unit unless elemnents
+	// are duplicated (broadcast).
+	inc_t rs_p = bcast_p;
 
 	// The "panel stride" of a micropanel packed object is interpreted as
 	// the distance between the (0,0) element of panel k and the (0,0)
