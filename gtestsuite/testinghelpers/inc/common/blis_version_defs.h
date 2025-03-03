@@ -40,6 +40,22 @@
 
 #ifdef AOCL_DEV
 
+    #define K_bli_cgemmsup_cv_zen4_asm_24x4m 1
+    #define K_bli_cgemmsup_cv_zen4_asm_24x3m 1
+    #define K_bli_cgemmsup_cv_zen4_asm_24x2m 1
+    #define K_bli_cgemmsup_cv_zen4_asm_24x1m 1
+    #define K_bli_cgemmsup_cv_zen4_asm_16x4 1
+    #define K_bli_cgemmsup_cv_zen4_asm_16x3 1
+    #define K_bli_cgemmsup_cv_zen4_asm_16x2 1
+    #define K_bli_cgemmsup_cv_zen4_asm_16x1 1
+    #define K_bli_cgemmsup_cv_zen4_asm_8x4 1
+    #define K_bli_cgemmsup_cv_zen4_asm_8x3 1
+    #define K_bli_cgemmsup_cv_zen4_asm_8x2 1
+    #define K_bli_cgemmsup_cv_zen4_asm_8x1 1
+    #define K_bli_cgemmsup_cv_zen4_asm_fx4 1
+    #define K_bli_cgemmsup_cv_zen4_asm_fx3 1
+    #define K_bli_cgemmsup_cv_zen4_asm_fx2 1
+    #define K_bli_cgemmsup_cv_zen4_asm_fx1 1
     #define K_bli_cgemm_zen4_asm_24x4 1
     #define K_bli_cgemm_zen4_asm_4x24 1
     #define K_bli_zgemmsup_cd_zen4_asm_12x2m 1

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -198,7 +198,7 @@ BLIS_INLINE void bli_gemmsup_ref_var1n2m_opt_cases
 	}
 	else
 	{
-		if ( ( dt == BLIS_DOUBLE ) || ( dt == BLIS_DCOMPLEX ) )
+		if ( ( dt == BLIS_DOUBLE ) || ( dt == BLIS_DCOMPLEX ) || ( dt == BLIS_SCOMPLEX ) )
 		{
 			// The optimizations are only done for CRC and RRC storage schemes to avoid RD kernels.
 			// Optimizations for other storage schemes is yet to be done.

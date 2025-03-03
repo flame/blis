@@ -49,6 +49,7 @@ class zgemmGenericSUP:
                                                     dcomplex,               // beta
                                                     char,                   // storage of C matrix
                                                     zgemmsup_ker_ft,        // Function pointer type for zgemm kernel
+                                                    gtint_t,                // MR/NR(to set panel stride based on m-var/n-var)
                                                     char,                   // transa
                                                     char,                   // transb
                                                     bool                    // is_memory_test
@@ -66,9 +67,10 @@ TEST_P( zgemmGenericSUP, UKR )
     T beta                   = std::get<4>(GetParam());                     // beta
     char storageC            = std::get<5>(GetParam());                     // storage scheme for C matrix
     zgemmsup_ker_ft kern_ptr = std::get<6>(GetParam());                     // pointer to the gemm kernel
-    char transa              = std::get<7>(GetParam());                     // transa
-    char transb              = std::get<8>(GetParam());                     // transb
-    bool is_memory_test      = std::get<9>(GetParam());                     // is_memory_test
+    gtint_t MR               = std::get<7>(GetParam());                     // ukr dimension MR
+    char transa              = std::get<8>(GetParam());                     // transa
+    char transb              = std::get<9>(GetParam());                     // transb
+    bool is_memory_test      = std::get<10>(GetParam());                    // is_memory_test
 
     // Set the threshold for the errors:
     // Check gtestsuite gemm.h or netlib source code for reminder of the
@@ -92,14 +94,14 @@ TEST_P( zgemmGenericSUP, UKR )
 #endif
         thresh = adj*(3*k+1)*testinghelpers::getEpsilon<T>();
     }
-    test_complex_gemmsup_ukr(storageC, transa, transb, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
+    test_complex_gemmsup_ukr(storageC, transa, transb, m, n, k, MR, alpha, beta, thresh, kern_ptr, is_memory_test);
 }// end of function
 
 class zgemmGenericSUPPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<gtint_t, gtint_t, gtint_t, dcomplex, dcomplex, char,
-                                          zgemmsup_ker_ft, char, char, bool>>  str) const {
+                                          zgemmsup_ker_ft, gtint_t, char, char, bool>>  str) const {
 
         gtint_t m           = std::get<0>(str.param);
         gtint_t n           = std::get<1>(str.param);
@@ -107,9 +109,9 @@ public:
         dcomplex alpha      = std::get<3>(str.param);
         dcomplex beta       = std::get<4>(str.param);
         char storageC       = std::get<5>(str.param);
-        char transa         = std::get<7>(str.param);
-        char transb         = std::get<8>(str.param);
-        bool is_memory_test = std::get<9>(str.param);
+        char transa         = std::get<8>(str.param);
+        char transb         = std::get<9>(str.param);
+        bool is_memory_test = std::get<10>(str.param);
 
         std::string str_name;
         str_name += "_stor_" + std::string(&storageC, 1);
@@ -141,6 +143,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -5.0}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('r'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_3x4m),                // zgemm_sup kernel
+            ::testing::Values(gtint_t(3)),                                  // Micro kernel block MR
             ::testing::Values('t'),                                         // transa
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -161,6 +164,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 5.0}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('r'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_2x4),                 // zgemm_sup kernel
+            ::testing::Values(gtint_t(2)),                                  // Micro kernel block MR
             ::testing::Values('t'),                                         // transa
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -181,6 +185,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 5.4}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('r'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_1x4),                 // zgemm_sup kernel
+            ::testing::Values(gtint_t(1)),                                  // Micro kernel block MR
             ::testing::Values('t'),                                         // transa
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -201,6 +206,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 9}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('r'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_3x2m),                // zgemm_sup kernel
+            ::testing::Values(gtint_t(3)),                                  // Micro kernel block MR
             ::testing::Values('t'),                                         // transa
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -221,6 +227,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 2.3}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('r'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_3x2),                 // zgemm_sup kernel
+            ::testing::Values(gtint_t(3)),                                  // Micro kernel block MR
             ::testing::Values('t'),                                         // transa
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -241,6 +248,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 13}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('r'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_2x2),                 // zgemm_sup kernel
+            ::testing::Values(gtint_t(2)),                                  // Micro kernel block MR
             ::testing::Values('t'),                                         // transa
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -261,6 +269,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 3}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('r'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_1x2),                 // zgemm_sup kernel
+            ::testing::Values(gtint_t(1)),                                  // Micro kernel block MR
             ::testing::Values('t'),                                         // transa
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -281,6 +290,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1.9}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('c'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_3x4m),                // zgemm_sup kernel
+            ::testing::Values(gtint_t(3)),                                  // Micro kernel block MR
             ::testing::Values('n'),                                         // transa
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -301,6 +311,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 3.9}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('c'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_3x2m),                // zgemm_sup kernel
+            ::testing::Values(gtint_t(3)),                                  // Micro kernel block MR
             ::testing::Values('n'),                                         // transa
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -321,6 +332,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1.4}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('c'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_3x2),                 // zgemm_sup kernel
+            ::testing::Values(gtint_t(3)),                                  // Micro kernel block MR
             ::testing::Values('n'),                                         // transa
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -341,6 +353,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1.99}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('c'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_2x4),                 // zgemm_sup kernel
+            ::testing::Values(gtint_t(2)),                                  // Micro kernel block MR
             ::testing::Values('n'),                                         // transa
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -361,6 +374,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0},dcomplex{0.0, 1.9},  dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('c'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_1x4),                 // zgemm_sup kernel
+            ::testing::Values(gtint_t(1)),                                  // Micro kernel block MR
             ::testing::Values('n'),                                         // transa
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -381,6 +395,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -1.3}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('c'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_2x2),                 // zgemm_sup kernel
+            ::testing::Values(gtint_t(2)),                                  // Micro kernel block MR
             ::testing::Values('n'),                                         // transa
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -401,6 +416,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 2.3}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('c'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_1x2),                 // zgemm_sup kernel
+            ::testing::Values(gtint_t(1)),                                  // Micro kernel block MR
             ::testing::Values('n'),                                         // transa
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -421,6 +437,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 2.9}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('r'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rd_zen_asm_3x4m),                // zgemm_sup kernel
+            ::testing::Values(gtint_t(3)),                                  // Micro kernel block MR
             ::testing::Values('n'),                                         // transa
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -441,6 +458,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1.19}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('r'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rd_zen_asm_3x2m),                // zgemm_sup kernel
+            ::testing::Values(gtint_t(3)),                                  // Micro kernel block MR
             ::testing::Values('n'),                                         // transa
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -461,6 +479,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 2.9}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('r'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rd_zen_asm_3x4n),                // zgemm_sup kernel
+            ::testing::Values(gtint_t(3)),                                  // Micro kernel block MR
             ::testing::Values('n'),                                         // transa
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -481,6 +500,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1.23}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('r'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rd_zen_asm_2x4n),                // zgemm_sup kernel
+            ::testing::Values(gtint_t(2)),                                  // Micro kernel block MR
             ::testing::Values('n'),                                         // transa
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -501,6 +521,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 2.9}, dcomplex{-7.3, 6.7}),  // beta value
             ::testing::Values('r'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rd_zen_asm_2x4),                 // zgemm_sup kernel
+            ::testing::Values(gtint_t(2)),                                  // Micro kernel block MR
             ::testing::Values('n'),                                         // transa
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -521,6 +542,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 21.9}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('r'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rd_zen_asm_1x4),                 // zgemm_sup kernel
+            ::testing::Values(gtint_t(1)),                                  // Micro kernel block MR
             ::testing::Values('n'),                                         // transa
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -541,6 +563,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -21.9}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('r'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rd_zen_asm_1x2),                 // zgemm_sup kernel
+            ::testing::Values(gtint_t(1)),                                  // Micro kernel block MR
             ::testing::Values('n'),                                         // transa
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -561,6 +584,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -2.3}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('r'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rd_zen_asm_2x2),                 // zgemm_sup kernel
+            ::testing::Values(gtint_t(2)),                                  // Micro kernel block MR
             ::testing::Values('n'),                                         // transa
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -581,6 +605,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -3}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('c'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_3x4n),                // zgemm_sup kernel
+            ::testing::Values(gtint_t(3)),                                  // Micro kernel block MR
             ::testing::Values('n'),                                         // transa
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -601,6 +626,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -1.9}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('c'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_2x4n),                // zgemm_sup kernel
+            ::testing::Values(gtint_t(2)),                                  // Micro kernel block MR
             ::testing::Values('n'),                                         // transa
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -621,6 +647,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 5.6}, dcomplex{-7.3, 6.7}),  // beta value
             ::testing::Values('c'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_1x4n),                // zgemm_sup kernel
+            ::testing::Values(gtint_t(1)),                                  // Micro kernel block MR
             ::testing::Values('n'),                                         // transa
             ::testing::Values('t'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -641,6 +668,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1.3}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('r'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_3x4n),                // zgemm_sup kernel
+            ::testing::Values(gtint_t(3)),                                  // Micro kernel block MR
             ::testing::Values('t'),                                         // transa
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -661,6 +689,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1.9}, dcomplex{-7.3, 6.7}),  // beta value
             ::testing::Values('r'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_2x4n),                // zgemm_sup kernel
+            ::testing::Values(gtint_t(2)),                                  // Micro kernel block MR
             ::testing::Values('t'),                                         // transa
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -681,6 +710,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -1.3}, dcomplex{-7.3, 6.7}), // beta value
             ::testing::Values('r'),                                         // storage of c
             ::testing::Values(bli_zgemmsup_rv_zen_asm_1x4n),                // zgemm_sup kernel
+            ::testing::Values(gtint_t(1)),                                  // Micro kernel block MR
             ::testing::Values('t'),                                         // transa
             ::testing::Values('n'),                                         // transb
             ::testing::Values(false, true)                                  // is_memory_test
@@ -705,6 +735,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -9}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_12x4m),              // zgemm_sup kernel
+             ::testing::Values(gtint_t(12)),                                 // Micro kernel block MR
              ::testing::Values('n'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -725,6 +756,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 9}, dcomplex{-7.3, 6.7}),   // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_12x3m),              // zgemm_sup kernel
+             ::testing::Values(gtint_t(12)),                                 // Micro kernel block MR
              ::testing::Values('n'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -745,6 +777,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -21.9}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_12x2m),              // zgemm_sup kernel
+             ::testing::Values(gtint_t(12)),                                 // Micro kernel block MR
              ::testing::Values('n'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -765,6 +798,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1.4}, dcomplex{-7.3, 6.7}),   // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_12x1m),              // zgemm_sup kernel
+             ::testing::Values(gtint_t(12)),                                 // Micro kernel block MR
              ::testing::Values('n'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -785,6 +819,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 8}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_8x4),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(8)),                                  // Micro kernel block MR
              ::testing::Values('n'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -805,6 +840,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -1.8}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_8x3),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(8)),                                  // Micro kernel block MR
              ::testing::Values('n'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -825,6 +861,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 9}, dcomplex{-7.3, 6.7}),  // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_8x2),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(8)),                                  // Micro kernel block MR
              ::testing::Values('n'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -845,6 +882,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -2}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_8x1),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(8)),                                  // Micro kernel block MR
              ::testing::Values('n'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -865,6 +903,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 9}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_4x4),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(4)),                                  // Micro kernel block MR
              ::testing::Values('n'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -885,6 +924,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1.5}, dcomplex{-7.3, 6.7}),  // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_4x3),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(4)),                                  // Micro kernel block MR
              ::testing::Values('n'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -905,6 +945,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -9}, dcomplex{-7.3, 6.7}),  // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_4x2),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(4)),                                  // Micro kernel block MR
              ::testing::Values('n'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -925,6 +966,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1}, dcomplex{-7.3, 6.7}),   // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_4x1),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(4)),                                  // Micro kernel block MR
              ::testing::Values('n'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -945,6 +987,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1.8}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_2x4),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(2)),                                  // Micro kernel block MR
              ::testing::Values('n'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -965,6 +1008,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1}, dcomplex{-7.3, 6.7}),  // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_2x3),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(2)),                                  // Micro kernel block MR
              ::testing::Values('n'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -985,6 +1029,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 9}, dcomplex{-7.3, 6.7}),   // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_2x2),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(2)),                                  // Micro kernel block MR
              ::testing::Values('n'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -1005,6 +1050,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -9}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_2x1),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(2)),                                  // Micro kernel block MR
              ::testing::Values('n'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -1025,6 +1071,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -9}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('r'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_12x4m),              // zgemm_sup kernel
+             ::testing::Values(gtint_t(12)),                                 // Micro kernel block MR
              ::testing::Values('t'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -1045,6 +1092,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1.2}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('r'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_12x3m),              // zgemm_sup kernel
+             ::testing::Values(gtint_t(12)),                                 // Micro kernel block MR
              ::testing::Values('t'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -1065,6 +1113,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 8.9}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('r'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_12x2m),              // zgemm_sup kernel
+             ::testing::Values(gtint_t(12)),                                 // Micro kernel block MR
              ::testing::Values('t'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -1085,6 +1134,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 19}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('r'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cv_zen4_asm_12x1m),              // zgemm_sup kernel
+             ::testing::Values(gtint_t(12)),                                 // Micro kernel block MR
              ::testing::Values('t'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -1113,6 +1163,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -9.0}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cd_zen4_asm_12x4m),              // zgemm_sup kernel
+             ::testing::Values(gtint_t(12)),                                 // Micro kernel block MR
              ::testing::Values('t'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -1140,6 +1191,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -9.0}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cd_zen4_asm_12x2m),              // zgemm_sup kernel
+             ::testing::Values(gtint_t(12)),                                 // Micro kernel block MR
              ::testing::Values('t'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -1164,6 +1216,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -9.0}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cd_zen4_asm_8x4),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(8)),                                  // Micro kernel block MR
              ::testing::Values('t'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -1188,6 +1241,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -9.0}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cd_zen4_asm_8x2),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(8)),                                  // Micro kernel block MR
              ::testing::Values('t'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -1212,6 +1266,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -9.0}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cd_zen4_asm_4x4),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(4)),                                  // Micro kernel block MR
              ::testing::Values('t'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -1236,6 +1291,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -9.0}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cd_zen4_asm_4x2),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(4)),                                  // Micro kernel block MR
              ::testing::Values('t'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -1260,6 +1316,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -9.0}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cd_zen4_asm_2x4),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(2)),                                  // Micro kernel block MR
              ::testing::Values('t'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test
@@ -1284,6 +1341,7 @@ INSTANTIATE_TEST_SUITE_P(
              ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -9.0}, dcomplex{-7.3, 6.7}), // beta value
              ::testing::Values('c'),                                         // storage of c
              ::testing::Values(bli_zgemmsup_cd_zen4_asm_2x2),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(2)),                                  // Micro kernel block MR
              ::testing::Values('t'),                                         // transa
              ::testing::Values('n'),                                         // transb
              ::testing::Values(false, true)                                  // is_memory_test

@@ -73,7 +73,7 @@
 /**********************************************************************/
 
 template<typename T, typename FT>
-static void test_complex_gemmsup_ukr( char storage, char trnsa, char trnsb, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, double thresh, FT ukr_fp, bool is_memory_test = false )
+static void test_complex_gemmsup_ukr( char storage, char trnsa, char trnsb, gtint_t m, gtint_t n, gtint_t k, gtint_t MR, T alpha, T beta, double thresh, FT ukr_fp, bool is_memory_test = false )
 {
     // Compute the leading dimensions of a, b, and c.
     gtint_t lda = testinghelpers::get_leading_dimension( storage, trnsa, m, k, 0 );
@@ -161,7 +161,7 @@ static void test_complex_gemmsup_ukr( char storage, char trnsa, char trnsb, gtin
     {
         auxinfo_t data;
         //Panel stride update is required only for zen4 sup kernels
-        inc_t ps_a_use = (12 * rs_a); //12 = MR
+        inc_t ps_a_use = (MR * rs_a);
         bli_auxinfo_set_ps_a( ps_a_use, &data );
 
         ukr_fp(
@@ -196,7 +196,7 @@ static void test_complex_gemmsup_ukr( char storage, char trnsa, char trnsb, gtin
 
             // second call to ukr
             auxinfo_t data;
-            inc_t ps_a_use = (12 * rs_a); //12 = MR
+            inc_t ps_a_use = (MR * rs_a);
             bli_auxinfo_set_ps_a( ps_a_use, &data );
 
             ukr_fp(
