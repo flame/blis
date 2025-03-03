@@ -1377,6 +1377,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     post_ops->matrix_add = NULL; \
     post_ops->matrix_mul = NULL; \
     post_ops->pre_ops = NULL; \
+    post_ops->post_op_grp = NULL; \
  \
     /* Only supporting 8 post ops at max for now.*/ \
     dim_t max_post_ops_seq_length = 8; \
