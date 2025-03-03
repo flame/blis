@@ -71,6 +71,10 @@ GENTFUNC( dcomplex, z, blasname, blisname )
 \
 GENTFUNC( scomplex, c, blasname, blisname )
 
+#define INSERT_GENTFUNC_BLAS_S( blasname, blisname ) \
+\
+GENTFUNC( float,    s, blasname, blisname )
+
 // -- Basic one-operand macro with real domain only --
 
 

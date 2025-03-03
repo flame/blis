@@ -420,6 +420,19 @@ void bli_dnorm2fv_unb_var1_avx512
        cntx_t*  cntx
      );
 
+void bli_cgemm_32x4_avx512_k1_nn
+(
+    dim_t  m,
+    dim_t  n,
+    dim_t  k,
+    scomplex*    alpha,
+    scomplex*    a, const inc_t lda,
+    scomplex*    b, const inc_t ldb,
+    scomplex*    beta,
+    scomplex*    c, const inc_t ldc
+);
+
+
 err_t bli_zgemm_16x4_avx512_k1_nn
 (
     dim_t  m,

@@ -319,12 +319,12 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 	  BLIS_CCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64n_avx512, TRUE,
 	  BLIS_CCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64n_avx512, TRUE,
 
-	  BLIS_RRR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
-	  BLIS_RCR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
-	  BLIS_CRR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
-	  BLIS_RCC, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8n, TRUE,
-	  BLIS_CCR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8n, TRUE,
-	  BLIS_CCC, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8n, TRUE,
+	  BLIS_RRR, BLIS_SCOMPLEX, bli_cgemmsup_cv_zen4_asm_24x4m, FALSE,
+	  BLIS_RCR, BLIS_SCOMPLEX, bli_cgemmsup_cv_zen4_asm_24x4m, FALSE,
+	  BLIS_CRR, BLIS_SCOMPLEX, bli_cgemmsup_cv_zen4_asm_24x4m, FALSE,
+	  BLIS_RCC, BLIS_SCOMPLEX, bli_cgemmsup_cv_zen4_asm_24x4m, FALSE,
+	  BLIS_CCR, BLIS_SCOMPLEX, bli_cgemmsup_cv_zen4_asm_24x4m, FALSE,
+	  BLIS_CCC, BLIS_SCOMPLEX, bli_cgemmsup_cv_zen4_asm_24x4m, FALSE,
 
 	  BLIS_RRR, BLIS_DCOMPLEX, bli_zgemmsup_cv_zen4_asm_12x4m, FALSE,
 	  BLIS_RRC, BLIS_DCOMPLEX, bli_zgemmsup_cd_zen4_asm_12x4m, FALSE,
@@ -340,11 +340,11 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 	// Initialize level-3 sup blocksize objects with architecture-specific
 	// values.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,    24,     3,    12 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    64,     8,     8,     4 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   192,   144,    72,    48 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   512,   384,   128,    64 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  8064,  4032,  2040,  1020 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,    24,    24,    12 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    64,     8,     4,     4 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   192,   144,   120,    48 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   512,   384,   512,    64 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  8064,  4032,  4080,  1020 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes for small/unpacked level-3 problems.

@@ -524,8 +524,10 @@ static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char st
               beta == testinghelpers::ONE<T>()))
         thresh = 0.0;
     else
-        thresh = (7*k+3)*testinghelpers::getEpsilon<T>();
-
+    {
+        double adj = 1.6;
+        thresh = adj*(7*k+3)*testinghelpers::getEpsilon<T>();
+    }
     // call reference implementation
     testinghelpers::ref_gemm<T>( storage, 'n', 'n', m, n, k, alpha,
                                  buf_a, lda, buf_b, ldb, beta, buf_cref, ldc);

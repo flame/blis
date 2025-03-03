@@ -1572,3 +1572,94 @@ INSTANTIATE_TEST_SUITE_P(
 );
 #endif
 #endif
+
+// Function pointer specific to cgemm kernel that handles
+// special case where k=1.
+typedef void (*cgemm_k1_kernel)
+     (
+        dim_t  m,
+        dim_t  n,
+        dim_t  k,
+        scomplex*    alpha,
+        scomplex*    a, const inc_t lda,
+        scomplex*    b, const inc_t ldb,
+        scomplex*    beta,
+        scomplex*    c, const inc_t ldc
+    );
+
+// AOCL-BLAS has a set of kernels(AVX2 and AVX512) that separately handle
+// k=1 cases for ZGEMM. Thus, we need to define a test-fixture class for testing
+// these kernels
+class cgemmUkrk1 :
+        public ::testing::TestWithParam<std::tuple<scomplex,        // alpha
+                                                   scomplex,        // beta
+                                                   char,            // storage
+                                                   gtint_t,         // m
+                                                   gtint_t,         // n
+                                                   cgemm_k1_kernel, // kernel-pointer type
+                                                   bool>> {};       // is_mem_test
+
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(cgemmUkrk1);
+
+TEST_P(cgemmUkrk1, FunctionalTest)
+{
+    using T = scomplex;
+    gtint_t k      = 1;
+    T alpha        = std::get<0>(GetParam());           // alpha
+    T beta         = std::get<1>(GetParam());           // beta
+    char storage   = std::get<2>(GetParam());           // indicates storage of all matrix operands
+    gtint_t m = std::get<3>(GetParam());                // m
+    gtint_t n = std::get<4>(GetParam());                // n
+    cgemm_k1_kernel kern_ptr = std::get<5>(GetParam()); // kernel address
+    bool memory_test = std::get<6>(GetParam());         // is_mem_test
+
+    // Call to the testing interface(specific to k=1 cases)
+    test_gemmk1_ukr(kern_ptr, m, n, k, storage, alpha, beta, memory_test);
+}
+
+class cgemmUkrk1Print {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<scomplex, scomplex, char, gtint_t, gtint_t, cgemm_k1_kernel, bool>>  str) const {
+        gtint_t k       = 1;
+        scomplex alpha    = std::get<0>(str.param);
+        scomplex beta     = std::get<1>(str.param);
+        char storage    = std::get<2>(str.param);
+        gtint_t m       = std::get<3>(str.param);
+        gtint_t n       = std::get<4>(str.param);
+        bool memory_test = std::get<6>(str.param);
+
+        std::string str_name;
+        str_name += "_k_" + std::to_string(k);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_n_" + std::to_string(n);
+        str_name = str_name + "_" + storage;
+        str_name += ( memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
+
+        return str_name;
+    }
+};
+
+#if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
+#ifdef K_bli_cgemm_32x4_avx512_k1_nn
+INSTANTIATE_TEST_SUITE_P(
+    bli_cgemm_32x4_avx512_k1_nn,
+    cgemmUkrk1,
+    ::testing::Combine(
+
+        ::testing::Values(scomplex{1.0, 0.0}, scomplex{-1.0, 0.0},
+                          scomplex{0.0, 0.0}, scomplex{2.1, -1.9}),     // alpha value
+        ::testing::Values(scomplex{1.0, 0.0}, scomplex{-1.0, 0.0},
+                          scomplex{0.0, 0.0}, scomplex{2.1, -1.9}),     // beta value
+        ::testing::Values('c'),                                         // storage
+        ::testing::Range(gtint_t(1), gtint_t(65), 1),                   // values of m
+        ::testing::Range(gtint_t(1), gtint_t(9), 1),                    // values of n
+        ::testing::Values(bli_cgemm_32x4_avx512_k1_nn),
+        ::testing::Values(true, false)                                  // memory test
+    ),
+    ::cgemmUkrk1Print()
+);
+#endif
+#endif

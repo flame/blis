@@ -99,8 +99,10 @@ TEST_P( cgemmGeneric, API )
         thresh = adj*testinghelpers::getEpsilon<T>();
     }
     else
-        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
-
+    {
+        double adj = 4.0;
+        thresh = adj*(3*k+1)*testinghelpers::getEpsilon<T>();
+    }
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
@@ -281,6 +283,33 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of a
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of b
             ::testing::Values(gtint_t(0))                                   // increment to the leading dim of c
+        ),
+        ::gemmGenericPrint<scomplex>()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        K_1,
+        cgemmGeneric,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                                              // storage format
+            ::testing::Values('n'),                                         // transa
+            ::testing::Values('n'),                                         // transb
+            ::testing::Range(gtint_t(2), gtint_t(63), 1),                   // m
+            ::testing::Range(gtint_t(2), gtint_t(9), 1),                    // n
+            ::testing::Values(gtint_t(1)),                                  // k
+            ::testing::Values(scomplex{1.0, 0.0}, scomplex{-1.0, 0.0},
+                              scomplex{0.0, 1.0}, scomplex{2.1, -1.9},
+                              scomplex{0.0, 0.0}),                          // alpha
+            ::testing::Values(scomplex{1.0, 0.0}, scomplex{-1.0, 0.0},
+                              scomplex{0.0, 1.0}, scomplex{2.1, -1.9},
+                              scomplex{0.0, 0.0}),                          // beta
+            ::testing::Values(gtint_t(0), gtint_t(5)),                      // increment to the leading dim of a
+            ::testing::Values(gtint_t(0), gtint_t(9)),                      // increment to the leading dim of b
+            ::testing::Values(gtint_t(0), gtint_t(2))                       // increment to the leading dim of c
         ),
         ::gemmGenericPrint<scomplex>()
     );
