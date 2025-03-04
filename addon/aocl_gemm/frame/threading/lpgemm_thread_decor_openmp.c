@@ -906,7 +906,7 @@ BLIS_INLINE AOCL_TID_DISTR_TYPE lpgemm_get_tid_distr_type
 			( thr_attrs->tid_distr_nearly_seq == TRUE ) &&
 			( thr_attrs->tid_core_grp_load_high == TRUE );
 
-	if ( ( mr_x_nr_blks < low_util_n_thread_thres ) &&
+	if ( ( mr_x_nr_blks <= low_util_n_thread_thres ) &&
 		 ( can_spread_tids == TRUE ) )
 	{
 		tid_distr = STRIDE2;
