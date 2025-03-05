@@ -42,9 +42,11 @@ endif()
 # Set the C standard to C99.
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
+set(CMAKE_C_EXTENSIONS OFF)
 # Set the C++ standard to C++11.
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Enable IDE folders for targets.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
