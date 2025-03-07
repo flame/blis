@@ -36627,7 +36627,7 @@
     jz(.SUB18DROWSTORBZ)                                        \
 																\
     label(.SUB18DCOLSTORBZ)                                     \
-    STORE_COLSTORED_C_18x6_Bn                                   \
+    STORE_COLSTORED_C_18x6_B0                                   \
     jmp(.CONCLUDE)                                              \
 																\
     label(.SUB18DROWSTORBZ)                                     \
