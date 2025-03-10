@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -572,6 +572,11 @@ void BLIS_EXPORT_BLAS cblas_sgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
          f77_int N, f77_int K, float alpha, const float *A,
                  f77_int lda, const float *B, f77_int ldb,
                  float beta, float *C, f77_int ldc);
+void BLIS_EXPORT_BLAS cblas_sgemmtr(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
+                 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+                 f77_int N, f77_int K, float alpha, const float *A,
+                 f77_int lda, const float *B, f77_int ldb,
+                 float beta, float *C, f77_int ldc);
 /** @}*/
 void BLIS_EXPORT_BLAS cblas_dgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                  enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int N,
@@ -642,8 +647,13 @@ void BLIS_EXPORT_BLAS cblas_dtrsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
 * @return None
 */
 void BLIS_EXPORT_BLAS cblas_dgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
-         enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
-         f77_int N, f77_int K, double alpha, const double *A,
+                 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+                 f77_int N, f77_int K, double alpha, const double *A,
+                 f77_int lda, const double *B, f77_int ldb,
+                 double beta, double *C, f77_int ldc);
+void BLIS_EXPORT_BLAS cblas_dgemmtr(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
+                 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+                 f77_int N, f77_int K, double alpha, const double *A,
                  f77_int lda, const double *B, f77_int ldb,
                  double beta, double *C, f77_int ldc);
 /** @}*/
@@ -716,8 +726,13 @@ void BLIS_EXPORT_BLAS cblas_ctrsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
 * @return None
 */
 void BLIS_EXPORT_BLAS cblas_cgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
-         enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
-         f77_int N, f77_int K, const void *alpha, const void *A,
+                 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+                 f77_int N, f77_int K, const void *alpha, const void *A,
+                 f77_int lda, const void *B, f77_int ldb,
+                 const void *beta, void *C, f77_int ldc);
+void BLIS_EXPORT_BLAS cblas_cgemmtr(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
+                 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+                 f77_int N, f77_int K, const void *alpha, const void *A,
                  f77_int lda, const void *B, f77_int ldb,
                  const void *beta, void *C, f77_int ldc);
 /** @}*/
@@ -790,8 +805,13 @@ void BLIS_EXPORT_BLAS cblas_ztrsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
 * @return None
 */
 void BLIS_EXPORT_BLAS cblas_zgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
-         enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
-         f77_int N, f77_int K, const void *alpha, const void *A,
+                 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+                 f77_int N, f77_int K, const void *alpha, const void *A,
+                 f77_int lda, const void *B, f77_int ldb,
+                 const void *beta, void *C, f77_int ldc);
+void BLIS_EXPORT_BLAS cblas_zgemmtr(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
+                 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+                 f77_int N, f77_int K, const void *alpha, const void *A,
                  f77_int lda, const void *B, f77_int ldb,
                  const void *beta, void *C, f77_int ldc);
 /** @}*/
@@ -839,7 +859,6 @@ void BLIS_EXPORT_BLAS cblas_xerbla(f77_int p, const char *rout, const char *form
 
 BLIS_EXPORT_BLAS float  cblas_scabs1( const void *z);
 BLIS_EXPORT_BLAS double  cblas_dcabs1( const void *z);
-
 
 /*
  * ===========================================================================

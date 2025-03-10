@@ -1,3 +1,37 @@
+/*
+
+   BLIS
+   An object-based framework for developing high-performance BLAS-like
+   libraries.
+
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
+   met:
+    - Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    - Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+   HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
 #include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
@@ -5,34 +39,32 @@
  * cblas_dgemmt.c
  * This program is a C interface to dgemmt.
  *
- * Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
- *
  */
 
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_dgemmt( enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
-                   enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
-                   f77_int N, f77_int K,
-                   double alpha, const double  *A,
-                   f77_int lda, const double  *B, f77_int ldb,
-                   double beta, double  *C, f77_int ldc)
+void cblas_dgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
+                  enum CBLAS_TRANSPOSE TransA,
+                  enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int K,
+                  double alpha, const double  *A,
+                  f77_int lda, const double  *B, f77_int ldb,
+                  double beta, double  *C, f77_int ldc)
 {
-        AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-   char TA, TB, UL;
+   AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+   char UL, TA, TB;
 #ifdef F77_CHAR
-   F77_CHAR F77_TA, F77_TB, F77_UL;
+   F77_CHAR F77_UL, F77_TA, F77_TB;
 #else
+   #define F77_UL &UL
    #define F77_TA &TA
    #define F77_TB &TB
-   #define F77_UL &UL
 #endif
 
 #ifdef F77_INT
-   F77_INT F77_N=N, F77_K=K, F77_lda=lda, F77_ldb=ldb;
+   F77_INT F77_M=M, F77_K=K, F77_lda=lda, F77_ldb=ldb;
    F77_INT F77_ldc=ldc;
 #else
-   #define F77_N N
+   #define F77_M M
    #define F77_K K
    #define F77_lda lda
    #define F77_ldb ldb
@@ -46,8 +78,9 @@ void cblas_dgemmt( enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
 
    if( Order == CblasColMajor )
    {
-      if( Uplo == CblasUpper) UL = 'U';
-      else if(Uplo == CblasLower) UL = 'L';
+
+      if( Uplo == CblasUpper) UL='U';
+      else if ( Uplo == CblasLower ) UL='L';
       else
       {
          cblas_xerbla(2, "cblas_dgemmt","Illegal Uplo setting, %d\n", Uplo);
@@ -82,12 +115,12 @@ void cblas_dgemmt( enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
       }
 
       #ifdef F77_CHAR
+         F77_UL = C2F_CHAR(&UL);
          F77_TA = C2F_CHAR(&TA);
          F77_TB = C2F_CHAR(&TB);
-         F77_UL = C2F_CHAR(&UL);
       #endif
 
-      F77_dgemmt(F77_UL,F77_TA, F77_TB, &F77_N, &F77_K, &alpha, A,
+      F77_dgemmt(F77_UL, F77_TA, F77_TB, &F77_M, &F77_K, &alpha, A,
        &F77_lda, B, &F77_ldb, &beta, C, &F77_ldc);
    } else if (Order == CblasRowMajor)
    {
@@ -95,8 +128,8 @@ void cblas_dgemmt( enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
       /* In case of row major order,
        * Swap A & B and induce transpose to C
        */
-      if(Uplo == CblasUpper) UL = 'L';
-      else if(Uplo == CblasLower) UL = 'U';
+      if( Uplo == CblasUpper) UL='L';
+      else if ( Uplo == CblasLower ) UL='U';
       else
       {
          cblas_xerbla(2, "cblas_dgemmt","Illegal Uplo setting, %d\n", Uplo);
@@ -129,12 +162,12 @@ void cblas_dgemmt( enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
          return;
       }
       #ifdef F77_CHAR
+         F77_UL = C2F_CHAR(&UL);
          F77_TA = C2F_CHAR(&TA);
          F77_TB = C2F_CHAR(&TB);
-         F77_UL = C2F_CHAR(&UL);
       #endif
 
-      F77_dgemmt(F77_UL,F77_TA, F77_TB, &F77_N, &F77_K, &alpha, B,
+      F77_dgemmt(F77_UL, F77_TA, F77_TB, &F77_M, &F77_K, &alpha, B,
                   &F77_ldb, A, &F77_lda, &beta, C, &F77_ldc);
    }
    else
@@ -148,4 +181,17 @@ void cblas_dgemmt( enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
    return;
 }
+
+void cblas_dgemmtr(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
+                  enum CBLAS_TRANSPOSE TransA,
+                  enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int K,
+                  double alpha, const double  *A,
+                  f77_int lda, const double  *B, f77_int ldb,
+                  double beta, double  *C, f77_int ldc)
+#ifdef BLIS_OS_OSX
+{ cblas_dgemmt(Order, Uplo, TransA, TransB, M, K, alpha, A, lda, B, ldb, beta, C, ldc); }
+#else
+__attribute__((alias("cblas_dgemmt")));
+#endif
+
 #endif
