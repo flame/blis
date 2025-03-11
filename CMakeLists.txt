@@ -1202,11 +1202,11 @@ if(WIN32)
 endif()
 
 if(THREADING_MODEL STREQUAL "no")
-    set(PC_IN_FILE "aocl-blas.pc.in")
-    set(PC_OUT_FILE "aocl-blas.pc")
+    set(PC_IN_FILE "blis.pc.in")
+    set(PC_OUT_FILE "blis.pc")
 else()
-    set(PC_IN_FILE "aocl-blas-mt.pc.in")
-    set(PC_OUT_FILE "aocl-blas-mt.pc")
+    set(PC_IN_FILE "blis-mt.pc.in")
+    set(PC_OUT_FILE "blis-mt.pc")
 endif()
 
 # Set directories for installation of libraries and header files.

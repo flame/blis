@@ -3,7 +3,7 @@ exec_prefix=${prefix}
 libdir=@LIB_DIR@
 includedir=@INCLUDE_DIR@
 
-Name: AOCL-BLAS
+Name: BLIS
 Description: BLAS-like Library Instantiation Software Framework
 Version: @VERSION_STRING@
 Libs: -L${libdir} -l@LIBBLIS@
