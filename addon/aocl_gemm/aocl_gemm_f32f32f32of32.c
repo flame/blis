@@ -44,36 +44,36 @@
 #include "lpgemm_logger.h"
 
 static inline bool is_tiny_input_f32
-     (
-       dim_t m,
-       dim_t n,
-       dim_t k,
-       lpgemm_cntx_t* lcntx
-     )
+	 (
+	   dim_t m,
+	   dim_t n,
+	   dim_t k,
+	   lpgemm_cntx_t* lcntx
+	 )
 {
-	bool is_tiny = FALSE;
-
-    const dim_t NC = lcntx->blksz.NC;
-    const dim_t MC = lcntx->blksz.MC;
-    const dim_t KC = lcntx->blksz.KC;
-    const dim_t MR = lcntx->blksz.MR;
-    const dim_t NR = lcntx->blksz.NR;
+	const dim_t NC = lcntx->blksz.NC;
+	const dim_t MC = lcntx->blksz.MC;
+	const dim_t KC = lcntx->blksz.KC;
+	const dim_t MR = lcntx->blksz.MR;
+	const dim_t NR = lcntx->blksz.NR;
 
 	dim_t mnk = m * n * k;
+	dim_t mk  = m * k;
 	const dim_t mnk_magic_num = 12 * 64 * 496;
-	const dim_t m_thresh = 6 * MR;
+	const dim_t mk_thresh = 12000;
+	const dim_t m_thresh = 5 * MR;
 	const dim_t n_thresh = 2 * NR;
 	const dim_t k_thresh = 480;
 
 	// Need to explicitly check for MC, NC boundaries for safety.
-	if ( ( k < KC ) && ( m <= MC ) && ( n < NC ) &&
-		 ( ( m <= m_thresh ) && ( n <= n_thresh ) && ( k <= k_thresh ) &&
-		   ( mnk < mnk_magic_num ) ) )
+	if ( ( ( k < KC ) && ( m <= MC ) && ( n < NC ) ) &&
+		 ( ( ( m <= m_thresh ) && ( n <= n_thresh ) && ( k <= k_thresh ) ) ||
+		   ( ( mnk < mnk_magic_num && m != 1 && mk < mk_thresh ) ) ) )
 	{
-		is_tiny = TRUE;
+		return TRUE;
 	}
 
-	return is_tiny;
+	return FALSE;
 }
 
 AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
@@ -221,21 +221,40 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 
 	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( F32F32F32OF32 );
 
-	if ( ( is_tiny_input_f32( m, n, k, lcntx_g ) == TRUE ) &&
-		 ( is_single_thread( &rntm_g ) == TRUE) &&
-	  	 ( is_row_major == TRUE ) )
+	if ( is_single_thread( &rntm_g ) == TRUE )
 	{
-		lpgemm_rowvar_tiny_f32f32f32of32
-		(
-		  m, n, k,
-		  a, rs_a, cs_a, mtag_a,
-		  b, rs_b, cs_b, mtag_b,
-		  c, rs_c, cs_c,
-		  alpha, beta,
-		  lcntx_g,
-		  post_op_list, F32
-		);
-		return;
+		if ( ( is_row_major == TRUE ) &&
+			 ( is_tiny_input_f32( m, n, k, lcntx_g ) == TRUE ) )
+		{
+			lpgemm_rowvar_tiny_f32f32f32of32
+			(
+			  m, n, k,
+			  a, rs_a, cs_a, mtag_a,
+			  b, rs_b, cs_b, mtag_b,
+			  c, rs_c, cs_c,
+			  alpha, beta,
+			  lcntx_g,
+			  post_op_list, F32
+			);
+
+			return;
+		}
+		else if ( ( is_column_major == TRUE ) &&
+				  ( is_tiny_input_f32( n, m, k, lcntx_g ) == TRUE ) )
+		{
+			lpgemm_rowvar_tiny_f32f32f32of32
+			(
+			  n, m, k,
+			  b, rs_b, cs_b, mtag_b,
+			  a, rs_a, cs_a, mtag_a,
+			  c, rs_c, cs_c,
+			  alpha, beta,
+			  lcntx_g,
+			  post_op_list, F32
+			);
+
+			return;
+		}
 	}
 
 #ifdef BLIS_ENABLE_OPENMP
