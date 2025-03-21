@@ -1224,7 +1224,7 @@ void dtrsm_blis_impl
                     }
                     else //if ( blis_side == BLIS_RIGHT )
                     {
-                        if ( n0 < 1812 || m0 < 3220 )
+                        if ( (n0 < 1812 || m0 < 3220) && (m0 < 14000) )
                         {
                             ker_ft = bli_trsm_small_mt_ZEN5;
                         }
