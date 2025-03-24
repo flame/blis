@@ -553,19 +553,54 @@ POST_OPS_DOWNSCALE_5xLT16:
 			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 			if ( post_ops_list_temp->scale_factor_len > 1 )
 			{
-				scale0 = _mm512_maskz_loadu_ps
-							(
-							  load_mask,
-							  ( ( float* )post_ops_list_temp->scale_factor +
-								post_ops_attr.post_op_c_j )
-							);
+				if( post_ops_list_temp->sf_stor_type == U8 )
+				{
+					U8_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S8 )
+				{
+					S8_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S32 )
+				{
+					S32_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == BF16 )
+				{
+					BF16_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else
+				{
+					scale0 = _mm512_maskz_loadu_ps(
+						load_mask,
+						( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j ) );
+				}
 			}
 			else if ( post_ops_list_temp->scale_factor_len == 1 )
 			{
-				scale0 =
-					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+				if( post_ops_list_temp->sf_stor_type == U8 )
+				{
+					U8_F32_SCALE_BCST(scale0,0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S8 )
+				{
+					S8_F32_SCALE_BCST(scale0,0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S32 )
+				{
+					S32_F32_SCALE_BCST(scale0,0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == BF16 )
+				{
+					BF16_F32_SCALE_BCST(scale0,0)
+				}
+				else
+				{
+					scale0 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+				}
 			}
-
 			// Need to ensure sse not used to avoid avx512 -> sse transition.
 			__m128i zero_point = _mm512_castsi512_si128( _mm512_setzero_si512() );
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
@@ -1691,19 +1726,54 @@ POST_OPS_DOWNSCALE_4xLT16:
 			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 			if ( post_ops_list_temp->scale_factor_len > 1 )
 			{
-				scale0 = _mm512_maskz_loadu_ps
-							(
-							  load_mask,
-							  ( ( float* )post_ops_list_temp->scale_factor +
-								post_ops_attr.post_op_c_j )
-							);
+				if( post_ops_list_temp->sf_stor_type == U8 )
+				{
+					U8_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S8 )
+				{
+					S8_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S32 )
+				{
+					S32_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == BF16 )
+				{
+					BF16_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else
+				{
+					scale0 = _mm512_maskz_loadu_ps(
+						load_mask,
+						( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j ));
+				}
 			}
 			else if ( post_ops_list_temp->scale_factor_len == 1 )
 			{
-				scale0 =
-					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+				if( post_ops_list_temp->sf_stor_type == U8 )
+				{
+					U8_F32_SCALE_BCST(scale0,0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S8 )
+				{
+					S8_F32_SCALE_BCST(scale0,0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S32 )
+				{
+					S32_F32_SCALE_BCST(scale0,0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == BF16 )
+				{
+					BF16_F32_SCALE_BCST(scale0,0)
+				}
+				else
+				{
+					scale0 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+				}
 			}
-
 			// Need to ensure sse not used to avoid avx512 -> sse transition.
 			__m128i zero_point = _mm512_castsi512_si128( _mm512_setzero_si512() );
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
@@ -2675,17 +2745,53 @@ POST_OPS_DOWNSCALE_3xLT16:
 			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 			if ( post_ops_list_temp->scale_factor_len > 1 )
 			{
-				scale0 = _mm512_maskz_loadu_ps
-							(
-							  load_mask,
-							  ( ( float* )post_ops_list_temp->scale_factor +
-								post_ops_attr.post_op_c_j )
-							);
+				if( post_ops_list_temp->sf_stor_type == U8 )
+				{
+					U8_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S8 )
+				{
+					S8_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S32 )
+				{
+					S32_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == BF16 )
+				{
+					BF16_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else
+				{
+					scale0 = _mm512_maskz_loadu_ps(
+						load_mask,
+						( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j ) );
+				}
 			}
 			else if ( post_ops_list_temp->scale_factor_len == 1 )
 			{
-				scale0 =
-					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+				if( post_ops_list_temp->sf_stor_type == U8 )
+				{
+					U8_F32_SCALE_BCST(scale0,0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S8 )
+				{
+					S8_F32_SCALE_BCST(scale0,0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S32 )
+				{
+					S32_F32_SCALE_BCST(scale0,0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == BF16 )
+				{
+					BF16_F32_SCALE_BCST(scale0,0)
+				}
+				else
+				{
+					scale0 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+				}
 			}
 
 			// Need to ensure sse not used to avoid avx512 -> sse transition.
@@ -3506,17 +3612,53 @@ POST_OPS_DOWNSCALE_2xLT16:
 			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 			if ( post_ops_list_temp->scale_factor_len > 1 )
 			{
-				scale0 = _mm512_maskz_loadu_ps
-							(
-							  load_mask,
-							  ( ( float* )post_ops_list_temp->scale_factor +
-								post_ops_attr.post_op_c_j )
-							);
+				if( post_ops_list_temp->sf_stor_type == U8 )
+				{
+					U8_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S8 )
+				{
+					S8_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S32 )
+				{
+					S32_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == BF16 )
+				{
+					BF16_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else
+				{
+					scale0 = _mm512_maskz_loadu_ps(
+						load_mask,
+						( ( float* )post_ops_list_temp->scale_factor +
+						post_ops_attr.post_op_c_j ) );
+				}
 			}
 			else if ( post_ops_list_temp->scale_factor_len == 1 )
 			{
-				scale0 =
-					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+				if( post_ops_list_temp->sf_stor_type == U8 )
+				{
+					U8_F32_SCALE_BCST(scale0,0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S8 )
+				{
+					S8_F32_SCALE_BCST(scale0,0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S32 )
+				{
+					S32_F32_SCALE_BCST(scale0,0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == BF16 )
+				{
+					BF16_F32_SCALE_BCST(scale0,0)
+				}
+				else
+				{
+					scale0 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+				}
 			}
 
 			// Need to ensure sse not used to avoid avx512 -> sse transition.
@@ -4184,17 +4326,53 @@ POST_OPS_DOWNSCALE_1xLT16:
 			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 			if ( post_ops_list_temp->scale_factor_len > 1 )
 			{
-				scale0 = _mm512_maskz_loadu_ps
-							(
-							  load_mask,
-							  ( ( float* )post_ops_list_temp->scale_factor +
-								post_ops_attr.post_op_c_j )
-							);
+				if( post_ops_list_temp->sf_stor_type == U8 )
+				{
+					U8_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S8 )
+				{
+					S8_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S32 )
+				{
+					S32_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == BF16 )
+				{
+					BF16_F32_SCALE_LOAD(scale0,load_mask, 0)
+				}
+				else
+				{
+					scale0 = _mm512_maskz_loadu_ps(
+							load_mask,
+							( ( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j ) );
+				}
 			}
 			else if ( post_ops_list_temp->scale_factor_len == 1 )
 			{
-				scale0 =
-					_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+				if( post_ops_list_temp->sf_stor_type == U8 )
+				{
+					U8_F32_SCALE_BCST(scale0,0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S8 )
+				{
+					S8_F32_SCALE_BCST(scale0,0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == S32 )
+				{
+					S32_F32_SCALE_BCST(scale0,0)
+				}
+				else if( post_ops_list_temp->sf_stor_type == BF16 )
+				{
+					BF16_F32_SCALE_BCST(scale0,0)
+				}
+				else
+				{
+					scale0 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+				}
 			}
 
 			// Need to ensure sse not used to avoid avx512 -> sse transition.
@@ -4978,19 +5156,57 @@ POST_OPS_CLIP_5x16:
 POST_OPS_DOWNSCALE_5x16:
 	{
 		__m512 scale0;
+		__mmask16 scale_mask = _cvtu32_mask16( 0xFFFF );
 
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
-
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
 		__m128i zero_point0 = _mm512_castsi512_si128( _mm512_setzero_si512() );
 
@@ -6062,19 +6278,57 @@ POST_OPS_CLIP_4x16:
 POST_OPS_DOWNSCALE_4x16:
 	{
 		__m512 scale0;
+		__mmask16 scale_mask = _cvtu32_mask16( 0xFFFF );
 
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
-
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
 		__m128i zero_point0 = _mm512_castsi512_si128( _mm512_setzero_si512() );
 
@@ -7002,17 +7256,56 @@ POST_OPS_CLIP_3x16:
 POST_OPS_DOWNSCALE_3x16:
 	{
 		__m512 scale0;
+		__mmask16 scale_mask = _cvtu32_mask16( 0xFFFF );
 
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
 
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
@@ -7798,17 +8091,56 @@ POST_OPS_CLIP_2x16:
 POST_OPS_DOWNSCALE_2x16:
 	{
 		__m512 scale0;
+		__mmask16 scale_mask = _cvtu32_mask16( 0xFFFF );
 
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
 
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
@@ -8451,17 +8783,56 @@ POST_OPS_CLIP_1x16:
 POST_OPS_DOWNSCALE_1x16:
 	{
 		__m512 scale0;
+		__mmask16 scale_mask = _cvtu32_mask16( 0xFFFF );
 
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
 
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
@@ -9358,24 +9729,70 @@ POST_OPS_CLIP_5x32:
 POST_OPS_DOWNSCALE_5x32:
 	{
 		__m512 scale0, scale1;
+		__mmask16 scale_mask = _cvtu32_mask16( 0xFFFF );
 
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-			scale1 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				U8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S32_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				BF16_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				scale1 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale1 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+				U8_F32_SCALE_BCST(scale1,1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+				S8_F32_SCALE_BCST(scale1,1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+				S32_F32_SCALE_BCST(scale1,1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+				BF16_F32_SCALE_BCST(scale1,1)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale1 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
-
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
 		__m128i zero_point0 = _mm512_castsi512_si128( _mm512_setzero_si512() );
 		__m128i zero_point1 = _mm512_castsi512_si128( _mm512_setzero_si512() );
@@ -10700,22 +11117,69 @@ POST_OPS_CLIP_4x32:
 POST_OPS_DOWNSCALE_4x32:
 	{
 		__m512 scale0, scale1;
+		__mmask16 scale_mask = _cvtu32_mask16( 0xFFFF );
 
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-			scale1 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				U8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S32_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				BF16_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				scale1 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale1 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+				U8_F32_SCALE_BCST(scale1,1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+				S8_F32_SCALE_BCST(scale1,1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+				S32_F32_SCALE_BCST(scale1,1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+				BF16_F32_SCALE_BCST(scale1,1)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale1 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
 
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
@@ -11851,22 +12315,69 @@ POST_OPS_CLIP_3x32:
 POST_OPS_DOWNSCALE_3x32:
 	{
 		__m512 scale0, scale1;
+		__mmask16 scale_mask = _cvtmask16_u32( 0xFFFF );
 
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-			scale1 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				U8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S32_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				BF16_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				scale1 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale1 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+				U8_F32_SCALE_BCST(scale1,1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+				S8_F32_SCALE_BCST(scale1,1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+				S32_F32_SCALE_BCST(scale1,1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+				BF16_F32_SCALE_BCST(scale1,1)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale1 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
 
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
@@ -12809,22 +13320,69 @@ POST_OPS_CLIP_2x32:
 POST_OPS_DOWNSCALE_2x32:
 	{
 		__m512 scale0, scale1;
+		__mmask16 scale_mask = _cvtu32_mask16( 0xFFFF );
 
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-			scale1 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				U8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S32_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				BF16_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				scale1 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale1 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+				U8_F32_SCALE_BCST(scale1,1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+				S8_F32_SCALE_BCST(scale1,1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+				S32_F32_SCALE_BCST(scale1,1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+				BF16_F32_SCALE_BCST(scale1,1)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale1 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
 
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
@@ -13574,22 +14132,69 @@ POST_OPS_CLIP_1x32:
 POST_OPS_DOWNSCALE_1x32:
 	{
 		__m512 scale0, scale1;
+		__mmask16 scale_mask = _cvtu32_mask16( 0xFFFF );
 
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-			scale1 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				U8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S32_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				BF16_F32_SCALE_LOAD(scale1,scale_mask, 1)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				scale1 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale1 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+				U8_F32_SCALE_BCST(scale1,1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+				S8_F32_SCALE_BCST(scale1,1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+				S32_F32_SCALE_BCST(scale1,1)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+				BF16_F32_SCALE_BCST(scale1,1)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale1 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
 
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
@@ -14648,29 +15253,83 @@ POST_OPS_CLIP_5x48:
 POST_OPS_DOWNSCALE_5x48:
 	{
 		__m512 scale0, scale1, scale2;
+		__mmask16 scale_mask = _cvtu32_mask16( 0xFFFF );
 
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-			scale1 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-			scale2 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				U8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				U8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S32_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S32_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				BF16_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				BF16_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				scale1 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+				scale2 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale1 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale2 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+				U8_F32_SCALE_BCST(scale1,1)
+				U8_F32_SCALE_BCST(scale2,2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+				S8_F32_SCALE_BCST(scale1,1)
+				S8_F32_SCALE_BCST(scale2,2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+				S32_F32_SCALE_BCST(scale1,1)
+				S32_F32_SCALE_BCST(scale2,2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+				BF16_F32_SCALE_BCST(scale1,1)
+				BF16_F32_SCALE_BCST(scale2,2)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale1 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale2 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
-
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
 		__m128i zero_point0 = _mm512_castsi512_si128( _mm512_setzero_si512() );
 		__m128i zero_point1 = _mm512_castsi512_si128( _mm512_setzero_si512() );
@@ -16319,29 +16978,83 @@ POST_OPS_CLIP_4x48:
 POST_OPS_DOWNSCALE_4x48:
 	{
 		__m512 scale0, scale1, scale2;
+		__mmask16 scale_mask = _cvtu32_mask16( 0xFFFF );
 
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-			scale1 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-			scale2 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				U8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				U8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S32_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S32_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				BF16_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				BF16_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				scale1 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+				scale2 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale1 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale2 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+				U8_F32_SCALE_BCST(scale1,1)
+				U8_F32_SCALE_BCST(scale2,2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+				S8_F32_SCALE_BCST(scale1,1)
+				S8_F32_SCALE_BCST(scale2,2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+				S32_F32_SCALE_BCST(scale1,1)
+				S32_F32_SCALE_BCST(scale2,2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+				BF16_F32_SCALE_BCST(scale1,1)
+				BF16_F32_SCALE_BCST(scale2,2)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale1 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale2 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
-
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
 		__m128i zero_point0 = _mm512_castsi512_si128( _mm512_setzero_si512() );
 		__m128i zero_point1 = _mm512_castsi512_si128( _mm512_setzero_si512() );
@@ -17734,27 +18447,82 @@ POST_OPS_CLIP_3x48:
 POST_OPS_DOWNSCALE_3x48:
 	{
 		__m512 scale0, scale1, scale2;
+		__mmask16 scale_mask =  _cvtu32_mask16( 0xFFFF );
 
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-			scale1 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-			scale2 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				U8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				U8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S32_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S32_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				BF16_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				BF16_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				scale1 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+				scale2 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale1 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale2 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+				U8_F32_SCALE_BCST(scale1,1)
+				U8_F32_SCALE_BCST(scale2,2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+				S8_F32_SCALE_BCST(scale1,1)
+				S8_F32_SCALE_BCST(scale2,2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+				S32_F32_SCALE_BCST(scale1,1)
+				S32_F32_SCALE_BCST(scale2,2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+				BF16_F32_SCALE_BCST(scale1,1)
+				BF16_F32_SCALE_BCST(scale2,2)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale1 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale2 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
 
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
@@ -18893,29 +19661,83 @@ POST_OPS_CLIP_2x48:
 POST_OPS_DOWNSCALE_2x48:
 	{
 		__m512 scale0, scale1, scale2;
+		__mmask16 scale_mask = _cvtu32_mask16( 0xFFFF );
 
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-			scale1 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-			scale2 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				U8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				U8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S32_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S32_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				BF16_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				BF16_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				scale1 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+				scale2 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale1 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale2 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+				U8_F32_SCALE_BCST(scale1,1)
+				U8_F32_SCALE_BCST(scale2,2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+				S8_F32_SCALE_BCST(scale1,1)
+				S8_F32_SCALE_BCST(scale2,2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+				S32_F32_SCALE_BCST(scale1,1)
+				S32_F32_SCALE_BCST(scale2,2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+				BF16_F32_SCALE_BCST(scale1,1)
+				BF16_F32_SCALE_BCST(scale2,2)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale1 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale2 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
-
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
 		__m128i zero_point0 = _mm512_castsi512_si128( _mm512_setzero_si512() );
 		__m128i zero_point1 = _mm512_castsi512_si128( _mm512_setzero_si512() );
@@ -19803,27 +20625,82 @@ POST_OPS_CLIP_1x48:
 POST_OPS_DOWNSCALE_1x48:
 	{
 		__m512 scale0, scale1, scale2;
+		__mmask16 scale_mask = _cvtu32_mask16( 0xFFFF );
 
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-			scale1 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-			scale2 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				U8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				U8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S32_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S32_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				BF16_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				BF16_F32_SCALE_LOAD(scale2,scale_mask, 2)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				scale1 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+				scale2 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale1 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale2 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+				U8_F32_SCALE_BCST(scale1,1)
+				U8_F32_SCALE_BCST(scale2,2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+				S8_F32_SCALE_BCST(scale1,1)
+				S8_F32_SCALE_BCST(scale2,2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+				S32_F32_SCALE_BCST(scale1,1)
+				S32_F32_SCALE_BCST(scale2,2)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+				BF16_F32_SCALE_BCST(scale1,1)
+				BF16_F32_SCALE_BCST(scale2,2)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale1 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale2 = _mm512_set1_ps(
+						*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
 
 		// Need to ensure sse not used to avoid avx512 -> sse transition.

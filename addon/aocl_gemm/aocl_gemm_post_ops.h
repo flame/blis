@@ -87,6 +87,7 @@ typedef struct
 	dim_t scale_factor_len;
 	dim_t zero_point_len;
 	AOCL_PARAMS_STORAGE_TYPES zp_stor_type;
+	AOCL_PARAMS_STORAGE_TYPES sf_stor_type;
 } aocl_post_op_sum; // Also use for scale.
 
 typedef struct

@@ -753,9 +753,27 @@ LPGEMV_N_EQ1_KERN(int8_t, int8_t, int32_t, s8s8s32os32)
 		POST_OPS_DOWNSCALE_6x64:
 		{
 			__m512 scale0 = _mm512_setzero_ps();
-			scale0 = _mm512_set1_ps(
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
 			             *( ( float* )post_ops_list_temp->scale_factor ) );
-
+			}
 			// Need to ensure sse not used to avoid avx512 -> sse transition.
 			__m128i zero_point0 = _mm512_castsi512_si128(
 			                          _mm512_setzero_si512() );

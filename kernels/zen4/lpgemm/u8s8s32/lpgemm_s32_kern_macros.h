@@ -585,6 +585,100 @@ flt_reg_pfx ## m_ind ## n_ind = _mm512_add_ps \
 #define CVT_STORE_F32_U8(reg,m_ind,n_ind) \
 	CVT_STORE_F32_U8_MASK(mask_all1,reg,m_ind,n_ind) \
 
+#define S8_F32_SCALE_LOAD(scr,mask,n_ind) \
+	scr = _mm512_cvtepi32_ps \
+		( \
+			_mm512_cvtepi8_epi32 \
+			( \
+			  _mm_maskz_loadu_epi8 \
+			  ( \
+				( mask ), \
+				( ( int8_t* )post_ops_list_temp->scale_factor + \
+				post_ops_attr.post_op_c_j + ( n_ind * 16 ) )\
+			  ) \
+			) \
+		); \
+
+#define U8_F32_SCALE_LOAD(scr,mask,n_ind) \
+	scr = _mm512_cvtepi32_ps \
+		( \
+			_mm512_cvtepu8_epi32 \
+			( \
+			  _mm_maskz_loadu_epi8 \
+			  ( \
+				( mask ), \
+				( ( int8_t* )post_ops_list_temp->scale_factor + \
+					post_ops_attr.post_op_c_j + ( n_ind * 16 ) ) \
+			  ) \
+			) \
+		);
+
+#define S32_F32_SCALE_LOAD(scr,mask,n_ind) \
+	scr  = 	_mm512_cvtepi32_ps \
+			( \
+				_mm512_maskz_loadu_epi32 \
+				( \
+					( mask ), \
+					( ( int32_t* )post_ops_list_temp->scale_factor + \
+						post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+					) \
+				) \
+			);
+
+#define BF16_F32_SCALE_LOAD(scr,mask,n_ind) \
+	scr = ( __m512)( _mm512_sllv_epi32 \
+			( \
+				_mm512_cvtepi16_epi32 \
+				( \
+					_mm256_maskz_loadu_epi16 \
+					( \
+						( mask ), \
+						( ( bfloat16* )post_ops_list_temp->scale_factor + \
+							post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+						) \
+					) \
+				), _mm512_set1_epi32( 16 ) \
+			) \
+		); \
+
+#define S32_F32_SCALE_BCST(scr,n_ind) \
+	scr = _mm512_cvtepi32_ps \
+		( \
+			_mm512_set1_epi32 \
+			( \
+				*( ( int32_t* )post_ops_list_temp->scale_factor ) \
+			)\
+		);
+
+#define U8_F32_SCALE_BCST(scr,n_ind) \
+	scr = _mm512_cvtepi32_ps \
+		( \
+			_mm512_cvtepu8_epi32 \
+			( \
+				_mm_set1_epi8(*( ( int8_t* )post_ops_list_temp->scale_factor ) ) \
+			)\
+		);
+
+#define S8_F32_SCALE_BCST(scr,n_ind) \
+	scr = _mm512_cvtepi32_ps \
+		( \
+			_mm512_cvtepi8_epi32 \
+			( \
+				_mm_set1_epi8(*( ( int8_t* )post_ops_list_temp->scale_factor ) ) \
+			)\
+		);
+
+#define BF16_F32_SCALE_BCST(scr,n_ind) \
+	scr = ( __m512)( _mm512_sllv_epi32 \
+			( \
+				_mm512_cvtepi16_epi32 \
+				( \
+					_mm256_set1_epi16( \
+						*( ( bfloat16* )post_ops_list_temp->scale_factor ) ) \
+				), _mm512_set1_epi32( 16 ) \
+			) \
+		);
+
 #ifdef LPGEMM_BF16_JIT
 #define CVT_STORE_F32_BF16_MASK(mask,reg,m_ind,n_ind)
 #define CVT_STORE_F32_BF16_MASK_AVX2(reg,mask, ptr)

@@ -507,61 +507,61 @@ POST_OPS_BIAS_5x64:
 
 		// c[0,0-15]
 		acc_00 = _mm512_add_ps( b0, acc_00 );
-		
+
 		// c[0,16-31]
 		acc_01 = _mm512_add_ps( b1, acc_01 );
-		
+
 		// c[0,32-47]
 		acc_02 = _mm512_add_ps( b2, acc_02 );
 
 		// c[0,48-63]
 		acc_03 = _mm512_add_ps( b3, acc_03 );
-		
+
 		// c[1,0-15]
 		acc_10 = _mm512_add_ps( b0, acc_10 );
-		
+
 		// c[1,16-31]
 		acc_11 = _mm512_add_ps( b1, acc_11 );
-		
+
 		// c[1,32-47]
 		acc_12 = _mm512_add_ps( b2, acc_12 );
-		
+
 		// c[1,48-63]
 		acc_13 = _mm512_add_ps( b3, acc_13 );
-		
+
 		// c[2,0-15]
 		acc_20 = _mm512_add_ps( b0, acc_20 );
-		
+
 		// c[2,16-31]
 		acc_21 = _mm512_add_ps( b1, acc_21 );
-		
+
 		// c[2,32-47]
 		acc_22 = _mm512_add_ps( b2, acc_22 );
-		
+
 		// c[2,48-63]
 		acc_23 = _mm512_add_ps( b3, acc_23 );
-		
+
 		// c[3,0-15]
 		acc_30 = _mm512_add_ps( b0, acc_30 );
-		
+
 		// c[3,16-31]
 		acc_31 = _mm512_add_ps( b1, acc_31 );
-		
+
 		// c[3,32-47]
 		acc_32 = _mm512_add_ps( b2, acc_32 );
-		
+
 		// c[3,48-63]
 		acc_33 = _mm512_add_ps( b3, acc_33 );
-		
+
 		// c[4,0-15]
 		acc_40 = _mm512_add_ps( b0, acc_40 );
-		
+
 		// c[4,16-31]
 		acc_41 = _mm512_add_ps( b1, acc_41 );
-		
+
 		// c[4,32-47]
 		acc_42 = _mm512_add_ps( b2, acc_42 );
-		
+
 		// c[4,48-63]
 		acc_43 = _mm512_add_ps( b3, acc_43 );
 
@@ -573,61 +573,61 @@ POST_OPS_RELU_5x64:
 
 		// c[0,0-15]
 		acc_00 = _mm512_max_ps( zero, acc_00 );
-		
+
 		// c[0,16-31]
 		acc_01 = _mm512_max_ps( zero, acc_01 );
-		
+
 		// c[0,32-47]
 		acc_02 = _mm512_max_ps( zero, acc_02 );
-		
+
 		// c[0,48-63]
 		acc_03 = _mm512_max_ps( zero, acc_03 );
-		
+
 		// c[1,0-15]
 		acc_10 = _mm512_max_ps( zero, acc_10 );
-		
+
 		// c[1,16-31]
 		acc_11 = _mm512_max_ps( zero, acc_11 );
-		
+
 		// c[1,32-47]
 		acc_12 = _mm512_max_ps( zero, acc_12 );
-		
+
 		// c[1,48-63]
 		acc_13 = _mm512_max_ps( zero, acc_13 );
-		
+
 		// c[2,0-15]
 		acc_20 = _mm512_max_ps( zero, acc_20 );
-		
+
 		// c[2,16-31]
 		acc_21 = _mm512_max_ps( zero, acc_21 );
-		
+
 		// c[2,32-47]
 		acc_22 = _mm512_max_ps( zero, acc_22 );
-		
+
 		// c[2,48-63]
 		acc_23 = _mm512_max_ps( zero, acc_23 );
-		
+
 		// c[3,0-15]
 		acc_30 = _mm512_max_ps( zero, acc_30 );
-		
+
 		// c[3,16-31]
 		acc_31 = _mm512_max_ps( zero, acc_31 );
-		
+
 		// c[3,32-47]
 		acc_32 = _mm512_max_ps( zero, acc_32 );
-		
+
 		// c[3,48-63]
 		acc_33 = _mm512_max_ps( zero, acc_33 );
-		
+
 		// c[4,0-15]
 		acc_40 = _mm512_max_ps( zero, acc_40 );
-		
+
 		// c[4,16-31]
 		acc_41 = _mm512_max_ps( zero, acc_41 );
-		
+
 		// c[4,32-47]
 		acc_42 = _mm512_max_ps( zero, acc_42 );
-		
+
 		// c[4,48-63]
 		acc_43 = _mm512_max_ps( zero, acc_43 );
 
@@ -788,61 +788,61 @@ POST_OPS_GELU_ERF_5x64:
 
 		// c[0,0-15]
 		GELU_ERF_F32_AVX512_DEF(acc_00, y, r, r2)
-		
+
 		// c[0,16-31]
 		GELU_ERF_F32_AVX512_DEF(acc_01, y, r, r2)
-		
+
 		// c[0,32-47]
 		GELU_ERF_F32_AVX512_DEF(acc_02, y, r, r2)
-		
+
 		// c[0,48-63]
 		GELU_ERF_F32_AVX512_DEF(acc_03, y, r, r2)
-		
+
 		// c[1,0-15]
 		GELU_ERF_F32_AVX512_DEF(acc_10, y, r, r2)
-		
+
 		// c[1,16-31]
 		GELU_ERF_F32_AVX512_DEF(acc_11, y, r, r2)
-		
+
 		// c[1,32-47]
 		GELU_ERF_F32_AVX512_DEF(acc_12, y, r, r2)
-		
+
 		// c[1,48-63]
 		GELU_ERF_F32_AVX512_DEF(acc_13, y, r, r2)
-		
+
 		// c[2,0-15]
 		GELU_ERF_F32_AVX512_DEF(acc_20, y, r, r2)
-		
+
 		// c[2,16-31]
 		GELU_ERF_F32_AVX512_DEF(acc_21, y, r, r2)
-		
+
 		// c[2,32-47]
 		GELU_ERF_F32_AVX512_DEF(acc_22, y, r, r2)
-		
+
 		// c[2,48-63]
 		GELU_ERF_F32_AVX512_DEF(acc_23, y, r, r2)
-		
+
 		// c[3,0-15]
 		GELU_ERF_F32_AVX512_DEF(acc_30, y, r, r2)
-		
+
 		// c[3,16-31]
 		GELU_ERF_F32_AVX512_DEF(acc_31, y, r, r2)
-		
+
 		// c[3,32-47]
 		GELU_ERF_F32_AVX512_DEF(acc_32, y, r, r2)
-		
+
 		// c[3,48-63]
 		GELU_ERF_F32_AVX512_DEF(acc_33, y, r, r2)
-		
+
 		// c[4,0-15]
 		GELU_ERF_F32_AVX512_DEF(acc_40, y, r, r2)
-		
+
 		// c[4,16-31]
 		GELU_ERF_F32_AVX512_DEF(acc_41, y, r, r2)
-		
+
 		// c[4,32-47]
 		GELU_ERF_F32_AVX512_DEF(acc_42, y, r, r2)
-		
+
 		// c[4,48-63]
 		GELU_ERF_F32_AVX512_DEF(acc_43, y, r, r2)
 
@@ -932,32 +932,95 @@ POST_OPS_CLIP_5x64:
 POST_OPS_DOWNSCALE_5x64:
 	{
 		__m512 scale0, scale1, scale2, scale3;
+		__mmask16 scale_mask = _cvtu32_mask16( 0xFFFF );
 
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-			scale1 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-			scale2 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-			scale3=
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				U8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				U8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				U8_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				S8_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S32_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S32_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				S32_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				BF16_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				BF16_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				BF16_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				scale1 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+				scale2 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+				scale3 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale1 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale2 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale3 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+				U8_F32_SCALE_BCST(scale1,1)
+				U8_F32_SCALE_BCST(scale2,2)
+				U8_F32_SCALE_BCST(scale3,3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+				S8_F32_SCALE_BCST(scale1,1)
+				S8_F32_SCALE_BCST(scale2,2)
+				S8_F32_SCALE_BCST(scale3,3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+				S32_F32_SCALE_BCST(scale1,1)
+				S32_F32_SCALE_BCST(scale2,2)
+				S32_F32_SCALE_BCST(scale3,3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+				BF16_F32_SCALE_BCST(scale1,1)
+				BF16_F32_SCALE_BCST(scale2,2)
+				BF16_F32_SCALE_BCST(scale3,3)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale1 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale2 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale3 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
 
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
@@ -2561,49 +2624,49 @@ POST_OPS_BIAS_4x64:
 
 		// c[0,0-15]
 		acc_00 = _mm512_add_ps( b0, acc_00 );
-		
+
 		// c[0,16-31]
 		acc_01 = _mm512_add_ps( b1, acc_01 );
-		
+
 		// c[0,32-47]
 		acc_02 = _mm512_add_ps( b2, acc_02 );
-		
+
 		// c[0,48-63]
 		acc_03 = _mm512_add_ps( b3, acc_03 );
-		
+
 		// c[1,0-15]
 		acc_10 = _mm512_add_ps( b0, acc_10 );
-		
+
 		// c[1,16-31]
 		acc_11 = _mm512_add_ps( b1, acc_11 );
-		
+
 		// c[1,32-47]
 		acc_12 = _mm512_add_ps( b2, acc_12 );
-		
+
 		// c[1,48-63]
 		acc_13 = _mm512_add_ps( b3, acc_13 );
-		
+
 		// c[2,0-15]
 		acc_20 = _mm512_add_ps( b0, acc_20 );
-		
+
 		// c[2,16-31]
 		acc_21 = _mm512_add_ps( b1, acc_21 );
-		
+
 		// c[2,32-47]
 		acc_22 = _mm512_add_ps( b2, acc_22 );
-		
+
 		// c[2,48-63]
 		acc_23 = _mm512_add_ps( b3, acc_23 );
-		
+
 		// c[3,0-15]
 		acc_30 = _mm512_add_ps( b0, acc_30 );
-		
+
 		// c[3,16-31]
 		acc_31 = _mm512_add_ps( b1, acc_31 );
-		
+
 		// c[3,32-47]
 		acc_32 = _mm512_add_ps( b2, acc_32 );
-		
+
 		// c[3,48-63]
 		acc_33 = _mm512_add_ps( b3, acc_33 );
 
@@ -2615,49 +2678,49 @@ POST_OPS_RELU_4x64:
 
 		// c[0,0-15]
 		acc_00 = _mm512_max_ps( zero, acc_00 );
-		
+
 		// c[0,16-31]
 		acc_01 = _mm512_max_ps( zero, acc_01 );
-		
+
 		// c[0,32-47]
 		acc_02 = _mm512_max_ps( zero, acc_02 );
-		
+
 		// c[0,48-63]
 		acc_03 = _mm512_max_ps( zero, acc_03 );
-		
+
 		// c[1,0-15]
 		acc_10 = _mm512_max_ps( zero, acc_10 );
-		
+
 		// c[1,16-31]
 		acc_11 = _mm512_max_ps( zero, acc_11 );
-		
+
 		// c[1,32-47]
 		acc_12 = _mm512_max_ps( zero, acc_12 );
-		
+
 		// c[1,48-63]
 		acc_13 = _mm512_max_ps( zero, acc_13 );
-		
+
 		// c[2,0-15]
 		acc_20 = _mm512_max_ps( zero, acc_20 );
-		
+
 		// c[2,16-31]
 		acc_21 = _mm512_max_ps( zero, acc_21 );
-		
+
 		// c[2,32-47]
 		acc_22 = _mm512_max_ps( zero, acc_22 );
-		
+
 		// c[2,48-63]
 		acc_23 = _mm512_max_ps( zero, acc_23 );
-		
+
 		// c[3,0-15]
 		acc_30 = _mm512_max_ps( zero, acc_30 );
-		
+
 		// c[3,16-31]
 		acc_31 = _mm512_max_ps( zero, acc_31 );
-		
+
 		// c[3,32-47]
 		acc_32 = _mm512_max_ps( zero, acc_32 );
-		
+
 		// c[3,48-63]
 		acc_33 = _mm512_max_ps( zero, acc_33 );
 
@@ -2793,49 +2856,49 @@ POST_OPS_GELU_ERF_4x64:
 
 		// c[0,0-15]
 		GELU_ERF_F32_AVX512_DEF(acc_00, y, r, r2)
-		
+
 		// c[0,16-31]
 		GELU_ERF_F32_AVX512_DEF(acc_01, y, r, r2)
-		
+
 		// c[0,32-47]
 		GELU_ERF_F32_AVX512_DEF(acc_02, y, r, r2)
-		
+
 		// c[0,48-63]
 		GELU_ERF_F32_AVX512_DEF(acc_03, y, r, r2)
-		
+
 		// c[1,0-15]
 		GELU_ERF_F32_AVX512_DEF(acc_10, y, r, r2)
-		
+
 		// c[1,16-31]
 		GELU_ERF_F32_AVX512_DEF(acc_11, y, r, r2)
-		
+
 		// c[1,32-47]
 		GELU_ERF_F32_AVX512_DEF(acc_12, y, r, r2)
-		
+
 		// c[1,48-63]
 		GELU_ERF_F32_AVX512_DEF(acc_13, y, r, r2)
-		
+
 		// c[2,0-15]
 		GELU_ERF_F32_AVX512_DEF(acc_20, y, r, r2)
-		
+
 		// c[2,16-31]
 		GELU_ERF_F32_AVX512_DEF(acc_21, y, r, r2)
-		
+
 		// c[2,32-47]
 		GELU_ERF_F32_AVX512_DEF(acc_22, y, r, r2)
-		
+
 		// c[2,48-63]
 		GELU_ERF_F32_AVX512_DEF(acc_23, y, r, r2)
-		
+
 		// c[3,0-15]
 		GELU_ERF_F32_AVX512_DEF(acc_30, y, r, r2)
-		
+
 		// c[3,16-31]
 		GELU_ERF_F32_AVX512_DEF(acc_31, y, r, r2)
-		
+
 		// c[3,32-47]
 		GELU_ERF_F32_AVX512_DEF(acc_32, y, r, r2)
-		
+
 		// c[3,48-63]
 		GELU_ERF_F32_AVX512_DEF(acc_33, y, r, r2)
 
@@ -2914,31 +2977,95 @@ POST_OPS_DOWNSCALE_4x64:
 	{
 		__m512 scale0, scale1, scale2, scale3;
 
+		__mmask16 scale_mask = _cvtu32_mask16( 0xFFFF );
+
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-			scale1 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-			scale2 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-			scale3=
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				U8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				U8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				U8_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				S8_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S32_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S32_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				S32_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				BF16_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				BF16_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				BF16_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				scale1 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+				scale2 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+				scale3 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale1 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale2 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale3 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+				U8_F32_SCALE_BCST(scale1,1)
+				U8_F32_SCALE_BCST(scale2,2)
+				U8_F32_SCALE_BCST(scale3,3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+				S8_F32_SCALE_BCST(scale1,1)
+				S8_F32_SCALE_BCST(scale2,2)
+				S8_F32_SCALE_BCST(scale3,3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+				S32_F32_SCALE_BCST(scale1,1)
+				S32_F32_SCALE_BCST(scale2,2)
+				S32_F32_SCALE_BCST(scale3,3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+				BF16_F32_SCALE_BCST(scale1,1)
+				BF16_F32_SCALE_BCST(scale2,2)
+				BF16_F32_SCALE_BCST(scale3,3)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale1 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale2 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale3 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
 
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
@@ -4297,37 +4424,37 @@ POST_OPS_BIAS_3x64:
 
 		// c[0,0-15]
 		acc_00 = _mm512_add_ps( b0, acc_00 );
-		
+
 		// c[0,16-31]
 		acc_01 = _mm512_add_ps( b1, acc_01 );
-		
+
 		// c[0,32-47]
 		acc_02 = _mm512_add_ps( b2, acc_02 );
 
 		// c[0,48-63]
 		acc_03 = _mm512_add_ps( b3, acc_03 );
-		
+
 		// c[1,0-15]
 		acc_10 = _mm512_add_ps( b0, acc_10 );
-		
+
 		// c[1,16-31]
 		acc_11 = _mm512_add_ps( b1, acc_11 );
-		
+
 		// c[1,32-47]
 		acc_12 = _mm512_add_ps( b2, acc_12 );
-		
+
 		// c[1,48-63]
 		acc_13 = _mm512_add_ps( b3, acc_13 );
-		
+
 		// c[2,0-15]
 		acc_20 = _mm512_add_ps( b0, acc_20 );
-		
+
 		// c[2,16-31]
 		acc_21 = _mm512_add_ps( b1, acc_21 );
-		
+
 		// c[2,32-47]
 		acc_22 = _mm512_add_ps( b2, acc_22 );
-		
+
 		// c[2,48-63]
 		acc_23 = _mm512_add_ps( b3, acc_23 );
 
@@ -4339,37 +4466,37 @@ POST_OPS_RELU_3x64:
 
 		// c[0,0-15]
 		acc_00 = _mm512_max_ps( zero, acc_00 );
-		
+
 		// c[0,16-31]
 		acc_01 = _mm512_max_ps( zero, acc_01 );
-		
+
 		// c[0,32-47]
 		acc_02 = _mm512_max_ps( zero, acc_02 );
-		
+
 		// c[0,48-63]
 		acc_03 = _mm512_max_ps( zero, acc_03 );
-		
+
 		// c[1,0-15]
 		acc_10 = _mm512_max_ps( zero, acc_10 );
-		
+
 		// c[1,16-31]
 		acc_11 = _mm512_max_ps( zero, acc_11 );
-		
+
 		// c[1,32-47]
 		acc_12 = _mm512_max_ps( zero, acc_12 );
-		
+
 		// c[1,48-63]
 		acc_13 = _mm512_max_ps( zero, acc_13 );
-		
+
 		// c[2,0-15]
 		acc_20 = _mm512_max_ps( zero, acc_20 );
-		
+
 		// c[2,16-31]
 		acc_21 = _mm512_max_ps( zero, acc_21 );
-		
+
 		// c[2,32-47]
 		acc_22 = _mm512_max_ps( zero, acc_22 );
-		
+
 		// c[2,48-63]
 		acc_23 = _mm512_max_ps( zero, acc_23 );
 
@@ -4481,37 +4608,37 @@ POST_OPS_GELU_ERF_3x64:
 
 		// c[0,0-15]
 		GELU_ERF_F32_AVX512_DEF(acc_00, y, r, r2)
-		
+
 		// c[0,16-31]
 		GELU_ERF_F32_AVX512_DEF(acc_01, y, r, r2)
-		
+
 		// c[0,32-47]
 		GELU_ERF_F32_AVX512_DEF(acc_02, y, r, r2)
-		
+
 		// c[0,48-63]
 		GELU_ERF_F32_AVX512_DEF(acc_03, y, r, r2)
-		
+
 		// c[1,0-15]
 		GELU_ERF_F32_AVX512_DEF(acc_10, y, r, r2)
-		
+
 		// c[1,16-31]
 		GELU_ERF_F32_AVX512_DEF(acc_11, y, r, r2)
-		
+
 		// c[1,32-47]
 		GELU_ERF_F32_AVX512_DEF(acc_12, y, r, r2)
-		
+
 		// c[1,48-63]
 		GELU_ERF_F32_AVX512_DEF(acc_13, y, r, r2)
-		
+
 		// c[2,0-15]
 		GELU_ERF_F32_AVX512_DEF(acc_20, y, r, r2)
-		
+
 		// c[2,16-31]
 		GELU_ERF_F32_AVX512_DEF(acc_21, y, r, r2)
-		
+
 		// c[2,32-47]
 		GELU_ERF_F32_AVX512_DEF(acc_22, y, r, r2)
-		
+
 		// c[2,48-63]
 		GELU_ERF_F32_AVX512_DEF(acc_23, y, r, r2)
 
@@ -4578,31 +4705,95 @@ POST_OPS_DOWNSCALE_3x64:
 	{
 		__m512 scale0, scale1, scale2, scale3;
 
+		__mmask16 scale_mask = _cvtu32_mask16( 0xFFFF );
+
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-			scale1 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-			scale2 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-			scale3=
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				U8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				U8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				U8_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				S8_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S32_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S32_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				S32_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				BF16_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				BF16_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				BF16_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				scale1 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+				scale2 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+				scale3 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale1 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale2 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale3 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+				U8_F32_SCALE_BCST(scale1,1)
+				U8_F32_SCALE_BCST(scale2,2)
+				U8_F32_SCALE_BCST(scale3,3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+				S8_F32_SCALE_BCST(scale1,1)
+				S8_F32_SCALE_BCST(scale2,2)
+				S8_F32_SCALE_BCST(scale3,3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+				S32_F32_SCALE_BCST(scale1,1)
+				S32_F32_SCALE_BCST(scale2,2)
+				S32_F32_SCALE_BCST(scale3,3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+				BF16_F32_SCALE_BCST(scale1,1)
+				BF16_F32_SCALE_BCST(scale2,2)
+				BF16_F32_SCALE_BCST(scale3,3)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale1 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale2 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale3 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
 
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
@@ -5726,13 +5917,13 @@ POST_OPS_BIAS_2x64:
 
 		// c[0,32-47]
 		acc_02 = _mm512_add_ps( b2, acc_02 );
-		
+
 		// c[0,48-63]
 		acc_03 = _mm512_add_ps( b3, acc_03 );
-		
+
 		// c[1,0-15]
 		acc_10 = _mm512_add_ps( b0, acc_10 );
-		
+
 		// c[1,16-31]
 		acc_11 = _mm512_add_ps( b1, acc_11 );
 
@@ -5753,22 +5944,22 @@ POST_OPS_RELU_2x64:
 
 		// c[0,16-31]
 		acc_01 = _mm512_max_ps( zero, acc_01 );
-		
+
 		// c[0,32-47]
 		acc_02 = _mm512_max_ps( zero, acc_02 );
-		
+
 		// c[0,48-63]
 		acc_03 = _mm512_max_ps( zero, acc_03 );
-		
+
 		// c[1,0-15]
 		acc_10 = _mm512_max_ps( zero, acc_10 );
 
 		// c[1,16-31]
 		acc_11 = _mm512_max_ps( zero, acc_11 );
-		
+
 		// c[1,32-47]
 		acc_12 = _mm512_max_ps( zero, acc_12 );
-		
+
 		// c[1,48-63]
 		acc_13 = _mm512_max_ps( zero, acc_13 );
 
@@ -5826,25 +6017,25 @@ POST_OPS_GELU_TANH_2x64:
 
 		// c[0,0-15]
 		GELU_TANH_F32_AVX512_DEF(acc_00, y, r, r2, x, z, dn, tmpout)
-		
+
 		// c[0,16-31]
 		GELU_TANH_F32_AVX512_DEF(acc_01, y, r, r2, x, z, dn, tmpout)
-		
+
 		// c[0,32-47]
 		GELU_TANH_F32_AVX512_DEF(acc_02, y, r, r2, x, z, dn, tmpout)
-		
+
 		// c[0,48-63]
 		GELU_TANH_F32_AVX512_DEF(acc_03, y, r, r2, x, z, dn, tmpout)
-		
+
 		// c[1,0-15]
 		GELU_TANH_F32_AVX512_DEF(acc_10, y, r, r2, x, z, dn, tmpout)
-		
+
 		// c[1,16-31]
 		GELU_TANH_F32_AVX512_DEF(acc_11, y, r, r2, x, z, dn, tmpout)
-		
+
 		// c[1,32-47]
 		GELU_TANH_F32_AVX512_DEF(acc_12, y, r, r2, x, z, dn, tmpout)
-		
+
 		// c[1,48-63]
 		GELU_TANH_F32_AVX512_DEF(acc_13, y, r, r2, x, z, dn, tmpout)
 
@@ -5856,25 +6047,25 @@ POST_OPS_GELU_ERF_2x64:
 
 		// c[0,0-15]
 		GELU_ERF_F32_AVX512_DEF(acc_00, y, r, r2)
-		
+
 		// c[0,16-31]
 		GELU_ERF_F32_AVX512_DEF(acc_01, y, r, r2)
-		
+
 		// c[0,32-47]
 		GELU_ERF_F32_AVX512_DEF(acc_02, y, r, r2)
-		
+
 		// c[0,48-63]
 		GELU_ERF_F32_AVX512_DEF(acc_03, y, r, r2)
-		
+
 		// c[1,0-15]
 		GELU_ERF_F32_AVX512_DEF(acc_10, y, r, r2)
-		
+
 		// c[1,16-31]
 		GELU_ERF_F32_AVX512_DEF(acc_11, y, r, r2)
-		
+
 		// c[1,32-47]
 		GELU_ERF_F32_AVX512_DEF(acc_12, y, r, r2)
-		
+
 		// c[1,48-63]
 		GELU_ERF_F32_AVX512_DEF(acc_13, y, r, r2)
 
@@ -5928,34 +6119,96 @@ POST_OPS_CLIP_2x64:
 POST_OPS_DOWNSCALE_2x64:
 	{
 		__m512 scale0, scale1, scale2, scale3;
+		__mmask16 scale_mask = _cvtu32_mask16( 0xFFFF );
 
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-			scale1 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-			scale2 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-			scale3=
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				U8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				U8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				U8_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				S8_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S32_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S32_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				S32_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				BF16_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				BF16_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				BF16_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				scale1 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+				scale2 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+				scale3 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale1 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale2 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale3 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+				U8_F32_SCALE_BCST(scale1,1)
+				U8_F32_SCALE_BCST(scale2,2)
+				U8_F32_SCALE_BCST(scale3,3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+				S8_F32_SCALE_BCST(scale1,1)
+				S8_F32_SCALE_BCST(scale2,2)
+				S8_F32_SCALE_BCST(scale3,3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+				S32_F32_SCALE_BCST(scale1,1)
+				S32_F32_SCALE_BCST(scale2,2)
+				S32_F32_SCALE_BCST(scale3,3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+				BF16_F32_SCALE_BCST(scale1,1)
+				BF16_F32_SCALE_BCST(scale2,2)
+				BF16_F32_SCALE_BCST(scale3,3)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale1 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale2 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale3 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
-
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
 		__m128i zero_point0 = _mm512_castsi512_si128( _mm512_setzero_si512() );
 		__m128i zero_point1 = _mm512_castsi512_si128( _mm512_setzero_si512() );
@@ -6836,7 +7089,7 @@ POST_OPS_RELU_1x64:
 
 		// c[0,16-31]
 		acc_01 = _mm512_max_ps( zero, acc_01 );
-		
+
 		// c[0,32-47]
 		acc_02 = _mm512_max_ps( zero, acc_02 );
 
@@ -6903,7 +7156,7 @@ POST_OPS_GELU_ERF_1x64:
 
 		// c[0,0-15]
 		GELU_ERF_F32_AVX512_DEF(acc_00, y, r, r2)
-		
+
 		// c[0,16-31]
 		GELU_ERF_F32_AVX512_DEF(acc_01, y, r, r2)
 
@@ -6952,31 +7205,95 @@ POST_OPS_DOWNSCALE_1x64:
 	{
 		__m512 scale0, scale1, scale2, scale3;
 
+		__mmask16 scale_mask = _cvtu32_mask16( 0xFFFF );
+
 		if ( post_ops_list_temp->scale_factor_len > 1 )
 		{
-			scale0 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-			scale1 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-			scale2 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-			scale3=
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				U8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				U8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				U8_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S8_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S8_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				S8_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				S32_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				S32_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				S32_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_LOAD(scale0,scale_mask, 0)
+				BF16_F32_SCALE_LOAD(scale1,scale_mask, 1)
+				BF16_F32_SCALE_LOAD(scale2,scale_mask, 2)
+				BF16_F32_SCALE_LOAD(scale3,scale_mask, 3)
+			}
+			else
+			{
+				scale0 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+				scale1 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+				scale2 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+				scale3 = _mm512_loadu_ps(
+						( float* )post_ops_list_temp->scale_factor +
+							post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+			}
 		}
 		else /*if ( post_ops_list_temp->scale_factor_len == 1 )*/
 		{
-			scale0 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale1 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale2 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-			scale3 =
-				_mm512_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			if( post_ops_list_temp->sf_stor_type == U8 )
+			{
+				U8_F32_SCALE_BCST(scale0,0)
+				U8_F32_SCALE_BCST(scale1,1)
+				U8_F32_SCALE_BCST(scale2,2)
+				U8_F32_SCALE_BCST(scale3,3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S8 )
+			{
+				S8_F32_SCALE_BCST(scale0,0)
+				S8_F32_SCALE_BCST(scale1,1)
+				S8_F32_SCALE_BCST(scale2,2)
+				S8_F32_SCALE_BCST(scale3,3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == S32 )
+			{
+				S32_F32_SCALE_BCST(scale0,0)
+				S32_F32_SCALE_BCST(scale1,1)
+				S32_F32_SCALE_BCST(scale2,2)
+				S32_F32_SCALE_BCST(scale3,3)
+			}
+			else if( post_ops_list_temp->sf_stor_type == BF16 )
+			{
+				BF16_F32_SCALE_BCST(scale0,0)
+				BF16_F32_SCALE_BCST(scale1,1)
+				BF16_F32_SCALE_BCST(scale2,2)
+				BF16_F32_SCALE_BCST(scale3,3)
+			}
+			else
+			{
+				scale0 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale1 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale2 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+				scale3 = _mm512_set1_ps(
+					*( ( float* )post_ops_list_temp->scale_factor ) );
+			}
 		}
 
 		// Need to ensure sse not used to avoid avx512 -> sse transition.
