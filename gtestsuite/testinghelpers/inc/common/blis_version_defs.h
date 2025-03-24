@@ -117,6 +117,8 @@
     #define K_bli_dgemv_n_zen_int_16x1n_avx512 1
     #define K_bli_dgemv_n_zen_int_8x1n_avx512 1
     #define K_bli_dgemv_n_zen_int_m_leftx1n_avx512 1
+    #define K_bli_dcopyv_zen4_asm_avx512_biway 1
+    #define K_bli_dcopyv_zen5_asm_avx512 1
 
     #define AOCL_50
 

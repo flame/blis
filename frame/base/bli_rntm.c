@@ -2115,34 +2115,40 @@ BLIS_INLINE void aocl_dcopyv_dynamic
 	{
 		case BLIS_ARCH_ZEN5:
 
-			if ( n_elem <= 39000 )
+			if (n_elem <= 43000)
 				*nt_ideal = 1;
-			else if ( n_elem <= 46000 )
-				*nt_ideal = 2;
-			else if (n_elem <= 160000)
+			else if (n_elem <= 180000)
 				*nt_ideal = 4;
 			else
-				*nt_ideal = 8;
 				// dcopy does not scale with more than 8 threads
+				*nt_ideal = 8;
 			break;
 
 		case BLIS_ARCH_ZEN4:
 
-			if ( n_elem <= 17000 )
-				*nt_ideal = 1;
-			else if (n_elem <= 62000)
-				*nt_ideal = 2;
-			else if (n_elem <= 96000)
-				*nt_ideal = 4;
-			else
-				*nt_ideal = 8;
-				// dcopy does not scale with more than 8 threads
-			break;
+		if (n_elem <= 3200)
+			*nt_ideal = 1;
+		else if (n_elem <= 4100)
+			*nt_ideal = 2;
+		else if (n_elem <= 9900)
+			*nt_ideal = 4;
+		else if (n_elem <= 330000)
+			*nt_ideal = 8;
+		else if (n_elem <= 910000)
+			*nt_ideal = 16;
+		else if (n_elem <= 2600000)
+			*nt_ideal = 32;
+		else if (n_elem <= 5200000)
+			*nt_ideal = 64;
+		else
+			*nt_ideal = -1;
+		break;
+
 		case BLIS_ARCH_ZEN:
 		case BLIS_ARCH_ZEN2:
 		case BLIS_ARCH_ZEN3:
 
-			if ( n_elem <= 17000 )
+			if (n_elem <= 17000)
 				*nt_ideal = 1;
 			else if (n_elem <= 52200)
 				*nt_ideal = 4;

@@ -309,9 +309,9 @@ void dcopy_blis_impl
 		case BLIS_ARCH_ZEN5:
 #if defined(BLIS_KERNELS_ZEN5)
 			// For Zen4 and Zen5, kernel implemented in AVX512 is used
-			copyv_ker_ptr = bli_dcopyv_zen4_asm_avx512;
+			copyv_ker_ptr = bli_dcopyv_zen5_asm_avx512;
 #if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
-			fast_path_thresh = 39000;
+			fast_path_thresh = 43000;
 #endif
 			break;
 #endif
@@ -320,7 +320,7 @@ void dcopy_blis_impl
 			// For Zen4 and Zen5, kernel implemented in AVX512 is used
 			copyv_ker_ptr = bli_dcopyv_zen4_asm_avx512;
 #if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
-			fast_path_thresh = 17000;
+			fast_path_thresh = 3300;
 #endif
 			break;
 #endif

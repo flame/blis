@@ -141,7 +141,7 @@ void bli_scopyv_zen4_asm_avx512
     label(.MAINLOOP)
 
     // Interleaved SIMD load and store operations to copy data from source to the destination
-    // Each vector register can hold 16 elements and is used twice before next jump operation 
+    // Each vector register can hold 16 elements and is used twice before next jump operation
     // 1 for loading the element from source and 1 for store it into the destination
 
     vmovups(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+15]
@@ -404,6 +404,7 @@ void bli_scopyv_zen4_asm_avx512
        a higher layer
 */
 
+// This function is used to copy the vector x to vector y using AVX512 instructions
 void bli_dcopyv_zen4_asm_avx512
 (
     conj_t           conjx,
@@ -413,7 +414,7 @@ void bli_dcopyv_zen4_asm_avx512
     cntx_t* restrict cntx
 )
 {
-    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2)
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3)
 
     // Initialize local pointers.
     double *x0 = x;
@@ -421,289 +422,586 @@ void bli_dcopyv_zen4_asm_avx512
 
     // Typecast int to 64 bit
     uint64_t n0 = (uint64_t)n;
-    int64_t incy0 = (int64_t)incy;
-    int64_t incx0 = (int64_t)incx;
 
     // If the vector dimension is zero return early.
-    if (bli_zero_dim1(n))
+    if (bli_zero_dim1(n0))
     {
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)
         return;
     }
 
-    // assembly code
-    begin_asm()
+    if ( incx == 1 && incy == 1 )
+    {
+        
+        // assembly code
+        begin_asm()
 
-    /*
-        rcx  - > n
-        rsi  - > x
-        r8   - > incx
-        rdi  - > y
-        r9   - > incy
-    */
+        /*
+            rcx  <-  n
+            rsi  <-  x
+            rdi  <-  y
+        */
 
-    // Loading the source and destination memory addresses into the respective registers
-    mov(var(x0), rsi)
-    mov(var(y0), rdi)
+        // Loading the source and destination memory addresses into the respective registers
+        mov(var(x0), rsi)
+        mov(var(y0), rdi)
 
-    // Loading the values in n, incx and inxy into the respective registers
-    mov(var(n0),    rcx)
-    mov(var(incx0), r8 )
-    mov(var(incy0), r9 )
+        // Loading the values in n, incx and inxy into the respective registers
+        mov(var(n0),    rcx)
 
-    // Checking if incx == 1 and incy == 1, incase the condition fails then SCALAR code section is executed
-    cmp(imm(1), r8)
-    jne(.SCALAR)
-    cmp(imm(1),r9)
-    jne(.SCALAR)
+        // ==========================================================================================================================
 
-// ==========================================================================================================================
+        // Section of code to move the data as blocks of 128 elements [ 8 double precision elements per register * 16 registers ]
+        label(.BLOCK128)
 
-    // Section of code to move the data as blocks of 128 elements
-    label(.BLOCK128)
+        // Skip to the next code section if the number of remaining elements is less than 128
+        cmp(imm(8*16), rcx)
+        jl(.BLOCK64)
 
-    cmp(imm(8*16), rcx)                 // Check if the number of remaining elements greater than or equal to 128 -> (NUMBER OF ELEMENTS PER REGISTER) * (NUMBER OF REGISTERS USED IN THE BLOCK)
-    jl(.BLOCK64)                        // Else, skip the BLOCK128 section and goto to BLOCK64 section of the code
+        // If the number of remaining elements is greater than or equal to 128, then jump to the main loop
+        label(.MAINLOOP)
 
-    label(.MAINLOOP)
-    
-    // Interleaved SIMD load and store operations to copy data from source to the destination
-    // Each vector register can hold 8 elements and is used twice before next jump operation 
-    // 1 vmovupd for loading the element from source and 1 vmovupd for store it into the destination
+        // Interleaved SIMD load and store operations are used to copy data from source to the destination
+        // Each vmovupd instruction moves 8 double precision elements (64 bytes) at a time
+        // The following instructions will move 128 double precision elements (1024 bytes) at a time
 
-    vmovupd(mem(rsi, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+7]
-    vmovupd(zmm0, mem(rdi, 0*64))       // y[i+0] - y[i+7] = zmm0
-    vmovupd(mem(rsi, 1*64), zmm1)       // zmm1 = x[i+8] - x[i+15]
-    vmovupd(zmm1, mem(rdi, 1*64))       // y[i+8] - y[i+15] = zmm1
-    vmovupd(mem(rsi, 2*64), zmm2)       // zmm2 = x[i+16] - x[i+23]
-    vmovupd(zmm2, mem(rdi, 2*64))       // y[i+16] - y[i+23] = zmm2
-    vmovupd(mem(rsi, 3*64), zmm3)       // zmm3 = x[i+24] - x[i+31]
-    vmovupd(zmm3, mem(rdi, 3*64))       // y[i+24] - y[i+31] = zmm3
+        vmovupd(mem(rsi, 0*64), zmm0)       // zmm0 <- x[0:7]
+        vmovupd(zmm0, mem(rdi, 0*64))       // y[0:7] <- zmm0
+        vmovupd(mem(rsi, 1*64), zmm1)       // zmm1 <- x[8:15]
+        vmovupd(zmm1, mem(rdi, 1*64))       // y[8:15] <- zmm1
 
-    vmovupd(mem(rsi, 4*64), zmm4)       // zmm4 = x[i+32] - x[i+39]
-    vmovupd(zmm4, mem(rdi, 4*64))       // y[i+32] - y[i+39] = zmm4
-    vmovupd(mem(rsi, 5*64), zmm5)       // zmm5 = x[i+40] - x[i+47]
-    vmovupd(zmm5, mem(rdi, 5*64))       // y[i+40] - y[i+47] = zmm5
-    vmovupd(mem(rsi, 6*64), zmm6)       // zmm6 = x[i+48] - x[i+55]
-    vmovupd(zmm6, mem(rdi, 6*64))       // y[i+48] - y[i+55] = zmm6
-    vmovupd(mem(rsi, 7*64), zmm7)       // zmm7 = x[i+56] - x[i+63]
-    vmovupd(zmm7, mem(rdi, 7*64))       // y[i+56] - y[i+63] = zmm7
+        vmovupd(mem(rsi, 2*64), zmm2)       // zmm2 <- x[16:23]
+        vmovupd(zmm2, mem(rdi, 2*64))       // y[16:23] <- zmm2
+        vmovupd(mem(rsi, 3*64), zmm3)       // zmm3 <- x[24:31]
+        vmovupd(zmm3, mem(rdi, 3*64))       // y[24:31] <- zmm3
 
-    vmovupd(mem(rsi, 8*64), zmm8)       // zmm8 = x[i+64] - x[i+71]
-    vmovupd(zmm8, mem(rdi, 8*64))       // y[i+64] - y[i+71] = zmm8
-    vmovupd(mem(rsi, 9*64), zmm9)       // zmm9 = x[i+72] - x[i+79]
-    vmovupd(zmm9, mem(rdi, 9*64))       // y[i+72] - y[i+79] = zmm9
-    vmovupd(mem(rsi, 10*64), zmm10)     // zmm10 = x[i+80] - x[i+87]
-    vmovupd(zmm10, mem(rdi, 10*64))     // y[i+80] - y[i+87] = zmm10
-    vmovupd(mem(rsi, 11*64), zmm11)     // zmm11 = x[i+88] - x[i+95]
-    vmovupd(zmm11, mem(rdi, 11*64))     // y[i+88] - y[i+95] = zmm11
+        vmovupd(mem(rsi, 4*64), zmm4)       // zmm4 <- x[32:39]
+        vmovupd(zmm4, mem(rdi, 4*64))       // y[32:39] <- zmm4
+        vmovupd(mem(rsi, 5*64), zmm5)       // zmm5 <- x[40:47]
+        vmovupd(zmm5, mem(rdi, 5*64))       // y[40:47] <- zmm5
 
-    vmovupd(mem(rsi, 12*64), zmm12)     // zmm12 = x[i+96] - x[i+103]
-    vmovupd(zmm12, mem(rdi, 12*64))     // y[i+96] - y[i+103] = zmm12
-    vmovupd(mem(rsi, 13*64), zmm13)     // zmm13 = x[i+104] - x[i+111]
-    vmovupd(zmm13, mem(rdi, 13*64))     // y[i+104] - y[i+111] = zmm13
-    vmovupd(mem(rsi, 14*64), zmm14)     // zmm14 = x[i+112] - x[i+119]
-    vmovupd(zmm14, mem(rdi, 14*64))     // y[i+112] - y[i+119] = zmm14
-    vmovupd(mem(rsi, 15*64), zmm15)     // zmm15 = x[i+120] - x[i+127]
-    vmovupd(zmm15, mem(rdi, 15*64))     // y[i+120] - y[i+127] = zmm15
+        vmovupd(mem(rsi, 6*64), zmm6)       // zmm6 <- x[48:55]
+        vmovupd(zmm6, mem(rdi, 6*64))       // y[48:55] <- zmm6
+        vmovupd(mem(rsi, 7*64), zmm7)       // zmm7 <- x[56:63]
+        vmovupd(zmm7, mem(rdi, 7*64))       // y[56:63] <- zmm7
 
-    // Increment the pointer
-    add(imm(8*8*16), rsi)               // Increment the x0 pointer by 1024 -> ( Size of double datatype ) * ( Number of elements per register ) * ( Number of zmm registers used in the section of code )
-    add(imm(8*8*16), rdi)               // Increment the y0 pointer by 1024
-    sub(imm(8*16),   rcx)               // reduce the number of remaining elements by 128 ->  ( Number of elements per register ) * ( Number of zmm registers used in the section of code )
+        vmovupd(mem(rsi, 8*64), zmm8)       // zmm8 <- x[64:71]
+        vmovupd(zmm8, mem(rdi, 8*64))       // y[64:71] <- zmm8
+        vmovupd(mem(rsi, 9*64), zmm9)       // zmm9 <- x[72:79]
+        vmovupd(zmm9, mem(rdi, 9*64))       // y[72:79] <- zmm9
+        
+        vmovupd(mem(rsi, 10*64), zmm10)     // zmm10 <- x[80:87]
+        vmovupd(zmm10, mem(rdi, 10*64))     // y[80:87] <- zmm10
+        vmovupd(mem(rsi, 11*64), zmm11)     // zmm11 <- x[88:95]
+        vmovupd(zmm11, mem(rdi, 11*64))     // y[88:95] <- zmm11
 
-    // Jump back to the Main loop if the number of remaning elements are still greater than 128
-    cmp(imm(8*16), rcx)
-    jge(.MAINLOOP)
+        vmovupd(mem(rsi, 12*64), zmm12)     // zmm12 <- x[96:103]
+        vmovupd(zmm12, mem(rdi, 12*64))     // y[96:103] <- zmm12
+        vmovupd(mem(rsi, 13*64), zmm13)     // zmm13 <- x[104:111]
+        vmovupd(zmm13, mem(rdi, 13*64))     // y[104:111] <- zmm13
 
-    // -----------------------------------------------------------
+        vmovupd(mem(rsi, 14*64), zmm14)     // zmm14 <- x[112:119]
+        vmovupd(zmm14, mem(rdi, 14*64))     // y[112:119] <- zmm14
+        vmovupd(mem(rsi, 15*64), zmm15)     // zmm15 <- x[120:127]
+        vmovupd(zmm15, mem(rdi, 15*64))     // y[120:127] <- zmm15
 
-    // Section of code to move the data as blocks of 64 elements
-    label(.BLOCK64)
+        // Increment the source and destination pointers by 1024 bytes (128 double precision elements)
+        add(imm(8*8*16), rsi)
+        add(imm(8*8*16), rdi)
 
-    cmp(imm(8*8), rcx)                  // Check if the number of remaining elements greater than or equal to 64
-    jl(.BLOCK32)                        // Else, skip the BLOCK64 section and goto to BLOCK32 section of the code
+        // Reduce the number of remaining elements by 128 (8 double precision elements * 16 registers)
+        sub(imm(8*16),   rcx)
 
-    // Interleaved SIMD load and store operations to copy data from source to the destination
+        // Jump back to the main loop if there are still more than 128 elements remaining
+        cmp(imm(8*16), rcx)
+        jge(.MAINLOOP)
 
-    vmovupd(mem(rsi, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+7]
-    vmovupd(zmm0, mem(rdi, 0*64))       // y[i+0] - y[i+7] = zmm0
-    vmovupd(mem(rsi, 1*64), zmm1)       // zmm1 = x[i+8] - x[i+15]
-    vmovupd(zmm1, mem(rdi, 1*64))       // y[i+8] - y[i+15] = zmm1
-    vmovupd(mem(rsi, 2*64), zmm2)       // zmm2 = x[i+16] - x[i+23]
-    vmovupd(zmm2, mem(rdi, 2*64))       // y[i+16] - y[i+23] = zmm2
-    vmovupd(mem(rsi, 3*64), zmm3)       // zmm3 = x[i+24] - x[i+31]
-    vmovupd(zmm3, mem(rdi, 3*64))       // y[i+24] - y[i+31] = zmm3
+        // ----------------------------------------------------------------------------------------------------------------------
 
-    vmovupd(mem(rsi, 4*64), zmm4)       // zmm4 = x[i+32] - x[i+39]
-    vmovupd(zmm4, mem(rdi, 4*64))       // y[i+32] - y[i+39] = zmm4
-    vmovupd(mem(rsi, 5*64), zmm5)       // zmm5 = x[i+40] - x[i+47]
-    vmovupd(zmm5, mem(rdi, 5*64))       // y[i+40] - y[i+47] = zmm5
-    vmovupd(mem(rsi, 6*64), zmm6)       // zmm6 = x[i+48] - x[i+55]
-    vmovupd(zmm6, mem(rdi, 6*64))       // y[i+48] - y[i+55] = zmm6
-    vmovupd(mem(rsi, 7*64), zmm7)       // zmm7 = x[i+56] - x[i+63]
-    vmovupd(zmm7, mem(rdi, 7*64))       // y[i+56] - y[i+63] = zmm7
+        // Section of code to move the data as blocks of 64 elements [ 8 double precision elements per register * 8 registers ]
+        label(.BLOCK64)
 
-    // Increment the pointer
-    add(imm(8*8*8), rsi)                // Increment the x0 pointer by 512
-    add(imm(8*8*8), rdi)                // Increment the y0 pointer by 512
-    sub(imm(8*8),   rcx)                // reduce the number of remaining elements by 64
+        // Skip to the next code section if the number of remaining elements is less than 64
+        cmp(imm(8*8), rcx)
+        jl(.BLOCK32)
 
-    // -----------------------------------------------------------
+        // The following instructions will move 64 double precision elements (512 bytes) at a time
 
-    // Section of code to move the data as blocks of 32 elements
-    label(.BLOCK32)
+        vmovupd(mem(rsi, 0*64), zmm0)       // zmm0 <- x[0:7]
+        vmovupd(zmm0, mem(rdi, 0*64))       // y[0:7] <- zmm0
+        vmovupd(mem(rsi, 1*64), zmm1)       // zmm1 <- x[8:15]
+        vmovupd(zmm1, mem(rdi, 1*64))       // y[8:15] <- zmm1
 
-    cmp(imm(8*4), rcx)                  // check if the number of remaining elements greater than or equal to 32
-    jl(.BLOCK16)                        // Else, skip the BLOCK32 section and goto to BLOCK16 section of the code
+        vmovupd(mem(rsi, 2*64), zmm2)       // zmm2 <- x[16:23]
+        vmovupd(zmm2, mem(rdi, 2*64))       // y[16:23] <- zmm2
+        vmovupd(mem(rsi, 3*64), zmm3)       // zmm3 <- x[24:31]
+        vmovupd(zmm3, mem(rdi, 3*64))       // y[24:31] <- zmm3
 
-    // Interleaved SIMD load and store operations to copy data from source to the destination
+        vmovupd(mem(rsi, 4*64), zmm4)       // zmm4 <- x[32:39]
+        vmovupd(zmm4, mem(rdi, 4*64))       // y[32:39] <- zmm4
+        vmovupd(mem(rsi, 5*64), zmm5)       // zmm5 <- x[40:47]
+        vmovupd(zmm5, mem(rdi, 5*64))       // y[40:47] <- zmm5
 
-    vmovupd(mem(rsi, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+7]
-    vmovupd(zmm0, mem(rdi, 0*64))       // y[i+0] - y[i+7] = zmm0
-    vmovupd(mem(rsi, 1*64), zmm1)       // zmm1 = x[i+8] - x[i+15]
-    vmovupd(zmm1, mem(rdi, 1*64))       // y[i+8] - y[i+15] = zmm1
-    vmovupd(mem(rsi, 2*64), zmm2)       // zmm2 = x[i+16] - x[i+23]
-    vmovupd(zmm2, mem(rdi, 2*64))       // y[i+16] - y[i+23] = zmm2
-    vmovupd(mem(rsi, 3*64), zmm3)       // zmm3 = x[i+24] - x[i+31]
-    vmovupd(zmm3, mem(rdi, 3*64))       // y[i+24] - y[i+31] = zmm3
+        vmovupd(mem(rsi, 6*64), zmm6)       // zmm6 <- x[48:55]
+        vmovupd(zmm6, mem(rdi, 6*64))       // y[48:55] <- zmm6
+        vmovupd(mem(rsi, 7*64), zmm7)       // zmm7 <- x[56:63]
+        vmovupd(zmm7, mem(rdi, 7*64))       // y[56:63] <- zmm7
 
-    // Increment the pointer
-    add(imm(8*8*4), rsi)                // Increment the x0 pointer by 256
-    add(imm(8*8*4), rdi)                // Increment the y0 pointer by 256
-    sub(imm(8*4),   rcx)                // reduce the number of remaining elements by 32
+        // Increment the source and destination pointers by 512 bytes (64 double precision elements)
+        add(imm(8*8*8), rsi)
+        add(imm(8*8*8), rdi)
 
-    // -----------------------------------------------------------
+        // Reduce the number of remaining elements by 64 (8 double precision elements * 8 registers)
+        sub(imm(8*8),   rcx)
 
-    // Section of code to move the data as blocks of 16 elements
-    label(.BLOCK16)
+        // ----------------------------------------------------------------------------------------------------------------------
 
-    cmp(imm(8*2), rcx)                  // check if the number of remaining elements greater than or equal to 16
-    jl(.BLOCK8)                         // else, skip the BLOCK16 section and goto to BLOCK8 section of the code
+        // Section of code to move the data as blocks of 32 elements [ 8 double precision elements per register * 4 registers ]
+        label(.BLOCK32)
 
-    // Interleaved SIMD load and store operations to copy data from source to the destination
+        // Skip to the next code section if the number of remaining elements is less than 32
+        cmp(imm(8*4), rcx)
+        jl(.BLOCK16)
 
-    vmovupd(mem(rsi, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+7]
-    vmovupd(zmm0, mem(rdi, 0*64))       // y[i+0] - y[i+7] = zmm0
-    vmovupd(mem(rsi, 1*64), zmm1)       // zmm1 = x[i+8] - x[i+15]
-    vmovupd(zmm1, mem(rdi, 1*64))       // y[i+8] - y[i+15] = zmm1
+        // The following instructions will move 32 double precision elements (256 bytes) at a time
 
-    // Increment the pointer
-    add(imm(8*8*2), rsi)                // Increment the x0 pointer by 128
-    add(imm(8*8*2), rdi)                // Increment the y0 pointer by 128
-    sub(imm(8*2),   rcx)                // reduce the number of remaining elements by 16
+        vmovupd(mem(rsi, 0*64), zmm0)       // zmm0 <- x[0:7]
+        vmovupd(zmm0, mem(rdi, 0*64))       // y[0:7] <- zmm0
+        vmovupd(mem(rsi, 1*64), zmm1)       // zmm1 <- x[8:15]
+        vmovupd(zmm1, mem(rdi, 1*64))       // y[8:15] <- zmm1
 
-    // -----------------------------------------------------------
+        vmovupd(mem(rsi, 2*64), zmm2)       // zmm2 <- x[16:23]
+        vmovupd(zmm2, mem(rdi, 2*64))       // y[16:23] <- zmm2
+        vmovupd(mem(rsi, 3*64), zmm3)       // zmm3 <- x[24:31]
+        vmovupd(zmm3, mem(rdi, 3*64))       // y[24:31] <- zmm3
 
-    // Section of code to move the data as blocks of 8 elements
-    label(.BLOCK8)
+        // Increment the source and destination pointers by 256 bytes (32 double precision elements)
+        add(imm(8*8*4), rsi)
+        add(imm(8*8*4), rdi)
 
-    cmp(imm(8), rcx)                    // check if the number of remaining elements greater than or equal to 8
-    jl(.FRINGE)                         // else, skip the BLOCK8 section and goto to FRINGE section of the code
+        // Reduce the number of remaining elements by 32 (8 double precision elements * 4 registers)
+        sub(imm(8*4),   rcx)
 
-    // Load and store operations to copy data from source to the destination
+        // ----------------------------------------------------------------------------------------------------------------------
 
-    vmovupd(mem(rsi, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+7]
-    vmovupd(zmm0, mem(rdi, 0*64))       // y[i+0] - y[i+7] = zmm0
+        // Section of code to move the data as blocks of 16 elements [ 8 double precision elements per register * 2 registers ]
+        label(.BLOCK16)
 
-    // Increment the pointer
-    add(imm(8*8), rsi)                  // Increment the x0 pointer by 64
-    add(imm(8*8), rdi)                  // Increment the y0 pointer by 64
-    sub(imm(8),   rcx)                  // reduce the number of remaining elements by 8
+        // Skip to the next code section if the number of remaining elements is less than 16
+        cmp(imm(8*2), rcx)
+        jl(.BLOCK8)
 
-    // -----------------------------------------------------------
+        // The following instructions will move 16 double precision elements (128 bytes) at a time
 
-    // Section of code to deal with fringe cases
-    label(.FRINGE)
+        vmovupd(mem(rsi, 0*64), zmm0)       // zmm0 <- x[0:7]
+        vmovupd(zmm0, mem(rdi, 0*64))       // y[0:7] <- zmm0
+        vmovupd(mem(rsi, 1*64), zmm1)       // zmm1 <- x[8:15]
+        vmovupd(zmm1, mem(rdi, 1*64))       // y[8:15] <- zmm1
 
-    cmp(imm(0), rcx)                    // Check if there are any fringe cases
-    je(.END)                            // Else, skip rest of the code
+        // Increment the source and destination pointers by 128 bytes (16 double precision elements)
+        add(imm(8*8*2), rsi)
+        add(imm(8*8*2), rdi)
 
-    // Creating a 8-bit mask
-    mov(imm(255), r8)                   // (255)10 -> (1111 1111)2
-    shlx(rcx, r8, r8)                   // shifting the bits in the register to the left depending on the number of fringe elements remaining
-    xor(imm(255), r8)                   // taking compliment of the register
-    
-    // Copying the 8-bit mask in the register to mask register
-    kmovq(r8, k(2))                     
+        // Reduce the number of remaining elements by 16 (8 double precision elements * 2 registers)
+        sub(imm(8*2),   rcx)
 
-    /*
-        Creating mask: Example - fringe case = 2
-            step 1 : r8 = (1111 1111)2  or  (255)10
-            step 2 : r8 = (1111 1100)2  or  (252)10
-            step 3 : r8 = (0000 0011)2  or  (3)10
-    */
+        // ----------------------------------------------------------------------------------------------------------------------
 
-    // Loading the input values using masked load
-    vmovupd(mem(rsi), zmm0 MASK_(K(2)))
+        // Section of code to move the data as blocks of 8 elements [ 8 double precision elements per register * 1 register ]
+        label(.BLOCK8)
 
-    // Storing the values to destination using masked store
-    vmovupd(zmm0, mem(rdi) MASK_(K(2)))
-    
-    // Multiple the value of remaining elements by 8
-    mov(imm(3), r11)                    // Load the value 3 to r11 register
-    shlx(r11, rcx, r11)                 // Left-Shift the value in rcx by 8
+        // Skip to the next code section if the number of remaining elements is less than 8
+        cmp(imm(8), rcx)
+        jl(.FRINGE)
 
-    // Increment the pointer
-    add(r11, rsi)                       // Increment the x0 pointer by (Number of remaining elements * 8)
-    add(r11, rdi)                       // Increment the y0 pointer by (Number of remaining elements * 8)
-    xor(rcx, rcx)                       // Set the value of remaining elements to 0
+        // Load and store operations to copy data from source to the destination
 
-    // After the above instructions are executed, the remaining part are skipped
-    jmp(.END)
+        vmovupd(mem(rsi, 0*64), zmm0)       // zmm0 <- x[0:7]
+        vmovupd(zmm0, mem(rdi, 0*64))       // y[0:7] <- zmm0
 
-    // ========================================================================================================================
+        // Increment the source and destination pointers by 64 bytes (8 double precision elements)
+        add(imm(8*8), rsi)
+        add(imm(8*8), rdi)
 
-    // Code section used to deal with situations where incx or incy is not 1
-    label(.SCALAR)
+        // Reduce the number of remaining elements by 8 (8 double precision elements * 1 register)
+        sub(imm(8),   rcx)
 
-    // incx and incy are multipled by 8 (shift left by 3 bits) and stored back into their respective registers
-    mov(imm(3), r11)
-    shlx(r11, r8, r8)
-    shlx(r11, r9, r9)
+        // ----------------------------------------------------------------------------------------------------------------------
 
-    // A loop is used to move one element at a time to the destination
-    label(.SCALARLOOP)
+        // Section of code to deal with fringe cases [ less than 8 elements ]
+        label(.FRINGE)
 
-    // Checking if all the elements are moved, then the loop will be terminated
-    cmp(imm(0), rcx)
-    je(.END)
+        // Skip to the end if there are no remaining elements
+        cmp(imm(0), rcx)
+        je(.END)
 
-    // Using vector register to mov one element at a time
-    vmovsd(mem(rsi, 0), xmm0)
-    vmovsd(xmm0, mem(rdi, 0))
+        // Creating a 8-bit mask
+        mov(imm(255), r8)                   // (255)10 -> (1111 1111)2
+        shlx(rcx, r8, r8)                   // shifting the bits in the register to the left depending on the number of fringe elements remaining
+        xor(imm(255), r8)                   // taking compliment of the register
 
-    // Moving the address pointer of x and y array by incx*8 and incy*8 bytes
-    add(r8, rsi)
-    add(r9, rdi)
+        // Copying the 8-bit mask in the register to mask register
+        kmovq(r8, k(2))
 
-    // Decrease the count for number of remaining elements
-    dec(rcx)
+        /*
+            Creating mask: Example - fringe case = 2
+                step 1 : r8 = (1111 1111)2  or  (255)10
+                step 2 : r8 = (1111 1100)2  or  (252)10
+                step 3 : r8 = (0000 0011)2  or  (3)10
+        */
 
-    // Jump back to SCALARLOOP
-    jmp(.SCALARLOOP)
+        // Loading the input values using masked load
+        vmovupd(mem(rsi), zmm0 MASK_(K(2)))
 
-    label(.END)
-    end_asm
-    (
-        : // output operands
-        : // input operands
-          [n0]     "m"     (n0),
-          [x0]     "m"     (x0),
-          [incx0]  "m"     (incx0),
-          [y0]     "m"     (y0),
-          [incy0]  "m"     (incy0)
-        : // register clobber list
-          "zmm0",  "zmm1",  "zmm2",  "zmm3",
-          "zmm4",  "zmm5",  "zmm6",  "zmm7",
-          "zmm8",  "zmm9",  "zmm10", "zmm11",
-          "zmm12", "zmm13", "zmm14", "zmm15",
-          "rsi",   "rdi",   "rcx",   "r8",
-          "r9",    "r11",   "k2",    "xmm0",
-          "memory"
-    )
+        // Storing the values to destination using masked store
+        vmovupd(zmm0, mem(rdi) MASK_(K(2)))
 
-    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)
+        label(.END)
+
+        end_asm
+        (
+            : // output operands
+            : // input operands
+            [n0]     "m"     (n0),
+            [x0]     "m"     (x0),
+            [y0]     "m"     (y0)
+            : // register clobber list
+            "zmm0",  "zmm1",  "zmm2",  "zmm3",
+            "zmm4",  "zmm5",  "zmm6",  "zmm7",
+            "zmm8",  "zmm9",  "zmm10", "zmm11",
+            "zmm12", "zmm13", "zmm14", "zmm15",
+            "rsi",   "rdi",   "rcx",   "r8",
+            "k2",    "xmm0",  "memory"
+        )
+    }
+
+    else
+    {
+        for ( dim_t i = 0; i < n; ++i)
+        {
+            *y0 = *x0;
+
+            x0 += incx;
+            y0 += incy;
+        }
+    }
+
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
+    return;
+}
+
+// This function is used to copy the vector x to vector y using AVX512 instructions in a two directional way
+void bli_dcopyv_zen4_asm_avx512_biway
+(
+    conj_t           conjx,
+    dim_t            n,
+    double*  restrict x, dim_t incx,
+    double*  restrict y, dim_t incy,
+    cntx_t* restrict cntx
+)
+{
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3)
+
+    // Initialize local pointers.
+    // x0 and y0 are the pointers to the head of the array
+    // xt0 and yt0 are the pointers to the tail of the array
+    double *x0 = x;
+    double *y0 = y;
+    double *xt0 = x + n;
+    double *yt0 = y + n;
+
+    // Typecast int to 64 bit
+    uint64_t n0 = (uint64_t)n;
+
+    // If the vector dimension is zero return early.
+    if (bli_zero_dim1(n0))
+    {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)
+        return;
+    }
+
+    if ( incx == 1 && incy == 1 )
+    {
+        // assembly code
+        begin_asm()
+
+        /*
+            rcx  <-  n
+            rsi  <-  x
+            rdi  <-  y
+        */
+
+        // Loading the source and destination memory addresses into the respective registers
+        mov(var(x0), rsi)
+        mov(var(y0), rdi)
+
+        mov(var(xt0), rax)
+        mov(var(yt0), rbx)
+
+        // Loading the values in n, incx and inxy into the respective registers
+        mov(var(n0),    rcx)
+
+    // ==========================================================================================================================
+
+        // Section of code to move the data as blocks of 128 elements [ 8 double precision elements per register * 16 registers ]
+        label(.BLOCK128)
+
+        // Skip to the next code section if the number of remaining elements is less than 128
+        cmp(imm(8*16), rcx)
+        jl(.BLOCK64)
+
+        // If the number of remaining elements is greater than or equal to 128, then jump to the main loop
+        label(.MAINLOOP)
+
+        // Interleaved SIMD load and store operations are used to copy data from source to the destination
+        // Each vmovupd instruction moves 8 double precision elements (64 bytes) at a time
+        // The following instructions will move 64 double precision elements (512 bytes) from the front and
+        // 64 double precision elements (512 bytes) from the back at a time
+
+        vmovupd(mem(rsi, 0*64), zmm0)       // zmm0      <- x[0:7]
+        vmovupd(zmm0, mem(rdi, 0*64))       // y[0:7]    <- zmm0
+        vmovupd(mem(rax, -1*64), zmm8)      // zmm8      <- x[-8:-1]
+        vmovupd(zmm8, mem(rbx, -1*64))      // y[-8:-1]  <- zmm8
+
+        vmovupd(mem(rsi, 1*64), zmm1)       // zmm1      <- x[8:15]
+        vmovupd(zmm1, mem(rdi, 1*64))       // y[8:15]   <- zmm1
+        vmovupd(mem(rax, -2*64), zmm9)      // zmm9      <- x[-16:-9]
+        vmovupd(zmm9, mem(rbx, -2*64))      // y[-16:-9] <- zmm9
+
+        vmovupd(mem(rsi, 2*64), zmm2)       // zmm2       <- x[16:23]
+        vmovupd(zmm2, mem(rdi, 2*64))       // y[16:23]   <- zmm2
+        vmovupd(mem(rax, -3*64), zmm10)     // zmm10      <- x[-24:-17]
+        vmovupd(zmm10, mem(rbx, -3*64))     // y[-24:-17] <- zmm10
+
+        vmovupd(mem(rsi, 3*64), zmm3)       // zmm3       <- x[24:31]
+        vmovupd(zmm3, mem(rdi, 3*64))       // y[24:31]   <- zmm3
+        vmovupd(mem(rax, -4*64), zmm11)     // zmm11      <- x[-32:-25]
+        vmovupd(zmm11, mem(rbx, -4*64))     // y[-32:-25] <- zmm11
+
+        vmovupd(mem(rsi, 4*64), zmm4)       // zmm4       <- x[32:39]
+        vmovupd(zmm4, mem(rdi, 4*64))       // y[32:39]   <- zmm4
+        vmovupd(mem(rax, -5*64), zmm12)     // zmm12      <- x[-40:-33]
+        vmovupd(zmm12, mem(rbx, -5*64))     // y[-40:-33] <- zmm12
+
+        vmovupd(mem(rsi, 5*64), zmm5)       // zmm5       <- x[40:47]
+        vmovupd(zmm5, mem(rdi, 5*64))       // y[40:47]   <- zmm5
+        vmovupd(mem(rax, -6*64), zmm13)     // zmm13      <- x[-48:-41]
+        vmovupd(zmm13, mem(rbx, -6*64))     // y[-48:-41] <- zmm13
+
+        vmovupd(mem(rsi, 6*64), zmm6)       // zmm6       <- x[48:55]
+        vmovupd(zmm6, mem(rdi, 6*64))       // y[48:55]   <- zmm6
+        vmovupd(mem(rax, -7*64), zmm14)     // zmm14      <- x[-56:-49]
+        vmovupd(zmm14, mem(rbx, -7*64))     // y[-56:-49] <- zmm14
+
+        vmovupd(mem(rsi, 7*64), zmm7)       // zmm7       <- x[56:63]
+        vmovupd(zmm7, mem(rdi, 7*64))       // y[56:63]   <- zmm7
+        vmovupd(mem(rax, -8*64), zmm15)     // zmm15      <- x[-64:-57]
+        vmovupd(zmm15, mem(rbx, -8*64))     // y[-64:-57] <- zmm15
+
+        // Increment the front source and destination pointers by 512 bytes (64 double precision elements in the front)
+        add(imm(8*8*8), rsi)
+        add(imm(8*8*8), rdi)
+
+        // Decrement the back source and destination pointers by 512 bytes (64 double precision elements in the back)
+        sub(imm(8*8*8), rax)
+        sub(imm(8*8*8), rbx)
+
+        // Reduce the number of remaining elements by 128 (8 double precision elements * 16 register)
+        sub(imm(8*16),   rcx)
+
+        // Jump back to the Main loop if the number of remaning elements are still greater than 128
+        cmp(imm(8*16), rcx)
+        jge(.MAINLOOP)
+
+        // ----------------------------------------------------------------------------------------------------------------------
+
+        // Section of code to move the data as blocks of 64 elements [ 8 double precision elements per register * 8 registers ]
+        label(.BLOCK64)
+
+        // Skip to the next code section if the number of remaining elements is less than 64
+        cmp(imm(8*8), rcx)
+        jl(.BLOCK32)
+
+        // The following instructions will move 32 double precision elements (256 bytes) from the front and
+        // 32 double precision elements (256 bytes) from the back at a time
+
+        vmovupd(mem(rsi, 0*64), zmm0)       // zmm0       <- x[0:7]
+        vmovupd(zmm0, mem(rdi, 0*64))       // y[0:7]     <- zmm0
+        vmovupd(mem(rax, -1*64), zmm8)      // zmm8       <- x[-8:-1]
+        vmovupd(zmm8, mem(rbx, -1*64))      // y[-8:-1]   <- zmm8
+
+        vmovupd(mem(rsi, 1*64), zmm1)       // zmm1       <- x[8:15]
+        vmovupd(zmm1, mem(rdi, 1*64))       // y[8:15]    <- zmm1
+        vmovupd(mem(rax, -2*64), zmm9)      // zmm9       <- x[-16:-9]
+        vmovupd(zmm9, mem(rbx, -2*64))      // y[-16:-9]  <- zmm9
+
+        vmovupd(mem(rsi, 2*64), zmm2)       // zmm2       <- x[16:23]
+        vmovupd(zmm2, mem(rdi, 2*64))       // y[16:23]   <- zmm2
+        vmovupd(mem(rax, -3*64), zmm10)     // zmm10      <- x[-24:-17]
+        vmovupd(zmm10, mem(rbx, -3*64))     // y[-24:-17] <- zmm10
+
+        vmovupd(mem(rsi, 3*64), zmm3)       // zmm3       <- x[24:31]
+        vmovupd(zmm3, mem(rdi, 3*64))       // y[24:31]   <- zmm3
+        vmovupd(mem(rax, -4*64), zmm11)     // zmm11      <- x[-32:-25]
+        vmovupd(zmm11, mem(rbx, -4*64))     // y[-32:-25] <- zmm11
+
+        // Increment the front source and destination pointers by 256 bytes (32 double precision elements in the front)
+        add(imm(8*8*4), rsi)
+        add(imm(8*8*4), rdi)
+
+        // Decrement the back source and destination pointers by 256 bytes (32 double precision elements in the back)
+        sub(imm(8*8*4), rax)
+        sub(imm(8*8*4), rbx)
+
+        // Reduce the number of remaining elements by 64 (8 double precision elements * 8 registers)
+        sub(imm(8*8),   rcx)
+
+        // ----------------------------------------------------------------------------------------------------------------------
+
+        // Section of code to move the data as blocks of 32 elements [ 8 double precision elements per register * 4 registers ]
+        label(.BLOCK32)
+
+        // Skip to the next code section if the number of remaining elements is less than 32
+        cmp(imm(8*4), rcx)
+        jl(.BLOCK16)
+
+        // The following instructions will move 16 double precision elements (128 bytes) from the front and
+        // 16 double precision elements (128 bytes) from the back at a time
+
+        vmovupd(mem(rsi, 0*64), zmm0)       // zmm0       <- x[0:7]
+        vmovupd(zmm0, mem(rdi, 0*64))       // y[0:7]     <- zmm0
+        vmovupd(mem(rax, -1*64), zmm8)      // zmm8       <- x[-8:-1]
+        vmovupd(zmm8, mem(rbx, -1*64))      // y[-8:-1]   <- zmm8
+
+        vmovupd(mem(rsi, 1*64), zmm1)       // zmm1       <- x[8:15]
+        vmovupd(zmm1, mem(rdi, 1*64))       // y[8:15]    <- zmm1
+        vmovupd(mem(rax, -2*64), zmm9)      // zmm9       <- x[-16:-9]
+        vmovupd(zmm9, mem(rbx, -2*64))      // y[-16:-9]  <- zmm9
+
+        // Increment the front source and destination pointers by 128 bytes (16 double precision elements in the front)
+        add(imm(8*8*2), rsi)
+        add(imm(8*8*2), rdi)
+
+        // Decrement the back source and destination pointers by 128 bytes (16 double precision elements in the back)
+        sub(imm(8*8*2), rax)
+        sub(imm(8*8*2), rbx)
+
+        // Reduce the number of remaining elements by 32 (8 double precision elements * 4 registers)
+        sub(imm(8*4),   rcx)
+
+        // ----------------------------------------------------------------------------------------------------------------------
+
+        // Section of code to move the data as blocks of 16 elements [ 8 double precision elements per register * 2 registers ]
+        label(.BLOCK16)
+
+        // Skip to the next code section if the number of remaining elements is less than 16
+        cmp(imm(8*2), rcx)
+        jl(.BLOCK8)
+
+        // The following instructions will move 8 double precision elements (64 bytes) from the front and
+        // 8 double precision elements (64 bytes) from the back at a time
+
+        vmovupd(mem(rsi, 0*64), zmm0)       // zmm0       <- x[0:7]
+        vmovupd(zmm0, mem(rdi, 0*64))       // y[0:7]     <- zmm0
+        vmovupd(mem(rax, -1*64), zmm8)      // zmm8       <- x[-8:-1]
+        vmovupd(zmm8, mem(rbx, -1*64))      // y[-8:-1]   <- zmm8
+
+        // Increment the front source and destination pointers by 64 bytes (8 double precision elements in the front)
+        add(imm(8*8), rsi)
+        add(imm(8*8), rdi)
+
+        // Decrement the front source and destination pointers by 64 bytes (8 double precision elements in the back)
+        sub(imm(8*8), rax)
+        sub(imm(8*8), rbx)
+
+        // Reduce the number of remaining elements by 16 (8 double precision elements * 2 registers)
+        sub(imm(8*2),   rcx)
+
+        // ----------------------------------------------------------------------------------------------------------------------
+
+        // Section of code to move the data as blocks of 8 elements [ 8 double precision elements per register * 1 register ]
+        label(.BLOCK8)
+
+        // Skip to the next code section if the number of remaining elements is less than 16
+        cmp(imm(8), rcx)
+        jl(.FRINGE)
+
+        // The following instructions will move 8 double precision elements (64 bytes) from the front at a time
+
+        vmovupd(mem(rsi, 0*64), zmm0)       // zmm0       <- x[0:7]
+        vmovupd(zmm0, mem(rdi, 0*64))       // y[0:7]     <- zmm0
+
+        // Increment the front source and destination pointers by 64 bytes (8 double precision elements in the front)
+        add(imm(8*8), rsi)
+        add(imm(8*8), rdi)
+
+        // Reduce the number of remaining elements by 8 (8 double precision elements * 1 register)
+        sub(imm(8),   rcx)
+
+        // ----------------------------------------------------------------------------------------------------------------------
+
+        // Section of code to deal with fringe cases [ less than 8 elements ]
+        label(.FRINGE)
+
+        // Skip to the end if there are no remaining elements
+        cmp(imm(0), rcx)
+        je(.END)
+
+        // Creating a 8-bit mask
+        mov(imm(255), r8)                   // (255)10 -> (1111 1111)2
+        shlx(rcx, r8, r8)                   // shifting the bits in the register to the left depending on the number of fringe elements remaining
+        xor(imm(255), r8)                   // taking compliment of the register
+
+        // Copying the 8-bit mask in the register to mask register
+        kmovq(r8, k(2))
+
+        /*
+            Creating mask: Example - fringe case = 2
+                step 1 : r8 = (1111 1111)2  or  (255)10
+                step 2 : r8 = (1111 1100)2  or  (252)10
+                step 3 : r8 = (0000 0011)2  or  (3)10
+        */
+
+        // Loading the input values using masked load
+        vmovupd(mem(rsi), zmm0 MASK_(K(2)))
+
+        // Storing the values to destination using masked store
+        vmovupd(zmm0, mem(rdi) MASK_(K(2)))
+
+        label(.END)
+
+        end_asm
+        (
+            : // output operands
+            : // input operands
+            [n0]     "m"     (n0),
+            [x0]     "m"     (x0),
+            [y0]     "m"     (y0),
+            [xt0]     "m"     (xt0),
+            [yt0]     "m"     (yt0)
+            : // register clobber list
+            "zmm0",  "zmm1",  "zmm2",  "zmm3",
+            "zmm4",  "zmm5",  "zmm6",  "zmm7",
+            "zmm8",  "zmm9",  "zmm10", "zmm11",
+            "zmm12", "zmm13", "zmm14", "zmm15",
+            "rsi",   "rdi",   "rcx",   "r8",
+            "rax",   "rbx",   "k2",    "memory"
+        )
+    }
+
+    else
+    {
+        for ( dim_t i = 0; i < n; ++i)
+        {
+            *y0 = *x0;
+
+            x0 += incx;
+            y0 += incy;
+        }
+    }
+
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
+    return;
 }
 
 // -----------------------------------------------------------------------------
@@ -1246,7 +1544,7 @@ void bli_zcopyv_zen4_asm_avx512
 
             label(.MAINLOOP)
             // Interleaved SIMD load and store operations to copy data from source to the destination
-            // Each vector register can hold 4 elements and is used twice before next jump operation 
+            // Each vector register can hold 4 elements and is used twice before next jump operation
             // 1 for loading the element from source and 1 for store it into the destination
 
             vmovupd(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+3]

@@ -99,6 +99,7 @@ DOTXF_KER_PROT( double,   d, dotxf_zen_int_avx512 )
 // copyv (asm)
 COPYV_KER_PROT( float,    s, copyv_zen4_asm_avx512 )
 COPYV_KER_PROT( double,   d, copyv_zen4_asm_avx512 )
+COPYV_KER_PROT( double,   d, copyv_zen4_asm_avx512_biway )
 COPYV_KER_PROT( dcomplex, z, copyv_zen4_asm_avx512 )
 
 // scal2v (intrinsics)

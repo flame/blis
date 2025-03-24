@@ -139,9 +139,8 @@ INSTANTIATE_TEST_SUITE_P(
     Unit testing for functionality of bli_dcopyv_zen4_asm_avx512 kernel.
     The code structure for bli_dcopyv_zen4_asm_avx512( ... ) is as follows :
     For unit strides :
-        Main loop    :  In blocks of 256 -->   L256
-        Fringe loops :  In blocks of 128 -->   L128
-                        In blocks of 64  -->   L64
+        Main loop    :  In blocks of 128 -->   L128
+        Fringe loops :  In blocks of 64  -->   L64
                         In blocks of 32  -->   L32
                         In blocks of 16  -->   L16
                         In blocks of 8   -->   L8
@@ -158,21 +157,19 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(bli_dcopyv_zen4_asm_avx512),
             ::testing::Values('n'),                   // conjugate parameter, 'n' for dcopyv
             ::testing::Values(// Testing the loops standalone
-                              gtint_t(256),           // size n, for L256
-                              gtint_t(128),           // L128
+                              gtint_t(128),           // size n, for L128
                               gtint_t(64),            // L64
                               gtint_t(32),            // L32
                               gtint_t(16),            // L16
                               gtint_t(8),             // L8
                               gtint_t(7),             // LScalar
                               // Testing the loops with combinations
-                              gtint_t(1280),           // 5*L256
-                              gtint_t(1408),           // 5*L256 + L128
-                              gtint_t(1472),           // 5*L256 + L128 + L64
-                              gtint_t(1504),           // 5*L256 + L128 + L64 + L32
-                              gtint_t(1520),           // 5*L256 + L128 + L64 + L32 + L16
-                              gtint_t(1528),           // 5*L256 + L128 + L64 + L32 + L16 + L8
-                              gtint_t(1535)),          // 5*L256 + L128 + L64 + L32 + L16 + L8 + 7(LScalar)
+                              gtint_t(640),           // 5*L128
+                              gtint_t(704),           // 5*L128 + L64
+                              gtint_t(736),           // 5*L128 + L64 + L32
+                              gtint_t(752),           // 5*L128 + L64 + L32 + L16
+                              gtint_t(760),           // 5*L128 + L64 + L32 + L16 + L8
+                              gtint_t(767)),          // 5*L128 + L64 + L32 + L16 + L8 + 7(LScalar)
             ::testing::Values(gtint_t(1)),            // stride size for x
             ::testing::Values(gtint_t(1)),            // stride size for y
             ::testing::Values(false, true)            // is_memory_test
@@ -188,6 +185,128 @@ INSTANTIATE_TEST_SUITE_P(
         dcopyvGeneric,
         ::testing::Combine(
             ::testing::Values(bli_dcopyv_zen4_asm_avx512),
+            ::testing::Values('n'),                      // conjugate parameter, 'n' for dcopyv
+            ::testing::Values(gtint_t(25), gtint_t(37)), // size of the vector
+            ::testing::Values(gtint_t(5)),               // stride size for x
+            ::testing::Values(gtint_t(3)),               // stride size for y
+            ::testing::Values(false, true)               // is_memory_test
+        ),
+        ::copyvUKRPrint<dcopyv_ker_ft>()
+    );
+#endif
+
+/*
+    Unit testing for functionality of bli_dcopyv_zen4_asm_avx512_biway kernel.
+    The code structure for bli_dcopyv_zen4_asm_avx512_biway( ... ) is as follows :
+    For unit strides :
+        Main loop    :  In blocks of 128 -->   L128
+        Fringe loops :  In blocks of 64  -->   L64
+                        In blocks of 32  -->   L32
+                        In blocks of 16  -->   L16
+                        In blocks of 8   -->   L8
+                        Element-wise loop -->  LScalar
+
+    For non-unit strides : A single loop, to process element wise.
+*/
+// Unit testing with Unit Strides(US), across all loops.
+#ifdef K_bli_dcopyv_zen4_asm_avx512_biway
+INSTANTIATE_TEST_SUITE_P(
+        bli_dcopyv_zen4_asm_avx512_biway_unitStrides,
+        dcopyvGeneric,
+        ::testing::Combine(
+            ::testing::Values(bli_dcopyv_zen4_asm_avx512_biway),
+            ::testing::Values('n'),                   // conjugate parameter, 'n' for dcopyv
+            ::testing::Values(// Testing the loops standalone
+                              gtint_t(128),           // size n, for L128
+                              gtint_t(64),            // L64
+                              gtint_t(32),            // L32
+                              gtint_t(16),            // L16
+                              gtint_t(8),             // L8
+                              gtint_t(7),             // LScalar
+                              // Testing the loops with combinations
+                              gtint_t(640),           // 5*L128
+                              gtint_t(704),           // 5*L128 + L64
+                              gtint_t(736),           // 5*L128 + L64 + L32
+                              gtint_t(752),           // 5*L128 + L64 + L32 + L16
+                              gtint_t(760),           // 5*L128 + L64 + L32 + L16 + L8
+                              gtint_t(767)),          // 5*L128 + L64 + L32 + L16 + L8 + 7(LScalar)
+            ::testing::Values(gtint_t(1)),            // stride size for x
+            ::testing::Values(gtint_t(1)),            // stride size for y
+            ::testing::Values(false, true)            // is_memory_test
+        ),
+        ::copyvUKRPrint<dcopyv_ker_ft>()
+    );
+#endif
+
+// Unit testing with Non-Unit Strides(US), across all loops.
+#ifdef K_bli_dcopyv_zen4_asm_avx512_biway
+INSTANTIATE_TEST_SUITE_P(
+        bli_dcopyv_zen4_asm_avx512_biway_nonUnitStrides,
+        dcopyvGeneric,
+        ::testing::Combine(
+            ::testing::Values(bli_dcopyv_zen4_asm_avx512_biway),
+            ::testing::Values('n'),                      // conjugate parameter, 'n' for dcopyv
+            ::testing::Values(gtint_t(25), gtint_t(37)), // size of the vector
+            ::testing::Values(gtint_t(5)),               // stride size for x
+            ::testing::Values(gtint_t(3)),               // stride size for y
+            ::testing::Values(false, true)               // is_memory_test
+        ),
+        ::copyvUKRPrint<dcopyv_ker_ft>()
+    );
+#endif
+#endif
+
+#if defined(BLIS_KERNELS_ZEN5) && defined(GTEST_AVX512)
+/*
+    Unit testing for functionality of bli_dcopyv_zen4_asm_avx512 kernel.
+    The code structure for bli_dcopyv_zen5_asm_avx512( ... ) is as follows :
+    For unit strides :
+        Main loop    :  In blocks of 128 -->   L128
+        Fringe loops :  In blocks of 64  -->   L64
+                        In blocks of 32  -->   L32
+                        In blocks of 16  -->   L16
+                        In blocks of 8   -->   L8
+                        Element-wise loop -->  LScalar
+
+    For non-unit strides : A single loop, to process element wise.
+*/
+// Unit testing with Unit Strides(US), across all loops.
+#ifdef K_bli_dcopyv_zen5_asm_avx512
+INSTANTIATE_TEST_SUITE_P(
+        bli_dcopyv_zen5_asm_avx512_unitStrides,
+        dcopyvGeneric,
+        ::testing::Combine(
+            ::testing::Values(bli_dcopyv_zen5_asm_avx512),
+            ::testing::Values('n'),                   // conjugate parameter, 'n' for dcopyv
+            ::testing::Values(// Testing the loops standalone
+                              gtint_t(128),           // size n, for L128
+                              gtint_t(64),            // L64
+                              gtint_t(32),            // L32
+                              gtint_t(16),            // L16
+                              gtint_t(8),             // L8
+                              gtint_t(7),             // LScalar
+                              // Testing the loops with combinations
+                              gtint_t(640),           // 5*L128
+                              gtint_t(704),           // 5*L128 + L64
+                              gtint_t(736),           // 5*L128 + L64 + L32
+                              gtint_t(752),           // 5*L128 + L64 + L32 + L16
+                              gtint_t(760),           // 5*L128 + L64 + L32 + L16 + L8
+                              gtint_t(767)),          // 5*L128 + L64 + L32 + L16 + L8 + 7(LScalar)
+            ::testing::Values(gtint_t(1)),            // stride size for x
+            ::testing::Values(gtint_t(1)),            // stride size for y
+            ::testing::Values(false, true)            // is_memory_test
+        ),
+        ::copyvUKRPrint<dcopyv_ker_ft>()
+    );
+#endif
+
+// Unit testing with Non-Unit Strides(US), across all loops.
+#ifdef K_bli_dcopyv_zen5_asm_avx512
+INSTANTIATE_TEST_SUITE_P(
+        bli_dcopyv_zen5_asm_avx512_nonUnitStrides,
+        dcopyvGeneric,
+        ::testing::Combine(
+            ::testing::Values(bli_dcopyv_zen5_asm_avx512),
             ::testing::Values('n'),                      // conjugate parameter, 'n' for dcopyv
             ::testing::Values(gtint_t(25), gtint_t(37)), // size of the vector
             ::testing::Values(gtint_t(5)),               // stride size for x

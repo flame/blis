@@ -291,10 +291,16 @@ void bli_dgemv_unf_var1
     switch (id)
     {
       case BLIS_ARCH_ZEN5:
+#if defined(BLIS_KERNELS_ZEN5)
+      gemv_kr_ptr   = bli_dgemv_t_zen_int_avx512;
+      scalv_kr_ptr  = bli_dscalv_zen_int_avx512;      // DSCALV
+      copyv_kr_ptr  = bli_dcopyv_zen5_asm_avx512;     // DCOPYV
+      break;
+#endif
       case BLIS_ARCH_ZEN4:
 
 #if defined(BLIS_KERNELS_ZEN4)
-        gemv_kr_ptr = bli_dgemv_t_zen_int_avx512;
+        gemv_kr_ptr   = bli_dgemv_t_zen_int_avx512;
         scalv_kr_ptr  = bli_dscalv_zen_int_avx512;      // DSCALV
         copyv_kr_ptr  = bli_dcopyv_zen4_asm_avx512;     // DCOPYV
         break;

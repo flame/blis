@@ -32,6 +32,9 @@
 
 */
 
+// DCOPYV kernel
+COPYV_KER_PROT( double,   d, copyv_zen5_asm_avx512 )
+
 // Dgemm sup RV kernels
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen5_asm_24x8m)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen5_asm_24x7m)

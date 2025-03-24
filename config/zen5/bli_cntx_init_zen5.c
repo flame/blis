@@ -199,7 +199,7 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 
 	  // copyv
 	  BLIS_COPYV_KER,  BLIS_FLOAT,    bli_scopyv_zen4_asm_avx512,
-	  BLIS_COPYV_KER,  BLIS_DOUBLE,   bli_dcopyv_zen4_asm_avx512,
+	  BLIS_COPYV_KER,  BLIS_DOUBLE,   bli_dcopyv_zen5_asm_avx512,
 	  BLIS_COPYV_KER,  BLIS_DCOMPLEX, bli_zcopyv_zen4_asm_avx512,
 
 	  // setv
