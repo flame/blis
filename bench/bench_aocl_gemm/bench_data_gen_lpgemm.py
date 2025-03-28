@@ -56,5 +56,5 @@ for stor in ["r"]:
                                                     post_op += "=" + "na"
                                                 else:
                                                     post_op += "=" + output_type
-                                                ofile.write(chars + " " + dims + " " + op + ":" + post_op + "\n")
+                                            ofile.write(chars + " " + dims + " " + op + ":" + post_op + "\n")
 ofile.close()

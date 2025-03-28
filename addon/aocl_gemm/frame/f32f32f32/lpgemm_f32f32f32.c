@@ -399,8 +399,7 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
     if ( c_downscale < F32 )
     {
         post_ops_attr.buf_downscale = c;
-    }
-    else
+    }else
     {
         post_ops_attr.buf_downscale = NULL;
     }
@@ -414,6 +413,21 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
     // Compute the JC loop thread range for the current thread.
     dim_t jc_start, jc_end;
     bli_thread_range_sub( &thread_jc, n, NR, FALSE, &jc_start, &jc_end );
+
+    // Compute the IC loop thread range for the current thread.
+    dim_t ic_start, ic_end;
+    bli_thread_range_sub( &thread_ic, m, MR, FALSE, &ic_start, &ic_end );
+
+    // Update the kernel pointer with right kernel
+    lpgemm_rowvar_f32 ker_ptr = (lpgemm_rowvar_f32) lcntx->kern_fun_ptr;
+
+    // Avoid packing of B in transb cases where rd kernels performs better
+    // than rv + pack. rv kernel calls rd when rs_b==1.
+    if( (n < 64) && (rs_b == 1) &&
+        (mtag_b == PACK) && (mtag_a == UNPACKED))
+    {
+        mtag_b  = UNPACKED;
+    }
 
     for ( dim_t jc = jc_start; jc < jc_end; jc += NC )
     {
@@ -545,9 +559,6 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
                 ps_b_use = 1;
             }
 
-            dim_t ic_start, ic_end;
-            bli_thread_range_sub( &thread_ic, m, MR, FALSE, &ic_start, &ic_end );
-
             for ( dim_t ic = ic_start; ic < ic_end; ic += MC )
             {
                 dim_t mc0 = bli_min( ( ic_end - ic ), MC );
@@ -584,7 +595,7 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
                     (
                       pack_a_buffer_f32f32f32of32,
                       ( a + ( rs_a * ic ) + ( pc * cs_a) ),
-					  rs_a, cs_a,
+                      rs_a, cs_a,
                       mc0, kc0,
                       &rs_a_use, &cs_a_use
                     );
@@ -611,8 +622,8 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
                     post_ops_attr.post_op_c_j = ( jc + jr );
                     post_ops_attr.rs_c_downscale = rs_c_downscale;
 
-                    // Reordered/unpacked B, reordered/unpacked A.
-                    ( ( lpgemm_rowvar_f32 )lcntx->kern_fun_ptr )
+                    // Call the micro-kernel
+                    ker_ptr
                     (
                       mc0, nr0, kc0,
                       ( float* )a_use, rs_a_use, cs_a_use, ps_a_use,

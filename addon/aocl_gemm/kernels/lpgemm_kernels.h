@@ -89,7 +89,15 @@ void lpgemm_rowvar_ ## LP_SFX \
 LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64);
 LPGEMM_MAIN_KERN(bfloat16,bfloat16,float,bf16bf16f32of32_6x64);
 LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m);
+LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m_rd);
+LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x8m_rd);
+LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x4m_rd);
+LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x2m_rd);
+LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x1m_rd);
 LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_avx512_6x64m);
+LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_avx512_6x64m_rd);
+LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_avx512_6x48m_rd);
+LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_avx512_6x32m_rd);
 LPGEMM_MAIN_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x64);
 
 
@@ -142,6 +150,51 @@ void lpgemm_rowvar_ ## LP_SFX \
      ) \
 
 LPGEMM_MAIN_KERN2(int8_t,int8_t,int32_t,s8s8s32os32_6x64m_sym_quant);
+
+#define LPGEMM_M_RD_FRINGE_KERN(A_type,B_type,C_type,LP_SFX) \
+void lpgemm_rowvar_ ## LP_SFX \
+     ( \
+       const dim_t         k0, \
+       const A_type*       a, \
+       const dim_t         rs_a, \
+       const dim_t         cs_a, \
+       const B_type*       b, \
+       const dim_t         rs_b, \
+       const dim_t         cs_b, \
+       C_type*             c, \
+       const dim_t         rs_c, \
+       const dim_t         cs_c, \
+       const C_type        alpha, \
+       const C_type        beta, \
+       lpgemm_post_op*     post_ops_list, \
+       lpgemm_post_op_attr post_ops_attr \
+     ) \
+
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x64_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x64_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x64_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x64_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x64_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x48_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x48_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x48_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x48_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x48_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x32_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x32_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x32_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x32_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x32_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_2x16_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_1x16_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_2x8_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_1x8_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_2x4_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_1x4_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_2x2_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_2x1_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_1x2_rd);
+LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_1x1_rd);
 
 #define LPGEMM_M_FRINGE_KERN(A_type,B_type,C_type,LP_SFX) \
 void lpgemm_rowvar_ ## LP_SFX \
@@ -256,7 +309,7 @@ void lpgemm_rowvar_ ## LP_SFX \
        const B_type*       b, \
        const dim_t         rs_b, \
        const dim_t         cs_b, \
-       float*             c, \
+       float*              c, \
        const dim_t         rs_c, \
        const C_type        alpha, \
        const C_type        beta, \

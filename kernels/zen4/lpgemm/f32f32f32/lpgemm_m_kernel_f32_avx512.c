@@ -44,6 +44,21 @@
 
 LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_avx512_6x64m)
 {
+    //Call RD kernels if B is transposed
+    if(rs_b == 1)
+    {
+        lpgemm_rowvar_f32f32f32of32_avx512_6x64m_rd
+        (
+          m0, n0, k0,
+          a, rs_a, cs_a, ps_a,
+          b, rs_b, cs_b,
+          c, rs_c, cs_c,
+          alpha, beta,
+          post_ops_list, post_ops_attr
+        );
+        return;
+    }
+
     static void* post_ops_labels[] =
             {
               &&POST_OPS_6x64F_DISABLE,
@@ -60,7 +75,9 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_avx512_6x64m)
               &&POST_OPS_TANH_6x64F,
               &&POST_OPS_SIGMOID_6x64F
             };
+
     uint64_t n_left = n0 % 64;  //n0 is expected to be n0<=NR
+
     // First check whether this is a edge case in the n dimension.
     // If so, dispatch other 12x?m kernels, as needed.
     if ( n_left )
