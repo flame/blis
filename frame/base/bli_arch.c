@@ -285,6 +285,9 @@ arch_t bli_arch_query_id_impl( void )
 		#ifdef BLIS_FAMILY_RV64IV
 		id = BLIS_ARCH_RV64IV;
 		#endif
+                #ifdef BLIS_FAMILY_RVV_SG2042	// added!
+                id = BLIS_ARCH_RVV_SG2042;
+                #endif
 
 		// SiFive microarchitectures.
 		#ifdef BLIS_FAMILY_SIFIVE_RVV
@@ -358,6 +361,7 @@ static const char* config_name[ BLIS_NUM_ARCHS ] =
     "rv64i",
     "rv32iv",
     "rv64iv",
+    "rvv_sg2042", // added!
 
     "sifive_rvv",
     "sifive_x280",

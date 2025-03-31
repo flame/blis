@@ -1,0 +1,11 @@
+prefix=/home/gceccolini/blis_sg2042
+exec_prefix=/home/gceccolini/blis_sg2042
+libdir=/home/gceccolini/blis_sg2042/lib
+includedir=/home/gceccolini/blis_sg2042/include
+
+Name: BLIS
+Description: BLAS-like Library Instantiation Software Framework
+Version: 0.9.0-180
+Libs: -L${libdir} -lblis
+Libs.private:  -lm -lpthread -latomic
+Cflags: -I${includedir}/blis

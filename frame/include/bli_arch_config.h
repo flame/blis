@@ -277,7 +277,9 @@ INSERT_GENTCONF
 #ifdef BLIS_KERNELS_RVIV
 #include "bli_kernels_rviv.h"
 #endif
-
+#ifdef BLIS_KERNELS_RVV_SG2042
+#include "bli_kernels_rvv_sg2042.h"
+#endif
 // -- SiFive RISC-V architectures --
 
 #ifdef BLIS_KERNELS_SIFIVE_RVV
