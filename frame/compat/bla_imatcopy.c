@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -156,7 +156,7 @@ static dim_t bli_ziMatCopy_cc
                dim_t          ldb
              );
 
-void simatcopy_
+void simatcopy_blis_impl
      (
        f77_char*    trans,
        f77_int*     rows,
@@ -226,8 +226,23 @@ void simatcopy_
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return ;
 }
+#ifdef BLIS_ENABLE_BLAS
+void simatcopy_
+     (
+       f77_char*    trans,
+       f77_int*     rows,
+       f77_int*     cols,
+       const float* alpha,
+       float*       aptr,
+       f77_int*     lda,
+       f77_int*     ldb
+     )
+{
+    simatcopy_blis_impl(trans,rows,cols,alpha,aptr,lda,ldb);
+}
+#endif
 
-void dimatcopy_
+void dimatcopy_blis_impl
      (
        f77_char*     trans,
        f77_int*      rows,
@@ -296,8 +311,23 @@ void dimatcopy_
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return ;
 }
+#ifdef BLIS_ENABLE_BLAS
+void dimatcopy_
+     (
+       f77_char*     trans,
+       f77_int*      rows,
+       f77_int*      cols,
+       const double* alpha,
+       double*       aptr,
+       f77_int*      lda,
+       f77_int*      ldb
+     )
+{
+    dimatcopy_blis_impl(trans,rows,cols,alpha,aptr,lda,ldb);
+}
+#endif
 
-void cimatcopy_
+void cimatcopy_blis_impl
      (
        f77_char*       trans,
        f77_int*        rows,
@@ -366,8 +396,23 @@ void cimatcopy_
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return ;
 }
+#ifdef BLIS_ENABLE_BLAS
+void cimatcopy_
+     (
+       f77_char*       trans,
+       f77_int*        rows,
+       f77_int*        cols,
+       const scomplex* alpha,
+       scomplex*       aptr,
+       f77_int*        lda,
+       f77_int*        ldb
+     )
+{
+    cimatcopy_blis_impl(trans,rows,cols,alpha,aptr,lda,ldb);
+}
+#endif
 
-void zimatcopy_
+void zimatcopy_blis_impl
      (
        f77_char*       trans,
        f77_int*        rows,
@@ -436,6 +481,21 @@ void zimatcopy_
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return ;
 }
+#ifdef BLIS_ENABLE_BLAS
+void zimatcopy_
+     (
+       f77_char*       trans,
+       f77_int*        rows,
+       f77_int*        cols,
+       const dcomplex* alpha,
+       dcomplex*       aptr,
+       f77_int*        lda,
+       f77_int*        ldb
+     )
+{
+    zimatcopy_blis_impl(trans,rows,cols,alpha,aptr,lda,ldb);
+}
+#endif
 
 // suffix cn means - column major & non-trans
 static dim_t bli_siMatCopy_cn(dim_t rows,dim_t cols,const float alpha,float* a,dim_t lda,dim_t ldb)

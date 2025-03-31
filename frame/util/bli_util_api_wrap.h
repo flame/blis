@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1674,8 +1674,6 @@ BLIS_EXPORT_BLIS void zgemmt( const f77_char* uploc,  const f77_char* transa,  c
 BLIS_EXPORT_BLIS void ZGEMMT_( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  dcomplex* alpha,  const dcomplex* a,  const f77_int* lda,  const dcomplex* b,  const f77_int* ldb,  const dcomplex* beta,  dcomplex* c,  const f77_int* ldc);
 
 
-//#ifdef BLIS_ENABLE_CBLAS
-
 BLIS_EXPORT_BLIS void CIMATCOPY(f77_char* trans,  f77_int* rows,  f77_int* cols,  const scomplex* alpha, scomplex* aptr,  f77_int* lda,  f77_int* ldb);
 
 BLIS_EXPORT_BLIS void cimatcopy(f77_char* trans,  f77_int* rows,  f77_int* cols,  const scomplex* alpha, scomplex* aptr,  f77_int* lda,  f77_int* ldb);
@@ -1705,6 +1703,14 @@ BLIS_EXPORT_BLIS void COMATCOPY(f77_char* trans,  f77_int* rows,  f77_int* cols,
 BLIS_EXPORT_BLIS void comatcopy(f77_char* trans,  f77_int* rows,  f77_int* cols,  const scomplex* alpha,  const scomplex* aptr,  f77_int* lda,  scomplex* bptr,  f77_int* ldb);
 
 BLIS_EXPORT_BLIS void COMATCOPY_(f77_char* trans,  f77_int* rows,  f77_int* cols,  const scomplex* alpha,  const scomplex* aptr,  f77_int* lda,  scomplex* bptr,  f77_int* ldb);
+
+
+
+BLIS_EXPORT_BLIS void DIMATCOPY( f77_char* trans,  f77_int* rows,  f77_int* cols,  const double* alpha, double* aptr,  f77_int* lda,  f77_int* ldb);
+
+BLIS_EXPORT_BLIS void dimatcopy( f77_char* trans,  f77_int* rows,  f77_int* cols,  const double* alpha, double* aptr,  f77_int* lda,  f77_int* ldb);
+
+BLIS_EXPORT_BLIS void DIMATCOPY_( f77_char* trans,  f77_int* rows,  f77_int* cols,  const double* alpha, double* aptr,  f77_int* lda,  f77_int* ldb);
 
 
 
@@ -1793,8 +1799,6 @@ BLIS_EXPORT_BLIS void ZOMATCOPY(f77_char* trans,  f77_int* rows,  f77_int* cols,
 BLIS_EXPORT_BLIS void zomatcopy(f77_char* trans,  f77_int* rows,  f77_int* cols,  const dcomplex* alpha,  const dcomplex* aptr,  f77_int* lda,  dcomplex* bptr,  f77_int* ldb);
 
 BLIS_EXPORT_BLIS void ZOMATCOPY_(f77_char* trans,  f77_int* rows,  f77_int* cols,  const dcomplex* alpha,  const dcomplex* aptr,  f77_int* lda,  dcomplex* bptr,  f77_int* ldb);
-
-//#endif // BLIS_ENABLE_CBLAS
 
 #endif
 #endif

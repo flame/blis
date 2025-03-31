@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -192,7 +192,7 @@ static dim_t bli_zoMatCopy2_cc
          dim_t 		     strideb
        );
 
-void somatcopy2_
+void somatcopy2_blis_impl
      (
        f77_char* 	trans,
        f77_int* 	rows,
@@ -264,8 +264,27 @@ void somatcopy2_
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return ;
 }
+#ifdef BLIS_ENABLE_BLAS
+void somatcopy2_
+     (
+       f77_char* 	trans,
+       f77_int* 	rows,
+       f77_int* 	cols,
+       const float* alpha,
+       const float* aptr,
+       f77_int* 	lda,
+       f77_int* 	stridea,
+       float* 		 bptr,
+       f77_int* 	ldb,
+       f77_int* 	strideb
+     )
+{
+    somatcopy2_blis_impl(trans,rows,cols,alpha,aptr,lda,stridea,bptr,ldb,
+                         strideb);
+}
+#endif
 
-void domatcopy2_
+void domatcopy2_blis_impl
      (
        f77_char* 	 trans,
        f77_int* 	 rows,
@@ -337,8 +356,27 @@ void domatcopy2_
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return ;
 }
+#ifdef BLIS_ENABLE_BLAS
+void domatcopy2_
+     (
+       f77_char* 	 trans,
+       f77_int* 	 rows,
+       f77_int* 	 cols,
+       const double* alpha,
+       const double* aptr,
+       f77_int* 	 lda,
+       f77_int* 	 stridea,
+       double* 		 bptr,
+       f77_int* 	 ldb,
+       f77_int* 	 strideb
+     )
+{
+    domatcopy2_blis_impl(trans,rows,cols,alpha,aptr,lda,stridea,bptr,ldb,
+                         strideb);
+}
+#endif
 
-void comatcopy2_
+void comatcopy2_blis_impl
      (
        f77_char* 	   trans,
        f77_int* 	   rows,
@@ -410,8 +448,27 @@ void comatcopy2_
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return ;
 }
+#ifdef BLIS_ENABLE_BLAS
+void comatcopy2_
+     (
+       f77_char* 	   trans,
+       f77_int* 	   rows,
+       f77_int* 	   cols,
+       const scomplex* alpha,
+       const scomplex* aptr,
+       f77_int* 	   lda,
+       f77_int* 	   stridea,
+       scomplex* 	   bptr,
+       f77_int* 	   ldb,
+       f77_int* 	   strideb
+     )
+{
+    comatcopy2_blis_impl(trans,rows,cols,alpha,aptr,lda,stridea,bptr,ldb,
+                         strideb);
+}
+#endif
 
-void zomatcopy2_
+void zomatcopy2_blis_impl
      (
        f77_char* 	   trans,
        f77_int* 	   rows,
@@ -483,6 +540,25 @@ void zomatcopy2_
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return ;
 }
+#ifdef BLIS_ENABLE_BLAS
+void zomatcopy2_
+     (
+       f77_char* 	   trans,
+       f77_int* 	   rows,
+       f77_int* 	   cols,
+       const dcomplex* alpha,
+       const dcomplex* aptr,
+       f77_int* 	   lda,
+       f77_int* 	   stridea,
+       dcomplex* 	   bptr,
+       f77_int* 	   ldb,
+       f77_int* 	   strideb
+     )
+{
+    zomatcopy2_blis_impl(trans,rows,cols,alpha,aptr,lda,stridea,bptr,ldb,
+                         strideb);
+}
+#endif
 
 // suffix cn means - column major & non-trans
 static dim_t bli_soMatCopy2_cn

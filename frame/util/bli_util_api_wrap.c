@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -2443,19 +2443,17 @@ void CGEMMT_( const f77_char* uploc, const f77_char* transa, const f77_char* tra
     cgemmt_blis_impl( uploc, transa, transb, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
 }
 
-//#ifdef BLIS_ENABLE_CBLAS
-
-void CIMATCOPY(f77_char* trans, f77_int* rows, f77_int* cols, const scomplex* alpha,scomplex* aptr, f77_int* lda, f77_int* ldb)
+void CIMATCOPY(f77_char* trans, f77_int* rows, f77_int* cols, const scomplex* alpha, scomplex* aptr, f77_int* lda, f77_int* ldb)
 {
     cimatcopy_( trans, rows, cols, alpha, aptr, lda, ldb);
 }
 
-void cimatcopy(f77_char* trans, f77_int* rows, f77_int* cols, const scomplex* alpha,scomplex* aptr, f77_int* lda, f77_int* ldb)
+void cimatcopy(f77_char* trans, f77_int* rows, f77_int* cols, const scomplex* alpha, scomplex* aptr, f77_int* lda, f77_int* ldb)
 {
     cimatcopy_( trans, rows, cols, alpha, aptr, lda, ldb);
 }
 
-void CIMATCOPY_(f77_char* trans, f77_int* rows, f77_int* cols, const scomplex* alpha,scomplex* aptr, f77_int* lda, f77_int* ldb)
+void CIMATCOPY_(f77_char* trans, f77_int* rows, f77_int* cols, const scomplex* alpha, scomplex* aptr, f77_int* lda, f77_int* ldb)
 {
     cimatcopy_( trans, rows, cols, alpha, aptr, lda, ldb);
 }
@@ -2504,8 +2502,6 @@ void COMATCOPY_(f77_char* trans, f77_int* rows, f77_int* cols, const scomplex* a
 {
     comatcopy_( trans, rows, cols, alpha, aptr, lda, bptr, ldb);
 }
-
-//#endif // BLIS_ENABLE_CBLAS
 
 #ifdef BLIS_ENABLE_CBLAS
 
@@ -2644,6 +2640,21 @@ void DGEMMT_( const f77_char* uploc, const f77_char* transa, const f77_char* tra
     dgemmt_blis_impl( uploc, transa, transb, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
 }
 
+void DIMATCOPY( f77_char* trans, f77_int* rows, f77_int* cols, const double* alpha, double* aptr, f77_int* lda, f77_int* ldb)
+{
+    dimatcopy_( trans, rows, cols, alpha, aptr, lda, ldb);
+}
+
+void dimatcopy( f77_char* trans, f77_int* rows, f77_int* cols, const double* alpha, double* aptr, f77_int* lda, f77_int* ldb)
+{
+    dimatcopy_( trans, rows, cols, alpha, aptr, lda, ldb);
+}
+
+void DIMATCOPY_( f77_char* trans, f77_int* rows, f77_int* cols, const double* alpha, double* aptr, f77_int* lda, f77_int* ldb)
+{
+    dimatcopy_( trans, rows, cols, alpha, aptr, lda, ldb);
+}
+
 #ifdef BLIS_ENABLE_CBLAS
 
 void DNRM2SUB(const f77_int* n, const double* x, const f77_int* incx, double *rval)
@@ -2662,8 +2673,6 @@ void DNRM2SUB_(const f77_int* n, const double* x, const f77_int* incx, double *r
 }
 
 #endif // BLIS_ENABLE_CBLAS
-
-//#ifdef BLIS_ENABLE_CBLAS
 
 void DOMATADD(f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const double* alpha, const double* A, f77_int* lda, const double* beta, const double* B, f77_int* ldb, double* C, f77_int* ldc)
 {
@@ -2709,8 +2718,6 @@ void DOMATCOPY_(f77_char* trans, f77_int* rows, f77_int* cols, const double* alp
 {
     domatcopy_( trans, rows, cols, alpha, aptr, lda, bptr, ldb);
 }
-
-//#endif // BLIS_ENABLE_CBLAS
 
 #ifdef BLIS_ENABLE_CBLAS
 
@@ -3105,24 +3112,20 @@ void SGEMMT_( const f77_char* uploc, const f77_char* transa, const f77_char* tra
     sgemmt_blis_impl( uploc, transa, transb, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
 }
 
-//#ifdef BLIS_ENABLE_CBLAS
-
-void SIMATCOPY( f77_char* trans, f77_int* rows, f77_int* cols, const float* alpha,float* aptr, f77_int* lda, f77_int* ldb)
+void SIMATCOPY( f77_char* trans, f77_int* rows, f77_int* cols, const float* alpha, float* aptr, f77_int* lda, f77_int* ldb)
 {
     simatcopy_( trans, rows, cols, alpha, aptr, lda, ldb);
 }
 
-void simatcopy( f77_char* trans, f77_int* rows, f77_int* cols, const float* alpha,float* aptr, f77_int* lda, f77_int* ldb)
+void simatcopy( f77_char* trans, f77_int* rows, f77_int* cols, const float* alpha, float* aptr, f77_int* lda, f77_int* ldb)
 {
     simatcopy_( trans, rows, cols, alpha, aptr, lda, ldb);
 }
 
-void SIMATCOPY_( f77_char* trans, f77_int* rows, f77_int* cols, const float* alpha,float* aptr, f77_int* lda, f77_int* ldb)
+void SIMATCOPY_( f77_char* trans, f77_int* rows, f77_int* cols, const float* alpha, float* aptr, f77_int* lda, f77_int* ldb)
 {
     simatcopy_( trans, rows, cols, alpha, aptr, lda, ldb);
 }
-
-//#endif // BLIS_ENABLE_CBLAS
 
 #ifdef BLIS_ENABLE_CBLAS
 
@@ -3142,8 +3145,6 @@ void SNRM2SUB_( const f77_int* n, const float* x, const f77_int* incx, float *rv
 }
 
 #endif // BLIS_ENABLE_CBLAS
-
-//#ifdef BLIS_ENABLE_CBLAS
 
 void SOMATADD( f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const float* alpha, const float* A, f77_int* lda, const float* beta, const float* B, f77_int* ldb, float* C, f77_int* ldc)
 {
@@ -3189,8 +3190,6 @@ void SOMATCOPY_( f77_char* trans, f77_int* rows, f77_int* cols, const float* alp
 {
     somatcopy_( trans, rows, cols, alpha, aptr, lda, bptr, ldb);
 }
-
-//#endif // BLIS_ENABLE_CBLAS
 
 void ZAXPBY( const f77_int* n, const dcomplex* alpha, const dcomplex *x, const f77_int* incx, const dcomplex* beta, dcomplex *y, const f77_int* incy)
 {
@@ -3286,19 +3285,17 @@ void ZGEMMT_( const f77_char* uploc, const f77_char* transa, const f77_char* tra
     zgemmt_blis_impl( uploc, transa, transb, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
 }
 
-//#ifdef BLIS_ENABLE_CBLAS
-
-void ZIMATCOPY(f77_char* trans, f77_int* rows, f77_int* cols, const dcomplex* alpha,dcomplex* aptr, f77_int* lda, f77_int* ldb)
+void ZIMATCOPY(f77_char* trans, f77_int* rows, f77_int* cols, const dcomplex* alpha, dcomplex* aptr, f77_int* lda, f77_int* ldb)
 {
     zimatcopy_( trans, rows, cols, alpha, aptr, lda, ldb);
 }
 
-void zimatcopy(f77_char* trans, f77_int* rows, f77_int* cols, const dcomplex* alpha,dcomplex* aptr, f77_int* lda, f77_int* ldb)
+void zimatcopy(f77_char* trans, f77_int* rows, f77_int* cols, const dcomplex* alpha, dcomplex* aptr, f77_int* lda, f77_int* ldb)
 {
     zimatcopy_( trans, rows, cols, alpha, aptr, lda, ldb);
 }
 
-void ZIMATCOPY_(f77_char* trans, f77_int* rows, f77_int* cols, const dcomplex* alpha,dcomplex* aptr, f77_int* lda, f77_int* ldb)
+void ZIMATCOPY_(f77_char* trans, f77_int* rows, f77_int* cols, const dcomplex* alpha, dcomplex* aptr, f77_int* lda, f77_int* ldb)
 {
     zimatcopy_( trans, rows, cols, alpha, aptr, lda, ldb);
 }
@@ -3347,8 +3344,6 @@ void ZOMATCOPY_(f77_char* trans, f77_int* rows, f77_int* cols, const dcomplex* a
 {
     zomatcopy_( trans, rows, cols, alpha, aptr, lda, bptr, ldb);
 }
-
-//#endif // BLIS_ENABLE_CBLAS
 
 float SCABS1(bla_scomplex* z)
 {
