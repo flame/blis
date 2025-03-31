@@ -39,7 +39,7 @@
 #define FLOAD fld
 #define FZERO(fr) fcvt.d.w fr, x0
 #define FEQ feq.d
-#define VLE vle64.v
-#define VSE vse64.v
+#define VLE th.vle.v
+#define VSE th.vse.v 
 
 #include "bli_sdgemm_rvv_sg2042_asm_4vx4.h"

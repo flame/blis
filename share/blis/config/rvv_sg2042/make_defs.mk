@@ -47,8 +47,10 @@ THIS_CONFIG    := rvv_sg2042
 # may specify additional flags here as needed.
 CPPROCFLAGS    := -DRISCV_SIZE=64
 
-RISCV_ARCH     := $(shell $(CC) -DFORCE_RISCV_VECTOR -E build/detect/riscv/bli_riscv_detect_arch.h | grep '^[^\#]')
-RISCV_ABI      := $(shell $(CC) -DFORCE_RISCV_VECTOR -E build/detect/riscv/bli_riscv_detect_abi.h | grep '^[^\#]')
+#RISCV_ARCH     := $(shell $(CC) -DFORCE_RISCV_VECTOR -E build/detect/riscv/bli_riscv_detect_arch.h | grep '^[^\#]')
+#RISCV_ABI      := $(shell $(CC) -DFORCE_RISCV_VECTOR -E build/detect/riscv/bli_riscv_detect_abi.h | grep '^[^\#]')
+RISCV_ARCH	:= rv64gc_zfh_xtheadvector
+RISCV_ABI	:= lp64d
 
 ifeq (,$(findstring 64,$(RISCV_ARCH)))
 $(error The RISC-V compiler architecture $(RISCV_ARCH) is not compatible with $(THIS_CONFIG))

@@ -34,7 +34,7 @@
 
 #include "bli_rvv_sg2042_utils.h"
 
-void bli_cgemm_rviv_asm_4vx4
+void bli_cgemm_rvv_sg2042_asm_4vx4
     (
              intptr_t   k,
        const void*      alpha,
@@ -44,7 +44,7 @@ void bli_cgemm_rviv_asm_4vx4
              void*      c, intptr_t rs_c, intptr_t cs_c
     );
 
-void bli_cgemm_rviv_4vx4
+void bli_cgemm_rvv_sg2042_4vx4
      (
              dim_t      m,
              dim_t      n,
@@ -72,7 +72,7 @@ void bli_cgemm_rviv_4vx4
 	// The kernel assumes rs_c == 1, and the context should not deviate from it.
 	assert( rs_c == 1 );
 
-	bli_cgemm_rviv_asm_4vx4( k, alpha, a, b, beta, c,
+	bli_cgemm_rvv_sg2042_asm_4vx4( k, alpha, a, b, beta, c,
 	                         get_vlenb() * 2, cs_c * sizeof(scomplex) );
 
 	GEMM_UKR_FLUSH_CT( c );
