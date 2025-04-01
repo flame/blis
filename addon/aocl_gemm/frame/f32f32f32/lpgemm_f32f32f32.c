@@ -318,6 +318,7 @@ LPGEMV(float, float, float, f32f32f32of32)
 
 LPGEMM_5LOOP(float, float, float, f32f32f32of32)
 {
+
 #ifdef BLIS_KERNELS_ZEN4
   // Handle using LPGEMV when m or/and n equal to 1
   // The avx512 check will be removed when avx2 kernels added in future
@@ -424,8 +425,9 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
     // Avoid packing of B in transb cases where rd kernels performs
     // better than rv + pack. rv kernel calls rd when rs_b==1.
     bool invoke_rd = FALSE;
-    if( ( ( n < 48 ) || ( m < 16 ) ) &&
-        ( rs_b == 1 ) && ( mtag_b == PACK ) &&
+
+    if( ( lpgemm_get_enabled_arch() != BLIS_ARCH_ZEN3) &&
+        ( ( n < 48 ) || ( m < 16 ) )  && ( rs_b == 1 ) && ( mtag_b == PACK ) &&
         ( mtag_a == UNPACKED ) )
     {
         invoke_rd = TRUE;

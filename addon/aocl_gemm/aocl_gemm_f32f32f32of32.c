@@ -148,7 +148,7 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 		rs_b = 1;
 		cs_b = ldb;
 	}
-	
+
 	const inc_t rs_c = ldc;
 	const inc_t cs_c = 1;
 
@@ -168,7 +168,7 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	// Inputs swapped in column major, A becomes B from kernel point of view.
 	else if ( ( is_column_major == TRUE ) && ( ( mtag_b == REORDERED ) || (mtag_a == REORDERED ) ) )
 	{
-		bli_print_msg(" Reordering of column major matrices is not supported.", 
+		bli_print_msg(" Reordering of column major matrices is not supported.",
 			__FILE__, __LINE__ );
 		goto err_hndl;
 	}

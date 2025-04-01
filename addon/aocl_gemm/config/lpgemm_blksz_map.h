@@ -57,7 +57,7 @@
 	XMACRO(F32OBF16, 144, 1024, 2048, 6, 64, 0, 0, 2*64, 64/2) \
 
 #define LPGEMM_BLKSZ_UPD_MAP_ZEN4_TO_ZEN \
-	XMACRO(F32F32F32OF32, 144, 8160, 512, 6, 16, 1, 6, 16, 1) \
+	XMACRO(F32F32F32OF32, 144, 8160, 512, 6, 64, 1, 6, 64, 1) \
 
 // The STMACRO follows the format MT, NT, KT which are SUP switch thresholds.
 // ID = One of the AOCL_OPERATION_TYPE enum.
