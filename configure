@@ -2668,26 +2668,28 @@ build_and_check_configurations()
 		fi
 	done
 
+	if [ ! "${script_name}" = "configure-plugin" ]; then
 
-	echo "${script_name}: checking sub-configurations' requisite kernels:"
+		echo "${script_name}: checking sub-configurations' requisite kernels:"
 
-	# Also, let's verify that the requisite kernel sets associated with
-	# the config name all correspond to directories that exist.
-	for kernel in ${kernel_list}; do
+		# Also, let's verify that the requisite kernel sets associated with
+		# the config name all correspond to directories that exist.
+		for kernel in ${kernel_list}; do
 
-		echo -n "${script_name}:   '${kernel}' kernels..."
+			echo -n "${script_name}:   '${kernel}' kernels..."
 
-		# Confirm that the current kernel sub-directory exists.
-		if [ ! -d "${kernels_dirpath}/${kernel}" ]; then
-			echo "do NOT exist!"
-			echo "${script_name}: "
-			echo "${script_name}: *** Cannot continue with nonexistent kernel '${kernel}'. ***"
-			echo "${script_name}: "
-			exit 1;
-		else
-			echo "exist."
-		fi
-	done
+			# Confirm that the current kernel sub-directory exists.
+			if [ ! -d "${kernels_dirpath}/${kernel}" ]; then
+				echo "do NOT exist!"
+				echo "${script_name}: "
+				echo "${script_name}: *** Cannot continue with nonexistent kernel '${kernel}'. ***"
+				echo "${script_name}: "
+				exit 1;
+			else
+				echo "exist."
+			fi
+		done
+	fi
 }
 
 check_build_tools()
