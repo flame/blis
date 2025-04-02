@@ -67,51 +67,52 @@
  * @note
  * N = 0 case never occurs.
  */
-#define CALL_KERNEL\
-        if(N >= 8)\
-        {\
-            avx512kern_fp[8](   conja,\
-                                conjb,\
-                                M,\
-                                N,\
-                                K,\
-                                (double *)alpha,\
-                                (a_local + (0 * rs_a) + (0 * cs_a)), /*A matrix offset*/\
-                                rs_a,\
-                                cs_a,\
-                                (b_local + (0 * cs_b) + (0 * rs_b)), /*B matrix offset*/\
-                                rs_b,\
-                                cs_b,\
-                                (double *)beta,\
-                                (c_local + 0 * cs_c + 0 * rs_c),     /*C matrix offset*/\
-                                rs_c,\
-                                cs_c,\
-                                &aux,\
-                                NULL\
-                            );\
-        }\
-        else\
-        {\
-            avx512kern_fp[N](   conja,\
-                                conjb,\
-                                M,\
-                                N,\
-                                K,\
-                                (double *)alpha,\
-                                (a_local + (0 * rs_a) + (0 * cs_a)), /*A matrix offset*/\
-                                rs_a,\
-                                cs_a,\
-                                (b_local + (0 * cs_b) + (0 * rs_b)), /*B matrix offset*/\
-                                rs_b,\
-                                cs_b,\
-                                (double *)beta,\
-                                (c_local + 0 * cs_c + 0 * rs_c),     /*C matrix offset*/\
-                                rs_c,\
-                                cs_c,\
-                                &aux,\
-                                NULL\
-                            );\
+#define CALL_KERNEL                                                                      \
+        if(N >= 8)                                                                       \
+        {                                                                                \
+            avx512kern_fp[8](   conja,                                                   \
+                                conjb,                                                   \
+                                M,                                                       \
+                                N,                                                       \
+                                K,                                                       \
+                                (double *)alpha,                                         \
+                                (a_local + (0 * rs_a) + (0 * cs_a)), /*A matrix offset*/ \
+                                rs_a,                                                    \
+                                cs_a,                                                    \
+                                (b_local + (0 * cs_b) + (0 * rs_b)), /*B matrix offset*/ \
+                                rs_b,                                                    \
+                                cs_b,                                                    \
+                                (double *)beta,                                          \
+                                (c_local + 0 * cs_c + 0 * rs_c),     /*C matrix offset*/ \
+                                rs_c,                                                    \
+                                cs_c,                                                    \
+                                &aux,                                                    \
+                                NULL                                                     \
+                            );                                                           \
+        }                                                                                \
+        else                                                                             \
+        {                                                                                \
+            avx512kern_fp[N](   conja,                                                   \
+                                conjb,                                                   \
+                                M,                                                       \
+                                N,                                                       \
+                                K,                                                       \
+                                (double *)alpha,                                         \
+                                (a_local + (0 * rs_a) + (0 * cs_a)), /*A matrix offset*/ \
+                                rs_a,                                                    \
+                                cs_a,                                                    \
+                                (b_local + (0 * cs_b) + (0 * rs_b)), /*B matrix offset*/ \
+                                rs_b,                                                    \
+                                cs_b,                                                    \
+                                (double *)beta,                                          \
+                                (c_local + 0 * cs_c + 0 * rs_c),     /*C matrix offset*/ \
+                                rs_c,                                                    \
+                                cs_c,                                                    \
+                                &aux,                                                    \
+                                NULL                                                     \
+                            );                                                           \
         }
+
 /**
  * @brief bli_dgemmsup_placeholder
  * 
@@ -333,9 +334,33 @@ err_t bli_dgemm_tiny_24x8
         ps_a_use = (24 * k);
         bli_auxinfo_set_ps_a( ps_a_use, &aux );
 
+        /**
+         * CALL_KERNEL makes actual call to micro kernel,
+         * which is bli_dgemmsup_rv_zen4_asm_24x8m_new and the family of
+         * it based on value of N dimension.
+         * Arguments passed to it are as follows.
+         * conja                                whether A matrix is conjugate
+           conjb                                whether B matrix is conjugate
+           M                                    M dimension
+           N                                    N dimension
+           K                                    K dimension
+           (double *)alpha                      Pointer to alpha value
+           (a_local + (0 * rs_a) + (0 * cs_a)), A matrix offset
+           rs_a                                 row stride of A matrix
+           cs_a                                 column stride of A matrix
+           (b_local + (0 * cs_b) + (0 * rs_b)), B matrix offset
+           rs_b                                 row stride of B matrix
+           cs_b                                 column stride of C matrix
+           (double *)beta                       pointer to Beta value
+           (c_local + 0 * cs_c + 0 * rs_c),     C matrix offset
+           rs_c                                 row stride of C matrix
+           cs_c                                 column stride of C matrix
+           &aux                                 Aux structure which carries additional info
+           NULL                                 we do not use context in tiny path.
+        */
         CALL_KERNEL
 
-	//Return the allocated memory back to small block allocator
+        //Return the allocated memory back to small block allocator
         bli_pba_release(&rntm, &local_mem_buf_A_s);
     }
     else
