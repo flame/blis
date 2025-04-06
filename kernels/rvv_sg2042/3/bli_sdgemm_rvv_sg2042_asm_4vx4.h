@@ -51,6 +51,45 @@
 // a7   cs_c
 //
 
+// C11 := beta * C11 + alpha * A1 * B1
+/* 
+In case of double precision gemm with 128 bit vector registers
+this kernel computes a 8 x 4 microtile result matrix c11 using two micropanels a1 and b1, 
+respectively with dimensions of 8 x k and k x 4. 
+For every rank 1 update (columns row prodcut) we produce and accumulate a intermadiate matrix result
+ab with dimensions 8 x 4 (we use loop unrolling with factor of 4 in the loop). 
+After k iterations we copy content of ab in c11 as final result. 
+The loop is designed to iterate with loop unrolling = 4, 
+when we are left with <= 3 columns and rows left we branch into special cases handles.
+
+  
+          c11:                    a1:                   b1:
+         _______        ________________________     _______
+        |       |      |0 8 10 18               |   |0 1 2 3|
+        |       |      |1 9 11 19               |   |4 5 6 7|
+        |       |  +=  |2 A 12 1A               |   |8 9 A B|
+MR = 8  |       |      |3 B 13 1B  . . .        |   |C D E F|
+        |       |      |4 C 14 1C               |   |       |
+        |       |      |5 D 15 1D               |   |       |
+        |       |      |6 E 16 1E               |   |       |   k
+        |_______|      |7_F_17_1F_______________|   |       |
+                                                    |   .   |
+         NR = 4                   k                 |   .   |                                                     
+                                                    |       |
+                            ab:                     |       |
+                        _________                   |_______|
+                       |1 9 11 19|   
+                       |2 A 12 1A|   
+                       |3 B 13 1B|   
+               MR = 8  |4 C 14 1C|  
+                       |5 D 15 1D|   
+                       |6 E 16 1E|   
+                       |7_F_17_1F|                             
+                           
+                          NR = 4
+*/
+
+// we save the k (number of columns of a1 and rows of b1) in "loop_counter"
 #define loop_counter a0
 
 // we hold pointers to two A columns at any time 
@@ -100,11 +139,13 @@
 #define ABX2   v8
 #define ABX3   v12
 
+// column stride 
 #define cs_c   a7
 
 REALNAME:
 #include "rvv_sg2042_save_registers.h"
 
+// we set LMUL = 4 for fully exploit register grouping  
 th.vsetvli s0, zero, VTYPE, m4
 csrr s0, vlenb
 FZERO(fzero)
@@ -163,11 +204,11 @@ VLE AX1, (AX1_ptr)
 // Point to A(:,l+2)
 add AX0_ptr, AX1_ptr, s0
 
-// compute and accumulate  AB with second column of A and second row of B
+// compute and accumulate AB with second column of A and second row of B
 th.vfmacc.vf ABX0, B10, AX1   // AB(X,0) += A(X,1) * B(1,0)
-th.vfmacc.vf ABX2, B11, AX1   // AB(X,0) += A(X,1) * B(1,1)
-th.vfmacc.vf ABX2, B12, AX1   // AB(X,0) += A(X,1) * B(1,2)
-th.vfmacc.vf ABX3, B13, AX1   // AB(X,0) += A(X,1) * B(1,3)
+th.vfmacc.vf ABX2, B11, AX1   // AB(X,1) += A(X,1) * B(1,1)
+th.vfmacc.vf ABX2, B12, AX1   // AB(X,2) += A(X,1) * B(1,2)
+th.vfmacc.vf ABX3, B13, AX1   // AB(X,3) += A(X,1) * B(1,3)
 
 // Load B(l+2,0:3)
 FLOAD B00, 0*DATASIZE(B_row_ptr)
@@ -189,9 +230,9 @@ add AX0_ptr, AX1_ptr, s0
 
 // compute and accumulate AB with third column of A and third row of B
 th.vfmacc.vf ABX0, B00, AX0   // AB(X,0) += A(X,2) * B(2,0)
-th.vfmacc.vf ABX2, B01, AX0   // AB(X,0) += A(X,2) * B(2,1)
-th.vfmacc.vf ABX2, B02, AX0   // AB(X,0) += A(X,2) * B(2,2)
-th.vfmacc.vf ABX3, B03, AX0   // AB(X,0) += A(X,2) * B(2,3)
+th.vfmacc.vf ABX2, B01, AX0   // AB(X,1) += A(X,2) * B(2,1)
+th.vfmacc.vf ABX2, B02, AX0   // AB(X,2) += A(X,2) * B(2,2)
+th.vfmacc.vf ABX3, B03, AX0   // AB(X,3) += A(X,2) * B(2,3)
 
 // Load B(l+3,0:3)
 FLOAD B10, 4*DATASIZE(B_row_ptr)
@@ -202,9 +243,9 @@ addi B_row_ptr, B_row_ptr, 8*DATASIZE
 
 // compute AB with fourth column of A and fourth row of B
 th.vfmacc.vf ABX0, B10, AX1   // AB(X,0) += A(X,3) * B(3,0)
-th.vfmacc.vf ABX2, B11, AX1   // AB(X,0) += A(X,3) * B(3,1)
-th.vfmacc.vf ABX2, B12, AX1   // AB(X,0) += A(X,3) * B(3,2)
-th.vfmacc.vf ABX3, B13, AX1   // AB(X,0) += A(X,3) * B(3,3)
+th.vfmacc.vf ABX2, B11, AX1   // AB(X,1) += A(X,3) * B(3,1)
+th.vfmacc.vf ABX2, B12, AX1   // AB(X,2) += A(X,3) * B(3,2)
+th.vfmacc.vf ABX3, B13, AX1   // AB(X,3) += A(X,3) * B(3,3)
 
 li tmp, 3
 ble loop_counter, tmp, TAIL_UNROLL_2
@@ -242,10 +283,10 @@ VLE AX0, (AX0_ptr)
 // Point to A(:,l+1)
 add AX1_ptr, AX0_ptr, s0
 
-th.vfmacc.vf ABX0, B00, AX0   // AB(0,:) += A(0,0) * B(0,:)
-th.vfmacc.vf ABX2, B01, AX0
-th.vfmacc.vf ABX2, B02, AX0
-th.vfmacc.vf ABX3, B03, AX0
+th.vfmacc.vf ABX0, B00, AX0   // AB(X,0) += A(X,0) * B(0,0)
+th.vfmacc.vf ABX2, B01, AX0   // AB(X,1) += A(X,0) * B(0,1)
+th.vfmacc.vf ABX2, B02, AX0   // AB(X,2) += A(X,0) * B(0,2)
+th.vfmacc.vf ABX3, B03, AX0   // AB(X,3) += A(X,0) * B(0,3)
 
 // Load B(l+1,0:3)
 FLOAD B10, 4*DATASIZE(B_row_ptr)
@@ -260,10 +301,10 @@ VLE AX1, (AX1_ptr)
 // Point to A(:,l+2)
 add AX0_ptr, AX1_ptr, s0
 
-th.vfmacc.vf ABX0, B10, AX1   // AB(0,:) += A(0,1) * B(1,:)
-th.vfmacc.vf ABX2, B11, AX1
-th.vfmacc.vf ABX2, B12, AX1
-th.vfmacc.vf ABX3, B13, AX1
+th.vfmacc.vf ABX0, B10, AX1   // AB(X,0) += A(X,1) * B(1,0)
+th.vfmacc.vf ABX2, B11, AX1   // AB(X,1) += A(X,1) * B(1,1)
+th.vfmacc.vf ABX2, B12, AX1   // AB(X,2) += A(X,1) * B(1,2)
+th.vfmacc.vf ABX3, B13, AX1   // AB(X,3) += A(X,1) * B(1,3)
 
 li tmp, 1
 ble loop_counter, tmp, TAIL_UNROLL_1
@@ -280,10 +321,10 @@ FLOAD B03, 3*DATASIZE(B_row_ptr)
 // Load A(:,l)
 VLE AX0, (AX0_ptr)
 
-th.vfmacc.vf ABX0, B00, AX0   // AB(0,:) += A(0,0) * B(0,:)
-th.vfmacc.vf ABX2, B01, AX0
-th.vfmacc.vf ABX2, B02, AX0
-th.vfmacc.vf ABX3, B03, AX0
+th.vfmacc.vf ABX0, B00, AX0   // AB(X,0) += A(X,0) * B(0,0)
+th.vfmacc.vf ABX2, B01, AX0   // AB(X,1) += A(X,0) * B(0,1)
+th.vfmacc.vf ABX2, B02, AX0   // AB(X,2) += A(X,0) * B(0,2)
+th.vfmacc.vf ABX3, B03, AX0   // AB(X,3) += A(X,0) * B(0,3)
 
 MULTIPLYALPHA:
 FLOAD ALPHA, (a1)
