@@ -404,7 +404,8 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                     else if ( post_op->seq_vector[op_id] == SCALE ) \
                     { \
                         temp_accum = GEN_FUNC_NAME(mat_mul_accuracy_check_downscale_,BLAS_SFX) \
-                            (temp_accum, post_op, j, ( post_op->sum )->sf_stor_type); \
+                            (temp_accum, post_op, j, ( post_op->sum )->sf_stor_type, \
+                                ( post_op->sum )->zp_stor_type); \
                     } \
                     else if ( post_op->seq_vector[op_id] == MATRIX_ADD ) \
                     { \

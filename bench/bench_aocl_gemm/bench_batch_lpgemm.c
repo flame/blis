@@ -616,7 +616,8 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                         else if ( post_op[bs_i]->seq_vector[op_id] == SCALE ) \
                         { \
                             post_temp_accum = GEN_FUNC_NAME(mat_mul_accuracy_check_downscale_,BLAS_DOWNSCALE_SFX) \
-                                (post_temp_accum, post_op[bs_i], j, ( post_op[bs_i]->sum )->sf_stor_type); \
+                                (post_temp_accum, post_op[bs_i], j, ( post_op[bs_i]->sum )->sf_stor_type, \
+                                    ( post_op[bs_i]->sum )->zp_stor_type); \
                         } \
                         else if ( post_op[bs_i]->seq_vector[op_id] == MATRIX_ADD ) \
                         { \

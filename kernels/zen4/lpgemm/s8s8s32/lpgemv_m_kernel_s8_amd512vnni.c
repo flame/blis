@@ -617,47 +617,93 @@ LPGEMV_M_EQ1_KERN(int8_t,int8_t,int32_t,s8s8s32os32)
 			}
 
 			// Need to ensure sse not used to avoid avx512 -> sse transition.
-			__m128i zero_point0 = _mm512_castsi512_si128(
-				                        _mm512_setzero_si512() );
-			__m128i zero_point1 = _mm512_castsi512_si128(
-				                        _mm512_setzero_si512() );
-			__m128i zero_point2 = _mm512_castsi512_si128(
-				                        _mm512_setzero_si512() );
-			__m128i zero_point3 = _mm512_castsi512_si128(
-				                        _mm512_setzero_si512() );
+			__m512 zero_point0 = _mm512_setzero_ps();
+			__m512 zero_point1 = _mm512_setzero_ps();
+			__m512 zero_point2 = _mm512_setzero_ps();
+			__m512 zero_point3 = _mm512_setzero_ps();
 
 			// int8_t zero point value.
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm_maskz_loadu_epi8( k1,
-							( ( int8_t* )post_ops_list_temp->op_args1 +
-							post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
-				zero_point1 = _mm_maskz_loadu_epi8( k2,
-							( ( int8_t* )post_ops_list_temp->op_args1 +
-							post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
-				zero_point2 = _mm_maskz_loadu_epi8( k3,
-							( ( int8_t* )post_ops_list_temp->op_args1 +
-							post_ops_attr.post_op_c_j + ( 2 * 16 ) ) );
-				zero_point3 = _mm_maskz_loadu_epi8( k4,
-							( ( int8_t* )post_ops_list_temp->op_args1 +
-							post_ops_attr.post_op_c_j + ( 3 * 16 ) ) );
+				if( post_ops_list_temp->zp_stor_type == BF16 )
+				{
+					BF16_F32_ZP_LOAD(zero_point0,k1, 0)
+					BF16_F32_ZP_LOAD(zero_point1,k1, 1)
+					BF16_F32_ZP_LOAD(zero_point2,k1, 2)
+					BF16_F32_ZP_LOAD(zero_point3,k1, 3)
+				}
+				else if( post_ops_list_temp->zp_stor_type == S32 )
+				{
+					S32_F32_ZP_LOAD(zero_point0,k1, 0)
+					S32_F32_ZP_LOAD(zero_point1,k1, 1)
+					S32_F32_ZP_LOAD(zero_point2,k1, 2)
+					S32_F32_ZP_LOAD(zero_point3,k1, 3)
+				}
+				else if( post_ops_list_temp->zp_stor_type == F32 )
+				{
+					F32_ZP_LOAD(zero_point0,k1,0)
+					F32_ZP_LOAD(zero_point1,k1,1)
+					F32_ZP_LOAD(zero_point2,k1,2)
+					F32_ZP_LOAD(zero_point3,k1,3)
+				}
+				else if( post_ops_list_temp->zp_stor_type == U8 )
+				{
+					U8_F32_ZP_LOAD(zero_point0,k1, 0)
+					U8_F32_ZP_LOAD(zero_point1,k1, 1)
+					U8_F32_ZP_LOAD(zero_point2,k1, 2)
+					U8_F32_ZP_LOAD(zero_point3,k1, 3)
+				}
+				else
+				{
+					S8_F32_ZP_LOAD(zero_point0,k1, 0)
+					S8_F32_ZP_LOAD(zero_point1,k1, 1)
+					S8_F32_ZP_LOAD(zero_point2,k1, 2)
+					S8_F32_ZP_LOAD(zero_point3,k1, 3)
+				}
 			}
 			else if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 			{
-				zero_point0 = _mm_maskz_set1_epi8( 0xFFFF,
-							*( ( int8_t* )post_ops_list_temp->op_args1 ) );
-				zero_point1 = _mm_maskz_set1_epi8( 0xFFFF,
-							*( ( int8_t* )post_ops_list_temp->op_args1 ) );
-				zero_point2 = _mm_maskz_set1_epi8( 0xFFFF,
-							*( ( int8_t* )post_ops_list_temp->op_args1 ) );
-				zero_point3 = _mm_maskz_set1_epi8( 0xFFFF,
-							*( ( int8_t* )post_ops_list_temp->op_args1 ) );
+				if( post_ops_list_temp->zp_stor_type == BF16 )
+				{
+					BF16_F32_ZP_BCST(zero_point0)
+					BF16_F32_ZP_BCST(zero_point1)
+					BF16_F32_ZP_BCST(zero_point2)
+					BF16_F32_ZP_BCST(zero_point3)
+				}
+				else if( post_ops_list_temp->zp_stor_type == F32 )
+				{
+					F32_ZP_BCST(zero_point0)
+					F32_ZP_BCST(zero_point1)
+					F32_ZP_BCST(zero_point2)
+					F32_ZP_BCST(zero_point3)
+				}
+				else if( post_ops_list_temp->zp_stor_type == S32 )
+				{
+					S32_F32_ZP_BCST(zero_point0)
+					S32_F32_ZP_BCST(zero_point1)
+					S32_F32_ZP_BCST(zero_point2)
+					S32_F32_ZP_BCST(zero_point3)
+				}
+				else if( post_ops_list_temp->zp_stor_type == U8 )
+				{
+					U8_F32_ZP_BCST(zero_point0)
+					U8_F32_ZP_BCST(zero_point1)
+					U8_F32_ZP_BCST(zero_point2)
+					U8_F32_ZP_BCST(zero_point3)
+				}
+				else
+				{
+					S8_F32_ZP_BCST(zero_point0)
+					S8_F32_ZP_BCST(zero_point1)
+					S8_F32_ZP_BCST(zero_point2)
+					S8_F32_ZP_BCST(zero_point3)
+				}
 			}
 
-			CVT_MULRND_F32(acc_8, scale0, zero_point0 );
-			CVT_MULRND_F32(acc_12, scale1, zero_point1 );
-			CVT_MULRND_F32(acc_16, scale2, zero_point2 );
-			CVT_MULRND_F32(acc_20, scale3, zero_point3 );
+			MULADD_RND_F32(acc_8, scale0, zero_point0 );
+			MULADD_RND_F32(acc_12, scale1, zero_point1 );
+			MULADD_RND_F32(acc_16, scale2, zero_point2 );
+			MULADD_RND_F32(acc_20, scale3, zero_point3 );
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}

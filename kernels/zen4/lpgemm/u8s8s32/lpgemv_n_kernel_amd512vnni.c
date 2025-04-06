@@ -740,14 +740,31 @@ LPGEMV_N_EQ1_KERN(uint8_t, int8_t, int32_t, u8s8s32os32)
 				scale0 = _mm512_set1_ps(
 			             *( ( float* )post_ops_list_temp->scale_factor ) );
 			}
-			// Need to ensure sse not used to avoid avx512 -> sse transition.
-			__m128i zero_point0 = _mm512_castsi512_si128(
-			                          _mm512_setzero_si512() );
 
-			zero_point0 = _mm_maskz_set1_epi8( 0xFFFF,
-			              *( ( int8_t* )post_ops_list_temp->op_args1 ) );
+			__m512 zero_point0 = _mm512_setzero_ps();
 
-			CVT_MULRND_F32(acc_8, scale0, zero_point0 );
+			if( post_ops_list_temp->zp_stor_type == BF16 )
+			{
+				BF16_F32_ZP_BCST(zero_point0)
+			}
+			else if( post_ops_list_temp->zp_stor_type == F32 )
+			{
+				F32_ZP_BCST(zero_point0)
+			}
+			else if( post_ops_list_temp->zp_stor_type == S32 )
+			{
+				S32_F32_ZP_BCST(zero_point0)
+			}
+			else if( post_ops_list_temp->zp_stor_type == U8 )
+			{
+				U8_F32_ZP_BCST(zero_point0)
+			}
+			else
+			{
+				S8_F32_ZP_BCST(zero_point0)
+			}
+
+			MULADD_RND_F32(acc_8, scale0, zero_point0 );
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}

@@ -834,13 +834,49 @@ float convert_scale_store_type_to_float
     return scale_float;
 }
 
+float convert_zp_store_type_to_float
+     (
+       aocl_post_op*  post_op,
+       AOCL_PARAMS_STORAGE_TYPES zp_stor_type,
+       dim_t j_zp
+     )
+{
+    float zp_float = 0.0;
+    if(zp_stor_type == AOCL_GEMM_BF16)
+    {
+        bfloat16_to_float( *( ( bfloat16* )( post_op->sum )->zero_point + j_zp ),
+                            &zp_float );
+    }
+    else if(zp_stor_type == AOCL_GEMM_INT32)
+    {
+        int32_t_to_float( *( ( int32_t* )( post_op->sum )->zero_point + j_zp ),
+                            &zp_float );
+    }
+    else if(zp_stor_type == AOCL_GEMM_INT8 )
+    {
+        int8_t_to_float( *( ( int8_t* )( post_op->sum )->zero_point + j_zp ),
+                            &zp_float );
+    }
+    else if(zp_stor_type == AOCL_GEMM_UINT8)
+    {
+        uint8_t_to_float( *( ( uint8_t* )( post_op->sum )->zero_point + j_zp ),
+                            &zp_float );
+    }
+    else
+    {
+        zp_float = *( ( float* )( post_op->sum )->zero_point + j_zp );
+    }
+    return zp_float;
+}
+
 #define GEN_MAT_MUL_ACC_CHK_DOWNSCALE(ZP_type,C_type,ACCUM_type,SCALE_type,BLAS_DOWNSCALE_SFX) \
 static inline ACCUM_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX \
      (\
        ACCUM_type temp_accum,\
        aocl_post_op*  post_op, \
        dim_t j, \
-       AOCL_PARAMS_STORAGE_TYPES sf_stor_type \
+       AOCL_PARAMS_STORAGE_TYPES sf_stor_type, \
+       AOCL_PARAMS_STORAGE_TYPES zp_stor_type \
      )\
 { \
     dim_t j_scale = j; \
@@ -855,12 +891,20 @@ static inline ACCUM_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX
        j_zp = 0; \
     } \
  \
+    float temp_zp; \
     float temp_sf = convert_scale_store_type_to_float(post_op, sf_stor_type, j_scale); \
+    if( zp_stor_type != NULLTYPE ) \
+    { \
+        temp_zp = convert_zp_store_type_to_float(post_op, zp_stor_type, j_zp);    \
+    } \
+    else \
+    { \
+        temp_zp = *( ( ZP_type* )( post_op->sum )->zero_point + j_zp ); \
+    } \
     ACCUM_type out_temp_accum = \
         ( ACCUM_type )min( \
                         max( nearbyintf( ( SCALE_type )( temp_accum ) * \
-                            ( temp_sf ) ) + \
-                            *( ( ZP_type* )( post_op->sum )->zero_point + j_zp ), \
+                            ( temp_sf ) ) + temp_zp, \
                             DSCALE_CLIP_MIN ), \
                         DSCALE_CLIP_MAX ); \
     return out_temp_accum; \
@@ -872,7 +916,8 @@ static inline float mat_mul_accuracy_check_downscale_bf16bf16f32obf16
        float temp_accum,
        aocl_post_op*  post_op,
        dim_t j,
-       AOCL_PARAMS_STORAGE_TYPES sf_stor_type
+       AOCL_PARAMS_STORAGE_TYPES sf_stor_type,
+       AOCL_PARAMS_STORAGE_TYPES zp_stor_type
      )
 {
     ( void ) sf_stor_type;
@@ -901,7 +946,8 @@ static inline float mat_mul_accuracy_check_downscale_f32f32f32of32
        float temp_accum,
        aocl_post_op*  post_op,
        dim_t j,
-       AOCL_PARAMS_STORAGE_TYPES sf_stor_type
+       AOCL_PARAMS_STORAGE_TYPES sf_stor_type,
+       AOCL_PARAMS_STORAGE_TYPES zp_stor_type
      )
 {
     ( void ) sf_stor_type;
@@ -1625,7 +1671,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             } \
             else if ( strcmp( ops_tok, "zp_stor_type" ) == 0) \
             { \
-                 ops_tok = strtok( NULL, ", " ); \
+                ops_tok = strtok( NULL, ", " ); \
                 if( ( strcmp( ops_tok, "na" ) == 0 ) ) \
                 { \
                     is_zp_stor_type = FALSE; \
