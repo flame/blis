@@ -76,9 +76,9 @@ int main( int argc, char** argv )
 	bli_setsc( 0.2, 0.0, &beta );
 	bli_setsc( 3.0, 0.0, &gamma );
 
-	bli_printm( "alpha:", &alpha, "%4.1f", "" );
-	bli_printm( "beta:", &beta, "%4.1f", "" );
-	bli_printm( "gamma:", &gamma, "%4.1f", "" );
+	bli_printm( "alpha:", &alpha, "% 4.3f", "" );
+	bli_printm( "beta:", &beta, "% 4.3f", "" );
+	bli_printm( "gamma:", &gamma, "% 4.3f", "" );
 
 	// Matrices, like vectors, can set by "broadcasting" a constant to every
 	// element.
@@ -86,9 +86,9 @@ int main( int argc, char** argv )
 	bli_setm( &alpha, &b );
 	bli_setm( &BLIS_ZERO, &c );
 
-	bli_printm( "a := 1.0", &a, "%4.1f", "" );
-	bli_printm( "b := alpha", &b, "%4.1f", "" );
-	bli_printm( "c := 0.0", &c, "%4.1f", "" );
+	bli_printm( "a := 1.0", &a, "% 4.3f", "" );
+	bli_printm( "b := alpha", &b, "% 4.3f", "" );
+	bli_printm( "c := 0.0", &c, "% 4.3f", "" );
 
 
 	//
@@ -100,7 +100,7 @@ int main( int argc, char** argv )
 	// Set a matrix to random values.
 	bli_randm( &e );
 
-	bli_printm( "e (randomized):", &e, "%4.1f", "" );
+	bli_printm( "e (randomized):", &e, "% 4.3f", "" );
 
 
 	//
@@ -111,26 +111,26 @@ int main( int argc, char** argv )
 
 	// Copy a matrix.
 	bli_copym( &e, &d );
-	bli_printm( "d := e", &d, "%4.1f", "" );
+	bli_printm( "d := e", &d, "% 4.3f", "" );
 
 	// Add and subtract vectors.
 	bli_addm( &a, &d );
-	bli_printm( "d := d + a", &d, "%4.1f", "" );
+	bli_printm( "d := d + a", &d, "% 4.3f", "" );
 
 	bli_subm( &a, &e );
-	bli_printm( "e := e - a", &e, "%4.1f", "" );
+	bli_printm( "e := e - a", &e, "% 4.3f", "" );
 
 	// Scale a matrix (destructive).
 	bli_scalm( &alpha, &e );
-	bli_printm( "e := alpha * e", &e, "%4.1f", "" );
+	bli_printm( "e := alpha * e", &e, "% 4.3f", "" );
 
 	// Scale a matrix (non-destructive).
 	bli_scal2m( &beta, &e, &c );
-	bli_printm( "c := beta * e", &c, "%4.1f", "" );
+	bli_printm( "c := beta * e", &c, "% 4.3f", "" );
 
 	// Scale and accumulate between matrices.
 	bli_axpym( &alpha, &a, &c );
-	bli_printm( "c := c + alpha * a", &c, "%4.1f", "" );
+	bli_printm( "c := c + alpha * a", &c, "% 4.3f", "" );
 
 
 	//
@@ -146,8 +146,8 @@ int main( int argc, char** argv )
 	// Initialize all of 'f' to -1.0 to simulate junk values.
 	bli_setm( &BLIS_MINUS_ONE, &f );
 
-	bli_printm( "e:", &e, "%4.1f", "" );
-	bli_printm( "f (initial value):", &f, "%4.1f", "" );
+	bli_printm( "e:", &e, "% 4.3f", "" );
+	bli_printm( "f (initial value):", &f, "% 4.3f", "" );
 
 	// Since we are going to copy 'e' to 'f', we need to indicate a transpose
 	// on 'e', the input operand. Transposition can be indicated by setting a
@@ -173,7 +173,7 @@ int main( int argc, char** argv )
 	// when marking an operand for transposition, not the destination.
 	bli_copym( &e, &f );
 
-	bli_printm( "f (copied value):", &f, "%4.1f", "" );
+	bli_printm( "f (copied value):", &f, "% 4.3f", "" );
 
 
 	//
@@ -194,8 +194,8 @@ int main( int argc, char** argv )
 	// Initialize all of 'h' to -1.0 to simulate junk values.
 	bli_setm( &BLIS_MINUS_ONE, &h );
 
-	bli_printm( "g:", &g, "%4.1f", "" );
-	bli_printm( "h (initial value):", &h, "%4.1f", "" );
+	bli_printm( "g:", &g, "% 4.3f", "" );
+	bli_printm( "h (initial value):", &h, "% 4.3f", "" );
 
 	// Set both the transpose and conjugation bits.
 	bli_obj_toggle_trans( &g );
@@ -206,7 +206,7 @@ int main( int argc, char** argv )
 	// conjugation.
 	bli_copym( &g, &h );
 
-	bli_printm( "h (copied value):", &h, "%4.1f", "" );
+	bli_printm( "h (copied value):", &h, "% 4.3f", "" );
 
 
 	// Free the objects.

@@ -74,14 +74,14 @@ int main( int argc, char** argv )
 	bli_setm( &BLIS_ONE, &b );
 	bli_setm( &BLIS_ZERO, &c );
 
-	bli_printm( "a: randomized", &a, "%4.1f", "" );
-	bli_printm( "b: set to 1.0", &b, "%4.1f", "" );
-	bli_printm( "c: initial value", &c, "%4.1f", "" );
+	bli_printm( "a: randomized", &a, "% 4.3f", "" );
+	bli_printm( "b: set to 1.0", &b, "% 4.3f", "" );
+	bli_printm( "c: initial value", &c, "% 4.3f", "" );
 
 	// c := beta * c + alpha * a * b, where 'a', 'b', and 'c' are general.
 	bli_gemm( alpha, &a, &b, beta, &c );
 
-	bli_printm( "c: after gemm", &c, "%4.1f", "" );
+	bli_printm( "c: after gemm", &c, "% 4.3f", "" );
 
 	// Free the objects.
 	bli_obj_free( &a );
@@ -115,14 +115,14 @@ int main( int argc, char** argv )
 	// Set the transpose bit in 'a'.
 	bli_obj_toggle_trans( &a );
 
-	bli_printm( "a: randomized", &a, "%4.1f", "" );
-	bli_printm( "b: set to 1.0", &b, "%4.1f", "" );
-	bli_printm( "c: initial value", &c, "%4.1f", "" );
+	bli_printm( "a: randomized", &a, "% 4.3f", "" );
+	bli_printm( "b: set to 1.0", &b, "% 4.3f", "" );
+	bli_printm( "c: initial value", &c, "% 4.3f", "" );
 
 	// c := beta * c + alpha * a^T * b, where 'a', 'b', and 'c' are general.
 	bli_gemm( alpha, &a, &b, beta, &c );
 
-	bli_printm( "c: after gemm", &c, "%4.1f", "" );
+	bli_printm( "c: after gemm", &c, "% 4.3f", "" );
 
 	// Free the objects.
 	bli_obj_free( &a );
@@ -155,13 +155,13 @@ int main( int argc, char** argv )
 	bli_obj_set_uplo( BLIS_LOWER, &c );
 	bli_randm( &c );
 
-	bli_printm( "a: set to random values", &a, "%4.1f", "" );
-	bli_printm( "c: initial value (zeros in upper triangle)", &c, "%4.1f", "" );
+	bli_printm( "a: set to random values", &a, "% 4.3f", "" );
+	bli_printm( "c: initial value (zeros in upper triangle)", &c, "% 4.3f", "" );
 
 	// c := c + alpha * a * a^T, where 'c' is symmetric and lower-stored.
 	bli_syrk( alpha, &a, beta, &c );
 
-	bli_printm( "c: after syrk", &c, "%4.1f", "" );
+	bli_printm( "c: after syrk", &c, "% 4.3f", "" );
 
 	// Free the objects.
 	bli_obj_free( &c );
@@ -202,16 +202,16 @@ int main( int argc, char** argv )
 	bli_obj_set_uplo( BLIS_UPPER, &a );
 	bli_randm( &a );
 
-	bli_printm( "a: randomized (zeros in lower triangle)", &a, "%4.1f", "" );
-	bli_printm( "b: set to 1.0", &b, "%4.1f", "" );
-	bli_printm( "c: initial value", &c, "%4.1f", "" );
+	bli_printm( "a: randomized (zeros in lower triangle)", &a, "% 4.3f", "" );
+	bli_printm( "b: set to 1.0", &b, "% 4.3f", "" );
+	bli_printm( "c: initial value", &c, "% 4.3f", "" );
 
 	// c := beta * c + alpha * a * b, where 'a' is symmetric and upper-stored.
 	// Note that the first 'side' operand indicates the side from which matrix
 	// 'a' is multiplied into 'b'.
 	bli_symm( side, alpha, &a, &b, beta, &c );
 
-	bli_printm( "c: after symm", &c, "%4.1f", "" );
+	bli_printm( "c: after symm", &c, "% 4.3f", "" );
 
 	// Free the objects.
 	bli_obj_free( &a );
@@ -251,13 +251,13 @@ int main( int argc, char** argv )
 	bli_obj_set_diag( BLIS_NONUNIT_DIAG, &a );
 	bli_randm( &a );
 
-	bli_printm( "a: randomized (zeros in upper triangle)", &a, "%4.1f", "" );
-	bli_printm( "b: initial value", &b, "%4.1f", "" );
+	bli_printm( "a: randomized (zeros in upper triangle)", &a, "% 4.3f", "" );
+	bli_printm( "b: initial value", &b, "% 4.3f", "" );
 
 	// b := alpha * a * b, where 'a' is triangular and lower-stored.
 	bli_trmm( side, alpha, &a, &b );
 
-	bli_printm( "x: after trmm", &b, "%4.1f", "" );
+	bli_printm( "x: after trmm", &b, "% 4.3f", "" );
 
 	// Free the objects.
 	bli_obj_free( &a );
@@ -303,21 +303,21 @@ int main( int argc, char** argv )
 	// that the matrix is not singular (singular matrices have no inverse).
 	bli_shiftd( &BLIS_TWO, &a );
 
-	bli_printm( "a: randomized (zeros in upper triangle)", &a, "%4.1f", "" );
-	bli_printm( "b: initial value", &b, "%4.1f", "" );
+	bli_printm( "a: randomized (zeros in upper triangle)", &a, "% 4.3f", "" );
+	bli_printm( "b: initial value", &b, "% 4.3f", "" );
 
 	// solve a * x = alpha * b, where 'a' is triangular and lower-stored, and
 	// overwrite b with the solution matrix x.
 	bli_trsm( side, alpha, &a, &b );
 
-	bli_printm( "b: after trsm", &b, "%4.1f", "" );
+	bli_printm( "b: after trsm", &b, "% 4.3f", "" );
 
 	// We can confirm the solution by comparing the product of a and x to the
 	// original value of b.
 	bli_copym( &b, &c );
 	bli_trmm( side, alpha, &a, &c );
 
-	bli_printm( "c: should equal initial value of b", &c, "%4.1f", "" );
+	bli_printm( "c: should equal initial value of b", &c, "% 4.3f", "" );
 
 	// Free the objects.
 	bli_obj_free( &a );

@@ -73,7 +73,7 @@ int main( int argc, char** argv )
 	// Now set the upper triangle to random values.
 	bli_randm( &a );
 
-	bli_printm( "a: randomize upper part (lower part may contain garbage)", &a, "%4.1f", "" );
+	bli_printm( "a: randomize upper part (lower part may contain garbage)", &a, "% 4.3f", "" );
 
 
 	//
@@ -125,14 +125,14 @@ int main( int argc, char** argv )
 	// triangle of 'bl' to zero).
 	bli_setm( &BLIS_ZERO, &bl );
 
-	bli_printm( "b: randomize upper part; set strictly lower part to 0.0", &b, "%4.1f", "" );
+	bli_printm( "b: randomize upper part; set strictly lower part to 0.0", &b, "% 4.3f", "" );
 
 	// You may not see the effect of setting the strictly lower part to zero,
 	// since those values may already be zero (instead of random junk). So
 	// let's set it to something you'll notice, like -1.0.
 	bli_setm( &BLIS_MINUS_ONE, &bl );
 
-	bli_printm( "b: randomize upper part; set strictly lower part to -1.0", &b, "%4.1f", "" );
+	bli_printm( "b: randomize upper part; set strictly lower part to -1.0", &b, "% 4.3f", "" );
 
 
 	//
@@ -158,7 +158,7 @@ int main( int argc, char** argv )
 	// uninitialized, the strictly upper part could contain junk.
 	bli_copym( &bl, &c );
 
-	bli_printm( "c: copy lower part of b (upper part may contain garbage)", &c, "%4.1f", "" );
+	bli_printm( "c: copy lower part of b (upper part may contain garbage)", &c, "% 4.3f", "" );
 
 	// Notice that the structure and uplo properties of 'c' were set to their
 	// default values, BLIS_GENERAL and BLIS_DENSE, respectively. Thus, it is
@@ -178,7 +178,7 @@ int main( int argc, char** argv )
 	// ignore the "unstored" regions of input operands because they are assumed
 	// to be zero).
 
-	bli_printm( "a: copy lower triangular bl to upper triangular a", &a, "%4.1f", "" );
+	bli_printm( "a: copy lower triangular bl to upper triangular a", &a, "% 4.3f", "" );
 
 
 	//
@@ -198,7 +198,7 @@ int main( int argc, char** argv )
 	// Let's start by setting entire destination matrix to zero.
 	bli_setm( &BLIS_ZERO, &d );
 
-	bli_printm( "d: initial value (all zeros)", &d, "%4.1f", "" );
+	bli_printm( "d: initial value (all zeros)", &d, "% 4.3f", "" );
 
 	// Recall that 'bl' is marked as lower triangular with a diagonal offset
 	// of 0. Also recall that 'bl' is an alias of 'b', which is now fully
@@ -210,7 +210,7 @@ int main( int argc, char** argv )
 	bli_setijm( 3.1, 0.0, 3, 1, &bl );
 	bli_setijm( 3.2, 0.0, 3, 2, &bl );
 
-	bli_printm( "bl: lower triangular bl is aliased to b", &bl, "%4.1f", "" );
+	bli_printm( "bl: lower triangular bl is aliased to b", &bl, "% 4.3f", "" );
 
 	// We want to pluck out the lower triangle and transpose it into the upper
 	// triangle of 'd'.
@@ -221,7 +221,7 @@ int main( int argc, char** argv )
 	// 'd'. It's the source operand that matters, not the destination!)
 	bli_copym( &bl, &d );
 
-	bli_printm( "d: transpose of lower triangular of bl copied to d", &d, "%4.1f", "" );
+	bli_printm( "d: transpose of lower triangular of bl copied to d", &d, "% 4.3f", "" );
 
 
 	//
@@ -242,7 +242,7 @@ int main( int argc, char** argv )
 	// Initialize the entire matrix to -1.0 to simulate junk values.
 	bli_setm( &BLIS_MINUS_ONE, &e );
 
-	bli_printm( "e: initial value (all -1.0)", &e, "%4.1f", "" );
+	bli_printm( "e: initial value (all -1.0)", &e, "% 4.3f", "" );
 
 	// Create an alias to work with.
 	bli_obj_alias_to( &e, &el );
@@ -258,7 +258,7 @@ int main( int argc, char** argv )
 	// Randomize the lower trapezoid.
 	bli_randm( &el );
 
-	bli_printm( "e: after lower trapezoid randomized", &e, "%4.1f", "" );
+	bli_printm( "e: after lower trapezoid randomized", &e, "% 4.3f", "" );
 
 	// Move the diagonal offset of 'el' to 1 and flip the uplo field to
 	// "upper".
@@ -268,7 +268,7 @@ int main( int argc, char** argv )
 	// Set the upper triangle to zero.
 	bli_setm( &BLIS_ZERO, &el );
 
-	bli_printm( "e: after upper triangle set to zero", &e, "%4.1f", "" );
+	bli_printm( "e: after upper triangle set to zero", &e, "% 4.3f", "" );
 
 
 	//
@@ -288,7 +288,7 @@ int main( int argc, char** argv )
 	// Initialize the entire matrix to -1.0 to simulate junk values.
 	bli_setm( &BLIS_MINUS_ONE, &h );
 
-	bli_printm( "h: initial value (all -1.0)", &h, "%4.1f", "" );
+	bli_printm( "h: initial value (all -1.0)", &h, "% 4.3f", "" );
 
 	// Set the diagonal offset of 'h' to -1.
 	bli_obj_set_diag_offset( -1, &h );
@@ -300,7 +300,7 @@ int main( int argc, char** argv )
 	// Randomize the elements on and above the first subdiagonal.
 	bli_randm( &h );
 
-	bli_printm( "h: after randomizing above first subdiagonal", &h, "%4.1f", "" );
+	bli_printm( "h: after randomizing above first subdiagonal", &h, "% 4.3f", "" );
 
 	// Create an alias to work with.
 	bli_obj_alias_to( &h, &hl );
@@ -313,7 +313,7 @@ int main( int argc, char** argv )
 	// the second subdiagonal) to zero.
 	bli_setm( &BLIS_ZERO, &hl );
 
-	bli_printm( "h: after setting elements below first subdiagonal to zero", &h, "%4.1f", "" );
+	bli_printm( "h: after setting elements below first subdiagonal to zero", &h, "% 4.3f", "" );
 
 
 	// Free the objects.
