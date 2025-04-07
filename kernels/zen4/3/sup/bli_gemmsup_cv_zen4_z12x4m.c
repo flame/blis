@@ -223,6 +223,16 @@
     GET_BETA_GENERIC(__VA_ARGS__,  \
     BETA_GENERIC_12Z, _0, BETA_GENERIC_8Z, _1, BETA_GENERIC_4Z)(__VA_ARGS__) \
 
+// Macro for scaling with beta if it is complex
+// in case of 1 load(fx? cases, f<4)
+#define BETA_GENERIC_fZ(C, R1, I1) \
+    VMOVUPD(MEM(C), ZMM(R1) MASK_(k(2))) \
+\
+    ALPHA_GENERIC(R1) \
+    VADDPD(ZMM(R1), ZMM(I1), ZMM(I1))  \
+\
+    VMOVUPD(ZMM(I1), MEM(C) MASK_(k(2))) \
+
 #define MICRO_TILE_12x4                             \
     /* Macro for 12x4 micro-tile evaluation   */    \
     /* Prebroadcasting B on ZMM(3) and ZMM(4) */    \
@@ -299,6 +309,41 @@
     VBROADCASTSD(MEM(RBX, 8), ZMM(4))               \
     /* Loading A using ZMM(0) */                    \
     VMOVUPD(MEM(RAX), ZMM(0))                       \
+    LEA(MEM(RBX, R15, 2), R9)                       \
+    /* Prebroadcasting B on ZMM(30) and ZMM(31) */  \
+    VBROADCASTSD(MEM(RBX, R15, 1), ZMM(30))         \
+    VBROADCASTSD(MEM(RBX, R15, 1, 8), ZMM(31))      \
+    /* 2 FMAs over 2 broadcasts */                  \
+    FMA(3, 5)                                       \
+    FMA(4, 6)                                       \
+    /* Prebroadcasting B on ZMM(3) and ZMM(4) */    \
+    VBROADCASTSD(MEM(R9), ZMM(3))                   \
+    VBROADCASTSD(MEM(R9, 8), ZMM(4))                \
+    /* 2 FMAs over 2 broadcasts */                  \
+    FMA(30, 11)                                     \
+    FMA(31, 12)                                     \
+    /* Prebroadcasting B on ZMM(30) and ZMM(31) */  \
+    VBROADCASTSD(MEM(R9, R15, 1), ZMM(30))          \
+    VBROADCASTSD(MEM(R9, R15, 1, 8), ZMM(31))       \
+    /* 2 FMAs over 2 broadcasts */                  \
+    FMA(3, 17)                                      \
+    FMA(4, 18)                                      \
+    /* 2 FMAs over 2 broadcasts */                  \
+    FMA(30, 23)                                     \
+    FMA(31, 24)                                     \
+    /* Adjusting addresses for next micro tiles */  \
+    ADD(R14, RBX)                                   \
+    ADD(R13, RAX)                                   \
+
+/* Macro to perform an fx4 micro-tile computation(f<4) */
+/* Macro assumes k(2) to have the mask for loading A */
+#define MICRO_TILE_fx4                              \
+    /* Macro for fx4 micro-tile evaluation   */ \
+    /* Prebroadcasting B on ZMM(3) and ZMM(4) */ \
+    VBROADCASTSD(MEM(RBX), ZMM(3))                  \
+    VBROADCASTSD(MEM(RBX, 8), ZMM(4))               \
+    /* Loading A using ZMM(0) */                    \
+    VMOVUPD(MEM(RAX), ZMM(0) MASK_KZ(2))            \
     LEA(MEM(RBX, R15, 2), R9)                       \
     /* Prebroadcasting B on ZMM(30) and ZMM(31) */  \
     VBROADCASTSD(MEM(RBX, R15, 1), ZMM(30))         \
@@ -406,6 +451,34 @@
     ADD(R14, RBX)                                   \
     ADD(R13, RAX)                                   \
 
+/* Macro to perform an fx3 micro-tile computation(f<4) */
+/* Macro assumes k(2) to have the mask for loading A */
+#define MICRO_TILE_fx3                              \
+    /* Macro for fx3 micro-tile evaluation   */     \
+    /* Prebroadcasting B on ZMM(3) and ZMM(4) */    \
+    VBROADCASTSD(MEM(RBX), ZMM(3))                  \
+    VBROADCASTSD(MEM(RBX, 8), ZMM(4))               \
+    /* Loading A using ZMM(0) */                    \
+    VMOVUPD(MEM(RAX), ZMM(0) MASK_KZ(2))            \
+    /* Prebroadcasting B on ZMM(30) and ZMM(31) */  \
+    VBROADCASTSD(MEM(RBX, R15, 1), ZMM(30))         \
+    VBROADCASTSD(MEM(RBX, R15, 1, 8), ZMM(31))      \
+    /* 2 FMAs over 2 broadcasts */                  \
+    FMA(3, 5)                                       \
+    FMA(4, 6)                                       \
+    /* Prebroadcasting B on ZMM(3) and ZMM(4) */    \
+    VBROADCASTSD(MEM(RBX, R15, 2), ZMM(3))          \
+    VBROADCASTSD(MEM(RBX, R15, 2, 8), ZMM(4))       \
+    /* 2 FMAs over 2 broadcasts */                  \
+    FMA(30, 11)                                     \
+    FMA(31, 12)                                     \
+    /* 2 FMAs over 2 broadcasts */                  \
+    FMA(3, 17)                                      \
+    FMA(4, 18)                                      \
+    /* Adjusting addresses for next micro tiles */  \
+    ADD(R14, RBX)                                   \
+    ADD(R13, RAX)                                   \
+
 #define MICRO_TILE_12x2                             \
     /* Macro for 12x2 micro-tile evaluation   */    \
     /* Prebroadcasting B on ZMM(3) and ZMM(4) */    \
@@ -469,6 +542,28 @@
     ADD(R14, RBX)                                   \
     ADD(R13, RAX)                                   \
 
+/* Macro to perform an fx2 micro-tile computation(f<4) */
+/* Macro assumes k(2) to have the mask for loading A */
+#define MICRO_TILE_fx2                              \
+    /* Macro for fx2 micro-tile evaluation   */     \
+    /* Prebroadcasting B on ZMM(3) and ZMM(4) */    \
+    VBROADCASTSD(MEM(RBX), ZMM(3))                  \
+    VBROADCASTSD(MEM(RBX, 8), ZMM(4))               \
+    /* Loading A using ZMM(0) */                    \
+    VMOVUPD(MEM(RAX), ZMM(0) MASK_KZ(2))            \
+    /* Prebroadcasting B on ZMM(30) and ZMM(31) */  \
+    VBROADCASTSD(MEM(RBX, R15, 1), ZMM(30))         \
+    VBROADCASTSD(MEM(RBX, R15, 1, 8), ZMM(31))      \
+    /* 2 FMAs over 2 broadcasts */                  \
+    FMA(3, 5)                                       \
+    FMA(4, 6)                                       \
+    /* 2 FMAs over 2 broadcasts */                  \
+    FMA(30, 11)                                     \
+    FMA(31, 12)                                     \
+    /* Adjusting addresses for next micro tiles */  \
+    ADD(R14, RBX)                                   \
+    ADD(R13, RAX)                                   \
+
 #define MICRO_TILE_12x1                             \
     /* Macro for 12x1 micro-tile evaluation   */    \
     /* Broadcasting B on ZMM(3) and ZMM(4) */       \
@@ -507,6 +602,22 @@
     VBROADCASTSD(MEM(RBX, 8), ZMM(4))               \
     /* Loading A using ZMM(0) */                    \
     VMOVUPD(MEM(RAX), ZMM(0))                       \
+    /* 2 FMAs over 2 broadcasts */                  \
+    FMA(3, 5)                                       \
+    FMA(4, 6)                                       \
+    /* Adjusting addresses for next micro tiles */  \
+    ADD(R14, RBX)                                   \
+    ADD(R13, RAX)                                   \
+
+/* Macro to perform an fx1 micro-tile computation(f<4) */
+/* Macro assumes k(2) to have the mask for loading A */
+#define MICRO_TILE_fx1                              \
+    /* Macro for fx1 micro-tile evaluation   */     \
+    /* Broadcasting B on ZMM(3) and ZMM(4) */       \
+    VBROADCASTSD(MEM(RBX), ZMM(3))                  \
+    VBROADCASTSD(MEM(RBX, 8), ZMM(4))               \
+    /* Loading A using ZMM(0) */                    \
+    VMOVUPD(MEM(RAX), ZMM(0) MASK_KZ(2))            \
     /* 2 FMAs over 2 broadcasts */                  \
     FMA(3, 5)                                       \
     FMA(4, 6)                                       \
@@ -668,8 +779,18 @@
     VMOVUPD(ZMM(I3), MEM(RCX))  \
     VMOVUPD(ZMM(I4), MEM(RCX, RDI, 1))  \
 
+// Macro for beta scaling of a 1x4 micro-tile of C when row-stored
+#define BETA_GEN_ROW_1x4(C, R1, I1)  \
+    VMOVUPD(MEM(C), ZMM(R1))    \
+    \
+    ALPHA_GENERIC(R1)   \
+    \
+    VADDPD(ZMM(R1), ZMM(I1), ZMM(I1))  \
+    \
+    VMOVUPD(ZMM(I1), MEM(RCX))    \
+
 // Macro for beta scaling of a 4x? micro-tile of C when row-stored, using mask register
-#define BETA_GEN_ROW_MASK(C, R1, I1, R2, I2, R3, I3, R4, I4)  \
+#define BETA_GEN_ROW_4x4_MASK(C, R1, I1, R2, I2, R3, I3, R4, I4)  \
     VMOVUPD(MEM(C), ZMM(R1) MASK_(k(3)))    \
     VMOVUPD(MEM(C, RDI, 1), ZMM(R2) MASK_(k(3)))    \
     LEA(MEM(C, RDI, 2), C)  \
@@ -689,6 +810,16 @@
     LEA(MEM(RCX, RDI, 2), RCX)  \
     VMOVUPD(ZMM(I3), MEM(RCX) MASK_(k(3)))  \
     VMOVUPD(ZMM(I4), MEM(RCX, RDI, 1) MASK_(k(3)))  \
+
+// Macro for beta scaling of a fx4(f<4) micro-tile of C when row-stored
+#define BETA_GEN_ROW_1x4_MASK(C, R1, I1)  \
+    VMOVUPD(MEM(C), ZMM(R1) MASK_(k(3)))    \
+    \
+    ALPHA_GENERIC(R1)   \
+    \
+    VADDPD(ZMM(R1), ZMM(I1), ZMM(I1))  \
+    \
+    VMOVUPD(ZMM(I1), MEM(RCX) MASK_(k(3)))    \
 
 // Macro for providing in-register transposition of a 2x2 block
 #define TRANSPOSE_2x2(R1, R2) \
@@ -1337,14 +1468,15 @@ void bli_zgemmsup_cv_zen4_asm_12x4m
         cij += mr_cur * rs_c; ai += mr_cur * rs_a;
         m_left -= mr_cur;
       }
-      if ( 1 == m_left )
+      if (1 == m_left)
       {
-        bli_zgemv_ex
-        (
-          BLIS_TRANSPOSE, conja, k0, n0,
-          alpha, bj, rs_b0, cs_b0, ai, cs_a0,
-          beta, cij, cs_c0, cntx, NULL
-        );
+        const dim_t      mr_cur = m_left;
+        bli_zgemmsup_cv_zen4_asm_fx4(conja, conjb, mr_cur, n0, k0, alpha,
+                                      ai, rs_a0, cs_a0,
+                                      bj, rs_b0, cs_b0,
+                                      beta,
+                                      cij, rs_c0, cs_c0,
+                                      data, cntx);
       }
     }
 }
@@ -1628,13 +1760,13 @@ void bli_zgemmsup_cv_zen4_asm_12x3m
     VBROADCASTSD(MEM(RBX), ZMM(0))    // Beta->real
     VBROADCASTSD(MEM(RBX, 8), ZMM(1)) // Beta->imag
 
-    BETA_GEN_ROW_MASK(R9, 5, 6, 11, 12, 17, 18, 23, 24)
+    BETA_GEN_ROW_4x4_MASK(R9, 5, 6, 11, 12, 17, 18, 23, 24)
     LEA(MEM(RCX, RDI, 2), RCX)
     LEA(MEM(R9, RDI, 2), R9)
-    BETA_GEN_ROW_MASK(R9, 7, 8, 13, 14, 19, 20, 25, 26)
+    BETA_GEN_ROW_4x4_MASK(R9, 7, 8, 13, 14, 19, 20, 25, 26)
     LEA(MEM(RCX, RDI, 2), RCX)
     LEA(MEM(R9, RDI, 2), R9)
-    BETA_GEN_ROW_MASK(R9, 9, 10, 15, 16, 21, 22, 27, 28)
+    BETA_GEN_ROW_4x4_MASK(R9, 9, 10, 15, 16, 21, 22, 27, 28)
     JMP(.END)
 
     // Handling when beta == 0
@@ -1756,14 +1888,15 @@ void bli_zgemmsup_cv_zen4_asm_12x3m
         cij += mr_cur * rs_c; ai += mr_cur * rs_a;
         m_left -= mr_cur;
       }
-      if ( 1 == m_left )
+      if (1 == m_left)
       {
-        bli_zgemv_ex
-        (
-          BLIS_TRANSPOSE, conja, k0, n0,
-          alpha, bj, rs_b0, cs_b0, ai, cs_a0,
-          beta, cij, cs_c0, cntx, NULL
-        );
+        const dim_t      mr_cur = m_left;
+        bli_zgemmsup_cv_zen4_asm_fx3(conja, conjb, mr_cur, n0, k0, alpha,
+                                      ai, rs_a0, cs_a0,
+                                      bj, rs_b0, cs_b0,
+                                      beta,
+                                      cij, rs_c0, cs_c0,
+                                      data, cntx);
       }
     }
 }
@@ -2033,13 +2166,13 @@ void bli_zgemmsup_cv_zen4_asm_12x2m
     VBROADCASTSD(MEM(RBX), ZMM(0))    // Beta->real
     VBROADCASTSD(MEM(RBX, 8), ZMM(1)) // Beta->imag
 
-    BETA_GEN_ROW_MASK(R9, 5, 6, 11, 12, 17, 18, 23, 24)
+    BETA_GEN_ROW_4x4_MASK(R9, 5, 6, 11, 12, 17, 18, 23, 24)
     LEA(MEM(RCX, RDI, 2), RCX)
     LEA(MEM(R9, RDI, 2), R9)
-    BETA_GEN_ROW_MASK(R9, 7, 8, 13, 14, 19, 20, 25, 26)
+    BETA_GEN_ROW_4x4_MASK(R9, 7, 8, 13, 14, 19, 20, 25, 26)
     LEA(MEM(RCX, RDI, 2), RCX)
     LEA(MEM(R9, RDI, 2), R9)
-    BETA_GEN_ROW_MASK(R9, 9, 10, 15, 16, 21, 22, 27, 28)
+    BETA_GEN_ROW_4x4_MASK(R9, 9, 10, 15, 16, 21, 22, 27, 28)
     JMP(.END)
 
     // Handling when beta == 0
@@ -2161,14 +2294,15 @@ void bli_zgemmsup_cv_zen4_asm_12x2m
         cij += mr_cur * rs_c; ai += mr_cur * rs_a;
         m_left -= mr_cur;
       }
-      if ( 1 == m_left )
+      if (1 == m_left)
       {
-        bli_zgemv_ex
-        (
-          BLIS_TRANSPOSE, conja, k0, n0,
-          alpha, bj, rs_b0, cs_b0, ai, cs_a0,
-          beta, cij, cs_c0, cntx, NULL
-        );
+        const dim_t      mr_cur = m_left;
+        bli_zgemmsup_cv_zen4_asm_fx2(conja, conjb, mr_cur, n0, k0, alpha,
+                                      ai, rs_a0, cs_a0,
+                                      bj, rs_b0, cs_b0,
+                                      beta,
+                                      cij, rs_c0, cs_c0,
+                                      data, cntx);
       }
     }
 }
@@ -2422,13 +2556,13 @@ void bli_zgemmsup_cv_zen4_asm_12x1m
     VBROADCASTSD(MEM(RBX), ZMM(0))    // Beta->real
     VBROADCASTSD(MEM(RBX, 8), ZMM(1)) // Beta->imag
 
-    BETA_GEN_ROW_MASK(R9, 5, 6, 11, 12, 17, 18, 23, 24)
+    BETA_GEN_ROW_4x4_MASK(R9, 5, 6, 11, 12, 17, 18, 23, 24)
     LEA(MEM(RCX, RDI, 2), RCX)
     LEA(MEM(R9, RDI, 2), R9)
-    BETA_GEN_ROW_MASK(R9, 7, 8, 13, 14, 19, 20, 25, 26)
+    BETA_GEN_ROW_4x4_MASK(R9, 7, 8, 13, 14, 19, 20, 25, 26)
     LEA(MEM(RCX, RDI, 2), RCX)
     LEA(MEM(R9, RDI, 2), R9)
-    BETA_GEN_ROW_MASK(R9, 9, 10, 15, 16, 21, 22, 27, 28)
+    BETA_GEN_ROW_4x4_MASK(R9, 9, 10, 15, 16, 21, 22, 27, 28)
     JMP(.END)
 
     // Handling when beta == 0
@@ -2550,14 +2684,15 @@ void bli_zgemmsup_cv_zen4_asm_12x1m
         cij += mr_cur * rs_c; ai += mr_cur * rs_a;
         m_left -= mr_cur;
       }
-      if ( 1 == m_left )
+      if (1 == m_left)
       {
-        bli_zgemv_ex
-        (
-          BLIS_TRANSPOSE, conja, k0, n0,
-          alpha, bj, rs_b0, cs_b0, ai, cs_a0,
-          beta, cij, cs_c0, cntx, NULL
-        );
+        const dim_t      mr_cur = m_left;
+        bli_zgemmsup_cv_zen4_asm_fx1(conja, conjb, mr_cur, n0, k0, alpha,
+                                      ai, rs_a0, cs_a0,
+                                      bj, rs_b0, cs_b0,
+                                      beta,
+                                      cij, rs_c0, cs_c0,
+                                      data, cntx);
       }
     }
 }
@@ -3003,10 +3138,10 @@ void bli_zgemmsup_cv_zen4_asm_8x3
     VBROADCASTSD(MEM(RBX), ZMM(0))    // Beta->real
     VBROADCASTSD(MEM(RBX, 8), ZMM(1)) // Beta->imag
 
-    BETA_GEN_ROW_MASK(R9, 5, 6, 11, 12, 17, 18, 23, 24)
+    BETA_GEN_ROW_4x4_MASK(R9, 5, 6, 11, 12, 17, 18, 23, 24)
     LEA(MEM(RCX, RDI, 2), RCX)
     LEA(MEM(R9, RDI, 2), R9)
-    BETA_GEN_ROW_MASK(R9, 7, 8, 13, 14, 19, 20, 25, 26)
+    BETA_GEN_ROW_4x4_MASK(R9, 7, 8, 13, 14, 19, 20, 25, 26)
     JMP(.END)
 
     // Handling when beta == 0
@@ -3248,10 +3383,10 @@ void bli_zgemmsup_cv_zen4_asm_8x2
     VBROADCASTSD(MEM(RBX), ZMM(0))    // Beta->real
     VBROADCASTSD(MEM(RBX, 8), ZMM(1)) // Beta->imag
 
-    BETA_GEN_ROW_MASK(R9, 5, 6, 11, 12, 17, 18, 23, 24)
+    BETA_GEN_ROW_4x4_MASK(R9, 5, 6, 11, 12, 17, 18, 23, 24)
     LEA(MEM(RCX, RDI, 2), RCX)
     LEA(MEM(R9, RDI, 2), R9)
-    BETA_GEN_ROW_MASK(R9, 7, 8, 13, 14, 19, 20, 25, 26)
+    BETA_GEN_ROW_4x4_MASK(R9, 7, 8, 13, 14, 19, 20, 25, 26)
     JMP(.END)
 
     // Handling when beta == 0
@@ -3485,10 +3620,10 @@ void bli_zgemmsup_cv_zen4_asm_8x1
     VBROADCASTSD(MEM(RBX), ZMM(0))    // Beta->real
     VBROADCASTSD(MEM(RBX, 8), ZMM(1)) // Beta->imag
 
-    BETA_GEN_ROW_MASK(R9, 5, 6, 11, 12, 17, 18, 23, 24)
+    BETA_GEN_ROW_4x4_MASK(R9, 5, 6, 11, 12, 17, 18, 23, 24)
     LEA(MEM(RCX, RDI, 2), RCX)
     LEA(MEM(R9, RDI, 2), R9)
-    BETA_GEN_ROW_MASK(R9, 7, 8, 13, 14, 19, 20, 25, 26)
+    BETA_GEN_ROW_4x4_MASK(R9, 7, 8, 13, 14, 19, 20, 25, 26)
     JMP(.END)
 
     // Handling when beta == 0
@@ -3951,7 +4086,7 @@ void bli_zgemmsup_cv_zen4_asm_4x3
     VBROADCASTSD(MEM(RBX), ZMM(0))    // Beta->real
     VBROADCASTSD(MEM(RBX, 8), ZMM(1)) // Beta->imag
 
-    BETA_GEN_ROW_MASK(R9, 5, 6, 11, 12, 17, 18, 23, 24)
+    BETA_GEN_ROW_4x4_MASK(R9, 5, 6, 11, 12, 17, 18, 23, 24)
     JMP(.END)
 
     // Handling when beta == 0
@@ -4175,7 +4310,7 @@ void bli_zgemmsup_cv_zen4_asm_4x2
     VBROADCASTSD(MEM(RBX), ZMM(0))    // Beta->real
     VBROADCASTSD(MEM(RBX, 8), ZMM(1)) // Beta->imag
 
-    BETA_GEN_ROW_MASK(R9, 5, 6, 11, 12, 17, 18, 23, 24)
+    BETA_GEN_ROW_4x4_MASK(R9, 5, 6, 11, 12, 17, 18, 23, 24)
     JMP(.END)
 
     // Handling when beta == 0
@@ -4392,7 +4527,7 @@ void bli_zgemmsup_cv_zen4_asm_4x1
     VBROADCASTSD(MEM(RBX), ZMM(0))    // Beta->real
     VBROADCASTSD(MEM(RBX, 8), ZMM(1)) // Beta->imag
 
-    BETA_GEN_ROW_MASK(R9, 5, 6, 11, 12, 17, 18, 23, 24)
+    BETA_GEN_ROW_4x4_MASK(R9, 5, 6, 11, 12, 17, 18, 23, 24)
     JMP(.END)
 
     // Handling when beta == 0
@@ -4434,6 +4569,1121 @@ void bli_zgemmsup_cv_zen4_asm_4x1
       "zmm24", "zmm25", "zmm26", "zmm27",
       "zmm28", "zmm29", "zmm30", "zmm31",
       "k3", "memory"
+    )
+}
+
+void bli_zgemmsup_cv_zen4_asm_fx4
+     (
+       conj_t       conja,
+       conj_t       conjb,
+       dim_t        m0,
+       dim_t        n0,
+       dim_t        k0,
+       dcomplex*    restrict alpha,
+       dcomplex*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       dcomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       dcomplex*    restrict beta,
+       dcomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
+{
+    // Main kernel
+    uint64_t cs_a   = cs_a0;
+    uint64_t rs_b   = rs_b0;
+    uint64_t cs_b   = cs_b0;
+    uint64_t rs_c   = rs_c0;
+    uint64_t cs_c   = cs_c0;
+
+    uint64_t k_iter = k0 / 4; // Unroll factor of 4
+    uint64_t k_left = k0 % 4;
+
+    const double value = 1.0; // To be broadcasted and used for complex arithmetic
+    const double *v = &value;
+
+    /*
+      The mask bits below are set for ensuring fx4 compatability
+      while transposing, and loading/storing C(k(2) mask register).
+      This mask is set based on the m-value(m0) that the kernel receives.
+      m0 is guaranteed to be less than 4.
+    */
+    uint64_t m_store_row = m0; // Also used when handling row-storage of C(post transpose)
+    uint8_t m_load_mask = ( (uint8_t)1 << ( 2 * m_store_row ) ) - (uint8_t)1;
+
+    // Assigning the type of beta scaling for enabling loading of C
+    char beta_mul_type = (beta->real == 0.0 && beta->imag == 0.0)? BLIS_MUL_ZERO : BLIS_MUL_DEFAULT;
+
+    BEGIN_ASM()
+
+    MOV(VAR(cs_a), R13)
+    LEA(MEM(, R13, 8), R13)
+    LEA(MEM(, R13, 2), R13)   // R13 = sizeof(dcomplex)*cs_a
+
+    MOV(VAR(rs_b), R14)
+    LEA(MEM(, R14, 8), R14)
+    LEA(MEM(, R14, 2), R14)   // R14 = sizeof(dcomplex)*rs_b
+
+    MOV(VAR(cs_b), R15)
+    LEA(MEM(, R15, 8), R15)
+    LEA(MEM(, R15, 2), R15)   // R15 = sizeof(dcomplex)*cs_b
+
+    MOV(VAR(rs_c), RDI)
+    LEA(MEM(, RDI, 8), RDI)
+    LEA(MEM(, RDI, 2), RDI)   // RDI = sizeof(dcomplex)*rs_c
+
+    MOV(VAR(cs_c), RSI)
+    LEA(MEM(, RSI, 8), RSI)
+    LEA(MEM(, RSI, 2), RSI)   // RSI = sizeof(dcomplex)*cs_c
+
+    MOV(VAR(m_load_mask), EBX)
+    KMOVW(EBX, k(2))          // k(2) = m_load_mask
+
+    // Intermediate register for complex arithmetic
+    MOV(VAR(v), R9)  // Used in fmaddsub instruction
+    VBROADCASTSD(MEM(R9), ZMM(29)) // Broadcasting 1.0 over ZMM(29)
+
+    MOV(var(a), RAX)     // RAX = addr of A for the MRxKC block
+    MOV(var(b), RBX)     // RBX = addr of B for the KCxNR block
+    MOV(var(c), RCX)     // RCX = addr of C for the MRxNR block
+
+    // Resetting all scratch registers
+    RESET_REGISTERS
+
+    // Setting iterator for k
+    MOV(VAR(k_iter), R8)
+    TEST(R8, R8)
+    JE(.ZKLEFT)
+    LABEL(.ZKITERMAIN)
+
+    MICRO_TILE_fx4
+    MICRO_TILE_fx4
+    MICRO_TILE_fx4
+    MICRO_TILE_fx4
+
+    DEC(R8)
+    JNZ(.ZKITERMAIN)
+
+    // Remainder loop for k
+    LABEL(.ZKLEFT)
+    MOV(VAR(k_left), R8)
+    TEST(R8, R8)
+    JE(.ACCUMULATE)
+    LABEL(.ZKLEFTLOOP)
+
+    MICRO_TILE_fx4
+
+    DEC(R8)
+    JNZ(.ZKLEFTLOOP)
+
+    LABEL(.ACCUMULATE) // Accumulating A*B over 4 registers
+    // Shuffling the registers FMAed with imaginary components in B.
+    PERMUTE(6)
+    PERMUTE(12)
+    PERMUTE(18)
+    PERMUTE(24)
+
+    // Final accumulation for A*B on 4 reg using the 8 reg.
+    ACC_COL(5, 6)
+    ACC_COL(11, 12)
+    ACC_COL(17, 18)
+    ACC_COL(23, 24)
+
+    // A*B is accumulated over the ZMM registers as follows :
+    /*
+      ZMM6  ZMM12  ZMM18  ZMM24
+    */
+
+    // Alpha scaling
+    MOV(VAR(alpha), RAX)
+    VBROADCASTSD(MEM(RAX), ZMM(0))  // Alpha->real
+    VBROADCASTSD(MEM(RAX, 8), ZMM(1)) // Alpha->imag
+
+    ALPHA_GENERIC(6)
+    ALPHA_GENERIC(12)
+    ALPHA_GENERIC(18)
+    ALPHA_GENERIC(24)
+
+    // Beta scaling
+    LABEL(.BETA_SCALE)
+    // Checking for storage scheme of C
+    CMP(IMM(16), RSI)
+    JE(.ROW_STORAGE_C)  // Jumping to row storage handling case
+
+    // Beta scaling when C is column stored
+    MOV(VAR(beta_mul_type), AL)
+    CMP(IMM(0), AL)    // Checking if beta == 0
+    JE(.STORE)
+
+    MOV(VAR(beta), RBX)
+    VBROADCASTSD(MEM(RBX), ZMM(0))    // Beta->real
+    VBROADCASTSD(MEM(RBX, 8), ZMM(1)) // Beta->imag
+
+    // Scaling C with beta, one column at a time
+    // The final parameter(2) represents the mask register
+    BETA_GENERIC_fZ(RCX, 5, 6)
+    ADD(RSI, RCX)
+    BETA_GENERIC_fZ(RCX, 11, 12)
+    ADD(RSI, RCX)
+    BETA_GENERIC_fZ(RCX, 17, 18)
+    ADD(RSI, RCX)
+    BETA_GENERIC_fZ(RCX, 23, 24)
+    JMP(.END)
+
+    // Handling when beta == 0
+    LABEL(.STORE)
+    LEA(MEM(RCX, RSI, 2), R9)
+    VMOVUPD(ZMM(6), MEM(RCX) MASK_(k(2)))
+
+    VMOVUPD(ZMM(12), MEM(RCX, RSI, 1) MASK_(k(2)))
+
+    VMOVUPD(ZMM(18), MEM(R9) MASK_(k(2)))
+
+    VMOVUPD(ZMM(24), MEM(R9, RSI, 1) MASK_(k(2)))
+    JMP(.END)
+
+    // Beta scaling when C is row stored
+    LABEL(.ROW_STORAGE_C)
+    /*
+      In-register transposition happens over the 12x4 micro-tile
+      in blocks of 4x4.
+    */
+    TRANSPOSE_4x4(6, 12, 18, 24)
+    /*
+      The layout post transposition and accumalation is as follows:
+      ZMM6
+      ZMM12
+      ZMM18
+      ZMM24
+    */
+
+    // Loading C(row stored) and beta scaling
+    MOV(VAR(beta_mul_type), AL)
+    CMP(IMM(0), AL)    // Checking if beta == 0
+    JE(.STORE_ROW)
+    MOV(VAR(beta), RBX)
+    VBROADCASTSD(MEM(RBX), ZMM(0))    // Beta->real
+    VBROADCASTSD(MEM(RBX, 8), ZMM(1)) // Beta->imag
+
+    /* Store the appropriate number of registers based on m0 */
+    MOV(var(m_store_row), R8)
+    CMP(IMM(3), R8)
+    JE(.SCALE_ROW_GEN_3)
+    CMP(IMM(2), R8)
+    JE(.SCALE_ROW_GEN_2)
+    CMP(IMM(1), R8)
+    JE(.SCALE_ROW_GEN_1)
+
+    LABEL(.SCALE_ROW_GEN_3)
+    BETA_GEN_ROW_1x4(RCX, 7, 6)
+    ADD(RDI, RCX)
+    BETA_GEN_ROW_1x4(RCX, 9, 12)
+    ADD(RDI, RCX)
+    BETA_GEN_ROW_1x4(RCX, 13, 18)
+    JMP(.END)
+
+    LABEL(.SCALE_ROW_GEN_2)
+    BETA_GEN_ROW_1x4(RCX, 7, 6)
+    ADD(RDI, RCX)
+    BETA_GEN_ROW_1x4(RCX, 9, 12)
+    JMP(.END)
+
+    LABEL(.SCALE_ROW_GEN_1)
+    BETA_GEN_ROW_1x4(RCX, 7, 6)
+    JMP(.END)
+
+    // Handling when beta == 0
+    LABEL(.STORE_ROW)
+    /* Store the appropriate number of registers based on m0 */
+    MOV(var(m_store_row), R8)
+    CMP(IMM(3), R8)
+    JE(.STORE_ROW_3)
+    CMP(IMM(2), R8)
+    JE(.STORE_ROW_2)
+    CMP(IMM(1), R8)
+    JE(.STORE_ROW_1)
+
+    LABEL(.STORE_ROW_3)
+    VMOVUPD(ZMM(6), MEM(RCX))
+    VMOVUPD(ZMM(12), MEM(RCX, RDI, 1))
+    VMOVUPD(ZMM(18), MEM(RCX, RDI, 2))
+    JMP(.END)
+
+    LABEL(.STORE_ROW_2)
+    VMOVUPD(ZMM(6), MEM(RCX))
+    VMOVUPD(ZMM(12), MEM(RCX, RDI, 1))
+    JMP(.END)
+
+    LABEL(.STORE_ROW_1)
+    VMOVUPD(ZMM(6), MEM(RCX))
+
+    LABEL(.END)
+
+    END_ASM(
+    : // output operands (none)
+    : // input operands
+      [v]  "m" (v),
+      [k_iter]  "m" (k_iter),
+      [k_left]  "m" (k_left),
+      [m_load_mask] "m" (m_load_mask),
+      [m_store_row] "m" (m_store_row),
+      [alpha]  "m" (alpha),
+      [a]      "m" (a),
+      [b]      "m" (b),
+      [beta_mul_type]   "m" (beta_mul_type),
+      [beta]   "m" (beta),
+      [c]      "m" (c),
+      [cs_a]   "m" (cs_a),
+      [rs_b]   "m" (rs_b),
+      [cs_b]   "m" (cs_b),
+      [rs_c]   "m" (rs_c),
+      [cs_c]   "m" (cs_c)
+    : // register clobber list
+      "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "ebx", "al",
+      "zmm0", "zmm1", "zmm2", "zmm3",
+      "zmm4", "zmm5", "zmm6", "zmm7",
+      "zmm8", "zmm9", "zmm10", "zmm11",
+      "zmm12", "zmm13", "zmm14", "zmm15",
+      "zmm16", "zmm17", "zmm18", "zmm19",
+      "zmm20", "zmm21", "zmm22", "zmm23",
+      "zmm24", "zmm25", "zmm26", "zmm27",
+      "zmm28", "zmm29", "zmm30", "zmm31",
+      "k2", "memory"
+    )
+}
+
+void bli_zgemmsup_cv_zen4_asm_fx3
+     (
+       conj_t       conja,
+       conj_t       conjb,
+       dim_t        m0,
+       dim_t        n0,
+       dim_t        k0,
+       dcomplex*    restrict alpha,
+       dcomplex*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       dcomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       dcomplex*    restrict beta,
+       dcomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
+{
+    // Main kernel
+    uint64_t cs_a   = cs_a0;
+    uint64_t rs_b   = rs_b0;
+    uint64_t cs_b   = cs_b0;
+    uint64_t rs_c   = rs_c0;
+    uint64_t cs_c   = cs_c0;
+
+    uint64_t k_iter = k0 / 4; // Unroll factor of 4
+    uint64_t k_left = k0 % 4;
+
+    const double value = 1.0; // To be broadcasted and used for complex arithmetic
+    const double *v = &value;
+
+    /*
+      The mask bits below are set for ensuring fx3 compatability
+      while transposing, and loading/storing C(k(2) mask register).
+      This mask is set based on the m-value(m0) that the kernel receives.
+      m0 is guaranteed to be less than 4.
+    */
+    uint64_t m_store_row = m0; // Also used when handling row-storage of C(post transpose)
+    uint8_t m_load_mask = ( (uint8_t)1 << ( 2 * m_store_row ) ) - (uint8_t)1;
+
+    /*
+      The mask bits below are set for ensuring ?x3 compatability
+      while transposing, and loading/storing C in case of row-storage(k(3) opmask register).
+      Mask is of length 8-bits, sinze a ZMM register holds 8 double precision elements.
+    */
+    uint64_t trans_load_mask = 0x3F; // mask for transposing and loading = 0b 00 11 11 11
+    /*
+      This mask ensures that the ZMM registers disregard the last 16 bytes while
+      using masked load/stores or FMA operations.
+    */
+
+    // Assigning the type of beta scaling for enabling loading of C
+    char beta_mul_type = (beta->real == 0.0 && beta->imag == 0.0)? BLIS_MUL_ZERO : BLIS_MUL_DEFAULT;
+
+    BEGIN_ASM()
+
+    MOV(VAR(cs_a), R13)
+    LEA(MEM(, R13, 8), R13)
+    LEA(MEM(, R13, 2), R13)   // R13 = sizeof(dcomplex)*cs_a
+
+    MOV(VAR(rs_b), R14)
+    LEA(MEM(, R14, 8), R14)
+    LEA(MEM(, R14, 2), R14)   // R14 = sizeof(dcomplex)*rs_b
+
+    MOV(VAR(cs_b), R15)
+    LEA(MEM(, R15, 8), R15)
+    LEA(MEM(, R15, 2), R15)   // R15 = sizeof(dcomplex)*cs_b
+
+    MOV(VAR(rs_c), RDI)
+    LEA(MEM(, RDI, 8), RDI)
+    LEA(MEM(, RDI, 2), RDI)   // RDI = sizeof(dcomplex)*rs_c
+
+    MOV(VAR(cs_c), RSI)
+    LEA(MEM(, RSI, 8), RSI)
+    LEA(MEM(, RSI, 2), RSI)   // RSI = sizeof(dcomplex)*cs_c
+
+    MOV(VAR(m_load_mask), EBX)
+    KMOVW(EBX, k(2))               // k(2) = m_load_mask
+
+    MOV(VAR(trans_load_mask), EAX)
+    KMOVW(EAX, k(3))               // k(3) = trans_load_mask
+
+    // Intermediate register for complex arithmetic
+    MOV(VAR(v), R9)  // Used in fmaddsub instruction
+    VBROADCASTSD(MEM(R9), ZMM(29)) // Broadcasting 1.0 over ZMM(29)
+
+    MOV(var(a), RAX)     // RAX = addr of A for the MRxKC block
+    MOV(var(b), RBX)     // RBX = addr of B for the KCxNR block
+    MOV(var(c), RCX)     // RCX = addr of C for the MRxNR block
+
+    // Resetting all scratch registers
+    RESET_REGISTERS
+
+    // Setting iterator for k
+    MOV(VAR(k_iter), R8)
+    TEST(R8, R8)
+    JE(.ZKLEFT)
+    LABEL(.ZKITERMAIN)
+
+    MICRO_TILE_fx3
+    MICRO_TILE_fx3
+    MICRO_TILE_fx3
+    MICRO_TILE_fx3
+
+    DEC(R8)
+    JNZ(.ZKITERMAIN)
+
+    // Remainder loop for k
+    LABEL(.ZKLEFT)
+    MOV(VAR(k_left), R8)
+    TEST(R8, R8)
+    JE(.ACCUMULATE)
+    LABEL(.ZKLEFTLOOP)
+
+    MICRO_TILE_fx3
+
+    DEC(R8)
+    JNZ(.ZKLEFTLOOP)
+
+    LABEL(.ACCUMULATE) // Accumulating A*B over 3 registers
+    // Shuffling the registers FMAed with imaginary components in B.
+    PERMUTE(6)
+    PERMUTE(12)
+    PERMUTE(18)
+
+    // Final accumulation for A*B on 3 reg using the 6 reg.
+    ACC_COL(5, 6)
+    ACC_COL(11, 12)
+    ACC_COL(17, 18)
+
+    // A*B is accumulated over the ZMM registers as follows :
+    /*
+      ZMM6  ZMM12  ZMM18
+    */
+
+    // Alpha scaling
+    MOV(VAR(alpha), RAX)
+    VBROADCASTSD(MEM(RAX), ZMM(0))  // Alpha->real
+    VBROADCASTSD(MEM(RAX, 8), ZMM(1)) // Alpha->imag
+
+    ALPHA_GENERIC(6)
+    ALPHA_GENERIC(12)
+    ALPHA_GENERIC(18)
+
+    // Beta scaling
+    LABEL(.BETA_SCALE)
+    // Checking for storage scheme of C
+    CMP(IMM(16), RSI)
+    JE(.ROW_STORAGE_C)  // Jumping to row storage handling case
+
+    MOV(VAR(beta_mul_type), AL)
+    CMP(IMM(0), AL)    // Checking if beta == 0
+    JE(.STORE)
+
+    MOV(VAR(beta), RBX)
+    VBROADCASTSD(MEM(RBX), ZMM(0))    // Beta->real
+    VBROADCASTSD(MEM(RBX, 8), ZMM(1)) // Beta->imag
+
+    // Scaling C with beta, one column at a time
+    BETA_GENERIC_fZ(RCX, 5, 6)
+    ADD(RSI, RCX)
+    BETA_GENERIC_fZ(RCX, 11, 12)
+    ADD(RSI, RCX)
+    BETA_GENERIC_fZ(RCX, 17, 18)
+    JMP(.END)
+
+    // Handling when beta == 0
+    LABEL(.STORE)
+    VMOVUPD(ZMM(6), MEM(RCX) MASK_(k(2)))
+
+    VMOVUPD(ZMM(12), MEM(RCX, RSI, 1) MASK_(k(2)))
+
+    VMOVUPD(ZMM(18), MEM(RCX, RSI, 2) MASK_(k(2)))
+    JMP(.END)
+
+    // Beta scaling when C is row stored
+    LABEL(.ROW_STORAGE_C)
+    /*
+      In-register transposition happens over the 12x4 micro-tile
+      in blocks of 4x4.
+    */
+    TRANSPOSE_4x4(6, 12, 18, 24)
+    /*
+      The layout post transposition and accumalation is as follows:
+      ZMM6
+      ZMM12
+      ZMM18
+      ZMM24
+    */
+
+    // Loading C(row stored) and beta scaling
+    MOV(VAR(beta_mul_type), AL)
+    CMP(IMM(0), AL)    // Checking if beta == 0
+    JE(.STORE_ROW)
+    MOV(VAR(beta), RBX)
+    VBROADCASTSD(MEM(RBX), ZMM(0))    // Beta->real
+    VBROADCASTSD(MEM(RBX, 8), ZMM(1)) // Beta->imag
+
+    /* Store the appropriate number of registers based on m0 */
+    MOV(var(m_store_row), R8)
+    CMP(IMM(3), R8)
+    JE(.SCALE_ROW_GEN_3)
+    CMP(IMM(2), R8)
+    JE(.SCALE_ROW_GEN_2)
+    CMP(IMM(1), R8)
+    JE(.SCALE_ROW_GEN_1)
+
+    LABEL(.SCALE_ROW_GEN_3)
+    BETA_GEN_ROW_1x4_MASK(RCX, 7, 6)
+    ADD(RDI, RCX)
+    BETA_GEN_ROW_1x4_MASK(RCX, 9, 12)
+    ADD(RDI, RCX)
+    BETA_GEN_ROW_1x4_MASK(RCX, 13, 18)
+    JMP(.END)
+
+    LABEL(.SCALE_ROW_GEN_2)
+    BETA_GEN_ROW_1x4_MASK(RCX, 7, 6)
+    ADD(RDI, RCX)
+    BETA_GEN_ROW_1x4_MASK(RCX, 9, 12)
+    JMP(.END)
+
+    LABEL(.SCALE_ROW_GEN_1)
+    BETA_GEN_ROW_1x4_MASK(RCX, 7, 6)
+    JMP(.END)
+
+    // Handling when beta == 0
+    LABEL(.STORE_ROW)
+
+    /* Store the appropriate number of registers based on m0 */
+    MOV(var(m_store_row), R8)
+    CMP(IMM(3), R8)
+    JE(.STORE_ROW_3)
+    CMP(IMM(2), R8)
+    JE(.STORE_ROW_2)
+    CMP(IMM(1), R8)
+    JE(.STORE_ROW_1)
+
+    LABEL(.STORE_ROW_3)
+    VMOVUPD(ZMM(6), MEM(RCX) MASK_(k(3)))
+    VMOVUPD(ZMM(12), MEM(RCX, RDI, 1) MASK_(k(3)))
+    VMOVUPD(ZMM(18), MEM(RCX, RDI, 2) MASK_(k(3)))
+    JMP(.END)
+
+    LABEL(.STORE_ROW_2)
+    VMOVUPD(ZMM(6), MEM(RCX) MASK_(k(3)))
+    VMOVUPD(ZMM(12), MEM(RCX, RDI, 1) MASK_(k(3)))
+    JMP(.END)
+
+    LABEL(.STORE_ROW_1)
+    VMOVUPD(ZMM(6), MEM(RCX) MASK_(k(3)))
+
+    LABEL(.END)
+
+    END_ASM(
+    : // output operands (none)
+    : // input operands
+      [v]  "m" (v),
+      [k_iter]  "m" (k_iter),
+      [k_left]  "m" (k_left),
+      [m_load_mask] "m" (m_load_mask),
+      [m_store_row] "m" (m_store_row),
+      [alpha]  "m" (alpha),
+      [trans_load_mask] "m" (trans_load_mask),
+      [a]      "m" (a),
+      [b]      "m" (b),
+      [beta_mul_type]   "m" (beta_mul_type),
+      [beta]   "m" (beta),
+      [c]      "m" (c),
+      [cs_a]   "m" (cs_a),
+      [rs_b]   "m" (rs_b),
+      [cs_b]   "m" (cs_b),
+      [rs_c]   "m" (rs_c),
+      [cs_c]   "m" (cs_c)
+    : // register clobber list
+      "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "eax", "ebx", "al",
+      "zmm0", "zmm1", "zmm2", "zmm3",
+      "zmm4", "zmm5", "zmm6", "zmm7",
+      "zmm8", "zmm9", "zmm10", "zmm11",
+      "zmm12", "zmm13", "zmm14", "zmm15",
+      "zmm16", "zmm17", "zmm18", "zmm19",
+      "zmm20", "zmm21", "zmm22", "zmm23",
+      "zmm24", "zmm25", "zmm26", "zmm27",
+      "zmm28", "zmm29", "zmm30", "zmm31",
+      "k2", "k3", "memory"
+    )
+}
+
+void bli_zgemmsup_cv_zen4_asm_fx2
+     (
+       conj_t       conja,
+       conj_t       conjb,
+       dim_t        m0,
+       dim_t        n0,
+       dim_t        k0,
+       dcomplex*    restrict alpha,
+       dcomplex*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       dcomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       dcomplex*    restrict beta,
+       dcomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
+{
+    // Main kernel
+    uint64_t cs_a   = cs_a0;
+    uint64_t rs_b   = rs_b0;
+    uint64_t cs_b   = cs_b0;
+    uint64_t rs_c   = rs_c0;
+    uint64_t cs_c   = cs_c0;
+
+    uint64_t k_iter = k0 / 4; // Unroll factor of 4
+    uint64_t k_left = k0 % 4;
+
+    const double value = 1.0; // To be broadcasted and used for complex arithmetic
+    const double *v = &value;
+
+    /*
+      The mask bits below are set for ensuring fx2 compatability
+      while transposing, and loading/storing C(k(2) mask register).
+      This mask is set based on the m-value(m0) that the kernel receives.
+      m0 is guaranteed to be less than 4.
+    */
+    uint64_t m_store_row = m0; // Also used when handling row-storage of C(post transpose)
+    uint8_t m_load_mask = ( (uint8_t)1 << ( 2 * m_store_row ) ) - (uint8_t)1;
+
+    /*
+      The mask bits below are set for ensuring ?x2 compatability
+      while transposing, and loading/storing C in case of row-storage(k(3) opmask register).
+      Mask is of length 8-bits, sinze a ZMM register holds 8 double precision elements.
+    */
+    uint64_t trans_load_mask = 0x0F; // mask for transposing and loading = 0b 00 00 11 11
+    /*
+      This mask ensures that the ZMM registers disregard the last 32 bytes while
+      using masked load/stores or FMA operations.
+    */
+
+    // Assigning the type of beta scaling for enabling loading of C
+    char beta_mul_type = (beta->real == 0.0 && beta->imag == 0.0)? BLIS_MUL_ZERO : BLIS_MUL_DEFAULT;
+
+    BEGIN_ASM()
+
+    MOV(VAR(cs_a), R13)
+    LEA(MEM(, R13, 8), R13)
+    LEA(MEM(, R13, 2), R13)   // R13 = sizeof(dcomplex)*cs_a
+
+    MOV(VAR(rs_b), R14)
+    LEA(MEM(, R14, 8), R14)
+    LEA(MEM(, R14, 2), R14)   // R14 = sizeof(dcomplex)*rs_b
+
+    MOV(VAR(cs_b), R15)
+    LEA(MEM(, R15, 8), R15)
+    LEA(MEM(, R15, 2), R15)   // R15 = sizeof(dcomplex)*cs_b
+
+    MOV(VAR(rs_c), RDI)
+    LEA(MEM(, RDI, 8), RDI)
+    LEA(MEM(, RDI, 2), RDI)   // RDI = sizeof(dcomplex)*rs_c
+
+    MOV(VAR(cs_c), RSI)
+    LEA(MEM(, RSI, 8), RSI)
+    LEA(MEM(, RSI, 2), RSI)   // RSI = sizeof(dcomplex)*cs_c
+
+    MOV(VAR(m_load_mask), EBX)
+    KMOVW(EBX, k(2))               // k(2) = m_load_mask
+
+    MOV(VAR(trans_load_mask), EAX)
+    KMOVW(EAX, k(3))               // k(3) = trans_load_mask
+
+    // Intermediate register for complex arithmetic
+    MOV(VAR(v), R9)  // Used in fmaddsub instruction
+    VBROADCASTSD(MEM(R9), ZMM(29)) // Broadcasting 1.0 over ZMM(29)
+
+    MOV(var(a), RAX)     // RAX = addr of A for the MRxKC block
+    MOV(var(b), RBX)     // RBX = addr of B for the KCxNR block
+    MOV(var(c), RCX)     // RCX = addr of C for the MRxNR block
+
+    // Resetting all scratch registers
+    RESET_REGISTERS
+
+    // Setting iterator for k
+    MOV(VAR(k_iter), R8)
+    TEST(R8, R8)
+    JE(.ZKLEFT)
+    LABEL(.ZKITERMAIN)
+
+    MICRO_TILE_fx2
+    MICRO_TILE_fx2
+    MICRO_TILE_fx2
+    MICRO_TILE_fx2
+
+    DEC(R8)
+    JNZ(.ZKITERMAIN)
+
+    // Remainder loop for k
+    LABEL(.ZKLEFT)
+    MOV(VAR(k_left), R8)
+    TEST(R8, R8)
+    JE(.ACCUMULATE)
+    LABEL(.ZKLEFTLOOP)
+
+    MICRO_TILE_fx2
+
+    DEC(R8)
+    JNZ(.ZKLEFTLOOP)
+
+    LABEL(.ACCUMULATE) // Accumulating A*B over 2 registers
+    // Shuffling the registers FMAed with imaginary components in B.
+    PERMUTE(6)
+    PERMUTE(12)
+
+    // Final accumulation for A*B on 2 reg using the 2 reg.
+    ACC_COL(5, 6)
+    ACC_COL(11, 12)
+
+    // A*B is accumulated over the ZMM registers as follows :
+    /*
+      ZMM6  ZMM12
+    */
+
+    // Alpha scaling
+    MOV(VAR(alpha), RAX)
+    VBROADCASTSD(MEM(RAX), ZMM(0))  // Alpha->real
+    VBROADCASTSD(MEM(RAX, 8), ZMM(1)) // Alpha->imag
+
+    ALPHA_GENERIC(6)
+    ALPHA_GENERIC(12)
+
+    // Beta scaling
+    LABEL(.BETA_SCALE)
+    // Checking for storage scheme of C
+    CMP(IMM(16), RSI)
+    JE(.ROW_STORAGE_C)  // Jumping to row storage handling case
+
+    // Beta scaling when C is column stored
+    MOV(VAR(beta_mul_type), AL)
+    CMP(IMM(0), AL)    // Checking if beta == 0
+    JE(.STORE)
+
+    MOV(VAR(beta), RBX)
+    VBROADCASTSD(MEM(RBX), ZMM(0))    // Beta->real
+    VBROADCASTSD(MEM(RBX, 8), ZMM(1)) // Beta->imag
+
+    // Scaling C with beta, one column at a time
+    BETA_GENERIC_fZ(RCX, 5, 6)
+    ADD(RSI, RCX)
+    BETA_GENERIC_fZ(RCX, 11, 12)
+    JMP(.END)
+
+    // Handling when beta == 0
+    LABEL(.STORE)
+    VMOVUPD(ZMM(6), MEM(RCX) MASK_(k(2)))
+
+    VMOVUPD(ZMM(12), MEM(RCX, RSI, 1) MASK_(k(2)))
+    JMP(.END)
+
+    // Beta scaling when C is row stored
+    LABEL(.ROW_STORAGE_C)
+    /*
+      In-register transposition happens over the 12x4 micro-tile
+      in blocks of 4x4.
+    */
+    TRANSPOSE_4x4(6, 12, 18, 24)
+    /*
+      The layout post transposition and accumalation is as follows:
+      ZMM6
+      ZMM12
+      ZMM18
+      ZMM24
+    */
+
+    // Loading C(row stored) and beta scaling
+    MOV(VAR(beta_mul_type), AL)
+    CMP(IMM(0), AL)    // Checking if beta == 0
+    JE(.STORE_ROW)
+    MOV(VAR(beta), RBX)
+    VBROADCASTSD(MEM(RBX), ZMM(0))    // Beta->real
+    VBROADCASTSD(MEM(RBX, 8), ZMM(1)) // Beta->imag
+
+    /* Store the appropriate number of registers based on m0 */
+    MOV(var(m_store_row), R8)
+    CMP(IMM(3), R8)
+    JE(.SCALE_ROW_GEN_3)
+    CMP(IMM(2), R8)
+    JE(.SCALE_ROW_GEN_2)
+    CMP(IMM(1), R8)
+    JE(.SCALE_ROW_GEN_1)
+
+    LABEL(.SCALE_ROW_GEN_3)
+    BETA_GEN_ROW_1x4_MASK(RCX, 7, 6)
+    ADD(RDI, RCX)
+    BETA_GEN_ROW_1x4_MASK(RCX, 9, 12)
+    ADD(RDI, RCX)
+    BETA_GEN_ROW_1x4_MASK(RCX, 13, 18)
+    JMP(.END)
+
+    LABEL(.SCALE_ROW_GEN_2)
+    BETA_GEN_ROW_1x4_MASK(RCX, 7, 6)
+    ADD(RDI, RCX)
+    BETA_GEN_ROW_1x4_MASK(RCX, 9, 12)
+    JMP(.END)
+
+    LABEL(.SCALE_ROW_GEN_1)
+    BETA_GEN_ROW_1x4_MASK(RCX, 7, 6)
+    JMP(.END)
+
+    // Handling when beta == 0
+    LABEL(.STORE_ROW)
+
+    /* Store the appropriate number of registers based on m0 */
+    MOV(var(m_store_row), R8)
+    CMP(IMM(3), R8)
+    JE(.STORE_ROW_3)
+    CMP(IMM(2), R8)
+    JE(.STORE_ROW_2)
+    CMP(IMM(1), R8)
+    JE(.STORE_ROW_1)
+
+    LABEL(.STORE_ROW_3)
+    VMOVUPD(ZMM(6), MEM(RCX) MASK_(k(3)))
+    VMOVUPD(ZMM(12), MEM(RCX, RDI, 1) MASK_(k(3)))
+    VMOVUPD(ZMM(18), MEM(RCX, RDI, 2) MASK_(k(3)))
+    JMP(.END)
+
+    LABEL(.STORE_ROW_2)
+    VMOVUPD(ZMM(6), MEM(RCX) MASK_(k(3)))
+    VMOVUPD(ZMM(12), MEM(RCX, RDI, 1) MASK_(k(3)))
+    JMP(.END)
+
+    LABEL(.STORE_ROW_1)
+    VMOVUPD(ZMM(6), MEM(RCX) MASK_(k(3)))
+
+    LABEL(.END)
+
+    END_ASM(
+    : // output operands (none)
+    : // input operands
+      [v]  "m" (v),
+      [k_iter]  "m" (k_iter),
+      [k_left]  "m" (k_left),
+      [m_load_mask] "m" (m_load_mask),
+      [m_store_row] "m" (m_store_row),
+      [alpha]  "m" (alpha),
+      [trans_load_mask] "m" (trans_load_mask),
+      [a]      "m" (a),
+      [b]      "m" (b),
+      [beta_mul_type]   "m" (beta_mul_type),
+      [beta]   "m" (beta),
+      [c]      "m" (c),
+      [cs_a]   "m" (cs_a),
+      [rs_b]   "m" (rs_b),
+      [cs_b]   "m" (cs_b),
+      [rs_c]   "m" (rs_c),
+      [cs_c]   "m" (cs_c)
+    : // register clobber list
+      "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "eax", "ebx", "al",
+      "zmm0", "zmm1", "zmm2", "zmm3",
+      "zmm4", "zmm5", "zmm6", "zmm7",
+      "zmm8", "zmm9", "zmm10", "zmm11",
+      "zmm12", "zmm13", "zmm14", "zmm15",
+      "zmm16", "zmm17", "zmm18", "zmm19",
+      "zmm20", "zmm21", "zmm22", "zmm23",
+      "zmm24", "zmm25", "zmm26", "zmm27",
+      "zmm28", "zmm29", "zmm30", "zmm31",
+      "k2", "k3", "memory"
+    )
+}
+
+void bli_zgemmsup_cv_zen4_asm_fx1
+     (
+       conj_t       conja,
+       conj_t       conjb,
+       dim_t        m0,
+       dim_t        n0,
+       dim_t        k0,
+       dcomplex*    restrict alpha,
+       dcomplex*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       dcomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       dcomplex*    restrict beta,
+       dcomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
+{
+    // Main kernel
+    uint64_t cs_a   = cs_a0;
+    uint64_t rs_b   = rs_b0;
+    uint64_t cs_b   = cs_b0;
+    uint64_t rs_c   = rs_c0;
+    uint64_t cs_c   = cs_c0;
+
+    uint64_t k_iter = k0 / 4; // Unroll factor of 4
+    uint64_t k_left = k0 % 4;
+
+    const double value = 1.0; // To be broadcasted and used for complex arithmetic
+    const double *v = &value;
+
+    /*
+      The mask bits below are set for ensuring fx1 compatability
+      while transposing, and loading/storing C(k(2) mask register).
+      This mask is set based on the m-value(m0) that the kernel receives.
+      m0 is guaranteed to be less than 4.
+    */
+    uint64_t m_store_row = m0; // Also used when handling row-storage of C(post transpose)
+    uint8_t m_load_mask = ( (uint8_t)1 << ( 2 * m_store_row ) ) - (uint8_t)1;
+
+    /*
+      The mask bits below are set for ensuring ?x1 compatability
+      while transposing, and loading/storing C in case of row-storage(k(3) opmask register).
+      Mask is of length 8-bits, sinze a ZMM register holds 8 double precision elements.
+    */
+    uint64_t trans_load_mask = 0x03; // mask for transposing and loading = 0b 00 00 00 11
+    /*
+      This mask ensures that the ZMM registers disregard the last 48 bytes while
+      using masked load/stores or FMA operations.
+    */
+
+    // Assigning the type of beta scaling for enabling loading of C
+    char beta_mul_type = (beta->real == 0.0 && beta->imag == 0.0)? BLIS_MUL_ZERO : BLIS_MUL_DEFAULT;
+
+    BEGIN_ASM()
+
+    MOV(VAR(cs_a), R13)
+    LEA(MEM(, R13, 8), R13)
+    LEA(MEM(, R13, 2), R13)   // R13 = sizeof(dcomplex)*cs_a
+
+    MOV(VAR(rs_b), R14)
+    LEA(MEM(, R14, 8), R14)
+    LEA(MEM(, R14, 2), R14)   // R14 = sizeof(dcomplex)*rs_b
+
+    MOV(VAR(cs_b), R15)
+    LEA(MEM(, R15, 8), R15)
+    LEA(MEM(, R15, 2), R15)   // R15 = sizeof(dcomplex)*cs_b
+
+    MOV(VAR(rs_c), RDI)
+    LEA(MEM(, RDI, 8), RDI)
+    LEA(MEM(, RDI, 2), RDI)   // RDI = sizeof(dcomplex)*rs_c
+
+    MOV(VAR(cs_c), RSI)
+    LEA(MEM(, RSI, 8), RSI)
+    LEA(MEM(, RSI, 2), RSI)   // RSI = sizeof(dcomplex)*cs_c
+
+    MOV(VAR(m_load_mask), EBX)
+    KMOVW(EBX, k(2))               // k(2) = m_load_mask
+
+    MOV(VAR(trans_load_mask), EAX)
+    KMOVW(EAX, k(3))               // k(3) = trans_load_mask
+
+    // Intermediate register for complex arithmetic
+    MOV(VAR(v), R9)  // Used in fmaddsub instruction
+    VBROADCASTSD(MEM(R9), ZMM(29)) // Broadcasting 1.0 over ZMM(29)
+
+    MOV(var(a), RAX)     // RAX = addr of A for the MRxKC block
+    MOV(var(b), RBX)     // RBX = addr of B for the KCxNR block
+    MOV(var(c), RCX)     // RCX = addr of C for the MRxNR block
+
+    // Resetting all scratch registers
+    RESET_REGISTERS
+
+    // Setting iterator for k
+    MOV(VAR(k_iter), R8)
+    TEST(R8, R8)
+    JE(.ZKLEFT)
+    LABEL(.ZKITERMAIN)
+
+    MICRO_TILE_fx1
+    MICRO_TILE_fx1
+    MICRO_TILE_fx1
+    MICRO_TILE_fx1
+
+    DEC(R8)
+    JNZ(.ZKITERMAIN)
+
+    // Remainder loop for k
+    LABEL(.ZKLEFT)
+    MOV(VAR(k_left), R8)
+    TEST(R8, R8)
+    JE(.ACCUMULATE)
+    LABEL(.ZKLEFTLOOP)
+
+    MICRO_TILE_fx1
+
+    DEC(R8)
+    JNZ(.ZKLEFTLOOP)
+
+    LABEL(.ACCUMULATE) // Accumulating A*B over 1 register
+    // Shuffling the registers FMAed with imaginary components in B.
+    PERMUTE(6)
+
+    // Final accumulation for A*B on 1 reg using the 2 reg.
+    ACC_COL(5, 6)
+
+    // A*B is accumulated over the ZMM registers as follows :
+    /*
+      ZMM6
+    */
+
+    // Alpha scaling
+    MOV(VAR(alpha), RAX)
+    VBROADCASTSD(MEM(RAX), ZMM(0))  // Alpha->real
+    VBROADCASTSD(MEM(RAX, 8), ZMM(1)) // Alpha->imag
+
+    ALPHA_GENERIC(6)
+
+    // Beta scaling
+    LABEL(.BETA_SCALE)
+    // Checking for storage scheme of C
+    CMP(IMM(16), RSI)
+    JE(.ROW_STORAGE_C)  // Jumping to row storage handling case
+
+    // Beta scaling when C is column stored
+    MOV(VAR(beta_mul_type), AL)
+    CMP(IMM(0), AL)    // Checking if beta == 0
+    JE(.STORE)
+
+    MOV(VAR(beta), RBX)
+    VBROADCASTSD(MEM(RBX), ZMM(0))    // Beta->real
+    VBROADCASTSD(MEM(RBX, 8), ZMM(1)) // Beta->imag
+
+    // Scaling C with beta, one column at a time
+    BETA_GENERIC_fZ(RCX, 5, 6)
+    JMP(.END)
+
+    // Handling when beta == 0
+    LABEL(.STORE)
+    VMOVUPD(ZMM(6), MEM(RCX) MASK_(k(2)))
+    JMP(.END)
+
+    // Beta scaling when C is row stored
+    LABEL(.ROW_STORAGE_C)
+    /*
+      In-register transposition happens over the 12x4 micro-tile
+      in blocks of 4x4.
+    */
+    TRANSPOSE_4x4(6, 12, 18, 24)
+    /*
+      The layout post transposition and accumalation is as follows:
+      ZMM6
+      ZMM12
+      ZMM18
+      ZMM24
+    */
+
+    // Loading C(row stored) and beta scaling
+    MOV(VAR(beta_mul_type), AL)
+    CMP(IMM(0), AL)    // Checking if beta == 0
+    JE(.STORE_ROW)
+    MOV(VAR(beta), RBX)
+    VBROADCASTSD(MEM(RBX), ZMM(0))    // Beta->real
+    VBROADCASTSD(MEM(RBX, 8), ZMM(1)) // Beta->imag
+
+    /* Store the appropriate number of registers based on m0 */
+    MOV(var(m_store_row), R8)
+    CMP(IMM(3), R8)
+    JE(.SCALE_ROW_GEN_3)
+    CMP(IMM(2), R8)
+    JE(.SCALE_ROW_GEN_2)
+    CMP(IMM(1), R8)
+    JE(.SCALE_ROW_GEN_1)
+
+    LABEL(.SCALE_ROW_GEN_3)
+    BETA_GEN_ROW_1x4_MASK(RCX, 7, 6)
+    ADD(RDI, RCX)
+    BETA_GEN_ROW_1x4_MASK(RCX, 9, 12)
+    ADD(RDI, RCX)
+    BETA_GEN_ROW_1x4_MASK(RCX, 13, 18)
+    JMP(.END)
+
+    LABEL(.SCALE_ROW_GEN_2)
+    BETA_GEN_ROW_1x4_MASK(RCX, 7, 6)
+    ADD(RDI, RCX)
+    BETA_GEN_ROW_1x4_MASK(RCX, 9, 12)
+    JMP(.END)
+
+    LABEL(.SCALE_ROW_GEN_1)
+    BETA_GEN_ROW_1x4_MASK(RCX, 7, 6)
+    JMP(.END)
+
+    // Handling when beta == 0
+    LABEL(.STORE_ROW)
+
+    /* Store the appropriate number of registers based on m0 */
+    MOV(var(m_store_row), R8)
+    CMP(IMM(3), R8)
+    JE(.STORE_ROW_3)
+    CMP(IMM(2), R8)
+    JE(.STORE_ROW_2)
+    CMP(IMM(1), R8)
+    JE(.STORE_ROW_1)
+
+    LABEL(.STORE_ROW_3)
+    VMOVUPD(ZMM(6), MEM(RCX) MASK_(k(3)))
+    VMOVUPD(ZMM(12), MEM(RCX, RDI, 1) MASK_(k(3)))
+    VMOVUPD(ZMM(18), MEM(RCX, RDI, 2) MASK_(k(3)))
+    JMP(.END)
+
+    LABEL(.STORE_ROW_2)
+    VMOVUPD(ZMM(6), MEM(RCX) MASK_(k(3)))
+    VMOVUPD(ZMM(12), MEM(RCX, RDI, 1) MASK_(k(3)))
+    JMP(.END)
+
+    LABEL(.STORE_ROW_1)
+    VMOVUPD(ZMM(6), MEM(RCX) MASK_(k(3)))
+
+    LABEL(.END)
+
+    END_ASM(
+    : // output operands (none)
+    : // input operands
+      [v]  "m" (v),
+      [k_iter]  "m" (k_iter),
+      [k_left]  "m" (k_left),
+      [m_load_mask] "m" (m_load_mask),
+      [m_store_row] "m" (m_store_row),
+      [trans_load_mask] "m" (trans_load_mask),
+      [alpha]  "m" (alpha),
+      [a]      "m" (a),
+      [b]      "m" (b),
+      [beta_mul_type]   "m" (beta_mul_type),
+      [beta]   "m" (beta),
+      [c]      "m" (c),
+      [cs_a]   "m" (cs_a),
+      [rs_b]   "m" (rs_b),
+      [cs_b]   "m" (cs_b),
+      [rs_c]   "m" (rs_c),
+      [cs_c]   "m" (cs_c)
+    : // register clobber list
+      "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "eax", "ebx", "al",
+      "zmm0", "zmm1", "zmm2", "zmm3",
+      "zmm4", "zmm5", "zmm6", "zmm7",
+      "zmm8", "zmm9", "zmm10", "zmm11",
+      "zmm12", "zmm13", "zmm14", "zmm15",
+      "zmm16", "zmm17", "zmm18", "zmm19",
+      "zmm20", "zmm21", "zmm22", "zmm23",
+      "zmm24", "zmm25", "zmm26", "zmm27",
+      "zmm28", "zmm29", "zmm30", "zmm31",
+      "k2", "k3", "memory"
     )
 }
 
@@ -5684,5 +6934,392 @@ void bli_zgemmsup_cv_zen4_asm_2x1
       "ymm4", "ymm5", "ymm6", "ymm7",
       "ymm8", "ymm9", "ymm10", "ymm11",
       "ymm12", "ymm13", "ymm14", "ymm15", "memory"
+    )
+}
+
+void bli_zgemmsup_cv_zen4_asm_1x4
+     (
+       conj_t       conja,
+       conj_t       conjb,
+       dim_t        m0,
+       dim_t        n0,
+       dim_t        k0,
+       dcomplex*    restrict alpha,
+       dcomplex*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       dcomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       dcomplex*    restrict beta,
+       dcomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
+{
+    // Main kernel
+    uint64_t cs_a   = cs_a0;
+    uint64_t rs_b   = rs_b0;
+    uint64_t cs_b   = cs_b0;
+    uint64_t rs_c   = rs_c0;
+    uint64_t cs_c   = cs_c0;
+
+    uint64_t k_iter = k0 / 4; // Unroll factor of 4
+    uint64_t k_left = k0 % 4;
+
+    const double value = 1.0; // To be broadcasted and used for complex arithmetic
+    const double *v = &value;
+
+    // Assigning the type of beta scaling for enabling loading of C
+    char beta_mul_type = (beta->real == 0.0 && beta->imag == 0.0)? BLIS_MUL_ZERO : BLIS_MUL_DEFAULT;
+
+    BEGIN_ASM()
+
+    MOV(VAR(cs_a), R13)
+    LEA(MEM(, R13, 8), R13)
+    LEA(MEM(, R13, 2), R13)   // R13 = sizeof(dcomplex)*cs_a
+
+    MOV(VAR(rs_b), R14)
+    LEA(MEM(, R14, 8), R14)
+    LEA(MEM(, R14, 2), R14)   // R14 = sizeof(dcomplex)*rs_b
+
+    MOV(VAR(cs_b), R15)
+    LEA(MEM(, R15, 8), R15)
+    LEA(MEM(, R15, 2), R15)   // R15 = sizeof(dcomplex)*cs_b
+
+    MOV(VAR(rs_c), RDI)
+    LEA(MEM(, RDI, 8), RDI)
+    LEA(MEM(, RDI, 2), RDI)   // RDI = sizeof(dcomplex)*rs_c
+
+    MOV(VAR(cs_c), RSI)
+    LEA(MEM(, RSI, 8), RSI)
+    LEA(MEM(, RSI, 2), RSI)   // RSI = sizeof(dcomplex)*cs_c
+
+    // Intermediate register for complex arithmetic
+    MOV(VAR(v), R9)  // Used in fmaddsub instruction
+    VBROADCASTSD(MEM(R9), YMM(2)) // Broadcasting 1.0 over YMM(2)
+
+    MOV(var(a), RAX)     // RAX = addr of A for the MRxKC block
+    MOV(var(b), RBX)     // RBX = addr of B for the KCxNR block
+    MOV(var(c), RCX)     // RCX = addr of C for the MRxNR block
+
+    // Resetting all scratch registers
+    VXORPD(YMM(5), YMM(5), YMM(5))
+    VXORPD(YMM(6), YMM(6), YMM(6))
+    VXORPD(YMM(7), YMM(7), YMM(7))
+    VXORPD(YMM(8), YMM(8), YMM(8))
+    VXORPD(YMM(9), YMM(9), YMM(9))
+    VXORPD(YMM(10), YMM(10), YMM(10))
+    VXORPD(YMM(11), YMM(11), YMM(11))
+    VXORPD(YMM(12), YMM(12), YMM(12))
+
+    // Setting iterator for k
+    MOV(VAR(k_iter), R8)
+    TEST(R8, R8)
+    JE(.ZKLEFT)
+    LABEL(.ZKITERMAIN)
+
+    /* Macro for 2x4 micro-tile evaluation   */
+    VBROADCASTSD(MEM(RBX), YMM(3))
+    VBROADCASTSD(MEM(RBX, 8), YMM(4))
+    VMOVUPD(MEM(RAX), YMM(0))
+    LEA(MEM(RBX, R15, 2), R9)
+    /* Prebroadcasting B on YMM(13) and YMM(14) */
+    VBROADCASTSD(MEM(RBX, R15, 1), YMM(13))
+    VBROADCASTSD(MEM(RBX, R15, 1, 8), YMM(14))
+    VFMADD231PD(YMM(0), YMM(3), YMM(5))
+    VFMADD231PD(YMM(0), YMM(4), YMM(6))
+    /* Prebroadcasting B on YMM(3) and YMM(4) */
+    VBROADCASTSD(MEM(R9), YMM(3))
+    VBROADCASTSD(MEM(R9, 8), YMM(4))
+    VFMADD231PD(YMM(0), YMM(13), YMM(7))
+    VFMADD231PD(YMM(0), YMM(14), YMM(8))
+    /* Prebroadcasting B on YMM(13) and YMM(14) */
+    VBROADCASTSD(MEM(R9, R15, 1), YMM(13))
+    VBROADCASTSD(MEM(R9, R15, 1, 8), YMM(14))
+    VFMADD231PD(YMM(0), YMM(3), YMM(9))
+    VFMADD231PD(YMM(0), YMM(4), YMM(10))
+    VFMADD231PD(YMM(0), YMM(13), YMM(11))
+    VFMADD231PD(YMM(0), YMM(14), YMM(12))
+    /* Adjusting addresses for next micro tiles */
+    ADD(R14, RBX)
+    ADD(R13, RAX)
+
+    // ----------------------------------------- //
+
+    /* Macro for 2x4 micro-tile evaluation   */
+    VBROADCASTSD(MEM(RBX), YMM(3))
+    VBROADCASTSD(MEM(RBX, 8), YMM(4))
+    VMOVUPD(MEM(RAX), YMM(0))
+    LEA(MEM(RBX, R15, 2), R9)
+    /* Prebroadcasting B on YMM(13) and YMM(14) */
+    VBROADCASTSD(MEM(RBX, R15, 1), YMM(13))
+    VBROADCASTSD(MEM(RBX, R15, 1, 8), YMM(14))
+    VFMADD231PD(YMM(0), YMM(3), YMM(5))
+    VFMADD231PD(YMM(0), YMM(4), YMM(6))
+    /* Prebroadcasting B on YMM(3) and YMM(4) */
+    VBROADCASTSD(MEM(R9), YMM(3))
+    VBROADCASTSD(MEM(R9, 8), YMM(4))
+    VFMADD231PD(YMM(0), YMM(13), YMM(7))
+    VFMADD231PD(YMM(0), YMM(14), YMM(8))
+    /* Prebroadcasting B on YMM(13) and YMM(14) */
+    VBROADCASTSD(MEM(R9, R15, 1), YMM(13))
+    VBROADCASTSD(MEM(R9, R15, 1, 8), YMM(14))
+    VFMADD231PD(YMM(0), YMM(3), YMM(9))
+    VFMADD231PD(YMM(0), YMM(4), YMM(10))
+    VFMADD231PD(YMM(0), YMM(13), YMM(11))
+    VFMADD231PD(YMM(0), YMM(14), YMM(12))
+    /* Adjusting addresses for next micro tiles */
+    ADD(R14, RBX)
+    ADD(R13, RAX)
+
+    // ----------------------------------------- //
+
+    /* Macro for 2x4 micro-tile evaluation   */
+    VBROADCASTSD(MEM(RBX), YMM(3))
+    VBROADCASTSD(MEM(RBX, 8), YMM(4))
+    VMOVUPD(MEM(RAX), YMM(0))
+    LEA(MEM(RBX, R15, 2), R9)
+    /* Prebroadcasting B on YMM(13) and YMM(14) */
+    VBROADCASTSD(MEM(RBX, R15, 1), YMM(13))
+    VBROADCASTSD(MEM(RBX, R15, 1, 8), YMM(14))
+    VFMADD231PD(YMM(0), YMM(3), YMM(5))
+    VFMADD231PD(YMM(0), YMM(4), YMM(6))
+    /* Prebroadcasting B on YMM(3) and YMM(4) */
+    VBROADCASTSD(MEM(R9), YMM(3))
+    VBROADCASTSD(MEM(R9, 8), YMM(4))
+    VFMADD231PD(YMM(0), YMM(13), YMM(7))
+    VFMADD231PD(YMM(0), YMM(14), YMM(8))
+    /* Prebroadcasting B on YMM(13) and YMM(14) */
+    VBROADCASTSD(MEM(R9, R15, 1), YMM(13))
+    VBROADCASTSD(MEM(R9, R15, 1, 8), YMM(14))
+    VFMADD231PD(YMM(0), YMM(3), YMM(9))
+    VFMADD231PD(YMM(0), YMM(4), YMM(10))
+    VFMADD231PD(YMM(0), YMM(13), YMM(11))
+    VFMADD231PD(YMM(0), YMM(14), YMM(12))
+    /* Adjusting addresses for next micro tiles */
+    ADD(R14, RBX)
+    ADD(R13, RAX)
+
+    // ----------------------------------------- //
+
+    /* Macro for 2x4 micro-tile evaluation   */
+    VBROADCASTSD(MEM(RBX), YMM(3))
+    VBROADCASTSD(MEM(RBX, 8), YMM(4))
+    VMOVUPD(MEM(RAX), YMM(0))
+    LEA(MEM(RBX, R15, 2), R9)
+    /* Prebroadcasting B on YMM(13) and YMM(14) */
+    VBROADCASTSD(MEM(RBX, R15, 1), YMM(13))
+    VBROADCASTSD(MEM(RBX, R15, 1, 8), YMM(14))
+    VFMADD231PD(YMM(0), YMM(3), YMM(5))
+    VFMADD231PD(YMM(0), YMM(4), YMM(6))
+    /* Prebroadcasting B on YMM(3) and YMM(4) */
+    VBROADCASTSD(MEM(R9), YMM(3))
+    VBROADCASTSD(MEM(R9, 8), YMM(4))
+    VFMADD231PD(YMM(0), YMM(13), YMM(7))
+    VFMADD231PD(YMM(0), YMM(14), YMM(8))
+    /* Prebroadcasting B on YMM(13) and YMM(14) */
+    VBROADCASTSD(MEM(R9, R15, 1), YMM(13))
+    VBROADCASTSD(MEM(R9, R15, 1, 8), YMM(14))
+    VFMADD231PD(YMM(0), YMM(3), YMM(9))
+    VFMADD231PD(YMM(0), YMM(4), YMM(10))
+    VFMADD231PD(YMM(0), YMM(13), YMM(11))
+    VFMADD231PD(YMM(0), YMM(14), YMM(12))
+    /* Adjusting addresses for next micro tiles */
+    ADD(R14, RBX)
+    ADD(R13, RAX)
+
+    DEC(R8)
+    JNZ(.ZKITERMAIN)
+
+    // Remainder loop for k
+    LABEL(.ZKLEFT)
+    MOV(VAR(k_left), R8)
+    TEST(R8, R8)
+    JE(.ACCUMULATE)
+    LABEL(.ZKLEFTLOOP)
+
+    /* Macro for 2x4 micro-tile evaluation   */
+    VBROADCASTSD(MEM(RBX), YMM(3))
+    VBROADCASTSD(MEM(RBX, 8), YMM(4))
+    VMOVUPD(MEM(RAX), YMM(0))
+    LEA(MEM(RBX, R15, 2), R9)
+    /* Prebroadcasting B on YMM(13) and YMM(14) */
+    VBROADCASTSD(MEM(RBX, R15, 1), YMM(13))
+    VBROADCASTSD(MEM(RBX, R15, 1, 8), YMM(14))
+    VFMADD231PD(YMM(0), YMM(3), YMM(5))
+    VFMADD231PD(YMM(0), YMM(4), YMM(6))
+    /* Prebroadcasting B on YMM(3) and YMM(4) */
+    VBROADCASTSD(MEM(R9), YMM(3))
+    VBROADCASTSD(MEM(R9, 8), YMM(4))
+    VFMADD231PD(YMM(0), YMM(13), YMM(7))
+    VFMADD231PD(YMM(0), YMM(14), YMM(8))
+    /* Prebroadcasting B on YMM(13) and YMM(14) */
+    VBROADCASTSD(MEM(R9, R15, 1), YMM(13))
+    VBROADCASTSD(MEM(R9, R15, 1, 8), YMM(14))
+    VFMADD231PD(YMM(0), YMM(3), YMM(9))
+    VFMADD231PD(YMM(0), YMM(4), YMM(10))
+    VFMADD231PD(YMM(0), YMM(13), YMM(11))
+    VFMADD231PD(YMM(0), YMM(14), YMM(12))
+    /* Adjusting addresses for next micro tiles */
+    ADD(R14, RBX)
+    ADD(R13, RAX)
+
+    DEC(R8)
+    JNZ(.ZKLEFTLOOP)
+
+    LABEL(.ACCUMULATE) // Accumulating A*B over 4 registers
+    // Shuffling the registers FMAed with imaginary components in B.
+    VPERMILPD(IMM(0x5), YMM(6), YMM(6))
+    VPERMILPD(IMM(0x5), YMM(8), YMM(8))
+    VPERMILPD(IMM(0x5), YMM(10), YMM(10))
+    VPERMILPD(IMM(0x5), YMM(12), YMM(12))
+
+    // Final accumulation for A*B on 4 reg using the 8 reg.
+    VADDSUBPD(YMM(6), YMM(5), YMM(6))
+    VADDSUBPD(YMM(8), YMM(7), YMM(8))
+    VADDSUBPD(YMM(10), YMM(9), YMM(10))
+    VADDSUBPD(YMM(12), YMM(11), YMM(12))
+
+    // A*B is accumulated over the YMM registers as follows :
+    /*
+      YMM6  YMM8  YMM10  YMM12
+    */
+
+    // Alpha scaling
+    MOV(VAR(alpha), RAX)
+    VBROADCASTSD(MEM(RAX), YMM(0))  // Alpha->real
+    VBROADCASTSD(MEM(RAX, 8), YMM(1)) // Alpha->imag
+
+    VMULPD(YMM(0), YMM(6), YMM(15))
+    VMULPD(YMM(1), YMM(6), YMM(6))
+    VPERMILPD(IMM(0x5), YMM(6), YMM(6))
+    VADDSUBPD(YMM(6), YMM(15), YMM(6))
+
+    VMULPD(YMM(0), YMM(8), YMM(15))
+    VMULPD(YMM(1), YMM(8), YMM(8))
+    VPERMILPD(IMM(0x5), YMM(8), YMM(8))
+    VADDSUBPD(YMM(8), YMM(15), YMM(8))
+
+    VMULPD(YMM(0), YMM(10), YMM(15))
+    VMULPD(YMM(1), YMM(10), YMM(10))
+    VPERMILPD(IMM(0x5), YMM(10), YMM(10))
+    VADDSUBPD(YMM(10), YMM(15), YMM(10))
+
+    VMULPD(YMM(0), YMM(12), YMM(15))
+    VMULPD(YMM(1), YMM(12), YMM(12))
+    VPERMILPD(IMM(0x5), YMM(12), YMM(12))
+    VADDSUBPD(YMM(12), YMM(15), YMM(12))
+
+    // Beta scaling
+    LABEL(.BETA_SCALE)
+    // Checking for storage scheme of C
+    CMP(IMM(16), RSI)
+    JE(.ROW_STORAGE_C)  // Jumping to row storage handling case
+
+    // Beta scaling when C is column stored
+    MOV(VAR(beta_mul_type), AL)
+    CMP(IMM(0), AL)    // Checking if beta == 0
+    JE(.STORE)
+
+    MOV(VAR(beta), RBX)
+    VBROADCASTSD(MEM(RBX), YMM(0))  // Beta->real
+    VBROADCASTSD(MEM(RBX, 8), YMM(1)) // Beta->imag
+
+    VMOVUPD(MEM(RCX), YMM(5))
+    VMULPD(YMM(0), YMM(5), YMM(15))
+    VMULPD(YMM(1), YMM(5), YMM(5))
+    VPERMILPD(IMM(0x5), YMM(5), YMM(5))
+    VADDSUBPD(YMM(5), YMM(15), YMM(5))
+    VADDPD(YMM(5), YMM(6), YMM(6))
+    VMOVUPD(YMM(6), MEM(RCX))
+    ADD(RSI, RCX)
+
+    VMOVUPD(MEM(RCX), YMM(7))
+    VMULPD(YMM(0), YMM(7), YMM(15))
+    VMULPD(YMM(1), YMM(7), YMM(7))
+    VPERMILPD(IMM(0x5), YMM(7), YMM(7))
+    VADDSUBPD(YMM(7), YMM(15), YMM(7))
+    VADDPD(YMM(7), YMM(8), YMM(8))
+    VMOVUPD(YMM(8), MEM(RCX))
+    ADD(RSI, RCX)
+
+    VMOVUPD(MEM(RCX), YMM(9))
+    VMULPD(YMM(0), YMM(9), YMM(15))
+    VMULPD(YMM(1), YMM(9), YMM(9))
+    VPERMILPD(IMM(0x5), YMM(9), YMM(9))
+    VADDSUBPD(YMM(9), YMM(15), YMM(9))
+    VADDPD(YMM(9), YMM(10), YMM(10))
+    VMOVUPD(YMM(10), MEM(RCX))
+    ADD(RSI, RCX)
+
+    VMOVUPD(MEM(RCX), YMM(11))
+    VMULPD(YMM(0), YMM(11), YMM(15))
+    VMULPD(YMM(1), YMM(11), YMM(11))
+    VPERMILPD(IMM(0x5), YMM(11), YMM(11))
+    VADDSUBPD(YMM(11), YMM(15), YMM(11))
+    VADDPD(YMM(11), YMM(12), YMM(12))
+    VMOVUPD(YMM(12), MEM(RCX))
+    JMP(.END)
+
+    LABEL(.STORE)
+    VMOVUPD(YMM(6), MEM(RCX))
+    ADD(RSI, RCX)
+    VMOVUPD(YMM(8), MEM(RCX))
+    ADD(RSI, RCX)
+    VMOVUPD(YMM(10), MEM(RCX))
+    ADD(RSI, RCX)
+    VMOVUPD(YMM(12), MEM(RCX))
+    JMP(.END)
+
+    // Beta scaling when C is row stored
+    LABEL(.ROW_STORAGE_C)
+    TRANSPOSE_2x2(6, 8)
+    TRANSPOSE_2x2(10, 12)
+
+    // Loading C(row stored) and beta scaling
+    MOV(RCX, R9)
+    MOV(VAR(beta_mul_type), AL)
+    CMP(IMM(0), AL)    // Checking if beta == 0
+    JE(.STORE_ROW)
+    MOV(VAR(beta), RBX)
+    VBROADCASTSD(MEM(RBX), YMM(0))    // Beta->real
+    VBROADCASTSD(MEM(RBX, 8), YMM(1)) // Beta->imag
+
+    BETA_GEN_ROW_2x4(R9, 5, 6, 9, 10)
+    ADD(RDI, R9)
+    BETA_GEN_ROW_2x4(R9, 7, 8, 11, 12)
+    JMP(.END)
+
+    // Handling when beta == 0
+    LABEL(.STORE_ROW)
+    VMOVUPD(YMM(6), MEM(RCX))
+    VMOVUPD(YMM(10), MEM(RCX, RSI, 2))
+    ADD(RDI, RCX)
+    VMOVUPD(YMM(8), MEM(RCX))
+    VMOVUPD(YMM(12), MEM(RCX, RSI, 2))
+
+    LABEL(.END)
+
+    END_ASM(
+    : // output operands (none)
+    : // input operands
+      [v]  "m" (v),
+      [k_iter]  "m" (k_iter),
+      [k_left]  "m" (k_left),
+      [alpha]  "m" (alpha),
+      [a]      "m" (a),
+      [b]      "m" (b),
+      [beta_mul_type]   "m" (beta_mul_type),
+      [beta]   "m" (beta),
+      [c]      "m" (c),
+      [cs_a]   "m" (cs_a),
+      [rs_b]   "m" (rs_b),
+      [cs_b]   "m" (cs_b),
+      [rs_c]   "m" (rs_c),
+      [cs_c]   "m" (cs_c)
+    : // register clobber list
+      "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "al",
+      "ymm0", "ymm1", "ymm2", "ymm3",
+      "ymm4", "ymm5", "ymm6", "ymm7",
+      "ymm8", "ymm9", "ymm10", "ymm11",
+      "ymm12", "ymm13", "ymm14", "ymm15",
+      "memory"
     )
 }

@@ -46,7 +46,12 @@
     ( ( bli_is_notrans( transa ) && ( m < 8 ) && ( n < 200 ) && ( k < 200 ) ) || \
       ( bli_is_trans( transa ) && ( m < 8 ) && ( n < 200 ) && ( k < 200 ) && ( k >= 8 ) ) ) ) || \
   /* In case of multi-threaded request */ \
-  ( ( is_parallel ) && ( ( m * n * k ) < 5000 ) && ( k >= 16 ) )
+  ( ( is_parallel ) && \
+    /* Separate thresholds based on transpose value of A */ \
+    ( ( bli_is_notrans( transa ) && \
+      ( ( m <= 4 ) && ( n <= 200 ) && ( k <= 8 ) ) ) || \
+      ( bli_is_trans( transa ) && \
+      ( ( m <= 4 ) && ( n >= 12 ) && ( n <= 200 ) && ( k <= 4 ) ) ) ) )
 
 #define zgemm_tiny_zen5_thresh_avx512( transa, transb, m, n, k, is_parallel ) \
   /* In case of single-threaded request */ \
@@ -55,7 +60,14 @@
     ( ( bli_is_notrans( transa ) && ( m < 200 ) && ( n < 200 ) && ( k < 200 ) ) || \
       ( bli_is_trans( transa ) && ( m < 200 ) && ( n < 200 ) && ( k < 200 ) && ( k >= 8 ) ) ) ) || \
   /* In case of multi-threaded request */ \
-  ( ( is_parallel ) && ( ( m * n * k ) < 10000 ) && ( k >= 16 ) )
+  ( ( is_parallel ) && \
+    /* Separate thresholds based on transpose value of A */ \
+    ( ( bli_is_notrans( transa ) && \
+      ( ( m <= 200 ) && ( k <= 200 ) && ( ( ( n <= 16 ) && ( ( m * k ) <= 16000 ) ) || \
+        ( ( n <= 16 ) && ( ( m * k ) <= 13000 ) ) ) ) ) || \
+        ( bli_is_notrans( transa ) && \
+        ( ( m <= 200 ) && ( k <= 200 ) && ( ( ( n <= 16 ) && ( ( m * k ) <= 7000 ) ) || \
+          ( ( n <= 16 ) && ( ( m * k ) <= 6000 ) ) ) ) ) ) )
 
 /* Defining the macro to be used for selecting the kernel at runtime */
 #define ZEN5_UKR_SELECTOR( ch, transa, transb, m, n, k, stor_id, ukr_support, gemmtiny_ukr_info, is_parallel ) \

@@ -975,6 +975,166 @@ INSTANTIATE_TEST_SUITE_P(
      );
 #endif
 
+#ifdef K_bli_zgemmsup_cv_zen4_asm_fx4
+INSTANTIATE_TEST_SUITE_P(
+         bli_zgemmsup_cv_zen4_asm_fx4_col_stored_c,
+         zgemmGenericSUP,
+         ::testing::Combine(
+             ::testing::Values(gtint_t(3)),                                  // values of m
+             ::testing::Values(gtint_t(4)),                                  // values of n
+             ::testing::Range(gtint_t(0), gtint_t(9), 1),                    // values of k
+             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{4.0, 0.0}, dcomplex{0.0, 3}, dcomplex{3.5, 4.5}),   // alpha value
+             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 9}, dcomplex{-7.3, 6.7}), // beta value
+             ::testing::Values('c'),                                         // storage of c
+             ::testing::Values(bli_zgemmsup_cv_zen4_asm_fx4),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(4)),                                  // Micro kernel block MR
+             ::testing::Values('n'),                                         // transa
+             ::testing::Values('n', 't'),                                    // transb
+             ::testing::Values(false, true)                                  // is_memory_test
+         ),
+         ::zgemmGenericSUPPrint()
+     );
+
+INSTANTIATE_TEST_SUITE_P(
+        bli_zgemmsup_cv_zen4_asm_fx4_row_stored_c,
+        zgemmGenericSUP,
+        ::testing::Combine(
+            ::testing::Values(gtint_t(3)),                                  // values of m
+            ::testing::Values(gtint_t(4)),                                  // values of n
+            ::testing::Range(gtint_t(0), gtint_t(19), 1),                   // values of k
+            ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{4.0, 0.0}, dcomplex{0.0, -1.9}, dcomplex{3.5, 4.5}),   // alpha value
+            ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1.5}, dcomplex{-7.3, 6.7}),  // beta value
+            ::testing::Values('r'),                                         // storage of c
+            ::testing::Values(bli_zgemmsup_cv_zen4_asm_fx4),                // zgemm_sup kernel
+            ::testing::Values(gtint_t(4)),                                  // Micro kernel block MR
+            ::testing::Values('t'),                                         // transa
+            ::testing::Values('n', 't'),                                    // transb
+            ::testing::Values(false, true)                                  // is_memory_test
+        ),
+        ::zgemmGenericSUPPrint()
+    );
+#endif
+
+#ifdef K_bli_zgemmsup_cv_zen4_asm_fx3
+INSTANTIATE_TEST_SUITE_P(
+         bli_zgemmsup_cv_zen4_asm_fx3_col_stored_c,
+         zgemmGenericSUP,
+         ::testing::Combine(
+             ::testing::Values(gtint_t(3)),                                  // values of m
+             ::testing::Values(gtint_t(3)),                                  // values of n
+             ::testing::Range(gtint_t(0), gtint_t(19), 1),                   // values of k
+             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{4.0, 0.0}, dcomplex{0.0, -1.9}, dcomplex{3.5, 4.5}),   // alpha value
+             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1.5}, dcomplex{-7.3, 6.7}),  // beta value
+             ::testing::Values('c'),                                         // storage of c
+             ::testing::Values(bli_zgemmsup_cv_zen4_asm_fx3),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(4)),                                  // Micro kernel block MR
+             ::testing::Values('n'),                                         // transa
+             ::testing::Values('n', 't'),                                    // transb
+             ::testing::Values(false, true)                                  // is_memory_test
+         ),
+         ::zgemmGenericSUPPrint()
+     );
+
+INSTANTIATE_TEST_SUITE_P(
+        bli_zgemmsup_cv_zen4_asm_fx3_row_stored_c,
+        zgemmGenericSUP,
+        ::testing::Combine(
+            ::testing::Values(gtint_t(3)),                                  // values of m
+            ::testing::Values(gtint_t(3)),                                  // values of n
+            ::testing::Range(gtint_t(0), gtint_t(19), 1),                   // values of k
+            ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{4.0, 0.0}, dcomplex{0.0, -1.9}, dcomplex{3.5, 4.5}),   // alpha value
+            ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1.5}, dcomplex{-7.3, 6.7}),  // beta value
+            ::testing::Values('r'),                                         // storage of c
+            ::testing::Values(bli_zgemmsup_cv_zen4_asm_fx3),                // zgemm_sup kernel
+            ::testing::Values(gtint_t(4)),                                  // Micro kernel block MR
+            ::testing::Values('t'),                                         // transa
+            ::testing::Values('n', 't'),                                    // transb
+            ::testing::Values(false, true)                                  // is_memory_test
+        ),
+        ::zgemmGenericSUPPrint()
+    );
+#endif
+
+#ifdef K_bli_zgemmsup_cv_zen4_asm_fx2
+INSTANTIATE_TEST_SUITE_P(
+         bli_zgemmsup_cv_zen4_asm_fx2_col_stored_c,
+         zgemmGenericSUP,
+         ::testing::Combine(
+             ::testing::Values(gtint_t(3)),                                  // values of m
+             ::testing::Values(gtint_t(2)),                                  // values of n
+             ::testing::Range(gtint_t(0), gtint_t(14), 1),                   // values of k
+             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{4.0, 0.0}, dcomplex{0.0, -19}, dcomplex{3.5, 4.5}),   // alpha value
+             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, -9}, dcomplex{-7.3, 6.7}),  // beta value
+             ::testing::Values('c'),                                         // storage of c
+             ::testing::Values(bli_zgemmsup_cv_zen4_asm_fx2),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(4)),                                  // Micro kernel block MR
+             ::testing::Values('n'),                                         // transa
+             ::testing::Values('n', 't'),                                    // transb
+             ::testing::Values(false, true)                                  // is_memory_test
+         ),
+         ::zgemmGenericSUPPrint()
+     );
+
+INSTANTIATE_TEST_SUITE_P(
+        bli_zgemmsup_cv_zen4_asm_fx2_row_stored_c,
+        zgemmGenericSUP,
+        ::testing::Combine(
+            ::testing::Values(gtint_t(3)),                                  // values of m
+            ::testing::Values(gtint_t(2)),                                  // values of n
+            ::testing::Range(gtint_t(0), gtint_t(19), 1),                   // values of k
+            ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{4.0, 0.0}, dcomplex{0.0, -1.9}, dcomplex{3.5, 4.5}),   // alpha value
+            ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1.5}, dcomplex{-7.3, 6.7}),  // beta value
+            ::testing::Values('r'),                                         // storage of c
+            ::testing::Values(bli_zgemmsup_cv_zen4_asm_fx2),                // zgemm_sup kernel
+            ::testing::Values(gtint_t(4)),                                  // Micro kernel block MR
+            ::testing::Values('t'),                                         // transa
+            ::testing::Values('n', 't'),                                    // transb
+            ::testing::Values(false, true)                                  // is_memory_test
+        ),
+        ::zgemmGenericSUPPrint()
+    );
+#endif
+
+#ifdef K_bli_zgemmsup_cv_zen4_asm_fx1
+INSTANTIATE_TEST_SUITE_P(
+         bli_zgemmsup_cv_zen4_asm_fx1_col_stored_c,
+         zgemmGenericSUP,
+         ::testing::Combine(
+             ::testing::Values(gtint_t(3)),                                  // values of m
+             ::testing::Values(gtint_t(1)),                                  // values of n
+             ::testing::Range(gtint_t(0), gtint_t(12), 1),                   // values of k
+             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{4.0, 0.0}, dcomplex{0.0, -19}, dcomplex{3.5, 4.5}),   // alpha value
+             ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1}, dcomplex{-7.3, 6.7}),   // beta value
+             ::testing::Values('c'),                                         // storage of c
+             ::testing::Values(bli_zgemmsup_cv_zen4_asm_fx1),                // zgemm_sup kernel
+             ::testing::Values(gtint_t(4)),                                  // Micro kernel block MR
+             ::testing::Values('n'),                                         // transa
+             ::testing::Values('n', 't'),                                    // transb
+             ::testing::Values(false, true)                                  // is_memory_test
+         ),
+         ::zgemmGenericSUPPrint()
+     );
+
+INSTANTIATE_TEST_SUITE_P(
+        bli_zgemmsup_cv_zen4_asm_fx1_row_stored_c,
+        zgemmGenericSUP,
+        ::testing::Combine(
+            ::testing::Values(gtint_t(3)),                                  // values of m
+            ::testing::Values(gtint_t(1)),                                  // values of n
+            ::testing::Range(gtint_t(0), gtint_t(19), 1),                   // values of k
+            ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{4.0, 0.0}, dcomplex{0.0, -1.9}, dcomplex{3.5, 4.5}),   // alpha value
+            ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{-5.0, 0.0}, dcomplex{0.0, 1.5}, dcomplex{-7.3, 6.7}),  // beta value
+            ::testing::Values('r'),                                         // storage of c
+            ::testing::Values(bli_zgemmsup_cv_zen4_asm_fx1),                // zgemm_sup kernel
+            ::testing::Values(gtint_t(4)),                                  // Micro kernel block MR
+            ::testing::Values('t'),                                         // transa
+            ::testing::Values('n', 't'),                                    // transb
+            ::testing::Values(false, true)                                  // is_memory_test
+        ),
+        ::zgemmGenericSUPPrint()
+    );
+#endif
+
 #ifdef K_bli_zgemmsup_cv_zen4_asm_2x4
 INSTANTIATE_TEST_SUITE_P(
          bli_zgemmsup_cv_zen4_asm_2x4_col_stored_c,

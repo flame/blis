@@ -361,6 +361,11 @@ GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_8x3 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_8x2 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_8x1 )
 
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_fx4 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_fx3 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_fx2 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_fx1 )
+
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_4x4 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_4x3 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_4x2 )

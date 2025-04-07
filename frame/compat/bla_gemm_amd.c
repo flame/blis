@@ -1218,30 +1218,6 @@ void zgemm_blis_impl
         }
     }
 
-    const num_t dt     = BLIS_DCOMPLEX;
-
-    obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1;
-    obj_t       ao     = BLIS_OBJECT_INITIALIZER;
-    obj_t       bo     = BLIS_OBJECT_INITIALIZER;
-    obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1;
-    obj_t       co     = BLIS_OBJECT_INITIALIZER;
-
-    dim_t       m0_a, n0_a;
-    dim_t       m0_b, n0_b;
-
-    bli_set_dims_with_trans( blis_transa, m0, k0, &m0_a, &n0_a );
-    bli_set_dims_with_trans( blis_transb, k0, n0, &m0_b, &n0_b );
-
-    bli_obj_init_finish_1x1( dt, (dcomplex*)alpha, &alphao );
-    bli_obj_init_finish_1x1( dt, (dcomplex*)beta,  &betao  );
-
-    bli_obj_init_finish( dt, m0_a, n0_a, (dcomplex*)a, rs_a, cs_a, &ao );
-    bli_obj_init_finish( dt, m0_b, n0_b, (dcomplex*)b, rs_b, cs_b, &bo );
-    bli_obj_init_finish( dt, m0,   n0,   (dcomplex*)c, rs_c, cs_c, &co );
-
-    bli_obj_set_conjtrans( blis_transa, &ao );
-    bli_obj_set_conjtrans( blis_transb, &bo );
-
     bool is_parallel = bli_thread_get_is_parallel(); // Check if parallel zgemm is invoked.
 
     // Tiny gemm dispatch
@@ -1270,6 +1246,30 @@ void zgemm_blis_impl
         return;
     }
 #endif
+
+    const num_t dt     = BLIS_DCOMPLEX;
+
+    obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1;
+    obj_t       ao     = BLIS_OBJECT_INITIALIZER;
+    obj_t       bo     = BLIS_OBJECT_INITIALIZER;
+    obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1;
+    obj_t       co     = BLIS_OBJECT_INITIALIZER;
+
+    dim_t       m0_a, n0_a;
+    dim_t       m0_b, n0_b;
+
+    bli_set_dims_with_trans( blis_transa, m0, k0, &m0_a, &n0_a );
+    bli_set_dims_with_trans( blis_transb, k0, n0, &m0_b, &n0_b );
+
+    bli_obj_init_finish_1x1( dt, (dcomplex*)alpha, &alphao );
+    bli_obj_init_finish_1x1( dt, (dcomplex*)beta,  &betao  );
+
+    bli_obj_init_finish( dt, m0_a, n0_a, (dcomplex*)a, rs_a, cs_a, &ao );
+    bli_obj_init_finish( dt, m0_b, n0_b, (dcomplex*)b, rs_b, cs_b, &bo );
+    bli_obj_init_finish( dt, m0,   n0,   (dcomplex*)c, rs_c, cs_c, &co );
+
+    bli_obj_set_conjtrans( blis_transa, &ao );
+    bli_obj_set_conjtrans( blis_transb, &bo );
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 
@@ -1301,9 +1301,8 @@ void zgemm_blis_impl
             double overall_thresh = (double)m0 * (double)n0 * (double)k0;
             bool mat_based_thresh = (( a_thresh < 500 ) || ( b_thresh < 500 ) || ( c_thresh < 500 ));
             bool entry_to_small_st = (( !is_parallel ) && mat_based_thresh && ( overall_thresh < 7500 ));
-            bool entry_to_small_mt = (( is_parallel ) && mat_based_thresh && ( overall_thresh < 5000 ));
 
-            entry_to_small = entry_to_small_st || entry_to_small_mt;
+            entry_to_small = entry_to_small_st;
             break;
         }
         case BLIS_ARCH_ZEN4:
@@ -1313,7 +1312,7 @@ void zgemm_blis_impl
             double overall_thresh = (double)m0 * (double)n0 * (double)k0;
             bool mat_based_thresh = (( a_thresh < 600 ) || ( b_thresh < 600 ) || ( c_thresh < 600 ));
             bool entry_to_small_st = (( !is_parallel ) && mat_based_thresh && ( overall_thresh < 20000 ));
-            bool entry_to_small_mt = (( is_parallel ) && mat_based_thresh && ( overall_thresh < 12500 ));
+            bool entry_to_small_mt = (( is_parallel ) && bli_is_trans( blis_transa ) && ( k0 <= 24 ) && ((( m0 <= 8 ) && ( n0 <= 60 )) || (( m0 <= 40 ) && ( n0 <= 12 ))));
 
             entry_to_small = entry_to_small_st || entry_to_small_mt;
             break;
