@@ -421,12 +421,12 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
     // Update the kernel pointer with right kernel
     lpgemm_rowvar_f32 ker_ptr = (lpgemm_rowvar_f32) lcntx->kern_fun_ptr;
 
-    // Avoid packing of B in transb cases where rd kernels performs better
-    // than rv + pack. rv kernel calls rd when rs_b==1.
-    if( (n < 64) && (rs_b == 1) &&
-        (mtag_b == PACK) && (mtag_a == UNPACKED))
+    // Avoid packing of B in transb cases where rd kernels performs
+    // better than rv + pack. rv kernel calls rd when rs_b==1.
+    if( ( rs_b == 1 ) && ( mtag_b == PACK ) && ( mtag_a == UNPACKED ) )
     {
-        mtag_b  = UNPACKED;
+        if      ( n < 48 ) mtag_b = UNPACKED;
+        else if ( m < 25 ) mtag_b = UNPACKED;
     }
 
     for ( dim_t jc = jc_start; jc < jc_end; jc += NC )
