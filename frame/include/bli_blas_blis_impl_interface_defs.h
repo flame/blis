@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -154,6 +154,23 @@
 #define ctrsm_blis_impl_  ctrsm_blis_impl
 #define ztrsm_blis_impl_  ztrsm_blis_impl
 #define lsame_blis_impl_  lsame_blis_impl
+
+#define cimatcopy_blis_impl_    cimatcopy_blis_impl
+#define comatadd_blis_impl_     comatadd_blis_impl
+#define comatcopy2_blis_impl_   comatcopy2_blis_impl
+#define comatcopy_blis_impl_    comatcopy_blis_impl
+#define dimatcopy_blis_impl_    dimatcopy_blis_impl
+#define domatadd_blis_impl_     domatadd_blis_impl
+#define domatcopy2_blis_impl_   domatcopy2_blis_impl
+#define domatcopy_blis_impl_    domatcopy_blis_impl
+#define simatcopy_blis_impl_    simatcopy_blis_impl
+#define somatadd_blis_impl_     somatadd_blis_impl
+#define somatcopy2_blis_impl_   somatcopy2_blis_impl
+#define somatcopy_blis_impl_    somatcopy_blis_impl
+#define zimatcopy_blis_impl_    zimatcopy_blis_impl
+#define zomatadd_blis_impl_     zomatadd_blis_impl
+#define zomatcopy2_blis_impl_   zomatcopy2_blis_impl
+#define zomatcopy_blis_impl_    zomatcopy_blis_impl
 
 #endif // BLIS_ENABLE_BLAS
 #endif // BLIS_ENABLE_NO_UNDERSCORE_API
@@ -359,6 +376,23 @@
 #define ztrmv_blis_impl                     ZTRMV_BLIS_IMPL
 #define ztrsm_blis_impl                     ZTRSM_BLIS_IMPL
 #define ztrsv_blis_impl                     ZTRSV_BLIS_IMPL
+
+#define cimatcopy_blis_impl                 CIMATCOPY_BLIS_IMPL
+#define comatadd_blis_impl                  COMATADD_BLIS_IMPL
+#define comatcopy2_blis_impl                COMATCOPY2_BLIS_IMPL
+#define comatcopy_blis_impl                 COMATCOPY_BLIS_IMPL
+#define dimatcopy_blis_impl                 DIMATCOPY_BLIS_IMPL
+#define domatadd_blis_impl                  DOMATADD_BLIS_IMPL
+#define domatcopy2_blis_impl                DOMATCOPY2_BLIS_IMPL
+#define domatcopy_blis_impl                 DOMATCOPY_BLIS_IMPL
+#define simatcopy_blis_impl                 SIMATCOPY_BLIS_IMPL
+#define somatadd_blis_impl                  SOMATADD_BLIS_IMPL
+#define somatcopy2_blis_impl                SOMATCOPY2_BLIS_IMPL
+#define somatcopy_blis_impl                 SOMATCOPY_BLIS_IMPL
+#define zimatcopy_blis_impl                 ZIMATCOPY_BLIS_IMPL
+#define zomatadd_blis_impl                  ZOMATADD_BLIS_IMPL
+#define zomatcopy2_blis_impl                ZOMATCOPY2_BLIS_IMPL
+#define zomatcopy_blis_impl                 ZOMATCOPY_BLIS_IMPL
 
 #endif // BLIS_ENABLE_BLAS
 #endif // BLIS_ENABLE_UPPERCASE_API

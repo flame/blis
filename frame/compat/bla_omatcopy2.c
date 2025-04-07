@@ -34,8 +34,6 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLAS
-
 static dim_t bli_soMatCopy2_cn
        (
          dim_t 		  rows,
@@ -1453,5 +1451,3 @@ static dim_t bli_zoMatCopy2_cc
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
     return ( 0 );
 }
-
-#endif

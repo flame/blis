@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -47,3 +47,11 @@ BLIS_EXPORT_BLAS void cimatcopy_ (f77_char* trans, f77_int* rows, f77_int* cols,
 BLIS_EXPORT_BLAS void zimatcopy_ (f77_char* trans, f77_int* rows, f77_int* cols, const dcomplex* alpha,dcomplex* aptr, f77_int* lda, f77_int* ldb);
 
 #endif
+
+BLIS_EXPORT_BLAS void simatcopy_blis_impl (f77_char* trans, f77_int* rows, f77_int* cols, const float* alpha,float* aptr, f77_int* lda, f77_int* ldb);
+
+BLIS_EXPORT_BLAS void dimatcopy_blis_impl (f77_char* trans, f77_int* rows, f77_int* cols, const double* alpha,double* aptr, f77_int* lda, f77_int* ldb);
+
+BLIS_EXPORT_BLAS void cimatcopy_blis_impl (f77_char* trans, f77_int* rows, f77_int* cols, const scomplex* alpha,scomplex* aptr, f77_int* lda, f77_int* ldb);
+
+BLIS_EXPORT_BLAS void zimatcopy_blis_impl (f77_char* trans, f77_int* rows, f77_int* cols, const dcomplex* alpha,dcomplex* aptr, f77_int* lda, f77_int* ldb);

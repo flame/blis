@@ -34,8 +34,6 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLAS
-
 static dim_t bli_soMatCopy_cn(dim_t rows, dim_t cols, const float alpha, const float* a, dim_t lda, float* b, dim_t ldb);
 
 static dim_t bli_soMatCopy_ct(dim_t rows, dim_t cols, const float alpha, const float* a, dim_t lda, float* b, dim_t ldb);
@@ -966,5 +964,3 @@ static dim_t bli_zoMatCopy_cc(dim_t rows, dim_t cols, const dcomplex alpha, cons
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
 	return(0);
 }
-
-#endif

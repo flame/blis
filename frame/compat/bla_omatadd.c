@@ -34,8 +34,6 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLAS
-
 static dim_t bli_soMatAdd_cn(dim_t m,dim_t n,const float alpha,float* aptr,dim_t lda,const float beta,float* bptr,dim_t ldb,float* C,dim_t ldc);
 
 static dim_t bli_doMatAdd_cn(dim_t m,dim_t n,const double alpha,double* aptr,dim_t lda,const double beta,double* bptr,dim_t ldb,double* C,dim_t ldc);
@@ -535,4 +533,3 @@ static dim_t bli_zoMatAdd_cn(dim_t rows,dim_t cols,const dcomplex alpha,dcomplex
  AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
  return(0);
 }
-#endif
