@@ -80,15 +80,15 @@ int main( int argc, char** argv )
 	bli_randm( &b );
 	bli_setm( &BLIS_ZERO, &c );
 
-	bli_printm( "a (double real):    randomized", &a, "%4.1f", "" );
-	bli_printm( "b (double complex): randomized", &b, "%4.1f", "" );
-	bli_printm( "c (double complex): initial value", &c, "%4.1f", "" );
+	bli_printm( "a (double real):    randomized", &a, "% 4.3f", "" );
+	bli_printm( "b (double complex): randomized", &b, "% 4.3f", "" );
+	bli_printm( "c (double complex): initial value", &c, "% 4.3f", "" );
 
 	// c := beta * c + alpha * a * b, where 'a' is real, and 'b' and 'c' are
 	// complex.
 	bli_gemm( alpha, &a, &b, beta, &c );
 
-	bli_printm( "c (double complex): after gemm", &c, "%4.1f", "" );
+	bli_printm( "c (double complex): after gemm", &c, "% 4.3f", "" );
 
 	// Free the objects.
 	bli_obj_free( &a );
@@ -129,16 +129,16 @@ int main( int argc, char** argv )
 	bli_randm( &b );
 	bli_setm( &BLIS_ZERO, &c );
 
-	bli_printm( "a (single real): randomized", &a, "%4.1f", "" );
-	bli_printm( "b (single real): randomized", &b, "%4.1f", "" );
-	bli_printm( "c (double real): initial value", &c, "%4.1f", "" );
+	bli_printm( "a (single real): randomized", &a, "% 4.3f", "" );
+	bli_printm( "b (single real): randomized", &b, "% 4.3f", "" );
+	bli_printm( "c (double real): initial value", &c, "% 4.3f", "" );
 
 	// c := beta * c + alpha * a * b, where 'a' and 'b' are single-precision
 	// real, 'c' is double-precision real, and the matrix product is performed
 	// in double-precision arithmetic.
 	bli_gemm( alpha, &a, &b, beta, &c );
 
-	bli_printm( "c (double real): after gemm (exec prec = double precision)", &c, "%4.1f", "" );
+	bli_printm( "c (double real): after gemm (exec prec = double precision)", &c, "% 4.3f", "" );
 
 	// Free the objects.
 	bli_obj_free( &a );
@@ -172,16 +172,16 @@ int main( int argc, char** argv )
 	bli_randm( &b );
 	bli_setm( &BLIS_ZERO, &c );
 
-	bli_printm( "a (single real): randomized", &a, "%4.1f", "" );
-	bli_printm( "b (double complex): randomized", &b, "%4.1f", "" );
-	bli_printm( "c (single complex): initial value", &c, "%4.1f", "" );
+	bli_printm( "a (single real): randomized", &a, "% 4.3f", "" );
+	bli_printm( "b (double complex): randomized", &b, "% 4.3f", "" );
+	bli_printm( "c (single complex): initial value", &c, "% 4.3f", "" );
 
 	// c := beta * c + alpha * a * b, where 'a' is single-precision real, 'b'
 	// is double-precision complex, 'c' is single-precision complex, and the
 	// matrix product is performed in single-precision arithmetic.
 	bli_gemm( alpha, &a, &b, beta, &c );
 
-	bli_printm( "c (single complex): after gemm (exec prec = single precision)", &c, "%4.1f", "" );
+	bli_printm( "c (single complex): after gemm (exec prec = single precision)", &c, "% 4.3f", "" );
 
 	// Free the objects.
 	bli_obj_free( &a );
@@ -204,12 +204,12 @@ int main( int argc, char** argv )
 	// Initialize a real matrix A.
 	bli_randm( &a );
 
-	bli_printm( "a (double real): randomized", &a, "%4.1f", "" );
+	bli_printm( "a (double real): randomized", &a, "% 4.3f", "" );
 
 	// Project real matrix A to the complex domain (in B).
 	bli_projm( &a, &b );
 
-	bli_printm( "b (double complex): projected from 'a'", &b, "%4.1f", "" );
+	bli_printm( "b (double complex): projected from 'a'", &b, "% 4.3f", "" );
 
 	// Notice how the imaginary components in B are zero since any real
 	// matrix implicitly has imaginary values that are equal to zero.
@@ -219,12 +219,12 @@ int main( int argc, char** argv )
 	// Initialize the complex matrix B.
 	bli_randm( &b );
 
-	bli_printm( "b (double complex): randomized", &b, "%4.1f", "" );
+	bli_printm( "b (double complex): randomized", &b, "% 4.3f", "" );
 
 	// Project complex matrix B to the real domain (in A).
 	bli_projm( &b, &a );
 
-	bli_printm( "a (double real): projected from 'b'", &a, "%4.1f", "" );
+	bli_printm( "a (double real): projected from 'b'", &a, "% 4.3f", "" );
 
 	// Notice how the imaginary components are lost in the projection from
 	// the complex domain to the real domain.

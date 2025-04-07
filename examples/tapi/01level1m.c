@@ -83,9 +83,9 @@ int main( int argc, char** argv )
 	beta  = 0.2;
 	gamma = 3.0;
 
-	printf( "alpha:\n%4.1f\n\n", alpha );
-	printf( "beta:\n%4.1f\n\n", beta );
-	printf( "gamma:\n%4.1f\n\n", gamma );
+	printf( "alpha:\n% 4.3f\n\n", alpha );
+	printf( "beta:\n% 4.3f\n\n", beta );
+	printf( "gamma:\n% 4.3f\n\n", gamma );
 	printf( "\n" );
 
 	// Matrices, like vectors, can set by "broadcasting" a constant to every
@@ -99,9 +99,9 @@ int main( int argc, char** argv )
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
 	           m, n, &zero, c, rs, cs );
 
-	bli_dprintm( "a := 1.0", m, n, a, rs, cs, "%4.1f", "" );
-	bli_dprintm( "b := alpha", m, n, b, rs, cs, "%4.1f", "" );
-	bli_dprintm( "c := 0.0", m, n, c, rs, cs, "%4.1f", "" );
+	bli_dprintm( "a := 1.0", m, n, a, rs, cs, "% 4.3f", "" );
+	bli_dprintm( "b := alpha", m, n, b, rs, cs, "% 4.3f", "" );
+	bli_dprintm( "c := 0.0", m, n, c, rs, cs, "% 4.3f", "" );
 
 
 	//
@@ -112,7 +112,7 @@ int main( int argc, char** argv )
 
 	bli_drandm( 0, BLIS_DENSE, m, n, e, rs, cs );
 
-	bli_dprintm( "e (randomized):", m, n, e, rs, cs, "%4.1f", "" );
+	bli_dprintm( "e (randomized):", m, n, e, rs, cs, "% 4.3f", "" );
 
 
 	//
@@ -124,31 +124,31 @@ int main( int argc, char** argv )
 	// Copy a matrix.
 	bli_dcopym( 0, BLIS_NONUNIT_DIAG, BLIS_DENSE, BLIS_NO_TRANSPOSE,
 	            m, n, e, rs, cs, d, rs, cs );
-	bli_dprintm( "d := e", m, n, d, rs, cs, "%4.1f", "" );
+	bli_dprintm( "d := e", m, n, d, rs, cs, "% 4.3f", "" );
 
 	// Add and subtract vectors.
 	bli_daddm( 0, BLIS_NONUNIT_DIAG, BLIS_DENSE, BLIS_NO_TRANSPOSE,
 	           m, n, a, rs, cs, d, rs, cs );
-	bli_dprintm( "d := d + a", m, n, d, rs, cs, "%4.1f", "" );
+	bli_dprintm( "d := d + a", m, n, d, rs, cs, "% 4.3f", "" );
 
 	bli_dsubm( 0, BLIS_NONUNIT_DIAG, BLIS_DENSE, BLIS_NO_TRANSPOSE,
 	           m, n, a, rs, cs, e, rs, cs );
-	bli_dprintm( "e := e - a", m, n, e, rs, cs, "%4.1f", "" );
+	bli_dprintm( "e := e - a", m, n, e, rs, cs, "% 4.3f", "" );
 
 	// Scale a matrix (destructive).
 	bli_dscalm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
 	            m, n, &alpha, e, rs, cs );
-	bli_dprintm( "e := alpha * e", m, n, e, rs, cs, "%4.1f", "" );
+	bli_dprintm( "e := alpha * e", m, n, e, rs, cs, "% 4.3f", "" );
 
 	// Scale a matrix (non-destructive).
 	bli_dscal2m( 0, BLIS_NONUNIT_DIAG, BLIS_DENSE, BLIS_NO_TRANSPOSE,
 	             m, n, &beta, e, rs, cs, c, rs, cs );
-	bli_dprintm( "c := beta * e", m, n, c, rs, cs, "%4.1f", "" );
+	bli_dprintm( "c := beta * e", m, n, c, rs, cs, "% 4.3f", "" );
 
 	// Scale and accumulate between matrices.
 	bli_daxpym( 0, BLIS_NONUNIT_DIAG, BLIS_DENSE, BLIS_NO_TRANSPOSE,
 	            m, n, &alpha, a, rs, cs, c, rs, cs );
-	bli_dprintm( "c := alpha * a", m, n, c, rs, cs, "%4.1f", "" );
+	bli_dprintm( "c := alpha * a", m, n, c, rs, cs, "% 4.3f", "" );
 
 
 	//
@@ -166,8 +166,8 @@ int main( int argc, char** argv )
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
 	           n, m, &minus_one, f, rsf, csf );
 
-	bli_dprintm( "e:", m, n, e, rs, cs, "%4.1f", "" );
-	bli_dprintm( "f (initial value):", n, m, f, rsf, csf, "%4.1f", "" );
+	bli_dprintm( "e:", m, n, e, rs, cs, "% 4.3f", "" );
+	bli_dprintm( "f (initial value):", n, m, f, rsf, csf, "% 4.3f", "" );
 
 
 	// Copy 'e' to 'f', transposing 'e' in the process. Notice that we haven't
@@ -176,7 +176,7 @@ int main( int argc, char** argv )
 	bli_dcopym( 0, BLIS_NONUNIT_DIAG, BLIS_DENSE, BLIS_TRANSPOSE,
 	            n, m, e, rs, cs, f, rsf, csf );
 
-	bli_dprintm( "f (copied value):", n, m, f, rsf, csf, "%4.1f", "" );
+	bli_dprintm( "f (copied value):", n, m, f, rsf, csf, "% 4.3f", "" );
 
 
 	//
@@ -193,13 +193,13 @@ int main( int argc, char** argv )
 	bli_zsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
 	           n, m, &minus_one_z, h, rsf, csf );
 
-	bli_zprintm( "g:", m, n, g, rs, cs, "%4.1f", "" );
-	bli_zprintm( "h (initial value):", n, m, h, rsf, csf, "%4.1f", "" );
+	bli_zprintm( "g:", m, n, g, rs, cs, "% 4.3f", "" );
+	bli_zprintm( "h (initial value):", n, m, h, rsf, csf, "% 4.3f", "" );
 
 	bli_zcopym( 0, BLIS_NONUNIT_DIAG, BLIS_DENSE, BLIS_CONJ_TRANSPOSE,
 	            n, m, g, rs, cs, h, rsf, csf );
 
-	bli_zprintm( "h (copied value):", n, m, h, rsf, csf, "%4.1f", "" );
+	bli_zprintm( "h (copied value):", n, m, h, rsf, csf, "% 4.3f", "" );
 
 
 	// Free the memory obtained via malloc().

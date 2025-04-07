@@ -70,7 +70,7 @@ int main( int argc, char** argv )
 	bli_drandm( 0, BLIS_UPPER, m, n, a, rs, cs );
 
 	bli_dprintm( "a: randomize upper part (lower part may contain garbage)",
-	             m, n, a, rs, cs, "%4.1f", "" );
+	             m, n, a, rs, cs, "% 4.3f", "" );
 
 
 	//
@@ -93,7 +93,7 @@ int main( int argc, char** argv )
 	           m, n, &zero, b, rs, cs );
 
 	bli_dprintm( "b: randomize upper part; set strictly lower part to 0.0)",
-	             m, n, b, rs, cs, "%4.1f", "" );
+	             m, n, b, rs, cs, "% 4.3f", "" );
 
 	// You may not see the effect of setting the strictly lower part to zero,
 	// since those values may already be zero (instead of random junk). So
@@ -102,7 +102,7 @@ int main( int argc, char** argv )
 	           m, n, &minus_one, b, rs, cs );
 
 	bli_dprintm( "b: randomize upper part; set strictly lower part to -1.0)",
-	             m, n, b, rs, cs, "%4.1f", "" );
+	             m, n, b, rs, cs, "% 4.3f", "" );
 
 
 	//
@@ -120,13 +120,13 @@ int main( int argc, char** argv )
 	            m, n, b, rs, cs, c, rs, cs );
 
 	bli_dprintm( "c: copy lower part of b (upper part may contain garbage)",
-	             m, n, c, rs, cs, "%4.1f", "" );
+	             m, n, c, rs, cs, "% 4.3f", "" );
 
 	bli_dcopym( 0, BLIS_NONUNIT_DIAG, BLIS_LOWER, BLIS_NO_TRANSPOSE,
 	            m, n, b, rs, cs, a, rs, cs );
 
 	bli_dprintm( "a: copy lower triangle of b to upper triangular a",
-	             m, n, a, rs, cs, "%4.1f", "" );
+	             m, n, a, rs, cs, "% 4.3f", "" );
 
 
 	//
@@ -145,7 +145,7 @@ int main( int argc, char** argv )
 	           m, n, &zero, d, rs, cs );
 
 	bli_dprintm( "d: initial value (all zeros)",
-	             m, n, d, rs, cs, "%4.1f", "" );
+	             m, n, d, rs, cs, "% 4.3f", "" );
 
 	// Let's change a few values of b manually so we can later see the full
 	// effect of the transposition.
@@ -156,13 +156,13 @@ int main( int argc, char** argv )
 	bli_dsetijm( 3.2, 0.0, 3, 2, b, rs, cs );
 
 	bli_dprintm( "b:",
-	             m, n, b, rs, cs, "%4.1f", "" );
+	             m, n, b, rs, cs, "% 4.3f", "" );
 
 	bli_dcopym( 0, BLIS_NONUNIT_DIAG, BLIS_LOWER, BLIS_TRANSPOSE,
 	            m, n, b, rs, cs, d, rs, cs );
 
 	bli_dprintm( "d: transpose of lower triangle of b copied to d",
-	             m, n, d, rs, cs, "%4.1f", "" );
+	             m, n, d, rs, cs, "% 4.3f", "" );
 
 
 	//
@@ -182,20 +182,20 @@ int main( int argc, char** argv )
 	           m, n, &minus_one, e, rs, cs );
 
 	bli_dprintm( "e: initial value (all -1.0)",
-	             m, n, e, rs, cs, "%4.1f", "" );
+	             m, n, e, rs, cs, "% 4.3f", "" );
 
 	// Randomize the lower trapezoid.
 	bli_drandm( 0, BLIS_LOWER, m, n, e, rs, cs );
 
 	bli_dprintm( "e: after lower trapezoid randomized",
-	             m, n, e, rs, cs, "%4.1f", "" );
+	             m, n, e, rs, cs, "% 4.3f", "" );
 
 	// Set the upper triangle to zero.
 	bli_dsetm( BLIS_NO_CONJUGATE, 1, BLIS_NONUNIT_DIAG, BLIS_UPPER,
 	           m, n, &zero, e, rs, cs );
 
 	bli_dprintm( "e: after upper triangle set to zero",
-	             m, n, e, rs, cs, "%4.1f", "" );
+	             m, n, e, rs, cs, "% 4.3f", "" );
 
 
 	//
@@ -214,13 +214,13 @@ int main( int argc, char** argv )
 	           m, n, &minus_one, h, rs, cs );
 
 	bli_dprintm( "h: initial value (all -1.0)",
-	             m, n, h, rs, cs, "%4.1f", "" );
+	             m, n, h, rs, cs, "% 4.3f", "" );
 
 	// Randomize the elements on and above the first subdiagonal.
 	bli_drandm( -1, BLIS_UPPER, m, n, h, rs, cs );
 
 	bli_dprintm( "h: after randomizing above first subdiagonal",
-	             m, n, h, rs, cs, "%4.1f", "" );
+	             m, n, h, rs, cs, "% 4.3f", "" );
 
 	// Set the region strictly below the first subdiagonal (on or below
 	// the second subdiagonal) to zero.
@@ -228,7 +228,7 @@ int main( int argc, char** argv )
 	           m, n, &zero, h, rs, cs );
 
 	bli_dprintm( "h: after setting elements below first subdiagonal to zero",
-	             m, n, h, rs, cs, "%4.1f", "" );
+	             m, n, h, rs, cs, "% 4.3f", "" );
 
 
 	// Free the memory obtained via malloc().
