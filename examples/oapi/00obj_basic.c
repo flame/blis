@@ -187,7 +187,7 @@ int main( int argc, char** argv )
 	// still need to make sure that the specifier makes sense for the data
 	// being printed. For example, you shouldn't use "%d" when printing
 	// elements of type 'float'.
-	bli_printm( "matrix 'a9' contents:", &a9, "%4.1f", "" );
+	bli_printm( "matrix 'a9' contents:", &a9, "% 4.3f", "" );
 
 
 	//
@@ -200,7 +200,7 @@ int main( int argc, char** argv )
 	// When printing complex matrices, the same format specifier gets used
 	// for both the real and imaginary parts.
 	bli_randm( &a11 );
-	bli_printm( "matrix 'a11' contents (complex):", &a11, "%4.1f", "" );
+	bli_printm( "matrix 'a11' contents (complex):", &a11, "% 4.3f", "" );
 
 
 	//

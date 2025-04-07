@@ -105,10 +105,10 @@ int main( int argc, char** argv )
 
 	// BLIS does not have a special print function for scalars, but since a
 	// 1x1 is also a vector and a matrix, we can use printv or printm.
-	bli_printm( "alpha:", &alpha, "%4.1f", "" );
-	bli_printm( "beta:", &beta, "%4.1f", "" );
-	bli_printm( "kappa:", &kappa, "%4.1f", "" );
-	bli_printm( "gamma:", &gamma, "%4.1f", "" );
+	bli_printm( "alpha:", &alpha, "% 4.3f", "" );
+	bli_printm( "beta:", &beta, "% 4.3f", "" );
+	bli_printm( "kappa:", &kappa, "% 4.3f", "" );
+	bli_printm( "gamma:", &gamma, "% 4.3f", "" );
 
 
 	//
@@ -121,7 +121,7 @@ int main( int argc, char** argv )
 	// can be used.
 	bli_obj_create_1x1( BLIS_DCOMPLEX, &zeta );
 	bli_setsc( 3.3, -4.4, &zeta );
-	bli_printm( "zeta (complex):", &zeta, "%4.1f", "" );
+	bli_printm( "zeta (complex):", &zeta, "% 4.3f", "" );
 
 
 	//
@@ -133,10 +133,10 @@ int main( int argc, char** argv )
 	// We can copy scalars amongst one another, and we can use the global
 	// scalar constants for input operands.
 	bli_copysc( &beta, &gamma );
-	bli_printm( "gamma (overwritten with beta):", &gamma, "%4.1f", "" );
+	bli_printm( "gamma (overwritten with beta):", &gamma, "% 4.3f", "" );
 
 	bli_copysc( &BLIS_ONE, &gamma );
-	bli_printm( "gamma (overwritten with BLIS_ONE):", &gamma, "%4.1f", "" );
+	bli_printm( "gamma (overwritten with BLIS_ONE):", &gamma, "% 4.3f", "" );
 
 
 	//
@@ -147,24 +147,24 @@ int main( int argc, char** argv )
 
 	// BLIS defines a range of basic floating-point operations on scalars.
 	bli_addsc( &beta, &gamma );
-	bli_printm( "gamma := gamma + beta", &gamma, "%4.1f", "" );
+	bli_printm( "gamma := gamma + beta", &gamma, "% 4.3f", "" );
 
 	bli_subsc( &alpha, &gamma );
-	bli_printm( "gamma := gamma - alpha", &gamma, "%4.1f", "" );
+	bli_printm( "gamma := gamma - alpha", &gamma, "% 4.3f", "" );
 
 	bli_divsc( &kappa, &gamma );
-	bli_printm( "gamma := gamma / kappa", &gamma, "%4.1f", "" );
+	bli_printm( "gamma := gamma / kappa", &gamma, "% 4.3f", "" );
 
 	bli_sqrtsc( &gamma, &gamma );
-	bli_printm( "gamma := sqrt( gamma )", &gamma, "%4.1f", "" );
+	bli_printm( "gamma := sqrt( gamma )", &gamma, "% 4.3f", "" );
 
 	bli_normfsc( &alpha, &alpha );
-	bli_printm( "alpha := normf( alpha ) # normf() = abs() in real domain.", &alpha, "%4.1f", "" );
+	bli_printm( "alpha := normf( alpha ) # normf() = abs() in real domain.", &alpha, "% 4.3f", "" );
 
 	// Note that normfsc() allows complex input objects, but requires that the
 	// output operand (the second operand) be a real object.
 	bli_normfsc( &zeta, &alpha );
-	bli_printm( "alpha := normf( zeta )  # normf() = complex modulus in complex domain.", &alpha, "%4.1f", "" );
+	bli_printm( "alpha := normf( zeta )  # normf() = complex modulus in complex domain.", &alpha, "% 4.3f", "" );
 
 	bli_invertsc( &gamma, &gamma );
 	bli_printm( "gamma := 1.0 / gamma", &gamma, "%4.2f", "" );

@@ -79,9 +79,9 @@ int main( int argc, char** argv )
 	bli_setsc( 0.2, 0.0, &beta );
 	bli_setsc( 3.0, 0.0, &gamma );
 
-	bli_printm( "alpha:", &alpha, "%4.1f", "" );
-	bli_printm( "beta:", &beta, "%4.1f", "" );
-	bli_printm( "gamma:", &gamma, "%4.1f", "" );
+	bli_printm( "alpha:", &alpha, "% 4.3f", "" );
+	bli_printm( "beta:", &beta, "% 4.3f", "" );
+	bli_printm( "gamma:", &gamma, "% 4.3f", "" );
 
 	// Vectors can set by "broadcasting" a constant to every element.
 	bli_setv( &BLIS_ONE, &x );
@@ -93,9 +93,9 @@ int main( int argc, char** argv )
 	// orientation of the vector (row or column) when printing, whereas
 	// printv always prints vectors as column vectors regardless of their
 	// they are 1 x n or n x 1.
-	bli_printm( "x := 1.0", &x, "%4.1f", "" );
-	bli_printm( "y := alpha", &y, "%4.1f", "" );
-	bli_printm( "z := 0.0", &z, "%4.1f", "" );
+	bli_printm( "x := 1.0", &x, "% 4.3f", "" );
+	bli_printm( "y := alpha", &y, "% 4.3f", "" );
+	bli_printm( "z := 0.0", &z, "% 4.3f", "" );
 
 
 	//
@@ -107,7 +107,7 @@ int main( int argc, char** argv )
 	// Set a vector to random values.
 	bli_randv( &w );
 
-	bli_printm( "w := randv()", &w, "%4.1f", "" );
+	bli_printm( "w := randv()", &w, "% 4.3f", "" );
 
 
 	//
@@ -118,38 +118,38 @@ int main( int argc, char** argv )
 
 	// Copy a vector.
 	bli_copyv( &w, &a );
-	bli_printm( "a := w", &a, "%4.1f", "" );
+	bli_printm( "a := w", &a, "% 4.3f", "" );
 
 	// Add and subtract vectors.
 	bli_addv( &y, &a );
-	bli_printm( "a := a + y", &a, "%4.1f", "" );
+	bli_printm( "a := a + y", &a, "% 4.3f", "" );
 
 	bli_subv( &w, &a );
-	bli_printm( "a := a - w", &a, "%4.1f", "" );
+	bli_printm( "a := a - w", &a, "% 4.3f", "" );
 
 	// Scale a vector (destructive).
 	bli_scalv( &beta, &a );
-	bli_printm( "a := beta * a", &a, "%4.1f", "" );
+	bli_printm( "a := beta * a", &a, "% 4.3f", "" );
 
 	// Scale a vector (non-destructive).
 	bli_scal2v( &gamma, &a, &z );
-	bli_printm( "z := gamma * a", &z, "%4.1f", "" );
+	bli_printm( "z := gamma * a", &z, "% 4.3f", "" );
 
 	// Scale and accumulate between vectors.
 	bli_axpyv( &alpha, &w, &x );
-	bli_printm( "x := x + alpha * w", &x, "%4.1f", "" );
+	bli_printm( "x := x + alpha * w", &x, "% 4.3f", "" );
 
 	bli_xpbyv( &w, &BLIS_MINUS_ONE, &x );
-	bli_printm( "x := -1.0 * x + w", &x, "%4.1f", "" );
+	bli_printm( "x := -1.0 * x + w", &x, "% 4.3f", "" );
 
 	// Invert a vector element-wise.
 	bli_invertv( &y );
-	bli_printm( "y := 1 / y", &y, "%4.1f", "" );
+	bli_printm( "y := 1 / y", &y, "% 4.3f", "" );
 
 	// Swap two vectors.
 	bli_swapv( &x, &y );
-	bli_printm( "x (after swapping with y)", &x, "%4.1f", "" );
-	bli_printm( "y (after swapping with x)", &y, "%4.1f", "" );
+	bli_printm( "x (after swapping with y)", &x, "% 4.3f", "" );
+	bli_printm( "y (after swapping with x)", &y, "% 4.3f", "" );
 
 
 	//

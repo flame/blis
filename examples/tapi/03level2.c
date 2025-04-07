@@ -80,15 +80,15 @@ int main( int argc, char** argv )
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
 	           m, n, &one, a, rs, cs );
 
-	bli_dprintm( "x: set to random values", m, 1, x, 1, m, "%4.1f", "" );
-	bli_dprintm( "y: set to -1.0", 1, n, y, n, 1, "%4.1f", "" );
-	bli_dprintm( "a: intial value", m, n, a, rs, cs, "%4.1f", "" );
+	bli_dprintm( "x: set to random values", m, 1, x, 1, m, "% 4.3f", "" );
+	bli_dprintm( "y: set to -1.0", 1, n, y, n, 1, "% 4.3f", "" );
+	bli_dprintm( "a: intial value", m, n, a, rs, cs, "% 4.3f", "" );
 
 	// a := a + alpha * x * y, where 'a' is general.
 	bli_dger( BLIS_NO_CONJUGATE, BLIS_NO_CONJUGATE,
 	          m, n, &alpha, x, 1, y, 1, a, rs, cs );
 
-	bli_dprintm( "a: after ger", m, n, a, rs, cs, "%4.1f", "" );
+	bli_dprintm( "a: after ger", m, n, a, rs, cs, "% 4.3f", "" );
 
 	// Free the memory obtained via malloc().
 	free( a );
@@ -119,15 +119,15 @@ int main( int argc, char** argv )
 	// Randomize 'a'.
 	bli_drandm( 0, BLIS_DENSE, m, n, a, rs, cs );
 
-	bli_dprintm( "a: randomized", m, n, a, rs, cs, "%4.1f", "" );
-	bli_dprintm( "x: set to 1.0", 1, n, x, n, 1, "%4.1f", "" );
-	bli_dprintm( "y: intial value", 1, m, y, m, 1, "%4.1f", "" );
+	bli_dprintm( "a: randomized", m, n, a, rs, cs, "% 4.3f", "" );
+	bli_dprintm( "x: set to 1.0", 1, n, x, n, 1, "% 4.3f", "" );
+	bli_dprintm( "y: intial value", 1, m, y, m, 1, "% 4.3f", "" );
 
 	// y := beta * y + alpha * a * x, where 'a' is general.
 	bli_dgemv( BLIS_NO_TRANSPOSE, BLIS_NO_CONJUGATE,
 	           m, n, &alpha, a, rs, cs, x, 1, &beta, y, 1 );
 
-	bli_dprintm( "y: after gemv", 1, m, y, m, 1, "%4.1f", "" );
+	bli_dprintm( "y: after gemv", 1, m, y, m, 1, "% 4.3f", "" );
 
 	// Free the memory obtained via malloc().
 	free( a );
@@ -160,13 +160,13 @@ int main( int argc, char** argv )
 	// Randomize the lower triangle of 'a'.
 	bli_drandm( 0, BLIS_LOWER, m, m, a, rs, cs );
 
-	bli_dprintm( "x: set to random values", 1, m, x, m, 1, "%4.1f", "" );
-	bli_dprintm( "a: initial value (zeros in upper triangle)", m, m, a, 1, m, "%4.1f", "" );
+	bli_dprintm( "x: set to random values", 1, m, x, m, 1, "% 4.3f", "" );
+	bli_dprintm( "a: initial value (zeros in upper triangle)", m, m, a, 1, m, "% 4.3f", "" );
 
 	// a := a + alpha * x * x^T, where 'a' is symmetric and lower-stored.
 	bli_dsyr( BLIS_LOWER, BLIS_NO_CONJUGATE, m, &alpha, x, 1, a, rs, cs );
 
-	bli_dprintm( "a: after syr", m, m, a, 1, m, "%4.1f", "" );
+	bli_dprintm( "a: after syr", m, m, a, 1, m, "% 4.3f", "" );
 
 	// Free the memory obtained via malloc().
 	free( a );
@@ -201,15 +201,15 @@ int main( int argc, char** argv )
 	// Randomize 'a'.
 	bli_drandm( 0, BLIS_UPPER, m, m, a, rs, cs );
 
-	bli_dprintm( "a: randomized (zeros in lower triangle)", m, m, a, rs, cs, "%4.1f", "" );
-	bli_dprintm( "x: set to 1.0", 1, m, x, m, 1, "%4.1f", "" );
-	bli_dprintm( "y: intial value", 1, m, y, m, 1, "%4.1f", "" );
+	bli_dprintm( "a: randomized (zeros in lower triangle)", m, m, a, rs, cs, "% 4.3f", "" );
+	bli_dprintm( "x: set to 1.0", 1, m, x, m, 1, "% 4.3f", "" );
+	bli_dprintm( "y: intial value", 1, m, y, m, 1, "% 4.3f", "" );
 
 	// y := beta * y + alpha * a * x, where 'a' is symmetric and upper-stored.
 	bli_dsymv( BLIS_UPPER, BLIS_NO_TRANSPOSE, BLIS_NO_CONJUGATE,
 	           m, &alpha, a, rs, cs, x, 1, &beta, y, 1 );
 
-	bli_dprintm( "y: after symv", 1, m, y, m, 1, "%4.1f", "" );
+	bli_dprintm( "y: after symv", 1, m, y, m, 1, "% 4.3f", "" );
 
 	// Free the memory obtained via malloc().
 	free( a );
@@ -242,14 +242,14 @@ int main( int argc, char** argv )
 	// Randomize 'a'.
 	bli_drandm( 0, BLIS_LOWER, m, m, a, rs, cs );
 
-	bli_dprintm( "a: randomized (zeros in upper triangle)", m, m, a, rs, cs, "%4.1f", "" );
-	bli_dprintm( "x: intial value", 1, m, x, m, 1, "%4.1f", "" );
+	bli_dprintm( "a: randomized (zeros in upper triangle)", m, m, a, rs, cs, "% 4.3f", "" );
+	bli_dprintm( "x: intial value", 1, m, x, m, 1, "% 4.3f", "" );
 
 	// x := alpha * a * x, where 'a' is triangular and lower-stored.
 	bli_dtrmv( BLIS_LOWER, BLIS_NO_TRANSPOSE, BLIS_NONUNIT_DIAG,
 	           m, &alpha, a, rs, cs, x, 1 );
 
-	bli_dprintm( "x: after trmv", 1, m, x, m, 1, "%4.1f", "" );
+	bli_dprintm( "x: after trmv", 1, m, x, m, 1, "% 4.3f", "" );
 
 	// Free the memory obtained via malloc().
 	free( a );
@@ -287,14 +287,14 @@ int main( int argc, char** argv )
 	// that the matrix is not singular (singular matrices have no inverse).
 	bli_dshiftd( 0, m, m, &two, a, rs, cs );
 
-	bli_dprintm( "a: randomized (zeros in upper triangle)", m, m, a, rs, cs, "%4.1f", "" );
-	bli_dprintm( "b: intial value", 1, m, b, m, 1, "%4.1f", "" );
+	bli_dprintm( "a: randomized (zeros in upper triangle)", m, m, a, rs, cs, "% 4.3f", "" );
+	bli_dprintm( "b: intial value", 1, m, b, m, 1, "% 4.3f", "" );
 
 	// x := alpha * a * x, where 'a' is triangular and lower-stored.
 	bli_dtrsv( BLIS_LOWER, BLIS_NO_TRANSPOSE, BLIS_NONUNIT_DIAG,
 	           m, &alpha, a, rs, cs, x, 1 );
 
-	bli_dprintm( "b: after trsv", 1, m, b, m, 1, "%4.1f", "" );
+	bli_dprintm( "b: after trsv", 1, m, b, m, 1, "% 4.3f", "" );
 
 	// We can confirm the solution by comparing the product of a and x to the
 	// original value of b.
@@ -302,7 +302,7 @@ int main( int argc, char** argv )
 	bli_dtrmv( BLIS_LOWER, BLIS_NO_TRANSPOSE, BLIS_NONUNIT_DIAG,
 	           m, &alpha, a, rs, cs, y, 1 );
 
-	bli_dprintm( "y: should equal initial value of b", 1, m, y, m, 1, "%4.1f", "" );
+	bli_dprintm( "y: should equal initial value of b", 1, m, y, m, 1, "% 4.3f", "" );
 
 	// Free the memory obtained via malloc().
 	free( a );
