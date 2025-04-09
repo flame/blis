@@ -379,6 +379,14 @@ GEN_GET_MATRIX_MUL_POST_OP_VAL(float,f32obf16)
 GEN_GET_MATRIX_MUL_POST_OP_VAL(float,f32os8)
 GEN_GET_MATRIX_MUL_POST_OP_VAL(float,f32ou8)
 
+GEN_CLIP_POST_OP_VAL_FLOAT(bf16of32)
+GEN_CLIP_POST_OP_VAL_FLOAT(bf16obf16)
+GEN_CLIP_POST_OP_VAL_FLOAT(f32of32)
+GEN_CLIP_POST_OP_VAL_FLOAT(f32obf16)
+GEN_CLIP_POST_OP_VAL_INT(f32os32)
+GEN_CLIP_POST_OP_VAL_INT(f32os8)
+GEN_CLIP_POST_OP_VAL_INT(f32ou8)
+
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(float,float)
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int32_t,float)
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int8_t,float)
@@ -521,17 +529,11 @@ void eltwise_ops_accuracy_check_driver_ ## LP_SFX \
                                 CLIP ) /* CLIP*/ \
                         { \
                             temp_accum = \
-                                min \
-                                ( \
-                                  max \
-                                  ( \
-                                    temp_accum, \
-                                    *( ( ACCUM_type* ) \
-                                       ( post_op->eltwise + ele_i )->algo.alpha ) \
-                                  ), \
-                                  *( ( ACCUM_type* ) \
-                                     ( post_op->eltwise + ele_i )->algo.beta) \
-                                ); \
+                            GEN_FUNC_NAME(get_clip_post_op_val_,LP_SFX) \
+                            ( temp_accum, \
+                              ( post_op->eltwise + ele_i )->algo.alpha, \
+                              ( post_op->eltwise + ele_i )->algo.beta \
+                            ); \
                             ele_i += 1; \
                         } \
                         else \

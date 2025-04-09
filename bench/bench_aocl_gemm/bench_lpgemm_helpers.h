@@ -412,6 +412,7 @@ static inline ACCUM_type get_bias_post_op_val_ ## BLAS_SFX \
     return *( ( ACCUM_type* )post_op_bias_ptr + j ); \
 } \
 
+/* GELU TANH */
 #define GEN_GELU_TANH_POSTOP_FLOAT(BLAS_SFX) \
 static inline float GELU_TANH_post_op_ ## BLAS_SFX \
      ( \
