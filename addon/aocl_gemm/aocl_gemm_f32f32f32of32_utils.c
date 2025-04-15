@@ -95,23 +95,38 @@ AOCL_GEMM_REORDER(float,f32f32f32of32)
 	bli_param_map_netlib_to_blis_trans(trans, &blis_trans);
 
 	if ( ( input_buf_addr == NULL ) || ( reorder_buf_addr == NULL ) ||
-	     ( k <= 0 ) || ( n <= 0 ) || ( bli_is_notrans( blis_trans ) && ( ldb < n ) ) ||
-	    ( bli_is_trans( blis_trans ) && ( ldb < k ) ) )
+	     ( k <= 0 ) || ( n <= 0 ) )
 	{
 		return; // Error.
 	}
 
 	// Only supports row major packing now.
 	inc_t rs_b, cs_b;
-	if ((order == 'r') || (order == 'R'))
+	if( ( order == 'r') || ( order == 'R' ) )
 	{
-		rs_b = bli_is_notrans(blis_trans) ? ldb : 1;
-		cs_b = bli_is_notrans(blis_trans) ? 1 : ldb;
+		if( ( bli_is_notrans( blis_trans ) && ( ldb < n ) ) ||
+		    ( bli_is_trans( blis_trans ) && ( ldb < k ) ) )
+		{
+			return; // Error.
+		}
+		else
+		{
+			rs_b = bli_is_notrans( blis_trans ) ? ldb : 1;
+			cs_b = bli_is_notrans( blis_trans ) ? 1 : ldb;
+		}
 	}
-	else if ((order == 'c') || (order == 'C'))
+	else if ( ( order == 'c' ) || ( order == 'C' ) )
 	{
-		rs_b = bli_is_notrans(blis_trans) ? 1 : ldb;
-		cs_b = bli_is_notrans(blis_trans) ? ldb : 1;
+		if( ( bli_is_notrans( blis_trans ) && ( ldb < k ) ) ||
+		    ( bli_is_trans( blis_trans ) && ( ldb < n ) ) )
+		{
+			return; // Error.
+		}
+		else
+		{
+			rs_b = bli_is_notrans( blis_trans ) ? 1 : ldb;
+			cs_b = bli_is_notrans( blis_trans ) ? ldb : 1;
+		}
 	}
 	else
 	{
@@ -125,7 +140,7 @@ AOCL_GEMM_REORDER(float,f32f32f32of32)
 				"cannot perform f32f32f32 gemm.", __FILE__, __LINE__ );
 		return; // Error.
 	}
-	
+
 	/* Initialize BLIS. */
 	bli_init_auto();
 
@@ -158,7 +173,7 @@ AOCL_GEMM_REORDER(float,f32f32f32of32)
 	n_threads = ( n_threads > 0 ) ? n_threads : 1;
 
 #ifdef BLIS_KERNELS_ZEN4
-	//When n == 1, B marix becomes a vector. 
+	//When n == 1, B marix becomes a vector.
 	//Reordering is avoided so that LPGEMV can process it efficiently.
 	if( ( n == 1 ) && ( lpgemm_get_enabled_arch() != BLIS_ARCH_ZEN3 ) )
 	{

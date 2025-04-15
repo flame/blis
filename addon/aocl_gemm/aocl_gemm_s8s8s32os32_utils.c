@@ -193,22 +193,37 @@ AOCL_GEMM_REORDER(int8_t,s8s8s32os32)
 	bli_param_map_netlib_to_blis_trans(trans, &blis_trans);
 
 	if ((input_buf_addr == NULL) || (reorder_buf_addr == NULL) ||
-		(k <= 0) || (n <= 0) || (bli_is_notrans(blis_trans) && (ldb < n)) ||
-		(bli_is_trans(blis_trans) && (ldb < k)) )
+		(k <= 0) || (n <= 0) )
 	{
 		return; // Error.
 	}
 
 	inc_t rs_b, cs_b;
-	if ((order == 'r') || (order == 'R'))
+	if( ( order == 'r') || ( order == 'R' ) )
 	{
-		rs_b = bli_is_notrans(blis_trans) ? ldb : 1;
-		cs_b = bli_is_notrans(blis_trans) ? 1 : ldb;
+		if( ( bli_is_notrans( blis_trans ) && ( ldb < n ) ) ||
+		    ( bli_is_trans( blis_trans ) && ( ldb < k ) ) )
+		{
+			return; // Error.
+		}
+		else
+		{
+			rs_b = bli_is_notrans( blis_trans ) ? ldb : 1;
+			cs_b = bli_is_notrans( blis_trans ) ? 1 : ldb;
+		}
 	}
-	else if ((order == 'c') || (order == 'C'))
+	else if ( ( order == 'c' ) || ( order == 'C' ) )
 	{
-		rs_b = bli_is_notrans(blis_trans) ? 1 : ldb;
-		cs_b = bli_is_notrans(blis_trans) ? ldb : 1;
+		if( ( bli_is_notrans( blis_trans ) && ( ldb < k ) ) ||
+		    ( bli_is_trans( blis_trans ) && ( ldb < n ) ) )
+		{
+			return; // Error.
+		}
+		else
+		{
+			rs_b = bli_is_notrans( blis_trans ) ? 1 : ldb;
+			cs_b = bli_is_notrans( blis_trans ) ? ldb : 1;
+		}
 	}
 	else
 	{
@@ -284,22 +299,37 @@ AOCL_GEMM_REORDER_SYM_QUANT(int8_t,s8s8s32os32_sym_quant)
 	bli_param_map_netlib_to_blis_trans(trans, &blis_trans);
 
 	if ((input_buf_addr == NULL) || (reorder_buf_addr == NULL) ||
-		(k <= 0) || (n <= 0) || (bli_is_notrans(blis_trans) && (ldb < n)) ||
-		(bli_is_trans(blis_trans) && (ldb < k)) )
+		(k <= 0) || (n <= 0) )
 	{
 		return; // Error.
 	}
 
 	inc_t rs_b, cs_b;
-	if ((order == 'r') || (order == 'R'))
+	if( ( order == 'r') || ( order == 'R' ) )
 	{
-		rs_b = bli_is_notrans(blis_trans) ? ldb : 1;
-		cs_b = bli_is_notrans(blis_trans) ? 1 : ldb;
+		if( ( bli_is_notrans( blis_trans ) && ( ldb < n ) ) ||
+		    ( bli_is_trans( blis_trans ) && ( ldb < k ) ) )
+		{
+			return; // Error.
+		}
+		else
+		{
+			rs_b = bli_is_notrans( blis_trans ) ? ldb : 1;
+			cs_b = bli_is_notrans( blis_trans ) ? 1 : ldb;
+		}
 	}
-	else if ((order == 'c') || (order == 'C'))
+	else if ( ( order == 'c' ) || ( order == 'C' ) )
 	{
-		rs_b = bli_is_notrans(blis_trans) ? 1 : ldb;
-		cs_b = bli_is_notrans(blis_trans) ? ldb : 1;
+		if( ( bli_is_notrans( blis_trans ) && ( ldb < k ) ) ||
+		    ( bli_is_trans( blis_trans ) && ( ldb < n ) ) )
+		{
+			return; // Error.
+		}
+		else
+		{
+			rs_b = bli_is_notrans( blis_trans ) ? 1 : ldb;
+			cs_b = bli_is_notrans( blis_trans ) ? ldb : 1;
+		}
 	}
 	else
 	{

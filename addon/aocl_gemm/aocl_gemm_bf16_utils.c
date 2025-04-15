@@ -305,7 +305,7 @@ AOCL_GEMM_REORDER(bfloat16, bf16bf16f32of32)
 	if( ( order == 'r') || ( order == 'R' ) )
 	{
 		if( ( bli_is_notrans( blis_trans ) && ( ldb < n ) ) ||
-	        ( bli_is_trans( blis_trans ) && ( ldb < k ) ) )
+		    ( bli_is_trans( blis_trans ) && ( ldb < k ) ) )
 		{
 			return; // Error.
 		}
@@ -318,7 +318,7 @@ AOCL_GEMM_REORDER(bfloat16, bf16bf16f32of32)
 	else if ( ( order == 'c' ) || ( order == 'C' ) )
 	{
 		if( ( bli_is_notrans( blis_trans ) && ( ldb < k ) ) ||
-	        ( bli_is_trans( blis_trans ) && ( ldb < n ) ) )
+		    ( bli_is_trans( blis_trans ) && ( ldb < n ) ) )
 		{
 			return; // Error.
 		}
