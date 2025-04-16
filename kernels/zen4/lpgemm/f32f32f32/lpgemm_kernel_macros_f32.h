@@ -183,6 +183,45 @@
     zmm2 = _mm512_mul_ps(zmm2,alpha); \
     zmm3 = _mm512_mul_ps(zmm3,alpha);
 
+/*Beta helpers*/
+// F32 fma macro
+#define F32_BETA_FMA(reg,scratch1,scratch2) \
+	scratch1 = _mm512_mul_ps( scratch2, scratch1 ); \
+	reg = _mm512_add_ps( scratch1, reg ); \
+
+#define BF16_F32_BETA_OP(reg,m_ir,m_ind,n_ind,scratch1,scratch2) \
+	scratch1 = \
+	  (__m512)( _mm512_sllv_epi32( _mm512_cvtepi16_epi32( (__m256i)_mm256_loadu_epi16 \
+	  ( \
+	    ( ( bfloat16* )post_ops_attr.buf_downscale + \
+	    ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+	    post_ops_attr.post_op_c_j + ( n_ind * 16 ) )\
+	  ) ), _mm512_set1_epi32 (16) ) );\
+	F32_BETA_FMA(reg,scratch1,scratch2)\
+
+// Downscale n < 16 mask load beta macro
+#define BF16_F32_BETA_OP_NLT16F_MASK(lmask,reg,m_ind,n_ind,scratch1,scratch2) \
+	scratch1 =  \
+	  (__m512)( _mm512_sllv_epi32( _mm512_cvtepi16_epi32( (__m256i)_mm256_maskz_loadu_epi16 \
+	  ( \
+	    lmask, \
+	    ( bfloat16* )post_ops_attr.buf_downscale + \
+	    ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+	    post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+	  ) ), _mm512_set1_epi32 (16) ) );\
+	F32_BETA_FMA(reg,scratch1,scratch2)\
+
+//BF16->F32 store helper
+#define CVT_STORE_F32_BF16_MASK(reg,m_ind,n_ind) \
+	_mm256_mask_storeu_epi16 \
+		( \
+			( bfloat16* )post_ops_attr.buf_downscale + \
+			( post_ops_attr.rs_c_downscale *  \
+				( post_ops_attr.post_op_c_i + m_ind ) ) + \
+			post_ops_attr.post_op_c_j + ( n_ind * 16 ), \
+			mask_all1, (__m256i) _mm512_cvtneps_pbh( reg ) \
+		) \
+
 // BF16 bias helper macros.
 #define BF16_F32_BIAS_LOAD(scr,mask,n_ind) \
 	scr = ( __m512)( _mm512_sllv_epi32 \
@@ -268,6 +307,33 @@
 			  ) \
 			) \
 			); \
+
+//zero point bf16->f32
+
+
+#define BF16_F32_ZP_BCST(scr,n_ind, zp_mask) \
+scr = ( __m512)( _mm512_sllv_epi32 \
+		( \
+			_mm512_cvtepi16_epi32 \
+			( \
+				_mm256_maskz_set1_epi16( zp_mask, \
+					*( ( bfloat16* )post_ops_list_temp->op_args1 ) ) \
+			), _mm512_set1_epi32( 16 ) \
+		) \
+	);
+
+#define BF16_F32_ZP_COL_BCST(scr,n_ind, zp_mask) \
+scr = ( __m512)( _mm512_sllv_epi32 \
+		( \
+			_mm512_cvtepi16_epi32 \
+			( \
+				_mm256_maskz_set1_epi16( zp_mask,\
+					*( (bfloat16* )post_ops_list_temp->op_args1 + \
+                                post_ops_attr.post_op_c_i + n_ind ) ) \
+			), _mm512_set1_epi32( 16 ) \
+		) \
+	);
+
 
 // Matrix Add post-ops helper macros
 #define F32_MATRIX_ADD_2COL(scr0,scr1,m_ind,r_ind0,r_ind1) \
@@ -772,7 +838,7 @@
 					) \
 					), _mm512_set1_epi32( 16 ) \
 				) \
-		  	); \
+			); \
 
 //s32 zero point helper macros
 #define S32_F32_SCALAR_ZP_BCAST(scr,mask) \

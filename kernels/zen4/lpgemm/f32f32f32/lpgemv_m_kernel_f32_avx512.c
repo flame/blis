@@ -254,21 +254,36 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32 )
 
 		if (beta != 0)
 		{
-			const float *_cbuf = c_use;
-			// load c and multiply with beta and
-			// add to accumulator and store back
 			zmm3 = _mm512_set1_ps(beta);
-			zmm0 = _mm512_maskz_loadu_ps(k1, _cbuf);
-			zmm8 = _mm512_fmadd_ps(zmm0, zmm3, zmm8);
 
-			zmm1 = _mm512_maskz_loadu_ps(k2, (_cbuf + 16));
-			zmm12 = _mm512_fmadd_ps(zmm1, zmm3, zmm12);
-
-			zmm2 = _mm512_maskz_loadu_ps(k3, (_cbuf + 32));
-			zmm16 = _mm512_fmadd_ps(zmm2, zmm3, zmm16);
-
-			zmm4 = _mm512_maskz_loadu_ps(k4, (_cbuf + 48));
-			zmm20 = _mm512_fmadd_ps(zmm4, zmm3, zmm20);
+			if ( ( post_ops_attr.buf_downscale != NULL ) &&
+			     ( post_ops_attr.is_first_k == TRUE ) )
+		    {
+              BF16_F32_BETA_OP_NLT16F_MASK(k1, zmm8, 0, 0,  zmm0,zmm3);
+              BF16_F32_BETA_OP_NLT16F_MASK(k2, zmm12, 0, 1,  zmm1,zmm3);
+              BF16_F32_BETA_OP_NLT16F_MASK(k3, zmm16, 0, 2,  zmm2,zmm3);
+              BF16_F32_BETA_OP_NLT16F_MASK(k4, zmm20, 0, 3,  zmm3,zmm3);
+            }  
+			else
+			{
+			  const float *_cbuf = c_use;
+			  // load c and multiply with beta and
+			  // add to accumulator and store back
+			  
+			  zmm0 = _mm512_maskz_loadu_ps(k1, _cbuf);
+			  zmm8 = _mm512_fmadd_ps(zmm0, zmm3, zmm8);
+  
+			  zmm1 = _mm512_maskz_loadu_ps(k2, (_cbuf + 16));
+			  zmm12 = _mm512_fmadd_ps(zmm1, zmm3, zmm12);
+  
+			  zmm2 = _mm512_maskz_loadu_ps(k3, (_cbuf + 32));
+			  zmm16 = _mm512_fmadd_ps(zmm2, zmm3, zmm16);
+  
+			  zmm4 = _mm512_maskz_loadu_ps(k4, (_cbuf + 48));
+			  zmm20 = _mm512_fmadd_ps(zmm4, zmm3, zmm20);
+  
+			}
+			
 		}
 
 		// Post Ops
@@ -405,10 +420,21 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32 )
 		}
 		if( *( (dim_t* )post_ops_list_temp->op_args3 ) == 1 )
 		{
-			zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
-			zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
-			zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
-			zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+			if ( ( post_ops_attr.buf_downscale != NULL ) &&
+                 ( post_ops_attr.is_first_k == TRUE ) )
+            {
+              BF16_F32_ZP_BCST(zero_point0,0, k1)
+              BF16_F32_ZP_BCST(zero_point1,1, k2)
+              BF16_F32_ZP_BCST(zero_point2,2, k3)
+              BF16_F32_ZP_BCST(zero_point3,3, k4)
+            }
+            else
+            {
+              zero_point0 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+              zero_point1 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+              zero_point2 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+              zero_point3 = _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 ) );
+            }
 		}
 		if( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 			( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
@@ -430,18 +456,25 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32 )
 			}
 			if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
 			{
-				zero_point0 = _mm512_maskz_loadu_ps( k1, (float* )
-								post_ops_list_temp->op_args1 +
-								post_ops_attr.post_op_c_j + ( 0 * 16 ) );
-				zero_point1 = _mm512_maskz_loadu_ps( k2, (float* )
-								post_ops_list_temp->op_args1 +
-								post_ops_attr.post_op_c_j + ( 1 * 16 ) );
-				zero_point2 = _mm512_maskz_loadu_ps( k3, (float* )
-								post_ops_list_temp->op_args1 +
-								post_ops_attr.post_op_c_j + ( 2 * 16 ) );
-				zero_point3 = _mm512_maskz_loadu_ps( k4, (float* )
-								post_ops_list_temp->op_args1 +
-								post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+				if ( ( post_ops_attr.buf_downscale != NULL ) &&
+                     ( post_ops_attr.is_first_k == TRUE ) )
+                {
+                  BF16_F32_ZP_LOAD(zero_point0, k1, 0)
+                  BF16_F32_ZP_LOAD(zero_point1, k2, 1)
+                  BF16_F32_ZP_LOAD(zero_point2, k3, 2)
+                  BF16_F32_ZP_LOAD(zero_point3, k4, 3)
+                }
+                else
+                {
+                  zero_point0 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                  zero_point1 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+                  zero_point2 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_j + ( 2 * 16 ) );
+                  zero_point3 = _mm512_loadu_ps( (float* )post_ops_list_temp->op_args1 +
+                                post_ops_attr.post_op_c_j + ( 3 * 16 ) );
+                }
 			}
 			//c[0, 0-15]
 			F32_SCL_MULRND(zmm8, selector1, zero_point0);
@@ -711,10 +744,44 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32 )
 	}
 	POST_OPS_6x64F_DISABLE:
 	{
-		_mm512_mask_storeu_ps(c_use, k1, zmm8);
-		_mm512_mask_storeu_ps((c_use + 16), k2, zmm12);
-		_mm512_mask_storeu_ps((c_use + 32), k3, zmm16);
-		_mm512_mask_storeu_ps((c_use + 48), k4, zmm20);
+		if ( post_ops_attr.buf_downscale != NULL ) 
+		{
+			_mm256_mask_storeu_epi16
+			(
+			( bfloat16* )post_ops_attr.buf_downscale +
+			post_ops_attr.post_op_c_j + ( 0 * 16 ),
+			k1, (__m256i) _mm512_cvtneps_pbh( zmm8 )
+			);
+
+			_mm256_mask_storeu_epi16
+			(
+			( bfloat16* )post_ops_attr.buf_downscale +
+			post_ops_attr.post_op_c_j + ( 1 * 16 ),
+			k2, (__m256i) _mm512_cvtneps_pbh( zmm12 )
+			);
+
+			_mm256_mask_storeu_epi16
+			(
+			( bfloat16* )post_ops_attr.buf_downscale +
+			post_ops_attr.post_op_c_j + ( 2 * 16 ),
+			k3, (__m256i) _mm512_cvtneps_pbh( zmm16 )
+			);
+
+			_mm256_mask_storeu_epi16
+			(
+			( bfloat16* )post_ops_attr.buf_downscale +
+			post_ops_attr.post_op_c_j + ( 3 * 16 ),
+			k4, (__m256i) _mm512_cvtneps_pbh( zmm20 )
+			);
+		}
+		else
+		{
+		  _mm512_mask_storeu_ps(c_use, k1, zmm8);
+		  _mm512_mask_storeu_ps((c_use + 16), k2, zmm12);
+		  _mm512_mask_storeu_ps((c_use + 32), k3, zmm16);
+		  _mm512_mask_storeu_ps((c_use + 48), k4, zmm20);
+
+		}
 		post_ops_attr.post_op_c_j += NR;
 	}
 	} // jr loop

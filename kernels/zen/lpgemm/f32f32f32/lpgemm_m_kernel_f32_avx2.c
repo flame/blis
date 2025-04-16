@@ -45,7 +45,7 @@
 LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
 {
     //Call RD kernels if B is transposed
-    if(rs_b == 1)
+    if(rs_b == 1 && n0 != 1)
     {
         lpgemm_rowvar_f32f32f32of32_6x16m_rd
         (

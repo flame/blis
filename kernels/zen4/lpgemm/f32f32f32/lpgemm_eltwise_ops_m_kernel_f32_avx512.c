@@ -786,23 +786,21 @@ POST_OPS_GELU_ERF_6x64_OPS:
 POST_OPS_CLIP_6x64_OPS:
 			{
 				__m512 min, max;
-				if( post_ops_attr.c_stor_type == S32 || 
+				if( post_ops_attr.c_stor_type == S32 ||
 					post_ops_attr.c_stor_type == S8 ||
 					post_ops_attr.c_stor_type == U8 )
 				{
-					min = _mm512_cvtepi32_ps 
-						( _mm512_set1_epi32( *( ( int32_t* ) post_ops_list_temp->op_args2 ) ) ); 
-					max = _mm512_cvtepi32_ps 
+					min = _mm512_cvtepi32_ps
+						( _mm512_set1_epi32( *( ( int32_t* ) post_ops_list_temp->op_args2 ) ) );
+					max = _mm512_cvtepi32_ps
 						( _mm512_set1_epi32( *( ( int32_t* ) post_ops_list_temp->op_args3 ) ) );
 				}
-				else 
+				else
 				{
 					min = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
 					max = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
 				}
 
-				float arr[16];
-				
 				// c[0, 0-15]
 				CLIP_F32S_AVX512(zmm8, min, max)
 
@@ -1896,7 +1894,7 @@ POST_OPS_SWISH_6x64_OPS:
 					zmm1 = _mm512_set1_ps
 							( *( ( float* )post_ops_list_temp->op_args2 ) );
 				}
-				
+
 				__m512 al_in, r, r2, z, dn;
 				__m512i ex_out;
 

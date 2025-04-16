@@ -229,10 +229,10 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 	bli_pba_rntm_set_pba( &rntm_g );
 
 	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( BF16BF16F32OF32 );
+
 #if (defined(BLIS_KERNELS_ZEN4) && (!defined(LPGEMM_BF16_JIT)))
-	arch_t arch_id =  bli_arch_query_id();
-	if( ( ( arch_id == BLIS_ARCH_ZEN4 ) || ( arch_id == BLIS_ARCH_ZEN5 ) ) &&
-		( is_single_thread( &rntm_g ) == TRUE) )
+
+	if( ( bli_cpuid_is_avx512bf16_supported() == TRUE ) && ( is_single_thread( &rntm_g ) == TRUE) )
 	{
 		if( ( is_row_major == TRUE ) &&
 			( is_tiny_input_bf16obf16( m, n, k, lcntx_g ) == TRUE ) )
