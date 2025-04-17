@@ -227,6 +227,9 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_avx512_6x64m_rd)
     // Save c_j index for restoring later.
     uint64_t post_op_c_j_save = post_ops_attr.post_op_c_j;
 
+    // Save c_i index for restoring later.
+    uint64_t post_op_c_i_save = post_ops_attr.post_op_c_i;
+
     dim_t jj, ii;
     for ( jj = 0; jj < 64; jj += 4 )    // LOOP_6x64J
     {
@@ -1526,14 +1529,14 @@ POST_OPS_6x64F_DISABLE:
         }   // END LOOP_6x4I
 
         post_ops_attr.post_op_c_j += 4;
-        post_ops_attr.post_op_c_i  = 0;
+        post_ops_attr.post_op_c_i  = post_op_c_i_save;
     }   // END LOOP_6x64J
 
     // Reset the value of post_op_c_j to point to the beginning.
     post_ops_attr.post_op_c_j = post_op_c_j_save;
 
     // Update the post_op_c_i value to account for the number of rows.
-    post_ops_attr.post_op_c_i = MR * m_iter;
+    post_ops_attr.post_op_c_i = post_op_c_i_save + MR * m_iter;
 
     consider_edge_cases:
 
@@ -1642,6 +1645,9 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_avx512_6x48m_rd)
 
     // Save c_j index for restoring later.
     uint64_t post_op_c_j_save = post_ops_attr.post_op_c_j;
+
+    // Save c_i index for restoring later.
+    uint64_t post_op_c_i_save = post_ops_attr.post_op_c_i;
 
     dim_t jj, ii;
     for ( jj = 0; jj < 48; jj += 4 )    // LOOP_6x48J
@@ -2945,14 +2951,14 @@ POST_OPS_6x48F_DISABLE:
         }   // END LOOP_6x4I
 
         post_ops_attr.post_op_c_j += 4;
-        post_ops_attr.post_op_c_i  = 0;
+        post_ops_attr.post_op_c_i  = post_op_c_i_save;
     }   // END LOOP_6x48J
 
     // Reset the value of post_op_c_j to point to the beginning.
     post_ops_attr.post_op_c_j = post_op_c_j_save;
 
     // Update the post_op_c_i value to account for the number of rows.
-    post_ops_attr.post_op_c_i = MR * m_iter;
+    post_ops_attr.post_op_c_i = post_op_c_i_save + MR * m_iter;
 
     consider_edge_cases:
 
@@ -3061,6 +3067,9 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_avx512_6x32m_rd)
 
     // Save c_j index for restoring later.
     uint64_t post_op_c_j_save = post_ops_attr.post_op_c_j;
+
+    // Save c_i index for restoring later.
+    uint64_t post_op_c_i_save = post_ops_attr.post_op_c_i;
 
     dim_t jj, ii;
     for ( jj = 0; jj < 32; jj += 4 )    // LOOP_6x32J
@@ -4361,14 +4370,14 @@ POST_OPS_6x32F_DISABLE:
         }   // END LOOP_6x4I
 
         post_ops_attr.post_op_c_j += 4;
-        post_ops_attr.post_op_c_i  = 0;
+        post_ops_attr.post_op_c_i  = post_op_c_i_save;
     }   // END LOOP_6x32J
 
     // Reset the value of post_op_c_j to point to the beginning.
     post_ops_attr.post_op_c_j = post_op_c_j_save;
 
     // Update the post_op_c_i value to account for the number of rows.
-    post_ops_attr.post_op_c_i = MR * m_iter;
+    post_ops_attr.post_op_c_i = post_op_c_i_save + MR * m_iter;
 
     consider_edge_cases:
 

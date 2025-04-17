@@ -179,7 +179,7 @@ AOCL_GEMM_REORDER(float,f32f32f32of32)
 	{
 		if(rs_b == 1)
 		{
-			memcpy(reorder_buf_addr, input_buf_addr, (k * sizeof(BLIS_FLOAT)));
+			memcpy(reorder_buf_addr, input_buf_addr, (k * sizeof(float)));
 		}else
 		{
 			for(dim_t k0 = 0; k0 < k; k0++)

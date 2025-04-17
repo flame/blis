@@ -423,10 +423,11 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
 
     // Avoid packing of B in transb cases where rd kernels performs
     // better than rv + pack. rv kernel calls rd when rs_b==1.
-    if( ( rs_b == 1 ) && ( mtag_b == PACK ) && ( mtag_a == UNPACKED ) )
+    if( ( n < 48 ) && ( rs_b == 1 ) && ( mtag_b == PACK ) &&
+        ( mtag_a == UNPACKED ) )
     {
-        if      ( n < 48 ) mtag_b = UNPACKED;
-        else if ( m < 25 ) mtag_b = UNPACKED;
+        mtag_b = UNPACKED;
+        should_pack_A = FALSE;
     }
 
     for ( dim_t jc = jc_start; jc < jc_end; jc += NC )
