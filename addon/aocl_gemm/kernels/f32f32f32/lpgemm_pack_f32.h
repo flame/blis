@@ -46,6 +46,18 @@ void packa_mr16_f32f32f32of32_col_major
       dim_t*          cs_p
     );
 
+    void packa_mr8_f32f32f32of32_col_major
+    (
+      float*	      pack_a_buffer,
+      const float*    a,
+      const dim_t     rs_a,
+      const dim_t     cs_a,
+      const dim_t     MC,
+      const dim_t     KC,
+      dim_t*          rs_p,
+      dim_t*          cs_p
+    );
+
 void packa_mr6_f32f32f32of32_avx512
      (
        float*       pack_a_buf,

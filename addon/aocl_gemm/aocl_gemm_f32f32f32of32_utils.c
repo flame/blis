@@ -70,14 +70,12 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(f32f32f32of32)
 
 	// Extra space since packing does width in multiples of NR.
 	dim_t n_reorder;
-#ifdef BLIS_KERNELS_ZEN4
-	if( ( n == 1 ) && ( lpgemm_get_enabled_arch() != BLIS_ARCH_ZEN3 ) )
+	if( ( n == 1 ) ) //&& ( lpgemm_get_enabled_arch() != BLIS_ARCH_ZEN3 ) )
 	{
 		//When n == 1, LPGEMV doesn't expect B to be reordered.
 		n_reorder = 1;
 	}
 	else
-#endif
 	{
 		n_reorder = ( ( n + NR - 1 ) / NR ) * NR;
 	}
@@ -172,10 +170,10 @@ AOCL_GEMM_REORDER(float,f32f32f32of32)
 	dim_t n_threads = bli_rntm_num_threads( &rntm_g );
 	n_threads = ( n_threads > 0 ) ? n_threads : 1;
 
-#ifdef BLIS_KERNELS_ZEN4
+
 	//When n == 1, B marix becomes a vector.
 	//Reordering is avoided so that LPGEMV can process it efficiently.
-	if( ( n == 1 ) && ( lpgemm_get_enabled_arch() != BLIS_ARCH_ZEN3 ) )
+	if( ( n == 1 ) ) //&& ( lpgemm_get_enabled_arch() != BLIS_ARCH_ZEN3 ) )
 	{
 		if(rs_b == 1)
 		{
@@ -189,7 +187,6 @@ AOCL_GEMM_REORDER(float,f32f32f32of32)
 		}
 		return;
 	}
-#endif
 
 #ifdef BLIS_ENABLE_OPENMP
 	_Pragma( "omp parallel num_threads(n_threads)" )

@@ -43,33 +43,563 @@
 //  to produce C output of MRX1. The vectorization is done in k loop and
 //  the horizontal reduction done to produce one output from each
 //  accumulator register
-void lpgemv_n_one_kernel_f32_avx2_ker_ft
-(
-    const dim_t           m0,
-    const dim_t           k,
-    const float           *a,
-    const dim_t           rs_a,
-    const dim_t           cs_a,
-    const AOCL_MEMORY_TAG mtag_a,
-    const float           *b,
-    const dim_t           rs_b,
-    const dim_t           cs_b,
-    const AOCL_MEMORY_TAG mtag_b,
-    float                 *c,
-    const dim_t           rs_c,
-    const dim_t           cs_c,
-    const float           alpha,
-    const float           beta,
-    const dim_t           MR,
-    const dim_t           KC,
-    lpgemm_post_op        *post_op_list,
-    lpgemm_post_op_attr   *post_op_attr
-)
-{
-//TODO: Created dummy function as place holder to get 
-//rid of linking issues in other zen configurations.
-//AVX2 varient wil be implemented in next commits.
-//Code will take LPGEMM path for LPGEMV in AVX2 env.
-}
 
+#define LPGEMV_N_KERNEL_4_LOADS( ymm0, ymm1, ymm2, ymm3, paddr, stride ) \
+    ymm0 = _mm256_loadu_ps( paddr ); \
+    ymm1 = _mm256_loadu_ps( paddr + stride ); \
+    ymm2 = _mm256_loadu_ps( paddr + 2 * stride ); \
+    ymm3 = _mm256_loadu_ps( paddr + 3 * stride );
+
+#define LPGEMV_N_KERNEL_4_MASKLOADS( ymm0, ymm1, ymm2, ymm3, mask, paddr, stride ) \
+    ymm0 = _mm256_maskload_ps( paddr, mask ); \
+    ymm1 = _mm256_maskload_ps( paddr + stride, mask ); \
+    ymm2 = _mm256_maskload_ps( paddr + 2 * stride, mask ); \
+    ymm3 = _mm256_maskload_ps( paddr + 3 * stride, mask );
+
+#define LPGEMV_N_KERNEL_4_FMA( ymm8, ymm9, ymm10, ymm11, ymm7, ymm0, ymm1, ymm2, ymm3 ) \
+    ymm8 = _mm256_fmadd_ps( ymm0, ymm7, ymm8 ); \
+    ymm9 = _mm256_fmadd_ps( ymm1, ymm7, ymm9 ); \
+    ymm10 = _mm256_fmadd_ps( ymm2, ymm7, ymm10 ); \
+    ymm11 = _mm256_fmadd_ps( ymm3, ymm7, ymm11 );
+
+#define LPGEMV_YMM2XMM( ymm8, ymm9, ymm10, ymm11, ymm0, ymm1, ymm2, ymm3, xmm0 ) \
+    ymm0 = _mm256_hadd_ps( ymm8, ymm9 ); \
+    ymm1 = _mm256_hadd_ps( ymm10, ymm11 ); \
+    ymm0 = _mm256_hadd_ps( ymm0, ymm1 ); \
+    xmm0 = _mm_add_ps(_mm256_extractf128_ps(ymm0, 0), _mm256_extractf128_ps(ymm0,1));
+
+#define RELU_SCALE_OP_F32_AVX2( acc, scale_reg, zreg, scratch_reg ) \
+    scratch_reg = _mm256_min_ps( acc, zreg ); \
+    acc = _mm256_max_ps( acc, zreg ); \
+    scratch_reg = _mm256_mul_ps( scratch_reg, scale_reg ); \
+    acc = _mm256_or_ps( acc, scratch_reg );
+
+
+LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32_avx2 )
+{
+  static void *post_ops_labels[] =
+      {
+          &&POST_OPS_1x16F_DISABLE,
+          &&POST_OPS_BIAS_1x16F,
+          &&POST_OPS_RELU_1x16F,
+          &&POST_OPS_RELU_SCALE_1x16F,
+          &&POST_OPS_GELU_TANH_1x16F,
+          &&POST_OPS_GELU_ERF_1x16F,
+          &&POST_OPS_CLIP_1x16F,
+          &&POST_OPS_DOWNSCALE_1x16F,
+          &&POST_OPS_MATRIX_ADD_1x16F,
+          &&POST_OPS_SWISH_1x16F,
+          &&POST_OPS_MATRIX_MUL_1x16F,
+          &&POST_OPS_TANH_1x16F,
+          &&POST_OPS_SIGMOID_1x16F
+      };
+
+    // Strides are updated based on matrix packing/reordering.
+    const float *a_use = NULL;
+    const float *b_use = NULL;
+    float *c_use = NULL;
+
+    lpgemm_post_op_attr post_ops_attr = *(post_op_attr);
+
+    __m256 ymm0, ymm1, ymm2, ymm3, ymm4, ymm7;
+    __m256 ymm8, ymm9, ymm10, ymm11, ymm12, ymm13, ymm14, ymm15;
+
+    __m128 xmm0, xmm1;
+
+    __m256i masks[9] = {
+        _mm256_set_epi32( 0,  0,  0,  0,  0,  0,  0,  0),    // 0 elements
+        _mm256_set_epi32( 0,  0,  0,  0,  0,  0,  0, -1),    // 1 element
+        _mm256_set_epi32( 0,  0,  0,  0,  0,  0, -1, -1),    // 2 elements
+        _mm256_set_epi32( 0,  0,  0,  0,  0, -1, -1, -1),    // 3 elements
+        _mm256_set_epi32( 0,  0,  0,  0, -1, -1, -1, -1),    // 4 elements
+        _mm256_set_epi32( 0,  0,  0, -1, -1, -1, -1, -1),    // 5 elements
+        _mm256_set_epi32( 0,  0, -1, -1, -1, -1, -1, -1),    // 6 elements
+        _mm256_set_epi32( 0, -1, -1, -1, -1, -1, -1, -1),     // 7 elements
+        _mm256_set_epi32(-1, -1, -1, -1, -1, -1, -1, -1)     // 8 elements
+    };
+
+
+
+    // MR comes from framework, we need to set it based on the underlying hardware configuration.
+    for (dim_t mr = 0; mr < m0; mr += MR)
+    {
+        dim_t mr0 = bli_min( m0 - mr, MR );
+
+        dim_t k_iter = k / 8;
+        dim_t k_rem = k % 8;
+
+        const __m256i store_mask = masks[mr0];
+        const __m256i k_rem_mask = masks[k_rem];
+
+        /* zero the accumulator registers */
+        ZERO_ACC_YMM_4_REG( ymm8, ymm9, ymm10, ymm11 );
+        ZERO_ACC_YMM_4_REG( ymm12, ymm13, ymm14, ymm15 );
+
+        //update pointers
+        a_use = a + mr * rs_a;
+        b_use = b;
+        c_use = c + mr * rs_c;
+
+        if( mr0 == MR )
+        {
+            for( dim_t k = 0; k < k_iter; k++ )
+            {
+                ymm7 = _mm256_loadu_ps( b_use );
+                b_use += 8; // move b pointer to next 8 elements
+
+                // Load 4x16 from row 0-3 of A
+                LPGEMV_N_KERNEL_4_LOADS( ymm0, ymm1, ymm2, ymm3, a_use, rs_a );
+                a_use += 4 * rs_a; // move a pointer to next 4x16 elements
+
+                // Perform the dot product
+                LPGEMV_N_KERNEL_4_FMA( ymm8, ymm9, ymm10, ymm11, ymm7, ymm0, ymm1, ymm2, ymm3 );
+
+                // Load 4x16 from row 4-7 of A
+                LPGEMV_N_KERNEL_4_LOADS( ymm0, ymm1, ymm2, ymm3, a_use, rs_a );
+                a_use -= 4 * rs_a; // move a pointer to next 4x16 elements
+
+                // Perform the dot product
+                LPGEMV_N_KERNEL_4_FMA( ymm12, ymm13, ymm14, ymm15, ymm7, ymm0, ymm1, ymm2, ymm3 );
+
+                a_use += 8;
+            } // k-loop
+
+            if( k_rem )
+            {
+                ymm7 = _mm256_maskload_ps( b_use, k_rem_mask );
+
+                // Load 4x16 from row 0-3 of A
+                LPGEMV_N_KERNEL_4_MASKLOADS( ymm0, ymm1, ymm2, ymm3, k_rem_mask, a_use, rs_a );
+                a_use += 4 * rs_a; // move a pointer to next 4x16 elements
+
+                // Perform the dot product
+                LPGEMV_N_KERNEL_4_FMA( ymm8, ymm9, ymm10, ymm11, ymm7, ymm0, ymm1, ymm2, ymm3 );
+
+                // Load 4x16 from row 4-7 of A
+                LPGEMV_N_KERNEL_4_MASKLOADS( ymm0, ymm1, ymm2, ymm3, k_rem_mask, a_use, rs_a );
+                a_use -= 4 * rs_a; // move a pointer to next 4x16 elements
+
+                // Perform the dot product
+                LPGEMV_N_KERNEL_4_FMA( ymm12, ymm13, ymm14, ymm15, ymm7, ymm0, ymm1, ymm2, ymm3 );
+            }
+
+            // Add the registers horizontally to get one output
+            LPGEMV_YMM2XMM( ymm8, ymm9, ymm10, ymm11, ymm0, ymm1, ymm2, ymm3, xmm0 );
+            LPGEMV_YMM2XMM( ymm12, ymm13, ymm14, ymm15, ymm4, ymm1, ymm2, ymm3, xmm1 );
+
+            // compose outputs into one ymm to perform post-ops.
+            ymm8 = _mm256_insertf128_ps( ymm8, xmm0, 0 );
+            ymm8 = _mm256_insertf128_ps( ymm8, xmm1, 1 );
+        }
+        else
+        {
+            //Handle fringe cases when mr0 < MR
+            const float *a_use_fringe = a_use;
+            dim_t mr0_use = mr0;
+            dim_t regidx = 0;
+
+            // Dot product for mfringe 4
+            if (mr0_use >= 4)
+            {
+                for( dim_t k = 0; k < k_iter; k++ )
+                {
+                    ymm7 = _mm256_loadu_ps( b_use );
+                    b_use += 8; // move b pointer to next 8 elements
+
+                    // Load 4x16 from row 0-3 of A
+                    LPGEMV_N_KERNEL_4_LOADS( ymm0, ymm1, ymm2, ymm3, a_use, rs_a );
+                    a_use += 8; // move a pointer to next 4x16 elements
+
+                    // Perform the dot product
+                    LPGEMV_N_KERNEL_4_FMA( ymm8, ymm9, ymm10, ymm11, ymm7, ymm0, ymm1, ymm2, ymm3 );
+                } // k-loop
+
+                if( k_rem )
+                {
+                    ymm7 = _mm256_maskload_ps( b_use, k_rem_mask );
+
+                    // Load 4x16 from row 0-3 of A
+                    LPGEMV_N_KERNEL_4_MASKLOADS( ymm0, ymm1, ymm2, ymm3, k_rem_mask, a_use, rs_a );
+
+                    // Perform the dot product
+                    LPGEMV_N_KERNEL_4_FMA( ymm8, ymm9, ymm10, ymm11, ymm7, ymm0, ymm1, ymm2, ymm3 );
+                }
+
+                //update pointers
+                mr0_use -= 4;
+                a_use = a_use_fringe + 4 * rs_a;
+                a_use_fringe = a_use;
+                b_use = b;
+
+                //Horizontal add 4 ymm registers and get output into 2 xmm registers
+                LPGEMV_YMM2XMM(ymm8, ymm9, ymm10, ymm11, ymm0, ymm1, ymm2, ymm3, xmm0)
+
+                // compose outputs into one ymm to perform post-ops.
+                ymm8 = _mm256_insertf128_ps( ymm8, xmm0, 0 );
+                regidx = 1;
+            }
+            // Dot product for  <= 3
+            if (mr0_use)
+            {
+                if( mr0_use >= 2 )
+                {
+                    for (dim_t k = 0; k < k_iter; k++)
+                    {
+                        ymm7 = _mm256_loadu_ps( b_use );
+                        b_use += 8; // move b pointer to next 8 elements
+
+                        // Load 2x16 from row 0-1 of A
+                        ymm0 = _mm256_loadu_ps( a_use );
+                        ymm1 = _mm256_loadu_ps( a_use + rs_a );
+                        a_use += 8; // move a pointer to next 4x16 elements
+
+                        ymm12 = _mm256_fmadd_ps( ymm0, ymm7, ymm12 );
+                        ymm13 = _mm256_fmadd_ps( ymm1, ymm7, ymm13 );
+
+                    } // k-loop
+                    if( k_rem )
+                    {
+                        ymm7 = _mm256_maskload_ps( b_use, k_rem_mask );
+
+                        // Load 2x16 from row 0-1 of A
+                        ymm0 = _mm256_maskload_ps( a_use, k_rem_mask );
+                        ymm1 = _mm256_maskload_ps( a_use + rs_a, k_rem_mask );
+
+                        ymm12 = _mm256_fmadd_ps( ymm0, ymm7, ymm12 );
+                        ymm13 = _mm256_fmadd_ps( ymm1, ymm7, ymm13 );
+                    }
+                    //update pointers
+                    mr0_use -= 2;
+                    a_use = a_use_fringe + 2 * rs_a;
+                    a_use_fringe = a_use;
+                    b_use = b;
+                }
+                if( mr0_use == 1 )
+                {
+                    for (dim_t k = 0; k < k_iter; k++)
+                    {
+                        ymm7 = _mm256_loadu_ps( b_use );
+                        b_use += 8; // move b pointer to next 8 elements
+
+                        // Load 1x16 from row 0 of A
+                        ymm0 = _mm256_loadu_ps( a_use );
+                        a_use += 8; // move a pointer to next 4x16 elements
+
+                        ymm14 = _mm256_fmadd_ps( ymm0, ymm7, ymm14 );
+
+                    } // k-loop
+                    if( k_rem )
+                    {
+                        ymm7 = _mm256_maskload_ps( b_use, k_rem_mask );
+
+                        // Load 1x16 from row 0 of A
+                        ymm0 = _mm256_maskload_ps( a_use, k_rem_mask );
+
+                        ymm14 = _mm256_fmadd_ps( ymm0, ymm7, ymm14 );
+                    }
+                    // When only fringe 1, update the registers to store in order
+                    if (!(mr0 & 0x2))  ymm12 = ymm14;
+                }
+
+                LPGEMV_YMM2XMM( ymm12, ymm13, ymm14, ymm15, ymm0, ymm1, ymm2, ymm3, xmm1 );
+                if (regidx == 0) ymm8 = _mm256_insertf128_ps(ymm8, xmm1, 0);
+                else ymm8 = _mm256_insertf128_ps(ymm8, xmm1, 1);
+            }
+        }
+
+        // scale accumulated output with alpha
+        ymm0 = _mm256_set1_ps( alpha );
+        ymm8 = _mm256_mul_ps( ymm8, ymm0 );
+
+        if( beta != 0.0f )
+        {
+            const float *_cbuf = c_use;
+
+            //C = beta*C + alpha*A*B
+            ymm3 = _mm256_set1_ps(beta);
+            if( rs_c == 1 )
+            {
+                ymm0 = _mm256_maskload_ps( _cbuf, store_mask );
+            }
+            else
+            {
+                // load c into ymm0
+                float ctemp[8] = { 0 };
+                for( dim_t i = 0; i < 8; i++ )
+                {
+                    ctemp[i] = _cbuf[i * rs_c];
+                }
+                ymm0 = _mm256_loadu_ps( ctemp );
+            }
+
+            // scale c with beta
+            ymm8 = _mm256_fmadd_ps( ymm0, ymm3, ymm8 );
+        }
+
+        // post-ops
+        post_ops_attr.is_last_k = TRUE;
+        lpgemm_post_op *post_ops_list_temp = post_op;
+        POST_OP_LABEL_LASTK_SAFE_JUMP
+
+POST_OPS_BIAS_1x16F:
+        {
+            if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			  ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+            {
+            ymm0 = _mm256_set1_ps(*( ( float * )post_ops_list_temp->op_args1 ) );
+            }
+            else
+            {
+            // If original output was columns major, then by the time
+            // kernel sees it, the matrix would be accessed as if it were
+            // transposed. Due to this the bias array will be accessed by
+            // the ic index, and each bias element corresponds to an
+            // entire row of the transposed output array, instead of an
+            // entire column.
+            ymm0 =  _mm256_maskload_ps( ( float* )post_ops_list_temp->op_args1 +
+                                    post_ops_attr.post_op_c_i , store_mask );
+            }
+            ymm8 = _mm256_add_ps(ymm0, ymm8);
+            POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+        }
+
+POST_OPS_RELU_1x16F:
+        {
+            ymm0 = _mm256_setzero_ps();
+            ymm8 = _mm256_max_ps( ymm8, ymm0 );
+            POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+        }
+POST_OPS_RELU_SCALE_1x16F:
+        {
+            ymm0 = _mm256_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+            ymm1 = _mm256_setzero_ps();
+
+            RELU_SCALE_OP_F32_AVX2( ymm8, ymm0, ymm1, ymm2 );
+            POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+        }
+POST_OPS_GELU_TANH_1x16F:
+        {
+            __m256 dn, x_tanh;
+            __m256i q;
+
+            // c[0,0-3]
+            GELU_TANH_F32_AVX2_DEF(ymm8, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+            POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+        }
+POST_OPS_GELU_ERF_1x16F:
+        {
+          // c[0, 0-15]
+          GELU_ERF_F32S_AVX2(ymm8, ymm0, ymm1, ymm2)
+          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+        }
+POST_OPS_CLIP_1x16F:
+        {
+          ymm0 = _mm256_set1_ps(*(float *)post_ops_list_temp->op_args2);
+          ymm1 = _mm256_set1_ps(*(float *)post_ops_list_temp->op_args3);
+
+          // c[0, 0-15]
+          CLIP_F32S_AVX2(ymm8, ymm0, ymm1)
+
+          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+        }
+POST_OPS_DOWNSCALE_1x16F:
+        {
+            __m256 zero_point0 = _mm256_setzero_ps();
+            __m256 selector1 = _mm256_setzero_ps();
+            // Need to account for row vs column major swaps. For scalars
+            // scale and zero point, no implications.
+            // Even though different registers are used for scalar in column
+            // and row major downscale path, all those registers will contain
+            // the same value.
+            if ( post_ops_list_temp->scale_factor_len == 1 )
+            {
+            selector1 =
+                _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+
+            }
+            if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+            {
+            zero_point0 = _mm256_set1_ps( *(float *)post_ops_list_temp->op_args1 );
+            }
+            if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+                ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+            {
+            // Scale/zp len cannot be > 1, since orignal n = 1.
+            F32_SCL_MULRND_AVX2(ymm8, selector1, zero_point0);
+            }
+            else
+            {
+            // If original output was columns major, then by the time
+            // kernel sees it, the matrix would be accessed as if it were
+            // transposed. Due to this the scale as well as zp array will
+            // be accessed by the ic index, and each scale/zp element
+            // corresponds to an entire row of the transposed output array,
+            // instead of an entire column.
+            if( post_ops_list_temp->scale_factor_len > 1 )
+            {
+                selector1 = _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
+                                    post_ops_attr.post_op_c_i, store_mask );
+            }
+            if( *( dim_t*)post_ops_list_temp->op_args3 > 1 )
+            {
+                zero_point0 = _mm256_maskload_ps( ( float * )post_ops_list_temp->op_args1 +
+                                    post_ops_attr.post_op_c_i, store_mask );
+            }
+            F32_SCL_MULRND_AVX2(ymm8, selector1, zero_point0);
+            }
+            POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+        }
+POST_OPS_MATRIX_ADD_1x16F:
+        {
+
+          __m256 selector1 = _mm256_setzero_ps();
+
+          dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+
+          __m256 scl_fctr1 = _mm256_setzero_ps();
+
+          // Even though different registers are used for scalar in column and
+          // row major case, all those registers will contain the same value.
+          // For column major, if m==1, then it means n=1 and scale_factor_len=1.
+          if ( post_ops_list_temp->scale_factor_len == 1 )
+          {
+            scl_fctr1 =
+              _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+          }
+          else
+          {
+            if ( ( *( char* )post_ops_list_temp->op_args2 == 'c' ) ||
+                ( *( char* )post_ops_list_temp->op_args2 == 'C' ) )
+            {
+              scl_fctr1 =
+                _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
+                    post_ops_attr.post_op_c_i + ( 0 * 16 ), store_mask );
+            }
+          }
+          float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+          if( ldm == 1 )
+          {
+            selector1 = _mm256_maskload_ps(( matptr +
+                                         post_ops_attr.post_op_c_i ), store_mask );
+              selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
+            ymm8 = _mm256_add_ps( selector1, ymm8 );
+
+          }
+          else
+          {
+            float ctemp[16];
+            for( dim_t i = 0; i < mr0; i++ )
+            {
+              ctemp[i] = *( matptr +
+                          ( ( post_ops_attr.post_op_c_i + i )
+                              * ldm ) );
+            }
+            selector1 = _mm256_maskload_ps( ctemp, store_mask );
+            selector1 = _mm256_mul_ps( selector1, scl_fctr1 ); \
+            ymm8 = _mm256_add_ps( selector1, ymm8 );
+          }
+          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+       }
+POST_OPS_MATRIX_MUL_1x16F:
+       {
+         __m256 selector1 = _mm256_setzero_ps();
+
+         dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+
+         __m256 scl_fctr1 = _mm256_setzero_ps();
+
+         // Even though different registers are used for scalar in column and
+         // row major case, all those registers will contain the same value.
+         // For column major, if m==1, then it means n=1 and scale_factor_len=1.
+         if ( post_ops_list_temp->scale_factor_len == 1 )
+         {
+           scl_fctr1 =
+             _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+         }
+         else
+         {
+           if ( ( *( char* )post_ops_list_temp->op_args2 == 'c' ) ||
+               ( *( char* )post_ops_list_temp->op_args2 == 'C' ) )
+           {
+             scl_fctr1 =
+               _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
+                   post_ops_attr.post_op_c_i + ( 0 * 16 ), store_mask );
+           }
+         }
+         float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+         if( ldm == 1 )
+         {
+           selector1 = _mm256_maskload_ps(( matptr +
+                                        post_ops_attr.post_op_c_i ), store_mask );
+             selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
+           ymm8 = _mm256_mul_ps( selector1, ymm8 );
+         }
+         else
+         {
+           float ctemp[16];
+           for( dim_t i = 0; i < mr0; i++ )
+           {
+             ctemp[i] = *( matptr +
+                         ( ( post_ops_attr.post_op_c_i + i )
+                             * ldm ) );
+           }
+           selector1 = _mm256_maskload_ps( ctemp, store_mask );
+           selector1 = _mm256_mul_ps( selector1, scl_fctr1 ); \
+           ymm8 = _mm256_mul_ps( selector1, ymm8 );
+         }
+
+         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+       }
+POST_OPS_SWISH_1x16F:
+       {
+         ymm7 =
+             _mm256_set1_ps( *( ( float* )post_ops_list_temp->op_args2 ) );
+         __m256i ex_out;
+
+         // c[0, 0-15]
+         SWISH_F32_AVX2_DEF(ymm8, ymm7, ymm0, ymm1, ymm2, ymm3, ymm4, ex_out);
+
+         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+       }
+POST_OPS_TANH_1x16F:
+       {
+         __m256i ymm6;
+         // c[0, 0-15]
+         TANH_F32S_AVX2(ymm8, ymm0, ymm1, ymm2, ymm3, ymm4, ymm6)
+
+         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+       }
+POST_OPS_SIGMOID_1x16F:
+       {
+         __m256i ex_out;
+
+         // c[0, 0-15]
+         SIGMOID_F32_AVX2_DEF(ymm8, ymm0, ymm1, ymm2, ymm3, ymm4, ex_out);
+
+         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+       }
+
+POST_OPS_1x16F_DISABLE:
+        {
+
+            if( rs_c == 1 )
+            {
+                _mm256_maskstore_ps ( c_use, store_mask, ymm8 );
+            }
+            else
+            {
+                // store c from ymm0
+                float ctemp[8];
+                _mm256_storeu_ps( ctemp, ymm8 );
+                for( dim_t i = 0; i < mr0; i++ )
+                {
+                    c_use[i * rs_c] = ctemp[i];
+                }
+            }
+        }
+        post_ops_attr.post_op_c_i += MR;
+    } // mr loop
+}
 #endif // BLIS_ADDON_LPGEMM
