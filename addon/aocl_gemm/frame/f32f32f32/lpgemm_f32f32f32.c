@@ -147,8 +147,8 @@ LPGEMV(float, float, float, f32f32f32of32)
 #ifdef BLIS_KERNELS_ZEN4
     if( lpgemm_get_enabled_arch() == BLIS_ARCH_ZEN3 )
     {
-      MR = 8;
-      ker_fp = lpgemv_n_one_f32f32f32of32_avx2;
+      MR = 16;
+      ker_fp = lpgemv_n_one_f32f32f32of32_avx512_256;
       packa_fp = packa_mr8_f32f32f32of32_col_major;
     }
     else

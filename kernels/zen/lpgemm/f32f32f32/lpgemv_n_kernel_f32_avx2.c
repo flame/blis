@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-  Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+  Copyright (C) 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -67,12 +67,6 @@
     ymm1 = _mm256_hadd_ps( ymm10, ymm11 ); \
     ymm0 = _mm256_hadd_ps( ymm0, ymm1 ); \
     xmm0 = _mm_add_ps(_mm256_extractf128_ps(ymm0, 0), _mm256_extractf128_ps(ymm0,1));
-
-#define RELU_SCALE_OP_F32_AVX2( acc, scale_reg, zreg, scratch_reg ) \
-    scratch_reg = _mm256_min_ps( acc, zreg ); \
-    acc = _mm256_max_ps( acc, zreg ); \
-    scratch_reg = _mm256_mul_ps( scratch_reg, scale_reg ); \
-    acc = _mm256_or_ps( acc, scratch_reg );
 
 
 LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32_avx2 )
@@ -147,16 +141,16 @@ LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32_avx2 )
                 ymm7 = _mm256_loadu_ps( b_use );
                 b_use += 8; // move b pointer to next 8 elements
 
-                // Load 4x16 from row 0-3 of A
+                // Load 4x8 from row 0-3 of A
                 LPGEMV_N_KERNEL_4_LOADS( ymm0, ymm1, ymm2, ymm3, a_use, rs_a );
-                a_use += 4 * rs_a; // move a pointer to next 4x16 elements
+                a_use += 4 * rs_a; // move a pointer to next 4x8 elements
 
                 // Perform the dot product
                 LPGEMV_N_KERNEL_4_FMA( ymm8, ymm9, ymm10, ymm11, ymm7, ymm0, ymm1, ymm2, ymm3 );
 
-                // Load 4x16 from row 4-7 of A
+                // Load 4x8 from row 4-7 of A
                 LPGEMV_N_KERNEL_4_LOADS( ymm0, ymm1, ymm2, ymm3, a_use, rs_a );
-                a_use -= 4 * rs_a; // move a pointer to next 4x16 elements
+                a_use -= 4 * rs_a; // move a pointer to next 4x8 elements
 
                 // Perform the dot product
                 LPGEMV_N_KERNEL_4_FMA( ymm12, ymm13, ymm14, ymm15, ymm7, ymm0, ymm1, ymm2, ymm3 );
@@ -168,16 +162,16 @@ LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32_avx2 )
             {
                 ymm7 = _mm256_maskload_ps( b_use, k_rem_mask );
 
-                // Load 4x16 from row 0-3 of A
+                // Load 4x8 from row 0-3 of A
                 LPGEMV_N_KERNEL_4_MASKLOADS( ymm0, ymm1, ymm2, ymm3, k_rem_mask, a_use, rs_a );
-                a_use += 4 * rs_a; // move a pointer to next 4x16 elements
+                a_use += 4 * rs_a; // move a pointer to next 4x8 elements
 
                 // Perform the dot product
                 LPGEMV_N_KERNEL_4_FMA( ymm8, ymm9, ymm10, ymm11, ymm7, ymm0, ymm1, ymm2, ymm3 );
 
-                // Load 4x16 from row 4-7 of A
+                // Load 4x8 from row 4-7 of A
                 LPGEMV_N_KERNEL_4_MASKLOADS( ymm0, ymm1, ymm2, ymm3, k_rem_mask, a_use, rs_a );
-                a_use -= 4 * rs_a; // move a pointer to next 4x16 elements
+                a_use -= 4 * rs_a; // move a pointer to next 4x8 elements
 
                 // Perform the dot product
                 LPGEMV_N_KERNEL_4_FMA( ymm12, ymm13, ymm14, ymm15, ymm7, ymm0, ymm1, ymm2, ymm3 );
@@ -206,9 +200,9 @@ LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32_avx2 )
                     ymm7 = _mm256_loadu_ps( b_use );
                     b_use += 8; // move b pointer to next 8 elements
 
-                    // Load 4x16 from row 0-3 of A
+                    // Load 4x8 from row 0-3 of A
                     LPGEMV_N_KERNEL_4_LOADS( ymm0, ymm1, ymm2, ymm3, a_use, rs_a );
-                    a_use += 8; // move a pointer to next 4x16 elements
+                    a_use += 8; // move a pointer to next 4x8 elements
 
                     // Perform the dot product
                     LPGEMV_N_KERNEL_4_FMA( ymm8, ymm9, ymm10, ymm11, ymm7, ymm0, ymm1, ymm2, ymm3 );
@@ -218,7 +212,7 @@ LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32_avx2 )
                 {
                     ymm7 = _mm256_maskload_ps( b_use, k_rem_mask );
 
-                    // Load 4x16 from row 0-3 of A
+                    // Load 4x8 from row 0-3 of A
                     LPGEMV_N_KERNEL_4_MASKLOADS( ymm0, ymm1, ymm2, ymm3, k_rem_mask, a_use, rs_a );
 
                     // Perform the dot product
@@ -251,7 +245,7 @@ LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32_avx2 )
                         // Load 2x16 from row 0-1 of A
                         ymm0 = _mm256_loadu_ps( a_use );
                         ymm1 = _mm256_loadu_ps( a_use + rs_a );
-                        a_use += 8; // move a pointer to next 4x16 elements
+                        a_use += 8; // move a pointer to next 4x8 elements
 
                         ymm12 = _mm256_fmadd_ps( ymm0, ymm7, ymm12 );
                         ymm13 = _mm256_fmadd_ps( ymm1, ymm7, ymm13 );
@@ -283,7 +277,7 @@ LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32_avx2 )
 
                         // Load 1x16 from row 0 of A
                         ymm0 = _mm256_loadu_ps( a_use );
-                        a_use += 8; // move a pointer to next 4x16 elements
+                        a_use += 8; // move a pointer to next 4x8 elements
 
                         ymm14 = _mm256_fmadd_ps( ymm0, ymm7, ymm14 );
 
@@ -325,7 +319,7 @@ LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32_avx2 )
             {
                 // load c into ymm0
                 float ctemp[8] = { 0 };
-                for( dim_t i = 0; i < 8; i++ )
+                for( dim_t i = 0; i < mr0; i++ )
                 {
                     ctemp[i] = _cbuf[i * rs_c];
                 }
@@ -374,7 +368,7 @@ POST_OPS_RELU_SCALE_1x16F:
             ymm0 = _mm256_set1_ps( *( float* )post_ops_list_temp->op_args2 );
             ymm1 = _mm256_setzero_ps();
 
-            RELU_SCALE_OP_F32_AVX2( ymm8, ymm0, ymm1, ymm2 );
+            RELU_SCALE_OP_F32S_AVX2( ymm8, ymm0, ymm1, ymm2 );
             POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
         }
 POST_OPS_GELU_TANH_1x16F:
@@ -538,7 +532,7 @@ POST_OPS_MATRIX_MUL_1x16F:
          }
          else
          {
-           float ctemp[16];
+           float ctemp[8];
            for( dim_t i = 0; i < mr0; i++ )
            {
              ctemp[i] = *( matptr +
