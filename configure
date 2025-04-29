@@ -2739,8 +2739,14 @@ check_build_tools()
 	                  "C compiler" "yes" found_cc
 
 	# Also check the compiler to see if we are (cross-)compiling for Windows
-	if "${found_cc}" -dM -E - < /dev/null 2> /dev/null | grep -q _WIN32; then
-		is_win=yes
+	if [ "${os_name}" == "Darwin" ] && "${found_cc}" --version 2> /dev/null | grep -q clang; then
+		if "${found_cc}" -dM -E - < /dev/null 2> /dev/null | grep TARGET_OS_WIN32 | grep -q 1; then
+			is_win=yes
+		fi
+	else
+		if "${found_cc}" -dM -E - < /dev/null 2> /dev/null | grep -q _WIN32; then
+			is_win=yes
+		fi
 	fi
 	is_msvc=no
 	if "${found_cc}" -dM -E - < /dev/null 2> /dev/null | grep -q _MSC_VER; then
