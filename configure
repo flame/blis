@@ -2739,7 +2739,7 @@ check_build_tools()
 	                  "C compiler" "yes" found_cc
 
 	# Also check the compiler to see if we are (cross-)compiling for Windows
-	if "${found_cc}" -dM -E - < /dev/null 2> /dev/null | grep -q _WIN32; then
+	if "${found_cc}" -dM -E - < /dev/null 2> /dev/null | grep -qE "#define\s+_WIN32"; then
 		is_win=yes
 	fi
 	is_msvc=no
