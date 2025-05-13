@@ -3401,7 +3401,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_1x16)
               &&POST_OPS_TANH_1x16F,
               &&POST_OPS_SIGMOID_1x16F
             };
-    fflush(stdout);
+
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
     uint64_t k_iter = (uint64_t)k0;
