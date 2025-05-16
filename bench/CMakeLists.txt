@@ -152,6 +152,7 @@ function(benchexe extn)
                                 PRIVATE
                                 # load-var-for,COPTFLAGS
                                 ${COPTFLAGS}
+                                ${CPPROCFLAGS}
                             )
         if(WIN32 AND BUILD_SHARED_LIBS)
             target_compile_definitions(${exec_name}.x
