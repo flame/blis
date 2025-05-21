@@ -5,7 +5,6 @@
       "name": "lp64",
       "hidden": true,
       "cacheVariables": {
-        "INT_SIZE": "32",
         "BLAS_INT_SIZE": "32"
       }
     },
@@ -13,7 +12,6 @@
       "name": "ilp64",
       "hidden": true,
       "cacheVariables": {
-        "INT_SIZE": "64",
         "BLAS_INT_SIZE": "64"
       }
     },
