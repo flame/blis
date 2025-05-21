@@ -4,6 +4,9 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: read
+
 jobs:
   check_branch_name:
     runs-on: Linux  # Use the default GitHub-hosted runner with Linux
