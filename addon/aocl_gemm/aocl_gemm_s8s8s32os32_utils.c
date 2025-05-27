@@ -169,7 +169,7 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE_SYM_QUANT(s8s8s32os32_sym_quant)
 #endif
 	dim_t group_size = meta_data->group_size;
 
-	if( group_size & 11 )
+	if( group_size & 3 )
 	{
 		bli_print_msg(" Group size should be multiple of 4 for s8s8s32os32_sym_quant", __FILE__, __LINE__ );
 		return 0; // Error.
@@ -345,7 +345,7 @@ AOCL_GEMM_REORDER_SYM_QUANT(int8_t,s8s8s32os32_sym_quant)
 	}
 
 	dim_t group_size = meta_data->group_size;
-	if( group_size & 11 )
+	if( group_size & 3 )
 	{
 		bli_print_msg(" Group size should be multiple of 4 for s8s8s32os32_sym_quant", __FILE__, __LINE__ );
 		return; // Error.
