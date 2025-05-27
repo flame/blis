@@ -653,10 +653,19 @@ LPGEMV_N_EQ1_KERN(int8_t, int8_t, int32_t, s8s8s32os32)
 			{
 				b0 = _mm512_cvtepi32_ps(
 						_mm512_cvtepi8_epi32(
-			 				_mm_maskz_loadu_epi8(
+							_mm_maskz_loadu_epi8(
 								_cvtu32_mask16( 0x0001 ),
 								( ( int8_t* )post_ops_list_temp->op_args1 )
-			  				) ) );
+							) ) );
+			}
+			else if ( post_ops_list_temp->stor_type == U8 )
+			{
+				b0 = _mm512_cvtepi32_ps(
+						_mm512_cvtepu8_epi32(
+							_mm_maskz_loadu_epi8(
+								_cvtu32_mask16( 0x0001 ),
+								( ( int8_t* )post_ops_list_temp->op_args1 )
+							) ) );
 			}
 			else if ( post_ops_list_temp->stor_type == S32 )
 			{
@@ -811,6 +820,7 @@ LPGEMV_N_EQ1_KERN(int8_t, int8_t, int32_t, s8s8s32os32)
 					  ( post_ops_attr.c_stor_type == S8 ) );
 			bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 );
 			bool is_f32 = ( post_ops_list_temp->stor_type == F32 );
+			bool is_u8 = ( post_ops_list_temp->stor_type == U8 );
 
 			__m512 scl_fctr1 = _mm512_setzero_ps();
 			__m512 t0 = _mm512_setzero_ps();
@@ -917,6 +927,33 @@ LPGEMV_N_EQ1_KERN(int8_t, int8_t, int32_t, s8s8s32os32)
 					acc_8 = _mm512_add_ps( t0, acc_8 );
 				}
 			}
+			else if ( is_u8 == TRUE )
+			{
+				uint8_t* matptr = ( uint8_t* )post_ops_list_temp->op_args1;
+
+				if( ldm == 1 )
+				{
+					U8_F32_MATRIX_ADD_LOAD( k2, t0, scl_fctr1, 0, 0 )
+					acc_8 = _mm512_add_ps( t0, acc_8 );
+				}
+				else
+				{
+					uint8_t ctemp[16];
+					for( dim_t i = 0; i < mr0; i++ )
+					{
+						ctemp[i] = *( matptr +
+						            ( ( post_ops_attr.post_op_c_i + i )
+						                * ldm ) );
+					}
+					t0 = _mm512_cvtepi32_ps(
+							_mm512_cvtepu8_epi32(
+								_mm_maskz_loadu_epi8( k2, ctemp ) ) );
+					t0 = _mm512_mul_round_ps( t0, scl_fctr1,
+							( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC )
+						);
+					acc_8 = _mm512_add_ps( t0, acc_8 );
+				}
+			}
 			else
 			{
 				int32_t* matptr = ( int32_t* )post_ops_list_temp->op_args1;
@@ -955,6 +992,7 @@ LPGEMV_N_EQ1_KERN(int8_t, int8_t, int32_t, s8s8s32os32)
 					  ( post_ops_attr.c_stor_type == S8 ) );
 			bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 );
 			bool is_f32 = ( post_ops_list_temp->stor_type == F32 );
+			bool is_u8 = ( post_ops_list_temp->stor_type == U8 );
 
 			__m512 scl_fctr1 = _mm512_setzero_ps();
 			__m512 t0 = _mm512_setzero_ps();
@@ -1060,6 +1098,35 @@ LPGEMV_N_EQ1_KERN(int8_t, int8_t, int32_t, s8s8s32os32)
 					}
 					t0 = _mm512_cvtepi32_ps(
 							_mm512_cvtepi8_epi32
+					            ( _mm_maskz_loadu_epi8( k2, ctemp ) ) );
+					t0 = _mm512_mul_round_ps( t0, scl_fctr1,
+						( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC ) );
+					acc_8 = _mm512_mul_round_ps( t0, acc_8,
+						( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC ) );
+				}
+			}
+			else if ( is_u8 == TRUE )
+			{
+				int8_t* matptr = ( int8_t* )post_ops_list_temp->op_args1;
+
+				if( ldm == 1 )
+				{
+					U8_F32_MATRIX_MUL_LOAD( k2, t0, scl_fctr1, 0, 0 )
+
+					acc_8 = _mm512_mul_round_ps( t0, acc_8,
+						( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC ) );
+				}
+				else
+				{
+					uint8_t ctemp[16];
+					for( dim_t i = 0; i < mr0; i++ )
+					{
+						ctemp[i] = *( matptr +
+						            ( ( post_ops_attr.post_op_c_i + i )
+						                * ldm ) );
+					}
+					t0 = _mm512_cvtepi32_ps(
+							_mm512_cvtepu8_epi32
 					            ( _mm_maskz_loadu_epi8( k2, ctemp ) ) );
 					t0 = _mm512_mul_round_ps( t0, scl_fctr1,
 						( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC ) );

@@ -403,6 +403,12 @@ static inline ACCUM_type get_bias_post_op_val_ ## BLAS_SFX \
         int8_t_to_float( *( ( int8_t* )post_op_bias_ptr + j ), &ret_val ); \
         return ret_val; \
     } \
+    if(bias_stor_type == AOCL_GEMM_UINT8) \
+    { \
+        float ret_val = 0.0; \
+        uint8_t_to_float( *( ( uint8_t* )post_op_bias_ptr + j ), &ret_val ); \
+        return ret_val; \
+    } \
     if(bias_stor_type == AOCL_GEMM_INT32) \
     { \
         float ret_val = 0.0; \
@@ -515,6 +521,12 @@ static inline ACCUM_type get_matrix_add_post_op_val_ ## BLAS_SFX \
     { \
         float ret_val = 0.0; \
         int8_t_to_float( *( ( int8_t* )mat_add_ptr + ( i * rs_m ) + ( j * cs_m ) ), &ret_val ); \
+        return ( ( float )ret_val * *( scl_fctr + j_scale ) ); \
+    } \
+    if( matadd_stor_type == AOCL_GEMM_UINT8 ) \
+    { \
+        float ret_val = 0.0; \
+        uint8_t_to_float( *( ( uint8_t* )mat_add_ptr + ( i * rs_m ) + ( j * cs_m ) ), &ret_val ); \
         return ( ( float )ret_val * *( scl_fctr + j_scale ) ); \
     } \
     if( matadd_stor_type == AOCL_GEMM_INT32 ) \
@@ -1556,6 +1568,11 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
                     is_bias_stor_type = TRUE; \
                     bias_stor_type = "S8"; \
                 } \
+                else if ( ( strcmp( ops_tok, "u8" ) == 0 ) ) \
+                { \
+                    is_bias_stor_type = TRUE; \
+                    bias_stor_type = "U8"; \
+                } \
                 is_bias = TRUE; \
                 cur_op_index++; \
             } \
@@ -1731,6 +1748,11 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
                     is_matadd_stor_type = TRUE; \
                     matadd_stor_type = "S8"; \
                 } \
+                else if ( ( strcmp( ops_tok, "u8" ) == 0 ) ) \
+                { \
+                    is_matadd_stor_type = TRUE; \
+                    matadd_stor_type = "U8"; \
+                } \
                 is_matrix_add = TRUE; \
                 cur_op_index++; \
             } \
@@ -1761,6 +1783,11 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
                 { \
                     is_matmul_stor_type = TRUE; \
                     matmul_stor_type = "S8"; \
+                } \
+                else if ( ( strcmp( ops_tok, "u8" ) == 0 ) ) \
+                { \
+                    is_matmul_stor_type = TRUE; \
+                    matmul_stor_type = "U8"; \
                 } \
                 is_matrix_mul = TRUE; \
                 cur_op_index++; \
@@ -1904,6 +1931,17 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
                         goto err_handler; \
                     } \
                     GEN_FUNC_NAME(fill_array_post_ops_,int8_t)( ( post_ops->bias )->bias, n ); \
+                } \
+                else if( ( strcmp( bias_stor_type, "U8" ) == 0 ) ) \
+                { \
+                    ( post_ops->bias )->stor_type = AOCL_GEMM_UINT8; \
+                    /* Allocate bias buffer, return early if alloc fails.*/ \
+                    ( post_ops->bias )->bias = malloc( n * sizeof( int8_t ) ); \
+                    if ( ( post_ops->bias )->bias == NULL ) \
+                    { \
+                        goto err_handler; \
+                    } \
+                    GEN_FUNC_NAME(fill_array_post_ops_,uint8_t)( ( post_ops->bias )->bias, n ); \
                 } \
                 else if( ( strcmp( bias_stor_type, "S32" ) == 0 ) ) \
                 { \
@@ -2329,6 +2367,16 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
                 } \
                 GEN_FUNC_NAME(fill_array_,int8_t)( ( post_ops->matrix_add )->matrix, ( m * n ) ); \
             } \
+            else if( ( strcmp( matadd_stor_type, "U8" ) == 0 ) ) \
+            { \
+                ( post_ops->matrix_add )->stor_type = AOCL_GEMM_UINT8; \
+                ( post_ops->matrix_add )->matrix = malloc( m * n * sizeof(int8_t) ); \
+                if ( ( post_ops->matrix_add )->matrix == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                GEN_FUNC_NAME(fill_array_,uint8_t)( ( post_ops->matrix_add )->matrix, ( m * n ) ); \
+            } \
             else {} \
         } \
         else \
@@ -2456,6 +2504,16 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
                     goto err_handler; \
                 } \
                 GEN_FUNC_NAME(fill_array_,int8_t)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
+            } \
+             else if( ( strcmp( matmul_stor_type, "U8" ) == 0 ) ) \
+            { \
+                ( post_ops->matrix_mul )->stor_type = AOCL_GEMM_UINT8; \
+                ( post_ops->matrix_mul )->matrix = malloc( m * n * sizeof(int8_t) ); \
+                if ( ( post_ops->matrix_mul )->matrix == NULL ) \
+                { \
+                    goto err_handler; \
+                } \
+                GEN_FUNC_NAME(fill_array_,uint8_t)( ( post_ops->matrix_mul )->matrix, ( m * n ) ); \
             } \
             else {} \
         } \

@@ -390,6 +390,13 @@ LPGEMV_M_EQ1_KERN(int8_t,int8_t,int32_t,s8s8s32os32)
 				S8_F32_BIAS_LOAD(b2, k3, 2);
 				S8_F32_BIAS_LOAD(b3, k4, 3);
 			}
+			else if ( post_ops_list_temp->stor_type == U8 )
+			{
+				U8_F32_BIAS_LOAD(b0, k1, 0);
+				U8_F32_BIAS_LOAD(b1, k2, 1);
+				U8_F32_BIAS_LOAD(b2, k3, 2);
+				U8_F32_BIAS_LOAD(b3, k4, 3);
+			}
 			else if ( post_ops_list_temp->stor_type == S32 )
 			{
 				S32_F32_BIAS_LOAD(b0, k1, 0);
@@ -716,6 +723,7 @@ LPGEMV_M_EQ1_KERN(int8_t,int8_t,int32_t,s8s8s32os32)
 					  ( post_ops_attr.c_stor_type == S8 ) );
 			bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 );
 			bool is_f32 = ( post_ops_list_temp->stor_type == F32 );
+			bool is_u8 = ( post_ops_list_temp->stor_type == U8 );
 
 			__m512 scl_fctr1 = _mm512_setzero_ps();
 			__m512 scl_fctr2 = _mm512_setzero_ps();
@@ -847,6 +855,31 @@ LPGEMV_M_EQ1_KERN(int8_t,int8_t,int32_t,s8s8s32os32)
 				acc_16 = _mm512_add_ps( t2, acc_16 );
 				acc_20 = _mm512_add_ps( t3, acc_20 );
 			}
+			else if ( is_u8 == TRUE )
+			{
+				uint8_t* matptr = ( uint8_t* )post_ops_list_temp->op_args1;
+
+				if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+					 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+				{
+					U8_F32_MATRIX_ADD_LOAD( k1, t0, scl_fctr1, 0, 0 );
+					U8_F32_MATRIX_ADD_LOAD( k2, t1, scl_fctr2, 0, 1 );
+					U8_F32_MATRIX_ADD_LOAD( k3, t2, scl_fctr3, 0, 2 );
+					U8_F32_MATRIX_ADD_LOAD( k4, t3, scl_fctr4, 0, 3 );
+				}
+				else
+				{
+					U8_F32_MATRIX_ADD_LOAD( k1, t0, scl_fctr1, 0, 0 );
+					U8_F32_MATRIX_ADD_LOAD( k2, t1, scl_fctr1, 0, 1 );
+					U8_F32_MATRIX_ADD_LOAD( k3, t2, scl_fctr1, 0, 2 );
+					U8_F32_MATRIX_ADD_LOAD( k4, t3, scl_fctr1, 0, 3 );
+				}
+
+				acc_8  = _mm512_add_ps( t0, acc_8 );
+				acc_12 = _mm512_add_ps( t1, acc_12 );
+				acc_16 = _mm512_add_ps( t2, acc_16 );
+				acc_20 = _mm512_add_ps( t3, acc_20 );
+			}
 			else
 			{
 				int32_t* matptr = ( int32_t* )post_ops_list_temp->op_args1;
@@ -892,6 +925,7 @@ LPGEMV_M_EQ1_KERN(int8_t,int8_t,int32_t,s8s8s32os32)
 					  ( post_ops_attr.c_stor_type == S8 ) );
 			bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 );
 			bool is_f32 = ( post_ops_list_temp->stor_type == F32 );
+			bool is_u8 = ( post_ops_list_temp->stor_type == U8 );
 
 			__m512 scl_fctr1 = _mm512_setzero_ps();
 			__m512 scl_fctr2 = _mm512_setzero_ps();
@@ -1024,6 +1058,35 @@ LPGEMV_M_EQ1_KERN(int8_t,int8_t,int32_t,s8s8s32os32)
 					S8_F32_MATRIX_MUL_LOAD( k2, t1, scl_fctr1, 0, 1 );
 					S8_F32_MATRIX_MUL_LOAD( k3, t2, scl_fctr1, 0, 2 );
 					S8_F32_MATRIX_MUL_LOAD( k4, t3, scl_fctr1, 0, 3 );
+				}
+
+				acc_8 = _mm512_mul_round_ps( t0, acc_8,
+					( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC ) );
+				acc_12 = _mm512_mul_round_ps( t1, acc_12,
+					( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC ) );
+				acc_16 = _mm512_mul_round_ps( t2, acc_16,
+					( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC ) );
+				acc_20 = _mm512_mul_round_ps( t3, acc_20,
+					( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC ) );
+			}
+			else if ( is_u8 == TRUE )
+			{
+				uint8_t* matptr = ( uint8_t* )post_ops_list_temp->op_args1;
+
+				if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+					 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+				{
+					U8_F32_MATRIX_MUL_LOAD( k1, t0, scl_fctr1, 0, 0 );
+					U8_F32_MATRIX_MUL_LOAD( k2, t1, scl_fctr2, 0, 1 );
+					U8_F32_MATRIX_MUL_LOAD( k3, t2, scl_fctr3, 0, 2 );
+					U8_F32_MATRIX_MUL_LOAD( k4, t3, scl_fctr4, 0, 3 );
+				}
+				else
+				{
+					U8_F32_MATRIX_MUL_LOAD( k1, t0, scl_fctr1, 0, 0 );
+					U8_F32_MATRIX_MUL_LOAD( k2, t1, scl_fctr1, 0, 1 );
+					U8_F32_MATRIX_MUL_LOAD( k3, t2, scl_fctr1, 0, 2 );
+					U8_F32_MATRIX_MUL_LOAD( k4, t3, scl_fctr1, 0, 3 );
 				}
 
 				acc_8 = _mm512_mul_round_ps( t0, acc_8,
