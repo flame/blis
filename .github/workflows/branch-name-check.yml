@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   check_branch_name:
-    runs-on: Linux  # Use the default GitHub-hosted runner with Linux
+    runs-on: amd_linux  # Use the default GitHub-hosted runner with Linux
 
     steps:
     - name: Check out code
@@ -26,7 +26,7 @@ jobs:
 
         echo "Checking branch name: $BRANCH_NAME"
         if [[ ! "$BRANCH_NAME" =~ ^u/.*/PR/.*$ ]] && [[ ! "$BRANCH_NAME" =~ ^u/.*/WIP/.*$ ]]; then
-          echo "Error: Branch name '$BRANCH_NAME' does not match the required naming convention 'u/$BASE_USER/PR-*' or 'u/$BASE_USER/WIP-*'."
+          echo "Error: Branch name '$BRANCH_NAME' does not match the required naming convention 'u/$BASE_USER/PR/*' or 'u/$BASE_USER/WIP/*'."
           exit 1
         fi
         echo "Branch name '$BRANCH_NAME' is valid."
