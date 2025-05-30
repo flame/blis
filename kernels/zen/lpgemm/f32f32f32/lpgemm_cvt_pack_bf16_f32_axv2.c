@@ -669,7 +669,7 @@ void cvt_bf16_f32_col_major
             SHUFFLE_8x8_AVX2
             PERMUTE_8x8_AVX2
             GET_STORE_MASK(4, store_mask);
-            MASKED_STORE_2COLS_AVX2(store_mask);
+            _mm256_maskstore_ps( ( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr ), store_mask, b_reg[0] );    \
         }
         for( ; ( kr + 1 ) < KC; kr += 2 )
         {
@@ -683,7 +683,7 @@ void cvt_bf16_f32_col_major
             SHUFFLE_8x8_AVX2
             PERMUTE_8x8_AVX2
             GET_STORE_MASK(2, store_mask);
-            MASKED_STORE_2COLS_AVX2(store_mask);
+            _mm256_maskstore_ps( ( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr ), store_mask, b_reg[0] );
         }
         for( ; kr < KC; kr += 1 )
         {
@@ -695,7 +695,7 @@ void cvt_bf16_f32_col_major
             SHUFFLE_8x8_AVX2
             PERMUTE_8x8_AVX2
             GET_STORE_MASK(1, store_mask);
-            MASKED_STORE_2COLS_AVX2(store_mask);
+            _mm256_maskstore_ps( ( cvt_buffer + ( ( ic + 0 ) * rs_p ) + kr ), store_mask, b_reg[0] );    \
         }
     }
 }

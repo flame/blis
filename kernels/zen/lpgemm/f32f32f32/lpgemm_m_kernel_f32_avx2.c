@@ -76,12 +76,6 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
               &&POST_OPS_SIGMOID_6x16F
             };
 
-
-
-
-
-
-
     uint64_t n_left = n0 % NR;  //n0 is expected to be n0<=NR
     // First check whether this is a edge case in the n dimension.
     // If so, dispatch other 6x?m kernels, as needed.

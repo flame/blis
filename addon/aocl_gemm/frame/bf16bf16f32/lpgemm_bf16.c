@@ -799,6 +799,7 @@ LPGEMM_5LOOP_AVX2(bfloat16,bfloat16,float,bf16bf16f32of32)
 
 	dim_t ic_start, ic_end;
 	bli_thread_range_sub( &thread_ic, m, MR, FALSE, &ic_start, &ic_end );
+
 	for ( dim_t jc = jc_start; jc < jc_end; jc += NC )
 	{
 		dim_t nc0 = bli_min( ( jc_end - jc ), NC );
@@ -898,7 +899,6 @@ LPGEMM_5LOOP_AVX2(bfloat16,bfloat16,float,bf16bf16f32of32)
 				bli_thread_ocomm_id( &thread_ic ),
 				&thread->comm[jc_work_id]
 			);
-
 			if ( mtag_b == PACK )
 			{
 				cvt_b_buffer_bf16_f32 =
@@ -914,6 +914,7 @@ LPGEMM_5LOOP_AVX2(bfloat16,bfloat16,float,bf16bf16f32of32)
 				  &thread_ic, nc0, NR, FALSE,
 				  &jc_packb_start, &jc_packb_end
 				);
+
 				// Ensure thread ranges are valid, especially cases where no:
 				// of threads available for parallelization are greater than
 				// no: of B panel NR chunks.
@@ -1014,7 +1015,6 @@ LPGEMM_5LOOP_AVX2(bfloat16,bfloat16,float,bf16bf16f32of32)
 				  mem_a_size_req, BLIS_BUFFER_FOR_GEN_USE,
 				  &mem_a, rntm
 				);
-
 				// For packed or unpacked A matrix, the mc0 * kc0 block is
 				//converted to F32, i.e., packing has to be done by default
 				cvt_a_buffer_bf16_f32 =

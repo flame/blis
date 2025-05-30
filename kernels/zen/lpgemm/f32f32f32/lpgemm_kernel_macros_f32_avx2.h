@@ -195,7 +195,7 @@ multiply with Beta, and add to alpha*A*B*/
 			(  \
 				_mm256_cvtepi16_epi32  \
 				( \
-					_mm_load_si128  \
+					_mm_loadu_si128  \
 					(  \
 						( __m128i const* )( \
 						( bfloat16* )post_ops_attr.buf_downscale + \

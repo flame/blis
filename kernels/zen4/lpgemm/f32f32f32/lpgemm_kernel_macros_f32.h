@@ -222,6 +222,19 @@
 			mask_all1, (__m256i) _mm512_cvtneps_pbh( reg ) \
 		) \
 
+#define CVT_STORE_F32_BF16_MASK_AVX512( reg, m_ind, n_ind ) \
+{ \
+	_mm512_storeu_ps((float*)temp, reg); \
+	dest = ( bfloat16* )post_ops_attr.buf_downscale + \
+		( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+		post_ops_attr.post_op_c_j + ( n_ind * 16 ); \
+	for(i = 0; i < 16; i++) \
+	{ \
+		tlsb = ( temp[i] & ( uint32_t )0x00010000 ) > 16; \
+		rounded = temp[i] + ( uint32_t )0x00007FFF + tlsb; \
+		memcpy( (dest+i), ((char *)(&rounded))+2, sizeof(bfloat16)); \
+	} \
+}
 // BF16 bias helper macros.
 #define BF16_F32_BIAS_LOAD(scr,mask,n_ind) \
 	scr = ( __m512)( _mm512_sllv_epi32 \

@@ -45,9 +45,9 @@
 LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_avx512_6x64m)
 {
     //Call RD kernels if B is transposed
-    if(rs_b == 1)
+    if(rs_b == 1 && n0 != 1 )
     {
-        lpgemm_rowvar_f32f32f32of32_avx512_6x64m_rd
+      lpgemm_rowvar_f32f32f32of32_avx512_6x64m_rd
         (
           m0, n0, k0,
           a, rs_a, cs_a, ps_a,
@@ -77,7 +77,6 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_avx512_6x64m)
             };
 
     uint64_t n_left = n0 % 64;  //n0 is expected to be n0<=NR
-
     // First check whether this is a edge case in the n dimension.
     // If so, dispatch other 12x?m kernels, as needed.
     if ( n_left )
@@ -1829,43 +1828,42 @@ POST_OPS_SIGMOID_6x64F:
 POST_OPS_6x64F_DISABLE:
       ;
 
-      // Generate a mask16 of all 1's.
-      __m512i selector_a = _mm512_setzero_epi32();
-      __m512i selector_b = _mm512_set1_epi32( 10 );
-      __mmask16 mask_all1 = _mm512_cmplt_epi32_mask( selector_a, selector_b );
-
       if ( ( post_ops_attr.buf_downscale != NULL ) &&
            ( post_ops_attr.is_last_k == TRUE ) )
       {
-        CVT_STORE_F32_BF16_MASK(zmm8, 0, 0);
-        CVT_STORE_F32_BF16_MASK(zmm9, 0, 1);
-        CVT_STORE_F32_BF16_MASK(zmm10, 0, 2);
-        CVT_STORE_F32_BF16_MASK(zmm11, 0, 3);
+        uint32_t tlsb, rounded, temp[16] = {0};
+        int i;
+        bfloat16* dest;
 
-        CVT_STORE_F32_BF16_MASK(zmm12, 1, 0);
-        CVT_STORE_F32_BF16_MASK(zmm13, 1, 1);
-        CVT_STORE_F32_BF16_MASK(zmm14, 1, 2);
-        CVT_STORE_F32_BF16_MASK(zmm15, 1, 3);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm8, 0, 0);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm9, 0, 1);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm10, 0, 2);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm11, 0, 3);
 
-        CVT_STORE_F32_BF16_MASK(zmm16, 2, 0);
-        CVT_STORE_F32_BF16_MASK(zmm17, 2, 1);
-        CVT_STORE_F32_BF16_MASK(zmm18, 2, 2);
-        CVT_STORE_F32_BF16_MASK(zmm19, 2, 3);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm12, 1, 0);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm13, 1, 1);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm14, 1, 2);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm15, 1, 3);
 
-        CVT_STORE_F32_BF16_MASK(zmm20, 3, 0);
-        CVT_STORE_F32_BF16_MASK(zmm21, 3, 1);
-        CVT_STORE_F32_BF16_MASK(zmm22, 3, 2);
-        CVT_STORE_F32_BF16_MASK(zmm23, 3, 3);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm16, 2, 0);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm17, 2, 1);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm18, 2, 2);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm19, 2, 3);
 
-        CVT_STORE_F32_BF16_MASK(zmm24, 4, 0);
-        CVT_STORE_F32_BF16_MASK(zmm25, 4, 1);
-        CVT_STORE_F32_BF16_MASK(zmm26, 4, 2);
-        CVT_STORE_F32_BF16_MASK(zmm27, 4, 3);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm20, 3, 0);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm21, 3, 1);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm22, 3, 2);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm23, 3, 3);
 
-        CVT_STORE_F32_BF16_MASK(zmm28, 5, 0);
-        CVT_STORE_F32_BF16_MASK(zmm29, 5, 1);
-        CVT_STORE_F32_BF16_MASK(zmm30, 5, 2);
-        CVT_STORE_F32_BF16_MASK(zmm31, 5, 3);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm24, 4, 0);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm25, 4, 1);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm26, 4, 2);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm27, 4, 3);
+
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm28, 5, 0);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm29, 5, 1);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm30, 5, 2);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm31, 5, 3);
       }
       else
       {
@@ -1904,6 +1902,7 @@ POST_OPS_6x64F_DISABLE:
     }//mloop
 
     consider_edge_cases:
+
     // Handle edge cases in the m dimension, if they exist.
     if( m_left )
     {
@@ -3315,37 +3314,37 @@ POST_OPS_SIGMOID_6x48F:
 
 POST_OPS_6x48F_DISABLE:
       ;
-      // Generate a mask16 of all 1's.
-      __m512i selector_a = _mm512_setzero_epi32();
-      __m512i selector_b = _mm512_set1_epi32( 10 );
-      __mmask16 mask_all1 = _mm512_cmplt_epi32_mask( selector_a, selector_b );
 
       if ( ( post_ops_attr.buf_downscale != NULL ) &&
            ( post_ops_attr.is_last_k == TRUE ) )
       {
-        CVT_STORE_F32_BF16_MASK(zmm8, 0, 0);
-        CVT_STORE_F32_BF16_MASK(zmm9, 0, 1);
-        CVT_STORE_F32_BF16_MASK(zmm10, 0, 2);
+        uint32_t tlsb, rounded, temp[16] = {0};
+        int i;
+        bfloat16* dest;
 
-        CVT_STORE_F32_BF16_MASK(zmm12, 1, 0);
-        CVT_STORE_F32_BF16_MASK(zmm13, 1, 1);
-        CVT_STORE_F32_BF16_MASK(zmm14, 1, 2);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm8, 0, 0);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm9, 0, 1);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm10, 0, 2);
 
-        CVT_STORE_F32_BF16_MASK(zmm16, 2, 0);
-        CVT_STORE_F32_BF16_MASK(zmm17, 2, 1);
-        CVT_STORE_F32_BF16_MASK(zmm18, 2, 2);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm12, 1, 0);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm13, 1, 1);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm14, 1, 2);
 
-        CVT_STORE_F32_BF16_MASK(zmm20, 3, 0);
-        CVT_STORE_F32_BF16_MASK(zmm21, 3, 1);
-        CVT_STORE_F32_BF16_MASK(zmm22, 3, 2);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm16, 2, 0);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm17, 2, 1);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm18, 2, 2);
 
-        CVT_STORE_F32_BF16_MASK(zmm24, 4, 0);
-        CVT_STORE_F32_BF16_MASK(zmm25, 4, 1);
-        CVT_STORE_F32_BF16_MASK(zmm26, 4, 2);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm20, 3, 0);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm21, 3, 1);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm22, 3, 2);
 
-        CVT_STORE_F32_BF16_MASK(zmm28, 5, 0);
-        CVT_STORE_F32_BF16_MASK(zmm29, 5, 1);
-        CVT_STORE_F32_BF16_MASK(zmm30, 5, 2);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm24, 4, 0);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm25, 4, 1);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm26, 4, 2);
+
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm28, 5, 0);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm29, 5, 1);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm30, 5, 2);
       }
       else
       {
@@ -4520,31 +4519,31 @@ POST_OPS_SIGMOID_6x32F:
       }
 POST_OPS_6x32F_DISABLE:
       ;
-      // Generate a mask16 of all 1's.
-      __m512i selector_a = _mm512_setzero_epi32();
-      __m512i selector_b = _mm512_set1_epi32( 10 );
-      __mmask16 mask_all1 = _mm512_cmplt_epi32_mask( selector_a, selector_b );
 
       if ( ( post_ops_attr.buf_downscale != NULL ) &&
            ( post_ops_attr.is_last_k == TRUE ) )
       {
-        CVT_STORE_F32_BF16_MASK(zmm8, 0, 0);
-        CVT_STORE_F32_BF16_MASK(zmm9, 0, 1);
+        uint32_t tlsb, rounded, temp[16] = {0};
+        int i;
+        bfloat16* dest;
 
-        CVT_STORE_F32_BF16_MASK(zmm12, 1, 0);
-        CVT_STORE_F32_BF16_MASK(zmm13, 1, 1);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm8, 0, 0);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm9, 0, 1);
 
-        CVT_STORE_F32_BF16_MASK(zmm16, 2, 0);
-        CVT_STORE_F32_BF16_MASK(zmm17, 2, 1);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm12, 1, 0);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm13, 1, 1);
 
-        CVT_STORE_F32_BF16_MASK(zmm20, 3, 0);
-        CVT_STORE_F32_BF16_MASK(zmm21, 3, 1);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm16, 2, 0);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm17, 2, 1);
 
-        CVT_STORE_F32_BF16_MASK(zmm24, 4, 0);
-        CVT_STORE_F32_BF16_MASK(zmm25, 4, 1);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm20, 3, 0);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm21, 3, 1);
 
-        CVT_STORE_F32_BF16_MASK(zmm28, 5, 0);
-        CVT_STORE_F32_BF16_MASK(zmm29, 5, 1);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm24, 4, 0);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm25, 4, 1);
+
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm28, 5, 0);
+        CVT_STORE_F32_BF16_MASK_AVX512(zmm29, 5, 1);
       }
       else
       {

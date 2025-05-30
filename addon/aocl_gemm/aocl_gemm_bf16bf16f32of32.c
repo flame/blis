@@ -235,8 +235,13 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( BF16BF16F32OF32 );
 
 #if (defined(BLIS_KERNELS_ZEN4) && (!defined(LPGEMM_BF16_JIT)))
-
-	if ( ( bli_cpuid_is_avx512bf16_supported() == TRUE ) &&
+	/* While AOCL_ENABLE_INSTRUCTIONS=AVX2 is enabled in machines that supports BF16/VNNI
+	*  with only the ISA check the exeution could enter tiny path and result in seg fault
+	*  as the tiny path for BF16->FP32 is not available. Hence the arch_id also has to be
+	*  verified here.
+	*/
+	arch_t arch_id =  bli_arch_query_id();
+	if( ( bli_cpuid_is_avx512bf16_supported() == TRUE ) && ( ( arch_id == BLIS_ARCH_ZEN4 ) || ( arch_id == BLIS_ARCH_ZEN5 ) ) &&
 		 ( is_tiny_input_bf16of32( m, n, k, lcntx_g ) == TRUE ) &&
 		 ( is_single_thread( &rntm_g ) == TRUE) &&
 		 ( is_row_major == TRUE ) )
