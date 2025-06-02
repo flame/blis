@@ -1547,7 +1547,7 @@ check_compiler()
 	# Specific:
 	#
 	#   skx: icc 15.0.1+, gcc 6.0+, clang 3.9+
-	#   knl: icc 14.0.1+, gcc 5.0+, clang 3.9+
+	#   knl: icc 14.0.1+, gcc 5.0-14, clang 3.9+
 	#   haswell: any
 	#   sandybridge: any
 	#   penryn: any
@@ -1597,7 +1597,7 @@ check_compiler()
 				blacklistcc_add "zen"
 			fi
 		fi
-		if [ ${cc_major} -lt 5 ]; then
+		if [[ ${cc_major} -lt 5 ]] || [[ ${cc_major} -gt 14 ]]; then
 			blacklistcc_add "knl"
 		fi
 		if [ ${cc_major} -lt 6 ]; then
