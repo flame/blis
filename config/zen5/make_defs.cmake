@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -38,29 +38,6 @@
 
 # Include file containing common flags for all AMD architectures
 include(${CMAKE_SOURCE_DIR}/config/zen/amd_config.cmake)
-if(NOT WIN32)
-    if(NOT (DEBUG_TYPE STREQUAL "off"))
-        set(CDBGFLAGS -g)
-    endif()
-
-    if(DEBUG_TYPE STREQUAL "noopt")
-        set(COPTFLAGS -O0)
-    else() # off or opt
-        set(COPTFLAGS -O3)
-    endif()
-endif()
-
-# Flags specific to LPGEMM kernels.
-set(CKLPOPTFLAGS "")
-
-# Flags specific to optimized kernels.
-# NOTE: The -fomit-frame-pointer option is needed for some kernels because
-# they make explicit use of the rbp register.
-if(MSVC)
-    set(CKOPTFLAGS ${COPTFLAGS} /Oy)
-else()
-    set(CKOPTFLAGS ${COPTFLAGS} -fomit-frame-pointer)
-endif()
 
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 14.0.0)
@@ -77,7 +54,7 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
         # gcc 13.0 or later
         list(APPEND CKVECFLAGS -march=znver4)
         list(APPEND CRVECFLAGS -march=znver4)
-        # Update CKOPTFLAGS for gcc to use O3 optimization without
+        # Update CKLPOPTFLAGS for gcc to use O3 optimization without
         # -ftree-pre and -ftree-partial-pre flag. These flag results
         # in suboptimal code generation for instrinsic based kernels.
         # The -ftree-loop-vectorize results in inefficient code gen
@@ -118,6 +95,7 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
     # AMD clang version 11.0.0 (CLANG: AOCC_2.3.0-Build#85 2020_11_10) (based on LLVM Mirror.Version.11.0.0)
     # AMD clang version 12.0.0 (CLANG: AOCC_3.0.0-Build#2 2020_11_05) (based on LLVM Mirror.Version.12.0.0)
     # AMD clang version 14.0.0 (CLANG: AOCC_4.0.0-Build#98 2022_06_15) (based on LLVM Mirror.Version.14.0.0)
+
     # For our purpose we just want to know if it version 2x or 3x or 4x
 
     # But also set these in case we are using upstream LLVM clang
@@ -145,6 +123,10 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
       # AOCC version 2x we will enable znver2
       list(APPEND CKVECFLAGS -march=znver2 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mavx512vbmi)
       list(APPEND CRVECFLAGS -march=znver2)
+    elseif(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.0.0)
+      # LLVM clang 19.0 or later
+      list(APPEND CKVECFLAGS -march=znver5 ${alignloops})
+      list(APPEND CRVECFLAGS -march=znver5)
     elseif(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0.0)
       # LLVM clang 16.0 or later
       list(APPEND CKVECFLAGS -march=znver4 ${alignloops})
@@ -161,7 +143,7 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
       list(APPEND CKVECFLAGS -march=znver1 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mavx512vbmi ${alignloops})
       list(APPEND CRVECFLAGS -march=znver1)
     endif()
-endif()
+endif() # clang
 
 # Flags specific to reference kernels.
 set(CROPTFLAGS ${CKOPTFLAGS})

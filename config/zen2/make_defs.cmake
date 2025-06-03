@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,35 +32,15 @@
 
 ]=]
 
+# FLAGS that are specific to the 'zen2' architecture are added here.
+# FLAGS that are common for all the AMD architectures are present in
+# config/zen/amd_config.mk.
+
 # Include file containing common flags for all AMD architectures
 include(${CMAKE_SOURCE_DIR}/config/zen/amd_config.cmake)
-if(NOT WIN32)
-    if(NOT (DEBUG_TYPE STREQUAL "off"))
-        set(CDBGFLAGS -g)
-    endif()
 
-    if(DEBUG_TYPE STREQUAL "noopt")
-        set(COPTFLAGS -O0)
-    else() # off or opt
-        set(COPTFLAGS -O3)
-    endif()
-endif()
-
-# Flags specific to LPGEMM kernels.
-set(CKLPOPTFLAGS "")
-
-# Flags specific to optimized kernels.
-# NOTE: The -fomit-frame-pointer option is needed for some kernels because
-# they make explicit use of the rbp register.
-if(MSVC)
-    set(CKOPTFLAGS ${COPTFLAGS} /Oy)
-else()
-    set(CKOPTFLAGS ${COPTFLAGS} -fomit-frame-pointer)
-endif()
-
-# gcc or clang version must be at least 4.0
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-    if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL  9.0.0)
+    if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0.0)
         # gcc 9.0 or later
         list(APPEND CKVECFLAGS -march=znver2)
         list(APPEND CKLPOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse)
@@ -74,6 +54,7 @@ endif() # gcc
 
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
     # AOCC clang has various formats for the version line
+
     # AOCC.LLVM.2.0.0.B191.2019_07_19 clang version 8.0.0 (CLANG: Jenkins AOCC_2_0_0-Build#191) (based on LLVM AOCC.LLVM.2.0.0.B191.2019_07_19)
     # AOCC.LLVM.2.1.0.B1030.2019_11_12 clang version 9.0.0 (CLANG: Build#1030) (based on LLVM AOCC.LLVM.2.1.0.B1030.2019_11_12)
     # AMD clang version 10.0.0 (CLANG: AOCC_2.2.0-Build#93 2020_06_25) (based on LLVM Mirror.Version.10.0.0)
@@ -104,7 +85,7 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
     else()
         list(APPEND CKVECFLAGS -march=znver1)
     endif()
-endif()
+endif() # clang
 
 # Flags specific to reference kernels.
 set(CROPTFLAGS ${CKOPTFLAGS})

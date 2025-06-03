@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -3522,6 +3522,9 @@ main()
 		| sed -e "s/@gcc_older_than_11_2_0@/${gcc_older_than_11_2_0}/g" \
 		| sed -e "s/@CC@/${cc_esc}/g" \
 		| sed -e "s/@CXX@/${cxx_esc}/g" \
+		| sed -e "s/@cc_major@/${cc_major}/g" \
+		| sed -e "s/@cc_minor@/${cc_minor}/g" \
+		| sed -e "s/@cc_revision@/${cc_revision}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
 		| sed -e "s/@AR@/${ar_esc}/g" \
 		| sed -e "s/@PYTHON@/${python_esc}/g" \

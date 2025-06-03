@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,18 +40,20 @@ if(NOT WIN32)
     if(DEBUG_TYPE STREQUAL "noopt")
         set(COPTFLAGS -O0)
     else() # off or opt
-        set(COPTFLAGS -O2 -fomit-frame-pointer)
+        set(COPTFLAGS -O3)
     endif()
 endif()
+
+# Flags specific to LPGEMM kernels.
+set(CKLPOPTFLAGS "")
 
 # Flags specific to optimized kernels.
 # NOTE: The -fomit-frame-pointer option is needed for some kernels because
 # they make explicit use of the rbp register.
 if(MSVC)
-    set(COPTFLAGS /Oy)
-    set(CKOPTFLAGS ${COPTFLAGS})
+    set(CKOPTFLAGS ${COPTFLAGS} /Oy)
 else()
-    set(CKOPTFLAGS ${COPTFLAGS} -O3)
+    set(CKOPTFLAGS ${COPTFLAGS} -fomit-frame-pointer)
 endif()
 
 if(MSVC)

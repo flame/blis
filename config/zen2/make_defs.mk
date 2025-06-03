@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2019 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2019 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -47,41 +47,8 @@ AMD_CONFIG_FILE := amd_config.mk
 AMD_CONFIG_PATH := $(BASE_SHARE_PATH)/config/zen
 -include $(AMD_CONFIG_PATH)/$(AMD_CONFIG_FILE)
 
-#
-# --- Determine the C compiler and related flags ---
-#
-
-# NOTE: The build system will append these variables with various
-# general-purpose/configuration-agnostic flags in common.mk. You
-# may specify additional flags here as needed.
-
-CPPROCFLAGS    :=
-CMISCFLAGS     :=
-CPICFLAGS      :=
-CWARNFLAGS     :=
-
-ifneq ($(DEBUG_TYPE),off)
-  CDBGFLAGS    := -g
-endif
-
-ifeq ($(DEBUG_TYPE),noopt)
-  COPTFLAGS    := -O0
-else
-  COPTFLAGS    := -O3
-endif
-
-# Flags specific to optimized kernels.
-# NOTE: The -fomit-frame-pointer option is needed for some kernels because
-# they make explicit use of the rbp register.
-CKOPTFLAGS     := $(COPTFLAGS) -fomit-frame-pointer
-# Additional flag which is required for lpgemm kernels
-CKLPOPTFLAGS   :=
-
-# gcc or clang version must be at least 4.0
 ifeq ($(CC_VENDOR),gcc)
-  GCC_VERSION := $(strip $(shell $(CC) -dumpversion | cut -d. -f1))
-
-  ifeq ($(shell test $(GCC_VERSION) -ge 9; echo $$?),0)
+  ifeq ($(shell test $(CC_MAJOR) -ge 9; echo $$?),0)
     # gcc 9.0 or later
     CKVECFLAGS += -march=znver2
     CKLPOPTFLAGS += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse
