@@ -658,8 +658,8 @@ POST_OPS_1x16F_DISABLE:
     if ( ( post_ops_attr.buf_downscale != NULL ) &&
          ( post_ops_attr.is_last_k == TRUE ) )
     {
-      STORE_F32_BF16_YMM(ymm8, 0, 0);
-      STORE_F32_BF16_YMM(ymm12, 0, 1);
+      STORE_F32_BF16_YMM(ymm8, 0, 0, 8);
+      STORE_F32_BF16_YMM(ymm12, 0, 1, 8);
     }
     else
     {
@@ -1268,8 +1268,8 @@ POST_OPS_1x16F_DISABLE:
     if ( ( post_ops_attr.buf_downscale != NULL ) &&
       ( post_ops_attr.is_last_k == TRUE ) )
     {
-      STORE_F32_BF16_YMM(ymm8, 0, 0);
-      STORE_F32_BF16_YMM(ymm12, 0, 1);
+      STORE_F32_BF16_YMM(ymm8, 0, 0, 8);
+      STORE_F32_BF16_YMM(ymm12, 0, 1, 8);
     }
     else
     {

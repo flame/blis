@@ -1108,35 +1108,35 @@ POST_OPS_6x32F_DISABLE:
             if ( ( post_ops_attr.buf_downscale != NULL ) &&
                 ( post_ops_attr.is_last_k == TRUE ) )
             {
-                STORE_F32_BF16_YMM(ymm8, 0, 0)
-                STORE_F32_BF16_YMM(ymm9, 0, 1)
-                STORE_F32_BF16_YMM(ymm10, 0, 2)
-                STORE_F32_BF16_YMM(ymm11, 0, 3)
+                STORE_F32_BF16_YMM(ymm8, 0, 0, 8)
+                STORE_F32_BF16_YMM(ymm9, 0, 1, 8)
+                STORE_F32_BF16_YMM(ymm10, 0, 2, 8)
+                STORE_F32_BF16_YMM(ymm11, 0, 3, 8)
 
-                STORE_F32_BF16_YMM(ymm12, 1, 0)
-                STORE_F32_BF16_YMM(ymm13, 1, 1)
-                STORE_F32_BF16_YMM(ymm14, 1, 2)
-                STORE_F32_BF16_YMM(ymm15, 1, 3)
+                STORE_F32_BF16_YMM(ymm12, 1, 0, 8)
+                STORE_F32_BF16_YMM(ymm13, 1, 1, 8)
+                STORE_F32_BF16_YMM(ymm14, 1, 2, 8)
+                STORE_F32_BF16_YMM(ymm15, 1, 3, 8)
 
-                STORE_F32_BF16_YMM(ymm16, 2, 0)
-                STORE_F32_BF16_YMM(ymm17, 2, 1)
-                STORE_F32_BF16_YMM(ymm18, 2, 2)
-                STORE_F32_BF16_YMM(ymm19, 2, 3)
+                STORE_F32_BF16_YMM(ymm16, 2, 0, 8)
+                STORE_F32_BF16_YMM(ymm17, 2, 1, 8)
+                STORE_F32_BF16_YMM(ymm18, 2, 2, 8)
+                STORE_F32_BF16_YMM(ymm19, 2, 3, 8)
 
-                STORE_F32_BF16_YMM(ymm20, 3, 0)
-                STORE_F32_BF16_YMM(ymm21, 3, 1)
-                STORE_F32_BF16_YMM(ymm22, 3, 2)
-                STORE_F32_BF16_YMM(ymm23, 3, 3)
+                STORE_F32_BF16_YMM(ymm20, 3, 0, 8)
+                STORE_F32_BF16_YMM(ymm21, 3, 1, 8)
+                STORE_F32_BF16_YMM(ymm22, 3, 2, 8)
+                STORE_F32_BF16_YMM(ymm23, 3, 3, 8)
 
-                STORE_F32_BF16_YMM(ymm24, 4, 0)
-                STORE_F32_BF16_YMM(ymm25, 4, 1)
-                STORE_F32_BF16_YMM(ymm26, 4, 2)
-                STORE_F32_BF16_YMM(ymm27, 4, 3)
+                STORE_F32_BF16_YMM(ymm24, 4, 0, 8)
+                STORE_F32_BF16_YMM(ymm25, 4, 1, 8)
+                STORE_F32_BF16_YMM(ymm26, 4, 2, 8)
+                STORE_F32_BF16_YMM(ymm27, 4, 3, 8)
 
-                STORE_F32_BF16_YMM(ymm28, 5, 0)
-                STORE_F32_BF16_YMM(ymm29, 5, 1)
-                STORE_F32_BF16_YMM(ymm30, 5, 2)
-                STORE_F32_BF16_YMM(ymm31, 5, 3)
+                STORE_F32_BF16_YMM(ymm28, 5, 0, 8)
+                STORE_F32_BF16_YMM(ymm29, 5, 1, 8)
+                STORE_F32_BF16_YMM(ymm30, 5, 2, 8)
+                STORE_F32_BF16_YMM(ymm31, 5, 3, 8)
             }
             else
             {
@@ -1185,7 +1185,7 @@ POST_OPS_6x32F_DISABLE:
     }//mloop
 
     consider_edge_cases:
-    
+
     // Handle edge cases in the m dimension, if they exist.
     if ( m_left )
     {

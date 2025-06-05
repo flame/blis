@@ -1006,14 +1006,14 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32_avx512_256 )
 		if ( ( post_ops_attr.buf_downscale != NULL ) &&
 			 ( post_ops_attr.is_last_k == TRUE ) )
 		{
-			STORE_F32_BF16_YMM(ymm16, 0, 0);
-			STORE_F32_BF16_YMM(ymm18, 0, 1);
-			STORE_F32_BF16_YMM(ymm20, 0, 2);
-			STORE_F32_BF16_YMM(ymm22, 0, 3);
-			STORE_F32_BF16_YMM(ymm24, 0, 4);
-			STORE_F32_BF16_YMM(ymm26, 0, 5);
-			STORE_F32_BF16_YMM(ymm28, 0, 6);
-			STORE_F32_BF16_YMM(ymm30, 0, 7);
+			STORE_F32_BF16_YMM(ymm16, 0, 0, 8);
+			STORE_F32_BF16_YMM(ymm18, 0, 1, 8);
+			STORE_F32_BF16_YMM(ymm20, 0, 2, 8);
+			STORE_F32_BF16_YMM(ymm22, 0, 3, 8);
+			STORE_F32_BF16_YMM(ymm24, 0, 4, 8);
+			STORE_F32_BF16_YMM(ymm26, 0, 5, 8);
+			STORE_F32_BF16_YMM(ymm28, 0, 6, 8);
+			STORE_F32_BF16_YMM(ymm30, 0, 7, 8);
 		}
 		else
 		{
