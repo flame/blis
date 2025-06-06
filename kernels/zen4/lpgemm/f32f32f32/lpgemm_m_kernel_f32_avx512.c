@@ -134,6 +134,7 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_avx512_6x64m)
         }
         if( n_left >= 8)
         {
+          dim_t nr_cur = n_left % 16;
           lpgemm_rowvar_f32f32f32of32_avx512_6xlt16m(m0, k0,
             ai,  rs_a, cs_a, ps_a,
             bj,  rs_b, cs_b,
@@ -141,8 +142,10 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_avx512_6x64m)
             alpha, beta,
             n_left,
             post_ops_list, post_ops_attr );
+            cij += nr_cur*cs_c; bj += nr_cur*cs_b; n_left -= nr_cur;
+            post_ops_attr.post_op_c_j += nr_cur;
         }
-        if( 8 > n_left )
+        if( n_left > 0 )
         {
           lpgemm_rowvar_f32f32f32of32_6xlt8m(m0, k0,
             ai,  rs_a, cs_a, ps_a,
