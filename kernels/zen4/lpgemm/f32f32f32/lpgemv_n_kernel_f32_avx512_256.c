@@ -121,7 +121,6 @@ LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32_avx512_256 )
         {
             store_mask1 = masks[8];
             store_mask2 = masks[mr0 - 8 ];
-
         }
         else
         {
@@ -450,21 +449,49 @@ POST_OPS_BIAS_1x32F:
             if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
                ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
             {
-            ymm0 = _mm256_set1_ps(*( ( float * )post_ops_list_temp->op_args1 ) );
-            ymm1 = _mm256_set1_ps(*( ( float * )post_ops_list_temp->op_args1 ) );
+                if( post_ops_list_temp->stor_type == BF16 )
+                {
+                    BF16_F32_BIAS_BCAST_AVX2(ymm0,0);
+                    BF16_F32_BIAS_BCAST_AVX2(ymm1,0);
+                }
+                else
+                {
+                    ymm0 = _mm256_set1_ps(*( ( float * )post_ops_list_temp->op_args1 ) );
+                    ymm1 = _mm256_set1_ps(*( ( float * )post_ops_list_temp->op_args1 ) );
+                }
             }
             else
             {
-            // If original output was columns major, then by the time
-            // kernel sees it, the matrix would be accessed as if it were
-            // transposed. Due to this the bias array will be accessed by
-            // the ic index, and each bias element corresponds to an
-            // entire row of the transposed output array, instead of an
-            // entire column.
-            ymm0 =  _mm256_maskload_ps( ( float* )post_ops_list_temp->op_args1 +
-                                    post_ops_attr.post_op_c_i , store_mask1 );
-            ymm1 =  _mm256_maskload_ps( ( float* )post_ops_list_temp->op_args1 +
-                                    post_ops_attr.post_op_c_i + 8, store_mask2 );
+                // If original output was columns major, then by the time
+                // kernel sees it, the matrix would be accessed as if it were
+                // transposed. Due to this the bias array will be accessed by
+                // the ic index, and each bias element corresponds to an
+                // entire row of the transposed output array, instead of an
+                // entire column.
+                if( post_ops_list_temp->stor_type == BF16 )
+                {
+                    __m128i bias_mask1 = _mm256_cvtepi32_epi16(store_mask1);
+                    __m128i bias_mask2 = _mm256_cvtepi32_epi16(store_mask2);
+                    ymm0 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
+                        _mm_maskload_epi32(
+                          ( int const* )( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+                          post_ops_attr.post_op_c_i )
+                        , bias_mask1 ) ), _mm256_set1_epi32( 16 ) )
+                        );
+                    ymm1 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
+                        _mm_maskload_epi32(
+                            ( int const* )( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
+                            post_ops_attr.post_op_c_i + 8)
+                        , bias_mask2 ) ), _mm256_set1_epi32( 16 ) )
+                        );
+                }
+                else
+                {
+                    ymm0 =  _mm256_maskload_ps( ( float* )post_ops_list_temp->op_args1 +
+                                            post_ops_attr.post_op_c_i , store_mask1 );
+                    ymm1 =  _mm256_maskload_ps( ( float* )post_ops_list_temp->op_args1 +
+                                            post_ops_attr.post_op_c_i + 8, store_mask2 );
+                }
             }
             ymm30 = _mm256_add_ps(ymm0, ymm30);
             ymm31 = _mm256_add_ps(ymm1, ymm31);
