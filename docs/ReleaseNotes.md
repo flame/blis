@@ -43,7 +43,7 @@
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
 
 ## Changes in 2.0:
-January 15, 2025
+June 7, 2025
 
 Improvements present in 2.0:
 
@@ -57,6 +57,8 @@ Framework:
 - Added a `func2_t` struct for dealing with 2-type kernels (see below). A `func2_t` can be safely cast to `func_t` to refer to only kernels with equal type parameters. (Devin Matthews)
 - The `bli_*_front` functions have been removed.
 - Extensive other back-end changes and improvements.
+- A new "level-0" macro back-end has been implemented. These macros from the basic language for implementing reference kernels and for enabling correct mixed-type computation. The new back-end specifically support full data-type flexibility, including the "computational" data-type (e.g. input/output in double, compute in single), as well as fully correct mixed-domain computation and safe in-place usage of operations such as `scal2v`. A dedicated testsuite (C++17 required) has also been added for this layer. A number of legacy macros have been retained as wrappers so that current code (e.g. optimized kernels) is not affected.
+- Fixed a lurking bug in `bli_obj_imag_part` which would have caused the base address to be computed incorrectly for sub-matrix objects.
 
 Compatibility:
 - Added a ScaLAPACK compatibility mode which disables some conflicting BLAS definitions. (Field Van Zee)
@@ -66,6 +68,7 @@ Compatibility:
 - Fixed improperly-quoted strings in Python scripts which affected compatibility with Python 3.12+. (@AngryLoki)
 - The static initializer macros (`BLIS_*_INITIALIZER`) have been fixed for compatibility with C++. (Devin Matthews)
 - Install "helper" `blis.h` and `cblas.h` headers directly to `INCDIR` (in addition to the full files in `INCDIR/blis`). (Field Van Zee, Jed Brown, Mo Zhou)
+- `gemmtr` aliases for the `gemmt` BLAS and CBLAS compatibility functions have been added to support recent versions of LAPACK. (Mo Zhou)
 
 Kernels:
 - Fixed an out-of-bounds read bug in the `haswell` `gemmsup` kernels. (John Mather)
@@ -77,22 +80,27 @@ Kernels:
 - The separate "MRxk" and "NRxk" packing kernels have been merged into one generic packing kernel. Packing kernels are now expected to pack any size micropanel, but may optimize for specific shapes. (Devin Matthews)
 - Added explicit packing kernels for diagonal portions of matrices, and for certain mixed-domain/1m cases. (Devin Matthews)
 - Improved support for duplication during packing ("broadcast-B") across all packing kernels.
+- Some bugs with mixed-precision/mixed-domain operations on certain architectures (esp. AVX512) have been fixed.
+- Fixed bug affecting reference kernels with clang 14.
 
 Build system:
 - The `cblas.h` file is now "flattened" immediately after `blis.h` is (if enabled), rather than later in the build process. (Jeff Diamond, Field Van Zee)
 - Added script to help with preparing release candidate branches. (Field Van Zee)
 - The configure script has been overhauled. In particular, using spaces in `CC`/`CXX` is now supported. (Devin Matthews)
 - Improved support for C++ source files in BLIS or in plugins. (Devin Matthews)
+- Disabled `armsve` on Windows due to build failures. (Hernan Martinez, Atsushi Tatsuma)
 
 Testing:
 - test/3 drivers now allow using the "default" induced method, rather than forcing native or 1m operation. (Field Van Zee, Leick Robinson)
 - Fix some segfaults in the test/3 drivers. (Field Van Zee, Leick Robinson)
 - The testsuite now tests *all* possible type combinations when requested. (Devin Matthews)
 - Improved detection of problems in `make check-blis` and related targets. (Devin Matthews)
+- CI testing infrastructure has moved to CircleCI.
 
 Documentation:
 - Added documentation for the new plugin system and for creating custom operations by modifying the BLIS control tree. (Devin Matthews)
 - Updated documentation for downloading BLIS in `README.md` and instructions for maintainers in `RELEASING`. (Field Van Zee)
+- Widened print format in code examples to avoid misinterpretation of results. (Minh Quan Ho, Mason McBride)
 
 ## Changes in 1.0
 May 6, 2024
