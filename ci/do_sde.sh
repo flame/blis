@@ -57,7 +57,7 @@ for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator 
         export BLIS_ARCH_TYPE=9
     elif [ "$ARCH" = "generic" ]; then
         TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/haswell.def --"
-        export BLIS_ARCH_TYPE=33
+        export BLIS_ARCH_TYPE=32
     else
         TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/$ARCH.def --"
     fi
