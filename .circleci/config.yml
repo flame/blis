@@ -5,6 +5,7 @@ branches:
     - master
     - dev
     - amd
+    - /r[0-9]+.x/
 
 executors:
   linux: # Docker using the Base Convenience Image
