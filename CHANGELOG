@@ -1,10 +1,269 @@
-commit bbddca9e12712e3f33d045f17f57556d39f4883a
+commit 43c8b0085459c86b9bf7614dae399429e1865475
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Jun 7 14:13:18 2025 -0500
+
+    Version file update (2.0-rc1)
+
+commit 4e2f8f9071681a51abe7438ef06c884afeca59ec
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Jan 17 13:54:40 2025 -0600
+
+    Update release instructions. (#837)
+    
+    Details:
+    - Rename `RELEASING` to `RELEASING.md`.
+    - Add additional structure and Markdown notation to `RELEASING.md`.
+    - Add a section on the overall release and branching strategy.
+    - Clarify and tweak instructions for making release candidates and releases.
+    - Add instructions for making point releaases and back-porting bug fixes.
+    - Rename `build/start-new-rc.sh` to `build/do-release.sh`.
+    - Tweak `do-release.sh` to do only common tasks for rcs, major releases, and point releases.
+    - Add `-b` option to `do-release.sh` which does a "bare" release without a new branch or tag (for "dev releases" on master).
+    - Update the version file on `master` to `3.0-dev` to reflect the new guidelines.
+    
+    (cherry picked from commit fb7ba1da524efa47011d95cfd8a9fee86018fcf0)
+
+commit ac3e46f54c5c4a784644e12481b0a77894415005
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Jun 7 14:09:52 2025 -0500
+
+    Update CREDITS and ReleaseNotes.md.
+
+commit 60d8a4a499be9f9a7cacec375a28bf5a8bec7a30
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Jun 7 13:17:15 2025 -0500
+
+    Fix arch definitions in CI.
+
+commit af5de5bfd199c0ea8f369d81401ee823733c708c
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Jun 7 12:33:41 2025 -0500
+
+    Turn on CI testing for release tracking branches.
+    
+    (cherry picked from commit 09e77a43651ba2673c3abac23093a595f1b3a920)
+
+commit 1a281e0f8791a0e5c86bfae6afccebe6bd378d3b
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu May 1 10:11:59 2025 -0500
+
+    Update CREDITS
+    
+    [ci skip]
+    
+    (cherry picked from commit 5097c599b58aecb7f990cc7bd7a5dad688a48df8)
+
+commit a8f3d7efad027d06471a639db6ad85cba47f473c
+Author: Atsushi Tatsuma <yoshoku@outlook.com>
+Date:   Fri May 2 00:09:31 2025 +0900
+
+    Fix to prevent is_win flag setting with clang on macOS (#867)
+    
+    Details:
+    - In some cases, macOS was improperly detected as Windows due to a builtin preprocessor definition `#define TARGET_OS_WINDOWS 0`.
+    - Update the detection to specifically look for `#define _WIN32` which more robustly detects Windows.
+    
+    (cherry picked from commit ec5b57289feaea755ff2eb4ab39511f3dd5879d6)
+
+commit 97a441ada10e2dc9044616cccbc365cac0524062
+Author: Minh Quan Ho <1337056+hominhquan@users.noreply.github.com>
+Date:   Mon Apr 7 21:21:45 2025 +0200
+
+    Examples: replace all 4.1f printm format by 4.3f (#865)
+    
+    Details:
+    - This avoids possible misinterpretation of computation results printed on stdout (thanks Mason McBride for reporting it in #864).
+    - Also force space for positive numbers to help with alignment.
+    
+    (cherry picked from commit 5d9e110a2aa58b6e5d131db9131bae0143f22f9f)
+
+commit c3497ed3645284fcd61fda719a47167173767fbd
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Apr 2 12:03:43 2025 -0500
+
+    Fix for plugins without explicit optimized kernels.
+    
+    (cherry picked from commit 53d21cb478801d8e978082da2889e5e67d4221c9)
+
+commit c90ecfb26c6cae4e3f288d74d4ac8d99283f081c
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sun Mar 2 09:08:35 2025 -0600
+
+    Adjust CI testing (#860)
+    
+    Details:
+    - Add tests for the `generic` config, including forcing broadcast-A,B which uses a different reference kernel. This uncovered a number of bugs, especially in `trsm`/`gemmtrsm` reference kernels, as well as diagonal packing.
+    - Move threaded builds into main build and run `make check` once for each enabled backend.
+    - Fix unused variable warnings in level-0 macros.
+    - Fix `bli_tbastbbs_mxn` and add `bli_tcompressbbs_mxn`. The latter was missing from the reference `gemmtrsm` microkernel and is needed since the B11 block is accumulated to but, for complex datatypes, the effective imaginary stride is non-unit if B is broadcast packed.
+    - Run all BLAS tests single-threaded.
+    
+    (cherry picked from commit 50054a6a7c0561d22720254ab6a9be1199ac10ab)
+
+commit 92bbb13b934558b9cace3a9734a028b117983f63
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sun Mar 2 08:56:54 2025 -0600
+
+    Fix check for SVE instructions which caused problems on Windows. (#859)
+    
+    * Fix check for SVE instructions which caused problems on Windows.
+    
+    Details:
+    - The context intialization for `armsve` was using the HWCAP functionality of Linux to check if SVE instructions are actually available, since these are used to determine the register blocksizes. Naturally, this causes problems on Windows.
+    - Instead, use functions from `bli_cpuid.c` to check for SVE. On Windows, no check is actually done and SVE is never detected.
+    - In the case that the user specifically requests the `armsve` config on Windows, only enable this check for the whole `arm64` family and just assume SVE is available otherwise.
+    
+    * Blacklist armsve on Windows.
+    
+    (cherry picked from commit 37e52a613a6fec3fe1cde0ca018498a16b28a5dc)
+
+commit 4715e59ebdc4fc710b5f53df4c1bc66374654046
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sun Mar 2 08:50:37 2025 -0600
+
+    Fix problem in `bli_obj_imag_part`. (#861)
+    
+    Details:
+    - When adjusting the buffer to point to the first imaginary element, the function `bli_obj_buffer_at_off` was used which includes and currently set offsets, but then `bli_obj_set_buffer` was used which is the offset *before* applying offsets.
+    - Now a matching `bli_obj_buffer` call is used to avoid any offsets.
+    
+    (cherry picked from commit 97084c75acd0ed104efc5da4dac0fb38a4a044f1)
+
+commit d3fa776b2d374a072403e8796d5e4570461e683b
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Feb 27 13:48:17 2025 -0600
+
+    Add new level-0 macro layer. (#830)
+    
+    Details:
+    - Developed by @fgvanzee and @devinamatthews.
+    - Level-0 scalar macros have moved from a named-based system (e.g. `bli_dcopys( ... )`) to a macro argument-based system (`bli_tcopys( d,d, ... )`).
+    - All macros are explicitly mixed-type.
+    - All input and output operands can have a distinct type (precision and/or domain). Unnecessary computations and spurious NaN/Inf propagation are avoided in mixed-domain cases.
+    - All macros which do math (i.e. not copy/set/etc.) take an additional computational precision.
+    - Tile-level macros, 1m, broadcast-B, and other extensions are also included.
+    - All macros should correctly handle aliasing of input and output operands (this needs to be rigorously checked).
+    - The macros work generically over the defined types -- new types only need limited support (primarily conversion to other types and basic math).
+    - For code outside of core BLIS (optimized kernels, sandboxes, etc.), a selection of legacy macros have been added which translate to the new level-0 macros. Behavior is unchanged.
+    - A standalone, templated C++ testsuite for the level-0 macros has been added. It is currently included as part of the CircleCI tests.
+    - Const-correctness of level-0 macros is also checked.
+    
+    (cherry picked from commit a014a08189d05f45752f7ac23d8d42a24536fb93)
+
+commit 60119e7d9a85b8f14c45d049e5abd7a7c143e85c
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Feb 19 13:53:39 2025 -0600
+
+    Update README.md
+    
+    Details:
+    - Add status badge for CircleCI.
+    - [ci skip]
+    
+    (cherry picked from commit 3c71737e426f8d567f1324b82609b4a61db670f8)
+
+commit 584a936d6bb4d148304de805e34d9e8f1e50854d
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Feb 19 13:31:19 2025 -0600
+
+    Do not use symbol aliases on macOS. (#856)
+    
+    Details:
+    - The BLAS/CBLAS function `?gemmtr` is currently implemented as a symbol alias of the already-existing `?gemmt`. This does not work on macOS/Darwin.
+    - Instead, use a minimal wrapper function which calls the appropriate existing BLAS/CBLAS function.
+    - Also clean up the CBLAS prototypes a bit.
+    
+    (cherry picked from commit 14047f62d1fc746cbabe112197cfc1afe526a82a)
+
+commit e5400a74c3e681357031d27eb375b1eef7cae2f6
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Feb 8 13:47:08 2025 -0600
+
+    Add CircleCI (#855)
+    
+    Details:
+    - This PR adds CircleCI testing in addition to TravisCI and Appveyor.
+    - All of the same tests as on Travis are run, except that different hardware typically ends up being used (usually Zen on Travis, Xeon Platinum on Circle). This has actually exposed a couple of bugs (see #850 and #852).
+    - The `travis` directory has been renamed to `ci` as it is now shared.
+    - Running SDE on CircleCI is a bit problematic because glibc changed how CPUID detection is done. This requires running some architectures with different hardware definition files and forcing a config via `BLIS_ARCH_TYPE`.
+    
+    (cherry picked from commit 40a52dc0289f27f74a43e886ae14bf11738db169)
+
+commit dffdaae41531ea2160cb21ae172d117dd896f3c4
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Feb 6 23:22:24 2025 -0600
+
+    Fix problem with clang-14.0.0 and reference `gemm` ukr. (#854)
+    
+    Details:
+    - clang 14.0.0 apparently makes some invalid assumptions about whether
+      or not the AB microtile is initialized in the `gemm` reference
+      microkernel. This leads to the "scale by alpha" part doing something
+      strange (all sorts of random and even NaN values pop up). I do not
+      know why this only manifested for `ztrsm` on `skx` (in
+      `zgemm_skx_ref` via `zgemmtrsm_skx_ref`). See #852.
+    - Aliasing the AB microtile (in the proper datatype) as a pointer to
+      a raw character array, and then initializing the character array
+      with `= { 0 }` convinces the compiler to do the right thing.
+    - The problem did not occur in 14.0.6 or 15.0.7. It may only be a narrow
+      band of versions which are problematic.
+    - This commit adds the char array workaround and fixes #852.
+    
+    (cherry picked from commit 028be422e306986674f7b1d96b99153bf2a6477e)
+    (cherry picked from commit a0d7f26ba37689d351963c276711e4f51bf99e3e)
+
+commit c091c25d116179619ffd61d9824cba55372b6e52
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Feb 5 16:10:37 2025 -0600
+
+    Increase the max size for stack buffers. (#851)
+    
+    Details:
+    - See #850 for details on the problem.
+    - This is a temporary fix which should work for sdcz data types.
+    - Altra architectures may still not fully work for MP/MD as the stack buffer size is hard-coded.
+    
+    (cherry picked from commit 5ad37a860b191f905a7ed895280a8057573ae909)
+
+commit 84e2ed773972276426ecf25b2037ec642d1ac15f
+Author: M. Zhou <cdluminate@gmail.com>
+Date:   Wed Feb 5 14:07:01 2025 -0800
+
+    Alias *gemmt_ as *gemmtr_ to fix lapack 3.12.1 compatibility. (#849)
+    
+    Details:
+    - Alias `?gemmt_` as `?gemmtr_` to fix lapack 3.12.1 compatibility. (Fixes #848)
+    - Add the `?gemmtr_ `and `cblas_?gemmtr` aliases to symbol list.
+    - Also alias `cblas_?gemmt` as `cblas_?gemmtr` for lapack 3.12.1 compatibility.
+    
+    (cherry picked from commit a6f2ce9dd53fbe099650d322fa69b21a3be10fb0)
+
+commit 9e96bcda6a126ff6bcba381bc2add2849cb792aa
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Jan 16 17:07:44 2025 -0600
+
+    Create a new type to represent IDs for all kernels, blocksizes, etc.
+    
+    Details:
+    - Currently, all enums used to represent built-in kernel IDs, blocksizes, preferences, and operation IDs have a special member equal to `BLIS_VA_END`, which in turn is `(siz_t)-1`. In principle, this would force the underlying type used to represent the enum values to be as wide as `siz_t`, particularly when passed to the variadic function `bli_cntx_set_ukrs` and friends. User-registered kernels IDs and such are of type `siz_t` explicitly. However, gcc (12 and older), clang, and icx pass literal enum constants (e.g. `BLIS_MR`) that are small enough as `int` when 32-bit mode is used (`-m32`). This causes a misalignment of the parameters on the stack and ultimately a segfault. The problem also exists in 64-bit mode with clang and icx and on aarch64 with clang, as parameters far enough down the list to go on the stack do not get the upper 4 bytes initialized.
+    - This commit introduces a new type `kerid_t` which is always `uint32_t`. This type is used for all kernel, blocksize, preference, and operation IDs (including user-registered ones). It is also used for `BLIS_VA_END`.
+    - Now all enum values are always passed as 32-bit ints on all architectures.
+    - Fixes #839.
+    - [cherry-picked from 32cc0ae3]
+
+commit 19573faaba3baca0a58663eec4ad8716846bc811
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jan 14 18:18:59 2025 -0600
+
+    CHANGELOG update (2.0-rc0)
+
+commit 215b76cfd82ce78fdbbd6786a3743ef6ae444f9a
 Author: Devin Matthews <damatthews@smu.edu>
 Date:   Tue Jan 14 18:18:58 2025 -0600
 
     Version file update (2.0-rc0)
 
-commit e24e9ed513d71184133313de67b22ccbd8ae1ed6
+commit 790b995f8f351d0147d3c9d781c3dab549317af1
 Author: Devin Matthews <damatthews@smu.edu>
 Date:   Tue Jan 14 18:15:40 2025 -0600
 
