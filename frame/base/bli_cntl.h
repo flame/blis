@@ -65,6 +65,14 @@ BLIS_EXPORT_BLIS void bli_cntl_attach_sub_node
        cntl_t* cntl
      );
 
+BLIS_EXPORT_BLIS void bli_cntl_insert_sub_node
+     (
+       dim_t   ways,
+       cntl_t* sub_node,
+       cntl_t* child_node,
+       cntl_t* cntl
+     );
+
 BLIS_EXPORT_BLIS void bli_cntl_clear_node
      (
        cntl_t* cntl

@@ -32,6 +32,7 @@
 config.mk
 bli_config.h
 bli_addon.h
+blis.pc
 
 # -- monolithic headers --
 
