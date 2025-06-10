@@ -42,5 +42,5 @@
 #define BLIS_ENABLE_OAPI
 
 // Include the object API definitions here.
-#include "bli_l2_oapi.c"
+#include "bli_l2_oapi_code.h"
 
