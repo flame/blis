@@ -78,7 +78,15 @@ gint_t bli_env_get_var( const char* env, gint_t fallback )
 	{
 		// If there was no error, convert the string to an integer and
 		// prepare to return that integer.
-		r_val = ( gint_t )strtol( str, NULL, 10 );
+		char* end;
+		r_val = ( gint_t )strtol( str, &end, 10 );
+
+		// If no characters were read, or if there are additional character
+		// after any digits, revert to the fallback value.
+		if ( str == end || *end != '\0' )
+		{
+			r_val = fallback;
+		}
 	}
 	else
 	{

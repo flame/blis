@@ -65,12 +65,14 @@ Configurations are described in detail in the [Configuration Guide](Configuratio
 Generally speaking, a configuration consists of several files that reside in a sub-directory of the `config` directory. To see a list of the available configurations, you may inspect this directory, or run `configure` with no arguments. Here are the current (as of this writing) contents of the `config` directory:
 ```
 $ ls config
-amd64      cortexa15  excavator  intel64  old         power7       template
-bgq        cortexa57  generic    knc      penryn      sandybridge  zen
-bulldozer  cortexa9   haswell    knl      piledriver  steamroller
+a64fx        arm32        cortexa15    firestorm    knl          power10      rv64i        skx          zen
+altra        arm64        cortexa53    generic      old          power7       rv64iv       steamroller  zen2
+altramax     armsve       cortexa57    haswell      penryn       power9       sandybridge  template     zen3
+amd64        bgq          cortexa9     intel64      piledriver   rv32i        sifive_rvv   thunderx2
+amd64_legacy bulldozer    excavator    knc          power        rv32iv       sifive_x280  x86_64
 ```
 There is one additional configuration available that is not present in the `config` directory, and that is `auto`.
-By targeting the `auto` configuration (i.e., `./configure auto`), the user is requesting that `configure` select a configuration automatically based on the detected features of the processor.
+By targeting the `auto` configuration (i.e., `./configure auto`), the user is requesting that `configure` select a configuration automatically based on the detected features of the processor. Many of the configurations cover multiple hardware types, e.g. `x86_64` covers all Intel and AMD architectures. While the appropriate member of the configuration family is detected at runtime based on your hardware, this choice can be overridden by exporting the `BLIS_ARCH_TYPE` environment variable, e.g. `export BLIS_ARCH_TYPE=haswell`.
 
 Another special configuration (one that, unlike `auto`, _is_ present in `config`) is the `generic` configuration. This configuration, like its name suggests, is architecture-agnostic and may be targeted in virtually any environment that supports the minimum build requirements of BLIS. The `generic` configuration uses a set of built-in, portable reference kernels (written in C99) that should work without modification on most, if not all, architectures. These reference kernels, however, should be expected to yield relatively low performance since they do not employ any architecture-specific optimizations beyond those the compiler provides automatically. (Historical note: The `generic` configuration corresponds to the `reference` configuration of previous releases of BLIS.)
 

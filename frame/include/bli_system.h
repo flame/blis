@@ -50,6 +50,7 @@
 #include <float.h>
 #include <errno.h>
 #include <ctype.h>
+#include <strings.h>
 
 // Determine the compiler (hopefully) and define conveniently named macros
 // accordingly.
