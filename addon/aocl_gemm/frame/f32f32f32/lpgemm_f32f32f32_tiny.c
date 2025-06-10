@@ -141,6 +141,7 @@ LPGEMV_TINY(float, float, float, f32f32f32of32)
     float* pack_b_buffer_f32f32f32of32 = NULL;
     err_t err = BLIS_SUCCESS;
 
+
     if(n == 1)
     {
         dim_t MR;
@@ -168,8 +169,9 @@ LPGEMV_TINY(float, float, float, f32f32f32of32)
         ker_fp = lpgemv_n_one_f32f32f32of32_avx2;
         packa_fp = packa_mr8_f32f32f32of32_col_major;
 #endif
-        // Pack B matrix if rs_b > 1
-        if( ( mtag_b == PACK ) && ( rs_b != 1 ) )
+        // Pack B matrix if rs_b > 1, ignoring the mtag_b here.
+        // For tiny sizes, it is better to pack B if it affects output accuracy.
+        if( ( rs_b != 1 ) )
         {
             siz_t mem_b_size_req = sizeof( float ) * k;
             pack_b_buffer_f32f32f32of32 =
@@ -185,7 +187,8 @@ LPGEMV_TINY(float, float, float, f32f32f32of32)
             cs_b_use = 1;
         }
 
-        if( ( mtag_a == PACK ) && ( cs_a != 1 ) )
+        // For tiny sizes, it is better to pack A if it affects output accuracy.
+        if( ( cs_a != 1 ) )
         {
             siz_t mem_a_size_req = sizeof(float) * m * k;
             pack_a_buffer_f32f32f32of32 =
@@ -248,7 +251,8 @@ LPGEMV_TINY(float, float, float, f32f32f32of32)
 #else
         ker_fp = lpgemv_m_one_f32f32f32of32_avx2;
 #endif
-        if( mtag_a == PACK && cs_a != 1)
+        // For tiny sizes, it is better to pack A if it affects output accuracy.
+        if( ( cs_a != 1 ) )
         {
           siz_t mem_a_size_req = sizeof( float ) * k;
           pack_a_buffer_f32f32f32of32 =
@@ -262,7 +266,7 @@ LPGEMV_TINY(float, float, float, f32f32f32of32)
           cs_a_use = 1;
         }
 
-        if (mtag_b == PACK)
+        if ( ( mtag_b == PACK ) )
         {
           dim_t nc0_updated = make_multiple_of_n(n, NR);
           siz_t mem_b_size_req = sizeof(float) * nc0_updated * k;
@@ -324,7 +328,7 @@ LPGEMV_TINY(float, float, float, f32f32f32of32)
 
 LPGEMM_TINY(float,float,float,f32f32f32of32)
 {
-// Handle using LPGEMV when m or/and n equal to 1
+  // Handle using LPGEMV when m or/and n equal to 1
   if ( ( ( ( m == 1 ) || ( n == 1 ) ) ) && ( ( bli_cpuid_is_avx512_supported() == TRUE ) ||
     ( bli_cpuid_is_avx2fma3_supported() == TRUE ) ) )
   {
@@ -384,7 +388,7 @@ LPGEMM_TINY(float,float,float,f32f32f32of32)
     // Even if the mtag_b is set to PACK, for tiny sizes its better to
     // pack only if it affects output accuracy (like column major B),
     // else ignore it.
-    if ( ( mtag_b == PACK ) && ( rs_b == 1 ) )
+    if ( ( mtag_b == PACK ) )
     {
         dim_t nc0_updated = make_multiple_of_n( n, NR );
         mem_b_size_req = sizeof( float ) * nc0_updated * k;

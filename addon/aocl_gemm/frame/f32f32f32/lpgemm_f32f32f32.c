@@ -154,6 +154,12 @@ LPGEMV(float, float, float, f32f32f32of32)
   if (c_downscale < F32) post_ops_attr.buf_downscale = c;
   else  post_ops_attr.buf_downscale = NULL;
 
+  // Should_pack_A/B is set either by the user through env variable
+  // or by the smart threading logic based on work distribution.
+  // Storage format of the matrices doesn't affect should_pack_A/B.
+  bool should_pack_B = bli_rntm_pack_b( rntm );
+  bool should_pack_A = bli_rntm_pack_a( rntm );
+
   // Generate thrinfo objects for jc and ic loops from lpgemm_thrinfo_t.
   thrinfo_t thread_jc;
   thrinfo_t thread_ic;
@@ -189,7 +195,7 @@ LPGEMV(float, float, float, f32f32f32of32)
     packa_fp = packa_mr8_f32f32f32of32_col_major;
 #endif
     // Pack B matrix if rs_b > 1
-    if( ( mtag_b == PACK ) && ( rs_b != 1 ) )
+    if( (should_pack_B == TRUE) || ( rs_b != 1 ) )
     {
       mem_b_size_req = sizeof( float ) * k;
 
@@ -227,7 +233,7 @@ LPGEMV(float, float, float, f32f32f32of32)
       post_ops_attr.post_op_c_i = ic;
 
       // To-Do: pack A case needs to be handled for AVX2 case.
-      if( mtag_a == PACK && cs_a != 1 )
+      if( (should_pack_A == TRUE) || ( cs_a != 1 ) )
       {
         mem_a_size_req = sizeof(float) * mc0 * k;
         lpgemm_alloc_mem_panel
@@ -258,11 +264,11 @@ LPGEMV(float, float, float, f32f32f32of32)
         &post_ops_attr
       );
     }
-    if ( ( mtag_a == PACK ) && ( bli_mem_is_alloc( &mem_a ) ) )
+    if ( ( (should_pack_A == TRUE) || ( cs_a != 1 ) ) && ( bli_mem_is_alloc( &mem_a ) ) )
     {
       bli_pba_release( rntm, &mem_a );
     }
-    if ( ( mtag_b == PACK ) && ( bli_mem_is_alloc( &mem_b ) ) )
+    if ( ( (should_pack_B == TRUE) || ( rs_b != 1 ) ) && ( bli_mem_is_alloc( &mem_b ) ) )
     {
       bli_pba_release( rntm, &mem_b );
     }
@@ -294,7 +300,7 @@ LPGEMV(float, float, float, f32f32f32of32)
     thread_jc.work_id = thread->tid;
     bli_thread_range_sub(&thread_jc, n, NR, FALSE, &jc_start, &jc_end);
 
-    if ( mtag_a == PACK )
+    if ( (should_pack_A == TRUE) || ( cs_a != 1 ) )
     {
       mem_a_size_req = sizeof( float ) * k;
 
@@ -340,7 +346,7 @@ LPGEMV(float, float, float, f32f32f32of32)
         rs_b_use = NR;
         cs_b_use = 1;
       }
-      else if (mtag_b == PACK)
+      else if ( (should_pack_B == TRUE) || ( mtag_b == PACK ) )
       {
         // nc0 needs to be a multiple of 16 since this gives maximum
         // vectorization. Packing B always results in buffers with width
@@ -406,9 +412,14 @@ LPGEMV(float, float, float, f32f32f32of32)
     } // jc loop
 
     // Release pack buffers.
-    if ( ( mtag_b == PACK ) && ( bli_mem_is_alloc( &mem_b ) ) )
+    if ( ( (should_pack_B == TRUE) || ( mtag_b == PACK ) ) && ( bli_mem_is_alloc( &mem_b ) ) )
     {
       bli_pba_release( rntm, &mem_b );
+    }
+
+    if ( ( (should_pack_A == TRUE) || ( cs_a != 1 ) ) && ( bli_mem_is_alloc( &mem_a ) ) )
+    {
+      bli_pba_release( rntm, &mem_a );
     }
   }
 }
@@ -472,7 +483,7 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
     siz_t mem_a_size_req = 0;
 
     // Check if packing of B is required.
-    bool should_pack_B = bli_rntm_pack_b( rntm ) || ( rs_b == 1 );
+    bool should_pack_B = bli_rntm_pack_b( rntm );
 
     // Pack buffer for B.
     float* pack_b_buffer_f32f32f32of32;
@@ -519,8 +530,8 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
     bool invoke_rd = FALSE;
 
     if( ( lpgemm_get_enabled_arch() != BLIS_ARCH_ZEN3) &&
-        ( ( n < 48 ) || ( m < 16 ) )  && ( rs_b == 1 ) && ( mtag_b == PACK ) &&
-        ( mtag_a == UNPACKED ) )
+        ( ( n < 48 ) || ( m < 16 ) )  && ( rs_b == 1 ) &&
+        ( mtag_a == UNPACKED ) && ( mtag_b == PACK ) )
     {
         invoke_rd = TRUE;
         mtag_b = UNPACKED;
@@ -558,7 +569,7 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
             is_last_k = ( ( pc + KC ) >= k ) ? ( TRUE ) : ( FALSE );
             post_ops_attr.is_last_k = is_last_k;
 
-            if ( ( mtag_b == PACK ) && ( should_pack_B == TRUE ) )
+            if ( ( mtag_b == PACK ) || ( should_pack_B == TRUE ) )
             {
                 // Pack B chunks are based on jc work id.
                 dim_t jc_work_id = bli_thread_work_id( &thread_jc );
@@ -744,7 +755,7 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
     }
 
     // Release pack buffers.
-    if ( ( mtag_b == PACK ) && ( should_pack_B == TRUE ) )
+    if ( ( mtag_b == PACK ) || ( should_pack_B == TRUE ) )
     {
         // All threads in work group should wait till B matrix usage is
         // completed by the participating threads.
