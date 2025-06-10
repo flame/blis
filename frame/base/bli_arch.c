@@ -130,6 +130,20 @@ arch_t bli_arch_query_id_impl( void )
 	dim_t req_id = bli_env_get_var( "BLIS_ARCH_TYPE", -1 );
 	const char* req_env = bli_env_get_str( "BLIS_ARCH_TYPE" );
 
+	// If the user specifically goes out of their way to define
+	// BLIS_ARCH_TYPE=-1, then we have to handle that specially.
+	if ( req_env )
+	{
+		// strtol allows leading whitespace
+		const char* p = req_env;
+		while ( isspace( *p ) ) p++;
+
+		if ( strcmp( p, "-1" ) == 0 )
+		{
+			req_env = NULL;
+		}
+	}
+
 	// When this file is being compiled as part of the configure script's
 	// hardware auto-detection driver, we avoid calling the bli_check APIs
 	// so that we aren't required to include those symbols in the executable.

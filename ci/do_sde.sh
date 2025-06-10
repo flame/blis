@@ -32,7 +32,8 @@ tar xvf $SDE_TARBALL
 make -j2 testsuite-bin blastest-bin
 
 for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator zen generic; do
-    export BLIS_ARCH_TYPE=-1
+    # The leading space is for stress testing
+    export BLIS_ARCH_TYPE=" -1"
 
     if [ "$ARCH" = "knl" ]; then
         TESTSUITE_WRAPPER="$SDE -knl --"
