@@ -32,7 +32,8 @@ tar xvf $SDE_TARBALL
 make -j2 testsuite-bin blastest-bin
 
 for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator zen generic; do
-    export BLIS_ARCH_TYPE=-1
+    # The leading space is for stress testing
+    export BLIS_ARCH_TYPE=" -1"
 
     if [ "$ARCH" = "knl" ]; then
         TESTSUITE_WRAPPER="$SDE -knl --"
@@ -41,23 +42,23 @@ for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator 
         # Instead, use the CPUID values for haswell, but force BLIS to use the
         # sandybridge configuration.
         TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/haswell.def --"
-        export BLIS_ARCH_TYPE=4
+        export BLIS_ARCH_TYPE="sandybridge"
     elif [ "$ARCH" = "piledriver" ]; then
         # We used to "patch" ld.so and libm to remove CPUID checks so that glibc
         # wouldn't try to use instructions not supported by SDE (FMA4). That no
         # longer works, so test Piledriver/Steamroller/Excavator as haswell
         # but with the configuration forced via environment variable.
         TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/haswell.def --"
-        export BLIS_ARCH_TYPE=11
+        export BLIS_ARCH_TYPE="piledriver"
     elif [ "$ARCH" = "steamroller" ]; then
         TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/haswell.def --"
-        export BLIS_ARCH_TYPE=10
+        export BLIS_ARCH_TYPE="steamroller"
     elif [ "$ARCH" = "excavator" ]; then
         TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/haswell.def --"
-        export BLIS_ARCH_TYPE=9
+        export BLIS_ARCH_TYPE="excavator"
     elif [ "$ARCH" = "generic" ]; then
         TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/haswell.def --"
-        export BLIS_ARCH_TYPE=33
+        export BLIS_ARCH_TYPE="generic"
     else
         TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/$ARCH.def --"
     fi
