@@ -51,6 +51,13 @@
 #include <errno.h>
 #include <ctype.h>
 
+#ifdef _MSC_VER
+  #define strncasecmp _strnicmp
+  #define strcasecmp _stricmp
+#else
+  #include <strings.h>
+#endif
+
 // Determine the compiler (hopefully) and define conveniently named macros
 // accordingly.
 #if   defined(__ICC) || defined(__INTEL_COMPILER)

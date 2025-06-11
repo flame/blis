@@ -128,14 +128,42 @@ arch_t bli_arch_query_id_impl( void )
 	// Check the environment variable BLIS_ARCH_TYPE to see if the user
 	// requested that we use a specific subconfiguration.
 	dim_t req_id = bli_env_get_var( "BLIS_ARCH_TYPE", -1 );
+	const char* req_env = bli_env_get_str( "BLIS_ARCH_TYPE" );
+
+	// If the user specifically goes out of their way to define
+	// BLIS_ARCH_TYPE=-1, then we have to handle that specially.
+	if ( req_env )
+	{
+		// strtol allows leading whitespace
+		const char* p = req_env;
+		while ( isspace( *p ) ) p++;
+
+		if ( strcmp( p, "-1" ) == 0 )
+		{
+			req_env = NULL;
+		}
+	}
 
 	// When this file is being compiled as part of the configure script's
 	// hardware auto-detection driver, we avoid calling the bli_check APIs
 	// so that we aren't required to include those symbols in the executable.
 #ifndef BLIS_CONFIGURETIME_CPUID
-	if ( req_id != -1 )
+	if ( req_env )
 	{
 		// BLIS_ARCH_TYPE was set. Cautiously check whether its value is usable.
+
+		// A non-numerical value was supplied. Check if it matches one of the
+		// configuration names.
+		if ( req_id == -1 )
+		{
+			for ( arch_t i = 0; i < BLIS_NUM_ARCHS; i++ )
+			{
+				if ( strcasecmp( req_env, bli_arch_string( i ) ) == 0 )
+				{
+					req_id = i;
+				}
+			}
+		}
 
 		// If req_id was set to an invalid arch_t value (ie: outside the range
 		// [0,BLIS_NUM_ARCHS-1]), output an error message and abort.
