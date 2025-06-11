@@ -320,7 +320,7 @@ endif()
 
 # This variable will need updating on each release since it's used to determined if
 # we are testing development branch or not.
-set(AOCL_BLAS_LATEST_VERSION 50)
+set(AOCL_BLAS_LATEST_VERSION 51)
 # Can we test the value of info stored within BLIS and returned by a call to
 # bli_info_get_info_value (introduced at AMD BLAS 4.2). This variables will be
 # updated below for earlier versions.
