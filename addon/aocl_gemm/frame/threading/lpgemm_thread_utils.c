@@ -55,11 +55,15 @@ static void lpgemm_detect_thread_topo()
 	lpgemm_thread_attrs.tid_cnt = nt_max;
 	lpgemm_thread_attrs.openmp_enabled = TRUE;
 
+    // Allocating memory for pointers, to track thread-core(s) binding
+    // by OpenMP. The pointers are also initialized to NULL, in case we
+    // actually do not spawn nt_max number of threads in the subsequent
+    // parallel region.
 	int** thread_core_bind_list = NULL;
 	int* adj_tid_cnt_for_core_grps = NULL;
 	int* tid_cnt_for_core_grps = NULL;
 
-	thread_core_bind_list = malloc( nt_max * sizeof( int* ) );
+	thread_core_bind_list = calloc( nt_max, sizeof( int* ) );
 	if ( thread_core_bind_list == NULL )
 	{
 		goto err_handle;
@@ -74,7 +78,6 @@ static void lpgemm_detect_thread_topo()
 		int place_num_procs = omp_get_place_num_procs( thread_place );
 
 		// 1 extra int for storing num_procs value.
-		thread_core_bind_list[thread_num] = NULL;
 		thread_core_bind_list[thread_num] = malloc( ( place_num_procs + 1 ) * sizeof( int ) );
 		if ( thread_core_bind_list[thread_num] != NULL )
 		{
@@ -102,6 +105,8 @@ static void lpgemm_detect_thread_topo()
 	for ( int ii = 0; ii < nt_max; ++ii )
 	{
 		lpgemm_thread_attrs.tid_core_grp_id_list[ii] = -1;
+        // Identify the core(s) in which thread would be bound
+        // In case the thread was never spawned, this code-section is skipped.
 		if ( thread_core_bind_list[ii] != NULL)
 		{
 			// Wrap around the proc/core ids based on number of cores used.
@@ -121,43 +126,35 @@ static void lpgemm_detect_thread_topo()
 				}
 			}
 		}
+		else
+		{
+			// Thread was not spawned, cannot detect topo.
+			// Break out of the current loop.
+			can_detect_topo = FALSE;
+			break;
+		}
+		// Check if the topo detection failed at any point.
+		// If so, break out of the loop.
 		if ( can_detect_topo == FALSE )
 		{
-			// Revert tid_core_grp_list to -1s;
-			for ( int jj = 0; jj < ii; ++jj )
-			{
-				lpgemm_thread_attrs.tid_core_grp_id_list[ii] = -1;
-			}
 			break;
 		}
 	}
 
 	int num_core_grps = num_procs / core_grp_size;
 
-	adj_tid_cnt_for_core_grps = malloc( num_core_grps * sizeof( int ) );
-	if ( adj_tid_cnt_for_core_grps == NULL )
-	{
-		goto err_handle;
-	}
-	for ( int ii = 0; ii < num_core_grps; ++ii )
-	{
-		adj_tid_cnt_for_core_grps[ii] = 0;
-	}
-
-	tid_cnt_for_core_grps = malloc( num_core_grps * sizeof( int ) );
-	if ( tid_cnt_for_core_grps == NULL )
-	{
-		goto err_handle;
-	}
-	for ( int ii = 0; ii < num_core_grps; ++ii )
-	{
-		tid_cnt_for_core_grps[ii] = 0;
-	}
-
 	// Get count of core groups that are loaded and not loaded with adj ranks.
 	// This will give an approximation for thread pin distribution.
 	if ( can_detect_topo == TRUE )
 	{
+		// Allocate memory to track the thread counts for each core group.
+		adj_tid_cnt_for_core_grps = calloc( num_core_grps, sizeof( int ) );
+		tid_cnt_for_core_grps = calloc( num_core_grps, sizeof( int ) );
+		if ( ( adj_tid_cnt_for_core_grps == NULL ) || ( tid_cnt_for_core_grps == NULL ) )
+		{
+			goto err_handle;
+		}
+
 		const int core_grp_loaded_thres = 3;
 		int core_grp_adj_tid_thres_cnt = 0;
 		int core_grp_adj_tid_cnt = 0;
