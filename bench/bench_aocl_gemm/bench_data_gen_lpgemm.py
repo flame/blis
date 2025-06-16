@@ -12,42 +12,107 @@
 #
 # To-Do: Add more testcases to cover testing of 5-loop framework
 # taking blocksizes into consideration based on API being tested.
+import os
+from enum import Enum, auto
+
+class BlocksizeType(Enum):
+    MC = 0
+    NC = 1
+    KC = 2
+    MR = 3
+    NR = 4
+    PACKA_RS = 5
+    PACKA_CS = 6
+    PACKB_RS = 7
+    PACKB_CS = 8
+
+
+# Helper function to get blocksize values
+def get_blocksize(data_type: str, blocksize_type: BlocksizeType) -> int:
+    """Get blocksize value using enum index"""
+    if data_type in BLKSZ_MAP:
+        return BLKSZ_MAP[data_type][blocksize_type.value]
+    raise ValueError(f"Data type {data_type} not found in blocksize map")
+
+
+LPGEMM_BLKSZ_MAP_ZEN4 = {
+	"u8s8s32": [144, 1024, 2048, 6, 64, 4, 24, 4*64, 64] ,
+	"f32f32f32": [192, 8064, 512, 6, 64, 1, 6, 64, 1] ,
+	"bf16bf16f32": [144, 1024, 4096, 6, 64, 0, 0, 2*64, 64/2] ,
+	"bf16s4f32": [144, 1024, 4096, 6, 64, 0, 0, 2*64, 64/2] ,
+	"s8s8s32": [144, 1024, 2048, 6, 64, 4, 24, 4*64, 64]
+}
+
+
+LPGEMM_BLKSZ_UPD_MAP_ZEN4_TO_ZEN = {
+	"f32f32f32": [144, 8064, 512, 6, 64, 1, 6, 64, 1]
+}
+
+LPGEMM_BLKSZ_MAP_ZEN = {
+	"u8s8s32": [144, 1024, 2048, 6, 64, 4, 24, 4*64, 64] ,
+	"f32f32f32": [144, 8064, 512, 6, 16, 1, 6, 16, 1] ,
+	"bf16bf16f32": [144, 1024, 4096, 6, 64, 0, 0, 2*64, 64/2] ,
+	"bf16s4f32": [144, 1024, 4096, 6, 64, 0, 0, 2*64, 64/2] ,
+	"s8s8s32": [144, 1024, 2048, 6, 64, 4, 24, 4*64, 64]
+}
+
+
+# Get the environment variable for testcase generation
+GENERATE_TESTCASES_FOR = os.getenv('GENERATE_TESTCASES_FOR', 'zen4').lower()
+
+# Select the appropriate blocksize map based on environment variable
+if GENERATE_TESTCASES_FOR == 'zen4':
+    BLKSZ_MAP = LPGEMM_BLKSZ_MAP_ZEN4
+elif GENERATE_TESTCASES_FOR == 'zen':
+    BLKSZ_MAP = LPGEMM_BLKSZ_MAP_ZEN
+elif GENERATE_TESTCASES_FOR == 'zen4_to_zen':
+    BLKSZ_MAP = LPGEMM_BLKSZ_UPD_MAP_ZEN4_TO_ZEN
+else:
+    raise ValueError(f"Invalid value for GENERATE_TESTCASES_FOR: {GENERATE_TESTCASES_FOR}. Must be one of: zen4, zen, zen4_to_zen")
 
 ops = {
     #In,acc type: [out_types]
     "f32f32f32"   : ["f32"],
-    "bf16bf16f32" : ["f32", "bf16"],
+    #"bf16bf16f32" : ["f32", "bf16"],
     #"bf16s4f32"   : ["f32", "bf16"],
-    "s8s8s32"     : ["s32", "u8", "s8", "bf16", "f32"],
-    "u8s8s32"     : ["s32", "u8", "s8", "bf16", "f32"]
+    # "s8s8s32"     : ["s32", "u8", "s8", "bf16", "f32"],
+    # "u8s8s32"     : ["s32", "u8", "s8", "bf16", "f32"]
 }
-post_ops = ["none", "bias", "relu", "prelu", "clip", "matrix_add", "matrix_mul",
+post_ops = ["none"]#["none", "bias", "relu", "prelu", "clip", "matrix_add", "matrix_mul",
 #            "swish", "gelu_tanh", "gelu_erf", "tanh", "sigmoid",
-            "scale=scalar,zp=scalar", "scale=vector,zp=scalar", "scale=scalar,zp=vector","scale=vector,zp=vector"]
+            #"scale=scalar,zp=scalar", "scale=vector,zp=scalar", "scale=scalar,zp=vector","scale=vector,zp=vector"]
 
 
-ofile = open("accuracy_test_data_lpgemm.txt", "w")
+import sys
 
-for stor in ["r"]:
-    packb_list = ["n", "p"] if stor == "c" else ["n", "p", "r"]
-    for transa in ["n", "t"]:
-        for transb in ["n", "t"]:
-            for packa in ["n"]:
-                for packb in packb_list:
-                    for m in range( 6, 0, -1):
-                        for n in [64, 48, 32, 16, 10, 1]:
-                            for k in [32, 256, 1024]:
-                                if( stor == "c" ):
-                                    stride_a = m if transa == "n" else k
-                                    stride_b = k if transb == "n" else n
-                                    stride_c = m
-                                else:
-                                    stride_a = k if transa == "n" else m
-                                    stride_b = n if transb == "n" else k
-                                    stride_c = n
-                                dims = " ".join([str(m), str(n), str(k), str(stride_a), str(stride_b), str(stride_c)])
-                                chars = " ".join([stor, transa, transb, packa, packb])
-                                for inputtypes in ops:
+if len(sys.argv) != 2:
+    print("Usage: python bench_data_gen_lpgemm.py <output_filename>")
+    sys.exit(1)
+
+output_filename = sys.argv[1]
+ofile = open(output_filename, "w")
+
+
+for inputtypes in ops:
+    for stor in ["r", "c"]:
+        packb_list = ["n", "p"] if stor == "c" else ["n", "p", "r"]
+        for transa in ["n", "t"]:
+            for transb in ["n", "t"]:
+                for packa in ["n"]:
+                    for packb in packb_list:
+                        for m in range(1, (get_blocksize(inputtypes, BlocksizeType.MR) * 2)+ 1):
+                            for n in range(1, get_blocksize(inputtypes, BlocksizeType.NR) * 2  + 1):
+                                for k in [32, 256, get_blocksize(inputtypes, BlocksizeType.KC)]:
+                                    if( stor == "c" ):
+                                        stride_a = m if transa == "n" else k
+                                        stride_b = k if transb == "n" else n
+                                        stride_c = m
+                                    else:
+                                        stride_a = k if transa == "n" else m
+                                        stride_b = n if transb == "n" else k
+                                        stride_c = n
+                                    dims = " ".join([str(m), str(n), str(k), str(stride_a), str(stride_b), str(stride_c)])
+                                    chars = " ".join([stor, transa, transb, packa, packb])
                                     for output_type in ops[inputtypes]:
                                         op = inputtypes + "o" + output_type
                                         for post_op in post_ops:
@@ -57,4 +122,37 @@ for stor in ["r"]:
                                                 else:
                                                     post_op += "=" + output_type
                                             ofile.write(chars + " " + dims + " " + op + ":" + post_op + "\n")
+
+#5 loop testcases
+for inputtypes in ops:
+    for stor in ["r", "c"]:
+        packb_list = ["n", "p"] if stor == "c" else ["n", "p", "r"]
+        for transa in ["n", "t"]:
+            for transb in ["n", "t"]:
+                for packa in ["n"]:
+                    for packb in packb_list:
+                        for m in [ get_blocksize(inputtypes, BlocksizeType.MC) * 2]:
+                            for n in [get_blocksize(inputtypes, BlocksizeType.NC) * 2]:
+                                for k in [get_blocksize(inputtypes, BlocksizeType.KC) * 2]:
+                                    if( stor == "c" ):
+                                        stride_a = m if transa == "n" else k
+                                        stride_b = k if transb == "n" else n
+                                        stride_c = m
+                                    else:
+                                        stride_a = k if transa == "n" else m
+                                        stride_b = n if transb == "n" else k
+                                        stride_c = n
+                                    dims = " ".join([str(m), str(n), str(k), str(stride_a), str(stride_b), str(stride_c)])
+                                    chars = " ".join([stor, transa, transb, packa, packb])
+                                    for output_type in ops[inputtypes]:
+                                        op = inputtypes + "o" + output_type
+                                        for post_op in post_ops:
+                                            if post_op == "bias" or post_op == "matrix_add" or post_op == "matrix_mul":
+                                                if( output_type == "u8"):
+                                                    post_op += "=" + "na"
+                                                else:
+                                                    post_op += "=" + output_type
+                                            ofile.write(chars + " " + dims + " " + op + ":" + post_op + "\n")
+
+
 ofile.close()

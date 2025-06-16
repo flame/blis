@@ -266,7 +266,13 @@ LPGEMV_TINY(float, float, float, f32f32f32of32)
           cs_a_use = 1;
         }
 
-        if ( ( mtag_b == PACK ) )
+        if ( mtag_b == REORDERED )
+        {
+          b_use = ( float* )b;
+          rs_b_use = NR;
+          cs_b_use = 1;
+        }
+        else if ( ( mtag_b == PACK ) )
         {
           dim_t nc0_updated = make_multiple_of_n(n, NR);
           siz_t mem_b_size_req = sizeof(float) * nc0_updated * k;
@@ -287,12 +293,6 @@ LPGEMV_TINY(float, float, float, f32f32f32of32)
           cs_b_use = 1;
 
           b_use = pack_b_buffer_f32f32f32of32;
-        }
-        else if ( mtag_b == REORDERED )
-        {
-          b_use = ( float* )b;
-          rs_b_use = NR;
-          cs_b_use = 1;
         }
         else
         {
@@ -388,7 +388,14 @@ LPGEMM_TINY(float,float,float,f32f32f32of32)
     // Even if the mtag_b is set to PACK, for tiny sizes its better to
     // pack only if it affects output accuracy (like column major B),
     // else ignore it.
-    if ( ( mtag_b == PACK ) )
+    if ( mtag_b == REORDERED )
+    {
+        b_use = b;
+        rs_b_use = NR;
+        cs_b_use = 1;
+        ps_b_use = k;
+    }
+    else if ( ( mtag_b == PACK ) )
     {
         dim_t nc0_updated = make_multiple_of_n( n, NR );
         mem_b_size_req = sizeof( float ) * nc0_updated * k;
@@ -409,13 +416,6 @@ LPGEMM_TINY(float,float,float,f32f32f32of32)
         ps_b_use = k;
 
         b_use = pack_b_buffer_f32f32f32of32;
-    }
-    else if ( mtag_b == REORDERED )
-    {
-        b_use = b;
-        rs_b_use = NR;
-        cs_b_use = 1;
-        ps_b_use = k;
     }
     else
     {

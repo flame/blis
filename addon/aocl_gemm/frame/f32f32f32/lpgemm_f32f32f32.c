@@ -124,6 +124,10 @@ typedef void (*lpgemv_a_pack_ft)
 
 LPGEMV(float, float, float, f32f32f32of32)
 {
+
+  /* Ignoring mtag_a/b and should_pack_A/B for now .
+     Matrices are packed only when the storage format is not supported by the kernel.
+  */
   const float* a_use = (float*)a;
   inc_t rs_a_use = rs_a;
   inc_t cs_a_use = cs_a;
@@ -153,12 +157,6 @@ LPGEMV(float, float, float, f32f32f32of32)
   post_ops_attr.c_stor_type = c_downscale;
   if (c_downscale < F32) post_ops_attr.buf_downscale = c;
   else  post_ops_attr.buf_downscale = NULL;
-
-  // Should_pack_A/B is set either by the user through env variable
-  // or by the smart threading logic based on work distribution.
-  // Storage format of the matrices doesn't affect should_pack_A/B.
-  bool should_pack_B = bli_rntm_pack_b( rntm );
-  bool should_pack_A = bli_rntm_pack_a( rntm );
 
   // Generate thrinfo objects for jc and ic loops from lpgemm_thrinfo_t.
   thrinfo_t thread_jc;
@@ -195,7 +193,7 @@ LPGEMV(float, float, float, f32f32f32of32)
     packa_fp = packa_mr8_f32f32f32of32_col_major;
 #endif
     // Pack B matrix if rs_b > 1
-    if( (should_pack_B == TRUE) || ( rs_b != 1 ) )
+    if( rs_b != 1 )
     {
       mem_b_size_req = sizeof( float ) * k;
 
@@ -233,7 +231,7 @@ LPGEMV(float, float, float, f32f32f32of32)
       post_ops_attr.post_op_c_i = ic;
 
       // To-Do: pack A case needs to be handled for AVX2 case.
-      if( (should_pack_A == TRUE) || ( cs_a != 1 ) )
+      if( cs_a != 1 )
       {
         mem_a_size_req = sizeof(float) * mc0 * k;
         lpgemm_alloc_mem_panel
@@ -264,11 +262,11 @@ LPGEMV(float, float, float, f32f32f32of32)
         &post_ops_attr
       );
     }
-    if ( ( (should_pack_A == TRUE) || ( cs_a != 1 ) ) && ( bli_mem_is_alloc( &mem_a ) ) )
+    if ( ( cs_a != 1 ) && ( bli_mem_is_alloc( &mem_a ) ) )
     {
       bli_pba_release( rntm, &mem_a );
     }
-    if ( ( (should_pack_B == TRUE) || ( rs_b != 1 ) ) && ( bli_mem_is_alloc( &mem_b ) ) )
+    if ( ( rs_b != 1 ) && ( bli_mem_is_alloc( &mem_b ) ) )
     {
       bli_pba_release( rntm, &mem_b );
     }
@@ -300,7 +298,7 @@ LPGEMV(float, float, float, f32f32f32of32)
     thread_jc.work_id = thread->tid;
     bli_thread_range_sub(&thread_jc, n, NR, FALSE, &jc_start, &jc_end);
 
-    if ( (should_pack_A == TRUE) || ( cs_a != 1 ) )
+    if ( cs_a != 1 )
     {
       mem_a_size_req = sizeof( float ) * k;
 
@@ -346,7 +344,7 @@ LPGEMV(float, float, float, f32f32f32of32)
         rs_b_use = NR;
         cs_b_use = 1;
       }
-      else if ( (should_pack_B == TRUE) || ( mtag_b == PACK ) )
+      else if ( mtag_b == PACK )
       {
         // nc0 needs to be a multiple of 16 since this gives maximum
         // vectorization. Packing B always results in buffers with width
@@ -412,12 +410,12 @@ LPGEMV(float, float, float, f32f32f32of32)
     } // jc loop
 
     // Release pack buffers.
-    if ( ( (should_pack_B == TRUE) || ( mtag_b == PACK ) ) && ( bli_mem_is_alloc( &mem_b ) ) )
+    if ( ( mtag_b == PACK ) && ( bli_mem_is_alloc( &mem_b ) ) )
     {
       bli_pba_release( rntm, &mem_b );
     }
 
-    if ( ( (should_pack_A == TRUE) || ( cs_a != 1 ) ) && ( bli_mem_is_alloc( &mem_a ) ) )
+    if ( ( cs_a != 1 ) && ( bli_mem_is_alloc( &mem_a ) ) )
     {
       bli_pba_release( rntm, &mem_a );
     }
@@ -569,7 +567,20 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
             is_last_k = ( ( pc + KC ) >= k ) ? ( TRUE ) : ( FALSE );
             post_ops_attr.is_last_k = is_last_k;
 
-            if ( ( mtag_b == PACK ) || ( should_pack_B == TRUE ) )
+            if ( mtag_b == REORDERED )
+            {
+                // In multi-threaded scenarios, an extra offset into a given
+                // packed B panel is required, since the jc loop split can
+                // result in per thread start offset inside the panel, instead
+                // of panel boundaries.
+                b_use = b + ( jc_cur_loop * k ) +
+                        ( n_sub_updated * pc ) + ( jc_cur_loop_rem * kc0 );
+
+                rs_b_use = NR;
+                cs_b_use = 1;
+                ps_b_use = kc0;
+            }
+            else if ( ( mtag_b == PACK ) || ( should_pack_B == TRUE ) )
             {
                 // Pack B chunks are based on jc work id.
                 dim_t jc_work_id = bli_thread_work_id( &thread_jc );
@@ -648,19 +659,6 @@ LPGEMM_5LOOP(float, float, float, f32f32f32of32)
                   &thread->comm[jc_work_id]
                 );
                 b_use = pack_b_buffer_f32f32f32of32;
-            }
-            else if ( mtag_b == REORDERED )
-            {
-                // In multi-threaded scenarios, an extra offset into a given
-                // packed B panel is required, since the jc loop split can
-                // result in per thread start offset inside the panel, instead
-                // of panel boundaries.
-                b_use = b + ( jc_cur_loop * k ) +
-                        ( n_sub_updated * pc ) + ( jc_cur_loop_rem * kc0 );
-
-                rs_b_use = NR;
-                cs_b_use = 1;
-                ps_b_use = kc0;
             }
             else
             {

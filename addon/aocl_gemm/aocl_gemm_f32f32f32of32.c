@@ -285,10 +285,6 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 		);
 	}
 #else
-	// Setting pack A and B by default for non open mp case.
-	bli_rntm_set_pack_a( 1, &rntm_g );
-	bli_rntm_set_pack_b( 1, &rntm_g );
-
 	// Swapping inputs to induce row major computation for column major inputs.
 	if ( is_column_major == TRUE )
 	{
