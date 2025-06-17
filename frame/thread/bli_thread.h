@@ -243,6 +243,8 @@ BLIS_EXPORT_BLIS void  bli_thread_init_rntm_from_global_rntm( rntm_t* rntm );
 
 BLIS_EXPORT_BLIS void  bli_thread_update_rntm_from_env( rntm_t* rntm );
 
+BLIS_EXPORT_BLIS void bli_thread_reset();
+
 // -----------------------------------------------------------------------------
 
 BLIS_INLINE void bli_thread_range_jrir_rr

@@ -165,3 +165,10 @@ f77_int PASTEF770(bli_info_get_info_value)
 	return f77_info_value;
 }
 
+void PASTEF770(bli_thread_reset)
+     (
+     )
+{
+	// Call the BLIS function.
+	bli_thread_reset();
+}

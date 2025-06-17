@@ -75,6 +75,11 @@ void bli_thread_finalize_tl( void )
 {
 }
 
+void bli_thread_reset( void )
+{
+	bli_thread_init_rntm_from_global_rntm( &tl_rntm );
+}
+
 // -----------------------------------------------------------------------------
 
 void bli_thread_range_sub

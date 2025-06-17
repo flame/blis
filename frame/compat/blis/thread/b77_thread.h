@@ -76,3 +76,7 @@ BLIS_EXPORT_BLAS f77_int PASTEF770(bli_info_get_info_value)
      (
      );
 
+BLIS_EXPORT_BLAS void PASTEF770(bli_thread_reset)
+     (
+     );
+
