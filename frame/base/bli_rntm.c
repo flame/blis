@@ -2784,3 +2784,270 @@ void bli_nthreads_l1f
 
 #endif
 }
+
+/*
+	Functionality:
+	--------------
+
+	This function decides the AOCL dynamic logic for L2 dgemv API based on the
+	architecture ID and size of the input variable.
+
+	Function signature
+	-------------------
+
+	This function takes the following input:
+
+	* 'arch_id' - Architecture ID of the system (copy of BLIS global arch id)
+	* 'm_elem' - Number of rows in the matrix
+	* 'n_elem' - Number of columns in the matrix
+	* 'variant' 	- Transpose / Non-Transpose variant of the kernel
+	* 'nt_ideal' - Ideal number of threads
+
+	Exception
+	----------
+
+	1. For non-Zen architectures, return -1. The expectation is that this is handled
+	   in the higher layer
+*/
+BLIS_INLINE void aocl_dgemv_dynamic
+     (
+       arch_t arch_id,
+       dim_t  m_elem,
+       dim_t  n_elem,
+	   trans_t  variant,
+       dim_t* nt_ideal
+     )
+{
+	// Pick the AOCL dynamic logic based on the
+	// architecture ID
+	dim_t size = n_elem * m_elem;
+
+	// AOCL dynamic logic for transpose case
+	if (variant == BLIS_TRANSPOSE)
+	{
+		switch ( arch_id )
+		{
+			case BLIS_ARCH_ZEN5:
+
+				if ( size <  12000 )
+					*nt_ideal = 1;
+				else if ( size <  27500 )
+					*nt_ideal = 4;
+				else if ( size <  758000 )
+					*nt_ideal = 8;
+				else if ( size <  1580000 )
+					*nt_ideal = 16;
+				else if ( size <  3390000 )
+					*nt_ideal = 32;
+				else if ( size <  10140000 )
+					*nt_ideal = 64;
+				else if ( size <  14600000 )
+					*nt_ideal = 96;
+				else
+					// For sizes in this range, AOCL dynamic does not make any change
+					*nt_ideal = -1;
+				break;
+
+			case BLIS_ARCH_ZEN4:
+
+				if ( size < 11000 )
+					*nt_ideal = 1;
+				else if ( size < 34500 )
+					*nt_ideal = 4;
+				else if ( size < 707000 )
+					*nt_ideal = 8;
+				else if ( size < 1870000 )
+					*nt_ideal = 16;
+				else if ( size < 4800000 )
+					*nt_ideal = 32;
+				else if ( size < 9000000 )
+					*nt_ideal = 64;
+				else
+					// For sizes in this range, AOCL dynamic does not make any change
+					*nt_ideal = -1;
+				break;
+
+			case BLIS_ARCH_ZEN:
+			case BLIS_ARCH_ZEN2:
+			case BLIS_ARCH_ZEN3:
+
+				if ( size < 13000 )
+					*nt_ideal = 1;
+				else if ( size < 17300 )
+					*nt_ideal = 4;
+				else if ( size < 300000 )
+					*nt_ideal = 8;
+				else if ( size < 640000 )
+					*nt_ideal = 16;
+				else if ( size < 1700000 )
+					*nt_ideal = 32;
+				else
+					// For sizes in this range, AOCL dynamic does not make any change
+					*nt_ideal = -1;
+				break;
+
+			default:
+			/*
+				Without this default condition, compiler will throw
+				a warning saying other conditions are not handled
+			*/
+
+			/*
+				For other architectures, AOCL dynamic does not make any change
+			*/
+			*nt_ideal = -1;
+
+		}
+	}
+
+	// AOCL dynamic logic for non-transpose case
+	else
+	{
+		*nt_ideal = -1;
+	}
+
+}
+
+/*
+	Functionality:
+	--------------
+
+	This function does the following:
+
+	1. Reads the number of threads requested by the user from the rntm variable
+	2. Acts as the gateway to the AOCL dynamic logic if AOCL dynamic is enabled
+	   and alters the count of the number of threads accordingly
+
+	Function signature
+	-------------------
+
+	This function takes the following input:
+
+	* 'ker_id' 		- ID of kernel invoking this function
+	* 'datatype' 	- Datatype of kernel
+	* 'variant' 	- Transpose / Non-Transpose variant of the kernel
+	* 'arch_id' 	- Architecture ID of the system (copy of BLIS global arch id)
+	* 'm_elem' 		- Number of row in the matrix
+	* 'n_elem' 		- Number of columns in the matrix
+	* 'nt_ideal' 	- Ideal number of threads
+
+	Exception
+	----------
+
+	None
+*/
+void bli_nthreads_l2
+     (
+       l2kr_t   ker_id,
+       num_t    data_type,
+       trans_t  variant,
+       arch_t   arch_id,
+       dim_t    m_elem,
+       dim_t    n_elem,
+       dim_t*   nt_ideal
+     )
+{
+#ifdef AOCL_DYNAMIC
+	/*
+		This code sections dispatches the AOCL dynamic logic kernel for
+		L2 APIs based on the kernel ID and the data type.
+	*/
+	// Function pointer to AOCL Dynamic logic kernel
+	void (*aocl_dynamic_func_l2)(arch_t, dim_t, dim_t, trans_t, dim_t* ) = NULL;
+
+	// Pick the aocl dynamic thread decision kernel based on the kernel ID
+	switch (ker_id)
+	{
+		case BLIS_GEMV_KER:
+
+			if ( data_type == BLIS_DOUBLE )
+			{
+				// Function for DGEMV
+				aocl_dynamic_func_l2 = aocl_dgemv_dynamic;
+			}
+			else
+			{
+				*nt_ideal = -1;
+			}
+			break;
+
+		default:
+			/*
+				For kernels that do no have AOCL dynamic logic,
+				use the number of threads requested by the user.
+			*/
+			*nt_ideal = -1;
+	}
+
+	/*
+		For APIs that do not have AOCL dynamic
+		logic, aocl_dynamic_func_l2 will be NULL.
+	*/
+	if( aocl_dynamic_func_l2 != NULL)
+	{
+		// Call the AOCL dynamic logic kernel
+		aocl_dynamic_func_l2
+		(
+			arch_id,
+			m_elem,
+			n_elem,
+			variant,
+			nt_ideal
+		);
+
+		if (*nt_ideal == 1)
+		{
+			// Return early when the number of threads is 1
+			return;
+		}
+	}
+
+#endif
+	// Initialized to avoid compiler warning
+	rntm_t rntm_local;
+
+	// Initialize a local runtime with global settings.
+	bli_rntm_init_from_global(&rntm_local);
+
+	// Query the total number of threads from the rntm_t object.
+	dim_t nt_rntm = bli_rntm_num_threads(&rntm_local);
+
+	if (nt_rntm <= 0)
+	{
+		// nt is less than one if BLIS manual setting of parallelism
+		// has been used. Parallelism here will be product of values.
+		nt_rntm = bli_rntm_calc_num_threads(&rntm_local);
+	}
+
+#ifdef AOCL_DYNAMIC
+
+	// Calculate the actual number of threads that will be spawned
+	if (*nt_ideal != -1)
+	{
+		// The if block is executed for all Zen architectures
+		*nt_ideal = bli_min(nt_rntm, *nt_ideal);
+	}
+	else
+	{
+		/*
+			For non-Zen architectures and very large sizes,
+			spawn the actual number of threads requested
+		*/
+		*nt_ideal = nt_rntm;
+	}
+
+	/*
+	  When the number of element to be processed is less
+	  than the number of threads spawn n_elem number of threads.
+	*/
+	if (n_elem < *nt_ideal)
+	{
+		*nt_ideal = n_elem;
+	}
+#else
+
+	// Calculate the actual number of threads that will be spawned
+	*nt_ideal = nt_rntm;
+
+#endif
+}

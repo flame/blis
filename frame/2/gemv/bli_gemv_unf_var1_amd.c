@@ -216,30 +216,12 @@ void bli_dgemv_unf_var1
     inc_t lda = cs_a, inca = rs_a;
     conj_t conja;
 
+    double *a_buf = a;
     double *x_buf = x;
     double *y_buf = y;
 
     inc_t buf_incx = incx;
     inc_t buf_incy = incy;
-
-    // 'bli_dgemv_unf_var1' is dot-based kernel. This kernel is called for the following cases:
-    //
-    // When op(A) = n and row-storage( lda = rs_a ), we compute dot product as y[i] = <A(i,:), x>, i = 0:m-1.
-    // gemv dot kernel always computes dot-product along the columns of A, we interchange m and n. Here m0 = n, n0 = m.
-    //
-    // op(A) = n   ->     lda  = rs_a;
-    //                    inca = cs_a;
-    //                    m0   = n;
-    //                    n0   = m;
-    //
-    // when op(A) = t and col-storage( lda = cs_a ), we compute dot product as y[i] = <A(:, i), x>, i = 0:n-1. Anyways
-    // the kernel computes dot along the columns of A, we don't interchange m & n, so here m0 = m and n0 = n.
-    //
-    // op(A) = t   ->     lda  = cs_a;
-    //                    inca = rs_a;
-    //                    m0   = m;
-    //                    n0   = n;
-    //
 
     // Invoking the reference kernel to handle general stride.
     if ( ( rs_a != 1 ) && ( cs_a != 1 ) )
@@ -261,10 +243,29 @@ void bli_dgemv_unf_var1
         return;
     }
 
+    // 'bli_dgemv_unf_var1' is dot-based kernel. This kernel is called for the following cases:
+    //
+    // When op(A) = n and row-storage( lda = rs_a ), we compute dot product as y[i] = <A(i,:), x>, i = 0:m-1.
+    // gemv dot kernel always computes dot-product along the columns of A, we interchange m and n. Here m0 = n, n0 = m.
+    //
+    // op(A) = n   ->     lda  = rs_a;
+    //                    inca = cs_a;
+    //                    m0   = n;
+    //                    n0   = m;
+    //
+    // when op(A) = t and col-storage( lda = cs_a ), we compute dot product as y[i] = <A(:, i), x>, i = 0:n-1. Anyways
+    // the kernel computes dot along the columns of A, we don't interchange m & n, so here m0 = m and n0 = n.
+    //
+    // op(A) = t   ->     lda  = cs_a;
+    //                    inca = rs_a;
+    //                    m0   = m;
+    //                    n0   = n;
+    //
     bli_set_dims_incs_with_trans(transa,
                                 m, n, rs_a, cs_a,
                                 &n0, &m0, &lda, &inca);
 
+    // Extract the conjugation from transa.
     conja = bli_extract_conj(transa);
 
     //memory pool declarations for packing vector X and Y.
@@ -288,21 +289,34 @@ void bli_dgemv_unf_var1
     */
     arch_t id = bli_arch_query_id();
 
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
+    // Setting the threshold to invoke the fast-path
+    // The fast-path is intended to directly call the kernel
+    // in case the criteria for single threaded execution is met.
+    dim_t fast_path_thresh = 0;
+#endif
+
     switch (id)
     {
       case BLIS_ARCH_ZEN5:
 #if defined(BLIS_KERNELS_ZEN5)
-      gemv_kr_ptr   = bli_dgemv_t_zen_int_avx512;
+      gemv_kr_ptr   = bli_dgemv_t_zen4_int;     // DGEMV
       scalv_kr_ptr  = bli_dscalv_zen_int_avx512;      // DSCALV
       copyv_kr_ptr  = bli_dcopyv_zen5_asm_avx512;     // DCOPYV
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
+      fast_path_thresh = 12000;
+#endif
       break;
 #endif
       case BLIS_ARCH_ZEN4:
 
 #if defined(BLIS_KERNELS_ZEN4)
-        gemv_kr_ptr   = bli_dgemv_t_zen_int_avx512;
+        gemv_kr_ptr   = bli_dgemv_t_zen4_int;     // DGEMV
         scalv_kr_ptr  = bli_dscalv_zen_int_avx512;      // DSCALV
         copyv_kr_ptr  = bli_dcopyv_zen4_asm_avx512;     // DCOPYV
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
+        fast_path_thresh = 11000;
+#endif
         break;
 #endif
 
@@ -310,9 +324,12 @@ void bli_dgemv_unf_var1
       case BLIS_ARCH_ZEN2:
       case BLIS_ARCH_ZEN3:
 
-        gemv_kr_ptr = bli_dgemv_t_zen_int_avx2;
+        gemv_kr_ptr   = bli_dgemv_t_zen_int;       // DGEMV
         scalv_kr_ptr  = bli_dscalv_zen_int;             // DSCALV
         copyv_kr_ptr  = bli_dcopyv_zen_int;             // DCOPYV
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
+          fast_path_thresh = 13000;
+#endif
         break;
 
       default:
@@ -329,20 +346,22 @@ void bli_dgemv_unf_var1
 
         PASTECH(d,dotxf_ker_ft) kfp_df;
 
-        // Query the context for the kernel function pointer and fusing factor.
+        // Query the context for the ddotxf kernel function pointer and fusing factor.
         kfp_df = bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx );
-
         dim_t b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_DF, cntx );
 
+        // 
         for ( i = 0; i < n0; i += f )
         {
+            // Determine the blocksize for the current iteration.
             f  = bli_determine_blocksize_dim_f( i, n0, b_fuse );
 
-            A1 = a + ( i * lda ) + ( 0 * inca );
+            // Calculate the pointers to the current block of A, x, and y.
+            A1 = a_buf + ( i * lda ) + ( 0 * inca );
             x1 = x_buf;
-            y1 = y + ( i * incy );
+            y1 = y_buf + ( i * incy );
 
-            // y1 = beta * y1 + alpha * A1 * x;
+            // kfp_df is a function pointer to the dotxf kernel
             kfp_df
             (
                 conja,
@@ -415,7 +434,7 @@ void bli_dgemv_unf_var1
             // Using unit-stride for y_temp vector.
             buf_incy = 1;
 
-            // Invoke the SCAL2V function using the function pointer.
+            // Invoke the COPYV function using the function pointer.
             copyv_kr_ptr
             (
               BLIS_NO_CONJUGATE,
@@ -493,6 +512,7 @@ void bli_dgemv_unf_var1
             // stride of vector x_buf =1
             buf_incx = 1;
 
+            // Invoke the COPYV function using the function pointer.
             copyv_kr_ptr
             (
                 BLIS_NO_CONJUGATE,
@@ -502,27 +522,120 @@ void bli_dgemv_unf_var1
                 cntx
             );
 
+            // Set x is packed as the memory allocation was successful
+            // and contents have been copied to a temp buffer.
             is_x_temp_buf_created = TRUE;
         }
     }
 
-    // Calling the selected kernel for the API
+    // If the increments of x and y are unit stride, we can use the
+    // optimized kernel path. The optimized kernel does not support
+    // non-unit stride for x and y.
     if ( buf_incx == 1 && buf_incy == 1 )
     {
-      gemv_kr_ptr
-      (
-          conja,
-          conjx,
-          m0,
-          n0,
-          alpha,
-          a, inca, lda,
-          x_buf, buf_incx,
-          beta,
-          y_buf, buf_incy,
-          cntx
-      );
+#if defined(BLIS_ENABLE_OPENMP)
+      // If the problem size is small, we can use a fast-path to avoid
+      // the overhead of threading.
+      if ( ((n0 * m0) <= fast_path_thresh) || ((n0 < 100) && (m0 < 100)) )
+      {
+#endif
+        // Call the DGEMV kernel directly with the packed buffers.
+        gemv_kr_ptr
+        (
+            conja,
+            conjx,
+            m0,
+            n0,
+            alpha,
+            a_buf, inca, lda,
+            x_buf, buf_incx,
+            beta,
+            y_buf, buf_incy,
+            cntx
+        );
+
+#if defined(BLIS_ENABLE_OPENMP)
+      }
+      else
+      {
+        // Initializing nt as 1 to avoid compiler warnings
+        dim_t nt = 1;
+
+        /*
+        For the given problem size and architecture, the function
+        returns the optimum number of threads with AOCL dynamic enabled
+        else it returns the number of threads requested by the user.
+        */
+
+        bli_nthreads_l2
+        (
+            BLIS_GEMV_KER,
+            BLIS_DOUBLE,
+            BLIS_TRANSPOSE,
+            id,
+            n0,
+            m0,
+            &nt
+        );
+
+        _Pragma("omp parallel num_threads(nt)")
+        {
+          dim_t start, end;
+          thrinfo_t thread;
+
+          // The factor by which the size should be a multiple during thread partition.
+          // The main loop of the kernel can handle 8 elements at a time hence 8 is selected for block_size.
+          dim_t block_size = 8;
+
+          // Get the thread ID
+          bli_thrinfo_set_work_id( omp_get_thread_num(), &thread );
+
+          // Get the actual number of threads spawned
+          bli_thrinfo_set_n_way( omp_get_num_threads(), &thread );
+
+          /*
+          Calculate the compute range (start and end) for the current thread
+          based on the actual number of threads spawned
+          */
+
+          bli_thread_range_sub
+          (
+              &thread,
+              n0,
+              block_size,
+              FALSE,
+              &start,
+              &end
+          );
+
+          // Calculating the value of n for the particular thread
+          dim_t n_thread_local = end - start;
+
+          // Calculating thread specific pointers
+          double *a_thread_local = a_buf + (start * lda);
+          double *y_thread_local = y_buf + start;
+          double *x_thread_local = x_buf;
+
+          // Call the DGEMV kernel with the thread-local pointers.
+          gemv_kr_ptr
+          (
+              conja,
+              conjx,
+              m0,
+              n_thread_local,
+              alpha,
+              a_thread_local, inca, lda,
+              x_thread_local, buf_incx,
+              beta,
+              y_thread_local, buf_incy,
+              cntx
+          );
+        }
+      }
+#endif
     }
+
+    // If the increments of x and y are not unit stride, we call the reference kernel.
     else
     {
       bli_dgemv_zen_ref

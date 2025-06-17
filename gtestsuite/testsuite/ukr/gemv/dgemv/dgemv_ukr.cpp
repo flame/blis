@@ -112,12 +112,12 @@ TEST_P( dgemvGeneric, UKR )
 
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 // Unit-tests
-#ifdef K_bli_dgemv_t_zen_int_avx2
+#ifdef K_bli_dgemv_t_zen_int
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_primary_zen,
     dgemvGeneric,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_t_zen_int_avx2),
+        ::testing::Values(bli_dgemv_t_zen_int),
         ::testing::Values('c'),                                         // storage format
         ::testing::Values('t'),                                         // transa
         ::testing::Values('n'),                                         // conjx
@@ -133,7 +133,7 @@ INSTANTIATE_TEST_SUITE_P(
                            gtint_t(95)),                                // 5 * L16 + L8 + L4 + Lfringe
         ::testing::Range( gtint_t(1), gtint_t(16), gtint_t(1)),         // n
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
-        ::testing::Values( double(0.0), double(1.0), double(2.0)),                               // beta
+        ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x (non-unit incx is handled by frame)
         ::testing::Values(gtint_t(1)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
@@ -143,12 +143,12 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_dgemv_t_zen_int_16x7m_avx2
+#ifdef K_bli_dgemv_t_zen_int_16x7m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx7_zen,
     dgemvGeneric,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_t_zen_int_16x7m_avx2),
+        ::testing::Values(bli_dgemv_t_zen_int_16x7m),
         ::testing::Values('c'),                                         // storage format
         ::testing::Values('t'),                                         // transa
         ::testing::Values('n'),                                         // conjx
@@ -164,7 +164,7 @@ INSTANTIATE_TEST_SUITE_P(
                            gtint_t(95)),                                // 5 * L16 + L8 + L4 + Lfringe
         ::testing::Values( gtint_t(7)),                                 // n
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
-        ::testing::Values( double(0.0), double(1.0), double(2.0)),                               // beta
+        ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
         ::testing::Values(gtint_t(1)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
@@ -174,12 +174,12 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_dgemv_t_zen_int_16x6m_avx2
+#ifdef K_bli_dgemv_t_zen_int_16x6m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx6_zen,
     dgemvGeneric,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_t_zen_int_16x6m_avx2),
+        ::testing::Values(bli_dgemv_t_zen_int_16x6m),
         ::testing::Values('c'),                                         // storage format
         ::testing::Values('t'),                                         // transa
         ::testing::Values('n'),                                         // conjx
@@ -195,7 +195,7 @@ INSTANTIATE_TEST_SUITE_P(
                            gtint_t(95)),                                // 5 * L16 + L8 + L4 + Lfringe
         ::testing::Values( gtint_t(6)),                                 // n
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
-        ::testing::Values( double(0.0), double(1.0), double(2.0)),                               // beta
+        ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
         ::testing::Values(gtint_t(1)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
@@ -205,12 +205,12 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_dgemv_t_zen_int_16x5m_avx2
+#ifdef K_bli_dgemv_t_zen_int_16x5m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx5_zen,
     dgemvGeneric,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_t_zen_int_16x5m_avx2),
+        ::testing::Values(bli_dgemv_t_zen_int_16x5m),
         ::testing::Values('c'),                                         // storage format
         ::testing::Values('t'),                                         // transa
         ::testing::Values('n'),                                         // conjx
@@ -226,7 +226,7 @@ INSTANTIATE_TEST_SUITE_P(
                            gtint_t(95)),                                // 5 * L16 + L8 + L4 + Lfringe
         ::testing::Values( gtint_t(5)),                                 // n
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
-        ::testing::Values( double(0.0), double(1.0), double(2.0)),                               // beta
+        ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
         ::testing::Values(gtint_t(1)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
@@ -236,12 +236,12 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_dgemv_t_zen_int_16x4m_avx2
+#ifdef K_bli_dgemv_t_zen_int_16x4m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx4_zen,
     dgemvGeneric,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_t_zen_int_16x4m_avx2),
+        ::testing::Values(bli_dgemv_t_zen_int_16x4m),
         ::testing::Values('c'),                                         // storage format
         ::testing::Values('t'),                                         // transa
         ::testing::Values('n'),                                         // conjx
@@ -257,7 +257,7 @@ INSTANTIATE_TEST_SUITE_P(
                            gtint_t(95)),                                // 5 * L16 + L8 + L4 + Lfringe
         ::testing::Values( gtint_t(4)),                                 // n
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
-        ::testing::Values( double(0.0), double(1.0), double(2.0)),                               // beta
+        ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
         ::testing::Values(gtint_t(1)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
@@ -267,12 +267,12 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_dgemv_t_zen_int_16x3m_avx2
+#ifdef K_bli_dgemv_t_zen_int_16x3m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx3_zen,
     dgemvGeneric,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_t_zen_int_16x3m_avx2),
+        ::testing::Values(bli_dgemv_t_zen_int_16x3m),
         ::testing::Values('c'),                                         // storage format
         ::testing::Values('t'),                                         // transa
         ::testing::Values('n'),                                         // conjx
@@ -288,7 +288,7 @@ INSTANTIATE_TEST_SUITE_P(
                            gtint_t(95)),                                // 5 * L16 + L8 + L4 + Lfringe
         ::testing::Values( gtint_t(3)),                                 // n
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
-        ::testing::Values( double(0.0), double(1.0), double(2.0)),                               // beta
+        ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
         ::testing::Values(gtint_t(1)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
@@ -298,12 +298,12 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_dgemv_t_zen_int_16x2m_avx2
+#ifdef K_bli_dgemv_t_zen_int_16x2m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx2_zen,
     dgemvGeneric,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_t_zen_int_16x2m_avx2),
+        ::testing::Values(bli_dgemv_t_zen_int_16x2m),
         ::testing::Values('c'),                                         // storage format
         ::testing::Values('t'),                                         // transa
         ::testing::Values('n'),                                         // conjx
@@ -319,7 +319,7 @@ INSTANTIATE_TEST_SUITE_P(
                            gtint_t(95)),                                // 5 * L16 + L8 + L4 + Lfringe
         ::testing::Values( gtint_t(2)),                                 // n
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
-        ::testing::Values( double(0.0), double(1.0), double(2.0)),                               // beta
+        ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
         ::testing::Values(gtint_t(1)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
@@ -329,12 +329,12 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_dgemv_t_zen_int_16x1m_avx2
+#ifdef K_bli_dgemv_t_zen_int_16x1m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx1_zen,
     dgemvGeneric,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_t_zen_int_16x1m_avx2),
+        ::testing::Values(bli_dgemv_t_zen_int_16x1m),
         ::testing::Values('c'),                                         // storage format
         ::testing::Values('t'),                                         // transa
         ::testing::Values('n'),                                         // conjx
@@ -350,7 +350,7 @@ INSTANTIATE_TEST_SUITE_P(
                            gtint_t(95)),                                // 5 * L16 + L8 + L4 + Lfringe
         ::testing::Values( gtint_t(1)),                                 // n
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
-        ::testing::Values( double(0.0), double(1.0), double(2.0)),                               // beta
+        ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
         ::testing::Values(gtint_t(1)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
@@ -363,12 +363,12 @@ INSTANTIATE_TEST_SUITE_P(
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 // Unit-tests
-#ifdef K_bli_dgemv_t_zen_int_avx512
+#ifdef K_bli_dgemv_t_zen4_int
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_primary_zen4,
     dgemvGeneric,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_t_zen_int_avx512),
+        ::testing::Values(bli_dgemv_t_zen4_int),
         ::testing::Values('c'),                                         // storage format
         ::testing::Values('t'),                                         // transa
         ::testing::Values('n'),                                         // conjx
@@ -384,7 +384,7 @@ INSTANTIATE_TEST_SUITE_P(
                            gtint_t(191)),                               // 5 * L32 + L16 + L8 + Lfringe
         ::testing::Range( gtint_t(1), gtint_t(16), gtint_t(1)),         // n
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
-        ::testing::Values( double(0.0), double(1.0), double(2.0)),                               // beta
+        ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x (non-unit incx is handled by frame)
         ::testing::Values(gtint_t(1)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
@@ -394,12 +394,12 @@ INSTANTIATE_TEST_SUITE_P(
 );
 #endif
 
-#ifdef K_bli_dgemv_t_zen_int_32x7m_avx512
+#ifdef K_bli_dgemv_t_zen4_int_32x7m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx7_zen4,
     dgemvGeneric,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_t_zen_int_32x7m_avx512),
+        ::testing::Values(bli_dgemv_t_zen4_int_32x7m),
         ::testing::Values('c'),                                         // storage format
         ::testing::Values('t'),                                         // transa
         ::testing::Values('n'),                                         // conjx
@@ -415,7 +415,7 @@ INSTANTIATE_TEST_SUITE_P(
                            gtint_t(191)),                               // 5 * L32 + L16 + L8 + Lfringe
         ::testing::Values( gtint_t(7)),                                 // n
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
-        ::testing::Values( double(0.0), double(1.0), double(2.0)),                               // beta
+        ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
         ::testing::Values(gtint_t(1)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
@@ -425,12 +425,12 @@ INSTANTIATE_TEST_SUITE_P(
 );
 #endif
 
-#ifdef K_bli_dgemv_t_zen_int_32x6m_avx512
+#ifdef K_bli_dgemv_t_zen4_int_32x6m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx6_zen4,
     dgemvGeneric,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_t_zen_int_32x6m_avx512),
+        ::testing::Values(bli_dgemv_t_zen4_int_32x6m),
         ::testing::Values('c'),                                         // storage format
         ::testing::Values('t'),                                         // transa
         ::testing::Values('n'),                                         // conjx
@@ -446,7 +446,7 @@ INSTANTIATE_TEST_SUITE_P(
                            gtint_t(191)),                               // 5 * L32 + L16 + L8 + Lfringe
         ::testing::Values( gtint_t(6)),                                 // n
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
-        ::testing::Values( double(0.0), double(1.0), double(2.0)),                               // beta
+        ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
         ::testing::Values(gtint_t(1)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
@@ -456,12 +456,12 @@ INSTANTIATE_TEST_SUITE_P(
 );
 #endif
 
-#ifdef K_bli_dgemv_t_zen_int_32x5m_avx512
+#ifdef K_bli_dgemv_t_zen4_int_32x5m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx5_zen4,
     dgemvGeneric,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_t_zen_int_32x5m_avx512),
+        ::testing::Values(bli_dgemv_t_zen4_int_32x5m),
         ::testing::Values('c'),                                         // storage format
         ::testing::Values('t'),                                         // transa
         ::testing::Values('n'),                                         // conjx
@@ -477,7 +477,7 @@ INSTANTIATE_TEST_SUITE_P(
                            gtint_t(191)),                               // 5 * L32 + L16 + L8 + Lfringe
         ::testing::Values( gtint_t(5)),                                 // n
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
-        ::testing::Values( double(0.0), double(1.0), double(2.0)),                               // beta
+        ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
         ::testing::Values(gtint_t(1)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
@@ -487,12 +487,12 @@ INSTANTIATE_TEST_SUITE_P(
 );
 #endif
 
-#ifdef K_bli_dgemv_t_zen_int_32x4m_avx512
+#ifdef K_bli_dgemv_t_zen4_int_32x4m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx4_zen4,
     dgemvGeneric,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_t_zen_int_32x4m_avx512),
+        ::testing::Values(bli_dgemv_t_zen4_int_32x4m),
         ::testing::Values('c'),                                         // storage format
         ::testing::Values('t'),                                         // transa
         ::testing::Values('n'),                                         // conjx
@@ -508,7 +508,7 @@ INSTANTIATE_TEST_SUITE_P(
                            gtint_t(191)),                               // 5 * L32 + L16 + L8 + Lfringe
         ::testing::Values( gtint_t(4)),                                 // n
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
-        ::testing::Values( double(0.0), double(1.0), double(2.0)),                               // beta
+        ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
         ::testing::Values(gtint_t(1)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
@@ -518,12 +518,12 @@ INSTANTIATE_TEST_SUITE_P(
 );
 #endif
 
-#ifdef K_bli_dgemv_t_zen_int_32x3m_avx512
+#ifdef K_bli_dgemv_t_zen4_int_32x3m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx3_zen4,
     dgemvGeneric,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_t_zen_int_32x3m_avx512),
+        ::testing::Values(bli_dgemv_t_zen4_int_32x3m),
         ::testing::Values('c'),                                         // storage format
         ::testing::Values('t'),                                         // transa
         ::testing::Values('n'),                                         // conjx
@@ -539,7 +539,7 @@ INSTANTIATE_TEST_SUITE_P(
                            gtint_t(191)),                               // 5 * L32 + L16 + L8 + Lfringe
         ::testing::Values( gtint_t(3)),                                 // n
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
-        ::testing::Values( double(0.0), double(1.0), double(2.0)),                               // beta
+        ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
         ::testing::Values(gtint_t(1)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
@@ -549,12 +549,12 @@ INSTANTIATE_TEST_SUITE_P(
 );
 #endif
 
-#ifdef K_bli_dgemv_t_zen_int_32x2m_avx512
+#ifdef K_bli_dgemv_t_zen4_int_32x2m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx2_zen4,
     dgemvGeneric,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_t_zen_int_32x2m_avx512),
+        ::testing::Values(bli_dgemv_t_zen4_int_32x2m),
         ::testing::Values('c'),                                         // storage format
         ::testing::Values('t'),                                         // transa
         ::testing::Values('n'),                                         // conjx
@@ -570,7 +570,7 @@ INSTANTIATE_TEST_SUITE_P(
                            gtint_t(191)),                               // 5 * L32 + L16 + L8 + Lfringe
         ::testing::Values( gtint_t(2)),                                 // n
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
-        ::testing::Values( double(0.0), double(1.0), double(2.0)),                               // beta
+        ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
         ::testing::Values(gtint_t(1)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
@@ -580,12 +580,12 @@ INSTANTIATE_TEST_SUITE_P(
 );
 #endif
 
-#ifdef K_bli_dgemv_t_zen_int_32x1m_avx512
+#ifdef K_bli_dgemv_t_zen4_int_32x1m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx1_zen4,
     dgemvGeneric,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_t_zen_int_32x1m_avx512),
+        ::testing::Values(bli_dgemv_t_zen4_int_32x1m),
         ::testing::Values('c'),                                         // storage format
         ::testing::Values('t'),                                         // transa
         ::testing::Values('n'),                                         // conjx
@@ -601,7 +601,7 @@ INSTANTIATE_TEST_SUITE_P(
                            gtint_t(191)),                               // 5 * L32 + L16 + L8 + Lfringe
         ::testing::Values( gtint_t(1)),                                 // n
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
-        ::testing::Values( double(0.0), double(1.0), double(2.0)),                               // beta
+        ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
         ::testing::Values(gtint_t(1)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a

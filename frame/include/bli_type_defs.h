@@ -668,6 +668,13 @@ typedef enum
 
 #define BLIS_NUM_LEVEL1F_KERS 5
 
+typedef enum
+{
+	BLIS_GEMV_KER = 0,
+	BLIS_TRSV_KER
+} l2kr_t;
+
+#define BLIS_NUM_LEVEL2_KERS 2
 
 typedef enum
 {
