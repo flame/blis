@@ -684,6 +684,9 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32_avx512_256 )
 		__m256 scl_fctr7 = _mm256_setzero_ps();
 		__m256 scl_fctr8 = _mm256_setzero_ps();
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+          ( ( post_ops_list_temp->stor_type == NONE ) &&
+            ( post_ops_attr.c_stor_type == BF16 ) );
 
 		// Even though different registers are used for scalar in column and
 		// row major case, all those registers will contain the same value.
@@ -746,65 +749,93 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32_avx512_256 )
 							post_ops_attr.post_op_c_j + ( 7 * 8 ), k8 );
 			}
 		}
-
-		float* matptr = ( float* )post_ops_list_temp->op_args1;
-
-		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
-				( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
-		{
-			selector1 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j ), k1 );
-			selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
-			selector2 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 8 ), k2 );
-			selector2 = _mm256_mul_ps( selector2, scl_fctr2 );
-			selector3 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 16 ), k3 );
-			selector3 = _mm256_mul_ps( selector3, scl_fctr3 );
-			selector4 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 24 ), k4 );
-			selector4 = _mm256_mul_ps( selector4, scl_fctr4 );
-			selector5 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 32 ) , k5 );
-			selector5 = _mm256_mul_ps( selector5, scl_fctr5 );
-			selector6 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 40 ), k6 );
-			selector6 = _mm256_mul_ps( selector6, scl_fctr6 );
-			selector7 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 48 ), k7 );
-			selector7 = _mm256_mul_ps( selector7, scl_fctr7 );
-			selector8 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 56 ), k8 );
-			selector8 = _mm256_mul_ps( selector8, scl_fctr8 );
+		if ( is_bf16 == TRUE )
+        {
+			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
+			if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+					( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+			{
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector1,scl_fctr1,0)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector2,scl_fctr2,1)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector3,scl_fctr3,2)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector4,scl_fctr4,3)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector5,scl_fctr5,4)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector6,scl_fctr6,5)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector7,scl_fctr7,6)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector8,scl_fctr8,7)
+			}
+			else
+			{
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector1,scl_fctr1,0)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector2,scl_fctr1,1)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector3,scl_fctr1,2)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector4,scl_fctr1,3)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector5,scl_fctr1,4)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector6,scl_fctr1,5)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector7,scl_fctr1,6)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector8,scl_fctr1,7)
+			}
 		}
 		else
 		{
-			selector1 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j ), k1 );
-			selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
-			selector2 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 8 ), k2 );
-			selector2 = _mm256_mul_ps( selector2, scl_fctr1 );
-			selector3 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 16 ), k3 );
-			selector3 = _mm256_mul_ps( selector3, scl_fctr1 );
-			selector4 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 24 ), k4 );
-			selector4 = _mm256_mul_ps( selector4, scl_fctr1 );
-			selector5 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 32 ) , k5 );
-			selector5 = _mm256_mul_ps( selector5, scl_fctr1 );
-			selector6 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 40 ), k6 );
-			selector6 = _mm256_mul_ps( selector6, scl_fctr1 );
-			selector7 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 48 ), k7 );
-			selector7 = _mm256_mul_ps( selector7, scl_fctr1 );
-			selector8 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 56 ), k8 );
-			selector8 = _mm256_mul_ps( selector8, scl_fctr1 );
-		}
+			float* matptr = ( float* )post_ops_list_temp->op_args1;
 
+			if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+					( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+			{
+				selector1 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j ), k1 );
+				selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
+				selector2 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 8 ), k2 );
+				selector2 = _mm256_mul_ps( selector2, scl_fctr2 );
+				selector3 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 16 ), k3 );
+				selector3 = _mm256_mul_ps( selector3, scl_fctr3 );
+				selector4 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 24 ), k4 );
+				selector4 = _mm256_mul_ps( selector4, scl_fctr4 );
+				selector5 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 32 ) , k5 );
+				selector5 = _mm256_mul_ps( selector5, scl_fctr5 );
+				selector6 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 40 ), k6 );
+				selector6 = _mm256_mul_ps( selector6, scl_fctr6 );
+				selector7 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 48 ), k7 );
+				selector7 = _mm256_mul_ps( selector7, scl_fctr7 );
+				selector8 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 56 ), k8 );
+				selector8 = _mm256_mul_ps( selector8, scl_fctr8 );
+			}
+			else
+			{
+				selector1 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j ), k1 );
+				selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
+				selector2 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 8 ), k2 );
+				selector2 = _mm256_mul_ps( selector2, scl_fctr1 );
+				selector3 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 16 ), k3 );
+				selector3 = _mm256_mul_ps( selector3, scl_fctr1 );
+				selector4 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 24 ), k4 );
+				selector4 = _mm256_mul_ps( selector4, scl_fctr1 );
+				selector5 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 32 ) , k5 );
+				selector5 = _mm256_mul_ps( selector5, scl_fctr1 );
+				selector6 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 40 ), k6 );
+				selector6 = _mm256_mul_ps( selector6, scl_fctr1 );
+				selector7 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 48 ), k7 );
+				selector7 = _mm256_mul_ps( selector7, scl_fctr1 );
+				selector8 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 56 ), k8 );
+				selector8 = _mm256_mul_ps( selector8, scl_fctr1 );
+			}
+		}
 		ymm16 = _mm256_add_ps( selector1, ymm16 );
 		ymm18 = _mm256_add_ps( selector2, ymm18 );
 		ymm20 = _mm256_add_ps( selector3, ymm20 );
@@ -837,6 +868,10 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32_avx512_256 )
 		__m256 scl_fctr7 = _mm256_setzero_ps();
 		__m256 scl_fctr8 = _mm256_setzero_ps();
 
+		bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+          ( ( post_ops_list_temp->stor_type == NONE ) &&
+            ( post_ops_attr.c_stor_type == BF16 ) );
+
 		// Even though different registers are used for scalar in column and
 		// row major case, all those registers will contain the same value.
 		// For column major, if m==1, then it means n=1 and scale_factor_len=1.
@@ -898,63 +933,93 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32_avx512_256 )
 							post_ops_attr.post_op_c_j + ( 7 * 8 ), k8 );
 			}
 		}
-
-		float* matptr = ( float* )post_ops_list_temp->op_args1;
-
-		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
-				( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		if ( is_bf16 == TRUE )
 		{
-			selector1 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j ), k1 );
-			selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
-			selector2 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 8 ), k2 );
-			selector2 = _mm256_mul_ps( selector2, scl_fctr2 );
-			selector3 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 16 ), k3 );
-			selector3 = _mm256_mul_ps( selector3, scl_fctr3 );
-			selector4 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 24 ), k4 );
-			selector4 = _mm256_mul_ps( selector4, scl_fctr4 );
-			selector5 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 32 ) , k5 );
-			selector5 = _mm256_mul_ps( selector5, scl_fctr5 );
-			selector6 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 40 ), k6 );
-			selector6 = _mm256_mul_ps( selector6, scl_fctr6 );
-			selector7 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 48 ), k7 );
-			selector7 = _mm256_mul_ps( selector7, scl_fctr7 );
-			selector8 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 56 ), k8 );
-			selector8 = _mm256_mul_ps( selector8, scl_fctr8 );
+			bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1; \
+
+			if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+					( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+			{
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector1,scl_fctr1,0)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector2,scl_fctr2,1)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector3,scl_fctr3,2)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector4,scl_fctr4,3)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector5,scl_fctr5,4)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector6,scl_fctr6,5)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector7,scl_fctr7,6)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector8,scl_fctr8,7)
+			}
+			else
+			{
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector1,scl_fctr1,0)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector2,scl_fctr1,1)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector3,scl_fctr1,2)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector4,scl_fctr1,3)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector5,scl_fctr1,4)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector6,scl_fctr1,5)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector7,scl_fctr1,6)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector8,scl_fctr1,7)
+			}
 		}
 		else
 		{
-			selector1 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j ), k1 );
-			selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
-			selector2 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 8 ), k2 );
-			selector2 = _mm256_mul_ps( selector2, scl_fctr1 );
-			selector3 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 16 ), k3 );
-			selector3 = _mm256_mul_ps( selector3, scl_fctr1 );
-			selector4 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 24 ), k4 );
-			selector4 = _mm256_mul_ps( selector4, scl_fctr1 );
-			selector5 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 32 ) , k5 );
-			selector5 = _mm256_mul_ps( selector5, scl_fctr1 );
-			selector6 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 40 ), k6 );
-			selector6 = _mm256_mul_ps( selector6, scl_fctr1 );
-			selector7 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 48 ), k7 );
-			selector7 = _mm256_mul_ps( selector7, scl_fctr1 );
-			selector8 =
-				_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 56 ), k8 );
-			selector8 = _mm256_mul_ps( selector8, scl_fctr1 );
+			float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+			if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+					( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+			{
+				selector1 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j ), k1 );
+				selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
+				selector2 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 8 ), k2 );
+				selector2 = _mm256_mul_ps( selector2, scl_fctr2 );
+				selector3 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 16 ), k3 );
+				selector3 = _mm256_mul_ps( selector3, scl_fctr3 );
+				selector4 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 24 ), k4 );
+				selector4 = _mm256_mul_ps( selector4, scl_fctr4 );
+				selector5 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 32 ) , k5 );
+				selector5 = _mm256_mul_ps( selector5, scl_fctr5 );
+				selector6 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 40 ), k6 );
+				selector6 = _mm256_mul_ps( selector6, scl_fctr6 );
+				selector7 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 48 ), k7 );
+				selector7 = _mm256_mul_ps( selector7, scl_fctr7 );
+				selector8 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 56 ), k8 );
+				selector8 = _mm256_mul_ps( selector8, scl_fctr8 );
+			}
+			else
+			{
+				selector1 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j ), k1 );
+				selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
+				selector2 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 8 ), k2 );
+				selector2 = _mm256_mul_ps( selector2, scl_fctr1 );
+				selector3 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 16 ), k3 );
+				selector3 = _mm256_mul_ps( selector3, scl_fctr1 );
+				selector4 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 24 ), k4 );
+				selector4 = _mm256_mul_ps( selector4, scl_fctr1 );
+				selector5 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 32 ) , k5 );
+				selector5 = _mm256_mul_ps( selector5, scl_fctr1 );
+				selector6 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 40 ), k6 );
+				selector6 = _mm256_mul_ps( selector6, scl_fctr1 );
+				selector7 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 48 ), k7 );
+				selector7 = _mm256_mul_ps( selector7, scl_fctr1 );
+				selector8 =
+					_mm256_maskload_ps( (matptr + post_ops_attr.post_op_c_j + 56 ), k8 );
+				selector8 = _mm256_mul_ps( selector8, scl_fctr1 );
+			}
 		}
 
 		ymm16 = _mm256_mul_ps( selector1, ymm16 );

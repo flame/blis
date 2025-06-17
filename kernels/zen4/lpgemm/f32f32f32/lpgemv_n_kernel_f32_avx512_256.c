@@ -550,6 +550,10 @@ POST_OPS_DOWNSCALE_1x32F:
             __m256 selector1 = _mm256_setzero_ps();
             __m256 selector2 = _mm256_setzero_ps();
 
+            bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+                    ( ( post_ops_list_temp->stor_type == NONE ) &&
+                      ( post_ops_attr.c_stor_type == BF16 ) );
+
             // Need to account for row vs column major swaps. For scalars
             // scale and zero point, no implications.
             // Even though different registers are used for scalar in column
@@ -557,10 +561,10 @@ POST_OPS_DOWNSCALE_1x32F:
             // the same value.
             if ( post_ops_list_temp->scale_factor_len == 1 )
             {
-            selector1 =
-                _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
-            selector2 =
-                _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+                selector1 =
+                    _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+                selector2 =
+                    _mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
             }
             else
             {
@@ -568,8 +572,16 @@ POST_OPS_DOWNSCALE_1x32F:
             }
             if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
             {
-            zero_point0 = _mm256_set1_ps( *(float *)post_ops_list_temp->op_args1 );
-            zero_point1 = _mm256_set1_ps( *(float *)post_ops_list_temp->op_args1 );
+                if( is_bf16 == TRUE )
+                {
+                    BF16_F32_ZP_SCALAR_BCAST_AVX2(zero_point0);
+                    BF16_F32_ZP_SCALAR_BCAST_AVX2(zero_point1);
+                }
+                else
+                {
+                    zero_point0 = _mm256_set1_ps( *(float *)post_ops_list_temp->op_args1 );
+                    zero_point1 = _mm256_set1_ps( *(float *)post_ops_list_temp->op_args1 );
+                }
             }
             else
             {
@@ -583,9 +595,9 @@ POST_OPS_DOWNSCALE_1x32F:
             if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
                 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
             {
-            // Scale/zp len cannot be > 1, since orignal n = 1.
-            F32_SCL_MULRND_AVX2(ymm30, selector1, zero_point0);
-            F32_SCL_MULRND_AVX2(ymm31, selector2, zero_point1);
+                // Scale/zp len cannot be > 1, since orignal n = 1.
+                F32_SCL_MULRND_AVX2(ymm30, selector1, zero_point0);
+                F32_SCL_MULRND_AVX2(ymm31, selector2, zero_point1);
             }
             else
             {
@@ -604,10 +616,20 @@ POST_OPS_DOWNSCALE_1x32F:
                 }
                 if( *( dim_t*)post_ops_list_temp->op_args3 > 1 )
                 {
-                    zero_point0 = _mm256_maskload_ps( ( float * )post_ops_list_temp->op_args1 +
-                                        post_ops_attr.post_op_c_i, store_mask1 );
-                    zero_point1 = _mm256_maskload_ps( ( float * )post_ops_list_temp->op_args1 +
-                                        post_ops_attr.post_op_c_i + 8, store_mask2 );
+                    __m128i zp_mask1 = _mm256_cvtepi32_epi16(store_mask1);
+                    __m128i zp_mask2 = _mm256_cvtepi32_epi16(store_mask2);
+                    if ( is_bf16 == TRUE )
+                    {
+                        BF16_F32_BIAS_LOAD_AVX2_MASK_GEMV(zero_point0,0,zp_mask1)
+                        BF16_F32_BIAS_LOAD_AVX2_MASK_GEMV(zero_point1,1,zp_mask2)
+                    }
+                    else
+                    {
+                        zero_point0 = _mm256_maskload_ps( ( float * )post_ops_list_temp->op_args1 +
+                                            post_ops_attr.post_op_c_i, store_mask1 );
+                        zero_point1 = _mm256_maskload_ps( ( float * )post_ops_list_temp->op_args1 +
+                                            post_ops_attr.post_op_c_i + 8, store_mask2 );
+                    }
                 }
                 F32_SCL_MULRND_AVX2(ymm30, selector1, zero_point0);
                 F32_SCL_MULRND_AVX2(ymm31, selector2, zero_point1);
@@ -617,13 +639,16 @@ POST_OPS_DOWNSCALE_1x32F:
         }
 POST_OPS_MATRIX_ADD_1x32F:
         {
-
           __m256 selector1 = _mm256_setzero_ps();
           __m256 selector2 = _mm256_setzero_ps();
           dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
           __m256 scl_fctr1 = _mm256_setzero_ps();
           __m256 scl_fctr2 = _mm256_setzero_ps();
+
+          bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+          ( ( post_ops_list_temp->stor_type == NONE ) &&
+            ( post_ops_attr.c_stor_type == BF16 ) );
 
           // Even though different registers are used for scalar in column and
           // row major case, all those registers will contain the same value.
@@ -648,40 +673,92 @@ POST_OPS_MATRIX_ADD_1x32F:
                     post_ops_attr.post_op_c_i + ( 1 * 8 ), store_mask2 );
             }
           }
-          float* matptr = ( float* )post_ops_list_temp->op_args1;
-
-          if( ldm == 1 )
+          if ( is_bf16 == TRUE )
           {
-            selector1 = _mm256_maskload_ps(( matptr +
-                                         post_ops_attr.post_op_c_i ), store_mask1 );
-            selector2 = _mm256_maskload_ps(( matptr +
-                                         post_ops_attr.post_op_c_i + 8 ), store_mask2 );
+            bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
-            selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
-            selector2 = _mm256_mul_ps( selector2, scl_fctr2 );
+            if( ldm == 1 )
+            {
+                selector1 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
+                                _mm_load_si128(
+                                ( __m128i const* )( matptr + post_ops_attr.post_op_c_i ) ) ),
+                                _mm256_set1_epi32( 16 ) )
+                            );
 
-            ymm30 = _mm256_add_ps( selector1, ymm30 );
-            ymm31 = _mm256_add_ps( selector2, ymm31 );
+                selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
+                selector2 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
+                                _mm_load_si128(
+                                ( __m128i const* )( matptr + post_ops_attr.post_op_c_i + 8 ) ) ),
+                                _mm256_set1_epi32( 16 ) )
+                            );
+                selector2 = _mm256_mul_ps( selector2, scl_fctr2 );
+
+                ymm30 = _mm256_add_ps( selector1, ymm30 );
+                ymm31 = _mm256_add_ps( selector2, ymm31 );
+            }
+            else
+            {
+                bfloat16 ctemp[16];
+                __m128i matstore_mask1 = _mm256_cvtepi32_epi16(store_mask1);
+                __m128i matstore_mask2 = _mm256_cvtepi32_epi16(store_mask2);
+
+                for( dim_t i = 0; i < mr0; i++ )
+                {
+                    ctemp[i] = *( matptr +
+                                ( ( post_ops_attr.post_op_c_i + i )
+                                    * ldm ) );
+                }
+                selector1 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
+                                _mm_maskload_epi32( ( int const* )( ctemp ),
+                                matstore_mask1 ) ), _mm256_set1_epi32( 16 ) )
+                            );
+                selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
+                selector2 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
+                                _mm_maskload_epi32( ( int const* )( ctemp + 8),
+                                matstore_mask2 ) ), _mm256_set1_epi32( 16 ) )
+                            );
+                selector2 = _mm256_mul_ps( selector2, scl_fctr2 );
+
+                ymm30 = _mm256_add_ps( selector1, ymm30 );
+                ymm31 = _mm256_add_ps( selector2, ymm31 );
+            }
           }
           else
           {
-            float ctemp[16] = {0};
-            for( dim_t i = 0; i < mr0; i++ )
+            float* matptr = ( float* )post_ops_list_temp->op_args1;
+
+            if( ldm == 1 )
             {
-              ctemp[i] = *( matptr +
-                          ( ( post_ops_attr.post_op_c_i + i )
-                              * ldm ) );
+                selector1 = _mm256_maskload_ps(( matptr +
+                                            post_ops_attr.post_op_c_i ), store_mask1 );
+                selector2 = _mm256_maskload_ps(( matptr +
+                                            post_ops_attr.post_op_c_i + 8 ), store_mask2 );
+
+                selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
+                selector2 = _mm256_mul_ps( selector2, scl_fctr2 );
+
+                ymm30 = _mm256_add_ps( selector1, ymm30 );
+                ymm31 = _mm256_add_ps( selector2, ymm31 );
             }
-            selector1 = _mm256_maskload_ps( ctemp, store_mask1 );
-            selector2 = _mm256_maskload_ps( ctemp + 8, store_mask2 );
+            else
+            {
+                float ctemp[16] = {0};
+                for( dim_t i = 0; i < mr0; i++ )
+                {
+                    ctemp[i] = *( matptr +
+                                ( ( post_ops_attr.post_op_c_i + i )
+                                    * ldm ) );
+                }
+                selector1 = _mm256_maskload_ps( ctemp, store_mask1 );
+                selector2 = _mm256_maskload_ps( ctemp + 8, store_mask2 );
 
-            selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
-            selector2 = _mm256_mul_ps( selector2, scl_fctr2 );
+                selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
+                selector2 = _mm256_mul_ps( selector2, scl_fctr2 );
 
-            ymm30 = _mm256_add_ps( selector1, ymm30 );
-            ymm31 = _mm256_add_ps( selector2, ymm31 );
-          }
-
+                ymm30 = _mm256_add_ps( selector1, ymm30 );
+                ymm31 = _mm256_add_ps( selector2, ymm31 );
+            }
+        }
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
        }
 POST_OPS_MATRIX_MUL_1x32F:
@@ -693,6 +770,10 @@ POST_OPS_MATRIX_MUL_1x32F:
 
          __m256 scl_fctr1 = _mm256_setzero_ps();
          __m256 scl_fctr2 = _mm256_setzero_ps();
+
+         bool is_bf16 = ( post_ops_list_temp->stor_type == BF16 ) ||
+          ( ( post_ops_list_temp->stor_type == NONE ) &&
+            ( post_ops_attr.c_stor_type == BF16 ) );
 
          // Even though different registers are used for scalar in column and
          // row major case, all those registers will contain the same value.
@@ -717,40 +798,92 @@ POST_OPS_MATRIX_MUL_1x32F:
                      post_ops_attr.post_op_c_i + ( 1 * 16 ), store_mask2 );
            }
          }
-         float* matptr = ( float* )post_ops_list_temp->op_args1;
+         if ( is_bf16 == TRUE )
+          {
+            bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
 
-         if( ldm == 1 )
-         {
-           selector1 = _mm256_maskload_ps(( matptr +
-                                        post_ops_attr.post_op_c_i ), store_mask1 );
-           selector2 = _mm256_maskload_ps(( matptr +
-                                        post_ops_attr.post_op_c_i + 8 ), store_mask2 );
+            if( ldm == 1 )
+            {
+                selector1 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
+                            _mm_load_si128(
+                            ( __m128i const* )( matptr + post_ops_attr.post_op_c_i ) ) ),
+                            _mm256_set1_epi32( 16 ) )
+                        );
 
-           selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
-           selector2 = _mm256_mul_ps( selector2, scl_fctr2 );
+                selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
+                selector2 =( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
+                                _mm_load_si128(
+                                ( __m128i const* )( matptr + post_ops_attr.post_op_c_i + 8 ) ) ),
+                                _mm256_set1_epi32( 16 ) )
+                            );
+                selector2 = _mm256_mul_ps( selector2, scl_fctr2 );
 
-           ymm30 = _mm256_mul_ps( selector1, ymm30 );
-           ymm31 = _mm256_mul_ps( selector2, ymm31 );
-         }
-         else
-         {
-           float ctemp[16];
-           for( dim_t i = 0; i < mr0; i++ )
-           {
-             ctemp[i] = *( matptr +
-                         ( ( post_ops_attr.post_op_c_i + i )
-                             * ldm ) );
-           }
-           selector1 = _mm256_maskload_ps( ctemp, store_mask1 );
-           selector2 = _mm256_maskload_ps( ctemp + 8, store_mask2 );
+                ymm30 = _mm256_mul_ps( selector1, ymm30 );
+                ymm31 = _mm256_mul_ps( selector2, ymm31 );
+            }
+            else
+            {
+                bfloat16 ctemp[16];
+                __m128i matstore_mask1 = _mm256_cvtepi32_epi16(store_mask1);
+                __m128i matstore_mask2 = _mm256_cvtepi32_epi16(store_mask2);
 
-           selector1 = _mm256_mul_ps( selector1, scl_fctr1 ); \
-           selector2 = _mm256_mul_ps( selector2, scl_fctr2 );
+                for( dim_t i = 0; i < mr0; i++ )
+                {
+                    ctemp[i] = *( matptr +
+                                ( ( post_ops_attr.post_op_c_i + i )
+                                    * ldm ) );
+                }
+                selector1 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
+                                _mm_maskload_epi32( ( int const* )( ctemp ),
+                                matstore_mask1 ) ), _mm256_set1_epi32( 16 ) )
+                            );
+                selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
+                selector2 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
+                                _mm_maskload_epi32( ( int const* )( ctemp + 8),
+                                matstore_mask2 ) ), _mm256_set1_epi32( 16 ) )
+                            );
+                selector2 = _mm256_mul_ps( selector2, scl_fctr2 );
 
-           ymm30 = _mm256_mul_ps( selector1, ymm30 );
-           ymm31 = _mm256_mul_ps( selector2, ymm31 );
-         }
+                ymm30 = _mm256_mul_ps( selector1, ymm30 );
+                ymm31 = _mm256_mul_ps( selector2, ymm31 );
+            }
+          }
+          else
+          {
+            float* matptr = ( float* )post_ops_list_temp->op_args1;
 
+            if( ldm == 1 )
+            {
+                selector1 = _mm256_maskload_ps(( matptr +
+                                                post_ops_attr.post_op_c_i ), store_mask1 );
+                selector2 = _mm256_maskload_ps(( matptr +
+                                                post_ops_attr.post_op_c_i + 8 ), store_mask2 );
+
+                selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
+                selector2 = _mm256_mul_ps( selector2, scl_fctr2 );
+
+                ymm30 = _mm256_mul_ps( selector1, ymm30 );
+                ymm31 = _mm256_mul_ps( selector2, ymm31 );
+            }
+            else
+            {
+                float ctemp[16];
+                for( dim_t i = 0; i < mr0; i++ )
+                {
+                    ctemp[i] = *( matptr +
+                                ( ( post_ops_attr.post_op_c_i + i )
+                                    * ldm ) );
+                }
+                selector1 = _mm256_maskload_ps( ctemp, store_mask1 );
+                selector2 = _mm256_maskload_ps( ctemp + 8, store_mask2 );
+
+                selector1 = _mm256_mul_ps( selector1, scl_fctr1 ); \
+                selector2 = _mm256_mul_ps( selector2, scl_fctr2 );
+
+                ymm30 = _mm256_mul_ps( selector1, ymm30 );
+                ymm31 = _mm256_mul_ps( selector2, ymm31 );
+            }
+        }
          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
        }
 POST_OPS_SWISH_1x32F:
