@@ -161,6 +161,11 @@ AOCL_BGEMM_MATMUL(float,float,float,float,f32f32f32of32)
 				mtag_a[bs_i] = PACK;
 			}
 
+			if( bli_is_trans(blis_transa ) )
+			{
+				mtag_b[bs_i] = PACK;
+			}
+
 			// swap m & n in case of col-major matrices
 			m_local[bs_i] = n[bs_i];
 			n_local[bs_i] = m[bs_i];
@@ -206,6 +211,11 @@ AOCL_BGEMM_MATMUL(float,float,float,float,f32f32f32of32)
 				mtag_a[bs_i] = PACK;
 			}
 
+			if( bli_is_trans(blis_transb )  && ( mtag_b[bs_i] == UNPACKED ) )
+			{
+				mtag_b[bs_i] = PACK;
+			}
+
 			// copy the values of m & n
 			m_local[bs_i] = m[bs_i];
 			n_local[bs_i] = n[bs_i];
@@ -217,14 +227,6 @@ AOCL_BGEMM_MATMUL(float,float,float,float,f32f32f32of32)
 
 		rs_c[bs_i] = ldc[bs_i];
 		cs_c[bs_i] = 1;
-
-		// By default enable packing for B matrix. Before the 5 loop, based on
-		// the input dimensions, the smart threading logic will adjust it
-		// (disable/enable) accordingly.
-		if ( mtag_b[bs_i] == UNPACKED )
-		{
-			mtag_b[bs_i] = PACK;
-		}
 
 		err_t err = lpgemm_translate_to_post_ops_list
 		(
@@ -259,10 +261,6 @@ AOCL_BGEMM_MATMUL(float,float,float,float,f32f32f32of32)
 
 
 #else
-	// Setting pack A and B by default for non open mp case.
-	bli_rntm_set_pack_a( 1, &rntm_g );
-	bli_rntm_set_pack_b( 1, &rntm_g );
-
 	batch_lpgemm_f32f32f32of32_thread_decorator
 	(
 	  batch_size, m_local, n_local, k,
