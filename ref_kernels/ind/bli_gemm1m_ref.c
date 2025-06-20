@@ -92,6 +92,7 @@ void PASTEMAC(chabr,chcr,opname,arch,suf) \
 \
 	if ( !bli_teq0s( chabr, *alpha_i ) || \
 	     !bli_teq0s( chcr, *beta_i ) || \
+	     rs_c <= 0 || cs_c <= 0 || \
 	     !bli_is_preferentially_stored( rs_c, cs_c, row_pref ) || \
 	     !PASTEMAC(chabr,chcr,same) ) \
 	{ \
