@@ -45,13 +45,13 @@
 // OpenMP-specific function prototypes.
 void bli_thrcomm_init_openmp( dim_t nt, thrcomm_t* comm );
 void bli_thrcomm_cleanup_openmp( thrcomm_t* comm );
-void bli_thrcomm_barrier_openmp( dim_t tid, thrcomm_t* comm );
+void bli_thrcomm_barrier_openmp( dim_t tid, thrcomm_t* comm, const char* tag );
 
 // Prototypes specific to the OpenMP tree barrier implementation.
 #ifdef BLIS_TREE_BARRIER
 barrier_t* bli_thrcomm_tree_barrier_create( int num_threads, int arity, barrier_t** leaves, int leaf_index );
 void       bli_thrcomm_tree_barrier_free( barrier_t* barrier );
-void       bli_thrcomm_tree_barrier( barrier_t* barack );
+void       bli_thrcomm_tree_barrier( barrier_t* barack, const char* tag );
 #endif
 
 #endif

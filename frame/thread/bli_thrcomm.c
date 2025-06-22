@@ -172,7 +172,7 @@ void bli_thrcomm_cleanup( thrcomm_t* comm )
 	fp( comm );
 }
 
-void bli_thrcomm_barrier( dim_t tid, thrcomm_t* comm )
+void bli_thrcomm_barrier( dim_t tid, thrcomm_t* comm, const char* tag )
 {
 	const timpl_t            ti = bli_thrcomm_thread_impl( comm );
 	const thrcomm_barrier_ft fp = barrier_fpa[ ti ];
@@ -182,25 +182,26 @@ void bli_thrcomm_barrier( dim_t tid, thrcomm_t* comm )
 	if ( fp == NULL ) bli_abort();
 
 	// Call the threading-specific barrier function.
-	fp( tid, comm );
+	fp( tid, comm, tag );
 }
 
 // -- Other functions ----------------------------------------------------------
 
 void* bli_thrcomm_bcast
      (
-       dim_t      id,
-       void*      to_send,
-       thrcomm_t* comm
+       dim_t       id,
+       void*       to_send,
+       thrcomm_t*  comm,
+	   const char* tag
      )
 {
 	if ( comm == NULL || comm->n_threads == 1 ) return to_send;
 
 	if ( id == 0 ) comm->sent_object = to_send;
 
-	bli_thrcomm_barrier( id, comm );
+	bli_thrcomm_barrier( id, comm, tag );
 	void* object = comm->sent_object;
-	bli_thrcomm_barrier( id, comm );
+	bli_thrcomm_barrier( id, comm, tag );
 
 	return object;
 }
@@ -222,7 +223,7 @@ void* bli_thrcomm_bcast
 
 #endif
 
-void bli_thrcomm_barrier_atomic( dim_t t_id, thrcomm_t* comm )
+void bli_thrcomm_barrier_atomic( dim_t t_id, thrcomm_t* comm, const char* tag )
 {
 	// Return early if the comm is NULL or if there is only one
 	// thread participating.
@@ -238,6 +239,11 @@ void bli_thrcomm_barrier_atomic( dim_t t_id, thrcomm_t* comm )
 	// decremented back to 0, and so forth).
 	gint_t orig_sense = __atomic_load_n( &comm->barrier_sense, __ATOMIC_RELAXED );
 
+	#ifdef BLIS_HARDEN_BARRIERS
+	comm->status[ t_id ].barrier_sense = orig_sense;
+	comm->status[ t_id ].tag           = tag;
+	#endif
+
 	// Register ourselves (the current thread) as having arrived by
 	// incrementing the barrier_threads_arrived variable. We must perform
 	// this increment (and a subsequent read) atomically.
@@ -248,13 +254,35 @@ void bli_thrcomm_barrier_atomic( dim_t t_id, thrcomm_t* comm )
 	// it will take actions that effectively ends and resets the barrier.
 	if ( my_threads_arrived == comm->n_threads )
 	{
+		#ifdef BLIS_HARDEN_BARRIERS
+		// Check that all threads a) called bli_thrinfo_barrier or
+		// bli_thrinfo_bcast from the same source location, and b)
+		// encountered the same original sense variable.
+		for ( dim_t i = 0;i < comm->n_threads; i++ )
+		{
+			if ( comm->status[ i ].barrier_sense != orig_sense ||
+			     comm->status[ i ].tag           != tag )
+			{
+				printf( "Inconsistency detected in barrier:\n" );
+				for ( dim_t j = 0;j < comm->n_threads; j++ )
+					printf( "Thread %d detected sense %lld at %s\n",
+					        (int)(j+1), (long long)comm->status[ j ].barrier_sense, comm->status[ j ].tag );
+				bli_abort();
+			}
+		}
+		#endif
+
 		// Reset the variable tracking the number of threads that have arrived
 		// to zero (which returns the barrier to the "empty" state. Then
 		// atomically toggle the barrier sense variable. This will signal to
 		// the other threads (which are spinning in the branch elow) that it
 		// is now safe to exit the barrier.
 		comm->barrier_threads_arrived = 0;
+		#ifdef BLIS_HARDEN_BARRIERS
+		__atomic_fetch_add( &comm->barrier_sense, 1, __ATOMIC_RELEASE );
+		#else
 		__atomic_fetch_xor( &comm->barrier_sense, 1, __ATOMIC_RELEASE );
+		#endif
 	}
 	else
 	{

@@ -183,15 +183,37 @@ void bli_thrinfo_attach_sub_node( thrinfo_t* sub_node, thrinfo_t* t );
 
 // other thrinfo_t-related functions
 
+#ifdef BLIS_HARDEN_BARRIERS
+
+BLIS_INLINE void* bli_thrinfo_broadcast_( const thrinfo_t* t, void* p, const char* tag )
+{
+	return bli_thrcomm_bcast( t->thread_id, p, t->comm, tag );
+}
+
+BLIS_INLINE void bli_thrinfo_barrier_( const thrinfo_t* t, const char* tag )
+{
+	bli_thrcomm_barrier( t->thread_id, t->comm, tag );
+}
+
+#define bli_thrinfo_broadcast( t, p ) \
+	bli_thrinfo_broadcast_( t, p, STRINGIFY_INT(__FILE__) ":" STRINGIFY_INT(__LINE__) )
+
+#define bli_thrinfo_barrier( t ) \
+	bli_thrinfo_barrier_( t, STRINGIFY_INT(__FILE__) ":" STRINGIFY_INT(__LINE__) )
+
+#else
+
 BLIS_INLINE void* bli_thrinfo_broadcast( const thrinfo_t* t, void* p )
 {
-	return bli_thrcomm_bcast( t->thread_id, p, t->comm );
+	return bli_thrcomm_bcast( t->thread_id, p, t->comm, "" );
 }
 
 BLIS_INLINE void bli_thrinfo_barrier( const thrinfo_t* t )
 {
-	bli_thrcomm_barrier( t->thread_id, t->comm );
+	bli_thrcomm_barrier( t->thread_id, t->comm, "" );
 }
+
+#endif
 
 
 //

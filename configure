@@ -256,6 +256,15 @@ print_usage()
                  --disable-threading if you suspect any correctness or
                  deadlock issues.
 
+   --harden-barriers
+
+                 Keep track of additional information which enables
+                 run-time detection of various issues due to either misuse
+                 of BLIS thrinfo_t structures (esp. via bli_thrinfo_barrier
+                 and bli_thrinfo_bcast) or potentially to bugs in the
+                 BLIS threading code itself. There may be a performance
+                 penalty.
+
    --disable-pba-pools, --enable-pba-pools
    --disable-sba-pools, --enable-sba-pools
 
@@ -3027,6 +3036,9 @@ blis_main()
 	# The thread-local storage flag.
 	enable_tls='yes'
 
+	# Barrier hardening flag.
+	harden_barriers='no'
+
 	# The threading flag.
 	threading_model='off'
 
@@ -3226,6 +3238,10 @@ blis_main()
 							;;
 						disable-tls)
 							enable_tls='no'
+							;;
+
+						harden-barriers)
+							harden_barriers='yes'
 							;;
 
 						enable-threading=*)
@@ -3801,6 +3817,13 @@ blis_main()
 		echo "${script_name}: WARNING: Please try --disable-threading if you suspect any correctness"
 		echo "${script_name}: WARNING: or deadlock issues."
 		enable_tls_01=0
+	fi
+
+	# Check for barrier hardening.
+	harden_barriers_01=0
+	if [[ ${harden_barriers} = yes ]]; then
+		echo "${script_name}: Barriers will be hardened. There may be some performance impact."
+		harden_barriers_01=1
 	fi
 
 	# Check the threading model flag and standardize its value, if needed.
@@ -4456,6 +4479,7 @@ blis_main()
 	add_config_var kernel_list_defines
 	add_config_var omit_symbol_list_defines
 	add_config_var enable_tls                enable_tls_01
+	add_config_var harden_barriers           harden_barriers_01
 	add_config_var enable_openmp             enable_openmp_01
 	add_config_var enable_openmp_as_def      enable_openmp_as_def_01
 	add_config_var enable_pthreads           enable_pthreads_01
