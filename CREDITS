@@ -7,6 +7,10 @@ The BLIS framework was originally authored by
 
   Field Van Zee            @fgvanzee                  (The University of Texas at Austin)
 
+and is currently maintained by
+
+  Devin Matthews           @devinamatthews            (Southern Methodist University)
+
 but many others have contributed code, ideas, and feedback, including
 
   Sameer Agarwal           @sandwichmaker             (Google)
@@ -79,7 +83,6 @@ but many others have contributed code, ideas, and feedback, including
   Simon Lukas Märtens      @ACSimon33                 (RWTH Aachen University)
   Hernan Martinez          @hmartinez82
   John Mather              @jmather-sesi              (SideFX Software)
-  Devin Matthews           @devinamatthews            (The University of Texas at Austin)
   Stefanos Mavros          @smavros
   Mithun Mohan             @MithunMohanKadavil        (AMD)
                            @moon-chilled
