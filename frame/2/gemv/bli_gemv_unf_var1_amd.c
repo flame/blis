@@ -35,6 +35,15 @@
 
 #include "blis.h"
 
+// Enable fast path for small GEMV problems when AOCL_DYNAMIC is defined.
+#if defined(AOCL_DYNAMIC)
+  // Fast path is enabled if the total problem size is below a threshold,
+  #define BLI_FAST_PATH (((n0 * m0) <= fast_path_thresh))
+#else
+  // Fast path is disabled if AOCL_DYNAMIC is not defined.
+  #define BLI_FAST_PATH 0
+#endif
+
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
 \
@@ -536,7 +545,7 @@ void bli_dgemv_unf_var1
 #if defined(BLIS_ENABLE_OPENMP)
       // If the problem size is small, we can use a fast-path to avoid
       // the overhead of threading.
-      if ( ((n0 * m0) <= fast_path_thresh) || ((n0 < 100) && (m0 < 100)) )
+        if( BLI_FAST_PATH )
       {
 #endif
         // Call the DGEMV kernel directly with the packed buffers.
