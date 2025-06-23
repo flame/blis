@@ -1,3 +1,98 @@
+commit b6a0372e016d69294493b381921357efbdf89674
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Jun 23 17:41:00 2025 -0500
+
+    Version file update (2.0)
+
+commit abc38a9ca341069bfe224bd190fa9ea712c32e54
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Jun 23 17:40:12 2025 -0500
+
+    Update ReleaseNotes.md.
+
+commit 17ffb7212bebae92991e090f40ddb7e3c8cc1354
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Jun 21 20:00:21 2025 -0500
+
+    Update license and related info.
+    
+    (cherry picked from commit cb0da3e6e851c0c6b1896812a6e986f4a6a11f4a)
+
+commit bf7a93fa3389372fb0a1611b573a68ffb96a5786
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Jun 20 18:04:46 2025 -0500
+
+    Fix an issue with 1m and negative strides. (#871)
+    
+    Details:
+    - In the reference `gemm1m` kernel, the code checks if the matrix
+      is "preferentially stored", meaning columns (rows) are contiguous
+      if the real-domain microkernel is column- (row-)preferential.
+    - However, `bli_is_preferentially_stored` checks for contiguity
+      based on the *absolute value* of the row and column strides,
+      such that a row or column stride of -1 is indicated as
+      preferentially stored.
+    - Passing the stride of -1 to the real-domain kernel then essentially
+      causes elements along each row or column to be written in opposite
+      order. This causes problems for 1m because a) imaginary elements
+      are written before real elements, and b) the provided pointer
+      points to the last *complex* element, which is one real element
+      too low and can then cause an out-of-bounds error when the last
+      real-domain element is written to an address preceding the row
+      or column storage.
+    - This commit adds a check for positivity of `rs_c` and `cs_c`
+      in `bli_gemm1m_ref` and `bli_gemm_ccr_ref` in order to pass
+      through directly to the real-domain microkernel. Technically,
+      only a -1 stride along the preferential storage direction will
+      lead to the errors noted above, but who know what other bad
+      things might happen for other negative strides (and god forbid
+      you put in a stride of 0...).
+    
+    (cherry picked from commit 028c5172be2994cf2dc9daf31b20c46455d4c36e)
+
+commit 965c667b2b7c7b229c5591a3e60b7ef51b21e6d1
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Jun 11 12:36:49 2025 -0500
+
+    Allow runtime configuration selection by name. (#870)
+    
+    Allow runtime configuration selection by name.
+    
+    Details:
+    - The `BLIS_ARCH_TYPE` environment variable currently only allows
+      numerical values, which requires reading the source to select the
+      appropriate value (and these values can change over time).
+    - Implement selection by name (case insensitive), based on the names
+      returned by `blis_arch_string` (typically the same as the folder name
+      in the `config` directory).
+    
+    (cherry picked from commit 5718de15ead2c3fdc5df63fb3159c0c6bb63b3eb)
+
+commit b33cf051f5c65738f898bc68b5ce007d038c823d
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Jun 9 14:26:34 2025 -0500
+
+    Fix the thread info node used in packing.
+    
+    Details:
+    - Previously, the packing kernel used the wrong thread info
+      node for packing, specifically, it used the node intended for
+      the GEMM kernel. Normally this is OK since there is no additional
+      thread partitioning between packing and the kernel. However,
+      for some external applications, additional data needed to be
+      allocated on the GEMM thread info node which conflicted with
+      the packing buffer.
+    - This commit uses the correct (parent) thread info node
+      during packing.
+    
+    (cherry picked from commit 3e3355a4cffeccc17c5fbedb1e2144d6ad22e24d)
+
+commit 9c941be53db3ae5e6cc3257e43f4e939220086f2
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Jun 7 14:13:18 2025 -0500
+
+    CHANGELOG update (2.0-rc1)
+
 commit 43c8b0085459c86b9bf7614dae399429e1865475
 Author: Devin Matthews <damatthews@smu.edu>
 Date:   Sat Jun 7 14:13:18 2025 -0500
