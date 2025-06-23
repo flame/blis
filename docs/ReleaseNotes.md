@@ -43,7 +43,7 @@
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
 
 ## Changes in 2.0:
-June 7, 2025
+June 24, 2025
 
 Improvements present in 2.0:
 
@@ -59,6 +59,9 @@ Framework:
 - Extensive other back-end changes and improvements.
 - A new "level-0" macro back-end has been implemented. These macros from the basic language for implementing reference kernels and for enabling correct mixed-type computation. The new back-end specifically support full data-type flexibility, including the "computational" data-type (e.g. input/output in double, compute in single), as well as fully correct mixed-domain computation and safe in-place usage of operations such as `scal2v`. A dedicated testsuite (C++17 required) has also been added for this layer. A number of legacy macros have been retained as wrappers so that current code (e.g. optimized kernels) is not affected.
 - Fixed a lurking bug in `bli_obj_imag_part` which would have caused the base address to be computed incorrectly for sub-matrix objects.
+- Users can now force the use of a particular configuration at runtime using `BLIS_ARCH_TYPE=<name>`, where `<name>` is on of the
+  configured sub-configurations (check the output of `configure` for options). This functionality existed previously, but only
+  using numeric configuration IDs which are undocumented.
 
 Compatibility:
 - Added a ScaLAPACK compatibility mode which disables some conflicting BLAS definitions. (Field Van Zee)
@@ -82,6 +85,7 @@ Kernels:
 - Improved support for duplication during packing ("broadcast-B") across all packing kernels.
 - Some bugs with mixed-precision/mixed-domain operations on certain architectures (esp. AVX512) have been fixed.
 - Fixed bug affecting reference kernels with clang 14.
+- Fixed a problem affecting row/column strides of exactly -1 with `gemm1m`.
 
 Build system:
 - The `cblas.h` file is now "flattened" immediately after `blis.h` is (if enabled), rather than later in the build process. (Jeff Diamond, Field Van Zee)
