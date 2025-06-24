@@ -50,6 +50,10 @@
 
 #define BLIS_VERSION_STRING "@version@"
 
+#define BLIS_VERSION_MAJOR @version_major@
+#define BLIS_VERSION_MINOR @version_minor@
+#define BLIS_VERSION_REVISION @version_revision@
+
 #if @enable_system@
 #define BLIS_ENABLE_SYSTEM
 #else

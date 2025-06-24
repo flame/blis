@@ -353,7 +353,7 @@ All BLIS definitions and prototypes may be included in your C source file by inc
 #include "otherstuff.h"
 #include "blis.h"
 ```
-If the BLAS compatibility layer was enabled at configure-time (as it is by default), then `blis.h` will also provide BLAS prototypes to your source code.
+If the BLAS compatibility layer was enabled at configure-time (as it is by default), then `blis.h` will also provide BLAS prototypes to your source code. `blis.h` provides the macros `BLIS_VERSION_{MAJOR,MINOR,REVISION}` as integer so that downstream code can check for compatible version of BLIS.
 
 
 ### Disabling BLAS prototypes

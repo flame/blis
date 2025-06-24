@@ -2194,7 +2194,7 @@ set_default_version()
 
 		echo "${script_name}: found '${gitdir}' directory; assuming git clone."
 
-		echo "${script_name}: executing: git describe --tags."
+		echo "${script_name}: executing: git describe --tags --abbrev=0."
 
 		gd_stderr="git_describe_stderr.txt"
 
@@ -2202,7 +2202,7 @@ set_default_version()
 		# followed by a number signifying how many commits have transpired
 		# since the tag, followed by a 'g' and a shortened hash tab. Capture
 		# stderr to a file.
-		git_describe_str=$(git -C "${dist_path}" describe --tags 2> "${gd_stderr}")
+		git_describe_str=$(git -C "${dist_path}" describe --tags --abbrev=0 2> "${gd_stderr}")
 
 		# Pull in whatever error message was generated, if any, and delete
 		# the file.
@@ -4387,9 +4387,20 @@ blis_main()
 	fi
 
 
+	# -- Parse the BLIS version into major, minor, and revision ----------------
+
+	version_major=$(echo "${version}" | cut -d. -f1)
+	version_minor=$(echo "${version}" | cut -d. -f2)
+	version_revision=$(echo "${version}" | cut -d. -f3)
+	version_revision=${version_revision:-0}
+
+
 	# -- Instantiate configuration files from templates ------------------------
 
 	add_config_var version
+	add_config_var version_major
+	add_config_var version_minor
+	add_config_var version_revision
 	add_config_var so_version_major
 	add_config_var so_version_minorbuild
 	add_config_var config_name
