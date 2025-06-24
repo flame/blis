@@ -43,7 +43,7 @@
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
 
 ## Changes in 2.0:
-June 24, 2025
+June 25, 2025
 
 Improvements present in 2.0:
 
@@ -86,6 +86,7 @@ Kernels:
 - Some bugs with mixed-precision/mixed-domain operations on certain architectures (esp. AVX512) have been fixed.
 - Fixed bug affecting reference kernels with clang 14.
 - Fixed a problem affecting row/column strides of exactly -1 with `gemm1m`.
+- Fixed an incompatibility between the `haswell` `gemmsup` kernels and gcc 15. (Dave Love, Christopher Hillenbrand)
 
 Build system:
 - The `cblas.h` file is now "flattened" immediately after `blis.h` is (if enabled), rather than later in the build process. (Jeff Diamond, Field Van Zee)
