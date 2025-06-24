@@ -94,6 +94,8 @@ Build system:
 - The configure script has been overhauled. In particular, using spaces in `CC`/`CXX` is now supported. (Devin Matthews)
 - Improved support for C++ source files in BLIS or in plugins. (Devin Matthews)
 - Disabled `armsve` on Windows due to build failures. (Hernan Martinez, Atsushi Tatsuma)
+- Added integer `BLIS_VERSION_{MAJOR,MINOR,REVISION}` macros to `blis.h` so that users can check BLIS version compatibility through the C preprocessor.
+- Moved `#include <omp.h>` from `blis.h` to the relevant source files. (Melven Roehrig-Zoellner)
 
 Testing:
 - test/3 drivers now allow using the "default" induced method, rather than forcing native or 1m operation. (Field Van Zee, Leick Robinson)
