@@ -34,6 +34,8 @@
 
 #include "blis.h"
 
+#include <omp.h>
+
 void bli_ddotv_bgq_int
      (
              conj_t  conjx,

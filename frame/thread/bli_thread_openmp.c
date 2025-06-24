@@ -36,6 +36,8 @@
 
 #ifdef BLIS_ENABLE_OPENMP
 
+#include <omp.h>
+
 void bli_thread_launch_openmp( dim_t n_threads, thread_func_t func, const void* params )
 {
 	const timpl_t ti = BLIS_OPENMP;

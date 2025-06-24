@@ -146,10 +146,10 @@ barrier_t* bli_thrcomm_tree_barrier_create( int num_threads, int arity, barrier_
 			kid->dad = me;
 
 			leaf_index += threads_this_kid;
-		}  
+		}
 		me->count = arity;
 		me->arity = arity;
-	}  
+	}
 
 	return me;
 }
