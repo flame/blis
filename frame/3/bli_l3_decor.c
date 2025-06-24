@@ -35,6 +35,10 @@
 
 #include "blis.h"
 
+#ifdef BLIS_ENABLE_OPENMP
+#include <omp.h>
+#endif
+
 struct l3_decor_params_s
 {
 	const obj_t*   a;
