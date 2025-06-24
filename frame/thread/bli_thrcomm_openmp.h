@@ -40,8 +40,6 @@
 // enabled.
 #ifdef BLIS_ENABLE_OPENMP
 
-#include <omp.h>
-
 // OpenMP-specific function prototypes.
 void bli_thrcomm_init_openmp( dim_t nt, thrcomm_t* comm );
 void bli_thrcomm_cleanup_openmp( thrcomm_t* comm );

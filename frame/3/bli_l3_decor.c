@@ -34,6 +34,10 @@
 
 #include "blis.h"
 
+#ifdef BLIS_ENABLE_OPENMP
+#include <omp.h>
+#endif
+
 struct l3_decor_params_s
 {
 	      l3int_ft func;
