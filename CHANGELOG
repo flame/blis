@@ -1,3 +1,65 @@
+commit 200c795373e8ddeffee8d957dcadd05f7e10ab7f
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jun 24 17:13:42 2025 -0500
+
+    Update ReleaseNotes.md.
+
+commit 11b276fb3b3848cc40cc5ceb87317f885fa90547
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jun 24 17:08:09 2025 -0500
+
+    Add refined version macros.
+    
+    Details:
+    - The `BLIS_VERSION` macro currently provides a string literal version of the BLIS version.
+    - Add `BLIS_VERSION_{MAJOR,MINOR,REVISION}` macros which provide integer literals useful for programmatically comparing versions from `blis.h` alone.
+    
+    (cherry picked from commit 290af2ea8f06a84bc4792a3e64b99f539bb347a7)
+
+commit cfbb94d7b8165f0a94c671320bace59f82626cd0
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jun 24 16:46:23 2025 -0500
+
+    Remove unnecessary OpenMP include. (#875)
+    
+    Details:
+    - Previously, `<omp.h>` was included in `bli_thrcomm_openmp.h` so that the framework
+      could access the necessary OpenMP functions.
+    - As @melven reported (#873), this causes issues when `blis.h` is included in C++ code since
+      the `<omp.h>` include happens with `extern "C"`.
+    - Move the include from the header to the necessary .c files so that it does not "pollute" `blis.h`.
+    
+    (cherry picked from commit 843a5e8d394d126ed370da523d2c09d7e12b582d)
+
+commit 05094eaba978fe14c573ccd37dac3379251e6c59
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jun 24 15:38:15 2025 -0500
+
+    Apply temporary fix for gcc 15. (#874)
+    
+    Details:
+    - As reported in #845, gcc 15 fails to build the haswell
+      gemmsup kernels due to the use of rbp.
+    - As a temporary fix, disable slp-tree-vectorization in just
+      the affected files.
+    - Thanks @loveshack for reporting and @chillenb for the suggested
+      fix.
+    - Eventually, the kernels should be rewritten to avoid using rbp.
+    
+    (cherry picked from commit 36effd70b6a323856d98b17dda9cc3afd181b658)
+
+commit 1a6809e4e5320e5f52dda768cc6c6e2faa44dbf1
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jun 24 14:55:38 2025 -0500
+
+    Update ReleaseNotes.md.
+
+commit 650b450b988fb0a467ebacdf8dede2b6cc6eb3ab
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Jun 23 17:41:01 2025 -0500
+
+    CHANGELOG update (2.0)
+
 commit b6a0372e016d69294493b381921357efbdf89674
 Author: Devin Matthews <damatthews@smu.edu>
 Date:   Mon Jun 23 17:41:00 2025 -0500
