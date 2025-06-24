@@ -35,7 +35,7 @@
 
 #include "blis.h"
 
-#if BLIS_ENABLE_OPENMP
+#ifdef BLIS_ENABLE_OPENMP
 #include <omp.h>
 #endif
 
