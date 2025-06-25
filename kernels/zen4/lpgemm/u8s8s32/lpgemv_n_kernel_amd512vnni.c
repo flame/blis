@@ -764,15 +764,14 @@ LPGEMV_N_EQ1_KERN(uint8_t, int8_t, int32_t, u8s8s32os32)
 			{
 				S32_F32_ZP_BCST(zero_point0)
 			}
-			else if( post_ops_list_temp->zp_stor_type == U8 )
-			{
-				U8_F32_ZP_BCST(zero_point0)
-			}
-			else
+			else if( post_ops_list_temp->zp_stor_type == S8 )
 			{
 				S8_F32_ZP_BCST(zero_point0)
 			}
-
+			else
+			{
+				U8_F32_ZP_BCST(zero_point0)
+			}
 			MULADD_RND_F32(acc_8, scale0, zero_point0 );
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR

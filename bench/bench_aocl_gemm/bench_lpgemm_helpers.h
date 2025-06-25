@@ -184,7 +184,6 @@ static inline void lpgemm_free( void* p )
         bli_free_user(p);
     }
 }
-
 bool is_integerAPI_avx512( char* api_name )
 {
     if ( ( strcmp( api_name, "u8s8s32of32" ) == 0) || ( strcmp( api_name, "u8s8s32os8" ) == 0) \
@@ -544,7 +543,7 @@ static inline ACCUM_type get_matrix_add_post_op_val_ ## BLAS_SFX \
     /* default case */ \
     if( is_integerAPI_avx512(#BLAS_SFX) ) \
     { \
-        if( strcmp( #BLAS_SFX, "u8s8s32os8" ) == 0 ) \
+        if( ( strcmp( #BLAS_SFX, "s8s8s32os8" ) == 0 ) || ( strcmp( #BLAS_SFX, "u8s8s32os8" ) ) == 0 ) \
         { \
             float ret_val = 0.0; \
             int8_t_to_float( *( ( int8_t* )mat_add_ptr + ( i * rs_m ) + ( j * cs_m ) ), &ret_val ); \
@@ -1646,7 +1645,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             } \
             else if ( strcmp( ops_tok, "sf_stor_type" ) == 0) \
             { \
-                 ops_tok = strtok( NULL, ", " ); \
+                ops_tok = strtok( NULL, ", " ); \
                 if( ( strcmp( ops_tok, "na" ) == 0 ) ) \
                 { \
                     is_sf_stor_type = FALSE; \
@@ -2230,6 +2229,7 @@ static inline aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         } \
         else \
         { \
+            ( post_ops->sum )->sf_stor_type = NULLTYPE; \
             ( post_ops->sum )->scale_factor = malloc( n_scale * sizeof( DSCALE_type ) ); \
             if ( ( post_ops->sum )->scale_factor == NULL ) \
             { \
