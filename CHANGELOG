@@ -1,3 +1,40 @@
+commit 894b0955a250682da0d2d3f074f910aaaf88c168
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jun 24 23:39:05 2025 -0500
+
+    Update ReleaseNotes.md.
+
+commit e10e526b3ed0271cf4c42cd36815e182aacabe4b
+Author: Jeff Hammond <jeff.science@gmail.com>
+Date:   Fri Nov 29 02:16:48 2024 +0200
+
+    Add complex return detection for nvfortran (#765)
+    
+    Details:
+    - Search for Intel ifx and NVIDIA/PGI Fortran compilers.
+    - Correctly determine the Fortran compiler vendor for Intel ifx and NVIDIA/PGI compilers.
+    - Determine the compiler version and correct Fortran complex return type for NVIDIA/PGI.
+    
+    (cherry picked from commit 12f2efa7dfe11a684d62af02592499d91b7e344b)
+
+commit 9a5c0290b8996bffe1a48511255c7055b777713c
+Author: Dave Love <dave.love@manchester.ac.uk>
+Date:   Fri Jan 24 21:44:32 2025 +0000
+
+    Blacklist KNL with GCC 15+ (#844)
+    
+    Details:
+    - GCC 15 drops support for Xeon Phi architectures such as KNL.
+    - This PR blacklists the `knl` configuration for GCC 15+.
+    
+    (cherry picked from commit 7e8a5891902312a281bce37037eaa06d7d501639)
+
+commit 154f9fcd9cf24b85451685c7e91e34a836375aed
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jun 24 17:14:58 2025 -0500
+
+    CHANGELOG update (2.0)
+
 commit 200c795373e8ddeffee8d957dcadd05f7e10ab7f
 Author: Devin Matthews <damatthews@smu.edu>
 Date:   Tue Jun 24 17:13:42 2025 -0500
