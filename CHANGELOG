@@ -1,10 +1,226 @@
-commit c00b9c748dbf271e5719dedd1184383efe662b44
+commit e67a93d6799f46f36575448b0a83cf5870dda87e
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jun 24 23:48:42 2025 -0500
+
+    Version file update (1.2)
+
+commit eb2c2721722ae87e1c4221ef12831b7d4469c11b
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jun 24 23:47:36 2025 -0500
+
+    Update ReleaseNotes.md.
+
+commit 7b4cb97fb0779d6c6f4b2782ec5c4876243cea1f
+Author: Dave Love <dave.love@manchester.ac.uk>
+Date:   Fri Jan 24 21:44:32 2025 +0000
+
+    Blacklist KNL with GCC 15+ (#844)
+    
+    Details:
+    - GCC 15 drops support for Xeon Phi architectures such as KNL.
+    - This PR blacklists the `knl` configuration for GCC 15+.
+    
+    (cherry picked from commit 7e8a5891902312a281bce37037eaa06d7d501639)
+
+commit 5c869ba46672379a4170756f5fb45a263ead3baa
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jun 24 16:46:23 2025 -0500
+
+    Remove unnecessary OpenMP include. (#875)
+    
+    Details:
+    - Previously, `<omp.h>` was included in `bli_thrcomm_openmp.h` so that the framework
+      could access the necessary OpenMP functions.
+    - As @melven reported (#873), this causes issues when `blis.h` is included in C++ code since
+      the `<omp.h>` include happens with `extern "C"`.
+    - Move the include from the header to the necessary .c files so that it does not "pollute" `blis.h`.
+    
+    (cherry picked from commit 843a5e8d394d126ed370da523d2c09d7e12b582d)
+
+commit ce7701a80f405c2280a03313f868c0b1c7b655cc
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jun 24 15:38:15 2025 -0500
+
+    Apply temporary fix for gcc 15. (#874)
+    
+    Details:
+    - As reported in #845, gcc 15 fails to build the haswell
+      gemmsup kernels due to the use of rbp.
+    - As a temporary fix, disable slp-tree-vectorization in just
+      the affected files.
+    - Thanks @loveshack for reporting and @chillenb for the suggested
+      fix.
+    - Eventually, the kernels should be rewritten to avoid using rbp.
+    
+    (cherry picked from commit 36effd70b6a323856d98b17dda9cc3afd181b658)
+
+commit 05e129db6912514d0fa322b37f22836760f4e264
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Jun 7 13:18:01 2025 -0500
+
+    Fix arch definitions in CI.
+
+commit a71902ecbb589b8485154d2a65560cd3b0b3c15b
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Jun 7 12:33:41 2025 -0500
+
+    Turn on CI testing for release tracking branches.
+    
+    (cherry picked from commit 09e77a43651ba2673c3abac23093a595f1b3a920)
+
+commit a5bdc496423470a01c7d6370504319a6759624be
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu May 1 10:11:59 2025 -0500
+
+    Update CREDITS
+    
+    [ci skip]
+    
+    (cherry picked from commit 5097c599b58aecb7f990cc7bd7a5dad688a48df8)
+
+commit a4d5d55dfcc2c298e0d7c95bd1ce20a1f264dd80
+Author: Minh Quan Ho <1337056+hominhquan@users.noreply.github.com>
+Date:   Mon Apr 7 21:21:45 2025 +0200
+
+    Examples: replace all 4.1f printm format by 4.3f (#865)
+    
+    Details:
+    - This avoids possible misinterpretation of computation results printed on stdout (thanks Mason McBride for reporting it in #864).
+    - Also force space for positive numbers to help with alignment.
+    
+    (cherry picked from commit 5d9e110a2aa58b6e5d131db9131bae0143f22f9f)
+
+commit 84720f71dae583f99687540c10a12f35332eba19
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sun Mar 2 09:08:35 2025 -0600
+
+    Adjust CI testing (#860)
+    
+    Details:
+    - Add tests for the `generic` config, including forcing broadcast-A,B which uses a different reference kernel. This uncovered a number of bugs, especially in `trsm`/`gemmtrsm` reference kernels, as well as diagonal packing.
+    - Move threaded builds into main build and run `make check` once for each enabled backend.
+    - Fix unused variable warnings in level-0 macros.
+    - Fix `bli_tbastbbs_mxn` and add `bli_tcompressbbs_mxn`. The latter was missing from the reference `gemmtrsm` microkernel and is needed since the B11 block is accumulated to but, for complex datatypes, the effective imaginary stride is non-unit if B is broadcast packed.
+    - Run all BLAS tests single-threaded.
+    
+    (cherry picked from commit 50054a6a7c0561d22720254ab6a9be1199ac10ab)
+
+commit e75eadc75c94d55b7298f0b370662f672c3e9aa5
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sun Mar 2 08:56:54 2025 -0600
+
+    Fix check for SVE instructions which caused problems on Windows. (#859)
+    
+    * Fix check for SVE instructions which caused problems on Windows.
+    
+    Details:
+    - The context intialization for `armsve` was using the HWCAP functionality of Linux to check if SVE instructions are actually available, since these are used to determine the register blocksizes. Naturally, this causes problems on Windows.
+    - Instead, use functions from `bli_cpuid.c` to check for SVE. On Windows, no check is actually done and SVE is never detected.
+    - In the case that the user specifically requests the `armsve` config on Windows, only enable this check for the whole `arm64` family and just assume SVE is available otherwise.
+    
+    * Blacklist armsve on Windows.
+    
+    (cherry picked from commit 37e52a613a6fec3fe1cde0ca018498a16b28a5dc)
+
+commit 6e5414987a5ebb48e32f335b3f302698c1890737
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sun Mar 2 08:50:37 2025 -0600
+
+    Fix problem in `bli_obj_imag_part`. (#861)
+    
+    Details:
+    - When adjusting the buffer to point to the first imaginary element, the function `bli_obj_buffer_at_off` was used which includes and currently set offsets, but then `bli_obj_set_buffer` was used which is the offset *before* applying offsets.
+    - Now a matching `bli_obj_buffer` call is used to avoid any offsets.
+    
+    (cherry picked from commit 97084c75acd0ed104efc5da4dac0fb38a4a044f1)
+
+commit 76e21d25f6d37fb78db3e9174a27302a5090c651
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Feb 19 13:53:39 2025 -0600
+
+    Update README.md
+    
+    Details:
+    - Add status badge for CircleCI.
+    - [ci skip]
+    
+    (cherry picked from commit 3c71737e426f8d567f1324b82609b4a61db670f8)
+
+commit 0dc6ad3729067e609b77d19e9d5d9dde5f3bc41e
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Feb 19 13:31:19 2025 -0600
+
+    Do not use symbol aliases on macOS. (#856)
+    
+    Details:
+    - The BLAS/CBLAS function `?gemmtr` is currently implemented as a symbol alias of the already-existing `?gemmt`. This does not work on macOS/Darwin.
+    - Instead, use a minimal wrapper function which calls the appropriate existing BLAS/CBLAS function.
+    - Also clean up the CBLAS prototypes a bit.
+    
+    (cherry picked from commit 14047f62d1fc746cbabe112197cfc1afe526a82a)
+
+commit 09c4109257fc34ace4ce081a560b5441b2f023d5
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Feb 8 13:47:08 2025 -0600
+
+    Add CircleCI (#855)
+    
+    Details:
+    - This PR adds CircleCI testing in addition to TravisCI and Appveyor.
+    - All of the same tests as on Travis are run, except that different hardware typically ends up being used (usually Zen on Travis, Xeon Platinum on Circle). This has actually exposed a couple of bugs (see #850 and #852).
+    - The `travis` directory has been renamed to `ci` as it is now shared.
+    - Running SDE on CircleCI is a bit problematic because glibc changed how CPUID detection is done. This requires running some architectures with different hardware definition files and forcing a config via `BLIS_ARCH_TYPE`.
+    
+    (cherry picked from commit 40a52dc0289f27f74a43e886ae14bf11738db169)
+
+commit a0d7f26ba37689d351963c276711e4f51bf99e3e
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Feb 6 23:22:24 2025 -0600
+
+    Fix problem with clang-14.0.0 and reference `gemm` ukr. (#854)
+    
+    Details:
+    - clang 14.0.0 apparently makes some invalid assumptions about whether
+      or not the AB microtile is initialized in the `gemm` reference
+      microkernel. This leads to the "scale by alpha" part doing something
+      strange (all sorts of random and even NaN values pop up). I do not
+      know why this only manifested for `ztrsm` on `skx` (in
+      `zgemm_skx_ref` via `zgemmtrsm_skx_ref`). See #852.
+    - Aliasing the AB microtile (in the proper datatype) as a pointer to
+      a raw character array, and then initializing the character array
+      with `= { 0 }` convinces the compiler to do the right thing.
+    - The problem did not occur in 14.0.6 or 15.0.7. It may only be a narrow
+      band of versions which are problematic.
+    - This commit adds the char array workaround and fixes #852.
+    
+    (cherry picked from commit 028be422e306986674f7b1d96b99153bf2a6477e)
+
+commit 8a287d52cb8124c987eadf2d3de6d915148e80ea
+Author: M. Zhou <cdluminate@gmail.com>
+Date:   Wed Feb 5 14:07:01 2025 -0800
+
+    Alias *gemmt_ as *gemmtr_ to fix lapack 3.12.1 compatibility. (#849)
+    
+    Details:
+    - Alias `?gemmt_` as `?gemmtr_` to fix lapack 3.12.1 compatibility. (Fixes #848)
+    - Add the `?gemmtr_ `and `cblas_?gemmtr` aliases to symbol list.
+    - Also alias `cblas_?gemmt` as `cblas_?gemmtr` for lapack 3.12.1 compatibility.
+    
+    (cherry picked from commit a6f2ce9dd53fbe099650d322fa69b21a3be10fb0)
+
+commit 464180ff28e6a3f74f7c754ec01ed8a6a2f978df
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Dec 19 11:47:44 2024 -0600
+
+    CHANGELOG update (1.1)
+
+commit 8bc75c39b3edca730a6c94f03c77b1371c03583f
 Author: Devin Matthews <damatthews@smu.edu>
 Date:   Thu Dec 19 11:47:44 2024 -0600
 
     Version file update (1.1)
 
-commit 623f6b9524204dbf6965f34cda52b23d6a51da96
+commit 77287b49c77ce6f0e0e54db23e819928bdfb3d28
 Author: Devin Matthews <damatthews@smu.edu>
 Date:   Thu Dec 19 11:41:26 2024 -0600
 
