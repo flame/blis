@@ -82,16 +82,25 @@ void bli_thrcomm_init_pthreads( dim_t n_threads, thrcomm_t* comm )
 	comm->ti                      = BLIS_POSIX;
 	comm->barrier_sense           = 0;
 	comm->barrier_threads_arrived = 0;
+
+	#ifdef BLIS_HARDEN_BARRIERS
+	err_t r_val;
+	comm->status = ( thrcomm_status_t* )bli_malloc_intl( n_threads * sizeof( thrcomm_status_t ), &r_val );
+	#endif
 }
 
 void bli_thrcomm_cleanup_pthreads( thrcomm_t* comm )
 {
+	#ifdef BLIS_HARDEN_BARRIERS
+	bli_free_intl( comm->status );
+	#endif
+
 	return;
 }
 
-void bli_thrcomm_barrier_pthreads( dim_t t_id, thrcomm_t* comm )
+void bli_thrcomm_barrier_pthreads( dim_t t_id, thrcomm_t* comm, const char* tag )
 {
-	bli_thrcomm_barrier_atomic( t_id, comm );
+	bli_thrcomm_barrier_atomic( t_id, comm, tag );
 }
 
 #endif

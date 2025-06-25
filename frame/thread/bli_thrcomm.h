@@ -81,13 +81,22 @@ typedef struct hpx_barrier_t
 // Define the thrcomm_t structure, which will be common to all threading
 // implementations.
 
+typedef struct thrcomm_status_s
+{
+	gint_t      barrier_sense;
+	const char* tag;
+	char        padding[ BLIS_CACHE_LINE_SIZE ];
+} thrcomm_status_t;
+
 typedef struct thrcomm_s
 {
 	// -- Fields common to all threading implementations --
-
-	void*       sent_object;
-	dim_t       n_threads;
-	timpl_t     ti;
+	void*             sent_object;
+	dim_t             n_threads;
+	timpl_t           ti;
+	#ifdef BLIS_HARDEN_BARRIERS
+	thrcomm_status_t* status;
+	#endif
 
 	// We insert a cache line of padding here to eliminate false sharing between
 	// the fields above and fields below.
@@ -155,7 +164,7 @@ typedef struct thrcomm_s
 // "overloaded" by each method of multithreading.
 typedef void (*thrcomm_init_ft)( dim_t nt, thrcomm_t* comm );
 typedef void (*thrcomm_cleanup_ft)( thrcomm_t* comm );
-typedef void (*thrcomm_barrier_ft)( dim_t tid, thrcomm_t* comm );
+typedef void (*thrcomm_barrier_ft)( dim_t tid, thrcomm_t* comm, const char* tag );
 
 
 // thrcomm_t query (field only)
@@ -180,13 +189,13 @@ void       bli_thrcomm_free( pool_t* sba_pool, thrcomm_t* comm );
 // require the timpl_t as an argument. The threading-specific functions can
 // (and do) omit the timpl_t from their function signatures since their
 // threading implementation is intrinsically known.
-void                   bli_thrcomm_init( timpl_t ti, dim_t n_threads, thrcomm_t* comm );
-void                   bli_thrcomm_cleanup( thrcomm_t* comm );
-BLIS_EXPORT_BLIS void  bli_thrcomm_barrier( dim_t thread_id, thrcomm_t* comm );
+void  bli_thrcomm_init( timpl_t ti, dim_t n_threads, thrcomm_t* comm );
+void  bli_thrcomm_cleanup( thrcomm_t* comm );
+void  bli_thrcomm_barrier( dim_t thread_id, thrcomm_t* comm, const char* tag );
 
 // Other function prototypes.
-BLIS_EXPORT_BLIS void* bli_thrcomm_bcast( dim_t inside_id, void* to_send, thrcomm_t* comm );
-void                   bli_thrcomm_barrier_atomic( dim_t thread_id, thrcomm_t* comm );
+void* bli_thrcomm_bcast( dim_t inside_id, void* to_send, thrcomm_t* comm, const char* tag );
+void  bli_thrcomm_barrier_atomic( dim_t thread_id, thrcomm_t* comm, const char* tag );
 
 #endif
 

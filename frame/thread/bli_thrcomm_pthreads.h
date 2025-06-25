@@ -36,12 +36,12 @@
 #define BLIS_THRCOMM_PTHREADS_H
 
 // Define these prototypes for situations when POSIX multithreading is enabled.
-#ifdef BLIS_ENABLE_PTHREADS 
+#ifdef BLIS_ENABLE_PTHREADS
 
 // pthreads-specific function prototypes.
 void bli_thrcomm_init_pthreads( dim_t nt, thrcomm_t* comm );
 void bli_thrcomm_cleanup_pthreads( thrcomm_t* comm );
-void bli_thrcomm_barrier_pthreads( dim_t tid, thrcomm_t* comm );
+void bli_thrcomm_barrier_pthreads( dim_t tid, thrcomm_t* comm, const char* tag );
 
 #endif
 

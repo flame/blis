@@ -55,7 +55,7 @@ void hpx_barrier_destroy( hpx_barrier_t* barrier )
 	auto* barrier_ = reinterpret_cast<hpx::barrier<>*>( barrier->handle );
 	barrier->handle = nullptr;
 
-	delete barrier_; 
+	delete barrier_;
 }
 
 void hpx_barrier_arrive_and_wait( hpx_barrier_t* barrier )
@@ -86,8 +86,9 @@ void bli_thrcomm_cleanup_hpx( thrcomm_t* comm )
 	hpx_barrier_destroy( &comm->barrier );
 }
 
-void bli_thrcomm_barrier_hpx( dim_t t_id, thrcomm_t* comm )
+void bli_thrcomm_barrier_hpx( dim_t t_id, thrcomm_t* comm, const char* tag )
 {
+	( void )tag;
 	hpx_barrier_arrive_and_wait( &comm->barrier );
 }
 

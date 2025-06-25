@@ -52,17 +52,26 @@ void bli_thrcomm_init_openmp( dim_t n_threads, thrcomm_t* comm )
 	comm->ti                      = BLIS_OPENMP;
 	comm->barrier_sense           = 0;
 	comm->barrier_threads_arrived = 0;
+
+	#ifdef BLIS_HARDEN_BARRIERS
+	err_t r_val;
+	comm->status = ( thrcomm_status_t* )bli_malloc_intl( n_threads * sizeof( thrcomm_status_t ), &r_val );
+	#endif
 }
 
 
 void bli_thrcomm_cleanup_openmp( thrcomm_t* comm )
 {
+	#ifdef BLIS_HARDEN_BARRIERS
+	bli_free_intl( comm->status );
+	#endif
+
 	return;
 }
 
-void bli_thrcomm_barrier_openmp( dim_t t_id, thrcomm_t* comm )
+void bli_thrcomm_barrier_openmp( dim_t t_id, thrcomm_t* comm, const char* tag )
 {
-	bli_thrcomm_barrier_atomic( t_id, comm );
+	bli_thrcomm_barrier_atomic( t_id, comm, tag );
 }
 
 #else
@@ -99,13 +108,13 @@ void bli_thrcomm_cleanup_openmp( thrcomm_t* comm )
 	bli_free_intl( comm->barriers );
 }
 
-void bli_thrcomm_barrier_openmp( dim_t t_id, thrcomm_t* comm )
+void bli_thrcomm_barrier_openmp( dim_t t_id, thrcomm_t* comm, const char* tag )
 {
 	// Return early if the comm is NULL or if there is only one
 	// thread participating.
 	if ( comm == NULL || comm->n_threads == 1 ) return;
 
-	bli_thrcomm_tree_barrier( comm->barriers[t_id] );
+	bli_thrcomm_tree_barrier( comm->barriers[t_id], tag );
 }
 
 // -- Helper functions ---------------------------------------------------------
@@ -184,8 +193,10 @@ void bli_thrcomm_tree_barrier_free( barrier_t* barrier )
 
 #endif
 
-void bli_thrcomm_tree_barrier( barrier_t* barack )
+void bli_thrcomm_tree_barrier( barrier_t* barack, const char* tag )
 {
+	//TODO
+
 	gint_t my_signal = __atomic_load_n( &barack->signal, __ATOMIC_RELAXED );
 
 	dim_t my_count =
