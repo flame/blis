@@ -96,6 +96,8 @@ Build system:
 - Disabled `armsve` on Windows due to build failures. (Hernan Martinez, Atsushi Tatsuma)
 - Added integer `BLIS_VERSION_{MAJOR,MINOR,REVISION}` macros to `blis.h` so that users can check BLIS version compatibility through the C preprocessor.
 - Moved `#include <omp.h>` from `blis.h` to the relevant source files. (Melven Roehrig-Zoellner)
+- Disable building KNL with gcc 15. (Dave Love)
+- Improved support for NVIDIA Fortran compilers (ifx and nvfortran), particularly in terms of selecting the correct method for returning complex numbers. (Jeff Hammond)
 
 Testing:
 - test/3 drivers now allow using the "default" induced method, rather than forcing native or 1m operation. (Field Van Zee, Leick Robinson)
