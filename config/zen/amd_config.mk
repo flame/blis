@@ -62,6 +62,11 @@ CKLPOPTFLAGS     :=
 
 ifeq ($(CC_VENDOR),gcc)
   CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma
+  ifeq ($(shell test $(CC_MAJOR) -ge 15; echo $$?),0)
+    # gcc 15.1.0 fails to compile SUP kernels if -ftree-slp-vectorize
+    # is enabled, which is default in -O2 and higher
+    CKOPTFLAGS += -fno-tree-slp-vectorize
+  endif
 else ifeq ($(CC_VENDOR),clang)
   CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -mno-fma4 -mno-tbm -mno-xop -mno-lwp
   ifeq ($(strip $(shell $(CC) -v |&head -1 |grep -c 'AOCC.LLVM')),1)

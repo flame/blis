@@ -66,6 +66,11 @@ endif
 # they make explicit use of the rbp register.
 CKOPTFLAGS     := $(COPTFLAGS) -O3 -fomit-frame-pointer
 ifeq ($(CC_VENDOR),gcc)
+  ifeq ($(shell test $(CC_MAJOR) -ge 15; echo $$?),0)
+    # gcc 15.1.0 fails to compile SUP kernels if -ftree-slp-vectorize
+    # is enabled, which is default in -O2 and higher
+    CKOPTFLAGS += -fno-tree-slp-vectorize
+  endif
   CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=haswell
   ifeq ($(GCC_OT_4_9_0),yes)
     # If gcc is older than 4.9.0, we must use a different label for -march.

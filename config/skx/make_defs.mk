@@ -67,6 +67,11 @@ endif
 CKOPTFLAGS     := $(COPTFLAGS) -O3 -fomit-frame-pointer
 
 ifeq ($(CC_VENDOR),gcc)
+  ifeq ($(shell test $(CC_MAJOR) -ge 15; echo $$?),0)
+    # gcc 15.1.0 fails to compile SUP kernels if -ftree-slp-vectorize
+    # is enabled, which is default in -O2 and higher
+    CKOPTFLAGS += -fno-tree-slp-vectorize
+  endif
   CKVECFLAGS     := -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse -march=skylake-avx512
 else ifeq ($(CC_VENDOR),icc)
   CKVECFLAGS     := -xCORE-AVX512
