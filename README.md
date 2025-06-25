@@ -93,6 +93,8 @@ and [collaborators](http://shpc.ices.utexas.edu/collaborators.html),
 [publications](http://shpc.ices.utexas.edu/publications.html),
 and [other educational projects](http://www.ulaff.net/) (such as MOOCs).
 
+Support for BLIS development at SMU was provided by the Office of Information Technology Research Technology Services team and HPC System Administrators on computational resources provided in partnership with SMU’s [O’Donnell Data Science and Research Computing Institute](https://www.smu.edu/provost/odonnell-institute).
+
 Education and Learning
 ----------------------
 
