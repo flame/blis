@@ -4,6 +4,7 @@
 
 ## Contents
 
+* [Changes in 1.2](ReleaseNotes.md#changes-in-12)
 * [Changes in 1.1](ReleaseNotes.md#changes-in-11)
 * [Changes in 1.0](ReleaseNotes.md#changes-in-10)
 * [Changes in 0.9.0](ReleaseNotes.md#changes-in-090)
@@ -42,8 +43,31 @@
 * [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
 
+## Changes in 1.2
+June 25, 2025
+
+Improvements present in 1.2:
+
+Compatibility:
+- gemmtr aliases for the gemmt BLAS and CBLAS compatibility functions have been added to support recent versions of LAPACK. (Mo Zhou)
+
+Kernels:
+- Fixed bug affecting reference kernels with clang 14.
+- Fixed an incompatibility between the haswell gemmsup kernels and gcc 15. (Dave Love, Christopher Hillenbrand)
+
+Build system:
+- Disabled armsve on Windows due to build failures. (Hernan Martinez, Atsushi Tatsuma)
+- Moved #include <omp.h> from blis.h to the relevant source files. (Melven Roehrig-Zoellner)
+- Disable building KNL with gcc 15. (Dave Love)
+
+Testing:
+- CI testing infrastructure has moved to CircleCI.
+
+Documentation:
+- Widened print format in code examples to avoid misinterpretation of results. (Minh Quan Ho, Mason McBride)
+
 ## Changes in 1.1
-January 15, 2024
+January 15, 2025
 
 Improvements present in 1.1:
 
