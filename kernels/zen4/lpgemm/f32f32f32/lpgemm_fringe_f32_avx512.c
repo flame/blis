@@ -39,6 +39,12 @@
 
 #include "lpgemm_kernel_macros_f32.h"
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x64)
 {
     static void* post_ops_labels[] =
@@ -1651,6 +1657,12 @@ POST_OPS_5x64F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x64)
 {
     static void* post_ops_labels[] =
@@ -3014,6 +3026,12 @@ POST_OPS_4x64F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x64)
 {
     static void* post_ops_labels[] =
@@ -4152,6 +4170,12 @@ POST_OPS_3x64F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x64)
 {
     static void* post_ops_labels[] =
@@ -5058,6 +5082,12 @@ POST_OPS_2x64F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x64)
 {
     static void* post_ops_labels[] =
@@ -5729,6 +5759,12 @@ POST_OPS_1x64F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x48)
 {
     static void* post_ops_labels[] =
@@ -7105,6 +7141,12 @@ POST_OPS_5x48F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x48)
 {
     static void* post_ops_labels[] =
@@ -8275,6 +8317,12 @@ POST_OPS_4x48F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x48)
 {
     static void* post_ops_labels[] =
@@ -9247,6 +9295,12 @@ POST_OPS_3x48F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x48)
 {
     static void* post_ops_labels[] =
@@ -10032,6 +10086,12 @@ POST_OPS_2x48F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x48)
 {
     static void* post_ops_labels[] =
@@ -10631,6 +10691,12 @@ POST_OPS_1x48F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x32)
 {
     static void* post_ops_labels[] =
@@ -11772,6 +11838,12 @@ POST_OPS_5x32F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x32)
 {
     static void* post_ops_labels[] =
@@ -12757,6 +12829,12 @@ POST_OPS_4x32F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x32)
 {
     static void* post_ops_labels[] =
@@ -13603,6 +13681,12 @@ POST_OPS_3x32F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x32)
 {
     static void* post_ops_labels[] =
@@ -14267,6 +14351,12 @@ POST_OPS_2x32F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x32)
 {
     static void* post_ops_labels[] =
@@ -14789,6 +14879,12 @@ POST_OPS_1x32F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x16)
 {
     static void* post_ops_labels[] =
@@ -15697,6 +15793,12 @@ POST_OPS_5x16F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x16)
 {
     static void* post_ops_labels[] =
@@ -16496,6 +16598,12 @@ POST_OPS_4x16F_DISABLE:
 }
 
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x16)
 {
     static void* post_ops_labels[] =
@@ -17188,6 +17296,12 @@ POST_OPS_3x16F_DISABLE:
 }
 
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x16)
 {
     static void* post_ops_labels[] =
@@ -17769,6 +17883,12 @@ POST_OPS_2x16F_DISABLE:
 }
 
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x16)
 {
     static void* post_ops_labels[] =
@@ -18228,6 +18348,12 @@ POST_OPS_1x16F_DISABLE:
 }
 
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_MN_LT_NR0_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5xlt16)
 {
     static void* post_ops_labels[] =
@@ -19135,6 +19261,12 @@ POST_OPS_5xlt16F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_MN_LT_NR0_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4xlt16)
 {
     static void* post_ops_labels[] =
@@ -19933,6 +20065,12 @@ POST_OPS_4xlt16F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_MN_LT_NR0_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3xlt16)
 {
     static void* post_ops_labels[] =
@@ -20627,6 +20765,12 @@ POST_OPS_3xlt16F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_MN_LT_NR0_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2xlt16)
 {
     static void* post_ops_labels[] =
@@ -21205,6 +21349,12 @@ POST_OPS_2xlt16F_DISABLE:
       }
 }
 
+// Disabling tree loop optimizations for fringe kernels when compiled with
+// GCC 11.4. This is done to address the aggressive optimizations that result
+// in numerical inaccuracies in the SIGMOID operation.
+#if defined(__GNUC__) && __GNUC__ == 11 && __GNUC_MINOR__ == 4
+    __attribute__((optimize("no-tree-loop-optimize")))
+#endif
 LPGEMM_MN_LT_NR0_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1xlt16)
 {
     static void* post_ops_labels[] =
