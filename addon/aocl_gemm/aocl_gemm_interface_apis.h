@@ -192,20 +192,21 @@ BLIS_EXPORT_ADDON void aocl_batch_gemm_ ## LP_SFX \
        const char*     order, \
        const char*     transa, \
        const char*     transb, \
-       const dim_t     batch_size, \
        const dim_t*    m, \
        const dim_t*    n, \
        const dim_t*    k, \
        const Sum_type* alpha, \
        const A_type**  a, \
        const dim_t*    lda, \
-       const char*     mem_format_a, \
        const B_type**  b, \
        const dim_t*    ldb, \
-       const char*     mem_format_b, \
        const Sum_type* beta, \
        C_type**        c, \
        const dim_t*    ldc, \
+       const dim_t     group_count, \
+       const dim_t*    group_size, \
+       const char*     mem_format_a, \
+       const char*     mem_format_b, \
        aocl_post_op**  post_op_unparsed \
      ) \
 

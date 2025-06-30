@@ -80,7 +80,8 @@ void mat_mul_ ## BLAS_SFX \
        char*   transb,  \
        char*   op_a, \
        char*   op_b, \
-       dim_t   bs, \
+       dim_t   group_count, \
+       dim_t*  group_size, \
        dim_t*  m, \
        dim_t*  n, \
        dim_t*  k, \
@@ -95,12 +96,13 @@ void mat_mul_ ## BLAS_SFX \
        aocl_post_op** post_op\
      ) \
 { \
-    aocl_batch_gemm_ ## BLAS_SFX( stor_order, transa, transb, bs, m, n, k, \
+    aocl_batch_gemm_ ## BLAS_SFX( stor_order, transa, transb, m, n, k, \
                     alpha, \
-                    (const A_type**)a, lda, op_a, \
-                    (const B_type**)b, ldb, op_b, \
+                    (const A_type**)a, lda,\
+                    (const B_type**)b, ldb, \
                     beta, \
-                    c, ldc, post_op ); \
+                    c, ldc, group_count, group_size, \
+                    op_a, op_b, post_op ); \
 } \
 
 GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32)
@@ -139,7 +141,8 @@ void print_result
        char*        transb,
        char*        op_a,
        char*        op_b,
-       dim_t        bs,
+       dim_t        group_count,
+       dim_t        group_size,
        dim_t*       m,
        dim_t*       n,
        dim_t*       k,
@@ -149,18 +152,19 @@ void print_result
        double      gflops
      )
 {
-    printf( "%s bs: %ld, stor:%c, transa:%c, transb:%c, op_a:%c, op_b:%c, m: %ld, n: %ld, k: %ld, lda: %ld," \
+    printf( "%s group_count: %ld, group_size = %ld, stor:%c, transa:%c, transb:%c, op_a:%c, op_b:%c, m: %ld, n: %ld, k: %ld, lda: %ld," \
             " ldb: %ld, ldc: %ld, n_repeats: %d, Gops: %f \n", \
-            msg, bs, stor_order[0], transa[0], transb[0], op_a[0], op_b[0], m[0], n[0], k[0], lda[0], ldb[0], \
-            ldc[0], n_repeats, gflops );
+            msg, group_count, group_size, stor_order[group_count - 1], transa[group_count - 1], transb[group_count - 1], op_a[group_count - 1], op_b[group_count - 1],
+            m[group_count - 1], n[group_count - 1], k[group_count - 1], lda[group_count - 1], ldb[group_count - 1], \
+            ldc[group_count - 1], n_repeats, gflops );
 
     if( bench_mode == 'a' )
     {
-        for( dim_t i = 1; i < bs; i++)
-        {
-            printf("stor:%c, transa:%c, transb:%c, op_a:%c, op_b:%c, m: %ld, n: %ld, k: %ld, lda: %ld, ldb: %ld, ldc: %ld\n",
-                stor_order[i], transa[i], transb[i], op_a[i], op_b[i], m[i], n[i], k[i], lda[i], ldb[i], ldc[i]);
-        }
+        for( dim_t j = 1; j < group_size; j++ ){
+                printf("stor:%c, transa:%c, transb:%c, op_a:%c, op_b:%c, m: %ld, n: %ld, k: %ld, lda: %ld, ldb: %ld, ldc: %ld\n",
+                    stor_order[group_count - 1], transa[group_count - 1], transb[group_count - 1], op_a[group_count - 1], op_b[group_count - 1],
+                    m[group_count - 1], n[group_count - 1], k[group_count - 1], lda[group_count - 1], ldb[group_count - 1], ldc[group_count - 1]);
+            }
     }
 }
 
@@ -173,7 +177,8 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
        char*   op_a, \
        char*   op_b, \
        int32_t n_repeats, \
-       dim_t   bs, \
+       dim_t   group_count, \
+       dim_t*  group_size, \
        dim_t*  m, \
        dim_t*  n, \
        dim_t*  k, \
@@ -197,7 +202,7 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
  \
         GEN_FUNC_NAME(mat_mul_,BLAS_SFX) \
         ( \
-          stor_order, transa, transb, op_a, op_b, bs, m, n, k, \
+          stor_order, transa, transb, op_a, op_b, group_count, group_size, m, n, k, \
           alpha, \
           a, lda, \
           b, ldb, \
@@ -210,10 +215,16 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
  \
     } \
     double ops = 0; \
-    for( dim_t i = 0; i < bs; i++ ) { ops += 2.0 * m[i] * n[i] * k[i];} \
-    double gflops = ( ops ) / ( dtime_save * 1.0e9 ); \
+    for( dim_t i = 0; i < group_count; i++ ) \
+    { \
+        for( dim_t j = 0; j < group_size[i]; j++) \
+        {\
+            ops += 2.0 * m[i] * n[i] * k[i]; \
+        } \
+        double gflops = ( ops ) / ( dtime_save * 1.0e9 ); \
  \
-    print_result( XSTR(BLAS_SFX), n_repeats, stor_order, transa, transb, op_a, op_b, bs, m, n, k, lda, ldb, ldc, gflops); \
+        print_result( XSTR(BLAS_SFX), n_repeats, stor_order, transa, transb, op_a, op_b, group_count, group_size[i], m, n, k, lda, ldb, ldc, gflops); \
+    }\
 } \
 
 GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32)
@@ -439,7 +450,8 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
        const char* stor_order, \
        char*    transa, \
        char*    transb, \
-       dim_t    bs, \
+       dim_t    group_count, \
+       dim_t*   group_size, \
        dim_t*   m, \
        dim_t*   n, \
        dim_t*   k, \
@@ -461,227 +473,232 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
     dim_t rs_c, cs_c; \
     dim_t rs_c_ref, cs_c_ref; \
  \
-    for( dim_t bs_i = 0; bs_i < bs; bs_i++ ) \
+    dim_t mat_idx = 0; \
+\
+    for( dim_t gc_i = 0; gc_i < group_count; gc_i++ ) \
     { \
-        if( stor_order[bs_i] == 'r' || stor_order[bs_i] == 'R' ) \
+        if( stor_order[gc_i] == 'r' || stor_order[gc_i] == 'R' ) \
         { \
-            if( ( transa[bs_i] == 'n' ) || ( transa[bs_i] == 'N' ) ) \
+            if( ( transa[gc_i] == 'n' ) || ( transa[gc_i] == 'N' ) ) \
             { \
-                rs_a = lda[bs_i]; \
+                rs_a = lda[gc_i]; \
                 cs_a = 1; \
             } \
             else \
             { \
                 rs_a = 1; \
-                cs_a = lda[bs_i]; \
+                cs_a = lda[gc_i]; \
             } \
-            if( ( transb[bs_i] == 'n' ) || ( transb[bs_i] == 'N' ) ) \
+            if( ( transb[gc_i] == 'n' ) || ( transb[gc_i] == 'N' ) ) \
             { \
-                rs_b = ldb[bs_i]; \
+                rs_b = ldb[gc_i]; \
                 cs_b = 1; \
             } \
             else \
             { \
                 rs_b = 1; \
-                cs_b = ldb[bs_i]; \
+                cs_b = ldb[gc_i]; \
             } \
-            rs_c = ldc[bs_i]; \
+            rs_c = ldc[gc_i]; \
             cs_c = 1; \
-            rs_c_ref = ldc_ref[bs_i]; \
+            rs_c_ref = ldc_ref[gc_i]; \
             cs_c_ref = 1; \
         } \
         else /* column storage */ \
         { \
-            if( transa[bs_i] == 'n' || transa[bs_i] == 'N') \
+            if( transa[gc_i] == 'n' || transa[gc_i] == 'N') \
             { \
                 rs_a = 1; \
-                cs_a = lda[bs_i]; \
+                cs_a = lda[gc_i]; \
             } \
             else \
             { \
-                rs_a= lda[bs_i]; \
+                rs_a= lda[gc_i]; \
                 cs_a = 1; \
             } \
-            if( ( transb[bs_i] == 'n' ) || ( transb[bs_i] == 'N' ) ) \
+            if( ( transb[gc_i] == 'n' ) || ( transb[gc_i] == 'N' ) ) \
             { \
                 rs_b = 1; \
-                cs_b = ldb[bs_i]; \
+                cs_b = ldb[gc_i]; \
             } \
             else \
             { \
-                rs_b = ldb[bs_i]; \
+                rs_b = ldb[gc_i]; \
                 cs_b = 1; \
             } \
             rs_c = 1; \
-            cs_c = ldc[bs_i]; \
+            cs_c = ldc[gc_i]; \
             rs_c_ref = 1; \
-            cs_c_ref = ldc_ref[bs_i]; \
+            cs_c_ref = ldc_ref[gc_i]; \
         } \
         aocl_pre_op* a_pre_op = NULL; \
-        if ( post_op[bs_i] != NULL ) \
+        if ( post_op[gc_i] != NULL ) \
         { \
-            a_pre_op = post_op[bs_i]->pre_ops; \
+            a_pre_op = post_op[gc_i]->pre_ops; \
         } \
-        for ( dim_t i = 0; i < m[bs_i]; ++i ) \
+        for( dim_t gs_i = 0; gs_i < group_size[gc_i]; gs_i++ ) \
         { \
-            for ( dim_t j = 0; j < n[bs_i]; ++j ) \
+            for ( dim_t i = 0; i < m[gc_i]; ++i ) \
             { \
-                ACCUM_type temp_accum = 0; \
-                C_type out_temp_accum = 0; \
- \
-                temp_accum = GEN_FUNC_NAME(mat_mul_accuracy_check_accum_,BLAS_SFX) \
-                    (a[bs_i], b[bs_i], c_ref[bs_i], temp_accum, alpha[bs_i], beta[bs_i],\
-                    rs_a, rs_b, cs_a, cs_b, rs_c_ref, cs_c_ref, i, j, k[bs_i], n[bs_i], \
-                    a_pre_op); \
+                for ( dim_t j = 0; j < n[gc_i]; ++j ) \
+                { \
+                    ACCUM_type temp_accum = 0; \
+                    C_type out_temp_accum = 0; \
     \
-                POST_ACCUM_type post_temp_accum = 0; \
-                if ( is_integerAPI_avx512(#BLAS_SFX) ) \
-                { \
-                    CVT_FUNC_NAME(ACCUM_type,POST_ACCUM_type)(temp_accum, &post_temp_accum); \
-                } \
-                else \
-                { \
-                    post_temp_accum = temp_accum; \
-                } \
-                if ( post_op[bs_i] != NULL ) \
-                { \
-                    dim_t ele_i = 0; \
-                    for ( dim_t op_id = 0; op_id < post_op[bs_i]->seq_length; ++op_id ) \
+                    temp_accum = GEN_FUNC_NAME(mat_mul_accuracy_check_accum_,BLAS_SFX) \
+                        (a[mat_idx + gs_i], b[mat_idx + gs_i], c_ref[mat_idx + gs_i], temp_accum, alpha[gc_i], beta[gc_i],\
+                        rs_a, rs_b, cs_a, cs_b, rs_c_ref, cs_c_ref, i, j, k[gc_i], n[gc_i], \
+                        a_pre_op); \
+                    POST_ACCUM_type post_temp_accum = 0; \
+                    if ( is_integerAPI_avx512(#BLAS_SFX) ) \
                     { \
-                        if ( post_op[bs_i]->seq_vector[op_id] == BIAS ) \
+                        CVT_FUNC_NAME(ACCUM_type,POST_ACCUM_type)(temp_accum, &post_temp_accum); \
+                    } \
+                    else \
+                    { \
+                        post_temp_accum = temp_accum; \
+                    } \
+                    if ( post_op[gc_i] != NULL ) \
+                    { \
+                        dim_t ele_i = 0; \
+                        for ( dim_t op_id = 0; op_id < post_op[gc_i]->seq_length; ++op_id ) \
                         { \
-                            post_temp_accum += GEN_FUNC_NAME(get_bias_post_op_val_,BLAS_SFX) \
-                                ( ( post_op[bs_i]->bias )->bias, j, ( post_op[bs_i]->bias )->stor_type ); \
-                        } \
-                        else if ( post_op[bs_i]->seq_vector[op_id] == ELTWISE ) \
-                        { \
-                            if ( ( post_op[bs_i]->eltwise + ele_i )->algo.algo_type == \
-                                    PRELU ) /* PReLU*/ \
+                            if ( post_op[gc_i]->seq_vector[op_id] == BIAS ) \
                             { \
-                                post_temp_accum =  GEN_FUNC_NAME(get_prelu_post_op_val_,BLAS_SFX) \
-                                    (post_temp_accum, ( post_op[bs_i]->eltwise + ele_i )->algo.alpha ); \
-                                ele_i += 1; \
+                                post_temp_accum += GEN_FUNC_NAME(get_bias_post_op_val_,BLAS_SFX) \
+                                    ( ( post_op[gc_i]->bias )->bias, j, ( post_op[gc_i]->bias )->stor_type ); \
                             } \
-                            else if ( ( post_op[bs_i]->eltwise + ele_i )->algo.algo_type == \
-                                    GELU_TANH ) /* TANH GeLU*/ \
+                            else if ( post_op[gc_i]->seq_vector[op_id] == ELTWISE ) \
                             { \
-                                post_temp_accum = GEN_FUNC_NAME(GELU_TANH_post_op_,BLAS_SFX) (post_temp_accum);\
-                                ele_i += 1; \
+                                if ( ( post_op[gc_i]->eltwise + ele_i )->algo.algo_type == \
+                                        PRELU ) /* PReLU*/ \
+                                { \
+                                    post_temp_accum =  GEN_FUNC_NAME(get_prelu_post_op_val_,BLAS_SFX) \
+                                        (post_temp_accum, ( post_op[gc_i]->eltwise + ele_i )->algo.alpha ); \
+                                    ele_i += 1; \
+                                } \
+                                else if ( ( post_op[gc_i]->eltwise + ele_i )->algo.algo_type == \
+                                        GELU_TANH ) /* TANH GeLU*/ \
+                                { \
+                                    post_temp_accum = GEN_FUNC_NAME(GELU_TANH_post_op_,BLAS_SFX) (post_temp_accum);\
+                                    ele_i += 1; \
+                                } \
+                                else if ( ( post_op[gc_i]->eltwise + ele_i )->algo.algo_type == \
+                                        GELU_ERF ) /* ERF GeLU*/ \
+                                { \
+                                    post_temp_accum = GEN_FUNC_NAME(GELU_ERF_post_op_,BLAS_SFX) (post_temp_accum);\
+                                    ele_i += 1; \
+                                } \
+                                else if ( ( post_op[gc_i]->eltwise + ele_i )->algo.algo_type == \
+                                        SWISH ) /* SiLU*/ \
+                                { \
+                                    post_temp_accum = GEN_FUNC_NAME(SWISH_post_op_,BLAS_SFX) \
+                                        (post_temp_accum, \
+                                        ( post_op[gc_i]->eltwise + ele_i )->algo.alpha );\
+                                    ele_i += 1; \
+                                } \
+                                else if ( ( post_op[gc_i]->eltwise + ele_i )->algo.algo_type == \
+                                        RELU ) /* ReLU*/ \
+                                { \
+                                    post_temp_accum = ( post_temp_accum > 0 ) ? post_temp_accum : 0 ; \
+                                    ele_i += 1; \
+                                } \
+                                else if ( ( post_op[gc_i]->eltwise + ele_i )->algo.algo_type == \
+                                        TANH ) /* TANH*/ \
+                                { \
+                                    post_temp_accum = GEN_FUNC_NAME(TANH_post_op_,BLAS_SFX) (post_temp_accum);\
+                                    ele_i += 1; \
+                                } \
+                                else if ( ( post_op[gc_i]->eltwise + ele_i )->algo.algo_type == \
+                                        SIGMOID ) /* Sigmoid*/ \
+                                { \
+                                    post_temp_accum = GEN_FUNC_NAME(SIGMOID_post_op_,BLAS_SFX) (post_temp_accum);\
+                                    ele_i += 1; \
+                                } \
+                                else if ( ( post_op[gc_i]->eltwise + ele_i )->algo.algo_type == \
+                                        CLIP ) /* CLIP*/ \
+                                { \
+                                    post_temp_accum = GEN_FUNC_NAME(get_clip_post_op_val_,BLAS_SFX) \
+                                        ( post_temp_accum, \
+                                            ( post_op[gc_i]->eltwise + ele_i )->algo.alpha, \
+                                            ( post_op[gc_i]->eltwise + ele_i )->algo.beta \
+                                        ); \
+                                    ele_i += 1; \
+                                } \
+                                else \
+                                {} \
                             } \
-                            else if ( ( post_op[bs_i]->eltwise + ele_i )->algo.algo_type == \
-                                    GELU_ERF ) /* ERF GeLU*/ \
+                            else if ( post_op[gc_i]->seq_vector[op_id] == SCALE ) \
                             { \
-                                post_temp_accum = GEN_FUNC_NAME(GELU_ERF_post_op_,BLAS_SFX) (post_temp_accum);\
-                                ele_i += 1; \
+                                post_temp_accum = GEN_FUNC_NAME(mat_mul_accuracy_check_downscale_,BLAS_DOWNSCALE_SFX) \
+                                    (post_temp_accum, post_op[gc_i], j, ( post_op[gc_i]->sum )->sf_stor_type, \
+                                        ( post_op[gc_i]->sum )->zp_stor_type); \
                             } \
-                            else if ( ( post_op[bs_i]->eltwise + ele_i )->algo.algo_type == \
-                                    SWISH ) /* SiLU*/ \
+                            else if ( post_op[mat_idx + gs_i]->seq_vector[op_id] == MATRIX_ADD ) \
                             { \
-                                post_temp_accum = GEN_FUNC_NAME(SWISH_post_op_,BLAS_SFX) \
-                                    (post_temp_accum, \
-                                    ( post_op[bs_i]->eltwise + ele_i )->algo.alpha );\
-                                ele_i += 1; \
+                                dim_t rs_m = ( post_op[gc_i]->matrix_add )->ldm; \
+                                dim_t cs_m = 1; \
+                                if ( ( stor_order[gc_i] == 'C' ) || ( stor_order[gc_i] == 'c' ) ) \
+                                { \
+                                    cs_m = rs_m; \
+                                    rs_m = 1; \
+                                } \
+                                float* scl_fctr = ( float* )( ( post_op[gc_i]->matrix_add )->scale_factor ); \
+                                dim_t scl_fctr_len = ( post_op[gc_i]->matrix_add )->scale_factor_len; \
+                                post_temp_accum += GEN_FUNC_NAME(get_matrix_add_post_op_val_,BLAS_SFX) \
+                                            ( ( post_op[gc_i]->matrix_add )->matrix, i, \
+                                            j, rs_m, cs_m, scl_fctr, scl_fctr_len, ( post_op[gc_i]->matrix_add )->stor_type ); \
                             } \
-                            else if ( ( post_op[bs_i]->eltwise + ele_i )->algo.algo_type == \
-                                    RELU ) /* ReLU*/ \
+                            else if ( post_op[gc_i]->seq_vector[op_id] == MATRIX_MUL ) \
                             { \
-                                post_temp_accum = ( post_temp_accum > 0 ) ? post_temp_accum : 0 ; \
-                                ele_i += 1; \
-                            } \
-                            else if ( ( post_op[bs_i]->eltwise + ele_i )->algo.algo_type == \
-                                    TANH ) /* TANH*/ \
-                            { \
-                                post_temp_accum = GEN_FUNC_NAME(TANH_post_op_,BLAS_SFX) (post_temp_accum);\
-                                ele_i += 1; \
-                            } \
-                            else if ( ( post_op[bs_i]->eltwise + ele_i )->algo.algo_type == \
-                                    SIGMOID ) /* Sigmoid*/ \
-                            { \
-                                post_temp_accum = GEN_FUNC_NAME(SIGMOID_post_op_,BLAS_SFX) (post_temp_accum);\
-                                ele_i += 1; \
-                            } \
-                            else if ( ( post_op[bs_i]->eltwise + ele_i )->algo.algo_type == \
-                                    CLIP ) /* CLIP*/ \
-                            { \
-                                post_temp_accum = GEN_FUNC_NAME(get_clip_post_op_val_,BLAS_SFX) \
-                                    ( post_temp_accum, \
-                                        ( post_op[bs_i]->eltwise + ele_i )->algo.alpha, \
-                                        ( post_op[bs_i]->eltwise + ele_i )->algo.beta \
-                                    ); \
-                                ele_i += 1; \
+                                dim_t rs_m = ( post_op[gc_i]->matrix_mul )->ldm; \
+                                dim_t cs_m = 1; \
+                                if ( ( stor_order[gc_i] == 'C' ) || ( stor_order[gc_i] == 'c' ) ) \
+                                { \
+                                    cs_m = rs_m; \
+                                    rs_m = 1; \
+                                } \
+                                float* scl_fctr = ( float* )( ( post_op[gc_i]->matrix_mul )->scale_factor ); \
+                                dim_t scl_fctr_len = ( post_op[gc_i]->matrix_mul )->scale_factor_len; \
+                                post_temp_accum *= GEN_FUNC_NAME(get_matrix_mul_post_op_val_,BLAS_SFX) \
+                                            ( ( post_op[gc_i]->matrix_mul )->matrix, i, \
+                                            j, rs_m, cs_m, scl_fctr, scl_fctr_len, ( post_op[gc_i]->matrix_mul )->stor_type ); \
                             } \
                             else \
                             {} \
                         } \
-                        else if ( post_op[bs_i]->seq_vector[op_id] == SCALE ) \
-                        { \
-                            post_temp_accum = GEN_FUNC_NAME(mat_mul_accuracy_check_downscale_,BLAS_DOWNSCALE_SFX) \
-                                (post_temp_accum, post_op[bs_i], j, ( post_op[bs_i]->sum )->sf_stor_type, \
-                                    ( post_op[bs_i]->sum )->zp_stor_type); \
-                        } \
-                        else if ( post_op[bs_i]->seq_vector[op_id] == MATRIX_ADD ) \
-                        { \
-                            dim_t rs_m = ( post_op[bs_i]->matrix_add )->ldm; \
-                            dim_t cs_m = 1; \
-                            if ( ( stor_order[bs_i] == 'C' ) || ( stor_order[bs_i] == 'c' ) ) \
-                            { \
-                                cs_m = rs_m; \
-                                rs_m = 1; \
-                            } \
-                            float* scl_fctr = ( float* )( ( post_op[bs_i]->matrix_add )->scale_factor ); \
-                            dim_t scl_fctr_len = ( post_op[bs_i]->matrix_add )->scale_factor_len; \
-                            post_temp_accum += GEN_FUNC_NAME(get_matrix_add_post_op_val_,BLAS_SFX) \
-                                        ( ( post_op[bs_i]->matrix_add )->matrix, i, \
-                                        j, rs_m, cs_m, scl_fctr, scl_fctr_len, ( post_op[bs_i]->matrix_add )->stor_type ); \
-                        } \
-                        else if ( post_op[bs_i]->seq_vector[op_id] == MATRIX_MUL ) \
-                        { \
-                            dim_t rs_m = ( post_op[bs_i]->matrix_mul )->ldm; \
-                            dim_t cs_m = 1; \
-                            if ( ( stor_order[bs_i] == 'C' ) || ( stor_order[bs_i] == 'c' ) ) \
-                            { \
-                                cs_m = rs_m; \
-                                rs_m = 1; \
-                            } \
-                            float* scl_fctr = ( float* )( ( post_op[bs_i]->matrix_mul )->scale_factor ); \
-                            dim_t scl_fctr_len = ( post_op[bs_i]->matrix_mul )->scale_factor_len; \
-                            post_temp_accum *= GEN_FUNC_NAME(get_matrix_mul_post_op_val_,BLAS_SFX) \
-                                        ( ( post_op[bs_i]->matrix_mul )->matrix, i, \
-                                        j, rs_m, cs_m, scl_fctr, scl_fctr_len, ( post_op[bs_i]->matrix_mul )->stor_type ); \
-                        } \
-                        else \
-                        {} \
                     } \
-                } \
-                /* Need to convert to downscaled type if required.*/ \
-                mat_mul_get_output_type_val ## POST_ACCUM_type ## C_type \
-                ( \
-                &out_temp_accum, &post_temp_accum \
-                ); \
-    \
-                float comp_float, ref_float; \
-                GEN_FUNC_NAME(C_type,_to_float)(*( c[bs_i] + ( rs_c * i ) + ( cs_c * j ) ), &comp_float); \
-                GEN_FUNC_NAME(C_type,_to_float)(out_temp_accum, &ref_float); \
-    \
-                if ( ( ( comp_float - ref_float ) > 1.0E-5 ) || \
-                    ( ( ref_float - comp_float ) > 1.0E-5 ) ) \
-                { \
-                    if ( fout ) \
+                    /* Need to convert to downscaled type if required.*/ \
+                    mat_mul_get_output_type_val ## POST_ACCUM_type ## C_type \
+                    ( \
+                        &out_temp_accum, &post_temp_accum \
+                    ); \
+        \
+                    float comp_float, ref_float; \
+                    GEN_FUNC_NAME(C_type,_to_float)(*( c[mat_idx + gs_i] + ( rs_c * i ) + ( cs_c * j ) ), &comp_float); \
+                    GEN_FUNC_NAME(C_type,_to_float)(out_temp_accum, &ref_float); \
+        \
+                    if ( ( ( comp_float - ref_float ) > 1.0E-5 ) || \
+                        ( ( ref_float - comp_float ) > 1.0E-5 ) ) \
                     { \
-                        fprintf( fout, "%s Failure input m: %ld, n: %ld, k: %ld," \
-                                        " lda: %ld, ldb: %ld, ldc: %ld, computed:%f, ref:%f, diff:%f\n", \
-                                        XSTR(BLAS_SFX), m[bs_i], n[bs_i], k[bs_i], lda[bs_i], ldb[bs_i], \
-                                        ldc[bs_i], comp_float, \
-                                        ref_float, comp_float - ref_float); \
-                        fflush( fout ); \
+                        if ( fout ) \
+                        { \
+                            fprintf( fout, "%s Failure input m: %ld, n: %ld, k: %ld," \
+                                            " lda: %ld, ldb: %ld, ldc: %ld, computed:%f, ref:%f, diff:%f\n", \
+                                            XSTR(BLAS_SFX), m[gc_i], n[gc_i], k[gc_i], lda[gc_i], ldb[gc_i], \
+                                            ldc[gc_i], comp_float, \
+                                            ref_float, comp_float - ref_float); \
+                            fflush( fout ); \
+                        } \
+                            printf("failure, group =  %ld, gemm:%ld, m_index: %ld, n_index: %ld, k: %ld, computed:%f, ref:%f," \
+                                    "diff:%f\n", gc_i, gs_i, i, j, k[gc_i], comp_float, ref_float, comp_float-ref_float); \
+                        fflush(stdout); \
+                        goto cleanup_acc; \
                     } \
-                        printf("failure, gemm:%ld, m_index: %ld, n_index: %ld, k: %ld, computed:%f, ref:%f," \
-                                "diff:%f\n", bs_i, i, j, k[bs_i], comp_float, ref_float, comp_float-ref_float); \
-                    fflush(stdout); \
-                    goto cleanup_acc; \
                 } \
             } \
-        } \
+        }\
+        mat_idx += group_size[gc_i]; \
     } \
 cleanup_acc: \
     return; \
@@ -741,7 +758,8 @@ void mat_mul_bench_main_ ## BLAS_SFX \
        char*   transb, \
        char*   op_a, \
        char*   op_b, \
-       dim_t   bs, \
+       dim_t   group_count, \
+       dim_t*  group_size, \
        dim_t*  m, \
        dim_t*  n, \
        dim_t*  k, \
@@ -757,17 +775,21 @@ void mat_mul_bench_main_ ## BLAS_SFX \
         n_repeats = global_n_repeat; \
     } \
  \
+    dim_t mat_idx = 0; \
+    /* array of pointers need to be created for the total no.of batches in all groups*/ \
+    dim_t total_size = 0; \
+    for( dim_t i = 0; i < group_count; i++ ){ total_size += group_size[i]; } \
     /* creating an array of pointers to A, B and C matrices in the batch */ \
-    A_type** a = ( A_type** ) lpgemm_malloc( sizeof( A_type* ) * bs ); \
-    B_type** b = ( B_type** ) lpgemm_malloc( sizeof( B_type* ) * bs ); \
-    C_type** c = ( C_type** ) lpgemm_malloc( sizeof( C_type* ) * bs ); \
-    C_type** c_ref = ( C_type** ) lpgemm_malloc( sizeof( C_type* ) * bs ); \
-    B_type** b_gemm = ( B_type** ) lpgemm_malloc( sizeof( B_type*) * bs ); \
-    Sum_type alpha[bs]; \
-    Sum_type beta[bs]; \
-    aocl_post_op** post_op = (aocl_post_op**)lpgemm_malloc(sizeof(aocl_post_op*) * bs); \
+    A_type** a = ( A_type** ) lpgemm_malloc( sizeof( A_type* ) * total_size ); \
+    B_type** b = ( B_type** ) lpgemm_malloc( sizeof( B_type* ) * total_size ); \
+    C_type** c = ( C_type** ) lpgemm_malloc( sizeof( C_type* ) * total_size ); \
+    C_type** c_ref = ( C_type** ) lpgemm_malloc( sizeof( C_type* ) * total_size ); \
+    B_type** b_gemm = ( B_type** ) lpgemm_malloc( sizeof( B_type*) * total_size ); \
+    Sum_type alpha[group_count]; \
+    Sum_type beta[group_count]; \
+    aocl_post_op** post_op = (aocl_post_op**)lpgemm_malloc(sizeof(aocl_post_op*) * group_count); \
     bool int4_testing = ( ( strcmp(#BLAS_SFX,"bf16s4f32of32") == 0 ) || ( strcmp(#BLAS_SFX,"bf16s4f32obf16") == 0 ) ); \
-    for( dim_t i = 0; i < bs; i++ ) \
+    for( dim_t i = 0; i < group_count; i++ ) \
     { \
         dim_t size_A = 0; \
         dim_t size_B = 0; \
@@ -784,44 +806,10 @@ void mat_mul_bench_main_ ## BLAS_SFX \
             size_B = ( ( transb[i] == 'n' ) || ( transb[i] == 'N' ) ) ? n[i] * stride_b[i] : k[i] * stride_b[i]; \
             size_C = n[i] * stride_c[i]; \
         } \
-        a[i] = ( A_type* ) lpgemm_malloc( sizeof( A_type ) * size_A ); \
-        GEN_FUNC_NAME(fill_array_,A_type)(a[i], size_A ); \
-         b[i] = ( B_type* ) lpgemm_malloc( sizeof( B_type ) * size_B ); \
-        if ( int4_testing == FALSE ) \
-        { \
-            GEN_FUNC_NAME(fill_array_,B_type)(b[i], size_B ); \
-        } \
-        else \
-        { \
-            GEN_FUNC_NAME(fill_array_,int4_c_t)(b[i], size_B); \
-        } \
-        c[i] = ( C_type* ) lpgemm_malloc( sizeof( C_type ) * size_C ); \
-        c_ref[i] = ( C_type* ) lpgemm_malloc( sizeof( C_type ) * size_C ); \
-        if ( bench_mode == 'a' ) \
-        { \
-            GEN_FUNC_NAME(fill_array_,C_type)(c[i], size_C ); \
-            memcpy(c_ref[i], c[i] , (size_C * sizeof(C_type))); \
-        } \
-        else \
-        { \
-            memset( ( void* ) c[i], 0, sizeof( C_type ) * size_C ); \
-            memset( ( void* ) c_ref[i], 0, sizeof( C_type ) * size_C ); \
-        } \
- \
-        if ( bench_mode == 'p' ) \
-        { \
-            alpha[i] = 1; \
-            beta[i] = 0; \
-        } \
-        else if ( bench_mode == 'a' ) \
-        { \
-            n_repeats = 1; \
-            alpha[i] = (i + 1) % 5; \
-            beta[i] = (i + 5 ) % 9; \
-        } \
+        /* post-ops are common for a batch and hence they can be commoned out */ \
         if ( ( ( post_ops_str[i] != NULL ) && \
-           ( strcmp( post_ops_str[i], "none" ) != 0 ) ) || \
-         ( global_dscale_out == 'y' ) || ( global_pre_op == 'y' ) ) \
+            ( strcmp( post_ops_str[i], "none" ) != 0 ) ) || \
+            ( global_dscale_out == 'y' ) || ( global_pre_op == 'y' ) ) \
         { \
             post_op[i] = GEN_FUNC_NAME(lpgemm_create_post_ops_struct_,BLAS_SFX)( m[i], n[i], k[i], post_ops_str[i], stor_order[i] ); \
             if ( post_op[i] == NULL ) \
@@ -834,38 +822,80 @@ void mat_mul_bench_main_ ## BLAS_SFX \
         { \
             post_op[i] = NULL; \
         } \
-        if ( ( op_b[i] == 'p' ) || ( op_b[i] == 'P' ) || ( op_b[i] == 'n' ) || ( op_b[i] == 'N' ) )  \
+    \
+        if ( bench_mode == 'p' ) \
         { \
-            b_gemm[i] = b[i]; \
+            alpha[i] = 1; \
+            beta[i] = 0; \
         } \
-        else if ( ( op_b[i] == 'r' ) || ( op_b[i] == 'R' ) ) \
+        else if ( bench_mode == 'a' ) \
         { \
+            n_repeats = 1; \
+            alpha[i] = (i + 1) % 5; \
+            beta[i] = (i + 5 ) % 9; \
+        } \
+    \
+        for( dim_t j = 0; j < group_size[i]; j++ ) \
+        {\
+            dim_t idx = ( mat_idx + j ); \
+            a[idx] = ( A_type* ) lpgemm_malloc( sizeof( A_type ) * size_A ); \
+            GEN_FUNC_NAME(fill_array_,A_type)(a[idx], size_A ); \
+            b[idx] = ( B_type* ) lpgemm_malloc( sizeof( B_type ) * size_B ); \
             if ( int4_testing == FALSE ) \
             { \
-                siz_t b_reorder_buf_siz_req = \
-                GEN_FUNC_NAME(aocl_get_reorder_buf_size_,REORDER_SFX)( stor_order[i], transb[i], 'B', k[i], n[i] ); \
-                b_gemm[i] = ( B_type* ) lpgemm_malloc( b_reorder_buf_siz_req ); \
-                GEN_FUNC_NAME(aocl_reorder_,REORDER_SFX)( stor_order[i], transb[i], 'B', \
-                        ( GET_B_TYPE_ ## REORDER_SFX * )b[i], \
-                        ( GET_B_TYPE_ ## REORDER_SFX * )b_gemm[i], \
-                        k[i], n[i], stride_b[i] ); \
+                GEN_FUNC_NAME(fill_array_,B_type)(b[idx], size_B ); \
             } \
-        /* It has to be ensured, for now, only int4 testing takes else path. */ \
             else \
             { \
-                siz_t b_reorder_buf_siz_req = \
-                    GEN_FUNC_NAME(aocl_get_reorder_buf_size_,INT4_REORDER_SFX)( stor_order[i], transb[i], 'B', k[i], n[i] ); \
-    \
-                b_gemm[i] = ( B_type* ) lpgemm_malloc( b_reorder_buf_siz_req ); \
-                GEN_FUNC_NAME(aocl_reorder_,INT4_REORDER_SFX)( stor_order[i], transb[i], 'B', \
-                        ( int8_t* )b[i], ( int8_t* )b_gemm[i], k[i], n[i], stride_b[i] ); \
+                GEN_FUNC_NAME(fill_array_,int4_c_t)(b[idx], size_B); \
             } \
-        } \
+            c[idx] = ( C_type* ) lpgemm_malloc( sizeof( C_type ) * size_C ); \
+            c_ref[idx] = ( C_type* ) lpgemm_malloc( sizeof( C_type ) * size_C ); \
+            if ( bench_mode == 'a' ) \
+            { \
+                GEN_FUNC_NAME(fill_array_,C_type)(c[idx], size_C ); \
+                memcpy(c_ref[idx], c[idx] , (size_C * sizeof(C_type))); \
+            } \
+            else \
+            { \
+                memset( ( void* ) c[idx], 0, sizeof( C_type ) * size_C ); \
+                memset( ( void* ) c_ref[idx], 0, sizeof( C_type ) * size_C ); \
+            } \
+    \
+            if ( ( op_b[i] == 'p' ) || ( op_b[i] == 'P' ) || ( op_b[i] == 'n' ) || ( op_b[i] == 'N' ) )  \
+            { \
+                b_gemm[idx] = b[idx]; \
+            } \
+            else if ( ( op_b[i] == 'r' ) || ( op_b[i] == 'R' ) ) \
+            { \
+                if ( int4_testing == FALSE ) \
+                { \
+                    siz_t b_reorder_buf_siz_req = \
+                    GEN_FUNC_NAME(aocl_get_reorder_buf_size_,REORDER_SFX)( stor_order[i], transb[i], 'B', k[i], n[i] ); \
+                    b_gemm[idx] = ( B_type* ) lpgemm_malloc( b_reorder_buf_siz_req ); \
+                    GEN_FUNC_NAME(aocl_reorder_,REORDER_SFX)( stor_order[i], transb[i], 'B', \
+                            ( GET_B_TYPE_ ## REORDER_SFX * )b[idx], \
+                            ( GET_B_TYPE_ ## REORDER_SFX * )b_gemm[idx], \
+                            k[i], n[i], stride_b[i] ); \
+                } \
+            /* It has to be ensured, for now, only int4 testing takes else path. */ \
+                else \
+                { \
+                    siz_t b_reorder_buf_siz_req = \
+                        GEN_FUNC_NAME(aocl_get_reorder_buf_size_,INT4_REORDER_SFX)( stor_order[i], transb[i], 'B', k[i], n[i] ); \
+        \
+                    b_gemm[idx] = ( B_type* ) lpgemm_malloc( b_reorder_buf_siz_req ); \
+                    GEN_FUNC_NAME(aocl_reorder_,INT4_REORDER_SFX)( stor_order[i], transb[i], 'B', \
+                            ( int8_t* )b[idx], ( int8_t* )b_gemm[idx], k[i], n[i], stride_b[i] ); \
+                } \
+            } \
+        }\
+        mat_idx += group_size[i]; \
     } /* Done with initializing inputs, */ \
     /* Reordering has already been taken care of. */ \
     GEN_FUNC_NAME(mat_mul_bench_driver_,BLAS_SFX) \
     ( \
-        stor_order, transa, transb, op_a, op_b, n_repeats, bs, m, n, k, \
+        stor_order, transa, transb, op_a, op_b, n_repeats, group_count, group_size, m, n, k, \
         alpha, \
         a, stride_a, \
         b_gemm, stride_b, \
@@ -880,7 +910,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
         fflush(stdout); \
         GEN_FUNC_NAME(mat_mul_accuracy_check_driver_,BLAS_SFX) \
         ( \
-          fout, stor_order, transa, transb, bs, m, n, k, \
+          fout, stor_order, transa, transb, group_count, group_size, m, n, k, \
           alpha, \
           a, stride_a, \
           b, stride_b, \
@@ -890,18 +920,29 @@ void mat_mul_bench_main_ ## BLAS_SFX \
           post_op \
         ); \
     } \
- \
-    for( dim_t i = 0; i < bs; i++ ) \
+    /* Free all allocated memory for each batch in all groups */ \
+    mat_idx = 0; \
+    for( dim_t i = 0; i < group_count; i++ ) \
     { \
-        lpgemm_free( a[i] ); \
-        lpgemm_free( b[i] ); \
-        lpgemm_free( c[i] ); \
-        lpgemm_free( c_ref[i] ); \
-        lpgemm_destroy_post_ops_struct( post_op[i] ); \
-        if( ( op_b[i] == 'r' ) || ( op_b[i] == 'R' ) ) \
+        for( dim_t j = 0; j < group_size[i]; j++ ) \
         { \
-            lpgemm_free( b_gemm[i]); \
+            dim_t idx = mat_idx + j; \
+            lpgemm_free( a[idx] ); \
+            lpgemm_free( b[idx] ); \
+            lpgemm_free( c[idx] ); \
+            lpgemm_free( c_ref[idx] ); \
+            /* Only free b_gemm if it is different from b (i.e., if reordering was done) */ \
+            if( ( op_b[i] == 'r' ) || ( op_b[i] == 'R' ) ) \
+            { \
+                lpgemm_free( b_gemm[idx] ); \
+            } \
+            /* Only destroy post_op struct once per group, not per batch */ \
+            if( j == 0 ) \
+            { \
+                lpgemm_destroy_post_ops_struct( post_op[i] ); \
+            } \
         } \
+        mat_idx += group_size[i]; \
     } \
     lpgemm_free( a ); \
     lpgemm_free( b ); \
@@ -1019,8 +1060,8 @@ int main( int argc, char** argv )
 
     fout = fopen( "lpgemm_accuracy_test_failures.txt", "w" );
 
-    // batch size
-    dim_t bs;
+    // group_count
+    dim_t group_count;
 
     const dim_t len_list_omp_cores_for_testing = 2;
     const dim_t list_omp_cores_for_testing[2] = { 1, 128 };
@@ -1059,25 +1100,36 @@ int main( int argc, char** argv )
         // Process the file until no more data remains
         while (fgets(line, MAX_LINE_LENGTH, fin))
         {
-            // Step 1: Extract 'op' and 'bs' from the first line
-            if (sscanf(line, "%23[^:]:bs=%ld", gemm_type_str, &bs) != 2)
+            // Step 1: Extract 'op' and 'group_count' from the first line
+            if (sscanf(line, "%23[^:]:group_count=%ld", gemm_type_str, &group_count) != 2)
             {
                 printf("Error: Failed to parse the first line.\n");
                 break;
             }
+            // group size
+            dim_t group_size[group_count];
 
-            char op_a[bs], op_b[bs];
-            char stor_order[bs];
-            char transa[bs], transb[bs];
-            dim_t m[bs], n[bs], k[bs];
-            dim_t stride_a[bs], stride_b[bs], stride_c[bs];
+            char op_a[group_count], op_b[group_count];
+            char stor_order[group_count];
+            char transa[group_count], transb[group_count];
+            dim_t m[group_count], n[group_count], k[group_count];
+            dim_t stride_a[group_count], stride_b[group_count], stride_c[group_count];
 
-            char post_ops_str[bs][POST_OPS_STR_LEN];
-            char post_ops_str_dest[bs][POST_OPS_STR_LEN]; //Strtok is used to parse, need to maintain a copy.
+            char post_ops_str[group_count][POST_OPS_STR_LEN];
+            char post_ops_str_dest[group_count][POST_OPS_STR_LEN]; //Strtok is used to parse, need to maintain a copy.
 
-            // Step 2: Read the next 'bs' number of lines and parse them
-            for (int i = 0; i < bs; i++)
+            for (int i = 0; i < group_count; i++)
             {
+                if (fgets(line, MAX_LINE_LENGTH, fin)) {
+                    // Step 2: Extract 'group_size' from the subsequent line
+                    if (sscanf(line, "group_size=%ld", &(group_size[i]) ) != 1 )
+                    {
+                        printf("Error: Failed to parse the first line.\n");
+                        break;
+                    }
+                }
+
+                // Step 3: Read the next lines and parse them for each group_count
                 if (fgets(line, MAX_LINE_LENGTH, fin)) {
 
                     if (sscanf( line, "%c %c %c %c %c " INT_FS INT_FS INT_FS
@@ -1099,35 +1151,35 @@ int main( int argc, char** argv )
             if ( ( strcmp( gemm_type_str, "bf16bf16f32of32" ) == 0 ) ||
                  ( strcmp( gemm_type_str, "*" ) == 0 ) )
             {
-                for( dim_t i = 0; i < bs; i++ )
+                for( dim_t i = 0; i < group_count; i++ )
                     strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
                 global_dscale_out = 'n';
                 global_pre_op = 'n';
                 GEN_FUNC_NAME(mat_mul_bench_main_, bf16bf16f32of32)
                 (
                     fin, fout, stor_order, transa, transb, op_a, op_b,
-                    bs, m, n, k, stride_a, stride_b, stride_c,
+                    group_count, group_size, m, n, k, stride_a, stride_b, stride_c,
                     post_ops_str_dest
                 );
             }
             if ( ( strcmp( gemm_type_str, "bf16bf16f32obf16" ) == 0 ) ||
                  ( strcmp( gemm_type_str, "*" ) == 0 ) )
             {
-                for( dim_t i = 0; i < bs; i++ )
+                for( dim_t i = 0; i < group_count; i++ )
                     strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
                 global_dscale_out = 'n';
                 global_pre_op = 'n';
                 GEN_FUNC_NAME(mat_mul_bench_main_, bf16bf16f32obf16)
                 (
                     fin, fout, stor_order, transa, transb, op_a, op_b,
-                    bs, m, n, k, stride_a, stride_b, stride_c,
+                    group_count, group_size, m, n, k, stride_a, stride_b, stride_c,
                     post_ops_str_dest
                 );
             }
             if ( ( strcmp( gemm_type_str, "f32f32f32of32" ) == 0 ) ||
                  ( strcmp( gemm_type_str, "*" ) == 0 ) )
             {
-                for( dim_t i = 0; i < bs; i++ )
+                for( dim_t i = 0; i < group_count; i++ )
                     strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
                 global_can_dscale = 'y';
                 global_dscale_out = 'n';
@@ -1135,7 +1187,7 @@ int main( int argc, char** argv )
                 GEN_FUNC_NAME(mat_mul_bench_main_,f32f32f32of32)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
-                  bs, m, n, k, stride_a, stride_b, stride_c,
+                  group_count, group_size, m, n, k, stride_a, stride_b, stride_c,
                   post_ops_str_dest
                 );
             }
@@ -1145,7 +1197,7 @@ int main( int argc, char** argv )
                 // Copy the original post op str to a temp string buffer.
                 // Done so that strtok can be applied on the same (strtok
                 // is a destructive parser.
-                for( dim_t i = 0; i < bs; i++ )
+                for( dim_t i = 0; i < group_count; i++ )
                     strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
                 global_dscale_out = 'n';
                 global_pre_op = 'n';
@@ -1154,7 +1206,7 @@ int main( int argc, char** argv )
                 GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os32)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
-                  bs, m, n, k, stride_a, stride_b, stride_c,
+                  group_count, group_size, m, n, k, stride_a, stride_b, stride_c,
                   post_ops_str_dest
                 );
             }
@@ -1164,7 +1216,7 @@ int main( int argc, char** argv )
                 // Copy the original post op str to a temp string buffer.
                 // Done so that strtok can be applied on the same (strtok
                 // is a destructive parser.
-                for( dim_t i = 0; i < bs; i++ )
+                for( dim_t i = 0; i < group_count; i++ )
                     strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
                 global_dscale_out = 'y';
                 global_pre_op = 'n';
@@ -1173,7 +1225,7 @@ int main( int argc, char** argv )
                 GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os8)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
-                  bs, m, n, k, stride_a, stride_b, stride_c,
+                  group_count, group_size, m, n, k, stride_a, stride_b, stride_c,
                   post_ops_str_dest
                 );
             }
@@ -1183,7 +1235,7 @@ int main( int argc, char** argv )
                 // Copy the original post op str to a temp string buffer.
                 // Done so that strtok can be applied on the same (strtok
                 // is a destructive parser.
-                for( dim_t i = 0; i < bs; i++ )
+                for( dim_t i = 0; i < group_count; i++ )
                     strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
                 global_dscale_out = 'y';
                 global_pre_op = 'n';
@@ -1192,7 +1244,7 @@ int main( int argc, char** argv )
                 GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32ou8)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
-                  bs, m, n, k, stride_a, stride_b, stride_c,
+                  group_count, group_size, m, n, k, stride_a, stride_b, stride_c,
                   post_ops_str_dest
                 );
             }
@@ -1202,14 +1254,14 @@ int main( int argc, char** argv )
                 // Copy the original post op str to a temp string buffer.
                 // Done so that strtok can be applied on the same (strtok
                 // is a destructive parser.
-                for( dim_t i = 0; i < bs; i++ )
+                for( dim_t i = 0; i < group_count; i++ )
                     strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
                 global_dscale_out = 'n';
                 global_pre_op = 'n';
                 GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32of32)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
-                  bs, m, n, k, stride_a, stride_b, stride_c,
+                  group_count, group_size, m, n, k, stride_a, stride_b, stride_c,
                   post_ops_str_dest
                 );
             }
@@ -1219,14 +1271,14 @@ int main( int argc, char** argv )
                 // Copy the original post op str to a temp string buffer.
                 // Done so that strtok can be applied on the same (strtok
                 // is a destructive parser.
-                for( dim_t i = 0; i < bs; i++ )
+                for( dim_t i = 0; i < group_count; i++ )
                     strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
                 global_dscale_out = 'n';
                 global_pre_op = 'n';
                 GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32obf16)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
-                  bs, m, n, k, stride_a, stride_b, stride_c,
+                  group_count, group_size, m, n, k, stride_a, stride_b, stride_c,
                   post_ops_str_dest
                 );
             }
@@ -1236,7 +1288,7 @@ int main( int argc, char** argv )
                 // Copy the original post op str to a temp string buffer.
                 // Done so that strtok can be applied on the same (strtok
                 // is a destructive parser.
-                for( dim_t i = 0; i < bs; i++ )
+                for( dim_t i = 0; i < group_count; i++ )
                     strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
                 global_dscale_out = 'n';
                 global_pre_op = 'n';
@@ -1245,7 +1297,7 @@ int main( int argc, char** argv )
                 GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32os32)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
-                  bs, m, n, k, stride_a, stride_b, stride_c,
+                  group_count, group_size, m, n, k, stride_a, stride_b, stride_c,
                   post_ops_str_dest
                 );
             }
@@ -1255,7 +1307,7 @@ int main( int argc, char** argv )
                 // Copy the original post op str to a temp string buffer.
                 // Done so that strtok can be applied on the same (strtok
                 // is a destructive parser.
-                for( dim_t i = 0; i < bs; i++ )
+                for( dim_t i = 0; i < group_count; i++ )
                     strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
                 global_dscale_out = 'y';
                 global_pre_op = 'n';
@@ -1264,7 +1316,7 @@ int main( int argc, char** argv )
                 GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32os8)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
-                  bs, m, n, k, stride_a, stride_b, stride_c,
+                  group_count, group_size, m, n, k, stride_a, stride_b, stride_c,
                   post_ops_str_dest
                 );
             }
@@ -1274,14 +1326,14 @@ int main( int argc, char** argv )
                 // Copy the original post op str to a temp string buffer.
                 // Done so that strtok can be applied on the same (strtok
                 // is a destructive parser.
-                for( dim_t i = 0; i < bs; i++ )
+                for( dim_t i = 0; i < group_count; i++ )
                     strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
                 global_dscale_out = 'n';
                 global_pre_op = 'n';
                 GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32of32)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
-                  bs, m, n, k, stride_a, stride_b, stride_c,
+                  group_count, group_size, m, n, k, stride_a, stride_b, stride_c,
                   post_ops_str_dest
                 );
             }
@@ -1291,14 +1343,14 @@ int main( int argc, char** argv )
                 // Copy the original post op str to a temp string buffer.
                 // Done so that strtok can be applied on the same (strtok
                 // is a destructive parser.
-                for( dim_t i = 0; i < bs; i++ )
+                for( dim_t i = 0; i < group_count; i++ )
                     strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
                 global_dscale_out = 'n';
                 global_pre_op = 'n';
                 GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32obf16)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
-                  bs, m, n, k, stride_a, stride_b, stride_c,
+                  group_count, group_size, m, n, k, stride_a, stride_b, stride_c,
                   post_ops_str_dest
                 );
             }
@@ -1308,7 +1360,7 @@ int main( int argc, char** argv )
                 // Copy the original post op str to a temp string buffer.
                 // Done so that strtok can be applied on the same (strtok
                 // is a destructive parser.
-                for( dim_t i = 0; i < bs; i++ )
+                for( dim_t i = 0; i < group_count; i++ )
                     strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
                 global_dscale_out = 'y';
                 global_pre_op = 'n';
@@ -1317,7 +1369,7 @@ int main( int argc, char** argv )
                 GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32ou8)
                 (
                   fin, fout, stor_order, transa, transb, op_a, op_b,
-                  bs, m, n, k, stride_a, stride_b, stride_c,
+                  group_count, group_size, m, n, k, stride_a, stride_b, stride_c,
                   post_ops_str_dest
                 );
             }
@@ -1326,7 +1378,7 @@ int main( int argc, char** argv )
                 // Copy the original post op str to a temp string buffer.
                 // Done so that strtok can be applied on the same (strtok
                 // is a destructive parser.
-                for( dim_t i = 0; i < bs; i++ )
+                for( dim_t i = 0; i < group_count; i++ )
                 {
                     strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
                     if ( ( op_b[i] != 'r' ) && ( op_b[i] != 'R' ) )
@@ -1342,7 +1394,7 @@ int main( int argc, char** argv )
                 GEN_FUNC_NAME(mat_mul_bench_main_, bf16s4f32of32)
                 (
                     fin, fout, stor_order, transa, transb, op_a, op_b,
-                    bs, m, n, k, stride_a, stride_b, stride_c,
+                    group_count, group_size, m, n, k, stride_a, stride_b, stride_c,
                     post_ops_str_dest
                 );
             }
@@ -1351,7 +1403,7 @@ int main( int argc, char** argv )
                 // Copy the original post op str to a temp string buffer.
                 // Done so that strtok can be applied on the same (strtok
                 // is a destructive parser.
-                for( dim_t i = 0; i < bs; i++ )
+                for( dim_t i = 0; i < group_count; i++ )
                 {
                     strncpy( post_ops_str_dest[i], post_ops_str[i], POST_OPS_STR_LEN );
                     if ( ( op_b[i] != 'r' ) && ( op_b[i] != 'R' ) )
@@ -1367,7 +1419,7 @@ int main( int argc, char** argv )
                 GEN_FUNC_NAME(mat_mul_bench_main_, bf16s4f32obf16)
                 (
                     fin, fout, stor_order, transa, transb, op_a, op_b,
-                    bs, m, n, k, stride_a, stride_b, stride_c,
+                    group_count, group_size, m, n, k, stride_a, stride_b, stride_c,
                     post_ops_str_dest
                 );
             }

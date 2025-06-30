@@ -320,7 +320,7 @@ void batch_lpgemm_write_logger_gemm_fn
        const char*   order,
        const char*   transa,
        const char*   transb,
-	   const dim_t   batch_size,
+	   const dim_t   group_count,
        const dim_t*  m,
        const dim_t*  n,
        const dim_t*  k,
@@ -340,8 +340,8 @@ void batch_lpgemm_write_logger_gemm_fn
 
 		char post_ops_str[2048] = {0};
 
-		fprintf(fd, "%s:bs=%ld\n", op_type, batch_size);
-		for( dim_t i = 0; i < batch_size; i++ )
+		fprintf(fd, "%s:group_count=%ld\n", op_type, group_count);
+		for( dim_t i = 0; i < group_count; i++ )
 		{
 			lpgemm_get_pre_ops_str( post_op_unparsed[i], pre_ops_str );
 			lpgemm_get_post_ops_str( post_op_unparsed[i], post_ops_str );

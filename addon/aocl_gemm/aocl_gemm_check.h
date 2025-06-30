@@ -105,11 +105,11 @@
 
 #define AOCL_BATCH_GEMM_CHECK( op_str, \
                          order, transa, transb, \
-                         gemm_no, \
+                         group_count, group_size, \
                          m, n, k, \
-                         a, lda, mtag_a, \
-                         b, ldb, mtag_b, \
-                         c, ldc, \
+                         lda, mtag_a, \
+                         ldb, mtag_b, \
+                         ldc, \
                          err_no \
                        ) \
 { \
@@ -164,12 +164,14 @@
         info = 17; \
     else if ( col_stored && ( ldc < m ) ) \
         info = 17; \
+    else if ( group_count < 0 || group_size < 0 ) \
+        info = 18; \
  \
     if( info != 0 ) \
     { \
         char print_msg[ 150 ]; \
  \
-        sprintf( print_msg, "** On entry to %6s, parameter number %2i of problem %ld had an illegal value", op_str, info, (long int) gemm_no); \
+        sprintf( print_msg, "** On entry to %6s, parameter number %2i of problem %ld had an illegal value", op_str, info, (long int) group_count); \
         bli_print_msg(print_msg, __FILE__, __LINE__); \
         err_no = info; \
     } \

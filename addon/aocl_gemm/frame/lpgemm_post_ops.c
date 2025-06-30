@@ -361,7 +361,7 @@ err_t lpgemm_translate_to_post_ops_list
 		  NONE, NONE
 		);
 
-		bli_print_msg(" Max supported post-ops is 5, supplied input post-ops" \
+		bli_print_msg(" Max supported post-ops is 8, supplied input post-ops" \
 						" are more. Exiting..", __FILE__, __LINE__ );
 		return BLIS_UNEXPECTED_VECTOR_DIM; //Error, seq length exceeds max post ops permitted.
 	}
