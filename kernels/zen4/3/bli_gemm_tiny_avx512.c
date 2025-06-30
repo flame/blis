@@ -34,17 +34,29 @@
 
 #include "blis.h"
 
-// Defining static arrays to hold all the kernel info, based on the datatype
+// Defining separate static arrays to hold all the kernel info, based on the datatype
+static gemmtiny_ukr_info_t cgemmtiny_ukr_avx512[] =
+{
+    { (void *)bli_cgemmsup_cv_zen4_asm_24x4m, (void *)bli_cpackm_zen4_asm_24xk, FALSE, FALSE, 24, 4 },
+    { (void *)bli_cgemmsup_cv_zen4_asm_24x4m, (void *)bli_cpackm_zen4_asm_24xk, FALSE,  TRUE, 24, 4 },
+    { (void *)bli_cgemmsup_cv_zen4_asm_24x4m, (void *)bli_cpackm_zen4_asm_24xk, FALSE, FALSE, 24, 4 },
+    { (void *)bli_cgemmsup_cv_zen4_asm_24x4m, (void *)bli_cpackm_zen4_asm_24xk, FALSE, FALSE, 24, 4 },
+    { (void *)bli_cgemmsup_cv_zen4_asm_24x4m, (void *)bli_cpackm_zen4_asm_24xk, FALSE, FALSE, 24, 4 },
+    { (void *)bli_cgemmsup_cv_zen4_asm_24x4m, (void *)bli_cpackm_zen4_asm_24xk, FALSE,  TRUE, 24, 4 },
+    { (void *)bli_cgemmsup_cv_zen4_asm_24x4m, (void *)bli_cpackm_zen4_asm_24xk, FALSE, FALSE, 24, 4 },
+    { (void *)bli_cgemmsup_cv_zen4_asm_24x4m, (void *)bli_cpackm_zen4_asm_24xk, FALSE, FALSE, 24, 4 }
+};
+
 static gemmtiny_ukr_info_t zgemmtiny_ukr_avx512[] =
 {
-    { (void *)bli_zgemmsup_cv_zen4_asm_12x4m, FALSE, 12, 4 },
-    { (void *)bli_zgemmsup_cd_zen4_asm_12x4m, FALSE, 12, 4 },
-    { (void *)bli_zgemmsup_cv_zen4_asm_12x4m, FALSE, 12, 4 },
-    { (void *)bli_zgemmsup_cv_zen4_asm_12x4m, FALSE, 12, 4 },
-    { (void *)bli_zgemmsup_cv_zen4_asm_12x4m, FALSE, 12, 4 },
-    { (void *)bli_zgemmsup_cd_zen4_asm_12x4m, FALSE, 12, 4 },
-    { (void *)bli_zgemmsup_cv_zen4_asm_12x4m, FALSE, 12, 4 },
-    { (void *)bli_zgemmsup_cv_zen4_asm_12x4m, FALSE, 12, 4 }
+    { (void *)bli_zgemmsup_cv_zen4_asm_12x4m, (void *)bli_zpackm_zen4_asm_12xk, FALSE, FALSE, 12, 4 },
+    { (void *)bli_zgemmsup_cd_zen4_asm_12x4m, (void *)bli_zpackm_zen4_asm_12xk, FALSE, FALSE, 12, 4 },
+    { (void *)bli_zgemmsup_cv_zen4_asm_12x4m, (void *)bli_zpackm_zen4_asm_12xk, FALSE, FALSE, 12, 4 },
+    { (void *)bli_zgemmsup_cv_zen4_asm_12x4m, (void *)bli_zpackm_zen4_asm_12xk, FALSE, FALSE, 12, 4 },
+    { (void *)bli_zgemmsup_cv_zen4_asm_12x4m, (void *)bli_zpackm_zen4_asm_12xk, FALSE, FALSE, 12, 4 },
+    { (void *)bli_zgemmsup_cd_zen4_asm_12x4m, (void *)bli_zpackm_zen4_asm_12xk, FALSE, FALSE, 12, 4 },
+    { (void *)bli_zgemmsup_cv_zen4_asm_12x4m, (void *)bli_zpackm_zen4_asm_12xk, FALSE, FALSE, 12, 4 },
+    { (void *)bli_zgemmsup_cv_zen4_asm_12x4m, (void *)bli_zpackm_zen4_asm_12xk, FALSE, FALSE, 12, 4 }
 };
 
 // Function macro that defines the bli_?gemmtiny_avx512_ukr_info functions
@@ -64,8 +76,13 @@ err_t PASTEMAC( ch, tfuncname ) \
   { \
    return BLIS_NOT_YET_IMPLEMENTED; \
   } \
+  else if ( ( fp_info->pack_fp == NULL ) && ( fp_info->enable_pack == TRUE ) ) \
+  { \
+    return BLIS_NOT_YET_IMPLEMENTED; \
+  } \
 \
   return BLIS_SUCCESS; \
 } \
 
+GENTFUNC( scomplex, c, gemmtiny_avx512_ukr_info )
 GENTFUNC( dcomplex, z, gemmtiny_avx512_ukr_info )

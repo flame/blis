@@ -35,11 +35,52 @@
 #ifndef BLIS_CONFIG_ZEN5_H
 #define BLIS_CONFIG_ZEN5_H
 
+/* NOTE : The order in the macro naming is as follows : THRESH_{API}_{dt}_{codepath}_{march}_{isa}
+          The case-sensitivity of {dt} is small, since it is passed from a higher layer(where is it
+          used for function-name generation as well). */
+
+// Thresholds for CGEMM Tiny code-paths
+// This is specific to the micro-architecture
+// The macros take the input dimensions and the transpose values for the GEMM API
+// and define a condition that checks for entry based on these parameters
+#define THRESH_GEMM_c_TINY_ZEN5_AVX2( transa, transb, m, n, k, is_parallel ) \
+  ( 0 )
+
+#define THRESH_GEMM_c_TINY_ZEN5_AVX512( transa, transb, m, n, k, is_parallel ) \
+  /* In case of single-threaded request */ \
+  ( ( !is_parallel ) && \
+    ( ( ( bli_is_notrans( transa ) && \
+      ( ( ( k <= 48 ) && ( m <= 396 ) && ( n <= 396 ) ) || \
+        ( ( k <= 288 ) && \
+          ( ( ( m <= 360 ) && ( n <= 32 ) ) || \
+            ( ( m <= 76 ) && ( n <= 224 ) ) ) ) ) ) ) || \
+      ( ( bli_is_trans( transa ) && \
+        ( ( ( n <= 48 ) && \
+            ( ( ( m <= 368 ) && ( k <= 120 ) ) || \
+              ( ( m <= 396 ) && ( k <= 92 ) ) || \
+              ( ( m <= 192 ) && ( k <= 396 ) ) ) ) || \
+          ( ( n <= 396 ) && \
+            ( ( ( m <= 144 ) && ( k <= 48 ) ) || \
+              ( ( m <= 72 ) && ( k <= 192 ) ) ) ) ) ) ) ) ) || \
+  /* In case of multi-threaded request */ \
+  ( ( is_parallel ) && \
+    ( ( ( bli_is_notrans( transa ) && \
+        ( ( ( n <= 8 ) && \
+            ( ( ( m <= 396 ) && ( k <= 32 ) ) || \
+              ( ( m <= 48 ) && ( k <= 120 ) ) ) ) || \
+          ( ( m <= 96 ) && ( n <= 28 ) && ( k <= 16 ) ) ) ) ) || \
+      ( ( bli_is_trans( transa ) && \
+        ( ( ( n <= 16 ) && \
+            ( ( ( m <= 208 ) && ( k <= 24 ) ) || \
+              ( ( m <= 396 ) && ( k <= 8 ) ) ) ) || \
+          ( ( m <= 72 ) && ( n <= 8 ) && ( k <= 200 ) ) || \
+          ( ( m <= 24 ) && ( n <= 100 ) && ( k <= 16 ) ) ) ) ) ) ) \
+
 // Thresholds for ZGEMM Tiny code-paths
 // This is specific to the micro-architecture
 // The macros take the input dimensions and the transpose values for the GEMM API
 // and define a condition that checks for entry based on these parameters
-#define zgemm_tiny_zen5_thresh_avx2( transa, transb, m, n, k, is_parallel ) \
+#define THRESH_GEMM_z_TINY_ZEN5_AVX2( transa, transb, m, n, k, is_parallel ) \
   /* In case of single-threaded request */ \
   ( ( !is_parallel ) && \
     /* Separate thresholds based on transpose value of A */ \
@@ -53,7 +94,7 @@
       ( bli_is_trans( transa ) && \
       ( ( m <= 4 ) && ( n >= 12 ) && ( n <= 200 ) && ( k <= 4 ) ) ) ) )
 
-#define zgemm_tiny_zen5_thresh_avx512( transa, transb, m, n, k, is_parallel ) \
+#define THRESH_GEMM_z_TINY_ZEN5_AVX512( transa, transb, m, n, k, is_parallel ) \
   /* In case of single-threaded request */ \
   ( ( !is_parallel ) && \
     /* Separate thresholds based on transpose value of A */ \
@@ -71,9 +112,9 @@
 
 /* Defining the macro to be used for selecting the kernel at runtime */
 #define ZEN5_UKR_SELECTOR( ch, transa, transb, m, n, k, stor_id, ukr_support, gemmtiny_ukr_info, is_parallel ) \
-    if ( PASTECH3( ch, gemm_tiny, _zen5_thresh, _avx2 )( transa, transb, m, n, k, is_parallel ) ) \
+    if ( PASTECH2( THRESH_GEMM_, ch, _TINY_ZEN5_AVX2 )( transa, transb, m, n, k, is_parallel ) ) \
       LOOKUP_AVX2_UKR( ch, stor_id, ukr_support, gemmtiny_ukr_info ) \
-    else if ( PASTECH3( ch, gemm_tiny, _zen5_thresh, _avx512 )( transa, transb, m, n, k, is_parallel ) ) \
+    else if ( PASTECH2( THRESH_GEMM_, ch, _TINY_ZEN5_AVX512 )( transa, transb, m, n, k, is_parallel ) ) \
       LOOKUP_AVX512_UKR( ch, stor_id, ukr_support, gemmtiny_ukr_info ) \
     break;
 

@@ -1043,7 +1043,9 @@ typedef enum
 typedef struct
 {
     void* ukr_fp;            // Generic function pointer for tiny(SUP) kernels
+    void* pack_fp;           // Generic function pointer for packing kernels
     bool stor_pref;          // Storage preference of the kernel
+    bool enable_pack;        // Enabling/Disabling packing of the load matrix
     dim_t MR;                // Blocking dimension MR
     dim_t NR;                // Blocking dimension NR
 } gemmtiny_ukr_info_t;

@@ -300,7 +300,7 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 	// Update the context with optimized small/unpacked gemm kernels.
 	bli_cntx_set_l3_sup_kers
 	(
-	  30,
+	  32,
 	  BLIS_RRR, BLIS_DOUBLE, bli_dgemmsup_rv_zen5_asm_24x8m, FALSE,
 	  BLIS_RRC, BLIS_DOUBLE, bli_dgemmsup_rv_zen5_asm_24x8m, FALSE,
 	  BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_rv_zen5_asm_24x8m, FALSE,
@@ -320,9 +320,11 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 	  BLIS_CCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64n_avx512, TRUE,
 
 	  BLIS_RRR, BLIS_SCOMPLEX, bli_cgemmsup_cv_zen4_asm_24x4m, FALSE,
+	  BLIS_RRC, BLIS_SCOMPLEX, bli_cgemmsup_cv_zen4_asm_24x4m, FALSE,
 	  BLIS_RCR, BLIS_SCOMPLEX, bli_cgemmsup_cv_zen4_asm_24x4m, FALSE,
 	  BLIS_CRR, BLIS_SCOMPLEX, bli_cgemmsup_cv_zen4_asm_24x4m, FALSE,
 	  BLIS_RCC, BLIS_SCOMPLEX, bli_cgemmsup_cv_zen4_asm_24x4m, FALSE,
+	  BLIS_CRC, BLIS_SCOMPLEX, bli_cgemmsup_cv_zen4_asm_24x4m, FALSE,
 	  BLIS_CCR, BLIS_SCOMPLEX, bli_cgemmsup_cv_zen4_asm_24x4m, FALSE,
 	  BLIS_CCC, BLIS_SCOMPLEX, bli_cgemmsup_cv_zen4_asm_24x4m, FALSE,
 

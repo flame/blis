@@ -46,6 +46,7 @@ err_t PASTEMAC( ch, tfuncname ) \
         gemmtiny_ukr_info_t *fp_info \
       ); \
 
+GENTFUNC( scomplex, c, gemmtiny_avx512_ukr_info )
 GENTFUNC( dcomplex, z, gemmtiny_avx512_ukr_info )
 
 /* Enabling the query for AVX512 kernels, based on the library's configuration */

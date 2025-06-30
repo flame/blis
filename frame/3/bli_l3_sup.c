@@ -76,9 +76,8 @@ err_t bli_gemmsup
 
     //Don't use sup for currently unsupported storage types in cgemmsup
     if(bli_obj_is_scomplex(c) &&
-    (((stor_id == BLIS_RRC)||(stor_id == BLIS_CRC))
-    || ((transa == BLIS_CONJ_NO_TRANSPOSE) || (transa == BLIS_CONJ_TRANSPOSE))
-    || ((transb == BLIS_CONJ_NO_TRANSPOSE) || (transb == BLIS_CONJ_TRANSPOSE))
+    (((transa == BLIS_CONJ_NO_TRANSPOSE) || (transa == BLIS_CONJ_TRANSPOSE)) ||
+     ((transb == BLIS_CONJ_NO_TRANSPOSE) || (transb == BLIS_CONJ_TRANSPOSE))
     )){
 	//printf(" gemmsup: Returning with for un-supported storage types and conjugate property in cgemmsup \n");
 	AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Unsuppported storage type for cgemm");

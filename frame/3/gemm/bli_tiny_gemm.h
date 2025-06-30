@@ -52,4 +52,5 @@ err_t PASTEMAC( ch, tfuncname ) \
       bool is_parallel \
     ); \
 
+GENTFUNC( scomplex, c, gemm_tiny )
 GENTFUNC( dcomplex, z, gemm_tiny )

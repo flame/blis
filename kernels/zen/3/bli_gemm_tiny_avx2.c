@@ -35,16 +35,28 @@
 #include "blis.h"
 
 // Defining separate static arrays to hold all the kernel info, based on the datatype
+static gemmtiny_ukr_info_t cgemmtiny_ukr_avx2[] =
+{
+    { (void *)bli_cgemmsup_rv_zen_asm_3x8m, (void *)bli_cpackm_haswell_asm_8xk, TRUE, FALSE, 3, 4 },
+    { (void *)bli_cgemmsup_rv_zen_asm_3x8m, (void *)bli_cpackm_haswell_asm_8xk, TRUE,  TRUE, 3, 4 },
+    { (void *)bli_cgemmsup_rv_zen_asm_3x8m, (void *)bli_cpackm_haswell_asm_8xk, TRUE, FALSE, 3, 4 },
+    { (void *)bli_cgemmsup_rv_zen_asm_3x8m, (void *)bli_cpackm_haswell_asm_8xk, TRUE, FALSE, 3, 4 },
+    { (void *)bli_cgemmsup_rv_zen_asm_3x8m, (void *)bli_cpackm_haswell_asm_8xk, TRUE, FALSE, 3, 4 },
+    { (void *)bli_cgemmsup_rv_zen_asm_3x8m, (void *)bli_cpackm_haswell_asm_8xk, TRUE,  TRUE, 3, 4 },
+    { (void *)bli_cgemmsup_rv_zen_asm_3x8m, (void *)bli_cpackm_haswell_asm_8xk, TRUE, FALSE, 3, 4 },
+    { (void *)bli_cgemmsup_rv_zen_asm_3x8m, (void *)bli_cpackm_haswell_asm_8xk, TRUE, FALSE, 3, 4 }
+};
+
 static gemmtiny_ukr_info_t zgemmtiny_ukr_avx2[] =
 {
-    { (void *)bli_zgemmsup_rv_zen_asm_3x4m, TRUE, 3, 4 },
-    { (void *)bli_zgemmsup_rd_zen_asm_3x4m, TRUE, 3, 4 },
-    { (void *)bli_zgemmsup_rv_zen_asm_3x4m, TRUE, 3, 4 },
-    { (void *)bli_zgemmsup_rv_zen_asm_3x4m, TRUE, 3, 4 },
-    { (void *)bli_zgemmsup_rv_zen_asm_3x4m, TRUE, 3, 4 },
-    { (void *)bli_zgemmsup_rd_zen_asm_3x4m, TRUE, 3, 4 },
-    { (void *)bli_zgemmsup_rv_zen_asm_3x4m, TRUE, 3, 4 },
-    { (void *)bli_zgemmsup_rv_zen_asm_3x4m, TRUE, 3, 4 }
+    { (void *)bli_zgemmsup_rv_zen_asm_3x4m, (void *)bli_zpackm_haswell_asm_4xk, TRUE, FALSE, 3, 4 },
+    { (void *)bli_zgemmsup_rd_zen_asm_3x4m, (void *)bli_zpackm_haswell_asm_4xk, TRUE, FALSE, 3, 4 },
+    { (void *)bli_zgemmsup_rv_zen_asm_3x4m, (void *)bli_zpackm_haswell_asm_4xk, TRUE, FALSE, 3, 4 },
+    { (void *)bli_zgemmsup_rv_zen_asm_3x4m, (void *)bli_zpackm_haswell_asm_4xk, TRUE, FALSE, 3, 4 },
+    { (void *)bli_zgemmsup_rv_zen_asm_3x4m, (void *)bli_zpackm_haswell_asm_4xk, TRUE, FALSE, 3, 4 },
+    { (void *)bli_zgemmsup_rd_zen_asm_3x4m, (void *)bli_zpackm_haswell_asm_4xk, TRUE, FALSE, 3, 4 },
+    { (void *)bli_zgemmsup_rv_zen_asm_3x4m, (void *)bli_zpackm_haswell_asm_4xk, TRUE, FALSE, 3, 4 },
+    { (void *)bli_zgemmsup_rv_zen_asm_3x4m, (void *)bli_zpackm_haswell_asm_4xk, TRUE, FALSE, 3, 4 }
 };
 
 // Function macro that defines the bli_?gemmtiny_avx2_ukr_info functions
@@ -64,8 +76,13 @@ err_t PASTEMAC( ch, tfuncname ) \
   { \
    return BLIS_NOT_YET_IMPLEMENTED; \
   } \
+  else if ( ( fp_info->pack_fp == NULL ) && ( fp_info->enable_pack == TRUE ) ) \
+  { \
+    return BLIS_NOT_YET_IMPLEMENTED; \
+  } \
 \
   return BLIS_SUCCESS; \
 } \
 
+GENTFUNC( scomplex, c, gemmtiny_avx2_ukr_info )
 GENTFUNC( dcomplex, z, gemmtiny_avx2_ukr_info )
