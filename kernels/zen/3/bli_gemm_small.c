@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2017 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2017 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -38,18 +38,29 @@
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 
+// This will select the threshold below which small matrix code will be called.
+// Only set here if they have not been defined in the relevant bli_family_*.h file.
+#ifndef BLIS_SMALL_MATRIX_THRES
+#define BLIS_SMALL_MATRIX_THRES        700
+#endif
+
+#ifndef BLIS_SMALL_M_RECT_MATRIX_THRES
+#define BLIS_SMALL_M_RECT_MATRIX_THRES 160
+#endif
+
+#ifndef BLIS_SMALL_K_RECT_MATRIX_THRES
+#define BLIS_SMALL_K_RECT_MATRIX_THRES 128
+#endif
+
 #define MR 32
 #define D_MR (MR >> 1)
 #define Z_MR (MR >> 3)
 #define NR 3
-#define D_BLIS_SMALL_MATRIX_K_THRES_ROME    256
 
 #define BLIS_ENABLE_PREFETCH
-#define D_BLIS_SMALL_MATRIX_THRES (BLIS_SMALL_MATRIX_THRES / 2 )
-#define D_BLIS_SMALL_M_RECT_MATRIX_THRES (BLIS_SMALL_M_RECT_MATRIX_THRES / 2)
-#define D_BLIS_SMALL_K_RECT_MATRIX_THRES (BLIS_SMALL_K_RECT_MATRIX_THRES / 2)
 #define BLIS_ATBN_M_THRES 40 // Threshold value of M for/below which small matrix code is called.
 #define AT_MR 4 // The kernel dimension of the A transpose GEMM kernel.(AT_MR * NR).
+
 static err_t bli_sgemm_small
      (
        obj_t*  alpha,
@@ -4473,13 +4484,6 @@ err_t bli_dgemm_small_At
         return BLIS_NOT_YET_IMPLEMENTED;
     }
 
-/* #ifdef BLIS_ENABLE_SMALL_MATRIX_ROME
- *    if( (L && K) && ((K < D_BLIS_SMALL_MATRIX_K_THRES_ROME) || ((N < BLIS_SMALL_MATRIX_THRES_ROME) && (K < BLIS_SMALL_MATRIX_THRES_ROME))))
- * #else
- *  if ((((L) < (D_BLIS_SMALL_MATRIX_THRES * D_BLIS_SMALL_MATRIX_THRES))
- *      || ((M  < D_BLIS_SMALL_M_RECT_MATRIX_THRES) && (K < D_BLIS_SMALL_K_RECT_MATRIX_THRES))) && ((L!=0) && (K!=0)))
- * #endif
- */
     if(  M && N && K )
     {
         guint_t lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.

@@ -53,9 +53,6 @@
 #define BLIS_SMALL_M_RECT_MATRIX_THRES 160
 #define BLIS_SMALL_K_RECT_MATRIX_THRES 128
 
-#define BLIS_SMALL_MATRIX_A_THRES_M_SYRK 96
-#define BLIS_SMALL_MATRIX_A_THRES_N_SYRK 128
-
 // When running HPL with pure MPI without DGEMM threading (Single-threaded
 // BLIS), defining this macro as 1 yields better performance.
 #define AOCL_BLIS_MULTIINSTANCE   0

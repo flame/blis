@@ -133,24 +133,24 @@ void PASTEF77S(ch,blasname) \
     rs_b = 1; \
     cs_b = *ldb; \
 \
-	/* If alpha is zero, set B to zero and return early */ \
-	if( PASTEMAC(ch,eq0)( *alpha ) ) \
-	{ \
-		PASTEMAC2(ch,setm,_ex)( BLIS_NO_CONJUGATE, \
-								0, \
-								BLIS_NONUNIT_DIAG, \
-								BLIS_DENSE, \
-								m0, n0, \
-								(ftype*) alpha, \
-								(ftype*) b, rs_b, cs_b, \
-								NULL, NULL \
-							  ); \
-		AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *m, *n); \
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
-		/* Finalize BLIS. */ \
-		bli_finalize_auto(); \
-		return; \
-	} \
+    /* If alpha is zero, set B to zero and return early */ \
+    if( PASTEMAC(ch,eq0)( *alpha ) ) \
+    { \
+        PASTEMAC2(ch,setm,_ex)( BLIS_NO_CONJUGATE, \
+                                0, \
+                                BLIS_NONUNIT_DIAG, \
+                                BLIS_DENSE, \
+                                m0, n0, \
+                                (ftype*) alpha, \
+                                (ftype*) b, rs_b, cs_b, \
+                                NULL, NULL \
+                              ); \
+        AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *m, *n); \
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+        /* Finalize BLIS. */ \
+        bli_finalize_auto(); \
+        return; \
+    } \
 \
     /* Call BLIS interface. */ \
     PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
@@ -264,24 +264,24 @@ void PASTEF77S(ch,blasname) \
     const inc_t cs_b = *ldb; \
     const num_t dt = PASTEMAC(ch,type); \
 \
-	/* If alpha is zero, set B to zero and return early */ \
-	if( PASTEMAC(ch,eq0)( *alpha ) ) \
-	{ \
-		PASTEMAC2(ch,setm,_ex)( BLIS_NO_CONJUGATE, \
-								0, \
-								BLIS_NONUNIT_DIAG, \
-								BLIS_DENSE, \
-								m0, n0, \
-								(ftype*) alpha, \
-								(ftype*) b, rs_b, cs_b, \
-								NULL, NULL \
-							  ); \
-		AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *m, *n); \
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
-		/* Finalize BLIS. */ \
-		bli_finalize_auto(); \
-		return; \
-	} \
+    /* If alpha is zero, set B to zero and return early */ \
+    if( PASTEMAC(ch,eq0)( *alpha ) ) \
+    { \
+        PASTEMAC2(ch,setm,_ex)( BLIS_NO_CONJUGATE, \
+                                0, \
+                                BLIS_NONUNIT_DIAG, \
+                                BLIS_DENSE, \
+                                m0, n0, \
+                                (ftype*) alpha, \
+                                (ftype*) b, rs_b, cs_b, \
+                                NULL, NULL \
+                              ); \
+        AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *m, *n); \
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+        /* Finalize BLIS. */ \
+        bli_finalize_auto(); \
+        return; \
+    } \
 \
     /* ----------------------------------------------------------- */ \
     /*    TRSM API: AX = B, where X = B                            */ \
@@ -479,6 +479,7 @@ void PASTEF77S(ch,blasname) \
     /* Finalize BLIS. */ \
     bli_finalize_auto(); \
 } \
+IF_BLIS_ENABLE_BLAS(\
 void PASTEF77(ch,blasname) \
      ( \
        const f77_char* side, \
@@ -494,7 +495,7 @@ void PASTEF77(ch,blasname) \
 { \
     TRSM_BLIS_IMPL(ch, blasname) \
 } \
-
+)
 #endif
 
 
@@ -508,7 +509,7 @@ void strsm_blis_impl
     const f77_int*  n,
     const float*    alpha,
     const float*    a, const f77_int* lda,
-    float*    b, const f77_int* ldb
+          float*    b, const f77_int* ldb
 )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
@@ -568,24 +569,24 @@ void strsm_blis_impl
     const inc_t cs_b = *ldb;
     const num_t dt = BLIS_FLOAT;
 
-	/* If alpha is zero, set B to zero and return early */
-	if( PASTEMAC(s,eq0)( *alpha ) )
-	{
-		PASTEMAC2(s,setm,_ex)( BLIS_NO_CONJUGATE,
-								0,
-								BLIS_NONUNIT_DIAG,
-								BLIS_DENSE,
-								m0, n0,
-								(float*) alpha,
-								(float*) b, rs_b, cs_b,
-								NULL, NULL
-							  );
-		AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *side, *m, *n);
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-		/* Finalize BLIS. */
-		bli_finalize_auto();
-		return;
-	}
+    /* If alpha is zero, set B to zero and return early */
+    if( PASTEMAC(s,eq0)( *alpha ) )
+    {
+        PASTEMAC2(s,setm,_ex)( BLIS_NO_CONJUGATE,
+                                0,
+                                BLIS_NONUNIT_DIAG,
+                                BLIS_DENSE,
+                                m0, n0,
+                                (float*) alpha,
+                                (float*) b, rs_b, cs_b,
+                                NULL, NULL
+                              );
+        AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *side, *m, *n);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+        /* Finalize BLIS. */
+        bli_finalize_auto();
+        return;
+    }
 
     if( n0 == 1 )
     {
@@ -628,19 +629,22 @@ void strsm_blis_impl
         }
         else if( ( blis_side == BLIS_RIGHT ) && ( m0 != 1 ) )
         {
-            /* b = alpha * b; */
-            bli_sscalv_ex
-            (
-                conja,
-                m0,
-                (float*)alpha,
-                b, rs_b,
-                NULL,
-                NULL
-            );
+            /* Avoid alpha scaling when alpha is one */
+            if ( !PASTEMAC(s, eq1)(*alpha) )
+            {
+                bli_sscalv_ex
+                (
+                    conja,
+                    m0,
+                    (float*)alpha,
+                    b, rs_b,
+                    NULL,
+                    NULL
+                );
+            }
             if(blis_diaga == BLIS_NONUNIT_DIAG)
             {
-                float inva = 1.0/ *a;
+                float inva = 1.0f/ *a;
                 for(dim_t indx = 0; indx < m0; indx ++)
                 {
                     b[indx] = ( inva * b[indx] );
@@ -702,19 +706,22 @@ void strsm_blis_impl
         }
         else if(( blis_side == BLIS_LEFT ) && ( n0 != 1 ))
         {
-            /* b = alpha * b; */
-            bli_sscalv_ex
-            (
-                conja,
-                n0,
-                (float*)alpha,
-                b, cs_b,
-                NULL,
-                NULL
-            );
+            /* Avoid alpha scaling when alpha is one */
+            if ( !PASTEMAC(s, eq1)(*alpha) )
+            {
+                bli_sscalv_ex
+                (
+                    conja,
+                    n0,
+                    (float*)alpha,
+                    b, cs_b,
+                    NULL,
+                    NULL
+                );
+            }
             if(blis_diaga == BLIS_NONUNIT_DIAG)
             {
-                float inva = 1.0/ *a;
+                float inva = 1.0f/ *a;
                 for(dim_t indx = 0; indx < n0; indx ++)
                 {
                     b[indx*cs_b] = (inva * b[indx*cs_b] );
@@ -747,40 +754,42 @@ void strsm_blis_impl
     bli_obj_set_struc( struca, &ao );
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
+
     // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {
-	    /* bli_strsm_small is performing better existing native
-	     * implementations for [m,n]<=1000 for single thread.
-	     * In case of multithread when [m,n]<=128 single thread implementation
-	     * is doing better than native multithread */
-	    bool is_parallel = bli_thread_get_is_parallel();
-	    if((!is_parallel && m0<=1000 && n0<=1000) ||
+        /* bli_strsm_small is performing better existing native
+         * implementations for [m,n]<=1000 for single thread.
+         * In case of multithread when [m,n]<=128 single thread implementation
+         * is doing better than native multithread */
+        bool is_parallel = bli_thread_get_is_parallel();
+        if((!is_parallel && m0<=1000 && n0<=1000) ||
                (is_parallel && (m0+n0)<320))
-	    {
-		    err_t status;
-		    status = bli_trsm_small
-                             (
-                               blis_side,
-			       &alphao,
-			       &ao,
-			       &bo,
-			       NULL,
-			       NULL,
-			       is_parallel
-			     );
-		    if (status == BLIS_SUCCESS)
-		    {
-			    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *side, *m, *n);
-			    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-			    /* Finalize BLIS. */
-			    bli_finalize_auto();
-			    return;
-		    }
-	    }
-    }
-#endif
+        {
+            err_t small_status;
+            small_status = bli_trsm_small
+                           (
+                             blis_side,
+                             &alphao,
+                             &ao,
+                             &bo,
+                             NULL,
+                             NULL,
+                             is_parallel
+                           );
+            if ( small_status == BLIS_SUCCESS )
+            {
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *side, *m, *n);
+                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+                /* Finalize BLIS. */
+                bli_finalize_auto();
+                return;
+            }
+        }
+    } // bli_cpuid_is_avx2fma3_supported
+
+#endif //#ifdef BLIS_ENABLE_SMALL_MATRIX
 
     //bli_trsmnat
     //(
@@ -821,7 +830,7 @@ void strsm_
     const f77_int*  n,
     const float*    alpha,
     const float*    a, const f77_int* lda,
-    float*    b, const f77_int* ldb
+          float*    b, const f77_int* ldb
 )
 {
     strsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
@@ -842,9 +851,9 @@ void dtrsm_blis_impl
     const f77_char* diaga,
     const f77_int*  m,
     const f77_int*  n,
-    const double*    alpha,
-    const double*    a, const f77_int* lda,
-    double*    b, const f77_int* ldb
+    const double*   alpha,
+    const double*   a, const f77_int* lda,
+          double*   b, const f77_int* ldb
 )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
@@ -904,24 +913,24 @@ void dtrsm_blis_impl
     const inc_t cs_b = *ldb;
     const num_t dt = BLIS_DOUBLE;
 
-	/* If alpha is zero, set B to zero and return early */
-	if( PASTEMAC(d,eq0)( *alpha ) )
-	{
-		PASTEMAC2(d,setm,_ex)( BLIS_NO_CONJUGATE,
-								0,
-								BLIS_NONUNIT_DIAG,
-								BLIS_DENSE,
-								m0, n0,
-								(double*) alpha,
-								(double*) b, rs_b, cs_b,
-								NULL, NULL
-							  );
-		AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *side, *m, *n);
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-		/* Finalize BLIS. */
-		bli_finalize_auto();
-		return;
-	}
+    /* If alpha is zero, set B to zero and return early */
+    if( PASTEMAC(d,eq0)( *alpha ) )
+    {
+        PASTEMAC2(d,setm,_ex)( BLIS_NO_CONJUGATE,
+                                0,
+                                BLIS_NONUNIT_DIAG,
+                                BLIS_DENSE,
+                                m0, n0,
+                                (double*) alpha,
+                                (double*) b, rs_b, cs_b,
+                                NULL, NULL
+                              );
+        AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *side, *m, *n);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+        /* Finalize BLIS. */
+        bli_finalize_auto();
+        return;
+    }
 
     if( n0 == 1 )
     {
@@ -964,16 +973,19 @@ void dtrsm_blis_impl
         }
         else if( ( blis_side == BLIS_RIGHT ) && ( m0 != 1 ) )
         {
-            /* b = alpha * b; */
-            bli_dscalv_ex
-            (
-                conja,
-                m0,
-                (double*)alpha,
-                b, rs_b,
-                NULL,
-                NULL
-            );
+            /* Avoid alpha scaling when alpha is one */
+            if ( !PASTEMAC(d, eq1)(*alpha) )
+            {
+                bli_dscalv_ex
+                (
+                    conja,
+                    m0,
+                    (double*)alpha,
+                    b, rs_b,
+                    NULL,
+                    NULL
+                );
+            }
             if(blis_diaga == BLIS_NONUNIT_DIAG)
             {
                 double inva = 1.0/ *a;
@@ -1038,16 +1050,19 @@ void dtrsm_blis_impl
         }
         else if(( blis_side == BLIS_LEFT ) && ( n0 != 1 ))
         {
-            /* b = alpha * b; */
-            bli_dscalv_ex
-            (
-                conja,
-                n0,
-                (double*)alpha,
-                b, cs_b,
-                NULL,
-                NULL
-            );
+            /* Avoid alpha scaling when alpha is one */
+            if ( !PASTEMAC(d, eq1)(*alpha) )
+            {
+                bli_dscalv_ex
+                (
+                    conja,
+                    n0,
+                    (double*)alpha,
+                    b, cs_b,
+                    NULL,
+                    NULL
+                );
+            }
             if(blis_diaga == BLIS_NONUNIT_DIAG)
             {
                 double inva = 1.0/ *a;
@@ -1100,8 +1115,8 @@ void dtrsm_blis_impl
               cntl_t*  cntl,
               bool     is_parallel
             );
-        err_t status = BLIS_NOT_YET_IMPLEMENTED;
-        
+        err_t small_status = BLIS_NOT_YET_IMPLEMENTED;
+
         // trsm small kernel function pointer definition
         dtrsm_small_ker_ft ker_ft = NULL;
 
@@ -1260,9 +1275,9 @@ void dtrsm_blis_impl
 #endif// BLIS_ENABLE_OPENMP
         if(ker_ft)
         {
-            status = ker_ft(blis_side, &alphao, &ao, &bo, NULL, NULL, is_parallel);
+            small_status = ker_ft(blis_side, &alphao, &ao, &bo, NULL, NULL, is_parallel);
         }
-        if (status == BLIS_SUCCESS)
+        if ( small_status == BLIS_SUCCESS )
         {
             AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *side, *m, *n);
             AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
@@ -1271,7 +1286,8 @@ void dtrsm_blis_impl
             return;
         }
     } // bli_cpuid_is_avx2fma3_supported
-#endif// END of BLIS_ENABLE_SMALL_MATRIX_TRSM
+
+#endif //#ifdef BLIS_ENABLE_SMALL_MATRIX
 
     //bli_trsmnat
     //(
@@ -1310,9 +1326,9 @@ void dtrsm_
     const f77_char* diaga,
     const f77_int*  m,
     const f77_int*  n,
-    const double*    alpha,
-    const double*    a, const f77_int* lda,
-    double*    b, const f77_int* ldb
+    const double*   alpha,
+    const double*   a, const f77_int* lda,
+          double*   b, const f77_int* ldb
 )
 {
     dtrsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
@@ -1334,9 +1350,9 @@ void ztrsm_blis_impl
     const f77_char* diaga,
     const f77_int*  m,
     const f77_int*  n,
-    const dcomplex*    alpha,
-    const dcomplex*    a, const f77_int* lda,
-    dcomplex*    b, const f77_int* ldb
+    const dcomplex* alpha,
+    const dcomplex* a, const f77_int* lda,
+          dcomplex* b, const f77_int* ldb
 )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
@@ -1396,24 +1412,24 @@ void ztrsm_blis_impl
     const inc_t cs_b = *ldb;
     const num_t dt = BLIS_DCOMPLEX;
 
-	/* If alpha is zero, set B to zero and return early */
-	if( PASTEMAC(z,eq0)( *alpha ) )
-	{
-		PASTEMAC2(z,setm,_ex)( BLIS_NO_CONJUGATE,
-								0,
-								BLIS_NONUNIT_DIAG,
-								BLIS_DENSE,
-								m0, n0,
-								(dcomplex*) alpha,
-								(dcomplex*) b, rs_b, cs_b,
-								NULL, NULL
-							  );
-		AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-		/* Finalize BLIS. */
-		bli_finalize_auto();
-		return;
-	}
+    /* If alpha is zero, set B to zero and return early */
+    if( PASTEMAC(z,eq0)( *alpha ) )
+    {
+        PASTEMAC2(z,setm,_ex)( BLIS_NO_CONJUGATE,
+                                0,
+                                BLIS_NONUNIT_DIAG,
+                                BLIS_DENSE,
+                                m0, n0,
+                                (dcomplex*) alpha,
+                                (dcomplex*) b, rs_b, cs_b,
+                                NULL, NULL
+                              );
+        AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+        /* Finalize BLIS. */
+        bli_finalize_auto();
+        return;
+    }
 
     if( n0 == 1 )
     {
@@ -1468,50 +1484,49 @@ void ztrsm_blis_impl
                     NULL,
                     NULL
                 );
-            }   
-	    if(blis_diaga == BLIS_NONUNIT_DIAG)
-	    {
-		    dcomplex inva = {1.0, 0.0};
-		    dcomplex a_dup;
-		    /**
-		     * For conjugate transpose and non-unit diagonal
-		     * kernel, negating imaginary part of A.
-		     * As the dimension of A is 1x1, there's going to
-		     * be only one 1 element of A.
-		     */
-		    if(blis_transa == BLIS_CONJ_TRANSPOSE)
-		    {
-			    a_dup.real = a->real;
-			    a_dup.imag = a->imag * -1.0;
-		    }
-		    else
-		    {
-			    a_dup.real = a->real;
-			    a_dup.imag = a->imag;
-		    }
+            }
+            if(blis_diaga == BLIS_NONUNIT_DIAG)
+            {
+                dcomplex inva = {1.0, 0.0};
+                dcomplex a_dup;
+                /**
+                 * For conjugate transpose and non-unit diagonal
+                 * kernel, negating imaginary part of A.
+                 * As the dimension of A is 1x1, there's going to
+                 * be only one 1 element of A.
+                 */
+                if(blis_transa == BLIS_CONJ_TRANSPOSE)
+                {
+                    a_dup.real = a->real;
+                    a_dup.imag = a->imag * -1.0;
+                }
+                else
+                {
+                    a_dup.real = a->real;
+                    a_dup.imag = a->imag;
+                }
 
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
-		    bli_zinvscals(a_dup, inva);
+                bli_zinvscals(a_dup, inva);
 #else
-		    inva.real = a_dup.real;
-		    inva.imag = a_dup.imag;
+                inva.real = a_dup.real;
+                inva.imag = a_dup.imag;
 #endif
-		    for(dim_t indx = 0; indx < m0; indx ++)
-		    {
+                for(dim_t indx = 0; indx < m0; indx ++)
+                {
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
-			    bli_zscals(inva, b[indx])
+                    bli_zscals(inva, b[indx])
 #else
-
-			    bli_zinvscals(inva, b[indx])
+                    bli_zinvscals(inva, b[indx])
 #endif
-		    }
+                }
 
-	    }
+            }
 
-	    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
-	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-	    return;
-	}
+            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
+            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+            return;
+        }
     }
     else if( m0 == 1 )
     {
@@ -1580,13 +1595,13 @@ void ztrsm_blis_impl
             if(blis_diaga == BLIS_NONUNIT_DIAG)
             {
                 dcomplex inva = {1.0, 0.0};
-		dcomplex a_dup;
-		/**
-		 * For conjugate transpose and non-unit diagonal
-		 * kernel, negating imaginary part of A.
-		 * As the dimension of A is 1x1, there's going to
-		 * be only one 1 element of A.
-		 */
+                dcomplex a_dup;
+                /**
+                 * For conjugate transpose and non-unit diagonal
+                 * kernel, negating imaginary part of A.
+                 * As the dimension of A is 1x1, there's going to
+                 * be only one 1 element of A.
+                 */
                 if(blis_transa == BLIS_CONJ_TRANSPOSE)
                 {
                         a_dup.real = a->real;
@@ -1594,31 +1609,29 @@ void ztrsm_blis_impl
                 }
                 else
                 {
-			a_dup.real = a->real;
+                        a_dup.real = a->real;
                         a_dup.imag = a->imag;
                 }
 
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
-		bli_zinvscals(a_dup, inva);
+                bli_zinvscals(a_dup, inva);
 #else
-		inva.real = a_dup.real;
-		inva.imag = a_dup.imag;
+                inva.real = a_dup.real;
+                inva.imag = a_dup.imag;
 #endif
                 for(dim_t indx = 0; indx < n0; indx ++)
                 {
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
-			bli_zscals(inva ,b[indx * cs_b])
+                    bli_zscals(inva ,b[indx * cs_b])
 #else
-
-			bli_zinvscals(inva ,b[indx * cs_b])
+                    bli_zinvscals(inva ,b[indx * cs_b])
 #endif
                 }
             }
 
-	    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
-	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-	    return;
-
+            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
+            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+            return;
         }
     }
 
@@ -1644,6 +1657,7 @@ void ztrsm_blis_impl
     bli_obj_set_struc( struca, &ao );
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
+
     // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if ( bli_cpuid_is_avx2fma3_supported() == TRUE )
@@ -1662,19 +1676,27 @@ void ztrsm_blis_impl
             cntl_t*  cntl,
             bool     is_parallel
         );
-        err_t status = BLIS_NOT_YET_IMPLEMENTED;
+        err_t small_status = BLIS_NOT_YET_IMPLEMENTED;
 
         // trsm small kernel function pointer definition
         ztrsm_small_ker_ft ker_ft = NULL;
-        arch_t id                 = bli_arch_query_id();
-        bool is_parallel          = bli_thread_get_is_parallel();
-        dim_t dim_a               = n0;
+
+        // Query the architecture ID
+        arch_t id = bli_arch_query_id();
+
+        bool is_parallel = bli_thread_get_is_parallel();
+
+        // dimensions of triangular matrix
+        // for left variants, dim_a is m0,
+        // for right variants, dim_a is n0
+        dim_t dim_a = n0;
         (void) dim_a; //avoid unused warning for zen2/3
         if (blis_side == BLIS_LEFT)
             dim_a = m0;
 
         // size of output matrix(B)
         dim_t size_b = m0*n0;
+
 #if defined(BLIS_ENABLE_OPENMP)
         switch (id)
         {
@@ -1776,9 +1798,9 @@ void ztrsm_blis_impl
         }
         if(ker_ft)
         {
-            status = ker_ft(blis_side, &alphao, &ao, &bo, NULL, NULL, is_parallel);
+            small_status = ker_ft(blis_side, &alphao, &ao, &bo, NULL, NULL, is_parallel);
         }
-        if (status == BLIS_SUCCESS)
+        if ( small_status == BLIS_SUCCESS )
         {
             AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
             AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
@@ -1787,7 +1809,8 @@ void ztrsm_blis_impl
             return;
         }
     } // bli_cpuid_is_avx2fma3_supported
-#endif// END of BLIS_ENABLE_SMALL_MATRIX_TRSM
+
+#endif //#ifdef BLIS_ENABLE_SMALL_MATRIX
 
     //bli_trsmnat
     //(
@@ -1826,9 +1849,9 @@ void ztrsm_
     const f77_char* diaga,
     const f77_int*  m,
     const f77_int*  n,
-    const dcomplex*    alpha,
-    const dcomplex*    a, const f77_int* lda,
-    dcomplex*    b, const f77_int* ldb
+    const dcomplex* alpha,
+    const dcomplex* a, const f77_int* lda,
+          dcomplex* b, const f77_int* ldb
 )
 {
     ztrsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
@@ -1850,9 +1873,9 @@ void ctrsm_blis_impl
     const f77_char* diaga,
     const f77_int*  m,
     const f77_int*  n,
-    const scomplex*    alpha,
-    const scomplex*    a, const f77_int* lda,
-    scomplex*    b, const f77_int* ldb
+    const scomplex* alpha,
+    const scomplex* a, const f77_int* lda,
+          scomplex* b, const f77_int* ldb
 )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
@@ -1912,24 +1935,24 @@ void ctrsm_blis_impl
     const inc_t cs_b = *ldb;
     const num_t dt = BLIS_SCOMPLEX;
 
-	/* If alpha is zero, set B to zero and return early */
-	if( PASTEMAC(c,eq0)( *alpha ) )
-	{
-		PASTEMAC2(c,setm,_ex)( BLIS_NO_CONJUGATE,
-								0,
-								BLIS_NONUNIT_DIAG,
-								BLIS_DENSE,
-								m0, n0,
-								(scomplex*) alpha,
-								(scomplex*) b, rs_b, cs_b,
-								NULL, NULL
-							  );
-		AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *side, *m, *n);
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-		/* Finalize BLIS. */
-		bli_finalize_auto();
-		return;
-	}
+    /* If alpha is zero, set B to zero and return early */
+    if( PASTEMAC(c,eq0)( *alpha ) )
+    {
+        PASTEMAC2(c,setm,_ex)( BLIS_NO_CONJUGATE,
+                                0,
+                                BLIS_NONUNIT_DIAG,
+                                BLIS_DENSE,
+                                m0, n0,
+                                (scomplex*) alpha,
+                                (scomplex*) b, rs_b, cs_b,
+                                NULL, NULL
+                              );
+        AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *side, *m, *n);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+        /* Finalize BLIS. */
+        bli_finalize_auto();
+        return;
+    }
 
     if( n0 == 1 )
     {
@@ -1972,57 +1995,60 @@ void ctrsm_blis_impl
         }
         else if( ( blis_side == BLIS_RIGHT ) && ( m0 != 1 ) )
         {
-            bli_cscalv_ex
-            (
-                conja,
-                m0,
-                (scomplex*)alpha,
-                (scomplex*)b, rs_b,
-                NULL,
-                NULL
-            );
+            /* Avoid alpha scaling when alpha is one */
+            if ( !PASTEMAC(c, eq1)(*alpha) )
+            {
+                bli_cscalv_ex
+                (
+                    conja,
+                    m0,
+                    (scomplex*)alpha,
+                    (scomplex*)b, rs_b,
+                    NULL,
+                    NULL
+                );
+            }
             if(blis_diaga == BLIS_NONUNIT_DIAG)
             {
-                scomplex inva = {1.0, 0.0};
-		scomplex a_dup;
-		/**
-		 * For conjugate transpose and non-unit diagonal
-		 * kernel, negating imaginary part of A.
-		 * As the dimension of A is 1x1, there's going to
-		 * be only one 1 element of A.
-		 */
+                scomplex inva = {1.0f, 0.0f};
+                scomplex a_dup;
+                /**
+                 * For conjugate transpose and non-unit diagonal
+                 * kernel, negating imaginary part of A.
+                 * As the dimension of A is 1x1, there's going to
+                 * be only one 1 element of A.
+                 */
                 if(blis_transa == BLIS_CONJ_TRANSPOSE)
                 {
                         a_dup.real = a->real;
-                        a_dup.imag = a->imag * -1.0;
+                        a_dup.imag = a->imag * -1.0f;
                 }
                 else
                 {
-			a_dup.real = a->real;
+                        a_dup.real = a->real;
                         a_dup.imag = a->imag;
                 }
 
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
-		bli_cinvscals(a_dup, inva);
+                bli_cinvscals(a_dup, inva);
 #else
-		inva.real = a_dup.real;
-		inva.imag = a_dup.imag;
+                inva.real = a_dup.real;
+                inva.imag = a_dup.imag;
 #endif
 
                 for(dim_t indx = 0; indx < m0; indx ++)
                 {
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
-			bli_cscals(inva ,b[indx])
+                    bli_cscals(inva ,b[indx])
 #else
-			bli_cinvscals(inva, b[indx])
+                    bli_cinvscals(inva, b[indx])
 #endif
                 }
             }
 
-	    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *side, *m, *n);
-	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-	    return;
-
+            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *side, *m, *n);
+            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+            return;
         }
     }
     else if( m0 == 1 )
@@ -2076,56 +2102,59 @@ void ctrsm_blis_impl
         }
         else if(( blis_side == BLIS_LEFT ) && ( n0 != 1 ))
         {
-            bli_cscalv_ex
-            (
-                conja,
-                n0,
-                (scomplex*)alpha,
-                (scomplex*)b, cs_b,
-                NULL,
-                NULL
-            );
+            /* Avoid alpha scaling when alpha is one */
+            if ( !PASTEMAC(c, eq1)(*alpha) )
+            {
+                bli_cscalv_ex
+                (
+                    conja,
+                    n0,
+                    (scomplex*)alpha,
+                    (scomplex*)b, cs_b,
+                    NULL,
+                    NULL
+                );
+            }
             if(blis_diaga == BLIS_NONUNIT_DIAG)
             {
-                scomplex inva = {1.0, 0.0};
-		scomplex a_dup;
-		/**
-		 * For conjugate transpose and non-unit diagonal
-		 * kernel, negating imaginary part of A.
-		 * As the dimension of A is 1x1, there's going to
-		 * be only one 1 element of A.
-		 */
+                scomplex inva = {1.0f, 0.0f};
+                scomplex a_dup;
+                /**
+                 * For conjugate transpose and non-unit diagonal
+                 * kernel, negating imaginary part of A.
+                 * As the dimension of A is 1x1, there's going to
+                 * be only one 1 element of A.
+                 */
                 if(blis_transa == BLIS_CONJ_TRANSPOSE)
                 {
                         a_dup.real = a->real;
-                        a_dup.imag = a->imag * -1.0;
+                        a_dup.imag = a->imag * -1.0f;
                 }
                 else
                 {
-			a_dup.real = a->real;
+                        a_dup.real = a->real;
                         a_dup.imag = a->imag;
                 }
 
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
-		bli_cinvscals(a_dup, inva)
+                bli_cinvscals(a_dup, inva)
 #else
-		inva.real = a_dup.real;
-		inva.imag = a_dup.imag;
+                inva.real = a_dup.real;
+                inva.imag = a_dup.imag;
 #endif
                 for(dim_t indx = 0; indx < n0; indx ++)
                 {
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
-			bli_cscals(inva ,b[indx * cs_b])
+                    bli_cscals(inva ,b[indx * cs_b])
 #else
-			bli_cinvscals(inva, b[indx * cs_b])
+                    bli_cinvscals(inva, b[indx * cs_b])
 #endif
-
                 }
             }
 
-	    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *side, *m, *n);
-	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-	    return;
+            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *side, *m, *n);
+            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+            return;
         }
     }
 
@@ -2151,6 +2180,7 @@ void ctrsm_blis_impl
     bli_obj_set_struc( struca, &ao );
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
+
     // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == TRUE)
@@ -2163,18 +2193,18 @@ void ctrsm_blis_impl
         if((!is_parallel && m0<=1000 && n0<=1000) ||
            (is_parallel && (m0+n0)<320))
         {
-            err_t status;
-            status = bli_trsm_small
-                    (
-                        blis_side,
-                        &alphao,
-                        &ao,
-                        &bo,
-                        NULL,
-                        NULL,
-                        is_parallel
-                    );
-            if (status == BLIS_SUCCESS)
+            err_t small_status;
+            small_status = bli_trsm_small
+                           (
+                             blis_side,
+                             &alphao,
+                             &ao,
+                             &bo,
+                             NULL,
+                             NULL,
+                             is_parallel
+                           );
+            if ( small_status == BLIS_SUCCESS )
             {
                 AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
@@ -2184,7 +2214,8 @@ void ctrsm_blis_impl
             }
         }
     } // bli_cpuid_is_avx2fma3_supported
-#endif
+
+#endif //#ifdef BLIS_ENABLE_SMALL_MATRIX
 
     //bli_trsmnat
     //(
@@ -2223,9 +2254,9 @@ void ctrsm_
     const f77_char* diaga,
     const f77_int*  m,
     const f77_int*  n,
-    const scomplex*    alpha,
-    const scomplex*    a, const f77_int* lda,
-    scomplex*    b, const f77_int* ldb
+    const scomplex* alpha,
+    const scomplex* a, const f77_int* lda,
+          scomplex* b, const f77_int* ldb
 )
 {
     ctrsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
