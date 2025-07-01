@@ -1414,8 +1414,10 @@ void bli_dgemmsup_rv_haswell_asm_4x8
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-	uint64_t k_iter = k0 / 4;
-	uint64_t k_left = k0 % 4;
+	uint64_t k_iter_8 = k0 / 8;        //unroll by 8
+	uint64_t k_left   = k0 % 8;
+	uint64_t k_iter_4 = k_left / 4;    //unroll by 4
+	k_left            = k_left % 4;    //k_left
 
 	uint64_t rs_a   = rs_a0;
 	uint64_t cs_a   = cs_a0;
@@ -1451,70 +1453,44 @@ void bli_dgemmsup_rv_haswell_asm_4x8
 	                                   // in reading beyond the bounds allocated mem
 	                                   // (the likely result: a segmentation fault).
 
-	mov(var(c), rcx)                   // load address of c
 	mov(var(rs_c), rdi)                // load rs_c
 	lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
-
-
-
-	cmp(imm(8), rdi)                   // set ZF if (8*rs_c) == 8.
-	jz(.DCOLPFETCH)                    // jump to column storage case
-	label(.DROWPFETCH)                 // row-stored prefetching on c
-
-	lea(mem(rcx, rdi, 2), rdx)         //
-	lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-	prefetch(0, mem(rcx,         7*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 7*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 7*8)) // prefetch c + 2*rs_c
-	prefetch(0, mem(rdx,         7*8)) // prefetch c + 3*rs_c
-
-	jmp(.DPOSTPFETCH)                  // jump to end of prefetching c
-	label(.DCOLPFETCH)                 // column-stored prefetching c
-
-	mov(var(cs_c), rsi)                // load cs_c to rsi (temporarily)
-	lea(mem(, rsi, 8), rsi)            // cs_c *= sizeof(double)
-	lea(mem(rcx, rsi, 2), rdx)         //
-	lea(mem(rdx, rsi, 1), rdx)         // rdx = c + 3*cs_c;
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*cs_c
-	prefetch(0, mem(rcx, rsi, 1, 3*8)) // prefetch c + 1*cs_c
-	prefetch(0, mem(rcx, rsi, 2, 3*8)) // prefetch c + 2*cs_c
-	prefetch(0, mem(rdx,         3*8)) // prefetch c + 3*cs_c
-	prefetch(0, mem(rdx, rsi, 1, 3*8)) // prefetch c + 4*cs_c
-	prefetch(0, mem(rdx, rsi, 2, 3*8)) // prefetch c + 5*cs_c
-	lea(mem(rdx, rsi, 2), rdx)         // rdx = c + 5*cs_c;
-	prefetch(0, mem(rdx, rsi, 1, 3*8)) // prefetch c + 6*cs_c
-	prefetch(0, mem(rdx, rsi, 2, 3*8)) // prefetch c + 7*cs_c
-
-	label(.DPOSTPFETCH)                // done prefetching c
-
 
 #if 1
 	lea(mem(rax, r9,  8), rdx)         //
 	lea(mem(rdx, r9,  8), rdx)         // rdx = a + 16*cs_a;
 #endif
 
+	lea(mem(r10, r10, 2), rcx)         // rcx = 3*cs_a;
 
+    /**
+	 * Prefetching Strategy
+	 * B matrix prefetch brings the next rows of B into cache before it is accessed.
+	 * It follows streaming access, which is cache-friendly.
+	 * Very short prefetch distance typically the next rows to be accessed in loop.
+	 * 
+	 * A matrix prefetch brings future elements of A(64 bytes ahead, 1 unrolled iterations apart.)
+	 * Since prefetched data are to be reused within unrolled iterations itself, data will be accessed,
+	 * before it gets evicted from cache.
+	 */
 
-
-	mov(var(k_iter), rsi)              // i = k_iter;
-	test(rsi, rsi)                     // check i via logical AND.
-	je(.DCONSIDKLEFT)                  // if i == 0, jump to code that
-	                                   // contains the k_left loop.
+	mov(var(k_iter_8), rsi)              // i = k_iter;
+	sub(imm(0x10), rsi)
+	jle(.DLOOPKLOOP2)
 
 
 	label(.DLOOPKITER)                 // MAIN LOOP
 
 
 	// ---------------------------------- iteration 0
-
-#if 1
-	prefetch(0, mem(rdx, 4*8))
-#endif
-
+	// Prefetch 4th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
 	vmovupd(mem(rbx, 0*32), ymm0)
 	vmovupd(mem(rbx, 1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
 
+	// Prefetch A[8] (64 bytes ahead of current A)
+	prefetch(0, 0x40(rax))
 	vbroadcastsd(mem(rax        ), ymm2)
 	vbroadcastsd(mem(rax, r8,  1), ymm3)
 	vfmadd231pd(ymm0, ymm2, ymm4)
@@ -1532,16 +1508,15 @@ void bli_dgemmsup_rv_haswell_asm_4x8
 
 
 	// ---------------------------------- iteration 1
-
-#if 0
-	prefetch(0, mem(rdx, r9, 1, 4*8))
-#endif
-
+	// Prefetch 5th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
 	vmovupd(mem(rbx, 0*32), ymm0)
 	vmovupd(mem(rbx, 1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
 
 	vbroadcastsd(mem(rax        ), ymm2)
+	// Prefetch A[9] (64 bytes ahead of current A)
+	prefetch(0, 0x40(rax, r8, 1))
 	vbroadcastsd(mem(rax, r8,  1), ymm3)
 	vfmadd231pd(ymm0, ymm2, ymm4)
 	vfmadd231pd(ymm1, ymm2, ymm5)
@@ -1558,11 +1533,8 @@ void bli_dgemmsup_rv_haswell_asm_4x8
 
 
 	// ---------------------------------- iteration 2
-
-#if 1
-	prefetch(0, mem(rdx, r9, 2, 4*8))
-#endif
-
+	// Prefetch 6th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
 	vmovupd(mem(rbx, 0*32), ymm0)
 	vmovupd(mem(rbx, 1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
@@ -1574,6 +1546,8 @@ void bli_dgemmsup_rv_haswell_asm_4x8
 	vfmadd231pd(ymm0, ymm3, ymm6)
 	vfmadd231pd(ymm1, ymm3, ymm7)
 
+	// Prefetch A[10] (64 bytes ahead of current A)
+	prefetch(0, 0x40(rax, r8, 2))
 	vbroadcastsd(mem(rax, r8,  2), ymm2)
 	vbroadcastsd(mem(rax, r13, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
@@ -1584,11 +1558,82 @@ void bli_dgemmsup_rv_haswell_asm_4x8
 
 
 	// ---------------------------------- iteration 3
+	// Prefetch 7th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
 
-#if 1
-	lea(mem(rdx, r9,  4), rdx)         // a_prefetch += 4*cs_a;
-#endif
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
 
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	// Prefetch A[11] (64 bytes ahead of current A)
+	prefetch(0, 0x40(rax, r13, 1))
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	// ---------------------------------- iteration 4
+	// Prefetch 8th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	// Prefetch A[12] (64 bytes ahead of current A)
+	prefetch(0, 0x40(rax, r8, 4))
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+
+	// ---------------------------------- iteration 5
+	// Prefetch 9th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	// Prefetch A[13] (64 bytes ahead of current A)
+	prefetch(0, 0x40(rax, r15, 1))
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+
+	// ---------------------------------- iteration 6
+	// Prefetch 10th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
 	vmovupd(mem(rbx, 0*32), ymm0)
 	vmovupd(mem(rbx, 1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
@@ -1609,14 +1654,375 @@ void bli_dgemmsup_rv_haswell_asm_4x8
 	vfmadd231pd(ymm1, ymm3, ymm11)
 
 
+	// ---------------------------------- iteration 7
+	// Prefetch 11th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
 
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKITER)                   // iterate again if i != 0.
 
 
+	label(.DLOOPKLOOP2)
+
+	cmp(imm(8), rdi)                   // set ZF if (8*rs_c) == 8.
+	jz(.DCOLPFETCH)                    // jump to column storage case
+	label(.DROWPFETCH)                 // row-stored prefetching on c
+
+	lea(mem(r12, rdi, 2), rdx)         //
+	lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
+	prefetch(0, mem(r12,         7*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 7*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 7*8)) // prefetch c + 2*rs_c
+	prefetch(0, mem(rdx,         7*8)) // prefetch c + 3*rs_c
+	prefetch(0, mem(rdx, rdi, 1, 7*8)) // prefetch c + 4*rs_c
+	prefetch(0, mem(rdx, rdi, 2, 7*8)) // prefetch c + 5*rs_c
+
+	jmp(.DPOSTPFETCH)                  // jump to end of prefetching c
+	label(.DCOLPFETCH)                 // column-stored prefetching c
+
+	mov(var(cs_c), r9)                // load cs_c to rsi (temporarily)
+	lea(mem(, r9, 8), r9)            // cs_c *= sizeof(double)
+	lea(mem(r12, r9, 2), rdx)         //
+	lea(mem(rdx, r9, 1), rdx)         // rdx = c + 3*cs_c;
+	prefetch(0, mem(r12,         7*8)) // prefetch c + 0*cs_c
+	prefetch(0, mem(r12, r9, 1, 7*8)) // prefetch c + 1*cs_c
+	prefetch(0, mem(r12, r9, 2, 7*8)) // prefetch c + 2*cs_c
+	prefetch(0, mem(rdx,         7*8)) // prefetch c + 3*cs_c
+	prefetch(0, mem(rdx, r9, 1, 7*8)) // prefetch c + 4*cs_c
+	prefetch(0, mem(rdx, r9, 2, 7*8)) // prefetch c + 5*cs_c
+	lea(mem(rdx, r9, 2), rdx)         // rdx = c + 5*cs_c;
+	prefetch(0, mem(rdx, r9, 1, 7*8)) // prefetch c + 6*cs_c
+	prefetch(0, mem(rdx, r9, 2, 7*8)) // prefetch c + 7*cs_c
+
+	mov(var(cs_a), r9)                 // load cs_a
+	lea(mem(, r9, 8), r9)              // rs_a *= sizeof(double)
+
+	label(.DPOSTPFETCH)                // done prefetching c
+
+	add(imm(0x10), rsi)
+	jle(.DCONSIDKLEFT_8)
+
+	label(.DLOOPKITERPOSTPREFETCH)                 // MAIN LOOP
+
+	// ---------------------------------- iteration 0
+	// Prefetch 4th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	// Prefetch A[8] (64 bytes ahead of current A)
+	prefetch(0, 0x40(rax))
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
 
 
+	// ---------------------------------- iteration 1
+	// Prefetch 5th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
 
+	vbroadcastsd(mem(rax        ), ymm2)
+	// Prefetch A[9] (64 bytes ahead of current A)
+	prefetch(0, 0x40(rax, r8, 1))
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+
+	// ---------------------------------- iteration 2
+	// Prefetch 6th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	// Prefetch A[10] (64 bytes ahead of current A)
+	prefetch(0, 0x40(rax, r8, 2))
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+
+	// ---------------------------------- iteration 3
+	// Prefetch 7th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	// Prefetch A[11] (64 bytes ahead of current A)
+	prefetch(0, 0x40(rax, r13, 1))
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	// ---------------------------------- iteration 4
+	// Prefetch 8th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	// Prefetch A[12] (64 bytes ahead of current A)
+	prefetch(0, 0x40(rax, r8, 4))
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+
+	// ---------------------------------- iteration 5
+	// Prefetch 9th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	// Prefetch A[13] (64 bytes ahead of current A)
+	prefetch(0, 0x40(rax, r15, 1))
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+
+	// ---------------------------------- iteration 6
+	// Prefetch 10th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+
+	// ---------------------------------- iteration 7
+	// Prefetch 11th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	dec(rsi)                           // i -= 1;
+	jne(.DLOOPKITERPOSTPREFETCH)                   // iterate again if i != 0.
+
+	label(.DCONSIDKLEFT_8)
+
+	mov(var(k_iter_4), rsi)
+	test(rsi, rsi)
+	je(.DCONSIDKLEFT)
+
+	label(.DLOOPKITER_4)
+	// ---------------------------------- iteration 0
+	// Prefetch 4th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	prefetch(0, 0x40(rax))
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+
+	// ---------------------------------- iteration 1
+	// Prefetch 5th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	prefetch(0, 0x40(rax, r8, 1))
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+
+	// ---------------------------------- iteration 2
+	// Prefetch 6th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	prefetch(0, 0x40(rax, r8, 2))
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+
+	// ---------------------------------- iteration 3
+	// Prefetch 7th row of B from current position
+	prefetch(0, 0x00(rbx, rcx, 1))
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	prefetch(0, 0x40(rax, r13, 1))
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	dec(rsi)                           // i -= 1;
+	jne(.DLOOPKITER_4)                 // iterate again if i != 0.
 
 	label(.DCONSIDKLEFT)
 
@@ -1627,11 +2033,6 @@ void bli_dgemmsup_rv_haswell_asm_4x8
 
 
 	label(.DLOOPKLEFT)                 // EDGE LOOP
-
-#if 0
-	prefetch(0, mem(rdx, 5*8))
-	add(r9, rdx)
-#endif
 
 	vmovupd(mem(rbx, 0*32), ymm0)
 	vmovupd(mem(rbx, 1*32), ymm1)
@@ -1661,25 +2062,11 @@ void bli_dgemmsup_rv_haswell_asm_4x8
 	label(.DPOSTACCUM)
 
 
-
+	mov(var(c), rcx)                   // load address of c
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
-
-	vmulpd(ymm0, ymm4, ymm4)           // scale by alpha
-	vmulpd(ymm0, ymm5, ymm5)
-	vmulpd(ymm0, ymm6, ymm6)
-	vmulpd(ymm0, ymm7, ymm7)
-	vmulpd(ymm0, ymm8, ymm8)
-	vmulpd(ymm0, ymm9, ymm9)
-	vmulpd(ymm0, ymm10, ymm10)
-	vmulpd(ymm0, ymm11, ymm11)
-
-
-
-
-
 
 	mov(var(cs_c), rsi)                // load cs_c
 	lea(mem(, rsi, 8), rsi)            // rsi = cs_c * sizeof(double)
@@ -1693,8 +2080,8 @@ void bli_dgemmsup_rv_haswell_asm_4x8
 
 	                                   // now avoid loading C if beta == 0
 
-	vxorpd(ymm0, ymm0, ymm0)           // set ymm0 to zero.
-	vucomisd(xmm0, xmm3)               // set ZF if beta == 0.
+	vxorpd(ymm1, ymm1, ymm1)           // set ymm0 to zero.
+	vucomisd(xmm1, xmm3)               // set ZF if beta == 0.
 	je(.DBETAZERO)                     // if ZF = 1, jump to beta == 0 case
 
 
@@ -1705,18 +2092,32 @@ void bli_dgemmsup_rv_haswell_asm_4x8
 
 
 	label(.DROWSTORED)
-
 	lea(mem(rcx, rdi, 1), rax)         // load address of c +  1*rs_c;
 	lea(mem(rcx, rdi, 2), rdx)         // load address of c +  2*rs_c;
 	lea(mem(rdx, rdi, 1), rbx)         // load address of c +  3*rs_c;
 
+	vmulpd(ymm0, ymm4, ymm4)
 	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm4)
+
+	vmulpd(ymm0, ymm5, ymm5)
 	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm5)
+
+	vmulpd(ymm0, ymm6, ymm6)
 	vfmadd231pd(mem(rax, 0*32), ymm3, ymm6)
+
+	vmulpd(ymm0, ymm7, ymm7)
 	vfmadd231pd(mem(rax, 1*32), ymm3, ymm7)
+
+	vmulpd(ymm0, ymm8, ymm8)
 	vfmadd231pd(mem(rdx, 0*32), ymm3, ymm8)
+
+	vmulpd(ymm0, ymm9, ymm9)
 	vfmadd231pd(mem(rdx, 1*32), ymm3, ymm9)
+
+	vmulpd(ymm0, ymm10, ymm10)
 	vfmadd231pd(mem(rbx, 0*32), ymm3, ymm10)
+
+	vmulpd(ymm0, ymm11, ymm11)
 	vfmadd231pd(mem(rbx, 1*32), ymm3, ymm11)
 
 	vmovupd(ymm4, mem(rcx, 0*32))
@@ -1734,7 +2135,14 @@ void bli_dgemmsup_rv_haswell_asm_4x8
 
 
 	label(.DCOLSTORED)
-
+	vmulpd(ymm0, ymm4, ymm4)           // scale by alpha
+	vmulpd(ymm0, ymm5, ymm5)
+	vmulpd(ymm0, ymm6, ymm6)
+	vmulpd(ymm0, ymm7, ymm7)
+	vmulpd(ymm0, ymm8, ymm8)
+	vmulpd(ymm0, ymm9, ymm9)
+	vmulpd(ymm0, ymm10, ymm10)
+	vmulpd(ymm0, ymm11, ymm11)
 	                                   // begin I/O on columns 0-3
 	vunpcklpd(ymm6, ymm4, ymm0)
 	vunpckhpd(ymm6, ymm4, ymm1)
@@ -1796,7 +2204,14 @@ void bli_dgemmsup_rv_haswell_asm_4x8
 
 
 	label(.DROWSTORBZ)
-
+	vmulpd(ymm0, ymm4, ymm4)           // scale by alpha
+	vmulpd(ymm0, ymm5, ymm5)
+	vmulpd(ymm0, ymm6, ymm6)
+	vmulpd(ymm0, ymm7, ymm7)
+	vmulpd(ymm0, ymm8, ymm8)
+	vmulpd(ymm0, ymm9, ymm9)
+	vmulpd(ymm0, ymm10, ymm10)
+	vmulpd(ymm0, ymm11, ymm11)
 
 	vmovupd(ymm4, mem(rcx, 0*32))
 	vmovupd(ymm5, mem(rcx, 1*32))
@@ -1820,7 +2235,14 @@ void bli_dgemmsup_rv_haswell_asm_4x8
 
 
 	label(.DCOLSTORBZ)
-
+	vmulpd(ymm0, ymm4, ymm4)           // scale by alpha
+	vmulpd(ymm0, ymm5, ymm5)
+	vmulpd(ymm0, ymm6, ymm6)
+	vmulpd(ymm0, ymm7, ymm7)
+	vmulpd(ymm0, ymm8, ymm8)
+	vmulpd(ymm0, ymm9, ymm9)
+	vmulpd(ymm0, ymm10, ymm10)
+	vmulpd(ymm0, ymm11, ymm11)
 	                                   // begin I/O on columns 0-3
 	vunpcklpd(ymm6, ymm4, ymm0)
 	vunpckhpd(ymm6, ymm4, ymm1)
@@ -1865,7 +2287,8 @@ void bli_dgemmsup_rv_haswell_asm_4x8
     end_asm(
 	: // output operands (none)
 	: // input operands
-      [k_iter] "m" (k_iter),
+      [k_iter_8] "m" (k_iter_8),
+      [k_iter_4] "m" (k_iter_4),
       [k_left] "m" (k_left),
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
