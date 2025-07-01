@@ -85,8 +85,8 @@ void bli_cpackm_zen4_asm_24xk
     const dim_t      mnr   = 24;
 
     // Store the iterations along m dimension in blocks of 8(for both copyting and setting to 0)
-    dim_t m_iter = cdim0 / 8;
-    dim_t m_left = cdim0 % 8;
+    uint64_t m_iter = cdim0 / 8;
+    uint64_t m_left = cdim0 % 8;
 
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
