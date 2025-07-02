@@ -38,7 +38,7 @@
 // -- Locked pool-of-arrays type --
 
 /*
-typedef struct
+typedef struct apool_s
 {
 	bli_pthread_mutex_t mutex;
 	pool_t              pool;

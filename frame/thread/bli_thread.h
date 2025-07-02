@@ -69,7 +69,7 @@ BLIS_EXPORT_BLIS void bli_thread_launch
 // -----------------------------------------------------------------------------
 
 // Factorization and partitioning prototypes
-typedef struct
+typedef struct bli_prime_factors_s
 {
     dim_t n;
     dim_t sqrt_n;

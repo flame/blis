@@ -38,7 +38,7 @@
 // gemm kernel parameter struct.
 //
 
-typedef struct
+typedef struct gemm_ker_params_s
 {
 	gemm_ukr_ft ukr;
 } gemm_ker_params_t;

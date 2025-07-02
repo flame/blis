@@ -102,7 +102,7 @@
 #define BLIS_TEST_PARAM_DIAG_CHARS   "nu"
 
 #define NUM_PARAM_TYPES         6
-typedef enum
+typedef enum param_e
 {
 	BLIS_TEST_PARAM_SIDE      = 0,
 	BLIS_TEST_PARAM_UPLO      = 1,
@@ -119,14 +119,14 @@ typedef enum
 
 
 #define NUM_OPERAND_TYPES       2
-typedef enum
+typedef enum operand_e
 {
 	BLIS_TEST_MATRIX_OPERAND  = 0,
 	BLIS_TEST_VECTOR_OPERAND  = 1,
 } operand_t;
 
 
-typedef enum
+typedef enum dimset_e
 {
 	BLIS_TEST_DIMS_MNK        = 0,
 	BLIS_TEST_DIMS_MN         = 1,
@@ -138,7 +138,7 @@ typedef enum
 } dimset_t;
 
 
-typedef enum
+typedef enum iface_e
 {
 	BLIS_TEST_SEQ_UKERNEL     = 0,
 	BLIS_TEST_SEQ_FRONT_END   = 1,
@@ -146,7 +146,7 @@ typedef enum
 } iface_t;
 
 
-typedef enum
+typedef enum rand_e
 {
 	BLIS_TEST_RAND_REAL_VALUES = 0,
 	BLIS_TEST_RAND_NARROW_POW2 = 1,
@@ -155,7 +155,7 @@ typedef enum
 
 
 
-typedef struct
+typedef struct test_params_s
 {
 	unsigned int  n_repeats;
 	unsigned int  n_mstorage;
@@ -182,7 +182,7 @@ typedef struct
 } test_params_t;
 
 
-typedef struct
+typedef struct test_op_s
 {
 	// parent test_ops_t struct
 	struct test_ops_s*   ops;
@@ -289,7 +289,7 @@ typedef struct test_ops_s
 } test_ops_t;
 
 
-typedef struct
+typedef struct thresh_s
 {
 	double failwarn;
 	double warnpass;

@@ -72,7 +72,7 @@ typedef int bli_pthread_barrierattr_t;
 
 // -- pthread types --
 
-typedef struct
+typedef struct bli_pthread_s
 {
     HANDLE handle;
     void* retval;
@@ -83,7 +83,7 @@ typedef void bli_pthread_mutexattr_t;
 typedef CONDITION_VARIABLE bli_pthread_cond_t;
 typedef void bli_pthread_condattr_t;
 typedef INIT_ONCE bli_pthread_once_t;
-typedef struct
+typedef struct bli_pthread_barrier_s
 {
     bli_pthread_mutex_t mutex;
     bli_pthread_cond_t  cond;
@@ -103,7 +103,7 @@ typedef void bli_pthread_barrierattr_t;
 #include <pthread.h>
 
 // This branch defines a pthreads-like API, bli_pthreads_*(), and implements it
-// in terms of the corresponding pthreads_*() types, macros, and function calls. 
+// in terms of the corresponding pthreads_*() types, macros, and function calls.
 
 // -- pthread types --
 
@@ -122,7 +122,7 @@ typedef pthread_once_t      bli_pthread_once_t;
 
 typedef void bli_pthread_barrierattr_t;
 
-typedef struct
+typedef struct bli_pthread_barrier_s
 {
 	bli_pthread_mutex_t mutex;
 	bli_pthread_cond_t  cond;
@@ -274,7 +274,7 @@ BLIS_EXPORT_BLIS int bli_pthread_barrier_wait
 
 // -- pthread_switch --
 
-typedef struct
+typedef struct bli_pthread_switch_s
 {
     int                 status;
     bli_pthread_mutex_t mutex;

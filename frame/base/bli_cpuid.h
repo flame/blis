@@ -37,7 +37,7 @@
   // Used only during standalone testing of ARM support.
   #define FALSE 0
   #define TRUE  1
-  typedef enum
+  typedef enum arch_e
   {
 	BLIS_ARCH_CORTEXA57 = 10,
 	BLIS_ARCH_CORTEXA15 = 11,

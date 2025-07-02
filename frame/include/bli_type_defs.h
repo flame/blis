@@ -392,7 +392,7 @@ typedef void  (*free_ft)  ( void*  p    );
 
 // -- Operational parameter types --
 
-typedef enum
+typedef enum trans_e
 {
 	BLIS_NO_TRANSPOSE      = 0x0,
 	BLIS_TRANSPOSE         = BLIS_BITVAL_TRANS,
@@ -400,13 +400,13 @@ typedef enum
 	BLIS_CONJ_TRANSPOSE    = BLIS_BITVAL_CONJ_TRANS
 } trans_t;
 
-typedef enum
+typedef enum conj_e
 {
 	BLIS_NO_CONJUGATE      = 0x0,
 	BLIS_CONJUGATE         = BLIS_BITVAL_CONJ
 } conj_t;
 
-typedef enum
+typedef enum uplo_e
 {
 	BLIS_ZEROS             = BLIS_BITVAL_ZEROS,
 	BLIS_LOWER             = BLIS_BITVAL_LOWER,
@@ -414,25 +414,25 @@ typedef enum
 	BLIS_DENSE             = BLIS_BITVAL_DENSE
 } uplo_t;
 
-typedef enum
+typedef enum side_e
 {
 	BLIS_LEFT              = 0x0,
 	BLIS_RIGHT
 } side_t;
 
-typedef enum
+typedef enum diag_e
 {
 	BLIS_NONUNIT_DIAG      = 0x0,
 	BLIS_UNIT_DIAG         = BLIS_BITVAL_UNIT_DIAG
 } diag_t;
 
-typedef enum
+typedef enum invdiag_e
 {
 	BLIS_NO_INVERT_DIAG    = 0x0,
 	BLIS_INVERT_DIAG       = BLIS_BITVAL_INVERT_DIAG
 } invdiag_t;
 
-typedef enum
+typedef enum struc_e
 {
 	BLIS_GENERAL           = BLIS_BITVAL_GENERAL,
 	BLIS_HERMITIAN         = BLIS_BITVAL_HERMITIAN,
@@ -443,7 +443,7 @@ typedef enum
 
 // -- Data type --
 
-typedef enum
+typedef enum num_e
 {
 	BLIS_FLOAT             = BLIS_BITVAL_FLOAT_TYPE,
 	BLIS_DOUBLE            = BLIS_BITVAL_DOUBLE_TYPE,
@@ -455,13 +455,13 @@ typedef enum
 	BLIS_DT_HI             = BLIS_DCOMPLEX
 } num_t;
 
-typedef enum
+typedef enum dom_e
 {
 	BLIS_REAL              = BLIS_BITVAL_REAL,
 	BLIS_COMPLEX           = BLIS_BITVAL_COMPLEX
 } dom_t;
 
-typedef enum
+typedef enum prec_e
 {
 	BLIS_SINGLE_PREC       = BLIS_BITVAL_SINGLE_PREC,
 	BLIS_DOUBLE_PREC       = BLIS_BITVAL_DOUBLE_PREC
@@ -470,7 +470,7 @@ typedef enum
 
 // -- Pack schema type --
 
-typedef enum
+typedef enum pack_e
 {
 	BLIS_NOT_PACKED       = BLIS_BITVAL_NOT_PACKED,
 	BLIS_PACKED_UNSPEC    = BLIS_BITVAL_PACKED_UNSPEC,
@@ -490,7 +490,7 @@ typedef enum
 
 // -- Pack order type --
 
-typedef enum
+typedef enum packord_e
 {
 	BLIS_PACK_FWD_IF_UPPER = BLIS_BITVAL_PACK_FWD_IF_UPPER,
 	BLIS_PACK_REV_IF_UPPER = BLIS_BITVAL_PACK_REV_IF_UPPER,
@@ -502,7 +502,7 @@ typedef enum
 
 // -- Pack buffer type --
 
-typedef enum
+typedef enum packbuf_e
 {
 	BLIS_BUFFER_FOR_A_BLOCK = BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
 	BLIS_BUFFER_FOR_B_PANEL = BLIS_BITVAL_BUFFER_FOR_B_PANEL,
@@ -513,7 +513,7 @@ typedef enum
 
 // -- Partitioning direction --
 
-typedef enum
+typedef enum dir_e
 {
 	BLIS_FWD,
 	BLIS_BWD
@@ -522,7 +522,7 @@ typedef enum
 
 // -- Subpartition type --
 
-typedef enum
+typedef enum subpart_e
 {
 	BLIS_SUBPART0,
 	BLIS_SUBPART1,
@@ -545,7 +545,7 @@ typedef enum
 
 // -- Matrix dimension type --
 
-typedef enum
+typedef enum mdim_e
 {
 	BLIS_M = 0,
 	BLIS_N = 1
@@ -554,7 +554,7 @@ typedef enum
 
 // -- Machine parameter types --
 
-typedef enum
+typedef enum machval_e
 {
 	BLIS_MACH_EPS = 0,
 	BLIS_MACH_SFMIN,
@@ -578,7 +578,7 @@ typedef enum
 
 // -- Induced method types --
 
-typedef enum
+typedef enum ind_e
 {
 	BLIS_1M        = 0,
 	BLIS_NAT,
@@ -598,7 +598,7 @@ typedef enum
 
 // -- Threading implementation type --
 
-typedef enum
+typedef enum timpl_e
 {
 	BLIS_SINGLE = 0,
 	BLIS_OPENMP,
@@ -635,7 +635,7 @@ typedef uint32_t kerid_t;
 
 #define BLIS_VA_END  ((kerid_t)-1)
 
-typedef enum
+typedef enum ukr_e
 {
 	// -- Single-type kernels --
 
@@ -719,7 +719,7 @@ typedef enum
 } ukr_t;
 
 
-typedef enum
+typedef enum ukr_pref_e
 {
     // l3 kernel row preferences
 	BLIS_GEMM_UKR_ROW_PREF,
@@ -746,7 +746,7 @@ typedef enum
 	BLIS_UKR_PREFS_END_ = BLIS_VA_END
 } ukr_pref_t;
 
-typedef enum
+typedef enum kimpl_e
 {
 	BLIS_REFERENCE_UKERNEL = 0,
 	BLIS_VIRTUAL_UKERNEL,
@@ -759,7 +759,7 @@ typedef enum
 
 
 #if 0
-typedef enum
+typedef enum l3sup_e
 {
 	// RV = row-stored, contiguous vector-loading
 	// RG = row-stored, non-contiguous gather-loading
@@ -793,7 +793,7 @@ typedef enum
 #endif
 
 
-typedef enum
+typedef enum stor3_e
 {
 	// 3-operand storage combinations
 	BLIS_RRR = 0,
@@ -834,7 +834,7 @@ typedef enum
 
 
 #if 0
-typedef enum
+typedef enum thridx_e
 {
 	BLIS_JC_IDX = 0,
 	BLIS_PC_IDX,
@@ -850,7 +850,7 @@ typedef enum
 
 // -- Operation ID type --
 
-typedef enum
+typedef enum opid_e
 {
 //
 // NOTE: If/when additional type values are added to this enum,
@@ -887,7 +887,7 @@ typedef enum
 
 // -- Blocksize ID type --
 
-typedef enum
+typedef enum bszid_e
 {
 	// NOTE: the level-3 blocksizes MUST be indexed starting at zero.
 	// At one point, we made this assumption in bli_cntx_set_blkszs()
@@ -954,7 +954,7 @@ enum
 // OR if values are rearranged, be sure to update the string array
 // in bli_arch.c.
 
-typedef enum
+typedef enum arch_e
 {
 	// NOTE: The C language standard guarantees that the first enum value
 	// starts at 0.
@@ -1030,7 +1030,7 @@ typedef enum
 
 // -- Pool block type --
 
-typedef struct
+typedef struct pblk_s
 {
 	void*     buf;
 	siz_t     block_size;
@@ -1040,7 +1040,7 @@ typedef struct
 
 // -- Pool type --
 
-typedef struct
+typedef struct pool_s
 {
 	void*     block_ptrs;
 	dim_t     block_ptrs_len;
@@ -1060,7 +1060,7 @@ typedef struct
 
 // -- Array type --
 
-typedef struct
+typedef struct array_s
 {
 	void*     buf;
 
@@ -1072,7 +1072,7 @@ typedef struct
 
 // -- Locked pool-of-arrays-of-pools type --
 
-typedef struct
+typedef struct apool_s
 {
 	bli_pthread_mutex_t mutex;
 	pool_t              pool;
@@ -1174,7 +1174,7 @@ typedef struct mbool_s
 // parameter values that may be of use to the micro-kernel without
 // cluttering up the micro-kernel interface itself.
 
-typedef struct
+typedef struct auxinfo_s
 {
 	// The pack schemas of A and B.
 	pack_t schema_a;
@@ -1438,7 +1438,7 @@ BLIS_INLINE void bli_obj_init_subpart_from( const obj_t* a, obj_t* b )
 // -- Stack type --
 
 // NB: stack_t is already taken by <signal.h>
-typedef struct
+typedef struct stck_s
 {
 	siz_t elem_size;
 	siz_t block_len;
@@ -1489,13 +1489,13 @@ typedef struct rntm_s
 
 // -- Error types --
 
-typedef enum
+typedef enum errlev_e
 {
 	BLIS_NO_ERROR_CHECKING = 0,
 	BLIS_FULL_ERROR_CHECKING
 } errlev_t;
 
-typedef enum
+typedef enum err_e
 {
 	// Generic error codes
 	BLIS_SUCCESS                               = (  -1),
