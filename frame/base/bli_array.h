@@ -38,7 +38,7 @@
 // -- Array type --
 
 /*
-typedef struct
+typedef struct array_s
 {
 	void*     buf;
 

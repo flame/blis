@@ -211,7 +211,7 @@ int bli_pthread_equal
 
 // -- pthread_create(), pthread_join() --
 
-typedef struct
+typedef struct bli_thread_param
 {
 	void* (*start_routine)( void* );
 	void*   param;
@@ -409,7 +409,7 @@ int bli_pthread_equal
 #else // !defined(BLIS_DISABLE_SYSTEM) && !defined(_MSC_VER)
 
 // This branch defines a pthreads-like API, bli_pthreads_*(), and implements it
-// in terms of the corresponding pthreads_*() types, macros, and function calls. 
+// in terms of the corresponding pthreads_*() types, macros, and function calls.
 // This branch is compiled for Linux and other non-Windows environments where
 // we assume that *some* implementation of pthreads is provided (although it
 // may lack barriers--see below).

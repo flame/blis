@@ -37,7 +37,7 @@
 // packm params types.
 //
 
-typedef struct
+typedef struct packm_blk_var1_params_s
 {
 	//                  Type of C          Type of P
 	packm_ker_ft ukr_fn[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES];

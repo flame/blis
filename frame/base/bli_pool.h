@@ -39,7 +39,7 @@
 // -- Pool block type --
 
 /*
-typedef struct
+typedef struct pblk_s
 {
 	void*     buf;
 	siz_t     block_size;
@@ -50,7 +50,7 @@ typedef struct
 // -- Pool type --
 
 /*
-typedef struct
+typedef struct pool_s
 {
 	void*     block_ptrs;
 	siz_t     block_ptrs_len;

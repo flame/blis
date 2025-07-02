@@ -38,7 +38,7 @@
 // -- Stack type based on a dynamic block array --
 
 /*
-typedef struct
+typedef struct stck_s
 {
 	siz_t elem_size;
 	siz_t block_len;

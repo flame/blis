@@ -50,7 +50,7 @@ typedef struct mem_s
 	siz_t     size;
 } mem_t;
 
-typedef struct
+typedef struct pblk_s
 {
 	void*     buf;
 	siz_t     block_size;
