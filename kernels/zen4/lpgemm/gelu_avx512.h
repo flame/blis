@@ -50,16 +50,13 @@
 	reg = _mm512_mul_ps (x_tanh, _mm512_set1_ps (0.5));
 
 
-/* ERF GeLU (x) = 0.5* x * (1 + erf (x * 0.707107 ))  */
-#define GELU_ERF_F32_AVX512_DEF(reg, r, x, x_erf) \
-\
-  x_erf = _mm512_mul_ps (reg, _mm512_set1_ps (0.707107)); \
-\
-  /*x_erf = erf(x_erf) */  \
-  ERF_AVX512(x_erf, r, x); \
-\
-  x_erf = _mm512_add_ps (x_erf, _mm512_set1_ps (1)); \
-  x_erf = _mm512_mul_ps (x_erf, reg); \
-  reg = _mm512_mul_ps (x_erf, _mm512_set1_ps (0.5));
+/* ERF GeLU (x) = 0.5* x * (1 + erf (x * 0.707107 )) */
+#define GELU_ERF_F32_AVX512_DEF(reg, y, r, r2) \
+  r = _mm512_mul_ps (reg, _mm512_set1_ps (0.70710678118654f)); \
+  y = _mm512_setzero (); \
+  ERF_AOCL_AVX512(y, r); \
+  r2 = _mm512_add_ps (y, _mm512_set1_ps (1)); \
+  r2 = _mm512_mul_ps (r2, reg); \
+  reg = _mm512_mul_ps (r2, _mm512_set1_ps (0.5)); \
 
 #endif // AOCL_LPGEMM_GELU_DEF_AVX512_H

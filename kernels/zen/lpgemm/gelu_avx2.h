@@ -65,27 +65,29 @@
 	reg = _mm_mul_ps (x_tanh, _mm_set1_ps (0.5));
 
 /* ERF GeLU (x) = 0.5* x * (1 + erf (x * 0.707107 ))  */
-#define GELU_ERF_F32_AVX2_DEF(reg, r, x, x_erf) \
-\
-  x_erf = _mm256_mul_ps (reg, _mm256_set1_ps (0.707107)); \
-\
-  /*x_erf = erf(x_erf) */  \
-  ERF_AVX2(x_erf, r, x); \
-\
-  x_erf = _mm256_add_ps (x_erf, _mm256_set1_ps (1)); \
-  x_erf = _mm256_mul_ps (x_erf, reg); \
-  reg = _mm256_mul_ps (x_erf, _mm256_set1_ps (0.5));
+#define GELU_ERF_F32_AVX2_DEF(reg, y, r, r2) \
+  r = _mm256_mul_ps (reg, _mm256_set1_ps (0.70710678118654f)); \
+  y = _mm256_setzero_ps(); \
+  ERF_AVX2(y, r); \
+  r2 = _mm256_add_ps (y, _mm256_set1_ps (1)); \
+  r2 = _mm256_mul_ps (r2, reg); \
+  reg = _mm256_mul_ps (r2, _mm256_set1_ps (0.5)); \
 
 /* ERF GeLU (x) = 0.5* x * (1 + erf (x * 0.707107 ))  */
 #define GELU_ERF_F32_SSE_DEF(reg, r, x, x_erf) \
+{\
+  x = _mm_mul_ps (reg, _mm_set1_ps (0.70710678118654f)); \
 \
-  x_erf = _mm_mul_ps (reg, _mm_set1_ps (0.707107)); \
-\
-  /*x_erf = erf(x_erf) */  \
-  ERF_SSE(x_erf, r, x); \
-\
-  x_erf = _mm_add_ps (x_erf, _mm_set1_ps (1)); \
-  x_erf = _mm_mul_ps (x_erf, reg); \
-  reg = _mm_mul_ps (x_erf, _mm_set1_ps (0.5));
+ __m256 y = _mm256_setzero_ps(); \
+ __m256 r1 = _mm256_setzero_ps(); \
+  r1 = _mm256_insertf128_ps(r1, x, 0); \
+  \
+  ERF_AVX2_LOW(y, r1); \
+  \
+  x_erf = _mm256_extractf128_ps(y, 0); \
+  r = _mm_add_ps (x_erf, _mm_set1_ps (1)); \
+  x_erf = _mm_mul_ps (r, reg); \
+  reg = _mm_mul_ps (x_erf, _mm_set1_ps (0.5)); \
+}
 
 #endif // AOCL_LPGEMM_GELU_DEF_AVX2_H

@@ -47,25 +47,7 @@
 #define EXPF_MIN -88.0f
 #define EXPF_MAX 88.0f
 #define inf 1.0/0.0
-#define sign -2147483648
-
-//constants for erf function
-#define lpgemm_erf_c0 0x1.20dd7890d27e1cec99fce48c29cp0
-#define lpgemm_erf_c1 -0x1.ab4bed70f238422edeeba9c558p-16
-#define lpgemm_erf_c2 -0x1.80a1bd5878e0b0689c5ff4fcdd4p-2
-#define lpgemm_erf_c3 -0x1.07cb4cde6a7d9528c8a732990e4p-8
-#define lpgemm_erf_c4 0x1.092cba598f96f00ddc5854cf7cp-3
-#define lpgemm_erf_c5 -0x1.51f0ce4ac87c55f11f685864714p-5
-#define lpgemm_erf_c6 0x1.4101f320bf8bc4d41c228faaa6cp-5
-#define lpgemm_erf_c7 -0x1.2300882a7d1b712726997de80ep-4
-#define lpgemm_erf_c8 0x1.d45745fff0e4b6d0604a9ab6284p-5
-#define lpgemm_erf_c9 -0x1.9eb1491956e31ded96176d7c8acp-6
-#define lpgemm_erf_c10 0x1.b9183fc75d326b9044bc63c9694p-8
-#define lpgemm_erf_c11 -0x1.10e8f8c89ad8645e7d769cd596cp-10
-#define lpgemm_erf_c12 0x1.224ffc80cc19957a48ecedad6c8p-14
-#define lpgemm_erf_c13 0x1.12a30f42c71308321e7e7cb0174p-18
-#define lpgemm_erf_c14 -0x1.155445e2e006723066d72d22ddcp-20
-#define lpgemm_erf_c15 0x1.c6a4181da4ef76f22bd39bb5dcp-25
+#define sign_bit_mask -2147483648
 
 //Trignometric EXP, TANH and ERF functions for AVX512
 
@@ -96,27 +78,95 @@
     z =  _mm512_add_ps ((__m512)q, _mm512_set1_ps(-1)); \
     z = _mm512_div_ps (z, _mm512_add_ps (z, _mm512_set1_ps(2))); \
     z = _mm512_mul_ps (z, _mm512_set1_ps(-1)); \
-    x_tanh = (__m512)(_mm512_xor_epi32 (_mm512_and_epi32 ((__m512i)x_tanh, (_mm512_set1_epi32(sign))), (__m512i)z)) ;
+    x_tanh = (__m512)(_mm512_xor_epi32 (_mm512_and_epi32 ((__m512i)x_tanh, (_mm512_set1_epi32(sign_bit_mask))), (__m512i)z)) ;
 
-#define POLY_EVAL_HORNER_16_0_AVX512(r,x) \
-    x = _mm512_mul_ps (_mm512_fmadd_ps ( \
-    _mm512_fmadd_ps(_mm512_fmadd_ps (_mm512_fmadd_ps (_mm512_fmadd_ps (_mm512_fmadd_ps ( _mm512_fmadd_ps ( \
-    _mm512_fmadd_ps (_mm512_fmadd_ps (_mm512_fmadd_ps (_mm512_fmadd_ps (_mm512_fmadd_ps (_mm512_fmadd_ps ( \
-    _mm512_fmadd_ps ( _mm512_fmadd_ps (r, _mm512_set1_ps(lpgemm_erf_c15), _mm512_set1_ps(lpgemm_erf_c14)), r, _mm512_set1_ps(lpgemm_erf_c13)), \
-    r, _mm512_set1_ps(lpgemm_erf_c12)), r,  _mm512_set1_ps(lpgemm_erf_c11)), r, _mm512_set1_ps(lpgemm_erf_c10)), r, _mm512_set1_ps(lpgemm_erf_c9)), \
-    r, _mm512_set1_ps(lpgemm_erf_c8)), r, _mm512_set1_ps(lpgemm_erf_c7)), r, _mm512_set1_ps(lpgemm_erf_c6)), r, _mm512_set1_ps(lpgemm_erf_c5)), r, \
-    _mm512_set1_ps(lpgemm_erf_c4)), r, _mm512_set1_ps(lpgemm_erf_c3)), r, _mm512_set1_ps(lpgemm_erf_c2)), r, _mm512_set1_ps(lpgemm_erf_c1)), r, \
-    _mm512_set1_ps(lpgemm_erf_c0)), r); \
+/*
+    The erf function implementation is taken from the AMD AOCL LIBM library.
+    https://github.com/AMD-AOCL/aocl-libm/blob/amd-main/src/optimized/erff.c
+*/
 
-#define ERF_AVX512(x_erf, r, x) \
-    r = (__m512)_mm512_and_epi32 ((__m512i)x_erf, _mm512_set1_epi32(0x7FFFFFFF)); \
+#define as_v16_f32_u32(x) _mm512_castsi512_ps(x)
+#define as_v16_u32_f32(x) _mm512_castps_si512(x)
+
+#define erf512_c0  _mm512_set1_pd((0x1.20dd7890d27e1cec99fce48c29cp0))
+#define erf512_c1  _mm512_set1_pd((-0x1.ab4bed70f238422edeeba9c558p-16))
+#define erf512_c2  _mm512_set1_pd((-0x1.80a1bd5878e0b0689c5ff4fcdd4p-2))
+#define erf512_c3  _mm512_set1_pd((-0x1.07cb4cde6a7d9528c8a732990e4p-8))
+#define erf512_c4  _mm512_set1_pd((0x1.092cba598f96f00ddc5854cf7cp-3))
+#define erf512_c5  _mm512_set1_pd((-0x1.51f0ce4ac87c55f11f685864714p-5))
+#define erf512_c6  _mm512_set1_pd((0x1.4101f320bf8bc4d41c228faaa6cp-5))
+#define erf512_c7  _mm512_set1_pd((-0x1.2300882a7d1b712726997de80ep-4))
+#define erf512_c8  _mm512_set1_pd((0x1.d45745fff0e4b6d0604a9ab6284p-5))
+#define erf512_c9  _mm512_set1_pd((-0x1.9eb1491956e31ded96176d7c8acp-6))
+#define erf512_c10  _mm512_set1_pd((0x1.b9183fc75d326b9044bc63c9694p-8))
+#define erf512_c11  _mm512_set1_pd((-0x1.10e8f8c89ad8645e7d769cd596cp-10))
+#define erf512_c12  _mm512_set1_pd((0x1.224ffc80cc19957a48ecedad6c8p-14))
+#define erf512_c13  _mm512_set1_pd((0x1.12a30f42c71308321e7e7cb0174p-18))
+#define erf512_c14  _mm512_set1_pd((-0x1.155445e2e006723066d72d22ddcp-20))
+#define erf512_c15  _mm512_set1_pd((0x1.c6a4181da4ef76f22bd39bb5dcp-25))
+
+#define ERF512_UBOUND    (0x407AD447)  // 3.402823466E+38F
+#define ERF512_BOUND     _mm512_set1_ps((float)(3.91920638084411621F))
+
+typedef union {
+    float    f;
+    int  i;
+    unsigned int u;
+} flt32_t;
+
+static inline unsigned int
+asuint32(float f)
+{
+	flt32_t fl = {.f = f};
+	return fl.u;
+}
+
+#define POLY_EVAL_HORNER_16_0_AVX512(x, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9,\
+                                     c10, c11, c12, c13, c14, c15) ({            \
+    __typeof(x) q = _mm512_mul_pd(x , _mm512_fmadd_pd(_mm512_fmadd_pd( \
+                    _mm512_fmadd_pd(_mm512_fmadd_pd(_mm512_fmadd_pd( \
+                    _mm512_fmadd_pd(_mm512_fmadd_pd(_mm512_fmadd_pd( \
+                    _mm512_fmadd_pd(_mm512_fmadd_pd(_mm512_fmadd_pd( \
+                    _mm512_fmadd_pd(_mm512_fmadd_pd(_mm512_fmadd_pd( \
+                    _mm512_fmadd_pd( c15, x, c14), x, c13), x, c12), \
+                    x, c11), x, c10), x, c9), x, c8), x, c7), x, c6), x, \
+                    c5), x, c4), x, c3), x, c2), x, c1), x, c0)); \
+q; \
+})
+
+//ERF_AOCL Macro
+#define ERF_AOCL_AVX512(y, r) \
+{ \
+    __m512 absr = _mm512_abs_ps(r); \
+    uint32_t uxmax = asuint32(_mm512_reduce_max_ps(absr)); \
+    __m512d _y1d = _mm512_cvtps_pd(_mm512_extractf32x8_ps(absr, 0)); \
+    __m512d _y2d = _mm512_cvtps_pd(_mm512_extractf32x8_ps(absr, 1)); \
+ \
+    _y1d = POLY_EVAL_HORNER_16_0_AVX512(_y1d, erf512_c0, erf512_c1, erf512_c2,\
+                                        erf512_c3, erf512_c4, erf512_c5, erf512_c6, \
+                                        erf512_c7, erf512_c8, erf512_c9, erf512_c10,\
+                                        erf512_c11, erf512_c12, erf512_c13, \
+                                        erf512_c14, erf512_c15); \
+    _y2d = POLY_EVAL_HORNER_16_0_AVX512(_y2d, erf512_c0, erf512_c1, erf512_c2,\
+                                        erf512_c3, erf512_c4, erf512_c5, erf512_c6, \
+                                        erf512_c7, erf512_c8, erf512_c9, erf512_c10,\
+                                        erf512_c11, erf512_c12, erf512_c13, \
+                                        erf512_c14, erf512_c15); \
 \
-    POLY_EVAL_HORNER_16_0_AVX512(r,x); \
+    y = _mm512_insertf32x8(y, _mm512_cvtpd_ps(_y1d), 0); \
+    y = _mm512_insertf32x8(y, _mm512_cvtpd_ps(_y2d), 1); \
 \
-    x = (__m512)_mm512_mask_xor_epi32 ((__m512i)_mm512_set1_ps(1), _mm512_cmpnle_ps_mask \
-        ( _mm512_set1_ps(3.553f), r), (__m512i)x, _mm512_set1_epi32(0)); \
-    x = (__m512)_mm512_mask_xor_epi32 ((__m512i)_mm512_set1_ps(1), _mm512_cmpnle_ps_mask \
-        ( _mm512_set1_ps(1.0f), x), (__m512i)x, _mm512_set1_epi32(0)); \
-    x_erf = (__m512)_mm512_or_epi32(_mm512_and_epi32 ((__m512i)x_erf, _mm512_set1_epi32(~(0x7FFFFFFF))), (__m512i)x);
+    __m512i sign = _mm512_and_epi32(_mm512_castps_si512(r), \
+                   _mm512_set1_epi32((unsigned int)0x80000000)); \
+\
+    y = as_v16_f32_u32(sign | as_v16_u32_f32(y)); \
+    if (uxmax > ERF512_UBOUND) { \
+        __mmask16 mask = _mm512_cmp_ps_mask((ERF512_BOUND), absr, _CMP_LT_OQ); \
+        __m512 fONE = _mm512_set1_ps(1.0f); \
+        y = _mm512_mask_blend_ps(mask, y, fONE); \
+        y = as_v16_f32_u32(sign | as_v16_u32_f32(y)); \
+    } \
+} \
+
 
 #endif // AOCL_LPGEMM_MATH_UTILS_AVX512_H

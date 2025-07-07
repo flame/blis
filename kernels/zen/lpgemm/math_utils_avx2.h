@@ -47,25 +47,26 @@
 #define EXPF_MIN -88.0f
 #define EXPF_MAX 88.0f
 #define inf 1.0/0.0
-#define sign -2147483648
+#define sign (-2147483648)
 
-//constants for erf function
-#define lpgemm_erf_c0 0x1.20dd7890d27e1cec99fce48c29cp0
-#define lpgemm_erf_c1 -0x1.ab4bed70f238422edeeba9c558p-16
-#define lpgemm_erf_c2 -0x1.80a1bd5878e0b0689c5ff4fcdd4p-2
-#define lpgemm_erf_c3 -0x1.07cb4cde6a7d9528c8a732990e4p-8
-#define lpgemm_erf_c4 0x1.092cba598f96f00ddc5854cf7cp-3
-#define lpgemm_erf_c5 -0x1.51f0ce4ac87c55f11f685864714p-5
-#define lpgemm_erf_c6 0x1.4101f320bf8bc4d41c228faaa6cp-5
-#define lpgemm_erf_c7 -0x1.2300882a7d1b712726997de80ep-4
-#define lpgemm_erf_c8 0x1.d45745fff0e4b6d0604a9ab6284p-5
-#define lpgemm_erf_c9 -0x1.9eb1491956e31ded96176d7c8acp-6
-#define lpgemm_erf_c10 0x1.b9183fc75d326b9044bc63c9694p-8
-#define lpgemm_erf_c11 -0x1.10e8f8c89ad8645e7d769cd596cp-10
-#define lpgemm_erf_c12 0x1.224ffc80cc19957a48ecedad6c8p-14
-#define lpgemm_erf_c13 0x1.12a30f42c71308321e7e7cb0174p-18
-#define lpgemm_erf_c14 -0x1.155445e2e006723066d72d22ddcp-20
-#define lpgemm_erf_c15 0x1.c6a4181da4ef76f22bd39bb5dcp-25
+#define erf_c0  _mm256_set1_pd((0x1.20dd7890d27e1cec99fce48c29cp0))
+#define erf_c1  _mm256_set1_pd((-0x1.ab4bed70f238422edeeba9c558p-16))
+#define erf_c2  _mm256_set1_pd((-0x1.80a1bd5878e0b0689c5ff4fcdd4p-2))
+#define erf_c3  _mm256_set1_pd((-0x1.07cb4cde6a7d9528c8a732990e4p-8))
+#define erf_c4  _mm256_set1_pd((0x1.092cba598f96f00ddc5854cf7cp-3))
+#define erf_c5  _mm256_set1_pd((-0x1.51f0ce4ac87c55f11f685864714p-5))
+#define erf_c6  _mm256_set1_pd((0x1.4101f320bf8bc4d41c228faaa6cp-5))
+#define erf_c7  _mm256_set1_pd((-0x1.2300882a7d1b712726997de80ep-4))
+#define erf_c8  _mm256_set1_pd((0x1.d45745fff0e4b6d0604a9ab6284p-5))
+#define erf_c9  _mm256_set1_pd((-0x1.9eb1491956e31ded96176d7c8acp-6))
+#define erf_c10  _mm256_set1_pd((0x1.b9183fc75d326b9044bc63c9694p-8))
+#define erf_c11  _mm256_set1_pd((-0x1.10e8f8c89ad8645e7d769cd596cp-10))
+#define erf_c12  _mm256_set1_pd((0x1.224ffc80cc19957a48ecedad6c8p-14))
+#define erf_c13  _mm256_set1_pd((0x1.12a30f42c71308321e7e7cb0174p-18))
+#define erf_c14  _mm256_set1_pd((-0x1.155445e2e006723066d72d22ddcp-20))
+#define erf_c15  _mm256_set1_pd((0x1.c6a4181da4ef76f22bd39bb5dcp-25))
+
+#define ERF_UBOUND    (0x407AD447)  // 3.402823466E+38F
 
 //Trignometric EXP, TANH and ERF functions for AVX2
 
@@ -97,24 +98,42 @@
     z = _mm256_mul_ps (z, _mm256_set1_ps(-1)); \
     x_tanh = (_mm256_xor_ps (_mm256_and_ps (x_tanh, (__m256)(_mm256_set1_epi32(sign))), z)) ;
 
-#define POLY_EVAL_HORNER_16_0_AVX2(r,x) \
-    x = _mm256_mul_ps (_mm256_fmadd_ps ( \
-    _mm256_fmadd_ps(_mm256_fmadd_ps (_mm256_fmadd_ps (_mm256_fmadd_ps (_mm256_fmadd_ps ( _mm256_fmadd_ps ( \
-    _mm256_fmadd_ps (_mm256_fmadd_ps (_mm256_fmadd_ps (_mm256_fmadd_ps (_mm256_fmadd_ps (_mm256_fmadd_ps ( \
-    _mm256_fmadd_ps ( _mm256_fmadd_ps (r, _mm256_set1_ps(lpgemm_erf_c15), _mm256_set1_ps(lpgemm_erf_c14)), r, _mm256_set1_ps(lpgemm_erf_c13)), \
-    r, _mm256_set1_ps(lpgemm_erf_c12)), r,  _mm256_set1_ps(lpgemm_erf_c11)), r, _mm256_set1_ps(lpgemm_erf_c10)), r, _mm256_set1_ps(lpgemm_erf_c9)), \
-    r, _mm256_set1_ps(lpgemm_erf_c8)), r, _mm256_set1_ps(lpgemm_erf_c7)), r, _mm256_set1_ps(lpgemm_erf_c6)), r, _mm256_set1_ps(lpgemm_erf_c5)), r, \
-    _mm256_set1_ps(lpgemm_erf_c4)), r, _mm256_set1_ps(lpgemm_erf_c3)), r, _mm256_set1_ps(lpgemm_erf_c2)), r, _mm256_set1_ps(lpgemm_erf_c1)), r, \
-    _mm256_set1_ps(lpgemm_erf_c0)), r); \
+#define POLY_EVAL_HORNER_16_0_AVX2(x, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9,\
+                                   c10, c11, c12, c13, c14, c15) \
+({ \
+__typeof(x) q = _mm256_mul_pd(x , _mm256_fmadd_pd(_mm256_fmadd_pd( \
+                _mm256_fmadd_pd(_mm256_fmadd_pd(_mm256_fmadd_pd( \
+                _mm256_fmadd_pd(_mm256_fmadd_pd(_mm256_fmadd_pd( \
+                _mm256_fmadd_pd(_mm256_fmadd_pd(_mm256_fmadd_pd( \
+                _mm256_fmadd_pd(_mm256_fmadd_pd(_mm256_fmadd_pd( \
+                _mm256_fmadd_pd( c15, x, c14), x, c13), x, c12), \
+                x, c11), x, c10), x, c9), x, c8), x, c7), x, c6), x, \
+                c5), x, c4), x, c3), x, c2), x, c1), x, c0)); \
+q; \
+})
 
-#define ERF_AVX2(x_erf, r, x) \
-    r = _mm256_and_ps (x_erf, (__m256)_mm256_set1_epi32(0x7FFFFFFF)); \
-\
-    POLY_EVAL_HORNER_16_0_AVX2(r,x); \
-\
-    x = _mm256_blendv_ps (x, _mm256_set1_ps(1), _mm256_cmp_ps (_mm256_set1_ps(3.553f), r, 1)); \
-    x = _mm256_blendv_ps (x, _mm256_set1_ps(1), _mm256_cmp_ps (_mm256_set1_ps(1.0f), x, 1)); \
-    x_erf = _mm256_or_ps(_mm256_and_ps (x_erf, (__m256)_mm256_set1_epi32(~(0x7FFFFFFF))), x);
+#define ERF_AVX2(y, r) \
+{ \
+    __m256 absr = _mm256_and_ps (r, (__m256)_mm256_set1_epi32(0x7FFFFFFF));  \
+    __m256 erf_sign = _mm256_and_ps (r, (__m256)_mm256_set1_epi32(~(0x7FFFFFFF)));  \
+    __m256d _y1d = _mm256_cvtps_pd(_mm256_extractf128_ps(absr, 0)); \
+    __m256d _y2d = _mm256_cvtps_pd(_mm256_extractf128_ps(absr, 1)); \
+    _y1d = POLY_EVAL_HORNER_16_0_AVX2(_y1d, erf_c0, erf_c1, erf_c2, erf_c3, \
+                                      erf_c4, erf_c5, erf_c6, erf_c7, erf_c8, \
+                                      erf_c9, erf_c10, erf_c11, erf_c12, erf_c13,\
+                                      erf_c14, erf_c15); \
+    _y2d = POLY_EVAL_HORNER_16_0_AVX2(_y2d, erf_c0, erf_c1, erf_c2, erf_c3, \
+                                      erf_c4, erf_c5, erf_c6, erf_c7, erf_c8, \
+                                      erf_c9, erf_c10, erf_c11, erf_c12, erf_c13,\
+                                      erf_c14, erf_c15); \
+    y = _mm256_insertf128_ps(y, _mm256_cvtpd_ps(_y1d), 0); \
+    y = _mm256_insertf128_ps(y, _mm256_cvtpd_ps(_y2d), 1); \
+    y = _mm256_blendv_ps (y, _mm256_set1_ps(1), \
+                          _mm256_cmp_ps (_mm256_set1_ps(ERF_UBOUND), absr, 1)); \
+    y = _mm256_blendv_ps (y, _mm256_set1_ps(1), \
+                          _mm256_cmp_ps (_mm256_set1_ps(1.0f), y, 1)); \
+    y = _mm256_or_ps(erf_sign, y); \
+} \
 
 //Trignometric EXP, TANH and ERF functions for SSE
 
@@ -146,23 +165,21 @@
     z = _mm_mul_ps (z, _mm_set1_ps(-1)); \
     x_tanh = (_mm_xor_ps (_mm_and_ps (x_tanh, (__m128)(_mm_set1_epi32(sign))), z)) ;
 
-#define POLY_EVAL_HORNER_16_0_SSE(r,x) \
-    x = _mm_mul_ps (_mm_fmadd_ps ( \
-    _mm_fmadd_ps(_mm_fmadd_ps (_mm_fmadd_ps (_mm_fmadd_ps (_mm_fmadd_ps ( _mm_fmadd_ps ( \
-    _mm_fmadd_ps (_mm_fmadd_ps (_mm_fmadd_ps (_mm_fmadd_ps (_mm_fmadd_ps (_mm_fmadd_ps ( \
-    _mm_fmadd_ps ( _mm_fmadd_ps (r, _mm_set1_ps(lpgemm_erf_c15), _mm_set1_ps(lpgemm_erf_c14)), r, _mm_set1_ps(lpgemm_erf_c13)), \
-    r, _mm_set1_ps(lpgemm_erf_c12)), r,  _mm_set1_ps(lpgemm_erf_c11)), r, _mm_set1_ps(lpgemm_erf_c10)), r, _mm_set1_ps(lpgemm_erf_c9)), \
-    r, _mm_set1_ps(lpgemm_erf_c8)), r, _mm_set1_ps(lpgemm_erf_c7)), r, _mm_set1_ps(lpgemm_erf_c6)), r, _mm_set1_ps(lpgemm_erf_c5)), r, \
-    _mm_set1_ps(lpgemm_erf_c4)), r, _mm_set1_ps(lpgemm_erf_c3)), r, _mm_set1_ps(lpgemm_erf_c2)), r, _mm_set1_ps(lpgemm_erf_c1)), r, \
-    _mm_set1_ps(lpgemm_erf_c0)), r); \
-
-#define ERF_SSE(x_erf, r, x) \
-    r = _mm_and_ps (x_erf, (__m128)_mm_set1_epi32(0x7FFFFFFF)); \
-\
-    POLY_EVAL_HORNER_16_0_SSE(r,x); \
-\
-    x = _mm_blendv_ps (x, _mm_set1_ps(1), _mm_cmp_ps (_mm_set1_ps(3.553f), r, 1)); \
-    x = _mm_blendv_ps (x, _mm_set1_ps(1), _mm_cmp_ps (_mm_set1_ps(1.0f), x, 1)); \
-    x_erf = _mm_or_ps(_mm_and_ps (x_erf, (__m128)_mm_set1_epi32(~(0x7FFFFFFF))), x);
+#define ERF_AVX2_LOW(y, r) \
+{ \
+    __m256 absr = _mm256_and_ps (r, (__m256)_mm256_set1_epi32(0x7FFFFFFF));  \
+    __m256 erf_sign = _mm256_and_ps (r, (__m256)_mm256_set1_epi32(~(0x7FFFFFFF)));  \
+    __m256d _y1d = _mm256_cvtps_pd(_mm256_extractf128_ps(absr, 0)); \
+    _y1d = POLY_EVAL_HORNER_16_0_AVX2(_y1d, erf_c0, erf_c1, erf_c2, erf_c3, \
+                                      erf_c4, erf_c5, erf_c6, erf_c7, erf_c8, \
+                                      erf_c9, erf_c10, erf_c11, erf_c12, erf_c13,\
+                                      erf_c14, erf_c15); \
+    y = _mm256_insertf128_ps(y, _mm256_cvtpd_ps(_y1d), 0); \
+    y = _mm256_blendv_ps (y, _mm256_set1_ps(1), \
+        _mm256_cmp_ps (_mm256_set1_ps(ERF_UBOUND), absr, 1)); \
+    y = _mm256_blendv_ps (y, _mm256_set1_ps(1), \
+        _mm256_cmp_ps (_mm256_set1_ps(1.0f), y, 1)); \
+    y = _mm256_or_ps(erf_sign, y); \
+}
 
 #endif // AOCL_LPGEMM_MATH_UTILS_AVX2_H

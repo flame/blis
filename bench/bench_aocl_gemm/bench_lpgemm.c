@@ -645,8 +645,8 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
             GEN_FUNC_NAME(C_type,_to_float)(*( c + ( rs_c * i ) + ( cs_c * j ) ), &comp_float); \
             GEN_FUNC_NAME(C_type,_to_float)(out_temp_accum, &ref_float); \
  \
-            if ( ( ( comp_float - ref_float ) > 1.0E-5 ) || \
-                 ( ( ref_float - comp_float ) > 1.0E-5 ) ) \
+            if ( ( ( comp_float - ref_float ) / (ref_float)  > 1.0E-5 ) || \
+                 ( ( ref_float - comp_float ) / (comp_float) > 1.0E-5 ) ) \
             { \
                 if ( fout ) \
                 { \
