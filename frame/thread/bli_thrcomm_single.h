@@ -41,7 +41,7 @@
 // Sequential-specific function prototypes.
 void bli_thrcomm_init_single( dim_t nt, thrcomm_t* comm );
 void bli_thrcomm_cleanup_single( thrcomm_t* comm );
-void bli_thrcomm_barrier_single( dim_t tid, thrcomm_t* comm );
+void bli_thrcomm_barrier_single( dim_t tid, thrcomm_t* comm, const char* tag );
 
 #endif
 

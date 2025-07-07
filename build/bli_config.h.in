@@ -87,6 +87,10 @@
 #endif
 #endif
 
+#if @harden_barriers@
+#define BLIS_HARDEN_BARRIERS
+#endif
+
 #if @enable_jrir_slab@
 #define BLIS_ENABLE_JRIR_SLAB
 #endif

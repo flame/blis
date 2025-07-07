@@ -990,8 +990,6 @@ bli_szcopysc
 bli_szipsc
 bli_szxpbym_md
 bli_szxpbym_md_ex
-bli_thrcomm_barrier
-bli_thrcomm_bcast
 bli_thread_get_ic_nt
 bli_thread_get_ir_nt
 bli_thread_get_jc_nt

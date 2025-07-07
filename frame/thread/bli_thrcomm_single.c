@@ -51,7 +51,7 @@ void bli_thrcomm_cleanup_single( thrcomm_t* comm )
 	if ( comm == NULL ) return;
 }
 
-void bli_thrcomm_barrier_single( dim_t t_id, thrcomm_t* comm )
+void bli_thrcomm_barrier_single( dim_t t_id, thrcomm_t* comm, const char* tag )
 {
 	return;
 }
