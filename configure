@@ -260,15 +260,58 @@ print_usage()
 	echo "                 only be enabled when mixed domain/precision support is"
 	echo "                 enabled."
 	echo " "
-	echo "   --disable-sup-handling, --enable-sup-handling"
+	echo "   --disable-mnk1-matrix, --enable-mnk1-matrix"
+	echo " "
+	echo "                 Disable (enabled by default) handling of matrix problem"
+	echo "                 where M, N or K = 1 via separate code branches. When disabled,"
+	echo "                 these operations will be performed by gemm rather than gemv"
+	echo "                 or other optimized implementations."
+	echo " "
+	echo "   --disable-tiny-matrix, --enable-tiny-matrix"
+	echo " "
+	echo "                 Disable (enabled by default) handling of tiny"
+	echo "                 matrix problems via tiny code branches. When disabled,"
+	echo "                 these tiny level-3 operations will be performed by"
+	echo "                 the conventional implementation, which is optimized for"
+	echo "                 medium and large problems. Note that what qualifies as"
+	echo "                 \"tiny\" depends on thresholds that may vary by sub-"
+	echo "                 configuration."
+	echo "                 Currently only of relevance on configs that include"
+	echo "                 AMD Zen sub-configs"
+	echo " "
+	echo "   --disable-small-matrix, --enable-small-matrix"
 	echo " "
 	echo "                 Disable (enabled by default) handling of small/skinny"
-	echo "                 matrix problems via separate code branches. When disabled,"
+	echo "                 matrix problems via small code branches. When disabled,"
 	echo "                 these small/skinny level-3 operations will be performed by"
 	echo "                 the conventional implementation, which is optimized for"
 	echo "                 medium and large problems. Note that what qualifies as"
 	echo "                 \"small\" depends on thresholds that may vary by sub-"
 	echo "                 configuration."
+	echo "                 Currently only of relevance on configs that include"
+	echo "                 AMD Zen sub-configs"
+	echo " "
+	echo "   --disable-sup-handling, --enable-sup-handling"
+	echo " "
+	echo "                 Disable (enabled by default) handling of small/skinny"
+	echo "                 matrix problems via SUP code branches. When disabled,"
+	echo "                 these small/skinny level-3 operations will be performed by"
+	echo "                 the conventional implementation, which is optimized for"
+	echo "                 medium and large problems. Note that what qualifies as"
+	echo "                 \"SUP\" depends on thresholds that may vary by sub-"
+	echo "                 configuration."
+	echo " "
+	echo "   --disable-small-matrix-trsm, --enable-small-matrix-trsm"
+	echo " "
+	echo "                 Disable (enabled by default) handling of small/skinny"
+	echo "                 TRSM problems via small code branches. When disabled,"
+	echo "                 these small/skinny level-3 operations will be performed by"
+	echo "                 the conventional implementation, which is optimized for"
+	echo "                 medium and large problems. Note that what qualifies as"
+	echo "                 \"small\" depends on thresholds that may vary by sub-"
+	echo "                 configuration."
+	echo "                 Currently only of relevance on configs that include"
+	echo "                 AMD Zen sub-configs"
 	echo " "
 	echo "   -a NAME --enable-addon=NAME"
 	echo " "
@@ -2108,9 +2151,15 @@ main()
 	enable_cblas='no'
 	enable_mixed_dt='yes'
 	enable_mixed_dt_extra_mem='yes'
+
+	enable_mnk1_matrix='yes'
+	enable_tiny_matrix='yes'
+	enable_small_matrix='yes'
 	enable_sup_handling='yes'
-	enable_memkind='' # The default memkind value is determined later on.
+	enable_small_matrix_trsm='yes'
 	enable_trsm_preinversion='yes'
+
+	enable_memkind='' # The default memkind value is determined later on.
 	enable_aocl_dynamic='yes'
 	force_version='no'
 	complex_return='default'
@@ -2319,11 +2368,35 @@ main()
 						disable-mixed-dt-extra-mem)
 							enable_mixed_dt_extra_mem='no'
 							;;
+						enable-mnk1-matrix)
+							enable_mnk1_matrix='yes'
+							;;
+						disable-mnk1-matrix)
+							enable_mnk1_matrix='no'
+							;;
+						enable-tiny-matrix)
+							enable_tiny_matrix='yes'
+							;;
+						disable-tiny-matrix)
+							enable_tiny_matrix='no'
+							;;
+						enable-small-matrix)
+							enable_small_matrix='yes'
+							;;
+						disable-small-matrix)
+							enable_small_matrix='no'
+							;;
 						enable-sup-handling)
 							enable_sup_handling='yes'
 							;;
 						disable-sup-handling)
 							enable_sup_handling='no'
+							;;
+						enable-small-matrix-trsm)
+							enable_small_matrix_trsm='yes'
+							;;
+						disable-small-matrix-trsm)
+							enable_small_matrix_trsm='no'
 							;;
 						with-memkind)
 							enable_memkind='yes'
@@ -3213,12 +3286,40 @@ main()
 		enable_mixed_dt_extra_mem_01=0
 		enable_mixed_dt_01=0
 	fi
-	if [ "x${enable_sup_handling}" = "xyes" ]; then
+	if [ "x${enable_mnk1_matrix}" = "xyes" ]; then
+		echo "${script_name}: M,N,K=1 matrix handling is enabled."
+		enable_mnk1_matrix_01=1
+	else
+		echo "${script_name}: M,N,K=1 matrix handling is disabled."
+		enable_mnk1_matrix_01=0
+	fi
+	if [ "x${enable_tiny_matrix}" = "xyes" ]; then
+		echo "${script_name}: tiny matrix handling is enabled."
+		enable_tiny_matrix_01=1
+	else
+		echo "${script_name}: tiny matrix handling is disabled."
+		enable_tiny_matrix_01=0
+	fi
+	if [ "x${enable_small_matrix}" = "xyes" ]; then
 		echo "${script_name}: small matrix handling is enabled."
-		enable_sup_handling_01=1
+		enable_small_matrix_01=1
 	else
 		echo "${script_name}: small matrix handling is disabled."
+		enable_small_matrix_01=0
+	fi
+	if [ "x${enable_sup_handling}" = "xyes" ]; then
+		echo "${script_name}: SUP matrix handling is enabled."
+		enable_sup_handling_01=1
+	else
+		echo "${script_name}: SUP matrix handling is disabled."
 		enable_sup_handling_01=0
+	fi
+	if [ "x${enable_small_matrix_trsm}" = "xyes" ]; then
+		echo "${script_name}: TRSM small matrix handling is enabled."
+		enable_small_matrix_trsm_01=1
+	else
+		echo "${script_name}: TRSM small matrix handling is disabled."
+		enable_small_matrix_trsm_01=0
 	fi
 	if [ "x${enable_trsm_preinversion}" = "xyes" ]; then
 		echo "${script_name}: trsm diagonal element pre-inversion is enabled."
@@ -3586,9 +3687,13 @@ main()
 		| sed   -e "s/@enable_cblas@/${enable_cblas_01}/g" \
 		| sed   -e "s/@enable_mixed_dt@/${enable_mixed_dt_01}/g" \
 		| sed   -e "s/@enable_mixed_dt_extra_mem@/${enable_mixed_dt_extra_mem_01}/g" \
+		| sed   -e "s/@enable_mnk1_matrix@/${enable_mnk1_matrix_01}/g" \
+		| sed   -e "s/@enable_tiny_matrix@/${enable_tiny_matrix_01}/g" \
+		| sed   -e "s/@enable_small_matrix@/${enable_small_matrix_01}/g" \
 		| sed   -e "s/@enable_sup_handling@/${enable_sup_handling_01}/g" \
-		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
+		| sed   -e "s/@enable_small_matrix_trsm@/${enable_small_matrix_trsm_01}/g" \
 		| sed   -e "s/@enable_trsm_preinversion@/${enable_trsm_preinversion_01}/g" \
+		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
 		| sed   -e "s/@enable_aocl_dynamic@/${enable_aocl_dynamic_01}/g" \
 		| sed   -e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g" \
 		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \

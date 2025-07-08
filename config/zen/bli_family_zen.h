@@ -44,9 +44,6 @@
 #define BLIS_THREAD_MAX_IR      1
 #define BLIS_THREAD_MAX_JR      1
 
-#define BLIS_ENABLE_SMALL_MATRIX
-#define BLIS_ENABLE_SMALL_MATRIX_TRSM
-
 // This will select the threshold below which small matrix code will be called.
 #define BLIS_SMALL_MATRIX_THRES        700
 #define BLIS_SMALL_M_RECT_MATRIX_THRES 160

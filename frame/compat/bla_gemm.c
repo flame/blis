@@ -285,6 +285,7 @@ void PASTEF77S(ch,blasname) \
 	const inc_t rs_c = 1; \
 	const inc_t cs_c = *ldc; \
 \
+IF_BLIS_ENABLE_MNK1_MATRIX(\
 	if( n0 == 1 ) \
 	{ \
 		if(bli_is_notrans(blis_transa)) \
@@ -357,6 +358,7 @@ void PASTEF77S(ch,blasname) \
   		bli_finalize_auto(); \
 		return; \
 	} \
+) /* End of IF_BLIS_ENABLE_MNK1_MATRIX */ \
 \
 	const num_t dt     = PASTEMAC(ch,type); \
 \

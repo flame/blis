@@ -304,6 +304,7 @@ void PASTEF77S(ch,blasname) \
     const inc_t rs_c = 1; \
     const inc_t cs_c = *ldc; \
 \
+IF_BLIS_ENABLE_MNK1_MATRIX(\
     if( n0 == 1 ) \
     { \
         if(bli_is_notrans(blis_transa)) \
@@ -380,6 +381,7 @@ void PASTEF77S(ch,blasname) \
         bli_finalize_auto(); \
         return; \
     } \
+) /* End of IF_BLIS_ENABLE_MNK1_MATRIX */ \
 \
     const num_t dt     = PASTEMAC(ch,type); \
 \
@@ -534,6 +536,8 @@ void dgemm_blis_impl
     const inc_t rs_c = 1;
     const inc_t cs_c = *ldc;
 
+#ifdef BLIS_ENABLE_MNK1_MATRIX
+
     /* Call GEMV when m == 1 or n == 1 with the context set
     to an uninitialized void pointer i.e. ((void *)0)*/
     if (n0 == 1)
@@ -615,6 +619,8 @@ void dgemm_blis_impl
         return;
     }
 
+#endif // End of BLIS_ENABLE_MNK1_MATRIX
+
     // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == FALSE)
@@ -664,6 +670,8 @@ void dgemm_blis_impl
         bli_finalize_auto();
         return;
     }
+
+#ifdef BLIS_ENABLE_MNK1_MATRIX
 
     /*
     Invoking the API for input sizes with k = 1.
@@ -715,6 +723,9 @@ void dgemm_blis_impl
         }
     }
 
+#endif // End of BLIS_ENABLE_MNK1_MATRIX
+
+#ifdef BLIS_ENABLE_TINY_MATRIX
     /**
      *Early check for tiny sizes.
      *if inputs are in range of tiny gemm kernel,
@@ -746,6 +757,7 @@ void dgemm_blis_impl
         bli_finalize_auto();
         return;
     }
+#endif // End of BLIS_ENABLE_TINY_MATRIX
 
     const num_t dt     = BLIS_DOUBLE;
 
@@ -859,8 +871,9 @@ void dgemm_blis_impl
         }
     }
 
-#endif //#ifdef BLIS_ENABLE_SMALL_MATRIX
+#endif // End of BLIS_ENABLE_SMALL_MATRIX
 
+#ifdef BLIS_ENABLE_SUP_HANDLING
     err_t sup_status = BLIS_FAILURE;
     sup_status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
     if ( sup_status == BLIS_SUCCESS )
@@ -871,6 +884,7 @@ void dgemm_blis_impl
         bli_finalize_auto();
         return;
     }
+#endif // End of BLIS_ENABLE_SUP_HANDLING
 
     // fall back on native path when dgemm is not handled in sup path.
     //bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
@@ -1012,6 +1026,8 @@ void zgemm_blis_impl
     const inc_t rs_c = 1;
     const inc_t cs_c = *ldc;
 
+#ifdef BLIS_ENABLE_MNK1_MATRIX
+
     /* Call GEMV when m == 1 or n == 1 with the context set
     to an uninitialized void pointer i.e. ((void *)0)*/
     if (n0 == 1)
@@ -1093,6 +1109,8 @@ void zgemm_blis_impl
         return;
     }
 
+#endif // End of BLIS_ENABLE_MNK1_MATRIX
+
     // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == FALSE)
@@ -1142,6 +1160,8 @@ void zgemm_blis_impl
         bli_finalize_auto();
         return;
     }
+
+#ifdef BLIS_ENABLE_MNK1_MATRIX
 
     /*
     Invoking the API for input sizes with k = 1.
@@ -1240,6 +1260,11 @@ void zgemm_blis_impl
         }
     }
 
+#endif // End of BLIS_ENABLE_MNK1_MATRIX
+
+#ifdef BLIS_ENABLE_TINY_MATRIX
+
+    // May also be used in small path below
     bool is_parallel = bli_thread_get_is_parallel(); // Check if parallel zgemm is invoked.
 
     // Tiny gemm dispatch
@@ -1271,6 +1296,8 @@ void zgemm_blis_impl
     }
 #endif
 
+#endif // End of BLIS_ENABLE_TINY_MATRIX
+
     const num_t dt     = BLIS_DCOMPLEX;
 
     obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1;
@@ -1296,6 +1323,11 @@ void zgemm_blis_impl
     bli_obj_set_conjtrans( blis_transb, &bo );
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
+
+    /* Check if we have already defined this above */
+#ifndef BLIS_ENABLE_TINY_MATRIX
+    bool is_parallel = bli_thread_get_is_parallel(); // Check if parallel zgemm is invoked.
+#endif
 
     /* Query the architecture ID */
     arch_t arch_id = bli_arch_query_id();
@@ -1389,8 +1421,9 @@ void zgemm_blis_impl
         }
     }
 
-#endif //#ifdef BLIS_ENABLE_SMALL_MATRIX
+#endif // End of BLIS_ENABLE_SMALL_MATRIX
 
+#ifdef BLIS_ENABLE_SUP_HANDLING
     err_t sup_status = BLIS_FAILURE;
     sup_status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
     if ( sup_status == BLIS_SUCCESS )
@@ -1401,6 +1434,7 @@ void zgemm_blis_impl
         bli_finalize_auto();
         return;
     }
+#endif // End of BLIS_ENABLE_SUP_HANDLING
 
     // fall back on native path when zgemm is not handled in sup path.
     //bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
@@ -1555,6 +1589,8 @@ void cgemm_blis_impl
     const inc_t rs_c = 1;
     const inc_t cs_c = *ldc;
 
+#ifdef BLIS_ENABLE_MNK1_MATRIX
+
     /* Call GEMV when m == 1 or n == 1 with the context set
     to an uninitialized void pointer i.e. ((void *)0)*/
     if (n0 == 1)
@@ -1636,6 +1672,8 @@ void cgemm_blis_impl
         return;
     }
 
+#endif // End of BLIS_ENABLE_MNK1_MATRIX
+
     // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == FALSE)
@@ -1686,6 +1724,8 @@ void cgemm_blis_impl
         return;
     }
 
+#ifdef BLIS_ENABLE_MNK1_MATRIX
+
     /*
     Invoking the API for input sizes with k = 1.
     - The API is single-threaded.
@@ -1719,6 +1759,10 @@ void cgemm_blis_impl
     }
 #endif
 
+#endif // End of BLIS_ENABLE_MNK1_MATRIX
+
+#ifdef BLIS_ENABLE_TINY_MATRIX
+
     bool is_parallel = bli_thread_get_is_parallel(); // Check if parallel cgemm is invoked.
 
     // Tiny gemm dispatch
@@ -1750,6 +1794,8 @@ void cgemm_blis_impl
     }
 #endif
 
+#endif // End of BLIS_ENABLE_TINY_MATRIX
+
     const num_t dt     = BLIS_SCOMPLEX;
 
     obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1;
@@ -1774,6 +1820,7 @@ void cgemm_blis_impl
     bli_obj_set_conjtrans( blis_transa, &ao );
     bli_obj_set_conjtrans( blis_transb, &bo );
 
+#ifdef BLIS_ENABLE_SUP_HANDLING
     err_t sup_status = BLIS_FAILURE;
     sup_status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
     if ( sup_status == BLIS_SUCCESS )
@@ -1784,6 +1831,7 @@ void cgemm_blis_impl
         bli_finalize_auto();
         return;
     }
+#endif // End of BLIS_ENABLE_SUP_HANDLING
 
     // fall back on native path when cgemm is not handled in sup path.
     //bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);

@@ -317,6 +317,8 @@ void dgemv_blis_impl
         return;
     }
 
+#ifdef BLIS_ENABLE_TINY_MATRIX
+
     /**
      * DGEMV Tiny Path
      * If the matrix dimensions are within 8x8 then calculate the result
@@ -340,6 +342,8 @@ void dgemv_blis_impl
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         return;
     }
+
+#endif // End of BLIS_ENABLE_TINY_MATRIX
 
     /* Call variants based on transpose value. */
     if((bli_does_notrans(blis_transa) && bli_is_col_stored( rs_a, cs_a )) 

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -160,10 +160,34 @@ ${KERNEL_LIST_DEFINES}
 #endif
 #endif
 
+#if ${ENABLE_MNK1_MATRIX_01}
+#define BLIS_ENABLE_MNK1_MATRIX
+#else
+#define BLIS_DISABLE_MNK1_MATRIX
+#endif
+
+#if ${ENABLE_TINY_MATRIX_01}
+#define BLIS_ENABLE_TINY_MATRIX
+#else
+#define BLIS_DISABLE_TINY_MATRIX
+#endif
+
+#if ${ENABLE_SMALL_MATRIX_01}
+#define BLIS_ENABLE_SMALL_MATRIX
+#else
+#define BLIS_DISABLE_SMALL_MATRIX
+#endif
+
 #if ${ENABLE_SUP_HANDLING_01}
 #define BLIS_ENABLE_SUP_HANDLING
 #else
 #define BLIS_DISABLE_SUP_HANDLING
+#endif
+
+#if ${ENABLE_SMALL_MATRIX_TRSM_01}
+#define BLIS_ENABLE_SMALL_MATRIX_TRSM
+#else
+#define BLIS_DISABLE_SMALL_MATRIX_TRSM
 #endif
 
 #if ${ENABLE_MEMKIND_01}

@@ -308,6 +308,7 @@ void PASTEF77S(ch,blasname) \
     /*   If Transpose(A) uplo = higher then uplo = lower           */ \
     /* ----------------------------------------------------------- */ \
 \
+IF_BLIS_ENABLE_MNK1_MATRIX(\
     if( n0 == 1 ) \
     { \
         if( blis_side == BLIS_LEFT ) \
@@ -442,6 +443,7 @@ void PASTEF77S(ch,blasname) \
             return; \
         } \
     } \
+) /* End of IF_BLIS_ENABLE_MNK1_MATRIX */ \
 \
     const struc_t struca = BLIS_TRIANGULAR; \
 \
@@ -588,6 +590,8 @@ void strsm_blis_impl
         return;
     }
 
+#ifdef BLIS_ENABLE_MNK1_MATRIX
+
     if( n0 == 1 )
     {
         if( blis_side == BLIS_LEFT )
@@ -732,6 +736,9 @@ void strsm_blis_impl
             return;
         }
     }
+
+#endif // End of BLIS_ENABLE_MNK1_MATRIX
+
     const struc_t struca = BLIS_TRIANGULAR;
 
     obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1;
@@ -789,7 +796,7 @@ void strsm_blis_impl
         }
     } // bli_cpuid_is_avx2fma3_supported
 
-#endif //#ifdef BLIS_ENABLE_SMALL_MATRIX
+#endif // End of BLIS_ENABLE_SMALL_MATRIX_TRSM
 
     //bli_trsmnat
     //(
@@ -932,6 +939,8 @@ void dtrsm_blis_impl
         return;
     }
 
+#ifdef BLIS_ENABLE_MNK1_MATRIX
+
     if( n0 == 1 )
     {
         if( blis_side == BLIS_LEFT )
@@ -1076,6 +1085,8 @@ void dtrsm_blis_impl
             return;
         }
     }
+
+#endif // End of BLIS_ENABLE_MNK1_MATRIX
 
     const struc_t struca = BLIS_TRIANGULAR;
 
@@ -1287,7 +1298,7 @@ void dtrsm_blis_impl
         }
     } // bli_cpuid_is_avx2fma3_supported
 
-#endif //#ifdef BLIS_ENABLE_SMALL_MATRIX
+#endif // End of BLIS_ENABLE_SMALL_MATRIX
 
     //bli_trsmnat
     //(
@@ -1430,6 +1441,8 @@ void ztrsm_blis_impl
         bli_finalize_auto();
         return;
     }
+
+#ifdef BLIS_ENABLE_MNK1_MATRIX
 
     if( n0 == 1 )
     {
@@ -1635,6 +1648,8 @@ void ztrsm_blis_impl
         }
     }
 
+#endif // End of BLIS_ENABLE_MNK1_MATRIX
+
     const struc_t struca = BLIS_TRIANGULAR;
 
     obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1;
@@ -1810,7 +1825,7 @@ void ztrsm_blis_impl
         }
     } // bli_cpuid_is_avx2fma3_supported
 
-#endif //#ifdef BLIS_ENABLE_SMALL_MATRIX
+#endif // End of BLIS_ENABLE_SMALL_MATRIX
 
     //bli_trsmnat
     //(
@@ -1953,6 +1968,8 @@ void ctrsm_blis_impl
         bli_finalize_auto();
         return;
     }
+
+#ifdef BLIS_ENABLE_MNK1_MATRIX
 
     if( n0 == 1 )
     {
@@ -2158,6 +2175,8 @@ void ctrsm_blis_impl
         }
     }
 
+#endif // End of BLIS_ENABLE_MNK1_MATRIX
+
     const struc_t struca = BLIS_TRIANGULAR;
 
     obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1;
@@ -2215,7 +2234,7 @@ void ctrsm_blis_impl
         }
     } // bli_cpuid_is_avx2fma3_supported
 
-#endif //#ifdef BLIS_ENABLE_SMALL_MATRIX
+#endif // End of BLIS_ENABLE_SMALL_MATRIX
 
     //bli_trsmnat
     //(

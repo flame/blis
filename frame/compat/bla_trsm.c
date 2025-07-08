@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -247,6 +247,7 @@ void PASTEF77S(ch,blasname) \
     /*   If Transpose(A) uplo = higher then uplo = lower           */ \
     /* ----------------------------------------------------------- */ \
 \
+IF_BLIS_ENABLE_MNK1_MATRIX(\
     if( n0 == 1 ) \
     { \
         if( blis_side == BLIS_LEFT ) \
@@ -375,6 +376,7 @@ void PASTEF77S(ch,blasname) \
             return; \
         } \
     } \
+) /* End of IF_BLIS_ENABLE_MNK1_MATRIX */ \
 \
     const struc_t struca = BLIS_TRIANGULAR; \
 \
