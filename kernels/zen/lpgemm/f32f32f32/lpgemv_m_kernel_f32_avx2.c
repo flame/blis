@@ -237,12 +237,19 @@ void lpgemv_m_one_f32f32f32of32_avx2_LT16
       // load c and multiply with beta and
       // add to accumulator and store back
       ymm3 = _mm256_set1_ps( beta );
-      ymm0 = _mm256_maskload_ps( _cbuf, k1 );
-      ymm8 = _mm256_fmadd_ps( ymm0, ymm3, ymm8 );
+      if( post_ops_attr.buf_downscale != NULL )
+			{
+        BF16_F32_C_BNZ_8(0,0,ymm0, ymm3,ymm8)
+				BF16_F32_C_BNZ_8(0,1,ymm1, ymm3,ymm12)
+      }
+      else
+      {
+        ymm0 = _mm256_maskload_ps( _cbuf, k1 );
+        ymm8 = _mm256_fmadd_ps( ymm0, ymm3, ymm8 );
 
-      ymm1 = _mm256_maskload_ps( _cbuf + 8, k2 );
-      ymm12 = _mm256_fmadd_ps( ymm1, ymm3, ymm12 );
-
+        ymm1 = _mm256_maskload_ps( _cbuf + 8, k2 );
+        ymm12 = _mm256_fmadd_ps( ymm1, ymm3, ymm12 );
+      }
     }
 
     // Post Ops
@@ -836,8 +843,7 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32_avx2 )
       // add to accumulator and store back
       ymm3 = _mm256_set1_ps( beta );
 
-      if ( ( post_ops_attr.buf_downscale != NULL ) &&
-           ( post_ops_attr.is_first_k == TRUE ) )
+      if ( ( post_ops_attr.buf_downscale != NULL ) )
       {
         BF16_F32_C_BNZ_8(0,0,ymm0,ymm3,ymm8)
         BF16_F32_C_BNZ_8(0,1,ymm1,ymm3,ymm12)

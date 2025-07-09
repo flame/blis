@@ -233,6 +233,9 @@ multiply with Beta, and add to alpha*A*B*/
 			); \
 	ymm2 = _mm256_fmadd_ps(ymm0, beta, ymm2); \
 
+#define BF16_F32_C_BNZ_GEMV_MASK(m_ind,n_ind,ymm0,beta,ymm2,mask) \
+	load_mask = _mm256_cvtepi32_epi16(mask); \
+	BF16_F32_C_BNZ_8_MASK(m_ind,n_ind,ymm0,beta,ymm2,load_mask) \
 
 /*Load C from buf_downscale and convert to F32,
 multiply with Beta, and add to alpha*A*B*/
@@ -773,10 +776,46 @@ multiply with Beta, and add to alpha*A*B*/
             );   \
 }
 
+#define STORE_F32_BF16_N_ONE_YMM( temp, m_ele ) \
+{ \
+	dest = ( bfloat16* )post_ops_attr.buf_downscale + \
+		( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i ) ) ; \
+	for(i = 0; i < m_ele; i++) \
+	{ \
+		tlsb = ( temp[i] & ( uint32_t )0x00010000 ) > 16; \
+		rounded = temp[i] + ( uint32_t )0x00007FFF + tlsb; \
+		memcpy( (dest+i*rs_c), ((char *)(&rounded))+2, sizeof(bfloat16)); \
+	} \
+}
 
 #define STORE_F32_BF16_YMM( reg, m_ind, n_ind, n_elems ) \
 { \
 	_mm256_storeu_ps((float*)temp, reg); \
+	dest = ( bfloat16* )post_ops_attr.buf_downscale + \
+		( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+		post_ops_attr.post_op_c_j + ( n_ind * 8 ); \
+	for(i = 0; i < n_elems; i++) \
+	{ \
+		tlsb = ( temp[i] & ( uint32_t )0x00010000 ) > 16; \
+		rounded = temp[i] + ( uint32_t )0x00007FFF + tlsb; \
+		memcpy( (dest+i), ((char *)(&rounded))+2, sizeof(bfloat16)); \
+	} \
+}
+
+#define MASK_STORE_F32_BF16_YMM( reg, m_ind, n_ind, mask ) \
+{ \
+	uint32_t temp[8] = {0}; \
+	int32_t ele[8] = {0}; \
+	int n_elems = 0; \
+	_mm256_storeu_ps((float*)temp, reg); \
+	_mm256_storeu_si256((__m256i*)ele, mask); \
+	for( dim_t i = 0; i < 8; i++ ) \
+	{ \
+		if(ele[i] == -1) \
+		{ \
+			n_elems++; \
+		} \
+	} \
 	dest = ( bfloat16* )post_ops_attr.buf_downscale + \
 		( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
 		post_ops_attr.post_op_c_j + ( n_ind * 8 ); \

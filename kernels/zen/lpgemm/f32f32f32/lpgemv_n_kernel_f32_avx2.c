@@ -68,7 +68,6 @@
     ymm0 = _mm256_hadd_ps( ymm0, ymm1 ); \
     xmm0 = _mm_add_ps(_mm256_extractf128_ps(ymm0, 0), _mm256_extractf128_ps(ymm0,1));
 
-
 LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32_avx2 )
 {
   static void *post_ops_labels[] =
@@ -311,17 +310,47 @@ LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32_avx2 )
             ymm3 = _mm256_set1_ps(beta);
             if( rs_c == 1 )
             {
-                ymm0 = _mm256_maskload_ps( _cbuf, store_mask );
+              if ( post_ops_attr.buf_downscale != NULL )
+                {
+                    ymm0 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
+                        _mm_loadu_si128(
+                          ( __m128i const* )( ( ( bfloat16* )post_ops_attr.buf_downscale ) +
+                          ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + 0 ) )
+                          + post_ops_attr.post_op_c_j + (0 * 8) ) ) ), _mm256_set1_epi32( 16 ) )
+                        );
+                }
+                else
+                {
+                    ymm0 = _mm256_maskload_ps( _cbuf, store_mask );
+                }
             }
             else
             {
-                // load c into ymm0
-                float ctemp[8] = { 0 };
-                for( dim_t i = 0; i < mr0; i++ )
+              if ( post_ops_attr.buf_downscale != NULL  )
                 {
-                    ctemp[i] = _cbuf[i * rs_c];
+                    bfloat16 ctemp[8] = {0};
+                    for( dim_t i = 0; i < mr0; i++ )
+                    {
+                        ctemp[i] = *( ( bfloat16* )post_ops_attr.buf_downscale +
+                                    ( post_ops_attr.rs_c_downscale *
+                                    ( post_ops_attr.post_op_c_i + i ) ) );
+                    }
+                    ymm0 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
+                                _mm_loadu_si128(
+                                ( __m128i const* )( (bfloat16* )ctemp) ) ),
+                                _mm256_set1_epi32( 16 ) )
+                            );
                 }
-                ymm0 = _mm256_loadu_ps( ctemp );
+                else
+                {
+                    // load c into ymm0
+                    float ctemp[8] = { 0 };
+                    for( dim_t i = 0; i < mr0; i++ )
+                    {
+                        ctemp[i] = _cbuf[i * rs_c];
+                    }
+                    ymm0 = _mm256_loadu_ps( ctemp );
+                }
             }
 
             // scale c with beta
@@ -701,7 +730,28 @@ POST_OPS_SIGMOID_1x16F:
 
 POST_OPS_1x16F_DISABLE:
         {
+          if( ( post_ops_attr.buf_downscale != NULL ) &&
+                    ( post_ops_attr.is_last_k == TRUE ) )
+          {
+              uint32_t tlsb, rounded, temp[8] = {0};
+              int i;
+              bfloat16* dest;
 
+              if( rs_c == 1 )
+              {
+                  _mm256_maskstore_ps((float*)temp, store_mask, ymm8);
+
+                  STORE_F32_BF16_N_ONE_YMM(temp, mr0)
+              }
+              else
+              {
+                  _mm256_storeu_ps((float*)temp, ymm8);
+
+                  STORE_F32_BF16_N_ONE_YMM( temp, mr0 )
+              }
+          }
+          else
+          {
             if( rs_c == 1 )
             {
                 _mm256_maskstore_ps ( c_use, store_mask, ymm8 );
@@ -716,6 +766,7 @@ POST_OPS_1x16F_DISABLE:
                     c_use[i * rs_c] = ctemp[i];
                 }
             }
+          }
         }
         post_ops_attr.post_op_c_i += MR;
     } // mr loop

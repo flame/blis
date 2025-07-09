@@ -587,14 +587,40 @@ void unpackb_nr64_bf16_f32_row_major
 void unpackb_nr64_bf16_f32
 	(
 	  const bfloat16* b,
-	  float*       unpack_b_buffer,
+	  float*       	  unpack_b_buffer,
 	  const dim_t	  KC,
 	  const dim_t     NC,
 	  dim_t           rs_b,
-	  dim_t           cs_b
+	  dim_t           cs_b,
+	  bool 			  is_n_one
 	)
 {
-	if( cs_b == 1 )
+	if( is_n_one == TRUE )
+	{
+		__m256 a_reg;
+        dim_t k0 = 0;
+        __m256i store_mask;
+
+		for( ; ( k0 + 8 ) < KC; k0 += 8 )
+		{
+			a_reg = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
+						(const __m128i*)(( b + k0 ) ) ) );
+			_mm256_storeu_ps( ( unpack_b_buffer + k0 ), a_reg );
+		}
+		dim_t k_left = (KC - k0);
+
+        if( k_left > 0 )
+        {
+            bfloat16 buff[8] = {0};
+            for( int i = 0; i < k_left; i++ )buff[i]  = ( *( b + (k0 + i) ) );
+
+            a_reg = CVT_BF16_F32_SHIFT_AVX2( (__m128i)_mm_loadu_si128( \
+                (const __m128i*)( buff ) ) );
+            GET_STORE_MASK(k_left, store_mask);
+            _mm256_maskstore_ps( ( unpack_b_buffer + k0 ), store_mask, a_reg );
+        }
+	}
+	else if( cs_b == 1 )
 	{
 		unpackb_nr64_bf16_f32_row_major( b, unpack_b_buffer, NC, KC, rs_b );
 	}

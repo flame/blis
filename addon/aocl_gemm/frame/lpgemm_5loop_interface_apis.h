@@ -209,7 +209,7 @@ void lpgemm_rowvar_avx512bf16_ ## LP_SFX \
        AOCL_STORAGE_TYPE     c_downscale \
      ) \
 
-    LPGEMM_5LOOP_AVX512BF16(bfloat16,bfloat16,float,bf16bf16f32of32);
+  LPGEMM_5LOOP_AVX512BF16(bfloat16,bfloat16,float,bf16bf16f32of32);
 
 #define LPGEMV_TINY(A_type, B_type, C_type, LP_SFX) \
 void lpgemv_rowvar_tiny_ ## LP_SFX \
@@ -268,5 +268,33 @@ LPGEMV(float, float, float, f32f32f32of32);
 LPGEMV(bfloat16,bfloat16,float,bf16bf16f32of32);
 LPGEMV(uint8_t,int8_t,int32_t,u8s8s32os32);
 LPGEMV(int8_t,int8_t,int32_t,s8s8s32os32);
+
+#define LPGEMV_AVX2(A_type, B_type, C_type, LP_SFX) \
+void lpgemv_rowvar_avx2_ ## LP_SFX \
+    ( \
+      const dim_t           m, \
+      const dim_t           n, \
+      const dim_t           k, \
+      const A_type          *a, \
+      const dim_t           rs_a, \
+      const dim_t           cs_a, \
+      const AOCL_MEMORY_TAG mtag_a, \
+      const B_type          *b, \
+      const dim_t           rs_b, \
+      const dim_t           cs_b, \
+      const AOCL_MEMORY_TAG mtag_b, \
+      C_type                *c, \
+      const dim_t           rs_c, \
+      const dim_t           cs_c, \
+      const C_type          alpha, \
+      const C_type          beta, \
+      rntm_t                *rntm, \
+      lpgemm_thrinfo_t      *thread, \
+      lpgemm_cntx_t         *lcntx, \
+      lpgemm_post_op        *post_op_list, \
+      AOCL_STORAGE_TYPE      c_downscale \
+    ) \
+
+LPGEMV_AVX2(bfloat16, bfloat16, float, bf16bf16f32of32);
 
 #endif // LPGEMM_5LOOP_INTF_H

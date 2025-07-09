@@ -99,8 +99,8 @@ AOCL_GEMM_REORDER(bfloat16, bf16bf16f32of32_reference)
 		return; // A reorder not supported.
 	}
 
-#if (defined(BLIS_KERNELS_ZEN4) && (!defined(LPGEMM_BF16_JIT)))
-	if( ( n == 1 ) && ( bli_cpuid_is_avx512bf16_supported() == TRUE ) && ( lpgemm_get_enabled_arch() != BLIS_ARCH_ZEN3 ) )
+#if (!defined(LPGEMM_BF16_JIT))
+	if( n == 1 )
 	{
 		if( rs_b == 1 )
 		{
@@ -260,7 +260,7 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(bf16bf16f32of32)
 	/*It is expected that while bf16 input is passed to AVX2 kernels,
 	  the unreorder/conversion of bf16->f32 is done, which expects the
 	  reordered matrix to be padded with n multiple of 16, k multiple of 2. */
-	if( ( n == 1 ) && ( bli_cpuid_is_avx512bf16_supported() == TRUE ) && ( lpgemm_get_enabled_arch() != BLIS_ARCH_ZEN3 ) )
+	if( ( n == 1 ) )
 	{
 		n_reorder = 1;
 	}
@@ -271,7 +271,7 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(bf16bf16f32of32)
 
 	// Extra space since packing does length in multiples of 2.
 	dim_t k_reorder;
-	if( ( n == 1 ) && ( bli_cpuid_is_avx512bf16_supported() == TRUE ) && ( lpgemm_get_enabled_arch() != BLIS_ARCH_ZEN3 ) )
+	if( ( n == 1 ) )
 	{
 		k_reorder = k;
 	}

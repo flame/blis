@@ -191,11 +191,12 @@ void unpackb_nr64_bf16bf16f32of32
 void unpackb_nr64_bf16_f32
     (
       const bfloat16* b,
-      float*       unpack_b_buffer,
-      const dim_t	  NC,
-      const dim_t     KC,
+      float*          unpack_b_buffer,
+      const dim_t	    KC,
+      const dim_t     NC,
       dim_t           rs_b,
-      dim_t           cs_b
+      dim_t           cs_b,
+      bool            is_n_one
     );
 
 void cvt_bf16_f32(

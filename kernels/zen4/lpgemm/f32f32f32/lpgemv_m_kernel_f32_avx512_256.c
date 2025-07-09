@@ -314,33 +314,47 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32_avx512_256 )
 		{
 			ymm0 = _mm256_set1_ps( beta );
 
-			const float *_cbuf = c_use;
-			// load c and multiply with beta and
-			// add to accumulator and store back
+			if( post_ops_attr.buf_downscale != NULL )
+			{
+				BF16_F32_C_BNZ_8(0,0,ymm1, ymm0,ymm16)
+				BF16_F32_C_BNZ_8(0,1,ymm2, ymm0,ymm18)
+				BF16_F32_C_BNZ_8(0,2,ymm3, ymm0,ymm20)
+				BF16_F32_C_BNZ_8(0,3,ymm4, ymm0,ymm22)
+				BF16_F32_C_BNZ_8(0,4,ymm5, ymm0,ymm24)
+				BF16_F32_C_BNZ_8(0,5,ymm6, ymm0,ymm26)
+				BF16_F32_C_BNZ_8(0,6,ymm7, ymm0,ymm28)
+				BF16_F32_C_BNZ_8(0,7,ymm8, ymm0,ymm30)
+			}
+			else
+			{
+				const float *_cbuf = c_use;
+				// load c and multiply with beta and
+				// add to accumulator and store back
 
-			ymm1 = _mm256_maskload_ps( _cbuf, k1 );
-			ymm16 = _mm256_fmadd_ps(ymm1, ymm0, ymm16);
+				ymm1 = _mm256_maskload_ps( _cbuf, k1 );
+				ymm16 = _mm256_fmadd_ps(ymm1, ymm0, ymm16);
 
-			ymm2 = _mm256_maskload_ps( (_cbuf + 8), k2 );
-			ymm18 = _mm256_fmadd_ps(ymm2, ymm0, ymm18 );
+				ymm2 = _mm256_maskload_ps( (_cbuf + 8), k2 );
+				ymm18 = _mm256_fmadd_ps(ymm2, ymm0, ymm18 );
 
-			ymm3 = _mm256_maskload_ps( (_cbuf + 16), k3 );
-			ymm20 = _mm256_fmadd_ps(ymm3, ymm0, ymm20 );
+				ymm3 = _mm256_maskload_ps( (_cbuf + 16), k3 );
+				ymm20 = _mm256_fmadd_ps(ymm3, ymm0, ymm20 );
 
-			ymm4 = _mm256_maskload_ps( (_cbuf + 24), k4 );
-			ymm22 = _mm256_fmadd_ps(ymm4, ymm0, ymm22 );
+				ymm4 = _mm256_maskload_ps( (_cbuf + 24), k4 );
+				ymm22 = _mm256_fmadd_ps(ymm4, ymm0, ymm22 );
 
-			ymm5 = _mm256_maskload_ps( (_cbuf + 32), k5 );
-			ymm24 = _mm256_fmadd_ps(ymm5, ymm0, ymm24 );
+				ymm5 = _mm256_maskload_ps( (_cbuf + 32), k5 );
+				ymm24 = _mm256_fmadd_ps(ymm5, ymm0, ymm24 );
 
-			ymm6 = _mm256_maskload_ps( (_cbuf + 40), k6 );
-			ymm26 = _mm256_fmadd_ps(ymm6, ymm0, ymm26 );
+				ymm6 = _mm256_maskload_ps( (_cbuf + 40), k6 );
+				ymm26 = _mm256_fmadd_ps(ymm6, ymm0, ymm26 );
 
-			ymm7 = _mm256_maskload_ps( (_cbuf + 48), k7 );
-			ymm28 = _mm256_fmadd_ps(ymm7, ymm0, ymm28 );
+				ymm7 = _mm256_maskload_ps( (_cbuf + 48), k7 );
+				ymm28 = _mm256_fmadd_ps(ymm7, ymm0, ymm28 );
 
-			ymm8 = _mm256_maskload_ps( (_cbuf + 56), k8 );
-			ymm30 = _mm256_fmadd_ps(ymm8, ymm0, ymm30 );
+				ymm8 = _mm256_maskload_ps( (_cbuf + 56), k8 );
+				ymm30 = _mm256_fmadd_ps(ymm8, ymm0, ymm30 );
+			}
 		}
 
 		// Post Ops
@@ -526,7 +540,6 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32_avx512_256 )
 		// Even though different registers are used for scalar in column
 		// and row major downscale path, all those registers will contain
 		// the same value.
-
 		if( post_ops_list_temp->scale_factor_len == 1 )
 		{
 			selector1 =
@@ -1087,32 +1100,32 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32_avx512_256 )
 	}
 	POST_OPS_1x64F_DISABLE:
 	{
-	uint32_t tlsb, rounded, temp[8] = {0};
-	int i;
-	bfloat16* dest;
+		uint32_t tlsb, rounded;
+		int i;
+		bfloat16* dest;
 
 		if ( ( post_ops_attr.buf_downscale != NULL ) &&
 			 ( post_ops_attr.is_last_k == TRUE ) )
 		{
-			STORE_F32_BF16_YMM(ymm16, 0, 0, 8);
-			STORE_F32_BF16_YMM(ymm18, 0, 1, 8);
-			STORE_F32_BF16_YMM(ymm20, 0, 2, 8);
-			STORE_F32_BF16_YMM(ymm22, 0, 3, 8);
-			STORE_F32_BF16_YMM(ymm24, 0, 4, 8);
-			STORE_F32_BF16_YMM(ymm26, 0, 5, 8);
-			STORE_F32_BF16_YMM(ymm28, 0, 6, 8);
-			STORE_F32_BF16_YMM(ymm30, 0, 7, 8);
+			MASK_STORE_F32_BF16_YMM(ymm16, 0, 0, k1);
+			MASK_STORE_F32_BF16_YMM(ymm18, 0, 1, k2);
+			MASK_STORE_F32_BF16_YMM(ymm20, 0, 2, k3);
+			MASK_STORE_F32_BF16_YMM(ymm22, 0, 3, k4);
+			MASK_STORE_F32_BF16_YMM(ymm24, 0, 4, k5);
+			MASK_STORE_F32_BF16_YMM(ymm26, 0, 5, k6);
+			MASK_STORE_F32_BF16_YMM(ymm28, 0, 6, k7);
+			MASK_STORE_F32_BF16_YMM(ymm30, 0, 7, k8);
 		}
 		else
 		{
-		_mm256_maskstore_ps(c_use, k1, ymm16);
-		_mm256_maskstore_ps((c_use + 8), k2, ymm18);
-		_mm256_maskstore_ps((c_use + 16), k3, ymm20);
-		_mm256_maskstore_ps((c_use + 24), k4, ymm22);
-		_mm256_maskstore_ps((c_use + 32), k5, ymm24);
-		_mm256_maskstore_ps((c_use + 40), k6, ymm26);
-		_mm256_maskstore_ps((c_use + 48), k7, ymm28);
-		_mm256_maskstore_ps((c_use + 56), k8, ymm30);
+			_mm256_maskstore_ps(c_use, k1, ymm16);
+			_mm256_maskstore_ps((c_use + 8), k2, ymm18);
+			_mm256_maskstore_ps((c_use + 16), k3, ymm20);
+			_mm256_maskstore_ps((c_use + 24), k4, ymm22);
+			_mm256_maskstore_ps((c_use + 32), k5, ymm24);
+			_mm256_maskstore_ps((c_use + 40), k6, ymm26);
+			_mm256_maskstore_ps((c_use + 48), k7, ymm28);
+			_mm256_maskstore_ps((c_use + 56), k8, ymm30);
 
 		}
 		post_ops_attr.post_op_c_j += NR;

@@ -256,8 +256,7 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32 )
 		{
 			zmm3 = _mm512_set1_ps(beta);
 
-			if ( ( post_ops_attr.buf_downscale != NULL ) &&
-			     ( post_ops_attr.is_first_k == TRUE ) )
+			if ( ( post_ops_attr.buf_downscale != NULL )  )
 		    {
               BF16_F32_BETA_OP_NLT16F_MASK(k1, zmm8, 0, 0,  zmm0,zmm3);
               BF16_F32_BETA_OP_NLT16F_MASK(k2, zmm12, 0, 1,  zmm1,zmm3);
