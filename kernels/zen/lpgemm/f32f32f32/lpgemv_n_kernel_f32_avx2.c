@@ -369,11 +369,8 @@ POST_OPS_BIAS_1x16F:
             {
               if( post_ops_list_temp->stor_type == BF16 )
               {
-                ymm0 = (__m256)( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
-                      _mm_set1_epi16(
-                         *( ( bfloat16* )post_ops_list_temp->op_args1 )
-                      ) ), _mm256_set1_epi32( 16 ) )
-                      );
+                BF16_F32_BIAS_BCAST_AVX2_GEMV( ymm0)
+
               }
               else
               {
@@ -390,13 +387,7 @@ POST_OPS_BIAS_1x16F:
             // entire column.
             if( post_ops_list_temp->stor_type == BF16 )
             {
-             __m128i bias_mask = _mm_loadu_si128((__m128i*)mask[mr0]);
-              ymm0 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
-                    _mm_maskload_epi32(
-                      ( int const* )( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
-                      post_ops_attr.post_op_c_i )
-                    , bias_mask ) ), _mm256_set1_epi32( 16 ) )
-                    );
+             BF16_F32_BIAS_LOAD_AVX2_GEMV( ymm0, 0 );
             }
             else
             {
@@ -500,13 +491,7 @@ POST_OPS_DOWNSCALE_1x16F:
             {
               if( is_bf16 == TRUE )
               {
-                __m128i zp_mask = _mm_loadu_si128((__m128i*)mask[mr0]);
-                zero_point0 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
-                  _mm_maskload_epi32(
-                    ( int const* )( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
-                    post_ops_attr.post_op_c_i )
-                  , zp_mask ) ), _mm256_set1_epi32( 16 ) )
-                  );
+                BF16_F32_ZP_VECTOR_LOAD_AVX2_GEMV( ymm0, 0 )
               }
               else
               {

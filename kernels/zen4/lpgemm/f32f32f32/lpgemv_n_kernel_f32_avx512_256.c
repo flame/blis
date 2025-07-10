@@ -422,17 +422,17 @@ LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32_avx512_256 )
                 if ( post_ops_attr.buf_downscale != NULL )
                 {
                     ymm0 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
-                        _mm_loadu_si128(
-                          ( __m128i const* )( ( ( bfloat16* )post_ops_attr.buf_downscale ) +
-                          ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + 0 ) )
-                          + post_ops_attr.post_op_c_j + (0 * 8) ) ) ), _mm256_set1_epi32( 16 ) )
-                        );
+                            _mm_loadu_si128( ( __m128i const* )
+                            ( ( ( bfloat16* )post_ops_attr.buf_downscale ) +
+                            ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i ) )
+                            + (0 * 8) ) ) ), _mm256_set1_epi32( 16 ) )
+                            );
                     ymm1 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
-                        _mm_loadu_si128(
-                            ( __m128i const* )( ( ( bfloat16* )post_ops_attr.buf_downscale ) +
-                          ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + 0 ) )
-                          + post_ops_attr.post_op_c_j + (1 * 8) ) ) ), _mm256_set1_epi32( 16 ) )
-                        );
+                            _mm_loadu_si128( ( __m128i const* )
+                            ( ( ( bfloat16* )post_ops_attr.buf_downscale ) +
+                            ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i ) )
+                            + (1 * 8) ) ) ), _mm256_set1_epi32( 16 ) )
+                            );
                 }
                 else
                 {
@@ -492,16 +492,8 @@ POST_OPS_BIAS_1x32F:
             {
                 if( post_ops_list_temp->stor_type == BF16 )
                 {
-                    ymm0 = (__m256)( _mm256_sllv_epi32( _mm256_cvtepi16_epi32 \
-                            ( _mm_set1_epi16 \
-                                ( *( ( bfloat16* )post_ops_list_temp->op_args1 )
-                                ) ), _mm256_set1_epi32( 16 ) )
-                            );
-                    ymm1 = (__m256)( _mm256_sllv_epi32( _mm256_cvtepi16_epi32
-                            ( _mm_set1_epi16
-                                ( *( ( bfloat16* )post_ops_list_temp->op_args1 )
-                                ) ), _mm256_set1_epi32( 16 ) )
-                            );
+                    BF16_F32_BIAS_BCAST_AVX2_GEMV( ymm0)
+                    BF16_F32_BIAS_BCAST_AVX2_GEMV( ymm1)
                 }
                 else
                 {
@@ -519,20 +511,8 @@ POST_OPS_BIAS_1x32F:
                 // entire column.
                 if( post_ops_list_temp->stor_type == BF16 )
                 {
-                    __m128i bias_mask1 = _mm256_cvtepi32_epi16(store_mask1);
-                    __m128i bias_mask2 = _mm256_cvtepi32_epi16(store_mask2);
-                    ymm0 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
-                        _mm_maskload_epi32(
-                          ( int const* )( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
-                          post_ops_attr.post_op_c_i )
-                        , bias_mask1 ) ), _mm256_set1_epi32( 16 ) )
-                        );
-                    ymm1 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
-                        _mm_maskload_epi32(
-                            ( int const* )( ( ( bfloat16* )post_ops_list_temp->op_args1 ) +
-                            post_ops_attr.post_op_c_i + 8)
-                        , bias_mask2 ) ), _mm256_set1_epi32( 16 ) )
-                        );
+                    BF16_F32_BIAS_LOAD_AVX2_GEMV( ymm0, 0 )
+                    BF16_F32_BIAS_LOAD_AVX2_GEMV( ymm1, 1 )
                 }
                 else
                 {
@@ -632,15 +612,6 @@ POST_OPS_DOWNSCALE_1x32F:
                     zero_point1 = _mm256_set1_ps( *(float *)post_ops_list_temp->op_args1 );
                 }
             }
-            else
-            {
-                // If original output was columns major, then by the time
-                // kernel sees it, the matrix would be accessed as if it were
-                // transposed. Due to this the scale as well as zp array will
-                // be accessed by the ic index, and each scale/zp element
-                // corresponds to an entire row of the transposed output array,
-                // instead of an entire column.
-            }
             if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
                 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
             {
@@ -665,12 +636,10 @@ POST_OPS_DOWNSCALE_1x32F:
                 }
                 if( *( dim_t*)post_ops_list_temp->op_args3 > 1 )
                 {
-                    __m128i zp_mask1 = _mm256_cvtepi32_epi16(store_mask1);
-                    __m128i zp_mask2 = _mm256_cvtepi32_epi16(store_mask2);
                     if ( is_bf16 == TRUE )
                     {
-                        BF16_F32_BIAS_LOAD_AVX2_MASK_GEMV(zero_point0,0,zp_mask1)
-                        BF16_F32_BIAS_LOAD_AVX2_MASK_GEMV(zero_point1,1,zp_mask2)
+                        BF16_F32_ZP_VECTOR_LOAD_AVX2_GEMV(zero_point0, 0)
+                        BF16_F32_ZP_VECTOR_LOAD_AVX2_GEMV(zero_point1, 1)
                     }
                     else
                     {
@@ -975,7 +944,6 @@ POST_OPS_1x32F_DISABLE:
                 uint32_t tlsb, rounded, temp[16] = {0};
                 int i;
                 bfloat16* dest;
-
                 if( rs_c == 1 )
                 {
                     _mm256_maskstore_ps((float*)temp, store_mask1, ymm30);
@@ -986,7 +954,7 @@ POST_OPS_1x32F_DISABLE:
                 else
                 {
                     _mm256_storeu_ps((float*)temp, ymm30);
-	                _mm256_storeu_ps((float*)(temp+8), ymm31);
+	                _mm256_storeu_ps((float*)(temp + 8), ymm31);
 
                     STORE_F32_BF16_N_ONE_YMM( temp, mr0 )
                 }

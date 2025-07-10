@@ -111,15 +111,22 @@ void lpgemv_m_one_f32f32f32of32_avx2_LT16
     ZERO_ACC_YMM_4_REG(ymm12, ymm13, ymm14, ymm15);
 
     dim_t n_left = n0 % 8;
+    // n1, n2 holds the n_elems values.
+    dim_t n1 = 0, n2 = 0;
+
     if (nr0 < 8)
     {
       k1 = masks[n_left];
+      n1 = n_left;
       k2 =masks[0];
+      n2 = 0;
     }
     else
     {
       k1 = masks[8];
+      n1 = 8;
       k2 = masks[n_left];
+      n2 = n_left;
     }
 
     _mm_prefetch((c_use + 0 * rs_c), _MM_HINT_T0);
@@ -239,8 +246,8 @@ void lpgemv_m_one_f32f32f32of32_avx2_LT16
       ymm3 = _mm256_set1_ps( beta );
       if( post_ops_attr.buf_downscale != NULL )
 			{
-        BF16_F32_C_BNZ_8(0,0,ymm0, ymm3,ymm8)
-				BF16_F32_C_BNZ_8(0,1,ymm1, ymm3,ymm12)
+        BF16_F32_C_BNZ_GEMV_MASK(0, ymm0, ymm3, ymm8, n1)
+        BF16_F32_C_BNZ_GEMV_MASK(1, ymm1, ymm3, ymm12, n2)
       }
       else
       {
@@ -264,8 +271,10 @@ void lpgemv_m_one_f32f32f32of32_avx2_LT16
       {
         if( post_ops_list_temp->stor_type == BF16 )
         {
-          BF16_F32_BIAS_LOAD_AVX2( ymm0, 0 );
-          BF16_F32_BIAS_LOAD_AVX2( ymm1, 1 );
+          BF16_F32_BIAS_AVX2_GEMV_MASK(0, ymm0, n1 )
+          BF16_F32_BIAS_AVX2_GEMV_MASK(1, ymm1, n2 )
+          // BF16_F32_BIAS_LOAD_AVX2( ymm0, 0 );
+          // BF16_F32_BIAS_LOAD_AVX2( ymm1, 1 );
         }
         else
         {

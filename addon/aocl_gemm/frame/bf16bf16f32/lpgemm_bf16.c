@@ -1004,6 +1004,15 @@ LPGEMV_AVX2(bfloat16, bfloat16, float, bf16bf16f32of32)
 			dim_t jc_cur_loop_rem = 0;
 			dim_t n_sub_updated = 0;
 
+			dim_t nc0_updated = make_multiple_of_n( nc0, packb_min_NR );
+			mem_b_size_req = sizeof( float ) * nc0_updated * k_updated;
+
+			lpgemm_alloc_mem_panel
+				(
+					mem_b_size_req, BLIS_BUFFER_FOR_B_PANEL,
+					&mem_b, rntm
+				);
+
 			if (mtag_b == REORDERED)
 			{
 				get_B_panel_reordered_start_offset_width
@@ -1021,17 +1030,6 @@ LPGEMV_AVX2(bfloat16, bfloat16, float, bf16bf16f32of32)
 				dim_t kc0_updated = kc0;
 				kc0_updated += ( kc0_updated & 0x1 );
 
-				dim_t nc0_updated = make_multiple_of_n( nc0, packb_min_NR );
-				mem_b_size_req = sizeof( float ) * nc0_updated * k_updated;
-
-				n_sub_updated = nc0_updated;
-
-				lpgemm_alloc_mem_panel
-				(
-					mem_b_size_req, BLIS_BUFFER_FOR_B_PANEL,
-					&mem_b, rntm
-				);
-
 				if( mtag_b == REORDERED )
 				{
 					float *b_unreorder =
@@ -1043,8 +1041,8 @@ LPGEMV_AVX2(bfloat16, bfloat16, float, bf16bf16f32of32)
 					unpackb_nr64_bf16_f32
 					(
 						( b + ( jc_cur_loop * k_updated ) +
-						( jc_cur_loop_rem * kc0_updated) ),
-						( b_unreorder ),
+						( jc_cur_loop_rem * kc0_updated) + ( n_sub_updated * pc )),
+						( b_unreorder + (nc0 * pc)),
 						kc0, nc0 ,
 						rs_b_use, cs_b_use, FALSE
 					);
@@ -1059,7 +1057,7 @@ LPGEMV_AVX2(bfloat16, bfloat16, float, bf16bf16f32of32)
 
 					cvt_bf16_f32
 					(
-						( cvt_b_buffer_bf16_f32 ),
+						( cvt_b_buffer_bf16_f32 + (nc0 * pc) ),
 						( b + ( rs_b * pc ) + ( cs_b * jc ) ), rs_b, cs_b,
 						kc0, nc0,
 						rs_b_use, cs_b_use
