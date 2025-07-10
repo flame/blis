@@ -1893,27 +1893,369 @@ void bli_nthreads_optimum(
 		dim_t n = bli_obj_width(c);
 		dim_t k = bli_obj_width_after_trans(a);
 
-		if((m<=128 || n<=128 || k<=128) && ((m+n+k) <= 400))
+
+		// Query the architecture ID
+		arch_t id = bli_arch_query_id();
+		if( id == BLIS_ARCH_ZEN5 || id == BLIS_ARCH_ZEN4 )
 		{
-			n_threads_ideal = 8;
+			/*
+				The logic for ideal thread selection is as follows:
+				Every GEMM kernel performs matrix multiplication(single-threaded) on an
+				MRxNR block of C, MRxk block of A, and kxNR block of B.
+
+				Thus, the upper bound on the number of threads is ceil(m/MR) * ceil(n/NR).
+				This is because the framework will block the data into ceil(m/MR) panels along
+				the "m" direction and ceil(n/NR) panels along the "n" direction.
+
+				In reality, the ideal number of threads could be lesser than ceil(m/MR) * ceil(n/NR),
+				based on the 'k' value. For small 'k', each MR×NR tile requires less computation per
+				data loaded (low arithmetic intensity), so memory bandwidth is a limiting factor.
+				Too many threads may saturate memory bandwidth, causing contention and reducing
+				efficiency. For large 'k', arithmetic intensity increases. Threads spend more time
+				computing per unit of data loaded, so you may be able to utilize more threads efficiently.
+
+				Also, we have a candidate set of discrete thread values from which we choose the
+				best number of threads. That is, from the list of [1, 2, 4, 8, 16, 32, 48, 64, 96, 192].
+
+				Thus, for any value of (m,n,k), we first determine the upper bound(theoretical best),
+				based on MR and NR. We find the value in the thread list that is just greater than or
+				equal to the theoretical best.
+				Ex : theoretical_threads = 70 will be subjected to inspection inside the condition
+				     "theoretical_threads <= 96".
+				
+				Inside this condition, the optimal numer of threads is decided among all the thread
+				values <= 96 in the list, based on patterns seen in 'k', 'm' and 'n'.
+
+				P.S : This logic can further be experimented on, by considering a continuous list of
+				      threads values rather than discrete. This way, the only limiting factor will be 'k'.
+					  We could also experiment with different thread factorization methods, to achieve
+					  optimal work distribution.
+			*/
+			// Set the kernel dimensions
+			dim_t MR = 12, NR = 4;
+			// Calculate theoretical threads for constraint checking
+			dim_t theoretical_threads = ( ( m + MR - 1 ) / MR ) * ( ( n + NR - 1 ) / NR );
+
+			// Cascading constraint-based rules
+			if ( theoretical_threads <= 2 )
+			{
+				if ( k <= 96 )
+					n_threads_ideal = 1;
+				else
+					n_threads_ideal = 2;
+			}
+			else if ( theoretical_threads <= 4 )
+			{
+				if ( k <= 24 )
+					n_threads_ideal = 1;
+				else if ( k <= 48 )
+					n_threads_ideal = 2;
+				else
+					n_threads_ideal = 4;
+			}
+			else if ( theoretical_threads <= 8 )
+			{
+				if ( k <= 12 )
+					n_threads_ideal = 2;
+				else if ( k <= 24 )
+					n_threads_ideal = 4;
+				else
+				{
+					if ( ( ( n <= 12 ) && ( k <= 48 ) ) )
+						n_threads_ideal = 4;
+					else
+						n_threads_ideal = 8;
+				}
+			}
+			else if ( theoretical_threads <= 16 )
+			{
+				if ( k <= 384 )
+				{
+					if ( k <= 12 )
+					{
+						if ( ( n <= 48 ) && ( m <= 48 ) )
+							n_threads_ideal = 2;
+						else
+							n_threads_ideal = 4;
+					}
+					else
+					{
+						if ( ( k <= 192 ) || ( m <= 36 ) || ( n <= 8 ) )
+							n_threads_ideal = 8;
+						else
+							n_threads_ideal = 16;
+					}
+				}
+				else
+				{
+					if ( n <= 20 )
+						n_threads_ideal = 8;
+					else
+						n_threads_ideal = 16;
+				}
+			}
+			else if ( theoretical_threads <= 32 )
+			{
+				if ( k <= 192 )
+				{
+					if ( ( k <= 96 ) || ( m <= 300 ) )
+						n_threads_ideal = 8;
+					else
+						n_threads_ideal = 32;
+				}
+				else
+				{
+					if ( n <= 20 )
+						n_threads_ideal = 8;
+					else if ( n <= 116 )
+						n_threads_ideal = 16;
+					else
+						n_threads_ideal = 32;
+				}
+			}
+			else if ( theoretical_threads <= 48 )
+			{
+				if ( k <= 96 )
+				{
+					n_threads_ideal = 8;
+				}
+				else
+				{
+					if ( n <= 8 )
+					{
+						if ( m <= 540 )
+							n_threads_ideal = 32;
+						else
+							n_threads_ideal = 48;
+					}
+					else
+					{
+						if ( k <= 384 )
+						{
+							if ( n <= 72 )
+							{
+								if ( m <= 192 )
+									n_threads_ideal = 48;
+								else if ( k <= 192 )
+									n_threads_ideal = 32;
+								else
+									n_threads_ideal = 48;
+							}
+							else
+							{
+								if ( k <= 192 )
+									n_threads_ideal = 32;
+								else if ( n <= 164 )
+									n_threads_ideal = 32;
+								else
+									n_threads_ideal = 48;
+							}
+						}
+						else
+						{
+							n_threads_ideal = 48;
+						}
+					}
+				}
+			}
+			else if ( theoretical_threads <= 96 )
+			{
+				if ( k <= 48 )
+				{
+					n_threads_ideal = 8;
+				}
+				else if ( k <= 768 )
+				{
+					if ( k <= 96 )
+					{
+						n_threads_ideal = 32;
+					}
+					else
+					{
+						if ( n <= 164 )
+						{
+							if ( m <= 576 )
+								n_threads_ideal = 48;
+							else
+								n_threads_ideal = 96;
+						}
+						else
+						{
+							if ( k <= 192 )
+							{
+								if ( n <= 268 )
+									n_threads_ideal = 32;
+								else
+									n_threads_ideal = 48;
+							}
+							else
+							{
+								n_threads_ideal = 48;
+							}
+						}
+					}
+				}
+				else
+				{
+					n_threads_ideal = 96;
+				}
+			}
+			else if ( theoretical_threads <= 192 )
+			{
+				if ( k <= 96 )
+				{
+					if ( k <= 48 )
+						n_threads_ideal = 8;
+					else
+						n_threads_ideal = 32;
+				}
+				else if ( k <= 384 )
+				{
+					if ( k <= 192 )
+					{
+						if ( n <= 384 )
+						{
+							if ( n <= 14 )
+								n_threads_ideal = 48;
+							else
+								n_threads_ideal = 96;
+						}
+						else
+						{
+							n_threads_ideal = 48;
+						}
+					}
+					else
+					{
+						n_threads_ideal = 96;
+					}
+				}
+				else
+				{
+					if ( m <= 1146 )
+					{
+						if ( n <= 270 )
+						{
+							if ( k <= 768 )
+							{
+								n_threads_ideal = 192;
+							}
+							else
+							{
+								if ( m <= 54 )
+									n_threads_ideal = 96;
+								else
+									n_threads_ideal = 192;
+							}
+						}
+						else
+						{
+							if ( n <= 642 )
+								n_threads_ideal = 96;
+							else
+								n_threads_ideal = 192;
+						}
+					}
+					else
+					{
+						n_threads_ideal = 192;
+					}
+				}
+			}
+			// In case the theoretical threads is greater than 192, we subject the inputs
+			// to a set of heuristics derived based on patterns in the inputs.
+			else
+			{
+				if ( k <= 192 )
+				{
+					if ( k <= 24 )
+					{
+						if ( n <= 2376 )
+						{
+							n_threads_ideal = 8;
+						}
+						else
+						{
+							if ( k <= 16 )
+								n_threads_ideal = 8;
+							else
+								n_threads_ideal = 16;
+						}
+					}
+					else if ( k <= 48 )
+					{
+						if ( n <= 64 )
+						{
+							if ( m <= 2736 )
+							{
+								n_threads_ideal = 32;
+							}
+							else
+							{
+								n_threads_ideal = 96;
+							}
+						}
+						else
+						{
+							n_threads_ideal = 96;
+						}
+					}
+					else if ( k <= 96 )
+					{
+						if ( n <= 72 )
+							n_threads_ideal = 32;
+						else
+							n_threads_ideal = 96;
+					}
+					else
+					{
+						n_threads_ideal = 96;
+					}
+				}
+				else if ( k <= 384 )
+				{
+					if ( m <= 5892 )
+					{
+						if ( n <= 16 )
+							n_threads_ideal = 96;
+						else
+							n_threads_ideal = 192;
+					}
+					else
+					{
+						n_threads_ideal = 192;
+					}
+				}
+				else
+				{
+					n_threads_ideal = 192;
+				}
+			}
 		}
-		else if((m<=256 || n<=256 || k<=256) && ((m+n+k) <= 800))
+		else // Not BLIS_ARCH_ZEN5 or BLIS_ARCH_ZEN4
 		{
-			n_threads_ideal = 16;
-		}
-		if((m<=48) || (n<=48) || (k<=48))
-		{
-			if((m+n+k) <= 840)
+			if((m<=128 || n<=128 || k<=128) && ((m+n+k) <= 400))
 			{
 				n_threads_ideal = 8;
 			}
-			else if((m+n+k) <= 1240)
+			else if((m<=256 || n<=256 || k<=256) && ((m+n+k) <= 800))
 			{
 				n_threads_ideal = 16;
 			}
-			else if((m+n+k) <= 1540)
+			if((m<=48) || (n<=48) || (k<=48))
 			{
-				n_threads_ideal = 32;
+				if((m+n+k) <= 840)
+				{
+					n_threads_ideal = 8;
+				}
+				else if((m+n+k) <= 1240)
+				{
+					n_threads_ideal = 16;
+				}
+				else if((m+n+k) <= 1540)
+				{
+					n_threads_ideal = 32;
+				}
 			}
 		}
 	}
