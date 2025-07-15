@@ -87,6 +87,7 @@ BLIS_EXPORT_ADDON void aocl_reorder_ ## LP_SFX \
      ) \
 
 AOCL_GEMM_REORDER(float,f32f32f32of32);
+AOCL_GEMM_REORDER(float,f32f32f32of32_reference);
 AOCL_GEMM_REORDER(int8_t,u8s8s32os32);
 AOCL_GEMM_REORDER(bfloat16,bf16bf16f32of32);
 AOCL_GEMM_REORDER(bfloat16,bf16bf16f32of32_reference);
@@ -139,6 +140,7 @@ BLIS_EXPORT_ADDON void aocl_unreorder_ ## LP_SFX \
 
 AOCL_GEMM_UNREORDER(bfloat16, bf16bf16f32of32);
 AOCL_GEMM_UNREORDER(bfloat16, bf16bf16f32of32_reference);
+AOCL_GEMM_UNREORDER(float, f32f32f32of32_reference);
 AOCL_GEMM_UNREORDER(int8_t, s8s8s32os32_reference);
 
 #define AOCL_GEMM_MATMUL(A_type,B_type,C_type,Sum_type,LP_SFX) \
