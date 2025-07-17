@@ -7029,10 +7029,163 @@ zmm7 = zmm16[0] zmm15[0] zmm14[0] zmm13[0] zmm12[0] zmm11[0] zmm10[0] zmm9 [0]
     a10 += p_lda; \
   }
 
+#define BLIS_DTRSM_SMALL_GEMM_3mx8n(a10, b01, cs_b, p_lda, k_iter) \
+  for (k = 0; k < k_iter; k++) /*loop for number of GEMM operations*/ \
+  { \
+    ymm0 = _mm256_broadcast_sd((double const *)(a10+2)); \
+    xmm5 = _mm_loadu_pd((double const *)(a10));          \
+    ymm0 = _mm256_insertf128_pd(ymm0, xmm5, 0);          \
+    \
+    ymm1 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 0))); \
+    ymm2 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 1))); \
+    ymm3 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 2))); \
+    ymm4 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 3))); \
+    ymm5 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 4))); \
+    ymm6 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 5))); \
+    ymm7 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 6))); \
+    ymm8 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 7))); \
+    \
+    _mm_prefetch((char const*)(b01 + 4 * cs_b), _MM_HINT_T0); \
+    ymm9  = _mm256_fmadd_pd (ymm1, ymm0, ymm9); \
+    ymm10 = _mm256_fmadd_pd(ymm2, ymm0, ymm10); \
+    ymm11 = _mm256_fmadd_pd(ymm3, ymm0, ymm11); \
+    ymm12 = _mm256_fmadd_pd(ymm4, ymm0, ymm12); \
+    ymm13 = _mm256_fmadd_pd(ymm5, ymm0, ymm13); \
+    ymm14 = _mm256_fmadd_pd(ymm6, ymm0, ymm14); \
+    ymm15 = _mm256_fmadd_pd(ymm7, ymm0, ymm15); \
+    ymm16 = _mm256_fmadd_pd(ymm8, ymm0, ymm16); \
+    \
+    b01 += 1; \
+    a10 += p_lda; \
+  }
+
+#define BLIS_DTRSM_SMALL_GEMM_2mx8n(a10, b01, cs_b, p_lda, k_iter) \
+  for (k = 0; k < k_iter; k++) /*loop for number of GEMM operations*/ \
+  { \
+    ymm0 = _mm256_castpd128_pd256( _mm_loadu_pd((double const *)(a10)) ); \
+    \
+    ymm1 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 0))); \
+    ymm2 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 1))); \
+    ymm3 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 2))); \
+    ymm4 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 3))); \
+    ymm5 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 4))); \
+    ymm6 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 5))); \
+    ymm7 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 6))); \
+    ymm8 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 7))); \
+    \
+    _mm_prefetch((char const*)(b01 + 4 * cs_b), _MM_HINT_T0); \
+    ymm9  = _mm256_fmadd_pd (ymm1, ymm0, ymm9); \
+    ymm10 = _mm256_fmadd_pd(ymm2, ymm0, ymm10); \
+    ymm11 = _mm256_fmadd_pd(ymm3, ymm0, ymm11); \
+    ymm12 = _mm256_fmadd_pd(ymm4, ymm0, ymm12); \
+    ymm13 = _mm256_fmadd_pd(ymm5, ymm0, ymm13); \
+    ymm14 = _mm256_fmadd_pd(ymm6, ymm0, ymm14); \
+    ymm15 = _mm256_fmadd_pd(ymm7, ymm0, ymm15); \
+    ymm16 = _mm256_fmadd_pd(ymm8, ymm0, ymm16); \
+    \
+    b01 += 1; \
+    a10 += p_lda; \
+  }
+
+#define BLIS_DTRSM_SMALL_GEMM_1mx8n(a10, b01, cs_b, p_lda, k_iter) \
+  for (k = 0; k < k_iter; k++) /*loop for number of GEMM operations*/ \
+  { \
+    ymm0 = _mm256_broadcast_sd((double const *)(a10)); \
+    \
+    ymm1 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 0))); \
+    ymm2 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 1))); \
+    ymm3 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 2))); \
+    ymm4 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 3))); \
+    ymm5 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 4))); \
+    ymm6 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 5))); \
+    ymm7 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 6))); \
+    ymm8 = _mm256_broadcast_sd((double const*)(b01 + (cs_b * 7))); \
+    \
+    _mm_prefetch((char const*)(b01 + 4 * cs_b), _MM_HINT_T0); \
+    ymm9  = _mm256_fmadd_pd (ymm1, ymm0, ymm9); \
+    ymm10 = _mm256_fmadd_pd(ymm2, ymm0, ymm10); \
+    ymm11 = _mm256_fmadd_pd(ymm3, ymm0, ymm11); \
+    ymm12 = _mm256_fmadd_pd(ymm4, ymm0, ymm12); \
+    ymm13 = _mm256_fmadd_pd(ymm5, ymm0, ymm13); \
+    ymm14 = _mm256_fmadd_pd(ymm6, ymm0, ymm14); \
+    ymm15 = _mm256_fmadd_pd(ymm7, ymm0, ymm15); \
+    ymm16 = _mm256_fmadd_pd(ymm8, ymm0, ymm16); \
+    \
+    b01 += 1; \
+    a10 += p_lda; \
+  }
+
+
 #define BLIS_DTRSM_SMALL_GEMM_4mx4n(a10, b01, cs_b, p_lda, k_iter) \
   for (k = 0; k < k_iter; k++) /*loop for number of GEMM operations*/ \
   { \
     ymm0 = _mm256_loadu_pd((double const *)(a10)); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 0))); \
+    ymm8 = _mm256_fmadd_pd(ymm2, ymm0, ymm8); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 1))); \
+    ymm9 = _mm256_fmadd_pd(ymm2, ymm0, ymm9); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 2))); \
+    ymm10 = _mm256_fmadd_pd(ymm2, ymm0, ymm10); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 3))); \
+    ymm11 = _mm256_fmadd_pd(ymm2, ymm0, ymm11); \
+    \
+    b01 += 1;   /*move to  next row of B*/ \
+    a10 += p_lda; /*pointer math to calculate next block of A for GEMM*/ \
+  }
+
+#define BLIS_DTRSM_SMALL_GEMM_3mx4n(a10, b01, cs_b, p_lda, k_iter) \
+  for (k = 0; k < k_iter; k++) /*loop for number of GEMM operations*/ \
+  { \
+    ymm0 = _mm256_broadcast_sd((double const *)(a10+2)); \
+    xmm5 = _mm_loadu_pd((double const *)(a10));          \
+    ymm0 = _mm256_insertf128_pd(ymm0, xmm5, 0);          \
+    ymm0 = _mm256_loadu_pd((double const *)(a10)); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 0))); \
+    ymm8 = _mm256_fmadd_pd(ymm2, ymm0, ymm8); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 1))); \
+    ymm9 = _mm256_fmadd_pd(ymm2, ymm0, ymm9); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 2))); \
+    ymm10 = _mm256_fmadd_pd(ymm2, ymm0, ymm10); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 3))); \
+    ymm11 = _mm256_fmadd_pd(ymm2, ymm0, ymm11); \
+    \
+    b01 += 1;   /*move to  next row of B*/ \
+    a10 += p_lda; /*pointer math to calculate next block of A for GEMM*/ \
+  }
+
+#define BLIS_DTRSM_SMALL_GEMM_2mx4n(a10, b01, cs_b, p_lda, k_iter) \
+  for (k = 0; k < k_iter; k++) /*loop for number of GEMM operations*/ \
+  { \
+    ymm0 = _mm256_castpd128_pd256( _mm_loadu_pd((double const *)(a10)) ); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 0))); \
+    ymm8 = _mm256_fmadd_pd(ymm2, ymm0, ymm8); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 1))); \
+    ymm9 = _mm256_fmadd_pd(ymm2, ymm0, ymm9); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 2))); \
+    ymm10 = _mm256_fmadd_pd(ymm2, ymm0, ymm10); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 3))); \
+    ymm11 = _mm256_fmadd_pd(ymm2, ymm0, ymm11); \
+    \
+    b01 += 1;   /*move to  next row of B*/ \
+    a10 += p_lda; /*pointer math to calculate next block of A for GEMM*/ \
+  }
+
+#define BLIS_DTRSM_SMALL_GEMM_1mx4n(a10, b01, cs_b, p_lda, k_iter) \
+  for (k = 0; k < k_iter; k++) /*loop for number of GEMM operations*/ \
+  { \
+    ymm0 = _mm256_broadcast_sd((double const *)(a10)); \
     \
     ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 0))); \
     ymm8 = _mm256_fmadd_pd(ymm2, ymm0, ymm8); \
@@ -7068,10 +7221,113 @@ zmm7 = zmm16[0] zmm15[0] zmm14[0] zmm13[0] zmm12[0] zmm11[0] zmm10[0] zmm9 [0]
     a10 += p_lda; /*pointer math to calculate next block of A for GEMM*/ \
   }
 
+#define BLIS_DTRSM_SMALL_GEMM_3mx3n(a10, b01, cs_b, p_lda, k_iter) \
+  for (k = 0; k < k_iter; k++) /*loop for number of GEMM operations*/ \
+  { \
+    ymm0 = _mm256_broadcast_sd((double const *)(a10+2)); \
+    xmm5 = _mm_loadu_pd((double const *)(a10));          \
+    ymm0 = _mm256_insertf128_pd(ymm0, xmm5, 0);          \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 0))); \
+    ymm8 = _mm256_fmadd_pd(ymm2, ymm0, ymm8); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 1))); \
+    ymm9 = _mm256_fmadd_pd(ymm2, ymm0, ymm9); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 2))); \
+    ymm10 = _mm256_fmadd_pd(ymm2, ymm0, ymm10); \
+    \
+    b01 += 1;   /*move to  next row of B*/ \
+    a10 += p_lda; /*pointer math to calculate next block of A for GEMM*/ \
+  }
+
+#define BLIS_DTRSM_SMALL_GEMM_2mx3n(a10, b01, cs_b, p_lda, k_iter) \
+  for (k = 0; k < k_iter; k++) /*loop for number of GEMM operations*/ \
+  { \
+    ymm0 = _mm256_castpd128_pd256( _mm_loadu_pd((double const *)(a10)) ); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 0))); \
+    ymm8 = _mm256_fmadd_pd(ymm2, ymm0, ymm8); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 1))); \
+    ymm9 = _mm256_fmadd_pd(ymm2, ymm0, ymm9); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 2))); \
+    ymm10 = _mm256_fmadd_pd(ymm2, ymm0, ymm10); \
+    \
+    b01 += 1;   /*move to  next row of B*/ \
+    a10 += p_lda; /*pointer math to calculate next block of A for GEMM*/ \
+  }
+
+#define BLIS_DTRSM_SMALL_GEMM_1mx3n(a10, b01, cs_b, p_lda, k_iter) \
+  for (k = 0; k < k_iter; k++) /*loop for number of GEMM operations*/ \
+  { \
+    ymm0 = _mm256_broadcast_sd((double const *)(a10)); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 0))); \
+    ymm8 = _mm256_fmadd_pd(ymm2, ymm0, ymm8); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 1))); \
+    ymm9 = _mm256_fmadd_pd(ymm2, ymm0, ymm9); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 2))); \
+    ymm10 = _mm256_fmadd_pd(ymm2, ymm0, ymm10); \
+    \
+    b01 += 1;   /*move to  next row of B*/ \
+    a10 += p_lda; /*pointer math to calculate next block of A for GEMM*/ \
+  }
+
 #define BLIS_DTRSM_SMALL_GEMM_4mx2n(a10, b01, cs_b, p_lda, k_iter) \
   for (k = 0; k < k_iter; k++) /*loop for number of GEMM operations*/ \
   { \
     ymm0 = _mm256_loadu_pd((double const *)(a10)); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 0))); \
+    ymm8 = _mm256_fmadd_pd(ymm2, ymm0, ymm8); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 1))); \
+    ymm9 = _mm256_fmadd_pd(ymm2, ymm0, ymm9); \
+    \
+    b01 += 1;   /*move to  next row of B*/ \
+    a10 += p_lda; /*pointer math to calculate next block of A for GEMM*/ \
+  }
+
+#define BLIS_DTRSM_SMALL_GEMM_3mx2n(a10, b01, cs_b, p_lda, k_iter) \
+  for (k = 0; k < k_iter; k++) /*loop for number of GEMM operations*/ \
+  { \
+    ymm0 = _mm256_broadcast_sd((double const *)(a10+2)); \
+    xmm5 = _mm_loadu_pd((double const *)(a10));          \
+    ymm0 = _mm256_insertf128_pd(ymm0, xmm5, 0);          \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 0))); \
+    ymm8 = _mm256_fmadd_pd(ymm2, ymm0, ymm8); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 1))); \
+    ymm9 = _mm256_fmadd_pd(ymm2, ymm0, ymm9); \
+    \
+    b01 += 1;   /*move to  next row of B*/ \
+    a10 += p_lda; /*pointer math to calculate next block of A for GEMM*/ \
+  }
+
+#define BLIS_DTRSM_SMALL_GEMM_2mx2n(a10, b01, cs_b, p_lda, k_iter) \
+  for (k = 0; k < k_iter; k++) /*loop for number of GEMM operations*/ \
+  { \
+    ymm0 = _mm256_castpd128_pd256( _mm_loadu_pd((double const *)(a10)) ); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 0))); \
+    ymm8 = _mm256_fmadd_pd(ymm2, ymm0, ymm8); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 1))); \
+    ymm9 = _mm256_fmadd_pd(ymm2, ymm0, ymm9); \
+    \
+    b01 += 1;   /*move to  next row of B*/ \
+    a10 += p_lda; /*pointer math to calculate next block of A for GEMM*/ \
+  }
+
+#define BLIS_DTRSM_SMALL_GEMM_1mx2n(a10, b01, cs_b, p_lda, k_iter) \
+  for (k = 0; k < k_iter; k++) /*loop for number of GEMM operations*/ \
+  { \
+    ymm0 = _mm256_broadcast_sd((double const *)(a10)); \
     \
     ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 0))); \
     ymm8 = _mm256_fmadd_pd(ymm2, ymm0, ymm8); \
@@ -7094,6 +7350,45 @@ zmm7 = zmm16[0] zmm15[0] zmm14[0] zmm13[0] zmm12[0] zmm11[0] zmm10[0] zmm9 [0]
     b01 += 1;   /*move to  next row of B*/ \
     a10 += p_lda; /*pointer math to calculate next block of A for GEMM*/ \
   }
+
+#define BLIS_DTRSM_SMALL_GEMM_3mx1n(a10, b01, cs_b, p_lda, k_iter) \
+  for (k = 0; k < k_iter; k++) /*loop for number of GEMM operations*/ \
+  { \
+    ymm0 = _mm256_broadcast_sd((double const *)(a10+2)); \
+    xmm5 = _mm_loadu_pd((double const *)(a10));          \
+    ymm0 = _mm256_insertf128_pd(ymm0, xmm5, 0);          \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 0))); \
+    ymm8 = _mm256_fmadd_pd(ymm2, ymm0, ymm8); \
+    \
+    b01 += 1;   /*move to  next row of B*/ \
+    a10 += p_lda; /*pointer math to calculate next block of A for GEMM*/ \
+  }
+
+#define BLIS_DTRSM_SMALL_GEMM_2mx1n(a10, b01, cs_b, p_lda, k_iter) \
+  for (k = 0; k < k_iter; k++) /*loop for number of GEMM operations*/ \
+  { \
+    ymm0 = _mm256_castpd128_pd256( _mm_loadu_pd((double const *)(a10)) ); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 0))); \
+    ymm8 = _mm256_fmadd_pd(ymm2, ymm0, ymm8); \
+    \
+    b01 += 1;   /*move to  next row of B*/ \
+    a10 += p_lda; /*pointer math to calculate next block of A for GEMM*/ \
+  }
+
+#define BLIS_DTRSM_SMALL_GEMM_1mx1n(a10, b01, cs_b, p_lda, k_iter) \
+  for (k = 0; k < k_iter; k++) /*loop for number of GEMM operations*/ \
+  { \
+    ymm0 = _mm256_broadcast_sd((double const *)(a10)); \
+    \
+    ymm2 = _mm256_broadcast_sd((double const *)(b01 + (cs_b * 0))); \
+    ymm8 = _mm256_fmadd_pd(ymm2, ymm0, ymm8); \
+    \
+    b01 += 1;   /*move to  next row of B*/ \
+    a10 += p_lda; /*pointer math to calculate next block of A for GEMM*/ \
+  }
+
 
 // endregion - GEMM DTRSM for left variants
 
@@ -10459,7 +10754,7 @@ err_t bli_dtrsm_small_AltXB_AuXB_AVX512
         BLIS_SET_YMM_REG_ZEROS_FOR_LEFT
 
         /// GEMM code begins///
-        BLIS_DTRSM_SMALL_GEMM_4mx8n(a10, b01, cs_b, p_lda, k_iter)
+        BLIS_DTRSM_SMALL_GEMM_3mx8n(a10, b01, cs_b, p_lda, k_iter)
         ymm0 =_mm256_broadcast_sd((double const *)(&AlphaVal));
 
         xmm5 = _mm_loadu_pd((double const *)(b11 + cs_b * 0));
@@ -10542,7 +10837,7 @@ err_t bli_dtrsm_small_AltXB_AuXB_AVX512
 
 
         /// GEMM code begins///
-        BLIS_DTRSM_SMALL_GEMM_4mx4n(a10, b01, cs_b, p_lda, k_iter)
+        BLIS_DTRSM_SMALL_GEMM_3mx4n(a10, b01, cs_b, p_lda, k_iter)
 
         ymm16 = _mm256_broadcast_sd((double const *)(&AlphaVal)); // register to hold alpha
 
@@ -10602,7 +10897,7 @@ err_t bli_dtrsm_small_AltXB_AuXB_AVX512
         if (3 == n_remainder)
         {
           /// GEMM code begins///
-          BLIS_DTRSM_SMALL_GEMM_4mx3n(a10, b01, cs_b, p_lda, k_iter)
+          BLIS_DTRSM_SMALL_GEMM_3mx3n(a10, b01, cs_b, p_lda, k_iter)
 
           BLIS_PRE_DTRSM_SMALL_3M_3N(AlphaVal, b11, cs_b)
 
@@ -10613,7 +10908,7 @@ err_t bli_dtrsm_small_AltXB_AuXB_AVX512
         else if (2 == n_remainder)
         {
           /// GEMM code begins///
-          BLIS_DTRSM_SMALL_GEMM_4mx2n(a10, b01, cs_b, p_lda, k_iter)
+          BLIS_DTRSM_SMALL_GEMM_3mx2n(a10, b01, cs_b, p_lda, k_iter)
 
           BLIS_PRE_DTRSM_SMALL_3M_2N(AlphaVal, b11, cs_b)
 
@@ -10624,7 +10919,7 @@ err_t bli_dtrsm_small_AltXB_AuXB_AVX512
         else if (1 == n_remainder)
         {
           /// GEMM code begins///
-          BLIS_DTRSM_SMALL_GEMM_4mx1n(a10, b01, cs_b, p_lda, k_iter)
+          BLIS_DTRSM_SMALL_GEMM_3mx1n(a10, b01, cs_b, p_lda, k_iter)
 
           BLIS_PRE_DTRSM_SMALL_3M_1N(AlphaVal, b11, cs_b)
 
@@ -10689,7 +10984,7 @@ err_t bli_dtrsm_small_AltXB_AuXB_AVX512
         BLIS_SET_YMM_REG_ZEROS_FOR_LEFT
 
         /// GEMM code begins///
-        BLIS_DTRSM_SMALL_GEMM_4mx8n(a10, b01, cs_b, p_lda, k_iter)
+        BLIS_DTRSM_SMALL_GEMM_2mx8n(a10, b01, cs_b, p_lda, k_iter)
 
         ymm0 = _mm256_broadcast_sd((double const *)(&AlphaVal));
         xmm5 = _mm_loadu_pd((double const *)(b11 + cs_b * 0));
@@ -10754,7 +11049,7 @@ err_t bli_dtrsm_small_AltXB_AuXB_AVX512
 
 
         /// GEMM code begins///
-        BLIS_DTRSM_SMALL_GEMM_4mx4n(a10, b01, cs_b, p_lda, k_iter)
+        BLIS_DTRSM_SMALL_GEMM_2mx4n(a10, b01, cs_b, p_lda, k_iter)
 
         ymm16 = _mm256_broadcast_sd((double const *)(&AlphaVal)); // register to hold alpha
 
@@ -10804,7 +11099,7 @@ err_t bli_dtrsm_small_AltXB_AuXB_AVX512
         if (3 == n_remainder)
         {
           /// GEMM code begins///
-          BLIS_DTRSM_SMALL_GEMM_4mx3n(a10, b01, cs_b, p_lda, k_iter)
+          BLIS_DTRSM_SMALL_GEMM_2mx3n(a10, b01, cs_b, p_lda, k_iter)
 
           BLIS_PRE_DTRSM_SMALL_2M_3N(AlphaVal, b11, cs_b)
 
@@ -10815,7 +11110,7 @@ err_t bli_dtrsm_small_AltXB_AuXB_AVX512
         else if (2 == n_remainder)
         {
           /// GEMM code begins///
-          BLIS_DTRSM_SMALL_GEMM_4mx2n(a10, b01, cs_b, p_lda, k_iter)
+          BLIS_DTRSM_SMALL_GEMM_2mx2n(a10, b01, cs_b, p_lda, k_iter)
 
           BLIS_PRE_DTRSM_SMALL_2M_2N(AlphaVal, b11, cs_b)
 
@@ -10827,7 +11122,7 @@ err_t bli_dtrsm_small_AltXB_AuXB_AVX512
         else if (1 == n_remainder)
         {
           /// GEMM code begins///
-          BLIS_DTRSM_SMALL_GEMM_4mx1n(a10, b01, cs_b, p_lda, k_iter)
+          BLIS_DTRSM_SMALL_GEMM_2mx1n(a10, b01, cs_b, p_lda, k_iter)
 
           BLIS_PRE_DTRSM_SMALL_2M_1N(AlphaVal, b11, cs_b) 
           if (transa)
@@ -10890,7 +11185,7 @@ err_t bli_dtrsm_small_AltXB_AuXB_AVX512
 
         /*Fill zeros into ymm registers used in gemm accumulations */
         BLIS_SET_YMM_REG_ZEROS_FOR_LEFT
-        BLIS_DTRSM_SMALL_GEMM_4mx8n(a10, b01, cs_b, p_lda, k_iter)
+        BLIS_DTRSM_SMALL_GEMM_1mx8n(a10, b01, cs_b, p_lda, k_iter)
 
         /// GEMM code ends///
         ymm0 = _mm256_broadcast_sd((double const *)(&AlphaVal));
@@ -10939,7 +11234,7 @@ err_t bli_dtrsm_small_AltXB_AuXB_AVX512
         BLIS_SET_YMM_REG_ZEROS_FOR_LEFT
 
 
-        BLIS_DTRSM_SMALL_GEMM_4mx4n(a10, b01, cs_b, p_lda, k_iter)
+        BLIS_DTRSM_SMALL_GEMM_1mx4n(a10, b01, cs_b, p_lda, k_iter)
 
         ymm16 = _mm256_broadcast_sd((double const *)(&AlphaVal)); // register to hold alpha
 
@@ -10981,7 +11276,7 @@ err_t bli_dtrsm_small_AltXB_AuXB_AVX512
         if (3 == n_remainder)
         {
           /// GEMM code begins///
-          BLIS_DTRSM_SMALL_GEMM_4mx3n(a10, b01, cs_b, p_lda, k_iter)
+          BLIS_DTRSM_SMALL_GEMM_1mx3n(a10, b01, cs_b, p_lda, k_iter)
 
           BLIS_PRE_DTRSM_SMALL_1M_3N(AlphaVal, b11, cs_b)
 
@@ -10993,7 +11288,7 @@ err_t bli_dtrsm_small_AltXB_AuXB_AVX512
         else if (2 == n_remainder)
         {
           /// GEMM code begins///
-          BLIS_DTRSM_SMALL_GEMM_4mx2n(a10, b01, cs_b, p_lda, k_iter)
+          BLIS_DTRSM_SMALL_GEMM_1mx2n(a10, b01, cs_b, p_lda, k_iter)
 
           BLIS_PRE_DTRSM_SMALL_1M_2N(AlphaVal, b11, cs_b)
 
@@ -11004,7 +11299,7 @@ err_t bli_dtrsm_small_AltXB_AuXB_AVX512
         else if (1 == n_remainder)
         {
           /// GEMM code begins///
-          BLIS_DTRSM_SMALL_GEMM_4mx1n(a10, b01, cs_b, p_lda, k_iter)
+          BLIS_DTRSM_SMALL_GEMM_1mx1n(a10, b01, cs_b, p_lda, k_iter)
 
           BLIS_PRE_DTRSM_SMALL_1M_1N(AlphaVal, b11, cs_b)
 
