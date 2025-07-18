@@ -491,7 +491,7 @@ POST_OPS_DOWNSCALE_1x16F:
             {
               if( is_bf16 == TRUE )
               {
-                BF16_F32_ZP_VECTOR_LOAD_AVX2_GEMV( ymm0, 0 )
+                BF16_F32_ZP_VECTOR_AVX2_GEMV_MASK(0, zero_point0,mr0);
               }
               else
               {
@@ -724,7 +724,7 @@ POST_OPS_1x16F_DISABLE:
 
               if( rs_c == 1 )
               {
-                  _mm256_maskstore_ps((float*)temp, store_mask, ymm8);
+                 _mm256_maskstore_ps((float*)temp, store_mask, ymm8);
 
                   STORE_F32_BF16_N_ONE_YMM(temp, mr0)
               }
@@ -739,7 +739,7 @@ POST_OPS_1x16F_DISABLE:
           {
             if( rs_c == 1 )
             {
-                _mm256_maskstore_ps ( c_use, store_mask, ymm8 );
+               _mm256_maskstore_ps( c_use, store_mask, ymm8 );
             }
             else
             {

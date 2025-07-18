@@ -246,7 +246,7 @@ GEN_LPGEMM_DECORATOR_FN(int8_t,int8_t,int32_t,s8s8s32o32)
 #define GEN_BATCH_LPGEMM_DECORATOR_FN(A_type,B_type,C_type,LPGEMM_SFX) \
 void batch_lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
      ( \
-       const dim_t            bs, \
+       const dim_t            group_size, \
        const dim_t*           m, \
        const dim_t*           n, \
        const dim_t*           k, \
@@ -277,7 +277,7 @@ GEN_BATCH_LPGEMM_DECORATOR_FN(int8_t,int8_t,int32_t,s8s8s32o32)
 #define GEN_BATCH_LPGEMM_DECORATOR_FN_MP(A_type,B_type,C_type,LPGEMM_SFX) \
 void batch_lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
      ( \
-       const dim_t            bs, \
+       const dim_t            group_size, \
        const dim_t*           m, \
        const dim_t*           n, \
        const dim_t*           k, \

@@ -273,8 +273,6 @@ void lpgemv_m_one_f32f32f32of32_avx2_LT16
         {
           BF16_F32_BIAS_AVX2_GEMV_MASK(0, ymm0, n1 )
           BF16_F32_BIAS_AVX2_GEMV_MASK(1, ymm1, n2 )
-          // BF16_F32_BIAS_LOAD_AVX2( ymm0, 0 );
-          // BF16_F32_BIAS_LOAD_AVX2( ymm1, 1 );
         }
         else
         {
@@ -667,15 +665,15 @@ POST_OPS_SIGMOID_1x16F:
 POST_OPS_1x16F_DISABLE:
     ;
 
-    uint32_t tlsb, rounded, temp[8] = {0};
+    uint32_t tlsb, rounded;
     int i;
     bfloat16* dest;
 
     if ( ( post_ops_attr.buf_downscale != NULL ) &&
          ( post_ops_attr.is_last_k == TRUE ) )
     {
-      STORE_F32_BF16_YMM(ymm8, 0, 0, 8);
-      STORE_F32_BF16_YMM(ymm12, 0, 1, 8);
+        MASK_STORE_F32_BF16_YMM(ymm8, 0, 0, k1);
+        MASK_STORE_F32_BF16_YMM(ymm12, 0, 1, k2);
     }
     else
     {

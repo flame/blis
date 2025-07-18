@@ -231,9 +231,9 @@ AOCL_BGEMM_MATMUL(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32)
 	#else
 		batch_lpgemm_u8s8s32o32_thread_decorator
 		(
-			g_sz, m, n, k,
-			a, rs_a, cs_a, mtag_a,
-			b, rs_b, cs_b, mtag_b,
+			g_sz, m_local, n_local, k_local,
+			(const uint8_t**)a_local, rs_a, cs_a, mtag_a,
+			(const int8_t**)b_local, rs_b, cs_b, mtag_b,
 			&c[mat_idx], rs_c, cs_c,
 			alpha[gc_i], beta[gc_i],
 			&rntm_g, lcntx_g,
