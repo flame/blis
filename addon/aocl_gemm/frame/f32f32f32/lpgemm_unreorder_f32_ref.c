@@ -38,8 +38,95 @@
 
 #ifdef BLIS_ADDON_LPGEMM
 
+void unpackb_f32f32f32of32_row_major_ref
+(
+	float*       b,
+	float*       unpack_b,
+	const dim_t  NC,
+	const dim_t  KC,
+	const dim_t  NR,
+	dim_t        ldb
+)
+{
+	dim_t n_full_pieces = NC / NR;
+	dim_t n_full_pieces_loop_limit = n_full_pieces * NR;
+	dim_t n_partial_pieces = NC % NR;
 
-//TODO: Kept it as place holder for now, yet to test this completely!
+	for (dim_t jc = 0; jc < n_full_pieces_loop_limit; jc += NR)
+	{
+		for (dim_t kr = 0; kr < KC; kr++)
+		{
+			float* outp = (unpack_b + (ldb * kr) + jc);
+			float* inp = (b + (jc * KC) + (kr * NR));
+
+			for (dim_t i = 0; i < NR; i++) {
+				*outp++ = *inp++;
+			}
+		}
+	}
+	if(n_partial_pieces > 0)
+	{
+		dim_t nr0 = n_partial_pieces;
+		float* b_rem = (b + (n_full_pieces_loop_limit * KC));
+		float* unpack_b_rem = (unpack_b + n_full_pieces_loop_limit);
+
+		for (dim_t kr = 0; kr < KC; kr++)
+		{
+			float* inp = (b_rem + kr * NR);
+			float* outp = (unpack_b_rem + (ldb * kr));
+
+			for (dim_t i = 0; i < nr0; i++) {
+				*outp++ = *inp++;
+			}
+		}
+	}
+}
+
+void unpackb_f32f32f32of32_col_major_ref
+(
+	float*       b,
+	float*       unpack_b,
+	const dim_t  NC,
+	const dim_t  KC,
+	const dim_t  NR,
+	dim_t        ldb
+)
+{
+	dim_t n_full_pieces = NC / NR;
+	dim_t n_full_pieces_loop_limit = n_full_pieces * NR;
+	dim_t n_partial_pieces = NC % NR;
+
+	for ( dim_t jc = 0; jc < n_full_pieces_loop_limit; jc += NR )
+	{
+		for (dim_t kr = 0; kr < KC; kr++)
+		{
+			float* outp = (unpack_b + jc * KC + kr);
+			float* inp = (b + (jc * ldb) + (kr * NR));
+
+			for (dim_t i = 0; i < NR; i++)
+			{
+				*(outp + i * ldb ) = *inp++;
+			}
+		}
+	}
+	if(n_partial_pieces > 0)
+	{
+		float* b_rem = (b + (n_full_pieces_loop_limit * KC));
+		float* unpack_b_rem = (unpack_b + n_full_pieces_loop_limit * ldb);
+
+		for (dim_t kr = 0; kr < KC; kr++)
+		{
+			float* inp = (b_rem + kr * NR);
+			float* outp = (unpack_b_rem + kr);
+
+			for (dim_t i = 0; i < n_partial_pieces; i++)
+			{
+				*(outp + i * ldb ) = *inp++;
+			}
+		}
+	}
+}
+
 void unpackb_f32f32f32of32_reference
 	(
 	  float*       b,
@@ -53,33 +140,11 @@ void unpackb_f32f32f32of32_reference
 {
 	if( cs_b == 1 )
 	{
-		for ( dim_t jc = 0; jc < NC; jc += NR )
-		{
-			dim_t nr0 = ((NC - jc) > NR ? NR : (NC - jc));
-			float* outp = ( unpack_b + jc );
-			float* inp = (b + jc * NR );
-			for ( dim_t kr = 0; kr < KC; kr++ )
-			{
-				outp += nr0; inp  += NR ;
-
-				for(dim_t i = 0; i < nr0; i++)	*outp++ = *inp++;
-			}
-		}
+		unpackb_f32f32f32of32_row_major_ref(b, unpack_b, NC, KC, NR, rs_b);
 	}
 	else
 	{
-		
-		for ( dim_t jc = 0; jc < NC; jc += NR )
-		{
-			dim_t nr0 = ((NC - jc) >  NR ? NR : (NC - jc));
-			for ( dim_t kr = 0; kr < KC; kr++ )
-			{
-				float* outp0 = ( unpack_b + ( cs_b * kr) + jc );
-				float* inp0 = ( b + ( jc * KC ) + ( ( kr + NR )));
-
-				for(dim_t i = 0; i < nr0; i++)	*outp0++ = *inp0++;
-			}
-		}
+		unpackb_f32f32f32of32_col_major_ref(b, unpack_b, NC, KC, NR, cs_b);
 	}
 }
 

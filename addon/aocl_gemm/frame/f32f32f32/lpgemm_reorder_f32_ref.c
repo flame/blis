@@ -39,15 +39,15 @@
 #ifdef BLIS_ADDON_LPGEMM
 
 /*
-	Below are the reference packb functions which are 
-    varied based on block size NR (64, 48, 32, 16, lt) and 
+	Below are the reference packb functions which are
+    varied based on block size NR (64, 48, 32, 16, lt) and
     order (row / column (transpose)).
 */
 
 static void   packb_f32f32f32of32_row_major_ref
 (
 	float*       	pack_b,
-	const float*       	b,
+	float*       	b,
 	const dim_t     ldb,
 	const dim_t     NC,
 	const dim_t     KC,
@@ -69,11 +69,11 @@ static void   packb_f32f32f32of32_row_major_ref
 		}
 	}
 
-	if(n_partial_pieces > 0) 
+	if(n_partial_pieces > 0)
 	{
 		float* pack_b_rem  = ( pack_b + ( n_full_pieces_loop_limit * KC ) );
 		float* b_rem = ( b + n_full_pieces_loop_limit );
-		for ( dim_t kr = 0; kr < KC; kr ++ ) 
+		for ( dim_t kr = 0; kr < KC; kr ++ )
 		{
 			float* inp0 = ( b_rem + ( ldb * kr ) );
 			float* outp0 = ( pack_b_rem + ( kr * NR ) );
@@ -88,7 +88,7 @@ static void   packb_f32f32f32of32_row_major_ref
 static void  packb_nr_f32f32f32of32_col_major_ref
 (
     float*       	pack_b_buffer,
-    const float*       	b,
+    float*       	b,
 	const dim_t     NR,
     const dim_t     ldb,
     const dim_t     KC,
@@ -117,7 +117,7 @@ static void  packb_nr_f32f32f32of32_col_major_ref
 static void  packb_f32f32f32of32_col_major_ref
 (
     float*      	pack_b_buffer,
-    const float*    b,
+    float*    b,
     const dim_t     ldb,
     const dim_t     NC,
     const dim_t     KC,
@@ -133,7 +133,7 @@ static void  packb_f32f32f32of32_col_major_ref
 	for ( dim_t jc = 0; jc < n_full_pieces_loop_limit; jc += NR )
 	{
 		packb_nr_f32f32f32of32_col_major_ref
-		( 
+		(
 			pack_b_buffer + (jc * KC),
 			b + (jc * ldb), NR, ldb, KC, NR
 		);
@@ -155,7 +155,7 @@ static void  packb_f32f32f32of32_col_major_ref
 void  packb_f32f32f32of32_reference
 (
     float*       	pack_b,
-    const float*       	b,
+    float*       	b,
     const dim_t  	rs_b,
     const dim_t  	cs_b,
     const dim_t  	NC,

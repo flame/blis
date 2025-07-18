@@ -363,7 +363,7 @@ AOCL_GEMM_REORDER(float,f32f32f32of32_reference)
 
 	//When n == 1, B marix becomes a vector.
 	//Reordering is avoided so that LPGEMV can process it efficiently.
-	if( ( n == 1 ) ) //&& ( lpgemm_get_enabled_arch() != BLIS_ARCH_ZEN3 ) )
+	if( ( n == 1 ) )
 	{
 		if(rs_b == 1)
 		{
@@ -531,7 +531,7 @@ void unreorderb_nr64_f32f32f32of32_reference
 				  ( jc_cur_loop * k ) + ( n_sub_updated * pc ) +
 				  ( jc_cur_loop_rem * kc0 ),
 				  ( ( ( float* )b->storage.aligned_buffer ) +
-				  ( rs_b * pc ) + (jc * cs_b)),
+				  ( rs_b * pc ) + (jc * cs_b) ),
 				  nc0, kc0, NR, rs_b, cs_b
 				);
 			}
