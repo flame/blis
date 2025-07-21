@@ -1092,6 +1092,7 @@ PARENT_PATH        := $(CONFIG_FRAG_PATH)
 
 # Recursively include the makefile fragments in each of the sub-configuration
 # directories.
+$(info "config fragment paths: $(addsuffix /$(FRAGMENT_MK), $(CONFIG_PATHS))")
 -include $(addsuffix /$(FRAGMENT_MK), $(CONFIG_PATHS))
 
 # -- kernels --
@@ -1108,6 +1109,7 @@ PARENT_PATH        := $(KERNELS_FRAG_PATH)
 
 # Recursively include the makefile fragments in each of the kernels sub-
 # directories.
+$(info "kernel fragment paths: $(addsuffix /$(FRAGMENT_MK), $(KERNEL_PATHS))")
 -include $(addsuffix /$(FRAGMENT_MK), $(KERNEL_PATHS))
 
 # -- ref_kernels --
@@ -1122,6 +1124,8 @@ PARENT_PATH        := $(OBJ_DIR)/$(CONFIG_NAME)
 
 # Recursively include all the makefile fragments in the directories for the
 # reference kernels and portable framework.
+$(info "refkern fragment paths: $(addsuffix /$(FRAGMENT_MK), $(REFKERN_FRAG_PATH))")
+$(info "frame fragment paths: $(addsuffix /$(FRAGMENT_MK), $(FRAME_FRAG_PATH))")
 -include $(addsuffix /$(FRAGMENT_MK), $(REFKERN_FRAG_PATH))
 -include $(addsuffix /$(FRAGMENT_MK), $(FRAME_FRAG_PATH))
 
@@ -1165,6 +1169,7 @@ PARENT_PATH        := $(SANDBOX_FRAG_PATH)
 # Create a list of the makefile fragments using the variable into which each
 # of the above include statements accumulated their directory paths.
 MAKEFILE_FRAGMENTS := $(addsuffix /$(FRAGMENT_MK), $(FRAGMENT_DIR_PATHS))
+$(info "fragment paths found: $(addsuffix /$(FRAGMENT_MK), $(FRAGMENT_DIR_PATHS)))
 
 # Detect whether we actually got any makefile fragments. If we didn't, then it
 # is likely that the user has not yet generated them (via configure).
