@@ -190,6 +190,7 @@ gen-obj-paths-from-src = $(foreach ch, $(1), \
 # Generate object file paths for source code found in the sub-configuration
 # directories.
 MK_CONFIG_OBJS      := $(call gen-obj-paths-from-src,$(CONFIG_SRC_SUFS),$(MK_CONFIG_SRC),$(CONFIG_PATH),$(BASE_OBJ_CONFIG_PATH))
+$(info "config objects: $(MK_CONFIG_OBJS)")
 
 # Generate object file paths for architecture-specific kernel source code.
 # We target only .c, .s, and .S files. Note that MK_KERNELS_SRC is already
@@ -261,6 +262,7 @@ MK_BLIS_OBJS        := $(MK_CONFIG_OBJS) \
                        $(MK_FRAME_OBJS) \
                        $(MK_ADDON_OBJS) \
                        $(MK_SANDBOX_OBJS)
+$(info "object files: $(MK_BLIS_OBJS)")
 
 # Optionally filter out the BLAS and CBLAS compatibility layer object files.
 # This is not actually necessary, since each affected file is guarded by C
@@ -592,6 +594,7 @@ endif
 # first argument: a configuration name from config_list, used to look up the
 # CFLAGS to use during compilation.
 define make-config-rule
+$(info "defining config make rule: $(BASE_OBJ_CONFIG_PATH)/$(1)/%.o: $(CONFIG_PATH)/$(1)/%.c")
 $(BASE_OBJ_CONFIG_PATH)/$(1)/%.o: $(CONFIG_PATH)/$(1)/%.c $(HEADERS_TO_BUILD) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-config-cflags-for,$(1)) -c $$< -o $$@
@@ -732,6 +735,7 @@ get-config-for-kset = $(lastword $(subst :, ,$(filter $(1):%,$(KCONFIG_MAP))))
 # Instantiate the build rule for files in the configuration directory for
 # each of the sub-configurations in CONFIG_LIST with the CFLAGS designated
 # for that sub-configuration.
+$(info "generating config make rules for: $(CONFIG_LIST)")
 $(foreach conf, $(CONFIG_LIST), $(eval $(call make-config-rule,$(conf))))
 
 # Instantiate the build rule for framework files. Use the CFLAGS for the
