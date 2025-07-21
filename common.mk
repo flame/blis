@@ -1170,6 +1170,10 @@ PARENT_PATH        := $(SANDBOX_FRAG_PATH)
 # of the above include statements accumulated their directory paths.
 MAKEFILE_FRAGMENTS := $(addsuffix /$(FRAGMENT_MK), $(FRAGMENT_DIR_PATHS))
 $(info "fragment paths found: $(addsuffix /$(FRAGMENT_MK), $(FRAGMENT_DIR_PATHS)))
+$(info "config source files: $(MK_CONFIG_SRC)")
+$(info "kernels source files: $(MK_KERNELS_SRC)")
+$(info "refkern source files: $(MK_REFKERN_SRC)")
+$(info "frame source files: $(MK_FRAME_SRC)")
 
 # Detect whether we actually got any makefile fragments. If we didn't, then it
 # is likely that the user has not yet generated them (via configure).
