@@ -262,7 +262,11 @@
 
 
 #ifdef BLIS_OS_WINDOWS
-  #define BLIS_TLS_TYPE __declspec(thread)
+  #ifdef BLIS_IS_BUILDING_LIBRARY
+    #define BLIS_TLS_TYPE __declspec(thread)
+  #else
+    #define BLIS_TLS_TYPE
+  #endif
 #else
   #define BLIS_TLS_TYPE __thread
 #endif
