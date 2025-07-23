@@ -92,7 +92,12 @@ ifeq ($(CC_VENDOR),aocc)
     CVECFLAGS_VER  := -march=znver2
   endif
 else
-  $(error gcc, clang, or aocc is required for this configuration.)
+ifeq ($(CC_VENDOR),NVIDIA)
+  CKVECFLAGS       := -march=znver2 -fast
+  CRVECFLAGS       := $(CKVECFLAGS)
+else
+  $(error gcc, clang, aocc, or nvc is required for this configuration.)
+endif
 endif
 endif
 endif

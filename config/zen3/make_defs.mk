@@ -109,7 +109,7 @@ ifeq ($(CC_VENDOR),aocc)
   endif
   CKVECFLAGS       += -mfpmath=sse
   CRVECFLAGS       += -funsafe-math-optimizations -ffp-contract=fast
-ifeq ($(CC_VENDOR),nvc)
+ifeq ($(CC_VENDOR),NVIDIA)
   CVECFLAGS_VER    := -march=znver3
   CRVECFLAGS       += -fast
 else
