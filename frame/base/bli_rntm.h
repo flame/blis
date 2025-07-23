@@ -351,7 +351,7 @@ void bli_rntm_sanitize
        rntm_t* rntm
      );
 
-void bli_rntm_factorize
+BLIS_EXPORT_BLIS void bli_rntm_factorize
      (
        dim_t   m,
        dim_t   n,
