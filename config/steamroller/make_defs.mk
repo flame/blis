@@ -68,7 +68,11 @@ else
 ifeq ($(CC_VENDOR),clang)
 CKVECFLAGS     := -mfpmath=sse -mavx -mfma -march=bdver3 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
 else
-$(error gcc or clang are required for this configuration.)
+ifeq ($(CC_VENDOR),NVIDIA)
+CKVECFLAGS     := -march=piledriver -fast -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+else
+$(error gcc, clang, or nvc is required for this configuration.)
+endif
 endif
 endif
 

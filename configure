@@ -1556,7 +1556,32 @@ get_compiler_version()
 	# isolate the version number.
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
+<<<<<<< HEAD
 	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM|oneAPI|crosstool-NG' | { read first rest ; echo $first ; })
+=======
+	cc_vendor=$(echo "${vendor_string}" |
+	            grep -oE 'icc|gcc|clang|NVIDIA|emcc|pnacl|IBM|oneAPI|crosstool-NG|GCC' |
+	            { read -r first rest ; echo "${first}"; })
+
+	# AOCC version strings contain both "clang" and "AOCC" substrings, and
+	# so we have perform a follow-up check to make sure cc_vendor gets set
+	# correctly.
+	if [[ ${vendor_string} = *AOCC* ]]; then
+		cc_vendor="aocc"
+	fi
+
+	# Detect armclang, which doesn't have a nice, unambiguous, one-word tag
+	if [[ ${vendor_string} = *'Arm C/C++/Fortran Compiler'* ]]; then
+		cc_vendor="armclang"
+	fi
+
+	# Begin parsing cc_vendor for the version string.
+
+	if [ "${cc_vendor}" = "GCC" ]; then
+		# Conda gcc sometimes has GCC (all caps) in the version string
+		cc_vendor="gcc"
+	fi
+>>>>>>> 54a014121 (Improve NVHPC support and add CI test. (#880))
 	if [ "${cc_vendor}" = "crosstool-NG" ]; then
 	     # Treat compilers built by crosstool-NG (for eg: conda) as gcc.
 	     cc_vendor="gcc"
@@ -1570,7 +1595,20 @@ get_compiler_version()
 	elif [ "${cc_vendor}" = "oneAPI" ]; then
 		# Treat Intel oneAPI's clang as clang, not icc.
 		cc_vendor="clang"
+<<<<<<< HEAD
 		cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
+=======
+		cc_version=$(echo "${vendor_string}" \
+		             | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.?[0-9]*' \
+		             | { read -r first rest ; echo "${first}"; })
+
+	elif [ "${cc_vendor}" = "NVIDIA" ]; then
+
+		cc_version=$(echo "${vendor_string}" \
+		             | grep -oE '[0-9]+\.[0-9]+-[0-9]+' \
+		             | { read -r first rest ; echo "${first}" | tr '-' '.'; })
+
+>>>>>>> 54a014121 (Improve NVHPC support and add CI test. (#880))
 	else
 		cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
 	fi
@@ -1651,8 +1689,18 @@ check_compiler()
 
 	# Fixme: check on a64fx, neoverse, and others
 
+<<<<<<< HEAD
 	# gcc
 	if [ "x${cc_vendor}" = "xgcc" ]; then
+=======
+	# nvc
+    if [[ ${cc_vendor} = NVIDIA ]]; then
+        blacklistcc_add "knl"
+    fi
+    
+    # gcc
+    if [[ ${cc_vendor} = gcc ]]; then
+>>>>>>> 54a014121 (Improve NVHPC support and add CI test. (#880))
 
 		if [ ${cc_major} -lt 4 ]; then
 			echoerr_unsupportedcc

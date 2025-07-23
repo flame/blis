@@ -744,6 +744,10 @@ CWARNFLAGS :=
 # Disable unused function warnings and stop compiling on first error for
 # all compilers that accept such options: gcc, clang, and icc.
 ifneq ($(CC_VENDOR),ibm)
+<<<<<<< HEAD
+=======
+ifneq ($(CC_VENDOR),NVIDIA)
+>>>>>>> 54a014121 (Improve NVHPC support and add CI test. (#880))
 CWARNFLAGS += -Wall -Wno-unused-function -Wfatal-errors
 endif
 
@@ -752,6 +756,31 @@ ifeq ($(CC_VENDOR),clang)
 CWARNFLAGS += -Wno-tautological-compare -Wno-pass-failed
 endif
 
+<<<<<<< HEAD
+=======
+# Disable some warnings in nvc
+ifeq ($(CC_VENDOR),NVIDIA)
+CWARNFLAGS += --diag_suppress unsigned_compare_with_zero \
+			  --diag_suppress cast_to_qualified_type \
+			  --diag_suppress bad_initializer_type \
+			  --diag_suppress used_before_set \
+			  --diag_suppress mixed_enum_type \
+			  --diag_suppress incompatible_assignment_operands
+endif
+
+# Disable other annoying warnings.
+ifeq ($(CC_VENDOR),clang)
+CWARNFLAGS +=
+else
+ifeq ($(CC_VENDOR),gcc)
+# The '-Wno-maybe-uninitialized' option makes me nervous. Let's temporarily
+# disable for now. -FGVZ
+#CWARNFLAGS += -Wno-maybe-uninitialized -Wno-comment
+CWARNFLAGS += -Wno-comment
+endif
+endif
+
+>>>>>>> 54a014121 (Improve NVHPC support and add CI test. (#880))
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
 
 # --- Position-independent code flags (shared libraries only) ---
