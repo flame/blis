@@ -783,7 +783,7 @@ endif
 # Disable unused function warnings and stop compiling on first error for
 # all compilers that accept such options: gcc, clang, and icc.
 ifneq ($(CC_VENDOR),ibm)
-ifneq ($(CC_VENDOR),nvc)
+ifneq ($(CC_VENDOR),NVIDIA)
 CWARNFLAGS += -Wall -Wno-unused-function -Wfatal-errors
 else
 CWARNFLAGS += -Wall -Wno-unused-function
@@ -793,6 +793,16 @@ endif
 # Disable tautological comparision warnings in clang.
 ifeq ($(CC_VENDOR),clang)
 CWARNFLAGS += -Wno-tautological-compare -Wno-pass-failed
+endif
+
+# Disable some warnings in nvc
+ifeq ($(CC_VENDOR),NVIDIA)
+CWARNFLAGS += --diag_suppress unsigned_compare_with_zero \
+			  --diag_suppress cast_to_qualified_type \
+			  --diag_suppress bad_initializer_type \
+			  --diag_suppress used_before_set \
+			  --diag_suppress mixed_enum_type \
+			  --diag_suppress incompatible_assignment_operands
 endif
 
 # Disable other annoying warnings.

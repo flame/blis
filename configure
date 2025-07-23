@@ -1639,7 +1639,7 @@ get_compiler_version()
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
 	cc_vendor=$(echo "${vendor_string}" |
-	            grep -oE 'icc|gcc|clang|nvc|emcc|pnacl|IBM|oneAPI|crosstool-NG|GCC' |
+	            grep -oE 'icc|gcc|clang|NVIDIA|emcc|pnacl|IBM|oneAPI|crosstool-NG|GCC' |
 	            { read -r first rest ; echo "${first}"; })
 
 	# AOCC version strings contain both "clang" and "AOCC" substrings, and
@@ -1722,6 +1722,12 @@ get_compiler_version()
 		cc_version=$(echo "${vendor_string}" \
 		             | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.?[0-9]*' \
 		             | { read -r first rest ; echo "${first}"; })
+
+	elif [ "${cc_vendor}" = "NVIDIA" ]; then
+
+		cc_version=$(echo "${vendor_string}" \
+		             | grep -oE '[0-9]+\.[0-9]+-[0-9]+' \
+		             | { read -r first rest ; echo "${first}" | tr '-' '.'; })
 
 	else
 
@@ -1808,8 +1814,13 @@ check_compiler()
 
 	# Fixme: check on a64fx, neoverse, and others
 
-	# gcc
-	if [[ ${cc_vendor} = gcc ]]; then
+	# nvc
+    if [[ ${cc_vendor} = NVIDIA ]]; then
+        blacklistcc_add "knl"
+    fi
+    
+    # gcc
+    if [[ ${cc_vendor} = gcc ]]; then
 
 		if [[ ${cc_major} -lt 4 ]]; then
 			echoerr_unsupportedcc

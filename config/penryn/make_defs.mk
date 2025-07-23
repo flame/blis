@@ -71,7 +71,11 @@ else
 ifeq ($(CC_VENDOR),clang)
 CKVECFLAGS     := -mssse3 -mfpmath=sse -march=core2
 else
-$(error gcc, icc, or clang is required for this configuration.)
+ifeq ($(CC_VENDOR),NVIDIA)
+CKVECFLAGS     := -march=px -fast
+else
+$(error gcc, icc, clang, or nvc is required for this configuration.)
+endif
 endif
 endif
 endif

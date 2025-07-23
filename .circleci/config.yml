@@ -66,6 +66,13 @@ workflows:
           CXX: clang++
           PACKAGES: clang libomp-dev
 
+      # nvc build
+      - build:
+          CC: nvc
+          THR: openmp,pthreads
+          CXX: nvc++
+          PACKAGES: nvhpc-25-7
+
       # macOS with system compiler (clang)
       - build:
           os: macos
@@ -185,7 +192,12 @@ jobs:
           steps:
             - run:
                 name: Installing Dependencies
-                command:
+                command: |
+                  export CC="<< parameters.CC >>"
+                  if [ $CC = nvc ]; then
+                    curl https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA-HPC-SDK | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg
+                    echo 'deb [signed-by=/usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /' | sudo tee /etc/apt/sources.list.d/nvhpc.list
+                  fi
                   sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get install -y make python3 << parameters.PACKAGES >>
 
       - run:
@@ -207,6 +219,14 @@ jobs:
             pwd
             if [ $OOT -eq 1 ]; then export DIST_PATH=`pwd`; mkdir ../oot; cd ../oot; chmod -R a-w $DIST_PATH; fi
             pwd
+
+            if [ $CC = nvc ];then
+              NVARCH=`uname -s`_`uname -m`; export NVARCH
+              NVCOMPILERS=/opt/nvidia/hpc_sdk; export NVCOMPILERS
+              MANPATH=$MANPATH:$NVCOMPILERS/$NVARCH/25.7/compilers/man; export MANPATH
+              PATH=$NVCOMPILERS/$NVARCH/25.7/compilers/bin:$PATH; export PATH
+              export FC=nvfortran
+            fi
 
             if [ "$CONF" = "rv64iv" ]; then
               $DIST_PATH/ci/do_riscv.sh "$CONF";
