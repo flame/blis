@@ -108,6 +108,17 @@ endif # clang
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
 CRVECFLAGS     := $(CKVECFLAGS)
+ifeq ($(CC_VENDOR),NVIDIA)
+  CVECFLAGS_VER    := -march=znver3
+  CRVECFLAGS       += -fast
+else
+  $(error gcc, clang, nvc or aocc is required for this configuration.)
+endif
+endif
+endif
+endif
+CKVECFLAGS         += $(CVECFLAGS_VER)
+CRVECFLAGS         += $(CVECFLAGS_VER)
 
 # Store all of the variables here to new variables containing the
 # configuration name.

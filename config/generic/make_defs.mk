@@ -71,7 +71,7 @@ else
 ifeq ($(CC_VENDOR),clang)
 CKVECFLAGS     :=
 else
-ifeq ($(CC_VENDOR),nvc)
+ifeq ($(CC_VENDOR),NVIDIA)
 CKVECFLAGS     :=
 else
 $(error gcc, icc, nvc, or clang is required for this configuration.)

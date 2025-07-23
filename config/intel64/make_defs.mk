@@ -70,7 +70,23 @@ else ifeq ($(CC_VENDOR),icc)
 else ifeq ($(CC_VENDOR),clang)
   CKVECFLAGS     := -mssse3 -mfpmath=sse -march=core2
 else
+<<<<<<< HEAD
   $(error gcc, icc, or clang is required for this configuration.)
+=======
+ifeq ($(CC_VENDOR),icc)
+CKVECFLAGS     := -xSSSE3
+else
+ifeq ($(CC_VENDOR),clang)
+CKVECFLAGS     := -mssse3 -mfpmath=sse -march=core2
+else
+ifeq ($(CC_VENDOR),NVIDIA)
+CKVECFLAGS     := -march=px -fast
+else
+$(error gcc, icc, clang, or nvc is required for this configuration.)
+endif
+endif
+endif
+>>>>>>> 54a014121 (Improve NVHPC support and add CI test. (#880))
 endif
 
 # Flags specific to reference kernels.
