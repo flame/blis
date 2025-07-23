@@ -81,7 +81,11 @@ else
 CKVECFLAGS     := -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse -march=skylake-avx512
 endif
 else
-$(error gcc, icc, or clang is required for this configuration.)
+ifeq ($(CC_VENDOR),NVIDIA)
+CKVECFLAGS     := -march=skylake -fast
+else
+$(error gcc, icc, clang, or nvc is required for this configuration.)
+endif
 endif
 endif
 endif
@@ -115,7 +119,11 @@ else
 CRVECFLAGS     := -march=skylake-avx512 -mno-avx512f -mno-avx512vl -mno-avx512bw -mno-avx512dq -mno-avx512cd -funsafe-math-optimizations -ffp-contract=fast
 endif
 else
-$(error gcc, icc, or clang is required for this configuration.)
+ifeq ($(CC_VENDOR),NVIDIA)
+CRVECFLAGS     := -march=skylake -fast
+else
+$(error gcc, icc, clang, or nvc is required for this configuration.)
+endif
 endif
 endif
 endif
