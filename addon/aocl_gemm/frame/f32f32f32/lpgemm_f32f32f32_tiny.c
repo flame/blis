@@ -151,6 +151,11 @@ LPGEMV_TINY(float, float, float, f32f32f32of32)
         // Workaround to select right kernel and blocksizes based on arch
         // since GEMV parameters are not available in lpgemm context.
 #ifdef BLIS_KERNELS_ZEN4
+      // Runtime check for AVX512 ISA support.
+      // We intend to use AOCL_ENABLE_INSTRUCTIONS only if the
+      // underlying architecture supports AVX512 ISA.
+      if( bli_cpuid_is_avx512_supported() == TRUE )
+      {
         if( lpgemm_get_enabled_arch() == BLIS_ARCH_ZEN3 )
         {
           MR = 16;
@@ -163,11 +168,16 @@ LPGEMV_TINY(float, float, float, f32f32f32of32)
           ker_fp = lpgemv_n_one_f32f32f32of32;
           packa_fp = packa_mr16_f32f32f32of32_col_major;
         }
-#else
+      }
+      else
+      {
+#endif
         // Increased MR from 6 to 16 to make use of 32 ZMM registers
         MR = 8;
         ker_fp = lpgemv_n_one_f32f32f32of32_avx2;
         packa_fp = packa_mr8_f32f32f32of32_col_major;
+#ifdef BLIS_KERNELS_ZEN4
+      }
 #endif
         // Pack B matrix if rs_b > 1, ignoring the mtag_b here.
         // For tiny sizes, it is better to pack B if it affects output accuracy.
@@ -240,6 +250,11 @@ LPGEMV_TINY(float, float, float, f32f32f32of32)
         lpgemv_m_one_ker_ft ker_fp;
 
 #ifdef BLIS_KERNELS_ZEN4
+      // Runtime check for AVX512 ISA support.
+      // We intend to use AOCL_ENABLE_INSTRUCTIONS only if the
+      // underlying architecture supports AVX512 ISA.
+      if( bli_cpuid_is_avx512_supported() == TRUE )
+      {
         if( lpgemm_get_enabled_arch() == BLIS_ARCH_ZEN3 )
         {
           ker_fp = lpgemv_m_one_f32f32f32of32_avx512_256;
@@ -248,8 +263,13 @@ LPGEMV_TINY(float, float, float, f32f32f32of32)
         {
           ker_fp = lpgemv_m_one_f32f32f32of32;
         }
-#else
+      }
+      else
+      {
+#endif
         ker_fp = lpgemv_m_one_f32f32f32of32_avx2;
+#ifdef BLIS_KERNELS_ZEN4
+      }
 #endif
         // For tiny sizes, it is better to pack A if it affects output accuracy.
         if( ( cs_a != 1 ) )

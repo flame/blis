@@ -174,23 +174,32 @@ LPGEMV(float, float, float, f32f32f32of32)
     // Workaround to select right kernel and blocksizes based on arch
     // since GEMV parameters are not available in lpgemm context.
 #ifdef BLIS_KERNELS_ZEN4
-    if( lpgemm_get_enabled_arch() == BLIS_ARCH_ZEN3 )
+    // Runtime check for AVX512 ISA support.
+    // We intend to use AOCL_ENABLE_INSTRUCTIONS only if the
+    // underlying architecture supports AVX512 ISA.
+    if( bli_cpuid_is_avx512_supported() == TRUE )
     {
-      MR = 16;
-      ker_fp = lpgemv_n_one_f32f32f32of32_avx512_256;
-      packa_fp = packa_mr8_f32f32f32of32_col_major;
+      if( lpgemm_get_enabled_arch() == BLIS_ARCH_ZEN3 )
+      {
+        MR = 16;
+        ker_fp = lpgemv_n_one_f32f32f32of32_avx512_256;
+        packa_fp = packa_mr8_f32f32f32of32_col_major;
+      }
+      else
+      {
+        MR = 16;
+        ker_fp = lpgemv_n_one_f32f32f32of32;
+        packa_fp = packa_mr16_f32f32f32of32_col_major;
+      }
     }
     else
     {
-      MR = 16;
-      ker_fp = lpgemv_n_one_f32f32f32of32;
-      packa_fp = packa_mr16_f32f32f32of32_col_major;
+#endif
+      MR = 8;
+      ker_fp = lpgemv_n_one_f32f32f32of32_avx2;
+      packa_fp = packa_mr8_f32f32f32of32_col_major;
+#ifdef BLIS_KERNELS_ZEN4
     }
-#else
-    // Increased MR from 6 to 16 to make use of 32 ZMM registers
-    MR = 8;
-    ker_fp = lpgemv_n_one_f32f32f32of32_avx2;
-    packa_fp = packa_mr8_f32f32f32of32_col_major;
 #endif
     // Pack B matrix if rs_b > 1
     if( rs_b != 1 )
@@ -276,21 +285,31 @@ LPGEMV(float, float, float, f32f32f32of32)
     lpgemv_m_one_ker_ft ker_fp;
     lpgemv_a_pack_ft packa_fp;
 
-    #ifdef BLIS_KERNELS_ZEN4
-    if( lpgemm_get_enabled_arch() == BLIS_ARCH_ZEN3 )
+#ifdef BLIS_KERNELS_ZEN4
+    // Runtime check for AVX512 ISA support.
+    // We intend to use AOCL_ENABLE_INSTRUCTIONS only if the
+    // underlying architecture supports AVX512 ISA.
+    if( bli_cpuid_is_avx512_supported() == TRUE )
     {
-      ker_fp = lpgemv_m_one_f32f32f32of32_avx512_256;
-      packa_fp = packa_mr8_f32f32f32of32_col_major;
+      if( lpgemm_get_enabled_arch() == BLIS_ARCH_ZEN3 )
+      {
+        ker_fp = lpgemv_m_one_f32f32f32of32_avx512_256;
+        packa_fp = packa_mr8_f32f32f32of32_col_major;
+      }
+      else
+      {
+        ker_fp = lpgemv_m_one_f32f32f32of32;
+        packa_fp = packa_mr16_f32f32f32of32_col_major;
+      }
     }
     else
     {
-      ker_fp = lpgemv_m_one_f32f32f32of32;
-      packa_fp = packa_mr16_f32f32f32of32_col_major;
+#endif
+      ker_fp = lpgemv_m_one_f32f32f32of32_avx2;
+      packa_fp = packa_mr8_f32f32f32of32_col_major;
+#ifdef BLIS_KERNELS_ZEN4
     }
-    #else
-    ker_fp = lpgemv_m_one_f32f32f32of32_avx2;
-    packa_fp = packa_mr8_f32f32f32of32_col_major;
-    #endif
+#endif
     // Compute the JC loop thread range for the current thread.
     dim_t jc_start, jc_end;
     thread_jc.n_way = ( thread_jc.n_way == 1 ) ?

@@ -823,20 +823,27 @@ LPGEMV_AVX2(bfloat16, bfloat16, float, bf16bf16f32of32)
 	{
 		lpgemv_n_one_ker_ft ker_fp;
 #ifdef BLIS_KERNELS_ZEN4
-		if( lpgemm_get_enabled_arch() == BLIS_ARCH_ZEN3 )
+		if( bli_cpuid_is_avx512_supported() == TRUE )
 		{
-			f32_MR = 16;
-			ker_fp = lpgemv_n_one_f32f32f32of32_avx512_256;
+			if( lpgemm_get_enabled_arch() == BLIS_ARCH_ZEN3 )
+			{
+				f32_MR = 16;
+				ker_fp = lpgemv_n_one_f32f32f32of32_avx512_256;
+			}
+			else
+			{
+				f32_MR = 16;
+				ker_fp = lpgemv_n_one_f32f32f32of32;
+			}
 		}
 		else
 		{
-			f32_MR = 16;
-			ker_fp = lpgemv_n_one_f32f32f32of32;
-		}
-#else
+#endif
 		// Increased MR from 6 to 16 to make use of 32 ZMM registers
 		f32_MR = 8;
 		ker_fp = lpgemv_n_one_f32f32f32of32_avx2;
+#ifdef BLIS_KERNELS_ZEN4
+		}
 #endif
 		// for bf16 inputs no matter if it's packed/re-ordered and unpacked,
 		// the matrix to be given to the kernels has to be in bf16.
@@ -944,16 +951,23 @@ LPGEMV_AVX2(bfloat16, bfloat16, float, bf16bf16f32of32)
 		lpgemv_m_one_ker_ft ker_fp;
 
 #ifdef BLIS_KERNELS_ZEN4
-		if( lpgemm_get_enabled_arch() == BLIS_ARCH_ZEN3 )
+		if( bli_cpuid_is_avx512_supported() == TRUE )
 		{
-			ker_fp = lpgemv_m_one_f32f32f32of32_avx512_256;
+			if( lpgemm_get_enabled_arch() == BLIS_ARCH_ZEN3 )
+			{
+				ker_fp = lpgemv_m_one_f32f32f32of32_avx512_256;
+			}
+			else
+			{
+				ker_fp = lpgemv_m_one_f32f32f32of32;
+			}
 		}
 		else
 		{
-			ker_fp = lpgemv_m_one_f32f32f32of32;
-		}
-#else
+#endif
 			ker_fp = lpgemv_m_one_f32f32f32of32_avx2;
+#ifdef BLIS_KERNELS_ZEN4
+		}
 #endif
 		// Compute the JC loop thread range for the current thread.
 		dim_t jc_start, jc_end;
