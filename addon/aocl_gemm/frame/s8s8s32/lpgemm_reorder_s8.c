@@ -58,7 +58,7 @@ void unreorderb_nr64_s8s8s32os32_reference
 	dim_t k = b->length;
 
 	dim_t k_updated = k;
-	k_updated += (k_updated & 0x3);
+	k_updated = make_multiple_of_n( k, 4 );
 
 	dim_t n_threads = bli_rntm_num_threads( rntm );
 	n_threads = ( n_threads > 0 ) ? n_threads : 1;
@@ -101,12 +101,11 @@ void unreorderb_nr64_s8s8s32os32_reference
 			{
 				dim_t kc0 = bli_min( ( k - pc ), KC );
 
-				// k needs to be a multiple of 2 so that it can be used with dpbf
+				// k needs to be a multiple of 4 so that it can be used with dpbf
 				// instruction. Padding is added in cases this condition is not
 				// satisfied, and therefore the k offset used for packed/reordered
 				// buffer needs to be updated.
-				dim_t kc0_updated = kc0;
-				kc0_updated += (kc0_updated & 0x3);
+				dim_t kc0_updated = make_multiple_of_n( kc0, 4 );
 
 				unpackb_nr64_s8_reference
 				(
