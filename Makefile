@@ -301,6 +301,9 @@ ifeq ($(INSTALL_HH),yes)
 HEADERS_TO_INSTALL += $(wildcard $(VEND_CPP_PATH)/*.hh)
 endif
 
+# Determine that paths of the installed header files
+HEADERS_INSTALLED := $(foreach hdr,$(HEADERS_TO_INSTALL),$(MK_INCL_DIR_INST)/$(notdir $(hdr)))
+
 # Define a list of so-called helper headers to install. These helper headers
 # are very simple headers that go one directory up from INCDIR/blis (which
 # by default is PREFIX/include/blis, where PREFIX is the install prefix). The
@@ -491,7 +494,7 @@ UNINSTALL_OLD_SYML    += $(wildcard $(INSTALL_LIBDIR)/$(LIBBLIS)-*.$(SHLIB_EXT))
 # This shell command grabs all files named "*.h" that are not blis.h or cblas.h
 # in the installation directory. We consider this set of headers to be "old" and
 # eligible for removal upon running of the uninstall-old-headers target.
-UNINSTALL_OLD_HEADERS := $(filter-out $(BLIS_H),$(filter-out $(CBLAS_H),$(wildcard $(INSTALL_INCDIR)/blis/*.h)))
+UNINSTALL_OLD_HEADERS := $(filter-out %/$(BLIS_H),$(filter-out %/$(CBLAS_H),$(wildcard $(INSTALL_INCDIR)/blis/*.h)))
 
 endif # IS_CONFIGURED
 
@@ -1079,17 +1082,27 @@ endif
 
 # --- Install header rules ---
 
-install-headers: check-env $(MK_INCL_DIR_INST) install-helper-headers
+install-headers: check-env $(HEADERS_INSTALLED) install-helper-headers
 
 # Rule for installing main headers.
-$(MK_INCL_DIR_INST): $(HEADERS_TO_INSTALL) $(CONFIG_MK_FILE)
+$(MK_INCL_DIR_INST)/%.h: $(BASE_INC_PATH)/%.h $(CONFIG_MK_FILE)
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(MKDIR) $(@)
-	$(INSTALL) -m 0644 $(HEADERS_TO_INSTALL) $(@)
+	$(MKDIR) $(dir $(@))
+	$(INSTALL) -m 0644 $(<) $(dir $(@))
 else
-	@$(MKDIR) $(@)
-	@echo "Installing $(notdir $(HEADERS_TO_INSTALL)) into $(@)/"
-	@$(INSTALL) -m 0644 $(HEADERS_TO_INSTALL) $(@)
+	@$(MKDIR) $(dir $(@))
+	@echo "Installing $(notdir $(<)) into $(dir $(@))/"
+	@$(INSTALL) -m 0644 $(<) $(dir $(@))
+endif
+
+$(MK_INCL_DIR_INST)/%.hh: $(VEND_CPP_PATH)/%.hh $(CONFIG_MK_FILE)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(MKDIR) $(dir $(@))
+	$(INSTALL) -m 0644 $(<) $(dir $(@))
+else
+	@$(MKDIR) $(dir $(@))
+	@echo "Installing $(notdir $(<)) into $(dir $(@))/"
+	@$(INSTALL) -m 0644 $(<) $(dir $(@))
 endif
 
 install-helper-headers: check-env $(HELP_HEADERS_INSTALLED)
