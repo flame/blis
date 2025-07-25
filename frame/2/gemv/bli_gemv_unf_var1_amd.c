@@ -230,7 +230,6 @@ void bli_dgemv_unf_var1
     double *y_buf = y;
 
     inc_t buf_incx = incx;
-    inc_t buf_incy = incy;
 
     // Invoking the reference kernel to handle general stride.
     if ( ( rs_a != 1 ) && ( cs_a != 1 ) )
@@ -277,14 +276,12 @@ void bli_dgemv_unf_var1
     // Extract the conjugation from transa.
     conja = bli_extract_conj(transa);
 
-    //memory pool declarations for packing vector X and Y.
+    //memory pool declarations for packing vector X.
     mem_t mem_bufX;
-    mem_t mem_bufY;
     rntm_t rntm;
 
-    // Boolean to check if x and y vectors are packed and memory needs to be freed.
+    // Boolean to check if x vector are packed and memory needs to be freed.
     bool is_x_temp_buf_created = FALSE;
-    bool is_y_temp_buf_created = FALSE;
 
     // Function pointer declaration for the functions that will be used.
     dgemv_ker_ft   gemv_kr_ptr;         // DGEMV
@@ -389,76 +386,7 @@ void bli_dgemv_unf_var1
           AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
           return;
     }
-
-    /*  If y has non-unit increments and alpha is non-zero, y is packed and
-        scaled by beta. The scaled contents are copied to a temp buffer (y_buf)
-        and passed to the kernels. At the end, the contents of y_buf are copied
-        back to y and memory is freed.
-
-        If alpha is zero, the GEMV operation is reduced to y := beta * y, thus,
-        packing of y is unnecessary so y is only scaled by beta and returned.
-    */
-
-    if ( (incy != 1) && (!bli_deq0( *alpha )))
-    {
-        /*  Initialize mem pool buffer to NULL and size to 0.
-            "buf" and "size" fields are assigned once memory is allocated from
-            the pool in bli_pba_acquire_m().
-
-            This will ensure bli_mem_is_alloc() will be passed on an allocated
-            memory if created or a NULL.
-        */
-        mem_bufY.pblk.buf = NULL;   mem_bufY.pblk.block_size = 0;
-        mem_bufY.buf_type = 0;      mem_bufY.size = 0;
-        mem_bufY.pool = NULL;
-
-        // In order to get the buffer from pool via rntm access to memory broker
-        // is needed.Following are initializations for rntm.
-        bli_rntm_init_from_global( &rntm );
-        bli_rntm_set_num_threads_only( 1, &rntm );
-        bli_pba_rntm_set_pba( &rntm );
-
-        // Calculate the size required for n0 double elements in vector Y.
-        size_t buffer_size = n0 * sizeof( double );
-
-        #ifdef BLIS_ENABLE_MEM_TRACING
-        printf("bli_dgemv_unf_var1(): get mem pool block for vector y\n");
-        #endif
-
-        // Acquire a Buffer(n0*size(double)) from the memory broker and save the
-        // associated mem_t entry to mem_bufY.
-        bli_pba_acquire_m
-        (
-          &rntm,
-          buffer_size,
-          BLIS_BUFFER_FOR_B_PANEL,
-          &mem_bufY
-        );
-
-        // Continue packing Y if buffer memory is allocated.
-        if ( bli_mem_is_alloc( &mem_bufY ) )
-        {
-            y_buf = bli_mem_buffer( &mem_bufY );
-
-            // Using unit-stride for y_temp vector.
-            buf_incy = 1;
-
-            // Invoke the COPYV function using the function pointer.
-            copyv_kr_ptr
-            (
-              BLIS_NO_CONJUGATE,
-              n0,
-              y, incy,
-              y_buf, buf_incy,
-              cntx
-            );
-
-            // Set y is packed as the memory allocation was successful
-            // and contents have been scaled and copied to a temp buffer.
-            is_y_temp_buf_created = TRUE;
-        }
-    }
-
+    
     // If alpha is zero, the GEMV operation is reduced to y := beta * y, thus,
     // y is only scaled by beta and returned.
     if( bli_deq0( *alpha ) )
@@ -469,7 +397,7 @@ void bli_dgemv_unf_var1
           BLIS_NO_CONJUGATE,
           n0,
           beta,
-          y_buf, buf_incy,
+          y_buf, incy,
           cntx
         );
 
@@ -540,7 +468,7 @@ void bli_dgemv_unf_var1
     // If the increments of x and y are unit stride, we can use the
     // optimized kernel path. The optimized kernel does not support
     // non-unit stride for x and y.
-    if ( buf_incx == 1 && buf_incy == 1 )
+    if ( buf_incx == 1 )
     {
 #if defined(BLIS_ENABLE_OPENMP)
       // If the problem size is small, we can use a fast-path to avoid
@@ -559,7 +487,7 @@ void bli_dgemv_unf_var1
             a_buf, inca, lda,
             x_buf, buf_incx,
             beta,
-            y_buf, buf_incy,
+            y_buf, incy,
             cntx
         );
 
@@ -622,7 +550,7 @@ void bli_dgemv_unf_var1
 
           // Calculating thread specific pointers
           double *a_thread_local = a_buf + (start * lda);
-          double *y_thread_local = y_buf + start;
+          double *y_thread_local = y_buf + (start * incy);
           double *x_thread_local = x_buf;
 
           // Call the DGEMV kernel with the thread-local pointers.
@@ -636,7 +564,7 @@ void bli_dgemv_unf_var1
               a_thread_local, inca, lda,
               x_thread_local, buf_incx,
               beta,
-              y_thread_local, buf_incy,
+              y_thread_local, incy,
               cntx
           );
         }
@@ -669,27 +597,6 @@ void bli_dgemv_unf_var1
  #endif
         // Return the buffer to pool
         bli_pba_release(&rntm, &mem_bufX);
-    }
-
-    // If y was packed into y_temp, copy the contents back to y and free memory.
-    if (is_y_temp_buf_created)
-    {
-        // Invoke COPYV to store the result from unit-strided y_buf to non-unit
-        // strided y.
-        copyv_kr_ptr
-        (
-          BLIS_NO_CONJUGATE,
-          n0,
-          y_buf, buf_incy,
-          y, incy,
-          cntx
-        );
-
- #ifdef BLIS_ENABLE_MEM_TRACING
-        printf("bli_dgemv_unf_var1(): releasing mem pool block for vector y\n");
- #endif
-        // Return the buffer to pool.
-        bli_pba_release( &rntm , &mem_bufY );
     }
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);

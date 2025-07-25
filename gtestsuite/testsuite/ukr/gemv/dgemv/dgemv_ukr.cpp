@@ -135,7 +135,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x (non-unit incx is handled by frame)
-        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(1), gtint_t(3)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
@@ -166,7 +166,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
-        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(1), gtint_t(3)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
@@ -197,7 +197,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
-        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(1), gtint_t(3)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
@@ -228,7 +228,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
-        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(1), gtint_t(3)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
@@ -259,7 +259,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
-        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(1), gtint_t(3)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
@@ -290,7 +290,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
-        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(1), gtint_t(3)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
@@ -321,7 +321,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
-        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(1), gtint_t(3)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
@@ -352,7 +352,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
-        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(1), gtint_t(3)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
@@ -386,7 +386,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x (non-unit incx is handled by frame)
-        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(1), gtint_t(3)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
@@ -417,7 +417,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
-        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(1), gtint_t(3)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
@@ -448,7 +448,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
-        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(1), gtint_t(3)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
@@ -479,7 +479,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
-        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(1), gtint_t(3)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
@@ -510,7 +510,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
-        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(1), gtint_t(3)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
@@ -541,7 +541,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
-        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(1), gtint_t(3)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
@@ -572,7 +572,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
-        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(1), gtint_t(3)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
@@ -603,7 +603,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // alpha
         ::testing::Values( double(0.0), double(1.0), double(2.0)),      // beta
         ::testing::Values(gtint_t(1)),                                  // stride size for x
-        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(1), gtint_t(3)),                                  // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),

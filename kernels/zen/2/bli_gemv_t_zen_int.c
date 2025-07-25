@@ -161,348 +161,720 @@ void bli_dgemv_t_zen_int
         beta_mask = _mm256_loadu_si256( (__m256i *)mask_ptr[4]);
     }
 
-    // This code section will be responsible for handling cases where beta is equal to zero.
-    // The following loop processes the matrix A in chunks of 8 columns at a time.
-    // For each chunk, the result of the matrix-vector multiplication is stored in the corresponding elements of the vector y.
-    for ( i = 0; i < n_iter; ++i)
+    if ( incy == 1 )
     {
-        // j denotes the number of rows completed
-        dim_t j = 0;
-
-        // Creating an array of pointers for 8 columns of matrix A
-        av[0] = a_buf + 0 * lda;            // av[0] = a_buf[:, 0]
-        av[1] = a_buf + 1 * lda;            // av[1] = a_buf[:, 1]
-        av[2] = a_buf + 2 * lda;            // av[2] = a_buf[:, 2]
-        av[3] = a_buf + 3 * lda;            // av[3] = a_buf[:, 3]
-
-        av[4] = a_buf + 4 * lda;            // av[4] = a_buf[:, 4]
-        av[5] = a_buf + 5 * lda;            // av[5] = a_buf[:, 5]
-        av[6] = a_buf + 6 * lda;            // av[6] = a_buf[:, 6]
-        av[7] = a_buf + 7 * lda;            // av[7] = a_buf[:, 7]
-
-        // Clearing vectors for next loop
-        rhov[0].v = _mm256_setzero_pd();
-        rhov[1].v = _mm256_setzero_pd();
-        rhov[2].v = _mm256_setzero_pd();
-        rhov[3].v = _mm256_setzero_pd();
-
-        rhov[4].v = _mm256_setzero_pd();
-        rhov[5].v = _mm256_setzero_pd();
-        rhov[6].v = _mm256_setzero_pd();
-        rhov[7].v = _mm256_setzero_pd();
-
-        // Loading data from vector y
-        yv0.v =  _mm256_maskload_pd( y_buf, beta_mask );                  // yv0 = y_buf[0:3]
-        yv1.v =  _mm256_maskload_pd( y_buf + 4, beta_mask );              // yv1 = y_buf[4:7]
-
-        // Calculating beta * y
-        yv0.v =  _mm256_mul_pd ( betav.v, yv0.v );         // yv0 = beta * y_buf[0:3]
-        yv1.v =  _mm256_mul_pd ( betav.v, yv1.v );         // yv1 = beta * y_buf[4:7]
-
-        // Handles (x_buf[0:15] * a_buf[0:15,0:7])
-        for ( j = 0; (j + 15) < m; j += 16 )
+        // This code section will be responsible for handling cases where beta is equal to zero.
+        // The following loop processes the matrix A in chunks of 8 columns at a time.
+        // For each chunk, the result of the matrix-vector multiplication is stored in the corresponding elements of the vector y.
+        for ( i = 0; i < n_iter; ++i)
         {
-            // Load the input values from vector X.
-            xv0.v =  _mm256_loadu_pd( x_buf );                              // xv0 = x_buf[0:3]
+            // j denotes the number of rows completed
+            dim_t j = 0;
 
-            // Load the input values from Matrix A
-            a_vec[0].v =  _mm256_loadu_pd( av[0] );                         // a_vec[0] = a_buf[0:3, 0]
-            a_vec[1].v =  _mm256_loadu_pd( av[1] );                         // a_vec[1] = a_buf[0:3, 1]
-            a_vec[2].v =  _mm256_loadu_pd( av[2] );                         // a_vec[2] = a_buf[0:3, 2]
-            a_vec[3].v =  _mm256_loadu_pd( av[3] );                         // a_vec[3] = a_buf[0:3, 3]
+            // Creating an array of pointers for 8 columns of matrix A
+            av[0] = a_buf + 0 * lda;            // av[0] = a_buf[:, 0]
+            av[1] = a_buf + 1 * lda;            // av[1] = a_buf[:, 1]
+            av[2] = a_buf + 2 * lda;            // av[2] = a_buf[:, 2]
+            av[3] = a_buf + 3 * lda;            // av[3] = a_buf[:, 3]
 
-            // perform: rho?v += a?v * x0v;
-            rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv0.v, rhov[0].v );    // rhov[0] += a_buf[0:3, 0] * x_buf[0:3]
-            rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv0.v, rhov[1].v );    // rhov[1] += a_buf[0:3, 1] * x_buf[0:3]
-            rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv0.v, rhov[2].v );    // rhov[2] += a_buf[0:3, 2] * x_buf[0:3]
-            rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv0.v, rhov[3].v );    // rhov[3] += a_buf[0:3, 3] * x_buf[0:3]
+            av[4] = a_buf + 4 * lda;            // av[4] = a_buf[:, 4]
+            av[5] = a_buf + 5 * lda;            // av[5] = a_buf[:, 5]
+            av[6] = a_buf + 6 * lda;            // av[6] = a_buf[:, 6]
+            av[7] = a_buf + 7 * lda;            // av[7] = a_buf[:, 7]
 
-            // Load the input values from Matrix A
-            a_vec[4].v =  _mm256_loadu_pd( av[4] );                         // a_vec[4] = a_buf[0:3, 4]
-            a_vec[5].v =  _mm256_loadu_pd( av[5] );                         // a_vec[5] = a_buf[0:3, 5]
-            a_vec[6].v =  _mm256_loadu_pd( av[6] );                         // a_vec[6] = a_buf[0:3, 6]
-            a_vec[7].v =  _mm256_loadu_pd( av[7] );                         // a_vec[7] = a_buf[0:3, 7]
+            // Clearing vectors for next loop
+            rhov[0].v = _mm256_setzero_pd();
+            rhov[1].v = _mm256_setzero_pd();
+            rhov[2].v = _mm256_setzero_pd();
+            rhov[3].v = _mm256_setzero_pd();
 
-            // perform: rho?v += a?v * x0v;
-            rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv0.v, rhov[4].v );    // rhov[4] += a_buf[0:3, 4] * x_buf[0:3]
-            rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv0.v, rhov[5].v );    // rhov[5] += a_buf[0:3, 5] * x_buf[0:3]
-            rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv0.v, rhov[6].v );    // rhov[6] += a_buf[0:3, 6] * x_buf[0:3]
-            rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv0.v, rhov[7].v );    // rhov[7] += a_buf[0:3, 7] * x_buf[0:3]
+            rhov[4].v = _mm256_setzero_pd();
+            rhov[5].v = _mm256_setzero_pd();
+            rhov[6].v = _mm256_setzero_pd();
+            rhov[7].v = _mm256_setzero_pd();
 
-            // Load the input values from vector X.
-            xv1.v =  _mm256_loadu_pd( x_buf + 4 );                          // xv1 = x_buf[4:7]
+            // Loading data from vector y
+            yv0.v =  _mm256_maskload_pd( y_buf, beta_mask );                  // yv0 = y_buf[0:3]
+            yv1.v =  _mm256_maskload_pd( y_buf + 4, beta_mask );              // yv1 = y_buf[4:7]
 
-            // Load the input values from Matrix A
-            a_vec[0].v =  _mm256_loadu_pd( av[0] + 4 );                     // a_vec[0] = a_buf[4:7, 0]
-            a_vec[1].v =  _mm256_loadu_pd( av[1] + 4 );                     // a_vec[1] = a_buf[4:7, 1]
-            a_vec[2].v =  _mm256_loadu_pd( av[2] + 4 );                     // a_vec[2] = a_buf[4:7, 2]
-            a_vec[3].v =  _mm256_loadu_pd( av[3] + 4 );                     // a_vec[3] = a_buf[4:7, 3]
+            // Calculating beta * y
+            yv0.v =  _mm256_mul_pd ( betav.v, yv0.v );         // yv0 = beta * y_buf[0:3]
+            yv1.v =  _mm256_mul_pd ( betav.v, yv1.v );         // yv1 = beta * y_buf[4:7]
 
-            // perform: rho?v += a?v * x0v;
-            rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv1.v, rhov[0].v );    // rhov[0] += a_buf[4:7, 0] * x_buf[4:7]
-            rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv1.v, rhov[1].v );    // rhov[1] += a_buf[4:7, 1] * x_buf[4:7]
-            rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv1.v, rhov[2].v );    // rhov[2] += a_buf[4:7, 2] * x_buf[4:7]
-            rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv1.v, rhov[3].v );    // rhov[3] += a_buf[4:7, 3] * x_buf[4:7]
+            // Handles (x_buf[0:15] * a_buf[0:15,0:7])
+            for ( j = 0; (j + 15) < m; j += 16 )
+            {
+                // Load the input values from vector X.
+                xv0.v =  _mm256_loadu_pd( x_buf );                              // xv0 = x_buf[0:3]
 
-            // Load the input values from Matrix A
-            a_vec[4].v =  _mm256_loadu_pd( av[4] + 4 );                     // a_vec[4] = a_buf[4:7, 4]
-            a_vec[5].v =  _mm256_loadu_pd( av[5] + 4 );                     // a_vec[5] = a_buf[4:7, 5]
-            a_vec[6].v =  _mm256_loadu_pd( av[6] + 4 );                     // a_vec[6] = a_buf[4:7, 6]
-            a_vec[7].v =  _mm256_loadu_pd( av[7] + 4 );                     // a_vec[7] = a_buf[4:7, 7]
+                // Load the input values from Matrix A
+                a_vec[0].v =  _mm256_loadu_pd( av[0] );                         // a_vec[0] = a_buf[0:3, 0]
+                a_vec[1].v =  _mm256_loadu_pd( av[1] );                         // a_vec[1] = a_buf[0:3, 1]
+                a_vec[2].v =  _mm256_loadu_pd( av[2] );                         // a_vec[2] = a_buf[0:3, 2]
+                a_vec[3].v =  _mm256_loadu_pd( av[3] );                         // a_vec[3] = a_buf[0:3, 3]
 
-            // perform: rho?v += a?v * x0v;
-            rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv1.v, rhov[4].v );    // rhov[4] += a_buf[4:7, 4] * x_buf[4:7]
-            rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv1.v, rhov[5].v );    // rhov[5] += a_buf[4:7, 5] * x_buf[4:7]
-            rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv1.v, rhov[6].v );    // rhov[6] += a_buf[4:7, 6] * x_buf[4:7]
-            rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv1.v, rhov[7].v );    // rhov[7] += a_buf[4:7, 7] * x_buf[4:7]
+                // perform: rho?v += a?v * x0v;
+                rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv0.v, rhov[0].v );    // rhov[0] += a_buf[0:3, 0] * x_buf[0:3]
+                rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv0.v, rhov[1].v );    // rhov[1] += a_buf[0:3, 1] * x_buf[0:3]
+                rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv0.v, rhov[2].v );    // rhov[2] += a_buf[0:3, 2] * x_buf[0:3]
+                rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv0.v, rhov[3].v );    // rhov[3] += a_buf[0:3, 3] * x_buf[0:3]
 
-            // Load the input values from vector X.
-            xv2.v =  _mm256_loadu_pd( x_buf + 8 );                          // xv2 = x_buf[8:11]
+                // Load the input values from Matrix A
+                a_vec[4].v =  _mm256_loadu_pd( av[4] );                         // a_vec[4] = a_buf[0:3, 4]
+                a_vec[5].v =  _mm256_loadu_pd( av[5] );                         // a_vec[5] = a_buf[0:3, 5]
+                a_vec[6].v =  _mm256_loadu_pd( av[6] );                         // a_vec[6] = a_buf[0:3, 6]
+                a_vec[7].v =  _mm256_loadu_pd( av[7] );                         // a_vec[7] = a_buf[0:3, 7]
 
-            // Load the input values from Matrix A
-            a_vec[0].v =  _mm256_loadu_pd( av[0] + 8 );                     // a_vec[0] = a_buf[8:11, 0]
-            a_vec[1].v =  _mm256_loadu_pd( av[1] + 8 );                     // a_vec[1] = a_buf[8:11, 1]
-            a_vec[2].v =  _mm256_loadu_pd( av[2] + 8 );                     // a_vec[2] = a_buf[8:11, 2]
-            a_vec[3].v =  _mm256_loadu_pd( av[3] + 8 );                     // a_vec[3] = a_buf[8:11, 3]
+                // perform: rho?v += a?v * x0v;
+                rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv0.v, rhov[4].v );    // rhov[4] += a_buf[0:3, 4] * x_buf[0:3]
+                rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv0.v, rhov[5].v );    // rhov[5] += a_buf[0:3, 5] * x_buf[0:3]
+                rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv0.v, rhov[6].v );    // rhov[6] += a_buf[0:3, 6] * x_buf[0:3]
+                rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv0.v, rhov[7].v );    // rhov[7] += a_buf[0:3, 7] * x_buf[0:3]
 
-            // perform: rho?v += a?v * x0v;
-            rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv2.v, rhov[0].v );    // rhov[0] += a_buf[8:11, 0] * x_buf[8:11]
-            rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv2.v, rhov[1].v );    // rhov[1] += a_buf[8:11, 1] * x_buf[8:11]
-            rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv2.v, rhov[2].v );    // rhov[2] += a_buf[8:11, 2] * x_buf[8:11]
-            rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv2.v, rhov[3].v );    // rhov[3] += a_buf[8:11, 3] * x_buf[8:11]
+                // Load the input values from vector X.
+                xv1.v =  _mm256_loadu_pd( x_buf + 4 );                          // xv1 = x_buf[4:7]
 
-            // Load the input values from Matrix A
-            a_vec[4].v =  _mm256_loadu_pd( av[4] + 8 );                     // a_vec[4] = a_buf[8:11, 4]
-            a_vec[5].v =  _mm256_loadu_pd( av[5] + 8 );                     // a_vec[5] = a_buf[8:11, 5]
-            a_vec[6].v =  _mm256_loadu_pd( av[6] + 8 );                     // a_vec[6] = a_buf[8:11, 6]
-            a_vec[7].v =  _mm256_loadu_pd( av[7] + 8 );                     // a_vec[7] = a_buf[8:11, 7]
+                // Load the input values from Matrix A
+                a_vec[0].v =  _mm256_loadu_pd( av[0] + 4 );                     // a_vec[0] = a_buf[4:7, 0]
+                a_vec[1].v =  _mm256_loadu_pd( av[1] + 4 );                     // a_vec[1] = a_buf[4:7, 1]
+                a_vec[2].v =  _mm256_loadu_pd( av[2] + 4 );                     // a_vec[2] = a_buf[4:7, 2]
+                a_vec[3].v =  _mm256_loadu_pd( av[3] + 4 );                     // a_vec[3] = a_buf[4:7, 3]
 
-            // perform: rho?v += a?v * x0v;
-            rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv2.v, rhov[4].v );    // rhov[4] += a_buf[8:11, 4] * x_buf[8:11]
-            rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv2.v, rhov[5].v );    // rhov[5] += a_buf[8:11, 5] * x_buf[8:11]
-            rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv2.v, rhov[6].v );    // rhov[6] += a_buf[8:11, 6] * x_buf[8:11]
-            rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv2.v, rhov[7].v );    // rhov[7] += a_buf[8:11, 7] * x_buf[8:11]
+                // perform: rho?v += a?v * x0v;
+                rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv1.v, rhov[0].v );    // rhov[0] += a_buf[4:7, 0] * x_buf[4:7]
+                rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv1.v, rhov[1].v );    // rhov[1] += a_buf[4:7, 1] * x_buf[4:7]
+                rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv1.v, rhov[2].v );    // rhov[2] += a_buf[4:7, 2] * x_buf[4:7]
+                rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv1.v, rhov[3].v );    // rhov[3] += a_buf[4:7, 3] * x_buf[4:7]
 
-            // Load the input values from vector X.
-            xv3.v =  _mm256_loadu_pd( x_buf + 12 );                         // xv3 = x_buf[12:15]
+                // Load the input values from Matrix A
+                a_vec[4].v =  _mm256_loadu_pd( av[4] + 4 );                     // a_vec[4] = a_buf[4:7, 4]
+                a_vec[5].v =  _mm256_loadu_pd( av[5] + 4 );                     // a_vec[5] = a_buf[4:7, 5]
+                a_vec[6].v =  _mm256_loadu_pd( av[6] + 4 );                     // a_vec[6] = a_buf[4:7, 6]
+                a_vec[7].v =  _mm256_loadu_pd( av[7] + 4 );                     // a_vec[7] = a_buf[4:7, 7]
 
-            // Load the input values from Matrix A
-            a_vec[0].v =  _mm256_loadu_pd( av[0] + 12 );                    // a_vec[0] = a_buf[12:15, 0]
-            a_vec[1].v =  _mm256_loadu_pd( av[1] + 12 );                    // a_vec[1] = a_buf[12:15, 1]
-            a_vec[2].v =  _mm256_loadu_pd( av[2] + 12 );                    // a_vec[2] = a_buf[12:15, 2]
-            a_vec[3].v =  _mm256_loadu_pd( av[3] + 12 );                    // a_vec[3] = a_buf[12:15, 3]
+                // perform: rho?v += a?v * x0v;
+                rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv1.v, rhov[4].v );    // rhov[4] += a_buf[4:7, 4] * x_buf[4:7]
+                rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv1.v, rhov[5].v );    // rhov[5] += a_buf[4:7, 5] * x_buf[4:7]
+                rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv1.v, rhov[6].v );    // rhov[6] += a_buf[4:7, 6] * x_buf[4:7]
+                rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv1.v, rhov[7].v );    // rhov[7] += a_buf[4:7, 7] * x_buf[4:7]
 
-            // perform: rho?v += a?v * x0v;
-            rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv3.v, rhov[0].v );    // rhov[0] += a_buf[12:15, 0] * x_buf[12:15]
-            rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv3.v, rhov[1].v );    // rhov[1] += a_buf[12:15, 1] * x_buf[12:15]
-            rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv3.v, rhov[2].v );    // rhov[2] += a_buf[12:15, 2] * x_buf[12:15]
-            rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv3.v, rhov[3].v );    // rhov[3] += a_buf[12:15, 3] * x_buf[12:15]
+                // Load the input values from vector X.
+                xv2.v =  _mm256_loadu_pd( x_buf + 8 );                          // xv2 = x_buf[8:11]
 
-            // Load the input values from Matrix A
-            a_vec[4].v =  _mm256_loadu_pd( av[4] + 12 );                    // a_vec[4] = a_buf[12:15, 4]
-            a_vec[5].v =  _mm256_loadu_pd( av[5] + 12 );                    // a_vec[5] = a_buf[12:15, 5]
-            a_vec[6].v =  _mm256_loadu_pd( av[6] + 12 );                    // a_vec[6] = a_buf[12:15, 6]
-            a_vec[7].v =  _mm256_loadu_pd( av[7] + 12 );                    // a_vec[7] = a_buf[12:15, 7]
+                // Load the input values from Matrix A
+                a_vec[0].v =  _mm256_loadu_pd( av[0] + 8 );                     // a_vec[0] = a_buf[8:11, 0]
+                a_vec[1].v =  _mm256_loadu_pd( av[1] + 8 );                     // a_vec[1] = a_buf[8:11, 1]
+                a_vec[2].v =  _mm256_loadu_pd( av[2] + 8 );                     // a_vec[2] = a_buf[8:11, 2]
+                a_vec[3].v =  _mm256_loadu_pd( av[3] + 8 );                     // a_vec[3] = a_buf[8:11, 3]
 
-            // perform: rho?v += a?v * x0v;
-            rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv3.v, rhov[4].v );    // rhov[4] += a_buf[12:15, 4] * x_buf[12:15]
-            rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv3.v, rhov[5].v );    // rhov[5] += a_buf[12:15, 5] * x_buf[12:15]
-            rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv3.v, rhov[6].v );    // rhov[6] += a_buf[12:15, 6] * x_buf[12:15]
-            rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv3.v, rhov[7].v );    // rhov[7] += a_buf[12:15, 7] * x_buf[12:15]
+                // perform: rho?v += a?v * x0v;
+                rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv2.v, rhov[0].v );    // rhov[0] += a_buf[8:11, 0] * x_buf[8:11]
+                rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv2.v, rhov[1].v );    // rhov[1] += a_buf[8:11, 1] * x_buf[8:11]
+                rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv2.v, rhov[2].v );    // rhov[2] += a_buf[8:11, 2] * x_buf[8:11]
+                rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv2.v, rhov[3].v );    // rhov[3] += a_buf[8:11, 3] * x_buf[8:11]
 
-            // Incrementing pointers by 16 (4 iterations * 4 elements per register)
-            av[0] += 16;
-            av[1] += 16;
-            av[2] += 16;
-            av[3] += 16;
-            av[4] += 16;
-            av[5] += 16;
-            av[6] += 16;
-            av[7] += 16;
-            x_buf += 16;
+                // Load the input values from Matrix A
+                a_vec[4].v =  _mm256_loadu_pd( av[4] + 8 );                     // a_vec[4] = a_buf[8:11, 4]
+                a_vec[5].v =  _mm256_loadu_pd( av[5] + 8 );                     // a_vec[5] = a_buf[8:11, 5]
+                a_vec[6].v =  _mm256_loadu_pd( av[6] + 8 );                     // a_vec[6] = a_buf[8:11, 6]
+                a_vec[7].v =  _mm256_loadu_pd( av[7] + 8 );                     // a_vec[7] = a_buf[8:11, 7]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv2.v, rhov[4].v );    // rhov[4] += a_buf[8:11, 4] * x_buf[8:11]
+                rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv2.v, rhov[5].v );    // rhov[5] += a_buf[8:11, 5] * x_buf[8:11]
+                rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv2.v, rhov[6].v );    // rhov[6] += a_buf[8:11, 6] * x_buf[8:11]
+                rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv2.v, rhov[7].v );    // rhov[7] += a_buf[8:11, 7] * x_buf[8:11]
+
+                // Load the input values from vector X.
+                xv3.v =  _mm256_loadu_pd( x_buf + 12 );                         // xv3 = x_buf[12:15]
+
+                // Load the input values from Matrix A
+                a_vec[0].v =  _mm256_loadu_pd( av[0] + 12 );                    // a_vec[0] = a_buf[12:15, 0]
+                a_vec[1].v =  _mm256_loadu_pd( av[1] + 12 );                    // a_vec[1] = a_buf[12:15, 1]
+                a_vec[2].v =  _mm256_loadu_pd( av[2] + 12 );                    // a_vec[2] = a_buf[12:15, 2]
+                a_vec[3].v =  _mm256_loadu_pd( av[3] + 12 );                    // a_vec[3] = a_buf[12:15, 3]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv3.v, rhov[0].v );    // rhov[0] += a_buf[12:15, 0] * x_buf[12:15]
+                rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv3.v, rhov[1].v );    // rhov[1] += a_buf[12:15, 1] * x_buf[12:15]
+                rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv3.v, rhov[2].v );    // rhov[2] += a_buf[12:15, 2] * x_buf[12:15]
+                rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv3.v, rhov[3].v );    // rhov[3] += a_buf[12:15, 3] * x_buf[12:15]
+
+                // Load the input values from Matrix A
+                a_vec[4].v =  _mm256_loadu_pd( av[4] + 12 );                    // a_vec[4] = a_buf[12:15, 4]
+                a_vec[5].v =  _mm256_loadu_pd( av[5] + 12 );                    // a_vec[5] = a_buf[12:15, 5]
+                a_vec[6].v =  _mm256_loadu_pd( av[6] + 12 );                    // a_vec[6] = a_buf[12:15, 6]
+                a_vec[7].v =  _mm256_loadu_pd( av[7] + 12 );                    // a_vec[7] = a_buf[12:15, 7]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv3.v, rhov[4].v );    // rhov[4] += a_buf[12:15, 4] * x_buf[12:15]
+                rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv3.v, rhov[5].v );    // rhov[5] += a_buf[12:15, 5] * x_buf[12:15]
+                rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv3.v, rhov[6].v );    // rhov[6] += a_buf[12:15, 6] * x_buf[12:15]
+                rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv3.v, rhov[7].v );    // rhov[7] += a_buf[12:15, 7] * x_buf[12:15]
+
+                // Incrementing pointers by 16 (4 iterations * 4 elements per register)
+                av[0] += 16;
+                av[1] += 16;
+                av[2] += 16;
+                av[3] += 16;
+                av[4] += 16;
+                av[5] += 16;
+                av[6] += 16;
+                av[7] += 16;
+                x_buf += 16;
+            }
+
+            // Handles (x_buf[0:7] * a_buf[0:7,0:7])
+            if ( (j + 7) < m )
+            {
+                // Load the input values from vector X.
+                xv0.v =  _mm256_loadu_pd( x_buf );                              // xv0 = x_buf[0:3]
+
+                // Load the input values from Matrix A
+                a_vec[0].v =  _mm256_loadu_pd( av[0] );                         // a_vec[0] = a_buf[0:3, 0]
+                a_vec[1].v =  _mm256_loadu_pd( av[1] );                         // a_vec[1] = a_buf[0:3, 1]
+                a_vec[2].v =  _mm256_loadu_pd( av[2] );                         // a_vec[2] = a_buf[0:3, 2]
+                a_vec[3].v =  _mm256_loadu_pd( av[3] );                         // a_vec[3] = a_buf[0:3, 3]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv0.v, rhov[0].v );    // rhov[0] += a_buf[0:3, 0] * x_buf[0:3]
+                rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv0.v, rhov[1].v );    // rhov[1] += a_buf[0:3, 1] * x_buf[0:3]
+                rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv0.v, rhov[2].v );    // rhov[2] += a_buf[0:3, 2] * x_buf[0:3]
+                rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv0.v, rhov[3].v );    // rhov[3] += a_buf[0:3, 3] * x_buf[0:3]
+
+                // Load the input values from Matrix A
+                a_vec[4].v =  _mm256_loadu_pd( av[4] );                         // a_vec[4] = a_buf[0:3, 4]
+                a_vec[5].v =  _mm256_loadu_pd( av[5] );                         // a_vec[5] = a_buf[0:3, 5]
+                a_vec[6].v =  _mm256_loadu_pd( av[6] );                         // a_vec[6] = a_buf[0:3, 6]
+                a_vec[7].v =  _mm256_loadu_pd( av[7] );                         // a_vec[7] = a_buf[0:3, 7]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv0.v, rhov[4].v );    // rhov[4] += a_buf[0:3, 4] * x_buf[0:3]
+                rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv0.v, rhov[5].v );    // rhov[5] += a_buf[0:3, 5] * x_buf[0:3]
+                rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv0.v, rhov[6].v );    // rhov[6] += a_buf[0:3, 6] * x_buf[0:3]
+                rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv0.v, rhov[7].v );    // rhov[7] += a_buf[0:3, 7] * x_buf[0:3]
+
+                // Load the input values from vector X.
+                xv1.v =  _mm256_loadu_pd( x_buf + 4 );                          // xv1 = x_buf[4:7]
+
+                // Load the input values from Matrix A
+                a_vec[0].v =  _mm256_loadu_pd( av[0] + 4 );                     // a_vec[0] = a_buf[4:7, 0]
+                a_vec[1].v =  _mm256_loadu_pd( av[1] + 4 );                     // a_vec[1] = a_buf[4:7, 1]
+                a_vec[2].v =  _mm256_loadu_pd( av[2] + 4 );                     // a_vec[2] = a_buf[4:7, 2]
+                a_vec[3].v =  _mm256_loadu_pd( av[3] + 4 );                     // a_vec[3] = a_buf[4:7, 3]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv1.v, rhov[0].v );    // rhov[0] += a_buf[4:7, 0] * x_buf[4:7]
+                rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv1.v, rhov[1].v );    // rhov[1] += a_buf[4:7, 1] * x_buf[4:7]
+                rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv1.v, rhov[2].v );    // rhov[2] += a_buf[4:7, 2] * x_buf[4:7]
+                rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv1.v, rhov[3].v );    // rhov[3] += a_buf[4:7, 3] * x_buf[4:7]
+
+                // Load the input values from Matrix A
+                a_vec[4].v =  _mm256_loadu_pd( av[4] + 4 );                     // a_vec[4] = a_buf[4:7, 4]
+                a_vec[5].v =  _mm256_loadu_pd( av[5] + 4 );                     // a_vec[5] = a_buf[4:7, 5]
+                a_vec[6].v =  _mm256_loadu_pd( av[6] + 4 );                     // a_vec[6] = a_buf[4:7, 6]
+                a_vec[7].v =  _mm256_loadu_pd( av[7] + 4 );                     // a_vec[7] = a_buf[4:7, 7]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv1.v, rhov[4].v );    // rhov[4] += a_buf[4:7, 4] * x_buf[4:7]
+                rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv1.v, rhov[5].v );    // rhov[5] += a_buf[4:7, 5] * x_buf[4:7]
+                rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv1.v, rhov[6].v );    // rhov[6] += a_buf[4:7, 6] * x_buf[4:7]
+                rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv1.v, rhov[7].v );    // rhov[7] += a_buf[4:7, 7] * x_buf[4:7]
+
+                // Incrementing pointers by 8 (2 iterations * 4 elements per register)
+                av[0] += 8;
+                av[1] += 8;
+                av[2] += 8;
+                av[3] += 8;
+                av[4] += 8;
+                av[5] += 8;
+                av[6] += 8;
+                av[7] += 8;
+                x_buf += 8;
+                j     += 8;
+            }
+
+            // Handles (x_buf[0:3] * a_buf[0:7,0:3])
+            if ( (j + 3) < m )
+            {
+                // Load the input values from vector X.
+                xv0.v =  _mm256_loadu_pd( x_buf );                              // xv0 = x_buf[0:3]
+
+                // Load the input values from Matrix A
+                a_vec[0].v =  _mm256_loadu_pd( av[0] );                         // a_vec[0] = a_buf[0:3, 0]
+                a_vec[1].v =  _mm256_loadu_pd( av[1] );                         // a_vec[1] = a_buf[0:3, 1]
+                a_vec[2].v =  _mm256_loadu_pd( av[2] );                         // a_vec[2] = a_buf[0:3, 2]
+                a_vec[3].v =  _mm256_loadu_pd( av[3] );                         // a_vec[3] = a_buf[0:3, 3]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv0.v, rhov[0].v );    // rhov[0] += a_buf[0:3, 0] * x_buf[0:3]
+                rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv0.v, rhov[1].v );    // rhov[1] += a_buf[0:3, 1] * x_buf[0:3]
+                rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv0.v, rhov[2].v );    // rhov[2] += a_buf[0:3, 2] * x_buf[0:3]
+                rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv0.v, rhov[3].v );    // rhov[3] += a_buf[0:3, 3] * x_buf[0:3]
+
+                // Load the input values from Matrix A
+                a_vec[4].v =  _mm256_loadu_pd( av[4] );                         // a_vec[4] = a_buf[0:3, 4]
+                a_vec[5].v =  _mm256_loadu_pd( av[5] );                         // a_vec[5] = a_buf[0:3, 5]
+                a_vec[6].v =  _mm256_loadu_pd( av[6] );                         // a_vec[6] = a_buf[0:3, 6]
+                a_vec[7].v =  _mm256_loadu_pd( av[7] );                         // a_vec[7] = a_buf[0:3, 7]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv0.v, rhov[4].v );    // rhov[4] += a_buf[4, 0:7] * x_buf[0:3]
+                rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv0.v, rhov[5].v );    // rhov[5] += a_buf[5, 0:7] * x_buf[0:3]
+                rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv0.v, rhov[6].v );    // rhov[6] += a_buf[6, 0:7] * x_buf[0:3]
+                rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv0.v, rhov[7].v );    // rhov[7] += a_buf[7, 0:7] * x_buf[0:3]
+
+                // Incrementing pointers by 4 (1 iteration * 4 elements per register)
+                av[0] += 4;
+                av[1] += 4;
+                av[2] += 4;
+                av[3] += 4;
+                av[4] += 4;
+                av[5] += 4;
+                av[6] += 4;
+                av[7] += 4;
+                x_buf += 4;
+                j    += 4;
+            }
+
+            // Handles fringe cases -> (x_buf[0:m_left] * a_buf[0:m_left, 0:7])
+            if( m_left )
+            {
+                // Load the input values from vector X.
+                xv0.v = _mm256_maskload_pd(x_buf, m_mask);                      // xv0 = x_buf[0:m_left]
+
+                // Load the input values from Matrix A
+                a_vec[0].v = _mm256_maskload_pd(av[0], m_mask);                 // a_vec[0] = a_buf[0:m_left, 0]
+                a_vec[1].v = _mm256_maskload_pd(av[1], m_mask);                 // a_vec[1] = a_buf[0:m_left, 1]
+                a_vec[2].v = _mm256_maskload_pd(av[2], m_mask);                 // a_vec[2] = a_buf[0:m_left, 2]
+                a_vec[3].v = _mm256_maskload_pd(av[3], m_mask);                 // a_vec[3] = a_buf[0:m_left, 3]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv0.v, rhov[0].v );    // rhov[0] += a_buf[0:m_left, 0] * x_buf[0:3]
+                rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv0.v, rhov[1].v );    // rhov[1] += a_buf[0:m_left, 1] * x_buf[0:3]
+                rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv0.v, rhov[2].v );    // rhov[2] += a_buf[0:m_left, 2] * x_buf[0:3]
+                rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv0.v, rhov[3].v );    // rhov[3] += a_buf[0:m_left, 3] * x_buf[0:3]
+
+                // Load the input values from Matrix A
+                a_vec[4].v = _mm256_maskload_pd(av[4], m_mask);                 // a_vec[4] = a_buf[0:m_left, 4]
+                a_vec[5].v = _mm256_maskload_pd(av[5], m_mask);                 // a_vec[5] = a_buf[0:m_left, 5]
+                a_vec[6].v = _mm256_maskload_pd(av[6], m_mask);                 // a_vec[6] = a_buf[0:m_left, 6]
+                a_vec[7].v = _mm256_maskload_pd(av[7], m_mask);                 // a_vec[7] = a_buf[0:m_left, 7]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv0.v, rhov[4].v );    // rhov[4] += a_buf[0:m_left, 4] * x_buf[0:3]
+                rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv0.v, rhov[5].v );    // rhov[5] += a_buf[0:m_left, 5] * x_buf[0:3]
+                rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv0.v, rhov[6].v );    // rhov[6] += a_buf[0:m_left, 6] * x_buf[0:3]
+                rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv0.v, rhov[7].v );    // rhov[7] += a_buf[0:m_left, 7] * x_buf[0:3]
+            }
+            // This section of code is used to find the sum of values in 8 vectors (rhov[0:7]),
+            // and store the result into the 4 elements of rhov[0] and rhov[1] vectors each.
+            rhov[0].v = _mm256_hadd_pd( rhov[0].v, rhov[0].v );                  //rhov[0][0:1] = rhov[0][0] + rhov[0][1], rhov[0][2:3] = rhov[0][2] + rhov[0][3]
+            rhov[1].v = _mm256_hadd_pd( rhov[1].v, rhov[1].v );                  //rhov[1][0:1] = rhov[1][0] + rhov[1][1], rhov[1][2:3] = rhov[1][2] + rhov[1][3]
+            rhov[2].v = _mm256_hadd_pd( rhov[2].v, rhov[2].v );                  //rhov[2][0:1] = rhov[2][0] + rhov[2][1], rhov[2][2:3] = rhov[2][2] + rhov[2][3]
+            rhov[3].v = _mm256_hadd_pd( rhov[3].v, rhov[3].v );                  //rhov[3][0:1] = rhov[3][0] + rhov[3][1], rhov[3][2:3] = rhov[3][2] + rhov[3][3]
+
+            rhov[4].v = _mm256_hadd_pd( rhov[4].v, rhov[4].v );                  //rhov[4][0:1] = rhov[4][0] + rhov[4][1], rhov[4][2:3] = rhov[4][2] + rhov[4][3]
+            rhov[5].v = _mm256_hadd_pd( rhov[5].v, rhov[5].v );                  //rhov[5][0:1] = rhov[5][0] + rhov[5][1], rhov[5][2:3] = rhov[5][2] + rhov[5][3]
+            rhov[6].v = _mm256_hadd_pd( rhov[6].v, rhov[6].v );                  //rhov[6][0:1] = rhov[6][0] + rhov[6][1], rhov[6][2:3] = rhov[6][2] + rhov[6][3]
+            rhov[7].v = _mm256_hadd_pd( rhov[7].v, rhov[7].v );                  //rhov[7][0:1] = rhov[7][0] + rhov[7][1], rhov[7][2:3] = rhov[7][2] + rhov[7][3]
+
+            // Sum the results of the horizontal adds to get the final sums for each vector
+            rhov[0].d[0] = rhov[0].d[0] + rhov[0].d[2];                         // rhov[0][0] = (rhov[0][0] + rhov[0][1]) + (rhov[0][2] + rhov[0][3])
+            rhov[0].d[1] = rhov[1].d[0] + rhov[1].d[2];                         // rhov[0][1] = (rhov[1][0] + rhov[1][1]) + (rhov[1][2] + rhov[1][3])
+            rhov[0].d[2] = rhov[2].d[0] + rhov[2].d[2];                         // rhov[0][2] = (rhov[2][0] + rhov[2][1]) + (rhov[2][2] + rhov[2][3])
+            rhov[0].d[3] = rhov[3].d[0] + rhov[3].d[2];                         // rhov[0][3] = (rhov[3][0] + rhov[3][1]) + (rhov[3][2] + rhov[3][3])
+
+            // yv0 = alpha * rho + yv0
+            yv0.v = _mm256_fmadd_pd( alphav.v, rhov[0].v, yv0.v );
+
+            // Sum the results of the horizontal adds to get the final sums for each vector
+            rhov[1].d[0] = rhov[4].d[0] + rhov[4].d[2];                         // rhov[1][0] = (rhov[4][0] + rhov[4][1]) + (rhov[4][2] + rhov[4][3])
+            rhov[1].d[1] = rhov[5].d[0] + rhov[5].d[2];                         // rhov[1][1] = (rhov[5][0] + rhov[5][1]) + (rhov[5][2] + rhov[5][3])
+            rhov[1].d[2] = rhov[6].d[0] + rhov[6].d[2];                         // rhov[1][2] = (rhov[6][0] + rhov[6][1]) + (rhov[6][2] + rhov[6][3])
+            rhov[1].d[3] = rhov[7].d[0] + rhov[7].d[2];                         // rhov[1][3] = (rhov[7][0] + rhov[7][1]) + (rhov[7][2] + rhov[7][3])
+
+            // yv1 = alpha * rho + yv1
+            yv1.v = _mm256_fmadd_pd( alphav.v, rhov[1].v, yv1.v );
+
+            // Store the result back into vector y using '_mm256_storeu_pd'
+            _mm256_storeu_pd( y_buf, yv0.v );                                   // y_buf[0:3] = yv0
+            _mm256_storeu_pd( y_buf + 4, yv1.v );                               // y_buf[4:7] = yv1
+
+            // The pointers are moved to the corresponding position for next calculation.
+            x_buf = x;
+            y_buf += 8;
+            a_buf += 8 * lda;
         }
-
-        // Handles (x_buf[0:7] * a_buf[0:7,0:7])
-        if ( (j + 7) < m )
+    }
+    else
+    {
+        // This code section will be responsible for handling cases where beta is equal to zero.
+        // The following loop processes the matrix A in chunks of 8 columns at a time.
+        // For each chunk, the result of the matrix-vector multiplication is stored in the corresponding elements of the vector y.
+        for ( i = 0; i < n_iter; ++i)
         {
-            // Load the input values from vector X.
-            xv0.v =  _mm256_loadu_pd( x_buf );                              // xv0 = x_buf[0:3]
+            // j denotes the number of rows completed
+            dim_t j = 0;
 
-            // Load the input values from Matrix A
-            a_vec[0].v =  _mm256_loadu_pd( av[0] );                         // a_vec[0] = a_buf[0:3, 0]
-            a_vec[1].v =  _mm256_loadu_pd( av[1] );                         // a_vec[1] = a_buf[0:3, 1]
-            a_vec[2].v =  _mm256_loadu_pd( av[2] );                         // a_vec[2] = a_buf[0:3, 2]
-            a_vec[3].v =  _mm256_loadu_pd( av[3] );                         // a_vec[3] = a_buf[0:3, 3]
+            // Creating an array of pointers for 8 columns of matrix A
+            av[0] = a_buf + 0 * lda;            // av[0] = a_buf[:, 0]
+            av[1] = a_buf + 1 * lda;            // av[1] = a_buf[:, 1]
+            av[2] = a_buf + 2 * lda;            // av[2] = a_buf[:, 2]
+            av[3] = a_buf + 3 * lda;            // av[3] = a_buf[:, 3]
 
-            // perform: rho?v += a?v * x0v;
-            rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv0.v, rhov[0].v );    // rhov[0] += a_buf[0:3, 0] * x_buf[0:3]
-            rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv0.v, rhov[1].v );    // rhov[1] += a_buf[0:3, 1] * x_buf[0:3]
-            rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv0.v, rhov[2].v );    // rhov[2] += a_buf[0:3, 2] * x_buf[0:3]
-            rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv0.v, rhov[3].v );    // rhov[3] += a_buf[0:3, 3] * x_buf[0:3]
+            av[4] = a_buf + 4 * lda;            // av[4] = a_buf[:, 4]
+            av[5] = a_buf + 5 * lda;            // av[5] = a_buf[:, 5]
+            av[6] = a_buf + 6 * lda;            // av[6] = a_buf[:, 6]
+            av[7] = a_buf + 7 * lda;            // av[7] = a_buf[:, 7]
 
-            // Load the input values from Matrix A
-            a_vec[4].v =  _mm256_loadu_pd( av[4] );                         // a_vec[4] = a_buf[0:3, 4]
-            a_vec[5].v =  _mm256_loadu_pd( av[5] );                         // a_vec[5] = a_buf[0:3, 5]
-            a_vec[6].v =  _mm256_loadu_pd( av[6] );                         // a_vec[6] = a_buf[0:3, 6]
-            a_vec[7].v =  _mm256_loadu_pd( av[7] );                         // a_vec[7] = a_buf[0:3, 7]
+            // Clearing vectors for next loop
+            rhov[0].v = _mm256_setzero_pd();
+            rhov[1].v = _mm256_setzero_pd();
+            rhov[2].v = _mm256_setzero_pd();
+            rhov[3].v = _mm256_setzero_pd();
 
-            // perform: rho?v += a?v * x0v;
-            rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv0.v, rhov[4].v );    // rhov[4] += a_buf[0:3, 4] * x_buf[0:3]
-            rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv0.v, rhov[5].v );    // rhov[5] += a_buf[0:3, 5] * x_buf[0:3]
-            rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv0.v, rhov[6].v );    // rhov[6] += a_buf[0:3, 6] * x_buf[0:3]
-            rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv0.v, rhov[7].v );    // rhov[7] += a_buf[0:3, 7] * x_buf[0:3]
+            rhov[4].v = _mm256_setzero_pd();
+            rhov[5].v = _mm256_setzero_pd();
+            rhov[6].v = _mm256_setzero_pd();
+            rhov[7].v = _mm256_setzero_pd();
 
-            // Load the input values from vector X.
-            xv1.v =  _mm256_loadu_pd( x_buf + 4 );                          // xv1 = x_buf[4:7]
+            // Loading data from vector y
+            yv0.d[0] = *( y_buf + 0 * incy);                                // yv0[0] = y_buf[0]
+            yv0.d[1] = *( y_buf + 1 * incy);                                // yv0[1] = y_buf[1]
+            yv0.d[2] = *( y_buf + 2 * incy);                                // yv0[2] = y_buf[2]
+            yv0.d[3] = *( y_buf + 3 * incy);                                // yv0[3] = y_buf[3]
 
-            // Load the input values from Matrix A
-            a_vec[0].v =  _mm256_loadu_pd( av[0] + 4 );                     // a_vec[0] = a_buf[4:7, 0]
-            a_vec[1].v =  _mm256_loadu_pd( av[1] + 4 );                     // a_vec[1] = a_buf[4:7, 1]
-            a_vec[2].v =  _mm256_loadu_pd( av[2] + 4 );                     // a_vec[2] = a_buf[4:7, 2]
-            a_vec[3].v =  _mm256_loadu_pd( av[3] + 4 );                     // a_vec[3] = a_buf[4:7, 3]
+            yv1.d[0] = *( y_buf + 4 * incy);                                // yv1[0] = y_buf[4]
+            yv1.d[1] = *( y_buf + 5 * incy);                                // yv1[1] = y_buf[5]
+            yv1.d[2] = *( y_buf + 6 * incy);                                // yv1[2] = y_buf[6]
+            yv1.d[3] = *( y_buf + 7 * incy);                                // yv1[3] = y_buf[7]
 
-            // perform: rho?v += a?v * x0v;
-            rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv1.v, rhov[0].v );    // rhov[0] += a_buf[4:7, 0] * x_buf[4:7]
-            rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv1.v, rhov[1].v );    // rhov[1] += a_buf[4:7, 1] * x_buf[4:7]
-            rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv1.v, rhov[2].v );    // rhov[2] += a_buf[4:7, 2] * x_buf[4:7]
-            rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv1.v, rhov[3].v );    // rhov[3] += a_buf[4:7, 3] * x_buf[4:7]
+            // Calculating beta * y
+            if (bli_deq0( *beta ))
+            {
+                yv0.v =  _mm256_setzero_pd();                               // yv0 = beta * y_buf[0:3]
+                yv1.v =  _mm256_setzero_pd();                               // yv1 = beta * y_buf[4:7]
+            }
+            else
+            {
+                yv0.v =  _mm256_mul_pd ( betav.v, yv0.v );                  // yv0 = beta * y_buf[0:3]
+                yv1.v =  _mm256_mul_pd ( betav.v, yv1.v );                  // yv1 = beta * y_buf[4:7]
+            }
 
-            // Load the input values from Matrix A
-            a_vec[4].v =  _mm256_loadu_pd( av[4] + 4 );                     // a_vec[4] = a_buf[4:7, 4]
-            a_vec[5].v =  _mm256_loadu_pd( av[5] + 4 );                     // a_vec[5] = a_buf[4:7, 5]
-            a_vec[6].v =  _mm256_loadu_pd( av[6] + 4 );                     // a_vec[6] = a_buf[4:7, 6]
-            a_vec[7].v =  _mm256_loadu_pd( av[7] + 4 );                     // a_vec[7] = a_buf[4:7, 7]
+            // Handles (x_buf[0:15] * a_buf[0:15,0:7])
+            for ( j = 0; (j + 15) < m; j += 16 )
+            {
+                // Load the input values from vector X.
+                xv0.v =  _mm256_loadu_pd( x_buf );                              // xv0 = x_buf[0:3]
 
-            // perform: rho?v += a?v * x0v;
-            rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv1.v, rhov[4].v );    // rhov[4] += a_buf[4:7, 4] * x_buf[4:7]
-            rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv1.v, rhov[5].v );    // rhov[5] += a_buf[4:7, 5] * x_buf[4:7]
-            rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv1.v, rhov[6].v );    // rhov[6] += a_buf[4:7, 6] * x_buf[4:7]
-            rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv1.v, rhov[7].v );    // rhov[7] += a_buf[4:7, 7] * x_buf[4:7]
+                // Load the input values from Matrix A
+                a_vec[0].v =  _mm256_loadu_pd( av[0] );                         // a_vec[0] = a_buf[0:3, 0]
+                a_vec[1].v =  _mm256_loadu_pd( av[1] );                         // a_vec[1] = a_buf[0:3, 1]
+                a_vec[2].v =  _mm256_loadu_pd( av[2] );                         // a_vec[2] = a_buf[0:3, 2]
+                a_vec[3].v =  _mm256_loadu_pd( av[3] );                         // a_vec[3] = a_buf[0:3, 3]
 
-            // Incrementing pointers by 8 (2 iterations * 4 elements per register)
-            av[0] += 8;
-            av[1] += 8;
-            av[2] += 8;
-            av[3] += 8;
-            av[4] += 8;
-            av[5] += 8;
-            av[6] += 8;
-            av[7] += 8;
-            x_buf += 8;
-            j     += 8;
+                // perform: rho?v += a?v * x0v;
+                rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv0.v, rhov[0].v );    // rhov[0] += a_buf[0:3, 0] * x_buf[0:3]
+                rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv0.v, rhov[1].v );    // rhov[1] += a_buf[0:3, 1] * x_buf[0:3]
+                rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv0.v, rhov[2].v );    // rhov[2] += a_buf[0:3, 2] * x_buf[0:3]
+                rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv0.v, rhov[3].v );    // rhov[3] += a_buf[0:3, 3] * x_buf[0:3]
+
+                // Load the input values from Matrix A
+                a_vec[4].v =  _mm256_loadu_pd( av[4] );                         // a_vec[4] = a_buf[0:3, 4]
+                a_vec[5].v =  _mm256_loadu_pd( av[5] );                         // a_vec[5] = a_buf[0:3, 5]
+                a_vec[6].v =  _mm256_loadu_pd( av[6] );                         // a_vec[6] = a_buf[0:3, 6]
+                a_vec[7].v =  _mm256_loadu_pd( av[7] );                         // a_vec[7] = a_buf[0:3, 7]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv0.v, rhov[4].v );    // rhov[4] += a_buf[0:3, 4] * x_buf[0:3]
+                rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv0.v, rhov[5].v );    // rhov[5] += a_buf[0:3, 5] * x_buf[0:3]
+                rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv0.v, rhov[6].v );    // rhov[6] += a_buf[0:3, 6] * x_buf[0:3]
+                rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv0.v, rhov[7].v );    // rhov[7] += a_buf[0:3, 7] * x_buf[0:3]
+
+                // Load the input values from vector X.
+                xv1.v =  _mm256_loadu_pd( x_buf + 4 );                          // xv1 = x_buf[4:7]
+
+                // Load the input values from Matrix A
+                a_vec[0].v =  _mm256_loadu_pd( av[0] + 4 );                     // a_vec[0] = a_buf[4:7, 0]
+                a_vec[1].v =  _mm256_loadu_pd( av[1] + 4 );                     // a_vec[1] = a_buf[4:7, 1]
+                a_vec[2].v =  _mm256_loadu_pd( av[2] + 4 );                     // a_vec[2] = a_buf[4:7, 2]
+                a_vec[3].v =  _mm256_loadu_pd( av[3] + 4 );                     // a_vec[3] = a_buf[4:7, 3]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv1.v, rhov[0].v );    // rhov[0] += a_buf[4:7, 0] * x_buf[4:7]
+                rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv1.v, rhov[1].v );    // rhov[1] += a_buf[4:7, 1] * x_buf[4:7]
+                rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv1.v, rhov[2].v );    // rhov[2] += a_buf[4:7, 2] * x_buf[4:7]
+                rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv1.v, rhov[3].v );    // rhov[3] += a_buf[4:7, 3] * x_buf[4:7]
+
+                // Load the input values from Matrix A
+                a_vec[4].v =  _mm256_loadu_pd( av[4] + 4 );                     // a_vec[4] = a_buf[4:7, 4]
+                a_vec[5].v =  _mm256_loadu_pd( av[5] + 4 );                     // a_vec[5] = a_buf[4:7, 5]
+                a_vec[6].v =  _mm256_loadu_pd( av[6] + 4 );                     // a_vec[6] = a_buf[4:7, 6]
+                a_vec[7].v =  _mm256_loadu_pd( av[7] + 4 );                     // a_vec[7] = a_buf[4:7, 7]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv1.v, rhov[4].v );    // rhov[4] += a_buf[4:7, 4] * x_buf[4:7]
+                rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv1.v, rhov[5].v );    // rhov[5] += a_buf[4:7, 5] * x_buf[4:7]
+                rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv1.v, rhov[6].v );    // rhov[6] += a_buf[4:7, 6] * x_buf[4:7]
+                rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv1.v, rhov[7].v );    // rhov[7] += a_buf[4:7, 7] * x_buf[4:7]
+
+                // Load the input values from vector X.
+                xv2.v =  _mm256_loadu_pd( x_buf + 8 );                          // xv2 = x_buf[8:11]
+
+                // Load the input values from Matrix A
+                a_vec[0].v =  _mm256_loadu_pd( av[0] + 8 );                     // a_vec[0] = a_buf[8:11, 0]
+                a_vec[1].v =  _mm256_loadu_pd( av[1] + 8 );                     // a_vec[1] = a_buf[8:11, 1]
+                a_vec[2].v =  _mm256_loadu_pd( av[2] + 8 );                     // a_vec[2] = a_buf[8:11, 2]
+                a_vec[3].v =  _mm256_loadu_pd( av[3] + 8 );                     // a_vec[3] = a_buf[8:11, 3]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv2.v, rhov[0].v );    // rhov[0] += a_buf[8:11, 0] * x_buf[8:11]
+                rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv2.v, rhov[1].v );    // rhov[1] += a_buf[8:11, 1] * x_buf[8:11]
+                rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv2.v, rhov[2].v );    // rhov[2] += a_buf[8:11, 2] * x_buf[8:11]
+                rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv2.v, rhov[3].v );    // rhov[3] += a_buf[8:11, 3] * x_buf[8:11]
+
+                // Load the input values from Matrix A
+                a_vec[4].v =  _mm256_loadu_pd( av[4] + 8 );                     // a_vec[4] = a_buf[8:11, 4]
+                a_vec[5].v =  _mm256_loadu_pd( av[5] + 8 );                     // a_vec[5] = a_buf[8:11, 5]
+                a_vec[6].v =  _mm256_loadu_pd( av[6] + 8 );                     // a_vec[6] = a_buf[8:11, 6]
+                a_vec[7].v =  _mm256_loadu_pd( av[7] + 8 );                     // a_vec[7] = a_buf[8:11, 7]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv2.v, rhov[4].v );    // rhov[4] += a_buf[8:11, 4] * x_buf[8:11]
+                rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv2.v, rhov[5].v );    // rhov[5] += a_buf[8:11, 5] * x_buf[8:11]
+                rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv2.v, rhov[6].v );    // rhov[6] += a_buf[8:11, 6] * x_buf[8:11]
+                rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv2.v, rhov[7].v );    // rhov[7] += a_buf[8:11, 7] * x_buf[8:11]
+
+                // Load the input values from vector X.
+                xv3.v =  _mm256_loadu_pd( x_buf + 12 );                         // xv3 = x_buf[12:15]
+
+                // Load the input values from Matrix A
+                a_vec[0].v =  _mm256_loadu_pd( av[0] + 12 );                    // a_vec[0] = a_buf[12:15, 0]
+                a_vec[1].v =  _mm256_loadu_pd( av[1] + 12 );                    // a_vec[1] = a_buf[12:15, 1]
+                a_vec[2].v =  _mm256_loadu_pd( av[2] + 12 );                    // a_vec[2] = a_buf[12:15, 2]
+                a_vec[3].v =  _mm256_loadu_pd( av[3] + 12 );                    // a_vec[3] = a_buf[12:15, 3]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv3.v, rhov[0].v );    // rhov[0] += a_buf[12:15, 0] * x_buf[12:15]
+                rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv3.v, rhov[1].v );    // rhov[1] += a_buf[12:15, 1] * x_buf[12:15]
+                rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv3.v, rhov[2].v );    // rhov[2] += a_buf[12:15, 2] * x_buf[12:15]
+                rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv3.v, rhov[3].v );    // rhov[3] += a_buf[12:15, 3] * x_buf[12:15]
+
+                // Load the input values from Matrix A
+                a_vec[4].v =  _mm256_loadu_pd( av[4] + 12 );                    // a_vec[4] = a_buf[12:15, 4]
+                a_vec[5].v =  _mm256_loadu_pd( av[5] + 12 );                    // a_vec[5] = a_buf[12:15, 5]
+                a_vec[6].v =  _mm256_loadu_pd( av[6] + 12 );                    // a_vec[6] = a_buf[12:15, 6]
+                a_vec[7].v =  _mm256_loadu_pd( av[7] + 12 );                    // a_vec[7] = a_buf[12:15, 7]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv3.v, rhov[4].v );    // rhov[4] += a_buf[12:15, 4] * x_buf[12:15]
+                rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv3.v, rhov[5].v );    // rhov[5] += a_buf[12:15, 5] * x_buf[12:15]
+                rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv3.v, rhov[6].v );    // rhov[6] += a_buf[12:15, 6] * x_buf[12:15]
+                rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv3.v, rhov[7].v );    // rhov[7] += a_buf[12:15, 7] * x_buf[12:15]
+
+                // Incrementing pointers by 16 (4 iterations * 4 elements per register)
+                av[0] += 16;
+                av[1] += 16;
+                av[2] += 16;
+                av[3] += 16;
+                av[4] += 16;
+                av[5] += 16;
+                av[6] += 16;
+                av[7] += 16;
+                x_buf += 16;
+            }
+
+            // Handles (x_buf[0:7] * a_buf[0:7,0:7])
+            if ( (j + 7) < m )
+            {
+                // Load the input values from vector X.
+                xv0.v =  _mm256_loadu_pd( x_buf );                              // xv0 = x_buf[0:3]
+
+                // Load the input values from Matrix A
+                a_vec[0].v =  _mm256_loadu_pd( av[0] );                         // a_vec[0] = a_buf[0:3, 0]
+                a_vec[1].v =  _mm256_loadu_pd( av[1] );                         // a_vec[1] = a_buf[0:3, 1]
+                a_vec[2].v =  _mm256_loadu_pd( av[2] );                         // a_vec[2] = a_buf[0:3, 2]
+                a_vec[3].v =  _mm256_loadu_pd( av[3] );                         // a_vec[3] = a_buf[0:3, 3]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv0.v, rhov[0].v );    // rhov[0] += a_buf[0:3, 0] * x_buf[0:3]
+                rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv0.v, rhov[1].v );    // rhov[1] += a_buf[0:3, 1] * x_buf[0:3]
+                rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv0.v, rhov[2].v );    // rhov[2] += a_buf[0:3, 2] * x_buf[0:3]
+                rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv0.v, rhov[3].v );    // rhov[3] += a_buf[0:3, 3] * x_buf[0:3]
+
+                // Load the input values from Matrix A
+                a_vec[4].v =  _mm256_loadu_pd( av[4] );                         // a_vec[4] = a_buf[0:3, 4]
+                a_vec[5].v =  _mm256_loadu_pd( av[5] );                         // a_vec[5] = a_buf[0:3, 5]
+                a_vec[6].v =  _mm256_loadu_pd( av[6] );                         // a_vec[6] = a_buf[0:3, 6]
+                a_vec[7].v =  _mm256_loadu_pd( av[7] );                         // a_vec[7] = a_buf[0:3, 7]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv0.v, rhov[4].v );    // rhov[4] += a_buf[0:3, 4] * x_buf[0:3]
+                rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv0.v, rhov[5].v );    // rhov[5] += a_buf[0:3, 5] * x_buf[0:3]
+                rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv0.v, rhov[6].v );    // rhov[6] += a_buf[0:3, 6] * x_buf[0:3]
+                rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv0.v, rhov[7].v );    // rhov[7] += a_buf[0:3, 7] * x_buf[0:3]
+
+                // Load the input values from vector X.
+                xv1.v =  _mm256_loadu_pd( x_buf + 4 );                          // xv1 = x_buf[4:7]
+
+                // Load the input values from Matrix A
+                a_vec[0].v =  _mm256_loadu_pd( av[0] + 4 );                     // a_vec[0] = a_buf[4:7, 0]
+                a_vec[1].v =  _mm256_loadu_pd( av[1] + 4 );                     // a_vec[1] = a_buf[4:7, 1]
+                a_vec[2].v =  _mm256_loadu_pd( av[2] + 4 );                     // a_vec[2] = a_buf[4:7, 2]
+                a_vec[3].v =  _mm256_loadu_pd( av[3] + 4 );                     // a_vec[3] = a_buf[4:7, 3]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv1.v, rhov[0].v );    // rhov[0] += a_buf[4:7, 0] * x_buf[4:7]
+                rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv1.v, rhov[1].v );    // rhov[1] += a_buf[4:7, 1] * x_buf[4:7]
+                rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv1.v, rhov[2].v );    // rhov[2] += a_buf[4:7, 2] * x_buf[4:7]
+                rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv1.v, rhov[3].v );    // rhov[3] += a_buf[4:7, 3] * x_buf[4:7]
+
+                // Load the input values from Matrix A
+                a_vec[4].v =  _mm256_loadu_pd( av[4] + 4 );                     // a_vec[4] = a_buf[4:7, 4]
+                a_vec[5].v =  _mm256_loadu_pd( av[5] + 4 );                     // a_vec[5] = a_buf[4:7, 5]
+                a_vec[6].v =  _mm256_loadu_pd( av[6] + 4 );                     // a_vec[6] = a_buf[4:7, 6]
+                a_vec[7].v =  _mm256_loadu_pd( av[7] + 4 );                     // a_vec[7] = a_buf[4:7, 7]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv1.v, rhov[4].v );    // rhov[4] += a_buf[4:7, 4] * x_buf[4:7]
+                rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv1.v, rhov[5].v );    // rhov[5] += a_buf[4:7, 5] * x_buf[4:7]
+                rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv1.v, rhov[6].v );    // rhov[6] += a_buf[4:7, 6] * x_buf[4:7]
+                rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv1.v, rhov[7].v );    // rhov[7] += a_buf[4:7, 7] * x_buf[4:7]
+
+                // Incrementing pointers by 8 (2 iterations * 4 elements per register)
+                av[0] += 8;
+                av[1] += 8;
+                av[2] += 8;
+                av[3] += 8;
+                av[4] += 8;
+                av[5] += 8;
+                av[6] += 8;
+                av[7] += 8;
+                x_buf += 8;
+                j     += 8;
+            }
+
+            // Handles (x_buf[0:3] * a_buf[0:7,0:3])
+            if ( (j + 3) < m )
+            {
+                // Load the input values from vector X.
+                xv0.v =  _mm256_loadu_pd( x_buf );                              // xv0 = x_buf[0:3]
+
+                // Load the input values from Matrix A
+                a_vec[0].v =  _mm256_loadu_pd( av[0] );                         // a_vec[0] = a_buf[0:3, 0]
+                a_vec[1].v =  _mm256_loadu_pd( av[1] );                         // a_vec[1] = a_buf[0:3, 1]
+                a_vec[2].v =  _mm256_loadu_pd( av[2] );                         // a_vec[2] = a_buf[0:3, 2]
+                a_vec[3].v =  _mm256_loadu_pd( av[3] );                         // a_vec[3] = a_buf[0:3, 3]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv0.v, rhov[0].v );    // rhov[0] += a_buf[0:3, 0] * x_buf[0:3]
+                rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv0.v, rhov[1].v );    // rhov[1] += a_buf[0:3, 1] * x_buf[0:3]
+                rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv0.v, rhov[2].v );    // rhov[2] += a_buf[0:3, 2] * x_buf[0:3]
+                rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv0.v, rhov[3].v );    // rhov[3] += a_buf[0:3, 3] * x_buf[0:3]
+
+                // Load the input values from Matrix A
+                a_vec[4].v =  _mm256_loadu_pd( av[4] );                         // a_vec[4] = a_buf[0:3, 4]
+                a_vec[5].v =  _mm256_loadu_pd( av[5] );                         // a_vec[5] = a_buf[0:3, 5]
+                a_vec[6].v =  _mm256_loadu_pd( av[6] );                         // a_vec[6] = a_buf[0:3, 6]
+                a_vec[7].v =  _mm256_loadu_pd( av[7] );                         // a_vec[7] = a_buf[0:3, 7]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv0.v, rhov[4].v );    // rhov[4] += a_buf[4, 0:7] * x_buf[0:3]
+                rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv0.v, rhov[5].v );    // rhov[5] += a_buf[5, 0:7] * x_buf[0:3]
+                rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv0.v, rhov[6].v );    // rhov[6] += a_buf[6, 0:7] * x_buf[0:3]
+                rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv0.v, rhov[7].v );    // rhov[7] += a_buf[7, 0:7] * x_buf[0:3]
+
+                // Incrementing pointers by 4 (1 iteration * 4 elements per register)
+                av[0] += 4;
+                av[1] += 4;
+                av[2] += 4;
+                av[3] += 4;
+                av[4] += 4;
+                av[5] += 4;
+                av[6] += 4;
+                av[7] += 4;
+                x_buf += 4;
+                j    += 4;
+            }
+
+            // Handles fringe cases -> (x_buf[0:m_left] * a_buf[0:m_left, 0:7])
+            if( m_left )
+            {
+                // Load the input values from vector X.
+                xv0.v = _mm256_maskload_pd(x_buf, m_mask);                      // xv0 = x_buf[0:m_left]
+
+                // Load the input values from Matrix A
+                a_vec[0].v = _mm256_maskload_pd(av[0], m_mask);                 // a_vec[0] = a_buf[0:m_left, 0]
+                a_vec[1].v = _mm256_maskload_pd(av[1], m_mask);                 // a_vec[1] = a_buf[0:m_left, 1]
+                a_vec[2].v = _mm256_maskload_pd(av[2], m_mask);                 // a_vec[2] = a_buf[0:m_left, 2]
+                a_vec[3].v = _mm256_maskload_pd(av[3], m_mask);                 // a_vec[3] = a_buf[0:m_left, 3]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv0.v, rhov[0].v );    // rhov[0] += a_buf[0:m_left, 0] * x_buf[0:3]
+                rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv0.v, rhov[1].v );    // rhov[1] += a_buf[0:m_left, 1] * x_buf[0:3]
+                rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv0.v, rhov[2].v );    // rhov[2] += a_buf[0:m_left, 2] * x_buf[0:3]
+                rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv0.v, rhov[3].v );    // rhov[3] += a_buf[0:m_left, 3] * x_buf[0:3]
+
+                // Load the input values from Matrix A
+                a_vec[4].v = _mm256_maskload_pd(av[4], m_mask);                 // a_vec[4] = a_buf[0:m_left, 4]
+                a_vec[5].v = _mm256_maskload_pd(av[5], m_mask);                 // a_vec[5] = a_buf[0:m_left, 5]
+                a_vec[6].v = _mm256_maskload_pd(av[6], m_mask);                 // a_vec[6] = a_buf[0:m_left, 6]
+                a_vec[7].v = _mm256_maskload_pd(av[7], m_mask);                 // a_vec[7] = a_buf[0:m_left, 7]
+
+                // perform: rho?v += a?v * x0v;
+                rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv0.v, rhov[4].v );    // rhov[4] += a_buf[0:m_left, 4] * x_buf[0:3]
+                rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv0.v, rhov[5].v );    // rhov[5] += a_buf[0:m_left, 5] * x_buf[0:3]
+                rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv0.v, rhov[6].v );    // rhov[6] += a_buf[0:m_left, 6] * x_buf[0:3]
+                rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv0.v, rhov[7].v );    // rhov[7] += a_buf[0:m_left, 7] * x_buf[0:3]
+            }
+            // This section of code is used to find the sum of values in 8 vectors (rhov[0:7]),
+            // and store the result into the 4 elements of rhov[0] and rhov[1] vectors each.
+            rhov[0].v = _mm256_hadd_pd( rhov[0].v, rhov[0].v );                  //rhov[0][0:1] = rhov[0][0] + rhov[0][1], rhov[0][2:3] = rhov[0][2] + rhov[0][3]
+            rhov[1].v = _mm256_hadd_pd( rhov[1].v, rhov[1].v );                  //rhov[1][0:1] = rhov[1][0] + rhov[1][1], rhov[1][2:3] = rhov[1][2] + rhov[1][3]
+            rhov[2].v = _mm256_hadd_pd( rhov[2].v, rhov[2].v );                  //rhov[2][0:1] = rhov[2][0] + rhov[2][1], rhov[2][2:3] = rhov[2][2] + rhov[2][3]
+            rhov[3].v = _mm256_hadd_pd( rhov[3].v, rhov[3].v );                  //rhov[3][0:1] = rhov[3][0] + rhov[3][1], rhov[3][2:3] = rhov[3][2] + rhov[3][3]
+
+            rhov[4].v = _mm256_hadd_pd( rhov[4].v, rhov[4].v );                  //rhov[4][0:1] = rhov[4][0] + rhov[4][1], rhov[4][2:3] = rhov[4][2] + rhov[4][3]
+            rhov[5].v = _mm256_hadd_pd( rhov[5].v, rhov[5].v );                  //rhov[5][0:1] = rhov[5][0] + rhov[5][1], rhov[5][2:3] = rhov[5][2] + rhov[5][3]
+            rhov[6].v = _mm256_hadd_pd( rhov[6].v, rhov[6].v );                  //rhov[6][0:1] = rhov[6][0] + rhov[6][1], rhov[6][2:3] = rhov[6][2] + rhov[6][3]
+            rhov[7].v = _mm256_hadd_pd( rhov[7].v, rhov[7].v );                  //rhov[7][0:1] = rhov[7][0] + rhov[7][1], rhov[7][2:3] = rhov[7][2] + rhov[7][3]
+
+            // Sum the results of the horizontal adds to get the final sums for each vector
+            rhov[0].d[0] = rhov[0].d[0] + rhov[0].d[2];                         // rhov[0][0] = (rhov[0][0] + rhov[0][1]) + (rhov[0][2] + rhov[0][3])
+            rhov[0].d[1] = rhov[1].d[0] + rhov[1].d[2];                         // rhov[0][1] = (rhov[1][0] + rhov[1][1]) + (rhov[1][2] + rhov[1][3])
+            rhov[0].d[2] = rhov[2].d[0] + rhov[2].d[2];                         // rhov[0][2] = (rhov[2][0] + rhov[2][1]) + (rhov[2][2] + rhov[2][3])
+            rhov[0].d[3] = rhov[3].d[0] + rhov[3].d[2];                         // rhov[0][3] = (rhov[3][0] + rhov[3][1]) + (rhov[3][2] + rhov[3][3])
+
+            // yv0 = alpha * rho + yv0
+            yv0.v = _mm256_fmadd_pd( alphav.v, rhov[0].v, yv0.v );
+
+            // Sum the results of the horizontal adds to get the final sums for each vector
+            rhov[1].d[0] = rhov[4].d[0] + rhov[4].d[2];                         // rhov[1][0] = (rhov[4][0] + rhov[4][1]) + (rhov[4][2] + rhov[4][3])
+            rhov[1].d[1] = rhov[5].d[0] + rhov[5].d[2];                         // rhov[1][1] = (rhov[5][0] + rhov[5][1]) + (rhov[5][2] + rhov[5][3])
+            rhov[1].d[2] = rhov[6].d[0] + rhov[6].d[2];                         // rhov[1][2] = (rhov[6][0] + rhov[6][1]) + (rhov[6][2] + rhov[6][3])
+            rhov[1].d[3] = rhov[7].d[0] + rhov[7].d[2];                         // rhov[1][3] = (rhov[7][0] + rhov[7][1]) + (rhov[7][2] + rhov[7][3])
+
+            // yv1 = alpha * rho + yv1
+            yv1.v = _mm256_fmadd_pd( alphav.v, rhov[1].v, yv1.v );
+
+            // In case of non-unit stride y,
+            // The result is manually moved back onto vector y
+            *( y_buf + 0 * incy ) = yv0.d[0];
+            *( y_buf + 1 * incy ) = yv0.d[1];
+            *( y_buf + 2 * incy ) = yv0.d[2];
+            *( y_buf + 3 * incy ) = yv0.d[3];
+
+            *( y_buf + 4 * incy ) = yv1.d[0];
+            *( y_buf + 5 * incy ) = yv1.d[1];
+            *( y_buf + 6 * incy ) = yv1.d[2];
+            *( y_buf + 7 * incy ) = yv1.d[3];
+
+            // The pointers are moved to the corresponding position for next calculation.
+            x_buf = x;
+            y_buf += 8 * incy;
+            a_buf += 8 * lda;
         }
-
-        // Handles (x_buf[0:3] * a_buf[0:7,0:3])
-        if ( (j + 3) < m )
-        {
-            // Load the input values from vector X.
-            xv0.v =  _mm256_loadu_pd( x_buf );                              // xv0 = x_buf[0:3]
-
-            // Load the input values from Matrix A
-            a_vec[0].v =  _mm256_loadu_pd( av[0] );                         // a_vec[0] = a_buf[0:3, 0]
-            a_vec[1].v =  _mm256_loadu_pd( av[1] );                         // a_vec[1] = a_buf[0:3, 1]
-            a_vec[2].v =  _mm256_loadu_pd( av[2] );                         // a_vec[2] = a_buf[0:3, 2]
-            a_vec[3].v =  _mm256_loadu_pd( av[3] );                         // a_vec[3] = a_buf[0:3, 3]
-
-            // perform: rho?v += a?v * x0v;
-            rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv0.v, rhov[0].v );    // rhov[0] += a_buf[0:3, 0] * x_buf[0:3]
-            rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv0.v, rhov[1].v );    // rhov[1] += a_buf[0:3, 1] * x_buf[0:3]
-            rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv0.v, rhov[2].v );    // rhov[2] += a_buf[0:3, 2] * x_buf[0:3]
-            rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv0.v, rhov[3].v );    // rhov[3] += a_buf[0:3, 3] * x_buf[0:3]
-
-            // Load the input values from Matrix A
-            a_vec[4].v =  _mm256_loadu_pd( av[4] );                         // a_vec[4] = a_buf[0:3, 4]
-            a_vec[5].v =  _mm256_loadu_pd( av[5] );                         // a_vec[5] = a_buf[0:3, 5]
-            a_vec[6].v =  _mm256_loadu_pd( av[6] );                         // a_vec[6] = a_buf[0:3, 6]
-            a_vec[7].v =  _mm256_loadu_pd( av[7] );                         // a_vec[7] = a_buf[0:3, 7]
-
-            // perform: rho?v += a?v * x0v;
-            rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv0.v, rhov[4].v );    // rhov[4] += a_buf[4, 0:7] * x_buf[0:3]
-            rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv0.v, rhov[5].v );    // rhov[5] += a_buf[5, 0:7] * x_buf[0:3]
-            rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv0.v, rhov[6].v );    // rhov[6] += a_buf[6, 0:7] * x_buf[0:3]
-            rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv0.v, rhov[7].v );    // rhov[7] += a_buf[7, 0:7] * x_buf[0:3]
-
-            // Incrementing pointers by 4 (1 iteration * 4 elements per register)
-            av[0] += 4;
-            av[1] += 4;
-            av[2] += 4;
-            av[3] += 4;
-            av[4] += 4;
-            av[5] += 4;
-            av[6] += 4;
-            av[7] += 4;
-            x_buf += 4;
-            j    += 4;
-        }
-
-        // Handles fringe cases -> (x_buf[0:m_left] * a_buf[0:m_left, 0:7])
-        if( m_left )
-        {
-            // Load the input values from vector X.
-            xv0.v = _mm256_maskload_pd(x_buf, m_mask);                      // xv0 = x_buf[0:m_left]
-
-            // Load the input values from Matrix A
-            a_vec[0].v = _mm256_maskload_pd(av[0], m_mask);                 // a_vec[0] = a_buf[0:m_left, 0]
-            a_vec[1].v = _mm256_maskload_pd(av[1], m_mask);                 // a_vec[1] = a_buf[0:m_left, 1]
-            a_vec[2].v = _mm256_maskload_pd(av[2], m_mask);                 // a_vec[2] = a_buf[0:m_left, 2]
-            a_vec[3].v = _mm256_maskload_pd(av[3], m_mask);                 // a_vec[3] = a_buf[0:m_left, 3]
-
-            // perform: rho?v += a?v * x0v;
-            rhov[0].v = _mm256_fmadd_pd( a_vec[0].v, xv0.v, rhov[0].v );    // rhov[0] += a_buf[0:m_left, 0] * x_buf[0:3]
-            rhov[1].v = _mm256_fmadd_pd( a_vec[1].v, xv0.v, rhov[1].v );    // rhov[1] += a_buf[0:m_left, 1] * x_buf[0:3]
-            rhov[2].v = _mm256_fmadd_pd( a_vec[2].v, xv0.v, rhov[2].v );    // rhov[2] += a_buf[0:m_left, 2] * x_buf[0:3]
-            rhov[3].v = _mm256_fmadd_pd( a_vec[3].v, xv0.v, rhov[3].v );    // rhov[3] += a_buf[0:m_left, 3] * x_buf[0:3]
-
-            // Load the input values from Matrix A
-            a_vec[4].v = _mm256_maskload_pd(av[4], m_mask);                 // a_vec[4] = a_buf[0:m_left, 4]
-            a_vec[5].v = _mm256_maskload_pd(av[5], m_mask);                 // a_vec[5] = a_buf[0:m_left, 5]
-            a_vec[6].v = _mm256_maskload_pd(av[6], m_mask);                 // a_vec[6] = a_buf[0:m_left, 6]
-            a_vec[7].v = _mm256_maskload_pd(av[7], m_mask);                 // a_vec[7] = a_buf[0:m_left, 7]
-
-            // perform: rho?v += a?v * x0v;
-            rhov[4].v = _mm256_fmadd_pd( a_vec[4].v, xv0.v, rhov[4].v );    // rhov[4] += a_buf[0:m_left, 4] * x_buf[0:3]
-            rhov[5].v = _mm256_fmadd_pd( a_vec[5].v, xv0.v, rhov[5].v );    // rhov[5] += a_buf[0:m_left, 5] * x_buf[0:3]
-            rhov[6].v = _mm256_fmadd_pd( a_vec[6].v, xv0.v, rhov[6].v );    // rhov[6] += a_buf[0:m_left, 6] * x_buf[0:3]
-            rhov[7].v = _mm256_fmadd_pd( a_vec[7].v, xv0.v, rhov[7].v );    // rhov[7] += a_buf[0:m_left, 7] * x_buf[0:3]
-        }
-        // This section of code is used to find the sum of values in 8 vectors (rhov[0:7]),
-        // and store the result into the 4 elements of rhov[0] and rhov[1] vectors each.
-        rhov[0].v = _mm256_hadd_pd( rhov[0].v, rhov[0].v );                  //rhov[0][0:1] = rhov[0][0] + rhov[0][1], rhov[0][2:3] = rhov[0][2] + rhov[0][3]
-        rhov[1].v = _mm256_hadd_pd( rhov[1].v, rhov[1].v );                  //rhov[1][0:1] = rhov[1][0] + rhov[1][1], rhov[1][2:3] = rhov[1][2] + rhov[1][3]
-        rhov[2].v = _mm256_hadd_pd( rhov[2].v, rhov[2].v );                  //rhov[2][0:1] = rhov[2][0] + rhov[2][1], rhov[2][2:3] = rhov[2][2] + rhov[2][3]
-        rhov[3].v = _mm256_hadd_pd( rhov[3].v, rhov[3].v );                  //rhov[3][0:1] = rhov[3][0] + rhov[3][1], rhov[3][2:3] = rhov[3][2] + rhov[3][3]
-
-        rhov[4].v = _mm256_hadd_pd( rhov[4].v, rhov[4].v );                  //rhov[4][0:1] = rhov[4][0] + rhov[4][1], rhov[4][2:3] = rhov[4][2] + rhov[4][3]
-        rhov[5].v = _mm256_hadd_pd( rhov[5].v, rhov[5].v );                  //rhov[5][0:1] = rhov[5][0] + rhov[5][1], rhov[5][2:3] = rhov[5][2] + rhov[5][3]
-        rhov[6].v = _mm256_hadd_pd( rhov[6].v, rhov[6].v );                  //rhov[6][0:1] = rhov[6][0] + rhov[6][1], rhov[6][2:3] = rhov[6][2] + rhov[6][3]
-        rhov[7].v = _mm256_hadd_pd( rhov[7].v, rhov[7].v );                  //rhov[7][0:1] = rhov[7][0] + rhov[7][1], rhov[7][2:3] = rhov[7][2] + rhov[7][3]
-
-        // Sum the results of the horizontal adds to get the final sums for each vector
-        rhov[0].d[0] = rhov[0].d[0] + rhov[0].d[2];                         // rhov[0][0] = (rhov[0][0] + rhov[0][1]) + (rhov[0][2] + rhov[0][3])
-        rhov[0].d[1] = rhov[1].d[0] + rhov[1].d[2];                         // rhov[0][1] = (rhov[1][0] + rhov[1][1]) + (rhov[1][2] + rhov[1][3])
-        rhov[0].d[2] = rhov[2].d[0] + rhov[2].d[2];                         // rhov[0][2] = (rhov[2][0] + rhov[2][1]) + (rhov[2][2] + rhov[2][3])
-        rhov[0].d[3] = rhov[3].d[0] + rhov[3].d[2];                         // rhov[0][3] = (rhov[3][0] + rhov[3][1]) + (rhov[3][2] + rhov[3][3])
-
-        // yv0 = alpha * rho + yv0
-        yv0.v = _mm256_fmadd_pd( alphav.v, rhov[0].v, yv0.v );
-
-        // Sum the results of the horizontal adds to get the final sums for each vector
-        rhov[1].d[0] = rhov[4].d[0] + rhov[4].d[2];                         // rhov[1][0] = (rhov[4][0] + rhov[4][1]) + (rhov[4][2] + rhov[4][3])
-        rhov[1].d[1] = rhov[5].d[0] + rhov[5].d[2];                         // rhov[1][1] = (rhov[5][0] + rhov[5][1]) + (rhov[5][2] + rhov[5][3])
-        rhov[1].d[2] = rhov[6].d[0] + rhov[6].d[2];                         // rhov[1][2] = (rhov[6][0] + rhov[6][1]) + (rhov[6][2] + rhov[6][3])
-        rhov[1].d[3] = rhov[7].d[0] + rhov[7].d[2];                         // rhov[1][3] = (rhov[7][0] + rhov[7][1]) + (rhov[7][2] + rhov[7][3])
-
-        // yv1 = alpha * rho + yv1
-        yv1.v = _mm256_fmadd_pd( alphav.v, rhov[1].v, yv1.v );
-
-        // Store the result back into vector y using '_mm256_storeu_pd'
-        _mm256_storeu_pd( y_buf, yv0.v );                                   // y_buf[0:3] = yv0
-        _mm256_storeu_pd( y_buf + 4, yv1.v );                               // y_buf[4:7] = yv1
-
-        // The pointers are moved to the corresponding position for next calculation.
-        x_buf = x;
-        y_buf += 8;
-        a_buf += 8 * lda;
     }
 
     // The fringe rows are calculated in this code section.
@@ -594,10 +966,29 @@ void  bli_dgemv_t_zen_int_16x7m
         yv0.v = _mm256_setzero_pd();
         yv1.v = _mm256_setzero_pd();
     }
-    else
+    else if ( incy == 1)
     {
         yv0.v = _mm256_mul_pd( betav.v, _mm256_loadu_pd( y_buf ) );                                  // yv0 = y_buf[0:3]
         yv1.v = _mm256_mul_pd( betav.v, _mm256_maskload_pd( y_buf + 4, n_mask ) );                   // yv1 = y_buf[4:6]
+    }
+    else
+    {
+        // yv1 is assigned zero
+        yv1.v = _mm256_setzero_pd();
+
+        // In case of non-unit stride y,
+        // The inputs on vector y are manually moved to registor yv0
+        yv0.d[0] = *( y_buf + 0 * incy);                                // yv0[0] = y_buf[0]
+        yv0.d[1] = *( y_buf + 1 * incy);                                // yv0[1] = y_buf[1]
+        yv0.d[2] = *( y_buf + 2 * incy);                                // yv0[2] = y_buf[2]
+        yv0.d[3] = *( y_buf + 3 * incy);                                // yv0[3] = y_buf[3]
+
+        yv1.d[0] = *( y_buf + 4 * incy);                                // yv1[0] = y_buf[4]
+        yv1.d[1] = *( y_buf + 5 * incy);                                // yv1[1] = y_buf[5]
+        yv1.d[2] = *( y_buf + 6 * incy);                                // yv1[2] = y_buf[6]
+
+        yv0.v = _mm256_mul_pd( betav.v, yv0.v );                        // yv0 = beta * yv0 = beta * y_buf[0:3]
+        yv1.v = _mm256_mul_pd( betav.v, yv1.v );                        // yv1 = beta * yv1 = beta * y_buf[4:6]
     }
 
     // Handles (x_buf[0:15] * a_buf[0:15,0:6])
@@ -877,8 +1268,26 @@ void  bli_dgemv_t_zen_int_16x7m
     yv1.v = _mm256_fmadd_pd( alphav.v, rhov[1].v, yv1.v );
 
     // Store the result back into vector y using '_mm256_storeu_pd'
-    _mm256_storeu_pd( y_buf, yv0.v );                                   // y_buf[0:3] = yv0
-    _mm256_maskstore_pd( y_buf + 4, n_mask, yv1.v );                    // y_buf[4:6] = yv1
+    if ( incy == 1)
+    {
+        // In case of unit stride y,
+        // The result is moved back onto vector y using '_mm256_storeu_pd'
+        _mm256_storeu_pd( y_buf, yv0.v );                                   // y_buf[0:3] = yv0
+        _mm256_maskstore_pd( y_buf + 4, n_mask, yv1.v );                    // y_buf[4:6] = yv1
+    }
+    else
+    {
+        // In case of non-unit stride y,
+        // The result is manually moved back onto vector y
+        *( y_buf + 0 * incy ) = yv0.d[0];
+        *( y_buf + 1 * incy ) = yv0.d[1];
+        *( y_buf + 2 * incy ) = yv0.d[2];
+        *( y_buf + 3 * incy ) = yv0.d[3];
+
+        *( y_buf + 4 * incy ) = yv1.d[0];
+        *( y_buf + 5 * incy ) = yv1.d[1];
+        *( y_buf + 6 * incy ) = yv1.d[2];
+    }
 }
 
 void  bli_dgemv_t_zen_int_16x6m
@@ -945,10 +1354,28 @@ void  bli_dgemv_t_zen_int_16x6m
         yv0.v = _mm256_setzero_pd();
         yv1.v = _mm256_setzero_pd();
     }
+    else if ( incy == 1)
+    {
+        yv0.v = _mm256_mul_pd( betav.v, _mm256_loadu_pd( y_buf ) );                                  // yv0 = y_buf[0:3]
+        yv1.v = _mm256_mul_pd( betav.v, _mm256_maskload_pd( y_buf + 4, n_mask ) );                   // yv1 = y_buf[4:5]
+    }
     else
     {
-        yv0.v = _mm256_mul_pd( betav.v, _mm256_loadu_pd( y_buf ) );                                 // yv0 = y_buf[0:3]
-        yv1.v = _mm256_mul_pd( betav.v, _mm256_maskload_pd( y_buf + 4, n_mask ) );                  // yv1 = y_buf[4:5]
+        // yv1 is assigned zero
+        yv1.v = _mm256_setzero_pd();
+
+        // In case of non-unit stride y,
+        // The inputs on vector y are manually moved to registor yv0
+        yv0.d[0] = *( y_buf + 0 * incy);                                // yv0[0] = y_buf[0]
+        yv0.d[1] = *( y_buf + 1 * incy);                                // yv0[1] = y_buf[1]
+        yv0.d[2] = *( y_buf + 2 * incy);                                // yv0[2] = y_buf[2]
+        yv0.d[3] = *( y_buf + 3 * incy);                                // yv0[3] = y_buf[3]
+
+        yv1.d[0] = *( y_buf + 4 * incy);                                // yv1[0] = y_buf[4]
+        yv1.d[1] = *( y_buf + 5 * incy);                                // yv1[1] = y_buf[5]
+
+        yv0.v = _mm256_mul_pd( betav.v, yv0.v );                        // yv0 = beta * yv0 = beta * y_buf[0:3]
+        yv1.v = _mm256_mul_pd( betav.v, yv1.v );                        // yv1 = beta * yv1 = beta * y_buf[4:5]
     }
 
     // Handles (x_buf[0:15] * a_buf[0:15,0:5])
@@ -1205,8 +1632,25 @@ void  bli_dgemv_t_zen_int_16x6m
     yv1.v = _mm256_fmadd_pd( alphav.v, rhov[1].v, yv1.v );
 
     // Store the result back into vector y using '_mm256_storeu_pd'
-    _mm256_storeu_pd( y_buf, yv0.v );                                  // y_buf[0:3] = yv0
-    _mm256_maskstore_pd( y_buf + 4, n_mask, yv1.v );                   // y_buf[4:5] = yv1
+    if ( incy == 1)
+    {
+        // In case of unit stride y,
+        // The result is moved back onto vector y using '_mm256_storeu_pd'
+        _mm256_storeu_pd( y_buf, yv0.v );                                   // y_buf[0:3] = yv0
+        _mm256_maskstore_pd( y_buf + 4, n_mask, yv1.v );                    // y_buf[4:5] = yv1
+    }
+    else
+    {
+        // In case of non-unit stride y,
+        // The result is manually moved back onto vector y
+        *( y_buf + 0 * incy ) = yv0.d[0];
+        *( y_buf + 1 * incy ) = yv0.d[1];
+        *( y_buf + 2 * incy ) = yv0.d[2];
+        *( y_buf + 3 * incy ) = yv0.d[3];
+
+        *( y_buf + 4 * incy ) = yv1.d[0];
+        *( y_buf + 5 * incy ) = yv1.d[1];
+    }
 }
 
 void  bli_dgemv_t_zen_int_16x5m
@@ -1269,10 +1713,28 @@ void  bli_dgemv_t_zen_int_16x5m
         yv0.v = _mm256_setzero_pd();
         yv1.v = _mm256_setzero_pd();
     }
+    else if ( incy == 1)
+    {
+        yv0.v =   _mm256_mul_pd( betav.v, _mm256_loadu_pd( y_buf ) );                               // yv0 = y_buf[0:3]
+        yv1.d[0] = (*beta) * (*( y_buf + 4 * incy));                                                // yv1[0] = y_buf[4]
+    }
     else
     {
-        yv0.v =   _mm256_mul_pd( betav.v, _mm256_loadu_pd( y_buf ) );                                // yv0 = y_buf[0:3]
-        yv1.d[0] = (*beta) * (*( y_buf + 4 * incy));                  // yv1[0] = y_buf[4]
+        // yv1 is assigned zero
+        yv1.v = _mm256_setzero_pd();
+
+        // In case of non-unit stride y,
+        // The inputs on vector y are manually moved to registor yv0
+        yv0.d[0] = *( y_buf + 0 * incy);                                // yv0[0] = y_buf[0]
+        yv0.d[1] = *( y_buf + 1 * incy);                                // yv0[1] = y_buf[1]
+        yv0.d[2] = *( y_buf + 2 * incy);                                // yv0[2] = y_buf[2]
+        yv0.d[3] = *( y_buf + 3 * incy);                                // yv0[3] = y_buf[3]
+
+        yv1.d[0] = *( y_buf + 4 * incy);                                // yv1[0] = y_buf[4]
+
+
+        yv0.v = _mm256_mul_pd( betav.v, yv0.v );                        // yv0 = beta * yv0 = beta * y_buf[0:3]
+        yv1.v = _mm256_mul_pd( betav.v, yv1.v );                        // yv1 = beta * yv1 = beta * y_buf[4]
     }
 
     // Handles (x_buf[0:15] * a_buf[0:15,0:4])
@@ -1474,8 +1936,23 @@ void  bli_dgemv_t_zen_int_16x5m
     yv1.v = _mm256_fmadd_pd( alphav.v, rhov[1].v, yv1.v );
 
     // Store the result back into vector y
-    _mm256_storeu_pd( y_buf, yv0.v );                                   // y_buf[0:3] = yv0
-    *( y_buf + 4 * incy ) = yv1.d[0];                                   // y_buf[4] = yv1
+    if ( incy == 1)
+    {
+        // In case of unit stride y,
+        // The result is moved back onto vector y using '_mm256_storeu_pd'
+        _mm256_storeu_pd( y_buf, yv0.v );                                   // y_buf[0:3] = yv0
+        *( y_buf + 4 * incy ) = yv1.d[0];                                   // y_buf[4] = yv1
+    }
+    else
+    {
+        // In case of non-unit stride y,
+        // The result is manually moved back onto vector y
+        *( y_buf + 0 * incy ) = yv0.d[0];
+        *( y_buf + 1 * incy ) = yv0.d[1];
+        *( y_buf + 2 * incy ) = yv0.d[2];
+        *( y_buf + 3 * incy ) = yv0.d[3];
+        *( y_buf + 4 * incy ) = yv1.d[0];
+    }
 }
 
 void  bli_dgemv_t_zen_int_16x4m
@@ -1534,9 +2011,21 @@ void  bli_dgemv_t_zen_int_16x4m
         // yv0 is assigned zero if beta is 0
         yv0.v = _mm256_setzero_pd();
     }
-    else
+    else if ( incy == 1)
     {
         yv0.v = _mm256_mul_pd( betav.v, _mm256_loadu_pd( y_buf ) );        // yv0 = y_buf[0:3]
+    }
+    else
+    {
+
+        // In case of non-unit stride y,
+        // The inputs on vector y are manually moved to registor yv0
+        yv0.d[0] = *( y_buf + 0 * incy);                                // yv0[0] = y_buf[0]
+        yv0.d[1] = *( y_buf + 1 * incy);                                // yv0[1] = y_buf[1]
+        yv0.d[2] = *( y_buf + 2 * incy);                                // yv0[2] = y_buf[2]
+        yv0.d[3] = *( y_buf + 3 * incy);                                // yv0[3] = y_buf[3]
+
+        yv0.v = _mm256_mul_pd( betav.v, yv0.v );                        // yv0 = beta * yv0 = beta * y_buf[0:3]
     }
 
     // Handles (x_buf[0:15] * a_buf[0:15,0:3])
@@ -1714,7 +2203,21 @@ void  bli_dgemv_t_zen_int_16x4m
     yv0.v = _mm256_fmadd_pd( alphav.v, rhov[0].v, yv0.v );
 
     // Store the result back into vector y using '_mm256_storeu_pd'
-    _mm256_storeu_pd( y_buf, yv0.v );                                   // y_buf[0:3] = yv0
+    if ( incy == 1)
+    {
+        // In case of unit stride y,
+        // The result is moved back onto vector y using '_mm256_storeu_pd'
+        _mm256_storeu_pd( y_buf, yv0.v );                                   // y_buf[0:3] = yv0
+    }
+    else
+    {
+        // In case of non-unit stride y,
+        // The result is manually moved back onto vector y
+        *( y_buf + 0 * incy ) = yv0.d[0];
+        *( y_buf + 1 * incy ) = yv0.d[1];
+        *( y_buf + 2 * incy ) = yv0.d[2];
+        *( y_buf + 3 * incy ) = yv0.d[3];
+    }
 
 }
 
@@ -1776,10 +2279,25 @@ void  bli_dgemv_t_zen_int_16x3m
         // yv0 is assigned zero if beta is 0
         yv0.v = _mm256_setzero_pd();
     }
-    else
+    else if ( incy == 1)
     {
         yv0.v =  _mm256_mul_pd( betav.v, _mm256_maskload_pd( y_buf, n_mask ) );                       // yv0 = y_buf[0:2]
     }
+    else
+    {
+        // yv0 is assigned zero
+        yv0.v = _mm256_setzero_pd();
+
+        // In case of non-unit stride y,
+        // The inputs on vector y are manually moved to registor yv0
+        yv0.d[0] = *( y_buf + 0 * incy);                                // yv0[0] = y_buf[0]
+        yv0.d[1] = *( y_buf + 1 * incy);                                // yv0[1] = y_buf[1]
+        yv0.d[2] = *( y_buf + 2 * incy);                                // yv0[2] = y_buf[2]
+
+
+        yv0.v = _mm256_mul_pd( betav.v, yv0.v );                        // yv0 = beta * yv0 = beta * y_buf[0:2]
+    }
+    
 
     // Handles (x_buf[0:15] * a_buf[0:15,0:2])
     for ( i = 0; (i + 15) < m; i += 16 )
@@ -1935,7 +2453,20 @@ void  bli_dgemv_t_zen_int_16x3m
     yv0.v = _mm256_fmadd_pd( alphav.v, rhov[0].v, yv0.v );
 
     // Store the result back into vector y
-    _mm256_maskstore_pd( y_buf, n_mask, yv0.v );                         // y_buf[0:2] = yv0
+    if ( incy == 1)
+    {
+        // In case of unit stride y,
+        // The result is moved back onto vector y using '_mm256_storeu_pd'
+        _mm256_maskstore_pd( y_buf, n_mask, yv0.v );                         // y_buf[0:2] = yv0
+    }
+    else
+    {
+        // In case of non-unit stride y,
+        // The result is manually moved back onto vector y
+        *( y_buf + 0 * incy ) = yv0.d[0];
+        *( y_buf + 1 * incy ) = yv0.d[1];
+        *( y_buf + 2 * incy ) = yv0.d[2];
+    }
 }
 
 void  bli_dgemv_t_zen_int_16x2m
@@ -1996,9 +2527,22 @@ void  bli_dgemv_t_zen_int_16x2m
         // yv0 is assigned zero if beta is 0
         yv0.v = _mm256_setzero_pd();
     }
+    else if ( incy == 1)
+    {
+        yv0.v =  _mm256_mul_pd( betav.v, _mm256_maskload_pd( y_buf, n_mask ) );     // yv0 = y_buf[0:1]
+    }
     else
     {
-        yv0.v =  _mm256_mul_pd( betav.v, _mm256_maskload_pd( y_buf, n_mask ) );    // yv0 = y_buf[0:1]
+        // yv0 is assigned zero
+        yv0.v = _mm256_setzero_pd();
+
+        // In case of non-unit stride y,
+        // The inputs on vector y are manually moved to registor yv0
+        yv0.d[0] = *( y_buf + 0 * incy);                                // yv0[0] = y_buf[0]
+        yv0.d[1] = *( y_buf + 1 * incy);                                // yv0[1] = y_buf[1]
+
+
+        yv0.v = _mm256_mul_pd( betav.v, yv0.v );                        // yv0 = beta * yv0 = beta * y_buf[0:1]
     }
 
     // Handles (x_buf[0:15] * a_buf[0:15,0:1])
@@ -2137,7 +2681,19 @@ void  bli_dgemv_t_zen_int_16x2m
     yv0.v = _mm256_fmadd_pd( alphav.v, rhov[0].v, yv0.v );
 
     // Store the result back into vector y
-    _mm256_maskstore_pd( y_buf, n_mask, yv0.v );                        // y_buf[0:1] = yv0
+    if ( incy == 1)
+    {
+        // In case of unit stride y,
+        // The result is moved back onto vector y using '_mm256_storeu_pd'
+        _mm256_maskstore_pd( y_buf, n_mask, yv0.v );                         // y_buf[0:1] = yv0
+    }
+    else
+    {
+        // In case of non-unit stride y,
+        // The result is manually moved back onto vector y
+        *( y_buf + 0 * incy ) = yv0.d[0];
+        *( y_buf + 1 * incy ) = yv0.d[1];
+    }
 }
 
 void  bli_dgemv_t_zen_int_16x1m
