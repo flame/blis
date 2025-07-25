@@ -196,9 +196,9 @@ jobs:
       - run:
           name: Configuring, Building, Testing
           command: |
-            $DIST_PATH = .
-            $CC = "<< parameters.CC >>"
-            $CXX = "<< parameters.CXX >>"
+            $env:DIST_PATH = "."
+            $env:CC = "<< parameters.CC >>"
+            $env:CXX = "<< parameters.CXX >>"
             $CONF = "<< parameters.CONF >>"
             $TEST = "<< parameters.TEST >>"
             $THR = "<< parameters.THR >>"
@@ -208,8 +208,8 @@ jobs:
             if ($LIB_TYPE -eq "static") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS --disable-shared --enable-static" }
             if ($CBLAS -ne "no") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS --enable-cblas" }
             if ($SANDBOX -eq "yes") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS -s gemmlike" }
-            $RANLIB = "echo"
-            $LIBPTHREAD = ""
+            $env:RANLIB = "echo"
+            $env:LIBPTHREAD = ""
             bash -lc "./configure $CONFIGURE_OPTS --enable-threading=$THR --enable-arg-max-hack --prefix=$pwd $CONF"
             bash -lc "mingw32-make -j4 V=1"
             bash -lc "mingw32-make install"
