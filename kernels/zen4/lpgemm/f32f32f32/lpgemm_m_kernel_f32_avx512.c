@@ -44,6 +44,20 @@
 
 LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_avx512_6x64m)
 {
+    if(post_ops_list->op_code == POST_OPS_DISABLE)
+    {
+        lpgemm_rowvar_f32f32f32of32_avx512_6x64m_np
+        (
+          m0, n0, k0,
+          a, rs_a, cs_a, ps_a,
+          b, rs_b, cs_b,
+          c, rs_c, cs_c,
+          alpha, beta,
+          post_ops_list, post_ops_attr
+        );
+        return;
+    }
+    
     //Call RD kernels if B is transposed
     if(rs_b == 1 && n0 != 1 )
     {

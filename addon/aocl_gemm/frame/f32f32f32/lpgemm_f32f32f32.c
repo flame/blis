@@ -201,6 +201,7 @@ LPGEMV(float, float, float, f32f32f32of32)
 #ifdef BLIS_KERNELS_ZEN4
     }
 #endif
+
     // Pack B matrix if rs_b > 1
     if( rs_b != 1 )
     {

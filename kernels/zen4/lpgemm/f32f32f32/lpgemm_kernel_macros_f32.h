@@ -243,6 +243,7 @@
 		memcpy( (dest+i), ((char *)(&rounded))+2, sizeof(bfloat16)); \
 	} \
 }
+
 // BF16 bias helper macros.
 #define BF16_F32_BIAS_LOAD(scr,mask,n_ind) \
 	scr = ( __m512)( _mm512_sllv_epi32 \
