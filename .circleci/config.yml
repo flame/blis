@@ -210,7 +210,7 @@ jobs:
             if ($SANDBOX -eq "yes") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS -s gemmlike" }
             $env:RANLIB = "echo"
             $env:LIBPTHREAD = ""
-            bash -lc "./configure $CONFIGURE_OPTS --enable-threading=$THR --enable-arg-max-hack --prefix=$pwd $CONF"
+            bash -lc "./configure $CONFIGURE_OPTS --enable-threading=$THR --enable-arg-max-hack --prefix=\$(pwd) $CONF"
             bash -lc "mingw32-make -j4 V=1"
             bash -lc "mingw32-make install"
             if ($LIB_TYPE -eq "shared") { $TEST_TARGET = "checkblis-fast" }
