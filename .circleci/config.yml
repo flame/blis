@@ -186,6 +186,8 @@ jobs:
     executor:
       name: win/default
     steps:
+      - run: git config --global core.autocrlf input
+
       - checkout
 
       - run:
