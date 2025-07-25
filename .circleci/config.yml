@@ -199,7 +199,6 @@ jobs:
             set DIST_PATH=.
             set CC="<< parameters.CC >>"
             set CXX="<< parameters.CXX >>"
-            set OOT="<< parameters.OOT >>"
             set CONF="<< parameters.CONF >>"
             set TEST="<< parameters.TEST >>"
             set THR="<< parameters.THR >>"
