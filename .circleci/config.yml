@@ -217,12 +217,14 @@ jobs:
             echo "THR       = $THR"
             echo "LIB_TYPE  = $LIB_TYPE"
 
-            [ $CC = "clang" ] && $AR="llvm-ar"
-            [ $CC = "clang" ] && $AS="llvm-as"
-            [ $LIB_TYPE = "shared") && $CONFIGURE_OPTS="$CONFIGURE_OPTS --enable-shared --disable-static"
-            [ $LIB_TYPE = "static") && $CONFIGURE_OPTS="$CONFIGURE_OPTS --disable-shared --enable-static"
-            [ $CBLAS = "no" ] || $CONFIGURE_OPTS="$CONFIGURE_OPTS --enable-cblas"
-            [ $SANDBOX = "yes" ] && $CONFIGURE_OPTS="$CONFIGURE_OPTS -s gemmlike"
+            [ $CC       = "clang"  ] && $AR="llvm-ar"
+            [ $CC       = "clang"  ] && $AS="llvm-as"
+            [ $LIB_TYPE = "shared" ] && $CONFIGURE_OPTS="$CONFIGURE_OPTS --enable-shared --disable-static"
+            [ $LIB_TYPE = "static" ] && $CONFIGURE_OPTS="$CONFIGURE_OPTS --disable-shared --enable-static"
+            [ $CBLAS    =  "no"    ] || $CONFIGURE_OPTS="$CONFIGURE_OPTS --enable-cblas"
+            [ $SANDBOX  = "yes"    ] && $CONFIGURE_OPTS="$CONFIGURE_OPTS -s gemmlike"
+            [ $LIB_TYPE = "shared" ] && $TEST_TARGET="checkblis-fast"
+            [ $LIB_TYPE = "static" ] && $TEST_TARGET="check"
             $RANLIB="echo"
             $LIBPTHREAD=""
 
@@ -234,8 +236,6 @@ jobs:
 
             tar zcvf blis-x86_64-win-$LIB_TYPE.tar.gz blis
 
-            [ $LIB_TYPE = "shared" ] && $TEST_TARGET="checkblis-fast"
-            [ $LIB_TYPE = "static" ] && $TEST_TARGET="check"
             echo "Test target: $TEST_TARGET"
             [ $TEST = "FAST" ] && mingw32-make $TEST_TARGET -j4 V=1
 
