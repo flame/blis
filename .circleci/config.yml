@@ -8,7 +8,7 @@ branches:
     - /r[0-9]+.x/
 
 orbs:
-  windows: circleci/windows@5.1.0
+  win: circleci/windows@5.1.0
 
 executors:
   linux: # Docker using the Base Convenience Image
