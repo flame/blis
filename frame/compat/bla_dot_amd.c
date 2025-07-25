@@ -60,17 +60,18 @@ ftype PASTEF772S(ch,blasname,chc) \
        const ftype*   y, const f77_int* incy  \
      ) \
 { \
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
+\
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
     AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(blis_conjx), *n, *incx, *incy); \
+\
     dim_t  n0; \
     ftype* x0; \
     ftype* y0; \
     inc_t  incx0; \
     inc_t  incy0; \
     ftype  rho; \
-\
-    /* Initialize BLIS. */ \
-    bli_init_auto(); \
 \
     /* Convert/typecast negative values of n to zero. */ \
     bli_convert_blas_dim1( *n, n0 ); \
@@ -119,17 +120,19 @@ float sdot_blis_impl
        const float*   y, const f77_int* incy
      )
 {
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', 'N', *n, *incx, *incy);
+
     dim_t  n0;
     float* x0;
     float* y0;
     inc_t  incx0;
     inc_t  incy0;
     float  rho;
-
-    /* Initialize BLIS. */
-    //  bli_init_auto();
 
     // If the vector dimension is less than or equal to zero, return.
     if (*n <= 0)
@@ -616,17 +619,19 @@ scomplex cdotu_blis_impl
        const scomplex*   y, const f77_int* incy
      )
 {
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', 'N', *n, *incx, *incy);
+
     dim_t  n0;
     scomplex* x0;
     scomplex* y0;
     inc_t  incx0;
     inc_t  incy0;
     scomplex  rho;
-
-    /* Initialize BLIS. */
-    //  bli_init_auto();
 
     /* Convert/typecast negative values of n to zero. */
     if ( *n < 0 ) n0 = ( dim_t )0;
@@ -727,6 +732,13 @@ dcomplex zdotu_blis_impl
        const dcomplex*   y, const f77_int* incy
      )
 {
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', 'N', *n, *incx, *incy);
+
     dim_t  n0;
     dcomplex* x0;
     dcomplex* y0;
@@ -735,12 +747,6 @@ dcomplex zdotu_blis_impl
     dcomplex  rho;
 
     PASTEMAC(z,set0s)( rho );   // Initializing rho to 0.
-
-    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', 'N', *n, *incx, *incy);
-
-    /* Initialize BLIS. */
-    //  bli_init_auto();
 
     /* Convert/typecast negative values of n to zero. */
     if ( *n < 0 ) n0 = ( dim_t )0;
@@ -1024,18 +1030,19 @@ scomplex cdotc_blis_impl
        const scomplex*   y, const f77_int* incy
      )
 {
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', 'C', *n, *incx, *incy);
+
     dim_t  n0;
     scomplex* x0;
     scomplex* y0;
     inc_t  incx0;
     inc_t  incy0;
     scomplex  rho;
-
-    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', 'C', *n, *incx, *incy);
-
-    /* Initialize BLIS. */
-    //  bli_init_auto();
 
     /* Convert/typecast negative values of n to zero. */
     if ( *n < 0 ) n0 = ( dim_t )0;
@@ -1137,8 +1144,13 @@ dcomplex zdotc_blis_impl
        const dcomplex*   y, const f77_int* incy
      )
 {
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', 'C', *n, *incx, *incy);
+
     dim_t  n0;
     dcomplex* x0;
     dcomplex* y0;
@@ -1147,9 +1159,6 @@ dcomplex zdotc_blis_impl
     dcomplex  rho;
 
     PASTEMAC(z,set0s)( rho );   // Initializing rho to 0.
-
-    /* Initialize BLIS. */
-    //  bli_init_auto();
 
     /* Convert/typecast negative values of n to zero. */
     if ( *n < 0 ) n0 = ( dim_t )0;
@@ -1442,17 +1451,18 @@ void PASTEF772S(ch,blasname,chc) \
        const ftype*   y, const f77_int* incy  \
      ) \
 { \
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
-  AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(blis_conjx), *n, *incx, *incy); \
+        /* Initialize BLIS. */ \
+        bli_init_auto(); \
+\
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
+	AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(blis_conjx), *n, *incx, *incy); \
+\
         dim_t  n0; \
         ftype* x0; \
         ftype* y0; \
         inc_t  incx0; \
         inc_t  incy0; \
         ftype  rho; \
-\
-        /* Initialize BLIS. */ \
-        bli_init_auto(); \
 \
         /* Convert/typecast negative values of n to zero. */ \
         bli_convert_blas_dim1( *n, n0 ); \

@@ -76,6 +76,9 @@ void PASTEF77S(ch,blasname) \
              ftype*    b, const f77_int* ldb  \
      ) \
 { \
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
+\
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO) \
     AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), \
                              *side, *uploa,*transa, *diaga, *m, *n, \
@@ -88,9 +91,6 @@ void PASTEF77S(ch,blasname) \
     dim_t   m0, n0; \
     inc_t   rs_a, cs_a; \
     inc_t   rs_b, cs_b; \
-\
-    /* Initialize BLIS. */ \
-    bli_init_auto(); \
 \
     /* Perform BLAS parameter checking. */ \
     PASTEBLACHK(blasname) \
@@ -208,9 +208,13 @@ void PASTEF77S(ch,blasname) \
              ftype*    b, const f77_int* ldb  \
      ) \
 { \
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
+\
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO) \
     AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *uploa, \
                  *transa, *diaga, *m, *n, (void*)alpha, *lda, *ldb); \
+\
     side_t  blis_side; \
     uplo_t  blis_uploa; \
     trans_t blis_transa; \
@@ -218,9 +222,6 @@ void PASTEF77S(ch,blasname) \
     dim_t   m0, n0; \
     ftype   a_conj; \
     conj_t  conja = BLIS_NO_CONJUGATE ; \
-\
-    /* Initialize BLIS. */ \
-    bli_init_auto(); \
 \
     /* Perform BLAS parameter checking. */ \
     PASTEBLACHK(blasname) \
@@ -514,6 +515,9 @@ void strsm_blis_impl
           float*    b, const f77_int* ldb
 )
 {
+    /* Initialize BLIS. */
+    bli_init_auto();
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
     AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s),
                              *side, *uploa,*transa, *diaga, *m, *n,
@@ -525,9 +529,6 @@ void strsm_blis_impl
     diag_t  blis_diaga;
     dim_t   m0, n0;
     conj_t  conja = BLIS_NO_CONJUGATE ;
-
-    /* Initialize BLIS. */
-    bli_init_auto();
 
     /* Perform BLAS parameter checking. */
     PASTEBLACHK(trsm)
@@ -863,6 +864,9 @@ void dtrsm_blis_impl
           double*   b, const f77_int* ldb
 )
 {
+    /* Initialize BLIS. */
+    bli_init_auto();
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
     AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d),
                              *side, *uploa,*transa, *diaga, *m, *n,
@@ -874,9 +878,6 @@ void dtrsm_blis_impl
     diag_t  blis_diaga;
     dim_t   m0, n0;
     conj_t  conja = BLIS_NO_CONJUGATE ;
-
-    /* Initialize BLIS. */
-    bli_init_auto();
 
     /* Perform BLAS parameter checking. */
     PASTEBLACHK(trsm)
@@ -1366,6 +1367,9 @@ void ztrsm_blis_impl
           dcomplex* b, const f77_int* ldb
 )
 {
+    /* Initialize BLIS. */
+    bli_init_auto();
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
     AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z),
                              *side, *uploa,*transa, *diaga, *m, *n,
@@ -1377,9 +1381,6 @@ void ztrsm_blis_impl
     diag_t  blis_diaga;
     dim_t   m0, n0;
     conj_t  conja = BLIS_NO_CONJUGATE;
-
-    /* Initialize BLIS. */
-    bli_init_auto();
 
     /* Perform BLAS parameter checking. */
     PASTEBLACHK(trsm)
@@ -1893,6 +1894,9 @@ void ctrsm_blis_impl
           scomplex* b, const f77_int* ldb
 )
 {
+    /* Initialize BLIS. */
+    bli_init_auto();
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
     AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c),
                              *side, *uploa,*transa, *diaga, *m, *n,
@@ -1904,9 +1908,6 @@ void ctrsm_blis_impl
     diag_t  blis_diaga;
     dim_t   m0, n0;
     conj_t  conja = BLIS_NO_CONJUGATE;
-
-    /* Initialize BLIS. */
-    bli_init_auto();
 
     /* Perform BLAS parameter checking. */
     PASTEBLACHK(trsm)

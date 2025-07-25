@@ -82,9 +82,11 @@ void PASTEF77S(ch,blasname) \
 	inc_t   rs_b, cs_b; \
 	inc_t   rs_c, cs_c; \
 \
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
+\
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
+	AOCL_DTL_LOG_GEMMT_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *uploc, *transa, *transb, *n, *k, (void*)alpha, *lda, *ldb, (void*)beta, *ldc); \
 \
 	/* Perform BLAS parameter checking. */ \
 	PASTEBLACHK(blasname) \
@@ -207,16 +209,17 @@ void PASTEF77S(ch,blasname) \
              ftype*    c, const f77_int* ldc  \
      ) \
 { \
+	/* Initialize BLIS. */ \
+	bli_init_auto(); \
+\
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)	\
 	AOCL_DTL_LOG_GEMMT_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *uploc, *transa, *transb, *n, *k, (void*)alpha, *lda, *ldb, (void*)beta, *ldc); \
+\
 	trans_t blis_transa; \
 	trans_t blis_transb; \
 	uplo_t blis_uploc; \
 \
 	dim_t   n0, k0; \
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)	\
-\
-	/* Initialize BLIS. */ \
-	bli_init_auto(); \
 \
 	/* Perform BLAS parameter checking. */ \
 	PASTEBLACHK(blasname) \

@@ -55,11 +55,11 @@ void PASTEF77S(ch,blasname) \
 	inc_t  incx0; \
 	inc_t  incy0; \
 \
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
-	AOCL_DTL_LOG_COPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *n, *incx, *incy) \
-\
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
+\
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
+	AOCL_DTL_LOG_COPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *n, *incx, *incy) \
 \
 	/* Convert/typecast negative values of n to zero. */ \
 	bli_convert_blas_dim1( *n, n0 ); \
@@ -114,12 +114,12 @@ void scopy_blis_impl
 	inc_t  incx0;
 	inc_t  incy0;
 
+	/* Initialize BLIS. */
+	// Call to bli_init_auto() is not needed here
+	AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
 	AOCL_DTL_LOG_COPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', *n, *incx, *incy)
-
-	/* Initialize BLIS. */
-
-//  bli_init_auto();
 
 	/* Convert/typecast negative values of n to zero. */
 	if (*n < 0)
@@ -237,10 +237,12 @@ void dcopy_blis_impl
 	inc_t  incx0;
 	inc_t  incy0;
 
+	/* Initialize BLIS. */
+	// Call to bli_init_auto() is not needed here
+	AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 	AOCL_DTL_LOG_COPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, *incx, *incy)
-	/* Initialize BLIS. */
-	//  bli_init_auto();
 
 	/* Convert/typecast negative values of n to zero. */
 	if (*n < 0)
@@ -488,12 +490,12 @@ void zcopy_blis_impl
 	inc_t  incx0;
 	inc_t  incy0;
 
+	/* Initialize BLIS. */
+	// Call to bli_init_auto() is not needed here
+	AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
 	AOCL_DTL_LOG_COPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', *n, *incx, *incy)
-
-	/* Initialize BLIS. */
-
-//  bli_init_auto();
 
 	/* Convert/typecast negative values of n to zero. */
 	if (*n < 0)

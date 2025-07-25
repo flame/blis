@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -75,17 +75,18 @@ void PASTEF77S(ch,blasname) \
              ftype*    c, const f77_int* ldc  \
      ) \
 { \
+	/* Initialize BLIS. */ \
+	bli_init_auto(); \
+\
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
 	AOCL_DTL_LOG_SYMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *uploa, *m, *n, (void*)alpha, *lda, *ldb, (void*)beta, *ldc);\
+\
 	side_t  blis_side; \
 	uplo_t  blis_uploa; \
 	dim_t   m0, n0; \
 	inc_t   rs_a, cs_a; \
 	inc_t   rs_b, cs_b; \
 	inc_t   rs_c, cs_c; \
-\
-	/* Initialize BLIS. */ \
-	bli_init_auto(); \
 \
 	/* Perform BLAS parameter checking. */ \
 	PASTEBLACHK(blasname) \
@@ -204,14 +205,15 @@ void PASTEF77S(ch,blasname) \
              ftype*    c, const f77_int* ldc  \
      ) \
 { \
+	/* Initialize BLIS. */ \
+	bli_init_auto(); \
+\
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
 	AOCL_DTL_LOG_SYMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *uploa, *m, *n, (void*)alpha, *lda, *ldb, (void*)beta, *ldc);\
+\
 	side_t  blis_side; \
 	uplo_t  blis_uploa; \
 	dim_t   m0, n0; \
-\
-	/* Initialize BLIS. */ \
-	bli_init_auto(); \
 \
 	/* Perform BLAS parameter checking. */ \
 	PASTEBLACHK(blasname) \

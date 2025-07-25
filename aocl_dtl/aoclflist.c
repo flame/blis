@@ -5,7 +5,7 @@
  *               each thread. This is used to log the data
  *               to correct file as per the current thread id.
  *
- * Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
  *
  *==================================================================*/
 
@@ -19,7 +19,7 @@
 
 /* Disable instrumentation for following function, since they are called from
  * Auto Generated execution trace handlers. */
-Bool AOCL_FLIST_IsEmpty(
+bool AOCL_FLIST_IsEmpty(
     AOCL_FLIST_Node *plist) __attribute__((no_instrument_function));
 
 AOCL_FAL_FILE *AOCL_FLIST_GetFile(
@@ -40,7 +40,7 @@ void AOCL_FLIST_CloseAll(
 
 
 
-Bool AOCL_FLIST_IsEmpty(AOCL_FLIST_Node *plist)
+bool AOCL_FLIST_IsEmpty(AOCL_FLIST_Node *plist)
 {
     return (plist == NULL);
 

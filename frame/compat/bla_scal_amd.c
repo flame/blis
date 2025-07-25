@@ -68,10 +68,11 @@ void PASTEF772S(chx,cha,blasname) \
        ftype_x* x, const f77_int* incx  \
      ) \
 { \
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
-\
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
+\
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+	AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), (void *) alpha, *n, *incx ); \
 \
 	dim_t n0 = (dim_t)(*n); \
 	ftype_x *x0 = x; \
@@ -127,11 +128,12 @@ void sscal_blis_impl
        float*   x, const f77_int* incx
      )
 {
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', (void *) alpha, *n, *incx );
-
-    /* Initialize BLIS. */
-    //bli_init_auto();
 
     dim_t n0 = (dim_t)(*n);
     float *x0 = x;
@@ -214,11 +216,12 @@ void dscal_blis_impl
        double*   x, const f77_int* incx
      )
 {
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', (void *)alpha, *n, *incx );
-
-    /* Initialize BLIS. */
-    //bli_init_auto();
 
     dim_t n0 = (dim_t)(*n);
     double *x0 = x;
@@ -410,11 +413,12 @@ void zdscal_blis_impl
        dcomplex*   x, const f77_int* incx
      )
 {
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', (void *) alpha, *n, *incx );
-
-    /* Initialize BLIS. */
-    //bli_init_auto();
 
     dim_t  n0 = (dim_t)(*n);
     dcomplex* x0 = x;
@@ -585,11 +589,12 @@ void cscal_blis_impl
              scomplex* x, const f77_int* incx
      )
 {
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', (void *)alpha, *n, *incx);
-
-    /* Initialize BLIS. */
-    //bli_init_auto();
 
     dim_t n0 = (dim_t)(*n);
     scomplex *x0 = x;
@@ -676,11 +681,12 @@ void zscal_blis_impl
        dcomplex*   x, const f77_int* incx
      )
 {
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', (void *)alpha, *n, *incx);
-
-    /* Initialize BLIS. */
-    //bli_init_auto();
 
     dim_t n0 = (dim_t)(*n);
     dcomplex *x0 = x;

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -50,16 +50,17 @@ void PASTEF77S(ch,blasname) \
              ftype*   y, const f77_int* incy  \
      ) \
 { \
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
+\
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
     AOCL_DTL_LOG_AXPBY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *n, (void*)alpha, *incx, (void*)beta, *incy) \
+\
     dim_t  n0; \
     ftype* x0; \
     ftype* y0; \
     inc_t  incx0; \
     inc_t  incy0; \
-\
-    /* Initialize BLIS. */ \
-    bli_init_auto(); \
 \
     /* Convert/typecast negative values of n to zero. */ \
     bli_convert_blas_dim1( *n, n0 ); \
@@ -111,25 +112,26 @@ void saxpby_blis_impl
  float*   y, const f77_int* incy
 )
 {
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
-  AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', *n, (float *)alpha, *incx, *incy)
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
 
-  /* Early exit in case n is 0, or alpha is 0 and beta is 1 */
-  if ( ( *n <= 0 ) ||
-     ( PASTEMAC( s, eq0 )( *alpha ) && PASTEMAC( s, eq1 )( *beta ) ) )
-  {
-    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-    return;
-  }
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+    AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', *n, (float *)alpha, *incx, *incy)
+
+    /* Early exit in case n is 0, or alpha is 0 and beta is 1 */
+    if ( ( *n <= 0 ) ||
+       ( PASTEMAC( s, eq0 )( *alpha ) && PASTEMAC( s, eq1 )( *beta ) ) )
+    {
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+      return;
+    }
 
     dim_t n0;
     float *x0;
     float *y0;
     inc_t incx0;
     inc_t incy0;
-
-    /* Initialize BLIS. */
-    //    bli_init_auto();
 
     n0 = ( dim_t )( *n );
 
@@ -244,25 +246,26 @@ void daxpby_blis_impl
  double*   y, const f77_int* incy
 )
 {
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
-  AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, (double *)alpha, *incx, *incy)
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
 
-  /* Early exit in case n is 0, or alpha is 0 and beta is 1 */
-  if ( ( *n <= 0 ) ||
-     ( PASTEMAC( d, eq0 )( *alpha ) && PASTEMAC( d, eq1 )( *beta ) ) )
-  {
-    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-    return;
-  }
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+    AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, (double *)alpha, *incx, *incy)
+
+    /* Early exit in case n is 0, or alpha is 0 and beta is 1 */
+    if ( ( *n <= 0 ) ||
+       ( PASTEMAC( d, eq0 )( *alpha ) && PASTEMAC( d, eq1 )( *beta ) ) )
+    {
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+      return;
+    }
 
     dim_t n0;
     double *x0;
     double *y0;
     inc_t incx0;
     inc_t incy0;
-
-    /* Initialize BLIS. */
-    //    bli_init_auto();
 
     n0 = ( dim_t )( *n );
 
@@ -382,25 +385,26 @@ void caxpby_blis_impl
  scomplex*         y, const f77_int* incy
 )
 {
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
-  AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', *n, (scomplex *)alpha, *incx, *incy)
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
 
-  /* Early exit in case n is 0, or alpha is 0 and beta is 1 */
-  if ( ( *n <= 0 ) ||
-     ( PASTEMAC( c, eq0 )( *alpha ) && PASTEMAC( c, eq1 )( *beta ) ) )
-  {
-    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-    return;
-  }
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+    AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', *n, (scomplex *)alpha, *incx, *incy)
+
+    /* Early exit in case n is 0, or alpha is 0 and beta is 1 */
+    if ( ( *n <= 0 ) ||
+       ( PASTEMAC( c, eq0 )( *alpha ) && PASTEMAC( c, eq1 )( *beta ) ) )
+    {
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+      return;
+    }
 
     dim_t n0;
     scomplex *x0;
     scomplex *y0;
     inc_t incx0;
     inc_t incy0;
-
-    /* Initialize BLIS. */
-    //    bli_init_auto();
 
     n0 = ( dim_t )( *n );
 
@@ -515,25 +519,26 @@ void zaxpby_blis_impl
  dcomplex*         y, const f77_int* incy
 )
 {
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
-  AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', *n, (dcomplex *)alpha, *incx, *incy)
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
 
-  /* Early exit in case n is 0, or alpha is 0 and beta is 1 */
-  if ( ( *n <= 0 ) ||
-     ( PASTEMAC( c, eq0 )( *alpha ) && PASTEMAC( c, eq1 )( *beta ) ) )
-  {
-    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-    return;
-  }
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+    AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', *n, (dcomplex *)alpha, *incx, *incy)
+
+    /* Early exit in case n is 0, or alpha is 0 and beta is 1 */
+    if ( ( *n <= 0 ) ||
+       ( PASTEMAC( c, eq0 )( *alpha ) && PASTEMAC( c, eq1 )( *beta ) ) )
+    {
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+      return;
+    }
 
     dim_t n0;
     dcomplex *x0;
     dcomplex *y0;
     inc_t incx0;
     inc_t incy0;
-
-    /* Initialize BLIS. */
-    //    bli_init_auto();
 
     n0 = ( dim_t )( *n );
 

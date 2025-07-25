@@ -52,19 +52,6 @@
   #endif
 #endif
 
-#ifdef BLIS_IS_BUILDING_LIBRARY
-
-// -- Define typeof() operator if using non-GNU compiler --
-
-#ifndef __GNUC__
-  #define typeof __typeof__
-#else
-  #ifndef typeof
-  #define typeof __typeof__
-  #endif
-#endif
-
-
 // -- BLIS Thread Local Storage Keyword --
 
 // __thread for TLS is supported by GCC, CLANG, ICC, and IBMC.
@@ -79,6 +66,17 @@
   #define BLIS_THREAD_LOCAL
 #endif
 
+#ifdef BLIS_IS_BUILDING_LIBRARY
+
+// -- Define typeof() operator if using non-GNU compiler --
+
+#ifndef __GNUC__
+  #define typeof __typeof__
+#else
+  #ifndef typeof
+  #define typeof __typeof__
+  #endif
+#endif
 
 // -- BLIS constructor/destructor function attribute --
 

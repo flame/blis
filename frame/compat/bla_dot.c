@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -49,6 +49,9 @@ ftype PASTEF772S(ch,blasname,chc) \
        const ftype*   y, const f77_int* incy  \
      ) \
 { \
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
+\
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
     AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(blis_conjx), *n, *incx, *incy); \
     dim_t  n0; \
@@ -57,9 +60,6 @@ ftype PASTEF772S(ch,blasname,chc) \
     inc_t  incx0; \
     inc_t  incy0; \
     ftype  rho; \
-\
-    /* Initialize BLIS. */ \
-    bli_init_auto(); \
 \
     /* Convert/typecast negative values of n to zero. */ \
     bli_convert_blas_dim1( *n, n0 ); \
@@ -118,17 +118,18 @@ void PASTEF772S(ch,blasname,chc) \
        const ftype*   y, const f77_int* incy  \
      ) \
 { \
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
-  AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(blis_conjx), *n, *incx, *incy); \
+        /* Initialize BLIS. */ \
+        bli_init_auto(); \
+\
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
+	AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(blis_conjx), *n, *incx, *incy); \
+\
         dim_t  n0; \
         ftype* x0; \
         ftype* y0; \
         inc_t  incx0; \
         inc_t  incy0; \
         ftype  rho; \
-\
-        /* Initialize BLIS. */ \
-        bli_init_auto(); \
 \
         /* Convert/typecast negative values of n to zero. */ \
         bli_convert_blas_dim1( *n, n0 ); \

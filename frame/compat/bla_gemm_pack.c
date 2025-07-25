@@ -53,13 +53,14 @@ void sgemm_pack_blis_impl
              float*    dest
      )
 {
+    /* Initialize BLIS. */
+    bli_init_auto();
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 
     dim_t m;
     dim_t n;
     dim_t k;
-
-    bli_init_auto(); // initialize blis
 
     /* Perform BLAS parameter checking. */
     PASTEBLACHK(gemm_pack)
@@ -161,13 +162,14 @@ void dgemm_pack_blis_impl
              double*   dest
      )
 {
+    /* Initialize BLIS. */
+    bli_init_auto();
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 
     dim_t m;
     dim_t n;
     dim_t k;
-
-    bli_init_auto(); // initialize blis
 
     /* Perform BLAS parameter checking. */
     PASTEBLACHK(gemm_pack)

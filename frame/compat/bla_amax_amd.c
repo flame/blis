@@ -47,6 +47,9 @@ f77_int PASTEF772S(i,chx,blasname) \
        const ftype_x* x, const f77_int* incx  \
      ) \
 { \
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
+\
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
     AOCL_DTL_LOG_AMAX_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(chx), *n, *incx) \
 \
@@ -70,9 +73,6 @@ f77_int PASTEF772S(i,chx,blasname) \
       AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "iamax_: n=1") \
       return 1;                                   \
     }\
-\
-    /* Initialize BLIS. */ \
-    bli_init_auto(); \
 \
     /* Convert/typecast negative values of n to zero. */ \
     bli_convert_blas_dim1( *n, n0 ); \
@@ -120,6 +120,9 @@ f77_int isamax_blis_impl
        const float* x, const f77_int* incx
      )
 {
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_AMAX_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', *n, *incx);
@@ -147,9 +150,6 @@ f77_int isamax_blis_impl
       AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "iamax_: n=1");
       return 1;
     }
-
-    /* Initialize BLIS. */
-//  bli_init_auto();
 
     /* Convert/typecast negative values of n to zero. */
     if ( *n < 0 ) n0 = ( dim_t )0;
@@ -237,6 +237,10 @@ f77_int idamax_blis_impl
        const double* x, const f77_int* incx
      )
 {
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_AMAX_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, *incx);
 
@@ -265,9 +269,6 @@ f77_int idamax_blis_impl
       AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "iamax_: n=1");
       return 1;
     }
-
-    /* Initialize BLIS. */
-    //  bli_init_auto();
 
     /* Convert/typecast negative values of n to zero. */
     if ( *n < 0 )     n0 = ( dim_t )0;

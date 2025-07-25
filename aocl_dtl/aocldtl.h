@@ -5,7 +5,7 @@
  *               It provides defination for all macros to be
  *               used by user to add debug/trace information.
  *
- * Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
  *
  *==================================================================*/
 
@@ -120,7 +120,7 @@ uint64 AOCL_DTL_get_time_spent(void);
  * The global flag is maintain in the code to track the final
  * state of the logging feature.
  */
-extern Bool gbIsLoggingEnabled;
+extern BLIS_THREAD_LOCAL bool gbIsLoggingEnabled;
 
 /* API to enable logging at runtime */
 #define AOCL_DTL_Enable_Logs() \

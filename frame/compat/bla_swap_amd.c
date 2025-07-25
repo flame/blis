@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -49,15 +49,17 @@ void PASTEF77S(ch,blasname) \
        ftype*   y, const f77_int* incy  \
      ) \
 { \
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
+\
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    AOCL_DTL_LOG_SWAP_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *n, *incx, *incy); \
+\
     dim_t  n0; \
     ftype* x0; \
     ftype* y0; \
     inc_t  incx0; \
     inc_t  incy0; \
-\
-    /* Initialize BLIS. */ \
-    bli_init_auto(); \
 \
     /* Convert/typecast negative values of n to zero. */ \
     bli_convert_blas_dim1( *n, n0 ); \
@@ -101,16 +103,18 @@ void sswap_blis_impl
        float*   y, const f77_int* incy
      )
 {
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_SWAP_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', *n, *incx, *incy);
+
     dim_t  n0;
     float* x0;
     float* y0;
     inc_t  incx0;
     inc_t  incy0;
-
-    /* Initialize BLIS. */
-//  bli_init_auto();
 
     /* Convert/typecast negative values of n to zero. */
     if ( *n < 0 ) n0 = ( dim_t )0;
@@ -200,16 +204,18 @@ void dswap_blis_impl
        double*   y, const f77_int* incy
      )
 {
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_SWAP_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, *incx, *incy);
+
     dim_t  n0;
     double* x0;
     double* y0;
     inc_t  incx0;
     inc_t  incy0;
-
-    /* Initialize BLIS. */
-//  bli_init_auto();
 
     /* Convert/typecast negative values of n to zero. */
     if ( *n < 0 ) n0 = ( dim_t )0;

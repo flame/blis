@@ -3,7 +3,7 @@
  *
  * Description : BLIS library specific debug helpes.
  *
- * Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
  *
  *==================================================================*/
 
@@ -80,8 +80,8 @@ void AOCL_DTL_log_gemm_sizes(int8 loglevel,
     // {S, D, C, Z} transa, transb, m, n, k, alpha_real, alpha_imag,
     //              lda, ldb, beta_real, beta_imag, ldc
     sprintf(buffer, "%c %c %c %ld %ld %ld %lf %lf %ld %ld %lf %lf %ld",
-            toupper(dt_type),
-            toupper(transa), toupper(transb),
+            tolower(dt_type),
+            transa, transb,
             (dim_t)m, (dim_t)n, (dim_t)k,
             alpha_real, alpha_imag,
             (inc_t)lda, (inc_t)ldb,
@@ -174,7 +174,7 @@ void AOCL_DTL_log_trsm_sizes(int8 loglevel,
     DTL_get_complex_parts(dt_type, alpha, &alpha_real, &alpha_imag);
 
     //{S, D, C, Z} side, uplo, transa, diaga, m, n, lda, ldb, alpha_real, alpha_imag
-    sprintf(buffer, "%c %c %c %c %c %ld %ld %ld %ld %lf %lf", dt_type,
+    sprintf(buffer, "%c %c %c %c %c %ld %ld %ld %ld %lf %lf", tolower(dt_type),
             side, uploa, transa, diaga,
             (dim_t)m, (dim_t)n, (dim_t)lda, (dim_t)ldb,
             alpha_real, alpha_imag);
@@ -251,7 +251,7 @@ void AOCL_DTL_log_gemmt_sizes(int8 loglevel,
     // {S,D,C,Z} {triangC : l or u} {n k lda ldb ldc transa transb alpha_real alpha_imaginary
     // beta_real, beta_imaginary}
     sprintf(buffer, "%c %c %ld %ld %lu %lu %lu %c %c %lf %lf %lf %lf",
-            dt_type, uplo, (dim_t)n, (dim_t)k,
+            tolower(dt_type), uplo, (dim_t)n, (dim_t)k,
             (dim_t)lda, (dim_t)ldb, (dim_t)ldc,
             transa, transb,
             alpha_real, alpha_imag,
@@ -288,7 +288,7 @@ void AOCL_DTL_log_hemm_sizes(int8 loglevel,
     // {C, Z} { side, uploa, m, n, alpha_real, alpha_imag, lda, incx, beta_real, beta_imag, incy}
 
     sprintf(buffer, "%c %c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld\n",
-            dt_type, side, uploa, (dim_t)m, (dim_t)n, alpha_real, alpha_imag,
+            tolower(dt_type), side, uploa, (dim_t)m, (dim_t)n, alpha_real, alpha_imag,
             (dim_t)lda, (dim_t)ldb, beta_real, beta_imag, (dim_t)ldc);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -319,8 +319,8 @@ void AOCL_DTL_log_herk_sizes(int8 loglevel,
     DTL_get_complex_parts(dt_type, beta, &beta_real, &beta_imag);
 
     // {C, Z} {uploc, transa, m, k, alpha_real, alpha_imag, lda, beta_real, beta_imag, ldc}
-    sprintf(buffer, "%c %c %c %ld %ld %lf %lf %ld %lf %lf %ld\n",
-            dt_type, uploc, transa, (dim_t)m, (dim_t)k, alpha_real, alpha_imag, (dim_t)lda, beta_real, beta_imag, (dim_t)ldc);
+    sprintf(buffer, "%c %c %c %ld %ld %lf %lf %ld %lf %lf %ld\n", tolower(dt_type),
+            uploc, transa, (dim_t)m, (dim_t)k, alpha_real, alpha_imag, (dim_t)lda, beta_real, beta_imag, (dim_t)ldc);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -350,8 +350,8 @@ void AOCL_DTL_log_her2k_sizes(int8 loglevel,
     DTL_get_complex_parts(dt_type, beta, &beta_real, &beta_imag);
 
     // {C, Z} { uploc, transa, m, k, alpha_real, alpha_imag, lda, ldb, beta_real, beta_imag, ldc}
-    sprintf(buffer, "%c %c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld\n",
-            dt_type, uploc, transa, (dim_t)m, (dim_t)k, alpha_real, alpha_imag, (dim_t)lda, (dim_t)ldb, beta_real, beta_imag, (dim_t)ldc);
+    sprintf(buffer, "%c %c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld\n", tolower(dt_type),
+            uploc, transa, (dim_t)m, (dim_t)k, alpha_real, alpha_imag, (dim_t)lda, (dim_t)ldb, beta_real, beta_imag, (dim_t)ldc);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -381,8 +381,8 @@ void AOCL_DTL_log_symm_sizes(int8 loglevel,
     DTL_get_complex_parts(dt_type, beta, &beta_real, &beta_imag);
 
     // {S, D, C, Z} { side, uploa, m, n, alpha_real, alpha_imag, lda, ldb, beta_real, beta_imag, ldc}
-    sprintf(buffer, "%c %c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld\n",
-            dt_type, side, uploa, (dim_t)m, (dim_t)n, alpha_real, alpha_imag, (dim_t)lda, (dim_t)ldb, beta_real, beta_imag, (dim_t)ldc);
+    sprintf(buffer, "%c %c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld\n", tolower(dt_type),
+            side, uploa, (dim_t)m, (dim_t)n, alpha_real, alpha_imag, (dim_t)lda, (dim_t)ldb, beta_real, beta_imag, (dim_t)ldc);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -417,8 +417,8 @@ void AOCL_DTL_log_symv_sizes(int8 loglevel,
     }
 
     // {S, D} { uploa, m, alpha_d, lda, incx, beta_d, incy}
-    sprintf(buffer, "%c %c %ld %lf %ld %ld %lf %ld\n",
-            dt_type, uploa, (dim_t)m, alpha_d, (dim_t)lda, (dim_t)incx, beta_d, (dim_t)incy);
+    sprintf(buffer, "%c %c %ld %lf %ld %ld %lf %ld\n", tolower(dt_type),
+            uploa, (dim_t)m, alpha_d, (dim_t)lda, (dim_t)incx, beta_d, (dim_t)incy);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -447,8 +447,8 @@ void AOCL_DTL_log_gemv_sizes(int8 loglevel,
     DTL_get_complex_parts(dt_type, beta, &beta_real, &beta_imag);
 
     // {S, D,C, Z} { transa, m, n, alpha, lda, incx, beta, incy}
-    sprintf(buffer, "%c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld\n",
-            dt_type, transa, (dim_t)m, (dim_t)n, alpha_real, alpha_imag,
+    sprintf(buffer, "%c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld\n", tolower(dt_type),
+            transa, (dim_t)m, (dim_t)n, alpha_real, alpha_imag,
             (dim_t)lda, (dim_t)incx, beta_real, beta_imag, (dim_t)incy);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -472,7 +472,8 @@ void AOCL_DTL_log_ger_sizes(int8 loglevel,
 
     DTL_get_complex_parts(dt_type, alpha, &alpha_real, &alpha_imag);
 
-    sprintf(buffer, "%c %ld %ld %lf %lf %ld %ld %ld\n", dt_type, (dim_t)m, (dim_t)n, alpha_real, alpha_imag, (dim_t)incx, (dim_t)incy, (dim_t)lda);
+    sprintf(buffer, "%c %ld %ld %lf %lf %ld %ld %ld\n", tolower(dt_type),
+            (dim_t)m, (dim_t)n, alpha_real, alpha_imag, (dim_t)incx, (dim_t)incy, (dim_t)lda);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -495,8 +496,8 @@ void AOCL_DTL_log_her_sizes(int8 loglevel,
     DTL_get_complex_parts(dt_type, alpha, &alpha_real, &alpha_imag);
 
     // {C, Z} {uploa, m alpha_real, alpha_imag incx lda}
-    sprintf(buffer, "%c %c %ld %lf %lf %ld %ld\n",
-            dt_type, uploa, (dim_t)m, alpha_real, alpha_imag, (dim_t)incx, (dim_t)lda);
+    sprintf(buffer, "%c %c %ld %lf %lf %ld %ld\n", tolower(dt_type),
+            uploa, (dim_t)m, alpha_real, alpha_imag, (dim_t)incx, (dim_t)lda);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -514,7 +515,7 @@ void AOCL_DTL_log_dotv_sizes(int8 loglevel,
     char buffer[256];
 
     // { conjx, n, incx, incy}
-    sprintf(buffer, "%c %c %ld %ld %ld\n", dt_type, conjx, (dim_t)n, (dim_t)incx, (dim_t)incy);
+    sprintf(buffer, "%c %c %ld %ld %ld\n", tolower(dt_type), conjx, (dim_t)n, (dim_t)incx, (dim_t)incy);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -542,8 +543,8 @@ void AOCL_DTL_log_hemv_sizes(int8 loglevel,
     DTL_get_complex_parts(dt_type, beta, &beta_real, &beta_imag);
 
     // {S, D,C, Z} { uploa, m, alpha_real, alpha_imag, lda, incx, beta_real, beta_imag, incy}
-    sprintf(buffer, "%c %c %ld %lf %lf %ld %ld %lf %lf %ld\n",
-            dt_type, uploa, (dim_t)m, alpha_real, alpha_imag, (dim_t)lda, (dim_t)incx, beta_real, beta_imag, (dim_t)incy);
+    sprintf(buffer, "%c %c %ld %lf %lf %ld %ld %lf %lf %ld\n", tolower(dt_type),
+            uploa, (dim_t)m, alpha_real, alpha_imag, (dim_t)lda, (dim_t)incx, beta_real, beta_imag, (dim_t)incy);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -567,8 +568,8 @@ void AOCL_DTL_log_her2_sizes(int8 loglevel,
     DTL_get_complex_parts(dt_type, alpha, &alpha_real, &alpha_imag);
 
     // {S, D, C, Z} {uploa, m, alpha_real, alpha_imag, incx, incy}
-    sprintf(buffer, "%c %c %ld %lf %lf %ld %ld\n",
-            dt_type, uploa, (dim_t)m, alpha_real, alpha_imag, (dim_t)incx, (dim_t)incy);
+    sprintf(buffer, "%c %c %ld %lf %lf %ld %ld\n", tolower(dt_type),
+            uploa, (dim_t)m, alpha_real, alpha_imag, (dim_t)incx, (dim_t)incy);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -585,7 +586,7 @@ void AOCL_DTL_log_amax_sizes(int8 loglevel,
 {
     char buffer[256];
     // {S, D, C, Z} {n, incx}
-    sprintf(buffer, "%c %ld %ld\n", dt_type, (dim_t)n, (dim_t)incx);
+    sprintf(buffer, "%c %ld %ld\n", tolower(dt_type), (dim_t)n, (dim_t)incx);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -600,7 +601,7 @@ void AOCL_DTL_log_asum_sizes(int8 loglevel,
 {
     char buffer[256];
     // {S, D, C, Z} {n, incx}
-    sprintf(buffer, "%c %ld %ld\n", dt_type, (dim_t)n, (dim_t)incx);
+    sprintf(buffer, "%c %ld %ld\n", tolower(dt_type), (dim_t)n, (dim_t)incx);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -626,8 +627,8 @@ void AOCL_DTL_log_axpby_sizes(int8 loglevel,
     DTL_get_complex_parts(dt_type, beta, &beta_real, &beta_imag);
 
     // {S, D, C, Z} {n, alpha_real, alpha_imag, incx, beta_real, beta_imag, incy}
-    sprintf(buffer, "%c %ld %lf %lf %ld %lf %lf %ld\n",
-            dt_type, (dim_t)n, alpha_real, alpha_imag, (dim_t)incx,
+    sprintf(buffer, "%c %ld %lf %lf %ld %lf %lf %ld\n", tolower(dt_type),
+            (dim_t)n, alpha_real, alpha_imag, (dim_t)incx,
             beta_real, beta_imag, (dim_t)incy);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -650,8 +651,8 @@ void AOCL_DTL_log_axpy_sizes(int8 loglevel,
     DTL_get_complex_parts(dt_type, alpha, &alpha_real, &alpha_imag);
 
     // {S, D, C, Z} {n, alpha_real, alpha_imag, incx, incy}
-    sprintf(buffer, "%c %ld %lf %lf %ld %ld\n",
-            dt_type, (dim_t)n, alpha_real, alpha_imag, (dim_t)incx, (dim_t)incy);
+    sprintf(buffer, "%c %ld %lf %lf %ld %ld\n", tolower(dt_type),
+            (dim_t)n, alpha_real, alpha_imag, (dim_t)incx, (dim_t)incy);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -667,7 +668,7 @@ void AOCL_DTL_log_copy_sizes(int8 loglevel,
 {
     char buffer[256];
     // {S, D, C, Z} {n, incx, incy}
-    sprintf(buffer, "%c %ld %ld %ld\n", dt_type, (dim_t)n, (dim_t)incx, (dim_t)incy);
+    sprintf(buffer, "%c %ld %ld %ld\n", tolower(dt_type), (dim_t)n, (dim_t)incx, (dim_t)incy);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -688,8 +689,8 @@ void AOCL_DTL_log_scal_sizes(int8 loglevel,
     DTL_get_complex_parts(dt_type, alpha, &alpha_real, &alpha_imag);
 
     // {S, D, C, Z} { alpha, n, incx}
-    sprintf(buffer, "%c %lf %lf %ld %ld\n",
-            dt_type, alpha_real, alpha_imag, (dim_t)n, (dim_t)incx);
+    sprintf(buffer, "%c %lf %lf %ld %ld\n", tolower(dt_type),
+            alpha_real, alpha_imag, (dim_t)n, (dim_t)incx);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -705,8 +706,8 @@ void AOCL_DTL_log_swap_sizes(int8 loglevel,
 {
     char buffer[256];
     // {S, D, C, Z} {n, incx, incy}
-    sprintf(buffer, "%c %ld %ld %ld\n",
-            dt_type, (dim_t)n, (dim_t)incx, (dim_t)incy);
+    sprintf(buffer, "%c %ld %ld %ld\n", tolower(dt_type),
+            (dim_t)n, (dim_t)incx, (dim_t)incy);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -721,8 +722,7 @@ void AOCL_DTL_log_nrm2_sizes(int8 loglevel,
 {
     char buffer[256];
     // {S, D, C, Z} {n, incx}
-    sprintf(buffer, "%c %ld %ld",
-            dt_type, (dim_t)n, (dim_t)incx);
+    sprintf(buffer, "%c %ld %ld", tolower(dt_type), (dim_t)n, (dim_t)incx);
 
     AOCL_DTL_START_PERF_TIMER();
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -776,8 +776,8 @@ void AOCL_DTL_log_syr2_sizes(int8 loglevel,
     DTL_get_complex_parts(dt_type, alpha, &alpha_real, &alpha_imag);
 
     // { uploa, m, alpha_real, alpha_imag, incx, incy, lda}
-    sprintf(buffer, "%c %c %ld %lf %lf %ld %ld %ld\n",
-            dt_type, uploa, (dim_t)m, alpha_real, alpha_imag, (dim_t)incx, (dim_t)incy, (dim_t)lda);
+    sprintf(buffer, "%c %c %ld %lf %lf %ld %ld %ld\n", tolower(dt_type),
+            uploa, (dim_t)m, alpha_real, alpha_imag, (dim_t)incx, (dim_t)incy, (dim_t)lda);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -807,8 +807,8 @@ void AOCL_DTL_log_syr2k_sizes(int8 loglevel,
     DTL_get_complex_parts(dt_type, beta, &beta_real, &beta_imag);
 
     // { uploc, transa, m, k, alpha_real, alpha_imag, lda, ldb, beta_real, beta_imag, ldc}
-    sprintf(buffer, "%c %c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld\n",
-            dt_type, uploc, transa, (dim_t)m, (dim_t)k, alpha_real, alpha_imag, (dim_t)lda, (dim_t)ldb, beta_real, beta_imag, (dim_t)ldc);
+    sprintf(buffer, "%c %c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld\n", tolower(dt_type),
+            uploc, transa, (dim_t)m, (dim_t)k, alpha_real, alpha_imag, (dim_t)lda, (dim_t)ldb, beta_real, beta_imag, (dim_t)ldc);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -831,8 +831,8 @@ void AOCL_DTL_log_syr_sizes(int8 loglevel,
     DTL_get_complex_parts(dt_type, alpha, &alpha_real, &alpha_imag);
 
     // {S, D,C, Z} { uploa, m, alpha_real, alpha_imag, incx, lda}
-    sprintf(buffer, "%c %c %ld %lf %lf %ld %ld\n",
-            dt_type, uploa, (dim_t)m, alpha_real, alpha_imag, (dim_t)incx, (dim_t)lda);
+    sprintf(buffer, "%c %c %ld %lf %lf %ld %ld\n", tolower(dt_type),
+            uploa, (dim_t)m, alpha_real, alpha_imag, (dim_t)incx, (dim_t)lda);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -861,8 +861,8 @@ void AOCL_DTL_log_syrk_sizes(int8 loglevel,
     DTL_get_complex_parts(dt_type, beta, &beta_real, &beta_imag);
 
     // {S, D,C, Z} { uploc, transa, m, k, alpha_real, alpha_imag, lda, beta_real, beta_imag, ldc}
-    sprintf(buffer, "%c %c %c %ld %ld %lf %lf %ld %lf %lf %ld\n",
-            dt_type, uploc, transa, (dim_t)m, (dim_t)k, alpha_real, alpha_imag, (dim_t)lda, beta_real, beta_imag, (dim_t)ldc);
+    sprintf(buffer, "%c %c %c %ld %ld %lf %lf %ld %lf %lf %ld\n", tolower(dt_type),
+            uploc, transa, (dim_t)m, (dim_t)k, alpha_real, alpha_imag, (dim_t)lda, beta_real, beta_imag, (dim_t)ldc);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -889,8 +889,8 @@ void AOCL_DTL_log_trmm_sizes(int8 loglevel,
     DTL_get_complex_parts(dt_type, alpha, &alpha_real, &alpha_imag);
 
     // {S, D,C, Z} { side, uploa, transa, diaga, m, n, alpha_real, alpha_imag, lda, ldb}
-    sprintf(buffer, "%c %c %c %c %c %ld %ld %lf %lf %ld %ld\n",
-            dt_type, side, uploa, transa, diaga, (dim_t)m, (dim_t)n, alpha_real, alpha_imag, (dim_t)lda, (dim_t)ldb);
+    sprintf(buffer, "%c %c %c %c %c %ld %ld %lf %lf %ld %ld\n", tolower(dt_type),
+            side, uploa, transa, diaga, (dim_t)m, (dim_t)n, alpha_real, alpha_imag, (dim_t)lda, (dim_t)ldb);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -909,8 +909,8 @@ void AOCL_DTL_log_trmv_sizes(int8 loglevel,
 {
     char buffer[256];
     // {S, D,C, Z} { side, uploa, transa, diaga, m, lda, incx}
-    sprintf(buffer, "%c %c %c %c %ld %ld %ld\n",
-            dt_type, uploa, transa, diaga, (dim_t)m, (dim_t)lda, (dim_t)incx);
+    sprintf(buffer, "%c %c %c %c %ld %ld %ld\n", tolower(dt_type),
+            uploa, transa, diaga, (dim_t)m, (dim_t)lda, (dim_t)incx);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
@@ -929,8 +929,8 @@ void AOCL_DTL_log_trsv_sizes(int8 loglevel,
 {
     char buffer[256];
     // {S, D,C, Z} { side, uploa, transa, diaga, m, lda, incx}
-    sprintf(buffer, "%c %c %c %c %ld %ld %ld\n",
-            dt_type, uploa, transa, diaga, (dim_t)m, (dim_t)lda, (dim_t)incx);
+    sprintf(buffer, "%c %c %c %c %ld %ld %ld\n", tolower(dt_type),
+            uploa, transa, diaga, (dim_t)m, (dim_t)lda, (dim_t)incx);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }

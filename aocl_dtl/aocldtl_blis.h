@@ -3,15 +3,13 @@
  *
  * Description : BLIS library specific debug helpes.
  *
- * Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
  *
  *==================================================================*/
 
 
 #ifndef __AOCLDTL_BLIS_H
 #define __AOCLDTL_BLIS_H
-
-#include "blis.h"
 
 #if AOCL_DTL_LOG_ENABLE
 dim_t AOCL_get_requested_threads_count(void);
@@ -556,7 +554,8 @@ void AOCL_DTL_log_trmm_sizes(int8 loglevel,
     if (gbIsLoggingEnabled) \
         AOCL_DTL_log_trsv_sizes(loglevel, dt_type, uploa, transa, diaga, m, lda, incx,\
                                 __FILE__,__FUNCTION__,__LINE__);
-#else
+
+#else // AOCL_DTL_LOG_ENABLE
 
 #define AOCL_DTL_LOG_GEMM_INPUTS(loglevel, dt, transa, transb, m, n, k, alpha, lda, ldb, beta, ldc)
 
@@ -624,7 +623,6 @@ void AOCL_DTL_log_trmm_sizes(int8 loglevel,
 
 #define AOCL_DTL_LOG_TRSV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, lda, incx )
 
-#endif
+#endif // AOCL_DTL_LOG_ENABLE
 
-
-#endif
+#endif //ndef __AOCLDTL_BLIS_H

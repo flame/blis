@@ -4,7 +4,7 @@
  *
  * Description : Abstraction for various datatypes used by DTL.
  *
- * Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
  *
  *==================================================================*/
 #ifndef AOCL_TYPEDEF_H_
@@ -29,7 +29,6 @@ typedef unsigned short int      uint16;
 typedef unsigned int            uint32;
 typedef unsigned long           uint64;
 typedef uint8                   *STRING;
-typedef unsigned char           Bool;
 typedef char                    int8;
 typedef signed long int         int32;
 typedef short int               int16;
