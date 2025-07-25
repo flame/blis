@@ -191,7 +191,7 @@ jobs:
       - run:
           name: Installing Dependencies
           command: |
-            choco install mingw llvm
+            choco install mingw llvm python
 
       - run:
           name: Configuring, Building, Testing
