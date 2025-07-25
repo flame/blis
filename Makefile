@@ -262,10 +262,6 @@ MK_BLIS_OBJS        := $(MK_CONFIG_OBJS) \
                        $(MK_ADDON_OBJS) \
                        $(MK_SANDBOX_OBJS)
 
-
-$(info "Frame source: $(MK_FRAME_SRC)")
-$(info "Objects: $(MK_BLIS_OBJS)")
-
 # Optionally filter out the BLAS and CBLAS compatibility layer object files.
 # This is not actually necessary, since each affected file is guarded by C
 # preprocessor macros, but it but prevents "empty" object files from being

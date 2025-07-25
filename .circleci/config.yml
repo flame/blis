@@ -193,7 +193,7 @@ jobs:
       - run:
           name: Installing Dependencies
           command: |
-            choco install mingw llvm python
+            choco install mingw llvm
 
       - run:
           name: Configuring, Building, Testing
@@ -217,6 +217,7 @@ jobs:
             bash -lc "mingw32-make install"
             if ($LIB_TYPE -eq "shared") { $TEST_TARGET = "checkblis-fast" }
             if ($LIB_TYPE -eq "static") { $TEST_TARGET = "check" }
+            echo "Test target: $TEST_TARGET"
             if ($TEST -eq "FAST") { bash -lc "mingw32-make $TEST_TARGET -j4 V=1" }
             if ((-not (Select-String -Path output.testsuite -Pattern "Exiting normally" -SimpleMatch -Quiet)) -or
                 (Select-String -Path output.testsuite -Pattern "FAILURE" -SimpleMatch -Quiet))

@@ -1818,7 +1818,7 @@ check_compiler()
     if [[ ${cc_vendor} = NVIDIA ]]; then
         blacklistcc_add "knl"
     fi
-    
+
     # gcc
     if [[ ${cc_vendor} = gcc ]]; then
 
@@ -1916,6 +1916,9 @@ check_compiler()
 			fi
 			if [[ ${cc_major} -lt 11 ]]; then
 				blacklistcc_add "armsve"
+			fi
+			if [[ ${cc_major} -ge 19 ]]; then
+				blacklistcc_add "knl"
 			fi
 		fi
 	fi
