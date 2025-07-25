@@ -196,26 +196,26 @@ jobs:
       - run:
           name: Configuring, Building, Testing
           command: |
-            set DIST_PATH=.
-            set CC="<< parameters.CC >>"
-            set CXX="<< parameters.CXX >>"
-            set CONF="<< parameters.CONF >>"
-            set TEST="<< parameters.TEST >>"
-            set THR="<< parameters.THR >>"
-            if [%CC%]==[clang] set "AR=llvm-ar"
-            if [%CC%]==[clang] set "AS=llvm-as"
-            if [%LIB_TYPE%]==[shared] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --enable-shared --disable-static"
-            if [%LIB_TYPE%]==[static] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --disable-shared --enable-static"
-            if not [%CBLAS%]==[no] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --enable-cblas"
-            if [%SANDBOX%]==[yes] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% -s gemmlike"
-            set RANLIB=echo
-            set LIBPTHREAD=
-            bash -lc "./configure %CONFIGURE_OPTS% --enable-threading=%THR% --enable-arg-max-hack --prefix=%cd% %CONF%"
+            $DIST_PATH = .
+            $CC = "<< parameters.CC >>"
+            $CXX = "<< parameters.CXX >>"
+            $CONF = "<< parameters.CONF >>"
+            $TEST = "<< parameters.TEST >>"
+            $THR = "<< parameters.THR >>"
+            if ($CC -eq "clang") { $AR = "llvm-ar" }
+            if ($CC -eq "clang") { $AS = "llvm-as" }
+            if ($LIB_TYPE -eq "shared") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS --enable-shared --disable-static" }
+            if ($LIB_TYPE -eq "static") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS --disable-shared --enable-static" }
+            if ($CBLAS -ne "no") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS --enable-cblas" }
+            if ($SANDBOX -eq "yes") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS -s gemmlike" }
+            $RANLIB = "echo"
+            $LIBPTHREAD = ""
+            bash -lc "./configure $CONFIGURE_OPTS --enable-threading=$THR --enable-arg-max-hack --prefix=$pwd $CONF"
             bash -lc "mingw32-make -j4 V=1"
             bash -lc "mingw32-make install"
-            if [%LIB_TYPE%]==[shared] set "TEST_TARGET=checkblis-fast"
-            if [%LIB_TYPE%]==[static] set "TEST_TARGET=check"
-            if [%TEST%]==[FAST] bash -lc "mingw32-make %TEST_TARGET% -j4 V=1"
+            if ($LIB_TYPE -eq "shared") { $TEST_TARGET = "checkblis-fast" }
+            if ($LIB_TYPE -eq "static") { $TEST_TARGET = "check" }
+            if ($TEST -eq "FAST") { bash -lc "mingw32-make $TEST_TARGET -j4 V=1" }
 
   build:
     parameters:
