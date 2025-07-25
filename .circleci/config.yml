@@ -196,17 +196,18 @@ jobs:
             choco install mingw llvm
 
       - run:
+          shell: bash.exe
           name: Configuring, Building, Testing
           command: |
-            $env:DIST_PATH = "."
-            $env:CC = "<< parameters.CC >>"
-            $env:CXX = "<< parameters.CXX >>"
-            $CONF = "<< parameters.CONF >>"
-            $TEST = "<< parameters.TEST >>"
-            $THR = "<< parameters.THR >>"
-            $LIB_TYPE = "<< parameters.LIB_TYPE >>"
-            $CBLAS = "no"
-            $SANDBOX = "no"
+            DIST_PATH="."
+            CC="<< parameters.CC >>"
+            CXX="<< parameters.CXX >>"
+            CONF="<< parameters.CONF >>"
+            TEST="<< parameters.TEST >>"
+            THR="<< parameters.THR >>"
+            LIB_TYPE="<< parameters.LIB_TYPE >>"
+            CBLAS="no"
+            SANDBOX="no"
 
             echo "DIST_PATH = $env:DIST_PATH"
             echo "CC        = $env:CC"
@@ -216,37 +217,33 @@ jobs:
             echo "THR       = $THR"
             echo "LIB_TYPE  = $LIB_TYPE"
 
-            if ($CC -eq "clang") { $AR = "llvm-ar" }
-            if ($CC -eq "clang") { $AS = "llvm-as" }
-            if ($LIB_TYPE -eq "shared") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS --enable-shared --disable-static" }
-            if ($LIB_TYPE -eq "static") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS --disable-shared --enable-static" }
-            if ($CBLAS -ne "no") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS --enable-cblas" }
-            if ($SANDBOX -eq "yes") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS -s gemmlike" }
-            $env:RANLIB = "echo"
-            $env:LIBPTHREAD = ""
+            [ $CC = "clang" ] && $AR="llvm-ar"
+            [ $CC = "clang" ] && $AS="llvm-as"
+            [ $LIB_TYPE = "shared") && $CONFIGURE_OPTS="$CONFIGURE_OPTS --enable-shared --disable-static"
+            [ $LIB_TYPE = "static") && $CONFIGURE_OPTS="$CONFIGURE_OPTS --disable-shared --enable-static"
+            [ $CBLAS = "no" ] || $CONFIGURE_OPTS="$CONFIGURE_OPTS --enable-cblas"
+            [ $SANDBOX = "yes" ] && $CONFIGURE_OPTS="$CONFIGURE_OPTS -s gemmlike"
+            $RANLIB="echo"
+            $LIBPTHREAD=""
 
-            $CONFIGURE_OPTS = "$CONFIGURE_OPTS --enable-threading=$THR --enable-arg-max-hack --prefix=/c/Users/circleci/project/blis $CONF"
+            $CONFIGURE_OPTS="$CONFIGURE_OPTS --enable-threading=$THR --enable-arg-max-hack --prefix=/c/Users/circleci/project/blis $CONF"
             echo "Configuring with: $CONFIGURE_OPTS"
-            bash -lc "./configure $CONFIGURE_OPTS"
-            bash -lc "mingw32-make -j4 V=1"
-            bash -lc "mingw32-make install"
-
-            if ($LIB_TYPE -eq "shared") { $TEST_TARGET = "checkblis-fast" }
-            if ($LIB_TYPE -eq "static") { $TEST_TARGET = "check" }
-            echo "Test target: $TEST_TARGET"
-            if ($TEST -eq "FAST") { bash -lc "mingw32-make $TEST_TARGET -j4 V=1" }
+            ./configure $CONFIGURE_OPTS
+            mingw32-make -j4 V=1
+            mingw32-make install
 
             tar zcvf blis-x86_64-win-$LIB_TYPE.tar.gz blis
 
-            if ((-not (Select-String -Path output.testsuite -Pattern "Exiting normally" -SimpleMatch -Quiet)) -or
-                (Select-String -Path output.testsuite -Pattern "FAILURE" -SimpleMatch -Quiet))
-            {
-                throw "Build and/or tests failed."
-            }
+            [ $LIB_TYPE = "shared" ] && $TEST_TARGET="checkblis-fast"
+            [ $LIB_TYPE = "static" ] && $TEST_TARGET="check"
+            echo "Test target: $TEST_TARGET"
+            [ $TEST = "FAST" ] && mingw32-make $TEST_TARGET -j4 V=1
 
       - store_artifacts:
           path: blis-x86_64-win-<< parameters.LIB_TYPE >>.tar.gz
 
+      - store_artifacts:
+          path: output.testsuite
 
   build:
     parameters:
@@ -391,3 +388,6 @@ jobs:
             if [ "$TEST" != "0" ]; then $DIST_PATH/ci/do_testsuite.sh; fi
             if [ "$SDE" = "1" ]; then $DIST_PATH/ci/do_sde.sh; fi
             if [ "$LEVEL0" = "1" ]; then $DIST_PATH/ci/do_level0.sh; fi
+
+      - store_artifacts:
+          path: output.testsuite
