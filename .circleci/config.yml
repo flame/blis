@@ -204,6 +204,18 @@ jobs:
             $CONF = "<< parameters.CONF >>"
             $TEST = "<< parameters.TEST >>"
             $THR = "<< parameters.THR >>"
+            $LIB_TYPE = "<< parameters.LIB_TYPE >>"
+            $CBLAS = "no"
+            $SANDBOX = "no"
+
+            echo "DIST_PATH = $env:DIST_PATH"
+            echo "CC        = $env:CC"
+            echo "CXX       = $env:CXX"
+            echo "CONF      = $CONF"
+            echo "TEST      = $TEST"
+            echo "THR       = $THR"
+            echo "LIB_TYPE  = $LIB_TYPE"
+
             if ($CC -eq "clang") { $AR = "llvm-ar" }
             if ($CC -eq "clang") { $AS = "llvm-as" }
             if ($LIB_TYPE -eq "shared") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS --enable-shared --disable-static" }
@@ -212,18 +224,29 @@ jobs:
             if ($SANDBOX -eq "yes") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS -s gemmlike" }
             $env:RANLIB = "echo"
             $env:LIBPTHREAD = ""
-            bash -lc "./configure $CONFIGURE_OPTS --enable-threading=$THR --enable-arg-max-hack --prefix=/c/Users/circleci/project $CONF"
+
+            $CONFIGURE_OPTS = "$CONFIGURE_OPTS --enable-threading=$THR --enable-arg-max-hack --prefix=/c/Users/circleci/project/blis $CONF"
+            echo "Configuring with: $CONFIGURE_OPTS"
+            bash -lc "./configure $CONFIGURE_OPTS"
             bash -lc "mingw32-make -j4 V=1"
             bash -lc "mingw32-make install"
+
             if ($LIB_TYPE -eq "shared") { $TEST_TARGET = "checkblis-fast" }
             if ($LIB_TYPE -eq "static") { $TEST_TARGET = "check" }
             echo "Test target: $TEST_TARGET"
             if ($TEST -eq "FAST") { bash -lc "mingw32-make $TEST_TARGET -j4 V=1" }
+
+            tar zcvf blis-x86_64-win-$LIB_TYPE.tar.gz blis
+
             if ((-not (Select-String -Path output.testsuite -Pattern "Exiting normally" -SimpleMatch -Quiet)) -or
                 (Select-String -Path output.testsuite -Pattern "FAILURE" -SimpleMatch -Quiet))
             {
                 throw "Build and/or tests failed."
             }
+
+      - store_artifacts:
+          path: blis-x86_64-win-<< parameters.LIB_TYPE >>.tar.gz
+
 
   build:
     parameters:
