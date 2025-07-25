@@ -7,6 +7,9 @@ branches:
     - amd
     - /r[0-9]+.x/
 
+orbs:
+  windows: circleci/windows@5.1.0
+
 executors:
   linux: # Docker using the Base Convenience Image
     docker:
@@ -24,6 +27,26 @@ executors:
 workflows:
   build:
     jobs:
+      # Default:
+      # - win-build:
+      #     CC: gcc
+      #     TEST: FAST
+      #     THR: none
+      #     CONF: auto
+      #     LIB_TYPE: shared
+
+      - win-build:
+          CC: gcc
+          THR: openmp,pthreads
+          LIB_TYPE: static
+          CONF: x86_64
+
+      - win-build:
+          CC: clang
+          THR: openmp,pthreads
+          LIB_TYPE: shared
+          CONF: x86_64
+
       # Default:
       # - build:
       #     os: linux
@@ -140,6 +163,61 @@ workflows:
           LDFLAGS: -static
 
 jobs:
+  win-build:
+    parameters:
+      CC:
+        type: string
+        default: gcc
+      CXX:
+        type: string
+        default: g++
+      TEST:
+        type: string
+        default: FAST
+      THR:
+        type: string
+        default: none
+      CONF:
+        type: string
+        default: auto
+      LIB_TYPE:
+        type: string
+        default: shared
+    executor:
+      name: win/default
+    steps:
+      - checkout
+
+      - run:
+          name: Installing Dependencies
+          command: |
+            choco install mingw
+
+      - run:
+          name: Configuring, Building, Testing
+          command: |
+            set DIST_PATH=.
+            set CC="<< parameters.CC >>"
+            set CXX="<< parameters.CXX >>"
+            set OOT="<< parameters.OOT >>"
+            set CONF="<< parameters.CONF >>"
+            set TEST="<< parameters.TEST >>"
+            set THR="<< parameters.THR >>"
+            if [%CC%]==[clang] set "AR=llvm-ar"
+            if [%CC%]==[clang] set "AS=llvm-as"
+            if [%LIB_TYPE%]==[shared] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --enable-shared --disable-static"
+            if [%LIB_TYPE%]==[static] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --disable-shared --enable-static"
+            if not [%CBLAS%]==[no] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --enable-cblas"
+            if [%SANDBOX%]==[yes] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% -s gemmlike"
+            set RANLIB=echo
+            set LIBPTHREAD=
+            bash -lc "./configure %CONFIGURE_OPTS% --enable-threading=%THR% --enable-arg-max-hack --prefix=%cd% %CONF%"
+            bash -lc "mingw32-make -j4 V=1"
+            bash -lc "mingw32-make install"
+            if [%LIB_TYPE%]==[shared] set "TEST_TARGET=checkblis-fast"
+            if [%LIB_TYPE%]==[static] set "TEST_TARGET=check"
+            if [%TEST%]==[FAST] bash -lc "mingw32-make %TEST_TARGET% -j4 V=1"
+
   build:
     parameters:
       os:
