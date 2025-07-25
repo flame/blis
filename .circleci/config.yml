@@ -216,6 +216,11 @@ jobs:
             if ($LIB_TYPE -eq "shared") { $TEST_TARGET = "checkblis-fast" }
             if ($LIB_TYPE -eq "static") { $TEST_TARGET = "check" }
             if ($TEST -eq "FAST") { bash -lc "mingw32-make $TEST_TARGET -j4 V=1" }
+            if ((-not Select-String -Path output.testsuite -Pattern "Exiting normally" -SimpleMatch -Quiet) -or
+                (Select-String -Path output.testsuite -Pattern "FAILURE" -SimpleMatch -Quiet))
+            {
+                throw "Build and/or tests failed."
+            }
 
   build:
     parameters:

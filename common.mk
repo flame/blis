@@ -1135,6 +1135,8 @@ PARENT_PATH        := $(OBJ_DIR)/$(CONFIG_NAME)
 -include $(addsuffix /$(FRAGMENT_MK), $(REFKERN_FRAG_PATH))
 -include $(addsuffix /$(FRAGMENT_MK), $(FRAME_FRAG_PATH))
 
+$(info "Frame fragment: $(addsuffix /$(FRAGMENT_MK), $(FRAME_FRAG_PATH))")
+
 # -- addon --
 
 # Construct paths to each addon.
