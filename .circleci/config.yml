@@ -238,10 +238,10 @@ jobs:
             tar zcvf blis-x86_64-win-$LIB_TYPE.tar.gz blis
 
             Select-String -Path output.testsuite -Pattern "Exiting normally" -SimpleMatch
-            Select-String -Path output.testsuite -Pattern "FAILURE" -SimpleMatch
+            Select-String -Path output.testsuite -Pattern "FAILURE" -CaseSensitive -SimpleMatch
 
             if ((-not (Select-String -Path output.testsuite -Pattern "Exiting normally" -SimpleMatch -Quiet)) -or
-                (Select-String -Path output.testsuite -Pattern "FAILURE" -SimpleMatch -Quiet))
+                (Select-String -Path output.testsuite -Pattern "FAILURE" -SimpleMatch -CaseSensitive -Quiet))
             {
                 throw "Build and/or tests failed."
             }
