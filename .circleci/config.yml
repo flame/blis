@@ -196,9 +196,16 @@ jobs:
             choco install mingw llvm
 
       - run:
+          name: '???'
+          command: |
+            bash -lc "echo $PATH"
+
+      - run:
           shell: bash.exe
           name: Configuring, Building, Testing
           command: |
+            echo $PATH
+
             DIST_PATH="."
             CC="<< parameters.CC >>"
             CXX="<< parameters.CXX >>"
