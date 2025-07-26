@@ -199,8 +199,9 @@ jobs:
           shell: bash.exe
           name: Configuring, Building, Testing
           command: |
-            PATH="$PATH:/c/ProgramData/mingw64/mingw64/bin:/c/Program Files/LLVM/bin:/c/Program Files (x86)/LLVM/bin"
+            PATH="/c/ProgramData/mingw64/mingw64/bin:/c/Program Files/LLVM/bin:/c/Program Files (x86)/LLVM/bin:$PATH"
             echo $PATH
+            which find
 
             export DIST_PATH="."
             export CC="<< parameters.CC >>"
