@@ -36,13 +36,13 @@ workflows:
       #     LIB_TYPE: shared
 
       - win-build:
-          CC: gcc
+          CC: gcc.exe
           THR: openmp,pthreads
           LIB_TYPE: static
           CONF: x86_64
 
       - win-build:
-          CC: clang
+          CC: clang.exe
           THR: openmp,pthreads
           LIB_TYPE: shared
           CONF: x86_64
@@ -167,10 +167,10 @@ jobs:
     parameters:
       CC:
         type: string
-        default: gcc
+        default: gcc.exe
       CXX:
         type: string
-        default: g++
+        default: g++.exe
       TEST:
         type: string
         default: FAST
@@ -199,6 +199,7 @@ jobs:
           name: '???'
           command: |
             bash -lc "echo $PATH"
+            echo $env:Path
 
       - run:
           shell: bash.exe
@@ -216,9 +217,9 @@ jobs:
             CBLAS="no"
             SANDBOX="no"
 
-            echo "DIST_PATH = $env:DIST_PATH"
-            echo "CC        = $env:CC"
-            echo "CXX       = $env:CXX"
+            echo "DIST_PATH = $DIST_PATH"
+            echo "CC        = $CC"
+            echo "CXX       = $CXX"
             echo "CONF      = $CONF"
             echo "TEST      = $TEST"
             echo "THR       = $THR"
@@ -238,13 +239,13 @@ jobs:
             CONFIGURE_OPTS="$CONFIGURE_OPTS --enable-threading=$THR --enable-arg-max-hack --prefix=/c/Users/circleci/project/blis $CONF"
             echo "Configuring with: $CONFIGURE_OPTS"
             ./configure $CONFIGURE_OPTS
-            mingw32-make -j4 V=1
-            mingw32-make install
+            mingw32-make.exe -j4 V=1
+            mingw32-make.exe install
 
             tar zcvf blis-x86_64-win-$LIB_TYPE.tar.gz blis
 
             echo "Test target: $TEST_TARGET"
-            [ $TEST = "FAST" ] && mingw32-make $TEST_TARGET -j4 V=1
+            [ $TEST = "FAST" ] && mingw32-make.exe $TEST_TARGET -j4 V=1
 
       - store_artifacts:
           path: blis-x86_64-win-<< parameters.LIB_TYPE >>.tar.gz
