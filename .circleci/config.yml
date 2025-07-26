@@ -194,54 +194,57 @@ jobs:
           name: Installing Dependencies
           command: |
             choco install mingw llvm
-
       - run:
-          shell: bash.exe
           name: Configuring, Building, Testing
           command: |
-            PATH="/c/ProgramData/mingw64/mingw64/bin:/c/Program Files/LLVM/bin:/c/Program Files (x86)/LLVM/bin:$PATH"
-            echo $PATH
-            which find
+            $env:DIST_PATH = "."
+            $env:CC = "<< parameters.CC >>"
+            $env:CXX = "<< parameters.CXX >>"
+            $CONF = "<< parameters.CONF >>"
+            $TEST = "<< parameters.TEST >>"
+            $THR = "<< parameters.THR >>"
+            $LIB_TYPE = "<< parameters.LIB_TYPE >>"
+            $CBLAS = "no"
+            $SANDBOX = "no"
 
-            export DIST_PATH="."
-            export CC="<< parameters.CC >>"
-            export CXX="<< parameters.CXX >>"
-            export CONF="<< parameters.CONF >>"
-            export TEST="<< parameters.TEST >>"
-            export THR="<< parameters.THR >>"
-            export LIB_TYPE="<< parameters.LIB_TYPE >>"
-            export CBLAS="no"
-            export SANDBOX="no"
-
-            echo "DIST_PATH = $DIST_PATH"
-            echo "CC        = $CC"
-            echo "CXX       = $CXX"
+            echo "DIST_PATH = $env:DIST_PATH"
+            echo "CC        = $env:CC"
+            echo "CXX       = $env:CXX"
             echo "CONF      = $CONF"
             echo "TEST      = $TEST"
             echo "THR       = $THR"
             echo "LIB_TYPE  = $LIB_TYPE"
 
-            [ $CC       = "clang"  ] && AR="llvm-ar"
-            [ $CC       = "clang"  ] && AS="llvm-as"
-            [ $LIB_TYPE = "shared" ] && CONFIGURE_OPTS="$CONFIGURE_OPTS --enable-shared --disable-static"
-            [ $LIB_TYPE = "static" ] && CONFIGURE_OPTS="$CONFIGURE_OPTS --disable-shared --enable-static"
-            [ $CBLAS    = "yes"    ] && CONFIGURE_OPTS="$CONFIGURE_OPTS --enable-cblas"
-            [ $SANDBOX  = "yes"    ] && CONFIGURE_OPTS="$CONFIGURE_OPTS -s gemmlike"
-            [ $LIB_TYPE = "shared" ] && TEST_TARGET="checkblis-fast"
-            [ $LIB_TYPE = "static" ] && TEST_TARGET="check"
-            RANLIB="echo"
-            LIBPTHREAD=""
+            if ($CC -eq "clang") { $AR = "llvm-ar" }
+            if ($CC -eq "clang") { $AS = "llvm-as" }
+            if ($LIB_TYPE -eq "shared") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS --enable-shared --disable-static" }
+            if ($LIB_TYPE -eq "static") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS --disable-shared --enable-static" }
+            if ($CBLAS -ne "no") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS --enable-cblas" }
+            if ($SANDBOX -eq "yes") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS -s gemmlike" }
+            $env:RANLIB = "echo"
+            $env:LIBPTHREAD = ""
 
-            CONFIGURE_OPTS="$CONFIGURE_OPTS --enable-threading=$THR --enable-arg-max-hack --prefix=/c/Users/circleci/project/blis $CONF"
+            $CONFIGURE_OPTS = "$CONFIGURE_OPTS --enable-threading=$THR --enable-arg-max-hack --prefix=/c/Users/circleci/project/blis $CONF"
             echo "Configuring with: $CONFIGURE_OPTS"
-            ./configure $CONFIGURE_OPTS
-            mingw32-make -j4 V=1
-            mingw32-make install
+            bash -lc "./configure $CONFIGURE_OPTS"
+            bash -lc "mingw32-make -j4 V=1"
+            bash -lc "mingw32-make install"
+
+            if ($LIB_TYPE -eq "shared") { $TEST_TARGET = "checkblis-fast" }
+            if ($LIB_TYPE -eq "static") { $TEST_TARGET = "check" }
+            echo "Test target: $TEST_TARGET"
+            if ($TEST -eq "FAST") { bash -lc "mingw32-make $TEST_TARGET -j4 V=1" }
 
             tar zcvf blis-x86_64-win-$LIB_TYPE.tar.gz blis
 
-            echo "Test target: $TEST_TARGET"
-            [ $TEST = "FAST" ] && mingw32-make $TEST_TARGET -j4 V=1
+            Select-String -Path output.testsuite -Pattern "Exiting normally" -SimpleMatch
+            Select-String -Path output.testsuite -Pattern "FAILURE" -SimpleMatch
+
+            if ((-not (Select-String -Path output.testsuite -Pattern "Exiting normally" -SimpleMatch -Quiet)) -or
+                (Select-String -Path output.testsuite -Pattern "FAILURE" -SimpleMatch -Quiet))
+            {
+                throw "Build and/or tests failed."
+            }
 
       - store_artifacts:
           path: blis-x86_64-win-<< parameters.LIB_TYPE >>.tar.gz
