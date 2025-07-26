@@ -7,6 +7,9 @@ branches:
     - amd
     - /r[0-9]+.x/
 
+orbs:
+  win: circleci/windows@5.1.0
+
 executors:
   linux: # Docker using the Base Convenience Image
     docker:
@@ -24,6 +27,26 @@ executors:
 workflows:
   build:
     jobs:
+      # Default:
+      # - win-build:
+      #     CC: gcc
+      #     TEST: FAST
+      #     THR: none
+      #     CONF: auto
+      #     LIB_TYPE: shared
+
+      - win-build:
+          CC: gcc
+          THR: openmp,pthreads
+          LIB_TYPE: static
+          CONF: x86_64
+
+      - win-build:
+          CC: clang
+          THR: openmp,pthreads
+          LIB_TYPE: shared
+          CONF: x86_64
+
       # Default:
       # - build:
       #     os: linux
@@ -140,6 +163,95 @@ workflows:
           LDFLAGS: -static
 
 jobs:
+  win-build:
+    parameters:
+      CC:
+        type: string
+        default: gcc
+      CXX:
+        type: string
+        default: g++
+      TEST:
+        type: string
+        default: FAST
+      THR:
+        type: string
+        default: none
+      CONF:
+        type: string
+        default: auto
+      LIB_TYPE:
+        type: string
+        default: shared
+    executor:
+      name: win/default
+    steps:
+      - run: git config --global core.autocrlf input
+
+      - checkout
+
+      - run:
+          name: Installing Dependencies
+          command: |
+            choco install mingw llvm
+      - run:
+          name: Configuring, Building, Testing
+          command: |
+            $env:DIST_PATH = "."
+            $env:CC = "<< parameters.CC >>"
+            $env:CXX = "<< parameters.CXX >>"
+            $CONF = "<< parameters.CONF >>"
+            $TEST = "<< parameters.TEST >>"
+            $THR = "<< parameters.THR >>"
+            $LIB_TYPE = "<< parameters.LIB_TYPE >>"
+            $CBLAS = "no"
+            $SANDBOX = "no"
+
+            echo "DIST_PATH = $env:DIST_PATH"
+            echo "CC        = $env:CC"
+            echo "CXX       = $env:CXX"
+            echo "CONF      = $CONF"
+            echo "TEST      = $TEST"
+            echo "THR       = $THR"
+            echo "LIB_TYPE  = $LIB_TYPE"
+
+            if ($CC -eq "clang") { $AR = "llvm-ar" }
+            if ($CC -eq "clang") { $AS = "llvm-as" }
+            if ($LIB_TYPE -eq "shared") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS --enable-shared --disable-static" }
+            if ($LIB_TYPE -eq "static") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS --disable-shared --enable-static" }
+            if ($CBLAS -ne "no") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS --enable-cblas" }
+            if ($SANDBOX -eq "yes") { $CONFIGURE_OPTS = "$CONFIGURE_OPTS -s gemmlike" }
+            $env:RANLIB = "echo"
+            $env:LIBPTHREAD = ""
+
+            $CONFIGURE_OPTS = "$CONFIGURE_OPTS --enable-threading=$THR --enable-arg-max-hack --prefix=/c/Users/circleci/project/blis $CONF"
+            echo "Configuring with: $CONFIGURE_OPTS"
+            bash -lc "./configure $CONFIGURE_OPTS"
+            bash -lc "mingw32-make -j4 V=1"
+            bash -lc "mingw32-make install"
+
+            if ($LIB_TYPE -eq "shared") { $TEST_TARGET = "checkblis-fast" }
+            if ($LIB_TYPE -eq "static") { $TEST_TARGET = "check" }
+            echo "Test target: $TEST_TARGET"
+            if ($TEST -eq "FAST") { bash -lc "mingw32-make $TEST_TARGET -j4 V=1" }
+
+            tar zcvf blis-x86_64-win-$LIB_TYPE.tar.gz blis
+
+            Select-String -Path output.testsuite -Pattern "Exiting normally" -SimpleMatch
+            Select-String -Path output.testsuite -Pattern "FAILURE" -CaseSensitive -SimpleMatch
+
+            if ((-not (Select-String -Path output.testsuite -Pattern "Exiting normally" -SimpleMatch -Quiet)) -or
+                (Select-String -Path output.testsuite -Pattern "FAILURE" -SimpleMatch -CaseSensitive -Quiet))
+            {
+                throw "Build and/or tests failed."
+            }
+
+      - store_artifacts:
+          path: blis-x86_64-win-<< parameters.LIB_TYPE >>.tar.gz
+
+      - store_artifacts:
+          path: output.testsuite
+
   build:
     parameters:
       os:
@@ -283,3 +395,6 @@ jobs:
             if [ "$TEST" != "0" ]; then $DIST_PATH/ci/do_testsuite.sh; fi
             if [ "$SDE" = "1" ]; then $DIST_PATH/ci/do_sde.sh; fi
             if [ "$LEVEL0" = "1" ]; then $DIST_PATH/ci/do_level0.sh; fi
+
+      - store_artifacts:
+          path: output.testsuite
