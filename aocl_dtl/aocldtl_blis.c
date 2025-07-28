@@ -11,7 +11,12 @@
 
 dim_t AOCL_get_requested_threads_count(void)
 {
-    return bli_thread_get_num_threads();
+    dim_t nthreads = bli_thread_get_num_threads();
+    // If BLIS ways parallelism has been set, or if the OpenMP level
+    // is not active, then stored nt is currently -1. Change value to
+    // 1 for printing in logs
+    if ( nthreads < 0 ) nthreads = 1;
+    return nthreads;
 }
 
 #if AOCL_DTL_LOG_ENABLE
@@ -87,7 +92,6 @@ void AOCL_DTL_log_gemm_sizes(int8 loglevel,
             (inc_t)lda, (inc_t)ldb,
             beta_real, beta_imag,
             (inc_t)ldc);
-
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
 

@@ -234,4 +234,14 @@ ${KERNEL_LIST_DEFINES}
 #define __blis_arch_type_name "${RENAME_BLIS_ARCH_TYPE}"
 #define __blis_model_type_name "${RENAME_BLIS_MODEL_TYPE}"
 
+#if ${ENABLE_DTL_TRACE_01}
+#define AOCL_DTL_TRACE_ENABLE 1
+#endif
+
+#if ${ENABLE_DTL_LOG_01}
+#define AOCL_DTL_LOG_ENABLE 1
+#endif
+
+#define AOCL_DTL_TRACE_LEVEL_NUMBER AOCL_DTL_LEVEL_TRACE_${AOCL_DTL_TRACE_LEVEL}
+
 #endif

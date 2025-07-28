@@ -421,6 +421,27 @@ print_usage()
 	echo "                 Change environment variable used to select architecture model specific"
 	echo "                 optimizations from BLIS_MODEL_TYPE to STRING"
 	echo " "
+	echo "   --enable-aocl-dtl=OPTION, --disable-aocl-dtl"
+	echo " "
+	echo "                 Enable DTL tracing and/or logging functionality"
+	echo "                 OPTION={all,trace,log,off}. The default is 'off'."
+	echo "                 Unrecognized options will be treated as 'off'."
+	echo "                 Details of the options:"
+	echo "                 * logging records basic information for each BLAS"
+	echo "                   call, with some APIs including timing information."
+	echo "                 * tracing records more detailed information on"
+	echo "                   the call stack within the BLAS APIs, and is mostly"
+	echo "                   of use for BLIS developers. The level of detail is"
+	echo "                   controlled by --aocl-dtl-trace-level option. More detailed"
+	echo "                   tracing will significantly increase API runtime."
+	echo " "
+	echo "   --aocl-dtl-trace-level=OPTION"
+	echo " "
+	echo "                 Sets the level of detail in tracing, see the description"
+	echo "                 in aocl_dtl/aocldtlcf.h for more details."
+	echo "                 OPTION=1..10, used to set different levels of detail in"
+	echo "                 tracing. Default value is 5."
+	echo " "
 	echo "   -q, --quiet   Suppress informational output. By default, configure"
 	echo "                 is verbose. (NOTE: -q is not yet implemented)"
 	echo " "
@@ -2167,6 +2188,10 @@ main()
 	rename_blis_arch_type='BLIS_ARCH_TYPE'
 	rename_blis_model_type='BLIS_MODEL_TYPE'
 
+	# DTL tracing/logging flag.
+	enable_aocl_dtl='off'
+	aocl_dtl_trace_level_number='unset'
+
 	# The addon flag and names.
 	addon_flag=''
 	addon_list=''
@@ -2436,6 +2461,15 @@ main()
 							;;
 						rename-blis-model-type=*)
 							rename_blis_model_type=${OPTARG#*=}
+							;;
+						enable-aocl-dtl=*)
+							enable_aocl_dtl=${OPTARG#*=}
+							;;
+						disable-aocl-dtl=*)
+							enable_aocl_dtl='off'
+							;;
+						aocl-dtl-trace-level=*)
+							aocl_dtl_trace_level_number=${OPTARG#*=}
 							;;
 						*)
 							print_usage
@@ -3329,6 +3363,22 @@ main()
 		enable_trsm_preinversion_01=0
 	fi
 
+	# Check AOCL DTL flag configuration
+	enable_aocl_dtl_trace_01=0
+	enable_aocl_dtl_log_01=0
+	if [ "x${enable_aocl_dtl}" = "xtrace" ]; then
+		enable_aocl_dtl_trace_01=1
+	elif [ "x${enable_aocl_dtl}" = "xlog" ]; then
+		enable_aocl_dtl_log_01=1
+	elif [ "x${enable_aocl_dtl}" = "xall" ]; then
+		enable_aocl_dtl_trace_01=1
+		enable_aocl_dtl_log_01=1
+	fi
+
+	if [ "x${aocl_dtl_trace_level_number}" = "xunset" ]; then
+		aocl_dtl_trace_level_number=5
+	fi
+
 	# Check aocl dynamic threading configuration and enable it only if
 	# multi-threading is enabled
 	if [ "x${enable_aocl_dynamic}" = "xyes" ]; then
@@ -3702,6 +3752,9 @@ main()
 		| sed   -e "s/@disable_blis_arch_type@/${disable_blis_arch_type_01}/g" \
 		| sed   -e "s/@rename_blis_arch_type@/${rename_blis_arch_type}/g" \
 		| sed   -e "s/@rename_blis_model_type@/${rename_blis_model_type}/g" \
+		| sed   -e "s/@enable_aocl_dtl_trace@/${enable_aocl_dtl_trace_01}/g" \
+		| sed   -e "s/@enable_aocl_dtl_log@/${enable_aocl_dtl_log_01}/g" \
+		| sed   -e "s/@aocl_dtl_trace_level_number@/${aocl_dtl_trace_level_number}/g" \
 		> "${bli_config_h_out_path}"
 
 	# -- Instantiate bli_addon.h file from template ----------------------------

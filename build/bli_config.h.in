@@ -236,4 +236,14 @@
 #define __blis_arch_type_name "@rename_blis_arch_type@"
 #define __blis_model_type_name "@rename_blis_model_type@"
 
+#if @enable_aocl_dtl_trace@
+#define AOCL_DTL_TRACE_ENABLE 1
+#endif
+
+#if @enable_aocl_dtl_log@
+#define AOCL_DTL_LOG_ENABLE 1
+#endif
+
+#define AOCL_DTL_TRACE_LEVEL_NUMBER AOCL_DTL_LEVEL_TRACE_@aocl_dtl_trace_level_number@
+
 #endif
