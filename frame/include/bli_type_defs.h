@@ -1539,11 +1539,21 @@ typedef struct cntx_s
 
 
 // -- Runtime type --
+#define BLIS_ALIGN 64
 
+#if defined(_WIN32)
+   #if defined(__clang__)
+       #define BLIS_ATTRIB_ALIGN __attribute__((aligned(BLIS_ALIGN)))
+   #else
+       #define BLIS_ATTRIB_ALIGN
+   #endif
+#else
+   #define BLIS_ATTRIB_ALIGN __attribute__((aligned(BLIS_ALIGN)))
+#endif
 // NOTE: The order of these fields must be kept consistent with the definition
 // of the BLIS_RNTM_INITIALIZER macro in bli_rntm.h.
 
-typedef struct __attribute__((aligned(64))) rntm_s
+typedef struct BLIS_ATTRIB_ALIGN rntm_s
 {
 	// "External" fields: these may be queried by the end-user.
 	bool      auto_factor;
