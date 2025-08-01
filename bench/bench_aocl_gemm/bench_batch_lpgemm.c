@@ -775,7 +775,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
         n_repeats = global_n_repeat; \
     } \
  \
-    dim_t mat_idx = 0; \
+    dim_t mat_idx = 0, idx = 0; \
     /* array of pointers need to be created for the total no.of batches in all groups*/ \
     dim_t total_size = 0; \
     for( dim_t i = 0; i < group_count; i++ ){ total_size += group_size[i]; } \
@@ -837,7 +837,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
     \
         for( dim_t j = 0; j < group_size[i]; j++ ) \
         {\
-            dim_t idx = ( mat_idx + j ); \
+            idx = ( mat_idx + j ); \
             a[idx] = ( A_type* ) lpgemm_malloc( sizeof( A_type ) * size_A ); \
             GEN_FUNC_NAME(fill_array_,A_type)(a[idx], size_A ); \
             b[idx] = ( B_type* ) lpgemm_malloc( sizeof( B_type ) * size_B ); \
@@ -922,11 +922,12 @@ void mat_mul_bench_main_ ## BLAS_SFX \
     } \
     /* Free all allocated memory for each batch in all groups */ \
     mat_idx = 0; \
+    idx = 0; \
     for( dim_t i = 0; i < group_count; i++ ) \
     { \
         for( dim_t j = 0; j < group_size[i]; j++ ) \
         { \
-            dim_t idx = mat_idx + j; \
+           idx = mat_idx + j; \
             lpgemm_free( a[idx] ); \
             lpgemm_free( b[idx] ); \
             lpgemm_free( c[idx] ); \
@@ -936,12 +937,9 @@ void mat_mul_bench_main_ ## BLAS_SFX \
             { \
                 lpgemm_free( b_gemm[idx] ); \
             } \
-            /* Only destroy post_op struct once per group, not per batch */ \
-            if( j == 0 ) \
-            { \
-                lpgemm_destroy_post_ops_struct( post_op[i] ); \
-            } \
         } \
+        /* Only destroy post_op struct once per group, not per batch */ \
+        lpgemm_destroy_post_ops_struct( post_op[i] );  \
         mat_idx += group_size[i]; \
     } \
     lpgemm_free( a ); \

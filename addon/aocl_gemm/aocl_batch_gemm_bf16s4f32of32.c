@@ -364,33 +364,14 @@ AOCL_BGEMM_MATMUL(bfloat16,int8_t,bfloat16,float,bf16s4f32obf16)
 
 		if( err != BLIS_SUCCESS ) goto err_hndl;
 
+		/* Map BLAS chars to their corresponding BLIS enumerated type value. */
+		bli_param_map_netlib_to_blis_trans( transa[gc_i], &blis_transa );
+		bli_param_map_netlib_to_blis_trans( transb[gc_i], &blis_transb );
+
+		bool is_column_major = ( ( order[gc_i] == 'c' ) || ( order[gc_i] == 'C' ) );
 
 		for( dim_t gs_i = 0; gs_i < g_sz; gs_i++ )
 		{
-			// check for validity of params.
-			AOCL_BATCH_GEMM_CHECK
-			(
-				"batch_bf16s4f32obf16",
-				order[gc_i], transa[gc_i], transb[gc_i],
-				group_count, group_size[gc_i],
-				m[gc_i], n[gc_i], k[gc_i],
-				lda[gc_i], mem_format_a[gc_i],
-				ldb[gc_i], mem_format_b[gc_i],
-				ldc[gc_i],
-				err_no
-			);
-
-			if ( err_no != 0 )
-			{
-				goto err_hndl;
-			}
-
-			/* Map BLAS chars to their corresponding BLIS enumerated type value. */
-			bli_param_map_netlib_to_blis_trans( transa[gc_i], &blis_transa );
-			bli_param_map_netlib_to_blis_trans( transb[gc_i], &blis_transb );
-
-			bool is_column_major = ( ( order[gc_i] == 'c' ) || ( order[gc_i] == 'C' ) );
-
 			if( is_column_major == TRUE )
 			{
 				bli_print_msg("Column major inputs not supported.",
@@ -417,8 +398,8 @@ AOCL_BGEMM_MATMUL(bfloat16,int8_t,bfloat16,float,bf16s4f32obf16)
 					cs_b[gs_i] = ldb[gc_i];
 				}
 
-				bli_param_map_char_to_lpmtag( mem_format_a[gs_i], &(mtag_a[gs_i]) );
-				bli_param_map_char_to_lpmtag( mem_format_b[gs_i], &(mtag_b[gs_i]) );
+				bli_param_map_char_to_lpmtag( mem_format_a[gc_i], &(mtag_a[gs_i]) );
+				bli_param_map_char_to_lpmtag( mem_format_b[gc_i], &(mtag_b[gs_i]) );
 
 				// Reorder is not supported for A matrix
 				if(  mtag_a[gs_i] == REORDERED )
