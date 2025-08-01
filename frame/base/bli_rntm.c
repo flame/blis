@@ -1333,21 +1333,7 @@ void bli_nthreads_optimum(
 				{
 					if ( n <= 12 )
 					{
-						if ( k <= 48 )
-						{
-							if ( n <= 8 )
-							{
-								n_threads_ideal = 8;
-							}
-							else
-							{
-								n_threads_ideal = 8;
-							}
-						}
-						else
-						{
-							n_threads_ideal = 8;
-						}
+						n_threads_ideal = 8;
 					}
 					else
 					{
@@ -1364,14 +1350,7 @@ void bli_nthreads_optimum(
 						}
 						else
 						{
-							if ( n <= 32 )
-							{
-								n_threads_ideal = 8;
-							}
-							else
-							{
-								n_threads_ideal = 8;
-							}
+							n_threads_ideal = 8;
 						}
 					}
 				}
@@ -1382,60 +1361,18 @@ void bli_nthreads_optimum(
 				{
 					if ( k <= 12 )
 					{
-						if ( n <= 16 )
-						{
-							n_threads_ideal = 4;
-						}
-						else
-						{
-							n_threads_ideal = 4;
-						}
+						n_threads_ideal = 4;
 					}
 					else
 					{
-						if ( k <= 24 )
-						{
-							if ( m <= 240 )
-							{
-								n_threads_ideal = 8;
-							}
-							else
-							{
-								n_threads_ideal = 8;
-							}
-						}
-						else
-						{
-							n_threads_ideal = 8;
-						}
+						n_threads_ideal = 8;
 					}
 				}
 				else
 				{
 					if ( n <= 18 )
 					{
-						if ( n <= 12 )
-						{
-							if ( k <= 8192 )
-							{
-								n_threads_ideal = 16;
-							}
-							else
-							{
-								n_threads_ideal = 16;
-							}
-						}
-						else
-						{
-							if ( m <= 96 )
-							{
-								n_threads_ideal = 16;
-							}
-							else
-							{
-								n_threads_ideal = 16;
-							}
-						}
+						n_threads_ideal = 16;
 					}
 					else
 					{
@@ -1445,14 +1382,7 @@ void bli_nthreads_optimum(
 						}
 						else
 						{
-							if ( n <= 64 )
-							{
-								n_threads_ideal = 16;
-							}
-							else
-							{
-								n_threads_ideal = 16;
-							}
+							n_threads_ideal = 16;
 						}
 					}
 				}
@@ -1461,28 +1391,7 @@ void bli_nthreads_optimum(
 			{
 				if ( k <= 96 )
 				{
-					if ( k <= 12 )
-					{
-						if ( n <= 12 )
-						{
-							n_threads_ideal = 8;
-						}
-						else
-						{
-							if ( n <= 36 )
-							{
-								n_threads_ideal = 8;
-							}
-							else
-							{
-								n_threads_ideal = 8;
-							}
-						}
-					}
-					else
-					{
-						n_threads_ideal = 8;
-					}
+					n_threads_ideal = 8;
 				}
 				else
 				{
@@ -1494,14 +1403,7 @@ void bli_nthreads_optimum(
 						}
 						else
 						{
-							if ( n <= 12 )
-							{
-								n_threads_ideal = 32;
-							}
-							else
-							{
-								n_threads_ideal = 32;
-							}
+							n_threads_ideal = 32;
 						}
 					}
 					else
@@ -1528,65 +1430,23 @@ void bli_nthreads_optimum(
 			{
 				if ( k <= 96 )
 				{
-					if ( k <= 48 )
-					{
-						n_threads_ideal = 8;
-					}
-					else
-					{
-						if ( n <= 24 )
-						{
-							n_threads_ideal = 8;
-						}
-						else
-						{
-							n_threads_ideal = 8;
-						}
-					}
+					n_threads_ideal = 8;
 				}
 				else
 				{
 					if ( n <= 8 )
 					{
-						if ( k <= 4096 )
-						{
-							if ( m <= 1032 )
-							{
-								n_threads_ideal = 32;
-							}
-							else
-							{
-								n_threads_ideal = 32;
-							}
-						}
-						else
-						{
-							n_threads_ideal = 32;
-						}
+						n_threads_ideal = 32;
 					}
 					else
 					{
 						if ( k <= 192 )
 						{
-							if ( n <= 88 )
-							{
-								n_threads_ideal = 32;
-							}
-							else
-							{
-								n_threads_ideal = 32;
-							}
+							n_threads_ideal = 32;
 						}
 						else
 						{
-							if ( k <= 384 )
-							{
-								n_threads_ideal = 48;
-							}
-							else
-							{
-								n_threads_ideal = 48;
-							}
+							n_threads_ideal = 48;
 						}
 					}
 				}
@@ -1597,21 +1457,7 @@ void bli_nthreads_optimum(
 				{
 					if ( k <= 48 )
 					{
-						if ( n <= 48 )
-						{
-							if ( n <= 16 )
-							{
-								n_threads_ideal = 16;
-							}
-							else
-							{
-								n_threads_ideal = 16;
-							}
-						}
-						else
-						{
-							n_threads_ideal = 16;
-						}
+						n_threads_ideal = 16;
 					}
 					else
 					{
@@ -1649,28 +1495,14 @@ void bli_nthreads_optimum(
 						}
 						else
 						{
-							if ( n <= 294 )
-							{
-								n_threads_ideal = 48;
-							}
-							else
-							{
-								n_threads_ideal = 48;
-							}
+							n_threads_ideal = 48;
 						}
 					}
 					else
 					{
 						if ( m <= 1596 )
 						{
-							if ( n <= 98 )
-							{
-								n_threads_ideal = 96;
-							}
-							else
-							{
-								n_threads_ideal = 96;
-							}
+							n_threads_ideal = 96;
 						}
 						else
 						{
@@ -1685,28 +1517,7 @@ void bli_nthreads_optimum(
 				{
 					if ( k <= 48 )
 					{
-						if ( m <= 480 )
-						{
-							if ( n <= 272 )
-							{
-								n_threads_ideal = 32;
-							}
-							else
-							{
-								n_threads_ideal = 32;
-							}
-						}
-						else
-						{
-							if ( n <= 16 )
-							{
-								n_threads_ideal = 32;
-							}
-							else
-							{
-								n_threads_ideal = 32;
-							}
-						}
+						n_threads_ideal = 32;
 					}
 					else
 					{
@@ -1733,25 +1544,11 @@ void bli_nthreads_optimum(
 					{
 						if ( k <= 192 )
 						{
-							if ( n <= 12 )
-							{
-								n_threads_ideal = 48;
-							}
-							else
-							{
-								n_threads_ideal = 48;
-							}
+							n_threads_ideal = 48;
 						}
 						else
 						{
-							if ( k <= 384 )
-							{
-								n_threads_ideal = 96;
-							}
-							else
-							{
-								n_threads_ideal = 96;
-							}
+							n_threads_ideal = 96;
 						}
 					}
 					else
@@ -1769,14 +1566,7 @@ void bli_nthreads_optimum(
 						}
 						else
 						{
-							if ( m <= 3936 )
-							{
-								n_threads_ideal = 96;
-							}
-							else
-							{
-								n_threads_ideal = 96;
-							}
+							n_threads_ideal = 96;
 						}
 					}
 				}
@@ -1789,28 +1579,7 @@ void bli_nthreads_optimum(
 				{
 					if ( k <= 48 )
 					{
-						if ( m <= 480 )
-						{
-							if ( n <= 268 )
-							{
-								n_threads_ideal = 32;
-							}
-							else
-							{
-								n_threads_ideal = 32;
-							}
-						}
-						else
-						{
-							if ( n <= 16 )
-							{
-								n_threads_ideal = 32;
-							}
-							else
-							{
-								n_threads_ideal = 32;
-							}
-						}
+						n_threads_ideal = 32;
 					}
 					else
 					{
@@ -1837,25 +1606,11 @@ void bli_nthreads_optimum(
 					{
 						if ( k <= 192 )
 						{
-							if ( n <= 12 )
-							{
-								n_threads_ideal = 48;
-							}
-							else
-							{
-								n_threads_ideal = 48;
-							}
+							n_threads_ideal = 48;
 						}
 						else
 						{
-							if ( k <= 384 )
-							{
-								n_threads_ideal = 96;
-							}
-							else
-							{
-								n_threads_ideal = 96;
-							}
+							n_threads_ideal = 96;
 						}
 					}
 					else
@@ -1873,14 +1628,7 @@ void bli_nthreads_optimum(
 						}
 						else
 						{
-							if ( m <= 3936 )
-							{
-								n_threads_ideal = 96;
-							}
-							else
-							{
-								n_threads_ideal = 96;
-							}
+							n_threads_ideal = 96;
 						}
 					}
 				}
