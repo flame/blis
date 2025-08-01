@@ -225,7 +225,7 @@ int main( int argc, char** argv )
             exit(1);
 #endif
 
-        gflops = ( 1.0 * n ) / ( dtime_save * 1.0e9 );
+        gflops = (double)n / ( dtime_save * 1.0e9 );
         if ( bli_is_complex( dt ) ) gflops *= 4.0;
 
         printf( "data_swapv_%s", BLAS );

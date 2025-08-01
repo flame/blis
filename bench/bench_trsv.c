@@ -372,7 +372,7 @@ int main( int argc, char** argv )
         exit(1);
 #endif
 
-        gflops = ( 1.0 * m * m ) / ( dtime_save * 1.0e9 );
+        gflops = ( (double)m * (double)m ) / ( dtime_save * 1.0e9 );
 
 #ifdef BLIS
         printf( "data_trsv_blis" );

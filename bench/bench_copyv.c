@@ -241,8 +241,8 @@ int main( int argc, char** argv )
             exit(1);
 #endif
 
-        gflops = (n * 1) / (dtime_save * 1.0e9);
-        if(bli_is_complex(dt)) gflops *= 2;
+        gflops = (double)n / (dtime_save * 1.0e9);
+        if(bli_is_complex(dt)) gflops *= 2.0;
 
         printf( "data_copyv_%s", BLAS );
 

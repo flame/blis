@@ -217,7 +217,7 @@ int main( int argc, char** argv )
             dtime_save = bli_clock_min_diff( dtime_save, dtime );
         }
 
-        gflops = ( 1.0 * n ) / dtime_save / 1.0e9;
+        gflops = (double)n / ( dtime_save * 1.0e9 );
         if ( bli_obj_is_complex( &x ) ) gflops *= 2.0;
 
 #ifdef PRINT

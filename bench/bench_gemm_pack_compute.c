@@ -962,7 +962,7 @@ int main( int argc, char** argv )
 #endif
         }
 
-        gflops = ( 2.0 * m * k * n ) / ( dtime_save * 1.0e9 );
+        gflops = ( 2.0 * (double)m * (double)k * (double)n ) / ( dtime_save * 1.0e9 );
 
         if ( bli_is_complex( dt ) ) gflops *= 4.0;
 

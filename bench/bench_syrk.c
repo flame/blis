@@ -401,7 +401,9 @@ int main( int argc, char** argv )
             dtime_save = bli_clock_min_diff( dtime_save, dtime );
         }
 
-        gflops = ( n * k * n ) / ( dtime_save * 1.0e9 );
+        // if n * k * n is not explicitly type cast, then there are cases where n*k*n overflows
+        // which results in negative gflops.
+        gflops = ( (double)n * (double)k * (double)n ) / ( dtime_save * 1.0e9 );
 
         if ( bli_is_complex( dt ) ) gflops *= 4.0;
 
