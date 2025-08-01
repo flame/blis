@@ -114,8 +114,6 @@ void saxpby_blis_impl
 {
     /* Initialize BLIS. */
     // Call to bli_init_auto() is not needed here
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
-
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', *n, (float *)alpha, *incx, *incy)
 
@@ -248,8 +246,6 @@ void daxpby_blis_impl
 {
     /* Initialize BLIS. */
     // Call to bli_init_auto() is not needed here
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
-
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, (double *)alpha, *incx, *incy)
 
@@ -387,8 +383,6 @@ void caxpby_blis_impl
 {
     /* Initialize BLIS. */
     // Call to bli_init_auto() is not needed here
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
-
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', *n, (scomplex *)alpha, *incx, *incy)
 
@@ -521,8 +515,6 @@ void zaxpby_blis_impl
 {
     /* Initialize BLIS. */
     // Call to bli_init_auto() is not needed here
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
-
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', *n, (dcomplex *)alpha, *incx, *incy)
 

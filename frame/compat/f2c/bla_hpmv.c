@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -171,6 +171,7 @@ int PASTEF77S(c,hpmv)(const bla_character *uplo, const bla_integer *n, const bla
     --ap;
 
     /* Function Body */
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 
     // Initialize info_value to 0
     gint_t info_value = 0;
@@ -188,6 +189,7 @@ int PASTEF77S(c,hpmv)(const bla_character *uplo, const bla_integer *n, const bla
 	info = 9;
     }
     if (info != 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	PASTE_XERBLA("CHPMV ", &info, (ftnlen)6);
 	return 0;
     }
@@ -196,6 +198,7 @@ int PASTEF77S(c,hpmv)(const bla_character *uplo, const bla_integer *n, const bla
 
     if (*n == 0 || (bli_creal(*alpha) == 0.f && bli_cimag(*alpha) == 0.f && (bli_creal(*beta) == 1.f && 
 	    bli_cimag(*beta) == 0.f))) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
 
@@ -260,6 +263,7 @@ int PASTEF77S(c,hpmv)(const bla_character *uplo, const bla_integer *n, const bla
 	}
     }
     if (bli_creal(*alpha) == 0.f && bli_cimag(*alpha) == 0.f) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
     kk = 1;
@@ -437,6 +441,7 @@ int PASTEF77S(c,hpmv)(const bla_character *uplo, const bla_integer *n, const bla
 	}
     }
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*     End of CHPMV . */
@@ -575,6 +580,7 @@ int PASTEF77S(z,hpmv)(const bla_character *uplo, const bla_integer *n, const bla
     --ap;
 
     /* Function Body */
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 
     // Initialize info_value to 0
     gint_t info_value = 0;
@@ -592,6 +598,7 @@ int PASTEF77S(z,hpmv)(const bla_character *uplo, const bla_integer *n, const bla
 	info = 9;
     }
     if (info != 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	PASTE_XERBLA("ZHPMV ", &info, (ftnlen)6);
 	return 0;
     }
@@ -600,6 +607,7 @@ int PASTEF77S(z,hpmv)(const bla_character *uplo, const bla_integer *n, const bla
 
     if (*n == 0 || (bli_zreal(*alpha) == 0. && bli_zimag(*alpha) == 0. && (bli_zreal(*beta) == 1. && 
 	    bli_zimag(*beta) == 0.))) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
 
@@ -664,6 +672,7 @@ int PASTEF77S(z,hpmv)(const bla_character *uplo, const bla_integer *n, const bla
 	}
     }
     if (bli_zreal(*alpha) == 0. && bli_zimag(*alpha) == 0.) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
     kk = 1;
@@ -841,6 +850,7 @@ int PASTEF77S(z,hpmv)(const bla_character *uplo, const bla_integer *n, const bla
 	}
     }
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*     End of ZHPMV . */

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -173,6 +173,7 @@ int PASTEF77S(c,tpsv)(const bla_character *uplo, const bla_character *trans, con
     --ap;
 
     /* Function Body */
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 
     // Initialize info_value to 0
     gint_t info_value = 0;
@@ -195,6 +196,7 @@ int PASTEF77S(c,tpsv)(const bla_character *uplo, const bla_character *trans, con
 	info = 7;
     }
     if (info != 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	PASTE_XERBLA("CTPSV ", &info, (ftnlen)6);
 	return 0;
     }
@@ -202,6 +204,7 @@ int PASTEF77S(c,tpsv)(const bla_character *uplo, const bla_character *trans, con
 /*     Quick return if possible. */
 
     if (*n == 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
 
@@ -532,6 +535,7 @@ int PASTEF77S(c,tpsv)(const bla_character *uplo, const bla_character *trans, con
 	}
     }
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*     End of CTPSV . */
@@ -667,6 +671,7 @@ int PASTEF77S(d,tpsv)(const bla_character *uplo, const bla_character *trans, con
     --ap;
 
     /* Function Body */
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 
     // Initialize info_value to 0
     gint_t info_value = 0;
@@ -689,6 +694,7 @@ int PASTEF77S(d,tpsv)(const bla_character *uplo, const bla_character *trans, con
 	info = 7;
     }
     if (info != 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	PASTE_XERBLA("DTPSV ", &info, (ftnlen)6);
 	return 0;
     }
@@ -696,6 +702,7 @@ int PASTEF77S(d,tpsv)(const bla_character *uplo, const bla_character *trans, con
 /*     Quick return if possible. */
 
     if (*n == 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
 
@@ -889,6 +896,7 @@ int PASTEF77S(d,tpsv)(const bla_character *uplo, const bla_character *trans, con
 	}
     }
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*     End of DTPSV . */
@@ -1024,6 +1032,7 @@ int PASTEF77S(s,tpsv)(const bla_character *uplo, const bla_character *trans, con
     --ap;
 
     /* Function Body */
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 
     // Initialize info_value to 0
     gint_t info_value = 0;
@@ -1046,6 +1055,7 @@ int PASTEF77S(s,tpsv)(const bla_character *uplo, const bla_character *trans, con
 	info = 7;
     }
     if (info != 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	PASTE_XERBLA("STPSV ", &info, (ftnlen)6);
 	return 0;
     }
@@ -1053,6 +1063,7 @@ int PASTEF77S(s,tpsv)(const bla_character *uplo, const bla_character *trans, con
 /*     Quick return if possible. */
 
     if (*n == 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
 
@@ -1246,6 +1257,7 @@ int PASTEF77S(s,tpsv)(const bla_character *uplo, const bla_character *trans, con
 	}
     }
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*     End of STPSV . */
@@ -1387,6 +1399,7 @@ int PASTEF77S(z,tpsv)(const bla_character *uplo, const bla_character *trans, con
     --ap;
 
     /* Function Body */
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 
     // Initialize info_value to 0
     gint_t info_value = 0;
@@ -1409,6 +1422,7 @@ int PASTEF77S(z,tpsv)(const bla_character *uplo, const bla_character *trans, con
 	info = 7;
     }
     if (info != 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	PASTE_XERBLA("ZTPSV ", &info, (ftnlen)6);
 	return 0;
     }
@@ -1416,6 +1430,7 @@ int PASTEF77S(z,tpsv)(const bla_character *uplo, const bla_character *trans, con
 /*     Quick return if possible. */
 
     if (*n == 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
 
@@ -1746,6 +1761,7 @@ int PASTEF77S(z,tpsv)(const bla_character *uplo, const bla_character *trans, con
 	}
     }
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*     End of ZTPSV . */

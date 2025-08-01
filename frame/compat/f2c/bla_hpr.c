@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -158,6 +158,7 @@ int PASTEF77S(c,hpr)(const bla_character *uplo, const bla_integer *n, const bla_
     --x;
 
     /* Function Body */
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 
     // Initialize info_value to 0
     gint_t info_value = 0;
@@ -173,6 +174,7 @@ int PASTEF77S(c,hpr)(const bla_character *uplo, const bla_integer *n, const bla_
 	info = 5;
     }
     if (info != 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	PASTE_XERBLA("CHPR  ", &info, (ftnlen)6);
 	return 0;
     }
@@ -180,6 +182,7 @@ int PASTEF77S(c,hpr)(const bla_character *uplo, const bla_integer *n, const bla_
 /*     Quick return if possible. */
 
     if (*n == 0 || *alpha == 0.f) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
 
@@ -351,6 +354,7 @@ int PASTEF77S(c,hpr)(const bla_character *uplo, const bla_integer *n, const bla_
 	}
     }
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*     End of CHPR  . */
@@ -476,6 +480,7 @@ int PASTEF77S(z,hpr)(const bla_character *uplo, const bla_integer *n, const bla_
     --x;
 
     /* Function Body */
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 
     // Initialize info_value to 0
     gint_t info_value = 0;
@@ -491,6 +496,7 @@ int PASTEF77S(z,hpr)(const bla_character *uplo, const bla_integer *n, const bla_
 	info = 5;
     }
     if (info != 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	PASTE_XERBLA("ZHPR  ", &info, (ftnlen)6);
 	return 0;
     }
@@ -498,6 +504,7 @@ int PASTEF77S(z,hpr)(const bla_character *uplo, const bla_integer *n, const bla_
 /*     Quick return if possible. */
 
     if (*n == 0 || *alpha == 0.) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
 
@@ -669,6 +676,7 @@ int PASTEF77S(z,hpr)(const bla_character *uplo, const bla_integer *n, const bla_
 	}
     }
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*     End of ZHPR  . */

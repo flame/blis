@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -60,6 +60,8 @@ int PASTEF77S(s,rotg)(bla_real *sa, bla_real *sb, bla_real *c__, bla_real *s)
 /*     construct givens plane rotation. */
 /*     jack dongarra, linpack, 3/11/78. */
 
+    /* Function Body */
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 
     roe = *sb;
     if (bli_fabs(*sa) > bli_fabs(*sb)) {
@@ -93,6 +95,7 @@ L10:
 L20:
     *sa = r__;
     *sb = z__;
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 } /* srotg_ */
 
@@ -121,6 +124,8 @@ int PASTEF77S(d,rotg)(bla_double *da, bla_double *db, bla_double *c__, bla_doubl
 /*     construct givens plane rotation. */
 /*     jack dongarra, linpack, 3/11/78. */
 
+    /* Function Body */
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 
     roe = *db;
     if (bli_fabs(*da) > bli_fabs(*db)) {
@@ -154,6 +159,7 @@ L10:
 L20:
     *da = r__;
     *db = z__;
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 } /* drotg_ */
 
@@ -176,6 +182,9 @@ L20:
     bla_real norm;
     bla_scomplex alpha;
     bla_real scale;
+
+    /* Function Body */
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 
     if (bla_c_abs(ca) != 0.f) {
 	goto L10;
@@ -204,6 +213,7 @@ L10:
     bli_csets( (norm * bli_creal(alpha)), (norm * bli_cimag(alpha)), q__1 );
     bli_csets( bli_creal(q__1), bli_cimag(q__1), *ca );
 L20:
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 } /* crotg_ */
 
@@ -228,6 +238,9 @@ L20:
     bla_double norm;
     bla_dcomplex alpha;
     bla_double scale;
+
+    /* Function Body */
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 
     if (bla_z_abs(ca) != 0.) {
 	goto L10;
@@ -258,6 +271,7 @@ L10:
     bli_zsets( (norm * bli_zreal(alpha)), (norm * bli_zimag(alpha)), z__1 );
     bli_zsets( bli_zreal(z__1), bli_zimag(z__1), *ca );
 L20:
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 } /* zrotg_ */
 
