@@ -52,13 +52,22 @@ void bli_gemm_front
 
 	#ifdef AOCL_DYNAMIC
 	// If dynamic-threading is enabled, calculate optimum number
-        //  of threads.
-        //  rntm will be updated with optimum number of threads.
-        if( bli_obj_is_dcomplex(c))// This will enable for ZGEMM
-        {
-            bli_nthreads_optimum(a, b, c, BLIS_GEMM, rntm);
-        }
-        #endif
+	// of threads. rntm will be updated with optimum number of threads.
+
+	// In case of ZEN3/ZEN2/ZEN architecture, we are using the aocl_dynamic
+	// logic to decide the optimal number of threads.
+	// Ideally, the native path is intended to be used solely for compute
+	// bound sizes, without any need for dynamic threading.
+	// TODO : As part of future work, we have to retune the entry conditions
+	//        to native(ZEN3/ZEN2/ZEN), and remove the need for dynamic threading
+	//        here (GitHub Issue #114).
+	arch_t arch_id = bli_arch_query_id();
+	if( bli_obj_is_dcomplex( c ) && ( ( arch_id == BLIS_ARCH_ZEN3 ) ||
+	    ( arch_id == BLIS_ARCH_ZEN2 ) || ( arch_id == BLIS_ARCH_ZEN ) ) )
+	{
+		bli_nthreads_optimum(a, b, c, BLIS_GEMM, rntm);
+	}
+	#endif
 
 	obj_t   a_local;
 	obj_t   b_local;

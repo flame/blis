@@ -87,10 +87,8 @@ bool bli_cntx_gemmsup_thresh_is_met_zen5( obj_t* a, obj_t* b, obj_t* c, cntx_t* 
 		// The threshold for m is a single value, but for n, it is
 		// also based on the packing size of A, since the kernels are
 		// column preferential
-		if( ( m <= 60 ) || ( ( n <= 60 ) && ( m <= 960 ) && ( k <= 16384 ) ) || ( k <= 8 ) ) return TRUE;
+        if( ( m <= 1380 ) || ( n <= 1520 ) || ( k <= 128 ) ) return TRUE;
 
-		// For all combinations in small sizes
-		if( ( m <= 216 ) && ( n <= 216 ) && ( k <= 216 ) ) return TRUE;
 		return FALSE;
 	}
 	else if( dt == BLIS_SCOMPLEX )
