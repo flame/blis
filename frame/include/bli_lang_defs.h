@@ -62,6 +62,8 @@
 // for building BLIS is low.
 #if defined(__GNUC__) || defined(__clang__) || defined(__ICC) || defined(__IBMC__) || defined(__INTEL_LLVM_COMPILER)
   #define BLIS_THREAD_LOCAL __thread
+#elif defined(_MSC_VER) && _MSC_VER >= 1310
+  #define BLIS_THREAD_LOCAL __declspec(thread)
 #else
   #define BLIS_THREAD_LOCAL
 #endif
