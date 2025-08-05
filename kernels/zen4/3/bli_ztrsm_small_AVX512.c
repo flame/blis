@@ -157,10 +157,10 @@
     bool is_unitdiag = bli_obj_has_unit_diag( a );     \
     dcomplex AlphaVal = *(dcomplex *)AlphaObj->buffer; \
     \
-    dim_t d_mr = 4; \
-    dim_t d_nr = 4; \
-    dim_t i, j;     \
-    dim_t k_iter;   \
+    dim_t d_mr = 4;     \
+    dim_t d_nr = 4;     \
+    dim_t i = 0, j = 0; \
+    dim_t k_iter = 0;   \
     \
     dcomplex* restrict L = bli_obj_buffer_at_off( a ); \
     dcomplex* restrict B = bli_obj_buffer_at_off( b ); \

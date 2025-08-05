@@ -193,8 +193,8 @@
                                                                             \
     dim_t z_mr  = Z_MR_;                                                    \
     dim_t z_nr  = Z_NR_;                                                    \
-    dim_t i, j;                                                             \
-    dim_t k_iter;                                                           \
+    dim_t i = 0, j = 0;                                                     \
+    dim_t k_iter = 0;                                                       \
                                                                             \
     dcomplex* restrict L = bli_obj_buffer_at_off( a );                      \
     dcomplex* restrict B = bli_obj_buffer_at_off( b );                      \
@@ -548,9 +548,9 @@ BLIS_INLINE void rlnn_n_rem
     t_reg[5] = _mm512_set1_pd( 1.0 ); /*(constant) used for fmaddsub*/
     t_reg[4] = _mm512_set1_pd(-1.0);
 
-    __mmask8 mask_m_0, mask_m_1, mask_m_2;
+    __mmask8 mask_m_0 = 0, mask_m_1 = 0, mask_m_2 = 0;
     dcomplex *a_gemm, *a_trsm, *b_gemm, *b_trsm;
-    dim_t m_rem;
+    dim_t m_rem = 0;
     dim_t n_rem = j + z_nr;
     L_ = L + ((j - n_rem + z_nr) * cs_a) + (j + z_nr) * rs_a;
 #ifdef ENABLE_PACK_A
@@ -995,8 +995,8 @@ err_t bli_ztrsm_small_XAutB_XAlB_ZEN5
                                                                                    \
     dim_t z_mr =Z_MR_;                                                             \
     dim_t z_nr = Z_NR_;                                                            \
-    dim_t i, j;                                                                    \
-    dim_t k_iter;                                                                  \
+    dim_t i = 0, j = 0;                                                            \
+    dim_t k_iter = 0;                                                              \
                                                                                    \
     dcomplex* restrict L = bli_obj_buffer_at_off( a );                             \
     dcomplex* restrict B = bli_obj_buffer_at_off( b );                             \
@@ -1241,10 +1241,10 @@ BLIS_INLINE void lunn_m_rem
         c_reg[i] = _mm512_setzero_pd(); /*initialize c_reg to zero*/
     }
 
-    __mmask8 mask_m_0, mask_m_1, mask_m_2;
+    __mmask8 mask_m_0 = 0, mask_m_1 = 0, mask_m_2 = 0;
     dcomplex *a_gemm, *a_trsm, *b_trsm, *b_gemm;
     dim_t m_rem = i + z_mr;
-    dim_t n_rem;
+    dim_t n_rem = 0;
     L_ = L + ((i - m_rem + z_mr) * cs_a) + (i + z_mr) * rs_a;
 #ifdef ENABLE_PACK_A
         if(bPackedA)
