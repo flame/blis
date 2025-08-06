@@ -1,4 +1,5 @@
-"""Copyright (C) 2021 - 2023, Advanced Micro Devices, Inc. All rights reserved."""
+#!/usr/bin/env python3
+"""Copyright (C) 2021 - 2025, Advanced Micro Devices, Inc. All rights reserved."""
 
 ################################################################################
 # This file is used to mirroring the refkernels folder data into to zen, zen2, #

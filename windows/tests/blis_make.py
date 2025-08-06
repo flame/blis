@@ -1,4 +1,5 @@
-"""Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved."""
+#!/usr/bin/env python3
+"""Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved."""
 import re
 import subprocess
 import yaml
