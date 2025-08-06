@@ -510,6 +510,11 @@ LPGEMM_5LOOP(int8_t,int8_t,int32_t,s8s8s32o32)
 				temp_scal_c_buffer_s8s8s32o32 = bli_mem_buffer( &mem_scale_c );
 
 				c_use_jc = ( int32_t* )temp_scal_c_buffer_s8s8s32o32;
+			}else
+			{
+				// When k <= KC, output is written directly as there is no need of 
+				// intermediate buffer to store the output
+				c_use_jc = c + jc;
 			}
 
 			// The temp c buffer stride is modified as opposed to original C matrix.

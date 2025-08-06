@@ -445,7 +445,6 @@ LPGEMM_5LOOP_AVX512BF16(bfloat16,bfloat16,float,bf16bf16f32of32)
 		{
 			c_use_jc = c + jc;
 		}
-		// Temp accumulaton buffer for C allocation.
 		else if ( c_downscale < F32 )
 		{
 			// Buffer memory is only required if output needs to be
@@ -466,6 +465,11 @@ LPGEMM_5LOOP_AVX512BF16(bfloat16,bfloat16,float,bf16bf16f32of32)
 				temp_scal_c_buffer_bf16 = bli_mem_buffer( &mem_scale_c );
 
 				c_use_jc = ( float* )temp_scal_c_buffer_bf16;
+			}else
+			{
+				// When k <= KC, output is written directly as there is no need of 
+				// intermediate buffer to store the output
+				c_use_jc = c + jc;
 			}
 
 			// The temp c buffer stride is modified as opposed to original C matrix.
@@ -1257,6 +1261,11 @@ LPGEMM_5LOOP_AVX2(bfloat16,bfloat16,float,bf16bf16f32of32)
 				temp_scal_c_buffer_bf16 = bli_mem_buffer( &mem_scale_c );
 
 				c_use_jc = ( float* )temp_scal_c_buffer_bf16;
+			}else
+			{
+				// When k <= KC, output is written directly as there is no need of 
+				// intermediate buffer to store the output
+				c_use_jc = c + jc;
 			}
 
 			// The temp c buffer stride is modified as opposed to original C matrix.

@@ -182,12 +182,12 @@ LPGEMM_TINY(bfloat16,bfloat16,float,bf16bf16f32of32)
 
 	dim_t NR = lcntx->blksz.NR;
 
-	const int16_t* a_use = NULL;
+	const int16_t* a_use = a;
 	dim_t cs_a_use = cs_a;
 	dim_t rs_a_use = rs_a;
 	dim_t a_block_stride = 0;
 
-	const int16_t* b_use = NULL;
+	const int16_t* b_use = b;
 	dim_t rs_b_use = rs_b;
 	dim_t cs_b_use = cs_b;
 
