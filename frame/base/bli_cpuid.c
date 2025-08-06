@@ -154,10 +154,18 @@ arch_t bli_cpuid_query_id( void )
 	{
 		// Check for each Intel configuration that is enabled, check for that
 		// microarchitecture. We check from most recent to most dated.
+#ifdef BLIS_CONFIG_ZEN5
+		// Even if not optimized for Intel processors, this should
+		// generally perform better than skx codepath.
+		// Currently only enabled for zen5 and amdzen configurations
+		if ( is_avx512_supported )
+			return BLIS_ARCH_ZEN5;
+#endif
 #ifdef BLIS_CONFIG_ZEN4
 		// Even if not optimized for Intel processors, this should
 		// generally perform better than skx codepath.
 		// Currently only enabled for zen4 and amdzen configurations
+		// Use zen4 if zen5 is not available.
 		if ( is_avx512_supported )
 			return BLIS_ARCH_ZEN4;
 #endif
@@ -249,6 +257,15 @@ arch_t bli_cpuid_query_id( void )
 #ifdef BLIS_CONFIG_BULLDOZER
 		if ( bli_cpuid_is_bulldozer( family, model, features ) )
 			return BLIS_ARCH_BULLDOZER;
+#endif
+		// Tests in case we are using intel64 config on AMD platform
+#ifdef BLIS_CONFIG_SKX
+		if ( is_avx512_supported )
+			return BLIS_ARCH_SKX;
+#endif
+#ifdef BLIS_CONFIG_HASWELL
+		if ( is_avx2fma3_supported )
+			return BLIS_ARCH_HASWELL;
 #endif
 		// If none of the other sub-configurations were detected, return
 		// the 'generic' arch_t id value.
