@@ -100,7 +100,7 @@ macro(get_dirpaths_with_suffixes result curdir sufflist)
     # from the name, so that we can exclude the files that are part of the ignore
     # list even if the blis directory is located in a directory with a name that
     # would be ignored.
-    string(REPLACE "${CMAKE_SOURCE_DIR}/" "" curdirsimple ${curdir})
+    string(REPLACE "${PROJECT_SOURCE_DIR}/" "" curdirsimple ${curdir})
     # Filter out anything that is part of the IGNORE_LIST.
     foreach(item ${IGNORE_LIST})
         list(FILTER dirlist EXCLUDE REGEX ${curdirsimple}.*/${item}/)
@@ -119,7 +119,7 @@ foreach(dir ${test_files})
     add_executable(${exec_name} ${files})
     set_target_properties(${exec_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
     set_target_properties(${exec_name} PROPERTIES OUTPUT_NAME ${exec_name})
-    target_include_directories(${exec_name} PUBLIC ${BLIS_INCLUDE} ${CMAKE_SOURCE_DIR}/testinghelpers/inc ${CMAKE_SOURCE_DIR}/testsuite/)
+    target_include_directories(${exec_name} PUBLIC ${BLIS_INCLUDE} ${PROJECT_SOURCE_DIR}/testinghelpers/inc ${PROJECT_SOURCE_DIR}/testsuite/)
     target_link_libraries(${exec_name} gtest gtest_main testinghelpers ${BLIS_LIBRARY} ${COMMON_LIBS})
     # if we test serial BLIS, but MKL is used as a reference we still need to set up OpenMP.
     if( (ENABLE_THREADING STREQUAL "openmp") OR (MKL_ENABLE_THREADING STREQUAL "openmp") OR (NOT(OPENMP_NESTED STREQUAL "0")))

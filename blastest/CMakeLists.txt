@@ -46,7 +46,7 @@ else()
 endif()
 
 # Include the corresponding make_defs.cmake that holds the required compiler options.
-include(${CMAKE_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY}/make_defs.cmake)
+include(${PROJECT_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY}/make_defs.cmake)
 
 # Create a static library using the sources in f2c directory.
 file(GLOB f2c_sources LIST_DIRECTORIES false ${CMAKE_CURRENT_SOURCE_DIR}/f2c/*.c)
@@ -175,7 +175,7 @@ if(WIN32 AND BUILD_SHARED_LIBS)
 else()
     add_custom_target(testblas DEPENDS ${test_executables})
     add_custom_target(checkblas
-                        COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/build/cmake/check-blastest.py "."
+                        COMMAND ${Python_EXECUTABLE} ${PROJECT_SOURCE_DIR}/build/cmake/check-blastest.py "."
                         DEPENDS testblas
                         WORKING_DIRECTORY $<TARGET_FILE_DIR:${libblis_link}>
                     )

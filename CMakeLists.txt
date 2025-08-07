@@ -87,14 +87,14 @@ endif()
 if(BLIS_CONFIG_FAMILY STREQUAL "auto")
     message(STATUS "automatic configuration requested")
     set(auto_detect_source_files
-        "${CMAKE_SOURCE_DIR}/build/detect/config/config_detect.c"
-        "${CMAKE_SOURCE_DIR}/frame/base/bli_arch.c"
-        "${CMAKE_SOURCE_DIR}/frame/base/bli_cpuid.c"
-        "${CMAKE_SOURCE_DIR}/frame/base/bli_env.c"
+        "${PROJECT_SOURCE_DIR}/build/detect/config/config_detect.c"
+        "${PROJECT_SOURCE_DIR}/frame/base/bli_arch.c"
+        "${PROJECT_SOURCE_DIR}/frame/base/bli_cpuid.c"
+        "${PROJECT_SOURCE_DIR}/frame/base/bli_env.c"
        )
-    set(frame_include " ${CMAKE_SOURCE_DIR}/frame/include")
-    set(base_include " ${CMAKE_SOURCE_DIR}/frame/base")
-    set(thread_include " ${CMAKE_SOURCE_DIR}/frame/thread")
+    set(frame_include " ${PROJECT_SOURCE_DIR}/frame/include")
+    set(base_include " ${PROJECT_SOURCE_DIR}/frame/base")
+    set(thread_include " ${PROJECT_SOURCE_DIR}/frame/thread")
     # Try building an executable from one or more source files.
     # Build success returns TRUE and build failure returns FALSE in COMPILERESULT.
     # If the build succeeds, this runs the executable and stores the exit code in RUNRESULT.
@@ -129,7 +129,7 @@ endif()
 
 # Read the registered configuration names and lists into associative arrays.
 execute_process(
-    COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/build/cmake/read_registry.py "${BLIS_CONFIG_FAMILY}" "${CMAKE_SOURCE_DIR}"
+    COMMAND ${Python_EXECUTABLE} ${PROJECT_SOURCE_DIR}/build/cmake/read_registry.py "${BLIS_CONFIG_FAMILY}" "${PROJECT_SOURCE_DIR}"
     RESULT_VARIABLE CMD_RESULT
     OUTPUT_VARIABLE CONFIGURATION_STRING
     OUTPUT_STRIP_TRAILING_WHITESPACE )
@@ -386,7 +386,7 @@ if(NOT WIN32)
     # option, we try to detect whether libmemkind is available. If it is,
     # the default implied option will be --with-memkind; otherwise, will be
     # --without-memkind.
-    try_compile(HAS_MEMKIND "${CMAKE_BINARY_DIR}/temp" SOURCES "${CMAKE_SOURCE_DIR}/build/detect/memkind/libmemkind_detect.c"
+    try_compile(HAS_MEMKIND "${CMAKE_BINARY_DIR}/temp" SOURCES "${PROJECT_SOURCE_DIR}/build/detect/memkind/libmemkind_detect.c"
                 LINK_OPTIONS
                     "-lmemkind"
                 )
@@ -397,7 +397,7 @@ endif()
 #------------------------------------
 if(ENABLE_THREADING STREQUAL "openmp")
     # Try to determine whether the chosen compiler supports #pragma omp simd.
-    try_compile(PRAGMA_OMP_SIMD "${CMAKE_BINARY_DIR}/temp" SOURCES "${CMAKE_SOURCE_DIR}/build/detect/omp_simd/omp_simd_detect.c"
+    try_compile(PRAGMA_OMP_SIMD "${CMAKE_BINARY_DIR}/temp" SOURCES "${PROJECT_SOURCE_DIR}/build/detect/omp_simd/omp_simd_detect.c"
                 CMAKE_FLAGS
                     "-O3 -march=native -fopenmp-simd"
                 C_STANDARD 99
@@ -407,7 +407,7 @@ endif()
 #       Acquire the BLIS version
 #------------------------------------
 # Set the VERSION variable to the default value in the 'version' file.
-file(STRINGS ${CMAKE_SOURCE_DIR}/version VERSION)
+file(STRINGS ${PROJECT_SOURCE_DIR}/version VERSION)
 # Get timestamp.
 string(TIMESTAMP BUILD_DATE "%Y%m%d")
 # Update using the timestamp.
@@ -422,7 +422,7 @@ else()
     message("   Configuring with custom version string: ${VERSION_STRING}")
 endif()
 # Set the shared library (.so) version file.
-file(STRINGS ${CMAKE_SOURCE_DIR}/so_version SO_VERSION)
+file(STRINGS ${PROJECT_SOURCE_DIR}/so_version SO_VERSION)
 # The first line of the 'so_version' file contains the .so major version.
 list(GET SO_VERSION 0 SO_VERSION_MAJOR)
 # The second line contains the minor and build .so version numbers
@@ -750,7 +750,7 @@ else()
     message("   Configuring with addons:")
     foreach(ADDON ${ENABLE_ADDON})
         message("   ${ADDON}")
-        if(NOT (EXISTS ${CMAKE_SOURCE_DIR}/addon/${ADDON}))
+        if(NOT (EXISTS ${PROJECT_SOURCE_DIR}/addon/${ADDON}))
             message(FATAL_ERROR "Requested addon sub-directory does not exist! Cannot continue. \
                                     *** Please verify addon existence and name.")
         endif()
@@ -885,7 +885,7 @@ set(ALL_HEADER_PATHS_LIST "")
 set(ALL_HEADER_FILES_LIST "")
 
 # Include functionality that returns header paths.
-include(${CMAKE_SOURCE_DIR}/build/cmake/subdir_helper_functions.cmake)
+include(${PROJECT_SOURCE_DIR}/build/cmake/subdir_helper_functions.cmake)
 
 # If the CONFIG_LIST does not already contain the CONFIG_NAME (i.e.,
 # if CONFIG_NAME is an umbrella family), add in the corresponding
@@ -894,9 +894,9 @@ include(${CMAKE_SOURCE_DIR}/build/cmake/subdir_helper_functions.cmake)
 list(FIND CONFIG_LIST ${BLIS_CONFIG_FAMILY} IS_UMBRELLA)
 if(${IS_UMBRELLA} STREQUAL "-1")
     # Collect all subdirectory paths that have at least one file with suffix in ALL_H99_SUFS list.
-    get_dirpaths_with_suffixes(${BLIS_CONFIG_FAMILY}_HEADER_PATHS ${CMAKE_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY} "${ALL_H99_SUFS}")
+    get_dirpaths_with_suffixes(${BLIS_CONFIG_FAMILY}_HEADER_PATHS ${PROJECT_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY} "${ALL_H99_SUFS}")
     # Collect all files in the subdirectories.
-    get_filepaths_with_suffixes(${BLIS_CONFIG_FAMILY}_HEADER_FILES ${CMAKE_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY} "${ALL_H99_SUFS}")
+    get_filepaths_with_suffixes(${BLIS_CONFIG_FAMILY}_HEADER_FILES ${PROJECT_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY} "${ALL_H99_SUFS}")
 endif()
 list(APPEND ALL_HEADER_PATHS_LIST "${${BLIS_CONFIG_FAMILY}_HEADER_PATHS}")
 list(APPEND ALL_HEADER_FILES_LIST "${${BLIS_CONFIG_FAMILY}_HEADER_FILES}")
@@ -904,9 +904,9 @@ list(APPEND ALL_HEADER_FILES_LIST "${${BLIS_CONFIG_FAMILY}_HEADER_FILES}")
 # Get header directory paths for each of the sub-configurations present
 # in the configuration list.
 foreach(CONF ${CONFIG_LIST})
-    get_dirpaths_with_suffixes(config_${CONF}_HEADER_PATHS ${CMAKE_SOURCE_DIR}/config/${CONF} "${ALL_H99_SUFS}")
+    get_dirpaths_with_suffixes(config_${CONF}_HEADER_PATHS ${PROJECT_SOURCE_DIR}/config/${CONF} "${ALL_H99_SUFS}")
     list(APPEND ALL_HEADER_PATHS_LIST "${config_${CONF}_HEADER_PATHS}")
-    get_filepaths_with_suffixes(config_${CONF}_FILES_PATHS ${CMAKE_SOURCE_DIR}/config/${CONF} "${ALL_H99_SUFS}")
+    get_filepaths_with_suffixes(config_${CONF}_FILES_PATHS ${PROJECT_SOURCE_DIR}/config/${CONF} "${ALL_H99_SUFS}")
     list(APPEND ALL_HEADER_FILES_LIST "${config_${CONF}_HEADER_FILES}")
 endforeach()
 
@@ -914,22 +914,22 @@ endforeach()
 # in the kernel list.
 foreach(KERN ${KERNEL_LIST})
     # Collect all subdirectory paths that have at least one file with suffix in ALL_H99_SUFS list.
-    get_dirpaths_with_suffixes(kernels_${KERN}_HEADER_PATHS ${CMAKE_SOURCE_DIR}/kernels/${KERN} "${ALL_H99_SUFS}")
+    get_dirpaths_with_suffixes(kernels_${KERN}_HEADER_PATHS ${PROJECT_SOURCE_DIR}/kernels/${KERN} "${ALL_H99_SUFS}")
     list(APPEND ALL_HEADER_PATHS_LIST "${kernels_${KERN}_HEADER_PATHS}")
-    get_filepaths_with_suffixes(kernels_${KERN}_HEADER_FILES ${CMAKE_SOURCE_DIR}/kernels/${KERN} "${ALL_H99_SUFS}")
+    get_filepaths_with_suffixes(kernels_${KERN}_HEADER_FILES ${PROJECT_SOURCE_DIR}/kernels/${KERN} "${ALL_H99_SUFS}")
     list(APPEND ALL_HEADER_PATHS_FILES "${kernels_${KERN}_HEADER_FILES}")
 endforeach()
 
 # Get header directory paths for framework directory.
-get_dirpaths_with_suffixes(frame_HEADER_PATHS ${CMAKE_SOURCE_DIR}/frame "${ALL_H99_SUFS}")
+get_dirpaths_with_suffixes(frame_HEADER_PATHS ${PROJECT_SOURCE_DIR}/frame "${ALL_H99_SUFS}")
 list(APPEND ALL_HEADER_PATHS_LIST "${frame_HEADER_PATHS}")
-get_filepaths_with_suffixes(frame_HEADER_FILES ${CMAKE_SOURCE_DIR}/frame "${ALL_H99_SUFS}")
+get_filepaths_with_suffixes(frame_HEADER_FILES ${PROJECT_SOURCE_DIR}/frame "${ALL_H99_SUFS}")
 list(APPEND ALL_HEADER_FILES_LIST "${frame_HEADER_FILES}")
 
 # Get header directory paths for AOCL DTL logs directory.
-get_dirpaths_with_suffixes(aocl_dtl_HEADER_PATHS ${CMAKE_SOURCE_DIR}/aocl_dtl "${ALL_H99_SUFS}")
+get_dirpaths_with_suffixes(aocl_dtl_HEADER_PATHS ${PROJECT_SOURCE_DIR}/aocl_dtl "${ALL_H99_SUFS}")
 list(APPEND ALL_HEADER_PATHS_LIST "${aocl_dtl_HEADER_PATHS}")
-get_filepaths_with_suffixes(aocl_dtl_HEADER_FILES ${CMAKE_SOURCE_DIR}/aocl_dtl "${ALL_H99_SUFS}")
+get_filepaths_with_suffixes(aocl_dtl_HEADER_FILES ${PROJECT_SOURCE_DIR}/aocl_dtl "${ALL_H99_SUFS}")
 list(APPEND ALL_HEADER_FILES_LIST "${aocl_dtl_FILES_PATHS}")
 
 # Get a copy of the header paths without including the addons and the sandbox.
@@ -937,9 +937,9 @@ set(FRAME_HEADER_DIRPATHS_LIST ${ALL_HEADER_PATHS_LIST})
 
 # Get header directory paths for each of the addons.
 foreach(ADDON ${ENABLE_ADDON})
-    get_dirpaths_with_suffixes(addon_${ADDON}_HEADER_PATHS ${CMAKE_SOURCE_DIR}/addon/${ADDON} "${ALL_H99_SUFS}")
+    get_dirpaths_with_suffixes(addon_${ADDON}_HEADER_PATHS ${PROJECT_SOURCE_DIR}/addon/${ADDON} "${ALL_H99_SUFS}")
     list(APPEND ALL_HEADER_PATHS_LIST "${addon_${ADDON}_HEADER_PATHS}")
-    get_filepaths_with_suffixes(addon_${ADDON}_HEADER_FILES ${CMAKE_SOURCE_DIR}/addon/${ADDON} "${ALL_H99_SUFS}")
+    get_filepaths_with_suffixes(addon_${ADDON}_HEADER_FILES ${PROJECT_SOURCE_DIR}/addon/${ADDON} "${ALL_H99_SUFS}")
     list(APPEND ALL_HEADER_FILES_LIST "${addon_${ADDON}_HEADER_FILES}")
 endforeach()
 
@@ -961,8 +961,8 @@ list(JOIN ALL_HEADER_PATHS_LIST " " ALL_HEADER_PATHS_STRING)
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY})
 # Flatten header python script file which expand header contents in blis.h.
 add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h
-                COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/build/flatten-headers.py -c -v1
-                "${CMAKE_SOURCE_DIR}/frame/include/blis.h"
+                COMMAND ${Python_EXECUTABLE} ${PROJECT_SOURCE_DIR}/build/flatten-headers.py -c -v1
+                "${PROJECT_SOURCE_DIR}/frame/include/blis.h"
                 "${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h"
                 "${PROJECT_BINARY_DIR}/include"
                 "${ALL_HEADER_PATHS_STRING}"
@@ -977,8 +977,8 @@ add_custom_target(flat-header DEPENDS ${PROJECT_BINARY_DIR}/include/${BLIS_CONFI
 # Flatten header python script file which expand header contents in cblas.h.
 if(ENABLE_CBLAS)
     add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h
-                    COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/build/flatten-headers.py -c -v1
-                    "${CMAKE_SOURCE_DIR}/frame/compat/cblas/src/cblas.h"
+                    COMMAND ${Python_EXECUTABLE} ${PROJECT_SOURCE_DIR}/build/flatten-headers.py -c -v1
+                    "${PROJECT_SOURCE_DIR}/frame/compat/cblas/src/cblas.h"
                     "${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h"
                     "${PROJECT_BINARY_DIR}/${include}"
                     "${ALL_HEADER_PATHS_STRING}"
@@ -1082,7 +1082,7 @@ if(NOT WIN32)
 endif()
 
 # Macro to remove/replace absolute path within library
-list(APPEND BUILD_SYMFLAGS "-fmacro-prefix-map=${CMAKE_SOURCE_DIR}/=")
+list(APPEND BUILD_SYMFLAGS "-fmacro-prefix-map=${PROJECT_SOURCE_DIR}/=")
 
 # --- C Preprocessor flags ---
 # Enable clock_gettime() in time.h.
@@ -1115,7 +1115,7 @@ endif()
 # files will be needed when compiling bli_cntx_ref.c with the monolithic header.
 
 # Read content of bli_cntx_ref.c and put it in REF_KER_HEADERS_TEMP.
-file(STRINGS ${CMAKE_SOURCE_DIR}/ref_kernels/bli_cntx_ref.c REF_KER_HEADERS_TEMP)
+file(STRINGS ${PROJECT_SOURCE_DIR}/ref_kernels/bli_cntx_ref.c REF_KER_HEADERS_TEMP)
 # Only keep the lines where there are includes.
 list(FILTER REF_KER_HEADERS_TEMP INCLUDE REGEX "\#include")
 # REF_KER_HEADERS has a list of all files that are included in bli_cntx_ref.c.
@@ -1144,7 +1144,7 @@ list(REMOVE_DUPLICATES REF_KER_H_PATHS)
 set(CINFLAGS ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY})
 list(APPEND CINFLAGS ${REF_KER_H_PATHS})
 # Then add frame/include since it's needed for bli_oapi_w[o]_cntx.h.
-list(APPEND CINFLAGS ${CMAKE_SOURCE_DIR}/frame/include)
+list(APPEND CINFLAGS ${PROJECT_SOURCE_DIR}/frame/include)
 # If CBLAS is enabled, we also include the path to the cblas.h directory so
 # that the compiler will be able to find cblas.h as the CBLAS source code is
 # being compiled.
@@ -1233,8 +1233,8 @@ set(BLIS_PUBLIC_HEADERS
     ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h
     # Include AMD's C++ template header files in the list of headers
     # to install.
-    ${CMAKE_SOURCE_DIR}/vendor/cpp/blis.hh
-    ${CMAKE_SOURCE_DIR}/vendor/cpp/cblas.hh
+    ${PROJECT_SOURCE_DIR}/vendor/cpp/blis.hh
+    ${PROJECT_SOURCE_DIR}/vendor/cpp/cblas.hh
 )
 if(ENABLE_CBLAS)
     list(APPEND BLIS_PUBLIC_HEADERS ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h)
@@ -1293,7 +1293,7 @@ endif()
 string(JOIN " " LDFLAGS_STRING ${LDFLAGS_STRING})
 if(NOT WIN32)
     configure_file(
-        ${CMAKE_SOURCE_DIR}/build/cmake/${PC_IN_FILE}
+        ${PROJECT_SOURCE_DIR}/build/cmake/${PC_IN_FILE}
         ${CMAKE_BINARY_DIR}/${PC_OUT_FILE}
         @ONLY
     )

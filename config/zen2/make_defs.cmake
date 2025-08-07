@@ -37,7 +37,7 @@
 # config/zen/amd_config.mk.
 
 # Include file containing common flags for all AMD architectures
-include(${CMAKE_SOURCE_DIR}/config/zen/amd_config.cmake)
+include(${PROJECT_SOURCE_DIR}/config/zen/amd_config.cmake)
 
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0.0)

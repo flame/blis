@@ -44,7 +44,7 @@ function(generate_config_targets config_target)
                     ${LOCAL_SOURCE_FILES}
                 )
     # Include the corresponding make_defs.cmake that holds the required compiler options.
-    include(${CMAKE_SOURCE_DIR}/config/${config_target}/make_defs.cmake)
+    include(${PROJECT_SOURCE_DIR}/config/${config_target}/make_defs.cmake)
     # Use PRIVATE keyword for option setting since we do not want the properties to propagate in other targets.
     # mimicing get-config-cflags-for
     target_compile_options(${config_target}_CONFIG
@@ -93,7 +93,7 @@ function(generate_config_targets config_target)
     # Create on object library using the corresponding reference kernel initialization file.
     add_library(${config_target}_REFINIT
                 OBJECT
-                ${CMAKE_SOURCE_DIR}/ref_kernels/bli_cntx_ref.c
+                ${PROJECT_SOURCE_DIR}/ref_kernels/bli_cntx_ref.c
             )
     # Use PRIVATE keyword for option setting since we do not want the properties to propagate in other targets.
     # mimicing get-refinit-cflags-for
@@ -145,7 +145,7 @@ function(generate_config_targets config_target)
     set_target_properties(${config_target}_REFINIT PROPERTIES FOLDER object-libs-targets)
 
     # Collect all subdirectory paths that have at least one file with suffix in KERNELS_SRC_SUFS list.
-    set(REFKERN_PATH ${CMAKE_SOURCE_DIR}/ref_kernels)
+    set(REFKERN_PATH ${PROJECT_SOURCE_DIR}/ref_kernels)
     get_filepaths_with_suffixes(LOCAL_REFKERN_FILES ${REFKERN_PATH} ${KERNELS_SRC_SUFS})
     # Remove bli_cntx_ref.c from source list.
     list(FILTER LOCAL_REFKERN_FILES EXCLUDE REGEX bli_cntx_ref.c)

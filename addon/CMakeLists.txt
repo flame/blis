@@ -56,7 +56,7 @@ function(generate_addon_targets addon_target)
                         ${LOCAL_SOURCE_C99_FILES}
                     )
         # Include the corresponding make_defs.cmake that holds the required compiler options.
-        include(${CMAKE_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY}/make_defs.cmake)
+        include(${PROJECT_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY}/make_defs.cmake)
         # Use PRIVATE keyword for option setting since we do not want the properties to propagate in other targets.
         # mimicing get-addon-c99flags-for
         target_compile_options(${addon_target}_C99_ADDON
@@ -115,7 +115,7 @@ function(generate_addon_targets addon_target)
                         ${LOCAL_KERNEL_FILES_C99}
                     )
         # Include the corresponding make_defs.cmake that holds the required compiler options.
-        include(${CMAKE_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY}/make_defs.cmake)
+        include(${PROJECT_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY}/make_defs.cmake)
         # Use PRIVATE keyword for option setting since we do not want the properties to propagate in other targets.
         # mimicing get-addon-c99flags-for
         target_compile_options(${addon_target}_C99_KERNEL_ADDON

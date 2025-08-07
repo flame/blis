@@ -33,11 +33,11 @@
 ]=]
 
 # Create a list of keywords for files that need to be ignored by the system.
-file(READ ${CMAKE_SOURCE_DIR}/build/gen-make-frags/ignore_list IGNORE_LIST)
+file(READ ${PROJECT_SOURCE_DIR}/build/gen-make-frags/ignore_list IGNORE_LIST)
 string(REPLACE "\n" ";" IGNORE_LIST ${IGNORE_LIST})
 
 # Create a list of suffixes for files that need to be compiled to create the library.
-file(READ ${CMAKE_SOURCE_DIR}/build/gen-make-frags/suffix_list SUFFIX_LIST)
+file(READ ${PROJECT_SOURCE_DIR}/build/gen-make-frags/suffix_list SUFFIX_LIST)
 string(REPLACE "\n" ";" SUFFIX_LIST ${SUFFIX_LIST})
 
 #--------------------------------------------
@@ -109,7 +109,7 @@ macro(get_dirpaths_with_suffixes result curdir sufflist)
     # from the name, so that we can exclude the files that are part of the ignore
     # list even if the blis directory is located in a directory with a name that
     # would be ignored.
-    string(REPLACE "${CMAKE_SOURCE_DIR}/" "" curdirsimple ${curdir})
+    string(REPLACE "${PROJECT_SOURCE_DIR}/" "" curdirsimple ${curdir})
     # Filter out anything that is part of the IGNORE_LIST.
     foreach(item ${IGNORE_LIST})
         list(FILTER dirlist EXCLUDE REGEX ${curdirsimple}.*/${item}/)
@@ -126,7 +126,7 @@ macro(get_filepaths_with_suffixes result curdir sufflist)
     # from the name, so that we can exclude the files that are part of the ignore
     # list even if the blis directory is located in a directory with a name that
     # would be ignored.
-    string(REPLACE "${CMAKE_SOURCE_DIR}/" "" curdirsimple ${curdir})
+    string(REPLACE "${PROJECT_SOURCE_DIR}/" "" curdirsimple ${curdir})
     foreach(suff ${sufflist})
         # dirlist will have all files which are below this directory.
         file(GLOB_RECURSE suff_files LIST_DIRECTORIES false ${curdir}/*\.${suff})

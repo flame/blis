@@ -116,7 +116,7 @@ set(ATLAS_LIB ${ATLAS_LIB} ${F77BLAS_LIB})
 
 
 # Include the corresponding make_defs.cmake that holds the required compiler options.
-include(${CMAKE_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY}/make_defs.cmake)
+include(${PROJECT_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY}/make_defs.cmake)
 
 # Gather all local source files.
 file(GLOB file_list LIST_DIRECTORIES false RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/" "*.c")

@@ -46,7 +46,7 @@ else()
 endif()
 
 # Include the corresponding make_defs.cmake that holds the required compiler options.
-include(${CMAKE_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY}/make_defs.cmake)
+include(${PROJECT_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY}/make_defs.cmake)
 
 # Gather all local source files.
 file(GLOB testsuite_sources LIST_DIRECTORIES false ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c)
@@ -128,7 +128,7 @@ function(add_testblis flavour)
                     )
     # Check the results of the BLIS testsuite.
     add_custom_target(checkblis${dashflavour}
-                        COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/build/cmake/check-blistest.py ${CMAKE_CURRENT_BINARY_DIR}/output.testsuite${dotflavour}
+                        COMMAND ${Python_EXECUTABLE} ${PROJECT_SOURCE_DIR}/build/cmake/check-blistest.py ${CMAKE_CURRENT_BINARY_DIR}/output.testsuite${dotflavour}
                         DEPENDS testblis${dashflavour}
                   )
 endfunction()

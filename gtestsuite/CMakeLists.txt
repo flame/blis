@@ -328,14 +328,14 @@ set(CAN_TEST_INFO_VALUE ON)
 # The following part will be used to set up macros that relate to the version
 # of BLIS library being tested.
 if(ENABLE_THREADING STREQUAL "openmp")
-    try_run(RUNRESULT COMPILERESULT "${CMAKE_BINARY_DIR}/temp" SOURCES ${CMAKE_SOURCE_DIR}/cmake/get_version.cpp
+    try_run(RUNRESULT COMPILERESULT "${CMAKE_BINARY_DIR}/temp" SOURCES ${PROJECT_SOURCE_DIR}/cmake/get_version.cpp
             COMPILE_DEFINITIONS -I${BLIS_PATH}/include/ -I${BLIS_PATH}/include/blis
             LINK_LIBRARIES ${BLIS_LIBRARY} ${COMMON_LIBS} OpenMP::OpenMP_CXX ${ASAN_FLAGS} ${COVERAGE_FLAGS}
             RUN_OUTPUT_VARIABLE TEST_BLIS_VERSION
             COMPILE_OUTPUT_VARIABLE COMP_VAR_VERSION
     )
 else()
-    try_run(RUNRESULT COMPILERESULT "${CMAKE_BINARY_DIR}/temp" SOURCES ${CMAKE_SOURCE_DIR}/cmake/get_version.cpp
+    try_run(RUNRESULT COMPILERESULT "${CMAKE_BINARY_DIR}/temp" SOURCES ${PROJECT_SOURCE_DIR}/cmake/get_version.cpp
             COMPILE_DEFINITIONS -I${BLIS_PATH}/include/ -I${BLIS_PATH}/include/blis
             LINK_LIBRARIES ${BLIS_LIBRARY} ${COMMON_LIBS} ${ASAN_FLAGS} ${COVERAGE_FLAGS}
             RUN_OUTPUT_VARIABLE TEST_BLIS_VERSION
@@ -387,14 +387,14 @@ endif()
 # This way, kernel tests won't be compiled/run for shared versions of BLIS.
 if(BLIS_LINKING_TYPE STREQUAL "static")
     if(ENABLE_THREADING STREQUAL "openmp")
-        try_run(RUNRESULT COMPILERESULT "${CMAKE_BINARY_DIR}/temp" SOURCES ${CMAKE_SOURCE_DIR}/cmake/config_ukr_tests.cpp
+        try_run(RUNRESULT COMPILERESULT "${CMAKE_BINARY_DIR}/temp" SOURCES ${PROJECT_SOURCE_DIR}/cmake/config_ukr_tests.cpp
             COMPILE_DEFINITIONS -I${BLIS_PATH}/include/ -I${BLIS_PATH}/include/blis
             LINK_LIBRARIES ${BLIS_LIBRARY} ${COMMON_LIBS} OpenMP::OpenMP_CXX ${ASAN_FLAGS} ${COVERAGE_FLAGS}
             RUN_OUTPUT_VARIABLE UKR_CONFIG
             COMPILE_OUTPUT_VARIABLE COMP_VAR
         )
     else()
-        try_run(RUNRESULT COMPILERESULT "${CMAKE_BINARY_DIR}/temp" SOURCES ${CMAKE_SOURCE_DIR}/cmake/config_ukr_tests.cpp
+        try_run(RUNRESULT COMPILERESULT "${CMAKE_BINARY_DIR}/temp" SOURCES ${PROJECT_SOURCE_DIR}/cmake/config_ukr_tests.cpp
             COMPILE_DEFINITIONS -I${BLIS_PATH}/include/ -I${BLIS_PATH}/include/blis
             LINK_LIBRARIES ${BLIS_LIBRARY} ${COMMON_LIBS} ${ASAN_FLAGS} ${COVERAGE_FLAGS}
             RUN_OUTPUT_VARIABLE UKR_CONFIG

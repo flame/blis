@@ -59,7 +59,7 @@ function(generate_kernel_targets kernel_target)
                         ${LOCAL_SOURCE_FILES}
                     )
         # Include the corresponding make_defs.cmake that holds the required compiler options.
-        include(${CMAKE_SOURCE_DIR}/config/${LOCAL_CONFIG}/make_defs.cmake)
+        include(${PROJECT_SOURCE_DIR}/config/${LOCAL_CONFIG}/make_defs.cmake)
         # Use PRIVATE keyword for option setting since we do not want the
         # properties to propagate in other targets.
         # mimicing get-kernel-cflags-for
@@ -124,7 +124,7 @@ function(generate_kernel_targets kernel_target)
         set_source_files_properties(${LOCAL_ZEN_LPGEMM_SOURCE_FILES} PROPERTIES COMPILE_OPTIONS "-mno-avx512f")
 
         # Include the corresponding make_defs.cmake that holds the required compiler options.
-        include(${CMAKE_SOURCE_DIR}/config/${LOCAL_CONFIG}/make_defs.cmake)
+        include(${PROJECT_SOURCE_DIR}/config/${LOCAL_CONFIG}/make_defs.cmake)
         # Use PRIVATE keyword for option setting since we do not want the
         # properties to propagate in other targets.
         # mimicing get-kernel-cflags-for

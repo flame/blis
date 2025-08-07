@@ -81,7 +81,7 @@ add_library(FRAME
             )
 
 # Include the corresponding make_defs.cmake that holds the required compiler options.
-include(${CMAKE_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY}/make_defs.cmake)
+include(${PROJECT_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY}/make_defs.cmake)
 # Use PRIVATE keyword for option setting since we do not want the properties to propagate in other targets.
 # mimicing get-frame-cflags-for
 target_compile_options(FRAME
