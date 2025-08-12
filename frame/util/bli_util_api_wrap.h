@@ -1547,6 +1547,14 @@ BLIS_EXPORT_BLIS void CGEMMT_( const f77_char* uploc,  const f77_char* transa,  
 
 
 
+BLIS_EXPORT_BLIS void CGEMMTR( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  scomplex* alpha,  const scomplex* a,  const f77_int* lda,  const scomplex* b,  const f77_int* ldb,  const scomplex* beta,  scomplex* c,  const f77_int* ldc);
+
+BLIS_EXPORT_BLIS void cgemmtr( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  scomplex* alpha,  const scomplex* a,  const f77_int* lda,  const scomplex* b,  const f77_int* ldb,  const scomplex* beta,  scomplex* c,  const f77_int* ldc);
+
+BLIS_EXPORT_BLIS void CGEMMTR_( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  scomplex* alpha,  const scomplex* a,  const f77_int* lda,  const scomplex* b,  const f77_int* ldb,  const scomplex* beta,  scomplex* c,  const f77_int* ldc);
+
+
+
 BLIS_EXPORT_BLIS void DAXPBY(const f77_int* n,  const double* alpha,  const double *x,  const f77_int* incx,  const double* beta,  double *y,  const f77_int* incy);
 
 BLIS_EXPORT_BLIS void daxpby(const f77_int* n,  const double* alpha,  const double *x,  const f77_int* incx,  const double* beta,  double *y,  const f77_int* incy);
@@ -1592,6 +1600,14 @@ BLIS_EXPORT_BLIS void DGEMMT( const f77_char* uploc,  const f77_char* transa,  c
 BLIS_EXPORT_BLIS void dgemmt( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  double* alpha,  const double* a,  const f77_int* lda,  const double* b,  const f77_int* ldb,  const double* beta,  double* c,  const f77_int* ldc);
 
 BLIS_EXPORT_BLIS void DGEMMT_( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  double* alpha,  const double* a,  const f77_int* lda,  const double* b,  const f77_int* ldb,  const double* beta,  double* c,  const f77_int* ldc);
+
+
+
+BLIS_EXPORT_BLIS void DGEMMTR( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  double* alpha,  const double* a,  const f77_int* lda,  const double* b,  const f77_int* ldb,  const double* beta,  double* c,  const f77_int* ldc);
+
+BLIS_EXPORT_BLIS void dgemmtr( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  double* alpha,  const double* a,  const f77_int* lda,  const double* b,  const f77_int* ldb,  const double* beta,  double* c,  const f77_int* ldc);
+
+BLIS_EXPORT_BLIS void DGEMMTR_( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  double* alpha,  const double* a,  const f77_int* lda,  const double* b,  const f77_int* ldb,  const double* beta,  double* c,  const f77_int* ldc);
 
 
 
@@ -1643,6 +1659,14 @@ BLIS_EXPORT_BLIS void SGEMMT_( const f77_char* uploc,  const f77_char* transa,  
 
 
 
+BLIS_EXPORT_BLIS void SGEMMTR( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  float* alpha,  const float* a,  const f77_int* lda,  const float* b,  const f77_int* ldb,  const float* beta,  float* c,  const f77_int* ldc);
+
+BLIS_EXPORT_BLIS void sgemmtr( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  float* alpha,  const float* a,  const f77_int* lda,  const float* b,  const f77_int* ldb,  const float* beta,  float* c,  const f77_int* ldc);
+
+BLIS_EXPORT_BLIS void SGEMMTR_( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  float* alpha,  const float* a,  const f77_int* lda,  const float* b,  const f77_int* ldb,  const float* beta,  float* c,  const f77_int* ldc);
+
+
+
 BLIS_EXPORT_BLIS void ZAXPBY( const f77_int* n,  const dcomplex* alpha,  const dcomplex *x,  const f77_int* incx,  const dcomplex* beta,  dcomplex *y,  const f77_int* incy);
 
 BLIS_EXPORT_BLIS void zaxpby( const f77_int* n,  const dcomplex* alpha,  const dcomplex *x,  const f77_int* incx,  const dcomplex* beta,  dcomplex *y,  const f77_int* incy);
@@ -1672,6 +1696,15 @@ BLIS_EXPORT_BLIS void ZGEMMT( const f77_char* uploc,  const f77_char* transa,  c
 BLIS_EXPORT_BLIS void zgemmt( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  dcomplex* alpha,  const dcomplex* a,  const f77_int* lda,  const dcomplex* b,  const f77_int* ldb,  const dcomplex* beta,  dcomplex* c,  const f77_int* ldc);
 
 BLIS_EXPORT_BLIS void ZGEMMT_( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  dcomplex* alpha,  const dcomplex* a,  const f77_int* lda,  const dcomplex* b,  const f77_int* ldb,  const dcomplex* beta,  dcomplex* c,  const f77_int* ldc);
+
+
+
+BLIS_EXPORT_BLIS void ZGEMMTR( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  dcomplex* alpha,  const dcomplex* a,  const f77_int* lda,  const dcomplex* b,  const f77_int* ldb,  const dcomplex* beta,  dcomplex* c,  const f77_int* ldc);
+
+BLIS_EXPORT_BLIS void zgemmtr( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  dcomplex* alpha,  const dcomplex* a,  const f77_int* lda,  const dcomplex* b,  const f77_int* ldb,  const dcomplex* beta,  dcomplex* c,  const f77_int* ldc);
+
+BLIS_EXPORT_BLIS void ZGEMMTR_( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  dcomplex* alpha,  const dcomplex* a,  const f77_int* lda,  const dcomplex* b,  const f77_int* ldb,  const dcomplex* beta,  dcomplex* c,  const f77_int* ldc);
+
 
 
 BLIS_EXPORT_BLIS void CIMATCOPY(f77_char* trans,  f77_int* rows,  f77_int* cols,  const scomplex* alpha, scomplex* aptr,  f77_int* lda,  f77_int* ldb);
