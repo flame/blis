@@ -146,7 +146,25 @@ GEMV_KER_PROT( double,  d, gemv_n_zen_int_8x1n_avx512 )
 GEMV_KER_PROT( double,  d, gemv_n_zen_int_m_leftx1n_avx512 )
 
 // dgemv_t kernels for handling op(A) = 't', i.e., transa = 't' cases.
-GEMV_KER_PROT( double,  d, gemv_t_zen4_int )
+// export gemv kernel so that it can be directly called avoiding blis overhead.
+BLIS_EXPORT void bli_dgemv_t_zen4_int
+     (
+       conj_t conja,
+       conj_t conjx,
+       dim_t m,
+       dim_t n,
+       double* restrict alpha,
+       double* restrict a,
+       inc_t rs,
+       inc_t cs,
+       double* restrict x,
+       inc_t incx,
+       double* restrict beta,
+       double* restrict y,
+       inc_t incy,
+       cntx_t* restrict cntx
+      );
+
 GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x7m )
 GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x6m )
 GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x5m )
@@ -499,7 +517,7 @@ void bli_dgemv_n_zen4_int
        cntx_t* cntx
      );
 
-void bli_dgemv_n_zen4_40x2_int_st
+BLIS_EXPORT void bli_dgemv_n_zen4_40x2_int_st
      (
        trans_t transa,
        conj_t  conjx,
