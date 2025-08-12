@@ -216,7 +216,10 @@ int PASTEF77S(c,tbsv)(const bla_character *uplo, const bla_character *trans, con
     --x;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_TBSV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *uplo,
+			     *trans, *diag, *n, *k, *lda, *incx);
 
     // Initialize info_value to 0
     gint_t info_value = 0;
@@ -802,7 +805,10 @@ int PASTEF77S(d,tbsv)(const bla_character *uplo, const bla_character *trans, con
     --x;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_TBSV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *uplo,
+			     *trans, *diag, *n, *k, *lda, *incx);
 
     // Initialize info_value to 0
     gint_t info_value = 0;
@@ -1243,7 +1249,10 @@ int PASTEF77S(s,tbsv)(const bla_character *uplo, const bla_character *trans, con
     --x;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_TBSV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *uplo,
+			     *trans, *diag, *n, *k, *lda, *incx);
 
     // Initialize info_value to 0
     gint_t info_value = 0;
@@ -1689,7 +1698,10 @@ int PASTEF77S(z,tbsv)(const bla_character *uplo, const bla_character *trans, con
     --x;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_TBSV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *uplo,
+			     *trans, *diag, *n, *k, *lda, *incx);
 
     // Initialize info_value to 0
     gint_t info_value = 0;

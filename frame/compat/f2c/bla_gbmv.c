@@ -206,7 +206,9 @@ int PASTEF77S(c,gbmv)(const bla_character *trans, const bla_integer *m, const bl
     --y;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_GBMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *trans, *m, *n, *kl, *ku, (void*)alpha, *lda, *incx, (void*)beta, *incy);
 
     // Initialize info_value to 0
     gint_t info_value = 0;
@@ -649,7 +651,9 @@ int PASTEF77S(d,gbmv)(const bla_character *trans, const bla_integer *m, const bl
     --y;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_GBMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *trans, *m, *n, *kl, *ku, (void*)alpha, *lda, *incx, (void*)beta, *incy);
 
     // Initialize info_value to 0
     gint_t info_value = 0;
@@ -1016,7 +1020,9 @@ int PASTEF77S(s,gbmv)(const bla_character *trans, const bla_integer *m, const bl
     --y;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_GBMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *trans, *m, *n, *kl, *ku, (void*)alpha, *lda, *incx, (void*)beta, *incy);
 
     // Initialize info_value to 0
     gint_t info_value = 0;
@@ -1392,7 +1398,9 @@ int PASTEF77S(z,gbmv)(const bla_character *trans, const bla_integer *m, const bl
     --y;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_GBMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *trans, *m, *n, *kl, *ku, (void*)alpha, *lda, *incx, (void*)beta, *incy);
 
     // Initialize info_value to 0
     gint_t info_value = 0;

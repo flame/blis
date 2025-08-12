@@ -308,6 +308,78 @@ void AOCL_DTL_log_trsv_sizes(int8 loglevel,
                              const char* function_name,
                              int line);
 
+// Level-2 Banded Logging
+
+void AOCL_DTL_log_gbmv_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char transa,
+                             const f77_int  m,
+                             const f77_int  n,
+                             const f77_int  kl,
+                             const f77_int  ku,
+                             const void*    alpha,
+                             const f77_int lda,
+                             const f77_int incx,
+                             const void*    beta,
+                             const f77_int incy,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_hbmv_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char uploa,
+                             const f77_int  m,
+                             const f77_int  k,
+                             const void* alpha,
+                             const f77_int lda,
+                             const f77_int incx,
+                             const void* beta,
+                             const f77_int incy,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_sbmv_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char uploa,
+                             const f77_int  m,
+                             const f77_int  k,
+                             const void*    alpha,
+                             const f77_int lda,
+                             const f77_int incx,
+                             const void*    beta,
+                             const f77_int incy,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_tbmv_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char uploa,
+                             const f77_char transa,
+                             const f77_char diaga,
+                             const f77_int m,
+                             const f77_int k,
+                             const f77_int lda,
+                             const f77_int incx,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_tbsv_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char uploa,
+                             const f77_char transa,
+                             const f77_char diaga,
+                             const f77_int m,
+                             const f77_int k,
+                             const f77_int lda,
+                             const f77_int incx,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
 // Level-1 Logging
 
 void AOCL_DTL_log_amax_sizes(int8 loglevel,
@@ -397,6 +469,97 @@ void AOCL_DTL_log_swap_sizes(int8 loglevel,
                              const char* filename,
                              const char* function_name,
                              int line);
+
+// Level-2 Packed Logging
+
+void AOCL_DTL_log_hpmv_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char uploa,
+                             const f77_int  m,
+                             const void* alpha,
+                             const f77_int incx,
+                             const void* beta,
+                             const f77_int incy,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_hpr2_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char uploa,
+                             const f77_int  m,
+                             const void* alpha,
+                             const f77_int incx,
+                             const f77_int incy,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_hpr_sizes(int8 loglevel,
+                            char dt_type,
+                            const f77_char uploa,
+                            const f77_int  m,
+                            const void* alpha,
+                            const f77_int  incx,
+                            const char* filename,
+                            const char* function_name,
+                            int line);
+
+void AOCL_DTL_log_spmv_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char uploa,
+                             const f77_int  m,
+                             const void*    alpha,
+                             const f77_int incx,
+                             const void*    beta,
+                             const f77_int incy,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_spr2_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char uploa,
+                             const f77_int  m,
+                             const void*    alpha,
+                             const f77_int  incx,
+                             const f77_int  incy,
+                             const char*    filename,
+                             const char*    function_name,
+                             int  line);
+
+void AOCL_DTL_log_spr_sizes(int8 loglevel,
+                            char dt_type,
+                            const f77_char  uploa,
+                            const f77_int   m,
+                            const void*     alpha,
+                            const f77_int   incx,
+                            const char*     filename,
+                            const char*     function_name,
+                            int line);
+
+void AOCL_DTL_log_tpmv_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char uploa,
+                             const f77_char transa,
+                             const f77_char diaga,
+                             const f77_int m,
+                             const f77_int incx,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_tpsv_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char uploa,
+                             const f77_char transa,
+                             const f77_char diaga,
+                             const f77_int m,
+                             const f77_int incx,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
 // Level-3 Macros
 
 #define AOCL_DTL_LOG_GEMM_INPUTS(loglevel, dt, transa, transb, m, n, k, alpha, lda, ldb, beta, ldc)    \
@@ -511,6 +674,74 @@ void AOCL_DTL_log_swap_sizes(int8 loglevel,
         AOCL_DTL_log_trsv_sizes(loglevel, dt_type, uploa, transa, diaga, m, lda, incx,\
                                 __FILE__,__FUNCTION__,__LINE__);
 
+// Level-2 Banded Macros
+
+#define AOCL_DTL_LOG_GBMV_INPUTS(loglevel, dt_type, transa, m, n, kl, ku, alp, lda, incx, beta, incy) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_gbmv_sizes(loglevel, dt_type, transa, m, n, kl, ku, alp, lda, incx, beta, incy, __FILE__,\
+                            __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_HBMV_INPUTS(loglevel, dt_type, uploa, m, k, alpha, lda, incx, beta, incy) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_hbmv_sizes(loglevel, dt_type, uploa, m, k, alpha, lda, incx, beta, incy, \
+                            __FILE__, __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_SBMV_INPUTS(loglevel, dt_type, uploa, m, k, alpha, lda, incx, beta, incy)\
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_sbmv_sizes(loglevel, dt_type, uploa, m, k, alpha, lda, incx, beta, incy, __FILE__,\
+                                __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_TBMV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, k, lda, incx) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_tbmv_sizes(loglevel, dt_type, uploa, transa, diaga, m, k, lda, incx,\
+                                __FILE__,__FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_TBSV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, k, lda, incx) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_tbsv_sizes(loglevel, dt_type, uploa, transa, diaga, m, k, lda, incx,\
+                                __FILE__,__FUNCTION__,__LINE__);
+
+// Level-2 Packed Macros
+
+#define AOCL_DTL_LOG_HPMV_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, beta, incy) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_hpmv_sizes(loglevel, dt_type, uploa, m, alpha, incx, beta, incy, \
+                            __FILE__, __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_HPR2_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, incy) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_hpr2_sizes(loglevel, dt_type, uploa, m, alpha, incx, incy, \
+                            __FILE__, __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_HPR_INPUTS(loglevel, dt_type, uploa, m, alpha, incx )\
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_hpr_sizes(loglevel, dt_type, uploa, m, alpha, incx,  __FILE__,__FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_SPMV_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, beta, incy)\
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_spmv_sizes(loglevel, dt_type, uploa, m, alpha, incx, beta, incy, __FILE__,\
+                                __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_SPR2_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, incy) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_spr2_sizes(loglevel, dt_type, uploa, m, alpha, incx, incy, __FILE__,\
+                                __FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_SPR_INPUTS(loglevel, dt_type, uploa, m, alpha, incx) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_spr_sizes(loglevel, dt_type, uploa, m, alpha, incx,\
+                                __FILE__,__FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_TPMV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, incx) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_tpmv_sizes(loglevel, dt_type, uploa, transa, diaga, m, incx,\
+                                __FILE__,__FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_TPSV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, incx ) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_tpsv_sizes(loglevel, dt_type, uploa, transa, diaga, m, incx,\
+                                __FILE__,__FUNCTION__,__LINE__);
+
 // Level-1 Macros
 
 #define AOCL_DTL_LOG_AMAX_INPUTS(loglevel, dt_type, n, incx) \
@@ -607,6 +838,36 @@ void AOCL_DTL_log_swap_sizes(int8 loglevel,
 #define AOCL_DTL_LOG_TRMV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, lda, incx)
 
 #define AOCL_DTL_LOG_TRSV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, lda, incx )
+
+// Level-2 Banded Macros
+
+#define AOCL_DTL_LOG_GBMV_INPUTS(loglevel, dt_type, transa, m, n, kl, ku, alp, lda, incx, beta, incy)
+
+#define AOCL_DTL_LOG_HBMV_INPUTS(loglevel, dt_type, uploa, m, k, alpha, lda, incx, beta, incy)
+
+#define AOCL_DTL_LOG_SBMV_INPUTS(loglevel, dt_type, uploa, m, k, alpha, lda, incx, beta, incy)
+
+#define AOCL_DTL_LOG_TBMV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, k, lda, incx)
+
+#define AOCL_DTL_LOG_TBSV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, k, lda, incx)
+
+// Level-2 Packed Macros
+
+#define AOCL_DTL_LOG_HPMV_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, beta, incy)
+
+#define AOCL_DTL_LOG_HPR2_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, incy)
+
+#define AOCL_DTL_LOG_HPR_INPUTS(loglevel, dt_type, uploa, m, alpha, incx )
+
+#define AOCL_DTL_LOG_SPMV_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, beta, incy)
+
+#define AOCL_DTL_LOG_SPR2_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, incy)
+
+#define AOCL_DTL_LOG_SPR_INPUTS(loglevel, dt_type, uploa, m, alpha, incx)
+
+#define AOCL_DTL_LOG_TPMV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, incx)
+
+#define AOCL_DTL_LOG_TPSV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, incx )
 
 // Level-1 Macros
 
