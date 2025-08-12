@@ -284,9 +284,9 @@ void bli_dgemv_unf_var1
     bool is_x_temp_buf_created = FALSE;
 
     // Function pointer declaration for the functions that will be used.
-    dgemv_ker_ft   gemv_kr_ptr;         // DGEMV
-    dscalv_ker_ft  scalv_kr_ptr;        // DSCALV
-    dcopyv_ker_ft  copyv_kr_ptr;        // DCOPYV
+    dgemv_ker_ft_conja   gemv_kr_ptr;         // DGEMV
+    dscalv_ker_ft        scalv_kr_ptr;        // DSCALV
+    dcopyv_ker_ft        copyv_kr_ptr;        // DCOPYV
 
     /*
       Fatbinary config amdzen when run on non-AMD X86 will query for

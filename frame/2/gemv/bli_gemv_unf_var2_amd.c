@@ -251,19 +251,18 @@ void PASTEMAC(ch,varname) \
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3); \
 }
 
-void bli_dgemv_unf_var2
-     (
-       trans_t transa,
-       conj_t  conjx,
-       dim_t   m,
-       dim_t   n,
-       double* alpha,
-       double* a, inc_t rs_a, inc_t cs_a,
-       double* x, inc_t incx,
-       double* beta,
-       double* y, inc_t incy,
-       cntx_t* cntx
-     )
+void bli_dgemv_unf_var2 (
+                          trans_t transa,
+                          conj_t  conjx,
+                          dim_t   m,
+                          dim_t   n,
+                          double* alpha,
+                          double* a, inc_t rs_a, inc_t cs_a,
+                          double* x, inc_t incx,
+                          double* beta,
+                          double* y, inc_t incy,
+                          cntx_t* cntx
+                        )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3);
 
@@ -281,28 +280,49 @@ void bli_dgemv_unf_var2
       Function pointer declaration for the functions
       that will be used by this API
     */
-    daxpyf_ker_ft   axpyf_kr_ptr; // DAXPYF
-    dscal2v_ker_ft  scal2v_kr_ptr; // DSCAL2V
-    dscalv_ker_ft   scalv_kr_ptr; // DSCALV
-    dcopyv_ker_ft   copyv_kr_ptr; // DCOPYV
+    daxpyf_ker_ft   axpyf_kr_ptr;   // DAXPYF
+    dscal2v_ker_ft  scal2v_kr_ptr;  // DSCAL2V
+    dscalv_ker_ft   scalv_kr_ptr;   // DSCALV
+    dcopyv_ker_ft   copyv_kr_ptr;   // DCOPYV
 
     switch (id)
     {
         case BLIS_ARCH_ZEN5:
+#if defined(BLIS_KERNELS_ZEN4)
+        //this is the main Interface kernel present in zen4 kernel 
+        // directory, this main kernel invokes other kernels based
+        // on certain metrics.
+        bli_dgemv_n_zen4_int(
+                              transa,
+                              conjx,
+                              m,
+                              n,
+                              alpha,
+                              a, rs_a, cs_a,
+                              x, incx,
+                              beta,
+                              y, incy,
+                              cntx
+                            );
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
+        return;
+#endif
+
         case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
-            bli_dgemv_n_avx512(
-                transa,
-                conjx,
-                m,
-                n,
-                alpha,
-                a, rs_a, cs_a,
-                x, incx,
-                beta,
-                y, incy,
-                cntx
-            );
+        bli_dgemv_n_zen4_int(
+                              transa,
+                              conjx,
+                              m,
+                              n,
+                              alpha,
+                              a, rs_a, cs_a,
+                              x, incx,
+                              beta,
+                              y, incy,
+                              cntx
+                            );
 
             AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
             return;
@@ -311,17 +331,17 @@ void bli_dgemv_unf_var2
         case BLIS_ARCH_ZEN2:
         case BLIS_ARCH_ZEN3:
             bli_dgemv_n_avx2(
-                transa,
-                conjx,
-                m,
-                n,
-                alpha,
-                a, rs_a, cs_a,
-                x, incx,
-                beta,
-                y, incy,
-                cntx
-            );
+                              transa,
+                              conjx,
+                              m,
+                              n,
+                              alpha,
+                              a, rs_a, cs_a,
+                              x, incx,
+                              beta,
+                              y, incy,
+                              cntx
+                           );
 
             AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
             return;

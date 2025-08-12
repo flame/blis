@@ -530,6 +530,19 @@ void bli_dgemv_zen_ref
        cntx_t* restrict cntx
      );
 
+void bli_sgemv_zen_ref
+    (
+       trans_t          transa,
+       dim_t            m,
+       dim_t            b_n,
+       float* restrict alpha,
+       float* restrict a, inc_t inca, inc_t lda,
+       float* restrict x, inc_t incx,
+       float* restrict beta,
+       float* restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     );
+
 void bli_dgemv_n_avx2
      (
        trans_t transa,

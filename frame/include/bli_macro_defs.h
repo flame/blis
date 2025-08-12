@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -80,6 +80,9 @@
 
 #define PASTECH3_(ch1,ch2,ch3,op)  ch1 ## ch2 ## ch3 ## op
 #define PASTECH3(ch1,ch2,ch3,op)   PASTECH3_(ch1,ch2,ch3,op)
+
+#define PASTECH4_(ch1,ch2,ch3,ch4,op)  ch1 ## ch2 ## ch3 ## ch4 ## op
+#define PASTECH4(ch1,ch2,ch3,ch4,op)   PASTECH4_(ch1,ch2,ch3,ch4,op)
 
 #define MKSTR(s1)                  #s1
 #define STRINGIFY_INT( s )         MKSTR( s )

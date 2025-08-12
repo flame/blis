@@ -40,6 +40,13 @@
 
 #ifdef AOCL_DEV
     #define AOCL_51
+    #define K_bli_dgemv_n_zen4_int 1
+    #define K_bli_dgemv_n_zen4_40x2_int_st 1
+    #define K_bli_dgemv_n_zen4_40x2_int_mt 1
+    #define K_bli_dgemv_m_zen4_40x8_int_st 1
+    #define K_bli_dgemv_m_zen4_40x8_int_mt_Ndiv 1
+    #define K_bli_dgemv_m_zen4_40x8_int_mt_Mdiv 1
+    #define K_bli_dgemv_m_zen4_40x8_int_mt_Mdiv_Ndiv 1
 
 #endif
 
@@ -123,7 +130,6 @@
     #define K_bli_dgemv_n_zen_int_m_leftx1n_avx512 1
     #define K_bli_dcopyv_zen4_asm_avx512_biway 1
     #define K_bli_dcopyv_zen5_asm_avx512 1
-
     #define AOCL_50
 
 #endif

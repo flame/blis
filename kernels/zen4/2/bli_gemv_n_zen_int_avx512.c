@@ -46,7 +46,7 @@
  */
 
 // Function pointers for n-biased kernels.
-static dgemv_ker_ft n_ker_fp[5][4] =
+static dgemv_ker_ft_conja n_ker_fp[5][4] =
 {
     { bli_dgemv_n_zen_int_32x8n_avx512,
       bli_dgemv_n_zen_int_16x8n_avx512,
@@ -71,7 +71,22 @@ static dgemv_ker_ft n_ker_fp[5][4] =
 };
 
 // Function pointers for m-biased kernels.
-static dgemv_ker_ft m_ker_fp[8] =
+// Assume matrx A is m x n
+// m-kernels implies we loop along the m-dimension
+// it will be the innermost loop.
+// 16mx8 -> loop in steps of 16 across the m-dimension
+// 8 signifies outmost loop in steps of 8, which is along
+// n dimension
+/*
+* |y0| += | a00 a01 | * | x0 |
+  |y1|    | a10 a11 |   | x1 |
+|y0|  +=  | a00 | * x0
+|y1|      | a10 |
+
+|y0|  +=  | a01 | * x1
+|y1|      | a11 |
+*/
+static dgemv_ker_ft_conja m_ker_fp[8] =
 {
     bli_dgemv_n_zen_int_16mx8_avx512,   // base kernel
     bli_dgemv_n_zen_int_16mx1_avx512,   // n = 1
@@ -85,10 +100,10 @@ static dgemv_ker_ft m_ker_fp[8] =
 
 
 /**
- * bli_dgemv_n_avx512(...) handles cases where op(A) = NO_TRANSPOSE and invokes
+ * bli_dgemv_n_zen4_32x8_int_st(...) handles cases where op(A) = NO_TRANSPOSE and invokes
  * the n/m-biased kernel based on the conditions satisfied.
  */
-void bli_dgemv_n_avx512
+void bli_dgemv_n_zen4_32x8_int_st
      (
        trans_t transa,
        conj_t  conjx,
@@ -155,27 +170,26 @@ void bli_dgemv_n_avx512
 
     // If n0 is less than 5 and y is unit strided, invoke optimized n-biased
     // kernels which handle beta scaling of y vector.
-    if ( n0 < 5 && incy == 1 )
+    if ( (n0 < 5) && (incy == 1) )
     {
         dim_t m_idx = 0;    // 32x8n kernel
-        if      ( 32 > m0 && m0 > 15 ) m_idx = 1;   // 16x8n kernel; [16,31)
-        else if ( 16 > m0 && m0 > 7  ) m_idx = 2;   // 8x8n kernel; [8,15)
-        else if (  8 > m0 && m0 > 0  ) m_idx = 3;   // m_leftx8n kernel; [1,7)
+        if      ( (m0 > 15) && (m0 < 32) ) m_idx = 1;   // 16x8n kernel; [16,31)
+        else if ( (16 > m0) && (m0 > 7 ) ) m_idx = 2;   // 8x8n kernel; [8,15)
+        else if (  (8 > m0) && (m0 > 0 ) ) m_idx = 3;   // m_leftx8n kernel; [1,7)
 
         // Invoke respective kernel based on n dimension.
-        n_ker_fp[n0][m_idx]
-        (
-          conja,
-          conjx,
-          m0,
-          n0,
-          alpha,
-          a, rs_at, cs_at,
-          x, incx,
-          beta,
-          y_temp, temp_incy,
-          cntx
-        );
+        n_ker_fp[n0][m_idx] (
+                              conja,
+                              conjx,
+                              m0,
+                              n0,
+                              alpha,
+                              a, rs_at, cs_at,
+                              x, incx,
+                              beta,
+                              y_temp, temp_incy,
+                              cntx
+                            );
 
         return;
     }
@@ -213,7 +227,7 @@ void bli_dgemv_n_avx512
         size_t buffer_size = m0 * sizeof( double );
 
 #ifdef BLIS_ENABLE_MEM_TRACING
-        printf("bli_dgemv_n_avx512(): get mem pool block\n");
+        printf("bli_dgemv_n_zen4_32x8_int_st(): get mem pool block\n");
 #endif
 
         /**
@@ -286,7 +300,7 @@ void bli_dgemv_n_avx512
     if ( n0 < 8 ) n_idx = n0;
 
     // Invoke respective m_kernel
-    m_ker_fp[n_idx]
+    m_ker_fp[n_idx] 
     (
       conja,
       conjx,
@@ -317,7 +331,7 @@ void bli_dgemv_n_avx512
         );
 
 #ifdef BLIS_ENABLE_MEM_TRACING
-        printf( "bli_dgemv_n_avx512(): releasing mem pool block\n" );
+        printf( "bli_dgemv_n_zen4_32x8_int_st(): releasing mem pool block\n" );
 #endif
         // Return the buffer to pool.
         bli_pba_release( &rntm , &mem_bufY );

@@ -39,8 +39,8 @@
 
 using T = double;
 
-class dgemvGeneric :
-        public ::testing::TestWithParam<std::tuple<dgemv_ker_ft,
+class dgemvGenericConja :
+        public ::testing::TestWithParam<std::tuple<dgemv_ker_ft_conja,
                                                    char,        // storage format
                                                    char,        // transa
                                                    char,        // conjx
@@ -53,15 +53,15 @@ class dgemvGeneric :
                                                    gtint_t,     // lda_inc
                                                    bool>> {};   // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dgemvGeneric);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dgemvGenericConja);
 
-TEST_P( dgemvGeneric, UKR )
+TEST_P( dgemvGenericConja, UKR )
 {
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
     // test suite instantiation (INSTANTIATE_TEST_SUITE_P).
     //----------------------------------------------------------
-    dgemv_ker_ft ukr_fp = std::get<0>(GetParam());
+    dgemv_ker_ft_conja ukr_fp = std::get<0>(GetParam());
     // matrix storage format(row major, column major)
     char storage = std::get<1>(GetParam());
     // denotes whether matrix a is n,c,t,h
@@ -107,7 +107,78 @@ TEST_P( dgemvGeneric, UKR )
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
-    test_gemv_ukr<T, dgemv_ker_ft>( ukr_fp, storage, transa, conjx, m, n, alpha, lda_inc, incx, beta, incy, thresh, is_memory_test );
+    test_gemv_ukr_conja<T, dgemv_ker_ft_conja>( ukr_fp, storage, transa, conjx, m, n, alpha, lda_inc, incx, beta, incy, thresh, is_memory_test );
+}
+
+class dgemvGenericTransa :
+        public ::testing::TestWithParam<std::tuple<dgemv_ker_ft_transa,
+                                                   char,        // storage format
+                                                   char,        // transa
+                                                   char,        // conjx
+                                                   gtint_t,     // m
+                                                   gtint_t,     // n
+                                                   T,           // alpha
+                                                   T,           // beta
+                                                   gtint_t,     // incx
+                                                   gtint_t,     // incy
+                                                   gtint_t,     // lda_inc
+                                                   bool>> {};   // is_memory_test
+
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dgemvGenericTransa);
+
+TEST_P( dgemvGenericTransa, UKR )
+{
+    //----------------------------------------------------------
+    // Initialize values from the parameters passed through
+    // test suite instantiation (INSTANTIATE_TEST_SUITE_P).
+    //----------------------------------------------------------
+    dgemv_ker_ft_transa ukr_fp = std::get<0>(GetParam());
+    // matrix storage format(row major, column major)
+    char storage = std::get<1>(GetParam());
+    // denotes whether matrix a is n,c,t,h
+    char transa = std::get<2>(GetParam());
+    // denotes whether vector x is n,c
+    char conjx = std::get<3>(GetParam());
+    // matrix size m
+    gtint_t m  = std::get<4>(GetParam());
+    // matrix size n
+    gtint_t n  = std::get<5>(GetParam());
+    // specifies alpha value
+    T alpha = std::get<6>(GetParam());
+    // specifies beta value
+    T beta = std::get<7>(GetParam());
+    // stride size for x:
+    gtint_t incx = std::get<8>(GetParam());
+    // stride size for y:
+    gtint_t incy = std::get<9>(GetParam());
+    // lda increment.
+    // If increment is zero, then the array size matches the matrix size.
+    // If increment are nonnegative, the array size is bigger than the matrix size.
+    gtint_t lda_inc = std::get<10>(GetParam());
+    // is_memory_test:
+    bool is_memory_test = std::get<11>(GetParam());
+
+    // Set the threshold for the errors:
+    // Check gtestsuite gemv.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    double thresh;
+    if (m == 0 || n == 0)
+        thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>() && (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>()))
+        thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>())
+        thresh = testinghelpers::getEpsilon<T>();
+    else
+        if(( transa == 'n' ) || ( transa == 'N' ))
+            thresh = (3*n+1)*testinghelpers::getEpsilon<T>();
+        else
+            thresh = (3*m+1)*testinghelpers::getEpsilon<T>();
+
+    //----------------------------------------------------------
+    //     Call test body using these parameters
+    //----------------------------------------------------------
+    test_gemv_ukr_transa<T, dgemv_ker_ft_transa>( ukr_fp, storage, transa, conjx, m, n, alpha, lda_inc, incx, beta, incy, thresh, is_memory_test );
 }
 
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
@@ -115,7 +186,7 @@ TEST_P( dgemvGeneric, UKR )
 #ifdef K_bli_dgemv_t_zen_int
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_primary_zen,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_t_zen_int),
         ::testing::Values('c'),                                         // storage format
@@ -139,14 +210,14 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
     );
 #endif
 
 #ifdef K_bli_dgemv_t_zen_int_16x7m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx7_zen,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_t_zen_int_16x7m),
         ::testing::Values('c'),                                         // storage format
@@ -170,14 +241,14 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
     );
 #endif
 
 #ifdef K_bli_dgemv_t_zen_int_16x6m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx6_zen,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_t_zen_int_16x6m),
         ::testing::Values('c'),                                         // storage format
@@ -201,14 +272,14 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
     );
 #endif
 
 #ifdef K_bli_dgemv_t_zen_int_16x5m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx5_zen,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_t_zen_int_16x5m),
         ::testing::Values('c'),                                         // storage format
@@ -232,14 +303,14 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
     );
 #endif
 
 #ifdef K_bli_dgemv_t_zen_int_16x4m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx4_zen,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_t_zen_int_16x4m),
         ::testing::Values('c'),                                         // storage format
@@ -263,14 +334,14 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
     );
 #endif
 
 #ifdef K_bli_dgemv_t_zen_int_16x3m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx3_zen,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_t_zen_int_16x3m),
         ::testing::Values('c'),                                         // storage format
@@ -294,14 +365,14 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
     );
 #endif
 
 #ifdef K_bli_dgemv_t_zen_int_16x2m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx2_zen,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_t_zen_int_16x2m),
         ::testing::Values('c'),                                         // storage format
@@ -325,14 +396,14 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
     );
 #endif
 
 #ifdef K_bli_dgemv_t_zen_int_16x1m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx1_zen,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_t_zen_int_16x1m),
         ::testing::Values('c'),                                         // storage format
@@ -356,7 +427,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
     );
 #endif
 #endif
@@ -366,7 +437,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_t_zen4_int
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_primary_zen4,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_t_zen4_int),
         ::testing::Values('c'),                                         // storage format
@@ -390,14 +461,14 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
 #ifdef K_bli_dgemv_t_zen4_int_32x7m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx7_zen4,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_t_zen4_int_32x7m),
         ::testing::Values('c'),                                         // storage format
@@ -421,14 +492,14 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
 #ifdef K_bli_dgemv_t_zen4_int_32x6m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx6_zen4,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_t_zen4_int_32x6m),
         ::testing::Values('c'),                                         // storage format
@@ -452,14 +523,14 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
 #ifdef K_bli_dgemv_t_zen4_int_32x5m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx5_zen4,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_t_zen4_int_32x5m),
         ::testing::Values('c'),                                         // storage format
@@ -483,14 +554,14 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
 #ifdef K_bli_dgemv_t_zen4_int_32x4m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx4_zen4,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_t_zen4_int_32x4m),
         ::testing::Values('c'),                                         // storage format
@@ -514,14 +585,14 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
 #ifdef K_bli_dgemv_t_zen4_int_32x3m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx3_zen4,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_t_zen4_int_32x3m),
         ::testing::Values('c'),                                         // storage format
@@ -545,14 +616,14 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
 #ifdef K_bli_dgemv_t_zen4_int_32x2m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx2_zen4,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_t_zen4_int_32x2m),
         ::testing::Values('c'),                                         // storage format
@@ -576,14 +647,14 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
 #ifdef K_bli_dgemv_t_zen4_int_32x1m
 INSTANTIATE_TEST_SUITE_P(
     dgemv_t_mx1_zen4,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_t_zen4_int_32x1m),
         ::testing::Values('c'),                                         // storage format
@@ -607,14 +678,14 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(0), gtint_t(7)),                      // increment to the leading dim of a
         ::testing::Values(false, true)                                  // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
 // -------------------------------
 // DGEMV NO_TRANSPOSE Kernel Tests
 // -------------------------------
-static dgemv_ker_ft m_ker_fp[8] =
+static dgemv_ker_ft_conja m_ker_fp[8] =
 {
     bli_dgemv_n_zen_int_16mx1_avx512,   // n = 1
     bli_dgemv_n_zen_int_16mx2_avx512,   // n = 2
@@ -629,7 +700,7 @@ static dgemv_ker_ft m_ker_fp[8] =
 #define DGEMV_TEST_M(N) \
     INSTANTIATE_TEST_SUITE_P( \
         dgemv_n_avx512_16mx##N, \
-        dgemvGeneric, \
+        dgemvGenericConja, \
         ::testing::Combine( \
             ::testing::Values(m_ker_fp[N-1]), \
             ::testing::Values( 'c' ), \
@@ -648,7 +719,7 @@ static dgemv_ker_ft m_ker_fp[8] =
             ::testing::Values( gtint_t(0), gtint_t(7) ), \
             ::testing::Values( false, true) \
         ), \
-        (::gemvUKRPrint<double, dgemv_ker_ft>()) \
+        (::gemvUKRPrint<double, dgemv_ker_ft_conja>()) \
     );
 #ifdef K_bli_dgemv_n_zen_int_16mx8_avx512
 DGEMV_TEST_M(8)
@@ -686,7 +757,7 @@ DGEMV_TEST_M(1)
 #ifdef K_bli_dgemv_n_zen_int_32x8n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_32x8n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_32x8n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -702,7 +773,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -710,7 +781,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_16x8n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_16x8n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_16x8n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -726,7 +797,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -734,7 +805,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_8x8n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_8x8n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_8x8n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -750,7 +821,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -758,7 +829,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_m_leftx8n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_m_leftx8n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_m_leftx8n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -774,7 +845,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -782,7 +853,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_32x4n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_32x4n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_32x4n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -798,7 +869,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -806,7 +877,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_16x4n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_16x4n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_16x4n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -821,7 +892,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -829,7 +900,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_8x4n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_8x4n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_8x4n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -844,7 +915,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -852,7 +923,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_m_leftx4n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_m_leftx4n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_m_leftx4n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -867,7 +938,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -875,7 +946,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_32x3n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_32x3n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_32x3n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -891,7 +962,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -899,7 +970,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_16x3n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_16x3n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_16x3n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -914,7 +985,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -922,7 +993,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_8x3n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_8x3n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_8x3n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -937,7 +1008,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -945,7 +1016,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_m_leftx3n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_m_leftx3n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_m_leftx3n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -960,7 +1031,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -968,7 +1039,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_32x2n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_32x2n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_32x2n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -984,7 +1055,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -992,7 +1063,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_16x2n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_16x2n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_16x2n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -1007,7 +1078,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -1015,7 +1086,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_8x2n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_8x2n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_8x2n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -1030,7 +1101,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -1038,7 +1109,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_m_leftx2n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_m_leftx2n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_m_leftx2n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -1053,7 +1124,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -1061,7 +1132,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_32x1n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_32x1n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_32x1n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -1077,7 +1148,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -1085,7 +1156,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_16x1n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_16x1n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_16x1n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -1100,7 +1171,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -1108,7 +1179,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_8x1n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_8x1n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_8x1n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -1123,7 +1194,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
 
@@ -1131,7 +1202,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifdef K_bli_dgemv_n_zen_int_m_leftx1n_avx512
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_m_leftx1n_avx512,
-    dgemvGeneric,
+    dgemvGenericConja,
     ::testing::Combine(
         ::testing::Values(bli_dgemv_n_zen_int_m_leftx1n_avx512),
         ::testing::Values( 'c' ),                                       // storage format
@@ -1146,7 +1217,178 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
         ::testing::Values( false, true)                                 // is_memory_test
     ),
-    (::gemvUKRPrint<double, dgemv_ker_ft>())
+    (::gemvUKRPrint<double, dgemv_ker_ft_conja>())
 );
 #endif
+
+// Parent avx512 function which calls different (M/N/ST/MT) kernels based on sizes
+#ifdef K_bli_dgemv_n_zen4_int
+INSTANTIATE_TEST_SUITE_P(
+    bli_dgemv_n_zen4_int,
+    dgemvGenericTransa,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen4_int),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(1), gtint_t(8), gtint_t(15),
+                          gtint_t(58), gtint_t(159), gtint_t(231) ),    // m
+        ::testing::Values( gtint_t(1), gtint_t(5), gtint_t(12),
+                          gtint_t(84), gtint_t(132), gtint_t(271) ),    // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft_transa>())
+);
+#endif
+
+
+#ifdef K_bli_dgemv_n_zen4_40x2_int_st
+INSTANTIATE_TEST_SUITE_P(
+    bli_dgemv_n_zen4_40x2_int_st,
+    dgemvGenericTransa,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen4_40x2_int_st),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(1), gtint_t(3), gtint_t(12),
+                          gtint_t(58), gtint_t(159), gtint_t(231) ),    // m
+        ::testing::Values( gtint_t(1), gtint_t(6), gtint_t(16),
+                          gtint_t(84), gtint_t(132), gtint_t(271) ),    // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft_transa>())
+);
+#endif
+
+#if defined(BLIS_ENABLE_OPENMP) && defined(K_bli_dgemv_n_zen4_40x2_int_mt)
+INSTANTIATE_TEST_SUITE_P(
+    bli_dgemv_n_zen4_40x2_int_mt,
+    dgemvGenericTransa,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_n_zen4_40x2_int_mt),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(1), gtint_t(3), gtint_t(12),
+                          gtint_t(58), gtint_t(159), gtint_t(231) ),    // m
+        ::testing::Values( gtint_t(1), gtint_t(6), gtint_t(16),
+                          gtint_t(84), gtint_t(132), gtint_t(271) ),    // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft_transa>())
+);
+#endif
+
+#ifdef K_bli_dgemv_m_zen4_40x8_int_st
+INSTANTIATE_TEST_SUITE_P(
+    bli_dgemv_m_zen4_40x8_int_st,
+    dgemvGenericTransa,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_m_zen4_40x8_int_st),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(1), gtint_t(3), gtint_t(12),
+                          gtint_t(58), gtint_t(159), gtint_t(231) ),    // m
+        ::testing::Values( gtint_t(1), gtint_t(6), gtint_t(16),
+                          gtint_t(84), gtint_t(132), gtint_t(271) ),    // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft_transa>())
+);
+#endif
+
+#if defined(BLIS_ENABLE_OPENMP) && defined(K_bli_dgemv_m_zen4_40x8_int_mt_Ndiv)
+INSTANTIATE_TEST_SUITE_P(
+    bli_dgemv_m_zen4_40x8_int_mt_Ndiv,
+    dgemvGenericTransa,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_m_zen4_40x8_int_mt_Ndiv),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(1), gtint_t(3), gtint_t(12),
+                          gtint_t(58), gtint_t(159), gtint_t(231) ),    // m
+        ::testing::Values( gtint_t(1), gtint_t(6), gtint_t(16),
+                          gtint_t(84), gtint_t(132), gtint_t(271) ),    // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft_transa>())
+);
+#endif
+
+#if defined(BLIS_ENABLE_OPENMP) && defined(K_bli_dgemv_m_zen4_40x8_int_mt_Mdiv)
+INSTANTIATE_TEST_SUITE_P(
+    bli_dgemv_m_zen4_40x8_int_mt_Mdiv,
+    dgemvGenericTransa,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_m_zen4_40x8_int_mt_Mdiv),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(1), gtint_t(3), gtint_t(12),
+                          gtint_t(58), gtint_t(159), gtint_t(231) ),    // m
+        ::testing::Values( gtint_t(1), gtint_t(6), gtint_t(16),
+                          gtint_t(84), gtint_t(132), gtint_t(271) ),    // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft_transa>())
+);
+#endif
+
+#if defined(BLIS_ENABLE_OPENMP) && defined(K_bli_dgemv_m_zen4_40x8_int_mt_Mdiv_Ndiv)
+INSTANTIATE_TEST_SUITE_P(
+    bli_dgemv_m_zen4_40x8_int_mt_Mdiv_Ndiv,
+    dgemvGenericTransa,
+    ::testing::Combine(
+        ::testing::Values(bli_dgemv_m_zen4_40x8_int_mt_Mdiv_Ndiv),
+        ::testing::Values( 'c' ),                                       // storage format
+        ::testing::Values( 'n' ),                                       // transa
+        ::testing::Values( 'n' ),                                       // conjx
+        ::testing::Values( gtint_t(1), gtint_t(3), gtint_t(12),
+                          gtint_t(58), gtint_t(159), gtint_t(231) ),    // m
+        ::testing::Values( gtint_t(1), gtint_t(6), gtint_t(16),
+                          gtint_t(84), gtint_t(132), gtint_t(271) ),    // n
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // alpha
+        ::testing::Values( double(0.0), double(1.0), double(2.0) ),     // beta
+        ::testing::Values( gtint_t(1), gtint_t(3) ),                    // stride size for x
+        ::testing::Values( gtint_t(1) ),                                // stride size for y (non-unit incy is handled by frame, thus, using incy=1)
+        ::testing::Values( gtint_t(0), gtint_t(7) ),                    // increment to the leading dim of a
+        ::testing::Values( false, true)                                 // is_memory_test
+    ),
+    (::gemvUKRPrint<double, dgemv_ker_ft_transa>())
+);
+#endif
+
 #endif

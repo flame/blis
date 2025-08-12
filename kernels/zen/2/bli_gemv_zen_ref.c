@@ -236,3 +236,120 @@ void bli_dgemv_zen_ref
         }
     }
 }
+
+
+/**
+ * bli_sgemv_zen_ref( ... )
+ * This reference kernel for SGEMV supports row/colum storage schemes for both
+ * transpose and no-transpose cases.
+ */
+void bli_sgemv_zen_ref
+     (
+      trans_t          transa,
+      dim_t            m,
+      dim_t            n,
+      float* restrict alpha,
+      float* restrict a, inc_t inca, inc_t lda,
+      float* restrict x, inc_t incx,
+      float* restrict beta,
+      float* restrict y, inc_t incy,
+      cntx_t* restrict cntx
+     )
+{
+    dim_t m0 = m;
+    dim_t n0 = n;
+    dim_t leny = m0;    // Initializing length of y vector.
+
+    float* a0 = (float*) a;
+    float* x0 = (float*) x;
+    float* y0 = (float*) y;
+
+    if ( bli_is_trans( transa ) || bli_is_conjtrans( transa ) )
+    {
+        // Updating length of y matrix if transpose is enabled.
+        leny = n0;
+    }
+
+    // Perform y := beta * y
+    if ( !bli_seq1(*beta) ) // beta != 1
+    {
+        if ( bli_seq0(*beta) )  // beta == 0
+        {
+            for ( dim_t i = 0; i < leny; ++i )
+            {
+                PASTEMAC(s,sets)( 0.0, 0.0, *(y0 + i*incy))
+            }
+        }
+        else    // beta != 0
+        {
+            for ( dim_t i = 0; i < leny; ++i )
+            {
+                PASTEMAC(s,scals)( *beta, *(y0 + i*incy) )
+            }
+        }
+    }
+
+    // If alpha == 0, return.
+    if ( bli_seq0( *alpha ) ) return;
+
+    if ( bli_is_notrans( transa ) )     // BLIS_NO_TRANSPOSE
+    {
+        if ( incy == 1 )
+        {
+            for ( dim_t i = 0; i < n0; ++i )
+            {
+                float rho = (*alpha) * (*x0);
+                for ( dim_t j = 0; j < m0; ++j )
+                {
+                    *(y0 + j) += rho * (*(a0 + j*inca));
+                }
+                x0 += incx;
+                a0 += lda;
+            }
+        }
+        else // if ( incy != 1 )
+        {
+            for ( dim_t i = 0; i < n0; ++i )
+            {
+                float rho = (*alpha) * (*x0);
+                for ( dim_t j = 0; j < m0; ++j )
+                {
+                    *(y0 + j*incy) += rho * (*(a0 + j*inca));
+                }
+                x0 += incx;
+                a0 += lda;
+            }
+        }
+    }
+    else    // BLIS_TRANSPOSE
+    {
+        if ( incx == 1 )
+        {
+            for ( dim_t i = 0; i < n0; ++i )
+            {
+                float rho = 0.0;
+                for ( dim_t j = 0; j < m0; ++j )
+                {
+                    rho += (*(a0 + j*inca)) * (*(x0 + j));
+                }
+                (*y0) += (*alpha) * rho;
+                y0 += incy;
+                a0 += lda;
+            }
+        }
+        else    // if ( incx != 1 )
+        {
+            for ( dim_t i = 0; i < n0; ++i )
+            {
+                float rho = 0.0;
+                for ( dim_t j = 0; j < m0; ++j )
+                {
+                    rho += (*(a0 + j*inca)) * (*(x0 + j*incx));
+                }
+                (*y0) += (*alpha) * rho;
+                y0 += incy;
+                a0 += lda;
+            }
+        }
+    }
+}

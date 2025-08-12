@@ -54,7 +54,7 @@ typedef union
  */
 
 // Function pointers for n-biased kernels.
-static dgemv_ker_ft n_ker_fp[8] =
+static dgemv_ker_ft_conja n_ker_fp[8] =
 {
     NULL,
     bli_dgemv_t_zen4_int_32x1m,   // n = 1

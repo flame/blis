@@ -3905,7 +3905,39 @@ BLIS_INLINE void aocl_dgemv_dynamic
 	// AOCL dynamic logic for non-transpose case
 	else
 	{
-		*nt_ideal = -1;
+		switch ( arch_id )
+		{
+		case BLIS_ARCH_ZEN5:
+			// logic tuned using linear regression
+			if ( size <= 95000 )
+				*nt_ideal = 1;
+			else if ( size <= 200000 )
+				*nt_ideal = 2;
+			else if ( size <= 750000 )
+				*nt_ideal = 8;
+			else if ( size <= 1800000 )
+				*nt_ideal = 16;
+			else if ( size <= 3800000 )
+				*nt_ideal = 32;
+			else
+				*nt_ideal = -1;
+			break;
+		case BLIS_ARCH_ZEN4:
+			if ( size <= 120000)
+				*nt_ideal = 1;
+			else if ( size <= 1500000)
+				*nt_ideal = 16;
+			else if ( size <= 7300000)
+				*nt_ideal = 32;
+			else
+				*nt_ideal = -1;
+			break;
+		default:
+			// Without this default condition, compiler will throw
+			// a warning saying other conditions are not handled
+			// For other architectures, AOCL dynamic does not make any change
+			*nt_ideal = -1;
+		}
 	}
 
 }

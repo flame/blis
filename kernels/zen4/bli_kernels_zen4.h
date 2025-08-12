@@ -471,7 +471,105 @@ void bli_dynamic_blkszs_zen4
 // function for resetting zmm registers after L3 apis
 void bli_zero_zmm();
 
-void bli_dgemv_n_avx512
+void bli_dgemv_n_zen4_32x8_int_st
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     );
+
+void bli_dgemv_n_zen4_int
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     );
+
+void bli_dgemv_n_zen4_40x2_int_st
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     );
+
+void bli_dgemv_n_zen4_40x2_int_mt
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     );
+
+void bli_dgemv_m_zen4_40x8_int_st
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     );
+
+void bli_dgemv_m_zen4_40x8_int_mt_Ndiv
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     );
+
+     void bli_dgemv_m_zen4_40x8_int_mt_Mdiv
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     );
+
+     void bli_dgemv_m_zen4_40x8_int_mt_Mdiv_Ndiv
      (
        trans_t transa,
        conj_t  conjx,
