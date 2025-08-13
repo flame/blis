@@ -183,6 +183,47 @@ void AOCL_DTL_log_trsm_stats(int8 loglevel,
                              const f77_int m,
                              const f77_int n);
 
+
+// Level-3 Extension Logging
+
+void AOCL_DTL_log_gemm_get_size_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char identifer,
+                             const f77_int m,
+                             const f77_int n,
+                             const f77_int k,
+                             const char *filename,
+                             const char *function_name,
+                             int line);
+
+void AOCL_DTL_log_gemm_pack_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char identifer,
+                             const f77_char trans,
+                             const f77_int m,
+                             const f77_int n,
+                             const f77_int k,
+                             const void *alpha,
+                             const f77_int pld,
+                             const char *filename,
+                             const char *function_name,
+                             int line);
+
+void AOCL_DTL_log_gemm_compute_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char transa,
+                             const f77_char transb,
+                             const f77_int m,
+                             const f77_int n,
+                             const f77_int k,
+                             const f77_int lda,
+                             const f77_int ldb,
+                             const void *beta,
+                             const f77_int ldc,
+                             const char *filename,
+                             const char *function_name,
+                             int line);
+
 // Level-2 Logging
 
 void AOCL_DTL_log_gemv_sizes(int8 loglevel,
@@ -380,96 +421,6 @@ void AOCL_DTL_log_tbsv_sizes(int8 loglevel,
                              const char* function_name,
                              int line);
 
-// Level-1 Logging
-
-void AOCL_DTL_log_amax_sizes(int8 loglevel,
-                             char dt_type,
-                             const f77_int  n,
-                             const f77_int incx,
-                             const char* filename,
-                             const char* function_name,
-                             int line);
-
-void AOCL_DTL_log_asum_sizes(int8 loglevel,
-                             char dt_type,
-                             const f77_int  n,
-                             const f77_int incx,
-                             const char* filename,
-                             const char* function_name,
-                             int line);
-
-void AOCL_DTL_log_axpby_sizes(int8 loglevel,
-                              char dt_type,
-                              const f77_int  n,
-                              const void* alpha,
-                              const f77_int incx,
-                              const void* beta,
-                              const f77_int incy,
-                              const char* filename,
-                              const char* function_name,
-                              int line);
-
-void AOCL_DTL_log_axpy_sizes(int8 loglevel,
-                             char dt_type,
-                             const f77_int  n,
-                             const void* alpha,
-                             const f77_int incx,
-                             const f77_int incy,
-                             const char* filename,
-                             const char* function_name,
-                             int line);
-
-void AOCL_DTL_log_copy_sizes(int8 loglevel,
-                             char dt_type,
-                             const f77_int n,
-                             const f77_int incx,
-                             const f77_int incy,
-                             const char* filename,
-                             const char* function_name,
-                             int line);
-
-void AOCL_DTL_log_dotv_sizes(int8 loglevel,
-                             char dt_type,
-                             const f77_char conjx,
-                             const f77_int  n,
-                             const f77_int incx,
-                             const f77_int incy,
-                             const char* filename,
-                             const char* function_name,
-                             int line
-                             );
-
-void AOCL_DTL_log_nrm2_sizes(int8 loglevel,
-                             char dt_type,
-                             const f77_int  n,
-                             const f77_int  incx,
-                             const char* filename,
-                             const char* function_name,
-                             int line);
-
-void AOCL_DTL_log_nrm2_stats(int8 loglevel,
-                             char dt_type,
-                             const f77_int n);
-
-
-void AOCL_DTL_log_scal_sizes(int8 loglevel,
-                             char dt_type,
-                             const void* alpha,
-                             const f77_int  n,
-                             const f77_int  incx,
-                             const char* filename,
-                             const char* function_name,
-                             int line);
-
-void AOCL_DTL_log_swap_sizes(int8 loglevel,
-                             char dt_type,
-                             const f77_int  n,
-                             const f77_int  incx,
-                             const f77_int  incy,
-                             const char* filename,
-                             const char* function_name,
-                             int line);
-
 // Level-2 Packed Logging
 
 void AOCL_DTL_log_hpmv_sizes(int8 loglevel,
@@ -560,6 +511,143 @@ void AOCL_DTL_log_tpsv_sizes(int8 loglevel,
                              const char* function_name,
                              int line);
 
+// Level-2 plane rotations and modified Givens transformation Logging
+
+void AOCL_DTL_log_rot_sizes(int8 loglevel,
+                            char dt_type,
+                            const f77_int m,
+                            const f77_int incx,
+                            const f77_int incy,
+                            const void* c,
+                            const void* s,
+                            const char* filename,
+                            const char* function_name,
+                            int line);
+
+void AOCL_DTL_log_rotg_sizes(int8 loglevel,
+                             char dt_type,
+                             const void* a,
+                             const void* b,
+                             const void* c,
+                             const void* s,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_rotm_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_int m,
+                             const f77_int incx,
+                             const f77_int incy,
+                             const void* param1,
+                             const void* param2,
+                             const void* param3,
+                             const void* param4,
+                             const void* param5,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_rotmg_sizes(int8 loglevel,
+                              char dt_type,
+                              const void* dd1,
+                              const void* dd2,
+                              const void* dx1,
+                              const void* dy1,
+                              const char* filename,
+                              const char* function_name,
+                              int line);
+
+// Level-1 Logging
+
+void AOCL_DTL_log_amax_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_int  n,
+                             const f77_int incx,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_asum_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_int  n,
+                             const f77_int incx,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_axpby_sizes(int8 loglevel,
+                              char dt_type,
+                              const f77_int  n,
+                              const void* alpha,
+                              const f77_int incx,
+                              const void* beta,
+                              const f77_int incy,
+                              const char* filename,
+                              const char* function_name,
+                              int line);
+
+void AOCL_DTL_log_axpy_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_int  n,
+                             const void* alpha,
+                             const f77_int incx,
+                             const f77_int incy,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_copy_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_int n,
+                             const f77_int incx,
+                             const f77_int incy,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_dotv_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char conjx,
+                             const f77_int  n,
+                             const f77_int incx,
+                             const f77_int incy,
+                             const char* filename,
+                             const char* function_name,
+                             int line
+                             );
+
+void AOCL_DTL_log_nrm2_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_int  n,
+                             const f77_int  incx,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_nrm2_stats(int8 loglevel,
+                             char dt_type,
+                             const f77_int n);
+
+
+void AOCL_DTL_log_scal_sizes(int8 loglevel,
+                             char dt_type,
+                             const void* alpha,
+                             const f77_int  n,
+                             const f77_int  incx,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_swap_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_int  n,
+                             const f77_int  incx,
+                             const f77_int  incy,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
 // Level-3 Macros
 
 #define AOCL_DTL_LOG_GEMM_INPUTS(loglevel, dt, transa, transb, m, n, k, alpha, lda, ldb, beta, ldc)    \
@@ -623,6 +711,23 @@ void AOCL_DTL_log_tpsv_sizes(int8 loglevel,
 #define AOCL_DTL_LOG_TRSM_STATS(loglevel, dt_type, side, m, n)    \
     if (gbIsLoggingEnabled) \
         AOCL_DTL_log_trsm_stats(loglevel, dt_type, side, m, n);
+
+// Level-3 Extension Macros
+
+#define AOCL_DTL_LOG_GEMM_GET_SIZE_INPUTS(loglevel, dt, identifier, m, n, k) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_gemm_get_size_sizes(loglevel, dt, identifier, m, n, k, \
+                                         __FILE__, __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_GEMM_PACK_INPUTS(loglevel, dt, identifier, trans, m, n, k, alpha, pld) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_gemm_pack_sizes(loglevel, dt, identifier, trans, m, n, k, alpha, pld, \
+                                     __FILE__, __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_GEMM_COMPUTE_INPUTS(loglevel, dt, transa, transb, m, n, k, lda, ldb, beta, ldc) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_gemm_compute_sizes(loglevel, dt, transa, transb, m, n, k, lda, ldb, beta, ldc, \
+                                        __FILE__, __FUNCTION__, __LINE__);
 
 // Level-2 Macros
 
@@ -742,6 +847,28 @@ void AOCL_DTL_log_tpsv_sizes(int8 loglevel,
         AOCL_DTL_log_tpsv_sizes(loglevel, dt_type, uploa, transa, diaga, m, incx,\
                                 __FILE__,__FUNCTION__,__LINE__);
 
+// Level-2 plane rotations and modified Givens transformation Macros
+
+#define AOCL_DTL_LOG_ROT_INPUTS(loglevel, dt_type, m, incx, incy, c, s) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_rot_sizes(loglevel, dt_type, m, incx, incy, c, s, \
+                               __FILE__,__FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_ROTG_INPUTS(loglevel, dt_type, a, b, c, s) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_rotg_sizes(loglevel, dt_type, a, b, c, s, \
+                                __FILE__,__FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_ROTM_INPUTS(loglevel, dt_type, m, incx, incy, param1, param2, param3, param4, param5) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_rotm_sizes(loglevel, dt_type, m, incx, incy, param1, param2, param3, param4, param5, \
+                                __FILE__,__FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_ROTMG_INPUTS(loglevel, dt_type, dd1, dd2, dx1, dy1) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_rotmg_sizes(loglevel, dt_type, dd1, dd2, dx1, dy1, \
+                                 __FILE__,__FUNCTION__,__LINE__);
+
 // Level-1 Macros
 
 #define AOCL_DTL_LOG_AMAX_INPUTS(loglevel, dt_type, n, incx) \
@@ -817,6 +944,14 @@ void AOCL_DTL_log_tpsv_sizes(int8 loglevel,
 
 #define AOCL_DTL_LOG_TRSM_STATS(loglevel, dt_type, side, m, n)
 
+// Level-3 Extension Macros
+
+#define AOCL_DTL_LOG_GEMM_GET_SIZE_INPUTS(loglevel, dt, identifier, m, n, k)
+
+#define AOCL_DTL_LOG_GEMM_PACK_INPUTS(loglevel, dt, identifier, trans, m, n, k, alpha, pld)
+
+#define AOCL_DTL_LOG_GEMM_COMPUTE_INPUTS(loglevel, dt, transa, transb, m, n, k, lda, ldb, beta, ldc)
+
 // Level-2 Macros
 
 #define AOCL_DTL_LOG_GEMV_INPUTS(loglevel, dt_type, transa, m, n, alp, lda, incx, beta, incy)
@@ -868,6 +1003,16 @@ void AOCL_DTL_log_tpsv_sizes(int8 loglevel,
 #define AOCL_DTL_LOG_TPMV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, incx)
 
 #define AOCL_DTL_LOG_TPSV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, incx )
+
+// Level-2 plane rotations and modified Givens transformation Macros
+
+#define AOCL_DTL_LOG_ROT_INPUTS(loglevel, dt_type, m, incx, incy, c, s)
+
+#define AOCL_DTL_LOG_ROTG_INPUTS(loglevel, dt_type, a, b, c, s)
+
+#define AOCL_DTL_LOG_ROTM_INPUTS(loglevel, dt_type, m, incx, incy, param1, param2, param3, param4, param5) \
+
+#define AOCL_DTL_LOG_ROTMG_INPUTS(loglevel, dt_type, dd1, dd2, dx1, dy1)
 
 // Level-1 Macros
 

@@ -57,6 +57,8 @@ void sgemm_pack_blis_impl
     bli_init_auto();
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_GEMM_PACK_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *identifier, *trans, *mm, *nn, *kk,
+                                  (void*)alpha, *pld);
 
     dim_t m;
     dim_t n;
@@ -166,6 +168,8 @@ void dgemm_pack_blis_impl
     bli_init_auto();
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_GEMM_PACK_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *identifier, *trans, *mm, *nn, *kk,
+                                  (void*)alpha, *pld);
 
     dim_t m;
     dim_t n;

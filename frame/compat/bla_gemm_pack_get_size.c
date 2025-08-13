@@ -54,6 +54,7 @@ f77_int dgemm_pack_get_size_blis_impl
     bli_init_auto();
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_GEMM_GET_SIZE_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *identifier, *pm, *pn, *pk);
 
     cntx_t* cntx = bli_gks_query_cntx(); // Get processor specific context.
 
@@ -182,6 +183,7 @@ f77_int sgemm_pack_get_size_blis_impl
     bli_init_auto();
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_GEMM_GET_SIZE_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *identifier, *pm, *pn, *pk);
 
     cntx_t* cntx = bli_gks_query_cntx(); // Get processor specific context.
 

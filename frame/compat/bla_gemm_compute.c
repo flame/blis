@@ -58,10 +58,10 @@ void sgemm_compute_blis_impl
     bli_init_auto();
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-
-    // @todo: Add AOCL DTL logs
-    // AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *transa, *transb, *m, *n, *k,
-                            //  (void*)alpha, *lda, *ldb, (void*)beta, *ldc);
+    AOCL_DTL_LOG_GEMM_COMPUTE_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *transa, *transb, *m, *n, *k,
+                                     *( ( *rs_a != 1 ) ? rs_a : cs_a ),
+                                     *( ( *rs_b != 1 ) ? rs_b : cs_b ),
+                                     (void*)beta, *rs_c);
 
     trans_t blis_transa;
     trans_t blis_transb;
@@ -87,9 +87,10 @@ void sgemm_compute_blis_impl
     /* Quick return. */
     if ( *m == 0 || *n == 0 || ( ( *k == 0) && PASTEMAC(s,eq1)( *beta ) ) )
     {
+      AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *m, *n, *k); \
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
       /* Finalize BLIS. */
       bli_finalize_auto();
-      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
       return;
     }
 
@@ -131,11 +132,10 @@ void sgemm_compute_blis_impl
         NULL
     );
 
+    AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *m, *n, *k); \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     /* Finalize BLIS. */
     bli_finalize_auto();
-
-    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-
     return;
 }
 
@@ -185,10 +185,10 @@ void dgemm_compute_blis_impl
     bli_init_auto();
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-
-    // @todo: Add AOCL DTL logs
-    // AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *transa, *transb, *m, *n, *k,
-                            //  (void*)alpha, *lda, *ldb, (void*)beta, *ldc);
+    AOCL_DTL_LOG_GEMM_COMPUTE_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *transa, *transb, *m, *n, *k,
+                                     *( ( *rs_a != 1 ) ? rs_a : cs_a ),
+                                     *( ( *rs_b != 1 ) ? rs_b : cs_b ),
+                                     (void*)beta, *rs_c);
 
     trans_t blis_transa;
     trans_t blis_transb;
@@ -215,9 +215,10 @@ void dgemm_compute_blis_impl
    /* Quick return. */
     if ( *m == 0 || *n == 0 || ( ( *k == 0) && PASTEMAC(d,eq1)( *beta ) ) )
     {
+      AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *m, *n, *k); \
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
       /* Finalize BLIS. */
       bli_finalize_auto();
-      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
       return;
     }
 
@@ -259,11 +260,10 @@ void dgemm_compute_blis_impl
         NULL
     );
 
+    AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *m, *n, *k); \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     /* Finalize BLIS. */
     bli_finalize_auto();
-
-    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-
     return;
 }
 

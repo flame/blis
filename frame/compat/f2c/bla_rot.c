@@ -62,7 +62,10 @@ int PASTEF77S(s,rot)(const bla_integer *n, bla_real *sx, const bla_integer *incx
     --sx;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_ROT_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *n,
+                            *incx, *incy, (void*)c__, (void*)s);
 
     if (*n <= 0) {
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
@@ -136,7 +139,10 @@ int PASTEF77S(d,rot)(const bla_integer *n, bla_double *dx, const bla_integer *in
     --dx;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_ROT_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *n,
+                            *incx, *incy, (void*)c__, (void*)s);
 
     if (*n <= 0) {
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
@@ -211,7 +217,10 @@ L20:
     --cx;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_ROT_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(cs), *n,
+                            *incx, *incy, (void*)c__, (void*)s);
 
     if (*n <= 0) {
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
@@ -309,7 +318,10 @@ L20:
     --zx;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_ROT_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(zd), *n,
+                            *incx, *incy, (void*)c__, (void*)s);
 
     if (*n <= 0) {
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
