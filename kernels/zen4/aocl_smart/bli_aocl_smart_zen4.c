@@ -87,7 +87,7 @@ bool bli_cntx_gemmsup_thresh_is_met_zen4( obj_t* a, obj_t* b, obj_t* c, cntx_t* 
         // The threshold for m is a single value, but for n, it is
         // also based on the packing size of A, since the kernels are
         // column preferential
-        if( ( m <= 1380 ) || ( n <= 1520 ) || ( k <= 128 ) ) return TRUE;
+        if( (  ( ( m <= 3400 ) || ( n <= 1800 ) ) && ( k <= 128 ) ) && ( m + n + k < 6400 ) ) return TRUE;
 
         return FALSE;
 	}
