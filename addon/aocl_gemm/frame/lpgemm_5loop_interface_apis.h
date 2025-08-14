@@ -297,4 +297,33 @@ void lpgemv_rowvar_avx2_ ## LP_SFX \
 
 LPGEMV_AVX2(bfloat16, bfloat16, float, bf16bf16f32of32);
 
+#define LPGEMV2(A_type, B_type, C_type, LP_SFX) \
+void lpgemv_rowvar_ ## LP_SFX \
+    ( \
+      const dim_t           m, \
+      const dim_t           n, \
+      const dim_t           k, \
+      const A_type          *a, \
+      const dim_t           rs_a, \
+      const dim_t           cs_a, \
+      const AOCL_MEMORY_TAG mtag_a, \
+      const B_type          *b, \
+      const dim_t           rs_b, \
+      const dim_t           cs_b, \
+      const AOCL_MEMORY_TAG mtag_b, \
+      float                 *c, \
+      const dim_t           rs_c, \
+      const dim_t           cs_c, \
+      const C_type          alpha, \
+      const C_type          beta, \
+      rntm_t                *rntm, \
+      lpgemm_thrinfo_t      *thread, \
+      lpgemm_cntx_t         *lcntx, \
+      lpgemm_group_post_op  *grp_post_op_list, \
+      lpgemm_post_op        *post_op_list, \
+      AOCL_STORAGE_TYPE      c_downscale \
+    ) \
+
+LPGEMV2(int8_t,int8_t,int32_t,s8s8s32os32_sym_quant);
+
 #endif // LPGEMM_5LOOP_INTF_H
