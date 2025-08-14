@@ -1739,6 +1739,11 @@ void ztrsm_blis_impl
                 }
                 else
                 {
+#ifdef BLIS_DISABLE_TRSM_PREINVERSION
+                    // if preinversion is disabled, use native codepath for
+                    // better accuracy in large sizes
+                    if (dim_a <= 500)
+#endif
                     ker_ft = bli_trsm_small_mt;
                 }
             }
@@ -1799,6 +1804,11 @@ void ztrsm_blis_impl
                         }
                         else
                         {
+#ifdef BLIS_DISABLE_TRSM_PREINVERSION
+                            // if preinversion is disabled, use native codepath for
+                            // better accuracy in large sizes
+                            if (dim_a <= 500)
+#endif
                             ker_ft = bli_trsm_small;
                         }
                     }
@@ -1808,6 +1818,11 @@ void ztrsm_blis_impl
                 case BLIS_ARCH_ZEN2:
                 case BLIS_ARCH_ZEN3:
                 default:
+#ifdef BLIS_DISABLE_TRSM_PREINVERSION
+                    // if preinversion is disabled, use native codepath for
+                    // better accuracy in large sizes
+                    if (dim_a <= 500)
+#endif
                     ker_ft = bli_trsm_small;
                     break;
             }

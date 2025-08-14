@@ -2289,10 +2289,12 @@ void bli_nthreads_optimum(
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
 		if ( (m <= 300) && (n <= 300) )
 			n_threads_ideal = 8;
-		else if ( (m <= 400) && (n <= 400) )
+		else if ( (m <= 500) && (n <= 500) )
 			n_threads_ideal = 16;
 		else if ( (m <= 900) && (n <= 900) )
 			n_threads_ideal = 32;
+		else if ( (m <= 2000) && (n <= 2000) )
+			n_threads_ideal = 64;
 #else
 		if((m>=64) && (m<=256) && (n>=64) && (n<=256))
 		{
