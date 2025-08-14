@@ -1465,9 +1465,10 @@ void bli_dgemv_n_zen4_int (
                       double*, 
                       inc_t, cntx_t* ) = NULL;
 
-    dim_t size = m * n;
-
 // If AOCL_DYNAMIC is enabled, call ST kernels for small sizes.
+#if (defined(AOCL_DYNAMIC) || (defined(BLIS_ENABLE_OPENMP)))
+    dim_t size = m * n;
+#endif
 #ifdef AOCL_DYNAMIC
     if ( size < 95000 )
     {
@@ -1514,6 +1515,12 @@ void bli_dgemv_n_zen4_int (
 #endif
     }
 
+    // Use 32x8 kernel when transa = "C" or "H"
+    // and if incy != 1, which uses packing to handle non unit stride y
+    if ( incy != 1 || transa != BLIS_NO_TRANSPOSE)
+    {
+        ker_ft = bli_dgemv_n_zen4_32x8_int_st;
+    }
     ker_ft
     (
         transa,

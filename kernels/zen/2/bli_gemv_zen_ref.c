@@ -175,7 +175,7 @@ void bli_dgemv_zen_ref
     // If alpha == 0, return.
     if ( bli_deq0( *alpha ) ) return;
 
-    if ( bli_is_notrans( transa ) )     // BLIS_NO_TRANSPOSE
+    if ( bli_does_notrans( transa ) ) // transa = N or C
     {
         if ( incy == 1 )
         {
@@ -292,7 +292,7 @@ void bli_sgemv_zen_ref
     // If alpha == 0, return.
     if ( bli_seq0( *alpha ) ) return;
 
-    if ( bli_is_notrans( transa ) )     // BLIS_NO_TRANSPOSE
+    if ( bli_does_notrans( transa ) ) // transa = N or C
     {
         if ( incy == 1 )
         {
