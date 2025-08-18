@@ -1005,11 +1005,32 @@ endif()
 set(LIBMEMKIND -lmemkind)
 
 # Default linker flags.
+# Security hardening flags :
+#   Default (no user override): DISABLED.
+#   Enable:  -DENABLE_SECURITY_FLAGS=ON  (or =1/TRUE) : enabled
+#   Disable: -DENABLE_SECURITY_FLAGS=OFF (or =0/FALSE) : disabled (default)
+option(ENABLE_SECURITY_FLAGS "Enable addition of compiler/linker security hardening flags" OFF)
+set(SECURITY_FLAGS_ENABLED ${ENABLE_SECURITY_FLAGS})
+
+if(SECURITY_FLAGS_ENABLED)
+    if(WIN32)
+        # ELF-specific linker hardening flags not applicable on Windows.
+        # (Consider adding /guard:cf or /DYNAMICBASE /NXCOMPAT if using link.exe, but keep minimal here.)
+        set(LDFLAGS "")
+        message(STATUS "Security hardening flags: ENABLED (no ELF linker flags applied on Windows)")
+    else()
+        set(LDFLAGS "-Wl,-z,now" "-Wl,-z,relro")
+        message(STATUS "Security hardening flags: ENABLED")
+    endif()
+else()
+    message(STATUS "Security hardening flags: DISABLED")
+    set(LDFLAGS "")
+endif()
 # NOTE: -lpthread is needed unconditionally because BLIS uses pthread_once()
 # to initialize itself in a thread-safe manner. The one exception to this
 # rule: if --disable-system is given at configure-time, LIBPTHREAD is empty.
 if(NOT WIN32)
-    set(LDFLAGS ${LIBM} ${LIBPTHREAD})
+    list(APPEND LDFLAGS ${LIBM} ${LIBPTHREAD})
 endif()
 # Add libmemkind to the link-time flags, if it was enabled at configure-time.
 if(ENABLE_MEMKIND STREQUAL "yes")
@@ -1084,6 +1105,20 @@ endif()
 # Macro to remove/replace absolute path within library
 list(APPEND BUILD_SYMFLAGS "-fmacro-prefix-map=${PROJECT_SOURCE_DIR}/=")
 
+if(SECURITY_FLAGS_ENABLED)
+    if(WIN32)
+        # MSVC/clang-cl: /GS is on by default in most configurations; leave explicit flags empty.
+        # Avoid -D_FORTIFY_SOURCE / -fstack-protector-strong which are GCC/Clang (ELF) specific.
+        set(CLANGFLAGS "")
+        set(CXXLANGFLAGS "")
+    else()
+        set(CLANGFLAGS "-D_FORTIFY_SOURCE=2" "-fstack-protector-strong")
+        set(CXXLANGFLAGS "-D_FORTIFY_SOURCE=2" "-fstack-protector-strong")
+    endif()
+else()
+    set(CLANGFLAGS "")
+    set(CXXLANGFLAGS "")
+endif()
 # --- C Preprocessor flags ---
 # Enable clock_gettime() in time.h.
 set(CPPROCFLAGS -D_POSIX_C_SOURCE=200112L)

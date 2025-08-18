@@ -402,6 +402,12 @@ print_usage()
 	echo "                 Num_threads is derived from either environment variable"
 	echo "                 OMP_NUM_THREADS or BLIS_NUM_THREADS' or bli_set_num_threads() API."
 	echo " "
+	echo "   --enable-security-flags, --disable-security-flags"
+	echo " "
+	echo "                 Enable (disabled by default) addition of compiler and linker"
+	echo "                 security hardening flags (e.g. -D_FORTIFY_SOURCE=2 -fstack-protector-strong"
+	echo "                 and -Wl,-z,relro -Wl,-z,now on ELF platforms). Disabling omits them."
+	echo " "
 	echo "   --enable-blis-arch-type, --disable-blis-arch-type"
 	echo " "
 	echo "                 Disable support for AOCL_ENABLE_INSTRUCTIONS, BLIS_ARCH_TYPE and"
@@ -2182,6 +2188,7 @@ main()
 
 	enable_memkind='' # The default memkind value is determined later on.
 	enable_aocl_dynamic='yes'
+	enable_security_flags='no'
 	force_version='no'
 	complex_return='default'
 	disable_blis_arch_type='unset'
@@ -2440,6 +2447,12 @@ main()
 							;;
 						disable-aocl-dynamic)
 							enable_aocl_dynamic='no'
+							;;
+						enable-security-flags)
+							enable_security_flags='yes'
+							;;
+						disable-security-flags)
+							enable_security_flags='no'
 							;;
 						force-version=*)
 							force_version=${OPTARG#*=}
@@ -3363,6 +3376,12 @@ main()
 		enable_trsm_preinversion_01=0
 	fi
 
+	if [ "x${enable_security_flags}" = "xyes" ]; then
+		echo "${script_name}: security hardening flags are enabled."
+	else
+		echo "${script_name}: security hardening flags are disabled."
+	fi
+
 	# Check AOCL DTL flag configuration
 	enable_aocl_dtl_trace_01=0
 	enable_aocl_dtl_log_01=0
@@ -3705,6 +3724,7 @@ main()
 		| sed -e "s/@sandbox@/${sandbox}/g" \
 		| sed -e "s/@enable_trsm_preinversion@/${enable_trsm_preinversion}/g" \
 		| sed -e "s/@enable_aocl_dynamic@/${enable_aocl_dynamic}/g" \
+		| sed -e "s/@enable_security_flags@/${enable_security_flags}/g" \
 		| sed -e "s/@complex_return@/${complex_return}/g" \
 		| sed -e "s/@blas_int_type_size@/${blas_int_type_size}/g" \
 		| sed   -e "s/\@enable_aocl_zen\@/${enable_aocl_zen}/g" \

@@ -582,6 +582,26 @@ endif
 # rule: if --disable-system is given at configure-time, LIBPTHREAD is empty.
 LDFLAGS    := $(LDFLAGS_PRESET) $(LIBM) $(LIBPTHREAD) $(STDCXX)
 
+SECURITY_FLAGS_ENABLED := no
+# If configure provided MK_ENABLE_SECURITY_FLAGS, honor it first.
+ifeq ($(MK_ENABLE_SECURITY_FLAGS),no)
+  SECURITY_FLAGS_ENABLED := no
+endif
+ifeq ($(MK_ENABLE_SECURITY_FLAGS),yes)
+  SECURITY_FLAGS_ENABLED := yes
+endif
+
+ifeq ($(SECURITY_FLAGS_ENABLED),yes)
+  # Only add ELF linker hardening flags on non-Windows (gcc/clang toolchains)
+  ifneq ($(IS_WIN),yes)
+    ifneq ($(filter gcc clang,$(CC_VENDOR)),)
+      LDFLAGS += -Wl,-z,now -Wl,-z,relro
+    endif
+  endif
+  $(info Security hardening flags: ENABLED)
+else
+  $(info Security hardening flags: DISABLED)
+endif
 # Add libmemkind to the link-time flags, if it was enabled at configure-time.
 ifeq ($(MK_ENABLE_MEMKIND),yes)
 LDFLAGS    += $(LIBMEMKIND)
@@ -819,12 +839,27 @@ BUILD_SYMFLAGS += -fmacro-prefix-map=${DIST_PATH}=.
 
 # --- Language flags ---
 
-# Enable C99.
+# Enable C99 (add security flags only if enabled).
 CLANGFLAGS := -std=c99
+ifeq ($(SECURITY_FLAGS_ENABLED),yes)
+  # Apply GCC/Clang UNIX-specific hardening flags only when not on Windows.
+  ifneq ($(IS_WIN),yes)
+    ifneq ($(filter gcc clang,$(CC_VENDOR)),)
+      CLANGFLAGS += -D_FORTIFY_SOURCE=2 -fstack-protector-strong
+    endif
+  endif
+endif
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CLANGFLAGS,$(c))))
 
 # Enable C++11.
 CXXLANGFLAGS := -std=c++11
+ifeq ($(SECURITY_FLAGS_ENABLED),yes)
+  ifneq ($(IS_WIN),yes)
+    ifneq ($(filter gcc clang,$(CC_VENDOR)),)
+      CXXLANGFLAGS += -D_FORTIFY_SOURCE=2 -fstack-protector-strong
+    endif
+  endif
+endif
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CXXLANGFLAGS,$(c))))
 
 # --- C Preprocessor flags ---

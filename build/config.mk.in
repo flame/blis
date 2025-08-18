@@ -219,5 +219,8 @@ MK_BLAS_INT_TYPE_SIZE := @blas_int_type_size@
 
 MK_IS_ARCH_ZEN := @enable_aocl_zen@
 
+# Security hardening flags (yes/no) as chosen via configure.
+MK_ENABLE_SECURITY_FLAGS := @enable_security_flags@
+
 # end of ifndef CONFIG_MK_INCLUDED conditional block
 endif
