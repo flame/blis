@@ -246,6 +246,10 @@ void bli_zpackm_zen4_asm_12xk
     const uint64_t lda    = lda0;
     const uint64_t ldp    = ldp0;
 
+	 // Note: k_left is currently initialized as k % 4, which ensures safe mask calculation.
+	 // Be cautious if modifying this logic in the future (e.g., using k % by other large values),
+	 // as (k_left * 2) may overflow when used in bit shifts, potentially causing undefined behavior
+	 // or incorrect masks for uint8_t. Ensure k_left remains within a safe range (e.g., < 128
     uint8_t mask = ((1 << (k_left*2)) - 1);
     if (mask == 0) mask = 0xff;
 
