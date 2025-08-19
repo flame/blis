@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -159,7 +159,7 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-// Tests for bli_sscalv_zen_int10 (AVX2) kernel.
+// Tests for bli_sscalv_zen_int_10 (AVX2) kernel.
 /**
  * Cases and Loops:
  * C0 L128    - Main loop, handles 128 elements
@@ -174,12 +174,12 @@ INSTANTIATE_TEST_SUITE_P(
  *
  * LNUnit - loop for non-unit increments
 */
-#ifdef K_bli_sscalv_zen_int10
+#ifdef K_bli_sscalv_zen_int_10
 INSTANTIATE_TEST_SUITE_P(
-        bli_sscalv_zen_int10_unitPositiveStride,
+        bli_sscalv_zen_int_10_unitPositiveStride,
         sscalvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_sscalv_zen_int10),
+            ::testing::Values(K_bli_sscalv_zen_int_10),
             // conj(alpha): uses n (no_conjugate) since it is real.
             ::testing::Values('n'),
             // m: size of vector.
@@ -219,12 +219,12 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_sscalv_zen_int10
+#ifdef K_bli_sscalv_zen_int_10
 INSTANTIATE_TEST_SUITE_P(
-        bli_sscalv_zen_int10_nonUnitPositiveStrides,
+        bli_sscalv_zen_int_10_nonUnitPositiveStrides,
         sscalvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_sscalv_zen_int10),
+            ::testing::Values(K_bli_sscalv_zen_int_10),
             // conj(alpha): uses n (no_conjugate) since it is real.
             ::testing::Values('n'),
             // m: size of vector.

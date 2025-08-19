@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -97,7 +97,7 @@ float horizontal_add_sf(__m256 const a) {
 }
 
 // Optimized function that computes the Frobenius norm using AVX2 intrinsics.
-void bli_snorm2fv_unb_var1_avx2
+void bli_snorm2fv_zen_int_unb_var1
     (
        dim_t    n,
        float*   x, inc_t incx,
@@ -834,7 +834,7 @@ void bli_snorm2fv_unb_var1_avx2
 }
 
 // Optimized function that computes the Frobenius norm using AVX2 intrinsics.
-void bli_scnorm2fv_unb_var1_avx2
+void bli_scnorm2fv_zen_int_unb_var1
     (
        dim_t    n,
        scomplex*   x, inc_t incx,
@@ -1601,7 +1601,7 @@ void bli_scnorm2fv_unb_var1_avx2
 }
 
 // Optimized function that computes the Frobenius norm using AVX2 intrinsics.
-void bli_dnorm2fv_unb_var1_avx2
+void bli_dnorm2fv_zen_int_unb_var1
     (
        dim_t    n,
        double*   x, inc_t incx,
@@ -1954,7 +1954,7 @@ void bli_dnorm2fv_unb_var1_avx2
 }
 
 // Optimized function that computes the Frobenius norm using AVX2 intrinsics.
-void bli_dznorm2fv_unb_var1_avx2
+void bli_dznorm2fv_zen_int_unb_var1
     (
        dim_t    n,
        dcomplex*   x, inc_t incx,

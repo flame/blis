@@ -330,7 +330,7 @@ void bli_dgemv_unf_var2 (
         case BLIS_ARCH_ZEN:
         case BLIS_ARCH_ZEN2:
         case BLIS_ARCH_ZEN3:
-            bli_dgemv_n_avx2(
+            bli_dgemv_n_zen(
                               transa,
                               conjx,
                               m,
@@ -630,7 +630,7 @@ void bli_sgemv_unf_var2
     /* If beta is zero, use setv. Otherwise, scale by beta. */
         /* y = beta * y; */
     /* beta=0 case is handled by scalv internally */
-    bli_sscalv_zen_int10
+    bli_sscalv_zen_int_10
     (
       BLIS_NO_CONJUGATE,
       n_elem,
@@ -736,7 +736,7 @@ void bli_zgemv_unf_var2
     case BLIS_ARCH_ZEN5:
     case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
-      axpyf_kr_ptr = bli_zaxpyf_zen_int_8_avx512;
+      axpyf_kr_ptr = bli_zaxpyf_zen4_int_8;
       b_fuse = 8;
 
       scal2v_kr_ptr = bli_zscal2v_zen_int;
@@ -745,7 +745,7 @@ void bli_zgemv_unf_var2
 
       copyv_kr_ptr = bli_zcopyv_zen_int;
 
-      setv_kr_ptr = bli_zsetv_zen_int_avx512;
+      setv_kr_ptr = bli_zsetv_zen4_int;
       break;
 #endif
     case BLIS_ARCH_ZEN:

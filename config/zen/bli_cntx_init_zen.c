@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -114,22 +114,22 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  BLIS_AMAXV_KER,  BLIS_DOUBLE,   bli_damaxv_zen_int,
 
 	  // axpbyv
-	  BLIS_AXPBYV_KER, BLIS_FLOAT,    bli_saxpbyv_zen_int10,
-	  BLIS_AXPBYV_KER, BLIS_DOUBLE,   bli_daxpbyv_zen_int10,
+	  BLIS_AXPBYV_KER, BLIS_FLOAT,    bli_saxpbyv_zen_int_10,
+	  BLIS_AXPBYV_KER, BLIS_DOUBLE,   bli_daxpbyv_zen_int_10,
 	  BLIS_AXPBYV_KER, BLIS_SCOMPLEX, bli_caxpbyv_zen_int,
 	  BLIS_AXPBYV_KER, BLIS_DCOMPLEX, bli_zaxpbyv_zen_int,
 
 	  // axpyv
-	  BLIS_AXPYV_KER,  BLIS_FLOAT,    bli_saxpyv_zen_int10,
-	  BLIS_AXPYV_KER,  BLIS_DOUBLE,   bli_daxpyv_zen_int10,
-	  BLIS_AXPYV_KER,  BLIS_SCOMPLEX, bli_caxpyv_zen_int5,
-	  BLIS_AXPYV_KER,  BLIS_DCOMPLEX, bli_zaxpyv_zen_int5,
+	  BLIS_AXPYV_KER,  BLIS_FLOAT,    bli_saxpyv_zen_int_10,
+	  BLIS_AXPYV_KER,  BLIS_DOUBLE,   bli_daxpyv_zen_int_10,
+	  BLIS_AXPYV_KER,  BLIS_SCOMPLEX, bli_caxpyv_zen_int_5,
+	  BLIS_AXPYV_KER,  BLIS_DCOMPLEX, bli_zaxpyv_zen_int_5,
 
 	  // dotv
 	  BLIS_DOTV_KER,   BLIS_FLOAT,    bli_sdotv_zen_int,
 	  BLIS_DOTV_KER,   BLIS_DOUBLE,   bli_ddotv_zen_int,
-	  BLIS_DOTV_KER,   BLIS_SCOMPLEX, bli_cdotv_zen_int5,
-	  BLIS_DOTV_KER,   BLIS_DCOMPLEX, bli_zdotv_zen_int5,
+	  BLIS_DOTV_KER,   BLIS_SCOMPLEX, bli_cdotv_zen_int_5,
+	  BLIS_DOTV_KER,   BLIS_DCOMPLEX, bli_zdotv_zen_int_5,
 
 	  // dotxv
 	  BLIS_DOTXV_KER,  BLIS_FLOAT,    bli_sdotxv_zen_int,
@@ -138,14 +138,14 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  BLIS_DOTXV_KER,  BLIS_SCOMPLEX, bli_cdotxv_zen_int,
 
 	  // scalv
-	  BLIS_SCALV_KER,  BLIS_FLOAT,    bli_sscalv_zen_int10,
-	  BLIS_SCALV_KER,  BLIS_DOUBLE,   bli_dscalv_zen_int10,
+	  BLIS_SCALV_KER,  BLIS_FLOAT,    bli_sscalv_zen_int_10,
+	  BLIS_SCALV_KER,  BLIS_DOUBLE,   bli_dscalv_zen_int_10,
 	  BLIS_SCALV_KER,  BLIS_SCOMPLEX, bli_cscalv_zen_int,
 	  BLIS_SCALV_KER,  BLIS_DCOMPLEX, bli_zscalv_zen_int,
 
 	  // swapv
-	  BLIS_SWAPV_KER,  BLIS_FLOAT,    bli_sswapv_zen_int8,
-	  BLIS_SWAPV_KER,  BLIS_DOUBLE,   bli_dswapv_zen_int8,
+	  BLIS_SWAPV_KER,  BLIS_FLOAT,    bli_sswapv_zen_int_8,
+	  BLIS_SWAPV_KER,  BLIS_DOUBLE,   bli_dswapv_zen_int_8,
 
 	  // copyv
 	  BLIS_COPYV_KER,  BLIS_FLOAT,    bli_scopyv_zen_int,

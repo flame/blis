@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
    Portions of this file consist of AI-generated content.
 
    Redistribution and use in source and binary forms, with or without
@@ -121,12 +121,12 @@ TEST_P( zaxpyfGeneric, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
-#ifdef K_bli_zaxpyf_zen_int_8_avx512
+#ifdef K_bli_zaxpyf_zen4_int_8
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyf_zen_int_2_avx512_unitStrides,
         zaxpyfGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_zaxpyf_zen_int_8_avx512),             // kernel address
+            ::testing::Values(K_bli_zaxpyf_zen4_int_8),           // kernel address
             ::testing::Values('n'
 #if defined(TEST_BLIS_TYPED)
                               ,'c'
@@ -156,12 +156,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // Unit testing with non-unit strides, across all loops.
-#ifdef K_bli_zaxpyf_zen_int_8_avx512
+#ifdef K_bli_zaxpyf_zen4_int_8
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyf_zen_int_2_avx512_nonUnitStrides,
         zaxpyfGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_zaxpyf_zen_int_8_avx512),             // kernel address
+            ::testing::Values(K_bli_zaxpyf_zen4_int_8),           // kernel address
             ::testing::Values('n'
 #if defined(TEST_BLIS_TYPED)
                               ,'c'
@@ -195,12 +195,12 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
-#ifdef K_bli_zaxpyf_zen_int_8_avx512
+#ifdef K_bli_zaxpyf_zen4_int_8
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyf_zen_int_4_avx512_unitStrides,
         zaxpyfGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_zaxpyf_zen_int_8_avx512),             // kernel address
+            ::testing::Values(K_bli_zaxpyf_zen4_int_8),           // kernel address
             ::testing::Values('n'
 #if defined(TEST_BLIS_TYPED)
                               ,'c'
@@ -230,12 +230,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // Unit testing with non-unit strides, across all loops.
-#ifdef K_bli_zaxpyf_zen_int_8_avx512
+#ifdef K_bli_zaxpyf_zen4_int_8
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpyf_zen_int_4_avx512_nonUnitStrides,
         zaxpyfGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_zaxpyf_zen_int_8_avx512),             // kernel address
+            ::testing::Values(K_bli_zaxpyf_zen4_int_8),           // kernel address
             ::testing::Values('n'
 #if defined(TEST_BLIS_TYPED)
                               ,'c'
@@ -259,8 +259,8 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 /*
-    Unit testing for functionality of bli_zaxpyf_zen_int_8_avx512 kernel.
-    The code structure for bli_zaxpyf_zen_int_8_avx512( ... ) is as follows :
+    Unit testing for functionality of bli_zaxpyf_zen4_int_8 kernel.
+    The code structure for bli_zaxpyf_zen4_int_8( ... ) is as follows :
     For unit strides :
         Main loop    :  In blocks of 8 --> L8
         Fringe loops :  In blocks of 4 --> L4
@@ -269,12 +269,12 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
-#ifdef K_bli_zaxpyf_zen_int_8_avx512
+#ifdef K_bli_zaxpyf_zen4_int_8
 INSTANTIATE_TEST_SUITE_P(
-        bli_zaxpyf_zen_int_8_avx512_unitStrides,
+        bli_zaxpyf_zen4_int_8_unitStrides,
         zaxpyfGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_zaxpyf_zen_int_8_avx512),             // kernel address
+            ::testing::Values(K_bli_zaxpyf_zen4_int_8),           // kernel address
             ::testing::Values('n'
 #if defined(TEST_BLIS_TYPED)
                               ,'c'
@@ -304,12 +304,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // Unit testing with non-unit strides, across all loops.
-#ifdef K_bli_zaxpyf_zen_int_8_avx512
+#ifdef K_bli_zaxpyf_zen4_int_8
 INSTANTIATE_TEST_SUITE_P(
-        bli_zaxpyf_zen_int_8_avx512_nonUnitStrides,
+        bli_zaxpyf_zen4_int_8_nonUnitStrides,
         zaxpyfGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_zaxpyf_zen_int_8_avx512),             // kernel address
+            ::testing::Values(K_bli_zaxpyf_zen4_int_8),           // kernel address
             ::testing::Values('n'
 #if defined(TEST_BLIS_TYPED)
                               ,'c'

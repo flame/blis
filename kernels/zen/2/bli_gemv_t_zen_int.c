@@ -897,7 +897,7 @@ void bli_dgemv_t_zen_int
     return;
 }
 
-void  bli_dgemv_t_zen_int_16x7m
+void bli_dgemv_t_zen_int_16x7m
      (
        conj_t           conja,
        conj_t           conjx,
@@ -1290,7 +1290,7 @@ void  bli_dgemv_t_zen_int_16x7m
     }
 }
 
-void  bli_dgemv_t_zen_int_16x6m
+void bli_dgemv_t_zen_int_16x6m
      (
        conj_t           conja,
        conj_t           conjx,
@@ -1653,7 +1653,7 @@ void  bli_dgemv_t_zen_int_16x6m
     }
 }
 
-void  bli_dgemv_t_zen_int_16x5m
+void bli_dgemv_t_zen_int_16x5m
      (
        conj_t           conja,
        conj_t           conjx,
@@ -1955,7 +1955,7 @@ void  bli_dgemv_t_zen_int_16x5m
     }
 }
 
-void  bli_dgemv_t_zen_int_16x4m
+void bli_dgemv_t_zen_int_16x4m
      (
        conj_t           conja,
        conj_t           conjx,
@@ -2221,7 +2221,7 @@ void  bli_dgemv_t_zen_int_16x4m
 
 }
 
-void  bli_dgemv_t_zen_int_16x3m
+void bli_dgemv_t_zen_int_16x3m
      (
        conj_t           conja,
        conj_t           conjx,
@@ -2469,7 +2469,7 @@ void  bli_dgemv_t_zen_int_16x3m
     }
 }
 
-void  bli_dgemv_t_zen_int_16x2m
+void bli_dgemv_t_zen_int_16x2m
      (
        conj_t           conja,
        conj_t           conjx,
@@ -2696,7 +2696,7 @@ void  bli_dgemv_t_zen_int_16x2m
     }
 }
 
-void  bli_dgemv_t_zen_int_16x1m
+void bli_dgemv_t_zen_int_16x1m
      (
        conj_t           conja,
        conj_t           conjx,

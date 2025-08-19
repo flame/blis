@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -169,12 +169,12 @@ INSTANTIATE_TEST_SUITE_P(
 
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-#ifdef K_bli_trsm_small
+#ifdef K_bli_trsm_small_zen
 INSTANTIATE_TEST_SUITE_P(
-    bli_trsm_small,
+    bli_trsm_small_zen,
     strsmGenericSmall,
     ::testing::Combine(
-        ::testing::Values(bli_trsm_small),            // ker_ptr
+        ::testing::Values(K_bli_trsm_small_zen),          // ker_ptr
         ::testing::Values('l', 'r'),                  // side
         ::testing::Values('l', 'u'),                  // uplo
         ::testing::Values('n', 'u'),                  // diaga

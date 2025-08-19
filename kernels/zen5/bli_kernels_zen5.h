@@ -33,17 +33,17 @@
 */
 
 // DCOPYV kernel
-COPYV_KER_PROT( double,   d, copyv_zen5_asm_avx512 )
+COPYV_KER_PROT( double,   d, copyv_zen5_asm )
 
 // Dgemm sup RV kernels
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen5_asm_24x8m)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen5_asm_24x7m)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen5_asm_24x6m)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen5_asm_24x5m)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen5_asm_24x4m)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen5_asm_24x3m)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen5_asm_24x2m)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen5_asm_24x1m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen5_asm_24x8m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen5_asm_24x7m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen5_asm_24x6m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen5_asm_24x5m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen5_asm_24x4m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen5_asm_24x3m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen5_asm_24x2m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen5_asm_24x1m)
 
 // threshold functions
 bool bli_cntx_gemmsup_thresh_is_met_zen5
@@ -62,7 +62,7 @@ void bli_dynamic_blkszs_zen5
       num_t dt
     );
 
-err_t bli_trsm_small_ZEN5
+err_t bli_trsm_small_zen5
       (
         side_t side,
         obj_t  *alpha,
@@ -73,18 +73,18 @@ err_t bli_trsm_small_ZEN5
         bool   is_parallel
       );
 
-TRSMSMALL_KER_PROT( d, trsm_small_XAltB_XAuB_ZEN5 )
-TRSMSMALL_KER_PROT( d, trsm_small_XAutB_XAlB_ZEN5 )
-TRSMSMALL_KER_PROT( d, trsm_small_AltXB_AuXB_ZEN5 )
-TRSMSMALL_KER_PROT( d, trsm_small_AutXB_AlXB_ZEN5 )
+TRSMSMALL_KER_PROT( d, trsm_small_zen5_int_XAltB_XAuB )
+TRSMSMALL_KER_PROT( d, trsm_small_zen5_int_XAutB_XAlB )
+TRSMSMALL_KER_PROT( d, trsm_small_zen5_int_AltXB_AuXB )
+TRSMSMALL_KER_PROT( d, trsm_small_zen5_int_AutXB_AlXB )
 
-TRSMSMALL_KER_PROT( z, trsm_small_XAltB_XAuB_ZEN5 )
-TRSMSMALL_KER_PROT( z, trsm_small_XAutB_XAlB_ZEN5 )
-TRSMSMALL_KER_PROT( z, trsm_small_AltXB_AuXB_ZEN5 )
-TRSMSMALL_KER_PROT( z, trsm_small_AutXB_AlXB_ZEN5 )
+TRSMSMALL_KER_PROT( z, trsm_small_zen5_int_XAltB_XAuB )
+TRSMSMALL_KER_PROT( z, trsm_small_zen5_int_XAutB_XAlB )
+TRSMSMALL_KER_PROT( z, trsm_small_zen5_int_AltXB_AuXB )
+TRSMSMALL_KER_PROT( z, trsm_small_zen5_int_AutXB_AlXB )
 
 #ifdef BLIS_ENABLE_OPENMP
-err_t bli_trsm_small_mt_ZEN5
+err_t bli_trsm_small_zen5_mt
       (
         side_t side,
         obj_t  *alpha,

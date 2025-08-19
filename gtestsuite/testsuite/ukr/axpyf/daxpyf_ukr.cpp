@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
    Portions of this file consist of AI-generated content.
 
    Redistribution and use in source and binary forms, with or without
@@ -125,15 +125,15 @@ TEST_P( daxpyfGeneric, UKR )
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 /*
-    Unit testing for functionality of bli_daxpyf_zen_int_avx512 kernel.
+    Unit testing for functionality of bli_daxpyf_zen4_int kernel.
 */
 // Unit testing with unit strides, across all fuse-factors.
-#ifdef K_bli_daxpyf_zen_int_avx512
+#ifdef K_bli_daxpyf_zen4_int
 INSTANTIATE_TEST_SUITE_P(
-        bli_daxpyf_zen_int_avx512_unitStrides,
+        bli_daxpyf_zen4_int_unitStrides,
         daxpyfGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_daxpyf_zen_int_avx512),       // kernel address
+            ::testing::Values(K_bli_daxpyf_zen4_int),     // kernel address
             ::testing::Values('n'),     // use x, not conj(x) (since it is real)
             ::testing::Values('n'),     // use x, not conj(x) (since it is real)
             ::testing::Values(gtint_t(1),
@@ -167,12 +167,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // Unit testing with non-unit strides, across all fuse-factors.
-#ifdef K_bli_daxpyf_zen_int_avx512
+#ifdef K_bli_daxpyf_zen4_int
 INSTANTIATE_TEST_SUITE_P(
-        bli_daxpyf_zen_int_avx512_nonUnitStrides,
+        bli_daxpyf_zen4_int_nonUnitStrides,
         daxpyfGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_daxpyf_zen_int_avx512),       // kernel address
+            ::testing::Values(K_bli_daxpyf_zen4_int),     // kernel address
             ::testing::Values('n'),     // use x, not conj(x) (since it is real)
             ::testing::Values('n'),     // use x, not conj(x) (since it is real)
             ::testing::Values(gtint_t(15), gtint_t(27)),    // for size n

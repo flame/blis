@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -270,7 +270,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 
-#ifdef K_bli_sgemmsup_rv_zen_asm_6x64m_avx512
+#ifdef K_bli_sgemmsup_rv_zen4_asm_6x64m
 INSTANTIATE_TEST_SUITE_P(
         bli_sgemmsup_rv_zen_asm_6x64m_row_stored_c,
         sgemmGenericSUP,
@@ -281,7 +281,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
             ::testing::Values('r'),                                  // storage of c
-            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x64m_avx512), // sgemm_sup kernel
+            ::testing::Values(K_bli_sgemmsup_rv_zen4_asm_6x64m), // sgemm_sup kernel
             ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
             ::testing::Values('t'),                                  // transa
             ::testing::Values('n'),                                  // transb
@@ -292,7 +292,7 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_sgemmsup_rv_zen_asm_6x64m_avx512
+#ifdef K_bli_sgemmsup_rv_zen4_asm_6x64m
 INSTANTIATE_TEST_SUITE_P(
         bli_sgemmsup_rv_zen_asm_6x64m_col_stored_c,
         sgemmGenericSUP,
@@ -303,7 +303,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
             ::testing::Values('c'),                                  // storage of c
-            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x64m_avx512), // sgemm_sup_kernel
+            ::testing::Values(K_bli_sgemmsup_rv_zen4_asm_6x64m), // sgemm_sup_kernel
             ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
             ::testing::Values('n'),                                  // transa
             ::testing::Values('t'),                                  // transb
@@ -315,7 +315,7 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 /*
-    The bli_sgemmsup_rd_zen_asm_6x64m_avx512(standalone), accepts inputs with the
+    The bli_sgemmsup_rd_zen4_asm_6x64m(standalone), accepts inputs with the
     following contingency for n.
         n <= NR, where NR is 64
     The code structure for the sgemm_sup rd kernels(m-var) are as follows: 
@@ -336,7 +336,7 @@ INSTANTIATE_TEST_SUITE_P(
 */
 
 // Checking with row storage of C
-#ifdef K_bli_sgemmsup_rd_zen_asm_6x64m_avx512
+#ifdef K_bli_sgemmsup_rd_zen4_asm_6x64m
 INSTANTIATE_TEST_SUITE_P(
         bli_sgemmsup_rd_zen_asm_6x64m_row_stored_c,
         sgemmGenericSUP,
@@ -357,7 +357,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
             ::testing::Values('r'),                                  // storage of c
-            ::testing::Values(bli_sgemmsup_rd_zen_asm_6x64m_avx512), // sgemm_sup_kernel
+            ::testing::Values(K_bli_sgemmsup_rd_zen4_asm_6x64m), // sgemm_sup_kernel
             ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
             ::testing::Values('n'),                                  // transa, has to be N for row storage
             ::testing::Values('t'),                                  // transb, has to be T for row storage
@@ -371,7 +371,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Checking with col storage of C
 // NOTE : Since we are inducing transpose at opertaion level, for code coverage, we
 //        have to interchange m and n instantiations
-#ifdef K_bli_sgemmsup_rd_zen_asm_6x64m_avx512
+#ifdef K_bli_sgemmsup_rd_zen4_asm_6x64m
 INSTANTIATE_TEST_SUITE_P(
         bli_sgemmsup_rd_zen_asm_6x64m_col_stored_c,
         sgemmGenericSUP,
@@ -392,7 +392,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
             ::testing::Values('c'),                                  // storage of c
-            ::testing::Values(bli_sgemmsup_rd_zen_asm_6x64m_avx512), // sgemm_sup_kernel
+            ::testing::Values(K_bli_sgemmsup_rd_zen4_asm_6x64m), // sgemm_sup_kernel
             ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
             ::testing::Values('t'),                                  // transa, has to be T for row storage
             ::testing::Values('n'),                                  // transb, has to be N for row storage
@@ -403,7 +403,7 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_sgemmsup_rv_zen_asm_6x64n_avx512
+#ifdef K_bli_sgemmsup_rv_zen4_asm_6x64n
 INSTANTIATE_TEST_SUITE_P(
         bli_sgemmsup_rv_zen_asm_6x64n_row_stored_c,
         sgemmGenericSUP,
@@ -414,7 +414,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
             ::testing::Values('r'),                                  // storage of c
-            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x64n_avx512), // sgemm_sup_kernel
+            ::testing::Values(K_bli_sgemmsup_rv_zen4_asm_6x64n), // sgemm_sup_kernel
             ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
             ::testing::Values('t'),                                  // transa
             ::testing::Values('n'),                                  // transb
@@ -425,7 +425,7 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_sgemmsup_rd_zen_asm_6x64n_avx512
+#ifdef K_bli_sgemmsup_rd_zen4_asm_6x64n
 INSTANTIATE_TEST_SUITE_P(
         bli_sgemmsup_rd_zen_asm_6x64n_row_stored_c,
         sgemmGenericSUP,
@@ -436,7 +436,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
             ::testing::Values('r'),                                  // storage of c
-            ::testing::Values(bli_sgemmsup_rd_zen_asm_6x64n_avx512), // sgemm_sup_kernel
+            ::testing::Values(K_bli_sgemmsup_rd_zen4_asm_6x64n), // sgemm_sup_kernel
             ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
             ::testing::Values('n'),                                  // transa
             ::testing::Values('t'),                                  // transb

@@ -1816,9 +1816,9 @@ public:
 };
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
-#ifdef K_bli_zgemm_16x4_avx512_k1_nn
+#ifdef K_bli_zgemm_zen4_int_16x4_k1_nn
 INSTANTIATE_TEST_SUITE_P(
-    bli_zgemm_16x4_avx512_k1_nn,
+    bli_zgemm_zen4_int_16x4_k1_nn,
     zgemmUkrk1,
     ::testing::Combine(
 
@@ -1829,7 +1829,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values('c'),                                         // storage
         ::testing::Range(gtint_t(1), gtint_t(33), 1),                   // values of m
         ::testing::Range(gtint_t(1), gtint_t(9), 1),                    // values of n
-        ::testing::Values(bli_zgemm_16x4_avx512_k1_nn),
+        ::testing::Values(K_bli_zgemm_zen4_int_16x4_k1_nn),
         ::testing::Values(true, false)                                  // memory test
     ),
     ::zgemmUkrk1Print()
@@ -1838,9 +1838,9 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
-#ifdef K_bli_zgemm_4x4_avx2_k1_nn
+#ifdef K_bli_zgemm_zen_int_4x4_k1_nn
 INSTANTIATE_TEST_SUITE_P(
-    bli_zgemm_4x4_avx2_k1_nn,
+    bli_zgemm_zen_int_4x4_k1_nn,
     zgemmUkrk1,
     ::testing::Combine(
         ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},
@@ -1850,7 +1850,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values('c'),                                         // storage
         ::testing::Range(gtint_t(1), gtint_t(9), 1),                    // values of m
         ::testing::Range(gtint_t(1), gtint_t(9), 1),                    // values of n
-        ::testing::Values(bli_zgemm_4x4_avx2_k1_nn),
+        ::testing::Values(K_bli_zgemm_zen_int_4x4_k1_nn),
         ::testing::Values(true, false)                                  // memory test
     ),
     ::zgemmUkrk1Print()

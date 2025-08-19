@@ -165,13 +165,13 @@ void sscal_blis_impl
         case BLIS_ARCH_ZEN5:
         case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
-          scalv_ker_ptr = bli_sscalv_zen_int_avx512;
+          scalv_ker_ptr = bli_sscalv_zen4_int;
           break;
 #endif
         case BLIS_ARCH_ZEN:
         case BLIS_ARCH_ZEN2:
         case BLIS_ARCH_ZEN3:
-          scalv_ker_ptr = bli_sscalv_zen_int10;
+          scalv_ker_ptr = bli_sscalv_zen_int_10;
           break;
 
         default:
@@ -257,7 +257,7 @@ void dscal_blis_impl
         case BLIS_ARCH_ZEN5:
 #if defined(BLIS_KERNELS_ZEN5)
           // AVX512 Kernel
-          scalv_ker_ptr = bli_dscalv_zen_int_avx512;
+          scalv_ker_ptr = bli_dscalv_zen4_int;
   #ifdef BLIS_ENABLE_OPENMP
           ST_THRESH = 63894;
   #endif
@@ -266,7 +266,7 @@ void dscal_blis_impl
         case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
           // AVX512 Kernel
-          scalv_ker_ptr = bli_dscalv_zen_int_avx512;
+          scalv_ker_ptr = bli_dscalv_zen4_int;
   #ifdef BLIS_ENABLE_OPENMP
           ST_THRESH = 27500;
   #endif
@@ -277,7 +277,7 @@ void dscal_blis_impl
         case BLIS_ARCH_ZEN3:
 
           // AVX2 Kernel
-          scalv_ker_ptr = bli_dscalv_zen_int10;
+          scalv_ker_ptr = bli_dscalv_zen_int_10;
 #ifdef BLIS_ENABLE_OPENMP
           ST_THRESH = 30000;
 #endif
@@ -459,7 +459,7 @@ void zdscal_blis_impl
         case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
           // AVX512 Kernel
-          scalv_ker_ptr = bli_zdscalv_zen_int_avx512;
+          scalv_ker_ptr = bli_zdscalv_zen4_int;
           break;
 #endif
         case BLIS_ARCH_ZEN:
@@ -467,7 +467,7 @@ void zdscal_blis_impl
         case BLIS_ARCH_ZEN3:
 
           // AVX2 Kernel
-          scalv_ker_ptr = bli_zdscalv_zen_int10;
+          scalv_ker_ptr = bli_zdscalv_zen_int_10;
           break;
 
         default:
@@ -627,7 +627,7 @@ void cscal_blis_impl
         case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
           // AVX512 Kernel
-          scalv_ker_ptr = bli_cscalv_zen_int_avx512;
+          scalv_ker_ptr = bli_cscalv_zen4_int;
           break;
 #endif
         case BLIS_ARCH_ZEN:
@@ -719,7 +719,7 @@ void zscal_blis_impl
         case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
           // AVX512 Kernel
-          scalv_ker_ptr = bli_zscalv_zen_int_avx512;
+          scalv_ker_ptr = bli_zscalv_zen4_int;
           break;
 #endif
         case BLIS_ARCH_ZEN:

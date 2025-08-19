@@ -215,14 +215,14 @@ void saxpy_blis_impl
       case BLIS_ARCH_ZEN5:
       case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
-        axpyv_ker_ptr = bli_saxpyv_zen_int_avx512;
+        axpyv_ker_ptr = bli_saxpyv_zen4_int;
 
         break;
 #endif
       case BLIS_ARCH_ZEN:
       case BLIS_ARCH_ZEN2:
       case BLIS_ARCH_ZEN3:
-        axpyv_ker_ptr = bli_saxpyv_zen_int10;
+        axpyv_ker_ptr = bli_saxpyv_zen_int_10;
 
         break;
       default:
@@ -354,7 +354,7 @@ void daxpy_blis_impl
     {
       case BLIS_ARCH_ZEN5:
 #if defined(BLIS_KERNELS_ZEN4)
-          axpyv_ker_ptr = bli_daxpyv_zen_int_avx512;
+          axpyv_ker_ptr = bli_daxpyv_zen4_int;
 #if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
           fast_path_thresh = 34000;
 #endif
@@ -362,7 +362,7 @@ void daxpy_blis_impl
 #endif
       case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
-          axpyv_ker_ptr = bli_daxpyv_zen_int_avx512;
+          axpyv_ker_ptr = bli_daxpyv_zen4_int;
 #if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
           fast_path_thresh = 11000;
 #endif
@@ -373,7 +373,7 @@ void daxpy_blis_impl
       case BLIS_ARCH_ZEN3:
 
           // AVX2 Kernel
-          axpyv_ker_ptr = bli_daxpyv_zen_int10;
+          axpyv_ker_ptr = bli_daxpyv_zen_int_10;
 #if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
           fast_path_thresh = 4000;
 #endif
@@ -590,7 +590,7 @@ void caxpy_blis_impl
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {
-        bli_caxpyv_zen_int5
+        bli_caxpyv_zen_int_5
         (
           BLIS_NO_CONJUGATE,
           n_elem,
@@ -722,7 +722,7 @@ void zaxpy_blis_impl
 
 #if defined(BLIS_KERNELS_ZEN4)
           // AVX512 Kernel
-          axpyv_ker_ptr = bli_zaxpyv_zen_int_avx512;
+          axpyv_ker_ptr = bli_zaxpyv_zen4_int;
           break;
 #endif
       case BLIS_ARCH_ZEN:
@@ -730,7 +730,7 @@ void zaxpy_blis_impl
       case BLIS_ARCH_ZEN3:
 
           // AVX2 Kernel
-          axpyv_ker_ptr = bli_zaxpyv_zen_int5;
+          axpyv_ker_ptr = bli_zaxpyv_zen_int_5;
           break;
 
       default:

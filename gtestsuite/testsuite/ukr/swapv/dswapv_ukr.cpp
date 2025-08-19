@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -75,16 +75,16 @@ TEST_P( dswapvGeneric, UKR )
 // ----------------------------------------------
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 
-// Tests for bli_dswapv_zen_int8 (AVX2) kernel.
+// Tests for bli_dswapv_zen_int_8 (AVX2) kernel.
 // For unit inc on x and y:
 // Optimised code is avialble for n = 32, 16, 8, 4
 
-#ifdef K_bli_dswapv_zen_int8
+#ifdef K_bli_dswapv_zen_int_8
 INSTANTIATE_TEST_SUITE_P(
         UnitIncrements,
         dswapvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_dswapv_zen_int8),
+            ::testing::Values(K_bli_dswapv_zen_int_8),
             // n: size of vector.
             ::testing::Values(
                 gtint_t(1), gtint_t(2), gtint_t(4), gtint_t(8), gtint_t(16), gtint_t(32),
@@ -108,12 +108,12 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_dswapv_zen_int8
+#ifdef K_bli_dswapv_zen_int_8
 INSTANTIATE_TEST_SUITE_P(
         NonUnitIncrements,
         dswapvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_dswapv_zen_int8),
+            ::testing::Values(K_bli_dswapv_zen_int_8),
             // n: size of vector.
             ::testing::Values(
                 gtint_t(1),

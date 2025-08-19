@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -136,8 +136,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 /*
-    Unit testing for functionality of bli_scopyv_zen4_asm_avx512 kernel.
-    The code structure for bli_scopyv_zen4_asm_avx512( ... ) is as follows :
+    Unit testing for functionality of bli_scopyv_zen4_asm kernel.
+    The code structure for bli_scopyv_zen4_asm( ... ) is as follows :
     For unit strides :
         Main loop    :  In blocks of 512 -->   L512
         Fringe loops :  In blocks of 256 -->   L256
@@ -150,12 +150,12 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with Unit Strides(US), across all loops.
-#ifdef K_bli_scopyv_zen4_asm_avx512
+#ifdef K_bli_scopyv_zen4_asm
 INSTANTIATE_TEST_SUITE_P(
-        bli_scopyv_zen4_asm_avx512_unitStrides,
+        bli_scopyv_zen4_asm_unitStrides,
         scopyvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_scopyv_zen4_asm_avx512),
+            ::testing::Values(K_bli_scopyv_zen4_asm),
             ::testing::Values('n'),                   // conjugate parameter, 'n' for scopyv
             ::testing::Values(// Testing the loops standalone
                               gtint_t(512),           // size n, for L512
@@ -182,12 +182,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // Unit testing with Non-Unit Strides(US), across all loops.
-#ifdef K_bli_scopyv_zen4_asm_avx512
+#ifdef K_bli_scopyv_zen4_asm
 INSTANTIATE_TEST_SUITE_P(
-        bli_scopyv_zen4_asm_avx512_nonUnitStrides,
+        bli_scopyv_zen4_asm_nonUnitStrides,
         scopyvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_scopyv_zen4_asm_avx512),
+            ::testing::Values(K_bli_scopyv_zen4_asm),
             ::testing::Values('n'),                      // conjugate parameter, 'n' for scopyv
             ::testing::Values(gtint_t(25), gtint_t(37)), // size of the vector
             ::testing::Values(gtint_t(5)),               // stride size for x

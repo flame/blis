@@ -65,9 +65,11 @@ typedef err_t (*trsmsmall_ker_ft)
         7 : 0b111   RUT[N\U],
     }
 */
-#define DATATYPES 4
-#define VARIANTS  8
-trsmsmall_ker_ft ker_fps_zen5[DATATYPES][VARIANTS] =
+
+/*
+ * Kernels Table
+ */
+trsmsmall_ker_ft ker_fps_zen5[4][8] =
   {
     {NULL,
      NULL,
@@ -85,25 +87,25 @@ trsmsmall_ker_ft ker_fps_zen5[DATATYPES][VARIANTS] =
      NULL,
      NULL,
      NULL},
-    {bli_dtrsm_small_AutXB_AlXB_ZEN5,
-     bli_dtrsm_small_AltXB_AuXB_ZEN5,
-     bli_dtrsm_small_AltXB_AuXB_ZEN5,
-     bli_dtrsm_small_AutXB_AlXB_ZEN5,
-     bli_dtrsm_small_XAutB_XAlB_ZEN5,
-     bli_dtrsm_small_XAltB_XAuB_ZEN5,
-     bli_dtrsm_small_XAltB_XAuB_ZEN5,
-     bli_dtrsm_small_XAutB_XAlB_ZEN5},
-    {bli_ztrsm_small_AutXB_AlXB_ZEN5,
-     bli_ztrsm_small_AltXB_AuXB_ZEN5,
-     bli_ztrsm_small_AltXB_AuXB_ZEN5,
-     bli_ztrsm_small_AutXB_AlXB_ZEN5,
-     bli_ztrsm_small_XAutB_XAlB_ZEN5,
-     bli_ztrsm_small_XAltB_XAuB_ZEN5,
-     bli_ztrsm_small_XAltB_XAuB_ZEN5,
-     bli_ztrsm_small_XAutB_XAlB_ZEN5},
+    {bli_dtrsm_small_zen5_int_AutXB_AlXB,
+     bli_dtrsm_small_zen5_int_AltXB_AuXB,
+     bli_dtrsm_small_zen5_int_AltXB_AuXB,
+     bli_dtrsm_small_zen5_int_AutXB_AlXB,
+     bli_dtrsm_small_zen5_int_XAutB_XAlB,
+     bli_dtrsm_small_zen5_int_XAltB_XAuB,
+     bli_dtrsm_small_zen5_int_XAltB_XAuB,
+     bli_dtrsm_small_zen5_int_XAutB_XAlB},
+    {bli_ztrsm_small_zen5_int_AutXB_AlXB,
+     bli_ztrsm_small_zen5_int_AltXB_AuXB,
+     bli_ztrsm_small_zen5_int_AltXB_AuXB,
+     bli_ztrsm_small_zen5_int_AutXB_AlXB,
+     bli_ztrsm_small_zen5_int_XAutB_XAlB,
+     bli_ztrsm_small_zen5_int_XAltB_XAuB,
+     bli_ztrsm_small_zen5_int_XAltB_XAuB,
+     bli_ztrsm_small_zen5_int_XAutB_XAlB},
 };
 
-err_t bli_trsm_small_ZEN5
+err_t bli_trsm_small_zen5
      (
        side_t   side,
        obj_t*   alpha,
@@ -174,7 +176,7 @@ err_t bli_trsm_small_ZEN5
 /*
  * Parallelized dtrsm_small across m-dimension or n-dimension based on side(Left/Right)
  */
-err_t bli_trsm_small_mt_ZEN5
+err_t bli_trsm_small_zen5_mt
      (
        side_t   side,
        obj_t*   alpha,
@@ -236,7 +238,7 @@ err_t bli_trsm_small_mt_ZEN5
         {
             if(tid == 0)
             {
-                bli_trsm_small_ZEN5
+                bli_trsm_small_zen5
                 (
                 side,
                 alpha,
@@ -297,7 +299,7 @@ err_t bli_trsm_small_mt_ZEN5
             // all threads
             err_t status_l = BLIS_SUCCESS;
 
-            status_l = bli_trsm_small_ZEN5
+            status_l = bli_trsm_small_zen5
               (
                 side,
                 alpha,

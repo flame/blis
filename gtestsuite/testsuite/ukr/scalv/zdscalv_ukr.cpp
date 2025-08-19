@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -93,7 +93,7 @@ TEST_P( zdscalvGeneric, UKR )
 // ----- Begin ZEN1/2/3 (AVX2) Kernel Tests -----
 // ----------------------------------------------
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
-// Tests for bli_zdscalv_zen_int10 (AVX2) kernel.
+// Tests for bli_zdscalv_zen_int_10 (AVX2) kernel.
 /**
  * Loops:
  * L30     - Main loop, handles 30 elements
@@ -104,12 +104,12 @@ TEST_P( zdscalvGeneric, UKR )
  * L2      - handles 2 elements
  * LScalar - leftover loop (also handles non-unit increments)
 */
-#ifdef K_bli_zdscalv_zen_int10
+#ifdef K_bli_zdscalv_zen_int_10
 INSTANTIATE_TEST_SUITE_P(
-        bli_zdscalv_zen_int10_unitPositiveStride,
+        bli_zdscalv_zen_int_10_unitPositiveStride,
         zdscalvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_zdscalv_zen_int10),
+            ::testing::Values(K_bli_zdscalv_zen_int_10),
             // conj(alpha): specify if alpha needs to be conjugated.
             ::testing::Values(
                                 'n',
@@ -147,12 +147,12 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_zdscalv_zen_int10
+#ifdef K_bli_zdscalv_zen_int_10
 INSTANTIATE_TEST_SUITE_P(
-        bli_zdscalv_zen_int10_nonUnitPositiveStride,
+        bli_zdscalv_zen_int_10_nonUnitPositiveStride,
         zdscalvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_zdscalv_zen_int10),
+            ::testing::Values(K_bli_zdscalv_zen_int_10),
             // conj(alpha): specify if alpha needs to be conjugated.
             ::testing::Values(
                                 'n',
@@ -189,7 +189,7 @@ INSTANTIATE_TEST_SUITE_P(
 // -----  Begin ZEN4 (AVX512) Kernel Tests  -----
 // ----------------------------------------------
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
-// Tests for bli_zdscalv_zen_int_avx512 (AVX512) kernel.
+// Tests for bli_zdscalv_zen4_int (AVX512) kernel.
 /**
  * Loops:
  * L16     - Main loop, handles 16 elements
@@ -198,12 +198,12 @@ INSTANTIATE_TEST_SUITE_P(
  * L2      - handles 2 elements
  * LScalar - leftover loop (also handles non-unit increments)
 */
-#ifdef K_bli_zdscalv_zen_int_avx512
+#ifdef K_bli_zdscalv_zen4_int
 INSTANTIATE_TEST_SUITE_P(
-        bli_zdscalv_zen_int_avx512_unitPositiveStride,
+        bli_zdscalv_zen4_int_unitPositiveStride,
         zdscalvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_zdscalv_zen_int_avx512),
+            ::testing::Values(K_bli_zdscalv_zen4_int),
             // conj(alpha): specify if alpha needs to be conjugated.
             ::testing::Values(
                                 'n',
@@ -236,12 +236,12 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_zdscalv_zen_int_avx512
+#ifdef K_bli_zdscalv_zen4_int
 INSTANTIATE_TEST_SUITE_P(
-        bli_zdscalv_zen_int_avx512_nonUnitPositiveStrides,
+        bli_zdscalv_zen4_int_nonUnitPositiveStrides,
         zdscalvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_zdscalv_zen_int_avx512),
+            ::testing::Values(K_bli_zdscalv_zen4_int),
             // conj(alpha): specify if alpha needs to be conjugated.
             ::testing::Values(
                                 'n',

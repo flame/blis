@@ -33,117 +33,117 @@
 */
 
 // Including the header for tiny gemm kernel signatures
-#include "bli_gemm_tiny_avx512.h"
+#include "bli_gemm_tiny_zen4.h"
 
 // -- level-1v --
 
 // addv (intrinsics)
-ADDV_KER_PROT( double,   d, addv_zen_int_avx512 )
+ADDV_KER_PROT( double,   d, addv_zen4_int )
 
 // amaxv (intrinsics)
-AMAXV_KER_PROT( float,    s, amaxv_zen_int_avx512 )
-BLIS_EXPORT_BLIS AMAXV_KER_PROT( double,   d, amaxv_zen_int_avx512 )
+AMAXV_KER_PROT( float,    s, amaxv_zen4_int )
+BLIS_EXPORT_BLIS AMAXV_KER_PROT( double,   d, amaxv_zen4_int )
 
 // scalv (AVX512 intrinsics)
-SCALV_KER_PROT( float,     s, scalv_zen_int_avx512 )
-BLIS_EXPORT_BLIS SCALV_KER_PROT( double,    d, scalv_zen_int_avx512 )
-SCALV_KER_PROT( scomplex,  c, scalv_zen_int_avx512 )
-SCALV_KER_PROT( dcomplex,  z, scalv_zen_int_avx512 )
-SCALV_KER_PROT( dcomplex,  z, dscalv_zen_int_avx512) // ZDSCAL kernel
+SCALV_KER_PROT( float,     s, scalv_zen4_int )
+BLIS_EXPORT_BLIS SCALV_KER_PROT( double,    d, scalv_zen4_int )
+SCALV_KER_PROT( scomplex,  c, scalv_zen4_int )
+SCALV_KER_PROT( dcomplex,  z, scalv_zen4_int )
+SCALV_KER_PROT( dcomplex,  z, dscalv_zen4_int) // ZDSCAL kernel
 
 // setv (intrinsics)
-SETV_KER_PROT(float,    s, setv_zen_int_avx512)
-SETV_KER_PROT(double,   d, setv_zen_int_avx512)
-SETV_KER_PROT(dcomplex, z, setv_zen_int_avx512)
+SETV_KER_PROT(float,    s, setv_zen4_int)
+SETV_KER_PROT(double,   d, setv_zen4_int)
+SETV_KER_PROT(dcomplex, z, setv_zen4_int)
 
 // dotv (intrinsics)
-DOTV_KER_PROT( float,    s, dotv_zen_int_avx512 )
-DOTV_KER_PROT( double,   d, dotv_zen_int_avx512 )
-DOTV_KER_PROT( dcomplex, z, dotv_zen_int_avx512 )
-DOTV_KER_PROT( dcomplex, z, dotv_zen4_asm_avx512 )
+DOTV_KER_PROT( float,    s, dotv_zen4_int )
+DOTV_KER_PROT( double,   d, dotv_zen4_int )
+DOTV_KER_PROT( dcomplex, z, dotv_zen4_int )
+DOTV_KER_PROT( dcomplex, z, dotv_zen4_asm )
 
 // axpyv (intrinsics)
-AXPYV_KER_PROT( float,    s, axpyv_zen_int_avx512 )
-BLIS_EXPORT_BLIS AXPYV_KER_PROT( double,   d, axpyv_zen_int_avx512 )
-AXPYV_KER_PROT( dcomplex, z, axpyv_zen_int_avx512 )
+AXPYV_KER_PROT( float,    s, axpyv_zen4_int )
+BLIS_EXPORT_BLIS AXPYV_KER_PROT( double,   d, axpyv_zen4_int )
+AXPYV_KER_PROT( dcomplex, z, axpyv_zen4_int )
 
 // axpbyv ( intrinsics )
-AXPBYV_KER_PROT( double, d, axpbyv_zen_int_avx512 );
+AXPBYV_KER_PROT( double, d, axpbyv_zen4_int );
 
 // axpyf (intrinsics)
-AXPYF_KER_PROT( dcomplex, z, axpyf_zen_int_2_avx512 )
-AXPYF_KER_PROT( dcomplex, z, axpyf_zen_int_4_avx512 )
-AXPYF_KER_PROT( dcomplex, z, axpyf_zen_int_8_avx512 )
+AXPYF_KER_PROT( dcomplex, z, axpyf_zen4_int_2 )
+AXPYF_KER_PROT( dcomplex, z, axpyf_zen4_int_4 )
+AXPYF_KER_PROT( dcomplex, z, axpyf_zen4_int_8 )
 
 // axpyf (intrinsics)
-AXPYF_KER_PROT( double,   d, axpyf_zen_int_avx512 )
-AXPYF_KER_PROT( double,   d, axpyf_zen_int2_avx512 )
-AXPYF_KER_PROT( double,   d, axpyf_zen_int4_avx512 )
-AXPYF_KER_PROT( double,   d, axpyf_zen_int6_avx512 )
-AXPYF_KER_PROT( double,   d, axpyf_zen_int8_avx512 )
-AXPYF_KER_PROT( double,   d, axpyf_zen_int12_avx512 )
-AXPYF_KER_PROT( double,   d, axpyf_zen_int16_avx512 )
-AXPYF_KER_PROT( double,   d, axpyf_zen_int32_avx512 )
+AXPYF_KER_PROT( double,   d, axpyf_zen4_int )
+AXPYF_KER_PROT( double,   d, axpyf_zen4_int_2 )
+AXPYF_KER_PROT( double,   d, axpyf_zen4_int_4 )
+AXPYF_KER_PROT( double,   d, axpyf_zen4_int_6 )
+AXPYF_KER_PROT( double,   d, axpyf_zen4_int_8 )
+AXPYF_KER_PROT( double,   d, axpyf_zen4_int_12 )
+AXPYF_KER_PROT( double,   d, axpyf_zen4_int_16 )
+AXPYF_KER_PROT( double,   d, axpyf_zen4_int_32 )
 #ifdef BLIS_ENABLE_OPENMP
-AXPYF_KER_PROT( double,   d, axpyf_zen_int32_avx512_mt )
+AXPYF_KER_PROT( double,   d, axpyf_zen4_int_32_mt )
 #endif
 
 // dotxf (intrinsics)
-DOTXF_KER_PROT( double,   d, dotxf_zen_int_avx512 )
+DOTXF_KER_PROT( double,   d, dotxf_zen4_int )
 
 // copyv (intrinsics)
-// COPYV_KER_PROT( float,    s, copyv_zen_int_avx512 )
-// COPYV_KER_PROT( double,   d, copyv_zen_int_avx512 )
-// COPYV_KER_PROT( dcomplex, z, copyv_zen_int_avx512 )
+// COPYV_KER_PROT( float,    s, copyv_zen4_int )
+// COPYV_KER_PROT( double,   d, copyv_zen4_int )
+// COPYV_KER_PROT( dcomplex, z, copyv_zen4_int )
 
 // copyv (asm)
-COPYV_KER_PROT( float,    s, copyv_zen4_asm_avx512 )
-COPYV_KER_PROT( double,   d, copyv_zen4_asm_avx512 )
-COPYV_KER_PROT( double,   d, copyv_zen4_asm_avx512_biway )
-COPYV_KER_PROT( dcomplex, z, copyv_zen4_asm_avx512 )
+COPYV_KER_PROT( float,    s, copyv_zen4_asm )
+COPYV_KER_PROT( double,   d, copyv_zen4_asm )
+COPYV_KER_PROT( double,   d, copyv_zen4_asm_biway )
+COPYV_KER_PROT( dcomplex, z, copyv_zen4_asm )
 
 // scal2v (intrinsics)
-SCAL2V_KER_PROT(double,   d, scal2v_zen_int_avx512)
+SCAL2V_KER_PROT(double,   d, scal2v_zen4_int)
 
 // dotxv (intrinsics)
-DOTXV_KER_PROT( dcomplex, z, dotxv_zen_int_avx512 )
+DOTXV_KER_PROT( dcomplex, z, dotxv_zen4_int )
 
 // dotxf (intrinsics)
-DOTXF_KER_PROT( dcomplex, z, dotxf_zen_int_8_avx512 )
-DOTXF_KER_PROT( dcomplex, z, dotxf_zen_int_4_avx512 )
-DOTXF_KER_PROT( dcomplex, z, dotxf_zen_int_2_avx512 )
+DOTXF_KER_PROT( dcomplex, z, dotxf_zen4_int_8 )
+DOTXF_KER_PROT( dcomplex, z, dotxf_zen4_int_4 )
+DOTXF_KER_PROT( dcomplex, z, dotxf_zen4_int_2 )
 
 // gemv (intrinsics)
 // dgemv_n kernels for handling op(A) = 'n', i.e., transa = 'n' cases.
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_16mx8_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_16mx7_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_16mx6_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_16mx5_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_16mx4_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_16mx3_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_16mx2_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_16mx1_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx8 )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx7 )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx6 )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx5 )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx4 )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx3 )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx2 )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx1 )
 
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_32x8n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_16x8n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_8x8n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_m_leftx8n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_32x4n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_16x4n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_8x4n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_m_leftx4n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_32x3n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_16x3n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_8x3n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_m_leftx3n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_32x2n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_16x2n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_8x2n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_m_leftx2n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_32x1n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_16x1n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_8x1n_avx512 )
-GEMV_KER_PROT( double,  d, gemv_n_zen_int_m_leftx1n_avx512 )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_32x8n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16x8n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_8x8n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_m_leftx8n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_32x4n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16x4n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_8x4n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_m_leftx4n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_32x3n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16x3n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_8x3n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_m_leftx3n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_32x2n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16x2n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_8x2n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_m_leftx2n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_32x1n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16x1n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_8x1n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_m_leftx1n )
 
 // dgemv_t kernels for handling op(A) = 't', i.e., transa = 't' cases.
 // export gemv kernel so that it can be directly called avoiding blis overhead.
@@ -173,8 +173,8 @@ GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x3m )
 GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x2m )
 GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x1m )
 
-GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_l_zen_asm_16x14)
-GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_zen_asm_16x14)
+GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_l_zen4_asm_16x14)
+GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_zen4_asm_16x14)
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_l_zen4_asm_8x24)
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_zen4_asm_8x24)
 GEMMTRSM_UKR_PROT( dcomplex, z, gemmtrsm_l_zen4_asm_4x12)
@@ -192,7 +192,7 @@ PACKM_KER_PROT( dcomplex, z, packm_zen4_asm_12xk )
 PACKM_KER_PROT( dcomplex, z, packm_zen4_asm_4xk )
 
 // native dgemm kernel
-GEMM_UKR_PROT( double,   d, gemm_avx512_asm_8x24 )
+GEMM_UKR_PROT( double,   d, gemm_zen4_asm_8x24 )
 GEMM_UKR_PROT( double,   d, gemm_zen4_asm_32x6 )
 GEMM_UKR_PROT( dcomplex, z, gemm_zen4_asm_12x4 )
 GEMM_UKR_PROT( dcomplex, z, gemm_zen4_asm_4x12 )
@@ -200,7 +200,7 @@ GEMM_UKR_PROT( scomplex, c, gemm_zen4_asm_24x4 )
 GEMM_UKR_PROT( scomplex, c, gemm_zen4_asm_4x24 )
 
 // dgemm native macro kernel
-void bli_dgemm_avx512_asm_8x24_macro_kernel
+void bli_dgemm_zen4_asm_8x24_macro_kernel
 (
     dim_t   n,
     dim_t   m,
@@ -214,95 +214,95 @@ void bli_dgemm_avx512_asm_8x24_macro_kernel
 
 
 //sgemm rv sup
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x64m_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x48m_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x32m_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x16m_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x64m_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x48m_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x32m_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x16m_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x64m_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x48m_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x32m_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x16m_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x64m_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x48m_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x32m_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x16m_avx512 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_6x64m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_6x48m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_6x32m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_6x16m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_4x64m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_4x48m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_4x32m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_4x16m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_2x64m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_2x48m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_2x32m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_2x16m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_1x64m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_1x48m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_1x32m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_1x16m )
 
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x64n_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x64n_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x64n_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x64n_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x64n_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x64n_avx512 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_6x64n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_5x64n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_4x64n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_3x64n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_2x64n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_1x64n )
 
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x48_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x32_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x16_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x48_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x32_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x16_avx512 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_5x48 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_5x32 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_5x16 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_3x48 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_3x32 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_3x16 )
 
 // sgemm rd sup
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_6x64m_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_6x48m_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_6x32m_avx512 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_6x64m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_6x48m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_6x32m )
 
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_3x64n_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_2x64n_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_6x64n_avx512 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_3x64n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_2x64n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_6x64n )
 
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_5x64_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_4x64_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_3x64_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_2x64_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_1x64_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_5x48_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_4x48_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_3x48_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_2x48_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_1x48_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_5x32_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_4x32_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_3x32_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_2x32_avx512 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_1x32_avx512 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_5x64 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_4x64 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_3x64 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_2x64 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_1x64 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_5x48 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_4x48 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_3x48 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_2x48 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_1x48 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_5x32 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_4x32 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_3x32 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_2x32 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_1x32 )
 
-TRSMSMALL_PROT(trsm_small_AVX512)
-TRSMSMALL_KER_PROT( d, trsm_small_AutXB_AlXB_AVX512 )
-TRSMSMALL_KER_PROT( d, trsm_small_XAltB_XAuB_AVX512 )
-TRSMSMALL_KER_PROT( d, trsm_small_XAutB_XAlB_AVX512 )
-TRSMSMALL_KER_PROT( d, trsm_small_AltXB_AuXB_AVX512 )
-TRSMSMALL_KER_PROT( z, trsm_small_AutXB_AlXB_AVX512 )
-TRSMSMALL_KER_PROT( z, trsm_small_XAltB_XAuB_AVX512 )
-TRSMSMALL_KER_PROT( z, trsm_small_XAutB_XAlB_AVX512 )
-TRSMSMALL_KER_PROT( z, trsm_small_AltXB_AuXB_AVX512 )
+TRSMSMALL_PROT(trsm_small_zen4)
+TRSMSMALL_KER_PROT( d, trsm_small_zen4_int_AutXB_AlXB )
+TRSMSMALL_KER_PROT( d, trsm_small_zen4_int_XAltB_XAuB )
+TRSMSMALL_KER_PROT( d, trsm_small_zen4_int_XAutB_XAlB )
+TRSMSMALL_KER_PROT( d, trsm_small_zen4_int_AltXB_AuXB )
+TRSMSMALL_KER_PROT( z, trsm_small_zen4_int_AutXB_AlXB )
+TRSMSMALL_KER_PROT( z, trsm_small_zen4_int_XAltB_XAuB )
+TRSMSMALL_KER_PROT( z, trsm_small_zen4_int_XAutB_XAlB )
+TRSMSMALL_KER_PROT( z, trsm_small_zen4_int_AltXB_AuXB )
 
 #ifdef BLIS_ENABLE_OPENMP
-TRSMSMALL_PROT(trsm_small_mt_AVX512)
+TRSMSMALL_PROT(trsm_small_zen4_mt)
 #endif
 
 // Dgemm sup RV kernels
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8m)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x7m)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x6m)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x5m)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x4m)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x3m)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x2m)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x1m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x8m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x7m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x6m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x5m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x4m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x3m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x2m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x1m)
 
 
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8m_new)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x7m_new)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x6m_new)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x5m_new)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x4m_new)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x3m_new)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x2m_new)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x1m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x8m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x7m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x6m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x5m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x4m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x3m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x2m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x1m_new)
 
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x8)
@@ -312,12 +312,12 @@ GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x8m_lower)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x8m_upper)
 
 /* DGEMMT 24x8 triangular kernels */
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8m_lower_0)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8m_lower_1)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8m_lower_2)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8m_upper_0)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8m_upper_1)
-GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8m_upper_2)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x8m_lower_0)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x8m_lower_1)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x8m_lower_2)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x8m_upper_0)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x8m_upper_1)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x8m_upper_2)
 
 GEMMSUP_KER_PROT( dcomplex,  z, gemmsup_rv_zen4_asm_4x4m)
 GEMMSUP_KER_PROT( dcomplex,  z, gemmsup_rv_zen4_asm_4x4m_lower)
@@ -408,7 +408,7 @@ GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_4x2 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_2x4 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_2x2 )
 
-err_t bli_dgemm_24x8_avx512_k1_nn
+err_t bli_dgemm_zen4_int_24x8_k1_nn
     (
       dim_t m,
       dim_t n,
@@ -420,7 +420,7 @@ err_t bli_dgemm_24x8_avx512_k1_nn
       double* c, const inc_t ldc
      );
 
-err_t bli_dgemm_tiny_24x8
+err_t bli_dgemm_tiny_zen4_24x8
      (
         conj_t              conja,
         conj_t              conjb,
@@ -436,7 +436,7 @@ err_t bli_dgemm_tiny_24x8
         double*    c, const inc_t rs_c0, const inc_t cs_c0
      );
 
-void bli_dnorm2fv_unb_var1_avx512
+void bli_dnorm2fv_zen4_int_unb_var1
      (
        dim_t    n,
        double*   x, inc_t incx,
@@ -444,7 +444,7 @@ void bli_dnorm2fv_unb_var1_avx512
        cntx_t*  cntx
      );
 
-void bli_cgemm_32x4_avx512_k1_nn
+void bli_cgemm_zen4_int_32x4_k1_nn
 (
     dim_t  m,
     dim_t  n,
@@ -457,7 +457,7 @@ void bli_cgemm_32x4_avx512_k1_nn
 );
 
 
-err_t bli_zgemm_16x4_avx512_k1_nn
+err_t bli_zgemm_zen4_int_16x4_k1_nn
 (
     dim_t  m,
     dim_t  n,
@@ -489,7 +489,7 @@ void bli_dynamic_blkszs_zen4
 // function for resetting zmm registers after L3 apis
 void bli_zero_zmm();
 
-void bli_dgemv_n_zen4_32x8_int_st
+void bli_dgemv_n_zen4_int_32x8_st
      (
        trans_t transa,
        conj_t  conjx,
@@ -517,7 +517,7 @@ void bli_dgemv_n_zen4_int
        cntx_t* cntx
      );
 
-BLIS_EXPORT void bli_dgemv_n_zen4_40x2_int_st
+BLIS_EXPORT void bli_dgemv_n_zen4_int_40x2_st
      (
        trans_t transa,
        conj_t  conjx,
@@ -531,7 +531,7 @@ BLIS_EXPORT void bli_dgemv_n_zen4_40x2_int_st
        cntx_t* cntx
      );
 
-void bli_dgemv_n_zen4_40x2_int_mt
+void bli_dgemv_n_zen4_int_40x2_mt
      (
        trans_t transa,
        conj_t  conjx,
@@ -545,7 +545,7 @@ void bli_dgemv_n_zen4_40x2_int_mt
        cntx_t* cntx
      );
 
-void bli_dgemv_m_zen4_40x8_int_st
+void bli_dgemv_m_zen4_int_40x8_st
      (
        trans_t transa,
        conj_t  conjx,
@@ -559,7 +559,7 @@ void bli_dgemv_m_zen4_40x8_int_st
        cntx_t* cntx
      );
 
-void bli_dgemv_m_zen4_40x8_int_mt_Ndiv
+void bli_dgemv_m_zen4_int_40x8_mt_Ndiv
      (
        trans_t transa,
        conj_t  conjx,
@@ -573,7 +573,7 @@ void bli_dgemv_m_zen4_40x8_int_mt_Ndiv
        cntx_t* cntx
      );
 
-     void bli_dgemv_m_zen4_40x8_int_mt_Mdiv
+     void bli_dgemv_m_zen4_int_40x8_mt_Mdiv
      (
        trans_t transa,
        conj_t  conjx,
@@ -587,7 +587,7 @@ void bli_dgemv_m_zen4_40x8_int_mt_Ndiv
        cntx_t* cntx
      );
 
-     void bli_dgemv_m_zen4_40x8_int_mt_Mdiv_Ndiv
+     void bli_dgemv_m_zen4_int_40x8_mt_Mdiv_Ndiv
      (
        trans_t transa,
        conj_t  conjx,

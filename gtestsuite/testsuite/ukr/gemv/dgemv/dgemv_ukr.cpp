@@ -687,14 +687,14 @@ INSTANTIATE_TEST_SUITE_P(
 // -------------------------------
 static dgemv_ker_ft_conja m_ker_fp[8] =
 {
-    bli_dgemv_n_zen_int_16mx1_avx512,   // n = 1
-    bli_dgemv_n_zen_int_16mx2_avx512,   // n = 2
-    bli_dgemv_n_zen_int_16mx3_avx512,   // n = 3
-    bli_dgemv_n_zen_int_16mx4_avx512,   // n = 4
-    bli_dgemv_n_zen_int_16mx5_avx512,   // n = 5
-    bli_dgemv_n_zen_int_16mx6_avx512,   // n = 6
-    bli_dgemv_n_zen_int_16mx7_avx512,   // n = 7
-    bli_dgemv_n_zen_int_16mx8_avx512,   // n = 8; base kernel
+    bli_dgemv_n_zen4_int_16mx1,   // n = 1
+    bli_dgemv_n_zen4_int_16mx2,   // n = 2
+    bli_dgemv_n_zen4_int_16mx3,   // n = 3
+    bli_dgemv_n_zen4_int_16mx4,   // n = 4
+    bli_dgemv_n_zen4_int_16mx5,   // n = 5
+    bli_dgemv_n_zen4_int_16mx6,   // n = 6
+    bli_dgemv_n_zen4_int_16mx7,   // n = 7
+    bli_dgemv_n_zen4_int_16mx8,   // n = 8; base kernel
 };
 
 #define DGEMV_TEST_M(N) \
@@ -721,45 +721,45 @@ static dgemv_ker_ft_conja m_ker_fp[8] =
         ), \
         (::gemvUKRPrint<double, dgemv_ker_ft_conja>()) \
     );
-#ifdef K_bli_dgemv_n_zen_int_16mx8_avx512
+#ifdef K_bli_dgemv_n_zen4_int_16mx8
 DGEMV_TEST_M(8)
 #endif
 
-#ifdef K_bli_dgemv_n_zen_int_16mx7_avx512
+#ifdef K_bli_dgemv_n_zen4_int_16mx7
 DGEMV_TEST_M(7)
 #endif
 
-#ifdef K_bli_dgemv_n_zen_int_16mx6_avx512
+#ifdef K_bli_dgemv_n_zen4_int_16mx6
 DGEMV_TEST_M(6)
 #endif
 
-#ifdef K_bli_dgemv_n_zen_int_16mx5_avx512
+#ifdef K_bli_dgemv_n_zen4_int_16mx5
 DGEMV_TEST_M(5)
 #endif
 
-#ifdef K_bli_dgemv_n_zen_int_16mx4_avx512
+#ifdef K_bli_dgemv_n_zen4_int_16mx4
 DGEMV_TEST_M(4)
 #endif
 
-#ifdef K_bli_dgemv_n_zen_int_16mx3_avx512
+#ifdef K_bli_dgemv_n_zen4_int_16mx3
 DGEMV_TEST_M(3)
 #endif
 
-#ifdef K_bli_dgemv_n_zen_int_16mx2_avx512
+#ifdef K_bli_dgemv_n_zen4_int_16mx2
 DGEMV_TEST_M(2)
 #endif
 
-#ifdef K_bli_dgemv_n_zen_int_16mx1_avx512
+#ifdef K_bli_dgemv_n_zen4_int_16mx1
 DGEMV_TEST_M(1)
 #endif
 
 // 32x8n kernel will handle case where m >= 32.
-#ifdef K_bli_dgemv_n_zen_int_32x8n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_32x8n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_32x8n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_32x8n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_32x8n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -778,12 +778,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // 16x8n kernel will handle case where m = [16, 32).
-#ifdef K_bli_dgemv_n_zen_int_16x8n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_16x8n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_16x8n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_16x8n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_16x8n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -802,12 +802,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // 8x8n kernel will handle case where m = [8, 15).
-#ifdef K_bli_dgemv_n_zen_int_8x8n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_8x8n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_8x8n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_8x8n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_8x8n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -826,12 +826,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // m_leftx8n kernel will handle case where m = [1, 7).
-#ifdef K_bli_dgemv_n_zen_int_m_leftx8n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_m_leftx8n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_m_leftx8n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_m_leftx8n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_m_leftx8n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -850,12 +850,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // 32x4n kernel will handle case where m >= 32 and n = 4.
-#ifdef K_bli_dgemv_n_zen_int_32x4n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_32x4n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_32x4n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_32x4n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_32x4n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -874,12 +874,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // 16x4n kernel will handle case where m = [16, 32) and n = 4.
-#ifdef K_bli_dgemv_n_zen_int_16x4n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_16x4n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_16x4n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_16x4n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_16x4n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -897,12 +897,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // 8x4n kernel will handle case where m = [8, 15) and n = 4.
-#ifdef K_bli_dgemv_n_zen_int_8x4n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_8x4n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_8x4n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_8x4n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_8x4n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -920,12 +920,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // m_leftx4n kernel will handle case where m = [1, 7) and n = 4.
-#ifdef K_bli_dgemv_n_zen_int_m_leftx4n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_m_leftx4n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_m_leftx4n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_m_leftx4n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_m_leftx4n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -943,12 +943,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // 32x3n kernel will handle case where m >= 32 and n = 3.
-#ifdef K_bli_dgemv_n_zen_int_32x3n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_32x3n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_32x3n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_32x3n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_32x3n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -967,12 +967,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // 16x3n kernel will handle case where m = [16, 32) and n = 3.
-#ifdef K_bli_dgemv_n_zen_int_16x3n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_16x3n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_16x3n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_16x3n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_16x3n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -990,12 +990,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // 8x3n kernel will handle case where m = [8, 15) and n = 3.
-#ifdef K_bli_dgemv_n_zen_int_8x3n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_8x3n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_8x3n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_8x3n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_8x3n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -1013,12 +1013,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // m_leftx3n kernel will handle case where m = [1, 7) and n = 3.
-#ifdef K_bli_dgemv_n_zen_int_m_leftx3n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_m_leftx3n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_m_leftx3n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_m_leftx3n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_m_leftx3n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -1036,12 +1036,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // 32x2n kernel will handle case where m >= 32 and n = 2.
-#ifdef K_bli_dgemv_n_zen_int_32x2n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_32x2n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_32x2n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_32x2n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_32x2n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -1060,12 +1060,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // 16x2n kernel will handle case where m = [16, 32) and n = 2.
-#ifdef K_bli_dgemv_n_zen_int_16x2n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_16x2n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_16x2n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_16x2n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_16x2n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -1083,12 +1083,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // 8x2n kernel will handle case where m = [8, 15) and n = 2.
-#ifdef K_bli_dgemv_n_zen_int_8x2n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_8x2n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_8x2n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_8x2n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_8x2n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -1106,12 +1106,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // m_leftx2n kernel will handle case where m = [1, 7) and n = 2.
-#ifdef K_bli_dgemv_n_zen_int_m_leftx2n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_m_leftx2n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_m_leftx2n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_m_leftx2n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_m_leftx2n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -1129,12 +1129,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // 32x1n kernel will handle case where m >= 32 and n = 1.
-#ifdef K_bli_dgemv_n_zen_int_32x1n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_32x1n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_32x1n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_32x1n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_32x1n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -1153,12 +1153,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // 16x1n kernel will handle case where m = [16, 32) and n = 1.
-#ifdef K_bli_dgemv_n_zen_int_16x1n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_16x1n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_16x1n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_16x1n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_16x1n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -1176,12 +1176,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // 8x1n kernel will handle case where m = [8, 15) and n = 1.
-#ifdef K_bli_dgemv_n_zen_int_8x1n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_8x1n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_8x1n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_8x1n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_8x1n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -1199,12 +1199,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // m_leftx1n kernel will handle case where m = [1, 7) and n = 1.
-#ifdef K_bli_dgemv_n_zen_int_m_leftx1n_avx512
+#ifdef K_bli_dgemv_n_zen4_int_m_leftx1n
 INSTANTIATE_TEST_SUITE_P(
     dgemv_n_m_leftx1n_avx512,
     dgemvGenericConja,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen_int_m_leftx1n_avx512),
+        ::testing::Values(K_bli_dgemv_n_zen4_int_m_leftx1n),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -1247,12 +1247,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 
-#ifdef K_bli_dgemv_n_zen4_40x2_int_st
+#ifdef K_bli_dgemv_n_zen4_int_40x2_st
 INSTANTIATE_TEST_SUITE_P(
-    bli_dgemv_n_zen4_40x2_int_st,
+    bli_dgemv_n_zen4_int_40x2_st,
     dgemvGenericTransa,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen4_40x2_int_st),
+        ::testing::Values(bli_dgemv_n_zen4_int_40x2_st),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -1271,12 +1271,12 @@ INSTANTIATE_TEST_SUITE_P(
 );
 #endif
 
-#if defined(BLIS_ENABLE_OPENMP) && defined(K_bli_dgemv_n_zen4_40x2_int_mt)
+#if defined(BLIS_ENABLE_OPENMP) && defined(K_bli_dgemv_n_zen4_int_40x2_mt)
 INSTANTIATE_TEST_SUITE_P(
-    bli_dgemv_n_zen4_40x2_int_mt,
+    bli_dgemv_n_zen4_int_40x2_mt,
     dgemvGenericTransa,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_n_zen4_40x2_int_mt),
+        ::testing::Values(bli_dgemv_n_zen4_int_40x2_mt),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -1295,12 +1295,12 @@ INSTANTIATE_TEST_SUITE_P(
 );
 #endif
 
-#ifdef K_bli_dgemv_m_zen4_40x8_int_st
+#ifdef K_bli_dgemv_m_zen4_int_40x8_st
 INSTANTIATE_TEST_SUITE_P(
-    bli_dgemv_m_zen4_40x8_int_st,
+    bli_dgemv_m_zen4_int_40x8_st,
     dgemvGenericTransa,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_m_zen4_40x8_int_st),
+        ::testing::Values(bli_dgemv_m_zen4_int_40x8_st),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -1319,12 +1319,12 @@ INSTANTIATE_TEST_SUITE_P(
 );
 #endif
 
-#if defined(BLIS_ENABLE_OPENMP) && defined(K_bli_dgemv_m_zen4_40x8_int_mt_Ndiv)
+#if defined(BLIS_ENABLE_OPENMP) && defined(K_bli_dgemv_m_zen4_int_40x8_mt_Ndiv)
 INSTANTIATE_TEST_SUITE_P(
-    bli_dgemv_m_zen4_40x8_int_mt_Ndiv,
+    bli_dgemv_m_zen4_int_40x8_mt_Ndiv,
     dgemvGenericTransa,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_m_zen4_40x8_int_mt_Ndiv),
+        ::testing::Values(bli_dgemv_m_zen4_int_40x8_mt_Ndiv),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -1343,12 +1343,12 @@ INSTANTIATE_TEST_SUITE_P(
 );
 #endif
 
-#if defined(BLIS_ENABLE_OPENMP) && defined(K_bli_dgemv_m_zen4_40x8_int_mt_Mdiv)
+#if defined(BLIS_ENABLE_OPENMP) && defined(K_bli_dgemv_m_zen4_int_40x8_mt_Mdiv)
 INSTANTIATE_TEST_SUITE_P(
-    bli_dgemv_m_zen4_40x8_int_mt_Mdiv,
+    bli_dgemv_m_zen4_int_40x8_mt_Mdiv,
     dgemvGenericTransa,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_m_zen4_40x8_int_mt_Mdiv),
+        ::testing::Values(bli_dgemv_m_zen4_int_40x8_mt_Mdiv),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx
@@ -1367,12 +1367,12 @@ INSTANTIATE_TEST_SUITE_P(
 );
 #endif
 
-#if defined(BLIS_ENABLE_OPENMP) && defined(K_bli_dgemv_m_zen4_40x8_int_mt_Mdiv_Ndiv)
+#if defined(BLIS_ENABLE_OPENMP) && defined(K_bli_dgemv_m_zen4_int_40x8_mt_Mdiv_Ndiv)
 INSTANTIATE_TEST_SUITE_P(
-    bli_dgemv_m_zen4_40x8_int_mt_Mdiv_Ndiv,
+    bli_dgemv_m_zen4_int_40x8_mt_Mdiv_Ndiv,
     dgemvGenericTransa,
     ::testing::Combine(
-        ::testing::Values(bli_dgemv_m_zen4_40x8_int_mt_Mdiv_Ndiv),
+        ::testing::Values(bli_dgemv_m_zen4_int_40x8_mt_Mdiv_Ndiv),
         ::testing::Values( 'c' ),                                       // storage format
         ::testing::Values( 'n' ),                                       // transa
         ::testing::Values( 'n' ),                                       // conjx

@@ -34,7 +34,7 @@
 */
 
 // Including the header for tiny gemm kernel signatures
-#include "bli_gemm_tiny_avx2.h"
+#include "bli_gemm_tiny_zen.h"
 
 // -- level-1m --
 // Removed - reference packm kernels are used
@@ -59,28 +59,28 @@ AXPBYV_KER_PROT( scomplex, c, axpbyv_zen_int )
 AXPBYV_KER_PROT( dcomplex, z, axpbyv_zen_int )
 
 // axpbyv (intrinsics, unrolled x10)
-AXPBYV_KER_PROT( float,    s, axpbyv_zen_int10 )
-AXPBYV_KER_PROT( double,   d, axpbyv_zen_int10 )
+AXPBYV_KER_PROT( float,    s, axpbyv_zen_int_10 )
+AXPBYV_KER_PROT( double,   d, axpbyv_zen_int_10 )
 
 // axpyv (intrinsics)
 AXPYV_KER_PROT( float,    s, axpyv_zen_int )
 AXPYV_KER_PROT( double,   d, axpyv_zen_int )
 
 // axpyv (intrinsics unrolled x10)
-AXPYV_KER_PROT( float,    s, axpyv_zen_int10 )
-BLIS_EXPORT_BLIS AXPYV_KER_PROT( double,   d, axpyv_zen_int10 )
-AXPYV_KER_PROT( scomplex, c, axpyv_zen_int5 )
-AXPYV_KER_PROT( dcomplex, z, axpyv_zen_int5 )
+AXPYV_KER_PROT( float,    s, axpyv_zen_int_10 )
+BLIS_EXPORT_BLIS AXPYV_KER_PROT( double,   d, axpyv_zen_int_10 )
+AXPYV_KER_PROT( scomplex, c, axpyv_zen_int_5 )
+AXPYV_KER_PROT( dcomplex, z, axpyv_zen_int_5 )
 
 // dotv (intrinsics)
 DOTV_KER_PROT( float,    s, dotv_zen_int )
 DOTV_KER_PROT( double,   d, dotv_zen_int )
 
 // dotv (intrinsics, unrolled x10)
-DOTV_KER_PROT( float,    s, dotv_zen_int10 )
-DOTV_KER_PROT( double,   d, dotv_zen_int10 )
-DOTV_KER_PROT( scomplex,  c, dotv_zen_int5 )
-DOTV_KER_PROT( dcomplex,  z, dotv_zen_int5 )
+DOTV_KER_PROT( float,    s, dotv_zen_int_10 )
+DOTV_KER_PROT( double,   d, dotv_zen_int_10 )
+DOTV_KER_PROT( scomplex,  c, dotv_zen_int_5 )
+DOTV_KER_PROT( dcomplex,  z, dotv_zen_int_5 )
 
 // dotxv (intrinsics)
 DOTXV_KER_PROT( float,    s, dotxv_zen_int )
@@ -95,13 +95,13 @@ SCALV_KER_PROT( scomplex, c, scalv_zen_int )
 SCALV_KER_PROT( dcomplex, z, scalv_zen_int )
 
 // scalv (intrinsics unrolled x10)
-SCALV_KER_PROT( float,      s, scalv_zen_int10 )
-BLIS_EXPORT_BLIS SCALV_KER_PROT( double,     d, scalv_zen_int10 )
-SCALV_KER_PROT( dcomplex,   z, dscalv_zen_int10 )
+SCALV_KER_PROT( float,      s, scalv_zen_int_10 )
+BLIS_EXPORT_BLIS SCALV_KER_PROT( double,     d, scalv_zen_int_10 )
+SCALV_KER_PROT( dcomplex,   z, dscalv_zen_int_10 )
 
 // swapv (intrinsics)
-SWAPV_KER_PROT(float,   s, swapv_zen_int8 )
-BLIS_EXPORT_BLIS SWAPV_KER_PROT(double,  d, swapv_zen_int8 )
+SWAPV_KER_PROT(float,   s, swapv_zen_int_8 )
+BLIS_EXPORT_BLIS SWAPV_KER_PROT(double,  d, swapv_zen_int_8 )
 
 // copyv (intrinsics)
 COPYV_KER_PROT( float,      s, copyv_zen_int )
@@ -328,7 +328,7 @@ err_t bli_dgemm_tiny
         double*    c, const inc_t rs_c0, const inc_t cs_c0
 );
 
-err_t bli_dgemm_tiny_6x8
+err_t bli_dgemm_tiny_zen_6x8
      (
         conj_t              conja,
         conj_t              conjb,
@@ -388,7 +388,7 @@ err_t bli_zgemm_small_At
       cntl_t* cntl
     );
 
-err_t bli_dgemm_8x6_avx2_k1_nn
+err_t bli_dgemm_zen_int_8x6_k1_nn
     (
       dim_t m,
       dim_t n,
@@ -400,7 +400,7 @@ err_t bli_dgemm_8x6_avx2_k1_nn
       double* c, const inc_t ldc
      );
 
-err_t bli_zgemm_4x4_avx2_k1_nn
+err_t bli_zgemm_zen_int_4x4_k1_nn
     (
       dim_t m,
       dim_t n,
@@ -412,7 +412,7 @@ err_t bli_zgemm_4x4_avx2_k1_nn
       dcomplex* c, const inc_t ldc
      );
 
-err_t bli_trsm_small
+err_t bli_trsm_small_zen
      (
        side_t  side,
        obj_t*  alpha,
@@ -424,7 +424,7 @@ err_t bli_trsm_small
      );
 
 #ifdef BLIS_ENABLE_OPENMP
-err_t bli_trsm_small_mt
+err_t bli_trsm_small_zen_mt
      (
        side_t  side,
        obj_t*  alpha,
@@ -480,7 +480,7 @@ bool bli_cntx_trsm_small_thresh_is_met_zen
         dim_t n
     );
 
-void bli_snorm2fv_unb_var1_avx2
+void bli_snorm2fv_zen_int_unb_var1
      (
        dim_t    n,
        float*   x, inc_t incx,
@@ -488,7 +488,7 @@ void bli_snorm2fv_unb_var1_avx2
        cntx_t*  cntx
      );
 
-void bli_dnorm2fv_unb_var1_avx2
+void bli_dnorm2fv_zen_int_unb_var1
      (
        dim_t    n,
        double*   x, inc_t incx,
@@ -496,7 +496,7 @@ void bli_dnorm2fv_unb_var1_avx2
        cntx_t*  cntx
      );
 
-void bli_scnorm2fv_unb_var1_avx2
+void bli_scnorm2fv_zen_int_unb_var1
      (
        dim_t    n,
        scomplex*   x, inc_t incx,
@@ -504,7 +504,7 @@ void bli_scnorm2fv_unb_var1_avx2
        cntx_t*  cntx
      );
 
-void bli_dznorm2fv_unb_var1_avx2
+void bli_dznorm2fv_zen_int_unb_var1
      (
        dim_t    n,
        dcomplex*   x, inc_t incx,
@@ -543,7 +543,7 @@ void bli_sgemv_zen_ref
        cntx_t* restrict cntx
      );
 
-void bli_dgemv_n_avx2
+void bli_dgemv_n_zen
      (
        trans_t transa,
        conj_t  conjx,

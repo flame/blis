@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -72,8 +72,8 @@ TEST_P( dnrm2Generic, UKR )
 
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 /*
-    Unit testing for functionality of bli_dnorm2fv_unb_var1_avx2 kernel.
-    The code structure for bli_dnorm2fv_unb_var1_avx2( ... ) is as follows :
+    Unit testing for functionality of bli_dnorm2fv_zen_int_unb_var1 kernel.
+    The code structure for bli_dnorm2fv_zen_int_unb_var1( ... ) is as follows :
     For unit strides :
         Main loop    :  In blocks of 8 --> L8
         Fringe loops :  In blocks of 4 --> L4
@@ -82,12 +82,12 @@ TEST_P( dnrm2Generic, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
-#ifdef K_bli_dnorm2fv_unb_var1_avx2
+#ifdef K_bli_dnorm2fv_zen_int_unb_var1
 INSTANTIATE_TEST_SUITE_P(
-        bli_dnorm2fv_unb_var1_avx2_unitStrides,
+        bli_dnorm2fv_zen_int_unb_var1_unitStrides,
         dnrm2Generic,
         ::testing::Combine(
-            ::testing::Values(bli_dnorm2fv_unb_var1_avx2), // ukr function
+            ::testing::Values(K_bli_dnorm2fv_zen_int_unb_var1), // ukr function
             // m size of vector
             ::testing::Values(// Testing the loops standalone
                               gtint_t(8),                  // size n, for L8
@@ -105,12 +105,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // Unit testing with non-unit strides.
-#ifdef K_bli_dnorm2fv_unb_var1_avx2
+#ifdef K_bli_dnorm2fv_zen_int_unb_var1
 INSTANTIATE_TEST_SUITE_P(
-        bli_dnorm2fv_unb_var1_avx2_nonUnitStrides,
+        bli_dnorm2fv_zen_int_unb_var1_nonUnitStrides,
         dnrm2Generic,
         ::testing::Combine(
-            ::testing::Values(bli_dnorm2fv_unb_var1_avx2), // ukr function
+            ::testing::Values(K_bli_dnorm2fv_zen_int_unb_var1), // ukr function
             // m size of vector
             ::testing::Values(// Testing the loops standalone
                               gtint_t(25),                 // n, size of the vector
@@ -127,8 +127,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 /*
-    Unit testing for functionality of bli_dnorm2fv_unb_var1_avx512 kernel.
-    The code structure for bli_dnorm2fv_unb_var1_avx512( ... ) is as follows :
+    Unit testing for functionality of bli_dnorm2fv_zen4_int_unb_var1 kernel.
+    The code structure for bli_dnorm2fv_zen4_int_unb_var1( ... ) is as follows :
     For unit strides :
         Main loop    :  In blocks of 32 --> L32
         Fringe loops :  In blocks of 16 --> L16
@@ -138,12 +138,12 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
-#ifdef K_bli_dnorm2fv_unb_var1_avx512
+#ifdef K_bli_dnorm2fv_zen4_int_unb_var1
 INSTANTIATE_TEST_SUITE_P(
-        bli_dnorm2fv_unb_var1_avx512_unitStrides,
+        bli_dnorm2fv_zen4_int_unb_var1_unitStrides,
         dnrm2Generic,
         ::testing::Combine(
-            ::testing::Values(bli_dnorm2fv_unb_var1_avx512), // ukr function
+            ::testing::Values(K_bli_dnorm2fv_zen4_int_unb_var1), // ukr function
             // m size of vector
             ::testing::Values(// Testing the loops standalone
                               gtint_t(32),                 // size n, for L32
@@ -162,12 +162,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // Unit testing with non-unit strides.
-#ifdef K_bli_dnorm2fv_unb_var1_avx512
+#ifdef K_bli_dnorm2fv_zen4_int_unb_var1
 INSTANTIATE_TEST_SUITE_P(
-        bli_dnorm2fv_unb_var1_avx512_nonUnitStrides,
+        bli_dnorm2fv_zen4_int_unb_var1_nonUnitStrides,
         dnrm2Generic,
         ::testing::Combine(
-            ::testing::Values(bli_dnorm2fv_unb_var1_avx512), // ukr function
+            ::testing::Values(K_bli_dnorm2fv_zen4_int_unb_var1), // ukr function
             // m size of vector
             ::testing::Values(// Testing the loops standalone
                               gtint_t(25),                 // n, size of the vector

@@ -776,7 +776,7 @@ void strsm_blis_impl
                (is_parallel && (m0+n0)<320))
         {
             err_t small_status;
-            small_status = bli_trsm_small
+            small_status = bli_trsm_small_zen
                            (
                              blis_side,
                              &alphao,
@@ -1181,22 +1181,22 @@ void dtrsm_blis_impl
                 {
                     if ( m0 <= 120 )
                     {
-                        ker_ft = bli_trsm_small_AVX512;
+                        ker_ft = bli_trsm_small_zen4;
                     }
                     else if ( (log10(n0) + (0.65*log10(m0)) ) < 4.4 )
                     {
-                        ker_ft = bli_trsm_small_ZEN5;
+                        ker_ft = bli_trsm_small_zen5;
                     }
                 }
                 else //if ( blis_side == BLIS_RIGHT )
                 {
                     if ( (log10(m0) + (3.2*log10(n0)) ) < 7 )
                     {
-                        ker_ft = bli_trsm_small_AVX512;
+                        ker_ft = bli_trsm_small_zen4;
                     }
                     else if ( (log10(m0) + (0.85*log10(n0)) ) < 5 )
                     {
-                        ker_ft = bli_trsm_small_ZEN5;
+                        ker_ft = bli_trsm_small_zen5;
                     }
                 }
                 break;
@@ -1210,11 +1210,11 @@ void dtrsm_blis_impl
                     except for sizes where n is multiple of 8.*/
                     if (((n0 % 8 == 0) && (n0 < 50)) || ((m0 > 50) && (n0 > 50)))
                     {
-                        ker_ft = bli_trsm_small_AVX512;
+                        ker_ft = bli_trsm_small_zen4;
                     }
                     else
                     {
-                        ker_ft = bli_trsm_small;
+                        ker_ft = bli_trsm_small_zen;
                     }
                 }
                 break;
@@ -1226,7 +1226,7 @@ void dtrsm_blis_impl
                 if ((!is_parallel && ((dim_a < 1500) && (size_b < 5e6)) ) ||
                     (is_parallel && (m0+n0)<200))
                 {
-                    ker_ft = bli_trsm_small;
+                    ker_ft = bli_trsm_small_zen;
                 }
                 break;
         }
@@ -1242,7 +1242,7 @@ void dtrsm_blis_impl
                     {
                         if ( n0 < 4300 )
                         {
-                            ker_ft = bli_trsm_small_mt_ZEN5;
+                            ker_ft = bli_trsm_small_zen5_mt;
                         }
                         else
                         {
@@ -1253,7 +1253,7 @@ void dtrsm_blis_impl
                     {
                         if ( (n0 < 1812 || m0 < 3220) && (m0 < 14000) )
                         {
-                            ker_ft = bli_trsm_small_mt_ZEN5;
+                            ker_ft = bli_trsm_small_zen5_mt;
                         }
                         else
                         {
@@ -1268,7 +1268,7 @@ void dtrsm_blis_impl
                 if( (ker_ft == NULL) && (is_parallel) &&
                     ((dim_a < 2500) && (size_b < 5e6)) )
                 {
-                    ker_ft = bli_trsm_small_mt_AVX512;
+                    ker_ft = bli_trsm_small_zen4_mt;
                 }
                 break;
 #endif// BLIS_KERNELS_ZEN4
@@ -1279,7 +1279,7 @@ void dtrsm_blis_impl
                 if( (ker_ft == NULL) && (is_parallel) &&
                     ((dim_a < 2500) && (size_b < 5e6)) )
                 {
-                    ker_ft = bli_trsm_small_mt;
+                    ker_ft = bli_trsm_small_zen_mt;
                 }
                 break;
             }
@@ -1723,7 +1723,7 @@ void ztrsm_blis_impl
             {
                 if (!bli_obj_has_conj(&ao)) // if transa == 'C', go to native code path
                 {
-                    ker_ft = bli_trsm_small_mt_ZEN5; // 12x4 non fused kernel for ZEN5
+                    ker_ft = bli_trsm_small_zen5_mt; // 12x4 non fused kernel for ZEN5
                 }
             }
             break;
@@ -1735,7 +1735,7 @@ void ztrsm_blis_impl
             {
                 if (!bli_obj_has_conj(&ao))
                 {
-                    ker_ft = bli_trsm_small_mt_AVX512; // 4x4 fused kernel for ZEN4
+                    ker_ft = bli_trsm_small_zen4_mt; // 4x4 fused kernel for ZEN4
                 }
                 else
                 {
@@ -1744,7 +1744,7 @@ void ztrsm_blis_impl
                     // better accuracy in large sizes
                     if (dim_a <= 500)
 #endif
-                    ker_ft = bli_trsm_small_mt;
+                    ker_ft = bli_trsm_small_zen_mt;
                 }
             }
             break;
@@ -1772,22 +1772,22 @@ void ztrsm_blis_impl
                     {
                         if ( m0 <= 88 )
                         {
-                            ker_ft = bli_trsm_small_AVX512;
+                            ker_ft = bli_trsm_small_zen4;
                         }
                         else if ( (log10(n0) + (0.15*log10(m0)) ) < 2.924 )
                         {
-                            ker_ft = bli_trsm_small_ZEN5;
+                            ker_ft = bli_trsm_small_zen5;
                         }
                     }
                     else //if ( blis_side == BLIS_RIGHT )
                     {
                         if ( (log10(m0) + (2.8*log10(n0)) ) < 6 )
                         {
-                            ker_ft = bli_trsm_small_AVX512;
+                            ker_ft = bli_trsm_small_zen4;
                         }
                         else if ( (log10(m0) + (1.058*log10(n0)) ) < 5.373 )
                         {
-                            ker_ft = bli_trsm_small_ZEN5;
+                            ker_ft = bli_trsm_small_zen5;
                         }
                     }
                     break;
@@ -1800,7 +1800,7 @@ void ztrsm_blis_impl
                         // conjugate
                         if (!bli_obj_has_conj(&ao))
                         {
-                            ker_ft = bli_trsm_small_AVX512;
+                            ker_ft = bli_trsm_small_zen4;
                         }
                         else
                         {
@@ -1809,7 +1809,7 @@ void ztrsm_blis_impl
                             // better accuracy in large sizes
                             if (dim_a <= 500)
 #endif
-                            ker_ft = bli_trsm_small;
+                            ker_ft = bli_trsm_small_zen;
                         }
                     }
                     break;
@@ -1823,7 +1823,7 @@ void ztrsm_blis_impl
                     // better accuracy in large sizes
                     if (dim_a <= 500)
 #endif
-                    ker_ft = bli_trsm_small;
+                    ker_ft = bli_trsm_small_zen;
                     break;
             }
         }
@@ -2229,7 +2229,7 @@ void ctrsm_blis_impl
            (is_parallel && (m0+n0)<320))
         {
             err_t small_status;
-            small_status = bli_trsm_small
+            small_status = bli_trsm_small_zen
                            (
                              blis_side,
                              &alphao,

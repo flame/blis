@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -80,7 +80,7 @@ void bli_saxpbyv_zen_int
 	// 		When beta = !( 0 or 1 ) --> SSCALV
 	if ( bli_seq0( *alpha ) )
 	{
-		bli_sscalv_zen_int10
+		bli_sscalv_zen_int_10
 		(
 		  BLIS_NO_CONJUGATE,
 		  n,
@@ -337,7 +337,7 @@ void bli_daxpbyv_zen_int
 	// 		When beta = !( 0 or 1 ) --> DSCALV
 	if ( bli_deq0( *alpha ) )
 	{
-		bli_dscalv_zen_int10
+		bli_dscalv_zen_int_10
 		(
 		  BLIS_NO_CONJUGATE,
 		  n,
@@ -648,7 +648,7 @@ void bli_caxpbyv_zen_int
 		}
 		else
 		{
-			bli_caxpyv_zen_int5
+			bli_caxpyv_zen_int_5
 			(
 			  conjx,
 			  n,
@@ -1331,7 +1331,7 @@ void bli_zaxpbyv_zen_int
 		}
 		else
 		{
-			bli_zaxpyv_zen_int5
+			bli_zaxpyv_zen_int_5
 			(
 			  conjx,
 			  n,

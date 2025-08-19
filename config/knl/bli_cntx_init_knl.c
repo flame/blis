@@ -89,8 +89,8 @@ void bli_cntx_init_knl( cntx_t* cntx )
 	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int,
 	  BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int,
 #else
-	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int10,
-	  BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int10,
+	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int_10,
+	  BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int_10,
 #endif
 	  // dotv
 	  BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int,
@@ -103,8 +103,8 @@ void bli_cntx_init_knl( cntx_t* cntx )
 	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int,
 	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int,
 #else
-	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int10,
-	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int10,
+	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int_10,
+	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int_10,
 #endif
 	  cntx
 	);

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -144,8 +144,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 /*
-    Unit testing for functionality of bli_dsetv_zen_int_avx512 kernel.
-    The code structure for bli_dsetv_zen_int_avx512( ... ) is as follows :
+    Unit testing for functionality of bli_dsetv_zen4_int kernel.
+    The code structure for bli_dsetv_zen4_int( ... ) is as follows :
     For unit strides :
         Main loop    :  In blocks of 256 -->  L256
         Fringe loops :  In blocks of 128 -->  L128
@@ -159,12 +159,12 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with Unit Strides(US), across all loops.
-#ifdef K_bli_dsetv_zen_int_avx512
+#ifdef K_bli_dsetv_zen4_int
 INSTANTIATE_TEST_SUITE_P(
-        bli_dsetv_zen_int_avx512_unitStrides,
+        bli_dsetv_zen4_int_unitStrides,
         dsetvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_dsetv_zen_int_avx512),
+            ::testing::Values(K_bli_dsetv_zen4_int),
             ::testing::Values('n', 'c'),              // conjalpha
             ::testing::Values(double(2.2)),           // alpha
             ::testing::Values(// Testing the loops standalone
@@ -201,12 +201,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // Unit testing with Non-Unit Strides(US), across all loops.
-#ifdef K_bli_dsetv_zen_int_avx512
+#ifdef K_bli_dsetv_zen4_int
 INSTANTIATE_TEST_SUITE_P(
-        bli_dsetv_zen_int_avx512_nonUnitStrides,
+        bli_dsetv_zen4_int_nonUnitStrides,
         dsetvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_dsetv_zen_int_avx512),
+            ::testing::Values(K_bli_dsetv_zen4_int),
             ::testing::Values('n', 'c'),                 // conjalpha
             ::testing::Values(double(2.2)),              // alpha
             ::testing::Values(gtint_t(25), gtint_t(37)), // size of the vector

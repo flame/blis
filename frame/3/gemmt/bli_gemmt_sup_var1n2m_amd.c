@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -81,17 +81,17 @@ typedef void (*gemmt_ker_ft)
 #if defined(BLIS_KERNELS_ZEN4)
 gemmt_ker_ft ker_fpus_zen4[3] =
 	{
-		bli_dgemmsup_rv_zen4_asm_24x8m_upper_0,
-		bli_dgemmsup_rv_zen4_asm_24x8m_upper_1,
-		bli_dgemmsup_rv_zen4_asm_24x8m_upper_2
+		bli_dgemmsup_cv_zen4_asm_24x8m_upper_0,
+		bli_dgemmsup_cv_zen4_asm_24x8m_upper_1,
+		bli_dgemmsup_cv_zen4_asm_24x8m_upper_2
 	};
 
 //Look-up table for Gemmt Lower Variant Kernels
 gemmt_ker_ft ker_fpls_zen4[3] = 
 	{
-		bli_dgemmsup_rv_zen4_asm_24x8m_lower_0,
-		bli_dgemmsup_rv_zen4_asm_24x8m_lower_1,
-		bli_dgemmsup_rv_zen4_asm_24x8m_lower_2
+		bli_dgemmsup_cv_zen4_asm_24x8m_lower_0,
+		bli_dgemmsup_cv_zen4_asm_24x8m_lower_1,
+		bli_dgemmsup_cv_zen4_asm_24x8m_lower_2
 	};
 #endif 
 

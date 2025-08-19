@@ -206,7 +206,7 @@ float sdot_blis_impl
 #if defined(BLIS_KERNELS_ZEN4)
 
             // AVX-512 Kernel
-            dotv_ker_ptr = bli_sdotv_zen_int_avx512;
+            dotv_ker_ptr = bli_sdotv_zen4_int;
 
         break;
 #endif
@@ -215,7 +215,7 @@ float sdot_blis_impl
         case BLIS_ARCH_ZEN3:
 
             // AVX-2 Kernel
-            dotv_ker_ptr = bli_sdotv_zen_int10;
+            dotv_ker_ptr = bli_sdotv_zen_int_10;
 
             break;
         default:
@@ -347,7 +347,7 @@ double ddot_blis_impl
 
 #if defined(BLIS_KERNELS_ZEN5)
           // AVX-512 Kernel
-          dotv_ker_ptr = bli_ddotv_zen_int_avx512;
+          dotv_ker_ptr = bli_ddotv_zen4_int;
 #if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
           fast_path_thresh = 6600;
 #endif
@@ -358,7 +358,7 @@ double ddot_blis_impl
 
 #if defined(BLIS_KERNELS_ZEN4)
           // AVX-512 Kernel
-          dotv_ker_ptr = bli_ddotv_zen_int_avx512;
+          dotv_ker_ptr = bli_ddotv_zen4_int;
 #if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
           fast_path_thresh = 5600;
 #endif
@@ -370,7 +370,7 @@ double ddot_blis_impl
       case BLIS_ARCH_ZEN3:
 
           // AVX2 Kernel
-          dotv_ker_ptr = bli_ddotv_zen_int10;
+          dotv_ker_ptr = bli_ddotv_zen_int_10;
 #if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
           fast_path_thresh = 2500;
 #endif
@@ -686,7 +686,7 @@ scomplex cdotu_blis_impl
     if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {
         /* Call BLIS kernel. */
-        bli_cdotv_zen_int5
+        bli_cdotv_zen_int_5
         (
         BLIS_NO_CONJUGATE,
         BLIS_NO_CONJUGATE,
@@ -807,14 +807,14 @@ dcomplex zdotu_blis_impl
         case BLIS_ARCH_ZEN5:
         case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
-            zdotv_ker_ptr = bli_zdotv_zen_int_avx512;
+            zdotv_ker_ptr = bli_zdotv_zen4_int;
             break;
 #endif
 
         case BLIS_ARCH_ZEN3:
         case BLIS_ARCH_ZEN2:
         case BLIS_ARCH_ZEN:
-            zdotv_ker_ptr = bli_zdotv_zen_int5;
+            zdotv_ker_ptr = bli_zdotv_zen_int_5;
             break;
 
         default:
@@ -1097,7 +1097,7 @@ scomplex cdotc_blis_impl
     if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {
         /* Call BLIS kernel. */
-        bli_cdotv_zen_int5
+        bli_cdotv_zen_int_5
         (
         BLIS_CONJUGATE,
         BLIS_NO_CONJUGATE,
@@ -1220,15 +1220,15 @@ dcomplex zdotc_blis_impl
         case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
             // Currently only the AVX512 intrinsic kernel is enabled.
-            zdotv_ker_ptr = bli_zdotv_zen_int_avx512;
-            // zdotv_ker_ptr = bli_zdotv_zen4_asm_avx512;
+            zdotv_ker_ptr = bli_zdotv_zen4_int;
+            // zdotv_ker_ptr = bli_zdotv_zen4_asm;
             break;
 #endif
 
         case BLIS_ARCH_ZEN3:
         case BLIS_ARCH_ZEN2:
         case BLIS_ARCH_ZEN:
-            zdotv_ker_ptr = bli_zdotv_zen_int5;
+            zdotv_ker_ptr = bli_zdotv_zen_int_5;
             break;
         
         default:

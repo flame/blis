@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -72,8 +72,8 @@ TEST_P( scnrm2Generic, UKR )
 
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 /*
-    Unit testing for functionality of bli_scnorm2fv_unb_var1_avx2 kernel.
-    The code structure for bli_scnorm2fv_unb_var1_avx2( ... ) is as follows :
+    Unit testing for functionality of bli_scnorm2fv_zen_int_unb_var1 kernel.
+    The code structure for bli_scnorm2fv_zen_int_unb_var1( ... ) is as follows :
     For unit strides :
         Main loop    :  In blocks of 16 --> L16
         Fringe loops :  In blocks of 12 --> L12
@@ -85,12 +85,12 @@ TEST_P( scnrm2Generic, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
-#ifdef K_bli_scnorm2fv_unb_var1_avx2
+#ifdef K_bli_scnorm2fv_zen_int_unb_var1
 INSTANTIATE_TEST_SUITE_P(
-        bli_scnorm2fv_unb_var1_avx2_unitStrides,
+        bli_scnorm2fv_zen_int_unb_var1_unitStrides,
         scnrm2Generic,
         ::testing::Combine(
-            ::testing::Values(bli_scnorm2fv_unb_var1_avx2), // ukr function
+            ::testing::Values(K_bli_scnorm2fv_zen_int_unb_var1), // ukr function
             // m size of vector
             ::testing::Values(// Testing the loops standalone
                               gtint_t(64),                  // size n, for L16
@@ -106,12 +106,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // Unit testing with non-unit strides.
-#ifdef K_bli_scnorm2fv_unb_var1_avx2
+#ifdef K_bli_scnorm2fv_zen_int_unb_var1
 INSTANTIATE_TEST_SUITE_P(
-        bli_scnorm2fv_unb_var1_avx2_nonUnitStrides,
+        bli_scnorm2fv_zen_int_unb_var1_nonUnitStrides,
         scnrm2Generic,
         ::testing::Combine(
-            ::testing::Values(bli_scnorm2fv_unb_var1_avx2), // ukr function
+            ::testing::Values(K_bli_scnorm2fv_zen_int_unb_var1), // ukr function
             // m size of vector
             ::testing::Values(// Testing the loops standalone
                               gtint_t(25),                  // n, size of the vector

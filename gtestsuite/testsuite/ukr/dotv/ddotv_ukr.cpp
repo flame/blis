@@ -163,7 +163,7 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-// Tests for bli_ddotv_zen_int10 (AVX2) kernel.
+// Tests for bli_ddotv_zen_int_10 (AVX2) kernel.
 /**
  * Loops:
  * L20     - Main loop, handles 20 elements
@@ -174,12 +174,12 @@ INSTANTIATE_TEST_SUITE_P(
  *
  * LNUnit  - loop for non-unit increments
 */
-#ifdef K_bli_ddotv_zen_int10
+#ifdef K_bli_ddotv_zen_int_10
 INSTANTIATE_TEST_SUITE_P(
-        bli_ddotv_zen_int10_unitStride,
+        bli_ddotv_zen_int_10_unitStride,
         ddotvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_ddotv_zen_int10),
+            ::testing::Values(K_bli_ddotv_zen_int_10),
             // conj(x): uses n (no_conjugate) since it is real.
             ::testing::Values('n'),
             // conj(y): uses n (no_conjugate) since it is real.
@@ -220,12 +220,12 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_ddotv_zen_int10
+#ifdef K_bli_ddotv_zen_int_10
 INSTANTIATE_TEST_SUITE_P(
-        bli_ddotv_zen_int10_nonUnitPositiveStrides,
+        bli_ddotv_zen_int_10_nonUnitPositiveStrides,
         ddotvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_ddotv_zen_int10),
+            ::testing::Values(K_bli_ddotv_zen_int_10),
             // conj(x): uses n (no_conjugate) since it is real.
             ::testing::Values('n'),
             // conj(y): uses n (no_conjugate) since it is real.
@@ -258,7 +258,7 @@ INSTANTIATE_TEST_SUITE_P(
 // -----  Begin ZEN4 (AVX512) Kernel Tests  -----
 // ----------------------------------------------
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
-// Tests for bli_ddotv_zen_int_avx512 (AVX512) kernel.
+// Tests for bli_ddotv_zen4_int (AVX512) kernel.
 /**
  * Loops & If conditions:
  * L40     - Main loop, handles 40 elements
@@ -268,12 +268,12 @@ INSTANTIATE_TEST_SUITE_P(
  *
  * LNUnit  - loop for non-unit increments
 */
-#ifdef K_bli_ddotv_zen_int_avx512
+#ifdef K_bli_ddotv_zen4_int
 INSTANTIATE_TEST_SUITE_P(
-        bli_ddotv_zen_int_avx512_unitStride,
+        bli_ddotv_zen4_int_unitStride,
         ddotvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_ddotv_zen_int_avx512),
+            ::testing::Values(K_bli_ddotv_zen4_int),
             // conj(x): uses n (no_conjugate) since it is real.
             ::testing::Values('n'),
             // conj(y): uses n (no_conjugate) since it is real.
@@ -313,12 +313,12 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_ddotv_zen_int_avx512
+#ifdef K_bli_ddotv_zen4_int
 INSTANTIATE_TEST_SUITE_P(
-        bli_ddotv_zen_int_avx512_nonUnitPositiveStrides,
+        bli_ddotv_zen4_int_nonUnitPositiveStrides,
         ddotvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_ddotv_zen_int_avx512),
+            ::testing::Values(K_bli_ddotv_zen4_int),
             // conj(x): uses n (no_conjugate) since it is real.
             ::testing::Values('n'),
             // conj(y): uses n (no_conjugate) since it is real.

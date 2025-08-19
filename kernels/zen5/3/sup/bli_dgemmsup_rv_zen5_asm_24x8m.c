@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -195,7 +195,7 @@
  * Prefetch of A matrix is not done in edge-case kernels.
  */
 
-void bli_dgemmsup_rv_zen5_asm_24x8m
+void bli_dgemmsup_cv_zen5_asm_24x8m
 (
        conj_t    conja,
        conj_t    conjb,
@@ -226,13 +226,13 @@ void bli_dgemmsup_rv_zen5_asm_24x8m
         dgemmsup_ker_ft ker_fps[8] =
         {
           NULL,
-          bli_dgemmsup_rv_zen5_asm_24x1m,
-          bli_dgemmsup_rv_zen5_asm_24x2m,
-          bli_dgemmsup_rv_zen5_asm_24x3m,
-          bli_dgemmsup_rv_zen5_asm_24x4m,
-          bli_dgemmsup_rv_zen5_asm_24x5m,
-          bli_dgemmsup_rv_zen5_asm_24x6m,
-          bli_dgemmsup_rv_zen5_asm_24x7m,
+          bli_dgemmsup_cv_zen5_asm_24x1m,
+          bli_dgemmsup_cv_zen5_asm_24x2m,
+          bli_dgemmsup_cv_zen5_asm_24x3m,
+          bli_dgemmsup_cv_zen5_asm_24x4m,
+          bli_dgemmsup_cv_zen5_asm_24x5m,
+          bli_dgemmsup_cv_zen5_asm_24x6m,
+          bli_dgemmsup_cv_zen5_asm_24x7m,
         };
 
         dgemmsup_ker_ft ker_fp = ker_fps[ n_left ];
@@ -1834,7 +1834,7 @@ void bli_dgemmsup_rv_zen5_asm_24x8m
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
 
-void bli_dgemmsup_rv_zen5_asm_24x7m
+void bli_dgemmsup_cv_zen5_asm_24x7m
 (
        conj_t    conja,
        conj_t    conjb,
@@ -3329,7 +3329,7 @@ void bli_dgemmsup_rv_zen5_asm_24x7m
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
 
-void bli_dgemmsup_rv_zen5_asm_24x6m
+void bli_dgemmsup_cv_zen5_asm_24x6m
 (
        conj_t    conja,
        conj_t    conjb,
@@ -4712,7 +4712,7 @@ void bli_dgemmsup_rv_zen5_asm_24x6m
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
 
-void bli_dgemmsup_rv_zen5_asm_24x5m
+void bli_dgemmsup_cv_zen5_asm_24x5m
 (
        conj_t    conja,
        conj_t    conjb,
@@ -5978,7 +5978,7 @@ void bli_dgemmsup_rv_zen5_asm_24x5m
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
 
-void bli_dgemmsup_rv_zen5_asm_24x4m
+void bli_dgemmsup_cv_zen5_asm_24x4m
 (
        conj_t    conja,
        conj_t    conjb,
@@ -7117,7 +7117,7 @@ void bli_dgemmsup_rv_zen5_asm_24x4m
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
 
-void bli_dgemmsup_rv_zen5_asm_24x3m
+void bli_dgemmsup_cv_zen5_asm_24x3m
 (
        conj_t    conja,
        conj_t    conjb,
@@ -8132,7 +8132,7 @@ void bli_dgemmsup_rv_zen5_asm_24x3m
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
 
-void bli_dgemmsup_rv_zen5_asm_24x2m
+void bli_dgemmsup_cv_zen5_asm_24x2m
 (
        conj_t    conja,
        conj_t    conjb,
@@ -9025,7 +9025,7 @@ void bli_dgemmsup_rv_zen5_asm_24x2m
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
 
-void bli_dgemmsup_rv_zen5_asm_24x1m
+void bli_dgemmsup_cv_zen5_asm_24x1m
 (
        conj_t    conja,
        conj_t    conjb,

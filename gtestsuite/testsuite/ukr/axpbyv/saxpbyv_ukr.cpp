@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -114,8 +114,8 @@ TEST_P( saxpbyvGeneric, UKR )
 
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 /*
-    Unit testing for functionality of bli_saxpbyv_zen_int10 kernel.
-    The code structure for bli_saxpbyv_zen_int10( ... ) is as follows :
+    Unit testing for functionality of bli_saxpbyv_zen_int_10 kernel.
+    The code structure for bli_saxpbyv_zen_int_10( ... ) is as follows :
     For unit strides :
         Main loop    :  In blocks of 80 --> L80
         Fringe loops :  In blocks of 40 --> L40
@@ -128,12 +128,12 @@ TEST_P( saxpbyvGeneric, UKR )
 */
 
 // Unit testing with unit stride, across all loops.
-#ifdef K_bli_saxpbyv_zen_int10
+#ifdef K_bli_saxpbyv_zen_int_10
 INSTANTIATE_TEST_SUITE_P(
-        bli_saxpbyv_zen_int10_unitStride,
+        bli_saxpbyv_zen_int_10_unitStride,
         saxpbyvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_saxpbyv_zen_int10),      // kernel address
+            ::testing::Values(K_bli_saxpbyv_zen_int_10),    // kernel address
             ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
             ::testing::Values(// Testing the loops standalone
                               gtint_t(80),                 // size n, for L80
@@ -161,12 +161,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // Unit testing for non unit strides
-#ifdef K_bli_saxpbyv_zen_int10
+#ifdef K_bli_saxpbyv_zen_int_10
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpbyv_zen_int_unitStride,
         saxpbyvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_saxpbyv_zen_int10),      // kernel address
+            ::testing::Values(K_bli_saxpbyv_zen_int_10),    // kernel address
             ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
             ::testing::Values(gtint_t(10),                 // n, size of the vector
                               gtint_t(25)),

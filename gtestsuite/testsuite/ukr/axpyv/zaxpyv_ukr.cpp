@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
    Portions of this file consist of AI-generated content.
 
    Redistribution and use in source and binary forms, with or without
@@ -94,7 +94,7 @@ TEST_P( zaxpyvGeneric, UKR )
 
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 /*
-    Unit testing for functionality of bli_zaxpyv_zen_int5 kernel.
+    Unit testing for functionality of bli_zaxpyv_zen_int_5 kernel.
     The code structure for bli_zaxpyv_zen_int10( ... ) is as follows :
     For unit strides :
         Main loop    :  In blocks of 14 --> L14
@@ -107,12 +107,12 @@ TEST_P( zaxpyvGeneric, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
-#ifdef K_bli_zaxpyv_zen_int5
+#ifdef K_bli_zaxpyv_zen_int_5
 INSTANTIATE_TEST_SUITE_P(
-        bli_zaxpyv_zen_int5_unitStrides,
+        bli_zaxpyv_zen_int_5_unitStrides,
         zaxpyvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_zaxpyv_zen_int5),                     // kernel address
+            ::testing::Values(K_bli_zaxpyv_zen_int_5),                   // kernel address
             ::testing::Values('n'
 #ifdef TEST_BLIS_TYPED
                             , 'c'                                       // conjx
@@ -144,12 +144,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // Unit testing for non unit strides
-#ifdef K_bli_zaxpyv_zen_int5
+#ifdef K_bli_zaxpyv_zen_int_5
 INSTANTIATE_TEST_SUITE_P(
-        bli_zaxpyv_zen_int5_nonUnitStrides,
+        bli_zaxpyv_zen_int_5_nonUnitStrides,
         zaxpyvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_zaxpyv_zen_int5),                     // kernel address
+            ::testing::Values(K_bli_zaxpyv_zen_int_5),                   // kernel address
             ::testing::Values('n'
 #ifdef TEST_BLIS_TYPED
                             , 'c'                                       // conjx
@@ -171,8 +171,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 /*
-    Unit testing for functionality of bli_zaxpyv_zen_int_avx512 kernel.
-    The code structure for bli_zaxpyv_zen_int_avx512( ... ) is as follows :
+    Unit testing for functionality of bli_zaxpyv_zen4_int kernel.
+    The code structure for bli_zaxpyv_zen4_int( ... ) is as follows :
     For unit strides :
         Main loop    :  In blocks of 32 --> L32
         Fringe loops :  In blocks of 16 --> L16
@@ -183,12 +183,12 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
-#ifdef K_bli_zaxpyv_zen_int_avx512
+#ifdef K_bli_zaxpyv_zen4_int
 INSTANTIATE_TEST_SUITE_P(
-        bli_zaxpyv_zen_int_avx512_unitStrides,
+        bli_zaxpyv_zen4_int_unitStrides,
         zaxpyvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_zaxpyv_zen_int_avx512),               // kernel address
+            ::testing::Values(K_bli_zaxpyv_zen4_int),             // kernel address
             ::testing::Values('n'
 #ifdef TEST_BLIS_TYPED
                             , 'c'                                       // conjx
@@ -219,12 +219,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // Unit testing for non unit strides
-#ifdef K_bli_zaxpyv_zen_int_avx512
+#ifdef K_bli_zaxpyv_zen4_int
 INSTANTIATE_TEST_SUITE_P(
-        bli_zaxpyv_zen_int_avx512_nonUnitStrides,
+        bli_zaxpyv_zen4_int_nonUnitStrides,
         zaxpyvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_zaxpyv_zen_int_avx512),               // kernel address
+            ::testing::Values(K_bli_zaxpyv_zen4_int),             // kernel address
             ::testing::Values('n'
 #ifdef TEST_BLIS_TYPED
                             , 'c'                                       // conjx

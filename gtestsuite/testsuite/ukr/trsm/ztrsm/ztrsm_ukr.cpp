@@ -135,12 +135,12 @@ TEST_P( ztrsmGenericSmall, UKR )
 #if defined(BLIS_KERNELS_ZEN5) && defined(GTEST_AVX512)
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-#ifdef K_bli_ztrsm_small_ZEN5
+#ifdef K_bli_ztrsm_small_zen5
 INSTANTIATE_TEST_SUITE_P(
-    bli_trsm_small_ZEN5_r,
+    bli_trsm_small_zen5_r,
     ztrsmGenericSmall,
     ::testing::Combine(
-        ::testing::Values(bli_trsm_small_ZEN5),       // ker_ptr
+        ::testing::Values(K_bli_trsm_small_zen5),     // ker_ptr
         ::testing::Values('r'),                       // side
         ::testing::Values('l', 'u'),                  // uplo
         ::testing::Values('n', 'u'),                  // diaga
@@ -157,10 +157,10 @@ INSTANTIATE_TEST_SUITE_P(
 );
 
 INSTANTIATE_TEST_SUITE_P(
-    bli_trsm_small_ZEN5_l,
+    bli_trsm_small_zen5_l,
     ztrsmGenericSmall,
     ::testing::Combine(
-        ::testing::Values(bli_trsm_small_ZEN5),       // ker_ptr
+        ::testing::Values(K_bli_trsm_small_zen5),     // ker_ptr
         ::testing::Values('l'),                       // side
         ::testing::Values('l', 'u'),                  // uplo
         ::testing::Values('n', 'u'),                  // diaga
@@ -177,10 +177,10 @@ INSTANTIATE_TEST_SUITE_P(
 );
 
 INSTANTIATE_TEST_SUITE_P(
-    bli_trsm_small_ZEN5_gemm,
+    bli_trsm_small_zen5_gemm,
     ztrsmGenericSmall,
     ::testing::Combine(
-        ::testing::Values(bli_trsm_small_ZEN5),        // ker_ptr
+        ::testing::Values(K_bli_trsm_small_zen5),      // ker_ptr
         ::testing::Values('l', 'r'),                   // side
         ::testing::Values('l', 'u'),                   // uplo
         ::testing::Values('n', 'u'),                   // diaga
@@ -194,7 +194,7 @@ INSTANTIATE_TEST_SUITE_P(
     ),
     (::trsmSmallUKRPrint<dcomplex, trsm_small_ker_ft>())
 );
-#endif // K_bli_ztrsm_small_ZEN5
+#endif // K_bli_ztrsm_small_zen5
 #endif // BLIS_ENABLE_SMALL_MATRIX_TRSM
 
 #endif // defined(BLIS_KERNELS_ZEN5) && defined(GTEST_AVX512)
@@ -248,12 +248,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-#ifdef K_bli_trsm_small_AVX512
+#ifdef K_bli_trsm_small_zen4
 INSTANTIATE_TEST_SUITE_P(
-    bli_trsm_small_AVX512,
+    bli_trsm_small_zen4,
     ztrsmGenericSmall,
     ::testing::Combine(
-        ::testing::Values(bli_trsm_small_AVX512),     // ker_ptr
+        ::testing::Values(K_bli_trsm_small_zen4),   // ker_ptr
         ::testing::Values('l', 'r'),                  // side
         ::testing::Values('l', 'u'),                  // uplo
         ::testing::Values('n', 'u'),                  // diaga
@@ -324,12 +324,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-#ifdef K_bli_trsm_small
+#ifdef K_bli_trsm_small_zen
 INSTANTIATE_TEST_SUITE_P(
-    bli_trsm_small,
+    bli_trsm_small_zen,
     ztrsmGenericSmall,
     ::testing::Combine(
-        ::testing::Values(bli_trsm_small),            // ker_ptr
+        ::testing::Values(K_bli_trsm_small_zen),          // ker_ptr
         ::testing::Values('l', 'r'),                  // side
         ::testing::Values('l', 'u'),                  // uplo
         ::testing::Values('n', 'u'),                  // diaga

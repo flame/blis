@@ -271,9 +271,9 @@ INSTANTIATE_TEST_SUITE_P(
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 
-#ifdef K_bli_dgemmsup_rv_zen4_asm_24x8m
+#ifdef K_bli_dgemmsup_cv_zen4_asm_24x8m
 INSTANTIATE_TEST_SUITE_P(
-         bli_dgemmsup_rv_zen4_asm_24x8m_col_stored_c,
+         bli_dgemmsup_cv_zen4_asm_24x8m_col_stored_c,
          dgemmGenericSUP,
          ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(25), 1),           // values of m
@@ -282,7 +282,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                 // beta value
             ::testing::Values('c'),                                 // storage of c
-            ::testing::Values(bli_dgemmsup_rv_zen4_asm_24x8m),      // dgemm_sup kernel
+            ::testing::Values(K_bli_dgemmsup_cv_zen4_asm_24x8m),    // dgemm_sup kernel
             ::testing::Values(gtint_t(8)),                          // Micro kernel block MR
             ::testing::Values('n'),                                 // transa
             ::testing::Values('n'),                                 // transb
@@ -293,9 +293,9 @@ INSTANTIATE_TEST_SUITE_P(
      );
 #endif
 
-#ifdef K_bli_dgemmsup_rv_zen4_asm_24x8m
+#ifdef K_bli_dgemmsup_cv_zen4_asm_24x8m
 INSTANTIATE_TEST_SUITE_P(
-         bli_dgemmsup_rv_zen4_asm_24x8m_row_stored_c,
+         bli_dgemmsup_cv_zen4_asm_24x8m_row_stored_c,
          dgemmGenericSUP,
          ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(25), 1),           // values of m
@@ -304,7 +304,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                 // beta value
             ::testing::Values('r'),                                 // storage of c
-            ::testing::Values(bli_dgemmsup_rv_zen4_asm_24x8m),      // dgemm_sup kernel
+            ::testing::Values(K_bli_dgemmsup_cv_zen4_asm_24x8m),    // dgemm_sup kernel
             ::testing::Values(gtint_t(8)),                          // Micro kernel block MR
             ::testing::Values('t'),                                 // transa
             ::testing::Values('n'),                                 // transb
@@ -315,9 +315,9 @@ INSTANTIATE_TEST_SUITE_P(
      );
 #endif
 
-#ifdef K_bli_dgemmsup_rv_zen4_asm_24x8m_new
+#ifdef K_bli_dgemmsup_cv_zen4_asm_24x8m_new
 INSTANTIATE_TEST_SUITE_P(
-         bli_dgemmsup_rv_zen4_asm_24x8m_new_col_stored_c,
+         bli_dgemmsup_cv_zen4_asm_24x8m_new_col_stored_c,
          dgemmGenericSUP,
          ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(25), 1),           // values of m
@@ -326,7 +326,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                 // beta value
             ::testing::Values('c'),                                 // storage of c
-            ::testing::Values(bli_dgemmsup_rv_zen4_asm_24x8m_new),      // dgemm_sup kernel
+            ::testing::Values(K_bli_dgemmsup_cv_zen4_asm_24x8m_new),    // dgemm_sup kernel
             ::testing::Values(gtint_t(8)),                          // Micro kernel block MR
             ::testing::Values('n'),                                 // transa
             ::testing::Values('n'),                                 // transb
@@ -337,9 +337,9 @@ INSTANTIATE_TEST_SUITE_P(
      );
 #endif
 
-#ifdef K_bli_dgemmsup_rv_zen4_asm_24x8m_new
+#ifdef K_bli_dgemmsup_cv_zen4_asm_24x8m_new
 INSTANTIATE_TEST_SUITE_P(
-         bli_dgemmsup_rv_zen4_asm_24x8m_new_row_stored_c,
+         bli_dgemmsup_cv_zen4_asm_24x8m_new_row_stored_c,
          dgemmGenericSUP,
          ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(25), 1),           // values of m
@@ -348,7 +348,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                 // beta value
             ::testing::Values('r'),                                 // storage of c
-            ::testing::Values(bli_dgemmsup_rv_zen4_asm_24x8m_new),      // dgemm_sup kernel
+            ::testing::Values(K_bli_dgemmsup_cv_zen4_asm_24x8m_new),    // dgemm_sup kernel
             ::testing::Values(gtint_t(8)),                          // Micro kernel block MR
             ::testing::Values('t'),                                 // transa
             ::testing::Values('n'),                                 // transb
@@ -363,9 +363,9 @@ INSTANTIATE_TEST_SUITE_P(
 
 #if defined(BLIS_KERNELS_ZEN5) && defined(GTEST_AVX512)
 
-#ifdef K_bli_dgemmsup_rv_zen5_asm_24x8m
+#ifdef K_bli_dgemmsup_cv_zen5_asm_24x8m
 INSTANTIATE_TEST_SUITE_P(
-         bli_dgemmsup_rv_zen5_asm_24x8m_col_stored_c,
+         bli_dgemmsup_cv_zen5_asm_24x8m_col_stored_c,
          dgemmGenericSUP,
          ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(25), 1),           // values of m
@@ -374,7 +374,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                 // beta value
             ::testing::Values('c'),                                 // storage of c
-            ::testing::Values(bli_dgemmsup_rv_zen5_asm_24x8m),      // dgemm_sup kernel
+            ::testing::Values(K_bli_dgemmsup_cv_zen5_asm_24x8m),    // dgemm_sup kernel
             ::testing::Values(gtint_t(8)),                          // Micro kernel block MR
             ::testing::Values('n'),                                 // transa
             ::testing::Values('n'),                                 // transb
@@ -385,9 +385,9 @@ INSTANTIATE_TEST_SUITE_P(
      );
 #endif
 
-#ifdef K_bli_dgemmsup_rv_zen5_asm_24x8m
+#ifdef K_bli_dgemmsup_cv_zen5_asm_24x8m
 INSTANTIATE_TEST_SUITE_P(
-         bli_dgemmsup_rv_zen5_asm_24x8m_row_stored_c,
+         bli_dgemmsup_cv_zen5_asm_24x8m_row_stored_c,
          dgemmGenericSUP,
          ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(25), 1),           // values of m
@@ -396,7 +396,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                 // beta value
             ::testing::Values('r'),                                 // storage of c
-            ::testing::Values(bli_dgemmsup_rv_zen5_asm_24x8m),      // dgemm_sup kernel
+            ::testing::Values(K_bli_dgemmsup_cv_zen5_asm_24x8m),    // dgemm_sup kernel
             ::testing::Values(gtint_t(8)),                          // Micro kernel block MR
             ::testing::Values('t'),                                 // transa
             ::testing::Values('n'),                                 // transb
@@ -510,26 +510,7 @@ INSTANTIATE_TEST_SUITE_P(
 );
 #endif
 
-#ifdef K_bli_dgemm_avx512_asm_8x24
-INSTANTIATE_TEST_SUITE_P(
-    bli_dgemm_avx512_asm_8x24,
-    dgemmGenericNat,
-    ::testing::Combine(
-        ::testing::Range(gtint_t(0), gtint_t(17), 1),   // values of k
-        ::testing::Values(2.0, 1.0, -1.0),              // alpha value
-        ::testing::Values(1.0, 0.0, -1.0, 2.3),         // beta value
-        ::testing::Values('r', 'c'),                    // storage
-        ::testing::Values(8),                           // values of m
-        ::testing::Values(24),                          // values of n
-        ::testing::Values(bli_dgemm_avx512_asm_8x24),
-        ::testing::Values(true, false)                  // memory test
-    ),
-    ::dgemmGenericNatPrint()
-);
-#endif
-
 #ifdef K_bli_dgemm_zen4_asm_8x24
-// Old version of bli_dgemm_avx512_asm_8x24 kernel, removed in 5.1
 INSTANTIATE_TEST_SUITE_P(
     bli_dgemm_zen4_asm_8x24,
     dgemmGenericNat,
@@ -540,7 +521,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values('r', 'c'),                    // storage
         ::testing::Values(8),                           // values of m
         ::testing::Values(24),                          // values of n
-        ::testing::Values(bli_dgemm_zen4_asm_8x24),
+        ::testing::Values(K_bli_dgemm_zen4_asm_8x24),
         ::testing::Values(true, false)                  // memory test
     ),
     ::dgemmGenericNatPrint()
@@ -665,9 +646,9 @@ public:
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 
-#ifdef K_bli_dgemm_24x8_avx512_k1_nn
+#ifdef K_bli_dgemm_zen4_int_24x8_k1_nn
 INSTANTIATE_TEST_SUITE_P(
-    bli_dgemm_24x8_avx512_k1_nn,
+    bli_dgemm_zen4_int_24x8_k1_nn,
     dgemmGenericK1,
     ::testing::Combine(
 
@@ -676,7 +657,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values('c'),                        // storage
         ::testing::Range(gtint_t(1), gtint_t(25), 1),  // values of m
         ::testing::Range(gtint_t(1), gtint_t(9), 1),   // values of n
-        ::testing::Values(bli_dgemm_24x8_avx512_k1_nn),
+        ::testing::Values(K_bli_dgemm_zen4_int_24x8_k1_nn),
         ::testing::Values(true, false)                 // memory test
     ),
     ::dgemmGenericK1Print()
@@ -688,9 +669,9 @@ INSTANTIATE_TEST_SUITE_P(
 
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 
-#ifdef K_bli_dgemm_8x6_avx2_k1_nn
+#ifdef K_bli_dgemm_zen_int_8x6_k1_nn
 INSTANTIATE_TEST_SUITE_P(
-    bli_dgemm_8x6_avx2_k1_nn,
+    bli_dgemm_zen_int_8x6_k1_nn,
     dgemmGenericK1,
     ::testing::Combine(
         ::testing::Values(2.0, 1.0, -1.0),           // alpha value
@@ -698,7 +679,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values('c'),                      // storage
         ::testing::Range(gtint_t(1), gtint_t(9), 1), // values of m
         ::testing::Range(gtint_t(1), gtint_t(7), 1), // values of n
-        ::testing::Values(bli_dgemm_8x6_avx2_k1_nn),
+        ::testing::Values(K_bli_dgemm_zen_int_8x6_k1_nn),
         ::testing::Values(true, false)               // memory test
     ),
     ::dgemmGenericK1Print()

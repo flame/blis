@@ -1643,9 +1643,9 @@ public:
 };
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
-#ifdef K_bli_cgemm_32x4_avx512_k1_nn
+#ifdef K_bli_cgemm_zen4_int_32x4_k1_nn
 INSTANTIATE_TEST_SUITE_P(
-    bli_cgemm_32x4_avx512_k1_nn,
+    bli_cgemm_zen4_int_32x4_k1_nn,
     cgemmUkrk1,
     ::testing::Combine(
 
@@ -1656,7 +1656,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values('c'),                                         // storage
         ::testing::Range(gtint_t(1), gtint_t(65), 1),                   // values of m
         ::testing::Range(gtint_t(1), gtint_t(9), 1),                    // values of n
-        ::testing::Values(bli_cgemm_32x4_avx512_k1_nn),
+        ::testing::Values(K_bli_cgemm_zen4_int_32x4_k1_nn),
         ::testing::Values(true, false)                                  // memory test
     ),
     ::cgemmUkrk1Print()

@@ -410,7 +410,7 @@ err_t bli_dgemm_tiny
           case BLIS_ARCH_ZEN5:
 	  case BLIS_ARCH_ZEN4:
 #if defined(BLIS_FAMILY_ZEN5) || defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64)
-		return bli_dgemm_tiny_24x8
+		return bli_dgemm_tiny_zen4_24x8
 			(
 			 1 * (transa == BLIS_CONJ_NO_TRANSPOSE),
 			 1 * (transb == BLIS_CONJ_NO_TRANSPOSE),
@@ -431,7 +431,7 @@ err_t bli_dgemm_tiny
           case BLIS_ARCH_ZEN:
           case BLIS_ARCH_ZEN2:
           case BLIS_ARCH_ZEN3:
-	      return bli_dgemm_tiny_6x8
+	      return bli_dgemm_tiny_zen_6x8
 		      (
 		       1 * (transa == BLIS_CONJ_NO_TRANSPOSE),
 		       1 * (transb == BLIS_CONJ_NO_TRANSPOSE),
@@ -466,7 +466,7 @@ err_t bli_dgemm_tiny
               ((m + k-n) < 1500) && ((n + k-m) < 1500) ) ||
               ((n <= 100) && (k <=100)))))
               {
-                  return bli_dgemm_tiny_24x8
+                  return bli_dgemm_tiny_zen4_24x8
                           (
                               1 * (transa == BLIS_CONJ_NO_TRANSPOSE),
                               1 * (transb == BLIS_CONJ_NO_TRANSPOSE),
@@ -490,7 +490,7 @@ err_t bli_dgemm_tiny
           case BLIS_ARCH_ZEN3:
               if( ( (m <= 8)  || ( (m <= 1000) && (n <= 24) && (k >= 4) ) ) && (k <= 1500) )
               {
-                  return bli_dgemm_tiny_6x8
+                  return bli_dgemm_tiny_zen_6x8
                           (
                               1 * (transa == BLIS_CONJ_NO_TRANSPOSE),
                               1 * (transb == BLIS_CONJ_NO_TRANSPOSE),

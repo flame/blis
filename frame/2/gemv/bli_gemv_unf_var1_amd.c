@@ -307,8 +307,8 @@ void bli_dgemv_unf_var1
       case BLIS_ARCH_ZEN5:
 #if defined(BLIS_KERNELS_ZEN5)
       gemv_kr_ptr   = bli_dgemv_t_zen4_int;     // DGEMV
-      scalv_kr_ptr  = bli_dscalv_zen_int_avx512;      // DSCALV
-      copyv_kr_ptr  = bli_dcopyv_zen5_asm_avx512;     // DCOPYV
+      scalv_kr_ptr  = bli_dscalv_zen4_int;      // DSCALV
+      copyv_kr_ptr  = bli_dcopyv_zen5_asm;     // DCOPYV
 #if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
       fast_path_thresh = 12000;
 #endif
@@ -318,8 +318,8 @@ void bli_dgemv_unf_var1
 
 #if defined(BLIS_KERNELS_ZEN4)
         gemv_kr_ptr   = bli_dgemv_t_zen4_int;     // DGEMV
-        scalv_kr_ptr  = bli_dscalv_zen_int_avx512;      // DSCALV
-        copyv_kr_ptr  = bli_dcopyv_zen4_asm_avx512;     // DCOPYV
+        scalv_kr_ptr  = bli_dscalv_zen4_int;      // DSCALV
+        copyv_kr_ptr  = bli_dcopyv_zen4_asm;     // DCOPYV
 #if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
         fast_path_thresh = 11000;
 #endif
@@ -925,7 +925,7 @@ void bli_zgemv_unf_var1
           factor of DOTXF kernel
         */
 
-        dotxf_kr_ptr = bli_zdotxf_zen_int_8_avx512;
+        dotxf_kr_ptr = bli_zdotxf_zen4_int_8;
         b_fuse = 8;
 
         scal2v_kr_ptr = bli_zscal2v_zen_int;

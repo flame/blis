@@ -313,12 +313,12 @@ void bli_dtrsv_unf_var2
             {
                 if ( m < 2500 )
                 {
-                    kfp_af = bli_daxpyf_zen_int8_avx512;
+                    kfp_af = bli_daxpyf_zen4_int_8;
                     b_fuse = 8;
                 }
                 else
                 {
-                    kfp_af = bli_daxpyf_zen_int12_avx512;
+                    kfp_af = bli_daxpyf_zen4_int_12;
                     b_fuse = 12;
                 }
 #if defined(BLIS_ENABLE_OPENMP)
@@ -331,7 +331,7 @@ void bli_dtrsv_unf_var2
                     // If NT == 1, don't use MT kernel.
                     if ( n_threads > 1 )
                     {
-                        kfp_af = bli_daxpyf_zen_int32_avx512_mt;
+                        kfp_af = bli_daxpyf_zen4_int_32_mt;
                         b_fuse = 32;
                     }
                 }

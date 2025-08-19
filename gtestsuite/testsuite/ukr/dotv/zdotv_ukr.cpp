@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -90,7 +90,7 @@ TEST_P( zdotvGeneric, UKR )
 // -----  Begin ZEN4 (AVX512) Kernel Tests  -----
 // ----------------------------------------------
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
-// Tests for bli_zdotv_zen_int_avx512 (AVX512) kernel.
+// Tests for bli_zdotv_zen4_int (AVX512) kernel.
 /**
  * Loops & If conditions:
  * L32     - Main loop, handles 32 elements
@@ -102,12 +102,12 @@ TEST_P( zdotvGeneric, UKR )
  *
  * LNUnit  - loop for non-unit increments
 */
-#ifdef K_bli_zdotv_zen_int_avx512
+#ifdef K_bli_zdotv_zen4_int
 INSTANTIATE_TEST_SUITE_P(
-        bli_zdotv_zen_int_avx512_unitStride,
+        bli_zdotv_zen4_int_unitStride,
         zdotvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_zdotv_zen_int_avx512),
+            ::testing::Values(K_bli_zdotv_zen4_int),
             // conj(x): use n (no_conjugate) or c (conjugate).
             ::testing::Values('n', 'c'),
             // conj(y): use n (no_conjugate) or c (conjugate).
@@ -147,12 +147,12 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_zdotv_zen_int_avx512
+#ifdef K_bli_zdotv_zen4_int
 INSTANTIATE_TEST_SUITE_P(
-        bli_zdotv_zen_int_avx512_nonUnitPositiveStrides,
+        bli_zdotv_zen4_int_nonUnitPositiveStrides,
         zdotvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_zdotv_zen_int_avx512),
+            ::testing::Values(K_bli_zdotv_zen4_int),
             // conj(x): uses n (no_conjugate) since it is real.
             ::testing::Values('n'),
             // conj(y): uses n (no_conjugate) since it is real.
@@ -176,7 +176,7 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-// Tests for bli_zdotv_zen_int_avx512 (AVX512) kernel.
+// Tests for bli_zdotv_zen4_int (AVX512) kernel.
 /**
  * Loops & If conditions:
  * L32     - Main loop, handles 32 elements
@@ -188,12 +188,12 @@ INSTANTIATE_TEST_SUITE_P(
  *
  * LNUnit  - loop for non-unit increments
 */
-#ifdef K_bli_zdotv_zen4_asm_avx512
+#ifdef K_bli_zdotv_zen4_asm
 INSTANTIATE_TEST_SUITE_P(
-        DISABLED_bli_zdotv_zen4_asm_avx512_unitStride,
+        DISABLED_bli_zdotv_zen4_asm_unitStride,
         zdotvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_zdotv_zen4_asm_avx512),
+            ::testing::Values(K_bli_zdotv_zen4_asm),
             // conj(x): use n (no_conjugate) or c (conjugate).
             ::testing::Values('n', 'c'),
             // conj(y): use n (no_conjugate) or c (conjugate).
@@ -233,12 +233,12 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_zdotv_zen4_asm_avx512
+#ifdef K_bli_zdotv_zen4_asm
 INSTANTIATE_TEST_SUITE_P(
-        bli_zdotv_zen4_asm_avx512_nonUnitPositiveStrides,
+        bli_zdotv_zen4_asm_nonUnitPositiveStrides,
         zdotvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_zdotv_zen4_asm_avx512),
+            ::testing::Values(K_bli_zdotv_zen4_asm),
             // conj(x): uses n (no_conjugate) since it is real.
             ::testing::Values('n'),
             // conj(y): uses n (no_conjugate) since it is real.

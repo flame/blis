@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
    Portions of this file consist of AI-generated content.
 
    Redistribution and use in source and binary forms, with or without
@@ -146,8 +146,8 @@ INSTANTIATE_TEST_SUITE_P(
 // ----------------------------------------------
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 /*
-    Unit testing for functionality of bli_daddv_zen_int_avx512 kernel.
-    The code structure for bli_daddv_zen_int_avx512( ... ) is as follows :
+    Unit testing for functionality of bli_daddv_zen4_int kernel.
+    The code structure for bli_daddv_zen4_int( ... ) is as follows :
     For unit strides :
         Main loop    :  In blocks of 64  --> L64
         Fringe loops :  In blocks of 32  --> L32
@@ -157,12 +157,12 @@ INSTANTIATE_TEST_SUITE_P(
 
     For non-unit strides : A single loop, to process element wise.
 */
-#ifdef K_bli_daddv_zen_int_avx512
+#ifdef K_bli_daddv_zen4_int
 INSTANTIATE_TEST_SUITE_P(
-        bli_daddv_zen_int_avx512_unitStrides,
+        bli_daddv_zen4_int_unitStrides,
         daddvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_daddv_zen_int_avx512),      // kernel address
+            ::testing::Values(K_bli_daddv_zen4_int),    // kernel address
             ::testing::Values('n'),                           // use x, not conj(x) (since it is real)
             ::testing::Values(// Testing the loops standalone
                               gtint_t(64),                    // size n, for L64
@@ -179,12 +179,12 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_daddv_zen_int_avx512
+#ifdef K_bli_daddv_zen4_int
 INSTANTIATE_TEST_SUITE_P(
-        bli_daddv_zen_int_avx512_nonUnitStrides,
+        bli_daddv_zen4_int_nonUnitStrides,
         daddvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_daddv_zen_int_avx512),      // kernel address
+            ::testing::Values(K_bli_daddv_zen4_int),    // kernel address
             ::testing::Values('n'),                           // use x, not conj(x) (since it is real)
             ::testing::Values(// Testing the loops standalone
                               gtint_t(7),                     // size n, for LScalar

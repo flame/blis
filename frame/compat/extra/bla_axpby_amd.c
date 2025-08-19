@@ -192,7 +192,7 @@ void saxpby_blis_impl
       case BLIS_ARCH_ZEN:
       case BLIS_ARCH_ZEN2:
       case BLIS_ARCH_ZEN3:
-        axpbyv_ker_ptr = bli_saxpbyv_zen_int10;
+        axpbyv_ker_ptr = bli_saxpbyv_zen_int_10;
 
         break;
       default:
@@ -324,14 +324,14 @@ void daxpby_blis_impl
       case BLIS_ARCH_ZEN5:
       case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
-        axpbyv_ker_ptr = bli_daxpbyv_zen_int_avx512;
+        axpbyv_ker_ptr = bli_daxpbyv_zen4_int;
 
         break;
 #endif
       case BLIS_ARCH_ZEN:
       case BLIS_ARCH_ZEN2:
       case BLIS_ARCH_ZEN3:
-        axpbyv_ker_ptr = bli_daxpbyv_zen_int10;
+        axpbyv_ker_ptr = bli_daxpbyv_zen_int_10;
 
         break;
       default:

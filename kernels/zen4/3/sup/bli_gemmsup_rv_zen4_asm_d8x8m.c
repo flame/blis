@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -653,7 +653,7 @@ void bli_dgemmsup_rv_zen4_asm_8x8m_upper_mle8
     |********|         >
      ________
 */
-void bli_dgemmsup_rv_zen4_asm_24x8m_lower_0
+void bli_dgemmsup_cv_zen4_asm_24x8m_lower_0
       (
         conj_t              conja,
         conj_t              conjb,
@@ -708,7 +708,7 @@ void bli_dgemmsup_rv_zen4_asm_24x8m_lower_0
     );
 
     // call full GEMM kernel for remaning parts of matrix
-    bli_dgemmsup_rv_zen4_asm_24x8m
+    bli_dgemmsup_cv_zen4_asm_24x8m
     (
         conja,
         conjb,
@@ -758,7 +758,7 @@ void bli_dgemmsup_rv_zen4_asm_24x8m_lower_0
     |********|         >
      ________
 */
-void bli_dgemmsup_rv_zen4_asm_24x8m_lower_1
+void bli_dgemmsup_cv_zen4_asm_24x8m_lower_1
       (
         conj_t              conja,
         conj_t              conjb,
@@ -818,7 +818,7 @@ void bli_dgemmsup_rv_zen4_asm_24x8m_lower_1
     );
 
     // call full GEMM kernel for remaning parts of matrix
-    bli_dgemmsup_rv_zen4_asm_24x8m
+    bli_dgemmsup_cv_zen4_asm_24x8m
     (
         conja,
         conjb,
@@ -868,7 +868,7 @@ void bli_dgemmsup_rv_zen4_asm_24x8m_lower_1
     |*******-|          >
      ________
 */
-void bli_dgemmsup_rv_zen4_asm_24x8m_lower_2
+void bli_dgemmsup_cv_zen4_asm_24x8m_lower_2
       (
         conj_t              conja,
         conj_t              conjb,
@@ -928,7 +928,7 @@ void bli_dgemmsup_rv_zen4_asm_24x8m_lower_2
     );
 
     // call full GEMM kernel for remaning parts of matrix
-    bli_dgemmsup_rv_zen4_asm_24x8m
+    bli_dgemmsup_cv_zen4_asm_24x8m
     (
         conja,
         conjb,
@@ -1018,7 +1018,7 @@ void bli_dgemmsup_rv_zen4_asm_24x8m_lower_2
     |--------|
      ________ 
 */
-void bli_dgemmsup_rv_zen4_asm_24x8m_upper_0
+void bli_dgemmsup_cv_zen4_asm_24x8m_upper_0
       (
         conj_t              conja,
         conj_t              conjb,
@@ -1061,7 +1061,7 @@ void bli_dgemmsup_rv_zen4_asm_24x8m_upper_0
     }
 
     // call full GEMM kernel for intial part of matrix
-    bli_dgemmsup_rv_zen4_asm_24x8m
+    bli_dgemmsup_cv_zen4_asm_24x8m
     (
         conja,
         conjb,
@@ -1133,7 +1133,7 @@ void bli_dgemmsup_rv_zen4_asm_24x8m_upper_0
     |--------|
      ________ 
 */
-void bli_dgemmsup_rv_zen4_asm_24x8m_upper_1
+void bli_dgemmsup_cv_zen4_asm_24x8m_upper_1
       (
         conj_t              conja,
         conj_t              conjb,
@@ -1167,7 +1167,7 @@ void bli_dgemmsup_rv_zen4_asm_24x8m_upper_1
     }
 
     // call full GEMM kernel for intial part of matrix
-    bli_dgemmsup_rv_zen4_asm_24x8m
+    bli_dgemmsup_cv_zen4_asm_24x8m
     (
         conja,
         conjb,
@@ -1238,7 +1238,7 @@ void bli_dgemmsup_rv_zen4_asm_24x8m_upper_1
     |-------*|          >
      ________
 */
-void bli_dgemmsup_rv_zen4_asm_24x8m_upper_2
+void bli_dgemmsup_cv_zen4_asm_24x8m_upper_2
       (
         conj_t              conja,
         conj_t              conjb,
@@ -1267,7 +1267,7 @@ void bli_dgemmsup_rv_zen4_asm_24x8m_upper_2
     }
 
     // call full GEMM kernel for intial part of matrix
-    bli_dgemmsup_rv_zen4_asm_24x8m
+    bli_dgemmsup_cv_zen4_asm_24x8m
     (
         conja,
         conjb,

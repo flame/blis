@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -56,7 +56,7 @@ typedef err_t (*trsmsmall_ker_ft)
 //A.'X = B;  A is upper triangular;
 //A has to be transposed; double precision
 
-BLIS_INLINE err_t bli_dtrsm_small_AutXB_AlXB
+BLIS_INLINE err_t bli_dtrsm_small_zen_int_AutXB_AlXB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -71,7 +71,7 @@ BLIS_INLINE err_t bli_dtrsm_small_AutXB_AlXB
 */
 //AX = B;  A is lower triangular; transpose; double precision
 
-BLIS_INLINE err_t bli_dtrsm_small_AltXB_AuXB
+BLIS_INLINE err_t bli_dtrsm_small_zen_int_AltXB_AuXB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -85,7 +85,7 @@ BLIS_INLINE err_t bli_dtrsm_small_AltXB_AuXB
 // XA = B; A is lower-traingular; No transpose;
 //double precision; non-unit diagonal
 
-BLIS_INLINE  err_t bli_dtrsm_small_XAutB_XAlB
+BLIS_INLINE err_t bli_dtrsm_small_zen_int_XAutB_XAlB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -99,7 +99,7 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAutB_XAlB
 //XA = B; A is lower-triangular; A is transposed;
 // double precision; non-unit-diagonal
 
-BLIS_INLINE  err_t bli_dtrsm_small_XAltB_XAuB
+BLIS_INLINE err_t bli_dtrsm_small_zen_int_XAltB_XAuB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -111,7 +111,7 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAltB_XAuB
 /*
  * ZTRSM kernel declaration
  */
-BLIS_INLINE err_t bli_ztrsm_small_AutXB_AlXB
+BLIS_INLINE err_t bli_ztrsm_small_zen_int_AutXB_AlXB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -120,7 +120,7 @@ BLIS_INLINE err_t bli_ztrsm_small_AutXB_AlXB
     cntl_t* cntl
 );
 
-BLIS_INLINE err_t bli_ztrsm_small_AltXB_AuXB
+BLIS_INLINE err_t bli_ztrsm_small_zen_int_AltXB_AuXB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -129,7 +129,7 @@ BLIS_INLINE err_t bli_ztrsm_small_AltXB_AuXB
     cntl_t* cntl
 );
 
-BLIS_INLINE  err_t bli_ztrsm_small_XAutB_XAlB
+BLIS_INLINE err_t bli_ztrsm_small_zen_int_XAutB_XAlB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -138,7 +138,7 @@ BLIS_INLINE  err_t bli_ztrsm_small_XAutB_XAlB
     cntl_t* cntl
 );
 
-BLIS_INLINE  err_t bli_ztrsm_small_XAltB_XAuB
+BLIS_INLINE err_t bli_ztrsm_small_zen_int_XAltB_XAuB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -149,7 +149,7 @@ BLIS_INLINE  err_t bli_ztrsm_small_XAltB_XAuB
 /*
  * CTRSM kernel declaration
  */
-BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
+BLIS_INLINE err_t bli_ctrsm_small_zen_int_AutXB_AlXB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -158,7 +158,7 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
     cntl_t* cntl
 );
 
-BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
+BLIS_INLINE err_t bli_ctrsm_small_zen_int_AltXB_AuXB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -167,7 +167,7 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
     cntl_t* cntl
 );
 
-BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
+BLIS_INLINE err_t bli_ctrsm_small_zen_int_XAutB_XAlB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -176,7 +176,7 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
     cntl_t* cntl
 );
 
-BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
+BLIS_INLINE err_t bli_ctrsm_small_zen_int_XAltB_XAuB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -187,7 +187,7 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 /*
  * STRSM kernel declaration
  */
-BLIS_INLINE err_t bli_strsm_small_AutXB_AlXB
+BLIS_INLINE err_t bli_strsm_small_zen_int_AutXB_AlXB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -196,7 +196,7 @@ BLIS_INLINE err_t bli_strsm_small_AutXB_AlXB
     cntl_t* cntl
 );
 
-BLIS_INLINE err_t bli_strsm_small_AltXB_AuXB
+BLIS_INLINE err_t bli_strsm_small_zen_int_AltXB_AuXB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -205,7 +205,7 @@ BLIS_INLINE err_t bli_strsm_small_AltXB_AuXB
     cntl_t* cntl
 );
 
-BLIS_INLINE  err_t bli_strsm_small_XAutB_XAlB
+BLIS_INLINE err_t bli_strsm_small_zen_int_XAutB_XAlB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -214,7 +214,7 @@ BLIS_INLINE  err_t bli_strsm_small_XAutB_XAlB
     cntl_t* cntl
 );
 
-BLIS_INLINE  err_t bli_strsm_small_XAltB_XAuB
+BLIS_INLINE err_t bli_strsm_small_zen_int_XAltB_XAuB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -5027,7 +5027,7 @@ BLIS_INLINE err_t dtrsm_XAltB_ref
     Pack a block of 8xk or 6xk from input buffer into packed buffer
     directly or after transpose based on input params
 */
-BLIS_INLINE void bli_dtrsm_small_pack
+BLIS_INLINE void bli_dtrsm_small_zen_int_pack
 (
     char side,
     dim_t size,
@@ -5272,7 +5272,7 @@ BLIS_INLINE void bli_dtrsm_small_pack
     a. This helps to utilize cache line efficiently in TRSM operation
     b. store ones when input is unit diagonal
 */
-BLIS_INLINE void dtrsm_small_pack_diag_element
+BLIS_INLINE void dtrsm_small_zen_int_pack_diag_element
 (
     bool is_unitdiag,
     double *a11,
@@ -5337,47 +5337,47 @@ BLIS_INLINE void dtrsm_small_pack_diag_element
 /*
  * Kernels Table
 */
-trsmsmall_ker_ft ker_fps[4][8] =
+trsmsmall_ker_ft ker_fps_zen[4][8] =
 {
-        {bli_strsm_small_AutXB_AlXB,
-        bli_strsm_small_AltXB_AuXB,
-        bli_strsm_small_AltXB_AuXB,
-        bli_strsm_small_AutXB_AlXB,
-        bli_strsm_small_XAutB_XAlB,
-        bli_strsm_small_XAltB_XAuB,
-        bli_strsm_small_XAltB_XAuB,
-        bli_strsm_small_XAutB_XAlB },
+        {bli_strsm_small_zen_int_AutXB_AlXB,
+        bli_strsm_small_zen_int_AltXB_AuXB,
+        bli_strsm_small_zen_int_AltXB_AuXB,
+        bli_strsm_small_zen_int_AutXB_AlXB,
+        bli_strsm_small_zen_int_XAutB_XAlB,
+        bli_strsm_small_zen_int_XAltB_XAuB,
+        bli_strsm_small_zen_int_XAltB_XAuB,
+        bli_strsm_small_zen_int_XAutB_XAlB },
 
-        {bli_ctrsm_small_AutXB_AlXB,
-        bli_ctrsm_small_AltXB_AuXB,
-        bli_ctrsm_small_AltXB_AuXB,
-        bli_ctrsm_small_AutXB_AlXB,
-        bli_ctrsm_small_XAutB_XAlB,
-        bli_ctrsm_small_XAltB_XAuB,
-        bli_ctrsm_small_XAltB_XAuB,
-        bli_ctrsm_small_XAutB_XAlB },
+        {bli_ctrsm_small_zen_int_AutXB_AlXB,
+        bli_ctrsm_small_zen_int_AltXB_AuXB,
+        bli_ctrsm_small_zen_int_AltXB_AuXB,
+        bli_ctrsm_small_zen_int_AutXB_AlXB,
+        bli_ctrsm_small_zen_int_XAutB_XAlB,
+        bli_ctrsm_small_zen_int_XAltB_XAuB,
+        bli_ctrsm_small_zen_int_XAltB_XAuB,
+        bli_ctrsm_small_zen_int_XAutB_XAlB },
 
-        {bli_dtrsm_small_AutXB_AlXB,
-        bli_dtrsm_small_AltXB_AuXB,
-        bli_dtrsm_small_AltXB_AuXB,
-        bli_dtrsm_small_AutXB_AlXB,
-        bli_dtrsm_small_XAutB_XAlB,
-        bli_dtrsm_small_XAltB_XAuB,
-        bli_dtrsm_small_XAltB_XAuB,
-        bli_dtrsm_small_XAutB_XAlB },
+        {bli_dtrsm_small_zen_int_AutXB_AlXB,
+        bli_dtrsm_small_zen_int_AltXB_AuXB,
+        bli_dtrsm_small_zen_int_AltXB_AuXB,
+        bli_dtrsm_small_zen_int_AutXB_AlXB,
+        bli_dtrsm_small_zen_int_XAutB_XAlB,
+        bli_dtrsm_small_zen_int_XAltB_XAuB,
+        bli_dtrsm_small_zen_int_XAltB_XAuB,
+        bli_dtrsm_small_zen_int_XAutB_XAlB },
 
-        {bli_ztrsm_small_AutXB_AlXB,
-        bli_ztrsm_small_AltXB_AuXB,
-        bli_ztrsm_small_AltXB_AuXB,
-        bli_ztrsm_small_AutXB_AlXB,
-        bli_ztrsm_small_XAutB_XAlB,
-        bli_ztrsm_small_XAltB_XAuB,
-        bli_ztrsm_small_XAltB_XAuB,
-        bli_ztrsm_small_XAutB_XAlB },
+        {bli_ztrsm_small_zen_int_AutXB_AlXB,
+        bli_ztrsm_small_zen_int_AltXB_AuXB,
+        bli_ztrsm_small_zen_int_AltXB_AuXB,
+        bli_ztrsm_small_zen_int_AutXB_AlXB,
+        bli_ztrsm_small_zen_int_XAutB_XAlB,
+        bli_ztrsm_small_zen_int_XAltB_XAuB,
+        bli_ztrsm_small_zen_int_XAltB_XAuB,
+        bli_ztrsm_small_zen_int_XAutB_XAlB },
 };
 
 /*
-* The bli_trsm_small implements a version of TRSM where A is packed and reused
+* The bli_trsm_small_zen implements a version of TRSM where A is packed and reused
 *
 * Input:  A: MxM (triangular matrix)
 *         B: MxN matrix
@@ -5387,7 +5387,7 @@ trsmsmall_ker_ft ker_fps[4][8] =
 *
 * Note: Currently only dtrsm is supported when A & B are column-major
 */
-err_t bli_trsm_small
+err_t bli_trsm_small_zen
 (
     side_t  side,
     obj_t*  alpha,
@@ -5461,7 +5461,7 @@ err_t bli_trsm_small
                      ( transa & 0x1) );
 
 
-    trsmsmall_ker_ft ker_fp = ker_fps[dt][ keridx ];
+    trsmsmall_ker_ft ker_fp = ker_fps_zen[dt][ keridx ];
 
     /*Call the kernel*/
     err = ker_fp
@@ -5481,7 +5481,7 @@ err_t bli_trsm_small
  * Parallelized dtrsm_small across m-dimension or n-dimension based on side(Left/Right)
  */
 
-err_t bli_trsm_small_mt
+err_t bli_trsm_small_zen_mt
 (
     side_t  side,
     obj_t*  alpha,
@@ -5545,7 +5545,7 @@ err_t bli_trsm_small_mt
         {
             if(tid == 0)
             {
-                bli_trsm_small
+                bli_trsm_small_zen
                 (
                   side,
                   alpha,
@@ -5607,7 +5607,7 @@ err_t bli_trsm_small_mt
             // all threads
             err_t status_l = BLIS_SUCCESS;
 
-            status_l = bli_trsm_small
+            status_l = bli_trsm_small_zen
                         (
                           side,
                           alpha,
@@ -8319,7 +8319,7 @@ BLIS_INLINE err_t ztrsm_AuXB_ref
     }\
 }
 
-BLIS_INLINE void bli_ztrsm_small_pack
+BLIS_INLINE void bli_ztrsm_small_zen_int_pack
 (
     char side,
     dim_t size,
@@ -8465,7 +8465,7 @@ BLIS_INLINE void bli_ztrsm_small_pack
 
 }
 
-BLIS_INLINE void ztrsm_small_pack_diag_element
+BLIS_INLINE void ztrsm_small_zen_pack_diag_element
 (
     bool is_unitdiag,
     dcomplex *a11,
@@ -8545,7 +8545,7 @@ b11 *   *   *   *   *    **a01 *  * a11
 
 */
 
-BLIS_INLINE  err_t bli_dtrsm_small_XAltB_XAuB
+BLIS_INLINE err_t bli_dtrsm_small_zen_int_XAltB_XAuB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -8661,7 +8661,7 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAltB_XAuB
                until it reaches 6x(n-6) which is the maximum GEMM alone block size in A
             b. This packed buffer is reused to calculate all m cols of B matrix
             */
-            bli_dtrsm_small_pack('R', j, 1, a01, cs_a, D_A_pack, p_lda,d_nr);
+            bli_dtrsm_small_zen_int_pack('R', j, 1, a01, cs_a, D_A_pack, p_lda,d_nr);
 
             /*
                Pack 6 diagonal elements of A block into an array
@@ -8669,12 +8669,12 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAltB_XAuB
                b. store ones when input is unit diagonal
             */
 
-            dtrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_nr);
+            dtrsm_small_zen_int_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_nr);
         }
         else
         {
-            bli_dtrsm_small_pack('R', j, 0, a01, rs_a, D_A_pack, p_lda,d_nr);
-            dtrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_nr);
+            bli_dtrsm_small_zen_int_pack('R', j, 0, a01, rs_a, D_A_pack, p_lda,d_nr);
+            dtrsm_small_zen_int_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_nr);
         }
 
         /*
@@ -10954,7 +10954,7 @@ b10 *****************      *************
     *****************      *******************
 
 */
-BLIS_INLINE  err_t bli_dtrsm_small_XAutB_XAlB
+BLIS_INLINE err_t bli_dtrsm_small_zen_int_XAutB_XAlB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -11070,19 +11070,19 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAutB_XAlB
                until it reaches 6x(n-6) which is the maximum GEMM alone block size in A
             b. This packed buffer is reused to calculate all m cols of B matrix
             */
-            bli_dtrsm_small_pack('R', p_lda, 1, a01, cs_a, D_A_pack, p_lda,d_nr);
+            bli_dtrsm_small_zen_int_pack('R', p_lda, 1, a01, cs_a, D_A_pack, p_lda,d_nr);
 
             /*
                Pack 6 diagonal elements of A block into an array
                a. This helps to utilize cache line efficiently in TRSM operation
                b. store ones when input is unit diagonal
             */
-            dtrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_nr);
+            dtrsm_small_zen_int_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_nr);
         }
         else
         {
-            bli_dtrsm_small_pack('R', p_lda, 0, a01, rs_a, D_A_pack, p_lda,d_nr);
-            dtrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_nr);
+            bli_dtrsm_small_zen_int_pack('R', p_lda, 0, a01, rs_a, D_A_pack, p_lda,d_nr);
+            dtrsm_small_zen_int_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_nr);
         }
 
         /*
@@ -13283,7 +13283,7 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAutB_XAlB
  *  A is lower-triangular, transpose, non-unit diagonal
  *  dimensions A: mxm X: mxn B: mxn
 */
-BLIS_INLINE err_t bli_dtrsm_small_AltXB_AuXB
+BLIS_INLINE err_t bli_dtrsm_small_zen_int_AltXB_AuXB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -13402,19 +13402,19 @@ BLIS_INLINE err_t bli_dtrsm_small_AltXB_AuXB
                  until it reaches 8x(m-8) which is the maximum GEMM alone block size in A
               b. This packed buffer is reused to calculate all n rows of B matrix
             */
-            bli_dtrsm_small_pack('L', (m-i-d_mr), 1, a10, cs_a, D_A_pack,p_lda,d_mr);
+            bli_dtrsm_small_zen_int_pack('L', (m-i-d_mr), 1, a10, cs_a, D_A_pack,p_lda,d_mr);
 
                /*
                Pack 8 diagonal elements of A block into an array
                a. This helps to utilize cache line efficiently in TRSM operation
                b. store ones when input is unit diagonal
             */
-            dtrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_mr);
+            dtrsm_small_zen_int_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_mr);
         }
         else
         {
-            bli_dtrsm_small_pack('L', (m-i-d_mr), 0, a10, rs_a, D_A_pack,p_lda,d_mr);
-            dtrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_mr);
+            bli_dtrsm_small_zen_int_pack('L', (m-i-d_mr), 0, a10, rs_a, D_A_pack,p_lda,d_mr);
+            dtrsm_small_zen_int_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_mr);
         }
 
         /*
@@ -15296,7 +15296,7 @@ a10 ******          b11 *****************
     ****************    *****************
         a11--->
 */
-BLIS_INLINE err_t bli_dtrsm_small_AutXB_AlXB
+BLIS_INLINE err_t bli_dtrsm_small_zen_int_AutXB_AlXB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -15410,19 +15410,19 @@ BLIS_INLINE err_t bli_dtrsm_small_AutXB_AlXB
                  until it reaches 8x(m-8) which is the maximum GEMM alone block size in A
               b. This packed buffer is reused to calculate all n rows of B matrix
             */
-            bli_dtrsm_small_pack('L', i, 1, a10, cs_a, D_A_pack, p_lda,d_mr);
+            bli_dtrsm_small_zen_int_pack('L', i, 1, a10, cs_a, D_A_pack, p_lda,d_mr);
 
             /*
                Pack 8 diagonal elements of A block into an array
                a. This helps to utilize cache line efficiently in TRSM operation
                b. store ones when input is unit diagonal
             */
-            dtrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_mr);
+            dtrsm_small_zen_int_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_mr);
         }
         else
         {
-            bli_dtrsm_small_pack('L', i, 0, a10, rs_a, D_A_pack, p_lda,d_mr);
-            dtrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_mr);
+            bli_dtrsm_small_zen_int_pack('L', i, 0, a10, rs_a, D_A_pack, p_lda,d_mr);
+            dtrsm_small_zen_int_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_mr);
         }
 
         /*
@@ -17361,7 +17361,7 @@ BLIS_INLINE err_t bli_dtrsm_small_AutXB_AlXB
     a. This helps to utilize cache line efficiently in TRSM operation
     b. store ones when input is unit diagonal
 */
-BLIS_INLINE void strsm_small_pack_diag_element
+BLIS_INLINE void strsm_small_zen_int_pack_diag_element
 (
     char side,
     bool is_unitdiag,
@@ -17477,7 +17477,7 @@ BLIS_INLINE void strsm_small_pack_diag_element
     Pack a block of 16xk or 6xk from input buffer into packed buffer
     directly or after transpose based on input params
 */
-BLIS_INLINE void bli_strsm_small_pack
+BLIS_INLINE void bli_strsm_small_zen_int_pack
 (
     char side,
     dim_t size,
@@ -17903,7 +17903,7 @@ b10 *****************      *************
     *****************      *******************
 
 */
-BLIS_INLINE  err_t bli_strsm_small_XAutB_XAlB
+BLIS_INLINE err_t bli_strsm_small_zen_int_XAutB_XAlB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -18015,19 +18015,19 @@ BLIS_INLINE  err_t bli_strsm_small_XAutB_XAlB
                until it reaches 6x(n-6) which is the maximum GEMM alone block size in A
             b. This packed buffer is reused to calculate all m cols of B matrix
             */
-            bli_strsm_small_pack('R', p_lda, 1, a01, cs_a, D_A_pack, p_lda,d_nr);
+            bli_strsm_small_zen_int_pack('R', p_lda, 1, a01, cs_a, D_A_pack, p_lda,d_nr);
 
             /*
                Pack 6 diagonal elements of A block into an array
                a. This helps to utilize cache line efficiently in TRSM operation
                b. store ones when input is unit diagonal
             */
-            strsm_small_pack_diag_element('R',is_unitdiag,a11,cs_a,d11_pack,d_nr);
+            strsm_small_zen_int_pack_diag_element('R',is_unitdiag,a11,cs_a,d11_pack,d_nr);
         }
         else
         {
-            bli_strsm_small_pack('R', p_lda, 0, a01, rs_a, D_A_pack, p_lda,d_nr);
-            strsm_small_pack_diag_element('R',is_unitdiag,a11,rs_a,d11_pack,d_nr);
+            bli_strsm_small_zen_int_pack('R', p_lda, 0, a01, rs_a, D_A_pack, p_lda,d_nr);
+            strsm_small_zen_int_pack_diag_element('R',is_unitdiag,a11,rs_a,d11_pack,d_nr);
         }
 
         /*
@@ -21572,7 +21572,7 @@ b11 *   *   *   *   *    **a01 *  * a11
 
 */
 
-BLIS_INLINE  err_t bli_strsm_small_XAltB_XAuB
+BLIS_INLINE err_t bli_strsm_small_zen_int_XAltB_XAuB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -21686,7 +21686,7 @@ BLIS_INLINE  err_t bli_strsm_small_XAltB_XAuB
                until it reaches 6x(n-6) which is the maximum GEMM alone block size in A
             b. This packed buffer is reused to calculate all m cols of B matrix
             */
-            bli_strsm_small_pack('R', j, 1, a01, cs_a, D_A_pack, p_lda,d_nr);
+            bli_strsm_small_zen_int_pack('R', j, 1, a01, cs_a, D_A_pack, p_lda,d_nr);
 
             /*
                Pack 6 diagonal elements of A block into an array
@@ -21694,12 +21694,12 @@ BLIS_INLINE  err_t bli_strsm_small_XAltB_XAuB
                b. store ones when input is unit diagonal
             */
 
-            strsm_small_pack_diag_element('R',is_unitdiag,a11,cs_a,d11_pack,d_nr);
+            strsm_small_zen_int_pack_diag_element('R',is_unitdiag,a11,cs_a,d11_pack,d_nr);
         }
         else
         {
-            bli_strsm_small_pack('R', j, 0, a01, rs_a, D_A_pack, p_lda,d_nr);
-            strsm_small_pack_diag_element('R',is_unitdiag,a11,rs_a,d11_pack,d_nr);
+            bli_strsm_small_zen_int_pack('R', j, 0, a01, rs_a, D_A_pack, p_lda,d_nr);
+            strsm_small_zen_int_pack_diag_element('R',is_unitdiag,a11,rs_a,d11_pack,d_nr);
         }
 
         /*
@@ -25419,7 +25419,7 @@ a10 ******          b11 *****************
     ****************    *****************
         a11--->
 */
-BLIS_INLINE err_t bli_strsm_small_AutXB_AlXB
+BLIS_INLINE err_t bli_strsm_small_zen_int_AutXB_AlXB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -25537,19 +25537,19 @@ BLIS_INLINE err_t bli_strsm_small_AutXB_AlXB
                  until it reaches 16x(m-16) which is the maximum GEMM alone block size in A
               b. This packed buffer is reused to calculate all n rows of B matrix
             */
-            bli_strsm_small_pack('L', i, 1, a10, cs_a, D_A_pack, p_lda,d_mr);
+            bli_strsm_small_zen_int_pack('L', i, 1, a10, cs_a, D_A_pack, p_lda,d_mr);
 
             /*
                Pack 16 diagonal elements of A block into an array
                a. This helps to utilize cache line efficiently in TRSM operation
                b. store ones when input is unit diagonal
             */
-            strsm_small_pack_diag_element('L',is_unitdiag,a11,cs_a,d11_pack,d_mr);
+            strsm_small_zen_int_pack_diag_element('L',is_unitdiag,a11,cs_a,d11_pack,d_mr);
         }
         else
         {
-            bli_strsm_small_pack('L', i, 0, a10, rs_a, D_A_pack, p_lda,d_mr);
-            strsm_small_pack_diag_element('L',is_unitdiag,a11,rs_a,d11_pack,d_mr);
+            bli_strsm_small_zen_int_pack('L', i, 0, a10, rs_a, D_A_pack, p_lda,d_mr);
+            strsm_small_zen_int_pack_diag_element('L',is_unitdiag,a11,rs_a,d11_pack,d_mr);
         }
 
         /*
@@ -29799,7 +29799,7 @@ BLIS_INLINE err_t bli_strsm_small_AutXB_AlXB
  *  A is lower-triangular, transpose, non-unit diagonal
  *  dimensions A: mxm X: mxn B: mxn
 */
-BLIS_INLINE err_t bli_strsm_small_AltXB_AuXB
+BLIS_INLINE err_t bli_strsm_small_zen_int_AltXB_AuXB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -29921,19 +29921,19 @@ BLIS_INLINE err_t bli_strsm_small_AltXB_AuXB
                  until it reaches 16x(m-16) which is the maximum GEMM alone block size in A
               b. This packed buffer is reused to calculate all n rows of B matrix
             */
-            bli_strsm_small_pack('L', (m-i-d_mr), 1, a10, cs_a, D_A_pack,p_lda,d_mr);
+            bli_strsm_small_zen_int_pack('L', (m-i-d_mr), 1, a10, cs_a, D_A_pack,p_lda,d_mr);
 
                /*
                Pack 8 diagonal elements of A block into an array
                a. This helps to utilize cache line efficiently in TRSM operation
                b. store ones when input is unit diagonal
             */
-            strsm_small_pack_diag_element('L',is_unitdiag,a11,cs_a,d11_pack,d_mr);
+            strsm_small_zen_int_pack_diag_element('L',is_unitdiag,a11,cs_a,d11_pack,d_mr);
         }
         else
         {
-            bli_strsm_small_pack('L', (m-i-d_mr), 0, a10, rs_a, D_A_pack,p_lda,d_mr);
-            strsm_small_pack_diag_element('L',is_unitdiag,a11,rs_a,d11_pack,d_mr);
+            bli_strsm_small_zen_int_pack('L', (m-i-d_mr), 0, a10, rs_a, D_A_pack,p_lda,d_mr);
+            strsm_small_zen_int_pack_diag_element('L',is_unitdiag,a11,rs_a,d11_pack,d_mr);
         }
 
         /*
@@ -33952,7 +33952,7 @@ BLIS_INLINE err_t bli_strsm_small_AltXB_AuXB
   return BLIS_SUCCESS;
 }
 
-BLIS_INLINE err_t bli_ztrsm_small_AutXB_AlXB
+BLIS_INLINE err_t bli_ztrsm_small_zen_int_AutXB_AlXB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -34071,19 +34071,19 @@ BLIS_INLINE err_t bli_ztrsm_small_AutXB_AlXB
                  in A
               b. This packed buffer is reused to calculate all n rows of B matrix
             */
-            bli_ztrsm_small_pack('L', i, 1, a10, cs_a, D_A_pack, p_lda,d_mr);
+            bli_ztrsm_small_zen_int_pack('L', i, 1, a10, cs_a, D_A_pack, p_lda,d_mr);
 
             /*
                Pack 4 diagonal elements of A block into an array
                a. This helps to utilize cache line efficiently in TRSM operation
                b. store ones when input is unit diagonal
             */
-            ztrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_mr);
+            ztrsm_small_zen_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_mr);
         }
         else
         {
-            bli_ztrsm_small_pack('L', i, 0, a10, rs_a, D_A_pack, p_lda,d_mr);
-            ztrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_mr);
+            bli_ztrsm_small_zen_int_pack('L', i, 0, a10, rs_a, D_A_pack, p_lda,d_mr);
+            ztrsm_small_zen_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_mr);
         }
         /*
             a. Perform GEMM using a10, b01.
@@ -35194,7 +35194,7 @@ BLIS_INLINE err_t bli_ztrsm_small_AutXB_AlXB
     return BLIS_SUCCESS;
 }
 
-BLIS_INLINE err_t bli_ztrsm_small_AltXB_AuXB
+BLIS_INLINE err_t bli_ztrsm_small_zen_int_AltXB_AuXB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -35317,19 +35317,19 @@ BLIS_INLINE err_t bli_ztrsm_small_AltXB_AuXB
                  in A
               b. This packed buffer is reused to calculate all n rows of B matrix
             */
-            bli_ztrsm_small_pack('L', (m-i-d_mr), 1, a10, cs_a, D_A_pack,p_lda,d_mr);
+            bli_ztrsm_small_zen_int_pack('L', (m-i-d_mr), 1, a10, cs_a, D_A_pack,p_lda,d_mr);
 
                /*
                Pack 8 diagonal elements of A block into an array
                a. This helps to utilize cache line efficiently in TRSM operation
                b. store ones when input is unit diagonal
             */
-            ztrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_mr);
+            ztrsm_small_zen_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_mr);
         }
         else
         {
-            bli_ztrsm_small_pack('L', (m-i-d_mr), 0, a10, rs_a, D_A_pack,p_lda,d_mr);
-            ztrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_mr);
+            bli_ztrsm_small_zen_int_pack('L', (m-i-d_mr), 0, a10, rs_a, D_A_pack,p_lda,d_mr);
+            ztrsm_small_zen_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_mr);
         }
 
         /*
@@ -36426,7 +36426,7 @@ BLIS_INLINE err_t bli_ztrsm_small_AltXB_AuXB
     return BLIS_SUCCESS;
 }
 
-BLIS_INLINE err_t bli_ztrsm_small_XAutB_XAlB
+BLIS_INLINE err_t bli_ztrsm_small_zen_int_XAutB_XAlB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -36534,7 +36534,7 @@ BLIS_INLINE err_t bli_ztrsm_small_XAutB_XAlB
                b. This packed buffer is reused to calculate all m cols of B
                matrix
                */
-            bli_ztrsm_small_pack('R', p_lda, 1, a01, cs_a, D_A_pack,
+            bli_ztrsm_small_zen_int_pack('R', p_lda, 1, a01, cs_a, D_A_pack,
                     p_lda,d_nr);
 
             /*
@@ -36543,14 +36543,14 @@ BLIS_INLINE err_t bli_ztrsm_small_XAutB_XAlB
                operation
                b. store ones when input is unit diagonal
                */
-            ztrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,
+            ztrsm_small_zen_pack_diag_element(is_unitdiag,a11,cs_a,
                     d11_pack,d_nr);
         }
         else
         {
-            bli_ztrsm_small_pack('R', p_lda, 0, a01, rs_a, D_A_pack,
+            bli_ztrsm_small_zen_int_pack('R', p_lda, 0, a01, rs_a, D_A_pack,
                     p_lda,d_nr);
-            ztrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,
+            ztrsm_small_zen_pack_diag_element(is_unitdiag,a11,rs_a,
                     d11_pack,d_nr);
         }
 
@@ -37327,12 +37327,12 @@ BLIS_INLINE err_t bli_ztrsm_small_XAutB_XAlB
         {
             if(transa)
             {
-                ztrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,
+                ztrsm_small_zen_pack_diag_element(is_unitdiag,a11,cs_a,
                     d11_pack,n_remainder);
             }
             else
             {
-                ztrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,
+                ztrsm_small_zen_pack_diag_element(is_unitdiag,a11,rs_a,
                     d11_pack,n_remainder);
             }
         }
@@ -37732,12 +37732,12 @@ BLIS_INLINE err_t bli_ztrsm_small_XAutB_XAlB
         {
             if(transa)
             {
-                ztrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,
+                ztrsm_small_zen_pack_diag_element(is_unitdiag,a11,cs_a,
                     d11_pack,n_remainder);
             }
             else
             {
-                ztrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,
+                ztrsm_small_zen_pack_diag_element(is_unitdiag,a11,rs_a,
                     d11_pack,n_remainder);
             }
         }
@@ -37893,7 +37893,7 @@ BLIS_INLINE err_t bli_ztrsm_small_XAutB_XAlB
     return BLIS_SUCCESS;
 }
 
-BLIS_INLINE err_t bli_ztrsm_small_XAltB_XAuB
+BLIS_INLINE err_t bli_ztrsm_small_zen_int_XAltB_XAuB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -38000,7 +38000,7 @@ BLIS_INLINE err_t bli_ztrsm_small_XAltB_XAuB
                b. This packed buffer is reused to calculate all m cols of
                B matrix
                */
-            bli_ztrsm_small_pack('R', j, 1, a01, cs_a, D_A_pack, p_lda,d_nr);
+            bli_ztrsm_small_zen_int_pack('R', j, 1, a01, cs_a, D_A_pack, p_lda,d_nr);
 
             /*
                Pack 3 diagonal elements of A block into an array
@@ -38008,14 +38008,14 @@ BLIS_INLINE err_t bli_ztrsm_small_XAltB_XAuB
                operation
                b. store ones when input is unit diagonal
                */
-            ztrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,
+            ztrsm_small_zen_pack_diag_element(is_unitdiag,a11,cs_a,
                     d11_pack,d_nr);
         }
         else
         {
-            bli_ztrsm_small_pack('R', j, 0, a01, rs_a, D_A_pack,
+            bli_ztrsm_small_zen_int_pack('R', j, 0, a01, rs_a, D_A_pack,
                     p_lda,d_nr);
-            ztrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,
+            ztrsm_small_zen_pack_diag_element(is_unitdiag,a11,rs_a,
                     d11_pack,d_nr);
         }
 
@@ -38762,12 +38762,12 @@ BLIS_INLINE err_t bli_ztrsm_small_XAltB_XAuB
         {
             if(transa)
             {
-                ztrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,
+                ztrsm_small_zen_pack_diag_element(is_unitdiag,a11,cs_a,
                     d11_pack,n_remainder);
             }
             else
             {
-                ztrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,
+                ztrsm_small_zen_pack_diag_element(is_unitdiag,a11,rs_a,
                     d11_pack,n_remainder);
             }
         }
@@ -39164,12 +39164,12 @@ BLIS_INLINE err_t bli_ztrsm_small_XAltB_XAuB
         {
             if(transa)
             {
-                ztrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,
+                ztrsm_small_zen_pack_diag_element(is_unitdiag,a11,cs_a,
                     d11_pack,n_remainder);
             }
             else
             {
-                ztrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,
+                ztrsm_small_zen_pack_diag_element(is_unitdiag,a11,rs_a,
                     d11_pack,n_remainder);
             }
         }
@@ -39583,7 +39583,7 @@ BLIS_INLINE err_t ctrsm_AlXB_ref
     return BLIS_SUCCESS;
 }
 
-BLIS_INLINE void bli_ctrsm_small_pack
+BLIS_INLINE void bli_ctrsm_small_zen_int_pack
 (
     char side,
     dim_t size,
@@ -39768,7 +39768,7 @@ BLIS_INLINE void bli_ctrsm_small_pack
     }
 }
 
-BLIS_INLINE void ctrsm_small_pack_diag_element
+BLIS_INLINE void ctrsm_small_zen_pack_diag_element
 (
 	bool is_unitdiag,
 	scomplex *a11,
@@ -42491,7 +42491,7 @@ BLIS_INLINE void ctrsm_small_pack_diag_element
 	_mm256_storeu_ps((float *)(b11 + cs_b * 2 + 4), ymm2);\
 }
 
-BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
+BLIS_INLINE err_t bli_ctrsm_small_zen_int_AutXB_AlXB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -42615,19 +42615,19 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			   in A
 			   b. This packed buffer is reused to calculate all n rows of B matrix
 			   */
-			bli_ctrsm_small_pack('L', i, 1, a10, cs_a, D_A_pack, p_lda,d_mr);
+			bli_ctrsm_small_zen_int_pack('L', i, 1, a10, cs_a, D_A_pack, p_lda,d_mr);
 
 			/*
 			   Pack 4 diagonal elements of A block into an array
 			   a. This helps to utilize cache line efficiently in TRSM operation
 			   b. store ones when input is unit diagonal
 			   */
-			ctrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_mr);
+			ctrsm_small_zen_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_mr);
 		}
 		else
 		{
-			bli_ctrsm_small_pack('L', i, 0, a10, rs_a, D_A_pack, p_lda,d_mr);
-			ctrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_mr);
+			bli_ctrsm_small_zen_int_pack('L', i, 0, a10, rs_a, D_A_pack, p_lda,d_mr);
+			ctrsm_small_zen_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_mr);
 		}
 		/*
 		   a. Perform GEMM using a10, b01.
@@ -44131,11 +44131,11 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 		{
 			if(transa)
 			{
-				ctrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,m_rem);
+				ctrsm_small_zen_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,m_rem);
 			}
 			else
 			{
-				ctrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,m_rem);
+				ctrsm_small_zen_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,m_rem);
 			}
 		}
 
@@ -45028,7 +45028,7 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 	return BLIS_SUCCESS;
 }
 
-BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
+BLIS_INLINE err_t bli_ctrsm_small_zen_int_AltXB_AuXB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -45155,19 +45155,19 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			   in A
 			   b. This packed buffer is reused to calculate all n rows of B matrix
 			   */
-			bli_ctrsm_small_pack('L', (m-i-d_mr), 1, a10, cs_a, D_A_pack, p_lda,d_mr);
+			bli_ctrsm_small_zen_int_pack('L', (m-i-d_mr), 1, a10, cs_a, D_A_pack, p_lda,d_mr);
 
 			/*
 			   Pack 4 diagonal elements of A block into an array
 			   a. This helps to utilize cache line efficiently in TRSM operation
 			   b. store ones when input is unit diagonal
 			   */
-			ctrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_mr);
+			ctrsm_small_zen_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_mr);
 		}
 		else
 		{
-			bli_ctrsm_small_pack('L', (m-i-d_mr), 0, a10, rs_a, D_A_pack, p_lda,d_mr);
-			ctrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_mr);
+			bli_ctrsm_small_zen_int_pack('L', (m-i-d_mr), 0, a10, rs_a, D_A_pack, p_lda,d_mr);
+			ctrsm_small_zen_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_mr);
 		}
 		/*
 		   a. Perform GEMM using a10, b01.
@@ -46880,11 +46880,11 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 		{
 			if(transa)
 			{
-				ctrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,4);
+				ctrsm_small_zen_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,4);
 			}
 			else
 			{
-				ctrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,4);
+				ctrsm_small_zen_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,4);
 			}
 		}
 
@@ -47815,7 +47815,7 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 	return BLIS_SUCCESS;
 }
 
-BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
+BLIS_INLINE err_t bli_ctrsm_small_zen_int_XAutB_XAlB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -47934,19 +47934,19 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			   in A
 			   b. This packed buffer is reused to calculate all n rows of B matrix
 			   */
-			bli_ctrsm_small_pack('R', p_lda, 1, a01, cs_a, D_A_pack, p_lda,d_nr);
+			bli_ctrsm_small_zen_int_pack('R', p_lda, 1, a01, cs_a, D_A_pack, p_lda,d_nr);
 
 			/*
 			   Pack 4 diagonal elements of A block into an array
 			   a. This helps to utilize cache line efficiently in TRSM operation
 			   b. store ones when input is unit diagonal
 			   */
-			ctrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_nr);
+			ctrsm_small_zen_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_nr);
 		}
 		else
 		{
-			bli_ctrsm_small_pack('R', p_lda, 0, a01, rs_a, D_A_pack, p_lda,d_nr);
-			ctrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_nr);
+			bli_ctrsm_small_zen_int_pack('R', p_lda, 0, a01, rs_a, D_A_pack, p_lda,d_nr);
+			ctrsm_small_zen_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_nr);
 		}
 		/*
 		   a. Perform GEMM using a10, b01.
@@ -48684,11 +48684,11 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 		{
 			if(transa)
 			{
-				ctrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,n_rem);
+				ctrsm_small_zen_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,n_rem);
 			}
 			else
 			{
-				ctrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,n_rem);
+				ctrsm_small_zen_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,n_rem);
 			}
 		}
 
@@ -49202,7 +49202,7 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 
 		if(!is_unitdiag)
 		{
-			ctrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,n_rem);
+			ctrsm_small_zen_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,n_rem);
 		}
 
 		for(i = (m-d_mr); (i+1) > 0; i -= d_mr)
@@ -49438,7 +49438,7 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 	return BLIS_SUCCESS;
 }
 
-BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
+BLIS_INLINE err_t bli_ctrsm_small_zen_int_XAltB_XAuB
 (
     obj_t* AlphaObj,
     obj_t* a,
@@ -49558,19 +49558,19 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			   in A
 			   b. This packed buffer is reused to calculate all n rows of B matrix
 			   */
-			bli_ctrsm_small_pack('R', j, 1, a01, cs_a, D_A_pack, p_lda,d_nr);
+			bli_ctrsm_small_zen_int_pack('R', j, 1, a01, cs_a, D_A_pack, p_lda,d_nr);
 
 			/*
 			   Pack 4 diagonal elements of A block into an array
 			   a. This helps to utilize cache line efficiently in TRSM operation
 			   b. store ones when input is unit diagonal
 			   */
-			ctrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_nr);
+			ctrsm_small_zen_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,d_nr);
 		}
 		else
 		{
-			bli_ctrsm_small_pack('R', j, 0, a01, rs_a, D_A_pack, p_lda,d_nr);
-			ctrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_nr);
+			bli_ctrsm_small_zen_int_pack('R', j, 0, a01, rs_a, D_A_pack, p_lda,d_nr);
+			ctrsm_small_zen_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,d_nr);
 		}
 		/*
 		   a. Perform GEMM using a10, b01.
@@ -50314,11 +50314,11 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 		{
 			if(transa)
 			{
-				ctrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,n_rem);
+				ctrsm_small_zen_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,n_rem);
 			}
 			else
 			{
-				ctrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,n_rem);
+				ctrsm_small_zen_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,n_rem);
 			}
 		}
 
@@ -50843,7 +50843,7 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 
 		if(!is_unitdiag)
 		{
-			 ctrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,n_rem);
+			 ctrsm_small_zen_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,n_rem);
 		}
 
 		for(i = 0; (i+d_mr-1) < m; i += d_mr)

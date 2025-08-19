@@ -739,7 +739,7 @@ void cgemv_blis_impl
         scomplex rho;
         if (bli_cpuid_is_avx2fma3_supported() == TRUE)
         {
-            bli_cdotv_zen_int5
+            bli_cdotv_zen_int_5
             (
               conja,
               BLIS_NO_CONJUGATE,
@@ -987,7 +987,7 @@ void zgemv_blis_impl
 
         if (bli_cpuid_is_avx2fma3_supported() == TRUE)
         {
-            bli_zdotv_zen_int5
+            bli_zdotv_zen_int_5
             (
               conja,
               BLIS_NO_CONJUGATE,

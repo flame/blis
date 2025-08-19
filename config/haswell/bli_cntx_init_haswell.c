@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -118,8 +118,8 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int,
 	  BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int,
 #else
-	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int10,
-	  BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int10,
+	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int_10,
+	  BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int_10,
 #endif
 	  // dotv
 	  BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int,
@@ -134,8 +134,8 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int,
 	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int,
 #else
-	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int10,
-	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int10,
+	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int_10,
+	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int_10,
 #endif
 	  cntx
 	);

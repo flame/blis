@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
    Portions of this file consist of AI-generated content.
 
    Redistribution and use in source and binary forms, with or without
@@ -94,8 +94,8 @@ TEST_P( caxpyvGeneric, UKR )
 
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 /*
-    Unit testing for functionality of bli_caxpyv_zen_int5 kernel.
-    The code structure for bli_caxpyv_zen_int5( ... ) is as follows :
+    Unit testing for functionality of bli_caxpyv_zen_int_5 kernel.
+    The code structure for bli_caxpyv_zen_int_5( ... ) is as follows :
     For unit strides :
         Main loop    :  In blocks of 20 --> L20
         Fringe loops :  In blocks of 8  --> L8
@@ -105,12 +105,12 @@ TEST_P( caxpyvGeneric, UKR )
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
-#ifdef K_bli_caxpyv_zen_int5
+#ifdef K_bli_caxpyv_zen_int_5
 INSTANTIATE_TEST_SUITE_P(
-        bli_caxpyv_zen_int5_unitStrides,
+        bli_caxpyv_zen_int_5_unitStrides,
         caxpyvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_caxpyv_zen_int5),                     // kernel address
+            ::testing::Values(K_bli_caxpyv_zen_int_5),                   // kernel address
             ::testing::Values('n'
 #ifdef TEST_BLIS_TYPED
                             , 'c'                                       // conjx
@@ -138,12 +138,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // Unit testing for non unit strides
-#ifdef K_bli_caxpyv_zen_int5
+#ifdef K_bli_caxpyv_zen_int_5
 INSTANTIATE_TEST_SUITE_P(
-        bli_caxpyv_zen_int5_nonUnitStrides,
+        bli_caxpyv_zen_int_5_nonUnitStrides,
         caxpyvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_caxpyv_zen_int5),                     // kernel address
+            ::testing::Values(K_bli_caxpyv_zen_int_5),                   // kernel address
             ::testing::Values('n'
 #ifdef TEST_BLIS_TYPED
                             , 'c'                                       // conjx

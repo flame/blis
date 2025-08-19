@@ -141,8 +141,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 /*
-    Unit testing for functionality of bli_damaxv_zen_int_avx512 kernel.
-    The code structure for bli_damaxv_zen_int_avx512( ... ) is as follows :
+    Unit testing for functionality of bli_damaxv_zen4_int kernel.
+    The code structure for bli_damaxv_zen4_int( ... ) is as follows :
 
     For unit strides :
         Main loop    :  In blocks of 64 --> L64
@@ -154,12 +154,12 @@ INSTANTIATE_TEST_SUITE_P(
     For non-unit strides : A single loop, to process element wise.
 */
 // Unit testing with unit strides, across all loops.
-#ifdef K_bli_damaxv_zen_int_avx512
+#ifdef K_bli_damaxv_zen4_int
 INSTANTIATE_TEST_SUITE_P(
-        bli_damaxv_zen_int_avx512_unitStrides,
+        bli_damaxv_zen4_int_unitStrides,
         damaxvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_damaxv_zen_int_avx512),   // kernel address
+            ::testing::Values(K_bli_damaxv_zen4_int), // kernel address
             ::testing::Values(gtint_t(64),                  // for size n, L64
                               gtint_t(32),                  // L32
                               gtint_t(16),                  // L16
@@ -174,13 +174,13 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_damaxv_zen_int_avx512
+#ifdef K_bli_damaxv_zen4_int
 // Unit testing with non-unit strides.
 INSTANTIATE_TEST_SUITE_P(
-        bli_damaxv_zen_int_avx512_nonUnitStrides,
+        bli_damaxv_zen4_int_nonUnitStrides,
         damaxvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_damaxv_zen_int_avx512),   // kernel address
+            ::testing::Values(K_bli_damaxv_zen4_int), // kernel address
             ::testing::Values(gtint_t(10),                  // n, size of the vector
                               gtint_t(25)),
             ::testing::Values(gtint_t(5)),                  // incx

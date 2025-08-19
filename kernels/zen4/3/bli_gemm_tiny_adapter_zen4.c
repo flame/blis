@@ -70,7 +70,7 @@
 #define CALL_KERNEL                                                                      \
         if(N >= 8)                                                                       \
         {                                                                                \
-            avx512kern_fp[8](   conja,                                                   \
+            kern_fp_zen4[8](   conja,                                                   \
                                 conjb,                                                   \
                                 M,                                                       \
                                 N,                                                       \
@@ -92,7 +92,7 @@
         }                                                                                \
         else                                                                             \
         {                                                                                \
-            avx512kern_fp[N](   conja,                                                   \
+            kern_fp_zen4[N](   conja,                                                   \
                                 conjb,                                                   \
                                 M,                                                       \
                                 N,                                                       \
@@ -117,7 +117,7 @@
  * @brief bli_dgemmsup_placeholder
  * 
  * This is just a dummy function, which does nothing.
- * Instead of setting 0th index avx512kern_fp table to NULL,
+ * Instead of setting 0th index kern_fp_zen4 table to NULL,
  * this dummy function is assigned.
  * Since we are directly calling kernels via function pointer
  * without null checks, it is better to assign a dummy function
@@ -142,21 +142,21 @@ static void bli_dgemmsup_placeholder
     return;
 }
 
-static dgemmsup_ker_ft avx512kern_fp[] =
+static dgemmsup_ker_ft kern_fp_zen4[] =
 {
     bli_dgemmsup_placeholder,
-    bli_dgemmsup_rv_zen4_asm_24x1m_new,
-    bli_dgemmsup_rv_zen4_asm_24x2m_new,
-    bli_dgemmsup_rv_zen4_asm_24x3m_new,
-    bli_dgemmsup_rv_zen4_asm_24x4m_new,
-    bli_dgemmsup_rv_zen4_asm_24x5m_new,
-    bli_dgemmsup_rv_zen4_asm_24x6m_new,
-    bli_dgemmsup_rv_zen4_asm_24x7m_new,
-    bli_dgemmsup_rv_zen4_asm_24x8m_new
+    bli_dgemmsup_cv_zen4_asm_24x1m_new,
+    bli_dgemmsup_cv_zen4_asm_24x2m_new,
+    bli_dgemmsup_cv_zen4_asm_24x3m_new,
+    bli_dgemmsup_cv_zen4_asm_24x4m_new,
+    bli_dgemmsup_cv_zen4_asm_24x5m_new,
+    bli_dgemmsup_cv_zen4_asm_24x6m_new,
+    bli_dgemmsup_cv_zen4_asm_24x7m_new,
+    bli_dgemmsup_cv_zen4_asm_24x8m_new
 };
 
 
-err_t bli_dgemm_tiny_24x8
+err_t bli_dgemm_tiny_zen4_24x8
      (
         conj_t              conja,
         conj_t              conjb,
@@ -336,7 +336,7 @@ err_t bli_dgemm_tiny_24x8
 
         /**
          * CALL_KERNEL makes actual call to micro kernel,
-         * which is bli_dgemmsup_rv_zen4_asm_24x8m_new and the family of
+         * which is bli_dgemmsup_cv_zen4_asm_24x8m_new and the family of
          * it based on value of N dimension.
          * Arguments passed to it are as follows.
          * conja                                whether A matrix is conjugate

@@ -33,7 +33,7 @@
 */
 #include "blis.h"
 
-static dgemmsup_ker_ft kern_fp[] =
+static dgemmsup_ker_ft kern_fp_zen[] =
 {
     bli_dgemmsup_rv_haswell_asm_6x8m,
     bli_dgemmsup_rd_haswell_asm_6x8m,
@@ -45,7 +45,7 @@ static dgemmsup_ker_ft kern_fp[] =
     bli_dgemmsup_rv_haswell_asm_6x8n
 };
 
-err_t bli_dgemm_tiny_6x8
+err_t bli_dgemm_tiny_zen_6x8
      (
         conj_t              conja,
         conj_t              conjb,
@@ -202,7 +202,7 @@ err_t bli_dgemm_tiny_6x8
      */
     inc_t ps_a_use = (MR_ * rs_a);
     bli_auxinfo_set_ps_a( ps_a_use, &aux );
-    dgemmsup_ker_ft kern_ptr = kern_fp[stor_id];
+    dgemmsup_ker_ft kern_ptr = kern_fp_zen[stor_id];
 
     /**
      * JC Loop is eliminated as it iterates only once, So computation

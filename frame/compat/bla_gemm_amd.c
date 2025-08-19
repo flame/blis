@@ -689,7 +689,7 @@ void dgemm_blis_impl
         if ( arch_id == BLIS_ARCH_ZEN || arch_id == BLIS_ARCH_ZEN2 ||
              arch_id == BLIS_ARCH_ZEN3 )
         {
-            k1_status = bli_dgemm_8x6_avx2_k1_nn
+            k1_status = bli_dgemm_zen_int_8x6_k1_nn
                         (
                           m0, n0, k0,
                           (double*)alpha,
@@ -702,7 +702,7 @@ void dgemm_blis_impl
 #if defined(BLIS_FAMILY_ZEN5) || defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64)
         else if ( arch_id == BLIS_ARCH_ZEN5 || arch_id == BLIS_ARCH_ZEN4 )
         {
-            k1_status = bli_dgemm_24x8_avx512_k1_nn
+            k1_status = bli_dgemm_zen4_int_24x8_k1_nn
                         (
                           m0, n0, k0,
                           (double*)alpha,
@@ -1179,7 +1179,7 @@ void zgemm_blis_impl
         if ( arch_id == BLIS_ARCH_ZEN || arch_id == BLIS_ARCH_ZEN2 ||
              arch_id == BLIS_ARCH_ZEN3 )
         {
-            k1_status = bli_zgemm_4x4_avx2_k1_nn
+            k1_status = bli_zgemm_zen_int_4x4_k1_nn
                         (
                           m0, n0, k0,
                           (dcomplex*)alpha,
@@ -1197,7 +1197,7 @@ void zgemm_blis_impl
             // This holds true irrespective of the broadcast direction( n0 )
             if( m0 < 30 )
             {
-                k1_status = bli_zgemm_4x4_avx2_k1_nn
+                k1_status = bli_zgemm_zen_int_4x4_k1_nn
                             (
                               m0, n0, k0,
                               (dcomplex*)alpha,
@@ -1209,7 +1209,7 @@ void zgemm_blis_impl
             }
             else
             {
-                k1_status = bli_zgemm_16x4_avx512_k1_nn
+                k1_status = bli_zgemm_zen4_int_16x4_k1_nn
                             (
                               m0, n0, k0,
                               (dcomplex*)alpha,
@@ -1226,7 +1226,7 @@ void zgemm_blis_impl
             // ( i.e, small or tiny sizes ), or if the load directon( m0 ) < 10
             if( ( m0 < 30 && n0 < 30 ) || m0 < 10 )
             {
-                k1_status = bli_zgemm_4x4_avx2_k1_nn
+                k1_status = bli_zgemm_zen_int_4x4_k1_nn
                             (
                               m0, n0, k0,
                               (dcomplex*)alpha,
@@ -1238,7 +1238,7 @@ void zgemm_blis_impl
             }
             else
             {
-                k1_status = bli_zgemm_16x4_avx512_k1_nn
+                k1_status = bli_zgemm_zen4_int_16x4_k1_nn
                             (
                               m0, n0, k0,
                               (dcomplex*)alpha,
@@ -1740,7 +1740,7 @@ void cgemm_blis_impl
 
         if ( ( arch_id == BLIS_ARCH_ZEN4 ) || ( arch_id == BLIS_ARCH_ZEN5 ) )
         {
-            bli_cgemm_32x4_avx512_k1_nn
+            bli_cgemm_zen4_int_32x4_k1_nn
             (
                 m0, n0, k0,
                 (scomplex*)alpha,

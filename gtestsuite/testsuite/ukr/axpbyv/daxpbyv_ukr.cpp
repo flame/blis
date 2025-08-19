@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -113,8 +113,8 @@ TEST_P( daxpbyvGeneric, UKR )
 
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 /*
-    Unit testing for functionality of bli_daxpbyv_zen_int10 kernel.
-    The code structure for bli_daxpbyv_zen_int10( ... ) is as follows :
+    Unit testing for functionality of bli_daxpbyv_zen_int_10 kernel.
+    The code structure for bli_daxpbyv_zen_int_10( ... ) is as follows :
     For unit strides :
         Main loop    :  In blocks of 40 --> L40
         Fringe loops :  In blocks of 20 --> L20
@@ -126,12 +126,12 @@ TEST_P( daxpbyvGeneric, UKR )
 */
 
 // Unit testing with unit stride, across all loops.
-#ifdef K_bli_daxpbyv_zen_int10
+#ifdef K_bli_daxpbyv_zen_int_10
 INSTANTIATE_TEST_SUITE_P(
-        bli_daxpbyv_zen_int10_unitStrides,
+        bli_daxpbyv_zen_int_10_unitStrides,
         daxpbyvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_daxpbyv_zen_int10),      // kernel address
+            ::testing::Values(K_bli_daxpbyv_zen_int_10),    // kernel address
             ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
             ::testing::Values(// Testing the loops standalone
                               gtint_t(40),                 // size n, for L40
@@ -160,12 +160,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // Unit testing for non unit strides
-#ifdef K_bli_daxpbyv_zen_int10
+#ifdef K_bli_daxpbyv_zen_int_10
 INSTANTIATE_TEST_SUITE_P(
-        bli_daxpbyv_zen_int10_nonUnitStrides,
+        bli_daxpbyv_zen_int_10_nonUnitStrides,
         daxpbyvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_daxpbyv_zen_int10),      // kernel address
+            ::testing::Values(K_bli_daxpbyv_zen_int_10),    // kernel address
             ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
             ::testing::Values(gtint_t(10),                 // n, size of the vector
                               gtint_t(25)),
@@ -244,8 +244,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 /*
-    Unit testing for functionality of bli_daxpbyv_zen_int_avx512 kernel.
-    The code structure for bli_daxpbyv_zen_int_avx512( ... ) is as follows :
+    Unit testing for functionality of bli_daxpbyv_zen4_int kernel.
+    The code structure for bli_daxpbyv_zen4_int( ... ) is as follows :
     For unit strides :
         Main loop    :  In blocks of 64  --> L64
         Fringe loops :  In blocks of 32  --> L32
@@ -257,12 +257,12 @@ INSTANTIATE_TEST_SUITE_P(
 */
 
 // Unit testing with unit stride, across all loops.
-#ifdef K_bli_daxpbyv_zen_int_avx512
+#ifdef K_bli_daxpbyv_zen4_int
 INSTANTIATE_TEST_SUITE_P(
-        bli_daxpbyv_zen_int_avx512_unitStrides,
+        bli_daxpbyv_zen4_int_unitStrides,
         daxpbyvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_daxpbyv_zen_int_avx512),      // kernel address
+            ::testing::Values(K_bli_daxpbyv_zen4_int),    // kernel address
             ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
             ::testing::Values(// Testing the loops standalone
                               gtint_t(64),                 // size n, for L64
@@ -286,12 +286,12 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
 
 // Unit testing for non unit strides
-#ifdef K_bli_daxpbyv_zen_int_avx512
+#ifdef K_bli_daxpbyv_zen4_int
 INSTANTIATE_TEST_SUITE_P(
-        bli_daxpbyv_zen_int_avx512_nonUnitStrides,
+        bli_daxpbyv_zen4_int_nonUnitStrides,
         daxpbyvGeneric,
         ::testing::Combine(
-            ::testing::Values(bli_daxpbyv_zen_int_avx512),      // kernel address
+            ::testing::Values(K_bli_daxpbyv_zen4_int),    // kernel address
             ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
             ::testing::Values(gtint_t(10),                 // n, size of the vector
                               gtint_t(25)),

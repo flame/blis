@@ -319,7 +319,7 @@ f77_int idamax_blis_impl
       case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
           // AVX512 Kernel
-          amaxv_fun_ptr = bli_damaxv_zen_int_avx512;
+          amaxv_fun_ptr = bli_damaxv_zen4_int;
           break;
 #endif
       case BLIS_ARCH_ZEN:

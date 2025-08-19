@@ -378,7 +378,7 @@ GENERATE_KERNELS(st)
 /*
 * Define a macro for the function that calls the correct kernel
 * based on the sizes of m and n
-* example: bli_dgemv_n_zen4_MRxNR_int_st ()
+* example: bli_dgemv_n_zen4_int_MRxNR_st ()
 */
 /*
 * This operation computes y = beta*y + alpha*A*x, where A is an m x n matrix,
@@ -405,7 +405,7 @@ m_left|   |            Region 3                      | && n % NR |
 */
 
 #define GENT_GEMV_CALLER(ctype, ch, MR, NR, direction, threading)                        \
-void PASTEMAC4(ch, gemv_, direction, PASTECH4(_zen4_, MR, x, NR, _int_ ), threading)     \
+void PASTEMAC4(ch, gemv_, direction, PASTECH4(_zen4_int_, MR, x, NR, _ ), threading)     \
      (                                                                                   \
        trans_t transa,                                                                   \
        conj_t  conjx,                                                                    \
@@ -579,7 +579,7 @@ GENT_GEMV_CALLER(double, d, 40, 2, n, st);
 GENERATE_KERNELS(mt)
 
 /*  Call the multi-thread interface kernel */
-GENT_GEMV_CALLER(double, d, 40, 2, n, mt); //bli_dgemv_n_zen4_40x2_int_mt
+GENT_GEMV_CALLER(double, d, 40, 2, n, mt); //bli_dgemv_n_zen4_int_40x2_mt
 
 #endif
 // #endregion MT N kernels
@@ -782,8 +782,8 @@ static dgemv_ker dgemv_m_ker_fp[10][8] =
  * pointer table. This strategy handles any matrix dimensions efficiently.
  *
  * The generated function name follows the pattern:
- * bli_<ch>gemv_<direction>_zen4_<MR>x<NR>_int_st
- * Example: bli_dgemv_m_zen4_40x8_int_st
+ * bli_<ch>gemv_<direction>_zen4_int_<MR>x<NR>_st
+ * Example: bli_dgemv_m_zen4_int_40x8_st
  *
  * Partitioning Strategy:
  *   The matrix is divided based on the largest multiples of MR and NR
@@ -821,7 +821,7 @@ static dgemv_ker dgemv_m_ker_fp[10][8] =
  * 4. Calls the appropriate kernels for each of the four regions.
  */
 #define GENT_GEMV_CALLER(ctype, ch, MR, NR, direction)                                       \
-void PASTEMAC3(ch, gemv_, direction, PASTECH4(_zen4_,MR,x,NR,_int_st))                       \
+void PASTEMAC3(ch, gemv_, direction, PASTECH4(_zen4_int_,MR,x,NR,_st))                       \
      (                                                                                       \
        trans_t transa,                                                                       \
        conj_t  conjx,                                                                        \
@@ -864,7 +864,7 @@ void PASTEMAC3(ch, gemv_, direction, PASTECH4(_zen4_,MR,x,NR,_int_st))          
                                                                                              \
     if (*beta != 1)                                                                          \
     {                                                                                        \
-        PASTEMAC(ch, scalv_zen_int_avx512)                                                   \
+        PASTEMAC(ch, scalv_zen4_int)                                                   \
         (                                                                                    \
           BLIS_NO_CONJUGATE,                                                                 \
           m,                                                                                 \
@@ -951,7 +951,7 @@ void PASTEMAC3(ch, gemv_, direction, PASTECH4(_zen4_,MR,x,NR,_int_st))          
 
 /*
  * Generate the main single-threaded GEMV M-kernel interface function.
- * This will create the function `bli_dgemv_m_zen4_40x8_int_st`.
+ * This will create the function `bli_dgemv_m_zen4_int_40x8_st`.
  */
 GENT_GEMV_CALLER(double, d, 40, 8, m);
 
@@ -1013,7 +1013,7 @@ GENT_GEMV_CALLER(double, d, 40, 8, m);
      * - Poor performance on multi-CCD systems due to NUMA effects.
      */
     void
-    bli_dgemv_m_zen4_40x8_int_mt_Mdiv_Ndiv(
+    bli_dgemv_m_zen4_int_40x8_mt_Mdiv_Ndiv(
         trans_t transa,
         conj_t conjx,
         dim_t m,
@@ -1042,7 +1042,7 @@ GENT_GEMV_CALLER(double, d, 40, 8, m);
 
     if ( m <= nt || n <= nt)
     {
-        bli_dgemv_m_zen4_40x8_int_mt_Mdiv
+        bli_dgemv_m_zen4_int_40x8_mt_Mdiv
         (
             transa, conjx, m, n, alpha, a, rs_a, cs_a, x, incx, beta, y, incy, cntx
         );
@@ -1052,7 +1052,7 @@ GENT_GEMV_CALLER(double, d, 40, 8, m);
     /* Handle beta scaling if beta != 1 */
     if (*beta != 1)
     {
-        bli_dscalv_zen_int_avx512
+        bli_dscalv_zen4_int
         (
           BLIS_NO_CONJUGATE,
           m,
@@ -1103,7 +1103,7 @@ GENT_GEMV_CALLER(double, d, 40, 8, m);
             }
 
             /* Call single-threaded kernel for this thread's block */
-            bli_dgemv_m_zen4_40x8_int_st
+            bli_dgemv_m_zen4_int_40x8_st
             (
                 transa,
                 conjx,
@@ -1150,7 +1150,7 @@ GENT_GEMV_CALLER(double, d, 40, 8, m);
  * 4. Each thread calls single-threaded kernel for its portion
  * 5. No synchronization needed as threads work on disjoint memory regions
  */
-void bli_dgemv_m_zen4_40x8_int_mt_Mdiv
+void bli_dgemv_m_zen4_int_40x8_mt_Mdiv
      (
        trans_t transa,
        conj_t  conjx,
@@ -1210,7 +1210,7 @@ void bli_dgemv_m_zen4_40x8_int_mt_Mdiv
         bli_thread_vector_partition( m, nt_real, &thread_start, &job_per_thread, tid );
 
         /* Call single-threaded kernel for this thread's portion */
-        bli_dgemv_m_zen4_40x8_int_st
+        bli_dgemv_m_zen4_int_40x8_st
         (
             transa,
             conjx,
@@ -1261,7 +1261,7 @@ void bli_dgemv_m_zen4_40x8_int_mt_Mdiv
  * 6. Accumulate results from all threads using vector addition
  * 7. Release temporary memory
  */
-void bli_dgemv_m_zen4_40x8_int_mt_Ndiv
+void bli_dgemv_m_zen4_int_40x8_mt_Ndiv
      (
        trans_t transa,
        conj_t  conjx,
@@ -1361,7 +1361,7 @@ void bli_dgemv_m_zen4_40x8_int_mt_Ndiv
     /* Fallback to M-division if single thread or insufficient memory */
     if (nt == 1)
     {
-        bli_dgemv_m_zen4_40x8_int_mt_Mdiv
+        bli_dgemv_m_zen4_int_40x8_mt_Mdiv
         (
             transa, conjx, m, n, alpha, a, rs_a, cs_a, x, incx, beta, y, incy, cntx
         );
@@ -1396,7 +1396,7 @@ void bli_dgemv_m_zen4_40x8_int_mt_Ndiv
         *(temp_mem + tid) = job_per_thread;
 
         /* Call single-threaded kernel for this thread's portion */
-        bli_dgemv_m_zen4_40x8_int_st
+        bli_dgemv_m_zen4_int_40x8_st
         (
             transa,
             conjx,
@@ -1415,7 +1415,7 @@ void bli_dgemv_m_zen4_40x8_int_mt_Ndiv
     for(dim_t i = 1; i < nt; ++i)
     {
         if ( *(temp_mem + i) == 0 ) continue;
-        bli_daddv_zen_int_avx512
+        bli_daddv_zen4_int
         (
             BLIS_NO_CONJUGATE,
             m,
@@ -1475,15 +1475,15 @@ void bli_dgemv_n_zen4_int (
         // we call sequential GEMV
         if ( m <= 46 )
         {
-            ker_ft = bli_dgemv_n_zen4_40x2_int_st;
+            ker_ft = bli_dgemv_n_zen4_int_40x2_st;
         }
         else if ( n < 8 )
         {
-            ker_ft = bli_dgemv_n_zen4_32x8_int_st;
+            ker_ft = bli_dgemv_n_zen4_int_32x8_st;
         }
         else
         {
-            ker_ft = bli_dgemv_m_zen4_40x8_int_st;
+            ker_ft = bli_dgemv_m_zen4_int_40x8_st;
         }
     }
     else
@@ -1493,24 +1493,24 @@ void bli_dgemv_n_zen4_int (
 #ifdef BLIS_ENABLE_OPENMP
         if ( m < 1250 || size >= (700000 * 128))
         {
-            ker_ft = bli_dgemv_m_zen4_40x8_int_mt_Ndiv;
+            ker_ft = bli_dgemv_m_zen4_int_40x8_mt_Ndiv;
         }
         else
         {
-            ker_ft = bli_dgemv_m_zen4_40x8_int_mt_Mdiv;
+            ker_ft = bli_dgemv_m_zen4_int_40x8_mt_Mdiv;
         }
 #else
         if ( m <= 46 )
         {
-            ker_ft = bli_dgemv_n_zen4_40x2_int_st;
+            ker_ft = bli_dgemv_n_zen4_int_40x2_st;
         }
         else if ( n < 8 )
         {
-            ker_ft = bli_dgemv_n_zen4_32x8_int_st;
+            ker_ft = bli_dgemv_n_zen4_int_32x8_st;
         }
         else
         {
-            ker_ft = bli_dgemv_m_zen4_40x8_int_st;
+            ker_ft = bli_dgemv_m_zen4_int_40x8_st;
         }
 #endif
     }
@@ -1519,7 +1519,7 @@ void bli_dgemv_n_zen4_int (
     // and if incy != 1, which uses packing to handle non unit stride y
     if ( incy != 1 || transa != BLIS_NO_TRANSPOSE)
     {
-        ker_ft = bli_dgemv_n_zen4_32x8_int_st;
+        ker_ft = bli_dgemv_n_zen4_int_32x8_st;
     }
     ker_ft
     (
