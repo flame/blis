@@ -586,14 +586,16 @@ TYPED_TEST(gemm_compute_IIT_ERS, ZeroAlpha_ZeroBeta_UU)
     // Test with all arguments correct except for the value we are choosing to test.
     std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
     std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
-    std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
+    // Matrix C should not be read, only set.
+    std::vector<T> c( testinghelpers::matsize( STORAGE, 'N', M, N, LDC ) );
+    testinghelpers::set_matrix( STORAGE, M, N, c.data(), 'N', LDC, testinghelpers::aocl_extreme<T>() );
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> c_ref(c);
 
     testinghelpers::ref_gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, K, alpha,
                a.data(), LDA, b.data(), LDB, beta, c_ref.data(), LDC );
 
-    // Enable packing of A matrix to accound for alpha = 0 scaling.
+    // Enable packing of A matrix to account for alpha = 0 scaling.
     gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
     computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC, thresh);
@@ -612,7 +614,9 @@ TYPED_TEST(gemm_compute_IIT_ERS, ZeroAlpha_ZeroBeta_PU)
     testinghelpers::initzero<T>( alpha );
     testinghelpers::initzero<T>( beta );
 
-    std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
+    // Matrix C should not be read, only set.
+    std::vector<T> c( testinghelpers::matsize( STORAGE, 'N', M, N, LDC ) );
+    testinghelpers::set_matrix( STORAGE, M, N, c.data(), 'N', LDC, testinghelpers::aocl_extreme<T>() );
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> zero_mat = testinghelpers::get_random_matrix<T>(0, 0, STORAGE, 'n', M, N, LDB);
 
@@ -620,7 +624,7 @@ TYPED_TEST(gemm_compute_IIT_ERS, ZeroAlpha_ZeroBeta_PU)
     std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
     std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
 
-    // Enable packing of A matrix to accound for alpha = 0 scaling.
+    // Enable packing of A matrix to account for alpha = 0 scaling.
     gemm_compute<T>( STORAGE, TRANS, TRANS, 'P', 'U', M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
     computediff<T>( "C", STORAGE, N, N, c.data(), zero_mat.data(), LDC);
@@ -639,7 +643,9 @@ TYPED_TEST(gemm_compute_IIT_ERS, ZeroAlpha_ZeroBeta_UP)
     testinghelpers::initzero<T>( alpha );
     testinghelpers::initzero<T>( beta );
 
-    std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
+    // Matrix C should not be read, only set.
+    std::vector<T> c( testinghelpers::matsize( STORAGE, 'N', M, N, LDC ) );
+    testinghelpers::set_matrix( STORAGE, M, N, c.data(), 'N', LDC, testinghelpers::aocl_extreme<T>() );
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> zero_mat = testinghelpers::get_random_matrix<T>(0, 0, STORAGE, 'n', M, N, LDB);
 
@@ -647,7 +653,7 @@ TYPED_TEST(gemm_compute_IIT_ERS, ZeroAlpha_ZeroBeta_UP)
     std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
     std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
 
-    // Enable packing of A matrix to accound for alpha = 0 scaling.
+    // Enable packing of A matrix to account for alpha = 0 scaling.
     gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'P', M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
     computediff<T>( "C", STORAGE, N, N, c.data(), zero_mat.data(), LDC);

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -36,7 +36,7 @@
 #include "common/testing_helpers.h"
 #include "level3/gemm/test_gemm.h"
 #include "inc/check_error.h"
-#include "common/wrong_inputs_helpers.h"
+//#include "common/wrong_inputs_helpers.h"
 
 template <typename T>
 class gemm_IIT_ERS : public ::testing::Test {};
@@ -44,7 +44,7 @@ typedef ::testing::Types<float, double, scomplex, dcomplex> TypeParam; // The su
 TYPED_TEST_SUITE(gemm_IIT_ERS, TypeParam); // Defining individual testsuites based on the datatype support.
 
 // Adding namespace to get default parameters(valid case) from testinghelpers/common/wrong_input_helpers.h.
-using namespace testinghelpers::IIT;
+//using namespace testinghelpers::IIT;
 
 #if defined(TEST_CBLAS)
 #define INFO_OFFSET 1
@@ -58,29 +58,38 @@ using namespace testinghelpers::IIT;
 TYPED_TEST(gemm_IIT_ERS, invalid_storage)
 {
     using T = TypeParam;
-
+    static const char STORAGE = 'c';
+    static const char TRANSA = 'n';
+    static const char TRANSB = 'n';
+    static const gtint_t M = 4;
+    static const gtint_t N = 4;
+    static const gtint_t K = 4;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
     T alpha, beta;
     testinghelpers::initone<T>( alpha );
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-    gemm<T>( 'x', TRANS, TRANS, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
+    gemm<T>( 'x', TRANSA, TRANSB, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
 #ifdef CAN_TEST_INFO_VALUE
     gtint_t info = bli_info_get_info_value();
     computediff<gtint_t>( "info", info, 1 );
 #endif
 
     // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
     std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> c_ref(c);
 
     // Call BLIS Gemm with a invalid value for TRANS value for A.
-    gemm<T>( 'x', TRANS, TRANS, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
+    gemm<T>( 'x', TRANSA, TRANSB, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
-    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
 
 #ifdef CAN_TEST_INFO_VALUE
     info = bli_info_get_info_value();
@@ -111,16 +120,25 @@ TYPED_TEST(gemm_IIT_ERS, invalid_storage)
 TYPED_TEST(gemm_IIT_ERS, invalid_transa)
 {
     using T = TypeParam;
-
+    static const char STORAGE = 'c';
+    static const char TRANSA = 'n';
+    static const char TRANSB = 'n';
+    static const gtint_t M = 4;
+    static const gtint_t N = 4;
+    static const gtint_t K = 4;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
     T alpha, beta;
     testinghelpers::initone<T>( alpha );
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
 #if defined(TEST_BLAS_LIKE)
-    gemm<T>( STORAGE, 'p', TRANS, M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
+    gemm<T>( STORAGE, 'p', TRANSB, M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
-    gemm<T>( STORAGE, 'p', TRANS, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
+    gemm<T>( STORAGE, 'p', TRANSB, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
 #endif
 #ifdef CAN_TEST_INFO_VALUE
     gtint_t info = bli_info_get_info_value();
@@ -128,16 +146,16 @@ TYPED_TEST(gemm_IIT_ERS, invalid_transa)
 #endif
 
     // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
     std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> c_ref(c);
 
     // Call BLIS Gemm with a invalid value for TRANS value for A.
-    gemm<T>( STORAGE, 'p', TRANS, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
+    gemm<T>( STORAGE, 'p', TRANSB, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
-    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
 
 #ifdef CAN_TEST_INFO_VALUE
     info = bli_info_get_info_value();
@@ -149,16 +167,25 @@ TYPED_TEST(gemm_IIT_ERS, invalid_transa)
 TYPED_TEST(gemm_IIT_ERS, invalid_transb)
 {
     using T = TypeParam;
-
+    static const char STORAGE = 'c';
+    static const char TRANSA = 'n';
+    static const char TRANSB = 'n';
+    static const gtint_t M = 4;
+    static const gtint_t N = 4;
+    static const gtint_t K = 4;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
     T alpha, beta;
     testinghelpers::initone<T>( alpha );
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
 #if defined(TEST_BLAS_LIKE)
-    gemm<T>( STORAGE, TRANS, 'p', M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, 'p', M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
-    gemm<T>( STORAGE, TRANS, 'p', M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, 'p', M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
 #endif
 #ifdef CAN_TEST_INFO_VALUE
     gtint_t info = bli_info_get_info_value();
@@ -166,16 +193,16 @@ TYPED_TEST(gemm_IIT_ERS, invalid_transb)
 #endif
 
     // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
     std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> c_ref(c);
 
     // Call BLIS Gemm with a invalid value for TRANS value for B.
-    gemm<T>( STORAGE, TRANS, 'p', M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
+    gemm<T>( STORAGE, TRANSA, 'p', M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
-    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
 
 #ifdef CAN_TEST_INFO_VALUE
     info = bli_info_get_info_value();
@@ -187,16 +214,25 @@ TYPED_TEST(gemm_IIT_ERS, invalid_transb)
 TYPED_TEST(gemm_IIT_ERS, m_lt_zero)
 {
     using T = TypeParam;
-
+    static const char STORAGE = 'c';
+    static const char TRANSA = 'n';
+    static const char TRANSB = 'n';
+    static const gtint_t M = 4;
+    static const gtint_t N = 4;
+    static const gtint_t K = 4;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
     T alpha, beta;
     testinghelpers::initone<T>( alpha );
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
 #if defined(TEST_BLAS_LIKE)
-    gemm<T>( STORAGE, TRANS, TRANS, -1, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, -1, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
-    gemm<T>( STORAGE, TRANS, TRANS, -1, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, -1, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
 #endif
 #ifdef CAN_TEST_INFO_VALUE
     gtint_t info = bli_info_get_info_value();
@@ -204,16 +240,16 @@ TYPED_TEST(gemm_IIT_ERS, m_lt_zero)
 #endif
 
     // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
     std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> c_ref(c);
 
     // Call BLIS Gemm with a invalid value for m.
-    gemm<T>( STORAGE, TRANS, TRANS, -1, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, -1, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
-    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
 
 #ifdef CAN_TEST_INFO_VALUE
     info = bli_info_get_info_value();
@@ -225,16 +261,25 @@ TYPED_TEST(gemm_IIT_ERS, m_lt_zero)
 TYPED_TEST(gemm_IIT_ERS, n_lt_zero)
 {
     using T = TypeParam;
-
+    static const char STORAGE = 'c';
+    static const char TRANSA = 'n';
+    static const char TRANSB = 'n';
+    static const gtint_t M = 4;
+    static const gtint_t N = 4;
+    static const gtint_t K = 4;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
     T alpha, beta;
     testinghelpers::initone<T>( alpha );
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
 #if defined(TEST_BLAS_LIKE)
-    gemm<T>( STORAGE, TRANS, TRANS, M, -1, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, -1, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
-    gemm<T>( STORAGE, TRANS, TRANS, M, -1, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, -1, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
 #endif
 #ifdef CAN_TEST_INFO_VALUE
     gtint_t info = bli_info_get_info_value();
@@ -242,16 +287,16 @@ TYPED_TEST(gemm_IIT_ERS, n_lt_zero)
 #endif
 
     // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
     std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> c_ref(c);
 
     // Call BLIS Gemm with a invalid value for n.
-    gemm<T>( STORAGE, TRANS, TRANS, M, -1, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, -1, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
-    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
 
 #ifdef CAN_TEST_INFO_VALUE
     info = bli_info_get_info_value();
@@ -263,16 +308,25 @@ TYPED_TEST(gemm_IIT_ERS, n_lt_zero)
 TYPED_TEST(gemm_IIT_ERS, k_lt_zero)
 {
     using T = TypeParam;
-
+    static const char STORAGE = 'c';
+    static const char TRANSA = 'n';
+    static const char TRANSB = 'n';
+    static const gtint_t M = 4;
+    static const gtint_t N = 4;
+    static const gtint_t K = 4;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
     T alpha, beta;
     testinghelpers::initone<T>( alpha );
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
 #if defined(TEST_BLAS_LIKE)
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, -1, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, -1, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, -1, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, -1, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
 #endif
 #ifdef CAN_TEST_INFO_VALUE
     gtint_t info = bli_info_get_info_value();
@@ -280,16 +334,16 @@ TYPED_TEST(gemm_IIT_ERS, k_lt_zero)
 #endif
 
     // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
     std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> c_ref(c);
 
     // Call BLIS Gemm with a invalid value for k.
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, -1, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, -1, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
-    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
 
 #ifdef CAN_TEST_INFO_VALUE
     info = bli_info_get_info_value();
@@ -298,19 +352,28 @@ TYPED_TEST(gemm_IIT_ERS, k_lt_zero)
 }
 
 // When info == 8
-TYPED_TEST(gemm_IIT_ERS, invalid_lda)
+TYPED_TEST(gemm_IIT_ERS, invalid_lda_transa_n)
 {
     using T = TypeParam;
-
+    static const char STORAGE = 'c';
+    static const char TRANSA = 'n';
+    static const char TRANSB = 'n';
+    static const gtint_t M = 7;
+    static const gtint_t N = 4;
+    static const gtint_t K = 4;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
     T alpha, beta;
     testinghelpers::initone<T>( alpha );
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
 #if defined(TEST_BLAS_LIKE)
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, K, nullptr, nullptr, LDA - 1, nullptr, LDB, nullptr, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, nullptr, nullptr, LDA - 1, nullptr, LDB, nullptr, nullptr, LDC );
 #else
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, nullptr, LDA - 1, nullptr, LDB, &beta, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, nullptr, LDA - 1, nullptr, LDB, &beta, nullptr, LDC );
 #endif
 #ifdef CAN_TEST_INFO_VALUE
     gtint_t info = bli_info_get_info_value();
@@ -318,16 +381,110 @@ TYPED_TEST(gemm_IIT_ERS, invalid_lda)
 #endif
 
     // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
     std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> c_ref(c);
 
     // Call BLIS Gemm with a invalid value for lda.
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, a.data(), LDA - 1, b.data(), LDB, &beta, c.data(), LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, a.data(), LDA - 1, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
-    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 8 );
+#endif
+}
+
+// When info == 8
+TYPED_TEST(gemm_IIT_ERS, invalid_lda_transa_t)
+{
+    using T = TypeParam;
+    static const char STORAGE = 'c';
+    static const char TRANSA = 't';
+    static const char TRANSB = 'n';
+    static const gtint_t M = 4;
+    static const gtint_t N = 4;
+    static const gtint_t K = 7;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
+    T alpha, beta;
+    testinghelpers::initone<T>( alpha );
+    testinghelpers::initone<T>( beta );
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#if defined(TEST_BLAS_LIKE)
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, nullptr, nullptr, LDA - 1, nullptr, LDB, nullptr, nullptr, LDC );
+#else
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, nullptr, LDA - 1, nullptr, LDB, &beta, nullptr, LDC );
+#endif
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 8 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
+    std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
+    // Copy so that we check that the elements of C are not modified.
+    std::vector<T> c_ref(c);
+
+    // Call BLIS Gemm with a invalid value for lda.
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, a.data(), LDA - 1, b.data(), LDB, &beta, c.data(), LDC );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 8 );
+#endif
+}
+
+// When info == 8
+TYPED_TEST(gemm_IIT_ERS, invalid_lda_transa_c)
+{
+    using T = TypeParam;
+    static const char STORAGE = 'c';
+    static const char TRANSA = 'c';
+    static const char TRANSB = 'n';
+    static const gtint_t M = 4;
+    static const gtint_t N = 4;
+    static const gtint_t K = 7;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
+    T alpha, beta;
+    testinghelpers::initone<T>( alpha );
+    testinghelpers::initone<T>( beta );
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#if defined(TEST_BLAS_LIKE)
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, nullptr, nullptr, LDA - 1, nullptr, LDB, nullptr, nullptr, LDC );
+#else
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, nullptr, LDA - 1, nullptr, LDB, &beta, nullptr, LDC );
+#endif
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 8 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
+    std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
+    // Copy so that we check that the elements of C are not modified.
+    std::vector<T> c_ref(c);
+
+    // Call BLIS Gemm with a invalid value for lda.
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, a.data(), LDA - 1, b.data(), LDB, &beta, c.data(), LDC );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
 
 #ifdef CAN_TEST_INFO_VALUE
     info = bli_info_get_info_value();
@@ -336,19 +493,28 @@ TYPED_TEST(gemm_IIT_ERS, invalid_lda)
 }
 
 // When info == 10
-TYPED_TEST(gemm_IIT_ERS, invalid_ldb)
+TYPED_TEST(gemm_IIT_ERS, invalid_ldb_transb_n)
 {
     using T = TypeParam;
-
+    static const char STORAGE = 'c';
+    static const char TRANSA = 'n';
+    static const char TRANSB = 'n';
+    static const gtint_t M = 4;
+    static const gtint_t N = 4;
+    static const gtint_t K = 7;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
     T alpha, beta;
     testinghelpers::initone<T>( alpha );
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
 #if defined(TEST_BLAS_LIKE)
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, K, nullptr, nullptr, LDA, nullptr, LDB - 1, nullptr, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, nullptr, nullptr, LDA, nullptr, LDB - 1, nullptr, nullptr, LDC );
 #else
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, nullptr, LDA, nullptr, LDB - 1, &beta, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, nullptr, LDA, nullptr, LDB - 1, &beta, nullptr, LDC );
 #endif
 #ifdef CAN_TEST_INFO_VALUE
     gtint_t info = bli_info_get_info_value();
@@ -356,16 +522,110 @@ TYPED_TEST(gemm_IIT_ERS, invalid_ldb)
 #endif
 
     // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
     std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> c_ref(c);
 
     // Call BLIS Gemm with a invalid value for ldb.
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, a.data(), LDA, b.data(), LDB - 1, &beta, c.data(), LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, a.data(), LDA, b.data(), LDB - 1, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
-    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 10 );
+#endif
+}
+
+// When info == 10
+TYPED_TEST(gemm_IIT_ERS, invalid_ldb_transb_t)
+{
+    using T = TypeParam;
+    static const char STORAGE = 'c';
+    static const char TRANSA = 'n';
+    static const char TRANSB = 't';
+    static const gtint_t M = 4;
+    static const gtint_t N = 7;
+    static const gtint_t K = 4;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
+    T alpha, beta;
+    testinghelpers::initone<T>( alpha );
+    testinghelpers::initone<T>( beta );
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#if defined(TEST_BLAS_LIKE)
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, nullptr, nullptr, LDA, nullptr, LDB - 1, nullptr, nullptr, LDC );
+#else
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, nullptr, LDA, nullptr, LDB - 1, &beta, nullptr, LDC );
+#endif
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 10 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
+    std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
+    // Copy so that we check that the elements of C are not modified.
+    std::vector<T> c_ref(c);
+
+    // Call BLIS Gemm with a invalid value for ldb.
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, a.data(), LDA, b.data(), LDB - 1, &beta, c.data(), LDC );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 10 );
+#endif
+}
+
+// When info == 10
+TYPED_TEST(gemm_IIT_ERS, invalid_ldb_transb_c)
+{
+    using T = TypeParam;
+    static const char STORAGE = 'c';
+    static const char TRANSA = 'n';
+    static const char TRANSB = 'c';
+    static const gtint_t M = 4;
+    static const gtint_t N = 7;
+    static const gtint_t K = 4;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
+    T alpha, beta;
+    testinghelpers::initone<T>( alpha );
+    testinghelpers::initone<T>( beta );
+
+    // Test with nullptr for all suitable arguments that shouldn't be accessed.
+#if defined(TEST_BLAS_LIKE)
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, nullptr, nullptr, LDA, nullptr, LDB - 1, nullptr, nullptr, LDC );
+#else
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, nullptr, LDA, nullptr, LDB - 1, &beta, nullptr, LDC );
+#endif
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 10 );
+#endif
+
+    // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
+    std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
+    // Copy so that we check that the elements of C are not modified.
+    std::vector<T> c_ref(c);
+
+    // Call BLIS Gemm with a invalid value for ldb.
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, a.data(), LDA, b.data(), LDB - 1, &beta, c.data(), LDC );
+    // Use bitwise comparison (no threshold).
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
 
 #ifdef CAN_TEST_INFO_VALUE
     info = bli_info_get_info_value();
@@ -377,16 +637,25 @@ TYPED_TEST(gemm_IIT_ERS, invalid_ldb)
 TYPED_TEST(gemm_IIT_ERS, invalid_ldc)
 {
     using T = TypeParam;
-
+    static const char STORAGE = 'c';
+    static const char TRANSA = 'n';
+    static const char TRANSB = 'n';
+    static const gtint_t M = 7;
+    static const gtint_t N = 4;
+    static const gtint_t K = 4;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
     T alpha, beta;
     testinghelpers::initone<T>( alpha );
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
 #if defined(TEST_BLAS_LIKE)
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC - 1 );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC - 1 );
 #else
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC - 1 );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC - 1 );
 #endif
 #ifdef CAN_TEST_INFO_VALUE
     gtint_t info = bli_info_get_info_value();
@@ -394,16 +663,16 @@ TYPED_TEST(gemm_IIT_ERS, invalid_ldc)
 #endif
 
     // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
     std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> c_ref(c);
 
     // Call BLIS Gemm with a invalid value for ldc.
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC - 1 );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC - 1 );
     // Use bitwise comparison (no threshold).
-    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
 
 #ifdef CAN_TEST_INFO_VALUE
     info = bli_info_get_info_value();
@@ -428,16 +697,25 @@ TYPED_TEST(gemm_IIT_ERS, invalid_ldc)
 TYPED_TEST(gemm_IIT_ERS, m_eq_zero)
 {
     using T = TypeParam;
-
+    static const char STORAGE = 'c';
+    static const char TRANSA = 'n';
+    static const char TRANSB = 'n';
+    static const gtint_t M = 4;
+    static const gtint_t N = 4;
+    static const gtint_t K = 4;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
     T alpha, beta;
     testinghelpers::initone<T>( alpha );
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
 #if defined(TEST_BLAS_LIKE)
-    gemm<T>( STORAGE, TRANS, TRANS, 0, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, 0, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
-    gemm<T>( STORAGE, TRANS, TRANS, 0, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, 0, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
 #endif
 #ifdef CAN_TEST_INFO_VALUE
     gtint_t info = bli_info_get_info_value();
@@ -445,15 +723,15 @@ TYPED_TEST(gemm_IIT_ERS, m_eq_zero)
 #endif
 
     // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
     std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> c_ref(c);
 
-    gemm<T>( STORAGE, TRANS, TRANS, 0, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, 0, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
-    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
 
 #ifdef CAN_TEST_INFO_VALUE
     info = bli_info_get_info_value();
@@ -465,16 +743,25 @@ TYPED_TEST(gemm_IIT_ERS, m_eq_zero)
 TYPED_TEST(gemm_IIT_ERS, n_eq_zero)
 {
     using T = TypeParam;
-
+    static const char STORAGE = 'c';
+    static const char TRANSA = 'n';
+    static const char TRANSB = 'n';
+    static const gtint_t M = 4;
+    static const gtint_t N = 4;
+    static const gtint_t K = 4;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
     T alpha, beta;
     testinghelpers::initone<T>( alpha );
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
 #if defined(TEST_BLAS_LIKE)
-    gemm<T>( STORAGE, TRANS, TRANS, M, 0, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, 0, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
 #else
-    gemm<T>( STORAGE, TRANS, TRANS, M, 0, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, 0, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
 #endif
 #ifdef CAN_TEST_INFO_VALUE
     gtint_t info = bli_info_get_info_value();
@@ -482,15 +769,15 @@ TYPED_TEST(gemm_IIT_ERS, n_eq_zero)
 #endif
 
     // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
     std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> c_ref(c);
 
-    gemm<T>( STORAGE, TRANS, TRANS, M, 0, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, 0, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
-    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
 
 #ifdef CAN_TEST_INFO_VALUE
     info = bli_info_get_info_value();
@@ -502,16 +789,25 @@ TYPED_TEST(gemm_IIT_ERS, n_eq_zero)
 TYPED_TEST(gemm_IIT_ERS, alpha_zero_beta_one)
 {
     using T = TypeParam;
-
+    static const char STORAGE = 'c';
+    static const char TRANSA = 'n';
+    static const char TRANSB = 'n';
+    static const gtint_t M = 4;
+    static const gtint_t N = 4;
+    static const gtint_t K = 4;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
     T alpha, beta;
     testinghelpers::initzero<T>( alpha );
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
 #if defined(TEST_BLAS_LIKE)
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
 #else
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
 #endif
 #ifdef CAN_TEST_INFO_VALUE
     gtint_t info = bli_info_get_info_value();
@@ -519,15 +815,15 @@ TYPED_TEST(gemm_IIT_ERS, alpha_zero_beta_one)
 #endif
 
     // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
     std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> c_ref(c);
 
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
-    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
 
 #ifdef CAN_TEST_INFO_VALUE
     info = bli_info_get_info_value();
@@ -539,16 +835,25 @@ TYPED_TEST(gemm_IIT_ERS, alpha_zero_beta_one)
 TYPED_TEST(gemm_IIT_ERS, k_zero_beta_one)
 {
     using T = TypeParam;
-
+    static const char STORAGE = 'c';
+    static const char TRANSA = 'n';
+    static const char TRANSB = 'n';
+    static const gtint_t M = 4;
+    static const gtint_t N = 4;
+    static const gtint_t K = 4;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
     T alpha, beta;
     testinghelpers::initone<T>( alpha );
     testinghelpers::initone<T>( beta );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
 #if defined(TEST_BLAS_LIKE)
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, 0, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, 0, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
 #else
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, 0, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, 0, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
 #endif
 #ifdef CAN_TEST_INFO_VALUE
     gtint_t info = bli_info_get_info_value();
@@ -556,15 +861,15 @@ TYPED_TEST(gemm_IIT_ERS, k_zero_beta_one)
 #endif
 
     // Test with all arguments correct except for the value we are choosing to test.
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
     std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> c_ref(c);
 
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, 0, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, 0, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
-    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
 
 #ifdef CAN_TEST_INFO_VALUE
     info = bli_info_get_info_value();
@@ -576,18 +881,29 @@ TYPED_TEST(gemm_IIT_ERS, k_zero_beta_one)
 TYPED_TEST(gemm_IIT_ERS, ZeroAlpha_ZeroBeta)
 {
     using T = TypeParam;
-
+    static const char STORAGE = 'c';
+    static const char TRANSA = 'n';
+    static const char TRANSB = 'n';
+    static const gtint_t M = 4;
+    static const gtint_t N = 4;
+    static const gtint_t K = 4;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
     T alpha, beta;
     testinghelpers::initzero<T>( alpha );
     testinghelpers::initzero<T>( beta );
 
-    std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
-    // Copy so that we check that the elements of C are not modified.
+    // Matrix C should not be read, only set.
+    std::vector<T> c( testinghelpers::matsize( STORAGE, 'N', M, N, LDC ) );
+    testinghelpers::set_matrix( STORAGE, M, N, c.data(), 'N', LDC, testinghelpers::aocl_extreme<T>() );
     std::vector<T> c2(c);
-    std::vector<T> zero_mat = testinghelpers::get_random_matrix<T>(0, 0, STORAGE, 'n', M, N, LDB);
+    // Set up expected output matrix
+    std::vector<T> zero_mat = testinghelpers::get_random_matrix<T>(0, 0, STORAGE, 'N', M, N, LDB);
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, c2.data(), LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, c2.data(), LDC );
     computediff<T>( "C", STORAGE, N, N, c2.data(), zero_mat.data(), LDC);
 #ifdef CAN_TEST_INFO_VALUE
     gtint_t info = bli_info_get_info_value();
@@ -595,9 +911,9 @@ TYPED_TEST(gemm_IIT_ERS, ZeroAlpha_ZeroBeta)
 #endif
 
     // Test with all arguments correct except for the value we are choosing to test.
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
     computediff<T>( "C", STORAGE, N, N, c.data(), zero_mat.data(), LDC);
 
@@ -611,24 +927,33 @@ TYPED_TEST(gemm_IIT_ERS, ZeroAlpha_ZeroBeta)
 TYPED_TEST(gemm_IIT_ERS, ZeroAlpha_OtherBeta)
 {
     using T = TypeParam;
-
+    static const char STORAGE = 'c';
+    static const char TRANSA = 'n';
+    static const char TRANSB = 'n';
+    static const gtint_t M = 4;
+    static const gtint_t N = 4;
+    static const gtint_t K = 4;
+    // Set the dimension for row/col of A and B, depending on the value of trans.
+    gtint_t LDA = ((TRANSA == 'n')||(TRANSA == 'N'))? M : K;
+    gtint_t LDB = ((TRANSB == 'n')||(TRANSB == 'N'))? K : N;
+    gtint_t LDC = M;
     T alpha, beta;
     testinghelpers::initzero<T>( alpha );
     beta = T{2.0};
     double thresh = testinghelpers::getEpsilon<T>();
 
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
     std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> c2(c);
     std::vector<T> c_ref(c);
 
-    testinghelpers::ref_gemm<T>( STORAGE, TRANS, TRANS, M, N, K, alpha,
+    testinghelpers::ref_gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, alpha,
                a.data(), LDA, b.data(), LDB, beta, c_ref.data(), LDC );
 
     // Test with nullptr for all suitable arguments that shouldn't be accessed.
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, c2.data(), LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, c2.data(), LDC );
     computediff<T>( "C", STORAGE, N, N, c2.data(), c_ref.data(), LDC, thresh);
 #ifdef CAN_TEST_INFO_VALUE
     gtint_t info = bli_info_get_info_value();
@@ -636,7 +961,7 @@ TYPED_TEST(gemm_IIT_ERS, ZeroAlpha_OtherBeta)
 #endif
 
     // Test with all arguments correct except for the value we are choosing to test.
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
     computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC, thresh);
 
@@ -657,7 +982,7 @@ TYPED_TEST(gemm_IIT_ERS, null_a_matrix)
 {
     using T = TypeParam;
     std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSB, K, N, LDB);
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> c_ref(c);
     T alpha, beta;
@@ -665,12 +990,12 @@ TYPED_TEST(gemm_IIT_ERS, null_a_matrix)
     testinghelpers::initone<T>( alpha );
     testinghelpers::initone<T>( beta );
 
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, nullptr, LDA, b.data(), LDB, &beta, c.data(), LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, nullptr, LDA, b.data(), LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
-    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
 
 #ifdef CAN_TEST_INFO_VALUE
-    info = bli_info_get_info_value();
+    gtint_t info = bli_info_get_info_value();
     computediff<gtint_t>( "info", info, 0 );
 #endif
 }
@@ -680,7 +1005,7 @@ TYPED_TEST(gemm_IIT_ERS, null_b_matrix)
 {
     using T = TypeParam;
     std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, TRANSA, M, K, LDA);
     // Copy so that we check that the elements of C are not modified.
     std::vector<T> c_ref(c);
     T alpha, beta;
@@ -688,12 +1013,12 @@ TYPED_TEST(gemm_IIT_ERS, null_b_matrix)
     testinghelpers::initone<T>( alpha );
     testinghelpers::initone<T>( beta );
 
-    gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, a.data(), LDA, nullptr, LDB, &beta, c.data(), LDC );
+    gemm<T>( STORAGE, TRANSA, TRANSB, M, N, K, &alpha, a.data(), LDA, nullptr, LDB, &beta, c.data(), LDC );
     // Use bitwise comparison (no threshold).
-    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+    computediff<T>( "C", STORAGE, M, N, c.data(), c_ref.data(), LDC);
 
 #ifdef CAN_TEST_INFO_VALUE
-    info = bli_info_get_info_value();
+    gtint_t info = bli_info_get_info_value();
     computediff<gtint_t>( "info", info, 0 );
 #endif
 }
