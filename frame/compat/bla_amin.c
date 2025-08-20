@@ -47,6 +47,12 @@ f77_int PASTEF772S(i,chx,blasname) \
        const ftype_x* x, const f77_int* incx  \
      ) \
 { \
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
+\
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    AOCL_DTL_LOG_AMIN_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(chx), *n, *incx) \
+\
     dim_t    n0; \
     ftype_x* x0; \
     inc_t    incx0; \
@@ -57,10 +63,10 @@ f77_int PASTEF772S(i,chx,blasname) \
        is needed to emulate netlib BLAS. Without it, bli_?aminv() will
        return 0, which ends up getting incremented to 1 (below) before
        being returned, which is not what we want. */ \
-    if ( *n < 1 || *incx <= 0 ) return 0; \
-\
-    /* Initialize BLIS. */ \
-    bli_init_auto(); \
+    if ( *n < 1 || *incx <= 0 ) { \
+      AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "iamin_: vector empty") \
+      return 0;                                   \
+    }\
 \
     /* Convert/typecast negative values of n to zero. */ \
     bli_convert_blas_dim1( *n, n0 ); \
@@ -84,6 +90,7 @@ f77_int PASTEF772S(i,chx,blasname) \
        integer size, that typecast occurs here. */ \
     f77_index = bli_index + 1; \
 \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
     /* Finalize BLIS. */ \
     bli_finalize_auto(); \
 \

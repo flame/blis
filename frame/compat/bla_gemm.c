@@ -70,7 +70,7 @@ void PASTEF77S(ch,blasname) \
 \
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
 	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *transa, *transb, *m, *n, *k, \
-				(void*)alpha, *lda, *ldb, (void*)beta, *ldc); \
+				 (void*)alpha, *lda, *ldb, (void*)beta, *ldc); \
 \
 	/* Perform BLAS parameter checking. */ \
 	PASTEBLACHK(blasname) \
@@ -214,7 +214,7 @@ void PASTEF77S(ch,blasname) \
 \
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
 	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *transa, *transb, *m, *n, *k, \
-				(void*)alpha, *lda, *ldb, (void*)beta, *ldc); \
+				 (void*)alpha, *lda, *ldb, (void*)beta, *ldc); \
 \
 	/* Perform BLAS parameter checking. */ \
 	PASTEBLACHK(blasname) \

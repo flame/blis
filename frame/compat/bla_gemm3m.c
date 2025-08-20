@@ -69,6 +69,8 @@ void PASTEF77S(ch,blasname) \
 	bli_init_auto(); \
 \
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
+	AOCL_DTL_LOG_GEMM3M_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *transa, *transb, *m, *n, *k, \
+				   (void*)alpha, *lda, *ldb, (void*)beta, *ldc); \
 \
 	/* Perform BLAS parameter checking. */ \
 	PASTEBLACHK(blasname) \
@@ -89,6 +91,7 @@ void PASTEF77S(ch,blasname) \
 	if ( *m == 0 || *n == 0 || (( PASTEMAC(ch,eq0)( *alpha ) || *k == 0) \
 	   && PASTEMAC(ch,eq1)( *beta ) )) \
 	{ \
+		AOCL_DTL_LOG_GEMM3M_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *m, *n, *k); \
 		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
 		/* Finalize BLIS. */ \
 		bli_finalize_auto(); \
@@ -145,6 +148,7 @@ void PASTEF77S(ch,blasname) \
 		); \
 	} \
 \
+	AOCL_DTL_LOG_GEMM3M_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *m, *n, *k); \
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
@@ -195,6 +199,8 @@ void PASTEF77S(ch,blasname) \
 	bli_init_auto(); \
 \
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)    \
+	AOCL_DTL_LOG_GEMM3M_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *transa, *transb, *m, *n, *k, \
+				   (void*)alpha, *lda, *ldb, (void*)beta, *ldc); \
 \
 	/* Perform BLAS parameter checking. */ \
 	PASTEBLACHK(blasname) \
@@ -215,6 +221,7 @@ void PASTEF77S(ch,blasname) \
 	if ( *m == 0 || *n == 0 || (( PASTEMAC(ch,eq0)( *alpha ) || *k == 0) \
 	   && PASTEMAC(ch,eq1)( *beta ) )) \
 	{ \
+		AOCL_DTL_LOG_GEMM3M_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *m, *n, *k); \
 		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
 		/* Finalize BLIS. */ \
 		bli_finalize_auto(); \
@@ -293,6 +300,7 @@ void PASTEF77S(ch,blasname) \
 	} \
 \
 \
+	AOCL_DTL_LOG_GEMM3M_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *m, *n, *k); \
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO) \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \

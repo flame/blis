@@ -478,6 +478,95 @@ void AOCL_DTL_log_trsm_stats(int8 loglevel,
 
 // Level-3 Extension Logging
 
+void AOCL_DTL_log_gemm3m_sizes(int8 loglevel,
+                               char dt_type,
+                               const f77_char transa,
+                               const f77_char transb,
+                               const f77_int m,
+                               const f77_int n,
+                               const f77_int k,
+                               const void *alpha,
+                               const f77_int lda,
+                               const f77_int ldb,
+                               const void *beta,
+                               const f77_int ldc,
+                               const char *filename,
+                               const char *function_name,
+                               int line)
+{
+    char buffer[256];
+
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
+    double beta_real = 0.0;
+    double beta_imag = 0.0;
+
+    DTL_get_complex_parts(dt_type, alpha, &alpha_real, &alpha_imag);
+    DTL_get_complex_parts(dt_type, beta, &beta_real, &beta_imag);
+
+    // Ordering as per cblas/blas interfaces
+    // {S, D, C, Z} transa, transb, m, n, k, alpha_real, alpha_imag,
+    //              lda, ldb, beta_real, beta_imag, ldc
+    sprintf(buffer, "%c %c %c %ld %ld %ld %lf %lf %ld %ld %lf %lf %ld",
+            tolower(dt_type),
+            transa, transb,
+            (dim_t)m, (dim_t)n, (dim_t)k,
+            alpha_real, alpha_imag,
+            (inc_t)lda, (inc_t)ldb,
+            beta_real, beta_imag,
+            (inc_t)ldc);
+
+    AOCL_DTL_START_PERF_TIMER();
+    DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+}
+
+void AOCL_DTL_log_gemm3m_stats(int8 loglevel,
+                               char dt_type,
+                               const f77_int m,
+                               const f77_int n,
+                               const f77_int k)
+{
+    char buffer[256];
+
+    // Execution time is in micro seconds.
+    Double execution_time = AOCL_DTL_get_time_spent();
+
+    double flops = 2.0 * m * n * k;
+    if (dt_type == 'c' || dt_type == 'C' || dt_type == 'z' || dt_type == 'Z')
+    {
+        flops = 4.0 * flops;
+    }
+
+    if (execution_time != 0.0)
+        sprintf(buffer, " nt=%ld %.3f ms %0.3f GFLOPS",
+                AOCL_get_requested_threads_count(),
+                execution_time/1000.0,
+                flops/(execution_time * 1e3));
+    else
+        sprintf(buffer, " nt=%ld %.3f ms",
+                AOCL_get_requested_threads_count(),
+                execution_time/1000.0);
+
+    DTL_Trace(loglevel, TRACE_TYPE_RAW, NULL, NULL, 0, buffer);
+}
+
+void AOCL_DTL_log_gemm_batch_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_int group_count,
+                             const char *filename,
+                             const char *function_name,
+                             int line)
+{
+    char buffer[256];
+
+    // Ordering as per cblas/blas interfaces
+    // {S, D, C, Z} identifier, group_count
+    sprintf(buffer, "%c %ld\n", tolower(dt_type),
+            (dim_t)group_count);
+
+    DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+}
+
 void AOCL_DTL_log_gemm_get_size_sizes(int8 loglevel,
                              char dt_type,
                              const f77_char identifier,
@@ -1288,6 +1377,21 @@ void AOCL_DTL_log_rotmg_sizes(int8 loglevel,
 
 // Level-1 Logging
 
+void AOCL_DTL_log_amin_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_int n,
+                             const f77_int incx,
+                             const char *filename,
+                             const char *function_name,
+                             int line)
+{
+    char buffer[256];
+    // {S, D, C, Z} {n, incx}
+    sprintf(buffer, "%c %ld %ld\n", tolower(dt_type), (dim_t)n, (dim_t)incx);
+
+    DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+}
+
 void AOCL_DTL_log_amax_sizes(int8 loglevel,
                              char dt_type,
                              const f77_int n,
@@ -1483,6 +1587,117 @@ void AOCL_DTL_log_swap_sizes(int8 loglevel,
     sprintf(buffer, "%c %ld %ld %ld\n", tolower(dt_type),
             (dim_t)n, (dim_t)incx, (dim_t)incy);
 
+    DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+}
+
+// Matrix Copy and Transpose Logging
+
+void AOCL_DTL_log_matadd_sizes(int8 loglevel,
+                               char dt_type,
+                               const f77_char transa,
+                               const f77_char transb,
+                               const f77_int  m,
+                               const f77_int  n,
+                               const void*    alpha,
+                               const f77_int  lda,
+                               const void*    beta,
+                               const f77_int  ldb,
+                               const f77_int  ldc,
+                               const char* filename,
+                               const char* function_name,
+                               int line)
+{
+    char buffer[256];
+
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
+    double beta_real = 0.0;
+    double beta_imag = 0.0;
+
+    DTL_get_complex_parts(dt_type, alpha, &alpha_real, &alpha_imag);
+    DTL_get_complex_parts(dt_type, beta, &beta_real, &beta_imag);
+
+    // Ordering as per cblas/blas interfaces
+    // {S, D, C, Z} transa, transb, m, n, alpha_real, alpha_imag,
+    //              lda, beta_real, beta_imag, ldb, ldc
+    sprintf(buffer, "%c %c %c %ld %ld %lf %lf %ld %lf %lf %ld %ld",
+            tolower(dt_type),
+            transa, transb,
+            (dim_t)m, (dim_t)n,
+            alpha_real, alpha_imag, (inc_t)lda,
+            beta_real, beta_imag, (inc_t)ldb,
+            (inc_t)ldc);
+
+    AOCL_DTL_START_PERF_TIMER();
+    DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+}
+
+
+
+void AOCL_DTL_log_matcopy_sizes(int8 loglevel,
+                                char dt_type,
+                                const f77_char trans,
+                                const f77_int  rows,
+                                const f77_int  cols,
+                                const void*    alpha,
+                                const f77_int  lda,
+                                const f77_int  ldb,
+                                const char* filename,
+                                const char* function_name,
+                                int line)
+{
+    char buffer[256];
+
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
+
+    DTL_get_complex_parts(dt_type, alpha, &alpha_real, &alpha_imag);
+
+    // Ordering as per cblas/blas interfaces
+    // {S, D, C, Z} trans, rows, cols, alpha_real, alpha_imag,
+    //              lda, ldb
+    sprintf(buffer, "%c %c %ld %ld %lf %lf %ld %ld",
+            tolower(dt_type), trans,
+            (dim_t)rows, (dim_t)cols,
+            alpha_real, alpha_imag,
+            (inc_t)lda, (inc_t)ldb);
+
+    AOCL_DTL_START_PERF_TIMER();
+    DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+}
+
+void AOCL_DTL_log_matcopy2_sizes(int8 loglevel,
+                                 char dt_type,
+                                 const f77_char trans,
+                                 const f77_int  rows,
+                                 const f77_int  cols,
+                                 const void*    alpha,
+                                 const f77_int  lda,
+                                 const f77_int  stridea,
+                                 const f77_int  ldb,
+                                 const f77_int  strideb,
+                                 const char* filename,
+                                 const char* function_name,
+                                 int line)
+{
+    char buffer[256];
+
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
+
+    DTL_get_complex_parts(dt_type, alpha, &alpha_real, &alpha_imag);
+
+    // Ordering as per cblas/blas interfaces
+    // {S, D, C, Z} trans, rows, cols, alpha_real, alpha_imag,
+    //              lda, stridea, ldb, strideb
+    sprintf(buffer, "%c %c %ld %ld %lf %lf %ld %ld %ld %ld",
+            tolower(dt_type), trans,
+            (dim_t)rows, (dim_t)cols,
+            alpha_real, alpha_imag,
+            (inc_t)lda, (inc_t)stridea,
+            (inc_t)ldb, (inc_t)strideb);
+
+    AOCL_DTL_START_PERF_TIMER();
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
 

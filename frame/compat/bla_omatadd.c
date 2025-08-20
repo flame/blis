@@ -96,8 +96,12 @@ static void bli_zconjugate(dcomplex* A,dim_t cols,dim_t rows)
 
 void somatadd_blis_impl (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const float* alpha, const float* A, f77_int* lda, const float* beta, const float* B, f77_int* ldb, float* C, f77_int* ldc)
 {
+ /* Initialize BLIS. */
+ // Call to bli_init_auto() is not needed here
+ AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
- //bli_init_once();
+ AOCL_DTL_LOG_MATADD_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *transa, *transb, *m, *n,
+                            (void*)alpha, *lda, (void*)beta, *ldb, *ldc );
 
  if( alpha == NULL || A == NULL || beta == NULL || B == NULL || C == NULL || *lda < 1 || *ldb < 1 || *ldc < 1 || *m < 1 || *n < 1)
  {
@@ -175,8 +179,13 @@ void somatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
 
 void domatadd_blis_impl (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const double* alpha, const double* A, f77_int* lda, const double* beta, const double* B, f77_int* ldb, double* C, f77_int* ldc)
 {
+ /* Initialize BLIS. */
+ // Call to bli_init_auto() is not needed here
+ AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
- //bli_init_once();
+ AOCL_DTL_LOG_MATADD_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *transa, *transb, *m, *n,
+                            (void*)alpha, *lda, (void*)beta, *ldb, *ldc );
+
  if( alpha == NULL || A == NULL || beta == NULL || B == NULL || C == NULL || *lda < 1 || *ldb < 1 || *ldc < 1 || *m < 1 || *n < 1)
  {
   bli_print_msg( " Invalid function parameters domatadd_() .", __FILE__, __LINE__ );
@@ -253,8 +262,13 @@ void domatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
 
 void comatadd_blis_impl (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const scomplex* alpha, const scomplex* A, f77_int* lda,const scomplex* beta, scomplex* B, f77_int* ldb, scomplex* C, f77_int* ldc)
 {
+ /* Initialize BLIS. */
+ // Call to bli_init_auto() is not needed here
+ AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
- //bli_init_once();
+ AOCL_DTL_LOG_MATADD_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *transa, *transb, *m, *n,
+                            (void*)alpha, *lda, (void*)beta, *ldb, *ldc );
+
  if( alpha == NULL || A == NULL || beta == NULL || B == NULL || C == NULL || *lda < 1 || *ldb < 1 || *ldc < 1 || *m < 1 || *n < 1)
  {
   bli_print_msg( " Invalid function parameters comatadd_() .", __FILE__, __LINE__ );
@@ -344,8 +358,13 @@ void comatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
 
 void zomatadd_blis_impl (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const dcomplex* alpha, const dcomplex* A, f77_int* lda,const dcomplex* beta, dcomplex* B, f77_int* ldb, dcomplex* C, f77_int* ldc)
 {
+ /* Initialize BLIS. */
+ // Call to bli_init_auto() is not needed here
+ AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
- //bli_init_once();
+ AOCL_DTL_LOG_MATADD_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *transa, *transb, *m, *n,
+                            (void*)alpha, *lda, (void*)beta, *ldb, *ldc );
+
  if( alpha == NULL || A == NULL || beta == NULL || B == NULL || C == NULL || *lda < 1 || *ldb < 1 || *ldc < 1 || *m < 1 || *n < 1)
  {
   bli_print_msg( " Invalid function parameters zomatadd_() .", __FILE__, __LINE__ );

@@ -70,6 +70,9 @@ void PASTEF77S(ch,blasname) \
     /* Initialize BLIS. */ \
     bli_init_auto(); \
 \
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    AOCL_DTL_LOG_GEMM_BATCH_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *group_count); \
+\
     /* Perform BLAS parameter checking. */ \
     f77_int count; \
     for(count = 0; count < *group_count; count++) \
@@ -133,6 +136,8 @@ void PASTEF77S(ch,blasname) \
         } \
     } \
 \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
+    /* Finalize BLIS. */  \
     bli_finalize_auto(); \
 } \
 IF_BLIS_ENABLE_BLAS(\
@@ -184,6 +189,9 @@ void PASTEF77S(ch,blasname) \
 \
     /* Initialize BLIS. */ \
     bli_init_auto(); \
+\
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    AOCL_DTL_LOG_GEMM_BATCH_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *group_count); \
 \
     /* Perform BLAS parameter checking. */ \
     f77_int count; \
@@ -266,6 +274,7 @@ void PASTEF77S(ch,blasname) \
         } \
     } \
 \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
     /* Finalize BLIS. */  \
     bli_finalize_auto(); \
 } \

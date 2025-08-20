@@ -96,10 +96,10 @@ f77_int PASTEF772S(i,chx,blasname) \
        integer size, that typecast occurs here. */ \
     f77_index = bli_index + 1; \
 \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
     /* Finalize BLIS. */ \
     bli_finalize_auto(); \
 \
-    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
     return f77_index; \
 }\
 \

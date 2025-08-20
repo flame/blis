@@ -165,9 +165,13 @@ void simatcopy_blis_impl
        f77_int*     ldb
      )
 {
-    //printf("I am from simatcopy_\n");
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-    //bli_init_once();
+    AOCL_DTL_LOG_MATCOPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *trans, *rows, *cols,
+                                (void*)alpha, *lda, *ldb );
+
     if ( !( *trans == 'n' || *trans == 'N' ||
         *trans == 't' || *trans == 'T' ||
         *trans == 'c' || *trans == 'C' ||
@@ -251,8 +255,13 @@ void dimatcopy_blis_impl
        f77_int*      ldb
      )
 {
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-    //bli_init_once();
+    AOCL_DTL_LOG_MATCOPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *trans, *rows, *cols,
+                                (void*)alpha, *lda, *ldb );
+
     if ( !( *trans == 'n' || *trans == 'N' ||
         *trans == 't' || *trans == 'T' ||
         *trans == 'c' || *trans == 'C' ||
@@ -336,8 +345,13 @@ void cimatcopy_blis_impl
        f77_int*        ldb
      )
 {
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-    //bli_init_once();
+    AOCL_DTL_LOG_MATCOPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *trans, *rows, *cols,
+                                (void*)alpha, *lda, *ldb );
+
     if ( !( *trans == 'n' || *trans == 'N' ||
         *trans == 't' || *trans == 'T' ||
         *trans == 'c' || *trans == 'C' ||
@@ -421,8 +435,13 @@ void zimatcopy_blis_impl
        f77_int*        ldb
      )
 {
+    /* Initialize BLIS. */
+    // Call to bli_init_auto() is not needed here
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-    //bli_init_once();
+    AOCL_DTL_LOG_MATCOPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *trans, *rows, *cols,
+                                (void*)alpha, *lda, *ldb );
+
     if ( !( *trans == 'n' || *trans == 'N' ||
         *trans == 't' || *trans == 'T' ||
         *trans == 'c' || *trans == 'C' ||

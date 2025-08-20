@@ -60,7 +60,14 @@ static dim_t bli_zoMatCopy_cc(dim_t rows, dim_t cols, const dcomplex alpha, cons
 
 void somatcopy_blis_impl (f77_char* trans, f77_int* rows, f77_int* cols, const float* alpha, const float* aptr, f77_int* lda, float* bptr, f77_int* ldb)
 {
+
+	/* Initialize BLIS. */
+	// Call to bli_init_auto() is not needed here
+	AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+	AOCL_DTL_LOG_MATCOPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *trans, *rows, *cols,
+				    (void*)alpha, *lda, *ldb );
+
 	if ( !(*trans == 'n' || *trans == 'N' ||
 		   *trans == 't' || *trans == 'T' ||
 		   *trans == 'c' || *trans == 'C' ||
@@ -108,8 +115,13 @@ void somatcopy_ (f77_char* trans, f77_int* rows, f77_int* cols, const float* alp
 
 void domatcopy_blis_impl (f77_char* trans, f77_int* rows, f77_int* cols, const double* alpha, const double* aptr, f77_int* lda, double* bptr, f77_int* ldb)
 {
+	/* Initialize BLIS. */
+	// Call to bli_init_auto() is not needed here
+	AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-	//bli_init_once();
+	AOCL_DTL_LOG_MATCOPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *trans, *rows, *cols,
+				    (void*)alpha, *lda, *ldb );
+
 	if ( !(*trans == 'n' || *trans == 'N' ||
 		   *trans == 't' || *trans == 'T' ||
 		   *trans == 'c' || *trans == 'C' ||
@@ -157,8 +169,13 @@ void domatcopy_ (f77_char* trans, f77_int* rows, f77_int* cols, const double* al
 
 void comatcopy_blis_impl (f77_char* trans, f77_int* rows, f77_int* cols, const scomplex* alpha, const scomplex* aptr, f77_int* lda, scomplex* bptr, f77_int* ldb)
 {
+	/* Initialize BLIS. */
+	// Call to bli_init_auto() is not needed here
+	AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-	//bli_init_once();
+	AOCL_DTL_LOG_MATCOPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *trans, *rows, *cols,
+				    (void*)alpha, *lda, *ldb );
+
 	if ( !(*trans == 'n' || *trans == 'N' ||
 		   *trans == 't' || *trans == 'T' ||
 		   *trans == 'c' || *trans == 'C' ||
@@ -207,8 +224,13 @@ void comatcopy_ (f77_char* trans, f77_int* rows, f77_int* cols, const scomplex* 
 
 void zomatcopy_blis_impl (f77_char* trans, f77_int* rows, f77_int* cols, const dcomplex* alpha, const dcomplex* aptr, f77_int* lda, dcomplex* bptr, f77_int* ldb)
 {
+	/* Initialize BLIS. */
+	// Call to bli_init_auto() is not needed here
+	AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-	//bli_init_once();
+	AOCL_DTL_LOG_MATCOPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *trans, *rows, *cols,
+				    (void*)alpha, *lda, *ldb );
+
 	if ( !(*trans == 'n' || *trans == 'N' ||
 		   *trans == 't' || *trans == 'T' ||
 		   *trans == 'c' || *trans == 'C' ||

@@ -186,6 +186,35 @@ void AOCL_DTL_log_trsm_stats(int8 loglevel,
 
 // Level-3 Extension Logging
 
+void AOCL_DTL_log_gemm3m_sizes(int8 loglevel,
+                               char dt_type,
+                               const f77_char transa,
+                               const f77_char transb,
+                               const f77_int m,
+                               const f77_int n,
+                               const f77_int k,
+                               const void *alpha,
+                               const f77_int lda,
+                               const f77_int ldb,
+                               const void *beta,
+                               const f77_int ldc,
+                               const char *filename,
+                               const char *function_name,
+                               int line);
+
+void AOCL_DTL_log_gemm3m_stats(int8 loglevel,
+                               char dt_type,
+                               const f77_int m,
+                               const f77_int n,
+                               const f77_int k);
+
+void AOCL_DTL_log_gemm_batch_sizes(int8 loglevel,
+                                   char dt_type,
+                                   const f77_int group_count,
+                                   const char *filename,
+                                   const char *function_name,
+                                   int line);
+
 void AOCL_DTL_log_gemm_get_size_sizes(int8 loglevel,
                              char dt_type,
                              const f77_char identifer,
@@ -560,6 +589,14 @@ void AOCL_DTL_log_rotmg_sizes(int8 loglevel,
 
 // Level-1 Logging
 
+void AOCL_DTL_log_amin_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_int  n,
+                             const f77_int incx,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
 void AOCL_DTL_log_amax_sizes(int8 loglevel,
                              char dt_type,
                              const f77_int  n,
@@ -648,6 +685,49 @@ void AOCL_DTL_log_swap_sizes(int8 loglevel,
                              const char* function_name,
                              int line);
 
+// Matrix Copy and Transpose Logging
+
+void AOCL_DTL_log_matadd_sizes(int8 loglevel,
+                               char dt_type,
+                               const f77_char transa,
+                               const f77_char transb,
+                               const f77_int  m,
+                               const f77_int  n,
+                               const void*    alpha,
+                               const f77_int  lda,
+                               const void*    beta,
+                               const f77_int  ldb,
+                               const f77_int  ldc,
+                               const char* filename,
+                               const char* function_name,
+                               int line);
+
+void AOCL_DTL_log_matcopy_sizes(int8 loglevel,
+                                char dt_type,
+                                const f77_char trans,
+                                const f77_int  rows,
+                                const f77_int  cols,
+                                const void*    alpha,
+                                const f77_int  lda,
+                                const f77_int  ldb,
+                                const char* filename,
+                                const char* function_name,
+                                int line);
+
+void AOCL_DTL_log_matcopy2_sizes(int8 loglevel,
+                                 char dt_type,
+                                 const f77_char trans,
+                                 const f77_int  rows,
+                                 const f77_int  cols,
+                                 const void*    alpha,
+                                 const f77_int  lda,
+                                 const f77_int  stridea,
+                                 const f77_int  ldb,
+                                 const f77_int  strideb,
+                                 const char* filename,
+                                 const char* function_name,
+                                 int line);
+
 // Level-3 Macros
 
 #define AOCL_DTL_LOG_GEMM_INPUTS(loglevel, dt, transa, transb, m, n, k, alpha, lda, ldb, beta, ldc)    \
@@ -713,6 +793,20 @@ void AOCL_DTL_log_swap_sizes(int8 loglevel,
         AOCL_DTL_log_trsm_stats(loglevel, dt_type, side, m, n);
 
 // Level-3 Extension Macros
+
+#define AOCL_DTL_LOG_GEMM3M_INPUTS(loglevel, dt, transa, transb, m, n, k, alpha, lda, ldb, beta, ldc)    \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_gemm3m_sizes(loglevel, dt, transa, transb, m, n, k, alpha, lda, ldb, beta, ldc, \
+                                __FILE__, __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_GEMM3M_STATS(loglevel, dt_type, m, n, k)    \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_gemm3m_stats(loglevel, dt_type, m, n, k);
+
+#define AOCL_DTL_LOG_GEMM_BATCH_INPUTS(loglevel, dt, group_count) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_gemm_batch_sizes(loglevel, dt, group_count, \
+                                         __FILE__, __FUNCTION__, __LINE__);
 
 #define AOCL_DTL_LOG_GEMM_GET_SIZE_INPUTS(loglevel, dt, identifier, m, n, k) \
     if (gbIsLoggingEnabled) \
@@ -871,6 +965,10 @@ void AOCL_DTL_log_swap_sizes(int8 loglevel,
 
 // Level-1 Macros
 
+#define AOCL_DTL_LOG_AMIN_INPUTS(loglevel, dt_type, n, incx) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_amin_sizes(loglevel, dt_type, n, incx, __FILE__, __FUNCTION__, __LINE__);
+
 #define AOCL_DTL_LOG_AMAX_INPUTS(loglevel, dt_type, n, incx) \
     if (gbIsLoggingEnabled) \
         AOCL_DTL_log_amax_sizes(loglevel, dt_type, n, incx, __FILE__, __FUNCTION__, __LINE__);
@@ -913,6 +1011,19 @@ void AOCL_DTL_log_swap_sizes(int8 loglevel,
     if (gbIsLoggingEnabled) \
         AOCL_DTL_log_swap_sizes(loglevel, dt_type, n, incx, incy,  __FILE__,__FUNCTION__,__LINE__);
 
+// Matrix Copy and Transpose Macros
+
+#define AOCL_DTL_LOG_MATADD_INPUTS(loglevel, dt_type, transa, transb, m, n, alpha, lda, beta, ldb, ldc ) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_matadd_sizes(loglevel, dt_type, transa, transb, m, n, alpha, lda, beta, ldb, ldc,  __FILE__,__FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_MATCOPY_INPUTS(loglevel, dt_type, trans, rows, cols, alpha, lda, ldb ) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_matcopy_sizes(loglevel, dt_type, trans, rows, cols, alpha, lda, ldb,  __FILE__,__FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_MATCOPY2_INPUTS(loglevel, dt_type, trans, rows, cols, alpha, lda, stridea, ldb, strideb ) \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_matcopy2_sizes(loglevel, dt_type, trans, rows, cols, alpha, lda, stridea, ldb, strideb,  __FILE__,__FUNCTION__,__LINE__);
 
 #else // AOCL_DTL_LOG_ENABLE
 
@@ -945,6 +1056,12 @@ void AOCL_DTL_log_swap_sizes(int8 loglevel,
 #define AOCL_DTL_LOG_TRSM_STATS(loglevel, dt_type, side, m, n)
 
 // Level-3 Extension Macros
+
+#define AOCL_DTL_LOG_GEMM3M_INPUTS(loglevel, dt, transa, transb, m, n, k, alpha, lda, ldb, beta, ldc)
+
+#define AOCL_DTL_LOG_GEMM3M_STATS(loglevel, dt_type, m, n, k)
+
+#define AOCL_DTL_LOG_GEMM_BATCH_INPUTS(loglevel, dt, group_count)
 
 #define AOCL_DTL_LOG_GEMM_GET_SIZE_INPUTS(loglevel, dt, identifier, m, n, k)
 
@@ -1016,6 +1133,8 @@ void AOCL_DTL_log_swap_sizes(int8 loglevel,
 
 // Level-1 Macros
 
+#define AOCL_DTL_LOG_AMIN_INPUTS(loglevel, dt_type, n, incx)
+
 #define AOCL_DTL_LOG_AMAX_INPUTS(loglevel, dt_type, n, incx)
 
 #define AOCL_DTL_LOG_ASUM_INPUTS(loglevel, dt_type, n, incx)
@@ -1035,6 +1154,14 @@ void AOCL_DTL_log_swap_sizes(int8 loglevel,
 #define AOCL_DTL_LOG_SCAL_INPUTS(loglevel, dt_type, alpha, n, incx )
 
 #define AOCL_DTL_LOG_SWAP_INPUTS(loglevel, dt_type, n, incx, incy)
+
+// Matrix Copy and Transpose Macros
+
+#define AOCL_DTL_LOG_MATADD_INPUTS(loglevel, dt_type, transa, transb, m, n, alpha, lda, beta, ldb, ldc )
+
+#define AOCL_DTL_LOG_MATCOPY_INPUTS(loglevel, dt_type, trans, rows, cols, alpha, lda, ldb )
+
+#define AOCL_DTL_LOG_MATCOPY2_INPUTS(loglevel, dt_type, trans, rows, cols, alpha, lda, stridea, ldb, strideb )
 
 #endif // AOCL_DTL_LOG_ENABLE
 
