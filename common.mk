@@ -598,9 +598,6 @@ ifeq ($(SECURITY_FLAGS_ENABLED),yes)
       LDFLAGS += -Wl,-z,now -Wl,-z,relro
     endif
   endif
-  $(info Security hardening flags: ENABLED)
-else
-  $(info Security hardening flags: DISABLED)
 endif
 # Add libmemkind to the link-time flags, if it was enabled at configure-time.
 ifeq ($(MK_ENABLE_MEMKIND),yes)
