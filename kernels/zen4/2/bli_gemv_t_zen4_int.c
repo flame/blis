@@ -110,7 +110,7 @@ static dgemv_ker_ft_conja n_ker_fp[8] =
        dim_t   n,
        double* alpha,
        double* a, inc_t inca, inc_t lda,
-       double* x, inc_t incx,
+       double* x0, inc_t incx0,
        double* beta,
        double* y, inc_t incy,
        cntx_t* cntx
@@ -118,8 +118,75 @@ static dgemv_ker_ft_conja n_ker_fp[8] =
 {
     double* restrict a_buf = a;
     double* restrict y_buf = y;
-    double* restrict x_buf = x;
+    double*              x = x0;  // optionally packed buffer
 
+    inc_t             incx = incx0;
+    
+    bool    is_x_temp_buf_created = false;
+    mem_t   mem_bufX;
+    rntm_t  rntm_l;
+    
+    if (incx != 1)
+    {
+        /*
+              Initialize mem pool buffer to NULL and size to 0
+              "buf" and "size" fields are assigned once memory
+              is allocated from the pool in bli_pba_acquire_m().
+              This will ensure bli_mem_is_alloc() will be passed on
+              an allocated memory if created or a NULL .
+        */
+
+        mem_bufX.pblk.buf = NULL;
+        mem_bufX.pblk.block_size = 0;
+        mem_bufX.buf_type = 0;
+        mem_bufX.size = 0;
+        mem_bufX.pool = NULL;
+
+        // In order to get the buffer from pool via rntm_l access to memory broker
+        // is needed.Following are initializations for rntm_l.
+        bli_rntm_init_from_global(&rntm_l);
+        bli_rntm_set_num_threads_only(1, &rntm_l);
+        bli_pba_rntm_set_pba(&rntm_l);
+
+        //calculate the size required for m0 double elements in vector X.
+        size_t buffer_size = m * sizeof(double);
+
+#ifdef BLIS_ENABLE_MEM_TRACING
+        printf("bli_dgemv_t_zen4_int(): get mem pool block for vector x\n");
+#endif
+
+        // acquire a Buffer(m0*size(double)) from the memory broker
+        // and save the associated mem_t entry to mem_bufX.
+        bli_pba_acquire_m(&rntm_l,
+                            buffer_size,
+                            BLIS_BUFFER_FOR_B_PANEL,
+                            &mem_bufX);
+
+        // Continue packing X if buffer memory is allocated.
+        if ( bli_mem_is_alloc(&mem_bufX) )
+        {
+            x = bli_mem_buffer(&mem_bufX);
+
+            // stride of vector x_buf =1
+            incx = 1;
+
+            // Invoke the COPYV function using the function pointer.
+            bli_dcopyv_zen4_asm
+            (
+                BLIS_NO_CONJUGATE,
+                m,
+                x0, incx0,
+                x, incx,
+                cntx
+            );
+
+            // Set x is packed as the memory allocation was successful
+            // and contents have been copied to a temp buffer.
+            is_x_temp_buf_created = TRUE;
+        }
+    }
+
+    double*          x_buf = x;  // temporary buffer
     // i denotes the number of rows completed
     // The variable 'j' is used to denote the number of rows that have been completed.
     dim_t i = 0, j = 0;
@@ -1033,6 +1100,14 @@ static dgemv_ker_ft_conja n_ker_fp[8] =
             y_buf, incy,
             cntx
         );
+    }
+    if (is_x_temp_buf_created)
+    {
+ #ifdef BLIS_ENABLE_MEM_TRACING
+        printf("bli_dgemv_t_zen4_int(): releasing mem pool block for vector x\n");
+ #endif
+        // Return the buffer to pool
+        bli_pba_release(&rntm_l, &mem_bufX);
     }
     return;
 }
