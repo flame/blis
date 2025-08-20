@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -233,7 +233,10 @@ static void gemv( char storage, char trans, char conj_x, gtint_t m, gtint_t n,
 
     if (ap && size_ap > 0)
     {
-        computediff<T>( "A", storage, m, n, ap, ap_cpy, lda, true );
+        if(( trans == 'n' ) || ( trans == 'N' ))
+            computediff<T>( "A", storage, m, n, ap, ap_cpy, lda, true );
+        else
+            computediff<T>( "A", storage, n, m, ap, ap_cpy, lda, true );
         delete[] ap_cpy;
     }
 
