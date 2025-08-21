@@ -123,9 +123,18 @@
 // Macro for checking if the request is for a single-threaded operation on ZGEMM, for the AVX2 ISA
 #define IS_TINY_NOT_PARALLEL_z_ZEN4_AVX2( transa, transb, m, n, k, is_parallel ) \
    ( ( !is_parallel ) && \
-    /* Separate thresholds based on transpose value of A */ \
-    ( ( bli_is_notrans( transa ) && ( m < 60 ) && ( n >= 4 ) && ( n < 200 ) && ( k < 68 ) ) || \
-      ( bli_is_trans( transa ) && ( m < 200 ) && ( n < 200 ) && ( k < 200 ) && ( k >= 16 ) ) ) )
+    /* Separate thresholds based on transpose value of A */                              \
+                                                                                         \
+    /* An additional check (m % 2 == 0) is included in both branches. */                 \
+	/* Now, only inputs with an even m dimension (divisible by 2) which are below the */ \
+	/* threshold of avx2 kernel are routed to the AVX2 kernel */                         \
+	/* Odd m values are routed to the AVX512 kernel. */                                  \
+	/* Because avx2 kernels invokes gemv calls for m_left=1 */                           \
+	/* (odd m dimension of matrix) */                                                    \
+    /* The gemv function call adds overhead for very small sizes and results */          \
+    /* in suboptimal performance. */                                                     \
+    ( ( bli_is_notrans( transa ) && ( m < 60 ) && ( n >= 4 ) && ( n < 200 ) && ( k < 68 ) && (m % 2 == 0) ) || \
+      ( bli_is_trans( transa ) && ( m < 200 ) && ( n < 200 ) && ( k < 200 ) && ( k >= 16 ) && (m % 2 == 0) ) ) )
 
 // Macro for checking if the request is for a multi-threaded operation on ZGEMM, for the AVX2 ISA
 #define IS_TINY_PARALLEL_z_ZEN4_AVX2( transa, transb, m, n, k, is_parallel ) \
@@ -140,9 +149,15 @@
 // Macro for checking if the request is for a single-threaded operation on ZGEMM, for the AVX512 ISA
 #define IS_TINY_NOT_PARALLEL_z_ZEN4_AVX512( transa, transb, m, n, k, is_parallel ) \
   ( ( !is_parallel ) && \
-    /* Separate thresholds based on transpose value of A */ \
-    ( ( bli_is_notrans( transa ) && ( m < 200 ) && ( n < 200 ) && ( k < 200 ) && \
-        ( ( m * k ) < 1500 ) && ( ( n * k ) < 1500 ) && ( ( m * n ) < 1500 ) ) || \
+    /* Separate thresholds based on transpose value of A */                                               \
+                                                                                                          \
+    /* Threshold change to route all of the inputs to avx512 tiny path. */                                \
+    /* Eliminating dependency of avx2 zgemm_small path if A, B matrix storage is 'N'(not transpose) or */ \
+    /* 'T'(transpose). */                                                                                 \
+                                                                                                          \
+    /* Dependency on AVX2 zgemm_small path is eliminated for non-transpose and transpose storage. */      \
+    /* For conjugate transpose cases, falling back to AVX2 is still allowed. */                           \
+    ( ( bli_is_notrans( transa ) && ( m < 200 ) && ( n < 200 ) && ( k < 200 ) ) || \
       ( bli_is_trans( transa ) && ( m < 200 ) && ( n < 200 ) && ( k < 200 ) && ( k >= 8 ) ) ) )
 
 // Macro for checking if the request is for a multi-threaded operation on ZGEMM, for the AVX512 ISA
