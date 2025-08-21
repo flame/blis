@@ -327,10 +327,12 @@ set(AOCL_BLAS_LATEST_VERSION 51)
 set(CAN_TEST_INFO_VALUE ON)
 # The following part will be used to set up macros that relate to the version
 # of BLIS library being tested.
+
 if(ENABLE_THREADING STREQUAL "openmp")
     try_run(RUNRESULT COMPILERESULT "${CMAKE_BINARY_DIR}/temp" SOURCES ${CMAKE_SOURCE_DIR}/cmake/get_version.cpp
             COMPILE_DEFINITIONS -I${BLIS_PATH}/include/ -I${BLIS_PATH}/include/blis
             LINK_LIBRARIES ${BLIS_LIBRARY} ${COMMON_LIBS} OpenMP::OpenMP_CXX ${ASAN_FLAGS} ${COVERAGE_FLAGS}
+			WORKING_DIRECTORY ${BLIS_PATH}/lib/
             RUN_OUTPUT_VARIABLE TEST_BLIS_VERSION
             COMPILE_OUTPUT_VARIABLE COMP_VAR_VERSION
     )
@@ -338,6 +340,7 @@ else()
     try_run(RUNRESULT COMPILERESULT "${CMAKE_BINARY_DIR}/temp" SOURCES ${CMAKE_SOURCE_DIR}/cmake/get_version.cpp
             COMPILE_DEFINITIONS -I${BLIS_PATH}/include/ -I${BLIS_PATH}/include/blis
             LINK_LIBRARIES ${BLIS_LIBRARY} ${COMMON_LIBS} ${ASAN_FLAGS} ${COVERAGE_FLAGS}
+			WORKING_DIRECTORY ${BLIS_PATH}/lib/
             RUN_OUTPUT_VARIABLE TEST_BLIS_VERSION
             COMPILE_OUTPUT_VARIABLE COMP_VAR_VERSION
     )
@@ -345,8 +348,8 @@ endif()
 if(NOT COMPILERESULT)
     message(FATAL_ERROR "Compiling get_version.cpp failed with the following error ${COMP_VAR_VERSION}.")
 else()
-    # Version strings that get returned have this form: AOCL-BLAS 5.0.1 Build 20241111
-    # We do not need anything after 5.0.1 for testing so we create a list and then keep
+    # Version strings that get returned have this form: AOCL-BLAS 5.1.1 Build 20241111
+    # We do not need anything after 5.1.1 for testing so we create a list and then keep
     # only the first two elements.
     string(FIND ${TEST_BLIS_VERSION} "error" FAILED_AT_RUNTIME)
     if(NOT (${FAILED_AT_RUNTIME} STREQUAL "-1"))
@@ -356,8 +359,9 @@ else()
     if(NOT (${FAILED_AT_RUNTIME} STREQUAL "-1"))
        message(FATAL_ERROR "Running get_version.cpp failed with the following error " ${TEST_BLIS_VERSION})
     endif()
+    message(STATUS "Testing BLIS with version ${TEST_BLIS_VERSION}")
     string(REPLACE " " ";" TEST_BLIS_VERSION ${TEST_BLIS_VERSION})
-    # After this TEST_BLIS_VERSION looks like 5.0.1
+    # After this TEST_BLIS_VERSION looks like 5.1.1
     list(GET TEST_BLIS_VERSION 1 TEST_BLIS_VERSION)
     # Make a list where we break down the versioning
     string(REPLACE "." ";" TEST_BLIS_VERSION ${TEST_BLIS_VERSION})
