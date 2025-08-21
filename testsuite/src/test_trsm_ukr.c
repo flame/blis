@@ -193,13 +193,26 @@ void libblis_test_trsm_ukr_experiment
 	bli_param_map_char_to_blis_dt( dc_str[0], &datatype );
 
 	// Fix m and n to MR and NR, respectively.
-	m = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, cntx );
-	n = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, cntx );
+	// Use trsm blocksizes.
+	m = bli_cntx_get_trsm_blksz_def_dt( datatype, BLIS_MR, cntx );
+	n = bli_cntx_get_trsm_blksz_def_dt( datatype, BLIS_NR, cntx );
 
 	// Also query PACKMR and PACKNR as the leading dimensions to ap and bp,
 	// respectively.
-	ldap = bli_cntx_get_blksz_max_dt( datatype, BLIS_MR, cntx );
-	ldbp = bli_cntx_get_blksz_max_dt( datatype, BLIS_NR, cntx );
+	ldap = bli_cntx_get_trsm_blksz_max_dt( datatype, BLIS_MR, cntx );
+	ldbp = bli_cntx_get_trsm_blksz_max_dt( datatype, BLIS_NR, cntx );
+
+	// if trsm block sizes are not set use global block sizes
+	if( m == 0 || n == 0)
+	{
+		m = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, cntx );
+		n = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, cntx );
+
+		// Also query PACKMR and PACKNR as the leading dimensions to ap and bp,
+		// respectively.
+		ldap = bli_cntx_get_blksz_max_dt( datatype, BLIS_MR, cntx );
+		ldbp = bli_cntx_get_blksz_max_dt( datatype, BLIS_NR, cntx);
+	}
 
 	// Store the register blocksizes so that the driver can retrieve the
 	// values later when printing results.
@@ -285,12 +298,11 @@ void libblis_test_trsm_ukr_experiment
 	// allocated so we can re-store it to the object afterward.
 	void* buf_ap = bli_obj_buffer( &ap );
 	void* buf_bp = bli_obj_buffer( &bp );
-	// trsm_ukr are derived from gemm kernels therefore packing is done with
-	// gemm blocksizes
-	bli_packm_init_pack( BLIS_INVERT_DIAG, BLIS_GEMM, BLIS_PACKED_ROW_PANELS,
+
+	bli_packm_init_pack( BLIS_INVERT_DIAG, BLIS_TRSM, BLIS_PACKED_ROW_PANELS,
 	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
 	                     BLIS_MR, BLIS_KR, &a, &ap, cntx );
-	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_GEMM, BLIS_PACKED_COL_PANELS,
+	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_TRSM, BLIS_PACKED_COL_PANELS,
 	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
 	                     BLIS_KR, BLIS_NR, &b, &bp, cntx );
 	bli_obj_set_buffer( buf_ap, &ap );

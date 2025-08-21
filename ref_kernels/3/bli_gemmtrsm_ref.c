@@ -52,15 +52,25 @@ void PASTEMAC3(ch,opname,arch,suf) \
 { \
 	const num_t     dt     = PASTEMAC(ch,type); \
 \
-	const inc_t     packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
+  /* Use trsm blocksizes if they are available else use general blocksizes. */ \
+	inc_t           packnr = bli_cntx_get_trsm_blksz_max_dt( dt, BLIS_NR, cntx ); \
+  if ( packnr == 0 ) \
+  { \
+      packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
+  } \
 \
 	const inc_t     rs_b   = packnr; \
 	const inc_t     cs_b   = 1; \
 \
 	ctype*          minus_one = PASTEMAC(ch,m1); \
 \
+  /* Use GEMM_FOR_TRSM_UKR if it is define else use GEMM_UKR. */ \
 	PASTECH(ch,gemm_ukr_ft) \
-	              gemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	              gemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, BLIS_GEMM_FOR_TRSM_UKR, cntx ); \
+  if ( gemm_ukr == NULL ) \
+  { \
+      gemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+  } \
 	PASTECH(ch,trsm_ukr_ft) \
 	              trsm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, trsmkerid, cntx ); \
 \

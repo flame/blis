@@ -79,17 +79,18 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 	// their storage preferences.
 	bli_cntx_set_l3_nat_ukrs
 	(
-	  13,
+	  14,
 	  // gemm
 	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_skx_asm_32x12_l2,   FALSE,
-	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_zen4_asm_8x24,    TRUE,
+	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_zen4_asm_8x24,      TRUE,
 	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_zen4_asm_24x4,      FALSE,
 	  /*bli_zgemm_zen4_asm_12x4 is a column preferred kernel*/
 	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_zen4_asm_12x4,      FALSE,
 
 	  // Different  GEMM kernels are used for TRSM for zen4 architecture
 	  BLIS_GEMM_FOR_TRSM_UKR,       BLIS_FLOAT,    bli_sgemm_haswell_asm_6x16,  TRUE,
-	  BLIS_GEMM_FOR_TRSM_UKR,       BLIS_DOUBLE,   bli_dgemm_zen4_asm_8x24,   TRUE,
+	  BLIS_GEMM_FOR_TRSM_UKR,       BLIS_DOUBLE,   bli_dgemm_zen4_asm_8x24,     TRUE,
+	  BLIS_GEMM_FOR_TRSM_UKR,       BLIS_SCOMPLEX, bli_cgemm_haswell_asm_3x8,   TRUE,
 	  BLIS_GEMM_FOR_TRSM_UKR,       BLIS_DCOMPLEX, bli_zgemm_zen4_asm_4x12,     TRUE,
 
 	  // gemmtrsm_l
@@ -119,7 +120,7 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 	// Update the context with optimized packm kernels.
 	bli_cntx_set_packm_kers
 	(
-	  11,
+	  13,
 	  BLIS_PACKM_6XK_KER,  BLIS_FLOAT,    bli_spackm_haswell_asm_6xk,
 	  BLIS_PACKM_16XK_KER, BLIS_FLOAT,    bli_spackm_haswell_asm_16xk,
 	  BLIS_PACKM_6XK_KER,  BLIS_DOUBLE,   bli_dpackm_haswell_asm_6xk,
@@ -128,6 +129,8 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 	  BLIS_PACKM_32XK_KER, BLIS_DOUBLE,   bli_dpackm_zen4_asm_32xk,
 	  BLIS_PACKM_4XK_KER,  BLIS_SCOMPLEX, bli_cpackm_zen4_asm_4xk,
 	  BLIS_PACKM_24XK_KER, BLIS_SCOMPLEX, bli_cpackm_zen4_asm_24xk,
+	  BLIS_PACKM_3XK_KER,  BLIS_SCOMPLEX, bli_cpackm_haswell_asm_3xk,
+	  BLIS_PACKM_8XK_KER,  BLIS_SCOMPLEX, bli_cpackm_haswell_asm_8xk,
 	  BLIS_PACKM_3XK_KER,  BLIS_DCOMPLEX, bli_zpackm_haswell_asm_3xk,
 	  BLIS_PACKM_12XK_KER, BLIS_DCOMPLEX, bli_zpackm_zen4_asm_12xk,
 	  BLIS_PACKM_4XK_KER,  BLIS_DCOMPLEX, bli_zpackm_zen4_asm_4xk,
@@ -250,8 +253,8 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 	// Using different cache block sizes for TRSM instead of common level-3 block sizes.
 	// Tuning is done for double-precision only.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,     8,    24,     4 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,    24,     4,    12 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,     8,     3,     4 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,    24,     8,    12 );
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,   120,   144,    40 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   512,   256,   512 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4008,  4080,  2004 );
