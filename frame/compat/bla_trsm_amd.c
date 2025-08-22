@@ -1183,7 +1183,7 @@ void dtrsm_blis_impl
                     {
                         ker_ft = bli_trsm_small_zen4;
                     }
-                    else if ( (log10(n0) + (0.65*log10(m0)) ) < 4.4 )
+                    else if ( (log10(n0) + (0.65*log10(m0)) ) < 4.4  && ( m0 < 4500 ) )
                     {
                         ker_ft = bli_trsm_small_zen5;
                     }
@@ -1194,7 +1194,7 @@ void dtrsm_blis_impl
                     {
                         ker_ft = bli_trsm_small_zen4;
                     }
-                    else if ( (log10(m0) + (0.85*log10(n0)) ) < 5 )
+                    else if ( (log10(m0) + (0.85*log10(n0)) ) < 5 && ( n0 < 4500 ))
                     {
                         ker_ft = bli_trsm_small_zen5;
                     }
