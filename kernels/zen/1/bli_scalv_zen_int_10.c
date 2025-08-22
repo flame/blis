@@ -924,25 +924,35 @@ void bli_cscalv_zen_int
 			x_vec_ymm[2] = _mm256_loadu_ps(x0 + 2 * n_elem_per_reg);
 			x_vec_ymm[3] = _mm256_loadu_ps(x0 + 3 * n_elem_per_reg);
 
+			// Compute x * alpha_imag for all vectors
 			temp_ymm[0] = _mm256_mul_ps(x_vec_ymm[0], alpha_imag_ymm);
 			temp_ymm[1] = _mm256_mul_ps(x_vec_ymm[1], alpha_imag_ymm);
 			temp_ymm[2] = _mm256_mul_ps(x_vec_ymm[2], alpha_imag_ymm);
 			temp_ymm[3] = _mm256_mul_ps(x_vec_ymm[3], alpha_imag_ymm);
 
+			// Permute the imaginary results
 			temp_ymm[4] = _mm256_permute_ps(temp_ymm[0], 0xB1);
 			temp_ymm[5] = _mm256_permute_ps(temp_ymm[1], 0xB1);
 			temp_ymm[6] = _mm256_permute_ps(temp_ymm[2], 0xB1);
 			temp_ymm[7] = _mm256_permute_ps(temp_ymm[3], 0xB1);
 
-			temp_ymm[0] = _mm256_fmaddsub_ps(x_vec_ymm[0], alpha_real_ymm, temp_ymm[4]);
-			temp_ymm[1] = _mm256_fmaddsub_ps(x_vec_ymm[1], alpha_real_ymm, temp_ymm[5]);
-			temp_ymm[2] = _mm256_fmaddsub_ps(x_vec_ymm[2], alpha_real_ymm, temp_ymm[6]);
-			temp_ymm[3] = _mm256_fmaddsub_ps(x_vec_ymm[3], alpha_real_ymm, temp_ymm[7]);
+			// Compute x * alpha_real first, then add/sub the permuted imaginary part
+			// This ensures the correct operand order for the FMA operation
+			temp_ymm[0] = _mm256_mul_ps(x_vec_ymm[0], alpha_real_ymm);
+			temp_ymm[1] = _mm256_mul_ps(x_vec_ymm[1], alpha_real_ymm);
+			temp_ymm[2] = _mm256_mul_ps(x_vec_ymm[2], alpha_real_ymm);
+			temp_ymm[3] = _mm256_mul_ps(x_vec_ymm[3], alpha_real_ymm);
 
-			_mm256_storeu_ps(x0, temp_ymm[0]);
-			_mm256_storeu_ps(x0 + n_elem_per_reg, temp_ymm[1]);
-			_mm256_storeu_ps(x0 + 2 * n_elem_per_reg, temp_ymm[2]);
-			_mm256_storeu_ps(x0 + 3 * n_elem_per_reg, temp_ymm[3]);
+			// Now add/subtract the permuted imaginary parts
+			x_vec_ymm[0] = _mm256_addsub_ps(temp_ymm[0], temp_ymm[4]);
+			x_vec_ymm[1] = _mm256_addsub_ps(temp_ymm[1], temp_ymm[5]);
+			x_vec_ymm[2] = _mm256_addsub_ps(temp_ymm[2], temp_ymm[6]);
+			x_vec_ymm[3] = _mm256_addsub_ps(temp_ymm[3], temp_ymm[7]);
+
+			_mm256_storeu_ps(x0, x_vec_ymm[0]);
+			_mm256_storeu_ps(x0 + n_elem_per_reg, x_vec_ymm[1]);
+			_mm256_storeu_ps(x0 + 2 * n_elem_per_reg, x_vec_ymm[2]);
+			_mm256_storeu_ps(x0 + 3 * n_elem_per_reg, x_vec_ymm[3]);
 
 			x0 += 4 * n_elem_per_reg;
 		}
@@ -952,17 +962,24 @@ void bli_cscalv_zen_int
 			x_vec_ymm[0] = _mm256_loadu_ps(x0);
 			x_vec_ymm[1] = _mm256_loadu_ps(x0 + n_elem_per_reg);
 
+			// Compute x * alpha_imag for both vectors
 			temp_ymm[0] = _mm256_mul_ps(x_vec_ymm[0], alpha_imag_ymm);
 			temp_ymm[1] = _mm256_mul_ps(x_vec_ymm[1], alpha_imag_ymm);
 
+			// Permute the imaginary results
 			temp_ymm[2] = _mm256_permute_ps(temp_ymm[0], 0xB1);
 			temp_ymm[3] = _mm256_permute_ps(temp_ymm[1], 0xB1);
 
-			temp_ymm[0] = _mm256_fmaddsub_ps(x_vec_ymm[0], alpha_real_ymm, temp_ymm[2]);
-			temp_ymm[1] = _mm256_fmaddsub_ps(x_vec_ymm[1], alpha_real_ymm, temp_ymm[3]);
+			// Compute x * alpha_real first, then add/sub the permuted imaginary part
+			temp_ymm[0] = _mm256_mul_ps(x_vec_ymm[0], alpha_real_ymm);
+			temp_ymm[1] = _mm256_mul_ps(x_vec_ymm[1], alpha_real_ymm);
 
-			_mm256_storeu_ps(x0, temp_ymm[0]);
-			_mm256_storeu_ps(x0 + n_elem_per_reg, temp_ymm[1]);
+			// Now add/subtract the permuted imaginary parts
+			x_vec_ymm[0] = _mm256_addsub_ps(temp_ymm[0], temp_ymm[2]);
+			x_vec_ymm[1] = _mm256_addsub_ps(temp_ymm[1], temp_ymm[3]);
+
+			_mm256_storeu_ps(x0, x_vec_ymm[0]);
+			_mm256_storeu_ps(x0 + n_elem_per_reg, x_vec_ymm[1]);
 
 			x0 += 2 * n_elem_per_reg;
 		}
@@ -971,13 +988,19 @@ void bli_cscalv_zen_int
 		{
 			x_vec_ymm[0] = _mm256_loadu_ps(x0);
 
+			// Compute x * alpha_imag
 			temp_ymm[0] = _mm256_mul_ps(x_vec_ymm[0], alpha_imag_ymm);
 
+			// Permute the imaginary result
 			temp_ymm[1] = _mm256_permute_ps(temp_ymm[0], 0xB1);
 
-			temp_ymm[0] = _mm256_fmaddsub_ps(x_vec_ymm[0], alpha_real_ymm, temp_ymm[1]);
+			// Compute x * alpha_real first, then add/sub the permuted imaginary part
+			temp_ymm[0] = _mm256_mul_ps(x_vec_ymm[0], alpha_real_ymm);
 
-			_mm256_storeu_ps(x0, temp_ymm[0]);
+			// Now add/subtract the permuted imaginary part
+			x_vec_ymm[0] = _mm256_addsub_ps(temp_ymm[0], temp_ymm[1]);
+
+			_mm256_storeu_ps(x0, x_vec_ymm[0]);
 
 			x0 += n_elem_per_reg;
 		}
