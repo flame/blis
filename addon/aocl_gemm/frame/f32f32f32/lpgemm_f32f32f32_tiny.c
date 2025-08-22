@@ -179,9 +179,14 @@ LPGEMV_TINY(float, float, float, f32f32f32of32)
 #ifdef BLIS_KERNELS_ZEN4
       }
 #endif
-        // Pack B matrix if rs_b > 1, ignoring the mtag_b here.
+        // The vector is already contiguous if reordered.
+        if (mtag_b == REORDERED)
+        {
+          rs_b_use = 1;
+          cs_b_use = 1;
+        }
         // For tiny sizes, it is better to pack B if it affects output accuracy.
-        if( ( rs_b != 1 ) )
+        else if( ( rs_b != 1 ) )
         {
             siz_t mem_b_size_req = sizeof( float ) * k;
             pack_b_buffer_f32f32f32of32 =

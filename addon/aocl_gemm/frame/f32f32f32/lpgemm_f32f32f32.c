@@ -202,8 +202,14 @@ LPGEMV(float, float, float, f32f32f32of32)
     }
 #endif
 
+    // The vector is already contiguous if reordered.
+    if (mtag_b == REORDERED)
+    {
+      rs_b_use = 1;
+      cs_b_use = 1;
+    }
     // Pack B matrix if rs_b > 1
-    if( rs_b != 1 )
+    else if (rs_b != 1)
     {
       mem_b_size_req = sizeof( float ) * k;
 
