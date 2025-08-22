@@ -151,7 +151,14 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,int32_t,int32_t,s8s8s32os32)
 						"is not supported.", __FILE__, __LINE__);
 		goto err_hndl;
 	}
-
+	// A matrix packing is only done in column major case, or when
+    // A matrix is transposed in row major. PackA kernels for row-maj
+    // is not supported, hence we set it to unpacked and proceed with GEMM.
+    if ((is_row_major == TRUE) && (mtag_a == PACK)) {
+        mtag_a = UNPACKED;
+    } else if (is_column_major == TRUE && mtag_b == PACK) {
+        mtag_b = UNPACKED;
+    }
 	// From 5-loop function point of view
 	// B matrix needs to be packed in a certain format in order to be loaded
 	// and used in bf16 instrution. As such the mtag_b always needs to be either
