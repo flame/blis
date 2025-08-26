@@ -1714,7 +1714,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -2251,7 +2252,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -2784,7 +2786,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -3314,7 +3317,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -3841,7 +3845,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -4364,7 +4369,9 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2",
+                "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5",
+                "xmm6", "xmm8", "k3", "memory"
                 )
                 break;
             }
@@ -4885,7 +4892,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -5809,7 +5817,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -6208,7 +6217,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -6604,7 +6614,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -6997,7 +7008,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -7387,7 +7399,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -7774,7 +7787,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -8157,7 +8171,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -8773,7 +8788,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -9029,7 +9045,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -9283,7 +9300,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -9532,7 +9550,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -9780,7 +9799,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -10024,7 +10044,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }
@@ -10264,7 +10285,8 @@ void bli_dpackm_zen4_asm_24xk
                 "zmm4", "zmm5", "zmm6", "zmm7",
                 "zmm8", "zmm9", "zmm10", "zmm11",
                 "zmm12", "zmm13", "zmm14", "zmm15",
-                "zmm16", "zmm17", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
+                "zmm16", "zmm17", "zmm18", "zmm20",
+                "zmm30", "zmm31", "k2", "k3", "memory"
                 )
                 break;
             }

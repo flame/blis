@@ -3052,7 +3052,7 @@ void bli_sgemmsup_rv_haswell_asm_1x6
 
 	// -------------------------------------------------------------------------
 
-	begin_asm()
+	begin _ asm()
 	
 	vzeroall()                         // zero all xmm/ymm registers.
 	
@@ -3377,7 +3377,7 @@ void bli_sgemmsup_rv_haswell_asm_1x6
 	
 	
 
-    end_asm(
+    end _ asm(
 	: // output operands (none)
 	: // input operands
       [k_iter] "m" (k_iter),

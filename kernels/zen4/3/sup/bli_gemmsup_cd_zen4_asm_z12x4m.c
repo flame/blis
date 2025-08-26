@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -469,7 +469,7 @@ void bli_zgemmsup_cd_zen4_asm_12x4m
 
     /*
         Register clobber list and usage(for GPRs) :
-        BEGIN_ASM
+        BEGIN _ ASM
 
             R10 - Base addr of A
             RDX - Base addr of B
@@ -498,7 +498,7 @@ void bli_zgemmsup_cd_zen4_asm_12x4m
                 R12 - Offset by 2 cols using cs_c
                 R10 - Copy base addr of A
                 R15 - +2, !=4
-        END_ASM
+        END _ ASM
     */
 
     // Assembly code-section

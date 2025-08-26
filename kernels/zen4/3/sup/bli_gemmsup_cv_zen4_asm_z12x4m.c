@@ -7064,6 +7064,9 @@ void bli_zgemmsup_cv_zen4_asm_12x4m
           [cs_c]   "m" (cs_c)
         : // register clobber list
           "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "al",
+          "ymm0", "ymm1", "ymm2", "ymm3", "ymm5",
+          "ymm6", "ymm7", "ymm8", "ymm9",
+          "ymm10", "ymm11", "ymm12", "ymm15",
           "zmm0", "zmm1", "zmm2", "zmm3",
           "zmm4", "zmm5", "zmm6", "zmm7",
           "zmm8", "zmm9", "zmm10", "zmm11",
@@ -7072,7 +7075,7 @@ void bli_zgemmsup_cv_zen4_asm_12x4m
           "zmm20", "zmm21", "zmm22", "zmm23",
           "zmm24", "zmm25", "zmm26", "zmm27",
           "zmm28", "zmm29", "zmm30", "zmm31",
-          "memory"
+          "k2", "memory"
         )
     }
 
@@ -7529,6 +7532,11 @@ void bli_zgemmsup_cv_zen4_asm_12x3m
       [cs_c]   "m" (cs_c)
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "al",
+      "xmm9", "xmm10", "xmm11", "xmm12",
+      "ymm0", "ymm1", "ymm2", "ymm3",
+      "ymm5", "ymm6", "ymm7", "ymm8",
+      "ymm9", "ymm10", "ymm11", "ymm12",
+      "ymm13", "ymm14", "ymm15",
       "zmm0", "zmm1", "zmm2", "zmm3",
       "zmm4", "zmm5", "zmm6", "zmm7",
       "zmm8", "zmm9", "zmm10", "zmm11",
@@ -7938,6 +7946,8 @@ void bli_zgemmsup_cv_zen4_asm_12x2m
       [cs_c]   "m" (cs_c)
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "al",
+      "ymm0", "ymm1", "ymm2", "ymm3", "ymm5",
+      "ymm6","ymm7", "ymm8", "ymm15",
       "zmm0", "zmm1", "zmm2", "zmm3",
       "zmm4", "zmm5", "zmm6", "zmm7",
       "zmm8", "zmm9", "zmm10", "zmm11",
@@ -8332,6 +8342,9 @@ void bli_zgemmsup_cv_zen4_asm_12x1m
       [cs_c]   "m" (cs_c)
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "al",
+      "xmm5", "xmm6", "xmm14", "xmm15",
+      "ymm0", "ymm1", "ymm2", "ymm3",
+      "ymm5", "ymm6", "ymm14", "ymm15",
       "zmm0", "zmm1", "zmm2", "zmm3",
       "zmm4", "zmm5", "zmm6", "zmm7",
       "zmm8", "zmm9", "zmm10", "zmm11",
