@@ -891,10 +891,10 @@ POST_OPS_MATRIX_ADD_6x16F:
           {
             scl_fctr1 =
               _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                  post_ops_attr.post_op_c_j + ( 0 * 8 ) );
             scl_fctr2 =
               _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                  post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+                  post_ops_attr.post_op_c_j + ( 1 * 8 ) );
           }
           else
           {
@@ -1052,10 +1052,10 @@ POST_OPS_MATRIX_MUL_6x16F:
           {
             scl_fctr1 =
               _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                  post_ops_attr.post_op_c_j + ( 0 * 8 ) );
             scl_fctr2 =
               _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                  post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+                  post_ops_attr.post_op_c_j + ( 1 * 8 ) );
           }
           else
           {
@@ -1937,7 +1937,7 @@ POST_OPS_MATRIX_ADD_6x8F:
           {
             scl_fctr1 =
               _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                  post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           }
           else
           {
@@ -2095,7 +2095,7 @@ POST_OPS_MATRIX_MUL_6x8F:
           {
             scl_fctr1 =
               _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                  post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           }
           else
           {
@@ -2895,7 +2895,7 @@ POST_OPS_MATRIX_ADD_6x4F:
           {
             scl_fctr1 =
               _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                  post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           }
           else
           {
@@ -3052,7 +3052,7 @@ POST_OPS_MATRIX_MUL_6x4F:
           {
             scl_fctr1 =
               _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                  post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           }
           else
           {
@@ -3852,7 +3852,7 @@ POST_OPS_MATRIX_ADD_6x2F:
           {
             scl_fctr1 =
               _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                  post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           }
           else
           {
@@ -4010,7 +4010,7 @@ POST_OPS_MATRIX_MUL_6x2F:
           {
             scl_fctr1 =
               _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                  post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           }
           else
           {
@@ -4807,7 +4807,7 @@ POST_OPS_MATRIX_ADD_6x1F:
           {
             scl_fctr1 =
               _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                  post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           }
           else
           {
@@ -4965,7 +4965,7 @@ POST_OPS_MATRIX_MUL_6x1F:
           {
             scl_fctr1 =
               _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                  post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           }
           else
           {
@@ -5793,7 +5793,7 @@ POST_OPS_MATRIX_ADD_6xlt8F:
           {
             scl_fctr1 =
               _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
-                  post_ops_attr.post_op_c_j + ( 0 * 16 ), ymm_mask );
+                  post_ops_attr.post_op_c_j + ( 0 * 8 ), ymm_mask );
           }
           else
           {
@@ -5952,7 +5952,7 @@ POST_OPS_MATRIX_MUL_6xlt8F:
           {
             scl_fctr1 =
               _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
-                  post_ops_attr.post_op_c_j + ( 0 * 16 ), ymm_mask );
+                  post_ops_attr.post_op_c_j + ( 0 * 8 ), ymm_mask );
           }
           else
           {

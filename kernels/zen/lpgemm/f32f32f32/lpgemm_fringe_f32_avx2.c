@@ -687,10 +687,10 @@ POST_OPS_MATRIX_ADD_5x16F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           scl_fctr2 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 1 * 8 ) );
         }
         else
         {
@@ -830,10 +830,10 @@ POST_OPS_MATRIX_MUL_5x16F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           scl_fctr2 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 1 * 8 ) );
         }
         else
         {
@@ -1646,10 +1646,10 @@ POST_OPS_MATRIX_ADD_4x16F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           scl_fctr2 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 1 * 8 ) );
         }
         else
         {
@@ -1771,10 +1771,10 @@ POST_OPS_MATRIX_MUL_4x16F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           scl_fctr2 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 1 * 8 ) );
         }
         else
         {
@@ -2468,10 +2468,10 @@ POST_OPS_MATRIX_ADD_3x16F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           scl_fctr2 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 1 * 8 ) );
         }
         else
         {
@@ -2575,10 +2575,10 @@ POST_OPS_MATRIX_MUL_3x16F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           scl_fctr2 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 1 * 8 ) );
         }
         else
         {
@@ -3148,10 +3148,10 @@ POST_OPS_MATRIX_ADD_2x16F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           scl_fctr2 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 1 * 8 ) );
         }
         else
         {
@@ -3237,10 +3237,10 @@ POST_OPS_MATRIX_MUL_2x16F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           scl_fctr2 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 1 * 8 ) );
         }
         else
         {
@@ -3702,10 +3702,10 @@ POST_OPS_MATRIX_ADD_1x16F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           scl_fctr2 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 1 * 8 ) );
         }
         else
         {
@@ -3776,10 +3776,10 @@ POST_OPS_MATRIX_MUL_1x16F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           scl_fctr2 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 1 * 8 ) );
         }
         else
         {
@@ -4370,7 +4370,7 @@ POST_OPS_MATRIX_ADD_5x8F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -4509,7 +4509,7 @@ POST_OPS_MATRIX_MUL_5x8F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -5136,7 +5136,7 @@ POST_OPS_MATRIX_ADD_4x8F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -5258,7 +5258,7 @@ POST_OPS_MATRIX_MUL_4x8F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -5805,7 +5805,7 @@ POST_OPS_MATRIX_ADD_3x8F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -5909,7 +5909,7 @@ POST_OPS_MATRIX_MUL_3x8F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -6378,7 +6378,7 @@ POST_OPS_MATRIX_ADD_2x8F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -6463,7 +6463,7 @@ POST_OPS_MATRIX_MUL_2x8F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -6849,7 +6849,7 @@ POST_OPS_MATRIX_ADD_1x8F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -6916,7 +6916,7 @@ POST_OPS_MATRIX_MUL_1x8F:
         {
           scl_fctr1 =
             _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -7482,7 +7482,7 @@ POST_OPS_MATRIX_ADD_5x4F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -7621,7 +7621,7 @@ POST_OPS_MATRIX_MUL_5x4F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -8235,7 +8235,7 @@ POST_OPS_MATRIX_ADD_4x4F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -8357,7 +8357,7 @@ POST_OPS_MATRIX_MUL_4x4F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -8894,7 +8894,7 @@ POST_OPS_MATRIX_ADD_3x4F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -8997,7 +8997,7 @@ POST_OPS_MATRIX_MUL_3x4F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -9463,7 +9463,7 @@ POST_OPS_MATRIX_ADD_2x4F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -9548,7 +9548,7 @@ POST_OPS_MATRIX_MUL_2x4F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -9929,7 +9929,7 @@ POST_OPS_MATRIX_ADD_1x4F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -9995,7 +9995,7 @@ POST_OPS_MATRIX_MUL_1x4F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -10562,7 +10562,7 @@ POST_OPS_MATRIX_ADD_5x2F:
           {
             scl_fctr1 =
               _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                  post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                  post_ops_attr.post_op_c_j + ( 0 * 8 ) );
           }
           else
           {
@@ -10702,7 +10702,7 @@ POST_OPS_MATRIX_MUL_5x2F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -11316,7 +11316,7 @@ POST_OPS_MATRIX_ADD_4x2F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -11437,7 +11437,7 @@ POST_OPS_MATRIX_MUL_4x2F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -11973,7 +11973,7 @@ POST_OPS_MATRIX_ADD_3x2F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -12076,7 +12076,7 @@ POST_OPS_MATRIX_MUL_3x2F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -12538,7 +12538,7 @@ POST_OPS_MATRIX_ADD_2x2F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -12623,7 +12623,7 @@ POST_OPS_MATRIX_MUL_2x2F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -13002,7 +13002,7 @@ POST_OPS_MATRIX_ADD_1x2F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -13069,7 +13069,7 @@ POST_OPS_MATRIX_MUL_1x2F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -13634,7 +13634,7 @@ POST_OPS_MATRIX_ADD_5x1F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -13773,7 +13773,7 @@ POST_OPS_MATRIX_MUL_5x1F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -14388,7 +14388,7 @@ POST_OPS_MATRIX_ADD_4x1F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -14509,7 +14509,7 @@ POST_OPS_MATRIX_MUL_4x1F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -15044,7 +15044,7 @@ POST_OPS_MATRIX_ADD_3x1F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -15147,7 +15147,7 @@ POST_OPS_MATRIX_MUL_3x1F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -15610,7 +15610,7 @@ POST_OPS_MATRIX_ADD_2x1F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -15695,7 +15695,7 @@ POST_OPS_MATRIX_MUL_2x1F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -16075,7 +16075,7 @@ POST_OPS_MATRIX_ADD_1x1F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -16142,7 +16142,7 @@ POST_OPS_MATRIX_MUL_1x1F:
         {
           scl_fctr1 =
             _mm_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
         }
         else
         {
@@ -16737,7 +16737,7 @@ POST_OPS_MATRIX_ADD_5xlt8F:
         {
           scl_fctr1 =
             _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ), ymm_mask );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ), ymm_mask );
         }
         else
         {
@@ -16876,7 +16876,7 @@ POST_OPS_MATRIX_MUL_5xlt8F:
         {
           scl_fctr1 =
             _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ), ymm_mask );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ), ymm_mask );
         }
         else
         {
@@ -17507,7 +17507,7 @@ POST_OPS_MATRIX_ADD_4xlt8F:
         {
           scl_fctr1 =
             _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ), ymm_mask );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ), ymm_mask );
         }
         else
         {
@@ -17632,7 +17632,7 @@ POST_OPS_MATRIX_MUL_4xlt8F:
         {
           scl_fctr1 =
             _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ), ymm_mask );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ), ymm_mask );
         }
         else
         {
@@ -18190,7 +18190,7 @@ POST_OPS_MATRIX_ADD_3xlt8F:
         {
           scl_fctr1 =
             _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ), ymm_mask );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ), ymm_mask );
         }
         else
         {
@@ -18297,7 +18297,7 @@ POST_OPS_MATRIX_MUL_3xlt8F:
         {
           scl_fctr1 =
             _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ), ymm_mask );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ), ymm_mask );
         }
         else
         {
@@ -18775,7 +18775,7 @@ POST_OPS_MATRIX_ADD_2xlt8F:
         {
           scl_fctr1 =
             _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ), ymm_mask );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ), ymm_mask );
         }
         else
         {
@@ -18864,7 +18864,7 @@ POST_OPS_MATRIX_MUL_2xlt8F:
         {
           scl_fctr1 =
             _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ), ymm_mask );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ), ymm_mask );
         }
         else
         {
@@ -19264,7 +19264,7 @@ POST_OPS_MATRIX_ADD_1xlt8F:
         {
           scl_fctr1 =
             _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ), ymm_mask );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ), ymm_mask );
         }
         else
         {
@@ -19335,7 +19335,7 @@ POST_OPS_MATRIX_MUL_1xlt8F:
         {
           scl_fctr1 =
             _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 16 ), ymm_mask );
+                post_ops_attr.post_op_c_j + ( 0 * 8 ), ymm_mask );
         }
         else
         {
