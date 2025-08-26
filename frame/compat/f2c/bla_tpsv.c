@@ -48,7 +48,7 @@ extern BLIS_THREAD_LOCAL rntm_t tl_rntm;
 int PASTEF77S(c,tpsv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_scomplex *ap, bla_scomplex *x, const bla_integer *incx)
 {
     /* System generated locals */
-    bla_integer i__1, i__2, i__3, i__4, i__5;
+    dim_t i__1, i__2, i__3, i__4, i__5;
     bla_scomplex q__1, q__2, q__3;
 
     /* Builtin functions */
@@ -57,9 +57,9 @@ int PASTEF77S(c,tpsv)(const bla_character *uplo, const bla_character *trans, con
     /* Local variables */
     bla_integer info;
     bla_scomplex temp;
-    bla_integer i__, j, k;
+    dim_t i__, j, k;
     //extern bla_logical PASTE_LSAME(bla_character *, bla_character *, ftnlen, ftnlen);
-    bla_integer kk, ix, jx, kx = 0;
+    dim_t kk, ix, jx, kx = 0;
     //extern /* Subroutine */ int PASTE_XERBLA(bla_character *, bla_integer *, ftnlen);
     bla_logical noconj, nounit;
 
@@ -231,7 +231,10 @@ int PASTEF77S(c,tpsv)(const bla_character *uplo, const bla_character *trans, con
 /*        Form  x := inv( A )*x. */
 
 	if (PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1)) {
-	    kk = *n * (*n + 1) / 2;
+		// Bug Fix: for 32 bit integers, *n * (*n + 1) can overflow.
+		dim_t n0 = *n;
+		kk = n0 * (n0 + 1) / 2;
+		// kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    i__1 = j;
@@ -446,7 +449,10 @@ int PASTEF77S(c,tpsv)(const bla_character *uplo, const bla_character *trans, con
 		}
 	    }
 	} else {
-	    kk = *n * (*n + 1) / 2;
+	    // Bug Fix: for 32 bit integers, *n * (*n + 1) can overflow.
+		dim_t n0 = *n;
+		kk = n0 * (n0 + 1) / 2;
+		// kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    i__1 = j;
@@ -554,14 +560,14 @@ int PASTEF77S(c,tpsv)(const bla_character *uplo, const bla_character *trans, con
 int PASTEF77S(d,tpsv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_double *ap, bla_double *x, const bla_integer *incx)
 {
     /* System generated locals */
-    bla_integer i__1, i__2;
+    dim_t i__1, i__2;
 
     /* Local variables */
     bla_integer info;
     bla_double temp;
-    bla_integer i__, j, k;
+    dim_t i__, j, k;
     //extern bla_logical PASTE_LSAME(bla_character *, bla_character *, ftnlen, ftnlen);
-    bla_integer kk, ix, jx, kx = 0;
+    dim_t kk, ix, jx, kx = 0;
     //extern /* Subroutine */ int PASTE_XERBLA(bla_character *, bla_integer *, ftnlen);
     bla_logical nounit;
 
@@ -731,7 +737,10 @@ int PASTEF77S(d,tpsv)(const bla_character *uplo, const bla_character *trans, con
 /*        Form  x := inv( A )*x. */
 
 	if (PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1)) {
-	    kk = *n * (*n + 1) / 2;
+		// Bug Fix: for 32 bit integers, *n * (*n + 1) can overflow.
+		dim_t n0 = *n;
+		kk = n0 * (n0 + 1) / 2;
+		// kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    if (x[j] != 0.) {
@@ -860,7 +869,10 @@ int PASTEF77S(d,tpsv)(const bla_character *uplo, const bla_character *trans, con
 		}
 	    }
 	} else {
-	    kk = *n * (*n + 1) / 2;
+		// Bug Fix: for 32 bit integers, *n * (*n + 1) can overflow.
+		dim_t n0 = *n;
+		kk = n0 * (n0 + 1) / 2;
+		// kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    temp = x[j];
@@ -918,14 +930,14 @@ int PASTEF77S(d,tpsv)(const bla_character *uplo, const bla_character *trans, con
 int PASTEF77S(s,tpsv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_real *ap, bla_real *x, const bla_integer *incx)
 {
     /* System generated locals */
-    bla_integer i__1, i__2;
+    dim_t i__1, i__2;
 
     /* Local variables */
     bla_integer info;
     bla_real temp;
-    bla_integer i__, j, k;
+    dim_t i__, j, k;
     //extern bla_logical PASTE_LSAME(bla_character *, bla_character *, ftnlen, ftnlen);
-    bla_integer kk, ix, jx, kx = 0;
+    dim_t kk, ix, jx, kx = 0;
     //extern /* Subroutine */ int PASTE_XERBLA(bla_character *, bla_integer *, ftnlen);
     bla_logical nounit;
 
@@ -1095,7 +1107,10 @@ int PASTEF77S(s,tpsv)(const bla_character *uplo, const bla_character *trans, con
 /*        Form  x := inv( A )*x. */
 
 	if (PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1)) {
-	    kk = *n * (*n + 1) / 2;
+		// Bug Fix: for 32 bit integers, *n * (*n + 1) can overflow.
+		dim_t n0 = *n;
+		kk = n0 * (n0 + 1) / 2;
+		// kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    if (x[j] != 0.f) {
@@ -1224,7 +1239,10 @@ int PASTEF77S(s,tpsv)(const bla_character *uplo, const bla_character *trans, con
 		}
 	    }
 	} else {
-	    kk = *n * (*n + 1) / 2;
+		// Bug Fix: for 32 bit integers, *n * (*n + 1) can overflow.
+		dim_t n0 = *n;
+		kk = n0 * (n0 + 1) / 2;
+		// kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    temp = x[j];
@@ -1282,7 +1300,7 @@ int PASTEF77S(s,tpsv)(const bla_character *uplo, const bla_character *trans, con
 int PASTEF77S(z,tpsv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_dcomplex *ap, bla_dcomplex *x, const bla_integer *incx)
 {
     /* System generated locals */
-    bla_integer i__1, i__2, i__3, i__4, i__5;
+    dim_t i__1, i__2, i__3, i__4, i__5;
     bla_dcomplex z__1, z__2, z__3;
 
     /* Builtin functions */
@@ -1292,9 +1310,9 @@ int PASTEF77S(z,tpsv)(const bla_character *uplo, const bla_character *trans, con
     /* Local variables */
     bla_integer info;
     bla_dcomplex temp;
-    bla_integer i__, j, k;
+    dim_t i__, j, k;
     //extern bla_logical PASTE_LSAME(bla_character *, bla_character *, ftnlen, ftnlen);
-    bla_integer kk, ix, jx, kx = 0;
+    dim_t kk, ix, jx, kx = 0;
     //extern /* Subroutine */ int PASTE_XERBLA(bla_character *, bla_integer *, ftnlen);
     bla_logical noconj, nounit;
 
@@ -1466,7 +1484,10 @@ int PASTEF77S(z,tpsv)(const bla_character *uplo, const bla_character *trans, con
 /*        Form  x := inv( A )*x. */
 
 	if (PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1)) {
-	    kk = *n * (*n + 1) / 2;
+		// Bug Fix: for 32 bit integers, *n * (*n + 1) can overflow.
+		dim_t n0 = *n;
+		kk = n0 * (n0 + 1) / 2;
+		// kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    i__1 = j;
@@ -1681,7 +1702,10 @@ int PASTEF77S(z,tpsv)(const bla_character *uplo, const bla_character *trans, con
 		}
 	    }
 	} else {
-	    kk = *n * (*n + 1) / 2;
+		// Bug Fix: for 32 bit integers, *n * (*n + 1) can overflow.
+		dim_t n0 = *n;
+		kk = n0 * (n0 + 1) / 2;
+		// kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    i__1 = j;

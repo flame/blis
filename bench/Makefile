@@ -195,7 +195,8 @@ blis: \
        bench_axpbyv_blis.x \
        bench_axpyv_blis.x \
        bench_gemm_pack_compute_blis.x \
-       bench_asumv_blis.x
+       bench_asumv_blis.x \
+       bench_getlibraryInfo_blis.x
 
 openblas: \
       bench_gemm_openblas.x \
