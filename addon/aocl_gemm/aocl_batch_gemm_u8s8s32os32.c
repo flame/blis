@@ -137,60 +137,67 @@ AOCL_BGEMM_MATMUL(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32)
 
 		if( err != BLIS_SUCCESS ) goto err_hndl;
 
+		// Column major inputs not supported
+		if( is_column_major == TRUE )
+		{
+			bli_print_msg("Column major inputs not supported.",
+					__FILE__, __LINE__);
+			goto err_hndl;
+		}
+
+		// Only row major is supported 
 		for( dim_t gs_i = 0; gs_i < g_sz; gs_i++ )
 		{
-			if( is_column_major == TRUE )
+			rs_a[gs_i] = lda[gc_i];
+			cs_a[gs_i] = 1;
+
+			if( bli_is_trans( blis_transa ) )
 			{
-				bli_print_msg("Column major inputs not supported.",
-						__FILE__, __LINE__);
+				rs_a[gs_i] = 1;
+				cs_a[gs_i] = lda[gc_i];
+			}
+
+			rs_b[gs_i] = ldb[gc_i];
+			cs_b[gs_i] = 1;
+
+			if( bli_is_trans( blis_transb ) )
+			{
+				rs_b[gs_i] = 1;
+				cs_b[gs_i] = ldb[gc_i];
+			}
+
+			bli_param_map_char_to_lpmtag( mem_format_a[gc_i], &(mtag_a[gs_i]) );
+			bli_param_map_char_to_lpmtag( mem_format_b[gc_i], &(mtag_b[gs_i]) );
+
+			// Reorder is not supported for A matrix
+			if(  mtag_a[gs_i] == REORDERED )
+			{
+				bli_print_msg(" Reordering of A matrix is not supported in row major case.", __FILE__, __LINE__ );
 				goto err_hndl;
 			}
-			else // row-major
+			// A matrix packing is not supported in row major case.
+			// If A matrix is packed and not transposed, set to Unpack
+			// and proceed with GEMM.
+			if ((mtag_a[gs_i] == PACK) && (!bli_is_trans(blis_transa))) 
 			{
-				rs_a[gs_i] = lda[gc_i];
-				cs_a[gs_i] = 1;
-
-				if( bli_is_trans( blis_transa ) )
-				{
-					rs_a[gs_i] = 1;
-					cs_a[gs_i] = lda[gc_i];
-				}
-
-				rs_b[gs_i] = ldb[gc_i];
-				cs_b[gs_i] = 1;
-
-				if( bli_is_trans( blis_transb ) )
-				{
-					rs_b[gs_i] = 1;
-					cs_b[gs_i] = ldb[gc_i];
-				}
-
-				bli_param_map_char_to_lpmtag( mem_format_a[gc_i], &(mtag_a[gs_i]) );
-				bli_param_map_char_to_lpmtag( mem_format_b[gc_i], &(mtag_b[gs_i]) );
-
-				// Reorder is not supported for A matrix
-				if(  mtag_a[gs_i] == REORDERED )
-				{
-					bli_print_msg(" Reordering of A matrix is not supported in row major case.", __FILE__, __LINE__ );
-					goto err_hndl;
-				}
-				// From 5-loop function point of view,
-				// A matrix when in column major storage needs to be packed to row-major
-				// storage as kernel expects A matrix to be in row-major format.
-				if( bli_is_trans(blis_transa ) )
-				{
-					mtag_a[gs_i] = PACK;
-				}
-
-				// copy the values of m & n
-				m_local[gs_i] = m[gc_i];
-				n_local[gs_i] = n[gc_i];
-
-				// copy the values of a & b pointers
-				a_local[gs_i] = (uint8_t*)(a[mat_idx + gs_i]);
-				b_local[gs_i] = (int8_t*)(b[mat_idx + gs_i]);
+				mtag_a[gs_i] = UNPACKED;
+			}
+			// From 5-loop function point of view,
+			// A matrix when in column major storage needs to be packed to row-major
+			// storage as kernel expects A matrix to be in row-major format.
+			if( bli_is_trans(blis_transa ) )
+			{
+				mtag_a[gs_i] = PACK;
 			}
 
+			// copy the values of m & n
+			m_local[gs_i] = m[gc_i];
+			n_local[gs_i] = n[gc_i];
+
+			// copy the values of a & b pointers
+			a_local[gs_i] = (uint8_t*)(a[mat_idx + gs_i]);
+			b_local[gs_i] = (int8_t*)(b[mat_idx + gs_i]);
+		
 			k_local[gs_i] = k[gc_i];
 
 			rs_c[gs_i] = ldc[gc_i];
@@ -341,58 +348,65 @@ AOCL_BGEMM_MATMUL(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
 
 		bool is_column_major = ( ( order[gc_i] == 'c' ) || ( order[gc_i] == 'C' ) );
 
+		// Column major inputs not supported
+		if( is_column_major == TRUE )
+		{
+			bli_print_msg("Column major inputs not supported.",
+					__FILE__, __LINE__);
+			goto err_hndl;
+		}
+
+		// Only row major is supported 
 		for( dim_t gs_i = 0; gs_i < g_sz; gs_i++ )
 		{
-			if( is_column_major == TRUE )
+			rs_a[gs_i] = lda[gc_i];
+			cs_a[gs_i] = 1;
+
+			if( bli_is_trans( blis_transa ) )
 			{
-				bli_print_msg("Column major inputs not supported.",
-						__FILE__, __LINE__);
+				rs_a[gs_i] = 1;
+				cs_a[gs_i] = lda[gc_i];
+			}
+
+			rs_b[gs_i] = ldb[gc_i];
+			cs_b[gs_i] = 1;
+
+			if( bli_is_trans( blis_transb ) )
+			{
+				rs_b[gs_i] = 1;
+				cs_b[gs_i] = ldb[gc_i];
+			}
+
+			bli_param_map_char_to_lpmtag( mem_format_a[gc_i], &(mtag_a[gs_i]) );
+			bli_param_map_char_to_lpmtag( mem_format_b[gc_i], &(mtag_b[gs_i]) );
+
+			// Reorder is not supported for A matrix
+			if(  mtag_a[gs_i] == REORDERED )
+			{
+				bli_print_msg(" Reordering of A matrix is not supported in row major case.", __FILE__, __LINE__ );
 				goto err_hndl;
 			}
-			else // row-major
+			// A matrix packing is not supported in row major case.
+			// If A matrix is packed and not transposed, set to Unpack
+			// and proceed with GEMM.
+			if ((mtag_a[gs_i] == PACK) && (!bli_is_trans(blis_transa))) 
 			{
-				rs_a[gs_i] = lda[gc_i];
-				cs_a[gs_i] = 1;
-
-				if( bli_is_trans( blis_transa ) )
-				{
-					rs_a[gs_i] = 1;
-					cs_a[gs_i] = lda[gc_i];
-				}
-
-				rs_b[gs_i] = ldb[gc_i];
-				cs_b[gs_i] = 1;
-
-				if( bli_is_trans( blis_transb ) )
-				{
-					rs_b[gs_i] = 1;
-					cs_b[gs_i] = ldb[gc_i];
-				}
-
-				bli_param_map_char_to_lpmtag( mem_format_a[gc_i], &(mtag_a[gs_i]) );
-				bli_param_map_char_to_lpmtag( mem_format_b[gc_i], &(mtag_b[gs_i]) );
-
-				// Reorder is not supported for A matrix
-				if(  mtag_a[gs_i] == REORDERED )
-				{
-					bli_print_msg(" Reordering of A matrix is not supported in row major case.", __FILE__, __LINE__ );
-					goto err_hndl;
-				}
-				// From 5-loop function point of view,
-				// A matrix when in column major storage needs to be packed to row-major
-				// storage as kernel expects A matrix to be in row-major format.
-				if( bli_is_trans(blis_transa ) )
-				{
-					mtag_a[gs_i] = PACK;
-				}
-				// copy the values of m & n
-				m_local[gs_i] = m[gc_i];
-				n_local[gs_i] = n[gc_i];
-
-				// copy the values of a & b pointers
-				a_local[gs_i] = (uint8_t*)(a[mat_idx + gs_i]);
-				b_local[gs_i] = (int8_t*)(b[mat_idx + gs_i]);
+				mtag_a[gs_i] = UNPACKED;
 			}
+			// From 5-loop function point of view,
+			// A matrix when in column major storage needs to be packed to row-major
+			// storage as kernel expects A matrix to be in row-major format.
+			if( bli_is_trans(blis_transa ) )
+			{
+				mtag_a[gs_i] = PACK;
+			}
+			// copy the values of m & n
+			m_local[gs_i] = m[gc_i];
+			n_local[gs_i] = n[gc_i];
+
+			// copy the values of a & b pointers
+			a_local[gs_i] = (uint8_t*)(a[mat_idx + gs_i]);
+			b_local[gs_i] = (int8_t*)(b[mat_idx + gs_i]);
 
 			k_local[gs_i] = k[gc_i];
 
@@ -545,59 +559,65 @@ AOCL_BGEMM_MATMUL(uint8_t,int8_t,float,int32_t,u8s8s32of32)
 
 		bool is_column_major = ( ( order[gc_i] == 'c' ) || ( order[gc_i] == 'C' ) );
 
+		// Column major inputs not supported
+		if( is_column_major == TRUE )
+		{
+			bli_print_msg("Column major inputs not supported.",
+					__FILE__, __LINE__);
+			goto err_hndl;
+		}
+
 		for( dim_t gs_i = 0; gs_i < g_sz; gs_i++ )
 		{
-			if( is_column_major == TRUE )
+			rs_a[gs_i] = lda[gc_i];
+			cs_a[gs_i] = 1;
+
+			if( bli_is_trans( blis_transa ) )
 			{
-				bli_print_msg("Column major inputs not supported.",
-						__FILE__, __LINE__);
+				rs_a[gs_i] = 1;
+				cs_a[gs_i] = lda[gc_i];
+			}
+
+			rs_b[gs_i] = ldb[gc_i];
+			cs_b[gs_i] = 1;
+
+			if( bli_is_trans( blis_transb ) )
+			{
+				rs_b[gs_i] = 1;
+				cs_b[gs_i] = ldb[gc_i];
+			}
+
+			bli_param_map_char_to_lpmtag( mem_format_a[gc_i], &(mtag_a[gs_i]) );
+			bli_param_map_char_to_lpmtag( mem_format_b[gc_i], &(mtag_b[gs_i]) );
+
+			// Reorder is not supported for A matrix
+			if(  mtag_a[gs_i] == REORDERED )
+			{
+				bli_print_msg(" Reordering of A matrix is not supported in row major case.", __FILE__, __LINE__ );
 				goto err_hndl;
 			}
-			else // row-major
+			// A matrix packing is not supported in row major case.
+			// If A matrix is packed and not transposed, set to Unpack
+			// and proceed with GEMM.
+			if ((mtag_a[gs_i] == PACK) && (!bli_is_trans(blis_transa))) 
 			{
-				rs_a[gs_i] = lda[gc_i];
-				cs_a[gs_i] = 1;
-
-				if( bli_is_trans( blis_transa ) )
-				{
-					rs_a[gs_i] = 1;
-					cs_a[gs_i] = lda[gc_i];
-				}
-
-				rs_b[gs_i] = ldb[gc_i];
-				cs_b[gs_i] = 1;
-
-				if( bli_is_trans( blis_transb ) )
-				{
-					rs_b[gs_i] = 1;
-					cs_b[gs_i] = ldb[gc_i];
-				}
-
-				bli_param_map_char_to_lpmtag( mem_format_a[gc_i], &(mtag_a[gs_i]) );
-				bli_param_map_char_to_lpmtag( mem_format_b[gc_i], &(mtag_b[gs_i]) );
-
-				// Reorder is not supported for A matrix
-				if(  mtag_a[gs_i] == REORDERED )
-				{
-					bli_print_msg(" Reordering of A matrix is not supported in row major case.", __FILE__, __LINE__ );
-					goto err_hndl;
-				}
-				// From 5-loop function point of view,
-				// A matrix when in column major storage needs to be packed to row-major
-				// storage as kernel expects A matrix to be in row-major format.
-				if( bli_is_trans(blis_transa ) )
-				{
-					mtag_a[gs_i] = PACK;
-				}
-
-				// copy the values of m & n
-				m_local[gs_i] = m[gc_i];
-				n_local[gs_i] = n[gc_i];
-
-				// copy the values of a & b pointers
-				a_local[gs_i] = (uint8_t*)(a[mat_idx + gs_i]);
-				b_local[gs_i] = (int8_t*)(b[mat_idx + gs_i]);
+				mtag_a[gs_i] = UNPACKED;
 			}
+			// From 5-loop function point of view,
+			// A matrix when in column major storage needs to be packed to row-major
+			// storage as kernel expects A matrix to be in row-major format.
+			if( bli_is_trans(blis_transa ) )
+			{
+				mtag_a[gs_i] = PACK;
+			}
+
+			// copy the values of m & n
+			m_local[gs_i] = m[gc_i];
+			n_local[gs_i] = n[gc_i];
+
+			// copy the values of a & b pointers
+			a_local[gs_i] = (uint8_t*)(a[mat_idx + gs_i]);
+			b_local[gs_i] = (int8_t*)(b[mat_idx + gs_i]);
 
 			k_local[gs_i] = k[gc_i];
 
@@ -745,17 +765,16 @@ AOCL_BGEMM_MATMUL(uint8_t,int8_t,bfloat16,int32_t,u8s8s32obf16)
 
 		bool is_column_major = ( ( order[gc_i] == 'c' ) || ( order[gc_i] == 'C' ) );
 
+		if( is_column_major == TRUE )
+		{
+			bli_print_msg("Column major inputs not supported.",
+					__FILE__, __LINE__);
+			goto err_hndl;
+		}
+
 		for( dim_t gs_i = 0; gs_i < g_sz; gs_i++ )
 		{
-			if( is_column_major == TRUE )
-			{
-				bli_print_msg("Column major inputs not supported.",
-						__FILE__, __LINE__);
-				goto err_hndl;
-			}
-			else // row-major
-			{
-				rs_a[gs_i] = lda[gc_i];
+			rs_a[gs_i] = lda[gc_i];
 				cs_a[gs_i] = 1;
 
 				if( bli_is_trans( blis_transa ) )
@@ -776,29 +795,34 @@ AOCL_BGEMM_MATMUL(uint8_t,int8_t,bfloat16,int32_t,u8s8s32obf16)
 				bli_param_map_char_to_lpmtag( mem_format_a[gc_i], &(mtag_a[gs_i]) );
 				bli_param_map_char_to_lpmtag( mem_format_b[gc_i], &(mtag_b[gs_i]) );
 
-				// Reorder is not supported for A matrix
-				if(  mtag_a[gs_i] == REORDERED )
-				{
-					bli_print_msg(" Reordering of A matrix is not supported in row major case.", __FILE__, __LINE__ );
-					goto err_hndl;
-				}
-
-				// From 5-loop function point of view,
-				// A matrix when in column major storage needs to be packed to row-major
-				// storage as kernel expects A matrix to be in row-major format.
-				if( bli_is_trans(blis_transa ) )
-				{
-					mtag_a[gs_i] = PACK;
-				}
-
-				// copy the values of m & n
-				m_local[gs_i] = m[gc_i];
-				n_local[gs_i] = n[gc_i];
-
-				// copy the values of a & b pointers
-				a_local[gs_i] = (uint8_t*)(a[mat_idx + gs_i]);
-				b_local[gs_i] = (int8_t*)(b[mat_idx + gs_i]);
+			// Reorder is not supported for A matrix
+			if(  mtag_a[gs_i] == REORDERED )
+			{
+				bli_print_msg(" Reordering of A matrix is not supported in row major case.", __FILE__, __LINE__ );
+				goto err_hndl;
 			}
+			// A matrix packing is not supported in row major case.
+			// If A matrix is packed and not transposed, set to Unpack
+			// and proceed with GEMM.
+			if ((mtag_a[gs_i] == PACK) && (!bli_is_trans(blis_transa))) 
+			{
+				mtag_a[gs_i] = UNPACKED;
+			}
+			// From 5-loop function point of view,
+			// A matrix when in column major storage needs to be packed to row-major
+			// storage as kernel expects A matrix to be in row-major format.
+			if( bli_is_trans(blis_transa ) )
+			{
+				mtag_a[gs_i] = PACK;
+			}
+
+			// copy the values of m & n
+			m_local[gs_i] = m[gc_i];
+			n_local[gs_i] = n[gc_i];
+
+			// copy the values of a & b pointers
+			a_local[gs_i] = (uint8_t*)(a[mat_idx + gs_i]);
+			b_local[gs_i] = (int8_t*)(b[mat_idx + gs_i]);
 
 			k_local[gs_i] = k[gc_i];
 
@@ -944,59 +968,65 @@ AOCL_BGEMM_MATMUL(uint8_t,int8_t,uint8_t,int32_t,u8s8s32ou8)
 
 		bool is_column_major = ( ( order[gc_i] == 'c' ) || ( order[gc_i] == 'C' ) );
 
+		// Column major inputs not supported
+		if( is_column_major == TRUE )
+		{
+			bli_print_msg("Column major inputs not supported.",
+					__FILE__, __LINE__);
+			goto err_hndl;
+		}
+
 		for( dim_t gs_i = 0; gs_i < g_sz; gs_i++ )
 		{
-			if( is_column_major == TRUE )
+			rs_a[gs_i] = lda[gc_i];
+			cs_a[gs_i] = 1;
+
+			if( bli_is_trans( blis_transa ) )
 			{
-				bli_print_msg("Column major inputs not supported.",
-						__FILE__, __LINE__);
+				rs_a[gs_i] = 1;
+				cs_a[gs_i] = lda[gc_i];
+			}
+
+			rs_b[gs_i] = ldb[gc_i];
+			cs_b[gs_i] = 1;
+
+			if( bli_is_trans( blis_transb ) )
+			{
+				rs_b[gs_i] = 1;
+				cs_b[gs_i] = ldb[gc_i];
+			}
+
+			bli_param_map_char_to_lpmtag( mem_format_a[gc_i], &(mtag_a[gs_i]) );
+			bli_param_map_char_to_lpmtag( mem_format_b[gc_i], &(mtag_b[gs_i]) );
+
+			// Reorder is not supported for A matrix
+			if(  mtag_a[gs_i] == REORDERED )
+			{
+				bli_print_msg(" Reordering of A matrix is not supported in row major case.", __FILE__, __LINE__ );
 				goto err_hndl;
 			}
-			else // row-major
+			// A matrix packing is not supported in row major case.
+			// If A matrix is packed and not transposed, set to Unpack
+			// and proceed with GEMM.
+			if ((mtag_a[gs_i] == PACK) && (!bli_is_trans(blis_transa))) 
 			{
-				rs_a[gs_i] = lda[gc_i];
-				cs_a[gs_i] = 1;
-
-				if( bli_is_trans( blis_transa ) )
-				{
-					rs_a[gs_i] = 1;
-					cs_a[gs_i] = lda[gc_i];
-				}
-
-				rs_b[gs_i] = ldb[gc_i];
-				cs_b[gs_i] = 1;
-
-				if( bli_is_trans( blis_transb ) )
-				{
-					rs_b[gs_i] = 1;
-					cs_b[gs_i] = ldb[gc_i];
-				}
-
-				bli_param_map_char_to_lpmtag( mem_format_a[gc_i], &(mtag_a[gs_i]) );
-				bli_param_map_char_to_lpmtag( mem_format_b[gc_i], &(mtag_b[gs_i]) );
-
-				// Reorder is not supported for A matrix
-				if(  mtag_a[gs_i] == REORDERED )
-				{
-					bli_print_msg(" Reordering of A matrix is not supported in row major case.", __FILE__, __LINE__ );
-					goto err_hndl;
-				}
-				// From 5-loop function point of view,
-				// A matrix when in column major storage needs to be packed to row-major
-				// storage as kernel expects A matrix to be in row-major format.
-				if( bli_is_trans(blis_transa ) )
-				{
-					mtag_a[gs_i] = PACK;
-				}
-
-				// copy the values of m & n
-				m_local[gs_i] = m[gc_i];
-				n_local[gs_i] = n[gc_i];
-
-				// copy the values of a & b pointers
-				a_local[gs_i] = (uint8_t*)(a[mat_idx + gs_i]);
-				b_local[gs_i] = (int8_t*)(b[mat_idx + gs_i]);
+				mtag_a[gs_i] = UNPACKED;
 			}
+			// From 5-loop function point of view,
+			// A matrix when in column major storage needs to be packed to row-major
+			// storage as kernel expects A matrix to be in row-major format.
+			if( bli_is_trans(blis_transa ) )
+			{
+				mtag_a[gs_i] = PACK;
+			}
+
+			// copy the values of m & n
+			m_local[gs_i] = m[gc_i];
+			n_local[gs_i] = n[gc_i];
+
+			// copy the values of a & b pointers
+			a_local[gs_i] = (uint8_t*)(a[mat_idx + gs_i]);
+			b_local[gs_i] = (int8_t*)(b[mat_idx + gs_i]);
 
 			k_local[gs_i] = k[gc_i];
 

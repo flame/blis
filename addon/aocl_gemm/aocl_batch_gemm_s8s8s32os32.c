@@ -136,20 +136,19 @@ AOCL_BGEMM_MATMUL(int8_t,int8_t,int32_t,int32_t,s8s8s32os32)
 		bli_param_map_netlib_to_blis_trans( transb[gc_i], &blis_transb );
 
 		bool is_column_major = ((order[gc_i] == 'c') || (order[gc_i] == 'C'));
+		// Column major support disabled for int API's till micro-kernel
+		// post-ops are updated to account for column major.
+		if(is_column_major == TRUE && post_op_unparsed[gc_i] != NULL)
+		{
+			bli_print_msg("Column major inputs not supported with Post-ops.",
+						  __FILE__, __LINE__);
+			goto err_hndl;
+		}
 
 		for( dim_t gs_i = 0; gs_i < g_sz; gs_i++ )
 		{
 			if ( is_column_major == TRUE )
 			{
-				// Column major support disabled for int API's till micro-kernel
-				// post-ops are updated to account for column major.
-				if (post_op_unparsed[gs_i] != NULL )
-				{
-					bli_print_msg("Column major inputs not supported with Post-ops.",
-								__FILE__, __LINE__);
-					goto err_hndl;
-				}
-
 				rs_a[gs_i] = ldb[gc_i];
 				cs_a[gs_i] = 1;
 
@@ -177,6 +176,14 @@ AOCL_BGEMM_MATMUL(int8_t,int8_t,int32_t,int32_t,s8s8s32os32)
 				{
 					bli_print_msg(" Reordering of column major matrices is not supported.", __FILE__, __LINE__ );
 					goto err_hndl;
+				}
+				// A matrix packing is done in column major case, only when the matrix
+				// has to be transposed to row-major format. In col-maj case, inputs are
+				// swapped and B becomes A from kernel point of view. Hence, if B is packed, 
+				// set B to unpacked and proceed with GEMM.
+				if ((mtag_b[gs_i] == PACK))
+				{
+					mtag_b[gs_i] = UNPACKED;
 				}
 				// From 5-loop function point of view,
 				// A matrix when in column major storage needs to be packed to row-major
@@ -223,6 +230,13 @@ AOCL_BGEMM_MATMUL(int8_t,int8_t,int32_t,int32_t,s8s8s32os32)
 				{
 					bli_print_msg(" Reordering of A matrix is not supported in row major case.", __FILE__, __LINE__ );
 					goto err_hndl;
+				}
+				// A matrix packing is not supported in row major case.
+				// If A matrix is packed and not transposed, set to Unpack
+				// and proceed with GEMM.
+				if ((mtag_a[gs_i] == PACK) && (!bli_is_trans(blis_transa))) 
+				{
+					mtag_a[gs_i] = UNPACKED;
 				}
 				// From 5-loop function point of view,
 				// A matrix when in column major storage needs to be packed to row-major
@@ -387,20 +401,19 @@ AOCL_BGEMM_MATMUL(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
 		bli_param_map_netlib_to_blis_trans( transb[gc_i], &blis_transb );
 
 		bool is_column_major = ( (order[gc_i] == 'c') || (order[gc_i] == 'C'));
+		// Column major support disabled for int API's till micro-kernel
+		// post-ops are updated to account for column major
+		if ((is_column_major == TRUE) && post_op_unparsed[gc_i] != NULL )
+		{
+			bli_print_msg("Column major inputs not supported with Post-ops.",
+						__FILE__, __LINE__);
+			goto err_hndl;
+		}
 
 		for( dim_t gs_i = 0; gs_i < g_sz; gs_i++ )
 		{
 			if( is_column_major == TRUE )
 			{
-				// Column major support disabled for int API's till micro-kernel
-				// post-ops are updated to account for column major
-				if (post_op_unparsed[mat_idx + gs_i] != NULL )
-				{
-					bli_print_msg("Column major inputs not supported with Post-ops.",
-								__FILE__, __LINE__);
-					goto err_hndl;
-				}
-
 				rs_a[gs_i] = ldb[gc_i];
 				cs_a[gs_i] = 1;
 
@@ -427,7 +440,14 @@ AOCL_BGEMM_MATMUL(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
 					bli_print_msg(" Reordering of column major matrices is not supported.", __FILE__, __LINE__ );
 					goto err_hndl;
 				}
-
+				// A matrix packing is done in column major case, only when the matrix
+				// has to be transposed to row-major format. In col-maj case, inputs are
+				// swapped and B becomes A from kernel point of view. Hence, if B is packed, 
+				// set B to unpacked and proceed with GEMM.
+				if ((mtag_b[gs_i] == PACK))
+				{
+					mtag_b[gs_i] = UNPACKED;
+				}
 				if ( bli_is_trans(blis_transb ) )
 				{
 					mtag_a[gs_i] = PACK;
@@ -466,6 +486,13 @@ AOCL_BGEMM_MATMUL(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
 				{
 					bli_print_msg(" Reordering of A matrix is not supported in row major case.", __FILE__, __LINE__ );
 					goto err_hndl;
+				}
+				// A matrix packing is not supported in row major case.
+				// If A matrix is packed and not transposed, set to Unpack
+				// and proceed with GEMM.
+				if ((mtag_a[gs_i] == PACK) && (!bli_is_trans(blis_transa))) 
+				{
+					mtag_a[gs_i] = UNPACKED;
 				}
 
 				if( bli_is_trans(blis_transa ) )
@@ -622,20 +649,19 @@ AOCL_BGEMM_MATMUL(int8_t,int8_t,float,int32_t,s8s8s32of32)
 		bli_param_map_netlib_to_blis_trans( transb[gc_i], &blis_transb );
 
 		bool is_column_major = ( ( order[gc_i] == 'c' ) || ( order[gc_i] == 'C' ) );
+		// Column major support disabled for int API's till micro-kernel
+		// post-ops are updated to account for column major.
+		if ((is_column_major == TRUE) && post_op_unparsed[gc_i] != NULL )
+		{
+			bli_print_msg("Column major inputs not supported with Post-ops.",
+						__FILE__, __LINE__);
+			goto err_hndl;
+		}
 
 		for( dim_t gs_i = 0; gs_i < g_sz; gs_i++ )
 		{
 			if( is_column_major == TRUE )
 			{
-				// Column major support disabled for int API's till micro-kernel
-				// post-ops are updated to account for column major.
-				if (post_op_unparsed[mat_idx + gs_i] != NULL )
-				{
-					bli_print_msg("Column major inputs not supported with Post-ops.",
-								__FILE__, __LINE__);
-					goto err_hndl;
-				}
-
 				rs_a[gs_i] = ldb[gc_i];
 				cs_a[gs_i] = 1;
 
@@ -663,6 +689,14 @@ AOCL_BGEMM_MATMUL(int8_t,int8_t,float,int32_t,s8s8s32of32)
 				{
 					bli_print_msg(" Reordering of column major matrices is not supported.", __FILE__, __LINE__ );
 					goto err_hndl;
+				}
+				// A matrix packing is done in column major case, only when the matrix
+				// has to be transposed to row-major format. In col-maj case, inputs are
+				// swapped and B becomes A from kernel point of view. Hence, if B is packed, 
+				// set B to unpacked and proceed with GEMM.
+				if ((mtag_b[gs_i] == PACK))
+				{
+					mtag_b[gs_i] = UNPACKED;
 				}
 				// From 5-loop function point of view,
 				// A matrix when in column major storage needs to be packed to row-major
@@ -709,6 +743,13 @@ AOCL_BGEMM_MATMUL(int8_t,int8_t,float,int32_t,s8s8s32of32)
 				{
 					bli_print_msg(" Reordering of A matrix is not supported in row major case.", __FILE__, __LINE__ );
 					goto err_hndl;
+				}
+				// A matrix packing is not supported in row major case.
+				// If A matrix is packed and not transposed, set to Unpack
+				// and proceed with GEMM.
+				if ((mtag_a[gs_i] == PACK) && (!bli_is_trans(blis_transa))) 
+				{
+					mtag_a[gs_i] = UNPACKED;
 				}
 				// From 5-loop function point of view,
 				// A matrix when in column major storage needs to be packed to row-major
@@ -878,20 +919,19 @@ AOCL_BGEMM_MATMUL(int8_t,int8_t,bfloat16,int32_t,s8s8s32obf16)
 		bli_param_map_netlib_to_blis_trans( transb[gc_i], &blis_transb );
 
 		bool is_column_major = ( ( order[gc_i] == 'c' ) || ( order[gc_i] == 'C' ) );
+		// Column major support disabled for int API's till micro-kernel
+		// post-ops are updated to account for column major.
+		if ((is_column_major == TRUE) && post_op_unparsed[gc_i] != NULL )
+		{
+			bli_print_msg("Column major inputs not supported with Post-ops.",
+						__FILE__, __LINE__);
+			goto err_hndl;
+		}
 
 		for( dim_t gs_i = 0; gs_i < g_sz; gs_i++ )
 		{
 			if( is_column_major == TRUE )
 			{
-				// Column major support disabled for int API's till micro-kernel
-				// post-ops are updated to account for column major.
-				if (post_op_unparsed[mat_idx + gs_i] != NULL )
-				{
-					bli_print_msg("Column major inputs not supported with Post-ops.",
-								__FILE__, __LINE__);
-					goto err_hndl;
-				}
-
 				rs_a[gs_i] = ldb[gc_i];
 				cs_a[gs_i] = 1;
 
@@ -919,6 +959,14 @@ AOCL_BGEMM_MATMUL(int8_t,int8_t,bfloat16,int32_t,s8s8s32obf16)
 				{
 					bli_print_msg(" Reordering of column major matrices is not supported.", __FILE__, __LINE__ );
 					goto err_hndl;
+				}
+				// A matrix packing is done in column major case, only when the matrix
+				// has to be transposed to row-major format. In col-maj case, inputs are
+				// swapped and B becomes A from kernel point of view. Hence, if B is packed, 
+				// set B to unpacked and proceed with GEMM.
+				if ((mtag_b[gs_i] == PACK))
+				{
+					mtag_b[gs_i] = UNPACKED;
 				}
 				// From 5-loop function point of view,
 				// A matrix when in column major storage needs to be packed to row-major
@@ -965,6 +1013,13 @@ AOCL_BGEMM_MATMUL(int8_t,int8_t,bfloat16,int32_t,s8s8s32obf16)
 				{
 					bli_print_msg(" Reordering of A matrix is not supported in row major case.", __FILE__, __LINE__ );
 					goto err_hndl;
+				}
+				// A matrix packing is not supported in row major case.
+				// If A matrix is packed and not transposed, set to Unpack
+				// and proceed with GEMM.
+				if ((mtag_a[gs_i] == PACK) && (!bli_is_trans(blis_transa))) 
+				{
+					mtag_a[gs_i] = UNPACKED;
 				}
 				// From 5-loop function point of view,
 				// A matrix when in column major storage needs to be packed to row-major
@@ -1131,20 +1186,19 @@ AOCL_BGEMM_MATMUL(int8_t,int8_t,uint8_t,int32_t,s8s8s32ou8)
 		bli_param_map_netlib_to_blis_trans( transb[gc_i], &blis_transb );
 
 		bool is_column_major = ( ( order[gc_i] == 'c' ) || ( order[gc_i] == 'C' ) );
+		// Column major support disabled for int API's till micro-kernel
+		// post-ops are updated to account for column major.
+		if ((is_column_major == TRUE) && post_op_unparsed[gc_i] != NULL )
+		{
+			bli_print_msg("Column major inputs not supported with Post-ops.",
+						__FILE__, __LINE__);
+			goto err_hndl;
+		}
 
 		for( dim_t gs_i = 0; gs_i < g_sz; gs_i++ )
 		{
 			if( is_column_major == TRUE )
 			{
-				// Column major support disabled for int API's till micro-kernel
-				// post-ops are updated to account for column major.
-				if (post_op_unparsed[gs_i] != NULL )
-				{
-					bli_print_msg("Column major inputs not supported with Post-ops.",
-								__FILE__, __LINE__);
-					goto err_hndl;
-				}
-
 				rs_a[gs_i] = ldb[gc_i];
 				cs_a[gs_i] = 1;
 
@@ -1172,6 +1226,14 @@ AOCL_BGEMM_MATMUL(int8_t,int8_t,uint8_t,int32_t,s8s8s32ou8)
 				{
 					bli_print_msg(" Reordering of column major matrices is not supported.", __FILE__, __LINE__ );
 					goto err_hndl;
+				}
+				// A matrix packing is done in column major case, only when the matrix
+				// has to be transposed to row-major format. In col-maj case, inputs are
+				// swapped and B becomes A from kernel point of view. Hence, if B is packed, 
+				// set B to unpacked and proceed with GEMM.
+				if ((mtag_b[gs_i] == PACK))
+				{
+					mtag_b[gs_i] = UNPACKED;
 				}
 				// From 5-loop function point of view,
 				// A matrix when in column major storage needs to be packed to row-major
@@ -1218,6 +1280,13 @@ AOCL_BGEMM_MATMUL(int8_t,int8_t,uint8_t,int32_t,s8s8s32ou8)
 				{
 					bli_print_msg(" Reordering of A matrix is not supported in row major case.", __FILE__, __LINE__ );
 					goto err_hndl;
+				}
+				// A matrix packing is not supported in row major case.
+				// If A matrix is packed and not transposed, set to Unpack
+				// and proceed with GEMM.
+				if ((mtag_a[gs_i] == PACK) && (!bli_is_trans(blis_transa))) 
+				{
+					mtag_a[gs_i] = UNPACKED;
 				}
 				// From 5-loop function point of view,
 				// A matrix when in column major storage needs to be packed to row-major

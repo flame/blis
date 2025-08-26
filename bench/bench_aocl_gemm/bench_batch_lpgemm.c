@@ -634,7 +634,7 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                                     (post_temp_accum, post_op[gc_i], j, ( post_op[gc_i]->sum )->sf_stor_type, \
                                         ( post_op[gc_i]->sum )->zp_stor_type); \
                             } \
-                            else if ( post_op[mat_idx + gs_i]->seq_vector[op_id] == MATRIX_ADD ) \
+                            else if ( post_op[gc_i]->seq_vector[op_id] == MATRIX_ADD ) \
                             { \
                                 dim_t rs_m = ( post_op[gc_i]->matrix_add )->ldm; \
                                 dim_t cs_m = 1; \
