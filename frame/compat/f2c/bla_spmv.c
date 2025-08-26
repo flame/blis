@@ -163,7 +163,7 @@ int PASTEF77S(d,spmv)(const bla_character *uplo, const bla_integer *n, const bla
     --ap;
 
     /* Function Body */
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+    AOCL_DTL_INITIALIZE();
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_SPMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *uplo, *n,
                              (void*)alpha, *incx, (void*)beta, *incy);
@@ -478,7 +478,7 @@ int PASTEF77S(s,spmv)(const bla_character *uplo, const bla_integer *n, const bla
     --ap;
 
     /* Function Body */
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+    AOCL_DTL_INITIALIZE();
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_SPMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *uplo, *n,
                              (void*)alpha, *incx, (void*)beta, *incy);

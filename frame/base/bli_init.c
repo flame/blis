@@ -92,6 +92,10 @@ void bli_init_once( void )
 		initialize_tl_rntm = FALSE;
 	}
 
+	// Initialize DTL Library. Trace level set by the user
+	// is available in the blis.h header file.
+	AOCL_DTL_INITIALIZE();
+
 	// On every call each application thread must
 	// reset info_value to 0
 	gint_t info_value = 0;
@@ -102,14 +106,13 @@ void bli_init_once( void )
 void bli_finalize_once( void )
 {
 	bli_pthread_once( &once_finalize, bli_finalize_apis );
+	AOCL_DTL_UNINITIALIZE();
 }
 
 // -----------------------------------------------------------------------------
 
 void bli_init_apis( void )
 {
-	/* Initialize DTL Library with trace level set by the user */
-	AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
 	// Initialize various sub-APIs.
 	bli_gks_init();
 	bli_ind_init();
@@ -135,7 +138,6 @@ void bli_finalize_apis( void )
 	bli_thread_finalize();
 	bli_ind_finalize();
 	bli_gks_finalize();
-	AOCL_DTL_UNINITIALIZE();
 
 	// Reset the control variable that will allow (re-)initialization.
 	// NOTE: We must initialize a fresh pthread_once_t object and THEN copy the

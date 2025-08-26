@@ -116,7 +116,7 @@ void scopy_blis_impl
 
 	/* Initialize BLIS. */
 	// Call to bli_init_auto() is not needed here
-	AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+	AOCL_DTL_INITIALIZE();
 
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
 	AOCL_DTL_LOG_COPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', *n, *incx, *incy)
@@ -239,7 +239,7 @@ void dcopy_blis_impl
 
 	/* Initialize BLIS. */
 	// Call to bli_init_auto() is not needed here
-	AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+	AOCL_DTL_INITIALIZE();
 
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 	AOCL_DTL_LOG_COPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, *incx, *incy)
@@ -492,7 +492,7 @@ void zcopy_blis_impl
 
 	/* Initialize BLIS. */
 	// Call to bli_init_auto() is not needed here
-	AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+	AOCL_DTL_INITIALIZE();
 
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
 	AOCL_DTL_LOG_COPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', *n, *incx, *incy)

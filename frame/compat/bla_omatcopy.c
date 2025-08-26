@@ -63,7 +63,7 @@ void somatcopy_blis_impl (f77_char* trans, f77_int* rows, f77_int* cols, const f
 
 	/* Initialize BLIS. */
 	// Call to bli_init_auto() is not needed here
-	AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+	AOCL_DTL_INITIALIZE();
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 	AOCL_DTL_LOG_MATCOPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *trans, *rows, *cols,
 				    (void*)alpha, *lda, *ldb );
@@ -117,7 +117,7 @@ void domatcopy_blis_impl (f77_char* trans, f77_int* rows, f77_int* cols, const d
 {
 	/* Initialize BLIS. */
 	// Call to bli_init_auto() is not needed here
-	AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+	AOCL_DTL_INITIALIZE();
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 	AOCL_DTL_LOG_MATCOPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *trans, *rows, *cols,
 				    (void*)alpha, *lda, *ldb );
@@ -171,7 +171,7 @@ void comatcopy_blis_impl (f77_char* trans, f77_int* rows, f77_int* cols, const s
 {
 	/* Initialize BLIS. */
 	// Call to bli_init_auto() is not needed here
-	AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+	AOCL_DTL_INITIALIZE();
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 	AOCL_DTL_LOG_MATCOPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *trans, *rows, *cols,
 				    (void*)alpha, *lda, *ldb );
@@ -226,7 +226,7 @@ void zomatcopy_blis_impl (f77_char* trans, f77_int* rows, f77_int* cols, const d
 {
 	/* Initialize BLIS. */
 	// Call to bli_init_auto() is not needed here
-	AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+	AOCL_DTL_INITIALIZE();
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 	AOCL_DTL_LOG_MATCOPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *trans, *rows, *cols,
 				    (void*)alpha, *lda, *ldb );

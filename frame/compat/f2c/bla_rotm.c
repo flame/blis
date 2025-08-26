@@ -80,7 +80,7 @@ int PASTEF77S(s,rotm)(const bla_integer *n, bla_real *sx, const bla_integer *inc
     --sx;
 
     /* Function Body */
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+    AOCL_DTL_INITIALIZE();
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_ROTM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *n,
                              *incx, *incy, (void*)&sparam[1], (void*)&sparam[2],
@@ -253,7 +253,7 @@ int PASTEF77S(d,rotm)(const bla_integer *n, bla_double *dx, const bla_integer *i
     --dx;
 
     /* Function Body */
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+    AOCL_DTL_INITIALIZE();
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_ROTM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *n,
                              *incx, *incy, (void*)&dparam[1], (void*)&dparam[2],

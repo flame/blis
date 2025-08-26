@@ -122,7 +122,7 @@ float sdot_blis_impl
 {
     /* Initialize BLIS. */
     // Call to bli_init_auto() is not needed here
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+    AOCL_DTL_INITIALIZE();
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', 'N', *n, *incx, *incy);
@@ -263,7 +263,7 @@ double ddot_blis_impl
 {
     /* Initialize BLIS. */
     // Call to bli_init_auto() is not needed here
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+    AOCL_DTL_INITIALIZE();
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', 'N', *n, *incx, *incy);
@@ -625,7 +625,7 @@ scomplex cdotu_blis_impl
 {
     /* Initialize BLIS. */
     // Call to bli_init_auto() is not needed here
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+    AOCL_DTL_INITIALIZE();
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', 'N', *n, *incx, *incy);
@@ -738,7 +738,7 @@ dcomplex zdotu_blis_impl
 {
     /* Initialize BLIS. */
     // Call to bli_init_auto() is not needed here
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+    AOCL_DTL_INITIALIZE();
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', 'N', *n, *incx, *incy);
@@ -1036,7 +1036,7 @@ scomplex cdotc_blis_impl
 {
     /* Initialize BLIS. */
     // Call to bli_init_auto() is not needed here
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+    AOCL_DTL_INITIALIZE();
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', 'C', *n, *incx, *incy);
@@ -1150,7 +1150,7 @@ dcomplex zdotc_blis_impl
 {
     /* Initialize BLIS. */
     // Call to bli_init_auto() is not needed here
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+    AOCL_DTL_INITIALIZE();
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', 'C', *n, *incx, *incy);
@@ -1567,7 +1567,7 @@ double PASTEF77S(d,sdot)
 
     /* Initialize BLIS. */
     // Call to bli_init_auto() is not needed here
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+    AOCL_DTL_INITIALIZE();
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', 'N', *n, *incx, *incy);

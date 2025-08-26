@@ -61,7 +61,7 @@ int PASTEF77S(s,rotg)(bla_real *sa, bla_real *sb, bla_real *c__, bla_real *s)
 /*     jack dongarra, linpack, 3/11/78. */
 
     /* Function Body */
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+    AOCL_DTL_INITIALIZE();
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_ROTG_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s),
                              (void*)sa, (void*)sb, (void*)c__, (void*)s);
@@ -128,7 +128,7 @@ int PASTEF77S(d,rotg)(bla_double *da, bla_double *db, bla_double *c__, bla_doubl
 /*     jack dongarra, linpack, 3/11/78. */
 
     /* Function Body */
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+    AOCL_DTL_INITIALIZE();
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_ROTG_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d),
                              (void*)da, (void*)db, (void*)c__, (void*)s);
@@ -190,7 +190,7 @@ L20:
     bla_real scale;
 
     /* Function Body */
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+    AOCL_DTL_INITIALIZE();
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_ROTG_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c),
                              (void*)ca, (void*)cb, (void*)c__, (void*)s);
@@ -249,7 +249,7 @@ L20:
     bla_double scale;
 
     /* Function Body */
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
+    AOCL_DTL_INITIALIZE();
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_ROTG_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z),
                              (void*)ca, (void*)cb, (void*)c__, (void*)s);

@@ -120,19 +120,20 @@ uint64 AOCL_DTL_get_time_spent(void);
  * The global flag is maintain in the code to track the final
  * state of the logging feature.
  */
-extern BLIS_THREAD_LOCAL bool gbIsLoggingEnabled;
+extern BLIS_THREAD_LOCAL bool tlIsLoggingEnabled;
+extern bool                   gbIsLoggingEnabled;
 
 /* API to enable logging at runtime */
 #define AOCL_DTL_Enable_Logs() \
-    /* Initialize DTL if not alredy done so */ \
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL); \
-    gbIsLoggingEnabled = TRUE;
+    /* Initialize DTL if not already done so */ \
+    AOCL_DTL_INITIALIZE(); \
+    tlIsLoggingEnabled = TRUE;
 
 /* API to disable logging at runtime */
 #define AOCL_DTL_Disable_Logs() \
-    /* Initialize DTL if not alredy done so */ \
-    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL); \
-    gbIsLoggingEnabled = FALSE;
+    /* Initialize DTL if not already done so */ \
+    AOCL_DTL_INITIALIZE(); \
+    tlIsLoggingEnabled = FALSE;
 
 /* Macro to log the Data */
 #define AOCL_DTL_START_PERF_TIMER() \
@@ -144,11 +145,11 @@ extern BLIS_THREAD_LOCAL bool gbIsLoggingEnabled;
 
 /* Macro to initialize the prerequisite for debuging */
 #ifdef AOCL_DTL_INITIALIZE_ENABLE
-#define AOCL_DTL_INITIALIZE(CURRENT_LOG_LEVEL) \
-    DTL_Initialize(CURRENT_LOG_LEVEL);
+#define AOCL_DTL_INITIALIZE() \
+    DTL_Initialize();
 #else
 /* Dummy macro definition if the AOCL_DTL_INITIALIZE macro is not enabled */
-#define AOCL_DTL_INITIALIZE(CURRENT_LOG_LEVEL)
+#define AOCL_DTL_INITIALIZE()
 #endif
 
 /* Macro for uninitializing the prerequisite */
@@ -162,8 +163,9 @@ extern BLIS_THREAD_LOCAL bool gbIsLoggingEnabled;
 
 #ifdef AOCL_DTL_INITIALIZE_ENABLE
 /* Prototypes for initializing and uninitializing the debug functions */
-void DTL_Initialize(
-    uint32 ui32CurrentLogLevel);
+void DTL_Initialize(void);
+void DTL_Initialize_Global(void);
+void DTL_Initialize_TL(void);
 void DTL_Uninitialize(void);
 #endif
 
