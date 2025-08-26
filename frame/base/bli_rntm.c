@@ -3119,34 +3119,41 @@ BLIS_INLINE void aocl_dcopyv_dynamic
 	{
 		case BLIS_ARCH_ZEN5:
 
-			if (n_elem <= 43000)
+			if (n_elem <= 38000)
 				*nt_ideal = 1;
-			else if (n_elem <= 180000)
+			else if (n_elem <= 47000)
+				*nt_ideal = 2;
+			else if (n_elem <= 130000)
 				*nt_ideal = 4;
-			else
-				// dcopy does not scale with more than 8 threads
+			else if (n_elem <= 2300000)
 				*nt_ideal = 8;
+			else if (n_elem <= 4000000)
+				*nt_ideal = 96;
+			else
+				// For sizes in this range, AOCL dynamic does not make any change
+				// Use -1 to indicate that all available threads should be used.
+				*nt_ideal = -1;
 			break;
 
 		case BLIS_ARCH_ZEN4:
 
-		if (n_elem <= 3200)
-			*nt_ideal = 1;
-		else if (n_elem <= 4100)
-			*nt_ideal = 2;
-		else if (n_elem <= 9900)
-			*nt_ideal = 4;
-		else if (n_elem <= 330000)
-			*nt_ideal = 8;
-		else if (n_elem <= 910000)
-			*nt_ideal = 16;
-		else if (n_elem <= 2600000)
-			*nt_ideal = 32;
-		else if (n_elem <= 5200000)
-			*nt_ideal = 64;
-		else
-			*nt_ideal = -1;
-		break;
+			if (n_elem <= 17000)
+				*nt_ideal = 1;
+			else if (n_elem <= 74000)
+				*nt_ideal = 2;
+			else if (n_elem <= 140000)
+				*nt_ideal = 4;
+			else if (n_elem <= 3000000)
+				*nt_ideal = 8;
+			else if (n_elem <= 10000000)
+				*nt_ideal = 32;
+			else if (n_elem <= 30000000)
+				*nt_ideal = 64;
+			else
+				// For sizes in this range, AOCL dynamic does not make any change
+				// Use -1 to indicate that all available threads should be used.
+				*nt_ideal = -1;
+			break;
 
 		case BLIS_ARCH_ZEN:
 		case BLIS_ARCH_ZEN2:
