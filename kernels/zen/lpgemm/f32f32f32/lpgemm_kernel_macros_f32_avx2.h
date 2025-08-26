@@ -217,25 +217,37 @@ multiply with Beta, and add to alpha*A*B*/
 	ymm2 = _mm256_fmadd_ps(ymm0, beta, ymm2); \
 
 #define BF16_F32_C_BNZ_8_MASK(m_ind,n_ind,ymm0,beta,ymm2,mask) \
+{ \
+	bfloat16 data_feeder[8] = {0};   \
+	bfloat16 *post_op_ptr = ( bfloat16* )post_ops_attr.buf_downscale + \
+	( post_ops_attr.rs_c_downscale * \
+		( post_ops_attr.post_op_c_i + m_ind ) ) + \
+	post_ops_attr.post_op_c_j + ( n_ind * 8 ); \
+	int32_t ele[8] = {0}; \
+	_mm256_storeu_si256((__m256i*)ele, mask); \
+	for(dim_t i = 0; i < 8; i++) \
+	{ \
+		if(ele[i] == -1) \
+		{ \
+			data_feeder[i] = *(post_op_ptr + i); \
+		} \
+	} \
 	ymm0 = (__m256)_mm256_sllv_epi32  \
 			(  \
 				_mm256_cvtepi16_epi32  \
 				( \
-					_mm_maskload_epi32   \
+					_mm_loadu_si128   \
 					(  \
-						( int const* )( \
-						( bfloat16* )post_ops_attr.buf_downscale + \
-						( post_ops_attr.rs_c_downscale * \
-							( post_ops_attr.post_op_c_i + m_ind ) ) + \
-						post_ops_attr.post_op_c_j + ( n_ind * 8 ) ) \
-					, mask )  \
+						( __m128i const* )( data_feeder ) \
+					)  \
 				), _mm256_set1_epi32( 16 )  \
 			); \
 	ymm2 = _mm256_fmadd_ps(ymm0, beta, ymm2); \
+} \
 
 #define BF16_F32_C_BNZ_GEMV_MASK(n_ind,ymm0,beta,ymm2,n_elems) \
 {\
-	int16_t data_feeder[8] = {0};   \
+	bfloat16 data_feeder[8] = {0};   \
 	bfloat16 *post_op_ptr = ( bfloat16* )( post_ops_attr.buf_downscale) + \
 					( post_ops_attr.post_op_c_j + ( n_ind * 8 )  );   \
 	for(dim_t i = 0; i < n_elems; i++) data_feeder[i] = *(post_op_ptr + i); \
@@ -385,6 +397,11 @@ multiply with Beta, and add to alpha*A*B*/
 	F32_F32_MATRIX_ADD_LOAD_YMM(scr1,scl_fct1,m_ind,1); \
 	F32_MATRIX_ADD_2COL_YMM(scr0,scr1,m_ind,r_ind0,r_ind1); \
 
+#define F32_F32_MATRIX_ADD_2COL_YMM_MASK(scr0,scr1,scl_fct0,scl_fct1,m_ind,r_ind0,r_ind1,k1,k2) \
+	F32_F32_MATRIX_ADD_LOAD_YMM_MASK(scr0,scl_fct0,m_ind,0,k1); \
+	F32_F32_MATRIX_ADD_LOAD_YMM_MASK(scr1,scl_fct1,m_ind,1,k2); \
+	F32_MATRIX_ADD_2COL_YMM(scr0,scr1,m_ind,r_ind0,r_ind1); \
+
 #define F32_F32_MATRIX_ADD_4COL_YMM(scr0,scr1,scr2,scr3,scl_fct0,scl_fct1,scl_fct2,scl_fct3,m_ind,r_ind0,r_ind1,r_ind2,r_ind3) \
 	F32_F32_MATRIX_ADD_LOAD_YMM(scr0,scl_fct0,m_ind,0); \
 	F32_F32_MATRIX_ADD_LOAD_YMM(scr1,scl_fct1,m_ind,1); \
@@ -408,20 +425,25 @@ multiply with Beta, and add to alpha*A*B*/
 			); \
 	scr = _mm256_mul_ps( scr, scl_fct ); \
 
-#define BF16_F32_MATRIX_ADD_LOAD_YMM_MASK(scr,scl_fct,m_ind,n_ind,mask) \
-	scr =	(__m256)( _mm256_sllv_epi32  \
-				(  \
-					_mm256_cvtepi16_epi32  \
-					( \
-						_mm_maskload_epi32 \
-						( ( int const* )( matptr + \
-						( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
-						post_ops_attr.post_op_c_j + ( n_ind * 8 ) )  \
-						, mask ) \
-					), _mm256_set1_epi32( 16 )  \
-				)  \
-			); \
+#define BF16_F32_MATRIX_ADD_LOAD_YMM_MASK(scr,scl_fct,m_ind,n_ind,n_elems) \
+{\
+	bfloat16 data_feeder[8] = {0};   \
+	bfloat16 *post_op_ptr = ( bfloat16* )(matptr + \
+		( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+		post_ops_attr.post_op_c_j + ( n_ind * 8 ) );   \
+	for(dim_t i = 0; i < n_elems; i++) data_feeder[i] = *(post_op_ptr + i); \
+	scr = (__m256)_mm256_sllv_epi32  \
+        (  \
+          _mm256_cvtepi16_epi32  \
+          ( \
+            _mm_loadu_si128  \
+            (  \
+              ( __m128i const* )( data_feeder ) \
+            )  \
+          ), _mm256_set1_epi32( 16 )  \
+        ); \
 	scr = _mm256_mul_ps( scr, scl_fct ); \
+} \
 
 #define BF16_F32_MATRIX_ADD_4COL_YMM(scr0,scr1,scr2,scr3,scl_fct0,scl_fct1,scl_fct2,scl_fct3,m_ind,r_ind0,r_ind1,r_ind2,r_ind3) \
 	BF16_F32_MATRIX_ADD_LOAD_YMM(scr0,scl_fct0,m_ind,0); \
@@ -435,24 +457,40 @@ multiply with Beta, and add to alpha*A*B*/
 	BF16_F32_MATRIX_ADD_LOAD_YMM(scr1,scl_fct1,m_ind,1); \
 	F32_MATRIX_ADD_2COL_YMM(scr0,scr1,m_ind,r_ind0,r_ind1); \
 
+#define BF16_F32_MATRIX_ADD_2COL_YMM_MASK(scr0,scr1,scl_fct0,scl_fct1,m_ind,r_ind0,r_ind1,n1,n2) \
+	BF16_F32_MATRIX_ADD_LOAD_YMM_MASK(scr0,scl_fct0,m_ind,0,n1); \
+	BF16_F32_MATRIX_ADD_LOAD_YMM_MASK(scr1,scl_fct1,m_ind,1,n2); \
+	F32_MATRIX_ADD_2COL_YMM(scr0,scr1,m_ind,r_ind0,r_ind1); \
+
 #define BF16_F32_MATRIX_ADD_1COL_YMM(scr0,scl_fct0,m_ind,r_ind0) \
 	BF16_F32_MATRIX_ADD_LOAD_YMM(scr0,scl_fct0,m_ind,0); \
 	F32_MATRIX_ADD_1COL_YMM(scr0,m_ind,r_ind0); \
 
-#define BF16_F32_MATRIX_ADD_1COL_YMM_MASK(scr0,scl_fct0,m_ind,r_ind0,mask) \
-	BF16_F32_MATRIX_ADD_LOAD_YMM_MASK(scr0,scl_fct0,m_ind,0,mask); \
+#define BF16_F32_MATRIX_ADD_1COL_YMM_MASK(scr0,scl_fct0,m_ind,r_ind0,n_elems) \
+	BF16_F32_MATRIX_ADD_LOAD_YMM_MASK(scr0,scl_fct0,m_ind,0,n_elems); \
 	F32_MATRIX_ADD_1COL_YMM(scr0,m_ind,r_ind0); \
 
-#define BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,scr0,scl_fct0,n_ind) \
+#define BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,scr0,scl_fct0,n_ind,mask) \
 { \
+	bfloat16 *post_op_ptr = ( bfloat16* )(matptr + \
+		post_ops_attr.post_op_c_j + ( n_ind * 8 ) ); \
+	bfloat16 data_feeder[8] = {0}; \
+	int32_t ele[8] = {0}; \
+	_mm256_storeu_si256((__m256i*)ele, mask); \
+	for(dim_t i = 0; i < 8; i++) \
+	{ \
+		if(ele[i] == -1 ) \
+		{ \
+			data_feeder[i] = *(post_op_ptr + i); \
+		} \
+	} \
 	scr0 =	(__m256)( _mm256_sllv_epi32  \
 		(  \
 			_mm256_cvtepi16_epi32  \
 			( \
-				_mm_load_si128 \
-				( ( __m128i const* )( matptr + \
-				post_ops_attr.post_op_c_j + ( n_ind * 8 ) ) ) \
-			), _mm256_set1_epi32( 16 )  \
+				_mm_loadu_si128 \
+				( ( __m128i const* )( data_feeder )) \
+			), _mm256_set1_epi32( 16 ) \
 		)  \
 	); \
 	scr0 = _mm256_mul_ps( scr0, scl_fct0 ); \
@@ -498,7 +536,7 @@ multiply with Beta, and add to alpha*A*B*/
 
 #define BF16_F32_MATRIX_ADD_LOAD_XMM_1ELE(scr,scl_fct,m_ind,n_ind) \
 	{   \
-		int16_t data_feeder[8] = {0};   \
+		bfloat16 data_feeder[8] = {0};   \
 		bfloat16 *post_op_ptr = ( bfloat16* )( matptr + \
 						( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
 						post_ops_attr.post_op_c_j );   \
@@ -603,6 +641,11 @@ multiply with Beta, and add to alpha*A*B*/
 	F32_F32_MATRIX_MUL_LOAD_YMM(scr1,scl_fct1,m_ind,1); \
 	F32_MATRIX_MUL_2COL_YMM(scr0,scr1,m_ind,r_ind0,r_ind1); \
 
+#define F32_F32_MATRIX_MUL_2COL_YMM_MASK(scr0,scr1,scl_fct0,scl_fct1,m_ind,r_ind0,r_ind1,k1,k2) \
+	F32_F32_MATRIX_MUL_LOAD_YMM_MASK(scr0,scl_fct0,m_ind,0,k1); \
+	F32_F32_MATRIX_MUL_LOAD_YMM_MASK(scr1,scl_fct1,m_ind,1,k2); \
+	F32_MATRIX_MUL_2COL_YMM(scr0,scr1,m_ind,r_ind0,r_ind1); \
+
 #define F32_F32_MATRIX_MUL_4COL_YMM(scr0,scr1,scr2,scr3,scl_fct0,scl_fct1,scl_fct2,scl_fct3,m_ind,r_ind0,r_ind1,r_ind2,r_ind3) \
 	F32_F32_MATRIX_MUL_LOAD_YMM(scr0,scl_fct0,m_ind,0); \
 	F32_F32_MATRIX_MUL_LOAD_YMM(scr1,scl_fct1,m_ind,1); \
@@ -635,11 +678,11 @@ multiply with Beta, and add to alpha*A*B*/
 #define BF16_F32_MATRIX_MUL_LOAD_YMM(scr0,scl_fct0,m_ind,n_ind) \
 	BF16_F32_MATRIX_ADD_LOAD_YMM(scr0,scl_fct0,m_ind,n_ind); \
 
-#define BF16_F32_MATRIX_MUL_LOAD_YMM_MASK(scr0,scl_fct0,m_ind,n_ind,mask) \
-	BF16_F32_MATRIX_ADD_LOAD_YMM_MASK(scr0,scl_fct0,m_ind,n_ind,mask); \
+#define BF16_F32_MATRIX_MUL_LOAD_YMM_MASK(scr0,scl_fct0,m_ind,n_ind,n_elems) \
+	BF16_F32_MATRIX_ADD_LOAD_YMM_MASK(scr0,scl_fct0,m_ind,n_ind,n_elems); \
 
-#define BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,scr0,scl_fct0,n_ind) \
-	BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,scr0,scl_fct0,n_ind) \
+#define BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,scr0,scl_fct0,n_ind,mask) \
+	BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,scr0,scl_fct0,n_ind,mask) \
 
 #ifdef BF16_F32_MATRIX_MUL_1COL
 #undef BF16_F32_MATRIX_MUL_1COL
@@ -653,8 +696,8 @@ multiply with Beta, and add to alpha*A*B*/
 #undef BF16_F32_MATRIX_MUL_1COL_MASK
 #endif
 
-#define BF16_F32_MATRIX_MUL_1COL_MASK(scr0,scl_fct0,m_ind,r_ind0,mask) \
-	BF16_F32_MATRIX_MUL_LOAD_YMM_MASK(scr0,scl_fct0,m_ind,0,mask); \
+#define BF16_F32_MATRIX_MUL_1COL_MASK(scr0,scl_fct0,m_ind,r_ind0,n_elems) \
+	BF16_F32_MATRIX_MUL_LOAD_YMM_MASK(scr0,scl_fct0,m_ind,0,n_elems); \
 	F32_MATRIX_MUL_1COL_YMM(scr0,m_ind,r_ind0); \
 
 #ifdef BF16_F32_MATRIX_MUL_2COL
@@ -663,6 +706,11 @@ multiply with Beta, and add to alpha*A*B*/
 #define BF16_F32_MATRIX_MUL_2COL(scr0,scr1,scl_fct0,scl_fct1,m_ind,r_ind0,r_ind1) \
 	BF16_F32_MATRIX_MUL_LOAD_YMM(scr0,scl_fct0,m_ind,0); \
 	BF16_F32_MATRIX_MUL_LOAD_YMM(scr1,scl_fct1,m_ind,1); \
+	F32_MATRIX_MUL_2COL_YMM(scr0,scr1,m_ind,r_ind0,r_ind1); \
+
+#define BF16_F32_MATRIX_MUL_2COL_MASK(scr0,scr1,scl_fct0,scl_fct1,m_ind,r_ind0,r_ind1,n1,n2) \
+	BF16_F32_MATRIX_MUL_LOAD_YMM_MASK(scr0,scl_fct0,m_ind,0,n1); \
+	BF16_F32_MATRIX_MUL_LOAD_YMM_MASK(scr1,scl_fct1,m_ind,1,n2); \
 	F32_MATRIX_MUL_2COL_YMM(scr0,scr1,m_ind,r_ind0,r_ind1); \
 
 #ifdef BF16_F32_MATRIX_MUL_4COL
@@ -707,19 +755,31 @@ multiply with Beta, and add to alpha*A*B*/
 				); \
 
 #define BF16_F32_BIAS_LOAD_AVX2_MASK(scr,n_ind,mask) \
+{\
+	bfloat16 data_feeder[8] = {0};   \
+	int32_t ele[8] = {0}; \
+	_mm256_storeu_si256((__m256i*)ele, mask); \
+	bfloat16 *post_op_ptr = ((bfloat16*)(post_ops_list_temp->op_args1 )) + \
+	post_ops_attr.post_op_c_j + ( n_ind * 8 ); \
+	for(dim_t i = 0; i < 8; i++) \
+	{ \
+		if(ele[i] == -1) \
+		{ \
+			data_feeder[i] = *(post_op_ptr + i); \
+		} \
+	} \
 	scr = (__m256)( _mm256_sllv_epi32  \
-					(  \
-						_mm256_cvtepi16_epi32  \
-						( \
-							_mm_maskload_epi32  \
-							(  \
-								( int const* )( \
-								( ( bfloat16* )post_ops_list_temp->op_args1 ) + \
-								post_ops_attr.post_op_c_j + ( n_ind * 8 ) ) \
-							, mask )  \
-						), _mm256_set1_epi32( 16 )  \
-					) \
-				); \
+				(  \
+					_mm256_cvtepi16_epi32  \
+					( \
+						_mm_loadu_si128  \
+						(  \
+						( __m128i const* )( data_feeder ) \
+						)  \
+					), _mm256_set1_epi32( 16 )  \
+				) \
+			); \
+} \
 
 #define BF16_F32_BIAS_BCAST_AVX2(scr,m_ind)  \
 	scr = (__m256)( _mm256_sllv_epi32  \
@@ -790,14 +850,13 @@ multiply with Beta, and add to alpha*A*B*/
 					) \
 				); \
 
-#define BF16_F32_BIAS_AVX2_GEMV_MASK(n_ind,ymm0,n_elems) \
+#define BF16_F32_BIAS_AVX2_GEMV_MASK(n_ind,scr,n_elems) \
 {\
-	int16_t data_feeder[8] = {0};   \
-	bfloat16 *post_op_ptr = ( bfloat16* )( post_ops_attr.buf_downscale) + \
-					post_ops_attr.post_op_c_i + \
-					( post_ops_attr.post_op_c_j + ( n_ind * 8 )  );   \
+	bfloat16 data_feeder[8] = {0};   \
+	bfloat16 *post_op_ptr = ( ( bfloat16* )post_ops_list_temp->op_args1 ) + \
+	                          post_ops_attr.post_op_c_i + ( n_ind * 8 );   \
 	for(dim_t i = 0; i < n_elems; i++) data_feeder[i] = *(post_op_ptr + i); \
-	ymm0 = (__m256)_mm256_sllv_epi32  \
+	scr = (__m256)_mm256_sllv_epi32  \
         (  \
           _mm256_cvtepi16_epi32  \
           ( \
@@ -946,8 +1005,8 @@ multiply with Beta, and add to alpha*A*B*/
 #define BF16_F32_ZP_VECTOR_LOAD_AVX2_GEMV(scr,n_ind)  \
 	BF16_F32_BIAS_LOAD_AVX2_GEMV(scr,n_ind) \
 
-#define BF16_F32_ZP_VECTOR_AVX2_GEMV_MASK(n_ind,ymm0,n_elems) \
-	BF16_F32_BIAS_AVX2_GEMV_MASK(n_ind,ymm0,n_elems)
+#define BF16_F32_ZP_VECTOR_AVX2_GEMV_MASK(n_ind,scr,n_elems) \
+	BF16_F32_BIAS_AVX2_GEMV_MASK(n_ind,scr,n_elems)
 
 #define BF16_F32_ZP_SCALAR_BCAST_SSE(scr)  \
 	scr = (__m128)_mm_sllv_epi32  \

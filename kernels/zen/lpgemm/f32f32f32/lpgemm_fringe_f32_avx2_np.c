@@ -2486,12 +2486,11 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(float,float,float,f32f32f32of32_5xlt8_np)
       if ( ( post_ops_attr.buf_downscale != NULL ) &&
         ( post_ops_attr.is_first_k == TRUE ) )
       {
-        __m128i xmm_mask = _mm_loadu_si128((__m128i*)mask[n0_rem]);
-        BF16_F32_C_BNZ_8_MASK(0,0,ymm0,ymm3,ymm4, xmm_mask)
-        BF16_F32_C_BNZ_8_MASK(1,0,ymm0,ymm3,ymm6, xmm_mask)
-        BF16_F32_C_BNZ_8_MASK(2,0,ymm0,ymm3,ymm8, xmm_mask)
-        BF16_F32_C_BNZ_8_MASK(3,0,ymm0,ymm3,ymm10, xmm_mask)
-        BF16_F32_C_BNZ_8_MASK(4,0,ymm0,ymm3,ymm12, xmm_mask)
+        BF16_F32_C_BNZ_8_MASK(0,0,ymm0,ymm3,ymm4, ymm_mask)
+        BF16_F32_C_BNZ_8_MASK(1,0,ymm0,ymm3,ymm6, ymm_mask)
+        BF16_F32_C_BNZ_8_MASK(2,0,ymm0,ymm3,ymm8, ymm_mask)
+        BF16_F32_C_BNZ_8_MASK(3,0,ymm0,ymm3,ymm10, ymm_mask)
+        BF16_F32_C_BNZ_8_MASK(4,0,ymm0,ymm3,ymm12, ymm_mask)
       }
       else
       {
@@ -2596,11 +2595,10 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(float,float,float,f32f32f32of32_4xlt8_np)
       if ( ( post_ops_attr.buf_downscale != NULL ) &&
         ( post_ops_attr.is_first_k == TRUE ) )
       {
-        __m128i xmm_mask = _mm_loadu_si128((__m128i*)mask[n0_rem]);
-        BF16_F32_C_BNZ_8_MASK(0,0,ymm0,ymm3,ymm4, xmm_mask)
-        BF16_F32_C_BNZ_8_MASK(1,0,ymm0,ymm3,ymm6, xmm_mask)
-        BF16_F32_C_BNZ_8_MASK(2,0,ymm0,ymm3,ymm8, xmm_mask)
-        BF16_F32_C_BNZ_8_MASK(3,0,ymm0,ymm3,ymm10, xmm_mask)
+        BF16_F32_C_BNZ_8_MASK(0,0,ymm0,ymm3,ymm4, ymm_mask)
+        BF16_F32_C_BNZ_8_MASK(1,0,ymm0,ymm3,ymm6, ymm_mask)
+        BF16_F32_C_BNZ_8_MASK(2,0,ymm0,ymm3,ymm8, ymm_mask)
+        BF16_F32_C_BNZ_8_MASK(3,0,ymm0,ymm3,ymm10, ymm_mask)
       }
       else
       {
@@ -2700,10 +2698,9 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(float,float,float,f32f32f32of32_3xlt8_np)
       if ( ( post_ops_attr.buf_downscale != NULL ) &&
         ( post_ops_attr.is_first_k == TRUE ) )
       {
-        __m128i xmm_mask = _mm_loadu_si128((__m128i*)mask[n0_rem]);
-        BF16_F32_C_BNZ_8_MASK(0,0,ymm0,ymm3,ymm4, xmm_mask)
-        BF16_F32_C_BNZ_8_MASK(1,0,ymm0,ymm3,ymm6, xmm_mask)
-        BF16_F32_C_BNZ_8_MASK(2,0,ymm0,ymm3,ymm8, xmm_mask)
+        BF16_F32_C_BNZ_8_MASK(0,0,ymm0,ymm3,ymm4, ymm_mask)
+        BF16_F32_C_BNZ_8_MASK(1,0,ymm0,ymm3,ymm6, ymm_mask)
+        BF16_F32_C_BNZ_8_MASK(2,0,ymm0,ymm3,ymm8, ymm_mask)
       }
       else
       {
@@ -2790,9 +2787,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(float,float,float,f32f32f32of32_2xlt8_np)
       if ( ( post_ops_attr.buf_downscale != NULL ) &&
         ( post_ops_attr.is_first_k == TRUE ) )
       {
-        __m128i xmm_mask = _mm_loadu_si128((__m128i*)mask[n0_rem]);
-        BF16_F32_C_BNZ_8_MASK(0,0,ymm0,ymm3,ymm4, xmm_mask)
-        BF16_F32_C_BNZ_8_MASK(1,0,ymm0,ymm3,ymm6, xmm_mask)
+        BF16_F32_C_BNZ_8_MASK(0,0,ymm0,ymm3,ymm4, ymm_mask)
+        BF16_F32_C_BNZ_8_MASK(1,0,ymm0,ymm3,ymm6, ymm_mask)
       }
       else
       {
@@ -2871,8 +2867,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(float,float,float,f32f32f32of32_1xlt8_np)
       if ( ( post_ops_attr.buf_downscale != NULL ) &&
         ( post_ops_attr.is_first_k == TRUE ) )
       {
-        __m128i xmm_mask = _mm_loadu_si128((__m128i*)mask[n0_rem]);
-        BF16_F32_C_BNZ_8_MASK(0,0,ymm0,ymm3,ymm4, xmm_mask)
+        BF16_F32_C_BNZ_8_MASK(0,0,ymm0,ymm3,ymm4, ymm_mask)
       }
       else
       {

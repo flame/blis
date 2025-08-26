@@ -271,8 +271,8 @@ void lpgemv_m_one_f32f32f32of32_avx2_LT16
       {
         if( post_ops_list_temp->stor_type == BF16 )
         {
-          BF16_F32_BIAS_AVX2_GEMV_MASK(0, ymm0, n1 )
-          BF16_F32_BIAS_AVX2_GEMV_MASK(1, ymm1, n2 )
+          BF16_F32_BIAS_LOAD_AVX2_MASK(ymm0, 0, k1 )
+          BF16_F32_BIAS_LOAD_AVX2_MASK(ymm1, 1, k2 )
         }
         else
         {
@@ -415,24 +415,24 @@ POST_OPS_DOWNSCALE_1x16F:
       {
         if( post_ops_list_temp->scale_factor_len > 1 )
         {
-          selector1 = _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                        post_ops_attr.post_op_c_j + ( 0 * 8 ) );
-          selector2 = _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                        post_ops_attr.post_op_c_j + ( 1 * 8 ) );
+          selector1 = _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 0 * 8 ), k1 );
+          selector2 = _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
+                        post_ops_attr.post_op_c_j + ( 1 * 8 ), k2 );
         }
         if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
         {
           if( is_bf16 == TRUE )
           {
-            BF16_F32_ZP_VECTOR_LOAD_AVX2(zero_point0,0);
-            BF16_F32_ZP_VECTOR_LOAD_AVX2(zero_point1,1);
+            BF16_F32_ZP_VECTOR_LOAD_AVX2_MASK(zero_point0,0,k1);
+            BF16_F32_ZP_VECTOR_LOAD_AVX2_MASK(zero_point1,1,k2);
           }
           else
           {
-            zero_point0 = _mm256_loadu_ps( (float* )post_ops_list_temp->op_args1 +
-                          post_ops_attr.post_op_c_j + ( 0 * 8 ) );
-            zero_point1 = _mm256_loadu_ps( (float* )post_ops_list_temp->op_args1 +
-                          post_ops_attr.post_op_c_j + ( 1 * 8 ) );
+            zero_point0 = _mm256_maskload_ps( (float* )post_ops_list_temp->op_args1 +
+                          post_ops_attr.post_op_c_j + ( 0 * 8 ), k1 );
+            zero_point1 = _mm256_maskload_ps( (float* )post_ops_list_temp->op_args1 +
+                          post_ops_attr.post_op_c_j + ( 1 * 8 ), k2 );
           }
         }
         //c[0, 0-7]
@@ -501,11 +501,11 @@ POST_OPS_MATRIX_ADD_1x16F:
           ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
         {
           scl_fctr1 =
-            _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+            _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
+                post_ops_attr.post_op_c_j + ( 0 * 8 ), k1 );
           scl_fctr2 =
-            _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 1 * 8 ) );
+            _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
+                post_ops_attr.post_op_c_j + ( 1 * 8 ), k2 );
         }
         else
         {
@@ -523,12 +523,12 @@ POST_OPS_MATRIX_ADD_1x16F:
             ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
         {
           // c[0:0-15]
-          BF16_F32_MATRIX_ADD_2COL_YMM(ymm1,ymm2,scl_fctr1,scl_fctr2,0,8,12);
+          BF16_F32_MATRIX_ADD_2COL_YMM_MASK(ymm1,ymm2,scl_fctr1,scl_fctr2,0,8,12,n1,n2);
         }
         else
         {
           // c[0:0-15]
-          BF16_F32_MATRIX_ADD_2COL_YMM(ymm1,ymm2,scl_fctr1,scl_fctr1,0,8,12);
+          BF16_F32_MATRIX_ADD_2COL_YMM_MASK(ymm1,ymm2,scl_fctr1,scl_fctr1,0,8,12,n1,n2);
         }
       }
       else
@@ -539,12 +539,12 @@ POST_OPS_MATRIX_ADD_1x16F:
           ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
         {
           // c[0:0-15]
-          F32_F32_MATRIX_ADD_2COL_YMM(ymm1,ymm2,scl_fctr1,scl_fctr2,0,8,12);
+          F32_F32_MATRIX_ADD_2COL_YMM_MASK(ymm1,ymm2,scl_fctr1,scl_fctr2,0,8,12,k1,k2);
         }
         else
         {
           // c[0:0-15]
-          F32_F32_MATRIX_ADD_2COL_YMM(ymm1,ymm2,scl_fctr1,scl_fctr1,0,8,12);
+          F32_F32_MATRIX_ADD_2COL_YMM_MASK(ymm1,ymm2,scl_fctr1,scl_fctr1,0,8,12,k1,k2);
         }
       }
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
@@ -575,11 +575,11 @@ POST_OPS_MATRIX_MUL_1x16F:
           ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
         {
           scl_fctr1 =
-            _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+            _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
+                post_ops_attr.post_op_c_j + ( 0 * 8 ), k1 );
           scl_fctr2 =
-            _mm256_loadu_ps( ( float* )post_ops_list_temp->scale_factor +
-                post_ops_attr.post_op_c_j + ( 1 * 8 ) );
+            _mm256_maskload_ps( ( float* )post_ops_list_temp->scale_factor +
+                post_ops_attr.post_op_c_j + ( 1 * 8 ), k2 );
         }
         else
         {
@@ -597,12 +597,12 @@ POST_OPS_MATRIX_MUL_1x16F:
         ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
         {
           // c[0:0-15]
-          BF16_F32_MATRIX_MUL_2COL(ymm1,ymm2,scl_fctr1,scl_fctr2,0,8,12);
+          BF16_F32_MATRIX_MUL_2COL_MASK(ymm1,ymm2,scl_fctr1,scl_fctr2,0,8,12,n1,n2);
         }
         else
         {
           // c[0:0-15]
-          BF16_F32_MATRIX_MUL_2COL(ymm1,ymm2,scl_fctr1,scl_fctr1,0,8,12);
+          BF16_F32_MATRIX_MUL_2COL_MASK(ymm1,ymm2,scl_fctr1,scl_fctr1,0,8,12,n1,n2);
         }
       }
       else
@@ -613,12 +613,12 @@ POST_OPS_MATRIX_MUL_1x16F:
           ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
         {
           // c[0:0-15]
-          F32_F32_MATRIX_MUL_2COL_YMM(ymm1,ymm2,scl_fctr1,scl_fctr2,0,8,12);
+          F32_F32_MATRIX_MUL_2COL_YMM_MASK(ymm1,ymm2,scl_fctr1,scl_fctr2,0,8,12,k1,k2);
         }
         else
         {
           // c[0:0-15]
-          F32_F32_MATRIX_MUL_2COL_YMM(ymm1,ymm2,scl_fctr1,scl_fctr1,0,8,12);
+          F32_F32_MATRIX_MUL_2COL_YMM_MASK(ymm1,ymm2,scl_fctr1,scl_fctr1,0,8,12,k1,k2);
         }
       }
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR

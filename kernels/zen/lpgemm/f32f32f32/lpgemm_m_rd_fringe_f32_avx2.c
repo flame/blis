@@ -3107,7 +3107,7 @@ LPGEMM_M_RD_FRINGE_KERN(float,float,float,f32f32f32of32_1x4_rd)
     uint64_t rs_c0   = rs_c;
     uint64_t cs_c0   = cs_c;
 
-    __m256  ymm0,  ymm1,  ymm2,  ymm3, ymm4, ymm5, ymm7, ymm8, 
+    __m256  ymm0,  ymm1,  ymm2,  ymm3, ymm4, ymm5, ymm7, ymm8,
            ymm10, ymm11, ymm13, ymm14;
     __m128 xmm0, xmm1, xmm2, xmm3, xmm4, xmm5;
 

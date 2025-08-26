@@ -698,14 +698,14 @@ POST_OPS_MATRIX_ADD_1x32F:
             if( ldm == 1 )
             {
                 selector1 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
-                                _mm_load_si128(
+                                _mm_loadu_si128(
                                 ( __m128i const* )( matptr + post_ops_attr.post_op_c_i ) ) ),
                                 _mm256_set1_epi32( 16 ) )
                             );
 
                 selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
                 selector2 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
-                                _mm_load_si128(
+                                _mm_loadu_si128(
                                 ( __m128i const* )( matptr + post_ops_attr.post_op_c_i + 8 ) ) ),
                                 _mm256_set1_epi32( 16 ) )
                             );
@@ -823,14 +823,14 @@ POST_OPS_MATRIX_MUL_1x32F:
             if( ldm == 1 )
             {
                 selector1 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
-                            _mm_load_si128(
+                            _mm_loadu_si128(
                             ( __m128i const* )( matptr + post_ops_attr.post_op_c_i ) ) ),
                             _mm256_set1_epi32( 16 ) )
                         );
 
                 selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
                 selector2 =( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
-                                _mm_load_si128(
+                                _mm_loadu_si128(
                                 ( __m128i const* )( matptr + post_ops_attr.post_op_c_i + 8 ) ) ),
                                 _mm256_set1_epi32( 16 ) )
                             );

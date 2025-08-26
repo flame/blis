@@ -316,14 +316,14 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32_avx512_256 )
 
 			if( post_ops_attr.buf_downscale != NULL )
 			{
-				BF16_F32_C_BNZ_8(0,0,ymm1, ymm0,ymm16)
-				BF16_F32_C_BNZ_8(0,1,ymm2, ymm0,ymm18)
-				BF16_F32_C_BNZ_8(0,2,ymm3, ymm0,ymm20)
-				BF16_F32_C_BNZ_8(0,3,ymm4, ymm0,ymm22)
-				BF16_F32_C_BNZ_8(0,4,ymm5, ymm0,ymm24)
-				BF16_F32_C_BNZ_8(0,5,ymm6, ymm0,ymm26)
-				BF16_F32_C_BNZ_8(0,6,ymm7, ymm0,ymm28)
-				BF16_F32_C_BNZ_8(0,7,ymm8, ymm0,ymm30)
+				BF16_F32_C_BNZ_8_MASK(0,0,ymm1, ymm0,ymm16, k1)
+				BF16_F32_C_BNZ_8_MASK(0,1,ymm2, ymm0,ymm18, k2)
+				BF16_F32_C_BNZ_8_MASK(0,2,ymm3, ymm0,ymm20, k3)
+				BF16_F32_C_BNZ_8_MASK(0,3,ymm4, ymm0,ymm22, k4)
+				BF16_F32_C_BNZ_8_MASK(0,4,ymm5, ymm0,ymm24, k5)
+				BF16_F32_C_BNZ_8_MASK(0,5,ymm6, ymm0,ymm26, k6)
+				BF16_F32_C_BNZ_8_MASK(0,6,ymm7, ymm0,ymm28, k7)
+				BF16_F32_C_BNZ_8_MASK(0,7,ymm8, ymm0,ymm30, k8)
 			}
 			else
 			{
@@ -369,14 +369,14 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32_avx512_256 )
 		{
 			if( post_ops_list_temp->stor_type == BF16 )
 			{
-			  BF16_F32_BIAS_LOAD_AVX2( ymm9, 0 );
-			  BF16_F32_BIAS_LOAD_AVX2( ymm10, 1 );
-			  BF16_F32_BIAS_LOAD_AVX2( ymm11, 2 );
-			  BF16_F32_BIAS_LOAD_AVX2( ymm12, 3 );
-			  BF16_F32_BIAS_LOAD_AVX2( ymm13, 4 );
-			  BF16_F32_BIAS_LOAD_AVX2( ymm14, 5 );
-			  BF16_F32_BIAS_LOAD_AVX2( ymm15, 6 );
-			  BF16_F32_BIAS_LOAD_AVX2( ymm8, 7 );
+			  BF16_F32_BIAS_LOAD_AVX2_MASK( ymm9, 0, k1 );
+			  BF16_F32_BIAS_LOAD_AVX2_MASK( ymm10, 1, k2 );
+			  BF16_F32_BIAS_LOAD_AVX2_MASK( ymm11, 2, k3 );
+			  BF16_F32_BIAS_LOAD_AVX2_MASK( ymm12, 3, k4 );
+			  BF16_F32_BIAS_LOAD_AVX2_MASK( ymm13, 4, k5 );
+			  BF16_F32_BIAS_LOAD_AVX2_MASK( ymm14, 5, k6 );
+			  BF16_F32_BIAS_LOAD_AVX2_MASK( ymm15, 6, k7 );
+			  BF16_F32_BIAS_LOAD_AVX2_MASK( ymm8, 7, k8 );
 			}
 			else
 			{
@@ -618,14 +618,14 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32_avx512_256 )
 			{
 				if ( is_bf16 == TRUE )
 				{
-					BF16_F32_ZP_VECTOR_LOAD_AVX2(zero_point0, 0)
-					BF16_F32_ZP_VECTOR_LOAD_AVX2(zero_point1, 1)
-					BF16_F32_ZP_VECTOR_LOAD_AVX2(zero_point2, 2)
-					BF16_F32_ZP_VECTOR_LOAD_AVX2(zero_point3, 3)
-					BF16_F32_ZP_VECTOR_LOAD_AVX2(zero_point4, 4)
-					BF16_F32_ZP_VECTOR_LOAD_AVX2(zero_point5, 5)
-					BF16_F32_ZP_VECTOR_LOAD_AVX2(zero_point6, 6)
-					BF16_F32_ZP_VECTOR_LOAD_AVX2(zero_point7, 7)
+					BF16_F32_ZP_VECTOR_LOAD_AVX2_MASK(zero_point0, 0, k1)
+					BF16_F32_ZP_VECTOR_LOAD_AVX2_MASK(zero_point1, 1, k2)
+					BF16_F32_ZP_VECTOR_LOAD_AVX2_MASK(zero_point2, 2, k3)
+					BF16_F32_ZP_VECTOR_LOAD_AVX2_MASK(zero_point3, 3, k4)
+					BF16_F32_ZP_VECTOR_LOAD_AVX2_MASK(zero_point4, 4, k5)
+					BF16_F32_ZP_VECTOR_LOAD_AVX2_MASK(zero_point5, 5, k6)
+					BF16_F32_ZP_VECTOR_LOAD_AVX2_MASK(zero_point6, 6, k7)
+					BF16_F32_ZP_VECTOR_LOAD_AVX2_MASK(zero_point7, 7, k8)
 				}
 				else
 				{
@@ -768,25 +768,25 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32_avx512_256 )
 			if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 					( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
-				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector1,scl_fctr1,0)
-				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector2,scl_fctr2,1)
-				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector3,scl_fctr3,2)
-				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector4,scl_fctr4,3)
-				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector5,scl_fctr5,4)
-				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector6,scl_fctr6,5)
-				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector7,scl_fctr7,6)
-				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector8,scl_fctr8,7)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector1,scl_fctr1,0, k1)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector2,scl_fctr2,1, k2)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector3,scl_fctr3,2, k3)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector4,scl_fctr4,3, k4)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector5,scl_fctr5,4, k5)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector6,scl_fctr6,5, k6)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector7,scl_fctr7,6, k7)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector8,scl_fctr8,7, k8)
 			}
 			else
 			{
-				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector1,scl_fctr1,0)
-				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector2,scl_fctr1,1)
-				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector3,scl_fctr1,2)
-				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector4,scl_fctr1,3)
-				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector5,scl_fctr1,4)
-				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector6,scl_fctr1,5)
-				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector7,scl_fctr1,6)
-				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector8,scl_fctr1,7)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector1,scl_fctr1,0, k1)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector2,scl_fctr1,1, k2)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector3,scl_fctr1,2, k3)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector4,scl_fctr1,3, k4)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector5,scl_fctr1,4, k5)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector6,scl_fctr1,5, k6)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector7,scl_fctr1,6, k7)
+				BF16_F32_MATRIX_ADD_GEMV_MASK(matptr,selector8,scl_fctr1,7, k8)
 			}
 		}
 		else
@@ -953,25 +953,25 @@ LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32_avx512_256 )
 			if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
 					( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
-				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector1,scl_fctr1,0)
-				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector2,scl_fctr2,1)
-				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector3,scl_fctr3,2)
-				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector4,scl_fctr4,3)
-				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector5,scl_fctr5,4)
-				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector6,scl_fctr6,5)
-				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector7,scl_fctr7,6)
-				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector8,scl_fctr8,7)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector1,scl_fctr1,0, k1)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector2,scl_fctr2,1, k2)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector3,scl_fctr3,2, k3)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector4,scl_fctr4,3, k4)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector5,scl_fctr5,4, k5)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector6,scl_fctr6,5, k6)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector7,scl_fctr7,6, k7)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector8,scl_fctr8,7, k8)
 			}
 			else
 			{
-				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector1,scl_fctr1,0)
-				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector2,scl_fctr1,1)
-				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector3,scl_fctr1,2)
-				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector4,scl_fctr1,3)
-				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector5,scl_fctr1,4)
-				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector6,scl_fctr1,5)
-				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector7,scl_fctr1,6)
-				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector8,scl_fctr1,7)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector1,scl_fctr1,0, k1)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector2,scl_fctr1,1, k2)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector3,scl_fctr1,2, k3)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector4,scl_fctr1,3, k4)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector5,scl_fctr1,4, k5)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector6,scl_fctr1,5, k6)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector7,scl_fctr1,6, k7)
+				BF16_F32_MATRIX_MUL_GEMV_MASK(matptr,selector8,scl_fctr1,7, k8)
 			}
 		}
 		else

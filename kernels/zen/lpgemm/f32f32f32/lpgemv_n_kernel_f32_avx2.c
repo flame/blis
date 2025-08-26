@@ -387,7 +387,7 @@ POST_OPS_BIAS_1x16F:
             // entire column.
             if( post_ops_list_temp->stor_type == BF16 )
             {
-             BF16_F32_BIAS_LOAD_AVX2_GEMV( ymm0, 0 );
+              BF16_F32_BIAS_AVX2_GEMV_MASK( 0, ymm0, mr0 );
             }
             else
             {
@@ -536,35 +536,21 @@ POST_OPS_MATRIX_ADD_1x16F:
           if ( is_bf16 == TRUE )
           {
             bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
-            __m128i _mask = _mm_loadu_si128((__m128i*)mask[mr0]);
 
-            if( ldm == 1 )
+            bfloat16 ctemp[16];
+            for( dim_t i = 0; i < mr0; i++ )
             {
-              selector1 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
-                  _mm_maskload_epi32(
-                    ( int const* )( matptr + post_ops_attr.post_op_c_i )
-                  , _mask ) ), _mm256_set1_epi32( 16 ) )
-                );
+              ctemp[i] = *( matptr +
+                          ( ( post_ops_attr.post_op_c_i + i )
+                              * ldm ) );
+            }
+            selector1 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
+                _mm_loadu_si128(
+                ( __m128i const* )( ctemp ) ) ), _mm256_set1_epi32( 16 ) )
+            );
+            selector1 = _mm256_mul_ps( selector1, scl_fctr1 ); \
+            ymm8 = _mm256_add_ps( selector1, ymm8 );
 
-              selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
-              ymm8 = _mm256_add_ps( selector1, ymm8 );
-            }
-            else
-            {
-              bfloat16 ctemp[16];
-              for( dim_t i = 0; i < mr0; i++ )
-              {
-                ctemp[i] = *( matptr +
-                            ( ( post_ops_attr.post_op_c_i + i )
-                                * ldm ) );
-              }
-              selector1 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
-                  _mm_maskload_epi32(
-                  ( int const* )( ctemp ), _mask ) ), _mm256_set1_epi32( 16 ) )
-              );
-              selector1 = _mm256_mul_ps( selector1, scl_fctr1 ); \
-              ymm8 = _mm256_add_ps( selector1, ymm8 );
-            }
           }
           else
           {
@@ -627,35 +613,20 @@ POST_OPS_MATRIX_MUL_1x16F:
          if ( is_bf16 == TRUE )
         {
           bfloat16* matptr = ( bfloat16* )post_ops_list_temp->op_args1;
-          __m128i _mask = _mm_loadu_si128((__m128i*)mask[mr0]);
 
-          if( ldm == 1 )
+          bfloat16 ctemp[16];
+          for( dim_t i = 0; i < mr0; i++ )
           {
-            selector1 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
-              _mm_maskload_epi32(
-                ( int const* )( matptr + post_ops_attr.post_op_c_i )
-              , _mask ) ), _mm256_set1_epi32( 16 ) )
-            );
-
-            selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
-            ymm8 = _mm256_mul_ps( selector1, ymm8 );
+            ctemp[i] = *( matptr +
+                        ( ( post_ops_attr.post_op_c_i + i )
+                            * ldm ) );
           }
-          else
-          {
-            bfloat16 ctemp[16];
-            for( dim_t i = 0; i < mr0; i++ )
-            {
-              ctemp[i] = *( matptr +
-                          ( ( post_ops_attr.post_op_c_i + i )
-                              * ldm ) );
-            }
-            selector1 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
-                      _mm_maskload_epi32(
-                      ( int const* )( ctemp ), _mask ) ), _mm256_set1_epi32( 16 ) )
-                    );
-            selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
-            ymm8 = _mm256_mul_ps( selector1, ymm8 );
-          }
+          selector1 = ( __m256 )( _mm256_sllv_epi32( _mm256_cvtepi16_epi32(
+                    _mm_loadu_si128(
+                    ( __m128i const* )( ctemp ) ) ), _mm256_set1_epi32( 16 ) )
+                  );
+          selector1 = _mm256_mul_ps( selector1, scl_fctr1 );
+          ymm8 = _mm256_mul_ps( selector1, ymm8 );
         }
         else
         {
