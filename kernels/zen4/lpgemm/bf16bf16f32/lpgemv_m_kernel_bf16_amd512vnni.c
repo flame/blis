@@ -155,6 +155,11 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 
 			for (dim_t k = 0; k < k_iter; k++)
 			{
+				//Prefetch B data required for next iteration
+				_mm_prefetch(b_use + 4*rs_b, _MM_HINT_T0);
+				_mm_prefetch(b_use + 5*rs_b, _MM_HINT_T0);
+				_mm_prefetch(b_use + 6*rs_b, _MM_HINT_T0);
+				_mm_prefetch(b_use + 7*rs_b, _MM_HINT_T0);
 
 				// load first 4x32 tile from row 0-3
 				zmm0 = (__m512bh)_mm512_maskz_loadu_epi16( k5, b_use );

@@ -180,6 +180,10 @@ void packb_nr64_bf16bf16f32of32_row_major
 	{
 		for ( dim_t kr = 0; kr < k_full_pieces; kr += 2 )
 		{
+			//Prefetch B data required for next iteration
+			_mm_prefetch( ( b + ( ldb * ( kr + 2 ) ) + jc ), _MM_HINT_T0);
+			_mm_prefetch( ( b + ( ldb * ( kr + 3 ) ) + jc ), _MM_HINT_T0);
+
 			// Rearrange for dpbf16_ps, read 2 rows from B with 64 elements in each row.
 			a0 = _mm512_loadu_si512( b + ( ldb * ( kr + 0 ) ) + jc  );
 			b0 = _mm512_loadu_si512( b + ( ldb * ( kr + 0 ) ) + jc + 32 );
@@ -203,6 +207,7 @@ void packb_nr64_bf16bf16f32of32_row_major
 			_mm512_storeu_si512( pack_b_buffer_bf16bf16f32of32 + ( jc * KC_updated ) + ( ( kr + 1 ) * NR ), d0 );
 			_mm512_storeu_si512( pack_b_buffer_bf16bf16f32of32 + ( jc * KC_updated ) + ( ( kr + 1 ) * NR ) + 32, c0 );
 		}
+
 		// Handle k remainder.
 		if( k_partial_pieces > 0)
 		{

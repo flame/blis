@@ -235,7 +235,14 @@ void lpgemm_load_thread_attrs()
 	lpgemm_thread_attrs.tid_distr_nearly_seq = FALSE;
 	lpgemm_thread_attrs.tid_core_grp_load_high = FALSE;
 
-	lpgemm_detect_thread_topo();
+	/*
+	TODO: Disabling lpgemm_detect_thread_topo detection for now until for 
+		  further investigation.
+	Reason: libgomp is not honoring standard function omp_get_place_proc_ids
+	on virtual machines.
+	*/
+
+	// lpgemm_detect_thread_topo();
 }
 
 void lpgemm_init_thread_attrs()
