@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -61,18 +62,114 @@ bool bli_packm_init
 
 	// If the object is marked as being filled with zeros, then we can skip
 	// the packm operation entirely and alias.
-	if ( bli_obj_is_zeros( c ) )
-		return false;
+	if ( bli_obj_is_zeros( a ) )
+	{
+		bli_obj_alias_to( a, p );
+		return 0;
+	}
 
-	// Extract various fields from the control tree.
-	bszid_t bmult_id_m   = bli_cntl_packm_params_bmid_m( cntl );
-	bszid_t bmult_id_n   = bli_cntl_packm_params_bmid_n( cntl );
-	pack_t  schema       = bli_cntl_packm_params_pack_schema( cntl );
-	num_t   dt_tar       = bli_obj_target_dt( c );
-	num_t   dt_scalar    = bli_obj_scalar_dt( c );
-	dim_t   bmult_m_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_m, cntx );
-	dim_t   bmult_m_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_m, cntx );
-	dim_t   bmult_n_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_n, cntx );
+	// Prepare a few other variables based on properties of the control
+	// tree.
+
+	invdiag_t invert_diag;
+	packord_t pack_ord_if_up;
+	packord_t pack_ord_if_lo;
+
+	if ( does_invert_diag ) invert_diag = BLIS_INVERT_DIAG;
+	else                    invert_diag = BLIS_NO_INVERT_DIAG;
+
+	if ( rev_iter_if_upper ) pack_ord_if_up = BLIS_PACK_REV_IF_UPPER;
+	else                     pack_ord_if_up = BLIS_PACK_FWD_IF_UPPER;
+
+	if ( rev_iter_if_lower ) pack_ord_if_lo = BLIS_PACK_REV_IF_LOWER;
+	else                     pack_ord_if_lo = BLIS_PACK_FWD_IF_LOWER;
+
+	// Initialize object p for the final packed matrix.
+	size_needed
+	=
+	bli_packm_init_pack
+	(
+	  invert_diag,
+	  bli_cntl_family( cntl ),
+	  schema,
+	  pack_ord_if_up,
+	  pack_ord_if_lo,
+	  bmult_id_m,
+	  bmult_id_n,
+	  a,
+	  p,
+	  cntx
+	);
+
+	// Return the size needed for memory allocation of the packed buffer.
+	return size_needed;
+}
+
+
+siz_t bli_packm_init_pack
+     (
+       invdiag_t invert_diag,
+       opid_t    family,
+       pack_t    schema,
+       packord_t pack_ord_if_up,
+       packord_t pack_ord_if_lo,
+       bszid_t   bmult_id_m,
+       bszid_t   bmult_id_n,
+       obj_t*    a,
+       obj_t*    p,
+       cntx_t*   cntx
+     )
+{
+	bli_init_once();
+
+	num_t     dt_tar       = bli_obj_target_dt( a );
+	num_t     dt_scalar    = bli_obj_scalar_dt( a );
+	trans_t   transa       = bli_obj_onlytrans_status( a );
+	dim_t     m_a          = bli_obj_length( a );
+	dim_t     n_a          = bli_obj_width( a );
+
+	dim_t     bmult_m_def  = 0;
+	dim_t     bmult_m_pack = 0;
+	dim_t     bmult_n_def  = 0;
+	dim_t     bmult_n_pack = 0;
+
+	dim_t     m_p, n_p;
+	dim_t     m_p_pad, n_p_pad;
+	siz_t     size_p;
+	siz_t     elem_size_p;
+	inc_t     rs_p, cs_p;
+	inc_t     is_p;
+
+	if( family == BLIS_TRSM )
+	{
+		bmult_m_def  = bli_cntx_get_trsm_blksz_def_dt( dt_tar, bmult_id_m, cntx );
+		bmult_m_pack = bli_cntx_get_trsm_blksz_max_dt( dt_tar, bmult_id_m, cntx );
+		bmult_n_def  = bli_cntx_get_trsm_blksz_def_dt( dt_tar, bmult_id_n, cntx );
+		bmult_n_pack = bli_cntx_get_trsm_blksz_max_dt( dt_tar, bmult_id_n, cntx );
+
+		// bmult_m_def will be zero when trsm block sizes are not set, use global
+		// block sizes in this case
+		if( bmult_m_def == 0 )
+		{
+			bmult_m_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_m, cntx );
+			bmult_m_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_m, cntx );
+		}
+		if( bmult_n_def == 0 )
+		{
+			bmult_n_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_n, cntx );
+			bmult_n_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_n, cntx );
+		}
+	}
+	else
+	{
+		bmult_m_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_m, cntx );
+		bmult_m_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_m, cntx );
+		bmult_n_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_n, cntx );
+		bmult_n_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_n, cntx );
+	}
+
+	// We begin by copying the fields of A.
+	bli_obj_alias_to( a, p );
 
 	// Typecast the internal scalar value to the target datatype.
 	// Note that if the typecasting is needed, this must happen BEFORE we

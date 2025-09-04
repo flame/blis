@@ -4,7 +4,8 @@
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
-#  Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2014, The University of Texas at Austin
+#  Copyright (C) 2019 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,61 +39,67 @@
 THIS_CONFIG    := zen2
 #CONFIGS_INCL   += $(THIS_CONFIG)
 
-#
-# --- Determine the C compiler and related flags ---
-#
+# Include file containing common flags for all AMD architectures
+AMD_CONFIG_FILE := amd_config.mk
+AMD_CONFIG_PATH := $(BASE_SHARE_PATH)/config/zen
+-include $(AMD_CONFIG_PATH)/$(AMD_CONFIG_FILE)
 
-# NOTE: The build system will append these variables with various
-# general-purpose/configuration-agnostic flags in common.mk. You
-# may specify additional flags here as needed.
-CPPROCFLAGS    :=
-CMISCFLAGS     :=
-CPICFLAGS      := -fPIC
-CWARNFLAGS     :=
-
-ifneq ($(DEBUG_TYPE),off)
-CDBGFLAGS      := -g
-endif
-
-ifeq ($(DEBUG_TYPE),noopt)
-COPTFLAGS      := -O0
-else
-COPTFLAGS      := -O2 -fomit-frame-pointer
-endif
-
-# Flags specific to optimized and reference kernels.
-# NOTE: The -fomit-frame-pointer option is needed for some kernels because
-# they make explicit use of the rbp register.
-CKOPTFLAGS         := $(COPTFLAGS) -O3
-CROPTFLAGS         := $(CKOPTFLAGS)
-CKVECFLAGS         := -mavx2 -mfma -mfpmath=sse
-CRVECFLAGS         := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
 ifeq ($(CC_VENDOR),gcc)
-  ifeq ($(GCC_OT_6_1_0),yes)  # gcc versions older than 6.1.
-    CVECFLAGS_VER  := -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+  ifeq ($(shell test $(CC_MAJOR) -ge 9; echo $$?),0)
+    # gcc 9.0 or later
+    CKVECFLAGS += -march=znver2
+    CKLPOPTFLAGS += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse
   else
-  ifeq ($(GCC_OT_9_1_0),yes)  # gcc versions 6.1 or newer, but older than 9.1.
-    CVECFLAGS_VER  := -march=znver1 -mno-avx256-split-unaligned-store
-  else                        # gcc versions 9.1 or newer.
-    CVECFLAGS_VER  := -march=znver2
+    # If gcc is older than 9.1.0 but at least 6.1.0, then we can use -march=znver1
+    # as the fallback option.
+    CKVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
+    CRVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
   endif
-  endif
-else
+endif # gcc
+
 ifeq ($(CC_VENDOR),clang)
-  ifeq ($(CLANG_OT_9_0_0),yes)  # clang versions older than 9.0.
-    CVECFLAGS_VER  := -march=znver1
-  else                          # clang versions 9.0 or newer.
-    CVECFLAGS_VER  := -march=znver2
+  # AOCC clang has various formats for the version line
+
+  # AOCC.LLVM.2.0.0.B191.2019_07_19 clang version 8.0.0 (CLANG: Jenkins AOCC_2_0_0-Build#191) (based on LLVM AOCC.LLVM.2.0.0.B191.2019_07_19)
+  # AOCC.LLVM.2.1.0.B1030.2019_11_12 clang version 9.0.0 (CLANG: Build#1030) (based on LLVM AOCC.LLVM.2.1.0.B1030.2019_11_12)
+  # AMD clang version 10.0.0 (CLANG: AOCC_2.2.0-Build#93 2020_06_25) (based on LLVM Mirror.Version.10.0.0)
+  # AMD clang version 11.0.0 (CLANG: AOCC_2.3.0-Build#85 2020_11_10) (based on LLVM Mirror.Version.11.0.0)
+  # AMD clang version 12.0.0 (CLANG: AOCC_3.0.0-Build#2 2020_11_05) (based on LLVM Mirror.Version.12.0.0)
+  # AMD clang version 14.0.0 (CLANG: AOCC_4.0.0-Build#98 2022_06_15) (based on LLVM Mirror.Version.14.0.0)
+
+  # For our purpose we just want to know if it version 2x or 3x or 4x
+
+  # But also set these in case we are using upstream LLVM clang
+  VENDOR_STRING := $(strip $(shell ${CC_VENDOR} --version | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*'))
+  CC_MAJOR := $(shell (echo ${VENDOR_STRING} | cut -d. -f1))
+
+  ifeq ($(strip $(shell $(CC) -v |&head -1 |grep -c 'AOCC_4')),1)
+    # AOCC version 4x we will enable znver2
+    CKVECFLAGS += -march=znver2
+  else ifeq ($(strip $(shell $(CC) -v |&head -1 |grep -c 'AOCC_3')),1)
+    # AOCC version 3x we will enable znver2
+    CKVECFLAGS += -march=znver2
+  else ifeq ($(strip $(shell $(CC) -v |&head -1 |grep -c 'AOCC.LLVM.2\|AOCC_2')),1)
+    # AOCC version 2x we will enable znver2
+    CKVECFLAGS += -march=znver2
+  else ifeq ($(shell test $(CC_MAJOR) -ge 9; echo $$?),0)
+    # LLVM clang 9.0 or later
+    CKVECFLAGS += -march=znver2
+  else
+    CKVECFLAGS += -march=znver1
   endif
+endif # clang
+
+# Flags specific to reference kernels.
+CROPTFLAGS     := $(CKOPTFLAGS)
+CRVECFLAGS     := $(CKVECFLAGS)
 else
-ifeq ($(CC_VENDOR),aocc)
-  ifeq ($(AOCC_OT_2_0_0),yes)   # aocc versions older than 2.0.
-    CVECFLAGS_VER  := -march=znver1 -mllvm -disable-licm-vrp
-  else                          # aocc versions 2.0 or newer.
-    CVECFLAGS_VER  := -march=znver2
-  endif
+ifeq ($(CC_VENDOR),NVIDIA)
+  CKVECFLAGS       := -march=znver2 -fast
+  CRVECFLAGS       := $(CKVECFLAGS)
 else
-  $(error gcc, clang, or aocc is required for this configuration.)
+  $(error gcc, clang, aocc, or nvc is required for this configuration.)
+endif
 endif
 endif
 endif

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -45,9 +45,10 @@ void bli_gemm_blk_var1
              thrinfo_t* thread_par
      )
 {
-	obj_t ap, cp;
-	bli_obj_alias_to( a, &ap );
-	bli_obj_alias_to( c, &cp );
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5);
+	obj_t a1, c1;
+	dim_t my_start, my_end;
+	dim_t b_alg;
 
 	// Determine the direction in which to partition (forwards or backwards).
 	const dir_t direct = bli_l3_direct( &ap, b, &cp, cntl );
@@ -68,8 +69,8 @@ void bli_gemm_blk_var1
 	dim_t b_alg;
 	for ( dim_t i = my_start; i < my_end; i += b_alg )
 	{
-		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize( direct, i, my_end, &ap,
+		// Determine the current algorithmic blocksize for GEMM.
+		b_alg = bli_determine_blocksize( BLIS_GEMM, direct, i, my_end, a,
 		                                 bli_cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for A1 and C1.
@@ -92,5 +93,7 @@ void bli_gemm_blk_var1
 		  thread
 		);
 	}
+	
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5);
 }
 

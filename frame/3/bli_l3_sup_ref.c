@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019 - 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -45,6 +45,7 @@ err_t bli_gemmsup_ref
              rntm_t* rntm
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3);
 	// This function implements the default gemmsup handler. If you are a
 	// BLIS developer and wish to use a different gemmsup handler, please
 	// register a different function pointer in the context in your
@@ -87,6 +88,13 @@ err_t bli_gemmsup_ref
 	// return from the parallel/threaded region.
 	if ( stor_id == BLIS_XXX ) return BLIS_FAILURE;
 
+#ifdef AOCL_DYNAMIC
+	// If dynamic-threading is enabled, calculate optimum number
+	//  of threads.
+	//  rntm will be updated with optimum number of threads.
+	bli_nthreads_optimum(a, b, c, BLIS_GEMM, rntm );
+#endif
+
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop.
 	bli_rntm_factorize_sup
@@ -105,8 +113,7 @@ err_t bli_gemmsup_ref
 	//bli_rntm_set_pack_b( 0, rntm );
 #endif
 
-	return
-	bli_l3_sup_thread_decorator
+	err_t err = bli_l3_sup_thread_decorator
 	(
 	  bli_gemmsup_int,
 	  BLIS_GEMM, // operation family id
@@ -118,6 +125,9 @@ err_t bli_gemmsup_ref
 	  cntx,
 	  rntm
 	);
+
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
+        return err;
 }
 
 // -----------------------------------------------------------------------------
@@ -133,14 +143,16 @@ err_t bli_gemmtsup_ref
              rntm_t* rntm
      )
 {
-	// This function implements the default gemmtsup handler. If you are a
-	// BLIS developer and wish to use a different gemmtsup handler, please
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3);
+//	AOCL_DTL_LOG_GEMMT_INPUTS(AOCL_DTL_LEVEL_TRACE_3, alpha, a, b, beta, c);
+	// This function implements the default gemmsup handler. If you are a
+	// BLIS developer and wish to use a different gemmsup handler, please
 	// register a different function pointer in the context in your
 	// sub-configuration's bli_cntx_init_*() function.
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_gemmt_check( alpha, a, b, beta, c, cntx );
+		bli_gemm_check( alpha, a, b, beta, c, cntx );
 
 #if 0
 	// NOTE: This special case handling is done within the variants.
@@ -160,7 +172,6 @@ err_t bli_gemmtsup_ref
 		return BLIS_SUCCESS;
 	}
 #endif
-
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop.
 	bli_rntm_factorize_sup
@@ -171,8 +182,14 @@ err_t bli_gemmtsup_ref
 	  rntm
 	);
 
-	return
-	bli_l3_sup_thread_decorator
+#if 0
+	printf( "rntm.pack_a = %d\n", ( int )bli_rntm_pack_a( rntm ) );
+	printf( "rntm.pack_b = %d\n", ( int )bli_rntm_pack_b( rntm ) );
+
+	//bli_rntm_set_pack_a( 0, rntm );
+	//bli_rntm_set_pack_b( 0, rntm );
+#endif
+	err_t err = bli_l3_sup_thread_decorator
 	(
 	  bli_gemmtsup_int,
 	  BLIS_GEMMT, // operation family id
@@ -184,5 +201,8 @@ err_t bli_gemmtsup_ref
 	  cntx,
 	  rntm
 	);
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
+	return err;
 }
 

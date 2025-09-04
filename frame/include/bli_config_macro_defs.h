@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -191,6 +191,16 @@
   #define BLIS_ENABLE_BLAS
 #endif
 
+#ifdef BLIS_ENABLE_BLAS
+  #define IF_BLIS_ENABLE_BLAS(...) __VA_ARGS__
+  #define PASTE_LSAME PASTEF770(lsame)
+  #define PASTE_XERBLA PASTEF770(xerbla)
+#else
+  #define IF_BLIS_ENABLE_BLAS(...)
+  #define PASTE_LSAME lsame_blis_impl
+  #define PASTE_XERBLA xerbla_blis_impl
+#endif
+
 // The bit size of the integer type used to track values such as dimensions and
 // leading dimensions (ie: column strides) within the BLAS compatibility layer.
 // A value of 32 results in the compatibility layer using 32-bit signed integers
@@ -251,7 +261,7 @@
       #ifdef BLIS_IS_BUILDING_LIBRARY
         #define BLIS_EXPORT __declspec(dllexport)
       #else
-        #define BLIS_EXPORT __declspec(dllimport)
+        #define BLIS_EXPORT
       #endif
     #elif defined(__GNUC__) && __GNUC__ >= 4
       #define BLIS_EXPORT __attribute__ ((visibility ("default")))
@@ -264,22 +274,6 @@
 #define BLIS_EXPORT_BLIS  BLIS_EXPORT
 #define BLIS_EXPORT_BLAS  BLIS_EXPORT
 #define BLIS_EXPORT_ADDON BLIS_EXPORT
-
-
-// -- OVERRIDABLE (WEAK) SYMBOLS -----------------------------------------------
-
-// On Linux, functions called from a shared library can be overriden by the main
-// program simply by providing a new definition. However, macOS uses a "two-level
-// namespace" which causes calls to shared library functions to be tied to the
-// library and not overridable. As a workaround, certain symbols can be defined
-// as "weak" and are given lower preference during linking.
-#ifndef BLIS_OVERRIDABLE
-#if BLIS_OS_OSX
-#define BLIS_OVERRIDABLE __attribute__((weak))
-#else
-#define BLIS_OVERRIDABLE
-#endif
-#endif
 
 
 // -- STATIC INLINE FUNCTIONS --------------------------------------------------
@@ -297,5 +291,33 @@
 #endif
 
 
+#ifdef BLIS_OS_WINDOWS
+  #ifdef BLIS_IS_BUILDING_LIBRARY
+    #define BLIS_TLS_TYPE __declspec(thread)
+  #else
+    #define BLIS_TLS_TYPE
+  #endif
+#else
+  #define BLIS_TLS_TYPE __thread
 #endif
 
+#endif
+
+// -- CODE PATH ENABLEMENT --------------------------------------------------
+#ifdef BLIS_ENABLE_MNK1_MATRIX
+  #define IF_BLIS_ENABLE_MNK1_MATRIX(...) __VA_ARGS__
+#else
+  #define IF_BLIS_ENABLE_MNK1_MATRIX(...)
+#endif
+
+#ifdef BLIS_ENABLE_TINY_MATRIX
+  #define IF_BLIS_ENABLE_TINY_MATRIX(...) __VA_ARGS__
+#else
+  #define IF_BLIS_ENABLE_TINY_MATRIX(...)
+#endif
+
+#ifdef BLIS_ENABLE_SMALL_MATRIX
+  #define IF_BLIS_ENABLE_SMALL_MATRIX(...) __VA_ARGS__
+#else
+  #define IF_BLIS_ENABLE_SMALL_MATRIX(...)
+#endif

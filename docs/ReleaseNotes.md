@@ -159,7 +159,6 @@ Framework:
 - Changed default value of `BLIS_THREAD_RATIO_M` from 2 to 1, which leads to slightly different automatic thread factorizations.
 - Enable the 1m method only if the real domain microkernel is not a reference kernel. BLIS now forgoes use of 1m if both the real and complex domain kernels are reference implementations.
 - Relocated the general stride handling for `gemmsup`. This fixed an issue whereby `gemm` would fail to trigger to conventional code path for cases that use general stride even after `gemmsup` rejected the problem. (RuQing Xu)
-- Disabled AMD's small matrix handling entry points for `syrk` and `trsm` due to lack of testing on our side.
 - Fixed an incorrect function signature (and prototype) of `bli_?gemmt()`. (RuQing Xu)
 - Redefined `BLIS_NUM_ARCHS` to be part of the `arch_t` enum, which means it will be updated automatically when defining future subconfigs.
 - Minor code consolidation in all level-3 `_front()` functions.

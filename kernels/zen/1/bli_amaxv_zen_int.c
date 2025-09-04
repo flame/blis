@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2016 - 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2016 - 2025, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2018, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@
 
 #include "immintrin.h"
 #include "blis.h"
-
 
 /* Union data structure to access AVX registers
    One 256-bit AVX register holds 8 SP elements. */
@@ -97,8 +96,59 @@ typedef union
 	                           ) \
 	            );
 
-// -----------------------------------------------------------------------------
+/*
+	This macro takes a __m128 vector and a double pointer as inputs. It
+	stores the largest element in the __m128 in the address pointed by the
+	float pointer. In case of the vector having NaNs, it stores the non-NaN
+	element(unless all are NaNs, in which case it stores NaN).
 
+	Signature
+	----------
+
+	* 'max_res' - __m128
+	* 'max_val' - Double pointer
+*/
+#define _mm_vec_max_ps(max_res, max_val) \
+		bool first_nan = isnan(max_res[0]); \
+		bool second_nan = isnan(max_res[1]); \
+		bool third_nan = isnan(max_res[2]); \
+		bool fourth_nan = isnan(max_res[3]); \
+		float max_val_0, max_val_1; \
+		/* Acquiring the abs max from the first two elements */ \
+		/* In case both are NaNs or none of them is, we compare and
+		   store the greater element */ \
+		if(!(first_nan ^ second_nan)) \
+		{ \
+			max_val_0 = bli_max(max_res[0], max_res[1]); \
+		} \
+		/* If first element is NaN, store the second element */ \
+		else if(first_nan) max_val_0 = max_res[1]; \
+		/* If second element is NaN, store the first element */ \
+		else 			   max_val_0 = max_res[0]; \
+\
+		/* Acquiring the abs max from the last two elements */ \
+		/* In case both are NaNs or none of them is, we compare and
+		   store the greater element */ \
+		if(!(third_nan ^ fourth_nan)) \
+		{ \
+			max_val_1 = bli_max(max_res[2], max_res[3]); \
+		} \
+		/* If third element is NaN, store the fourth element */ \
+		else if(third_nan) max_val_1 = max_res[3]; \
+		/* If fourth element is NaN, store the third element */ \
+		else 			   max_val_1 = max_res[2]; \
+		/* Final conparision */ \
+		if(!(isnan(max_val_0) ^ isnan(max_val_1))) \
+		{ \
+			*max_val = bli_max(max_val_0, max_val_1); \
+		} \
+		/* If third element is NaN, store the fourth element */ \
+		else if(isnan(max_val_0)) *max_val = max_val_1; \
+		/* If fourth element is NaN, store the third element */ \
+		else 			   *max_val = max_val_0; \
+
+
+// -----------------------------------------------------------------------------
 void bli_samaxv_zen_int
      (
              dim_t   n,
@@ -107,28 +157,20 @@ void bli_samaxv_zen_int
        const cntx_t* cntx
      )
 {
-	const float* restrict x = x0;
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3)
+	float*  minus_one = PASTEMAC(s,m1);
+	dim_t*  zero_i    = PASTEMAC(i,0);
 
-	const float* restrict minus_one = PASTEMAC(s,m1);
-	const dim_t* restrict zero_i    = PASTEMAC(i,0);
-
-	float   chi1_r;
-	//float   chi1_i;
-	float   abs_chi1;
+	/* Declare the local variables for usage */
 	float   abs_chi1_max;
 	dim_t   i_max_l;
 	dim_t   i;
 
-	/* If the vector length is zero, return early. This directly emulates
-	   the behavior of netlib BLAS's i?amax() routines. */
-	if ( bli_zero_dim1( n ) )
-	{
-		PASTEMAC(i,copys)( *zero_i, *index );
-		return;
-	}
-
 	/* Initialize the index of the maximum absolute value to zero. */
 	PASTEMAC(i,copys)( *zero_i, i_max_l );
+
+	/* Initialize the index for the iterations. */
+	PASTEMAC(i,copys)( *zero_i, i );
 
 	/* Initialize the maximum absolute value search candidate with
 	   -1, which is guaranteed to be less than all values we will
@@ -139,25 +181,22 @@ void bli_samaxv_zen_int
 	// scalar code.
 	if ( incx != 1 || n < 8 )
 	{
-		for ( i = 0; i < n; ++i )
+		// Variable to hold the abs value of the current element
+		float   abs_chi1;
+		for ( ; i < n; ++i )
 		{
 			const float* restrict chi1 = x + (i  )*incx;
 
-			/* Get the real and imaginary components of chi1. */
-			chi1_r = *chi1;
-
-			/* Replace chi1_r and chi1_i with their absolute values. */
-			chi1_r = fabsf( chi1_r );
-
-			/* Add the real and imaginary absolute values together. */
-			abs_chi1 = chi1_r;
+			/* Replace chi1_r with the absolute values. */
+			abs_chi1 = fabsf( *chi1 );
 
 			/* If the absolute value of the current element exceeds that of
 			   the previous largest, save it and its index. If NaN is
 			   encountered, then treat it the same as if it were a valid
-			   value that was smaller than any previously seen. This
+			   value that was smaller than any previously seen. The comparision
+			   operation does this, since with NaN it always fails. This
 			   behavior mimics that of LAPACK's i?amax(). */
-			if ( abs_chi1_max < abs_chi1 || ( isnan( abs_chi1 ) && !isnan( abs_chi1_max ) ) )
+			if ( abs_chi1_max < abs_chi1 )
 			{
 				abs_chi1_max = abs_chi1;
 				i_max_l      = i;
@@ -166,356 +205,1010 @@ void bli_samaxv_zen_int
 	}
 	else
 	{
-		dim_t  n_iter, n_left;
-		dim_t  num_vec_elements = 8;
-		v8sf_t x_vec, max_vec, maxInx_vec, mask_vec;
-		v8sf_t idx_vec, inc_vec;
-		v8sf_t sign_mask;
+		dim_t const n_elem_per_reg = 8;
 
-		v4sf_t max_vec_lo, max_vec_hi, mask_vec_lo;
-		v4sf_t maxInx_vec_lo, maxInx_vec_hi;
+		__m256 x_vec[8], temp[4], max_array, sign_mask;
+		v4sf_t max_hi, max_lo, sign_mask_128;
 
-		n_iter = n / num_vec_elements;
-		n_left = n % num_vec_elements;
+		// Initializing a local pointer for iterating
+		float *temp_ptr = x;
 
-		idx_vec.v    = _mm256_set_ps( 7, 6, 5, 4, 3, 2, 1, 0 );
-		inc_vec.v    = _mm256_set1_ps( 8 );
-		max_vec.v    = _mm256_set1_ps( -1 );
-		maxInx_vec.v = _mm256_setzero_ps();
-		sign_mask.v  = _mm256_set1_ps( -0.f );
+		// Initializing variables to keep track of the
+		// absolute maximum
+		float abs_max_val = -1.0f, temp_max_val = -1.0f;
 
-		for ( i = 0; i < n_iter; ++i )
+		// Initializing the start and end of the search space
+		dim_t window_start = -1, window_end = -1;
+
+		// Initializing the mask to minus zero (-0.0)
+		sign_mask = _mm256_set1_ps(-0.f);
+		sign_mask_128.v = _mm_set1_ps(-0.f);
+
+		// Setting the temporary registers to 0.0
+		temp[0] = _mm256_setzero_ps();
+		temp[1] = _mm256_setzero_ps();
+		temp[2] = _mm256_setzero_ps();
+		temp[3] = _mm256_setzero_ps();
+
+		/*
+			The logic for this kernels can be broken down into two
+			phases :
+			- Finding the absolute maximum value and the search space
+			  for its first occurence.
+			- Finding the index of the first occurence of absolute maximum
+			  value.
+		*/
+		for (; (i + 63) < n; i += 64)
 		{
-			x_vec.v      = _mm256_loadu_ps( x );
+			// Loading the first 4 vectors
+			x_vec[0] = _mm256_loadu_ps(temp_ptr);
+			x_vec[1] = _mm256_loadu_ps(temp_ptr + n_elem_per_reg);
+			x_vec[2] = _mm256_loadu_ps(temp_ptr + 2 * n_elem_per_reg);
+			x_vec[3] = _mm256_loadu_ps(temp_ptr + 3 * n_elem_per_reg);
 
-			// Get the absolute value of the vector element.
-			x_vec.v      = _mm256_andnot_ps( sign_mask.v, x_vec.v );
+			// Obtaining the absolute values
+			x_vec[0] = _mm256_andnot_ps(sign_mask, x_vec[0]);
+			x_vec[1] = _mm256_andnot_ps(sign_mask, x_vec[1]);
+			x_vec[2] = _mm256_andnot_ps(sign_mask, x_vec[2]);
+			x_vec[3] = _mm256_andnot_ps(sign_mask, x_vec[3]);
 
-			mask_vec.v   = CMP256( s, x_vec.v, max_vec.v );
+			// Propagating the absolute maximums using temp.
+			// NOTE : NaNs as part of the load are not propagated
+			//        if they are the first operand, due to the nature
+			//		  of vmaxpd instruction.
+			temp[0] = _mm256_max_ps(x_vec[0], temp[0]);
+			temp[1] = _mm256_max_ps(x_vec[1], temp[1]);
+			temp[2] = _mm256_max_ps(x_vec[2], temp[2]);
+			temp[3] = _mm256_max_ps(x_vec[3], temp[3]);
 
-			max_vec.v    = _mm256_blendv_ps( max_vec.v, x_vec.v, mask_vec.v );
-			maxInx_vec.v = _mm256_blendv_ps( maxInx_vec.v, idx_vec.v, mask_vec.v );
+			// Loading the next 4 vectors
+			x_vec[4] = _mm256_loadu_ps(temp_ptr + 4 * n_elem_per_reg);
+			x_vec[5] = _mm256_loadu_ps(temp_ptr + 5 * n_elem_per_reg);
+			x_vec[6] = _mm256_loadu_ps(temp_ptr + 6 * n_elem_per_reg);
+			x_vec[7] = _mm256_loadu_ps(temp_ptr + 7 * n_elem_per_reg);
 
-			idx_vec.v += inc_vec.v;
-			x         += num_vec_elements;
-		}
+			// Obtaining the absolute values
+			x_vec[4] = _mm256_andnot_ps(sign_mask, x_vec[4]);
+			x_vec[5] = _mm256_andnot_ps(sign_mask, x_vec[5]);
+			x_vec[6] = _mm256_andnot_ps(sign_mask, x_vec[6]);
+			x_vec[7] = _mm256_andnot_ps(sign_mask, x_vec[7]);
 
-		max_vec_lo.v    = _mm256_extractf128_ps( max_vec.v, 0 );
-		max_vec_hi.v    = _mm256_extractf128_ps( max_vec.v, 1 );
-		maxInx_vec_lo.v = _mm256_extractf128_ps( maxInx_vec.v, 0 );
-		maxInx_vec_hi.v = _mm256_extractf128_ps( maxInx_vec.v, 1 );
+			// Propagating the absolute maximums using temp.
+			// NOTE : NaNs as part of the load are not propagated
+			//        if they are the first operand, due to the nature
+			//		  of vmaxpd instruction.
+			temp[0] = _mm256_max_ps(x_vec[4], temp[0]);
+			temp[1] = _mm256_max_ps(x_vec[5], temp[1]);
+			temp[2] = _mm256_max_ps(x_vec[6], temp[2]);
+			temp[3] = _mm256_max_ps(x_vec[7], temp[3]);
 
-		mask_vec_lo.v = CMP128( s, max_vec_hi.v, max_vec_lo.v, maxInx_vec_hi.v, maxInx_vec_lo.v );
+			// Obtaining the final abs max values from the 8 loads
+			temp[0] = _mm256_max_ps(temp[0], temp[1]);
+			temp[2] = _mm256_max_ps(temp[2], temp[3]);
 
-		max_vec_lo.v    = _mm_blendv_ps( max_vec_lo.v, max_vec_hi.v, mask_vec_lo.v );
-		maxInx_vec_lo.v = _mm_blendv_ps( maxInx_vec_lo.v, maxInx_vec_hi.v, mask_vec_lo.v );
+			max_array = _mm256_max_ps(temp[0], temp[2]);
 
-		max_vec_hi.v    = _mm_permute_ps( max_vec_lo.v, 14 );
-		maxInx_vec_hi.v = _mm_permute_ps( maxInx_vec_lo.v, 14 );
+			// Reduction to obtain the abs max as a scalar
+			max_hi.v = _mm256_extractf128_ps(max_array, 1);
+			max_lo.v = _mm256_extractf128_ps(max_array, 0);
 
-		mask_vec_lo.v = CMP128( s, max_vec_hi.v, max_vec_lo.v, maxInx_vec_hi.v, maxInx_vec_lo.v );
+			max_hi.v = _mm_max_ps(max_hi.v, max_lo.v);
 
-		max_vec_lo.v    = _mm_blendv_ps( max_vec_lo.v, max_vec_hi.v, mask_vec_lo.v );
-		maxInx_vec_lo.v = _mm_blendv_ps( maxInx_vec_lo.v, maxInx_vec_hi.v, mask_vec_lo.v );
+			_mm_vec_max_ps(max_hi.f, &temp_max_val);
 
-		max_vec_hi.v    = _mm_permute_ps( max_vec_lo.v, 1 );
-		maxInx_vec_hi.v = _mm_permute_ps( maxInx_vec_lo.v, 1 );
-
-		mask_vec_lo.v = CMP128( s, max_vec_hi.v, max_vec_lo.v, maxInx_vec_hi.v, maxInx_vec_lo.v );
-
-		max_vec_lo.v    = _mm_blendv_ps( max_vec_lo.v, max_vec_hi.v, mask_vec_lo.v );
-		maxInx_vec_lo.v = _mm_blendv_ps( maxInx_vec_lo.v, maxInx_vec_hi.v, mask_vec_lo.v );
-
-		abs_chi1_max = max_vec_lo.f[0];
-		i_max_l      = maxInx_vec_lo.f[0];
-
-		for ( i = n - n_left; i < n; i++ )
-		{
-			const float* restrict chi1 = x;
-
-			/* Get the real and imaginary components of chi1. */
-			chi1_r = *chi1;
-
-			/* Replace chi1_r and chi1_i with their absolute values. */
-			abs_chi1 = fabsf( chi1_r );
-
-			/* If the absolute value of the current element exceeds that of
-			   the previous largest, save it and its index. If NaN is
-			   encountered, then treat it the same as if it were a valid
-			   value that was smaller than any previously seen. This
-			   behavior mimics that of LAPACK's i?amax(). */
-			if ( abs_chi1_max < abs_chi1 || ( isnan( abs_chi1 ) && !isnan( abs_chi1_max ) ) )
+			// Updating the search space if the current maximum is
+			// greater than the previous maximum
+			if (abs_max_val < temp_max_val)
 			{
-				abs_chi1_max = abs_chi1;
-				i_max_l      = i;
+				window_start = i;
+				window_end = window_start + (8 * n_elem_per_reg);
+
+				abs_max_val = temp_max_val;
 			}
 
-			x += 1;
+			// Increment the pointer for the next iteration
+			temp_ptr += 8 * n_elem_per_reg;
+		}
+
+		for (; (i + 31) < n; i += 32)
+		{
+			// Loading the first 4 vectors
+			x_vec[0] = _mm256_loadu_ps(temp_ptr);
+			x_vec[1] = _mm256_loadu_ps(temp_ptr + n_elem_per_reg);
+			x_vec[2] = _mm256_loadu_ps(temp_ptr + 2 * n_elem_per_reg);
+			x_vec[3] = _mm256_loadu_ps(temp_ptr + 3 * n_elem_per_reg);
+
+			// Obtaining the absolute values
+			x_vec[0] = _mm256_andnot_ps(sign_mask, x_vec[0]);
+			x_vec[1] = _mm256_andnot_ps(sign_mask, x_vec[1]);
+			x_vec[2] = _mm256_andnot_ps(sign_mask, x_vec[2]);
+			x_vec[3] = _mm256_andnot_ps(sign_mask, x_vec[3]);
+
+			// Propagating the absolute maximums using temp.
+			// NOTE : NaNs as part of the load are not propagated
+			//        if they are the first operand, due to the nature
+			//		  of vmaxpd instruction.
+			temp[0] = _mm256_max_ps(x_vec[0], temp[0]);
+			temp[1] = _mm256_max_ps(x_vec[1], temp[1]);
+			temp[0] = _mm256_max_ps(x_vec[2], temp[0]);
+			temp[1] = _mm256_max_ps(x_vec[3], temp[1]);
+
+			// Obtaining the final abs max values from the 4 loads
+			max_array = _mm256_max_ps(temp[0], temp[1]);
+
+			// Reduction to obtain the abs max as a scalar
+			max_hi.v = _mm256_extractf128_ps(max_array, 1);
+			max_lo.v = _mm256_extractf128_ps(max_array, 0);
+
+			max_hi.v = _mm_max_ps(max_hi.v, max_lo.v);
+
+			_mm_vec_max_ps(max_hi.f, &temp_max_val);
+
+			// Updating the search space if the current maximum is
+			// greater than the previous maximum
+			if (abs_max_val < temp_max_val)
+			{
+				window_start = i;
+				window_end = window_start + (4 * n_elem_per_reg);
+
+				abs_max_val = temp_max_val;
+			}
+
+			// Increment the pointer for the next iteration
+			temp_ptr += 4 * n_elem_per_reg;
+		}
+
+		for (; (i + 15) < n; i += 16)
+		{
+			// Loading the first 4 vectors
+			x_vec[0] = _mm256_loadu_ps(temp_ptr);
+			x_vec[1] = _mm256_loadu_ps(temp_ptr + n_elem_per_reg);
+
+			// Obtaining the absolute values
+			x_vec[0] = _mm256_andnot_ps(sign_mask, x_vec[0]);
+			x_vec[1] = _mm256_andnot_ps(sign_mask, x_vec[1]);
+
+			// Propagating the absolute maximums using temp.
+			// NOTE : NaNs as part of the load are not propagated
+			//        if they are the first operand, due to the nature
+			//		  of vmaxpd instruction.
+			temp[0] = _mm256_max_ps(x_vec[0], temp[0]);
+			temp[1] = _mm256_max_ps(x_vec[1], temp[1]);
+
+			// Obtaining the final abs max values from the 4 loads
+			max_array = _mm256_max_ps(temp[0], temp[1]);
+
+			// Reduction to obtain the abs max as a scalar
+			max_hi.v = _mm256_extractf128_ps(max_array, 1);
+			max_lo.v = _mm256_extractf128_ps(max_array, 0);
+
+			max_hi.v = _mm_max_ps(max_hi.v, max_lo.v);
+
+			_mm_vec_max_ps(max_hi.f, &temp_max_val);
+
+			// Updating the search space if the current maximum is
+			// greater than the previous maximum
+			if (abs_max_val < temp_max_val)
+			{
+				window_start = i;
+				window_end = window_start + (2 * n_elem_per_reg);
+
+				abs_max_val = temp_max_val;
+			}
+
+			// Increment the pointer for the next iteration
+			temp_ptr += 2 * n_elem_per_reg;
+		}
+
+		for (; (i + 7) < n; i += 8)
+		{
+			// Loading the vector
+			x_vec[0] = _mm256_loadu_ps(temp_ptr);
+
+			// Obtaining the absolute values
+			x_vec[0] = _mm256_andnot_ps(sign_mask, x_vec[0]);
+
+			// Propagating the absolute maximums using temp.
+			// NOTE : NaNs as part of the load are not propagated
+			//        if they are the first operand, due to the nature
+			//		  of vmaxpd instruction.
+			max_array = _mm256_max_ps(x_vec[0], temp[0]);
+
+			max_hi.v = _mm256_extractf128_ps(max_array, 1);
+			max_lo.v = _mm256_extractf128_ps(max_array, 0);
+
+			// Reduction to obtain the abs max as a scalar
+			max_hi.v = _mm_max_ps(max_hi.v, max_lo.v);
+
+			_mm_vec_max_ps(max_hi.f, &temp_max_val);
+
+			// Updating the search space if the current maximum is
+			// greater than the previous maximum
+			if (abs_max_val < temp_max_val)
+			{
+				window_start = i;
+				window_end = window_start + n_elem_per_reg;
+
+				abs_max_val = temp_max_val;
+			}
+
+			// Increment the pointer for the next iteration
+			temp_ptr += n_elem_per_reg;
+		}
+
+		for (; (i + 3) < n; i += 4)
+		{
+			// Loading the 4 elements
+			max_hi.v = _mm_loadu_ps(temp_ptr);
+			max_hi.v = _mm_andnot_ps(sign_mask_128.v, max_hi.v);
+
+			// Finding the maximum without NaN propagation
+			_mm_vec_max_ps(max_hi.f, &temp_max_val);
+
+			// Updating the search space if the current maximum is
+			// greater than the previous maximum
+			if (abs_max_val < temp_max_val)
+			{
+				window_start = i;
+				window_end = window_start + 4;
+
+				abs_max_val = temp_max_val;
+			}
+
+			// Increment the pointer for the next iteration
+			temp_ptr += 4;
+		}
+
+		for (; i < n; ++i)
+		{
+			temp_max_val = fabsf(*temp_ptr);
+
+			if (temp_max_val > abs_max_val)
+			{
+				abs_max_val = temp_max_val;
+				window_end = i;
+				window_start = i;
+			}
+
+			temp_ptr += incx;
+		}
+
+		// Setting the variables for finding the first occurence
+		// of abs max value(max search space length is 64)
+		temp_ptr = x + window_start;
+		i_max_l = window_start;
+
+		// Searching for the first occurence of the element
+		while( i_max_l < window_end )
+		{
+			float value = fabsf(*temp_ptr);
+
+			if ( value == abs_max_val )
+				break;
+
+			i_max_l += 1;
+			temp_ptr += 1;
 		}
 	}
 
 	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
 	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions (which may occur
-	// later, especially if BLIS is compiled with -mfpmath=sse).
+	// transitioning from AVX to SSE instructions (which may occur later,
+	// especially if BLIS is compiled with -mfpmath=sse).
 	_mm256_zeroupper();
 
 	/* Store final index to output variable. */
-	*index = i_max_l;
+	*i_max = i_max_l;
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
 }
 
 // -----------------------------------------------------------------------------
 
-void bli_damaxv_zen_int
-     (
-             dim_t   n,
-       const void*   x0, inc_t incx,
-             dim_t*  index,
-       const cntx_t* cntx
-     )
+
+/*
+	This macro takes a __m128d vector and a double pointer as inputs. It
+	stores the largest element in the __m128d in the address pointed by the
+	double pointer. In case of the vector having NaNs, it stores the non-NaN
+	element(unless both are NaNs, in which case it stores NaN).
+
+	Signature
+	----------
+
+	* 'max_res' - __m128d
+	* 'max_val' - Double pointer
+*/
+#define _mm_vec_max_pd(max_res, max_val) \
+		/* Checking if first and second elements are NaNs */ \
+		bool first_nan = isnan(max_res[0]); \
+		bool second_nan = isnan(max_res[1]); \
+		/* In case both are NaNs or none of them is, we compare and
+		   store the greater element */ \
+		if(!(first_nan ^ second_nan)) \
+		{ \
+			*max_val = bli_max(max_res[0], max_res[1]);; \
+		} \
+		/* If first element is NaN, store the second element */ \
+		else if(first_nan) *max_val = max_res[1]; \
+		/* If second element is NaN, store the first element */ \
+		else 			   *max_val = max_res[0];
+
+/*
+	Functionality
+	--------------
+
+	This function finds the first occurence of the absolute largest element in a double
+	array and the range (start and end index) in which that element can be found.
+
+	Function signature
+	-------------------
+
+	This function takes a void pointer as input (internally casted to a double pointer)
+	which points to an array of type double, the correspending array's stride and length.
+	It uses the function parameters to return the output.
+
+	* 'x' - Void pointer pointing to an array of type double
+	* 'incx' - Stride to point to the next element in the array
+	* 'n' - Length of the array passed
+	* 'max_num' - Double pointer to the memory of the absolute largest element
+	* 'start_index', 'end_index' - Range in which the largest element can be found
+
+	The function has been made static(BLIS_INLINE) to restrict its scope.
+
+	Exception
+	----------
+
+	1. When the length of the array or the increment is zero set the absolute maximum, start
+	   index and end index to -1.
+*/
+BLIS_INLINE void bli_vec_absmax_double
+(
+	const void *x, dim_t incx, dim_t n,
+	double *abs_max_num,
+	dim_t *start_index, dim_t *end_index
+)
 {
-	const double* restrict x = x0;
+	// Local variables/pointers to hold the relevant info
+	double *temp_ptr = (double *)x;
+	double temp_max_val, curr_max_val = -1;
 
-	const double* restrict minus_one = PASTEMAC(d,m1);
-	const dim_t*  restrict zero_i    = PASTEMAC(i,0);
+	dim_t window_start, window_end, i = 0;
+	window_start = window_end = 0;
 
-	double  chi1_r;
-	//double  chi1_i;
-	double  abs_chi1;
-	double  abs_chi1_max;
-	dim_t   i_max_l;
-	dim_t   i;
-
-	/* If the vector length is zero, return early. This directly emulates
-	   the behavior of netlib BLAS's i?amax() routines. */
-	if ( bli_zero_dim1( n ) )
+	/*
+		When incx == 1 and n >= 2 the compute can be
+		vectorized using AVX-2 or SSE instructions
+	*/
+	if (incx == 1 && n >= 2)
 	{
-		PASTEMAC(i,copys)( *zero_i, *index );
+		dim_t const n_elem_per_reg = 4;
+
+		__m256d x_vec[8], temp[4], max_array, sign_mask;
+		v2dd_t max_hi, max_lo, sign_mask_128;
+
+		// Initializing the mask to minus zero (-0.0)
+		sign_mask = _mm256_set1_pd(-0.f);
+		sign_mask_128.v = _mm_set1_pd(-0.f);
+
+		// Setting the temporary registers to 0.0
+		temp[0] = _mm256_setzero_pd();
+		temp[1] = _mm256_setzero_pd();
+		temp[2] = _mm256_setzero_pd();
+		temp[3] = _mm256_setzero_pd();
+
+		for (i = 0; (i + 47) < n; i += 48)
+		{
+			// Loading the first 4 vectors
+			x_vec[0] = _mm256_loadu_pd(temp_ptr);
+			x_vec[1] = _mm256_loadu_pd(temp_ptr + n_elem_per_reg);
+			x_vec[2] = _mm256_loadu_pd(temp_ptr + 2 * n_elem_per_reg);
+			x_vec[3] = _mm256_loadu_pd(temp_ptr + 3 * n_elem_per_reg);
+
+			// Obtaining the absolute values
+			x_vec[0] = _mm256_andnot_pd(sign_mask, x_vec[0]);
+			x_vec[1] = _mm256_andnot_pd(sign_mask, x_vec[1]);
+			x_vec[2] = _mm256_andnot_pd(sign_mask, x_vec[2]);
+			x_vec[3] = _mm256_andnot_pd(sign_mask, x_vec[3]);
+
+			// Propagating the absolute maximums using temp.
+			// NOTE : NaNs as part of the load are not propagated
+			//        if they are the first operand, due to the nature
+			//		  of vmaxpd instruction.
+			temp[0] = _mm256_max_pd(x_vec[0], temp[0]);
+			temp[1] = _mm256_max_pd(x_vec[1], temp[1]);
+			temp[2] = _mm256_max_pd(x_vec[2], temp[2]);
+			temp[3] = _mm256_max_pd(x_vec[3], temp[3]);
+
+			// Loading the next 4 vectors
+			x_vec[4] = _mm256_loadu_pd(temp_ptr + 4 * n_elem_per_reg);
+			x_vec[5] = _mm256_loadu_pd(temp_ptr + 5 * n_elem_per_reg);
+			x_vec[6] = _mm256_loadu_pd(temp_ptr + 6 * n_elem_per_reg);
+			x_vec[7] = _mm256_loadu_pd(temp_ptr + 7 * n_elem_per_reg);
+
+			// Obtaining the absolute values
+			x_vec[4] = _mm256_andnot_pd(sign_mask, x_vec[4]);
+			x_vec[5] = _mm256_andnot_pd(sign_mask, x_vec[5]);
+			x_vec[6] = _mm256_andnot_pd(sign_mask, x_vec[6]);
+			x_vec[7] = _mm256_andnot_pd(sign_mask, x_vec[7]);
+
+			// Propagating the absolute maximums using temp.
+			// NOTE : NaNs as part of the load are not propagated
+			//        if they are the first operand, due to the nature
+			//		  of vmaxpd instruction.
+			temp[0] = _mm256_max_pd(x_vec[4], temp[0]);
+			temp[1] = _mm256_max_pd(x_vec[5], temp[1]);
+			temp[2] = _mm256_max_pd(x_vec[6], temp[2]);
+			temp[3] = _mm256_max_pd(x_vec[7], temp[3]);
+
+			// Loading the last 4 vectors
+			x_vec[0] = _mm256_loadu_pd(temp_ptr + 8 * n_elem_per_reg);
+			x_vec[1] = _mm256_loadu_pd(temp_ptr + 9 * n_elem_per_reg);
+			x_vec[2] = _mm256_loadu_pd(temp_ptr + 10 * n_elem_per_reg);
+			x_vec[3] = _mm256_loadu_pd(temp_ptr + 11 * n_elem_per_reg);
+
+			// Obtaining the absolute values
+			x_vec[0] = _mm256_andnot_pd(sign_mask, x_vec[0]);
+			x_vec[1] = _mm256_andnot_pd(sign_mask, x_vec[1]);
+			x_vec[2] = _mm256_andnot_pd(sign_mask, x_vec[2]);
+			x_vec[3] = _mm256_andnot_pd(sign_mask, x_vec[3]);
+
+			// Propagating the absolute maximums using temp.
+			// NOTE : NaNs as part of the load are not propagated
+			//        if they are the first operand, due to the nature
+			//		  of vmaxpd instruction.
+			temp[0] = _mm256_max_pd(x_vec[0], temp[0]);
+			temp[1] = _mm256_max_pd(x_vec[1], temp[1]);
+			temp[2] = _mm256_max_pd(x_vec[2], temp[2]);
+			temp[3] = _mm256_max_pd(x_vec[3], temp[3]);
+
+			// Obtaining the final abs max values from the 8 loads
+			temp[0] = _mm256_max_pd(temp[0], temp[1]);
+			temp[2] = _mm256_max_pd(temp[2], temp[3]);
+
+			max_array = _mm256_max_pd(temp[0], temp[2]);
+
+			// Reduction to obtain the abs max as a scalar
+			max_hi.v = _mm256_extractf128_pd(max_array, 1);
+			max_lo.v = _mm256_extractf128_pd(max_array, 0);
+
+			max_hi.v = _mm_max_pd(max_hi.v, max_lo.v);
+
+			_mm_vec_max_pd(max_hi.d, &temp_max_val);
+
+			// Updating the search space if the current maximum is
+			// greater than the previous maximum
+			if (curr_max_val < temp_max_val)
+			{
+				window_start = i;
+				window_end = window_start + (12 * n_elem_per_reg);
+
+				curr_max_val = temp_max_val;
+			}
+
+			// Increment the pointer for the next iteration
+			temp_ptr += 12 * n_elem_per_reg;
+		}
+
+		for (; (i + 31) < n; i += 32)
+		{
+			// Loading the first 4 vectors
+			x_vec[0] = _mm256_loadu_pd(temp_ptr);
+			x_vec[1] = _mm256_loadu_pd(temp_ptr + n_elem_per_reg);
+			x_vec[2] = _mm256_loadu_pd(temp_ptr + 2 * n_elem_per_reg);
+			x_vec[3] = _mm256_loadu_pd(temp_ptr + 3 * n_elem_per_reg);
+
+			// Obtaining the absolute values
+			x_vec[0] = _mm256_andnot_pd(sign_mask, x_vec[0]);
+			x_vec[1] = _mm256_andnot_pd(sign_mask, x_vec[1]);
+			x_vec[2] = _mm256_andnot_pd(sign_mask, x_vec[2]);
+			x_vec[3] = _mm256_andnot_pd(sign_mask, x_vec[3]);
+
+			// Propagating the absolute maximums using temp.
+			// NOTE : NaNs as part of the load are not propagated
+			//        if they are the first operand, due to the nature
+			//		  of vmaxpd instruction.
+			temp[0] = _mm256_max_pd(x_vec[0], temp[0]);
+			temp[1] = _mm256_max_pd(x_vec[1], temp[1]);
+			temp[2] = _mm256_max_pd(x_vec[2], temp[2]);
+			temp[3] = _mm256_max_pd(x_vec[3], temp[3]);
+
+			// Loading the next 4 vectors
+			x_vec[4] = _mm256_loadu_pd(temp_ptr + 4 * n_elem_per_reg);
+			x_vec[5] = _mm256_loadu_pd(temp_ptr + 5 * n_elem_per_reg);
+			x_vec[6] = _mm256_loadu_pd(temp_ptr + 6 * n_elem_per_reg);
+			x_vec[7] = _mm256_loadu_pd(temp_ptr + 7 * n_elem_per_reg);
+
+			// Obtaining the absolute values
+			x_vec[4] = _mm256_andnot_pd(sign_mask, x_vec[4]);
+			x_vec[5] = _mm256_andnot_pd(sign_mask, x_vec[5]);
+			x_vec[6] = _mm256_andnot_pd(sign_mask, x_vec[6]);
+			x_vec[7] = _mm256_andnot_pd(sign_mask, x_vec[7]);
+
+			// Propagating the absolute maximums using temp.
+			// NOTE : NaNs as part of the load are not propagated
+			//        if they are the first operand, due to the nature
+			//		  of vmaxpd instruction.
+			temp[0] = _mm256_max_pd(x_vec[4], temp[0]);
+			temp[1] = _mm256_max_pd(x_vec[5], temp[1]);
+			temp[2] = _mm256_max_pd(x_vec[6], temp[2]);
+			temp[3] = _mm256_max_pd(x_vec[7], temp[3]);
+
+			// Obtaining the final abs max values from the 8 loads
+			temp[0] = _mm256_max_pd(temp[0], temp[1]);
+			temp[2] = _mm256_max_pd(temp[2], temp[3]);
+
+			max_array = _mm256_max_pd(temp[0], temp[2]);
+
+			// Reduction to obtain the abs max as a scalar
+			max_hi.v = _mm256_extractf128_pd(max_array, 1);
+			max_lo.v = _mm256_extractf128_pd(max_array, 0);
+
+			max_hi.v = _mm_max_pd(max_hi.v, max_lo.v);
+
+			_mm_vec_max_pd(max_hi.d, &temp_max_val);
+
+			// Updating the search space if the current maximum is
+			// greater than the previous maximum
+			if (curr_max_val < temp_max_val)
+			{
+				window_start = i;
+				window_end = window_start + (8 * n_elem_per_reg);
+
+				curr_max_val = temp_max_val;
+			}
+
+			// Increment the pointer for the next iteration
+			temp_ptr += 8 * n_elem_per_reg;
+		}
+
+		for (; (i + 15) < n; i += 16)
+		{
+			// Loading the first 4 vectors
+			x_vec[0] = _mm256_loadu_pd(temp_ptr);
+			x_vec[1] = _mm256_loadu_pd(temp_ptr + n_elem_per_reg);
+			x_vec[2] = _mm256_loadu_pd(temp_ptr + 2 * n_elem_per_reg);
+			x_vec[3] = _mm256_loadu_pd(temp_ptr + 3 * n_elem_per_reg);
+
+			// Obtaining the absolute values
+			x_vec[0] = _mm256_andnot_pd(sign_mask, x_vec[0]);
+			x_vec[1] = _mm256_andnot_pd(sign_mask, x_vec[1]);
+			x_vec[2] = _mm256_andnot_pd(sign_mask, x_vec[2]);
+			x_vec[3] = _mm256_andnot_pd(sign_mask, x_vec[3]);
+
+			// Propagating the absolute maximums using temp.
+			// NOTE : NaNs as part of the load are not propagated
+			//        if they are the first operand, due to the nature
+			//		  of vmaxpd instruction.
+			temp[0] = _mm256_max_pd(x_vec[0], temp[0]);
+			temp[1] = _mm256_max_pd(x_vec[1], temp[1]);
+			temp[0] = _mm256_max_pd(x_vec[2], temp[0]);
+			temp[1] = _mm256_max_pd(x_vec[3], temp[1]);
+
+			// Obtaining the final abs max values from the 4 loads
+			max_array = _mm256_max_pd(temp[0], temp[1]);
+
+			// Reduction to obtain the abs max as a scalar
+			max_hi.v = _mm256_extractf128_pd(max_array, 1);
+			max_lo.v = _mm256_extractf128_pd(max_array, 0);
+
+			max_hi.v = _mm_max_pd(max_hi.v, max_lo.v);
+
+			_mm_vec_max_pd(max_hi.d, &temp_max_val);
+
+			// Updating the search space if the current maximum is
+			// greater than the previous maximum
+			if (curr_max_val < temp_max_val)
+			{
+				window_start = i;
+				window_end = window_start + (4 * n_elem_per_reg);
+
+				curr_max_val = temp_max_val;
+			}
+
+			// Increment the pointer for the next iteration
+			temp_ptr += 4 * n_elem_per_reg;
+		}
+
+		for (; (i + 7) < n; i += 8)
+		{
+			// Loading the first 2 vectors
+			x_vec[0] = _mm256_loadu_pd(temp_ptr);
+			x_vec[1] = _mm256_loadu_pd(temp_ptr + n_elem_per_reg);
+
+			// Obtaining the absolute values
+			x_vec[0] = _mm256_andnot_pd(sign_mask, x_vec[0]);
+			x_vec[1] = _mm256_andnot_pd(sign_mask, x_vec[1]);
+
+			// Propagating the absolute maximums using temp.
+			// NOTE : NaNs as part of the load are not propagated
+			//        if they are the first operand, due to the nature
+			//		  of vmaxpd instruction.
+			temp[0] = _mm256_max_pd(x_vec[0], temp[0]);
+			max_array = _mm256_max_pd(x_vec[1], temp[0]);
+
+			// Reduction to obtain the abs max as a scalar
+			max_hi.v = _mm256_extractf128_pd(max_array, 1);
+			max_lo.v = _mm256_extractf128_pd(max_array, 0);
+
+			max_hi.v = _mm_max_pd(max_hi.v, max_lo.v);
+
+			_mm_vec_max_pd(max_hi.d, &temp_max_val);
+
+			// Updating the search space if the current maximum is
+			// greater than the previous maximum
+			if (curr_max_val < temp_max_val)
+			{
+				window_start = i;
+				window_end = window_start + (2 * n_elem_per_reg);
+
+				curr_max_val = temp_max_val;
+			}
+
+			// Increment the pointer for the next iteration
+			temp_ptr += 2 * n_elem_per_reg;
+		}
+
+		for (; (i + 3) < n; i += 4)
+		{
+			// Loading the vector
+			x_vec[0] = _mm256_loadu_pd(temp_ptr);
+
+			// Obtaining the absolute values
+			x_vec[0] = _mm256_andnot_pd(sign_mask, x_vec[0]);
+
+			// Propagating the absolute maximums using temp.
+			// NOTE : NaNs as part of the load are not propagated
+			//        if they are the first operand, due to the nature
+			//		  of vmaxpd instruction.
+			max_array = _mm256_max_pd(x_vec[0], temp[0]);
+
+			max_hi.v = _mm256_extractf128_pd(max_array, 1);
+			max_lo.v = _mm256_extractf128_pd(max_array, 0);
+
+			// Reduction to obtain the abs max as a scalar
+			max_hi.v = _mm_max_pd(max_hi.v, max_lo.v);
+
+			_mm_vec_max_pd(max_hi.d, &temp_max_val);
+
+			// Updating the search space if the current maximum is
+			// greater than the previous maximum
+			if (curr_max_val < temp_max_val)
+			{
+				window_start = i;
+				window_end = window_start + n_elem_per_reg;
+
+				curr_max_val = temp_max_val;
+			}
+
+			// Increment the pointer for the next iteration
+			temp_ptr += n_elem_per_reg;
+		}
+
+		for (; (i + 1) < n; i += 2)
+		{
+			// Loading the 2 elements
+			max_hi.v = _mm_loadu_pd(temp_ptr);
+			max_hi.v = _mm_andnot_pd(sign_mask_128.v, max_hi.v);
+
+			// Finding the maximum without NaN propagation
+			_mm_vec_max_pd(max_hi.d, &temp_max_val);
+
+			// Updating the search space if the current maximum is
+			// greater than the previous maximum
+			if (curr_max_val < temp_max_val)
+			{
+				window_start = i;
+				window_end = window_start + 2;
+
+				curr_max_val = temp_max_val;
+			}
+
+			// Increment the pointer for the next iteration
+			temp_ptr += 2;
+		}
+	}
+
+	/*
+		This loops performs the compute in two cases:
+
+		1. The complete compute when incx != 1
+		2. It process the last element when 'n' is not a
+		   multiple of 2.
+	*/
+	for (; i < n; ++i)
+	{
+		temp_max_val = fabs(*temp_ptr);
+
+		if (temp_max_val > curr_max_val)
+		{
+			curr_max_val = temp_max_val;
+			window_end = i;
+			window_start = i;
+		}
+
+		temp_ptr += incx;
+	}
+
+	/*
+		Store the index range  in which the largest element
+		can be found in the address passed
+	*/
+	*start_index = window_start;
+	*end_index = window_end;
+
+	// Store the value of the largest element in the address passed
+	*abs_max_num = curr_max_val;
+}
+
+
+/*
+	Functionality
+	-------------
+
+	This function locates the index at which a given absolute value of an element
+	first occurs.
+
+	Function Signature
+	-------------------
+
+	This function takes a void pointer as input (internally casted to a double pointer)
+	which points to an array of type double, the correspending array's stride and length.
+	It uses the function parameters to return the output.
+
+	* 'x' - Void pointer pointing to an array of type double
+	* 'incx' - Stride to point to the next element in the array
+	* 'n' - Length of the array passed
+	* 'element' - Double pointer to the memory of the element to be searched
+	* 'index' - Range in which the largest element can be found
+
+	The function has been made static(BLIS_INLINE) to restrict its scope.
+
+	Exception
+	----------
+
+	1. When the length of the array or the increment is zero set the index to -1.
+*/
+BLIS_INLINE void bli_vec_search_double
+(
+    const void* x, dim_t incx,
+    dim_t n,
+    double* element,
+    dim_t* index
+)
+{
+	/*
+		When the length of the array or the
+		increment is zero set the index to -1.
+	*/
+	if (bli_zero_dim1(n) || bli_zero_dim1(incx))
+	{
+		*index = -1;
+
 		return;
 	}
 
-	/* Initialize the index of the maximum absolute value to zero. */ \
-	PASTEMAC(i,copys)( *zero_i, i_max_l );
+	double *temp_ptr = (double *)x;
 
-	/* Initialize the maximum absolute value search candidate with
-	   -1, which is guaranteed to be less than all values we will
-	   compute. */
-	PASTEMAC(d,copys)( *minus_one, abs_chi1_max );
+	dim_t i = 0;
 
-	// For non-unit strides, or very small vector lengths, compute with
-	// scalar code.
-	if ( incx != 1 || n < 4 )
+	/*
+		When incx == 1 and n >= 2 the compute can be
+		vectorized using AVX-2 or SSE instructions.
+
+		This vectorization does not reduce the total
+		number of comparisons performed but vectorizes the
+		calculation of the absolute values.
+	*/
+	if (incx == 1 && n >= 2)
 	{
-		for ( i = 0; i < n; ++i )
+		const dim_t n_elem_per_reg = 4;
+
+		__m256d x_vec, max_reg, mask_gen;
+
+		// Initializing the mask to minus zero (-0.0)
+		__m256d sign_mask = _mm256_set1_pd(-0.f);
+
+		/*
+			Set the register to the absolute
+			value of the element passed
+		*/
+		max_reg = _mm256_set1_pd(fabs(*element));
+
+		for (i = 0; (i + 3)< n; i += n_elem_per_reg)
 		{
-			const double* restrict chi1 = x + (i  )*incx;
+			// Load the array elements into the register
+			x_vec = _mm256_loadu_pd(temp_ptr);
 
-			/* Get the real and imaginary components of chi1. */
-			chi1_r = *chi1;
+			// Calculate the absolute values of the elements
+			x_vec = _mm256_andnot_pd(sign_mask, x_vec);
 
-			/* Replace chi1_r and chi1_i with their absolute values. */
-			chi1_r = fabs( chi1_r );
+			/*
+				Check for equality with the absolute value
+				of the element to be searched for
+			*/
+			mask_gen = _mm256_cmp_pd(x_vec, max_reg, _CMP_EQ_OQ);
 
-			/* Add the real and imaginary absolute values together. */
-			abs_chi1 = chi1_r;
+			/*
+				Check if the element exists in the loaded vector
+				using the mask generated.
 
-			/* If the absolute value of the current element exceeds that of
-			   the previous largest, save it and its index. If NaN is
-			   encountered, then treat it the same as if it were a valid
-			   value that was smaller than any previously seen. This
-			   behavior mimics that of LAPACK's i?amax(). */
-			if ( abs_chi1_max < abs_chi1 || ( isnan( abs_chi1 ) && !isnan( abs_chi1_max ) ) )
+				The mask is generated because comparison to zero is
+				a cheaper operation.
+			*/
+			for (dim_t j = 0; j < n_elem_per_reg; ++j)
 			{
-				abs_chi1_max = abs_chi1;
-				i_max_l      = i;
+				double mask_val = mask_gen[j];
+
+				if (mask_val != 0)
+				{
+					*index = i + j;
+					return;
+				}
 			}
+
+			temp_ptr += n_elem_per_reg;
 		}
+
+		/*
+			Issue vzeroupper instruction to clear upper lanes of ymm registers.
+			This avoids a performance penalty caused by false dependencies when
+			transitioning from AVX to SSE instructions (which may occur as soon
+			as the n_left cleanup loop below if BLIS is compiled with
+			-mfpmath=sse).
+		*/
+		_mm256_zeroupper();
+
+		// Perform the above compute using SSE instructions
+		__m128d x_vec_128, mask_gen_128, max_reg_128;
+
+		max_reg_128 = _mm_set1_pd(*element);
+
+		for (; (i + 1) < n; i += 2)
+		{
+			x_vec_128 = _mm_loadu_pd(temp_ptr);
+			x_vec_128 = _mm_andnot_pd(_mm_set1_pd(-0.f), x_vec_128);
+
+			mask_gen_128 = _mm_cmp_pd(x_vec_128, max_reg_128, _CMP_EQ_OQ);
+
+			for (dim_t j = 0; j < 2; ++j)
+			{
+				double mask_val = mask_gen_128[j];
+
+				if (mask_val != 0)
+				{
+					*index = i + j;
+					return;
+				}
+			}
+
+			temp_ptr += 2;
+		}
+	}
+
+	/*
+		This loops performs the compute in two cases:
+
+		1. The complete compute when incx != 1
+		2. It process the last element when 'n' is not a
+		   multiple of 2.
+	*/
+	for (; i < n; i += 1)
+	{
+		double value = fabs(*temp_ptr);
+
+		if (value == *element)
+		{
+			*index = i;
+			return;
+		}
+
+		temp_ptr += incx;
+	}
+
+	// When the element is not found in the
+	*index = -2;
+}
+
+/*
+	Functionality
+	-------------
+
+	This function finds the index of the first element having maximum absolute value
+	with the array index starting from 0.
+
+	Function Signature
+	-------------------
+
+	This function takes a double pointer as input, the correspending vector's stride
+	and length. It uses the function parameters to return the output.
+
+	* 'x' - Double pointer pointing to an array
+	* 'incx' - Stride to point to the next element in the array
+	* 'n' - Length of the array passed
+	* 'i_max' - Index at which the absolute largest element can be found
+	* 'cntx' - BLIS context object
+
+	Exception
+	----------
+
+	1. When the vector length is zero, return early. This directly emulates the behavior
+	   of netlib BLAS's i?amax() routines.
+
+	Deviation from BLAS
+	--------------------
+
+	1. In this function, the array index starts from 0 while in BLAS the indexing
+	   starts from 1. The deviation is expected to be handled in the BLAS layer of
+	   the library.
+*/
+BLIS_EXPORT_BLIS void bli_damaxv_zen_int
+     (
+       dim_t            n,
+       double* restrict x, inc_t incx,
+       dim_t*  restrict i_max,
+       cntx_t* restrict cntx
+     )
+{
+	// Temporary pointer used inside the function
+	double *x_temp = x;
+
+	// Will hold the absolute largest element in the array
+	double max_val;
+
+	/*
+		Holds the index range in which the absolute
+		largest element first occurs
+	*/
+	dim_t start_index, end_index;
+
+	/*
+		Length of the search space where the absolute
+		largest element first occurs
+	*/
+	dim_t search_len;
+
+	/*
+		This function find the first occurence of the absolute largest element in a double
+		array and the range (start and end index) in which that element can be found.
+	*/
+	bli_vec_absmax_double
+	(
+		(void *)x_temp, incx, n,
+		&max_val,
+		&start_index, &end_index
+	);
+
+	// Calculate the length of the search space
+	search_len = end_index - start_index;
+
+	dim_t element_index;
+
+	if (start_index != end_index)
+	{
+		// Adjust the pointer based on the search range
+		x_temp = x + (start_index * incx);
+
+		/*
+			This function locates the index at which a given absolute
+			value of a element first occurs.
+		*/
+		bli_vec_search_double
+		(
+			(void *)x_temp, incx,
+			search_len,
+			&max_val,
+			&element_index
+		);
+
+		// Calculate the index the of the absolute largest element and store it
+		element_index = start_index + element_index;
 	}
 	else
 	{
-		dim_t  n_iter, n_left;
-		dim_t  num_vec_elements = 4;
-		v4df_t x_vec, max_vec, maxInx_vec, mask_vec;
-		v4df_t idx_vec, inc_vec;
-		v4df_t sign_mask;
-
-		v2dd_t max_vec_lo, max_vec_hi, mask_vec_lo;
-		v2dd_t maxInx_vec_lo, maxInx_vec_hi;
-
-		n_iter = n / num_vec_elements;
-		n_left = n % num_vec_elements;
-
-		idx_vec.v    = _mm256_set_pd( 3, 2, 1, 0 );
-		inc_vec.v    = _mm256_set1_pd( 4 );
-		max_vec.v    = _mm256_set1_pd( -1 );
-		maxInx_vec.v = _mm256_setzero_pd();
-		sign_mask.v  = _mm256_set1_pd( -0.f );
-
-		for ( i = 0; i < n_iter; ++i )
-		{
-			x_vec.v      = _mm256_loadu_pd( x );
-
-			// Get the absolute value of the vector element.
-			x_vec.v      = _mm256_andnot_pd( sign_mask.v, x_vec.v );
-
-			mask_vec.v   = CMP256( d, x_vec.v, max_vec.v );
-
-			max_vec.v    = _mm256_blendv_pd( max_vec.v, x_vec.v, mask_vec.v );
-			maxInx_vec.v = _mm256_blendv_pd( maxInx_vec.v, idx_vec.v, mask_vec.v );
-
-			idx_vec.v += inc_vec.v;
-			x         += num_vec_elements;
-		}
-
-		max_vec_lo.v    = _mm256_extractf128_pd( max_vec.v, 0 );
-		max_vec_hi.v    = _mm256_extractf128_pd( max_vec.v, 1 );
-		maxInx_vec_lo.v = _mm256_extractf128_pd( maxInx_vec.v, 0 );
-		maxInx_vec_hi.v = _mm256_extractf128_pd( maxInx_vec.v, 1 );
-
-		mask_vec_lo.v = CMP128( d, max_vec_hi.v, max_vec_lo.v, maxInx_vec_hi.v, maxInx_vec_lo.v );
-
-		max_vec_lo.v    = _mm_blendv_pd( max_vec_lo.v, max_vec_hi.v, mask_vec_lo.v );
-		maxInx_vec_lo.v = _mm_blendv_pd( maxInx_vec_lo.v, maxInx_vec_hi.v, mask_vec_lo.v );
-
-		max_vec_hi.v    = _mm_permute_pd( max_vec_lo.v, 1 );
-		maxInx_vec_hi.v = _mm_permute_pd( maxInx_vec_lo.v, 1 );
-
-		mask_vec_lo.v = CMP128( d, max_vec_hi.v, max_vec_lo.v, maxInx_vec_hi.v, maxInx_vec_lo.v );
-
-		max_vec_lo.v    = _mm_blendv_pd( max_vec_lo.v, max_vec_hi.v, mask_vec_lo.v );
-		maxInx_vec_lo.v = _mm_blendv_pd( maxInx_vec_lo.v, maxInx_vec_hi.v, mask_vec_lo.v );
-
-		abs_chi1_max = max_vec_lo.d[0];
-		i_max_l      = maxInx_vec_lo.d[0];
-
-		for ( i = n - n_left; i < n; i++ )
-		{
-			const double* restrict chi1 = x;
-
-			/* Get the real and imaginary components of chi1. */
-			chi1_r = *chi1;
-
-			/* Replace chi1_r and chi1_i with their absolute values. */
-			abs_chi1 = fabs( chi1_r );
-
-			/* If the absolute value of the current element exceeds that of
-			   the previous largest, save it and its index. If NaN is
-			   encountered, return the index of the first NaN. This
-			   behavior mimics that of LAPACK's i?amax(). */
-			if ( abs_chi1_max < abs_chi1 || ( isnan( abs_chi1 ) && !isnan( abs_chi1_max ) ) )
-			{
-				abs_chi1_max = abs_chi1;
-				i_max_l      = i;
-			}
-
-			x += 1;
-		}
+		// Store the index the of the absolute largest element
+		element_index = start_index;
 	}
 
-	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions (which may occur
-	// later, especially if BLIS is compiled with -mfpmath=sse).
-	_mm256_zeroupper();
-
-	/* Store final index to output variable. */
-	*index = i_max_l;
+	// Store final index to output variable.
+	*i_max = element_index;
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
 }
-
-// -----------------------------------------------------------------------------
-
-#if 0
-#undef  GENTFUNCR
-#define GENTFUNCR( ctype, ctype_r, ch, chr, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       dim_t    n, \
-       ctype*   x, inc_t incx, \
-       dim_t*   index, \
-       cntx_t*  cntx  \
-     ) \
-{ \
-	ctype_r* minus_one = PASTEMAC(chr,m1); \
-	dim_t*   zero_i    = PASTEMAC(i,0); \
-\
-	ctype_r  chi1_r; \
-	ctype_r  chi1_i; \
-	ctype_r  abs_chi1; \
-	ctype_r  abs_chi1_max; \
-	dim_t    i; \
-\
-	/* Initialize the index of the maximum absolute value to zero. */ \
-	PASTEMAC(i,copys)( zero_i, *index ); \
-\
-	/* If the vector length is zero, return early. This directly emulates
-	   the behavior of netlib BLAS's i?amax() routines. */ \
-	if ( bli_zero_dim1( n ) ) return; \
-\
-	/* Initialize the maximum absolute value search candidate with
-	   -1, which is guaranteed to be less than all values we will
-	   compute. */ \
-	PASTEMAC(chr,copys)( *minus_one, abs_chi1_max ); \
-\
-	if ( incx == 1 ) \
-	{ \
-		for ( i = 0; i < n; ++i ) \
-		{ \
-			/* Get the real and imaginary components of chi1. */ \
-			PASTEMAC2(ch,chr,gets)( x[i], chi1_r, chi1_i ); \
-\
-			/* Replace chi1_r and chi1_i with their absolute values. */ \
-			PASTEMAC(chr,abval2s)( chi1_r, chi1_r ); \
-			PASTEMAC(chr,abval2s)( chi1_i, chi1_i ); \
-\
-			/* Add the real and imaginary absolute values together. */ \
-			PASTEMAC(chr,set0s)( abs_chi1 ); \
-			PASTEMAC(chr,adds)( chi1_r, abs_chi1 ); \
-			PASTEMAC(chr,adds)( chi1_i, abs_chi1 ); \
-\
-			/* If the absolute value of the current element exceeds that of
-			   the previous largest, save it and its index. If NaN is
-			   encountered, then treat it the same as if it were a valid
-			   value that was smaller than any previously seen. This
-			   behavior mimics that of LAPACK's ?lange(). */ \
-			if ( abs_chi1_max < abs_chi1 || bli_isnan( abs_chi1 ) ) \
-			{ \
-				abs_chi1_max = abs_chi1; \
-				*index       = i; \
-			} \
-		} \
-	} \
-	else \
-	{ \
-		for ( i = 0; i < n; ++i ) \
-		{ \
-			ctype* chi1 = x + (i  )*incx; \
-\
-			/* Get the real and imaginary components of chi1. */ \
-			PASTEMAC2(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
-\
-			/* Replace chi1_r and chi1_i with their absolute values. */ \
-			PASTEMAC(chr,abval2s)( chi1_r, chi1_r ); \
-			PASTEMAC(chr,abval2s)( chi1_i, chi1_i ); \
-\
-			/* Add the real and imaginary absolute values together. */ \
-			PASTEMAC(chr,set0s)( abs_chi1 ); \
-			PASTEMAC(chr,adds)( chi1_r, abs_chi1 ); \
-			PASTEMAC(chr,adds)( chi1_i, abs_chi1 ); \
-\
-			/* If the absolute value of the current element exceeds that of
-			   the previous largest, save it and its index. If NaN is
-			   encountered, then treat it the same as if it were a valid
-			   value that was smaller than any previously seen. This
-			   behavior mimics that of LAPACK's ?lange(). */ \
-			if ( abs_chi1_max < abs_chi1 || bli_isnan( abs_chi1 ) ) \
-			{ \
-				abs_chi1_max = abs_chi1; \
-				*index       = i; \
-			} \
-		} \
-	} \
-}
-GENTFUNCR( scomplex, float,  c, s, amaxv_zen_int )
-GENTFUNCR( dcomplex, double, z, d, amaxv_zen_int )
-#endif

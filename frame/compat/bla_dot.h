@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,15 +33,22 @@
 
 */
 
-#if 1
-
 //
 // Prototype BLAS-to-BLIS interfaces.
 //
 #undef  GENTPROTDOT
 #define GENTPROTDOT( ftype, ch, chc, blasname ) \
 \
+IF_BLIS_ENABLE_BLAS(\
 BLIS_EXPORT_BLAS ftype PASTEF772(ch,blasname,chc) \
+     ( \
+       const f77_int* n, \
+       const ftype*   x, const f77_int* incx, \
+       const ftype*   y, const f77_int* incy  \
+     );\
+)\
+\
+BLIS_EXPORT_BLAS ftype PASTEF772S(ch,blasname,chc) \
      ( \
        const f77_int* n, \
        const ftype*   x, const f77_int* incx, \
@@ -60,7 +68,17 @@ INSERT_GENTPROTDOTC_BLAS( dot )
 #undef  GENTPROTDOT
 #define GENTPROTDOT( ftype, ch, chc, blasname ) \
 \
+IF_BLIS_ENABLE_BLAS(\
 BLIS_EXPORT_BLAS void PASTEF772(ch,blasname,chc) \
+     ( \
+       ftype*         rhop, \
+       const f77_int* n, \
+       const ftype*   x, const f77_int* incx, \
+       const ftype*   y, const f77_int* incy  \
+     );\
+)\
+\
+BLIS_EXPORT_BLAS void PASTEF772S(ch,blasname,chc) \
      ( \
        ftype*         rhop, \
        const f77_int* n, \
@@ -72,9 +90,9 @@ INSERT_GENTPROTDOTC_BLAS( dot )
 
 #endif
 
-
 // -- "Black sheep" dot product function prototypes --
 
+#ifdef BLIS_ENABLE_BLAS
 BLIS_EXPORT_BLAS float PASTEF77(sd,sdot)
      (
        const f77_int* n,
@@ -82,12 +100,26 @@ BLIS_EXPORT_BLAS float PASTEF77(sd,sdot)
        const float*   x, const f77_int* incx,
        const float*   y, const f77_int* incy
      );
-
+#endif
+BLIS_EXPORT_BLAS float PASTEF77S(sd,sdot)
+     (
+       const f77_int* n,
+       const float*   sb,
+       const float*   x, const f77_int* incx,
+       const float*   y, const f77_int* incy
+     );
+     
+#ifdef BLIS_ENABLE_BLAS
 BLIS_EXPORT_BLAS double PASTEF77(d,sdot)
      (
          const f77_int* n,
          const float*   x, const f77_int* incx,
          const float*   y, const f77_int* incy
      );
-
 #endif
+BLIS_EXPORT_BLAS double PASTEF77S(d,sdot)
+     (
+         const f77_int* n,
+         const float*   x, const f77_int* incx,
+         const float*   y, const f77_int* incy
+     );

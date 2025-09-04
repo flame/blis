@@ -1,0 +1,261 @@
+{
+    "version": 6,
+    "include": [
+        "base.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "linux-ninja",
+            "inherits": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "condition": {
+              "type": "notEquals",
+              "lhs": "${hostSystemName}",
+              "rhs": "Windows"
+            }
+        },
+        {
+          "name": "linux-ninja-st-lp64-amdzen-static",
+          "inherits": ["linux-ninja", "st", "lp64", "amdzen", "static"],            
+          "hidden": false,
+          "cacheVariables": {
+              "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-amdzen",
+              "BLIS_LINKING_TYPE": "static",
+              "REF_CBLAS": "MKL"
+          }
+        },
+        {
+            "name": "linux-ninja-st-lp64-amdzen-shared",
+            "inherits": ["linux-ninja", "st", "lp64", "amdzen", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-amdzen",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-ninja-mt-lp64-amdzen-static",
+            "inherits": ["linux-ninja", "mt", "lp64", "amdzen", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-amdzen",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-ninja-mt-lp64-amdzen-shared",
+            "inherits": ["linux-ninja", "mt", "lp64", "amdzen", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-amdzen",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-ninja-st-ilp64-amdzen-static",
+            "inherits": ["linux-ninja", "st", "ilp64", "amdzen", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-amdzen",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-ninja-st-ilp64-amdzen-shared",
+            "inherits": ["linux-ninja", "st", "ilp64", "amdzen", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-amdzen",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-ninja-mt-ilp64-amdzen-static",
+            "inherits": ["linux-ninja", "mt", "ilp64", "amdzen", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-amdzen",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-ninja-mt-ilp64-amdzen-shared",
+            "inherits": ["linux-ninja", "mt", "ilp64", "amdzen", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-amdzen",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-ninja-st-lp64-auto-static",
+            "inherits": ["linux-ninja", "st", "lp64", "auto", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-auto",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-ninja-st-lp64-auto-shared",
+            "inherits": ["linux-ninja", "st", "lp64", "auto", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-auto",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-ninja-mt-lp64-auto-static",
+            "inherits": ["linux-ninja", "mt", "lp64", "auto", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-auto",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-ninja-mt-lp64-auto-shared",
+            "inherits": ["linux-ninja", "mt", "lp64", "auto", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-auto",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-ninja-st-ilp64-auto-static",
+            "inherits": ["linux-ninja", "st", "ilp64", "auto", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-auto",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-ninja-st-ilp64-auto-shared",
+            "inherits": ["linux-ninja", "st", "ilp64", "auto", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-auto",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-ninja-mt-ilp64-auto-static",
+            "inherits": ["linux-ninja", "mt", "ilp64", "auto", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-auto",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-ninja-mt-ilp64-auto-shared",
+            "inherits": ["linux-ninja", "mt", "ilp64", "auto", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-auto",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          }
+    ],
+    "buildPresets": [
+        {
+            "name": "linux-ninja-st-lp64-amdzen-static",
+            "configurePreset": "linux-ninja-st-lp64-amdzen-static",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-ninja-st-lp64-amdzen-shared",
+            "configurePreset": "linux-ninja-st-lp64-amdzen-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-ninja-mt-lp64-amdzen-static",
+            "configurePreset": "linux-ninja-mt-lp64-amdzen-static",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-ninja-mt-lp64-amdzen-shared",
+            "configurePreset": "linux-ninja-mt-lp64-amdzen-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-ninja-st-ilp64-amdzen-static",
+            "configurePreset": "linux-ninja-st-ilp64-amdzen-static",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-ninja-st-ilp64-amdzen-shared",
+            "configurePreset": "linux-ninja-st-ilp64-amdzen-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-ninja-mt-ilp64-amdzen-static",
+            "configurePreset": "linux-ninja-mt-ilp64-amdzen-static",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-ninja-mt-ilp64-amdzen-shared",
+            "configurePreset": "linux-ninja-mt-ilp64-amdzen-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-ninja-st-lp64-auto-static",
+            "configurePreset": "linux-ninja-st-lp64-auto-static",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-ninja-st-lp64-auto-shared",
+            "configurePreset": "linux-ninja-st-lp64-auto-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-ninja-mt-lp64-auto-static",
+            "configurePreset": "linux-ninja-mt-lp64-auto-static",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-ninja-mt-lp64-auto-shared",
+            "configurePreset": "linux-ninja-mt-lp64-auto-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-ninja-st-ilp64-auto-static",
+            "configurePreset": "linux-ninja-st-lp64-auto-static",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-ninja-st-ilp64-auto-shared",
+            "configurePreset": "linux-ninja-st-lp64-auto-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-ninja-mt-ilp64-auto-static",
+            "configurePreset": "linux-ninja-mt-lp64-auto-static",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-ninja-mt-ilp64-auto-shared",
+            "configurePreset": "linux-ninja-mt-lp64-auto-shared",
+            "inherits": "base"
+        }
+    ]
+}

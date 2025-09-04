@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -92,3 +92,9 @@
 #include "bli_trmm3.h"
 #include "bli_trsm.h"
 #include "bli_gemmt.h"
+
+// Smart Threading API's.
+#include "bli_l3_smart_threading.h"
+
+// BLAS Extension API - Compute
+#include "bli_l3_compute.h"

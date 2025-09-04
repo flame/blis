@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019 - 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -46,42 +46,22 @@ err_t bli_gemmsup_int
              thrinfo_t* thread
      )
 {
-#if 0
-	//bli_gemmsup_ref_var2
-	//bli_gemmsup_ref_var1
-	#if 0
-	bli_gemmsup_ref_var1n
-	#else
-	#endif
-	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
-	const bool    is_rrr_rrc_rcr_crr = ( stor_id == BLIS_RRR ||
-	                                     stor_id == BLIS_RRC ||
-	                                     stor_id == BLIS_RCR ||
-	                                     stor_id == BLIS_CRR );
-	if ( is_rrr_rrc_rcr_crr )
-	{
-		bli_gemmsup_ref_var2m
-		(
-		  BLIS_NO_TRANSPOSE, alpha, a, b, beta, c, stor_id, cntx, rntm
-		);
-	}
-	else
-	{
-		bli_gemmsup_ref_var2m
-		(
-		  BLIS_TRANSPOSE, alpha, a, b, beta, c, stor_id, cntx, rntm
-		);
-	}
-
-	return BLIS_SUCCESS;
-#endif
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_4);
 
 	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
+
+	// Don't use the small/unpacked implementation if one of the matrices
+	// uses general stride.
+	if ( stor_id == BLIS_XXX ) {
+		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_4, "SUP doesn't support general stide.");
+		return BLIS_FAILURE;
+	}
 
 	const bool    is_rrr_rrc_rcr_crr = ( stor_id == BLIS_RRR ||
 	                                     stor_id == BLIS_RRC ||
 	                                     stor_id == BLIS_RCR ||
 	                                     stor_id == BLIS_CRR );
+
 	const bool    is_rcc_crc_ccr_ccc = !is_rrr_rrc_rcr_crr;
 
 	const num_t   dt         = bli_obj_dt( c );
@@ -99,7 +79,6 @@ err_t bli_gemmsup_int
 	bool         use_bp      = TRUE;
 	dim_t        jc_new;
 	dim_t        ic_new;
-
 
 	if ( is_primary )
 	{
@@ -179,8 +158,15 @@ err_t bli_gemmsup_int
 		// Decide which algorithm to use (block-panel var2m or panel-block
 		// var1n) based on the number of micropanels in the m and n dimensions.
 		// Also, recalculate the automatic thread factorization.
-		if         ( mu >= nu )    use_bp = TRUE;
-		else /* if ( mu <  nu ) */ use_bp = FALSE;
+		if         ( mu >= nu )    use_bp = FALSE; //TRUE; // VK
+		else /* if ( mu <  nu ) */ use_bp = TRUE;  //FALSE;
+
+		// In zgemm, mkernel outperforms nkernel for both m > n and n < m.
+		// mkernel is forced for zgemm.
+		if(bli_is_dcomplex(dt))
+		{
+			use_bp = TRUE;//mkernel
+		}
 
 		// If the parallel thread factorization was automatic, we update it
 		// with a new factorization based on the matrix dimensions in units
@@ -235,6 +221,7 @@ err_t bli_gemmsup_int
 	}
 
 	// Return success so that the caller knows that we computed the solution.
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
 	return BLIS_SUCCESS;
 }
 
@@ -252,7 +239,18 @@ err_t bli_gemmtsup_int
              thrinfo_t* thread
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_4);
+//	AOCL_DTL_LOG_GEMMT_INPUTS(AOCL_DTL_LEVEL_TRACE_4, alpha, a, b, beta, c);
+
+
 	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
+
+	// Don't use the small/unpacked implementation if one of the matrices
+	// uses general stride.
+	if ( stor_id == BLIS_XXX ) {
+		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_4, "SUP doesn't support general stide.");
+		return BLIS_FAILURE;
+	}
 
 	const bool    is_rrr_rrc_rcr_crr = ( stor_id == BLIS_RRR ||
 	                                     stor_id == BLIS_RRC ||
@@ -326,11 +324,9 @@ err_t bli_gemmtsup_int
 			printf( "bli_l3_sup_int(): var2m primary\n" );
 			#endif
 			// block-panel macrokernel; m -> mc, mr; n -> nc, nr: var2()
-#if 0
 			bli_gemmtsup_ref_var2m( BLIS_NO_TRANSPOSE,
 			                        alpha, a, b, beta, c,
 			                        stor_id, cntx, rntm, thread );
-#endif
 		}
 		else // use_pb
 		{
@@ -339,11 +335,9 @@ err_t bli_gemmtsup_int
 			printf( "bli_l3_sup_int(): var1n primary\n" );
 			#endif
 			// panel-block macrokernel; m -> nc*,mr; n -> mc*,nr: var1()
-#if 0
 			bli_gemmtsup_ref_var1n( BLIS_NO_TRANSPOSE,
 			                        alpha, a, b, beta, c,
 			                        stor_id, cntx, rntm, thread );
-#endif
 			// *requires nudging of nc up to be a multiple of mr.
 		}
 	}
@@ -359,6 +353,7 @@ err_t bli_gemmtsup_int
 		// Decide which algorithm to use (block-panel var2m or panel-block
 		// var1n) based on the number of micropanels in the m and n dimensions.
 		// Also, recalculate the automatic thread factorization.
+
 		if         ( mu >= nu )    use_bp = TRUE;
 		else /* if ( mu <  nu ) */ use_bp = FALSE;
 
@@ -396,11 +391,9 @@ err_t bli_gemmtsup_int
 			printf( "bli_l3_sup_int(): var2m non-primary\n" );
 			#endif
 			// panel-block macrokernel; m -> nc, nr; n -> mc, mr: var2() + trans
-#if 0
 			bli_gemmtsup_ref_var2m( BLIS_TRANSPOSE,
 			                        alpha, a, b, beta, c,
 			                        stor_id, cntx, rntm, thread );
-#endif
 		}
 		else // use_pb
 		{
@@ -409,16 +402,15 @@ err_t bli_gemmtsup_int
 			printf( "bli_l3_sup_int(): var1n non-primary\n" );
 			#endif
 			// block-panel macrokernel; m -> mc*,nr; n -> nc*,mr: var1() + trans
-#if 0
 			bli_gemmtsup_ref_var1n( BLIS_TRANSPOSE,
 			                        alpha, a, b, beta, c,
 			                        stor_id, cntx, rntm, thread );
-#endif
 			// *requires nudging of mc up to be a multiple of nr.
 		}
 	}
 
 	// Return success so that the caller knows that we computed the solution.
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
 	return BLIS_SUCCESS;
 }
 

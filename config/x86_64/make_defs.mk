@@ -5,6 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
+#  Copyright (C) 2025, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -63,29 +64,39 @@ endif
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS) -O3
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -mssse3 -mfpmath=sse -march=core2
+  CKVECFLAGS     := -mssse3 -mfpmath=sse -march=core2
+else ifeq ($(CC_VENDOR),icc)
+  CKVECFLAGS     := -xSSE3
+else ifeq ($(CC_VENDOR),clang)
+  CKVECFLAGS     := -mssse3 -mfpmath=sse -march=core2
 else
+<<<<<<< HEAD
+  $(error gcc, icc, or clang is required for this configuration.)
+=======
 ifeq ($(CC_VENDOR),icc)
 CKVECFLAGS     := -xSSE3
 else
 ifeq ($(CC_VENDOR),clang)
 CKVECFLAGS     := -mssse3 -mfpmath=sse -march=core2
 else
-$(error gcc, icc, or clang is required for this configuration.)
+ifeq ($(CC_VENDOR),NVIDIA)
+CKVECFLAGS     := -march=px -fast
+else
+$(error gcc, icc, clang, or nvc is required for this configuration.)
 endif
 endif
+endif
+>>>>>>> 54a014121 (Improve NVHPC support and add CI test. (#880))
 endif
 
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+  CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+else ifeq ($(CC_VENDOR),clang)
+  CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
 else
-ifeq ($(CC_VENDOR),clang)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
-else
-CRVECFLAGS     := $(CKVECFLAGS)
-endif
+  CRVECFLAGS     := $(CKVECFLAGS)
 endif
 
 # Store all of the variables here to new variables containing the

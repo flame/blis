@@ -5,7 +5,8 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021 - 2025, Advanced Micro Devices, Inc. All rights reserved. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -55,7 +56,7 @@
 // accordingly.
 #if   defined(__ICC) || defined(__INTEL_COMPILER)
   #define BLIS_ICC
-#elif defined(__clang__)
+#elif defined(__clang__) || defined(__INTEL_LLVM_COMPILER)
   #define BLIS_CLANG
 #elif defined(__GNUC__)
   #define BLIS_GCC
@@ -106,13 +107,15 @@
   #define VC_EXTRALEAN
   #include <windows.h>
 
-  #if !defined(__clang__) && !defined(__GNUC__)
+  #ifdef BLIS_IS_BUILDING_LIBRARY
+  #if !defined(__clang__) && !defined(__GNUC__) && !defined(__INTEL_LLVM_COMPILER) && !defined(__INTEL_COMPILER)
     // Undefine attribute specifiers in Windows.
     #define __attribute__(x)
 
     // Undefine restrict.
     #define restrict
   #endif
+  #endif // BLIS_IS_BUILDING_LIBRARY
 
 #endif
 

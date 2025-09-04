@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -61,6 +61,16 @@ static cntx_t* cached_cntx_ind = NULL;
 
 // -----------------------------------------------------------------------------
 
+// A pthread_once_t variable is a pthread structure used in pthread_once().
+// pthread_once() is guaranteed to execute exactly once among all threads that
+// pass in this control object.
+static bli_pthread_once_t gks_once_init = BLIS_PTHREAD_ONCE_INIT;
+
+void bli_gks_init_once( void )
+{
+	bli_pthread_once( &gks_once_init, bli_gks_init );
+}
+
 void bli_gks_init( void )
 {
 	{
@@ -104,8 +114,17 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_penryn_ind );
 #endif
 
-		// -- AMD architectures ------------------------------------------------
-
+		// AMD architectures
+#ifdef BLIS_CONFIG_ZEN5
+		bli_gks_register_cntx( BLIS_ARCH_ZEN5,        bli_cntx_init_zen5,
+		                                              bli_cntx_init_zen5_ref,
+		                                              bli_cntx_init_zen5_ind );
+#endif
+#ifdef BLIS_CONFIG_ZEN4
+		bli_gks_register_cntx( BLIS_ARCH_ZEN4,        bli_cntx_init_zen4,
+		                                              bli_cntx_init_zen4_ref,
+		                                              bli_cntx_init_zen4_ind );
+#endif
 #ifdef BLIS_CONFIG_ZEN3
 		bli_gks_register_cntx( BLIS_ARCH_ZEN3,        bli_cntx_init_zen3,
 		                                              bli_cntx_init_zen3_ref,
@@ -458,7 +477,7 @@ void bli_gks_register_cntx
 
 	// At this point, we know the pointer to the array of cntx_t* is NULL and
 	// needs to be allocated. Allocate the memory and initialize it to
-	// zeros/NULL, storing the address of the alloacted memory at the element
+	// zeros/NULL, storing the address of the allocated memory at the element
 	// for the current architecture id.
 	gks[ id ] = bli_calloc_intl( sizeof( cntx_t* ) * BLIS_NUM_IND_METHODS, &r_val );
 
@@ -513,10 +532,35 @@ void bli_gks_register_cntx
 	e_val = bli_check_valid_nc_mod_mult( nc, mr ); bli_check_error_code( e_val );
 #endif
 
-	// Verify that the register blocksizes in the context are sufficiently large
-	// relative to the maximum stack buffer size defined at configure-time.
-	e_val = bli_check_sufficient_stack_buf_size( gks_id_nat );
-	bli_check_error_code( e_val );
+
+	// Verify that cache blocksizes are whole multiples of register blocksizes for TRSM.
+	mc = bli_cntx_get_trsm_blksz( BLIS_MC, gks_id_nat );
+	nc = bli_cntx_get_trsm_blksz( BLIS_NC, gks_id_nat );
+	kc = bli_cntx_get_trsm_blksz( BLIS_KC, gks_id_nat );
+	mr = bli_cntx_get_trsm_blksz( BLIS_MR, gks_id_nat );
+	nr = bli_cntx_get_trsm_blksz( BLIS_NR, gks_id_nat );
+	kr = bli_cntx_get_trsm_blksz( BLIS_KR, gks_id_nat );
+
+	// If trsm blocksizes are not set then skip check.
+	for ( num_t dt = BLIS_DT_LO; dt <= BLIS_DT_HI; ++dt )
+	{
+		dim_t mr_dt  = bli_blksz_get_def( dt, mr );
+		dim_t nr_dt  = bli_blksz_get_def( dt, nr );
+		dim_t kr_dt  = bli_blksz_get_def( dt, kr );
+
+		if( mr_dt == 0 || nr_dt == 0 || kr_dt == 0 )
+		{
+			return;
+		}
+	}
+
+	e_val = bli_check_valid_mc_mod_mult( mc, mr ); bli_check_error_code( e_val );
+	e_val = bli_check_valid_nc_mod_mult( nc, nr ); bli_check_error_code( e_val );
+	e_val = bli_check_valid_kc_mod_mult( kc, kr ); bli_check_error_code( e_val );
+#ifndef BLIS_RELAX_MCNR_NCMR_CONSTRAINTS
+	e_val = bli_check_valid_mc_mod_mult( mc, nr ); bli_check_error_code( e_val );
+	e_val = bli_check_valid_nc_mod_mult( nc, mr ); bli_check_error_code( e_val );
+#endif
 }
 
 // -----------------------------------------------------------------------------
@@ -688,6 +732,22 @@ const cntx_t* bli_gks_query_ind_cntx_impl
 			// gks_id[ ind ].
 			gks_id_ind    = bli_calloc_intl( sizeof( cntx_t ), &r_val );
 			gks_id[ ind ] = gks_id_ind;
+
+			// Before we can call the induced method context initialization
+			// function on the newly allocated structure, we must first copy
+			// over the contents of the native context.
+			*gks_id_ind = *gks_id_nat;
+
+			// Use the architecture id to look up the function pointer to the
+			// context initialization function for induced methods.
+			ind_cntx_init_ft f = cntx_ind_init[ id ];
+
+			// Now we modify the context (so that it contains the proper values
+			// for its induced method) by calling the context initialization
+			// function for the current induced method. (That function assumes
+			// that the context is pre- initialized with values for native
+			// execution.)
+			f( ind, gks_id_ind );
 		}
 
 		// Before we can call the induced method context initialization

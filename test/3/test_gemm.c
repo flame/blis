@@ -169,9 +169,7 @@ int main( int argc, char** argv )
 		//bli_printm( "beta: ", &beta,  "%7.4e", "" );
 
 		bli_copym( &c, &c_save );
-
-#ifdef BLIS
-		// Switch to the induced method specified by ind.
+#if 0 //def BLIS
 		bli_ind_disable_all_dt( dt );
 		bli_ind_enable_dt( ind, dt );
 #endif

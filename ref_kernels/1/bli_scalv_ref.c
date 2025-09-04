@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -55,7 +56,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	if ( PASTEMAC(ch,eq1)( *alpha ) ) return; \
 \
 	/* If alpha is zero, use setv. */ \
-	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
+	if ( PASTEMAC(ch,eq0)( *alpha ) && n > 0) \
 	{ \
 		const ctype* zero = PASTEMAC(ch,0); \
 \
@@ -74,6 +75,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		return; \
 	} \
 \
+        dim_t n0 = bli_abs(n); \
+\
 	ctype alpha_conj; \
 \
 	PASTEMAC(ch,copycjs)( conjalpha, *alpha, alpha_conj ); \
@@ -81,14 +84,14 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	if ( incx == 1 ) \
 	{ \
 		PRAGMA_SIMD \
-		for ( dim_t i = 0; i < n; ++i ) \
+		for ( dim_t i = 0; i < n0; ++i ) \
 		{ \
 			PASTEMAC(ch,scals)( alpha_conj, x[i] ); \
 		} \
 	} \
 	else \
 	{ \
-		for ( dim_t i = 0; i < n; ++i ) \
+		for ( dim_t i = 0; i < n0; ++i ) \
 		{ \
 			PASTEMAC(ch,scals)( alpha_conj, *x ); \
 \

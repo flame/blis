@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,8 +35,6 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLAS
-
 double bla_d_abs(const bla_double *x)
 {
 	if(*x >= 0.0)
@@ -43,6 +42,4 @@ double bla_d_abs(const bla_double *x)
 
 	return(- *x);
 }
-
-#endif
 

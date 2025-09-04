@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -141,10 +141,18 @@ void bli_pool_finalize
 	// check is not universally appropriate.
 	if ( top_index != 0 && !reinit )
 	{
+		#ifdef BLIS_ENABLE_MEM_TRACING
 		printf( "bli_pool_finalize(): final top_index == %d (expected 0); block_size: %d.\n",
 		        ( int )top_index, ( int )bli_pool_block_size( pool ) );
 		printf( "bli_pool_finalize(): Implication: not all blocks were checked back in!\n" );
-		bli_abort();
+		fflush( stdout );
+		#endif
+
+		// We will not abort if there are checked out buffers as
+		// they will be freed when returned to the pool. This allows us to have
+		// buffers of different sizes in the pool.
+		
+		//bli_abort();
 	}
 
 	// Query the free() function pointer for the pool.

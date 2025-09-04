@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2019, The University of Texas at Austin
+   Copyright (C) 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -61,7 +62,7 @@
     //#define PRAGMA_SIMD  GEN_PRAGMA(simd)
     #define PRAGMA_SIMD  PRAGMA_OMP_SIMD
 
-  #elif defined(__clang__)
+  #elif defined(__clang__) || defined(__INTEL_LLVM_COMPILER)
 
     // clang/llvm.
     #define PRAGMA_SIMD  PRAGMA_OMP_SIMD

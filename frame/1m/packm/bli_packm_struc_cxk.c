@@ -250,21 +250,14 @@ void PASTEMAC(ch,varname) \
 		{ \
 			if ( bli_is_1m_packed( schema ) ) \
 			{ \
-			    ctype_r* restrict zero = PASTEMAC(chr,0); \
+				ctype* restrict __attribute__ ((unused)) pi11 = p11; \
 \
-				PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
-				( \
-				  BLIS_NO_CONJUGATE, \
-				  0, \
-				  BLIS_NONUNIT_DIAG, \
-				  BLIS_DENSE, \
-				  packmrnr_r, \
-				  p12_len_max * 2, \
-				  zero, \
-				  ( ctype_r* )p12, 1, ldp, \
-				  cntx, \
-				  NULL  \
-				); \
+				for ( i = 0; i < p11_m; ++i ) \
+				{ \
+					PASTEMAC(ch,seti0s)( *pi11 ); \
+\
+					pi11 += rs_p + cs_p; \
+				} \
 			} \
 			else \
 			{ \

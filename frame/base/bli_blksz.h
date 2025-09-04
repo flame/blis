@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020 - 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -252,30 +253,33 @@ void bli_blksz_reduce_max_to
 
 dim_t bli_determine_blocksize
      (
-             dir_t   direct,
-             dim_t   i,
-             dim_t   dim,
-       const obj_t*  obj,
-             bszid_t bszid,
-       const cntx_t* cntx
+       opid_t  family,
+       dir_t   direct,
+       dim_t   i,
+       dim_t   dim,
+       obj_t*  obj,
+       bszid_t bszid,
+       cntx_t* cntx
      );
 
 dim_t bli_determine_blocksize_f
      (
-             dim_t   i,
-             dim_t   dim,
-       const obj_t*  obj,
-             bszid_t bszid,
-       const cntx_t* cntx
+       opid_t  family,
+       dim_t   i,
+       dim_t   dim,
+       obj_t*  obj,
+       bszid_t bszid,
+       cntx_t* cntx
      );
 
 dim_t bli_determine_blocksize_b
      (
-             dim_t   i,
-             dim_t   dim,
-       const obj_t*  obj,
-             bszid_t bszid,
-       const cntx_t* cntx
+       opid_t  family,
+       dim_t   i,
+       dim_t   dim,
+       obj_t*  obj,
+       bszid_t bszid,
+       cntx_t* cntx
      );
 
 dim_t bli_determine_blocksize_f_sub

@@ -149,4 +149,3 @@ void bli_shgemm_power10_mma_8x16
     }
 
 }
-#endif // BLIS_SANDBOX_POWER10

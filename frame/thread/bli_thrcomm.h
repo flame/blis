@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -162,9 +162,11 @@ BLIS_INLINE timpl_t bli_thrcomm_thread_impl( thrcomm_t* comm )
 }
 
 
-// Threading method-agnostic function prototypes.
-thrcomm_t* bli_thrcomm_create( timpl_t ti, pool_t* sba_pool, dim_t n_threads );
-void       bli_thrcomm_free( pool_t* sba_pool, thrcomm_t* comm );
+// Thread communicator prototypes.
+BLIS_EXPORT_BLIS thrcomm_t* bli_thrcomm_create( rntm_t* rntm, dim_t n_threads );
+BLIS_EXPORT_BLIS void       bli_thrcomm_free( rntm_t* rntm, thrcomm_t* comm );
+BLIS_EXPORT_BLIS void       bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm );
+BLIS_EXPORT_BLIS void       bli_thrcomm_cleanup( thrcomm_t* comm );
 
 // Threading method-specific function prototypes.
 // NOTE: These are the prototypes to the dispatcher functions and thus they

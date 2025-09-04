@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,12 +40,29 @@
 // Define BLAS-to-BLIS interfaces.
 //
 
+#if defined(BLIS_KERNELS_ZEN4)
+
+    #define HERK_BLIS_IMPL(ch, blasname) \
+        PASTEF77S(ch,blasname) ( uploc, transa, m, k, alpha, a, lda, beta, c, ldc ); \
+        arch_t id = bli_arch_query_id(); \
+        if (id == BLIS_ARCH_ZEN5 || id == BLIS_ARCH_ZEN4) \
+        { \
+            bli_zero_zmm(); \
+        } \
+
+#else
+
+    #define HERK_BLIS_IMPL(ch, blasname) \
+        PASTEF77S(ch,blasname) ( uploc, transa, m, k, alpha, a, lda, beta, c, ldc ); \
+
+#endif
+
 #ifdef BLIS_BLAS3_CALLS_TAPI
 
 #undef  GENTFUNCCO
 #define GENTFUNCCO( ftype, ftype_r, ch, chr, blasname, blisname ) \
 \
-void PASTEF77(ch,blasname) \
+void PASTEF77S(ch,blasname) \
      ( \
        const f77_char* uploc, \
        const f77_char* transa, \
@@ -63,6 +80,9 @@ void PASTEF77(ch,blasname) \
 \
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
+\
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+	AOCL_DTL_LOG_HERK_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *uploc, *transa, *m, *k, (void*)alpha, *lda, (void*)beta, *ldc);\
 \
 	/* Perform BLAS parameter checking. */ \
 	PASTEBLACHK(blasname) \
@@ -96,6 +116,7 @@ void PASTEF77(ch,blasname) \
          ) \
 	   ) \
 	{ \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 		/* Finalize BLIS. */ \
 		bli_finalize_auto(); \
 \
@@ -107,6 +128,36 @@ void PASTEF77(ch,blasname) \
 	const inc_t cs_a = *lda; \
 	const inc_t rs_c = 1; \
 	const inc_t cs_c = *ldc; \
+\
+	/* If alpha is zero, scale C by beta and return early */ \
+	if( PASTEMAC(chr,eq0)( *alpha ) ) \
+	{ \
+		ftype beta_complex; \
+		beta_complex.real = *beta; \
+		beta_complex.imag = 0.0; \
+		PASTEMAC2(ch,scalm,_ex)( BLIS_NO_CONJUGATE, \
+								  0, \
+								  BLIS_NONUNIT_DIAG, \
+								  blis_uploc, \
+								  m0, \
+								  m0, \
+								  (ftype*) &beta_complex, \
+								  (ftype*) c, rs_c, cs_c, \
+								  NULL, NULL \
+								); \
+		/* The Hermitian rank-k product was computed as Re(alpha)*A*A', even for the
+		   diagonal elements. Mathematically, the imaginary components of
+		   diagonal elements of a Hermitian rank-k product should always be
+		   zero. However, in practice, they sometimes accumulate meaningless
+		   non-zero values. To prevent this, we explicitly set those values
+		   to zero before returning.
+		*/ \
+		PASTEMAC2(ch,setid,_ex)( 0, m0, m0, (void*)alpha, c, rs_c, cs_c, NULL, NULL ); \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+		/* Finalize BLIS. */ \
+		bli_finalize_auto(); \
+		return; \
+	} \
 \
 	/* Call BLIS interface. */ \
 	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
@@ -123,16 +174,33 @@ void PASTEF77(ch,blasname) \
 	  NULL  \
 	); \
 \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
-}
+} \
+IF_BLIS_ENABLE_BLAS(\
+void PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* uploc, \
+       const f77_char* transa, \
+       const f77_int*  m, \
+       const f77_int*  k, \
+       const ftype_r*  alpha, \
+       const ftype*    a, const f77_int* lda, \
+       const ftype_r*  beta, \
+             ftype*    c, const f77_int* ldc  \
+     ) \
+{ \
+	HERK_BLIS_IMPL(ch,blasname) \
+} \
+)
 
 #else
 
 #undef  GENTFUNCCO
 #define GENTFUNCCO( ftype, ftype_r, ch, chr, blasname, blisname ) \
 \
-void PASTEF77(ch,blasname) \
+void PASTEF77S(ch,blasname) \
      ( \
        const f77_char* uploc, \
        const f77_char* transa, \
@@ -150,6 +218,9 @@ void PASTEF77(ch,blasname) \
 \
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
+\
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+	AOCL_DTL_LOG_HERK_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(uploc), *transa, *m, *k, (void*)alpha, *lda, (void*)beta, *ldc);\
 \
 	/* Perform BLAS parameter checking. */ \
 	PASTEBLACHK(blasname) \
@@ -183,6 +254,7 @@ void PASTEF77(ch,blasname) \
          ) \
 	   ) \
 	{ \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 		/* Finalize BLIS. */ \
 		bli_finalize_auto(); \
 \
@@ -197,6 +269,36 @@ void PASTEF77(ch,blasname) \
 \
 	const num_t   dt_r   = PASTEMAC(chr,type); \
 	const num_t   dt     = PASTEMAC(ch,type); \
+\
+	/* If alpha is zero, scale C by beta and return early */ \
+	if( PASTEMAC(chr,eq0)( *alpha ) ) \
+	{ \
+		ftype beta_complex; \
+		beta_complex.real = *beta; \
+		beta_complex.imag = 0.0; \
+		PASTEMAC2(ch,scalm,_ex)( BLIS_NO_CONJUGATE, \
+								  0, \
+								  BLIS_NONUNIT_DIAG, \
+								  blis_uploc, \
+								  m0, \
+								  m0, \
+								  (ftype*) &beta_complex, \
+								  (ftype*) c, rs_c, cs_c, \
+								  NULL, NULL \
+								); \
+		/* The Hermitian rank-k product was computed as Re(alpha)*A*A', even for the
+		   diagonal elements. Mathematically, the imaginary components of
+		   diagonal elements of a Hermitian rank-k product should always be
+		   zero. However, in practice, they sometimes accumulate meaningless
+		   non-zero values. To prevent this, we explicitly set those values
+		   to zero before returning.
+		*/ \
+		PASTEMAC2(ch,setid,_ex)( 0, m0, m0, (void*)alpha, c, rs_c, cs_c, NULL, NULL ); \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+		/* Finalize BLIS. */ \
+		bli_finalize_auto(); \
+		return; \
+	} \
 \
 	const struc_t strucc = BLIS_HERMITIAN; \
 \
@@ -230,13 +332,28 @@ void PASTEF77(ch,blasname) \
 	  NULL  \
 	); \
 \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
-}
+} \
+IF_BLIS_ENABLE_BLAS(\
+void PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* uploc, \
+       const f77_char* transa, \
+       const f77_int*  m, \
+       const f77_int*  k, \
+       const ftype_r*  alpha, \
+       const ftype*    a, const f77_int* lda, \
+       const ftype_r*  beta, \
+             ftype*    c, const f77_int* ldc  \
+     ) \
+{ \
+	HERK_BLIS_IMPL(ch,blasname) \
+} \
+)
 
 #endif
 
-#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNCCO_BLAS( herk, herk )
-#endif
 

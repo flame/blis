@@ -88,7 +88,9 @@ void bao_l3_thread_decorator_openmp
 		// Query the thread's id from OpenMP.
 		const dim_t tid = omp_get_thread_num();
 
-		// Check for a somewhat obscure OpenMP thread-mistmatch issue.
+		// Check for a somewhat obscure OpenMP thread-mismatch issue.
+		// NOTE: This calls the same function used for the conventional/large
+		// code path.
 		bli_l3_thread_decorator_thread_check( n_threads, tid, gl_comm, rntm_p );
 
 		// Use the thread id to access the appropriate pool_t* within the

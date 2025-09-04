@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -44,14 +45,13 @@ void bli_l3_packa
              thrinfo_t* thread
      )
 {
-	obj_t a_local, a_pack;
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5);
+	obj_t a_pack;
 
-	bli_obj_alias_to( a, &a_local );
-	if ( bli_obj_has_trans( a ) )
-	{
-		bli_obj_induce_trans( &a_local );
-		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &a_local );
-	}
+	// BY setting family id to BLIS_GEMM_MD, we indicate packing kernels
+	// to scale alpha while packing.
+	if(bli_obj_dt(c) != bli_obj_dt(b))
+		bli_cntl_set_family(BLIS_GEMM_MD, cntl);
 
 	// Pack matrix A according to the control tree node.
 	bli_packm_int
@@ -75,6 +75,8 @@ void bli_l3_packa
 	  bli_cntl_sub_node( cntl ),
 	  bli_thrinfo_sub_node( thread )
 	);
+	
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5);
 }
 
 // -----------------------------------------------------------------------------
@@ -89,18 +91,14 @@ void bli_l3_packb
              thrinfo_t* thread
      )
 {
-	obj_t bt_local, bt_pack;
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5);
 
-	// We always pass B^T to bli_l3_packm.
-	bli_obj_alias_to( b, &bt_local );
-	if ( bli_obj_has_trans( b ) )
-	{
-		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &bt_local );
-	}
-	else
-	{
-		bli_obj_induce_trans( &bt_local );
-	}
+	obj_t b_pack;
+
+	// BY setting family id to BLIS_GEMM_MD, we indicate packing kernels
+	// to scale alpha while packing.
+	if(bli_obj_dt(c) != bli_obj_dt(a))
+		bli_cntl_set_family(BLIS_GEMM_MD, cntl);
 
 	// Pack matrix B according to the control tree node.
 	bli_packm_int
@@ -111,6 +109,10 @@ void bli_l3_packb
 	  cntl,
 	  thread
 	);
+	// Once packing of B matrix is done, fall back to GEMM execution.
+	if(bli_obj_dt(c) != bli_obj_dt(a))
+		bli_cntl_set_family(BLIS_GEMM, cntl);
+
 
 	// Transpose packed object back to B.
 	bli_obj_induce_trans( &bt_pack );
@@ -127,5 +129,7 @@ void bli_l3_packb
 	  bli_cntl_sub_node( cntl ),
 	  bli_thrinfo_sub_node( thread )
 	);
+	
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5);
 }
 

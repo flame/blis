@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,3 +36,12 @@
 void bli_const_init( void );
 void bli_const_finalize( void );
 
+/* constant used to check 1 and -1 when double converted uint64 */
+#define BLIS_DOUBLE_TO_UINT64_ONE_ABS   0x3ff0000000000000
+#define BLIS_DOUBLE_TO_UINT64_MINUS_ONE 0xbff0000000000000
+
+/* enum used to clasify alpha and beta to one of the below category */
+enum mulfactor {  BLIS_MUL_MINUS_ONE = -1,
+                  BLIS_MUL_ZERO,
+                  BLIS_MUL_ONE,
+                  BLIS_MUL_DEFAULT  };

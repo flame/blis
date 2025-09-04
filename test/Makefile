@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2017 - 2020, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2017 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -37,7 +37,7 @@
 # Makefile
 #
 # Field G. Van Zee
-# 
+#
 # Makefile for standalone BLIS test drivers.
 #
 
@@ -110,6 +110,14 @@ MKL_LIB        := -L$(MKL_LIB_PATH) \
                   -lpthread -lm -ldl
 
 
+# Uncomment below lines & comment above lines to link with multi-threaded library.
+#MKL_LIB        := -L$(MKL_LIB_PATH) \
+#                  -lmkl_intel_lp64 \
+#                  -lmkl_core \
+#                  -lmkl_gnu_thread \
+#                  -lpthread -lm -ldl -liomp5
+
+
 #
 # --- General build definitions ------------------------------------------------
 #
@@ -122,10 +130,13 @@ TEST_OBJS      := $(patsubst $(TEST_SRC_PATH)/%.c, \
                              $(TEST_OBJ_PATH)/%.o, \
                              $(wildcard $(TEST_SRC_PATH)/*.c))
 
+
+CBLAS_HEADER_PATH  = ../frame/compat/cblas/src
+
 # Override the value of CINCFLAGS so that the value of CFLAGS returned by
 # get-user-cflags-for() is not cluttered up with include paths needed only
 # while building BLIS.
-CINCFLAGS      := -I$(INC_PATH)
+CINCFLAGS      := -I$(INC_PATH) -I$(CBLAS_HEADER_PATH)
 
 # Use the CFLAGS for the configuration family.
 CFLAGS         := $(call get-user-cflags-for,$(CONFIG_NAME))
@@ -145,12 +156,20 @@ CFLAGS         += -I$(TEST_SRC_PATH)
 # Define the operations we will test.
 TEST_OPS := dotv axpyv axpbyv\
             gemv ger hemv her her2 trmv trsv \
-            gemm gemm3m gemm_batch hemm herk her2k trmm trsm
+            gemm hemm herk her2k trmm trsm \
+
+# Include extension API's added by AMD in operations list
+# Keeping it separate in case it needs to be guarded by a variable
+
+TEST_OPS := $(TEST_OPS) axpbyv cabs1 copyv gemm3m gemm_batch \
+            gemmt imatcopy omatadd omatcopy omatcopy2 \
+            scalv swapv trmv
 
 # Optionally test gemmt, which some libraries might not implement.
 ifeq ($(BUILD_GEMMT),yes)
 TEST_OPS := $(TEST_OPS) gemmt
 endif
+
 
 # Define a function to create the executable names.
 test-bins = $(foreach op, $(TEST_OPS), test_$(op)_$(1).x)
@@ -183,7 +202,7 @@ test_%_mkl.o: test_%.c
 	$(CC) $(CFLAGS) -DBLAS=\"mkl\" -c $< -o $@
 
 test_%_blis.o: test_%.c
-	$(CC) $(CFLAGS) -DBLIS -c $< -o $@
+	$(CC) $(CFLAGS) -DBLAS=\"aocl\" -c $< -o $@
 
 
 # -- Executable file rules --
@@ -224,4 +243,3 @@ clean: cleanx
 
 cleanx:
 	- $(RM_F) *.o *.x
-

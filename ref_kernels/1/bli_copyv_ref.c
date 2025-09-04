@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -46,7 +47,13 @@ void PASTEMAC3(ch,opname,arch,suf) \
        const cntx_t* cntx  \
      ) \
 { \
-	if ( bli_zero_dim1( n ) ) return; \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3) \
+\
+	if ( bli_zero_dim1( n ) ) \
+	{ \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3) \
+		return; \
+	} \
 \
 	const ctype* x = x0; \
 	      ctype* y = y0; \
@@ -93,6 +100,9 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			} \
 		} \
 	} \
+\
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3) \
+\
 }
 
 INSERT_GENTFUNC_BASIC( copyv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )

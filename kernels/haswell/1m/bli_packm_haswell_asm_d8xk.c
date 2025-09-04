@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019 - 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -100,6 +100,8 @@ void bli_dpackm_haswell_asm_8xk
 	// NOTE: If/when this kernel ever supports scaling by kappa within the
 	// assembly region, this constraint should be lifted.
 	const bool     unitk  = bli_deq1( *(( double* )kappa) );
+
+	double* restrict a_next = a + cdim0;
 
 
 	// -------------------------------------------------------------------------
@@ -267,7 +269,7 @@ void bli_dpackm_haswell_asm_8xk
 		label(.DCOLUNIT)
 
 		lea(mem(r10, r10, 2), r13)         // r13 = 3*lda
-
+		mov(var(a_next), rcx)
 		mov(var(k_iter), rsi)              // i = k_iter;
 		test(rsi, rsi)                     // check i via logical AND.
 		je(.DCONKLEFTCOLU)                 // if i == 0, jump to code that
@@ -278,22 +280,27 @@ void bli_dpackm_haswell_asm_8xk
 
 		vmovupd(mem(rax,          0), ymm0)
 		vmovupd(mem(rax,         32), ymm1)
+		prefetch(0, mem(rcx,7*8))
 		vmovupd(ymm0, mem(rbx, 0*64+ 0))
 		vmovupd(ymm1, mem(rbx, 0*64+32))
 
 		vmovupd(mem(rax, r10, 1,  0), ymm2)
 		vmovupd(mem(rax, r10, 1, 32), ymm3)
+		prefetch(0, mem(rcx, r10, 1,7*8))
 		vmovupd(ymm2, mem(rbx, 1*64+ 0))
 		vmovupd(ymm3, mem(rbx, 1*64+32))
 
 		vmovupd(mem(rax, r10, 2,  0), ymm4)
 		vmovupd(mem(rax, r10, 2, 32), ymm5)
+		prefetch(0, mem(rcx, r10, 2,7*8))
 		vmovupd(ymm4, mem(rbx, 2*64+ 0))
 		vmovupd(ymm5, mem(rbx, 2*64+32))
 
 		vmovupd(mem(rax, r13, 1,  0), ymm6)
 		vmovupd(mem(rax, r13, 1, 32), ymm7)
+		prefetch(0, mem(rcx, r13, 1,7*8))
 		add(r14, rax)                      // a += 4*lda;
+		add(r14, rcx)
 		vmovupd(ymm6, mem(rbx, 3*64+ 0))
 		vmovupd(ymm7, mem(rbx, 3*64+32))
 		add(imm(4*8*8), rbx)               // p += 4*ldp = 4*8;
@@ -315,7 +322,9 @@ void bli_dpackm_haswell_asm_8xk
 
 		vmovupd(mem(rax,          0), ymm0)
 		vmovupd(mem(rax,         32), ymm1)
+		prefetch(0, mem(rcx,7*8))
 		add(r10, rax)                      // a += lda;
+		add(r10, rcx)
 		vmovupd(ymm0, mem(rbx, 0*64+ 0))
 		vmovupd(ymm1, mem(rbx, 0*64+32))
 		add(imm(8*8), rbx)                 // p += ldp = 8;
@@ -343,7 +352,8 @@ void bli_dpackm_haswell_asm_8xk
 		  [p]      "m" (p),
 		  [ldp]    "m" (ldp),
 		  [kappa]  "m" (kappa),
-		  [one]    "m" (one)
+		  [one]    "m" (one),
+		  [a_next] "m" (a_next)
 		: // register clobber list
 		  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 		  "r8", /*"r9",*/ "r10", /*"r11",*/ "r12", "r13", "r14", "r15",
@@ -351,6 +361,8 @@ void bli_dpackm_haswell_asm_8xk
 		  "xmm4", "xmm5", "xmm6", "xmm7",
 		  "xmm8", "xmm9", "xmm10", "xmm11",
 		  "xmm12", "xmm13", "xmm14", "xmm15",
+		  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
+		  "ymm7", "ymm10", "ymm11", "ymm12", "ymm13",
 		  "memory"
 		)
 	}

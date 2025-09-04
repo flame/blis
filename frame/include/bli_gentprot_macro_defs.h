@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -52,6 +53,11 @@
 \
 GENTPROT( float,    s, blasname ) \
 GENTPROT( double,   d, blasname ) \
+GENTPROT( scomplex, c, blasname ) \
+GENTPROT( dcomplex, z, blasname )
+
+#define INSERT_GENTPROT_BLAS_CZ( blasname ) \
+\
 GENTPROT( scomplex, c, blasname ) \
 GENTPROT( dcomplex, z, blasname )
 
@@ -137,15 +143,40 @@ GENTPROTSCAL( dcomplex, dcomplex,  , z, blasname ) \
 GENTPROTSCAL( float,    scomplex, s, c, blasname ) \
 GENTPROTSCAL( double,   dcomplex, d, z, blasname )
 
-
-
+// -- GEMMT specific function --------------------------------------------------
+#define INSERT_GENTPROT_GEMMT(opname, funcname) \
+\
+GENTPROT( float,     s, opname, l, funcname ) \
+GENTPROT( double,    d, opname, l, funcname ) \
+GENTPROT( float,     s, opname, u, funcname ) \
+GENTPROT( double,    d, opname, u, funcname ) \
+GENTPROT( scomplex,  c, opname, l, funcname ) \
+GENTPROT( dcomplex,  z, opname, l, funcname ) \
+GENTPROT( scomplex,  c, opname, u, funcname ) \
+GENTPROT( dcomplex,  z, opname, u, funcname ) 
 
 // -- Macros for functions with one operand ------------------------------------
 
 
 // -- Basic one-operand macro --
 
-#define INSERT_GENTPROT_BASIC( ... ) \
+// -- (no auxiliary arguments) --
+
+#define INSERT_GENTPROT_BASIC0( tfuncname ) \
+\
+GENTPROT( float,    s, tfuncname ) \
+GENTPROT( double,   d, tfuncname ) \
+GENTPROT( scomplex, c, tfuncname ) \
+GENTPROT( dcomplex, z, tfuncname )
+
+#define INSERT_GENTPROT_BASIC0_SD( tfuncname ) \
+\
+GENTPROT( float,    s, tfuncname ) \
+GENTPROT( double,   d, tfuncname )
+
+// -- (one auxiliary argument) --
+
+#define INSERT_GENTPROT_BASIC( tfuncname, varname ) \
 \
 GENTPROT( float,    s, __VA_ARGS__ ) \
 GENTPROT( double,   d, __VA_ARGS__ ) \

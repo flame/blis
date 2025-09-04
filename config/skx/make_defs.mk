@@ -5,6 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
+#  Copyright (C) 2025, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -55,21 +56,39 @@ CDBGFLAGS      := -g
 endif
 
 ifeq ($(DEBUG_TYPE),noopt)
-COPTFLAGS      := -O0
+  COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2
+  COPTFLAGS      := -O2
 endif
 
 # Flags specific to optimized kernels.
 # NOTE: The -fomit-frame-pointer option is needed for some kernels because
 # they make explicit use of the rbp register.
 CKOPTFLAGS     := $(COPTFLAGS) -O3 -fomit-frame-pointer
+
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse -march=skylake-avx512
+  ifeq ($(shell test $(CC_MAJOR) -ge 15; echo $$?),0)
+    # gcc 15.1.0 fails to compile SUP kernels if -ftree-slp-vectorize
+    # is enabled, which is default in -O2 and higher
+    CKOPTFLAGS += -fno-tree-slp-vectorize
+  endif
+  CKVECFLAGS     := -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse -march=skylake-avx512
+else ifeq ($(CC_VENDOR),icc)
+  CKVECFLAGS     := -xCORE-AVX512
+else ifeq ($(CC_VENDOR),clang)
+  # NOTE: We have to use -march=haswell on Windows because apparently AVX512
+  # uses an alternate calling convention where xmm registers are not callee-saved
+  # on the stack. When this is mixed with framework code compiled for general
+  # x86_64 mode then chaos ensues (e.g. #514).
+  ifeq ($(IS_WIN),yes)
+    CKVECFLAGS     := -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse -march=haswell
+  else
+    CKVECFLAGS     := -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse -march=skylake-avx512
+  endif
 else
-ifeq ($(CC_VENDOR),icc)
-CKVECFLAGS     := -xCORE-AVX512
-else
+<<<<<<< HEAD
+  $(error gcc, icc, or clang is required for this configuration.)
+=======
 ifeq ($(CC_VENDOR),clang)
 # NOTE: We have to use -march=haswell on Windows because apparently AVX512
 # uses an alternate calling convention where xmm registers are not callee-saved
@@ -81,15 +100,20 @@ else
 CKVECFLAGS     := -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse -march=skylake-avx512
 endif
 else
-$(error gcc, icc, or clang is required for this configuration.)
+ifeq ($(CC_VENDOR),NVIDIA)
+CKVECFLAGS     := -march=skylake -fast
+else
+$(error gcc, icc, clang, or nvc is required for this configuration.)
 endif
 endif
+endif
+>>>>>>> 54a014121 (Improve NVHPC support and add CI test. (#880))
 endif
 
 # The assembler on OS X won't recognize AVX512 without help
 ifneq ($(CC_VENDOR),icc)
 ifeq ($(OS_NAME),Darwin)
-CKVECFLAGS     += -Wa,-march=skylake-avx512
+  CKVECFLAGS     += -Wa,-march=skylake-avx512
 endif
 endif
 
@@ -99,8 +123,23 @@ endif
 # to overcome the AVX-512 frequency drop". (Issue #187)
 CROPTFLAGS     := $(CKOPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CRVECFLAGS     := -march=skylake-avx512 -mno-avx512f -mno-avx512vl -mno-avx512bw -mno-avx512dq -mno-avx512cd -funsafe-math-optimizations -ffp-contract=fast
+  CRVECFLAGS     := -march=skylake-avx512 -mno-avx512f -mno-avx512vl -mno-avx512bw -mno-avx512dq -mno-avx512cd -funsafe-math-optimizations -ffp-contract=fast
+else ifeq ($(CC_VENDOR),icc)
+  CRVECFLAGS     := -xCORE-AVX2
+else ifeq ($(CC_VENDOR),clang)
+  # NOTE: We have to use -march=haswell on Windows because apparently AVX512
+  # uses an alternate calling convention where xmm registers are not callee-saved
+  # on the stack. When this is mixed with framework code compiled for general
+  # x86_64 mode then chaos ensues (e.g. #514).
+  ifeq ($(IS_WIN),yes)
+    CRVECFLAGS     := -march=haswell -funsafe-math-optimizations -ffp-contract=fast
+  else
+    CRVECFLAGS     := -march=skylake-avx512 -mno-avx512f -mno-avx512vl -mno-avx512bw -mno-avx512dq -mno-avx512cd -funsafe-math-optimizations -ffp-contract=fast
+  endif
 else
+<<<<<<< HEAD
+  $(error gcc, icc, or clang is required for this configuration.)
+=======
 ifeq ($(CC_VENDOR),icc)
 CRVECFLAGS     := -xCORE-AVX2
 else
@@ -115,9 +154,14 @@ else
 CRVECFLAGS     := -march=skylake-avx512 -mno-avx512f -mno-avx512vl -mno-avx512bw -mno-avx512dq -mno-avx512cd -funsafe-math-optimizations -ffp-contract=fast
 endif
 else
-$(error gcc, icc, or clang is required for this configuration.)
+ifeq ($(CC_VENDOR),NVIDIA)
+CRVECFLAGS     := -march=skylake -fast
+else
+$(error gcc, icc, clang, or nvc is required for this configuration.)
 endif
 endif
+endif
+>>>>>>> 54a014121 (Improve NVHPC support and add CI test. (#880))
 endif
 
 # Store all of the variables here to new variables containing the

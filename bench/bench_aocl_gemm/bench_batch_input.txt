@@ -1,0 +1,29 @@
+f32f32f32of32:group_count=2
+group_size=4
+r n n n n 6 64 128 128 64 64 bias=bf16,relu,swish
+group_size=3
+r n t n n 78 9810 1229 1229 9810 9810 matrix_add=bf16,matrix_mul=f32
+s8s8s32obf16:group_count=1
+group_size=5
+r n n n r 67 21 1823 1823 21 21 scale=vector,zp=scalar,relu,clip
+f32f32f32of32:group_count=1
+group_size=7
+r n t n n 43 2240 1553 1553 1553 2240 scale=vector,zp=scalar,relu,clip
+bf16bf16f32obf16:group_count=1
+group_size=6
+r n n n r 79 2676 1995 1995 2676 2676 bias=na,swish
+bf16bf16f32of32:group_count=1
+group_size=6
+r t n n r 143 1943 730 143 1943 1943 bias=na,clip
+bf16s4f32of32:group_count=1
+group_size=6
+r t n n r 79 1177 1968 79 1177 1177 scale=vector,zp=scalar,relu,clip
+bf16s4f32obf16:group_count=1
+group_size=6
+r n n n r 17 2714 468 468 2714 2714 scale=vector,zp=vector,bias=na
+s8s8s32obf16:group_count=1
+group_size=4
+r n n n n 43 2240 1553 1553 2240 2240 scale=vector,zp=scalar,relu,clip
+*:group_count=1
+group_size=3
+r t t n n 92 1479 589 92 589 1479 scale=vector,zp=vector,bias=na,clip

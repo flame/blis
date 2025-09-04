@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -42,7 +43,178 @@
 #undef  L1VTPROT
 #define L1VTPROT( ctype, ch, funcname, opname ) \
 \
-void PASTEMAC(ch,funcname) \
+void PASTEMAC(ch,opname) \
+      ( \
+        conj_t           conjx, \
+        dim_t            n, \
+        ctype*  restrict x, inc_t incx, \
+        ctype*  restrict y, inc_t incy, \
+        cntx_t* restrict cntx  \
+      );
+
+
+#define AMAXV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       dim_t            n, \
+       ctype*  restrict x, inc_t incx, \
+       dim_t*  restrict index, \
+       cntx_t* restrict cntx  \
+     ); \
+
+#define AMINV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       dim_t            n, \
+       ctype*  restrict x, inc_t incx, \
+       dim_t*  restrict index, \
+       cntx_t* restrict cntx  \
+     ); \
+
+#define AXPBYV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t           conjx, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict beta, \
+       ctype*  restrict y, inc_t incy, \
+       cntx_t* restrict cntx  \
+     ); \
+
+
+#define AXPYV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t           conjx, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict y, inc_t incy, \
+       cntx_t* restrict cntx  \
+     ); \
+
+
+#define COPYV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+      ( \
+        conj_t           conjx, \
+        dim_t            n, \
+        ctype*  restrict x, inc_t incx, \
+        ctype*  restrict y, inc_t incy, \
+        cntx_t* restrict cntx  \
+      );
+
+
+#define DOTV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t           conjx, \
+       conj_t           conjy, \
+       dim_t            n, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict y, inc_t incy, \
+       ctype*  restrict rho, \
+       cntx_t* restrict cntx  \
+     ); \
+
+
+#define DOTXV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t           conjx, \
+       conj_t           conjy, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict y, inc_t incy, \
+       ctype*  restrict beta, \
+       ctype*  restrict rho, \
+       cntx_t* restrict cntx  \
+     ); \
+
+
+#define INVERTV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       dim_t            n, \
+       ctype*  restrict x, inc_t incx, \
+       cntx_t* restrict cntx  \
+     ); \
+
+
+#define SCALV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t           conjalpha, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       cntx_t* restrict cntx  \
+     ); \
+
+
+#define SCAL2V_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t           conjx, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict y, inc_t incy, \
+       cntx_t* restrict cntx  \
+     ); \
+
+
+#define SETV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t           conjalpha, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       cntx_t* restrict cntx  \
+     ); \
+
+
+#define SUBV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+      ( \
+        conj_t           conjx, \
+        dim_t            n, \
+        ctype*  restrict x, inc_t incx, \
+        ctype*  restrict y, inc_t incy, \
+        cntx_t* restrict cntx  \
+      );
+
+
+#define SWAPV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       dim_t            n, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict y, inc_t incy, \
+       cntx_t* restrict cntx  \
+     ); \
+
+
+#define XPBYV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
      ( \
        PASTECH(opname,_params), \
        BLIS_CNTX_PARAM  \
