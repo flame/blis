@@ -36,19 +36,17 @@
 #ifdef EIGEN
   #define BLIS_DISABLE_BLAS_DEFS
   #include "blis.h"
-  #include "test_utils.h"
   #include <Eigen/Core>
   #include <Eigen/src/misc/blas.h>
   using namespace Eigen;
 #else
   #include "blis.h"
-  #include "test_utils.h"
 #endif
 
-//#define PRINT
+#define COL_STORAGE
+//#define ROW_STORAGE
 
-static const char* LOCAL_OPNAME_STR = "gemm";
-static const char* LOCAL_PC_STR     = "nn";
+//#define PRINT
 
 int main( int argc, char** argv )
 {
@@ -72,43 +70,65 @@ int main( int argc, char** argv )
 	double   dtime_save;
 	double   gflops;
 
-	params_t params;
-
-	// Supress compiler warnings about unused variable 'ind'.
-	( void )ind;
-
-
 	//bli_init();
 
 	//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-	// Parse the command line options into strings, integers, enums,
-	// and doubles, as appropriate.
-	parse_cl_params( argc, argv, init_def_params, &params );
+	n_repeats = 3;
 
-	dt        = params.dt;
+	dt      = DT;
 
-	ind       = params.im;
+	ind     = IND;
 
-	p_begin   = params.sta;
-	p_max     = params.end;
-	p_inc     = params.inc;
+#if 1
+	p_begin = P_BEGIN;
+	p_max   = P_MAX;
+	p_inc   = P_INC;
 
-	m_input   = params.m;
-	n_input   = params.n;
-	k_input   = params.k;
+	m_input = -1;
+	n_input = -1;
+	k_input = -1;
+#else
+	p_begin = 40;
+	p_max   = 1000;
+	p_inc   = 40;
 
-	n_repeats = params.nr;
+	m_input = -1;
+	n_input = -1;
+	k_input = -1;
+#endif
 
 
-	// Map the datatype to its corresponding char.
-	bli_param_map_blis_to_char_dt( dt, &dt_ch );
+	// Supress compiler warnings about unused variable 'ind'.
+	( void )ind;
 
-	// Map the parameter chars to their corresponding BLIS enum type values.
-	bli_param_map_char_to_blis_trans( params.pc_str[0], &transa );
-	bli_param_map_char_to_blis_trans( params.pc_str[1], &transb );
+#if 0
 
-	// Map the BLIS enum type values to their corresponding BLAS chars.
+	cntx_t* cntx;
+
+	ind_t ind_mod = ind;
+
+	// Initialize a context for the current induced method and datatype.
+	cntx = bli_gks_query_ind_cntx( ind_mod, dt );
+
+	// Set k to the kc blocksize for the current datatype.
+	k_input = bli_cntx_get_blksz_def_dt( dt, BLIS_KC, cntx );
+
+#elif 1
+
+	//k_input = 256;
+
+#endif
+
+	// Choose the char corresponding to the requested datatype.
+	if      ( bli_is_float( dt ) )    dt_ch = 's';
+	else if ( bli_is_double( dt ) )   dt_ch = 'd';
+	else if ( bli_is_scomplex( dt ) ) dt_ch = 'c';
+	else                              dt_ch = 'z';
+
+	transa = BLIS_NO_TRANSPOSE;
+	transb = BLIS_NO_TRANSPOSE;
+
 	bli_param_map_blis_to_netlib_trans( transa, &f77_transa );
 	bli_param_map_blis_to_netlib_trans( transb, &f77_transb );
 
@@ -116,8 +136,8 @@ int main( int argc, char** argv )
 	// matlab allocates space for the entire array once up-front.
 	for ( p = p_begin; p + p_inc <= p_max; p += p_inc ) ;
 
-	printf( "data_%s_%cgemm_%s", THR_STR, dt_ch, IMPL_STR );
-	printf( "( %4lu, 1:4 ) = [ %5lu %5lu %5lu %8.2f ];\n",
+	printf( "data_%s_%cgemm_%s", THR_STR, dt_ch, STR );
+	printf( "( %2lu, 1:4 ) = [ %4lu %4lu %4lu %7.2f ];\n",
 	        ( unsigned long )(p - p_begin)/p_inc + 1,
 	        ( unsigned long )0,
 	        ( unsigned long )0,
@@ -138,20 +158,17 @@ int main( int argc, char** argv )
 		bli_obj_create( dt, 1, 1, 0, 0, &alpha );
 		bli_obj_create( dt, 1, 1, 0, 0, &beta );
 
-		// Choose the storage of each matrix based on the corresponding
-		// char in the params_t struct. Note that the expected order of
-		// storage specifers in sc_str is CAB (not ABC).
-		if ( params.sc_str[1] == 'c' ) bli_obj_create( dt, m, k, 0, 0, &a );
-		else                           bli_obj_create( dt, m, k, k, 1, &a );
-
-		if ( params.sc_str[2] == 'c' ) bli_obj_create( dt, k, n, 0, 0, &b );
-		else                           bli_obj_create( dt, k, n, n, 1, &b );
-
-		if ( params.sc_str[0] == 'c' ) bli_obj_create( dt, m, n, 0, 0, &c );
-		else                           bli_obj_create( dt, m, n, n, 1, &c );
-
-		if ( params.sc_str[0] == 'c' ) bli_obj_create( dt, m, n, 0, 0, &c_save );
-		else                           bli_obj_create( dt, m, n, n, 1, &c_save );
+	#ifdef COL_STORAGE
+		bli_obj_create( dt, m, k, 0, 0, &a );
+		bli_obj_create( dt, k, n, 0, 0, &b );
+		bli_obj_create( dt, m, n, 0, 0, &c );
+		bli_obj_create( dt, m, n, 0, 0, &c_save );
+	#else
+		bli_obj_create( dt, m, k, k, 1, &a );
+		bli_obj_create( dt, k, n, n, 1, &b );
+		bli_obj_create( dt, m, n, n, 1, &c );
+		bli_obj_create( dt, m, n, n, 1, &c_save );
+	#endif
 
 		bli_randm( &a );
 		bli_randm( &b );
@@ -160,18 +177,11 @@ int main( int argc, char** argv )
 		bli_obj_set_conjtrans( transa, &a );
 		bli_obj_set_conjtrans( transb, &b );
 
-		//bli_setsc(  (2.0/1.0), 0.0, &alpha );
-		//bli_setsc(  (1.0/1.0), 0.0, &beta );
-		bli_setsc( params.alpha, 0.0, &alpha );
-		bli_setsc( params.beta,  0.0, &beta );
-
-		//bli_printm( "alpha:", &alpha, "%7.4e", "" );
-		//bli_printm( "beta: ", &beta,  "%7.4e", "" );
+		bli_setsc(  (2.0/1.0), 0.0, &alpha );
+		bli_setsc(  (1.0/1.0), 0.0, &beta );
 
 		bli_copym( &c, &c_save );
-
-#ifdef BLIS
-		// Switch to the induced method specified by ind.
+#if 0 //def BLIS
 		bli_ind_disable_all_dt( dt );
 		bli_ind_enable_dt( ind, dt );
 #endif
@@ -185,66 +195,58 @@ int main( int argc, char** argv )
 		void* bp = bli_obj_buffer_at_off( &b );
 		void* cp = bli_obj_buffer_at_off( &c );
 
-		int os_a, os_b, os_c;
-
-		if ( params.sc_str[0] == 'c' )
-		{
-			os_a = bli_obj_col_stride( &a );
-			os_b = bli_obj_col_stride( &b );
-			os_c = bli_obj_col_stride( &c );
-		}
-		else
-		{
-			os_a = bli_obj_row_stride( &a );
-			os_b = bli_obj_row_stride( &b );
-			os_c = bli_obj_row_stride( &c );
-		}
+	#ifdef COL_STORAGE
+		const int os_a = bli_obj_col_stride( &a );
+		const int os_b = bli_obj_col_stride( &b );
+		const int os_c = bli_obj_col_stride( &c );
+	#else
+		const int os_a = bli_obj_row_stride( &a );
+		const int os_b = bli_obj_row_stride( &b );
+		const int os_c = bli_obj_row_stride( &c );
+	#endif
 
 		Stride<Dynamic,1> stride_a( os_a, 1 );
 		Stride<Dynamic,1> stride_b( os_b, 1 );
 		Stride<Dynamic,1> stride_c( os_c, 1 );
 
-		typedef Matrix<float,                Dynamic, Dynamic, ColMajor> MatrixXs_c;
-		typedef Matrix<double,               Dynamic, Dynamic, ColMajor> MatrixXd_c;
-		typedef Matrix<std::complex<float>,  Dynamic, Dynamic, ColMajor> MatrixXc_c;
-		typedef Matrix<std::complex<double>, Dynamic, Dynamic, ColMajor> MatrixXz_c;
-
-		typedef Matrix<float,                Dynamic, Dynamic, RowMajor> MatrixXs_r;
-		typedef Matrix<double,               Dynamic, Dynamic, RowMajor> MatrixXd_r;
-		typedef Matrix<std::complex<float>,  Dynamic, Dynamic, RowMajor> MatrixXc_r;
-		typedef Matrix<std::complex<double>, Dynamic, Dynamic, RowMajor> MatrixXz_r;
-
-		Map<MatrixXs_c, 0, Stride<Dynamic,1> > As_c(               ( float*  )ap, m, k, stride_a );
-		Map<MatrixXs_c, 0, Stride<Dynamic,1> > Bs_c(               ( float*  )bp, k, n, stride_b );
-		Map<MatrixXs_c, 0, Stride<Dynamic,1> > Cs_c(               ( float*  )cp, m, n, stride_c );
-
-		Map<MatrixXd_c, 0, Stride<Dynamic,1> > Ad_c(               ( double* )ap, m, k, stride_a );
-		Map<MatrixXd_c, 0, Stride<Dynamic,1> > Bd_c(               ( double* )bp, k, n, stride_b );
-		Map<MatrixXd_c, 0, Stride<Dynamic,1> > Cd_c(               ( double* )cp, m, n, stride_c );
-
-		Map<MatrixXc_c, 0, Stride<Dynamic,1> > Ac_c( ( std::complex<float>*  )ap, m, k, stride_a );
-		Map<MatrixXc_c, 0, Stride<Dynamic,1> > Bc_c( ( std::complex<float>*  )bp, k, n, stride_b );
-		Map<MatrixXc_c, 0, Stride<Dynamic,1> > Cc_c( ( std::complex<float>*  )cp, m, n, stride_c );
-
-		Map<MatrixXz_c, 0, Stride<Dynamic,1> > Az_c( ( std::complex<double>* )ap, m, k, stride_a );
-		Map<MatrixXz_c, 0, Stride<Dynamic,1> > Bz_c( ( std::complex<double>* )bp, k, n, stride_b );
-		Map<MatrixXz_c, 0, Stride<Dynamic,1> > Cz_c( ( std::complex<double>* )cp, m, n, stride_c );
-
-		Map<MatrixXs_r, 0, Stride<Dynamic,1> > As_r(               ( float*  )ap, m, k, stride_a );
-		Map<MatrixXs_r, 0, Stride<Dynamic,1> > Bs_r(               ( float*  )bp, k, n, stride_b );
-		Map<MatrixXs_r, 0, Stride<Dynamic,1> > Cs_r(               ( float*  )cp, m, n, stride_c );
-
-		Map<MatrixXd_r, 0, Stride<Dynamic,1> > Ad_r(               ( double* )ap, m, k, stride_a );
-		Map<MatrixXd_r, 0, Stride<Dynamic,1> > Bd_r(               ( double* )bp, k, n, stride_b );
-		Map<MatrixXd_r, 0, Stride<Dynamic,1> > Cd_r(               ( double* )cp, m, n, stride_c );
-
-		Map<MatrixXc_r, 0, Stride<Dynamic,1> > Ac_r( ( std::complex<float>*  )ap, m, k, stride_a );
-		Map<MatrixXc_r, 0, Stride<Dynamic,1> > Bc_r( ( std::complex<float>*  )bp, k, n, stride_b );
-		Map<MatrixXc_r, 0, Stride<Dynamic,1> > Cc_r( ( std::complex<float>*  )cp, m, n, stride_c );
-
-		Map<MatrixXz_r, 0, Stride<Dynamic,1> > Az_r( ( std::complex<double>* )ap, m, k, stride_a );
-		Map<MatrixXz_r, 0, Stride<Dynamic,1> > Bz_r( ( std::complex<double>* )bp, k, n, stride_b );
-		Map<MatrixXz_r, 0, Stride<Dynamic,1> > Cz_r( ( std::complex<double>* )cp, m, n, stride_c );
+	#ifdef COL_STORAGE
+		#if defined(IS_FLOAT)
+		typedef Matrix<float,                Dynamic, Dynamic, ColMajor> MatrixXf_;
+		#elif defined (IS_DOUBLE)
+		typedef Matrix<double,               Dynamic, Dynamic, ColMajor> MatrixXd_;
+		#elif defined (IS_SCOMPLEX)
+		typedef Matrix<std::complex<float>,  Dynamic, Dynamic, ColMajor> MatrixXcf_;
+		#elif defined (IS_DCOMPLEX)
+		typedef Matrix<std::complex<double>, Dynamic, Dynamic, ColMajor> MatrixXcd_;
+		#endif
+	#else
+		#if defined(IS_FLOAT)
+		typedef Matrix<float,                Dynamic, Dynamic, RowMajor> MatrixXf_;
+		#elif defined (IS_DOUBLE)
+		typedef Matrix<double,               Dynamic, Dynamic, RowMajor> MatrixXd_;
+		#elif defined (IS_SCOMPLEX)
+		typedef Matrix<std::complex<float>,  Dynamic, Dynamic, RowMajor> MatrixXcf_;
+		#elif defined (IS_DCOMPLEX)
+		typedef Matrix<std::complex<double>, Dynamic, Dynamic, RowMajor> MatrixXcd_;
+		#endif
+	#endif
+	#if defined(IS_FLOAT)
+		Map<MatrixXf_,  0, Stride<Dynamic,1> > A( ( float*  )ap, m, k, stride_a );
+		Map<MatrixXf_,  0, Stride<Dynamic,1> > B( ( float*  )bp, k, n, stride_b );
+		Map<MatrixXf_,  0, Stride<Dynamic,1> > C( ( float*  )cp, m, n, stride_c );
+	#elif defined (IS_DOUBLE)
+		Map<MatrixXd_,  0, Stride<Dynamic,1> > A( ( double* )ap, m, k, stride_a );
+		Map<MatrixXd_,  0, Stride<Dynamic,1> > B( ( double* )bp, k, n, stride_b );
+		Map<MatrixXd_,  0, Stride<Dynamic,1> > C( ( double* )cp, m, n, stride_c );
+	#elif defined (IS_SCOMPLEX)
+		Map<MatrixXcf_, 0, Stride<Dynamic,1> > A( ( std::complex<float>*  )ap, m, k, stride_a );
+		Map<MatrixXcf_, 0, Stride<Dynamic,1> > B( ( std::complex<float>*  )bp, k, n, stride_b );
+		Map<MatrixXcf_, 0, Stride<Dynamic,1> > C( ( std::complex<float>*  )cp, m, n, stride_c );
+	#elif defined (IS_DCOMPLEX)
+		Map<MatrixXcd_, 0, Stride<Dynamic,1> > A( ( std::complex<double>* )ap, m, k, stride_a );
+		Map<MatrixXcd_, 0, Stride<Dynamic,1> > B( ( std::complex<double>* )bp, k, n, stride_b );
+		Map<MatrixXcd_, 0, Stride<Dynamic,1> > C( ( std::complex<double>* )cp, m, n, stride_c );
+	#endif
 #endif
 
 		dtime_save = DBL_MAX;
@@ -271,22 +273,7 @@ int main( int argc, char** argv )
 
 #elif defined(EIGEN)
 
-			//C.noalias() += alpha_r * A * B;
-
-			if ( params.sc_str[0] == 'c' )
-			{
-				if      ( params.dt_str[0] == 's' ) Cs_c.noalias() += alpha_r * As_c * Bs_c;
-				else if ( params.dt_str[0] == 'd' ) Cd_c.noalias() += alpha_r * Ad_c * Bd_c;
-				else if ( params.dt_str[0] == 'c' ) Cc_c.noalias() += alpha_r * Ac_c * Bc_c;
-				else if ( params.dt_str[0] == 'z' ) Cz_c.noalias() += alpha_r * Az_c * Bz_c;
-			}
-			else // if ( params.sc_str[0] == 'r' )
-			{
-				if      ( params.dt_str[0] == 's' ) Cs_r.noalias() += alpha_r * As_r * Bs_r;
-				else if ( params.dt_str[0] == 'd' ) Cd_r.noalias() += alpha_r * Ad_r * Bd_r;
-				else if ( params.dt_str[0] == 'c' ) Cc_r.noalias() += alpha_r * Ac_r * Bc_r;
-				else if ( params.dt_str[0] == 'z' ) Cz_r.noalias() += alpha_r * Az_r * Bz_r;
-			}
+			C.noalias() += alpha_r * A * B;
 
 #else // if defined(BLAS)
 
@@ -305,15 +292,15 @@ int main( int argc, char** argv )
 				float*    cp     = ( float* )bli_obj_buffer( &c );
 
 				sgemm_( &f77_transa,
-				        &f77_transb,
-				        &mm,
-				        &nn,
-				        &kk,
-				        alphap,
-				        ap, &lda,
-				        bp, &ldb,
-				        betap,
-				        cp, &ldc );
+						&f77_transb,
+						&mm,
+						&nn,
+						&kk,
+						alphap,
+						ap, &lda,
+						bp, &ldb,
+						betap,
+						cp, &ldc );
 			}
 			else if ( bli_is_double( dt ) )
 			{
@@ -330,15 +317,15 @@ int main( int argc, char** argv )
 				double*   cp     = ( double* )bli_obj_buffer( &c );
 
 				dgemm_( &f77_transa,
-				        &f77_transb,
-				        &mm,
-				        &nn,
-				        &kk,
-				        alphap,
-				        ap, &lda,
-				        bp, &ldb,
-				        betap,
-				        cp, &ldc );
+						&f77_transb,
+						&mm,
+						&nn,
+						&kk,
+						alphap,
+						ap, &lda,
+						bp, &ldb,
+						betap,
+						cp, &ldc );
 			}
 			else if ( bli_is_scomplex( dt ) )
 			{
@@ -355,15 +342,15 @@ int main( int argc, char** argv )
 				scomplex* cp     = ( scomplex* )bli_obj_buffer( &c );
 
 				cgemm_( &f77_transa,
-				        &f77_transb,
-				        &mm,
-				        &nn,
-				        &kk,
-				        alphap,
-				        ap, &lda,
-				        bp, &ldb,
-				        betap,
-				        cp, &ldc );
+						&f77_transb,
+						&mm,
+						&nn,
+						&kk,
+						alphap,
+						ap, &lda,
+						bp, &ldb,
+						betap,
+						cp, &ldc );
 			}
 			else if ( bli_is_dcomplex( dt ) )
 			{
@@ -380,15 +367,15 @@ int main( int argc, char** argv )
 				dcomplex* cp     = ( dcomplex* )bli_obj_buffer( &c );
 
 				zgemm_( &f77_transa,
-				        &f77_transb,
-				        &mm,
-				        &nn,
-				        &kk,
-				        alphap,
-				        ap, &lda,
-				        bp, &ldb,
-				        betap,
-				        cp, &ldc );
+						&f77_transb,
+						&mm,
+						&nn,
+						&kk,
+						alphap,
+						ap, &lda,
+						bp, &ldb,
+						betap,
+						cp, &ldc );
 			}
 #endif
 
@@ -404,13 +391,12 @@ int main( int argc, char** argv )
 
 		if ( bli_is_complex( dt ) ) gflops *= 4.0;
 
-		printf( "data_%s_%cgemm_%s", THR_STR, dt_ch, IMPL_STR );
-		printf( "( %4lu, 1:4 ) = [ %5lu %5lu %5lu %8.2f ];\n",
+		printf( "data_%s_%cgemm_%s", THR_STR, dt_ch, STR );
+		printf( "( %2lu, 1:4 ) = [ %4lu %4lu %4lu %7.2f ];\n",
 		        ( unsigned long )(p - p_begin)/p_inc + 1,
 		        ( unsigned long )m,
 		        ( unsigned long )k,
 		        ( unsigned long )n, gflops );
-		fflush( stdout );
 
 		bli_obj_free( &alpha );
 		bli_obj_free( &beta );
@@ -424,27 +410,5 @@ int main( int argc, char** argv )
 	//bli_finalize();
 
 	return 0;
-}
-
-void init_def_params( params_t* params )
-{
-	params->opname    = LOCAL_OPNAME_STR;
-	params->impl      = IMPL_STR;
-
-	params->pc_str    = LOCAL_PC_STR;
-	params->dt_str    = GLOB_DEF_DT_STR;
-	params->sc_str    = GLOB_DEF_SC_STR;
-
-	params->im_str    = GLOB_DEF_IM_STR;
-
-	params->ps_str    = GLOB_DEF_PS_STR;
-	params->m_str     = GLOB_DEF_M_STR;
-	params->n_str     = GLOB_DEF_N_STR;
-	params->k_str     = GLOB_DEF_K_STR;
-
-	params->nr_str    = GLOB_DEF_NR_STR;
-
-	params->alpha_str = GLOB_DEF_ALPHA_STR;
-	params->beta_str  = GLOB_DEF_BETA_STR;
 }
 

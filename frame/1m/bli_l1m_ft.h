@@ -44,14 +44,14 @@
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-             doff_t  diagoffx, \
-             diag_t  diagx, \
-             uplo_t  uplox, \
-             trans_t transx, \
-             dim_t   m, \
-             dim_t   n, \
-       const ctype*  x, inc_t rs_x, inc_t cs_x, \
-             ctype*  y, inc_t rs_y, inc_t cs_y  \
+       doff_t  diagoffx, \
+       diag_t  diagx, \
+       uplo_t  uplox, \
+       trans_t transx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  x, inc_t rs_x, inc_t cs_x, \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
@@ -66,15 +66,15 @@ INSERT_GENTDEF( copym )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-             doff_t  diagoffx, \
-             diag_t  diagx, \
-             uplo_t  uplox, \
-             trans_t transx, \
-             dim_t   m, \
-             dim_t   n, \
-       const ctype*  alpha, \
-       const ctype*  x, inc_t rs_x, inc_t cs_x, \
-             ctype*  y, inc_t rs_y, inc_t cs_y  \
+       doff_t  diagoffx, \
+       diag_t  diagx, \
+       uplo_t  uplox, \
+       trans_t transx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t rs_x, inc_t cs_x, \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
@@ -87,39 +87,38 @@ INSERT_GENTDEF( axpym )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-             doff_t  diagoffx, \
-             diag_t  diagx, \
-             uplo_t  uplox, \
-             trans_t transx, \
-             dim_t   m, \
-             dim_t   n, \
-       const ctype*  alpha, \
-       const ctype*  x, inc_t rs_x, inc_t cs_x, \
-             ctype*  y, inc_t rs_y, inc_t cs_y  \
+       doff_t  diagoffx, \
+       diag_t  diagx, \
+       uplo_t  uplox, \
+       trans_t transx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t rs_x, inc_t cs_x, \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( scal2m )
 
-// invscalm, scalm, setm
+// scalm, setm
 
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-             conj_t conjalpha, \
-             doff_t diagoffx, \
-             diag_t diagx, \
-             uplo_t uplox, \
-             dim_t  m, \
-             dim_t  n, \
-       const ctype* alpha, \
-             ctype* x, inc_t rs_x, inc_t cs_x  \
+       conj_t  conjalpha, \
+       doff_t  diagoffx, \
+       diag_t  diagx, \
+       uplo_t  uplox, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t rs_x, inc_t cs_x  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
-INSERT_GENTDEF( invscalm )
 INSERT_GENTDEF( scalm )
 INSERT_GENTDEF( setm )
 
@@ -130,15 +129,15 @@ INSERT_GENTDEF( setm )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-             doff_t  diagoffx, \
-             diag_t  diagx, \
-             uplo_t  uplox, \
-             trans_t transx, \
-             dim_t   m, \
-             dim_t   n, \
-       const ctype*  x, inc_t rs_x, inc_t cs_x, \
-       const ctype*  beta, \
-             ctype*  y, inc_t rs_y, inc_t cs_y  \
+       doff_t  diagoffx, \
+       diag_t  diagx, \
+       uplo_t  uplox, \
+       trans_t transx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  x, inc_t rs_x, inc_t cs_x, \
+       ctype*  beta, \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
        BLIS_TAPI_EX_PARAMS  \
      );
 

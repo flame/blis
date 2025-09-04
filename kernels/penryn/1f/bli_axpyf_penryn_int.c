@@ -45,37 +45,43 @@ typedef union
 
 void bli_daxpyf_penryn_int
      (
-             conj_t  conja,
-             conj_t  conjx,
-             dim_t   m,
-             dim_t   b_n,
-       const void*   alpha,
-       const void*   a, inc_t inca, inc_t lda,
-       const void*   x, inc_t incx,
-             void*   y, inc_t incy,
-       const cntx_t* cntx
+       conj_t           conja,
+       conj_t           conjx,
+       dim_t            m,
+       dim_t            b_n,
+       double* restrict alpha,
+       double* restrict a, inc_t inca, inc_t lda,
+       double* restrict x, inc_t incx,
+       double* restrict y, inc_t incy,
+       cntx_t* restrict cntx
      )
 {
-	const double*  restrict alpha_cast = alpha;
-	const double*  restrict a_cast     = a;
-	const double*  restrict x_cast     = x;
-	      double*  restrict y_cast     = y;
+	double*  restrict alpha_cast = alpha;
+	double*  restrict a_cast = a;
+	double*  restrict x_cast = x;
+	double*  restrict y_cast = y;
+	dim_t             i;
 
-	const dim_t             n_elem_per_reg = 2;
-	const dim_t             n_iter_unroll  = 2;
+	const dim_t       n_elem_per_reg = 2;
+	const dim_t       n_iter_unroll  = 2;
 
-	      dim_t             m_pre;
-	      dim_t             m_run;
-	      dim_t             m_left;
+	dim_t             m_pre;
+	dim_t             m_run;
+	dim_t             m_left;
 
-          double            a0c, a1c, a2c, a3c;
-          double            chi0, chi1, chi2, chi3;
+    double*  restrict a0;
+    double*  restrict a1;
+    double*  restrict a2;
+    double*  restrict a3;
+    double*  restrict y0;
+    double            a0c, a1c, a2c, a3c;
+    double            chi0, chi1, chi2, chi3;
 
-	      v2df_t            a00v, a01v, a02v, a03v, y0v;
-	      v2df_t            a10v, a11v, a12v, a13v, y1v;
-	      v2df_t            chi0v, chi1v, chi2v, chi3v;
+	v2df_t            a00v, a01v, a02v, a03v, y0v;
+	v2df_t            a10v, a11v, a12v, a13v, y1v;
+	v2df_t            chi0v, chi1v, chi2v, chi3v;
 
-	      bool              use_ref = FALSE;
+	bool              use_ref = FALSE;
 
 
 	if ( bli_zero_dim2( m, b_n ) ) return;
@@ -109,8 +115,7 @@ void bli_daxpyf_penryn_int
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		#if 0
-		axpyf_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYF_KER, cntx );
+		daxpyf_ker_ft f = bli_cntx_get_l1f_ker_dt( BLIS_DOUBLE, BLIS_AXPYF_KER, cntx );
 
 		f
 		(
@@ -124,8 +129,6 @@ void bli_daxpyf_penryn_int
 		  y_cast, incy,
 		  cntx
 		);
-		#endif
-		bli_abort();
 		return;
 	}
 
@@ -133,11 +136,11 @@ void bli_daxpyf_penryn_int
 	m_run       = ( m - m_pre ) / ( n_elem_per_reg * n_iter_unroll );
 	m_left      = ( m - m_pre ) % ( n_elem_per_reg * n_iter_unroll );
 
-	const double* restrict a0   = a_cast + 0*lda;
-	const double* restrict a1   = a_cast + 1*lda;
-	const double* restrict a2   = a_cast + 2*lda;
-	const double* restrict a3   = a_cast + 3*lda;
-	      double* restrict y0   = y_cast;
+	a0   = a_cast + 0*lda;
+	a1   = a_cast + 1*lda;
+	a2   = a_cast + 2*lda;
+	a3   = a_cast + 3*lda;
+	y0   = y_cast;
 
 	chi0 = *(x_cast + 0*incx);
 	chi1 = *(x_cast + 1*incx);
@@ -173,7 +176,7 @@ void bli_daxpyf_penryn_int
 	chi2v.v = _mm_loaddup_pd( ( double* )&chi2 );
 	chi3v.v = _mm_loaddup_pd( ( double* )&chi3 );
 
-	for ( dim_t i = 0; i < m_run; ++i )
+	for ( i = 0; i < m_run; ++i )
 	{
 		y0v.v = _mm_load_pd( ( double* )(y0 + 0*n_elem_per_reg) );
 
@@ -218,7 +221,7 @@ void bli_daxpyf_penryn_int
 
 	if ( m_left > 0 )
 	{
-		for ( dim_t i = 0; i < m_left; ++i )
+		for ( i = 0; i < m_left; ++i )
 		{
 			a0c = *a0;
 			a1c = *a1;

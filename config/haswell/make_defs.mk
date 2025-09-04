@@ -5,6 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
+#  Copyright (C) 2025, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -47,7 +48,7 @@ THIS_CONFIG    := haswell
 # may specify additional flags here as needed.
 CPPROCFLAGS    :=
 CMISCFLAGS     :=
-CPICFLAGS      := -fPIC
+CPICFLAGS      :=
 CWARNFLAGS     :=
 
 ifneq ($(DEBUG_TYPE),off)
@@ -55,9 +56,9 @@ CDBGFLAGS      := -g
 endif
 
 ifeq ($(DEBUG_TYPE),noopt)
-COPTFLAGS      := -O0
+  COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2
+  COPTFLAGS      := -O2
 endif
 
 # Flags specific to optimized kernels.
@@ -65,33 +66,32 @@ endif
 # they make explicit use of the rbp register.
 CKOPTFLAGS     := $(COPTFLAGS) -O3 -fomit-frame-pointer
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=haswell
-ifeq ($(GCC_OT_4_9_0),yes)
-# If gcc is older than 4.9.0, we must use a different label for -march.
-CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=core-avx2
-endif
+  ifeq ($(shell test $(CC_MAJOR) -ge 15; echo $$?),0)
+    # gcc 15.1.0 fails to compile SUP kernels if -ftree-slp-vectorize
+    # is enabled, which is default in -O2 and higher
+    CKOPTFLAGS += -fno-tree-slp-vectorize
+  endif
+  CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=haswell
+  ifeq ($(GCC_OT_4_9_0),yes)
+    # If gcc is older than 4.9.0, we must use a different label for -march.
+    CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=core-avx2
+  endif
+else ifeq ($(CC_VENDOR),icc)
+  CKVECFLAGS     := -xCORE-AVX2
+else ifeq ($(CC_VENDOR),clang)
+  CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=haswell
 else
-ifeq ($(CC_VENDOR),icc)
-CKVECFLAGS     := -xCORE-AVX2
-else
-ifeq ($(CC_VENDOR),clang)
-CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=haswell
-else
-$(error gcc, icc, or clang is required for this configuration.)
-endif
-endif
+  $(error gcc, icc, or clang is required for this configuration.)
 endif
 
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+  CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+else ifeq ($(CC_VENDOR),clang)
+  CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
 else
-ifeq ($(CC_VENDOR),clang)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
-else
-CRVECFLAGS     := $(CKVECFLAGS)
-endif
+  CRVECFLAGS     := $(CKVECFLAGS)
 endif
 
 # Store all of the variables here to new variables containing the

@@ -1,9 +1,11 @@
+#
+#
 #  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2017 - 2019, Advanced Micro Devices, Inc.
+#  Copyright (C) 2017 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -112,7 +114,9 @@ TEST_OBJS      := $(patsubst $(TEST_SRC_PATH)/%.c, \
 # while building BLIS.
 CINCFLAGS      := -I$(INC_PATH)
 
-CXX	= g++
+# Use CXX from the blis configuration, this will insure that
+# correct compiler and compiler version is used to build testcpp folder
+#CXX	= g++
 
 # Use the CFLAGS for the configuration family.
 override CFLAGS         += $(call get-sandbox-cxxflags-for,$(CONFIG_NAME))
@@ -140,8 +144,7 @@ LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
 #
 all: blis 
 
-
-blis: test_asum_blis.x \
+CPPEXES := test_asum_blis.x \
 	test_axpy_blis.x \
 	test_copy_blis.x \
 	test_dot_blis.x \
@@ -181,8 +184,10 @@ blis: test_asum_blis.x \
 	test_trmm_blis.x \
 	test_trsm_blis.x \
 	test_trsv_blis.x 
- 
 
+CPPEXES := $(addprefix $(MK_USE_LIB)/,$(CPPEXES))
+
+blis: $(CPPEXES)
 
 # --Object file rules --
 
@@ -195,7 +200,8 @@ test_%_blis.o: test_%.cc
 
 # -- Executable file rules --
 
-test_%_blis.x: test_%_blis.o $(LIBBLIS_LINK)
+$(MK_USE_LIB)/test_%_blis.x: test_%_blis.o $(LIBBLIS_LINK)
+	@mkdir -p ./$(MK_USE_LIB)
 	@$(LINKER) $^       $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 	./$@
 
@@ -204,5 +210,5 @@ test_%_blis.x: test_%_blis.o $(LIBBLIS_LINK)
 clean: cleanx
 
 cleanx:
-	- $(RM_F) *.o *.x
+	- $(RM_F) ./*.o ./{shared,static}/*.x
 

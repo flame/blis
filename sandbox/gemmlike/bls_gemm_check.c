@@ -36,12 +36,12 @@
 
 void bls_gemm_check
      (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx
      )
 {
 	//bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
@@ -97,6 +97,11 @@ void bls_gemm_check
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_object_buffer( c );
+	bli_check_error_code( e_val );
+
+	// Check for sufficiently sized stack buffers
+
+	e_val = bli_check_sufficient_stack_buf_size( bli_obj_dt( a ), cntx );
 	bli_check_error_code( e_val );
 
 	// Check object dimensions.

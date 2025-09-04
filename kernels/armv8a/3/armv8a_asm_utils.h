@@ -34,12 +34,12 @@
 
 */
 
-// Apple/Clang's local label requirements.
-#if defined(__APPLE__) || defined(__clang__)
-#define LABEL(str) "   L" #str"%=: \n\t"
-#define BEQ(str) "b.eq L" #str"%=  \n\t"
-#define BNE(str) "b.ne L" #str"%=  \n\t"
-#define BRANCH(str) "b L" #str"%=  \n\t"
+// Apple's local label requirements.
+#if defined(__APPLE__)
+#define LABEL(str) "   L" #str": \n\t"
+#define BEQ(str) "b.eq L" #str"  \n\t"
+#define BNE(str) "b.ne L" #str"  \n\t"
+#define BRANCH(str) "b L" #str"  \n\t"
 #else
 #define LABEL(str) "   ." #str": \n\t"
 #define BEQ(str) "b.eq ." #str"  \n\t"
@@ -61,18 +61,6 @@
   CLEAR4V(V4,V5,V6,V7)
 
 // Scale vectors.
-#define SSCALE1V(V,A,IDX) \
-" fmul  v"#V".4s, v"#V".4s, v"#A".s["#IDX"] \n\t"
-#define SSCALE2V(V0,V1,A,IDX) \
-  SSCALE1V(V0,A,IDX) \
-  SSCALE1V(V1,A,IDX)
-#define SSCALE4V(V0,V1,V2,V3,A,IDX) \
-  SSCALE2V(V0,V1,A,IDX) \
-  SSCALE2V(V2,V3,A,IDX)
-#define SSCALE8V(V0,V1,V2,V3,V4,V5,V6,V7,A,IDX) \
-  SSCALE4V(V0,V1,V2,V3,A,IDX) \
-  SSCALE4V(V4,V5,V6,V7,A,IDX)
-
 #define DSCALE1V(V,A,IDX) \
 " fmul  v"#V".2d, v"#V".2d, v"#A".d["#IDX"] \n\t"
 #define DSCALE2V(V0,V1,A,IDX) \
@@ -86,18 +74,6 @@
   DSCALE4V(V4,V5,V6,V7,A,IDX)
 
 // Scale-accumulate.
-#define SSCALEA1V(D,S,A,IDX) \
-" fmla  v"#D".4s, v"#S".4s, v"#A".s["#IDX"] \n\t"
-#define SSCALEA2V(D0,D1,S0,S1,A,IDX) \
-  SSCALEA1V(D0,S0,A,IDX) \
-  SSCALEA1V(D1,S1,A,IDX)
-#define SSCALEA4V(D0,D1,D2,D3,S0,S1,S2,S3,A,IDX) \
-  SSCALEA2V(D0,D1,S0,S1,A,IDX) \
-  SSCALEA2V(D2,D3,S2,S3,A,IDX)
-#define SSCALEA8V(D0,D1,D2,D3,D4,D5,D6,D7,S0,S1,S2,S3,S4,S5,S6,S7,A,IDX) \
-  SSCALEA4V(D0,D1,D2,D3,S0,S1,S2,S3,A,IDX) \
-  SSCALEA4V(D4,D5,D6,D7,S4,S5,S6,S7,A,IDX)
-
 #define DSCALEA1V(D,S,A,IDX) \
 " fmla  v"#D".2d, v"#S".2d, v"#A".d["#IDX"] \n\t"
 #define DSCALEA2V(D0,D1,S0,S1,A,IDX) \
@@ -119,16 +95,8 @@
 #define DLOAD4V(V0,V1,V2,V3,ADDR,SHIFT) \
   DLOAD2V(V0,V1,ADDR,SHIFT) \
   DLOAD2V(V2,V3,ADDR,SHIFT+32)
-#define SLOAD1V DLOAD1V
-#define SLOAD2V DLOAD2V
-#define SLOAD4V DLOAD4V
 
 // Generic: load one line.
-#define SLOAD1V_GATHER_ELMFWD(V,ADDR,INC) \
-" ld1   {v"#V".s}[0], ["#ADDR"], "#INC" \n\t" \
-" ld1   {v"#V".s}[1], ["#ADDR"], "#INC" \n\t" \
-" ld1   {v"#V".s}[2], ["#ADDR"], "#INC" \n\t" \
-" ld1   {v"#V".s}[3], ["#ADDR"], "#INC" \n\t"
 #define DLOAD1V_GATHER_ELMFWD(V,ADDR,INC) \
 " ld1   {v"#V".d}[0], ["#ADDR"], "#INC" \n\t" \
 " ld1   {v"#V".d}[1], ["#ADDR"], "#INC" \n\t"
@@ -142,16 +110,8 @@
 #define DSTORE4V(V0,V1,V2,V3,ADDR,SHIFT) \
   DSTORE2V(V0,V1,ADDR,SHIFT) \
   DSTORE2V(V2,V3,ADDR,SHIFT+32)
-#define SSTORE1V DSTORE1V
-#define SSTORE2V DSTORE2V
-#define SSTORE4V DSTORE4V
 
 // Generic: store one line.
-#define SSTORE1V_SCATTER_ELMFWD(V,ADDR,INC) \
-" st1   {v"#V".s}[0], ["#ADDR"], "#INC" \n\t" \
-" st1   {v"#V".s}[1], ["#ADDR"], "#INC" \n\t" \
-" st1   {v"#V".s}[2], ["#ADDR"], "#INC" \n\t" \
-" st1   {v"#V".s}[3], ["#ADDR"], "#INC" \n\t"
 #define DSTORE1V_SCATTER_ELMFWD(V,ADDR,INC) \
 " st1   {v"#V".d}[0], ["#ADDR"], "#INC" \n\t" \
 " st1   {v"#V".d}[1], ["#ADDR"], "#INC" \n\t"

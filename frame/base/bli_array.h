@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -51,17 +51,17 @@ typedef struct
 
 // Array entry query
 
-BLIS_INLINE void* bli_array_buf( const array_t* array )
+BLIS_INLINE void* bli_array_buf( array_t* array )
 {
 	return array->buf;
 }
 
-BLIS_INLINE siz_t bli_array_num_elem( const array_t* array )
+BLIS_INLINE siz_t bli_array_num_elem( array_t* array )
 {
 	return array->num_elem;
 }
 
-BLIS_INLINE siz_t bli_array_elem_size( const array_t* array )
+BLIS_INLINE siz_t bli_array_elem_size( array_t* array )
 {
 	return array->elem_size;
 }
@@ -87,30 +87,30 @@ BLIS_INLINE void bli_array_set_elem_size( siz_t elem_size, array_t* array ) \
 
 void bli_array_init
      (
-       siz_t    num_elem,
-       siz_t    elem_size,
-       array_t* array
+       const siz_t       num_elem,
+       const siz_t       elem_size,
+       array_t* restrict array
      );
 void bli_array_resize
      (
-       siz_t    num_elem_new,
-       array_t* array
+       const siz_t       num_elem_new,
+       array_t* restrict array
      );
 void bli_array_finalize
      (
-       array_t* array
+       array_t* restrict array
      );
 
 void* bli_array_elem
      (
-             siz_t    index,
-       const array_t* array
+       const siz_t       index,
+       array_t* restrict array
      );
 void bli_array_set_elem
      (
-       void*    elem,
-       siz_t    index,
-       array_t* array
+       void*    restrict elem,
+       const siz_t       index,
+       array_t* restrict array
      );
 
 #endif

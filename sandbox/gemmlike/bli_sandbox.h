@@ -53,5 +53,7 @@
 
 #include "bls_packm_cxk.h"
 
+#include "bls_l3_decor.h"
+
 
 #endif

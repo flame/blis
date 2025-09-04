@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,14 +35,17 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLAS
+// Make thread settings local to each thread calling BLIS routines.
+// (The definition resides in bli_rntm.c.)
+extern BLIS_THREAD_LOCAL rntm_t tl_rntm;
 
 /* chpr2.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(c,hpr2)(const bla_character *uplo, const bla_integer *n, const bla_scomplex *alpha, const bla_scomplex *x, const bla_integer *incx, const bla_scomplex *y, const bla_integer *incy, bla_scomplex *ap)
+/* Subroutine */ 
+int PASTEF77S(c,hpr2)(const bla_character *uplo, const bla_integer *n, const bla_scomplex *alpha, const bla_scomplex *x, const bla_integer *incx, const bla_scomplex *y, const bla_integer *incy, bla_scomplex *ap)
 {
     /* System generated locals */
     bla_integer i__1, i__2, i__3, i__4, i__5, i__6;
@@ -55,9 +59,9 @@
     bla_integer info;
     bla_scomplex temp1, temp2;
     bla_integer i__, j, k;
-    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTE_LSAME(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer kk, ix, iy, jx = 0, jy = 0, kx = 0, ky = 0;
-    //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
+    //extern /* Subroutine */ int PASTE_XERBLA(bla_character *, bla_integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -166,8 +170,17 @@
     --x;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE();
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_HPR2_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *uplo,
+		       	     *n, (void*)alpha, *incx, *incy);
+
+    // Initialize info_value to 0
+    gint_t info_value = 0;
+    bli_rntm_set_info_value_only( info_value, &tl_rntm );
+
     info = 0;
-    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
+    if (! PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -178,13 +191,15 @@
 	info = 7;
     }
     if (info != 0) {
-	PASTEF770(xerbla)("CHPR2 ", &info, (ftnlen)6);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+	PASTE_XERBLA("CHPR2 ", &info, (ftnlen)6);
 	return 0;
     }
 
 /*     Quick return if possible. */
 
     if (*n == 0 || (bli_creal(*alpha) == 0.f && bli_cimag(*alpha) == 0.f)) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
 
@@ -210,7 +225,7 @@
 /*     are accessed sequentially with one pass through AP. */
 
     kk = 1;
-    if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  A  when upper triangle is stored in AP. */
 
@@ -418,6 +433,7 @@
 	}
     }
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*     End of CHPR2 . */
@@ -429,7 +445,8 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(z,hpr2)(const bla_character *uplo, const bla_integer *n, const bla_dcomplex *alpha, const bla_dcomplex *x, const bla_integer *incx, const bla_dcomplex *y, const bla_integer *incy, bla_dcomplex *ap)
+/* Subroutine */ 
+int PASTEF77S(z,hpr2)(const bla_character *uplo, const bla_integer *n, const bla_dcomplex *alpha, const bla_dcomplex *x, const bla_integer *incx, const bla_dcomplex *y, const bla_integer *incy, bla_dcomplex *ap)
 {
     /* System generated locals */
     bla_integer i__1, i__2, i__3, i__4, i__5, i__6;
@@ -443,9 +460,9 @@
     bla_integer info;
     bla_dcomplex temp1, temp2;
     bla_integer i__, j, k;
-    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTE_LSAME(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer kk, ix, iy, jx = 0, jy = 0, kx = 0, ky = 0;
-    //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
+    //extern /* Subroutine */ int PASTE_XERBLA(bla_character *, bla_integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -554,8 +571,17 @@
     --x;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE();
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_HPR2_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *uplo,
+		       	     *n, (void*)alpha, *incx, *incy);
+
+    // Initialize info_value to 0
+    gint_t info_value = 0;
+    bli_rntm_set_info_value_only( info_value, &tl_rntm );
+
     info = 0;
-    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
+    if (! PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -566,13 +592,15 @@
 	info = 7;
     }
     if (info != 0) {
-	PASTEF770(xerbla)("ZHPR2 ", &info, (ftnlen)6);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+	PASTE_XERBLA("ZHPR2 ", &info, (ftnlen)6);
 	return 0;
     }
 
 /*     Quick return if possible. */
 
     if (*n == 0 || (bli_zreal(*alpha) == 0. && bli_zimag(*alpha) == 0.)) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
 
@@ -598,7 +626,7 @@
 /*     are accessed sequentially with one pass through AP. */
 
     kk = 1;
-    if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  A  when upper triangle is stored in AP. */
 
@@ -806,11 +834,24 @@
 	}
     }
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*     End of ZHPR2 . */
 
 } /* zhpr2_ */
+
+#ifdef BLIS_ENABLE_BLAS
+
+int PASTEF77(c,hpr2)(const bla_character *uplo, const bla_integer *n, const bla_scomplex *alpha, const bla_scomplex *x, const bla_integer *incx, const bla_scomplex *y, const bla_integer *incy, bla_scomplex *ap)
+{
+  return PASTEF77S(c,hpr2)( uplo, n, alpha, x, incx, y, incy, ap ); 
+}
+
+int PASTEF77(z,hpr2)(const bla_character *uplo, const bla_integer *n, const bla_dcomplex *alpha, const bla_dcomplex *x, const bla_integer *incx, const bla_dcomplex *y, const bla_integer *incy, bla_dcomplex *ap)
+{
+  return PASTEF77S(z,hpr2)( uplo, n, alpha, x, incx, y, incy, ap ); 
+}
 
 #endif
 

@@ -49,15 +49,15 @@
 
 void bli_dpackm_armv8a_int_8xk
      (
-             conj_t  conja,
-             pack_t  schema,
-             dim_t   cdim0,
-             dim_t   k0,
-             dim_t   k0_max,
-       const void*   kappa,
-       const void*   a, inc_t inca0, inc_t lda0,
-             void*   p,              inc_t ldp0,
-       const cntx_t* cntx
+       conj_t              conja,
+       pack_t              schema,
+       dim_t               cdim0,
+       dim_t               k0,
+       dim_t               k0_max,
+       double*    restrict kappa,
+       double*    restrict a, inc_t inca0, inc_t lda0,
+       double*    restrict p,              inc_t ldp0,
+       cntx_t*    restrict cntx
      )
 {
   // This is the panel dimension assumed by the packm kernel.
@@ -67,9 +67,8 @@ void bli_dpackm_armv8a_int_8xk
   // different size than is expected by load instructions.
   uint64_t       k_iter = k0 / 2;
   uint64_t       k_left = k0 % 2;
-
-  const double*  a_loc  = a;
-        double*  p_loc  = p;
+  double*        a_loc  = a;
+  double*        p_loc  = p;
 
   // NOTE: For the purposes of the comments in this packm kernel, we
   // interpret inca and lda as rs_a and cs_a, respectively, and similarly
@@ -87,7 +86,7 @@ void bli_dpackm_armv8a_int_8xk
 
   // NOTE: If/when this kernel ever supports scaling by kappa within the
   // assembly region, this constraint should be lifted.
-  const bool     unitk  = bli_deq1( *(( double* )kappa) );
+  const bool     unitk  = bli_deq1( *kappa );
 
 
   // -------------------------------------------------------------------------
@@ -321,13 +320,13 @@ void bli_dpackm_armv8a_int_8xk
       const dim_t      i      = cdim0;
       const dim_t      m_edge = mnr - cdim0;
       const dim_t      n_edge = k0_max;
-      double* restrict p_edge = ( double* )p + (i  )*1;
+      double* restrict p_edge = p + (i  )*1;
 
       bli_dset0s_mxn
       (
         m_edge,
         n_edge,
-        p_edge, 1, ldp
+        p_edge, 1, ldp 
       );
     }
   }
@@ -341,13 +340,13 @@ void bli_dpackm_armv8a_int_8xk
     const dim_t      j      = k0;
     const dim_t      m_edge = mnr;
     const dim_t      n_edge = k0_max - k0;
-    double* restrict p_edge = ( double* )p + (j  )*ldp;
+    double* restrict p_edge = p + (j  )*ldp;
 
     bli_dset0s_mxn
     (
       m_edge,
       n_edge,
-      p_edge, 1, ldp
+      p_edge, 1, ldp 
     );
   }
 }

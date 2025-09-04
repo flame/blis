@@ -3,7 +3,7 @@
 set -e
 set -x
 
-SDE_VERSION=sde-external-8.69.1-2021-07-18-lin
+SDE_VERSION=sde-external-8.63.0-2021-01-18-lin
 SDE_TARBALL=$SDE_VERSION.tar.bz2
 SDE=$SDE_VERSION/sde64
 
@@ -46,7 +46,7 @@ for LIB in $LD_SO $LIBC_SO $LIBM_SO; do
 done
 
 #for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator zen; do
-for ARCH in penryn sandybridge haswell skx knl zen zen2 zen3; do
+for ARCH in penryn sandybridge haswell skx knl zen; do
     if [ "$ARCH" = "knl" ]; then
         $SDE -knl -- ./test_libblis.x > output.testsuite
     else

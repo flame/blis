@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -47,6 +47,7 @@ extern "C" {
 
 // NOTE: PLEASE DON'T CHANGE THE ORDER IN WHICH HEADERS ARE INCLUDED UNLESS
 // YOU ARE SURE THAT IT DOESN'T BREAK INTER-HEADER MACRO DEPENDENCIES.
+// ALSO REMEMBER TO UPDATE ./frame/compat/cblas/src/cblas.h APPROPRIATELY
 
 // -- configure definitions --
 
@@ -80,18 +81,23 @@ extern "C" {
 #include "bli_pragma_macro_defs.h"
 
 
-// -- BLIS architecture/kernel definitions --
+// -- Threading definitions --
 
-#include "bli_pre_ker_params.h"
-#include "bli_l1v_ker_params.h"
-#include "bli_l1f_ker_params.h"
-#include "bli_l1m_ker_params.h"
-#include "bli_l3_ukr_params.h"
-#include "bli_l3_sup_ker_params.h"
+#include "bli_thread.h"
+#include "bli_pthread.h"
+
+
+// -- Constant definitions --
+
+#include "bli_extern_defs.h"
+
+
+// -- BLIS architecture/kernel definitions --
 
 #include "bli_l1v_ker_prot.h"
 #include "bli_l1f_ker_prot.h"
 #include "bli_l1m_ker_prot.h"
+#include "bli_l2_ker_prot.h"
 #include "bli_l3_ukr_prot.h"
 #include "bli_l3_sup_ker_prot.h"
 
@@ -99,21 +105,6 @@ extern "C" {
 #include "bli_arch_config.h"
 
 #include "bli_kernel_macro_defs.h"
-
-
-// -- Threading definitions --
-
-#include "bli_thread.h"
-#include "bli_thread_range.h"
-#include "bli_thread_range_slab_rr.h"
-#include "bli_thread_range_tlb.h"
-
-#include "bli_pthread.h"
-
-
-// -- Constant definitions --
-
-#include "bli_extern_defs.h"
 
 
 // -- Base operation prototypes --
@@ -209,9 +200,6 @@ extern "C" {
 
 // -- addon definitions --
 
-// NOTE: These definitions should not be included much earlier since an addon
-// may wish to utilize other types and definitions provided by BLIS.
-
 #include "bli_addon.h"
 
 
@@ -233,6 +221,8 @@ extern "C" {
 
 #include "bli_winsys.h"
 
+#include "aocldtl.h"
+#include "aocldtl_blis.h"
 
 // End extern "C" construct block.
 #ifdef __cplusplus

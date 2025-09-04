@@ -21,6 +21,10 @@ other tortious action, arising out of or in connection with the
 use or performance of this software.
 ****************************************************************/
 
+/*
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+*/
+
 #include <f2c_config.h>
 #include "f2c.h"
 #include "fio.h"
@@ -43,7 +47,9 @@ integer f_end(alist *a)
 	if(a->aunit>=MXUNIT || a->aunit<0) err(a->aerr,101,"endfile");
 	b = &f__units[a->aunit];
 	if(b->ufd==NULL) {
-		char nbuf[10];
+		/* Increased buffer size from 10 to 17 to eliminate
+		   warning message from gcc. */
+		char nbuf[17];
 		sprintf(nbuf,"fort.%ld",(long)a->aunit);
 		if (tf = fopen(nbuf, f__w_mode[0]))
 			fclose(tf);

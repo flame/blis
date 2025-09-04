@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -178,7 +178,7 @@ void PASTEMAC(ch,varname) \
 	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const bool      col_pref    = bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_VIR_UKR, cntx ); \
+	const bool      col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	const inc_t     rs_ct       = ( col_pref ? 1 : NR ); \
 	const inc_t     cs_ct       = ( col_pref ? MR : 1 ); \
 \
@@ -327,17 +327,17 @@ void PASTEMAC(ch,varname) \
 	/*thrinfo_t* ir_thread = bli_thrinfo_sub_node( thread );*/ \
 \
 	/* Query the number of threads and thread ids for each loop. */ \
-	dim_t jr_nt  = bli_thrinfo_n_way( thread ); \
-	dim_t jr_tid = bli_thrinfo_work_id( thread ); \
-	/*dim_t ir_nt  = bli_thrinfo_n_way( ir_thread ); \
-	dim_t ir_tid = bli_thrinfo_work_id( ir_thread );*/ \
+	dim_t jr_nt  = bli_thread_n_way( thread ); \
+	dim_t jr_tid = bli_thread_work_id( thread ); \
+	/*dim_t ir_nt  = bli_thread_n_way( ir_thread ); \
+	dim_t ir_tid = bli_thread_work_id( ir_thread );*/ \
 \
 	dim_t jr_start, jr_end; \
 	/*dim_t ir_start, ir_end;*/ \
 	dim_t jr_inc; \
 \
 	/* Use round-robin assignment of micropanels to threads in the 2nd loop for
-	   the initial rectangular region of C (if it exists).
+	   the initial rectangular region of C (if it exists). 
 	   NOTE: Parallelism in the 1st loop is disabled for now. */ \
 	bli_thread_range_jrir_rr( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
 	/*bli_thread_range_jrir_rr( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc );*/ \

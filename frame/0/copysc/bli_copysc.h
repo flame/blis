@@ -42,8 +42,8 @@
 \
 BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
-       const obj_t* chi, \
-       const obj_t* psi  \
+       obj_t*  chi, \
+       obj_t*  psi  \
      );
 GENFRONT( copysc )
 
@@ -57,12 +57,12 @@ GENFRONT( copysc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(chx,chy,varname) \
      ( \
-             conj_t conjchi, \
-       const void*  chi, \
-             void*  psi \
+       conj_t conjchi, \
+       void*  chi, \
+       void*  psi \
      );
 
-INSERT_GENTPROT2_BASIC( copysc )
-INSERT_GENTPROT2_MIX_D( copysc )
-INSERT_GENTPROT2_MIX_P( copysc )
+INSERT_GENTPROT2_BASIC0( copysc )
+INSERT_GENTPROT2_MIX_D0( copysc )
+INSERT_GENTPROT2_MIX_P0( copysc )
 

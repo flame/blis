@@ -39,17 +39,14 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-             conj_t  conjx, \
-             dim_t   n, \
-       const void*   x0, inc_t incx, \
-             void*   y0, inc_t incy, \
-       const cntx_t* cntx  \
+       conj_t           conjx, \
+       dim_t            n, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict y, inc_t incy, \
+       cntx_t* restrict cntx  \
      ) \
 { \
 	if ( bli_zero_dim1( n ) ) return; \
-\
-	const ctype* restrict x = x0; \
-	      ctype* restrict y = y0; \
 \
 	if ( bli_is_conj( conjx ) ) \
 	{ \
@@ -95,5 +92,5 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( subv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC_BASIC2( subv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

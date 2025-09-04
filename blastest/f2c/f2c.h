@@ -33,11 +33,7 @@ use or performance of this software.
 
 #include <math.h>
 #include <string.h>
-#ifdef _MSC_VER
-# include <f2c_types_win.h>
-#else
-# include <f2c_types.h>
-#endif
+#include <f2c_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -161,10 +157,12 @@ struct Namelist {
 };
 typedef struct Namelist Namelist;
 
-#define abs(x) ((x) >= 0 ? (x) : -(x))
-#define dabs(x) (doublereal)abs(x)
+#ifndef _MSC_VER
 #define min(a,b) ((a) <= (b) ? (a) : (b))
 #define max(a,b) ((a) >= (b) ? (a) : (b))
+#endif
+#define abs(x) ((x) >= 0 ? (x) : -(x))
+#define dabs(x) (doublereal)abs(x)
 #define dmin(a,b) (doublereal)min(a,b)
 #define dmax(a,b) (doublereal)max(a,b)
 #define bit_test(a,b)	((a) >> (b) & 1)

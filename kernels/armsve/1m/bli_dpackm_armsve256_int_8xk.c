@@ -35,7 +35,7 @@
 
 #include "blis.h"
 
-#if !defined(BLIS_FAMILY_A64FX)
+#if (defined(BLIS_FAMILY_ARMSVE) && !defined(BLIS_FAMILY_A64FX))
 #include <arm_sve.h>
 
 // assumption:
@@ -44,15 +44,15 @@
 
 void bli_dpackm_armsve256_int_8xk
      (
-             conj_t  conja,
-             pack_t  schema,
-             dim_t   cdim_,
-             dim_t   n_,
-             dim_t   n_max_,
-       const void*   kappa,
-       const void*   a, inc_t inca_, inc_t lda_,
-             void*   p,              inc_t ldp_,
-       const cntx_t* cntx
+       conj_t           conja,
+       pack_t           schema,
+       dim_t            cdim_,
+       dim_t            n_,
+       dim_t            n_max_,
+       double* restrict kappa,
+       double* restrict a, inc_t inca_, inc_t lda_,
+       double* restrict p,              inc_t ldp_,
+       cntx_t* restrict cntx
      )
 {
     const int64_t cdim  = cdim_;
@@ -63,13 +63,13 @@ void bli_dpackm_armsve256_int_8xk
     const int64_t lda   = lda_;
     const int64_t ldp   = ldp_;
 
-    const double* restrict alpha1     = a;
-    const double* restrict alpha1_4   = alpha1 + 4 * inca;
-          double* restrict pi1        = p;
-    const svbool_t         all_active = svptrue_b64();
-    svfloat64_t            z_a0;
-    svfloat64_t            z_a4;
-    svuint64_t             z_index;
+    double* restrict alpha1     = a;
+    double* restrict alpha1_4   = alpha1 + 4 * inca;
+    double* restrict pi1        = p;
+    const   svbool_t all_active = svptrue_b64();
+    svfloat64_t      z_a0;
+    svfloat64_t      z_a4;
+    svuint64_t       z_index;
 
     // creating index for gather/scatter
     //   with each element as: 0, 1*inca, 2*inca, 3*inca
@@ -77,7 +77,7 @@ void bli_dpackm_armsve256_int_8xk
 
     if ( cdim == mnr )
     {
-        if ( bli_deq1( *(( double* )kappa) ) )
+        if ( bli_deq1( *kappa ) )
         {
             if ( inca == 1 )  // continous memory. packA style
             {
@@ -129,7 +129,7 @@ void bli_dpackm_armsve256_int_8xk
             // load kappa into vector
             svfloat64_t z_kappa;
 
-            z_kappa = svdup_f64( *(( double* )kappa) );
+            z_kappa = svdup_f64( *kappa );
 
             if ( inca == 1 )  // continous memory. packA style
             {
@@ -201,7 +201,7 @@ void bli_dpackm_armsve256_int_8xk
             const dim_t      i      = cdim;
             const dim_t      m_edge = mnr - i;
             const dim_t      n_edge = n_max;
-            double* restrict p_edge = ( double* )p + (i  )*1;
+            double* restrict p_edge = p + (i  )*1;
 
             bli_dset0s_mxn
             (
@@ -217,7 +217,7 @@ void bli_dpackm_armsve256_int_8xk
         const dim_t      j      = n;
         const dim_t      m_edge = mnr;
         const dim_t      n_edge = n_max - j;
-        double* restrict p_edge = ( double* )p + (j  )*ldp;
+        double* restrict p_edge = p + (j  )*ldp;
 
         bli_dset0s_mxn
         (

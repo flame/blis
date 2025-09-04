@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,20 +40,20 @@
 
 /*
    rrr:
-	 --------        ------        --------
-	 --------        ------        --------
-	 --------   +=   ------ ...    --------
-	 --------        ------        --------
-	 --------        ------            :
-	 --------        ------            :
+	 --------        ------        --------      
+	 --------        ------        --------      
+	 --------   +=   ------ ...    --------      
+	 --------        ------        --------      
+	 --------        ------            :         
+	 --------        ------            :         
 
    rcr:
-	 --------        | | | |       --------
-	 --------        | | | |       --------
-	 --------   +=   | | | | ...   --------
-	 --------        | | | |       --------
-	 --------        | | | |           :
-	 --------        | | | |           :
+	 --------        | | | |       --------      
+	 --------        | | | |       --------      
+	 --------   +=   | | | | ...   --------      
+	 --------        | | | |       --------      
+	 --------        | | | |           :         
+	 --------        | | | |           :         
 
    Assumptions:
    - B is row-stored;
@@ -69,12 +69,12 @@
    cost of the in-register transpose).
 
    crr:
-	 | | | | | | | |       ------        --------
-	 | | | | | | | |       ------        --------
-	 | | | | | | | |  +=   ------ ...    --------
-	 | | | | | | | |       ------        --------
-	 | | | | | | | |       ------            :
-	 | | | | | | | |       ------            :
+	 | | | | | | | |       ------        --------      
+	 | | | | | | | |       ------        --------      
+	 | | | | | | | |  +=   ------ ...    --------      
+	 | | | | | | | |       ------        --------      
+	 | | | | | | | |       ------            :         
+	 | | | | | | | |       ------            :         
 */
 
 // Prototype reference microkernels.
@@ -83,18 +83,18 @@ GEMMSUP_KER_PROT( float,    s, gemmsup_r_haswell_ref )
 
 void bli_sgemmsup_rv_haswell_asm_6x8
      (
-             conj_t     conja,
-             conj_t     conjb,
-             dim_t      m0,
-             dim_t      n0,
-             dim_t      k0,
-       const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
-       const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       float*     restrict alpha,
+       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
+       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
+       float*     restrict beta,
+       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -115,9 +115,9 @@ void bli_sgemmsup_rv_haswell_asm_6x8
 	// -------------------------------------------------------------------------
 
 	begin_asm()
-
+	
 	vzeroall()                         // zero all xmm/ymm registers.
-
+	
 	mov(var(a), rax)                   // load address of a.
 	mov(var(rs_a), r8)                 // load rs_a
 	mov(var(cs_a), r9)                 // load cs_a
@@ -132,7 +132,7 @@ void bli_sgemmsup_rv_haswell_asm_6x8
 	//mov(var(cs_b), r11)                // load cs_b
 	lea(mem(, r10, 4), r10)            // rs_b *= sizeof(float)
 	//lea(mem(, r11, 4), r11)            // cs_b *= sizeof(float)
-
+	
 	                                   // NOTE: We cannot pre-load elements of a or b
 	                                   // because it could eventually, in the last
 	                                   // unrolled iter or the cleanup loop, result
@@ -181,25 +181,25 @@ void bli_sgemmsup_rv_haswell_asm_6x8
 	lea(mem(rax, r9,  8), rdx)         //
 	lea(mem(rdx, r9,  8), rdx)         // rdx = a + 16*cs_a;
 #endif
-
-
-
-
+	
+	
+	
+	
 	mov(var(k_iter), rsi)              // i = k_iter;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.SCONSIDKLEFT)                  // if i == 0, jump to code that
 	                                   // contains the k_left loop.
-
-
+	
+	
 	label(.SLOOPKITER)                 // MAIN LOOP
-
-
+	
+	
 	// ---------------------------------- iteration 0
 
 #if 1
 	prefetch(0, mem(rdx, 5*8))
 #endif
-
+	
 	vmovups(mem(rbx, 0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
 
@@ -207,19 +207,19 @@ void bli_sgemmsup_rv_haswell_asm_6x8
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	vbroadcastss(mem(rax, r13, 1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm8)
 	vfmadd231ps(ymm0, ymm3, ymm10)
-
+	
 	vbroadcastss(mem(rax, r8,  4), ymm2)
 	vbroadcastss(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm12)
 	vfmadd231ps(ymm0, ymm3, ymm14)
 
-
+	
 	// ---------------------------------- iteration 1
 
 #if 0
@@ -233,25 +233,25 @@ void bli_sgemmsup_rv_haswell_asm_6x8
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	vbroadcastss(mem(rax, r13, 1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm8)
 	vfmadd231ps(ymm0, ymm3, ymm10)
-
+	
 	vbroadcastss(mem(rax, r8,  4), ymm2)
 	vbroadcastss(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm12)
 	vfmadd231ps(ymm0, ymm3, ymm14)
-
-
+	
+	
 	// ---------------------------------- iteration 2
 
 #if 1
 	prefetch(0, mem(rdx, r9, 2, 5*8))
 #endif
-
+	
 	vmovups(mem(rbx, 0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
 
@@ -259,18 +259,18 @@ void bli_sgemmsup_rv_haswell_asm_6x8
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	vbroadcastss(mem(rax, r13, 1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm8)
 	vfmadd231ps(ymm0, ymm3, ymm10)
-
+	
 	vbroadcastss(mem(rax, r8,  4), ymm2)
 	vbroadcastss(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm12)
 	vfmadd231ps(ymm0, ymm3, ymm14)
-
+	
 
 	// ---------------------------------- iteration 3
 
@@ -285,103 +285,103 @@ void bli_sgemmsup_rv_haswell_asm_6x8
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	vbroadcastss(mem(rax, r13, 1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm8)
 	vfmadd231ps(ymm0, ymm3, ymm10)
-
+	
 	vbroadcastss(mem(rax, r8,  4), ymm2)
 	vbroadcastss(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm12)
 	vfmadd231ps(ymm0, ymm3, ymm14)
-
-
-
+	
+	
+	
 	dec(rsi)                           // i -= 1;
 	jne(.SLOOPKITER)                   // iterate again if i != 0.
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
 	label(.SCONSIDKLEFT)
-
+	
 	mov(var(k_left), rsi)              // i = k_left;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.SPOSTACCUM)                    // if i == 0, we're done; jump to end.
 	                                   // else, we prepare to enter k_left loop.
-
-
+	
+	
 	label(.SLOOPKLEFT)                 // EDGE LOOP
 
 #if 0
 	prefetch(0, mem(rdx, 5*8))
 	add(r9, rdx)
 #endif
-
+	
 	vmovups(mem(rbx, 0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
-
+	
 	vbroadcastss(mem(rax        ), ymm2)
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	vbroadcastss(mem(rax, r13, 1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm8)
 	vfmadd231ps(ymm0, ymm3, ymm10)
-
+	
 	vbroadcastss(mem(rax, r8,  4), ymm2)
 	vbroadcastss(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm12)
 	vfmadd231ps(ymm0, ymm3, ymm14)
-
-
+	
+	
 	dec(rsi)                           // i -= 1;
 	jne(.SLOOPKLEFT)                   // iterate again if i != 0.
-
-
-
+	
+	
+	
 	label(.SPOSTACCUM)
 
-
-
+	
+	
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
 	vbroadcastss(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastss(mem(rbx), ymm3)       // load beta and duplicate
-
+	
 	vmulps(ymm0, ymm4, ymm4)           // scale by alpha
 	vmulps(ymm0, ymm6, ymm6)
 	vmulps(ymm0, ymm8, ymm8)
 	vmulps(ymm0, ymm10, ymm10)
 	vmulps(ymm0, ymm12, ymm12)
 	vmulps(ymm0, ymm14, ymm14)
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
 	mov(var(cs_c), rsi)                // load cs_c
 	lea(mem(, rsi, 4), rsi)            // rsi = cs_c * sizeof(float)
-
+	
 	//lea(mem(rcx, rsi, 4), rdx)         // load address of c +  4*cs_c;
 	lea(mem(rcx, rdi, 4), rdx)         // load address of c +  4*rs_c;
 
 	lea(mem(rsi, rsi, 2), rax)         // rax = 3*cs_c;
 	lea(mem(rsi, rsi, 4), rbx)         // rbx = 5*cs_c;
 	lea(mem(rax, rsi, 4), rbp)         // rbp = 7*cs_c;
-
-
-
+	
+	
+	
 	                                   // now avoid loading C if beta == 0
-
+	
 	vxorps(ymm0, ymm0, ymm0)           // set ymm0 to zero.
 	vucomiss(xmm0, xmm3)               // set ZF if beta == 0.
 	je(.SBETAZERO)                     // if ZF = 1, jump to beta == 0 case
@@ -390,42 +390,42 @@ void bli_sgemmsup_rv_haswell_asm_6x8
 
 	cmp(imm(4), rdi)                   // set ZF if (4*rs_c) == 4.
 	jz(.SCOLSTORED)                    // jump to column storage case
+	
 
-
-
+	
 	label(.SROWSTORED)
-
-
+	
+	
 	vfmadd231ps(mem(rcx, 0*32), ymm3, ymm4)
 	vmovups(ymm4, mem(rcx, 0*32))
 	add(rdi, rcx)
-
-
+	
+	
 	vfmadd231ps(mem(rcx, 0*32), ymm3, ymm6)
 	vmovups(ymm6, mem(rcx, 0*32))
 	add(rdi, rcx)
-
-
+	
+	
 	vfmadd231ps(mem(rcx, 0*32), ymm3, ymm8)
 	vmovups(ymm8, mem(rcx, 0*32))
 	add(rdi, rcx)
-
-
+	
+	
 	vfmadd231ps(mem(rcx, 0*32), ymm3, ymm10)
 	vmovups(ymm10, mem(rcx, 0*32))
 	add(rdi, rcx)
-
-
+	
+	
 	vfmadd231ps(mem(rcx, 0*32), ymm3, ymm12)
 	vmovups(ymm12, mem(rcx, 0*32))
 	add(rdi, rcx)
-
-
+	
+	
 	vfmadd231ps(mem(rcx, 0*32), ymm3, ymm14)
 	vmovups(ymm14, mem(rcx, 0*32))
 	//add(rdi, rcx)
-
-
+	
+	
 	jmp(.SDONE)                        // jump to end.
 
 
@@ -502,45 +502,45 @@ void bli_sgemmsup_rv_haswell_asm_6x8
 
 
 	jmp(.SDONE)                        // jump to end.
-
-
-
-
+	
+	
+	
+	
 	label(.SBETAZERO)
-
+	
 
 	cmp(imm(4), rdi)                   // set ZF if (4*rs_c) == 4.
 	jz(.SCOLSTORBZ)                    // jump to column storage case
 
 
-
+	
 	label(.SROWSTORBZ)
-
-
+	
+	
 	vmovups(ymm4, mem(rcx, 0*32))
 	add(rdi, rcx)
-
+	
 
 	vmovups(ymm6, mem(rcx, 0*32))
 	add(rdi, rcx)
-
-
+	
+	
 	vmovups(ymm8, mem(rcx, 0*32))
 	add(rdi, rcx)
-
-
+	
+	
 	vmovups(ymm10, mem(rcx, 0*32))
 	add(rdi, rcx)
-
-
+	
+	
 	vmovups(ymm12, mem(rcx, 0*32))
 	add(rdi, rcx)
-
-
+	
+	
 	vmovups(ymm14, mem(rcx, 0*32))
 	//add(rdi, rcx)
-
-
+	
+	
 	jmp(.SDONE)                        // jump to end.
 
 
@@ -596,12 +596,12 @@ void bli_sgemmsup_rv_haswell_asm_6x8
 
 	//lea(mem(rdx, rsi, 8), rdx)         // rdx += 8*cs_c
 
-
-
-
+	
+	
+	
 	label(.SDONE)
-
-
+	
+	
 
     end_asm(
 	: // output operands (none)
@@ -628,24 +628,26 @@ void bli_sgemmsup_rv_haswell_asm_6x8
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6",
+	  "ymm8", "ymm10", "ymm12", "ymm14",
 	  "memory"
 	)
 }
 
 void bli_sgemmsup_rv_haswell_asm_5x8
      (
-             conj_t     conja,
-             conj_t     conjb,
-             dim_t      m0,
-             dim_t      n0,
-             dim_t      k0,
-       const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
-       const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       float*     restrict alpha,
+       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
+       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
+       float*     restrict beta,
+       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -666,9 +668,9 @@ void bli_sgemmsup_rv_haswell_asm_5x8
 	// -------------------------------------------------------------------------
 
 	begin_asm()
-
+	
 	vzeroall()                         // zero all xmm/ymm registers.
-
+	
 	mov(var(a), rax)                   // load address of a.
 	mov(var(rs_a), r8)                 // load rs_a
 	mov(var(cs_a), r9)                 // load cs_a
@@ -683,7 +685,7 @@ void bli_sgemmsup_rv_haswell_asm_5x8
 	//mov(var(cs_b), r11)                // load cs_b
 	lea(mem(, r10, 4), r10)            // rs_b *= sizeof(float)
 	//lea(mem(, r11, 4), r11)            // cs_b *= sizeof(float)
-
+	
 	                                   // NOTE: We cannot pre-load elements of a or b
 	                                   // because it could eventually, in the last
 	                                   // unrolled iter or the cleanup loop, result
@@ -731,25 +733,25 @@ void bli_sgemmsup_rv_haswell_asm_5x8
 	lea(mem(rax, r9,  8), rdx)         //
 	lea(mem(rdx, r9,  8), rdx)         // rdx = a + 16*cs_a;
 #endif
-
-
-
-
+	
+	
+	
+	
 	mov(var(k_iter), rsi)              // i = k_iter;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.SCONSIDKLEFT)                  // if i == 0, jump to code that
 	                                   // contains the k_left loop.
-
-
+	
+	
 	label(.SLOOPKITER)                 // MAIN LOOP
-
-
+	
+	
 	// ---------------------------------- iteration 0
 
 #if 1
 	prefetch(0, mem(rdx, 4*8))
 #endif
-
+	
 	vmovups(mem(rbx, 0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
 
@@ -757,17 +759,17 @@ void bli_sgemmsup_rv_haswell_asm_5x8
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	vbroadcastss(mem(rax, r13, 1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm8)
 	vfmadd231ps(ymm0, ymm3, ymm10)
-
+	
 	vbroadcastss(mem(rax, r8,  4), ymm2)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm12)
 
-
+	
 	// ---------------------------------- iteration 1
 
 #if 0
@@ -781,23 +783,23 @@ void bli_sgemmsup_rv_haswell_asm_5x8
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	vbroadcastss(mem(rax, r13, 1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm8)
 	vfmadd231ps(ymm0, ymm3, ymm10)
-
+	
 	vbroadcastss(mem(rax, r8,  4), ymm2)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm12)
-
-
+	
+	
 	// ---------------------------------- iteration 2
 
 #if 1
 	prefetch(0, mem(rdx, r9, 2, 4*8))
 #endif
-
+	
 	vmovups(mem(rbx, 0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
 
@@ -805,16 +807,16 @@ void bli_sgemmsup_rv_haswell_asm_5x8
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	vbroadcastss(mem(rax, r13, 1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm8)
 	vfmadd231ps(ymm0, ymm3, ymm10)
-
+	
 	vbroadcastss(mem(rax, r8,  4), ymm2)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm12)
-
+	
 
 	// ---------------------------------- iteration 3
 
@@ -829,98 +831,98 @@ void bli_sgemmsup_rv_haswell_asm_5x8
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	vbroadcastss(mem(rax, r13, 1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm8)
 	vfmadd231ps(ymm0, ymm3, ymm10)
-
+	
 	vbroadcastss(mem(rax, r8,  4), ymm2)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm12)
-
-
-
+	
+	
+	
 	dec(rsi)                           // i -= 1;
 	jne(.SLOOPKITER)                   // iterate again if i != 0.
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
 	label(.SCONSIDKLEFT)
-
+	
 	mov(var(k_left), rsi)              // i = k_left;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.SPOSTACCUM)                    // if i == 0, we're done; jump to end.
 	                                   // else, we prepare to enter k_left loop.
-
-
+	
+	
 	label(.SLOOPKLEFT)                 // EDGE LOOP
 
 #if 0
 	prefetch(0, mem(rdx, 5*8))
 	add(r9, rdx)
 #endif
-
+	
 	vmovups(mem(rbx, 0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
-
+	
 	vbroadcastss(mem(rax        ), ymm2)
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	vbroadcastss(mem(rax, r13, 1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm8)
 	vfmadd231ps(ymm0, ymm3, ymm10)
-
+	
 	vbroadcastss(mem(rax, r8,  4), ymm2)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm12)
-
-
+	
+	
 	dec(rsi)                           // i -= 1;
 	jne(.SLOOPKLEFT)                   // iterate again if i != 0.
-
-
-
+	
+	
+	
 	label(.SPOSTACCUM)
 
-
-
+	
+	
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
 	vbroadcastss(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastss(mem(rbx), ymm3)       // load beta and duplicate
-
+	
 	vmulps(ymm0, ymm4, ymm4)           // scale by alpha
 	vmulps(ymm0, ymm6, ymm6)
 	vmulps(ymm0, ymm8, ymm8)
 	vmulps(ymm0, ymm10, ymm10)
 	vmulps(ymm0, ymm12, ymm12)
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
 	mov(var(cs_c), rsi)                // load cs_c
 	lea(mem(, rsi, 4), rsi)            // rsi = cs_c * sizeof(float)
-
+	
 	//lea(mem(rcx, rsi, 4), rdx)         // load address of c +  4*cs_c;
 	lea(mem(rcx, rdi, 4), rdx)         // load address of c +  4*rs_c;
 
 	lea(mem(rsi, rsi, 2), rax)         // rax = 3*cs_c;
 	lea(mem(rsi, rsi, 4), rbx)         // rbx = 5*cs_c;
 	lea(mem(rax, rsi, 4), rbp)         // rbp = 7*cs_c;
-
-
-
+	
+	
+	
 	                                   // now avoid loading C if beta == 0
-
+	
 	vxorps(ymm0, ymm0, ymm0)           // set ymm0 to zero.
 	vucomiss(xmm0, xmm3)               // set ZF if beta == 0.
 	je(.SBETAZERO)                     // if ZF = 1, jump to beta == 0 case
@@ -929,37 +931,37 @@ void bli_sgemmsup_rv_haswell_asm_5x8
 
 	cmp(imm(4), rdi)                   // set ZF if (4*rs_c) == 4.
 	jz(.SCOLSTORED)                    // jump to column storage case
+	
 
-
-
+	
 	label(.SROWSTORED)
-
-
+	
+	
 	vfmadd231ps(mem(rcx, 0*32), ymm3, ymm4)
 	vmovups(ymm4, mem(rcx, 0*32))
 	add(rdi, rcx)
-
-
+	
+	
 	vfmadd231ps(mem(rcx, 0*32), ymm3, ymm6)
 	vmovups(ymm6, mem(rcx, 0*32))
 	add(rdi, rcx)
-
-
+	
+	
 	vfmadd231ps(mem(rcx, 0*32), ymm3, ymm8)
 	vmovups(ymm8, mem(rcx, 0*32))
 	add(rdi, rcx)
-
-
+	
+	
 	vfmadd231ps(mem(rcx, 0*32), ymm3, ymm10)
 	vmovups(ymm10, mem(rcx, 0*32))
 	add(rdi, rcx)
-
-
+	
+	
 	vfmadd231ps(mem(rcx, 0*32), ymm3, ymm12)
 	vmovups(ymm12, mem(rcx, 0*32))
 	//add(rdi, rcx)
-
-
+	
+	
 	jmp(.SDONE)                        // jump to end.
 
 
@@ -1049,41 +1051,41 @@ void bli_sgemmsup_rv_haswell_asm_5x8
 
 
 	jmp(.SDONE)                        // jump to end.
-
-
-
-
+	
+	
+	
+	
 	label(.SBETAZERO)
-
+	
 
 	cmp(imm(4), rdi)                   // set ZF if (4*rs_c) == 4.
 	jz(.SCOLSTORBZ)                    // jump to column storage case
 
 
-
+	
 	label(.SROWSTORBZ)
-
-
+	
+	
 	vmovups(ymm4, mem(rcx, 0*32))
 	add(rdi, rcx)
-
+	
 
 	vmovups(ymm6, mem(rcx, 0*32))
 	add(rdi, rcx)
-
-
+	
+	
 	vmovups(ymm8, mem(rcx, 0*32))
 	add(rdi, rcx)
-
-
+	
+	
 	vmovups(ymm10, mem(rcx, 0*32))
 	add(rdi, rcx)
-
-
+	
+	
 	vmovups(ymm12, mem(rcx, 0*32))
 	//add(rdi, rcx)
-
-
+	
+	
 	jmp(.SDONE)                        // jump to end.
 
 
@@ -1147,12 +1149,12 @@ void bli_sgemmsup_rv_haswell_asm_5x8
 
 	//lea(mem(rdx, rsi, 8), rdx)         // rdx += 8*cs_c
 
-
-
-
+	
+	
+	
 	label(.SDONE)
-
-
+	
+	
 
     end_asm(
 	: // output operands (none)
@@ -1179,24 +1181,26 @@ void bli_sgemmsup_rv_haswell_asm_5x8
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6",
+	  "ymm8", "ymm10", "ymm12",
 	  "memory"
 	)
 }
 
 void bli_sgemmsup_rv_haswell_asm_4x8
      (
-             conj_t     conja,
-             conj_t     conjb,
-             dim_t      m0,
-             dim_t      n0,
-             dim_t      k0,
-       const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
-       const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       float*     restrict alpha,
+       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
+       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
+       float*     restrict beta,
+       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -1217,9 +1221,9 @@ void bli_sgemmsup_rv_haswell_asm_4x8
 	// -------------------------------------------------------------------------
 
 	begin_asm()
-
+	
 	vzeroall()                         // zero all xmm/ymm registers.
-
+	
 	mov(var(a), rax)                   // load address of a.
 	mov(var(rs_a), r8)                 // load rs_a
 	mov(var(cs_a), r9)                 // load cs_a
@@ -1234,7 +1238,7 @@ void bli_sgemmsup_rv_haswell_asm_4x8
 	//mov(var(cs_b), r11)                // load cs_b
 	lea(mem(, r10, 4), r10)            // rs_b *= sizeof(float)
 	//lea(mem(, r11, 4), r11)            // cs_b *= sizeof(float)
-
+	
 	                                   // NOTE: We cannot pre-load elements of a or b
 	                                   // because it could eventually, in the last
 	                                   // unrolled iter or the cleanup loop, result
@@ -1281,25 +1285,25 @@ void bli_sgemmsup_rv_haswell_asm_4x8
 	lea(mem(rax, r9,  8), rdx)         //
 	lea(mem(rdx, r9,  8), rdx)         // rdx = a + 16*cs_a;
 #endif
-
-
-
+	
+	
+	
 
 	mov(var(k_iter), rsi)              // i = k_iter;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.SCONSIDKLEFT)                  // if i == 0, jump to code that
 	                                   // contains the k_left loop.
-
-
+	
+	
 	label(.SLOOPKITER)                 // MAIN LOOP
-
-
+	
+	
 	// ---------------------------------- iteration 0
 
 #if 1
 	prefetch(0, mem(rdx, 4*8))
 #endif
-
+	
 	vmovups(mem(rbx, 0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
 
@@ -1307,14 +1311,14 @@ void bli_sgemmsup_rv_haswell_asm_4x8
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	vbroadcastss(mem(rax, r13, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm8)
 	vfmadd231ps(ymm0, ymm3, ymm10)
 
-
+	
 	// ---------------------------------- iteration 1
 
 #if 0
@@ -1328,20 +1332,20 @@ void bli_sgemmsup_rv_haswell_asm_4x8
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	vbroadcastss(mem(rax, r13, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm8)
 	vfmadd231ps(ymm0, ymm3, ymm10)
-
-
+	
+	
 	// ---------------------------------- iteration 2
 
 #if 1
 	prefetch(0, mem(rdx, r9, 2, 4*8))
 #endif
-
+	
 	vmovups(mem(rbx, 0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
 
@@ -1349,13 +1353,13 @@ void bli_sgemmsup_rv_haswell_asm_4x8
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	vbroadcastss(mem(rax, r13, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm8)
 	vfmadd231ps(ymm0, ymm3, ymm10)
-
+	
 
 	// ---------------------------------- iteration 3
 
@@ -1370,38 +1374,38 @@ void bli_sgemmsup_rv_haswell_asm_4x8
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	vbroadcastss(mem(rax, r13, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm8)
 	vfmadd231ps(ymm0, ymm3, ymm10)
-
-
-
+	
+	
+	
 	dec(rsi)                           // i -= 1;
 	jne(.SLOOPKITER)                   // iterate again if i != 0.
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
 	label(.SCONSIDKLEFT)
-
+	
 	mov(var(k_left), rsi)              // i = k_left;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.SPOSTACCUM)                    // if i == 0, we're done; jump to end.
 	                                   // else, we prepare to enter k_left loop.
-
-
+	
+	
 	label(.SLOOPKLEFT)                 // EDGE LOOP
 
 #if 0
 	prefetch(0, mem(rdx, 5*8))
 	add(r9, rdx)
 #endif
-
+	
 	vmovups(mem(rbx, 0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
 
@@ -1409,66 +1413,66 @@ void bli_sgemmsup_rv_haswell_asm_4x8
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	vbroadcastss(mem(rax, r13, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm8)
 	vfmadd231ps(ymm0, ymm3, ymm10)
-
-
+	
+	
 	dec(rsi)                           // i -= 1;
 	jne(.SLOOPKLEFT)                   // iterate again if i != 0.
-
-
-
+	
+	
+	
 	label(.SPOSTACCUM)
 
 
-
+	
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
 	vbroadcastss(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastss(mem(rbx), ymm3)       // load beta and duplicate
-
+	
 	vmulps(ymm0, ymm4, ymm4)           // scale by alpha
 	vmulps(ymm0, ymm6, ymm6)
 	vmulps(ymm0, ymm8, ymm8)
 	vmulps(ymm0, ymm10, ymm10)
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
 	mov(var(cs_c), rsi)                // load cs_c
 	lea(mem(, rsi, 4), rsi)            // rsi = cs_c * sizeof(float)
-
+	
 	//lea(mem(rcx, rsi, 4), rdx)         // load address of c +  4*cs_c;
 	//lea(mem(rcx, rdi, 4), rdx)         // load address of c +  4*rs_c;
 
 	lea(mem(rsi, rsi, 2), rax)         // rax = 3*cs_c;
 	lea(mem(rsi, rsi, 4), rbx)         // rbx = 5*cs_c;
 	lea(mem(rax, rsi, 4), rbp)         // rbp = 7*cs_c;
-
-
-
+	
+	
+	
 	                                   // now avoid loading C if beta == 0
-
+	
 	vxorps(ymm0, ymm0, ymm0)           // set ymm0 to zero.
 	vucomiss(xmm0, xmm3)               // set ZF if beta == 0.
 	je(.SBETAZERO)                     // if ZF = 1, jump to beta == 0 case
-
+	
 
 
 	cmp(imm(4), rdi)                   // set ZF if (4*rs_c) == 4.
 	jz(.SCOLSTORED)                    // jump to column storage case
 
 
-
+	
 	label(.SROWSTORED)
-
-
+	
+	
 	vfmadd231ps(mem(rcx, 0*32), ymm3, ymm4)
 	vmovups(ymm4, mem(rcx, 0*32))
 	add(rdi, rcx)
@@ -1487,10 +1491,10 @@ void bli_sgemmsup_rv_haswell_asm_4x8
 	vfmadd231ps(mem(rcx, 0*32), ymm3, ymm10)
 	vmovups(ymm10, mem(rcx, 0*32))
 	//add(rdi, rcx)
-
-
+	
+	
 	jmp(.SDONE)                        // jump to end.
-
+	
 
 
 	label(.SCOLSTORED)
@@ -1538,19 +1542,19 @@ void bli_sgemmsup_rv_haswell_asm_4x8
 	jmp(.SDONE)                        // jump to end.
 
 
-
-
+	
+	
 	label(.SBETAZERO)
-
+	
 
 	cmp(imm(4), rdi)                   // set ZF if (8*rs_c) == 8.
 	jz(.SCOLSTORBZ)                    // jump to column storage case
 
 
-
+	
 	label(.SROWSTORBZ)
-
-
+	
+	
 	vmovups(ymm4, mem(rcx, 0*32))
 	add(rdi, rcx)
 
@@ -1565,8 +1569,8 @@ void bli_sgemmsup_rv_haswell_asm_4x8
 
 	vmovups(ymm10, mem(rcx, 0*32))
 	//add(rdi, rcx)
-
-
+	
+	
 	jmp(.SDONE)                        // jump to end.
 
 
@@ -1604,12 +1608,12 @@ void bli_sgemmsup_rv_haswell_asm_4x8
 
 	//lea(mem(rcx, rsi, 8), rcx)         // rcx += 8*cs_c
 
-
-
-
+	
+	
+	
 	label(.SDONE)
-
-
+	
+	
 
     end_asm(
 	: // output operands (none)
@@ -1636,24 +1640,26 @@ void bli_sgemmsup_rv_haswell_asm_4x8
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6",
+	  "ymm8", "ymm10",
 	  "memory"
 	)
 }
 
 void bli_sgemmsup_rv_haswell_asm_3x8
      (
-             conj_t     conja,
-             conj_t     conjb,
-             dim_t      m0,
-             dim_t      n0,
-             dim_t      k0,
-       const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
-       const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       float*     restrict alpha,
+       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
+       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
+       float*     restrict beta,
+       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -1674,9 +1680,9 @@ void bli_sgemmsup_rv_haswell_asm_3x8
 	// -------------------------------------------------------------------------
 
 	begin_asm()
-
+	
 	vzeroall()                         // zero all xmm/ymm registers.
-
+	
 	mov(var(a), rax)                   // load address of a.
 	mov(var(rs_a), r8)                 // load rs_a
 	mov(var(cs_a), r9)                 // load cs_a
@@ -1691,7 +1697,7 @@ void bli_sgemmsup_rv_haswell_asm_3x8
 	//mov(var(cs_b), r11)                // load cs_b
 	lea(mem(, r10, 4), r10)            // rs_b *= sizeof(float)
 	//lea(mem(, r11, 4), r11)            // cs_b *= sizeof(float)
-
+	
 	                                   // NOTE: We cannot pre-load elements of a or b
 	                                   // because it could eventually, in the last
 	                                   // unrolled iter or the cleanup loop, result
@@ -1737,25 +1743,25 @@ void bli_sgemmsup_rv_haswell_asm_3x8
 	lea(mem(rax, r9,  8), rdx)         //
 	lea(mem(rdx, r9,  8), rdx)         // rdx = a + 16*cs_a;
 #endif
-
-
-
+	
+	
+	
 
 	mov(var(k_iter), rsi)              // i = k_iter;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.SCONSIDKLEFT)                  // if i == 0, jump to code that
 	                                   // contains the k_left loop.
-
-
+	
+	
 	label(.SLOOPKITER)                 // MAIN LOOP
-
-
+	
+	
 	// ---------------------------------- iteration 0
 
 #if 1
 	prefetch(0, mem(rdx, 4*8))
 #endif
-
+	
 	vmovups(mem(rbx, 0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
 
@@ -1763,12 +1769,12 @@ void bli_sgemmsup_rv_haswell_asm_3x8
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm8)
 
-
+	
 	// ---------------------------------- iteration 1
 
 #if 0
@@ -1782,18 +1788,18 @@ void bli_sgemmsup_rv_haswell_asm_3x8
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm8)
-
-
+	
+	
 	// ---------------------------------- iteration 2
 
 #if 1
 	prefetch(0, mem(rdx, r9, 2, 4*8))
 #endif
-
+	
 	vmovups(mem(rbx, 0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
 
@@ -1801,11 +1807,11 @@ void bli_sgemmsup_rv_haswell_asm_3x8
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm8)
-
+	
 
 	// ---------------------------------- iteration 3
 
@@ -1820,36 +1826,36 @@ void bli_sgemmsup_rv_haswell_asm_3x8
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm8)
-
-
-
+	
+	
+	
 	dec(rsi)                           // i -= 1;
 	jne(.SLOOPKITER)                   // iterate again if i != 0.
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
 	label(.SCONSIDKLEFT)
-
+	
 	mov(var(k_left), rsi)              // i = k_left;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.SPOSTACCUM)                    // if i == 0, we're done; jump to end.
 	                                   // else, we prepare to enter k_left loop.
-
-
+	
+	
 	label(.SLOOPKLEFT)                 // EDGE LOOP
 
 #if 0
 	prefetch(0, mem(rdx, 5*8))
 	add(r9, rdx)
 #endif
-
+	
 	vmovups(mem(rbx, 0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
 
@@ -1857,63 +1863,63 @@ void bli_sgemmsup_rv_haswell_asm_3x8
 	vbroadcastss(mem(rax, r8,  1), ymm3)
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 	vbroadcastss(mem(rax, r8,  2), ymm2)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm8)
-
-
+	
+	
 	dec(rsi)                           // i -= 1;
 	jne(.SLOOPKLEFT)                   // iterate again if i != 0.
-
-
-
+	
+	
+	
 	label(.SPOSTACCUM)
 
 
-
+	
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
 	vbroadcastss(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastss(mem(rbx), ymm3)       // load beta and duplicate
-
+	
 	vmulps(ymm0, ymm4, ymm4)           // scale by alpha
 	vmulps(ymm0, ymm6, ymm6)
 	vmulps(ymm0, ymm8, ymm8)
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
 	mov(var(cs_c), rsi)                // load cs_c
 	lea(mem(, rsi, 4), rsi)            // rsi = cs_c * sizeof(float)
-
+	
 	//lea(mem(rcx, rsi, 4), rdx)         // load address of c +  4*cs_c;
 	lea(mem(rcx, rdi, 2), rdx)         // load address of c +  2*rs_c;
 
 	lea(mem(rsi, rsi, 2), rax)         // rax = 3*cs_c;
 	lea(mem(rsi, rsi, 4), rbx)         // rbx = 5*cs_c;
 	lea(mem(rax, rsi, 4), rbp)         // rbp = 7*cs_c;
-
-
-
+	
+	
+	
 	                                   // now avoid loading C if beta == 0
-
+	
 	vxorps(ymm0, ymm0, ymm0)           // set ymm0 to zero.
 	vucomiss(xmm0, xmm3)               // set ZF if beta == 0.
 	je(.SBETAZERO)                     // if ZF = 1, jump to beta == 0 case
-
+	
 
 
 	cmp(imm(4), rdi)                   // set ZF if (4*rs_c) == 4.
 	jz(.SCOLSTORED)                    // jump to column storage case
 
 
-
+	
 	label(.SROWSTORED)
-
-
+	
+	
 	vfmadd231ps(mem(rcx, 0*32), ymm3, ymm4)
 	vmovups(ymm4, mem(rcx, 0*32))
 	add(rdi, rcx)
@@ -1927,10 +1933,10 @@ void bli_sgemmsup_rv_haswell_asm_3x8
 	vfmadd231ps(mem(rcx, 0*32), ymm3, ymm8)
 	vmovups(ymm8, mem(rcx, 0*32))
 	//add(rdi, rcx)
-
-
+	
+	
 	jmp(.SDONE)                        // jump to end.
-
+	
 
 
 	label(.SCOLSTORED)
@@ -2010,19 +2016,19 @@ void bli_sgemmsup_rv_haswell_asm_3x8
 	jmp(.SDONE)                        // jump to end.
 
 
-
-
+	
+	
 	label(.SBETAZERO)
-
+	
 
 	cmp(imm(4), rdi)                   // set ZF if (8*rs_c) == 8.
 	jz(.SCOLSTORBZ)                    // jump to column storage case
 
 
-
+	
 	label(.SROWSTORBZ)
-
-
+	
+	
 	vmovups(ymm4, mem(rcx, 0*32))
 	add(rdi, rcx)
 
@@ -2033,8 +2039,8 @@ void bli_sgemmsup_rv_haswell_asm_3x8
 
 	vmovups(ymm8, mem(rcx, 0*32))
 	//add(rdi, rcx)
-
-
+	
+	
 	jmp(.SDONE)                        // jump to end.
 
 
@@ -2084,12 +2090,12 @@ void bli_sgemmsup_rv_haswell_asm_3x8
 
 	//lea(mem(rdx, rsi, 8), rdx)         // rdx += 8*cs_c
 
-
-
-
+	
+	
+	
 	label(.SDONE)
-
-
+	
+	
 
     end_asm(
 	: // output operands (none)
@@ -2116,24 +2122,25 @@ void bli_sgemmsup_rv_haswell_asm_3x8
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm2", "ymm3", "ymm4", "ymm6", "ymm8",
 	  "memory"
 	)
 }
 
 void bli_sgemmsup_rv_haswell_asm_2x8
      (
-             conj_t     conja,
-             conj_t     conjb,
-             dim_t      m0,
-             dim_t      n0,
-             dim_t      k0,
-       const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
-       const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       float*     restrict alpha,
+       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
+       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
+       float*     restrict beta,
+       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -2154,9 +2161,9 @@ void bli_sgemmsup_rv_haswell_asm_2x8
 	// -------------------------------------------------------------------------
 
 	begin_asm()
-
+	
 	vzeroall()                         // zero all xmm/ymm registers.
-
+	
 	mov(var(a), rax)                   // load address of a.
 	mov(var(rs_a), r8)                 // load rs_a
 	mov(var(cs_a), r9)                 // load cs_a
@@ -2171,7 +2178,7 @@ void bli_sgemmsup_rv_haswell_asm_2x8
 	//mov(var(cs_b), r11)                // load cs_b
 	lea(mem(, r10, 4), r10)            // rs_b *= sizeof(float)
 	//lea(mem(, r11, 4), r11)            // cs_b *= sizeof(float)
-
+	
 	                                   // NOTE: We cannot pre-load elements of a or b
 	                                   // because it could eventually, in the last
 	                                   // unrolled iter or the cleanup loop, result
@@ -2216,25 +2223,25 @@ void bli_sgemmsup_rv_haswell_asm_2x8
 	lea(mem(rax, r9,  8), rdx)         //
 	lea(mem(rdx, r9,  8), rdx)         // rdx = a + 16*cs_a;
 #endif
-
-
-
+	
+	
+	
 
 	mov(var(k_iter), rsi)              // i = k_iter;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.SCONSIDKLEFT)                  // if i == 0, jump to code that
 	                                   // contains the k_left loop.
-
-
+	
+	
 	label(.SLOOPKITER)                 // MAIN LOOP
-
-
+	
+	
 	// ---------------------------------- iteration 0
 
 #if 1
 	prefetch(0, mem(rdx, 4*8))
 #endif
-
+	
 	vmovups(mem(rbx, 0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
 
@@ -2244,7 +2251,7 @@ void bli_sgemmsup_rv_haswell_asm_2x8
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
 
-
+	
 	// ---------------------------------- iteration 1
 
 #if 0
@@ -2259,14 +2266,14 @@ void bli_sgemmsup_rv_haswell_asm_2x8
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
-
+	
+	
 	// ---------------------------------- iteration 2
 
 #if 1
 	prefetch(0, mem(rdx, r9, 2, 4*8))
 #endif
-
+	
 	vmovups(mem(rbx, 0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
 
@@ -2275,7 +2282,7 @@ void bli_sgemmsup_rv_haswell_asm_2x8
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
+	
 
 	// ---------------------------------- iteration 3
 
@@ -2291,32 +2298,32 @@ void bli_sgemmsup_rv_haswell_asm_2x8
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
-
-
+	
+	
+	
 	dec(rsi)                           // i -= 1;
 	jne(.SLOOPKITER)                   // iterate again if i != 0.
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
 	label(.SCONSIDKLEFT)
-
+	
 	mov(var(k_left), rsi)              // i = k_left;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.SPOSTACCUM)                    // if i == 0, we're done; jump to end.
 	                                   // else, we prepare to enter k_left loop.
-
-
+	
+	
 	label(.SLOOPKLEFT)                 // EDGE LOOP
 
 #if 0
 	prefetch(0, mem(rdx, 5*8))
 	add(r9, rdx)
 #endif
-
+	
 	vmovups(mem(rbx, 0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
 
@@ -2325,58 +2332,58 @@ void bli_sgemmsup_rv_haswell_asm_2x8
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm4)
 	vfmadd231ps(ymm0, ymm3, ymm6)
-
-
+	
+	
 	dec(rsi)                           // i -= 1;
 	jne(.SLOOPKLEFT)                   // iterate again if i != 0.
-
-
-
+	
+	
+	
 	label(.SPOSTACCUM)
 
 
-
+	
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
 	vbroadcastss(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastss(mem(rbx), ymm3)       // load beta and duplicate
-
+	
 	vmulps(ymm0, ymm4, ymm4)           // scale by alpha
 	vmulps(ymm0, ymm6, ymm6)
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
 	mov(var(cs_c), rsi)                // load cs_c
 	lea(mem(, rsi, 4), rsi)            // rsi = cs_c * sizeof(float)
-
+	
 	//lea(mem(rcx, rsi, 4), rdx)         // load address of c +  4*cs_c;
 	//lea(mem(rcx, rdi, 2), rdx)         // load address of c +  2*rs_c;
 
 	lea(mem(rsi, rsi, 2), rax)         // rax = 3*cs_c;
 	lea(mem(rsi, rsi, 4), rbx)         // rbx = 5*cs_c;
 	lea(mem(rax, rsi, 4), rbp)         // rbp = 7*cs_c;
-
-
-
+	
+	
+	
 	                                   // now avoid loading C if beta == 0
-
+	
 	vxorps(ymm0, ymm0, ymm0)           // set ymm0 to zero.
 	vucomiss(xmm0, xmm3)               // set ZF if beta == 0.
 	je(.SBETAZERO)                     // if ZF = 1, jump to beta == 0 case
-
+	
 
 
 	cmp(imm(4), rdi)                   // set ZF if (4*rs_c) == 4.
 	jz(.SCOLSTORED)                    // jump to column storage case
 
 
-
+	
 	label(.SROWSTORED)
-
-
+	
+	
 	vfmadd231ps(mem(rcx, 0*32), ymm3, ymm4)
 	vmovups(ymm4, mem(rcx, 0*32))
 	add(rdi, rcx)
@@ -2385,10 +2392,10 @@ void bli_sgemmsup_rv_haswell_asm_2x8
 	vfmadd231ps(mem(rcx, 0*32), ymm3, ymm6)
 	vmovups(ymm6, mem(rcx, 0*32))
 	//add(rdi, rcx)
-
-
+	
+	
 	jmp(.SDONE)                        // jump to end.
-
+	
 
 
 	label(.SCOLSTORED)
@@ -2426,27 +2433,27 @@ void bli_sgemmsup_rv_haswell_asm_2x8
 	jmp(.SDONE)                        // jump to end.
 
 
-
-
+	
+	
 	label(.SBETAZERO)
-
+	
 
 	cmp(imm(4), rdi)                   // set ZF if (8*rs_c) == 8.
 	jz(.SCOLSTORBZ)                    // jump to column storage case
 
 
-
+	
 	label(.SROWSTORBZ)
-
-
+	
+	
 	vmovups(ymm4, mem(rcx, 0*32))
 	add(rdi, rcx)
 
 
 	vmovups(ymm6, mem(rcx, 0*32))
 	//add(rdi, rcx)
-
-
+	
+	
 	jmp(.SDONE)                        // jump to end.
 
 
@@ -2470,12 +2477,12 @@ void bli_sgemmsup_rv_haswell_asm_2x8
 
 	//lea(mem(rcx, rsi, 8), rcx)         // rcx += 8*cs_c
 
-
-
-
+	
+	
+	
 	label(.SDONE)
-
-
+	
+	
 
     end_asm(
 	: // output operands (none)
@@ -2502,24 +2509,25 @@ void bli_sgemmsup_rv_haswell_asm_2x8
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm2", "ymm3", "ymm4", "ymm6",
 	  "memory"
 	)
 }
 
 void bli_sgemmsup_rv_haswell_asm_1x8
      (
-             conj_t     conja,
-             conj_t     conjb,
-             dim_t      m0,
-             dim_t      n0,
-             dim_t      k0,
-       const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
-       const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       float*     restrict alpha,
+       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
+       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
+       float*     restrict beta,
+       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -2540,9 +2548,9 @@ void bli_sgemmsup_rv_haswell_asm_1x8
 	// -------------------------------------------------------------------------
 
 	begin_asm()
-
+	
 	vzeroall()                         // zero all xmm/ymm registers.
-
+	
 	mov(var(a), rax)                   // load address of a.
 	mov(var(rs_a), r8)                 // load rs_a
 	mov(var(cs_a), r9)                 // load cs_a
@@ -2557,7 +2565,7 @@ void bli_sgemmsup_rv_haswell_asm_1x8
 	//mov(var(cs_b), r11)                // load cs_b
 	lea(mem(, r10, 4), r10)            // rs_b *= sizeof(float)
 	//lea(mem(, r11, 4), r11)            // cs_b *= sizeof(float)
-
+	
 	                                   // NOTE: We cannot pre-load elements of a or b
 	                                   // because it could eventually, in the last
 	                                   // unrolled iter or the cleanup loop, result
@@ -2601,25 +2609,25 @@ void bli_sgemmsup_rv_haswell_asm_1x8
 	lea(mem(rax, r9,  8), rdx)         //
 	lea(mem(rdx, r9,  8), rdx)         // rdx = a + 16*cs_a;
 #endif
-
-
-
+	
+	
+	
 
 	mov(var(k_iter), rsi)              // i = k_iter;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.SCONSIDKLEFT)                  // if i == 0, jump to code that
 	                                   // contains the k_left loop.
-
-
+	
+	
 	label(.SLOOPKITER)                 // MAIN LOOP
-
-
+	
+	
 	// ---------------------------------- iteration 0
 
 #if 1
 	prefetch(0, mem(rdx, 4*8))
 #endif
-
+	
 	vmovups(mem(rbx, 0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
 
@@ -2627,7 +2635,7 @@ void bli_sgemmsup_rv_haswell_asm_1x8
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm4)
 
-
+	
 	// ---------------------------------- iteration 1
 
 #if 0
@@ -2640,21 +2648,21 @@ void bli_sgemmsup_rv_haswell_asm_1x8
 	vbroadcastss(mem(rax        ), ymm2)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm4)
-
-
+	
+	
 	// ---------------------------------- iteration 2
 
 #if 1
 	prefetch(0, mem(rdx, r9, 2, 4*8))
 #endif
-
+	
 	vmovups(mem(rbx, 0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
 
 	vbroadcastss(mem(rax        ), ymm2)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm4)
-
+	
 
 	// ---------------------------------- iteration 3
 
@@ -2668,96 +2676,96 @@ void bli_sgemmsup_rv_haswell_asm_1x8
 	vbroadcastss(mem(rax        ), ymm2)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm4)
-
-
-
+	
+	
+	
 	dec(rsi)                           // i -= 1;
 	jne(.SLOOPKITER)                   // iterate again if i != 0.
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
 	label(.SCONSIDKLEFT)
-
+	
 	mov(var(k_left), rsi)              // i = k_left;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.SPOSTACCUM)                    // if i == 0, we're done; jump to end.
 	                                   // else, we prepare to enter k_left loop.
-
-
+	
+	
 	label(.SLOOPKLEFT)                 // EDGE LOOP
 
 #if 0
 	prefetch(0, mem(rdx, 5*8))
 	add(r9, rdx)
 #endif
-
+	
 	vmovups(mem(rbx, 0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
 
 	vbroadcastss(mem(rax        ), ymm2)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231ps(ymm0, ymm2, ymm4)
-
-
+	
+	
 	dec(rsi)                           // i -= 1;
 	jne(.SLOOPKLEFT)                   // iterate again if i != 0.
-
-
-
+	
+	
+	
 	label(.SPOSTACCUM)
 
 
-
+	
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
 	vbroadcastss(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastss(mem(rbx), ymm3)       // load beta and duplicate
-
+	
 	vmulps(ymm0, ymm4, ymm4)           // scale by alpha
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
 	mov(var(cs_c), rsi)                // load cs_c
 	lea(mem(, rsi, 4), rsi)            // rsi = cs_c * sizeof(float)
-
+	
 	//lea(mem(rcx, rsi, 4), rdx)         // load address of c +  4*cs_c;
 	//lea(mem(rcx, rdi, 2), rdx)         // load address of c +  2*rs_c;
 
 	lea(mem(rsi, rsi, 2), rax)         // rax = 3*cs_c;
 	lea(mem(rsi, rsi, 4), rbx)         // rbx = 5*cs_c;
 	lea(mem(rax, rsi, 4), rbp)         // rbp = 7*cs_c;
-
-
-
+	
+	
+	
 	                                   // now avoid loading C if beta == 0
-
+	
 	vxorps(ymm0, ymm0, ymm0)           // set ymm0 to zero.
 	vucomiss(xmm0, xmm3)               // set ZF if beta == 0.
 	je(.SBETAZERO)                     // if ZF = 1, jump to beta == 0 case
-
+	
 
 
 	cmp(imm(4), rdi)                   // set ZF if (4*rs_c) == 4.
 	jz(.SCOLSTORED)                    // jump to column storage case
 
 
-
+	
 	label(.SROWSTORED)
-
-
+	
+	
 	vfmadd231ps(mem(rcx, 0*32), ymm3, ymm4)
 	vmovups(ymm4, mem(rcx, 0*32))
 	//add(rdi, rcx)
-
-
+	
+	
 	jmp(.SDONE)                        // jump to end.
-
+	
 
 
 	label(.SCOLSTORED)
@@ -2808,23 +2816,23 @@ void bli_sgemmsup_rv_haswell_asm_1x8
 	jmp(.SDONE)                        // jump to end.
 
 
-
-
+	
+	
 	label(.SBETAZERO)
-
+	
 
 	cmp(imm(4), rdi)                   // set ZF if (8*rs_c) == 8.
 	jz(.SCOLSTORBZ)                    // jump to column storage case
 
 
-
+	
 	label(.SROWSTORBZ)
-
-
+	
+	
 	vmovups(ymm4, mem(rcx, 0*32))
 	//add(rdi, rcx)
-
-
+	
+	
 	jmp(.SDONE)                        // jump to end.
 
 
@@ -2857,12 +2865,12 @@ void bli_sgemmsup_rv_haswell_asm_1x8
 
 	//lea(mem(rcx, rsi, 8), rcx)         // rcx += 8*cs_c
 
-
-
-
+	
+	
+	
 	label(.SDONE)
-
-
+	
+	
 
     end_asm(
 	: // output operands (none)
@@ -2889,6 +2897,7 @@ void bli_sgemmsup_rv_haswell_asm_1x8
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm2", "ymm3", "ymm4",
 	  "memory"
 	)
 }

@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,9 +35,9 @@
 
 #include "blis.h"
 
-bool bli_obj_equals( const obj_t* a, const obj_t* b )
+bool bli_obj_equals( obj_t* a, obj_t* b )
 {
-#if 0
+#if 1
 	bool  r_val = FALSE;
 	num_t dt_a;
 	num_t dt_b;
@@ -45,7 +46,15 @@ bool bli_obj_equals( const obj_t* a, const obj_t* b )
 	// The function is not yet implemented for vectors and matrices.
 	if ( !bli_obj_is_1x1( a ) ||
 	     !bli_obj_is_1x1( b ) )
-		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	{
+
+		if ( bli_obj_is_vector( a ) && bli_obj_is_vector( b ) )
+			bli_eqv( a, b, &r_val );
+		else
+			bli_eqm( a, b, &r_val );
+
+		return r_val;
+	}
 
 	dt_a = bli_obj_dt( a );
 	dt_b = bli_obj_dt( b );
@@ -95,7 +104,7 @@ bool bli_obj_equals( const obj_t* a, const obj_t* b )
 #endif
 }
 
-bool bli_obj_imag_equals( const obj_t* a, const obj_t* b )
+bool bli_obj_imag_equals( obj_t* a, obj_t* b )
 {
 #if 0
 	bool  r_val = FALSE;
@@ -165,7 +174,7 @@ bool bli_obj_imag_equals( const obj_t* a, const obj_t* b )
 	return r_val;
 }
 
-bool bli_obj_imag_is_zero( const obj_t* a )
+bool bli_obj_imag_is_zero( obj_t* a )
 {
 	bool r_val = TRUE;
 

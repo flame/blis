@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -44,39 +44,39 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
-       trans_t    transc, \
-       pack_t     schema, \
-       dim_t      m, \
-       dim_t      n, \
-       dim_t      m_max, \
-       dim_t      n_max, \
-       void*      kappa, \
-       void*      c, inc_t rs_c, inc_t cs_c, \
-       void*      p, inc_t rs_p, inc_t cs_p, \
-                     dim_t pd_p, inc_t ps_p, \
-       cntx_t*    cntx, \
-       thrinfo_t* thread  \
+       trans_t          transc, \
+       pack_t           schema, \
+       dim_t            m, \
+       dim_t            n, \
+       dim_t            m_max, \
+       dim_t            n_max, \
+       ctype*  restrict kappa, \
+       ctype*  restrict c, inc_t rs_c, inc_t cs_c, \
+       ctype*  restrict p, inc_t rs_p, inc_t cs_p, \
+                           dim_t pd_p, inc_t ps_p, \
+       cntx_t* restrict cntx, \
+       thrinfo_t* restrict thread  \
      ) \
 { \
-	ctype* kappa_cast = kappa; \
-	ctype* c_cast     = c; \
-	ctype* p_cast     = p; \
+	ctype* restrict kappa_cast = kappa; \
+	ctype* restrict c_cast     = c; \
+	ctype* restrict p_cast     = p; \
 \
-	dim_t  iter_dim; \
-	dim_t  n_iter; \
-	dim_t  it, ic; \
-	dim_t  ic0; \
-	doff_t ic_inc; \
-	dim_t  panel_len_full; \
-	dim_t  panel_len_i; \
-	dim_t  panel_len_max; \
-	dim_t  panel_len_max_i; \
-	dim_t  panel_dim_i; \
-	dim_t  panel_dim_max; \
-	inc_t  vs_c; \
-	inc_t  ldc; \
-	inc_t  ldp, p_inc; \
-	conj_t conjc; \
+	dim_t           iter_dim; \
+	dim_t           n_iter; \
+	dim_t           it, ic; \
+	dim_t           ic0; \
+	doff_t          ic_inc; \
+	dim_t           panel_len_full; \
+	dim_t           panel_len_i; \
+	dim_t           panel_len_max; \
+	dim_t           panel_len_max_i; \
+	dim_t           panel_dim_i; \
+	dim_t           panel_dim_max; \
+	inc_t           vs_c; \
+	inc_t           ldc; \
+	inc_t           ldp, p_inc; \
+	conj_t          conjc; \
 \
 \
 	/* Extract the conjugation bit from the transposition argument. */ \
@@ -123,14 +123,6 @@ void PASTEMAC(ch,varname) \
 		ldp            = cs_p; \
 	} \
 \
-	num_t dt     = PASTEMAC(ch,type); \
-	ukr_t ker_id = bli_is_col_packed( schema ) ? BLIS_PACKM_NRXK_KER \
-	                                           : BLIS_PACKM_MRXK_KER; \
-\
-	/* Query the context for the unpackm kernel corresponding to the current
-	   panel dimension, or kernel id. */ \
-	PASTECH(packm_cxk,_ker_ft) f = bli_cntx_get_ukr_dt( dt, ker_id, cntx ); \
-\
 	/* Compute the total number of iterations we'll need. */ \
 	n_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 ); \
 \
@@ -141,12 +133,12 @@ void PASTEMAC(ch,varname) \
 		ic_inc = panel_dim_max; \
 	} \
 \
-	ctype* p_begin = p_cast; \
+	ctype* restrict p_begin = p_cast; \
 \
 	/* Query the number of threads and thread ids from the current thread's
 	   packm thrinfo_t node. */ \
-	const dim_t nt  = bli_thrinfo_n_way( thread ); \
-	const dim_t tid = bli_thrinfo_work_id( thread ); \
+	const dim_t nt  = bli_thread_n_way( thread ); \
+	const dim_t tid = bli_thread_work_id( thread ); \
 \
 	/* Suppress warnings in case tid isn't used (ie: as in slab partitioning). */ \
 	( void )nt; \
@@ -155,10 +147,10 @@ void PASTEMAC(ch,varname) \
 	dim_t it_start, it_end, it_inc; \
 \
 	/* Determine the thread range and increment using the current thread's
-	   packm thrinfo_t node. NOTE: The definition of bli_thread_range_slrr()
+	   packm thrinfo_t node. NOTE: The definition of bli_thread_range_jrir()
 	   will depend on whether slab or round-robin partitioning was requested
 	   at configure-time. */ \
-	bli_thread_range_slrr( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
+	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
 \
 	/* Iterate over every logical micropanel in the source matrix. */ \
 	for ( ic  = ic0,    it  = 0; it < n_iter; \
@@ -166,24 +158,25 @@ void PASTEMAC(ch,varname) \
 	{ \
 		panel_dim_i = bli_min( panel_dim_max, iter_dim - ic ); \
 \
-		ctype* c_begin = c_cast   + (ic  )*vs_c; \
+		ctype* restrict c_begin = c_cast   + (ic  )*vs_c; \
 \
-		ctype* c_use = c_begin; \
-		ctype* p_use = p_begin; \
+		ctype* restrict c_use = c_begin; \
+		ctype* restrict p_use = p_begin; \
 \
 		{ \
 			panel_len_i     = panel_len_full; \
 			panel_len_max_i = panel_len_max; \
 \
-			/* The definition of bli_is_my_iter() will depend on whether slab
+			/* The definition of bli_packm_my_iter() will depend on whether slab
 			   or round-robin partitioning was requested at configure-time. */ \
-			if ( bli_is_my_iter( it, it_start, it_end, tid, nt ) ) \
+			if ( bli_packm_my_iter( it, it_start, it_end, tid, nt ) ) \
 			{ \
-				f \
+				PASTEMAC(ch,packm_cxk) \
 				( \
 				  conjc, \
 				  schema, \
 				  panel_dim_i, \
+				  panel_dim_max, \
 				  panel_len_i, \
 				  panel_len_max_i, \
 				  kappa_cast, \
@@ -234,9 +227,9 @@ PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: a packed", *m_panel_max, *n_panel
 \
 /*
 if ( col_stored ) { \
-	if ( bli_thrinfo_work_id( thread ) == 0 ) \
+	if ( bli_thread_work_id( thread ) == 0 ) \
 	{ \
-	printf( "packm_blk_var1: thread %lu  (a = %p, ap = %p)\n", bli_thrinfo_work_id( thread ), c_use, p_use ); \
+	printf( "packm_blk_var1: thread %lu  (a = %p, ap = %p)\n", bli_thread_work_id( thread ), c_use, p_use ); \
 	fflush( stdout ); \
 	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: a", *m_panel_use, *n_panel_use, \
 	                      ( ctype* )c_use,         rs_c, cs_c, "%4.1f", "" ); \
@@ -244,10 +237,10 @@ if ( col_stored ) { \
 	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
 	fflush( stdout ); \
 	} \
-bli_thrinfo_barrier( thread ); \
-	if ( bli_thrinfo_work_id( thread ) == 1 ) \
+bli_thread_barrier( thread ); \
+	if ( bli_thread_work_id( thread ) == 1 ) \
 	{ \
-	printf( "packm_blk_var1: thread %lu  (a = %p, ap = %p)\n", bli_thrinfo_work_id( thread ), c_use, p_use ); \
+	printf( "packm_blk_var1: thread %lu  (a = %p, ap = %p)\n", bli_thread_work_id( thread ), c_use, p_use ); \
 	fflush( stdout ); \
 	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: a", *m_panel_use, *n_panel_use, \
 	                      ( ctype* )c_use,         rs_c, cs_c, "%4.1f", "" ); \
@@ -255,12 +248,12 @@ bli_thrinfo_barrier( thread ); \
 	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
 	fflush( stdout ); \
 	} \
-bli_thrinfo_barrier( thread ); \
+bli_thread_barrier( thread ); \
 } \
 else { \
-	if ( bli_thrinfo_work_id( thread ) == 0 ) \
+	if ( bli_thread_work_id( thread ) == 0 ) \
 	{ \
-	printf( "packm_blk_var1: thread %lu  (b = %p, bp = %p)\n", bli_thrinfo_work_id( thread ), c_use, p_use ); \
+	printf( "packm_blk_var1: thread %lu  (b = %p, bp = %p)\n", bli_thread_work_id( thread ), c_use, p_use ); \
 	fflush( stdout ); \
 	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: b", *m_panel_use, *n_panel_use, \
 	                      ( ctype* )c_use,         rs_c, cs_c, "%4.1f", "" ); \
@@ -268,10 +261,10 @@ else { \
 	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
 	fflush( stdout ); \
 	} \
-bli_thrinfo_barrier( thread ); \
-	if ( bli_thrinfo_work_id( thread ) == 1 ) \
+bli_thread_barrier( thread ); \
+	if ( bli_thread_work_id( thread ) == 1 ) \
 	{ \
-	printf( "packm_blk_var1: thread %lu  (b = %p, bp = %p)\n", bli_thrinfo_work_id( thread ), c_use, p_use ); \
+	printf( "packm_blk_var1: thread %lu  (b = %p, bp = %p)\n", bli_thread_work_id( thread ), c_use, p_use ); \
 	fflush( stdout ); \
 	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: b", *m_panel_use, *n_panel_use, \
 	                      ( ctype* )c_use,         rs_c, cs_c, "%4.1f", "" ); \
@@ -279,7 +272,7 @@ bli_thrinfo_barrier( thread ); \
 	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
 	fflush( stdout ); \
 	} \
-bli_thrinfo_barrier( thread ); \
+bli_thread_barrier( thread ); \
 } \
 */
 /*
@@ -317,28 +310,28 @@ bli_thrinfo_barrier( thread ); \
 \
 void PASTEMAC(ch,varname) \
      ( \
-       trans_t    transc, \
-       pack_t     schema, \
-       dim_t      m, \
-       dim_t      n, \
-       void*      kappa, \
-       void*      c, inc_t rs_c, inc_t cs_c, \
-       void*      p, inc_t rs_p, inc_t cs_p, \
-       cntx_t*    cntx, \
-       thrinfo_t* thread  \
+       trans_t          transc, \
+       pack_t           schema, \
+       dim_t            m, \
+       dim_t            n, \
+       ctype*  restrict kappa, \
+       ctype*  restrict c, inc_t rs_c, inc_t cs_c, \
+       ctype*  restrict p, inc_t rs_p, inc_t cs_p, \
+       cntx_t* restrict cntx, \
+       thrinfo_t* restrict thread  \
      ) \
 { \
-	ctype* kappa_cast = kappa; \
-	ctype* c_cast     = c; \
-	ctype* p_cast     = p; \
+	ctype* restrict kappa_cast = kappa; \
+	ctype* restrict c_cast     = c; \
+	ctype* restrict p_cast     = p; \
 \
-	dim_t  iter_dim; \
-	dim_t  n_iter; \
-	dim_t  it; \
-	dim_t  vector_len; \
-	inc_t  incc, ldc; \
-	inc_t  incp, ldp; \
-	conj_t conjc; \
+	dim_t           iter_dim; \
+	dim_t           n_iter; \
+	dim_t           it; \
+	dim_t           vector_len; \
+	inc_t           incc, ldc; \
+	inc_t           incp, ldp; \
+	conj_t          conjc; \
 \
 \
 	/* Extract the conjugation bit from the transposition argument. */ \
@@ -384,12 +377,12 @@ void PASTEMAC(ch,varname) \
 	n_iter = iter_dim; \
 \
 \
-	ctype* p_begin = p_cast; \
+	ctype* restrict p_begin = p_cast; \
 \
 	/* Query the number of threads and thread ids from the current thread's
 	   packm thrinfo_t node. */ \
-	const dim_t nt  = bli_thrinfo_n_way( thread ); \
-	const dim_t tid = bli_thrinfo_work_id( thread ); \
+	const dim_t nt  = bli_thread_n_way( thread ); \
+	const dim_t tid = bli_thread_work_id( thread ); \
 \
 	/* Suppress warnings in case tid isn't used (ie: as in slab partitioning). */ \
 	( void )nt; \
@@ -398,23 +391,23 @@ void PASTEMAC(ch,varname) \
 	dim_t it_start, it_end, it_inc; \
 \
 	/* Determine the thread range and increment using the current thread's
-	   packm thrinfo_t node. NOTE: The definition of bli_thread_range_slrr()
+	   packm thrinfo_t node. NOTE: The definition of bli_thread_range_jrir()
 	   will depend on whether slab or round-robin partitioning was requested
 	   at configure-time. */ \
-	bli_thread_range_slrr( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
+	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
 \
 	/* Iterate over every logical micropanel in the source matrix. */ \
 	for ( it = 0; it < n_iter; it += 1 ) \
 	{ \
-		ctype* c_begin = c_cast + (it  )*ldc; \
+		ctype* restrict c_begin = c_cast + (it  )*ldc; \
 \
-		ctype* c_use = c_begin; \
-		ctype* p_use = p_begin; \
+		ctype* restrict c_use = c_begin; \
+		ctype* restrict p_use = p_begin; \
 \
 		{ \
-			/* The definition of bli_is_my_iter() will depend on whether slab
+			/* The definition of bli_packm_my_iter() will depend on whether slab
 			   or round-robin partitioning was requested at configure-time. */ \
-			if ( bli_is_my_iter( it, it_start, it_end, tid, nt ) ) \
+			if ( bli_packm_my_iter( it, it_start, it_end, tid, nt ) ) \
 			{ \
 				PASTEMAC2(ch,scal2v,BLIS_TAPI_EX_SUF) \
 				( \

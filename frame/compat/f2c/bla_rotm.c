@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,14 +35,13 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLAS
-
 /* srotm.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,rotm)(const bla_integer *n, bla_real *sx, const bla_integer *incx, bla_real *sy, const bla_integer *incy, const bla_real *sparam)
+/* Subroutine */ 
+int PASTEF77S(s,rotm)(const bla_integer *n, bla_real *sx, const bla_integer *incx, bla_real *sy, const bla_integer *incy, const bla_real *sparam)
 {
     /* Initialized data */
 
@@ -80,6 +80,11 @@
     --sx;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE();
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_ROTM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *n,
+                             *incx, *incy, (void*)&sparam[1], (void*)&sparam[2],
+                             (void*)&sparam[3], (void*)&sparam[4], (void*)&sparam[5]);
 
     sflag = sparam[1];
     if (*n <= 0 || sflag + two == zero) {
@@ -199,6 +204,7 @@ L120:
 /* L130: */
     }
 L140:
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 } /* srotm_ */
 
@@ -207,7 +213,8 @@ L140:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,rotm)(const bla_integer *n, bla_double *dx, const bla_integer *incx, bla_double *dy, const bla_integer *incy, const bla_double *dparam)
+/* Subroutine */ 
+int PASTEF77S(d,rotm)(const bla_integer *n, bla_double *dx, const bla_integer *incx, bla_double *dy, const bla_integer *incy, const bla_double *dparam)
 {
     /* Initialized data */
 
@@ -246,6 +253,11 @@ L140:
     --dx;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE();
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_ROTM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *n,
+                             *incx, *incy, (void*)&dparam[1], (void*)&dparam[2],
+                             (void*)&dparam[3], (void*)&dparam[4], (void*)&dparam[5]);
 
     dflag = dparam[1];
     if (*n <= 0 || dflag + two == zero) {
@@ -365,8 +377,21 @@ L120:
 /* L130: */
     }
 L140:
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 } /* drotm_ */
+
+#ifdef BLIS_ENABLE_BLAS
+
+int PASTEF77(s,rotm)(const bla_integer *n, bla_real *sx, const bla_integer *incx, bla_real *sy, const bla_integer *incy, const bla_real *sparam)
+{
+  return PASTEF77S(s,rotm)( n, sx, incx, sy, incy, sparam);
+}
+
+int PASTEF77(d,rotm)(const bla_integer *n, bla_double *dx, const bla_integer *incx, bla_double *dy, const bla_integer *incy, const bla_double *dparam)
+{
+  return PASTEF77S(d,rotm)( n, dx, incx, dy, incy, dparam);
+}
 
 #endif
 

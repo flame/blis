@@ -34,14 +34,13 @@
 
 typedef struct getopt_s
 {
-	const char* nextchar;
-	const char* optarg;
-	      int   optind;
-	      int   opterr;
-	      int   optopt;
+	char* optarg;
+	int   optind;
+	int   opterr;
+	int   optopt;
 } getopt_t;
 
 BLIS_EXPORT_BLIS void bli_getopt_init_state( int opterr, getopt_t* state );
 
-BLIS_EXPORT_BLIS int bli_getopt( int argc, const char* const * argv, const char* optstring, getopt_t* state );
+BLIS_EXPORT_BLIS int bli_getopt( int argc, char** const argv, const char* optstring, getopt_t* state );
 

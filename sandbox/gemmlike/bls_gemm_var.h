@@ -42,16 +42,18 @@
 \
 void PASTECH(bls_,opname) \
      ( \
-       const obj_t*     alpha, \
-       const obj_t*     a, \
-       const obj_t*     b, \
-       const obj_t*     beta, \
-       const obj_t*     c, \
-       const cntx_t*    cntx, \
-             thrinfo_t* thread  \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm, \
+       thrinfo_t* thread  \
      );
 
 GENPROT( gemm_bp_var1 )
+GENPROT( gemm_bp_var2 )
 
 
 //
@@ -74,14 +76,21 @@ void PASTECH2(bls_,ch,varname) \
        void*   restrict beta, \
        void*   restrict c, inc_t rs_c, inc_t cs_c, \
        cntx_t* restrict cntx, \
+       rntm_t* restrict rntm, \
        thrinfo_t* restrict thread  \
      );
 
-//INSERT_GENTPROT_BASIC( gemm_bp_var1 )
+//INSERT_GENTPROT_BASIC0( gemm_bp_var1 )
 GENTPROT( float,    s, gemm_bp_var1 )
 GENTPROT( double,   d, gemm_bp_var1 )
 GENTPROT( scomplex, c, gemm_bp_var1 )
 GENTPROT( dcomplex, z, gemm_bp_var1 )
+
+//INSERT_GENTPROT_BASIC0( gemm_bp_var2 )
+GENTPROT( float,    s, gemm_bp_var2 )
+GENTPROT( double,   d, gemm_bp_var2 )
+GENTPROT( scomplex, c, gemm_bp_var2 )
+GENTPROT( dcomplex, z, gemm_bp_var2 )
 
 
 //
@@ -107,7 +116,7 @@ void PASTECH2(bls_,ch,varname) \
        cntx_t*    restrict cntx  \
      );
 
-//INSERT_GENTPROT_BASIC( gemm_kernel )
+//INSERT_GENTPROT_BASIC0( gemm_kernel )
 GENTPROT( float,    s, gemm_kernel )
 GENTPROT( double,   d, gemm_kernel )
 GENTPROT( scomplex, c, gemm_kernel )

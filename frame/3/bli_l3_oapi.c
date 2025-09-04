@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2021, The University of Texas at Austin
+   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -43,11 +44,11 @@
 \
 void PASTEMAC0(opname) \
      ( \
-       const obj_t* alpha, \
-       const obj_t* a, \
-       const obj_t* b, \
-       const obj_t* beta, \
-       const obj_t* c  \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c  \
      ) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t
@@ -66,12 +67,12 @@ GENFRONT( syr2k )
 \
 void PASTEMAC0(opname) \
      ( \
-             side_t side, \
-       const obj_t* alpha, \
-       const obj_t* a, \
-       const obj_t* b, \
-       const obj_t* beta, \
-       const obj_t* c  \
+       side_t  side, \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c  \
      ) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t
@@ -89,10 +90,10 @@ GENFRONT( trmm3 )
 \
 void PASTEMAC0(opname) \
      ( \
-       const obj_t* alpha, \
-       const obj_t* a, \
-       const obj_t* beta, \
-       const obj_t* c  \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  beta, \
+       obj_t*  c  \
      ) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t
@@ -109,10 +110,10 @@ GENFRONT( syrk )
 \
 void PASTEMAC0(opname) \
      ( \
-             side_t side, \
-       const obj_t* alpha, \
-       const obj_t* a, \
-       const obj_t* b  \
+       side_t  side, \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b  \
      ) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t

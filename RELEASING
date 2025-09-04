@@ -7,42 +7,38 @@ Here are the steps to follow to create a new release (version) of BLIS:
 
    If there are any commits upstream, merge them as appropriate.
 
-2. Consider whether the so_version should be updated (via the so_version
-   file in the 'build' directory) due to any ABI changes since the previous
-   version. If so, commit that change now.
-
-3. Verify that the code builds properly.
+2. Verify that the code builds properly.
 
    $ ./configure auto; make
 
-4. Verify that the code passes BLIS and BLAS tests:
+3. Verify that the code passes BLIS and BLAS tests:
 
    $ make check           # BLIS testsuite (fast) + BLAS test drivers
    $ make checkblis       # BLIS testsuite (full ex. mixed-datatype)
    $ make checkblis-md    # BLIS testsuite (mixed-datatype only)
    $ make checkblis-salt  # BLIS testsuite (fast + salt)
 
-5. Draft a new announcement to blis-devel, crediting those who
+4. Draft a new announcement to blis-devel, crediting those who
    contributed towards this version by browsing 'git log'.
 
-6. Update CREDITS file if 'git log' reveals any new contributors.
+5. Update CREDITS file if 'git log' reveals any new contributors.
 
-7. Update docs/ReleaseNotes.md file with body of finalized announcement
+6. Update docs/ReleaseNotes.md file with body of finalized announcement
    and the date of the release.
 
-8. Commit changes from steps 5 and 6.
+7. Commit changes from steps 5 and 6.
 
-9. Bump the version number:
+8. Bump the version number:
 
    $ ./build/bump-version.sh "0.3.2"
 
    This will result in two new commits: a version file update and a CHANGELOG
    file update.
 
-10. Push the new commits and new tag associated with the new version:
+9. Push the new commits and new tag associated with the new version:
 
    $ git push
    $ git push --tag
 
-11. Send finalized announcement to blis-devel.
+10. Send finalized announcement to blis-devel.
 

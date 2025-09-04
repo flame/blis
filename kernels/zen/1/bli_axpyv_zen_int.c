@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2016 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2016 - 2023, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2018, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
@@ -57,24 +57,23 @@ typedef union
 
 void bli_saxpyv_zen_int
      (
-             conj_t  conjx,
-             dim_t   n,
-       const void*   alpha0,
-       const void*   x0, inc_t incx,
-             void*   y0, inc_t incy,
-       const cntx_t* cntx
+       conj_t           conjx,
+       dim_t            n,
+       float*  restrict alpha,
+       float*  restrict x, inc_t incx,
+       float*  restrict y, inc_t incy,
+       cntx_t* restrict cntx
      )
 {
-	const float*     alpha = alpha0;
-	const float*     x     = x0;
-	      float*     y     = y0;
-
 	const dim_t      n_elem_per_reg = 8;
 	const dim_t      n_iter_unroll  = 4;
 
 	dim_t            i;
 	dim_t            n_viter;
 	dim_t            n_left;
+
+	float*  restrict x0;
+	float*  restrict y0;
 
 	v8sf_t           alphav;
 	v8sf_t           x0v, x1v, x2v, x3v;
@@ -98,8 +97,8 @@ void bli_saxpyv_zen_int
 	}
 
 	// Initialize local pointers.
-	const float* restrict xp = x;
-	      float* restrict yp = y;
+	x0 = x;
+	y0 = y;
 
 	// Broadcast the alpha scalar to all elements of a vector register.
 	alphav.v = _mm256_broadcast_ss( alpha );
@@ -109,17 +108,17 @@ void bli_saxpyv_zen_int
 	for ( i = 0; i < n_viter; ++i )
 	{
 		// Load the input values.
-		y0v.v = _mm256_loadu_ps( yp + 0*n_elem_per_reg );
-		x0v.v = _mm256_loadu_ps( xp + 0*n_elem_per_reg );
+		y0v.v = _mm256_loadu_ps( y0 + 0*n_elem_per_reg );
+		x0v.v = _mm256_loadu_ps( x0 + 0*n_elem_per_reg );
 
-		y1v.v = _mm256_loadu_ps( yp + 1*n_elem_per_reg );
-		x1v.v = _mm256_loadu_ps( xp + 1*n_elem_per_reg );
+		y1v.v = _mm256_loadu_ps( y0 + 1*n_elem_per_reg );
+		x1v.v = _mm256_loadu_ps( x0 + 1*n_elem_per_reg );
 
-		y2v.v = _mm256_loadu_ps( yp + 2*n_elem_per_reg );
-		x2v.v = _mm256_loadu_ps( xp + 2*n_elem_per_reg );
+		y2v.v = _mm256_loadu_ps( y0 + 2*n_elem_per_reg );
+		x2v.v = _mm256_loadu_ps( x0 + 2*n_elem_per_reg );
 
-		y3v.v = _mm256_loadu_ps( yp + 3*n_elem_per_reg );
-		x3v.v = _mm256_loadu_ps( xp + 3*n_elem_per_reg );
+		y3v.v = _mm256_loadu_ps( y0 + 3*n_elem_per_reg );
+		x3v.v = _mm256_loadu_ps( x0 + 3*n_elem_per_reg );
 
 		// perform : y += alpha * x;
 		y0v.v = _mm256_fmadd_ps( alphav.v, x0v.v, y0v.v );
@@ -128,19 +127,19 @@ void bli_saxpyv_zen_int
 		y3v.v = _mm256_fmadd_ps( alphav.v, x3v.v, y3v.v );
 
 		// Store the output.
-		_mm256_storeu_ps( (yp + 0*n_elem_per_reg), y0v.v );
-		_mm256_storeu_ps( (yp + 1*n_elem_per_reg), y1v.v );
-		_mm256_storeu_ps( (yp + 2*n_elem_per_reg), y2v.v );
-		_mm256_storeu_ps( (yp + 3*n_elem_per_reg), y3v.v );
+		_mm256_storeu_ps( (y0 + 0*n_elem_per_reg), y0v.v );
+		_mm256_storeu_ps( (y0 + 1*n_elem_per_reg), y1v.v );
+		_mm256_storeu_ps( (y0 + 2*n_elem_per_reg), y2v.v );
+		_mm256_storeu_ps( (y0 + 3*n_elem_per_reg), y3v.v );
 
-		xp += n_elem_per_reg * n_iter_unroll;
-		yp += n_elem_per_reg * n_iter_unroll;
+		x0 += n_elem_per_reg * n_iter_unroll;
+		y0 += n_elem_per_reg * n_iter_unroll;
 	}
 
 	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
 	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions (which may occur
-	// as soon as the n_left cleanup loop below if BLIS is compiled with
+	// transitioning from AVX to SSE instructions (which may occur as soon
+	// as the n_left cleanup loop below if BLIS is compiled with
 	// -mfpmath=sse).
 	_mm256_zeroupper();
 
@@ -149,12 +148,12 @@ void bli_saxpyv_zen_int
 	// If there are leftover iterations, perform them with scalar code.
 	for ( i = 0; i < n_left; ++i )
 	{
-		const float x0c = *xp;
+		const float x0c = *x0;
 
-		*yp += alphac * x0c;
+		*y0 += alphac * x0c;
 
-		xp += incx;
-		yp += incy;
+		x0 += incx;
+		y0 += incy;
 	}
 }
 
@@ -162,24 +161,23 @@ void bli_saxpyv_zen_int
 
 void bli_daxpyv_zen_int
      (
-             conj_t  conjx,
-             dim_t   n,
-       const void*   alpha0,
-       const void*   x0, inc_t incx,
-             void*   y0, inc_t incy,
-       const cntx_t* cntx
+       conj_t           conjx,
+       dim_t            n,
+       double* restrict alpha,
+       double* restrict x, inc_t incx,
+       double* restrict y, inc_t incy,
+       cntx_t* restrict cntx
      )
 {
-	const double*     alpha = alpha0;
-	const double*     x     = x0;
-	      double*     y     = y0;
-
 	const dim_t       n_elem_per_reg = 4;
 	const dim_t       n_iter_unroll  = 4;
 
 	dim_t             i;
 	dim_t             n_viter;
 	dim_t             n_left;
+
+	double*  restrict x0;
+	double*  restrict y0;
 
 	v4df_t            alphav;
 	v4df_t            x0v, x1v, x2v, x3v;
@@ -203,8 +201,8 @@ void bli_daxpyv_zen_int
 	}
 
 	// Initialize local pointers.
-	const double* restrict xp = x;
-	      double* restrict yp = y;
+	x0 = x;
+	y0 = y;
 
 	// Broadcast the alpha scalar to all elements of a vector register.
 	alphav.v = _mm256_broadcast_sd( alpha );
@@ -214,17 +212,17 @@ void bli_daxpyv_zen_int
 	for ( i = 0; i < n_viter; ++i )
 	{
 		// Load the input values.
-		y0v.v = _mm256_loadu_pd( yp + 0*n_elem_per_reg );
-		x0v.v = _mm256_loadu_pd( xp + 0*n_elem_per_reg );
+		y0v.v = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
+		x0v.v = _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
 
-		y1v.v = _mm256_loadu_pd( yp + 1*n_elem_per_reg );
-		x1v.v = _mm256_loadu_pd( xp + 1*n_elem_per_reg );
+		y1v.v = _mm256_loadu_pd( y0 + 1*n_elem_per_reg );
+		x1v.v = _mm256_loadu_pd( x0 + 1*n_elem_per_reg );
 
-		y2v.v = _mm256_loadu_pd( yp + 2*n_elem_per_reg );
-		x2v.v = _mm256_loadu_pd( xp + 2*n_elem_per_reg );
+		y2v.v = _mm256_loadu_pd( y0 + 2*n_elem_per_reg );
+		x2v.v = _mm256_loadu_pd( x0 + 2*n_elem_per_reg );
 
-		y3v.v = _mm256_loadu_pd( yp + 3*n_elem_per_reg );
-		x3v.v = _mm256_loadu_pd( xp + 3*n_elem_per_reg );
+		y3v.v = _mm256_loadu_pd( y0 + 3*n_elem_per_reg );
+		x3v.v = _mm256_loadu_pd( x0 + 3*n_elem_per_reg );
 
 		// perform : y += alpha * x;
 		y0v.v = _mm256_fmadd_pd( alphav.v, x0v.v, y0v.v );
@@ -233,19 +231,19 @@ void bli_daxpyv_zen_int
 		y3v.v = _mm256_fmadd_pd( alphav.v, x3v.v, y3v.v );
 
 		// Store the output.
-		_mm256_storeu_pd( (yp + 0*n_elem_per_reg), y0v.v );
-		_mm256_storeu_pd( (yp + 1*n_elem_per_reg), y1v.v );
-		_mm256_storeu_pd( (yp + 2*n_elem_per_reg), y2v.v );
-		_mm256_storeu_pd( (yp + 3*n_elem_per_reg), y3v.v );
+		_mm256_storeu_pd( (y0 + 0*n_elem_per_reg), y0v.v );
+		_mm256_storeu_pd( (y0 + 1*n_elem_per_reg), y1v.v );
+		_mm256_storeu_pd( (y0 + 2*n_elem_per_reg), y2v.v );
+		_mm256_storeu_pd( (y0 + 3*n_elem_per_reg), y3v.v );
 
-		xp += n_elem_per_reg * n_iter_unroll;
-		yp += n_elem_per_reg * n_iter_unroll;
+		x0 += n_elem_per_reg * n_iter_unroll;
+		y0 += n_elem_per_reg * n_iter_unroll;
 	}
 
 	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
 	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions (which may occur
-	// as soon as the n_left cleanup loop below if BLIS is compiled with
+	// transitioning from AVX to SSE instructions (which may occur as soon
+	// as the n_left cleanup loop below if BLIS is compiled with
 	// -mfpmath=sse).
 	_mm256_zeroupper();
 
@@ -254,12 +252,12 @@ void bli_daxpyv_zen_int
 	// If there are leftover iterations, perform them with scalar code.
 	for ( i = 0; i < n_left; ++i )
 	{
-		const double x0c = *xp;
+		const double x0c = *x0;
 
-		*yp += alphac * x0c;
+		*y0 += alphac * x0c;
 
-		xp += incx;
-		yp += incy;
+		x0 += incx;
+		y0 += incy;
 	}
 }
 

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -38,9 +38,9 @@
 
 void bli_array_init
      (
-       siz_t    num_elem,
-       siz_t    elem_size,
-       array_t* array
+       const siz_t       num_elem,
+       const siz_t       elem_size,
+       array_t* restrict array
      )
 {
 	err_t r_val;
@@ -54,7 +54,7 @@ void bli_array_init
 	const size_t array_size = num_elem * elem_size;
 
 	// Allocate the array buffer.
-	void* buf = bli_malloc_intl( array_size, &r_val );
+	void* restrict buf = bli_malloc_intl( array_size, &r_val );
 
 	// Initialize the array elements to zero. THIS IS IMPORANT because
 	// consumer threads will use the NULL-ness of the array elements to
@@ -70,8 +70,8 @@ void bli_array_init
 
 void bli_array_resize
      (
-       siz_t    num_elem_new,
-       array_t* array
+       const siz_t       num_elem_new,
+       array_t* restrict array
      )
 {
 	err_t r_val;
@@ -94,7 +94,7 @@ void bli_array_resize
 	const size_t array_size_new  = num_elem_new  * elem_size;
 
 	// Query the previous array buffer.
-	void* buf_prev = bli_array_buf( array );
+	void* restrict buf_prev = bli_array_buf( array );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_array_resize(): allocating array [%d * %d]: ",
@@ -102,7 +102,7 @@ void bli_array_resize
 	#endif
 
 	// Allocate a new array buffer.
-	char* buf_new = bli_malloc_intl( array_size_new, &r_val );
+	char* restrict buf_new = bli_malloc_intl( array_size_new, &r_val );
 
 	// Copy the previous array contents to the new array.
 	memcpy( buf_new, buf_prev, array_size_prev );
@@ -129,7 +129,7 @@ void bli_array_resize
 
 void bli_array_finalize
      (
-       array_t* array
+       array_t* restrict array
      )
 {
 	#ifdef BLIS_ENABLE_MEM_TRACING
@@ -138,7 +138,7 @@ void bli_array_finalize
 	#endif
 
 	// Query the buffer from the array.
-	void* buf = bli_array_buf( array );
+	void* restrict buf = bli_array_buf( array );
 
 	// Free the buffer.
 	bli_free_intl( buf );
@@ -146,8 +146,8 @@ void bli_array_finalize
 
 void* bli_array_elem
      (
-             siz_t    index,
-       const array_t* array
+       const siz_t       index,
+       array_t* restrict array
      )
 {
 	// Query the number of elements in the array.
@@ -161,7 +161,7 @@ void* bli_array_elem
 
 	// Query the buffer from the array, but store it as a char* so we can use
 	// it to easily perform byte pointer arithmetic.
-	char* buf = bli_array_buf( array );
+	char* restrict buf = bli_array_buf( array );
 
 	// Advance the pointer by (index * elem_size) bytes.
 	buf += index * elem_size;
@@ -172,19 +172,17 @@ void* bli_array_elem
 
 void bli_array_set_elem
      (
-       void*    elem,
-       siz_t    index,
-       array_t* array
+       void*    restrict elem,
+       const siz_t       index,
+       array_t* restrict array
      )
 {
 	// Query the size of each element in the array.
 	const siz_t elem_size = bli_array_elem_size( array );
 
 	// Query the buffer from the array as a char*.
-	char* buf = bli_array_buf( array );
+	char* restrict buf = bli_array_buf( array );
 
-// memcpy() is the only safe way to copy data of unknown type
-#if 0
 	if ( elem_size == sizeof( void* ) )
 	{
 		#ifdef BLIS_ENABLE_MEM_TRACING
@@ -195,19 +193,16 @@ void bli_array_set_elem
 
 		// Special case: Handle elem_size = sizeof( void* ) without calling
 		// memcpy().
-		void** buf_vvp  = ( void** )buf;
-		void** elem_vvp = ( void** )elem;
+		void** restrict buf_vvp  = ( void** )buf;
+		void** restrict elem_vvp = ( void** )elem;
 
 		buf_vvp[ index ] = *elem_vvp;
 	}
 	else
 	{
-#endif
 		// General case: Copy the elem_size bytes from elem to buf at the
 		// element index specified by index.
 		memcpy( &buf[ index * elem_size ], elem, ( size_t )elem_size );
-#if 0
 	}
-#endif
 }
 

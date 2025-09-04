@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,37 +35,43 @@
 
 cntl_t* bli_gemm_cntl_create
      (
-       pool_t* pool,
+       rntm_t* rntm,
        opid_t  family,
        pack_t  schema_a,
-       pack_t  schema_b,
-       void_fp ker
+       pack_t  schema_b
      );
 
 // -----------------------------------------------------------------------------
 
 cntl_t* bli_gemmbp_cntl_create
      (
-       pool_t* pool,
+       rntm_t* rntm,
        opid_t  family,
        pack_t  schema_a,
-       pack_t  schema_b,
-       void_fp ker
+       pack_t  schema_b
      );
+
+#if 0
+cntl_t* bli_gemmpb_cntl_create
+     (
+       opid_t family,
+     );
+#endif
 
 // -----------------------------------------------------------------------------
 
 void bli_gemm_cntl_free
      (
-       pool_t* pool,
-       cntl_t* cntl
+       rntm_t*    rntm,
+       cntl_t*    cntl,
+       thrinfo_t* thread
      );
 
 // -----------------------------------------------------------------------------
 
 cntl_t* bli_gemm_cntl_create_node
      (
-       pool_t* pool,
+       rntm_t* rntm,
        opid_t  family,
        bszid_t bszid,
        void_fp var_func,

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -69,8 +69,8 @@
 
 int main( int argc, char** argv )
 {
-	arch_t id     = bli_cpuid_query_id();
-	const char* s = bli_arch_string( id );
+	arch_t id = bli_cpuid_query_id();
+	char*  s  = bli_arch_string( id );
 
 	printf( "%s\n", s );
 

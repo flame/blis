@@ -1,4 +1,7 @@
 /* dblat3.f -- translated by f2c (version 20100827).
+
+	Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
+   
    You must link the resulting object file with libf2c:
 	on Microsoft Windows system, link with libf2c.lib;
 	on Linux or Unix systems, link with .../path/to/libf2c.a -lm
@@ -135,14 +138,9 @@ static integer c__2 = 2;
 /*  ===================================================================== */
 /* Main program */ int main(void)
 {
-#ifdef BLIS_ENABLE_HPX
-    char* program = "dblat3";
-    bli_thread_initialize_hpx( 1, &program );
-#endif
-
     /* Initialized data */
 
-    static char snames[6*6] = "DGEMM " "DSYMM " "DTRMM " "DTRSM " "DSYRK "
+    static char snames[6*6] = "DGEMM " "DSYMM " "DTRMM " "DTRSM " "DSYRK " 
 	    "DSYR2K";
 
     /* Format strings */
@@ -184,10 +182,10 @@ static integer c__2 = 2;
     cllist cl__1;
 
     /* Builtin functions */
-    integer s_rsle(cilist *), do_lio(integer *, integer *, char *, ftnlen),
+    integer s_rsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
 	    e_rsle(void), f_open(olist *), s_wsfe(cilist *), do_fio(integer *,
-	     char *, ftnlen), e_wsfe(void), s_wsle(cilist *), e_wsle(void),
-	    s_rsfe(cilist *), e_rsfe(void), s_cmp(const char *, const char *, ftnlen,
+	     char *, ftnlen), e_wsfe(void), s_wsle(cilist *), e_wsle(void), 
+	    s_rsfe(cilist *), e_rsfe(void), s_cmp(const char *, const char *, ftnlen, 
 	    ftnlen);
     /* Subroutine */ int s_stop(char *, ftnlen);
     integer f_clos(cllist *);
@@ -205,38 +203,38 @@ static integer c__2 = 2;
     integer nbet, ntra;
     logical rewi;
     integer nout;
-    extern /* Subroutine */ int dchk1_(char *, doublereal *, doublereal *,
-	    integer *, integer *, logical *, logical *, logical *, integer *,
-	    integer *, integer *, doublereal *, integer *, doublereal *,
+    extern /* Subroutine */ int dchk1_(char *, doublereal *, doublereal *, 
+	    integer *, integer *, logical *, logical *, logical *, integer *, 
+	    integer *, integer *, doublereal *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, doublereal *, doublereal *,
-	     doublereal *, doublereal *, doublereal *, doublereal *,
-	    doublereal *, doublereal *, doublereal *, ftnlen), dchk2_(char *,
-	    doublereal *, doublereal *, integer *, integer *, logical *,
-	    logical *, logical *, integer *, integer *, integer *, doublereal
+	     doublereal *, doublereal *, doublereal *, doublereal *, 
+	    doublereal *, doublereal *, doublereal *, ftnlen), dchk2_(char *, 
+	    doublereal *, doublereal *, integer *, integer *, logical *, 
+	    logical *, logical *, integer *, integer *, integer *, doublereal 
 	    *, integer *, doublereal *, integer *, doublereal *, doublereal *,
-	     doublereal *, doublereal *, doublereal *, doublereal *,
-	    doublereal *, doublereal *, doublereal *, doublereal *,
-	    doublereal *, ftnlen), dchk3_(char *, doublereal *, doublereal *,
-	    integer *, integer *, logical *, logical *, logical *, integer *,
-	    integer *, integer *, doublereal *, integer *, doublereal *,
-	    doublereal *, doublereal *, doublereal *, doublereal *,
-	    doublereal *, doublereal *, doublereal *, doublereal *, ftnlen),
-	    dchk4_(char *, doublereal *, doublereal *, integer *, integer *,
-	    logical *, logical *, logical *, integer *, integer *, integer *,
-	    doublereal *, integer *, doublereal *, integer *, doublereal *,
-	    doublereal *, doublereal *, doublereal *, doublereal *,
-	    doublereal *, doublereal *, doublereal *, doublereal *,
-	    doublereal *, doublereal *, ftnlen), dchk5_(char *, doublereal *,
-	    doublereal *, integer *, integer *, logical *, logical *, logical
-	    *, integer *, integer *, integer *, doublereal *, integer *,
+	     doublereal *, doublereal *, doublereal *, doublereal *, 
+	    doublereal *, doublereal *, doublereal *, doublereal *, 
+	    doublereal *, ftnlen), dchk3_(char *, doublereal *, doublereal *, 
+	    integer *, integer *, logical *, logical *, logical *, integer *, 
+	    integer *, integer *, doublereal *, integer *, doublereal *, 
+	    doublereal *, doublereal *, doublereal *, doublereal *, 
+	    doublereal *, doublereal *, doublereal *, doublereal *, ftnlen), 
+	    dchk4_(char *, doublereal *, doublereal *, integer *, integer *, 
+	    logical *, logical *, logical *, integer *, integer *, integer *, 
+	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
+	    doublereal *, doublereal *, doublereal *, doublereal *, 
+	    doublereal *, doublereal *, doublereal *, doublereal *, 
+	    doublereal *, doublereal *, ftnlen), dchk5_(char *, doublereal *, 
+	    doublereal *, integer *, integer *, logical *, logical *, logical 
+	    *, integer *, integer *, integer *, doublereal *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, doublereal *,
-	     doublereal *, doublereal *, doublereal *, doublereal *,
-	    doublereal *, doublereal *, doublereal *, doublereal *, ftnlen),
+	     doublereal *, doublereal *, doublereal *, doublereal *, 
+	    doublereal *, doublereal *, doublereal *, doublereal *, ftnlen), 
 	    dchke_(integer *, char *, integer *, ftnlen);
     logical fatal;
-    extern /* Subroutine */ int dmmch_(char *, char *, integer *, integer *,
-	    integer *, doublereal *, doublereal *, integer *, doublereal *,
-	    integer *, doublereal *, doublereal *, integer *, doublereal *,
+    extern /* Subroutine */ int dmmch_(char *, char *, integer *, integer *, 
+	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
+	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
 	    doublereal *, doublereal *, integer *, doublereal *, doublereal *,
 	     logical *, integer *, logical *, ftnlen, ftnlen);
     logical trace;
@@ -511,7 +509,7 @@ L30:
 	goto L60;
     }
     for (i__ = 1; i__ <= 6; ++i__) {
-	if (s_cmp(snamet, snames + (i__ - 1) * 6, (ftnlen)6, (ftnlen)6) == 0)
+	if (s_cmp(snamet, snames + (i__ - 1) * 6, (ftnlen)6, (ftnlen)6) == 0) 
 		{
 	    goto L50;
 	}
@@ -559,7 +557,7 @@ L60:
     }
     i__1 = n;
     for (j = 1; j <= i__1; ++j) {
-	cc[j - 1] = (doublereal) (j * ((j + 1) * j) / 2 - (j + 1) * j * (j -
+	cc[j - 1] = (doublereal) (j * ((j + 1) * j) / 2 - (j + 1) * j * (j - 
 		1) / 3);
 /* L110: */
     }
@@ -604,7 +602,7 @@ L60:
     }
     i__1 = n;
     for (j = 1; j <= i__1; ++j) {
-	cc[n - j] = (doublereal) (j * ((j + 1) * j) / 2 - (j + 1) * j * (j -
+	cc[n - j] = (doublereal) (j * ((j + 1) * j) / 2 - (j + 1) * j * (j - 
 		1) / 3);
 /* L130: */
     }
@@ -677,34 +675,34 @@ L60:
 /*           Test DGEMM, 01. */
 L140:
 	    dchk1_(snames + (isnum - 1) * 6, &eps, &thresh, &nout, &ntra, &
-		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &nbet,
-		    bet, &c__65, ab, aa, as, &ab[4225], bb, bs, c__, cc, cs,
+		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &nbet, 
+		    bet, &c__65, ab, aa, as, &ab[4225], bb, bs, c__, cc, cs, 
 		    ct, g, (ftnlen)6);
 	    goto L190;
 /*           Test DSYMM, 02. */
 L150:
 	    dchk2_(snames + (isnum - 1) * 6, &eps, &thresh, &nout, &ntra, &
-		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &nbet,
-		    bet, &c__65, ab, aa, as, &ab[4225], bb, bs, c__, cc, cs,
+		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &nbet, 
+		    bet, &c__65, ab, aa, as, &ab[4225], bb, bs, c__, cc, cs, 
 		    ct, g, (ftnlen)6);
 	    goto L190;
 /*           Test DTRMM, 03, DTRSM, 04. */
 L160:
 	    dchk3_(snames + (isnum - 1) * 6, &eps, &thresh, &nout, &ntra, &
-		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &c__65,
+		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &c__65, 
 		    ab, aa, as, &ab[4225], bb, bs, ct, g, c__, (ftnlen)6);
 	    goto L190;
 /*           Test DSYRK, 05. */
 L170:
 	    dchk4_(snames + (isnum - 1) * 6, &eps, &thresh, &nout, &ntra, &
-		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &nbet,
-		    bet, &c__65, ab, aa, as, &ab[4225], bb, bs, c__, cc, cs,
+		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &nbet, 
+		    bet, &c__65, ab, aa, as, &ab[4225], bb, bs, c__, cc, cs, 
 		    ct, g, (ftnlen)6);
 	    goto L190;
 /*           Test DSYR2K, 06. */
 L180:
 	    dchk5_(snames + (isnum - 1) * 6, &eps, &thresh, &nout, &ntra, &
-		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &nbet,
+		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &nbet, 
 		    bet, &c__65, ab, aa, as, bb, bs, c__, cc, cs, ct, g, w, (
 		    ftnlen)6);
 	    goto L190;
@@ -748,20 +746,15 @@ L230:
 
 /*     End of DBLAT3. */
 
-#ifdef BLIS_ENABLE_HPX
-    return bli_thread_finalize_hpx();
-#else
-	// Return peacefully.
-	return 0;
-#endif
+    return 0;
 } /* main */
 
-/* Subroutine */ int dchk1_(char *sname, doublereal *eps, doublereal *thresh,
+/* Subroutine */ int dchk1_(char *sname, doublereal *eps, doublereal *thresh, 
 	integer *nout, integer *ntra, logical *trace, logical *rewi, logical *
-	fatal, integer *nidim, integer *idim, integer *nalf, doublereal *alf,
-	integer *nbet, doublereal *bet, integer *nmax, doublereal *a,
-	doublereal *aa, doublereal *as, doublereal *b, doublereal *bb,
-	doublereal *bs, doublereal *c__, doublereal *cc, doublereal *cs,
+	fatal, integer *nidim, integer *idim, integer *nalf, doublereal *alf, 
+	integer *nbet, doublereal *bet, integer *nmax, doublereal *a, 
+	doublereal *aa, doublereal *as, doublereal *b, doublereal *bb, 
+	doublereal *bs, doublereal *c__, doublereal *cc, doublereal *cs, 
 	doublereal *ct, doublereal *g, ftnlen sname_len)
 {
     /* Initialized data */
@@ -785,7 +778,7 @@ L230:
 	    "ER:\002)";
 
     /* System generated locals */
-    integer a_dim1, a_offset, b_dim1, b_offset, c_dim1, c_offset, i__1, i__2,
+    integer a_dim1, a_offset, b_dim1, b_offset, c_dim1, c_offset, i__1, i__2, 
 	    i__3, i__4, i__5, i__6;
     alist al__1;
 
@@ -794,22 +787,22 @@ L230:
 	     f_rew(alist *);
 
     /* Local variables */
-    integer i__, k, m, n, ia, ib, ma, mb, na, nb, nc, ik, im, in, ks, ms, ns,
+    integer i__, k, m, n, ia, ib, ma, mb, na, nb, nc, ik, im, in, ks, ms, ns, 
 	    ica, icb, laa, lbb, lda, lcc, ldb, ldc;
     extern logical lde_(doublereal *, doublereal *, integer *);
     doublereal als, bls, err, beta;
     integer ldas, ldbs, ldcs;
     logical same, null;
-    extern /* Subroutine */ int dmake_(char *, char *, char *, integer *,
-	    integer *, doublereal *, integer *, doublereal *, integer *,
+    extern /* Subroutine */ int dmake_(char *, char *, char *, integer *, 
+	    integer *, doublereal *, integer *, doublereal *, integer *, 
 	    logical *, doublereal *, ftnlen, ftnlen, ftnlen);
     doublereal alpha;
-    extern /* Subroutine */ int dmmch_(char *, char *, integer *, integer *,
-	    integer *, doublereal *, doublereal *, integer *, doublereal *,
-	    integer *, doublereal *, doublereal *, integer *, doublereal *,
+    extern /* Subroutine */ int dmmch_(char *, char *, integer *, integer *, 
+	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
+	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
 	    doublereal *, doublereal *, integer *, doublereal *, doublereal *,
-	     logical *, integer *, logical *, ftnlen, ftnlen), dgemm_(char *,
-	    char *, integer *, integer *, integer *, doublereal *, doublereal
+	     logical *, integer *, logical *, ftnlen, ftnlen), dgemm_(char *, 
+	    char *, integer *, integer *, integer *, doublereal *, doublereal 
 	    *, integer *, doublereal *, integer *, doublereal *, doublereal *,
 	     integer *, ftnlen, ftnlen);
     logical isame[13], trana, tranb;
@@ -908,7 +901,7 @@ L230:
 		for (ica = 1; ica <= 3; ++ica) {
 		    *(unsigned char *)transa = *(unsigned char *)&ich[ica - 1]
 			    ;
-		    trana = *(unsigned char *)transa == 'T' || *(unsigned
+		    trana = *(unsigned char *)transa == 'T' || *(unsigned 
 			    char *)transa == 'C';
 
 		    if (trana) {
@@ -936,9 +929,9 @@ L230:
 			    ftnlen)1);
 
 		    for (icb = 1; icb <= 3; ++icb) {
-			*(unsigned char *)transb = *(unsigned char *)&ich[icb
+			*(unsigned char *)transb = *(unsigned char *)&ich[icb 
 				- 1];
-			tranb = *(unsigned char *)transb == 'T' || *(unsigned
+			tranb = *(unsigned char *)transb == 'T' || *(unsigned 
 				char *)transb == 'C';
 
 			if (tranb) {
@@ -1110,9 +1103,9 @@ L230:
 
 				    dmmch_(transa, transb, &m, &n, &k, &alpha,
 					     &a[a_offset], nmax, &b[b_offset],
-					     nmax, &beta, &c__[c_offset],
+					     nmax, &beta, &c__[c_offset], 
 					    nmax, &ct[1], &g[1], &cc[1], &ldc,
-					     eps, &err, fatal, nout, &c_true,
+					     eps, &err, fatal, nout, &c_true, 
 					    (ftnlen)1, (ftnlen)1);
 				    errmax = max(errmax,err);
 /*                             If got really bad answer, report and */
@@ -1193,12 +1186,12 @@ L130:
 
 } /* dchk1_ */
 
-/* Subroutine */ int dchk2_(char *sname, doublereal *eps, doublereal *thresh,
+/* Subroutine */ int dchk2_(char *sname, doublereal *eps, doublereal *thresh, 
 	integer *nout, integer *ntra, logical *trace, logical *rewi, logical *
-	fatal, integer *nidim, integer *idim, integer *nalf, doublereal *alf,
-	integer *nbet, doublereal *bet, integer *nmax, doublereal *a,
-	doublereal *aa, doublereal *as, doublereal *b, doublereal *bb,
-	doublereal *bs, doublereal *c__, doublereal *cc, doublereal *cs,
+	fatal, integer *nidim, integer *idim, integer *nalf, doublereal *alf, 
+	integer *nbet, doublereal *bet, integer *nmax, doublereal *a, 
+	doublereal *aa, doublereal *as, doublereal *b, doublereal *bb, 
+	doublereal *bs, doublereal *c__, doublereal *cc, doublereal *cs, 
 	doublereal *ct, doublereal *g, ftnlen sname_len)
 {
     /* Initialized data */
@@ -1223,7 +1216,7 @@ L130:
 	    "ER:\002)";
 
     /* System generated locals */
-    integer a_dim1, a_offset, b_dim1, b_offset, c_dim1, c_offset, i__1, i__2,
+    integer a_dim1, a_offset, b_dim1, b_offset, c_dim1, c_offset, i__1, i__2, 
 	    i__3, i__4, i__5;
     alist al__1;
 
@@ -1232,7 +1225,7 @@ L130:
 	     f_rew(alist *);
 
     /* Local variables */
-    integer i__, m, n, ia, ib, na, nc, im, in, ms, ns, laa, lbb, lda, lcc,
+    integer i__, m, n, ia, ib, na, nc, im, in, ms, ns, laa, lbb, lda, lcc, 
 	    ldb, ldc;
     extern logical lde_(doublereal *, doublereal *, integer *);
     integer ics;
@@ -1244,21 +1237,21 @@ L130:
     char side[1];
     logical left, null;
     char uplo[1];
-    extern /* Subroutine */ int dmake_(char *, char *, char *, integer *,
-	    integer *, doublereal *, integer *, doublereal *, integer *,
+    extern /* Subroutine */ int dmake_(char *, char *, char *, integer *, 
+	    integer *, doublereal *, integer *, doublereal *, integer *, 
 	    logical *, doublereal *, ftnlen, ftnlen, ftnlen);
     doublereal alpha;
-    extern /* Subroutine */ int dmmch_(char *, char *, integer *, integer *,
-	    integer *, doublereal *, doublereal *, integer *, doublereal *,
-	    integer *, doublereal *, doublereal *, integer *, doublereal *,
+    extern /* Subroutine */ int dmmch_(char *, char *, integer *, integer *, 
+	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
+	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
 	    doublereal *, doublereal *, integer *, doublereal *, doublereal *,
 	     logical *, integer *, logical *, ftnlen, ftnlen);
     logical isame[13];
     char sides[1];
     integer nargs;
     logical reset;
-    extern /* Subroutine */ int dsymm_(char *, char *, integer *, integer *,
-	    doublereal *, doublereal *, integer *, doublereal *, integer *,
+    extern /* Subroutine */ int dsymm_(char *, char *, integer *, integer *, 
+	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *, integer *, ftnlen, ftnlen);
     char uplos[1];
     extern logical lderes_(char *, char *, integer *, integer *, doublereal *,
@@ -1401,7 +1394,7 @@ L130:
 
 /*                       Generate the matrix C. */
 
-			    dmake_("GE", " ", " ", &m, &n, &c__[c_offset],
+			    dmake_("GE", " ", " ", &m, &n, &c__[c_offset], 
 				    nmax, &cc[1], &ldc, &reset, &c_b86, (
 				    ftnlen)2, (ftnlen)1, (ftnlen)1);
 
@@ -1482,9 +1475,9 @@ L130:
 
 /*                       See what data changed inside subroutines. */
 
-			    isame[0] = *(unsigned char *)sides == *(unsigned
+			    isame[0] = *(unsigned char *)sides == *(unsigned 
 				    char *)side;
-			    isame[1] = *(unsigned char *)uplos == *(unsigned
+			    isame[1] = *(unsigned char *)uplos == *(unsigned 
 				    char *)uplo;
 			    isame[2] = ms == m;
 			    isame[3] = ns == n;
@@ -1529,14 +1522,14 @@ L130:
 
 				if (left) {
 				    dmmch_("N", "N", &m, &n, &m, &alpha, &a[
-					    a_offset], nmax, &b[b_offset],
+					    a_offset], nmax, &b[b_offset], 
 					    nmax, &beta, &c__[c_offset], nmax,
 					     &ct[1], &g[1], &cc[1], &ldc, eps,
 					     &err, fatal, nout, &c_true, (
 					    ftnlen)1, (ftnlen)1);
 				} else {
 				    dmmch_("N", "N", &m, &n, &n, &alpha, &b[
-					    b_offset], nmax, &a[a_offset],
+					    b_offset], nmax, &a[a_offset], 
 					    nmax, &beta, &c__[c_offset], nmax,
 					     &ct[1], &g[1], &cc[1], &ldc, eps,
 					     &err, fatal, nout, &c_true, (
@@ -1616,11 +1609,11 @@ L120:
 
 } /* dchk2_ */
 
-/* Subroutine */ int dchk3_(char *sname, doublereal *eps, doublereal *thresh,
+/* Subroutine */ int dchk3_(char *sname, doublereal *eps, doublereal *thresh, 
 	integer *nout, integer *ntra, logical *trace, logical *rewi, logical *
-	fatal, integer *nidim, integer *idim, integer *nalf, doublereal *alf,
-	integer *nmax, doublereal *a, doublereal *aa, doublereal *as,
-	doublereal *b, doublereal *bb, doublereal *bs, doublereal *ct,
+	fatal, integer *nidim, integer *idim, integer *nalf, doublereal *alf, 
+	integer *nmax, doublereal *a, doublereal *aa, doublereal *as, 
+	doublereal *b, doublereal *bb, doublereal *bs, doublereal *ct, 
 	doublereal *g, doublereal *c__, ftnlen sname_len)
 {
     /* Initialized data */
@@ -1647,7 +1640,7 @@ L120:
 	    "ER:\002)";
 
     /* System generated locals */
-    integer a_dim1, a_offset, b_dim1, b_offset, c_dim1, c_offset, i__1, i__2,
+    integer a_dim1, a_offset, b_dim1, b_offset, c_dim1, c_offset, i__1, i__2, 
 	    i__3, i__4, i__5;
     alist al__1;
 
@@ -1668,25 +1661,25 @@ L120:
     char side[1];
     logical left, null;
     char uplo[1];
-    extern /* Subroutine */ int dmake_(char *, char *, char *, integer *,
-	    integer *, doublereal *, integer *, doublereal *, integer *,
+    extern /* Subroutine */ int dmake_(char *, char *, char *, integer *, 
+	    integer *, doublereal *, integer *, doublereal *, integer *, 
 	    logical *, doublereal *, ftnlen, ftnlen, ftnlen);
     doublereal alpha;
     char diags[1];
-    extern /* Subroutine */ int dmmch_(char *, char *, integer *, integer *,
-	    integer *, doublereal *, doublereal *, integer *, doublereal *,
-	    integer *, doublereal *, doublereal *, integer *, doublereal *,
+    extern /* Subroutine */ int dmmch_(char *, char *, integer *, integer *, 
+	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
+	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
 	    doublereal *, doublereal *, integer *, doublereal *, doublereal *,
 	     logical *, integer *, logical *, ftnlen, ftnlen);
     logical isame[13];
     char sides[1];
     integer nargs;
     logical reset;
-    extern /* Subroutine */ int dtrmm_(char *, char *, char *, char *,
-	    integer *, integer *, doublereal *, doublereal *, integer *,
+    extern /* Subroutine */ int dtrmm_(char *, char *, char *, char *, 
+	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *, ftnlen, ftnlen, ftnlen, ftnlen), dtrsm_(
 	    char *, char *, char *, char *, integer *, integer *, doublereal *
-	    , doublereal *, integer *, doublereal *, integer *, ftnlen,
+	    , doublereal *, integer *, doublereal *, integer *, ftnlen, 
 	    ftnlen, ftnlen, ftnlen);
     char uplos[1];
     extern logical lderes_(char *, char *, integer *, integer *, doublereal *,
@@ -1826,7 +1819,7 @@ L120:
 
 /*                          Generate the matrix B. */
 
-				dmake_("GE", " ", " ", &m, &n, &b[b_offset],
+				dmake_("GE", " ", " ", &m, &n, &b[b_offset], 
 					nmax, &bb[1], &ldb, &reset, &c_b86, (
 					ftnlen)2, (ftnlen)1, (ftnlen)1);
 
@@ -1892,7 +1885,7 @@ L120:
 				    }
 				    dtrmm_(side, uplo, transa, diag, &m, &n, &
 					    alpha, &aa[1], &lda, &bb[1], &ldb,
-					     (ftnlen)1, (ftnlen)1, (ftnlen)1,
+					     (ftnlen)1, (ftnlen)1, (ftnlen)1, 
 					    (ftnlen)1);
 				} else if (s_cmp(sname + 3, "SM", (ftnlen)2, (
 					ftnlen)2) == 0) {
@@ -1925,7 +1918,7 @@ L120:
 				    }
 				    dtrsm_(side, uplo, transa, diag, &m, &n, &
 					    alpha, &aa[1], &lda, &bb[1], &ldb,
-					     (ftnlen)1, (ftnlen)1, (ftnlen)1,
+					     (ftnlen)1, (ftnlen)1, (ftnlen)1, 
 					    (ftnlen)1);
 				}
 
@@ -1994,18 +1987,18 @@ L120:
 					    dmmch_(transa, "N", &m, &n, &m, &
 						    alpha, &a[a_offset], nmax,
 						     &b[b_offset], nmax, &
-						    c_b86, &c__[c_offset],
+						    c_b86, &c__[c_offset], 
 						    nmax, &ct[1], &g[1], &bb[
-						    1], &ldb, eps, &err,
+						    1], &ldb, eps, &err, 
 						    fatal, nout, &c_true, (
 						    ftnlen)1, (ftnlen)1);
 					} else {
 					    dmmch_("N", transa, &m, &n, &n, &
 						    alpha, &b[b_offset], nmax,
 						     &a[a_offset], nmax, &
-						    c_b86, &c__[c_offset],
+						    c_b86, &c__[c_offset], 
 						    nmax, &ct[1], &g[1], &bb[
-						    1], &ldb, eps, &err,
+						    1], &ldb, eps, &err, 
 						    fatal, nout, &c_true, (
 						    ftnlen)1, (ftnlen)1);
 					}
@@ -2018,10 +2011,10 @@ L120:
 					i__4 = n;
 					for (j = 1; j <= i__4; ++j) {
 					    i__5 = m;
-					    for (i__ = 1; i__ <= i__5; ++i__)
+					    for (i__ = 1; i__ <= i__5; ++i__) 
 						    {
 			  c__[i__ + j * c_dim1] = bb[i__ + (j - 1) * ldb];
-			  bb[i__ + (j - 1) * ldb] = alpha * b[i__ + j *
+			  bb[i__ + (j - 1) * ldb] = alpha * b[i__ + j * 
 				  b_dim1];
 /* L60: */
 					    }
@@ -2034,16 +2027,16 @@ L120:
 						     &c__[c_offset], nmax, &
 						    c_b86, &b[b_offset], nmax,
 						     &ct[1], &g[1], &bb[1], &
-						    ldb, eps, &err, fatal,
+						    ldb, eps, &err, fatal, 
 						    nout, &c_false, (ftnlen)1,
 						     (ftnlen)1);
 					} else {
 					    dmmch_("N", transa, &m, &n, &n, &
-						    c_b96, &c__[c_offset],
-						    nmax, &a[a_offset], nmax,
-						    &c_b86, &b[b_offset],
+						    c_b96, &c__[c_offset], 
+						    nmax, &a[a_offset], nmax, 
+						    &c_b86, &b[b_offset], 
 						    nmax, &ct[1], &g[1], &bb[
-						    1], &ldb, eps, &err,
+						    1], &ldb, eps, &err, 
 						    fatal, nout, &c_false, (
 						    ftnlen)1, (ftnlen)1);
 					}
@@ -2124,12 +2117,12 @@ L160:
 
 } /* dchk3_ */
 
-/* Subroutine */ int dchk4_(char *sname, doublereal *eps, doublereal *thresh,
+/* Subroutine */ int dchk4_(char *sname, doublereal *eps, doublereal *thresh, 
 	integer *nout, integer *ntra, logical *trace, logical *rewi, logical *
-	fatal, integer *nidim, integer *idim, integer *nalf, doublereal *alf,
-	integer *nbet, doublereal *bet, integer *nmax, doublereal *a,
-	doublereal *aa, doublereal *as, doublereal *b, doublereal *bb,
-	doublereal *bs, doublereal *c__, doublereal *cc, doublereal *cs,
+	fatal, integer *nidim, integer *idim, integer *nalf, doublereal *alf, 
+	integer *nbet, doublereal *bet, integer *nmax, doublereal *a, 
+	doublereal *aa, doublereal *as, doublereal *b, doublereal *bb, 
+	doublereal *bs, doublereal *c__, doublereal *cc, doublereal *cs, 
 	doublereal *ct, doublereal *g, ftnlen sname_len)
 {
     /* Initialized data */
@@ -2156,7 +2149,7 @@ L160:
 	    "ER:\002)";
 
     /* System generated locals */
-    integer a_dim1, a_offset, b_dim1, b_offset, c_dim1, c_offset, i__1, i__2,
+    integer a_dim1, a_offset, b_dim1, b_offset, c_dim1, c_offset, i__1, i__2, 
 	    i__3, i__4, i__5;
     alist al__1;
 
@@ -2176,13 +2169,13 @@ L160:
     doublereal bets;
     logical tran, null;
     char uplo[1];
-    extern /* Subroutine */ int dmake_(char *, char *, char *, integer *,
-	    integer *, doublereal *, integer *, doublereal *, integer *,
+    extern /* Subroutine */ int dmake_(char *, char *, char *, integer *, 
+	    integer *, doublereal *, integer *, doublereal *, integer *, 
 	    logical *, doublereal *, ftnlen, ftnlen, ftnlen);
     doublereal alpha;
-    extern /* Subroutine */ int dmmch_(char *, char *, integer *, integer *,
-	    integer *, doublereal *, doublereal *, integer *, doublereal *,
-	    integer *, doublereal *, doublereal *, integer *, doublereal *,
+    extern /* Subroutine */ int dmmch_(char *, char *, integer *, integer *, 
+	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
+	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
 	    doublereal *, doublereal *, integer *, doublereal *, doublereal *,
 	     logical *, integer *, logical *, ftnlen, ftnlen);
     logical isame[13];
@@ -2190,7 +2183,7 @@ L160:
     logical reset;
     char trans[1];
     logical upper;
-    extern /* Subroutine */ int dsyrk_(char *, char *, integer *, integer *,
+    extern /* Subroutine */ int dsyrk_(char *, char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, doublereal *, doublereal *,
 	     integer *, ftnlen, ftnlen);
     char uplos[1];
@@ -2322,7 +2315,7 @@ L160:
 
 /*                       Generate the matrix C. */
 
-			    dmake_("SY", uplo, " ", &n, &n, &c__[c_offset],
+			    dmake_("SY", uplo, " ", &n, &n, &c__[c_offset], 
 				    nmax, &cc[1], &ldc, &reset, &c_b86, (
 				    ftnlen)2, (ftnlen)1, (ftnlen)1);
 
@@ -2379,7 +2372,7 @@ L160:
 				al__1.aunit = *ntra;
 				f_rew(&al__1);
 			    }
-			    dsyrk_(uplo, trans, &n, &k, &alpha, &aa[1], &lda,
+			    dsyrk_(uplo, trans, &n, &k, &alpha, &aa[1], &lda, 
 				    &beta, &cc[1], &ldc, (ftnlen)1, (ftnlen)1)
 				    ;
 
@@ -2395,9 +2388,9 @@ L160:
 
 /*                       See what data changed inside subroutines. */
 
-			    isame[0] = *(unsigned char *)uplos == *(unsigned
+			    isame[0] = *(unsigned char *)uplos == *(unsigned 
 				    char *)uplo;
-			    isame[1] = *(unsigned char *)transs == *(unsigned
+			    isame[1] = *(unsigned char *)transs == *(unsigned 
 				    char *)trans;
 			    isame[2] = ns == n;
 			    isame[3] = ks == k;
@@ -2450,19 +2443,19 @@ L160:
 				    }
 				    if (tran) {
 					dmmch_("T", "N", &lj, &c__1, &k, &
-						alpha, &a[jj * a_dim1 + 1],
-						nmax, &a[j * a_dim1 + 1],
-						nmax, &beta, &c__[jj + j *
-						c_dim1], nmax, &ct[1], &g[1],
-						&cc[jc], &ldc, eps, &err,
+						alpha, &a[jj * a_dim1 + 1], 
+						nmax, &a[j * a_dim1 + 1], 
+						nmax, &beta, &c__[jj + j * 
+						c_dim1], nmax, &ct[1], &g[1], 
+						&cc[jc], &ldc, eps, &err, 
 						fatal, nout, &c_true, (ftnlen)
 						1, (ftnlen)1);
 				    } else {
 					dmmch_("N", "T", &lj, &c__1, &k, &
-						alpha, &a[jj + a_dim1], nmax,
+						alpha, &a[jj + a_dim1], nmax, 
 						&a[j + a_dim1], nmax, &beta, &
 						c__[jj + j * c_dim1], nmax, &
-						ct[1], &g[1], &cc[jc], &ldc,
+						ct[1], &g[1], &cc[jc], &ldc, 
 						eps, &err, fatal, nout, &
 						c_true, (ftnlen)1, (ftnlen)1);
 				    }
@@ -2554,12 +2547,12 @@ L130:
 
 } /* dchk4_ */
 
-/* Subroutine */ int dchk5_(char *sname, doublereal *eps, doublereal *thresh,
+/* Subroutine */ int dchk5_(char *sname, doublereal *eps, doublereal *thresh, 
 	integer *nout, integer *ntra, logical *trace, logical *rewi, logical *
-	fatal, integer *nidim, integer *idim, integer *nalf, doublereal *alf,
-	integer *nbet, doublereal *bet, integer *nmax, doublereal *ab,
-	doublereal *aa, doublereal *as, doublereal *bb, doublereal *bs,
-	doublereal *c__, doublereal *cc, doublereal *cs, doublereal *ct,
+	fatal, integer *nidim, integer *idim, integer *nalf, doublereal *alf, 
+	integer *nbet, doublereal *bet, integer *nmax, doublereal *ab, 
+	doublereal *aa, doublereal *as, doublereal *bb, doublereal *bs, 
+	doublereal *c__, doublereal *cc, doublereal *cs, doublereal *ct, 
 	doublereal *g, doublereal *w, ftnlen sname_len)
 {
     /* Initialized data */
@@ -2607,13 +2600,13 @@ L130:
     doublereal bets;
     logical tran, null;
     char uplo[1];
-    extern /* Subroutine */ int dmake_(char *, char *, char *, integer *,
-	    integer *, doublereal *, integer *, doublereal *, integer *,
+    extern /* Subroutine */ int dmake_(char *, char *, char *, integer *, 
+	    integer *, doublereal *, integer *, doublereal *, integer *, 
 	    logical *, doublereal *, ftnlen, ftnlen, ftnlen);
     doublereal alpha;
-    extern /* Subroutine */ int dmmch_(char *, char *, integer *, integer *,
-	    integer *, doublereal *, doublereal *, integer *, doublereal *,
-	    integer *, doublereal *, doublereal *, integer *, doublereal *,
+    extern /* Subroutine */ int dmmch_(char *, char *, integer *, integer *, 
+	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
+	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
 	    doublereal *, doublereal *, integer *, doublereal *, doublereal *,
 	     logical *, integer *, logical *, ftnlen, ftnlen);
     logical isame[13];
@@ -2622,8 +2615,8 @@ L130:
     char trans[1];
     logical upper;
     char uplos[1];
-    extern /* Subroutine */ int dsyr2k_(char *, char *, integer *, integer *,
-	    doublereal *, doublereal *, integer *, doublereal *, integer *,
+    extern /* Subroutine */ int dsyr2k_(char *, char *, integer *, integer *, 
+	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *, integer *, ftnlen, ftnlen);
     extern logical lderes_(char *, char *, integer *, integer *, doublereal *,
 	     doublereal *, integer *, ftnlen, ftnlen);
@@ -2772,7 +2765,7 @@ L130:
 
 /*                       Generate the matrix C. */
 
-			    dmake_("SY", uplo, " ", &n, &n, &c__[c_offset],
+			    dmake_("SY", uplo, " ", &n, &n, &c__[c_offset], 
 				    nmax, &cc[1], &ldc, &reset, &c_b86, (
 				    ftnlen)2, (ftnlen)1, (ftnlen)1);
 
@@ -2853,9 +2846,9 @@ L130:
 
 /*                       See what data changed inside subroutines. */
 
-			    isame[0] = *(unsigned char *)uplos == *(unsigned
+			    isame[0] = *(unsigned char *)uplos == *(unsigned 
 				    char *)uplo;
-			    isame[1] = *(unsigned char *)transs == *(unsigned
+			    isame[1] = *(unsigned char *)transs == *(unsigned 
 				    char *)trans;
 			    isame[2] = ns == n;
 			    isame[3] = ks == k;
@@ -2912,7 +2905,7 @@ L130:
 				    if (tran) {
 					i__6 = k;
 					for (i__ = 1; i__ <= i__6; ++i__) {
-					    w[i__] = ab[(j - 1 << 1) * *nmax
+					    w[i__] = ab[(j - 1 << 1) * *nmax 
 						    + k + i__];
 					    w[k + i__] = ab[(j - 1 << 1) * *
 						    nmax + i__];
@@ -2923,17 +2916,17 @@ L130:
 					i__8 = *nmax << 1;
 					dmmch_("T", "N", &lj, &c__1, &i__6, &
 						alpha, &ab[jjab], &i__7, &w[1]
-						, &i__8, &beta, &c__[jj + j *
-						c_dim1], nmax, &ct[1], &g[1],
-						&cc[jc], &ldc, eps, &err,
+						, &i__8, &beta, &c__[jj + j * 
+						c_dim1], nmax, &ct[1], &g[1], 
+						&cc[jc], &ldc, eps, &err, 
 						fatal, nout, &c_true, (ftnlen)
 						1, (ftnlen)1);
 				    } else {
 					i__6 = k;
 					for (i__ = 1; i__ <= i__6; ++i__) {
-					    w[i__] = ab[(k + i__ - 1) * *nmax
+					    w[i__] = ab[(k + i__ - 1) * *nmax 
 						    + j];
-					    w[k + i__] = ab[(i__ - 1) * *nmax
+					    w[k + i__] = ab[(i__ - 1) * *nmax 
 						    + j];
 /* L60: */
 					}
@@ -2941,9 +2934,9 @@ L130:
 					i__7 = *nmax << 1;
 					dmmch_("N", "N", &lj, &c__1, &i__6, &
 						alpha, &ab[jj], nmax, &w[1], &
-						i__7, &beta, &c__[jj + j *
-						c_dim1], nmax, &ct[1], &g[1],
-						&cc[jc], &ldc, eps, &err,
+						i__7, &beta, &c__[jj + j * 
+						c_dim1], nmax, &ct[1], &g[1], 
+						&cc[jc], &ldc, eps, &err, 
 						fatal, nout, &c_true, (ftnlen)
 						1, (ftnlen)1);
 				    }
@@ -3039,7 +3032,7 @@ L160:
 
 } /* dchk5_ */
 
-/* Subroutine */ int dchke_(integer *isnum, char *srnamt, integer *nout,
+/* Subroutine */ int dchke_(integer *isnum, char *srnamt, integer *nout, 
 	ftnlen srnamt_len)
 {
     /* Format strings */
@@ -3052,24 +3045,24 @@ L160:
     integer s_wsfe(cilist *), do_fio(integer *, char *, ftnlen), e_wsfe(void);
 
     /* Local variables */
-    doublereal a[2]	/* was [2][1] */, b[2]	/* was [2][1] */, c__[2]
+    doublereal a[2]	/* was [2][1] */, b[2]	/* was [2][1] */, c__[2]	
 	    /* was [2][1] */, beta, alpha;
-    extern /* Subroutine */ int dgemm_(char *, char *, integer *, integer *,
-	    integer *, doublereal *, doublereal *, integer *, doublereal *,
+    extern /* Subroutine */ int dgemm_(char *, char *, integer *, integer *, 
+	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *, ftnlen, ftnlen),
-	     dtrmm_(char *, char *, char *, char *, integer *, integer *,
-	    doublereal *, doublereal *, integer *, doublereal *, integer *,
+	     dtrmm_(char *, char *, char *, char *, integer *, integer *, 
+	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
 	    ftnlen, ftnlen, ftnlen, ftnlen), dsymm_(char *, char *, integer *,
-	     integer *, doublereal *, doublereal *, integer *, doublereal *,
+	     integer *, doublereal *, doublereal *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *, ftnlen, ftnlen),
-	     dtrsm_(char *, char *, char *, char *, integer *, integer *,
-	    doublereal *, doublereal *, integer *, doublereal *, integer *,
+	     dtrsm_(char *, char *, char *, char *, integer *, integer *, 
+	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
 	    ftnlen, ftnlen, ftnlen, ftnlen), dsyrk_(char *, char *, integer *,
-	     integer *, doublereal *, doublereal *, integer *, doublereal *,
-	    doublereal *, integer *, ftnlen, ftnlen), dsyr2k_(char *, char *,
-	    integer *, integer *, doublereal *, doublereal *, integer *,
-	    doublereal *, integer *, doublereal *, doublereal *, integer *,
-	    ftnlen, ftnlen), chkxer_(char *, integer *, integer *, logical *,
+	     integer *, doublereal *, doublereal *, integer *, doublereal *, 
+	    doublereal *, integer *, ftnlen, ftnlen), dsyr2k_(char *, char *, 
+	    integer *, integer *, doublereal *, doublereal *, integer *, 
+	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
+	    ftnlen, ftnlen), chkxer_(char *, integer *, integer *, logical *, 
 	    logical *, ftnlen);
 
     /* Fortran I/O blocks */
@@ -3123,142 +3116,142 @@ L160:
     }
 L10:
     infoc_1.infot = 1;
-    dgemm_("/", "N", &c__0, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("/", "N", &c__0, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 1;
-    dgemm_("/", "T", &c__0, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("/", "T", &c__0, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 2;
-    dgemm_("N", "/", &c__0, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("N", "/", &c__0, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 2;
-    dgemm_("T", "/", &c__0, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("T", "/", &c__0, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 3;
-    dgemm_("N", "N", &c_n1, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("N", "N", &c_n1, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 3;
-    dgemm_("N", "T", &c_n1, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("N", "T", &c_n1, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 3;
-    dgemm_("T", "N", &c_n1, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("T", "N", &c_n1, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 3;
-    dgemm_("T", "T", &c_n1, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("T", "T", &c_n1, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 4;
-    dgemm_("N", "N", &c__0, &c_n1, &c__0, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("N", "N", &c__0, &c_n1, &c__0, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 4;
-    dgemm_("N", "T", &c__0, &c_n1, &c__0, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("N", "T", &c__0, &c_n1, &c__0, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 4;
-    dgemm_("T", "N", &c__0, &c_n1, &c__0, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("T", "N", &c__0, &c_n1, &c__0, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 4;
-    dgemm_("T", "T", &c__0, &c_n1, &c__0, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("T", "T", &c__0, &c_n1, &c__0, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 5;
-    dgemm_("N", "N", &c__0, &c__0, &c_n1, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("N", "N", &c__0, &c__0, &c_n1, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 5;
-    dgemm_("N", "T", &c__0, &c__0, &c_n1, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("N", "T", &c__0, &c__0, &c_n1, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 5;
-    dgemm_("T", "N", &c__0, &c__0, &c_n1, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("T", "N", &c__0, &c__0, &c_n1, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 5;
-    dgemm_("T", "T", &c__0, &c__0, &c_n1, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("T", "T", &c__0, &c__0, &c_n1, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 8;
-    dgemm_("N", "N", &c__2, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("N", "N", &c__2, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__2, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 8;
-    dgemm_("N", "T", &c__2, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("N", "T", &c__2, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__2, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 8;
-    dgemm_("T", "N", &c__0, &c__0, &c__2, &alpha, a, &c__1, b, &c__2, &beta,
+    dgemm_("T", "N", &c__0, &c__0, &c__2, &alpha, a, &c__1, b, &c__2, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 8;
-    dgemm_("T", "T", &c__0, &c__0, &c__2, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("T", "T", &c__0, &c__0, &c__2, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 10;
-    dgemm_("N", "N", &c__0, &c__0, &c__2, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("N", "N", &c__0, &c__0, &c__2, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 10;
-    dgemm_("T", "N", &c__0, &c__0, &c__2, &alpha, a, &c__2, b, &c__1, &beta,
+    dgemm_("T", "N", &c__0, &c__0, &c__2, &alpha, a, &c__2, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 10;
-    dgemm_("N", "T", &c__0, &c__2, &c__0, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("N", "T", &c__0, &c__2, &c__0, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 10;
-    dgemm_("T", "T", &c__0, &c__2, &c__0, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("T", "T", &c__0, &c__2, &c__0, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 13;
-    dgemm_("N", "N", &c__2, &c__0, &c__0, &alpha, a, &c__2, b, &c__1, &beta,
+    dgemm_("N", "N", &c__2, &c__0, &c__0, &alpha, a, &c__2, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 13;
-    dgemm_("N", "T", &c__2, &c__0, &c__0, &alpha, a, &c__2, b, &c__1, &beta,
+    dgemm_("N", "T", &c__2, &c__0, &c__0, &alpha, a, &c__2, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 13;
-    dgemm_("T", "N", &c__2, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("T", "N", &c__2, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
     infoc_1.infot = 13;
-    dgemm_("T", "T", &c__2, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta,
+    dgemm_("T", "T", &c__2, &c__0, &c__0, &alpha, a, &c__1, b, &c__1, &beta, 
 	    c__, &c__1, (ftnlen)1, (ftnlen)1);
     chkxer_(srnamt, &infoc_1.infot, nout, &infoc_1.lerr, &infoc_1.ok, (ftnlen)
 	    6);
@@ -3962,9 +3955,9 @@ L70:
 
 } /* dchke_ */
 
-/* Subroutine */ int dmake_(char *type__, char *uplo, char *diag, integer *m,
+/* Subroutine */ int dmake_(char *type__, char *uplo, char *diag, integer *m, 
 	integer *n, doublereal *a, integer *nmax, doublereal *aa, integer *
-	lda, logical *reset, doublereal *transl, ftnlen type_len, ftnlen
+	lda, logical *reset, doublereal *transl, ftnlen type_len, ftnlen 
 	uplo_len, ftnlen diag_len)
 {
     /* System generated locals */
@@ -4107,8 +4100,8 @@ L70:
 } /* dmake_ */
 
 /* Subroutine */ int dmmch_(char *transa, char *transb, integer *m, integer *
-	n, integer *kk, doublereal *alpha, doublereal *a, integer *lda,
-	doublereal *b, integer *ldb, doublereal *beta, doublereal *c__,
+	n, integer *kk, doublereal *alpha, doublereal *a, integer *lda, 
+	doublereal *b, integer *ldb, doublereal *beta, doublereal *c__, 
 	integer *ldc, doublereal *ct, doublereal *g, doublereal *cc, integer *
 	ldcc, doublereal *eps, doublereal *err, logical *fatal, integer *nout,
 	 logical *mv, ftnlen transa_len, ftnlen transb_len)
@@ -4122,7 +4115,7 @@ L70:
 	    " \002,i3)";
 
     /* System generated locals */
-    integer a_dim1, a_offset, b_dim1, b_offset, c_dim1, c_offset, cc_dim1,
+    integer a_dim1, a_offset, b_dim1, b_offset, c_dim1, c_offset, cc_dim1, 
 	    cc_offset, i__1, i__2, i__3;
     doublereal d__1, d__2;
 
@@ -4176,9 +4169,9 @@ L70:
     cc -= cc_offset;
 
     /* Function Body */
-    trana = *(unsigned char *)transa == 'T' || *(unsigned char *)transa ==
+    trana = *(unsigned char *)transa == 'T' || *(unsigned char *)transa == 
 	    'C';
-    tranb = *(unsigned char *)transb == 'T' || *(unsigned char *)transb ==
+    tranb = *(unsigned char *)transb == 'T' || *(unsigned char *)transb == 
 	    'C';
 
 /*     Compute expected result, one column at a time, in CT using data */
@@ -4200,7 +4193,7 @@ L70:
 		i__3 = *m;
 		for (i__ = 1; i__ <= i__3; ++i__) {
 		    ct[i__] += a[i__ + k * a_dim1] * b[k + j * b_dim1];
-		    g[i__] += (d__1 = a[i__ + k * a_dim1], abs(d__1)) * (d__2
+		    g[i__] += (d__1 = a[i__ + k * a_dim1], abs(d__1)) * (d__2 
 			    = b[k + j * b_dim1], abs(d__2));
 /* L20: */
 		}
@@ -4212,7 +4205,7 @@ L70:
 		i__3 = *m;
 		for (i__ = 1; i__ <= i__3; ++i__) {
 		    ct[i__] += a[k + i__ * a_dim1] * b[k + j * b_dim1];
-		    g[i__] += (d__1 = a[k + i__ * a_dim1], abs(d__1)) * (d__2
+		    g[i__] += (d__1 = a[k + i__ * a_dim1], abs(d__1)) * (d__2 
 			    = b[k + j * b_dim1], abs(d__2));
 /* L40: */
 		}
@@ -4224,7 +4217,7 @@ L70:
 		i__3 = *m;
 		for (i__ = 1; i__ <= i__3; ++i__) {
 		    ct[i__] += a[i__ + k * a_dim1] * b[j + k * b_dim1];
-		    g[i__] += (d__1 = a[i__ + k * a_dim1], abs(d__1)) * (d__2
+		    g[i__] += (d__1 = a[i__ + k * a_dim1], abs(d__1)) * (d__2 
 			    = b[j + k * b_dim1], abs(d__2));
 /* L60: */
 		}
@@ -4236,7 +4229,7 @@ L70:
 		i__3 = *m;
 		for (i__ = 1; i__ <= i__3; ++i__) {
 		    ct[i__] += a[k + i__ * a_dim1] * b[j + k * b_dim1];
-		    g[i__] += (d__1 = a[k + i__ * a_dim1], abs(d__1)) * (d__2
+		    g[i__] += (d__1 = a[k + i__ * a_dim1], abs(d__1)) * (d__2 
 			    = b[j + k * b_dim1], abs(d__2));
 /* L80: */
 		}
@@ -4340,13 +4333,10 @@ logical lde_(doublereal *ri, doublereal *rj, integer *lr)
 /*     .. Array Arguments .. */
 /*     .. Local Scalars .. */
 /*     .. Executable Statements .. */
-    /* Parameter adjustments */
-    --rj;
-    --ri;
 
     /* Function Body */
     i__1 = *lr;
-    for (i__ = 1; i__ <= i__1; ++i__) {
+    for (i__ = 0; i__ < i__1; ++i__) {
 	if (ri[i__] != rj[i__]) {
 	    goto L20;
 	}
@@ -4530,7 +4520,7 @@ doublereal ddiff_(doublereal *x, doublereal *y)
 
 } /* ddiff_ */
 
-/* Subroutine */ int chkxer_(char *srnamt, integer *infot, integer *nout,
+/* Subroutine */ int chkxer_(char *srnamt, integer *infot, integer *nout, 
 	logical *lerr, logical *ok, ftnlen srnamt_len)
 {
     /* Format strings */
@@ -4573,7 +4563,7 @@ doublereal ddiff_(doublereal *x, doublereal *y)
 
 } /* chkxer_ */
 
-/* Subroutine */ int xerbla_(char *srname, integer *info, ftnlen srname_len)
+/* Subroutine */ void xerbla_(char *srname, integer *info, ftnlen srname_len)
 {
     /* Format strings */
     static char fmt_9999[] = "(\002 ******* XERBLA WAS CALLED WITH INFO ="
@@ -4639,7 +4629,7 @@ doublereal ddiff_(doublereal *x, doublereal *y)
 	e_wsfe();
 	infoc_2.ok = FALSE_;
     }
-    return 0;
+    return;
 
 
 /*     End of XERBLA */

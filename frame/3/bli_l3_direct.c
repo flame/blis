@@ -36,17 +36,17 @@
 
 dir_t bli_l3_direct
      (
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  c,
-       const cntl_t* cntl
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       cntl_t* cntl
      )
 {
 	// Query the operation family.
 	opid_t family = bli_cntl_family( cntl );
 
 	if      ( family == BLIS_GEMM ) return bli_gemm_direct( a, b, c );
-	else if ( family == BLIS_GEMMT ) return bli_gemmt_direct( a, b, c );
+	else if ( family == BLIS_HERK ) return bli_herk_direct( a, b, c );
 	else if ( family == BLIS_TRMM ) return bli_trmm_direct( a, b, c );
 	else if ( family == BLIS_TRSM ) return bli_trsm_direct( a, b, c );
 
@@ -58,9 +58,9 @@ dir_t bli_l3_direct
 
 dir_t bli_gemm_direct
      (
-       const obj_t* a,
-       const obj_t* b,
-       const obj_t* c
+       obj_t* a,
+       obj_t* b,
+       obj_t* c
      )
 {
 	// For gemm, movement may be forwards (or backwards).
@@ -68,23 +68,23 @@ dir_t bli_gemm_direct
 	return BLIS_FWD;
 }
 
-dir_t bli_gemmt_direct
+dir_t bli_herk_direct
      (
-       const obj_t* a,
-       const obj_t* b,
-       const obj_t* c
+       obj_t* a,
+       obj_t* b,
+       obj_t* c
      )
 {
-	// For gemmt, movement may be forwards (or backwards).
+	// For herk, movement may be forwards (or backwards).
 
 	return BLIS_FWD;
 }
 
 dir_t bli_trmm_direct
      (
-       const obj_t* a,
-       const obj_t* b,
-       const obj_t* c
+       obj_t* a,
+       obj_t* b,
+       obj_t* c
      )
 {
 	dir_t direct;
@@ -111,9 +111,9 @@ dir_t bli_trmm_direct
 
 dir_t bli_trsm_direct
      (
-       const obj_t* a,
-       const obj_t* b,
-       const obj_t* c
+       obj_t* a,
+       obj_t* b,
+       obj_t* c
      )
 {
 	dir_t direct;

@@ -27,10 +27,10 @@ use or performance of this software.
 #include <f2c_config.h>
 #include <math.h>
 
-#ifdef _MSC_VER
-#define isnan _isnan
-#define isinf(x) (!_finite(x))
-#endif
+
+
+
+
 
 #ifndef isnan
 # define isnan(x)						 \

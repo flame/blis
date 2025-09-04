@@ -88,8 +88,10 @@ void PASTEMAC(ch,varname) \
 \
 	conja = bli_extract_conj( transa ); \
 \
+	PASTECH(ch,dotxf_ker_ft) kfp_df; \
+\
 	/* Query the context for the kernel function pointer and fusing factor. */ \
-	dotxf_ker_ft kfp_df = bli_cntx_get_ukr_dt( dt, BLIS_DOTXF_KER, cntx ); \
+	kfp_df = bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx ); \
 	b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_DF, cntx ); \
 \
 	/* We reduce all of the possible cases down to just lower/upper. */ \
@@ -213,5 +215,5 @@ void PASTEMAC(ch,varname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( trmv_unf_var1 )
+INSERT_GENTFUNC_BASIC0( trmv_unf_var1 )
 

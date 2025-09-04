@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,16 +33,14 @@
 
 */
 
-#if 1
-
 #define bla_gemv_check( dt_str, op_str, transa, m, n, lda, incx, incy ) \
 { \
 	f77_int info = 0; \
 	f77_int nota, ta, conja; \
 \
-	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1 ); \
-	ta    = PASTEF770(lsame)( transa, "T", (ftnlen)1, (ftnlen)1 ); \
-	conja = PASTEF770(lsame)( transa, "C", (ftnlen)1, (ftnlen)1 ); \
+	nota  = PASTE_LSAME( transa, "N", (ftnlen)1, (ftnlen)1 ); \
+	ta    = PASTE_LSAME( transa, "T", (ftnlen)1, (ftnlen)1 ); \
+	conja = PASTE_LSAME( transa, "C", (ftnlen)1, (ftnlen)1 ); \
 \
 	if      ( !nota && !ta && !conja ) \
 		info = 1; \
@@ -64,10 +63,14 @@
 \
 		bli_string_mkupper( func_str ); \
 \
-		PASTEF770(xerbla)( func_str, &info, (ftnlen)6 ); \
+		PASTE_XERBLA( func_str, &info, (ftnlen)6 ); \
+\
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
+\
+		/* Finalize BLIS. */ \
+		bli_finalize_auto(); \
 \
 		return; \
 	} \
 }
 
-#endif

@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,7 +42,7 @@
 #undef  GENTFUNCRO
 #define GENTFUNCRO( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77(ch,blasname) \
+void PASTEF77S(ch,blasname) \
      ( \
        const f77_char* uploa, \
        const f77_int*  m, \
@@ -52,15 +53,19 @@ void PASTEF77(ch,blasname) \
              ftype*    y, const f77_int* incy  \
      ) \
 { \
+	/* Initialize BLIS. */ \
+	bli_init_auto(); \
+\
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+	AOCL_DTL_LOG_SYMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *uploa, *m, (void*)alpha, *lda, *incx, (void*)beta, *incy);\
+\
 	uplo_t  blis_uploa; \
 	dim_t   m0; \
 	ftype*  x0; \
 	ftype*  y0; \
 	inc_t   incx0; \
 	inc_t   incy0; \
-\
-	/* Initialize BLIS. */ \
-	bli_init_auto(); \
+	inc_t   rs_a, cs_a; \
 \
 	/* Perform BLAS parameter checking. */ \
 	PASTEBLACHK(blasname) \
@@ -86,8 +91,8 @@ void PASTEF77(ch,blasname) \
 	bli_convert_blas_incv( m0, (ftype*)y, *incy, y0, incy0 ); \
 \
 	/* Set the row and column strides of A. */ \
-	const inc_t rs_a = 1; \
-	const inc_t cs_a = *lda; \
+	rs_a = 1; \
+	cs_a = *lda; \
 \
 	/* Call BLIS interface. */ \
 	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
@@ -105,11 +110,27 @@ void PASTEF77(ch,blasname) \
 	  NULL  \
 	); \
 \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
-}
+}\
+\
+IF_BLIS_ENABLE_BLAS(\
+void PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* uploa, \
+       const f77_int*  m, \
+       const ftype*    alpha, \
+       const ftype*    a, const f77_int* lda, \
+       const ftype*    x, const f77_int* incx, \
+       const ftype*    beta, \
+             ftype*    y, const f77_int* incy  \
+     ) \
+{ \
+    PASTEF77S(ch,blasname) \
+     ( uploa, m, alpha, a, lda, x, incx, beta, y, incy ); \
+}\
+)
 
-#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNCRO_BLAS( symv, symv )
-#endif
 

@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -19,14 +20,14 @@
       from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-   AS IS AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE UNIVERSITY
-   OF TEXAS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
-   OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+   HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
@@ -182,30 +183,26 @@ static int32_t offsets[32] __attribute__((aligned(64))) =
 //#define LOOPMON
 void bli_sgemm_knl_asm_24x16
      (
-             dim_t      m,
-             dim_t      n,
-             dim_t      k_,
-       const void*      alpha,
-       const void*      a,
-       const void*      b,
-       const void*      beta,
-             void*      c, inc_t rs_c_, inc_t cs_c_,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       dim_t               k_,
+       float*     restrict alpha,
+       float*     restrict a,
+       float*     restrict b,
+       float*     restrict beta,
+       float*     restrict c, inc_t rs_c_, inc_t cs_c_,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
     (void)data;
     (void)cntx;
 
-    const double* a_next = bli_auxinfo_next_a( data );
-    const double* b_next = bli_auxinfo_next_b( data );
+    const double * a_next = bli_auxinfo_next_a( data );
+    const double * b_next = bli_auxinfo_next_b( data );
 
-    int32_t* offsetPtr = &offsets[0];
-    int64_t k = k_;
-    int64_t rs_c = rs_c_;
-    int64_t cs_c = cs_c_;
-
-    GEMM_UKR_SETUP_CT( s, 24, 16, true );
+    const int32_t * offsetPtr = &offsets[0];
+    const int64_t k = k_;
+    const int64_t rs_c = rs_c_;
+    const int64_t cs_c = cs_c_;
 
 #ifdef MONITORS
     int toph, topl, both, botl, midl, midh, mid2l, mid2h;
@@ -566,7 +563,10 @@ void bli_sgemm_knl_asm_24x16
     // Check if C is row stride. If not, jump to the slow scattered update
     MOV(RAX, VAR(rs_c))
     LEA(RAX, MEM(,RAX,4))
+    MOV(RBX, VAR(cs_c))
     LEA(RDI, MEM(RAX,RAX,2))
+    CMP(RBX, IMM(1))
+    JNE(SCATTEREDUPDATE)
 
     VMOVD(EDX, XMM(1))
     SAL(EDX) //shift out sign bit
@@ -589,6 +589,74 @@ void bli_sgemm_knl_asm_24x16
     UPDATE_C_BZ_FOUR_ROWS(20,21,22,23)
     UPDATE_C_BZ_FOUR_ROWS(24,25,26,27)
     UPDATE_C_BZ_FOUR_ROWS(28,29,30,31)
+
+    JMP(END)
+
+    LABEL(SCATTEREDUPDATE)
+
+    MOV(RDI, VAR(offsetPtr))
+    VMOVAPS(ZMM(2), MEM(RDI))
+    /* Note that this ignores the upper 32 bits in cs_c */
+    VPBROADCASTD(ZMM(3), EBX)
+    VPMULLD(ZMM(2), ZMM(3), ZMM(2))
+
+    VMOVD(EDX, XMM(1))
+    SAL(EDX) //shift out sign bit
+    JZ(SCATTERBZ)
+
+    UPDATE_C_ROW_SCATTERED( 8)
+    UPDATE_C_ROW_SCATTERED( 9)
+    UPDATE_C_ROW_SCATTERED(10)
+    UPDATE_C_ROW_SCATTERED(11)
+    UPDATE_C_ROW_SCATTERED(12)
+    UPDATE_C_ROW_SCATTERED(13)
+    UPDATE_C_ROW_SCATTERED(14)
+    UPDATE_C_ROW_SCATTERED(15)
+    UPDATE_C_ROW_SCATTERED(16)
+    UPDATE_C_ROW_SCATTERED(17)
+    UPDATE_C_ROW_SCATTERED(18)
+    UPDATE_C_ROW_SCATTERED(19)
+    UPDATE_C_ROW_SCATTERED(20)
+    UPDATE_C_ROW_SCATTERED(21)
+    UPDATE_C_ROW_SCATTERED(22)
+    UPDATE_C_ROW_SCATTERED(23)
+    UPDATE_C_ROW_SCATTERED(24)
+    UPDATE_C_ROW_SCATTERED(25)
+    UPDATE_C_ROW_SCATTERED(26)
+    UPDATE_C_ROW_SCATTERED(27)
+    UPDATE_C_ROW_SCATTERED(28)
+    UPDATE_C_ROW_SCATTERED(29)
+    UPDATE_C_ROW_SCATTERED(30)
+    UPDATE_C_ROW_SCATTERED(31)
+
+    JMP(END)
+
+    LABEL(SCATTERBZ)
+
+    UPDATE_C_BZ_ROW_SCATTERED( 8)
+    UPDATE_C_BZ_ROW_SCATTERED( 9)
+    UPDATE_C_BZ_ROW_SCATTERED(10)
+    UPDATE_C_BZ_ROW_SCATTERED(11)
+    UPDATE_C_BZ_ROW_SCATTERED(12)
+    UPDATE_C_BZ_ROW_SCATTERED(13)
+    UPDATE_C_BZ_ROW_SCATTERED(14)
+    UPDATE_C_BZ_ROW_SCATTERED(15)
+    UPDATE_C_BZ_ROW_SCATTERED(16)
+    UPDATE_C_BZ_ROW_SCATTERED(17)
+    UPDATE_C_BZ_ROW_SCATTERED(18)
+    UPDATE_C_BZ_ROW_SCATTERED(19)
+    UPDATE_C_BZ_ROW_SCATTERED(20)
+    UPDATE_C_BZ_ROW_SCATTERED(21)
+    UPDATE_C_BZ_ROW_SCATTERED(22)
+    UPDATE_C_BZ_ROW_SCATTERED(23)
+    UPDATE_C_BZ_ROW_SCATTERED(24)
+    UPDATE_C_BZ_ROW_SCATTERED(25)
+    UPDATE_C_BZ_ROW_SCATTERED(26)
+    UPDATE_C_BZ_ROW_SCATTERED(27)
+    UPDATE_C_BZ_ROW_SCATTERED(28)
+    UPDATE_C_BZ_ROW_SCATTERED(29)
+    UPDATE_C_BZ_ROW_SCATTERED(30)
+    UPDATE_C_BZ_ROW_SCATTERED(31)
 
     LABEL(END)
 
@@ -628,10 +696,8 @@ void bli_sgemm_knl_asm_24x16
       "zmm6", "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
       "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19", "zmm20", "zmm21",
       "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
-      "zmm30", "zmm31", "memory"
+      "zmm30", "zmm31", "k0", "k1", "k2", "xmm1", "ymm3", "ymm5", "memory"
     )
-
-    GEMM_UKR_FLUSH_CT( s );
 
 #ifdef LOOPMON
     printf("looptime = \t%d\n", bloopl - tloopl);

@@ -49,6 +49,7 @@ typedef void (*FUNCPTR_T)
        void*   restrict beta,
        void*   restrict c, inc_t rs_c, inc_t cs_c,
        cntx_t* restrict cntx,
+       rntm_t* restrict rntm,
        thrinfo_t* restrict thread
      );
 
@@ -62,13 +63,14 @@ static FUNCPTR_T GENARRAY_PREF(ftypes,bls_,gemm_bp_var1);
 
 void bls_gemm_bp_var1
      (
-       const obj_t*     alpha,
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     beta,
-       const obj_t*     c,
-       const cntx_t*    cntx,
-             thrinfo_t* thread
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       thrinfo_t* thread
      )
 {
 	const num_t    dt        = bli_obj_dt( c );
@@ -112,7 +114,8 @@ void bls_gemm_bp_var1
 	  buf_b, rs_b, cs_b,
 	  buf_beta,
 	  buf_c, rs_c, cs_c,
-	  ( cntx_t* )cntx,
+	  cntx,
+	  rntm,
 	  thread
 	);
 }
@@ -137,6 +140,7 @@ void PASTECH2(bls_,ch,varname) \
        void*   restrict beta, \
        void*   restrict c, inc_t rs_c, inc_t cs_c, \
        cntx_t* restrict cntx, \
+       rntm_t* restrict rntm, \
        thrinfo_t* restrict thread  \
      ) \
 { \
@@ -151,7 +155,19 @@ void PASTECH2(bls_,ch,varname) \
 \
 	/* Query the context for the microkernel address and cast it to its
 	   function pointer type. */ \
-	gemm_ukr_ft gemm_ukr = bli_cntx_get_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	PASTECH(ch,gemm_ukr_ft) \
+               gemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+\
+	/* Temporary C buffer for edge cases. Note that the strides of this
+	   temporary buffer are set so that they match the storage of the
+	   original C matrix. For example, if C is column-stored, ct will be
+	   column-stored as well. */ \
+	ctype       ct[ BLIS_STACK_BUF_MAX_SIZE \
+	                / sizeof( ctype ) ] \
+	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+	const bool col_pref = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	const inc_t rs_ct   = ( col_pref ? 1 : NR ); \
+	const inc_t cs_ct   = ( col_pref ? MR : 1 ); \
 \
 	/* Compute partitioning step values for each matrix of each loop. */ \
 	const inc_t jcstep_c = cs_c; \
@@ -178,16 +194,46 @@ void PASTECH2(bls_,ch,varname) \
 	ctype           alpha_local = *alpha_cast; \
 	ctype           beta_local  = *beta_cast; \
 	ctype           one_local   = *PASTEMAC(ch,1); \
+	ctype           zero_local  = *PASTEMAC(ch,0); \
 \
 	auxinfo_t       aux; \
 \
-	thrinfo_t* restrict thread_jc = bli_thrinfo_sub_node( thread ); \
-	thrinfo_t* restrict thread_pc = bli_thrinfo_sub_node( thread_jc ); \
-	thrinfo_t* restrict thread_pb = bli_thrinfo_sub_node( thread_pc ); \
-	thrinfo_t* restrict thread_ic = bli_thrinfo_sub_node( thread_pb ); \
-	thrinfo_t* restrict thread_pa = bli_thrinfo_sub_node( thread_ic ); \
-	thrinfo_t* restrict thread_jr = bli_thrinfo_sub_node( thread_pa ); \
-	thrinfo_t* restrict thread_ir = bli_thrinfo_sub_node( thread_jr ); \
+	/* Initialize a mem_t entry for A and B. Strictly speaking, this is only
+	   needed for the matrix we will be packing (if any), but we do it
+	   unconditionally to be safe. */ \
+	mem_t mem_a = BLIS_MEM_INITIALIZER; \
+	mem_t mem_b = BLIS_MEM_INITIALIZER; \
+\
+	/* Define an array of bszid_t ids, which will act as our substitute for
+	   the cntl_t tree. */ \
+	bszid_t bszids[8] = { BLIS_NC,      /* 5th loop */ \
+	                      BLIS_KC,      /* 4th loop */ \
+	                      BLIS_NO_PART, /* pack B */ \
+	                      BLIS_MC,      /* 3rd loop */ \
+	                      BLIS_NO_PART, /* pack A */ \
+	                      BLIS_NR,      /* 2nd loop */ \
+	                      BLIS_MR,      /* 1st loop */ \
+	                      BLIS_KR };    /* microkernel loop */  \
+\
+	bszid_t* restrict bszids_jc = &bszids[0]; \
+	bszid_t* restrict bszids_pc = &bszids[1]; \
+	/*bszid_t* restrict bszids_pb = &bszids[2];*/ \
+	bszid_t* restrict bszids_ic = &bszids[3]; \
+	/*bszid_t* restrict bszids_pa = &bszids[4];*/ \
+	bszid_t* restrict bszids_jr = &bszids[5]; \
+	/*bszid_t* restrict bszids_ir = &bszids[6];*/ \
+\
+	thrinfo_t* restrict thread_jc = NULL; \
+	thrinfo_t* restrict thread_pc = NULL; \
+	thrinfo_t* restrict thread_pb = NULL; \
+	thrinfo_t* restrict thread_ic = NULL; \
+	thrinfo_t* restrict thread_pa = NULL; \
+	thrinfo_t* restrict thread_jr = NULL; \
+	thrinfo_t* restrict thread_ir = NULL; \
+\
+	/* Identify the current thrinfo_t node and then grow the tree. */ \
+	thread_jc = thread; \
+	bli_thrinfo_sup_grow( rntm, bszids_jc, thread_jc ); \
 \
 	/* Compute the JC loop thread range for the current thread. */ \
 	dim_t jc_start, jc_end; \
@@ -206,6 +252,10 @@ void PASTECH2(bls_,ch,varname) \
 \
 		ctype* restrict b_jc = b_00 + jj * jcstep_b; \
 		ctype* restrict c_jc = c_00 + jj * jcstep_c; \
+\
+		/* Identify the current thrinfo_t node and then grow the tree. */ \
+		thread_pc = bli_thrinfo_sub_node( thread_jc ); \
+		bli_thrinfo_sup_grow( rntm, bszids_pc, thread_pc ); \
 \
 		/* Compute the PC loop thread range for the current thread. */ \
 		const dim_t pc_start = 0, pc_end = k; \
@@ -230,6 +280,14 @@ void PASTECH2(bls_,ch,varname) \
 			ctype* b_use; \
 			inc_t  rs_b_use, cs_b_use, ps_b_use; \
 \
+			/* Identify the current thrinfo_t node. Note that the thrinfo_t
+			   node will have already been created by a previous call to
+			   bli_thrinfo_sup_grow() since bszid_t values of BLIS_NO_PART
+			   cause the tree to grow by two (e.g. to the next bszid that is
+			   a normal bszid_t value). */ \
+			thread_pb = bli_thrinfo_sub_node( thread_pc ); \
+			/*bli_thrinfo_sup_grow( rntm, bszids_pb, thread_pb );*/ \
+\
 			/* Determine the packing buffer and related parameters for matrix
 			   B. Then call the packm implementation. */ \
 			PASTECH2(bls_,ch,packm_b) \
@@ -242,12 +300,18 @@ void PASTECH2(bls_,ch,varname) \
 			  &b_use, &rs_b_use, &cs_b_use, \
 			                     &ps_b_use, \
 			  cntx, \
+			  rntm, \
+			  &mem_b, \
 			  thread_pb  \
 			); \
 \
 			/* Alias b_use so that it's clear this is our current block of
 			   matrix B. */ \
 			ctype* restrict b_pc_use = b_use; \
+\
+			/* Identify the current thrinfo_t node and then grow the tree. */ \
+			thread_ic = bli_thrinfo_sub_node( thread_pb ); \
+			bli_thrinfo_sup_grow( rntm, bszids_ic, thread_ic ); \
 \
 			/* Compute the IC loop thread range for the current thread. */ \
 			dim_t ic_start, ic_end; \
@@ -270,6 +334,14 @@ void PASTECH2(bls_,ch,varname) \
 				ctype* a_use; \
 				inc_t  rs_a_use, cs_a_use, ps_a_use; \
 \
+				/* Identify the current thrinfo_t node. Note that the thrinfo_t
+				   node will have already been created by a previous call to
+				   bli_thrinfo_sup_grow() since bszid_t values of BLIS_NO_PART
+				   cause the tree to grow by two (e.g. to the next bszid that is
+				   a normal bszid_t value). */ \
+				thread_pa = bli_thrinfo_sub_node( thread_ic ); \
+				/*bli_thrinfo_sup_grow( rntm, bszids_pa, thread_pa );*/ \
+\
 				/* Determine the packing buffer and related parameters for matrix
 				   A. Then call the packm implementation. */ \
 				PASTECH2(bls_,ch,packm_a) \
@@ -282,6 +354,8 @@ void PASTECH2(bls_,ch,varname) \
 				  &a_use, &rs_a_use, &cs_a_use, \
 				                     &ps_a_use, \
 				  cntx, \
+				  rntm, \
+				  &mem_a, \
 				  thread_pa  \
 				); \
 \
@@ -289,11 +363,15 @@ void PASTECH2(bls_,ch,varname) \
 				   matrix A. */ \
 				ctype* restrict a_ic_use = a_use; \
 \
+				/* Identify the current thrinfo_t node and then grow the tree. */ \
+				thread_jr = bli_thrinfo_sub_node( thread_pa ); \
+				bli_thrinfo_sup_grow( rntm, bszids_jr, thread_jr ); \
+\
 				/* Query the number of threads and thread ids for the JR loop.
 				   NOTE: These values are only needed when computing the next
 				   micropanel of B. */ \
-				const dim_t jr_nt  = bli_thrinfo_n_way( thread_jr ); \
-				const dim_t jr_tid = bli_thrinfo_work_id( thread_jr ); \
+				const dim_t jr_nt  = bli_thread_n_way( thread_jr ); \
+				const dim_t jr_tid = bli_thread_work_id( thread_jr ); \
 \
 				/* Compute number of primary and leftover components of the JR loop. */ \
 				dim_t jr_iter = ( nc_cur + NR - 1 ) / NR; \
@@ -316,11 +394,14 @@ void PASTECH2(bls_,ch,varname) \
 					   of B. */ \
 					ctype* restrict b2 = b_jr; \
 \
+					/* Identify the current thrinfo_t node. */ \
+					thread_ir = bli_thrinfo_sub_node( thread_jr ); \
+\
 					/* Query the number of threads and thread ids for the IR loop.
 					   NOTE: These values are only needed when computing the next
 					   micropanel of A. */ \
-					const dim_t ir_nt  = bli_thrinfo_n_way( thread_ir ); \
-					const dim_t ir_tid = bli_thrinfo_work_id( thread_ir ); \
+					const dim_t ir_nt  = bli_thread_n_way( thread_ir ); \
+					const dim_t ir_tid = bli_thread_work_id( thread_ir ); \
 \
 					/* Compute number of primary and leftover components of the IR loop. */ \
 					dim_t ir_iter = ( mc_cur + MR - 1 ) / MR; \
@@ -343,11 +424,11 @@ void PASTECH2(bls_,ch,varname) \
 \
 						/* Compute the addresses of the next micropanels of A and B. */ \
 						a2 = bli_gemm_get_next_a_upanel( a_ir, ps_a_use, 1 ); \
-						if ( bli_is_last_iter_slrr( i, ir_end, ir_tid, ir_nt ) ) \
+						if ( bli_is_last_iter( i, ir_end, ir_tid, ir_nt ) ) \
 						{ \
 							a2 = a_ic_use; \
 							b2 = bli_gemm_get_next_b_upanel( b_jr, ps_b_use, 1 ); \
-							if ( bli_is_last_iter_slrr( j, jr_end, jr_tid, jr_nt ) ) \
+							if ( bli_is_last_iter( j, jr_end, jr_tid, jr_nt ) ) \
 								b2 = b_pc_use; \
 						} \
 \
@@ -356,20 +437,47 @@ void PASTECH2(bls_,ch,varname) \
 						bli_auxinfo_set_next_a( a2, &aux ); \
 						bli_auxinfo_set_next_b( b2, &aux ); \
 \
-						/* Invoke the gemm microkernel. */ \
-						gemm_ukr \
-						( \
-						  mr_cur, \
-						  nr_cur, \
-						  kc_cur, \
-						  &alpha_local, \
-						  a_ir, \
-						  b_jr, \
-						  beta_use, \
-						  c_ir, rs_c, cs_c, \
-						  &aux, \
-						  cntx  \
-						); \
+						/* Handle interior and edge cases separately. */ \
+						if ( mr_cur == MR && nr_cur == NR ) \
+						{ \
+							/* Invoke the gemm microkernel. */ \
+							gemm_ukr \
+							( \
+							  kc_cur, \
+							  &alpha_local, \
+							  a_ir, \
+							  b_jr, \
+							  beta_use, \
+							  c_ir, rs_c, cs_c, \
+							  &aux, \
+							  cntx  \
+							); \
+						} \
+						else \
+						{ \
+							/* Invoke the gemm microkernel. */ \
+							gemm_ukr \
+							( \
+							  kc_cur, \
+							  &alpha_local, \
+							  a_ir, \
+							  b_jr, \
+							  &zero_local, \
+							  ct, rs_ct, cs_ct, \
+							  &aux, \
+							  cntx  \
+							); \
+\
+							/* Scale the bottom edge of C and add the result from above. */ \
+							PASTEMAC(ch,xpbys_mxn) \
+							( \
+							  mr_cur, \
+							  nr_cur, \
+							  ct,   rs_ct, cs_ct, \
+							  beta_use, \
+							  c_ir, rs_c,  cs_c \
+							); \
+						} \
 					} \
 				} \
 			} \
@@ -377,9 +485,23 @@ void PASTECH2(bls_,ch,varname) \
 			/* This barrier is needed to prevent threads from starting to pack
 			   the next row panel of B before the current row panel is fully
 			   computed upon. */ \
-			bli_thrinfo_barrier( thread_pb ); \
+			bli_thread_barrier( thread_pb ); \
 		} \
 	} \
+\
+	/* Release any memory that was acquired for packing matrices A and B. */ \
+	PASTECH2(bls_,ch,packm_finalize_mem_a) \
+	( \
+	  rntm, \
+	  &mem_a, \
+	  thread_pa  \
+	); \
+	PASTECH2(bls_,ch,packm_finalize_mem_b) \
+	( \
+	  rntm, \
+	  &mem_b, \
+	  thread_pb  \
+	); \
 \
 /*
 PASTEMAC(ch,fprintm)( stdout, "gemm_bp_var1: a1_packed", mr_cur, kc_cur, a_ir, rs_a_use, cs_a_use, "%5.2f", "" ); \
@@ -388,7 +510,7 @@ PASTEMAC(ch,fprintm)( stdout, "gemm_bp_var1: c ", mr_cur, nr_cur, c_ir, rs_c, cs
 */ \
 }
 
-//INSERT_GENTFUNC_BASIC( gemm_bp_var1 )
+//INSERT_GENTFUNC_BASIC0( gemm_bp_var1 )
 GENTFUNC( float,    s, gemm_bp_var1 )
 GENTFUNC( double,   d, gemm_bp_var1 )
 GENTFUNC( scomplex, c, gemm_bp_var1 )

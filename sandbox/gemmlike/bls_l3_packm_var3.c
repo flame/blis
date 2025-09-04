@@ -45,7 +45,7 @@
 \
 void PASTECH2(bls_,ch,varname) \
      ( \
-       conj_t           conjc, \
+       trans_t          transc, \
        pack_t           schema, \
        dim_t            m, \
        dim_t            n, \
@@ -75,6 +75,11 @@ void PASTECH2(bls_,ch,varname) \
 	inc_t           incc; \
 	inc_t           ldc; \
 	inc_t           ldp; \
+	conj_t          conjc; \
+\
+\
+	/* Extract the conjugation bit from the transposition argument. */ \
+	conjc = bli_extract_conj( transc ); \
 \
 	/* Create flags to incidate row or column storage. Note that the
 	   schema bit that encodes row or column is describing the form of
@@ -121,8 +126,8 @@ void PASTECH2(bls_,ch,varname) \
 \
 	/* Query the number of threads and thread ids from the current thread's
 	   packm thrinfo_t node. */ \
-	const dim_t nt  = bli_thrinfo_n_way( thread ); \
-	const dim_t tid = bli_thrinfo_work_id( thread ); \
+	const dim_t nt  = bli_thread_n_way( thread ); \
+	const dim_t tid = bli_thread_work_id( thread ); \
 \
 	/* Suppress warnings in case tid isn't used (ie: as in slab partitioning). */ \
 	( void )nt; \
@@ -178,7 +183,7 @@ void PASTECH2(bls_,ch,varname) \
 	} \
 }
 
-//INSERT_GENTFUNC_BASIC( packm_var3 )
+//INSERT_GENTFUNC_BASIC0( packm_var3 )
 GENTFUNC( float,    s, packm_var3 )
 GENTFUNC( double,   d, packm_var3 )
 GENTFUNC( scomplex, c, packm_var3 )

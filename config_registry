@@ -8,22 +8,23 @@
 #
 
 # Processor families.
-x86_64:         intel64 amd64 amd64_legacy
+x86_64:         intel64 amdzen amd64_legacy
 intel64:        skx knl haswell sandybridge penryn generic
 amd64_legacy:   excavator steamroller piledriver bulldozer generic
-amd64:          zen3 zen2 zen generic
-arm64:          armsve firestorm thunderx2 cortexa57 cortexa53 generic
+amdzen:         zen5 zen4 zen3 zen2 zen generic
+arm64:          firestorm thunderx2 cortexa57 cortexa53 generic
 arm32:          cortexa15 cortexa9 generic
-power:          power10 power9 generic
 
 # Intel architectures.
-skx:         skx/skx/haswell/zen
+skx:         skx/skx/haswell/zen/zen4
 knl:         knl/knl/haswell/zen
 haswell:     haswell/haswell/zen
 sandybridge: sandybridge
 penryn:      penryn
 
 # AMD architectures.
+zen5:        zen5/zen5/zen4/skx/zen3/zen2/zen/haswell
+zen4:        zen4/zen4/skx/zen3/zen2/zen/haswell
 zen3:        zen3/zen3/zen2/zen/haswell
 zen2:        zen2/zen2/zen/haswell
 zen:         zen/zen/haswell
@@ -46,12 +47,6 @@ cortexa9:    cortexa9/armv7a
 power10:     power10
 power9:      power9
 bgq:         bgq
-
-# RISC-V architectures.
-rv32i:       rv32i/rvi
-rv64i:       rv64i/rvi
-rv32iv:      rv32iv/rviv
-rv64iv:      rv64iv/rviv
 
 # Generic architectures.
 generic:     generic

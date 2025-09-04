@@ -43,8 +43,8 @@
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* chi, \
-       const obj_t* psi  \
+       obj_t*  chi, \
+       obj_t*  psi  \
      ) \
 { \
 	bli_l0_xxsc_check( chi, psi ); \
@@ -55,8 +55,20 @@ GENFRONT( copysc )
 GENFRONT( divsc )
 GENFRONT( mulsc )
 GENFRONT( sqrtsc )
-GENFRONT( sqrtrsc )
 GENFRONT( subsc )
+
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       obj_t*  chi  \
+     ) \
+{ \
+	bli_l0_xsc_check( chi ); \
+}
+
 GENFRONT( invertsc )
 
 
@@ -65,8 +77,8 @@ GENFRONT( invertsc )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* chi, \
-       const obj_t* norm  \
+       obj_t*  chi, \
+       obj_t*  norm  \
      ) \
 { \
 	bli_l0_xx2sc_check( chi, norm ); \
@@ -79,9 +91,9 @@ GENFRONT( normfsc )
 
 void bli_getsc_check
      (
-       const obj_t*  chi,
-       const double* zeta_r,
-       const double* zeta_i
+       obj_t*  chi,
+       double* zeta_r,
+       double* zeta_i 
      )
 {
 	err_t e_val;
@@ -105,9 +117,9 @@ void bli_getsc_check
 
 void bli_setsc_check
      (
-       double       zeta_r,
-       double       zeta_i,
-       const obj_t* chi
+       double  zeta_r,
+       double  zeta_i,
+       obj_t*  chi 
      )
 {
 	err_t e_val;
@@ -131,9 +143,9 @@ void bli_setsc_check
 
 void bli_unzipsc_check
      (
-       const obj_t* chi,
-       const obj_t* zeta_r,
-       const obj_t* zeta_i
+       obj_t*  chi,
+       obj_t*  zeta_r,
+       obj_t*  zeta_i 
      )
 {
 	err_t e_val;
@@ -187,9 +199,9 @@ void bli_unzipsc_check
 
 void bli_zipsc_check
      (
-       const obj_t* zeta_r,
-       const obj_t* zeta_i,
-       const obj_t* chi
+       obj_t*  zeta_r,
+       obj_t*  zeta_i,
+       obj_t*  chi 
      )
 {
 	err_t e_val;
@@ -242,7 +254,7 @@ void bli_zipsc_check
 
 void bli_l0_xsc_check
      (
-       const obj_t* chi
+       obj_t*  chi
      )
 {
 	err_t e_val;
@@ -268,8 +280,8 @@ void bli_l0_xsc_check
 
 void bli_l0_xxsc_check
      (
-       const obj_t* chi,
-       const obj_t* psi
+       obj_t*  chi,
+       obj_t*  psi 
      )
 {
 	err_t e_val;
@@ -304,8 +316,8 @@ void bli_l0_xxsc_check
 
 void bli_l0_xx2sc_check
      (
-       const obj_t* chi,
-       const obj_t* absq
+       obj_t*  chi,
+       obj_t*  absq 
      )
 {
 	err_t e_val;
@@ -343,9 +355,9 @@ void bli_l0_xx2sc_check
 
 void bli_l0_xxbsc_check
      (
-       const obj_t* chi,
-       const obj_t* psi,
-       const bool*  is
+       obj_t*  chi,
+       obj_t*  psi,
+       bool*   is_eq
      )
 {
 	err_t e_val;

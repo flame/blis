@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -39,40 +39,35 @@
 
 void bli_trsm_blk_var1
      (
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     c,
-       const cntx_t*    cntx,
-       const cntl_t*    cntl,
-             thrinfo_t* thread_par
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       cntl_t* cntl,
+       thrinfo_t* thread
      )
 {
-	obj_t ap, cp;
-	bli_obj_alias_to( a, &ap );
-	bli_obj_alias_to( c, &cp );
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5);
+	dim_t my_start, my_end;
+	dim_t b_alg;
 
 	// Determine the direction in which to partition (forwards or backwards).
-	dir_t direct = bli_l3_direct( &ap, b, &cp, cntl );
+	dir_t direct = bli_l3_direct( a, b, c, cntl );
 
 	// Prune any zero region that exists along the partitioning dimension.
-	bli_l3_prune_unref_mparts_m( &ap, b, &cp, cntl );
+	bli_l3_prune_unref_mparts_m( a, b, c, cntl );
 
 	// Isolate the diagonal block A11 and its corresponding row panel C1.
-	const dim_t kc = bli_obj_width_after_trans( &ap );
+	const dim_t kc = bli_obj_width( a );
 	obj_t a11, c1;
 	bli_acquire_mpart_mdim( direct, BLIS_SUBPART1,
-	                        0, kc, &ap, &a11 );
+	                        0, kc, a, &a11 );
 	bli_acquire_mpart_mdim( direct, BLIS_SUBPART1,
-	                        0, kc, &cp, &c1 );
+	                        0, kc, c, &c1 );
 
 	// All threads iterate over the entire diagonal block A11.
-	thrinfo_t* thread_pre = bli_thrinfo_sub_prenode( thread_par );
-	dim_t my_start = 0, my_end = kc;
-	//bli_thread_range_mdim
-	//(
-	//  direct, thread_pre, &a11, b, &c1, cntl, cntx,
-	//  &my_start, &my_end
-	//);
+	my_start = 0; my_end = kc;
 
 #ifdef PRINT
 	printf( "bli_trsm_blk_var1(): a11 is %d x %d at offsets (%3d, %3d)\n",
@@ -82,14 +77,14 @@ void bli_trsm_blk_var1
 #endif
 
 	// Partition along the m dimension for the trsm subproblem.
-	dim_t b_alg;
 	for ( dim_t i = my_start; i < my_end; i += b_alg )
 	{
-		b_alg = bli_determine_blocksize( direct, i, my_end, &a11,
-		                                 bli_cntl_bszid( cntl ), cntx );
-
-		// Acquire partitions for A1 and C1.
 		obj_t a11_1, c1_1;
+
+		// Determine the current algorithmic blocksize for TRSM.
+		b_alg = bli_determine_blocksize( BLIS_TRSM, direct, i, my_end, &a11,
+		                                 bli_cntl_bszid( cntl ), cntx );
+		// Acquire partitions for A1 and C1.
 		bli_acquire_mpart_mdim( direct, BLIS_SUBPART1,
 		                        i, b_alg, &a11, &a11_1 );
 		bli_acquire_mpart_mdim( direct, BLIS_SUBPART1,
@@ -102,7 +97,7 @@ void bli_trsm_blk_var1
 #endif
 
 		// Perform trsm subproblem.
-		bli_l3_int
+		bli_trsm_int
 		(
 		  &BLIS_ONE,
 		  &a11_1,
@@ -110,8 +105,9 @@ void bli_trsm_blk_var1
 		  &BLIS_ONE,
 		  &c1_1,
 		  cntx,
+		  rntm,
 		  bli_cntl_sub_prenode( cntl ),
-		  thread_pre
+		  bli_thrinfo_sub_prenode( thread )
 		);
 	}
 
@@ -122,16 +118,16 @@ void bli_trsm_blk_var1
 	// We must execute a barrier here because the upcoming rank-k update
 	// requires the packed matrix B to be fully updated by the trsm
 	// subproblem.
-	bli_thrinfo_barrier( thread_par );
+	bli_thread_barrier( thread );
 
 	// Isolate the remaining part of the column panel matrix A, which we do by
 	// acquiring the subpartition ahead of A11 (that is, A21 or A01, depending
 	// on whether we are moving forwards or backwards, respectively).
 	obj_t ax1, cx1;
 	bli_acquire_mpart_mdim( direct, BLIS_SUBPART1A,
-	                        0, kc, &ap, &ax1 );
+	                        0, kc, a, &ax1 );
 	bli_acquire_mpart_mdim( direct, BLIS_SUBPART1A,
-	                        0, kc, &cp, &cx1 );
+	                        0, kc, c, &cx1 );
 
 #ifdef PRINT
 	printf( "bli_trsm_blk_var1(): ax1 is %d x %d at offsets (%3d, %3d)\n",
@@ -141,11 +137,10 @@ void bli_trsm_blk_var1
 
 	// Determine the current thread's subpartition range for the gemm
 	// subproblem over Ax1.
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 	bli_thread_range_mdim
 	(
 	  direct, thread, &ax1, b, &cx1, cntl, cntx,
-	  &my_start, &my_end
+      &my_start, &my_end
 	);
 
 #ifdef PRINT
@@ -155,12 +150,13 @@ void bli_trsm_blk_var1
 	// Partition along the m dimension for the gemm subproblem.
 	for ( dim_t i = my_start; i < my_end; i += b_alg )
 	{
-		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize( direct, i, my_end, &ax1,
+		obj_t a11, c1;
+
+		// Determine the current algorithmic blocksize for GEMM_FOR_TRSM.
+		b_alg = bli_determine_blocksize( BLIS_TRSM, direct, i, my_end, &ax1,
 		                                 bli_cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for A1 and C1.
-		obj_t a11, c1;
 		bli_acquire_mpart_mdim( direct, BLIS_SUBPART1,
 		                        i, b_alg, &ax1, &a11 );
 		bli_acquire_mpart_mdim( direct, BLIS_SUBPART1,
@@ -174,7 +170,7 @@ void bli_trsm_blk_var1
 
 		// Perform gemm subproblem. (Note that we use the same backend
 		// function as before, since we're calling the same macrokernel.)
-		bli_l3_int
+		bli_trsm_int
 		(
 		  &BLIS_ONE,
 		  &a11,
@@ -182,12 +178,14 @@ void bli_trsm_blk_var1
 		  &BLIS_ONE,
 		  &c1,
 		  cntx,
+		  rntm,
 		  bli_cntl_sub_node( cntl ),
-		  thread
+		  bli_thrinfo_sub_node( thread )
 		);
 	}
 #ifdef PRINT
 	printf( "bli_trsm_blk_var1(): finishing gemm subproblem loop.\n" );
 #endif
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5);
 }
 

@@ -36,19 +36,19 @@
 
 typedef void (*setijv_fp)
      (
-       double ar,
-       double ai,
-       dim_t  i,
-       void*  x, inc_t incx
+       double         ar,
+       double         ai,
+       dim_t          i,
+       void* restrict x, inc_t incx
      );
 static setijv_fp GENARRAY(ftypes_setijv,setijv);
 
 err_t bli_setijv
      (
-             double ar,
-             double ai,
-             dim_t  i,
-       const obj_t* x
+       double  ar,
+       double  ai,
+       dim_t   i,
+       obj_t*  x
      )
 {
 	dim_t n    = bli_obj_vector_dim( x );
@@ -84,10 +84,10 @@ err_t bli_setijv
 \
 void PASTEMAC(ch,opname) \
      ( \
-       double ar, \
-       double ai, \
-       dim_t  i, \
-       void*  x, inc_t incx  \
+       double         ar, \
+       double         ai, \
+       dim_t          i, \
+       void* restrict x, inc_t incx  \
      ) \
 { \
 	ctype* restrict x_cast = ( ctype* )x; \
@@ -97,25 +97,25 @@ void PASTEMAC(ch,opname) \
 	PASTEMAC2(z,ch,sets)( ar, ai, *x_i ); \
 }
 
-INSERT_GENTFUNC_BASIC( setijv )
+INSERT_GENTFUNC_BASIC0( setijv )
 
 // -----------------------------------------------------------------------------
 
 typedef void (*getijv_fp)
      (
-             dim_t   i,
-       const void*   x, inc_t incx,
-             double* ar,
-             double* ai
+       dim_t          i,
+       void* restrict x, inc_t incx,
+       double*        ar,
+       double*        ai
      );
 static getijv_fp GENARRAY(ftypes_getijv,getijv);
 
 err_t bli_getijv
       (
-              dim_t   i,
-        const obj_t*  x,
-              double* ar,
-              double* ai
+        dim_t   i,
+        obj_t*  x,
+        double* ar,
+        double* ai
       )
 {
 	dim_t n    = bli_obj_vector_dim( x );
@@ -151,18 +151,18 @@ err_t bli_getijv
 \
 void PASTEMAC(ch,opname) \
      ( \
-             dim_t   i, \
-       const void*   x, inc_t incx, \
-             double* ar, \
-             double* ai  \
+       dim_t          i, \
+       void* restrict x, inc_t incx, \
+       double*        ar, \
+       double*        ai  \
      ) \
 { \
-	const ctype* restrict x_cast = ( const ctype* )x; \
+	ctype* restrict x_cast = ( ctype* )x; \
 \
-	const ctype* restrict x_i = x_cast + (i  )*incx; \
+	ctype* restrict x_i = x_cast + (i  )*incx; \
 \
 	PASTEMAC2(ch,z,gets)( *x_i, *ar, *ai ); \
 }
 
-INSERT_GENTFUNC_BASIC( getijv )
+INSERT_GENTFUNC_BASIC0( getijv )
 

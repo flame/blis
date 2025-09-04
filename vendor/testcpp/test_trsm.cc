@@ -3,7 +3,7 @@
    BLISPP
    C++ test driver for BLIS CPP trsm routine and reference blis trsm routine.
 
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -101,6 +101,12 @@ void test_trsm(  )
     allocate_init_buffer(A , m , m);
     allocate_init_buffer(B , m , n);
     copy_buffer(B, B_ref , m ,n);
+
+    // Make A diagonally dominant to guarantee that the system has a solution.
+    for(int i=0; i<m; i++)
+    {
+        A[i+i*lda] = T{float(m)}*A[i+i*lda];
+    }
 
 #ifdef PRINT
     printmatrix(A, lda ,m,m, (char *)"A");

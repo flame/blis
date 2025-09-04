@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,38 +33,191 @@
 
 */
 
-#ifndef BLIS_L1V_KER_PROT_H
-#define BLIS_L1V_KER_PROT_H
 
 //
 // Define template prototypes for level-1v kernels.
 //
 
-#undef  L1VTPROT
-#define L1VTPROT( ctype, ch, funcname, opname ) \
+#define ADDV_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,funcname) \
+void PASTEMAC(ch,opname) \
+      ( \
+        conj_t           conjx, \
+        dim_t            n, \
+        ctype*  restrict x, inc_t incx, \
+        ctype*  restrict y, inc_t incy, \
+        cntx_t* restrict cntx  \
+      );
+
+
+#define AMAXV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
      ( \
-       PASTECH(opname,_params), \
-       BLIS_CNTX_PARAM  \
-     );
+       dim_t            n, \
+       ctype*  restrict x, inc_t incx, \
+       dim_t*  restrict index, \
+       cntx_t* restrict cntx  \
+     ); \
 
-#define ADDV_KER_PROT(     ctype, ch, fn )  L1VTPROT( ctype, ch, fn, addv );
-#define AMAXV_KER_PROT(    ctype, ch, fn )  L1VTPROT( ctype, ch, fn, amaxv );
-#define AXPBYV_KER_PROT(   ctype, ch, fn )  L1VTPROT( ctype, ch, fn, axpbyv );
-#define AXPYV_KER_PROT(    ctype, ch, fn )  L1VTPROT( ctype, ch, fn, axpyv );
-#define COPYV_KER_PROT(    ctype, ch, fn )  L1VTPROT( ctype, ch, fn, copyv );
-#define DOTV_KER_PROT(     ctype, ch, fn )  L1VTPROT( ctype, ch, fn, dotv );
-#define DOTXV_KER_PROT(    ctype, ch, fn )  L1VTPROT( ctype, ch, fn, dotxv );
-#define INVERTV_KER_PROT(  ctype, ch, fn )  L1VTPROT( ctype, ch, fn, invertv );
-#define INVSCALV_KER_PROT( ctype, ch, fn )  L1VTPROT( ctype, ch, fn, invscalv );
-#define SCALV_KER_PROT(    ctype, ch, fn )  L1VTPROT( ctype, ch, fn, scalv );
-#define SCAL2V_KER_PROT(   ctype, ch, fn )  L1VTPROT( ctype, ch, fn, scal2v );
-#define SETV_KER_PROT(     ctype, ch, fn )  L1VTPROT( ctype, ch, fn, setv );
-#define SUBV_KER_PROT(     ctype, ch, fn )  L1VTPROT( ctype, ch, fn, subv );
-#define SWAPV_KER_PROT(    ctype, ch, fn )  L1VTPROT( ctype, ch, fn, swapv );
-#define XPBYV_KER_PROT(    ctype, ch, fn )  L1VTPROT( ctype, ch, fn, xpbyv );
+#define AMINV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       dim_t            n, \
+       ctype*  restrict x, inc_t incx, \
+       dim_t*  restrict index, \
+       cntx_t* restrict cntx  \
+     ); \
+
+#define AXPBYV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t           conjx, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict beta, \
+       ctype*  restrict y, inc_t incy, \
+       cntx_t* restrict cntx  \
+     ); \
 
 
-#endif
+#define AXPYV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t           conjx, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict y, inc_t incy, \
+       cntx_t* restrict cntx  \
+     ); \
+
+
+#define COPYV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+      ( \
+        conj_t           conjx, \
+        dim_t            n, \
+        ctype*  restrict x, inc_t incx, \
+        ctype*  restrict y, inc_t incy, \
+        cntx_t* restrict cntx  \
+      );
+
+
+#define DOTV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t           conjx, \
+       conj_t           conjy, \
+       dim_t            n, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict y, inc_t incy, \
+       ctype*  restrict rho, \
+       cntx_t* restrict cntx  \
+     ); \
+
+
+#define DOTXV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t           conjx, \
+       conj_t           conjy, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict y, inc_t incy, \
+       ctype*  restrict beta, \
+       ctype*  restrict rho, \
+       cntx_t* restrict cntx  \
+     ); \
+
+
+#define INVERTV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       dim_t            n, \
+       ctype*  restrict x, inc_t incx, \
+       cntx_t* restrict cntx  \
+     ); \
+
+
+#define SCALV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t           conjalpha, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       cntx_t* restrict cntx  \
+     ); \
+
+
+#define SCAL2V_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t           conjx, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict y, inc_t incy, \
+       cntx_t* restrict cntx  \
+     ); \
+
+
+#define SETV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t           conjalpha, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       cntx_t* restrict cntx  \
+     ); \
+
+
+#define SUBV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+      ( \
+        conj_t           conjx, \
+        dim_t            n, \
+        ctype*  restrict x, inc_t incx, \
+        ctype*  restrict y, inc_t incy, \
+        cntx_t* restrict cntx  \
+      );
+
+
+#define SWAPV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       dim_t            n, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict y, inc_t incy, \
+       cntx_t* restrict cntx  \
+     ); \
+
+
+#define XPBYV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t           conjx, \
+       dim_t            n, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict beta, \
+       ctype*  restrict y, inc_t incy, \
+       cntx_t* restrict cntx  \
+     ); \
 

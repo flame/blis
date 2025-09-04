@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,8 +34,8 @@
 
 */
 
-#ifndef BLIS_PBA_H
-#define BLIS_PBA_H
+#ifndef BLIS_MEMBRK_H
+#define BLIS_MEMBRK_H
 
 // Packing block allocator (formerly memory broker)
 
@@ -73,17 +73,17 @@ BLIS_INLINE pool_t* bli_pba_pool( dim_t pool_index, pba_t* pba )
 	return &(pba->pools[ pool_index ]);
 }
 
-BLIS_INLINE siz_t bli_pba_align_size( const pba_t* pba )
+BLIS_INLINE siz_t bli_pba_align_size( pba_t* pba )
 {
 	return pba->align_size;
 }
 
-BLIS_INLINE malloc_ft bli_pba_malloc_fp( const pba_t* pba )
+BLIS_INLINE malloc_ft bli_pba_malloc_fp( pba_t* pba )
 {
 	return pba->malloc_fp;
 }
 
-BLIS_INLINE free_ft bli_pba_free_fp( const pba_t* pba )
+BLIS_INLINE free_ft bli_pba_free_fp( pba_t* pba )
 {
 	return pba->free_fp;
 }
@@ -119,11 +119,11 @@ BLIS_INLINE void bli_pba_unlock( pba_t* pba )
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS pba_t* bli_pba_query( void );
+pba_t* bli_pba_query( void );
 
 void bli_pba_init
      (
-       const cntx_t* cntx
+       cntx_t*   cntx
      );
 void bli_pba_finalize
      (
@@ -132,7 +132,7 @@ void bli_pba_finalize
 
 void bli_pba_acquire_m
      (
-       pba_t*    pba,
+       rntm_t*   rntm,
        siz_t     req_size,
        packbuf_t buf_type,
        mem_t*    mem
@@ -140,22 +140,27 @@ void bli_pba_acquire_m
 
 void bli_pba_release
      (
-       pba_t* pba,
-       mem_t* mem
+       rntm_t* rntm,
+       mem_t*  mem
+     );
+
+BLIS_EXPORT_BLIS void bli_pba_rntm_set_pba
+     (
+       rntm_t* rntm
      );
 
 siz_t bli_pba_pool_size
      (
-       const pba_t*    pba,
-             packbuf_t buf_type
+       pba_t*    pba,
+       packbuf_t buf_type
      );
 
 // ----------------------------------------------------------------------------
 
 void bli_pba_init_pools
      (
-       const cntx_t* cntx,
-             pba_t*  pba
+       cntx_t* cntx,
+       pba_t*  pba
      );
 void bli_pba_finalize_pools
      (
@@ -164,18 +169,18 @@ void bli_pba_finalize_pools
 
 void bli_pba_compute_pool_block_sizes
      (
-             siz_t*  bs_a,
-             siz_t*  bs_b,
-             siz_t*  bs_c,
-       const cntx_t* cntx
+       siz_t*  bs_a,
+       siz_t*  bs_b,
+       siz_t*  bs_c,
+       cntx_t* cntx
      );
 void bli_pba_compute_pool_block_sizes_dt
      (
-             num_t   dt,
-             siz_t*  bs_a,
-             siz_t*  bs_b,
-             siz_t*  bs_c,
-       const cntx_t* cntx
+       num_t   dt,
+       siz_t*  bs_a,
+       siz_t*  bs_b,
+       siz_t*  bs_c,
+       cntx_t* cntx
      );
 
 #endif

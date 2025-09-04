@@ -34,10 +34,10 @@
 
 BLIS_EXPORT_BLIS err_t bli_setijv
      (
-             double  ar,
-             double  ai,
-             dim_t   i,
-       const obj_t*  x
+       double  ar,
+       double  ai,
+       dim_t   i,
+       obj_t*  x
      );
 
 #undef  GENTPROT
@@ -45,22 +45,22 @@ BLIS_EXPORT_BLIS err_t bli_setijv
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
-       double ar, \
-       double ai, \
-       dim_t  i, \
-       void*  x, inc_t incx  \
+       double         ar, \
+       double         ai, \
+       dim_t          i, \
+       void* restrict x, inc_t incx  \
      );
 
-INSERT_GENTPROT_BASIC( setijv )
+INSERT_GENTPROT_BASIC0( setijv )
 
 // -----------------------------------------------------------------------------
 
 BLIS_EXPORT_BLIS err_t bli_getijv
       (
-              dim_t   i,
-        const obj_t*  x,
-              double* ar,
-              double* ai
+        dim_t   i,
+        obj_t*  x,
+        double* ar,
+        double* ai
       );
 
 #undef  GENTPROT
@@ -68,11 +68,11 @@ BLIS_EXPORT_BLIS err_t bli_getijv
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
-             dim_t   i, \
-       const void*   b, inc_t incx, \
-             double* ar, \
-             double* ai  \
+       dim_t          i, \
+       void* restrict b, inc_t incx, \
+       double*        ar, \
+       double*        ai  \
      );
 
-INSERT_GENTPROT_BASIC( getijv )
+INSERT_GENTPROT_BASIC0( getijv )
 
