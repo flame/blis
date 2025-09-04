@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -113,8 +113,32 @@ void bli_packm_blk_var1
 
 	doff_t  diagoffc_inc   = ( doff_t )panel_dim_max;
 
-	obj_t   kappa_local;
-	char*   kappa_cast     = bli_packm_scalar( &kappa_local, p );
+	// Treatment of kappa (ie: packing during scaling) depends on
+	// whether we are executing an induced method.
+	// For dzgemm, scale alpha during packing.
+	if ( bli_is_nat_packed( schema ) && cntl && bli_cntl_family(cntl) != BLIS_GEMM_MD)
+	{
+		// This branch is for native execution, where we assume that
+		// the micro-kernel will always apply the alpha scalar of the
+		// higher-level operation. Thus, we use BLIS_ONE for kappa so
+		// that the underlying packm implementation does not perform
+		// any scaling during packing.
+		buf_kappa = bli_obj_buffer_for_const( dt_p, &BLIS_ONE );
+	}
+	else // if ( bli_is_ind_packed( schema ) )
+	{
+		obj_t* kappa_p;
+
+		// The value for kappa we use will depend on whether the scalar
+		// attached to A has a nonzero imaginary component. If it does,
+		// then we will apply the scalar during packing to facilitate
+		// implementing induced complex domain algorithms in terms of
+		// real domain micro-kernels. (In the aforementioned situation,
+		// applying a real scalar is easy, but applying a complex one is
+		// harder, so we avoid the need altogether with the code below.)
+		if ( bli_obj_scalar_has_nonzero_imag( p ) )
+		{
+			//printf( "applying non-zero imag kappa\n" );
 
 	// we use the default lookup table to determine the right func_t
 	// for the current schema.
@@ -128,10 +152,22 @@ void bli_packm_blk_var1
 	{
 		packm_ker_cast = packm_struc_cxk_md[ dt_c ][ dt_p ];
 	}
-
-	// Query the address of the packm params field of the obj_t. The user might
-	// have set this field in order to specify a custom packm kernel.
-	packm_blk_var1_params_t* params = bli_obj_pack_params( c );
+	
+#ifdef BLIS_KERNELS_ZEN4
+	// For DGEMM in AVX512, scale by alpha during packing
+	if
+	( 
+		( bli_obj_dt( p ) == BLIS_DOUBLE ) &&
+		( ( bli_arch_query_id() == BLIS_ARCH_ZEN5 ) ||
+		  ( bli_arch_query_id() == BLIS_ARCH_ZEN4 ) )
+	)
+	{
+		bli_obj_scalar_detach( p, &kappa );
+		// Reset the attached scalar (to 1.0).
+		bli_obj_scalar_reset( p );
+		buf_kappa = kappa.buffer;
+	}
+#endif
 
 	if ( params && params->ukr_fn[ dt_c ][ dt_p ] )
 	{

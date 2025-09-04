@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -46,24 +46,28 @@ void bli_gemm_front
              rntm_t* rntm
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3);
 	bli_init_once();
 
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
 
-#if 0
-#ifdef BLIS_ENABLE_SMALL_MATRIX
-	// Only handle small problems separately for homogeneous datatypes.
-	if ( bli_obj_dt( a ) == bli_obj_dt( b ) &&
-	     bli_obj_dt( a ) == bli_obj_dt( c ) &&
-	     bli_obj_comp_prec( c ) == bli_obj_prec( c ) )
+	// If C has a zero dimension, return early.
+	if ( bli_obj_has_zero_dim( c ) )
 	{
-		err_t status = bli_gemm_small( alpha, a, b, beta, c, cntx, cntl );
-		if ( status == BLIS_SUCCESS ) return;
+		return;
 	}
-#endif
-#endif
+
+	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
+	// and return early.
+	if ( bli_obj_equals( alpha, &BLIS_ZERO ) ||
+	     bli_obj_has_zero_dim( a ) ||
+	     bli_obj_has_zero_dim( b ) )
+	{
+		bli_scalm( beta, c );
+		return;
+	}
 
 	// Alias A, B, and C in case we need to apply transformations.
 	bli_obj_alias_to( a, &a_local );
@@ -133,6 +137,30 @@ void bli_gemm_front
 	alpha = &BLIS_ONE;
 	beta  = &BLIS_ONE;
 
+#ifdef BLIS_ENABLE_GEMM_MD
+	// Don't perform the following optimization for ccr or crc cases, as
+	// those cases are sensitive to the ukernel storage preference (ie:
+	// transposing the operation would break them).
+	if ( !bli_gemm_md_is_ccr( &a_local, &b_local, &c_local ) &&
+	     !bli_gemm_md_is_crc( &a_local, &b_local, &c_local ) )
+#endif
+	// An optimization: If C is stored by rows and the micro-kernel prefers
+	// contiguous columns, or if C is stored by columns and the micro-kernel
+	// prefers contiguous rows, transpose the entire operation to allow the
+	// micro-kernel to access elements of C in its preferred manner.
+	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
+	{
+		bli_obj_swap( &a_local, &b_local );
+
+		bli_obj_induce_trans( &a_local );
+		bli_obj_induce_trans( &b_local );
+		bli_obj_induce_trans( &c_local );
+
+		// We must also swap the pack schemas, which were set by bli_gemm_md()
+		// or the inlined code above.
+		bli_obj_swap_pack_schemas( &a_local, &b_local );
+	}
+	
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop, and then make any
 	// additional modifications necessary for the current operation.
@@ -142,7 +170,7 @@ void bli_gemm_front
 	  BLIS_LEFT, // ignored for gemm/hemm/symm
 	  bli_obj_length( &c_local ),
 	  bli_obj_width( &c_local ),
-	  bli_obj_width( &a_local ),
+	  bli_obj_width_after_trans( &a_local ),
 	  rntm
 	);
 
@@ -217,7 +245,7 @@ void bli_gemm_front
 		bli_obj_set_exec_dt( dt_exec, &ct );
 		bli_obj_set_comp_dt( dt_comp, &ct );
 
-		// A naive approach would cast C to the comptuation datatype,
+		// A naive approach would cast C to the computation datatype,
 		// compute with beta, and then cast the result back to the
 		// user-provided output matrix. However, we employ a different
 		// approach that halves the number of memops on C (or its
@@ -263,5 +291,9 @@ void bli_gemm_front
 	}
 #endif
 #endif
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
 }
+
+// -----------------------------------------------------------------------------
+
 

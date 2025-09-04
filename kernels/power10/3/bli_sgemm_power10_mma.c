@@ -148,6 +148,4 @@ void bli_sgemm_power10_mma_8x16
         SAVE_ACC_bz(fv4sf_t, &acc6, rs_c,  8+4*rs_c);
         SAVE_ACC_bz(fv4sf_t, &acc7, rs_c, 12+4*rs_c);
     }
-
-    GEMM_UKR_FLUSH_CT( s );
 }

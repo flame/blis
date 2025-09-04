@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -19,14 +20,14 @@
       from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-   AS IS AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE UNIVERSITY
-   OF TEXAS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
-   OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+   HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
@@ -181,33 +182,33 @@ void bli_dgemm_skx_asm_16x14
     BEGIN_ASM()
 
     VXORPD(YMM( 4), YMM( 4), YMM( 4)) //clear out registers
-    VXORPD(YMM( 5), YMM( 5), YMM( 5))
-    VXORPD(YMM( 6), YMM( 6), YMM( 6))
-    VXORPD(YMM( 7), YMM( 7), YMM( 7))
-    VXORPD(YMM( 8), YMM( 8), YMM( 8))
-    VXORPD(YMM( 9), YMM( 9), YMM( 9))
-    VXORPD(YMM(10), YMM(10), YMM(10))
-    VXORPD(YMM(11), YMM(11), YMM(11))
-    VXORPD(YMM(12), YMM(12), YMM(12))
-    VXORPD(YMM(13), YMM(13), YMM(13))
-    VXORPD(YMM(14), YMM(14), YMM(14))
-    VXORPD(YMM(15), YMM(15), YMM(15))
-    VXORPD(YMM(16), YMM(16), YMM(16))
-    VXORPD(YMM(17), YMM(17), YMM(17))
-    VXORPD(YMM(18), YMM(18), YMM(18))
-    VXORPD(YMM(19), YMM(19), YMM(19))
-    VXORPD(YMM(20), YMM(20), YMM(20))
-    VXORPD(YMM(21), YMM(21), YMM(21))
-    VXORPD(YMM(22), YMM(22), YMM(22))
-    VXORPD(YMM(23), YMM(23), YMM(23))
-    VXORPD(YMM(24), YMM(24), YMM(24))
-    VXORPD(YMM(25), YMM(25), YMM(25))
-    VXORPD(YMM(26), YMM(26), YMM(26))
-    VXORPD(YMM(27), YMM(27), YMM(27))
-    VXORPD(YMM(28), YMM(28), YMM(28))
-    VXORPD(YMM(29), YMM(29), YMM(29))
-    VXORPD(YMM(30), YMM(30), YMM(30))
-    VXORPD(YMM(31), YMM(31), YMM(31))
+    VMOVAPD(YMM(5) , YMM(4))
+    VMOVAPD(YMM(6) , YMM(4))
+    VMOVAPD(YMM(7) , YMM(4))
+    VMOVAPD(YMM(8) , YMM(4))
+    VMOVAPD(YMM(9) , YMM(4))
+    VMOVAPD(YMM(10), YMM(4))
+    VMOVAPD(YMM(11), YMM(4))
+    VMOVAPD(YMM(12), YMM(4))
+    VMOVAPD(YMM(13), YMM(4))
+    VMOVAPD(YMM(14), YMM(4))
+    VMOVAPD(YMM(15), YMM(4))
+    VMOVAPD(YMM(16), YMM(4))
+    VMOVAPD(YMM(17), YMM(4))
+    VMOVAPD(YMM(18), YMM(4))
+    VMOVAPD(YMM(19), YMM(4))
+    VMOVAPD(YMM(20), YMM(4))
+    VMOVAPD(YMM(21), YMM(4))
+    VMOVAPD(YMM(22), YMM(4))
+    VMOVAPD(YMM(23), YMM(4))
+    VMOVAPD(YMM(24), YMM(4))
+    VMOVAPD(YMM(25), YMM(4))
+    VMOVAPD(YMM(26), YMM(4))
+    VMOVAPD(YMM(27), YMM(4))
+    VMOVAPD(YMM(28), YMM(4))
+    VMOVAPD(YMM(29), YMM(4))
+    VMOVAPD(YMM(30), YMM(4))
+    VMOVAPD(YMM(31), YMM(4))
 
     MOV(RSI, VAR(k)) //loop index
     MOV(RAX, VAR(a)) //load address of a
@@ -382,7 +383,12 @@ void bli_dgemm_skx_asm_16x14
           [cs_c]      "m" (cs_c)
         : // register clobber list
           "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8", "r9", "r10", "r11", "r12",
-          "r13", "r14", "r15", "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5",
+          "r13", "r14", "r15", "k0", "k1", "k2", "k3", "k4", "xmm1",
+          "xmm2", "ymm2", "ymm4", "ymm5", "ymm6", "ymm7", "ymm8", "ymm9",
+          "ymm10", "ymm11", "ymm12", "ymm13", "ymm14", "ymm15", "ymm16",
+          "ymm17", "ymm18", "ymm19", "ymm20", "ymm21", "ymm22", "ymm23",
+          "ymm24", "ymm25", "ymm26", "ymm27", "ymm28", "ymm29", "ymm30",
+          "ymm31", "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5",
           "zmm6", "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
           "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19", "zmm20", "zmm21",
           "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",

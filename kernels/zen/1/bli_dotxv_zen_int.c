@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2016 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2016 - 2023, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2018, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
@@ -37,12 +37,28 @@
 #include "blis.h"
 
 /* Union data structure to access AVX registers
+   One 128-bit AVX register holds 8 SP elements. */
+typedef union
+{
+	__m128  v;
+	float   f[4] __attribute__((aligned(64)));
+} v4sf_t;
+
+/* Union data structure to access AVX registers
    One 256-bit AVX register holds 8 SP elements. */
 typedef union
 {
 	__m256  v;
 	float   f[8] __attribute__((aligned(64)));
 } v8sf_t;
+
+/* Union data structure to access AVX registers
+*  One 128-bit AVX register holds 4 DP elements. */
+typedef union
+{
+	__m128d v;
+	double  d[2] __attribute__((aligned(64)));
+} v2df_t;
 
 /* Union data structure to access AVX registers
 *  One 256-bit AVX register holds 4 DP elements. */
@@ -82,11 +98,7 @@ void bli_sdotxv_zen_int
 
 	float            rho_l;
 
-	v8sf_t           rho0v, rho1v, rho2v, rho3v;
-	v8sf_t           x0v, y0v;
-	v8sf_t           x1v, y1v;
-	v8sf_t           x2v, y2v;
-	v8sf_t           x3v, y3v;
+	v8sf_t           rhov[4], xv[4], yv[4];
 
 	// If beta is zero, initialize rho1 to zero instead of scaling
 	// rho by beta (in case rho contains NaN or Inf).
@@ -121,50 +133,60 @@ void bli_sdotxv_zen_int
 	const float* restrict yp = y;
 
 	// Initialize the unrolled iterations' rho vectors to zero.
-	rho0v.v = _mm256_setzero_ps();
-	rho1v.v = _mm256_setzero_ps();
-	rho2v.v = _mm256_setzero_ps();
-	rho3v.v = _mm256_setzero_ps();
+	rhov[0].v = _mm256_setzero_ps();
+	rhov[1].v = _mm256_setzero_ps();
+	rhov[2].v = _mm256_setzero_ps();
+	rhov[3].v = _mm256_setzero_ps();
 
 	for ( i = 0; i < n_viter; ++i )
 	{
 		// Load the x and y input vector elements.
-		x0v.v = _mm256_loadu_ps( xp + 0*n_elem_per_reg );
-		y0v.v = _mm256_loadu_ps( yp + 0*n_elem_per_reg );
+		xv[0].v = _mm256_loadu_ps( x0 + 0*n_elem_per_reg );
+		yv[0].v = _mm256_loadu_ps( y0 + 0*n_elem_per_reg );
 
-		x1v.v = _mm256_loadu_ps( xp + 1*n_elem_per_reg );
-		y1v.v = _mm256_loadu_ps( yp + 1*n_elem_per_reg );
+		xv[1].v = _mm256_loadu_ps( x0 + 1*n_elem_per_reg );
+		yv[1].v = _mm256_loadu_ps( y0 + 1*n_elem_per_reg );
 
-		x2v.v = _mm256_loadu_ps( xp + 2*n_elem_per_reg );
-		y2v.v = _mm256_loadu_ps( yp + 2*n_elem_per_reg );
+		xv[2].v = _mm256_loadu_ps( x0 + 2*n_elem_per_reg );
+		yv[2].v = _mm256_loadu_ps( y0 + 2*n_elem_per_reg );
 
-		x3v.v = _mm256_loadu_ps( xp + 3*n_elem_per_reg );
-		y3v.v = _mm256_loadu_ps( yp + 3*n_elem_per_reg );
+		xv[3].v = _mm256_loadu_ps( x0 + 3*n_elem_per_reg );
+		yv[3].v = _mm256_loadu_ps( y0 + 3*n_elem_per_reg );
 
 		// Compute the element-wise product of the x and y vectors,
 		// storing in the corresponding rho vectors.
-		rho0v.v = _mm256_fmadd_ps( x0v.v, y0v.v, rho0v.v );
-		rho1v.v = _mm256_fmadd_ps( x1v.v, y1v.v, rho1v.v );
-		rho2v.v = _mm256_fmadd_ps( x2v.v, y2v.v, rho2v.v );
-		rho3v.v = _mm256_fmadd_ps( x3v.v, y3v.v, rho3v.v );
+		rhov[0].v = _mm256_fmadd_ps( xv[0].v, yv[0].v, rhov[0].v );
+		rhov[1].v = _mm256_fmadd_ps( xv[1].v, yv[1].v, rhov[1].v );
+		rhov[2].v = _mm256_fmadd_ps( xv[2].v, yv[2].v, rhov[2].v );
+		rhov[3].v = _mm256_fmadd_ps( xv[3].v, yv[3].v, rhov[3].v );
 
 		xp += ( n_elem_per_reg * n_iter_unroll );
 		yp += ( n_elem_per_reg * n_iter_unroll );
 	}
 
 	// Accumulate the unrolled rho vectors into a single vector.
-	rho0v.v += rho1v.v;
-	rho0v.v += rho2v.v;
-	rho0v.v += rho3v.v;
+	rhov[0].v = _mm256_add_ps(rhov[0].v,rhov[1].v);
+	rhov[0].v = _mm256_add_ps(rhov[0].v,rhov[2].v);
+	rhov[0].v = _mm256_add_ps(rhov[0].v,rhov[3].v);
+
+	v4sf_t inter0, inter1;
+
+	inter0.v = _mm256_extractf128_ps(rhov[0].v,0);
+	inter1.v = _mm256_extractf128_ps(rhov[0].v,1);
+
+	inter0.v = _mm_add_ps(inter0.v, inter1.v);
+
+	inter1.v = _mm_permute_ps(inter0.v, 14);
+
+	inter0.v = _mm_add_ps(inter0.v,inter1.v);
 
 	// Accumulate the final rho vector into a single scalar result.
-	rho_l = rho0v.f[0] + rho0v.f[1] + rho0v.f[2] + rho0v.f[3] +
-	        rho0v.f[4] + rho0v.f[5] + rho0v.f[6] + rho0v.f[7];
+	rho0 = inter0.f[0] + inter0.f[1];
 
 	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
 	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions (which may occur
-	// as soon as the n_left cleanup loop below if BLIS is compiled with
+	// transitioning from AVX to SSE instructions (which may occur as soon
+	// as the n_left cleanup loop below if BLIS is compiled with
 	// -mfpmath=sse).
 	_mm256_zeroupper();
 
@@ -214,12 +236,8 @@ void bli_ddotxv_zen_int
 
 	double           rho_l;
 
-	v4df_t           rho0v, rho1v, rho2v, rho3v;
-	v4df_t           x0v, y0v;
-	v4df_t           x1v, y1v;
-	v4df_t           x2v, y2v;
-	v4df_t           x3v, y3v;
-
+	v4df_t           rhov[4], xv[4], yv[4];
+	
 	// If beta is zero, initialize rho1 to zero instead of scaling
 	// rho by beta (in case rho contains NaN or Inf).
 	if ( PASTEMAC(d,eq0)( *beta ) )
@@ -253,49 +271,56 @@ void bli_ddotxv_zen_int
 	const double* restrict yp = y;
 
 	// Initialize the unrolled iterations' rho vectors to zero.
-	rho0v.v = _mm256_setzero_pd();
-	rho1v.v = _mm256_setzero_pd();
-	rho2v.v = _mm256_setzero_pd();
-	rho3v.v = _mm256_setzero_pd();
+	rhov[0].v = _mm256_setzero_pd();
+	rhov[1].v = _mm256_setzero_pd();
+	rhov[2].v = _mm256_setzero_pd();
+	rhov[3].v = _mm256_setzero_pd();
 
 	for ( i = 0; i < n_viter; ++i )
 	{
 		// Load the x and y input vector elements.
-		x0v.v = _mm256_loadu_pd( xp + 0*n_elem_per_reg );
-		y0v.v = _mm256_loadu_pd( yp + 0*n_elem_per_reg );
+		xv[0].v = _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
+		yv[0].v = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
 
-		x1v.v = _mm256_loadu_pd( xp + 1*n_elem_per_reg );
-		y1v.v = _mm256_loadu_pd( yp + 1*n_elem_per_reg );
+		xv[1].v = _mm256_loadu_pd( x0 + 1*n_elem_per_reg );
+		yv[1].v = _mm256_loadu_pd( y0 + 1*n_elem_per_reg );
 
-		x2v.v = _mm256_loadu_pd( xp + 2*n_elem_per_reg );
-		y2v.v = _mm256_loadu_pd( yp + 2*n_elem_per_reg );
+		xv[2].v = _mm256_loadu_pd( x0 + 2*n_elem_per_reg );
+		yv[2].v = _mm256_loadu_pd( y0 + 2*n_elem_per_reg );
 
-		x3v.v = _mm256_loadu_pd( xp + 3*n_elem_per_reg );
-		y3v.v = _mm256_loadu_pd( yp + 3*n_elem_per_reg );
-
+		xv[3].v = _mm256_loadu_pd( x0 + 3*n_elem_per_reg );
+		yv[3].v = _mm256_loadu_pd( y0 + 3*n_elem_per_reg );
+		
 		// Compute the element-wise product of the x and y vectors,
 		// storing in the corresponding rho vectors.
-		rho0v.v = _mm256_fmadd_pd( x0v.v, y0v.v, rho0v.v );
-		rho1v.v = _mm256_fmadd_pd( x1v.v, y1v.v, rho1v.v );
-		rho2v.v = _mm256_fmadd_pd( x2v.v, y2v.v, rho2v.v );
-		rho3v.v = _mm256_fmadd_pd( x3v.v, y3v.v, rho3v.v );
+		rhov[0].v = _mm256_fmadd_pd( xv[0].v, yv[0].v, rhov[0].v );
+		rhov[1].v = _mm256_fmadd_pd( xv[1].v, yv[1].v, rhov[1].v );
+		rhov[2].v = _mm256_fmadd_pd( xv[2].v, yv[2].v, rhov[2].v );
+		rhov[3].v = _mm256_fmadd_pd( xv[3].v, yv[3].v, rhov[3].v );
 
 		xp += ( n_elem_per_reg * n_iter_unroll );
 		yp += ( n_elem_per_reg * n_iter_unroll );
 	}
 
 	// Accumulate the unrolled rho vectors into a single vector.
-	rho0v.v += rho1v.v;
-	rho0v.v += rho2v.v;
-	rho0v.v += rho3v.v;
+	rhov[0].v = _mm256_add_pd(rhov[1].v,rhov[0].v);
+	rhov[0].v = _mm256_add_pd(rhov[2].v,rhov[0].v);
+	rhov[0].v = _mm256_add_pd(rhov[3].v,rhov[0].v);
+
+	v2df_t inter1, inter2;
+
+	inter1.v = _mm256_extractf128_pd(rhov[0].v,1);
+	inter2.v = _mm256_extractf128_pd(rhov[0].v,0);
+
+	inter1.v = _mm_add_pd(inter1.v, inter2.v);
 
 	// Accumulate the final rho vector into a single scalar result.
-	rho_l = rho0v.d[0] + rho0v.d[1] + rho0v.d[2] + rho0v.d[3];
+	rho0 = inter1.d[0] + inter1.d[1];
 
 	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
 	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions (which may occur
-	// as soon as the n_left cleanup loop below if BLIS is compiled with
+	// transitioning from AVX to SSE instructions (which may occur as soon
+	// as the n_left cleanup loop below if BLIS is compiled with
 	// -mfpmath=sse).
 	_mm256_zeroupper();
 
@@ -315,3 +340,502 @@ void bli_ddotxv_zen_int
 	PASTEMAC(d,axpys)( *alpha, rho_l, *rho );
 }
 
+
+
+void bli_zdotxv_zen_int
+     (
+       conj_t           conjx,
+       conj_t           conjy,
+       dim_t            n,
+       dcomplex* restrict alpha,
+       dcomplex* restrict x, inc_t incx,
+       dcomplex* restrict y, inc_t incy,
+       dcomplex* restrict beta,
+       dcomplex* restrict rho,
+       cntx_t* restrict cntx
+     )
+{
+	const dim_t      n_elem_per_reg = 2;
+	const dim_t      n_iter_unroll  = 4;
+
+	dim_t            i;
+	dim_t            n_viter;
+	dim_t            n_left;
+
+	dcomplex* restrict x0;
+	dcomplex* restrict y0;
+	dcomplex           rho0;
+
+	v4df_t           rhov[8], xv[4], yv[8];
+
+	conj_t conjx_use = conjx;
+	if ( bli_is_conj( conjy ) )
+	{
+		bli_toggle_conj( &conjx_use );
+	}
+	// If beta is zero, initialize rho1 to zero instead of scaling
+	// rho by beta (in case rho contains NaN or Inf).
+	if ( PASTEMAC(z,eq0)( *beta ) )
+	{
+		PASTEMAC(z,set0s)( *rho );
+	}
+	else
+	{
+		PASTEMAC(z,scals)( *beta, *rho );
+	}
+
+	// If the vector dimension is zero, output rho and return early.
+	if ( bli_zero_dim1( n ) || PASTEMAC(z,eq0)( *alpha ) ) return;
+
+	// Use the unrolling factor and the number of elements per register
+	// to compute the number of vectorized and leftover iterations.
+	n_viter = ( n ) / ( n_elem_per_reg * n_iter_unroll );
+	n_left  = ( n ) % ( n_elem_per_reg * n_iter_unroll );
+
+	// If there is anything that would interfere with our use of contiguous
+	// vector loads/stores, override n_viter and n_left to use scalar code
+	// for all iterations.
+	if ( incx != 1 || incy != 1 )
+	{
+		n_viter = 0;
+		n_left  = n;
+	}
+
+	// Initialize local pointers.
+	x0 = x;
+	y0 = y;
+
+	// Initialize the unrolled iterations' rho vectors to zero.
+	rhov[0].v = _mm256_setzero_pd();
+	rhov[1].v = _mm256_setzero_pd();
+	rhov[2].v = _mm256_setzero_pd();
+	rhov[3].v = _mm256_setzero_pd();
+
+	rhov[4].v = _mm256_setzero_pd();
+	rhov[5].v = _mm256_setzero_pd();
+	rhov[6].v = _mm256_setzero_pd();
+	rhov[7].v = _mm256_setzero_pd();
+
+	if ( bli_is_conj( conjx_use ) )
+        {
+		__m256d conju = _mm256_setr_pd(1.0, -1.0, 1.0, -1.0);
+		for ( i = 0; i < n_viter; ++i )
+		{
+			// Load the x and y input vector elements.
+			xv[0].v = _mm256_loadu_pd((double *) (x0 + 0*n_elem_per_reg) );
+			yv[0].v = _mm256_loadu_pd((double *) (y0 + 0*n_elem_per_reg) );
+
+			xv[1].v = _mm256_loadu_pd((double *) (x0 + 1*n_elem_per_reg) );
+			yv[1].v = _mm256_loadu_pd((double *) (y0 + 1*n_elem_per_reg) );
+
+			xv[2].v = _mm256_loadu_pd((double *) (x0 + 2*n_elem_per_reg) );
+			yv[2].v = _mm256_loadu_pd((double *) (y0 + 2*n_elem_per_reg) );
+
+			xv[3].v = _mm256_loadu_pd((double *) (x0 + 3*n_elem_per_reg) );
+			yv[3].v = _mm256_loadu_pd((double *) (y0 + 3*n_elem_per_reg) );
+
+			yv[0].v = _mm256_mul_pd(yv[0].v, conju);
+			yv[1].v = _mm256_mul_pd(yv[1].v, conju);
+			yv[2].v = _mm256_mul_pd(yv[2].v, conju);
+			yv[3].v = _mm256_mul_pd(yv[3].v, conju);
+			//yi0 yi0 yi1 yi1
+			//xr0 xi0 xr1 xi1
+			//after permute of vector registers
+			//yi0*xr0 yi0*xi0 yi1*xr1 yi1*xi1
+			yv[4].v = _mm256_permute_pd( yv[0].v, 15 );
+			yv[5].v = _mm256_permute_pd( yv[1].v, 15 );
+			yv[6].v = _mm256_permute_pd( yv[2].v, 15 );
+			yv[7].v = _mm256_permute_pd( yv[3].v, 15 );
+
+			//yr0 yr0 yr1 yr1
+			//xr0 xi0 xr1 xi1
+			//after permute of vector registers
+			//yr0*xr0 yr0*xi0 yr1*xr1 yr1*xi1
+			yv[0].v = _mm256_permute_pd( yv[0].v, 0 );
+			yv[1].v = _mm256_permute_pd( yv[1].v, 0 );
+			yv[2].v = _mm256_permute_pd( yv[2].v, 0 );
+			yv[3].v = _mm256_permute_pd( yv[3].v, 0 );
+
+			// Compute the element-wise product of the x and y vectors,
+			// storing in the corresponding rho vectors.
+			rhov[0].v = _mm256_fmadd_pd( xv[0].v, yv[0].v, rhov[0].v );
+			rhov[1].v = _mm256_fmadd_pd( xv[1].v, yv[1].v, rhov[1].v );
+			rhov[2].v = _mm256_fmadd_pd( xv[2].v, yv[2].v, rhov[2].v );
+			rhov[3].v = _mm256_fmadd_pd( xv[3].v, yv[3].v, rhov[3].v );
+
+			rhov[4].v = _mm256_fmadd_pd( xv[0].v, yv[4].v, rhov[4].v );
+			rhov[5].v = _mm256_fmadd_pd( xv[1].v, yv[5].v, rhov[5].v );
+			rhov[6].v = _mm256_fmadd_pd( xv[2].v, yv[6].v, rhov[6].v );
+			rhov[7].v = _mm256_fmadd_pd( xv[3].v, yv[7].v, rhov[7].v );
+
+			x0 += ( n_elem_per_reg * n_iter_unroll );
+			y0 += ( n_elem_per_reg * n_iter_unroll );
+		}
+	}
+	else
+	{
+		for ( i = 0; i < n_viter; ++i )
+		{
+			// Load the x and y input vector elements.
+			xv[0].v = _mm256_loadu_pd((double *) (x0 + 0*n_elem_per_reg) );
+			yv[0].v = _mm256_loadu_pd((double *) (y0 + 0*n_elem_per_reg) );
+
+			xv[1].v = _mm256_loadu_pd((double *) (x0 + 1*n_elem_per_reg) );
+			yv[1].v = _mm256_loadu_pd((double *) (y0 + 1*n_elem_per_reg) );
+
+			xv[2].v = _mm256_loadu_pd((double *) (x0 + 2*n_elem_per_reg) );
+			yv[2].v = _mm256_loadu_pd((double *) (y0 + 2*n_elem_per_reg) );
+
+			xv[3].v = _mm256_loadu_pd((double *) (x0 + 3*n_elem_per_reg) );
+			yv[3].v = _mm256_loadu_pd((double *) (y0 + 3*n_elem_per_reg) );
+
+			//yi0 yi0 yi1 yi1
+			//xr0 xi0 xr1 xi1
+			//---------------
+			//yi0*xr0 yi0*xi0 yi1*xr1 yi1*xi1
+			yv[4].v = _mm256_permute_pd( yv[0].v, 15 );
+			yv[5].v = _mm256_permute_pd( yv[1].v, 15 );
+			yv[6].v = _mm256_permute_pd( yv[2].v, 15 );
+			yv[7].v = _mm256_permute_pd( yv[3].v, 15 );
+
+			//yr0 yr0 yr1 yr1
+			//xr0 xi0 xr1 xi1
+			//----------------
+			//yr0*xr0 yr0*xi0 yr1*xr1 yr1*xi1
+			yv[0].v = _mm256_permute_pd( yv[0].v, 0 );
+			yv[1].v = _mm256_permute_pd( yv[1].v, 0 );
+			yv[2].v = _mm256_permute_pd( yv[2].v, 0 );
+			yv[3].v = _mm256_permute_pd( yv[3].v, 0 );
+
+			// Compute the element-wise product of the x and y vectors,
+			// storing in the corresponding rho vectors.
+			rhov[0].v = _mm256_fmadd_pd( xv[0].v, yv[0].v, rhov[0].v );
+			rhov[1].v = _mm256_fmadd_pd( xv[1].v, yv[1].v, rhov[1].v );
+			rhov[2].v = _mm256_fmadd_pd( xv[2].v, yv[2].v, rhov[2].v );
+			rhov[3].v = _mm256_fmadd_pd( xv[3].v, yv[3].v, rhov[3].v );
+
+			rhov[4].v = _mm256_fmadd_pd( xv[0].v, yv[4].v, rhov[4].v );
+			rhov[5].v = _mm256_fmadd_pd( xv[1].v, yv[5].v, rhov[5].v );
+			rhov[6].v = _mm256_fmadd_pd( xv[2].v, yv[6].v, rhov[6].v );
+			rhov[7].v = _mm256_fmadd_pd( xv[3].v, yv[7].v, rhov[7].v );
+
+			x0 += ( n_elem_per_reg * n_iter_unroll );
+			y0 += ( n_elem_per_reg * n_iter_unroll );
+		}
+	}
+
+	//yr0*xr0 yr0*xi0 yr1*xr1 yr1*xi1
+	//   -      +        -      +
+	//yi0*xi0 yi0*xr0 yi1*xi1 yi1*xr1
+	rhov[4].v = _mm256_permute_pd(rhov[4].v, 0x05);
+	rhov[5].v = _mm256_permute_pd(rhov[5].v, 0x05);
+	rhov[6].v = _mm256_permute_pd(rhov[6].v, 0x05);
+	rhov[7].v = _mm256_permute_pd(rhov[7].v, 0x05);
+
+	rhov[0].v = _mm256_addsub_pd(rhov[0].v, rhov[4].v);
+	rhov[1].v = _mm256_addsub_pd(rhov[1].v, rhov[5].v);
+	rhov[2].v = _mm256_addsub_pd(rhov[2].v, rhov[6].v);
+	rhov[3].v = _mm256_addsub_pd(rhov[3].v, rhov[7].v);
+
+	// Accumulate the unrolled rho vectors into a single vector.
+	rhov[0].v = _mm256_add_pd(rhov[1].v,rhov[0].v);
+	rhov[0].v = _mm256_add_pd(rhov[2].v,rhov[0].v);
+	rhov[0].v = _mm256_add_pd(rhov[3].v,rhov[0].v);
+
+	v2df_t inter1, inter2;
+
+	inter1.v = _mm256_extractf128_pd(rhov[0].v,1);
+	inter2.v = _mm256_extractf128_pd(rhov[0].v,0);
+
+	inter1.v = _mm_add_pd(inter1.v, inter2.v);
+
+	// Accumulate the final rho vector into a single scalar result.
+	rho0.real = inter1.d[0];
+	rho0.imag = inter1.d[1];
+
+	/* Negate sign of imaginary value when vector y is conjugate */
+	if ( bli_is_conj(conjx_use))
+            rho0.imag = -rho0.imag;
+
+	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
+	// This avoids a performance penalty caused by false dependencies when
+	// transitioning from AVX to SSE instructions (which may occur as soon
+	// as the n_left cleanup loop below if BLIS is compiled with
+	// -mfpmath=sse).
+	_mm256_zeroupper();
+
+	// If there are leftover iterations, perform them with scalar code.
+	if ( bli_is_conj( conjx_use ) )
+	{
+		for ( i = 0; i < n_left; ++i )
+		{
+			PASTEMAC(z,dotjs)( *x0, *y0, rho0 );
+			x0 += incx;
+			y0 += incy;
+		}
+	}
+	else
+	{
+		for ( i = 0; i < n_left; ++i )
+		{
+			PASTEMAC(z,dots)( *x0, *y0, rho0 );
+			x0 += incx;
+			y0 += incy;
+		}
+	}
+
+	if ( bli_is_conj( conjy ) )
+		PASTEMAC(z,conjs)( rho0 );
+
+	// Accumulate the final result into the output variable.
+	PASTEMAC(z,axpys)( *alpha, rho0, *rho );
+}
+
+void bli_cdotxv_zen_int
+     (
+       conj_t           conjx,
+       conj_t           conjy,
+       dim_t            n,
+       scomplex* restrict alpha,
+       scomplex* restrict x, inc_t incx,
+       scomplex* restrict y, inc_t incy,
+       scomplex* restrict beta,
+       scomplex* restrict rho,
+       cntx_t* restrict cntx
+     )
+{
+	const dim_t      n_elem_per_reg = 4;
+	const dim_t      n_iter_unroll  = 4;
+
+	dim_t            i;
+	dim_t            n_viter;
+	dim_t            n_left;
+
+	scomplex* restrict x0;
+	scomplex* restrict y0;
+	scomplex           rho0;
+
+	v8sf_t           rhov[8], xv[4], yv[8];
+
+	conj_t conjx_use = conjx;
+	if ( bli_is_conj( conjy ) )
+	{
+		bli_toggle_conj( &conjx_use );
+	}
+	// If beta is zero, initialize rho1 to zero instead of scaling
+	// rho by beta (in case rho contains NaN or Inf).
+	if ( PASTEMAC(c,eq0)( *beta ) )
+	{
+		PASTEMAC(c,set0s)( *rho );
+	}
+	else
+	{
+		PASTEMAC(c,scals)( *beta, *rho );
+	}
+
+	// If the vector dimension is zero, output rho and return early.
+	if ( bli_zero_dim1( n ) || PASTEMAC(c,eq0)( *alpha ) ) return;
+
+	// Use the unrolling factor and the number of elements per register
+	// to compute the number of vectorized and leftover iterations.
+	n_viter = ( n ) / ( n_elem_per_reg * n_iter_unroll );
+	n_left  = ( n ) % ( n_elem_per_reg * n_iter_unroll );
+
+	// If there is anything that would interfere with our use of contiguous
+	// vector loads/stores, override n_viter and n_left to use scalar code
+	// for all iterations.
+	if ( incx != 1 || incy != 1 )
+	{
+		n_viter = 0;
+		n_left  = n;
+	}
+
+	// Initialize local pointers.
+	x0 = x;
+	y0 = y;
+
+	// Initialize the unrolled iterations' rho vectors to zero.
+	rhov[0].v = _mm256_setzero_ps();
+	rhov[1].v = _mm256_setzero_ps();
+	rhov[2].v = _mm256_setzero_ps();
+	rhov[3].v = _mm256_setzero_ps();
+
+	rhov[4].v = _mm256_setzero_ps();
+	rhov[5].v = _mm256_setzero_ps();
+	rhov[6].v = _mm256_setzero_ps();
+	rhov[7].v = _mm256_setzero_ps();
+
+	if ( bli_is_conj( conjx_use ) )
+        {
+		__m256 conju = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
+		for ( i = 0; i < n_viter; ++i )
+		{
+			// Load the x and y input vector elements.
+			xv[0].v = _mm256_loadu_ps((float *) (x0 + 0*n_elem_per_reg) );
+			yv[0].v = _mm256_loadu_ps((float *) (y0 + 0*n_elem_per_reg) );
+
+			xv[1].v = _mm256_loadu_ps((float *) (x0 + 1*n_elem_per_reg) );
+			yv[1].v = _mm256_loadu_ps((float *) (y0 + 1*n_elem_per_reg) );
+
+			xv[2].v = _mm256_loadu_ps((float *) (x0 + 2*n_elem_per_reg) );
+			yv[2].v = _mm256_loadu_ps((float *) (y0 + 2*n_elem_per_reg) );
+
+			xv[3].v = _mm256_loadu_ps((float *) (x0 + 3*n_elem_per_reg) );
+			yv[3].v = _mm256_loadu_ps((float *) (y0 + 3*n_elem_per_reg) );
+
+			yv[0].v = _mm256_mul_ps(yv[0].v, conju);
+			yv[1].v = _mm256_mul_ps(yv[1].v, conju);
+			yv[2].v = _mm256_mul_ps(yv[2].v, conju);
+			yv[3].v = _mm256_mul_ps(yv[3].v, conju);
+			//yi0 yi0 yi1 yi1
+			//xr0 xi0 xr1 xi1
+			//after permute of vector registers
+			//yi0*xr0 yi0*xi0 yi1*xr1 yi1*xi1
+			yv[4].v = _mm256_permute_ps( yv[0].v, 0xf5 );
+			yv[5].v = _mm256_permute_ps( yv[1].v, 0xf5 );
+			yv[6].v = _mm256_permute_ps( yv[2].v, 0xf5 );
+			yv[7].v = _mm256_permute_ps( yv[3].v, 0xf5 );
+
+			//yr0 yr0 yr1 yr1
+			//xr0 xi0 xr1 xi1
+			//after permute of vector registers
+			//yr0*xr0 yr0*xi0 yr1*xr1 yr1*xi1
+			yv[0].v = _mm256_permute_ps( yv[0].v, 0xa0 );
+			yv[1].v = _mm256_permute_ps( yv[1].v, 0xa0 );
+			yv[2].v = _mm256_permute_ps( yv[2].v, 0xa0 );
+			yv[3].v = _mm256_permute_ps( yv[3].v, 0xa0 );
+
+			// Compute the element-wise product of the x and y vectors,
+			// storing in the corresponding rho vectors.
+			rhov[0].v = _mm256_fmadd_ps( xv[0].v, yv[0].v, rhov[0].v );
+			rhov[1].v = _mm256_fmadd_ps( xv[1].v, yv[1].v, rhov[1].v );
+			rhov[2].v = _mm256_fmadd_ps( xv[2].v, yv[2].v, rhov[2].v );
+			rhov[3].v = _mm256_fmadd_ps( xv[3].v, yv[3].v, rhov[3].v );
+
+			rhov[4].v = _mm256_fmadd_ps( xv[0].v, yv[4].v, rhov[4].v );
+			rhov[5].v = _mm256_fmadd_ps( xv[1].v, yv[5].v, rhov[5].v );
+			rhov[6].v = _mm256_fmadd_ps( xv[2].v, yv[6].v, rhov[6].v );
+			rhov[7].v = _mm256_fmadd_ps( xv[3].v, yv[7].v, rhov[7].v );
+
+			x0 += ( n_elem_per_reg * n_iter_unroll );
+			y0 += ( n_elem_per_reg * n_iter_unroll );
+		}
+	}
+	else
+	{
+		for ( i = 0; i < n_viter; ++i )
+		{
+			// Load the x and y input vector elements.
+			xv[0].v = _mm256_loadu_ps((float *) (x0 + 0*n_elem_per_reg) );
+			yv[0].v = _mm256_loadu_ps((float *) (y0 + 0*n_elem_per_reg) );
+
+			xv[1].v = _mm256_loadu_ps((float *) (x0 + 1*n_elem_per_reg) );
+			yv[1].v = _mm256_loadu_ps((float *) (y0 + 1*n_elem_per_reg) );
+
+			xv[2].v = _mm256_loadu_ps((float *) (x0 + 2*n_elem_per_reg) );
+			yv[2].v = _mm256_loadu_ps((float *) (y0 + 2*n_elem_per_reg) );
+
+			xv[3].v = _mm256_loadu_ps((float *) (x0 + 3*n_elem_per_reg) );
+			yv[3].v = _mm256_loadu_ps((float *) (y0 + 3*n_elem_per_reg) );
+
+			//yi0 yi0 yi1 yi1
+			//xr0 xi0 xr1 xi1
+			//---------------
+			//yi0*xr0 yi0*xi0 yi1*xr1 yi1*xi1
+			yv[4].v = _mm256_permute_ps( yv[0].v, 0xf5 );
+			yv[5].v = _mm256_permute_ps( yv[1].v, 0xf5 );
+			yv[6].v = _mm256_permute_ps( yv[2].v, 0xf5 );
+			yv[7].v = _mm256_permute_ps( yv[3].v, 0xf5 );
+
+			//yr0 yr0 yr1 yr1
+			//xr0 xi0 xr1 xi1
+			//----------------
+			//yr0*xr0 yr0*xi0 yr1*xr1 yr1*xi1
+			yv[0].v = _mm256_permute_ps( yv[0].v, 0xa0 );
+			yv[1].v = _mm256_permute_ps( yv[1].v, 0xa0 );
+			yv[2].v = _mm256_permute_ps( yv[2].v, 0xa0 );
+			yv[3].v = _mm256_permute_ps( yv[3].v, 0xa0 );
+
+			// Compute the element-wise product of the x and y vectors,
+			// storing in the corresponding rho vectors.
+			rhov[0].v = _mm256_fmadd_ps( xv[0].v, yv[0].v, rhov[0].v );
+			rhov[1].v = _mm256_fmadd_ps( xv[1].v, yv[1].v, rhov[1].v );
+			rhov[2].v = _mm256_fmadd_ps( xv[2].v, yv[2].v, rhov[2].v );
+			rhov[3].v = _mm256_fmadd_ps( xv[3].v, yv[3].v, rhov[3].v );
+
+			rhov[4].v = _mm256_fmadd_ps( xv[0].v, yv[4].v, rhov[4].v );
+			rhov[5].v = _mm256_fmadd_ps( xv[1].v, yv[5].v, rhov[5].v );
+			rhov[6].v = _mm256_fmadd_ps( xv[2].v, yv[6].v, rhov[6].v );
+			rhov[7].v = _mm256_fmadd_ps( xv[3].v, yv[7].v, rhov[7].v );
+
+			x0 += ( n_elem_per_reg * n_iter_unroll );
+			y0 += ( n_elem_per_reg * n_iter_unroll );
+		}
+	}
+
+	//yr0*xr0 yr0*xi0 yr1*xr1 yr1*xi1
+	//   -      +        -      +
+	//yi0*xi0 yi0*xr0 yi1*xi1 yi1*xr1
+	rhov[4].v = _mm256_permute_ps(rhov[4].v, 0xb1);
+	rhov[5].v = _mm256_permute_ps(rhov[5].v, 0xb1);
+	rhov[6].v = _mm256_permute_ps(rhov[6].v, 0xb1);
+	rhov[7].v = _mm256_permute_ps(rhov[7].v, 0xb1);
+
+	rhov[0].v = _mm256_addsub_ps(rhov[0].v, rhov[4].v);
+	rhov[1].v = _mm256_addsub_ps(rhov[1].v, rhov[5].v);
+	rhov[2].v = _mm256_addsub_ps(rhov[2].v, rhov[6].v);
+	rhov[3].v = _mm256_addsub_ps(rhov[3].v, rhov[7].v);
+
+	// Accumulate the unrolled rho vectors into a single vector.
+	rhov[0].v = _mm256_add_ps(rhov[1].v,rhov[0].v);
+	rhov[0].v = _mm256_add_ps(rhov[2].v,rhov[0].v);
+	rhov[0].v = _mm256_add_ps(rhov[3].v,rhov[0].v);
+
+	v4sf_t inter1, inter2;
+
+	inter1.v = _mm256_extractf128_ps(rhov[0].v,1);
+	inter2.v = _mm256_extractf128_ps(rhov[0].v,0);
+
+	inter1.v = _mm_add_ps(inter1.v, inter2.v);
+
+	// Accumulate the final rho vector into a single scalar result.
+	rho0.real = inter1.f[0] + inter1.f[2];
+	rho0.imag = inter1.f[1] + inter1.f[3];
+
+	/* Negate sign of imaginary value when vector y is conjugate */
+	if ( bli_is_conj(conjx_use))
+            rho0.imag = -rho0.imag;
+
+	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
+	// This avoids a performance penalty caused by false dependencies when
+	// transitioning from AVX to SSE instructions (which may occur as soon
+	// as the n_left cleanup loop below if BLIS is compiled with
+	// -mfpmath=sse).
+	_mm256_zeroupper();
+
+	// If there are leftover iterations, perform them with scalar code.
+	if ( bli_is_conj( conjx_use ) )
+	{
+		for ( i = 0; i < n_left; ++i )
+		{
+			PASTEMAC(c,dotjs)( *x0, *y0, rho0 );
+			x0 += incx;
+			y0 += incy;
+		}
+	}
+	else
+	{
+		for ( i = 0; i < n_left; ++i )
+		{
+			PASTEMAC(c,dots)( *x0, *y0, rho0 );
+			x0 += incx;
+			y0 += incy;
+		}
+	}
+
+	if ( bli_is_conj( conjy ) )
+		PASTEMAC(c,conjs)( rho0 );
+
+	// Accumulate the final result into the output variable.
+	PASTEMAC(c,axpys)( *alpha, rho0, *rho );
+}

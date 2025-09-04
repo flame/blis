@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -65,7 +66,8 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 
-INSERT_GENTPROT_BASIC( amaxv )
+INSERT_GENTPROT_BASIC0( amaxv )
+INSERT_GENTPROT_BASIC0( aminv )
 
 
 #undef  GENTPROT

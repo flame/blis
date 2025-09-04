@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -82,6 +82,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
        const cntx_t*    cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
 	uint64_t m_left = m0 % 6;
 
 	// First check whether this is a edge case in the n dimension. If so,
@@ -314,7 +315,6 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
 	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
 #endif
-	//lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 	lea(mem(rbx, r11, 4), r10)         // r10 = rbx + 4*cs_b
 
 
@@ -734,12 +734,15 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5",
+	  "ymm6", "ymm7", "ymm8", "ymm9", "ymm10", "ymm11",
+	  "ymm12", "ymm13", "ymm14", "ymm15",
 	  "memory"
 	)
 
@@ -790,6 +793,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 			#endif
 		}
 	}
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
 
 void bli_dgemmsup_rd_haswell_asm_3x8n
@@ -808,6 +812,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
        const cntx_t*    cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -906,7 +911,6 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
 	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
 #endif
-	//lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 	lea(mem(rbx, r11, 4), r10)         // r10 = rbx + 4*cs_b
 
 
@@ -1162,7 +1166,6 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 
 
 
-
 	label(.DPOSTACCUM)
 
 	                                   // ymm4  ymm7  ymm10 ymm13
@@ -1320,12 +1323,15 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5",
+	  "ymm6", "ymm7", "ymm8", "ymm9", "ymm10", "ymm11",
+	  "ymm12", "ymm13", "ymm14", "ymm15",
 	  "memory"
 	)
 
@@ -1377,6 +1383,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 			#endif
 		}
 	}
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
 
 void bli_dgemmsup_rd_haswell_asm_2x8n
@@ -1395,6 +1402,7 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
        const cntx_t*    cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -1488,7 +1496,6 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 	prefetch(0, mem(rcx, 3*8))         // prefetch c + 0*rs_c
 	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
 #endif
-	//lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 	lea(mem(rbx, r11, 4), r10)         // r10 = rbx + 4*cs_b
 
 
@@ -1851,12 +1858,14 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5",
+	  "ymm7", "ymm8", "ymm10", "ymm11", "ymm13", "ymm14",
 	  "memory"
 	)
 
@@ -1907,6 +1916,7 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 			#endif
 		}
 	}
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
 
 void bli_dgemmsup_rd_haswell_asm_1x8n
@@ -1925,6 +1935,7 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
        const cntx_t*    cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -2013,7 +2024,6 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
 	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
 #endif
-	//lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 	lea(mem(rbx, r11, 4), r10)         // r10 = rbx + 4*cs_b
 
 
@@ -2325,12 +2335,13 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm2", "ymm3", "ymm4", "ymm7", "ymm10", "ymm13",
 	  "memory"
 	)
 
@@ -2381,5 +2392,6 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 			#endif
 		}
 	}
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
 

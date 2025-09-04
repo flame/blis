@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,6 +34,8 @@
 */
 
 #include "blis.h"
+//#define PRINT_SMALL_TRSM_INFO
+
 
 void bli_trsm_front
      (
@@ -45,6 +47,8 @@ void bli_trsm_front
              rntm_t* rntm
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3);
+//	AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_3, side, alpha, a, b);
 	bli_init_once();
 
 	obj_t   a_local;
@@ -53,7 +57,7 @@ void bli_trsm_front
 
 #if 0
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-	gint_t status = bli_trsm_small( side, alpha, a, b, cntx, cntl );
+	gint_t status = bli_trsm_small_zen( side, alpha, a, b, cntx, cntl );
 	if ( status == BLIS_SUCCESS ) return;
 #endif
 #endif
@@ -62,6 +66,7 @@ void bli_trsm_front
 	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
 	{
 		bli_scalm( alpha, b );
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
 		return;
 	}
 
@@ -128,6 +133,18 @@ void bli_trsm_front
 	// Set the pack schemas within the objects.
 	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
 
+	// Set each alias as the root object.
+	// NOTE: We MUST wait until we are done potentially swapping the objects
+	// before setting the root fields!
+	bli_obj_set_as_root( &a_local );
+	bli_obj_set_as_root( &b_local );
+	bli_obj_set_as_root( &c_local );
+
+#ifdef AOCL_DYNAMIC
+	// If dynamic-threading is enabled, calculate optimum number
+	//  of threads and update in rntm
+	bli_nthreads_optimum(a, b, b, BLIS_TRSM, rntm );
+#endif
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop, and then make any
 	// additional modifications necessary for the current operation.
@@ -154,5 +171,7 @@ void bli_trsm_front
 	  cntx,
 	  rntm
 	);
+
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
 }
 

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -387,7 +387,6 @@ void bli_sgemmsup_rv_haswell_asm_6x2
 
 
 	label(.SROWSTORED)
-
 
 	vmovsd(mem(rcx), xmm0)
 	vfmadd231ps(xmm0, xmm3, xmm4)
@@ -853,7 +852,6 @@ void bli_sgemmsup_rv_haswell_asm_5x2
 
 	label(.SROWSTORED)
 
-
 	vmovsd(mem(rcx), xmm0)
 	vfmadd231ps(xmm0, xmm3, xmm4)
 	vmovsd(xmm4, mem(rcx, 0*32))
@@ -1298,7 +1296,6 @@ void bli_sgemmsup_rv_haswell_asm_4x2
 
 	label(.SROWSTORED)
 
-
 	vmovsd(mem(rcx), xmm0)
 	vfmadd231ps(xmm0, xmm3, xmm4)
 	vmovsd(xmm4, mem(rcx, 0*32))
@@ -1697,7 +1694,6 @@ void bli_sgemmsup_rv_haswell_asm_3x2
 
 	label(.SROWSTORED)
 
-
 	vmovsd(mem(rcx), xmm0)
 	vfmadd231ps(xmm0, xmm3, xmm4)
 	vmovsd(xmm4, mem(rcx, 0*32))
@@ -2083,7 +2079,6 @@ void bli_sgemmsup_rv_haswell_asm_2x2
 
 	label(.SROWSTORED)
 
-
 	vmovsd(mem(rcx), xmm0)
 	vfmadd231ps(xmm0, xmm3, xmm4)
 	vmovsd(xmm4, mem(rcx, 0*32))
@@ -2422,7 +2417,6 @@ void bli_sgemmsup_rv_haswell_asm_1x2
 
 
 	label(.SROWSTORED)
-
 
 	vmovsd(mem(rcx), xmm0)
 	vfmadd231ps(xmm0, xmm3, xmm4)

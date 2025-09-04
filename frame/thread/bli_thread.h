@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -52,9 +52,18 @@ typedef void (*thread_func_t)( thrcomm_t* gl_comm, dim_t tid, const void* params
 #include "bli_thread_hpx.h"
 #include "bli_thread_single.h"
 
+// Include the pack full thread decorator and related definitions and prototypes
+// for the pack code path.
+#include "bli_pack_full_decor.h"
+// Include the level-3 thread decorator and related definitions and prototypes
+// for the compute code path.
+#include "bli_l3_compute_decor.h"
+
 // Initialization-related prototypes.
 void bli_thread_init( void );
+void bli_thread_init_tl( void );
 void bli_thread_finalize( void );
+void bli_thread_finalize_tl( void );
 
 // -----------------------------------------------------------------------------
 
@@ -89,6 +98,7 @@ void bli_thread_partition_2x2
        dim_t* restrict nt1,
        dim_t* restrict nt2
      );
+
 void bli_thread_partition_2x2_slow
      (
        dim_t           n_thread,
@@ -106,6 +116,26 @@ void bli_thread_partition_2x2_fast
        dim_t* restrict nt2
      );
 
+void bli_thread_vector_partition
+     (
+       dim_t  n_elem,
+       dim_t  t_count,
+       dim_t* start,
+       dim_t* compute_len,
+       dim_t  thread_id
+     );
+
+void bli_normfv_thread_partition
+	 (
+		dim_t 	n_elem,
+		dim_t 	t_count,
+		dim_t* 	start,
+		dim_t* 	compute_len,
+		dim_t  	block_size,
+		dim_t 	incx,
+		dim_t 	thread_id
+	 );
+
 // -----------------------------------------------------------------------------
 
 dim_t bli_gcd( dim_t x, dim_t y );
@@ -114,14 +144,102 @@ dim_t bli_ipow( dim_t base, dim_t power );
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS dim_t   bli_thread_get_jc_nt( void );
-BLIS_EXPORT_BLIS dim_t   bli_thread_get_pc_nt( void );
-BLIS_EXPORT_BLIS dim_t   bli_thread_get_ic_nt( void );
-BLIS_EXPORT_BLIS dim_t   bli_thread_get_jr_nt( void );
-BLIS_EXPORT_BLIS dim_t   bli_thread_get_ir_nt( void );
-BLIS_EXPORT_BLIS dim_t   bli_thread_get_num_threads( void );
-BLIS_EXPORT_BLIS timpl_t bli_thread_get_thread_impl( void );
-BLIS_EXPORT_BLIS const char* bli_thread_get_thread_impl_str( timpl_t ti );
+BLIS_EXPORT_BLIS dim_t bli_thread_get_jc_nt( void );
+BLIS_EXPORT_BLIS dim_t bli_thread_get_pc_nt( void );
+BLIS_EXPORT_BLIS dim_t bli_thread_get_ic_nt( void );
+BLIS_EXPORT_BLIS dim_t bli_thread_get_jr_nt( void );
+BLIS_EXPORT_BLIS dim_t bli_thread_get_ir_nt( void );
+BLIS_EXPORT_BLIS dim_t bli_thread_get_num_threads( void );
+
+BLIS_EXPORT_BLIS bool bli_thread_get_is_parallel( void ); 
+
+BLIS_EXPORT_BLIS void  bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir );
+BLIS_EXPORT_BLIS void  bli_thread_set_num_threads( dim_t value );
+
+BLIS_EXPORT_BLIS void  bli_thread_init_rntm_from_env( rntm_t* rntm );
+
+BLIS_EXPORT_BLIS void  bli_thread_init_rntm_from_global_rntm( rntm_t* rntm );
+
+BLIS_EXPORT_BLIS void  bli_thread_update_rntm_from_env( rntm_t* rntm );
+
+BLIS_EXPORT_BLIS void bli_thread_reset();
+
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE void bli_thread_range_jrir_rr
+     (
+       thrinfo_t* thread,
+       dim_t      n,
+       dim_t      bf,
+       bool       handle_edge_low,
+       dim_t*     start,
+       dim_t*     end,
+       dim_t*     inc
+     )
+{
+	// Use interleaved partitioning of jr/ir loops.
+	*start = bli_thread_work_id( thread );
+	*inc   = bli_thread_n_way( thread );
+	*end   = n;
+}
+
+BLIS_INLINE void bli_thread_range_jrir_sl
+     (
+       thrinfo_t* thread,
+       dim_t      n,
+       dim_t      bf,
+       bool       handle_edge_low,
+       dim_t*     start,
+       dim_t*     end,
+       dim_t*     inc
+     )
+{
+	// Use contiguous slab partitioning of jr/ir loops.
+	bli_thread_range_sub( thread, n, bf, handle_edge_low, start, end );
+	*inc = 1;
+}
+
+BLIS_INLINE void bli_thread_range_jrir
+     (
+       thrinfo_t* thread,
+       dim_t      n,
+       dim_t      bf,
+       bool       handle_edge_low,
+       dim_t*     start,
+       dim_t*     end,
+       dim_t*     inc
+     )
+{
+	// Define a general-purpose version of bli_thread_range_jrir() whose
+	// definition depends on whether slab or round-robin partitioning was
+	// requested at configure-time.
+#ifdef BLIS_ENABLE_JRIR_SLAB
+	bli_thread_range_jrir_sl( thread, n, bf, handle_edge_low, start, end, inc );
+#else
+	bli_thread_range_jrir_rr( thread, n, bf, handle_edge_low, start, end, inc );
+#endif
+}
+
+#if 0
+BLIS_INLINE void bli_thread_range_weighted_jrir
+     (
+       thrinfo_t* thread,
+       doff_t     diagoff,
+       uplo_t     uplo,
+       dim_t      m,
+       dim_t      n,
+       dim_t      bf,
+       bool       handle_edge_low,
+       dim_t*     start,
+       dim_t*     end,
+       dim_t*     inc
+     )
+{
+#ifdef BLIS_ENABLE_JRIR_SLAB
+
+	// Use contiguous slab partitioning for jr/ir loops.
+	bli_thread_range_weighted_sub( thread, diagoff, uplo, m, n, bf,
+	                               handle_edge_low, start, end );
 
 BLIS_EXPORT_BLIS void    bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir );
 BLIS_EXPORT_BLIS void    bli_thread_set_num_threads( dim_t value );

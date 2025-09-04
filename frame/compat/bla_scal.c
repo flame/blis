@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -39,8 +40,57 @@
 // Define BLAS-to-BLIS interfaces.
 //
 #undef  GENTFUNCSCAL
-#define GENTFUNCSCAL( ftype_x, ftype_a, chx, cha, blasname, blisname ) \
+#define GENTFUNCSCAL( ftype_x, ftype_a, chx, cha, chau, blasname, blisname ) \
 \
+void PASTEF772S(chx,cha,blasname) \
+     ( \
+       const f77_int* n, \
+       const ftype_a* alpha, \
+       ftype_x* x, const f77_int* incx  \
+     ) \
+{ \
+	/* Initialize BLIS. */ \
+	bli_init_auto(); \
+\
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+	AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), (void *) alpha, *n, *incx ); \
+\
+	dim_t n0 = (dim_t)(*n); \
+	ftype_x *x0 = x; \
+	inc_t incx0 = (inc_t)(*incx); \
+\
+	if ((n0 <= 0) || (alpha == NULL) || (incx0 <= 0) || PASTEMAC(chau, eq1)(*alpha)) \
+	{ \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
+		/* Finalize BLIS. */ \
+		bli_finalize_auto(); \
+		return ; \
+	} \
+\
+	/* NOTE: We do not natively implement BLAS's csscal/zdscal in BLIS.
+	   that is, we just always sub-optimally implement those cases
+	   by casting alpha to ctype_x (potentially the complex domain) and
+	   using the homogeneous datatype instance according to that type. */ \
+	ftype_x  alpha_cast; \
+	PASTEMAC2(cha,chx,copys)( *alpha, alpha_cast ); \
+\
+	/* Call BLIS interface. */ \
+	/* Pass size as negative to stipulate don't use SETV when alpha=0 */ \
+	PASTEMAC2(chx,blisname,BLIS_TAPI_EX_SUF) \
+	( \
+	  BLIS_NO_CONJUGATE, \
+	  -n0, \
+	  &alpha_cast, \
+	  x0, incx0, \
+	  NULL, \
+	  NULL  \
+	); \
+\
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+	/* Finalize BLIS. */ \
+	bli_finalize_auto(); \
+}\
+IF_BLIS_ENABLE_BLAS(\
 void PASTEF772(chx,cha,blasname) \
      ( \
        const f77_int* n, \
@@ -48,43 +98,8 @@ void PASTEF772(chx,cha,blasname) \
        ftype_x* x, const f77_int* incx  \
      ) \
 { \
-	dim_t    n0; \
-	ftype_x* x0; \
-	inc_t    incx0; \
-	ftype_x  alpha_cast; \
-\
-	/* Initialize BLIS. */ \
-	bli_init_auto(); \
-\
-	/* Convert/typecast negative values of n to zero. */ \
-	bli_convert_blas_dim1( *n, n0 ); \
-\
-	/* If the input increments are negative, adjust the pointers so we can
-	   use positive increments instead. */ \
-	bli_convert_blas_incv( n0, (ftype_x*)x, *incx, x0, incx0 ); \
-\
-	/* NOTE: We do not natively implement BLAS's csscal/zdscal in BLIS.
-	   that is, we just always sub-optimally implement those cases
-	   by casting alpha to ctype_x (potentially the complex domain) and
-	   using the homogeneous datatype instance according to that type. */ \
-	PASTEMAC2(cha,chx,copys)( *alpha, alpha_cast ); \
-\
-	/* Call BLIS interface. */ \
-	PASTEMAC2(chx,blisname,BLIS_TAPI_EX_SUF) \
-	( \
-	  BLIS_NO_CONJUGATE, \
-	  n0, \
-	  &alpha_cast, \
-	  x0, incx0, \
-	  NULL, \
-	  NULL  \
-	); \
-\
-	/* Finalize BLIS. */ \
-	bli_finalize_auto(); \
-}
+  PASTEF772S(chx,cha,blasname)( n, alpha, x, incx ); \
+} \
+)
 
-#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNCSCAL_BLAS( scal, scalv )
-#endif
-

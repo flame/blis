@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,6 +35,8 @@
 
 #ifndef BLIS_XPBYS_MXN_H
 #define BLIS_XPBYS_MXN_H
+
+#ifdef BLIS_IS_BUILDING_LIBRARY
 
 // xpbys_mxn
 
@@ -826,5 +829,7 @@ BLIS_INLINE void bli_zxpbys_mxn
 }
 #endif
 
+
+#endif // BLIS_IS_BUILDING_LIBRARY
 
 #endif

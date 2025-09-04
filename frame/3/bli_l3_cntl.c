@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -54,8 +54,9 @@ void bli_l3_cntl_create_if
 	if ( cntl_orig == NULL )
 	{
 		if ( family == BLIS_GEMM ||
-		     family == BLIS_GEMMT ||
-		     family == BLIS_TRMM )
+		     family == BLIS_HERK ||
+		     family == BLIS_TRMM ||
+		     family == BLIS_GEMMT)
 		{
 			*cntl_use = bli_gemm_cntl_create
 			(

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -53,6 +53,15 @@
 
 arch_t bli_cpuid_query_id( void );
 
+model_t bli_cpuid_query_model_id( arch_t id );
+
+uint32_t bli_cpuid_query_fp_datapath( void );
+
+uint32_t bli_cpuid_query_l1d_cache_size( void );
+uint32_t bli_cpuid_query_l1i_cache_size( void );
+uint32_t bli_cpuid_query_l2_cache_size( void );
+uint32_t bli_cpuid_query_l3_cache_size( void );
+
 // Intel
 bool bli_cpuid_is_skx( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_knl( uint32_t family, uint32_t model, uint32_t features );
@@ -61,6 +70,9 @@ bool bli_cpuid_is_sandybridge( uint32_t family, uint32_t model, uint32_t feature
 bool bli_cpuid_is_penryn( uint32_t family, uint32_t model, uint32_t features );
 
 // AMD
+bool bli_cpuid_is_zen5( uint32_t family, uint32_t model, uint32_t features );
+bool bli_cpuid_is_zen4( uint32_t family, uint32_t model, uint32_t features );
+bool bli_cpuid_is_avx512_fallback( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_zen3( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_zen2( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_zen( uint32_t family, uint32_t model, uint32_t features );
@@ -68,6 +80,10 @@ bool bli_cpuid_is_excavator( uint32_t family, uint32_t model, uint32_t features 
 bool bli_cpuid_is_steamroller( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_piledriver( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_bulldozer( uint32_t family, uint32_t model, uint32_t features );
+
+model_t bli_cpuid_get_zen5_cpuid_model( uint32_t family, uint32_t model, uint32_t features );
+model_t bli_cpuid_get_zen4_cpuid_model( uint32_t family, uint32_t model, uint32_t features );
+model_t bli_cpuid_get_zen3_cpuid_model( uint32_t family, uint32_t model, uint32_t features );
 
 // ARM
 bool bli_cpuid_is_thunderx2( uint32_t model, uint32_t part, uint32_t features );
@@ -79,6 +95,10 @@ bool bli_cpuid_is_cortexa15( uint32_t model, uint32_t part, uint32_t features );
 bool bli_cpuid_is_cortexa9( uint32_t model, uint32_t part, uint32_t features );
 
 uint32_t bli_cpuid_query( uint32_t* family, uint32_t* model, uint32_t* features );
+
+void bli_cpuid_check_datapath( uint32_t vendor, uint32_t features );
+
+void bli_cpuid_check_cache( uint32_t vendor );
 
 // -----------------------------------------------------------------------------
 
@@ -135,6 +155,15 @@ BLIS_INLINE bool bli_cpuid_has_features( uint32_t have, uint32_t want )
 void get_cpu_name( char *cpu_name );
 int  vpu_count( void );
 
+bool bli_cpuid_is_avx2fma3_supported(void);
+bool bli_cpuid_is_avx512_supported(void);
+bool bli_cpuid_is_avx512vnni_supported(void);
+bool bli_cpuid_is_avx512bf16_supported(void);
+
+void bli_cpuid_check_avx2fma3_support( uint32_t family, uint32_t model, uint32_t features );
+void bli_cpuid_check_avx512_support( uint32_t family, uint32_t model, uint32_t features );
+void bli_cpuid_check_avx512vnni_support( uint32_t family, uint32_t model, uint32_t features );
+void bli_cpuid_check_avx512bf16_support( uint32_t family, uint32_t model, uint32_t features );
 
 enum
 {
@@ -144,21 +173,41 @@ enum
 };
 enum
 {
-	FEATURE_SSE3     = 0x0001,
-	FEATURE_SSSE3    = 0x0002,
-	FEATURE_SSE41    = 0x0004,
-	FEATURE_SSE42    = 0x0008,
-	FEATURE_AVX      = 0x0010,
-	FEATURE_AVX2     = 0x0020,
-	FEATURE_FMA3     = 0x0040,
-	FEATURE_FMA4     = 0x0080,
-	FEATURE_AVX512F  = 0x0100,
+	FEATURE_SSE3 = 0x0001,
+	FEATURE_SSSE3 = 0x0002,
+	FEATURE_SSE41 = 0x0004,
+	FEATURE_SSE42 = 0x0008,
+	FEATURE_AVX = 0x0010,
+	FEATURE_AVX2 = 0x0020,
+	FEATURE_FMA3 = 0x0040,
+	FEATURE_FMA4 = 0x0080,
+	FEATURE_AVX512F = 0x0100,
 	FEATURE_AVX512DQ = 0x0200,
 	FEATURE_AVX512PF = 0x0400,
 	FEATURE_AVX512ER = 0x0800,
 	FEATURE_AVX512CD = 0x1000,
 	FEATURE_AVX512BW = 0x2000,
-	FEATURE_AVX512VL = 0x4000
+	FEATURE_AVX512VL = 0x4000,
+	FEATURE_AVX512VNNI = 0x8000,
+	FEATURE_AVX512BF16 = 0x10000,
+	FEATURE_AVXVNNI = 0x20000,
+	FEATURE_AVX512VP2INTERSECT = 0x40000,
+	FEATURE_MOVDIRI = 0x80000,
+	FEATURE_MOVDIR64B = 0x100000,
+	FEATURE_DATAPATH_FP128 = 0x200000,
+	FEATURE_DATAPATH_FP256 = 0x400000,
+	FEATURE_DATAPATH_FP512 = 0x800000
+};
+
+// To reduce confusion, include MOVU bit so enum values match those in
+// CPUID_Fn8000001A_EAX id function.
+enum
+{
+	DATAPATH_UNSET = -1,
+	DATAPATH_FP128,
+	DATAPATH_MOVU,
+	DATAPATH_FP256,
+	DATAPATH_FP512
 };
 
 #elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM) || defined(_ARCH_PPC)

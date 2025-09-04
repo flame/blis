@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -70,7 +70,7 @@
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS thrinfo_t* bli_l3_thrinfo_create
+BLIS_EXPORT_BLIS void bli_l3_sup_thrinfo_free
      (
              dim_t       id,
              thrcomm_t*  gl_comm,
@@ -86,7 +86,7 @@ void bli_l3_thrinfo_grow
        const cntl_t*     cntl
      );
 
-thrinfo_t* bli_l3_sup_thrinfo_create
+BLIS_EXPORT_BLIS void bli_l3_sup_thrinfo_create_root
      (
              dim_t      id,
              thrcomm_t* gl_comm,

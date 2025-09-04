@@ -7,6 +7,7 @@
  * Written by Keita Teranishi
  * 4/8/1998
  *
+ * Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
  */
 
 #include "cblas.h"
@@ -17,6 +18,7 @@ void cblas_dgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                  f77_int lda, const double  *B, f77_int ldb,
                  double beta, double  *C, f77_int ldc)
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
    char TA, TB;   
 #ifdef F77_CHAR
    F77_CHAR F77_TA, F77_TB;
@@ -52,7 +54,8 @@ void cblas_dgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
          cblas_xerbla(2, "cblas_dgemm","Illegal TransA setting, %d\n", TransA);
          CBLAS_CallFromC = 0;
          RowMajorStrg = 0;
-         return;
+	 AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Illegal transA setting.");
+	 return;
       }
 
       if(TransB == CblasTrans) TB='T';
@@ -63,6 +66,7 @@ void cblas_dgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
          cblas_xerbla(3, "cblas_dgemm","Illegal TransB setting, %d\n", TransB);
          CBLAS_CallFromC = 0;
          RowMajorStrg = 0;
+	 AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Illegal transB setting.");
          return;
       }
 
@@ -84,6 +88,7 @@ void cblas_dgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
          cblas_xerbla(2, "cblas_dgemm","Illegal TransA setting, %d\n", TransA);
          CBLAS_CallFromC = 0;
          RowMajorStrg = 0;
+	 AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Illegal transA setting.");
          return;
       }
       if(TransB == CblasTrans) TA='T';
@@ -94,6 +99,8 @@ void cblas_dgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
          cblas_xerbla(2, "cblas_dgemm","Illegal TransB setting, %d\n", TransB);
          CBLAS_CallFromC = 0;
          RowMajorStrg = 0;
+	 AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Illegal transB setting.");
+
          return;
       }
       #ifdef F77_CHAR
@@ -104,9 +111,15 @@ void cblas_dgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
       F77_dgemm(F77_TA, F77_TB, &F77_N, &F77_M, &F77_K, &alpha, B,
                   &F77_ldb, A, &F77_lda, &beta, C, &F77_ldc);
    } 
-   else  cblas_xerbla(1, "cblas_dgemm", "Illegal Order setting, %d\n", Order);
-   CBLAS_CallFromC = 0;
-   RowMajorStrg = 0;
+   else
+   {
+        cblas_xerbla(1, "cblas_dgemm", "Illegal Order setting, %d\n", Order);
+        CBLAS_CallFromC = 0;
+        RowMajorStrg = 0;
+        AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Illegal Order setting.");
+        return;
+   }
+   AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
    return;
 }
 #endif

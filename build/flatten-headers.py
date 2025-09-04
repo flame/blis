@@ -1,10 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 #  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
+#  Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -110,7 +111,7 @@ def print_usage():
 
 def canonicalize_ws( s ):
 
-	return re.sub( '\s+', ' ', s ).strip()
+	return re.sub( r'\s+', ' ', s ).strip()
 
 # ---
 
@@ -166,7 +167,7 @@ def list_contains_header( items ):
 	rval = False
 	for item in items:
 
-		is_h = re.search( "\.h", item )
+		is_h = re.search( r"\.h", item )
 
 		if is_h:
 			rval = True
@@ -198,7 +199,7 @@ def get_header_path( filename, header_dirpaths ):
 
 def strip_cstyle_comments( string ):
 
-	return re.sub( "/\*.*?\*/", "", string, flags=re.S )
+	return re.sub( r"/\*.*?\*/", "", string, flags=re.S )
 
 # ------------------------------------------------------------------------------
 
@@ -419,8 +420,14 @@ def main():
 		                  % output_name, verbose_flag )
 		sys.exit()
 
-	# Print usage if we don't have exactly four arguments.
-	if len( args ) != 4:
+	# Print usage if we don't have minimum four arguments.
+	if len( args ) < 4:
+		print_usage()
+		sys.exit()
+	elif "||" in args[:4] or "'(set', 'FAIL_LINE=3&', 'goto', ':ABORT)'" in args[:4]:
+		print('\n==============================================')
+		print(sys.argv)
+		print('==============================================\n')
 		print_usage()
 		sys.exit()
 
@@ -527,7 +534,7 @@ def main():
 	# Precompile the main regular expression used to isolate #include
 	# directives and the headers they reference. This regex object will
 	# get reused over and over again in flatten_header().
-	regex = re.compile( '^[\s]*#include (["<])([\w\.\-/]*)([">])' )
+	regex = re.compile( r'^[\s]*#include (["<])([\w\.\-/]*)([">])' )
 
 	# Recursively substitute headers for occurrences of #include directives.
 	final_string = flatten_header( inputfile, header_dirpaths, nestsp )

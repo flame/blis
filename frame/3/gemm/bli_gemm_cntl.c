@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -60,25 +60,16 @@ cntl_t* bli_gemmbp_cntl_create
 {
 	void_fp macro_kernel_fp;
 
-	// Choose the default macrokernel based on the operation family...
-	if      ( family == BLIS_GEMM )  macro_kernel_fp = bli_gemm_ker_var2;
-	else if ( family == BLIS_GEMMT ) macro_kernel_fp =
-	                                   #ifdef BLIS_ENABLE_JRIR_TLB
-	                                   bli_gemmt_x_ker_var2b;
-	                                   #else // ifdef ( _SLAB || _RR )
-	                                   bli_gemmt_x_ker_var2;
-	                                   #endif
-	else if ( family == BLIS_TRMM )  macro_kernel_fp =
-	                                   #ifdef BLIS_ENABLE_JRIR_TLB
-	                                   bli_trmm_xx_ker_var2b;
-	                                   #else // ifdef ( _SLAB || _RR )
-	                                   bli_trmm_xx_ker_var2;
-	                                   #endif
-	else /* should never execute */  macro_kernel_fp = NULL;
+	// Use the function pointers to the macrokernels that use slab
+	// assignment of micropanels to threads in the jr and ir loops.
+	if      ( family == BLIS_GEMM ) macro_kernel_fp = bli_gemm_ker_var2;
+	else if ( family == BLIS_HERK ) macro_kernel_fp = bli_herk_x_ker_var2;
+	else if ( family == BLIS_TRMM ) macro_kernel_fp = bli_trmm_xx_ker_var2;
+	else if ( family == BLIS_GEMMT ) macro_kernel_fp = bli_gemmt_ker_var2;
+	else /* should never execute */ macro_kernel_fp = NULL;
 
-	// ...unless a non-NULL kernel function pointer is passed in, in which
-	// case we use that instead.
-	if ( ker ) macro_kernel_fp = ker;
+	packa_fp = bli_packm_blk_var1;
+	packb_fp = bli_packm_blk_var1;
 
 	// Create two nodes for the macro-kernel.
 	cntl_t* gemm_cntl_bu_ke = bli_gemm_cntl_create_node
@@ -102,8 +93,10 @@ cntl_t* bli_gemmbp_cntl_create
 	// Create a node for packing matrix A.
 	cntl_t* gemm_cntl_packa = bli_packm_cntl_create_node
 	(
-	  pool,
-	  bli_l3_packa, // pack the left-hand operand
+	  rntm,
+	  BLIS_GEMM,
+	  bli_gemm_packa,  // pack the left-hand operand
+	  packa_fp,
 	  BLIS_MR,
 	  BLIS_KR,
 	  FALSE,        // do NOT invert diagonal
@@ -127,8 +120,11 @@ cntl_t* bli_gemmbp_cntl_create
 	// Create a node for packing matrix B.
 	cntl_t* gemm_cntl_packb = bli_packm_cntl_create_node
 	(
-	  pool,
-	  bli_l3_packb, // pack the right-hand operand
+	  rntm,
+	  BLIS_GEMM,
+	  bli_gemm_packb,  // pack the right-hand operand
+	  packb_fp,
+	  BLIS_KR,
 	  BLIS_NR,
 	  BLIS_KR,
 	  FALSE,        // do NOT invert diagonal
@@ -161,6 +157,105 @@ cntl_t* bli_gemmbp_cntl_create
 
 	return gemm_cntl_vl_mm;
 }
+
+// -----------------------------------------------------------------------------
+
+// This control tree creation function is disabled because it is no longer used.
+// (It was originally created in the run up to publishing the 1m journal article,
+// but was disabled to reduce complexity.)
+#if 0
+cntl_t* bli_gemmpb_cntl_create
+     (
+       opid_t family
+     )
+{
+	void_fp macro_kernel_p = bli_gemm_ker_var1;
+
+	// Change the macro-kernel if the operation family is herk or trmm.
+	//if      ( family == BLIS_HERK ) macro_kernel_p = bli_herk_x_ker_var2;
+	//else if ( family == BLIS_TRMM ) macro_kernel_p = bli_trmm_xx_ker_var2;
+
+	// Create two nodes for the macro-kernel.
+	cntl_t* gemm_cntl_ub_ke = bli_gemm_cntl_create_node
+	(
+	  family,  // the operation family
+	  BLIS_MR, // needed for bli_thrinfo_rgrow()
+	  NULL,    // variant function pointer not used
+	  NULL     // no sub-node; this is the leaf of the tree.
+	);
+
+	cntl_t* gemm_cntl_pb_ub = bli_gemm_cntl_create_node
+	(
+	  family,
+	  BLIS_NR, // not used by macro-kernel, but needed for bli_thrinfo_rgrow()
+	  macro_kernel_p,
+	  gemm_cntl_ub_ke
+	);
+
+	// Create a node for packing matrix A (which is really the right-hand
+	// operand "B").
+	cntl_t* gemm_cntl_packb = bli_packm_cntl_create_node
+	(
+	  bli_gemm_packb,  // pack the right-hand operand
+	  BLIS_GEMM,
+	  bli_packm_blk_var1,
+	  BLIS_KR,
+	  BLIS_MR,
+	  FALSE,   // do NOT invert diagonal
+	  FALSE,   // reverse iteration if upper?
+	  FALSE,   // reverse iteration if lower?
+	  BLIS_PACKED_COL_PANELS,
+	  BLIS_BUFFER_FOR_A_BLOCK,
+	  gemm_cntl_pb_ub
+	);
+
+	// Create a node for partitioning the n dimension by MC.
+	cntl_t* gemm_cntl_op_pb = bli_gemm_cntl_create_node
+	(
+	  family,
+	  BLIS_MC,
+	  bli_gemm_blk_var2,
+	  gemm_cntl_packb
+	);
+
+	// Create a node for packing matrix B (which is really the left-hand
+	// operand "A").
+	cntl_t* gemm_cntl_packa = bli_packm_cntl_create_node
+	(
+	  bli_gemm_packa,  // pack the left-hand operand
+	  BLIS_GEMM,
+	  bli_packm_blk_var1,
+	  BLIS_NR,
+	  BLIS_KR,
+	  FALSE,   // do NOT invert diagonal
+	  FALSE,   // reverse iteration if upper?
+	  FALSE,   // reverse iteration if lower?
+	  BLIS_PACKED_ROW_PANELS,
+	  BLIS_BUFFER_FOR_B_PANEL,
+	  gemm_cntl_op_pb
+	);
+
+	// Create a node for partitioning the k dimension by KC.
+	cntl_t* gemm_cntl_mm_op = bli_gemm_cntl_create_node
+	(
+	  family,
+	  BLIS_KC,
+	  bli_gemm_blk_var3,
+	  gemm_cntl_packa
+	);
+
+	// Create a node for partitioning the m dimension by NC.
+	cntl_t* gemm_cntl_vl_mm = bli_gemm_cntl_create_node
+	(
+	  family,
+	  BLIS_NC,
+	  bli_gemm_blk_var1,
+	  gemm_cntl_mm_op
+	);
+
+	return gemm_cntl_vl_mm;
+}
+#endif
 
 // -----------------------------------------------------------------------------
 

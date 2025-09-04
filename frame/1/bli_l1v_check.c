@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -47,7 +48,7 @@ void PASTEMAC(opname,_check) \
        const obj_t* y  \
      ) \
 { \
-	bli_l1v_xy_check( x, y ); \
+    bli_l1v_xy_check( x, y ); \
 }
 
 GENFRONT( addv )
@@ -65,10 +66,11 @@ void PASTEMAC(opname,_check) \
        const obj_t* index  \
      ) \
 { \
-	bli_l1v_xi_check( x, index ); \
+    bli_l1v_xi_check( x, index ); \
 }
 
 GENFRONT( amaxv )
+GENFRONT( aminv )
 
 
 #undef  GENFRONT
@@ -82,7 +84,7 @@ void PASTEMAC(opname,_check) \
        const obj_t* y  \
      ) \
 { \
-	bli_l1v_axby_check( alpha, x, beta, y ); \
+    bli_l1v_axby_check( alpha, x, beta, y ); \
 }
 
 GENFRONT( axpbyv )
@@ -98,7 +100,7 @@ void PASTEMAC(opname,_check) \
        const obj_t* y  \
      ) \
 { \
-	bli_l1v_axy_check( alpha, x, y ); \
+    bli_l1v_axy_check( alpha, x, y ); \
 }
 
 GENFRONT( axpyv )
@@ -115,7 +117,7 @@ void PASTEMAC(opname,_check) \
        const obj_t* rho  \
      ) \
 { \
-	bli_l1v_dot_check( &BLIS_ONE, x, y, &BLIS_ONE, rho ); \
+    bli_l1v_dot_check( &BLIS_ONE, x, y, &BLIS_ONE, rho ); \
 }
 
 GENFRONT( dotv )
@@ -133,7 +135,7 @@ void PASTEMAC(opname,_check) \
        const obj_t* rho  \
      ) \
 { \
-	bli_l1v_dot_check( alpha, x, y, beta, rho ); \
+    bli_l1v_dot_check( alpha, x, y, beta, rho ); \
 }
 
 GENFRONT( dotxv )
@@ -147,7 +149,7 @@ void PASTEMAC(opname,_check) \
        const obj_t* x  \
      ) \
 { \
-	bli_l1v_x_check( x ); \
+    bli_l1v_x_check( x ); \
 }
 
 GENFRONT( invertv )
@@ -162,7 +164,7 @@ void PASTEMAC(opname,_check) \
        const obj_t* x  \
      ) \
 { \
-	bli_l1v_ax_check( alpha, x ); \
+    bli_l1v_ax_check( alpha, x ); \
 }
 
 GENFRONT( invscalv )
@@ -180,7 +182,7 @@ void PASTEMAC(opname,_check) \
        const obj_t* y  \
      ) \
 { \
-	bli_l1v_xby_check( x, beta, y ); \
+    bli_l1v_xby_check( x, beta, y ); \
 }
 
 GENFRONT( xpbyv )
@@ -190,94 +192,94 @@ GENFRONT( xpbyv )
 
 void bli_l1v_xy_check
      (
-       const obj_t* x,
-       const obj_t* y
+       obj_t*  x,
+       obj_t*  y
      )
 {
-	err_t e_val;
+    err_t e_val;
 
-	// Check object datatypes.
+    // Check object datatypes.
 
-	e_val = bli_check_floating_object( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_floating_object( x );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_floating_object( y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_floating_object( y );
+    bli_check_error_code( e_val );
 
-	// Check for consistent datatypes.
+    // Check for consistent datatypes.
 
-	e_val = bli_check_consistent_object_datatypes( x, y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_consistent_object_datatypes( x, y );
+    bli_check_error_code( e_val );
 
-	// Check object dimensions.
+    // Check object dimensions.
 
-	e_val = bli_check_vector_object( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_vector_object( x );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_vector_object( y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_vector_object( y );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_equal_vector_lengths( x, y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_equal_vector_lengths( x, y );
+    bli_check_error_code( e_val );
 
-	// Check object buffers (for non-NULLness).
+    // Check object buffers (for non-NULLness).
 
-	e_val = bli_check_object_buffer( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( x );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_object_buffer( y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( y );
+    bli_check_error_code( e_val );
 }
 
 void bli_l1v_axy_check
      (
-       const obj_t* alpha,
-       const obj_t* x,
-       const obj_t* y
+       obj_t*  alpha,
+       obj_t*  x,
+       obj_t*  y
      )
 {
-	err_t e_val;
+    err_t e_val;
 
-	// Check object datatypes.
+    // Check object datatypes.
 
-	e_val = bli_check_noninteger_object( alpha );
-	bli_check_error_code( e_val );
+    e_val = bli_check_noninteger_object( alpha );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_floating_object( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_floating_object( x );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_floating_object( y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_floating_object( y );
+    bli_check_error_code( e_val );
 
-	// Check for consistent datatypes.
+    // Check for consistent datatypes.
 
-	e_val = bli_check_consistent_object_datatypes( x, y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_consistent_object_datatypes( x, y );
+    bli_check_error_code( e_val );
 
-	// Check object dimensions.
+    // Check object dimensions.
 
-	e_val = bli_check_scalar_object( alpha );
-	bli_check_error_code( e_val );
+    e_val = bli_check_scalar_object( alpha );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_vector_object( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_vector_object( x );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_vector_object( y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_vector_object( y );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_equal_vector_lengths( x, y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_equal_vector_lengths( x, y );
+    bli_check_error_code( e_val );
 
-	// Check object buffers (for non-NULLness).
+    // Check object buffers (for non-NULLness).
 
-	e_val = bli_check_object_buffer( alpha );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( alpha );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_object_buffer( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( x );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_object_buffer( y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( y );
+    bli_check_error_code( e_val );
 }
 
 void bli_l1v_xby_check
@@ -287,48 +289,48 @@ void bli_l1v_xby_check
        const obj_t* y
      )
 {
-	err_t e_val;
+    err_t e_val;
 
-	// Check object datatypes.
+    // Check object datatypes.
 
-	e_val = bli_check_noninteger_object( beta );
-	bli_check_error_code( e_val );
+    e_val = bli_check_noninteger_object( beta );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_floating_object( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_floating_object( x );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_floating_object( y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_floating_object( y );
+    bli_check_error_code( e_val );
 
-	// Check for consistent datatypes.
+    // Check for consistent datatypes.
 
-	e_val = bli_check_consistent_object_datatypes( x, y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_consistent_object_datatypes( x, y );
+    bli_check_error_code( e_val );
 
-	// Check object dimensions.
+    // Check object dimensions.
 
-	e_val = bli_check_scalar_object( beta );
-	bli_check_error_code( e_val );
+    e_val = bli_check_scalar_object( beta );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_vector_object( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_vector_object( x );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_vector_object( y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_vector_object( y );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_equal_vector_lengths( x, y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_equal_vector_lengths( x, y );
+    bli_check_error_code( e_val );
 
-	// Check object buffers (for non-NULLness).
+    // Check object buffers (for non-NULLness).
 
-	e_val = bli_check_object_buffer( beta );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( beta );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_object_buffer( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( x );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_object_buffer( y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( y );
+    bli_check_error_code( e_val );
 }
 
 void bli_l1v_axby_check
@@ -339,187 +341,187 @@ void bli_l1v_axby_check
        const obj_t* y
      )
 {
-	err_t e_val;
+    err_t e_val;
 
-	// Check object datatypes.
+    // Check object datatypes.
 
-	e_val = bli_check_noninteger_object( alpha );
-	bli_check_error_code( e_val );
+    e_val = bli_check_noninteger_object( alpha );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_noninteger_object( beta );
-	bli_check_error_code( e_val );
+    e_val = bli_check_noninteger_object( beta );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_floating_object( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_floating_object( x );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_floating_object( y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_floating_object( y );
+    bli_check_error_code( e_val );
 
-	// Check for consistent datatypes.
+    // Check for consistent datatypes.
 
-	e_val = bli_check_consistent_object_datatypes( x, y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_consistent_object_datatypes( x, y );
+    bli_check_error_code( e_val );
 
-	// Check object dimensions.
+    // Check object dimensions.
 
-	e_val = bli_check_scalar_object( alpha );
-	bli_check_error_code( e_val );
+    e_val = bli_check_scalar_object( alpha );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_scalar_object( beta );
-	bli_check_error_code( e_val );
+    e_val = bli_check_scalar_object( beta );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_vector_object( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_vector_object( x );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_vector_object( y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_vector_object( y );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_equal_vector_lengths( x, y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_equal_vector_lengths( x, y );
+    bli_check_error_code( e_val );
 
-	// Check object buffers (for non-NULLness).
+    // Check object buffers (for non-NULLness).
 
-	e_val = bli_check_object_buffer( alpha );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( alpha );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_object_buffer( beta );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( beta );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_object_buffer( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( x );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_object_buffer( y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( y );
+    bli_check_error_code( e_val );
 }
 
 void bli_l1v_dot_check
      (
-       const obj_t* alpha,
-       const obj_t* x,
-       const obj_t* y,
-       const obj_t* beta,
-       const obj_t* rho
+       obj_t*  alpha,
+       obj_t*  x,
+       obj_t*  y,
+       obj_t*  beta,
+       obj_t*  rho
      )
 {
-	err_t e_val;
+    err_t e_val;
 
-	// Check object datatypes.
+    // Check object datatypes.
 
-	e_val = bli_check_noninteger_object( alpha );
-	bli_check_error_code( e_val );
+    e_val = bli_check_noninteger_object( alpha );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_floating_object( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_floating_object( x );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_floating_object( y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_floating_object( y );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_noninteger_object( beta );
-	bli_check_error_code( e_val );
+    e_val = bli_check_noninteger_object( beta );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_noninteger_object( rho );
-	bli_check_error_code( e_val );
+    e_val = bli_check_noninteger_object( rho );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_nonconstant_object( rho );
-	bli_check_error_code( e_val );
+    e_val = bli_check_nonconstant_object( rho );
+    bli_check_error_code( e_val );
 
-	// Check for consistent datatypes.
+    // Check for consistent datatypes.
 
-	e_val = bli_check_consistent_object_datatypes( x, y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_consistent_object_datatypes( x, y );
+    bli_check_error_code( e_val );
 
-	// Check object dimensions.
+    // Check object dimensions.
 
-	e_val = bli_check_scalar_object( alpha );
-	bli_check_error_code( e_val );
+    e_val = bli_check_scalar_object( alpha );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_vector_object( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_vector_object( x );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_vector_object( y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_vector_object( y );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_scalar_object( beta );
-	bli_check_error_code( e_val );
+    e_val = bli_check_scalar_object( beta );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_scalar_object( rho );
-	bli_check_error_code( e_val );
+    e_val = bli_check_scalar_object( rho );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_equal_vector_lengths( x, y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_equal_vector_lengths( x, y );
+    bli_check_error_code( e_val );
 
-	// Check object buffers (for non-NULLness).
+    // Check object buffers (for non-NULLness).
 
-	e_val = bli_check_object_buffer( alpha );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( alpha );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_object_buffer( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( x );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_object_buffer( y );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( y );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_object_buffer( beta );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( beta );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_object_buffer( rho );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( rho );
+    bli_check_error_code( e_val );
 }
 
 void bli_l1v_x_check
      (
-       const obj_t* x
+       obj_t*  x
      )
 {
-	err_t e_val;
+    err_t e_val;
 
-	// Check object datatypes.
+    // Check object datatypes.
 
-	e_val = bli_check_floating_object( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_floating_object( x );
+    bli_check_error_code( e_val );
 
-	// Check object dimensions.
+    // Check object dimensions.
 
-	e_val = bli_check_vector_object( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_vector_object( x );
+    bli_check_error_code( e_val );
 
-	// Check object buffers (for non-NULLness).
+    // Check object buffers (for non-NULLness).
 
-	e_val = bli_check_object_buffer( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( x );
+    bli_check_error_code( e_val );
 }
 
 void bli_l1v_ax_check
      (
-       const obj_t* alpha,
-       const obj_t* x
+       obj_t*  alpha,
+       obj_t*  x
      )
 {
-	err_t e_val;
+    err_t e_val;
 
-	// Check object datatypes.
+    // Check object datatypes.
 
-	e_val = bli_check_noninteger_object( alpha );
-	bli_check_error_code( e_val );
+    e_val = bli_check_noninteger_object( alpha );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_floating_object( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_floating_object( x );
+    bli_check_error_code( e_val );
 
-	// Check object dimensions.
+    // Check object dimensions.
 
-	e_val = bli_check_scalar_object( alpha );
-	bli_check_error_code( e_val );
+    e_val = bli_check_scalar_object( alpha );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_vector_object( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_vector_object( x );
+    bli_check_error_code( e_val );
 
-	// Check object buffers (for non-NULLness).
+    // Check object buffers (for non-NULLness).
 
-	e_val = bli_check_object_buffer( alpha );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( alpha );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_object_buffer( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( x );
+    bli_check_error_code( e_val );
 }
 
 void bli_l1v_xi_check
@@ -528,33 +530,33 @@ void bli_l1v_xi_check
        const obj_t* index
      )
 {
-	err_t e_val;
+    err_t e_val;
 
-	// Check object datatypes.
+    // Check object datatypes.
 
-	e_val = bli_check_floating_object( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_floating_object( x );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_integer_object( index );
-	bli_check_error_code( e_val );
+    e_val = bli_check_integer_object( index );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_nonconstant_object( index );
-	bli_check_error_code( e_val );
+    e_val = bli_check_nonconstant_object( index );
+    bli_check_error_code( e_val );
 
-	// Check object dimensions.
+    // Check object dimensions.
 
-	e_val = bli_check_vector_object( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_vector_object( x );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_scalar_object( index );
-	bli_check_error_code( e_val );
+    e_val = bli_check_scalar_object( index );
+    bli_check_error_code( e_val );
 
-	// Check object buffers (for non-NULLness).
+    // Check object buffers (for non-NULLness).
 
-	e_val = bli_check_object_buffer( x );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( x );
+    bli_check_error_code( e_val );
 
-	e_val = bli_check_object_buffer( index );
-	bli_check_error_code( e_val );
+    e_val = bli_check_object_buffer( index );
+    bli_check_error_code( e_val );
 }
 

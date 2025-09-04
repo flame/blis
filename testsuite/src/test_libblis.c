@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -348,7 +348,7 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 
 	// Attempt to open input file corresponding to input_filename as
 	// read-only/binary.
-	input_stream = fopen( input_filename, "rb" );
+	input_stream = fopen( input_filename, "r" );
 	libblis_test_fopen_check_stream( input_filename, input_stream );
 
 	// Initialize the individual override field to FALSE.
@@ -455,7 +455,7 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 
 	// Attempt to open input file corresponding to input_filename as
 	// read-only/binary.
-	input_stream = fopen( input_filename, "rb" );
+	input_stream = fopen( input_filename, "r" );
 	libblis_test_fopen_check_stream( input_filename, input_stream );
 
 	// Read the number of repeats.
@@ -2099,6 +2099,7 @@ void libblis_test_op_driver
 
 		bli_abort();
 #endif
+		free(chars_for_dt);
 	}
 	else // ( ( !mixed_domain && !mixed_precision ) || op->opid != BLIS_GEMM )
 	{
@@ -2619,7 +2620,7 @@ void fill_string_with_n_spaces( char* str, unsigned int n_spaces )
 {
 	unsigned int i;
 
-	// Initialze to empty string in case n_spaces == 0.
+	// Initialize to empty string in case n_spaces == 0.
 	sprintf( str, "%s", "" );
 
 	for ( i = 0; i < n_spaces; ++i )

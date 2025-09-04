@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -45,7 +45,16 @@
 // Enabled kernel sets (kernel_list)
 @kernel_list_defines@
 
-#define BLIS_VERSION_STRING "@version@"
+
+//This macro is enabled only for ZEN family configurations.
+//This enables us to use different cache-blocking sizes for TRSM instead of common level-3 cache-block sizes.
+#if @enable_aocl_zen@
+#define AOCL_BLIS_ZEN
+#endif
+
+#if @enable_aocl_dynamic@
+#define AOCL_DYNAMIC
+#endif
 
 #if @enable_system@
 #define BLIS_ENABLE_SYSTEM
@@ -146,6 +155,16 @@
 #endif
 #endif
 
+// If the CBLAS compatibility layer was enabled while the BLAS layer
+// was not enabled, we must enable the BLAS layer here. Also undefine
+// BLIS_DISABLE_BLAS to ensure consistency.
+#ifdef BLIS_ENABLE_CBLAS
+#ifndef BLIS_ENABLE_BLAS
+#define BLIS_ENABLE_BLAS
+#endif
+#undef BLIS_DISABLE_BLAS
+#endif // BLIS_ENABLE_CBLAS
+
 #ifndef BLIS_ENABLE_MIXED_DT
 #ifndef BLIS_DISABLE_MIXED_DT
 #if @enable_mixed_dt@
@@ -166,10 +185,34 @@
 #endif
 #endif
 
+#if @enable_mnk1_matrix@
+#define BLIS_ENABLE_MNK1_MATRIX
+#else
+#define BLIS_DISABLE_MNK1_MATRIX
+#endif
+
+#if @enable_tiny_matrix@
+#define BLIS_ENABLE_TINY_MATRIX
+#else
+#define BLIS_DISABLE_TINY_MATRIX
+#endif
+
+#if @enable_small_matrix@
+#define BLIS_ENABLE_SMALL_MATRIX
+#else
+#define BLIS_DISABLE_SMALL_MATRIX
+#endif
+
 #if @enable_sup_handling@
 #define BLIS_ENABLE_SUP_HANDLING
 #else
 #define BLIS_DISABLE_SUP_HANDLING
+#endif
+
+#if @enable_small_matrix_trsm@
+#define BLIS_ENABLE_SMALL_MATRIX_TRSM
+#else
+#define BLIS_DISABLE_SMALL_MATRIX_TRSM
 #endif
 
 #if @enable_memkind@
@@ -208,5 +251,22 @@
 #define BLIS_DISABLE_COMPLEX_RETURN_INTEL
 #endif
 
+#if @disable_blis_arch_type@
+#define DISABLE_BLIS_ARCH_TYPE
+#define DISABLE_BLIS_MODEL_TYPE
+#endif
+
+#define __blis_arch_type_name "@rename_blis_arch_type@"
+#define __blis_model_type_name "@rename_blis_model_type@"
+
+#if @enable_aocl_dtl_trace@
+#define AOCL_DTL_TRACE_ENABLE 1
+#endif
+
+#if @enable_aocl_dtl_log@
+#define AOCL_DTL_LOG_ENABLE 1
+#endif
+
+#define AOCL_DTL_TRACE_LEVEL_NUMBER AOCL_DTL_LEVEL_TRACE_@aocl_dtl_trace_level_number@
 
 #endif

@@ -42,5 +42,5 @@
 #define BLIS_ENABLE_TAPI
 
 // Include the typed API definitions here.
-#include "bli_util_tapi.c"
+#include "bli_util_tapi_code.h"
 

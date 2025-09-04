@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2022, Advanced Micro Devices, Inc.
+#  Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -114,6 +114,7 @@ BASE_OBJ_PATH          := ./$(OBJ_DIR)/$(CONFIG_NAME)
 # of source code.
 BASE_OBJ_CONFIG_PATH   := $(BASE_OBJ_PATH)/$(CONFIG_DIR)
 BASE_OBJ_FRAME_PATH    := $(BASE_OBJ_PATH)/$(FRAME_DIR)
+BASE_OBJ_AOCLDTL_PATH  := $(BASE_OBJ_PATH)/$(AOCLDTL_DIR)
 BASE_OBJ_REFKERN_PATH  := $(BASE_OBJ_PATH)/$(REFKERN_DIR)
 BASE_OBJ_KERNELS_PATH  := $(BASE_OBJ_PATH)/$(KERNELS_DIR)
 BASE_OBJ_ADDON_PATH    := $(BASE_OBJ_PATH)/$(ADDON_DIR)
@@ -191,6 +192,13 @@ gen-obj-paths-from-src = $(foreach ch, $(1), \
 # directories.
 MK_CONFIG_OBJS      := $(call gen-obj-paths-from-src,$(CONFIG_SRC_SUFS),$(MK_CONFIG_SRC),$(CONFIG_PATH),$(BASE_OBJ_CONFIG_PATH))
 
+MK_KERNELS_LPGEMM_SRC   := $(filter  ./kernels/zen/lpgemm/%.c, $(MK_KERNELS_SRC))
+MK_KERNELS_LPGEMM_SRC   += $(filter  ./kernels/zen4/lpgemm/%.c, $(MK_KERNELS_SRC))
+MK_KERNELS_SRC          := $(filter-out $(MK_KERNELS_LPGEMM_SRC),$(MK_KERNELS_SRC))
+ifeq ($(filter aocl_gemm, $(ADDON_LIST)), aocl_gemm)
+  MK_KERNELS_LPGEMM_OBJS  := $(call gen-obj-paths-from-src,$(KERNELS_SRC_SUFS),$(MK_KERNELS_LPGEMM_SRC),$(KERNELS_PATH),$(BASE_OBJ_KERNELS_PATH))
+endif
+
 # Generate object file paths for architecture-specific kernel source code.
 # We target only .c, .s, and .S files. Note that MK_KERNELS_SRC is already
 # limited to the kernel source corresponding to the kernel sets in
@@ -220,13 +228,55 @@ MK_ADDON_KERS_SRC   := $(foreach addon, $(ADDON_LIST), \
                            $(filter $(ADDON_PATH)/$(addon)/$(KERNELS_DIR)/%, \
                                     $(MK_ADDON_SRC)) \
                         )
+
+# Generate non-kernel list for all addons except aocl_gemm
+# We process aocl_gemma addon separately.
 MK_ADDON_OTHER_SRC  := $(foreach addon, $(ADDON_LIST), \
-                           $(filter-out $(ADDON_PATH)/$(addon)/$(KERNELS_DIR)/%, \
-                                        $(MK_ADDON_SRC)) \
+                            $(if $(filter-out aocl_gemm,$(addon)), \
+                                $(filter-out $(ADDON_PATH)/$(addon)/$(KERNELS_DIR)/%, \
+                                             $(MK_ADDON_SRC))) \
                         )
+
+# Pick the .cpp files present in JIT folder only in the following conditions
+# 1. when gcc version is older than 11.2
+# 2. when aocl_gemm addon is enabled.
+ifeq ($(filter aocl_gemm, $(ADDON_LIST)), aocl_gemm)
+    ifeq ($(GCC_OT_11_2_0),no)
+        MK_AOCL_GEMM_OTHER_SRC := $(filter-out $(ADDON_PATH)/$(aocl_gemm)/$(KERNELS_DIR)/%, \
+                                               $(MK_ADDON_SRC))
+        MK_ADDON_OTHER_SRC  := $(filter %.c,$(MK_AOCL_GEMM_OTHER_SRC))
+    else
+        MK_ADDON_OTHER_SRC  := $(filter-out $(ADDON_PATH)/$(aocl_gemm)/$(KERNELS_DIR)/%, \
+                                            $(MK_ADDON_SRC))
+    endif
+endif
+
 MK_ADDON_KERS_OBJS  := $(call gen-obj-paths-from-src,$(ADDON_SRC_SUFS),$(MK_ADDON_KERS_SRC),$(ADDON_PATH),$(BASE_OBJ_ADDON_PATH))
 MK_ADDON_OTHER_OBJS := $(call gen-obj-paths-from-src,$(ADDON_SRC_SUFS),$(MK_ADDON_OTHER_SRC),$(ADDON_PATH),$(BASE_OBJ_ADDON_PATH))
 MK_ADDON_OBJS       := $(MK_ADDON_KERS_OBJS) $(MK_ADDON_OTHER_OBJS)
+# AMD has optimized some of the framework files, these optimizations
+# may not be compatible with other platforms.
+#
+# In order to keep main framework code independent of AMD changes,
+# AMD has duplicated the files and updated them for example
+# frame/compact/bla_gemm.c : generic framework file
+# frame/compact/bla_gemm_amd.c : AMD optimized framework file
+# Based on the archiecture we choose correct files
+
+ifeq ($(MK_IS_ARCH_ZEN),yes)
+# Build is being done for AMD platforms, remove the objects which
+# don't have amd suffix (for which exists AMD specific implementation).
+MK_FRAME_AMD_OBJS  := $(filter $(BASE_OBJ_FRAME_PATH)/%amd.o, $(MK_FRAME_OBJS))
+FILES_TO_REMOVE := $(subst _amd.o,.o, $(MK_FRAME_AMD_OBJS))
+MK_FRAME_OBJS := $(filter-out $(FILES_TO_REMOVE), $(MK_FRAME_OBJS))
+else
+# Build is done for non AMD platforms, remove the amd specific objects
+MK_FRAME_AMD_OBJS  := $(filter $(BASE_OBJ_FRAME_PATH)/%amd.o, $(MK_FRAME_OBJS))
+MK_FRAME_OBJS := $(filter-out $(MK_FRAME_AMD_OBJS), $(MK_FRAME_OBJS))
+endif
+
+# Generate object file paths for all of the debgu and trace logger.
+MK_AOCLDTL_OBJS       := $(call gen-obj-paths-from-src,$(AOCLDTL_SRC_SUFS),$(MK_AOCLDTL_SRC),$(AOCLDTL_PATH),$(BASE_OBJ_AOCLDTL_PATH))
 
 # Generate object file paths for the sandbox source code. If a sandbox was not
 # enabled a configure-time, this variable will we empty.
@@ -259,8 +309,13 @@ MK_BLIS_OBJS        := $(MK_CONFIG_OBJS) \
                        $(MK_KERNELS_OBJS) \
                        $(MK_REFKERN_OBJS) \
                        $(MK_FRAME_OBJS) \
+                       $(MK_AOCLDTL_OBJS) \
                        $(MK_ADDON_OBJS) \
                        $(MK_SANDBOX_OBJS)
+
+ifeq ($(filter aocl_gemm, $(ADDON_LIST)), aocl_gemm)
+  MK_BLIS_OBJS      += $(MK_KERNELS_LPGEMM_OBJS)
+endif
 
 # Optionally filter out the BLAS and CBLAS compatibility layer object files.
 # This is not actually necessary, since each affected file is guarded by C
@@ -271,9 +326,11 @@ BASE_OBJ_CBLAS_PATH := $(BASE_OBJ_FRAME_PATH)/compat/cblas
 ifeq ($(MK_ENABLE_CBLAS),no)
 MK_BLIS_OBJS        := $(filter-out $(BASE_OBJ_CBLAS_PATH)/%.o, $(MK_BLIS_OBJS) )
 endif
-ifeq ($(MK_ENABLE_BLAS),no)
-MK_BLIS_OBJS        := $(filter-out $(BASE_OBJ_BLAS_PATH)/%.o,  $(MK_BLIS_OBJS) )
-endif
+# Include bla_ files so that we get the *_blis_impl interfaces. Actual BLAS
+# interfaces will not be included from these files when MK_ENABLE_BLAS is no.
+##ifeq ($(MK_ENABLE_BLAS),no)
+##MK_BLIS_OBJS        := $(filter-out $(BASE_OBJ_BLAS_PATH)/%.o,  $(MK_BLIS_OBJS) )
+##endif
 
 
 
@@ -291,13 +348,9 @@ ifeq ($(MK_ENABLE_CBLAS),yes)
 HEADERS_TO_INSTALL += $(CBLAS_H_FLAT)
 endif
 
-# If requested, include AMD's C++ template header files in the list of headers
+# Include AMD's C++ template header files in the list of headers
 # to install.
-ifeq ($(INSTALL_HH),yes)
 HEADERS_TO_INSTALL += $(wildcard $(VEND_CPP_PATH)/*.hh)
-endif
-
-
 
 #
 # --- public makefile fragment definitions -------------------------------------
@@ -307,8 +360,6 @@ endif
 FRAGS_TO_INSTALL := $(CONFIG_MK_FILE) \
                     $(COMMON_MK_FILE)
 
-PC_IN_FILE  := blis.pc.in
-PC_OUT_FILE := blis.pc
 
 
 #
@@ -320,6 +371,7 @@ BLASTEST_INPUT_PATH    := $(DIST_PATH)/$(BLASTEST_DIR)/input
 
 # The location of the BLAS test suite object directory.
 BASE_OBJ_BLASTEST_PATH := $(BASE_OBJ_PATH)/$(BLASTEST_DIR)
+BASE_EXE_BLASTEST_PATH := $(BASE_OBJ_BLASTEST_PATH)/$(MK_USE_LIB)
 
 # The locations of the BLAS test suite source code (f2c and drivers).
 BLASTEST_F2C_SRC_PATH  := $(DIST_PATH)/$(BLASTEST_DIR)/f2c
@@ -347,7 +399,7 @@ BLASTEST_DRV_BASES     := $(basename $(notdir $(BLASTEST_DRV_OBJS)))
 
 # The binary executable driver names.
 BLASTEST_DRV_BINS      := $(addsuffix .x,$(BLASTEST_DRV_BASES))
-BLASTEST_DRV_BIN_PATHS := $(addprefix $(BASE_OBJ_BLASTEST_PATH)/,$(BLASTEST_DRV_BINS))
+BLASTEST_DRV_BIN_PATHS := $(addprefix $(BASE_EXE_BLASTEST_PATH)/,$(BLASTEST_DRV_BINS))
 
 # Binary executable driver "run-" names
 BLASTEST_DRV_BINS_R    := $(addprefix run-,$(BLASTEST_DRV_BASES))
@@ -393,6 +445,7 @@ TESTSUITE_SALT_OPS_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_SALT_OPS)
 # directory.
 TESTSUITE_SRC_PATH      := $(DIST_PATH)/$(TESTSUITE_DIR)/src
 BASE_OBJ_TESTSUITE_PATH := $(BASE_OBJ_PATH)/$(TESTSUITE_DIR)
+BASE_EXE_TESTSUITE_PATH := $(BASE_OBJ_PATH)/$(TESTSUITE_DIR)/$(MK_USE_LIB)
 
 # Convert source file paths to object file paths by replacing the base source
 # directories with the base object directories, and also replacing the source
@@ -414,7 +467,7 @@ MK_TESTSUITE_OBJS       := $(sort \
 # unusual environments (e.g. ARM) can run the testsuite through some other
 # binary. See .travis.yml for details on how the variable is employed in
 # practice.
-TESTSUITE_BIN           := test_$(LIBBLIS).x
+TESTSUITE_BIN           := $(BASE_EXE_TESTSUITE_PATH)/test_$(LIBBLIS).x
 TESTSUITE_WRAPPER       ?=
 
 # The location of the script that checks the BLIS testsuite output.
@@ -468,6 +521,8 @@ libs: libblis
 test: checkblis checkblas
 
 check: checkblis-fast checkblas
+
+checkcpp: checkbliscpp
 
 install: libs install-libs install-lib-symlinks install-headers install-share
 
@@ -578,6 +633,18 @@ endif
 endif
 endef
 
+# first argument: a configuration name from the union of config_list and
+# config_name, used to look up the CFLAGS to use during compilation.
+define make-aocldtl-rule
+$(BASE_OBJ_AOCLDTL_PATH)/%.o: $(AOCLDTL_PATH)/%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CC) $(call get-aocldtl-cflags-for,$(1)) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-aocldtl-text-for,$(1))
+	@$(CC) $(call get-aocldtl-cflags-for,$(1)) -c $$< -o $$@
+endif
+endef
+
 # first argument: a kernel set (name) being targeted (e.g. haswell).
 define make-refinit-rule
 $(BASE_OBJ_REFKERN_PATH)/$(1)/bli_cntx_$(1)_ref.o: $(REFKERN_PATH)/bli_cntx_ref.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
@@ -610,6 +677,29 @@ ifeq ($(ENABLE_VERBOSE),yes)
 else
 	@echo "Compiling $$@" $(call get-kernel-text-for,$(2))
 	@$(CC) $(call get-kernel-cflags-for,$(2)) -c $$< -o $$@
+endif
+endef
+
+# first argument: a kernel set (name) being targeted (e.g. haswell).
+# second argument: the configuration whose CFLAGS we should use in compilation.
+# third argument: the kernel file suffix being considered.
+define make-kernels-lpgemm-rule
+$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.$(3) $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+ifeq ($(ENABLE_VERBOSE),yes)
+        # disable AVX-512F instructions from being generated by the compiler for zen/lpgemm folder.
+        ifeq ($(findstring zen/lpgemm, $(1)), zen/lpgemm)
+	     $(CC) $(call get-kernel-lpgemm-cflags-for,$(2)) -mno-avx512f -c $$< -o $$@
+        else
+	     $(CC) $(call get-kernel-lpgemm-cflags-for,$(2)) -c $$< -o $$@
+        endif
+else
+        ifeq ($(findstring zen/lpgemm, $(1)), zen/lpgemm)
+	     @echo "Compiling $$@" $(call get-kernel-lpgemm-text-for,$(2)) -mno-avx512f
+	     @$(CC) $(call get-kernel-lpgemm-cflags-for,$(2)) -mno-avx512f -c $$< -o $$@
+        else
+	     @echo "Compiling $$@" $(call get-kernel-lpgemm-text-for,$(2))
+	     @$(CC) $(call get-kernel-lpgemm-cflags-for,$(2)) -c $$< -o $$@
+        endif
 endif
 endef
 
@@ -697,6 +787,14 @@ $(foreach conf, $(CONFIG_LIST), $(eval $(call make-config-rule,$(conf))))
 # item.)
 $(foreach conf, $(CONFIG_NAME), $(eval $(call make-frame-rule,$(conf))))
 
+# Instantiate the build rule for debug and trace log. Use the CFLAGS for the
+# configuration family, which exists in the directory whose name is equal to
+# CONFIG_NAME. Note that this doesn't need to be in a loop since we expect
+# CONFIG_NAME to only ever contain a single name. (BTW: If CONFIG_NAME refers
+# to a singleton family, then CONFIG_LIST contains CONFIG_NAME as its only
+# item.)
+$(foreach conf, $(CONFIG_NAME), $(eval $(call make-aocldtl-rule,$(conf))))
+
 # Instantiate the build rule for reference kernel initialization and
 # reference kernels for each of the sub-configurations in CONFIG_LIST with
 # the CFLAGS designated for that sub-configuration.
@@ -709,6 +807,10 @@ $(foreach conf, $(CONFIG_LIST), $(eval $(call make-refkern-rule,$(conf))))
 $(foreach suf, $(KERNELS_SRC_SUFS), \
 $(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call get-config-for-kset,$(kset)),$(suf)))))
 
+ifeq ($(filter aocl_gemm, $(ADDON_LIST)), aocl_gemm)
+  $(foreach suf, $(KERNELS_SRC_SUFS), \
+  $(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-lpgemm-rule,$(kset)/lpgemm,$(call get-config-for-kset,$(kset)),$(suf)))))
+endif
 # Instantiate the build rule for C addon files. Use the CFLAGS for the
 # configuration family.
 $(foreach suf, $(ADDON_C99_SUFS), \
@@ -849,7 +951,8 @@ else
 	@$(RANLIB) $@
 endif
 
-$(BASE_OBJ_BLASTEST_PATH)/%.x: $(BASE_OBJ_BLASTEST_PATH)/%.o $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK)
+$(BASE_EXE_BLASTEST_PATH)/%.x: $(BASE_OBJ_BLASTEST_PATH)/%.o $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK)
+	@mkdir -p $(BASE_EXE_BLASTEST_PATH)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(LINKER) $< $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 else
@@ -859,12 +962,12 @@ endif
 
 # A rule to run ?blat1.x driver files.
 define make-run-blat1-rule
-run-$(1): $(BASE_OBJ_BLASTEST_PATH)/$(1).x
+run-$(1): $(BASE_EXE_BLASTEST_PATH)/$(1).x
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(TESTSUITE_WRAPPER) $(BASE_OBJ_BLASTEST_PATH)/$(1).x > out.$(1)
+	$(TESTSUITE_WRAPPER) $(BASE_EXE_BLASTEST_PATH)/$(1).x > out.$(1)
 else
 	@echo "Running $(1).x > 'out.$(1)'"
-	@$(TESTSUITE_WRAPPER) $(BASE_OBJ_BLASTEST_PATH)/$(1).x > out.$(1)
+	@$(TESTSUITE_WRAPPER) $(BASE_EXE_BLASTEST_PATH)/$(1).x > out.$(1)
 endif
 endef
 
@@ -873,12 +976,12 @@ $(foreach name, $(BLASTEST_DRV1_BASES), $(eval $(call make-run-blat1-rule,$(name
 
 # A rule to run ?blat2.x and ?blat3.x driver files.
 define make-run-blat23-rule
-run-$(1): $(BASE_OBJ_BLASTEST_PATH)/$(1).x
+run-$(1): $(BASE_EXE_BLASTEST_PATH)/$(1).x
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(TESTSUITE_WRAPPER) $(BASE_OBJ_BLASTEST_PATH)/$(1).x < $(BLASTEST_INPUT_PATH)/$(1).in
+	$(TESTSUITE_WRAPPER) $(BASE_EXE_BLASTEST_PATH)/$(1).x < $(BLASTEST_INPUT_PATH)/$(1).in
 else
 	@echo "Running $(1).x < '$(BLASTEST_INPUT_PATH)/$(1).in' (output to 'out.$(1)')"
-	@$(TESTSUITE_WRAPPER) $(BASE_OBJ_BLASTEST_PATH)/$(1).x < $(BLASTEST_INPUT_PATH)/$(1).in
+	@$(TESTSUITE_WRAPPER) $(BASE_EXE_BLASTEST_PATH)/$(1).x < $(BLASTEST_INPUT_PATH)/$(1).in
 endif
 endef
 
@@ -921,6 +1024,7 @@ endif
 
 # Testsuite binary rule.
 $(TESTSUITE_BIN): $(MK_TESTSUITE_OBJS) $(LIBBLIS_LINK)
+	@mkdir -p $(BASE_EXE_TESTSUITE_PATH)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(LINKER) $(MK_TESTSUITE_OBJS) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 else
@@ -931,13 +1035,13 @@ endif
 # A rule to run the testsuite using the normal input.* files.
 testsuite-run: testsuite-bin
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
+	$(TESTSUITE_WRAPPER) $(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
 	                   -o $(TESTSUITE_CONF_OPS_PATH) \
 	                    > $(TESTSUITE_OUT_FILE)
 
 else
 	@echo "Running $(TESTSUITE_BIN) with output redirected to '$(TESTSUITE_OUT_FILE)'"
-	@$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
+	@$(TESTSUITE_WRAPPER) $(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
 	                    -o $(TESTSUITE_CONF_OPS_PATH) \
 	                     > $(TESTSUITE_OUT_FILE)
 endif
@@ -986,6 +1090,10 @@ else
 	                    -o $(TESTSUITE_SALT_OPS_PATH) \
 	                     > $(TESTSUITE_OUT_FILE)
 endif
+
+# Check results of BLIS CPP Template tests
+checkbliscpp:
+	$(MAKE) -C $(VEND_TESTCPP_DIR)
 
 # Check the results of the BLIS testsuite.
 checkblis: testsuite-run
@@ -1068,6 +1176,17 @@ else
 	               $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)/
 endif
 
+# BLIS library in pkg-configure blis.pc.in file.
+ifeq ($(THREADING_MODEL),off)
+AOCLLIB            := blis
+PC_IN_FILE         := blis.pc.in
+PC_OUT_FILE        := blis.pc
+else
+AOCLLIB            := blis-mt
+PC_IN_FILE         := blis-mt.pc.in
+PC_OUT_FILE        := blis-mt.pc
+endif
+
 $(PC_SHARE_DIR_INST):  $(PC_IN_FILE)
 	$(MKDIR) $(@)
 ifeq ($(ENABLE_VERBOSE),no)
@@ -1075,6 +1194,7 @@ ifeq ($(ENABLE_VERBOSE),no)
 endif
 	$(shell cat "$(PC_IN_FILE)" \
 	| sed -e "s#@PACKAGE_VERSION@#$(VERSION)#g" \
+	| sed -e "s#@AOCLLIB@#$(AOCLLIB)#g" \
 	| sed -e "s#@prefix@#$(prefix)#g" \
 	| sed -e "s#@exec_prefix@#$(exec_prefix)#g" \
 	| sed -e "s#@libdir@#$(libdir)#g" \
@@ -1173,25 +1293,29 @@ endif # ifeq ($(IS_WIN),no)
 # --- Query current configuration ---
 
 showconfig: check-env
-	@echo "configuration family:       $(CONFIG_NAME)"
-	@echo "sub-configurations:         $(CONFIG_LIST)"
-	@echo "requisite kernels sets:     $(KERNEL_LIST)"
-	@echo "kernel-to-config map:       $(KCONFIG_MAP)"
+	@echo "configuration family:        $(CONFIG_NAME)"
+	@echo "sub-configurations:          $(CONFIG_LIST)"
+	@echo "requisite kernels sets:      $(KERNEL_LIST)"
+	@echo "kernel-to-config map:        $(KCONFIG_MAP)"
 	@echo "-------------------------"
-	@echo "BLIS version string:        $(VERSION)"
-	@echo ".so major version:          $(SO_MAJOR)"
-	@echo ".so minor.build vers:       $(SO_MINORB)"
-	@echo "install libdir:             $(INSTALL_LIBDIR)"
-	@echo "install includedir:         $(INSTALL_INCDIR)"
-	@echo "install sharedir:           $(INSTALL_SHAREDIR)"
-	@echo "debugging status:           $(DEBUG_TYPE)"
-	@echo "enable AddressSanitizer?    $(MK_ENABLE_ASAN)"
-	@echo "enabled threading model(s): $(THREADING_MODEL)"
-	@echo "enable BLAS API?            $(MK_ENABLE_BLAS)"
-	@echo "enable CBLAS API?           $(MK_ENABLE_CBLAS)"
-	@echo "build static library?       $(MK_ENABLE_STATIC)"
-	@echo "build shared library?       $(MK_ENABLE_SHARED)"
-	@echo "ARG_MAX hack enabled?       $(ARG_MAX_HACK)"
+	@echo "BLIS version string:         $(VERSION)"
+	@echo ".so major version:           $(SO_MAJOR)"
+	@echo ".so minor.build vers:        $(SO_MINORB)"
+	@echo "install libdir:              $(INSTALL_LIBDIR)"
+	@echo "install includedir:          $(INSTALL_INCDIR)"
+	@echo "install sharedir:            $(INSTALL_SHAREDIR)"
+	@echo "debugging status:            $(DEBUG_TYPE)"
+	@echo "multithreading status:       $(THREADING_MODEL)"
+	@echo "enable BLAS API?             $(MK_ENABLE_BLAS)"
+	@echo "enable CBLAS API?            $(MK_ENABLE_CBLAS)"
+	@echo "build static library?        $(MK_ENABLE_STATIC)"
+	@echo "build shared library?        $(MK_ENABLE_SHARED)"
+	@echo "ARG_MAX hack enabled?        $(ARG_MAX_HACK)"
+	@echo "complex return scheme:       $(MK_COMPLEX_RETURN_SCHEME)"
+	@echo "enable trsm preinversion:    $(MK_ENABLE_TRSM_PREINVERSION)"
+	@echo "enable AOCL dynamic threads: $(MK_ENABLE_AOCL_DYNAMIC)"
+	@echo "BLAS Integer size(LP/ILP):   $(MK_BLAS_INT_TYPE_SIZE)"
+
 
 
 # --- Clean rules ---
@@ -1201,6 +1325,7 @@ ifeq ($(IS_CONFIGURED),yes)
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(FIND) $(CONFIG_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(FRAME_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+	- $(FIND) $(AOCLDTL_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(REFKERN_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(KERNELS_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 ifneq ($(ADDON_LIST),)
@@ -1214,6 +1339,8 @@ else
 	@- $(FIND) $(CONFIG_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	@echo "Removing makefile fragments from $(FRAME_FRAG_PATH)"
 	@- $(FIND) $(FRAME_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+	@echo "Removing makefile fragments from $(AOCLDTL_FRAG_PATH)"
+	@- $(FIND) $(AOCLDTL_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	@echo "Removing makefile fragments from $(REFKERN_FRAG_PATH)"
 	@- $(FIND) $(REFKERN_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	@echo "Removing makefile fragments from $(KERNELS_FRAG_PATH)"
@@ -1269,7 +1396,7 @@ ifeq ($(IS_CONFIGURED),yes)
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $(BLASTEST_F2C_OBJS) $(BLASTEST_DRV_OBJS)
 	- $(RM_F) $(BLASTEST_F2C_LIB)
-	- $(RM_F) $(BLASTEST_DRV_BIN_PATHS)
+	- $(RM_RF) $(BASE_OBJ_BLASTEST_PATH)/{shared,static}
 	- $(RM_F) $(addprefix out.,$(BLASTEST_DRV_BASES))
 else
 	@echo "Removing object files from $(BASE_OBJ_BLASTEST_PATH)"
@@ -1277,7 +1404,7 @@ else
 	@echo "Removing libf2c.a from $(BASE_OBJ_BLASTEST_PATH)"
 	@- $(RM_F) $(BLASTEST_F2C_LIB)
 	@echo "Removing binaries from $(BASE_OBJ_BLASTEST_PATH)"
-	@- $(RM_F) $(BLASTEST_DRV_BIN_PATHS)
+	@- $(RM_RF) $(BASE_OBJ_BLASTEST_PATH)/{shared,static}
 	@echo "Removing driver output files 'out.*'"
 	@- $(RM_F) $(addprefix out.,$(BLASTEST_DRV_BASES))
 endif # ENABLE_VERBOSE
@@ -1312,13 +1439,13 @@ cleanblistesttop:
 ifeq ($(IS_CONFIGURED),yes)
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $(MK_TESTSUITE_OBJS)
-	- $(RM_F) $(TESTSUITE_BIN)
+	- $(RM_RF) $(BASE_OBJ_TESTSUITE_PATH)/{shared,static}
 	- $(RM_F) $(TESTSUITE_OUT_FILE)
 else
 	@echo "Removing object files from $(BASE_OBJ_TESTSUITE_PATH)"
 	@- $(RM_F) $(MK_TESTSUITE_OBJS)
 	@echo "Removing binary $(TESTSUITE_BIN)"
-	@- $(RM_F) $(TESTSUITE_BIN)
+	@- $(RM_RF) $(BASE_OBJ_TESTSUITE_PATH)/{shared,static}
 	@echo "Removing $(TESTSUITE_OUT_FILE)"
 	@- $(RM_F) $(TESTSUITE_OUT_FILE)
 endif # ENABLE_VERBOSE
@@ -1328,14 +1455,14 @@ cleanblistestdir:
 ifeq ($(IS_CONFIGURED),yes)
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(FIND) $(TESTSUITE_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
-	- $(RM_F) $(TESTSUITE_DIR)/$(TESTSUITE_BIN)
-#	- $(MAKE) -C $(VEND_TESTCPP_DIR) clean
+	- $(RM_RF) $(BASE_OBJ_TESTSUITE_PATH)/{shared,static}
+	- $(MAKE) -C $(VEND_TESTCPP_DIR) clean
 else
 	@echo "Removing object files from $(TESTSUITE_DIR)/$(OBJ_DIR)"
 	@- $(FIND) $(TESTSUITE_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
-	@echo "Removing binary $(TESTSUITE_DIR)/$(TESTSUITE_BIN)"
-	@- $(RM_F) $(TESTSUITE_DIR)/$(TESTSUITE_BIN)
-#	@$(MAKE) -C $(VEND_TESTCPP_DIR) clean
+	@echo "Removing binary $(TESTSUITE_BIN)"
+	@- $(RM_RF) $(BASE_OBJ_TESTSUITE_PATH)/{shared,static}
+	@$(MAKE) -C $(VEND_TESTCPP_DIR) clean
 endif # ENABLE_VERBOSE
 endif # IS_CONFIGURED
 
@@ -1429,4 +1556,3 @@ else
 	@echo "Uninstalling $(@F) from $(@D)/"
 	@- $(RM_F) $@
 endif
-

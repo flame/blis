@@ -1,10 +1,9 @@
 #
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
-#  Copyright (C) 2014, The University of Texas at Austin
 #  Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without

@@ -138,7 +138,7 @@ int computeErrorM(
     for ( i = 0; i < m; i ++ ) {
         for ( j = 0; j < n; j ++ ) {
 	     if ( (fabs (A( i, j )) - fabs( A_ref( i, j ))) > 0.0000001 )  {
-                cout << A(i,j) << A_ref(i,j);
+                cout << A(i,j) << A_ref(i,j)<< "\n";
                 ret = 1;
                 break;
             }

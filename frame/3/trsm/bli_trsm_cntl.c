@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -66,6 +66,7 @@ cntl_t* bli_trsm_l_cntl_create
 	if ( ker ) macro_kernel_p = ker;
 
 	const opid_t family = BLIS_TRSM;
+	opid_t pack_family = BLIS_TRSM;
 
 	//
 	// Create nodes for packing A and the macro-kernel (gemm branch).
@@ -92,8 +93,10 @@ cntl_t* bli_trsm_l_cntl_create
 	// Create a node for packing matrix A.
 	cntl_t* gemm_cntl_packa = bli_packm_cntl_create_node
 	(
-	  pool,
-	  bli_l3_packa, // trsm operation's packm function for A.
+	  rntm,
+	  pack_family,
+	  bli_trsm_packa, // trsm operation's packm function for A.
+	  packa_fp,
 	  BLIS_MR,
 	  BLIS_MR,
 	  FALSE,        // do NOT invert diagonal
@@ -129,8 +132,10 @@ cntl_t* bli_trsm_l_cntl_create
 	// Create a node for packing matrix A.
 	cntl_t* trsm_cntl_packa = bli_packm_cntl_create_node
 	(
-	  pool,
-	  bli_l3_packa, // trsm operation's packm function for A.
+	  rntm,
+	  pack_family,
+	  bli_trsm_packa, // trsm operation's packm function for A.
+	  packa_fp,
 	  BLIS_MR,
 	  BLIS_MR,
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
@@ -166,8 +171,11 @@ cntl_t* bli_trsm_l_cntl_create
 	// Create a node for packing matrix B.
 	cntl_t* trsm_cntl_packb = bli_packm_cntl_create_node
 	(
-	  pool,
-	  bli_l3_packb,
+	  rntm,
+	  pack_family,
+	  bli_trsm_packb,
+	  packb_fp,
+	  BLIS_MR,
 	  BLIS_NR,
 	  BLIS_MR,
 	  FALSE,        // do NOT invert diagonal
@@ -216,6 +224,7 @@ cntl_t* bli_trsm_r_cntl_create
 	if ( ker ) macro_kernel_p = ker;
 
 	const opid_t family = BLIS_TRSM;
+	opid_t pack_family = BLIS_TRSM;
 
 	// Create two nodes for the macro-kernel.
 	cntl_t* trsm_cntl_bu_ke = bli_trsm_cntl_create_node
@@ -239,8 +248,10 @@ cntl_t* bli_trsm_r_cntl_create
 	// Create a node for packing matrix A.
 	cntl_t* trsm_cntl_packa = bli_packm_cntl_create_node
 	(
-	  pool,
-	  bli_l3_packa,
+	  rntm,
+	  pack_family,
+	  bli_trsm_packa,
+	  packa_fp,
 	  BLIS_NR,
 	  BLIS_MR,
 	  FALSE,   // do NOT invert diagonal
@@ -264,8 +275,10 @@ cntl_t* bli_trsm_r_cntl_create
 	// Create a node for packing matrix B.
 	cntl_t* trsm_cntl_packb = bli_packm_cntl_create_node
 	(
-	  pool,
-	  bli_l3_packb,
+	  rntm,
+	  pack_family,
+	  bli_trsm_packb,
+	  packb_fp,
 	  BLIS_MR,
 	  BLIS_MR,
 	  TRUE,    // do NOT invert diagonal

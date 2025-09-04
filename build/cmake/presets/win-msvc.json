@@ -1,0 +1,624 @@
+{
+    "version": 6,
+    "include": [
+        "base.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "win-msvc",
+            "inherits": "base",
+            "hidden": true,
+            "cacheVariables": {
+              "COMPLEX_RETURN": "intel",
+              "ENABLE_NO_UNDERSCORE_API": "ON",
+              "OpenMP_libomp_LIBRARY": "$env{OpenMP_lib_path}/libiomp5md.lib"
+            },
+            "generator": "Visual Studio 17 2022",
+            "condition": {
+              "type": "equals",
+              "lhs": "${hostSystemName}",
+              "rhs": "Windows"
+            },
+            "toolset": "ClangCl"
+          },
+          {
+            "name": "win-msvc-st-lp64-amdzen-static",
+            "inherits": ["win-msvc", "st", "lp64", "amdzen", "static"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-win-msvc-lp64-amdzen"
+            },
+            "hidden": false
+          },
+          {
+            "name": "win-msvc-st-lp64-amdzen-shared",
+            "inherits": ["win-msvc", "st", "lp64", "amdzen", "shared"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-win-msvc-lp64-amdzen"
+            },
+            "hidden": false
+          },
+          {
+            "name": "win-msvc-mt-lp64-amdzen-static", 
+            "inherits": ["win-msvc", "mt", "lp64", "amdzen", "static"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-win-msvc-lp64-amdzen"
+            },
+            "hidden": false
+          },
+          {
+            "name": "win-msvc-mt-lp64-amdzen-shared", 
+            "inherits": ["win-msvc", "mt", "lp64", "amdzen", "shared"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-win-msvc-lp64-amdzen"
+            },
+            "hidden": false
+          },
+          {
+            "name": "win-msvc-st-ilp64-amdzen-static",
+            "inherits": ["win-msvc", "st", "ilp64", "amdzen", "static"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-win-msvc-ilp64-amdzen"
+            },
+            "hidden": false
+          },
+          {
+            "name": "win-msvc-st-ilp64-amdzen-shared",
+            "inherits": ["win-msvc", "st", "ilp64", "amdzen", "shared"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-win-msvc-ilp64-amdzen"
+            },
+            "hidden": false
+          },
+          {
+            "name": "win-msvc-mt-ilp64-amdzen-static", 
+            "inherits": ["win-msvc", "mt", "ilp64", "amdzen", "static"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-win-msvc-ilp64-amdzen"
+            },
+            "hidden": false
+          },
+          {
+            "name": "win-msvc-mt-ilp64-amdzen-shared", 
+            "inherits": ["win-msvc", "mt", "ilp64", "amdzen", "shared"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-win-msvc-ilp64-amdzen"
+            },
+            "hidden": false
+          },
+      
+          {
+            "name": "win-msvc-st-lp64-auto-static",
+            "inherits": ["win-msvc", "st", "lp64", "auto", "static"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-win-msvc-lp64-auto"
+            },
+            "hidden": false
+          },
+          {
+            "name": "win-msvc-st-lp64-auto-shared",
+            "inherits": ["win-msvc", "st", "lp64", "auto", "shared"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-win-msvc-lp64-auto"
+            },
+            "hidden": false
+          },
+          {
+            "name": "win-msvc-mt-lp64-auto-static", 
+            "inherits": ["win-msvc", "mt", "lp64", "auto", "static"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-win-msvc-lp64-auto"
+            },
+            "hidden": false
+          },
+          {
+            "name": "win-msvc-mt-lp64-auto-shared", 
+            "inherits": ["win-msvc", "mt", "lp64", "auto", "shared"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-win-msvc-lp64-auto"
+            },
+            "hidden": false
+          },
+          {
+            "name": "win-msvc-st-ilp64-auto-static",
+            "inherits": ["win-msvc", "st", "ilp64", "auto", "static"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-win-msvc-ilp64-auto"
+            },
+            "hidden": false
+          },
+          {
+            "name": "win-msvc-st-ilp64-auto-shared",
+            "inherits": ["win-msvc", "st", "ilp64", "auto", "shared"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-win-msvc-ilp64-auto"
+            },
+            "hidden": false
+          },
+          {
+            "name": "win-msvc-mt-ilp64-auto-static", 
+            "inherits": ["win-msvc", "mt", "ilp64", "auto", "static"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-win-msvc-ilp64-auto"
+            },
+            "hidden": false
+          },
+          {
+            "name": "win-msvc-mt-ilp64-auto-shared", 
+            "inherits": ["win-msvc", "mt", "ilp64", "auto", "shared"],
+            "cacheVariables": {
+              "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-win-msvc-ilp64-auto"
+            },
+            "hidden": false
+          }
+    ],
+    "buildPresets": [
+        
+    {
+        "name": "win-msvc-st-lp64-amdzen-static",
+        "configurePreset": "win-msvc-st-lp64-amdzen-static",
+        "inherits": "base"
+      },
+      {
+        "name": "win-msvc-st-lp64-amdzen-shared",
+        "configurePreset": "win-msvc-st-lp64-amdzen-shared",
+        "inherits": "base"
+      },
+      {
+        "name": "win-msvc-mt-lp64-amdzen-static",
+        "configurePreset": "win-msvc-mt-lp64-amdzen-static",
+        "inherits": "base"
+      },
+      {
+        "name": "win-msvc-mt-lp64-amdzen-shared",
+        "configurePreset": "win-msvc-mt-lp64-amdzen-shared",
+        "inherits": "base"
+      },
+      {
+        "name": "win-msvc-st-ilp64-amdzen-static",
+        "configurePreset": "win-msvc-st-ilp64-amdzen-static",
+        "inherits": "base"
+      },
+      {
+        "name": "win-msvc-st-ilp64-amdzen-shared",
+        "configurePreset": "win-msvc-st-ilp64-amdzen-shared",
+        "inherits": "base"
+      },
+      {
+        "name": "win-msvc-mt-ilp64-amdzen-static",
+        "configurePreset": "win-msvc-mt-ilp64-amdzen-static",
+        "inherits": "base"
+      },
+      {
+        "name": "win-msvc-mt-ilp64-amdzen-shared",
+        "configurePreset": "win-msvc-mt-ilp64-amdzen-shared",
+        "inherits": "base"
+      },
+      {
+        "name": "win-msvc-st-lp64-auto-static",
+        "configurePreset": "win-msvc-st-lp64-auto-static",
+        "inherits": "base"
+      },
+      {
+        "name": "win-msvc-st-lp64-auto-shared",
+        "configurePreset": "win-msvc-st-lp64-auto-shared",
+        "inherits": "base"
+      },
+      {
+        "name": "win-msvc-mt-lp64-auto-static",
+        "configurePreset": "win-msvc-mt-lp64-auto-static",
+        "inherits": "base"
+      },
+      {
+        "name": "win-msvc-mt-lp64-auto-shared",
+        "configurePreset": "win-msvc-mt-lp64-auto-shared",
+        "inherits": "base"
+      },
+      {
+        "name": "win-msvc-st-ilp64-auto-static",
+        "configurePreset": "win-msvc-st-ilp64-auto-static",
+        "inherits": "base"
+      },
+      {
+        "name": "win-msvc-st-ilp64-auto-shared",
+        "configurePreset": "win-msvc-st-ilp64-auto-shared",
+        "inherits": "base"
+      },
+      {
+        "name": "win-msvc-mt-ilp64-auto-static",
+        "configurePreset": "win-msvc-mt-ilp64-auto-static",
+        "inherits": "base"
+      },
+      {
+        "name": "win-msvc-mt-ilp64-auto-shared",
+        "configurePreset": "win-msvc-mt-ilp64-auto-shared",
+        "inherits": "base"
+      }  ,
+      {
+        "name": "win-msvc-st-lp64-amdzen-static-check",
+        "description": "Check static single-threaded LP64 BLIS with amdzen option on Windows",
+        "configurePreset": "win-msvc-st-lp64-amdzen-static",
+        "targets": ["check", "testsuite/checkblis-md"]
+      },
+      {
+        "name": "win-msvc-st-lp64-amdzen-shared-check",
+        "description": "Check shared single-threaded LP64 BLIS with amdzen option on Windows",
+        "configurePreset": "win-msvc-st-lp64-amdzen-shared",
+        "targets": ["check", "testsuite/checkblis-md"]
+      },
+      {
+        "name": "win-msvc-mt-lp64-amdzen-static-check",
+        "description": "Check multithreaded static LP64 BLIS with amdzen option on Windows",
+        "configurePreset": "win-msvc-mt-lp64-amdzen-static",
+        "targets": ["check", "testsuite/checkblis-md"]
+      },
+      {
+        "name": "win-msvc-mt-lp64-amdzen-shared-check",
+        "description": "Check multithreaded shared LP64 BLIS with amdzen option on Windows",
+        "configurePreset": "win-msvc-mt-lp64-amdzen-shared",
+        "targets": ["check", "testsuite/checkblis-md"]
+      },
+      {
+        "name": "win-msvc-st-ilp64-amdzen-static-check",
+        "description": "Check single-threaded static ILP64 BLIS with amdzen option on Windows",
+        "configurePreset": "win-msvc-st-ilp64-amdzen-static",
+        "targets": ["check", "testsuite/checkblis-md"]
+      },
+      {
+        "name": "win-msvc-st-ilp64-amdzen-shared-check",
+        "description": "Check single-threaded shared ILP64 BLIS with amdzen option on Windows",
+        "configurePreset": "win-msvc-st-ilp64-amdzen-shared",
+        "targets": ["check", "testsuite/checkblis-md"]
+      },
+      {
+        "name": "win-msvc-mt-ilp64-amdzen-static-check",
+        "description": "Check multithreaded static ILP64 BLIS with amdzen option on Windows",
+        "configurePreset": "win-msvc-mt-ilp64-amdzen-static",
+        "targets": ["check", "testsuite/checkblis-md"]
+      },
+      {
+        "name": "win-msvc-mt-ilp64-amdzen-shared-check",
+        "description": "Check multithreaded shared ILP64 BLIS with amdzen option on Windows",
+        "configurePreset": "win-msvc-mt-ilp64-amdzen-shared",
+        "targets": ["check", "testsuite/checkblis-md"]
+      },
+      {
+        "name": "win-msvc-st-lp64-auto-static-check",
+        "description": "Check static single-threaded LP64 BLIS with auto option on Windows",
+        "configurePreset": "win-msvc-st-lp64-auto-static",
+        "targets": ["check", "testsuite/checkblis-md"]
+      },
+      {
+        "name": "win-msvc-st-lp64-auto-shared-check",
+        "description": "Check shared single-threaded LP64 BLIS with auto option on Windows",
+        "configurePreset": "win-msvc-st-lp64-auto-shared",
+        "targets": ["check", "testsuite/checkblis-md"]
+      },
+      {
+        "name": "win-msvc-mt-lp64-auto-static-check",
+        "description": "Check multithreaded static LP64 BLIS with auto option on Windows",
+        "configurePreset": "win-msvc-mt-lp64-auto-static",
+        "targets": ["check", "testsuite/checkblis-md"]
+      },
+      {
+        "name": "win-msvc-mt-lp64-auto-shared-check",
+        "description": "Check multithreaded shared LP64 BLIS with auto option on Windows",
+        "configurePreset": "win-msvc-mt-lp64-auto-shared",
+        "targets": ["check", "testsuite/checkblis-md"]
+      },
+      {
+        "name": "win-msvc-st-ilp64-auto-static-check",
+        "description": "Check single-threaded static ILP64 BLIS with auto option on Windows",
+        "configurePreset": "win-msvc-st-ilp64-auto-static",
+        "targets": ["check", "testsuite/checkblis-md"]
+      },
+      {
+        "name": "win-msvc-st-ilp64-auto-shared-check",
+        "description": "Check single-threaded shared ILP64 BLIS with auto option on Windows",
+        "configurePreset": "win-msvc-st-ilp64-auto-shared",
+        "targets": ["check", "testsuite/checkblis-md"]
+      },
+      {
+        "name": "win-msvc-mt-ilp64-auto-static-check",
+        "description": "Check multithreaded static ILP64 BLIS with auto option on Windows",
+        "configurePreset": "win-msvc-mt-ilp64-auto-static",
+        "targets": ["check", "testsuite/checkblis-md"]
+      },
+      {
+        "name": "win-msvc-mt-ilp64-auto-shared-check",
+        "description": "Check multithreaded shared ILP64 BLIS with auto option on Windows",
+        "configurePreset": "win-msvc-mt-ilp64-auto-shared",
+        "targets": ["check", "testsuite/checkblis-md"]
+      }
+    ],
+    "workflowPresets": [
+        {
+            "name": "win-msvc-st-lp64-amdzen-static",
+            "description": "Build and check single-threaded static BLIS for amdzen configuration on Windows",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "win-msvc-st-lp64-amdzen-static"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-st-lp64-amdzen-static"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-st-lp64-amdzen-static-check"
+              }
+            ]
+          },
+          {
+            "name": "win-msvc-st-lp64-amdzen-shared",
+            "description": "Build and check single-threaded shared BLIS for amdzen configuration on Windows",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "win-msvc-st-lp64-amdzen-shared"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-st-lp64-amdzen-shared"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-st-lp64-amdzen-shared-check"
+              }
+            ]
+          },
+          {
+            "name": "win-msvc-mt-lp64-amdzen-static",
+            "description": "Build and check multithreaded static BLIS for amdzen configuration on Windows",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "win-msvc-mt-lp64-amdzen-static"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-mt-lp64-amdzen-static"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-mt-lp64-amdzen-static-check"
+              }
+            ]
+          },
+          {
+            "name": "win-msvc-mt-lp64-amdzen-shared",
+            "description": "Build and check multithreaded shared BLIS for amdzen configuration on Windows",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "win-msvc-mt-lp64-amdzen-shared"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-mt-lp64-amdzen-shared"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-mt-lp64-amdzen-shared-check"
+              }
+            ]
+          },
+          {
+            "name": "win-msvc-st-ilp64-amdzen-static",
+            "description": "Build and check single-threaded static BLIS for amdzen configuration on Windows",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "win-msvc-st-ilp64-amdzen-static"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-st-ilp64-amdzen-static"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-st-ilp64-amdzen-static-check"
+              }
+            ]
+          },
+          {
+            "name": "win-msvc-st-ilp64-amdzen-shared",
+            "description": "Build and check single-threaded shared BLIS for amdzen configuration on Windows",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "win-msvc-st-ilp64-amdzen-shared"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-st-ilp64-amdzen-shared"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-st-ilp64-amdzen-shared-check"
+              }
+            ]
+          },
+          {
+            "name": "win-msvc-mt-ilp64-amdzen-static",
+            "description": "Build and check multithreaded static BLIS for amdzen configuration on Windows",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "win-msvc-mt-ilp64-amdzen-static"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-mt-ilp64-amdzen-static"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-mt-ilp64-amdzen-static-check"
+              }
+            ]
+          },
+          {
+            "name": "win-msvc-mt-ilp64-amdzen-shared",
+            "description": "Build and check multithreaded shared BLIS for amdzen configuration on Windows",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "win-msvc-mt-ilp64-amdzen-shared"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-mt-ilp64-amdzen-shared"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-mt-ilp64-amdzen-shared-check"
+              }
+            ]
+          },
+      
+          {
+            "name": "win-msvc-st-lp64-auto-static",
+            "description": "Build and check single-threaded static BLIS for auto configuration on Windows",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "win-msvc-st-lp64-auto-static"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-st-lp64-auto-static"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-st-lp64-auto-static-check"
+              }
+            ]
+          },
+          {
+            "name": "win-msvc-st-lp64-auto-shared",
+            "description": "Build and check single-threaded shared BLIS for auto configuration on Windows",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "win-msvc-st-lp64-auto-shared"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-st-lp64-auto-shared"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-st-lp64-auto-shared-check"
+              }
+            ]
+          },
+          {
+            "name": "win-msvc-mt-lp64-auto-static",
+            "description": "Build and check multithreaded static BLIS for auto configuration on Windows",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "win-msvc-mt-lp64-auto-static"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-mt-lp64-auto-static"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-mt-lp64-auto-static-check"
+              }
+            ]
+          },
+          {
+            "name": "win-msvc-mt-lp64-auto-shared",
+            "description": "Build and check multithreaded shared BLIS for auto configuration on Windows",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "win-msvc-mt-lp64-auto-shared"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-mt-lp64-auto-shared"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-mt-lp64-auto-shared-check"
+              }
+            ]
+          },
+          {
+            "name": "win-msvc-st-ilp64-auto-static",
+            "description": "Build and check single-threaded static BLIS for auto configuration on Windows",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "win-msvc-st-ilp64-auto-static"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-st-ilp64-auto-static"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-st-ilp64-auto-static-check"
+              }
+            ]
+          },
+          {
+            "name": "win-msvc-st-ilp64-auto-shared",
+            "description": "Build and check single-threaded shared BLIS for auto configuration on Windows",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "win-msvc-st-ilp64-auto-shared"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-st-ilp64-auto-shared"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-st-ilp64-auto-shared-check"
+              }
+            ]
+          },
+          {
+            "name": "win-msvc-mt-ilp64-auto-static",
+            "description": "Build and check multithreaded static BLIS for auto configuration on Windows",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "win-msvc-mt-ilp64-auto-static"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-mt-ilp64-auto-static"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-mt-ilp64-auto-static-check"
+              }
+            ]
+          },
+          {
+            "name": "win-msvc-mt-ilp64-auto-shared",
+            "description": "Build and check multithreaded shared BLIS for auto configuration on Windows",
+            "steps": [
+              {
+                "type": "configure",
+                "name": "win-msvc-mt-ilp64-auto-shared"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-mt-ilp64-auto-shared"
+              },
+              {
+                "type": "build",
+                "name": "win-msvc-mt-ilp64-auto-shared-check"
+              }
+            ]
+          }
+    ]
+}

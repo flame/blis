@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -122,8 +122,7 @@ int main( int argc, char** argv )
 	        ( unsigned long )0, 0.0 );
 
 
-	//for ( p = p_begin; p <= p_max; p += p_inc )
-	for ( p = p_max; p_begin <= p; p -= p_inc )
+	for ( p = p_begin; p <= p_max; p += p_inc )
 	{
 
 		if ( m_input < 0 ) m = p / ( dim_t )abs(m_input);

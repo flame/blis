@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,7 +41,18 @@
 #undef  GENTPROTRO
 #define GENTPROTRO( ftype, ch, blasname ) \
 \
+IF_BLIS_ENABLE_BLAS(\
 BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* uploa, \
+       const f77_int*  m, \
+       const ftype*    alpha, \
+       const ftype*    x, const f77_int* incx, \
+             ftype*    a, const f77_int* lda  \
+     );\
+)\
+\
+BLIS_EXPORT_BLAS void PASTEF77S(ch,blasname) \
      ( \
        const f77_char* uploa, \
        const f77_int*  m, \
@@ -49,9 +61,7 @@ BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
              ftype*    a, const f77_int* lda  \
      );
 
-#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTPROTRO_BLAS( syr )
-#endif
 
 #endif
 

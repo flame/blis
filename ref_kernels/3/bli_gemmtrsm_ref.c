@@ -67,14 +67,12 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	const dim_t mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
 	const dim_t nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
 \
-	const inc_t packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
-\
-	const inc_t rs_b   = packnr; \
-	const inc_t cs_b   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBN, cntx ); \
-/*
-printf( "bli_gemmtrsm_ref(): cs_b = %d\n", (int)cs_b ); \
-printf( "bli_gemmtrsm_ref(): k nr = %d %d\n", (int)k, (int)nr ); \
-*/ \
+  /* Use trsm blocksizes if they are available else use general blocksizes. */ \
+	inc_t           packnr = bli_cntx_get_trsm_blksz_max_dt( dt, BLIS_NR, cntx ); \
+  if ( packnr == 0 ) \
+  { \
+      packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
+  } \
 \
 	const ctype* minus_one = PASTEMAC(ch,m1); \
 \
@@ -103,18 +101,15 @@ PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11", mr, 2*nr, \
 	const inc_t     rs_ct    = ( col_pref ? 1 : nr ); \
 	const inc_t     cs_ct    = ( col_pref ? mr : 1 ); \
 \
-	const bool      use_ct   = ( m < mr || n < nr ); \
-\
-	      ctype*    c11_use  = c11; \
-	      inc_t     rs_c_use = rs_c; \
-	      inc_t     cs_c_use = cs_c; \
-\
-	if ( use_ct ) \
-	{ \
-		c11_use  = ct; \
-		rs_c_use = rs_ct; \
-		cs_c_use = cs_ct; \
-	} \
+  /* Use GEMM_FOR_TRSM_UKR if it is define else use GEMM_UKR. */ \
+	PASTECH(ch,gemm_ukr_ft) \
+	              gemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, BLIS_GEMM_FOR_TRSM_UKR, cntx ); \
+  if ( gemm_ukr == NULL ) \
+  { \
+      gemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+  } \
+	PASTECH(ch,trsm_ukr_ft) \
+	              trsm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, trsmkerid, cntx ); \
 \
 	/* lower: b11 = alpha * b11 - a10 * b01; */ \
 	/* upper: b11 = alpha * b11 - a12 * b21; */ \

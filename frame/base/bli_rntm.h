@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -37,6 +37,116 @@
 #ifndef BLIS_RNTM_H
 #define BLIS_RNTM_H
 
+// Define this to print information about threading in rntm structures.
+//#define PRINT_THREADING
+
+
+// Function prototypes
+
+BLIS_EXPORT_BLIS void bli_rntm_init_from_global( rntm_t* rntm );
+
+BLIS_EXPORT_BLIS void bli_rntm_set_ways_for_op
+     (
+       opid_t  l3_op,
+       side_t  side,
+       dim_t   m,
+       dim_t   n,
+       dim_t   k,
+       rntm_t* rntm
+     );
+
+void bli_rntm_set_ways_from_rntm
+     (
+       dim_t   m,
+       dim_t   n,
+       dim_t   k,
+       rntm_t* rntm
+     );
+
+BLIS_EXPORT_BLIS void bli_rntm_set_ways_from_rntm_sup
+     (
+       dim_t   m,
+       dim_t   n,
+       dim_t   k,
+       rntm_t* rntm
+     );
+
+void bli_rntm_print
+     (
+       rntm_t* rntm
+     );
+
+dim_t bli_rntm_calc_num_threads_in
+     (
+       bszid_t* restrict bszid_cur,
+       rntm_t*  restrict rntm
+     );
+
+BLIS_EXPORT_BLIS void bli_nthreads_optimum
+     (
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       opid_t  family,
+       rntm_t* rntm
+     );
+
+#ifdef AOCL_DYNAMIC
+err_t bli_smart_threading_sup
+     (
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       opid_t  family,
+       rntm_t* rntm,
+       cntx_t* cntx
+     );
+#endif
+
+void aocl_dnormfv_dynamic
+     (
+       arch_t arch_id,
+       dim_t  n_elem,
+       dim_t* nt_ideal
+     );
+
+void aocl_znormfv_dynamic
+     (
+       arch_t arch_id,
+       dim_t  n_elem,
+       dim_t* nt_ideal
+     );
+
+void bli_nthreads_l1
+     (
+       l1vkr_t ker_id,
+       num_t   data_type_a,
+       num_t   data_type_b,
+       arch_t  arch_id,
+       dim_t   n_elem,
+       dim_t*  nt_ideal
+     );
+
+void bli_nthreads_l1f
+     (
+       l1fkr_t ker_id,
+       num_t   data_type_a,
+       num_t   data_type_b,
+       arch_t  arch_id,
+       dim_t   n_elem,
+       dim_t*  nt_ideal
+     );
+
+void bli_nthreads_l2
+     (
+       l2kr_t   ker_id,
+       num_t    data_type,
+       trans_t  variant,
+       arch_t   arch_id,
+       dim_t    m_elem,
+       dim_t    n_elem,
+       dim_t*   nt_ideal
+     );
 
 // Runtime object type (defined in bli_type_defs.h)
 
@@ -69,7 +179,12 @@ BLIS_INLINE bool bli_rntm_auto_factor( const rntm_t* rntm )
 	return rntm->auto_factor;
 }
 
-BLIS_INLINE dim_t bli_rntm_num_threads( const rntm_t* rntm )
+BLIS_INLINE bool bli_rntm_blis_mt( rntm_t* rntm )
+{
+	return rntm->blis_mt;
+}
+
+BLIS_INLINE dim_t bli_rntm_num_threads( rntm_t* rntm )
 {
 	return rntm->num_threads;
 }
@@ -127,9 +242,54 @@ BLIS_INLINE void bli_rntm_set_thread_impl_only( timpl_t thread_impl, rntm_t* rnt
 	rntm->thread_impl = thread_impl;
 }
 
+BLIS_INLINE pba_t* bli_rntm_pba( rntm_t* rntm )
+{
+	return rntm->pba;
+}
+
+#if 0
+BLIS_INLINE dim_t bli_rntm_equals( rntm_t* rntm1, rntm_t* rntm2 )
+{
+	const bool nt = bli_rntm_num_threads( rntm1 ) == bli_rntm_num_threads( rntm2 );
+	const bool jc = bli_rntm_jc_ways( rntm1 ) == bli_rntm_jc_ways( rntm2 );
+	const bool pc = bli_rntm_pc_ways( rntm1 ) == bli_rntm_pc_ways( rntm2 );
+	const bool ic = bli_rntm_ic_ways( rntm1 ) == bli_rntm_ic_ways( rntm2 );
+	const bool jr = bli_rntm_jr_ways( rntm1 ) == bli_rntm_jr_ways( rntm2 );
+	const bool ir = bli_rntm_ir_ways( rntm1 ) == bli_rntm_ir_ways( rntm2 );
+	const bool pr = bli_rntm_pr_ways( rntm1 ) == bli_rntm_pr_ways( rntm2 );
+
+	if ( nt && jc && pc && ic && jr && ir && pr ) return TRUE;
+	else                                          return FALSE;
+}
+#endif
+
+BLIS_INLINE bool bli_rntm_stop_on_error( rntm_t* rntm )
+{
+	return rntm->stop_on_error;
+}
+
+BLIS_INLINE bool bli_rntm_print_on_error( rntm_t* rntm )
+{
+	return rntm->print_on_error;
+}
+
+BLIS_INLINE gint_t bli_rntm_info_value( rntm_t* rntm )
+{
+	return rntm->info_value;
+}
+
+//
+// -- rntm_t modification (internal use only) ----------------------------------
+//
+
 BLIS_INLINE void bli_rntm_set_auto_factor_only( bool auto_factor, rntm_t* rntm )
 {
 	rntm->auto_factor = auto_factor;
+}
+
+BLIS_INLINE void bli_rntm_set_blis_mt_only( bool blis_mt, rntm_t* rntm )
+{
+	rntm->blis_mt = blis_mt;
 }
 
 BLIS_INLINE void bli_rntm_set_num_threads_only( dim_t nt, rntm_t* rntm )
@@ -187,14 +347,68 @@ BLIS_INLINE void bli_rntm_clear_ways_only( rntm_t* rntm )
 	bli_rntm_set_ways_only( 1, 1, 1, 1, 1, rntm );
 }
 
+BLIS_INLINE void bli_rntm_set_stop_on_error_only( bool stop_on_error, rntm_t* rntm )
+{
+	rntm->stop_on_error = stop_on_error;
+}
+
+BLIS_INLINE void bli_rntm_set_print_on_error_only( bool print_on_error, rntm_t* rntm )
+{
+	rntm->print_on_error = print_on_error;
+}
+
+BLIS_INLINE void bli_rntm_set_info_value_only( gint_t info_value, rntm_t* rntm )
+{
+	rntm->info_value = info_value;
+}
+
 //
 // -- rntm_t modification (public API) -----------------------------------------
 //
 
 BLIS_INLINE void bli_rntm_set_thread_impl( timpl_t thread_impl, rntm_t* rntm )
 {
-	// Set the threading implementation to use.
-	bli_rntm_set_thread_impl_only( thread_impl, rntm );
+	// Record the total number of threads to use.
+	bli_rntm_set_num_threads_only( nt, rntm );
+
+	// Set the individual ways of parallelism to default states.
+	bli_rntm_clear_ways_only( rntm );
+
+	// BLIS_NUM_THREADS env variable or BLIS API to set the
+	// number of threads is used. Setting the blis_mt flag to TRUE
+	// so that OMP API or OMP env variables will not be of effect
+	// going forward.
+	bli_rntm_set_blis_mt_only(TRUE, rntm);
+
+#ifdef PRINT_THREADING
+	printf( "bli_rntm_set_num_threads()\n" );
+	bli_rntm_print( rntm );
+#endif
+}
+
+BLIS_INLINE void bli_rntm_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir, rntm_t* rntm )
+{
+	// Record the number of ways of parallelism per loop.
+	bli_rntm_set_jc_ways_only( jc, rntm );
+	bli_rntm_set_pc_ways_only( pc, rntm );
+	bli_rntm_set_ic_ways_only( ic, rntm );
+	bli_rntm_set_jr_ways_only( jr, rntm );
+	bli_rntm_set_ir_ways_only( ir, rntm );
+	bli_rntm_set_pr_ways_only(  1, rntm );
+
+	// Set the num_threads field to a default state.
+	bli_rntm_clear_num_threads_only( rntm );
+
+	// BLIS_NUM_THREADS env variable or BLIS API to set the
+	// number of threads is used. Setting the blis_mt flag to TRUE
+	// so that OMP API or OMP env variables will not be of effect
+	// going forward.
+	bli_rntm_set_blis_mt_only(TRUE, rntm);
+
+#ifdef PRINT_THREADING
+	printf( "bli_rntm_set_ways()\n" );
+	bli_rntm_print( rntm );
+#endif
 }
 
 BLIS_INLINE void bli_rntm_set_pack_a( bool pack_a, rntm_t* rntm )
@@ -265,7 +479,13 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
           .pack_a      = FALSE, \
           .pack_b      = FALSE, \
           .l3_sup      = TRUE, \
-        }  \
+          .blis_mt     = FALSE, \
+          .sba_pool    = NULL, \
+          .pba         = NULL, \
+          .stop_on_error  = FALSE, \
+          .print_on_error = TRUE, \
+          .info_value     = 0, \
+        }
 
 BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 {
@@ -278,6 +498,10 @@ BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 	bli_rntm_clear_pack_a( rntm );
 	bli_rntm_clear_pack_b( rntm );
 	bli_rntm_clear_l3_sup( rntm );
+	bli_rntm_set_blis_mt_only(FALSE, rntm);
+
+	bli_rntm_clear_sba_pool( rntm );
+	bli_rntm_clear_pba( rntm );
 }
 
 //
@@ -300,69 +524,7 @@ BLIS_INLINE dim_t bli_rntm_calc_num_threads
 	return n_threads;
 }
 
-//
-// -- Function prototypes ------------------------------------------------------
-//
-
-BLIS_EXPORT_BLIS void bli_rntm_init_from_global( rntm_t* rntm );
-
-BLIS_EXPORT_BLIS void bli_rntm_set_num_threads
-     (
-       dim_t   nt,
-       rntm_t* rntm
-     );
-
-BLIS_EXPORT_BLIS void bli_rntm_set_ways
-     (
-       dim_t   jc,
-       dim_t   pc,
-       dim_t   ic,
-       dim_t   jr,
-       dim_t   ir,
-       rntm_t* rntm
-     );
-
-BLIS_EXPORT_BLIS void bli_rntm_set_ways_for_op
-     (
-       opid_t  l3_op,
-       side_t  side,
-       dim_t   m,
-       dim_t   n,
-       dim_t   k,
-       rntm_t* rntm
-     );
-
-void bli_rntm_sanitize
-     (
-       rntm_t* rntm
-     );
-
-void bli_rntm_factorize
-     (
-       dim_t   m,
-       dim_t   n,
-       dim_t   k,
-       rntm_t* rntm
-     );
-
-void bli_rntm_factorize_sup
-     (
-       dim_t   m,
-       dim_t   n,
-       dim_t   k,
-       rntm_t* rntm
-     );
-
-void bli_rntm_print
-     (
-       const rntm_t* rntm
-     );
-
-dim_t bli_rntm_calc_num_threads_in
-     (
-       const bszid_t* bszid_cur,
-       const rntm_t*  rntm
-     );
+// -----------------------------------------------------------------------------
 
 #endif
 

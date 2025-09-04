@@ -55,11 +55,20 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	const num_t     dt     = PASTEMAC(ch,type); \
 \
-	const dim_t     mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
-	const dim_t     nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
+	/* Use trsm blocksizes if they are available else use general blocksizes. */  \
+	dim_t           mr     = bli_cntx_get_trsm_blksz_def_dt( dt, BLIS_MR, cntx ); \
+	dim_t           nr     = bli_cntx_get_trsm_blksz_def_dt( dt, BLIS_NR, cntx ); \
 \
-	const inc_t     packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx ); \
-	const inc_t     packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
+	inc_t           packmr = bli_cntx_get_trsm_blksz_max_dt( dt, BLIS_MR, cntx ); \
+	inc_t           packnr = bli_cntx_get_trsm_blksz_max_dt( dt, BLIS_NR, cntx ); \
+\
+	if ( mr == 0 || nr == 0 ) \
+	{ \
+		mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
+		nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
+		packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx ); \
+		packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
+	} \
 \
 	const dim_t     m      = mr; \
 	const dim_t     n      = nr; \
@@ -143,11 +152,20 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	const num_t     dt     = PASTEMAC(ch,type); \
 \
-	const dim_t     mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
-	const dim_t     nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
+	/* Use trsm blocksizes if they are available else use general blocksizes. */  \
+	 dim_t          mr     = bli_cntx_get_trsm_blksz_def_dt( dt, BLIS_MR, cntx ); \
+	 dim_t          nr     = bli_cntx_get_trsm_blksz_def_dt( dt, BLIS_NR, cntx ); \
 \
-	const inc_t     packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx ); \
-	const inc_t     packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
+	 inc_t          packmr = bli_cntx_get_trsm_blksz_max_dt( dt, BLIS_MR, cntx ); \
+	 inc_t          packnr = bli_cntx_get_trsm_blksz_max_dt( dt, BLIS_NR, cntx ); \
+\
+	if ( mr == 0 || nr == 0 ) \
+	{ \
+		mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
+		nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
+		packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx ); \
+		packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
+	} \
 \
 	const dim_t     m      = mr; \
 	const dim_t     n      = nr; \

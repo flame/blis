@@ -173,7 +173,7 @@ Originally, BLIS did indeed require the application to explicitly setup (initial
 
 Yes! BLIS supports multithreading (via OpenMP, POSIX threads, or HPX) for all of its level-3 operations. For more information on enabling and controlling multithreading, please see the [Multithreading](Multithreading.md) guide.
 
-BLIS is also thread-safe so that you can call BLIS from threads within a multithreaded library or application. BLIS derives its thread-safety via unconditional use of features present in POSIX threads (pthreads). These pthreads features are employed for thread-safety regardless of whether BLIS is configured for OpenMP multithreading, pthreads multithreading, or single-threaded execution.
+BLIS is also thread-safe so that you can call BLIS from threads within a multithreaded library or application. BLIS derives is thread-safety via unconditional use of features present in POSIX threads (pthreads). These pthreads features are employed for thread-safety regardless of whether BLIS is configured for OpenMP multithreading, pthreads multithreading, or single-threaded execution.
 
 ### Does BLIS support NUMA environments?
 

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -36,7 +36,6 @@
 #ifndef BLIS_LANG_DEFS_H
 #define BLIS_LANG_DEFS_H
 
-
 // -- Undefine restrict for C++ and C89/90 --
 
 #ifdef __cplusplus
@@ -53,6 +52,23 @@
   #endif
 #endif
 
+// -- BLIS Thread Local Storage Keyword --
+
+// __thread for TLS is supported by GCC, CLANG, ICC, and IBMC.
+// There is a small risk here as __GNUC__ can also be defined by some other
+// compiler (other than ICC and CLANG which we know define it) that
+// doesn't support __thread, as __GNUC__ is not quite unique to GCC.
+// But the possibility of someone using such non-main-stream compiler
+// for building BLIS is low.
+#if defined(__GNUC__) || defined(__clang__) || defined(__ICC) || defined(__IBMC__) || defined(__INTEL_LLVM_COMPILER)
+  #define BLIS_THREAD_LOCAL __thread
+#elif defined(_MSC_VER) && _MSC_VER >= 1310
+  #define BLIS_THREAD_LOCAL __declspec(thread)
+#else
+  #define BLIS_THREAD_LOCAL
+#endif
+
+#ifdef BLIS_IS_BUILDING_LIBRARY
 
 // -- Define typeof() operator if using non-GNU compiler --
 
@@ -63,25 +79,6 @@
   #define typeof __typeof__
   #endif
 #endif
-
-
-// -- BLIS Thread Local Storage Keyword --
-
-// __thread for TLS is supported by GCC, CLANG, ICC, and IBMC.
-// There is a small risk here as __GNUC__ can also be defined by some other
-// compiler (other than ICC and CLANG which we know define it) that
-// doesn't support __thread, as __GNUC__ is not quite unique to GCC.
-// But the possibility of someone using such non-main-stream compiler
-// for building BLIS is low.
-#if defined(BLIS_ENABLE_TLS) && ( defined(__GNUC__)  || \
-                                  defined(__clang__) || \
-                                  defined(__ICC)     || \
-                                  defined(__IBMC__) )
-  #define BLIS_THREAD_LOCAL __thread
-#else
-  #define BLIS_THREAD_LOCAL
-#endif
-
 
 // -- BLIS constructor/destructor function attribute --
 
@@ -96,7 +93,7 @@
   // ICC defines __GNUC__ but doesn't support this
   #define BLIS_ATTRIB_CTOR
   #define BLIS_ATTRIB_DTOR
-#elif defined(__clang__)
+#elif defined(__clang__) || defined(__INTEL_LLVM_COMPILER)
   // CLANG supports __attribute__, but its documentation doesn't
   // mention support for constructor/destructor. Compiling with
   // clang and testing shows that it does support.
@@ -110,5 +107,6 @@
   #define BLIS_ATTRIB_DTOR
 #endif
 
+#endif // BLIS_IS_BUILDING_LIBRARY
 
 #endif

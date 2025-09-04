@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -44,12 +45,9 @@ void bli_trsm_blk_var3
              thrinfo_t* thread_par
      )
 {
-	obj_t ap, bp, cs;
-	bli_obj_alias_to( a, &ap );
-	bli_obj_alias_to( b, &bp );
-	bli_obj_alias_to( c, &cs );
-
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5);
+	obj_t a1, b1;
+	dim_t b_alg;
 
 	// Determine the direction in which to partition (forwards or backwards).
 	dir_t direct = bli_l3_direct( &ap, &bp, &cs, cntl );
@@ -98,5 +96,6 @@ void bli_trsm_blk_var3
 			bli_obj_scalar_reset( &cs );
 		}
 	}
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5)
 }
 

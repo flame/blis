@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2020-2022, Advanced Micro Devices, Inc.
+#  Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -47,409 +47,433 @@ print_usage()
 	fi
 
 	# Echo usage info.
-	cat <<EOF
-
- ${script_name} (BLIS ${version})
-
- Configure BLIS's build system for compilation using a specified
- configuration directory.
-
- Usage:
-
-   ${script_name} [options] [env. vars.] confname
-
- Arguments:
-
-   confname      The name of the sub-directory inside of the 'config'
-                 directory containing the desired BLIS configuration.
-                 Note that confname MUST be specified; if it is not,
-                 configure will complain. To build a completely generic
-                 implementation, use the 'generic' configuration
-
- Options:
-
-   -p PREFIX, --prefix=PREFIX
-
-                 The common installation prefix for all files. If given,
-                 this option effectively implies:
-                   --libdir=EXECPREFIX/lib
-                   --includedir=PREFIX/include
-                   --sharedir=PREFIX/share
-                 where EXECPREFIX defaults to PREFIX. If this option is
-                 not given, PREFIX defaults to '${prefix_def}'. If PREFIX
-                 refers to a directory that does not exist, it will be
-                 created.
-
-   --exec-prefix=EXECPREFIX
-
-                 The installation prefix for libraries. Specifically, if
-                 given, this option effectively implies:
-                   --libdir=EXECPREFIX/lib
-                 If not given, EXECPREFIX defaults to PREFIX, which may be
-                 modified by the --prefix option. If EXECPREFIX refers to
-                 a directory that does not exist, it will be created.
-
-   --libdir=LIBDIR
-
-                 The path to which make will install libraries. If not
-                 given, LIBDIR defaults to PREFIX/lib. If LIBDIR refers to
-                 a directory that does not exist, it will be created.
-
-   --includedir=INCDIR
-
-                 The path to which make will install development header
-                 files. If not given, INCDIR defaults to PREFIX/include.
-                 If INCDIR refers to a directory that does not exist, it
-                 will be created.
-
-   --sharedir=SHAREDIR
-
-                 The path to which make will makefile fragments containing
-                 make variables determined by configure (e.g. CC, CFLAGS,
-                 and LDFLAGS). These files allow certain BLIS makefiles,
-                 such as those in the examples or testsuite directories, to
-                 operate on an installed copy of BLIS rather than a local
-                 (and possibly uninstalled) copy. If not given, SHAREDIR
-                 defaults to PREFIX/share. If SHAREDIR refers to a
-                 directory that does not exist, it will be created.
-
-   --enable-verbose-make, --disable-verbose-make
-
-                 Enable (disabled by default) verbose compilation output
-                 during make.
-
-   --enable-arg-max-hack --disable-arg-max-hack
-
-                 Enable (disabled by default) build system logic that
-                 will allow archiving/linking the static/shared library
-                 even if the command plus command line arguments exceeds
-                 the operating system limit (ARG_MAX).
-
-   -d DEBUG, --enable-debug[=DEBUG]
-
-                 Enable debugging symbols in the library. If argument
-                 DEBUG is given as 'opt', then optimization flags are
-                 kept in the framework, otherwise optimization is
-                 turned off.
-
-   --disable-static, --enable-static
-
-                 Disable (enabled by default) building BLIS as a static
-                 library. If the static library build is disabled, the
-                 shared library build must remain enabled.
-
-   --disable-shared, --enable-shared
-
-                 Disable (enabled by default) building BLIS as a shared
-                 library. If the shared library build is disabled, the
-                 static library build must remain enabled.
-
-   --enable-rpath, --disable-rpath
-
-                 Enable (disabled by default) setting an install_name for
-                 dynamic libraries on macOS which starts with @rpath rather
-                 than the absolute install path.
-
-   -e SYMBOLS, --export-shared[=SYMBOLS]
-
-                 Specify the subset of library symbols that are exported
-                 within a shared library. Valid values for SYMBOLS are:
-                 'public' (the default) and 'all'. By default, only
-                 functions and variables that belong to public APIs are
-                 exported in shared libraries. However, the user may
-                 instead export all symbols in BLIS, even those that were
-                 intended for internal use only. Note that the public APIs
-                 encompass all functions that almost any user would ever
-                 want to call, including the BLAS/CBLAS compatibility APIs
-                 as well as the basic and expert interfaces to the typed
-                 and object APIs that are unique to BLIS. Also note that
-                 changing this option to 'all' will have no effect in some
-                 environments, such as when compiling with clang on
-                 Windows.
-
-   -t MODEL, --enable-threading[=MODEL], --disable-threading
-
-                 Enable threading in the library, using threading model(s)
-                 MODEL={single,openmp,pthreads,hpx,auto}. If multiple values
-                 are specified within MODEL, they will all be compiled into
-                 BLIS, and the choice of which to use will be determined at
-                 runtime. If the user does not express a preference (by
-                 setting the BLIS_THREAD_IMPL environment variable to
-                 'single', 'openmp', 'pthreads', or 'hpx'; by calling the
-                 global runtime API bli_thread_set_thread_impl(); or by
-                 encoding a choice on a per-call basis within a rntm_t
-                 passed into the expert API), then the first model listed
-                 in MODEL will be used by default. Note that 'single' is
-                 silently appended to whatever the user specifies in MODEL,
-                 meaning that single-threaded functionality will always be
-                 available, even if it is not requested and even if it is
-                 not enabled by default. Even --disable-threading is
-                 actually shorthand for --enable-threading=single (which is
-                 the default when the option is not specified).
-
-   --enable-system, --disable-system
-
-                 Enable conventional operating system support, such as
-                 pthreads for thread-safety. The default state is enabled.
-                 However, in rare circumstances you may wish to configure
-                 BLIS for use with a minimal or nonexistent operating
-                 system (e.g. hardware simulators). In these situations,
-                 --disable-system may be used to jettison all compile-time
-                 and link-time dependencies outside of the standard C
-                 library. When disabled, this option also forces the use
-                 of --disable-threading.
-
-   --enable-tls, --disable-tls
-
-                 Enable thread-local storage (TLS) for static variables
-                 in BLIS. The default state is enabled. However, like with
-                 --disable-system, there may be rare situations, such as
-                 when --disable-system is appropriate, where thread-local
-                 storage is unsupported by the compiler. In those cases,
-                 disabling TLS may be a suitable workaround.
-		         WARNING: DISABLING TLS IS DANGEROUS AND MAY CAUSE RACE
-                 CONDITIONS! Please try combining --disable-tls with
-                 --disable-threading if you suspect any correctness or
-                 deadlock issues.
-
-   --disable-pba-pools, --enable-pba-pools
-   --disable-sba-pools, --enable-sba-pools
-
-                 Disable (enabled by default) use of internal memory pools
-                 within the packing block allocator (pba) and/or the small
-                 block allocator (sba). The former is used to allocate
-                 memory used to pack submatrices while the latter is used
-                 to allocate control/thread tree nodes and thread
-                 communicators. Both allocations take place in the context
-                 of level-3 operations. When the pba is disabled, the
-                 malloc()-like function specified by BLIS_MALLOC_POOL is
-                 called on-demand whenever a packing block is needed, and
-                 when the sba is disabled, the malloc()-like function
-                 specified by BLIS_MALLOC_INTL is called whenever a small
-                 block is needed, with the two allocators calling free()-
-                 like functions BLIS_FREE_POOL and BLIS_FREE_INTL,
-                 respectively when blocks are released. When enabled,
-                 either or both pools are populated via the same functions
-                 mentioned previously, and henceforth blocks are checked
-                 out and in. The library quickly reaches a state in which
-                 it no longer needs to call malloc() or free(), even
-                 across many separate level-3 operation invocations.
-
-   --enable-mem-tracing, --disable-mem-tracing
-
-                 Enable (disabled by default) output to stdout that traces
-                 the allocation and freeing of memory, including the names
-                 of the functions that triggered the allocation/freeing.
-                 Enabling this option WILL NEGATIVELY IMPACT PERFORMANCE.
-                 Please use only for informational/debugging purposes.
-
-   --enable-asan, --disable-asan
-
-                 Enable (disabled by default) compiling and linking BLIS
-                 framework code with the AddressSanitizer (ASan) library.
-                 Optimized kernels are NOT compiled with ASan support due
-                 to limitations of register assignment in inline assembly.
-                 WARNING: ENABLING THIS OPTION WILL NEGATIVELY IMPACT
-                 PERFORMANCE. Please use only for informational/debugging
-                 purposes.
-
-   -i SIZE, --int-size=SIZE
-
-                 Set the size (in bits) of internal BLIS integers and
-                 integer types used in native BLIS interfaces. The
-                 default integer type size is architecture dependent.
-                 (Hint: You can always find this value printed at the
-                 beginning of the testsuite output.)
-
-   -b SIZE, --blas-int-size=SIZE
-
-                 Set the size (in bits) of integer types in external
-                 BLAS and CBLAS interfaces, if enabled. The default
-                 integer type size used in BLAS/CBLAS is 32 bits.
-
-   --disable-blas, --enable-blas
-
-                 Disable (enabled by default) building the BLAS
-                 compatibility layer.
-
-   --enable-cblas, --disable-cblas
-
-                 Enable (disabled by default) building the CBLAS
-                 compatibility layer. This automatically enables the
-                 BLAS compatibility layer as well.
-
-   --disable-mixed-dt, --enable-mixed-dt
-
-                 Disable (enabled by default) support for mixing the
-                 storage domain and/or storage precision of matrix
-                 operands for the gemm operation, as well as support
-                 for computing in a precision different from one or
-                 both of matrices A and B.
-
-   --disable-mixed-dt-extra-mem, --enable-mixed-dt-extra-mem
-
-                 Disable (enabled by default) support for additional
-                 mixed datatype optimizations that require temporarily
-                 allocating extra memory--specifically, a single m x n
-                 matrix (per application thread) whose storage datatype
-                 is equal to the computation datatype. This option may
-                 only be enabled when mixed domain/precision support is
-                 enabled.
-
-   --disable-sup-handling, --enable-sup-handling
-
-                 Disable (enabled by default) handling of small/skinny
-                 matrix problems via separate code branches. When disabled,
-                 these small/skinny level-3 operations will be performed by
-                 the conventional implementation, which is optimized for
-                 medium and large problems. Note that what qualifies as
-                 "small" depends on thresholds that may vary by sub-
-                 configuration.
-
-   --enable-amd-frame-tweaks, --disable-amd-frame-tweaks
-
-                 Enable building with certain framework files that have
-                 been customized by AMD for Zen-based microarchitectures.
-                 The default counterparts of these files must be portable,
-                 and so these customized files may provide some (typically
-                 modest) performance improvement for some select operations
-                 and/or APIs, though there may a few (tiny dimension) cases
-                 where the improvement is more pronounced. Note that the
-                 target configuration must be Zen-based (or 'amd64') for
-                 this option to have any effect. (Also note that this
-                 option is NOT to be confused with enabling AMD *kernels*,
-                 which are determined by the BLIS subconfiguration used at
-                 runtime.) By default, these customized files are disabled.
-
-   -a NAME --enable-addon=NAME
-
-                 Enable the code provided by an addon. An addon consists
-                 of a separate directory of code that provides additional
-                 APIs, implementations, and/or operations that would
-                 otherwise not be present within a build of BLIS. This
-                 option may be used multiple times to specify the inclusion
-                 of multiple addons. By default, no addons are enabled.
-
-   -s NAME --enable-sandbox=NAME
-
-                 Enable a separate sandbox implementation of gemm. This
-                 option disables BLIS's conventional gemm implementation
-                 (which shares common infrastructure with other level-3
-                 operations) and instead compiles and uses the code in
-                 the NAME directory, which is expected to be a sub-
-                 directory of 'sandbox'. By default, no sandboxes are
-                 enabled.
-
-   --with-memkind, --without-memkind
-
-                 Forcibly enable or disable the use of libmemkind's
-                 hbw_malloc() and hbw_free() as substitutes for malloc()
-                 and free(), respectively, when allocating memory for
-                 BLIS's memory pools, which are used to manage buffers
-                 into which matrices are packed. The default behavior
-                 for this option is environment-dependent; if configure
-                 detects the presence of libmemkind, libmemkind is used
-                 by default, and otherwise it is not used by default.
-
-   -r METHOD, --thread-part-jrir=METHOD
-
-                 Select a strategy for partitioning computation in JR and
-                 IR loops and assigning that computation to threads. Valid
-                 values for METHOD are 'rr', 'slab', and 'tlb':
-                  'rr':   Assign the computation associated with whole
-                          columns of microtiles to threads in a round-
-                          robin fashion. When selected, round-robin
-                          assignment is also employed during packing.
-                  'slab': Partition the computation into N contiguous
-                          regions, where each region contains a whole
-                          number of microtile columns, and assign one
-                          region to each thread. For some operations, the
-                          number of microtile columns contained within a
-                          given region may differ from that of other
-                          regions, depending on how much work is implied
-                          by each region. When selected, slab assignment
-                          is also employed during packing.
-                  'tlb':  Tile-level load balancing is similar to slab,
-                          except that regions will be divided at a more
-                          granular level (individual microtiles instead
-                          of whole columns of microtiles) to ensure more
-                          equitable assignment of work to threads. When
-                          selected, tlb will only be employed for level-3
-                          operations except trsm; due to practical and
-                          algorithmic limitations, slab partitioning will
-                          be used instead during packing and for trsm.
-                 The default strategy is 'slab'. NOTE: Specifying this
-                 option constitutes a request, which may be ignored in
-                 select situations if implementation has a good reason to
-                 do so. (See description of 'tlb' above for an example of
-                 this.)
-
-   --disable-trsm-preinversion, --enable-trsm-preinversion
-
-                 Disable (enabled by default) pre-inversion of triangular
-                 matrix diagonals when performing trsm. When pre-inversion
-                 is enabled, diagonal elements are inverted outside of the
-                 microkernel (e.g. during packing) so that the microkernel
-                 can use multiply instructions. When disabled, division
-                 instructions are used within the microkernel. Executing
-                 these division instructions within the microkernel will
-                 incur a performance penalty, but numerical robustness will
-                 improve for certain cases involving denormal numbers that
-                 would otherwise result in overflow in the pre-inverted
-                 values.
-
-   --force-version=STRING
-
-                 Force configure to use an arbitrary version string
-                 STRING. This option may be useful when repackaging
-                 custom versions of BLIS by outside organizations.
-
-   -c, --show-config-lists
-
-                 Print the config and kernel lists, and kernel-to-config
-                 map after they are read from file. This can be useful
-                 when debugging certain configuration issues, and/or as
-                 a sanity check to make sure these lists are constituted
-                 as expected.
-
-   --complex-return=gnu|intel
-
-                 Specify the way in which complex numbers are returned
-                 from Fortran functions, either "gnu" (return in
-                 registers) or "intel" (return via hidden argument).
-                 If not specified and the environment variable FC is set,
-                 attempt to determine the return type from the compiler.
-                 Otherwise, the default is "gnu".
-
-   -q, --quiet   Suppress informational output. By default, configure
-                 is verbose. (NOTE: -q is not yet implemented)
-
-   -h, --help    Output this information and quit.
-
- Environment Variables:
-
-   CC            Specifies the C compiler to use.
-   CXX           Specifies the C++ compiler to use (sandbox only).
-   FC            Specifies the Fortran compiler to use (only to determine --complex-return).
-   AR            Specifies the static library archiver to use.
-   RANLIB        Specifies the ranlib (library indexer) executable to use.
-   PYTHON        Specifies the python interpreter to use.
-   CFLAGS        Specifies additional compiler flags to use (prepended).
-   LDFLAGS       Specifies additional linker flags to use (prepended).
-   LIBPTHREAD    Pthreads library to use.
-
-   Environment variables are traditionally set prior to running configure:
-
-     CC=gcc ./configure [options] haswell
-
-   However, they may also be specified as command line options, e.g.:
-
-     ./configure [options] CC=gcc haswell
-
-   Note that not all compilers are compatible with a given
-   configuration.
-
-EOF
+	echo " "
+	echo " ${script_name} (BLIS ${version})"
+	#echo " "
+	#echo " BLIS ${version}"
+	echo " "
+	echo " Configure BLIS's build system for compilation using a specified"
+	echo " configuration directory."
+	echo " "
+	echo " Usage:"
+	echo " "
+	echo "   ${script_name} [options] [env. vars.] confname"
+	echo " "
+	echo " Arguments:"
+	echo " "
+	echo "   confname      The name of the sub-directory inside of the 'config'"
+	echo "                 directory containing the desired BLIS configuration."
+	echo "                 Note that confname MUST be specified; if it is not,"
+	echo "                 configure will complain. To build a completely generic"
+	echo "                 implementation, use the 'generic' configuration"
+	echo " "
+	echo " Options:"
+	echo " "
+	echo "   -p PREFIX, --prefix=PREFIX"
+	echo " "
+	echo "                 The common installation prefix for all files. If given,"
+	echo "                 this option effectively implies:"
+	echo "                   --libdir=EXECPREFIX/lib"
+	echo "                   --includedir=PREFIX/include"
+	echo "                   --sharedir=PREFIX/share"
+	echo "                 where EXECPREFIX defaults to PREFIX. If this option is"
+	echo "                 not given, PREFIX defaults to '${prefix_def}'. If PREFIX"
+	echo "                 refers to a directory that does not exist, it will be"
+	echo "                 created."
+	echo " "
+	echo "   --exec-prefix=EXECPREFIX"
+	echo " "
+	echo "                 The installation prefix for libraries. Specifically, if"
+	echo "                 given, this option effectively implies:"
+	echo "                   --libdir=EXECPREFIX/lib"
+	echo "                 If not given, EXECPREFIX defaults to PREFIX, which may be"
+	echo "                 modified by the --prefix option. If EXECPREFIX refers to"
+	echo "                 a directory that does not exist, it will be created."
+	echo " "
+	echo "   --libdir=LIBDIR"
+	echo " "
+	echo "                 The path to which make will install libraries. If not"
+	echo "                 given, LIBDIR defaults to PREFIX/lib. If LIBDIR refers to"
+	echo "                 a directory that does not exist, it will be created."
+	echo " "
+	echo "   --includedir=INCDIR"
+	echo " "
+	echo "                 The path to which make will install development header"
+	echo "                 files. If not given, INCDIR defaults to PREFIX/include."
+	echo "                 If INCDIR refers to a directory that does not exist, it"
+	echo "                 will be created."
+	echo " "
+	echo "   --sharedir=SHAREDIR"
+	echo " "
+	echo "                 The path to which make will makefile fragments containing"
+	echo "                 make variables determined by configure (e.g. CC, CFLAGS,"
+	echo "                 and LDFLAGS). These files allow certain BLIS makefiles,"
+	echo "                 such as those in the examples or testsuite directories, to"
+	echo "                 operate on an installed copy of BLIS rather than a local"
+	echo "                 (and possibly uninstalled) copy. If not given, SHAREDIR"
+	echo "                 defaults to PREFIX/share. If SHAREDIR refers to a"
+	echo "                 directory that does not exist, it will be created."
+	echo " "
+	echo "   --enable-verbose-make, --disable-verbose-make"
+	echo " "
+	echo "                 Enable (disabled by default) verbose compilation output"
+	echo "                 during make."
+	echo " "
+	echo "   --enable-arg-max-hack --disable-arg-max-hack"
+	echo " "
+	echo "                 Enable (disabled by default) build system logic that"
+	echo "                 will allow archiving/linking the static/shared library"
+	echo "                 even if the command plus command line arguments exceeds"
+	echo "                 the operating system limit (ARG_MAX)."
+	echo " "
+	echo "   -d DEBUG, --enable-debug[=DEBUG]"
+	echo " "
+	echo "                 Enable debugging symbols in the library. If argument"
+	echo "                 DEBUG is given as 'opt', then optimization flags are"
+	echo "                 kept in the framework, otherwise optimization is"
+	echo "                 turned off."
+	echo " "
+	echo "   --disable-static, --enable-static"
+	echo " "
+	echo "                 Disable (enabled by default) building BLIS as a static"
+	echo "                 library. If the static library build is disabled, the"
+	echo "                 shared library build must remain enabled."
+	echo " "
+	echo "   --disable-shared, --enable-shared"
+	echo " "
+	echo "                 Disable (enabled by default) building BLIS as a shared"
+	echo "                 library. If the shared library build is disabled, the"
+	echo "                 static library build must remain enabled."
+	echo " "
+	echo "   --enable-rpath, --disable-rpath"
+	echo " "
+	echo "                 Enable (disabled by default) setting an install_name for"
+	echo "                 dynamic libraries on macOS which starts with @rpath rather"
+	echo "                 than the absolute install path."
+	echo " "
+	echo "   -e SYMBOLS, --export-shared[=SYMBOLS]"
+	echo " "
+	echo "                 Specify the subset of library symbols that are exported"
+	echo "                 within a shared library. Valid values for SYMBOLS are:"
+	echo "                 'public' (the default) and 'all'. By default, only"
+	echo "                 functions and variables that belong to public APIs are"
+	echo "                 exported in shared libraries. However, the user may"
+	echo "                 instead export all symbols in BLIS, even those that were"
+	echo "                 intended for internal use only. Note that the public APIs"
+	echo "                 encompass all functions that almost any user would ever"
+	echo "                 want to call, including the BLAS/CBLAS compatibility APIs"
+	echo "                 as well as the basic and expert interfaces to the typed"
+	echo "                 and object APIs that are unique to BLIS. Also note that"
+	echo "                 changing this option to 'all' will have no effect in some"
+	echo "                 environments, such as when compiling with clang on"
+	echo "                 Windows."
+	echo " "
+	echo "   -t MODEL, --enable-threading[=MODEL], --disable-threading"
+	echo " "
+	echo "                 Enable threading in the library, using threading model"
+	echo "                 MODEL={openmp,pthreads,no}. If MODEL=no or "
+	echo "                 --disable-threading is specified, threading will be"
+	echo "                 disabled. The default is 'no'."
+	echo " "
+	echo "   --enable-system, --disable-system"
+	echo " "
+	echo "                 Enable conventional operating system support, such as"
+	echo "                 pthreads for thread-safety. The default state is enabled."
+	echo "                 However, in rare circumstances you may wish to configure"
+	echo "                 BLIS for use with a minimal or nonexistent operating"
+	echo "                 system (e.g. hardware simulators). In these situations,"
+	echo "                 --disable-system may be used to jettison all compile-time"
+	echo "                 and link-time dependencies outside of the standard C"
+	echo "                 library. When disabled, this option also forces the use"
+	echo "                 of --disable-threading."
+	echo " "
+	echo "   --disable-pba-pools, --enable-pba-pools"
+	echo "   --disable-sba-pools, --enable-sba-pools"
+	echo " "
+	echo "                 Disable (enabled by default) use of internal memory pools"
+	echo "                 within the packing block allocator (pba) and/or the small"
+	echo "                 block allocator (sba). The former is used to allocate"
+	echo "                 memory used to pack submatrices while the latter is used"
+	echo "                 to allocate control/thread tree nodes and thread"
+	echo "                 communicators. Both allocations take place in the context"
+	echo "                 of level-3 operations. When the pba is disabled, the"
+	echo "                 malloc()-like function specified by BLIS_MALLOC_POOL is"
+	echo "                 called on-demand whenever a packing block is needed, and"
+	echo "                 when the sba is disabled, the malloc()-like function"
+	echo "                 specified by BLIS_MALLOC_INTL is called whenever a small"
+	echo "                 block is needed, with the two allocators calling free()-"
+	echo "                 like functions BLIS_FREE_POOL and BLIS_FREE_INTL,"
+	echo "                 respectively when blocks are released. When enabled,"
+	echo "                 either or both pools are populated via the same functions"
+	echo "                 mentioned previously, and henceforth blocks are checked"
+	echo "                 out and in. The library quickly reaches a state in which"
+	echo "                 it no longer needs to call malloc() or free(), even"
+	echo "                 across many separate level-3 operation invocations."
+	echo " "
+	echo "   --enable-mem-tracing, --disable-mem-tracing"
+	echo " "
+	echo "                 Enable (disable by default) output to stdout that traces"
+	echo "                 the allocation and freeing of memory, including the names"
+	echo "                 of the functions that triggered the allocation/freeing."
+	echo "                 Enabling this option WILL NEGATIVELY IMPACT PERFORMANCE."
+	echo "                 Please use only for informational/debugging purposes."
+	echo " "
+	echo "   -i SIZE, --int-size=SIZE"
+	echo " "
+	echo "                 Set the size (in bits) of internal BLIS integers and"
+	echo "                 integer types used in native BLIS interfaces. The"
+	echo "                 default integer type size is architecture dependent."
+	echo "                 (Hint: You can always find this value printed at the"
+	echo "                 beginning of the testsuite output.)"
+	echo " "
+	echo "   -b SIZE, --blas-int-size=SIZE"
+	echo " "
+	echo "                 Set the size (in bits) of integer types in external"
+	echo "                 BLAS and CBLAS interfaces, if enabled. The default"
+	echo "                 integer type size used in BLAS/CBLAS is 32 bits."
+	echo " "
+	echo "   --disable-blas, --enable-blas"
+	echo " "
+	echo "                 Disable (enabled by default) building the BLAS"
+	echo "                 compatibility layer."
+	echo " "
+	echo "   --enable-cblas, --disable-cblas"
+	echo " "
+	echo "                 Enable (disabled by default) building the CBLAS"
+	echo "                 compatibility layer. This automatically enables the"
+	echo "                 BLAS compatibility layer as well."
+	echo " "
+	echo "   --disable-mixed-dt, --enable-mixed-dt"
+	echo " "
+	echo "                 Disable (enabled by default) support for mixing the"
+	echo "                 storage domain and/or storage precision of matrix"
+	echo "                 operands for the gemm operation, as well as support"
+	echo "                 for computing in a precision different from one or"
+	echo "                 both of matrices A and B."
+	echo " "
+	echo "   --disable-mixed-dt-extra-mem, --enable-mixed-dt-extra-mem"
+	echo " "
+	echo "                 Disable (enabled by default) support for additional"
+	echo "                 mixed datatype optimizations that require temporarily"
+	echo "                 allocating extra memory--specifically, a single m x n"
+	echo "                 matrix (per application thread) whose storage datatype"
+	echo "                 is equal to the computation datatype. This option may"
+	echo "                 only be enabled when mixed domain/precision support is"
+	echo "                 enabled."
+	echo " "
+	echo "   --disable-mnk1-matrix, --enable-mnk1-matrix"
+	echo " "
+	echo "                 Disable (enabled by default) handling of matrix problem"
+	echo "                 where M, N or K = 1 via separate code branches. When disabled,"
+	echo "                 these operations will be performed by gemm rather than gemv"
+	echo "                 or other optimized implementations."
+	echo " "
+	echo "   --disable-tiny-matrix, --enable-tiny-matrix"
+	echo " "
+	echo "                 Disable (enabled by default) handling of tiny"
+	echo "                 matrix problems via tiny code branches. When disabled,"
+	echo "                 these tiny level-3 operations will be performed by"
+	echo "                 the conventional implementation, which is optimized for"
+	echo "                 medium and large problems. Note that what qualifies as"
+	echo "                 \"tiny\" depends on thresholds that may vary by sub-"
+	echo "                 configuration."
+	echo "                 Currently only of relevance on configs that include"
+	echo "                 AMD Zen sub-configs"
+	echo " "
+	echo "   --disable-small-matrix, --enable-small-matrix"
+	echo " "
+	echo "                 Disable (enabled by default) handling of small/skinny"
+	echo "                 matrix problems via small code branches. When disabled,"
+	echo "                 these small/skinny level-3 operations will be performed by"
+	echo "                 the conventional implementation, which is optimized for"
+	echo "                 medium and large problems. Note that what qualifies as"
+	echo "                 \"small\" depends on thresholds that may vary by sub-"
+	echo "                 configuration."
+	echo "                 Currently only of relevance on configs that include"
+	echo "                 AMD Zen sub-configs"
+	echo " "
+	echo "   --disable-sup-handling, --enable-sup-handling"
+	echo " "
+	echo "                 Disable (enabled by default) handling of small/skinny"
+	echo "                 matrix problems via SUP code branches. When disabled,"
+	echo "                 these small/skinny level-3 operations will be performed by"
+	echo "                 the conventional implementation, which is optimized for"
+	echo "                 medium and large problems. Note that what qualifies as"
+	echo "                 \"SUP\" depends on thresholds that may vary by sub-"
+	echo "                 configuration."
+	echo " "
+	echo "   --disable-small-matrix-trsm, --enable-small-matrix-trsm"
+	echo " "
+	echo "                 Disable (enabled by default) handling of small/skinny"
+	echo "                 TRSM problems via small code branches. When disabled,"
+	echo "                 these small/skinny level-3 operations will be performed by"
+	echo "                 the conventional implementation, which is optimized for"
+	echo "                 medium and large problems. Note that what qualifies as"
+	echo "                 \"small\" depends on thresholds that may vary by sub-"
+	echo "                 configuration."
+	echo "                 Currently only of relevance on configs that include"
+	echo "                 AMD Zen sub-configs"
+	echo " "
+	echo "   -a NAME --enable-addon=NAME"
+	echo " "
+	echo "                 Enable the code provided by an addon. An addon consists"
+	echo "                 of a separate directory of code that provides additional"
+	echo "                 APIs, implementations, and/or operations that would"
+	echo "                 otherwise not be present within a build of BLIS. This"
+	echo "                 option may be used multiple times to specify the inclusion"
+	echo "                 of multiple addons. By default, no addons are enabled."
+	echo " "
+	echo "   -s NAME --enable-sandbox=NAME"
+	echo " "
+	echo "                 Enable a separate sandbox implementation of gemm. This"
+	echo "                 option disables BLIS's conventional gemm implementation"
+	echo "                 (which shares common infrastructure with other level-3"
+	echo "                 operations) and instead compiles and uses the code in"
+	echo "                 the NAME directory, which is expected to be a sub-"
+	echo "                 directory of 'sandbox'. By default, no sandboxes are"
+	echo "                 enabled."
+	echo " "
+	echo "   --with-memkind, --without-memkind"
+	echo " "
+	echo "                 Forcibly enable or disable the use of libmemkind's"
+	echo "                 hbw_malloc() and hbw_free() as substitutes for malloc()"
+	echo "                 and free(), respectively, when allocating memory for"
+	echo "                 BLIS's memory pools, which are used to manage buffers"
+	echo "                 into which matrices are packed. The default behavior"
+	echo "                 for this option is environment-dependent; if configure"
+	echo "                 detects the presence of libmemkind, libmemkind is used"
+	echo "                 by default, and otherwise it is not used by default."
+	echo " "
+	echo "   -r METHOD, --thread-part-jrir=METHOD"
+	echo " "
+	echo "                 Request a method of assigning micropanels to threads in"
+	echo "                 the JR and IR loops. Valid values for METHOD are 'slab'"
+	echo "                 and 'rr'. Using 'slab' assigns (as much as possible)"
+	echo "                 contiguous regions of micropanels to each thread while"
+	echo "                 using 'rr' assigns micropanels to threads in a round-"
+	echo "                 robin fashion. The chosen method also applies during"
+	echo "                 the packing of A and B. The default method is 'slab'."
+	echo "                 NOTE: Specifying this option constitutes a request,"
+	echo "                 which may be ignored in select situations if the"
+	echo "                 implementation has a good reason to do so."
+	echo " "
+	echo "   --disable-trsm-preinversion, --enable-trsm-preinversion"
+	echo " "
+	echo "                 Disable (enabled by default) pre-inversion of triangular"
+	echo "                 matrix diagonals when performing trsm. When pre-inversion"
+	echo "                 is enabled, diagonal elements are inverted outside of the"
+	echo "                 microkernel (e.g. during packing) so that the microkernel"
+	echo "                 can use multiply instructions. When disabled, division"
+	echo "                 instructions are used within the microkernel. Executing"
+	echo "                 these division instructions within the microkernel will"
+	echo "                 incur a performance penalty, but numerical robustness will"
+	echo "                 improve for certain cases involving denormal numbers that"
+	echo "                 would otherwise result in overflow in the pre-inverted"
+	echo "                 values."
+	echo " "
+	echo "   --force-version=STRING"
+	echo " "
+	echo "                 Force configure to use an arbitrary version string"
+	echo "                 STRING. This option may be useful when repackaging"
+	echo "                 custom versions of BLIS by outside organizations."
+	echo " "
+	echo "   -c, --show-config-lists"
+	echo " "
+	echo "                 Print the config and kernel lists, and kernel-to-config"
+	echo "                 map after they are read from file. This can be useful"
+	echo "                 when debugging certain configuration issues, and/or as"
+	echo "                 a sanity check to make sure these lists are constituted"
+	echo "                 as expected."
+	echo " "
+	echo "   --complex-return=gnu|intel"
+	echo " "
+	echo "                 Specify the way in which complex numbers are returned"
+	echo "                 from Fortran functions, either \"gnu\" (return in"
+	echo "                 registers) or \"intel\" (return via hidden argument)."
+	echo "                 If not specified and the environment variable FC is set,"
+	echo "                 attempt to determine the return type from the compiler."
+	echo "                 Otherwise, the default is \"gnu\"."
+	echo " "
+	echo "   --enable-aocl-dynamic, --disable-aocl-dynamic"
+	echo " "
+	echo "                 Disable (Enabled by default) dynamic selection of number of"
+	echo "                 threads used to solve the given problem."
+	echo "                 Range of optimum number of threads will be [1, num_threads],"
+	echo "                 where \"num_threads\" is number of threads set by the application."
+	echo "                 Num_threads is derived from either environment variable"
+	echo "                 OMP_NUM_THREADS or BLIS_NUM_THREADS' or bli_set_num_threads() API."
+	echo " "
+	echo "   --enable-security-flags, --disable-security-flags"
+	echo " "
+	echo "                 Enable (disabled by default) addition of compiler and linker"
+	echo "                 security hardening flags (e.g. -D_FORTIFY_SOURCE=2 -fstack-protector-strong"
+	echo "                 and -Wl,-z,relro -Wl,-z,now on ELF platforms). Disabling omits them."
+	echo " "
+	echo "   --enable-blis-arch-type, --disable-blis-arch-type"
+	echo " "
+	echo "                 Disable support for AOCL_ENABLE_INSTRUCTIONS, BLIS_ARCH_TYPE and"
+	echo "                 BLIS_MODEL_TYPE environment variables, which allows user to select"
+	echo "                 architecture specific code path and optimizations at runtime."
+	echo "                 If disabled, in builds with multiple code paths, BLIS"
+	echo "                 will still select path and optimizations automatically."
+	echo "                 Default: Enabled in builds with multiple code paths, else disabled."
+	echo " "
+	echo "   --rename-blis-arch-type=STRING"
+	echo " "
+	echo "                 Change environment variable used to select architecture specific"
+	echo "                 code path from BLIS_ARCH_TYPE to STRING"
+	echo " "
+	echo "   --rename-blis-model-type=STRING"
+	echo " "
+	echo "                 Change environment variable used to select architecture model specific"
+	echo "                 optimizations from BLIS_MODEL_TYPE to STRING"
+	echo " "
+	echo "   --enable-aocl-dtl=OPTION, --disable-aocl-dtl"
+	echo " "
+	echo "                 Enable DTL tracing and/or logging functionality"
+	echo "                 OPTION={all,trace,log,off}. The default is 'off'."
+	echo "                 Unrecognized options will be treated as 'off'."
+	echo "                 Details of the options:"
+	echo "                 * logging records basic information for each BLAS"
+	echo "                   call, with some APIs including timing information."
+	echo "                 * tracing records more detailed information on"
+	echo "                   the call stack within the BLAS APIs, and is mostly"
+	echo "                   of use for BLIS developers. The level of detail is"
+	echo "                   controlled by --aocl-dtl-trace-level option. More detailed"
+	echo "                   tracing will significantly increase API runtime."
+	echo " "
+	echo "   --aocl-dtl-trace-level=OPTION"
+	echo " "
+	echo "                 Sets the level of detail in tracing, see the description"
+	echo "                 in aocl_dtl/aocldtlcf.h for more details."
+	echo "                 OPTION=1..10, used to set different levels of detail in"
+	echo "                 tracing. Default value is 5."
+	echo " "
+	echo "   -q, --quiet   Suppress informational output. By default, configure"
+	echo "                 is verbose. (NOTE: -q is not yet implemented)"
+	echo " "
+	echo "   -h, --help    Output this information and quit."
+	echo " "
+	echo " Environment Variables:"
+	echo " "
+	echo "   CC            Specifies the C compiler to use."
+	echo "   CXX           Specifies the C++ compiler to use (sandbox only)."
+	echo "   FC            Specifies the Fortran compiler to use (only to determine --complex-return)."
+	echo "   RANLIB        Specifies the ranlib executable to use."
+	echo "   AR            Specifies the archiver to use."
+	echo "   CFLAGS        Specifies additional compiler flags to use (prepended)."
+	echo "   LDFLAGS       Specifies additional linker flags to use (prepended)."
+	echo "   LIBPTHREAD    Pthreads library to use."
+	echo "   PYTHON        Specifies the python interpreter to use."
+	echo " "
+	echo "   Environment variables may also be specified as command line"
+	echo "   options, e.g.:"
+	echo " "
+	echo "     ./configure [options] CC=gcc haswell"
+	echo " "
+	echo "   Note that not all compilers are compatible with a given"
+	echo "   configuration."
+	echo " "
 
 	# Exit with non-zero exit status
 	exit 1
@@ -1243,8 +1267,12 @@ auto_detect()
 	# NOTE: -D_GNU_SOURCE is needed to enable POSIX extensions to
 	# pthreads (i.e., barriers).
 
-	cmd="${cc} \
+	double_quote_open=\"\\\"
+	double_quote_close=\\\"\"
+	cmd="${cc} ${config_defines} \
 	      -DBLIS_CONFIGURETIME_CPUID \
+	      -D__blis_arch_type_name=${double_quote_open}${rename_blis_arch_type}${double_quote_close} \
+	      -D__blis_model_type_name=${double_quote_open}${rename_blis_model_type}${double_quote_close} \
 	      ${c_hdr_paths} \
 	      -std=c99 -D_GNU_SOURCE \
 	      ${cflags}"
@@ -1678,7 +1706,7 @@ check_compiler()
 	# Specific:
 	#
 	#   skx: icc 15.0.1+, gcc 6.0+, clang 3.9+
-	#   knl: icc 14.0.1+, gcc 5.0+, clang 3.9+
+	#   knl: icc 14.0.1+, gcc 5.0-14, clang 3.9+
 	#   haswell: any
 	#   sandybridge: any
 	#   penryn: any
@@ -1730,7 +1758,7 @@ check_compiler()
 				blacklistcc_add "zen"
 			fi
 		fi
-		if [[ ${cc_major} -lt 5 ]]; then
+		if [[ ${cc_major} -lt 5 ]] || [[ ${cc_major} -gt 14 ]]; then
 			blacklistcc_add "knl"
 		fi
 		if [[ ${cc_major} -lt 6 ]]; then
@@ -1886,14 +1914,7 @@ check_compiler_version_ranges()
 	gcc_older_than_4_9_0='no'
 	gcc_older_than_6_1_0='no'
 	gcc_older_than_9_1_0='no'
-	gcc_older_than_10_3_0='no'
-
-	clang_older_than_9_0_0='no'
-	clang_older_than_12_0_0='no'
-
-	aocc_older_than_2_0_0='no'
-	aocc_older_than_3_0_0='no'
-
+	gcc_older_than_11_2_0='no'
 	echo "${script_name}: checking ${cc} ${cc_version} against known consequential version ranges."
 
 	# gcc
@@ -1919,10 +1940,17 @@ check_compiler_version_ranges()
 			gcc_older_than_9_1_0='yes'
 		fi
 
-		# Check for gcc < 10.3.0 (ie: 10.2 or older).
-		if [[ ( ${cc_major} -lt 10 ) || ( ${cc_major} -eq 10 && ${cc_minor} -lt 3 ) ]]; then
-			echo "${script_name}: note: found ${cc} version older than 10.3."
-			gcc_older_than_10_3_0='yes'
+		# Check for gcc < 11.2.0 (ie: 11.2 or older).
+		if [ ${cc_major} -lt 11 ]; then
+			echo "${script_name}: note: found ${cc} version older than 11.2.0."
+			gcc_older_than_11_2_0='yes'
+		else
+			if [ ${cc_major} -eq 11 ]; then
+				if [ ${cc_minor} -lt 2 ]; then
+					echo "${script_name}: note: found ${cc} version older than 11.2.0."
+					gcc_older_than_11_2_0='yes'
+				fi
+			fi
 		fi
 	fi
 
@@ -2086,67 +2114,13 @@ try_assemble()
 
 set_default_version()
 {
-	local gitdir version_file gd_stderr git_describe_str git_error new_version_str
-
-	gitdir='.git'
-
 	# The path to the version file.
 	version_file=$1
 
 	echo "${script_name}: determining default version string."
 
-	# Check if the .git dir exists; if it does not, we do nothing.
-	if [ -d "${dist_path}/${gitdir}" ]; then
-
-		echo "${script_name}: found '${gitdir}' directory; assuming git clone."
-
-		echo "${script_name}: executing: git describe --tags."
-
-		gd_stderr="git_describe_stderr.txt"
-
-		# Query git for the version string, which is simply the current tag,
-		# followed by a number signifying how many commits have transpired
-		# since the tag, followed by a 'g' and a shortened hash tab. Capture
-		# stderr to a file.
-		git_describe_str=$(git -C "${dist_path}" describe --tags 2> "${gd_stderr}")
-
-		# Pull in whatever error message was generated, if any, and delete
-		# the file.
-		git_error=$(<"${gd_stderr}")
-
-		# Remove the stderr file.
-		rm -f "${gd_stderr}"
-
-		# If git returned an error, don't do anything.
-		if [ -n "${git_error}" ]; then
-
-			echo "${script_name}: git returned an error: '${git_error}'."
-			echo "${script_name}: using string from unmodified version file."
-
-			# Use what's in the version file as-is.
-			version=$(<"${version_file}")
-		else
-
-			echo "${script_name}: got back ${git_describe_str}."
-
-			# Strip off the commit hash label.
-			new_version_str=$(echo "${git_describe_str}" | cut -d- -f-2)
-
-			echo "${script_name}: truncating to ${new_version_str}."
-
-			# Write the new version string to the version file.
-			#echo "${new_version_str}" > ${version_file}
-
-			# Set the version variable.
-			version="${new_version_str}"
-		fi
-	else
-
-		echo "${script_name}: could not find '${gitdir}' directory; using unmodified version file."
-
-		# Use what's in the version file as-is.
-		version=$(<"${version_file}")
-	fi
+	# Use what's in the version file as-is.
+	version="AOCL-BLAS $(cat "${version_file}") Build $(date +%Y%m%d)"
 }
 
 select_tool_w_env()
@@ -2445,6 +2419,9 @@ main()
 	frame_dir='frame'
 	frame_dirpath="${dist_path}/${frame_dir}"
 
+	# The root directory of the BLIS framework.
+	aocldtl_dir='aocl_dtl'
+	aocldtl_dirpath="${dist_path}/${aocldtl_dir}"
 	# The names of the addons.
 	addon_dir='addon'
 	addon_dirpath="${dist_path}/${addon_dir}"
@@ -2565,12 +2542,30 @@ main()
 	enable_cblas='no'
 	enable_mixed_dt='yes'
 	enable_mixed_dt_extra_mem='yes'
+
+	enable_mnk1_matrix='yes'
+	enable_tiny_matrix='yes'
+	enable_small_matrix='yes'
 	enable_sup_handling='yes'
-	enable_amd_frame_tweaks='no'
-	enable_memkind='' # The default memkind value is determined later on.
+	enable_small_matrix_trsm='yes'
 	enable_trsm_preinversion='yes'
+
+	enable_memkind='' # The default memkind value is determined later on.
+	enable_aocl_dynamic='yes'
+	enable_security_flags='no'
 	force_version='no'
 	complex_return='default'
+	disable_blis_arch_type='unset'
+	rename_blis_arch_type='BLIS_ARCH_TYPE'
+	rename_blis_model_type='BLIS_MODEL_TYPE'
+
+	# DTL tracing/logging flag.
+	enable_aocl_dtl='off'
+	aocl_dtl_trace_level_number='unset'
+
+	# The addon flag and names.
+	addon_flag=''
+	addon_list=''
 
 	# The addon flag and names.
 	addon_flag=''
@@ -2757,7 +2752,6 @@ main()
 						disable-mem-tracing)
 							enable_mem_tracing='no'
 							;;
-
 						enable-addon=*)
 							addon_flag=1
 							addon_name=${OPTARG#*=}
@@ -2767,7 +2761,6 @@ main()
 						disable-addon)
 							addon_flag=''
 							;;
-
 						enable-sandbox=*)
 							sandbox_flag=1
 							sandbox=${OPTARG#*=}
@@ -2811,9 +2804,23 @@ main()
 						disable-mixed-dt-extra-mem)
 							enable_mixed_dt_extra_mem='no'
 							;;
-
-						sup)
-							enable_sup_handling='yes'
+						enable-mnk1-matrix)
+							enable_mnk1_matrix='yes'
+							;;
+						disable-mnk1-matrix)
+							enable_mnk1_matrix='no'
+							;;
+						enable-tiny-matrix)
+							enable_tiny_matrix='yes'
+							;;
+						disable-tiny-matrix)
+							enable_tiny_matrix='no'
+							;;
+						enable-small-matrix)
+							enable_small_matrix='yes'
+							;;
+						disable-small-matrix)
+							enable_small_matrix='no'
 							;;
 						enable-sup-handling)
 							enable_sup_handling='yes'
@@ -2824,14 +2831,12 @@ main()
 						disable-sup-handling)
 							enable_sup_handling='no'
 							;;
-
-						enable-amd-frame-tweaks)
-							enable_amd_frame_tweaks='yes'
+						enable-small-matrix-trsm)
+							enable_small_matrix_trsm='yes'
 							;;
-						disable-amd-frame-tweaks)
-							enable_amd_frame_tweaks='no'
+						disable-small-matrix-trsm)
+							enable_small_matrix_trsm='no'
 							;;
-
 						with-memkind)
 							enable_memkind='yes'
 							;;
@@ -2845,7 +2850,18 @@ main()
 						disable-trsm-preinversion)
 							enable_trsm_preinversion='no'
 							;;
-
+						enable-aocl-dynamic)
+							enable_aocl_dynamic='yes'
+							;;
+						disable-aocl-dynamic)
+							enable_aocl_dynamic='no'
+							;;
+						enable-security-flags)
+							enable_security_flags='yes'
+							;;
+						disable-security-flags)
+							enable_security_flags='no'
+							;;
 						force-version=*)
 							force_version=${OPTARG#*=}
 							;;
@@ -2857,7 +2873,27 @@ main()
 						complex-return=*)
 							complex_return=${OPTARG#*=}
 							;;
-
+						enable-blis-arch-type)
+							disable_blis_arch_type='no'
+							;;
+						disable-blis-arch-type)
+							disable_blis_arch_type='yes'
+							;;
+						rename-blis-arch-type=*)
+							rename_blis_arch_type=${OPTARG#*=}
+							;;
+						rename-blis-model-type=*)
+							rename_blis_model_type=${OPTARG#*=}
+							;;
+						enable-aocl-dtl=*)
+							enable_aocl_dtl=${OPTARG#*=}
+							;;
+						disable-aocl-dtl=*)
+							enable_aocl_dtl='off'
+							;;
+						aocl-dtl-trace-level=*)
+							aocl_dtl_trace_level_number=${OPTARG#*=}
+							;;
 						*)
 							print_usage
 							;;
@@ -3171,6 +3207,7 @@ main()
 		# Call the auto_detect() function and save the returned string in
 		# config_name.
 		config_name=$(auto_detect)
+		#config_name="generic"
 
 		# Debugging stuff. When confirming the behavior of auto_detect(),
 		# it is useful to output ${config_name}, which in theory could be
@@ -3365,6 +3402,19 @@ main()
 
 	fi
 
+	# Based on the number of sub-configurations, set default value for disable_blis_arch_type
+	# (if user hasn't set option). BLIS_ARCH_TYPE functionality only makes sense for use with
+	# processor families containing multiple sub-configurations, but user can force the
+	# functionality to be enabled/disabled with --enable-blis-arch-type/--disable-blis-arch-type
+	# configure options.
+	if [ "x${disable_blis_arch_type}" = "xunset"  ]; then
+		config_list_count=$(echo ${config_list} |wc -w)
+		if [ "x${config_list_count}" = "x1"  ]; then
+			disable_blis_arch_type='yes'
+		else
+			disable_blis_arch_type='no'
+		fi
+	fi
 
 	echo "${script_name}: checking sub-configurations:"
 
@@ -3833,7 +3883,9 @@ main()
 		echo "${script_name}: internal memory pools for small blocks are enabled."
 		enable_sba_pools_01=1
 	else
-		echo "${script_name}: internal memory pools for small blocks are disabled."
+		#echo "${script_name}: internal memory pools for small blocks are disabled."
+		echo "${script_name}: *** disabling memory pools for small blocks is currently disabled, awaiting fixes to this functionality."
+		exit 1
 		enable_sba_pools_01=0
 	fi
 	if [[ ${enable_mem_tracing} = yes ]]; then
@@ -3877,14 +3929,7 @@ main()
 		echo "${script_name}: compiler appears to not support #pragma omp simd."
 		enable_pragma_omp_simd_01=0
 	fi
-	if [[ ${enable_blas} = yes ]]; then
-		echo "${script_name}: the BLAS compatibility layer is enabled."
-		enable_blas_01=1
-	else
-		echo "${script_name}: the BLAS compatibility layer is disabled."
-		enable_blas_01=0
-	fi
-	if [[ ${enable_cblas} = yes ]]; then
+	if [ "x${enable_cblas}" = "xyes" ]; then
 		echo "${script_name}: the CBLAS compatibility layer is enabled."
 		enable_cblas_01=1
 		# Force BLAS layer when CBLAS is enabled
@@ -3893,7 +3938,14 @@ main()
 		echo "${script_name}: the CBLAS compatibility layer is disabled."
 		enable_cblas_01=0
 	fi
-	if [[ ${enable_mixed_dt} = yes ]]; then
+	if [ "x${enable_blas}" = "xyes" ]; then
+		echo "${script_name}: the BLAS compatibility layer is enabled."
+		enable_blas_01=1
+	else
+		echo "${script_name}: the BLAS compatibility layer is disabled."
+		enable_blas_01=0
+	fi
+	if [ "x${enable_mixed_dt}" = "xyes" ]; then
 		echo "${script_name}: mixed datatype support is enabled."
 
 		if [[ ${enable_mixed_dt_extra_mem} = yes ]]; then
@@ -3911,19 +3963,85 @@ main()
 		enable_mixed_dt_extra_mem_01=0
 		enable_mixed_dt_01=0
 	fi
-	if [[ ${enable_sup_handling} = yes ]]; then
-		echo "${script_name}: sup (skinny/unpacked) matrix handling is enabled."
+	if [ "x${enable_mnk1_matrix}" = "xyes" ]; then
+		echo "${script_name}: M,N,K=1 matrix handling is enabled."
+		enable_mnk1_matrix_01=1
+	else
+		echo "${script_name}: M,N,K=1 matrix handling is disabled."
+		enable_mnk1_matrix_01=0
+	fi
+	if [ "x${enable_tiny_matrix}" = "xyes" ]; then
+		echo "${script_name}: tiny matrix handling is enabled."
+		enable_tiny_matrix_01=1
+	else
+		echo "${script_name}: tiny matrix handling is disabled."
+		enable_tiny_matrix_01=0
+	fi
+	if [ "x${enable_small_matrix}" = "xyes" ]; then
+		echo "${script_name}: small matrix handling is enabled."
+		enable_small_matrix_01=1
+	else
+		echo "${script_name}: small matrix handling is disabled."
+		enable_small_matrix_01=0
+	fi
+	if [ "x${enable_sup_handling}" = "xyes" ]; then
+		echo "${script_name}: SUP matrix handling is enabled."
 		enable_sup_handling_01=1
 	else
-		echo "${script_name}: sup (skinny/unpacked) matrix handling is disabled."
+		echo "${script_name}: SUP matrix handling is disabled."
 		enable_sup_handling_01=0
 	fi
-	if [[ ${enable_trsm_preinversion} = yes ]]; then
+	if [ "x${enable_small_matrix_trsm}" = "xyes" ]; then
+		echo "${script_name}: TRSM small matrix handling is enabled."
+		enable_small_matrix_trsm_01=1
+	else
+		echo "${script_name}: TRSM small matrix handling is disabled."
+		enable_small_matrix_trsm_01=0
+	fi
+	if [ "x${enable_trsm_preinversion}" = "xyes" ]; then
 		echo "${script_name}: trsm diagonal element pre-inversion is enabled."
 		enable_trsm_preinversion_01=1
 	else
 		echo "${script_name}: trsm diagonal element pre-inversion is disabled."
 		enable_trsm_preinversion_01=0
+	fi
+
+	if [ "x${enable_security_flags}" = "xyes" ]; then
+		echo "${script_name}: security hardening flags are enabled."
+	else
+		echo "${script_name}: security hardening flags are disabled."
+	fi
+
+	# Check AOCL DTL flag configuration
+	enable_aocl_dtl_trace_01=0
+	enable_aocl_dtl_log_01=0
+	if [ "x${enable_aocl_dtl}" = "xtrace" ]; then
+		enable_aocl_dtl_trace_01=1
+	elif [ "x${enable_aocl_dtl}" = "xlog" ]; then
+		enable_aocl_dtl_log_01=1
+	elif [ "x${enable_aocl_dtl}" = "xall" ]; then
+		enable_aocl_dtl_trace_01=1
+		enable_aocl_dtl_log_01=1
+	fi
+
+	if [ "x${aocl_dtl_trace_level_number}" = "xunset" ]; then
+		aocl_dtl_trace_level_number=5
+	fi
+
+	# Check aocl dynamic threading configuration and enable it only if
+	# multi-threading is enabled
+	if [ "x${enable_aocl_dynamic}" = "xyes" ]; then
+		if [ "x${threading_model}" != "xoff" ]; then
+			echo "${script_name}: dynamic selection of number of threads is enabled"
+			enable_aocl_dynamic_01=1
+		else
+			enable_aocl_dynamic_01=0
+			enable_aocl_dynamic="no"
+			echo "${script_name}: dynamic threading is disabled as multithreading is disabled"
+		fi
+	else
+		echo "${script_name}: dynamic selection of number of threads is disabled"
+		enable_aocl_dynamic_01=0
 	fi
 
 	# Report integer sizes.
@@ -3947,27 +4065,6 @@ main()
 	if [[ ${blas_int_type_size} = 64 && ${int_type_size} = 32 ]]; then
 		echo "${script_name}: *** To avoid the possibility of truncation, we do not allow use of 64-bit integers in the BLAS API with 32-bit integers in BLIS. Please use a different configuration of integers."
 		exit 1
-	fi
-
-	# Check whether we should use AMD-customized versions of certain framework
-	# files.
-	if [[ ${enable_amd_frame_tweaks} = yes ]]; then
-
-		echo "${script_name}: AMD-specific framework files will be considered."
-		echo "${script_name}:   checking eligibility of target configuration."
-
-		# Make sure we are targeting either one of the zen subconfigs or the
-		# amd64 umbrella family.
-		if [[ ${config_name} != *zen* && ${config_name} != *amd64* ]]; then
-			echo "${script_name}:   target configuration '${config_name}' is not eligible."
-			echo "${script_name}:   disabling AMD-specific framework files."
-			enable_amd_frame_tweaks='no'
-		else
-			echo "${script_name}:   target configuration '${config_name}' is eligible."
-			echo "${script_name}:   enabling AMD-specific framework files."
-		fi
-	else
-		echo "${script_name}: AMD-specific framework files will not be considered."
 	fi
 
 	# Check if addons were given.
@@ -4068,6 +4165,23 @@ main()
 		exit 1
 	fi
 
+	if [ "x${disable_blis_arch_type}" = "xyes"  ]; then
+		echo "${script_name}: user selection of code path using AOCL_ENABLE_INSTRUCTIONS,"
+		echo "${script_name}:    BLIS_ARCH_TYPE and BLIS_MODEL_TYPE env vars is disabled."
+		disable_blis_arch_type_01='1'
+	else
+		disable_blis_arch_type_01='0'
+	fi
+
+	# Check if the user requested a custom env var name to replace BLIS_ARCH_TYPE.
+	if [ "x${rename_blis_arch_type}" != "xBLIS_ARCH_TYPE" ]; then
+		echo "${script_name}: configuring with BLIS_ARCH_TYPE env var renamed to '${rename_blis_arch_type}'."
+	fi
+	# Check if the user requested a custom env var name to replace BLIS_MODEL_TYPE.
+	if [ "x${rename_blis_model_type}" != "xBLIS_MODEL_TYPE" ]; then
+		echo "${script_name}: configuring with BLIS_MODEL_TYPE env var renamed to '${rename_blis_model_type}'."
+	fi
+
 	echo "${script_name}: configuring complex return type as \"${complex_return}\"."
 
 	# Variables that may contain forward slashes, such as paths, need extra
@@ -4113,6 +4227,19 @@ main()
 	# Create a #define for the configuration family (config_name).
 	uconf=$(echo "${config_name}" | tr '[:lower:]' '[:upper:]')
 	config_name_define="#define BLIS_FAMILY_${uconf}\n"
+
+	# Create a AOCL specific #define
+	# This macro is enabled only for zen family configurations.
+	# This enables us to use different cache block sizes for TRSM instead of common level-3 block sizes.
+	# Note: amd64_legacy is for pre-zen architectures.
+	uconf=$(echo ${config_name} | grep -v amd64_legacy |grep -c 'zen\|amd64\|x86_64' | cut -d. -f1)
+	if [[ $uconf == 1 ]]; then
+		enable_aocl_zen='yes'
+		enable_aocl_zen_01=1
+	else
+		enable_aocl_zen='no'
+		enable_aocl_zen_01=0;
+	fi
 
 	# Create a list of #defines, one for each configuration in config_list.
 	config_list_defines=""
@@ -4179,59 +4306,61 @@ main()
 	# Begin substituting information into the config_mk_in file, outputting
 	# to config_mk_out.
 	echo "${script_name}: creating ${config_mk_out_path} from ${config_mk_in_path}"
-	sed <"${config_mk_in_path}" >"${config_mk_out_path}"          \
-	-e "s/@version@/${version_esc}/g"                             \
-	-e "s/@so_version_major@/${so_version_major}/g"               \
-	-e "s/@so_version_minorbuild@/${so_version_minorbuild}/g"     \
-	-e "s/@config_name@/${config_name}/g"                         \
-	-e "s/@config_list@/${config_list}/g"                         \
-	-e "s/@kernel_list@/${kernel_list}/g"                         \
-	-e "s/@kconfig_map@/${kconfig_map}/g"                         \
-	-e "s/@os_name@/${os_name_esc}/g"                             \
-	-e "s/@is_win@/${is_win}/g"                                   \
-	-e "s/@is_msvc@/${is_msvc}/g"                                 \
-	-e "s/@dist_path@/${dist_path_esc}/g"                         \
-	-e "s/@CC_VENDOR@/${cc_vendor}/g"                             \
-	-e "s/@gcc_older_than_4_9_0@/${gcc_older_than_4_9_0}/g"       \
-	-e "s/@gcc_older_than_6_1_0@/${gcc_older_than_6_1_0}/g"       \
-	-e "s/@gcc_older_than_9_1_0@/${gcc_older_than_9_1_0}/g"       \
-	-e "s/@gcc_older_than_10_3_0@/${gcc_older_than_10_3_0}/g"     \
-	-e "s/@clang_older_than_9_0_0@/${clang_older_than_9_0_0}/g"   \
-	-e "s/@clang_older_than_12_0_0@/${clang_older_than_12_0_0}/g" \
-	-e "s/@aocc_older_than_2_0_0@/${aocc_older_than_2_0_0}/g"     \
-	-e "s/@aocc_older_than_3_0_0@/${aocc_older_than_3_0_0}/g"     \
-	-e "s/@CC@/${cc_esc}/g"                                       \
-	-e "s/@CXX@/${cxx_esc}/g"                                     \
-	-e "s/@AR@/${ar_esc}/g"                                       \
-	-e "s/@RANLIB@/${ranlib_esc}/g"                               \
-	-e "s/@PYTHON@/${python_esc}/g"                               \
-	-e "s/@libpthread@/${libpthread_esc}/g"                       \
-	-e "s/@cflags_preset@/${cflags_preset_esc}/g"                 \
-	-e "s/@ldflags_preset@/${ldflags_preset_esc}/g"               \
-	-e "s/@enable_asan@/${enable_asan}/g"                         \
-	-e "s/@debug_type@/${debug_type}/g"                           \
-	-e "s/@enable_debug@/${enable_debug}/g"                       \
-	-e "s/@enable_system@/${enable_system}/g"                     \
-	-e "s/@threading_model@/${threading_model}/g"                 \
-	-e "s/@prefix@/${prefix_esc}/g"                               \
-	-e "s/@exec_prefix@/${exec_prefix_esc}/g"                     \
-	-e "s/@libdir@/${libdir_esc}/g"                               \
-	-e "s/@includedir@/${includedir_esc}/g"                       \
-	-e "s/@sharedir@/${sharedir_esc}/g"                           \
-	-e "s/@enable_verbose@/${enable_verbose}/g"                   \
-	-e "s/@configured_oot@/${configured_oot}/g"                   \
-	-e "s/@enable_arg_max_hack@/${enable_arg_max_hack}/g"         \
-	-e "s/@enable_static@/${enable_static}/g"                     \
-	-e "s/@enable_shared@/${enable_shared}/g"                     \
-	-e "s/@enable_rpath@/${enable_rpath}/g"                       \
-	-e "s/@export_shared@/${export_shared}/g"                     \
-	-e "s/@enable_blas@/${enable_blas}/g"                         \
-	-e "s/@enable_cblas@/${enable_cblas}/g"                       \
-	-e "s/@enable_amd_frame_tweaks@/${enable_amd_frame_tweaks}/g" \
-	-e "s/@enable_memkind@/${enable_memkind}/g"                   \
-	-e "s/@pragma_omp_simd@/${pragma_omp_simd}/g"                 \
-	-e "s/@addon_list@/${addon_list}/g"                           \
-	-e "s/@sandbox@/${sandbox}/g"
+	cat "${config_mk_in_path}" \
+		| sed -e "s/@version@/${version_esc}/g" \
+		| sed -e "s/@so_version_major@/${so_version_major}/g" \
+		| sed -e "s/@so_version_minorbuild@/${so_version_minorbuild}/g" \
+		| sed -e "s/@config_name@/${config_name}/g" \
+		| sed -e "s/@config_list@/${config_list}/g" \
+		| sed -e "s/@kernel_list@/${kernel_list}/g" \
+		| sed -e "s/@kconfig_map@/${kconfig_map}/g" \
+		| sed -e "s/@os_name@/${os_name_esc}/g" \
+		| sed -e "s/@is_win@/${is_win}/g" \
+		| sed -e "s/@dist_path@/${dist_path_esc}/g" \
+		| sed -e "s/@CC_VENDOR@/${cc_vendor}/g" \
+		| sed -e "s/@gcc_older_than_4_9_0@/${gcc_older_than_4_9_0}/g" \
+		| sed -e "s/@gcc_older_than_6_1_0@/${gcc_older_than_6_1_0}/g" \
+		| sed -e "s/@gcc_older_than_9_1_0@/${gcc_older_than_9_1_0}/g" \
+		| sed -e "s/@gcc_older_than_11_2_0@/${gcc_older_than_11_2_0}/g" \
+		| sed -e "s/@CC@/${cc_esc}/g" \
+		| sed -e "s/@CXX@/${cxx_esc}/g" \
+		| sed -e "s/@cc_major@/${cc_major}/g" \
+		| sed -e "s/@cc_minor@/${cc_minor}/g" \
+		| sed -e "s/@cc_revision@/${cc_revision}/g" \
+		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
+		| sed -e "s/@AR@/${ar_esc}/g" \
+		| sed -e "s/@PYTHON@/${python_esc}/g" \
+		| sed -e "s/@libpthread@/${libpthread_esc}/g" \
+		| sed -e "s/@cflags_preset@/${cflags_preset_esc}/g" \
+		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
+		| sed -e "s/@debug_type@/${debug_type}/g" \
+		| sed -e "s/@enable_system@/${enable_system}/g" \
+		| sed -e "s/@threading_model@/${threading_model}/g" \
+		| sed -e "s/@prefix@/${prefix_esc}/g" \
+		| sed -e "s/@exec_prefix@/${exec_prefix_esc}/g" \
+		| sed -e "s/@libdir@/${libdir_esc}/g" \
+		| sed -e "s/@includedir@/${includedir_esc}/g" \
+		| sed -e "s/@sharedir@/${sharedir_esc}/g" \
+		| sed -e "s/@enable_verbose@/${enable_verbose}/g" \
+		| sed -e "s/@configured_oot@/${configured_oot}/g" \
+		| sed -e "s/@enable_arg_max_hack@/${enable_arg_max_hack}/g" \
+		| sed -e "s/@enable_static@/${enable_static}/g" \
+		| sed -e "s/@enable_shared@/${enable_shared}/g" \
+		| sed -e "s/@enable_rpath@/${enable_rpath}/g" \
+		| sed -e "s/@export_shared@/${export_shared}/g" \
+		| sed -e "s/@enable_blas@/${enable_blas}/g" \
+		| sed -e "s/@enable_cblas@/${enable_cblas}/g" \
+		| sed -e "s/@enable_memkind@/${enable_memkind}/g" \
+		| sed -e "s/@pragma_omp_simd@/${pragma_omp_simd}/g" \
+		| sed -e "s/@addon_list@/${addon_list}/g" \
+		| sed -e "s/@sandbox@/${sandbox}/g" \
+		| sed -e "s/@enable_trsm_preinversion@/${enable_trsm_preinversion}/g" \
+		| sed -e "s/@enable_aocl_dynamic@/${enable_aocl_dynamic}/g" \
+		| sed -e "s/@enable_security_flags@/${enable_security_flags}/g" \
+		| sed -e "s/@complex_return@/${complex_return}/g" \
+		| sed -e "s/@blas_int_type_size@/${blas_int_type_size}/g" \
+		| sed   -e "s/\@enable_aocl_zen\@/${enable_aocl_zen}/g" \
+		> "${config_mk_out_path}"
 
 	# -- Instantiate bli_config.h file from template ---------------------------
 
@@ -4241,39 +4370,44 @@ main()
 	# intuitively, which was used when constructing ${config_name_define},
 	# ${config_list_defines}, and ${kernel_list_defines}.
 	echo "${script_name}: creating ${bli_config_h_out_path} from ${bli_config_h_in_path}"
-	<"${bli_config_h_in_path}" perl -p                                   \
-	-e "s/\@config_name_define\@/${config_name_define}/g;"               \
-	-e "s/\@config_list_defines\@/${config_list_defines}/g;"             \
-	-e "s/\@kernel_list_defines\@/${kernel_list_defines}/g;"             \
-	| sed >"${bli_config_h_out_path}"                                    \
-	-e "s/@version@/${version_esc}/g"                                    \
-	-e "s/@enable_system@/${enable_system_01}/g"                         \
-	-e "s/@enable_tls@/${enable_tls_01}/g"                               \
-	-e "s/@enable_openmp@/${enable_openmp_01}/g"                         \
-	-e "s/@enable_openmp_as_def@/${enable_openmp_as_def_01}/g"           \
-	-e "s/@enable_pthreads@/${enable_pthreads_01}/g"                     \
-	-e "s/@enable_pthreads_as_def@/${enable_pthreads_as_def_01}/g"       \
-	-e "s/@enable_hpx@/${enable_hpx_01}/g"                               \
-	-e "s/@enable_hpx_as_def@/${enable_hpx_as_def_01}/g"                 \
-	-e "s/@enable_jrir_rr@/${enable_jrir_rr_01}/g"                       \
-	-e "s/@enable_jrir_slab@/${enable_jrir_slab_01}/g"                   \
-	-e "s/@enable_jrir_tlb@/${enable_jrir_tlb_01}/g"                     \
-	-e "s/@enable_pba_pools@/${enable_pba_pools_01}/g"                   \
-	-e "s/@enable_sba_pools@/${enable_sba_pools_01}/g"                   \
-	-e "s/@enable_mem_tracing@/${enable_mem_tracing_01}/g"               \
-	-e "s/@int_type_size@/${int_type_size}/g"                            \
-	-e "s/@blas_int_type_size@/${blas_int_type_size}/g"                  \
-	-e "s/@enable_blas@/${enable_blas_01}/g"                             \
-	-e "s/@enable_cblas@/${enable_cblas_01}/g"                           \
-	-e "s/@enable_mixed_dt@/${enable_mixed_dt_01}/g"                     \
-	-e "s/@enable_mixed_dt_extra_mem@/${enable_mixed_dt_extra_mem_01}/g" \
-	-e "s/@enable_sup_handling@/${enable_sup_handling_01}/g"             \
-	-e "s/@enable_memkind@/${enable_memkind_01}/g"                       \
-	-e "s/@enable_trsm_preinversion@/${enable_trsm_preinversion_01}/g"   \
-	-e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g"       \
-	-e "s/@enable_sandbox@/${enable_sandbox_01}/g"                       \
-	-e "s/@enable_shared@/${enable_shared_01}/g"                         \
-	-e "s/@complex_return_intel@/${complex_return_intel01}/g"
+	cat "${bli_config_h_in_path}" \
+		| perl -pe "s/\@config_name_define\@/${config_name_define}/g" \
+		| perl -pe "s/\@config_list_defines\@/${config_list_defines}/g" \
+		| perl -pe "s/\@kernel_list_defines\@/${kernel_list_defines}/g" \
+		| sed   -e "s/\@enable_aocl_zen\@/${enable_aocl_zen_01}/g" \
+		| sed   -e "s/@enable_system@/${enable_system_01}/g" \
+		| sed   -e "s/@enable_openmp@/${enable_openmp_01}/g" \
+		| sed   -e "s/@enable_pthreads@/${enable_pthreads_01}/g" \
+		| sed   -e "s/@enable_jrir_slab@/${enable_jrir_slab_01}/g" \
+		| sed   -e "s/@enable_jrir_rr@/${enable_jrir_rr_01}/g" \
+		| sed   -e "s/@enable_pba_pools@/${enable_pba_pools_01}/g" \
+		| sed   -e "s/@enable_sba_pools@/${enable_sba_pools_01}/g" \
+		| sed   -e "s/@enable_mem_tracing@/${enable_mem_tracing_01}/g" \
+		| sed   -e "s/@int_type_size@/${int_type_size}/g" \
+		| sed   -e "s/@blas_int_type_size@/${blas_int_type_size}/g" \
+		| sed   -e "s/@enable_blas@/${enable_blas_01}/g" \
+		| sed   -e "s/@enable_cblas@/${enable_cblas_01}/g" \
+		| sed   -e "s/@enable_mixed_dt@/${enable_mixed_dt_01}/g" \
+		| sed   -e "s/@enable_mixed_dt_extra_mem@/${enable_mixed_dt_extra_mem_01}/g" \
+		| sed   -e "s/@enable_mnk1_matrix@/${enable_mnk1_matrix_01}/g" \
+		| sed   -e "s/@enable_tiny_matrix@/${enable_tiny_matrix_01}/g" \
+		| sed   -e "s/@enable_small_matrix@/${enable_small_matrix_01}/g" \
+		| sed   -e "s/@enable_sup_handling@/${enable_sup_handling_01}/g" \
+		| sed   -e "s/@enable_small_matrix_trsm@/${enable_small_matrix_trsm_01}/g" \
+		| sed   -e "s/@enable_trsm_preinversion@/${enable_trsm_preinversion_01}/g" \
+		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
+		| sed   -e "s/@enable_aocl_dynamic@/${enable_aocl_dynamic_01}/g" \
+		| sed   -e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g" \
+		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \
+		| sed   -e "s/@enable_shared@/${enable_shared_01}/g" \
+		| sed   -e "s/@complex_return_intel@/${complex_return_intel01}/g" \
+		| sed   -e "s/@disable_blis_arch_type@/${disable_blis_arch_type_01}/g" \
+		| sed   -e "s/@rename_blis_arch_type@/${rename_blis_arch_type}/g" \
+		| sed   -e "s/@rename_blis_model_type@/${rename_blis_model_type}/g" \
+		| sed   -e "s/@enable_aocl_dtl_trace@/${enable_aocl_dtl_trace_01}/g" \
+		| sed   -e "s/@enable_aocl_dtl_log@/${enable_aocl_dtl_log_01}/g" \
+		| sed   -e "s/@aocl_dtl_trace_level_number@/${aocl_dtl_trace_level_number}/g" \
+		> "${bli_config_h_out_path}"
 
 	# -- Instantiate bli_addon.h file from template ----------------------------
 
@@ -4282,8 +4416,10 @@ main()
 	# of sed used on OS X is old and does not handle the '\n' character
 	# intuitively, which was used when constructing ${addon_list_includes}.
 	echo "${script_name}: creating ${bli_addon_h_out_path} from ${bli_addon_h_in_path}"
-	perl -pe "s/\@addon_list_includes\@/${addon_list_includes}/g" "${bli_addon_h_in_path}" \
-	| sed -e "s/@enable_addons@/${enable_addons_01}/g" > "${bli_addon_h_out_path}"
+	cat "${bli_addon_h_in_path}" \
+		| perl -pe "s/\@addon_list_includes\@/${addon_list_includes}/g" \
+		| sed   -e "s/@enable_addons@/${enable_addons_01}/g" \
+		> "${bli_addon_h_out_path}"
 
 	# -- Create top-level object directories -----------------------------------
 
@@ -4296,7 +4432,7 @@ main()
 
 	obj_config_dirpath="${base_obj_dirpath}/${config_dir}"
 
-	mkdir -p "${obj_config_dirpath}"
+	mkdir -p ${obj_config_dirpath}
 	for conf in ${config_list}; do
 		echo "${script_name}: creating ${obj_config_dirpath}/${conf}"
 		mkdir -p "${obj_config_dirpath}/${conf}"
@@ -4305,7 +4441,7 @@ main()
 
 	obj_kernels_dirpath="${base_obj_dirpath}/${kernels_dir}"
 
-	mkdir -p "${obj_kernels_dirpath}"
+	mkdir -p ${obj_kernels_dirpath}
 	for kern in ${kernel_list}; do
 		echo "${script_name}: creating ${obj_kernels_dirpath}/${kern}"
 		mkdir -p "${obj_kernels_dirpath}/${kern}"
@@ -4314,11 +4450,17 @@ main()
 
 	obj_refkern_dirpath="${base_obj_dirpath}/${refkern_dir}"
 
-	mkdir -p "${obj_refkern_dirpath}"
+	mkdir -p ${obj_refkern_dirpath}
 	for conf in ${config_list}; do
 		echo "${script_name}: creating ${obj_refkern_dirpath}/${conf}"
 		mkdir -p "${obj_refkern_dirpath}/${conf}"
 	done
+
+
+	obj_aocldtl_dirpath="${base_obj_dirpath}/${aocldtl_dir}"
+
+	echo "${script_name}: creating ${obj_aocldtl_dirpath}"
+	mkdir -p ${obj_aocldtl_dirpath}
 
 
 	obj_frame_dirpath="${base_obj_dirpath}/${frame_dir}"
@@ -4334,6 +4476,18 @@ main()
 		for addon in ${addon_list}; do
 			echo "${script_name}: creating ${obj_addon_dirpath}/${addon}"
 			mkdir -p "${obj_addon_dirpath}/${addon}"
+		done
+	fi
+
+
+
+	if [ -n "${addon_flag}" ]; then
+
+		obj_addon_dirpath="${base_obj_dirpath}/${addon_dir}"
+
+		for addon in ${addon_list}; do
+			echo "${script_name}: creating ${obj_addon_dirpath}/${addon}"
+			mkdir -p ${obj_addon_dirpath}/${addon}
 		done
 	fi
 
@@ -4364,6 +4518,7 @@ main()
 
 	echo "${script_name}: creating ${base_lib_dirpath}"
 	mkdir -p "${base_lib_dirpath}"
+
 
 
 	# Create include directory (if it does not already exist).
@@ -4430,6 +4585,20 @@ main()
 		done
 	fi
 
+	# Mirror framework source tree to its object sub-directory.
+	echo "${script_name}: mirroring ${aocldtl_dirpath} to ${obj_aocldtl_dirpath}"
+	${mirror_tree_sh} ${aocldtl_dirpath} ${obj_aocldtl_dirpath}
+
+	# Mirror the chosen addon source tree to its object sub-directory.
+	if [ -n "${addon_flag}" ]; then
+
+		for addon in ${addon_list}; do
+
+			echo "${script_name}: mirroring ${addon_dirpath}/${addon} to ${obj_addon_dirpath}/${addon}"
+			${mirror_tree_sh} "${addon_dirpath}/${addon}" "${obj_addon_dirpath}/${addon}"
+		done
+	fi
+
 	# Mirror the chosen sandbox source tree to its object sub-directory.
 	if [[ -n ${sandbox_flag} ]]; then
 
@@ -4480,6 +4649,18 @@ main()
 	create_makefile_fragment REFKERN "${refkern_dirpath}" \
 	                         "${obj_refkern_dirpath}"
 
+	# Generate makefile fragments in the DTL directory.
+	echo "${script_name}: creating makefile fragments in ${obj_aocldtl_dirpath}"
+	${gen_make_frags_sh} \
+			 -h -r -v0 \
+			 -o ${script_name} \
+			 -p 'AOCLDTL' \
+			 ${aocldtl_dirpath} \
+			 ${obj_aocldtl_dirpath} \
+			 ${gen_make_frags_dirpath}/fragment.mk \
+			 ${gen_make_frags_dirpath}/suffix_list \
+			 ${gen_make_frags_dirpath}/ignore_list
+
 	# Generate makefile fragments in the framework directory.
 	create_makefile_fragment FRAME "${frame_dirpath}" \
 	                         "${obj_frame_dirpath}"
@@ -4491,6 +4672,25 @@ main()
 			                         "${obj_addon_dirpath}/${addon}"
 		done
 	fi
+
+	# Generate makefile fragments in the addon sub-directory.
+	if [ -n "${addon_flag}" ]; then
+
+		for addon in ${addon_list}; do
+
+			echo "${script_name}: creating makefile fragments in ${obj_addon_dirpath}/${addon}"
+			${gen_make_frags_sh} \
+					 -h -r -v0 \
+					 -o ${script_name} \
+					 -p 'ADDON' \
+					 ${addon_dirpath}/${addon} \
+					 ${obj_addon_dirpath}/${addon} \
+					 ${gen_make_frags_dirpath}/fragment.mk \
+					 ${gen_make_frags_dirpath}/suffix_list \
+					 ${gen_make_frags_dirpath}/ignore_list
+		done
+	fi
+
 
 	# Generate makefile fragments in the sandbox sub-directory.
 	if [[ -n ${sandbox_flag} ]]; then

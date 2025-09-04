@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -47,9 +47,9 @@ void bli_trsm_blk_var1
              thrinfo_t* thread_par
      )
 {
-	obj_t ap, cp;
-	bli_obj_alias_to( a, &ap );
-	bli_obj_alias_to( c, &cp );
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5);
+	dim_t my_start, my_end;
+	dim_t b_alg;
 
 	// Determine the direction in which to partition (forwards or backwards).
 	dir_t direct = bli_l3_direct( &ap, b, &cp, cntl );
@@ -85,9 +85,11 @@ void bli_trsm_blk_var1
 	dim_t b_alg;
 	for ( dim_t i = my_start; i < my_end; i += b_alg )
 	{
-		b_alg = bli_determine_blocksize( direct, i, my_end, &a11,
-		                                 bli_cntl_bszid( cntl ), cntx );
+		obj_t a11_1, c1_1;
 
+		// Determine the current algorithmic blocksize for TRSM.
+		b_alg = bli_determine_blocksize( BLIS_TRSM, direct, i, my_end, &a11,
+		                                 bli_cntl_bszid( cntl ), cntx );
 		// Acquire partitions for A1 and C1.
 		obj_t a11_1, c1_1;
 		bli_acquire_mpart_mdim( direct, BLIS_SUBPART1,
@@ -155,8 +157,10 @@ void bli_trsm_blk_var1
 	// Partition along the m dimension for the gemm subproblem.
 	for ( dim_t i = my_start; i < my_end; i += b_alg )
 	{
-		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize( direct, i, my_end, &ax1,
+		obj_t a11, c1;
+
+		// Determine the current algorithmic blocksize for GEMM_FOR_TRSM.
+		b_alg = bli_determine_blocksize( BLIS_TRSM, direct, i, my_end, &ax1,
 		                                 bli_cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for A1 and C1.
@@ -189,5 +193,6 @@ void bli_trsm_blk_var1
 #ifdef PRINT
 	printf( "bli_trsm_blk_var1(): finishing gemm subproblem loop.\n" );
 #endif
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5);
 }
 

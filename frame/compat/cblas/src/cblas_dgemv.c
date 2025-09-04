@@ -16,6 +16,7 @@ void cblas_dgemv(enum CBLAS_ORDER order,
                  const double  *X, f77_int incX, double beta,
                  double  *Y, f77_int incY)
 {
+   AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
    char TA;
 #ifdef F77_CHAR
    F77_CHAR F77_TA;
@@ -44,6 +45,7 @@ void cblas_dgemv(enum CBLAS_ORDER order,
       else 
       {
          cblas_xerbla(2, "cblas_dgemv","Illegal TransA setting, %d\n", TransA);
+         AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Illegal TransA setting.");
          CBLAS_CallFromC = 0;
          RowMajorStrg = 0;
          return;
@@ -62,6 +64,7 @@ void cblas_dgemv(enum CBLAS_ORDER order,
       else if (TransA == CblasConjTrans) TA = 'N';
       else 
       {
+         AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Illegal TransA setting.");
          cblas_xerbla(2, "cblas_dgemv","Illegal TransA setting, %d\n", TransA);
          CBLAS_CallFromC = 0;
          RowMajorStrg = 0;
@@ -76,6 +79,7 @@ void cblas_dgemv(enum CBLAS_ORDER order,
    else cblas_xerbla(1, "cblas_dgemv", "Illegal Order setting, %d\n", order);
    CBLAS_CallFromC = 0;
    RowMajorStrg = 0;
+   AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
    return;
 }
 #endif
