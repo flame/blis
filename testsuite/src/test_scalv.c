@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,7 +40,7 @@
 // Static variables.
 static char*     op_str                    = "scalv";
 static char*     o_types                   = "v";  // y
-static char*     p_types                   = "c";  // conjalpha
+static char*     p_types                   = "c";  // conjbeta
 static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass for s
                                                { 1e-04, 1e-05 },   // warn, pass for c
                                                { 1e-13, 1e-14 },   // warn, pass for d
@@ -70,14 +70,14 @@ void libblis_test_scalv_experiment
 void libblis_test_scalv_impl
      (
        iface_t   iface,
-       obj_t*    alpha,
+       obj_t*    beta,
        obj_t*    y
      );
 
 void libblis_test_scalv_check
      (
        test_params_t* params,
-       obj_t*         alpha,
+       obj_t*         beta,
        obj_t*         y,
        obj_t*         y_orig,
        double*        resid
@@ -158,9 +158,9 @@ void libblis_test_scalv_experiment
 
 	dim_t        m;
 
-	conj_t       conjalpha;
+	conj_t       conjbeta;
 
-	obj_t        alpha, y;
+	obj_t        beta, y;
 	obj_t        y_save;
 
 
@@ -171,27 +171,27 @@ void libblis_test_scalv_experiment
 	m = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
 
 	// Map parameter characters to BLIS constants.
-	bli_param_map_char_to_blis_conj( pc_str[0], &conjalpha );
+	bli_param_map_char_to_blis_conj( pc_str[0], &conjbeta );
 
 	// Create test scalars.
-	bli_obj_scalar_init_detached( datatype, &alpha );
+	bli_obj_scalar_init_detached( datatype, &beta );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_vobj_create( params, datatype, sc_str[0], m, &y );
 	libblis_test_vobj_create( params, datatype, sc_str[0], m, &y_save );
 
-	// Set alpha.
+	// Set beta.
 	if ( bli_obj_is_real( &y ) )
-		bli_setsc( -2.0,  0.0, &alpha );
+		bli_setsc( -2.0,  0.0, &beta );
 	else
-		bli_setsc(  0.0, -2.0, &alpha );
+		bli_setsc(  0.0, -2.0, &beta );
 
 	// Randomize and save y.
 	libblis_test_vobj_randomize( params, FALSE, &y );
 	bli_copyv( &y, &y_save );
 
 	// Apply the parameters.
-	bli_obj_set_conj( conjalpha, &alpha );
+	bli_obj_set_conj( conjbeta, &beta );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -200,7 +200,7 @@ void libblis_test_scalv_experiment
 
 		time = bli_clock();
 
-		libblis_test_scalv_impl( iface, &alpha, &y );
+		libblis_test_scalv_impl( iface, &beta, &y );
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
@@ -210,7 +210,7 @@ void libblis_test_scalv_experiment
 	if ( bli_obj_is_complex( &y ) ) *perf *= 6.0;
 
 	// Perform checks.
-	libblis_test_scalv_check( params, &alpha, &y, &y_save, resid );
+	libblis_test_scalv_check( params, &beta, &y, &y_save, resid );
 
 	// Zero out performance and residual if output vector is empty.
 	libblis_test_check_empty_problem( &y, perf, resid );
@@ -225,14 +225,14 @@ void libblis_test_scalv_experiment
 void libblis_test_scalv_impl
      (
        iface_t   iface,
-       obj_t*    alpha,
+       obj_t*    beta,
        obj_t*    y
      )
 {
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bli_scalv( alpha, y );
+		bli_scalv( beta, y );
 		break;
 
 		default:
@@ -245,7 +245,7 @@ void libblis_test_scalv_impl
 void libblis_test_scalv_check
      (
        test_params_t* params,
-       obj_t*         alpha,
+       obj_t*         beta,
        obj_t*         y,
        obj_t*         y_orig,
        double*        resid
@@ -257,7 +257,7 @@ void libblis_test_scalv_check
 	dim_t  m       = bli_obj_vector_dim( y );
 
 	obj_t  norm_y_r;
-	obj_t  nalpha;
+	obj_t  nbeta;
 
 	obj_t  y2;
 
@@ -267,16 +267,16 @@ void libblis_test_scalv_check
 	// Pre-conditions:
 	// - y_orig is randomized.
 	// Note:
-	// - alpha should have a non-zero imaginary component in the complex
+	// - beta should have a non-zero imaginary component in the complex
 	//   cases in order to more fully exercise the implementation.
 	//
 	// Under these conditions, we assume that the implementation for
 	//
-	//   y := conjalpha(alpha) * y_orig
+	//   y := conjbeta(beta) * y_orig
 	//
 	// is functioning correctly if
 	//
-	//   normfv( y + -conjalpha(alpha) * y_orig )
+	//   normfv( y + -conjbeta(beta) * y_orig )
 	//
 	// is negligible.
 	//
@@ -284,13 +284,13 @@ void libblis_test_scalv_check
 	bli_obj_create( dt, m, 1, 0, 0, &y2 );
     bli_copyv( y_orig, &y2 );
 
-	bli_obj_scalar_init_detached( dt,      &nalpha );
+	bli_obj_scalar_init_detached( dt,      &nbeta );
 	bli_obj_scalar_init_detached( dt_real, &norm_y_r );
 
-	bli_copysc( alpha, &nalpha );
-	bli_mulsc( &BLIS_MINUS_ONE, &nalpha );
+	bli_copysc( beta, &nbeta );
+	bli_mulsc( &BLIS_MINUS_ONE, &nbeta );
 
-	bli_scalv( &nalpha, &y2 );
+	bli_scalv( &nbeta, &y2 );
     bli_addv( &y2, y );
 
     bli_normfv( y, &norm_y_r );

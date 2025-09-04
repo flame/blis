@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,7 +35,9 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLAS
+// Make thread settings local to each thread calling BLIS routines.
+// (The definition resides in bli_rntm.c.)
+extern BLIS_THREAD_LOCAL rntm_t tl_rntm;
 
 /* xerbla.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
@@ -43,7 +46,7 @@
 
 /* Table of constant values */
 
-/* Subroutine */ int PASTEF770(xerbla)(const bla_character *srname, const bla_integer *info, ftnlen srname_len)
+/* Subroutine */ void xerbla_blis_impl(const bla_character *srname, const bla_integer *info, ftnlen srname_len)
 {
 /*  -- LAPACK auxiliary routine (preliminary version) -- */
 /*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd., */
@@ -77,15 +80,49 @@
     //for ( i = 0; i < srname_len; ++i )
     //    srname[i] = toupper( srname[i] );
 
-    printf("** On entry to %6s, parameter number %2i had an illegal value\n",
-        srname, (int)*info);
+    // Make sure rntm variables are initialized.
+    bli_init_once();
 
-    //bli_abort();
+    // Store info value in thread-local rntm data structure.
+    gint_t info_value = (gint_t) *info;
+    bli_rntm_set_info_value_only( info_value, &tl_rntm );
+
+    bool print_on_error = bli_rntm_print_on_error( &tl_rntm );
+    if (print_on_error)
+    {
+        // The check for -10 is specific to xerbla_()'s use-case in ?imatcopy_() APIs.
+        // The definition of an info value for memory failure could be abstracted
+        // to a higher layer, if needed. This would enable us to reuse xerbla_()
+        // with this specific info value, in case of encountering a memory allocation
+        // failure.
+        if( *info == -10 )
+        {
+          printf("** On entry to %6s, memory allocation failed\n", srname);
+        }
+        else
+        {
+          printf("** On entry to %6s, parameter number %2i had an illegal value\n",
+              srname, (int)*info);
+        }
+    }
+
+    bool stop_on_error = bli_rntm_stop_on_error( &tl_rntm );
+    if (stop_on_error)
+    {
+        bli_abort();
+    }
 
 /*     End of XERBLA */
 
-    return 0;
-} /* xerbla */
+    return;
+} /* xerbla_blis_impl */
 
+
+#ifdef BLIS_ENABLE_BLAS
+/* Subroutine */ void PASTEF770(xerbla)(const bla_character *srname, const bla_integer *info, ftnlen srname_len)
+{
+    xerbla_blis_impl(srname, info, srname_len);
+    return;
+} /* xerbla */
 #endif
 

@@ -1,0 +1,33 @@
+name: Branch Name Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  check_branch_name:
+    runs-on: amd_linux  # Use the default GitHub-hosted runner with Linux
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Check branch name using Bash
+      env:
+        BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
+        USER: ${{ github.actor }}
+      run: |
+        echo "Original USER: $USER"
+        BASE_USER=${USER%_amdeng}  # Trim the trailing _amdeng from the USER
+        echo "Trimmed USER: $BASE_USER"
+
+        echo "Checking branch name: $BRANCH_NAME"
+        if [[ ! "$BRANCH_NAME" =~ ^u/.*/PR/.*$ ]] && [[ ! "$BRANCH_NAME" =~ ^u/.*/WIP/.*$ ]]; then
+          echo "Error: Branch name '$BRANCH_NAME' does not match the required naming convention 'u/$BASE_USER/PR/*' or 'u/$BASE_USER/WIP/*'."
+          exit 1
+        fi
+        echo "Branch name '$BRANCH_NAME' is valid."
+      shell: bash  # Use the default Linux shell

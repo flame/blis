@@ -39,7 +39,7 @@
 #undef  GENPROT
 #define GENPROT( tname, opname ) \
 \
-PASTECH(tname,_ukr_ft) \
+PASTECH2(tname,_ukr,_vft) \
 PASTEMAC(opname,_qfp)( num_t dt );
 
 GENPROT( gemm,     gemm_ukernel )

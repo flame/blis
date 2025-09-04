@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -43,17 +43,20 @@
 \
 void PASTEMAC0(opname) \
      ( \
-       const obj_t*     a, \
-       const obj_t*     b, \
-       const obj_t*     c, \
-       const cntx_t*    cntx, \
-       const cntl_t*    cntl, \
-             thrinfo_t* thread_par  \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm, \
+       cntl_t* cntl, \
+       thrinfo_t* thread  \
      );
 
 GENPROT( trsm_blk_var1 )
 GENPROT( trsm_blk_var2 )
 GENPROT( trsm_blk_var3 )
+GENPROT( trsm_packa )
+GENPROT( trsm_packb )
 
 GENPROT( trsm_xx_ker_var2 )
 
@@ -61,4 +64,37 @@ GENPROT( trsm_ll_ker_var2 )
 GENPROT( trsm_lu_ker_var2 )
 GENPROT( trsm_rl_ker_var2 )
 GENPROT( trsm_ru_ker_var2 )
+
+
+//
+// Prototype BLAS-like interfaces with void pointer operands.
+//
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, varname ) \
+\
+void PASTEMAC(ch,varname) \
+     ( \
+       doff_t  diagoff, \
+       pack_t  schema_a, \
+       pack_t  schema_b, \
+       dim_t   m, \
+       dim_t   n, \
+       dim_t   k, \
+       void*   alpha1, \
+       void*   a, inc_t cs_a, \
+                  dim_t pd_a, inc_t ps_a, \
+       void*   b, inc_t rs_b, \
+                  dim_t pd_b, inc_t ps_b, \
+       void*   alpha2, \
+       void*   c, inc_t rs_c, inc_t cs_c, \
+       cntx_t* cntx, \
+       rntm_t* rntm, \
+       thrinfo_t* thread  \
+     );
+
+INSERT_GENTPROT_BASIC0( trsm_ll_ker_var2 )
+INSERT_GENTPROT_BASIC0( trsm_lu_ker_var2 )
+INSERT_GENTPROT_BASIC0( trsm_rl_ker_var2 )
+INSERT_GENTPROT_BASIC0( trsm_ru_ker_var2 )
 

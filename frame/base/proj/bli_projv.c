@@ -36,8 +36,8 @@
 
 void bli_projv
      (
-       const obj_t* x,
-       const obj_t* y
+       obj_t* x,
+       obj_t* y
      )
 {
 	// Check parameters.
@@ -88,8 +88,8 @@ void bli_projv
 
 void bli_projv_check
      (
-       const obj_t* x,
-       const obj_t* y
+       obj_t* x,
+       obj_t* y
      )
 {
 	err_t e_val;

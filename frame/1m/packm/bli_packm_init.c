@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,13 +36,12 @@
 
 #include "blis.h"
 
-bool bli_packm_init
+siz_t bli_packm_init
      (
-       const obj_t*  c,
-             obj_t*  p,
-       const cntx_t* cntx,
-       const cntl_t* cntl,
-             thrinfo_t* thread
+       obj_t*  a,
+       obj_t*  p,
+       cntx_t* cntx,
+       cntl_t* cntl
      )
 {
 	bli_init_once();
@@ -52,27 +52,169 @@ bool bli_packm_init
 	// suitable block of memory from the memory allocator (if such a block
 	// of memory has not already been allocated previously).
 
+	bszid_t   bmult_id_m;
+	bszid_t   bmult_id_n;
+	bool      does_invert_diag;
+	bool      rev_iter_if_upper;
+	bool      rev_iter_if_lower;
+	pack_t    schema;
+	//packbuf_t pack_buf_type;
+	siz_t     size_needed;
+
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_packm_init_check( c, p, cntx );
+		bli_packm_init_check( a, p, cntx );
 
-	// We begin by copying the fields of A.
-	bli_obj_alias_to( c, p );
+	// Extract various fields from the control tree.
+	bmult_id_m        = bli_cntl_packm_params_bmid_m( cntl );
+	bmult_id_n        = bli_cntl_packm_params_bmid_n( cntl );
+	does_invert_diag  = bli_cntl_packm_params_does_invert_diag( cntl );
+	rev_iter_if_upper = bli_cntl_packm_params_rev_iter_if_upper( cntl );
+	rev_iter_if_lower = bli_cntl_packm_params_rev_iter_if_lower( cntl );
+	schema            = bli_cntl_packm_params_pack_schema( cntl );
+	//pack_buf_type     = bli_cntl_packm_params_pack_buf_type( cntl );
+
+#if 0
+	// Let us now check to see if the object has already been packed. First
+	// we check if it has been packed to an unspecified (row or column)
+	// format, in which case we can alias the object and return.
+	// NOTE: The reason we don't need to even look at the control tree in
+	// this case is as follows: an object's pack status is only set to
+	// BLIS_PACKED_UNSPEC for situations when the actual format used is
+	// not important, as long as its packed into contiguous rows or
+	// contiguous columns. A good example of this is packing for matrix
+	// operands in the level-2 operations.
+	if ( bli_obj_pack_schema( a ) == BLIS_PACKED_UNSPEC )
+	{
+		bli_obj_alias_to( a, p );
+		return 0;
+	}
+
+	// Now we check if the object has already been packed to the desired
+	// schema (as encoded in the control tree). If so, we can alias and
+	// return 0.
+	// NOTE: In most cases, an object's pack status will be BLIS_NOT_PACKED
+	// and thus packing will be called for (but in some cases packing has
+	// already taken place, or does not need to take place, and so that will
+	// be indicated by the pack status). Also, not all combinations of
+	// current pack status and desired pack schema are valid.
+	if ( bli_obj_pack_schema( a ) == pack_schema )
+	{
+		bli_obj_alias_to( a, p );
+		return 0;
+	}
+#endif
 
 	// If the object is marked as being filled with zeros, then we can skip
 	// the packm operation entirely and alias.
-	if ( bli_obj_is_zeros( c ) )
-		return false;
+	if ( bli_obj_is_zeros( a ) )
+	{
+		bli_obj_alias_to( a, p );
+		return 0;
+	}
 
-	// Extract various fields from the control tree.
-	bszid_t bmult_id_m   = bli_cntl_packm_params_bmid_m( cntl );
-	bszid_t bmult_id_n   = bli_cntl_packm_params_bmid_n( cntl );
-	pack_t  schema       = bli_cntl_packm_params_pack_schema( cntl );
-	num_t   dt_tar       = bli_obj_target_dt( c );
-	num_t   dt_scalar    = bli_obj_scalar_dt( c );
-	dim_t   bmult_m_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_m, cntx );
-	dim_t   bmult_m_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_m, cntx );
-	dim_t   bmult_n_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_n, cntx );
+	// Prepare a few other variables based on properties of the control
+	// tree.
+
+	invdiag_t invert_diag;
+	packord_t pack_ord_if_up;
+	packord_t pack_ord_if_lo;
+
+	if ( does_invert_diag ) invert_diag = BLIS_INVERT_DIAG;
+	else                    invert_diag = BLIS_NO_INVERT_DIAG;
+
+	if ( rev_iter_if_upper ) pack_ord_if_up = BLIS_PACK_REV_IF_UPPER;
+	else                     pack_ord_if_up = BLIS_PACK_FWD_IF_UPPER;
+
+	if ( rev_iter_if_lower ) pack_ord_if_lo = BLIS_PACK_REV_IF_LOWER;
+	else                     pack_ord_if_lo = BLIS_PACK_FWD_IF_LOWER;
+
+	// Initialize object p for the final packed matrix.
+	size_needed
+	=
+	bli_packm_init_pack
+	(
+	  invert_diag,
+	  bli_cntl_family( cntl ),
+	  schema,
+	  pack_ord_if_up,
+	  pack_ord_if_lo,
+	  bmult_id_m,
+	  bmult_id_n,
+	  a,
+	  p,
+	  cntx
+	);
+
+	// Return the size needed for memory allocation of the packed buffer.
+	return size_needed;
+}
+
+
+siz_t bli_packm_init_pack
+     (
+       invdiag_t invert_diag,
+       opid_t    family,
+       pack_t    schema,
+       packord_t pack_ord_if_up,
+       packord_t pack_ord_if_lo,
+       bszid_t   bmult_id_m,
+       bszid_t   bmult_id_n,
+       obj_t*    a,
+       obj_t*    p,
+       cntx_t*   cntx
+     )
+{
+	bli_init_once();
+
+	num_t     dt_tar       = bli_obj_target_dt( a );
+	num_t     dt_scalar    = bli_obj_scalar_dt( a );
+	trans_t   transa       = bli_obj_onlytrans_status( a );
+	dim_t     m_a          = bli_obj_length( a );
+	dim_t     n_a          = bli_obj_width( a );
+
+	dim_t     bmult_m_def  = 0;
+	dim_t     bmult_m_pack = 0;
+	dim_t     bmult_n_def  = 0;
+	dim_t     bmult_n_pack = 0;
+
+	dim_t     m_p, n_p;
+	dim_t     m_p_pad, n_p_pad;
+	siz_t     size_p;
+	siz_t     elem_size_p;
+	inc_t     rs_p, cs_p;
+	inc_t     is_p;
+
+	if( family == BLIS_TRSM )
+	{
+		bmult_m_def  = bli_cntx_get_trsm_blksz_def_dt( dt_tar, bmult_id_m, cntx );
+		bmult_m_pack = bli_cntx_get_trsm_blksz_max_dt( dt_tar, bmult_id_m, cntx );
+		bmult_n_def  = bli_cntx_get_trsm_blksz_def_dt( dt_tar, bmult_id_n, cntx );
+		bmult_n_pack = bli_cntx_get_trsm_blksz_max_dt( dt_tar, bmult_id_n, cntx );
+
+		// bmult_m_def will be zero when trsm block sizes are not set, use global
+		// block sizes in this case
+		if( bmult_m_def == 0 )
+		{
+			bmult_m_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_m, cntx );
+			bmult_m_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_m, cntx );
+		}
+		if( bmult_n_def == 0 )
+		{
+			bmult_n_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_n, cntx );
+			bmult_n_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_n, cntx );
+		}
+	}
+	else
+	{
+		bmult_m_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_m, cntx );
+		bmult_m_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_m, cntx );
+		bmult_n_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_n, cntx );
+		bmult_n_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_n, cntx );
+	}
+
+	// We begin by copying the fields of A.
+	bli_obj_alias_to( a, p );
 
 	// Typecast the internal scalar value to the target datatype.
 	// Note that if the typecasting is needed, this must happen BEFORE we
@@ -84,20 +226,50 @@ bool bli_packm_init
 
 	// Update the storage datatype of P to be the target datatype of A.
 	bli_obj_set_dt( dt_tar, p );
-	bli_obj_set_elem_size( bli_dt_size( dt_tar ), p );
 
-	// Store the pack schema to the object.
-	bli_obj_set_pack_schema( schema, p );
+	// Update the dimension fields to explicitly reflect a transposition,
+	// if needed.
+	// Then, clear the conjugation and transposition fields from the object
+	// since matrix packing in BLIS is deemed to take care of all conjugation
+	// and transposition necessary.
+	// Then, we adjust the properties of P when A needs a transposition.
+	// We negate the diagonal offset, and if A is upper- or lower-stored,
+	// we either toggle the uplo of P.
+	// Finally, if we mark P as dense since we assume that all matrices,
+	// regardless of structure, will be densified.
+	bli_obj_set_dims_with_trans( transa, m_a, n_a, p );
+	bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, p );
+	if ( bli_does_trans( transa ) )
+	{
+		bli_obj_negate_diag_offset( p );
+		if ( bli_obj_is_upper_or_lower( a ) )
+			bli_obj_toggle_uplo( p );
+	}
 
-	// Clear the conjugation field from the object since matrix packing
-	// in BLIS is deemed to take care of all conjugation necessary.
-	bli_obj_set_conj( BLIS_NO_CONJUGATE, p );
-
-	// Since we are packing micropanels, mark P as dense.
-	bli_obj_set_uplo( BLIS_DENSE, p );
+	// If we are packing micropanels, mark P as dense. Otherwise, we are
+	// probably being called in the context of a level-2 operation, in
+	// which case we do not want to overwrite the uplo field of P (inherited
+	// from A) with BLIS_DENSE because that information may be needed by
+	// the level-2 operation's unblocked variant to decide whether to
+	// execute a "lower" or "upper" branch of code.
+	if ( bli_is_panel_packed( schema ) )
+	{
+		bli_obj_set_uplo( BLIS_DENSE, p );
+	}
 
 	// Reset the view offsets to (0,0).
 	bli_obj_set_offs( 0, 0, p );
+
+	// Set the invert diagonal field.
+	bli_obj_set_invert_diag( invert_diag, p );
+
+	// Set the pack status of P to the pack schema prescribed in the control
+	// tree node.
+	bli_obj_set_pack_schema( schema, p );
+
+	// Set the packing order bits.
+	bli_obj_set_pack_order_if_upper( pack_ord_if_up, p );
+	bli_obj_set_pack_order_if_lower( pack_ord_if_lo, p );
 
 	// Compute the dimensions padded by the dimension multiples. These
 	// dimensions will be the dimensions of the packed matrices, including
@@ -106,10 +278,10 @@ bool bli_packm_init
 	// in P) and aligning them to the dimension multiples (typically equal
 	// to register blocksizes). This does waste a little bit of space for
 	// level-2 operations, but that's okay with us.
-	dim_t m_p     = bli_obj_length( p );
-	dim_t n_p     = bli_obj_width( p );
-	dim_t m_p_pad = bli_align_dim_to_mult( m_p, bmult_m_def );
-	dim_t n_p_pad = bli_align_dim_to_mult( n_p, bmult_n_def );
+	m_p     = bli_obj_length( p );
+	n_p     = bli_obj_width( p );
+	m_p_pad = bli_align_dim_to_mult( m_p, bmult_m_def );
+	n_p_pad = bli_align_dim_to_mult( n_p, bmult_n_def );
 
 	// Save the padded dimensions into the packed object. It is important
 	// to save these dimensions since they represent the actual dimensions
@@ -117,70 +289,177 @@ bool bli_packm_init
 	bli_obj_set_padded_dims( m_p_pad, n_p_pad, p );
 
 	// Now we prepare to compute strides, align them, and compute the
-	// total number of bytes needed for the packed buffer. Then we use
-	// that value to acquire an appropriate block of memory from the
-	// memory allocator.
+	// total number of bytes needed for the packed buffer. The caller
+	// will then use that value to acquire an appropriate block of memory
+	// from the memory allocator.
 
 	// Extract the element size for the packed object.
-	siz_t elem_size_p = bli_obj_elem_size( p );
+	elem_size_p = bli_obj_elem_size( p );
 
-	// The panel dimension (for each datatype) should be equal to the
-	// default (logical) blocksize multiple in the m dimension.
-	dim_t m_panel = bmult_m_def;
+	// Set the row and column strides of p based on the pack schema.
+	if      ( bli_is_row_packed( schema ) &&
+	          !bli_is_panel_packed( schema ) )
+	{
+		// For regular row storage, the padded width of our matrix
+		// should be used for the row stride, with the column stride set
+		// to one. By using the WIDTH of the mem_t region, we allow for
+		// zero-padding (if necessary/desired) along the right edge of
+		// the matrix.
+		rs_p = n_p_pad;
+		cs_p = 1;
 
-	// The "column stride" of a row-micropanel packed object is interpreted
-	// as the column stride WITHIN a micropanel. Thus, this is equal to the
-	// packing (storage) blocksize multiple, which may be equal to the
-	// default (logical) blocksize multiple).
-	inc_t cs_p = bmult_m_pack;
+		// Align the leading dimension according to the heap stride
+		// alignment size so that the second, third, etc rows begin at
+		// aligned addresses.
+		rs_p = bli_align_dim_to_size( rs_p, elem_size_p,
+		                              BLIS_HEAP_STRIDE_ALIGN_SIZE );
 
-	// The "row stride" of a row-micropanel packed object is interpreted
-	// as the row stride WITHIN a micropanel. Thus, it is unit.
-	inc_t rs_p = 1;
+		// Store the strides in P.
+		bli_obj_set_strides( rs_p, cs_p, p );
 
-	// The "panel stride" of a micropanel packed object is interpreted as
-	// the distance between the (0,0) element of panel k and the (0,0)
-	// element of panel k+1. We use the padded width computed above to
-	// allow for zero-padding (if necessary/desired) along the far end
-	// of each micropanel (ie: the right edge of the matrix). Zero-padding
-	// can also occur along the long edge of the last micropanel if the m
-	// dimension of the matrix is not a whole multiple of MR.
-	inc_t ps_p = cs_p * n_p_pad;
+		// Compute the size of the packed buffer.
+		size_p = m_p_pad * rs_p * elem_size_p;
+	}
+	else if ( bli_is_col_packed( schema ) &&
+	          !bli_is_panel_packed( schema ) )
+	{
+		// For regular column storage, the padded length of our matrix
+		// should be used for the column stride, with the row stride set
+		// to one. By using the LENGTH of the mem_t region, we allow for
+		// zero-padding (if necessary/desired) along the bottom edge of
+		// the matrix.
+		cs_p = m_p_pad;
+		rs_p = 1;
 
-	// As a general rule, we don't want micropanel strides to be odd. There
-	// are very few instances where this can happen, but we've seen it happen
-	// more than zero times (such as for certain small problems), and so we
-	// check for it here.
-	if ( bli_is_odd( ps_p ) ) ps_p += 1;
+		// Align the leading dimension according to the heap stride
+		// alignment size so that the second, third, etc columns begin at
+		// aligned addresses.
+		cs_p = bli_align_dim_to_size( cs_p, elem_size_p,
+		                              BLIS_HEAP_STRIDE_ALIGN_SIZE );
 
-	// Set the imaginary stride (in units of fundamental elements).
-	// This is the number of real elements that must be traversed before
-	// reaching the imaginary part of the packed micropanel. NOTE: the
-	// imaginary stride is mostly vestigial and left over from the 3m
-	// and 4m implementations.
-	inc_t is_p = 1;
+		// Store the strides in P.
+		bli_obj_set_strides( rs_p, cs_p, p );
 
-	// Store the strides and panel dimension in P.
-	bli_obj_set_strides( rs_p, cs_p, p );
-	bli_obj_set_imag_stride( is_p, p );
-	bli_obj_set_panel_dim( m_panel, p );
-	bli_obj_set_panel_stride( ps_p, p );
-	bli_obj_set_panel_length( m_panel, p );
-	bli_obj_set_panel_width( n_p, p );
+		// Compute the size of the packed buffer.
+		size_p = cs_p * n_p_pad * elem_size_p;
+	}
+	else if ( bli_is_row_packed( schema ) &&
+	          bli_is_panel_packed( schema ) )
+	{
+		dim_t m_panel;
+		dim_t ps_p;
 
-	// Compute the size of the packed buffer.
-	siz_t size_p = ps_p * ( m_p_pad / m_panel ) * elem_size_p;
+		// The panel dimension (for each datatype) should be equal to the
+		// default (logical) blocksize multiple in the m dimension.
+		m_panel = bmult_m_def;
 
-	// If the requested size is zero, then we don't need to do any allocation.
-	if ( size_p == 0 )
-		return false;
+		// The "column stride" of a row-micropanel packed object is interpreted
+		// as the column stride WITHIN a micropanel. Thus, this is equal to the
+		// packing (storage) blocksize multiple, which may be equal to the
+		// default (logical) blocksize multiple).
+		cs_p = bmult_m_pack;
 
-	// Update the buffer address in p to point to the buffer associated
-	// with the mem_t entry acquired from the memory broker (now cached in
-	// the control tree node).
-	void* buffer = bli_packm_alloc( size_p, cntl, thread );
-	bli_obj_set_buffer( buffer, p );
+		// The "row stride" of a row-micropanel packed object is interpreted
+		// as the row stride WITHIN a micropanel. Thus, it is unit.
+		rs_p = 1;
 
-	return true;
+		// The "panel stride" of a micropanel packed object is interpreted as
+		// the distance between the (0,0) element of panel k and the (0,0)
+		// element of panel k+1. We use the padded width computed above to
+		// allow for zero-padding (if necessary/desired) along the far end
+		// of each micropanel (ie: the right edge of the matrix). Zero-padding
+		// can also occur along the long edge of the last micropanel if the m
+		// dimension of the matrix is not a whole multiple of MR.
+		ps_p = cs_p * n_p_pad;
+
+		// As a general rule, we don't want micropanel strides to be odd.
+		// NOTE: This safety feature *may* not be necessary anymore, but was
+		// definitely needed to support certain variations of the 3m method.
+		if ( bli_is_odd( ps_p ) ) ps_p += 1;
+
+		// Set the imaginary stride (in units of fundamental elements).
+		// This is the number of real elements that must be traversed before
+		// reaching the imaginary part of the packed micropanel. NOTE: the
+		// imaginary stride is mostly vestigial and left over from the 3m
+		// and 4m implementations.
+		is_p = 1;
+
+		// Store the strides and panel dimension in P.
+		bli_obj_set_strides( rs_p, cs_p, p );
+		bli_obj_set_imag_stride( is_p, p );
+		bli_obj_set_panel_dim( m_panel, p );
+		bli_obj_set_panel_stride( ps_p, p );
+		bli_obj_set_panel_length( m_panel, p );
+		bli_obj_set_panel_width( n_p, p );
+
+		// Compute the size of the packed buffer.
+		size_p = ps_p * ( m_p_pad / m_panel ) * elem_size_p;
+	}
+	else if ( bli_is_col_packed( schema ) &&
+	          bli_is_panel_packed( schema ) )
+	{
+		dim_t n_panel;
+		dim_t ps_p;
+
+		// The panel dimension (for each datatype) should be equal to the
+		// default (logical) blocksize multiple in the n dimension.
+		n_panel = bmult_n_def;
+
+		// The "row stride" of a column-micropanel packed object is interpreted
+		// as the row stride WITHIN a micropanel. Thus, this is equal to the
+		// packing (storage) blocksize multiple (which may be equal to the
+		// default (logical) blocksize multiple.
+		rs_p = bmult_n_pack;
+
+		// The "column stride" of a column-micropanel packed object is
+		// interpreted as the column stride WITHIN a micropanel. Thus, it is
+		// unit.
+		cs_p = 1;
+
+		// The "panel stride" of a micropanel packed object is interpreted as
+		// the distance between the (0,0) element of panel k and the (0,0)
+		// element of panel k+1. We use the padded length computed above to
+		// allow for zero-padding (if necessary/desired) along the far end
+		// of each micropanel (ie: the bottom edge of the matrix). Zero-padding
+		// can also occur along the long edge of the last micropanel if the n
+		// dimension of the matrix is not a whole multiple of NR.
+		ps_p = m_p_pad * rs_p;
+
+		// As a general rule, we don't want micropanel strides to be odd.
+		// NOTE: This safety feature *may* not be necessary anymore, but was
+		// definitely needed to support certain variations of the 3m method.
+		if ( bli_is_odd( ps_p ) ) ps_p += 1;
+
+		// Set the imaginary stride (in units of fundamental elements).
+		// This is the number of real elements that must be traversed before
+		// reaching the imaginary part of the packed micropanel. NOTE: the
+		// imaginary stride is mostly vestigial and left over from the 3m
+		// and 4m implementations.
+		is_p = 1;
+
+		// Store the strides and panel dimension in P.
+		bli_obj_set_strides( rs_p, cs_p, p );
+		bli_obj_set_imag_stride( is_p, p );
+		bli_obj_set_panel_dim( n_panel, p );
+		bli_obj_set_panel_stride( ps_p, p );
+		bli_obj_set_panel_length( m_p, p );
+		bli_obj_set_panel_width( n_panel, p );
+
+		// Compute the size of the packed buffer.
+		size_p = ps_p * ( n_p_pad / n_panel ) * elem_size_p;
+	}
+	else
+	{
+		// NOTE: When implementing block storage, we only need to implement
+		// the following two cases:
+		// - row-stored blocks in row-major order
+		// - column-stored blocks in column-major order
+		// The other two combinations coincide with that of packed row-panel
+		// and packed column- panel storage.
+
+		size_p = 0;
+	}
+
+	return size_p;
 }
 

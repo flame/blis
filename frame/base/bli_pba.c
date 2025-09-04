@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -37,21 +37,21 @@
 #include "blis.h"
 
 // Statically initialize the mutex within the packing block allocator object.
-static pba_t global_pba = { .mutex = BLIS_PTHREAD_MUTEX_INITIALIZER };
+static pba_t pba = { .mutex = BLIS_PTHREAD_MUTEX_INITIALIZER };
 
 // -----------------------------------------------------------------------------
 
 pba_t* bli_pba_query( void )
 {
-    return &global_pba;
+    return &pba;
 }
 
 void bli_pba_init
      (
-       const cntx_t* cntx
+       cntx_t* restrict cntx
      )
 {
-	pba_t* pba = bli_pba_query();
+	pba_t* restrict pba = bli_pba_query();
 
 	const siz_t align_size = BLIS_POOL_ADDR_ALIGN_SIZE_GEN;
 	malloc_ft   malloc_fp  = BLIS_MALLOC_POOL;
@@ -77,7 +77,7 @@ void bli_pba_finalize
        void
      )
 {
-	pba_t* pba = bli_pba_query();
+	pba_t* restrict pba = bli_pba_query();
 
 #ifdef BLIS_ENABLE_PBA_POOLS
 	bli_pba_finalize_pools( pba );
@@ -92,12 +92,17 @@ void bli_pba_finalize
 
 void bli_pba_acquire_m
      (
-       pba_t*    pba,
+       rntm_t*   rntm,
        siz_t     req_size,
        packbuf_t buf_type,
        mem_t*    mem
      )
 {
+	pool_t* pool;
+	pblk_t* pblk;
+	dim_t   pi;
+	err_t   r_val;
+
 	// If the internal memory pools for packing block allocator are disabled,
 	// we spoof the buffer type as BLIS_BUFFER_FOR_GEN_USE to induce the
 	// immediate usage of bli_pba_malloc().
@@ -110,6 +115,10 @@ void bli_pba_acquire_m
 	#endif
 #endif
 
+	// Query the memory broker from the runtime.
+	pba_t* pba = bli_rntm_pba( rntm );
+
+
 	if ( buf_type == BLIS_BUFFER_FOR_GEN_USE )
 	{
 		malloc_ft malloc_fp  = bli_pba_malloc_fp( pba );
@@ -117,7 +126,6 @@ void bli_pba_acquire_m
 
 		// For general-use buffer requests, dynamically allocating memory
 		// is assumed to be sufficient.
-		err_t r_val;
 		void* buf = bli_fmalloc_align( malloc_fp, req_size, align_size, &r_val );
 
 		// Initialize the mem_t object with:
@@ -140,11 +148,11 @@ void bli_pba_acquire_m
 
 		// Map the requested packed buffer type to a zero-based index, which
 		// we then use to select the corresponding memory pool.
-		dim_t   pi   = bli_packbuf_index( buf_type );
-		pool_t* pool = bli_pba_pool( pi, pba );
+		pi   = bli_packbuf_index( buf_type );
+		pool = bli_pba_pool( pi, pba );
 
 		// Extract the address of the pblk_t struct within the mem_t.
-		pblk_t* pblk = bli_mem_pblk( mem );
+		pblk = bli_mem_pblk( mem );
 
 		// Acquire the mutex associated with the pba object.
 		bli_pba_lock( pba );
@@ -189,12 +197,19 @@ void bli_pba_acquire_m
 
 void bli_pba_release
      (
-       pba_t* pba,
-       mem_t* mem
+       rntm_t* rntm,
+       mem_t*  mem
      )
 {
+	packbuf_t buf_type;
+	pool_t*   pool;
+	pblk_t*   pblk;
+
+	// Query the memory broker from the runtime.
+	pba_t* pba = bli_rntm_pba( rntm );
+
 	// Extract the buffer type so we know what kind of memory was allocated.
-	packbuf_t buf_type = bli_mem_buf_type( mem );
+	buf_type = bli_mem_buf_type( mem );
 
 #ifndef BLIS_ENABLE_PBA_POOLS
 	#ifdef BLIS_ENABLE_MEM_TRACING
@@ -216,10 +231,10 @@ void bli_pba_release
 	{
 		// Extract the address of the pool from which the memory was
 		// allocated.
-		pool_t* pool = bli_mem_pool( mem );
+		pool = bli_mem_pool( mem );
 
 		// Extract the address of the pblk_t struct within the mem_t struct.
-		pblk_t* pblk = bli_mem_pblk( mem );
+		pblk = bli_mem_pblk( mem );
 
 		// Acquire the mutex associated with the pba object.
 		bli_pba_lock( pba );
@@ -267,10 +282,21 @@ void bli_pba_acquire_v
 #endif
 
 
+void bli_pba_rntm_set_pba
+     (
+       rntm_t* rntm
+     )
+{
+	pba_t* pba = bli_pba_query();
+
+	bli_rntm_set_pba( pba, rntm );
+}
+
+
 siz_t bli_pba_pool_size
      (
-       const pba_t*    pba,
-             packbuf_t buf_type
+       pba_t*    pba,
+       packbuf_t buf_type
      )
 {
 	siz_t r_val;
@@ -289,7 +315,7 @@ siz_t bli_pba_pool_size
 		// Acquire the pointer to the pool corresponding to the buf_type
 		// provided.
 		pool_index = bli_packbuf_index( buf_type );
-		pool       = bli_pba_pool( pool_index, ( pba_t* )pba );
+		pool       = bli_pba_pool( pool_index, pba );
 
 		// Compute the pool "size" as the product of the block size
 		// and the number of blocks in the pool.
@@ -304,8 +330,8 @@ siz_t bli_pba_pool_size
 
 void bli_pba_init_pools
      (
-       const cntx_t* cntx,
-             pba_t*  pba
+       cntx_t* cntx,
+       pba_t*  pba
      )
 {
 	// Map each of the packbuf_t values to an index starting at zero.
@@ -378,19 +404,19 @@ void bli_pba_finalize_pools
 	pool_t* pool_c  = bli_pba_pool( index_c, pba );
 
 	// Finalize the memory pools for A, B, and C.
-	bli_pool_finalize( pool_a, FALSE );
-	bli_pool_finalize( pool_b, FALSE );
-	bli_pool_finalize( pool_c, FALSE );
+	bli_pool_finalize( pool_a );
+	bli_pool_finalize( pool_b );
+	bli_pool_finalize( pool_c );
 }
 
 // -----------------------------------------------------------------------------
 
 void bli_pba_compute_pool_block_sizes
      (
-             siz_t*  bs_a,
-             siz_t*  bs_b,
-             siz_t*  bs_c,
-       const cntx_t* cntx
+       siz_t*  bs_a,
+       siz_t*  bs_b,
+       siz_t*  bs_c,
+       cntx_t* cntx
      )
 {
 	const ind_t im = bli_cntx_method( cntx );
@@ -399,10 +425,12 @@ void bli_pba_compute_pool_block_sizes
 	siz_t bs_cand_b = 0;
 	siz_t bs_cand_c = 0;
 
+	num_t dt;
+
 	// Compute pool block sizes for each datatype and find the maximum
 	// size for each pool. This is done so that new pools do not need
 	// to be allocated if the user switches datatypes.
-	for ( num_t dt = BLIS_DT_LO; dt <= BLIS_DT_HI; ++dt )
+	for ( dt = BLIS_DT_LO; dt <= BLIS_DT_HI; ++dt )
 	{
 		siz_t bs_dt_a;
 		siz_t bs_dt_b;
@@ -432,43 +460,71 @@ void bli_pba_compute_pool_block_sizes
 
 void bli_pba_compute_pool_block_sizes_dt
      (
-             num_t   dt,
-             siz_t*  bs_a,
-             siz_t*  bs_b,
-             siz_t*  bs_c,
-       const cntx_t* cntx
+       num_t   dt,
+       siz_t*  bs_a,
+       siz_t*  bs_b,
+       siz_t*  bs_c,
+       cntx_t* cntx
      )
 {
+	siz_t    size_dt = bli_dt_size( dt );
+
+	blksz_t* mr;
+	blksz_t* nr;
+
+	blksz_t* mc;
+	blksz_t* kc;
+	blksz_t* nc;
+
+	dim_t    mr_dt;
+	dim_t    nr_dt;
+	dim_t    max_mnr_dt;
+
+	dim_t    mc_max_dt;
+	dim_t    kc_max_dt;
+	dim_t    nc_max_dt;
+
+	dim_t    packmr_dt;
+	dim_t    packnr_dt;
+	dim_t    max_packmnr_dt;
+
+	dim_t    scale_num_dt;
+	dim_t    scale_den_dt;
+
+	dim_t    pool_mc_dt, left_mc_dt;
+	dim_t    pool_nc_dt, left_nc_dt;
+	dim_t    pool_kc_dt;
+
 	//
 	// Find the larger of the two register blocksizes.
 	//
 
 	// Query the mr and nr blksz_t objects for the given method of
 	// execution.
-	const blksz_t* mr = bli_cntx_get_blksz( BLIS_MR, cntx );
-	const blksz_t* nr = bli_cntx_get_blksz( BLIS_NR, cntx );
+	mr = bli_cntx_get_blksz( BLIS_MR, cntx );
+	nr = bli_cntx_get_blksz( BLIS_NR, cntx );
 
 	// Extract the mr and nr values specific to the current datatype.
-	dim_t mr_dt = bli_blksz_get_def( dt, mr );
-	dim_t nr_dt = bli_blksz_get_def( dt, nr );
+	mr_dt = bli_blksz_get_def( dt, mr );
+	nr_dt = bli_blksz_get_def( dt, nr );
 
 	// Find the maximum of mr and nr.
-	dim_t max_mnr_dt = bli_max( mr_dt, nr_dt );
+	max_mnr_dt = bli_max( mr_dt, nr_dt );
 
 	//
 	// Define local maximum cache blocksizes.
 	//
 
 	// Query the mc, kc, and nc blksz_t objects for native execution.
-	const blksz_t* mc = bli_cntx_get_blksz( BLIS_MC, cntx );
-	const blksz_t* kc = bli_cntx_get_blksz( BLIS_KC, cntx );
-	const blksz_t* nc = bli_cntx_get_blksz( BLIS_NC, cntx );
+	mc = bli_cntx_get_blksz( BLIS_MC, cntx );
+	kc = bli_cntx_get_blksz( BLIS_KC, cntx );
+	nc = bli_cntx_get_blksz( BLIS_NC, cntx );
 
 	// Extract the maximum mc, kc, and nc values specific to the current
 	// datatype.
-	dim_t mc_max_dt = bli_blksz_get_max( dt, mc );
-	dim_t kc_max_dt = bli_blksz_get_max( dt, kc );
-	dim_t nc_max_dt = bli_blksz_get_max( dt, nc );
+	mc_max_dt = bli_blksz_get_max( dt, mc );
+	kc_max_dt = bli_blksz_get_max( dt, kc );
+	nc_max_dt = bli_blksz_get_max( dt, nc );
 
 	// Add max(mr,nr) to kc to make room for the nudging of kc at
 	// runtime to be a multiple of mr or nr for triangular operations
@@ -500,11 +556,8 @@ void bli_pba_compute_pool_block_sizes_dt
 	// So, if packmr * nr >= packnr * mr, then we will use packmr and mr as
 	// our scaling factors. Otherwise, we'll use packnr and nr.
 
-	dim_t packmr_dt = bli_blksz_get_max( dt, mr );
-	dim_t packnr_dt = bli_blksz_get_max( dt, nr );
-
-	dim_t scale_num_dt;
-	dim_t scale_den_dt;
+	packmr_dt = bli_blksz_get_max( dt, mr );
+	packnr_dt = bli_blksz_get_max( dt, nr );
 
 	if ( packmr_dt * nr_dt >=
 	     packnr_dt * mr_dt ) { scale_num_dt = packmr_dt;
@@ -516,13 +569,13 @@ void bli_pba_compute_pool_block_sizes_dt
 	// Compute pool block dimensions.
 	//
 
-	dim_t pool_mc_dt = ( mc_max_dt * scale_num_dt ) / scale_den_dt;
-	dim_t left_mc_dt = ( mc_max_dt * scale_num_dt ) % scale_den_dt;
+	pool_mc_dt = ( mc_max_dt * scale_num_dt ) / scale_den_dt;
+	left_mc_dt = ( mc_max_dt * scale_num_dt ) % scale_den_dt;
 
-	dim_t pool_nc_dt = ( nc_max_dt * scale_num_dt ) / scale_den_dt;
-	dim_t left_nc_dt = ( nc_max_dt * scale_num_dt ) % scale_den_dt;
+	pool_nc_dt = ( nc_max_dt * scale_num_dt ) / scale_den_dt;
+	left_nc_dt = ( nc_max_dt * scale_num_dt ) % scale_den_dt;
 
-	dim_t pool_kc_dt = ( kc_max_dt );
+	pool_kc_dt = ( kc_max_dt );
 
 	if ( left_mc_dt > 0 ) pool_mc_dt += 1;
 	if ( left_nc_dt > 0 ) pool_nc_dt += 1;
@@ -531,12 +584,10 @@ void bli_pba_compute_pool_block_sizes_dt
 	// Compute pool block sizes
 	//
 
-	siz_t size_dt = bli_dt_size( dt );
-
 	// We add an extra micro-panel of space to the block sizes for A and B
 	// just to be sure any pre-loading performed by the micro-kernel does
 	// not cause a segmentation fault.
-	dim_t max_packmnr_dt = bli_max( packmr_dt, packnr_dt );
+	max_packmnr_dt = bli_max( packmr_dt, packnr_dt );
 
 	*bs_a = ( pool_mc_dt + max_packmnr_dt ) * pool_kc_dt * size_dt;
 	*bs_b = ( pool_nc_dt + max_packmnr_dt ) * pool_kc_dt * size_dt;

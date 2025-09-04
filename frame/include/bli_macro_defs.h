@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -81,14 +81,33 @@
 #define PASTECH3_(ch1,ch2,ch3,op)  ch1 ## ch2 ## ch3 ## op
 #define PASTECH3(ch1,ch2,ch3,op)   PASTECH3_(ch1,ch2,ch3,op)
 
+#define PASTECH4_(ch1,ch2,ch3,ch4,op)  ch1 ## ch2 ## ch3 ## ch4 ## op
+#define PASTECH4(ch1,ch2,ch3,ch4,op)   PASTECH4_(ch1,ch2,ch3,ch4,op)
+
 #define MKSTR(s1)                  #s1
 #define STRINGIFY_INT( s )         MKSTR( s )
 
-// Fortran-77 name-mangling macros.
-#define PASTEF770(name)                                      name ## _
-#define PASTEF77(ch1,name)                     ch1        ## name ## _
-#define PASTEF772(ch1,ch2,name)                ch1 ## ch2 ## name ## _
-#define PASTEF773(ch1,ch2,ch3,name)     ch1 ## ch2 ## ch3 ## name ## _
+#define PASTEMACT(ch1, ch2, ch3, ch4)   bli_ ## ch1 ## ch2 ## _ ## ch3 ## _ ## ch4
+// name-mangling macros.
+#ifdef BLIS_ENABLE_NO_UNDERSCORE_API
+#define PASTEF770(name)                                                  name
+#define PASTEF77(ch1,name)                                        ch1 ## name
+#define PASTEF772(ch1,ch2,name)                            ch1 ## ch2 ## name
+#define PASTEF773(ch1,ch2,ch3,name)                 ch1 ## ch2 ## ch3 ## name
+#else
+#define PASTEF770(name)                                            name ## _
+#define PASTEF77(ch1,name)                                  ch1 ## name ## _
+#define PASTEF772(ch1,ch2,name)                      ch1 ## ch2 ## name ## _
+#define PASTEF773(ch1,ch2,ch3,name)           ch1 ## ch2 ## ch3 ## name ## _
+#endif
+
+// Macros to define names _blis_impl suffix, *_blis_impl is the blis
+// blis implementation of the respective API's which is invoked from CBLAS
+// and BLAS wrapper. 
+#define PASTEF770S(name)                                   name ## _blis_impl
+#define PASTEF77S(ch1,name)                         ch1 ## name ## _blis_impl
+#define PASTEF772S(ch1,ch2,name)             ch1 ## ch2 ## name ## _blis_impl
+#define PASTEF773S(ch1,ch2,ch3,name)  ch1 ## ch2 ## ch3 ## name ## _blis_impl
 
 // -- Include other groups of macros
 
@@ -98,7 +117,6 @@
 #include "bli_gentprot_macro_defs.h"
 
 #include "bli_misc_macro_defs.h"
-#include "bli_edge_case_macro_defs.h"
 #include "bli_param_macro_defs.h"
 #include "bli_obj_macro_defs.h"
 #include "bli_complex_macro_defs.h"
@@ -110,5 +128,9 @@
 #include "bli_oapi_macro_defs.h"
 #include "bli_tapi_macro_defs.h"
 
+// -- Include definitions for BLAS interfaces
+
+#include "bli_blas_interface_defs.h"
+#include "bli_blas_blis_impl_interface_defs.h"
 
 #endif

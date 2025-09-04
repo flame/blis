@@ -43,16 +43,14 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-             dim_t   n, \
-       const void*   x0, inc_t incx, \
-             dim_t*  index, \
-       const cntx_t* cntx  \
+       dim_t            n, \
+       ctype*  restrict x, inc_t incx, \
+       dim_t*  restrict i_max, \
+       cntx_t* restrict cntx  \
      ) \
 { \
-	const ctype*   x         = x0; \
-\
-	const ctype_r* minus_one = PASTEMAC(chr,m1); \
-	const dim_t*   zero_i    = PASTEMAC(i,0); \
+	ctype_r* minus_one = PASTEMAC(chr,m1); \
+	dim_t*   zero_i    = PASTEMAC(i,0); \
 \
 	ctype_r  chi1_r; \
 	ctype_r  chi1_i; \
@@ -64,7 +62,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	   the behavior of netlib BLAS's i?amax() routines. */ \
 	if ( bli_zero_dim1( n ) ) \
 	{ \
-		PASTEMAC(i,copys)( *zero_i, *index ); \
+		PASTEMAC(i,copys)( *zero_i, *i_max ); \
 		return; \
 	} \
 \
@@ -78,7 +76,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	if ( incx == 1 ) \
 	{ \
-		const ctype* restrict chi1 = x; \
+		ctype* chi1 = x; \
 \
 		for ( dim_t i = 0; i < n; ++i ) \
 		{ \
@@ -112,7 +110,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	{ \
 		for ( dim_t i = 0; i < n; ++i ) \
 		{ \
-			const ctype* restrict chi1 = x + (i  )*incx; \
+			ctype* chi1 = x + (i  )*incx; \
 \
 			/* Get the real and imaginary components of chi1. */ \
 			PASTEMAC2(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
@@ -140,8 +138,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 \
 	/* Store the final index to the output variable. */ \
-	PASTEMAC(i,copys)( i_max_l, *index ); \
+	PASTEMAC(i,copys)( i_max_l, *i_max ); \
 }
 
-INSERT_GENTFUNCR_BASIC( amaxv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNCR_BASIC2( amaxv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

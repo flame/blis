@@ -40,24 +40,18 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-             conj_t  conjx, \
-             conj_t  conjy, \
-             dim_t   n, \
-       const void*   alphax0, \
-       const void*   alphay0, \
-       const void*   x0, inc_t incx, \
-       const void*   y0, inc_t incy, \
-             void*   z0, inc_t incz, \
-       const cntx_t* cntx  \
+       conj_t           conjx, \
+       conj_t           conjy, \
+       dim_t            n, \
+       ctype*  restrict alphax, \
+       ctype*  restrict alphay, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict y, inc_t incy, \
+       ctype*  restrict z, inc_t incz, \
+       cntx_t* restrict cntx  \
      ) \
 { \
 	if ( bli_zero_dim1( n ) ) return; \
-\
-	const ctype* restrict alphax = alphax0; \
-	const ctype* restrict alphay = alphay0; \
-	const ctype* restrict x      = x0; \
-	const ctype* restrict y      = y0; \
-	      ctype* restrict z      = z0; \
 \
 	if ( incz == 1 && incx == 1 && incy == 1 ) \
 	{ \
@@ -113,8 +107,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	else \
 	{ \
 		/* Query the context for the kernel function pointer. */ \
-		const num_t  dt     = PASTEMAC(ch,type); \
-		axpyv_ker_ft kfp_av = bli_cntx_get_ukr_dt( dt, BLIS_AXPYV_KER, cntx ); \
+		const num_t              dt     = PASTEMAC(ch,type); \
+		PASTECH(ch,axpyv_ker_ft) kfp_av \
+		= \
+		bli_cntx_get_l1v_ker_dt( dt, BLIS_AXPYV_KER, cntx ); \
 \
 		kfp_av \
 		( \
@@ -138,5 +134,5 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( axpy2v, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC_BASIC2( axpy2v, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

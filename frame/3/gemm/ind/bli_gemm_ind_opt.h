@@ -34,63 +34,29 @@
 
 BLIS_INLINE void bli_gemm_ind_recast_1m_params
      (
-             num_t*  dt_exec,
-             num_t*  dt_c,
-             pack_t  schema_a,
-       const obj_t*  c,
-             dim_t*  m,
-             dim_t*  n,
-             dim_t*  k,
-             inc_t*  pd_a, inc_t* ps_a,
-             inc_t*  pd_b, inc_t* ps_b,
-             inc_t*  rs_c, inc_t* cs_c,
-       const cntx_t* cntx
+       num_t* dt_exec,
+       pack_t schema_a,
+       obj_t* c,
+       dim_t* m,
+       dim_t* n,
+       dim_t* k,
+       inc_t* pd_a, inc_t* ps_a,
+       inc_t* pd_b, inc_t* ps_b,
+       inc_t* rs_c, inc_t* cs_c
      )
 {
 	obj_t beta;
 
-	// Detach the beta scalar from c so that we can test its imaginary
-	// component.
+	/* Detach the beta scalar from c so that we can test its imaginary
+	   component. */
 	bli_obj_scalar_detach( c, &beta );
 
-#if 1
-	// Determine whether the storage of C matches the IO preference of the
-	// microkernel. (We cannot utilize the optimization below if there is a
-	// mismatch.)
-	const ukr_t ukr_id     = BLIS_GEMM_VIR_UKR;
-
-	const bool  row_stored = bli_is_row_stored( *rs_c, *cs_c );
-	const bool  col_stored = !row_stored;
-	const bool  row_pref   = bli_cntx_ukr_prefers_rows_dt( *dt_c, ukr_id, cntx );
-	const bool  col_pref   = !row_pref;
-
-	const bool  is_match   = ( row_stored && row_pref ) ||
-	                         ( col_stored && col_pref );
-#else
-	// This was the previous behavior, which resulted in buggy behavior
-	// when executing right-sided hemm, and:
-	// - the 1m method is enabled,
-	// - BLIS_DISABLE_HEMM_RIGHT is #defined, and
-	// - the storage of C matches the microkernel IO preference PRIOR to
-	//   detecting the right-sidedness of the operation.
-	// See Issue #621 for details.
-	const bool is_match = TRUE;
-#endif
-
-	// If (a) the storage of C matches the IO pref of the ukernel, (b) beta is
-	// in the real domain, and (c) C is row- or column-stored, then we may
-	// proceed with the optimization below, which allows 1m to be induced by
-	// executing the real-domain macrokernel with the real-domain microkernel
-	// plus a few tweaked parameters. Otherwise, we must skip the optimization
-	// and allow 1m to execute via the complex-domain macrokernel calling the
-	// 1m virtual microkernel function, which will incur a little extra
-	// overhead.
-	if ( is_match &&
-	     bli_obj_imag_is_zero( &beta ) &&
+	/* If beta is in the real domain, and c is row- or column-stored,
+	   then we may proceed with the optimization. */
+	if ( bli_obj_imag_is_zero( &beta ) &&
 	     !bli_is_gen_stored( *rs_c, *cs_c ) )
 	{
 		*dt_exec = bli_dt_proj_to_real( *dt_exec );
-		*dt_c    = bli_dt_proj_to_real( *dt_c );
 
 		if ( bli_is_1e_packed( schema_a ) )
 		{
@@ -101,7 +67,7 @@ BLIS_INLINE void bli_gemm_ind_recast_1m_params
 			*pd_b *= 1; *ps_b *= 2;
 			*rs_c *= 1; *cs_c *= 2;
 		}
-		else // if ( bli_is_1r_packed( schema_a ) )
+		else /* if ( bli_is_1r_packed( schema_a ) ) */
 		{
 			*m    *= 1;
 			*n    *= 2;

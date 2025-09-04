@@ -34,8 +34,8 @@
 
 void bli_unpackm_int_check
      (
-       const obj_t*  p,
-       const obj_t*  a,
-       const cntx_t* cntx
+       obj_t*  p,
+       obj_t*  a,
+       cntx_t* cntx
      );
 

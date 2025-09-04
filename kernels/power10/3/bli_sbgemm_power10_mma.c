@@ -32,8 +32,6 @@
 
 */
 
-#ifdef BLIS_SANDBOX_POWER10
-
 #include "vector_int_macros.h"
 
 #define B_ACCUMULATE \
@@ -44,56 +42,48 @@
     __builtin_mma_xvbf16ger2pp (&acc4, ca[1], rb[0]); \
     __builtin_mma_xvbf16ger2pp (&acc5, ca[1], rb[1]); \
     __builtin_mma_xvbf16ger2pp (&acc6, ca[1], rb[2]); \
-    __builtin_mma_xvbf16ger2pp (&acc7, ca[1], rb[3]);
+    __builtin_mma_xvbf16ger2pp (&acc7, ca[1], rb[3]); 
 
 #define B_INCREMENT \
     A0+=16; \
-    B0+=32;
-
+    B0+=32; 
+    
 #define B_AB_PRODUCT \
     LOAD_VECTORS \
     B_INCREMENT \
-    B_ACCUMULATE
+    B_ACCUMULATE 
 
 
 void bli_sbgemm_power10_mma_8x16
     (
-              dim_t      m,
-              dim_t      n,
-              dim_t      k,
-        //const float*     alpha,
-        //const bfloat16*  a,
-        //const bfloat16*  b,
-        //const float*     beta,
-        //      float*     c, inc_t rs_c0, inc_t cs_c0,
-        const void*      alpha,
-        const void*      a,
-        const void*      b,
-        const void*      beta,
-              void*      c, inc_t rs_c0, inc_t cs_c0,
-              auxinfo_t* data,
-        const cntx_t*    cntx
+        dim_t               k0,
+        float*     restrict alpha,
+        bfloat16*  restrict a,
+        bfloat16*  restrict b,
+        float*     restrict beta,
+        float*     restrict c, inc_t rs_c0, inc_t cs_c0,
+        auxinfo_t* restrict data,
+        cntx_t*    restrict cntx
     )
 {
 
-    uint64_t k_iter = (k-1)/4;
-    uint64_t k_left = (k-1)%4;
+    uint64_t k_iter = (k0-1)/4;
+    uint64_t k_left = (k0-1)%4;
 
     uint64_t rs_c   = rs_c0;
-    //uint64_t cs_c   = cs_c0;
 
-    const bfloat16* restrict A0 = a;
-    const bfloat16* restrict B0 = b;
-          float*    restrict C0 = c;
+    bfloat16* restrict A0 = a;
+    bfloat16* restrict B0 = b;
+    float* restrict C0 = c;
 
-    float alpha_= *((float*)alpha),
-          beta_ = *((float*)beta);
+    float alpha_= *alpha,
+          beta_ = *beta;
 
     fv4sf_t result[4];
     fv4sf_t *rowC;
 
     // accumulators that will hold the matrix product
-    __vector_quad acc0, acc1, acc2, acc3,
+    __vector_quad acc0, acc1, acc2, acc3, 
                   acc4, acc5, acc6, acc7;
 
     vec_t *ca = (vec_t *) A0;
@@ -149,4 +139,3 @@ void bli_sbgemm_power10_mma_8x16
     }
 
 }
-#endif // BLIS_SANDBOX_POWER10

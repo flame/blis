@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -97,7 +97,7 @@
 
    crr:
 	 | | | | | | | |       ------        --------
-	 | | | | | | | |  +=   ------
+	 | | | | | | | |  +=   ------ 
 	 --------
 	 | | | | | | | |       ------        --------
 	 | | | | | | | |       ------            :
@@ -114,8 +114,8 @@ void bli_zgemmsup_rv_zen_asm_3x4m
        dcomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
        dcomplex*    restrict beta,
        dcomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*            data,
-       cntx_t*               cntx
+       auxinfo_t*   restrict data,
+       cntx_t*      restrict cntx
      )
 {
 	uint64_t n_left = n0 % 4;
@@ -477,7 +477,7 @@ void bli_zgemmsup_rv_zen_asm_3x4m
 	vmulpd(ymm1, ymm3, ymm3)
 	vaddsubpd(ymm3, ymm13, ymm13)
 
-	/* (ï¿½r + ï¿½i)x C + ((ar + ai) x AB) */
+	/* (ßr + ßi)x C + ((ar + ai) x AB) */
 	mov(var(beta), rbx) // load address of beta
 	vbroadcastsd(mem(rbx), ymm1) // load beta_r and duplicate
 	vbroadcastsd(mem(rbx, 8), ymm2) // load beta_i and duplicate
@@ -563,7 +563,7 @@ void bli_zgemmsup_rv_zen_asm_3x4m
 
 	ZGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddpd(ymm9, ymm0, ymm9)
-	add(rdi, rcx)
+	add(rdi, rcx) 
 
 	ZGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddpd(ymm13, ymm0, ymm13)
@@ -591,13 +591,13 @@ void bli_zgemmsup_rv_zen_asm_3x4m
 	vmovups(xmm12, mem(rcx,32))
 
 	add(rsi, rcx)
-
+	
 	vmovups(xmm5, mem(rcx))
 	vmovups(xmm9, mem(rcx, 16))
 	vmovups(xmm13,mem(rcx,32))
-
+	
 	add(rsi, rcx)
-
+	
 	vextractf128(imm(0x1), ymm5, xmm5)
 	vextractf128(imm(0x1), ymm9, xmm9)
 	vextractf128(imm(0x1), ymm13, xmm13)
@@ -649,13 +649,13 @@ void bli_zgemmsup_rv_zen_asm_3x4m
 	vmovups(xmm12, mem(rcx,32))
 
 	add(rsi, rcx)
-
+	
 	vmovups(xmm5, mem(rcx))
 	vmovups(xmm9, mem(rcx, 16))
 	vmovups(xmm13,mem(rcx,32))
-
+	
 	add(rsi, rcx)
-
+	
 	vextractf128(imm(0x1), ymm5, xmm5)
 	vextractf128(imm(0x1), ymm9, xmm9)
 	vextractf128(imm(0x1), ymm13, xmm13)
@@ -702,7 +702,9 @@ void bli_zgemmsup_rv_zen_asm_3x4m
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6", "ymm7",
+	  "ymm8", "ymm9", "ymm10", "ymm11", "ymm12", "ymm13", "ymm14",
+	  "ymm15", "memory"
 	)
 
 	consider_edge_cases:
@@ -750,8 +752,8 @@ void bli_zgemmsup_rv_zen_asm_3x2m
        dcomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
        dcomplex*    restrict beta,
        dcomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*            data,
-       cntx_t*               cntx
+       auxinfo_t*   restrict data,
+       cntx_t*      restrict cntx
 
      )
 {
@@ -1025,7 +1027,7 @@ void bli_zgemmsup_rv_zen_asm_3x2m
 	vmulpd(ymm1, ymm3, ymm3)
 	vaddsubpd(ymm3, ymm12, ymm12)
 
-	/* (ï¿½r + ï¿½i)x C + ((ar + ai) x AB) */
+	/* (ßr + ßi)x C + ((ar + ai) x AB) */
 	mov(var(beta), rbx) // load address of beta
 	vbroadcastsd(mem(rbx), ymm1) // load beta_r and duplicate
 	vbroadcastsd(mem(rbx, 8), ymm2) // load beta_i and duplicate
@@ -1079,7 +1081,7 @@ void bli_zgemmsup_rv_zen_asm_3x2m
 	mov(var(cs_c), rsi)        // load cs_c
 	lea(mem(, rsi, 8), rsi)    // rsi = cs_c * sizeof(real dt)
 	lea(mem(, rsi, 2), rsi)    // rsi = cs_c * sizeof((real+imag) dt)
-
+	
 	lea(mem(rsi, rsi, 2), r13)           // r13 = 3*rs_a
 
 	ZGEMM_INPUT_SCALE_CS_BETA_NZ
@@ -1089,7 +1091,7 @@ void bli_zgemmsup_rv_zen_asm_3x2m
 	ZGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddpd(ymm8, ymm0, ymm8)
 	add(rdi, rcx)
-
+	
 	ZGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddpd(ymm12, ymm0, ymm12)
 
@@ -1126,10 +1128,10 @@ void bli_zgemmsup_rv_zen_asm_3x2m
 
 	vmovupd(ymm4, mem(rcx))
 	add(rdi, rcx)
-
+	
 	vmovupd(ymm8, mem(rcx))
 	add(rdi, rcx)
-
+	
 	vmovupd(ymm12, mem(rcx))
 
 	jmp(.SDONE)                        // jump to end.
@@ -1194,7 +1196,8 @@ void bli_zgemmsup_rv_zen_asm_3x2m
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6", "ymm8", "ymm10",
+	  "ymm12", "ymm14", "memory"
 	)
 
 	consider_edge_cases:

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,6 +35,13 @@
 
 #include "blis.h"
 
+// Make thread settings local to each thread calling BLIS routines.
+// (The definition resides in bli_rntm.c.)
+extern BLIS_THREAD_LOCAL rntm_t tl_rntm;
+
+// Thread local variable to handle initialization of tl_rntm from global_rntm.
+BLIS_THREAD_LOCAL bool initialize_tl_rntm = TRUE;
+
 // -----------------------------------------------------------------------------
 
 void bli_init( void )
@@ -44,6 +51,7 @@ void bli_init( void )
 
 void bli_finalize( void )
 {
+	bli_thread_finalize_tl();
 	bli_finalize_once();
 }
 
@@ -64,21 +72,46 @@ void bli_finalize_auto( void )
 
 // -----------------------------------------------------------------------------
 
-static bli_pthread_switch_t lib_state = BLIS_PTHREAD_SWITCH_INIT;
+
+// A pthread_once_t variable is a pthread structure used in pthread_once().
+// pthread_once() is guaranteed to execute exactly once among all threads that
+// pass in this control object (until/unless the variable is reset).
+static bli_pthread_once_t once_init     = BLIS_PTHREAD_ONCE_INIT;
+static bli_pthread_once_t once_finalize = BLIS_PTHREAD_ONCE_INIT;
 
 void bli_init_once( void )
 {
-	bli_pthread_switch_on( &lib_state, bli_init_apis );
+	// Initialize all global data structures
+	bli_pthread_once( &once_init, bli_init_apis );
+
+	// Initialize tl_rntm as a copy of global_rntm
+	// Need to do this once per application thread
+	if (initialize_tl_rntm)
+	{
+		bli_thread_init_tl();
+		initialize_tl_rntm = FALSE;
+	}
+
+	// Initialize DTL Library. Trace level set by the user
+	// is available in the blis.h header file.
+	AOCL_DTL_INITIALIZE();
+
+	// On every call each application thread must
+	// reset info_value to 0
+	gint_t info_value = 0;
+	bli_rntm_set_info_value_only( info_value, &tl_rntm );
+
 }
 
 void bli_finalize_once( void )
 {
-	bli_pthread_switch_off( &lib_state, bli_finalize_apis );
+	bli_pthread_once( &once_finalize, bli_finalize_apis );
+	AOCL_DTL_UNINITIALIZE();
 }
 
 // -----------------------------------------------------------------------------
 
-int bli_init_apis( void )
+void bli_init_apis( void )
 {
 	// Initialize various sub-APIs.
 	bli_gks_init();
@@ -87,10 +120,17 @@ int bli_init_apis( void )
 	bli_pack_init();
 	bli_memsys_init();
 
-	return 0;
+	// Reset the control variable that will allow finalization.
+	// NOTE: We must initialize a fresh pthread_once_t object and THEN copy the
+	// contents to the static control variable because some implementations of
+	// pthreads define pthread_once_t as a struct and BLIS_PTHREAD_ONCE_INIT as
+	// a struct initializer expression (i.e. { ... }), which cannot be used in
+	// post-declaration struct assignment in strict C99.
+	const bli_pthread_once_t once_new = BLIS_PTHREAD_ONCE_INIT;
+	once_finalize = once_new;
 }
 
-int bli_finalize_apis( void )
+void bli_finalize_apis( void )
 {
 	// Finalize various sub-APIs.
 	bli_memsys_finalize();
@@ -99,6 +139,13 @@ int bli_finalize_apis( void )
 	bli_ind_finalize();
 	bli_gks_finalize();
 
-	return 0;
+	// Reset the control variable that will allow (re-)initialization.
+	// NOTE: We must initialize a fresh pthread_once_t object and THEN copy the
+	// contents to the static control variable because some implementations of
+	// pthreads define pthread_once_t as a struct and BLIS_PTHREAD_ONCE_INIT as
+	// a struct initializer expression (i.e. { ... }), which cannot be used in
+	// post-declaration struct assignment in strict C99.
+	const bli_pthread_once_t once_new = BLIS_PTHREAD_ONCE_INIT;
+	once_init = once_new;
 }
 

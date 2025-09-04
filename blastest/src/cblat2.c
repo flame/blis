@@ -1,4 +1,7 @@
 /* cblat2.f -- translated by f2c (version 20100827).
+
+	Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
+	
    You must link the resulting object file with libf2c:
 	on Microsoft Windows system, link with libf2c.lib;
 	on Linux or Unix systems, link with .../path/to/libf2c.a -lm
@@ -158,15 +161,10 @@ static logical c_false = FALSE_;
 /*  ===================================================================== */
 /* Main program */ int main(void)
 {
-#ifdef BLIS_ENABLE_HPX
-    char* program = "cblat2";
-    bli_thread_initialize_hpx( 1, &program );
-#endif
-
     /* Initialized data */
 
-    static char snames[6*17] = "CGEMV " "CGBMV " "CHEMV " "CHBMV " "CHPMV "
-	    "CTRMV " "CTBMV " "CTPMV " "CTRSV " "CTBSV " "CTPSV " "CGERC "
+    static char snames[6*17] = "CGEMV " "CGBMV " "CHEMV " "CHBMV " "CHPMV " 
+	    "CTRMV " "CTBMV " "CTPMV " "CTRSV " "CTBSV " "CTPSV " "CGERC " 
 	    "CGERU " "CHER  " "CHPR  " "CHER2 " "CHPR2 ";
 
     /* Format strings */
@@ -214,10 +212,10 @@ static logical c_false = FALSE_;
     cllist cl__1;
 
     /* Builtin functions */
-    integer s_rsle(cilist *), do_lio(integer *, integer *, char *, ftnlen),
+    integer s_rsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
 	    e_rsle(void), f_open(olist *), s_wsfe(cilist *), do_fio(integer *,
-	     char *, ftnlen), e_wsfe(void), s_wsle(cilist *), e_wsle(void),
-	    s_rsfe(cilist *), e_rsfe(void), s_cmp(const char *, const char *, ftnlen,
+	     char *, ftnlen), e_wsfe(void), s_wsle(cilist *), e_wsle(void), 
+	    s_rsfe(cilist *), e_rsfe(void), s_cmp(const char *, const char *, ftnlen, 
 	    ftnlen);
     /* Subroutine */ int s_stop(char *, ftnlen);
     integer f_clos(cllist *);
@@ -239,42 +237,42 @@ static logical c_false = FALSE_;
     integer ninc, nbet, ntra;
     logical rewi;
     integer nout;
-    extern /* Subroutine */ int cchk1_(char *, real *, real *, integer *,
-	    integer *, logical *, logical *, logical *, integer *, integer *,
-	    integer *, integer *, integer *, complex *, integer *, complex *,
-	    integer *, integer *, integer *, integer *, complex *, complex *,
-	    complex *, complex *, complex *, complex *, complex *, complex *,
-	    complex *, complex *, real *, ftnlen), cchk2_(char *, real *,
-	    real *, integer *, integer *, logical *, logical *, logical *,
-	    integer *, integer *, integer *, integer *, integer *, complex *,
-	    integer *, complex *, integer *, integer *, integer *, integer *,
-	    complex *, complex *, complex *, complex *, complex *, complex *,
-	    complex *, complex *, complex *, complex *, real *, ftnlen),
-	    cchk3_(char *, real *, real *, integer *, integer *, logical *,
-	    logical *, logical *, integer *, integer *, integer *, integer *,
-	    integer *, integer *, integer *, integer *, complex *, complex *,
-	    complex *, complex *, complex *, complex *, complex *, real *,
-	    complex *, ftnlen), cchk4_(char *, real *, real *, integer *,
-	    integer *, logical *, logical *, logical *, integer *, integer *,
-	    integer *, complex *, integer *, integer *, integer *, integer *,
-	    complex *, complex *, complex *, complex *, complex *, complex *,
-	    complex *, complex *, complex *, complex *, real *, complex *,
-	    ftnlen), cchk5_(char *, real *, real *, integer *, integer *,
-	    logical *, logical *, logical *, integer *, integer *, integer *,
-	    complex *, integer *, integer *, integer *, integer *, complex *,
-	    complex *, complex *, complex *, complex *, complex *, complex *,
-	    complex *, complex *, complex *, real *, complex *, ftnlen),
-	    cchk6_(char *, real *, real *, integer *, integer *, logical *,
-	    logical *, logical *, integer *, integer *, integer *, complex *,
-	    integer *, integer *, integer *, integer *, complex *, complex *,
-	    complex *, complex *, complex *, complex *, complex *, complex *,
+    extern /* Subroutine */ int cchk1_(char *, real *, real *, integer *, 
+	    integer *, logical *, logical *, logical *, integer *, integer *, 
+	    integer *, integer *, integer *, complex *, integer *, complex *, 
+	    integer *, integer *, integer *, integer *, complex *, complex *, 
+	    complex *, complex *, complex *, complex *, complex *, complex *, 
+	    complex *, complex *, real *, ftnlen), cchk2_(char *, real *, 
+	    real *, integer *, integer *, logical *, logical *, logical *, 
+	    integer *, integer *, integer *, integer *, integer *, complex *, 
+	    integer *, complex *, integer *, integer *, integer *, integer *, 
+	    complex *, complex *, complex *, complex *, complex *, complex *, 
+	    complex *, complex *, complex *, complex *, real *, ftnlen), 
+	    cchk3_(char *, real *, real *, integer *, integer *, logical *, 
+	    logical *, logical *, integer *, integer *, integer *, integer *, 
+	    integer *, integer *, integer *, integer *, complex *, complex *, 
+	    complex *, complex *, complex *, complex *, complex *, real *, 
+	    complex *, ftnlen), cchk4_(char *, real *, real *, integer *, 
+	    integer *, logical *, logical *, logical *, integer *, integer *, 
+	    integer *, complex *, integer *, integer *, integer *, integer *, 
+	    complex *, complex *, complex *, complex *, complex *, complex *, 
+	    complex *, complex *, complex *, complex *, real *, complex *, 
+	    ftnlen), cchk5_(char *, real *, real *, integer *, integer *, 
+	    logical *, logical *, logical *, integer *, integer *, integer *, 
+	    complex *, integer *, integer *, integer *, integer *, complex *, 
+	    complex *, complex *, complex *, complex *, complex *, complex *, 
+	    complex *, complex *, complex *, real *, complex *, ftnlen), 
+	    cchk6_(char *, real *, real *, integer *, integer *, logical *, 
+	    logical *, logical *, integer *, integer *, integer *, complex *, 
+	    integer *, integer *, integer *, integer *, complex *, complex *, 
+	    complex *, complex *, complex *, complex *, complex *, complex *, 
 	    complex *, complex *, real *, complex *, ftnlen), cchke_(integer *
 	    , char *, integer *, ftnlen);
     logical fatal, trace;
     integer nidim;
     extern /* Subroutine */ int cmvch_(char *, integer *, integer *, complex *
 	    , complex *, integer *, complex *, integer *, complex *, complex *
-	    , integer *, complex *, real *, complex *, real *, real *,
+	    , integer *, complex *, real *, complex *, real *, real *, 
 	    logical *, integer *, logical *, ftnlen);
     char snaps[32], trans[1];
     integer isnum;
@@ -623,7 +621,7 @@ L50:
 	goto L80;
     }
     for (i__ = 1; i__ <= 17; ++i__) {
-	if (s_cmp(snamet, snames + (i__ - 1) * 6, (ftnlen)6, (ftnlen)6) == 0)
+	if (s_cmp(snamet, snames + (i__ - 1) * 6, (ftnlen)6, (ftnlen)6) == 0) 
 		{
 	    goto L70;
 	}
@@ -682,7 +680,7 @@ L80:
 /*     YY holds the exact result. On exit from CMVCH YT holds */
 /*     the result computed by CMVCH. */
     *(unsigned char *)trans = 'N';
-    cmvch_(trans, &n, &n, &c_b2, a, &c__65, x, &c__1, &c_b1, y, &c__1, yt, g,
+    cmvch_(trans, &n, &n, &c_b2, a, &c__65, x, &c__1, &c_b1, y, &c__1, yt, g, 
 	    yy, &eps, &err, &fatal, &nout, &c_true, (ftnlen)1);
     same = lce_(yy, yt, &n);
     if (! same || err != 0.f) {
@@ -695,7 +693,7 @@ L80:
 	s_stop("", (ftnlen)0);
     }
     *(unsigned char *)trans = 'T';
-    cmvch_(trans, &n, &n, &c_b2, a, &c__65, x, &c_n1, &c_b1, y, &c_n1, yt, g,
+    cmvch_(trans, &n, &n, &c_b2, a, &c__65, x, &c_n1, &c_b1, y, &c_n1, yt, g, 
 	    yy, &eps, &err, &fatal, &nout, &c_true, (ftnlen)1);
     same = lce_(yy, yt, &n);
     if (! same || err != 0.f) {
@@ -756,44 +754,44 @@ L80:
 /*           Test CGEMV, 01, and CGBMV, 02. */
 L140:
 	    cchk1_(snames + (isnum - 1) * 6, &eps, &thresh, &nout, &ntra, &
-		    trace, &rewi, &fatal, &nidim, idim, &nkb, kb, &nalf, alf,
-		    &nbet, bet, &ninc, inc, &c__65, &c__2, a, aa, as, x, xx,
+		    trace, &rewi, &fatal, &nidim, idim, &nkb, kb, &nalf, alf, 
+		    &nbet, bet, &ninc, inc, &c__65, &c__2, a, aa, as, x, xx, 
 		    xs, y, yy, ys, yt, g, (ftnlen)6);
 	    goto L200;
 /*           Test CHEMV, 03, CHBMV, 04, and CHPMV, 05. */
 L150:
 	    cchk2_(snames + (isnum - 1) * 6, &eps, &thresh, &nout, &ntra, &
-		    trace, &rewi, &fatal, &nidim, idim, &nkb, kb, &nalf, alf,
-		    &nbet, bet, &ninc, inc, &c__65, &c__2, a, aa, as, x, xx,
+		    trace, &rewi, &fatal, &nidim, idim, &nkb, kb, &nalf, alf, 
+		    &nbet, bet, &ninc, inc, &c__65, &c__2, a, aa, as, x, xx, 
 		    xs, y, yy, ys, yt, g, (ftnlen)6);
 	    goto L200;
 /*           Test CTRMV, 06, CTBMV, 07, CTPMV, 08, */
 /*           CTRSV, 09, CTBSV, 10, and CTPSV, 11. */
 L160:
 	    cchk3_(snames + (isnum - 1) * 6, &eps, &thresh, &nout, &ntra, &
-		    trace, &rewi, &fatal, &nidim, idim, &nkb, kb, &ninc, inc,
+		    trace, &rewi, &fatal, &nidim, idim, &nkb, kb, &ninc, inc, 
 		    &c__65, &c__2, a, aa, as, y, yy, ys, yt, g, z__, (ftnlen)
 		    6);
 	    goto L200;
 /*           Test CGERC, 12, CGERU, 13. */
 L170:
 	    cchk4_(snames + (isnum - 1) * 6, &eps, &thresh, &nout, &ntra, &
-		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &ninc,
-		    inc, &c__65, &c__2, a, aa, as, x, xx, xs, y, yy, ys, yt,
+		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &ninc, 
+		    inc, &c__65, &c__2, a, aa, as, x, xx, xs, y, yy, ys, yt, 
 		    g, z__, (ftnlen)6);
 	    goto L200;
 /*           Test CHER, 14, and CHPR, 15. */
 L180:
 	    cchk5_(snames + (isnum - 1) * 6, &eps, &thresh, &nout, &ntra, &
-		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &ninc,
-		    inc, &c__65, &c__2, a, aa, as, x, xx, xs, y, yy, ys, yt,
+		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &ninc, 
+		    inc, &c__65, &c__2, a, aa, as, x, xx, xs, y, yy, ys, yt, 
 		    g, z__, (ftnlen)6);
 	    goto L200;
 /*           Test CHER2, 16, and CHPR2, 17. */
 L190:
 	    cchk6_(snames + (isnum - 1) * 6, &eps, &thresh, &nout, &ntra, &
-		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &ninc,
-		    inc, &c__65, &c__2, a, aa, as, x, xx, xs, y, yy, ys, yt,
+		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &ninc, 
+		    inc, &c__65, &c__2, a, aa, as, x, xx, xs, y, yy, ys, yt, 
 		    g, z__, (ftnlen)6);
 
 L200:
@@ -835,20 +833,15 @@ L240:
 
 /*     End of CBLAT2. */
 
-#ifdef BLIS_ENABLE_HPX
-    return bli_thread_finalize_hpx();
-#else
-	// Return peacefully.
-	return 0;
-#endif
+    return 0;
 } /* main */
 
 /* Subroutine */ int cchk1_(char *sname, real *eps, real *thresh, integer *
-	nout, integer *ntra, logical *trace, logical *rewi, logical *fatal,
+	nout, integer *ntra, logical *trace, logical *rewi, logical *fatal, 
 	integer *nidim, integer *idim, integer *nkb, integer *kb, integer *
-	nalf, complex *alf, integer *nbet, complex *bet, integer *ninc,
+	nalf, complex *alf, integer *nbet, complex *bet, integer *ninc, 
 	integer *inc, integer *nmax, integer *incmax, complex *a, complex *aa,
-	 complex *as, complex *x, complex *xx, complex *xs, complex *y,
+	 complex *as, complex *x, complex *xx, complex *xs, complex *y, 
 	complex *yy, complex *ys, complex *yt, real *g, ftnlen sname_len)
 {
     /* Initialized data */
@@ -877,7 +870,7 @@ L240:
 	    "ER:\002)";
 
     /* System generated locals */
-    integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5, i__6, i__7, i__8,
+    integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5, i__6, i__7, i__8, 
 	    i__9;
     alist al__1;
 
@@ -897,26 +890,26 @@ L240:
     logical same;
     integer incx, incy;
     logical full, tran, null;
-    extern /* Subroutine */ int cmake_(char *, char *, char *, integer *,
-	    integer *, complex *, integer *, complex *, integer *, integer *,
+    extern /* Subroutine */ int cmake_(char *, char *, char *, integer *, 
+	    integer *, complex *, integer *, complex *, integer *, integer *, 
 	    integer *, logical *, complex *, ftnlen, ftnlen, ftnlen);
     complex alpha;
     logical isame[13];
     extern /* Subroutine */ int cgbmv_(char *, integer *, integer *, integer *
 	    , integer *, complex *, complex *, integer *, complex *, integer *
-	    , complex *, complex *, integer *, ftnlen), cgemv_(char *,
-	    integer *, integer *, complex *, complex *, integer *, complex *,
+	    , complex *, complex *, integer *, ftnlen), cgemv_(char *, 
+	    integer *, integer *, complex *, complex *, integer *, complex *, 
 	    integer *, complex *, complex *, integer *, ftnlen), cmvch_(char *
 	    , integer *, integer *, complex *, complex *, integer *, complex *
-	    , integer *, complex *, complex *, integer *, complex *, real *,
-	    complex *, real *, real *, logical *, integer *, logical *,
+	    , integer *, complex *, complex *, integer *, complex *, real *, 
+	    complex *, real *, real *, logical *, integer *, logical *, 
 	    ftnlen);
     integer nargs;
     logical reset;
     integer incxs, incys;
     char trans[1];
     logical banded;
-    extern logical lceres_(char *, char *, integer *, integer *, complex *,
+    extern logical lceres_(char *, char *, integer *, integer *, complex *, 
 	    complex *, integer *, ftnlen, ftnlen);
     real errmax;
     complex transl;
@@ -1099,9 +1092,9 @@ L240:
 				    transl.r = 0.f, transl.i = 0.f;
 				    i__7 = abs(incy);
 				    i__8 = ml - 1;
-				    cmake_("GE", " ", " ", &c__1, &ml, &y[1],
+				    cmake_("GE", " ", " ", &c__1, &ml, &y[1], 
 					    &c__1, &yy[1], &i__7, &c__0, &
-					    i__8, &reset, &transl, (ftnlen)2,
+					    i__8, &reset, &transl, (ftnlen)2, 
 					    (ftnlen)1, (ftnlen)1);
 
 				    ++nc;
@@ -1109,7 +1102,7 @@ L240:
 /*                             Save every datum before calling the */
 /*                             subroutine. */
 
-				    *(unsigned char *)transs = *(unsigned
+				    *(unsigned char *)transs = *(unsigned 
 					    char *)trans;
 				    ms = m;
 				    ns = n;
@@ -1120,7 +1113,7 @@ L240:
 				    for (i__ = 1; i__ <= i__7; ++i__) {
 					i__8 = i__;
 					i__9 = i__;
-					as[i__8].r = aa[i__9].r, as[i__8].i =
+					as[i__8].r = aa[i__9].r, as[i__8].i = 
 						aa[i__9].i;
 /* L10: */
 				    }
@@ -1129,7 +1122,7 @@ L240:
 				    for (i__ = 1; i__ <= i__7; ++i__) {
 					i__8 = i__;
 					i__9 = i__;
-					xs[i__8].r = xx[i__9].r, xs[i__8].i =
+					xs[i__8].r = xx[i__9].r, xs[i__8].i = 
 						xx[i__9].i;
 /* L20: */
 				    }
@@ -1139,7 +1132,7 @@ L240:
 				    for (i__ = 1; i__ <= i__7; ++i__) {
 					i__8 = i__;
 					i__9 = i__;
-					ys[i__8].r = yy[i__9].r, ys[i__8].i =
+					ys[i__8].r = yy[i__9].r, ys[i__8].i = 
 						yy[i__9].i;
 /* L30: */
 				    }
@@ -1176,7 +1169,7 @@ L240:
 					    al__1.aunit = *ntra;
 					    f_rew(&al__1);
 					}
-					cgemv_(trans, &m, &n, &alpha, &aa[1],
+					cgemv_(trans, &m, &n, &alpha, &aa[1], 
 						&lda, &xx[1], &incx, &beta, &
 						yy[1], &incy, (ftnlen)1);
 				    } else if (banded) {
@@ -1235,7 +1228,7 @@ L240:
 				    isame[1] = ms == m;
 				    isame[2] = ns == n;
 				    if (full) {
-					isame[3] = als.r == alpha.r && als.i
+					isame[3] = als.r == alpha.r && als.i 
 						== alpha.i;
 					isame[4] = lce_(&as[1], &aa[1], &laa);
 					isame[5] = ldas == lda;
@@ -1257,13 +1250,13 @@ L240:
 				    } else if (banded) {
 					isame[3] = kls == kl;
 					isame[4] = kus == ku;
-					isame[5] = als.r == alpha.r && als.i
+					isame[5] = als.r == alpha.r && als.i 
 						== alpha.i;
 					isame[6] = lce_(&as[1], &aa[1], &laa);
 					isame[7] = ldas == lda;
 					isame[8] = lce_(&xs[1], &xx[1], &lx);
 					isame[9] = incxs == incx;
-					isame[10] = bls.r == beta.r && bls.i
+					isame[10] = bls.r == beta.r && bls.i 
 						== beta.i;
 					if (null) {
 					    isame[11] = lce_(&ys[1], &yy[1], &
@@ -1305,8 +1298,8 @@ L240:
 
 					cmvch_(trans, &m, &n, &alpha, &a[
 						a_offset], nmax, &x[1], &incx,
-						 &beta, &y[1], &incy, &yt[1],
-						&g[1], &yy[1], eps, &err,
+						 &beta, &y[1], &incy, &yt[1], 
+						&g[1], &yy[1], eps, &err, 
 						fatal, nout, &c_true, (ftnlen)
 						1);
 					errmax = max(errmax,err);
@@ -1411,11 +1404,11 @@ L140:
 } /* cchk1_ */
 
 /* Subroutine */ int cchk2_(char *sname, real *eps, real *thresh, integer *
-	nout, integer *ntra, logical *trace, logical *rewi, logical *fatal,
+	nout, integer *ntra, logical *trace, logical *rewi, logical *fatal, 
 	integer *nidim, integer *idim, integer *nkb, integer *kb, integer *
-	nalf, complex *alf, integer *nbet, complex *bet, integer *ninc,
+	nalf, complex *alf, integer *nbet, complex *bet, integer *ninc, 
 	integer *inc, integer *nmax, integer *incmax, complex *a, complex *aa,
-	 complex *as, complex *x, complex *xx, complex *xs, complex *y,
+	 complex *as, complex *x, complex *xx, complex *xs, complex *y, 
 	complex *yy, complex *ys, complex *yt, real *g, ftnlen sname_len)
 {
     /* Initialized data */
@@ -1448,7 +1441,7 @@ L140:
 	    "ER:\002)";
 
     /* System generated locals */
-    integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5, i__6, i__7, i__8,
+    integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5, i__6, i__7, i__8, 
 	    i__9;
     alist al__1;
 
@@ -1457,7 +1450,7 @@ L140:
 	     f_rew(alist *);
 
     /* Local variables */
-    integer i__, k, n, ia, ib, ic, nc, ik, in, nk, ks, ix, iy, ns, lx, ly,
+    integer i__, k, n, ia, ib, ic, nc, ik, in, nk, ks, ix, iy, ns, lx, ly, 
 	    laa, lda;
     extern logical lce_(complex *, complex *, integer *);
     complex als, bls;
@@ -1468,18 +1461,18 @@ L140:
     integer incx, incy;
     logical full, null;
     char uplo[1];
-    extern /* Subroutine */ int cmake_(char *, char *, char *, integer *,
-	    integer *, complex *, integer *, complex *, integer *, integer *,
+    extern /* Subroutine */ int cmake_(char *, char *, char *, integer *, 
+	    integer *, complex *, integer *, complex *, integer *, integer *, 
 	    integer *, logical *, complex *, ftnlen, ftnlen, ftnlen);
     complex alpha;
     logical isame[13];
     extern /* Subroutine */ int chbmv_(char *, integer *, integer *, complex *
 	    , complex *, integer *, complex *, integer *, complex *, complex *
-	    , integer *, ftnlen), chemv_(char *, integer *, complex *,
-	    complex *, integer *, complex *, integer *, complex *, complex *,
+	    , integer *, ftnlen), chemv_(char *, integer *, complex *, 
+	    complex *, integer *, complex *, integer *, complex *, complex *, 
 	    integer *, ftnlen), cmvch_(char *, integer *, integer *, complex *
 	    , complex *, integer *, complex *, integer *, complex *, complex *
-	    , integer *, complex *, real *, complex *, real *, real *,
+	    , integer *, complex *, real *, complex *, real *, real *, 
 	    logical *, integer *, logical *, ftnlen);
     integer nargs;
     extern /* Subroutine */ int chpmv_(char *, integer *, complex *, complex *
@@ -1488,7 +1481,7 @@ L140:
     integer incxs, incys;
     char uplos[1];
     logical banded, packed;
-    extern logical lceres_(char *, char *, integer *, integer *, complex *,
+    extern logical lceres_(char *, char *, integer *, integer *, complex *, 
 	    complex *, integer *, ftnlen, ftnlen);
     real errmax;
     complex transl;
@@ -1653,7 +1646,7 @@ L140:
 				i__8 = n - 1;
 				cmake_("GE", " ", " ", &c__1, &n, &y[1], &
 					c__1, &yy[1], &i__7, &c__0, &i__8, &
-					reset, &transl, (ftnlen)2, (ftnlen)1,
+					reset, &transl, (ftnlen)2, (ftnlen)1, 
 					(ftnlen)1);
 
 				++nc;
@@ -1805,13 +1798,13 @@ L140:
 					unsigned char *)uplos;
 				isame[1] = ns == n;
 				if (full) {
-				    isame[2] = als.r == alpha.r && als.i ==
+				    isame[2] = als.r == alpha.r && als.i == 
 					    alpha.i;
 				    isame[3] = lce_(&as[1], &aa[1], &laa);
 				    isame[4] = ldas == lda;
 				    isame[5] = lce_(&xs[1], &xx[1], &lx);
 				    isame[6] = incxs == incx;
-				    isame[7] = bls.r == beta.r && bls.i ==
+				    isame[7] = bls.r == beta.r && bls.i == 
 					    beta.i;
 				    if (null) {
 					isame[8] = lce_(&ys[1], &yy[1], &ly);
@@ -1824,13 +1817,13 @@ L140:
 				    isame[9] = incys == incy;
 				} else if (banded) {
 				    isame[2] = ks == k;
-				    isame[3] = als.r == alpha.r && als.i ==
+				    isame[3] = als.r == alpha.r && als.i == 
 					    alpha.i;
 				    isame[4] = lce_(&as[1], &aa[1], &laa);
 				    isame[5] = ldas == lda;
 				    isame[6] = lce_(&xs[1], &xx[1], &lx);
 				    isame[7] = incxs == incx;
-				    isame[8] = bls.r == beta.r && bls.i ==
+				    isame[8] = bls.r == beta.r && bls.i == 
 					    beta.i;
 				    if (null) {
 					isame[9] = lce_(&ys[1], &yy[1], &ly);
@@ -1842,12 +1835,12 @@ L140:
 				    }
 				    isame[10] = incys == incy;
 				} else if (packed) {
-				    isame[2] = als.r == alpha.r && als.i ==
+				    isame[2] = als.r == alpha.r && als.i == 
 					    alpha.i;
 				    isame[3] = lce_(&as[1], &aa[1], &laa);
 				    isame[4] = lce_(&xs[1], &xx[1], &lx);
 				    isame[5] = incxs == incx;
-				    isame[6] = bls.r == beta.r && bls.i ==
+				    isame[6] = bls.r == beta.r && bls.i == 
 					    beta.i;
 				    if (null) {
 					isame[7] = lce_(&ys[1], &yy[1], &ly);
@@ -1885,8 +1878,8 @@ L140:
 
 /*                             Check the result. */
 
-				    cmvch_("N", &n, &n, &alpha, &a[a_offset],
-					    nmax, &x[1], &incx, &beta, &y[1],
+				    cmvch_("N", &n, &n, &alpha, &a[a_offset], 
+					    nmax, &x[1], &incx, &beta, &y[1], 
 					    &incy, &yt[1], &g[1], &yy[1], eps,
 					     &err, fatal, nout, &c_true, (
 					    ftnlen)1);
@@ -1997,10 +1990,10 @@ L130:
 } /* cchk2_ */
 
 /* Subroutine */ int cchk3_(char *sname, real *eps, real *thresh, integer *
-	nout, integer *ntra, logical *trace, logical *rewi, logical *fatal,
+	nout, integer *ntra, logical *trace, logical *rewi, logical *fatal, 
 	integer *nidim, integer *idim, integer *nkb, integer *kb, integer *
-	ninc, integer *inc, integer *nmax, integer *incmax, complex *a,
-	complex *aa, complex *as, complex *x, complex *xx, complex *xs,
+	ninc, integer *inc, integer *nmax, integer *incmax, complex *a, 
+	complex *aa, complex *as, complex *x, complex *xx, complex *xs, 
 	complex *xt, real *g, complex *z__, ftnlen sname_len)
 {
     /* Initialized data */
@@ -2050,36 +2043,36 @@ L130:
     integer incx;
     logical full, null;
     char uplo[1];
-    extern /* Subroutine */ int cmake_(char *, char *, char *, integer *,
-	    integer *, complex *, integer *, complex *, integer *, integer *,
+    extern /* Subroutine */ int cmake_(char *, char *, char *, integer *, 
+	    integer *, complex *, integer *, complex *, integer *, integer *, 
 	    integer *, logical *, complex *, ftnlen, ftnlen, ftnlen);
     char diags[1];
     logical isame[13];
     extern /* Subroutine */ int cmvch_(char *, integer *, integer *, complex *
 	    , complex *, integer *, complex *, integer *, complex *, complex *
-	    , integer *, complex *, real *, complex *, real *, real *,
+	    , integer *, complex *, real *, complex *, real *, real *, 
 	    logical *, integer *, logical *, ftnlen);
     integer nargs;
-    extern /* Subroutine */ int ctbmv_(char *, char *, char *, integer *,
-	    integer *, complex *, integer *, complex *, integer *, ftnlen,
-	    ftnlen, ftnlen), ctbsv_(char *, char *, char *, integer *,
-	    integer *, complex *, integer *, complex *, integer *, ftnlen,
+    extern /* Subroutine */ int ctbmv_(char *, char *, char *, integer *, 
+	    integer *, complex *, integer *, complex *, integer *, ftnlen, 
+	    ftnlen, ftnlen), ctbsv_(char *, char *, char *, integer *, 
+	    integer *, complex *, integer *, complex *, integer *, ftnlen, 
 	    ftnlen, ftnlen);
     logical reset;
     integer incxs;
     char trans[1];
-    extern /* Subroutine */ int ctpmv_(char *, char *, char *, integer *,
+    extern /* Subroutine */ int ctpmv_(char *, char *, char *, integer *, 
 	    complex *, complex *, integer *, ftnlen, ftnlen, ftnlen), ctrmv_(
 	    char *, char *, char *, integer *, complex *, integer *, complex *
-	    , integer *, ftnlen, ftnlen, ftnlen), ctpsv_(char *, char *, char
-	    *, integer *, complex *, complex *, integer *, ftnlen, ftnlen,
+	    , integer *, ftnlen, ftnlen, ftnlen), ctpsv_(char *, char *, char 
+	    *, integer *, complex *, complex *, integer *, ftnlen, ftnlen, 
 	    ftnlen);
     char uplos[1];
-    extern /* Subroutine */ int ctrsv_(char *, char *, char *, integer *,
-	    complex *, integer *, complex *, integer *, ftnlen, ftnlen,
+    extern /* Subroutine */ int ctrsv_(char *, char *, char *, integer *, 
+	    complex *, integer *, complex *, integer *, ftnlen, ftnlen, 
 	    ftnlen);
     logical banded, packed;
-    extern logical lceres_(char *, char *, integer *, integer *, complex *,
+    extern logical lceres_(char *, char *, integer *, integer *, complex *, 
 	    complex *, integer *, ftnlen, ftnlen);
     real errmax;
     complex transl;
@@ -2207,13 +2200,13 @@ L130:
 			    ;
 
 		    for (icd = 1; icd <= 2; ++icd) {
-			*(unsigned char *)diag = *(unsigned char *)&ichd[icd
+			*(unsigned char *)diag = *(unsigned char *)&ichd[icd 
 				- 1];
 
 /*                    Generate the matrix A. */
 
 			transl.r = 0.f, transl.i = 0.f;
-			cmake_(sname + 1, uplo, diag, &n, &n, &a[a_offset],
+			cmake_(sname + 1, uplo, diag, &n, &n, &a[a_offset], 
 				nmax, &aa[1], &lda, &k, &k, &reset, &transl, (
 				ftnlen)2, (ftnlen)1, (ftnlen)1);
 
@@ -2268,7 +2261,7 @@ L130:
 
 /*                       Call the subroutine. */
 
-			    if (s_cmp(sname + 3, "MV", (ftnlen)2, (ftnlen)2)
+			    if (s_cmp(sname + 3, "MV", (ftnlen)2, (ftnlen)2) 
 				    == 0) {
 				if (full) {
 				    if (*trace) {
@@ -2321,7 +2314,7 @@ L130:
 					al__1.aunit = *ntra;
 					f_rew(&al__1);
 				    }
-				    ctbmv_(uplo, trans, diag, &n, &k, &aa[1],
+				    ctbmv_(uplo, trans, diag, &n, &k, &aa[1], 
 					    &lda, &xx[1], &incx, (ftnlen)1, (
 					    ftnlen)1, (ftnlen)1);
 				} else if (packed) {
@@ -2402,7 +2395,7 @@ L130:
 					al__1.aunit = *ntra;
 					f_rew(&al__1);
 				    }
-				    ctbsv_(uplo, trans, diag, &n, &k, &aa[1],
+				    ctbsv_(uplo, trans, diag, &n, &k, &aa[1], 
 					    &lda, &xx[1], &incx, (ftnlen)1, (
 					    ftnlen)1, (ftnlen)1);
 				} else if (packed) {
@@ -2444,11 +2437,11 @@ L130:
 
 /*                       See what data changed inside subroutines. */
 
-			    isame[0] = *(unsigned char *)uplo == *(unsigned
+			    isame[0] = *(unsigned char *)uplo == *(unsigned 
 				    char *)uplos;
-			    isame[1] = *(unsigned char *)trans == *(unsigned
+			    isame[1] = *(unsigned char *)trans == *(unsigned 
 				    char *)transs;
-			    isame[2] = *(unsigned char *)diag == *(unsigned
+			    isame[2] = *(unsigned char *)diag == *(unsigned 
 				    char *)diags;
 			    isame[3] = ns == n;
 			    if (full) {
@@ -2518,7 +2511,7 @@ L130:
 
 				    cmvch_(trans, &n, &n, &c_b2, &a[a_offset],
 					     nmax, &x[1], &incx, &c_b1, &z__[
-					    1], &incx, &xt[1], &g[1], &xx[1],
+					    1], &incx, &xt[1], &g[1], &xx[1], 
 					    eps, &err, fatal, nout, &c_true, (
 					    ftnlen)1);
 				} else if (s_cmp(sname + 3, "SV", (ftnlen)2, (
@@ -2530,18 +2523,18 @@ L130:
 				    for (i__ = 1; i__ <= i__4; ++i__) {
 					i__5 = i__;
 					i__6 = (i__ - 1) * abs(incx) + 1;
-					z__[i__5].r = xx[i__6].r, z__[i__5].i
+					z__[i__5].r = xx[i__6].r, z__[i__5].i 
 						= xx[i__6].i;
 					i__5 = (i__ - 1) * abs(incx) + 1;
 					i__6 = i__;
-					xx[i__5].r = x[i__6].r, xx[i__5].i =
+					xx[i__5].r = x[i__6].r, xx[i__5].i = 
 						x[i__6].i;
 /* L50: */
 				    }
 				    cmvch_(trans, &n, &n, &c_b2, &a[a_offset],
 					     nmax, &z__[1], &incx, &c_b1, &x[
-					    1], &incx, &xt[1], &g[1], &xx[1],
-					    eps, &err, fatal, nout, &c_false,
+					    1], &incx, &xt[1], &g[1], &xx[1], 
+					    eps, &err, fatal, nout, &c_false, 
 					    (ftnlen)1);
 				}
 				errmax = max(errmax,err);
@@ -2644,10 +2637,10 @@ L130:
 } /* cchk3_ */
 
 /* Subroutine */ int cchk4_(char *sname, real *eps, real *thresh, integer *
-	nout, integer *ntra, logical *trace, logical *rewi, logical *fatal,
+	nout, integer *ntra, logical *trace, logical *rewi, logical *fatal, 
 	integer *nidim, integer *idim, integer *nalf, complex *alf, integer *
-	ninc, integer *inc, integer *nmax, integer *incmax, complex *a,
-	complex *aa, complex *as, complex *x, complex *xx, complex *xs,
+	ninc, integer *inc, integer *nmax, integer *incmax, complex *a, 
+	complex *aa, complex *as, complex *x, complex *xx, complex *xs, 
 	complex *y, complex *yy, complex *ys, complex *yt, real *g, complex *
 	z__, ftnlen sname_len)
 {
@@ -2691,23 +2684,23 @@ L130:
     logical same, conj;
     integer incx, incy;
     logical null;
-    extern /* Subroutine */ int cmake_(char *, char *, char *, integer *,
-	    integer *, complex *, integer *, complex *, integer *, integer *,
+    extern /* Subroutine */ int cmake_(char *, char *, char *, integer *, 
+	    integer *, complex *, integer *, complex *, integer *, integer *, 
 	    integer *, logical *, complex *, ftnlen, ftnlen, ftnlen), cgerc_(
-	    integer *, integer *, complex *, complex *, integer *, complex *,
+	    integer *, integer *, complex *, complex *, integer *, complex *, 
 	    integer *, complex *, integer *);
     complex alpha;
     logical isame[13];
     extern /* Subroutine */ int cmvch_(char *, integer *, integer *, complex *
 	    , complex *, integer *, complex *, integer *, complex *, complex *
-	    , integer *, complex *, real *, complex *, real *, real *,
-	    logical *, integer *, logical *, ftnlen), cgeru_(integer *,
-	    integer *, complex *, complex *, integer *, complex *, integer *,
+	    , integer *, complex *, real *, complex *, real *, real *, 
+	    logical *, integer *, logical *, ftnlen), cgeru_(integer *, 
+	    integer *, complex *, complex *, integer *, complex *, integer *, 
 	    complex *, integer *);
     integer nargs;
     logical reset;
     integer incxs, incys;
-    extern logical lceres_(char *, char *, integer *, integer *, complex *,
+    extern logical lceres_(char *, char *, integer *, integer *, complex *, 
 	    complex *, integer *, ftnlen, ftnlen);
     real errmax;
     complex transl;
@@ -2811,7 +2804,7 @@ L130:
 		i__3 = abs(incx);
 		i__4 = m - 1;
 		cmake_("GE", " ", " ", &c__1, &m, &x[1], &c__1, &xx[1], &i__3,
-			 &c__0, &i__4, &reset, &transl, (ftnlen)2, (ftnlen)1,
+			 &c__0, &i__4, &reset, &transl, (ftnlen)2, (ftnlen)1, 
 			(ftnlen)1);
 		if (m > 1) {
 		    i__3 = m / 2;
@@ -2850,7 +2843,7 @@ L130:
 			transl.r = 0.f, transl.i = 0.f;
 			i__5 = m - 1;
 			i__6 = n - 1;
-			cmake_(sname + 1, " ", " ", &m, &n, &a[a_offset],
+			cmake_(sname + 1, " ", " ", &m, &n, &a[a_offset], 
 				nmax, &aa[1], &lda, &i__5, &i__6, &reset, &
 				transl, (ftnlen)2, (ftnlen)1, (ftnlen)1);
 
@@ -3009,9 +3002,9 @@ L130:
 				    r_cnjg(&q__1, w);
 				    w[0].r = q__1.r, w[0].i = q__1.i;
 				}
-				cmvch_("N", &m, &c__1, &alpha, &z__[1], nmax,
+				cmvch_("N", &m, &c__1, &alpha, &z__[1], nmax, 
 					w, &c__1, &c_b2, &a[j * a_dim1 + 1], &
-					c__1, &yt[1], &g[1], &aa[(j - 1) *
+					c__1, &yt[1], &g[1], &aa[(j - 1) * 
 					lda + 1], eps, &err, fatal, nout, &
 					c_true, (ftnlen)1);
 				errmax = max(errmax,err);
@@ -3092,10 +3085,10 @@ L150:
 } /* cchk4_ */
 
 /* Subroutine */ int cchk5_(char *sname, real *eps, real *thresh, integer *
-	nout, integer *ntra, logical *trace, logical *rewi, logical *fatal,
+	nout, integer *ntra, logical *trace, logical *rewi, logical *fatal, 
 	integer *nidim, integer *idim, integer *nalf, complex *alf, integer *
-	ninc, integer *inc, integer *nmax, integer *incmax, complex *a,
-	complex *aa, complex *as, complex *x, complex *xx, complex *xs,
+	ninc, integer *inc, integer *nmax, integer *incmax, complex *a, 
+	complex *aa, complex *as, complex *x, complex *xx, complex *xs, 
 	complex *y, complex *yy, complex *ys, complex *yt, real *g, complex *
 	z__, ftnlen sname_len)
 {
@@ -3140,24 +3133,24 @@ L150:
     integer ia, ja, ic, nc, jj, lj, in, ix, ns, lx, laa, lda;
     extern logical lce_(complex *, complex *, integer *);
     real err;
-    extern /* Subroutine */ int cher_(char *, integer *, real *, complex *,
+    extern /* Subroutine */ int cher_(char *, integer *, real *, complex *, 
 	    integer *, complex *, integer *, ftnlen);
     integer ldas;
     logical same;
-    extern /* Subroutine */ int chpr_(char *, integer *, real *, complex *,
+    extern /* Subroutine */ int chpr_(char *, integer *, real *, complex *, 
 	    integer *, complex *, ftnlen);
     real rals;
     integer incx;
     logical full, null;
     char uplo[1];
-    extern /* Subroutine */ int cmake_(char *, char *, char *, integer *,
-	    integer *, complex *, integer *, complex *, integer *, integer *,
+    extern /* Subroutine */ int cmake_(char *, char *, char *, integer *, 
+	    integer *, complex *, integer *, complex *, integer *, integer *, 
 	    integer *, logical *, complex *, ftnlen, ftnlen, ftnlen);
     complex alpha;
     logical isame[13];
     extern /* Subroutine */ int cmvch_(char *, integer *, integer *, complex *
 	    , complex *, integer *, complex *, integer *, complex *, complex *
-	    , integer *, complex *, real *, complex *, real *, real *,
+	    , integer *, complex *, real *, complex *, real *, real *, 
 	    logical *, integer *, logical *, ftnlen);
     integer nargs;
     logical reset;
@@ -3166,7 +3159,7 @@ L150:
     char uplos[1];
     logical packed;
     real ralpha;
-    extern logical lceres_(char *, char *, integer *, integer *, complex *,
+    extern logical lceres_(char *, char *, integer *, integer *, complex *, 
 	    complex *, integer *, ftnlen, ftnlen);
     real errmax;
     complex transl;
@@ -3271,7 +3264,7 @@ L150:
 		i__3 = abs(incx);
 		i__4 = n - 1;
 		cmake_("GE", " ", " ", &c__1, &n, &x[1], &c__1, &xx[1], &i__3,
-			 &c__0, &i__4, &reset, &transl, (ftnlen)2, (ftnlen)1,
+			 &c__0, &i__4, &reset, &transl, (ftnlen)2, (ftnlen)1, 
 			(ftnlen)1);
 		if (n > 1) {
 		    i__3 = n / 2;
@@ -3346,7 +3339,7 @@ L150:
 			    al__1.aunit = *ntra;
 			    f_rew(&al__1);
 			}
-			cher_(uplo, &n, &ralpha, &xx[1], &incx, &aa[1], &lda,
+			cher_(uplo, &n, &ralpha, &xx[1], &incx, &aa[1], &lda, 
 				(ftnlen)1);
 		    } else if (packed) {
 			if (*trace) {
@@ -3456,9 +3449,9 @@ L150:
 				jj = j;
 				lj = n - j + 1;
 			    }
-			    cmvch_("N", &lj, &c__1, &alpha, &z__[jj], &lj, w,
-				    &c__1, &c_b2, &a[jj + j * a_dim1], &c__1,
-				    &yt[1], &g[1], &aa[ja], eps, &err, fatal,
+			    cmvch_("N", &lj, &c__1, &alpha, &z__[jj], &lj, w, 
+				    &c__1, &c_b2, &a[jj + j * a_dim1], &c__1, 
+				    &yt[1], &g[1], &aa[ja], eps, &err, fatal, 
 				    nout, &c_true, (ftnlen)1);
 			    if (full) {
 				if (upper) {
@@ -3557,10 +3550,10 @@ L130:
 } /* cchk5_ */
 
 /* Subroutine */ int cchk6_(char *sname, real *eps, real *thresh, integer *
-	nout, integer *ntra, logical *trace, logical *rewi, logical *fatal,
+	nout, integer *ntra, logical *trace, logical *rewi, logical *fatal, 
 	integer *nidim, integer *idim, integer *nalf, complex *alf, integer *
-	ninc, integer *inc, integer *nmax, integer *incmax, complex *a,
-	complex *aa, complex *as, complex *x, complex *xx, complex *xs,
+	ninc, integer *inc, integer *nmax, integer *incmax, complex *a, 
+	complex *aa, complex *as, complex *x, complex *xx, complex *xs, 
 	complex *y, complex *yy, complex *ys, complex *yt, real *g, complex *
 	z__, ftnlen sname_len)
 {
@@ -3590,7 +3583,7 @@ L130:
 	    "ER:\002)";
 
     /* System generated locals */
-    integer a_dim1, a_offset, z_dim1, z_offset, i__1, i__2, i__3, i__4, i__5,
+    integer a_dim1, a_offset, z_dim1, z_offset, i__1, i__2, i__3, i__4, i__5, 
 	    i__6, i__7;
     complex q__1, q__2, q__3;
     alist al__1;
@@ -3613,17 +3606,17 @@ L130:
     logical full, null;
     char uplo[1];
     extern /* Subroutine */ int cher2_(char *, integer *, complex *, complex *
-	    , integer *, complex *, integer *, complex *, integer *, ftnlen),
-	    chpr2_(char *, integer *, complex *, complex *, integer *,
-	    complex *, integer *, complex *, ftnlen), cmake_(char *, char *,
-	    char *, integer *, integer *, complex *, integer *, complex *,
-	    integer *, integer *, integer *, logical *, complex *, ftnlen,
+	    , integer *, complex *, integer *, complex *, integer *, ftnlen), 
+	    chpr2_(char *, integer *, complex *, complex *, integer *, 
+	    complex *, integer *, complex *, ftnlen), cmake_(char *, char *, 
+	    char *, integer *, integer *, complex *, integer *, complex *, 
+	    integer *, integer *, integer *, logical *, complex *, ftnlen, 
 	    ftnlen, ftnlen);
     complex alpha;
     logical isame[13];
     extern /* Subroutine */ int cmvch_(char *, integer *, integer *, complex *
 	    , complex *, integer *, complex *, integer *, complex *, complex *
-	    , integer *, complex *, real *, complex *, real *, real *,
+	    , integer *, complex *, real *, complex *, real *, real *, 
 	    logical *, integer *, logical *, ftnlen);
     integer nargs;
     logical reset;
@@ -3631,7 +3624,7 @@ L130:
     logical upper;
     char uplos[1];
     logical packed;
-    extern logical lceres_(char *, char *, integer *, integer *, complex *,
+    extern logical lceres_(char *, char *, integer *, integer *, complex *, 
 	    complex *, integer *, ftnlen, ftnlen);
     real errmax;
     complex transl;
@@ -3738,7 +3731,7 @@ L130:
 		i__3 = abs(incx);
 		i__4 = n - 1;
 		cmake_("GE", " ", " ", &c__1, &n, &x[1], &c__1, &xx[1], &i__3,
-			 &c__0, &i__4, &reset, &transl, (ftnlen)2, (ftnlen)1,
+			 &c__0, &i__4, &reset, &transl, (ftnlen)2, (ftnlen)1, 
 			(ftnlen)1);
 		if (n > 1) {
 		    i__3 = n / 2;
@@ -3778,7 +3771,7 @@ L130:
 			transl.r = 0.f, transl.i = 0.f;
 			i__5 = n - 1;
 			i__6 = n - 1;
-			cmake_(sname + 1, uplo, " ", &n, &n, &a[a_offset],
+			cmake_(sname + 1, uplo, " ", &n, &n, &a[a_offset], 
 				nmax, &aa[1], &lda, &i__5, &i__6, &reset, &
 				transl, (ftnlen)2, (ftnlen)1, (ftnlen)1);
 
@@ -3966,14 +3959,14 @@ L130:
 			    i__5 = n;
 			    for (j = 1; j <= i__5; ++j) {
 				r_cnjg(&q__2, &z__[j + (z_dim1 << 1)]);
-				q__1.r = alpha.r * q__2.r - alpha.i * q__2.i,
-					q__1.i = alpha.r * q__2.i + alpha.i *
+				q__1.r = alpha.r * q__2.r - alpha.i * q__2.i, 
+					q__1.i = alpha.r * q__2.i + alpha.i * 
 					q__2.r;
 				w[0].r = q__1.r, w[0].i = q__1.i;
 				r_cnjg(&q__2, &alpha);
 				r_cnjg(&q__3, &z__[j + z_dim1]);
-				q__1.r = q__2.r * q__3.r - q__2.i * q__3.i,
-					q__1.i = q__2.r * q__3.i + q__2.i *
+				q__1.r = q__2.r * q__3.r - q__2.i * q__3.i, 
+					q__1.i = q__2.r * q__3.i + q__2.i * 
 					q__3.r;
 				w[1].r = q__1.r, w[1].i = q__1.i;
 				if (upper) {
@@ -3983,8 +3976,8 @@ L130:
 				    jj = j;
 				    lj = n - j + 1;
 				}
-				cmvch_("N", &lj, &c__2, &c_b2, &z__[jj +
-					z_dim1], nmax, w, &c__1, &c_b2, &a[jj
+				cmvch_("N", &lj, &c__2, &c_b2, &z__[jj + 
+					z_dim1], nmax, w, &c__1, &c_b2, &a[jj 
 					+ j * a_dim1], &c__1, &yt[1], &g[1], &
 					aa[ja], eps, &err, fatal, nout, &
 					c_true, (ftnlen)1);
@@ -4089,7 +4082,7 @@ L170:
 
 } /* cchk6_ */
 
-/* Subroutine */ int cchke_(integer *isnum, char *srnamt, integer *nout,
+/* Subroutine */ int cchke_(integer *isnum, char *srnamt, integer *nout, 
 	ftnlen srnamt_len)
 {
     /* Format strings */
@@ -4103,40 +4096,40 @@ L170:
 
     /* Local variables */
     complex a[1]	/* was [1][1] */, x[1], y[1], beta;
-    extern /* Subroutine */ int cher_(char *, integer *, real *, complex *,
+    extern /* Subroutine */ int cher_(char *, integer *, real *, complex *, 
 	    integer *, complex *, integer *, ftnlen), chpr_(char *, integer *,
-	     real *, complex *, integer *, complex *, ftnlen), cher2_(char *,
-	    integer *, complex *, complex *, integer *, complex *, integer *,
+	     real *, complex *, integer *, complex *, ftnlen), cher2_(char *, 
+	    integer *, complex *, complex *, integer *, complex *, integer *, 
 	    complex *, integer *, ftnlen), chpr2_(char *, integer *, complex *
-	    , complex *, integer *, complex *, integer *, complex *, ftnlen),
-	    cgerc_(integer *, integer *, complex *, complex *, integer *,
+	    , complex *, integer *, complex *, integer *, complex *, ftnlen), 
+	    cgerc_(integer *, integer *, complex *, complex *, integer *, 
 	    complex *, integer *, complex *, integer *);
     complex alpha;
     extern /* Subroutine */ int cgbmv_(char *, integer *, integer *, integer *
 	    , integer *, complex *, complex *, integer *, complex *, integer *
-	    , complex *, complex *, integer *, ftnlen), chbmv_(char *,
-	    integer *, integer *, complex *, complex *, integer *, complex *,
+	    , complex *, complex *, integer *, ftnlen), chbmv_(char *, 
+	    integer *, integer *, complex *, complex *, integer *, complex *, 
 	    integer *, complex *, complex *, integer *, ftnlen), cgemv_(char *
 	    , integer *, integer *, complex *, complex *, integer *, complex *
 	    , integer *, complex *, complex *, integer *, ftnlen), chemv_(
-	    char *, integer *, complex *, complex *, integer *, complex *,
+	    char *, integer *, complex *, complex *, integer *, complex *, 
 	    integer *, complex *, complex *, integer *, ftnlen), cgeru_(
-	    integer *, integer *, complex *, complex *, integer *, complex *,
-	    integer *, complex *, integer *), ctbmv_(char *, char *, char *,
-	    integer *, integer *, complex *, integer *, complex *, integer *,
-	    ftnlen, ftnlen, ftnlen), chpmv_(char *, integer *, complex *,
-	    complex *, complex *, integer *, complex *, complex *, integer *,
-	    ftnlen), ctbsv_(char *, char *, char *, integer *, integer *,
-	    complex *, integer *, complex *, integer *, ftnlen, ftnlen,
-	    ftnlen), ctpmv_(char *, char *, char *, integer *, complex *,
-	    complex *, integer *, ftnlen, ftnlen, ftnlen), ctrmv_(char *,
-	    char *, char *, integer *, complex *, integer *, complex *,
+	    integer *, integer *, complex *, complex *, integer *, complex *, 
+	    integer *, complex *, integer *), ctbmv_(char *, char *, char *, 
+	    integer *, integer *, complex *, integer *, complex *, integer *, 
+	    ftnlen, ftnlen, ftnlen), chpmv_(char *, integer *, complex *, 
+	    complex *, complex *, integer *, complex *, complex *, integer *, 
+	    ftnlen), ctbsv_(char *, char *, char *, integer *, integer *, 
+	    complex *, integer *, complex *, integer *, ftnlen, ftnlen, 
+	    ftnlen), ctpmv_(char *, char *, char *, integer *, complex *, 
+	    complex *, integer *, ftnlen, ftnlen, ftnlen), ctrmv_(char *, 
+	    char *, char *, integer *, complex *, integer *, complex *, 
 	    integer *, ftnlen, ftnlen, ftnlen), ctpsv_(char *, char *, char *,
-	     integer *, complex *, complex *, integer *, ftnlen, ftnlen,
-	    ftnlen), ctrsv_(char *, char *, char *, integer *, complex *,
+	     integer *, complex *, complex *, integer *, ftnlen, ftnlen, 
+	    ftnlen), ctrsv_(char *, char *, char *, integer *, complex *, 
 	    integer *, complex *, integer *, ftnlen, ftnlen, ftnlen);
     real ralpha;
-    extern /* Subroutine */ int chkxer_(char *, integer *, integer *, logical
+    extern /* Subroutine */ int chkxer_(char *, integer *, integer *, logical 
 	    *, logical *, ftnlen);
 
     /* Fortran I/O blocks */
@@ -4665,9 +4658,9 @@ L180:
 
 } /* cchke_ */
 
-/* Subroutine */ int cmake_(char *type__, char *uplo, char *diag, integer *m,
-	integer *n, complex *a, integer *nmax, complex *aa, integer *lda,
-	integer *kl, integer *ku, logical *reset, complex *transl, ftnlen
+/* Subroutine */ int cmake_(char *type__, char *uplo, char *diag, integer *m, 
+	integer *n, complex *a, integer *nmax, complex *aa, integer *lda, 
+	integer *kl, integer *ku, logical *reset, complex *transl, ftnlen 
 	type_len, ftnlen uplo_len, ftnlen diag_len)
 {
     /* System generated locals */
@@ -4728,7 +4721,7 @@ L180:
 	i__2 = *m;
 	for (i__ = 1; i__ <= i__2; ++i__) {
 	    if (gen || upper && i__ <= j || lower && i__ >= j) {
-		if (i__ <= j && j - i__ <= *ku || i__ >= j && i__ - j <= *kl)
+		if (i__ <= j && j - i__ <= *ku || i__ >= j && i__ - j <= *kl) 
 			{
 		    i__3 = i__ + j * a_dim1;
 		    cbeg_(&q__2, reset);
@@ -4963,8 +4956,8 @@ L180:
 
 /* Subroutine */ int cmvch_(char *trans, integer *m, integer *n, complex *
 	alpha, complex *a, integer *nmax, complex *x, integer *incx, complex *
-	beta, complex *y, integer *incy, complex *yt, real *g, complex *yy,
-	real *eps, real *err, logical *fatal, integer *nout, logical *mv,
+	beta, complex *y, integer *incy, complex *yt, real *g, complex *yy, 
+	real *eps, real *err, logical *fatal, integer *nout, logical *mv, 
 	ftnlen trans_len)
 {
     /* Format strings */
@@ -5067,15 +5060,15 @@ L180:
 		i__4 = iy;
 		i__5 = j + i__ * a_dim1;
 		i__6 = jx;
-		q__2.r = a[i__5].r * x[i__6].r - a[i__5].i * x[i__6].i,
+		q__2.r = a[i__5].r * x[i__6].r - a[i__5].i * x[i__6].i, 
 			q__2.i = a[i__5].r * x[i__6].i + a[i__5].i * x[i__6]
 			.r;
 		q__1.r = yt[i__4].r + q__2.r, q__1.i = yt[i__4].i + q__2.i;
 		yt[i__3].r = q__1.r, yt[i__3].i = q__1.i;
 		i__3 = j + i__ * a_dim1;
 		i__4 = jx;
-		g[iy] += ((r__1 = a[i__3].r, abs(r__1)) + (r__2 = r_imag(&a[j
-			+ i__ * a_dim1]), abs(r__2))) * ((r__3 = x[i__4].r,
+		g[iy] += ((r__1 = a[i__3].r, abs(r__1)) + (r__2 = r_imag(&a[j 
+			+ i__ * a_dim1]), abs(r__2))) * ((r__3 = x[i__4].r, 
 			abs(r__3)) + (r__4 = r_imag(&x[jx]), abs(r__4)));
 		jx += incxl;
 /* L10: */
@@ -5087,14 +5080,14 @@ L180:
 		i__4 = iy;
 		r_cnjg(&q__3, &a[j + i__ * a_dim1]);
 		i__5 = jx;
-		q__2.r = q__3.r * x[i__5].r - q__3.i * x[i__5].i, q__2.i =
+		q__2.r = q__3.r * x[i__5].r - q__3.i * x[i__5].i, q__2.i = 
 			q__3.r * x[i__5].i + q__3.i * x[i__5].r;
 		q__1.r = yt[i__4].r + q__2.r, q__1.i = yt[i__4].i + q__2.i;
 		yt[i__3].r = q__1.r, yt[i__3].i = q__1.i;
 		i__3 = j + i__ * a_dim1;
 		i__4 = jx;
-		g[iy] += ((r__1 = a[i__3].r, abs(r__1)) + (r__2 = r_imag(&a[j
-			+ i__ * a_dim1]), abs(r__2))) * ((r__3 = x[i__4].r,
+		g[iy] += ((r__1 = a[i__3].r, abs(r__1)) + (r__2 = r_imag(&a[j 
+			+ i__ * a_dim1]), abs(r__2))) * ((r__3 = x[i__4].r, 
 			abs(r__3)) + (r__4 = r_imag(&x[jx]), abs(r__4)));
 		jx += incxl;
 /* L20: */
@@ -5106,7 +5099,7 @@ L180:
 		i__4 = iy;
 		i__5 = i__ + j * a_dim1;
 		i__6 = jx;
-		q__2.r = a[i__5].r * x[i__6].r - a[i__5].i * x[i__6].i,
+		q__2.r = a[i__5].r * x[i__6].r - a[i__5].i * x[i__6].i, 
 			q__2.i = a[i__5].r * x[i__6].i + a[i__5].i * x[i__6]
 			.r;
 		q__1.r = yt[i__4].r + q__2.r, q__1.i = yt[i__4].i + q__2.i;
@@ -5114,7 +5107,7 @@ L180:
 		i__3 = i__ + j * a_dim1;
 		i__4 = jx;
 		g[iy] += ((r__1 = a[i__3].r, abs(r__1)) + (r__2 = r_imag(&a[
-			i__ + j * a_dim1]), abs(r__2))) * ((r__3 = x[i__4].r,
+			i__ + j * a_dim1]), abs(r__2))) * ((r__3 = x[i__4].r, 
 			abs(r__3)) + (r__4 = r_imag(&x[jx]), abs(r__4)));
 		jx += incxl;
 /* L30: */
@@ -5122,7 +5115,7 @@ L180:
 	}
 	i__2 = iy;
 	i__3 = iy;
-	q__2.r = alpha->r * yt[i__3].r - alpha->i * yt[i__3].i, q__2.i =
+	q__2.r = alpha->r * yt[i__3].r - alpha->i * yt[i__3].i, q__2.i = 
 		alpha->r * yt[i__3].i + alpha->i * yt[i__3].r;
 	i__4 = iy;
 	q__3.r = beta->r * y[i__4].r - beta->i * y[i__4].i, q__3.i = beta->r *
@@ -5131,7 +5124,7 @@ L180:
 	yt[i__2].r = q__1.r, yt[i__2].i = q__1.i;
 	i__2 = iy;
 	g[iy] = ((r__1 = alpha->r, abs(r__1)) + (r__2 = r_imag(alpha), abs(
-		r__2))) * g[iy] + ((r__3 = beta->r, abs(r__3)) + (r__4 =
+		r__2))) * g[iy] + ((r__3 = beta->r, abs(r__3)) + (r__4 = 
 		r_imag(beta), abs(r__4))) * ((r__5 = y[i__2].r, abs(r__5)) + (
 		r__6 = r_imag(&y[iy]), abs(r__6)));
 	iy += incyl;
@@ -5218,13 +5211,10 @@ logical lce_(complex *ri, complex *rj, integer *lr)
 /*     .. Array Arguments .. */
 /*     .. Local Scalars .. */
 /*     .. Executable Statements .. */
-    /* Parameter adjustments */
-    --rj;
-    --ri;
 
     /* Function Body */
     i__1 = *lr;
-    for (i__ = 1; i__ <= i__1; ++i__) {
+    for (i__ = 0; i__ < i__1; ++i__) {
 	i__2 = i__;
 	i__3 = i__;
 	if (ri[i__2].r != rj[i__3].r || ri[i__2].i != rj[i__3].i) {
@@ -5420,7 +5410,7 @@ real sdiff_(real *x, real *y)
 
 } /* sdiff_ */
 
-/* Subroutine */ int chkxer_(char *srnamt, integer *infot, integer *nout,
+/* Subroutine */ int chkxer_(char *srnamt, integer *infot, integer *nout, 
 	logical *lerr, logical *ok, ftnlen srnamt_len)
 {
     /* Format strings */
@@ -5461,7 +5451,7 @@ real sdiff_(real *x, real *y)
 
 } /* chkxer_ */
 
-/* Subroutine */ int xerbla_(char *srname, integer *info, ftnlen srname_len)
+/* Subroutine */ void xerbla_(char *srname, integer *info, ftnlen srname_len)
 {
     /* Format strings */
     static char fmt_9999[] = "(\002 ******* XERBLA WAS CALLED WITH INFO ="
@@ -5525,7 +5515,7 @@ real sdiff_(real *x, real *y)
 	e_wsfe();
 	infoc_2.ok = FALSE_;
     }
-    return 0;
+    return;
 
 
 /*     End of XERBLA */

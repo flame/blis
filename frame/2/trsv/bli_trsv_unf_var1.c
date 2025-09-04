@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2019 - 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -49,183 +50,185 @@ void PASTEMAC(ch,varname) \
        cntx_t* cntx  \
      ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
+    if(cntx == NULL) cntx = bli_gks_query_cntx(); \
+    const num_t dt = PASTEMAC(ch,type); \
 \
-	ctype*  one        = PASTEMAC(ch,1); \
-	ctype*  minus_one  = PASTEMAC(ch,m1); \
-	ctype*  A10; \
-	ctype*  A11; \
-	ctype*  A12; \
-	ctype*  a10t; \
-	ctype*  alpha11; \
-	ctype*  a12t; \
-	ctype*  x0; \
-	ctype*  x1; \
-	ctype*  x2; \
-	ctype*  x01; \
-	ctype*  chi11; \
-	ctype*  x21; \
-	ctype   alpha11_conj; \
-	ctype   rho1; \
-	dim_t   iter, i, k, j, l; \
-	dim_t   b_fuse, f; \
-	dim_t   n_behind, f_behind; \
-	inc_t   rs_at, cs_at; \
-	uplo_t  uploa_trans; \
-	conj_t  conja; \
+    ctype*  one        = PASTEMAC(ch,1); \
+    ctype*  minus_one  = PASTEMAC(ch,m1); \
+    ctype*  A10; \
+    ctype*  A11; \
+    ctype*  A12; \
+    ctype*  a10t; \
+    ctype*  alpha11; \
+    ctype*  a12t; \
+    ctype*  x0; \
+    ctype*  x1; \
+    ctype*  x2; \
+    ctype*  x01; \
+    ctype*  chi11; \
+    ctype*  x21; \
+    ctype   alpha11_conj; \
+    ctype   rho1; \
+    dim_t   iter, i, k, j, l; \
+    dim_t   b_fuse, f; \
+    dim_t   n_behind, f_behind; \
+    inc_t   rs_at, cs_at; \
+    uplo_t  uploa_trans; \
+    conj_t  conja; \
 \
-	/* x = alpha * x; */ \
-	PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
-	( \
-	  BLIS_NO_CONJUGATE, \
-	  m, \
-	  alpha, \
-	  x, incx, \
-	  cntx, \
-	  NULL  \
-	); \
+    /* x = alpha * x; */ \
+    PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
+    ( \
+      BLIS_NO_CONJUGATE, \
+      m, \
+      alpha, \
+      x, incx, \
+      cntx, \
+      NULL  \
+    ); \
 \
-	if      ( bli_does_notrans( transa ) ) \
-	{ \
-		rs_at = rs_a; \
-		cs_at = cs_a; \
-		uploa_trans = uploa; \
-	} \
-	else /* if ( bli_does_trans( transa ) ) */ \
-	{ \
-		rs_at = cs_a; \
-		cs_at = rs_a; \
-		uploa_trans = bli_uplo_toggled( uploa ); \
-	} \
+    if      ( bli_does_notrans( transa ) ) \
+    { \
+        rs_at = rs_a; \
+        cs_at = cs_a; \
+        uploa_trans = uploa; \
+    } \
+    else /* if ( bli_does_trans( transa ) ) */ \
+    { \
+        rs_at = cs_a; \
+        cs_at = rs_a; \
+        uploa_trans = bli_uplo_toggled( uploa ); \
+    } \
 \
-	conja = bli_extract_conj( transa ); \
+    conja = bli_extract_conj( transa ); \
 \
-	/* Query the context for the kernel function pointer and fusing factor. */ \
-	dotxf_ker_ft kfp_df = bli_cntx_get_ukr_dt( dt, BLIS_DOTXF_KER, cntx ); \
-	b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_DF, cntx ); \
+    PASTECH(ch,dotxf_ker_ft) kfp_df; \
 \
-	/* We reduce all of the possible cases down to just lower/upper. */ \
-	if      ( bli_is_upper( uploa_trans ) ) \
-	{ \
-		for ( iter = 0; iter < m; iter += f ) \
-		{ \
-			f        = bli_determine_blocksize_dim_b( iter, m, b_fuse ); \
-			i        = m - iter - f; \
-			n_behind = iter; \
-			A11      = a + (i  )*rs_at + (i  )*cs_at; \
-			A12      = a + (i  )*rs_at + (i+f)*cs_at; \
-			x1       = x + (i  )*incx; \
-			x2       = x + (i+f)*incx; \
+    /* Query the context for the kernel function pointer and fusing factor. */ \
+    kfp_df = bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx ); \
+    b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_DF, cntx ); \
 \
-			/* x1 = x1 - A12 * x2; */ \
-			kfp_df \
-			( \
-			  conja, \
-			  BLIS_NO_CONJUGATE, \
-			  n_behind, \
-			  f, \
-			  minus_one, \
-			  A12, cs_at, rs_at, \
-			  x2,  incx, \
-			  one, \
-			  x1,  incx, \
-			  cntx  \
-			); \
+    /* We reduce all of the possible cases down to just lower/upper. */ \
+    if      ( bli_is_upper( uploa_trans ) ) \
+    { \
+        for ( iter = 0; iter < m; iter += f ) \
+        { \
+            f        = bli_determine_blocksize_dim_b( iter, m, b_fuse ); \
+            i        = m - iter - f; \
+            n_behind = iter; \
+            A11      = a + (i  )*rs_at + (i  )*cs_at; \
+            A12      = a + (i  )*rs_at + (i+f)*cs_at; \
+            x1       = x + (i  )*incx; \
+            x2       = x + (i+f)*incx; \
 \
-			/* x1 = x1 / triu( A11 ); */ \
-			for ( k = 0; k < f; ++k ) \
-			{ \
-				l        = f - k - 1; \
-				f_behind = k; \
-				alpha11  = A11 + (l  )*rs_at + (l  )*cs_at; \
-				a12t     = A11 + (l  )*rs_at + (l+1)*cs_at; \
-				chi11    = x1  + (l  )*incx; \
-				x21      = x1  + (l+1)*incx; \
+            /* x1 = x1 - A12 * x2; */ \
+            kfp_df \
+            ( \
+              conja, \
+              BLIS_NO_CONJUGATE, \
+              n_behind, \
+              f, \
+              minus_one, \
+              A12, cs_at, rs_at, \
+              x2,  incx, \
+              one, \
+              x1,  incx, \
+              cntx  \
+            ); \
 \
-				/* chi11 = chi11 - a12t * x21; */ \
-				PASTEMAC(ch,set0s)( rho1 ); \
-				if ( bli_is_conj( conja ) ) \
-				{ \
-					for ( j = 0; j < f_behind; ++j ) \
-						PASTEMAC(ch,dotjs)( *(a12t + j*cs_at), *(x21 + j*incx), rho1 ); \
-				} \
-				else \
-				{ \
-					for ( j = 0; j < f_behind; ++j ) \
-						PASTEMAC(ch,dots)( *(a12t + j*cs_at), *(x21 + j*incx), rho1 ); \
-				} \
-				PASTEMAC(ch,subs)( rho1, *chi11 ); \
+            /* x1 = x1 / triu( A11 ); */ \
+            for ( k = 0; k < f; ++k ) \
+            { \
+                l        = f - k - 1; \
+                f_behind = k; \
+                alpha11  = A11 + (l  )*rs_at + (l  )*cs_at; \
+                a12t     = A11 + (l  )*rs_at + (l+1)*cs_at; \
+                chi11    = x1  + (l  )*incx; \
+                x21      = x1  + (l+1)*incx; \
 \
-				/* chi11 = chi11 / alpha11; */ \
-				if ( bli_is_nonunit_diag( diaga ) ) \
-				{ \
-					PASTEMAC(ch,copycjs)( conja, *alpha11, alpha11_conj ); \
-					PASTEMAC(ch,invscals)( alpha11_conj, *chi11 ); \
-				} \
-			} \
-		} \
-	} \
-	else /* if ( bli_is_lower( uploa_trans ) ) */ \
-	{ \
-		for ( iter = 0; iter < m; iter += f ) \
-		{ \
-			f        = bli_determine_blocksize_dim_f( iter, m, b_fuse ); \
-			i        = iter; \
-			n_behind = i; \
-			A11      = a + (i  )*rs_at + (i  )*cs_at; \
-			A10      = a + (i  )*rs_at + (0  )*cs_at; \
-			x1       = x + (i  )*incx; \
-			x0       = x + (0  )*incx; \
+                /* chi11 = chi11 - a12t * x21; */ \
+                PASTEMAC(ch,set0s)( rho1 ); \
+                if ( bli_is_conj( conja ) ) \
+                { \
+                    for ( j = 0; j < f_behind; ++j ) \
+                        PASTEMAC(ch,dotjs)( *(a12t + j*cs_at), *(x21 + j*incx), rho1 ); \
+                } \
+                else \
+                { \
+                    for ( j = 0; j < f_behind; ++j ) \
+                        PASTEMAC(ch,dots)( *(a12t + j*cs_at), *(x21 + j*incx), rho1 ); \
+                } \
+                PASTEMAC(ch,subs)( rho1, *chi11 ); \
 \
-			/* x1 = x1 - A10 * x0; */ \
-			kfp_df \
-			( \
-			  conja, \
-			  BLIS_NO_CONJUGATE, \
-			  n_behind, \
-			  f, \
-			  minus_one, \
-			  A10, cs_at, rs_at, \
-			  x0,  incx, \
-			  one, \
-			  x1,  incx, \
-			  cntx  \
-			); \
+                /* chi11 = chi11 / alpha11; */ \
+                if ( bli_is_nonunit_diag( diaga ) ) \
+                { \
+                    PASTEMAC(ch,copycjs)( conja, *alpha11, alpha11_conj ); \
+                    PASTEMAC(ch,invscals)( alpha11_conj, *chi11 ); \
+                } \
+            } \
+        } \
+    } \
+    else /* if ( bli_is_lower( uploa_trans ) ) */ \
+    { \
+        for ( iter = 0; iter < m; iter += f ) \
+        { \
+            f        = bli_determine_blocksize_dim_f( iter, m, b_fuse ); \
+            i        = iter; \
+            n_behind = i; \
+            A11      = a + (i  )*rs_at + (i  )*cs_at; \
+            A10      = a + (i  )*rs_at + (0  )*cs_at; \
+            x1       = x + (i  )*incx; \
+            x0       = x + (0  )*incx; \
 \
-			/* x1 = x1 / tril( A11 ); */ \
-			for ( k = 0; k < f; ++k ) \
-			{ \
-				l        = k; \
-				f_behind = l; \
-				alpha11  = A11 + (l  )*rs_at + (l  )*cs_at; \
-				a10t     = A11 + (l  )*rs_at + (0  )*cs_at; \
-				chi11    = x1  + (l  )*incx; \
-				x01      = x1  + (0  )*incx; \
+            /* x1 = x1 - A10 * x0; */ \
+            kfp_df \
+            ( \
+              conja, \
+              BLIS_NO_CONJUGATE, \
+              n_behind, \
+              f, \
+              minus_one, \
+              A10, cs_at, rs_at, \
+              x0,  incx, \
+              one, \
+              x1,  incx, \
+              cntx  \
+            ); \
 \
-				/* chi11 = chi11 - a10t * x01; */ \
-				PASTEMAC(ch,set0s)( rho1 ); \
-				if ( bli_is_conj( conja ) ) \
-				{ \
-					for ( j = 0; j < f_behind; ++j ) \
-						PASTEMAC(ch,dotjs)( *(a10t + j*cs_at), *(x01 + j*incx), rho1 ); \
-				} \
-				else \
-				{ \
-					for ( j = 0; j < f_behind; ++j ) \
-						PASTEMAC(ch,dots)( *(a10t + j*cs_at), *(x01 + j*incx), rho1 ); \
-				} \
-				PASTEMAC(ch,subs)( rho1, *chi11 ); \
+            /* x1 = x1 / tril( A11 ); */ \
+            for ( k = 0; k < f; ++k ) \
+            { \
+                l        = k; \
+                f_behind = l; \
+                alpha11  = A11 + (l  )*rs_at + (l  )*cs_at; \
+                a10t     = A11 + (l  )*rs_at + (0  )*cs_at; \
+                chi11    = x1  + (l  )*incx; \
+                x01      = x1  + (0  )*incx; \
 \
-				/* chi11 = chi11 / alpha11; */ \
-				if ( bli_is_nonunit_diag( diaga ) ) \
-				{ \
-					PASTEMAC(ch,copycjs)( conja, *alpha11, alpha11_conj ); \
-					PASTEMAC(ch,invscals)( alpha11_conj, *chi11 ); \
-				} \
-			} \
-		} \
-	} \
+                /* chi11 = chi11 - a10t * x01; */ \
+                PASTEMAC(ch,set0s)( rho1 ); \
+                if ( bli_is_conj( conja ) ) \
+                { \
+                    for ( j = 0; j < f_behind; ++j ) \
+                        PASTEMAC(ch,dotjs)( *(a10t + j*cs_at), *(x01 + j*incx), rho1 ); \
+                } \
+                else \
+                { \
+                    for ( j = 0; j < f_behind; ++j ) \
+                        PASTEMAC(ch,dots)( *(a10t + j*cs_at), *(x01 + j*incx), rho1 ); \
+                } \
+                PASTEMAC(ch,subs)( rho1, *chi11 ); \
+\
+                /* chi11 = chi11 / alpha11; */ \
+                if ( bli_is_nonunit_diag( diaga ) ) \
+                { \
+                    PASTEMAC(ch,copycjs)( conja, *alpha11, alpha11_conj ); \
+                    PASTEMAC(ch,invscals)( alpha11_conj, *chi11 ); \
+                } \
+            } \
+        } \
+    } \
 }
 
-INSERT_GENTFUNC_BASIC( trsv_unf_var1 )
-
+INSERT_GENTFUNC_BASIC0( trsv_unf_var1 )

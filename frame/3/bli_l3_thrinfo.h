@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -39,22 +39,22 @@
 
 // gemm
 
+// NOTE: The definition of bli_gemm_get_next_?_upanel() does not need to
+// change depending on BLIS_ENABLE_JRIR_SLAB / BLIS_ENABLE_JRIR_RR.
 #define bli_gemm_get_next_a_upanel( a1, step, inc ) ( a1 + step * inc )
 #define bli_gemm_get_next_b_upanel( b1, step, inc ) ( b1 + step * inc )
 
-// gemmt
+// herk
 
-#define bli_gemmt_get_next_a_upanel( a1, step, inc ) ( a1 + step * inc )
-#define bli_gemmt_get_next_b_upanel( b1, step, inc ) ( b1 + step * inc )
-
-// NOTE: Here, we assume NO parallelism in the IR loop.
-#define bli_gemmt_l_wrap_a_upanel( a0, step, doff_j, mr, nr ) \
-        ( a0 + ( (-doff_j + 1*nr) / mr ) * step )
-#define bli_gemmt_u_wrap_a_upanel( a0, step, doff_j, mr, nr ) \
-        ( a0 )
+// NOTE: The definition of bli_herk_get_next_?_upanel() does not need to
+// change depending on BLIS_ENABLE_JRIR_SLAB / BLIS_ENABLE_JRIR_RR.
+#define bli_herk_get_next_a_upanel( a1, step, inc ) ( a1 + step * inc )
+#define bli_herk_get_next_b_upanel( b1, step, inc ) ( b1 + step * inc )
 
 // trmm
 
+// NOTE: The definition of bli_trmm_get_next_?_upanel() does not need to
+// change depending on BLIS_ENABLE_JRIR_SLAB / BLIS_ENABLE_JRIR_RR.
 #define bli_trmm_get_next_a_upanel( a1, step, inc ) ( a1 + step * inc )
 #define bli_trmm_get_next_b_upanel( b1, step, inc ) ( b1 + step * inc )
 
@@ -68,36 +68,60 @@
 \
 	( index % thread->n_way == thread->work_id % thread->n_way )
 
+//
+// thrinfo_t APIs specific to level-3 operations.
+//
+
+void bli_l3_thrinfo_init
+     (
+       thrinfo_t* thread,
+       thrcomm_t* ocomm,
+       dim_t      ocomm_id,
+       dim_t      n_way,
+       dim_t      work_id,
+       thrinfo_t* sub_node
+     );
+
+void bli_l3_thrinfo_init_single
+     (
+       thrinfo_t* thread
+     );
+
+void bli_l3_thrinfo_free
+     (
+       rntm_t*    rntm,
+       thrinfo_t* thread
+     );
+
+BLIS_EXPORT_BLIS void bli_l3_sup_thrinfo_free
+     (
+       rntm_t*    rntm,
+       thrinfo_t* thread
+     );
+
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS thrinfo_t* bli_l3_thrinfo_create
+void bli_l3_thrinfo_create_root
      (
-             dim_t       id,
-             thrcomm_t*  gl_comm,
-             array_t*    array,
-       const rntm_t*     rntm,
-       const cntl_t*     cntl
+       dim_t       id,
+       thrcomm_t*  gl_comm,
+       rntm_t*     rntm,
+       cntl_t*     cntl,
+       thrinfo_t** thread
      );
 
-void bli_l3_thrinfo_grow
+BLIS_EXPORT_BLIS void bli_l3_sup_thrinfo_create_root
      (
-             thrinfo_t*  thread_par,
-       const rntm_t*     rntm,
-       const cntl_t*     cntl
+       dim_t       id,
+       thrcomm_t*  gl_comm,
+       rntm_t*     rntm,
+       thrinfo_t** thread
      );
 
-thrinfo_t* bli_l3_sup_thrinfo_create
+void bli_l3_sup_thrinfo_update_root
      (
-             dim_t      id,
-             thrcomm_t* gl_comm,
-             pool_t*    pool,
-       const rntm_t*    rntm
-     );
-
-void bli_l3_sup_thrinfo_update
-     (
-       const rntm_t*     rntm,
-             thrinfo_t** root
+       rntm_t*    rntm,
+       thrinfo_t* thread
      );
 
 void bli_l3_thrinfo_print_gemm_paths
@@ -114,6 +138,7 @@ void bli_l3_thrinfo_print_trsm_paths
 
 void bli_l3_thrinfo_free_paths
      (
+       rntm_t*     rntm,
        thrinfo_t** threads
      );
 

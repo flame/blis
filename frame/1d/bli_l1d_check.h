@@ -42,8 +42,8 @@
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  x, \
-       const obj_t*  y  \
+       obj_t*  x, \
+       obj_t*  y  \
     );
 
 GENTPROT( addd )
@@ -56,9 +56,9 @@ GENTPROT( subd )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  alpha, \
-       const obj_t*  x, \
-       const obj_t*  y  \
+       obj_t*  alpha, \
+       obj_t*  x, \
+       obj_t*  y  \
     );
 
 GENTPROT( axpyd )
@@ -70,7 +70,7 @@ GENTPROT( scal2d )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  x  \
+       obj_t*  x  \
     );
 
 GENTPROT( invertd )
@@ -81,11 +81,10 @@ GENTPROT( invertd )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  alpha, \
-       const obj_t*  x  \
+       obj_t*  alpha, \
+       obj_t*  x  \
     );
 
-GENTPROT( invscald )
 GENTPROT( scald )
 GENTPROT( setd )
 GENTPROT( setid )
@@ -97,9 +96,9 @@ GENTPROT( shiftd )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  x, \
-       const obj_t*  beta, \
-       const obj_t*  y  \
+       obj_t*  x, \
+       obj_t*  beta, \
+       obj_t*  y  \
     );
 
 GENTPROT( xpbyd )
@@ -109,25 +108,25 @@ GENTPROT( xpbyd )
 
 void bli_l1d_xy_check
      (
-       const obj_t*  x,
-       const obj_t*  y
+       obj_t*  x,
+       obj_t*  y 
      );
 
 void bli_l1d_axy_check
      (
-       const obj_t*  alpha,
-       const obj_t*  x,
-       const obj_t*  y
+       obj_t*  alpha,
+       obj_t*  x,
+       obj_t*  y 
      );
 
 void bli_l1d_x_check
      (
-       const obj_t*  x
+       obj_t*  x 
      );
 
 void bli_l1d_ax_check
      (
-       const obj_t*  alpha,
-       const obj_t*  x
+       obj_t*  alpha,
+       obj_t*  x 
      );
 

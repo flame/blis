@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -43,13 +43,13 @@
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
      ( \
-       const obj_t*  alpha, \
-       const obj_t*  a, \
-       const obj_t*  b, \
-       const obj_t*  beta, \
-       const obj_t*  c, \
-       const cntx_t* cntx, \
-       const rntm_t* rntm  \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      );
 
 GENPROT( gemm )
@@ -63,14 +63,14 @@ GENPROT( syr2k )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
      ( \
-             side_t  side, \
-       const obj_t*  alpha, \
-       const obj_t*  a, \
-       const obj_t*  b, \
-       const obj_t*  beta, \
-       const obj_t*  c, \
-       const cntx_t* cntx, \
-       const rntm_t* rntm  \
+       side_t  side, \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      );
 
 GENPROT( hemm )
@@ -83,12 +83,12 @@ GENPROT( trmm3 )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
      ( \
-       const obj_t*  alpha, \
-       const obj_t*  a, \
-       const obj_t*  beta, \
-       const obj_t*  c, \
-       const cntx_t* cntx, \
-       const rntm_t* rntm  \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      );
 
 GENPROT( herk )
@@ -100,12 +100,12 @@ GENPROT( syrk )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
      ( \
-             side_t  side, \
-       const obj_t*  alpha, \
-       const obj_t*  a, \
-       const obj_t*  b, \
-       const cntx_t* cntx, \
-       const rntm_t* rntm  \
+       side_t  side, \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      );
 
 GENPROT( trmm )

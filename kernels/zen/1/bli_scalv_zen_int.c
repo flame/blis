@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2017 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2017 - 2024, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2018, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
@@ -57,22 +57,21 @@ typedef union
 
 void bli_sscalv_zen_int
      (
-             conj_t  conjalpha,
-             dim_t   n,
-       const void*   alpha0,
-             void*   x0, inc_t incx,
-       const cntx_t* cntx
+       conj_t           conjalpha,
+       dim_t            n,
+       float*  restrict alpha,
+       float*  restrict x, inc_t incx,
+       cntx_t* restrict cntx
      )
 {
-	const float*     alpha = alpha0;
-	      float*     x     = x0;
-
 	const dim_t      n_elem_per_reg = 8;
 	const dim_t      n_iter_unroll  = 4;
 
 	dim_t            i;
 	dim_t            n_viter;
 	dim_t            n_left;
+
+	float*  restrict x0;
 
 	v8sf_t           alphav;
 	v8sf_t           x0v, x1v, x2v, x3v;
@@ -81,10 +80,12 @@ void bli_sscalv_zen_int
 	if ( bli_zero_dim1( n ) || PASTEMAC(s,eq1)( *alpha ) ) return;
 
 	// If alpha is zero, use setv (in case y contains NaN or Inf).
-	if ( PASTEMAC(s,eq0)( *alpha ) )
+	// If alpha is zero, use setv if not called from BLAS scal itself (indicated by n being negative).
+	if ( PASTEMAC(s,eq0)( *alpha ) && n > 0 )
 	{
-		void*       zero = bli_s0;
-		setv_ker_ft f    = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_SETV_KER, cntx );
+		float*       zero = bli_s0;
+		if (cntx == NULL) cntx = bli_gks_query_cntx();
+		ssetv_ker_ft f    = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_SETV_KER, cntx );
 
 		f
 		(
@@ -97,10 +98,12 @@ void bli_sscalv_zen_int
 		return;
 	}
 
+	dim_t n0 = bli_abs(n);
+
 	// Use the unrolling factor and the number of elements per register
 	// to compute the number of vectorized and leftover iterations.
-	n_viter = ( n ) / ( n_elem_per_reg * n_iter_unroll );
-	n_left  = ( n ) % ( n_elem_per_reg * n_iter_unroll );
+	n_viter = ( n0 ) / ( n_elem_per_reg * n_iter_unroll );
+	n_left  = ( n0 ) % ( n_elem_per_reg * n_iter_unroll );
 
 	// If there is anything that would interfere with our use of contiguous
 	// vector loads/stores, override n_viter and n_left to use scalar code
@@ -108,11 +111,11 @@ void bli_sscalv_zen_int
 	if ( incx != 1 )
 	{
 		n_viter = 0;
-		n_left  = n;
+		n_left  = n0;
 	}
 
 	// Initialize local pointers.
-	float* restrict xp = x;
+	x0 = x;
 
 	// Broadcast the alpha scalar to all elements of a vector register.
 	alphav.v = _mm256_broadcast_ss( alpha );
@@ -122,10 +125,10 @@ void bli_sscalv_zen_int
 	for ( i = 0; i < n_viter; ++i )
 	{
 		// Load the input values.
-		x0v.v = _mm256_loadu_ps( xp + 0*n_elem_per_reg );
-		x1v.v = _mm256_loadu_ps( xp + 1*n_elem_per_reg );
-		x2v.v = _mm256_loadu_ps( xp + 2*n_elem_per_reg );
-		x3v.v = _mm256_loadu_ps( xp + 3*n_elem_per_reg );
+		x0v.v = _mm256_loadu_ps( x0 + 0*n_elem_per_reg );
+		x1v.v = _mm256_loadu_ps( x0 + 1*n_elem_per_reg );
+		x2v.v = _mm256_loadu_ps( x0 + 2*n_elem_per_reg );
+		x3v.v = _mm256_loadu_ps( x0 + 3*n_elem_per_reg );
 
 		// perform : x := alpha * x;
 		x0v.v = _mm256_mul_ps( alphav.v, x0v.v );
@@ -134,12 +137,12 @@ void bli_sscalv_zen_int
 		x3v.v = _mm256_mul_ps( alphav.v, x3v.v );
 
 		// Store the output.
-		_mm256_storeu_ps( (xp + 0*n_elem_per_reg), x0v.v );
-		_mm256_storeu_ps( (xp + 1*n_elem_per_reg), x1v.v );
-		_mm256_storeu_ps( (xp + 2*n_elem_per_reg), x2v.v );
-		_mm256_storeu_ps( (xp + 3*n_elem_per_reg), x3v.v );
+		_mm256_storeu_ps( (x0 + 0*n_elem_per_reg), x0v.v );
+		_mm256_storeu_ps( (x0 + 1*n_elem_per_reg), x1v.v );
+		_mm256_storeu_ps( (x0 + 2*n_elem_per_reg), x2v.v );
+		_mm256_storeu_ps( (x0 + 3*n_elem_per_reg), x3v.v );
 
-		xp += n_elem_per_reg * n_iter_unroll;
+		x0 += n_elem_per_reg * n_iter_unroll;
 	}
 
 	const float alphac = *alpha;
@@ -147,9 +150,9 @@ void bli_sscalv_zen_int
 	// If there are leftover iterations, perform them with scalar code.
 	for ( i = 0; i < n_left; ++i )
 	{
-		*xp *= alphac;
+		*x0 *= alphac;
 
-		xp += incx;
+		x0 += incx;
 	}
 }
 
@@ -157,16 +160,13 @@ void bli_sscalv_zen_int
 
 void bli_dscalv_zen_int
      (
-             conj_t  conjalpha,
-             dim_t   n,
-       const void*   alpha0,
-             void*   x0, inc_t incx,
-       const cntx_t* cntx
+       conj_t           conjalpha,
+       dim_t            n,
+       double* restrict alpha,
+       double* restrict x, inc_t incx,
+       cntx_t* restrict cntx
      )
 {
-	const double*     alpha = alpha0;
-	      double*     x     = x0;
-
 	const dim_t       n_elem_per_reg = 4;
 	const dim_t       n_iter_unroll  = 4;
 
@@ -174,17 +174,20 @@ void bli_dscalv_zen_int
 	dim_t             n_viter;
 	dim_t             n_left;
 
+	double*  restrict x0;
+
 	v4df_t            alphav;
 	v4df_t            x0v, x1v, x2v, x3v;
 
 	// If the vector dimension is zero, or if alpha is unit, return early.
 	if ( bli_zero_dim1( n ) || PASTEMAC(d,eq1)( *alpha ) ) return;
 
-	// If alpha is zero, use setv (in case y contains NaN or Inf).
-	if ( PASTEMAC(d,eq0)( *alpha ) )
+	// If alpha is zero, use setv if not called from BLAS scal itself (indicated by n being negative).
+	if ( PASTEMAC(d,eq0)( *alpha ) && n > 0 )
 	{
-		void*       zero = bli_d0;
-		setv_ker_ft f    = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_SETV_KER, cntx );
+		double*      zero = bli_d0;
+		if (cntx == NULL) cntx = bli_gks_query_cntx();
+		dsetv_ker_ft f    = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_SETV_KER, cntx );
 
 		f
 		(
@@ -197,10 +200,12 @@ void bli_dscalv_zen_int
 		return;
 	}
 
+	dim_t n0 = bli_abs(n);
+
 	// Use the unrolling factor and the number of elements per register
 	// to compute the number of vectorized and leftover iterations.
-	n_viter = ( n ) / ( n_elem_per_reg * n_iter_unroll );
-	n_left  = ( n ) % ( n_elem_per_reg * n_iter_unroll );
+	n_viter = ( n0 ) / ( n_elem_per_reg * n_iter_unroll );
+	n_left  = ( n0 ) % ( n_elem_per_reg * n_iter_unroll );
 
 	// If there is anything that would interfere with our use of contiguous
 	// vector loads/stores, override n_viter and n_left to use scalar code
@@ -208,11 +213,11 @@ void bli_dscalv_zen_int
 	if ( incx != 1 )
 	{
 		n_viter = 0;
-		n_left  = n;
+		n_left  = n0;
 	}
 
 	// Initialize local pointers.
-	double* restrict xp = x;
+	x0 = x;
 
 	// Broadcast the alpha scalar to all elements of a vector register.
 	alphav.v = _mm256_broadcast_sd( alpha );
@@ -222,10 +227,10 @@ void bli_dscalv_zen_int
 	for ( i = 0; i < n_viter; ++i )
 	{
 		// Load the input values.
-		x0v.v = _mm256_loadu_pd( xp + 0*n_elem_per_reg );
-		x1v.v = _mm256_loadu_pd( xp + 1*n_elem_per_reg );
-		x2v.v = _mm256_loadu_pd( xp + 2*n_elem_per_reg );
-		x3v.v = _mm256_loadu_pd( xp + 3*n_elem_per_reg );
+		x0v.v = _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
+		x1v.v = _mm256_loadu_pd( x0 + 1*n_elem_per_reg );
+		x2v.v = _mm256_loadu_pd( x0 + 2*n_elem_per_reg );
+		x3v.v = _mm256_loadu_pd( x0 + 3*n_elem_per_reg );
 
 		// perform : y += alpha * x;
 		x0v.v = _mm256_mul_pd( alphav.v, x0v.v );
@@ -234,12 +239,12 @@ void bli_dscalv_zen_int
 		x3v.v = _mm256_mul_pd( alphav.v, x3v.v );
 
 		// Store the output.
-		_mm256_storeu_pd( (xp + 0*n_elem_per_reg), x0v.v );
-		_mm256_storeu_pd( (xp + 1*n_elem_per_reg), x1v.v );
-		_mm256_storeu_pd( (xp + 2*n_elem_per_reg), x2v.v );
-		_mm256_storeu_pd( (xp + 3*n_elem_per_reg), x3v.v );
+		_mm256_storeu_pd( (x0 + 0*n_elem_per_reg), x0v.v );
+		_mm256_storeu_pd( (x0 + 1*n_elem_per_reg), x1v.v );
+		_mm256_storeu_pd( (x0 + 2*n_elem_per_reg), x2v.v );
+		_mm256_storeu_pd( (x0 + 3*n_elem_per_reg), x3v.v );
 
-		xp += n_elem_per_reg * n_iter_unroll;
+		x0 += n_elem_per_reg * n_iter_unroll;
 	}
 
 	const double alphac = *alpha;
@@ -247,9 +252,9 @@ void bli_dscalv_zen_int
 	// If there are leftover iterations, perform them with scalar code.
 	for ( i = 0; i < n_left; ++i )
 	{
-		*xp *= alphac;
+		*x0 *= alphac;
 
-		xp += incx;
+		x0 += incx;
 	}
 }
 

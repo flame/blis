@@ -40,12 +40,12 @@
 
 void bli_acquire_mpart
      (
-             dim_t  i,
-             dim_t  j,
-             dim_t  bm,
-             dim_t  bn,
-       const obj_t* parent,
-             obj_t* child
+       dim_t     i,
+       dim_t     j,
+       dim_t     bm,
+       dim_t     bn,
+       obj_t*    parent,
+       obj_t*    child
      )
 {
 	// Query the dimensions of the parent object.
@@ -83,11 +83,11 @@ void bli_acquire_mpart
 
 void bli_acquire_mpart_t2b
      (
-             subpart_t req_part,
-             dim_t     i,
-             dim_t     b,
-       const obj_t*    obj,
-             obj_t*    sub_obj
+       subpart_t req_part,
+       dim_t     i,
+       dim_t     b,
+       obj_t*    obj,
+       obj_t*    sub_obj
      )
 {
 	bli_acquire_mpart_mdim( BLIS_FWD, req_part, i, b, obj, sub_obj );
@@ -96,11 +96,11 @@ void bli_acquire_mpart_t2b
 
 void bli_acquire_mpart_b2t
      (
-             subpart_t req_part,
-             dim_t     i,
-             dim_t     b,
-       const obj_t*    obj,
-             obj_t*    sub_obj
+       subpart_t req_part,
+       dim_t     i,
+       dim_t     b,
+       obj_t*    obj,
+       obj_t*    sub_obj
      )
 {
 	bli_acquire_mpart_mdim( BLIS_BWD, req_part, i, b, obj, sub_obj );
@@ -109,12 +109,12 @@ void bli_acquire_mpart_b2t
 
 void bli_acquire_mpart_mdim
      (
-             dir_t     direct,
-             subpart_t req_part,
-             dim_t     i,
-             dim_t     b,
-       const obj_t*    obj,
-             obj_t*    sub_obj
+       dir_t     direct,
+       subpart_t req_part,
+       dim_t     i,
+       dim_t     b,
+       obj_t*    obj,
+       obj_t*    sub_obj
      )
 {
 	dim_t  m;
@@ -123,6 +123,7 @@ void bli_acquire_mpart_mdim
 	dim_t  n_part   = 0;
 	inc_t  offm_inc = 0;
 	inc_t  offn_inc = 0;
+	doff_t diag_off_inc;
 
 
 	// Call a special function for partitioning packed objects. (By only
@@ -234,7 +235,7 @@ void bli_acquire_mpart_mdim
 
 
 	// Compute the diagonal offset based on the m and n offsets.
-	doff_t diagoff_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
+	diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
 
 
 	// Begin by copying the info, elem size, buffer, row stride, and column
@@ -250,13 +251,13 @@ void bli_acquire_mpart_mdim
 	{
 		bli_obj_set_dims( m_part, n_part, sub_obj );
 		bli_obj_inc_offs( offm_inc, offn_inc, sub_obj );
-		bli_obj_inc_diag_offset( diagoff_inc, sub_obj );
+		bli_obj_inc_diag_offset( diag_off_inc, sub_obj );
 	}
 	else // if ( bli_obj_has_trans( obj ) )
 	{
 		bli_obj_set_dims( n_part, m_part, sub_obj );
 		bli_obj_inc_offs( offn_inc, offm_inc, sub_obj );
-		bli_obj_inc_diag_offset( -diagoff_inc, sub_obj );
+		bli_obj_inc_diag_offset( -diag_off_inc, sub_obj );
 	}
 
 
@@ -265,7 +266,7 @@ void bli_acquire_mpart_mdim
 	// diagonal, then set the subpartition structure to "general"; otherwise
 	// we let the subpartition inherit the storage structure of its immediate
 	// parent.
-	if ( !bli_obj_root_is_general( sub_obj ) &&
+	if ( !bli_obj_root_is_general( sub_obj ) && 
 	      bli_obj_is_outside_diag( sub_obj ) )
 	{
 		// NOTE: This comment may be out-of-date since we now distinguish
@@ -273,10 +274,10 @@ void bli_acquire_mpart_mdim
 		// Note that we cannot mark the subpartition object as general/dense
 		// here since it makes sense to preserve the existing uplo information
 		// a while longer so that the correct kernels are invoked. (Example:
-		// incremental packing/computing in gemmt produces subpartitions that
+		// incremental packing/computing in herk produces subpartitions that
 		// appear general/dense, but their uplo fields are needed to be either
 		// lower or upper, to determine which macro-kernel gets called in the
-		// gemmt_int() back-end.)
+		// herk_int() back-end.)
 
 		// If the subpartition lies entirely in an "unstored" triangle of the
 		// root matrix, then we need to tweak the subpartition. If the root
@@ -306,24 +307,24 @@ void bli_acquire_mpart_mdim
 
 void bli_acquire_mpart_l2r
      (
-             subpart_t req_part,
-             dim_t     j,
-             dim_t     b,
-       const obj_t*    obj,
-             obj_t*    sub_obj
+       subpart_t req_part,
+       dim_t     i,
+       dim_t     b,
+       obj_t*    obj,
+       obj_t*    sub_obj
      )
 {
-	bli_acquire_mpart_ndim( BLIS_FWD, req_part, j, b, obj, sub_obj );
+	bli_acquire_mpart_ndim( BLIS_FWD, req_part, i, b, obj, sub_obj );
 }
 
 
 void bli_acquire_mpart_r2l
      (
-             subpart_t req_part,
-             dim_t     j,
-             dim_t     b,
-       const obj_t*    obj,
-             obj_t*    sub_obj
+       subpart_t req_part,
+       dim_t     j,
+       dim_t     b,
+       obj_t*    obj,
+       obj_t*    sub_obj
      )
 {
 	bli_acquire_mpart_ndim( BLIS_BWD, req_part, j, b, obj, sub_obj );
@@ -332,12 +333,12 @@ void bli_acquire_mpart_r2l
 
 void bli_acquire_mpart_ndim
      (
-             dir_t     direct,
-             subpart_t req_part,
-             dim_t     j,
-             dim_t     b,
-       const obj_t*    obj,
-             obj_t*    sub_obj
+       dir_t     direct,
+       subpart_t req_part,
+       dim_t     j,
+       dim_t     b,
+       obj_t*    obj,
+       obj_t*    sub_obj
      )
 {
 	dim_t  m;
@@ -346,6 +347,7 @@ void bli_acquire_mpart_ndim
 	dim_t  n_part   = 0;
 	inc_t  offm_inc = 0;
 	inc_t  offn_inc = 0;
+	doff_t diag_off_inc;
 
 
 	// Call a special function for partitioning packed objects. (By only
@@ -457,7 +459,7 @@ void bli_acquire_mpart_ndim
 
 
 	// Compute the diagonal offset based on the m and n offsets.
-	doff_t diagoff_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
+	diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
 
 
 	// Begin by copying the info, elem size, buffer, row stride, and column
@@ -473,13 +475,13 @@ void bli_acquire_mpart_ndim
 	{
 		bli_obj_set_dims( m_part, n_part, sub_obj );
 		bli_obj_inc_offs( offm_inc, offn_inc, sub_obj );
-		bli_obj_inc_diag_offset( diagoff_inc, sub_obj );
+		bli_obj_inc_diag_offset( diag_off_inc, sub_obj );
 	}
 	else // if ( bli_obj_has_trans( obj ) )
 	{
 		bli_obj_set_dims( n_part, m_part, sub_obj );
 		bli_obj_inc_offs( offn_inc, offm_inc, sub_obj );
-		bli_obj_inc_diag_offset( -diagoff_inc, sub_obj );
+		bli_obj_inc_diag_offset( -diag_off_inc, sub_obj );
 	}
 
 
@@ -487,7 +489,7 @@ void bli_acquire_mpart_ndim
 	// diagonal), and the subpartition does not intersect the root matrix's
 	// diagonal, then we might need to modify some of the subpartition's
 	// properties, depending on its structure type.
-	if ( !bli_obj_root_is_general( sub_obj ) &&
+	if ( !bli_obj_root_is_general( sub_obj ) && 
 	      bli_obj_is_outside_diag( sub_obj ) )
 	{
 		// NOTE: This comment may be out-of-date since we now distinguish
@@ -495,10 +497,10 @@ void bli_acquire_mpart_ndim
 		// Note that we cannot mark the subpartition object as general/dense
 		// here since it makes sense to preserve the existing uplo information
 		// a while longer so that the correct kernels are invoked. (Example:
-		// incremental packing/computing in gemmt produces subpartitions that
+		// incremental packing/computing in herk produces subpartitions that
 		// appear general/dense, but their uplo fields are needed to be either
 		// lower or upper, to determine which macro-kernel gets called in the
-		// gemmt_int() back-end.)
+		// herk_int() back-end.)
 
 		// If the subpartition lies entirely in an "unstored" triangle of the
 		// root matrix, then we need to tweak the subpartition. If the root
@@ -528,11 +530,11 @@ void bli_acquire_mpart_ndim
 
 void bli_acquire_mpart_tl2br
      (
-             subpart_t req_part,
-             dim_t     i,
-             dim_t     b,
-       const obj_t*    obj,
-             obj_t*    sub_obj
+       subpart_t req_part,
+       dim_t     i,
+       dim_t     b,
+       obj_t*    obj,
+       obj_t*    sub_obj
      )
 {
 	bli_acquire_mpart_mndim( BLIS_FWD, req_part, i, b, obj, sub_obj );
@@ -541,11 +543,11 @@ void bli_acquire_mpart_tl2br
 
 void bli_acquire_mpart_br2tl
      (
-             subpart_t req_part,
-             dim_t     j,
-             dim_t     b,
-       const obj_t*    obj,
-             obj_t*    sub_obj
+       subpart_t req_part,
+       dim_t     j,
+       dim_t     b,
+       obj_t*    obj,
+       obj_t*    sub_obj
      )
 {
 	bli_acquire_mpart_mndim( BLIS_BWD, req_part, j, b, obj, sub_obj );
@@ -554,12 +556,12 @@ void bli_acquire_mpart_br2tl
 
 void bli_acquire_mpart_mndim
      (
-             dir_t     direct,
-             subpart_t req_part,
-             dim_t     ij,
-             dim_t     b,
-       const obj_t*    obj,
-             obj_t*    sub_obj
+       dir_t     direct,
+       subpart_t req_part,
+       dim_t     ij,
+       dim_t     b,
+       obj_t*    obj,
+       obj_t*    sub_obj
      )
 {
 	dim_t  m;
@@ -569,6 +571,7 @@ void bli_acquire_mpart_mndim
 	dim_t  n_part   = 0;
 	inc_t  offm_inc = 0;
 	inc_t  offn_inc = 0;
+	doff_t diag_off_inc;
 
 
 	// Call a special function for partitioning packed objects. (By only
@@ -709,7 +712,7 @@ void bli_acquire_mpart_mndim
 
 
 	// Compute the diagonal offset based on the m and n offsets.
-	doff_t diagoff_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
+	diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
 
 
 	// Begin by copying the info, elem size, buffer, row stride, and column
@@ -725,13 +728,13 @@ void bli_acquire_mpart_mndim
 	{
 		bli_obj_set_dims( m_part, n_part, sub_obj );
 		bli_obj_inc_offs( offm_inc, offn_inc, sub_obj );
-		bli_obj_inc_diag_offset( diagoff_inc, sub_obj );
+		bli_obj_inc_diag_offset( diag_off_inc, sub_obj );
 	}
 	else // if ( bli_obj_has_trans( obj ) )
 	{
 		bli_obj_set_dims( n_part, m_part, sub_obj );
 		bli_obj_inc_offs( offn_inc, offm_inc, sub_obj );
-		bli_obj_inc_diag_offset( -diagoff_inc, sub_obj );
+		bli_obj_inc_diag_offset( -diag_off_inc, sub_obj );
 	}
 
 	// If the root matrix is not general (ie: has structure defined by the
@@ -739,7 +742,7 @@ void bli_acquire_mpart_mndim
 	// diagonal, then set the subpartition structure to "general"; otherwise
 	// we let the subpartition inherit the storage structure of its immediate
 	// parent.
-	if ( !bli_obj_root_is_general( sub_obj ) &&
+	if ( !bli_obj_root_is_general( sub_obj ) && 
 	     req_part != BLIS_SUBPART00 &&
 	     req_part != BLIS_SUBPART11 &&
 	     req_part != BLIS_SUBPART22 )
@@ -759,10 +762,10 @@ void bli_acquire_mpart_mndim
 		// Note that we cannot mark the subpartition object as general/dense
 		// here since it makes sense to preserve the existing uplo information
 		// a while longer so that the correct kernels are invoked. (Example:
-		// incremental packing/computing in gemmt produces subpartitions that
+		// incremental packing/computing in herk produces subpartitions that
 		// appear general/dense, but their uplo fields are needed to be either
 		// lower or upper, to determine which macro-kernel gets called in the
-		// gemmt_int() back-end.)
+		// herk_int() back-end.)
 
 		// If the subpartition lies entirely in an "unstored" triangle of the
 		// root matrix, then we need to tweak the subpartition. If the root
@@ -795,11 +798,11 @@ void bli_acquire_mpart_mndim
 
 void bli_acquire_vpart_f2b
      (
-             subpart_t req_part,
-             dim_t     i,
-             dim_t     b,
-       const obj_t*    obj,
-             obj_t*    sub_obj
+       subpart_t req_part,
+       dim_t     i,
+       dim_t     b,
+       obj_t*    obj,
+       obj_t*    sub_obj
      )
 {
 	if ( bli_obj_is_col_vector( obj ) )
@@ -811,11 +814,11 @@ void bli_acquire_vpart_f2b
 
 void bli_acquire_vpart_b2f
      (
-             subpart_t req_part,
-             dim_t     i,
-             dim_t     b,
-       const obj_t*    obj,
-             obj_t*    sub_obj
+       subpart_t req_part,
+       dim_t     i,
+       dim_t     b,
+       obj_t*    obj,
+       obj_t*    sub_obj
      )
 {
 	if ( bli_obj_is_col_vector( obj ) )
@@ -830,10 +833,10 @@ void bli_acquire_vpart_b2f
 
 void bli_acquire_mij
      (
-             dim_t  i,
-             dim_t  j,
-       const obj_t* obj,
-             obj_t* sub_obj
+       dim_t     i,
+       dim_t     j,
+       obj_t*    obj,
+       obj_t*    sub_obj
      )
 {
 	obj_t tmp_obj;
@@ -845,9 +848,9 @@ void bli_acquire_mij
 
 void bli_acquire_vi
      (
-             dim_t  i,
-       const obj_t* obj,
-             obj_t* sub_obj
+       dim_t     i,
+       obj_t*    obj,
+       obj_t*    sub_obj
      )
 {
 	if ( bli_obj_is_col_vector( obj ) )

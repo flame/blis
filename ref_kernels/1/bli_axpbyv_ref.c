@@ -39,21 +39,16 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-             conj_t  conjx, \
-             dim_t   n, \
-       const void*   alpha0, \
-       const void*   x0, inc_t incx, \
-       const void*   beta0, \
-             void*   y0, inc_t incy, \
-       const cntx_t* cntx  \
+       conj_t           conjx, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict beta, \
+       ctype*  restrict y, inc_t incy, \
+       cntx_t* restrict cntx  \
      ) \
 { \
 	if ( bli_zero_dim1( n ) ) return; \
-\
-	const ctype* alpha = alpha0; \
-	const ctype* x     = x0; \
-	const ctype* beta  = beta0; \
-	      ctype* y     = y0; \
 \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
@@ -61,18 +56,18 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			/* If alpha is zero and beta is zero, set to zero. */ \
 \
-			const ctype* zero = PASTEMAC(ch,0); \
+			ctype* zero = PASTEMAC(ch,0); \
 \
 			/* Query the context for the kernel function pointer. */ \
-			const num_t dt     = PASTEMAC(ch,type); \
-			setv_ker_ft setv_p = bli_cntx_get_ukr_dt( dt, BLIS_SETV_KER, cntx ); \
+			const num_t             dt     = PASTEMAC(ch,type); \
+			PASTECH(ch,setv_ker_ft) setv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_SETV_KER, cntx ); \
 \
 			setv_p \
 			( \
 			  BLIS_NO_CONJUGATE, \
 			  n, \
 			  zero, \
-			  y0, incy, \
+			  y, incy, \
 			  cntx  \
 			); \
 			return; \
@@ -87,15 +82,15 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			/* If alpha is zero, scale by beta. */ \
 \
 			/* Query the context for the kernel function pointer. */ \
-			const num_t  dt      = PASTEMAC(ch,type); \
-			scalv_ker_ft scalv_p = bli_cntx_get_ukr_dt( dt, BLIS_SCALV_KER, cntx ); \
+			const num_t              dt      = PASTEMAC(ch,type); \
+			PASTECH(ch,scalv_ker_ft) scalv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_SCALV_KER, cntx ); \
 \
 			scalv_p \
 			( \
 			  BLIS_NO_CONJUGATE, \
 			  n, \
-			  beta0, \
-			  y0, incy, \
+			  beta, \
+			  y, incy, \
 			  cntx  \
 			); \
 			return; \
@@ -109,15 +104,15 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			/* If alpha is one and beta is zero, use copyv. */ \
 \
 			/* Query the context for the kernel function pointer. */ \
-			const num_t  dt      = PASTEMAC(ch,type); \
-			copyv_ker_ft copyv_p = bli_cntx_get_ukr_dt( dt, BLIS_COPYV_KER, cntx ); \
+			const num_t              dt      = PASTEMAC(ch,type); \
+			PASTECH(ch,copyv_ker_ft) copyv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_COPYV_KER, cntx ); \
 \
 			copyv_p \
 			( \
 			  conjx, \
 			  n, \
-			  x0, incx, \
-			  y0, incy, \
+			  x, incx, \
+			  y, incy, \
 			  cntx  \
 			); \
 			return; \
@@ -127,15 +122,15 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			/* If alpha is one and beta is one, use addv. */ \
 \
 			/* Query the context for the kernel function pointer. */ \
-			const num_t dt     = PASTEMAC(ch,type); \
-			addv_ker_ft addv_p = bli_cntx_get_ukr_dt( dt, BLIS_ADDV_KER, cntx ); \
+			const num_t             dt     = PASTEMAC(ch,type); \
+			PASTECH(ch,addv_ker_ft) addv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_ADDV_KER, cntx ); \
 \
 			addv_p \
 			( \
 			  conjx, \
 			  n, \
-			  x0, incx, \
-			  y0, incy, \
+			  x, incx, \
+			  y, incy, \
 			  cntx  \
 			); \
 			return; \
@@ -145,16 +140,16 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			/* If alpha is one and beta is something else, use xpbyv. */ \
 \
 			/* Query the context for the kernel function pointer. */ \
-			const num_t  dt      = PASTEMAC(ch,type); \
-			xpbyv_ker_ft xpbyv_p = bli_cntx_get_ukr_dt( dt, BLIS_XPBYV_KER, cntx ); \
+			const num_t              dt      = PASTEMAC(ch,type); \
+			PASTECH(ch,xpbyv_ker_ft) xpbyv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_XPBYV_KER, cntx ); \
 \
 			xpbyv_p \
 			( \
 			  conjx, \
 			  n, \
-			  x0, incx, \
-			  beta0, \
-			  y0, incy, \
+			  x, incx, \
+			  beta, \
+			  y, incy, \
 			  cntx  \
 			); \
 			return; \
@@ -167,16 +162,16 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			/* If alpha is something else and beta is zero, use scal2v. */ \
 \
 			/* Query the context for the kernel function pointer. */ \
-			const num_t   dt       = PASTEMAC(ch,type); \
-			scal2v_ker_ft scal2v_p = bli_cntx_get_ukr_dt( dt, BLIS_SCAL2V_KER, cntx ); \
+			const num_t               dt       = PASTEMAC(ch,type); \
+			PASTECH(ch,scal2v_ker_ft) scal2v_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_SCAL2V_KER, cntx ); \
 \
 			scal2v_p \
 			( \
 			  conjx, \
 			  n, \
-			  alpha0, \
-			  x0, incx, \
-			  y0, incy, \
+			  alpha, \
+			  x, incx, \
+			  y, incy, \
 			  cntx  \
 			); \
 			return; \
@@ -186,16 +181,16 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			/* If alpha is something else and beta is one, use axpyv. */ \
 \
 			/* Query the context for the kernel function pointer. */ \
-			const num_t  dt      = PASTEMAC(ch,type); \
-			axpyv_ker_ft axpyv_p = bli_cntx_get_ukr_dt( dt, BLIS_AXPYV_KER, cntx ); \
+			const num_t              dt      = PASTEMAC(ch,type); \
+			PASTECH(ch,axpyv_ker_ft) axpyv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_AXPYV_KER, cntx ); \
 \
 			axpyv_p \
 			( \
 			  conjx, \
 			  n, \
-			  alpha0, \
-			  x0, incx, \
-			  y0, incy, \
+			  alpha, \
+			  x, incx, \
+			  y, incy, \
 			  cntx  \
 			); \
 			return; \
@@ -248,5 +243,5 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( axpbyv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC_BASIC2( axpbyv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

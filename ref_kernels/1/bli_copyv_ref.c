@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -39,17 +40,20 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-             conj_t  conjx, \
-             dim_t   n, \
-       const void*   x0, inc_t incx, \
-             void*   y0, inc_t incy, \
-       const cntx_t* cntx  \
+       conj_t           conjx, \
+       dim_t            n, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict y, inc_t incy, \
+       cntx_t* restrict cntx  \
      ) \
 { \
-	if ( bli_zero_dim1( n ) ) return; \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3) \
 \
-	const ctype* x = x0; \
-	      ctype* y = y0; \
+	if ( bli_zero_dim1( n ) ) \
+	{ \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3) \
+		return; \
+	} \
 \
 	if ( bli_is_conj( conjx ) ) \
 	{ \
@@ -93,7 +97,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			} \
 		} \
 	} \
+\
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3) \
+\
 }
 
-INSERT_GENTFUNC_BASIC( copyv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC_BASIC2( copyv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

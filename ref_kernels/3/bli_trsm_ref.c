@@ -34,55 +34,72 @@
 
 #include "blis.h"
 
-// An implementation that indexes through B with the assumption that all
-// elements were broadcast (duplicated) by a factor of NP/NR.
+#if 0
+
+// An implementation that attempts to facilitate emission of vectorized
+// instructions via constant loop bounds + #pragma omp simd directives.
+
+// (Deleted. See 'old' directory.)
+
+#else
+
+// An implementation that uses variable loop bounds (queried from the context)
+// and makes no use of #pragma omp simd.
 
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, arch, suf, diagop ) \
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       const void*      a0, \
-             void*      b0, \
-             void*      c0, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
+       ctype*     restrict a, \
+       ctype*     restrict b, \
+       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
      ) \
 { \
-	const ctype*    a      = a0; \
-	      ctype*    b      = b0; \
-	      ctype*    c      = c0; \
-\
 	const num_t     dt     = PASTEMAC(ch,type); \
 \
-	const dim_t     mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
-	const dim_t     nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
+	/* Use trsm blocksizes if they are available else use general blocksizes. */  \
+	dim_t           mr     = bli_cntx_get_trsm_blksz_def_dt( dt, BLIS_MR, cntx ); \
+	dim_t           nr     = bli_cntx_get_trsm_blksz_def_dt( dt, BLIS_NR, cntx ); \
 \
-	const inc_t     packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx ); \
-	const inc_t     packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
+	inc_t           packmr = bli_cntx_get_trsm_blksz_max_dt( dt, BLIS_MR, cntx ); \
+	inc_t           packnr = bli_cntx_get_trsm_blksz_max_dt( dt, BLIS_NR, cntx ); \
+\
+	if ( mr == 0 || nr == 0 ) \
+	{ \
+		mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
+		nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
+		packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx ); \
+		packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
+	} \
 \
 	const dim_t     m      = mr; \
 	const dim_t     n      = nr; \
 \
-	const inc_t     rs_a   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBM, cntx ); \
+	const inc_t     rs_a   = 1; \
 	const inc_t     cs_a   = packmr; \
 \
 	const inc_t     rs_b   = packnr; \
-	const inc_t     cs_b   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBN, cntx ); \
+	const inc_t     cs_b   = 1; \
 \
-	for ( dim_t iter = 0; iter < m; ++iter ) \
+	dim_t           iter, i, j, l; \
+	dim_t           n_behind; \
+\
+	for ( iter = 0; iter < m; ++iter ) \
 	{ \
-		dim_t i        = iter; \
-		dim_t n_behind = i; \
+		i        = iter; \
+		n_behind = i; \
 \
-		const ctype* restrict alpha11 = a + (i  )*rs_a + (i  )*cs_a; \
-		const ctype* restrict a10t    = a + (i  )*rs_a + (0  )*cs_a; \
-		      ctype* restrict B0      = b + (0  )*rs_b + (0  )*cs_b; \
-		      ctype* restrict b1      = b + (i  )*rs_b + (0  )*cs_b; \
+		ctype* restrict alpha11  = a + (i  )*rs_a + (i  )*cs_a; \
+		ctype* restrict a10t     = a + (i  )*rs_a + (0  )*cs_a; \
+		ctype* restrict B0       = b + (0  )*rs_b + (0  )*cs_b; \
+		ctype* restrict b1       = b + (i  )*rs_b + (0  )*cs_b; \
 \
 		/* b1 = b1 - a10t * B0; */ \
 		/* b1 = b1 / alpha11; */ \
-		for ( dim_t j = 0; j < n; ++j ) \
+		for ( j = 0; j < n; ++j ) \
 		{ \
 			ctype* restrict b01     = B0 + (0  )*rs_b + (j  )*cs_b; \
 			ctype* restrict beta11  = b1 + (0  )*rs_b + (j  )*cs_b; \
@@ -92,10 +109,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 			/* beta11 = beta11 - a10t * b01; */ \
 			PASTEMAC(ch,set0s)( rho11 ); \
-			for ( dim_t l = 0; l < n_behind; ++l ) \
+			for ( l = 0; l < n_behind; ++l ) \
 			{ \
-				const ctype* restrict alpha10 = a10t + (l  )*cs_a; \
-				      ctype* restrict beta01  = b01  + (l  )*rs_b; \
+				ctype* restrict alpha10 = a10t + (l  )*cs_a; \
+				ctype* restrict beta01  = b01  + (l  )*rs_b; \
 \
 				PASTEMAC(ch,axpys)( *alpha10, *beta01, rho11 ); \
 			} \
@@ -106,22 +123,21 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			   (1.0/alpha11) is stored during packing instead alpha11 so we
 			   can multiply rather than divide. When preinversion is disabled,
 			   alpha11 is stored and division happens below explicitly. */ \
-			PASTEMAC(ch,scals)( *alpha11, beta11c ); \
+			PASTEMAC(ch,diagop)( *alpha11, beta11c ); \
 \
 			/* Output final result to matrix c. */ \
 			PASTEMAC(ch,copys)( beta11c, *gamma11 ); \
 \
 			/* Store the local value back to b11. */ \
-			for ( dim_t d = 0; d < cs_b; ++d ) \
-				PASTEMAC(ch,copys)( beta11c, *(beta11 + d) ); \
+			PASTEMAC(ch,copys)( beta11c, *beta11 ); \
 		} \
 	} \
 }
 
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
-INSERT_GENTFUNC_BASIC( trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, scals )
+INSERT_GENTFUNC_BASIC3( trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, scals )
 #else
-INSERT_GENTFUNC_BASIC( trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscals )
+INSERT_GENTFUNC_BASIC3( trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscals )
 #endif
 
 
@@ -130,47 +146,55 @@ INSERT_GENTFUNC_BASIC( trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscals )
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       const void*      a0, \
-             void*      b0, \
-             void*      c0, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
+       ctype*     restrict a, \
+       ctype*     restrict b, \
+       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
      ) \
 { \
-	const ctype*    a      = a0; \
-	      ctype*    b      = b0; \
-	      ctype*    c      = c0; \
-\
 	const num_t     dt     = PASTEMAC(ch,type); \
 \
-	const dim_t     mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
-	const dim_t     nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
+	/* Use trsm blocksizes if they are available else use general blocksizes. */  \
+	 dim_t          mr     = bli_cntx_get_trsm_blksz_def_dt( dt, BLIS_MR, cntx ); \
+	 dim_t          nr     = bli_cntx_get_trsm_blksz_def_dt( dt, BLIS_NR, cntx ); \
 \
-	const inc_t     packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx ); \
-	const inc_t     packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
+	 inc_t          packmr = bli_cntx_get_trsm_blksz_max_dt( dt, BLIS_MR, cntx ); \
+	 inc_t          packnr = bli_cntx_get_trsm_blksz_max_dt( dt, BLIS_NR, cntx ); \
+\
+	if ( mr == 0 || nr == 0 ) \
+	{ \
+		mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
+		nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
+		packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx ); \
+		packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
+	} \
 \
 	const dim_t     m      = mr; \
 	const dim_t     n      = nr; \
 \
-	const inc_t     rs_a   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBM, cntx ); \
+	const inc_t     rs_a   = 1; \
 	const inc_t     cs_a   = packmr; \
 \
 	const inc_t     rs_b   = packnr; \
-	const inc_t     cs_b   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBN, cntx ); \
+	const inc_t     cs_b   = 1; \
 \
-	for ( dim_t iter = 0; iter < m; ++iter ) \
+	dim_t           iter, i, j, l; \
+	dim_t           n_behind; \
+\
+	for ( iter = 0; iter < m; ++iter ) \
 	{ \
-		dim_t i        = m - iter - 1; \
-		dim_t n_behind = iter; \
+		i        = m - iter - 1; \
+		n_behind = iter; \
 \
-		const ctype* restrict alpha11 = a + (i  )*rs_a + (i  )*cs_a; \
-		const ctype* restrict a12t    = a + (i  )*rs_a + (i+1)*cs_a; \
-		      ctype* restrict b1      = b + (i  )*rs_b + (0  )*cs_b; \
-		      ctype* restrict B2      = b + (i+1)*rs_b + (0  )*cs_b; \
+		ctype* restrict alpha11  = a + (i  )*rs_a + (i  )*cs_a; \
+		ctype* restrict a12t     = a + (i  )*rs_a + (i+1)*cs_a; \
+		ctype* restrict b1       = b + (i  )*rs_b + (0  )*cs_b; \
+		ctype* restrict B2       = b + (i+1)*rs_b + (0  )*cs_b; \
 \
 		/* b1 = b1 - a12t * B2; */ \
 		/* b1 = b1 / alpha11; */ \
-		for ( dim_t j = 0; j < n; ++j ) \
+		for ( j = 0; j < n; ++j ) \
 		{ \
 			ctype* restrict beta11  = b1 + (0  )*rs_b + (j  )*cs_b; \
 			ctype* restrict b21     = B2 + (0  )*rs_b + (j  )*cs_b; \
@@ -180,10 +204,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 			/* beta11 = beta11 - a12t * b21; */ \
 			PASTEMAC(ch,set0s)( rho11 ); \
-			for ( dim_t l = 0; l < n_behind; ++l ) \
+			for ( l = 0; l < n_behind; ++l ) \
 			{ \
-				const ctype* restrict alpha12 = a12t + (l  )*cs_a; \
-				      ctype* restrict beta21  = b21  + (l  )*rs_b; \
+				ctype* restrict alpha12 = a12t + (l  )*cs_a; \
+				ctype* restrict beta21  = b21  + (l  )*rs_b; \
 \
 				PASTEMAC(ch,axpys)( *alpha12, *beta21, rho11 ); \
 			} \
@@ -200,15 +224,15 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			PASTEMAC(ch,copys)( beta11c, *gamma11 ); \
 \
 			/* Store the local value back to b11. */ \
-			for ( dim_t d = 0; d < cs_b; ++d ) \
-				PASTEMAC(ch,copys)( beta11c, *(beta11 + d) ); \
+			PASTEMAC(ch,copys)( beta11c, *beta11 ); \
 		} \
 	} \
 }
 
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
-INSERT_GENTFUNC_BASIC( trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, scals )
+INSERT_GENTFUNC_BASIC3( trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, scals )
 #else
-INSERT_GENTFUNC_BASIC( trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscals )
+INSERT_GENTFUNC_BASIC3( trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscals )
 #endif
 
+#endif

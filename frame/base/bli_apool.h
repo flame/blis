@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -61,14 +61,16 @@ BLIS_INLINE  bli_pthread_mutex_t* bli_apool_mutex( apool_t* apool )
 	return &(apool->mutex);
 }
 
-BLIS_INLINE siz_t bli_apool_def_array_len( const apool_t* pool )
+BLIS_INLINE siz_t bli_apool_def_array_len( apool_t* pool )
 {
 	return pool->def_array_len;
 }
 
-BLIS_INLINE bool bli_apool_is_exhausted( const apool_t* apool )
+BLIS_INLINE bool bli_apool_is_exhausted( apool_t* apool )
 {
-	return bli_pool_is_exhausted( &apool->pool );
+	pool_t* restrict pool = bli_apool_pool( apool );
+
+	return bli_pool_is_exhausted( pool );
 }
 
 // apool action
@@ -94,44 +96,44 @@ BLIS_INLINE void bli_apool_set_def_array_len( siz_t def_array_len, apool_t* pool
 
 void bli_apool_init
      (
-       apool_t* apool
+       apool_t* restrict apool
      );
 void bli_apool_finalize
      (
-       apool_t* apool
+       apool_t* restrict apool
      );
 
 array_t* bli_apool_checkout_array
      (
-       siz_t    n_threads,
-       apool_t* apool
+       siz_t             n_threads,
+       apool_t* restrict apool
      );
 void bli_apool_checkin_array
      (
-       array_t* array,
-       apool_t* apool
+       array_t* restrict array,
+       apool_t* restrict apool
      );
 
 pool_t* bli_apool_array_elem
      (
-       siz_t    index,
-       array_t* array
+       siz_t             index,
+       array_t* restrict array
      );
 
 void bli_apool_grow
      (
-       siz_t    num_blocks_add,
-       apool_t* apool
+       siz_t             num_blocks_add,
+       apool_t* restrict apool
      );
 
 void bli_apool_alloc_block
      (
-       siz_t     num_elem,
-       array_t** array_p
+       siz_t              num_elem,
+       array_t** restrict array_p
      );
 void bli_apool_free_block
      (
-       array_t* array
+       array_t* restrict array
      );
 
 

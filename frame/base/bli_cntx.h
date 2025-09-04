@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -43,13 +43,24 @@
 /*
 typedef struct cntx_s
 {
-	blksz_t   blkszs[ BLIS_NUM_BLKSZS ];
-	bszid_t   bmults[ BLIS_NUM_BLKSZS ];
+	blksz_t*  blkszs;
+	bszid_t*  bmults;
 
-	func_t    ukrs[ BLIS_NUM_UKRS ];
-	mbool_t   ukr_prefs[ BLIS_NUM_UKR_PREFS ];
+	func_t*   l3_vir_ukrs;
+	func_t*   l3_nat_ukrs;
+	mbool_t*  l3_nat_ukrs_prefs;
 
-	void_fp   l3_sup_handlers[ BLIS_NUM_LEVEL3_OPS ];
+	blksz_t*  l3_sup_thresh;
+	void**    l3_sup_handlers;
+	blksz_t*  l3_sup_blkszs;
+	func_t*   l3_sup_kers;
+	mbool_t*  l3_sup_kers_prefs;
+
+	func_t*   l1f_kers;
+	func_t*   l1v_kers;
+
+	func_t*   packm_kers;
+	func_t*   unpackm_kers;
 
 	ind_t     method;
 
@@ -62,7 +73,83 @@ typedef struct cntx_s
 // -- cntx_t query (fields only) -----------------------------------------------
 //
 
-BLIS_INLINE ind_t bli_cntx_method( const cntx_t* cntx )
+BLIS_INLINE blksz_t* bli_cntx_blkszs_buf( cntx_t* cntx )
+{
+	return cntx->blkszs;
+}
+BLIS_INLINE bszid_t* bli_cntx_bmults_buf( cntx_t* cntx )
+{
+	return cntx->bmults;
+}
+BLIS_INLINE blksz_t* bli_cntx_trsm_blkszs_buf( cntx_t* cntx )
+{
+    return cntx->trsm_blkszs;
+}
+BLIS_INLINE func_t* bli_cntx_l3_vir_ukrs_buf( cntx_t* cntx )
+{
+	return cntx->l3_vir_ukrs;
+}
+BLIS_INLINE func_t* bli_cntx_l3_nat_ukrs_buf( cntx_t* cntx )
+{
+	return cntx->l3_nat_ukrs;
+}
+BLIS_INLINE mbool_t* bli_cntx_l3_nat_ukrs_prefs_buf( cntx_t* cntx )
+{
+	return cntx->l3_nat_ukrs_prefs;
+}
+BLIS_INLINE blksz_t* bli_cntx_l3_sup_thresh_buf( cntx_t* cntx )
+{
+	return cntx->l3_sup_thresh;
+}
+BLIS_INLINE void** bli_cntx_l3_sup_handlers_buf( cntx_t* cntx )
+{
+	return cntx->l3_sup_handlers;
+}
+BLIS_INLINE blksz_t* bli_cntx_l3_sup_blkszs_buf( cntx_t* cntx )
+{
+	return cntx->l3_sup_blkszs;
+}
+BLIS_INLINE blksz_t* bli_cntx_l3_sup_tri_blkszs_buf( cntx_t* cntx )
+{
+	return cntx->l3_sup_tri_blkszs;
+}
+BLIS_INLINE func_t* bli_cntx_l3_sup_kers_buf( cntx_t* cntx )
+{
+	return cntx->l3_sup_kers;
+}
+BLIS_INLINE func_t* bli_cntx_l3_sup_tri_kers_buf( cntx_t* cntx )
+{
+	return cntx->l3_sup_tri_kers;
+}
+BLIS_INLINE mbool_t* bli_cntx_l3_sup_kers_prefs_buf( cntx_t* cntx )
+{
+	return cntx->l3_sup_kers_prefs;
+}
+BLIS_INLINE mbool_t* bli_cntx_l3_sup_tri_kers_prefs_buf( cntx_t* cntx )
+{
+	return cntx->l3_sup_tri_kers_prefs;
+}
+BLIS_INLINE func_t* bli_cntx_l1f_kers_buf( cntx_t* cntx )
+{
+	return cntx->l1f_kers;
+}
+BLIS_INLINE func_t* bli_cntx_l1v_kers_buf( cntx_t* cntx )
+{
+	return cntx->l1v_kers;
+}
+BLIS_INLINE void** bli_cntx_l3_thresh_funcs_buf(cntx_t* cntx )
+{
+	return cntx->l3_thresh_funcs;
+}
+BLIS_INLINE func_t* bli_cntx_packm_kers_buf( cntx_t* cntx )
+{
+	return cntx->packm_kers;
+}
+BLIS_INLINE func_t* bli_cntx_unpackm_kers_buf( cntx_t* cntx )
+{
+	return cntx->unpackm_kers;
+}
+BLIS_INLINE ind_t bli_cntx_method( cntx_t* cntx )
 {
 	return cntx->method;
 }
@@ -84,184 +171,639 @@ BLIS_INLINE void bli_cntx_set_method( ind_t method, cntx_t* cntx )
 // -- cntx_t query (complex) ---------------------------------------------------
 //
 
-BLIS_INLINE const blksz_t* bli_cntx_get_blksz( bszid_t bs_id, const cntx_t* cntx )
+BLIS_INLINE blksz_t* bli_cntx_get_blksz( bszid_t bs_id, cntx_t* cntx )
 {
+	blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
+	blksz_t* blksz  = &blkszs[ bs_id ];
+
 	// Return the address of the blksz_t identified by bs_id.
-	return &cntx->blkszs[ bs_id ];
+	return blksz;
 }
 
-BLIS_INLINE dim_t bli_cntx_get_blksz_def_dt( num_t dt, bszid_t bs_id, const cntx_t* cntx )
+BLIS_INLINE blksz_t* bli_cntx_get_trsm_blksz( bszid_t bs_id, cntx_t* cntx )
 {
-	const blksz_t* blksz  = bli_cntx_get_blksz( bs_id, cntx );
-	dim_t          bs_dt  = bli_blksz_get_def( dt, blksz );
+    blksz_t* blkszs = bli_cntx_trsm_blkszs_buf( cntx );
+    blksz_t* blksz  = &blkszs[ bs_id ];
+
+    // Return the address of the blksz_t identified by bs_id.
+    return blksz;
+
+}
+
+BLIS_INLINE dim_t bli_cntx_get_blksz_def_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
+{
+	blksz_t* blksz  = bli_cntx_get_blksz( bs_id, cntx );
+	dim_t    bs_dt  = bli_blksz_get_def( dt, blksz );
 
 	// Return the main (default) blocksize value for the datatype given.
 	return bs_dt;
 }
 
-BLIS_INLINE dim_t bli_cntx_get_blksz_max_dt( num_t dt, bszid_t bs_id, const cntx_t* cntx )
+BLIS_INLINE dim_t bli_cntx_get_trsm_blksz_def_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
 {
-	const blksz_t* blksz  = bli_cntx_get_blksz( bs_id, cntx );
-	dim_t          bs_dt  = bli_blksz_get_max( dt, blksz );
+	blksz_t* blksz  = bli_cntx_get_trsm_blksz( bs_id, cntx );
+	dim_t    bs_dt  = bli_blksz_get_def( dt, blksz );
+
+	// Return the main (default) blocksize value for the datatype given.
+	return bs_dt;
+}
+
+BLIS_INLINE dim_t bli_cntx_get_blksz_max_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
+{
+	blksz_t* blksz  = bli_cntx_get_blksz( bs_id, cntx );
+	dim_t    bs_dt  = bli_blksz_get_max( dt, blksz );
 
 	// Return the auxiliary (maximum) blocksize value for the datatype given.
 	return bs_dt;
 }
 
-BLIS_INLINE bszid_t bli_cntx_get_bmult_id( bszid_t bs_id, const cntx_t* cntx )
+BLIS_INLINE dim_t bli_cntx_get_trsm_blksz_max_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
 {
-	return cntx->bmults[ bs_id ];
+	blksz_t* blksz  = bli_cntx_get_trsm_blksz( bs_id, cntx );
+	dim_t    bs_dt  = bli_blksz_get_max( dt, blksz );
+
+	// Return the auxiliary (maximum) blocksize value for the datatype given.
+	return bs_dt;
 }
 
-BLIS_INLINE const blksz_t* bli_cntx_get_bmult( bszid_t bs_id, const cntx_t* cntx )
+BLIS_INLINE bszid_t bli_cntx_get_bmult_id( bszid_t bs_id, cntx_t* cntx )
 {
-	bszid_t        bm_id  = bli_cntx_get_bmult_id( bs_id, cntx );
-	const blksz_t* bmult  = bli_cntx_get_blksz( bm_id, cntx );
+	bszid_t* restrict bmults = bli_cntx_bmults_buf( cntx );
+	bszid_t           bm_id  = bmults[ bs_id ];
+
+	return bm_id;
+}
+
+BLIS_INLINE blksz_t* bli_cntx_get_bmult( bszid_t bs_id, cntx_t* cntx )
+{
+	bszid_t           bm_id  = bli_cntx_get_bmult_id( bs_id, cntx );
+	blksz_t* restrict bmult  = bli_cntx_get_blksz( bm_id, cntx );
 
 	return bmult;
 }
 
-BLIS_INLINE dim_t bli_cntx_get_bmult_dt( num_t dt, bszid_t bs_id, const cntx_t* cntx )
+BLIS_INLINE blksz_t* bli_cntx_get_trsm_bmult( bszid_t bs_id, cntx_t* cntx )
 {
-	const blksz_t* bmult  = bli_cntx_get_bmult( bs_id, cntx );
-	dim_t          bm_dt  = bli_blksz_get_def( dt, bmult );
+	bszid_t           bm_id  = bli_cntx_get_bmult_id( bs_id, cntx );
+	blksz_t* restrict bmult  = bli_cntx_get_trsm_blksz( bm_id, cntx );
+
+	return bmult;
+}
+
+BLIS_INLINE dim_t bli_cntx_get_bmult_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
+{
+	blksz_t* bmult  = bli_cntx_get_bmult( bs_id, cntx );
+	dim_t    bm_dt  = bli_blksz_get_def( dt, bmult );
 
 	return bm_dt;
 }
 
 // -----------------------------------------------------------------------------
 
-BLIS_INLINE const func_t* bli_cntx_get_ukrs( ukr_t ukr_id, const cntx_t* cntx )
+BLIS_INLINE func_t* bli_cntx_get_l3_vir_ukrs( l3ukr_t ukr_id, cntx_t* cntx )
 {
-	return &cntx->ukrs[ ukr_id ];
+	func_t* funcs = bli_cntx_l3_vir_ukrs_buf( cntx );
+	func_t* func  = &funcs[ ukr_id ];
+
+	return func;
 }
 
-BLIS_INLINE void_fp bli_cntx_get_ukr_dt( num_t dt, ukr_t ukr_id, const cntx_t* cntx )
+BLIS_INLINE void_fp bli_cntx_get_l3_vir_ukr_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	const func_t* func = bli_cntx_get_ukrs( ukr_id, cntx );
+	func_t* func = bli_cntx_get_l3_vir_ukrs( ukr_id, cntx );
 
 	return bli_func_get_dt( dt, func );
 }
 
-BLIS_INLINE void_fp bli_cntx_get_l3_vir_ukr_dt( num_t dt, ukr_t ukr_id, const cntx_t* cntx )
+BLIS_INLINE func_t* bli_cntx_get_l3_nat_ukrs( l3ukr_t ukr_id, cntx_t* cntx )
 {
-	switch ( ukr_id )
-	{
-		case BLIS_GEMM_UKR:       ukr_id = BLIS_GEMM_VIR_UKR; break;
-		case BLIS_TRSM_L_UKR:     ukr_id = BLIS_TRSM_L_VIR_UKR; break;
-		case BLIS_TRSM_U_UKR:     ukr_id = BLIS_TRSM_U_VIR_UKR; break;
-		case BLIS_GEMMTRSM_L_UKR: ukr_id = BLIS_GEMMTRSM_L_VIR_UKR; break;
-		case BLIS_GEMMTRSM_U_UKR: ukr_id = BLIS_GEMMTRSM_U_VIR_UKR; break;
-		default: break;
-	};
+	func_t* funcs = bli_cntx_l3_nat_ukrs_buf( cntx );
+	func_t* func  = &funcs[ ukr_id ];
 
-	return bli_cntx_get_ukr_dt( dt, ukr_id, cntx );
+	return func;
+}
+
+BLIS_INLINE void_fp bli_cntx_get_l3_nat_ukr_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+{
+	func_t* func = bli_cntx_get_l3_nat_ukrs( ukr_id, cntx );
+
+	return bli_func_get_dt( dt, func );
 }
 
 // -----------------------------------------------------------------------------
 
-BLIS_INLINE const mbool_t* bli_cntx_get_ukr_prefs( ukr_pref_t pref_id, const cntx_t* cntx )
+BLIS_INLINE mbool_t* bli_cntx_get_l3_nat_ukr_prefs( l3ukr_t ukr_id, cntx_t* cntx )
 {
-	return &cntx->ukr_prefs[ pref_id ];
+	mbool_t* mbools = bli_cntx_l3_nat_ukrs_prefs_buf( cntx );
+	mbool_t* mbool  = &mbools[ ukr_id ];
+
+	return mbool;
 }
 
-BLIS_INLINE bool bli_cntx_get_ukr_prefs_dt( num_t dt, ukr_pref_t ukr_id, const cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_get_l3_nat_ukr_prefs_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	const mbool_t* mbool = bli_cntx_get_ukr_prefs( ukr_id, cntx );
+	mbool_t* mbool = bli_cntx_get_l3_nat_ukr_prefs( ukr_id, cntx );
 
 	return ( bool )bli_mbool_get_dt( dt, mbool );
 }
 
 // -----------------------------------------------------------------------------
 
-BLIS_INLINE bool bli_cntx_l3_sup_thresh_is_met( num_t dt, dim_t m, dim_t n, dim_t k, const cntx_t* cntx )
+BLIS_INLINE blksz_t* bli_cntx_get_l3_sup_thresh( threshid_t thresh_id, cntx_t* cntx )
 {
-	if ( m < bli_cntx_get_blksz_def_dt( dt, BLIS_MT, cntx ) ) return TRUE;
-	if ( n < bli_cntx_get_blksz_def_dt( dt, BLIS_NT, cntx ) ) return TRUE;
-	if ( k < bli_cntx_get_blksz_def_dt( dt, BLIS_KT, cntx ) ) return TRUE;
+	blksz_t* threshs = bli_cntx_l3_sup_thresh_buf( cntx );
+	blksz_t* thresh  = &threshs[ thresh_id ];
 
-	return FALSE;
+	// Return the address of the blksz_t identified by thresh_id.
+	return thresh;
+}
+
+BLIS_INLINE dim_t bli_cntx_get_l3_sup_thresh_dt( num_t dt, threshid_t thresh_id, cntx_t* cntx )
+{
+	blksz_t* threshs   = bli_cntx_get_l3_sup_thresh( thresh_id, cntx );
+	dim_t    thresh_dt = bli_blksz_get_def( dt, threshs );
+
+	// Return the main (default) threshold value for the datatype given.
+	return thresh_dt;
 }
 
 // -----------------------------------------------------------------------------
 
-BLIS_INLINE void_fp bli_cntx_get_l3_sup_handler( opid_t op, const cntx_t* cntx )
+BLIS_INLINE void* bli_cntx_get_l3_sup_handler( opid_t op, cntx_t* cntx )
 {
-	return cntx->l3_sup_handlers[ op ];
+	void** funcs = bli_cntx_l3_sup_handlers_buf( cntx );
+	void*  func  = funcs[ op ];
+
+	return func;
 }
 
 // -----------------------------------------------------------------------------
 
-BLIS_INLINE bool bli_cntx_ukr_prefers_rows_dt( num_t dt, ukr_t ukr_id, const cntx_t* cntx )
+BLIS_INLINE blksz_t* bli_cntx_get_l3_sup_blksz( bszid_t bs_id, cntx_t* cntx )
 {
-	// This initial value will get overwritten during the switch statement below.
-	ukr_pref_t ukr_pref_id = BLIS_GEMM_UKR_ROW_PREF;
+	blksz_t* blkszs = bli_cntx_l3_sup_blkszs_buf( cntx );
+	blksz_t* blksz  = &blkszs[ bs_id ];
 
-	// Get the correct preference from the kernel ID.
-	switch ( ukr_id )
+	// Return the address of the blksz_t identified by bs_id.
+	return blksz;
+}
+BLIS_INLINE blksz_t* bli_cntx_get_l3_sup_tri_blksz( bszid_t bs_id, cntx_t* cntx )
+{
+	blksz_t* blkszs = bli_cntx_l3_sup_tri_blkszs_buf( cntx );
+	blksz_t* blksz  = &blkszs[ bs_id ];
+
+	// Return the address of the blksz_t identified by bs_id.
+	return blksz;
+}
+
+BLIS_INLINE dim_t bli_cntx_get_l3_sup_blksz_def_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
+{
+	blksz_t* blksz  = bli_cntx_get_l3_sup_blksz( bs_id, cntx );
+	dim_t    bs_dt  = bli_blksz_get_def( dt, blksz );
+
+	// Return the main (default) blocksize value for the datatype given.
+	return bs_dt;
+}
+
+BLIS_INLINE dim_t bli_cntx_get_l3_sup_tri_blksz_def_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
+{
+	blksz_t* blksz  = bli_cntx_get_l3_sup_tri_blksz( bs_id, cntx );
+	dim_t    bs_dt  = bli_blksz_get_def( dt, blksz );
+
+	// Return the main (default) blocksize value for the datatype given.
+	return bs_dt;
+}
+
+BLIS_INLINE dim_t bli_cntx_get_l3_sup_blksz_max_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
+{
+	blksz_t* blksz  = bli_cntx_get_l3_sup_blksz( bs_id, cntx );
+	dim_t    bs_dt  = bli_blksz_get_max( dt, blksz );
+
+	// Return the auxiliary (maximum) blocksize value for the datatype given.
+	return bs_dt;
+}
+
+BLIS_INLINE dim_t bli_cntx_get_l3_sup_tri_blksz_max_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
+{
+	blksz_t* blksz  = bli_cntx_get_l3_sup_tri_blksz( bs_id, cntx );
+	dim_t    bs_dt  = bli_blksz_get_max( dt, blksz );
+
+	if( bs_dt <= 0)
 	{
-		case BLIS_GEMM_VIR_UKR: // fallthrough
-		case BLIS_GEMM_UKR: ukr_pref_id = BLIS_GEMM_UKR_ROW_PREF; break;
-		case BLIS_TRSM_L_VIR_UKR: // fallthrough
-		case BLIS_TRSM_L_UKR: ukr_pref_id = BLIS_TRSM_L_UKR_ROW_PREF; break;
-		case BLIS_TRSM_U_VIR_UKR: // fallthrough
-		case BLIS_TRSM_U_UKR: ukr_pref_id = BLIS_TRSM_U_UKR_ROW_PREF; break;
-		case BLIS_GEMMTRSM_L_VIR_UKR: // fallthrough
-		case BLIS_GEMMTRSM_L_UKR: ukr_pref_id = BLIS_GEMMTRSM_L_UKR_ROW_PREF; break;
-		case BLIS_GEMMTRSM_U_VIR_UKR: // fallthrough
-		case BLIS_GEMMTRSM_U_UKR: ukr_pref_id = BLIS_GEMMTRSM_U_UKR_ROW_PREF; break;
-		case BLIS_GEMMSUP_RRR_UKR: ukr_pref_id = BLIS_GEMMSUP_RRR_UKR_ROW_PREF; break;
-		case BLIS_GEMMSUP_RRC_UKR: ukr_pref_id = BLIS_GEMMSUP_RRC_UKR_ROW_PREF; break;
-		case BLIS_GEMMSUP_RCR_UKR: ukr_pref_id = BLIS_GEMMSUP_RCR_UKR_ROW_PREF; break;
-		case BLIS_GEMMSUP_RCC_UKR: ukr_pref_id = BLIS_GEMMSUP_RCC_UKR_ROW_PREF; break;
-		case BLIS_GEMMSUP_CRR_UKR: ukr_pref_id = BLIS_GEMMSUP_CRR_UKR_ROW_PREF; break;
-		case BLIS_GEMMSUP_CRC_UKR: ukr_pref_id = BLIS_GEMMSUP_CRC_UKR_ROW_PREF; break;
-		case BLIS_GEMMSUP_CCR_UKR: ukr_pref_id = BLIS_GEMMSUP_CCR_UKR_ROW_PREF; break;
-		case BLIS_GEMMSUP_CCC_UKR: ukr_pref_id = BLIS_GEMMSUP_CCC_UKR_ROW_PREF; break;
-		case BLIS_GEMMSUP_XXX_UKR: ukr_pref_id = BLIS_GEMMSUP_XXX_UKR_ROW_PREF; break;
-		default: break; // TODO: should be an error condition
+		blksz  = bli_cntx_get_l3_sup_blksz( bs_id, cntx );
+		bs_dt  = bli_blksz_get_max( dt, blksz );
+	}
+	// Return the auxiliary (maximum) blocksize value for the datatype given.
+	return bs_dt;
+}
+
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE func_t* bli_cntx_get_l3_sup_kers( stor3_t stor_id, cntx_t* cntx )
+{
+	func_t* funcs = bli_cntx_l3_sup_kers_buf( cntx );
+	func_t* func  = &funcs[ stor_id ];
+
+	return func;
+}
+
+BLIS_INLINE func_t* bli_cntx_get_l3_sup_tri_kers( stor3_t stor_id, cntx_t* cntx )
+{
+	func_t* funcs = bli_cntx_l3_sup_tri_kers_buf( cntx );
+	func_t* func  = &funcs[ stor_id ];
+
+	return func;
+}
+
+BLIS_INLINE void* bli_cntx_get_l3_sup_ker_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+{
+	func_t* func = bli_cntx_get_l3_sup_kers( stor_id, cntx );
+
+	return bli_func_get_dt( dt, func );
+}
+
+BLIS_INLINE void* bli_cntx_get_l3_sup_tri_ker_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+{
+	func_t* func = bli_cntx_get_l3_sup_tri_kers( stor_id, cntx );
+
+	return bli_func_get_dt( dt, func );
+}
+
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE mbool_t* bli_cntx_get_l3_sup_ker_prefs( stor3_t stor_id, cntx_t* cntx )
+{
+	mbool_t* mbools = bli_cntx_l3_sup_kers_prefs_buf( cntx );
+	mbool_t* mbool  = &mbools[ stor_id ];
+
+	return mbool;
+}
+
+BLIS_INLINE mbool_t* bli_cntx_get_l3_sup_tri_ker_prefs( stor3_t stor_id, cntx_t* cntx )
+{
+	mbool_t* mbools = bli_cntx_l3_sup_tri_kers_prefs_buf( cntx );
+	mbool_t* mbool  = &mbools[ stor_id ];
+
+	return mbool;
+}
+
+BLIS_INLINE bool bli_cntx_get_l3_sup_ker_prefs_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+{
+	mbool_t* mbool = bli_cntx_get_l3_sup_ker_prefs( stor_id, cntx );
+
+	return ( bool )bli_mbool_get_dt( dt, mbool );
+}
+
+BLIS_INLINE bool bli_cntx_get_l3_sup_tri_ker_prefs_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+{
+	mbool_t* mbool = bli_cntx_get_l3_sup_tri_ker_prefs( stor_id, cntx );
+
+	return ( bool )bli_mbool_get_dt( dt, mbool );
+}
+
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE func_t* bli_cntx_get_l1f_kers( l1fkr_t ker_id, cntx_t* cntx )
+{
+	func_t* funcs = bli_cntx_l1f_kers_buf( cntx );
+	func_t* func  = &funcs[ ker_id ];
+
+	return func;
+}
+
+BLIS_INLINE void_fp bli_cntx_get_l1f_ker_dt( num_t dt, l1fkr_t ker_id, cntx_t* cntx )
+{
+	func_t* func = bli_cntx_get_l1f_kers( ker_id, cntx );
+
+	return bli_func_get_dt( dt, func );
+}
+
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE func_t* bli_cntx_get_l1v_kers( l1vkr_t ker_id, cntx_t* cntx )
+{
+	func_t* funcs = bli_cntx_l1v_kers_buf( cntx );
+	func_t* func  = &funcs[ ker_id ];
+
+	return func;
+}
+
+BLIS_INLINE void_fp bli_cntx_get_l1v_ker_dt( num_t dt, l1vkr_t ker_id, cntx_t* cntx )
+{
+	func_t* func = bli_cntx_get_l1v_kers( ker_id, cntx );
+
+	return bli_func_get_dt( dt, func );
+}
+
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE func_t* bli_cntx_get_packm_kers( l1mkr_t ker_id, cntx_t* cntx )
+{
+	func_t* func = NULL;
+
+	// Only index to the requested packm func_t if the packm kernel being
+	// requested is one that is explicitly supported.
+	if ( 0 <= ( gint_t )ker_id &&
+	          ( gint_t )ker_id < BLIS_NUM_PACKM_KERS )
+	{
+		func_t* funcs = bli_cntx_packm_kers_buf( cntx );
+
+		func = &funcs[ ker_id ];
 	}
 
-	// For virtual ukernels during non-native execution, use the real projection of
-	// the datatype.
-	if ( bli_cntx_method( cntx ) != BLIS_NAT )
+	return func;
+}
+
+BLIS_INLINE void_fp bli_cntx_get_packm_ker_dt( num_t dt, l1mkr_t ker_id, cntx_t* cntx )
+{
+	void_fp fp = NULL;
+
+	// Only query the context for the packm func_t (and then extract the
+	// datatype-specific function pointer) if the packm kernel being
+	// requested is one that is explicitly supported.
+	if ( 0 <= ( gint_t )ker_id &&
+	          ( gint_t )ker_id < BLIS_NUM_PACKM_KERS )
 	{
-		switch ( ukr_id )
+		func_t* func = bli_cntx_get_packm_kers( ker_id, cntx );
+
+		fp = bli_func_get_dt( dt, func );
+	}
+
+	return fp;
+}
+
+BLIS_INLINE void* bli_cntx_get_l3_thresh_func( opid_t func_id, cntx_t* cntx )
+{
+	void** funcs = bli_cntx_l3_thresh_funcs_buf( cntx );
+	void*    func  = funcs[ func_id ];
+
+	return func;
+}
+
+BLIS_INLINE func_t* bli_cntx_get_unpackm_kers( l1mkr_t ker_id, cntx_t* cntx )
+{
+	func_t* func = NULL;
+
+	// Only index to the requested unpackm func_t if the unpackm kernel being
+	// requested is one that is explicitly supported.
+	if ( 0 <= ( gint_t )ker_id &&
+	          ( gint_t )ker_id < BLIS_NUM_UNPACKM_KERS )
+	{
+		func_t* funcs = bli_cntx_unpackm_kers_buf( cntx );
+
+		func = &funcs[ ker_id ];
+	}
+
+	return func;
+}
+
+BLIS_INLINE void_fp bli_cntx_get_unpackm_ker_dt( num_t dt, l1mkr_t ker_id, cntx_t* cntx )
+{
+	void_fp fp = NULL;
+
+	// Only query the context for the unpackm func_t (and then extract the
+	// datatype-specific function pointer) if the unpackm kernel being
+	// requested is one that is explicitly supported.
+	if ( 0 <= ( gint_t )ker_id &&
+	          ( gint_t )ker_id < BLIS_NUM_UNPACKM_KERS )
+	{
+		func_t* func = bli_cntx_get_unpackm_kers( ker_id, cntx );
+
+		fp = bli_func_get_dt( dt, func );
+	}
+
+	return fp;
+}
+
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE bool bli_cntx_l3_nat_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+{
+	const bool prefs = bli_cntx_get_l3_nat_ukr_prefs_dt( dt, ukr_id, cntx );
+
+	// A ukernel preference of TRUE means the ukernel prefers row storage.
+	return ( bool )
+	       ( prefs == TRUE );
+}
+
+BLIS_INLINE bool bli_cntx_l3_nat_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+{
+	const bool prefs = bli_cntx_get_l3_nat_ukr_prefs_dt( dt, ukr_id, cntx );
+
+	// A ukernel preference of FALSE means the ukernel prefers column storage.
+	return ( bool )
+	       ( prefs == FALSE );
+}
+
+BLIS_INLINE bool bli_cntx_l3_nat_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
+{
+	// Note that we use the computation datatype, which may differ from the
+	// storage datatype of C (when performing a mixed datatype operation).
+	const num_t dt    = bli_obj_comp_dt( obj );
+	const bool  ukr_prefers_rows
+	                  = bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, ukr_id, cntx );
+	const bool  ukr_prefers_cols
+	                  = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, ukr_id, cntx );
+	bool        r_val = FALSE;
+
+	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
+	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
+
+	return r_val;
+}
+
+BLIS_INLINE bool bli_cntx_l3_nat_ukr_dislikes_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
+{
+	return ( bool )
+	       !bli_cntx_l3_nat_ukr_prefers_storage_of( obj, ukr_id, cntx );
+}
+
+// -----------------------------------------------------------------------------
+BLIS_INLINE bool bli_cntx_l3_vir_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+{
+	// For induced methods, return the ukernel storage preferences of the
+	// corresponding real micro-kernel.
+	// NOTE: This projection to real domain becomes unnecessary if you
+	// set the exec_dt for 1m to the real projection of the storage
+	// datatype.
+	if ( bli_cntx_method( cntx ) != BLIS_NAT )
+	    dt = bli_dt_proj_to_real( dt );
+
+	return bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, ukr_id, cntx );
+}
+
+BLIS_INLINE bool bli_cntx_l3_vir_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+{
+	// For induced methods, return the ukernel storage preferences of the
+	// corresponding real micro-kernel.
+	// NOTE: This projection to real domain becomes unnecessary if you
+	// set the exec_dt for 1m to the real projection of the storage
+	// datatype.
+	if ( bli_cntx_method( cntx ) != BLIS_NAT )
+	    dt = bli_dt_proj_to_real( dt );
+
+	return bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, ukr_id, cntx );
+}
+
+BLIS_INLINE bool bli_cntx_l3_vir_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
+{
+	// Note that we use the computation datatype, which may differ from the
+	// storage datatype of C (when performing a mixed datatype operation).
+	const num_t dt    = bli_obj_comp_dt( obj );
+	const bool  ukr_prefers_rows
+	                  = bli_cntx_l3_vir_ukr_prefers_rows_dt( dt, ukr_id, cntx );
+	const bool  ukr_prefers_cols
+	                  = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, ukr_id, cntx );
+	bool        r_val = FALSE;
+
+	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
+	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
+
+	return r_val;
+}
+
+BLIS_INLINE bool bli_cntx_l3_vir_ukr_dislikes_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
+{
+	return ( bool )
+	       !bli_cntx_l3_vir_ukr_prefers_storage_of( obj, ukr_id, cntx );
+}
+
+BLIS_INLINE bool bli_cntx_l3_vir_ukr_prefers_storage_of_md( obj_t* obj, num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+{
+	// we use the computation datatype, which may differ from the
+	// storage datatype of C
+	const bool  ukr_prefers_rows
+	                  = bli_cntx_l3_vir_ukr_prefers_rows_dt( dt, ukr_id, cntx );
+	const bool  ukr_prefers_cols
+	                  = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, ukr_id, cntx );
+	bool        r_val = FALSE;
+
+	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
+	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
+	return r_val;
+}
+
+BLIS_INLINE bool bli_cntx_l3_vir_ukr_dislikes_storage_of_md( obj_t* obj, num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+{
+	return ( bool )
+	       !bli_cntx_l3_vir_ukr_prefers_storage_of_md( obj, dt, ukr_id, cntx );
+}
+
+// -----------------------------------------------------------------------------
+
+
+BLIS_INLINE bool bli_cntx_l3_sup_ker_prefers_rows_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+{
+	const bool prefs = bli_cntx_get_l3_sup_ker_prefs_dt( dt, stor_id, cntx );
+
+	// A ukernel preference of TRUE means the ukernel prefers row storage.
+	return ( bool )
+	       ( prefs == TRUE );
+}
+
+BLIS_INLINE bool bli_cntx_l3_sup_tri_ker_prefers_rows_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+{
+	const bool prefs = bli_cntx_get_l3_sup_tri_ker_prefs_dt( dt, stor_id, cntx );
+
+	// A ukernel preference of TRUE means the ukernel prefers row storage.
+	return ( bool )
+	       ( prefs == TRUE );
+}
+
+BLIS_INLINE bool bli_cntx_l3_sup_ker_prefers_cols_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+{
+	const bool prefs = bli_cntx_get_l3_sup_ker_prefs_dt( dt, stor_id, cntx );
+
+	// A ukernel preference of FALSE means the ukernel prefers column storage.
+	return ( bool )
+	       ( prefs == FALSE );
+}
+
+BLIS_INLINE bool bli_cntx_l3_sup_tri_ker_prefers_cols_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+{
+	const bool prefs = bli_cntx_get_l3_sup_tri_ker_prefs_dt( dt, stor_id, cntx );
+
+	// A ukernel preference of FALSE means the ukernel prefers column storage.
+	return ( bool )
+	       ( prefs == FALSE );
+}
+BLIS_INLINE bool bli_cntx_l3_sup_ker_prefers_storage_of( obj_t* obj, stor3_t stor_id, cntx_t* cntx )
+{
+	const num_t dt    = bli_obj_dt( obj );
+	const bool  ukr_prefers_rows
+	                  = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, stor_id, cntx );
+	const bool  ukr_prefers_cols
+	                  = bli_cntx_l3_sup_ker_prefers_cols_dt( dt, stor_id, cntx );
+	bool        r_val = FALSE;
+
+	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
+	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
+
+	return r_val;
+}
+
+BLIS_INLINE bool bli_cntx_l3_sup_ker_dislikes_storage_of( obj_t* obj, stor3_t stor_id, cntx_t* cntx )
+{
+	return ( bool )
+	       !bli_cntx_l3_sup_ker_prefers_storage_of( obj, stor_id, cntx );
+}
+
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE bool bli_cntx_l3_sup_thresh_is_met( obj_t* a, obj_t* b, obj_t* c, cntx_t* cntx )
+{
+	num_t dt = bli_obj_dt( c );
+	dim_t k = bli_obj_width_after_trans( a );
+
+	dim_t m, n;
+
+	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
+
+	// The SUP kernel storage preference should be used to determine
+	// m and n. This ensures right thresholds are check even if native
+	// kernel storage preference is different.
+	if ( bli_cntx_l3_sup_ker_dislikes_storage_of( c, stor_id, cntx ) )
+	{
+		m = bli_obj_width(c);
+		n = bli_obj_length(c);
+	}
+	else
+	{
+		m = bli_obj_length( c );
+		n = bli_obj_width( c );
+
+	}
+
+
+	if(dt == BLIS_DOUBLE)
+	{
+		/**
+		 * In case of both matrices having large strides,
+		 * are to be handled in native path, since native
+		 * path does packing of both matrices by default.
+		 * It helps avoiding huge memory jumps while accessing
+		 * matrices during GEMM computation.
+		 */
+		dim_t  k = bli_obj_width( a );
+		inc_t rs_a = bli_obj_row_stride( a );
+		inc_t cs_a = bli_obj_col_stride( a );
+		inc_t rs_b = bli_obj_row_stride( b );
+		inc_t cs_b = bli_obj_col_stride( b );
+		inc_t stride_a = rs_a > cs_a ? rs_a : cs_a;
+		inc_t stride_b = rs_b > cs_b ? rs_b : cs_b;
+		if( (m > 5000 && n > 700 && k > 120) && (stride_a > 5000 && stride_b > 5000) )
 		{
-			case BLIS_GEMM_VIR_UKR: // fallthrough
-			case BLIS_TRSM_L_VIR_UKR: // fallthrough
-			case BLIS_TRSM_U_VIR_UKR: // fallthrough
-			case BLIS_GEMMTRSM_L_VIR_UKR: // fallthrough
-			case BLIS_GEMMTRSM_U_VIR_UKR: dt = bli_dt_proj_to_real( dt ); break;
-			default: break;
+			return FALSE;
 		}
 	}
 
-	return bli_cntx_get_ukr_prefs_dt( dt, ukr_pref_id, cntx );
-}
 
-BLIS_INLINE bool bli_cntx_ukr_prefers_cols_dt( num_t dt, ukr_t ukr_id, const cntx_t* cntx )
-{
-	return ! bli_cntx_ukr_prefers_rows_dt( dt, ukr_id, cntx );
-}
-
-BLIS_INLINE bool bli_cntx_prefers_storage_of( const obj_t* obj, ukr_t ukr_id, const cntx_t* cntx )
-{
-	const bool ukr_prefers_rows
-		= bli_cntx_ukr_prefers_rows_dt( bli_obj_dt( obj ), ukr_id, cntx );
-
-	if      ( bli_obj_is_row_stored( obj ) &&  ukr_prefers_rows ) return TRUE;
-	else if ( bli_obj_is_col_stored( obj ) && !ukr_prefers_rows ) return TRUE;
+	if ( m < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_MT, cntx ) ) return TRUE;
+	if ( n < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_NT, cntx ) ) return TRUE;
+	if ( k < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_KT, cntx ) ) return TRUE;
 
 	return FALSE;
 }
-
-BLIS_INLINE bool bli_cntx_dislikes_storage_of( const obj_t* obj, ukr_t ukr_id, const cntx_t* cntx )
-{
-	return ! bli_cntx_prefers_storage_of( obj, ukr_id, cntx );
-}
-
-// -----------------------------------------------------------------------------
 
 //
 // -- cntx_t modification (complex) --------------------------------------------
@@ -272,72 +814,90 @@ BLIS_INLINE bool bli_cntx_dislikes_storage_of( const obj_t* obj, ukr_t ukr_id, c
 
 BLIS_INLINE void bli_cntx_set_blksz( bszid_t bs_id, blksz_t* blksz, bszid_t mult_id, cntx_t* cntx )
 {
-	cntx->blkszs[ bs_id ] = *blksz;
-	cntx->bmults[ bs_id ] = mult_id;
+	blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
+	bszid_t* bmults = bli_cntx_bmults_buf( cntx );
+
+	blkszs[ bs_id ] = *blksz;
+	bmults[ bs_id ] = mult_id;
 }
 
 BLIS_INLINE void bli_cntx_set_blksz_def_dt( num_t dt, bszid_t bs_id, dim_t bs, cntx_t* cntx )
 {
-	bli_blksz_set_def( bs, dt, &cntx->blkszs[ bs_id ] );
+	blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
+	blksz_t* blksz  = &blkszs[ bs_id ];
+
+	bli_blksz_set_def( bs, dt, blksz );
 }
 
 BLIS_INLINE void bli_cntx_set_blksz_max_dt( num_t dt, bszid_t bs_id, dim_t bs, cntx_t* cntx )
 {
-	bli_blksz_set_max( bs, dt, &cntx->blkszs[ bs_id ]);
+	blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
+	blksz_t* blksz  = &blkszs[ bs_id ];
+
+	bli_blksz_set_max( bs, dt, blksz );
 }
 
-BLIS_INLINE void bli_cntx_set_ukr( ukr_t ukr_id, const func_t* func, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_l3_vir_ukr( l3ukr_t ukr_id, func_t* func, cntx_t* cntx )
 {
-	cntx->ukrs[ ukr_id ] = *func;
+	func_t* funcs = bli_cntx_l3_vir_ukrs_buf( cntx );
+
+	funcs[ ukr_id ] = *func;
 }
 
-BLIS_INLINE void bli_cntx_set_ukr_dt( void_fp fp, num_t dt, ukr_t ker_id, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_l3_nat_ukr( l3ukr_t ukr_id, func_t* func, cntx_t* cntx )
 {
-	bli_func_set_dt( fp, dt, &cntx->ukrs[ ker_id ] );
+	func_t* funcs = bli_cntx_l3_nat_ukrs_buf( cntx );
+
+	funcs[ ukr_id ] = *func;
 }
 
-BLIS_INLINE void bli_cntx_set_ukr_pref( ukr_pref_t ukr_id, mbool_t* prefs, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_l3_nat_ukr_prefs( l3ukr_t ukr_id, mbool_t* prefs, cntx_t* cntx )
 {
-	cntx->ukr_prefs[ ukr_id ] = *prefs;
+	mbool_t* mbools = bli_cntx_l3_nat_ukrs_prefs_buf( cntx );
+
+	mbools[ ukr_id ] = *prefs;
 }
 
-BLIS_INLINE void_fp bli_cntx_get_l3_sup_ker_dt( num_t dt, stor3_t stor_id, const cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_l1f_ker( l1fkr_t ker_id, func_t* func, cntx_t* cntx )
 {
-	ukr_t ukr_id = bli_stor3_ukr( stor_id );
+	func_t* funcs = bli_cntx_l1f_kers_buf( cntx );
 
-	return bli_cntx_get_ukr_dt( dt, ukr_id, cntx );
+	funcs[ ker_id ] = *func;
 }
 
-BLIS_INLINE dim_t bli_cntx_get_l3_sup_blksz_def_dt( num_t dt, bszid_t bs_id, const cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_l1v_ker( l1vkr_t ker_id, func_t* func, cntx_t* cntx )
 {
-	switch ( bs_id )
-	{
-		case BLIS_MR: bs_id = BLIS_MR_SUP; break;
-		case BLIS_NR: bs_id = BLIS_NR_SUP; break;
-		case BLIS_KR: bs_id = BLIS_KR_SUP; break;
-		case BLIS_MC: bs_id = BLIS_MC_SUP; break;
-		case BLIS_NC: bs_id = BLIS_NC_SUP; break;
-		case BLIS_KC: bs_id = BLIS_KC_SUP; break;
-		default: break;
-	};
+	func_t* funcs = bli_cntx_l1v_kers_buf( cntx );
 
-	return bli_cntx_get_blksz_def_dt( dt, bs_id, cntx );
+	funcs[ ker_id ] = *func;
 }
 
-BLIS_INLINE dim_t bli_cntx_get_l3_sup_blksz_max_dt( num_t dt, bszid_t bs_id, const cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_packm_ker( l1mkr_t ker_id, func_t* func, cntx_t* cntx )
 {
-	switch ( bs_id )
-	{
-		case BLIS_MR: bs_id = BLIS_MR_SUP; break;
-		case BLIS_NR: bs_id = BLIS_NR_SUP; break;
-		case BLIS_KR: bs_id = BLIS_KR_SUP; break;
-		case BLIS_MC: bs_id = BLIS_MC_SUP; break;
-		case BLIS_NC: bs_id = BLIS_NC_SUP; break;
-		case BLIS_KC: bs_id = BLIS_KC_SUP; break;
-		default: break;
-	};
+	func_t* funcs = bli_cntx_get_packm_kers( ker_id, cntx );
 
-	return bli_cntx_get_blksz_max_dt( dt, bs_id, cntx );
+	funcs[ ker_id ] = *func;
+}
+
+BLIS_INLINE void bli_cntx_set_packm_ker_dt( void_fp fp, num_t dt, l1mkr_t ker_id, cntx_t* cntx )
+{
+	func_t* func = ( func_t* )bli_cntx_get_packm_kers( ker_id, cntx );
+
+	bli_func_set_dt( fp, dt, func );
+}
+
+BLIS_INLINE void bli_cntx_set_unpackm_ker( l1mkr_t ker_id, func_t* func, cntx_t* cntx )
+{
+	func_t* funcs = bli_cntx_get_unpackm_kers( ker_id, cntx );
+
+	funcs[ ker_id ] = *func;
+}
+
+BLIS_INLINE void bli_cntx_set_unpackm_ker_dt( void_fp fp, num_t dt, l1mkr_t ker_id, cntx_t* cntx )
+{
+	func_t* func = ( func_t* )bli_cntx_get_unpackm_kers( ker_id, cntx );
+
+	bli_func_set_dt( fp, dt, func );
 }
 
 // -----------------------------------------------------------------------------
@@ -346,16 +906,28 @@ BLIS_INLINE dim_t bli_cntx_get_l3_sup_blksz_max_dt( num_t dt, bszid_t bs_id, con
 
 BLIS_EXPORT_BLIS void bli_cntx_clear( cntx_t* cntx );
 
-BLIS_EXPORT_BLIS void bli_cntx_set_blkszs( cntx_t* cntx, ... );
+BLIS_EXPORT_BLIS void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... );
 
-BLIS_EXPORT_BLIS void bli_cntx_set_ind_blkszs( ind_t method, num_t dt, cntx_t* cntx, ... );
+BLIS_EXPORT_BLIS void bli_cntx_set_trsm_blkszs( dim_t n_bs, ... );
 
-BLIS_EXPORT_BLIS void bli_cntx_set_ukrs( cntx_t* cntx, ... );
-BLIS_EXPORT_BLIS void bli_cntx_set_ukr_prefs( cntx_t* cntx, ... );
+BLIS_EXPORT_BLIS void bli_cntx_set_ind_blkszs( ind_t method, num_t dt, dim_t n_bs, ... );
 
-BLIS_EXPORT_BLIS void bli_cntx_print( const cntx_t* cntx );
+BLIS_EXPORT_BLIS void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... );
+BLIS_EXPORT_BLIS void bli_cntx_set_l3_vir_ukrs( dim_t n_ukrs, ... );
 
-BLIS_EXPORT_BLIS void bli_cntx_set_l3_sup_handlers( cntx_t* cntx, ... );
+BLIS_EXPORT_BLIS void bli_cntx_set_l3_sup_thresh( dim_t n_thresh, ... );
+BLIS_EXPORT_BLIS void bli_cntx_set_l3_sup_handlers( dim_t n_ops, ... );
+BLIS_EXPORT_BLIS void bli_cntx_set_l3_sup_blkszs( dim_t n_bs, ... );
+BLIS_EXPORT_BLIS void bli_cntx_set_l3_sup_tri_blkszs( dim_t n_bs, ... );
+BLIS_EXPORT_BLIS void bli_cntx_set_l3_sup_kers( dim_t n_ukrs, ... );
+BLIS_EXPORT_BLIS void bli_cntx_set_l3_sup_tri_kers( dim_t n_ukrs, ... );
+
+BLIS_EXPORT_BLIS void bli_cntx_set_l1f_kers( dim_t n_kers, ... );
+BLIS_EXPORT_BLIS void bli_cntx_set_l1v_kers( dim_t n_kers, ... );
+BLIS_EXPORT_BLIS void bli_cntx_set_packm_kers( dim_t n_kers, ... );
+BLIS_EXPORT_BLIS void bli_cntx_set_l3_thresh_funcs( dim_t n_funcs, ... );
+
+BLIS_EXPORT_BLIS void bli_cntx_print( cntx_t* cntx );
 
 
 #endif

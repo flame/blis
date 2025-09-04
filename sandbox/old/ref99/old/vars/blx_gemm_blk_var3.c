@@ -73,14 +73,14 @@ void blx_gemm_blk_var3
 		  bli_thrinfo_sub_node( thread )
 		);
 
-		bli_thrinfo_barrier( bli_thrinfo_sub_node( thread ) );
+		bli_thread_barrier( bli_thrinfo_sub_node( thread ) );
 
 		// This variant executes multiple rank-k updates. Therefore, if the
 		// internal beta scalar on matrix C is non-zero, we must use it
 		// only for the first iteration (and then BLIS_ONE for all others).
 		// And since c is a locally aliased obj_t, we can simply overwrite
 		// the internal beta scalar with BLIS_ONE once it has been used in
-		// the first iteration.
+		// the first iteration. 
 		if ( i == 0 ) bli_obj_scalar_reset( c );
 	}
 }

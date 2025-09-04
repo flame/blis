@@ -249,9 +249,13 @@ static int rd_F(ufloat *p, int w, int d, ftnlen len)
 		}
 	while(ch == ' ') {
 blankdrop:
-		if (!w--) goto zero; GET(ch); }
-	while(ch == '0')
-		{ if (!w--) goto zero; GET(ch); }
+		if (!w--) goto zero;
+		GET(ch);
+	}
+	while(ch == '0') {
+		if (!w--) goto zero;
+		GET(ch);
+	}
 	if (ch == ' ' && f__cblank)
 		goto blankdrop;
 	scale1 = f__scale;
@@ -262,7 +266,7 @@ digloop1:
 digloop1e:
 		if (!w--) goto done;
 		GET(ch);
-		}
+	}
 	if (ch == ' ') {
 		if (f__cblank)
 			{ ch = '0'; goto digloop1; }

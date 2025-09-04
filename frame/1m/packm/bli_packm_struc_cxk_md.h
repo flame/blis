@@ -37,28 +37,21 @@
 \
 void PASTEMAC2(chc,chp,varname) \
      ( \
-       struc_t  strucc, \
-       diag_t   diagc, \
-       uplo_t   uploc, \
-       conj_t   conjc, \
-       pack_t   schema, \
-       bool     invdiag, \
-       dim_t    panel_dim, \
-       dim_t    panel_len, \
-       dim_t    panel_dim_max, \
-       dim_t    panel_len_max, \
-       dim_t    panel_dim_off, \
-       dim_t    panel_len_off, \
-       ctype_p* kappa, \
-       ctype_c* c, inc_t incc, inc_t ldc, \
-       ctype_p* p,             inc_t ldp, \
-                   inc_t is_p, \
-       void*    params, \
-       cntx_t*  cntx  \
+       conj_t            conjc, \
+       pack_t            schema, \
+       dim_t             m_panel, \
+       dim_t             n_panel, \
+       dim_t             m_panel_max, \
+       dim_t             n_panel_max, \
+       ctype_p* restrict kappa, \
+       ctype_c* restrict c, inc_t rs_c, inc_t cs_c, \
+       ctype_p* restrict p, inc_t rs_p, inc_t cs_p, \
+                            inc_t is_p, \
+       cntx_t*           cntx  \
      );
 
-INSERT_GENTPROT2_BASIC( packm_struc_cxk_md )
-INSERT_GENTPROT2_MIX_DP( packm_struc_cxk_md )
+INSERT_GENTPROT2_BASIC0( packm_struc_cxk_md )
+INSERT_GENTPROT2_MIXDP0( packm_struc_cxk_md )
 
 
 #undef  GENTPROT2
@@ -66,17 +59,17 @@ INSERT_GENTPROT2_MIX_DP( packm_struc_cxk_md )
 \
 void PASTEMAC2(cha,chp,opname) \
      ( \
-       conj_t   conja, \
-       dim_t    m, \
-       dim_t    n, \
-       ctype_p* kappa, \
-       ctype_a* a, inc_t inca, inc_t lda, \
-       ctype_p* p,             inc_t ldp  \
+       conj_t            conja, \
+       dim_t             m, \
+       dim_t             n, \
+       ctype_p* restrict kappa, \
+       ctype_a* restrict a, inc_t inca, inc_t lda, \
+       ctype_p* restrict p,             inc_t ldp  \
      );
 
-INSERT_GENTPROT2_BASIC( packm_cxk_1e_md )
-INSERT_GENTPROT2_MIX_DP( packm_cxk_1e_md )
+INSERT_GENTPROT2_BASIC0( packm_cxk_1e_md )
+INSERT_GENTPROT2_MIXDP0( packm_cxk_1e_md )
 
-INSERT_GENTPROT2_BASIC( packm_cxk_1r_md )
-INSERT_GENTPROT2_MIX_DP( packm_cxk_1r_md )
+INSERT_GENTPROT2_BASIC0( packm_cxk_1r_md )
+INSERT_GENTPROT2_MIXDP0( packm_cxk_1r_md )
 

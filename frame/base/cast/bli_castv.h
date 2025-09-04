@@ -38,8 +38,8 @@
 
 BLIS_EXPORT_BLIS void bli_castv
      (
-       const obj_t* x,
-       const obj_t* y
+       obj_t* x,
+       obj_t* y
      );
 
 //
@@ -51,14 +51,14 @@ BLIS_EXPORT_BLIS void bli_castv
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(chx,chy,opname) \
      ( \
-             conj_t conjx, \
-             dim_t  n, \
-       const void*  x, inc_t incx, \
-             void*  y, inc_t incy  \
+       conj_t  conjx, \
+       dim_t   n, \
+       void*   x, inc_t incx, \
+       void*   y, inc_t incy  \
      );
 
-INSERT_GENTPROT2_BASIC( castv )
-INSERT_GENTPROT2_MIX_DP( castv )
+INSERT_GENTPROT2_BASIC0( castv )
+INSERT_GENTPROT2_MIXDP0( castv )
 
 //
 // Prototype object-based _check() function.
@@ -66,7 +66,7 @@ INSERT_GENTPROT2_MIX_DP( castv )
 
 void bli_castv_check
      (
-       const obj_t* x,
-       const obj_t* y
+       obj_t* x,
+       obj_t* y
      );
 

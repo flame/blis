@@ -45,37 +45,41 @@ typedef union
 
 void bli_daxpy2v_penryn_int
      (
-             conj_t  conjx,
-             conj_t  conjy,
-             dim_t   n,
-       const void*   alphax,
-       const void*   alphay,
-       const void*   x, inc_t incx,
-       const void*   y, inc_t incy,
-             void*   z, inc_t incz,
-       const cntx_t* cntx
+       conj_t           conjx,
+       conj_t           conjy,
+       dim_t            n,
+       double* restrict alpha,
+       double* restrict beta,
+       double* restrict x, inc_t incx,
+       double* restrict y, inc_t incy,
+       double* restrict z, inc_t incz,
+       cntx_t* restrict cntx
      )
 {
-	const double*  restrict alphax_cast = alphax;
-	const double*  restrict alphay_cast = alphay;
-	const double*  restrict x_cast      = x;
-	const double*  restrict y_cast      = y;
-	      double*  restrict z_cast      = z;
+	double*  restrict alpha_cast  = alpha;
+	double*  restrict beta_cast   = beta;
+	double*  restrict x_cast      = x;
+	double*  restrict y_cast      = y;
+	double*  restrict z_cast      = z;
+	dim_t             i;
 
-	const dim_t             n_elem_per_reg = 2;
-	const dim_t             n_iter_unroll  = 4;
+	const dim_t       n_elem_per_reg = 2;
+	const dim_t       n_iter_unroll  = 4;
 
-	      dim_t             n_pre;
-	      dim_t             n_run;
-	      dim_t             n_left;
+	dim_t             n_pre;
+	dim_t             n_run;
+	dim_t             n_left;
 
-	      double            alphaxc, alphayc, x1c, y1c;
+	double*  restrict x1;
+	double*  restrict y1;
+	double*  restrict z1;
+	double            alphac, betac, x1c, y1c;
 
-	      v2df_t            alphaxv, alphayv;
-	      v2df_t            x1v, y1v, z1v;
-	      v2df_t            x2v, y2v, z2v;
+	v2df_t            alphav, betav;
+	v2df_t            x1v, y1v, z1v;
+	v2df_t            x2v, y2v, z2v;
 
-	      bool              use_ref = FALSE;
+	bool              use_ref = FALSE;
 
 
 	if ( bli_zero_dim1( n ) ) return;
@@ -106,23 +110,20 @@ void bli_daxpy2v_penryn_int
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		#if 0
-		axpy2v_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPY2V_KER, cntx );
+		daxpy2v_ker_ft f = bli_cntx_get_l1f_ker_dt( BLIS_DOUBLE, BLIS_AXPY2V_KER, cntx );
 
 		f
 		(
 		  conjx,
 		  conjy,
 		  n,
-		  alphax,
-		  alphay,
+		  alpha,
+		  beta,
 		  x, incx,
 		  y, incy,
 		  z, incz,
 		  cntx
 		);
-		#endif
-		bli_abort();
 		return;
 	}
 
@@ -130,31 +131,51 @@ void bli_daxpy2v_penryn_int
 	n_run       = ( n - n_pre ) / ( n_elem_per_reg * n_iter_unroll );
 	n_left      = ( n - n_pre ) % ( n_elem_per_reg * n_iter_unroll );
 
-	alphaxc = *alphax_cast;
-	alphayc = *alphay_cast;
+	alphac = *alpha_cast;
+	betac  = *beta_cast;
 
-	const double* restrict x1 = x_cast;
-	const double* restrict y1 = y_cast;
-	      double* restrict z1 = z_cast;
+	x1 = x_cast;
+	y1 = y_cast;
+	z1 = z_cast;
 
 	if ( n_pre == 1 )
 	{
 		x1c = *x1;
 		y1c = *y1;
 
-		*z1 += alphaxc * x1c +
-		       alphayc * y1c;
+		*z1 += alphac * x1c +
+		       betac  * y1c;
 
 		x1 += incx;
 		y1 += incy;
 		z1 += incz;
 	}
 
-	alphaxv.v = _mm_loaddup_pd( ( double* )alphax_cast );
-	alphayv.v = _mm_loaddup_pd( ( double* )alphay_cast );
+	alphav.v = _mm_loaddup_pd( ( double* )alpha_cast );
+	betav.v  = _mm_loaddup_pd( ( double* )beta_cast );
 
-	for ( dim_t i = 0; i < n_run; ++i )
+	for ( i = 0; i < n_run; ++i )
 	{
+/*
+		z1v.v = _mm_load_pd( ( double* )z1 + 0*n_elem_per_reg );
+		x1v.v = _mm_load_pd( ( double* )x1 + 0*n_elem_per_reg );
+		y1v.v = _mm_load_pd( ( double* )y1 + 0*n_elem_per_reg );
+
+		z1v.v += alphav.v * x1v.v;
+		z1v.v += betav.v  * y1v.v;
+
+		_mm_store_pd( ( double* )(z1 + 0*n_elem_per_reg ), z1v.v );
+
+		z1v.v = _mm_load_pd( ( double* )z1 + 1*n_elem_per_reg );
+		x1v.v = _mm_load_pd( ( double* )x1 + 1*n_elem_per_reg );
+		y1v.v = _mm_load_pd( ( double* )y1 + 1*n_elem_per_reg );
+
+		z1v.v += alphav.v * x1v.v;
+		z1v.v += betav.v  * y1v.v;
+
+		_mm_store_pd( ( double* )(z1 + 1*n_elem_per_reg ), z1v.v );
+*/
+/*
 		z1v.v = _mm_load_pd( ( double* )z1 + 0*n_elem_per_reg );
 		x1v.v = _mm_load_pd( ( double* )x1 + 0*n_elem_per_reg );
 		y1v.v = _mm_load_pd( ( double* )y1 + 0*n_elem_per_reg );
@@ -163,8 +184,26 @@ void bli_daxpy2v_penryn_int
 		x2v.v = _mm_load_pd( ( double* )x1 + 1*n_elem_per_reg );
 		y2v.v = _mm_load_pd( ( double* )y1 + 1*n_elem_per_reg );
 
-		z1v.v += alphaxv.v * x1v.v;
-		z1v.v += alphayv.v  * y1v.v;
+		z1v.v += alphav.v * x1v.v;
+		z1v.v += betav.v  * y1v.v;
+
+		_mm_store_pd( ( double* )(z1 + 0*n_elem_per_reg ), z1v.v );
+
+		z2v.v += alphav.v * x2v.v;
+		z2v.v += betav.v  * y2v.v;
+
+		_mm_store_pd( ( double* )(z1 + 1*n_elem_per_reg ), z2v.v );
+*/
+		z1v.v = _mm_load_pd( ( double* )z1 + 0*n_elem_per_reg );
+		x1v.v = _mm_load_pd( ( double* )x1 + 0*n_elem_per_reg );
+		y1v.v = _mm_load_pd( ( double* )y1 + 0*n_elem_per_reg );
+
+		z2v.v = _mm_load_pd( ( double* )z1 + 1*n_elem_per_reg );
+		x2v.v = _mm_load_pd( ( double* )x1 + 1*n_elem_per_reg );
+		y2v.v = _mm_load_pd( ( double* )y1 + 1*n_elem_per_reg );
+
+		z1v.v += alphav.v * x1v.v;
+		z1v.v += betav.v  * y1v.v;
 
 		_mm_store_pd( ( double* )(z1 + 0*n_elem_per_reg ), z1v.v );
 
@@ -172,8 +211,8 @@ void bli_daxpy2v_penryn_int
 		x1v.v = _mm_load_pd( ( double* )x1 + 2*n_elem_per_reg );
 		y1v.v = _mm_load_pd( ( double* )y1 + 2*n_elem_per_reg );
 
-		z2v.v += alphaxv.v * x2v.v;
-		z2v.v += alphayv.v  * y2v.v;
+		z2v.v += alphav.v * x2v.v;
+		z2v.v += betav.v  * y2v.v;
 
 		_mm_store_pd( ( double* )(z1 + 1*n_elem_per_reg ), z2v.v );
 
@@ -181,13 +220,13 @@ void bli_daxpy2v_penryn_int
 		x2v.v = _mm_load_pd( ( double* )x1 + 3*n_elem_per_reg );
 		y2v.v = _mm_load_pd( ( double* )y1 + 3*n_elem_per_reg );
 
-		z1v.v += alphaxv.v * x1v.v;
-		z1v.v += alphayv.v  * y1v.v;
+		z1v.v += alphav.v * x1v.v;
+		z1v.v += betav.v  * y1v.v;
 
 		_mm_store_pd( ( double* )(z1 + 2*n_elem_per_reg ), z1v.v );
 
-		z2v.v += alphaxv.v * x2v.v;
-		z2v.v += alphayv.v  * y2v.v;
+		z2v.v += alphav.v * x2v.v;
+		z2v.v += betav.v  * y2v.v;
 
 		_mm_store_pd( ( double* )(z1 + 3*n_elem_per_reg ), z2v.v );
 
@@ -200,13 +239,13 @@ void bli_daxpy2v_penryn_int
 
 	if ( n_left > 0 )
 	{
-		for ( dim_t i = 0; i < n_left; ++i )
+		for ( i = 0; i < n_left; ++i )
 		{
 			x1c = *x1;
 			y1c = *y1;
 
-			*z1 += alphaxc * x1c +
-			       alphayc * y1c;
+			*z1 += alphac * x1c +
+			       betac  * y1c;
 
 			x1 += incx;
 			y1 += incy;

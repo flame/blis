@@ -291,6 +291,47 @@ cblas_axpy(
     cblas_zaxpy( n, &alpha, x, incx, y, incy );
 }
 
+//------------------------------------------------------------------------------
+inline void
+cblas_axpby(
+    int n, float alpha,
+    const float *x, int incx,
+    float       beta,
+    float       *y, int incy)
+{
+    cblas_saxpby(n, alpha, x, incx, beta, y, incy);
+}
+
+inline void
+cblas_axpby(
+    int n, double alpha,
+    const double *x, int incx,
+    double       beta,
+    double       *y, int incy)
+{
+    cblas_daxpby(n, alpha, x, incx, beta, y, incy);
+}
+
+inline void
+cblas_axpby(
+    int n, std::complex<float> alpha,
+    std::complex<float> const *x, int incx,
+    std::complex<float>       beta,
+    std::complex<float>*      y, int incy)
+{
+    cblas_caxpby(n, &alpha, x, incx, &beta, y, incy);
+}
+
+inline void
+cblas_axpby(
+    int n, std::complex<double> alpha,
+    std::complex<double> const *x, int incx,
+    std::complex<double>       beta,
+    std::complex<double>*      y, int incy)
+{
+    cblas_zaxpby(n, &alpha, x, incx, &beta, y, incy);
+}
+
 // -----------------------------------------------------------------------------
 inline float
 cblas_dot(

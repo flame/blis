@@ -39,16 +39,14 @@
 \
 void PASTEMAC(ch,opname) \
      ( \
-             dim_t      m, \
-             dim_t      n, \
-             dim_t      k, \
-       const ctype*     alpha, \
-       const ctype*     a, \
-       const ctype*     b, \
-       const ctype*     beta, \
-             ctype*     c, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
+       dim_t               k, \
+       ctype*     restrict alpha, \
+       ctype*     restrict a, \
+       ctype*     restrict b, \
+       ctype*     restrict beta, \
+       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
      ) \
 { \
 	bli_init_once(); \
@@ -57,25 +55,22 @@ void PASTEMAC(ch,opname) \
 \
 	/* Query the context for the function address of the current
 	   datatype's micro-kernel. */ \
-	PASTECH(tname,_ukr_ft) f = bli_cntx_get_l3_vir_ukr_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,tname,_ukr_ft) f = bli_cntx_get_l3_vir_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the typed function for the given datatype. */ \
-	f \
-	( \
-	  m, \
-	  n, \
-	  k, \
-	  alpha, \
-	  a, \
-	  b, \
-	  beta, \
-	  c, rs_c, cs_c, \
-	  data, \
-	  cntx  \
-	); \
+	f( \
+	   k, \
+	   alpha, \
+	   a, \
+	   b, \
+	   beta, \
+	   c, rs_c, cs_c, \
+	   data, \
+	   cntx  \
+	 ); \
 } \
 
-INSERT_GENTFUNC_BASIC( gemm_ukernel, gemm, BLIS_GEMM_UKR )
+INSERT_GENTFUNC_BASIC2( gemm_ukernel, gemm, BLIS_GEMM_UKR )
 
 
 #undef  GENTFUNC
@@ -83,17 +78,15 @@ INSERT_GENTFUNC_BASIC( gemm_ukernel, gemm, BLIS_GEMM_UKR )
 \
 void PASTEMAC(ch,opname) \
      ( \
-             dim_t      m, \
-             dim_t      n, \
-             dim_t      k, \
-       const ctype*     alpha, \
-       const ctype*     a1x, \
-       const ctype*     a11, \
-       const ctype*     bx1, \
-             ctype*     b11, \
-             ctype*     c11, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
+       dim_t               k, \
+       ctype*     restrict alpha, \
+       ctype*     restrict a1x, \
+       ctype*     restrict a11, \
+       ctype*     restrict bx1, \
+       ctype*     restrict b11, \
+       ctype*     restrict c11, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
      ) \
 { \
 	bli_init_once(); \
@@ -102,27 +95,24 @@ void PASTEMAC(ch,opname) \
 \
 	/* Query the context for the function address of the current
 	   datatype's micro-kernel. */ \
-	PASTECH(tname,_ukr_ft) f = bli_cntx_get_l3_vir_ukr_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,tname,_ukr_ft) f = bli_cntx_get_l3_vir_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the typed function for the given datatype. */ \
-	f \
-	( \
-	  m, \
-	  n, \
-	  k, \
-	  alpha, \
-	  a1x, \
-	  a11, \
-	  bx1, \
-	  b11, \
-	  c11, rs_c, cs_c, \
-	  data, \
-	  cntx  \
-	); \
+	f( \
+	   k, \
+	   alpha, \
+	   a1x, \
+	   a11, \
+	   bx1, \
+	   b11, \
+	   c11, rs_c, cs_c, \
+	   data, \
+	   cntx  \
+	 ); \
 } \
 
-INSERT_GENTFUNC_BASIC( gemmtrsm_l_ukernel, gemmtrsm, BLIS_GEMMTRSM_L_UKR )
-INSERT_GENTFUNC_BASIC( gemmtrsm_u_ukernel, gemmtrsm, BLIS_GEMMTRSM_U_UKR )
+INSERT_GENTFUNC_BASIC2( gemmtrsm_l_ukernel, gemmtrsm, BLIS_GEMMTRSM_L_UKR )
+INSERT_GENTFUNC_BASIC2( gemmtrsm_u_ukernel, gemmtrsm, BLIS_GEMMTRSM_U_UKR )
 
 
 #undef  GENTFUNC
@@ -130,11 +120,11 @@ INSERT_GENTFUNC_BASIC( gemmtrsm_u_ukernel, gemmtrsm, BLIS_GEMMTRSM_U_UKR )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       const ctype*     a, \
-             ctype*     b, \
-             ctype*     c, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
+       ctype*     restrict a, \
+       ctype*     restrict b, \
+       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
      ) \
 { \
 	bli_init_once(); \
@@ -143,19 +133,18 @@ void PASTEMAC(ch,opname) \
 \
 	/* Query the context for the function address of the current
 	   datatype's micro-kernel. */ \
-	PASTECH(tname,_ukr_ft) f = bli_cntx_get_l3_vir_ukr_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,tname,_ukr_ft) f = bli_cntx_get_l3_vir_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the typed function for the given datatype. */ \
-	f \
-	( \
-	  a, \
-	  b, \
-	  c, rs_c, cs_c, \
-	  data, \
-	  cntx  \
-	); \
+	f( \
+	   a, \
+	   b, \
+	   c, rs_c, cs_c, \
+	   data, \
+	   cntx  \
+	 ); \
 } \
 
-INSERT_GENTFUNC_BASIC( trsm_l_ukernel, trsm, BLIS_TRSM_L_UKR )
-INSERT_GENTFUNC_BASIC( trsm_u_ukernel, trsm, BLIS_TRSM_U_UKR )
+INSERT_GENTFUNC_BASIC2( trsm_l_ukernel, trsm, BLIS_TRSM_L_UKR )
+INSERT_GENTFUNC_BASIC2( trsm_u_ukernel, trsm, BLIS_TRSM_U_UKR )
 

@@ -69,11 +69,6 @@ static real c_b63 = 0.f;
 /*  ===================================================================== */
 /* Main program */ int main(void)
 {
-#ifdef BLIS_ENABLE_HPX
-    char* program = "sblat1";
-    bli_thread_initialize_hpx( 1, &program );
-#endif
-
     /* Initialized data */
 
     static real sfac = 9.765625e-4f;
@@ -128,11 +123,11 @@ static real c_b63 = 0.f;
 	combla_1.incy = 9999;
 	if (combla_1.icase == 3 || combla_1.icase == 11) {
 	    check0_(&sfac);
-	} else if (combla_1.icase == 7 || combla_1.icase == 8 ||
+	} else if (combla_1.icase == 7 || combla_1.icase == 8 || 
 		combla_1.icase == 9 || combla_1.icase == 10) {
 	    check1_(&sfac);
-	} else if (combla_1.icase == 1 || combla_1.icase == 2 ||
-		combla_1.icase == 5 || combla_1.icase == 6 || combla_1.icase
+	} else if (combla_1.icase == 1 || combla_1.icase == 2 || 
+		combla_1.icase == 5 || combla_1.icase == 6 || combla_1.icase 
 		== 12 || combla_1.icase == 13) {
 	    check2_(&sfac);
 	} else if (combla_1.icase == 4) {
@@ -147,12 +142,7 @@ static real c_b63 = 0.f;
     }
     s_stop("", (ftnlen)0);
 
-#ifdef BLIS_ENABLE_HPX
-    return bli_thread_finalize_hpx();
-#else
-	// Return peacefully.
-	return 0;
-#endif
+    return 0;
 } /* main */
 
 /* Subroutine */ int header_(void)
@@ -212,16 +202,16 @@ static real c_b63 = 0.f;
     static real dc1[8] = { .6f,.8f,-.6f,.8f,.6f,1.f,0.f,1.f };
 
     /* Builtin functions */
-    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen),
+    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
 	    e_wsle(void);
     /* Subroutine */ int s_stop(char *, ftnlen);
 
     /* Local variables */
     integer i__, k;
     real sa, sb, sc, ss, dtemp[9];
-    extern /* Subroutine */ int srotg_(real *, real *, real *, real *),
+    extern /* Subroutine */ int srotg_(real *, real *, real *, real *), 
 	    stest_(integer *, real *, real *, real *, real *), stest1_(real *,
-	     real *, real *, real *), srotmg_(real *, real *, real *, real *,
+	     real *, real *, real *), srotmg_(real *, real *, real *, real *, 
 	    real *);
 
     /* Fortran I/O blocks */
@@ -332,7 +322,7 @@ L40:
     real r__1;
 
     /* Builtin functions */
-    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen),
+    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
 	    e_wsle(void);
     /* Subroutine */ int s_stop(char *, ftnlen);
 
@@ -345,8 +335,8 @@ L40:
     real stemp[1];
     extern real sasum_(integer *, real *, integer *);
     real strue[8];
-    extern /* Subroutine */ int stest_(integer *, real *, real *, real *,
-	    real *), itest1_(integer *, integer *), stest1_(real *, real *,
+    extern /* Subroutine */ int stest_(integer *, real *, real *, real *, 
+	    real *), itest1_(integer *, integer *), stest1_(real *, real *, 
 	    real *, real *);
     extern integer isamax_(integer *, real *, integer *);
 
@@ -388,11 +378,11 @@ L40:
 		stest1_(&r__1, stemp, stemp, sfac);
 	    } else if (combla_1.icase == 9) {
 /*              .. SSCAL .. */
-		sscal_(&combla_1.n, &sa[(combla_1.incx - 1) * 5 + np1 - 1],
+		sscal_(&combla_1.n, &sa[(combla_1.incx - 1) * 5 + np1 - 1], 
 			sx, &combla_1.incx);
 		i__1 = len;
 		for (i__ = 1; i__ <= i__1; ++i__) {
-		    strue[i__ - 1] = dtrue5[i__ + (np1 + combla_1.incx * 5 <<
+		    strue[i__ - 1] = dtrue5[i__ + (np1 + combla_1.incx * 5 << 
 			    3) - 49];
 /* L40: */
 		}
@@ -465,87 +455,87 @@ L40:
 	    ;
     static struct {
 	real e_1[448];
-	} equiv_3 = {{ .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, 0.f, 0.f, 0.f,
-		0.f, 0.f, 0.f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, 0.f,
-		0.f, 0.f, 0.f, 0.f, 0.f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f,
-		-.8f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, -.9f, 0.f, 0.f, 0.f, 0.f,
-		0.f, 0.f, 3.5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, .1f, 0.f,
+	} equiv_3 = {{ .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, 0.f, 0.f, 0.f, 
+		0.f, 0.f, 0.f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, 0.f, 
+		0.f, 0.f, 0.f, 0.f, 0.f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+		-.8f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, -.9f, 0.f, 0.f, 0.f, 0.f, 
+		0.f, 0.f, 3.5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, .1f, 0.f, 
 		0.f, 0.f, 0.f, 0.f, -.8f, 3.8f, 0.f, 0.f, 0.f, 0.f, 0.f, -.9f,
-		 2.8f, 0.f, 0.f, 0.f, 0.f, 0.f, 3.5f, -.4f, 0.f, 0.f, 0.f,
-		0.f, 0.f, .6f, .1f, -.5f, .8f, 0.f, 0.f, 0.f, -.8f, 3.8f,
-		-2.2f, -1.2f, 0.f, 0.f, 0.f, -.9f, 2.8f, -1.4f, -1.3f, 0.f,
-		0.f, 0.f, 3.5f, -.4f, -2.2f, 4.7f, 0.f, 0.f, 0.f, .6f, 0.f,
-		0.f, 0.f, 0.f, 0.f, 0.f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f,
-		.6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, 0.f, 0.f, 0.f, 0.f,
-		0.f, 0.f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, -.8f, 0.f, 0.f,
-		0.f, 0.f, 0.f, 0.f, -.9f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 3.5f,
-		0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, .1f, -.5f, 0.f, 0.f, 0.f,
+		 2.8f, 0.f, 0.f, 0.f, 0.f, 0.f, 3.5f, -.4f, 0.f, 0.f, 0.f, 
+		0.f, 0.f, .6f, .1f, -.5f, .8f, 0.f, 0.f, 0.f, -.8f, 3.8f, 
+		-2.2f, -1.2f, 0.f, 0.f, 0.f, -.9f, 2.8f, -1.4f, -1.3f, 0.f, 
+		0.f, 0.f, 3.5f, -.4f, -2.2f, 4.7f, 0.f, 0.f, 0.f, .6f, 0.f, 
+		0.f, 0.f, 0.f, 0.f, 0.f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+		.6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, 0.f, 0.f, 0.f, 0.f, 
+		0.f, 0.f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, -.8f, 0.f, 0.f, 
+		0.f, 0.f, 0.f, 0.f, -.9f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 3.5f, 
+		0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, .1f, -.5f, 0.f, 0.f, 0.f, 
 		0.f, 0.f, .1f, -3.f, 0.f, 0.f, 0.f, 0.f, -.3f, .1f, -2.f, 0.f,
 		 0.f, 0.f, 0.f, 3.3f, .1f, -2.f, 0.f, 0.f, 0.f, 0.f, .6f, .1f,
-		 -.5f, .8f, .9f, -.3f, -.4f, -2.f, .1f, 1.4f, .8f, .6f, -.3f,
-		-2.8f, -1.8f, .1f, 1.3f, .8f, 0.f, -.3f, -1.9f, 3.8f, .1f,
-		-3.1f, .8f, 4.8f, -.3f, -1.5f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f,
-		0.f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, 0.f, 0.f, 0.f,
-		0.f, 0.f, 0.f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, 0.f,
-		0.f, 0.f, 0.f, 0.f, 0.f, -.8f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f,
-		-.9f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 3.5f, 0.f, 0.f, 0.f, 0.f,
+		 -.5f, .8f, .9f, -.3f, -.4f, -2.f, .1f, 1.4f, .8f, .6f, -.3f, 
+		-2.8f, -1.8f, .1f, 1.3f, .8f, 0.f, -.3f, -1.9f, 3.8f, .1f, 
+		-3.1f, .8f, 4.8f, -.3f, -1.5f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+		0.f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, 0.f, 0.f, 0.f, 
+		0.f, 0.f, 0.f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, 0.f, 
+		0.f, 0.f, 0.f, 0.f, 0.f, -.8f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+		-.9f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 3.5f, 0.f, 0.f, 0.f, 0.f, 
 		0.f, 0.f, .6f, .1f, -.5f, 0.f, 0.f, 0.f, 0.f, 4.8f, .1f, -3.f,
-		 0.f, 0.f, 0.f, 0.f, 3.3f, .1f, -2.f, 0.f, 0.f, 0.f, 0.f,
+		 0.f, 0.f, 0.f, 0.f, 3.3f, .1f, -2.f, 0.f, 0.f, 0.f, 0.f, 
 		2.1f, .1f, -2.f, 0.f, 0.f, 0.f, 0.f, .6f, .1f, -.5f, .8f, .9f,
 		 -.3f, -.4f, -1.6f, .1f, -2.2f, .8f, 5.4f, -.3f, -2.8f, -1.5f,
-		 .1f, -1.4f, .8f, 3.6f, -.3f, -1.9f, 3.7f, .1f, -2.2f, .8f,
-		3.6f, -.3f, -1.5f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f,
-		0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f,
-		0.f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, 0.f, 0.f, 0.f,
-		0.f, 0.f, 0.f, -.8f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, -.9f, 0.f,
-		0.f, 0.f, 0.f, 0.f, 0.f, 3.5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f,
-		.6f, .1f, 0.f, 0.f, 0.f, 0.f, 0.f, -.8f, -1.f, 0.f, 0.f, 0.f,
+		 .1f, -1.4f, .8f, 3.6f, -.3f, -1.9f, 3.7f, .1f, -2.2f, .8f, 
+		3.6f, -.3f, -1.5f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, 
+		0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+		0.f, .6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .6f, 0.f, 0.f, 0.f, 
+		0.f, 0.f, 0.f, -.8f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, -.9f, 0.f, 
+		0.f, 0.f, 0.f, 0.f, 0.f, 3.5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+		.6f, .1f, 0.f, 0.f, 0.f, 0.f, 0.f, -.8f, -1.f, 0.f, 0.f, 0.f, 
 		0.f, 0.f, -.9f, -.8f, 0.f, 0.f, 0.f, 0.f, 0.f, 3.5f, .8f, 0.f,
 		 0.f, 0.f, 0.f, 0.f, .6f, .1f, -.5f, .8f, 0.f, 0.f, 0.f, -.8f,
-		 -1.f, 1.4f, -1.6f, 0.f, 0.f, 0.f, -.9f, -.8f, 1.3f, -1.6f,
+		 -1.f, 1.4f, -1.6f, 0.f, 0.f, 0.f, -.9f, -.8f, 1.3f, -1.6f, 
 		0.f, 0.f, 0.f, 3.5f, .8f, -3.1f, 4.8f, 0.f, 0.f, 0.f }};
 
     static struct {
 	real e_1[448];
-	} equiv_7 = {{ .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f, 0.f,
-		0.f, 0.f, 0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f, 0.f,
-		0.f, 0.f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f,
-		.7f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.7f, 0.f, 0.f, 0.f, 0.f,
+	} equiv_7 = {{ .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f, 0.f, 
+		0.f, 0.f, 0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f, 0.f, 
+		0.f, 0.f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+		.7f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.7f, 0.f, 0.f, 0.f, 0.f, 
 		0.f, 0.f, -2.6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f, -.9f, 0.f,
-		 0.f, 0.f, 0.f, 0.f, .7f, -4.8f, 0.f, 0.f, 0.f, 0.f, 0.f,
-		1.7f, -.7f, 0.f, 0.f, 0.f, 0.f, 0.f, -2.6f, 3.5f, 0.f, 0.f,
+		 0.f, 0.f, 0.f, 0.f, .7f, -4.8f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+		1.7f, -.7f, 0.f, 0.f, 0.f, 0.f, 0.f, -2.6f, 3.5f, 0.f, 0.f, 
 		0.f, 0.f, 0.f, .5f, -.9f, .3f, .7f, 0.f, 0.f, 0.f, .7f, -4.8f,
-		 3.f, 1.1f, 0.f, 0.f, 0.f, 1.7f, -.7f, -.7f, 2.3f, 0.f, 0.f,
-		0.f, -2.6f, 3.5f, -.7f, -3.6f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f,
-		0.f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f,
-		0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f,
-		0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .7f, 0.f, 0.f, 0.f,
+		 3.f, 1.1f, 0.f, 0.f, 0.f, 1.7f, -.7f, -.7f, 2.3f, 0.f, 0.f, 
+		0.f, -2.6f, 3.5f, -.7f, -3.6f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f, 
+		0.f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f, 
+		0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+		0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .7f, 0.f, 0.f, 0.f, 
 		0.f, 0.f, 0.f, 1.7f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, -2.6f, 0.f,
-		 0.f, 0.f, 0.f, 0.f, 0.f, .5f, -.9f, .3f, 0.f, 0.f, 0.f, 0.f,
-		4.f, -.9f, -.3f, 0.f, 0.f, 0.f, 0.f, -.5f, -.9f, 1.5f, 0.f,
-		0.f, 0.f, 0.f, -1.5f, -.9f, -1.8f, 0.f, 0.f, 0.f, 0.f, .5f,
+		 0.f, 0.f, 0.f, 0.f, 0.f, .5f, -.9f, .3f, 0.f, 0.f, 0.f, 0.f, 
+		4.f, -.9f, -.3f, 0.f, 0.f, 0.f, 0.f, -.5f, -.9f, 1.5f, 0.f, 
+		0.f, 0.f, 0.f, -1.5f, -.9f, -1.8f, 0.f, 0.f, 0.f, 0.f, .5f, 
 		-.9f, .3f, .7f, -.6f, .2f, .8f, 3.7f, -.9f, -1.2f, .7f, -1.5f,
-		 .2f, 2.2f, -.3f, -.9f, 2.1f, .7f, -1.6f, .2f, 2.f, -1.6f,
-		-.9f, -2.1f, .7f, 2.9f, .2f, -3.8f, .5f, 0.f, 0.f, 0.f, 0.f,
-		0.f, 0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f,
-		0.f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f,
-		0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .7f, 0.f, 0.f, 0.f, 0.f, 0.f,
+		 .2f, 2.2f, -.3f, -.9f, 2.1f, .7f, -1.6f, .2f, 2.f, -1.6f, 
+		-.9f, -2.1f, .7f, 2.9f, .2f, -3.8f, .5f, 0.f, 0.f, 0.f, 0.f, 
+		0.f, 0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f, 
+		0.f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f, 
+		0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .7f, 0.f, 0.f, 0.f, 0.f, 0.f, 
 		0.f, 1.7f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, -2.6f, 0.f, 0.f, 0.f,
-		 0.f, 0.f, 0.f, .5f, -.9f, 0.f, 0.f, 0.f, 0.f, 0.f, 4.f,
+		 0.f, 0.f, 0.f, .5f, -.9f, 0.f, 0.f, 0.f, 0.f, 0.f, 4.f, 
 		-6.3f, 0.f, 0.f, 0.f, 0.f, 0.f, -.5f, .3f, 0.f, 0.f, 0.f, 0.f,
-		 0.f, -1.5f, 3.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f, -.9f, .3f,
-		.7f, 0.f, 0.f, 0.f, 3.7f, -7.2f, 3.f, 1.7f, 0.f, 0.f, 0.f,
-		-.3f, .9f, -.7f, 1.9f, 0.f, 0.f, 0.f, -1.6f, 2.7f, -.7f,
-		-3.4f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f,
-		0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f,
-		0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f, 0.f,
-		0.f, 0.f, 0.f, .7f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.7f, 0.f,
-		0.f, 0.f, 0.f, 0.f, 0.f, -2.6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f,
+		 0.f, -1.5f, 3.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f, -.9f, .3f, 
+		.7f, 0.f, 0.f, 0.f, 3.7f, -7.2f, 3.f, 1.7f, 0.f, 0.f, 0.f, 
+		-.3f, .9f, -.7f, 1.9f, 0.f, 0.f, 0.f, -1.6f, 2.7f, -.7f, 
+		-3.4f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f, 
+		0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+		0.f, .5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, .5f, 0.f, 0.f, 0.f, 
+		0.f, 0.f, 0.f, .7f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.7f, 0.f, 
+		0.f, 0.f, 0.f, 0.f, 0.f, -2.6f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 
 		.5f, -.9f, .3f, 0.f, 0.f, 0.f, 0.f, .7f, -.9f, 1.2f, 0.f, 0.f,
-		 0.f, 0.f, 1.7f, -.9f, .5f, 0.f, 0.f, 0.f, 0.f, -2.6f, -.9f,
-		-1.3f, 0.f, 0.f, 0.f, 0.f, .5f, -.9f, .3f, .7f, -.6f, .2f,
-		.8f, .7f, -.9f, 1.2f, .7f, -1.5f, .2f, 1.6f, 1.7f, -.9f, .5f,
-		.7f, -1.6f, .2f, 2.4f, -2.6f, -.9f, -1.3f, .7f, 2.9f, .2f,
+		 0.f, 0.f, 1.7f, -.9f, .5f, 0.f, 0.f, 0.f, 0.f, -2.6f, -.9f, 
+		-1.3f, 0.f, 0.f, 0.f, 0.f, .5f, -.9f, .3f, .7f, -.6f, .2f, 
+		.8f, .7f, -.9f, 1.2f, .7f, -1.5f, .2f, 1.6f, 1.7f, -.9f, .5f, 
+		.7f, -1.6f, .2f, 2.4f, -2.6f, -.9f, -1.3f, .7f, 2.9f, .2f, 
 		-4.f }};
 
 
@@ -554,7 +544,7 @@ L40:
     real r__1;
 
     /* Builtin functions */
-    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen),
+    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
 	    e_wsle(void);
     /* Subroutine */ int s_stop(char *, ftnlen);
 
@@ -578,13 +568,13 @@ L40:
 #define dt19yd ((real *)&equiv_7 + 336)
     integer ksize;
     real ssize[7];
-    extern /* Subroutine */ int scopy_(integer *, real *, integer *, real *,
+    extern /* Subroutine */ int scopy_(integer *, real *, integer *, real *, 
 	    integer *), sswap_(integer *, real *, integer *, real *, integer *
 	    ), stest_(integer *, real *, real *, real *, real *), saxpy_(
 	    integer *, real *, real *, integer *, real *, integer *), srotm_(
 	    integer *, real *, integer *, real *, integer *, real *), stest1_(
 	    real *, real *, real *, real *);
-    extern real sdsdot_(integer *, real *, real *, integer *, real *, integer
+    extern real sdsdot_(integer *, real *, real *, integer *, real *, integer 
 	    *);
 
     /* Fortran I/O blocks */
@@ -637,7 +627,7 @@ L40:
 /*              .. SDOT .. */
 		r__1 = sdot_(&combla_1.n, sx, &combla_1.incx, sy, &
 			combla_1.incy);
-		stest1_(&r__1, &dt7[kn + (ki << 2) - 5], &ssize1[kn - 1],
+		stest1_(&r__1, &dt7[kn + (ki << 2) - 5], &ssize1[kn - 1], 
 			sfac);
 	    } else if (combla_1.icase == 2) {
 /*              .. SAXPY .. */
@@ -674,9 +664,9 @@ L40:
 		    for (i__ = 1; i__ <= 7; ++i__) {
 			sx[i__ - 1] = dx1[i__ - 1];
 			sy[i__ - 1] = dy1[i__ - 1];
-			stx[i__ - 1] = dt19x[i__ + (kpar + (kni << 2)) * 7 -
+			stx[i__ - 1] = dt19x[i__ + (kpar + (kni << 2)) * 7 - 
 				36];
-			sty[i__ - 1] = dt19y[i__ + (kpar + (kni << 2)) * 7 -
+			sty[i__ - 1] = dt19y[i__ + (kpar + (kni << 2)) * 7 - 
 				36];
 		    }
 
@@ -706,7 +696,7 @@ L40:
 /*              .. SDSROT .. */
 		r__1 = sdsdot_(&combla_1.n, &c_b39, sx, &combla_1.incx, sy, &
 			combla_1.incy);
-		stest1_(&r__1, &st7b[kn + (ki << 2) - 5], &ssize3[kn - 1],
+		stest1_(&r__1, &st7b[kn + (ki << 2) - 5], &ssize3[kn - 1], 
 			sfac);
 	    } else {
 		s_wsle(&io___80);
@@ -769,7 +759,7 @@ L40:
 	    1.17f,1.17f,1.17f,1.17f,1.17f,1.17f,1.17f,1.17f,1.17f };
 
     /* Builtin functions */
-    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen),
+    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
 	    e_wsle(void);
     /* Subroutine */ int s_stop(char *, ftnlen);
 
@@ -780,12 +770,12 @@ L40:
     real mwpc[11];
     integer mwpn[11];
     real mwps[11];
-    extern /* Subroutine */ int srot_(integer *, real *, integer *, real *,
+    extern /* Subroutine */ int srot_(integer *, real *, integer *, real *, 
 	    integer *, real *, real *);
     real mwpx[5], mwpy[5];
     integer ksize;
     real copyx[5], copyy[5];
-    extern /* Subroutine */ int stest_(integer *, real *, real *, real *,
+    extern /* Subroutine */ int stest_(integer *, real *, real *, real *, 
 	    real *);
     real mwptx[55]	/* was [11][5] */, mwpty[55]	/* was [11][5] */;
     integer mwpinx[11], mwpiny[11];
@@ -1042,7 +1032,7 @@ L40:
 	sfac)
 {
     real scomp[1], strue[1];
-    extern /* Subroutine */ int stest_(integer *, real *, real *, real *,
+    extern /* Subroutine */ int stest_(integer *, real *, real *, real *, 
 	    real *);
 
 /*     ************************* STEST1 ***************************** */

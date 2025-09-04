@@ -34,112 +34,141 @@
 
 #include "blis.h"
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname, suf ) \
-\
-extern \
-void PASTEMAC2(ch,opname,suf) \
-     ( \
-             uint32_t   k, \
-       const ctype*     alpha, \
-       const ctype*     a, \
-       const ctype*     b, \
-       const ctype*     beta, \
-             ctype*     c, uint32_t rs_c, uint32_t cs_c, \
-             auxinfo_t* data  \
+extern
+void bli_sgemm_armv7a_ker_4x4
+     (
+       uint32_t            k,
+       float*     restrict alpha,
+       float*     restrict a,
+       float*     restrict b,
+       float*     restrict beta,
+       float*     restrict c, uint32_t rs_c, uint32_t cs_c,
+       auxinfo_t* restrict data
      );
-
-GENTPROT( float,    s, gemm_armv7a_ker_, 4x4 )
-GENTPROT( double,   d, gemm_armv7a_ker_, 4x4 )
-GENTPROT( scomplex, c, gemm_armv7a_ker_, 2x2 )
-GENTPROT( dcomplex, z, gemm_armv7a_ker_, 2x2 )
-
-
-
 
 void bli_sgemm_armv7a_asm_4x4
      (
-             dim_t      m,
-             dim_t      n,
-             dim_t      k,
-       const void*      alpha,
-       const void*      a,
-       const void*      b,
-       const void*      beta,
-             void*      c, inc_t rs_c, inc_t cs_c,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       dim_t               k0,
+       float*     restrict alpha,
+       float*     restrict a,
+       float*     restrict b,
+       float*     restrict beta,
+       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-	GEMM_UKR_SETUP_CT_ANY( s, 4, 4, false );
+	uint32_t k    = k0;
+	uint32_t rs_c = rs_c0;
+	uint32_t cs_c = cs_c0;
+
 	bli_sgemm_armv7a_ker_4x4( k, alpha, a, b, beta, c, rs_c, cs_c, data );
-	GEMM_UKR_FLUSH_CT( s );
 }
 
+
+
+extern
+void bli_dgemm_armv7a_ker_4x4
+     (
+       uint32_t            k,
+       double*    restrict alpha,
+       double*    restrict a,
+       double*    restrict b,
+       double*    restrict beta,
+       double*    restrict c, uint32_t rs_c, uint32_t cs_c,
+       auxinfo_t* restrict data
+     );
 
 void bli_dgemm_armv7a_asm_4x4
      (
-             dim_t      m,
-             dim_t      n,
-             dim_t      k,
-       const void*      alpha,
-       const void*      a,
-       const void*      b,
-       const void*      beta,
-             void*      c, inc_t rs_c, inc_t cs_c,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       dim_t               k0,
+       double*    restrict alpha,
+       double*    restrict a,
+       double*    restrict b,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-	GEMM_UKR_SETUP_CT_ANY( d, 4, 4, false );
+	uint32_t k    = k0;
+	uint32_t rs_c = rs_c0;
+	uint32_t cs_c = cs_c0;
+
 	bli_dgemm_armv7a_ker_4x4( k, alpha, a, b, beta, c, rs_c, cs_c, data );
-	GEMM_UKR_FLUSH_CT( d );
 }
 
+
+
+extern
+void bli_cgemm_armv7a_ker_2x2
+     (
+       uint32_t            k,
+       scomplex*  restrict alpha,
+       scomplex*  restrict a,
+       scomplex*  restrict b,
+       scomplex*  restrict beta,
+       scomplex*  restrict c, uint32_t rs_c, uint32_t cs_c,
+       auxinfo_t* restrict data
+     );
 
 void bli_cgemm_armv7a_asm_2x2
      (
-             dim_t      m,
-             dim_t      n,
-             dim_t      k,
-       const void*      alpha,
-       const void*      a,
-       const void*      b,
-       const void*      beta,
-             void*      c, inc_t rs_c, inc_t cs_c,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       dim_t               k0,
+       scomplex*  restrict alpha,
+       scomplex*  restrict a,
+       scomplex*  restrict b,
+       scomplex*  restrict beta,
+       scomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-	GEMM_UKR_SETUP_CT_ANY( c, 2, 2, false );
+	uint32_t k    = k0;
+	uint32_t rs_c = rs_c0;
+	uint32_t cs_c = cs_c0;
+
 	bli_cgemm_armv7a_ker_2x2( k, alpha, a, b, beta, c, rs_c, cs_c, data );
-	GEMM_UKR_FLUSH_CT( c );
 }
+
+
+
+extern
+void bli_zgemm_armv7a_ker_2x2
+     (
+       uint32_t            k,
+       dcomplex*  restrict alpha,
+       dcomplex*  restrict a,
+       dcomplex*  restrict b,
+       dcomplex*  restrict beta,
+       dcomplex*  restrict c, uint32_t rs_c, uint32_t cs_c,
+       auxinfo_t* restrict data
+     );
 
 void bli_zgemm_armv7a_asm_2x2
      (
-             dim_t      m,
-             dim_t      n,
-             dim_t      k,
-       const void*      alpha,
-       const void*      a,
-       const void*      b,
-       const void*      beta,
-             void*      c, inc_t rs_c, inc_t cs_c,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       dim_t               k0,
+       dcomplex*  restrict alpha,
+       dcomplex*  restrict a,
+       dcomplex*  restrict b,
+       dcomplex*  restrict beta,
+       dcomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-	GEMM_UKR_SETUP_CT_ANY( z, 2, 2, false );
+	uint32_t k    = k0;
+	uint32_t rs_c = rs_c0;
+	uint32_t cs_c = cs_c0;
+
 	bli_zgemm_armv7a_ker_2x2( k, alpha, a, b, beta, c, rs_c, cs_c, data );
-	GEMM_UKR_FLUSH_CT( z );
 }
 

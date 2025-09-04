@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,21 +33,25 @@
 
 */
 
-#include "bli_packm_alloc.h"
 #include "bli_packm_cntl.h"
 #include "bli_packm_check.h"
 #include "bli_packm_init.h"
 #include "bli_packm_int.h"
-#include "bli_packm_scalar.h"
 
 #include "bli_packm_part.h"
 
+#include "bli_packm_var.h"
+
 #include "bli_packm_struc_cxk.h"
+#include "bli_packm_struc_cxk_1er.h"
+
+#include "bli_packm_cxk.h"
+#include "bli_packm_cxk_1er.h"
+
+#include "bli_pack_full.h"
 
 // Mixed datatype support.
 #ifdef BLIS_ENABLE_GEMM_MD
-#include "bli_packm_struc_cxk_md.h"
+#include "bli_packm_md.h"
 #endif
-
-#include "bli_packm_blk_var1.h"
 

@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,18 +35,15 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLAS
-
 /* lsame.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-
 #ifdef LAPACK_ILP64
-long PASTEF770(lsame)(const char *ca, const char *cb, long ca_len, long cb_len)
+long lsame_blis_impl(const char *ca, const char *cb, long ca_len, long cb_len)
 #else
-int PASTEF770(lsame)(const char *ca, const char *cb, int ca_len, int cb_len)
+int lsame_blis_impl(const char *ca, const char *cb, int ca_len, int cb_len)
 #endif
 {
     /* System generated locals */
@@ -147,6 +145,22 @@ int PASTEF770(lsame)(const char *ca, const char *cb, int ca_len, int cb_len)
 
 /*     End of LSAME */
 
+    return ret_val;
+} /* lsame_blis_impl */
+
+
+#ifdef BLIS_ENABLE_BLAS
+
+#ifdef LAPACK_ILP64
+long PASTEF770(lsame)(const char *ca, const char *cb, long ca_len, long cb_len)
+#else
+int PASTEF770(lsame)(const char *ca, const char *cb, int ca_len, int cb_len)
+#endif
+{
+    /* System generated locals */
+    bla_logical ret_val;
+
+    ret_val = lsame_blis_impl(ca, cb, ca_len, cb_len);
     return ret_val;
 } /* lsame */
 

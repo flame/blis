@@ -35,7 +35,8 @@
 #include "bli_l1v_check.h"
 
 // Define kernel function types.
-#include "bli_l1v_ker_ft.h"
+//#include "bli_l1v_ft_ex.h"
+#include "bli_l1v_ft_ker.h"
 
 // Prototype object APIs (expert and non-expert).
 #include "bli_oapi_ex.h"

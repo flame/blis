@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -38,47 +38,67 @@
 //
 // Define BLAS-to-BLIS interfaces.
 //
-#undef  GENTFUNCR2
-#define GENTFUNCR2( ftype_x, ftype_r, chx, chr, blasname, blisname ) \
+#undef  GENTFUNCR3
+#define GENTFUNCR3( ftype_x, ftype_r, chx, chr, chru, blasname, blisname ) \
 \
+ftype_r PASTEF772S(chr,chx,blasname) \
+     ( \
+       const f77_int* n, \
+       const ftype_x* x, const f77_int* incx  \
+     ) \
+{ \
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
+\
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    AOCL_DTL_LOG_ASUM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(chx), *n, *incx) \
+    dim_t    n0; \
+    ftype_x* x0; \
+    inc_t    incx0; \
+    ftype_r  asum; \
+\
+    asum = *PASTEMAC(chru,0); \
+\
+    /* Early return scenarios */ \
+    if ( *n < 1 || *incx <= 0 ) { \
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+      return asum;                                \
+    }\
+\
+    /* Convert/typecast negative values of n to zero. */ \
+    bli_convert_blas_dim1( *n, n0 ); \
+\
+    /* If the input increments are negative, adjust the pointers so we can
+       use positive increments instead. */ \
+    bli_convert_blas_incv( n0, (ftype_x*)x, *incx, x0, incx0 ); \
+\
+    /* Call BLIS interface. */ \
+    PASTEMAC2(chx,blisname,BLIS_TAPI_EX_SUF) \
+    ( \
+      n0, \
+      x0, incx0, \
+      &asum, \
+      NULL, \
+      NULL  \
+    ); \
+\
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+    /* Finalize BLIS. */ \
+    bli_finalize_auto(); \
+\
+    return asum; \
+}\
+\
+IF_BLIS_ENABLE_BLAS(\
 ftype_r PASTEF772(chr,chx,blasname) \
      ( \
        const f77_int* n, \
        const ftype_x* x, const f77_int* incx  \
      ) \
 { \
-	dim_t    n0; \
-	ftype_x* x0; \
-	inc_t    incx0; \
-	ftype_r  asum; \
-\
-	/* Initialize BLIS. */ \
-	bli_init_auto(); \
-\
-	/* Convert/typecast negative values of n to zero. */ \
-	bli_convert_blas_dim1( *n, n0 ); \
-\
-	/* If the input increments are negative, adjust the pointers so we can
-	   use positive increments instead. */ \
-	bli_convert_blas_incv( n0, (ftype_x*)x, *incx, x0, incx0 ); \
-\
-	/* Call BLIS interface. */ \
-	PASTEMAC2(chx,blisname,BLIS_TAPI_EX_SUF) \
-	( \
-	  n0, \
-	  x0, incx0, \
-	  &asum, \
-	  NULL, \
-	  NULL  \
-	); \
-\
-	/* Finalize BLIS. */ \
-	bli_finalize_auto(); \
-\
-	return asum; \
-}
+  return PASTEF772S(chr,chx,blasname)( n, x, incx );\
+} \
+)
 
-#ifdef BLIS_ENABLE_BLAS
-INSERT_GENTFUNCR2_BLAS( asum, asumv )
-#endif
+INSERT_GENTFUNCR3_BLAS( asum, asumv )
 

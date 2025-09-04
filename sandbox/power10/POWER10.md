@@ -63,5 +63,5 @@ In `p10_testsuite`, there are performance gathering and correctness checking pro
 
 #### References
 
-* [bfloat16 wiki](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format)
-* [IEEE float16 wiki](https://en.wikipedia.org/wiki/Half-precision_floating-point_format)
+* [bfloat16 wiki]
+* [IEEE float16 wiki]

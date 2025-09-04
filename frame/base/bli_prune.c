@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -38,28 +38,9 @@
 void bli_prune_unref_mparts( obj_t* p, mdim_t mdim_p,
                              obj_t* s, mdim_t mdim_s )
 {
-	// NOTE: This function is not safe to use on packed objects because it does
-	// not currently take into account the atomicity of the packed micropanel
-	// widths (i.e., the register blocksize). That is, this function will prune
-	// greedily, without regard to whether doing so would prune off part of a
-	// micropanel *which has already been packed* and "assigned" to a thread for
-	// inclusion in the computation. In order to be safe for use use on packed
-	// matrices, this function would need to prune only up to the nearest
-	// micropanel edge (and to the corresponding location within the secondary
-	// matrix), which may not coincide exactly with the diagonal offset.
-	if ( bli_obj_is_packed( p ) || bli_obj_is_packed( s ) ) bli_abort();
-
-	// If the primary object is general AND dense, it has no structure, and
+	// If the primary object is general, it has no structure, and
 	// therefore, no unreferenced parts.
-	// NOTE: There is at least one situation where the matrix is general but
-	// its uplo_t value is lower or upper: gemmt. This operation benefits from
-	// pruning unreferenced regions the same way herk/her2k/syrk/syr2k would.
-	// Because of gemmt, and any future similar operations, we limit early
-	// returns to situations where the primary object has a dense uplo_t value
-	// IN ADDITION TO general structure (rather than only checking for general
-	// structure).
-	if ( bli_obj_is_general( p ) &&
-	     bli_obj_is_dense( p ) ) return;
+	if ( bli_obj_is_general( p ) ) return;
 
 	// If the primary object is BLIS_ZEROS, set the dimensions so that the
 	// matrix is empty. This is not strictly needed but rather a minor
@@ -135,13 +116,21 @@ void bli_prune_unref_mparts( obj_t* p, mdim_t mdim_p,
 		if         ( bli_is_m_dim( mdim_p ) )    q = m;
 		else /* if ( bli_is_n_dim( mdim_p ) ) */ q = n;
 
-		// Update the affected objects' diagonal offset, dimensions, and row
-		// and column offsets, in case anything changed.
+		// Update the affected objects in case anything changed. Notice that
+		// it is okay to update the dimension and diagonal offset fields of
+		// packed primary objects, as long as we do so in tandem with the
+		// secondary object to maintain conformality. This just means that
+		// the "ignore-able" zero region is skipped over here, rather than
+		// within the macro-kernel.
 		bli_obj_set_diag_offset( diagoff_p, p );
 		bli_obj_set_dim( mdim_p, q, p );
 		bli_obj_set_dim( mdim_s, q, s );
-		bli_obj_inc_off( mdim_p, off_inc, p );
-		bli_obj_inc_off( mdim_s, off_inc, s );
+
+		// Only update the affected offset fields if the object in question
+		// is NOT a packed object. Otherwise, bli_obj_buffer_at_off() will
+		// compute the wrong address within the macro-kernel object wrapper.
+		if ( !bli_obj_is_packed( p ) ) { bli_obj_inc_off( mdim_p, off_inc, p ); }
+		if ( !bli_obj_is_packed( s ) ) { bli_obj_inc_off( mdim_s, off_inc, s ); }
 	}
 }
 

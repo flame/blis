@@ -38,38 +38,38 @@
 
 void bls_gemm
      (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c
      );
 
 void bls_gemm_ex
      (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm
      );
 
 //
 // -- Prototype the gemm-like operation's thread entry point -------------------
 //
 
-err_t bls_gemm_int
+void bls_gemm_int
      (
-       const obj_t*     alpha,
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     beta,
-       const obj_t*     c,
-       const cntx_t*    cntx,
-       const rntm_t*    rntm,
-             thrinfo_t* thread
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       thrinfo_t* thread
      );
 
 //
@@ -93,7 +93,7 @@ void PASTECH2(bls_,ch,opname) \
        ctype*  c, inc_t rs_c, inc_t cs_c  \
      );
 
-//INSERT_GENTPROT_BASIC( gemm )
+//INSERT_GENTPROT_BASIC0( gemm )
 GENTPROT( float,    s, gemm )
 GENTPROT( double,   d, gemm )
 GENTPROT( scomplex, c, gemm )
