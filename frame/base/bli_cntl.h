@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -45,7 +45,14 @@ struct cntl_s
 	void_fp        var_func;
 	struct cntl_s* sub_prenode;
 	struct cntl_s* sub_node;
+
+	// Optional fields (needed only by some operations such as packm).
+	// NOTE: first field of params must be a uint64_t containing the size
+	// of the struct.
 	void*          params;
+
+	// Internal fields that track "cached" data.
+	mem_t          pack_mem;
 };
 typedef struct cntl_s cntl_t;
 */
@@ -55,7 +62,7 @@ typedef struct cntl_s cntl_t;
 
 BLIS_EXPORT_BLIS cntl_t* bli_cntl_create_node
      (
-       pool_t* pool,
+       rntm_t* rntm,
        opid_t  family,
        bszid_t bszid,
        void_fp var_func,
@@ -65,7 +72,7 @@ BLIS_EXPORT_BLIS cntl_t* bli_cntl_create_node
 
 BLIS_EXPORT_BLIS void bli_cntl_free_node
      (
-       pool_t* pool,
+       rntm_t* rntm,
        cntl_t* cntl
      );
 
@@ -78,14 +85,28 @@ BLIS_EXPORT_BLIS void bli_cntl_clear_node
 
 BLIS_EXPORT_BLIS void bli_cntl_free
      (
-       pool_t* pool,
-       cntl_t* cntl
+       rntm_t*    rntm,
+       cntl_t*    cntl,
+       thrinfo_t* thread
+     );
+
+BLIS_EXPORT_BLIS void bli_cntl_free_w_thrinfo
+     (
+       rntm_t*    rntm,
+       cntl_t*    cntl,
+       thrinfo_t* thread
+     );
+
+BLIS_EXPORT_BLIS void bli_cntl_free_wo_thrinfo
+     (
+       rntm_t*    rntm,
+       cntl_t*    cntl
      );
 
 BLIS_EXPORT_BLIS cntl_t* bli_cntl_copy
      (
-             pool_t* pool,
-       const cntl_t* cntl
+       rntm_t* rntm,
+       cntl_t* cntl
      );
 
 BLIS_EXPORT_BLIS void bli_cntl_mark_family
@@ -98,65 +119,70 @@ BLIS_EXPORT_BLIS void bli_cntl_mark_family
 
 dim_t bli_cntl_calc_num_threads_in
      (
-       const rntm_t* rntm,
-       const cntl_t* cntl
+       rntm_t* rntm,
+       cntl_t* cntl
      );
 
 // -----------------------------------------------------------------------------
 
 // cntl_t query (fields only)
 
-BLIS_INLINE opid_t bli_cntl_family( const cntl_t* cntl )
+BLIS_INLINE opid_t bli_cntl_family( cntl_t* cntl )
 {
 	return cntl->family;
 }
 
-BLIS_INLINE bszid_t bli_cntl_bszid( const cntl_t* cntl )
+BLIS_INLINE bszid_t bli_cntl_bszid( cntl_t* cntl )
 {
 	return cntl->bszid;
 }
 
-BLIS_INLINE void_fp bli_cntl_var_func( const cntl_t* cntl )
+BLIS_INLINE void_fp bli_cntl_var_func( cntl_t* cntl )
 {
 	return cntl->var_func;
 }
 
-BLIS_INLINE cntl_t* bli_cntl_sub_prenode( const cntl_t* cntl )
+BLIS_INLINE cntl_t* bli_cntl_sub_prenode( cntl_t* cntl )
 {
 	return cntl->sub_prenode;
 }
 
-BLIS_INLINE cntl_t* bli_cntl_sub_node( const cntl_t* cntl )
+BLIS_INLINE cntl_t* bli_cntl_sub_node( cntl_t* cntl )
 {
 	return cntl->sub_node;
 }
 
-BLIS_INLINE void* bli_cntl_params( const cntl_t* cntl )
+BLIS_INLINE void* bli_cntl_params( cntl_t* cntl )
 {
 	return cntl->params;
 }
 
-BLIS_INLINE uint64_t bli_cntl_params_size( const cntl_t* cntl )
+BLIS_INLINE uint64_t bli_cntl_params_size( cntl_t* cntl )
 {
 	// The first 64 bytes is always the size of the params structure.
 	return *( ( uint64_t* )(cntl->params) );
 }
 
+BLIS_INLINE mem_t* bli_cntl_pack_mem( cntl_t* cntl )
+{
+	return &(cntl->pack_mem);
+}
+
 // cntl_t query (complex)
 
-BLIS_INLINE bool bli_cntl_is_null( const cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_is_null( cntl_t* cntl )
 {
 	return ( bool )
 	       ( cntl == NULL );
 }
 
-BLIS_INLINE bool bli_cntl_is_leaf( const cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_is_leaf( cntl_t* cntl )
 {
 	return ( bool )
 	       ( bli_cntl_sub_node( cntl ) == NULL );
 }
 
-BLIS_INLINE bool bli_cntl_does_part( const cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_does_part( cntl_t* cntl )
 {
 	return ( bool )
 	       ( bli_cntl_bszid( cntl ) != BLIS_NO_PART );
@@ -192,5 +218,10 @@ BLIS_INLINE void bli_cntl_set_sub_node( cntl_t* sub_node, cntl_t* cntl )
 BLIS_INLINE void bli_cntl_set_params( void* params, cntl_t* cntl )
 {
 	cntl->params = params;
+}
+
+BLIS_INLINE void bli_cntl_set_pack_mem( mem_t* pack_mem, cntl_t* cntl )
+{
+	cntl->pack_mem = *pack_mem;
 }
 

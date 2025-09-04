@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -50,6 +51,8 @@ void PASTEMAC(ch,varname) \
        cntx_t* cntx  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	ctype*  a1; \
@@ -58,8 +61,10 @@ void PASTEMAC(ch,varname) \
 	ctype   alpha_psi1; \
 	dim_t   j; \
 \
+	PASTECH(ch,axpyv_ker_ft) kfp_av; \
+\
 	/* Query the context for the kernel function pointer. */ \
-	axpyv_ker_ft kfp_av = bli_cntx_get_ukr_dt( dt, BLIS_AXPYV_KER, cntx ); \
+	kfp_av = bli_cntx_get_l1v_ker_dt( dt, BLIS_AXPYV_KER, cntx ); \
 \
 	for ( j = 0; j < n; ++j ) \
 	{ \
@@ -81,7 +86,9 @@ void PASTEMAC(ch,varname) \
 		  cntx  \
 		); \
 	} \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3) \
+\
 }
 
-INSERT_GENTFUNC_BASIC( ger_unb_var2 )
+INSERT_GENTFUNC_BASIC0( ger_unb_var2 )
 

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019 - 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -43,15 +43,15 @@ PACKM_KER_PROT( double,   d, packm_6xk_haswell_ref )
 
 void bli_spackm_haswell_asm_6xk
      (
-             conj_t  conja,
-             pack_t  schema,
-             dim_t   cdim0,
-             dim_t   k0,
-             dim_t   k0_max,
-       const void*   kappa,
-       const void*   a, inc_t inca0, inc_t lda0,
-             void*   p,              inc_t ldp0,
-       const cntx_t* cntx
+       conj_t              conja,
+       pack_t              schema,
+       dim_t               cdim0,
+       dim_t               k0,
+       dim_t               k0_max,
+       float*     restrict kappa,
+       float*     restrict a, inc_t inca0, inc_t lda0,
+       float*     restrict p,              inc_t ldp0,
+       cntx_t*    restrict cntx
      )
 {
 #if 0
@@ -99,15 +99,15 @@ void bli_spackm_haswell_asm_6xk
 
 	// NOTE: If/when this kernel ever supports scaling by kappa within the
 	// assembly region, this constraint should be lifted.
-	const bool     unitk  = bli_seq1( *(( float* )kappa) );
-
+	const bool     unitk  = bli_seq1( *kappa );
+	
 
 	// -------------------------------------------------------------------------
 
 	if ( cdim0 == mnr && !gs && unitk )
 	{
 		begin_asm()
-
+		
 		mov(var(a), rax)                   // load address of a.
 
 		mov(var(inca), r8)                 // load inca
@@ -121,13 +121,13 @@ void bli_spackm_haswell_asm_6xk
 
 		mov(var(one), rdx)                 // load address of 1.0 constant
 		vmovss(mem(rdx), xmm1)             // load 1.0
-
+		
 		mov(var(kappa), rcx)               // load address of kappa
 		vmovss(mem(rcx), xmm0)             // load kappa
-
+		
 
 										   // now branch on kappa == 1.0
-
+		
 		vucomiss(xmm0, xmm1)               // set ZF if kappa == 1.0
 		je(.SKAPPAUNIT)                    // if ZF = 1, jump to beta == 0 case
 
@@ -137,7 +137,7 @@ void bli_spackm_haswell_asm_6xk
 
 		cmp(imm(4), r8)                    // set ZF if (4*inca) == 4.
 		jz(.SCOLNONU)                      // jump to column storage case
-
+		
 		// -- kappa non-unit, row storage on A -------------------------------------
 
 		label(.SROWNONU)
@@ -150,7 +150,7 @@ void bli_spackm_haswell_asm_6xk
 		label(.SCOLNONU)
 
 		jmp(.SDONE)                        // jump to end.
-
+		
 
 
 
@@ -161,7 +161,7 @@ void bli_spackm_haswell_asm_6xk
 
 
 		// -- kappa unit, row storage on A -----------------------------------------
-
+		
 		label(.SROWUNIT)
 
 		lea(mem(r8,  r8,  2), r13)         // r13 = 3*inca
@@ -274,7 +274,7 @@ void bli_spackm_haswell_asm_6xk
 		// -- kappa unit, column storage on A --------------------------------------
 
 		label(.SCOLUNIT)
-
+		
 		lea(mem(r10, r10, 2), r13)         // r13 = 3*lda
 		lea(mem(r13, r10, 2), r15)         // r15 = 5*lda
 		lea(mem(r13, r10, 4), rdx)         // rdx = 7*lda
@@ -361,8 +361,8 @@ void bli_spackm_haswell_asm_6xk
 
 
 		label(.SDONE)
-
-
+		
+		
 
 		end_asm(
 		: // output operands (none)
@@ -383,6 +383,8 @@ void bli_spackm_haswell_asm_6xk
 		  "xmm4", "xmm5", "xmm6", "xmm7",
 		  "xmm8", "xmm9", "xmm10", "xmm11",
 		  "xmm12", "xmm13", "xmm14", "xmm15",
+		  "ymm0", "ymm1", "ymm2", "ymm4", "ymm6",
+		  "ymm8", "ymm10", "ymm12", "ymm14",
 		  "memory"
 		)
 	}
@@ -410,13 +412,13 @@ void bli_spackm_haswell_asm_6xk
 			const dim_t      i      = cdim0;
 			const dim_t      m_edge = mnr - cdim0;
 			const dim_t      n_edge = k0_max;
-			float*  restrict p_edge = ( float* )p + (i  )*1;
+			float*  restrict p_edge = p + (i  )*1;
 
 			bli_sset0s_mxn
 			(
 			  m_edge,
 			  n_edge,
-			  p_edge, 1, ldp
+			  p_edge, 1, ldp 
 			);
 		}
 	}
@@ -428,13 +430,13 @@ void bli_spackm_haswell_asm_6xk
 		const dim_t      j      = k0;
 		const dim_t      m_edge = mnr;
 		const dim_t      n_edge = k0_max - k0;
-		float*  restrict p_edge = ( float* )p + (j  )*ldp;
+		float*  restrict p_edge = p + (j  )*ldp;
 
 		bli_sset0s_mxn
 		(
 		  m_edge,
 		  n_edge,
-		  p_edge, 1, ldp
+		  p_edge, 1, ldp 
 		);
 	}
 }

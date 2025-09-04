@@ -31,21 +31,20 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
-#include "./3/bli_armsve_utils.h"
 
-// GEMM_UKR_PROT( double,   d, gemm_armsve256_asm_8x8 )
+GEMM_UKR_PROT( double,   d, gemm_armsve256_asm_8x8 )
 GEMM_UKR_PROT( double,   d, gemm_armsve_asm_2vx10_unindexed )
 GEMM_UKR_PROT( float,    s, gemm_armsve_asm_2vx10_unindexed )
 GEMM_UKR_PROT( scomplex, c, gemm_armsve_asm_2vx10_unindexed )
 GEMM_UKR_PROT( dcomplex, z, gemm_armsve_asm_2vx10_unindexed )
-// GEMM_UKR_PROT( dcomplex, z, gemm_armsve_asm_2vx8_unindexed )
-// GEMM_UKR_PROT( dcomplex, z, gemm_armsve_asm_2vx7_unindexed )
+GEMM_UKR_PROT( dcomplex, z, gemm_armsve_asm_2vx8_unindexed )
+GEMM_UKR_PROT( dcomplex, z, gemm_armsve_asm_2vx7_unindexed )
 //GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armsve_2vx10_unindexed )
 //GEMMSUP_KER_PROT( double,   d, gemmsup_cv_armsve_2vx10_unindexed )
 //GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armsve_10x2v_unindexed )
 
 // Use SVE intrinsics only for referred cases.
-#if !defined(BLIS_FAMILY_A64FX)
+#if (defined(BLIS_FAMILY_ARMSVE) && !defined(BLIS_FAMILY_A64FX))
 PACKM_KER_PROT( double,   d, packm_armsve256_int_8xk )
 PACKM_KER_PROT( double,   d, packm_armsve512_int_12xk )
 #endif

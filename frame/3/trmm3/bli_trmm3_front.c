@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -36,14 +37,15 @@
 
 void bli_trmm3_front
      (
-             side_t  side,
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-             rntm_t* rntm
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       cntl_t* cntl
      )
 {
 	bli_init_once();
@@ -63,14 +65,6 @@ void bli_trmm3_front
 	bli_obj_alias_to( a, &a_local );
 	bli_obj_alias_to( b, &b_local );
 	bli_obj_alias_to( c, &c_local );
-
-	// Set the obj_t buffer field to the location currently implied by the row
-	// and column offsets and then zero the offsets. If any of the original
-	// obj_t's were views into larger matrices, this step effectively makes
-	// those obj_t's "forget" their lineage.
-	bli_obj_reset_origin( &a_local );
-	bli_obj_reset_origin( &b_local );
-	bli_obj_reset_origin( &c_local );
 
 	// We do not explicitly implement the cases where A is transposed.
 	// However, we can still handle them. Specifically, if A is marked as
@@ -126,7 +120,7 @@ void bli_trmm3_front
 	// contiguous columns, or if C is stored by columns and the micro-kernel
 	// prefers contiguous rows, transpose the entire operation to allow the
 	// micro-kernel to access elements of C in its preferred manner.
-	if ( bli_cntx_dislikes_storage_of( &c_local, BLIS_GEMM_VIR_UKR, cntx ) )
+	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
 	{
 		bli_toggle_side( &side );
 		bli_obj_induce_trans( &a_local );
@@ -146,6 +140,13 @@ void bli_trmm3_front
 	// Set the pack schemas within the objects.
 	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
 
+	// Set each alias as the root object.
+	// NOTE: We MUST wait until we are done potentially swapping the objects
+	// before setting the root fields!
+	bli_obj_set_as_root( &a_local );
+	bli_obj_set_as_root( &b_local );
+	bli_obj_set_as_root( &c_local );
+
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop, and then make any
 	// additional modifications necessary for the current operation.
@@ -162,7 +163,7 @@ void bli_trmm3_front
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
-	  bli_l3_int,
+	  bli_gemm_int,
 	  BLIS_TRMM, // operation family id
 	  alpha,
 	  &a_local,
@@ -170,7 +171,8 @@ void bli_trmm3_front
 	  beta,
 	  &c_local,
 	  cntx,
-	  rntm
+	  rntm,
+	  cntl
 	);
 }
 

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -58,17 +58,15 @@
 
 void bli_sgemmtrsm_l_haswell_asm_6x16
      (
-             dim_t      m, \
-             dim_t      n, \
-             dim_t      k0, \
-       const void*      alpha, \
-       const void*      a10, \
-       const void*      a11, \
-       const void*      b01, \
-             void*      b11, \
-             void*      c11, inc_t rs_c0, inc_t cs_c0, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
+       dim_t               k0,
+       float*     restrict alpha,
+       float*     restrict a10,
+       float*     restrict a11,
+       float*     restrict b01,
+       float*     restrict b11,
+       float*     restrict c11, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
 	//void*   a_next = bli_auxinfo_next_a( data );
@@ -82,8 +80,6 @@ void bli_sgemmtrsm_l_haswell_asm_6x16
 	uint64_t cs_c   = cs_c0;
 
 	float*   beta   = bli_sm1;
-
-	GEMMTRSM_UKR_SETUP_CT_ANY( s, 6, 16, true );
 
 	begin_asm()
 
@@ -827,10 +823,11 @@ void bli_sgemmtrsm_l_haswell_asm_6x16
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
+	  "ymm7", "ymm8", "ymm9", "ymm10", "ymm11", "ymm12",
+	  "ymm13", "ymm14", "ymm15",
 	  "memory"
 	)
-
-	GEMMTRSM_UKR_FLUSH_CT( s );
 }
 
 
@@ -849,19 +846,18 @@ void bli_sgemmtrsm_l_haswell_asm_6x16
 
 void bli_dgemmtrsm_l_haswell_asm_6x8
      (
-             dim_t      m, \
-             dim_t      n, \
-             dim_t      k0, \
-       const void*      alpha, \
-       const void*      a10, \
-       const void*      a11, \
-       const void*      b01, \
-             void*      b11, \
-             void*      c11, inc_t rs_c0, inc_t cs_c0, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
+       dim_t               k0,
+       double*    restrict alpha,
+       double*    restrict a10,
+       double*    restrict a11,
+       double*    restrict b01,
+       double*    restrict b11,
+       double*    restrict c11, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_9);
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
@@ -873,8 +869,6 @@ void bli_dgemmtrsm_l_haswell_asm_6x8
 	uint64_t cs_c   = cs_c0;
 
 	double*  beta   = bli_dm1;
-
-	GEMMTRSM_UKR_SETUP_CT_ANY( d, 6, 8, true );
 
 	begin_asm()
 
@@ -1580,10 +1574,12 @@ void bli_dgemmtrsm_l_haswell_asm_6x8
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
+	  "ymm7", "ymm8", "ymm9", "ymm10", "ymm11", "ymm12",
+	  "ymm13", "ymm14", "ymm15",
 	  "memory"
 	)
-
-	GEMMTRSM_UKR_FLUSH_CT( d );
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_9);
 }
 
 

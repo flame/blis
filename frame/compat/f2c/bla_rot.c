@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,14 +35,13 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLAS
-
 /* srot.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,rot)(const bla_integer *n, bla_real *sx, const bla_integer *incx, bla_real *sy, const bla_integer *incy, const bla_real *c__, const bla_real *s)
+/* Subroutine */ 
+int PASTEF77S(s,rot)(const bla_integer *n, bla_real *sx, const bla_integer *incx, bla_real *sy, const bla_integer *incy, const bla_real *c__, const bla_real *s)
 {
     /* System generated locals */
     bla_integer i__1;
@@ -62,7 +62,13 @@
     --sx;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE();
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_ROT_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *n,
+                            *incx, *incy, (void*)c__, (void*)s);
+
     if (*n <= 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
     if (*incx == 1 && *incy == 1) {
@@ -89,6 +95,7 @@
 	iy += *incy;
 /* L10: */
     }
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*       code for both increments equal to 1 */
@@ -101,6 +108,7 @@ L20:
 	sx[i__] = stemp;
 /* L30: */
     }
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 } /* srot_ */
 
@@ -109,7 +117,8 @@ L20:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,rot)(const bla_integer *n, bla_double *dx, const bla_integer *incx, bla_double *dy, const bla_integer *incy, const bla_double *c__, const bla_double *s)
+/* Subroutine */ 
+int PASTEF77S(d,rot)(const bla_integer *n, bla_double *dx, const bla_integer *incx, bla_double *dy, const bla_integer *incy, const bla_double *c__, const bla_double *s)
 {
     /* System generated locals */
     bla_integer i__1;
@@ -130,7 +139,13 @@ L20:
     --dx;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE();
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_ROT_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *n,
+                            *incx, *incy, (void*)c__, (void*)s);
+
     if (*n <= 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
     if (*incx == 1 && *incy == 1) {
@@ -157,6 +172,7 @@ L20:
 	iy += *incy;
 /* L10: */
     }
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*       code for both increments equal to 1 */
@@ -169,15 +185,17 @@ L20:
 	dx[i__] = dtemp;
 /* L30: */
     }
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 } /* drot_ */
+
 
 /* csrot.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(cs,rot)(const bla_integer *n, bla_scomplex *cx, const bla_integer *incx, bla_scomplex *cy, const bla_integer *incy, const bla_real *c__, const bla_real *s)
+/* Subroutine */ int PASTEF77S(cs,rot)(const bla_integer *n, bla_scomplex *cx, const bla_integer *incx, bla_scomplex *cy, const bla_integer *incy, const bla_real *c__, const bla_real *s)
 {
     /* System generated locals */
     bla_integer i__1, i__2, i__3, i__4;
@@ -199,7 +217,13 @@ L20:
     --cx;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE();
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_ROT_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(cs), *n,
+                            *incx, *incy, (void*)c__, (void*)s);
+
     if (*n <= 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
     if (*incx == 1 && *incy == 1) {
@@ -238,6 +262,7 @@ L20:
 	iy += *incy;
 /* L10: */
     }
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*       code for both increments equal to 1 */
@@ -262,6 +287,7 @@ L20:
 	bli_csets( (bli_creal(ctemp)), (bli_cimag(ctemp)), cx[i__2] );
 /* L30: */
     }
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 } /* csrot_ */
 
@@ -270,7 +296,7 @@ L20:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(zd,rot)(const bla_integer *n, bla_dcomplex *zx, const bla_integer *incx, bla_dcomplex *zy, const bla_integer *incy, const bla_double *c__, const bla_double *s)
+/* Subroutine */ int PASTEF77S(zd,rot)(const bla_integer *n, bla_dcomplex *zx, const bla_integer *incx, bla_dcomplex *zy, const bla_integer *incy, const bla_double *c__, const bla_double *s)
 {
     /* System generated locals */
     bla_integer i__1, i__2, i__3, i__4;
@@ -292,7 +318,13 @@ L20:
     --zx;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE();
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_ROT_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(zd), *n,
+                            *incx, *incy, (void*)c__, (void*)s);
+
     if (*n <= 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
     if (*incx == 1 && *incy == 1) {
@@ -331,6 +363,7 @@ L20:
 	iy += *incy;
 /* L10: */
     }
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*       code for both increments equal to 1 */
@@ -355,8 +388,31 @@ L20:
 	bli_zsets( (bli_zreal(ztemp)), (bli_zimag(ztemp)), zx[i__2] );
 /* L30: */
     }
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 } /* zdrot_ */
+
+#ifdef BLIS_ENABLE_BLAS
+
+int PASTEF77(s,rot)(const bla_integer *n, bla_real *sx, const bla_integer *incx, bla_real *sy, const bla_integer *incy, const bla_real *c__, const bla_real *s)
+{
+  return PASTEF77S(s,rot)( n, sx, incx, sy, incy, c__, s );
+}
+
+int PASTEF77(d,rot)(const bla_integer *n, bla_double *dx, const bla_integer *incx, bla_double *dy, const bla_integer *incy, const bla_double *c__, const bla_double *s)
+{
+  return PASTEF77S(d,rot)( n, dx, incx, dy, incy, c__, s );
+}
+
+int PASTEF77(cs,rot)(const bla_integer *n, bla_scomplex *cx, const bla_integer *incx, bla_scomplex *cy, const bla_integer *incy, const bla_real *c__, const bla_real *s)
+{
+  return PASTEF77S(cs,rot)(n, cx, incx, cy, incy, c__, s);
+}
+
+int PASTEF77(zd,rot)(const bla_integer *n, bla_dcomplex *zx, const bla_integer *incx, bla_dcomplex *zy, const bla_integer *incy, const bla_double *c__, const bla_double *s)
+{
+  return PASTEF77S(zd,rot)(n, zx, incx, zy, incy, c__, s);
+}
 
 #endif
 

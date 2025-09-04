@@ -36,22 +36,21 @@
 #include "blis.h"
 #include "armsve512_asm_transpose_d8x8.h"
 #include "armsve512_asm_transpose_d8x2.h"
-#include "../3/armsve_asm_macros.h"
 
 // assumption:
 //   SVE vector length = 512 bits.
 
 void bli_dpackm_armsve512_asm_10xk
      (
-             conj_t  conja,
-             pack_t  schema,
-             dim_t   cdim_,
-             dim_t   n_,
-             dim_t   n_max_,
-       const void*   kappa,
-       const void*   a, inc_t inca_, inc_t lda_,
-             void*   p,              inc_t ldp_,
-       const cntx_t* cntx
+       conj_t           conja,
+       pack_t           schema,
+       dim_t            cdim_,
+       dim_t            n_,
+       dim_t            n_max_,
+       double* restrict kappa,
+       double* restrict a, inc_t inca_, inc_t lda_,
+       double* restrict p,              inc_t ldp_,
+       cntx_t* restrict cntx
      )
 {
     const int64_t cdim  = cdim_;
@@ -62,7 +61,7 @@ void bli_dpackm_armsve512_asm_10xk
     const int64_t lda   = lda_;
     const int64_t ldp   = ldp_;
     const bool    gs    = inca != 1 && lda != 1;
-    const bool    unitk = bli_deq1( *(( double* )kappa) );
+    const bool    unitk = bli_deq1( *kappa );
 
 #ifdef _A64FX
     {
@@ -94,9 +93,9 @@ void bli_dpackm_armsve512_asm_10xk
             "mov  x8, %[n_mker] \n\t"
             "mov  x9, %[n_left] \n\t"
             "ptrue p0.d \n\t"
-            BNE(AROWSTOR)
+            "b.ne .AROWSTOR \n\t"
             // A stored in columns.
-            LABEL(ACOLSTOR)
+            " .ACOLSTOR: \n\t"
             // Prefetch distance.
             "mov  x17, #8 \n\t"
             "madd x17, x17, x3, xzr \n\t"
@@ -106,9 +105,9 @@ void bli_dpackm_armsve512_asm_10xk
             "lsl  x16, x16, #60 \n\t"
             "orr  x0, x0, x16 \n\t"
 #endif
-            LABEL(ACOLSTORMKER)
+            " .ACOLSTORMKER: \n\t"
             "cmp  x8, xzr \n\t"
-            BEQ(ACOLSTORMKEREND)
+            "b.eq .ACOLSTORMKEREND \n\t"
             "add  x5, x0, x3 \n\t"
             "add  x6, x5, x3 \n\t"
             "add  x7, x6, x3 \n\t"
@@ -202,11 +201,11 @@ void bli_dpackm_armsve512_asm_10xk
             // "add  x1, x1, #320 \n\t"
             "add  x0, x7, x3 \n\t"
             "sub  x8, x8, #1 \n\t"
-            BRANCH(ACOLSTORMKER)
-            LABEL(ACOLSTORMKEREND)
-            LABEL(ACOLSTORLEFT)
+            "b    .ACOLSTORMKER \n\t"
+            " .ACOLSTORMKEREND: \n\t"
+            " .ACOLSTORLEFT: \n\t"
             "cmp  x9, xzr \n\t"
-            BEQ(UNITKDONE)
+            "b.eq .UNITKDONE \n\t"
             "ld1d z0.d, p0/z, [x0] \n\t"
             "ldr  q1, [x0, #64] \n\t"
             "st1d z0.d, p0, [x1] \n\t"
@@ -214,14 +213,14 @@ void bli_dpackm_armsve512_asm_10xk
             "add  x0, x0, x3 \n\t"
             "add  x1, x1, x2 \n\t"
             "sub  x9, x9, #1 \n\t"
-            BRANCH(ACOLSTORLEFT)
+            "b    .ACOLSTORLEFT \n\t"
             // A stored in rows.
-            LABEL(AROWSTOR)
+            " .AROWSTOR: \n\t"
             // Prepare predicates for in-reg transpose.
             SVE512_IN_REG_TRANSPOSE_d8x8_PREPARE(x16,p0,p1,p2,p3,p8,p4,p6)
-            LABEL(AROWSTORMKER) // X[10-16] for A here not P. Be careful.
+            " .AROWSTORMKER: \n\t" // X[10-16] for A here not P. Be careful.
             "cmp  x8, xzr \n\t"
-            BEQ(AROWSTORMKEREND)
+            "b.eq .AROWSTORMKEREND \n\t"
             "add  x10, x0, x4 \n\t"
             "add  x11, x10, x4 \n\t"
             "add  x12, x11, x4 \n\t"
@@ -272,15 +271,15 @@ void bli_dpackm_armsve512_asm_10xk
             "add  x1, x16, x2 \n\t"
             "add  x0, x0, #64 \n\t"
             "sub  x8, x8, #1 \n\t"
-            BRANCH(AROWSTORMKER)
-            LABEL(AROWSTORMKEREND)
+            "b    .AROWSTORMKER \n\t"
+            " .AROWSTORMKEREND: \n\t"
             "mov  x4, %[inca] \n\t" // Restore unshifted inca.
             "index z30.d, xzr, x4 \n\t" // Generate index.
             "lsl  x4, x4, #3 \n\t" // Shift again.
             "lsl  x5, x4, #3 \n\t" // Virtual column vl.
-            LABEL(AROWSTORLEFT)
+            " .AROWSTORLEFT: \n\t"
             "cmp  x9, xzr \n\t"
-            BEQ(UNITKDONE)
+            "b.eq .UNITKDONE \n\t"
             "add  x6, x0, x5 \n\t"
             "add  x7, x6, x4 \n\t"
             "ld1d z0.d, p0/z, [x0, z30.d, lsl #3] \n\t"
@@ -292,8 +291,8 @@ void bli_dpackm_armsve512_asm_10xk
             "add  x1, x1, x2 \n\t"
             "add  x0, x0, #8 \n\t"
             "sub  x9, x9, #1 \n\t"
-            BRANCH(AROWSTORLEFT)
-            LABEL(UNITKDONE)
+            "b    .AROWSTORLEFT \n\t"
+            " .UNITKDONE: \n\t"
             "mov  x0, #0 \n\t"
             :
             : [a]      "r" (a),
@@ -337,7 +336,7 @@ void bli_dpackm_armsve512_asm_10xk
             const dim_t      i      = cdim;
             const dim_t      m_edge = mnr - i;
             const dim_t      n_edge = n_max;
-            double* restrict p_edge = ( double* )p + (i  )*1;
+            double* restrict p_edge = p + (i  )*1;
 
             bli_dset0s_mxn
             (
@@ -353,7 +352,7 @@ void bli_dpackm_armsve512_asm_10xk
         const dim_t      j      = n;
         const dim_t      m_edge = mnr;
         const dim_t      n_edge = n_max - j;
-        double* restrict p_edge = ( double* )p + (j  )*ldp;
+        double* restrict p_edge = p + (j  )*ldp;
 
         bli_dset0s_mxn
         (

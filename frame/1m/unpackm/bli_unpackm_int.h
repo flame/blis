@@ -34,11 +34,10 @@
 
 void bli_unpackm_int
      (
-       const obj_t*  p,
-       const obj_t*  a,
-       const cntx_t* cntx,
-       const rntm_t* rntm,
-       const cntl_t* cntl,
-       const thrinfo_t* thread
+       obj_t*  p,
+       obj_t*  a,
+       cntx_t* cntx,
+       cntl_t* cntl,
+       thrinfo_t* thread
      );
 

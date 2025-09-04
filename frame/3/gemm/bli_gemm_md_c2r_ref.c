@@ -41,50 +41,52 @@
 \
 void PASTEMAC2(ch,opname,suf) \
      ( \
-             dim_t      m, \
-             dim_t      n, \
-             dim_t      k, \
-       const void*      alpha, \
-       const void*      a, \
-       const void*      b, \
-       const void*      beta, \
-             void*      c, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
+       dim_t               k, \
+       ctype*     restrict alpha, \
+       ctype*     restrict a, \
+       ctype*     restrict b, \
+       ctype*     restrict beta, \
+       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
      ) \
 { \
 	const num_t       dt        = PASTEMAC(ch,type); \
 	const num_t       dt_r      = PASTEMAC(chr,type); \
 \
-	      gemm_ukr_ft rgemm_ukr = bli_cntx_get_ukr_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
-	const bool        col_pref  = bli_cntx_ukr_prefers_cols_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
+	PASTECH(chr,gemm_ukr_ft) \
+	                  rgemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
+	const bool        col_pref  = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
 	const bool        row_pref  = !col_pref; \
 \
 	const dim_t       mr        = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
 	const dim_t       nr        = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
 \
-	      dim_t       mr_r      = mr; \
-	      dim_t       nr_r      = nr; \
-\
-	      ctype       ct[ BLIS_STACK_BUF_MAX_SIZE \
+	ctype             ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                      / sizeof( ctype_r ) ] \
 	                      __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	      inc_t       rs_ct; \
-	      inc_t       cs_ct; \
+	inc_t             rs_ct; \
+	inc_t             cs_ct; \
 \
-	const ctype_r*    a_r       = ( ctype_r* )a; \
+	ctype_r* restrict a_r       = ( ctype_r* )a; \
 \
-	const ctype_r*    b_r       = ( ctype_r* )b; \
+	ctype_r* restrict b_r       = ( ctype_r* )b; \
 \
-	const ctype_r*    zero_r    = PASTEMAC(chr,0); \
+	ctype_r* restrict zero_r    = PASTEMAC(chr,0); \
 \
-	const ctype_r*    alpha_r   = &PASTEMAC(ch,real)( *(( ctype* )alpha) ); \
-	   /* ctype_r*    alpha_i   = &PASTEMAC(ch,imag)( *(( ctype* )alpha) ); */ \
+	ctype_r* restrict alpha_r   = &PASTEMAC(ch,real)( *alpha ); \
+/*
+	ctype_r* restrict alpha_i   = &PASTEMAC(ch,imag)( *alpha ); \
+*/ \
 \
-	const ctype_r*    beta_r    = &PASTEMAC(ch,real)( *(( ctype* )beta) ); \
-	const ctype_r*    beta_i    = &PASTEMAC(ch,imag)( *(( ctype* )beta) ); \
+	ctype_r* restrict beta_r    = &PASTEMAC(ch,real)( *beta ); \
+	ctype_r* restrict beta_i    = &PASTEMAC(ch,imag)( *beta ); \
 \
-	      bool        using_ct; \
+	ctype_r*          c_use; \
+	inc_t             rs_c_use; \
+	inc_t             cs_c_use; \
+\
+	bool              using_ct; \
 \
 	/* This virtual microkernel is used by ccr and crc mixed-domain cases
 	   when any of the following conditions are met:
@@ -140,20 +142,21 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 		if ( col_pref ) { rs_ct = 1;  cs_ct = mr; } \
 		else            { rs_ct = nr; cs_ct = 1; } \
 \
-		ctype_r* c_use    = ( ctype_r* )ct; \
-		inc_t    rs_c_use = rs_ct; \
-		inc_t    cs_c_use = cs_ct; \
+		c_use    = ( ctype_r* )ct; \
+		rs_c_use = rs_ct; \
+		cs_c_use = cs_ct; \
 \
-		/* Convert the strides and corresponding microtile dimension from being
-		   in units of complex elements to be in units of real elements. */ \
-		if ( bli_is_col_stored( rs_c_use, cs_c_use ) ) { cs_c_use *= 2; mr_r *= 2; } \
-		else                                           { rs_c_use *= 2; nr_r *= 2; }\
+		/* Convert the strides from being in units of complex elements to
+		   be in units of real elements. Note that we don't need to check for
+		   general storage here because that case corresponds to the scenario
+		   where we are using the ct buffer and its rs_ct/cs_ct strides. */ \
+		if ( bli_is_col_stored( rs_c_use, cs_c_use ) ) cs_c_use *= 2; \
+		else                                           rs_c_use *= 2; \
+\
 \
 		/* c = beta * c + alpha_r * a * b; */ \
 		rgemm_ukr \
 		( \
-		  mr_r, \
-		  nr_r, \
 		  k, \
 		  alpha_r, \
 		  a_r, \
@@ -164,42 +167,35 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 		  cntx  \
 		); \
 \
+		dim_t i, j; \
+\
 		/* Accumulate the final result in ct back to c. */ \
-		if ( PASTEMAC(ch,eq1)( *(( ctype* )beta) ) ) \
+		if ( PASTEMAC(ch,eq1)( *beta ) ) \
 		{ \
-			for ( dim_t j = 0; j < n; ++j ) \
-			for ( dim_t i = 0; i < m; ++i ) \
+			for ( j = 0; j < nr; ++j ) \
+			for ( i = 0; i < mr; ++i ) \
 			{ \
-				PASTEMAC(ch,adds) \
-				( \
-				  *(          ct + i*rs_ct + j*cs_ct), \
-				  *(( ctype* )c  + i*rs_c  + j*cs_c )  \
-				); \
+				PASTEMAC(ch,adds)( *(ct + i*rs_ct + j*cs_ct), \
+				                   *(c  + i*rs_c  + j*cs_c ) ); \
 			} \
 		} \
-		else if ( PASTEMAC(ch,eq0)( *(( ctype* )beta )) ) \
+		else if ( PASTEMAC(ch,eq0)( *beta ) ) \
 		{ \
-			for ( dim_t j = 0; j < n; ++j ) \
-			for ( dim_t i = 0; i < m; ++i ) \
+			for ( j = 0; j < nr; ++j ) \
+			for ( i = 0; i < mr; ++i ) \
 			{ \
-				PASTEMAC(ch,copys) \
-				( \
-				  *(          ct + i*rs_ct + j*cs_ct), \
-				  *(( ctype* )c  + i*rs_c  + j*cs_c )  \
-				); \
+				PASTEMAC(ch,copys)( *(ct + i*rs_ct + j*cs_ct), \
+				                    *(c  + i*rs_c  + j*cs_c ) ); \
 			} \
 		} \
 		else \
 		{ \
-			for ( dim_t j = 0; j < n; ++j ) \
-			for ( dim_t i = 0; i < m; ++i ) \
+			for ( j = 0; j < nr; ++j ) \
+			for ( i = 0; i < mr; ++i ) \
 			{ \
-				PASTEMAC(ch,xpbys) \
-				( \
-				  *(          ct + i*rs_ct + j*cs_ct), \
-				  *(( ctype* )beta                  ), \
-				  *(( ctype* )c  + i*rs_c  + j*cs_c )  \
-				); \
+				PASTEMAC(ch,xpbys)( *(ct + i*rs_ct + j*cs_ct), \
+				                    *beta, \
+				                    *(c  + i*rs_c  + j*cs_c ) ); \
 			} \
 		} \
 	} \
@@ -208,23 +204,20 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 		/* In the typical cases, we use the real part of beta and
 		   accumulate directly into the output matrix c. */ \
 \
-		ctype_r* c_use    = ( ctype_r* )c; \
-		inc_t    rs_c_use = rs_c; \
-		inc_t    cs_c_use = cs_c; \
+		c_use    = ( ctype_r* )c; \
+		rs_c_use = rs_c; \
+		cs_c_use = cs_c; \
 \
-		dim_t    m_use    = m; \
-		dim_t    n_use    = n; \
-\
-		/* Convert the strides and corresponding microtile dimension from being
-		   in units of complex elements to be in units of real elements. */ \
-		if ( bli_is_col_stored( rs_c_use, cs_c_use ) ) { cs_c_use *= 2; m_use *= 2; } \
-		else                                           { rs_c_use *= 2; n_use *= 2; } \
+		/* Convert the strides from being in units of complex elements to
+		   be in units of real elements. Note that we don't need to check for
+		   general storage here because that case corresponds to the scenario
+		   where we are using the ct buffer and its rs_ct/cs_ct strides. */ \
+		if ( bli_is_col_stored( rs_c_use, cs_c_use ) ) cs_c_use *= 2; \
+		else                                           rs_c_use *= 2; \
 \
 		/* c = beta * c + alpha_r * a * b; */ \
 		rgemm_ukr \
 		( \
-		  m_use, \
-		  n_use, \
 		  k, \
 		  alpha_r, \
 		  a_r, \
@@ -237,6 +230,6 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 	} \
 }
 
-INSERT_GENTFUNCCO( gemm_md_c2r, BLIS_REF_SUFFIX )
+INSERT_GENTFUNCCO_BASIC( gemm_md_c2r, BLIS_REF_SUFFIX )
 
 #endif

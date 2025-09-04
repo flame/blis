@@ -40,11 +40,11 @@
 
 void bls_gemm
      (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c
      )
 {
 	bls_gemm_ex
@@ -61,13 +61,13 @@ void bls_gemm
 
 void bls_gemm_ex
      (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm
      )
 {
 	bli_init_once();
@@ -75,30 +75,17 @@ void bls_gemm_ex
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
-
-	// Set the .pack_a and .pack_b fields to TRUE. This is only needed because
-	// this sandbox uses bli_thrinfo_sup_grow(), which calls
-	// bli_thrinfo_sup_create_for_cntl(), which employs an optimization if
-	// both fields are FALSE (as is often the case with sup). However, this
-	// sandbox implements the "large" code path, and so both A and B must
-	// always be packed. Setting the fields to TRUE will avoid the optimization
-	// while this sandbox implementation executes (and it also reinforces the
-	// fact that we *are* indeed packing A and B, albeit not in the sup context
-	// originally envisioned for the .pack_a and .pack_b fields).
-	bli_rntm_set_pack_a( TRUE, &rntm_l );
-	bli_rntm_set_pack_b( TRUE, &rntm_l );
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
 
 	// Obtain a valid (native) context from the gks if necessary.
 	// NOTE: This must be done before calling the _check() function, since
 	// that function assumes the context pointer is valid.
-	if ( cntx == NULL ) cntx = ( cntx_t* )bli_gks_query_cntx();
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bls_gemm_check( ( obj_t* )alpha, ( obj_t* )a, ( obj_t* )b,
-		                ( obj_t* )beta,  ( obj_t* )c, ( cntx_t* )cntx );
+		bls_gemm_check( alpha, a, b, beta, c, cntx );
 
 	// -- bli_gemm_front() -----------------------------------------------------
 
@@ -147,7 +134,7 @@ void bls_gemm_ex
 	// contiguous columns, or if C is stored by columns and the micro-kernel
 	// prefers contiguous rows, transpose the entire operation to allow the
 	// micro-kernel to access elements of C in its preferred manner.
-	if ( bli_cntx_dislikes_storage_of( &c_local, BLIS_GEMM_VIR_UKR, cntx ) )
+	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
 	{
 		bli_obj_swap( &a_local, &b_local );
 
@@ -166,13 +153,13 @@ void bls_gemm_ex
 	  bli_obj_length( &c_local ),
 	  bli_obj_width( &c_local ),
 	  bli_obj_width( &a_local ),
-	  &rntm_l
+	  rntm
 	);
 
 	// Spawn threads (if applicable), where bls_gemm_int() is the thread entry
 	// point function for each thread. This also begins the process of creating
 	// the thrinfo_t tree, which contains thread communicators.
-	bli_l3_sup_thread_decorator
+	bls_l3_thread_decorator
 	(
 	  bls_gemm_int,
 	  BLIS_GEMM, // operation family id
@@ -182,7 +169,7 @@ void bls_gemm_ex
 	  beta,
 	  &c_local,
 	  cntx,
-	  &rntm_l
+	  rntm
 	);
 }
 
@@ -190,22 +177,24 @@ void bls_gemm_ex
 // -- Define the gemm-like operation's thread entry point ----------------------
 //
 
-err_t bls_gemm_int
+void bls_gemm_int
      (
-       const obj_t*     alpha,
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     beta,
-       const obj_t*     c,
-       const cntx_t*    cntx,
-       const rntm_t*    rntm,
-             thrinfo_t* thread
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       thrinfo_t* thread
      )
 {
 	// In this function, we choose the gemm implementation that is executed
 	// on each thread.
 
-	// Call the block-panel algorithm.
+#if 1
+	// Call the block-panel algorithm that calls the kernel directly, which
+	// exposes edge-case handling.
 	bls_gemm_bp_var1
 	(
 	  alpha,
@@ -214,10 +203,24 @@ err_t bls_gemm_int
 	  beta,
 	  c,
 	  cntx,
+	  rntm,
 	  thread
 	);
-
-	return BLIS_SUCCESS;
+#else
+	// Call the block-panel algorithm that calls the kernel indirectly via a
+	// wrapper function, which hides edge-case handling.
+	bls_gemm_bp_var2
+	(
+	  alpha,
+	  a,
+	  b,
+	  beta,
+	  c,
+	  cntx,
+	  rntm,
+	  thread
+	);
+#endif
 }
 
 //
@@ -284,7 +287,7 @@ void PASTECH2(bls_,ch,opname) \
 	); \
 }
 
-//INSERT_GENTFUNC_BASIC( gemm )
+//INSERT_GENTFUNC_BASIC0( gemm )
 GENTFUNC( float,    s, gemm )
 GENTFUNC( double,   d, gemm )
 GENTFUNC( scomplex, c, gemm )

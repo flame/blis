@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,7 +42,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77(ch,blasname) \
+void PASTEF77S(ch,blasname) \
      ( \
        const f77_int* n, \
        const ftype*   x, const f77_int* incx, \
@@ -57,30 +58,45 @@ void PASTEF77(ch,blasname) \
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
 \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
+	AOCL_DTL_LOG_COPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *n, *incx, *incy) \
+\
 	/* Convert/typecast negative values of n to zero. */ \
 	bli_convert_blas_dim1( *n, n0 ); \
 \
 	/* If the input increments are negative, adjust the pointers so we can
 	   use positive increments instead. */ \
-	bli_convert_blas_incv( n0, (ftype*)x, *incx, x0, incx0 ); \
-	bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
+	   bli_convert_blas_incv(n0, (ftype*)x, *incx, x0, incx0); \
+	   bli_convert_blas_incv(n0, (ftype*)y, *incy, y0, incy0); \
+	   \
+	   /* Call BLIS interface. */ \
+	   PASTEMAC2(ch, blisname, BLIS_TAPI_EX_SUF) \
+	   (\
+	   BLIS_NO_CONJUGATE, \
+	   n0, \
+	   x0, incx0, \
+	   y0, incy0, \
+	   NULL, \
+	   NULL  \
+	   ); \
+	   \
 \
-	/* Call BLIS interface. */ \
-	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
-	( \
-	  BLIS_NO_CONJUGATE, \
-	  n0, \
-	  x0, incx0, \
-	  y0, incy0, \
-	  NULL, \
-	  NULL  \
-	); \
+           AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 \
-	/* Finalize BLIS. */ \
-	bli_finalize_auto(); \
-}
+	   /* Finalize BLIS. */ \
+	   bli_finalize_auto(); \
+}\
+\
+IF_BLIS_ENABLE_BLAS(\
+void PASTEF77(ch,blasname) \
+     ( \
+       const f77_int* n, \
+       const ftype*   x, const f77_int* incx, \
+             ftype*   y, const f77_int* incy  \
+     ) \
+{ \
+  PASTEF77S(ch,blasname)( n, x, incx, y, incy ); \
+} \
+)
 
-#ifdef BLIS_ENABLE_BLAS
-INSERT_GENTFUNC_BLAS( copy, copyv )
-#endif
-
+INSERT_GENTFUNC_BLAS(copy, copyv)

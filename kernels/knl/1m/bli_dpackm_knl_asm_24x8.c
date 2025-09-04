@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -108,15 +109,15 @@ static int32_t offsets[32] __attribute__((aligned(64))) =
 
 void bli_dpackm_knl_asm_8xk
      (
-             conj_t  conja,
-             pack_t  schema,
-             dim_t   cdim_,
-             dim_t   n_,
-             dim_t   n_max_,
-       const void*   kappa_,
-       const void*   a_, inc_t inca_, inc_t lda_,
-             void*   p_,              inc_t ldp_,
-       const cntx_t* cntx
+       conj_t           conja,
+       pack_t           schema,
+       dim_t            cdim_,
+       dim_t            n_,
+       dim_t            n_max_,
+       double* restrict kappa_,
+       double* restrict a_, inc_t inca_, inc_t lda_,
+       double* restrict p_,              inc_t ldp_,
+       cntx_t* restrict cntx
      )
 {
     const int32_t* offsetPtr = &offsets[0];
@@ -304,7 +305,8 @@ void bli_dpackm_knl_asm_8xk
           "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
           "zmm30", "zmm31",
           "rax", "rbx", "rcx", "rdx", "rdi", "rsi",
-          "r8", "r9", "r10", "r11", "r12", "r13", "r14", "memory"
+          "r8", "r9", "r10", "r11", "r12", "r13", "r14", "k0", "k1",
+          "ymm0", "ymm3", "memory"
     )
 
 	}
@@ -330,7 +332,7 @@ void bli_dpackm_knl_asm_8xk
 			const dim_t      i      = cdim;
 			const dim_t      m_edge = mnr - i;
 			const dim_t      n_edge = n_max;
-			double* restrict p_edge = ( double* )p + (i  )*1;
+			double* restrict p_edge = p + (i  )*1;
 
 			bli_dset0s_mxn
 			(
@@ -346,7 +348,7 @@ void bli_dpackm_knl_asm_8xk
 		const dim_t      j      = n;
 		const dim_t      m_edge = mnr;
 		const dim_t      n_edge = n_max - j;
-		double* restrict p_edge = ( double* )p + (j  )*ldp;
+		double* restrict p_edge = p + (j  )*ldp;
 
 		bli_dset0s_mxn
 		(
@@ -359,15 +361,15 @@ void bli_dpackm_knl_asm_8xk
 
 void bli_dpackm_knl_asm_24xk
      (
-             conj_t  conja,
-             pack_t  schema,
-             dim_t   cdim_,
-             dim_t   n_,
-             dim_t   n_max_,
-       const void*   kappa_,
-       const void*   a_, inc_t inca_, inc_t lda_,
-             void*   p_,              inc_t ldp_,
-       const cntx_t* cntx
+       conj_t           conja,
+       pack_t           schema,
+       dim_t            cdim_,
+       dim_t            n_,
+       dim_t            n_max_,
+       double* restrict kappa_,
+       double* restrict a_, inc_t inca_, inc_t lda_,
+       double* restrict p_,              inc_t ldp_,
+       cntx_t* restrict cntx
      )
 {
     const int32_t* offsetPtr = &offsets[0];
@@ -608,7 +610,8 @@ void bli_dpackm_knl_asm_24xk
           "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
           "zmm30", "zmm31",
           "rax", "rbx", "rcx", "rdi", "rsi",
-          "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "memory"
+          "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+          "k0", "k1", "k2", "k3", "ymm0", "ymm1", "ymm2", "ymm3", "memory"
     )
 
 	}
@@ -634,7 +637,7 @@ void bli_dpackm_knl_asm_24xk
 			const dim_t      i      = cdim;
 			const dim_t      m_edge = mnr - i;
 			const dim_t      n_edge = n_max;
-			double* restrict p_edge = ( double* )p + (i  )*1;
+			double* restrict p_edge = p + (i  )*1;
 
 			bli_dset0s_mxn
 			(
@@ -650,7 +653,7 @@ void bli_dpackm_knl_asm_24xk
 		const dim_t      j      = n;
 		const dim_t      m_edge = mnr;
 		const dim_t      n_edge = n_max - j;
-		double* restrict p_edge = ( double* )p + (j  )*ldp;
+		double* restrict p_edge = p + (j  )*ldp;
 
 		bli_dset0s_mxn
 		(

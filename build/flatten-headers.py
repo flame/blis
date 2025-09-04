@@ -1,10 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
-#  BLIS
+#  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
+#  Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -110,7 +111,7 @@ def print_usage():
 
 def canonicalize_ws( s ):
 
-	return re.sub( '\s+', ' ', s ).strip()
+	return re.sub( r'\s+', ' ', s ).strip()
 
 # ---
 
@@ -166,7 +167,7 @@ def list_contains_header( items ):
 	rval = False
 	for item in items:
 
-		is_h = re.search( "\.h", item )
+		is_h = re.search( r"\.h", item )
 
 		if is_h:
 			rval = True
@@ -198,7 +199,7 @@ def get_header_path( filename, header_dirpaths ):
 
 def strip_cstyle_comments( string ):
 
-	return re.sub( "/\*.*?\*/", "", string, flags=re.S )
+	return re.sub( r"/\*.*?\*/", "", string, flags=re.S )
 
 # ------------------------------------------------------------------------------
 
@@ -215,18 +216,8 @@ def flatten_header( inputfile, header_dirpaths, cursp ):
 	# Open the input file to process.
 	ifile = open( inputfile, "r" )
 
-	# A counter to track the line number being parsed within the current file.
-	# This counter, when selectively encoded into the flattened header via #line
-	# directives, facilitates easier debugging. (When the compiler finds an
-	# issue, it will be able to refer to the line number within the constituent
-	# header file rather than the flattened one.)
-	lineno = 0
-
 	# Iterate over the lines in the file.
 	while True:
-
-		# Increment the line number.
-		lineno += 1
 
 		# Read a line in the file.
 		line = ifile.readline()
@@ -278,16 +269,12 @@ def flatten_header( inputfile, header_dirpaths, cursp ):
 
 				# Mark the beginning of the header being inserted.
 				ostring += "%s%s%c" % ( beginstr, header, '\n' )
-				if line_numbers:
-					ostring += "#line %d \"%s\"%c\n" % ( 1, header_path, '\n' )
 
 				# Recurse on the header, accumulating the string.
 				ostring += flatten_header( header_path, header_dirpaths, cursp + "  " )
 
 				# Mark the end of the header being inserted.
 				ostring += "%s%s%c" % ( endstr, header, '\n' )
-				if line_numbers:
-					ostring += "#line %d \"%s\"%c\n" % ( lineno+1, inputfile, '\n' )
 
 				echov2( "%sheader file '%s' fully processed." \
 				        % ( cursp, header_path ) )
@@ -314,7 +301,7 @@ def flatten_header( inputfile, header_dirpaths, cursp ):
 		# endif
 
 	# endwhile
-
+	
 	# Close the input file.
 	ifile.close()
 
@@ -344,6 +331,7 @@ def find_header_dirs( dirpath ):
 	#endfor
 
 	return header_dirpaths
+	
 
 # ------------------------------------------------------------------------------
 
@@ -352,7 +340,6 @@ script_name    = None
 output_name    = None
 strip_comments = None
 recursive_flag = None
-line_numbers   = None
 verbose_flag   = None
 regex          = None
 root_inputfile = None
@@ -363,7 +350,6 @@ def main():
 	global output_name
 	global strip_comments
 	global recursive_flag
-	global line_numbers
 	global verbose_flag
 	global regex
 	global root_inputfile
@@ -375,14 +361,13 @@ def main():
 
 	strip_comments = False
 	recursive_flag = False
-	line_numbers   = False
 	verbose_flag   = "1"
 
 	nestsp         = "  "
 
 	# Process our command line options.
 	try:
-		opts, args = getopt.getopt( sys.argv[1:], "o:rclhv:" )
+		opts, args = getopt.getopt( sys.argv[1:], "o:rchv:" )
 
 	except getopt.GetoptError as err:
 		# print help information and exit:
@@ -395,8 +380,6 @@ def main():
 			output_name = optarg
 		elif opt == "-r":
 			recursive_flag = True
-		elif opt == "-l":
-			line_numbers = True
 		elif opt == "-c":
 			strip_comments = True
 		elif opt == "-v":
@@ -408,9 +391,6 @@ def main():
 			print_usage()
 			sys.exit()
 
-	if line_numbers and strip_comments:
-		my_print( "WARNING: stripping comments will result in inaccurate line numbers" )
-
 	# Make sure that the verboseness level is valid.
 	if ( verbose_flag != "0" and
 	     verbose_flag != "1" and
@@ -419,8 +399,14 @@ def main():
 		                  % output_name, verbose_flag )
 		sys.exit()
 
-	# Print usage if we don't have exactly four arguments.
-	if len( args ) != 4:
+	# Print usage if we don't have minimum four arguments.
+	if len( args ) < 4:
+		print_usage()
+		sys.exit()
+	elif "||" in args[:4] or "'(set', 'FAIL_LINE=3&', 'goto', ':ABORT)'" in args[:4]:
+		print('\n==============================================')
+		print(sys.argv)
+		print('==============================================\n')
 		print_usage()
 		sys.exit()
 
@@ -527,7 +513,7 @@ def main():
 	# Precompile the main regular expression used to isolate #include
 	# directives and the headers they reference. This regex object will
 	# get reused over and over again in flatten_header().
-	regex = re.compile( '^[\s]*#include (["<])([\w\.\-/]*)([">])' )
+	regex = re.compile( r'^[\s]*#include (["<])([\w\.\-/]*)([">])' )
 
 	# Recursively substitute headers for occurrences of #include directives.
 	final_string = flatten_header( inputfile, header_dirpaths, nestsp )

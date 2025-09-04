@@ -82,7 +82,7 @@ int main( int argc, char** argv )
 	m_input = 6;
 #endif
 
-	// her supports complex and double complex
+	// her supports complex and double complex 
 	dt_alpha = dt_x = dt_a = BLIS_DCOMPLEX;
 
 	uplo = BLIS_LOWER;
@@ -125,7 +125,7 @@ int main( int argc, char** argv )
 
 
 		bli_copym( &a, &a_save );
-
+	
 		dtime_save = DBL_MAX;
 
 		for ( r = 0; r < n_repeats; ++r )
@@ -141,75 +141,45 @@ int main( int argc, char** argv )
 #endif
 
 #ifdef BLIS
+			//bli_obj_toggle_conj( &x );
 
+			//bli_syr( &alpha,
 			bli_her( &alpha,
 			         &x,
 			         &a );
 
 #else
-			if ( bli_is_float( dt_a ) )
+			if ( bli_is_scomplex( dt_a ) )
 			{
 				f77_char uplo   = 'L';
 				f77_int  mm     = bli_obj_length( &a );
 				f77_int  incx   = bli_obj_vector_inc( &x );
 				f77_int  lda    = bli_obj_col_stride( &a );
-				float*   alphap = bli_obj_buffer( &alpha );
-				float*   xp     = bli_obj_buffer( &x );
-				float*   ap     = bli_obj_buffer( &a );
+				float*  alphap = bli_obj_buffer( &alpha );
+				scomplex* xp   = bli_obj_buffer( &x );
+				scomplex* ap   = bli_obj_buffer( &a );
 
-				ssyr_( &uplo,
-				       &mm,
-				       alphap,
-				       xp, &incx,
-				       ap, &lda );
+				cher_( &uplo,
+					&mm,
+					alphap,
+					xp, &incx,
+					ap, &lda );
 			}
-			else if ( bli_is_double( dt_a ) )
+			else if ( bli_is_dcomplex( dt_a ) )
 			{
 				f77_char uplo   = 'L';
 				f77_int  mm     = bli_obj_length( &a );
 				f77_int  incx   = bli_obj_vector_inc( &x );
 				f77_int  lda    = bli_obj_col_stride( &a );
 				double*  alphap = bli_obj_buffer( &alpha );
-				double*  xp     = bli_obj_buffer( &x );
-				double*  ap     = bli_obj_buffer( &a );
-
-				dsyr_( &uplo,
-				       &mm,
-				       alphap,
-				       xp, &incx,
-				       ap, &lda );
-			}
-			else if ( bli_is_scomplex( dt_a ) )
-			{
-				f77_char  uplo   = 'L';
-				f77_int   mm     = bli_obj_length( &a );
-				f77_int   incx   = bli_obj_vector_inc( &x );
-				f77_int   lda    = bli_obj_col_stride( &a );
-				float*    alphap = bli_obj_buffer( &alpha );
-				scomplex* xp     = bli_obj_buffer( &x );
-				scomplex* ap     = bli_obj_buffer( &a );
-
-				cher_( &uplo,
-				       &mm,
-				       alphap,
-				       xp, &incx,
-				       ap, &lda );
-			}
-			else if ( bli_is_dcomplex( dt_a ) )
-			{
-				f77_char  uplo   = 'L';
-				f77_int   mm     = bli_obj_length( &a );
-				f77_int   incx   = bli_obj_vector_inc( &x );
-				f77_int   lda    = bli_obj_col_stride( &a );
-				double*   alphap = bli_obj_buffer( &alpha );
-				dcomplex* xp     = bli_obj_buffer( &x );
-				dcomplex* ap     = bli_obj_buffer( &a );
+				dcomplex* xp   = bli_obj_buffer( &x );
+				dcomplex* ap   = bli_obj_buffer( &a );
 
 				zher_( &uplo,
-				       &mm,
-				       alphap,
-				       xp, &incx,
-				       ap, &lda );
+					&mm,
+					alphap,
+					xp, &incx,
+					ap, &lda );
 			}
 #endif
 

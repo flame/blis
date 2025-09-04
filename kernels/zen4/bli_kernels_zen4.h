@@ -1,0 +1,602 @@
+/*
+
+   BLIS
+   An object-based framework for developing high-performance BLAS-like
+   libraries.
+
+   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
+   met:
+    - Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    - Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+   HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
+// Including the header for tiny gemm kernel signatures
+#include "bli_gemm_tiny_zen4.h"
+
+// -- level-1v --
+
+// addv (intrinsics)
+ADDV_KER_PROT( double,   d, addv_zen4_int )
+
+// amaxv (intrinsics)
+AMAXV_KER_PROT( float,    s, amaxv_zen4_int )
+BLIS_EXPORT_BLIS AMAXV_KER_PROT( double,   d, amaxv_zen4_int )
+
+// scalv (AVX512 intrinsics)
+SCALV_KER_PROT( float,     s, scalv_zen4_int )
+BLIS_EXPORT_BLIS SCALV_KER_PROT( double,    d, scalv_zen4_int )
+SCALV_KER_PROT( scomplex,  c, scalv_zen4_int )
+SCALV_KER_PROT( dcomplex,  z, scalv_zen4_int )
+SCALV_KER_PROT( dcomplex,  z, dscalv_zen4_int) // ZDSCAL kernel
+
+// setv (intrinsics)
+SETV_KER_PROT(float,    s, setv_zen4_int)
+SETV_KER_PROT(double,   d, setv_zen4_int)
+SETV_KER_PROT(dcomplex, z, setv_zen4_int)
+
+// dotv (intrinsics)
+DOTV_KER_PROT( float,    s, dotv_zen4_int )
+DOTV_KER_PROT( double,   d, dotv_zen4_int )
+DOTV_KER_PROT( dcomplex, z, dotv_zen4_int )
+DOTV_KER_PROT( dcomplex, z, dotv_zen4_asm )
+
+// axpyv (intrinsics)
+AXPYV_KER_PROT( float,    s, axpyv_zen4_int )
+BLIS_EXPORT_BLIS AXPYV_KER_PROT( double,   d, axpyv_zen4_int )
+AXPYV_KER_PROT( dcomplex, z, axpyv_zen4_int )
+
+// axpbyv ( intrinsics )
+AXPBYV_KER_PROT( double, d, axpbyv_zen4_int );
+
+// axpyf (intrinsics)
+AXPYF_KER_PROT( dcomplex, z, axpyf_zen4_int_2 )
+AXPYF_KER_PROT( dcomplex, z, axpyf_zen4_int_4 )
+AXPYF_KER_PROT( dcomplex, z, axpyf_zen4_int_8 )
+
+// axpyf (intrinsics)
+AXPYF_KER_PROT( double,   d, axpyf_zen4_int )
+AXPYF_KER_PROT( double,   d, axpyf_zen4_int_2 )
+AXPYF_KER_PROT( double,   d, axpyf_zen4_int_4 )
+AXPYF_KER_PROT( double,   d, axpyf_zen4_int_6 )
+AXPYF_KER_PROT( double,   d, axpyf_zen4_int_8 )
+AXPYF_KER_PROT( double,   d, axpyf_zen4_int_12 )
+AXPYF_KER_PROT( double,   d, axpyf_zen4_int_16 )
+AXPYF_KER_PROT( double,   d, axpyf_zen4_int_32 )
+#ifdef BLIS_ENABLE_OPENMP
+AXPYF_KER_PROT( double,   d, axpyf_zen4_int_32_mt )
+#endif
+
+// dotxf (intrinsics)
+DOTXF_KER_PROT( double,   d, dotxf_zen4_int )
+
+// copyv (intrinsics)
+// COPYV_KER_PROT( float,    s, copyv_zen4_int )
+// COPYV_KER_PROT( double,   d, copyv_zen4_int )
+// COPYV_KER_PROT( dcomplex, z, copyv_zen4_int )
+
+// copyv (asm)
+COPYV_KER_PROT( float,    s, copyv_zen4_asm )
+COPYV_KER_PROT( double,   d, copyv_zen4_asm )
+COPYV_KER_PROT( double,   d, copyv_zen4_asm_biway )
+COPYV_KER_PROT( dcomplex, z, copyv_zen4_asm )
+
+// scal2v (intrinsics)
+SCAL2V_KER_PROT(double,   d, scal2v_zen4_int)
+
+// dotxv (intrinsics)
+DOTXV_KER_PROT( dcomplex, z, dotxv_zen4_int )
+
+// dotxf (intrinsics)
+DOTXF_KER_PROT( dcomplex, z, dotxf_zen4_int_8 )
+DOTXF_KER_PROT( dcomplex, z, dotxf_zen4_int_4 )
+DOTXF_KER_PROT( dcomplex, z, dotxf_zen4_int_2 )
+
+// gemv (intrinsics)
+// dgemv_n kernels for handling op(A) = 'n', i.e., transa = 'n' cases.
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx8 )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx7 )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx6 )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx5 )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx4 )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx3 )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx2 )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx1 )
+
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_32x8n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16x8n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_8x8n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_m_leftx8n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_32x4n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16x4n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_8x4n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_m_leftx4n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_32x3n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16x3n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_8x3n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_m_leftx3n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_32x2n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16x2n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_8x2n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_m_leftx2n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_32x1n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16x1n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_8x1n )
+GEMV_KER_PROT( double,  d, gemv_n_zen4_int_m_leftx1n )
+
+// dgemv_t kernels for handling op(A) = 't', i.e., transa = 't' cases.
+// export gemv kernel so that it can be directly called avoiding blis overhead.
+BLIS_EXPORT void bli_dgemv_t_zen4_int
+     (
+       conj_t conja,
+       conj_t conjx,
+       dim_t m,
+       dim_t n,
+       double* restrict alpha,
+       double* restrict a,
+       inc_t rs,
+       inc_t cs,
+       double* restrict x,
+       inc_t incx,
+       double* restrict beta,
+       double* restrict y,
+       inc_t incy,
+       cntx_t* restrict cntx
+      );
+
+GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x7m )
+GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x6m )
+GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x5m )
+GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x4m )
+GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x3m )
+GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x2m )
+GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x1m )
+
+GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_l_zen4_asm_16x14)
+GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_zen4_asm_16x14)
+GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_l_zen4_asm_8x24)
+GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_zen4_asm_8x24)
+GEMMTRSM_UKR_PROT( dcomplex, z, gemmtrsm_l_zen4_asm_4x12)
+GEMMTRSM_UKR_PROT( dcomplex, z, gemmtrsm_u_zen4_asm_4x12)
+
+//packing kernels
+PACKM_KER_PROT( double,   d, packm_zen4_asm_16xk )
+PACKM_KER_PROT( double,   d, packm_zen4_asm_8xk )
+PACKM_KER_PROT( double,   d, packm_zen4_asm_24xk )
+PACKM_KER_PROT( double,   d, packm_zen4_asm_32xk )
+PACKM_KER_PROT( double,   d, packm_32xk_zen4_ref )
+PACKM_KER_PROT( scomplex, c, packm_zen4_asm_24xk )
+PACKM_KER_PROT( scomplex, c, packm_zen4_asm_4xk )
+PACKM_KER_PROT( dcomplex, z, packm_zen4_asm_12xk )
+PACKM_KER_PROT( dcomplex, z, packm_zen4_asm_4xk )
+
+// native dgemm kernel
+GEMM_UKR_PROT( double,   d, gemm_zen4_asm_8x24 )
+GEMM_UKR_PROT( double,   d, gemm_zen4_asm_32x6 )
+GEMM_UKR_PROT( dcomplex, z, gemm_zen4_asm_12x4 )
+GEMM_UKR_PROT( dcomplex, z, gemm_zen4_asm_4x12 )
+GEMM_UKR_PROT( scomplex, c, gemm_zen4_asm_24x4 )
+GEMM_UKR_PROT( scomplex, c, gemm_zen4_asm_4x24 )
+
+// dgemm native macro kernel
+void bli_dgemm_zen4_asm_8x24_macro_kernel
+(
+    dim_t   n,
+    dim_t   m,
+    dim_t   k,
+    double* c,
+    double* a,
+    double* b,
+    dim_t   ldc,
+    double* beta
+);
+
+
+//sgemm rv sup
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_6x64m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_6x48m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_6x32m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_6x16m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_4x64m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_4x48m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_4x32m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_4x16m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_2x64m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_2x48m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_2x32m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_2x16m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_1x64m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_1x48m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_1x32m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_1x16m )
+
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_6x64n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_5x64n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_4x64n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_3x64n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_2x64n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_1x64n )
+
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_5x48 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_5x32 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_5x16 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_3x48 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_3x32 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen4_asm_3x16 )
+
+// sgemm rd sup
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_6x64m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_6x48m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_6x32m )
+
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_3x64n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_2x64n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_6x64n )
+
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_5x64 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_4x64 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_3x64 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_2x64 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_1x64 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_5x48 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_4x48 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_3x48 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_2x48 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_1x48 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_5x32 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_4x32 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_3x32 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_2x32 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen4_asm_1x32 )
+
+TRSMSMALL_PROT(trsm_small_zen4)
+TRSMSMALL_KER_PROT( d, trsm_small_zen4_int_AutXB_AlXB )
+TRSMSMALL_KER_PROT( d, trsm_small_zen4_int_XAltB_XAuB )
+TRSMSMALL_KER_PROT( d, trsm_small_zen4_int_XAutB_XAlB )
+TRSMSMALL_KER_PROT( d, trsm_small_zen4_int_AltXB_AuXB )
+TRSMSMALL_KER_PROT( z, trsm_small_zen4_int_AutXB_AlXB )
+TRSMSMALL_KER_PROT( z, trsm_small_zen4_int_XAltB_XAuB )
+TRSMSMALL_KER_PROT( z, trsm_small_zen4_int_XAutB_XAlB )
+TRSMSMALL_KER_PROT( z, trsm_small_zen4_int_AltXB_AuXB )
+
+#ifdef BLIS_ENABLE_OPENMP
+TRSMSMALL_PROT(trsm_small_zen4_mt)
+#endif
+
+// Dgemm sup RV kernels
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x8m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x7m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x6m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x5m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x4m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x3m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x2m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x1m)
+
+
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x8m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x7m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x6m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x5m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x4m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x3m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x2m_new)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x1m_new)
+
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x8)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x8)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x8m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x8m_lower)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x8m_upper)
+
+/* DGEMMT 24x8 triangular kernels */
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x8m_lower_0)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x8m_lower_1)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x8m_lower_2)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x8m_upper_0)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x8m_upper_1)
+GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen4_asm_24x8m_upper_2)
+
+GEMMSUP_KER_PROT( dcomplex,  z, gemmsup_rv_zen4_asm_4x4m)
+GEMMSUP_KER_PROT( dcomplex,  z, gemmsup_rv_zen4_asm_4x4m_lower)
+GEMMSUP_KER_PROT( dcomplex,  z, gemmsup_rv_zen4_asm_4x4m_upper)
+
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x7)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x7)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x7)
+
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x6)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x6)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x6)
+
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x5)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x5)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x5)
+
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x4)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x4)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x4)
+
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x3)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x3)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x3)
+
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x2)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x2)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x2)
+
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x1)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x1)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x1)
+
+// Cgemm sup CV kernels
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_cv_zen4_asm_24x4m )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_cv_zen4_asm_24x3m )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_cv_zen4_asm_24x2m )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_cv_zen4_asm_24x1m )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_cv_zen4_asm_16x4 )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_cv_zen4_asm_16x3 )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_cv_zen4_asm_16x2 )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_cv_zen4_asm_16x1 )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_cv_zen4_asm_8x4 )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_cv_zen4_asm_8x3 )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_cv_zen4_asm_8x2 )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_cv_zen4_asm_8x1 )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_cv_zen4_asm_fx4 )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_cv_zen4_asm_fx3 )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_cv_zen4_asm_fx2 )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_cv_zen4_asm_fx1 )
+
+// Zgemm sup CV kernels
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_12x4m )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_12x3m )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_12x2m )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_12x1m )
+
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_8x4 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_8x3 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_8x2 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_8x1 )
+
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_fx4 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_fx3 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_fx2 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_fx1 )
+
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_4x4 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_4x3 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_4x2 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_4x1 )
+
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_2x4 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_2x3 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_2x2 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_2x1 )
+
+// Zgemm sup CD kernels
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_12x4m )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_12x2m )
+
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_8x4 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_8x2 )
+
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_4x4 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_4x2 )
+
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_2x4 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cd_zen4_asm_2x2 )
+
+err_t bli_dgemm_zen4_int_24x8_k1_nn
+    (
+      dim_t m,
+      dim_t n,
+      dim_t k,
+      double* alpha,
+      double* a, const inc_t lda,
+      double* b, const inc_t ldb,
+      double* beta,
+      double* c, const inc_t ldc
+     );
+
+err_t bli_dgemm_tiny_zen4_24x8
+     (
+        conj_t              conja,
+        conj_t              conjb,
+        trans_t transa,
+        trans_t transb,
+        dim_t  m,
+        dim_t  n,
+        dim_t  k,
+        const double*    alpha,
+        const double*    a, const inc_t rs_a0, const inc_t cs_a0,
+        const double*    b, const inc_t rs_b0, const inc_t cs_b0,
+        const double*    beta,
+        double*    c, const inc_t rs_c0, const inc_t cs_c0
+     );
+
+void bli_dnorm2fv_zen4_int_unb_var1
+     (
+       dim_t    n,
+       double*   x, inc_t incx,
+       double* norm,
+       cntx_t*  cntx
+     );
+
+void bli_cgemm_zen4_int_32x4_k1_nn
+(
+    dim_t  m,
+    dim_t  n,
+    dim_t  k,
+    scomplex*    alpha,
+    scomplex*    a, const inc_t lda,
+    scomplex*    b, const inc_t ldb,
+    scomplex*    beta,
+    scomplex*    c, const inc_t ldc
+);
+
+
+err_t bli_zgemm_zen4_int_16x4_k1_nn
+(
+    dim_t  m,
+    dim_t  n,
+    dim_t  k,
+    dcomplex*    alpha,
+    dcomplex*    a, const inc_t lda,
+    dcomplex*    b, const inc_t ldb,
+    dcomplex*    beta,
+    dcomplex*    c, const inc_t ldc
+);
+
+// threshold functions
+bool bli_cntx_gemmsup_thresh_is_met_zen4
+	 (
+		obj_t*  a,
+		obj_t*  b,
+		obj_t*  c,
+		cntx_t* cntx
+	 );
+
+// dynamic blocksizes function
+void bli_dynamic_blkszs_zen4
+    (
+      dim_t n_threads,
+      cntx_t* cntx,
+      num_t dt
+    );
+
+// function for resetting zmm registers after L3 apis
+void bli_zero_zmm();
+
+void bli_dgemv_n_zen4_int_32x8_st
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     );
+
+void bli_dgemv_n_zen4_int
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     );
+
+BLIS_EXPORT void bli_dgemv_n_zen4_int_40x2_st
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     );
+
+void bli_dgemv_n_zen4_int_40x2_mt
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     );
+
+void bli_dgemv_m_zen4_int_40x8_st
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     );
+
+void bli_dgemv_m_zen4_int_40x8_mt_Ndiv
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     );
+
+     void bli_dgemv_m_zen4_int_40x8_mt_Mdiv
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     );
+
+     void bli_dgemv_m_zen4_int_40x8_mt_Mdiv_Ndiv
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     );

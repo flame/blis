@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,82 +33,147 @@
 
 */
 
+// Including the header for tiny gemm kernel signatures
+#include "bli_gemm_tiny_zen.h"
+
 // -- level-1m --
-PACKM_KER_PROT(double, d, packm_8xk_gen_zen)
-PACKM_KER_PROT(double, d, packm_6xk_gen_zen)
-PACKM_KER_PROT(double, d, packm_8xk_nn_zen)
-PACKM_KER_PROT(double, d, packm_6xk_nn_zen)
+// Removed - reference packm kernels are used
 
 
 // -- level-1v --
 
 // amaxv (intrinsics)
+ADDV_KER_PROT( float,    s, addv_zen_int )
+ADDV_KER_PROT( double,   d, addv_zen_int )
+ADDV_KER_PROT( scomplex, c, addv_zen_int )
+ADDV_KER_PROT( dcomplex, z, addv_zen_int )
+
+// amaxv (intrinsics)
 AMAXV_KER_PROT( float,    s, amaxv_zen_int )
-AMAXV_KER_PROT( double,   d, amaxv_zen_int )
+BLIS_EXPORT_BLIS AMAXV_KER_PROT( double,   d, amaxv_zen_int )
+
+// axpbyv (intrinsics)
+AXPBYV_KER_PROT( float,    s, axpbyv_zen_int )
+AXPBYV_KER_PROT( double,   d, axpbyv_zen_int )
+AXPBYV_KER_PROT( scomplex, c, axpbyv_zen_int )
+AXPBYV_KER_PROT( dcomplex, z, axpbyv_zen_int )
+
+// axpbyv (intrinsics, unrolled x10)
+AXPBYV_KER_PROT( float,    s, axpbyv_zen_int_10 )
+AXPBYV_KER_PROT( double,   d, axpbyv_zen_int_10 )
 
 // axpyv (intrinsics)
 AXPYV_KER_PROT( float,    s, axpyv_zen_int )
 AXPYV_KER_PROT( double,   d, axpyv_zen_int )
 
 // axpyv (intrinsics unrolled x10)
-AXPYV_KER_PROT( float,    s, axpyv_zen_int10 )
-AXPYV_KER_PROT( double,   d, axpyv_zen_int10 )
+AXPYV_KER_PROT( float,    s, axpyv_zen_int_10 )
+BLIS_EXPORT_BLIS AXPYV_KER_PROT( double,   d, axpyv_zen_int_10 )
+AXPYV_KER_PROT( scomplex, c, axpyv_zen_int_5 )
+AXPYV_KER_PROT( dcomplex, z, axpyv_zen_int_5 )
 
 // dotv (intrinsics)
 DOTV_KER_PROT( float,    s, dotv_zen_int )
 DOTV_KER_PROT( double,   d, dotv_zen_int )
 
 // dotv (intrinsics, unrolled x10)
-DOTV_KER_PROT( float,    s, dotv_zen_int10 )
-DOTV_KER_PROT( double,   d, dotv_zen_int10 )
+DOTV_KER_PROT( float,    s, dotv_zen_int_10 )
+DOTV_KER_PROT( double,   d, dotv_zen_int_10 )
+DOTV_KER_PROT( scomplex,  c, dotv_zen_int_5 )
+DOTV_KER_PROT( dcomplex,  z, dotv_zen_int_5 )
 
 // dotxv (intrinsics)
 DOTXV_KER_PROT( float,    s, dotxv_zen_int )
 DOTXV_KER_PROT( double,   d, dotxv_zen_int )
+DOTXV_KER_PROT( dcomplex, z, dotxv_zen_int )
+DOTXV_KER_PROT( scomplex, c, dotxv_zen_int )
 
 // scalv (intrinsics)
 SCALV_KER_PROT( float,    s, scalv_zen_int )
 SCALV_KER_PROT( double,   d, scalv_zen_int )
+SCALV_KER_PROT( scomplex, c, scalv_zen_int )
+SCALV_KER_PROT( dcomplex, z, scalv_zen_int )
 
 // scalv (intrinsics unrolled x10)
-SCALV_KER_PROT( float,    s, scalv_zen_int10 )
-SCALV_KER_PROT( double,   d, scalv_zen_int10 )
-SCALV_KER_PROT( scomplex, c, scalv_zen_int10 )
+SCALV_KER_PROT( float,      s, scalv_zen_int_10 )
+BLIS_EXPORT_BLIS SCALV_KER_PROT( double,     d, scalv_zen_int_10 )
+SCALV_KER_PROT( dcomplex,   z, dscalv_zen_int_10 )
 
 // swapv (intrinsics)
-SWAPV_KER_PROT(float,    s, swapv_zen_int8 )
-SWAPV_KER_PROT(double,   d, swapv_zen_int8 )
+SWAPV_KER_PROT(float,   s, swapv_zen_int_8 )
+BLIS_EXPORT_BLIS SWAPV_KER_PROT(double,  d, swapv_zen_int_8 )
 
 // copyv (intrinsics)
-COPYV_KER_PROT( float,    s, copyv_zen_int )
-COPYV_KER_PROT( double,   d, copyv_zen_int )
+COPYV_KER_PROT( float,      s, copyv_zen_int )
+COPYV_KER_PROT( double,     d, copyv_zen_int )
+COPYV_KER_PROT( scomplex,   c, copyv_zen_int )
+COPYV_KER_PROT( dcomplex,   z, copyv_zen_int )
 
-//
-SETV_KER_PROT(float,    s, setv_zen_int)
-SETV_KER_PROT(double,   d, setv_zen_int)
+// scal2v (intrinsics)
+SCAL2V_KER_PROT(float,    s, scal2v_zen_int)
+SCAL2V_KER_PROT(double,   d, scal2v_zen_int)
+SCAL2V_KER_PROT(scomplex, c, scal2v_zen_int)
+SCAL2V_KER_PROT(dcomplex, z, scal2v_zen_int)
 
-// swapv (intrinsics)
-SWAPV_KER_PROT(float, 	s, swapv_zen_int8 )
-SWAPV_KER_PROT(double,	d, swapv_zen_int8 )
-
+// setv (intrinsics)
+SETV_KER_PROT( float,    s, setv_zen_int)
+SETV_KER_PROT( double,   d, setv_zen_int)
+SETV_KER_PROT( scomplex, c, setv_zen_int)
+SETV_KER_PROT( dcomplex, z, setv_zen_int)
 
 // -- level-1f --
 
 // axpyf (intrinsics)
 AXPYF_KER_PROT( float,    s, axpyf_zen_int_8 )
 AXPYF_KER_PROT( double,   d, axpyf_zen_int_8 )
-AXPYF_KER_PROT( float,    s, axpyf_zen_int_5 )
-AXPYF_KER_PROT( double,   d, axpyf_zen_int_5 )
-
 AXPYF_KER_PROT( double,   d, axpyf_zen_int_16x4 )
+AXPYF_KER_PROT( double,   d, axpyf_zen_int_16x2 )
+
+AXPYF_KER_PROT( float,    s, axpyf_zen_int_5 )
+AXPYF_KER_PROT( float,    s, axpyf_zen_int_6 )
+AXPYF_KER_PROT( double,   d, axpyf_zen_int_5 )
+AXPYF_KER_PROT( scomplex, c, axpyf_zen_int_5 )
 AXPYF_KER_PROT( scomplex, c, axpyf_zen_int_4 )
+AXPYF_KER_PROT( dcomplex, z, axpyf_zen_int_5 )
+AXPYF_KER_PROT( dcomplex, z, axpyf_zen_int_4 )
+// axpy2v (intrinsics)
+AXPY2V_KER_PROT(double, d, axpy2v_zen_int )
+AXPY2V_KER_PROT(dcomplex, z, axpy2v_zen_int )
 
 // dotxf (intrinsics)
 DOTXF_KER_PROT( float,    s, dotxf_zen_int_8 )
 DOTXF_KER_PROT( double,   d, dotxf_zen_int_8 )
+DOTXF_KER_PROT( double,   d, dotxf_zen_int_4 )
+DOTXF_KER_PROT( double,   d, dotxf_zen_int_2 )
+DOTXF_KER_PROT( dcomplex,   z, dotxf_zen_int_6 )
+DOTXF_KER_PROT( scomplex,   c, dotxf_zen_int_6 )
+// dotxaxpyf (intrinsics)
+DOTXAXPYF_KER_PROT( double,   d, dotxaxpyf_zen_int_8 )
+DOTXAXPYF_KER_PROT( scomplex, c, dotxaxpyf_zen_int_8 )
+DOTXAXPYF_KER_PROT( dcomplex, z, dotxaxpyf_zen_int_8 )
+
+// -- level-2 ----------------------------------------------------------------
+
+//gemv(scalar code)
+GEMV_KER_PROT( double,   d,  gemv_zen_ref_c )
+GEMV_KER_PROT( scomplex, c,  gemv_zen_int_4x4 )
+GEMV_KER_PROT( dcomplex, z,  gemv_zen_int_4x4 )
+
+// gemv (intrinsics)
+GEMV_KER_PROT( double,  d, gemv_t_zen_int )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_16x7m )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_16x6m )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_16x5m )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_16x4m )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_16x3m )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_16x2m )
+GEMV_KER_PROT( double,  d, gemv_t_zen_int_16x1m )
+
+// her (intrinsics)
+HER_KER_PROT( dcomplex, z,  her_zen_int_var1 )
+HER_KER_PROT( dcomplex, z,  her_zen_int_var2 )
 
 // -- level-3 sup --------------------------------------------------------------
-
 // semmsup_rv
 
 //GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x16 )
@@ -126,7 +191,7 @@ GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x8 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x8 )
 
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x4 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x4 ) 
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x4 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x4 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x4 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x4 )
@@ -151,6 +216,33 @@ GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x16m )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x8m )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x4m )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x2m )
+//gemmsup_rv (mkernel in m dim) for mask load/store
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x16m_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x8m_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x4m_mask )
+GEMMSUP_KER_PROT( float,   s, bli_sgemmsup_rv_zen_asm_6x8m )
+GEMMSUP_KER_PROT( float,   s, bli_sgemmsup_rv_zen_asm_6x4m )
+GEMMSUP_KER_PROT( float,   s, bli_sgemmsup_rv_zen_asm_6x2m )
+
+//gemmsup_rv (mkernel in m dim) for fringe case
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x16_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x16_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x16_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x16_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x16_mask )
+
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x8_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x8_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x8_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x8_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x8_mask )
+
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x4_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x4_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x4_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x4_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x4_mask )
+
 // gemmsup_rv (mkernel in n dim)
 
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x16n )
@@ -197,6 +289,17 @@ GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_1x4 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_2x2 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_1x2 )
 
+//gemmsup_rd
+
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rd_zen_asm_3x4m )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rd_zen_asm_3x2m )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rd_zen_asm_2x4 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rd_zen_asm_1x4 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rd_zen_asm_2x2 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rd_zen_asm_1x2 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rd_zen_asm_3x4n )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rd_zen_asm_2x4n )
+
 // gemmsup_rv (mkernel in n dim)
 
 
@@ -211,3 +314,245 @@ GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_1x4n )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x2 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x1 )
 
+err_t bli_dgemm_tiny
+(
+        trans_t transa,
+        trans_t transb,
+        dim_t  m,
+        dim_t  n,
+        dim_t  k,
+        const double*    alpha,
+        const double*    a, const inc_t rs_a0, const inc_t cs_a0,
+        const double*    b, const inc_t rs_b0, const inc_t cs_b0,
+        const double*    beta,
+        double*    c, const inc_t rs_c0, const inc_t cs_c0
+);
+
+err_t bli_dgemm_tiny_zen_6x8
+     (
+        conj_t              conja,
+        conj_t              conjb,
+        trans_t transa,
+        trans_t transb,
+        dim_t  m,
+        dim_t  n,
+        dim_t  k,
+        const double*    alpha,
+        const double*    a, const inc_t rs_a0, const inc_t cs_a0,
+        const double*    b, const inc_t rs_b0, const inc_t cs_b0,
+        const double*    beta,
+        double*    c, const inc_t rs_c0, const inc_t cs_c0
+     );
+
+err_t bli_dgemm_small
+    (
+      obj_t*  alpha,
+      obj_t*  a,
+      obj_t*  b,
+      obj_t*  beta,
+      obj_t*  c,
+      cntx_t* cntx,
+      cntl_t* cntl
+    );
+
+err_t bli_dgemm_small_At
+    (
+      obj_t*  alpha,
+      obj_t*  a,
+      obj_t*  b,
+      obj_t*  beta,
+      obj_t*  c,
+      cntx_t* cntx,
+      cntl_t* cntl
+    );
+
+err_t bli_zgemm_small
+    (
+      obj_t*  alpha,
+      obj_t*  a,
+      obj_t*  b,
+      obj_t*  beta,
+      obj_t*  c,
+      cntx_t* cntx,
+      cntl_t* cntl
+    );
+
+err_t bli_zgemm_small_At
+    (
+      obj_t*  alpha,
+      obj_t*  a,
+      obj_t*  b,
+      obj_t*  beta,
+      obj_t*  c,
+      cntx_t* cntx,
+      cntl_t* cntl
+    );
+
+err_t bli_dgemm_zen_int_8x6_k1_nn
+    (
+      dim_t m,
+      dim_t n,
+      dim_t k,
+      double* alpha,
+      double* a, const inc_t lda,
+      double* b, const inc_t ldb,
+      double* beta,
+      double* c, const inc_t ldc
+     );
+
+err_t bli_zgemm_zen_int_4x4_k1_nn
+    (
+      dim_t m,
+      dim_t n,
+      dim_t k,
+      dcomplex* alpha,
+      dcomplex* a, const inc_t lda,
+      dcomplex* b, const inc_t ldb,
+      dcomplex* beta,
+      dcomplex* c, const inc_t ldc
+     );
+
+err_t bli_trsm_small_zen
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       cntx_t* cntx,
+       cntl_t* cntl,
+       bool is_parallel
+     );
+
+#ifdef BLIS_ENABLE_OPENMP
+err_t bli_trsm_small_zen_mt
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       cntx_t* cntx,
+       cntl_t* cntl,
+      bool     is_parallel
+     );
+
+void bli_multi_sgemv_4x2
+    (
+       conj_t           conjat,
+       conj_t           conjx,
+       dim_t            m,
+       dim_t            b_n,
+       float*  restrict alpha,
+       float*  restrict a, inc_t inca, inc_t lda,
+       float*  restrict x, inc_t incx,
+       float*  restrict beta,
+       float*  restrict y, inc_t incy,
+       cntx_t* restrict cntx,
+       dim_t            n_threads
+     );
+
+#endif
+
+// threshold functions
+bool bli_cntx_gemmtsup_thresh_is_met_zen
+     (
+       obj_t* a,
+       obj_t* b,
+       obj_t* c,
+       cntx_t* cntx
+     );
+
+bool bli_cntx_syrksup_thresh_is_met_zen
+     (
+       obj_t* a,
+       obj_t* b,
+       obj_t* c,
+       cntx_t* cntx
+     );
+
+/*
+ * Check if the TRSM small path should be taken for this
+ * input and threads combination
+ */
+bool bli_cntx_trsm_small_thresh_is_met_zen
+     (
+        obj_t* a,
+        dim_t m,
+        dim_t n
+    );
+
+void bli_snorm2fv_zen_int_unb_var1
+     (
+       dim_t    n,
+       float*   x, inc_t incx,
+       float* norm,
+       cntx_t*  cntx
+     );
+
+void bli_dnorm2fv_zen_int_unb_var1
+     (
+       dim_t    n,
+       double*   x, inc_t incx,
+       double* norm,
+       cntx_t*  cntx
+     );
+
+void bli_scnorm2fv_zen_int_unb_var1
+     (
+       dim_t    n,
+       scomplex*   x, inc_t incx,
+       float* norm,
+       cntx_t*  cntx
+     );
+
+void bli_dznorm2fv_zen_int_unb_var1
+     (
+       dim_t    n,
+       dcomplex*   x, inc_t incx,
+       double* norm,
+       cntx_t*  cntx
+     );
+
+GEMM_UKR_PROT( dcomplex, z, gemm_zen_asm_2x6)
+
+GEMMTRSM_UKR_PROT( dcomplex,   z, gemmtrsm_l_zen_asm_2x6)
+GEMMTRSM_UKR_PROT( dcomplex,   z, gemmtrsm_u_zen_asm_2x6)
+
+void bli_dgemv_zen_ref
+    (
+       trans_t          transa,
+       dim_t            m,
+       dim_t            b_n,
+       double* restrict alpha,
+       double* restrict a, inc_t inca, inc_t lda,
+       double* restrict x, inc_t incx,
+       double* restrict beta,
+       double* restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     );
+
+void bli_sgemv_zen_ref
+    (
+       trans_t          transa,
+       dim_t            m,
+       dim_t            b_n,
+       float* restrict alpha,
+       float* restrict a, inc_t inca, inc_t lda,
+       float* restrict x, inc_t incx,
+       float* restrict beta,
+       float* restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     );
+
+void bli_dgemv_n_zen
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     );

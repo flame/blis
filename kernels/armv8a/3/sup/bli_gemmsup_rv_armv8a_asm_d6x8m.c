@@ -37,6 +37,7 @@
 #include "blis.h"
 #include "assert.h"
 
+GEMMSUP_KER_PROT( double, d, gemmsup_r_armv8a_ref2 )
 
 // Label locality & misc.
 #include "../armv8a_asm_utils.h"
@@ -129,94 +130,71 @@
  */
 void bli_dgemmsup_rv_armv8a_asm_6x8m
      (
-             conj_t     conja,
-             conj_t     conjb,
-             dim_t      m0,
-             dim_t      n0,
-             dim_t      k0,
-       const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
-       const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       double*    restrict alpha,
+       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
   if ( n0 != 8 )
   {
-    assert( n0 <= 13 );
+    if ( n0 < 8 )
+    {
+      for ( ; n0 >= 4; n0 -= 4 )
+      {
+	dgemmsup_ker_ft ukr_fp;
+	auxinfo_t data_d8xkm = *data;
+	if ( bli_auxinfo_ps_a( data ) == 6 * rs_a0 )
+	{
+	  // Use 8x4 Asm kernel for the unpacked case.
+	  bli_auxinfo_set_ps_a( 8 * rs_a0, &data_d8xkm );
+	  ukr_fp = bli_dgemmsup_rv_armv8a_asm_8x4m;
+	}
+	else
+	{
+	  // Cannot change dimension for m when A is packed.
+	  ukr_fp = bli_dgemmsup_rv_armv8a_int_6x4mn;
+	}
 
-    // Manual separation.
-    gemmsup_ker_ft ker_fp1 = NULL;
-    gemmsup_ker_ft ker_fp2 = NULL;
-    dim_t          nr1, nr2;
-
-    if ( n0 == 13 )
-    {
-      ker_fp1 = bli_dgemmsup_rv_armv8a_asm_6x7m; nr1 = 7;
-      ker_fp2 = bli_dgemmsup_rv_armv8a_asm_6x6m; nr2 = 6;
+	ukr_fp
+	(
+	  conja, conjb, m0, 4, k0,
+	  alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+	  beta, c, rs_c0, cs_c0, &data_d8xkm, cntx
+	);
+	b += 4 * cs_b0;
+	c += 4 * cs_c0;
+      }
+      if ( n0 > 0 )
+      {
+	bli_dgemmsup_rv_armv8a_int_6x4mn
+	(
+	  conja, conjb, m0, n0, k0,
+	  alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+	  beta, c, rs_c0, cs_c0, data, cntx
+	);
+      }
     }
-    if ( n0 == 12 )
+    else
     {
-      ker_fp1 = bli_dgemmsup_rv_armv8a_asm_6x6m; nr1 = 6;
-      ker_fp2 = bli_dgemmsup_rv_armv8a_asm_6x6m; nr2 = 6;
+      assert( FALSE );
     }
-    if ( n0 == 11 )
-    {
-      ker_fp1 = bli_dgemmsup_rv_armv8a_asm_6x6m; nr1 = 6;
-      ker_fp2 = bli_dgemmsup_rv_armv8a_asm_6x5m; nr2 = 5;
-    }
-    if ( n0 == 10 )
-    {
-      ker_fp1 = bli_dgemmsup_rv_armv8a_asm_6x5m; nr1 = 5;
-      ker_fp2 = bli_dgemmsup_rv_armv8a_asm_6x5m; nr2 = 5;
-    }
-    if ( n0 == 9 )
-    {
-      ker_fp1 = bli_dgemmsup_rv_armv8a_asm_6x5m; nr1 = 5;
-      ker_fp2 = bli_dgemmsup_rv_armv8a_int_6x4mn; nr2 = 4;
-    }
-    if ( n0 == 7 )
-    {
-      ker_fp1 = bli_dgemmsup_rv_armv8a_asm_6x7m; nr1 = 7;
-    }
-    if ( n0 == 6 )
-    {
-      ker_fp1 = bli_dgemmsup_rv_armv8a_asm_6x6m; nr1 = 6;
-    }
-    if ( n0 == 5 )
-    {
-      ker_fp1 = bli_dgemmsup_rv_armv8a_asm_6x5m; nr1 = 5;
-    }
-    if ( n0 <= 4 )
-    {
-      ker_fp1 = bli_dgemmsup_rv_armv8a_int_6x4mn; nr1 = n0;
-    }
-
-    ker_fp1
-    (
-      conja, conjb, m0, nr1, k0,
-      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-      beta, c, rs_c0, cs_c0, data, cntx
-    );
-    b = ( double* )b + nr1 * cs_b0;
-    c = ( double* )c + nr1 * cs_c0;
-    if ( ker_fp2 )
-      ker_fp2
-      (
-        conja, conjb, m0, nr2, k0,
-        alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-        beta, c, rs_c0, cs_c0, data, cntx
-      );
     return;
   }
 
   // LLVM has very bad routing ability for inline asm.
   // Limit number of registers in case of Clang compilation.
 #ifndef __clang__
-  const void* a_next = bli_auxinfo_next_a( data );
-  const void* b_next = bli_auxinfo_next_b( data );
+  void*    a_next = bli_auxinfo_next_a( data );
+  void*    b_next = bli_auxinfo_next_b( data );
 #endif
   uint64_t ps_a   = bli_auxinfo_ps_a( data );
 
@@ -554,16 +532,44 @@ LABEL(END_EXEC)
 
 consider_edge_cases:
   // Forward address.
-  a = ( double* )a + m_iter * ps_a;
-  c = ( double* )c + m_iter * 6 * rs_c;
+  a = a + m_iter * ps_a;
+  c = c + m_iter * 6 * rs_c;
+#if 1
   auxinfo_t data_d6x4mn = *data;
   bli_auxinfo_set_ps_b( 4 * cs_b0, &data_d6x4mn );
   bli_dgemmsup_rv_armv8a_int_6x4mn
   (
     conja, conjb, m_left, 8, k0,
-    alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-    beta, c, rs_c0, cs_c0, &data_d6x4mn, cntx
+      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+      beta, c, rs_c0, cs_c0, &data_d6x4mn, cntx
   );
+#else
+  if ( m_left >= 4 )
+  {
+    // Calls 4x8m with only 1 outermost loop.
+    // As only 1 outermost loop is called,
+    //  ps_a needs not being set here.
+    //
+    bli_dgemmsup_rv_armv8a_asm_4x8m
+    (
+      conja, conjb, 4, 8, k0,
+      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+      beta, c, rs_c0, cs_c0, data, cntx
+    );
+    m_left -= 4;
+    a = a + 4 * rs_a;
+    c = c + 4 * rs_c;
+  }
+  if ( m_left )
+  {
+    bli_dgemmsup_r_armv8a_ref2
+    (
+      conja, conjb, m_left, 8, k0,
+      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+      beta, c, rs_c0, cs_c0, data, cntx
+    );
+  }
+#endif
 
 }
 

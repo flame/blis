@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2021, The University of Texas at Austin
+   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -38,534 +39,515 @@
 // Define object-based interfaces (expert).
 //
 
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
+     ) \
+{ \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+	bli_init_once(); \
+\
+	/* If C has a zero dimension, return early.	*/	\
+	if ( bli_obj_has_zero_dim( c ) ) {\
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+		return;									 \
+	}\
+\
+	/* if alpha or A or B has a zero dimension, \
+	   scale C by beta and return early. */ \
+	if ( bli_obj_equals( alpha, &BLIS_ZERO ) || \
+	     bli_obj_has_zero_dim( a ) || \
+	     bli_obj_has_zero_dim( b ) ) \
+	{\
+		bli_scalm( beta, c ); \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)	\
+		return;\
+	}\
+\
+	/* If the rntm is non-NULL, it may indicate that we should forgo sup
+	   handling altogether. */ \
+	bool enable_sup = TRUE; \
+	if ( rntm != NULL ) enable_sup = bli_rntm_l3_sup( rntm ); \
+\
+	if ( enable_sup ) \
+	{ \
+		/* Execute the small/unpacked oapi handler. If it finds that the problem
+		   does not fall within the thresholds that define "small", or for some
+		   other reason decides not to use the small/unpacked implementation,
+		   the function returns with BLIS_FAILURE, which causes execution to
+		   proceed towards the conventional implementation. */ \
+		err_t result = PASTEMAC(opname,sup)( alpha, a, b, beta, c, cntx, rntm ); \
+		if ( result == BLIS_SUCCESS ) \
+		{ \
+			AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)	\
+			return; \
+		} \
+	} \
+\
+	/* Initialize a local runtime with global settings if necessary. Note
+	   that in the case that a runtime is passed in, we make a local copy. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
+\
+	/* Default to using native execution. */ \
+	num_t dt = bli_obj_dt( c ); \
+	ind_t im = BLIS_NAT; \
+\
+	/* If each matrix operand has a complex storage datatype, try to get an
+	   induced method (if one is available and enabled). NOTE: Allowing
+	   precisions to vary while using 1m, which is what we do here, is unique
+	   to gemm; other level-3 operations use 1m only if all storage datatypes
+	   are equal (and they ignore the computation precision). */ \
+	if ( bli_obj_is_complex( c ) && \
+	     bli_obj_is_complex( a ) && \
+	     bli_obj_is_complex( b ) ) \
+	{ \
+		/* Find the highest priority induced method that is both enabled and
+		   available for the current operation. (If an induced method is
+		   available but not enabled, or simply unavailable, BLIS_NAT will
+		   be returned here.) */ \
+		im = PASTEMAC(opname,ind_find_avail)( dt ); \
+	} \
+\
+	/* If necessary, obtain a valid context from the gks using the induced
+	   method id determined above. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im, dt ); \
+\
+	/* Check the operands. */ \
+	if ( bli_error_checking_is_enabled() ) \
+		PASTEMAC(opname,_check)( alpha, a, b, beta, c, cntx ); \
+\
+	/* Invoke the operation's front-end and request the default control tree. */ \
+	PASTEMAC(opname,_front)( alpha, a, b, beta, c, cntx, rntm, NULL ); \
+\
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)	\
+}
+
 // If a sandbox was enabled, we forgo defining bli_gemm_ex() since it will be
 // defined in the sandbox environment.
 #ifndef BLIS_ENABLE_SANDBOX
-
-void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
-     (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm
-     )
-{
-	bli_init_once();
-
-	// If C has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( c ) ) return;
-
-	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
-	// and return early.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) ||
-	     bli_obj_has_zero_dim( a ) ||
-	     bli_obj_has_zero_dim( b ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
-
-	// If the rntm is non-NULL, it may indicate that we should forgo sup
-	// handling altogether.
-	bool enable_sup = TRUE;
-	if ( rntm != NULL ) enable_sup = bli_rntm_l3_sup( rntm );
-
-	if ( enable_sup )
-	{
-		// Execute the small/unpacked oapi handler. If it finds that the problem
-		// does not fall within the thresholds that define "small", or for some
-		// other reason decides not to use the small/unpacked implementation,
-		// the function returns with BLIS_FAILURE, which causes execution to
-		// proceed towards the conventional implementation.
-		err_t result = bli_gemmsup( alpha, a, b, beta, c, cntx, rntm );
-		if ( result == BLIS_SUCCESS )
-		{
-			return;
-		}
-	}
-
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
-
-	// Default to using native execution.
-	num_t dt = bli_obj_dt( c );
-	ind_t im = BLIS_NAT;
-
-	// If each matrix operand has a complex storage datatype, try to get an
-	// induced method (if one is available and enabled). NOTE: Allowing
-	// precisions to vary while using 1m, which is what we do here, is unique
-	// to gemm; other level-3 operations use 1m only if all storage datatypes
-	// are equal (and they ignore the computation precision).
-	if ( bli_obj_is_complex( c ) &&
-	     bli_obj_is_complex( a ) &&
-	     bli_obj_is_complex( b ) )
-	{
-		// Find the highest priority induced method that is both enabled and
-		// available for the current operation. (If an induced method is
-		// available but not enabled, or simply unavailable, BLIS_NAT will
-		// be returned here.)
-		im = bli_gemmind_find_avail( dt );
-	}
-
-	// If necessary, obtain a valid context from the gks using the induced
-	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
-
-	// Check the operands.
-	if ( bli_error_checking_is_enabled() )
-		bli_gemm_check( alpha, a, b, beta, c, cntx );
-
-	// Invoke the operation's front-end and request the default control tree.
-	bli_gemm_front( alpha, a, b, beta, c, cntx, &rntm_l );
-}
-
+GENFRONT( gemm )
 #endif
 
-
-void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
-     (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm
-     )
-{
-	bli_init_once();
-
-	// If C has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( c ) ) return;
-
-	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
-	// and return early.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) ||
-	     bli_obj_has_zero_dim( a ) ||
-	     bli_obj_has_zero_dim( b ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
-
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
-
-	// Default to using native execution.
-	num_t dt = bli_obj_dt( c );
-	ind_t im = BLIS_NAT;
-
-	// If all matrix operands are complex and of the same storage datatype, try
-	// to get an induced method (if one is available and enabled).
-	if ( bli_obj_dt( a ) == bli_obj_dt( c ) &&
-	     bli_obj_dt( b ) == bli_obj_dt( c ) &&
-	     bli_obj_is_complex( c ) )
-	{
-		// Find the highest priority induced method that is both enabled and
-		// available for the current operation. (If an induced method is
-		// available but not enabled, or simply unavailable, BLIS_NAT will
-		// be returned here.)
-		im = bli_gemmtind_find_avail( dt );
-	}
-
-	// If necessary, obtain a valid context from the gks using the induced
-	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
-
-	// Check the operands.
-	if ( bli_error_checking_is_enabled() )
-		bli_gemmt_check( alpha, a, b, beta, c, cntx );
-
-	// Invoke the operation's front-end and request the default control tree.
-	bli_gemmt_front( alpha, a, b, beta, c, cntx, &rntm_l );
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
+     ) \
+{ \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+	bli_init_once(); \
+\
+	/* If C has a zero dimension, return early.	*/	\
+	if ( bli_obj_has_zero_dim( c ) ) {\
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+		return;									 \
+	}\
+\
+	/* if alpha or A or B has a zero dimension, \
+	   scale C by beta and return early. */ \
+	if ( bli_obj_equals( alpha, &BLIS_ZERO ) || \
+	     bli_obj_has_zero_dim( a ) || \
+	     bli_obj_has_zero_dim( b ) ) \
+	{\
+		bli_scalm( beta, c ); \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)	\
+		return;\
+	}\
+\
+	/* If the rntm is non-NULL, it may indicate that we should forgo sup
+	   handling altogether. */ \
+	bool enable_sup = TRUE; \
+	if ( rntm != NULL ) enable_sup = bli_rntm_l3_sup( rntm ); \
+\
+	if ( enable_sup ) \
+	{ \
+		/* Execute the small/unpacked oapi handler. If it finds that the problem
+		   does not fall within the thresholds that define "small", or for some
+		   other reason decides not to use the small/unpacked implementation,
+		   the function returns with BLIS_FAILURE, which causes execution to
+		   proceed towards the conventional implementation. */ \
+		err_t result = PASTEMAC(opname,sup)( alpha, a, b, beta, c, cntx, rntm ); \
+		if ( result == BLIS_SUCCESS ) \
+		{\
+			AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+			return; \
+		} \
+	} \
+\
+	/* Initialize a local runtime with global settings if necessary. Note
+	   that in the case that a runtime is passed in, we make a local copy. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
+\
+	/* Default to using native execution. */ \
+	num_t dt = bli_obj_dt( c ); \
+	ind_t im = BLIS_NAT; \
+\
+	/* If all matrix operands are complex and of the same storage datatype, try
+	   to get an induced method (if one is available and enabled). */ \
+	if ( bli_obj_dt( a ) == bli_obj_dt( c ) && \
+	     bli_obj_dt( b ) == bli_obj_dt( c ) && \
+	     bli_obj_is_complex( c ) ) \
+	{ \
+		/* Find the highest priority induced method that is both enabled and
+		   available for the current operation. (If an induced method is
+		   available but not enabled, or simply unavailable, BLIS_NAT will
+		   be returned here.) */ \
+		im = PASTEMAC(opname,ind_find_avail)( dt ); \
+	} \
+\
+	/* If necessary, obtain a valid context from the gks using the induced
+	   method id determined above. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im, dt ); \
+\
+	/* Check the operands. */ \
+	if ( bli_error_checking_is_enabled() ) \
+		PASTEMAC(opname,_check)( alpha, a, b, beta, c, cntx ); \
+\
+	/* Invoke the operation's front-end and request the default control tree. */ \
+	PASTEMAC(opname,_front)( alpha, a, b, beta, c, cntx, rntm, NULL ); \
+\
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)	\
 }
 
+GENFRONT( gemmt )
 
-void PASTEMAC(her2k,BLIS_OAPI_EX_SUF)
-     (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm
-     )
-{
-	bli_init_once();
-
-	obj_t ah;
-	obj_t bh;
-	obj_t alphah;
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_her2k_check( alpha, a, b, beta, c, cntx );
-
-	bli_obj_alias_to( alpha, &alphah );
-	bli_obj_toggle_conj( &alphah );
-
-	bli_obj_alias_to( a, &ah );
-	bli_obj_toggle_trans( &ah );
-	bli_obj_toggle_conj( &ah );
-
-	bli_obj_alias_to( b, &bh );
-	bli_obj_toggle_trans( &bh );
-	bli_obj_toggle_conj( &bh );
-
-	// Invoke gemmt twice, using beta only the first time.
-	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)(   alpha, a, &bh,      beta, c, cntx, rntm );
-	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( &alphah, b, &ah, &BLIS_ONE, c, cntx, rntm );
-
-	// The Hermitian rank-2k product was computed as alpha*A*B'+alpha'*B*A', even for
-	// the diagonal elements. Mathematically, the imaginary components of
-	// diagonal elements of a Hermitian rank-2k product should always be
-	// zero. However, in practice, they sometimes accumulate meaningless
-	// non-zero values. To prevent this, we explicitly set those values
-	// to zero before returning.
-	bli_setid( &BLIS_ZERO, c );
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
+     ) \
+{ \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+	bli_init_once(); \
+\
+	/* Initialize a local runtime with global settings if necessary. Note
+	   that in the case that a runtime is passed in, we make a local copy. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
+\
+	/* Default to using native execution. */ \
+	num_t dt = bli_obj_dt( c ); \
+	ind_t im = BLIS_NAT; \
+\
+	/* If all matrix operands are complex and of the same storage datatype, try
+	   to get an induced method (if one is available and enabled). */ \
+	if ( bli_obj_dt( a ) == bli_obj_dt( c ) && \
+	     bli_obj_dt( b ) == bli_obj_dt( c ) && \
+	     bli_obj_is_complex( c ) ) \
+	{ \
+		/* Find the highest priority induced method that is both enabled and
+		   available for the current operation. (If an induced method is
+		   available but not enabled, or simply unavailable, BLIS_NAT will
+		   be returned here.) */ \
+		im = PASTEMAC(opname,ind_find_avail)( dt ); \
+	} \
+\
+	/* If necessary, obtain a valid context from the gks using the induced
+	   method id determined above. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im, dt ); \
+\
+	/* Check the operands. */ \
+	if ( bli_error_checking_is_enabled() ) \
+		PASTEMAC(opname,_check)( alpha, a, b, beta, c, cntx ); \
+\
+	/* Invoke the operation's front-end and request the default control tree. */ \
+	PASTEMAC(opname,_front)( alpha, a, b, beta, c, cntx, rntm, NULL ); \
+\
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)	\
 }
 
+GENFRONT( her2k )
+GENFRONT( syr2k )
 
-void PASTEMAC(syr2k,BLIS_OAPI_EX_SUF)
-     (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm
-     )
-{
-	bli_init_once();
 
-	obj_t at;
-	obj_t bt;
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_syr2k_check( alpha, a, b, beta, c, cntx );
-
-	bli_obj_alias_to( b, &bt );
-	bli_obj_toggle_trans( &bt );
-
-	bli_obj_alias_to( a, &at );
-	bli_obj_toggle_trans( &at );
-
-	// Invoke gemmt twice, using beta only the first time.
-	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, a, &bt,      beta, c, cntx, rntm );
-	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, b, &at, &BLIS_ONE, c, cntx, rntm );
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+     ( \
+       side_t  side, \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
+     ) \
+{ \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+	bli_init_once(); \
+\
+	/* Initialize a local runtime with global settings if necessary. Note
+	   that in the case that a runtime is passed in, we make a local copy. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
+\
+	/* Default to using native execution. */ \
+	num_t dt = bli_obj_dt( c ); \
+	ind_t im = BLIS_NAT; \
+\
+	/* If all matrix operands are complex and of the same storage datatype, try
+	   to get an induced method (if one is available and enabled). */ \
+	if ( bli_obj_dt( a ) == bli_obj_dt( c ) && \
+	     bli_obj_dt( b ) == bli_obj_dt( c ) && \
+	     bli_obj_is_complex( c ) ) \
+	{ \
+		/* Find the highest priority induced method that is both enabled and
+		   available for the current operation. (If an induced method is
+		   available but not enabled, or simply unavailable, BLIS_NAT will
+		   be returned here.) */ \
+		im = PASTEMAC(opname,ind_find_avail)( dt ); \
+	} \
+\
+	/* If necessary, obtain a valid context from the gks using the induced
+	   method id determined above. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im, dt ); \
+\
+	/* Check the operands. */ \
+	if ( bli_error_checking_is_enabled() ) \
+		PASTEMAC(opname,_check)( side, alpha, a, b, beta, c, cntx ); \
+\
+	/* Invoke the operation's front-end and request the default control tree. */ \
+	PASTEMAC(opname,_front)( side, alpha, a, b, beta, c, cntx, rntm, NULL ); \
+\
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)	\
 }
 
+GENFRONT( hemm )
+GENFRONT( symm )
+GENFRONT( trmm3 )
 
-void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
-     (
-             side_t  side,
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm
-     )
-{
-	bli_init_once();
 
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
-
-	// Default to using native execution.
-	num_t dt = bli_obj_dt( c );
-	ind_t im = BLIS_NAT;
-
-	// If all matrix operands are complex and of the same storage datatype, try
-	// to get an induced method (if one is available and enabled).
-	if ( bli_obj_dt( a ) == bli_obj_dt( c ) &&
-	     bli_obj_dt( b ) == bli_obj_dt( c ) &&
-	     bli_obj_is_complex( c ) )
-	{
-		// Find the highest priority induced method that is both enabled and
-		// available for the current operation. (If an induced method is
-		// available but not enabled, or simply unavailable, BLIS_NAT will
-		// be returned here.)
-		im = bli_hemmind_find_avail( dt );
-	}
-
-	// If necessary, obtain a valid context from the gks using the induced
-	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
-
-	// Check the operands.
-	if ( bli_error_checking_is_enabled() )
-		bli_hemm_check( side, alpha, a, b, beta, c, cntx );
-
-	// Invoke the operation's front-end and request the default control tree.
-	bli_hemm_front( side, alpha, a, b, beta, c, cntx, &rntm_l );
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
+     ) \
+{ \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+	bli_init_once(); \
+\
+	/* If C has a zero dimension, return early. */ \
+	if ( bli_obj_has_zero_dim( c ) ) {\
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+		return; \
+	} \
+\
+	/* If alpha or A or B has a zero dimension, \
+	   scale C by beta and return early. */ \
+\
+	if( bli_obj_equals( alpha, &BLIS_ZERO ) || \
+	    bli_obj_has_zero_dim( a ) ) \
+	{ \
+		bli_scalm( beta, c ); \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+		return; \
+	} \
+\
+	/* If the rntm is non-NULL, it may indicate that we should forgo SUP handling altogether. */ \
+	bool enable_sup = TRUE; \
+	if( rntm != NULL ) enable_sup = bli_rntm_l3_sup( rntm ); \
+\
+	if( enable_sup ) \
+	{ \
+		/* Execute the small/unpacked oapi handler.
+		   If it finds that the problem does not fall within the
+		   thresholds that define "small", or for some other reason
+		   decides not to use the small/unpacked implementation,
+		   the function returns with BLIS_FAILURE, which causes excution
+		   to proceed forward towards conventional implementation, */ \
+\
+		err_t result = PASTEMAC(opname, sup) ( alpha, a, beta, c, cntx, rntm ); \
+		if( result == BLIS_SUCCESS ) { \
+			AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+			return; \
+		} \
+	} \
+\
+	/* Initialize a local runtime with global settings if necessary. Note
+	   that in the case that a runtime is passed in, we make a local copy. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
+\
+	/* Default to using native execution. */ \
+	num_t dt = bli_obj_dt( c ); \
+	ind_t im = BLIS_NAT; \
+\
+	/* If all matrix operands are complex and of the same storage datatype, try
+	   to get an induced method (if one is available and enabled). */ \
+	if ( bli_obj_dt( a ) == bli_obj_dt( c ) && \
+	     bli_obj_is_complex( c ) ) \
+	{ \
+		/* Find the highest priority induced method that is both enabled and
+		   available for the current operation. (If an induced method is
+		   available but not enabled, or simply unavailable, BLIS_NAT will
+		   be returned here.) */ \
+		im = PASTEMAC(opname,ind_find_avail)( dt ); \
+	} \
+\
+	/* If necessary, obtain a valid context from the gks using the induced
+	   method id determined above. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im, dt ); \
+\
+	/* Check the operands. */ \
+	if ( bli_error_checking_is_enabled() ) \
+		PASTEMAC(opname,_check)( alpha, a, beta, c, cntx ); \
+\
+	/* Invoke the operation's front-end and request the default control tree. */ \
+	PASTEMAC(opname,_front)( alpha, a, beta, c, cntx, rntm, NULL ); \
+\
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)	\
 }
 
+GENFRONT( syrk )
 
-void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
-     (
-             side_t  side,
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm
-     )
-{
-	bli_init_once();
-
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
-
-	// Default to using native execution.
-	num_t dt = bli_obj_dt( c );
-	ind_t im = BLIS_NAT;
-
-	// If all matrix operands are complex and of the same storage datatype, try
-	// to get an induced method (if one is available and enabled).
-	if ( bli_obj_dt( a ) == bli_obj_dt( c ) &&
-	     bli_obj_dt( b ) == bli_obj_dt( c ) &&
-	     bli_obj_is_complex( c ) )
-	{
-		// Find the highest priority induced method that is both enabled and
-		// available for the current operation. (If an induced method is
-		// available but not enabled, or simply unavailable, BLIS_NAT will
-		// be returned here.)
-		im = bli_symmind_find_avail( dt );
-	}
-
-	// If necessary, obtain a valid context from the gks using the induced
-	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
-
-	// Check the operands.
-	if ( bli_error_checking_is_enabled() )
-		bli_symm_check( side, alpha, a, b, beta, c, cntx );
-
-	// Invoke the operation's front-end and request the default control tree.
-	bli_symm_front( side, alpha, a, b, beta, c, cntx, &rntm_l );
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
+     ) \
+{ \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+	bli_init_once(); \
+\
+	/* Initialize a local runtime with global settings if necessary. Note
+	   that in the case that a runtime is passed in, we make a local copy. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
+\
+	/* Default to using native execution. */ \
+	num_t dt = bli_obj_dt( c ); \
+	ind_t im = BLIS_NAT; \
+\
+	/* If all matrix operands are complex and of the same storage datatype, try
+	   to get an induced method (if one is available and enabled). */ \
+	if ( bli_obj_dt( a ) == bli_obj_dt( c ) && \
+	     bli_obj_is_complex( c ) ) \
+	{ \
+		/* Find the highest priority induced method that is both enabled and
+		   available for the current operation. (If an induced method is
+		   available but not enabled, or simply unavailable, BLIS_NAT will
+		   be returned here.) */ \
+		im = PASTEMAC(opname,ind_find_avail)( dt ); \
+	} \
+\
+	/* If necessary, obtain a valid context from the gks using the induced
+	   method id determined above. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im, dt ); \
+\
+	/* Check the operands. */ \
+	if ( bli_error_checking_is_enabled() ) \
+		PASTEMAC(opname,_check)( alpha, a, beta, c, cntx ); \
+\
+	/* Invoke the operation's front-end and request the default control tree. */ \
+	PASTEMAC(opname,_front)( alpha, a, beta, c, cntx, rntm, NULL ); \
+\
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)	\
 }
 
+GENFRONT( herk )
 
-void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
-     (
-             side_t  side,
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm
-     )
-{
-	bli_init_once();
 
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
-
-	// Default to using native execution.
-	num_t dt = bli_obj_dt( c );
-	ind_t im = BLIS_NAT;
-
-	// If all matrix operands are complex and of the same storage datatype, try
-	// to get an induced method (if one is available and enabled).
-	if ( bli_obj_dt( a ) == bli_obj_dt( c ) &&
-	     bli_obj_dt( b ) == bli_obj_dt( c ) &&
-	     bli_obj_is_complex( c ) )
-	{
-		// Find the highest priority induced method that is both enabled and
-		// available for the current operation. (If an induced method is
-		// available but not enabled, or simply unavailable, BLIS_NAT will
-		// be returned here.)
-		im = bli_trmm3ind_find_avail( dt );
-	}
-
-	// If necessary, obtain a valid context from the gks using the induced
-	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
-
-	// Check the operands.
-	if ( bli_error_checking_is_enabled() )
-		bli_trmm3_check( side, alpha, a, b, beta, c, cntx );
-
-	// Invoke the operation's front-end and request the default control tree.
-	bli_trmm3_front( side, alpha, a, b, beta, c, cntx, &rntm_l );
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+     ( \
+       side_t  side, \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
+     ) \
+{ \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+	bli_init_once(); \
+\
+	/* Initialize a local runtime with global settings if necessary. Note
+	   that in the case that a runtime is passed in, we make a local copy. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
+\
+	/* Default to using native execution. */ \
+	num_t dt = bli_obj_dt( b ); \
+	ind_t im = BLIS_NAT; \
+\
+	/* If all matrix operands are complex and of the same storage datatype, try
+	   to get an induced method (if one is available and enabled). */ \
+	if ( bli_obj_dt( a ) == bli_obj_dt( b ) && \
+	     bli_obj_is_complex( b ) ) \
+	{ \
+		/* Find the highest priority induced method that is both enabled and
+		   available for the current operation. (If an induced method is
+		   available but not enabled, or simply unavailable, BLIS_NAT will
+		   be returned here.) */ \
+		im = PASTEMAC(opname,ind_find_avail)( dt ); \
+	} \
+\
+	/* If necessary, obtain a valid context from the gks using the induced
+	   method id determined above. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im, dt ); \
+\
+	/* Check the operands. */ \
+	if ( bli_error_checking_is_enabled() ) \
+		PASTEMAC(opname,_check)( side, alpha, a, b, cntx ); \
+\
+	/* Invoke the operation's front-end and request the default control tree. */ \
+	PASTEMAC(opname,_front)( side, alpha, a, b, cntx, rntm, NULL ); \
+\
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)	\
 }
 
+GENFRONT( trmm )
+GENFRONT( trsm )
 
-void PASTEMAC(herk,BLIS_OAPI_EX_SUF)
-     (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm
-     )
-{
-	bli_init_once();
-
-	obj_t ah;
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_herk_check( alpha, a, beta, c, cntx );
-
-	bli_obj_alias_to( a, &ah );
-	bli_obj_toggle_trans( &ah );
-	bli_obj_toggle_conj( &ah );
-
-	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, a, &ah, beta, c, cntx, rntm );
-
-	// The Hermitian rank-k product was computed as Re(alpha)*A*A', even for the
-	// diagonal elements. Mathematically, the imaginary components of
-	// diagonal elements of a Hermitian rank-k product should always be
-	// zero. However, in practice, they sometimes accumulate meaningless
-	// non-zero values. To prevent this, we explicitly set those values
-	// to zero before returning.
-	bli_setid( &BLIS_ZERO, c );
-}
-
-
-void PASTEMAC(syrk,BLIS_OAPI_EX_SUF)
-     (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm
-     )
-{
-	bli_init_once();
-
-	obj_t at;
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_syrk_check( alpha, a, beta, c, cntx );
-
-	bli_obj_alias_to( a, &at );
-	bli_obj_toggle_trans( &at );
-
-	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, a, &at, beta, c, cntx, rntm );
-}
-
-
-void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
-     (
-             side_t  side,
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const cntx_t* cntx,
-       const rntm_t* rntm
-     )
-{
-	bli_init_once();
-
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
-
-	// Default to using native execution.
-	num_t dt = bli_obj_dt( b );
-	ind_t im = BLIS_NAT;
-
-	// If all matrix operands are complex and of the same storage datatype, try
-	// to get an induced method (if one is available and enabled).
-	if ( bli_obj_dt( a ) == bli_obj_dt( b ) &&
-	     bli_obj_is_complex( b ) )
-	{
-		// Find the highest priority induced method that is both enabled and
-		// available for the current operation. (If an induced method is
-		// available but not enabled, or simply unavailable, BLIS_NAT will
-		// be returned here.)
-		im = bli_trmmind_find_avail( dt );
-	}
-
-	// If necessary, obtain a valid context from the gks using the induced
-	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
-
-	// Check the operands.
-	if ( bli_error_checking_is_enabled() )
-		bli_trmm_check( side, alpha, a, b, cntx );
-
-	// Invoke the operation's front-end and request the default control tree.
-	bli_trmm_front( side, alpha, a, b, cntx, &rntm_l );
-}
-
-
-void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
-     (
-             side_t  side,
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const cntx_t* cntx,
-       const rntm_t* rntm
-     )
-{
-	bli_init_once();
-
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
-
-	// Default to using native execution.
-	num_t dt = bli_obj_dt( b );
-	ind_t im = BLIS_NAT;
-
-	// If all matrix operands are complex and of the same storage datatype, try
-	// to get an induced method (if one is available and enabled).
-	if ( bli_obj_dt( a ) == bli_obj_dt( b ) &&
-	     bli_obj_is_complex( b ) )
-	{
-		// Find the highest priority induced method that is both enabled and
-		// available for the current operation. (If an induced method is
-		// available but not enabled, or simply unavailable, BLIS_NAT will
-		// be returned here.)
-		im = bli_trsmind_find_avail( dt );
-	}
-
-	// If necessary, obtain a valid context from the gks using the induced
-	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
-
-	// Check the operands.
-	if ( bli_error_checking_is_enabled() )
-		bli_trsm_check( side, alpha, a, b, cntx );
-
-	// Invoke the operation's front-end and request the default control tree.
-	bli_trsm_front( side, alpha, a, b, cntx, &rntm_l );
-}

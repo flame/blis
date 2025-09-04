@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -39,8 +39,8 @@ BLIS_EXPORT_BLIS void     bli_error_checking_level_set( errlev_t new_level );
 
 BLIS_EXPORT_BLIS bool     bli_error_checking_is_enabled( void );
 
-void                      bli_print_msg( const char* str, const char* file, guint_t line );
+void                      bli_print_msg( char* str, char* file, guint_t line );
 BLIS_EXPORT_BLIS void     bli_abort( void );
 
-const char*               bli_error_string_for_code( gint_t code );
+char*                     bli_error_string_for_code( gint_t code );
 

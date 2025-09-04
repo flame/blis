@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -68,37 +68,38 @@ GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref )
 
 void bli_dgemmsup_rd_haswell_asm_6x8n
      (
-             conj_t     conja,
-             conj_t     conjb,
-             dim_t      m0,
-             dim_t      n0,
-             dim_t      k0,
-       const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
-       const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       double*    restrict alpha,
+       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
 	uint64_t m_left = m0 % 6;
 
 	// First check whether this is a edge case in the n dimension. If so,
 	// dispatch other ?x8m kernels, as needed.
 	if ( m_left )
 	{
-		      double* cij = ( double* )c;
-		const double* bj  = ( double* )b;
-		const double* ai  = ( double* )a;
+		double* restrict cij = c;
+		double* restrict bj  = b;
+		double* restrict ai  = a;
 
 #if 1
 		// We add special handling for slightly inflated MR blocksizes
 		// at edge cases, up to a maximum of 9.
 		if ( 6 < m0 )
 		{
-			gemmsup_ker_ft  ker_fp1 = NULL;
-			gemmsup_ker_ft  ker_fp2 = NULL;
+			dgemmsup_ker_ft ker_fp1 = NULL;
+			dgemmsup_ker_ft ker_fp2 = NULL;
 			dim_t           mr1, mr2;
 
 			// These kernels don't make any attempt to optimize the cases of
@@ -223,7 +224,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	begin_asm()
 
 	//vzeroall()                         // zero all xmm/ymm registers.
-
+	
 	//mov(var(a), rdx)                   // load address of a.
 	mov(var(rs_a), r8)                 // load rs_a
 	//mov(var(cs_a), r9)                 // load cs_a
@@ -241,7 +242,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 
 	lea(mem(r11, r11, 2), r13)         // r13 = 3*cs_b
 	//lea(mem(r8,  r8,  2), r10)         // r10 = 3*rs_a
-
+	
 
 	//mov(var(c), r12)                   // load address of c
 	mov(var(rs_c), rdi)                // load rs_c
@@ -314,7 +315,6 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
 	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
 #endif
-	//lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 	lea(mem(rbx, r11, 4), r10)         // r10 = rbx + 4*cs_b
 
 
@@ -734,12 +734,15 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5",
+	  "ymm6", "ymm7", "ymm8", "ymm9", "ymm10", "ymm11",
+	  "ymm12", "ymm13", "ymm14", "ymm15",
 	  "memory"
 	)
 
@@ -751,9 +754,9 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 		const dim_t      mr_cur = 6;
 		const dim_t      j_edge = n0 - ( dim_t )n_left;
 
-		      double* cij = ( double* )c + j_edge*cs_c;
-		const double* ai  = ( double* )a;
-		const double* bj  = ( double* )b + j_edge*cs_b;
+		double* restrict cij = c + j_edge*cs_c;
+		double* restrict ai  = a;
+		double* restrict bj  = b + j_edge*cs_b;
 
 		if ( 2 <= n_left )
 		{
@@ -790,24 +793,26 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 			#endif
 		}
 	}
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
 
 void bli_dgemmsup_rd_haswell_asm_3x8n
      (
-             conj_t     conja,
-             conj_t     conjb,
-             dim_t      m0,
-             dim_t      n0,
-             dim_t      k0,
-       const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
-       const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       double*    restrict alpha,
+       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -906,7 +911,6 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
 	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
 #endif
-	//lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 	lea(mem(rbx, r11, 4), r10)         // r10 = rbx + 4*cs_b
 
 
@@ -1162,7 +1166,6 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 
 
 
-
 	label(.DPOSTACCUM)
 
 	                                   // ymm4  ymm7  ymm10 ymm13
@@ -1320,12 +1323,15 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5",
+	  "ymm6", "ymm7", "ymm8", "ymm9", "ymm10", "ymm11",
+	  "ymm12", "ymm13", "ymm14", "ymm15",
 	  "memory"
 	)
 
@@ -1337,9 +1343,9 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 		const dim_t      mr_cur = 3;
 		const dim_t      j_edge = n0 - ( dim_t )n_left;
 
-		      double* cij = ( double* )c + j_edge*cs_c;
-		const double* ai  = ( double* )a;
-		const double* bj  = ( double* )b + j_edge*cs_b;
+		double* restrict cij = c + j_edge*cs_c;
+		double* restrict ai  = a;
+		double* restrict bj  = b + j_edge*cs_b;
 
 		if ( 2 <= n_left )
 		{
@@ -1377,24 +1383,26 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 			#endif
 		}
 	}
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
 
 void bli_dgemmsup_rd_haswell_asm_2x8n
      (
-             conj_t     conja,
-             conj_t     conjb,
-             dim_t      m0,
-             dim_t      n0,
-             dim_t      k0,
-       const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
-       const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       double*    restrict alpha,
+       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -1488,7 +1496,6 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 	prefetch(0, mem(rcx, 3*8))         // prefetch c + 0*rs_c
 	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
 #endif
-	//lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 	lea(mem(rbx, r11, 4), r10)         // r10 = rbx + 4*cs_b
 
 
@@ -1851,12 +1858,14 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5",
+	  "ymm7", "ymm8", "ymm10", "ymm11", "ymm13", "ymm14",
 	  "memory"
 	)
 
@@ -1868,9 +1877,9 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 		const dim_t      mr_cur = 2;
 		const dim_t      j_edge = n0 - ( dim_t )n_left;
 
-		      double* cij = ( double* )c + j_edge*cs_c;
-		const double* ai  = ( double* )a;
-		const double* bj  = ( double* )b + j_edge*cs_b;
+		double* restrict cij = c + j_edge*cs_c;
+		double* restrict ai  = a;
+		double* restrict bj  = b + j_edge*cs_b;
 
 		if ( 2 <= n_left )
 		{
@@ -1907,24 +1916,26 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 			#endif
 		}
 	}
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
 
 void bli_dgemmsup_rd_haswell_asm_1x8n
      (
-             conj_t     conja,
-             conj_t     conjb,
-             dim_t      m0,
-             dim_t      n0,
-             dim_t      k0,
-       const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
-       const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       double*    restrict alpha,
+       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -2013,7 +2024,6 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
 	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
 #endif
-	//lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 	lea(mem(rbx, r11, 4), r10)         // r10 = rbx + 4*cs_b
 
 
@@ -2325,12 +2335,13 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm2", "ymm3", "ymm4", "ymm7", "ymm10", "ymm13",
 	  "memory"
 	)
 
@@ -2342,9 +2353,9 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 		const dim_t      mr_cur = 1;
 		const dim_t      j_edge = n0 - ( dim_t )n_left;
 
-		      double* cij = ( double* )c + j_edge*cs_c;
-		const double* ai  = ( double* )a;
-		const double* bj  = ( double* )b + j_edge*cs_b;
+		double* restrict cij = c + j_edge*cs_c;
+		double* restrict ai  = a;
+		double* restrict bj  = b + j_edge*cs_b;
 
 		if ( 2 <= n_left )
 		{
@@ -2381,5 +2392,6 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 			#endif
 		}
 	}
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
 

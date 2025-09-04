@@ -34,176 +34,34 @@
 
 #include "blis.h"
 
-// Completely generic gemm ukr implementation which checks MR/NR at
-// runtime. Very slow, but has to be used in certain cases.
-
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, arch, suf ) \
-\
-static void PASTEMAC3(ch,opname,arch,suf) \
-     ( \
-             dim_t      m, \
-             dim_t      n, \
-             dim_t      k, \
-       const void*      alpha0, \
-       const void*      a0, \
-       const void*      b0, \
-       const void*      beta0, \
-             void*      c0, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
-     ) \
-{ \
-	const ctype* alpha = alpha0; \
-	const ctype* a     = a0; \
-	const ctype* b     = b0; \
-	const ctype* beta  = beta0; \
-	      ctype* c     = c0; \
-\
-	const num_t dt     = PASTEMAC(ch,type); \
-\
-	const inc_t packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx ); \
-	const inc_t packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
-\
-	const inc_t rs_a   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBM, cntx ); \
-	const inc_t cs_a   = packmr; \
-\
-	const inc_t rs_b   = packnr; \
-	const inc_t cs_b   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBN, cntx ); \
-\
-	ctype       ab[ BLIS_STACK_BUF_MAX_SIZE \
-	                / sizeof( ctype ) ] \
-	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const inc_t rs_ab  = 1; \
-	const inc_t cs_ab  = m; \
-\
-	/* Initialize the accumulator elements in ab to zero. */ \
-	for ( dim_t i = 0; i < m * n; ++i ) \
-	{ \
-		PASTEMAC(ch,set0s)( *(ab + i) ); \
-	} \
-\
-	/* Perform a series of k rank-1 updates into ab. */ \
-	for ( dim_t l = 0; l < k; ++l ) \
-	{ \
-		ctype* restrict abij = ab; \
-\
-		/* In an optimized implementation, these two loops over MR and NR
-		   are typically fully unrolled. */ \
-		for ( dim_t j = 0; j < n; ++j ) \
-		{ \
-			ctype bj = *(b + j*cs_b); \
-\
-			for ( dim_t i = 0; i < m; ++i ) \
-			{ \
-				ctype ai = *(a + i*rs_a); \
-\
-				PASTEMAC(ch,dots)( ai, bj, *abij ); \
-\
-				abij += rs_ab; \
-			} \
-		} \
-\
-		a += cs_a; \
-		b += rs_b; \
-	} \
-\
-	/* Scale the result in ab by alpha. */ \
-	for ( dim_t i = 0; i < m * n; ++i ) \
-	{ \
-		PASTEMAC(ch,scals)( *alpha, *(ab + i) ); \
-	} \
-\
-	/* If beta is zero, overwrite c with the scaled result in ab. Otherwise,
-	   scale by beta and then add the scaled redult in ab. */ \
-	if ( PASTEMAC(ch,eq0)( *beta ) ) \
-	{ \
-		PASTEMAC(ch,copys_mxn) \
-		( \
-		  m, \
-		  n, \
-		  ab, rs_ab, cs_ab, \
-		  c,  rs_c,  cs_c \
-		); \
-	} \
-	else \
-	{ \
-		PASTEMAC(ch,xpbys_mxn) \
-		( \
-		  m, \
-		  n, \
-		  ab, rs_ab, cs_ab, \
-		  beta, \
-		  c,  rs_c,  cs_c \
-		); \
-	} \
-}
-
-INSERT_GENTFUNC_BASIC( gemm_gen, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+#if 1
 
 // An implementation that attempts to facilitate emission of vectorized
 // instructions via constant loop bounds + #pragma omp simd directives.
-// If compile-time MR/NR are not available (indicated by BLIS_[MN]R_x = -1),
-// then the non-unrolled version (above) is used.
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, arch, suf ) \
+#define GENTFUNC( ctype, ch, opname, arch, suf, mr, nr ) \
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-             dim_t      m, \
-             dim_t      n, \
-             dim_t      k, \
-       const void*      alpha0, \
-       const void*      a0, \
-       const void*      b0, \
-       const void*      beta0, \
-             void*      c0, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
+       dim_t               k, \
+       ctype*     restrict alpha, \
+       ctype*     restrict a, \
+       ctype*     restrict b, \
+       ctype*     restrict beta, \
+       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
      ) \
 { \
-	const ctype* alpha = alpha0; \
-	const ctype* a     = a0; \
-	const ctype* b     = b0; \
-	const ctype* beta  = beta0; \
-	      ctype* c     = c0; \
+	ctype           ab[ BLIS_STACK_BUF_MAX_SIZE \
+	                    / sizeof( ctype ) ] \
+	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+	const inc_t     rs_ab  = nr; \
+	const inc_t     cs_ab  = 1; \
 \
-	const dim_t mr = PASTECH(BLIS_MR_,ch); \
-	const dim_t nr = PASTECH(BLIS_NR_,ch); \
-\
-	/* If either BLIS_MR_? or BLIS_NR_? was left undefined by the subconfig,
-	   the compiler can't fully unroll the MR and NR loop iterations below,
-	   which means there's no benefit to using this kernel over a general-
-	   purpose implementation instead. */ \
-	if ( mr == -1 || nr == -1 ) \
-	{ \
-		PASTEMAC3(ch,gemm_gen,arch,suf) \
-		( \
-		  m, \
-		  n, \
-		  k, \
-		  alpha, \
-		  a, \
-		  b, \
-		  beta, \
-		  c, rs_c, cs_c, \
-		  data, \
-		  cntx \
-		); \
-		return; \
-	} \
-\
-	      ctype ab[ BLIS_STACK_BUF_MAX_SIZE \
-	                / sizeof( ctype ) ] \
-	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const inc_t rs_ab  = nr; \
-	const inc_t cs_ab  = 1; \
-\
-	const inc_t rs_a   = PASTECH(BLIS_BBM_,ch); \
-	const inc_t cs_a   = PASTECH(BLIS_PACKMR_,ch); \
-	const inc_t rs_b   = PASTECH(BLIS_PACKNR_,ch); \
-	const inc_t cs_b   = PASTECH(BLIS_BBN_,ch); \
+	const inc_t     cs_a   = mr; \
+	const inc_t     rs_b   = nr; \
 \
 \
 	/* Initialize the accumulator elements in ab to zero. */ \
@@ -223,8 +81,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			{ \
 				PASTEMAC(ch,dots) \
 				( \
-				  a[ i*rs_a ], \
-				  b[ j*cs_b ], \
+				  a[ i ], \
+				  b[ j ], \
 				  ab[ i*rs_ab + j*cs_ab ]  \
 				); \
 			} \
@@ -249,8 +107,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 		if ( PASTEMAC(ch,eq0)( *beta ) ) \
 		{ \
-			for ( dim_t i = 0; i < m; ++i ) \
-			for ( dim_t j = 0; j < n; ++j ) \
+			for ( dim_t i = 0; i < mr; ++i ) \
+			for ( dim_t j = 0; j < nr; ++j ) \
 			PASTEMAC(ch,copys) \
 			( \
 			  ab[ i*rs_ab + j*cs_ab ], \
@@ -259,8 +117,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		} \
 		else \
 		{ \
-			for ( dim_t i = 0; i < m; ++i ) \
-			for ( dim_t j = 0; j < n; ++j ) \
+			for ( dim_t i = 0; i < mr; ++i ) \
+			for ( dim_t j = 0; j < nr; ++j ) \
 			PASTEMAC(ch,xpbys) \
 			( \
 			  ab[ i*rs_ab + j*cs_ab ], \
@@ -275,8 +133,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 		if ( PASTEMAC(ch,eq0)( *beta ) ) \
 		{ \
-			for ( dim_t j = 0; j < n; ++j ) \
-			for ( dim_t i = 0; i < m; ++i ) \
+			for ( dim_t j = 0; j < nr; ++j ) \
+			for ( dim_t i = 0; i < mr; ++i ) \
 			PASTEMAC(ch,copys) \
 			( \
 			  ab[ i*rs_ab + j*cs_ab ], \
@@ -285,8 +143,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		} \
 		else \
 		{ \
-			for ( dim_t j = 0; j < n; ++j ) \
-			for ( dim_t i = 0; i < m; ++i ) \
+			for ( dim_t j = 0; j < nr; ++j ) \
+			for ( dim_t i = 0; i < mr; ++i ) \
 			PASTEMAC(ch,xpbys) \
 			( \
 			  ab[ i*rs_ab + j*cs_ab ], \
@@ -297,6 +155,116 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+//INSERT_GENTFUNC_BASIC2( gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+GENTFUNC( float,    s, gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 16 )
+GENTFUNC( double,   d, gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 8 )
+GENTFUNC( scomplex, c, gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 8 )
+GENTFUNC( dcomplex, z, gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 4 )
 
+#else
+
+// An implementation that uses variable loop bounds (queried from the context)
+// and makes no use of #pragma omp simd.
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname, arch, suf ) \
+\
+void PASTEMAC3(ch,opname,arch,suf) \
+     ( \
+       dim_t               k, \
+       ctype*     restrict alpha, \
+       ctype*     restrict a, \
+       ctype*     restrict b, \
+       ctype*     restrict beta, \
+       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
+     ) \
+{ \
+	const num_t     dt     = PASTEMAC(ch,type); \
+\
+	const dim_t     mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
+	const dim_t     nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
+\
+	const inc_t     packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx ); \
+	const inc_t     packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
+\
+	const dim_t     m      = mr; \
+	const dim_t     n      = nr; \
+\
+	const inc_t     cs_a   = packmr; \
+\
+	const inc_t     rs_b   = packnr; \
+\
+	ctype           ab[ BLIS_STACK_BUF_MAX_SIZE \
+	                    / sizeof( ctype ) ] \
+	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+	const inc_t     rs_ab  = 1; \
+	const inc_t     cs_ab  = mr; \
+\
+	dim_t           l, j, i; \
+\
+	ctype           ai; \
+	ctype           bj; \
+\
+\
+	/* Initialize the accumulator elements in ab to zero. */ \
+	for ( i = 0; i < m * n; ++i ) \
+	{ \
+		PASTEMAC(ch,set0s)( *(ab + i) ); \
+	} \
+\
+	/* Perform a series of k rank-1 updates into ab. */ \
+	for ( l = 0; l < k; ++l ) \
+	{ \
+		ctype* restrict abij = ab; \
+\
+		/* In an optimized implementation, these two loops over MR and NR
+		   are typically fully unrolled. */ \
+		for ( j = 0; j < n; ++j ) \
+		{ \
+			bj = *(b + j); \
+\
+			for ( i = 0; i < m; ++i ) \
+			{ \
+				ai = *(a + i); \
+\
+				PASTEMAC(ch,dots)( ai, bj, *abij ); \
+\
+				abij += rs_ab; \
+			} \
+		} \
+\
+		a += cs_a; \
+		b += rs_b; \
+	} \
+\
+	/* Scale the result in ab by alpha. */ \
+	for ( i = 0; i < m * n; ++i ) \
+	{ \
+		PASTEMAC(ch,scals)( *alpha, *(ab + i) ); \
+	} \
+\
+	/* If beta is zero, overwrite c with the scaled result in ab. Otherwise,
+	   scale by beta and then add the scaled redult in ab. */ \
+	if ( PASTEMAC(ch,eq0)( *beta ) ) \
+	{ \
+		PASTEMAC(ch,copys_mxn)( m, \
+		                        n, \
+		                        ab, rs_ab, cs_ab, \
+		                        c,  rs_c,  cs_c ); \
+	} \
+	else \
+	{ \
+		PASTEMAC(ch,xpbys_mxn)( m, \
+		                        n, \
+		                        ab, rs_ab, cs_ab, \
+		                        beta, \
+		                        c,  rs_c,  cs_c ); \
+	} \
+}
+
+INSERT_GENTFUNC_BASIC2( gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+
+#endif
 

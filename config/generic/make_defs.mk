@@ -47,7 +47,7 @@ THIS_CONFIG    := generic
 # may specify additional flags here as needed.
 CPPROCFLAGS    :=
 CMISCFLAGS     :=
-CPICFLAGS      := -fPIC
+CPICFLAGS      :=
 CWARNFLAGS     :=
 
 ifneq ($(DEBUG_TYPE),off)
@@ -71,11 +71,7 @@ else
 ifeq ($(CC_VENDOR),clang)
 CKVECFLAGS     :=
 else
-ifeq ($(CC_VENDOR),nvc)
-CKVECFLAGS     :=
-else
-$(error gcc, icc, nvc, or clang is required for this configuration.)
-endif
+$(error gcc, icc, or clang is required for this configuration.)
 endif
 endif
 endif
@@ -83,10 +79,10 @@ endif
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+CRVECFLAGS     := $(CKVECFLAGS)
 else
 ifeq ($(CC_VENDOR),clang)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+CRVECFLAGS     := $(CKVECFLAGS)
 else
 CRVECFLAGS     := $(CKVECFLAGS)
 endif

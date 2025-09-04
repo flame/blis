@@ -1,0 +1,261 @@
+{
+    "version": 6,
+    "include": [
+        "base.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "linux-make",
+            "inherits": "base",
+            "hidden": true,
+            "generator": "Unix Makefiles",
+            "condition": {
+              "type": "notEquals",
+              "lhs": "${hostSystemName}",
+              "rhs": "Windows"
+            }
+        },
+        {
+          "name": "linux-make-st-lp64-amdzen-static",
+          "inherits": ["linux-make", "st", "lp64", "amdzen", "static"],            
+          "hidden": false,
+          "cacheVariables": {
+              "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-amdzen",
+              "BLIS_LINKING_TYPE": "static",
+              "REF_CBLAS": "MKL"
+          }
+        },
+        {
+            "name": "linux-make-st-lp64-amdzen-shared",
+            "inherits": ["linux-make", "st", "lp64", "amdzen", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-amdzen",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-make-mt-lp64-amdzen-static",
+            "inherits": ["linux-make", "mt", "lp64", "amdzen", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-amdzen",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-make-mt-lp64-amdzen-shared",
+            "inherits": ["linux-make", "mt", "lp64", "amdzen", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-amdzen",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-make-st-ilp64-amdzen-static",
+            "inherits": ["linux-make", "st", "ilp64", "amdzen", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-amdzen",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-make-st-ilp64-amdzen-shared",
+            "inherits": ["linux-make", "st", "ilp64", "amdzen", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-amdzen",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-make-mt-ilp64-amdzen-static",
+            "inherits": ["linux-make", "mt", "ilp64", "amdzen", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-amdzen",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-make-mt-ilp64-amdzen-shared",
+            "inherits": ["linux-make", "mt", "ilp64", "amdzen", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-amdzen",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-make-st-lp64-auto-static",
+            "inherits": ["linux-make", "st", "lp64", "auto", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-auto",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-make-st-lp64-auto-shared",
+            "inherits": ["linux-make", "st", "lp64", "auto", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-auto",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-make-mt-lp64-auto-static",
+            "inherits": ["linux-make", "mt", "lp64", "auto", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-auto",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-make-mt-lp64-auto-shared",
+            "inherits": ["linux-make", "mt", "lp64", "auto", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-auto",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-make-st-ilp64-auto-static",
+            "inherits": ["linux-make", "st", "ilp64", "auto", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-auto",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-make-st-ilp64-auto-shared",
+            "inherits": ["linux-make", "st", "ilp64", "auto", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-auto",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-make-mt-ilp64-auto-static",
+            "inherits": ["linux-make", "mt", "ilp64", "auto", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-auto",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "linux-make-mt-ilp64-auto-shared",
+            "inherits": ["linux-make", "mt", "ilp64", "auto", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-auto",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          }
+    ],
+    "buildPresets": [
+        {
+            "name": "linux-make-st-lp64-amdzen-static",
+            "configurePreset": "linux-make-st-lp64-amdzen-static",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-make-st-lp64-amdzen-shared",
+            "configurePreset": "linux-make-st-lp64-amdzen-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-make-mt-lp64-amdzen-static",
+            "configurePreset": "linux-make-mt-lp64-amdzen-static",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-make-mt-lp64-amdzen-shared",
+            "configurePreset": "linux-make-mt-lp64-amdzen-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-make-st-ilp64-amdzen-static",
+            "configurePreset": "linux-make-st-ilp64-amdzen-static",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-make-st-ilp64-amdzen-shared",
+            "configurePreset": "linux-make-st-ilp64-amdzen-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-make-mt-ilp64-amdzen-static",
+            "configurePreset": "linux-make-mt-ilp64-amdzen-static",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-make-mt-ilp64-amdzen-shared",
+            "configurePreset": "linux-make-mt-ilp64-amdzen-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-make-st-lp64-auto-static",
+            "configurePreset": "linux-make-st-lp64-auto-static",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-make-st-lp64-auto-shared",
+            "configurePreset": "linux-make-st-lp64-auto-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-make-mt-lp64-auto-static",
+            "configurePreset": "linux-make-mt-lp64-auto-static",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-make-mt-lp64-auto-shared",
+            "configurePreset": "linux-make-mt-lp64-auto-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-make-st-ilp64-auto-static",
+            "configurePreset": "linux-make-st-lp64-auto-static",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-make-st-ilp64-auto-shared",
+            "configurePreset": "linux-make-st-lp64-auto-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-make-mt-ilp64-auto-static",
+            "configurePreset": "linux-make-mt-lp64-auto-static",
+            "inherits": "base"
+        },
+        {
+            "name": "linux-make-mt-ilp64-auto-shared",
+            "configurePreset": "linux-make-mt-lp64-auto-shared",
+            "inherits": "base"
+        }
+    ]
+}

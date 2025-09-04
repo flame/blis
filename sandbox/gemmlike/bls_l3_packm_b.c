@@ -43,6 +43,8 @@ void PASTECH2(bls_,ch,opname) \
        dim_t            n, \
        dim_t            nr, \
        cntx_t* restrict cntx, \
+       rntm_t* restrict rntm, \
+       mem_t*  restrict mem, \
        thrinfo_t* restrict thread  \
      ) \
 { \
@@ -59,18 +61,16 @@ void PASTECH2(bls_,ch,opname) \
 \
 	/* Barrier to make sure all threads are caught up and ready to begin the
 	   packm stage. */ \
-	bli_thrinfo_barrier( thread ); \
+	bli_thread_barrier( thread ); \
 \
 	/* Compute the size of the memory block eneded. */ \
 	siz_t size_needed = sizeof( ctype ) * k_pack * n_pack; \
-\
-	mem_t* mem = bli_thrinfo_mem( thread ); \
 \
 	/* Check the mem_t entry provided by the caller. If it is unallocated,
 	   then we need to acquire a block from the packed block allocator. */ \
 	if ( bli_mem_is_unalloc( mem ) ) \
 	{ \
-		if ( bli_thrinfo_am_chief( thread ) ) \
+		if ( bli_thread_am_ochief( thread ) ) \
 		{ \
 			/* Acquire directly to the chief thread's mem_t that was passed in.
 			   It needs to be that mem_t struct, and not a local (temporary)
@@ -81,7 +81,7 @@ void PASTECH2(bls_,ch,opname) \
 			   again, I prefer to keep barriers to a minimum.) */ \
 			bli_pba_acquire_m \
 			( \
-			  bli_thrinfo_pba( thread ), \
+			  rntm, \
 			  size_needed, \
 			  pack_buf_type, \
 			  mem  \
@@ -90,13 +90,13 @@ void PASTECH2(bls_,ch,opname) \
 \
 		/* Broadcast the address of the chief thread's passed-in mem_t to all
 		   threads. */ \
-		mem_t* mem_p = bli_thrinfo_broadcast( thread, mem ); \
+		mem_t* mem_p = bli_thread_broadcast( thread, mem ); \
 \
 		/* Non-chief threads: Copy the contents of the chief thread's
 		   passed-in mem_t to the passed-in mem_t for this thread. (The
 		   chief thread already has the mem_t, so it does not need to
 		   perform any copy.) */ \
-		if ( !bli_thrinfo_am_chief( thread ) ) \
+		if ( !bli_thread_am_ochief( thread ) ) \
 		{ \
 			*mem = *mem_p; \
 		} \
@@ -115,7 +115,7 @@ void PASTECH2(bls_,ch,opname) \
 \
 		if ( mem_size < size_needed ) \
 		{ \
-			if ( bli_thrinfo_am_chief( thread ) ) \
+			if ( bli_thread_am_ochief( thread ) ) \
 			{ \
 				/* The chief thread releases the existing block associated
 				   with the mem_t, and then re-acquires a new block, saving
@@ -125,12 +125,12 @@ void PASTECH2(bls_,ch,opname) \
 				   (temporary) mem_t. */ \
 				bli_pba_release \
 				( \
-				  bli_thrinfo_pba( thread ), \
+				  rntm, \
 				  mem \
 				); \
 				bli_pba_acquire_m \
 				( \
-				  bli_thrinfo_pba( thread ), \
+				  rntm, \
 				  size_needed, \
 				  pack_buf_type, \
 				  mem \
@@ -139,13 +139,13 @@ void PASTECH2(bls_,ch,opname) \
 \
 			/* Broadcast the address of the chief thread's passed-in mem_t
 			   to all threads. */ \
-			mem_t* mem_p = bli_thrinfo_broadcast( thread, mem ); \
+			mem_t* mem_p = bli_thread_broadcast( thread, mem ); \
 \
 			/* Non-chief threads: Copy the contents of the chief thread's
 			   passed-in mem_t to the passed-in mem_t for this thread. (The
 			   chief thread already has the mem_t, so it does not need to
 			   perform any copy.) */ \
-			if ( !bli_thrinfo_am_chief( thread ) ) \
+			if ( !bli_thread_am_ochief( thread ) ) \
 			{ \
 				*mem = *mem_p; \
 			} \
@@ -158,11 +158,44 @@ void PASTECH2(bls_,ch,opname) \
 	} \
 }
 
-//INSERT_GENTFUNC_BASIC( packm_init_mem_b )
+//INSERT_GENTFUNC_BASIC0( packm_init_mem_b )
 GENTFUNC( float,    s, packm_init_mem_b )
 GENTFUNC( double,   d, packm_init_mem_b )
 GENTFUNC( scomplex, c, packm_init_mem_b )
 GENTFUNC( dcomplex, z, packm_init_mem_b )
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
+\
+void PASTECH2(bls_,ch,opname) \
+     ( \
+       rntm_t* restrict rntm, \
+       mem_t*  restrict mem, \
+       thrinfo_t* restrict thread  \
+     ) \
+{ \
+	if ( thread != NULL ) \
+	if ( bli_thread_am_ochief( thread ) ) \
+	{ \
+		/* Check the mem_t entry provided by the caller. Only proceed if it
+		   is allocated, which it should be. */ \
+		if ( bli_mem_is_alloc( mem ) ) \
+		{ \
+			bli_pba_release \
+			( \
+			  rntm, \
+			  mem \
+			); \
+		} \
+	} \
+}
+
+//INSERT_GENTFUNC_BASIC0( packm_finalize_mem_b )
+GENTFUNC( float,    s, packm_finalize_mem_b )
+GENTFUNC( double,   d, packm_finalize_mem_b )
+GENTFUNC( scomplex, c, packm_finalize_mem_b )
+GENTFUNC( dcomplex, z, packm_finalize_mem_b )
 
 
 #undef  GENTFUNC
@@ -207,7 +240,7 @@ void PASTECH2(bls_,ch,opname) \
 	*p = bli_mem_buffer( mem ); \
 }
 
-//INSERT_GENTFUNC_BASIC( packm_init_b )
+//INSERT_GENTFUNC_BASIC0( packm_init_b )
 GENTFUNC( float,    s, packm_init_b )
 GENTFUNC( double,   d, packm_init_b )
 GENTFUNC( scomplex, c, packm_init_b )
@@ -234,6 +267,8 @@ void PASTECH2(bls_,ch,opname) \
        ctype** restrict p, inc_t* restrict rs_p, inc_t* restrict cs_p, \
                                                  inc_t* restrict ps_p, \
        cntx_t* restrict cntx, \
+       rntm_t* restrict rntm, \
+       mem_t*  restrict mem, \
        thrinfo_t* restrict thread  \
      ) \
 { \
@@ -247,6 +282,8 @@ void PASTECH2(bls_,ch,opname) \
 	( \
 	  k_alloc, n_alloc, nr, \
 	  cntx, \
+	  rntm, \
+	  mem, \
 	  thread  \
 	); \
 \
@@ -258,7 +295,7 @@ void PASTECH2(bls_,ch,opname) \
 	  &k_max, &n_max, \
 	  p, rs_p,  cs_p, \
 	     &pd_p, ps_p, \
-	  bli_thrinfo_mem( thread )  \
+	  mem  \
 	); \
 \
 	/* Pack matrix B to the destination buffer chosen above. Here, the packed
@@ -274,16 +311,16 @@ void PASTECH2(bls_,ch,opname) \
 	  kappa, \
 	  b,  rs_b,  cs_b, \
 	  *p, *rs_p, *cs_p, \
-	       pd_p, *ps_p, \
+		  pd_p,  *ps_p, \
 	  cntx, \
-	  bli_thrinfo_sub_prenode( thread )  \
+	  thread  \
 	); \
 \
 	/* Barrier so that packing is done before computation. */ \
-	bli_thrinfo_barrier( thread ); \
+	bli_thread_barrier( thread ); \
 }
 
-//INSERT_GENTFUNC_BASIC( packm_b )
+//INSERT_GENTFUNC_BASIC0( packm_b )
 GENTFUNC( float,    s, packm_b )
 GENTFUNC( double,   d, packm_b )
 GENTFUNC( scomplex, c, packm_b )

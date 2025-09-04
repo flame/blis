@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -82,13 +82,16 @@ void bli_obj_create_without_buffer
        obj_t* obj
      )
 {
+	siz_t  elem_size;
+	void*  s;
+
 	bli_init_once();
 
 	if ( bli_error_checking_is_enabled() )
 		bli_obj_create_without_buffer_check( dt, m, n, obj );
 
 	// Query the size of one element of the object's pre-set datatype.
-	siz_t elem_size = bli_dt_size( dt );
+	elem_size = bli_dt_size( dt );
 
 	// Set any default properties that are appropriate.
 	bli_obj_set_defaults( obj );
@@ -115,14 +118,9 @@ void bli_obj_create_without_buffer
 	bli_obj_set_offs( 0, 0, obj );
 	bli_obj_set_diag_offset( 0, obj );
 
-	bli_obj_set_pack_fn( NULL, obj );
-	bli_obj_set_pack_params( NULL, obj );
-	bli_obj_set_ker_fn( NULL, obj );
-	bli_obj_set_ker_params( NULL, obj );
-
 	// Set the internal scalar to 1.0.
 	bli_obj_set_scalar_dt( dt, obj );
-	void* s = bli_obj_internal_scalar_buffer( obj );
+	s = bli_obj_internal_scalar_buffer( obj );
 
 	// Always writing the imaginary component is needed in mixed-domain
 	// scenarios. Failing to do this can lead to reading uninitialized
@@ -144,17 +142,21 @@ void bli_obj_alloc_buffer
        obj_t* obj
      )
 {
-	dim_t n_elem = 0;
-	err_t r_val;
+	dim_t  n_elem = 0;
+	dim_t  m, n;
+	siz_t  elem_size;
+	siz_t  buffer_size;
+	void*  p;
+	err_t  r_val;
 
 	bli_init_once();
 
 	// Query the dimensions of the object we are allocating.
-	dim_t m = bli_obj_length( obj );
-	dim_t n = bli_obj_width( obj );
+	m = bli_obj_length( obj );
+	n = bli_obj_width( obj );
 
 	// Query the size of one element.
-	siz_t elem_size = bli_obj_elem_size( obj );
+	elem_size = bli_obj_elem_size( obj );
 
 	// Adjust the strides, if needed, before doing anything else
 	// (particularly, before doing any error checking).
@@ -191,10 +193,10 @@ void bli_obj_alloc_buffer
 
 	// Compute the size of the total buffer to be allocated, which includes
 	// padding if the leading dimension was increased for alignment purposes.
-	siz_t buffer_size = ( siz_t )n_elem * elem_size;
+	buffer_size = ( siz_t )n_elem * elem_size;
 
 	// Allocate the buffer.
-	void* p = bli_malloc_user( buffer_size, &r_val );
+	p = bli_malloc_user( buffer_size, &r_val );
 
 	// Set individual fields.
 	bli_obj_set_buffer( p, obj );
@@ -257,8 +259,8 @@ void bli_obj_create_1x1_with_attached_buffer
 
 void bli_obj_create_conf_to
      (
-       const obj_t* s,
-             obj_t* d
+       obj_t* s,
+       obj_t* d
      )
 {
 	const num_t dt = bli_obj_dt( s );
@@ -354,7 +356,7 @@ void bli_obj_free
 
 	buf_a = bli_obj_buffer_at_off( a );
 
-	bli_zzsets( 0.0, 0.0, value );
+	bli_zzsets( 0.0, 0.0, value ); 
 
 	if ( bli_obj_is_float( a ) )
 	{
@@ -498,7 +500,7 @@ void bli_adjust_strides
 			// Set the column stride to indicate that this is a column vector
 			// stored in column-major order. This is done for legacy reasons,
 			// because we at one time we had to satisify the error checking
-			// in the underlying BLAS library, which expects the leading
+			// in the underlying BLAS library, which expects the leading 
 			// dimension to be set to at least m, even if it will never be
 			// used for indexing since it is a vector and thus only has one
 			// column of data.
@@ -545,7 +547,7 @@ static char* dt_names[ BLIS_NUM_FP_TYPES+1 ] =
 	"int"
 };
 
-const char* bli_dt_string
+char* bli_dt_string
      (
        num_t dt
      )
@@ -593,13 +595,15 @@ dim_t bli_align_dim_to_size
 
 dim_t bli_align_ptr_to_size
      (
-       const void*  p,
-             size_t align_size
+       void*  p,
+       size_t align_size
      )
 {
-	dim_t dim = ( ( ( uintptr_t )p + align_size - 1 ) /
-	              align_size
-	            ) * align_size;
+	dim_t dim;
+
+	dim = ( ( ( uintptr_t )p + align_size - 1 ) /
+	        align_size
+	      ) * align_size;
 
 	return dim;
 }
@@ -625,13 +629,13 @@ num_t bli_dt_union( num_t dt1, num_t dt2 )
 
 void bli_obj_print
      (
-       const char*  label,
-       const obj_t* obj
+       char*  label,
+       obj_t* obj
      )
 {
 	bli_init_once();
 
-	FILE* file = stdout;
+	FILE*  file     = stdout;
 
 	if ( bli_error_checking_is_enabled() )
 		bli_obj_print_check( label, obj );

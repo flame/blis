@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,7 +42,7 @@
 #undef  GENTFUNCCO
 #define GENTFUNCCO( ftype, ftype_r, ch, chr, blasname, blisname ) \
 \
-void PASTEF77(ch,blasname) \
+void PASTEF77S(ch,blasname) \
      ( \
        const f77_char* uploa, \
        const f77_int*  m, \
@@ -50,13 +51,17 @@ void PASTEF77(ch,blasname) \
              ftype*    a, const f77_int* lda  \
      ) \
 { \
+	/* Initialize BLIS. */ \
+	bli_init_auto(); \
+\
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+	AOCL_DTL_LOG_HER_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *uploa, *m, (void*)alpha, *incx, *lda);\
+\
 	uplo_t  blis_uploa; \
 	dim_t   m0; \
 	ftype*  x0; \
 	inc_t   incx0; \
-\
-	/* Initialize BLIS. */ \
-	bli_init_auto(); \
+	inc_t   rs_a, cs_a; \
 \
 	/* Perform BLAS parameter checking. */ \
 	PASTEBLACHK(blasname) \
@@ -80,8 +85,8 @@ void PASTEF77(ch,blasname) \
 	bli_convert_blas_incv( m0, (ftype*)x, *incx, x0, incx0 ); \
 \
 	/* Set the row and column strides of A. */ \
-	const inc_t rs_a = 1; \
-	const inc_t cs_a = *lda; \
+	rs_a = 1; \
+	cs_a = *lda; \
 \
 	/* Call BLIS interface. */ \
 	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
@@ -96,11 +101,25 @@ void PASTEF77(ch,blasname) \
 	  NULL  \
 	); \
 \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
-}
+}\
+\
+IF_BLIS_ENABLE_BLAS(\
+void PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* uploa, \
+       const f77_int*  m, \
+       const ftype_r*  alpha, \
+       const ftype*    x, const f77_int* incx, \
+             ftype*    a, const f77_int* lda  \
+     ) \
+{\
+    PASTEF77S(ch,blasname) \
+    ( uploa, m, alpha, x, incx, a, lda ); \
+} \
+)
 
-#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNCCO_BLAS( her, her )
-#endif
 

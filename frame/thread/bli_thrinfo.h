@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,16 +41,15 @@ struct thrinfo_s
 {
 	// The thread communicator for the other threads sharing the same work
 	// at this level.
-	thrcomm_t*         comm;
+	thrcomm_t*         ocomm;
 
-	// Our thread id within the thread communicator.
-	dim_t              thread_id;
+	// Our thread id within the ocomm thread communicator.
+	dim_t              ocomm_id;
 
-	// The number of communicators which are "siblings" of our communicator.
+	// The number of distinct threads used to parallelize the loop.
 	dim_t              n_way;
 
-	// An id to identify what we're working on. This is the same for all threads
-	// in the same communicator, and 0 <= work_id < n_way.
+	// What we're working on.
 	dim_t              work_id;
 
 	// When freeing, should the communicators in this node be freed? Usually,
@@ -59,14 +58,9 @@ struct thrinfo_s
 	// to false.
 	bool               free_comm;
 
-	// The small block pool.
-	pool_t*            sba_pool;
-
-	// The packing block allocator.
-	pba_t*             pba;
-
-	// Storage for allocated memory obtained from the packing block allocator.
-	mem_t              mem;
+	// The bszid_t to help identify the node. This is mostly only useful when
+	// debugging or tracing the allocation and release of thrinfo_t nodes.
+	bszid_t            bszid;
 
 	struct thrinfo_s*  sub_prenode;
 	struct thrinfo_s*  sub_node;
@@ -75,82 +69,74 @@ typedef struct thrinfo_s thrinfo_t;
 
 //
 // thrinfo_t functions
+// NOTE: The naming of these should be made consistent at some point.
+// (ie: bli_thrinfo_ vs. bli_thread_)
 //
 
 // thrinfo_t query (field only)
 
-BLIS_INLINE dim_t bli_thrinfo_num_threads( const thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_num_threads( thrinfo_t* t )
 {
-	return (t->comm)->n_threads;
+	return (t->ocomm)->n_threads;
 }
 
-BLIS_INLINE dim_t bli_thrinfo_thread_id( const thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_ocomm_id( thrinfo_t* t )
 {
-	return t->thread_id;
+	return t->ocomm_id;
 }
 
-BLIS_INLINE dim_t bli_thrinfo_n_way( const thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_n_way( thrinfo_t* t )
 {
 	return t->n_way;
 }
 
-BLIS_INLINE dim_t bli_thrinfo_work_id( const thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_work_id( thrinfo_t* t )
 {
 	return t->work_id;
 }
 
-BLIS_INLINE thrcomm_t* bli_thrinfo_comm( const thrinfo_t* t )
+BLIS_INLINE thrcomm_t* bli_thrinfo_ocomm( thrinfo_t* t )
 {
-	return t->comm;
+	return t->ocomm;
 }
 
-BLIS_INLINE bool bli_thrinfo_needs_free_comm( const thrinfo_t* t )
+BLIS_INLINE bool bli_thrinfo_needs_free_comm( thrinfo_t* t )
 {
 	return t->free_comm;
 }
 
-BLIS_INLINE pool_t* bli_thrinfo_sba_pool( const thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_bszid( thrinfo_t* t )
 {
-	return t->sba_pool;
+	return t->bszid;
 }
 
-BLIS_INLINE pba_t* bli_thrinfo_pba( const thrinfo_t* t )
-{
-	return t->pba;
-}
-
-BLIS_INLINE mem_t* bli_thrinfo_mem( thrinfo_t* t )
-{
-	return &t->mem;
-}
-
-BLIS_INLINE thrinfo_t* bli_thrinfo_sub_node( const thrinfo_t* t )
+BLIS_INLINE thrinfo_t* bli_thrinfo_sub_node( thrinfo_t* t )
 {
 	return t->sub_node;
 }
 
-BLIS_INLINE thrinfo_t* bli_thrinfo_sub_prenode( const thrinfo_t* t )
+BLIS_INLINE thrinfo_t* bli_thrinfo_sub_prenode( thrinfo_t* t )
 {
 	return t->sub_prenode;
 }
 
 // thrinfo_t query (complex)
 
-BLIS_INLINE bool bli_thrinfo_am_chief( const thrinfo_t* t )
+BLIS_INLINE bool bli_thread_am_ochief( thrinfo_t* t )
 {
-	return t->thread_id == 0;
+	return t->ocomm_id == 0;
 }
 
 // thrinfo_t modification
 
-BLIS_INLINE void bli_thrinfo_set_comm( thrcomm_t* comm, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_ocomm( thrcomm_t* ocomm, thrinfo_t* t )
 {
-	t->comm = comm;
+	t->ocomm = ocomm;
 }
 
-BLIS_INLINE void bli_thrinfo_set_thread_id( dim_t thread_id, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_ocomm_id( dim_t ocomm_id, thrinfo_t* t )
 {
-	t->thread_id = thread_id;
+	t->ocomm_id = ocomm_id;
 }
 
 BLIS_INLINE void bli_thrinfo_set_n_way( dim_t n_way, thrinfo_t* t )
@@ -168,14 +154,9 @@ BLIS_INLINE void bli_thrinfo_set_free_comm( bool free_comm, thrinfo_t* t )
 	t->free_comm = free_comm;
 }
 
-BLIS_INLINE void bli_thrinfo_set_sba_pool( pool_t* sba_pool, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_bszid( bszid_t bszid, thrinfo_t* t )
 {
-	t->sba_pool = sba_pool;
-}
-
-BLIS_INLINE void bli_thrinfo_set_pba( pba_t* pba, thrinfo_t* t )
-{
-	t->pba = pba;
+	t->bszid = bszid;
 }
 
 BLIS_INLINE void bli_thrinfo_set_sub_node( thrinfo_t* sub_node, thrinfo_t* t )
@@ -190,14 +171,14 @@ BLIS_INLINE void bli_thrinfo_set_sub_prenode( thrinfo_t* sub_prenode, thrinfo_t*
 
 // other thrinfo_t-related functions
 
-BLIS_INLINE void* bli_thrinfo_broadcast( const thrinfo_t* t, void* p )
+BLIS_INLINE void* bli_thread_broadcast( thrinfo_t* t, void* p )
 {
-	return bli_thrcomm_bcast( t->thread_id, p, t->comm );
+	return bli_thrcomm_bcast( t->ocomm_id, p, t->ocomm );
 }
 
-BLIS_INLINE void bli_thrinfo_barrier( const thrinfo_t* t )
+BLIS_INLINE void bli_thread_barrier( thrinfo_t* t )
 {
-	bli_thrcomm_barrier( t->thread_id, t->comm );
+	bli_thrcomm_barrier( t->ocomm_id, t->ocomm );
 }
 
 
@@ -205,47 +186,98 @@ BLIS_INLINE void bli_thrinfo_barrier( const thrinfo_t* t )
 // Prototypes for level-3 thrinfo functions not specific to any operation.
 //
 
-thrinfo_t* bli_thrinfo_create_root
-     (
-       thrcomm_t* comm,
-       dim_t      thread_id,
-       pool_t*    sba_pool,
-       pba_t*     pba
-     );
-
 thrinfo_t* bli_thrinfo_create
      (
-       thrcomm_t* comm,
-       dim_t      thread_id,
+       rntm_t*    rntm,
+       thrcomm_t* ocomm,
+       dim_t      ocomm_id,
        dim_t      n_way,
-       dim_t      work_id,
+       dim_t      work_id, 
        bool       free_comm,
-       pool_t*    sba_pool,
-       pba_t*     pba
+       bszid_t    bszid,
+       thrinfo_t* sub_node
      );
 
-BLIS_EXPORT_BLIS void bli_thrinfo_free
+void bli_thrinfo_init
      (
+       thrinfo_t* thread,
+       thrcomm_t* ocomm,
+       dim_t      ocomm_id,
+       dim_t      n_way,
+       dim_t      work_id, 
+       bool       free_comm,
+       bszid_t    bszid,
+       thrinfo_t* sub_node
+     );
+
+void bli_thrinfo_init_single
+     (
+       thrinfo_t* thread
+     );
+
+void bli_thrinfo_free
+     (
+       rntm_t*    rntm,
        thrinfo_t* thread
      );
 
 // -----------------------------------------------------------------------------
 
-thrinfo_t* bli_thrinfo_split
+void bli_thrinfo_grow
      (
-       dim_t      n_way,
-       thrinfo_t* thread_par
-     );
-
-void bli_thrinfo_print
-     (
+       rntm_t*    rntm,
+       cntl_t*    cntl,
        thrinfo_t* thread
      );
 
-void bli_thrinfo_print_sub
+thrinfo_t* bli_thrinfo_rgrow
      (
-       thrinfo_t* thread,
-       gint_t     level
+       rntm_t*    rntm,
+       cntl_t*    cntl_par,
+       cntl_t*    cntl_cur,
+       thrinfo_t* thread_par
      );
+
+thrinfo_t* bli_thrinfo_create_for_cntl
+     (
+       rntm_t*    rntm,
+       cntl_t*    cntl_par,
+       cntl_t*    cntl_chl,
+       thrinfo_t* thread_par
+     );
+
+thrinfo_t* bli_thrinfo_rgrow_prenode
+     (
+       rntm_t*    rntm,
+       cntl_t*    cntl_par,
+       cntl_t*    cntl_cur,
+       thrinfo_t* thread_par
+     );
+
+thrinfo_t* bli_thrinfo_create_for_cntl_prenode
+     (
+       rntm_t*    rntm,
+       cntl_t*    cntl_par,
+       cntl_t*    cntl_chl,
+       thrinfo_t* thread_par
+     );
+
+// -----------------------------------------------------------------------------
+
+#if 0
+void bli_thrinfo_grow_tree
+     (
+       rntm_t*    rntm,
+       cntl_t*    cntl,
+       thrinfo_t* thread
+     );
+
+void bli_thrinfo_grow_tree_ic
+     (
+       rntm_t*    rntm,
+       cntl_t*    cntl,
+       thrinfo_t* thread
+     );
+#endif
 
 #endif

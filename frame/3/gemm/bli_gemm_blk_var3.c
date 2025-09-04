@@ -36,57 +36,56 @@
 
 void bli_gemm_blk_var3
      (
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     c,
-       const cntx_t*    cntx,
-       const cntl_t*    cntl,
-             thrinfo_t* thread_par
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       cntl_t* cntl,
+       thrinfo_t* thread
      )
 {
-	obj_t ap, bp, cs;
-	bli_obj_alias_to( a, &ap );
-	bli_obj_alias_to( b, &bp );
-	bli_obj_alias_to( c, &cs );
-
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5);
+	obj_t a1, b1;
+	dim_t b_alg;
 
 	// Determine the direction in which to partition (forwards or backwards).
-	dir_t direct = bli_l3_direct( &ap, &bp, &cs, cntl );
+	dir_t direct = bli_l3_direct( a, b, c, cntl );
 
 	// Prune any zero region that exists along the partitioning dimension.
-	bli_l3_prune_unref_mparts_k( &ap, &bp, &cs, cntl );
+	bli_l3_prune_unref_mparts_k( a, b, c, cntl );
 
 	// Query dimension in partitioning direction.
-	dim_t k_trans = bli_obj_width_after_trans( &ap );
+	dim_t k_trans = bli_obj_width_after_trans( a );
 
 	// Partition along the k dimension.
-	dim_t b_alg;
 	for ( dim_t i = 0; i < k_trans; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_l3_determine_kc( direct, i, k_trans, &ap, &bp,
+		b_alg = bli_l3_determine_kc( direct, i, k_trans, a, b,
 		                             bli_cntl_bszid( cntl ), cntx, cntl );
 
 		// Acquire partitions for A1 and B1.
-		obj_t a1, b1;
 		bli_acquire_mpart_ndim( direct, BLIS_SUBPART1,
-		                        i, b_alg, &ap, &a1 );
+		                        i, b_alg, a, &a1 );
 		bli_acquire_mpart_mdim( direct, BLIS_SUBPART1,
-		                        i, b_alg, &bp, &b1 );
+		                        i, b_alg, b, &b1 );
 
 		// Perform gemm subproblem.
-		bli_l3_int
+		bli_gemm_int
 		(
 		  &BLIS_ONE,
 		  &a1,
 		  &b1,
 		  &BLIS_ONE,
-		  &cs,
+		  c,
 		  cntx,
+		  rntm,
 		  bli_cntl_sub_node( cntl ),
-		  thread
+		  bli_thrinfo_sub_node( thread )
 		);
+
+		bli_thread_barrier( bli_thrinfo_sub_node( thread ) );
 
 		// This variant executes multiple rank-k updates. Therefore, if the
 		// internal beta scalar on matrix C is non-zero, we must use it
@@ -95,7 +94,7 @@ void bli_gemm_blk_var3
 		// can simply overwrite the internal beta scalar with BLIS_ONE once
 		// it has been used in the first iteration. However...
 
-		// Unlike variant 3 of gemm and gemmt, which reset the internal scalar
+		// Unlike variant 3 of gemm and herk, which reset the internal scalar
 		// on C at the end of the first iteration so that subsequent iterations
 		// do not erroneously apply beta more than once, it is important that
 		// this behavior not be applied to trmm. That is because the order of
@@ -109,7 +108,9 @@ void bli_gemm_blk_var3
 		// Thus, for neither trmm nor trmm3 should we reset the scalar on C
 		// after the first iteration.
 		if ( bli_cntl_family( cntl ) != BLIS_TRMM )
-		if ( i == 0 ) bli_obj_scalar_reset( &cs );
+		if ( i == 0 ) bli_obj_scalar_reset( c );
 	}
+
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5);
 }
 

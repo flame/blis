@@ -1,0 +1,79 @@
+{
+    "version": 6,
+    "include": [
+      "cmake/presets/base.json",
+      "cmake/presets/linux-make.json",
+      "cmake/presets/linux-ninja.json",
+      "cmake/presets/win-msvc.json",
+      "cmake/presets/win-ninja.json"
+  ],
+    "configurePresets": [
+      {
+        "name": "linux-base",
+        "hidden": true
+      },
+      {
+        "name": "linux-st-lp64-auto-shared",
+        "description": "Configure for serial LP64 BLIS with on Linux",
+        "inherits": ["linux-base", "st", "lp64"],
+        "hidden": false,
+        "binaryDir": "${sourceDir}/build-${presetName}",
+        "cacheVariables": {
+          "BLIS_PATH": "${sourceParentDir}//install-linux-st-lp64-auto",
+          "BLIS_LINKING_TYPE": "shared",
+          "REF_CBLAS": "MKL"
+        }
+      }
+    ],
+    "buildPresets": [
+      {
+        "name": "linux-st-lp64-auto-shared",
+        "description": "Build GTestSuite using serial LP64 BLIS on Linux",
+        "configurePreset": "linux-st-lp64-auto-shared",
+        "jobs": 0
+      }
+    ],
+    "testPresets":[
+      {
+        "name":"testall",
+        "description": "Run all tests",
+        "configurePreset": "linux-st-lp64-auto-shared",
+        "output": {"outputOnFailure": false}
+      },
+      {
+        "name":"level3",
+        "description": "Run level3 tests only",
+        "configurePreset": "linux-st-lp64-auto-shared",
+        "output": {"outputOnFailure": false},
+        "filter": {
+          "include": {
+            "name": "level3"
+          },
+          "exclude": {
+            "name":"gemm|trsm"
+          }
+        }
+      }
+    ],
+
+    "workflowPresets": [
+      {
+        "name": "linux-st-lp64-auto-shared-check",
+        "description": "Build and check single-threaded shared BLIS for auto configuration on Linux",
+        "steps": [
+          {
+            "type": "configure",
+            "name": "linux-st-lp64-auto-shared"
+          },
+          {
+            "type": "build",
+            "name": "linux-st-lp64-auto-shared"
+          },
+          {
+            "type": "test",
+            "name": "level3"
+          }
+        ]
+      }
+    ]
+}

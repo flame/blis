@@ -49,7 +49,7 @@ void PASTEMAC(ch,varname) \
        rntm_t*  rntm  \
      );
 
-INSERT_GENTPROTR_BASIC( asumv_unb_var1 )
+INSERT_GENTPROTR_BASIC0( asumv_unb_var1 )
 
 
 #undef  GENTPROT
@@ -64,9 +64,9 @@ void PASTEMAC(ch,varname) \
        rntm_t* rntm  \
      );
 
-INSERT_GENTPROT_BASIC( mkherm_unb_var1 )
-INSERT_GENTPROT_BASIC( mksymm_unb_var1 )
-INSERT_GENTPROT_BASIC( mktrim_unb_var1 )
+INSERT_GENTPROT_BASIC0( mkherm_unb_var1 )
+INSERT_GENTPROT_BASIC0( mksymm_unb_var1 )
+INSERT_GENTPROT_BASIC0( mktrim_unb_var1 )
 
 
 #undef  GENTPROTR
@@ -81,9 +81,9 @@ void PASTEMAC(ch,varname) \
        rntm_t*  rntm  \
      );
 
-INSERT_GENTPROTR_BASIC( norm1v_unb_var1 )
-INSERT_GENTPROTR_BASIC( normfv_unb_var1 )
-INSERT_GENTPROTR_BASIC( normiv_unb_var1 )
+INSERT_GENTPROTR_BASIC0( norm1v_unb_var1 )
+INSERT_GENTPROTR_BASIC0( normfv_unb_var1 )
+INSERT_GENTPROTR_BASIC0( normiv_unb_var1 )
 
 
 #undef  GENTPROTR
@@ -102,9 +102,9 @@ void PASTEMAC(ch,varname) \
        rntm_t*  rntm  \
      );
 
-INSERT_GENTPROTR_BASIC( norm1m_unb_var1 )
-INSERT_GENTPROTR_BASIC( normfm_unb_var1 )
-INSERT_GENTPROTR_BASIC( normim_unb_var1 )
+INSERT_GENTPROTR_BASIC0( norm1m_unb_var1 )
+INSERT_GENTPROTR_BASIC0( normfm_unb_var1 )
+INSERT_GENTPROTR_BASIC0( normim_unb_var1 )
 
 
 #undef  GENTPROT
@@ -118,8 +118,8 @@ void PASTEMAC(ch,varname) \
        rntm_t* rntm  \
      );
 
-INSERT_GENTPROT_BASIC( randv_unb_var1 )
-INSERT_GENTPROT_BASIC( randnv_unb_var1 )
+INSERT_GENTPROT_BASIC0( randv_unb_var1 )
+INSERT_GENTPROT_BASIC0( randnv_unb_var1 )
 
 
 #undef  GENTPROT
@@ -136,8 +136,8 @@ void PASTEMAC(ch,varname) \
        rntm_t* rntm  \
      );
 
-INSERT_GENTPROT_BASIC( randm_unb_var1 )
-INSERT_GENTPROT_BASIC( randnm_unb_var1 )
+INSERT_GENTPROT_BASIC0( randm_unb_var1 )
+INSERT_GENTPROT_BASIC0( randnm_unb_var1 )
 
 
 #undef  GENTPROTR
@@ -153,7 +153,7 @@ void PASTEMAC(ch,varname) \
        rntm_t*  rntm  \
      );
 
-INSERT_GENTPROTR_BASIC( sumsqv_unb_var1 )
+INSERT_GENTPROTR_BASIC0( sumsqv_unb_var1 )
 
 // -----------------------------------------------------------------------------
 
@@ -162,13 +162,13 @@ INSERT_GENTPROTR_BASIC( sumsqv_unb_var1 )
 \
 bool PASTEMAC(ch,varname) \
      ( \
-       conj_t conjx, \
-       dim_t  n, \
-       ctype* x, inc_t incx, \
-       ctype* y, inc_t incy  \
+       conj_t  conjx, \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy  \
      );
 
-INSERT_GENTPROT_BASIC( eqv_unb_var1 )
+INSERT_GENTPROT_BASIC0( eqv_unb_var1 )
 
 
 #undef  GENTPROT
@@ -186,7 +186,7 @@ bool PASTEMAC(ch,varname) \
        ctype*  y, inc_t rs_y, inc_t cs_y  \
      );
 
-INSERT_GENTPROT_BASIC( eqm_unb_var1 )
+INSERT_GENTPROT_BASIC0( eqm_unb_var1 )
 
 
 #undef  GENTPROT
@@ -194,15 +194,15 @@ INSERT_GENTPROT_BASIC( eqm_unb_var1 )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
-             FILE*  file, \
-       const char*  s1, \
-             dim_t  n, \
-       const ctype* x, inc_t incx, \
-       const char*  format, \
-       const char*  s2  \
+       FILE*  file, \
+       char*  s1, \
+       dim_t  n, \
+       ctype* x, inc_t incx, \
+       char*  format, \
+       char*  s2  \
      );
 
-INSERT_GENTPROT_BASIC_I( fprintv )
+INSERT_GENTPROT_BASIC0_I( fprintv )
 
 
 #undef  GENTPROT
@@ -210,15 +210,15 @@ INSERT_GENTPROT_BASIC_I( fprintv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
-             FILE*  file, \
-       const char*  s1, \
-             dim_t  m, \
-             dim_t  n, \
-       const ctype* x, inc_t rs_x, inc_t cs_x, \
-       const char*  format, \
-       const char*  s2  \
+       FILE*  file, \
+       char*  s1, \
+       dim_t  m, \
+       dim_t  n, \
+       ctype* x, inc_t rs_x, inc_t cs_x, \
+       char*  format, \
+       char*  s2  \
      );
 
-INSERT_GENTPROT_BASIC_I( fprintm )
+INSERT_GENTPROT_BASIC0_I( fprintm )
 
 
