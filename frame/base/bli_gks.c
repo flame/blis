@@ -338,6 +338,7 @@ void bli_gks_init_ref_cntx
 	cntx_init_ft f = cntx_ref_init[ id ];
 
 	// Initialize the caller's context with reference kernels and related values.
+	memset( &cntx, 0, sizeof( cntx ) );
 	f( cntx );
 }
 
@@ -351,7 +352,6 @@ bool bli_gks_cntx_ukr_is_ref
      )
 {
 	cntx_t ref_cntx;
-	memset( &ref_cntx, 0, sizeof( ref_cntx ) );
 
 	// Initialize a context with reference kernels for the arch_t id queried
 	// via bli_arch_query_id().
@@ -377,7 +377,6 @@ bool bli_gks_cntx_ukr2_is_ref
      )
 {
 	cntx_t ref_cntx;
-	memset( &ref_cntx, 0, sizeof( ref_cntx ) );
 
 	// Initialize a context with reference kernels for the arch_t id queried
 	// via bli_arch_query_id().
