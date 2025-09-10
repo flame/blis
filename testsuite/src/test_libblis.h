@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -230,7 +230,6 @@ typedef struct test_ops_s
 	test_op_t dotv;
 	test_op_t dotxv;
 	test_op_t normfv;
-	test_op_t invscalv;
 	test_op_t scalv;
 	test_op_t scal2v;
 	test_op_t setv;
@@ -242,7 +241,6 @@ typedef struct test_ops_s
 	test_op_t axpym;
 	test_op_t copym;
 	test_op_t normfm;
-	test_op_t invscalm;
 	test_op_t scalm;
 	test_op_t scal2m;
 	test_op_t setm;
@@ -420,7 +418,7 @@ void fill_string_with_n_spaces( char* str, unsigned int n_spaces );
 // --- Create object ---
 
 void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, char storage, dim_t m, dim_t n, obj_t* a );
-thrinfo_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx );
+cntl_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx );
 void libblis_test_vobj_create( test_params_t* params, num_t dt, char storage, dim_t m, obj_t* x );
 
 // --- Randomize/initialize object ---
@@ -506,7 +504,6 @@ char libblis_test_proj_dtchar_to_precchar( char dt_char );
 #include "test_dotv.h"
 #include "test_dotxv.h"
 #include "test_normfv.h"
-#include "test_invscalv.h"
 #include "test_scalv.h"
 #include "test_scal2v.h"
 #include "test_setv.h"
@@ -518,7 +515,6 @@ char libblis_test_proj_dtchar_to_precchar( char dt_char );
 #include "test_axpym.h"
 #include "test_copym.h"
 #include "test_normfm.h"
-#include "test_invscalm.h"
 #include "test_scalm.h"
 #include "test_scal2m.h"
 #include "test_setm.h"

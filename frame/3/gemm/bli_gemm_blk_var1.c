@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -37,50 +37,48 @@
 
 void bli_gemm_blk_var1
      (
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     c,
-       const cntx_t*    cntx,
-       const cntl_t*    cntl,
-             thrinfo_t* thread_par
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       cntl_t* cntl,
+       thrinfo_t* thread
      )
 {
-	obj_t ap, cp;
-	bli_obj_alias_to( a, &ap );
-	bli_obj_alias_to( c, &cp );
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5);
+	obj_t a1, c1;
+	dim_t my_start, my_end;
+	dim_t b_alg;
 
 	// Determine the direction in which to partition (forwards or backwards).
-	const dir_t direct = bli_l3_direct( &ap, b, &cp, cntl );
+	dir_t direct = bli_l3_direct( a, b, c, cntl );
 
 	// Prune any zero region that exists along the partitioning dimension.
-	bli_l3_prune_unref_mparts_m( &ap, b, &cp, cntl );
+	bli_l3_prune_unref_mparts_m( a, b, c, cntl );
 
 	// Determine the current thread's subpartition range.
-	dim_t my_start, my_end;
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 	bli_thread_range_mdim
 	(
-	  direct, thread, &ap, b, &cp, cntl, cntx,
+	  direct, thread, a, b, c, cntl, cntx,
 	  &my_start, &my_end
 	);
 
 	// Partition along the m dimension.
-	dim_t b_alg;
 	for ( dim_t i = my_start; i < my_end; i += b_alg )
 	{
-		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize( direct, i, my_end, &ap,
+		// Determine the current algorithmic blocksize for GEMM.
+		b_alg = bli_determine_blocksize( BLIS_GEMM, direct, i, my_end, a,
 		                                 bli_cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for A1 and C1.
-		obj_t a1, c1;
 		bli_acquire_mpart_mdim( direct, BLIS_SUBPART1,
-		                        i, b_alg, &ap, &a1 );
+		                        i, b_alg, a, &a1 );
 		bli_acquire_mpart_mdim( direct, BLIS_SUBPART1,
-		                        i, b_alg, &cp, &c1 );
+		                        i, b_alg, c, &c1 );
 
 		// Perform gemm subproblem.
-		bli_l3_int
+		bli_gemm_int
 		(
 		  &BLIS_ONE,
 		  &a1,
@@ -88,9 +86,12 @@ void bli_gemm_blk_var1
 		  &BLIS_ONE,
 		  &c1,
 		  cntx,
+		  rntm,
 		  bli_cntl_sub_node( cntl ),
-		  thread
+		  bli_thrinfo_sub_node( thread )
 		);
 	}
+	
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5);
 }
 

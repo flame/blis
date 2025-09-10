@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -39,40 +40,39 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-             conj_t  conjalpha, \
-             dim_t   n, \
-       const void*   alpha0, \
-             void*   x0, inc_t incx, \
-       const cntx_t* cntx  \
+       conj_t           conjalpha, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       cntx_t* restrict cntx  \
      ) \
 { \
 	if ( bli_zero_dim1( n ) ) return; \
-\
-	const ctype* alpha = alpha0; \
-	      ctype* x     = x0; \
 \
 	/* If alpha is one, return. */ \
 	if ( PASTEMAC(ch,eq1)( *alpha ) ) return; \
 \
 	/* If alpha is zero, use setv. */ \
-	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
+	if ( PASTEMAC(ch,eq0)( *alpha ) && n > 0) \
 	{ \
-		const ctype* zero = PASTEMAC(ch,0); \
+		ctype* zero = PASTEMAC(ch,0); \
 \
 		/* Query the context for the kernel function pointer. */ \
-		const num_t dt     = PASTEMAC(ch,type); \
-		setv_ker_ft setv_p = bli_cntx_get_ukr_dt( dt, BLIS_SETV_KER, cntx ); \
+		const num_t             dt     = PASTEMAC(ch,type); \
+		PASTECH(ch,setv_ker_ft) setv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_SETV_KER, cntx ); \
 \
 		setv_p \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  n, \
 		  zero, \
-		  x0, incx, \
+		  x, incx, \
 		  cntx  \
 		); \
 		return; \
 	} \
+\
+        dim_t n0 = bli_abs(n); \
 \
 	ctype alpha_conj; \
 \
@@ -81,14 +81,14 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	if ( incx == 1 ) \
 	{ \
 		PRAGMA_SIMD \
-		for ( dim_t i = 0; i < n; ++i ) \
+		for ( dim_t i = 0; i < n0; ++i ) \
 		{ \
 			PASTEMAC(ch,scals)( alpha_conj, x[i] ); \
 		} \
 	} \
 	else \
 	{ \
-		for ( dim_t i = 0; i < n; ++i ) \
+		for ( dim_t i = 0; i < n0; ++i ) \
 		{ \
 			PASTEMAC(ch,scals)( alpha_conj, *x ); \
 \
@@ -97,5 +97,5 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( scalv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC_BASIC2( scalv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

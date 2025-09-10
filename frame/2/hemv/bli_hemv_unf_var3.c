@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -127,8 +128,10 @@ void PASTEMAC(ch,varname) \
 		); \
 	} \
 \
+	PASTECH(ch,dotxaxpyf_ker_ft) kfp_xf; \
+\
 	/* Query the context for the kernel function pointer and fusing factor. */ \
-	dotxaxpyf_ker_ft kfp_xf = bli_cntx_get_ukr_dt( dt, BLIS_DOTXAXPYF_KER, cntx ); \
+	kfp_xf = bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXAXPYF_KER, cntx ); \
 	b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_XF, cntx ); \
 \
 	for ( i = 0; i < m; i += f ) \
@@ -213,5 +216,6 @@ void PASTEMAC(ch,varname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( hemv_unf_var3 )
+INSERT_GENTFUNC_BASIC0( hemv_unf_var3 )
+
 

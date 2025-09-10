@@ -42,36 +42,30 @@
 // 2vx10 microkernels.
 #include "armsve_asm_2vx10cmplx.h"
 
-
 void bli_cgemm_armsve_asm_2vx10_unindexed
      (
-             dim_t      m, \
-             dim_t      n, \
-             dim_t      k, \
-       const void*      alpha, \
-       const void*      a, \
-       const void*      b, \
-       const void*      beta, \
-             void*      c, inc_t rs_c0, inc_t cs_c0, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
+       dim_t               k0,
+       scomplex*  restrict alpha,
+       scomplex*  restrict a,
+       scomplex*  restrict b,
+       scomplex*  restrict beta,
+       scomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
-  const void* a_next = bli_auxinfo_next_a( data );
-  const void* b_next = bli_auxinfo_next_b( data );
+  void* a_next = bli_auxinfo_next_a( data );
+  void* b_next = bli_auxinfo_next_b( data );
 
   // Typecast local copies of integers in case dim_t and inc_t are a
   // different size than is expected by load instructions.
-  uint64_t k_mker = k / 4;
-  uint64_t k_left = k % 4;
+  uint64_t k_mker = k0 / 4;
+  uint64_t k_left = k0 % 4;
   uint64_t rs_c   = rs_c0;
   uint64_t cs_c   = cs_c0;
   uint64_t info   = 0;
 
-  GEMM_UKR_SETUP_CT_ANY( c, m, 10, false );
-
   __asm__ volatile (
-" whilelo         p0.s, xzr, %12                  \n\t"
 // " ldr             x0, %[a]                        \n\t"
 // " ldr             x1, %[b]                        \n\t"
 " mov             x2, xzr                         \n\t"
@@ -97,13 +91,14 @@ void bli_cgemm_armsve_asm_2vx10_unindexed
 " madd            x2, x16, x2, xzr                \n\t" // cs_a
 " madd            x3, x16, x3, xzr                \n\t" // rs_b
 " madd            %4, x16, %4, xzr                \n\t" // cs_c
+" ptrue           p0.s                            \n\t"
 "                                                 \n\t"
 // " ldr             x5, %[k_mker]                   \n\t" // Number of loops.
 // " ldr             x6, %[k_left]                   \n\t"
 "                                                 \n\t"
-LABEL(LOAD_ABC)
+" LOAD_ABC:                                       \n\t"
 " cmp             %5, #0                          \n\t" // Don't preload if no microkernel there.
-BEQ(END_CCOL_PRFM)
+" b.eq            END_CCOL_PRFM                   \n\t"
 "                                                 \n\t"
 " ld1rw           z20.s, p0/z, [%1, 4*0]          \n\t" // Load B's real 8/10, no imaginary.
 " ld1rw           z21.s, p0/z, [%1, 4*2]          \n\t"
@@ -116,9 +111,9 @@ BEQ(END_CCOL_PRFM)
 "                                                 \n\t"
 GEMM_ACOLCMPLX_CONTIGUOUS_LOAD_FWD(z28,z29,p0,%0,x2)
 "                                                 \n\t"
-LABEL(CCOL_PRFM)
+" CCOL_PRFM:                                      \n\t"
 " cmp             %3, #1                          \n\t"
-BNE(END_CCOL_PRFM) // Do not prefetch for generic C storage.
+" b.ne            END_CCOL_PRFM                   \n\t" // Do not prefetch for generic C storage.
 " mov             x16, %2                         \n\t"
 " prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, %4                    \n\t"
@@ -139,14 +134,14 @@ BNE(END_CCOL_PRFM) // Do not prefetch for generic C storage.
 " prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, %4                    \n\t"
 " prfm            PLDL1KEEP, [x16]                \n\t"
-LABEL(END_CCOL_PRFM)
+" END_CCOL_PRFM:                                  \n\t"
 "                                                 \n\t"
 CLEAR_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z19)
 "                                                 \n\t"
 " cmp             %5, #0                          \n\t" // If no 4-microkernel can be applied.
-BEQ(K_LEFT_LOOP)
+" b.eq            K_LEFT_LOOP                     \n\t"
 "                                                 \n\t"
-LABEL(K_MKER_LOOP)
+" K_MKER_LOOP:                                    \n\t"
 "                                                 \n\t"
 GEMM_ACOLCMPLX_CONTIGUOUS_LOAD_FWD(z30,z31,p0,%0,x2)
 GEMM_2VX10CMPLX_MKER_LOOP_PLAIN_C_1(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z28,z29,z20,z21,z22,z23,z24,z25,z26,z27,%1,x3)
@@ -158,18 +153,18 @@ GEMM_ACOLCMPLX_CONTIGUOUS_LOAD_FWD(z30,z31,p0,%0,x2)
 GEMM_2VX10CMPLX_MKER_LOOP_PLAIN_C_1(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z28,z29,z20,z21,z22,z23,z24,z25,z26,z27,%1,x3)
 "                                                 \n\t"
 " subs            %5, %5, #1                      \n\t" // Decrease counter before final replica.
-BEQ(FIN_MKER_LOOP) // Branch early to avoid reading excess mem.
+" b.eq            FIN_MKER_LOOP                   \n\t" // Branch early to avoid reading excess mem.
 "                                                 \n\t"
 GEMM_ACOLCMPLX_CONTIGUOUS_LOAD_FWD(z28,z29,p0,%0,x2)
 GEMM_2VX10CMPLX_MKER_LOOP_PLAIN_C_2(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z30,z31,z20,z21,z22,z23,z24,z25,z26,z27,%1,x3)
-BRANCH(K_MKER_LOOP)
+" b               K_MKER_LOOP                     \n\t"
 "                                                 \n\t"
-LABEL(FIN_MKER_LOOP)
+" FIN_MKER_LOOP:                                  \n\t"
 GEMM_2VX10CMPLX_MKER_LOOP_PLAIN_C_2_RESIDUAL(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z30,z31,z20,z21,z22,z23,z24,z25,z26,z27,%1,x3)
 "                                                 \n\t"
-LABEL(K_LEFT_LOOP)
+" K_LEFT_LOOP:                                    \n\t"
 " cmp             %6, #0                          \n\t" // End of execution.
-BEQ(WRITE_MEM_PREP)
+" b.eq            WRITE_MEM_PREP                  \n\t"
 "                                                 \n\t"
 GEMM_ACOLCMPLX_CONTIGUOUS_LOAD_FWD(z28,z29,p0,%0,x2)
 " ld1rw           z20.s, p0/z, [%1, 4*0]          \n\t" // Load B's real 8/10, no imaginary.
@@ -182,9 +177,9 @@ GEMM_ACOLCMPLX_CONTIGUOUS_LOAD_FWD(z28,z29,p0,%0,x2)
 " ld1rw           z27.s, p0/z, [%1, 4*14]         \n\t"
 GEMM_2VX10CMPLX_MKER_LOOP_PLAIN_C_1_RESIDUAL(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z28,z29,z20,z21,z22,z23,z24,z25,z26,z27,%1,x3)
 " sub             %6, %6, #1                      \n\t"
-BRANCH(K_LEFT_LOOP)
+" b               K_LEFT_LOOP                     \n\t" // Next column / row.
 "                                                 \n\t"
-LABEL(WRITE_MEM_PREP)
+" WRITE_MEM_PREP:                                 \n\t"
 "                                                 \n\t"
 // " ldr             x7, %[alpha]                    \n\t" // Load alpha & beta (address).
 // " ldr             x8, %[beta]                     \n\t"
@@ -193,7 +188,7 @@ LABEL(WRITE_MEM_PREP)
 " ld1rw           z30.s, p0/z, [%8]               \n\t" // Real(beta).
 " ld1rw           z31.s, p0/z, [%8, 4]            \n\t" // Imag(beta).
 "                                                 \n\t"
-LABEL(PREFETCH_ABNEXT)
+" PREFETCH_ABNEXT:                                \n\t"
 // " ldr             x9,  %[a_next]                  \n\t"
 // " ldr             x10, %[b_next]                  \n\t"
 #ifdef _A64FX
@@ -209,89 +204,90 @@ LABEL(PREFETCH_ABNEXT)
 " prfm            PLDL1STRM, [%10]                \n\t"
 " prfm            PLDL1STRM, [%10, 256*1]         \n\t"
 "                                                 \n\t"
-LABEL(WRITE_MEM)
+" WRITE_MEM:                                      \n\t"
 " fmov            s27, #1.0                       \n\t"
 " fcmp            s29, #0.0                       \n\t" // Whether Imag(alpha) == 0.
 " fccmp           s28, s27, 0, eq                 \n\t" // Whether Real(alpha) == 1.
-BEQ(UNIT_ALPHA)
+" b.eq            UNIT_ALPHA                      \n\t"
 "                                                 \n\t"
 GEMM_FMULCMPLX_COL2(z20,z21,z22,z23,p0,z0 ,z1 ,z2 ,z3 ,z28,z29)
 GEMM_FMULCMPLX_COL2(z24,z25,z26,z27,p0,z4 ,z5 ,z6 ,z7 ,z28,z29)
 GEMM_FMULCMPLX_COL2(z0 ,z1 ,z2 ,z3 ,p0,z8, z9, z10,z11,z28,z29)
 GEMM_FMULCMPLX_COL2(z4 ,z5 ,z6 ,z7 ,p0,z12,z13,z14,z15,z28,z29)
 GEMM_FMULCMPLX_COL2(z8 ,z9 ,z10,z11,p0,z16,z17,z18,z19,z28,z29)
-BRANCH(WRITE_MEM_EXEC)
+" b               WRITE_MEM_EXEC                  \n\t"
 "                                                 \n\t"
-LABEL(UNIT_ALPHA)
+" UNIT_ALPHA:                                     \n\t"
 MOV_COL2(z20,z21,z22,z23,z0 ,z1 ,z2 ,z3 )
 MOV_COL2(z24,z25,z26,z27,z4 ,z5 ,z6 ,z7 )
 MOV_COL2(z0 ,z1 ,z2 ,z3 ,z8, z9, z10,z11)
 MOV_COL2(z4 ,z5 ,z6 ,z7 ,z12,z13,z14,z15)
 MOV_COL2(z8 ,z9 ,z10,z11,z16,z17,z18,z19)
 "                                                 \n\t"
-LABEL(WRITE_MEM_EXEC)
+" WRITE_MEM_EXEC:                                 \n\t"
 " mov             x9, %2                          \n\t" // C address for loading.
 "                                                 \n\t" // C address for storing is %2 itself.
 " cmp             %3, #1                          \n\t"
-BNE(WRITE_MEM_G)
+" b.ne            WRITE_MEM_G                     \n\t"
 "                                                 \n\t"
-LABEL(WRITE_MEM_C)
+" WRITE_MEM_C:                                    \n\t"
 " fmov            s29, wzr                        \n\t"
 " fcmp            s31, #0.0                       \n\t" // Whether Imag(beta) == 0.
 " fccmp           s30, s29, 0, eq                 \n\t" // Whether Real(beta) == 0.
-BEQ(ZERO_BETA_C_0_1_2_3)
+" b.eq            ZERO_BETA_C_0_1_2_3             \n\t"
 GEMM_CCMPLX_LOAD_COL2_C(z12,z13,z14,z15,p0,x9,%4)
 GEMM_CCMPLX_LOAD_COL2_C(z16,z17,z18,z19,p0,x9,%4)
 GEMM_FMLACMPLX_COL2(z20,z21,z22,z23,p0,z12,z13,z14,z15,z30,z31)
 GEMM_FMLACMPLX_COL2(z24,z25,z26,z27,p0,z16,z17,z18,z19,z30,z31)
-LABEL(ZERO_BETA_C_0_1_2_3)
+" ZERO_BETA_C_0_1_2_3:                            \n\t"
 GEMM_CCMPLX_STORE_COL2_C(z20,z21,z22,z23,p0,%2,%4)
 GEMM_CCMPLX_STORE_COL2_C(z24,z25,z26,z27,p0,%2,%4)
 "                                                 \n\t"
-BEQ(ZERO_BETA_C_4_5_6_7_8_9)
+" b.eq            ZERO_BETA_C_4_5_6_7_8_9         \n\t"
 GEMM_CCMPLX_LOAD_COL2_C(z12,z13,z14,z15,p0,x9,%4)
 GEMM_CCMPLX_LOAD_COL2_C(z16,z17,z18,z19,p0,x9,%4)
 GEMM_CCMPLX_LOAD_COL2_C(z20,z21,z22,z23,p0,x9,%4)
 GEMM_FMLACMPLX_COL2(z0 ,z1 ,z2 ,z3 ,p0,z12,z13,z14,z15,z30,z31)
 GEMM_FMLACMPLX_COL2(z4 ,z5 ,z6 ,z7 ,p0,z16,z17,z18,z19,z30,z31)
 GEMM_FMLACMPLX_COL2(z8 ,z9 ,z10,z11,p0,z20,z21,z22,z23,z30,z31)
-LABEL(ZERO_BETA_C_4_5_6_7_8_9)
+" ZERO_BETA_C_4_5_6_7_8_9:                        \n\t"
 GEMM_CCMPLX_STORE_COL2_C(z0 ,z1 ,z2 ,z3 ,p0,%2,%4)
 GEMM_CCMPLX_STORE_COL2_C(z4 ,z5 ,z6 ,z7 ,p0,%2,%4)
 GEMM_CCMPLX_STORE_COL2_C(z8 ,z9 ,z10,z11,p0,%2,%4)
-BRANCH(END_WRITE_MEM)
-// General-storage case -- Mainly for Column-storage or other aligned cases.
-LABEL(WRITE_MEM_G)
+" b               END_WRITE_MEM                   \n\t"
+"                                                 \n\t"
+" WRITE_MEM_G:                                    \n\t"
 " add             %3, %3, %3                      \n\t" // Skips passed to index is multiplied by 2,
-" index           z28.s, wzr, %w3                 \n\t" //  s.t. 2*sizeof(float) = 2*4 = 8.
+" mov             x3, %3                          \n\t" //  s.t. 2*sizeof(float) = 2*4 = 8.
+" index           z28.s, wzr, w3                  \n\t"
 " fmov            s29, wzr                        \n\t"
 " fcmp            s31, #0.0                       \n\t" // Whether Imag(beta) == 0.
 " fccmp           s30, s29, 0, eq                 \n\t" // Whether Real(beta) == 0.
-BEQ(ZERO_BETA_G_0_1_2_3)
+" b.eq            ZERO_BETA_G_0_1_2_3             \n\t"
 GEMM_CCMPLX_LOAD_COL2_G(z12,z13,z14,z15,p0,z28,x9,%4,x16)
 GEMM_CCMPLX_LOAD_COL2_G(z16,z17,z18,z19,p0,z28,x9,%4,x16)
 GEMM_FMLACMPLX_COL2(z20,z21,z22,z23,p0,z12,z13,z14,z15,z30,z31)
 GEMM_FMLACMPLX_COL2(z24,z25,z26,z27,p0,z16,z17,z18,z19,z30,z31)
-LABEL(ZERO_BETA_G_0_1_2_3)
+" ZERO_BETA_G_0_1_2_3:                            \n\t"
 GEMM_CCMPLX_STORE_COL2_G(z20,z21,z22,z23,p0,z28,%2,%4,x16)
 GEMM_CCMPLX_STORE_COL2_G(z24,z25,z26,z27,p0,z28,%2,%4,x16)
 "                                                 \n\t"
-BEQ(ZERO_BETA_G_4_5_6_7_8_9)
+" b.eq            ZERO_BETA_G_4_5_6_7_8_9         \n\t"
 GEMM_CCMPLX_LOAD_COL2_G(z12,z13,z14,z15,p0,z28,x9,%4,x16)
 GEMM_CCMPLX_LOAD_COL2_G(z16,z17,z18,z19,p0,z28,x9,%4,x16)
 GEMM_CCMPLX_LOAD_COL2_G(z20,z21,z22,z23,p0,z28,x9,%4,x16)
 GEMM_FMLACMPLX_COL2(z0 ,z1 ,z2 ,z3 ,p0,z12,z13,z14,z15,z30,z31)
 GEMM_FMLACMPLX_COL2(z4 ,z5 ,z6 ,z7 ,p0,z16,z17,z18,z19,z30,z31)
 GEMM_FMLACMPLX_COL2(z8 ,z9 ,z10,z11,p0,z20,z21,z22,z23,z30,z31)
-LABEL(ZERO_BETA_G_4_5_6_7_8_9)
+" ZERO_BETA_G_4_5_6_7_8_9:                        \n\t"
 GEMM_CCMPLX_STORE_COL2_G(z0 ,z1 ,z2 ,z3 ,p0,z28,%2,%4,x16)
 GEMM_CCMPLX_STORE_COL2_G(z4 ,z5 ,z6 ,z7 ,p0,z28,%2,%4,x16)
 GEMM_CCMPLX_STORE_COL2_G(z8 ,z9 ,z10,z11,p0,z28,%2,%4,x16)
 "                                                 \n\t"
-LABEL(END_WRITE_MEM)
-BRANCH(END_EXEC)
+" END_WRITE_MEM:                                  \n\t"
+" b               END_EXEC                        \n\t"
 "                                                 \n\t"
-LABEL(END_EXEC)
+" END_EXEC:                                       \n\t"
 " mov             %11, #0                         \n\t" // Return normal.
 : "+r" (a),      // %0
   "+r" (b),      // %1
@@ -305,7 +301,7 @@ LABEL(END_EXEC)
   "+r" (a_next), // %9
   "+r" (b_next), // %10
   "=r" (info)    // %11
-: "r"  (m)       // %12
+:
 : "x2","x3","x9","x16",
   "z0","z1","z2","z3","z4","z5","z6","z7",
   "z8","z9","z10","z11","z12","z13","z14","z15",
@@ -314,7 +310,5 @@ LABEL(END_EXEC)
   "z24","z25","z26","z27",
   "z28","z29","z30","z31"
   );
-
-  GEMM_UKR_FLUSH_CT( c );
 }
 

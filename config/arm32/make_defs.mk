@@ -47,7 +47,7 @@ THIS_CONFIG    := arm32
 # may specify additional flags here as needed.
 CPPROCFLAGS    :=
 CMISCFLAGS     := -mfloat-abi=hard -mfpu=neon
-CPICFLAGS      := -fPIC
+CPICFLAGS      :=
 CWARNFLAGS     :=
 
 ifneq ($(DEBUG_TYPE),off)

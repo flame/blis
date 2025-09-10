@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,48 +35,54 @@
 
 struct packm_params_s
 {
-	uint64_t  size; // size field must be present and come first.
-	bszid_t   bmid_m;
-	bszid_t   bmid_n;
-	bool      does_invert_diag;
-	bool      rev_iter_if_upper;
-	bool      rev_iter_if_lower;
-	pack_t    pack_schema;
-	packbuf_t pack_buf_type;
+	uint64_t      size; // size field must be present and come first.
+	packm_var_oft var_func;
+	bszid_t       bmid_m;
+	bszid_t       bmid_n;
+	bool          does_invert_diag;
+	bool          rev_iter_if_upper;
+	bool          rev_iter_if_lower;
+	pack_t        pack_schema;
+	packbuf_t     pack_buf_type;
 };
 typedef struct packm_params_s packm_params_t;
 
-BLIS_INLINE bszid_t bli_cntl_packm_params_bmid_m( const cntl_t* cntl )
+BLIS_INLINE packm_var_oft bli_cntl_packm_params_var_func( cntl_t* cntl )
+{
+	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->var_func;
+}
+
+BLIS_INLINE bszid_t bli_cntl_packm_params_bmid_m( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->bmid_m;
 }
 
-BLIS_INLINE bszid_t bli_cntl_packm_params_bmid_n( const cntl_t* cntl )
+BLIS_INLINE bszid_t bli_cntl_packm_params_bmid_n( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->bmid_n;
 }
 
-BLIS_INLINE bool bli_cntl_packm_params_does_invert_diag( const cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_packm_params_does_invert_diag( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->does_invert_diag;
 }
 
-BLIS_INLINE bool bli_cntl_packm_params_rev_iter_if_upper( const cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_packm_params_rev_iter_if_upper( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->rev_iter_if_upper;
 }
 
-BLIS_INLINE bool bli_cntl_packm_params_rev_iter_if_lower( const cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_packm_params_rev_iter_if_lower( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->rev_iter_if_lower;
 }
 
-BLIS_INLINE pack_t bli_cntl_packm_params_pack_schema( const cntl_t* cntl )
+BLIS_INLINE pack_t bli_cntl_packm_params_pack_schema( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->pack_schema;
 }
 
-BLIS_INLINE packbuf_t bli_cntl_packm_params_pack_buf_type( const cntl_t* cntl )
+BLIS_INLINE packbuf_t bli_cntl_packm_params_pack_buf_type( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->pack_buf_type;
 }
@@ -85,8 +91,10 @@ BLIS_INLINE packbuf_t bli_cntl_packm_params_pack_buf_type( const cntl_t* cntl )
 
 cntl_t* bli_packm_cntl_create_node
      (
-       pool_t*   pool,
+       rntm_t*   rntm,
+       opid_t    family,
        void_fp   var_func,
+       void_fp   packm_var_func,
        bszid_t   bmid_m,
        bszid_t   bmid_n,
        bool      does_invert_diag,

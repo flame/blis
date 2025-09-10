@@ -22,11 +22,11 @@ One of the primary features of BLIS is that it provides a large set of dense lin
 
 Presently, BLIS supports several groups of operations:
   * **[Level-1v](BLISTypedAPI.md#level-1v-operations)**: Operations on vectors:
-    * [addv](BLISTypedAPI.md#addv), [amaxv](BLISTypedAPI.md#amaxv), [axpyv](BLISTypedAPI.md#axpyv), [copyv](BLISTypedAPI.md#copyv), [dotv](BLISTypedAPI.md#dotv), [dotxv](BLISTypedAPI.md#dotxv), [invertv](BLISTypedAPI.md#invertv), [invscalv](BLISTypedAPI.md#invscalv), [scalv](BLISTypedAPI.md#scalv), [scal2v](BLISTypedAPI.md#scal2v), [setv](BLISTypedAPI.md#setv), [subv](BLISTypedAPI.md#subv), [swapv](BLISTypedAPI.md#swapv)
+    * [addv](BLISTypedAPI.md#addv), [amaxv](BLISTypedAPI.md#amaxv), [axpyv](BLISTypedAPI.md#axpyv), [copyv](BLISTypedAPI.md#copyv), [dotv](BLISTypedAPI.md#dotv), [dotxv](BLISTypedAPI.md#dotxv), [invertv](BLISTypedAPI.md#invertv), [scal2v](BLISTypedAPI.md#scal2v), [scalv](BLISTypedAPI.md#scalv), [setv](BLISTypedAPI.md#setv), [subv](BLISTypedAPI.md#subv), [swapv](BLISTypedAPI.md#swapv)
   * **[Level-1d](BLISTypedAPI.md#level-1d-operations)**: Element-wise operations on matrix diagonals:
-    * [addd](BLISTypedAPI.md#addd), [axpyd](BLISTypedAPI.md#axpyd), [copyd](BLISTypedAPI.md#copyd), [invertd](BLISTypedAPI.md#invertd), [invscald](BLISTypedAPI.md#invscald), [scald](BLISTypedAPI.md#scald), [scal2d](BLISTypedAPI.md#scal2d), [setd](BLISTypedAPI.md#setd), [setid](BLISTypedAPI.md#setid), [subd](BLISTypedAPI.md#subd)
+    * [addd](BLISTypedAPI.md#addd), [axpyd](BLISTypedAPI.md#axpyd), [copyd](BLISTypedAPI.md#copyd), [invertd](BLISTypedAPI.md#invertd), [scald](BLISTypedAPI.md#scald), [scal2d](BLISTypedAPI.md#scal2d), [setd](BLISTypedAPI.md#setd), [setid](BLISTypedAPI.md#setid), [subd](BLISTypedAPI.md#subd)
   * **[Level-1m](BLISTypedAPI.md#level-1m-operations)**: Element-wise operations on matrices:
-    * [addm](BLISTypedAPI.md#addm), [axpym](BLISTypedAPI.md#axpym), [copym](BLISTypedAPI.md#copym), [invscalm](BLISTypedAPI.md#invscalm), [scalm](BLISTypedAPI.md#scalm), [scal2m](BLISTypedAPI.md#scal2m), [setm](BLISTypedAPI.md#setm), [subm](BLISTypedAPI.md#subm)
+    * [addm](BLISTypedAPI.md#addm), [axpym](BLISTypedAPI.md#axpym), [copym](BLISTypedAPI.md#copym), [scalm](BLISTypedAPI.md#scalm), [scal2m](BLISTypedAPI.md#scal2m), [setm](BLISTypedAPI.md#setm), [subm](BLISTypedAPI.md#subm)
   * **[Level-1f](BLISTypedAPI.md#level-1f-operations)**: Fused operations on multiple vectors:
     * [axpy2v](BLISTypedAPI.md#axpy2v), [dotaxpyv](BLISTypedAPI.md#dotaxpyv), [axpyf](BLISTypedAPI.md#axpyf), [dotxf](BLISTypedAPI.md#dotxf), [dotxaxpyf](BLISTypedAPI.md#dotxaxpyf)
   * **[Level-2](BLISTypedAPI.md#level-2-operations)**: Operations with one matrix and (at least) one vector operand:
@@ -81,7 +81,6 @@ BLIS supports the following 14 level-1v kernels. These kernels are used primaril
   * **dotv**: Performs a [dot product](BLISTypedAPI.md#dotv) where the output scalar is overwritten.
   * **dotxv**: Performs an [extended dot product](BLISTypedAPI.md#dotxv) operation where the dot product is first scaled and then accumulated into a scaled output scalar.
   * **invertv**: Performs an [element-wise vector inversion](BLISTypedAPI.md#invertv) operation.
-  * **invscalv**: Performs an [in-place (destructive) vector inverse-scaling](BLISTypedAPI.md#invscalv) operation.
   * **scalv**: Performs an [in-place (destructive) vector scaling](BLISTypedAPI.md#scalv) operation.
   * **scal2v**: Performs an [out-of-place (non-destructive) vector scaling](BLISTypedAPI.md#scal2v) operation.
   * **setv**: Performs a [vector broadcast](BLISTypedAPI.md#setv) operation.
@@ -114,7 +113,7 @@ Note that all kernels, whether they be reference implementations or based on ful
 
 The first step is to obtain a valid context. Contexts store all of the information
 specific to a particular sub-configuration (usually loosely specific to a
-microarchitecture or group of closely-related microarchitectures). If a context is
+microarchitecture or group of closely-related microarchitectuers). If a context is
 not already available in your current scope, a default context for the hardware
 for which BLIS was configured (or, in the case of multi-configuration builds, the
 hardware on which BLIS is currently running) may be queried via:
@@ -185,7 +184,6 @@ datatype characters.
 | copyv            | `BLIS_COPYV_KER`      | `?copyv_ft`           |
 | dotxv            | `BLIS_DOTXV_KER`      | `?dotxv_ft`           |
 | invertv          | `BLIS_INVERTV_KER`    | `?invertv_ft`         |
-| invscalv         | `BLIS_INVSCALV_KER`   | `?invscalv_ft`        |
 | scalv            | `BLIS_SCALV_KER`      | `?scalv_ft`           |
 | scal2v           | `BLIS_SCAL2V_KER`     | `?scal2v_ft`          |
 | setv             | `BLIS_SETV_KER`       | `?setv_ft`            |
@@ -222,7 +220,6 @@ This section seeks to provide developers with a complete reference for each of t
     * [dotv](KernelsHowTo.md#dotv-kernel)
     * [dotxv](KernelsHowTo.md#dotxv-kernel)
     * [invertv](KernelsHowTo.md#invertv-kernel)
-    * [invscalv](KernelsHowTo.md#invscalv-kernel)
     * [scalv](KernelsHowTo.md#scalv-kernel)
     * [scal2v](KernelsHowTo.md#scal2v-kernel)
     * [setv](KernelsHowTo.md#setv-kernel)
@@ -232,7 +229,7 @@ This section seeks to provide developers with a complete reference for each of t
 
 The function prototypes in this section follow the same guidelines as those listed in the [BLIS typed API reference](BLISTypedAPI.md#Notes_for_using_this_reference). Namely:
   * Any occurrence of `?` should be replaced with `s`, `d`, `c`, or `z` to form an actual function name.
-  * Any occurrence of `ctype` should be replaced with the actual C99 language type corresponding to the datatype instance in question.
+  * Any occurrence of `ctype` should be replaced with the actual C type corresponding to the datatype instance in question.
   * Some matrix arguments have associated row and column strides arguments that proceed them, typically listed as `rsX` and `csX` for a given matrix `X`. Row strides are always listed first, and column strides are always listed second. The semantic meaning of a row stride is "the distance, in units of elements, from any given element to the corresponding element (within the same column) of the next row," and the meaning of a column stride is "the distance, in units of elements, from any given element to the corresponding element (within the same row) of the next column." Thus, unit row stride implies column-major storage and unit column stride implies row-major storage.
   * All occurrences of `alpha` and `beta` parameters are scalars.
 
@@ -251,8 +248,6 @@ This section describes in detail the various level-3 microkernels supported by B
 ```c
 void bli_?gemm_<suffix>
      (
-       dim_t               m,
-       dim_t               n,
        dim_t               k,
        ctype*     restrict alpha,
        ctype*     restrict a1,
@@ -269,8 +264,6 @@ where `<suffix>` is implementation-dependent. (Recall that the precise `<suffix>
 ```c
 void bli_?gemm_ukernel
      (
-       dim_t               m,
-       dim_t               n,
        dim_t               k,
        ctype*     restrict alpha,
        ctype*     restrict a1,
@@ -281,7 +274,6 @@ void bli_?gemm_ukernel
        cntx_t*    restrict cntx
      );
 ```
-This function simply queries a microkernel function pointer from the context specified by `cntx`. Note that in the case of either method of calling the microkernel, `cntx` must be a valid pointer. (Passing in `NULL` will *not* result in a default context being used.)
 
 The `gemm` microkernel, sometimes simply referred to as "the BLIS microkernel" or "the microkernel", performs the following operation:
 
@@ -289,20 +281,16 @@ The `gemm` microkernel, sometimes simply referred to as "the BLIS microkernel" o
   C11 := beta * C11 + alpha * A1 * B1
 ```
 
-where `A1` is an _m x k_ "micropanel" matrix stored in packed (column-wise) format, `B1` is a _k x n_ "micropanel" matrix stored in packed (row-wise) format, `C11` is an _m x n_ "microtile" matrix stored according to its row and column strides `rsc` and `csc`, and `alpha` and beta are scalars.
+where `A1` is an _MR x k_ "micropanel" matrix stored in packed (column-wise) format, `B1` is a _k x NR_ "micropanel" matrix stored in packed (row-wise) format, `C11` is an _MR x NR_ general matrix stored according to its row and column strides `rsc` and `csc`, and `alpha` and beta are scalars.
 
-Here, _m <= MR_ and _n <= NR_, where _MR_ and _NR_ are the register blocksizes associated with the microkernel. They are chosen by the developer when the microkernel is written and then encoded into a BLIS configuration, which will reference the microkernel when the BLIS framework is instantiated into a library. For more information on setting register blocksizes and related constants, please see the [BLIS developer configuration guide](ConfigurationHowTo.md).
-
-**Note:** For many years, BLIS defined its microkernel to operate on microtiles whose dimensions were *exactly* _MR x NR_. However, as of commit 54fa28b, we have augmented the `gemm` microkernel API to pass in _m_ and _n_ dimensions as well as _k_. This change was made as part of our decision to move edge-case handling into the microkernel, whereas previously it was handled outside of the microkernel, within the portable parts of BLIS framework. And while this does mean additional complexity for microkernel authors, adding generic edge-case handling can be done in a relatively painless manner by employing some pre-defined preprocessor macros (which are defined in `bli_edge_case_macro_defs.h`). For examples of how to use these macros, please see the beginning and end of existing microkernel functions residing within the `kernels` directory.
+_MR_ and _NR_ are the register blocksizes associated with the microkernel. They are chosen by the developer when the microkernel is written and then encoded into a BLIS configuration, which will reference the microkernel when the BLIS framework is instantiated into a library. For more information on setting register blocksizes and related constants, please see the [BLIS developer configuration guide](ConfigurationHowTo.md).
 
 Parameters:
 
-  * `m`:      The number of rows of `C11` and `A1`.
-  * `n`:      The number of columns of `C11` and `B1`.
   * `k`:      The number of columns of `A1` and rows of `B1`.
   * `alpha`:  The address of a scalar to the `A1 * B1` product.
-  * `a1`:     The address of a micropanel of matrix `A` of dimension _m x k_ (where _m <= MR_), stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKMR_.)
-  * `b1`:     The address of a micropanel of matrix `B` of dimension _k x n_ (where _n <= NR_), stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
+  * `a1`:     The address of a micropanel of matrix `A` of dimension _MR x k_, stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKMR_.)
+  * `b1`:     The address of a micropanel of matrix `B` of dimension _k x NR_, stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
   * `beta`:   The address of a scalar to the input value of matrix `C11`.
   * `c11`:    The address of a matrix `C11` of dimension _MR x NR_, stored according to `rsc` and `csc`.
   * `rsc`:    The row stride of matrix `C11` (ie: the distance to the next row, in units of matrix elements).
@@ -333,24 +321,24 @@ The diagram below shows the packed micropanel operands and how elements of each 
 
 #### Implementation Notes for gemm
 
-  * **Register blocksizes.** The register blocksizes `MR` and `NR`, corresponding to the maximum number of *logical* rows in `a1` and columns in `b1`, respectively, are defined in the context and may be queried via `bli_cntx_get_blksz_def_dt()`. However, you shouldn't need to query these values since the implementation inherently "knows" them already.
-  * **Leading dimensions of `a1` and `b1`: _PACKMR_ and _PACKNR_.** The packed micropanels `a1` and `b1` are simply stored in column-major and row-major order, respectively. Usually, the width of either micropanel (ie: the number of *logical* rows of `a1` and the number of columns of `b1`) is equal to that micropanel's so-called "leading dimension", or number of *physical* rows. Sometimes, it may be beneficial to specify a leading dimension that is larger than the panel width. This may be desirable because it allows each column of `a1` or row of `b1` to maintain a certain alignment in memory that would not otherwise be maintained by _MR_ and/or _NR_, which would othewise serve as the maximum value for each micropanel, respectively. If you want your microkernel to support _MR < PACKMR_ or _NR < PACKNR_, you should index through columns of `a1` and rows of `b1` using the values _PACKMR_ and _PACKNR_, respectively (which are stored in the context as the blocksize "maximums" associated with the `bszid_t` values `BLIS_MR` and `BLIS_NR`). These values are defined in the context and may be queried via `bli_cntx_get_blksz_max_dt()`. However, you shouldn't need to query these values since the microkernel implementation inherently must "know" them already.
+  * **Register blocksizes.** The register blocksizes `MR` and `NR`, corresponding to the number of *logical* rows in `a1` and columns in `b1`, respectively, are defined in the context and may be queried via `bli_cntx_get_blksz_def_dt()`. However, you shouldn't need to query these values since the implementation inherently "knows" them already.
+  * **Leading dimensions of `a1` and `b1`: _PACKMR_ and _PACKNR_.** The packed micropanels `a1` and `b1` are simply stored in column-major and row-major order, respectively. Usually, the width of either micropanel (ie: the number of logical rows of `a1`, or _MR_, and the number of columns of `b1`, or _NR_) is equal to that micropanel's so-called "leading dimension", or number of *physical* rows. Sometimes, it may be beneficial to specify a leading dimension that is larger than the panel width. This may be desirable because it allows each column of `a1` or row of `b1` to maintain a certain alignment in memory that would not otherwise be maintained by _MR_ and/or _NR_. In this case, you should index through `a1` and `b1` using the values _PACKMR_ and _PACKNR_, respectively (which are stored in the context as the blocksize "maximums" associated with the `bszid_t` values `BLIS_MR` and `BLIS_NR`). These values are defined in the context and may be queried via `bli_cntx_get_blksz_max_dt()`. However, you shouldn't need to query these values since the implementation inherently "knows" them already.
   * **Storage preference of `c11`.** Usually, an optimized `gemm` microkernel will have a "preferred" storage format for `C11`--typically either contiguous row-storage (i.e. `cs_c` = 1) or contiguous column-storage (i.e. `rs_c` = 1). This preference comes from how the microkernel is most efficiently able to load/store elements of `C11` from/to memory. Most microkernels use vector instructions to access contiguous columns (or column segments) of `C11`. However, the developer may decide that accessing contiguous rows (or row segments) is more desirable. If this is the case, this preference should be indicated via the `bool` argument when registering microkernels via `bli_cntx_set_l3_nat_ukrs()`--`TRUE` indicating a row preference and `FALSE` indicating a column preference. Properly setting this property allows the framework to perform a runtime optimization that will ensure the microkernel preference is honored, if at all possible.
-  * **Edge cases in _MR_, _NR_ dimensions.** Sometimes the microkernel will be called with micropanels `a1` and `b1` that correspond to edge cases, where only partial results are needed. This edge-case handling was once performed by the framework automatically. However, as of commit 54fa28b, edge-case handling is the responsiblity of the microkernel. This means that the kernel author will need to handle all possible values of _m_ and _n_ that are equal to **or** less than _MR_ and _NR_, respectively. Fortunately, this can be implemented outside of the assembly region of the microkernel with preprocessor macros. Please reference the existing microkernels in the `kernels` directory for examples of how this is done. (The macros that are now employed by most of BLIS's microkernels are defined in `bli_edge_case_macro_defs.h`.)
-  * **Alignment of `a1` and `b1`.** By default, the alignment of addresses `a1` and `b1` are aligned to the page size (4096 bytes). These alignment factors are set by `BLIS_POOL_ADDR_ALIGN_SIZE_A` and `BLIS_POOL_ADDR_ALIGN_SIZE_B`, respectively. Note that these alignment factors control only the alignment of the *first* micropanel within a given packed blockof matrix `A` or packed row-panel of matrix `B`. Subsequent micropanels will only be aligned to `sizeof(type)`, or, if `BLIS_POOL_ADDR_ALIGN_SIZE_A` is a multiple of `PACKMR` and/or `BLIS_POOL_ADDR_ALIGN_SIZE_B` is a multiple of `PACKNR`, then subsequent micropanels `a1` and/or `b1` will be aligned to `PACKMR * sizeof(type)` and/or `PACKNR * sizeof(type)`, respectively.
-  * **Unrolling loops.** As a general rule of thumb, the loop over _k_ is sometimes moderately unrolled; for example, in our experience, an unrolling factor of _u_ = 4 is fairly common. If unrolling is applied in the _k_ dimension, edge cases must be handled to support values of _k_ that are not multiples of _u_. It is nearly universally true that the microkernel should not contain loops in the _m_ or _n_ directions; in other words, iteration over these dimensions should always be fully unrolled (within the loop over _k_).
+  * **Edge cases in _MR_, _NR_ dimensions.** Sometimes the microkernel will be called with micropanels `a1` and `b1` that correspond to edge cases, where only partial results are needed. Zero-padding is handled automatically by the packing function to facilitate reuse of the same microkernel. Similarly, the logic for computing to temporary storage and then saving only the elements that correspond to elements of `C11` that exist (at the edges) is handled automatically within the macrokernel.
+  * **Alignment of `a1` and `b1`.** By default, the alignment of addresses `a1` and `b1` are aligned only to `sizeof(type)`. If `BLIS_POOL_ADDR_ALIGN_SIZE` is set to some larger multiple of `sizeof(type)`, such as the page size, then the *first* `a1` and `b1` micropanels will be aligned to that value, but subsequent micropanels will only be aligned to `sizeof(type)`, or, if `BLIS_POOL_ADDR_ALIGN_SIZE` is a multiple of `PACKMR` and `PACKNR`, then subsequent micropanels `a1` and `b1` will be aligned to `PACKMR * sizeof(type)` and `PACKNR * sizeof(type)`, respectively.
+  * **Unrolling loops.** As a general rule of thumb, the loop over _k_ is sometimes moderately unrolled; for example, in our experience, an unrolling factor of _u_ = 4 is fairly common. If unrolling is applied in the _k_ dimension, edge cases must be handled to support values of _k_ that are not multiples of _u_. It is nearly universally true that there should be no loops in the _MR_ or _NR_ directions; in other words, iteration over these dimensions should always be fully unrolled (within the loop over _k_).
   * **Zero `beta`.** If `beta` = 0.0 (or 0.0 + 0.0i for complex datatypes), then the microkernel should NOT use it explicitly, as `C11` may contain uninitialized memory (including elements containing `NaN` or `Inf`). This case should be detected and handled separately by overwriting `C11` with the `alpha * A1 * B1` product.
 
 #### Using the auxinfo\_t object
 
-Each microkernel ([gemm](KernelsHowTo.md#gemm-microkernel), [trsm](KernelsHowTo.md#trsm_microkernels), and [gemmtrsm](KernelsHowTo.md#gemmtrsm-microkernels)) takes as its last argument a pointer of type `auxinfo_t`. This BLIS-defined type is defined as a `struct` whose fields contain auxiliary values that may be useful to some microkernel authors, particularly when implementing certain optimization techniques. BLIS provides kernel authors access to the fields of the `auxinfo_t` object via the following static inline functions. Each function takes a single argument, the `auxinfo_t` pointer, and returns one of the values stored within the object.
+Each microkernel ([gemm](KernelsHowTo.md#gemm-microkernel), [trsm](KernelsHowTo.md#trsm_microkernels), and [gemmtrsm](KernelsHowTo.md#gemmtrsm-microkernels)) takes as its last argument a pointer of type `auxinfo_t`. This BLIS-defined type is defined as a `struct` whose fields contain auxiliary values that may be useful to some microkernel authors, particularly when implementing certain optimization techniques. BLIS provides kernel authors access to the fields of the `auxinfo_t` object via the following function-like preprocessor macros. Each macro takes a single argument, the `auxinfo_t` pointer, and returns one of the values stored within the object.
 
   * `bli_auxinfo_next_a()`. Returns the address (`void*`) of the micropanel of `A` that will be used the next time the microkernel will be called.
   * `bli_auxinfo_next_b()`. Returns the address (`void*`) of the micropanel of `B` that will be used the next time the microkernel will be called.
   * `bli_auxinfo_ps_a()`. Returns the panel stride (`inc_t`) of the current micropanel of `A`.
   * `bli_auxinfo_ps_b()`. Returns the panel stride (`inc_t`) of the current micropanel of `B`.
 
-The addresses of the next micropanels of `A` and `B` may be used by the microkernel to perform prefetching, if prefetching is supported by the architecture. Similarly, it may be useful to know the precise distance in memory to the next micropanel. (Note that occasionally the next micropanel to be used is **not** the same as the next micropanel in memory.)
+The addresses of the next micropanels of `A` and `B` may be used by the microkernel to perform prefetching, if prefetching is supported by the architecture. Similarly, it may be useful to know the precise distance in memory to the next micropanel. (Note that sometimes the next micropanel to be used is **not** the same as the next micropanel in memory.)
 
 Any and all of these values may be safely ignored; they are completely optional. However, BLIS guarantees that all values accessed via the macros listed above will **always** be initialized and meaningful, for every invocation of each microkernel (`gemm`, `trsm`, and `gemmtrsm`).
 
@@ -360,7 +348,8 @@ Any and all of these values may be safely ignored; they are completely optional.
 An example implementation of the `gemm` microkernel may be found in the `template` configuration directory in:
   * [config/template/kernels/3/bli\_gemm_opt\_mxn.c](https://github.com/flame/blis/tree/master/config/template/kernels/3/bli_gemm_opt_mxn.c)
 
-Note that this implementation is coded in C99 and lacks several kinds of optimization that are typical of real-world optimized microkernels, such as vector instructions (or intrinsics) and loop unrolling in the _m_ or _n_ dimensions. It is meant to serve only as a starting point for a microkernel developer.
+
+Note that this implementation is coded in C99 and lacks several kinds of optimization that are typical of real-world optimized microkernels, such as vector instructions (or intrinsics) and loop unrolling in _MR_ or _NR_. It is meant to serve only as a starting point for a microkernel developer.
 
 
 
@@ -422,8 +411,6 @@ where `A11` is _MR x MR_ and lower (`trsm_l`) or upper (`trsm_u`) triangular, `B
 
 _MR_ and _NR_ are the register blocksizes associated with the microkernel. They are chosen by the developer when the microkernel is written and then encoded into a BLIS configuration, which will reference the microkernel when the BLIS framework is instantiated into a library. For more information on setting register blocksizes and related constants, please see the [BLIS developer configuration guide](ConfigurationHowTo.md).
 
-**Note:** Although the `gemm` microkernel must handle edge-cases, and therefore must take _m_ and _n_ parameters, the `trsm` microkernels are simpler in that they still assume _m = MR_ and _n = NR_, and therefore do not need these _m_ and _n_ parameters passed in.
-
 Parameters:
 
   * `a11`:    The address of `A11`, which is the _MR x MR_ lower (`trsm_l`) or upper (`trsm_u`) triangular submatrix within the packed micropanel of matrix `A`. `A11` is stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKMR_.) Note that `A11` contains elements in both triangles, though elements in the unstored triangle are not guaranteed to be zero and thus should not be referenced.
@@ -467,8 +454,6 @@ Note that these implementations are coded in C99 and lack several kinds of optim
 ```c
 void bli_?gemmtrsm_l_<suffix>
      (
-       dim_t               m,
-       dim_t               n,
        dim_t               k,
        ctype*     restrict alpha,
        ctype*     restrict a10,
@@ -482,8 +467,6 @@ void bli_?gemmtrsm_l_<suffix>
 
 void bli_?gemmtrsm_u_<suffix>
      (
-       dim_t               m,
-       dim_t               n,
        dim_t               k,
        ctype*     restrict alpha,
        ctype*     restrict a12,
@@ -501,8 +484,6 @@ where `<suffix>` is implementation-dependent. (Recall that the precise `<suffix>
 ```c
 void bli_?gemmtrsm_l_ukernel
      (
-       dim_t               m,
-       dim_t               n,
        dim_t               k,
        ctype*     restrict alpha,
        ctype*     restrict a10,
@@ -516,8 +497,6 @@ void bli_?gemmtrsm_l_ukernel
 
 void bli_?gemmtrsm_u_ukernel
      (
-       dim_t               m,
-       dim_t               n,
        dim_t               k,
        ctype*     restrict alpha,
        ctype*     restrict a12,
@@ -538,7 +517,7 @@ The `gemmtrsm_l` microkernel performs the following compound operation:
   C11 := B11
 ```
 
-where `A11` is _MR x MR_ and lower triangular, `A10` is _MR x k_, and `B01` is _k x NR_.
+where `A11` is _MR_ x _MR_ and lower triangular, `A10` is _MR_ x _k_, and `B01` is _k_ x _NR_.
 The `gemmtrsm_u` microkernel performs:
 
 ```
@@ -547,22 +526,20 @@ The `gemmtrsm_u` microkernel performs:
   C11 := B11
 ```
 
-where `A11` is _MR x MR_ and upper triangular, `A12` is _MR x k_, and `B21` is _k x NR_.
-In both cases, `B11` is _MR x NR_ and `alpha` is a scalar. However, `C11` is _m x n_, and therefore the `C11 := B11` statements amount to a copy of only the top-leftmost _m x n_ elements of `B11`. (Recall that A11 and B11 are packed and therefore guaranteed to reside within fully-sized micropanels, whereas `C11` exists in the caller-provided output matrix and may represent a bottom-right edge case.) Here, `inv()` denotes matrix inverse.
+where `A11` is _MR_ x _MR_ and upper triangular, `A12` is _MR_ x _k_, and `B21` is _k_ x _NR_.
+In both cases, `B11` is _MR_ x _NR_ and `alpha` is a scalar. Here, `inv()` denotes matrix inverse.
 
 _MR_ and _NR_ are the register blocksizes associated with the microkernel. They are chosen by the developer when the microkernel is written and then encoded into a BLIS configuration, which will reference the microkernel when the BLIS framework is instantiated into a library. For more information on setting register blocksizes and related constants, please see the [BLIS developer configuration guide](ConfigurationHowTo.md).
 
 Parameters:
 
-  * `m`:      The number of rows of `C11`.
-  * `n`:      The number of columns of `C11`.
   * `k`:      The number of columns of `A10` and rows of `B01` (`trsm_l`); the number of columns of `A12` and rows of `B21` (`trsm_u`).
   * `alpha`:  The address of a scalar to be applied to `B11`.
   * `a10`, `a12`:    The address of `A10` or `A12`, which is the _MR x k_ submatrix of the packed micropanel of `A` that is situated to the left (`trsm_l`) or right (`trsm_u`) of the _MR x MR_ triangular submatrix `A11`. `A10` and `A12` are stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKMR_.)
   * `a11`:    The address of `A11`, which is the _MR x MR_ lower (`trsm_l`) or upper (`trsm_u`) triangular submatrix within the packed micropanel of matrix `A` that is situated to the right of `A10` (`trsm_l`) or the left of `A12` (`trsm_u`). `A11` is stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKMR_.) Note that `A11` contains elements in both triangles, though elements in the unstored triangle are not guaranteed to be zero and thus should not be referenced.
   * `b01`, `b21`:   The address of `B01` and `B21`, which is the _k x NR_ submatrix of the packed micropanel of `B` that is situated above (`trsm_l`) or below (`trsm_u`) the _MR x NR_ block `B11`. `B01` and `B21` are stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
   * `b11`:    The address of `B11`, which is the _MR x NR_ submatrix of the packed micropanel of `B`, situated below `B01` (`trsm_l`) or above `B21` (`trsm_u`). `B11` is stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
-  * `c11`:    The address of `C11`, which is an _m x n_ submatrix of matrix `C`, stored according to `rsc` and `csc`, where _m <= MR_ and _n <= NR_. `C11` is the submatrix within `C` that corresponds to the elements which were packed into `B11`. Thus, `C` is the original input matrix `B` to the overall `trsm` operation.
+  * `c11`:    The address of `C11`, which is an _MR x NR_ submatrix of matrix `C`, stored according to `rsc` and `csc`. `C11` is the submatrix within `C` that corresponds to the elements which were packed into `B11`. Thus, `C` is the original input matrix `B` to the overall `trsm` operation.
   * `rsc`:    The row stride of matrix `C11` (ie: the distance to the next row, in units of matrix elements).
   * `csc`:    The column stride of matrix `C11` (ie: the distance to the next column, in units of matrix elements).
   * `data`:   The address of an `auxinfo_t` object that contains auxiliary information that may be useful when optimizing the `gemmtrsm` microkernel implementation. (See [Using the auxinfo\_t object](KernelsHowTo.md#Using_the_auxinfo_t_object) for a discussion of the kinds of values available via `auxinfo_t`, and also [Implementation Notes for gemmtrsm](KernelsHowTo.md#implementation-notes-for-gemmtrsm) for caveats.)
@@ -713,7 +690,7 @@ This kernel performs the following operation:
 ```
   y := y + alpha * conja(a) * conjy(x)
 ```
-where `a` is an _m x b_ matrix, `x` is a vector of length _b_, and `y` is a vector of length _m_. Vectors `x` and `y` are stored with strides `incx` and `incy`, respectively. Matrix `a` is stored with row stride `inca` and column stride `lda`, though `inca` is most often (in practice) unit. This kernel is typically implemented as a fused series of _b_ `axpyv` operations updating the same vector `y` (with the elements of `x` serving as the scalars and the columns of `a` serving as the vectors to be scaled).
+where `a` is an _m_ x _b_ matrix, `x` is a vector of length _b_, and `y` is a vector of length _m_. Vectors `x` and `y` are stored with strides `incx` and `incy`, respectively. Matrix `a` is stored with row stride `inca` and column stride `lda`, though `inca` is most often (in practice) unit. This kernel is typically implemented as a fused series of _b_ `axpyv` operations updating the same vector `y` (with the elements of `x` serving as the scalars and the columns of `a` serving as the vectors to be scaled).
 
 ---
 
@@ -737,7 +714,7 @@ This kernel performs the following operation:
 ```
   y := beta * y + alpha * conjat(a)^T conjx(x)
 ```
-where `a` is an _m x b_ matrix, where `w` is a vector of length _m_, `y` is a vector of length _b_, and `alpha` is a scalar.
+where `a` is an _m_ x _b_ matrix, where `w` is a vector of length _m_, `y` is a vector of length _b_, and `alpha` is a scalar.
 Vectors `x` and `y` are stored with strides `incx` and `incy`, respectively. Matrix `a` is stored with row stride `inca` and column stride `lda`, though `inca` is most often (in practice) unit.
 This kernel is typically implemented as a series of _b_ `dotxv` operations with the same right-hand operand vector `x` (contracted with the rows of `a^T` and accumulating to the corresponding elements of vector `y`).
 
@@ -768,7 +745,7 @@ This kernel performs the following operation:
   y := beta * y + alpha * conjat(a)^T conjw(w)
   z :=        z + alpha *  conja(a)   conjx(x)
 ```
-where `a` is an _m x b_ matrix, `w` and `z` are vectors of length _m_, `x` and `y` are vectors of length _b_, and `alpha` and `beta` are scalars.
+where `a` is an _m_ x _b_ matrix, `w` and `z` are vectors of length _m_, `x` and `y` are vectors of length _b_, and `alpha` and `beta` are scalars.
 Vectors `w`, `z`, `x` and `y` are stored with strides `incw`, `incz`, `incx`, and `incy`, respectively. Matrix `a` is stored with row stride `inca` and column stride `lda`, though `inca` is most often (in practice) unit.
 This kernel is typically implemented as a series of _b_ `dotxv` operations with the same right-hand operand vector `w` fused with a series of _b_ `axpyv` operations updating the same vector `z`.
 
@@ -929,25 +906,6 @@ void bli_?invertv_<suffix>
      )
 ```
 This kernel inverts all elements of an _n_-length vector `x`.
-
----
-
-#### invscalv kernel
-```c
-void bli_?invscalv_<suffix>
-     (
-       conj_t           conjalpha,
-       dim_t            n,
-       ctype*  restrict alpha,
-       ctype*  restrict x, inc_t incx,
-       cntx_t* restrict cntx
-     )
-```
-This kernel performs the following operation:
-```
-  x := ( 1.0 / conjalpha(alpha) ) * x
-```
-where `x` is a vector of length _n_ stored with stride `incx` and `alpha` is a scalar.
 
 ---
 

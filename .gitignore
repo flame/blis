@@ -44,8 +44,7 @@ include/*/*.h
 # -- misc. --
 
 # BLIS testsuite output file
-output.testsuite
-output.testsuite.*
+output.testsuite*
 
 # BLAS test output files
 out.*
@@ -55,5 +54,17 @@ GPATH
 GRTAGS
 GTAGS
 
-# Mac DS.store files
-.DS_Store
+# cmake builds
+build_*/*
+
+# Windows build
+bin/*
+*.dll
+*.lib
+*.pdb
+*.exe
+
+.vscode
+
+# Gtestsuite build files
+gtestsuite/build/*

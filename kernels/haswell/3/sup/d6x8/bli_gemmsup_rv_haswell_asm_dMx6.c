@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -83,18 +83,18 @@ GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref )
 
 void bli_dgemmsup_rv_haswell_asm_6x6
      (
-             conj_t     conja,
-             conj_t     conjb,
-             dim_t      m0,
-             dim_t      n0,
-             dim_t      k0,
-       const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
-       const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       double*    restrict alpha,
+       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -682,30 +682,33 @@ void bli_dgemmsup_rv_haswell_asm_6x6
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
+	  "ymm7", "ymm8", "ymm9", "ymm10", "ymm11", "ymm12",
+	  "ymm13", "ymm14", "ymm15",
 	  "memory"
 	)
 }
 
 void bli_dgemmsup_rv_haswell_asm_5x6
      (
-             conj_t     conja,
-             conj_t     conjb,
-             dim_t      m0,
-             dim_t      n0,
-             dim_t      k0,
-       const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
-       const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       double*    restrict alpha,
+       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -1025,46 +1028,40 @@ void bli_dgemmsup_rv_haswell_asm_5x6
 
 	label(.DROWSTORED)
 
+	lea(mem(rcx, rdi, 1), rax)         // load address of c +  1*rs_c;
+	lea(mem(rcx, rdi, 2), rbx)         // load address of c +  2*rs_c;
+	lea(mem(rbx, rdi, 1), r8)         // load address of c +  3*rs_c;
 
 	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm4)
-	vmovupd(ymm4, mem(rcx, 0*32))
-
 	vfmadd231pd(mem(rcx, 1*32), xmm3, xmm5)
+
+	vfmadd231pd(mem(rax, 0*32), ymm3, ymm6)
+	vfmadd231pd(mem(rax, 1*32), xmm3, xmm7)
+
+	vfmadd231pd(mem(rbx, 0*32), ymm3, ymm8)
+	vfmadd231pd(mem(rbx, 1*32), xmm3, xmm9)
+
+	vfmadd231pd(mem(r8, 0*32), ymm3, ymm10)
+	vfmadd231pd(mem(r8, 1*32), xmm3, xmm11)
+
+	vfmadd231pd(mem(rdx, 0*32), ymm3, ymm12)
+	vfmadd231pd(mem(rdx, 1*32), xmm3, xmm13)
+
+
+	vmovupd(ymm4, mem(rcx, 0*32))
 	vmovupd(xmm5, mem(rcx, 1*32))
-	add(rdi, rcx)
 
+	vmovupd(ymm6, mem(rax, 0*32))
+	vmovupd(xmm7, mem(rax, 1*32))
 
-	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm6)
-	vmovupd(ymm6, mem(rcx, 0*32))
+	vmovupd(ymm8, mem(rbx, 0*32))
+	vmovupd(xmm9, mem(rbx, 1*32))
 
-	vfmadd231pd(mem(rcx, 1*32), xmm3, xmm7)
-	vmovupd(xmm7, mem(rcx, 1*32))
-	add(rdi, rcx)
+	vmovupd(ymm10, mem(r8, 0*32))
+	vmovupd(xmm11, mem(r8, 1*32))
 
-
-	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm8)
-	vmovupd(ymm8, mem(rcx, 0*32))
-
-	vfmadd231pd(mem(rcx, 1*32), xmm3, xmm9)
-	vmovupd(xmm9, mem(rcx, 1*32))
-	add(rdi, rcx)
-
-
-	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm10)
-	vmovupd(ymm10, mem(rcx, 0*32))
-
-	vfmadd231pd(mem(rcx, 1*32), xmm3, xmm11)
-	vmovupd(xmm11, mem(rcx, 1*32))
-	add(rdi, rcx)
-
-
-	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm12)
-	vmovupd(ymm12, mem(rcx, 0*32))
-
-	vfmadd231pd(mem(rcx, 1*32), xmm3, xmm13)
-	vmovupd(xmm13, mem(rcx, 1*32))
-	//add(rdi, rcx)
-
+	vmovupd(ymm12, mem(rdx, 0*32))
+	vmovupd(xmm13, mem(rdx, 1*32))
 
 	jmp(.DDONE)                        // jump to end.
 
@@ -1257,30 +1254,32 @@ void bli_dgemmsup_rv_haswell_asm_5x6
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
+	  "ymm7", "ymm8", "ymm9", "ymm10", "ymm11", "ymm12", "ymm13",
 	  "memory"
 	)
 }
 
 void bli_dgemmsup_rv_haswell_asm_4x6
      (
-             conj_t     conja,
-             conj_t     conjb,
-             dim_t      m0,
-             dim_t      n0,
-             dim_t      k0,
-       const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
-       const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       double*    restrict alpha,
+       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -1577,38 +1576,34 @@ void bli_dgemmsup_rv_haswell_asm_4x6
 
 	label(.DROWSTORED)
 
+	lea(mem(rcx, rdi, 1), rax)         // load address of c +  1*rs_c;
+	lea(mem(rcx, rdi, 2), rdx)         // load address of c +  2*rs_c;
+	lea(mem(rdx, rdi, 1), rbx)         // load address of c +  3*rs_c;
 
 	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm4)
-	vmovupd(ymm4, mem(rcx, 0*32))
-
 	vfmadd231pd(mem(rcx, 1*32), xmm3, xmm5)
+
+	vfmadd231pd(mem(rax, 0*32), ymm3, ymm6)
+	vfmadd231pd(mem(rax, 1*32), xmm3, xmm7)
+
+	vfmadd231pd(mem(rdx, 0*32), ymm3, ymm8)
+	vfmadd231pd(mem(rdx, 1*32), xmm3, xmm9)
+
+	vfmadd231pd(mem(rbx, 0*32), ymm3, ymm10)
+	vfmadd231pd(mem(rbx, 1*32), xmm3, xmm11)
+
+
+	vmovupd(ymm4, mem(rcx, 0*32))
 	vmovupd(xmm5, mem(rcx, 1*32))
-	add(rdi, rcx)
 
+	vmovupd(ymm6, mem(rax, 0*32))
+	vmovupd(xmm7, mem(rax, 1*32))
 
-	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm6)
-	vmovupd(ymm6, mem(rcx, 0*32))
+	vmovupd(ymm8, mem(rdx, 0*32))
+	vmovupd(xmm9, mem(rdx, 1*32))
 
-	vfmadd231pd(mem(rcx, 1*32), xmm3, xmm7)
-	vmovupd(xmm7, mem(rcx, 1*32))
-	add(rdi, rcx)
-
-
-	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm8)
-	vmovupd(ymm8, mem(rcx, 0*32))
-
-	vfmadd231pd(mem(rcx, 1*32), xmm3, xmm9)
-	vmovupd(xmm9, mem(rcx, 1*32))
-	add(rdi, rcx)
-
-
-	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm10)
-	vmovupd(ymm10, mem(rcx, 0*32))
-
-	vfmadd231pd(mem(rcx, 1*32), xmm3, xmm11)
-	vmovupd(xmm11, mem(rcx, 1*32))
-	//add(rdi, rcx)
-
+	vmovupd(ymm10, mem(rbx, 0*32))
+	vmovupd(xmm11, mem(rbx, 1*32))
 
 	jmp(.DDONE)                        // jump to end.
 
@@ -1755,30 +1750,32 @@ void bli_dgemmsup_rv_haswell_asm_4x6
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
+	  "ymm7", "ymm8", "ymm9", "ymm10", "ymm11",
 	  "memory"
 	)
 }
 
 void bli_dgemmsup_rv_haswell_asm_3x6
      (
-             conj_t     conja,
-             conj_t     conjb,
-             dim_t      m0,
-             dim_t      n0,
-             dim_t      k0,
-       const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
-       const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       double*    restrict alpha,
+       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -1908,15 +1905,15 @@ void bli_dgemmsup_rv_haswell_asm_3x6
 
 	vbroadcastsd(mem(rax        ), ymm2)
 	vbroadcastsd(mem(rax, r8,  1), ymm3)
-	vfmadd231pd(ymm0, ymm2, ymm4)
-	vfmadd231pd(ymm1, ymm2, ymm5)
-	vfmadd231pd(ymm0, ymm3, ymm6)
-	vfmadd231pd(ymm1, ymm3, ymm7)
+	vfmadd231pd(ymm0, ymm2, ymm10)
+	vfmadd231pd(ymm1, ymm2, ymm11)
+	vfmadd231pd(ymm0, ymm3, ymm12)
+	vfmadd231pd(ymm1, ymm3, ymm13)
 
 	vbroadcastsd(mem(rax, r8,  2), ymm2)
 	add(r9, rax)                       // a += cs_a;
-	vfmadd231pd(ymm0, ymm2, ymm8)
-	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm2, ymm14)
+	vfmadd231pd(ymm1, ymm2, ymm15)
 
 
 	// ---------------------------------- iteration 2
@@ -1954,24 +1951,27 @@ void bli_dgemmsup_rv_haswell_asm_3x6
 
 	vbroadcastsd(mem(rax        ), ymm2)
 	vbroadcastsd(mem(rax, r8,  1), ymm3)
-	vfmadd231pd(ymm0, ymm2, ymm4)
-	vfmadd231pd(ymm1, ymm2, ymm5)
-	vfmadd231pd(ymm0, ymm3, ymm6)
-	vfmadd231pd(ymm1, ymm3, ymm7)
+	vfmadd231pd(ymm0, ymm2, ymm10)
+	vfmadd231pd(ymm1, ymm2, ymm11)
+	vfmadd231pd(ymm0, ymm3, ymm12)
+	vfmadd231pd(ymm1, ymm3, ymm13)
 
 	vbroadcastsd(mem(rax, r8,  2), ymm2)
 	add(r9, rax)                       // a += cs_a;
-	vfmadd231pd(ymm0, ymm2, ymm8)
-	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm2, ymm14)
+	vfmadd231pd(ymm1, ymm2, ymm15)
 
 
 
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKITER)                   // iterate again if i != 0.
 
-
-
-
+	vaddpd(ymm10, ymm4, ymm4)
+	vaddpd(ymm11, ymm5, ymm5)
+	vaddpd(ymm12, ymm6, ymm6)
+	vaddpd(ymm13, ymm7, ymm7)
+	vaddpd(ymm14, ymm8, ymm8)
+	vaddpd(ymm15, ymm9, ymm9)
 
 
 	label(.DCONSIDKLEFT)
@@ -2057,29 +2057,21 @@ void bli_dgemmsup_rv_haswell_asm_3x6
 
 	label(.DROWSTORED)
 
+	lea(mem(rcx, rdi, 1), rbx)         // load address of c +  1*rs_c;
 
 	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm4)
-	vmovupd(ymm4, mem(rcx, 0*32))
-
 	vfmadd231pd(mem(rcx, 1*32), xmm3, xmm5)
+	vfmadd231pd(mem(rbx, 0*32), ymm3, ymm6)
+	vfmadd231pd(mem(rbx, 1*32), xmm3, xmm7)
+	vfmadd231pd(mem(rdx, 0*32), ymm3, ymm8)
+	vfmadd231pd(mem(rdx, 1*32), xmm3, xmm9)
+
+	vmovupd(ymm4, mem(rcx, 0*32))
 	vmovupd(xmm5, mem(rcx, 1*32))
-	add(rdi, rcx)
-
-
-	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm6)
-	vmovupd(ymm6, mem(rcx, 0*32))
-
-	vfmadd231pd(mem(rcx, 1*32), xmm3, xmm7)
-	vmovupd(xmm7, mem(rcx, 1*32))
-	add(rdi, rcx)
-
-
-	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm8)
-	vmovupd(ymm8, mem(rcx, 0*32))
-
-	vfmadd231pd(mem(rcx, 1*32), xmm3, xmm9)
-	vmovupd(xmm9, mem(rcx, 1*32))
-	//add(rdi, rcx)
+	vmovupd(ymm6, mem(rbx, 0*32))
+	vmovupd(xmm7, mem(rbx, 1*32))
+	vmovupd(ymm8, mem(rdx, 0*32))
+	vmovupd(xmm9, mem(rdx, 1*32))
 
 
 	jmp(.DDONE)                        // jump to end.
@@ -2270,30 +2262,32 @@ void bli_dgemmsup_rv_haswell_asm_3x6
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
+	  "ymm7", "ymm8", "ymm9", "ymm10", "ymm11",
+	  "ymm12", "ymm13", "ymm14", "ymm15", "memory"
 	)
 }
 
 void bli_dgemmsup_rv_haswell_asm_2x6
      (
-             conj_t     conja,
-             conj_t     conjb,
-             dim_t      m0,
-             dim_t      n0,
-             dim_t      k0,
-       const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
-       const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       double*    restrict alpha,
+       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -2416,13 +2410,13 @@ void bli_dgemmsup_rv_haswell_asm_2x6
 	vmovupd(mem(rbx, 1*32), xmm1)
 	add(r10, rbx)                      // b += rs_b;
 
-	vbroadcastsd(mem(rax        ), ymm2)
-	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vbroadcastsd(mem(rax        ), ymm12)
+	vbroadcastsd(mem(rax, r8,  1), ymm13)
 	add(r9, rax)                       // a += cs_a;
-	vfmadd231pd(ymm0, ymm2, ymm4)
-	vfmadd231pd(ymm1, ymm2, ymm5)
-	vfmadd231pd(ymm0, ymm3, ymm6)
-	vfmadd231pd(ymm1, ymm3, ymm7)
+	vfmadd231pd(ymm0, ymm12, ymm8)
+	vfmadd231pd(ymm1, ymm12, ymm9)
+	vfmadd231pd(ymm0, ymm13, ymm10)
+	vfmadd231pd(ymm1, ymm13, ymm11)
 
 
 	// ---------------------------------- iteration 2
@@ -2454,22 +2448,23 @@ void bli_dgemmsup_rv_haswell_asm_2x6
 	vmovupd(mem(rbx, 1*32), xmm1)
 	add(r10, rbx)                      // b += rs_b;
 
-	vbroadcastsd(mem(rax        ), ymm2)
-	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vbroadcastsd(mem(rax        ), ymm12)
+	vbroadcastsd(mem(rax, r8,  1), ymm13)
 	add(r9, rax)                       // a += cs_a;
-	vfmadd231pd(ymm0, ymm2, ymm4)
-	vfmadd231pd(ymm1, ymm2, ymm5)
-	vfmadd231pd(ymm0, ymm3, ymm6)
-	vfmadd231pd(ymm1, ymm3, ymm7)
+	vfmadd231pd(ymm0, ymm12, ymm8)
+	vfmadd231pd(ymm1, ymm12, ymm9)
+	vfmadd231pd(ymm0, ymm13, ymm10)
+	vfmadd231pd(ymm1, ymm13, ymm11)
 
 
 
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKITER)                   // iterate again if i != 0.
 
-
-
-
+	vaddpd(ymm8, ymm4, ymm4)
+	vaddpd(ymm9, ymm5, ymm5)
+	vaddpd(ymm10, ymm6, ymm6)
+	vaddpd(ymm11, ymm7, ymm7)
 
 
 	label(.DCONSIDKLEFT)
@@ -2549,21 +2544,17 @@ void bli_dgemmsup_rv_haswell_asm_2x6
 
 	label(.DROWSTORED)
 
+	lea(mem(rcx, rdi, 1), rdx)         // load address of c +  1*rs_c;
 
 	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm4)
-	vmovupd(ymm4, mem(rcx, 0*32))
-
 	vfmadd231pd(mem(rcx, 1*32), xmm3, xmm5)
+	vfmadd231pd(mem(rdx, 0*32), ymm3, ymm6)
+	vfmadd231pd(mem(rdx, 1*32), xmm3, xmm7)
+
+	vmovupd(ymm4, mem(rcx, 0*32))
 	vmovupd(xmm5, mem(rcx, 1*32))
-	add(rdi, rcx)
-
-
-	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm6)
-	vmovupd(ymm6, mem(rcx, 0*32))
-
-	vfmadd231pd(mem(rcx, 1*32), xmm3, xmm7)
-	vmovupd(xmm7, mem(rcx, 1*32))
-	//add(rdi, rcx)
+	vmovupd(ymm6, mem(rdx, 0*32))
+	vmovupd(xmm7, mem(rdx, 1*32))
 
 
 	jmp(.DDONE)                        // jump to end.
@@ -2701,30 +2692,32 @@ void bli_dgemmsup_rv_haswell_asm_2x6
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
+	  "ymm7", "ymm8", "ymm9", "ymm10", "ymm11",
+	  "ymm12", "ymm13", "memory"
 	)
 }
 
 void bli_dgemmsup_rv_haswell_asm_1x6
      (
-             conj_t     conja,
-             conj_t     conjb,
-             dim_t      m0,
-             dim_t      n0,
-             dim_t      k0,
-       const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
-       const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       double*    restrict alpha,
+       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -2843,10 +2836,10 @@ void bli_dgemmsup_rv_haswell_asm_1x6
 	vmovupd(mem(rbx, 1*32), xmm1)
 	add(r10, rbx)                      // b += rs_b;
 
-	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax        ), ymm3)
 	add(r9, rax)                       // a += cs_a;
-	vfmadd231pd(ymm0, ymm2, ymm4)
-	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
 
 
 	// ---------------------------------- iteration 2
@@ -2875,19 +2868,18 @@ void bli_dgemmsup_rv_haswell_asm_1x6
 	vmovupd(mem(rbx, 1*32), xmm1)
 	add(r10, rbx)                      // b += rs_b;
 
-	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax        ), ymm3)
 	add(r9, rax)                       // a += cs_a;
-	vfmadd231pd(ymm0, ymm2, ymm4)
-	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
 
 
 
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKITER)                   // iterate again if i != 0.
 
-
-
-
+	vaddpd(ymm6, ymm4, ymm4)
+	vaddpd(ymm7, ymm5, ymm5)
 
 
 	label(.DCONSIDKLEFT)
@@ -3078,13 +3070,14 @@ void bli_dgemmsup_rv_haswell_asm_1x6
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5",
+	  "ymm6", "ymm7", "memory"
 	)
 }
 

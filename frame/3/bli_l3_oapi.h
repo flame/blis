@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -43,11 +43,11 @@
 \
 BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
-       const obj_t* alpha, \
-       const obj_t* a, \
-       const obj_t* b, \
-       const obj_t* beta, \
-       const obj_t* c  \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c  \
      );
 
 GENPROT( gemm )
@@ -61,12 +61,12 @@ GENPROT( syr2k )
 \
 BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
-             side_t side, \
-       const obj_t* alpha, \
-       const obj_t* a, \
-       const obj_t* b, \
-       const obj_t* beta, \
-       const obj_t* c  \
+       side_t  side, \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c  \
      );
 
 GENPROT( hemm )
@@ -79,10 +79,10 @@ GENPROT( trmm3 )
 \
 BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
-       const obj_t* alpha, \
-       const obj_t* a, \
-       const obj_t* beta, \
-       const obj_t* c  \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  beta, \
+       obj_t*  c  \
      );
 
 GENPROT( herk )
@@ -94,10 +94,10 @@ GENPROT( syrk )
 \
 BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
-             side_t side, \
-       const obj_t* alpha, \
-       const obj_t* a, \
-       const obj_t* b  \
+       side_t  side, \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b  \
      );
 
 GENPROT( trmm )

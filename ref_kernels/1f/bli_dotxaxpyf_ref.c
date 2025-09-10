@@ -40,33 +40,25 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-             conj_t  conjat, \
-             conj_t  conja, \
-             conj_t  conjw, \
-             conj_t  conjx, \
-             dim_t   m, \
-             dim_t   b_n, \
-       const void*   alpha0, \
-       const void*   a0, inc_t inca, inc_t lda, \
-       const void*   w0, inc_t incw, \
-       const void*   x0, inc_t incx, \
-       const void*   beta0, \
-             void*   y0, inc_t incy, \
-             void*   z0, inc_t incz, \
-       const cntx_t* cntx  \
+       conj_t           conjat, \
+       conj_t           conja, \
+       conj_t           conjw, \
+       conj_t           conjx, \
+       dim_t            m, \
+       dim_t            b_n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict w, inc_t incw, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict beta, \
+       ctype*  restrict y, inc_t incy, \
+       ctype*  restrict z, inc_t incz, \
+       cntx_t* restrict cntx  \
      ) \
 { \
 	/* A is m x n.                   */ \
 	/* y = beta * y + alpha * A^T w; */ \
 	/* z =        z + alpha * A   x; */ \
-\
-	const ctype* restrict alpha = alpha0; \
-	const ctype* restrict a     = a0; \
-	const ctype* restrict w     = w0; \
-	const ctype* restrict x     = x0; \
-	const ctype* restrict beta  = beta0; \
-	      ctype* restrict y     = y0; \
-	      ctype* restrict z     = z0; \
 \
 	if ( 1 && inca == 1 && incw == 1 && incx == 1 && \
 	     incy == 1 && incz == 1 && b_n == ff ) \
@@ -170,9 +162,13 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	else \
 	{ \
 		/* Query the context for the kernel function pointer. */ \
-		const num_t  dt     = PASTEMAC(ch,type); \
-		dotxf_ker_ft kfp_df = bli_cntx_get_ukr_dt( dt, BLIS_DOTXF_KER, cntx ); \
-		axpyf_ker_ft kfp_af = bli_cntx_get_ukr_dt( dt, BLIS_AXPYF_KER, cntx ); \
+		const num_t              dt     = PASTEMAC(ch,type); \
+		PASTECH(ch,dotxf_ker_ft) kfp_df \
+		= \
+		bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx ); \
+		PASTECH(ch,axpyf_ker_ft) kfp_af \
+		= \
+		bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx ); \
 \
 		kfp_df \
 		( \
@@ -203,7 +199,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 }
 
-//INSERT_GENTFUNC_BASIC( dotxaxpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+//INSERT_GENTFUNC_BASIC2( dotxaxpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 GENTFUNC( float,    s, dotxaxpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4 )
 GENTFUNC( double,   d, dotxaxpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4 )
 GENTFUNC( scomplex, c, dotxaxpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4 )

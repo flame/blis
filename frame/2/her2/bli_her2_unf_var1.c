@@ -103,8 +103,10 @@ void PASTEMAC(ch,varname) \
 	conj0 = bli_apply_conj( conjh, conjy ); \
 	conj1 = bli_apply_conj( conjh, conjx ); \
 \
+	PASTECH(ch,axpy2v_ker_ft) kfp_2v; \
+\
 	/* Query the context for the kernel function pointer. */ \
-	axpy2v_ker_ft kfp_2v = bli_cntx_get_ukr_dt( dt, BLIS_AXPY2V_KER, cntx ); \
+	kfp_2v = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPY2V_KER, cntx ); \
 \
 	for ( i = 0; i < m; ++i ) \
 	{ \
@@ -156,5 +158,5 @@ void PASTEMAC(ch,varname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( her2_unf_var1 )
+INSERT_GENTFUNC_BASIC0( her2_unf_var1 )
 

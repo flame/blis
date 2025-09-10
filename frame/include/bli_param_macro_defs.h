@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -603,7 +603,19 @@ BLIS_INLINE bool bli_has_nonunit_inc3( inc_t s1, inc_t s2, inc_t s3 )
 	       ( s1 != 1 || s2 != 1 || s3 != 1 );
 }
 
+// offset-relate
 
+BLIS_INLINE bool bli_gemmt_is_strictly_below_diag( dim_t m_off, dim_t n_off, dim_t m, dim_t n )
+{
+	return ( bool )
+	       ( ( n_off + n - 1 ) < m_off );
+}
+
+BLIS_INLINE bool bli_gemmt_is_strictly_above_diag( dim_t m_off, dim_t n_off, dim_t m, dim_t n )
+{
+	return ( bool )
+	       ( ( m_off + m - 1 ) < n_off );
+}
 // diag offset-related
 
 BLIS_INLINE void bli_negate_diag_offset( doff_t* diagoff )
@@ -754,7 +766,7 @@ BLIS_INLINE void bli_prune_unstored_region_bottom_u( doff_t* diagoff, dim_t* m, 
 	*offm_inc = 0;
 
 	// If the diagonal intersects the right side of the matrix,
-	// ignore the area below that intersection.
+	// ignore the area below that intersection. 
 	if ( *m > -(*diagoff) + *n )
 	{
 		*m = -(*diagoff) + *n;
@@ -776,14 +788,6 @@ BLIS_INLINE void bli_reflect_about_diag( doff_t* diagoff, uplo_t* uplo, dim_t* m
 	bli_negate_diag_offset( diagoff );
 	bli_toggle_uplo( uplo );
 }
-
-// we don't know the type of a, so this must be a macro
-// rs_a and cs_a must be variables and not expressions
-#define bli_reflect_to_stored_part( diagoff, a, rs_a, cs_a ) \
-do { \
-	a += ( diagoff ) * ( cs_a - rs_a ); \
-	bli_swap_incs( &rs_a, &cs_a ); \
-} while (0) \
 
 BLIS_INLINE void bli_reverse_index_direction( dim_t n, dim_t* start, dim_t* end )
 {
@@ -866,22 +870,6 @@ BLIS_INLINE stor3_t bli_stor3_trans( stor3_t id )
 #endif
 }
 
-BLIS_INLINE ukr_t bli_stor3_ukr( stor3_t id )
-{
-	switch ( id )
-	{
-		case BLIS_RRR: return BLIS_GEMMSUP_RRR_UKR;
-		case BLIS_RRC: return BLIS_GEMMSUP_RRC_UKR;
-		case BLIS_RCR: return BLIS_GEMMSUP_RCR_UKR;
-		case BLIS_RCC: return BLIS_GEMMSUP_RCC_UKR;
-		case BLIS_CRR: return BLIS_GEMMSUP_CRR_UKR;
-		case BLIS_CRC: return BLIS_GEMMSUP_CRC_UKR;
-		case BLIS_CCR: return BLIS_GEMMSUP_CCR_UKR;
-		case BLIS_CCC: return BLIS_GEMMSUP_CCC_UKR;
-		default: return BLIS_GEMMSUP_XXX_UKR;
-	}
-}
-
 BLIS_INLINE stor3_t bli_stor3_transa( stor3_t id )
 {
 #if 0
@@ -927,6 +915,7 @@ BLIS_INLINE stor3_t bli_stor3_transb( stor3_t id )
 }
 
 
+
 // index-related
 
 BLIS_INLINE bool bli_is_edge_f( dim_t i, dim_t n_iter, dim_t n_left )
@@ -953,7 +942,7 @@ BLIS_INLINE bool bli_is_not_edge_b( dim_t i, dim_t n_iter, dim_t n_left )
 	       ( i != 0 || n_left == 0 );
 }
 
-BLIS_INLINE bool bli_is_last_iter_sl( dim_t i, dim_t end_iter )
+BLIS_INLINE bool bli_is_last_iter_sl( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
 {
 	return ( bool )
 	       ( i == end_iter - 1 );
@@ -965,56 +954,12 @@ BLIS_INLINE bool bli_is_last_iter_rr( dim_t i, dim_t end_iter, dim_t tid, dim_t 
 	       ( i == end_iter - 1 - ( ( end_iter - tid - 1 ) % nth ) );
 }
 
-BLIS_INLINE bool bli_is_last_iter_slrr( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
+BLIS_INLINE bool bli_is_last_iter( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
 {
-#ifdef BLIS_ENABLE_JRIR_RR
+#ifdef BLIS_ENABLE_JRIR_SLAB
+	return bli_is_last_iter_sl( i, end_iter, tid, nth );
+#else // BLIS_ENABLE_JRIR_RR
 	return bli_is_last_iter_rr( i, end_iter, tid, nth );
-#else // ifdef ( _SLAB || _TLB )
-	return bli_is_last_iter_sl( i, end_iter );
-#endif
-}
-
-BLIS_INLINE bool bli_is_last_iter_l( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
-{
-	return bli_is_last_iter_slrr( i, end_iter, tid, nth );
-}
-
-BLIS_INLINE bool bli_is_last_iter_u( doff_t diagoff, dim_t mr, dim_t nr, inc_t inc )
-{
-	return bli_is_strictly_below_diag_n( diagoff + inc*mr, mr, nr );
-}
-
-BLIS_INLINE bool bli_is_last_iter_tlb_l( dim_t i, dim_t end_iter )
-{
-	return bli_is_last_iter_sl( i, end_iter );
-}
-
-BLIS_INLINE bool bli_is_last_iter_tlb_u( doff_t diagoff, dim_t mr, dim_t nr )
-{
-	return bli_is_strictly_below_diag_n( diagoff + 1*mr, mr, nr );
-}
-
-BLIS_INLINE bool bli_is_my_iter_sl( dim_t i, dim_t st, dim_t en )
-{
-	return ( st <= i && i < en );
-}
-
-BLIS_INLINE bool bli_is_my_iter_rr( dim_t i, dim_t work_id, dim_t n_way )
-{
-	return ( i % n_way == work_id % n_way );
-}
-
-BLIS_INLINE bool bli_is_my_iter( dim_t i, dim_t st, dim_t en, dim_t work_id, dim_t n_way )
-{
-	// NOTE: This function is (as of this writing) only called from packm.
-	// If the structure of the cpp macros below is ever changed, make sure
-	// it is still consistent with that of bli_thread_range_slrr() since
-	// these functions are used together in packm.
-
-#ifdef BLIS_ENABLE_JRIR_RR
-	return bli_is_my_iter_rr( i, work_id, n_way );
-#else // ifdef ( _SLAB || _TLB )
-	return bli_is_my_iter_sl( i, st, en );
 #endif
 }
 

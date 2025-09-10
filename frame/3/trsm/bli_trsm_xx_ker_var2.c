@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,7 +35,7 @@
 
 #include "blis.h"
 
-static l3_var_oft vars[2][2] =
+static trsm_var_oft vars[2][2] =
 {
 	{ bli_trsm_ll_ker_var2, bli_trsm_lu_ker_var2 },
 	{ bli_trsm_rl_ker_var2, bli_trsm_ru_ker_var2 }
@@ -43,16 +43,20 @@ static l3_var_oft vars[2][2] =
 
 void bli_trsm_xx_ker_var2
      (
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     c,
-       const cntx_t*    cntx,
-       const cntl_t*    cntl,
-             thrinfo_t* thread_par
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       cntl_t* cntl,
+       thrinfo_t* thread
      )
 {
-	dim_t side;
-	dim_t uplo;
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_6);
+	dim_t        side;
+	dim_t        uplo;
+	trsm_var_oft f;
+	AOCL_progress_callback AOCL_progress_local_ptr = AOCL_progress_ptr;
 
 	// Set two bools: one based on the implied side parameter (the structure
 	// of the root object) and one based on the uplo field of the triangular
@@ -71,7 +75,7 @@ void bli_trsm_xx_ker_var2
 	}
 
 	// Index into the variant array to extract the correct function pointer.
-	l3_var_oft f = vars[side][uplo];
+	f = vars[side][uplo];
 
 	// Call the macrokernel.
 	f
@@ -80,8 +84,63 @@ void bli_trsm_xx_ker_var2
 	  b,
 	  c,
 	  cntx,
+	  rntm,
 	  cntl,
-	  thread_par
+	  thread
 	);
+
+	/* Send progress update if the user has enabled it */
+	if (AOCL_progress_local_ptr)
+	{
+		// Get the size of block processed in
+		// this iteration, add it to the accumulated
+		// total and send the update.
+		dim_t m = bli_obj_length(c);
+		dim_t n = bli_obj_width(c);
+		dim_t k = bli_obj_width(a);
+
+		num_t dt = bli_obj_dt(c);
+		char *dt_api = NULL;
+		dim_t dt_api_len = 5;
+
+		// Running total for current thread.
+		tls_aoclprogress_counter += m * n * k;
+
+		// Send the update only if number of elements processes so far
+		// has exceeded the freqency of reporting.
+		if ((tls_aoclprogress_counter - tls_aoclprogress_last_update) >=
+			 AOCL_PROGRESS_FREQUENCY)
+		{
+
+			// reset the last update counter for next iteration.
+			tls_aoclprogress_last_update = tls_aoclprogress_counter;
+
+			switch (dt)
+			{
+			case BLIS_FLOAT:
+				dt_api = "strsm";
+				break;
+			case BLIS_DOUBLE:
+				dt_api = "dtrsm";
+				break;
+			case BLIS_SCOMPLEX:
+				dt_api = "ctrsm";
+				break;
+			case BLIS_DCOMPLEX:
+				dt_api = "ztrsm";
+				break;
+			default:
+				dt_api = " trsm";
+			}
+
+			(*AOCL_progress_local_ptr)(dt_api,
+			                           dt_api_len,
+			                           tls_aoclprogress_counter,
+			                           AOCL_gettid(),
+			                           bli_rntm_num_threads(rntm));
+		}
+	}
+
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_6);
 }
 

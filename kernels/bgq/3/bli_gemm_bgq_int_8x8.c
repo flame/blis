@@ -56,26 +56,16 @@
 
 void bli_dgemm_bgq_int_8x8
      (
-             dim_t      m,
-             dim_t      n,
-             dim_t      k,
-       const void*      alpha0,
-       const void*      a0,
-       const void*      b0,
-       const void*      beta0,
-             void*      c0, inc_t rs_c, inc_t cs_c,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       dim_t               k,
+       double*    restrict alpha,
+       double*    restrict a,
+       double*    restrict b,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
-	const double* alpha = alpha0;
-	const double* a     = a0;
-	const double* b     = b0;
-	const double* beta  = beta0;
-	      double* c     = c0;
-
-    GEMM_UKR_SETUP_CT_ANY( d, 8, 8, false );
-
     //Registers for storing C.
     //4 4x4 subblocks of C, c00, c01, c10, c11
     //4 registers per subblock: a, b, c, d
@@ -211,8 +201,6 @@ void bli_dgemm_bgq_int_8x8
     UPDATE( AB, c, 0 );
     AB = vec_perm( c11d, c11d, pattern );
     UPDATE( AB, c, 4 );
-
-    GEMM_UKR_FLUSH_CT( d );
 }
 
 void printvec(vector4double v)
@@ -226,29 +214,19 @@ void printvec(vector4double v)
 
 void bli_zgemm_bgq_int_4x4
      (
-             dim_t      m,
-             dim_t      n,
-             dim_t      k,
-       const void*      alpha0,
-       const void*      a0,
-       const void*      b0,
-       const void*      beta0,
-             void*      c0, inc_t rs_c, inc_t cs_c,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       dim_t               k,
+       dcomplex*  restrict alpha,
+       dcomplex*  restrict a,
+       dcomplex*  restrict b,
+       dcomplex*  restrict beta,
+       dcomplex*  restrict c, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
-	const dcomplex* alpha = alpha0;
-	const dcomplex* a     = a0;
-	const dcomplex* b     = b0;
-	const dcomplex* beta  = beta0;
-	      dcomplex* c     = c0;
-
-    GEMM_UKR_SETUP_CT_ANY( z, 4, 4, false );
-
-    const double* a_d = ( double* )a;
-    const double* b_d = ( double* )b;
-          double* c_d = ( double* )c;
+    double* a_d = ( double* )a;
+    double* b_d = ( double* )b;
+    double* c_d = ( double* )c;
 
     //Registers for storing C.
     //2 2x4 subblocks of C, c0, and c1
@@ -390,6 +368,4 @@ void bli_zgemm_bgq_int_4x4
     c_d += 2*cs_c;
     ZUPDATE( c03a, c03b, c_d, 0 );
     ZUPDATE( c13a, c13b, c_d, 4 );
-
-    GEMM_UKR_FLUSH_CT( z );
 }

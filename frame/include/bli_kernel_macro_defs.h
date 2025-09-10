@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020 - 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -151,7 +152,6 @@
 #define BLIS_FREE_USER                   free
 #endif
 
-
 // -- Other system-related definitions -----------------------------------------
 
 // Size of a virtual memory page. This is used to align blocks within the
@@ -164,21 +164,21 @@
 // When configuring with umbrella configuration families, this should be
 // set to the maximum number of registers across all sub-configurations in
 // the family.
-#ifndef BLIS_SIMD_MAX_NUM_REGISTERS
-#define BLIS_SIMD_MAX_NUM_REGISTERS      32
+#ifndef BLIS_SIMD_NUM_REGISTERS
+#define BLIS_SIMD_NUM_REGISTERS          32
 #endif
 
 // The maximum size (in bytes) of each SIMD vector.
 // When configuring with umbrella configuration families, this should be
 // set to the maximum SIMD size across all sub-configurations in the family.
-#ifndef BLIS_SIMD_MAX_SIZE
-#define BLIS_SIMD_MAX_SIZE               64
+#ifndef BLIS_SIMD_SIZE
+#define BLIS_SIMD_SIZE                   64
 #endif
 
 // Alignment size (in bytes) needed by the instruction set for aligned
 // SIMD/vector instructions.
 #ifndef BLIS_SIMD_ALIGN_SIZE
-#define BLIS_SIMD_ALIGN_SIZE             BLIS_SIMD_MAX_SIZE
+#define BLIS_SIMD_ALIGN_SIZE             BLIS_SIMD_SIZE
 #endif
 
 // The maximum size in bytes of local stack buffers within macro-kernel
@@ -189,8 +189,8 @@
 // micro-tile footprint, even though the virtual micro-kernels will only
 // ever be writing to half (real or imaginary part) at a time.
 #ifndef BLIS_STACK_BUF_MAX_SIZE
-#define BLIS_STACK_BUF_MAX_SIZE          ( BLIS_SIMD_MAX_NUM_REGISTERS * \
-                                           BLIS_SIMD_MAX_SIZE * 2 )
+#define BLIS_STACK_BUF_MAX_SIZE          ( BLIS_SIMD_NUM_REGISTERS * \
+                                           BLIS_SIMD_SIZE * 2 )
 #endif
 
 // Alignment size used to align local stack buffers within macro-kernel
@@ -246,112 +246,6 @@
 #define BLIS_POOL_ADDR_OFFSET_SIZE_GEN   0
 #endif
 
-
-// -- MR and NR blocksizes (only for reference kernels) ------------------------
-
-// The build system defines BLIS_IN_REF_KERNEL, but only when compiling
-// reference kernels. By using compile-time constants for MR and NR, the
-// compiler can perform certain optimizations, such as unrolling and
-// vectorization, that would not be otherwise be possible.
-#ifdef BLIS_IN_REF_KERNEL
-
-#ifndef BLIS_MR_s
-#define BLIS_MR_s 4
-#endif
-
-#ifndef BLIS_MR_d
-#define BLIS_MR_d 4
-#endif
-
-#ifndef BLIS_MR_c
-#define BLIS_MR_c 4
-#endif
-
-#ifndef BLIS_MR_z
-#define BLIS_MR_z 4
-#endif
-
-#ifndef BLIS_NR_s
-#define BLIS_NR_s 16
-#endif
-
-#ifndef BLIS_NR_d
-#define BLIS_NR_d 8
-#endif
-
-#ifndef BLIS_NR_c
-#define BLIS_NR_c 8
-#endif
-
-#ifndef BLIS_NR_z
-#define BLIS_NR_z 4
-#endif
-
-#ifndef BLIS_BBM_s
-#define BLIS_BBM_s 1
-#endif
-
-#ifndef BLIS_BBM_d
-#define BLIS_BBM_d 1
-#endif
-
-#ifndef BLIS_BBM_c
-#define BLIS_BBM_c 1
-#endif
-
-#ifndef BLIS_BBM_z
-#define BLIS_BBM_z 1
-#endif
-
-#ifndef BLIS_BBN_s
-#define BLIS_BBN_s 1
-#endif
-
-#ifndef BLIS_BBN_d
-#define BLIS_BBN_d 1
-#endif
-
-#ifndef BLIS_BBN_c
-#define BLIS_BBN_c 1
-#endif
-
-#ifndef BLIS_BBN_z
-#define BLIS_BBN_z 1
-#endif
-
-#ifndef BLIS_PACKMR_s
-#define BLIS_PACKMR_s (BLIS_MR_s*BLIS_BBM_s)
-#endif
-
-#ifndef BLIS_PACKMR_d
-#define BLIS_PACKMR_d (BLIS_MR_d*BLIS_BBM_d)
-#endif
-
-#ifndef BLIS_PACKMR_c
-#define BLIS_PACKMR_c (BLIS_MR_c*BLIS_BBM_c)
-#endif
-
-#ifndef BLIS_PACKMR_z
-#define BLIS_PACKMR_z (BLIS_MR_z*BLIS_BBM_z)
-#endif
-
-#ifndef BLIS_PACKNR_s
-#define BLIS_PACKNR_s (BLIS_NR_s*BLIS_BBN_s)
-#endif
-
-#ifndef BLIS_PACKNR_d
-#define BLIS_PACKNR_d (BLIS_NR_d*BLIS_BBN_d)
-#endif
-
-#ifndef BLIS_PACKNR_c
-#define BLIS_PACKNR_c (BLIS_NR_c*BLIS_BBN_c)
-#endif
-
-#ifndef BLIS_PACKNR_z
-#define BLIS_PACKNR_z (BLIS_NR_z*BLIS_BBN_z)
-#endif
-
-#endif
 
 #endif
 

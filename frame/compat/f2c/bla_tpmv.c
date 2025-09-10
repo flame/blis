@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,17 +35,20 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLAS
+// Make thread settings local to each thread calling BLIS routines.
+// (The definition resides in bli_rntm.c.)
+extern BLIS_THREAD_LOCAL rntm_t tl_rntm;
 
 /* ctpmv.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(c,tpmv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_scomplex *ap, bla_scomplex *x, const bla_integer *incx)
+/* Subroutine */ 
+int PASTEF77S(c,tpmv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_scomplex *ap, bla_scomplex *x, const bla_integer *incx)
 {
     /* System generated locals */
-    bla_integer i__1, i__2, i__3, i__4, i__5;
+    dim_t i__1, i__2, i__3, i__4, i__5;
     bla_scomplex q__1, q__2, q__3;
 
     /* Builtin functions */
@@ -53,10 +57,10 @@
     /* Local variables */
     bla_integer info;
     bla_scomplex temp;
-    bla_integer i__, j, k;
-    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
-    bla_integer kk, ix, jx, kx = 0;
-    //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
+    dim_t i__, j, k;
+    //extern bla_logical PASTE_LSAME(bla_character *, bla_character *, ftnlen, ftnlen);
+    dim_t kk, ix, jx, kx = 0;
+    //extern /* Subroutine */ int PASTE_XERBLA(bla_character *, bla_integer *, ftnlen);
     bla_logical noconj, nounit;
 
 /*     .. Scalar Arguments .. */
@@ -166,15 +170,24 @@
     --ap;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE();
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_TPMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *uplo, 
+			     *trans, *diag, *n, *incx);
+
+    // Initialize info_value to 0
+    gint_t info_value = 0;
+    bli_rntm_set_info_value_only( info_value, &tl_rntm );
+
     info = 0;
-    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
+    if (! PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
-    } else if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, 
-	    "T", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (
+    } else if (! PASTE_LSAME(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(trans, 
+	    "T", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(trans, "C", (ftnlen)1, (
 	    ftnlen)1)) {
 	info = 2;
-    } else if (! PASTEF770(lsame)(diag, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(diag, 
+    } else if (! PASTE_LSAME(diag, "U", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(diag, 
 	    "N", (ftnlen)1, (ftnlen)1)) {
 	info = 3;
     } else if (*n < 0) {
@@ -183,18 +196,20 @@
 	info = 7;
     }
     if (info != 0) {
-	PASTEF770(xerbla)("CTPMV ", &info, (ftnlen)6);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+	PASTE_XERBLA("CTPMV ", &info, (ftnlen)6);
 	return 0;
     }
 
 /*     Quick return if possible. */
 
     if (*n == 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
 
-    noconj = PASTEF770(lsame)(trans, "T", (ftnlen)1, (ftnlen)1);
-    nounit = PASTEF770(lsame)(diag, "N", (ftnlen)1, (ftnlen)1);
+    noconj = PASTE_LSAME(trans, "T", (ftnlen)1, (ftnlen)1);
+    nounit = PASTE_LSAME(diag, "N", (ftnlen)1, (ftnlen)1);
 
 /*     Set up the start point in X if the increment is not unity. This */
 /*     will be  ( N - 1 )*INCX  too small for descending loops. */
@@ -208,11 +223,11 @@
 /*     Start the operations. In this version the elements of AP are */
 /*     accessed sequentially with one pass through AP. */
 
-    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTE_LSAME(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  x:= A*x. */
 
-	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kk = 1;
 	    if (*incx == 1) {
 		i__1 = *n;
@@ -278,7 +293,10 @@
 		}
 	    }
 	} else {
-	    kk = *n * (*n + 1) / 2;
+		// Bug Fix: for 32 bit integers, *n * (*n + 1) can overflow.
+		dim_t n0 = *n;
+		kk = n0 * (n0 + 1) / 2;
+	    // kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    i__1 = j;
@@ -346,8 +364,11 @@
 
 /*        Form  x := A'*x  or  x := conjg( A' )*x. */
 
-	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
-	    kk = *n * (*n + 1) / 2;
+	if (PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+		// Bug Fix: for 32 bit integers, *n * (*n + 1) can overflow.
+		dim_t n0 = *n;
+		kk = n0 * (n0 + 1) / 2;
+	    // kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    i__1 = j;
@@ -531,6 +552,7 @@
 	}
     }
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*     End of CTPMV . */
@@ -542,18 +564,19 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,tpmv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_double *ap, bla_double *x, const bla_integer *incx)
+/* Subroutine */ 
+int PASTEF77S(d,tpmv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_double *ap, bla_double *x, const bla_integer *incx)
 {
     /* System generated locals */
-    bla_integer i__1, i__2;
+    dim_t i__1, i__2;
 
     /* Local variables */
     bla_integer info;
     bla_double temp;
-    bla_integer i__, j, k;
-    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
-    bla_integer kk, ix, jx, kx = 0;
-    //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
+    dim_t i__, j, k;
+    //extern bla_logical PASTE_LSAME(bla_character *, bla_character *, ftnlen, ftnlen);
+    dim_t kk, ix, jx, kx = 0;
+    //extern /* Subroutine */ int PASTE_XERBLA(bla_character *, bla_integer *, ftnlen);
     bla_logical nounit;
 
 /*     .. Scalar Arguments .. */
@@ -662,15 +685,24 @@
     --ap;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE();
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_TPMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *uplo, 
+			     *trans, *diag, *n, *incx);
+
+    // Initialize info_value to 0
+    gint_t info_value = 0;
+    bli_rntm_set_info_value_only( info_value, &tl_rntm );
+
     info = 0;
-    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
+    if (! PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
-    } else if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, 
-	    "T", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (
+    } else if (! PASTE_LSAME(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(trans, 
+	    "T", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(trans, "C", (ftnlen)1, (
 	    ftnlen)1)) {
 	info = 2;
-    } else if (! PASTEF770(lsame)(diag, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(diag, 
+    } else if (! PASTE_LSAME(diag, "U", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(diag, 
 	    "N", (ftnlen)1, (ftnlen)1)) {
 	info = 3;
     } else if (*n < 0) {
@@ -679,17 +711,19 @@
 	info = 7;
     }
     if (info != 0) {
-	PASTEF770(xerbla)("DTPMV ", &info, (ftnlen)6);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+	PASTE_XERBLA("DTPMV ", &info, (ftnlen)6);
 	return 0;
     }
 
 /*     Quick return if possible. */
 
     if (*n == 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
 
-    nounit = PASTEF770(lsame)(diag, "N", (ftnlen)1, (ftnlen)1);
+    nounit = PASTE_LSAME(diag, "N", (ftnlen)1, (ftnlen)1);
 
 /*     Set up the start point in X if the increment is not unity. This */
 /*     will be  ( N - 1 )*INCX  too small for descending loops. */
@@ -703,11 +737,11 @@
 /*     Start the operations. In this version the elements of AP are */
 /*     accessed sequentially with one pass through AP. */
 
-    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTE_LSAME(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  x:= A*x. */
 
-	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kk = 1;
 	    if (*incx == 1) {
 		i__1 = *n;
@@ -751,7 +785,10 @@
 		}
 	    }
 	} else {
-	    kk = *n * (*n + 1) / 2;
+		// Bug Fix: for 32 bit integers, *n * (*n + 1) can overflow.
+        dim_t n0 = *n;
+		kk = n0 * (n0 + 1) / 2;
+	    //kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    if (x[j] != 0.) {
@@ -797,8 +834,11 @@
 
 /*        Form  x := A'*x. */
 
-	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
-	    kk = *n * (*n + 1) / 2;
+	if (PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+		// Bug Fix: for 32 bit integers, *n * (*n + 1) can overflow.
+        dim_t n0 = *n;
+		kk = n0 * (n0 + 1) / 2;
+	    // kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    temp = x[j];
@@ -879,6 +919,7 @@
 	}
     }
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*     End of DTPMV . */
@@ -890,18 +931,19 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,tpmv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_real *ap, bla_real *x, const bla_integer *incx)
+/* Subroutine */ 
+int PASTEF77S(s,tpmv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_real *ap, bla_real *x, const bla_integer *incx)
 {
     /* System generated locals */
-    bla_integer i__1, i__2;
+    dim_t i__1, i__2;
 
     /* Local variables */
     bla_integer info;
     bla_real temp;
-    bla_integer i__, j, k;
-    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
-    bla_integer kk, ix, jx, kx = 0;
-    //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
+    dim_t i__, j, k;
+    //extern bla_logical PASTE_LSAME(bla_character *, bla_character *, ftnlen, ftnlen);
+    dim_t kk, ix, jx, kx = 0;
+    //extern /* Subroutine */ int PASTE_XERBLA(bla_character *, bla_integer *, ftnlen);
     bla_logical nounit;
 
 /*     .. Scalar Arguments .. */
@@ -1010,15 +1052,24 @@
     --ap;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE();
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_TPMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *uplo, 
+			     *trans, *diag, *n, *incx);
+
+    // Initialize info_value to 0
+    gint_t info_value = 0;
+    bli_rntm_set_info_value_only( info_value, &tl_rntm );
+
     info = 0;
-    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
+    if (! PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
-    } else if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, 
-	    "T", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (
+    } else if (! PASTE_LSAME(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(trans, 
+	    "T", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(trans, "C", (ftnlen)1, (
 	    ftnlen)1)) {
 	info = 2;
-    } else if (! PASTEF770(lsame)(diag, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(diag, 
+    } else if (! PASTE_LSAME(diag, "U", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(diag, 
 	    "N", (ftnlen)1, (ftnlen)1)) {
 	info = 3;
     } else if (*n < 0) {
@@ -1027,17 +1078,19 @@
 	info = 7;
     }
     if (info != 0) {
-	PASTEF770(xerbla)("STPMV ", &info, (ftnlen)6);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+	PASTE_XERBLA("STPMV ", &info, (ftnlen)6);
 	return 0;
     }
 
 /*     Quick return if possible. */
 
     if (*n == 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
 
-    nounit = PASTEF770(lsame)(diag, "N", (ftnlen)1, (ftnlen)1);
+    nounit = PASTE_LSAME(diag, "N", (ftnlen)1, (ftnlen)1);
 
 /*     Set up the start point in X if the increment is not unity. This */
 /*     will be  ( N - 1 )*INCX  too small for descending loops. */
@@ -1051,11 +1104,11 @@
 /*     Start the operations. In this version the elements of AP are */
 /*     accessed sequentially with one pass through AP. */
 
-    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTE_LSAME(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  x:= A*x. */
 
-	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kk = 1;
 	    if (*incx == 1) {
 		i__1 = *n;
@@ -1099,7 +1152,10 @@
 		}
 	    }
 	} else {
-	    kk = *n * (*n + 1) / 2;
+		// Bug Fix: for 32 bit integers, *n * (*n + 1) can overflow.
+		dim_t n0 = *n;
+		kk = n0 * (n0 + 1) / 2;
+	    // kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    if (x[j] != 0.f) {
@@ -1145,8 +1201,11 @@
 
 /*        Form  x := A'*x. */
 
-	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
-	    kk = *n * (*n + 1) / 2;
+	if (PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+		// Bug Fix: for 32 bit integers, *n * (*n + 1) can overflow.
+		dim_t n0 = *n;
+		kk = n0 * (n0 + 1) / 2;
+	    // kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    temp = x[j];
@@ -1227,6 +1286,7 @@
 	}
     }
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*     End of STPMV . */
@@ -1238,10 +1298,11 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(z,tpmv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_dcomplex *ap, bla_dcomplex *x, const bla_integer *incx)
+/* Subroutine */ 
+int PASTEF77S(z,tpmv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_dcomplex *ap, bla_dcomplex *x, const bla_integer *incx)
 {
     /* System generated locals */
-    bla_integer i__1, i__2, i__3, i__4, i__5;
+    dim_t i__1, i__2, i__3, i__4, i__5;
     bla_dcomplex z__1, z__2, z__3;
 
     /* Builtin functions */
@@ -1250,10 +1311,10 @@
     /* Local variables */
     bla_integer info;
     bla_dcomplex temp;
-    bla_integer i__, j, k;
-    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
-    bla_integer kk, ix, jx, kx = 0;
-    //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
+    dim_t i__, j, k;
+    //extern bla_logical PASTE_LSAME(bla_character *, bla_character *, ftnlen, ftnlen);
+    dim_t kk, ix, jx, kx = 0;
+    //extern /* Subroutine */ int PASTE_XERBLA(bla_character *, bla_integer *, ftnlen);
     bla_logical noconj, nounit;
 
 /*     .. Scalar Arguments .. */
@@ -1363,15 +1424,24 @@
     --ap;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE();
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_TPMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *uplo, 
+			     *trans, *diag, *n, *incx);
+
+    // Initialize info_value to 0
+    gint_t info_value = 0;
+    bli_rntm_set_info_value_only( info_value, &tl_rntm );
+
     info = 0;
-    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
+    if (! PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
-    } else if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, 
-	    "T", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (
+    } else if (! PASTE_LSAME(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(trans, 
+	    "T", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(trans, "C", (ftnlen)1, (
 	    ftnlen)1)) {
 	info = 2;
-    } else if (! PASTEF770(lsame)(diag, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(diag, 
+    } else if (! PASTE_LSAME(diag, "U", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(diag, 
 	    "N", (ftnlen)1, (ftnlen)1)) {
 	info = 3;
     } else if (*n < 0) {
@@ -1380,18 +1450,20 @@
 	info = 7;
     }
     if (info != 0) {
-	PASTEF770(xerbla)("ZTPMV ", &info, (ftnlen)6);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+	PASTE_XERBLA("ZTPMV ", &info, (ftnlen)6);
 	return 0;
     }
 
 /*     Quick return if possible. */
 
     if (*n == 0) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
 
-    noconj = PASTEF770(lsame)(trans, "T", (ftnlen)1, (ftnlen)1);
-    nounit = PASTEF770(lsame)(diag, "N", (ftnlen)1, (ftnlen)1);
+    noconj = PASTE_LSAME(trans, "T", (ftnlen)1, (ftnlen)1);
+    nounit = PASTE_LSAME(diag, "N", (ftnlen)1, (ftnlen)1);
 
 /*     Set up the start point in X if the increment is not unity. This */
 /*     will be  ( N - 1 )*INCX  too small for descending loops. */
@@ -1405,11 +1477,11 @@
 /*     Start the operations. In this version the elements of AP are */
 /*     accessed sequentially with one pass through AP. */
 
-    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTE_LSAME(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  x:= A*x. */
 
-	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kk = 1;
 	    if (*incx == 1) {
 		i__1 = *n;
@@ -1475,7 +1547,10 @@
 		}
 	    }
 	} else {
-	    kk = *n * (*n + 1) / 2;
+		// Bug Fix: for 32 bit integers, *n * (*n + 1) can overflow.
+		dim_t n0 = *n;
+		kk = n0 * (n0 + 1) / 2;
+	    // kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    i__1 = j;
@@ -1543,8 +1618,11 @@
 
 /*        Form  x := A'*x  or  x := conjg( A' )*x. */
 
-	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
-	    kk = *n * (*n + 1) / 2;
+	if (PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+		// Bug Fix: for 32 bit integers, *n * (*n + 1) can overflow.
+		dim_t n0 = *n;
+		kk = n0 * (n0 + 1) / 2;
+	    // kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    i__1 = j;
@@ -1728,11 +1806,33 @@
 	}
     }
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*     End of ZTPMV . */
 
 } /* ztpmv_ */
 
-#endif
+#ifdef BLIS_ENABLE_BLAS
 
+int PASTEF77(s,tpmv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_real *ap, bla_real *x, const bla_integer *incx)
+{
+  return PASTEF77S(s,tpmv)( uplo, trans, diag, n, ap, x, incx );
+}
+
+int PASTEF77(d,tpmv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_double *ap, bla_double *x, const bla_integer *incx)
+{
+  return PASTEF77S(d,tpmv)( uplo, trans, diag, n, ap, x, incx );
+}
+
+int PASTEF77(c,tpmv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_scomplex *ap, bla_scomplex *x, const bla_integer *incx)
+{
+  return PASTEF77S(c,tpmv)( uplo, trans, diag, n, ap, x, incx );
+}
+
+int PASTEF77(z,tpmv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_dcomplex *ap, bla_dcomplex *x, const bla_integer *incx)
+{
+  return PASTEF77S(z,tpmv)( uplo, trans, diag, n, ap, x, incx );
+}
+
+#endif

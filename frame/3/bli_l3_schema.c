@@ -36,10 +36,10 @@
 
 void bli_l3_set_schemas
      (
-             obj_t*  a,
-             obj_t*  b,
-       const obj_t*  c,
-       const cntx_t* cntx
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       cntx_t* cntx
      )
 {
 	// Begin with pack schemas for native execution.
@@ -57,7 +57,7 @@ void bli_l3_set_schemas
 		// projection of dt to query the preference of the corresponding native
 		// real-domain microkernel. This is what ultimately determines which
 		// variant of 1m is applicable.
-		if ( bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_VIR_UKR, cntx ) )
+		if ( bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ) )
 		{
 			schema_a = BLIS_PACKED_ROW_PANELS_1E;
 			schema_b = BLIS_PACKED_COL_PANELS_1R;

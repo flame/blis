@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019 - 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -43,15 +43,15 @@ PACKM_KER_PROT( scomplex, c, packm_3xk_haswell_ref )
 
 void bli_cpackm_haswell_asm_3xk
      (
-             conj_t    conja,
-             pack_t    schema,
-             dim_t     cdim0,
-             dim_t     k0,
-             dim_t     k0_max,
-       const void*     kappa,
-       const void*     a, inc_t inca0, inc_t lda0,
-             void*     p,              inc_t ldp0,
-       const cntx_t*   cntx
+       conj_t              conja,
+       pack_t              schema,
+       dim_t               cdim0,
+       dim_t               k0,
+       dim_t               k0_max,
+       scomplex*  restrict kappa,
+       scomplex*  restrict a, inc_t inca0, inc_t lda0,
+       scomplex*  restrict p,              inc_t ldp0,
+       cntx_t*    restrict cntx
      )
 {
 #if 0
@@ -99,7 +99,7 @@ void bli_cpackm_haswell_asm_3xk
 
 	// NOTE: If/when this kernel ever supports scaling by kappa within the
 	// assembly region, this constraint should be lifted.
-	const bool     unitk  = bli_ceq1( *(( scomplex* )kappa) );
+	const bool     unitk  = bli_ceq1( *kappa );
 
 
 	// -------------------------------------------------------------------------
@@ -337,6 +337,8 @@ void bli_cpackm_haswell_asm_3xk
 		  "xmm4", "xmm5", "xmm6", "xmm7",
 		  "xmm8", "xmm9", "xmm10", "xmm11",
 		  "xmm12", "xmm13", "xmm14", "xmm15",
+		  "ymm0", "ymm1", "ymm2", "ymm4", "ymm6",
+		  "ymm10", "ymm11", "ymm12", "ymm13",
 		  "memory"
 		)
 	}
@@ -364,7 +366,7 @@ void bli_cpackm_haswell_asm_3xk
 			const dim_t        i      = cdim0;
 			const dim_t        m_edge = mnr - cdim0;
 			const dim_t        n_edge = k0_max;
-			scomplex* restrict p_edge = ( scomplex* )p + (i  )*1;
+			scomplex* restrict p_edge = p + (i  )*1;
 
 			bli_cset0s_mxn
 			(
@@ -384,7 +386,7 @@ void bli_cpackm_haswell_asm_3xk
 		const dim_t        j      = k0;
 		const dim_t        m_edge = mnr;
 		const dim_t        n_edge = k0_max - k0;
-		scomplex* restrict p_edge = ( scomplex* )p + (j  )*ldp;
+		scomplex* restrict p_edge = p + (j  )*ldp;
 
 		bli_cset0s_mxn
 		(

@@ -45,11 +45,11 @@
 \
 typedef void (*PASTECH(opname,_var_oft)) \
 ( \
-  const obj_t*  a, \
-        obj_t*  p, \
-  const cntx_t* cntx, \
-  const cntl_t* cntl, \
-        thrinfo_t* thread  \
+  obj_t*  a, \
+  obj_t*  p, \
+  cntx_t* cntx, \
+  cntl_t* cntl, \
+  thrinfo_t* thread  \
 );
 
 GENTDEF( packm )
@@ -60,11 +60,11 @@ GENTDEF( packm )
 \
 typedef void (*PASTECH(opname,_var_oft)) \
 ( \
-  const obj_t*  p, \
-  const obj_t*  a, \
-  const cntx_t* cntx, \
-  const cntl_t* cntl, \
-  const thrinfo_t* thread  \
+  obj_t*  p, \
+  obj_t*  a, \
+  cntx_t* cntx, \
+  cntl_t* cntl, \
+  thrinfo_t* thread  \
 );
 
 GENTDEF( unpackm )

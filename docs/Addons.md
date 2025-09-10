@@ -10,8 +10,8 @@
 
 ## Introduction
 
-This file briefly describes the requirements for enabling or creating a
-custom BLIS *addon*.
+This file briefly describes the requirements for building a custom BLIS
+*addon*.
 
 Simply put, an addon in BLIS provides additional APIs, operations, and/or
 implementations that may be useful to certain users. An addon can be

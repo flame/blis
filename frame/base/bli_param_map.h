@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -84,6 +84,7 @@ BLIS_INLINE void bli_param_map_netlib_to_blis_trans( char trans, trans_t* blis_t
 	if      ( trans == 'n' || trans == 'N' ) *blis_trans = BLIS_NO_TRANSPOSE;
 	else if ( trans == 't' || trans == 'T' ) *blis_trans = BLIS_TRANSPOSE;
 	else if ( trans == 'c' || trans == 'C' ) *blis_trans = BLIS_CONJ_TRANSPOSE;
+	else if ( trans == 'p' || trans == 'P' ) *blis_trans = BLIS_PACKED;
 	else
 	{
 		// See comment for bli_param_map_netlib_to_blis_side() above.

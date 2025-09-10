@@ -1,0 +1,101 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "lp64",
+      "hidden": true,
+      "cacheVariables": {
+        "BLAS_INT_SIZE": "32"
+      }
+    },
+    {
+      "name": "ilp64",
+      "hidden": true,
+      "cacheVariables": {
+        "BLAS_INT_SIZE": "64"
+      }
+    },
+    {
+      "name": "st",
+      "hidden": true,
+      "cacheVariables": {
+        "ENABLE_THREADING": "no"
+      }
+    },
+    {
+      "name": "mt",
+      "hidden": true,
+      "cacheVariables": {
+        "ENABLE_THREADING": "openmp"
+      }
+    },
+    {
+      "name": "amdzen",
+      "hidden": true,
+      "cacheVariables": {
+        "BLIS_CONFIG_FAMILY": "amdzen"
+      }
+    },
+    {
+      "name": "auto",
+      "hidden": true,
+      "cacheVariables": {
+        "BLIS_CONFIG_FAMILY": "auto"
+      }
+    },
+    {
+      "name": "zen5",
+      "hidden": true,
+      "cacheVariables": {
+        "BLIS_CONFIG_FAMILY": "zen5"
+      }
+    },
+    {
+      "name": "static",
+      "hidden": true,
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": "OFF"
+      }
+    },
+    {
+      "name": "shared",
+      "hidden": true,
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": "ON"
+      }
+    },
+    {
+      "name": "linux-static",
+      "description": "Build both static and shared libs on Linux but test with static.",
+      "hidden": true,
+      "cacheVariables": {
+        "TEST_WITH_SHARED": "OFF"
+      }
+    },
+    {
+      "name": "linux-shared",
+      "description": "Build both static and shared libs on Linux but test with shared.",
+      "hidden": true,
+      "cacheVariables": {
+        "TEST_WITH_SHARED": "ON"
+      }
+    },
+    {
+      "name": "base",
+      "hidden": true,
+      "cacheVariables": {
+        "ENABLE_CBLAS": "ON"
+      },
+      "binaryDir": "${sourceDir}/build-${presetName}"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "base",
+      "configurePreset": "base",
+      "targets": "install",
+      "configuration": "Release",
+      "jobs": 0
+    }
+  ]
+}

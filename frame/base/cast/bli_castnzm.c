@@ -41,11 +41,11 @@
 
 typedef void (*FUNCPTR_T)
      (
-             trans_t transa,
-             dim_t   m,
-             dim_t   n,
-       const void*   a, inc_t rs_a, inc_t cs_a,
-             void*   b, inc_t rs_b, inc_t cs_b
+       trans_t        transa,
+       dim_t          m,
+       dim_t          n,
+       void* restrict a, inc_t rs_a, inc_t cs_a,
+       void* restrict b, inc_t rs_b, inc_t cs_b
      );
 
 static FUNCPTR_T GENARRAY2_ALL(ftypes,castnzm);
@@ -56,25 +56,27 @@ static FUNCPTR_T GENARRAY2_ALL(ftypes,castnzm);
 
 void bli_castnzm
      (
-       const obj_t* a,
-       const obj_t* b
+       obj_t* a,
+       obj_t* b
      )
 {
-	const num_t   dt_a   = bli_obj_dt( a );
-	const num_t   dt_b   = bli_obj_dt( b );
+	num_t     dt_a     = bli_obj_dt( a );
+	num_t     dt_b     = bli_obj_dt( b );
 
-	const trans_t transa = bli_obj_conjtrans_status( a );
+	trans_t   transa   = bli_obj_conjtrans_status( a );
 
-	const dim_t   m      = bli_obj_length( b );
-	const dim_t   n      = bli_obj_width( b );
+	dim_t     m        = bli_obj_length( b );
+	dim_t     n        = bli_obj_width( b );
 
-	const void*   buf_a  = bli_obj_buffer_at_off( a );
-	const inc_t   rs_a   = bli_obj_row_stride( a );
-	const inc_t   cs_a   = bli_obj_col_stride( a );
+	void*     buf_a    = bli_obj_buffer_at_off( a );
+	inc_t     rs_a     = bli_obj_row_stride( a );
+	inc_t     cs_a     = bli_obj_col_stride( a );
 
-	      void*   buf_b  = bli_obj_buffer_at_off( b );
-	const inc_t   rs_b   = bli_obj_row_stride( b );
-	const inc_t   cs_b   = bli_obj_col_stride( b );
+	void*     buf_b    = bli_obj_buffer_at_off( b );
+	inc_t     rs_b     = bli_obj_row_stride( b );
+	inc_t     cs_b     = bli_obj_col_stride( b );
+
+	FUNCPTR_T f;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
@@ -91,7 +93,10 @@ void bli_castnzm
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
-	ftypes[dt_a][dt_b]
+	f = ftypes[dt_a][dt_b];
+
+	// Invoke the void pointer-based function.
+	f
 	(
 	  transa,
 	  m,
@@ -112,21 +117,21 @@ void bli_castnzm
 \
 void PASTEMAC2(cha,chb,opname) \
      ( \
-             trans_t transa, \
-             dim_t   m, \
-             dim_t   n, \
-       const void*   a, inc_t rs_a, inc_t cs_a, \
-             void*   b, inc_t rs_b, inc_t cs_b  \
+       trans_t        transa, \
+       dim_t          m, \
+       dim_t          n, \
+       void* restrict a, inc_t rs_a, inc_t cs_a, \
+       void* restrict b, inc_t rs_b, inc_t cs_b  \
      ) \
 { \
-	const ctype_a* restrict a_cast = a; \
-	      ctype_b* restrict b_cast = b; \
-	      conj_t            conja; \
-	      dim_t             n_iter; \
-	      dim_t             n_elem; \
-	      inc_t             lda, inca; \
-	      inc_t             ldb, incb; \
-	      dim_t             j, i; \
+	ctype_a* restrict a_cast = a; \
+	ctype_b* restrict b_cast = b; \
+	conj_t            conja; \
+	dim_t             n_iter; \
+	dim_t             n_elem; \
+	inc_t             lda, inca; \
+	inc_t             ldb, incb; \
+	dim_t             j, i; \
 \
 	/* Set various loop parameters. */ \
 	bli_set_dims_incs_2m \
@@ -145,8 +150,8 @@ void PASTEMAC2(cha,chb,opname) \
 		{ \
 			for ( j = 0; j < n_iter; ++j ) \
 			{ \
-				const ctype_a* restrict a1 = a_cast + (j  )*lda + (0  )*inca; \
-				      ctype_b* restrict b1 = b_cast + (j  )*ldb + (0  )*incb; \
+				ctype_a* restrict a1 = a_cast + (j  )*lda + (0  )*inca; \
+				ctype_b* restrict b1 = b_cast + (j  )*ldb + (0  )*incb; \
 \
 				for ( i = 0; i < n_elem; ++i ) \
 				{ \
@@ -158,8 +163,8 @@ void PASTEMAC2(cha,chb,opname) \
 		{ \
 			for ( j = 0; j < n_iter; ++j ) \
 			{ \
-				const ctype_a* restrict a1 = a_cast + (j  )*lda + (0  )*inca; \
-				      ctype_b* restrict b1 = b_cast + (j  )*ldb + (0  )*incb; \
+				ctype_a* restrict a1 = a_cast + (j  )*lda + (0  )*inca; \
+				ctype_b* restrict b1 = b_cast + (j  )*ldb + (0  )*incb; \
 \
 				for ( i = 0; i < n_elem; ++i ) \
 				{ \
@@ -177,8 +182,8 @@ void PASTEMAC2(cha,chb,opname) \
 		{ \
 			for ( j = 0; j < n_iter; ++j ) \
 			{ \
-				const ctype_a* restrict a1 = a_cast + (j  )*lda + (0  )*inca; \
-				      ctype_b* restrict b1 = b_cast + (j  )*ldb + (0  )*incb; \
+				ctype_a* restrict a1 = a_cast + (j  )*lda + (0  )*inca; \
+				ctype_b* restrict b1 = b_cast + (j  )*ldb + (0  )*incb; \
 \
 				for ( i = 0; i < n_elem; ++i ) \
 				{ \
@@ -190,8 +195,8 @@ void PASTEMAC2(cha,chb,opname) \
 		{ \
 			for ( j = 0; j < n_iter; ++j ) \
 			{ \
-				const ctype_a* restrict a1 = a_cast + (j  )*lda + (0  )*inca; \
-				      ctype_b* restrict b1 = b_cast + (j  )*ldb + (0  )*incb; \
+				ctype_a* restrict a1 = a_cast + (j  )*lda + (0  )*inca; \
+				ctype_b* restrict b1 = b_cast + (j  )*ldb + (0  )*incb; \
 \
 				for ( i = 0; i < n_elem; ++i ) \
 				{ \
@@ -205,8 +210,8 @@ void PASTEMAC2(cha,chb,opname) \
 	} \
 }
 
-INSERT_GENTFUNC2_BASIC( castnzm )
-INSERT_GENTFUNC2_MIX_DP( castnzm )
+INSERT_GENTFUNC2_BASIC0( castnzm )
+INSERT_GENTFUNC2_MIXDP0( castnzm )
 
 // -----------------------------------------------------------------------------
 
@@ -216,8 +221,8 @@ INSERT_GENTFUNC2_MIX_DP( castnzm )
 
 void bli_castnzm_check
      (
-       const obj_t* a,
-       const obj_t* b
+       obj_t* a,
+       obj_t* b
      )
 {
 	err_t e_val;

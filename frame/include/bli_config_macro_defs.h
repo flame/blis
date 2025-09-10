@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,16 +35,6 @@
 
 #ifndef BLIS_CONFIG_MACRO_DEFS_H
 #define BLIS_CONFIG_MACRO_DEFS_H
-
-// NOTE: This file should ONLY contain processing of macros that are set by
-// configure and output into bli_config.h. Any other macro processing --
-// especially such as for those macros that are expected to be optionally
-// set within a configuration's bli_family_<conf>.h header -- MUST be placed
-// in bli_kernel_macro_defs.h instead. The reason: bli_arch_config.h (which
-// #includes the configuration's bli_family_<conf>.h header) is #included
-// much later in blis.h than this file (bli_config_macro_defs.h), and so any
-// macros set in bli_family_<conf>.h would have no effect on the processing
-// that happens below.
 
 
 // -- INTEGER PROPERTIES -------------------------------------------------------
@@ -77,25 +67,6 @@
 #endif
 
 
-// -- MEMORY SUBSYSTEM PROPERTIES ----------------------------------------------
-
-// Size of a cache line (in bytes).
-#ifndef BLIS_CACHE_LINE_SIZE
-#define BLIS_CACHE_LINE_SIZE 64
-#endif
-
-
-// -- MULTITHREADING -----------------------------------------------------------
-
-// Enable caching of queried cntx_t pointers in the gks?
-#ifdef BLIS_DISABLE_GKS_CACHING
-  #undef BLIS_ENABLE_GKS_CACHING
-#else
-  // Default behavior is enabled.
-  #define BLIS_ENABLE_GKS_CACHING
-#endif
-
-
 // -- MULTITHREADING -----------------------------------------------------------
 
 // Enable multithreading via POSIX threads.
@@ -112,20 +83,19 @@
   // Default behavior is disabled.
 #endif
 
-// Enable multithreading via HPX.
-#ifdef BLIS_ENABLE_HPX
-  // No additional definitions needed.
-#else
-  // Default behavior is disabled.
+// Perform a sanity check to make sure the user doesn't try to enable
+// both OpenMP and pthreads.
+#if defined ( BLIS_ENABLE_OPENMP ) && \
+    defined ( BLIS_ENABLE_PTHREADS )
+  #error "BLIS_ENABLE_OPENMP and BLIS_ENABLE_PTHREADS may not be simultaneously defined."
 #endif
 
 // Here, we define BLIS_ENABLE_MULTITHREADING if either OpenMP
 // or pthreads are enabled. This macro is useful in situations when
-// we want to detect use of either OpenMP or pthreads, or both (as
-// opposed to neither being used).
-#if defined ( BLIS_ENABLE_OPENMP )   || \
-    defined ( BLIS_ENABLE_PTHREADS ) || \
-    defined ( BLIS_ENABLE_HPX )
+// we want to detect use of either OpenMP or pthreads (as opposed
+// to neither being used).
+#if defined ( BLIS_ENABLE_OPENMP ) || \
+    defined ( BLIS_ENABLE_PTHREADS )
   #define BLIS_ENABLE_MULTITHREADING
 #endif
 
@@ -191,6 +161,16 @@
   #define BLIS_ENABLE_BLAS
 #endif
 
+#ifdef BLIS_ENABLE_BLAS
+  #define IF_BLIS_ENABLE_BLAS(...) __VA_ARGS__
+  #define PASTE_LSAME PASTEF770(lsame)
+  #define PASTE_XERBLA PASTEF770(xerbla)
+#else
+  #define IF_BLIS_ENABLE_BLAS(...)
+  #define PASTE_LSAME lsame_blis_impl
+  #define PASTE_XERBLA xerbla_blis_impl
+#endif
+
 // The bit size of the integer type used to track values such as dimensions and
 // leading dimensions (ie: column strides) within the BLAS compatibility layer.
 // A value of 32 results in the compatibility layer using 32-bit signed integers
@@ -251,7 +231,7 @@
       #ifdef BLIS_IS_BUILDING_LIBRARY
         #define BLIS_EXPORT __declspec(dllexport)
       #else
-        #define BLIS_EXPORT __declspec(dllimport)
+        #define BLIS_EXPORT
       #endif
     #elif defined(__GNUC__) && __GNUC__ >= 4
       #define BLIS_EXPORT __attribute__ ((visibility ("default")))
@@ -264,22 +244,6 @@
 #define BLIS_EXPORT_BLIS  BLIS_EXPORT
 #define BLIS_EXPORT_BLAS  BLIS_EXPORT
 #define BLIS_EXPORT_ADDON BLIS_EXPORT
-
-
-// -- OVERRIDABLE (WEAK) SYMBOLS -----------------------------------------------
-
-// On Linux, functions called from a shared library can be overriden by the main
-// program simply by providing a new definition. However, macOS uses a "two-level
-// namespace" which causes calls to shared library functions to be tied to the
-// library and not overridable. As a workaround, certain symbols can be defined
-// as "weak" and are given lower preference during linking.
-#ifndef BLIS_OVERRIDABLE
-#if BLIS_OS_OSX
-#define BLIS_OVERRIDABLE __attribute__((weak))
-#else
-#define BLIS_OVERRIDABLE
-#endif
-#endif
 
 
 // -- STATIC INLINE FUNCTIONS --------------------------------------------------
@@ -297,5 +261,33 @@
 #endif
 
 
+#ifdef BLIS_OS_WINDOWS
+  #ifdef BLIS_IS_BUILDING_LIBRARY
+    #define BLIS_TLS_TYPE __declspec(thread)
+  #else
+    #define BLIS_TLS_TYPE
+  #endif
+#else
+  #define BLIS_TLS_TYPE __thread
 #endif
 
+#endif
+
+// -- CODE PATH ENABLEMENT --------------------------------------------------
+#ifdef BLIS_ENABLE_MNK1_MATRIX
+  #define IF_BLIS_ENABLE_MNK1_MATRIX(...) __VA_ARGS__
+#else
+  #define IF_BLIS_ENABLE_MNK1_MATRIX(...)
+#endif
+
+#ifdef BLIS_ENABLE_TINY_MATRIX
+  #define IF_BLIS_ENABLE_TINY_MATRIX(...) __VA_ARGS__
+#else
+  #define IF_BLIS_ENABLE_TINY_MATRIX(...)
+#endif
+
+#ifdef BLIS_ENABLE_SMALL_MATRIX
+  #define IF_BLIS_ENABLE_SMALL_MATRIX(...) __VA_ARGS__
+#else
+  #define IF_BLIS_ENABLE_SMALL_MATRIX(...)
+#endif

@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,29 +32,100 @@
 
 */
 
-
-//
-// Prototype object-based interfaces.
-//
-
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
 void PASTEMAC0(opname) \
      ( \
-       const obj_t*     a, \
-       const obj_t*     ah, \
-       const obj_t*     c, \
-       const cntx_t*    cntx, \
-       const cntl_t*    cntl, \
-             thrinfo_t* thread_par  \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm, \
+       cntl_t* cntl, \
+       thrinfo_t* thread  \
      );
 
-GENPROT( gemmt_x_ker_var2 )
-GENPROT( gemmt_l_ker_var2 )
-GENPROT( gemmt_u_ker_var2 )
+GENPROT( gemmt_ker_var2 )
 
-GENPROT( gemmt_x_ker_var2b )
-GENPROT( gemmt_l_ker_var2b )
-GENPROT( gemmt_u_ker_var2b )
+
+
+//
+// Prototype BLAS-like interfaces with void pointer operands.
+//
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname, uplo, varname ) \
+\
+void PASTEMACT(ch,opname,uplo,varname) \
+     ( \
+       pack_t  schema_a, \
+       pack_t  schema_b, \
+       dim_t   m_off, \
+       dim_t   n_off, \
+       dim_t   m, \
+       dim_t   n, \
+       dim_t   k, \
+       void*   alpha, \
+       void*   a, inc_t cs_a, inc_t is_a, \
+                  dim_t pd_a, inc_t ps_a, \
+       void*   b, inc_t rs_b, inc_t is_b, \
+                  dim_t pd_b, inc_t ps_b, \
+       void*   beta, \
+       void*   c, inc_t rs_c, inc_t cs_c, \
+       cntx_t* cntx, \
+       rntm_t* rntm, \
+       thrinfo_t* thread  \
+     );
+
+INSERT_GENTPROT_GEMMT( gemmt, ker_var2 )
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC0(opname) \
+	( \
+	  trans_t trans, \
+	  obj_t*  alpha, \
+	  obj_t*  a, \
+	  obj_t*  b, \
+	  obj_t*  beta, \
+	  obj_t*  c, \
+	  stor3_t eff_id, \
+	  cntx_t* cntx, \
+	  rntm_t* rntm, \
+	  thrinfo_t* thread  \
+	 );
+
+GENPROT( gemmtsup_ref_var1n )
+GENPROT( gemmtsup_ref_var2m )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname, uplo, varname ) \
+\
+void PASTEMACT(ch,opname,uplo,varname) \
+     ( \
+       bool             packa, \
+       bool             packb, \
+       conj_t           conja, \
+       conj_t           conjb, \
+       dim_t            m, \
+       dim_t            n, \
+       dim_t            k, \
+       void*   restrict alpha, \
+       void*   restrict a, inc_t rs_a, inc_t cs_a, \
+       void*   restrict b, inc_t rs_b, inc_t cs_b, \
+       void*   restrict beta, \
+       void*   restrict c, inc_t rs_c, inc_t cs_c, \
+       stor3_t          eff_id, \
+       cntx_t* restrict cntx, \
+       rntm_t* restrict rntm, \
+       thrinfo_t* restrict thread  \
+     );
+
+INSERT_GENTPROT_GEMMT( gemmtsup, ref_var1n )
+INSERT_GENTPROT_GEMMT( gemmtsup, ref_var2m )	
+
 

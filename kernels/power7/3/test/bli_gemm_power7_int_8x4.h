@@ -43,58 +43,50 @@
 
 void bli_sgemm_opt_8x4
      (
-       dim_t               m,
-       dim_t               n,
        dim_t               k,
        float*     restrict alpha,
        float*     restrict a,
        float*     restrict b,
        float*     restrict beta,
        float*     restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      );
 
 void bli_dgemm_opt_8x4
      (
-       dim_t               m,
-       dim_t               n,
        dim_t               k,
        double*    restrict alpha,
        double*    restrict a,
        double*    restrict b,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      );
 
 void bli_cgemm_opt_8x4
      (
-       dim_t               m,
-       dim_t               n,
        dim_t               k,
        scomplex*  restrict alpha,
        scomplex*  restrict a,
        scomplex*  restrict b,
        scomplex*  restrict beta,
        scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      );
 
 void bli_zgemm_opt_8x4
      (
-       dim_t               m,
-       dim_t               n,
        dim_t               k,
        dcomplex*  restrict alpha,
        dcomplex*  restrict a,
        dcomplex*  restrict b,
        dcomplex*  restrict beta,
        dcomplex*  restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      );
 
 #endif

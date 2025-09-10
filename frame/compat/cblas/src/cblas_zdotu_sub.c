@@ -14,6 +14,7 @@
 void cblas_zdotu_sub( f77_int N, const void *X, f77_int incX,
                       const void *Y, f77_int incY, void *dotu)
 {
+   AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 #ifdef F77_INT
    F77_INT F77_N=N, F77_incX=incX, F77_incY=incY;
 #else 
@@ -22,6 +23,7 @@ void cblas_zdotu_sub( f77_int N, const void *X, f77_int incX,
    #define F77_incY incY
 #endif
    F77_zdotu_sub( &F77_N, (dcomplex*)X, &F77_incX, (dcomplex*)Y, &F77_incY, (dcomplex*)dotu);
+   AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
    return;
 }
 #endif

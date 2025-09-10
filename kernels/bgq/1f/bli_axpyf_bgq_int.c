@@ -37,22 +37,17 @@
 
 void bli_daxpyf_bgq_int
      (
-             conj_t  conja,
-             conj_t  conjx,
-             dim_t   m,
-             dim_t   b_n,
-       const void*   alpha0,
-       const void*   a0, inc_t inca, inc_t lda,
-       const void*   x0, inc_t incx,
-             void*   y0, inc_t incy,
-       const cntx_t* cntx
+       conj_t           conja,
+       conj_t           conjx,
+       dim_t            m,
+       dim_t            b_n,
+       double* restrict alpha,
+       double* restrict a, inc_t inca, inc_t lda,
+       double* restrict x, inc_t incx,
+       double* restrict y, inc_t incy,
+       cntx_t* restrict cntx
      )
 {
-	const double* alpha = alpha0;
-	const double* a     = a0;
-	const double* x     = x0;
-	      double* y     = y0;
-
 	const dim_t fusefac = 8;
 
     if ( bli_zero_dim2( m, b_n ) ) return;
@@ -65,41 +60,25 @@ void bli_daxpyf_bgq_int
 		use_ref = TRUE;
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
-	{
+	{   
 //        printf("%d\t%d\t%d\t%d\t%d\t%d\n", fusefac, inca, incx, incy, bli_is_unaligned_to( ( siz_t )a, 32 ), bli_is_unaligned_to( ( siz_t )y, 32));
 //        printf("DEFAULTING TO REFERENCE IMPLEMENTATION\n");
-		#if 0
-		axpyf_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYF_KER, cntx );
-
-		f
-		(
-		  conja,
-		  conjx,
-		  m,
-		  b_n,
-		  alpha0,
-		  a0, inca, lda,
-		  x0, incx,
-		  y0, incy,
-		  cntx
-		);
-		#endif
-		bli_abort();
+		BLIS_DAXPYF_KERNEL_REF( conja, conjx, m, b_n, alpha, a, inca, lda, x, incx, y, incy, cntx );
 		return;
 	}
 
 	dim_t m_run       =  m / 4;
 	dim_t m_left      =  m % 4;
 
-	const double* ap0   = a + 0*lda;
-	const double* ap1   = a + 1*lda;
-	const double* ap2   = a + 2*lda;
-	const double* ap3   = a + 3*lda;
-	const double* ap4   = a + 4*lda;
-	const double* ap5   = a + 5*lda;
-	const double* ap6   = a + 6*lda;
-	const double* ap7   = a + 7*lda;
-	      double* yp0   = y;
+	double * a0   = a + 0*lda;
+	double * a1   = a + 1*lda;
+	double * a2   = a + 2*lda;
+	double * a3   = a + 3*lda;
+	double * a4   = a + 4*lda;
+	double * a5   = a + 5*lda;
+	double * a6   = a + 6*lda;
+	double * a7   = a + 7*lda;
+	double * y0   = y;
 
 	double chi0 = *(x + 0*incx);
 	double chi1 = *(x + 1*incx);
@@ -133,16 +112,16 @@ void bli_daxpyf_bgq_int
 
     for ( dim_t i = 0; i < m_run; i += 1 )
 	{
-		yv  = vec_lda( 0 * sizeof(double), &yp0[i*4]);
+		yv  = vec_lda( 0 * sizeof(double), &y0[i*4]);
 
-		a0v = vec_lda( 0 * sizeof(double), &ap0[i*4]);
-		a1v = vec_lda( 0 * sizeof(double), &ap1[i*4]);
-		a2v = vec_lda( 0 * sizeof(double), &ap2[i*4]);
-		a3v = vec_lda( 0 * sizeof(double), &ap3[i*4]);
-		a4v = vec_lda( 0 * sizeof(double), &ap4[i*4]);
-		a5v = vec_lda( 0 * sizeof(double), &ap5[i*4]);
-		a6v = vec_lda( 0 * sizeof(double), &ap6[i*4]);
-		a7v = vec_lda( 0 * sizeof(double), &ap7[i*4]);
+		a0v = vec_lda( 0 * sizeof(double), &a0[i*4]);
+		a1v = vec_lda( 0 * sizeof(double), &a1[i*4]);
+		a2v = vec_lda( 0 * sizeof(double), &a2[i*4]);
+		a3v = vec_lda( 0 * sizeof(double), &a3[i*4]);
+		a4v = vec_lda( 0 * sizeof(double), &a4[i*4]);
+		a5v = vec_lda( 0 * sizeof(double), &a5[i*4]);
+		a6v = vec_lda( 0 * sizeof(double), &a6[i*4]);
+		a7v = vec_lda( 0 * sizeof(double), &a7[i*4]);
 
         yv = vec_madd( chi0v, a0v, yv );
         yv = vec_madd( chi1v, a1v, yv );
@@ -153,19 +132,19 @@ void bli_daxpyf_bgq_int
         yv = vec_madd( chi6v, a6v, yv );
         yv = vec_madd( chi7v, a7v, yv );
 
-        vec_sta( yv, 0 * sizeof(double), &yp0[i*4]);
+        vec_sta( yv, 0 * sizeof(double), &y0[i*4]);
 	}
-
+    
     for ( dim_t i = 0; i < m_left; ++i )
     {
-        yp0[4*m_run + i] += chi0 * ap0[4*m_run + i]
-                         +  chi1 * ap1[4*m_run + i]
-                         +  chi2 * ap2[4*m_run + i]
-                         +  chi3 * ap3[4*m_run + i]
-                         +  chi4 * ap4[4*m_run + i]
-                         +  chi5 * ap5[4*m_run + i]
-                         +  chi6 * ap6[4*m_run + i]
-                         +  chi7 * ap7[4*m_run + i];
+        y0[4*m_run + i] += chi0 * a0[4*m_run + i]
+                      +  chi1 * a1[4*m_run + i]
+                      +  chi2 * a2[4*m_run + i]
+                      +  chi3 * a3[4*m_run + i]
+                      +  chi4 * a4[4*m_run + i]
+                      +  chi5 * a5[4*m_run + i]
+                      +  chi6 * a6[4*m_run + i]
+                      +  chi7 * a7[4*m_run + i];
     }
 
 }

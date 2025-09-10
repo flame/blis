@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -42,8 +43,8 @@
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* x, \
-       const obj_t* y  \
+       obj_t*  x, \
+       obj_t*  y  \
      );
 
 GENTPROT( addv )
@@ -57,22 +58,22 @@ GENTPROT( swapv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* x, \
-       const obj_t* index  \
+       obj_t*  x, \
+       obj_t*  index  \
      );
 
 GENTPROT( amaxv )
-
+GENTPROT( aminv )
 
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* alpha, \
-       const obj_t* x, \
-       const obj_t* beta, \
-       const obj_t* y  \
+       obj_t*  alpha, \
+       obj_t*  x, \
+       obj_t*  beta, \
+       obj_t*  y  \
      );
 
 GENTPROT( axpbyv )
@@ -83,9 +84,9 @@ GENTPROT( axpbyv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* alpha, \
-       const obj_t* x, \
-       const obj_t* y  \
+       obj_t*  alpha, \
+       obj_t*  x, \
+       obj_t*  y  \
      );
 
 GENTPROT( axpyv )
@@ -97,9 +98,9 @@ GENTPROT( scal2v )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* x, \
-       const obj_t* y, \
-       const obj_t* rho  \
+       obj_t*  x, \
+       obj_t*  y, \
+       obj_t*  rho  \
      );
 
 GENTPROT( dotv )
@@ -110,11 +111,11 @@ GENTPROT( dotv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* alpha, \
-       const obj_t* x, \
-       const obj_t* y, \
-       const obj_t* beta, \
-       const obj_t* rho  \
+       obj_t*  alpha, \
+       obj_t*  x, \
+       obj_t*  y, \
+       obj_t*  beta, \
+       obj_t*  rho  \
      );
 
 GENTPROT( dotxv )
@@ -125,7 +126,7 @@ GENTPROT( dotxv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* x  \
+       obj_t*  x  \
      );
 
 GENTPROT( invertv )
@@ -136,11 +137,10 @@ GENTPROT( invertv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* alpha, \
-       const obj_t* x  \
+       obj_t*  alpha, \
+       obj_t*  x  \
      );
 
-GENTPROT( invscalv )
 GENTPROT( scalv )
 GENTPROT( setv )
 
@@ -150,9 +150,9 @@ GENTPROT( setv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* x, \
-       const obj_t* beta, \
-       const obj_t* y  \
+       obj_t*  x, \
+       obj_t*  beta, \
+       obj_t*  y  \
      );
 
 GENTPROT( xpbyv )
@@ -163,55 +163,55 @@ GENTPROT( xpbyv )
 
 void bli_l1v_xy_check
      (
-       const obj_t* x,
-       const obj_t* y
+       obj_t*  x,
+       obj_t*  y
      );
 
 void bli_l1v_axy_check
      (
-       const obj_t* alpha,
-       const obj_t* x,
-       const obj_t* y
+       obj_t*  alpha,
+       obj_t*  x,
+       obj_t*  y
      );
 
 void bli_l1v_xby_check
      (
-       const obj_t* x,
-       const obj_t* beta,
-       const obj_t* y
+       obj_t*  x,
+       obj_t*  beta,
+       obj_t*  y
      );
 
 void bli_l1v_axby_check
      (
-       const obj_t* alpha,
-       const obj_t* x,
-       const obj_t* beta,
-       const obj_t* y
+       obj_t*  alpha,
+       obj_t*  x,
+       obj_t*  beta,
+       obj_t*  y
      );
 
 void bli_l1v_dot_check
      (
-       const obj_t* alpha,
-       const obj_t* x,
-       const obj_t* y,
-       const obj_t* beta,
-       const obj_t* rho
+       obj_t*  alpha,
+       obj_t*  x,
+       obj_t*  y,
+       obj_t*  beta,
+       obj_t*  rho
      );
 
 void bli_l1v_x_check
      (
-       const obj_t* x
+       obj_t*  x
      );
 
 void bli_l1v_ax_check
      (
-       const obj_t* alpha,
-       const obj_t* x
+       obj_t*  alpha,
+       obj_t*  x
      );
 
 void bli_l1v_xi_check
      (
-       const obj_t* x,
-       const obj_t* index
+       obj_t*  x,
+       obj_t*  index
      );
 

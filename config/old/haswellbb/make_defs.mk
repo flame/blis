@@ -47,7 +47,7 @@ THIS_CONFIG    := haswell
 # may specify additional flags here as needed.
 CPPROCFLAGS    :=
 CMISCFLAGS     :=
-CPICFLAGS      := -fPIC
+CPICFLAGS      :=
 CWARNFLAGS     :=
 
 ifneq ($(DEBUG_TYPE),off)

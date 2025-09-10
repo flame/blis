@@ -1,10 +1,10 @@
 #
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
-#  Copyright (C) 2019, Advanced Micro Devices, Inc.
+#  Copyright (C) 2021 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -37,9 +37,10 @@
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
+
 CPPROCFLAGS    :=
 CMISCFLAGS     :=
-CPICFLAGS      := -fPIC
+CPICFLAGS      :=
 CWARNFLAGS     :=
 
 ifneq ($(DEBUG_TYPE),off)
@@ -47,37 +48,41 @@ CDBGFLAGS      := -g
 endif
 
 ifeq ($(DEBUG_TYPE),noopt)
-COPTFLAGS      := -O0
+  COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2 -fomit-frame-pointer
+  COPTFLAGS      := -O3
 endif
 
 # Flags specific to optimized kernels.
 # NOTE: The -fomit-frame-pointer option is needed for some kernels because
 # they make explicit use of the rbp register.
-CKOPTFLAGS     := $(COPTFLAGS) -O3
+CKOPTFLAGS     := $(COPTFLAGS) -fomit-frame-pointer
+# Additional flag which is required for lpgemm kernels
+CKLPOPTFLAGS     :=
+
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma
+  CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma
+  ifeq ($(shell test $(CC_MAJOR) -ge 15; echo $$?),0)
+    # gcc 15.1.0 fails to compile SUP kernels if -ftree-slp-vectorize
+    # is enabled, which is default in -O2 and higher
+    CKOPTFLAGS += -fno-tree-slp-vectorize
+  endif
+else ifeq ($(CC_VENDOR),clang)
+  CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+  ifeq ($(strip $(shell $(CC) -v |&head -1 |grep -c 'AOCC.LLVM')),1)
+    CKVECFLAGS += -mllvm -disable-licm-vrp
+  endif
 else
-ifeq ($(CC_VENDOR),clang)
-CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma
-ifeq ($(strip $(shell clang -v |& head -1 | grep -c 'AOCC.LLVM')),1)
-CKVECFLAGS     += -mllvm -disable-licm-vrp
-endif
-else
-$(error gcc or clang are required for this configuration.)
-endif
+  $(error gcc or clang are required for this configuration.)
 endif
 
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+  CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+else ifeq ($(CC_VENDOR),clang)
+  CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
 else
-ifeq ($(CC_VENDOR),clang)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
-else
-CRVECFLAGS     := $(CKVECFLAGS)
-endif
+  CRVECFLAGS     := $(CKVECFLAGS)
 endif
 

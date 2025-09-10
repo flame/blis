@@ -50,7 +50,7 @@ void bli_zdotxaxpyf_template_noopt
        dcomplex* restrict beta,
        dcomplex* restrict y, inc_t incy,
        dcomplex* restrict z, inc_t incz,
-       cntx_t*            cntx
+       cntx_t*   restrict cntx
      )
 
 {

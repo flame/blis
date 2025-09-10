@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -54,13 +55,13 @@ GENFRONT( addv )
 GENFRONT( copyv )
 GENFRONT( subv )
 GENFRONT( amaxv )
+GENFRONT( aminv )
 GENFRONT( axpbyv )
 GENFRONT( axpyv )
 GENFRONT( scal2v )
 GENFRONT( dotv )
 GENFRONT( dotxv )
 GENFRONT( invertv )
-GENFRONT( invscalv )
 GENFRONT( scalv )
 GENFRONT( setv )
 GENFRONT( swapv )

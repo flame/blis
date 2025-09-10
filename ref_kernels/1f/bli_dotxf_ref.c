@@ -40,24 +40,18 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-             conj_t  conjat, \
-             conj_t  conjx, \
-             dim_t   m, \
-             dim_t   b_n, \
-       const void*   alpha0, \
-       const void*   a0, inc_t inca, inc_t lda, \
-       const void*   x0, inc_t incx, \
-       const void*   beta0, \
-             void*   y0, inc_t incy, \
-       const cntx_t* cntx  \
+       conj_t           conjat, \
+       conj_t           conjx, \
+       dim_t            m, \
+       dim_t            b_n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict beta, \
+       ctype*  restrict y, inc_t incy, \
+       cntx_t* restrict cntx  \
      ) \
 { \
-	const ctype* restrict alpha = alpha0; \
-	const ctype* restrict a     = a0; \
-	const ctype* restrict x     = x0; \
-	const ctype* restrict beta  = beta0; \
-	      ctype* restrict y     = y0; \
-\
 	if ( inca == 1 && incx == 1 && incy == 1 && b_n == ff ) \
 	{ \
 		ctype r[ ff ]; \
@@ -116,14 +110,16 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	else \
 	{ \
 		/* Query the context for the kernel function pointer. */ \
-		const num_t  dt     = PASTEMAC(ch,type); \
-		dotxv_ker_ft kfp_dv = bli_cntx_get_ukr_dt( dt, BLIS_DOTXV_KER, cntx ); \
+		const num_t              dt     = PASTEMAC(ch,type); \
+		PASTECH(ch,dotxv_ker_ft) kfp_dv \
+		= \
+		bli_cntx_get_l1v_ker_dt( dt, BLIS_DOTXV_KER, cntx ); \
 \
 		for ( dim_t i = 0; i < b_n; ++i ) \
 		{ \
-			const ctype* restrict a1   = a + (0  )*inca + (i  )*lda; \
-			const ctype* restrict x1   = x + (0  )*incx; \
-			      ctype* restrict psi1 = y + (i  )*incy; \
+			ctype* restrict a1   = a + (0  )*inca + (i  )*lda; \
+			ctype* restrict x1   = x + (0  )*incx; \
+			ctype* restrict psi1 = y + (i  )*incy; \
 \
 			kfp_dv \
 			( \
@@ -141,7 +137,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 }
 
-//INSERT_GENTFUNC_BASIC( dotxf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+//INSERT_GENTFUNC_BASIC2( dotxf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 GENTFUNC( float,    s, dotxf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 6 )
 GENTFUNC( double,   d, dotxf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 6 )
 GENTFUNC( scomplex, c, dotxf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 6 )

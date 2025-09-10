@@ -37,36 +37,26 @@
 
 void bli_sgemm_armv7a_int_4x4
      (
-             dim_t      m,
-             dim_t      n,
-             dim_t      k,
-       const void*      alpha0,
-       const void*      a0,
-       const void*      b0,
-       const void*      beta0,
-             void*      c0, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       dim_t               k0,
+       float*     restrict alpha,
+       float*     restrict a,
+       float*     restrict b,
+       float*     restrict beta,
+       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
-	const float* alpha = alpha0;
-	const float* a     = a0;
-	const float* b     = b0;
-	const float* beta  = beta0;
-	      float* c     = c0;
-
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-	uint32_t k_iter = k / 4;
-	uint32_t k_left = k % 4;
+	uint32_t k_iter = k0 / 4;
+	uint32_t k_left = k0 % 4;
 	uint32_t rs_c   = rs_c0;
 	uint32_t cs_c   = cs_c0;
 	uint32_t i;
 
-    GEMM_UKR_SETUP_CT( s, 4, 4, false );
-
-	const void* a_next = bli_auxinfo_next_a( data );
-	const void* b_next = bli_auxinfo_next_b( data );
+	void* a_next = bli_auxinfo_next_a( data );
+	void* b_next = bli_auxinfo_next_b( data );
 
 	float32x4_t alphav;
 	alphav = vmovq_n_f32( *alpha );
@@ -92,17 +82,47 @@ void bli_sgemm_armv7a_int_4x4
 
 	if ( *beta != 0.0F )
 	{
-		// Load column 0
-		cv0 = vld1q_f32( c + 0*cs_c );
+		if ( rs_c == 1 )
+		{
+			// Load column 0
+			cv0 = vld1q_f32( c + 0*rs_c + 0*cs_c );
 
-		// Load column 1
-		cv1 = vld1q_f32( c + 1*cs_c );
+			// Load column 1
+			cv1 = vld1q_f32( c + 0*rs_c + 1*cs_c );
 
-		// Load column 2
-		cv2 = vld1q_f32( c + 2*cs_c );
+			// Load column 2
+			cv2 = vld1q_f32( c + 0*rs_c + 2*cs_c );
 
-		// Load column 3
-		cv3 = vld1q_f32( c + 3*cs_c );
+			// Load column 3
+			cv3 = vld1q_f32( c + 0*rs_c + 3*cs_c );
+		}
+		else
+		{
+			// Load column 0
+			cv0 = vld1q_lane_f32( c + 0*rs_c + 0*cs_c, cv0, 0);
+			cv0 = vld1q_lane_f32( c + 1*rs_c + 0*cs_c, cv0, 1);
+			cv0 = vld1q_lane_f32( c + 2*rs_c + 0*cs_c, cv0, 2);
+			cv0 = vld1q_lane_f32( c + 3*rs_c + 0*cs_c, cv0, 3);
+
+			// Load column 1
+			cv1 = vld1q_lane_f32( c + 0*rs_c + 1*cs_c, cv1, 0);
+			cv1 = vld1q_lane_f32( c + 1*rs_c + 1*cs_c, cv1, 1);
+			cv1 = vld1q_lane_f32( c + 2*rs_c + 1*cs_c, cv1, 2);
+			cv1 = vld1q_lane_f32( c + 3*rs_c + 1*cs_c, cv1, 3);
+
+			// Load column 2
+			cv2 = vld1q_lane_f32( c + 0*rs_c + 2*cs_c, cv2, 0);
+			cv2 = vld1q_lane_f32( c + 1*rs_c + 2*cs_c, cv2, 1);
+			cv2 = vld1q_lane_f32( c + 2*rs_c + 2*cs_c, cv2, 2);
+			cv2 = vld1q_lane_f32( c + 3*rs_c + 2*cs_c, cv2, 3);
+
+			// Load column 3
+			cv3 = vld1q_lane_f32( c + 0*rs_c + 3*cs_c, cv3, 0);
+			cv3 = vld1q_lane_f32( c + 1*rs_c + 3*cs_c, cv3, 1);
+			cv3 = vld1q_lane_f32( c + 2*rs_c + 3*cs_c, cv3, 2);
+			cv3 = vld1q_lane_f32( c + 3*rs_c + 3*cs_c, cv3, 3);
+
+		}
 	}
 	else
 	{
@@ -235,38 +255,57 @@ void bli_sgemm_armv7a_int_4x4
 		cv3 = vmlaq_f32( cv3, abv3, alphav );
 	}
 
-	// Store column 0
-	vst1q_f32( c + 0*cs_c, cv0 );
-	// Store column 1
-	vst1q_f32( c + 1*cs_c, cv1 );
-	// Store column 2
-	vst1q_f32( c + 2*cs_c, cv2 );
-	// Store column 3
-	vst1q_f32( c + 3*cs_c, cv3 );
+	if ( rs_c == 1 )
+	{
+		// Store column 0
+		vst1q_f32( c + 0*rs_c + 0*cs_c, cv0 );
+		// Store column 1
+		vst1q_f32( c + 0*rs_c + 1*cs_c, cv1 );
+		// Store column 2
+		vst1q_f32( c + 0*rs_c + 2*cs_c, cv2 );
+		// Store column 3
+		vst1q_f32( c + 0*rs_c + 3*cs_c, cv3 );
+	}
+	else
+	{
+		// Store column 0
+		vst1q_lane_f32( c + 0*rs_c + 0*cs_c, cv0, 0);
+		vst1q_lane_f32( c + 1*rs_c + 0*cs_c, cv0, 1);
+		vst1q_lane_f32( c + 2*rs_c + 0*cs_c, cv0, 2);
+		vst1q_lane_f32( c + 3*rs_c + 0*cs_c, cv0, 3);
 
-    GEMM_UKR_FLUSH_CT( s );
+		// Store column 1
+		vst1q_lane_f32( c + 0*rs_c + 1*cs_c, cv1, 0);
+		vst1q_lane_f32( c + 1*rs_c + 1*cs_c, cv1, 1);
+		vst1q_lane_f32( c + 2*rs_c + 1*cs_c, cv1, 2);
+		vst1q_lane_f32( c + 3*rs_c + 1*cs_c, cv1, 3);
+
+		// Store column 2
+		vst1q_lane_f32( c + 0*rs_c + 2*cs_c, cv2, 0);
+		vst1q_lane_f32( c + 1*rs_c + 2*cs_c, cv2, 1);
+		vst1q_lane_f32( c + 2*rs_c + 2*cs_c, cv2, 2);
+		vst1q_lane_f32( c + 3*rs_c + 2*cs_c, cv2, 3);
+
+		// Store column 3
+		vst1q_lane_f32( c + 0*rs_c + 3*cs_c, cv3, 0);
+		vst1q_lane_f32( c + 1*rs_c + 3*cs_c, cv3, 1);
+		vst1q_lane_f32( c + 2*rs_c + 3*cs_c, cv3, 2);
+		vst1q_lane_f32( c + 3*rs_c + 3*cs_c, cv3, 3);
+	}
 }
 
 void bli_dgemm_armv7a_int_4x4
      (
-             dim_t      m,
-             dim_t      n,
-             dim_t      k,
-       const void*      alpha_,
-       const void*      a_,
-       const void*      b_,
-       const void*      beta_,
-             void*      c_, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
-       const cntx_t*    cntx
+       dim_t               k,
+       double*    restrict alpha,
+       double*    restrict a,
+       double*    restrict b,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
-	const double* alpha = alpha_;
-	const double* a     = a_;
-	const double* b     = b_;
-	const double* beta  = beta_;
-	      double* c     = c_;
-
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
 	//uint32_t k_iter = k0 / 4;
@@ -274,8 +313,6 @@ void bli_dgemm_armv7a_int_4x4
 	uint32_t rs_c   = rs_c0;
 	uint32_t cs_c   = cs_c0;
 	uint32_t i;
-
-    GEMM_UKR_SETUP_CT_ANY( d, 4, 4, false );
 
 	//void* a_next = bli_auxinfo_next_a( data );
 	//void* b_next = bli_auxinfo_next_b( data );
@@ -531,7 +568,5 @@ void bli_dgemm_armv7a_int_4x4
     	*c23 += ab23 * *alpha;
     	*c33 += ab33 * *alpha;
     }
-
-    GEMM_UKR_FLUSH_CT( d );
 }
 

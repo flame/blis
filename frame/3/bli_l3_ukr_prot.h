@@ -32,27 +32,51 @@
 
 */
 
-#ifndef BLIS_L3_UKR_PROT_H
-#define BLIS_L3_UKR_PROT_H
-
 //
 // Define template prototypes for level-3 micro-kernels.
 //
 
-#undef  L3TPROT
-#define L3TPROT( ctype, ch, funcname, opname ) \
+#define GEMM_UKR_PROT( ctype, ch, opname ) GEMM_UKR_PROT2(ctype, ctype, ch, opname)
+
+#define GEMM_UKR_PROT2( ctype_in, ctype_out, ch, opname ) \
 \
-void PASTEMAC(ch,funcname) \
+void PASTEMAC(ch,opname) \
      ( \
-       PASTECH(opname,_params), \
-       BLIS_AUXINFO_PARAM, \
-       BLIS_CNTX_PARAM  \
+       dim_t               k, \
+       ctype_out* restrict alpha, \
+       ctype_in*  restrict a, \
+       ctype_in*  restrict b, \
+       ctype_out* restrict beta, \
+       ctype_out* restrict c, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
      );
 
-#define GEMM_UKR_PROT(     ctype, ch, fn )  L3TPROT( ctype, ch, fn, gemm );
-#define GEMMTRSM_UKR_PROT( ctype, ch, fn )  L3TPROT( ctype, ch, fn, gemmtrsm );
-#define TRSM_UKR_PROT(     ctype, ch, fn )  L3TPROT( ctype, ch, fn, trsm );
+
+#define GEMMTRSM_UKR_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       dim_t               k, \
+       ctype*     restrict alpha, \
+       ctype*     restrict a1x, \
+       ctype*     restrict a11, \
+       ctype*     restrict bx1, \
+       ctype*     restrict b11, \
+       ctype*     restrict c11, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
+     );
 
 
-#endif
+#define TRSM_UKR_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       ctype*     restrict a, \
+       ctype*     restrict b, \
+       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
+     );
 

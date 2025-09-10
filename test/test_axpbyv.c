@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -51,8 +51,8 @@
 /*
  * BLIS interface API will be called by default.
  * To call BLAS API, modify line 159 to '#if 0'.
- * To call cblas API, modify line 159 to '#if 0'and define the 
- * macro 'CHECK_CBLAS' in line 44 
+ * To call cblas API, modify line 159 to '#if 0'and define the
+ * macro 'CHECK_CBLAS' in line 44
  *
  *Sample prototype for BLAS interface API is as follows:
  *                n    alpha     x      incx   beta       y        incy
@@ -95,13 +95,12 @@ int main( int argc, char** argv )
     n_input = 15;
 #endif
 
-#if 1 
+
     dt = BLIS_FLOAT;
     //dt = BLIS_DOUBLE;
-#else
+
     //dt = BLIS_SCOMPLEX;
-    dt = BLIS_DCOMPLEX;
-#endif
+    //  dt = BLIS_DCOMPLEX;
 
 
     dt_x = dt_y = dt_alpha = dt_beta = dt;
@@ -109,11 +108,13 @@ int main( int argc, char** argv )
     // Begin with initializing the last entry to zero so that
     // matlab allocates space for the entire array once up-front.
     for ( p = p_begin; p + p_inc <= p_end; p += p_inc ) ;
+
 #ifdef BLIS
     printf( "data_axpbyv_blis" );
 #else
     printf( "data_axpbyv_%s", BLAS );
 #endif
+
     printf( "( %2lu, 1:2 ) = [ %4lu %7.2f ];\n",
             ( unsigned long )(p - p_begin)/p_inc + 1,
             ( unsigned long )0, 0.0 );
@@ -168,16 +169,16 @@ int main( int argc, char** argv )
                 f77_int nn     = bli_obj_length( &x );
                 f77_int incx   = bli_obj_vector_inc( &x );
                 f77_int incy   = bli_obj_vector_inc( &y );
-                float   alphap = *(( float * )bli_obj_buffer( &alpha ));
-                float   betap  = *(( float * )bli_obj_buffer( &beta  ));
+                float   alphap = *(float *)bli_obj_buffer( &alpha );
+                float   betap  = *(float *)bli_obj_buffer( &beta  );
                 float*  xp     = bli_obj_buffer( &x );
                 float*  yp     = bli_obj_buffer( &y );
 #ifdef CHECK_CBLAS
                 cblas_saxpby( nn,
-                              alphap,
-                              xp, incx,
-                              betap,
-                              yp, incy );
+                          alphap,
+                          xp, incx,
+                          betap,
+                          yp, incy );
 #else
                 saxpby_( &nn,
                          &alphap,
@@ -193,16 +194,16 @@ int main( int argc, char** argv )
                 f77_int  nn     = bli_obj_length( &x );
                 f77_int  incx   = bli_obj_vector_inc( &x );
                 f77_int  incy   = bli_obj_vector_inc( &y );
-                double   alphap = *(( double * )bli_obj_buffer( &alpha ));
-                double   betap  = *(( double * )bli_obj_buffer( &beta  ));
+                double   alphap = *(double *)bli_obj_buffer( &alpha );
+                double   betap  = *(double *)bli_obj_buffer( &beta  );
                 double*  xp     = bli_obj_buffer( &x );
                 double*  yp     = bli_obj_buffer( &y );
 #ifdef CHECK_CBLAS
                 cblas_daxpby( nn,
-                              alphap,
-                              xp, incx,
-                              betap,
-                              yp, incy );
+                          alphap,
+                          xp, incx,
+                          betap,
+                          yp, incy );
 #else
                 daxpby_( &nn,
                          &alphap,
@@ -213,25 +214,25 @@ int main( int argc, char** argv )
             }
             else if ( bli_is_scomplex( dt ) )
             {
-                f77_int  nn     = bli_obj_length( &x );
-                f77_int  incx   = bli_obj_vector_inc( &x );
-                f77_int  incy   = bli_obj_vector_inc( &y );
-                void*    alphap = bli_obj_buffer( &alpha );
-                void*    betap  = bli_obj_buffer( &beta  );
-                void*    xp     = bli_obj_buffer( &x );
-                void*    yp     = bli_obj_buffer( &y );
+              f77_int  nn     = bli_obj_length( &x );
+              f77_int  incx   = bli_obj_vector_inc( &x );
+              f77_int  incy   = bli_obj_vector_inc( &y );
+              void*    alphap = bli_obj_buffer( &alpha );
+              void*    betap  = bli_obj_buffer( &beta  );
+              void*    xp     = bli_obj_buffer( &x );
+              void*    yp     = bli_obj_buffer( &y );
 #ifdef CHECK_CBLAS
                 cblas_caxpby( nn,
-                              alphap,
-                              xp, incx,
-                              betap,
-                              yp, incy );
+                          alphap,
+                          xp, incx,
+                          betap,
+                          yp, incy );
 #else
                 caxpby_( &nn,
-                         ( scomplex* )alphap,
-                         ( scomplex* )xp, &incx,
-                         ( scomplex* )betap,
-                         ( scomplex* )yp, &incy );
+                     (scomplex*)alphap,
+                     (scomplex*)xp, &incx,
+                     (scomplex*)betap,
+                     (scomplex*)yp, &incy );
 #endif
             }
             else if ( bli_is_dcomplex( dt ))
@@ -245,18 +246,19 @@ int main( int argc, char** argv )
                 void*    yp     = bli_obj_buffer( &y );
 #ifdef CHECK_CBLAS
                 cblas_zaxpby( nn,
-                              alphap,
-                              xp, incx,
-                              betap,
-                              yp, incy );
+                          alphap,
+                          xp, incx,
+                          betap,
+                          yp, incy );
 #else
                 zaxpby_( &nn,
-                         ( dcomplex* )alphap,
-                         ( dcomplex* )xp, &incx,
-                         ( dcomplex* )betap,
-                         ( dcomplex* )yp, &incy );
+                     (dcomplex*)alphap,
+                     (dcomplex*)xp, &incx,
+                     (dcomplex*)betap,
+                     (dcomplex*)yp, &incy );
 #endif
             }
+
 #endif
 
 #ifdef PRINT

@@ -42,8 +42,8 @@
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* x, \
-       const obj_t* asum  \
+       obj_t*  x, \
+       obj_t*  asum  \
      );
 
 GENPROT( asumv )
@@ -54,7 +54,7 @@ GENPROT( asumv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* x  \
+       obj_t*  x  \
      );
 
 GENPROT( mkherm )
@@ -67,8 +67,8 @@ GENPROT( mktrim )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* x, \
-       const obj_t* norm  \
+       obj_t*  x, \
+       obj_t*  norm  \
      );
 
 GENPROT( norm1v )
@@ -81,8 +81,8 @@ GENPROT( normiv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* x, \
-       const obj_t* norm  \
+       obj_t*  x, \
+       obj_t*  norm  \
      );
 
 GENPROT( norm1m )
@@ -95,7 +95,7 @@ GENPROT( normim )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* x  \
+       obj_t*  x  \
      );
 
 GENPROT( randv )
@@ -109,9 +109,9 @@ GENPROT( randnm )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* x, \
-       const obj_t* scale, \
-       const obj_t* sumsq  \
+       obj_t*  x, \
+       obj_t*  scale, \
+       obj_t*  sumsq  \
      );
 
 GENPROT( sumsqv )
@@ -123,16 +123,12 @@ GENPROT( sumsqv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* chi, \
-       const obj_t* psi, \
-       const bool*  is  \
+       obj_t*  chi, \
+       obj_t*  psi, \
+       bool*   is_eq  \
      );
 
 GENTPROT( eqsc )
-GENTPROT( ltsc )
-GENTPROT( ltesc )
-GENTPROT( gtsc )
-GENTPROT( gtesc )
 
 
 #undef  GENPROT
@@ -140,9 +136,9 @@ GENTPROT( gtesc )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t* x, \
-       const obj_t* y, \
-       const bool*  is  \
+       obj_t*  x, \
+       obj_t*  y, \
+       bool*   is_eq  \
     );
 
 GENPROT( eqv )
@@ -154,11 +150,11 @@ GENPROT( eqm )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const FILE*  file, \
-       const char*  s1, \
-       const obj_t* x, \
-       const char*  format, \
-       const char*  s2  \
+       FILE*  file, \
+       char*  s1, \
+       obj_t* x, \
+       char*  format, \
+       char*  s2  \
      );
 
 GENPROT( fprintv )
@@ -168,51 +164,51 @@ GENPROT( fprintm )
 
 void bli_utilv_xi_check
      (
-       const obj_t* x,
-       const obj_t* index
+       obj_t*  x,
+       obj_t*  index
      );
 
 void bli_utilv_xa_check
      (
-       const obj_t* x,
-       const obj_t* asum
+       obj_t*  x,
+       obj_t*  asum
      );
 
 void bli_utilm_mkhst_check
      (
-       const obj_t* a
+       obj_t*  a
      );
 
 void bli_utilv_norm_check
      (
-       const obj_t* x,
-       const obj_t* norm
+       obj_t*  x,
+       obj_t*  norm
      );
 
 void bli_utilm_norm_check
      (
-       const obj_t* x,
-       const obj_t* norm
+       obj_t*  x,
+       obj_t*  norm
      );
 
 void bli_utilm_fprint_check
      (
-       const FILE*  file,
-       const char*  s1,
-       const obj_t* x,
-       const char*  format,
-       const char*  s2
+       FILE*  file,
+       char*  s1,
+       obj_t* x,
+       char*  format,
+       char*  s2
      );
 
 void bli_utilm_rand_check
      (
-       const obj_t* x
+       obj_t* x
      );
 
 void bli_utilv_sumsqv_check
      (
-       const obj_t* x,
-       const obj_t* scale,
-       const obj_t* sumsq
+       obj_t*  x,
+       obj_t*  scale,
+       obj_t*  sumsq
      );
 

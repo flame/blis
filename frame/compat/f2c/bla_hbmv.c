@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,14 +35,17 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLAS
+// Make thread settings local to each thread calling BLIS routines.
+// (The definition resides in bli_rntm.c.)
+extern BLIS_THREAD_LOCAL rntm_t tl_rntm;
 
 /* chbmv.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(c,hbmv)(const bla_character *uplo, const bla_integer *n, const bla_integer *k, const bla_scomplex * alpha, const bla_scomplex *a, const bla_integer *lda, const bla_scomplex *x, const bla_integer *incx, const bla_scomplex *beta, bla_scomplex *y, const bla_integer *incy)
+/* Subroutine */ 
+int PASTEF77S(c,hbmv)(const bla_character *uplo, const bla_integer *n, const bla_integer *k, const bla_scomplex * alpha, const bla_scomplex *a, const bla_integer *lda, const bla_scomplex *x, const bla_integer *incx, const bla_scomplex *beta, bla_scomplex *y, const bla_integer *incy)
 {
     /* System generated locals */
     bla_integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5;
@@ -55,9 +59,9 @@
     bla_integer info;
     bla_scomplex temp1, temp2;
     bla_integer i__, j, l;
-    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTE_LSAME(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer kplus1, ix, iy, jx, jy, kx, ky;
-    //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
+    //extern /* Subroutine */ int PASTE_XERBLA(bla_character *, bla_integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -203,8 +207,17 @@
     --y;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE();
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_HBMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *uplo,
+			     *n, *k, (void*)alpha, *lda, *incx, (void*)beta, *incy);
+
+    // Initialize info_value to 0
+    gint_t info_value = 0;
+    bli_rntm_set_info_value_only( info_value, &tl_rntm );
+
     info = 0;
-    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
+    if (! PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -219,7 +232,8 @@
 	info = 11;
     }
     if (info != 0) {
-	PASTEF770(xerbla)("CHBMV ", &info, (ftnlen)6);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+	PASTE_XERBLA("CHBMV ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -227,6 +241,7 @@
 
     if (*n == 0 || (bli_creal(*alpha) == 0.f && bli_cimag(*alpha) == 0.f && (bli_creal(*beta) == 1.f && 
 	    bli_cimag(*beta) == 0.f))) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
 
@@ -291,9 +306,10 @@
 	}
     }
     if (bli_creal(*alpha) == 0.f && bli_cimag(*alpha) == 0.f) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
-    if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  y  when upper triangle of A is stored. */
 
@@ -476,6 +492,7 @@
 	}
     }
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*     End of CHBMV . */
@@ -487,7 +504,8 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(z,hbmv)(const bla_character *uplo, const bla_integer *n, const bla_integer *k, const bla_dcomplex *alpha, const bla_dcomplex *a, const bla_integer *lda, const bla_dcomplex *x, const bla_integer * incx, const bla_dcomplex *beta, bla_dcomplex *y, const bla_integer *incy)
+/* Subroutine */ 
+int PASTEF77S(z,hbmv)(const bla_character *uplo, const bla_integer *n, const bla_integer *k, const bla_dcomplex *alpha, const bla_dcomplex *a, const bla_integer *lda, const bla_dcomplex *x, const bla_integer * incx, const bla_dcomplex *beta, bla_dcomplex *y, const bla_integer *incy)
 {
     /* System generated locals */
     bla_integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5;
@@ -501,9 +519,9 @@
     bla_integer info;
     bla_dcomplex temp1, temp2;
     bla_integer i__, j, l;
-    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTE_LSAME(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer kplus1, ix, iy, jx, jy, kx, ky;
-    //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
+    //extern /* Subroutine */ int PASTE_XERBLA(bla_character *, bla_integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -649,8 +667,17 @@
     --y;
 
     /* Function Body */
+    AOCL_DTL_INITIALIZE();
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_HBMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *uplo,
+			     *n, *k, (void*)alpha, *lda, *incx, (void*)beta, *incy);
+
+    // Initialize info_value to 0
+    gint_t info_value = 0;
+    bli_rntm_set_info_value_only( info_value, &tl_rntm );
+
     info = 0;
-    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
+    if (! PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -665,7 +692,8 @@
 	info = 11;
     }
     if (info != 0) {
-	PASTEF770(xerbla)("ZHBMV ", &info, (ftnlen)6);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+	PASTE_XERBLA("ZHBMV ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -673,6 +701,7 @@
 
     if (*n == 0 || (bli_zreal(*alpha) == 0. && bli_zimag(*alpha) == 0. && (bli_zreal(*beta) == 1. && 
 	    bli_zimag(*beta) == 0.))) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
 
@@ -737,9 +766,10 @@
 	}
     }
     if (bli_zreal(*alpha) == 0. && bli_zimag(*alpha) == 0.) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	return 0;
     }
-    if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  y  when upper triangle of A is stored. */
 
@@ -922,11 +952,24 @@
 	}
     }
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return 0;
 
 /*     End of ZHBMV . */
 
 } /* zhbmv_ */
+
+#ifdef BLIS_ENABLE_BLAS
+
+int PASTEF77(c,hbmv)(const bla_character *uplo, const bla_integer *n, const bla_integer *k, const bla_scomplex * alpha, const bla_scomplex *a, const bla_integer *lda, const bla_scomplex *x, const bla_integer *incx, const bla_scomplex *beta, bla_scomplex *y, const bla_integer *incy)
+{
+  return PASTEF77S(c,hbmv)( uplo, n, k,  alpha, a, lda, x, incx, beta, y, incy ); 
+}
+
+int PASTEF77(z,hbmv)(const bla_character *uplo, const bla_integer *n, const bla_integer *k, const bla_dcomplex *alpha, const bla_dcomplex *a, const bla_integer *lda, const bla_dcomplex *x, const bla_integer * incx, const bla_dcomplex *beta, bla_dcomplex *y, const bla_integer *incy)
+{
+  return PASTEF77S(z,hbmv)( uplo, n, k,  alpha, a, lda, x, incx, beta, y, incy ); 
+}
 
 #endif
 

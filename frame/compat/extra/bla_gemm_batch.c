@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -44,6 +44,103 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
+void PASTEF77S(ch,blasname) \
+     ( \
+       const f77_char* transa_array, \
+       const f77_char* transb_array, \
+       const f77_int*  m_array, \
+       const f77_int*  n_array, \
+       const f77_int*  k_array, \
+       const ftype*    alpha_array, \
+       const ftype**   a_array, const f77_int* lda_array, \
+       const ftype**   b_array, const f77_int* ldb_array, \
+       const ftype*    beta_array, \
+             ftype**   c_array, const f77_int* ldc_array, \
+       const f77_int*  group_count, \
+       const f77_int*  group_size \
+     ) \
+{ \
+    trans_t blis_transa; \
+    trans_t blis_transb; \
+    dim_t   m0, n0, k0; \
+    inc_t   rs_a, cs_a; \
+    inc_t   rs_b, cs_b; \
+    inc_t   rs_c, cs_c; \
+\
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
+\
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    AOCL_DTL_LOG_GEMM_BATCH_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *group_count); \
+\
+    /* Perform BLAS parameter checking. */ \
+    f77_int count; \
+    for(count = 0; count < *group_count; count++) \
+    { \
+        PASTEBLACHK(blisname) \
+        ( \
+          MKSTR(ch), \
+          MKSTR(blisname), \
+          transa_array+count, \
+          transb_array+count, \
+          m_array+count, \
+          n_array+count, \
+          k_array+count, \
+          lda_array+count, \
+          ldb_array+count, \
+          ldc_array+count \
+       ); \
+    } \
+\
+    f77_int idx = 0, i, j; \
+\
+    for(i = 0; i < *group_count; i++) \
+    { \
+        /* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
+        bli_param_map_netlib_to_blis_trans( transa_array[i], &blis_transa ); \
+        bli_param_map_netlib_to_blis_trans( transb_array[i], &blis_transb ); \
+\
+        /* Typecast BLAS integers to BLIS integers. */ \
+        bli_convert_blas_dim1( m_array[i], m0 ); \
+        bli_convert_blas_dim1( n_array[i], n0 ); \
+        bli_convert_blas_dim1( k_array[i], k0 ); \
+\
+        /* Set the row and column strides of the matrix operands. */ \
+        rs_a = 1; \
+        cs_a = lda_array[i]; \
+        rs_b = 1; \
+        cs_b = ldb_array[i]; \
+        rs_c = 1; \
+        cs_c = ldc_array[i]; \
+\
+        for(j = 0; j < group_size[i]; j++) \
+        { \
+            /* Call BLIS interface. */ \
+            PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
+            ( \
+              blis_transa, \
+              blis_transb, \
+              m0, \
+              n0, \
+              k0, \
+              (ftype*)(alpha_array + i), \
+              (ftype*)*(a_array + idx), rs_a, cs_a, \
+              (ftype*)*(b_array + idx), rs_b, cs_b, \
+              (ftype*)(beta_array + i), \
+              (ftype*)*(c_array + idx), rs_c, cs_c, \
+              NULL, \
+              NULL  \
+            ); \
+\
+            idx++; \
+        } \
+    } \
+\
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
+    /* Finalize BLIS. */  \
+    bli_finalize_auto(); \
+} \
+IF_BLIS_ENABLE_BLAS(\
 void PASTEF77(ch,blasname) \
      ( \
        const f77_char* transa_array, \
@@ -60,84 +157,18 @@ void PASTEF77(ch,blasname) \
        const f77_int*  group_size \
      ) \
 { \
-	trans_t blis_transa; \
-	trans_t blis_transb; \
-	dim_t   m0, n0, k0; \
-\
-	/* Initialize BLIS. */ \
-	bli_init_auto(); \
-\
-	/* Perform BLAS parameter checking. */ \
-	for ( f77_int gi = 0; gi < *group_count; gi++ ) \
-	{ \
-		PASTEBLACHK(blisname) \
-		( \
-		  MKSTR(ch), \
-		  MKSTR(blisname), \
-		  transa_array+gi, \
-		  transb_array+gi, \
-		  m_array+gi, \
-		  n_array+gi, \
-		  k_array+gi, \
-		  lda_array+gi, \
-		  ldb_array+gi, \
-		  ldc_array+gi \
-		); \
-	} \
-\
-	f77_int idx = 0; \
-\
-	for ( f77_int i = 0; i < *group_count; i++ ) \
-	{ \
-		/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
-		bli_param_map_netlib_to_blis_trans( transa_array[i], &blis_transa ); \
-		bli_param_map_netlib_to_blis_trans( transb_array[i], &blis_transb ); \
-\
-		/* Typecast BLAS integers to BLIS integers. */ \
-		bli_convert_blas_dim1( m_array[i], m0 ); \
-		bli_convert_blas_dim1( n_array[i], n0 ); \
-		bli_convert_blas_dim1( k_array[i], k0 ); \
-\
-		/* Set the row and column strides of the matrix operands. */ \
-		const inc_t rs_a = 1; \
-		const inc_t cs_a = lda_array[i]; \
-		const inc_t rs_b = 1; \
-		const inc_t cs_b = ldb_array[i]; \
-		const inc_t rs_c = 1; \
-		const inc_t cs_c = ldc_array[i]; \
-\
-		for ( f77_int j = 0; j < group_size[i]; j++ ) \
-		{ \
-			/* Call BLIS interface. */ \
-			PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
-			( \
-			  blis_transa, \
-			  blis_transb, \
-			  m0, \
-			  n0, \
-			  k0, \
-			  (ftype*)(alpha_array + i), \
-			  (ftype*)*(a_array + idx), rs_a, cs_a, \
-			  (ftype*)*(b_array + idx), rs_b, cs_b, \
-			  (ftype*)(beta_array + i), \
-			  (ftype*)*(c_array + idx), rs_c, cs_c, \
-			  NULL, \
-			  NULL  \
-			); \
-\
-			idx++; \
-		} \
-	} \
-\
-	bli_finalize_auto(); \
-}
+	PASTEF77S(ch,blasname)( transa_array, transb_array, m_array, n_array, k_array, \
+				alpha_array, a_array, lda_array, b_array, ldb_array, beta_array, \
+				c_array, ldc_array, group_count, group_size ); \
+} \
+)
 
 #else
 
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77(ch,blasname) \
+void PASTEF77S(ch,blasname) \
      ( \
        const f77_char* transa_array, \
        const f77_char* transb_array, \
@@ -152,100 +183,125 @@ void PASTEF77(ch,blasname) \
        const f77_int* group_count, \
        const f77_int* group_size ) \
 { \
-	trans_t blis_transa; \
-	trans_t blis_transb; \
-	dim_t   m0, n0, k0; \
+    trans_t blis_transa; \
+    trans_t blis_transb; \
+    dim_t   m0, n0, k0; \
 \
-	/* Initialize BLIS. */ \
-	bli_init_auto(); \
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
 \
-	/* Perform BLAS parameter checking. */ \
-	for ( f77_int gi = 0; gi < *group_count; gi++ ) \
-	{ \
-		PASTEBLACHK(blisname) \
-		( \
-		  MKSTR(ch), \
-		  MKSTR(blisname), \
-		  transa_array+gi, \
-		  transb_array+gi, \
-		  m_array+gi, \
-		  n_array+gi, \
-		  k_array+gi, \
-		  lda_array+gi, \
-		  ldb_array+gi, \
-		  ldc_array+gi \
-		); \
-	} \
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    AOCL_DTL_LOG_GEMM_BATCH_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *group_count); \
 \
-	const num_t dt     = PASTEMAC(ch,type); \
+    /* Perform BLAS parameter checking. */ \
+    f77_int count; \
+    for(count = 0; count < *group_count; count++) \
+    { \
+        PASTEBLACHK(blisname) \
+        ( \
+          MKSTR(ch), \
+          MKSTR(blisname), \
+          transa_array+count, \
+          transb_array+count, \
+          m_array+count, \
+          n_array+count, \
+          k_array+count, \
+          lda_array+count, \
+          ldb_array+count, \
+          ldc_array+count \
+       ); \
+    } \
 \
-	f77_int idx = 0, i, j; \
+    const num_t dt     = PASTEMAC(ch,type); \
 \
-	for ( i = 0; i < *group_count; i++ ) \
-	{ \
-		/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
-		bli_param_map_netlib_to_blis_trans( transa_array[i], &blis_transa ); \
-		bli_param_map_netlib_to_blis_trans( transb_array[i], &blis_transb ); \
+    f77_int idx = 0, i, j; \
 \
-		/* Typecast BLAS integers to BLIS integers. */ \
-		bli_convert_blas_dim1( m_array[i], m0 ); \
-		bli_convert_blas_dim1( n_array[i], n0 ); \
-		bli_convert_blas_dim1( k_array[i], k0 ); \
+    for(i = 0; i < *group_count; i++) \
+    { \
+        /* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
+        bli_param_map_netlib_to_blis_trans( transa_array[i], &blis_transa ); \
+        bli_param_map_netlib_to_blis_trans( transb_array[i], &blis_transb ); \
 \
-		/* Set the row and column strides of the matrix operands. */ \
-		const inc_t rs_a = 1; \
-		const inc_t cs_a = lda_array[i]; \
-		const inc_t rs_b = 1; \
-		const inc_t cs_b = ldb_array[i]; \
-		const inc_t rs_c = 1; \
-		const inc_t cs_c = ldc_array[i]; \
+        /* Typecast BLAS integers to BLIS integers. */ \
+        bli_convert_blas_dim1( m_array[i], m0 ); \
+        bli_convert_blas_dim1( n_array[i], n0 ); \
+        bli_convert_blas_dim1( k_array[i], k0 ); \
 \
-		obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
-		obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
+        /* Set the row and column strides of the matrix operands. */ \
+        const inc_t rs_a = 1; \
+        const inc_t cs_a = lda_array[i]; \
+        const inc_t rs_b = 1; \
+        const inc_t cs_b = ldb_array[i]; \
+        const inc_t rs_c = 1; \
+        const inc_t cs_c = ldc_array[i]; \
 \
-		dim_t       m0_a, n0_a; \
-		dim_t       m0_b, n0_b; \
+        obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
+        obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
 \
-		bli_set_dims_with_trans( blis_transa, m0, k0, &m0_a, &n0_a ); \
-		bli_set_dims_with_trans( blis_transb, k0, n0, &m0_b, &n0_b ); \
+        dim_t       m0_a, n0_a; \
+        dim_t       m0_b, n0_b; \
 \
-		bli_obj_init_finish_1x1( dt, (ftype*)(alpha_array + i), &alphao ); \
-		bli_obj_init_finish_1x1( dt, (ftype*)(beta_array  + i),  &betao ); \
+        bli_set_dims_with_trans( blis_transa, m0, k0, &m0_a, &n0_a ); \
+        bli_set_dims_with_trans( blis_transb, k0, n0, &m0_b, &n0_b ); \
 \
-		for( j = 0; j < group_size[i]; j++ ) \
-		{ \
-			obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
-			obj_t       bo     = BLIS_OBJECT_INITIALIZER; \
-			obj_t       co     = BLIS_OBJECT_INITIALIZER; \
+        bli_obj_init_finish_1x1( dt, (ftype*)(alpha_array + i), &alphao ); \
+        bli_obj_init_finish_1x1( dt, (ftype*)(beta_array  + i),  &betao ); \
 \
-			bli_obj_init_finish( dt, m0_a, n0_a, (ftype*)*(a_array + idx), rs_a, cs_a, &ao ); \
-			bli_obj_init_finish( dt, m0_b, n0_b, (ftype*)*(b_array + idx), rs_b, cs_b, &bo ); \
-			bli_obj_init_finish( dt, m0,   n0,   (ftype*)*(c_array + idx), rs_c, cs_c, &co ); \
-			bli_obj_set_conjtrans( blis_transa, &ao ); \
-			bli_obj_set_conjtrans( blis_transb, &bo ); \
+        for( j = 0; j < group_size[i]; j++) \
+        { \
+            obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
+            obj_t       bo     = BLIS_OBJECT_INITIALIZER; \
+            obj_t       co     = BLIS_OBJECT_INITIALIZER; \
 \
-			PASTEMAC(blisname,BLIS_OAPI_EX_SUF) \
-			( \
-			  &alphao, \
-			  &ao, \
-			  &bo, \
-			  &betao, \
-			  &co, \
-			  NULL, \
-			  NULL  \
-			); \
+            bli_obj_init_finish( dt, m0_a, n0_a, (ftype*)*(a_array + idx), rs_a, cs_a, &ao ); \
+            bli_obj_init_finish( dt, m0_b, n0_b, (ftype*)*(b_array + idx), rs_b, cs_b, &bo ); \
+            bli_obj_init_finish( dt, m0,   n0,   (ftype*)*(c_array + idx), rs_c, cs_c, &co ); \
+            bli_obj_set_conjtrans( blis_transa, &ao ); \
+            bli_obj_set_conjtrans( blis_transb, &bo ); \
 \
-			idx++; \
-		} \
-	} \
+            PASTEMAC(blisname,BLIS_OAPI_EX_SUF) \
+            ( \
+              &alphao, \
+              &ao, \
+              &bo, \
+              &betao, \
+              &co, \
+              NULL, \
+              NULL  \
+            ); \
 \
-	/* Finalize BLIS. */  \
-	bli_finalize_auto(); \
-}
+            idx++; \
+        } \
+    } \
+\
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
+    /* Finalize BLIS. */  \
+    bli_finalize_auto(); \
+} \
+IF_BLIS_ENABLE_BLAS(\
+void PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* transa_array, \
+       const f77_char* transb_array, \
+       const f77_int*  m_array, \
+       const f77_int*  n_array, \
+       const f77_int*  k_array, \
+       const ftype*    alpha_array, \
+       const ftype**   a_array, const f77_int* lda_array, \
+       const ftype**   b_array, const f77_int* ldb_array, \
+       const ftype*    beta_array, \
+             ftype**   c_array, const f77_int* ldc_array, \
+       const f77_int*  group_count, \
+       const f77_int*  group_size \
+     ) \
+{ \
+	PASTEF77S(ch,blasname)( transa_array, transb_array, m_array, n_array, k_array, \
+				alpha_array, a_array, lda_array, b_array, ldb_array, beta_array, \
+				c_array, ldc_array, group_count, group_size ); \
+} \
+)
 
 #endif
 
-#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNC_BLAS( gemm_batch, gemm )
-#endif
 
