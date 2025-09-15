@@ -777,6 +777,7 @@
 #define VMOVDQA(_0, _1) INSTR_(vmovdqa, _0, _1)
 #define VMOVDQA32(_0, _1) INSTR_(vmovdqa32, _0, _1)
 #define VMOVDQA64(_0, _1) INSTR_(vmovdqa64, _0, _1)
+#define VMOVDQU(_0, _1) INSTR_(vmovdqu, _0, _1)
 #define VBROADCASTSS(_0, _1) INSTR_(vbroadcastss, _0, _1)
 #define VBROADCASTSD(_0, _1) INSTR_(vbroadcastsd, _0, _1)
 #define VPBROADCASTD(_0, _1) INSTR_(vpbroadcastd, _0, _1)
@@ -810,6 +811,7 @@
 #define vmovdqa(_0, _1) VMOVDQA(_0, _1)
 #define vmovdqa32(_0, _1) VMOVDQA32(_0, _1)
 #define vmovdqa64(_0, _1) VMOVDQA64(_0, _1)
+#define vmovdqu(_0, _1) VMOVDQU(_0, _1)
 #define vbroadcastss(_0, _1) VBROADCASTSS(_0, _1)
 #define vbroadcastsd(_0, _1) VBROADCASTSD(_0, _1)
 #define vpbroadcastd(_0, _1) VPBROADCASTD(_0, _1)
@@ -911,6 +913,8 @@
 #define VUCOMISD(_0, _1) INSTR_(vucomisd, _0, _1)
 #define VCOMISS(_0, _1) INSTR_(vcomiss, _0, _1)
 #define VCOMISD(_0, _1) INSTR_(vcomisd, _0, _1)
+
+#define VMASKMOVPD(_0, _1, _2) INSTR_(vmaskmovpd, _0, _1, _2)
 
 #define VFMADD132SS(_0, _1, _2) INSTR_(vfmadd132ss, _0, _1, _2)
 #define VFMADD213SS(_0, _1, _2) INSTR_(vfmadd213ss, _0, _1, _2)
@@ -1238,6 +1242,8 @@
 #define vblendpd(_0, _1, _2, _3) VBLENDPD(_0, _1, _2, _3)
 #define vblendmps(_0, _1, _2) VBLENDMSD(_0, _1, _2)
 #define vblendmpd(_0, _1, _2) VBLENDMPD(_0, _1, _2)
+
+#define vmaskmovpd(_0, _1, _2) VMASKMOVPD(_0, _1, _2)
 
 // Prefetches
 
