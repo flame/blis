@@ -31,8 +31,8 @@
 #  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-#
-# shellcheck disable=2001,2249,2034,2154,2181,2312,2250,2292
+# shellcheck enable=all
+# shellcheck disable=2001,2249,2034,2154,2181,2312,2250,2292,2248
 
 #
 # -- Helper functions ----------------------------------------------------------
@@ -1818,7 +1818,7 @@ check_compiler()
     if [[ ${cc_vendor} = NVIDIA ]]; then
         blacklistcc_add "knl"
     fi
-    
+
     # gcc
     if [[ ${cc_vendor} = gcc ]]; then
 
@@ -2448,7 +2448,7 @@ check_tool()
 		for opt in ${the_flags}; do
 
 			# See if the tool responds to the current flag.
-			${tool} ${opt} > /dev/null 2>&1
+			"${tool}" "${opt}" > /dev/null 2>&1
 
 			# If the tool responded to the flag with a nominal error code of
 			# 0, we found one that works and set rval accoringly.
@@ -2847,7 +2847,7 @@ create_makefile_fragment()
 	fi
 	echo "${script_name}: creating makefile fragments in $3"
 	"${gen_make_frags_sh}"                       \
-		-h ${recursive} -v0                      \
+		-h "${recursive}" -v0                    \
 		-o "${script_name}"                      \
 		-p "$1" "$2" "$3"                        \
 		"${gen_make_frags_dirpath}/fragment.mk"  \
@@ -3575,7 +3575,7 @@ blis_main()
 
 	fi
 
-	build_and_check_configurations
+	build_and_check_configurations "${config_name}"
 
 	# In order to determine the default behavior of the --with[out]-memkind
 	# option, we try to detect whether libmemkind is available. If it is,
@@ -4738,17 +4738,18 @@ blis_main()
 		echo "${script_name}: configured to build within top-level directory of source distribution."
 	fi
 
-	if [ "${warn_user_generic}" = "1" ]; then
-
-		echo "${script_name}: "
-		echo "${script_name}: *** Unable to automatically detect hardware type! ***"
-		echo "${script_name}: "
-		echo "${script_name}: NOTE: configure was unable to identify a subconfiguration"
-		echo "${script_name}: optimized for your hardware. As a result, the 'generic'"
-		echo "${script_name}: subconfiguration (with low-performance reference kernels)"
-		echo "${script_name}: will be used. For support, please open an issue on GitHub"
-		echo "${script_name}: at https://github.com/flame/blis/issues."
-		echo "${script_name}: "
+	if [[ ${warn_user_generic} = 1 ]]; then
+        cat <<EOF
+${script_name}:
+${script_name}: *** Unable to automatically detect hardware type! ***
+${script_name}:
+${script_name}: NOTE: configure was unable to identify a subconfiguration
+${script_name}: optimized for your hardware. As a result, the 'generic'
+${script_name}: subconfiguration (with low-performance reference kernels)
+${script_name}: will be used. For support, please open an issue on GitHub
+${script_name}: at https://github.com/flame/blis/issues.
+${script_name}:
+EOF
 	fi
 
 	# Exit peacefully.
@@ -4922,7 +4923,7 @@ EOF
 
 get_config_var()
 {
-	echo "$(grep "^ *$1 *:=" ${sharedir}/blis/config.mk | sed 's/'$1' *:= *//')"
+    grep "^ *$1 *:=" "${sharedir}"/blis/config.mk | sed 's/'"$1"' *:= *//'
 }
 
 maybe_echo()
@@ -5262,11 +5263,11 @@ plugin_main()
 	if [ $# -gt "1" ]; then   # more than one configuration argument given.
 		print_usage_plugin
 	elif [ $# == "0" ]; then   # try to guess the plugin name.
-		plugin_h=$(ls ${plugin_dir}/bli_plugin_*.h 2>/dev/null)
-		if [ -z ${plugin_h} ]; then
+		plugin_h=$(ls "${plugin_dir}"/bli_plugin_*.h 2>/dev/null)
+		if [ -z "${plugin_h}" ]; then
 			print_usage_plugin
 		else
-			plugin_name=$(echo ${plugin_h} | sed -e 's/.*bli_plugin_//' -e 's/\.h//')
+			plugin_name=$(echo "${plugin_h}" | sed -e 's/.*bli_plugin_//' -e 's/\.h//')
 		fi
 	else
 		plugin_name="${1}"
@@ -5396,7 +5397,7 @@ plugin_main()
 		if [ -e config_registry ] && [ ${force_flag} == '0' ]; then
 			maybe_echo "already done"
 		else
-			cp ${sharedir}/blis/config_registry config_registry
+			cp "${sharedir}"/blis/config_registry config_registry
 			maybe_echo "done"
 		fi
 
@@ -5408,9 +5409,9 @@ plugin_main()
 			maybe_echo "already done"
 		else
 			if [ ${examples_flag} == '1' ]; then
-				cp ${sharedir}/blis/plugin/bli_plugin_register.c bli_plugin_register.c
+				cp "${sharedir}"/blis/plugin/bli_plugin_register.c bli_plugin_register.c
 			else
-				strip_examples ${sharedir}/blis/plugin/bli_plugin_register.c bli_plugin_register.c
+				strip_examples "${sharedir}/blis/plugin/bli_plugin_register.c" bli_plugin_register.c
 			fi
 			perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|;" -e "s|\@plugin_name\@|${plugin_name}|;" bli_plugin_register.c
 			maybe_echo "done"
@@ -5418,15 +5419,15 @@ plugin_main()
 
 		# -- bli_plugin_<name>.h --
 
-		if [ -e bli_plugin_${plugin_name}.h ] && [ ${force_flag} == '0' ]; then
+		if [ -e "bli_plugin_${plugin_name}.h" ] && [ ${force_flag} == '0' ]; then
 			maybe_echo "${script_name}: creating bli_plugin_${plugin_name}.h from ${sharedir}/blis/plugin/bli_plugin.h.in...already done"
 		else
 			if [ ${examples_flag} == '1' ]; then
-				generate_config_file ${sharedir}/blis/plugin/bli_plugin.h.in bli_plugin_${plugin_name}.h
+				generate_config_file "${sharedir}/blis/plugin/bli_plugin.h.in" "bli_plugin_${plugin_name}.h"
 			else
-				generate_config_file ${sharedir}/blis/plugin/bli_plugin.h.in bli_plugin_${plugin_name}_.h
-				strip_examples bli_plugin_${plugin_name}_.h bli_plugin_${plugin_name}.h
-				rm bli_plugin_${plugin_name}_.h
+				generate_config_file "${sharedir}/blis/plugin/bli_plugin.h.in" "bli_plugin_${plugin_name}_.h"
+				strip_examples "bli_plugin_${plugin_name}_.h" "bli_plugin_${plugin_name}.h"
+				rm "bli_plugin_${plugin_name}_.h"
 			fi
 		fi
 
@@ -5441,14 +5442,14 @@ plugin_main()
 			files="bli_plugin_init_ref.c"
 		fi
 		for file in ${files}; do
-			if [ ! -e ref_kernels/${file} ] || [ ${force_flag} == '1' ]; then
+			if [ ! -e "ref_kernels/${file}" ] || [ ${force_flag} == '1' ]; then
 				mkdir -p ref_kernels
 				if [ ${examples_flag} == '1' ]; then
-					cp ${sharedir}/blis/plugin/${file} ref_kernels/${file}
+					cp "${sharedir}/blis/plugin/${file}" "ref_kernels/${file}"
 				else
-					strip_examples ${sharedir}/blis/plugin/${file} ref_kernels/${file}
+					strip_examples "${sharedir}/blis/plugin/${file}" "ref_kernels/${file}"
 				fi
-				perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|;" -e "s|\@plugin_name\@|${plugin_name}|;" ref_kernels/${file}
+				perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|;" -e "s|\@plugin_name\@|${plugin_name}|;" "ref_kernels/${file}"
 				done="false"
 			fi
 		done
@@ -5466,28 +5467,28 @@ plugin_main()
 		for config in ${full_config_list}; do
 			maybe_echo -n "${script_name}:   config/${config}..."
 
-			if [ -e config/${config}/make_defs.mk ] && [ ${force_flag} == '0' ]; then
+			if [ -e "config/${config}/make_defs.mk" ] && [ ${force_flag} == '0' ]; then
 				maybe_echo "already done"
 			else
-				mkdir -p config/${config}
-				cp ${sharedir}/blis/config/${config}/make_defs.mk config/${config}
+				mkdir -p "config/${config}"
+				cp "${sharedir}/blis/config/${config}/make_defs.mk" "config/${config}"
 				maybe_echo "done"
 			fi
 		done
 
 		for config in ${full_subconfig_list}; do
-			if [ ! -e config/${config}/bli_plugin_init_${config}.c ] || [ ${force_flag} == '1' ]; then
-				if [ ${config} != zen3 ] || [ ${examples_flag} == '0' ]; then
-					strip_examples ${sharedir}/blis/plugin/bli_plugin_init_zen3.c config/${config}/bli_plugin_init_${config}.c
-					perl -pi -e "s/zen3/${config}/g" config/${config}/bli_plugin_init_${config}.c
+			if [ ! -e "config/${config}/bli_plugin_init_${config}.c" ] || [ ${force_flag} == '1' ]; then
+				if [ "${config}" != zen3 ] || [ ${examples_flag} == '0' ]; then
+					strip_examples "${sharedir}/blis/plugin/bli_plugin_init_zen3.c" "config/${config}/bli_plugin_init_${config}.c"
+					perl -pi -e "s/zen3/${config}/g" "config/${config}/bli_plugin_init_${config}.c"
 				else
-					cp ${sharedir}/blis/plugin/bli_plugin_init_zen3.c config/${config}/bli_plugin_init_${config}.c
+					cp "${sharedir}/blis/plugin/bli_plugin_init_zen3.c" "config/${config}/bli_plugin_init_${config}.c"
 				fi
-				perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|;" -e "s|\@plugin_name\@|${plugin_name}|;" config/${config}/bli_plugin_init_${config}.c
+				perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|;" -e "s|\@plugin_name\@|${plugin_name}|;" "config/${config}/bli_plugin_init_${config}.c"
 			fi
 
-			if [ ! -e config/${config}/bli_kernel_defs_${config}.h ] || [ ${force_flag} == '1' ]; then
-				cp ${sharedir}/blis/config/${config}/bli_kernel_defs_${config}.h config/${config}/bli_kernel_defs_${config}.h
+			if [ ! -e "config/${config}/bli_kernel_defs_${config}.h" ] || [ ${force_flag} == '1' ]; then
+				cp "${sharedir}/blis/config/${config}/bli_kernel_defs_${config}.h" "config/${config}/bli_kernel_defs_${config}.h"
 			fi
 		done
 
@@ -5498,17 +5499,17 @@ plugin_main()
 		for kernels in ${full_kernel_list}; do
 			maybe_echo -n "${script_name}:   kernels/${kernels}..."
 
-			if [ -e kernels/${kernels} ] && [ ${force_flag} == '0' ]; then
+			if [ -e kernels/"${kernels}" ] && [ ${force_flag} == '0' ]; then
 				maybe_echo "already done"
 			else
-				mkdir -p kernels/${kernels}
+				mkdir -p kernels/"${kernels}"
 				maybe_echo "done"
 			fi
 		done
 
 		if [ ${examples_flag} == '1' ]; then
 			if [ ! -e kernels/zen3/my_kernel_1_zen3.c ] || [ ${force_flag} == '1' ]; then
-				cp ${sharedir}/blis/plugin/my_kernel_1_zen3.c kernels/zen3
+				cp "${sharedir}"/blis/plugin/my_kernel_1_zen3.c kernels/zen3
 				perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|;" -e "s|\@plugin_name\@|${plugin_name}|;" kernels/zen3/my_kernel_1_zen3.c
 			fi
 		fi
@@ -5530,7 +5531,7 @@ plugin_main()
 		if [ -e Makefile ] && [ ${force_flag} == '0' ]; then
 			maybe_echo "already done"
 		else
-			cp ${sharedir}/blis/plugin/Makefile Makefile
+			cp "${sharedir}"/blis/plugin/Makefile Makefile
 			maybe_echo "done"
 		fi
 
@@ -5548,7 +5549,7 @@ plugin_main()
 
 		build_and_check_configurations
 
-		generate_config_file ${sharedir}/blis/plugin/config.mk.in config.mk
+		generate_config_file "${sharedir}/blis/plugin/config.mk.in" config.mk
 
 		# -- Makefile fragments --
 

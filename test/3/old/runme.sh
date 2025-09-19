@@ -17,7 +17,7 @@ sys="blis"
 #export GOMP_CPU_AFFINITY="0 2 4 6 8 10 12 14 16 18 20 22 1 3 5 7 9 11 13 15 17 19 21 23"
 #export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103"
 
-if [ ${sys} = "blis" ]; then
+if [ "${sys}" = "blis" ]; then
 
 	export GOMP_CPU_AFFINITY="0-3"
 
@@ -26,7 +26,7 @@ if [ ${sys} = "blis" ]; then
 	         jc2ic1jr1_1s
 	         jc2ic2jr1_2s"
 
-elif [ ${sys} = "stampede2" ]; then
+elif [ "${sys}" = "stampede2" ]; then
 
 	echo "Need to set GOMP_CPU_AFFINITY."
 	exit 1
@@ -36,7 +36,7 @@ elif [ ${sys} = "stampede2" ]; then
 	         jc4ic6jr1_1s
 	         jc4ic12jr1_2s"
 
-elif [ ${sys} = "lonestar5" ]; then
+elif [ "${sys}" = "lonestar5" ]; then
 
 	export GOMP_CPU_AFFINITY="0-23"
 
@@ -48,7 +48,7 @@ elif [ ${sys} = "lonestar5" ]; then
 	         jc2ic3jr2_1s
 	         jc4ic3jr2_2s"
 
-elif [ ${sys} = "ul252" ]; then
+elif [ "${sys}" = "ul252" ]; then
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
 	export GOMP_CPU_AFFINITY="0-51"
@@ -58,7 +58,7 @@ elif [ ${sys} = "ul252" ]; then
 	         jc2ic13jr1_1s
 	         jc4ic13jr1_2s"
 
-elif [ ${sys} = "ul264" ]; then
+elif [ "${sys}" = "ul264" ]; then
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
 	export GOMP_CPU_AFFINITY="0-63"
@@ -68,7 +68,7 @@ elif [ ${sys} = "ul264" ]; then
 	         jc1ic8jr4_1s
 	         jc2ic8jr4_2s"
 
-elif [ ${sys} = "ul2128" ]; then
+elif [ "${sys}" = "ul2128" ]; then
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
 	export GOMP_CPU_AFFINITY="0-127"
@@ -143,7 +143,7 @@ for th in ${threads}; do
 	tsuf=${th##*_}; thinfo=${th%%_*}
 
 	# Identify each threading parameter and insert a space before it.
-	thsep=$(echo -e ${thinfo} | sed -e "s/\([jip][cr]\)/ \1/g" )
+	thsep=$(echo -e "${thinfo}" | sed -e "s/\([jip][cr]\)/ \1/g" )
 
 	nt=1
 
@@ -152,26 +152,26 @@ for th in ${threads}; do
 		# Given the current string, which identifies a loop and the
 		# number of ways of parallelism for that loop, strip out
 		# the ways and loop separately to identify each.
-		loop=$(echo -e ${loopnum} | sed -e "s/[0-9]//g" )
-		num=$(echo -e ${loopnum} | sed -e "s/[a-z]//g" )
+		loop=$(echo -e "${loopnum}" | sed -e "s/[0-9]//g" )
+		num=$(echo -e "${loopnum}" | sed -e "s/[a-z]//g" )
 
 		# Construct a string that we can evaluate to set the number
 		# of ways of parallelism for the current loop.
 		loop_nt_eq_num="${loop}_nt=${num}"
 
 		# Update the total number of threads.
-		nt=$(expr ${nt} \* ${num})
+		nt=$((nt * num))
 
 		# Evaluate the string to assign the ways to the variable.
-		eval ${loop_nt_eq_num}
+		eval "${loop_nt_eq_num}"
 
 	done
 
 	# Find a binary using the test driver prefix and the threading suffix.
 	# Then strip everything before and after the max problem size that's
 	# encoded into the name of the binary.
-	binname=$(ls -1 ${exec_root}_*_${tsuf}.x | head -n1)
-	temp1=${binname#${exec_root}_*_}
+	binname=$(ls -1 "${exec_root}"_*_"${tsuf}".x | head -n1)
+	temp1=${binname#"${exec_root}"_*_}
 	psize=${temp1%%_*}
 
 	# Sanity check: If 'ls' couldn't find any binaries, then the user
@@ -205,7 +205,7 @@ for th in ${threads}; do
 				fi
 
 				# Find the threading suffix by probing the executable.
-				binname=$(ls ${exec_root}_${dt}${op}_*_${im}_${tsuf}.x)
+				binname=$(ls "${exec_root}"_"${dt}""${op}"_*_"${im}"_"${tsuf}".x)
 
 				#echo "found file: ${binname} with suffix ${suf}"
 
@@ -236,7 +236,7 @@ for th in ${threads}; do
 					# properly if GOMP_CPU_AFFINITY is set. So we temporarily
 					# unset it here if we are about to execute OpenBLAS, but
 					# otherwise restore it.
-					if [ ${im} = "openblas" ]; then
+					if [ "${im}" = "openblas" ]; then
 						unset GOMP_CPU_AFFINITY
 					else
 						export GOMP_CPU_AFFINITY="${GOMP_CPU_AFFINITYsave}"
@@ -265,13 +265,12 @@ for th in ${threads}; do
 
 				# Run executable with or without numactl, depending on how
 				# the numactl variable was set.
-				${numactl} ./${exec_name} > ${out_file}
+				"${numactl}" ./"${exec_name}" > "${out_file}"
 
 				# Bedtime!
-				sleep ${delay}
+				sleep "${delay}"
 
 			done
 		done
 	done
 done
-

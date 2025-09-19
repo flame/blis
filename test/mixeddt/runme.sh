@@ -23,7 +23,7 @@ sys="tx2"
 export GOMP_CPU_AFFINITY="0 1 2 3"
 
 # Modify LD_LIBRARY_PATH.
-if [ ${sys} = "blis" ]; then
+if [ "${sys}" = "blis" ]; then
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
 
@@ -35,7 +35,7 @@ if [ ${sys} = "blis" ]; then
 	ir_nt=1 # 1st loop
 	nt=4
 
-elif [ ${sys} = "stampede2" ]; then
+elif [ "${sys}" = "stampede2" ]; then
 
 	echo "Need to set GOMP_CPU_AFFINITY."
 	exit 1
@@ -46,7 +46,7 @@ elif [ ${sys} = "stampede2" ]; then
 	ir_nt=1 # 1st loop
 	nt=48
 
-elif [ ${sys} = "lonestar5" ]; then
+elif [ "${sys}" = "lonestar5" ]; then
 
 	echo "Need to set GOMP_CPU_AFFINITY."
 	exit 1
@@ -60,7 +60,7 @@ elif [ ${sys} = "lonestar5" ]; then
 	ir_nt=1 # 1st loop
 	nt=24
 
-elif [ ${sys} = "ul252" ]; then
+elif [ "${sys}" = "ul252" ]; then
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
 	#export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103"
@@ -73,7 +73,7 @@ elif [ ${sys} = "ul252" ]; then
 	ir_nt=1 # 1st loop
 	#nt=52
 	nt=26
-elif [ ${sys} = "tx2" ]; then
+elif [ "${sys}" = "tx2" ]; then
 
 	export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55"
 
@@ -134,7 +134,7 @@ for th in ${threads}; do
 			for op in ${test_ops}; do
 
 				# Set the number of threads according to th.
-				if [ ${th} = "mt" ]; then
+				if [ "${th}" = "mt" ]; then
 
 					export BLIS_JC_NT=${jc_nt}
 					export BLIS_IC_NT=${ic_nt}
@@ -144,7 +144,7 @@ for th in ${threads}; do
 					export OPENBLAS_NUM_THREADS=${nt}
 
 					# Unset GOMP_CPU_AFFINITY for OpenBLAS.
-					if [ ${im} = "openblas" ]; then
+					if [ "${im}" = "openblas" ]; then
 						unset GOMP_CPU_AFFINITY
 					else
 						export GOMP_CPU_AFFINITY=${GOMP_CPU_AFFINITYsave}
@@ -168,7 +168,7 @@ for th in ${threads}; do
 				echo "Running (nt = ${OMP_NUM_THREADS}) ./${exec_name} > ${out_file}"
 
 				# Run executable.
-				./${exec_name} > ${out_file}
+				./"${exec_name}" > "${out_file}"
 
 				#sleep 1
 

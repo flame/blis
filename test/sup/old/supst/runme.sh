@@ -91,19 +91,19 @@ for th in ${threads}; do
 										# Construct the shape substring (e.g. m6npkp)
 										shstr=""
 
-										if [ ${chm} = "s" ]; then
+										if [ "${chm}" = "s" ]; then
 											shstr="${shstr}m${sm}"
 										else
 											shstr="${shstr}mp"
 										fi
 
-										if [ ${chn} = "s" ]; then
+										if [ "${chn}" = "s" ]; then
 											shstr="${shstr}n${sn}"
 										else
 											shstr="${shstr}np"
 										fi
 
-										if [ ${chk} = "s" ]; then
+										if [ "${chk}" = "s" ]; then
 											shstr="${shstr}k${sk}"
 										else
 											shstr="${shstr}kp"
@@ -120,9 +120,9 @@ for th in ${threads}; do
 										echo "Running (nt = ${nt}) ./${exec_name} > ${out_file}"
 
 										# Run executable.
-										./${exec_name} > ${out_file}
+										"./${exec_name}" > "${out_file}"
 
-										sleep ${delay}
+										sleep "${delay}"
 
 									done
 								done
@@ -134,4 +134,3 @@ for th in ${threads}; do
 		done
 	done
 done
-

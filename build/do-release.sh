@@ -41,7 +41,7 @@
 
 print_usage()
 {
-	echo <<- EOF
+	cat <<-EOF
 
 	$script_name
 
@@ -177,12 +177,12 @@ main()
 
 		echo "${script_name}: updating version file '${version_file}'."
 		if [ -z "$dry_run_flag" ]; then
-			echo "${new_version_str}" > ${version_file}
+			echo "${new_version_str}" > "${version_file}"
 		fi
 
 		echo "${script_name}: executing: git commit -m \"Version file update (${new_version_str})\" ${version_file}."
 		if [ -z "$dry_run_flag" ]; then
-			git commit -m "Version file update (${new_version_str})" ${version_file}
+			git commit -m "Version file update (${new_version_str})" "${version_file}"
 		fi
 
 		git_commit_str=$(git describe --always)
@@ -190,12 +190,12 @@ main()
 
 		echo "${script_name}: updating '${changelog_file}'."
 		if [ -z "$dry_run_flag" ]; then
-			git log --no-decorate > ${changelog_file}
+			git log --no-decorate > "${changelog_file}"
 		fi
 
 		echo "${script_name}: executing: git commit -m \"CHANGELOG update (${new_version_str})\" ${changelog_file}."
 		if [ -z "$dry_run_flag" ]; then
-			git commit -m "CHANGELOG update (${new_version_str})" ${changelog_file}
+			git commit -m "CHANGELOG update (${new_version_str})" "${changelog_file}"
 		fi
 
 		git_commit_str=$(git describe --always)
