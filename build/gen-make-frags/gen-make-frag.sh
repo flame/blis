@@ -145,7 +145,7 @@ gen_mkfile()
 
 
 	# Make sure the target directory exists
-	mkdir -p $this_frag_dir
+	mkdir -p "$this_frag_dir"
 
 
 	# Strip the leading path from the template makefile path to get its
@@ -168,7 +168,7 @@ gen_mkfile()
 	local_src_files=""
 
 	# Get a listing of the items in $this_dir
-	sub_items=$(ls $this_dir)
+	sub_items=$(ls "$this_dir")
 
 	# Generate a list of the source files we've chosen
 	for item in $sub_items; do
@@ -194,7 +194,7 @@ gen_mkfile()
 	cur_frag_sub_dirs=""
 
 	# Capture the relative path listing of items in $this_dir.
-	sub_items=$(ls $this_dir)
+	sub_items=$(ls "$this_dir")
 
 	# Determine the fragment's subdirectory names, if any exist
 	for item in $sub_items; do
@@ -204,8 +204,8 @@ gen_mkfile()
 
 		# If item is a directory, and it's not in the ignore list, descend into it.
 		#if [ -d $item_path ] && ! should_ignore $item; then
-		if [ "$recursive_flag" = "1" ] && [ -d $item_path ] && ! is_in_list $item "$ignore_dirs" ; then
-			cur_frag_sub_dirs=$cur_frag_sub_dirs" "$item
+		if [ "$recursive_flag" = "1" ] && [ -d "$item_path" ] && ! is_in_list $item "$ignore_dirs" ; then
+			cur_frag_sub_dirs="$cur_frag_sub_dirs $item"
 		fi
 	done
 
@@ -230,11 +230,11 @@ gen_mkfile()
 	# Copy the template makefile to the directory given, using the new
 	# makefile name we just created above.
 	if [ -z "$dry_run_flag" ]; then
-		cat $mkfile_frag_tmpl_path | sed -e s/"$mkfile_fragment_cur_dir_name_anchor"/"$cur_frag_dir"/g \
-		                           | sed -e s/"$mkfile_fragment_sub_dir_names_anchor"/"$cur_frag_sub_dirs"/g \
-		                           | sed -e s/"$mkfile_fragment_local_src_files_anchor"/"$local_src_files"/g \
-		                           | sed -e s/"$mkfile_fragment_src_var_name_anchor"/"$mkfile_frag_var_name"/g \
-		                           > $mkfile_frag_path
+		cat "$mkfile_frag_tmpl_path" | sed -e s/"$mkfile_fragment_cur_dir_name_anchor"/"$cur_frag_dir"/g \
+		                             | sed -e s/"$mkfile_fragment_sub_dir_names_anchor"/"$cur_frag_sub_dirs"/g \
+		                             | sed -e s/"$mkfile_fragment_local_src_files_anchor"/"$local_src_files"/g \
+		                             | sed -e s/"$mkfile_fragment_src_var_name_anchor"/"$mkfile_frag_var_name"/g \
+		                             > "$mkfile_frag_path"
 	fi
 
 
@@ -275,11 +275,11 @@ gen_mkfiles()
 
 
 	# Call our function to generate a makefile in the directory given.
-	gen_mkfile "${src_var_name}_$SRC" $cur_dir $this_frag_dir
+	gen_mkfile "${src_var_name}_$SRC" "$cur_dir" "$this_frag_dir"
 
 
 	# Get a listing of the directories in $directory
-	sub_items=$(ls $cur_dir)
+	sub_items=$(ls "$cur_dir")
 
 	# Descend into the contents of root_dir to generate the subdirectories'
 	# makefile fragments.
@@ -288,7 +288,7 @@ gen_mkfiles()
 		# If item is a directory, and it's not in the ignore list, descend into it.
 		#if [ -d "$cur_dir/$item" ] && ! should_ignore $item; then
 		if [ -d "$cur_dir/$item" ] && ! is_in_list $item "$ignore_dirs" ; then
-			gen_mkfiles $cur_dir/$item $this_frag_dir/$item
+			gen_mkfiles "$cur_dir/$item" "$this_frag_dir/$item"
 		fi
 	done
 
@@ -533,7 +533,7 @@ main()
 
 
 	# Call our function to generate a makefile in the root directory given.
-	gen_mkfile "${src_var_name}_$SRC" $root_dir $frag_dir
+	gen_mkfile "${src_var_name}_$SRC" "$root_dir" "$frag_dir"
 
 
 	# If we were asked to act recursively, then continue processing
@@ -541,7 +541,7 @@ main()
 	if [ -n "$recursive_flag" ]; then
 
 		# Get a listing of the directories in $directory.
-		sub_items=$(ls $root_dir)
+		sub_items=$(ls "$root_dir")
 
 		# Descend into the contents of root_dir to generate the makefile
 		# fragments.
@@ -551,7 +551,7 @@ main()
 			#if [ -d "$root_dir/$item" ] && ! should_ignore $item ; then
 			if [ -d "$root_dir/$item" ] && ! is_in_list $item "$ignore_dirs" ; then
 
-				gen_mkfiles $root_dir/$item $frag_dir/$item
+				gen_mkfiles "$root_dir/$item" "$frag_dir/$item"
 			fi
 		done
 	fi

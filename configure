@@ -1279,7 +1279,7 @@ auto_detect()
 		rootdir=${pair%:*}
 
 		filepath=$(find "${dist_path}/${rootdir}" -name "${filename}")
-		c_src_filepaths="${c_src_filepaths} ${filepath}"
+		c_src_filepaths="${c_src_filepaths} \"${filepath}\""
 	done
 
 	# Accumulate a list of header files we'll need to locate along with
@@ -1306,7 +1306,7 @@ auto_detect()
 
 		filepath=$(find "${dist_path}/${rootdir}" -name "${filename}")
 		path=${filepath%/*}
-		c_hdr_paths="${c_hdr_paths} -I${path}"
+		c_hdr_paths="${c_hdr_paths} \"-I${path}\""
 	done
 
 	# Define the executable name.
@@ -1344,7 +1344,7 @@ auto_detect()
 	# Special case for RISC-V, whose architecture can be detected with
 	# preprocessor macros alone. This avoids having to run RISC-V binaries
 	# on a cross-compiler host. Returns "generic" if RISC-V not detected.
-	riscv_config=$(${cmd} -E "${dist_path}/build/detect/riscv/bli_riscv_cpuid.h" |
+	riscv_config=$(eval "${cmd} -E \"${dist_path}/build/detect/riscv/bli_riscv_cpuid.h\"" |
 	               grep '^[^#]')
 	if [[ $riscv_config != *generic* ]]; then
 		echo "${riscv_config}"
@@ -4614,7 +4614,7 @@ blis_main()
 		#if [ -d "${kernels_dirpath}/${conf}" ]; then
 
 		echo "${script_name}: mirroring ${kernels_dirpath}/${kern} to ${obj_kernels_dirpath}/${kern}"
-		${mirror_tree_sh} "${kernels_dirpath}/${kern}" "${obj_kernels_dirpath}/${kern}"
+		"${mirror_tree_sh}" "${kernels_dirpath}/${kern}" "${obj_kernels_dirpath}/${kern}"
 		#else
 		#	echo "${script_name}: mirroring ${kernels_dirpath}/${conf} skipped... directory does not exist"
 		#fi
@@ -5547,10 +5547,10 @@ plugin_main()
 
 		# The extra '/.' on the FRAME call is necessary to trick create_makefile_fragments
 		# into not taking the last entry in ${plugin_dir} as the 'current directory name'.
-		create_makefile_fragment FRAME ${plugin_dir}/. obj/${config_name} false
-		create_makefile_fragment CONFIG ${config_dirpath} obj/${config_name}/config
-		create_makefile_fragment KERNELS ${kernels_dirpath} obj/${config_name}/kernels
-		create_makefile_fragment REFKERN ${refkern_dirpath} obj/${config_name}/ref_kernels
+		create_makefile_fragment FRAME "${plugin_dir}/." "obj/${config_name} false"
+		create_makefile_fragment CONFIG "${config_dirpath}" "obj/${config_name}/config"
+		create_makefile_fragment KERNELS "${kernels_dirpath}" "obj/${config_name}/kernels"
+		create_makefile_fragment REFKERN "${refkern_dirpath}" "obj/${config_name}/ref_kernels"
 
 	fi
 

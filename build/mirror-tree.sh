@@ -32,6 +32,8 @@
 #
 #
 
+set -e
+
 print_usage()
 {
 	local script_name
@@ -88,7 +90,7 @@ main()
 	
 	
 	# If the root new directory does not exist, then create it.
-	if [ ! -d $n_dir ]; then
+	if [ ! -d "$n_dir" ]; then
 		
 		# Be verbose, if -v was one of the command line options.
 		if [ -n "$verbose_flag" ]; then
@@ -98,7 +100,7 @@ main()
 		
 		# Make the root new directory. Create the parent directories if
 		# they do not exist with the -p option.
-		mkdir -p $n_dir
+		mkdir -p "$n_dir"
 	fi
 	
 	
@@ -111,7 +113,7 @@ main()
 	
 	# Begin recursion, starting with the contents of the existing
 	# directory.
-	mirror_tree "$(ls $e_dir)"
+	mirror_tree "$(ls "$e_dir")"
 	
 	
 	# Exit peacefully.
@@ -134,7 +136,7 @@ mirror_tree()
 		
 		# If the current existing directory exists, then create a
 		# corresponding subdirectory in new directory.
-		if [ -d ${cur_e_dir} ]; then
+		if [ -d "${cur_e_dir}" ]; then
 			
 			# Be verbose, if -v was one of the command line options.
 			if [ -n "$verbose_flag" ]; then
@@ -150,7 +152,7 @@ mirror_tree()
 			
 			
 			# Continue recursively on the contents of cur_e_dir.
-			mirror_tree "$(ls $cur_e_dir)"
+			mirror_tree "$(ls "$cur_e_dir")"
 		fi
 		
 		# Delete the end of the path, up to the first / character to
