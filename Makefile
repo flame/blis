@@ -543,16 +543,16 @@ ifeq ($(ALL_MAKE_DEFS_MK_PRESENT),no)
 endif
 
 make-symlinks:
-	@rm -f .dist_path
-	@ln -s "$(DIST_PATH_REAL)" .dist_path
+#	@rm -f .dist_path
+#	@ln -s "$(DIST_PATH_REAL)" .dist_path
 
 make-install-symlinks:
-	@rm -f .install_libdir
-	@rm -f .install_incdir
-	@rm -f .install_sharedir
-	@ln -s "$(INSTALL_LIBDIR_REAL)" .install_libdir
-	@ln -s "$(INSTALL_INCDIR_REAL)" .install_incdir
-	@ln -s "$(INSTALL_SHAREDIR_REAL)" .install_sharedir
+#	@rm -f .install_libdir
+#	@rm -f .install_incdir
+#	@rm -f .install_shredir
+#	@ln -s "$(INSTALL_LIBDIR_REAL)" .install_libdir
+#	@ln -s "$(INSTALL_INCDIR_REAL)" .install_incdir
+#	@ln -s "$(INSTALL_SHAREDIR_REAL)" .install_sharedir
 	@mkdir -p "$(INSTALL_LIBDIR_REAL)"
 	@mkdir -p "$(INSTALL_INCDIR_REAL)"
 	@mkdir -p "$(INSTALL_SHAREDIR_REAL)"
