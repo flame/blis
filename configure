@@ -4707,7 +4707,7 @@ blis_main()
 
     rm -f .dist_path; ln -s "${dist_path}" .dist_path
     rm -f .install_libdir; ln -s "${libdir}" .install_libdir
-    rm -f .install_incdir; ln -s "${includedir}" .install_libdir
+    rm -f .install_incdir; ln -s "${includedir}" .install_incdir
     rm -f .install_sharedir; ln -s "${sharedir}" .install_sharedir
 
 	# -- Handle out-of-tree builds ---------------------------------------------
