@@ -36,14 +36,12 @@ set -e
 
 print_usage()
 {
-	local script_name
-	
 	# Get the script name
 	script_name=${0##*/}
-	
+
 	# Echo usage info
 	echo " "
-	echo " "${script_name}
+	echo " ${script_name}"
 	echo " "
 	echo " Field G. Van Zee"
 	echo " "
@@ -72,7 +70,6 @@ main()
 		case $opt in
 			v  ) verbose_flag=1 ;;
 			\? ) print_usage
-			     exit 1
 		esac
 	done
 	shift $(($OPTIND - 1))
@@ -146,8 +143,8 @@ mirror_tree()
 			
 			# Make the new subdirectory, but only if it doesn't
 			# already exist.
-			if [ ! -d $cur_n_dir ]; then
-				mkdir $cur_n_dir
+			if [ ! -d "$cur_n_dir" ]; then
+				mkdir "$cur_n_dir"
 			fi
 			
 			

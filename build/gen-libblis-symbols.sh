@@ -3,7 +3,7 @@
 get_config_var()
 {
 	# Parse the compiler assigned to the CC variable within the config.mk file.
-	echo "$(grep "^ *$1 *:=" config.mk | sed 's/'$1' *:= *//')"
+	grep "^ *$1 *:=" config.mk | sed 's/'"$1"' *:= *//'
 }
 
 main()
@@ -17,7 +17,7 @@ main()
 	CONFIG_NAME=$(get_config_var CONFIG_NAME)
 	BLIS_H_FLAT="include/${CONFIG_NAME}/blis.h"
 
-	if [ ! -e ${BLIS_H_FLAT} ]; then
+	if [ ! -e "${BLIS_H_FLAT}" ]; then
 		echo "No monolithic blis.h file detected at ${BLIS_H_FLAT}; have you run 'make'?"
 		exit 1
 	fi
@@ -42,7 +42,7 @@ main()
 	#	| sort
 	#	| uniq
 	#
-	${CC} -DBLIS_ENABLE_CBLAS=1 -DBLIS_ENABLE_BLAS=1 -E ${BLIS_H_FLAT} \
+	${CC} -DBLIS_ENABLE_CBLAS=1 -DBLIS_ENABLE_BLAS=1 -E "${BLIS_H_FLAT}" \
 		| tr ';' '\n' \
 		| grep visibility \
 		| sed -E \

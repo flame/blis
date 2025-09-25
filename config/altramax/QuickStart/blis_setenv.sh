@@ -29,7 +29,7 @@ else
 fi
 
 if [ -f "$file_path_and_name" ] ; then
-	. $file_path_and_name quiet
+	.  "$file_path_and_name" quiet
 else
   echo "ERROR - this file is not being executed from a blis home directory."
   echo "If you cannot use this script in a home directory, you can hardcode"
@@ -55,11 +55,11 @@ if [ "$quiet_setenv" = "" ]; then
   echo "BLIS_HOME set to $BLIS_HOME"
   echo "BLIS_INC set to $BLIS_INC"
   echo "-----------------------------------------------------------------"
-  ls -l $BLIS_INC
+  ls -l "$BLIS_INC"
   echo "-----------------------------------------------------------------"
   echo "BLIS_LIB set to $BLIS_LIB"
   echo "-----------------------------------------------------------------"
-  ls -l $BLIS_LIB
+  ls -l "$BLIS_LIB"
   echo "-----------------------------------------------------------------"
 fi
 
@@ -108,7 +108,7 @@ elif (($firmware == 205)); then
     arrayCoreIDs=(0 1 64 65 8 9 72 73 2 3 66 67 10 11 74 75 4 5 68 69 12 13 76 77 6 7 70 71 14 15 78 79 16 17 80 81 24 25 88 89 18 19 82 83 26 27 90 91 20 21 84 85 28 29 92 93 22 23 86 87 30 31 94 95 32 33 96 97 40 41 104 105 34 35 98 99 42 43 106 107 36 37 100 101 44 45 108 109 38 39 102 103 46 47 110 111 48 49 112 113 52 53 116 117 50 51 114 115 54 55 118 119 56 57 120 121 60 61 124 125 58 59 122 123 62 63 126 127 128 129 192 193 136 137 200 201 130 131 194 195 138 139 202 203 132 133 196 197 140 141 204 205 134 135 198 199 142 143 206 207 144 145 208 209 152 153 216 217 146 147 210 211 154 155 218 219 148 149 212 213 156 157 220 221 150 151 214 215 158 159 222 223 160 161 224 225 168 169 232 233 162 163 226 227 170 171 234 235 164 165 228 229 172 173 236 237 166 167 230 231 174 175 238 239 176 177 240 241 180 181 244 245 178 179 242 243 182 183 246 247 184 185 248 249 188 189 252 253 186 187 250 251 190 191 254 255)
 else
   echo "ERROR - UNSUPPORTED FIRMWARE $firmware"
-  exit -1
+  exit 2
 fi
 
 # Brief check: @ = list all numbers, loop for i in ${}; do ... done
@@ -173,11 +173,10 @@ blis_set_cores_and_sockets() {
   echo "GOMP_CPU_AFFINITY set to $GOMP_CPU_AFFINITY"
   echo "JC/IC/JR = $BLIS_JC_NT/$BLIS_IC_NT/$BLIS_JR_NT"
 	}
-	
+
 # Convenience functions:
-blis_set_cores_1S() { blis_set_cores_and_sockets $1 1 ; }
-blis_set_cores_2S() { blis_set_cores_and_sockets $1 2 ; }
+blis_set_cores_1S() { blis_set_cores_and_sockets "$1" 1 ; }
+blis_set_cores_2S() { blis_set_cores_and_sockets "$1" 2 ; }
 
 # For safety:
 . ./blis_unset_par.sh
-

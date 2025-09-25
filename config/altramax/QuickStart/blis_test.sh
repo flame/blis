@@ -16,7 +16,7 @@ echo "#################################################################"
 # running the test code!
 . ./blis_unset_par.sh quiet
 echo "Switching to directory $BLIS_HOME"
-pushd $BLIS_HOME > /dev/null
+pushd "$BLIS_HOME" > /dev/null
 make check -j
 popd > /dev/null
 

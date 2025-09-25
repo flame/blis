@@ -33,9 +33,9 @@ elif [ ${sys} = "stampede2" ]; then
 	echo "Need to set GOMP_CPU_AFFINITY."
 	exit 1
 
-	threads="jc1ic1jr1_2400
-	         jc4ic6jr1_6000
-	         jc4ic12jr1_8000"
+#	threads="jc1ic1jr1_2400
+#	         jc4ic6jr1_6000
+#	         jc4ic12jr1_8000"
 
 elif [ ${sys} = "lonestar5" ]; then
 
@@ -103,7 +103,7 @@ for th in ${threads}; do
 	psize=${th##*_}; thinfo=${th%%_*}
 
 	# Identify each threading parameter and insert a space before it.
-	thsep=$(echo -e ${thinfo} | sed -e "s/\([jip][cr]\)/ \1/g" )
+	thsep=$(echo -e "${thinfo}" | sed -e "s/\([jip][cr]\)/ \1/g" )
 
 	nt=1
 
@@ -112,18 +112,18 @@ for th in ${threads}; do
 		# Given the current string, which identifies a loop and the
 		# number of ways of parallelism for that loop, strip out
 		# the ways and loop separately to identify each.
-		loop=$(echo -e ${loopnum} | sed -e "s/[0-9]//g" )
-		num=$(echo -e ${loopnum} | sed -e "s/[a-z]//g" )
+		loop=$(echo -e "${loopnum}" | sed -e "s/[0-9]//g" )
+		num=$(echo -e "${loopnum}" | sed -e "s/[a-z]//g" )
 
 		# Construct a string that we can evaluate to set the number
 		# of ways of parallelism for the current loop.
 		loop_nt_eq_num="${loop}_nt=${num}"
 
 		# Update the total number of threads.
-		nt=$(expr ${nt} \* ${num})
+		nt=$((nt * num))
 
 		# Evaluate the string to assign the ways to the variable.
-		eval ${loop_nt_eq_num}
+		eval "${loop_nt_eq_num}"
 
 	done
 
@@ -134,8 +134,7 @@ for th in ${threads}; do
 
 		for im in ${test_impls}; do
 
-			if [ "${dt}" = "s"       -o "${dt}" = "d"         ] && \
-			   [ "${im}" = "1m_blis" ]; then
+			if [[ ${dt} = s || ${dt} = d ]] && [[ ${im} = 1m_blis ]]; then
 				continue
 			fi
 
@@ -151,7 +150,7 @@ for th in ${threads}; do
 				fi
 
 				# Find the threading suffix by probing the executable.
-				binname=$(ls ${exec_root}_${dt}${op}_${psize}_${im}_*.x)
+				binname=$(ls "${exec_root}"_"${dt}""${op}"_"${psize}"_"${im}"_*.x)
 				suf_ext=${binname##*_}
 				suf=${suf_ext%%.*}
 
@@ -185,7 +184,7 @@ for th in ${threads}; do
 					# properly if GOMP_CPU_AFFINITY is set. So we temporarily
 					# unset it here if we are about to execute OpenBLAS, but
 					# otherwise restore it.
-					if [ ${im} = "openblas" ]; then
+					if [ "${im}" = "openblas" ]; then
 						unset GOMP_CPU_AFFINITY
 					else
 						export GOMP_CPU_AFFINITY="${GOMP_CPU_AFFINITYsave}"
@@ -223,4 +222,3 @@ for th in ${threads}; do
 		done
 	done
 done
-

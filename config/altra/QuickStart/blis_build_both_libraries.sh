@@ -10,28 +10,27 @@ echo "##########################################################"
 echo "Saving the pThreads build..."
 echo "##########################################################"
 # Temporarily move the pthreads build
-mkdir $BLIS_HOME/.tempinc
-mkdir $BLIS_HOME/.templib
-mv $BLIS_INC/* $BLIS_HOME/.tempinc/
-mv $BLIS_LIB/* $BLIS_HOME/.templib/
+mkdir "$BLIS_HOME"/.tempinc
+mkdir "$BLIS_HOME"/.templib
+mv "$BLIS_INC"/* "$BLIS_HOME"/.tempinc/
+mv "$BLIS_LIB"/* "$BLIS_HOME"/.templib/
 # And rename the pthread versions of the include and library files
 #echo "##########################################################"
-pushd $BLIS_HOME/.tempinc/ > /dev/null
+pushd "$BLIS_HOME"/.tempinc/ > /dev/null
 echo "Renaming pThread-enabled blis.h -> blisP.h"
 mv blis.h blisP.h
 popd > /dev/null
-pushd $BLIS_HOME/.templib/ > /dev/null
-for f in $(ls -1); do
+pushd "$BLIS_HOME"/.templib/ > /dev/null
+for f in *; do
     destf=${f/blis/blisP}
     echo "Renaming pThread library $f -> $destf"
     mv "$f" "$destf"
 
     # Fix the symbolic links
     if [[ -L "$destf" ]]; then
-        target=$(readlink $destf)
+        target=$(readlink "$destf")
         target=${target/blis/blisP}
-        \rm "$destf"
-        ln -s "$target" "$destf"
+        ln -sf "$target" "$destf"
     fi
 done
 popd > /dev/null
@@ -46,10 +45,10 @@ echo "##########################################################"
 echo "Restoring the pThreads build..."
 echo "##########################################################"
 # And move the pthread versions back
-mv $BLIS_HOME/.tempinc/*  $BLIS_INC/
-mv $BLIS_HOME/.templib/* $BLIS_LIB/
-rmdir $BLIS_HOME/.tempinc
-rmdir $BLIS_HOME/.templib
+mv "$BLIS_HOME"/.tempinc/*  "$BLIS_INC"/
+mv "$BLIS_HOME"/.templib/* "$BLIS_LIB"/
+rmdir "$BLIS_HOME"/.tempinc
+rmdir "$BLIS_HOME"/.templib
 
 . ./blis_test.sh quiet
 . ./blis_setenv.sh
