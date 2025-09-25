@@ -101,7 +101,7 @@ void bli_sgemm_haswell_asm_6x16
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-	GEMM_UKR_SETUP_CT_AMBI( s, 6, 16, true );
+	GEMM_UKR_SETUP_CT_ANY( s, 6, 16, true );
 
 	begin_asm()
 
@@ -967,7 +967,7 @@ void bli_dgemm_haswell_asm_6x8
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-	GEMM_UKR_SETUP_CT_AMBI( d, 6, 8, true );
+	GEMM_UKR_SETUP_CT_ANY( d, 6, 8, true );
 
 	begin_asm()
 
@@ -1713,7 +1713,7 @@ void bli_cgemm_haswell_asm_3x8
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-	GEMM_UKR_SETUP_CT( c, 3, 8, true );
+	GEMM_UKR_SETUP_CT_ANY( c, 3, 8, true );
 
 	begin_asm()
 
@@ -2251,7 +2251,7 @@ void bli_zgemm_haswell_asm_3x4
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-	GEMM_UKR_SETUP_CT( z, 3, 4, true );
+	GEMM_UKR_SETUP_CT_ANY( z, 3, 4, true );
 	begin_asm()
 
 	vzeroall() // zero all xmm/ymm registers.
