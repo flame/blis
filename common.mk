@@ -115,8 +115,8 @@ get-noopt-cxxflags-for   = $(strip $(CXXFLAGS_PRESET) \
                                    $(CINCFLAGS) \
                             )
 
-get-refinit-cflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
-                                   $(call get-noopt-cflags-for,$(1)) \
+get-refinit-cflags-for   = $(strip $(call get-noopt-cflags-for,$(1)) \
+                                   $(call load-var-for,COPTFLAGS,$(1)) \
                                    -DBLIS_CNAME=$(1) \
                                    -DBLIS_CNAME_UPPER=$(shell echo $(1) | tr a-z A-Z) \
                                    $(BUILD_ASANFLAGS) \
@@ -126,8 +126,8 @@ get-refinit-cflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    -include $(CONFIG_PATH)/$(1)/bli_kernel_defs_$(1).h \
                             )
 
-get-refinit-cxxflags-for = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
-                                   $(call get-noopt-cxxflags-for,$(1)) \
+get-refinit-cxxflags-for = $(strip $(call get-noopt-cxxflags-for,$(1)) \
+                                   $(call load-var-for,COPTFLAGS,$(1)) \
                                    -DBLIS_CNAME=$(1) \
                                    -DBLIS_CNAME_UPPER=$(shell echo $(1) | tr a-z A-Z) \
                                    $(BUILD_ASANFLAGS) \
@@ -137,9 +137,9 @@ get-refinit-cxxflags-for = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    -include $(CONFIG_PATH)/$(1)/bli_kernel_defs_$(1).h \
                             )
 
-get-refkern-cflags-for   = $(strip $(call load-var-for,CROPTFLAGS,$(1)) \
+get-refkern-cflags-for   = $(strip $(call get-noopt-cflags-for,$(1)) \
+                                   $(call load-var-for,CROPTFLAGS,$(1)) \
                                    $(call load-var-for,CRVECFLAGS,$(1)) \
-                                   $(call get-noopt-cflags-for,$(1)) \
                                    $(COMPSIMDFLAGS) \
                                    -DBLIS_CNAME=$(1) \
                                    -DBLIS_CNAME_UPPER=$(shell echo $(1) | tr a-z A-Z) \
@@ -150,9 +150,9 @@ get-refkern-cflags-for   = $(strip $(call load-var-for,CROPTFLAGS,$(1)) \
                                    -include $(CONFIG_PATH)/$(1)/bli_kernel_defs_$(1).h \
                             )
 
-get-refkern-cxxflags-for = $(strip $(call load-var-for,CROPTFLAGS,$(1)) \
+get-refkern-cxxflags-for = $(strip $(call get-noopt-cxxflags-for,$(1)) \
+                                   $(call load-var-for,CROPTFLAGS,$(1)) \
                                    $(call load-var-for,CRVECFLAGS,$(1)) \
-                                   $(call get-noopt-cxxflags-for,$(1)) \
                                    $(COMPSIMDFLAGS) \
                                    -DBLIS_CNAME=$(1) \
                                    -DBLIS_CNAME_UPPER=$(shell echo $(1) | tr a-z A-Z) \
@@ -163,8 +163,8 @@ get-refkern-cxxflags-for = $(strip $(call load-var-for,CROPTFLAGS,$(1)) \
                                    -include $(CONFIG_PATH)/$(1)/bli_kernel_defs_$(1).h \
                             )
 
-get-config-cflags-for    = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
-                                   $(call get-noopt-cflags-for,$(1)) \
+get-config-cflags-for    = $(strip $(call get-noopt-cflags-for,$(1)) \
+                                   $(call load-var-for,COPTFLAGS,$(1)) \
                                    -DBLIS_CNAME=$(1) \
                                    -DBLIS_CNAME_UPPER=$(shell echo $(1) | tr a-z A-Z) \
                                    $(BUILD_ASANFLAGS) \
@@ -172,8 +172,8 @@ get-config-cflags-for    = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(BUILD_SYMFLAGS) \
                             )
 
-get-config-cxxflags-for  = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
-                                   $(call get-noopt-cxxflags-for,$(1)) \
+get-config-cxxflags-for  = $(strip $(call get-noopt-cxxflags-for,$(1)) \
+                                   $(call load-var-for,COPTFLAGS,$(1)) \
                                    -DBLIS_CNAME=$(1) \
                                    -DBLIS_CNAME_UPPER=$(shell echo $(1) | tr a-z A-Z) \
                                    $(BUILD_ASANFLAGS) \
@@ -181,32 +181,32 @@ get-config-cxxflags-for  = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(BUILD_SYMFLAGS) \
                             )
 
-get-frame-cflags-for     = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
-                                   $(call get-noopt-cflags-for,$(1)) \
+get-frame-cflags-for     = $(strip $(call get-noopt-cflags-for,$(1)) \
+                                   $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(BUILD_ASANFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                             )
 
-get-frame-cxxflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
-                                   $(call get-noopt-cxxflags-for,$(1)) \
+get-frame-cxxflags-for   = $(strip $(call get-noopt-cxxflags-for,$(1)) \
+                                   $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(BUILD_ASANFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                             )
 
-get-kernel-cflags-for    = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
+get-kernel-cflags-for    = $(strip $(call get-noopt-cflags-for,$(1)) \
+                                   $(call load-var-for,CKOPTFLAGS,$(1)) \
                                    $(call load-var-for,CKVECFLAGS,$(1)) \
-                                   $(call get-noopt-cflags-for,$(1)) \
                                    -DBLIS_CNAME=$(1) \
                                    -DBLIS_CNAME_UPPER=$(shell echo $(1) | tr a-z A-Z) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                             )
 
-get-kernel-cxxflags-for  = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
+get-kernel-cxxflags-for  = $(strip $(call get-noopt-cxxflags-for,$(1)) \
+                                   $(call load-var-for,CKOPTFLAGS,$(1)) \
                                    $(call load-var-for,CKVECFLAGS,$(1)) \
-                                   $(call get-noopt-cxxflags-for,$(1)) \
                                    -DBLIS_CNAME=$(1) \
                                    -DBLIS_CNAME_UPPER=$(shell echo $(1) | tr a-z A-Z) \
                                    $(BUILD_CPPFLAGS) \
@@ -216,23 +216,23 @@ get-kernel-cxxflags-for  = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
 # When compiling addons, we use flags similar to those of general framework
 # source. This ensures that the same code can be linked and run across various
 # sub-configurations.
-get-addon-c99flags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
-                                   $(call get-noopt-cflags-for,$(1)) \
+get-addon-c99flags-for   = $(strip $(call get-noopt-cflags-for,$(1)) \
+                                   $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(CADDONINCFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                             )
-get-addon-cxxflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
-                                   $(call get-noopt-cxxflags-for,$(1)) \
+get-addon-cxxflags-for   = $(strip $(call get-noopt-cxxflags-for,$(1)) \
+                                   $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(CADDONINCFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                             )
 # When compiling addon kernels, we use flags similar to those of kernels
 # flags, except we also include the addon header paths.
-get-addon-kernel-c99flags-for = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
+get-addon-kernel-c99flags-for = $(strip $(call get-noopt-cflags-for,$(1)) \
+                                        $(call load-var-for,CKOPTFLAGS,$(1)) \
                                         $(call load-var-for,CKVECFLAGS,$(1)) \
-                                        $(call get-noopt-cflags-for,$(1)) \
                                         $(CADDONINCFLAGS) \
                                         $(BUILD_CPPFLAGS) \
                                         $(BUILD_SYMFLAGS) \
@@ -244,14 +244,14 @@ get-addon-kernel-c99flags-for = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
 # flags, we should prevent enabling sandboxes for umbrella families by verifying
 # that config_list == config_name if --enable-sandbox is given. THIS ALSO
 # APPLIES TO ADDONS ABOVE.)
-get-sandbox-c99flags-for = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
-                                   $(call get-noopt-cflags-for,$(1)) \
+get-sandbox-c99flags-for = $(strip $(call get-noopt-cflags-for,$(1)) \
+                                   $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(CSANDINCFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                             )
-get-sandbox-cxxflags-for = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
-                                   $(call get-noopt-cxxflags-for,$(1)) \
+get-sandbox-cxxflags-for = $(strip $(call get-noopt-cxxflags-for,$(1)) \
+                                   $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(CSANDINCFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
@@ -268,8 +268,8 @@ get-sandbox-cxxflags-for = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
 #   needed when a shared library is being compiled/linked; and
 # - BUILD_ASANFLAGS, which contains a flag that causes the compiler to
 #   insert instrumentation for memory error detection.
-get-user-cflags-for      = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
-                                   $(call get-noopt-cflags-for,$(1)) \
+get-user-cflags-for      = $(strip $(call get-noopt-cflags-for,$(1)) \
+                                   $(call load-var-for,COPTFLAGS,$(1)) \
                             )
 
 # Define functions that return messages appropriate for each non-verbose line
