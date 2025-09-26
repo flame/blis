@@ -47,9 +47,25 @@
 " fmla  v"#C0".2d, v"#A".2d, v"#B".d[0] \n\t" \
 " fmla  v"#C1".2d, v"#A".2d, v"#B".d[1] \n\t"
 
+#define DGEMM_2X2_NANOKERNEL_PLAIN(C0,C1,A,B) \
+  DGEMM_2X2_NANOKERNEL(C0,C1,A,B)
+
+#define DGEMM_2X2_NANOKERNEL_INIT(C0,C1,A,B) \
+" fmul  v"#C0".2d, v"#A".2d, v"#B".d[0] \n\t" \
+" fmul  v"#C1".2d, v"#A".2d, v"#B".d[1] \n\t"
+
 #define SGEMM_4X4_NANOKERNEL(C0,C1,C2,C3,A,B) \
 " fmla  v"#C0".4s, v"#A".4s, v"#B".s[0] \n\t" \
 " fmla  v"#C1".4s, v"#A".4s, v"#B".s[1] \n\t" \
 " fmla  v"#C2".4s, v"#A".4s, v"#B".s[2] \n\t" \
 " fmla  v"#C3".4s, v"#A".4s, v"#B".s[3] \n\t"
+
+#define SGEMM_4X4_NANOKERNEL_PLAIN(C0,C1,C2,C3,A,B) \
+  SGEMM_4X4_NANOKERNEL(C0,C1,C2,C3,A,B)
+
+#define SGEMM_4X4_NANOKERNEL_INIT(C0,C1,C2,C3,A,B) \
+" fmul  v"#C0".4s, v"#A".4s, v"#B".s[0] \n\t" \
+" fmul  v"#C1".4s, v"#A".4s, v"#B".s[1] \n\t" \
+" fmul  v"#C2".4s, v"#A".4s, v"#B".s[2] \n\t" \
+" fmul  v"#C3".4s, v"#A".4s, v"#B".s[3] \n\t"
 
