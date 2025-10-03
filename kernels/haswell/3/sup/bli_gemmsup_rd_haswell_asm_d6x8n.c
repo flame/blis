@@ -74,14 +74,18 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
              dim_t      n0,
              dim_t      k0,
        const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      a0, inc_t rs_a0, inc_t cs_a0,
+       const void*      b0, inc_t rs_b0, inc_t cs_b0,
        const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
+             void*      c0, inc_t rs_c0, inc_t cs_c0,
        const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
+	double *a = (double *)a0;
+	double *b = (double *)b0;
+	double *c = (double *)c0;
+
 	uint64_t m_left = m0 % 6;
 
 	// First check whether this is a edge case in the n dimension. If so,
@@ -800,10 +804,10 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
              dim_t      n0,
              dim_t      k0,
        const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      a0, inc_t rs_a0, inc_t cs_a0,
+       const void*      b0, inc_t rs_b0, inc_t cs_b0,
        const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
+             void*      c0, inc_t rs_c0, inc_t cs_c0,
        const auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -813,6 +817,10 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
+	double *a = (double *)a0;
+	double *b = (double *)b0;
+	double *c = (double *)c0;
+
 	uint64_t k_iter16 = k0 / 16;
 	uint64_t k_left16 = k0 % 16;
 	uint64_t k_iter4  = k_left16 / 4;
@@ -1387,10 +1395,10 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
              dim_t      n0,
              dim_t      k0,
        const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      a0, inc_t rs_a0, inc_t cs_a0,
+       const void*      b0, inc_t rs_b0, inc_t cs_b0,
        const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
+             void*      c0, inc_t rs_c0, inc_t cs_c0,
        const auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -1400,6 +1408,10 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
+	double *a = (double *)a0;
+	double *b = (double *)b0;
+	double *c = (double *)c0;
+
 	uint64_t k_iter16 = k0 / 16;
 	uint64_t k_left16 = k0 % 16;
 	uint64_t k_iter4  = k_left16 / 4;
@@ -1917,10 +1929,10 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
              dim_t      n0,
              dim_t      k0,
        const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      a0, inc_t rs_a0, inc_t cs_a0,
+       const void*      b0, inc_t rs_b0, inc_t cs_b0,
        const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
+             void*      c0, inc_t rs_c0, inc_t cs_c0,
        const auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -1930,6 +1942,10 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
+	double *a = (double *)a0;
+	double *b = (double *)b0;
+	double *c = (double *)c0;
+
 	uint64_t k_iter16 = k0 / 16;
 	uint64_t k_left16 = k0 % 16;
 	uint64_t k_iter4  = k_left16 / 4;
