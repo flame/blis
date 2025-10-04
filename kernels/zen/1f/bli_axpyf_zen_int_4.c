@@ -65,10 +65,10 @@ void bli_caxpyf_zen_int_4
        const cntx_t* cntx
      )
 {
-	const scomplex* restrict alpha = alpha0;
-	const scomplex* restrict a     = a0;
-	const scomplex* restrict x     = x0;
-	      scomplex* restrict y     = y0;
+	const scomplex* restrict alpha = (scomplex *)alpha0;
+	scomplex* restrict a     = (scomplex *)a0;
+	scomplex* restrict x     = (scomplex *)x0;
+	scomplex* restrict y     = (scomplex *)y0;
 
     inc_t fuse_fac = 4;
     inc_t i;
@@ -313,9 +313,9 @@ void bli_zaxpyf_zen_int_4
      )
 {
 	const dcomplex* restrict alpha = (dcomplex *)alpha0;
-	const dcomplex* restrict a     = (dcomplex *)a00;
-	const dcomplex* restrict x     = (dcomplex *)x00;
-	      dcomplex* restrict y     = (dcomplex *)y00;
+	dcomplex* restrict a     = (dcomplex *)a00;
+	dcomplex* restrict x     = (dcomplex *)x00;
+	dcomplex* restrict y     = (dcomplex *)y00;
 
     dim_t fuse_fac = 4;
     // If either dimension is zero, or if alpha is zero, return early.
