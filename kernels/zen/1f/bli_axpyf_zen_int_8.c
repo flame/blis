@@ -68,9 +68,9 @@ void bli_saxpyf_zen_int_8
      )
 {
 	const float* restrict alpha = (float *)alpha0;
-	const float* restrict a     = (float *)a00;
-	const float* restrict x     = (float *)x00;
-	      float* restrict y     = (float *)y00;
+	float* restrict a     = (float *)a00;
+	float* restrict x     = (float *)x00;
+	float* restrict y     = (float *)y00;
 
 	const dim_t      fuse_fac       = 8;
 	const dim_t      n_elem_per_reg = 8;
@@ -282,9 +282,9 @@ void bli_daxpyf_zen_int_8
      )
 {
 	const double* restrict alpha = (double *) alpha0;
-	const double* restrict a     = (double *) a00;
-	const double* restrict x     = (double *) x00;
-	      double* restrict y     = (double *) y00;
+	double* restrict a     = (double *) a00;
+	double* restrict x     = (double *) x00;
+	double* restrict y     = (double *) y00;
 
 	const dim_t      fuse_fac       = 8;
 	const dim_t      n_elem_per_reg = 4;
