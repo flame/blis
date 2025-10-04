@@ -51,9 +51,10 @@ AXPYV_KER_PROT( float,    s, axpyv_zen_int )
 AXPYV_KER_PROT( double,   d, axpyv_zen_int )
 
 // axpyv (intrinsics unrolled x10)
-AXPYV_KER_PROT( float,    s, axpyv_zen_int10 )
-AXPYV_KER_PROT( double,   d, axpyv_zen_int10 )
-
+AXPYV_KER_PROT( float,    s, axpyv_zen_int_10 )
+AXPYV_KER_PROT( double,   d, axpyv_zen_int_10 )
+AXPYV_KER_PROT( scomplex, c, axpyv_zen_int_5 )
+AXPYV_KER_PROT( dcomplex, z, axpyv_zen_int_5 )
 // dotv (intrinsics)
 DOTV_KER_PROT( float,    s, dotv_zen_int )
 DOTV_KER_PROT( double,   d, dotv_zen_int )
@@ -101,6 +102,7 @@ AXPYF_KER_PROT( float,    s, axpyf_zen_int_5 )
 AXPYF_KER_PROT( double,   d, axpyf_zen_int_5 )
 
 AXPYF_KER_PROT( double,   d, axpyf_zen_int_16x4 )
+AXPYF_KER_PROT( double,   d, axpyf_zen_int_16x2 )
 AXPYF_KER_PROT( scomplex, c, axpyf_zen_int_4 )
 
 // dotxf (intrinsics)
