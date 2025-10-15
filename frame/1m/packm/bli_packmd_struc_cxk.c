@@ -32,20 +32,18 @@
 
 */
 
-#ifndef BLIS_L1M_KER_PARAMS_H
-#define BLIS_L1M_KER_PARAMS_H
+#include "blis.h"
 
+#undef  GENTFUNC2RO
+#define GENTFUNC2RO( ctypec_r, ctype_c, ctypep_r, ctypep, chc_r, chc, chp_r, chp, varname ) \
+GENTFUNC2RO_( ctypec_r, ctypec_r, ctypep_r, ctypep_r, chc_r, chc_r, chp_r, chp_r, varname ) \
+GENTFUNC2RO_( ctypec_r, ctypec,   ctypep_r, ctypep,   chc_r, chc,   chp_r, chp,   varname )
 
-//
-// -- Level-1m kernel function types -------------------------------------------
-//
-
-// packm
-
-// NOTE: This is the function type for the structure-aware "kernel".
-
-#define packm_params \
+#undef  GENTFUNC2RO_
+#define GENTFUNC2RO_( ctypec_r, ctype_c, ctypep_r, ctypep, chc_r, chc, chp_r, chp, varname ) \
 \
+void PASTEMAC(chc,chp,varname) \
+     ( \
              struc_t strucc, \
              diag_t  diagc, \
              uplo_t  uploc, \
@@ -62,75 +60,48 @@
        const void*   kappa, \
        const void*   c, inc_t incc, inc_t ldc, \
              void*   p,             inc_t ldp, \
-       const void*   params  \
-
-
-// packm_cxk (packm microkernel)
-
-#define packm_cxk_params \
+       const void*   params_, \
+       const cntx_t* cntx \
+     ) \
+{ \
+	num_t dt_c          = PASTEMAC(chc,type); \
+	num_t dt_p          = PASTEMAC(chp,type); \
+	dim_t dt_c_size     = bli_dt_size( dt_c ); \
 \
-             conj_t  conja, \
-             pack_t  schema, \
-             dim_t   cdim, \
-             dim_t   cdim_max, \
-             dim_t   cdim_bcast, \
-             dim_t   n, \
-             dim_t   n_max, \
-       const void*   kappa, \
-       const void*   a, inc_t inca, inc_t lda, \
-             void*   p,             inc_t ldp, \
-       const void*   params  \
-
-#define packmd_cxk_params \
+	ukr_t cxk_ker_id    = BLIS_PACKMD_KER; \
 \
-             conj_t  conja, \
-             pack_t  schema, \
-             dim_t   cdim, \
-             dim_t   cdim_max, \
-             dim_t   cdim_bcast, \
-             dim_t   n, \
-             dim_t   n_max, \
-       const void*   kappa, \
-       const void*   a, inc_t inca, inc_t lda, \
-       const void*   d, inc_t incd, \
-             void*   p,             inc_t ldp, \
-       const void*   params  \
-
-
-// unpackm_cxk kernel
-
-#define unpackm_cxk_params \
+	packmd_cxk_ker_ft f_cxk = bli_cntx_get_ukr2_dt( dt_c, dt_p, cxk_ker_id, cntx ); \
 \
-             conj_t  conja, \
-             pack_t  schema, \
-             dim_t   cdim, \
-             dim_t   cdim_bcast, \
-             dim_t   n, \
-       const void*   kappa, \
-       const void*   p,             inc_t ldp, \
-             void*   a, inc_t inca, inc_t lda, \
-       const void*   params  \
-
-
-// packm_cxc_diag kernel
-
-#define packm_cxc_diag_params \
+	const gemmd_params* params = ( const gemmd_params* )params_; \
 \
-             struc_t struca, \
-             diag_t  diaga, \
-             uplo_t  uploa, \
-             conj_t  conja, \
-             pack_t  schema, \
-             bool    invdiag, \
-             dim_t   cdim, \
-             dim_t   cdim_max, \
-             dim_t   cdim_bcast, \
-             dim_t   n_max, \
-       const void*   kappa, \
-       const void*   a, inc_t inca, inc_t lda, \
-             void*   p,             inc_t ldp, \
-       const void*   params  \
+	      inc_t incd = params->incd; \
+	const char* d    = ( const char* )params->d + panel_len_off*incd*dt_c_size; \
+\
+	/* For general matrices, pack and return early */ \
+	if ( bli_is_general( strucc ) ) \
+	{ \
+		f_cxk \
+		( \
+		  conjc, \
+		  schema, \
+		  panel_dim, \
+		  panel_dim_max, \
+		  panel_bcast, \
+		  panel_len, \
+		  panel_len_max, \
+		  kappa, \
+		  c, incc, ldc, \
+		  d, incd, \
+		  p,       ldp, \
+		  params, \
+		  cntx \
+		); \
+		return; \
+	} \
+\
+	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
+}
 
-
-#endif
+INSERT_GENTFUNC2RO( packmd_struc_cxk )
+INSERT_GENTFUNC2RO_MIX_P( packmd_struc_cxk )
 

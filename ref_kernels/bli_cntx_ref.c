@@ -184,18 +184,20 @@ INSERT_PROTMAC_BASIC( GEMMSUP_KER_PROT, gemmsup_gx_ukr_name )
 
 // -- Construct arch-specific names for reference packm kernels --
 
-#define packm_ker_name           GENARNAME(packm)
-#define packm_1er_ker_name       GENARNAME(packm_1er)
+#define packm_ker_name          GENARNAME(packm)
+#define packmd_ker_name         GENARNAME(packmd)
+#define packm_1er_ker_name      GENARNAME(packm_1er)
 #define packm_ro_ker_name       GENARNAME(packm_ro)
-#define packm_diag_ker_name      GENARNAME(packm_diag)
-#define packm_diag_1er_ker_name  GENARNAME(packm_diag_1er)
+#define packm_diag_ker_name     GENARNAME(packm_diag)
+#define packm_diag_1er_ker_name GENARNAME(packm_diag_1er)
 #define packm_diag_ro_ker_name  GENARNAME(packm_diag_ro)
-#define unpackm_ker_name         GENARNAME(unpackm)
+#define unpackm_ker_name        GENARNAME(unpackm)
 
 // Instantiate prototypes for above functions using the pre-defined packm
 // kernel prototype-generating macros.
 
 INSERT_PROTMAC_MIX_P ( PACKM_KER_PROT2,      packm_ker_name )
+INSERT_PROTMAC_MIX_P ( PACKMD_KER_PROT2,     packmd_ker_name )
 INSERT_PROTMAC_MIX_CO( PACKM_KER_PROT2,      packm_1er_ker_name )
 INSERT_PROTMAC_MIX_CO( PACKM_KER_PROT2,      packm_ro_ker_name )
 INSERT_PROTMAC_MIX_P ( PACKM_DIAG_KER_PROT2, packm_diag_ker_name )
@@ -517,6 +519,7 @@ void GENBARNAME(cntx_init)
 	// -- Set level-1m (packm/unpackm) kernels ---------------------------------
 
 	gen_func_init_mix_p ( &func2s[ bli_ker_idx( BLIS_PACKM_KER ) ],           packm_ker_name );
+	gen_func_init_mix_p ( &func2s[ bli_ker_idx( BLIS_PACKMD_KER ) ],          packmd_ker_name );
 	gen_func_init_mix_co( &func2s[ bli_ker_idx( BLIS_PACKM_1ER_KER ) ],       packm_1er_ker_name );
 	gen_func_init_mix_co( &func2s[ bli_ker_idx( BLIS_PACKM_RO_KER ) ],        packm_ro_ker_name );
 	gen_func_init_mix_p ( &func2s[ bli_ker_idx( BLIS_PACKM_DIAG_KER ) ],      packm_diag_ker_name );
