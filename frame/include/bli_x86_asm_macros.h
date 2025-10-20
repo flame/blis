@@ -915,7 +915,7 @@
 #define VCOMISD(_0, _1) INSTR_(vcomisd, _0, _1)
 
 #define VMASKMOVPD(_0, _1, _2) INSTR_(vmaskmovpd, _0, _1, _2)
-
+#define VMASKMOVPS(_0, _1, _2) INSTR_(vmaskmovps, _0, _1, _2)
 #define VFMADD132SS(_0, _1, _2) INSTR_(vfmadd132ss, _0, _1, _2)
 #define VFMADD213SS(_0, _1, _2) INSTR_(vfmadd213ss, _0, _1, _2)
 #define VFMADD231SS(_0, _1, _2) INSTR_(vfmadd231ss, _0, _1, _2)
@@ -1242,7 +1242,7 @@
 #define vblendpd(_0, _1, _2, _3) VBLENDPD(_0, _1, _2, _3)
 #define vblendmps(_0, _1, _2) VBLENDMSD(_0, _1, _2)
 #define vblendmpd(_0, _1, _2) VBLENDMPD(_0, _1, _2)
-
+#define vmaskmovps(_0, _1, _2) VMASKMOVPS(_0, _1, _2)
 #define vmaskmovpd(_0, _1, _2) VMASKMOVPD(_0, _1, _2)
 
 // Prefetches
