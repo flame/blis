@@ -13,7 +13,7 @@ if [ "$quiet_confopenmp" = "" ]; then
 fi
 
 . ./blis_setenv.sh $quiet_confopenmp
-pushd $BLIS_HOME > /dev/null
+pushd "$BLIS_HOME" > /dev/null
 make distclean
 ./configure -t openmp --disable-pba-pools altramax
 popd > /dev/null

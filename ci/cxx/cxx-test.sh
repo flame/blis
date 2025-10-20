@@ -36,23 +36,23 @@
 SOURCE_DIR=$1
 CONFIG=$2
 
-if [ -z $SOURCE_DIR ] || [ -z $CONFIG ]; then
+if [ -z "$SOURCE_DIR" ] || [ -z "$CONFIG" ]; then
     echo "usage: cxx-test.sh <source dir> <config>"
     exit 1
 fi
 
 BUILD_DIR=$(pwd)
-INCLUDE_DIR=$BUILD_DIR/include/$CONFIG
-LIB_DIR=$BUILD_DIR/lib/$CONFIG
+INCLUDE_DIR=$BUILD_DIR/include/"$CONFIG"
+LIB_DIR=$BUILD_DIR/lib/"$CONFIG"
 
-if [ ! -e $INCLUDE_DIR/blis.h ]; then
+if [ ! -e "$INCLUDE_DIR"/blis.h ]; then
     echo "could not find blis.h"
     exit 1
 fi
 
-if [ ! -e $SOURCE_DIR/ci/cxx/Makefile ]; then
+if [ ! -e "$SOURCE_DIR"/ci/cxx/Makefile ]; then
     echo "could not find cxx-test Makefile"
     exit 1
 fi
 
-make -C $SOURCE_DIR/ci/cxx INCLUDE_DIR=$INCLUDE_DIR LIB_DIR=$LIB_DIR BUILD_DIR=$BUILD_DIR
+make -C "$SOURCE_DIR"/ci/cxx INCLUDE_DIR="$INCLUDE_DIR" LIB_DIR="$LIB_DIR" BUILD_DIR="$BUILD_DIR"

@@ -25,15 +25,15 @@ esac
 TOOLCHAIN_PATH=$DIST_PATH/../toolchain
 TOOLCHAIN_URL=https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/${TAG}/${TARBALL}
 
-mkdir -p $TOOLCHAIN_PATH
-cd $TOOLCHAIN_PATH
+mkdir -p "$TOOLCHAIN_PATH"
+cd "$TOOLCHAIN_PATH"
 
-wget $TOOLCHAIN_URL
-tar -xf $TARBALL
+wget "$TOOLCHAIN_URL"
+tar -xf "$TARBALL"
 
 # Once CI upgrades to jammy, the next three lines can be removed.
 # The qemu version installed via packages (qemu-user qemu-user-binfmt)
 # is sufficient.
 TARBALL_QEMU=qemu-riscv-2023.02.25-ubuntu-20.04.tar.gz
-wget https://github.com/flame/ci-utils/raw/master/riscv/${TARBALL_QEMU}
-tar -xf $TARBALL_QEMU
+wget https://github.com/flame/ci-utils/raw/master/riscv/"${TARBALL_QEMU}"
+tar -xf "$TARBALL_QEMU"

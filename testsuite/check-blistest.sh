@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -45,7 +45,7 @@ failmsg1="Please see output.testsuite for details."
 
 # First make sure that the testsuite completed normally (e.g. did not abort()
 # or segfault).
-grep -q 'Exiting normally' $1
+grep -q 'Exiting normally' "$1"
 
 # The testsuite did not complete if the error code from grep was *not* 0.
 if [ $? -ne 0 ]; then
@@ -54,7 +54,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # If the testsuite completed normally, check for numerical failures.
-grep -q 'FAILURE' $1
+grep -q 'FAILURE' "$1"
 
 # A numerical failure was detected if the error code from grep was 0.
 if [ $? -eq 0 ]; then
@@ -65,5 +65,3 @@ else
     printf "${ansi_green}""${script_name}: ${passmsg}""${ansi_normal}\n"
     exit 0
 fi
-
-

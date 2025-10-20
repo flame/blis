@@ -6,7 +6,7 @@ out_root="output"
 
 out_rootdir=$(date +%Y%m%d)
 #out_rootdir=20180830
-mkdir -p $out_rootdir
+mkdir -p "$out_rootdir"
 
 sys="thunderx2"
 
@@ -86,17 +86,17 @@ for nc in ${cores_r}; do
 
 			for op in ${test_ops_r}; do
 				# Set the number of threads according to th.
-				if [ ${nc} -gt 1 ]; then
+				if [ "${nc}" -gt 1 ]; then
 					# Unset GOMP_CPU_AFFINITY for MKL when using mkl_intel_thread.
-					if [ ${im} = "openblas" ]; then
+					if [ "${im}" = "openblas" ]; then
 						unset GOMP_CPU_AFFINITY
-					elif [ ${im} = "armpl" ]; then
+					elif [ "${im}" = "armpl" ]; then
 						unset GOMP_CPU_AFFINITY
 					else
 						export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55"
 
 					fi
-					if [ ${nc} -eq 28 ]; then
+					if [ "${nc}" -eq 28 ]; then
 
 						export BLIS_JC_NT=${jc_1_nt}
 						export BLIS_IC_NT=${ic_1_nt}
@@ -104,15 +104,15 @@ for nc in ${cores_r}; do
 						export BLIS_IR_NT=${ir_1_nt}
 						export OMP_NUM_THREADS=${nt_1}
 						out_dir="${out_rootdir}/1socket"
-						mkdir -p $out_rootdir/1socket
-					elif [ ${nc} -eq 56 ]; then
+						mkdir -p "$out_rootdir/1socket"
+					elif [ "${nc}" -eq 56 ]; then
                                         	export BLIS_JC_NT=${jc_2_nt}
                                         	export BLIS_IC_NT=${ic_2_nt}
                                         	export BLIS_JR_NT=${jr_2_nt}
                                         	export BLIS_IR_NT=${ir_2_nt}
                                         	export OMP_NUM_THREADS=${nt_2}
 						out_dir="${out_rootdir}/2sockets"
-						mkdir -p $out_rootdir/2sockets
+						mkdir -p "$out_rootdir/2sockets"
 					fi
 					th="mt"
 				else
@@ -123,7 +123,7 @@ for nc in ${cores_r}; do
 					export BLIS_IR_NT=1
 					export OMP_NUM_THREADS=1
 					out_dir="${out_rootdir}/st"
-					mkdir -p $out_rootdir/st
+					mkdir -p "$out_rootdir/st"
 					th="st"
 				fi
 
@@ -136,7 +136,7 @@ for nc in ${cores_r}; do
 				echo "Running (nt = ${OMP_NUM_THREADS}) ./${exec_name} > ${out_file}"
 
 				# Run executable.
-				./${exec_name} > ${out_file}
+				./"${exec_name}" > "${out_file}"
 
 				sleep 1
 
@@ -155,17 +155,17 @@ for nc in ${cores}; do
 			for op in ${test_ops}; do
 
 				# Set the number of threads according to th.
-				if [ ${nc} -gt 1 ]; then
+				if [ "${nc}" -gt 1 ]; then
 					# Unset GOMP_CPU_AFFINITY for MKL when using mkl_intel_thread.
-					if [ ${im} = "openblas" ]; then
+					if [ "${im}" = "openblas" ]; then
 						unset GOMP_CPU_AFFINITY
-					elif [ ${im} = "armpl" ]; then
+					elif [ "${im}" = "armpl" ]; then
 						unset GOMP_CPU_AFFINITY
 					else
 						export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55"
 
 					fi
-					if [ ${nc} -eq 28 ]; then
+					if [ "${nc}" -eq 28 ]; then
 
 						export BLIS_JC_NT=${jc_1_nt}
 						export BLIS_IC_NT=${ic_1_nt}
@@ -173,7 +173,7 @@ for nc in ${cores}; do
 						export BLIS_IR_NT=${ir_1_nt}
 						export OMP_NUM_THREADS=${nt_1}
 						out_dir="${out_rootdir}/1socket"
-					elif [ ${nc} -eq 56 ]; then
+					elif [ "${nc}" -eq 56 ]; then
                                         	export BLIS_JC_NT=${jc_2_nt}
                                         	export BLIS_IC_NT=${ic_2_nt}
                                         	export BLIS_JR_NT=${jr_2_nt}
@@ -201,7 +201,7 @@ for nc in ${cores}; do
 
 				echo "Running (nt = ${OMP_NUM_THREADS}) ./${exec_name} > ${out_file}"
 				# Run executable.
-				./${exec_name} > ${out_file}
+				./"${exec_name}" > "${out_file}"
 
 				sleep 1
 

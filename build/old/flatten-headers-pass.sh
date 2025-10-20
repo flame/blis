@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -175,12 +175,12 @@ find_header_dirs()
 	echoninfo "scanning contents of ${cur_dirpath}"
 
 	# Acquire a list of the directory's contents.
-	sub_items=$(ls ${cur_dirpath})
+	sub_items=$(ls "${cur_dirpath}")
 
 	# If there is at least one header present, add the current directory to
 	# the list header of directories. Otherwise, the current directory does
 	# not contribute to the list returned to the caller.
-	result=$(echo ${sub_items} | grep "\.h")
+	result=$(echo "${sub_items}" | grep "\.h")
 
 	if [ -n "${result}" ]; then
 		cur_list="${cur_dirpath}"
@@ -274,14 +274,14 @@ replace_pass()
 
 		# Check whether the line begins with a #include directive, but ignore
 		# the line if it contains the skip string.
-		result=$(echo ${curline} | grep '^[[:space:]]*#include ' | grep -v "${skipstr}")
+		result=$(echo "${curline}" | grep '^[[:space:]]*#include ' | grep -v "${skipstr}")
 
 		# If the #include directive was found...
 		if [ -n "${result}" ]; then
 
 			# Isolate the header filename. We must take care to include all
 			# characters that might appear between the "" or <>.
-			header=$(echo ${curline} | sed -e "s/#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g")
+			header=$(echo "${curline}" | sed -e "s/#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g")
 
 			# Add the header file to a list.
 			headerlist=$(canonicalize_ws "${headerlist} ${header}")
@@ -298,7 +298,7 @@ replace_pass()
 	for header in ${headerlist}; do
 
 		# Find the path to the header.
-		header_filepath=$(get_header_path ${header} "${dirpaths}")
+		header_filepath=$(get_header_path "${header}" "${dirpaths}")
 
 		# If the header has a slash, escape it so that sed doesn't get confused
 		# (since we use '/' as our search-and-replace delimiter).
@@ -316,12 +316,12 @@ replace_pass()
 			# later. Notice that we mimic the quotes or angle brackets
 			# around the header name, whichever pair was used in the input.
 
-			cat ${filename} \
-			    | sed -e "s/^[[:space:]]*#include \([\"<]\)\(${header_esc}\)\([\">]\).*/#include \1\2\3 ${skipstr}/" \
+			< "${filename}" \
+			    sed -e "s/^[[:space:]]*#include \([\"<]\)\(${header_esc}\)\([\">]\).*/#include \1\2\3 ${skipstr}/" \
 			    > "${filename}.tmp"
 
 			# Overwrite the original file with the updated copy.
-			mv "${filename}.tmp" ${filename}
+			mv "${filename}.tmp" "${filename}"
 
 		else
 
@@ -335,8 +335,8 @@ replace_pass()
 				# Make a temporary copy of ${header_filepath} stripped of its
 				# C-style comments. This leaves behind a single blank line,
 				# which is then deleted.
-				cat ${header_filepath} \
-				    | perl -0777 -pe "s/\/\*.*?\*\//${commstr}/gs" \
+				< "${header_filepath}" \
+				    perl -0777 -pe "s/\/\*.*?\*\//${commstr}/gs" \
 				    | sed -e "/${commstr}/d" \
 				    > "${header_filename}.tmp"
 
@@ -348,8 +348,8 @@ replace_pass()
 			# Replace the #include directive for the current header file with the
 			# contents of that header file, saving the result to a temporary file.
 			# We also insert begin and end markers to allow for more readability.
-			cat ${filename} \
-			    | sed -e "/^[[:space:]]*#include \"${header_esc}\"/ {" \
+			< "${filename}" \
+			      sed -e "/^[[:space:]]*#include \"${header_esc}\"/ {" \
 			          -e "i // begin ${header}" \
 			          -e "r ${header_to_insert}" \
 			          -e "a // end ${header}" \
@@ -358,7 +358,7 @@ replace_pass()
 			    > "${filename}.tmp"
 
 			# Overwrite the original header file with the updated copy.
-			mv "${filename}.tmp" ${filename}
+			mv "${filename}.tmp" "${filename}"
 
 			# If C-style comments were stripped, remove the temporary file.
 			if [ -n "${strip_comments}" ]; then
@@ -378,11 +378,11 @@ replace_pass()
 	# Search the updated file for #include directives, but ignore any
 	# hits that also contain the skip string (indicating that the header
 	# file referenced by that #include could not be found).
-	result=$(cat ${filename} | grep '^[[:space:]]*#include ' | grep -v "${skipstr}")
+	result=$(< "${filename}" grep '^[[:space:]]*#include ' | grep -v "${skipstr}")
 
 	# Return the result so the caller knows if we need to proceed with
 	# another pass.
-	echo ${result}
+	echo "${result}"
 }
 
 #
@@ -448,7 +448,7 @@ main()
 
 		echoninfo "checking ${item} "
 
-		if [ -d ${item} ]; then
+		if [ -d "${item}" ]; then
 			echon2info " ...directory exists."
 			dir_list2="${dir_list2} ${item}"
 		else
@@ -477,7 +477,7 @@ main()
 		dirpaths=""
 		for item in ${dir_list}; do
 
-			item_dirpaths=$(find_header_dirs ${item})
+			item_dirpaths=$(find_header_dirs "${item}")
 			dirpaths="${dirpaths} ${item_dirpaths}"
 		done
 		dirpaths=$(canonicalize_ws "${dirpaths}")
@@ -494,11 +494,11 @@ main()
 			echoninfo "scanning ${item}"
 
 			# Acquire a list of the directory's contents.
-			sub_items=$(ls ${item})
+			sub_items=$(ls "${item}")
 
 			# If there is at least one header present, add the current directory to
 			# the list header of directories.
-			result=$(echo ${sub_items} | grep "\.h")
+			result=$(echo "${sub_items}" | grep "\.h")
 			if [ -n "${result}" ]; then
 				dirpaths="${dirpaths} ${item}"
 				echon2info " ...found headers."
@@ -516,8 +516,8 @@ main()
 	echoinfo "preparing to monolithify '${inputfile}'."
 
 	# Make a copy of the inputfile.
-	cp ${inputfile} ${outputfile}
-	
+	cp "${inputfile}" "${outputfile}"
+
 	echoinfo "new header will be saved to '${outputfile}'."
 
 	done_flag="0"
@@ -527,7 +527,7 @@ main()
 
 		# Perform a replacement pass. The return string is non-null if
 		# additional passes are necessary and null otherwise.
-		result=$(replace_pass ${outputfile} "${dirpaths}")
+		result=$(replace_pass "${outputfile}" "${dirpaths}")
 
 		if [ -n "${result}" ]; then
 
@@ -552,4 +552,3 @@ main()
 
 # The script's main entry point, passing all parameters given.
 main "$@"
-

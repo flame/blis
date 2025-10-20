@@ -9,23 +9,23 @@ sys="blis"
 #sys="ul252"
 #sys="ul264"
 
-if [ ${sys} = "blis" ]; then
+if [ "${sys}" = "blis" ]; then
 
 	export GOMP_CPU_AFFINITY="0-3"
 	nt=4
 
-elif [ ${sys} = "lonestar5" ]; then
+elif [ "${sys}" = "lonestar5" ]; then
 
 	export GOMP_CPU_AFFINITY="0-23"
 	nt=12
 
-elif [ ${sys} = "ul252" ]; then
+elif [ "${sys}" = "ul252" ]; then
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
 	export GOMP_CPU_AFFINITY="0-51"
 	nt=26
 
-elif [ ${sys} = "ul264" ]; then
+elif [ "${sys}" = "ul264" ]; then
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
 	export GOMP_CPU_AFFINITY="0-63"
@@ -129,7 +129,7 @@ for th in ${threads}; do
 										# running properly if GOMP_CPU_AFFINITY is set.
 										# So we temporarily unset it here if we are about
 										# to execute OpenBLAS, but otherwise restore it.
-										if [ ${im} = "openblas" ]; then
+										if [ "${im}" = "openblas" ]; then
 											unset GOMP_CPU_AFFINITY
 										else
 											export GOMP_CPU_AFFINITY="${GOMP_CPU_AFFINITYsave}"
@@ -158,19 +158,19 @@ for th in ${threads}; do
 										# Construct the shape substring (e.g. m6npkp)
 										shstr=""
 
-										if [ ${chm} = "s" ]; then
+										if [ "${chm}" = "s" ]; then
 											shstr="${shstr}m${sm}"
 										else
 											shstr="${shstr}mp"
 										fi
 
-										if [ ${chn} = "s" ]; then
+										if [ "${chn}" = "s" ]; then
 											shstr="${shstr}n${sn}"
 										else
 											shstr="${shstr}np"
 										fi
 
-										if [ ${chk} = "s" ]; then
+										if [ "${chk}" = "s" ]; then
 											shstr="${shstr}k${sk}"
 										else
 											shstr="${shstr}kp"
@@ -187,9 +187,9 @@ for th in ${threads}; do
 										echo "Running (nt = ${nt_use}) ./${exec_name} > ${out_file}"
 
 										# Run executable.
-										./${exec_name} > ${out_file}
+										./"${exec_name}" > "${out_file}"
 
-										sleep ${delay}
+										sleep "${delay}"
 
 									done
 								done
@@ -201,4 +201,3 @@ for th in ${threads}; do
 		done
 	done
 done
-

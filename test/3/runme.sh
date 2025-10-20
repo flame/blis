@@ -150,7 +150,7 @@ for th in ${threads}; do
 	thinfo=${th%%_*}
 
 	# Identify each threading parameter and insert a space before it.
-	thinfo_sep=$(echo -e ${thinfo} | sed -e "s/\([jip][cr]\)/ \1/g" )
+	thinfo_sep=$(echo -e "${thinfo}" | sed -e "s/\([jip][cr]\)/ \1/g" )
 
 	nt=1
 
@@ -159,25 +159,25 @@ for th in ${threads}; do
 		# Given the current string, which identifies a loop and the number of
 		# ways of parallelism to be obtained from that loop, strip out the ways
 		# and loop separately to identify each.
-		loop=$(echo -e ${loopnum} | sed -e "s/[0-9]//g" )
-		nways=$(echo -e ${loopnum} | sed -e "s/[a-z]//g" )
+		loop=$(echo -e "${loopnum}" | sed -e "s/[0-9]//g" )
+		nways=$(echo -e "${loopnum}" | sed -e "s/[a-z]//g" )
 
 		# Construct a string that we can evaluate to set the number of ways of
 		# parallelism for the current loop (e.g. jc_nt, ic_nt, jr_nt).
 		loop_nt_eq_num="${loop}_nt=${nways}"
 
 		# Update the total number of threads.
-		nt=$(expr ${nt} \* ${nways})
+		nt=$((nt * nways))
 
 		# Evaluate the string to assign the ways to the variable.
-		eval ${loop_nt_eq_num}
+		eval "${loop_nt_eq_num}"
 
 	done
 
 	# Find a binary using the test driver prefix and the threading suffix.
 	# Then strip everything before and after the max problem size that's
 	# encoded into the name of the binary.
-	binname=$(ls -1 ${exec_root}_*_${tsuf}.x | head -n1)
+	binname=$(ls -1 "${exec_root}"_*_"${tsuf}".x | head -n1)
 
 	# Sanity check: If 'ls' couldn't find any binaries, then the user
 	# probably didn't build them. Inform the user and proceed to the next
@@ -244,7 +244,7 @@ for th in ${threads}; do
 					# properly if GOMP_CPU_AFFINITY is set. So we temporarily
 					# unset it here if we are about to execute OpenBLAS, but
 					# otherwise restore it.
-					if [ ${im} = "openblas" ]; then
+					if [ "${im}" = "openblas" ]; then
 						unset GOMP_CPU_AFFINITY
 					else
 						export GOMP_CPU_AFFINITY="${GOMP_CPU_AFFINITYsave}"
@@ -296,14 +296,13 @@ for th in ${threads}; do
 				# Run executable with or without numactl, depending on how
 				# the numactl variable was set.
 				if [ "${dryrun}" != "yes" ]; then
-					${numactl} ./${exec_name} -d ${dt} -c ${oppars} -i ${ind} -p "${psr}" -r ${nrepeats} ${qv} > ${out_file}
+					"${numactl}" ./"${exec_name}" -d "${dt}" -c "${oppars}" -i "${ind}" -p "${psr}" -r "${nrepeats}" "${qv}" > "${out_file}"
 				fi
 
 				# Bedtime!
-				sleep ${delay}
+				sleep "${delay}"
 
 			done
 		done
 	done
 done
-

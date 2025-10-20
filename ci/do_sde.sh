@@ -65,7 +65,7 @@ for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator 
 
     make TESTSUITE_WRAPPER="$TESTSUITE_WRAPPER" check
 
-    TMP=`grep "active sub-configuration" output.testsuite`
+    TMP=$(grep "active sub-configuration" output.testsuite)
     CONFIG=${TMP##* }
     if [ "$CONFIG" != "$ARCH" ]; then
         echo "Wrong configuration chosen:"

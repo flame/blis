@@ -13,7 +13,7 @@ if [ "$quiet_confpthreads" = "" ]; then
 fi
 
 . ./blis_setenv.sh $quiet_confpthreads
-pushd $BLIS_HOME > /dev/null
+pushd "$BLIS_HOME" > /dev/null
 make distclean
 ./configure -t pthreads --disable-pba-pools altramax
 popd > /dev/null
