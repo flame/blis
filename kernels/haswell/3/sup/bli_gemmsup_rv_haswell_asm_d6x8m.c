@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -95,14 +95,18 @@ void bli_dgemmsup_rv_haswell_asm_6x8m
              dim_t      n0,
              dim_t      k0,
        const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      a0, inc_t rs_a0, inc_t cs_a0,
+       const void*      b0, inc_t rs_b0, inc_t cs_b0,
        const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
+             void*      c0, inc_t rs_c0, inc_t cs_c0,
        const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
+	double *a = (double *)a0;
+	double *b = (double *)b0;
+	double *c = (double *)c0;
+
 	uint64_t n_left = n0 % 8;
 
 	// First check whether this is a edge case in the n dimension. If so,
@@ -997,14 +1001,17 @@ void bli_dgemmsup_rv_haswell_asm_6x6m
              dim_t      n0,
              dim_t      k0,
        const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      a0, inc_t rs_a0, inc_t cs_a0,
+       const void*      b0, inc_t rs_b0, inc_t cs_b0,
        const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
+             void*      c0, inc_t rs_c0, inc_t cs_c0,
        const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
+	double *a = (double *)a0;
+	double *b = (double *)b0;
+	double *c = (double *)c0;
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -1776,14 +1783,17 @@ void bli_dgemmsup_rv_haswell_asm_6x4m
              dim_t      n0,
              dim_t      k0,
        const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      a0, inc_t rs_a0, inc_t cs_a0,
+       const void*      b0, inc_t rs_b0, inc_t cs_b0,
        const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
+             void*      c0, inc_t rs_c0, inc_t cs_c0,
        const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
+	double *a = (double *)a0;
+	double *b = (double *)b0;
+	double *c = (double *)c0;
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -2433,14 +2443,17 @@ void bli_dgemmsup_rv_haswell_asm_6x2m
              dim_t      n0,
              dim_t      k0,
        const void*      alpha,
-       const void*      a, inc_t rs_a0, inc_t cs_a0,
-       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      a0, inc_t rs_a0, inc_t cs_a0,
+       const void*      b0, inc_t rs_b0, inc_t cs_b0,
        const void*      beta,
-             void*      c, inc_t rs_c0, inc_t cs_c0,
+             void*      c0, inc_t rs_c0, inc_t cs_c0,
        const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
+	double *a = (double *)a0;
+	double *b = (double *)b0;
+	double *c = (double *)c0;
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
