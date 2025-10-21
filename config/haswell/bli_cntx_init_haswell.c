@@ -80,6 +80,8 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	  // axpyf
 	  BLIS_AXPYF_KER,     BLIS_FLOAT,  bli_saxpyf_zen_int_8,
 	  BLIS_AXPYF_KER,     BLIS_DOUBLE, bli_daxpyf_zen_int_8,
+	  BLIS_AXPYF_KER,     BLIS_SCOMPLEX,  bli_caxpyf_zen_int_5,
+	  BLIS_AXPYF_KER,     BLIS_DCOMPLEX, bli_zaxpyf_zen_int_5,
 	  // dotxf
 	  BLIS_DOTXF_KER,     BLIS_FLOAT,  bli_sdotxf_zen_int_8,
 	  BLIS_DOTXF_KER,     BLIS_DOUBLE, bli_ddotxf_zen_int_8,
@@ -202,7 +204,7 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
 #endif
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  4080 );
-	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,     8,     8 );
+	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,     5,     5 );
 	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,     8,     8 );
 
 	// -------------------------------------------------------------------------

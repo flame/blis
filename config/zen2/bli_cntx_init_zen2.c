@@ -118,6 +118,8 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  // axpyf
 	  BLIS_AXPYF_KER,  BLIS_FLOAT,  bli_saxpyf_zen_int_5,
 	  BLIS_AXPYF_KER,  BLIS_DOUBLE, bli_daxpyf_zen_int_5,
+	  BLIS_AXPYF_KER,  BLIS_SCOMPLEX, bli_caxpyf_zen_int_5,
+	  BLIS_AXPYF_KER,  BLIS_DCOMPLEX, bli_zaxpyf_zen_int_5,
 
 	  // dotxf
 	  BLIS_DOTXF_KER,  BLIS_FLOAT,  bli_sdotxf_zen_int_8,
@@ -215,7 +217,7 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  4080 );
 #endif
 
-	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    5,    5 );
 	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
 
 	// Initialize sup thresholds with architecture-appropriate values.
