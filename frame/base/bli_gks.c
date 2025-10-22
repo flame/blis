@@ -338,6 +338,7 @@ void bli_gks_init_ref_cntx
 	cntx_init_ft f = cntx_ref_init[ id ];
 
 	// Initialize the caller's context with reference kernels and related values.
+	memset( &cntx, 0, sizeof( cntx ) );
 	f( cntx );
 }
 
