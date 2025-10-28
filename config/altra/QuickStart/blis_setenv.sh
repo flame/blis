@@ -29,7 +29,7 @@ else
 fi
 
 if [ -f "$file_path_and_name" ] ; then
-	. $file_path_and_name quiet
+	. "$file_path_and_name" quiet
 else
   echo "ERROR - this file is not being executed from a blis home directory."
   echo "If you cannot use this script in a home directory, you can hardcode"
@@ -64,11 +64,11 @@ if [ "$quiet_setenv" = "" ]; then
   echo "BLIS_HOME set to $BLIS_HOME"
   echo "BLIS_INC set to $BLIS_INC"
   echo "================================================================="
-  ls -l $BLIS_INC
+  ls -l "$BLIS_INC"
   echo "-----------------------------------------------------------------"
   echo "BLIS_LIB set to $BLIS_LIB"
   echo "-----------------------------------------------------------------"
-  ls -l $BLIS_LIB
+  ls -l "$BLIS_LIB"
   echo "#################################################################"
 fi
 
@@ -116,7 +116,7 @@ elif (($firmware == 108)); then
 arrayCoreIDs=(28 29 38 39 2 3 12 13 6 7 16 17 0 1 10 11 68 69 78 79 42 43 52 53 46 47 56 57 40 41 50 51 24 25 34 35 20 21 30 31 26 27 36 37 22 23 32 33 64 65 74 75 60 61 70 71 66 67 76 77 62 63 72 73 8 9 18 19 4 5 14 15 48 49 58 59 44 45 54 55 108 109 118 119 82 83 92 93 86 87 96 97 80 81 90 91 148 149 158 159 122 123 132 133 126 127 136 137 120 121 130 131 104 105 114 115 100 101 110 111 106 107 116 117 102 103 112 113 144 145 154 155 140 141 150 151 146 147 156 157 142 143 152 153 88 89 98 99 84 85 94 95 128 129 138 139 124 125 134 135)
 else
   echo "ERROR - UNSUPPORTED FIRMWARE $firmware"
-  exit -1
+  exit 2
 fi
 
 # Brief check: @ = list all numbers, loop for i in ${}; do ... done
@@ -183,8 +183,8 @@ blis_set_cores_and_sockets() {
 	}
 	
 # Convenience functions:
-blis_set_cores_1S() { blis_set_cores_and_sockets $1 1 ; }
-blis_set_cores_2S() { blis_set_cores_and_sockets $1 2 ; }
+blis_set_cores_1S() { blis_set_cores_and_sockets "$1" 1 ; }
+blis_set_cores_2S() { blis_set_cores_and_sockets "$1" 2 ; }
 
 # For safety:
 . ./blis_unset_par.sh

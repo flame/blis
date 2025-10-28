@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -48,7 +48,7 @@ print_usage()
 	
 	# Echo usage info
 	echo " "
-	echo " "$script_name
+	echo " $script_name"
 	echo " "
 	echo " Field G. Van Zee"
 	echo " "
@@ -126,7 +126,7 @@ main()
 	# Un-tar and un-gzip the tarball.
 	echo "${script_name}: extracting '${tarball_path}'."
 	echo "${script_name}: expecting unpacked directory to be named '${cblas_dir}'."
-	tar xzf ${tarball_path}
+	tar xzf "${tarball_path}"
 
 	# Create the directory into which we will copy the source code for the
 	# CBLAS wrappers.
@@ -154,7 +154,7 @@ main()
 	# Process each CBLAS source file.
 	echo "${script_name}: copying source from '${cblas_dir}/src' to '${src_dir}' with"
 	echo "${script_name}: '#ifdef BLIS_ENABLE_CBLAS' guard:"
-	for cbl_src_filepath in ${cblas_dir}/src/cblas_*.c; do
+	for cbl_src_filepath in "${cblas_dir}"/src/cblas_*.c; do
 
 		# Strip the path to obtain just the filename.
 		cbl_src_file=${cbl_src_filepath##*/}
@@ -167,8 +167,8 @@ main()
 		    include_bli_type_defs.h \
 		    include_bli_cblas.h \
 		    ifdef_cblas.h \
-		    ${cbl_src_filepath} \
-		    endif_cblas.h > ${src_dir}/${cbl_src_file}
+		    "${cbl_src_filepath}" \
+		    endif_cblas.h > "${src_dir}"/"${cbl_src_file}"
 	done
 
 	# Remove the temporary files.
@@ -250,8 +250,7 @@ fix_file()
 
 	echo "${script_name}: ...fixing ${filename} with 'sed -e ${sedstring}'"
 
-	cat ${filepath} | sed -e "${sedstring}" > ${filepath}.new
-	mv ${filepath}.new ${filepath}
+	sed -ie "${sedstring}" "${filepath}"
 }
 
 

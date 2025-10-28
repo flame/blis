@@ -330,7 +330,7 @@ CONFIG_MK_FILE     := config.mk
 # including common.mk, that path is used instead. This allows Makefiles for
 # example code and test drivers to reference an installed prefix directory
 # for situations when the build directory no longer exists.
-BASE_SHARE_PATH    := $(SHARE_PATH)
+BASE_SHARE_PATH    := $(shell echo $(SHARE_PATH) | sed 's/ /\\ /g')
 
 # Include the configuration file.
 -include $(BASE_SHARE_PATH)/$(CONFIG_MK_FILE)
@@ -369,6 +369,18 @@ DIST_PATH := .
 INSTALL_LIBDIR   := $(HOME)/blis/lib
 INSTALL_INCDIR   := $(HOME)/blis/include
 INSTALL_SHAREDIR := $(HOME)/blis/share
+
+else
+
+DIST_PATH_REAL := $(DIST_PATH)
+INSTALL_LIBDIR_REAL := $(INSTALL_LIBDIR)
+INSTALL_INCDIR_REAL := $(INSTALL_INCDIR)
+INSTALL_SHAREDIR_REAL := $(INSTALL_SHAREDIR)
+
+DIST_PATH := .dist_path
+INSTALL_LIBDIR := .install_libdir
+INSTALL_INCDIR := .install_incdir
+INSTALL_SHAREDIR := .install_sharedir
 
 endif
 
@@ -659,7 +671,7 @@ SOFLAGS    := -dynamiclib
 ifeq ($(MK_ENABLE_RPATH),yes)
 SOFLAGS    += -Wl,-install_name,@rpath/$(LIBBLIS_SONAME)
 else
-SOFLAGS    += -Wl,-install_name,$(libdir)/$(LIBBLIS_SONAME)
+SOFLAGS    += -Wl,-install_name,$(shell echo $(INSTALL_LIBDIR_REAL) | sed 's/ /\\ /g')/$(LIBBLIS_SONAME)
 endif
 else
 SOFLAGS    := -shared

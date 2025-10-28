@@ -8,7 +8,7 @@ echo "Configuring BLIS for Altra using pThreads for parallelism..."
 echo "##########################################################"
 . ./blis_configure_altra_pthreads.sh quiet
 echo "Switching to directory $BLIS_HOME"
-pushd $BLIS_HOME > /dev/null
+pushd "$BLIS_HOME" > /dev/null
 make -j
 popd > /dev/null
 if [ "$1" != "notest" ]; then

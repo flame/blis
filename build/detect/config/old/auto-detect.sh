@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -41,7 +41,7 @@
 
 main()
 {
-	if [ clang -v > /dev/null 2>&1 ]; then
+	if clang -v > /dev/null 2>&1; then
 	    CC=clang
 	else
 	    CC=gcc
@@ -56,7 +56,7 @@ main()
 	# The path to the script. We need this to find the top-level directory
 	# of the source distribution in the event that the user has chosen to
 	# build elsewhere.
-	dist_path=${0%/${script_name}}
+	dist_path=${0%/"${script_name}"}
 
 	# The path to the directory in which we are building. We do this to
 	# make explicit that we distinguish between the top-level directory
@@ -67,17 +67,17 @@ main()
 	# Detect architecture by predefined macros
 	#
 
-	out1=`$CC -E ${dist_path}/arch_detect.c`
+	out1=`$CC -E "${dist_path}"/arch_detect.c`
 
-	ARCH=`echo $out1 | grep -o "ARCH_[a-zA-Z0-9_]*" | head -n1`
+	ARCH=`echo "$out1" | grep -o "ARCH_[a-zA-Z0-9_]*" | head -n1`
 
-	if [ $ARCH = "ARCH_X86_64" ]; then
+	if [ "$ARCH" = "ARCH_X86_64" ]; then
 		CPUID_SRC=cpuid_x86.c
-	elif [ $ARCH = "ARCH_X86" ]; then
+	elif [ "$ARCH" = "ARCH_X86" ]; then
 		CPUID_SRC=cpuid_x86.c
-	elif [ $ARCH = "ARCH_ARM" ]; then
+	elif [ "$ARCH" = "ARCH_ARM" ]; then
 		CPUID_SRC=cpuid_arm.c
-	elif [ $ARCH = "ARCH_AARCH64" ]; then
+	elif [ "$ARCH" = "ARCH_AARCH64" ]; then
 		# Only support armv8 now
 		echo "armv8a"
 		return 0
@@ -90,9 +90,9 @@ main()
 	# Detect CPU cores
 	#
 
-	$CC -o ${cur_dirpath}/$CPUID_BIN ${dist_path}/$CPUID_SRC
-	${cur_dirpath}/$CPUID_BIN
-	rm -rf ${cur_dirpath}/$CPUID_BIN
+	$CC -o "${cur_dirpath:?}/${CPUID_BIN:?}" "${dist_path}/$CPUID_SRC"
+	"${cur_dirpath:?}/${CPUID_BIN:?}"
+	rm -rf ${cur_dirpath:?}/${CPUID_BIN:?}
 
 	# Exit peacefully.
 	return 0

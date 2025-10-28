@@ -129,24 +129,24 @@ for th in ${threads}; do
 
 		# Choose the small m, n, and k values based on the threadedness and
 		# datatype currently being executed.
-		if   [ ${th} = "st" ]; then
-			if   [ ${dt} = "s" ]; then
+		if   [ "${th}" = "st" ]; then
+			if   [ "${dt}" = "s" ]; then
 				sms=${sms_st_s}
 				sns=${sns_st_s}
 				sks=${sks_st_s}
-			elif [ ${dt} = "d" ]; then
+			elif [ "${dt}" = "d" ]; then
 				sms=${sms_st_d}
 				sns=${sns_st_d}
 				sks=${sks_st_d}
 			else
 				exit 1
 			fi
-		elif [ ${th} = "mt" ]; then
-			if   [ ${dt} = "s" ]; then
+		elif [ "${th}" = "mt" ]; then
+			if   [ "${dt}" = "s" ]; then
 				sms=${sms_mt_s}
 				sns=${sns_mt_s}
 				sks=${sks_mt_s}
-			elif [ ${dt} = "d" ]; then
+			elif [ "${dt}" = "d" ]; then
 				sms=${sms_mt_d}
 				sns=${sns_mt_d}
 				sks=${sks_mt_d}
@@ -222,7 +222,7 @@ for th in ${threads}; do
 
 													# Set BLIS_PACK_A if the pcombo char is 'p'; otherwise
 													# unset the variable altogether.
-													if [ ${packa} = "p" ]; then
+													if [ "${packa}" = "p" ]; then
 														export BLIS_PACK_A=1
 													else
 														unset BLIS_PACK_A
@@ -230,7 +230,7 @@ for th in ${threads}; do
 
 													# Set BLIS_PACK_B if the pcombo char is 'p'; otherwise
 													# unset the variable altogether.
-													if [ ${packb} = "p" ]; then
+													if [ "${packb}" = "p" ]; then
 														export BLIS_PACK_B=1
 													else
 														unset BLIS_PACK_B
@@ -265,7 +265,7 @@ for th in ${threads}; do
 												# running properly if GOMP_CPU_AFFINITY is set.
 												# So we temporarily unset it here if we are about
 												# to execute OpenBLAS, but otherwise restore it.
-												if [ ${im} = "openblas" ]; then
+												if [ "${im}" = "openblas" ]; then
 													unset GOMP_CPU_AFFINITY
 												else
 													export GOMP_CPU_AFFINITY="${GOMP_CPU_AFFINITYsave}"
@@ -294,19 +294,19 @@ for th in ${threads}; do
 												# Construct the shape substring (e.g. m6npkp)
 												shstr=""
 
-												if [ ${chm} = "s" ]; then
+												if [ "${chm}" = "s" ]; then
 													shstr="${shstr}m${sm}"
 												else
 													shstr="${shstr}mp"
 												fi
 
-												if [ ${chn} = "s" ]; then
+												if [ "${chn}" = "s" ]; then
 													shstr="${shstr}n${sn}"
 												else
 													shstr="${shstr}np"
 												fi
 
-												if [ ${chk} = "s" ]; then
+												if [ "${chk}" = "s" ]; then
 													shstr="${shstr}k${sk}"
 												else
 													shstr="${shstr}kp"
@@ -330,9 +330,9 @@ for th in ${threads}; do
 												echo "Running (nt = ${nt_use}) ${numactl} ./${exec_name} > ${out_file}"
 
 												# Run executable.
-												${numactl} ./${exec_name} > ${out_file}
+												"${numactl}" ./"${exec_name}" > "${out_file}"
 
-												sleep ${delay}
+												sleep "${delay}"
 
 											done
 										done
@@ -346,4 +346,3 @@ for th in ${threads}; do
 		done
 	done
 done
-

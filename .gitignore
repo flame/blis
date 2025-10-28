@@ -33,6 +33,10 @@ config.mk
 bli_config.h
 bli_addon.h
 blis.pc
+.dist_path
+.install_libdir
+.install_incdir
+.install_sharedir
 
 # -- monolithic headers --
 
