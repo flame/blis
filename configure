@@ -1778,7 +1778,7 @@ check_compiler()
 	# Specific:
 	#
 	#   skx: icc 15.0.1+, gcc 6.0+, clang 3.9+
-	#   knl: icc 14.0.1+, gcc 5.0-14, clang 3.9+
+	#   knl: icc 14.0.1+, gcc 5.0-14, clang 3.9+-18
 	#   haswell: any
 	#   sandybridge: any
 	#   penryn: any
@@ -1916,6 +1916,9 @@ check_compiler()
 			fi
 			if [[ ${cc_major} -lt 11 ]]; then
 				blacklistcc_add "armsve"
+			fi
+			if [[ ${cc_major} -ge 19 ]]; then
+				blacklistcc_add "knl"
 			fi
 		fi
 	fi
