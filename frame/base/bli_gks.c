@@ -111,7 +111,7 @@ int bli_gks_finalize( void )
 			if ( gks_id != NULL )
 			{
 				#ifdef BLIS_ENABLE_MEM_TRACING
-				printf( "bli_gks_finalize(): cntx for ind_t %d: ", ( int )ind );
+				printf( "bli_gks_finalize(): cntx for ind_t %d: ", ( int )id );
 				#endif
 
 				bli_cntx_free( gks_id );
