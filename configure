@@ -430,7 +430,7 @@ print_usage()
                  STRING. This option may be useful when repackaging
                  custom versions of BLIS by outside organizations.
 
-   -c, --show-config-lists
+   -c, --show-config-list
 
                  Print the config and kernel lists, and kernel-to-config
                  map after they are read from file. This can be useful
