@@ -32,16 +32,16 @@
 #
 #
 
+set -e
+
 print_usage()
 {
-	local script_name
-	
 	# Get the script name
 	script_name=${0##*/}
-	
+
 	# Echo usage info
 	echo " "
-	echo " "${script_name}
+	echo " ${script_name}"
 	echo " "
 	echo " Field G. Van Zee"
 	echo " "
@@ -70,7 +70,6 @@ main()
 		case $opt in
 			v  ) verbose_flag=1 ;;
 			\? ) print_usage
-			     exit 1
 		esac
 	done
 	shift $(($OPTIND - 1))
@@ -88,7 +87,7 @@ main()
 	
 	
 	# If the root new directory does not exist, then create it.
-	if [ ! -d $n_dir ]; then
+	if [ ! -d "$n_dir" ]; then
 		
 		# Be verbose, if -v was one of the command line options.
 		if [ -n "$verbose_flag" ]; then
@@ -98,7 +97,7 @@ main()
 		
 		# Make the root new directory. Create the parent directories if
 		# they do not exist with the -p option.
-		mkdir -p $n_dir
+		mkdir -p "$n_dir"
 	fi
 	
 	
@@ -111,7 +110,7 @@ main()
 	
 	# Begin recursion, starting with the contents of the existing
 	# directory.
-	mirror_tree "$(ls $e_dir)"
+	mirror_tree "$(ls "$e_dir")"
 	
 	
 	# Exit peacefully.
@@ -134,7 +133,7 @@ mirror_tree()
 		
 		# If the current existing directory exists, then create a
 		# corresponding subdirectory in new directory.
-		if [ -d ${cur_e_dir} ]; then
+		if [ -d "${cur_e_dir}" ]; then
 			
 			# Be verbose, if -v was one of the command line options.
 			if [ -n "$verbose_flag" ]; then
@@ -144,13 +143,13 @@ mirror_tree()
 			
 			# Make the new subdirectory, but only if it doesn't
 			# already exist.
-			if [ ! -d $cur_n_dir ]; then
-				mkdir $cur_n_dir
+			if [ ! -d "$cur_n_dir" ]; then
+				mkdir "$cur_n_dir"
 			fi
 			
 			
 			# Continue recursively on the contents of cur_e_dir.
-			mirror_tree "$(ls $cur_e_dir)"
+			mirror_tree "$(ls "$cur_e_dir")"
 		fi
 		
 		# Delete the end of the path, up to the first / character to

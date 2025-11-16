@@ -1,4 +1,4 @@
-#!/bin/blis
+#!/bin/sh
 
 if [ "$1" = "quiet" ]; then
     quiet_unsetpar="quiet"

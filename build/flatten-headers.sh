@@ -204,12 +204,12 @@ find_header_dirs()
 	echovt_n "scanning contents of ${cur_dirpath}"
 
 	# Acquire a list of the directory's contents.
-	sub_items=$(ls ${cur_dirpath})
+	sub_items=$(ls "${cur_dirpath}")
 
 	# If there is at least one header present, add the current directory to
 	# the list header of directories. Otherwise, the current directory does
 	# not contribute to the list returned to the caller.
-	result=$(echo ${sub_items} | grep "\.h")
+	result=$(echo "${sub_items}" | grep "\.h")
 
 	if [ -n "${result}" ]; then
 		cur_list="${cur_dirpath}"
@@ -295,7 +295,7 @@ replace_pass()
 	# found in the current header file.
 	headerlist=""
 
-	result=$(grep '^[[:space:]]*#include ' ${inputfile})
+	result=$(grep '^[[:space:]]*#include ' "${inputfile}")
 
 	# Only iterate through the file line-by-line if it contains at least
 	# one #include directive. If it does not contain any #include directives,
@@ -309,14 +309,14 @@ replace_pass()
 
 			# Check whether the line begins with a #include directive, but ignore
 			# the line if it contains the skip string.
-			result=$(echo ${curline} | grep '^[[:space:]]*#include ')
+			result=$(echo "${curline}" | grep '^[[:space:]]*#include ')
 
 			# If the #include directive was found...
 			if [ -n "${result}" ]; then
 
 				# Isolate the header filename. We must take care to include all
 				# characters that might appear between the "" or <>.
-				header=$(echo ${curline} | sed -e "s/#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g")
+				header=$(echo "${curline}" | sed -e "s/#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g")
 
 				# Add the header file to a list.
 				headerlist=$(canonicalize_ws "${headerlist} ${header}")
@@ -338,13 +338,13 @@ replace_pass()
 		# Make a copy of inputfile stripped of its C-style comments and
 		# save it to intermfile. This substitution leaves behind a single
 		# blank line.
-		cat ${inputfile} \
-		    | perl -0777 -pe "s/\/\*.*?\*\///gs" \
+		< "${inputfile}" \
+		    perl -0777 -pe "s/\/\*.*?\*\///gs" \
 		    > "${intermfile}"
 	else
 
 		# Otherwise, just copy inputfile to intermfile verbatim.
-		cp ${inputfile} ${intermfile}
+		cp "${inputfile}" "${intermfile}"
 	fi
 
 
@@ -352,7 +352,7 @@ replace_pass()
 	for header in ${headerlist}; do
 
 		# Find the path to the header.
-		header_filepath=$(get_header_path ${header} "${dirpaths}")
+		header_filepath=$(get_header_path "${header}" "${dirpaths}")
 
 		# If the header has a slash, escape it so that sed doesn't get confused
 		# (since we use '/' as our search-and-replace delimiter).
@@ -370,11 +370,7 @@ replace_pass()
 			# Notice that we mimic the quotes or angle brackets around the
 			# header name, whichever pair was used in the input.
 
-			cat ${intermfile} \
-			    | sed -e "s/^[[:space:]]*#include \([\"<]\)\(${header_esc}\)\([\">]\).*/#include \1\2\3 ${skipstr}/" \
-			    > "${intermfile}.tmp"
-
-			mv "${intermfile}.tmp" ${intermfile}
+			sed -ie "s/^[[:space:]]*#include \([\"<]\)\(${header_esc}\)\([\">]\).*/#include \1\2\3 ${skipstr}/" "${intermfile}"
 
 		else
 
@@ -382,7 +378,7 @@ replace_pass()
 
 			# Recursively produce an inlined/flattened intermediate file at
 			# ${header_filepath}.
-			subintermfile=$(replace_pass ${header_filepath} "${dirpaths}" "${cursp}${nestsp}")
+			subintermfile=$(replace_pass "${header_filepath}" "${dirpaths}" "${cursp}${nestsp}")
 
 			echovt "${cursp}inserting '${subintermfile}'."
 
@@ -393,16 +389,14 @@ replace_pass()
 			# bash to interpret '\n' as a newline, as needed for the 'a\' and 'i\'
 			# commands in POSIX (e.g. OS X) sed. (GNU sed allows a much more
 			# natural usage that does not require the backslash or newline.)
-			cat ${intermfile} \
-			    | sed -e "/^[[:space:]]*#include \"${header_esc}\"/ {" \
-			          -e 'i\'$'\n'"// begin ${header}"$'\n' \
-			          -e "r ${subintermfile}" \
-			          -e 'a\'$'\n'"// end ${header}"$'\n' \
-			          -e "d" \
-			          -e "}" \
-			    > "${intermfile}.tmp"
-
-			mv "${intermfile}.tmp" ${intermfile}
+			  sed -i \
+					  -e "/^[[:space:]]*#include \"${header_esc}\"/ {" \
+					  -e 'i\'$'\n'"// begin ${header}"$'\n' \
+					  -e "r ${subintermfile}" \
+					  -e 'a\'$'\n'"// end ${header}"$'\n' \
+					  -e "d" \
+					  -e "}" \
+				"${intermfile}"
 
 			echovt "${cursp}removing intermediate file '${subintermfile}'."
 
@@ -502,7 +496,7 @@ main()
 
 		echovt_n "checking ${item} "
 
-		if [ -d ${item} ]; then
+		if [ -d "${item}" ]; then
 			echovt_n2 " ...directory exists."
 			dir_list2="${dir_list2} ${item}"
 		else
@@ -531,7 +525,7 @@ main()
 		dirpaths=""
 		for item in ${dir_list}; do
 
-			item_dirpaths=$(find_header_dirs ${item})
+			item_dirpaths=$(find_header_dirs "${item}")
 			dirpaths="${dirpaths} ${item_dirpaths}"
 		done
 		dirpaths=$(canonicalize_ws "${dirpaths}")
@@ -548,11 +542,11 @@ main()
 			echovt_n "scanning ${item}"
 
 			# Acquire a list of the directory's contents.
-			sub_items=$(ls ${item})
+			sub_items=$(ls "${item}")
 
 			# If there is at least one header present, add the current directory to
 			# the list header of directories.
-			result=$(echo ${sub_items} | grep "\.h")
+			result=$(echo "${sub_items}" | grep "\.h")
 			if [ -n "${result}" ]; then
 				dirpaths="${dirpaths} ${item}"
 				echovt_n2 " ...found headers."
@@ -577,10 +571,10 @@ main()
 	echovo_n "."
 
 	# Recursively substitute headers for occurrences of #include directives.
-	intermfile=$(replace_pass ${inputfile} "${dirpaths}" "${nestsp}")
+	intermfile=$(replace_pass "${inputfile}" "${dirpaths}" "${nestsp}")
 
 	# Rename the intermediate file(path) to the output file(path).
-	mv ${intermfile} ${outputfile}
+	mv "${intermfile}" "${outputfile}"
 
 	echovt "substitution complete."
 	echovt "monolithic header saved as '${outputfile}'."

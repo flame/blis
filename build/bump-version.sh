@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -42,13 +42,13 @@
 print_usage()
 {
 	#local script_name
-	
+
 	# Get the script name
 	#script_name=${0##*/}
-	
+
 	# Echo usage info
 	echo " "
-	echo " "$script_name
+	echo " $script_name"
 	echo " "
 	echo " Field G. Van Zee"
 	echo " "
@@ -79,7 +79,7 @@ print_usage()
 	echo "   -f VERSFILE  version file name"
 	echo "                  Update VERSFILE with new version string instead of default"
 	echo "                  'version' file."
-	
+
 	# Exit with non-zero exit status
 	exit 1
 }
@@ -113,9 +113,9 @@ main()
 
 	# The git directory.
 	gitdir='.git'
-	
+
 	# Whether we are performing a dry run or not.
-	dry_run_flag=""	
+	dry_run_flag=""
 
 	# -- END GLOBAL VARIABLE DECLARATIONS --
 
@@ -165,12 +165,12 @@ main()
 
 		echo "${script_name}: updating version file '${version_file}'."
 		if [ -z "$dry_run_flag" ]; then
-			echo "${new_version_str}" > ${version_file}
+			echo "${new_version_str}" > "${version_file}"
 		fi
 
 		echo "${script_name}: executing: git commit -m \"Version file update (${new_version_str})\" ${version_file}."
 		if [ -z "$dry_run_flag" ]; then
-			git commit -m "Version file update (${new_version_str})" ${version_file}
+			git commit -m "Version file update (${new_version_str})" "${version_file}"
 		fi
 
 		git_commit_str=$(git describe --always)
@@ -178,7 +178,7 @@ main()
 
 		echo "${script_name}: executing: git tag ${new_version_str} ${git_commit_str}."
 		if [ -z "$dry_run_flag" ]; then
-			git tag ${new_version_str} ${git_commit_str}
+			git tag "${new_version_str}" "${git_commit_str}"
 		fi
 
 		echo "${script_name}: updating ${changelog_file}."

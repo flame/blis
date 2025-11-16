@@ -58,6 +58,7 @@
         check checkblas \
         checkblis checkblis-fast checkblis-md checkblis-salt \
         install-headers install-helper-headers install-libs install-lib-symlinks \
+        make-symlinks make-install-symlinks \
         showconfig \
         clean cleanmk cleanh cleanlib distclean \
         cleantest cleanblastest cleanblistest \
@@ -524,7 +525,7 @@ clean: cleanh cleanlib
 
 # --- Environment check rules ---
 
-check-env: check-env-make-defs check-env-fragments check-env-mk
+check-env: check-env-make-defs check-env-fragments check-env-mk make-symlinks
 
 check-env-mk:
 ifeq ($(CONFIG_MK_PRESENT),no)
@@ -540,6 +541,23 @@ check-env-make-defs: check-env-fragments
 ifeq ($(ALL_MAKE_DEFS_MK_PRESENT),no)
 	$(error Cannot proceed: Some make_defs.mk files not found or mislabeled!)
 endif
+
+make-symlinks:
+#	@rm -f .dist_path
+#	@ln -s "$(DIST_PATH_REAL)" .dist_path
+
+make-install-symlinks:
+#	@rm -f .install_libdir
+#	@rm -f .install_incdir
+#	@rm -f .install_shredir
+#	@ln -s "$(INSTALL_LIBDIR_REAL)" .install_libdir
+#	@ln -s "$(INSTALL_INCDIR_REAL)" .install_incdir
+#	@ln -s "$(INSTALL_SHAREDIR_REAL)" .install_sharedir
+	@mkdir -p "$(INSTALL_LIBDIR_REAL)"
+	@mkdir -p "$(INSTALL_INCDIR_REAL)"
+	@mkdir -p "$(INSTALL_SHAREDIR_REAL)"
+
+$(CONFIG_MK_FILE) $(ALL_H99_FILES): check-env
 
 
 # --- Shared/dynamic libblis symbol file creation/refresh ---
@@ -1085,23 +1103,23 @@ endif
 install-headers: check-env $(HEADERS_INSTALLED) install-helper-headers
 
 # Rule for installing main headers.
-$(MK_INCL_DIR_INST)/%.h: $(BASE_INC_PATH)/%.h $(CONFIG_MK_FILE)
+$(MK_INCL_DIR_INST)/%.h: $(BASE_INC_PATH)/%.h $(CONFIG_MK_FILE) make-install-symlinks
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(dir $(@))
 	$(INSTALL) -m 0644 $(<) $(dir $(@))
 else
 	@$(MKDIR) $(dir $(@))
-	@echo "Installing $(notdir $(<)) into $(dir $(@))/"
+	@echo "Installing $(notdir $(<)) into $(subst .install_incdir,$(INSTALL_INCDIR_REAL),$(dir $(@)))"
 	@$(INSTALL) -m 0644 $(<) $(dir $(@))
 endif
 
-$(MK_INCL_DIR_INST)/%.hh: $(VEND_CPP_PATH)/%.hh $(CONFIG_MK_FILE)
+$(MK_INCL_DIR_INST)/%.hh: $(VEND_CPP_PATH)/%.hh $(CONFIG_MK_FILE) make-install-symlinks
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(dir $(@))
 	$(INSTALL) -m 0644 $(<) $(dir $(@))
 else
 	@$(MKDIR) $(dir $(@))
-	@echo "Installing $(notdir $(<)) into $(dir $(@))/"
+	@echo "Installing $(notdir $(<)) into $(subst .install_incdir,$(INSTALL_INCDIR_REAL),$(dir $(@)))"
 	@$(INSTALL) -m 0644 $(<) $(dir $(@))
 endif
 
@@ -1109,13 +1127,11 @@ install-helper-headers: check-env $(HELP_HEADERS_INSTALLED)
 
 # A rule to install a helper header file.
 define make-helper-header-rule
-$(INSTALL_INCDIR)/$(notdir $(1)): $(BUILD_PATH)/$(notdir $(1)) $(CONFIG_MK_FILE)
+$(INSTALL_INCDIR)/$(notdir $(1)): $(BUILD_PATH)/$(notdir $(1)) $(CONFIG_MK_FILE) make-install-symlinks
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(MKDIR) $(INSTALL_INCDIR)
 	$(INSTALL) -m 0644 $$(<) $$(@)
 else
-	@$(MKDIR) $(INSTALL_INCDIR)
-	@echo "Installing $$(@F) helper header into $(INSTALL_INCDIR)/"
+	@echo "Installing $$(@F) helper header into $(INSTALL_INCDIR_REAL)/"
 	@$(INSTALL) -m 0644 $$(<) $$(@)
 endif
 endef
@@ -1127,7 +1143,7 @@ $(foreach h, $(HELP_HEADERS_TO_INSTALL), $(eval $(call make-helper-header-rule,$
 
 install-share: check-env $(MK_SHARE_DIR_INST) $(PC_SHARE_DIR_INST)
 
-$(MK_SHARE_DIR_INST): $(CONFIGURE_FILE) $(FRAGS_TO_INSTALL) $(PLUGIN_FRAGS_TO_INSTALL) $(CONFIG_DIR)/$(CONFIG_NAME)/$(MAKE_DEFS_FILE)
+$(MK_SHARE_DIR_INST): $(CONFIGURE_FILE) $(FRAGS_TO_INSTALL) $(PLUGIN_FRAGS_TO_INSTALL) $(CONFIG_DIR)/$(CONFIG_NAME)/$(MAKE_DEFS_FILE) make-install-symlinks
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@)
 	$(MKDIR) $(@)/plugin
@@ -1148,12 +1164,12 @@ ifeq ($(ENABLE_VERBOSE),yes)
 else
 	@$(MKDIR) $(@)
 	@$(MKDIR) $(@)/plugin
-	@echo "Installing $(notdir $(FRAGS_TO_INSTALL)) into $(@)/"
+	@echo "Installing $(notdir $(FRAGS_TO_INSTALL)) into $(INSTALL_SHAREDIR_REAL)/"
 	@$(INSTALL) -m 0755 $(filter %.sh,$(FRAGS_TO_INSTALL)) $(@)
 	@$(INSTALL) -m 0644 $(filter-out %.sh,$(FRAGS_TO_INSTALL)) $(@)
-	@echo "Installing $(notdir $(PLUGIN_FRAGS_TO_INSTALL)) into $(@)/plugin/"
+	@echo "Installing $(notdir $(PLUGIN_FRAGS_TO_INSTALL)) into $(INSTALL_SHAREDIR_REAL)/plugin/"
 	@$(INSTALL) -m 0644 $(PLUGIN_FRAGS_TO_INSTALL) $(@)/plugin
-	@echo "Installing $(CONFIGURE_FILE) into $(@)/configure-plugin"
+	@echo "Installing $(CONFIGURE_FILE) into $(INSTALL_SHAREDIR_REAL)/configure-plugin"
 	@$(INSTALL) -m 0755 $(CONFIGURE_FILE) $(@)/configure-plugin
 #	@$(MKDIR) -p $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)#\
 #	@echo "Installing $(CONFIG_DIR)/$(CONFIG_NAME)/$(MAKE_DEFS_FILE) into $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)"
@@ -1161,16 +1177,16 @@ else
 #	               $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)/
 	@for THIS_CONFIG in $(FULL_CONFIG_LIST); do \
 		$(MKDIR) -p $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
-		echo "Installing $(CONFIG_DIR)/$$THIS_CONFIG/$(MAKE_DEFS_FILE) into $(@)/$(CONFIG_DIR)/$$THIS_CONFIG"; \
+		echo "Installing $(CONFIG_DIR)/$$THIS_CONFIG/$(MAKE_DEFS_FILE) into $(INSTALL_SHAREDIR_REAL)/$(CONFIG_DIR)/$$THIS_CONFIG"; \
 		$(INSTALL) -m 0644 $(CONFIG_DIR)/$$THIS_CONFIG/$(MAKE_DEFS_FILE) \
 		              $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
-		echo "Installing $(CONFIG_DIR)/$$THIS_CONFIG/bli_kernel_defs_$$THIS_CONFIG.h into $(@)/$(CONFIG_DIR)/$$THIS_CONFIG"; \
+		echo "Installing $(CONFIG_DIR)/$$THIS_CONFIG/bli_kernel_defs_$$THIS_CONFIG.h into $(INSTALL_SHAREDIR_REAL)/$(CONFIG_DIR)/$$THIS_CONFIG"; \
 		$(INSTALL) -m 0644 $(CONFIG_DIR)/$$THIS_CONFIG/bli_kernel_defs_$$THIS_CONFIG.h \
 		              $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
 	done
 endif
 
-$(PC_SHARE_DIR_INST): $(PC_IN_FILE)
+$(PC_SHARE_DIR_INST): $(PC_IN_FILE) make-install-symlinks
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@)
 	$(shell cat "$(PC_IN_FILE)" \
@@ -1184,7 +1200,7 @@ ifeq ($(ENABLE_VERBOSE),yes)
 	$(INSTALL) -m 0644 $(PC_OUT_FILE) $(@)
 else
 	@$(MKDIR) $(@)
-	@echo "Installing $(PC_OUT_FILE) into $(@)/"
+	@echo "Installing $(PC_OUT_FILE) into $(subst .install_sharedir,$(INSTALL_SHAREDIR_REAL),$(@))"
 	@$(shell cat "$(PC_IN_FILE)" \
 	| sed -e "s#@PACKAGE_VERSION@#$(VERSION)#g" \
 	| sed -e "s#@prefix@#$(prefix)#g" \
@@ -1201,13 +1217,11 @@ endif
 install-libs: check-env $(MK_LIBS_INST)
 
 # Install static library.
-$(INSTALL_LIBDIR)/%.a: $(BASE_LIB_PATH)/%.a $(CONFIG_MK_FILE)
+$(INSTALL_LIBDIR)/%.a: $(BASE_LIB_PATH)/%.a $(CONFIG_MK_FILE) make-install-symlinks
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(MKDIR) $(@D)
 	$(INSTALL) -m 0644 $< $@
 else
-	@echo "Installing $(@F) into $(INSTALL_LIBDIR)/"
-	@$(MKDIR) $(@D)
+	@echo "Installing $(@F) into $(INSTALL_LIBDIR_REAL)/"
 	@$(INSTALL) -m 0644 $< $@
 endif
 
@@ -1217,36 +1231,30 @@ endif
 ifeq ($(IS_WIN),no)
 
 # Linux/OSX library (.so OR .dylib) installation rules.
-$(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MMB_EXT): $(BASE_LIB_PATH)/%.$(SHLIB_EXT) $(CONFIG_MK_FILE)
+$(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MMB_EXT): $(BASE_LIB_PATH)/%.$(SHLIB_EXT) $(CONFIG_MK_FILE) make-install-symlinks
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(MKDIR) $(@D)
 	$(INSTALL) -m 0755 $< $@
 else
-	@echo "Installing $(@F) into $(INSTALL_LIBDIR)/"
-	@$(MKDIR) $(@D)
+	@echo "Installing $(@F) into $(INSTALL_LIBDIR_REAL)/"
 	@$(INSTALL) -m 0755 $< $@
 endif
 
 else # ifeq ($(IS_WIN),yes)
 
 # Windows library (.dll and .lib) installation rules.
-$(INSTALL_LIBDIR)/%.$(SHLIB_EXT): $(BASE_LIB_PATH)/%.$(SHLIB_EXT)
+$(INSTALL_LIBDIR)/%.$(SHLIB_EXT): $(BASE_LIB_PATH)/%.$(SHLIB_EXT) make-install-symlinks
 ifeq ($(ENABLE_VERBOSE),yes)
-	@$(MKDIR) $(@D)
 	@$(INSTALL) -m 0644 $(BASE_LIB_PATH)/$(@F) $@
 else
-	@echo "Installing $(@F) into $(INSTALL_LIBDIR)/"
-	@$(MKDIR) $(@D)
+	@echo "Installing $(@F) into $(INSTALL_LIBDIR_REAL)/"
 	@$(INSTALL) -m 0644 $(BASE_LIB_PATH)/$(@F) $@
 endif
 
-$(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MAJ_EXT): $(BASE_LIB_PATH)/%.$(LIBBLIS_SO_MAJ_EXT)
+$(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MAJ_EXT): $(BASE_LIB_PATH)/%.$(LIBBLIS_SO_MAJ_EXT) make-install-symlinks
 ifeq ($(ENABLE_VERBOSE),yes)
-	@$(MKDIR) $(@D)
 	@$(INSTALL) -m 0644 $(BASE_LIB_PATH)/$(@F) $@
 else
-	@echo "Installing $(@F) into $(INSTALL_LIBDIR)/"
-	@$(MKDIR) $(@D)
+	@echo "Installing $(@F) into $(INSTALL_LIBDIR_REAL)/"
 	@$(INSTALL) -m 0644 $(BASE_LIB_PATH)/$(@F) $@
 endif
 
@@ -1265,7 +1273,7 @@ ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
 else
-	@echo "Installing symlink $(@F) into $(INSTALL_LIBDIR)/"
+	@echo "Installing symlink $(@F) into $(INSTALL_LIBDIR_REAL)/"
 	@$(SYMLINK) $(<F) $(@F)
 	@$(MV) $(@F) $(INSTALL_LIBDIR)/
 endif
@@ -1276,7 +1284,7 @@ ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
 else
-	@echo "Installing symlink $(@F) into $(INSTALL_LIBDIR)/"
+	@echo "Installing symlink $(@F) into $(INSTALL_LIBDIR_REAL)/"
 	@$(SYMLINK) $(<F) $(@F)
 	@$(MV) $(@F) $(INSTALL_LIBDIR)/
 endif
@@ -1312,6 +1320,7 @@ showconfig: check-env
 cleanmk:
 ifeq ($(IS_CONFIGURED),yes)
 ifeq ($(ENABLE_VERBOSE),yes)
+	- $(RM_F) .dist_path .install_libdir .install_incdir .install_sharedir
 	- $(FIND) $(CONFIG_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(FRAME_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(REFKERN_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
@@ -1323,6 +1332,8 @@ ifneq ($(SANDBOX),)
 	- $(FIND) $(SANDBOX_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 endif
 else
+	@echo "Removing helper symlinks"
+	@- $(RM_F) .dist_path .install_libdir .install_incdir .install_sharedir
 	@echo "Removing makefile fragments from $(CONFIG_FRAG_PATH)"
 	@- $(FIND) $(CONFIG_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	@echo "Removing makefile fragments from $(FRAME_FRAG_PATH)"

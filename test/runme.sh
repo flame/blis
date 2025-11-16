@@ -26,7 +26,7 @@ for im in ${test_impls}; do
 		echo "Running ${exec_name} > ${out_file}"
 
 		# Run executable.
-		./${exec_name} > ${out_file}
+		./"${exec_name}" > "${out_file}"
 
 		sleep 1
 

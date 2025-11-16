@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -52,7 +52,7 @@ for e in ${execs}; do
 
 	echo "Capturing ${exec_name}..."
 
-	./${exec_name} &
+	./"${exec_name}" &
 
 	sleep 1
 
@@ -60,4 +60,3 @@ for e in ${execs}; do
 
 	pkill "${exec_name}" > /dev/null
 done
-
