@@ -44,7 +44,7 @@ PACKM(PRECISION_CHAR, void)
     const DATATYPE* restrict a = a_;
     DATATYPE* restrict p = p_;
 
-    // MRxk kernel
+    // MRxk kernel, MR == 6
     if (cdim <= MR && cdim_max == MR && cdim_bcast == 1)
     {
         if (lda == 1) {
@@ -59,44 +59,44 @@ PACKM(PRECISION_CHAR, void)
             if (PASTEMAC(PRECISION_CHAR, eq1)(*kappa)) {
                 switch (cdim) {
                 case 0:
-                    arow0_r = VFMV_V_F(PREC, LMUL)(0., n);
-                    arow0_i = VFMV_V_F(PREC, LMUL)(0., n);
+                    arow0_r = VFMV_V_F(PREC, LMUL)(0., -1);
+                    arow0_i = VFMV_V_F(PREC, LMUL)(0., -1);
                 case 1:
-                    arow1_r = VFMV_V_F(PREC, LMUL)(0., n);
-                    arow1_i = VFMV_V_F(PREC, LMUL)(0., n);
+                    arow1_r = VFMV_V_F(PREC, LMUL)(0., -1);
+                    arow1_i = VFMV_V_F(PREC, LMUL)(0., -1);
                 case 2:
-                    arow2_r = VFMV_V_F(PREC, LMUL)(0., n);
-                    arow2_i = VFMV_V_F(PREC, LMUL)(0., n);
+                    arow2_r = VFMV_V_F(PREC, LMUL)(0., -1);
+                    arow2_i = VFMV_V_F(PREC, LMUL)(0., -1);
                 case 3:
-                    arow3_r = VFMV_V_F(PREC, LMUL)(0., n);
-                    arow3_i = VFMV_V_F(PREC, LMUL)(0., n);
+                    arow3_r = VFMV_V_F(PREC, LMUL)(0., -1);
+                    arow3_i = VFMV_V_F(PREC, LMUL)(0., -1);
                 case 4:
-                    arow4_r = VFMV_V_F(PREC, LMUL)(0., n);
-                    arow4_i = VFMV_V_F(PREC, LMUL)(0., n);
+                    arow4_r = VFMV_V_F(PREC, LMUL)(0., -1);
+                    arow4_i = VFMV_V_F(PREC, LMUL)(0., -1);
                 case 5:
-                    arow5_r = VFMV_V_F(PREC, LMUL)(0., n);
-                    arow5_i = VFMV_V_F(PREC, LMUL)(0., n);
+                    arow5_r = VFMV_V_F(PREC, LMUL)(0., -1);
+                    arow5_i = VFMV_V_F(PREC, LMUL)(0., -1);
                 }
             } else {
                 switch (cdim) {
                 case 0:
-                    kappa_arow0_r = VFMV_V_F(PREC, LMUL)(0., n);
-                    kappa_arow0_i = VFMV_V_F(PREC, LMUL)(0., n);
+                    kappa_arow0_r = VFMV_V_F(PREC, LMUL)(0., -1);
+                    kappa_arow0_i = VFMV_V_F(PREC, LMUL)(0., -1);
                 case 1:
-                    kappa_arow1_r = VFMV_V_F(PREC, LMUL)(0., n);
-                    kappa_arow1_i = VFMV_V_F(PREC, LMUL)(0., n);
+                    kappa_arow1_r = VFMV_V_F(PREC, LMUL)(0., -1);
+                    kappa_arow1_i = VFMV_V_F(PREC, LMUL)(0., -1);
                 case 2:
-                    kappa_arow2_r = VFMV_V_F(PREC, LMUL)(0., n);
-                    kappa_arow2_i = VFMV_V_F(PREC, LMUL)(0., n);
+                    kappa_arow2_r = VFMV_V_F(PREC, LMUL)(0., -1);
+                    kappa_arow2_i = VFMV_V_F(PREC, LMUL)(0., -1);
                 case 3:
-                    kappa_arow3_r = VFMV_V_F(PREC, LMUL)(0., n);
-                    kappa_arow3_i = VFMV_V_F(PREC, LMUL)(0., n);
+                    kappa_arow3_r = VFMV_V_F(PREC, LMUL)(0., -1);
+                    kappa_arow3_i = VFMV_V_F(PREC, LMUL)(0., -1);
                 case 4:
-                    kappa_arow4_r = VFMV_V_F(PREC, LMUL)(0., n);
-                    kappa_arow4_i = VFMV_V_F(PREC, LMUL)(0., n);
+                    kappa_arow4_r = VFMV_V_F(PREC, LMUL)(0., -1);
+                    kappa_arow4_i = VFMV_V_F(PREC, LMUL)(0., -1);
                 case 5:
-                    kappa_arow5_r = VFMV_V_F(PREC, LMUL)(0., n);
-                    kappa_arow5_i = VFMV_V_F(PREC, LMUL)(0., n);
+                    kappa_arow5_r = VFMV_V_F(PREC, LMUL)(0., -1);
+                    kappa_arow5_i = VFMV_V_F(PREC, LMUL)(0., -1);
                 }
             }
 
@@ -220,51 +220,82 @@ PACKM(PRECISION_CHAR, void)
             }
             
             RVV_TYPE_FX(PREC, LMUL_MR, 2) zero_padding = VUNDEFINED_FX(PREC, LMUL_MR, 2)();
-            zero_padding = VSET_V_F(PREC, LMUL_MR, 2)(zero_padding, 0, VFMV_V_F(PREC, LMUL_MR)(0., cdim_max));
-            zero_padding = VSET_V_F(PREC, LMUL_MR, 2)(zero_padding, 1, VFMV_V_F(PREC, LMUL_MR)(0., cdim_max));
+            zero_padding = VSET_V_F(PREC, LMUL_MR, 2)(zero_padding, 0, VFMV_V_F(PREC, LMUL_MR)(0., -1));
+            zero_padding = VSET_V_F(PREC, LMUL_MR, 2)(zero_padding, 1, VFMV_V_F(PREC, LMUL_MR)(0., -1));
             for (size_t i = n; i < n_max; ++i) {
-                VSSEG2_V_F(PREC, LMUL_MR, 2)((BASE_DT*) p, zero_padding, cdim_max);
+                DATATYPE* restrict p_tmp = p;
+                size_t avl = cdim_max; 
+                while (avl) {
+                    size_t vl = VSETVL(PREC, LMUL_MR)(avl);
+                    VSSEG2_V_F(PREC, LMUL_MR, 2)((BASE_DT*) p_tmp, zero_padding, vl);
+                    p_tmp += vl;
+                    avl -= vl;
+                }
                 p += ldp;
             }
         }
         else {
             RVV_TYPE_FX(PREC, LMUL_MR, 2) zero_padding = VUNDEFINED_FX(PREC, LMUL_MR, 2)();
-            zero_padding = VSET_V_F(PREC, LMUL_MR, 2)(zero_padding, 0, VFMV_V_F(PREC, LMUL_MR)(0., cdim_max));
-            zero_padding = VSET_V_F(PREC, LMUL_MR, 2)(zero_padding, 1, VFMV_V_F(PREC, LMUL_MR)(0., cdim_max));
+            zero_padding = VSET_V_F(PREC, LMUL_MR, 2)(zero_padding, 0, VFMV_V_F(PREC, LMUL_MR)(0., -1));
+            zero_padding = VSET_V_F(PREC, LMUL_MR, 2)(zero_padding, 1, VFMV_V_F(PREC, LMUL_MR)(0., -1));
 
             for (size_t i = 0; i < n; ++i) {
-                RVV_TYPE_FX(PREC, LMUL_MR, 2) acol;
-                if (inca == 1)
-                    acol = VLSEG2_V_F_TU(PREC, LMUL_MR, 2)(zero_padding, (BASE_DT*) a, cdim);
-                else
-                    acol = VLSSEG2_V_F_TU(PREC, LMUL_MR, 2)(zero_padding, (BASE_DT*) a, 2 * FLT_SIZE * inca, cdim);
-                RVV_TYPE_F(PREC, LMUL_MR) acol_r = VGET_V_F(PREC, LMUL_MR, 2)(acol, 0); 
-                RVV_TYPE_F(PREC, LMUL_MR) acol_i = VGET_V_F(PREC, LMUL_MR, 2)(acol, 1); 
-
-                if (PASTEMAC(PRECISION_CHAR, eq1)(*kappa)) {
-                    if (bli_is_conj(conja)) {
-                        acol_i = VFNEG_VF_TU(PREC, LMUL_MR)(acol_i, acol_i, cdim);
-                        acol = VSET_V_F(PREC, LMUL_MR, 2)(acol, 0, acol_r);
-                        acol = VSET_V_F(PREC, LMUL_MR, 2)(acol, 1, acol_i);
-                    }
-                } else {
-                    RVV_TYPE_F(PREC, LMUL_MR) kappa_acol_r, kappa_acol_i;
-                    if (bli_is_conj(conja))
-                        VCMUL_VF_CONJ_TU(PREC, LMUL_MR, kappa_acol_r, kappa_acol_i, acol_r, acol_i, kappa->real, kappa->imag, cdim);
+                const DATATYPE* restrict a_tmp = a;
+                DATATYPE* restrict p_tmp = p;
+                size_t avl = cdim;
+                while (avl) {
+                    size_t vl = VSETVL(PREC, LMUL_MR)(avl);
+                    RVV_TYPE_FX(PREC, LMUL_MR, 2) acol;
+                    if (inca == 1)
+                        acol = VLSEG2_V_F(PREC, LMUL_MR, 2)((BASE_DT*) a_tmp, vl);
                     else
-                        VCMUL_VF_TU(PREC, LMUL_MR, kappa_acol_r, kappa_acol_i, acol_r, acol_i, kappa->real, kappa->imag, cdim);
-                    acol = VSET_V_F(PREC, LMUL_MR, 2)(acol, 0, kappa_acol_r);
-                    acol = VSET_V_F(PREC, LMUL_MR, 2)(acol, 1, kappa_acol_i);
-                }
+                        acol = VLSSEG2_V_F(PREC, LMUL_MR, 2)((BASE_DT*) a_tmp, 2 * FLT_SIZE * inca, vl);
+                    RVV_TYPE_F(PREC, LMUL_MR) acol_r = VGET_V_F(PREC, LMUL_MR, 2)(acol, 0); 
+                    RVV_TYPE_F(PREC, LMUL_MR) acol_i = VGET_V_F(PREC, LMUL_MR, 2)(acol, 1); 
 
-                VSSEG2_V_F(PREC, LMUL_MR, 2)((BASE_DT*) p, acol, cdim_max);
+                    if (PASTEMAC(PRECISION_CHAR, eq1)(*kappa)) {
+                        if (bli_is_conj(conja)) {
+                            acol_i = VFNEG_VF(PREC, LMUL_MR)(acol_i, vl);
+                            acol = VSET_V_F(PREC, LMUL_MR, 2)(acol, 0, acol_r);
+                            acol = VSET_V_F(PREC, LMUL_MR, 2)(acol, 1, acol_i);
+                        }
+                    } else {
+                        RVV_TYPE_F(PREC, LMUL_MR) kappa_acol_r, kappa_acol_i;
+                        if (bli_is_conj(conja))
+                            VCMUL_VF_CONJ(PREC, LMUL_MR, kappa_acol_r, kappa_acol_i, acol_r, acol_i, kappa->real, kappa->imag, vl);
+                        else
+                            VCMUL_VF(PREC, LMUL_MR, kappa_acol_r, kappa_acol_i, acol_r, acol_i, kappa->real, kappa->imag, vl);
+                        acol = VSET_V_F(PREC, LMUL_MR, 2)(acol, 0, kappa_acol_r);
+                        acol = VSET_V_F(PREC, LMUL_MR, 2)(acol, 1, kappa_acol_i);
+                    }
+
+                    VSSEG2_V_F(PREC, LMUL_MR, 2)((BASE_DT*) p_tmp, acol, vl);
+                    a_tmp += inca * vl;
+                    p_tmp += vl;
+                    avl -= vl;
+                }
+                 
+                avl = cdim_max - cdim;
+                while (avl) {
+                    size_t vl = VSETVL(PREC, LMUL_MR)(avl);
+                    VSSEG2_V_F(PREC, LMUL_MR, 2)((BASE_DT*) p_tmp, zero_padding, vl);
+                    p_tmp += vl;
+                    avl -= vl;
+                }
                  
                 a += lda;
                 p += ldp;
             }
 
             for (size_t i = n; i < n_max; ++i) {
-                VSSEG2_V_F(PREC, LMUL_MR, 2)((BASE_DT*) p, zero_padding, cdim_max);
+                DATATYPE* restrict p_tmp = p;
+                size_t avl = cdim_max; 
+                while (avl) {
+                    size_t vl = VSETVL(PREC, LMUL_MR)(avl);
+                    VSSEG2_V_F(PREC, LMUL_MR, 2)((BASE_DT*) p_tmp, zero_padding, vl);
+                    p_tmp += vl;
+                    avl -= vl;
+                }
                 p += ldp;
             }
         }
@@ -275,8 +306,8 @@ PACKM(PRECISION_CHAR, void)
         if (lda == 1) {
             // a is "row major"
             RVV_TYPE_FX(PREC, LMUL_NR, 2) zero_padding = VUNDEFINED_FX(PREC, LMUL_NR, 2)();
-            zero_padding = VSET_V_F(PREC, LMUL_NR, 2)(zero_padding, 0, VFMV_V_F(PREC, LMUL_NR)(0., cdim_max));
-            zero_padding = VSET_V_F(PREC, LMUL_NR, 2)(zero_padding, 1, VFMV_V_F(PREC, LMUL_NR)(0., cdim_max));
+            zero_padding = VSET_V_F(PREC, LMUL_NR, 2)(zero_padding, 0, VFMV_V_F(PREC, LMUL_NR)(0., -1));
+            zero_padding = VSET_V_F(PREC, LMUL_NR, 2)(zero_padding, 1, VFMV_V_F(PREC, LMUL_NR)(0., -1));
             size_t avl = n;
             while (avl) {
                 size_t vl = VSETVL(PREC, LMUL)(avl);
@@ -463,7 +494,14 @@ PACKM(PRECISION_CHAR, void)
 
                 // pad lower edge
                 for (size_t i = 0; i < vl; ++i) {
-                    VSSEG2_V_F(PREC, LMUL_NR, 2)((BASE_DT*) p_tmp, zero_padding, cdim_max - cdim);
+                    DATATYPE* restrict p_tmp2 = p_tmp;
+                    size_t avl = cdim_max - cdim; 
+                    while (avl) {
+                        size_t vl = VSETVL(PREC, LMUL_NR)(avl);
+                        VSSEG2_V_F(PREC, LMUL_NR, 2)((BASE_DT*) p_tmp2, zero_padding, vl);
+                        p_tmp2 += vl;
+                        avl -= vl;
+                    }
                     p_tmp += ldp;
                 }
 
@@ -474,47 +512,78 @@ PACKM(PRECISION_CHAR, void)
             
             // pad right edge
             for (size_t i = n; i < n_max; ++i) {
-                VSSEG2_V_F(PREC, LMUL_NR, 2)((BASE_DT*) p, zero_padding, cdim_max);
+                DATATYPE* restrict p_tmp = p;
+                size_t avl = cdim_max; 
+                while (avl) {
+                    size_t vl = VSETVL(PREC, LMUL_NR)(avl);
+                    VSSEG2_V_F(PREC, LMUL_NR, 2)((BASE_DT*) p_tmp, zero_padding, vl);
+                    p_tmp += vl;
+                    avl -= vl;
+                }
                 p += ldp;
             }
         } else {
             RVV_TYPE_FX(PREC, LMUL_NR, 2) zero_padding = VUNDEFINED_FX(PREC, LMUL_NR, 2)();
-            zero_padding = VSET_V_F(PREC, LMUL_NR, 2)(zero_padding, 0, VFMV_V_F(PREC, LMUL_NR)(0., cdim_max));
-            zero_padding = VSET_V_F(PREC, LMUL_NR, 2)(zero_padding, 1, VFMV_V_F(PREC, LMUL_NR)(0., cdim_max));
+            zero_padding = VSET_V_F(PREC, LMUL_NR, 2)(zero_padding, 0, VFMV_V_F(PREC, LMUL_NR)(0., -1));
+            zero_padding = VSET_V_F(PREC, LMUL_NR, 2)(zero_padding, 1, VFMV_V_F(PREC, LMUL_NR)(0., -1));
 
             for (size_t i = 0; i < n; ++i) {
-                RVV_TYPE_FX(PREC, LMUL_NR, 2) acol;
-                if (inca == 1)
-                    acol = VLSEG2_V_F_TU(PREC, LMUL_NR, 2)(zero_padding, (BASE_DT*) a, cdim);
-                else
-                    acol = VLSSEG2_V_F_TU(PREC, LMUL_NR, 2)(zero_padding, (BASE_DT*) a, 2 * FLT_SIZE * inca, cdim);
-                RVV_TYPE_F(PREC, LMUL_NR) acol_r = VGET_V_F(PREC, LMUL_NR, 2)(acol, 0); 
-                RVV_TYPE_F(PREC, LMUL_NR) acol_i = VGET_V_F(PREC, LMUL_NR, 2)(acol, 1); 
-
-                if (PASTEMAC(PRECISION_CHAR, eq1)(*kappa)) {
-                    if (bli_is_conj(conja)) {
-                        acol_i = VFNEG_VF_TU(PREC, LMUL_NR)(acol_i, acol_i, cdim);
-                        acol = VSET_V_F(PREC, LMUL_NR, 2)(acol, 0, acol_r);
-                        acol = VSET_V_F(PREC, LMUL_NR, 2)(acol, 1, acol_i);
-                    }
-                } else {
-                    RVV_TYPE_F(PREC, LMUL_NR) kappa_acol_r, kappa_acol_i;
-                    if (bli_is_conj(conja))
-                        VCMUL_VF_CONJ_TU(PREC, LMUL_NR, kappa_acol_r, kappa_acol_i, acol_r, acol_i, kappa->real, kappa->imag, cdim);
+                const DATATYPE* restrict a_tmp = a;
+                DATATYPE* restrict p_tmp = p;
+                size_t avl = cdim;
+                while (avl) {
+                    size_t vl = VSETVL(PREC, LMUL_NR)(avl);
+                    RVV_TYPE_FX(PREC, LMUL_NR, 2) acol;
+                    if (inca == 1)
+                        acol = VLSEG2_V_F(PREC, LMUL_NR, 2)((BASE_DT*) a_tmp, vl);
                     else
-                        VCMUL_VF_TU(PREC, LMUL_NR, kappa_acol_r, kappa_acol_i, acol_r, acol_i, kappa->real, kappa->imag, cdim);
-                    acol = VSET_V_F(PREC, LMUL_NR, 2)(acol, 0, kappa_acol_r);
-                    acol = VSET_V_F(PREC, LMUL_NR, 2)(acol, 1, kappa_acol_i);
-                }
+                        acol = VLSSEG2_V_F(PREC, LMUL_NR, 2)((BASE_DT*) a_tmp, 2 * FLT_SIZE * inca, vl);
+                    RVV_TYPE_F(PREC, LMUL_NR) acol_r = VGET_V_F(PREC, LMUL_NR, 2)(acol, 0); 
+                    RVV_TYPE_F(PREC, LMUL_NR) acol_i = VGET_V_F(PREC, LMUL_NR, 2)(acol, 1); 
 
-                VSSEG2_V_F(PREC, LMUL_NR, 2)((BASE_DT*) p, acol, cdim_max);
+                    if (PASTEMAC(PRECISION_CHAR, eq1)(*kappa)) {
+                        if (bli_is_conj(conja)) {
+                            acol_i = VFNEG_VF(PREC, LMUL_NR)(acol_i, vl);
+                            acol = VSET_V_F(PREC, LMUL_NR, 2)(acol, 0, acol_r);
+                            acol = VSET_V_F(PREC, LMUL_NR, 2)(acol, 1, acol_i);
+                        }
+                    } else {
+                        RVV_TYPE_F(PREC, LMUL_NR) kappa_acol_r, kappa_acol_i;
+                        if (bli_is_conj(conja))
+                            VCMUL_VF_CONJ(PREC, LMUL_NR, kappa_acol_r, kappa_acol_i, acol_r, acol_i, kappa->real, kappa->imag, vl);
+                        else
+                            VCMUL_VF(PREC, LMUL_NR, kappa_acol_r, kappa_acol_i, acol_r, acol_i, kappa->real, kappa->imag, vl);
+                        acol = VSET_V_F(PREC, LMUL_NR, 2)(acol, 0, kappa_acol_r);
+                        acol = VSET_V_F(PREC, LMUL_NR, 2)(acol, 1, kappa_acol_i);
+                    }
+
+                    VSSEG2_V_F(PREC, LMUL_NR, 2)((BASE_DT*) p_tmp, acol, vl);
+                    a_tmp += inca * vl;
+                    p_tmp += vl;
+                    avl -= vl;
+                }
+                 
+                avl = cdim_max - cdim;
+                while (avl) {
+                    size_t vl = VSETVL(PREC, LMUL_NR)(avl);
+                    VSSEG2_V_F(PREC, LMUL_NR, 2)((BASE_DT*) p_tmp, zero_padding, vl);
+                    p_tmp += vl;
+                    avl -= vl;
+                }
                  
                 a += lda;
                 p += ldp;
             }
 
             for (size_t i = n; i < n_max; ++i) {
-                VSSEG2_V_F(PREC, LMUL_NR, 2)((BASE_DT*) p, zero_padding, cdim_max);
+                DATATYPE* restrict p_tmp = p;
+                size_t avl = cdim_max; 
+                while (avl) {
+                    size_t vl = VSETVL(PREC, LMUL_NR)(avl);
+                    VSSEG2_V_F(PREC, LMUL_NR, 2)((BASE_DT*) p_tmp, zero_padding, vl);
+                    p_tmp += vl;
+                    avl -= vl;
+                }
                 p += ldp;
             }
         }

@@ -63,18 +63,19 @@
 #define BLI_SET0S_EDGE_(PRECISION_CHAR) bli_##PRECISION_CHAR##set0s_edge
 #define BLI_SET0S_EDGE(PRECISION_CHAR) BLI_SET0S_EDGE_(PRECISION_CHAR)
 
-// LMUL is the LMUL used when a is "row major" (lda == 1). Since we use
-// segment stores with more than 4 fields, this is usually m1.
-// LMUL_MR is an LMUL large enough to hold MR floats (for spackm, cpackm)
-// or doubles (for dpackm, zpackm). LMUL_NR is analogous.
+// LMUL is used when a is "row major" (lda == 1). In this case, segment stores
+// with more than 4 fields are used, so it must be <= m1.
+// LMUL_MR and LMUL_NR are used to process columns of a in the MRxk and NRxk
+// kernels, respectively. For the real kernels, they may be any LMUL, but for
+// the complex kernels, they must be <= m4 because seg2 instructions are used.
 
 // Single precision real
 #define DATATYPE float
 #define PRECISION_CHAR s
 #define PREC 32
 #define LMUL m1
-#define LMUL_MR m1
-#define LMUL_NR m4
+#define LMUL_MR m8
+#define LMUL_NR m8
 #define FLT_SIZE sizeof(float)
 #define MR 7
 #define NR ( 4 * __riscv_vlenb() / 4 )
@@ -96,8 +97,8 @@
 #define PRECISION_CHAR d
 #define PREC 64
 #define LMUL m1
-#define LMUL_MR m1
-#define LMUL_NR m4
+#define LMUL_MR m8
+#define LMUL_NR m8
 #define FLT_SIZE sizeof(double)
 #define MR 7
 #define NR ( 4 * __riscv_vlenb() / 8 )
@@ -120,8 +121,8 @@
 #define PRECISION_CHAR c
 #define PREC 32
 #define LMUL m1
-#define LMUL_MR m1
-#define LMUL_NR m2
+#define LMUL_MR m4
+#define LMUL_NR m4
 #define FLT_SIZE sizeof(float)
 #define MR 6
 #define NR ( 2 * __riscv_vlenb() / 4 )
@@ -145,8 +146,8 @@
 #define PRECISION_CHAR z
 #define PREC 64
 #define LMUL m1
-#define LMUL_MR m1
-#define LMUL_NR m2
+#define LMUL_MR m4
+#define LMUL_NR m4
 #define FLT_SIZE sizeof(double)
 #define MR 6
 #define NR ( 2 * __riscv_vlenb() / 8 )
