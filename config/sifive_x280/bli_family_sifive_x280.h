@@ -32,3 +32,4 @@
 
 */
 
+#define BLIS_SIMD_MAX_SIZE (__riscv_v_min_vlen / 8)
