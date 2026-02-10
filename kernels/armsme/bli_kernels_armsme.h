@@ -121,3 +121,17 @@ __arm_new( "za" ) __arm_locally_streaming void bli_dgemm_armsme_int_8SVLxSVL
        const auxinfo_t* data,
        const cntx_t*    cntx
      );
+
+__arm_new( "za" ) __arm_locally_streaming void bli_dgemm_armsme_int_2SVLx4SVL
+     (
+             dim_t      m,
+             dim_t      n,
+             dim_t      k,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c, inc_t cs_c,
+       const auxinfo_t* data,
+       const cntx_t*    cntx
+     );

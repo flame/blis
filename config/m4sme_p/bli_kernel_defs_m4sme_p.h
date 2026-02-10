@@ -60,3 +60,11 @@
 #define BLIS_NR_s   16
 #define BLIS_NR_d   8
 #endif
+
+#if 0
+#define BLIS_MR_s   32
+#define BLIS_MR_d   16
+
+#define BLIS_NR_s   32
+#define BLIS_NR_d   32
+#endif
