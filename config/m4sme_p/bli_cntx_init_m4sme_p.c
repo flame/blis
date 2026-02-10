@@ -51,6 +51,8 @@ void bli_cntx_init_m4sme_p( cntx_t* cntx )
 	  // level-3
 	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_armsme_int_2SVLx2SVL,
 	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_armsme_int_4SVLx2SVL,
+	  BLIS_PACKM_KER, BLIS_FLOAT, bli_spackm_armsme_int_2SVLx2SVL,
+	  BLIS_PACKM_KER, BLIS_DOUBLE, bli_dpackm_armsme_int_4SVLx2SVL,
 	  BLIS_VA_END
 	);
 

@@ -32,6 +32,9 @@
 
 */
 
+PACKM_KER_PROT( float,    s, packm_armsme_int_2SVLx2SVL )
+PACKM_KER_PROT( double,   d, packm_armsme_int_4SVLx2SVL )
+
 __arm_new( "za" ) __arm_locally_streaming void bli_sgemm_armsme_int_2SVLx2SVL
      (
              dim_t      m,
