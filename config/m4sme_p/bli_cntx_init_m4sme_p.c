@@ -112,6 +112,41 @@ void bli_cntx_init_m4sme_p( cntx_t* cntx )
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ], 	10240, 3072,  -1,    -1 );
 #endif
 
+#if 0
+	// Update the context with optimized native gemm micro-kernels.
+	bli_cntx_set_ukrs
+	(
+	  cntx,
+
+	  // level-3
+	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_armsme_int_4SVLxSVL,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_armsme_int_8SVLxSVL,
+	  BLIS_PACKM_KER, BLIS_FLOAT, bli_spackm_armsme_int_SVLx4SVL,
+	  BLIS_PACKM_KER, BLIS_DOUBLE, bli_dpackm_armsme_int_SVLx8SVL,
+	  BLIS_VA_END
+	);
+
+	// Update the context with storage preferences.
+	 bli_cntx_set_ukr_prefs
+	(
+	  cntx,
+
+	  // level-3
+	  BLIS_GEMM_UKR_ROW_PREF, BLIS_FLOAT,  FALSE,
+	  BLIS_GEMM_UKR_ROW_PREF, BLIS_DOUBLE, FALSE,
+
+	  BLIS_VA_END
+	);
+
+	// Initialize level-3 blocksize objects with architecture-specific values.
+	//                                           s      d      c      z
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    64,    64,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,    8,     -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    512,   512,   -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],    4032,  2016,  -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ], 	10240, 3072,  -1,    -1 );
+#endif
+
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.
 	bli_cntx_set_blkszs
@@ -128,7 +163,3 @@ void bli_cntx_init_m4sme_p( cntx_t* cntx )
 	  BLIS_VA_END
 	);
 }
-
-
-
-
