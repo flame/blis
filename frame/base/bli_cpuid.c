@@ -1067,8 +1067,16 @@ static uint32_t get_coretype
 #ifdef __APPLE__
 	// Better values could be obtained from sysctlbyname()
 	// FIXME: compute actual part number
+#include <sys/sysctl.h>
 	implementer = 0x61; //Apple
 	part        = 0x023; //Firestorm
+	int sme2_supported = 0;
+	size_t len = sizeof(sme2_supported);
+	if (sysctlbyname("hw.optional.arm.FEAT_SME2", &sme2_supported, &len, NULL, 0) == 0) {
+		if (sme2_supported) {
+			*features |= FEATURE_SME2;
+		}
+	}
 #endif //__APPLE__
 
 	// From Linux arch/arm64/include/asm/cputype.h
@@ -1139,6 +1147,10 @@ static uint32_t get_coretype
 #define APPLE_CPU_PART_BLIZZARD_MAX  0x038
 #define APPLE_CPU_PART_AVALANCHE_MAX 0x039
 
+#ifdef BLIS_CONFIG_M4SME_P
+    if (*features & FEATURE_SME2)
+        return BLIS_ARCH_M4SME_P;
+#endif
 
 	// Fixme:  After merging the vpu_count branch we could report the
 	// part here with bli_dolog.

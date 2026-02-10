@@ -43,6 +43,14 @@
 
 // -- configuration-specific macros which are conditionally-enabled --
 
+// -- Apple M4 architecture ----------------------------------------------------
+
+#ifdef BLIS_CONFIG_M4SME_P
+#define INSERT_GENTCONF_M4SME_P GENTCONF( M4SME_P, m4sme_p )
+#else
+#define INSERT_GENTCONF_M4SME_P
+#endif
+
 // -- Intel architectures ------------------------------------------------------
 
 #ifdef BLIS_CONFIG_SKX
@@ -245,6 +253,8 @@
 // -- configuration-specific macro --
 
 #define INSERT_GENTCONF \
+\
+INSERT_GENTCONF_M4SME_P \
 \
 INSERT_GENTCONF_SKX \
 INSERT_GENTCONF_KNL \

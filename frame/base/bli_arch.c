@@ -252,6 +252,10 @@ arch_t bli_arch_query_id_impl( void )
 		#endif
 
 		// ARM microarchitectures.
+		#ifdef BLIS_FAMILY_M4SME_P
+		id = BLIS_ARCH_M4SME_P;
+		#endif
+
 		#ifdef BLIS_FAMILY_ARMSVE
 		id = BLIS_ARCH_ARMSVE;
 		#endif
@@ -362,6 +366,8 @@ static const char* config_name[ BLIS_NUM_ARCHS ] =
     "steamroller",
     "piledriver",
     "bulldozer",
+
+	"m4sme_p",
 
     "armsve",
     "a64fx",

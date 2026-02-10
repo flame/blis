@@ -120,6 +120,11 @@ INSERT_GENTCONF
 
 // -- ARM architectures --
 
+// ARM-SME
+#ifdef BLIS_FAMILY_M4SME_P
+#include "bli_family_m4sme_p.h"
+#endif
+
 // ARM-SVE
 #ifdef BLIS_FAMILY_ARMSVE
 #include "bli_family_armsve.h"
@@ -241,6 +246,9 @@ INSERT_GENTCONF
 
 // -- ARM architectures --
 
+#ifdef BLIS_KERNELS_ARMSME
+#include "bli_kernels_armsme.h"
+#endif
 #ifdef BLIS_KERNELS_ARMSVE
 #include "bli_kernels_armsve.h"
 #endif

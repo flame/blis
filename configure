@@ -1876,6 +1876,12 @@ check_compiler()
 		fi
 	fi
 
+	# sme2 clang support
+	if [[ ! ( "$(uname -s)" == "Darwin" && ${cc_vendor} = clang  && ${cc_major} -ge 17 ) ]]; then
+		blacklistcc_add "m4sme_p"
+		blacklistcc_add "m4sme_e"
+	fi
+
 	# clang
 	if [[ ${cc_vendor} = clang ]]; then
 		if [[ ${vendor_string} = *Apple* ]]; then
