@@ -1033,7 +1033,9 @@ int vpu_count( void )
 		// Xeon 6 6300 series are AVX2-only.
 
 
-		else return -1;
+		else return 2;
+		// guess 2 vpus for unknown Xeons.
+
 	}
 	else if ( strstr( cpu_name, "Intel(R) Core(TM)" ) != NULL )
 		return 2; // All i7/i9 with avx512?
