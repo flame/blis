@@ -987,6 +987,34 @@ int vpu_count( void )
 		else if ( 2199 >= sku && sku >= 2120 ) return 2;
 		else if ( 2102 == sku || sku == 2104 ) return 2; // Gold exceptions
 		else if ( 2119 >= sku && sku >= 2100 ) return 1;
+
+		// 3rd gen Intel Scalable and W all have 2 vpus.
+		else if ( 8399 >= sku && sku >= 8300 ) return 2; // Ice Lake Platinum
+		else if ( 6399 >= sku && sku >= 6300 ) return 2; // Ice Lake Gold
+		else if ( 5399 >= sku && sku >= 5300 ) return 2; // Ice Lake Gold
+		else if ( 4399 >= sku && sku >= 4300 ) return 2; // Ice Lake Silver
+		else if ( 3399 >= sku && sku >= 3300 ) return 2; // Ice Lake W
+
+		// 4th gen Intel Scalable and W all have 2 vpus except 3408U
+		else if ( 8499 >= sku && sku >= 8400 ) return 2; // Sapphire Rapids Platinum
+		else if ( 6499 >= sku && sku >= 6400 ) return 2; // Sapphire Rapids Gold
+		else if ( 5499 >= sku && sku >= 5400 ) return 2; // Sapphire Rapids Gold
+		else if ( 4499 >= sku && sku >= 4400 ) return 2; // Sapphire Rapids Silver
+		else if (                sku == 3408 ) return 1;
+		else if ( 3499 >= sku && sku >= 3400 ) return 2; // Sapphire Rapids W
+
+
+		// 5th gen Intel Scalable all have 2 vpus except 3508U
+		else if ( 8599 >= sku && sku >= 8500 ) return 2; // Emerald Rapids Platinum
+		else if ( 6599 >= sku && sku >= 6500 ) return 2; // Emerald Rapids Gold
+		else if ( 5599 >= sku && sku >= 5500 ) return 2; // Emerald Rapids Gold
+		else if ( 4599 >= sku && sku >= 4500 ) return 2; // Emerald Rapids Silver
+		else if (                sku == 3508 ) return 1;
+		else if ( 3599 >= sku && sku >= 3500 ) return 2; // Emerald Rapids W
+
+		// Intel Xeon 6 all seem to have 2 vpus.
+		// These should be added next.
+
 		else return -1;
 	}
 	else if ( strstr( cpu_name, "Intel(R) Core(TM)" ) != NULL )
