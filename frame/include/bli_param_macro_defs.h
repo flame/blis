@@ -86,6 +86,30 @@ BLIS_INLINE bool bli_is_dcomplex( num_t dt )
 	       ( dt == BLIS_DCOMPLEX );
 }
 
+BLIS_INLINE bool bli_is_fp16( num_t dt )
+{
+    return ( bool )
+           ( dt == BLIS_FP16 );
+} 
+
+BLIS_INLINE bool bli_is_hcomplex( num_t dt )
+{
+    return ( bool )
+           ( dt == BLIS_HCOMPLEX );
+}
+
+BLIS_INLINE bool bli_is_bf16( num_t dt )
+{
+    return ( bool )
+           ( dt == BLIS_BF16 );
+}
+
+BLIS_INLINE bool bli_is_bcomplex( num_t dt )
+{
+    return ( bool )
+           ( dt == BLIS_BCOMPLEX );
+}
+
 BLIS_INLINE bool bli_is_constant( num_t dt )
 {
 	return ( bool )
@@ -100,16 +124,34 @@ BLIS_INLINE bool bli_is_int( num_t dt )
 
 BLIS_INLINE bool bli_is_real( num_t dt )
 {
-	return ( bool )
-	       ( bli_is_float( dt ) ||
-	                   bli_is_double( dt ) );
+	return ( bool ) 
+           ( bli_is_float( dt )  ||
+             bli_is_double( dt ) ||
+             bli_is_fp16( dt )   ||
+                       bli_is_bf16( dt ) );
 }
 
 BLIS_INLINE bool bli_is_complex( num_t dt )
 {
 	return ( bool )
 	       ( bli_is_scomplex( dt ) ||
-	                   bli_is_dcomplex( dt ) );
+             bli_is_dcomplex( dt ) ||
+             bli_is_hcomplex( dt ) ||
+                       bli_is_bcomplex( dt ) );
+}
+
+BLIS_INLINE bool bli_is_fp16_prec( num_t dt )
+{
+    return ( bool )
+           ( bli_is_fp16( dt ) ||
+                       bli_is_hcomplex( dt ) );
+}
+
+BLIS_INLINE bool bli_is_bf16_prec( num_t dt )
+{
+    return (bool)
+           ( bli_is_bf16( dt) ||
+                       bli_is_bcomplex( dt ) );
 }
 
 BLIS_INLINE bool bli_is_single_prec( num_t dt )
@@ -129,19 +171,19 @@ BLIS_INLINE bool bli_is_double_prec( num_t dt )
 BLIS_INLINE dom_t bli_dt_domain( num_t dt )
 {
 	return ( dom_t )
-	       ( dt & BLIS_DOMAIN_BIT );
+           ( dt & BLIS_DOMAIN_BIT );
 }
 
 BLIS_INLINE bool bli_dt_dom_is_real( num_t dt )
 {
 	return ( bool )
-	       ( ( dt & BLIS_DOMAIN_BIT ) == BLIS_REAL );
+	       ( bli_dt_domain( dt ) == BLIS_REAL );
 }
 
 BLIS_INLINE bool bli_dt_dom_is_complex( num_t dt )
 {
 	return ( bool )
-	       ( ( dt & BLIS_DOMAIN_BIT ) == BLIS_COMPLEX );
+	       ( bli_dt_domain( dt ) == BLIS_COMPLEX );
 }
 
 BLIS_INLINE prec_t bli_dt_prec( num_t dt )
@@ -153,13 +195,15 @@ BLIS_INLINE prec_t bli_dt_prec( num_t dt )
 BLIS_INLINE bool bli_dt_prec_is_single( num_t dt )
 {
 	return ( bool )
-	       ( ( dt & BLIS_PRECISION_BIT ) == BLIS_SINGLE_PREC );
+	       ( bli_is_float( dt ) ||
+	                   bli_is_scomplex( dt ) );
 }
 
 BLIS_INLINE bool bli_dt_prec_is_double( num_t dt )
 {
 	return ( bool )
-	       ( ( dt & BLIS_PRECISION_BIT ) == BLIS_DOUBLE_PREC );
+	       ( bli_is_double( dt ) ||
+	                   bli_is_dcomplex( dt ) );
 }
 
 BLIS_INLINE num_t bli_dt_proj_to_real( num_t dt )
@@ -177,15 +221,26 @@ BLIS_INLINE num_t bli_dt_proj_to_complex( num_t dt )
 BLIS_INLINE num_t bli_dt_proj_to_single_prec( num_t dt )
 {
 	return ( num_t )
-	       ( dt & ~BLIS_BITVAL_DOUBLE_PREC );
+	       ( dt & ~BLIS_BITVAL_BF16_PREC );
 }
 
 BLIS_INLINE num_t bli_dt_proj_to_double_prec( num_t dt )
 {
 	return ( num_t )
-	       ( dt | BLIS_BITVAL_DOUBLE_PREC );
+	       ( ( dt & ~BLIS_BITVAL_FP16_PREC ) | BLIS_BITVAL_DOUBLE_PREC );
 }
 
+BLIS_INLINE num_t bli_dt_proj_to_fp16_prec( num_t dt )
+{
+    return ( num_t )
+           ( ( dt & ~BLIS_BITVAL_DOUBLE_PREC ) | BLIS_BITVAL_FP16_PREC );
+}
+
+BLIS_INLINE num_t bli_dt_proj_to_bf16_prec( num_t dt )
+{
+    return (num_t)
+           ( dt | BLIS_BITVAL_BF16_PREC );
+}
 
 // trans
 

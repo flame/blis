@@ -35,8 +35,11 @@
 //
 // -- Prototype the gemm-like operation's object API ---------------------------
 //
+//
 
-void bls_gemm
+BLIS_EXPORT_BLIS void bls_print();
+
+BLIS_EXPORT_BLIS void bls_gemm
      (
        const obj_t*  alpha,
        const obj_t*  a,
@@ -45,7 +48,7 @@ void bls_gemm
        const obj_t*  c
      );
 
-void bls_gemm_ex
+BLIS_EXPORT_BLIS void bls_gemm_ex
      (
        const obj_t*  alpha,
        const obj_t*  a,

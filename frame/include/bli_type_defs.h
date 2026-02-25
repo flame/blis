@@ -43,24 +43,77 @@
 //
 
 #ifdef __cplusplus
-  // For C++, include stdint.h.
   #include <cstdint>
-#elif __STDC_VERSION__ >= 199901L
-  // For C99 (or later), include stdint.h.
+  #include <cstddef>
+#else
   #include <stddef.h>
   #include <stdint.h>
   #include <stdbool.h>
+#endif
+
+//
+// -- FP16 (IEEE 754 Half-percision) types -------------------------------------
+//
+#undef BLIS_NATIVE_F16
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L && defined(__FLT16_MAX__)
+  // when the C standard is later than 2023
+  typedef _Float16 float16_t;
+  #define BLIS_NATIVE_F16
+#elif defined(__ARM_FP16_FORMAT_IEEE) || (defined(__GUNC__) && defined(__f16c__)) || defined(__clang__)
+  // check the compiler support __fp16 
+  typedef __fp16 float16_t;
+  #define BLIS_NATIVE_F16
 #else
-  // When stdint.h is not available, manually typedef the types we will use.
-  #ifdef _WIN32
-    typedef          __int32  int32_t;
-    typedef unsigned __int32 uint32_t;
-    typedef          __int64  int64_t;
-    typedef unsigned __int64 uint64_t;
-  #else
-    #error "Attempting to compile on pre-C99 system without stdint.h."
+  // if no support, we will use uint16_t as the placeholer
+  typedef uint16_t float16_t;
+#endif
+
+//
+// -- BF16 (Brain Floating Point) types ----------------------------------------
+//
+#undef BLIS_NATIVE_BF16
+#if defined(__bf16) || defined(__ARM_FEATURE_BF16) || defined(__FLT_BF16_MAX__)
+  typedef __bf16 bfloat16_t;
+  #define BLIS_NATIVE_BF16
+#elif defined(__clang__) && __has_extension(gnu_asm) && defined(__ARM_NEON)
+  typedef __bf16 bfloat16_t;
+  #define BLIS_NATIVE_BF16
+#else
+  #ifndef _DEFINED_BFLOAT16_T
+  #define _DEFINED_BFLOAT16_T
+    typedef uint16_t bfloat16_t;
   #endif
 #endif
+
+//
+// -- alignmnet -----------------------------------------------------------------
+//
+#if defined(__GNUC__) || defined(__clang__)
+    #define BLIS_ATTR_ALIGN2 __attribute__((aligned(2)))
+#else
+    #define BLIS_ATTR_ALIGN2 
+#endif
+
+
+//#ifdef __cplusplus
+//  // For C++, include stdint.h.
+//  #include <cstdint>
+//#elif __STDC_VERSION__ >= 199901L
+//  // For C99 (or later), include stdint.h.
+//  #include <stddef.h>
+//  #include <stdint.h>
+//  #include <stdbool.h>
+//#else
+//  // When stdint.h is not available, manually typedef the types we will use.
+//  #ifdef _WIN32
+//    typedef          __int32  int32_t;
+//    typedef unsigned __int32 uint32_t;
+//    typedef          __int64  int64_t;
+//    typedef unsigned __int64 uint64_t;
+//  #else
+//    #error "Attempting to compile on pre-C99 system without stdint.h."
+//  #endif
+//#endif
 
 // -- General-purpose integers --
 
@@ -120,7 +173,7 @@ typedef uint32_t objbits_t;  // object information bit field
 
 // Define the number of floating-point types supported, and the size of the
 // largest type.
-#define BLIS_NUM_FP_TYPES   4
+#define BLIS_NUM_FP_TYPES   8   //%%%
 #define BLIS_MAX_TYPE_SIZE  sizeof(dcomplex)
 
 // There are some places where we need to use sizeof() inside of a C
@@ -130,6 +183,10 @@ typedef uint32_t objbits_t;  // object information bit field
 #define BLIS_SIZEOF_D      8  // sizeof(double)
 #define BLIS_SIZEOF_C      8  // sizeof(scomplex)
 #define BLIS_SIZEOF_Z      16 // sizeof(dcomplex)
+#define BLIS_SIZEOF_H      2  // sizeof(fp16)
+#define BLIS_SIZEOF_B      2  // sizeof(bf16)
+#define BLIS_SIZEOF_L      4  // sizeof(hcomplex)
+#define BLIS_SIZEOF_V      4  // sizeof(bcomplex)
 
 // -- Complex types --
 
@@ -208,6 +265,25 @@ typedef uint32_t objbits_t;  // object information bit field
 
 #endif // BLIS_ENABLE_C99_COMPLEX
 
+// complex for FP16 and BF16
+#ifndef _DEFINED_HCOMPLEX
+#define _DEFINED_HCOMPLEX
+typedef struct hcomplex
+{
+    float16_t real;
+    float16_t imag;
+} hcomplex;
+#endif // DEFINED_HCOMPLEX
+
+#ifndef _DEFINED_BCOMPLEX
+#define _DEFINED_BCOMPLEX
+typedef struct bcomplex
+{
+    bfloat16_t real;
+    bfloat16_t imag;
+} bcomplex;
+#endif // DEFINED_BCOMPLEX
+
 // -- Atom type --
 
 // Note: atom types are used to hold "bufferless" scalar object values. Note
@@ -235,6 +311,7 @@ typedef float     f77_float;
 typedef double    f77_double;
 typedef scomplex  f77_scomplex;
 typedef dcomplex  f77_dcomplex;
+//%%%% add BF16 and FP16
 
 // -- Misc. function pointer types --
 
@@ -254,9 +331,9 @@ typedef void  (*free_ft)  ( void*  p    );
 // -- BLIS info bit field sizes ------------------------------------------------
 //
 
-#define BLIS_DATATYPE_NUM_BITS             ( BLIS_DOMAIN_NUM_BITS + BLIS_PRECISION_NUM_BITS )
+#define BLIS_DATATYPE_NUM_BITS               ( BLIS_DOMAIN_NUM_BITS + BLIS_PRECISION_NUM_BITS )
 #define   BLIS_DOMAIN_NUM_BITS               1
-#define   BLIS_PRECISION_NUM_BITS            2
+#define   BLIS_PRECISION_NUM_BITS            3
 #define BLIS_CONJTRANS_NUM_BITS            ( BLIS_TRANS_NUM_BITS + BLIS_CONJ_NUM_BITS )
 #define   BLIS_TRANS_NUM_BITS                1
 #define   BLIS_CONJ_NUM_BITS                 1
@@ -304,8 +381,10 @@ typedef void  (*free_ft)  ( void*  p    );
 #define BLIS_SCALAR_DT_SHIFT             ( BLIS_COMP_PREC_SHIFT + BLIS_PRECISION_NUM_BITS )
 #define   BLIS_SCALAR_DOMAIN_SHIFT       (   BLIS_SCALAR_DT_SHIFT )
 #define   BLIS_SCALAR_PREC_SHIFT         (   BLIS_SCALAR_DOMAIN_SHIFT + BLIS_DOMAIN_NUM_BITS )
-// This is the total number of bits, which should always be <= 32
 #define BLIS_INFO_NUM_BITS               ( BLIS_SCALAR_DT_SHIFT + BLIS_DATATYPE_NUM_BITS )
+
+// This is the total number of bits, which should always be <= 32
+static char bli_too_many_info_bits[BLIS_INFO_NUM_BITS <= 32 ? 1 : -1];
 
 //
 // -- BLIS info bit field masks ------------------------------------------------
@@ -343,14 +422,35 @@ typedef void  (*free_ft)  ( void*  p    );
 
 #define BLIS_BITVAL_REAL                  0x0
 #define BLIS_BITVAL_COMPLEX               BLIS_DOMAIN_BIT
-#define BLIS_BITVAL_SINGLE_PREC           0x0
+#define BLIS_BITVAL_SINGLE_PREC         ( 0x0 << BLIS_PRECISION_SHIFT )
 #define BLIS_BITVAL_DOUBLE_PREC         ( 0x1 << BLIS_PRECISION_SHIFT )
-#define   BLIS_BITVAL_FLOAT_TYPE          0x0
-#define   BLIS_BITVAL_SCOMPLEX_TYPE       BLIS_DOMAIN_BIT
-#define   BLIS_BITVAL_DOUBLE_TYPE         BLIS_BITVAL_DOUBLE_PREC
-#define   BLIS_BITVAL_DCOMPLEX_TYPE     ( BLIS_DOMAIN_BIT | BLIS_BITVAL_DOUBLE_PREC )
-#define   BLIS_BITVAL_INT_TYPE            0x04
-#define   BLIS_BITVAL_CONST_TYPE          0x05
+#define BLIS_BITVAL_FP16_PREC           ( 0x2 << BLIS_PRECISION_SHIFT )
+#define BLIS_BITVAL_BF16_PREC           ( 0x3 << BLIS_PRECISION_SHIFT )
+#define   BLIS_BITVAL_FLOAT_TYPE          ( BLIS_BITVAL_SINGLE_PREC )
+#define   BLIS_BITVAL_SCOMPLEX_TYPE       ( BLIS_BITVAL_SINGLE_PREC | BLIS_DOMAIN_BIT )
+#define   BLIS_BITVAL_DOUBLE_TYPE         ( BLIS_BITVAL_DOUBLE_PREC )
+#define   BLIS_BITVAL_DCOMPLEX_TYPE       ( BLIS_BITVAL_DOUBLE_PREC | BLIS_DOMAIN_BIT )
+#define   BLIS_BITVAL_FP16_TYPE           ( BLIS_BITVAL_FP16_PREC )
+#define   BLIS_BITVAL_HCOMPLEX_TYPE       ( BLIS_BITVAL_FP16_PREC | BLIS_DOMAIN_BIT )
+#define   BLIS_BITVAL_BF16_TYPE           ( BLIS_BITVAL_BF16_PREC )
+#define   BLIS_BITVAL_BCOMPLEX_TYPE       ( BLIS_BITVAL_BF16_PREC | BLIS_DOMAIN_BIT )
+#define   BLIS_BITVAL_INT_TYPE            ( 0x4 << BLIS_PRECISION_SHIFT )
+#define   BLIS_BITVAL_CONST_TYPE          ( 0x4 << BLIS_PRECISION_SHIFT | BLIS_DOMAIN_BIT)
+
+//#define BLIS_BITVAL_REAL                  0x0
+//#define BLIS_BITVAL_COMPLEX               0x1
+//#define BLIS_BITVAL_SINGLE_PREC         ( 0x0 << 1 )
+//#define BLIS_BITVAL_DOUBLE_PREC         ( 0x1 << 1 )
+//#define   BLIS_BITVAL_FLOAT_TYPE          0x00
+//#define   BLIS_BITVAL_SCOMPLEX_TYPE       0x01
+//#define   BLIS_BITVAL_DOUBLE_TYPE         0x02
+//#define   BLIS_BITVAL_DCOMPLEX_TYPE       0x03
+//#define   BLIS_BITVAL_FP16_TYPE           0x04
+//#define   BLIS_BITVAL_BF16_TYPE           0x05
+//#define   BLIS_BITVAL_INT_TYPE            0x06
+//#define   BLIS_BITVAL_CONST_TYPE          0x07
+//#define   BLIS_BITVAL_INT_TYPE            0x04
+//#define   BLIS_BITVAL_CONST_TYPE          0x05
 #define BLIS_BITVAL_NO_TRANS              0x0
 #define BLIS_BITVAL_TRANS                 BLIS_TRANS_BIT
 #define BLIS_BITVAL_NO_CONJ               0x0
@@ -446,27 +546,33 @@ typedef enum
 typedef enum
 {
 	BLIS_FLOAT             = BLIS_BITVAL_FLOAT_TYPE,
-	BLIS_DOUBLE            = BLIS_BITVAL_DOUBLE_TYPE,
 	BLIS_SCOMPLEX          = BLIS_BITVAL_SCOMPLEX_TYPE,
+	BLIS_DOUBLE            = BLIS_BITVAL_DOUBLE_TYPE,
 	BLIS_DCOMPLEX          = BLIS_BITVAL_DCOMPLEX_TYPE,
+    BLIS_FP16              = BLIS_BITVAL_FP16_TYPE,
+    BLIS_HCOMPLEX          = BLIS_BITVAL_HCOMPLEX_TYPE,
+    BLIS_BF16              = BLIS_BITVAL_BF16_TYPE,
+    BLIS_BCOMPLEX          = BLIS_BITVAL_BCOMPLEX_TYPE,
 	BLIS_INT               = BLIS_BITVAL_INT_TYPE,
 	BLIS_CONSTANT          = BLIS_BITVAL_CONST_TYPE,
 	BLIS_DT_LO             = BLIS_FLOAT,
-	BLIS_DT_HI             = BLIS_DCOMPLEX
+	BLIS_DT_HI             = BLIS_BCOMPLEX
 } num_t;
 
 typedef enum
 {
-	BLIS_REAL              = BLIS_BITVAL_REAL,
-	BLIS_COMPLEX           = BLIS_BITVAL_COMPLEX
+	BLIS_REAL,              
+	BLIS_COMPLEX  
 } dom_t;
+
 
 typedef enum
 {
 	BLIS_SINGLE_PREC       = BLIS_BITVAL_SINGLE_PREC,
-	BLIS_DOUBLE_PREC       = BLIS_BITVAL_DOUBLE_PREC
+	BLIS_DOUBLE_PREC       = BLIS_BITVAL_DOUBLE_PREC,
+    BLIS_FP16_PREC         = BLIS_BITVAL_FP16_PREC,
+    BLIS_BF16_PREC         = BLIS_BITVAL_BF16_PREC
 } prec_t;
-
 
 // -- Pack schema type --
 
@@ -1224,7 +1330,6 @@ typedef struct constdata_s
 	gint_t   i;
 
 } constdata_t;
-
 
 //
 // -- BLIS object type definitions ---------------------------------------------

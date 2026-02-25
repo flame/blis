@@ -603,3 +603,85 @@ LABEL(DEND_WRITE_MEM)
   GEMM_UKR_FLUSH_CT( d );
 }
 
+//void bli_sgemm_armv8a_asm_24x8r
+//     (
+//            dim_t      m,
+//            dim_t      n,
+//            dim_t      k,
+//      const void*  alpha,
+//      const void*   beta,
+//      const void*      a,
+//      const void*      b,
+//            void*      c, inc_t rs_0c, inc_t cs_c0,
+//      const auxinfo_t* data,
+//      const cntx_t*    cntx
+//     )
+//{
+//  const void* a_next = bli_auxinfo_next_a( data );
+//  const void* b_next = bli_auxinfo_next_b( data );   
+//
+//
+//  uint64_t k_mker = k / 4;
+//  uint64_t k_left = k % 4;
+//
+//  uint64_t rs_c = rs_c0;
+//  uint64_t cs_c = cs_c0;
+//
+//  GEMM_UKR_SETUP_CT( h, 24, 6, true );
+//
+//  __asm__ volatile
+//  (
+//  " ldr    x0,   %[a]           \n\t"    
+//  " ldr    x1,   %[b]           \n\t"
+//  " mov    x2,   #24            \n\t"   // Column skip for A;
+//  " mov    x3,   #8             \n\t"   // Row skip for B;
+//  "                            \n\t"
+//
+//  " ldr    x5,   %[c]           \n\t" 
+//  " ldr    x6,   %[rs_c]        \n\t"   // Row skip for C, (column_skip = 1)
+//  "                            \n\t"
+//  "                            \n\t"
+//  "                            \n\t"   //Multiply some address skips by sizeof(half).
+//  " lsl    x2,   x2, #2          \n\t"   // cs_a
+//  " lsl    x3,   x3, #2          \n\t"   // rs_b
+//  " lsl    x6,   x6, #2          \n\t"   // rs_c
+//  "                            \n\t"
+//  "                            \n\t"
+//  " cmp    %w[ct], wzr          \n\t" 
+//  " mov    x9,   x5             \n\t" 
+//  
+//  " b.ne LDEND_PRFMC%=         \n\t"
+//  "                            \n\t"   //Some prefetch of c
+//  " LDEND_PRFMC%=:             \n\t"   
+//  "                            \n\t"
+//  " ldr    x4,   %[k_mker]      \n\t"   // num of loops
+//  " ldr    x8,   %[k_left]      \n\t" 
+//  "                            \n\t"
+//  // Storeage Scheme
+//  // C -> [0:24]
+//  // A -> []
+//
+//
+//
+//
+//
+//  :
+//  :[a]          "m"  (a),
+//   [b]          "m"  (b),
+//   [c]          "m"  (c),
+//   [rs_c]       "m"  (rs_c),
+//   [k_mker]     "m"  (k_mker),
+//   [k_left]     "m"  (k_left),
+//   [alpha]      "m"  (alpha),
+//   [beta]       "m"  (beta),
+//   [a_next]     "m"  (a_next),
+//   [b_next]     "m"  (b_next),
+//   [ct]         "r"  (_use_ct)     // define by GEMM_UKR_SETUP_CT macro
+//  :"x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9",
+//   "v0",   "v1",  "v2",  "v3",  "v4",  "v5",  "v6",  "v7",
+//   "v8",   "v9", "v10", "v11", "v12", "v13", "v14", "v15",
+//   "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23",
+//   "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31"
+//  );
+//
+//}

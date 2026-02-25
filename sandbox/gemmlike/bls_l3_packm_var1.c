@@ -34,6 +34,42 @@
 
 #include "blis.h"
 
+void packing_chao
+     (
+             conj_t  conja,
+             pack_t  schema,
+             dim_t   panel_dim,
+             dim_t   panel_dim_max,
+             dim_t   panel_dim_bcast,
+             dim_t   panel_len,
+             dim_t   panel_len_max,
+       const void*   kappa,
+       const void*   c_use, inc_t incc, inc_t ldc,
+             void*   p_use,              inc_t ldp,
+       const void*   params,
+       const cntx_t* cntx
+     )
+{
+    _Float16  kappa_cast = *( _Float16* )kappa;
+    _Float16* c_cast     = ( _Float16* )c_use;
+    _Float16* p_cast     = ( _Float16* )p_use;
+
+    //printf("\n\n\n CALLING PACKING FUNCTION HERE \n");
+    //printf("panel_dim, panel_dim_max, panel_dim_bcast, panel_len, panel_len_max, incc, ldc, ldp = %d, %d, %d, %d, %d, %d, %d, %d\n", panel_dim, panel_dim_max, panel_dim_bcast, panel_len, panel_len_max, incc, ldc, ldp);
+
+    for(dim_t l = 0; l < panel_len; l++)
+    {
+        for(dim_t i = 0; i < panel_dim; i++)
+        {
+            _Float16* cli = c_cast + (l )*ldc + (i) *incc;
+            _Float16* pli = p_cast + (l )*ldp + (i) *1;
+            *pli = *cli;
+            //printf("l, i, cil_offset, pli_offset, cli_v, pli_v = %d, %d, %d, %d, %f, %f\n",l, i, (l )*ldc + (i) *incc, (l )*ldp + (i) *1 , (float)cli[0], (float)pli[0]);
+        }
+    }
+    return;
+}
+
 //
 // Variant 1 provides basic support for packing by calling packm_cxk().
 //
@@ -67,9 +103,9 @@ void bls_packm_var1
 	inc_t incc          = rs_c;
 	inc_t ldc           = cs_c;
 	inc_t ldp           = cs_p;
-	dim_t dt_size       = bli_dt_size( dt );
+	dim_t dt_size       = 2;  // bli_dt_size( dt );
 
-	packm_cxk_ker_ft f  = bli_cntx_get_ukr2_dt( dt, dt, BLIS_PACKM_KER, cntx );
+	//packm_cxk_ker_ft f  = bli_cntx_get_ukr2_dt( dt, dt, BLIS_PACKM_KER, cntx ); // hardcode the packing kernel 
 
 	// Compute the total number of iterations we'll need.
 	dim_t n_iter  = ( iter_dim + panel_dim_max - 1) / panel_dim_max;
@@ -100,13 +136,15 @@ void bls_packm_var1
 
 		const char* c_use = c_begin;
 		      char* p_use = p_begin;
+        //printf("ITERATIOn, c_begin_address, p_use_address = %d, %p, %p\n", it, c_begin,  p_use);
 
 		// The definition of bli_is_my_iter() will depend on whether slab
 		// or round-robin partitioning was requested at configure-time. (The
 		// default is slab.)
 		if ( bli_is_my_iter( it, it_start, it_end, tid, nt ) )
 		{
-			f
+			//f
+            packing_chao
 			(
 			  conjc,
 			  BLIS_PACKED_PANELS,
@@ -170,4 +208,5 @@ void bls_packm_var1
 		p_begin += ps_p*dt_size;
 	}
 }
+
 

@@ -508,12 +508,16 @@ void bli_adjust_strides
 	}
 }
 
-static siz_t dt_sizes[6] =
+static siz_t dt_sizes[10] =
 {
 	sizeof( float ),
 	sizeof( scomplex ),
 	sizeof( double ),
 	sizeof( dcomplex ),
+    sizeof( float16_t ),
+    sizeof( hcomplex ),
+    sizeof( bfloat16_t ),
+    sizeof( bcomplex ),
 	sizeof( gint_t ),
 	sizeof( constdata_t )
 };
@@ -526,6 +530,8 @@ siz_t bli_dt_size
 	if ( bli_error_checking_is_enabled() )
 		bli_dt_size_check( dt );
 
+    // Need to check the above used function correctness.
+
 	return dt_sizes[dt];
 }
 
@@ -535,8 +541,13 @@ static char* dt_names[ BLIS_NUM_FP_TYPES+1 ] =
 	"scomplex",
 	"double",
 	"dcomplex",
+    "float16_t",
+    "hcomplex",
+    "bfloat16_t",
+    "bcomplex",
 	"int"
 };
+// modify it with half percision
 
 const char* bli_dt_string
      (

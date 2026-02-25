@@ -61,13 +61,17 @@ void bls_packm_int
 	   NR) AND storage (PACKMR, PACKNR) blocksizes do not change. */
 	const dim_t m_pack = ( ( m_alloc + mr - 1) / mr ) * mr;
 	const dim_t k_pack = k_alloc;
+    
+    //printf("m_alloc, k_alloc, m, k, mr = %d, %d, %d, %d, %d\n", m_alloc, k_alloc, m, k, mr);
 
 	/* Barrier to make sure all threads are caught up and ready to begin the
 	   packm stage. */
 	bli_thrinfo_barrier( thread );
 
 	/* Compute the size of the memory block eneded. */
-	siz_t size_needed = bli_dt_size( dt ) * m_pack * k_pack;
+	//siz_t size_needed = bli_dt_size( dt ) * m_pack * k_pack;
+	siz_t size_needed = 2 * m_pack * k_pack;
+    //printf("m_pack, k_pack, size_need = %d, %d, %d\n", m_pack, k_pack, size_needed);
 
 	/* NOTE: This "rounding up" of the last upanel is absolutely necessary since
 	   we NEED that last micropanel to have the same ldim (cs_p) as the other
@@ -81,7 +85,8 @@ void bls_packm_int
 	*cs_p = mr;
 
 	dim_t pd_p = mr;
-	*ps_p = mr * k;
+    //printf("psp_time :::: mr, k = %d, %d\n", mr, k);
+	*ps_p = mr * k_pack;
 
 	/* Set the buffer address provided by the caller to point to the memory
 	   associated with the mem_t entry acquired from the memory pool. */
@@ -91,6 +96,19 @@ void bls_packm_int
 	  pack_buf_type,
 	  thread
 	);
+
+    //_Float16* p_chaoy_use     = ( _Float16* )p;
+    //printf("\n\n\n\-################ P COPY PANEL###################\n");
+    //for(int i_yc = 0; i_yc < m_max; i_yc++)
+    //{
+    //    for(int j_yc = 0; j_yc < k; j_yc++)
+    //    {   
+    //        printf("%f, ", (float)p_chaoy_use[i_yc * k + j_yc]);
+    //    }
+    //    printf("\n");
+    //}
+
+
 
 	bls_packm_var1
 	(

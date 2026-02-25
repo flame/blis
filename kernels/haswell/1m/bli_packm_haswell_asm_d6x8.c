@@ -602,7 +602,7 @@ void bli_dpackm_haswell_asm_6x8
 	bli_dset0s_edge
 	(
 	  cdim0*cdim_bcast, cdim_max*cdim_bcast,
-	  k0, k0_max,
+	  k0, k0_max, // MR, NR
 	  p, ldp
 	);
 }

@@ -146,8 +146,12 @@ err_t bli_check_valid_datatype( num_t dt )
 
 	if ( dt != BLIS_FLOAT &&
 	     dt != BLIS_DOUBLE &&
+         dt != BLIS_FP16 &&
+         dt != BLIS_BF16 &&
 	     dt != BLIS_SCOMPLEX &&
 	     dt != BLIS_DCOMPLEX &&
+         dt != BLIS_HCOMPLEX &&
+         dt != BLIS_BCOMPLEX &&
 	     dt != BLIS_INT &&
 	     dt != BLIS_CONSTANT )
 		e_val = BLIS_INVALID_DATATYPE;
@@ -593,6 +597,7 @@ err_t bli_check_matrix_strides( dim_t m, dim_t n, inc_t rs, inc_t cs, inc_t is )
 		}
 		else if ( rs == 1 )
 		{
+            //printf("cs = %d , m = %d\n", cs, m);
 			// For column-major storage, don't allow the column stride to be
 			// less than the m dimension.
 			if ( cs < m )

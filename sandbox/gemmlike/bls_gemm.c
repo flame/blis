@@ -38,6 +38,12 @@
 // -- Define the gemm-like operation's object API ------------------------------
 //
 
+void bls_print()
+{
+    printf("BLS_PRINT()\n");
+}
+
+
 void bls_gemm
      (
        const obj_t*  alpha,
@@ -47,6 +53,7 @@ void bls_gemm
        const obj_t*  c
      )
 {
+    printf("hello world\n");
 	bls_gemm_ex
 	(
 	  alpha,
@@ -70,7 +77,14 @@ void bls_gemm_ex
        const rntm_t* rntm
      )
 {
+    //printf("Hello world!\n");
 	bli_init_once();
+
+    int mc = bli_obj_length(c);                                                                                    
+    int nc = bli_obj_width(c);
+    //printf("bls_gemm_ex.....mc, nc = %d, %d\n", mc, nc);
+    
+    //printf("bls_gemm_bp_var1 function xxxxx , alpha, beta = %f, %f\n", *alpha, *beta);
 
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
@@ -144,6 +158,9 @@ void bls_gemm_ex
 		bli_obj_induce_trans( &b_local );
 		bli_obj_induce_trans( &c_local );
 	}
+    int mc_local = bli_obj_length(&c_local);
+    int nc_local = bli_obj_width(&c_local);
+    //printf("bls_gemm_ex.....mc_local, nc_local = %d, %d\n", mc_local, nc_local);
 
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop, and then make any
@@ -159,6 +176,7 @@ void bls_gemm_ex
 	// Spawn threads (if applicable), where bls_gemm_int() is the thread entry
 	// point function for each thread. This also begins the process of creating
 	// the thrinfo_t tree, which contains thread communicators.
+    //printf("Call bli_l3_sup_thread_decorator \n");
 	bli_l3_sup_thread_decorator
 	(
 	  bls_gemm_int,

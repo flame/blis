@@ -36,8 +36,15 @@
 //
 // Prototype the object-based variant interfaces.
 //
+BLIS_EXPORT_BLIS void bls_set_MC(int mr,
+                                 int nr,
+                                 int mc,
+                                 int nc,
+                                 int kc
+                                 );
 
-void bls_gemm_bp_var1
+
+BLIS_EXPORT_BLIS void bls_gemm_bp_var1
      (
        const obj_t*     alpha,
        const obj_t*     a,

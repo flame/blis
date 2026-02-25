@@ -72,6 +72,30 @@ BLIS_INLINE bool bli_obj_is_dcomplex( const obj_t* obj )
 	       ( bli_obj_dt( obj ) == BLIS_BITVAL_DCOMPLEX_TYPE );
 }
 
+BLIS_INLINE bool bli_obj_is_fp16( const obj_t* obj )
+{
+    return (bool)
+           ( bli_obj_dt( obj ) == BLIS_BITVAL_FP16_TYPE );
+}
+
+BLIS_INLINE bool bli_obj_is_fcomplex( const obj_t* obj )
+{
+    return (bool)
+           ( bli_obj_dt( obj ) == BLIS_BITVAL_HCOMPLEX_TYPE );
+}
+
+BLIS_INLINE bool bli_obj_is_bf16( const obj_t* obj )
+{
+    return (bool)
+           ( bli_obj_dt( obj ) == BLIS_BITVAL_BF16_TYPE );
+}
+
+BLIS_INLINE bool bli_obj_is_bcomplex( const obj_t* obj )
+{
+    return (bool)
+           ( bli_obj_dt( obj ) == BLIS_BITVAL_BCOMPLEX_TYPE );
+}
+
 BLIS_INLINE bool bli_obj_is_int( const obj_t* obj )
 {
 	return ( bool )
@@ -108,16 +132,40 @@ BLIS_INLINE bool bli_obj_is_double_prec( const obj_t* obj )
 	       ( bli_obj_prec( obj ) == BLIS_BITVAL_DOUBLE_PREC );
 }
 
+BLIS_INLINE bool bli_obj_is_fp16_prec( const obj_t* obj )
+{
+    return (bool) 
+           ( bli_obj_prec( obj ) == BLIS_BITVAL_FP16_PREC );
+}
+
+BLIS_INLINE bool bli_obj_is_bf16_prec( const obj_t* obj )
+{
+    return (bool) 
+           ( bli_obj_prec( obj ) == BLIS_BITVAL_BF16_PREC );
+}
+
 BLIS_INLINE num_t bli_obj_dt_proj_to_single_prec( const obj_t* obj )
 {
 	return ( num_t )
-	       ( bli_obj_dt( obj ) & ~BLIS_BITVAL_SINGLE_PREC );
+	       ( bli_obj_dt( obj ) & ~BLIS_BITVAL_BF16_PREC );
 }
 
 BLIS_INLINE num_t bli_obj_dt_proj_to_double_prec( const obj_t* obj )
 {
 	return ( num_t )
-	       ( bli_obj_dt( obj ) | BLIS_BITVAL_DOUBLE_PREC );
+	       ( ( bli_obj_dt( obj ) & ~BLIS_BITVAL_FP16_PREC ) | BLIS_BITVAL_DOUBLE_PREC );
+}
+
+BLIS_INLINE num_t bli_obj_dt_proj_to_fp16_prec( const obj_t* obj )
+{
+	return ( num_t )
+	       ( ( bli_obj_dt( obj ) & ~BLIS_BITVAL_DOUBLE_PREC ) | BLIS_BITVAL_FP16_PREC );
+}
+
+BLIS_INLINE num_t bli_obj_dt_proj_to_bf16_prec( const obj_t* obj )
+{
+	return ( num_t )
+	       ( bli_obj_dt( obj ) & BLIS_BITVAL_BF16_PREC );
 }
 
 BLIS_INLINE bool bli_obj_is_real( const obj_t* obj )
@@ -405,6 +453,7 @@ BLIS_INLINE void bli_obj_set_comp_prec( prec_t dt, obj_t* obj )
 	              ( dt << BLIS_COMP_PREC_SHIFT ) );
 }
 
+
 // NOTE: This function queries and modifies info2.
 BLIS_INLINE void bli_obj_set_scalar_dt( num_t dt, obj_t* obj )
 {
@@ -421,13 +470,13 @@ BLIS_INLINE void bli_obj_set_scalar_domain( dom_t dt, obj_t* obj )
 	               ( dt << BLIS_SCALAR_DT_SHIFT ) );
 }
 
-// NOTE: This function queries and modifies info2.
-BLIS_INLINE void bli_obj_set_scalar_prec( prec_t dt, obj_t* obj )
-{
-	obj->info2 = ( objbits_t )
-	             ( ( obj->info2 & ~BLIS_SCALAR_PREC_BIT ) |
-	               ( dt << BLIS_SCALAR_DT_SHIFT ) );
-}
+//// NOTE: This function queries and modifies info2.
+//BLIS_INLINE void bli_obj_set_scalar_prec( prec_t dt, obj_t* obj )
+//{
+//	obj->info2 = ( objbits_t )
+//	             ( ( obj->info2 & ~BLIS_SCALAR_PREC_BIT ) |
+//	               ( dt << BLIS_SCALAR_DT_SHIFT ) );
+//}
 
 BLIS_INLINE void bli_obj_set_pack_schema( pack_t schema, obj_t* obj )
 {
@@ -570,12 +619,12 @@ BLIS_INLINE void bli_obj_inc_diag_offset( doff_t offset, obj_t* obj )
 
 // Dimension query
 
-BLIS_INLINE dim_t bli_obj_length( const obj_t* obj )
+BLIS_EXPORT_BLIS BLIS_INLINE dim_t bli_obj_length( const obj_t* obj )
 {
 	return ( obj->dim[ BLIS_M ] );
 }
 
-BLIS_INLINE dim_t bli_obj_width( const obj_t* obj )
+BLIS_EXPORT_BLIS BLIS_INLINE dim_t bli_obj_width( const obj_t* obj )
 {
 	return ( obj->dim[ BLIS_N ] );
 }
