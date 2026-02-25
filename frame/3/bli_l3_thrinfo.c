@@ -165,6 +165,9 @@ void bli_l3_sup_thrinfo_update
 		thrinfo_t* thrinfo_sub_node = bli_thrinfo_sub_node( i, root );
 		if ( thrinfo_sub_node != NULL )
 			bli_thrinfo_free( thrinfo_sub_node );
+
+		// replace freed children with NULL.
+		bli_thrinfo_set_sub_node( i, NULL, root );
 	}
 
 	// Rebuild the children with the new rntm.
