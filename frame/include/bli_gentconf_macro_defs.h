@@ -50,6 +50,11 @@
 #else
 #define INSERT_GENTCONF_M4SME_P
 #endif
+#ifdef BLIS_CONFIG_M4SME_E
+#define INSERT_GENTCONF_M4SME_E GENTCONF( M4SME_E, m4sme_e )
+#else
+#define INSERT_GENTCONF_M4SME_E
+#endif
 
 // -- Intel architectures ------------------------------------------------------
 
@@ -255,6 +260,7 @@
 #define INSERT_GENTCONF \
 \
 INSERT_GENTCONF_M4SME_P \
+INSERT_GENTCONF_M4SME_E \
 \
 INSERT_GENTCONF_SKX \
 INSERT_GENTCONF_KNL \

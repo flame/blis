@@ -124,6 +124,9 @@ INSERT_GENTCONF
 #ifdef BLIS_FAMILY_M4SME_P
 #include "bli_family_m4sme_p.h"
 #endif
+#ifdef BLIS_FAMILY_M4SME_E
+#include "bli_family_m4sme_e.h"
+#endif
 
 // ARM-SVE
 #ifdef BLIS_FAMILY_ARMSVE
