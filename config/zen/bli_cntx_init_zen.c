@@ -157,6 +157,8 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  // setv
 	  BLIS_SETV_KER,   BLIS_FLOAT,  bli_ssetv_zen_int,
 	  BLIS_SETV_KER,   BLIS_DOUBLE, bli_dsetv_zen_int,
+	  BLIS_SETV_KER,   BLIS_SCOMPLEX, bli_csetv_zen_int,
+	  BLIS_SETV_KER,   BLIS_DCOMPLEX, bli_zsetv_zen_int,
 
 	  // swapv
 	  BLIS_SWAPV_KER,  BLIS_FLOAT,  bli_sswapv_zen_int8,
