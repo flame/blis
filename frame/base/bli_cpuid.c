@@ -1024,8 +1024,9 @@ et al
 #endif //__linux__
 
 #ifdef __APPLE__
+#define _DARWIN_C_SOURCE
 #include <sys/types.h>
-// #include <sys/sysctl.h>
+#include <sys/sysctl.h>
 #endif
 
 static uint32_t get_coretype
@@ -1067,7 +1068,6 @@ static uint32_t get_coretype
 #ifdef __APPLE__
 	// Better values could be obtained from sysctlbyname()
 	// FIXME: compute actual part number
-#include <sys/sysctl.h>
 	implementer = 0x61; //Apple
 	part        = 0x023; //Firestorm
 	int sme2_supported = 0;
