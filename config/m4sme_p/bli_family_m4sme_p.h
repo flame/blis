@@ -40,7 +40,7 @@
 
 #define BLIS_SIMD_ALIGN_SIZE           64
 
-#define BLIS_SIMD_MAX_SIZE             (64*64)
+#define BLIS_SIMD_MAX_SIZE             256
 #define BLIS_SIMD_MAX_NUM_REGISTERS    32
 
 
