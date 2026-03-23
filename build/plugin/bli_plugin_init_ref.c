@@ -86,9 +86,9 @@ void PASTEMAC(plugin_init_@plugin_name@,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
 	gen_func_init_co( &funcs[ MY_KERNEL_2 ], PASTECH(my_kernel_2,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX) );
 
 	// -- Set preferences ------------------------------------------------------
-	//                                        s      d      c      z
-	bli_mbool_init( &mbools[ MY_PREF_1 ],  TRUE,  TRUE,  TRUE,  TRUE );
-	bli_mbool_init( &mbools[ MY_PREF_2 ], FALSE, FALSE, FALSE, FALSE );
+	//                                        s      d      c      z      h      b      k      j
+	bli_mbool_init( &mbools[ MY_PREF_1 ],  TRUE,  TRUE,  TRUE,  TRUE,  TRUE,  TRUE,  TRUE,  TRUE );
+	bli_mbool_init( &mbools[ MY_PREF_2 ], FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE );
 
 	// -- Put block sizes, kernels, and preferences into the context -----------
 

@@ -185,8 +185,8 @@ typedef uint32_t objbits_t;  // object information bit field
 #define BLIS_SIZEOF_Z      16 // sizeof(dcomplex)
 #define BLIS_SIZEOF_H      2  // sizeof(fp16)
 #define BLIS_SIZEOF_B      2  // sizeof(bf16)
-#define BLIS_SIZEOF_L      4  // sizeof(hcomplex)
-#define BLIS_SIZEOF_V      4  // sizeof(bcomplex)
+#define BLIS_SIZEOF_K      4  // sizeof(hcomplex)
+#define BLIS_SIZEOF_J      4  // sizeof(bcomplex)
 
 // -- Complex types --
 
@@ -1323,11 +1323,15 @@ typedef struct
 // global scalar constants in bli_const.c.
 typedef struct constdata_s
 {
-	float    s;
-	double   d;
-	scomplex c;
-	dcomplex z;
-	gint_t   i;
+	float      s;
+	double     d;
+	scomplex   c;
+	dcomplex   z;
+    float16_t  h;
+    bfloat16_t b;
+    hcomplex   k;
+    bcomplex   j;
+	gint_t     i;
 
 } constdata_t;
 

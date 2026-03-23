@@ -55,7 +55,11 @@ BLIS_EXPORT_BLIS mbool_t* bli_mbool_create
        bool b_s,
        bool b_d,
        bool b_c,
-       bool b_z
+       bool b_z,
+       bool b_h,
+       bool b_b,
+       bool b_k,
+       bool b_j
      );
 
 BLIS_EXPORT_BLIS void bli_mbool_init
@@ -64,7 +68,11 @@ BLIS_EXPORT_BLIS void bli_mbool_init
        bool     b_s,
        bool     b_d,
        bool     b_c,
-       bool     b_z
+       bool     b_z,
+       bool     b_h,
+       bool     b_b,
+       bool     b_k,
+       bool     b_j
      );
 
 BLIS_EXPORT_BLIS void bli_mbool_free( mbool_t* b );

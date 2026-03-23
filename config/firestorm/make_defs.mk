@@ -57,12 +57,12 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2 -march=armv8-a
+COPTFLAGS      := -O2 -march=armv8-a+fp16
 endif
 
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS) -O3 -ftree-vectorize
-CKVECFLAGS     := -march=armv8-a
+CKVECFLAGS     := -march=armv8-a+fp16
 
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)

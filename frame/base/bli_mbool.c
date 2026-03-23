@@ -40,7 +40,11 @@ mbool_t* bli_mbool_create
        bool b_s,
        bool b_d,
        bool b_c,
-       bool b_z
+       bool b_z,
+       bool b_h,
+       bool b_b,
+       bool b_k,
+       bool b_j
      )
 {
 	mbool_t* b;
@@ -54,7 +58,11 @@ mbool_t* bli_mbool_create
 	  b_s,
 	  b_d,
 	  b_c,
-	  b_z
+	  b_z,
+      b_h,
+      b_b,
+      b_k,
+      b_j
 	);
 
 	return b;
@@ -66,13 +74,21 @@ void bli_mbool_init
        bool     b_s,
        bool     b_d,
        bool     b_c,
-       bool     b_z
+       bool     b_z,
+       bool     b_h,
+       bool     b_b,
+       bool     b_k,
+       bool     b_j
      )
 {
 	bli_mbool_set_dt( b_s, BLIS_FLOAT,    b );
 	bli_mbool_set_dt( b_d, BLIS_DOUBLE,   b );
 	bli_mbool_set_dt( b_c, BLIS_SCOMPLEX, b );
 	bli_mbool_set_dt( b_z, BLIS_DCOMPLEX, b );
+	bli_mbool_set_dt( b_h, BLIS_FP16,     b );
+	bli_mbool_set_dt( b_b, BLIS_BF16,     b );
+	bli_mbool_set_dt( b_k, BLIS_HCOMPLEX, b );
+	bli_mbool_set_dt( b_j, BLIS_BCOMPLEX, b );
 }
 
 void bli_mbool_free( mbool_t* b )
