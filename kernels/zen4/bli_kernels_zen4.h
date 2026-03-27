@@ -32,5 +32,15 @@
 
 */
 
-// amaxv (intrinsics)
+// addv (intrinsics)
 ADDV_KER_PROT( double,   d, addv_zen4_int )
+
+// scalv (intrinsics)
+SCALV_KER_PROT( float,    s, scalv_zen4_int )
+SCALV_KER_PROT( double,   d, scalv_zen4_int )
+SCALV_KER_PROT( dcomplex, z, scalv_zen4_int )
+//SCALV_KER_PROT( scomplex, c, scalv_zen4_int )
+
+SETV_KER_PROT(float,    s, setv_zen4_int)
+SETV_KER_PROT(double,   d, setv_zen4_int)
+SETV_KER_PROT(dcomplex,   z, setv_zen4_int)

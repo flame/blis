@@ -36,7 +36,7 @@
 
 void bli_cntx_init_zen4( cntx_t* cntx )
 {
-	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
+	//blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 
 	// Set default kernel blocksizes and functions.
 	bli_cntx_init_zen4_ref( cntx );
@@ -86,10 +86,17 @@ void bli_cntx_init_zen4( cntx_t* cntx )
 	  BLIS_COPYV_KER,  BLIS_DOUBLE, bli_dcopyv_zen_int,
 
 	  // setv
-	  BLIS_SETV_KER,  BLIS_FLOAT,  bli_ssetv_zen_int,
-	  BLIS_SETV_KER,  BLIS_DOUBLE, bli_dsetv_zen_int,
+	  BLIS_SETV_KER,  BLIS_FLOAT,  bli_ssetv_zen4_int,
+	  BLIS_SETV_KER,  BLIS_DOUBLE, bli_dsetv_zen4_int,
+	  BLIS_SETV_KER,  BLIS_DCOMPLEX, bli_zsetv_zen4_int,
 
-    // addv
+	  // scalv
+	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen4_int,
+	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen4_int,
+	  //BLIS_SCALV_KER,  BLIS_SCOMPLEX, bli_cscalv_zen4_int,
+	  BLIS_SCALV_KER,  BLIS_DCOMPLEX, bli_zscalv_zen4_int,
+
+      // addv
 	  BLIS_ADDV_KER,  BLIS_DOUBLE,     bli_daddv_zen4_int,
 
     BLIS_VA_END
