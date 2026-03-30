@@ -14,7 +14,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -57,6 +57,10 @@
 #define F77_drotmg     drotmg_
 #define F77_drot       drot_
 #define F77_drotm      drotm_
+#define F77_crotg      crotg_
+#define F77_csrot      csrot_
+#define F77_zrotg      zrotg_
+#define F77_zdrot      zdrot_
 #define F77_sswap      sswap_
 #define F77_scopy      scopy_
 #define F77_saxpy      saxpy_
