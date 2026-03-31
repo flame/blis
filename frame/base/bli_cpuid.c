@@ -322,37 +322,6 @@ bool bli_cpuid_is_zen4
 	return TRUE;
 }
 
-#if 0
-model_t bli_cpuid_get_zen4_cpuid_model
-    (
-       uint32_t family,
-       uint32_t model,
-       uint32_t features
-    )
-{
-	// Look at model of CPU and set cpuid_model appropriately.
-	// For Zen4, the default is Genoa.
-	model_t cpuid_model = BLIS_MODEL_GENOA;
-
-	if ( family == 0x19 )
-	{
-		if ( 0xA0 <= model && model <= 0xAf ) // Bergamo
-		{
-			cpuid_model = BLIS_MODEL_BERGAMO;
-		}
-		else
-		{
-			uint32_t l3_cache_size = bli_cpuid_query_l3_cache_size();
-			if ( l3_cache_size > 393216 )
-			{
-				cpuid_model = BLIS_MODEL_GENOA_X;
-			}
-		}
-	}
-	return cpuid_model;
-}
-#endif
-
 bool bli_cpuid_is_zen3
      (
        uint32_t family,
