@@ -93,7 +93,7 @@ void bli_hpackm_armv8a_int_12x16
     const bool     gs     = ( inca0 != 1 && lda0 != 1 );
     // NOTE: If/when this kernel ever supports scaling by kappa within the
     // assembly region, this constraint should be lifted.
-    const bool     unitk  = bli_deq1( *( ( double* ) kappa ) );
+    const bool     unitk  = bli_deq1( *( ( float16_t* ) kappa ) );
     
     
     // -------------------------------------------------------------------------
@@ -105,14 +105,15 @@ void bli_hpackm_armv8a_int_12x16
             {
                 // No need to use k-loops here.
                 // Simple let complier to expand loops.
+                printf(" inca = 1, lda = %d, \n", mr);
                 PRAGMA_UNROLL_4
                 for( dim_t ik = k_iter * 8 + k_left; ik > 0; --ik )
                 {
                     float16x8_t v0 = vld1q_f16( a_loc + 0 );
-                    float16x8_t v1 = vld1q_f16( a_loc + 8 );
+                    float16x4_t v1 = vld1_f16( a_loc + 8 );
 
                     vst1q_f16( p_loc + 0, v0 );
-                    vst1q_f16( p_loc + 8, v1 );
+                    vst1_f16( p_loc + 8, v1 );
 
                     a_loc += lda;
                     p_loc += ldp;
@@ -120,6 +121,7 @@ void bli_hpackm_armv8a_int_12x16
             }
             else // if ( lda == 1 )
             {
+                printf(" inca = %d, lda = %d\n", k0, 1) ;
                 float16x8_t v0 = (float16x8_t)vdupq_n_u16( 0 );
                 float16x8_t v1 = (float16x8_t)vdupq_n_u16( 0 );
                 float16x8_t v2 = (float16x8_t)vdupq_n_u16( 0 );
@@ -132,10 +134,6 @@ void bli_hpackm_armv8a_int_12x16
                 float16x8_t v9 = (float16x8_t)vdupq_n_u16( 0 );
                 float16x8_t v10 = (float16x8_t)vdupq_n_u16( 0 );
                 float16x8_t v11 = (float16x8_t)vdupq_n_u16( 0 );
-                float16x8_t v12 = (float16x8_t)vdupq_n_u16( 0 );
-                float16x8_t v13 = (float16x8_t)vdupq_n_u16( 0 );
-                float16x8_t v14 = (float16x8_t)vdupq_n_u16( 0 );
-                float16x8_t v15 = (float16x8_t)vdupq_n_u16( 0 );
                 float16x8_t vt0;
                 float16x8_t vt1;
                 float16x8_t vt2;
@@ -148,10 +146,15 @@ void bli_hpackm_armv8a_int_12x16
                 float16x8_t vt9;
                 float16x8_t vt10;
                 float16x8_t vt11;
-                float16x8_t vt12;
-                float16x8_t vt13;
-                float16x8_t vt14;
-                float16x8_t vt15;
+
+                float16x4_t hv0;
+                float16x4_t hv1;
+                float16x4_t hv2;
+                float16x4_t hv3;
+                float16x4_t hv4;
+                float16x4_t hv5;
+                float16x4_t hv6;
+                float16x4_t hv7;
 
                 PRAGMA_NOUNROLL
                 for( ; k_iter > 0; --k_iter)
@@ -184,10 +187,10 @@ void bli_hpackm_armv8a_int_12x16
                     v1  = (float16x8_t)vtrn1q_f32( (float32x4_t)vt1, (float32x4_t)vt3 );
                     v2  = (float16x8_t)vtrn2q_f32( (float32x4_t)vt0, (float32x4_t)vt2 );
                     v3  = (float16x8_t)vtrn2q_f32( (float32x4_t)vt1, (float32x4_t)vt3 );
-                    v4  = (float16x8_t)vtrn1q_f32( (float32x4_t)vt4, (float32x4_t)vt5 );
-                    v5  = (float16x8_t)vtrn1q_f32( (float32x4_t)vt6, (float32x4_t)vt7 );
-                    v6  = (float16x8_t)vtrn2q_f32( (float32x4_t)vt4, (float32x4_t)vt5 );
-                    v7  = (float16x8_t)vtrn2q_f32( (float32x4_t)vt6, (float32x4_t)vt7 );
+                    v4  = (float16x8_t)vtrn1q_f32( (float32x4_t)vt4, (float32x4_t)vt6 );
+                    v5  = (float16x8_t)vtrn1q_f32( (float32x4_t)vt5, (float32x4_t)vt7 );
+                    v6  = (float16x8_t)vtrn2q_f32( (float32x4_t)vt4, (float32x4_t)vt6 );
+                    v7  = (float16x8_t)vtrn2q_f32( (float32x4_t)vt5, (float32x4_t)vt7 );
                     vt0 = (float16x8_t)vtrn1q_f64( (float64x2_t)v0, (float64x2_t)v4 );
                     vt1 = (float16x8_t)vtrn1q_f64( (float64x2_t)v1, (float64x2_t)v5 );
                     vt2 = (float16x8_t)vtrn1q_f64( (float64x2_t)v2, (float64x2_t)v6 );
@@ -205,45 +208,45 @@ void bli_hpackm_armv8a_int_12x16
                     v9   = (float16x8_t)vtrn1q_f32( (float32x4_t)vt9, (float32x4_t)vt11 );
                     v10  = (float16x8_t)vtrn2q_f32( (float32x4_t)vt8, (float32x4_t)vt10 );
                     v11  = (float16x8_t)vtrn2q_f32( (float32x4_t)vt9, (float32x4_t)vt11 );
-                    vt8  = (float16x8_t)vtrn1q_f64( (float32x4_t)v8, (float32x4_t)v12 );
-                    vt9  = (float16x8_t)vtrn1q_f64( (float32x4_t)v9, (float32x4_t)v13 );
-                    vt10 = (float16x8_t)vtrn1q_f64( (float32x4_t)v10, (float32x4_t)v14 );
-                    vt11 = (float16x8_t)vtrn1q_f64( (float32x4_t)v11, (float32x4_t)v15 );
-                    vt12 = (float16x8_t)vtrn2q_f64( (float32x4_t)v8, (float32x4_t)v12 );
-                    vt13 = (float16x8_t)vtrn2q_f64( (float32x4_t)v9, (float32x4_t)v13 );
-                    vt14 = (float16x8_t)vtrn2q_f64( (float32x4_t)v10, (float32x4_t)v14 );
-                    vt15 = (float16x8_t)vtrn2q_f64( (float32x4_t)v11, (float32x4_t)v15 );
+                    hv0  = vget_low_f16(v8);
+                    hv1  = vget_low_f16(v9);
+                    hv2  = vget_low_f16(v10);
+                    hv3  = vget_low_f16(v11);
+                    hv4  = vget_high_f16(v8);
+                    hv5  = vget_high_f16(v9);
+                    hv6  = vget_high_f16(v10);
+                    hv7  = vget_high_f16(v11);
 
                     vst1q_f16( p_loc + 0, vt0 );
-                    vst1q_f16( p_loc + 8, vt8 );
+                    vst1_f16 ( p_loc + 8, hv0 );
                     p_loc += ldp;
 
                     vst1q_f16( p_loc + 0, vt1 );
-                    vst1q_f16( p_loc + 8, vt9 );
+                    vst1_f16 ( p_loc + 8, hv1 );
                     p_loc += ldp;
 
                     vst1q_f16( p_loc + 0, vt2 );
-                    vst1q_f16( p_loc + 8, vt10 );
+                    vst1_f16 ( p_loc + 8, hv2 );
                     p_loc += ldp;
 
                     vst1q_f16( p_loc + 0, vt3 );
-                    vst1q_f16( p_loc + 8, vt11 );
+                    vst1_f16 ( p_loc + 8, hv3 );
                     p_loc += ldp;
 
                     vst1q_f16( p_loc + 0, vt4 );
-                    vst1q_f16( p_loc + 8, vt12 );
+                    vst1_f16 ( p_loc + 8, hv4 );
                     p_loc += ldp;
 
                     vst1q_f16( p_loc + 0, vt5 );
-                    vst1q_f16( p_loc + 8, vt13 );
+                    vst1_f16 ( p_loc + 8, hv5 );
                     p_loc += ldp;
 
                     vst1q_f16( p_loc + 0, vt6 );
-                    vst1q_f16( p_loc + 8, vt14 );
+                    vst1_f16 ( p_loc + 8, hv6 );
                     p_loc += ldp;
 
                     vst1q_f16( p_loc + 0, vt7 );
-                    vst1q_f16( p_loc + 8, vt15 );
+                    vst1_f16 ( p_loc + 8, hv7 );
                     p_loc += ldp;
                     a_loc += 8 * lda;
                 } //  end of k_iter for loop
@@ -257,13 +260,13 @@ void bli_hpackm_armv8a_int_12x16
                     v0 = vld1q_lane_f16( a_loc + inca * 5, v0, 5);
                     v0 = vld1q_lane_f16( a_loc + inca * 6, v0, 6);
                     v0 = vld1q_lane_f16( a_loc + inca * 7, v0, 7);
-                    v1 = vld1q_lane_f16( a_loc + inca * 8, v1, 0);
-                    v1 = vld1q_lane_f16( a_loc + inca * 9, v1, 1);
-                    v1 = vld1q_lane_f16( a_loc + inca * 10, v1, 2);
-                    v1 = vld1q_lane_f16( a_loc + inca * 11, v1, 3);
+                    hv0 = vld1_lane_f16( a_loc + inca * 8, hv0, 0);
+                    hv0 = vld1_lane_f16( a_loc + inca * 9, hv0, 1);
+                    hv0 = vld1_lane_f16( a_loc + inca * 10, hv0, 2);
+                    hv0 = vld1_lane_f16( a_loc + inca * 11, hv0, 3);
 
                     vst1q_f16( p_loc + 0,  v0 );
-                    vst1q_f16( p_loc + 8,  v1 );
+                    vst1_f16 ( p_loc + 8,  hv0 );
                     p_loc += ldp;
                     a_loc += lda; // 1;
                 }
@@ -272,6 +275,7 @@ void bli_hpackm_armv8a_int_12x16
         else // if ( !unitk )
         {
             float16x8_t vkappa = vld1q_dup_f16( kappa );
+            float16x4_t hvkappa = vld1_dup_f16( kappa );
 
             if ( inca == 1 )
             {
@@ -281,14 +285,14 @@ void bli_hpackm_armv8a_int_12x16
                 for( dim_t ik = k_iter * 8 + k_left; ik > 0; --ik)
                 {
                     float16x8_t v0 = vld1q_f16( a_loc + 0 );
-                    float16x8_t v1 = vld1q_f16( a_loc + 8 );
+                    float16x4_t hv0 = vld1_f16( a_loc + 8 );
 
                     // Scale by kappa
-                    v0 = vmulq_f16( v0, vkappa );
-                    v1 = vmulq_f16( v1, vkappa );
+                    v0  = vmulq_f16(  v0,  vkappa );
+                    hv0 = vmul_f16 ( hv0, hvkappa );
                     
-                    vst1q_f16( p_loc + 0, v0 );
-                    vst1q_f16( p_loc + 8, v1 );
+                    vst1q_f16( p_loc + 0, v0  );
+                    vst1_f16 ( p_loc + 8, hv0 );
 
                     a_loc += lda;
                     p_loc += ldp;
@@ -308,10 +312,6 @@ void bli_hpackm_armv8a_int_12x16
                 float16x8_t v9 = (float16x8_t)vdupq_n_u16( 0 );
                 float16x8_t v10 = (float16x8_t)vdupq_n_u16( 0 );
                 float16x8_t v11 = (float16x8_t)vdupq_n_u16( 0 );
-                float16x8_t v12 = (float16x8_t)vdupq_n_u16( 0 );
-                float16x8_t v13 = (float16x8_t)vdupq_n_u16( 0 );
-                float16x8_t v14 = (float16x8_t)vdupq_n_u16( 0 );
-                float16x8_t v15 = (float16x8_t)vdupq_n_u16( 0 );
                 float16x8_t vt0;
                 float16x8_t vt1;
                 float16x8_t vt2;
@@ -324,10 +324,15 @@ void bli_hpackm_armv8a_int_12x16
                 float16x8_t vt9;
                 float16x8_t vt10;
                 float16x8_t vt11;
-                float16x8_t vt12;
-                float16x8_t vt13;
-                float16x8_t vt14;
-                float16x8_t vt15;
+
+                float16x4_t hv0;
+                float16x4_t hv1;
+                float16x4_t hv2;
+                float16x4_t hv3;
+                float16x4_t hv4;
+                float16x4_t hv5;
+                float16x4_t hv6;
+                float16x4_t hv7;
 
                 PRAGMA_NOUNROLL
                 for( ; k_iter > 0; --k_iter)
@@ -358,10 +363,6 @@ void bli_hpackm_armv8a_int_12x16
                     v9 = vmulq_f16( v9, vkappa );
                     v10 = vmulq_f16( v10, vkappa );
                     v11 = vmulq_f16( v11, vkappa );
-                    v12 = vmulq_f16( v12, vkappa );
-                    v13 = vmulq_f16( v13, vkappa );
-                    v14 = vmulq_f16( v14, vkappa );
-                    v15 = vmulq_f16( v15, vkappa );
 
                     // In-register transpose
                     // 
@@ -378,10 +379,10 @@ void bli_hpackm_armv8a_int_12x16
                     v1 = (float16x8_t)vtrn1q_f32( (float32x4_t)vt1, (float32x4_t)vt3 );
                     v2 = (float16x8_t)vtrn2q_f32( (float32x4_t)vt0, (float32x4_t)vt2 );
                     v3 = (float16x8_t)vtrn2q_f32( (float32x4_t)vt1, (float32x4_t)vt3 );
-                    v4 = (float16x8_t)vtrn1q_f32( (float32x4_t)vt4, (float32x4_t)vt5 );
-                    v5 = (float16x8_t)vtrn1q_f32( (float32x4_t)vt6, (float32x4_t)vt7 );
-                    v6 = (float16x8_t)vtrn2q_f32( (float32x4_t)vt4, (float32x4_t)vt5 );
-                    v7 = (float16x8_t)vtrn2q_f32( (float32x4_t)vt6, (float32x4_t)vt7 );
+                    v4 = (float16x8_t)vtrn1q_f32( (float32x4_t)vt4, (float32x4_t)vt6 );
+                    v5 = (float16x8_t)vtrn1q_f32( (float32x4_t)vt5, (float32x4_t)vt7 );
+                    v6 = (float16x8_t)vtrn2q_f32( (float32x4_t)vt4, (float32x4_t)vt6 );
+                    v7 = (float16x8_t)vtrn2q_f32( (float32x4_t)vt5, (float32x4_t)vt7 );
                     vt0 = (float16x8_t)vtrn1q_f64( (float64x2_t)v0, (float64x2_t)v4 );
                     vt1 = (float16x8_t)vtrn1q_f64( (float64x2_t)v1, (float64x2_t)v5 );
                     vt2 = (float16x8_t)vtrn1q_f64( (float64x2_t)v2, (float64x2_t)v6 );
@@ -399,45 +400,46 @@ void bli_hpackm_armv8a_int_12x16
                     v9 = (float16x8_t)vtrn1q_f32( (float32x4_t)vt9, (float32x4_t)vt11 );
                     v10 = (float16x8_t)vtrn2q_f32( (float32x4_t)vt8, (float32x4_t)vt10 );
                     v11 = (float16x8_t)vtrn2q_f32( (float32x4_t)vt9, (float32x4_t)vt11 );
-                    vt8 = (float16x8_t)vtrn1q_f64( (float32x4_t)v8, (float32x4_t)v12 );
-                    vt9 = (float16x8_t)vtrn1q_f64( (float32x4_t)v9, (float32x4_t)v13 );
-                    vt10 = (float16x8_t)vtrn1q_f64( (float32x4_t)v10, (float32x4_t)v14 );
-                    vt11 = (float16x8_t)vtrn1q_f64( (float32x4_t)v11, (float32x4_t)v15 );
-                    vt12 = (float16x8_t)vtrn2q_f64( (float32x4_t)v8, (float32x4_t)v12 );
-                    vt13 = (float16x8_t)vtrn2q_f64( (float32x4_t)v9, (float32x4_t)v13 );
-                    vt14 = (float16x8_t)vtrn2q_f64( (float32x4_t)v10, (float32x4_t)v14 );
-                    vt15 = (float16x8_t)vtrn2q_f64( (float32x4_t)v11, (float32x4_t)v15 );
+                    hv0  = vget_low_f16(v8);
+                    hv1  = vget_low_f16(v9);
+                    hv2  = vget_low_f16(v10);
+                    hv3  = vget_low_f16(v11);
+                    hv4  = vget_high_f16(v8);
+                    hv5  = vget_high_f16(v9);
+                    hv6  = vget_high_f16(v10);
+                    hv7  = vget_high_f16(v11);
+
 
                     vst1q_f16( p_loc + 0, vt0 );
-                    vst1q_f16( p_loc + 8, vt8 );
+                    vst1_f16 ( p_loc + 8, hv0 );
                     p_loc += ldp;
 
                     vst1q_f16( p_loc + 0, vt1 );
-                    vst1q_f16( p_loc + 8, vt9 );
+                    vst1_f16 ( p_loc + 8, hv1 );
                     p_loc += ldp;
 
                     vst1q_f16( p_loc + 0, vt2 );
-                    vst1q_f16( p_loc + 8, vt10 );
+                    vst1_f16 ( p_loc + 8, hv2 );
                     p_loc += ldp;
 
                     vst1q_f16( p_loc + 0, vt3 );
-                    vst1q_f16( p_loc + 8, vt11 );
+                    vst1_f16 ( p_loc + 8, hv3 );
                     p_loc += ldp;
 
                     vst1q_f16( p_loc + 0, vt4 );
-                    vst1q_f16( p_loc + 8, vt12 );
+                    vst1_f16 ( p_loc + 8, hv4 );
                     p_loc += ldp;
 
                     vst1q_f16( p_loc + 0, vt5 );
-                    vst1q_f16( p_loc + 8, vt13 );
+                    vst1_f16 ( p_loc + 8, hv5 );
                     p_loc += ldp;
 
                     vst1q_f16( p_loc + 0, vt6 );
-                    vst1q_f16( p_loc + 8, vt14 );
+                    vst1_f16 ( p_loc + 8, hv6 );
                     p_loc += ldp;
 
                     vst1q_f16( p_loc + 0, vt7 );
-                    vst1q_f16( p_loc + 8, vt15 );
+                    vst1_f16 ( p_loc + 8, hv7 );
                     p_loc += ldp;
                     a_loc += 8 * lda;
                 } //  end of k_iter for loop
@@ -451,17 +453,17 @@ void bli_hpackm_armv8a_int_12x16
                     v0 = vld1q_lane_f16( a_loc + inca * 5, v0, 5);
                     v0 = vld1q_lane_f16( a_loc + inca * 6, v0, 6);
                     v0 = vld1q_lane_f16( a_loc + inca * 7, v0, 7);
-                    v1 = vld1q_lane_f16( a_loc + inca * 8, v1, 0);
-                    v1 = vld1q_lane_f16( a_loc + inca * 9, v1, 1);
-                    v1 = vld1q_lane_f16( a_loc + inca * 10, v1, 2);
-                    v1 = vld1q_lane_f16( a_loc + inca * 11, v1, 3);
+                    hv0 = vld1_lane_f16( a_loc + inca * 8, hv0, 0);
+                    hv0 = vld1_lane_f16( a_loc + inca * 9, hv0, 1);
+                    hv0 = vld1_lane_f16( a_loc + inca * 10, hv0, 2);
+                    hv0 = vld1_lane_f16( a_loc + inca * 11, hv0, 3);
 
                     // Scale by kappa
-                    v0 = vmulq_f16( v0, vkappa );
-                    v1 = vmulq_f16( v1, vkappa );
+                    v0  = vmulq_f16( v0,  vkappa );
+                    hv0 = vmul_f16( hv0, hvkappa );
 
                     vst1q_f16( p_loc + 0,  v0 );
-                    vst1q_f16( p_loc + 8,  v1 );
+                    vst1_f16 ( p_loc + 8, hv0 );
                     p_loc += ldp;
                     a_loc += lda; // 1;
                 }
@@ -491,22 +493,22 @@ void bli_hpackm_armv8a_int_12x16
             }
             else // if ( lda == 1 )
             {
-                float16x8_t v0 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v1 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v2 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v3 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v4 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v5 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v6 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v7 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v8 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v9 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v10 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v11 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v12 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v13 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v14 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v15 = (float32x4_t)vdupq_n_u16( 0 );
+                float16x8_t v0 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v1 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v2 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v3 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v4 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v5 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v6 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v7 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v8 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v9 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v10 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v11 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v12 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v13 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v14 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v15 = (float16x8_t)vdupq_n_u16( 0 );
                 float16x8_t vt0;
                 float16x8_t vt1;
                 float16x8_t vt2;
@@ -684,22 +686,22 @@ void bli_hpackm_armv8a_int_12x16
             } // end if ( inca == 1 )
             else // if ( lda == 1 )
             {
-                float16x8_t v0 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v1 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v2 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v3 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v4 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v5 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v6 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v7 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v8 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v9 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v10 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v11 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v12 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v13 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v14 = (float32x4_t)vdupq_n_u16( 0 );
-                float16x8_t v15 = (float32x4_t)vdupq_n_u16( 0 );
+                float16x8_t v0 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v1 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v2 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v3 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v4 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v5 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v6 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v7 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v8 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v9 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v10 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v11 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v12 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v13 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v14 = (float16x8_t)vdupq_n_u16( 0 );
+                float16x8_t v15 = (float16x8_t)vdupq_n_u16( 0 );
                 float16x8_t vt0;
                 float16x8_t vt1;
                 float16x8_t vt2;
