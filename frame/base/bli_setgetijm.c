@@ -42,7 +42,13 @@ typedef void (*setijm_fp)
        dim_t  j,
        void*  b, inc_t rs, inc_t cs
      );
-static setijm_fp GENARRAY(ftypes_setijm,setijm);
+static setijm_fp ftypes_setijm[BLIS_NUM_FP_TYPES] =
+{
+	( setijm_fp )bli_ssetijm,
+	( setijm_fp )bli_csetijm,
+	( setijm_fp )bli_dsetijm,
+	( setijm_fp )bli_zsetijm
+};
 
 err_t bli_setijm
      (
@@ -94,12 +100,10 @@ void PASTEMAC(ch,opname) \
        double ai, \
        dim_t  i, \
        dim_t  j, \
-       void*  b, inc_t rs, inc_t cs  \
+       ctype* b, inc_t rs, inc_t cs  \
      ) \
 { \
-	ctype* b_cast = ( ctype* )b; \
-\
-	ctype* b_ij = b_cast + (i  )*rs + (j  )*cs; \
+	ctype* b_ij = b + (i  )*rs + (j  )*cs; \
 \
 	bli_tsets( z,ch, ar, ai, *b_ij ); \
 }
@@ -116,7 +120,13 @@ typedef void (*getijm_fp)
              double* ar,
              double* ai
      );
-static getijm_fp GENARRAY(ftypes_getijm,getijm);
+static getijm_fp ftypes_getijm[BLIS_NUM_FP_TYPES] =
+{
+	( getijm_fp )bli_sgetijm,
+	( getijm_fp )bli_cgetijm,
+	( getijm_fp )bli_dgetijm,
+	( getijm_fp )bli_zgetijm
+};
 
 err_t bli_getijm
       (
@@ -166,14 +176,12 @@ void PASTEMAC(ch,opname) \
      ( \
              dim_t   i, \
              dim_t   j, \
-       const void*   b, inc_t rs, inc_t cs, \
+       const ctype*  b, inc_t rs, inc_t cs, \
              double* ar, \
              double* ai  \
      ) \
 { \
-	const ctype* b_cast = ( const ctype* )b; \
-\
-	const ctype* b_ij = b_cast + (i  )*rs + (j  )*cs; \
+	const ctype* b_ij = b + (i  )*rs + (j  )*cs; \
 \
 	bli_tgets( ch,z, *b_ij, *ar, *ai ); \
 }

@@ -41,7 +41,13 @@ typedef void (*setijv_fp)
        dim_t  i,
        void*  x, inc_t incx
      );
-static setijv_fp GENARRAY(ftypes_setijv,setijv);
+static setijv_fp ftypes_setijv[BLIS_NUM_FP_TYPES] =
+{
+	( setijv_fp )bli_ssetijv,
+	( setijv_fp )bli_csetijv,
+	( setijv_fp )bli_dsetijv,
+	( setijv_fp )bli_zsetijv
+};
 
 err_t bli_setijv
      (
@@ -87,12 +93,10 @@ void PASTEMAC(ch,opname) \
        double ar, \
        double ai, \
        dim_t  i, \
-       void*  x, inc_t incx  \
+       ctype* x, inc_t incx  \
      ) \
 { \
-	ctype* restrict x_cast = ( ctype* )x; \
-\
-	ctype* restrict x_i = x_cast + (i  )*incx; \
+	ctype* restrict x_i = x + (i  )*incx; \
 \
 	bli_tsets( z,ch, ar, ai, *x_i ); \
 }
@@ -108,7 +112,13 @@ typedef void (*getijv_fp)
              double* ar,
              double* ai
      );
-static getijv_fp GENARRAY(ftypes_getijv,getijv);
+static getijv_fp ftypes_getijv[BLIS_NUM_FP_TYPES] =
+{
+	( getijv_fp )bli_sgetijv,
+	( getijv_fp )bli_cgetijv,
+	( getijv_fp )bli_dgetijv,
+	( getijv_fp )bli_zgetijv
+};
 
 err_t bli_getijv
       (
@@ -152,14 +162,12 @@ err_t bli_getijv
 void PASTEMAC(ch,opname) \
      ( \
              dim_t   i, \
-       const void*   x, inc_t incx, \
+       const ctype*  x, inc_t incx, \
              double* ar, \
              double* ai  \
      ) \
 { \
-	const ctype* restrict x_cast = ( const ctype* )x; \
-\
-	const ctype* restrict x_i = x_cast + (i  )*incx; \
+	const ctype* restrict x_i = x + (i  )*incx; \
 \
 	bli_tgets( ch,z, *x_i, *ar, *ai ); \
 }
