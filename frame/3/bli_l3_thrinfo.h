@@ -96,8 +96,8 @@ thrinfo_t* bli_l3_sup_thrinfo_create
 
 void bli_l3_sup_thrinfo_update
      (
-       const rntm_t*     rntm,
-             thrinfo_t** root
+       const rntm_t*    rntm,
+             thrinfo_t* root
      );
 
 void bli_l3_thrinfo_print_gemm_paths

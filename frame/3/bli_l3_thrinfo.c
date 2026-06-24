@@ -117,23 +117,16 @@ void bli_l3_thrinfo_grow
 
 // -----------------------------------------------------------------------------
 
-thrinfo_t* bli_l3_sup_thrinfo_create
+// Grow the thread control tree beneath an existing sup root node, splitting
+// the threads across the jc/pc/pb/ic/pa/jr/ir loops according to rntm. This
+// is the shared core of bli_l3_sup_thrinfo_create() and the re-factorization
+// performed by bli_l3_sup_thrinfo_update().
+static void bli_l3_sup_thrinfo_grow
      (
-             dim_t      id,
-             thrcomm_t* gl_comm,
-             pool_t*    sba_pool,
+             thrinfo_t* root,
        const rntm_t*    rntm
      )
 {
-	// Create the root thrinfo_t node.
-	thrinfo_t* root = bli_thrinfo_create_root
-	(
-	  gl_comm,
-	  id,
-	  sba_pool,
-	  bli_pba_query()
-	);
-
 	const dim_t n_way_jc = bli_rntm_ways_for( BLIS_NC, rntm );
 	const dim_t n_way_pc = bli_rntm_ways_for( BLIS_KC, rntm );
 	const dim_t n_way_ic = bli_rntm_ways_for( BLIS_MC, rntm );
@@ -164,28 +157,65 @@ thrinfo_t* bli_l3_sup_thrinfo_create
 	bli_thrinfo_set_sub_node( thread_pa, thread_ic );
 	bli_thrinfo_set_sub_node( thread_jr, thread_pa );
 	bli_thrinfo_set_sub_node( thread_ir, thread_jr );
+}
+
+thrinfo_t* bli_l3_sup_thrinfo_create
+     (
+             dim_t      id,
+             thrcomm_t* gl_comm,
+             pool_t*    sba_pool,
+       const rntm_t*    rntm
+     )
+{
+	// Create the root thrinfo_t node.
+	thrinfo_t* root = bli_thrinfo_create_root
+	(
+	  gl_comm,
+	  id,
+	  sba_pool,
+	  bli_pba_query()
+	);
+
+	// Grow the thread control tree beneath the root.
+	bli_l3_sup_thrinfo_grow( root, rntm );
 
 	return root;
 }
 
 void bli_l3_sup_thrinfo_update
      (
-       const rntm_t*     rntm,
-             thrinfo_t** root
+       const rntm_t*    rntm,
+             thrinfo_t* root
      )
 {
-	thrcomm_t* gl_comm  = bli_thrinfo_comm( *root );
-	dim_t      tid      = bli_thrinfo_thread_id( *root );
-	pool_t*    sba_pool = bli_thrinfo_sba_pool( *root );
-	dim_t      nt       = bli_thrinfo_num_threads( *root );
+	dim_t nt = bli_thrinfo_num_threads( root );
 
 	// Return early in single-threaded execution
 	// since the thread control tree may not have been
 	// allocated normally
 	if ( nt == 1 ) return;
 
-	bli_thrinfo_free( *root );
-	*root = bli_l3_sup_thrinfo_create( tid, gl_comm, sba_pool, rntm );
+	// Re-factorize the thread control tree for the updated rntm. We must NOT
+	// free the root node here: the caller (bli_l3_sup_thread_decorator_entry)
+	// retains 'root' and uses it for the closing bli_thrinfo_barrier() and
+	// bli_thrinfo_free(). Freeing and re-creating the root left that caller's
+	// pointer dangling, causing a use-after-free (and subsequent double-free)
+	// of the root thrinfo_t. See issues #919 and #780. Instead, free only the
+	// subtree beneath the root and regrow it in place.
+	thrinfo_t* sub_node = bli_thrinfo_sub_node( root );
+	if ( sub_node != NULL )
+	{
+		bli_thrinfo_free( sub_node );
+		bli_thrinfo_set_sub_node( NULL, root );
+	}
+	sub_node = bli_thrinfo_sub_prenode( root );
+	if ( sub_node != NULL )
+	{
+		bli_thrinfo_free( sub_node );
+		bli_thrinfo_set_sub_prenode( NULL, root );
+	}
+
+	bli_l3_sup_thrinfo_grow( root, rntm );
 }
 
 // -----------------------------------------------------------------------------
