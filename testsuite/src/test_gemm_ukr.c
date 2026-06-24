@@ -130,6 +130,9 @@ void libblis_test_gemm_ukr
 	// Call dependencies first.
 	if ( TRUE ) libblis_test_gemm_ukr_deps( tdata, params, op );
 
+	op->dim_spec[1] = 1; // m
+	op->dim_spec[2] = 1; // n
+
 	// Execute the test driver for each implementation requested.
 	//if ( op->front_seq == ENABLE )
 	{
@@ -186,12 +189,13 @@ bool libblis_test_gemm_ukr_experiment
 	// Use the datatype of the first char in the datatype combination string.
 	bli_param_map_char_to_blis_dt( dc_str[0], &datatype );
 
+	dim_t MR = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, cntx );
+	dim_t NR = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, cntx );
+
 	// Map the dimension specifier to actual dimensions.
 	k = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
-
-	// Fix m and n to MR and NR, respectively.
-	m   = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, cntx );
-	n   = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, cntx );
+	m = op->dim_spec[1];
+	n = op->dim_spec[2];
 
 	// Store the register blocksizes so that the driver can retrieve the
 	// values later when printing results.
@@ -298,7 +302,24 @@ bool libblis_test_gemm_ukr_experiment
 	bli_obj_free( &c );
 	bli_obj_free( &c_save );
 
-	return true;
+	if ( n == NR  )
+	{
+		if ( m == MR )
+		{
+			return true;
+		}
+		else
+		{
+			op->dim_spec[1] = m + 1;
+			op->dim_spec[2] = 1;
+		}
+	}
+	else
+	{
+		op->dim_spec[2] = n + 1;
+	}
+
+	return false;
 }
 
 
