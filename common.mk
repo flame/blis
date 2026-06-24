@@ -784,7 +784,7 @@ endif
 # all compilers that accept such options: gcc, clang, and icc.
 ifneq ($(CC_VENDOR),ibm)
 ifneq ($(CC_VENDOR),NVIDIA)
-CWARNFLAGS += -Wall -Wno-unused-function -Wfatal-errors
+CWARNFLAGS += -Wall -Wno-unused-function -Wfatal-errors -Werror=pointer-arith
 else
 CWARNFLAGS += -Wall -Wno-unused-function
 endif
