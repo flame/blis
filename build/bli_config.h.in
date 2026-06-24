@@ -117,6 +117,12 @@
 #define BLIS_DISABLE_MEM_TRACING
 #endif
 
+#if @enable_mixed_precision_norm@
+#define BLIS_ENABLE_MIXED_PRECISION_NORM
+#else
+#define BLIS_DISABLE_MIXED_PRECISION_NORM
+#endif
+
 #if @enable_scalapack_compat@
 #define BLIS_ENABLE_SCALAPACK_COMPAT
 #else
