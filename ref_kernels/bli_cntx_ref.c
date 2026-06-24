@@ -383,10 +383,8 @@ void GENBARNAME(cntx_init)
 	bli_blksz_init_easy( &blkszs[ BLIS_KC     ],           256,           256,           256,           256 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC     ],          4096,          4096,          4096,          4096 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KR_SUP ],             1,             1,             1,             1 );
-	bli_blksz_init     ( &blkszs[ BLIS_MR_SUP ],     BLIS_MR_s,     BLIS_MR_d,     BLIS_MR_c,     BLIS_MR_z,
-	                                             BLIS_PACKMR_s, BLIS_PACKMR_d, BLIS_PACKMR_c, BLIS_PACKMR_z );
-	bli_blksz_init     ( &blkszs[ BLIS_NR_SUP ],     BLIS_NR_s,     BLIS_NR_d,     BLIS_NR_c,     BLIS_NR_z,
-	                                             BLIS_PACKNR_s, BLIS_PACKNR_d, BLIS_PACKNR_c, BLIS_PACKNR_z );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR_SUP ],            16,             6,             6,             3 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR_SUP ],             8,             8,             4,             4 );
 	bli_blksz_init_easy( &blkszs[ BLIS_MC_SUP ],           256,           128,           128,            64 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC_SUP ],           256,           256,           256,           256 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC_SUP ],          4096,          4096,          4096,          4096 );
