@@ -976,64 +976,46 @@ else
 	@$(LINKER) $(MK_TESTSUITE_OBJS) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 endif
 
-# A rule to run the testsuite using the normal input.* files.
-testsuite-run: testsuite-bin
+# Template rule for running the testsuite with given input files.
+define make-run-testsuite-rule
+$(1): testsuite-bin
+ifeq ($(ENABLE_TEST_OUTPUT),yes)
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
-	                   -o $(TESTSUITE_CONF_OPS_PATH) \
+	$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(2) -o $(3) \
+	                    | tee $(TESTSUITE_OUT_FILE)
+
+else
+	@echo "Running $(TESTSUITE_BIN) with output echoed and redirected to '$(TESTSUITE_OUT_FILE)'"
+	@$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(2) -o $(3) \
+	                     | tee $(TESTSUITE_OUT_FILE)
+endif
+else
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(2) -o $(3) \
 	                    > $(TESTSUITE_OUT_FILE)
 
 else
 	@echo "Running $(TESTSUITE_BIN) with output redirected to '$(TESTSUITE_OUT_FILE)'"
-	@$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
-	                    -o $(TESTSUITE_CONF_OPS_PATH) \
+	@$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(2) -o $(3) \
 	                     > $(TESTSUITE_OUT_FILE)
 endif
+endif
+endef
+
+# A rule to run the testsuite using the normal input.* files.
+$(eval $(call make-run-testsuite-rule, testsuite-run, $(TESTSUITE_CONF_GEN_PATH), $(TESTSUITE_CONF_OPS_PATH)))
 
 # A rule to run the testsuite using the input.*.fast files, which
 # run a set of tests designed to finish much more quickly.
-testsuite-run-fast: testsuite-bin
-ifeq ($(ENABLE_VERBOSE),yes)
-	$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(TESTSUITE_FAST_GEN_PATH) \
-	                   -o $(TESTSUITE_FAST_OPS_PATH) \
-	                    > $(TESTSUITE_OUT_FILE)
-
-else
-	@echo "Running $(TESTSUITE_BIN) (fast) with output redirected to '$(TESTSUITE_OUT_FILE)'"
-	@$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(TESTSUITE_FAST_GEN_PATH) \
-	                    -o $(TESTSUITE_FAST_OPS_PATH) \
-	                     > $(TESTSUITE_OUT_FILE)
-endif
+$(eval $(call make-run-testsuite-rule, testsuite-run-fast, $(TESTSUITE_FAST_GEN_PATH), $(TESTSUITE_FAST_OPS_PATH)))
 
 # A rule to run the testsuite using the input.*.md files, which
 # run a set of tests designed to only exercise mixed-datatype gemm.
-testsuite-run-md: testsuite-bin
-ifeq ($(ENABLE_VERBOSE),yes)
-	$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(TESTSUITE_MIXD_GEN_PATH) \
-	                   -o $(TESTSUITE_MIXD_OPS_PATH) \
-	                    > $(TESTSUITE_OUT_FILE)
-
-else
-	@echo "Running $(TESTSUITE_BIN) (mixed dt) with output redirected to '$(TESTSUITE_OUT_FILE)'"
-	@$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(TESTSUITE_MIXD_GEN_PATH) \
-	                    -o $(TESTSUITE_MIXD_OPS_PATH) \
-	                     > $(TESTSUITE_OUT_FILE)
-endif
+$(eval $(call make-run-testsuite-rule, testsuite-run-md, $(TESTSUITE_MIXD_GEN_PATH), $(TESTSUITE_MIXD_OPS_PATH)))
 
 # A rule to run the testsuite using the input.*.salt files, which
 # simulates application-level threading across operation tests.
-testsuite-run-salt: testsuite-bin
-ifeq ($(ENABLE_VERBOSE),yes)
-	$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(TESTSUITE_SALT_GEN_PATH) \
-	                   -o $(TESTSUITE_SALT_OPS_PATH) \
-	                    > $(TESTSUITE_OUT_FILE)
-
-else
-	@echo "Running $(TESTSUITE_BIN) (salt) with output redirected to '$(TESTSUITE_OUT_FILE)'"
-	@$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(TESTSUITE_SALT_GEN_PATH) \
-	                    -o $(TESTSUITE_SALT_OPS_PATH) \
-	                     > $(TESTSUITE_OUT_FILE)
-endif
+$(eval $(call make-run-testsuite-rule, testsuite-run-salt, $(TESTSUITE_SALT_GEN_PATH), $(TESTSUITE_SALT_OPS_PATH)))
 
 # Check the results of the BLIS testsuite.
 checkblis: testsuite-run
