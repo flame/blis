@@ -38,8 +38,8 @@
 
 
 // Static variables.
-static char*     op_str                    = "gemm_ukr";
-static char*     o_types                   = "m"; // c
+static char*     op_str                    = "gemmsup_ukr";
+static char*     o_types                   = "mmm"; // ccc
 static char*     p_types                   = "";
 static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass for s
                                                { 1e-04, 1e-05 },   // warn, pass for c
@@ -47,14 +47,14 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
                                                { 1e-13, 1e-14 } }; // warn, pass for z
 
 // Local prototypes.
-void libblis_test_gemm_ukr_deps
+void libblis_test_gemmsup_ukr_deps
      (
        thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      );
 
-bool libblis_test_gemm_ukr_experiment
+bool libblis_test_gemmsup_ukr_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -67,7 +67,7 @@ bool libblis_test_gemm_ukr_experiment
        double*        resid
      );
 
-void libblis_test_gemm_ukr_impl
+void libblis_test_gemmsup_ukr_impl
      (
        iface_t   iface,
        obj_t*    alpha,
@@ -78,7 +78,7 @@ void libblis_test_gemm_ukr_impl
        cntx_t*   cntx
      );
 
-void libblis_test_gemm_ukr_check
+void libblis_test_gemmsup_ukr_check
      (
        test_params_t* params,
        obj_t*         alpha,
@@ -92,7 +92,7 @@ void libblis_test_gemm_ukr_check
 
 
 
-void libblis_test_gemm_ukr_deps
+void libblis_test_gemmsup_ukr_deps
      (
        thread_data_t* tdata,
        test_params_t* params,
@@ -112,7 +112,7 @@ void libblis_test_gemm_ukr_deps
 
 
 
-void libblis_test_gemm_ukr
+void libblis_test_gemmsup_ukr
      (
        thread_data_t* tdata,
        test_params_t* params,
@@ -128,7 +128,10 @@ void libblis_test_gemm_ukr
 	     libblis_test_l3ukr_is_disabled( op ) ) return;
 
 	// Call dependencies first.
-	if ( TRUE ) libblis_test_gemm_ukr_deps( tdata, params, op );
+	if ( TRUE ) libblis_test_gemmsup_ukr_deps( tdata, params, op );
+
+	op->dim_spec[1] = 1; // m
+	op->dim_spec[2] = 1; // n
 
 	// Execute the test driver for each implementation requested.
 	//if ( op->front_seq == ENABLE )
@@ -136,18 +139,18 @@ void libblis_test_gemm_ukr
 		libblis_test_op_driver( tdata,
 		                        params,
 		                        op,
-		                        BLIS_TEST_SEQ_UKERNEL,
+		                        BLIS_TEST_SEQ_SUP_UKERNEL,
 		                        op_str,
 		                        p_types,
 		                        o_types,
 		                        thresh,
-		                        libblis_test_gemm_ukr_experiment );
+		                        libblis_test_gemmsup_ukr_experiment );
 	}
 }
 
 
 
-bool libblis_test_gemm_ukr_experiment
+bool libblis_test_gemmsup_ukr_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -170,11 +173,7 @@ bool libblis_test_gemm_ukr_experiment
 
 	dim_t        m, n, k;
 
-	char         sc_a = 'c';
-	char         sc_b = 'r';
-
 	obj_t        alpha, a, b, beta, c;
-	obj_t        ap, bp;
 	obj_t        c_save;
 
 	cntx_t*      cntx;
@@ -186,12 +185,15 @@ bool libblis_test_gemm_ukr_experiment
 	// Use the datatype of the first char in the datatype combination string.
 	bli_param_map_char_to_blis_dt( dc_str[0], &datatype );
 
+	dim_t MRM = bli_cntx_get_l3_sup_blksz_max_dt( datatype, BLIS_MR, cntx );
+	dim_t NRM = bli_cntx_get_l3_sup_blksz_max_dt( datatype, BLIS_NR, cntx );
+	if ( MRM == 0) MRM = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, cntx );
+	if ( NRM == 0) NRM = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, cntx );
+
 	// Map the dimension specifier to actual dimensions.
 	k = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
-
-	// Fix m and n to MR and NR, respectively.
-	m   = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, cntx );
-	n   = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, cntx );
+	m = op->dim_spec[1];
+	n = op->dim_spec[2];
 
 	// Store the register blocksizes so that the driver can retrieve the
 	// values later when printing results.
@@ -202,15 +204,36 @@ bool libblis_test_gemm_ukr_experiment
 	bli_obj_scalar_init_detached( datatype, &alpha );
 	bli_obj_scalar_init_detached( datatype, &beta );
 
+	stor3_t stor_id = sc_str[0] == 'r' ?
+	                    sc_str[1] == 'r' ?
+	                      sc_str[2] == 'r' ? BLIS_RRR : BLIS_RRC :
+	                      sc_str[2] == 'r' ? BLIS_RCR : BLIS_RCC :
+	                    sc_str[1] == 'r' ?
+	                      sc_str[2] == 'r' ? BLIS_CRR : BLIS_CRC :
+	                      sc_str[2] == 'r' ? BLIS_CCR : BLIS_CCC;
+
+	const bool    is_rrr_rrc_rcr_crr = ( stor_id == BLIS_RRR ||
+	                                     stor_id == BLIS_RRC ||
+	                                     stor_id == BLIS_RCR ||
+	                                     stor_id == BLIS_CRR );
+	const bool    is_rcc_crc_ccr_ccc = !is_rrr_rrc_rcr_crr;
+	const bool    row_pref   = bli_cntx_ukr_prefers_rows_dt( datatype, bli_stor3_ukr( stor_id ), cntx );
+
+	const bool    is_primary = ( row_pref ? is_rrr_rrc_rcr_crr
+	                                      : is_rcc_crc_ccr_ccc );
+
+	dim_t m_use = is_primary ? m : n;
+	dim_t n_use = is_primary ? n : m;
+
 	// Create test operands.
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-	                          sc_a,      m, k, &a );
+	                          bli_stor3_stora( stor_id ), m_use, k, &a );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-	                          sc_b,      k, n, &b );
+	                          bli_stor3_storb( stor_id ), k, n_use, &b );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-	                          sc_str[0], m, n, &c );
+	                          bli_stor3_storc( stor_id ), m_use, n_use, &c );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-	                          sc_str[0], m, n, &c_save );
+	                          bli_stor3_storc( stor_id ), m_use, n_use, &c_save );
 
 	// Set alpha and beta.
 	if ( bli_obj_is_real( &c ) )
@@ -231,38 +254,6 @@ bool libblis_test_gemm_ukr_experiment
 	libblis_test_mobj_randomize( params, TRUE, &c );
 	bli_copym( &c, &c_save );
 
-	// Transpose B to B^T for packing.
-	bli_obj_induce_trans( &b );
-
-	// Create pack objects for a and b, and pack them to ap and bp,
-	// respectively.
-	thrinfo_t* thread_a = libblis_test_pobj_create
-	(
-	  BLIS_MR,
-	  BLIS_KR,
-	  BLIS_BBM,
-	  BLIS_NO_INVERT_DIAG,
-	  BLIS_PACKED_PANELS,
-	  BLIS_BUFFER_FOR_A_BLOCK,
-	  &a, &ap,
-	  cntx
-	);
-	thrinfo_t* thread_b = libblis_test_pobj_create
-	(
-	  BLIS_NR,
-	  BLIS_KR,
-	  BLIS_BBN,
-	  BLIS_NO_INVERT_DIAG,
-	  BLIS_PACKED_PANELS,
-	  BLIS_BUFFER_FOR_B_PANEL,
-	  &b, &bp,
-	  cntx
-	);
-
-	// Transpose B^T back to B and Bp^T back to Bp.
-	bli_obj_induce_trans( &b );
-	bli_obj_induce_trans( &bp );
-
 	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
@@ -270,8 +261,8 @@ bool libblis_test_gemm_ukr_experiment
 
 		time = bli_clock();
 
-		libblis_test_gemm_ukr_impl( iface,
-		                            &alpha, &ap, &bp, &beta, &c,
+		libblis_test_gemmsup_ukr_impl( iface,
+		                            &alpha, &a, &b, &beta, &c,
 		                            cntx );
 
 		time_min = bli_clock_min_diff( time_min, time );
@@ -282,15 +273,10 @@ bool libblis_test_gemm_ukr_experiment
 	if ( bli_obj_is_complex( &c ) ) *perf *= 4.0;
 
 	// Perform checks.
-	libblis_test_gemm_ukr_check( params, &alpha, &a, &b, &beta, &c, &c_save, resid );
+	libblis_test_gemmsup_ukr_check( params, &alpha, &a, &b, &beta, &c, &c_save, resid );
 
 	// Zero out performance and residual if output matrix is empty.
 	libblis_test_check_empty_problem( &c, perf, resid );
-
-	// Free the control tree nodes and release their cached mem_t entries
-	// back to the pba.
-	bli_thrinfo_free( thread_a );
-	bli_thrinfo_free( thread_b );
 
 	// Free the test objects.
 	bli_obj_free( &a );
@@ -298,12 +284,29 @@ bool libblis_test_gemm_ukr_experiment
 	bli_obj_free( &c );
 	bli_obj_free( &c_save );
 
-	return true;
+	if ( n == NRM  )
+	{
+		if ( m == MRM )
+		{
+			return true;
+		}
+		else
+		{
+			op->dim_spec[1] = m + 1;
+			op->dim_spec[2] = 1;
+		}
+	}
+	else
+	{
+		op->dim_spec[2] = n + 1;
+	}
+
+	return false;
 }
 
 
 
-void libblis_test_gemm_ukr_impl
+void libblis_test_gemmsup_ukr_impl
      (
        iface_t   iface,
        obj_t*    alpha,
@@ -314,10 +317,83 @@ void libblis_test_gemm_ukr_impl
        cntx_t*   cntx
      )
 {
+	num_t dt = bli_obj_dt( c );
+
+	dim_t m = bli_obj_length( c );
+	dim_t n = bli_obj_width( c );
+	dim_t k = bli_obj_width( a );
+
+	inc_t rs_a = bli_obj_row_stride( a );
+	inc_t cs_a = bli_obj_col_stride( a );
+	inc_t rs_b = bli_obj_row_stride( b );
+	inc_t cs_b = bli_obj_col_stride( b );
+	inc_t rs_c = bli_obj_row_stride( c );
+	inc_t cs_c = bli_obj_col_stride( c );
+
+	const void* buf_alpha = bli_obj_buffer_for_1x1( dt, alpha );
+	const void* buf_beta  = bli_obj_buffer_for_1x1( dt, beta );
+	const void* buf_a     = bli_obj_buffer_at_off( a );
+	const void* buf_b     = bli_obj_buffer_at_off( b );
+	      void* buf_c     = bli_obj_buffer_at_off( c );
+
+	conj_t conja = bli_obj_conj_status( a );
+	conj_t conjb = bli_obj_conj_status( b );
+
+	stor3_t stor_id = bli_stor3_from_strides( rs_c, cs_c, rs_a, cs_a, rs_b, cs_b );
+
+	const bool    is_rrr_rrc_rcr_crr = ( stor_id == BLIS_RRR ||
+	                                     stor_id == BLIS_RRC ||
+	                                     stor_id == BLIS_RCR ||
+	                                     stor_id == BLIS_CRR );
+	const bool    is_rcc_crc_ccr_ccc = !is_rrr_rrc_rcr_crr;
+	const bool    row_pref   = bli_cntx_ukr_prefers_rows_dt( dt, bli_stor3_ukr( stor_id ), cntx );
+
+	const bool    is_primary = ( row_pref ? is_rrr_rrc_rcr_crr
+	                                      : is_rcc_crc_ccr_ccc );
+
+	if ( !is_primary )
+	{
+		      conj_t conjtmp = conja; conja = conjb; conjb = conjtmp;
+		      dim_t  len_tmp =     m;     m =     n;     n = len_tmp;
+		const void*  buf_tmp = buf_a; buf_a = buf_b; buf_b = buf_tmp;
+		      inc_t  str_tmp =  rs_a;  rs_a =  cs_b;  cs_b = str_tmp;
+		             str_tmp =  cs_a;  cs_a =  rs_b;  rs_b = str_tmp;
+		             str_tmp =  rs_c;  rs_c =  cs_c;  cs_c = str_tmp;
+
+		//stor_id = bli_stor3_trans( stor_id );
+	}
+
+	gemmsup_ker_ft f = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx );
+
+	dim_t MR = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MR, cntx );
+	dim_t NR = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NR, cntx );
+
+	auxinfo_t auxinfo;
+	bli_auxinfo_set_ps_a( MR * rs_a, &auxinfo );
+	bli_auxinfo_set_ps_b( NR * cs_b, &auxinfo );
+
 	switch ( iface )
 	{
-		case BLIS_TEST_SEQ_UKERNEL:
-		bli_gemm_ukernel( alpha, a, b, beta, c, cntx );
+		case BLIS_TEST_SEQ_SUP_UKERNEL:
+		f
+		(
+		  BLIS_NO_CONJUGATE,
+		  BLIS_NO_CONJUGATE,
+		  m, n, k,
+		  buf_alpha,
+		  buf_a,
+		  rs_a,
+		  cs_a,
+		  buf_b,
+		  rs_b,
+		  cs_b,
+		  buf_beta,
+		  buf_c,
+		  rs_c,
+		  cs_c,
+		  &auxinfo,
+		  cntx
+		);
 		break;
 
 		default:
@@ -327,7 +403,7 @@ void libblis_test_gemm_ukr_impl
 
 
 
-void libblis_test_gemm_ukr_check
+void libblis_test_gemmsup_ukr_check
      (
        test_params_t* params,
        obj_t*         alpha,

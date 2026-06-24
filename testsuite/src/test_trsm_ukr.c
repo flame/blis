@@ -54,7 +54,7 @@ void libblis_test_trsm_ukr_deps
        test_op_t*     op
      );
 
-void libblis_test_trsm_ukr_experiment
+bool libblis_test_trsm_ukr_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -149,7 +149,7 @@ extern blksz_t* gemm_mr;
 extern blksz_t* gemm_nr;
 extern blksz_t* gemm_kr;
 
-void libblis_test_trsm_ukr_experiment
+bool libblis_test_trsm_ukr_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -315,6 +315,8 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 	bli_obj_free( &b );
 	bli_obj_free( &c );
 	bli_obj_free( &c_save );
+
+	return true;
 }
 
 

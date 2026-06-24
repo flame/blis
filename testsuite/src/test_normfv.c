@@ -54,7 +54,7 @@ void libblis_test_normfv_deps
        test_op_t*     op
      );
 
-void libblis_test_normfv_experiment
+bool libblis_test_normfv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -132,7 +132,7 @@ void libblis_test_normfv
 
 
 
-void libblis_test_normfv_experiment
+bool libblis_test_normfv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -185,7 +185,7 @@ void libblis_test_normfv_experiment
 	// Set all elements of x to beta.
 	bli_setv( &beta, &x );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		time = bli_clock();
@@ -207,6 +207,8 @@ void libblis_test_normfv_experiment
 
 	// Free the test objects.
 	bli_obj_free( &x );
+
+	return true;
 }
 
 

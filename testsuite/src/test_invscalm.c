@@ -54,7 +54,7 @@ void libblis_test_invscalm_deps
        test_op_t*     op
      );
 
-void libblis_test_invscalm_experiment
+bool libblis_test_invscalm_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -134,7 +134,7 @@ void libblis_test_invscalm
 
 
 
-void libblis_test_invscalm_experiment
+bool libblis_test_invscalm_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -196,7 +196,7 @@ void libblis_test_invscalm_experiment
 	// Apply the parameters.
 	bli_obj_set_conj( conjalpha, &alpha );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &y_save, &y );
@@ -221,6 +221,8 @@ void libblis_test_invscalm_experiment
 	// Free the test objects.
 	bli_obj_free( &y );
 	bli_obj_free( &y_save );
+
+	return true;
 }
 
 
@@ -291,7 +293,7 @@ void libblis_test_invscalm_check
 
 	bli_scalm( alpha, &y2 );
 	bli_subm( y_orig, &y2 );
-	
+
 	bli_normfm( &y2, &norm_y_r );
 
 	bli_getsc( &norm_y_r, resid, &junk );

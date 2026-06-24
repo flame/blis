@@ -54,7 +54,7 @@ void libblis_test_axpy2v_deps
        test_op_t*     op
      );
 
-void libblis_test_axpy2v_experiment
+bool libblis_test_axpy2v_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -144,7 +144,7 @@ void libblis_test_axpy2v
 
 
 
-void libblis_test_axpy2v_experiment
+bool libblis_test_axpy2v_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -249,6 +249,8 @@ void libblis_test_axpy2v_experiment
 	bli_obj_free( &y );
 	bli_obj_free( &z );
 	bli_obj_free( &z_save );
+
+	return true;
 }
 
 

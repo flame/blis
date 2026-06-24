@@ -54,7 +54,7 @@ void libblis_test_amaxv_deps
        test_op_t*     op
      );
 
-void libblis_test_amaxv_experiment
+bool libblis_test_amaxv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -137,7 +137,7 @@ void libblis_test_amaxv
 
 
 
-void libblis_test_amaxv_experiment
+bool libblis_test_amaxv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -204,6 +204,8 @@ void libblis_test_amaxv_experiment
 
 	// Free the test objects.
 	bli_obj_free( &x );
+
+	return true;
 }
 
 

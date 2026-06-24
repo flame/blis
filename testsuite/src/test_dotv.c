@@ -54,7 +54,7 @@ void libblis_test_dotv_deps
        test_op_t*     op
      );
 
-void libblis_test_dotv_experiment
+bool libblis_test_dotv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -135,7 +135,7 @@ void libblis_test_dotv
 
 
 
-void libblis_test_dotv_experiment
+bool libblis_test_dotv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -184,7 +184,7 @@ void libblis_test_dotv_experiment
 	libblis_test_vobj_randomize( params, TRUE, &x );
 
 	// Determine whether to make a copy of x with or without conjugation.
-	// 
+	//
 	//  conjx conjy  ~conjx^conjy   y is initialized as
 	//  n     n      c              y = conj(x)
 	//  n     c      n              y = x
@@ -200,7 +200,7 @@ void libblis_test_dotv_experiment
 	bli_obj_set_conj( conjx, &x );
 	bli_obj_set_conj( conjy, &y );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copysc( &BLIS_MINUS_ONE, &rho );
@@ -225,6 +225,8 @@ void libblis_test_dotv_experiment
 	// Free the test objects.
 	bli_obj_free( &x );
 	bli_obj_free( &y );
+
+	return true;
 }
 
 
