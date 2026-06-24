@@ -139,7 +139,7 @@ err_t bli_gemmsup_int
 			// new ways of parallelism value for the jc loop.
 			rntm_t rntm_l = *rntm;
 			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, &rntm_l );
-			bli_l3_sup_thrinfo_update( &rntm_l, &thread );
+			bli_l3_sup_thrinfo_update( &rntm_l, thread );
 		}
 
 
@@ -205,7 +205,7 @@ err_t bli_gemmsup_int
 			// new ways of parallelism value for the jc loop.
 			rntm_t rntm_l = *rntm;
 			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, &rntm_l );
-			bli_l3_sup_thrinfo_update( &rntm_l, &thread );
+			bli_l3_sup_thrinfo_update( &rntm_l, thread );
 		}
 
 
@@ -315,7 +315,7 @@ err_t bli_gemmtsup_int
 			// new ways of parallelism value for the jc loop.
 			rntm_t rntm_l = *rntm;
 			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, &rntm_l );
-			bli_l3_sup_thrinfo_update( &rntm_l, &thread );
+			bli_l3_sup_thrinfo_update( &rntm_l, thread );
 		}
 
 
@@ -385,7 +385,7 @@ err_t bli_gemmtsup_int
 			// new ways of parallelism value for the jc loop.
 			rntm_t rntm_l = *rntm;
 			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, &rntm_l );
-			bli_l3_sup_thrinfo_update( &rntm_l, &thread );
+			bli_l3_sup_thrinfo_update( &rntm_l, thread );
 		}
 
 
