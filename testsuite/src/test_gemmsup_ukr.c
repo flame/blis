@@ -187,8 +187,8 @@ bool libblis_test_gemmsup_ukr_experiment
 
 	dim_t MRM = bli_cntx_get_l3_sup_blksz_max_dt( datatype, BLIS_MR, cntx );
 	dim_t NRM = bli_cntx_get_l3_sup_blksz_max_dt( datatype, BLIS_NR, cntx );
-	if ( MRM <= 0) MRM = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, cntx );
-	if ( NRM <= 0) NRM = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, cntx );
+	if ( MRM <= 0) MRM = bli_cntx_get_l3_sup_blksz_def_dt( datatype, BLIS_MR, cntx );
+	if ( NRM <= 0) NRM = bli_cntx_get_l3_sup_blksz_def_dt( datatype, BLIS_NR, cntx );
 
 	// Map the dimension specifier to actual dimensions.
 	k = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
@@ -284,9 +284,9 @@ bool libblis_test_gemmsup_ukr_experiment
 	bli_obj_free( &c );
 	bli_obj_free( &c_save );
 
-	if ( n == NRM  )
+	if ( n >= NRM  )
 	{
-		if ( m == MRM )
+		if ( m >= MRM )
 		{
 			return true;
 		}

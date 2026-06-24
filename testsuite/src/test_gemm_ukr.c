@@ -302,9 +302,9 @@ bool libblis_test_gemm_ukr_experiment
 	bli_obj_free( &c );
 	bli_obj_free( &c_save );
 
-	if ( n == NR  )
+	if ( n >= NR  )
 	{
-		if ( m == MR )
+		if ( m >= MR )
 		{
 			return true;
 		}
