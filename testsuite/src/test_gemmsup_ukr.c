@@ -190,12 +190,6 @@ bool libblis_test_gemmsup_ukr_experiment
 	if ( MRM <= 0) MRM = bli_cntx_get_l3_sup_blksz_def_dt( datatype, BLIS_MR, cntx );
 	if ( NRM <= 0) NRM = bli_cntx_get_l3_sup_blksz_def_dt( datatype, BLIS_NR, cntx );
 
-	printf("block sizes: %lld %lld %lld %lld (%lld %lld)\n",
-		bli_cntx_get_l3_sup_blksz_max_dt( datatype, BLIS_MR, cntx ),
-		bli_cntx_get_l3_sup_blksz_max_dt( datatype, BLIS_NR, cntx ),
-		bli_cntx_get_l3_sup_blksz_def_dt( datatype, BLIS_MR, cntx ),
-		bli_cntx_get_l3_sup_blksz_def_dt( datatype, BLIS_NR, cntx ), MRM, NRM);
-
 	// Map the dimension specifier to actual dimensions.
 	k = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
 	m = op->dim_spec[1];
