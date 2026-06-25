@@ -48,7 +48,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
        double ar, \
        double ai, \
        dim_t  i, \
-       void*  x, inc_t incx  \
+       ctype* x, inc_t incx  \
      );
 
 INSERT_GENTPROT_BASIC( setijv )
@@ -69,7 +69,7 @@ BLIS_EXPORT_BLIS err_t bli_getijv
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
              dim_t   i, \
-       const void*   b, inc_t incx, \
+       const ctype*  b, inc_t incx, \
              double* ar, \
              double* ai  \
      );
