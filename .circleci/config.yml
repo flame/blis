@@ -235,6 +235,10 @@ jobs:
             ls -l
             $CC --version
             $CC -v
+            echo "config.mk"
+            cat config.mk
+            echo "bli_config.h"
+            cat bli_config.h
 
             make V=1 -j2
             make install
