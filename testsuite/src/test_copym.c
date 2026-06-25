@@ -54,7 +54,7 @@ void libblis_test_copym_deps
        test_op_t*     op
      );
 
-void libblis_test_copym_experiment
+bool libblis_test_copym_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -133,7 +133,7 @@ void libblis_test_copym
 
 
 
-void libblis_test_copym_experiment
+bool libblis_test_copym_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -204,6 +204,8 @@ void libblis_test_copym_experiment
 	// Free the test objects.
 	bli_obj_free( &x );
 	bli_obj_free( &y );
+
+	return true;
 }
 
 

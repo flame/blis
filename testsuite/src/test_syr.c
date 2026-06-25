@@ -54,7 +54,7 @@ void libblis_test_syr_deps
        test_op_t*     op
      );
 
-void libblis_test_syr_experiment
+bool libblis_test_syr_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -141,7 +141,7 @@ void libblis_test_syr
 
 
 
-void libblis_test_syr_experiment
+bool libblis_test_syr_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -216,7 +216,7 @@ void libblis_test_syr_experiment
 	// Apply the remaining parameters.
 	bli_obj_set_conj( conjx, &x );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &a_save, &a );
@@ -242,6 +242,8 @@ void libblis_test_syr_experiment
 	bli_obj_free( &x );
 	bli_obj_free( &a );
 	bli_obj_free( &a_save );
+
+	return true;
 }
 
 

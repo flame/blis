@@ -54,7 +54,7 @@ void libblis_test_addm_deps
        test_op_t*     op
      );
 
-void libblis_test_addm_experiment
+bool libblis_test_addm_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -134,7 +134,7 @@ void libblis_test_addm
 
 
 
-void libblis_test_addm_experiment
+bool libblis_test_addm_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -214,6 +214,8 @@ void libblis_test_addm_experiment
 	// Free the test objects.
 	bli_obj_free( &x );
 	bli_obj_free( &y );
+
+	return true;
 }
 
 

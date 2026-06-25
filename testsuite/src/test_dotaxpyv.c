@@ -54,7 +54,7 @@ void libblis_test_dotaxpyv_deps
        test_op_t*     op
      );
 
-void libblis_test_dotaxpyv_experiment
+bool libblis_test_dotaxpyv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -146,7 +146,7 @@ void libblis_test_dotaxpyv
 
 
 
-void libblis_test_dotaxpyv_experiment
+bool libblis_test_dotaxpyv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -269,6 +269,8 @@ void libblis_test_dotaxpyv_experiment
 	bli_obj_free( &y );
 	bli_obj_free( &z );
 	bli_obj_free( &z_save );
+
+	return true;
 }
 
 

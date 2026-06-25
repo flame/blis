@@ -54,7 +54,7 @@ void libblis_test_dotxaxpyf_deps
        test_op_t*     op
      );
 
-void libblis_test_dotxaxpyf_experiment
+bool libblis_test_dotxaxpyf_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -152,7 +152,7 @@ void libblis_test_dotxaxpyf
 
 
 
-void libblis_test_dotxaxpyf_experiment
+bool libblis_test_dotxaxpyf_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -285,6 +285,8 @@ void libblis_test_dotxaxpyf_experiment
 	bli_obj_free( &z );
 	bli_obj_free( &y_save );
 	bli_obj_free( &z_save );
+
+	return true;
 }
 
 

@@ -54,7 +54,7 @@ void libblis_test_randv_deps
        test_op_t*     op
      );
 
-void libblis_test_randv_experiment
+bool libblis_test_randv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -129,7 +129,7 @@ void libblis_test_randv
 
 
 
-void libblis_test_randv_experiment
+bool libblis_test_randv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -172,7 +172,7 @@ void libblis_test_randv_experiment
 	// Create the test objects.
 	libblis_test_vobj_create( params, datatype, x_store, m, &x );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		time = bli_clock();
@@ -198,6 +198,8 @@ void libblis_test_randv_experiment
 
 	// Free the test objects.
 	bli_obj_free( &x );
+
+	return true;
 }
 
 
