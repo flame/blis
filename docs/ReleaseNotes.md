@@ -4,6 +4,7 @@
 
 ## Contents
 
+* [Changes in 2.1](ReleaseNotes.md#changes-in-21)
 * [Changes in 2.0](ReleaseNotes.md#changes-in-20)
 * [Changes in 1.0](ReleaseNotes.md#changes-in-10)
 * [Changes in 0.9.0](ReleaseNotes.md#changes-in-090)
@@ -41,6 +42,38 @@
 * [Changes in 0.0.3](ReleaseNotes.md#changes-in-003)
 * [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
+
+## Changes in 2.1:
+June 25, 2026
+
+Improvements present in 2.1:
+
+Framework:
+- Fix use-after-free of in `gemmsup` threading code
+  (Christopher Hillenbrand, Eylon Krause).
+
+Compatibility:
+- Export additional symbol names.
+
+Kernels:
+- Fix bugs in `firestorm` and `haswell` `gemmsup` kernels
+  (Oliver Grisel, Harsh Dave, Sam James, Paul Zander).
+
+Build system:
+- Add flags to detect arithmetic on `void*` (gcc and llvm only).
+- Don't attempt to build `knl` config with llvm 19 or later (Michał Górny).
+- Improve compiler flag ordering to preserve optimization flags (Minh Quan Ho).
+- Improved NVHPC support.
+- Fix issue with (re-)installation of `blis.h`.
+
+Testing:
+- Added comprehensive testing for `gemmsup` kernels, and testing for
+  `gemm` kernels over all tile sizes up to `MR*NR`.
+- Added `T=1` option to `Makefile` which causes testsuite output to be
+  echoed as well as written to `output.testsuite`.
+
+Documentation:
+- Fix typo in `configure --help` (Michał Górny).
 
 ## Changes in 2.0:
 June 25, 2025
