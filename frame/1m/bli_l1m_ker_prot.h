@@ -62,6 +62,7 @@ void PASTEMAC(chx,chy,funcname) \
 #define PACKM_DIAG_KER_PROT( ctype, ch, fn )  L1MTPROT( ctype, ch, fn, packm_cxc_diag );
 
 #define PACKM_KER_PROT2(      ctypex, ctypey, chx, chy, fn )  L1MTPROT2( ctypex, ctypey, chx, chy, fn, packm_cxk );
+#define PACKMD_KER_PROT2(     ctypex, ctypey, chx, chy, fn )  L1MTPROT2( ctypex, ctypey, chx, chy, fn, packmd_cxk );
 #define UNPACKM_KER_PROT2(    ctypex, ctypey, chx, chy, fn )  L1MTPROT2( ctypex, ctypey, chx, chy, fn, unpackm_cxk );
 #define PACKM_DIAG_KER_PROT2( ctypex, ctypey, chx, chy, fn )  L1MTPROT2( ctypex, ctypey, chx, chy, fn, packm_cxc_diag );
 

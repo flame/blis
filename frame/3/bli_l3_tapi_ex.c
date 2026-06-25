@@ -99,6 +99,69 @@ void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
 INSERT_GENTFUNC_BASIC( gemm )
 
 #undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
+     ( \
+             trans_t transa, \
+             trans_t transb, \
+             dim_t   m, \
+             dim_t   n, \
+             dim_t   k, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  d, inc_t inc_d, \
+       const ctype*  b, inc_t rs_b, inc_t cs_b, \
+       const ctype*  beta, \
+             ctype*  c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t* cntx, \
+       const rntm_t* rntm  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	const num_t dt = PASTEMAC(ch,type); \
+\
+	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       dobj   = BLIS_OBJECT_INITIALIZER; \
+	obj_t       bo     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       co     = BLIS_OBJECT_INITIALIZER; \
+\
+	dim_t       m_a, n_a; \
+	dim_t       m_b, n_b; \
+\
+	bli_set_dims_with_trans( transa, m, k, &m_a, &n_a ); \
+	bli_set_dims_with_trans( transb, k, n, &m_b, &n_b ); \
+\
+	bli_obj_init_finish_1x1( dt, ( void* )alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt, ( void* )beta,  &betao  ); \
+\
+	bli_obj_init_finish( dt, m_a, n_a, ( void* )a, rs_a,  cs_a, &ao ); \
+	bli_obj_init_finish( dt, k,   1,   ( void* )d, inc_d, 1,    &dobj ); \
+	bli_obj_init_finish( dt, m_b, n_b, ( void* )b, rs_b,  cs_b, &bo ); \
+	bli_obj_init_finish( dt, m,   n,            c, rs_c,  cs_c, &co ); \
+\
+	bli_obj_set_conjtrans( transa, &ao ); \
+	bli_obj_set_conjtrans( transb, &bo ); \
+\
+	PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+	( \
+	  &alphao, \
+	  &ao, \
+	  &dobj, \
+	  &bo, \
+	  &betao, \
+	  &co, \
+	  cntx, \
+	  rntm  \
+	); \
+}
+
+INSERT_GENTFUNC_BASIC( gemdm )
+
+#undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, struca ) \
 \
 void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
@@ -461,6 +524,325 @@ void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
 }
 
 INSERT_GENTFUNC_BASIC( gemmt )
+
+
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
+\
+void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
+     ( \
+             uplo_t   uploc, \
+             trans_t  transa, \
+             dim_t    m, \
+             dim_t    k, \
+       const ctype_r* alpha, \
+       const ctype*   a, inc_t rs_a, inc_t cs_a, \
+       const ctype_r* d, inc_t inc_d, \
+       const ctype_r* beta, \
+             ctype*   c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t*  cntx, \
+       const rntm_t*  rntm  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	const num_t dt_r = PASTEMAC(chr,type); \
+	const num_t dt   = PASTEMAC(ch,type); \
+\
+	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       dobj   = BLIS_OBJECT_INITIALIZER; \
+	obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       co     = BLIS_OBJECT_INITIALIZER; \
+\
+	dim_t       m_a, n_a; \
+\
+	bli_set_dims_with_trans( transa, m, k, &m_a, &n_a ); \
+\
+	bli_obj_init_finish_1x1( dt_r, ( void* )alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt_r, ( void* )beta,  &betao  ); \
+\
+	bli_obj_init_finish( dt, m_a, n_a, ( void* )a, rs_a,  cs_a, &ao ); \
+	bli_obj_init_finish( dt, k,   1,   ( void* )d, inc_d, 1,    &dobj ); \
+	bli_obj_init_finish( dt, m,   m,            c, rs_c,  cs_c, &co ); \
+\
+	bli_obj_set_uplo( uploc, &co ); \
+	bli_obj_set_conjtrans( transa, &ao ); \
+\
+	bli_obj_set_struc( BLIS_HERMITIAN, &co ); \
+\
+	PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+	( \
+	  &alphao, \
+	  &ao, \
+	  &dobj, \
+	  &betao, \
+	  &co, \
+	  cntx, \
+	  rntm  \
+	); \
+}
+
+INSERT_GENTFUNCR_BASIC( herkd )
+
+
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
+\
+void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
+     ( \
+             uplo_t   uploc, \
+             trans_t  transa, \
+             trans_t  transb, \
+             dim_t    m, \
+             dim_t    k, \
+       const ctype*   alpha, \
+       const ctype*   a, inc_t rs_a, inc_t cs_a, \
+       const ctype*   d, inc_t inc_d, \
+       const ctype*   b, inc_t rs_b, inc_t cs_b, \
+       const ctype_r* beta, \
+             ctype*   c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t*  cntx, \
+       const rntm_t*  rntm  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	const num_t dt_r = PASTEMAC(chr,type); \
+	const num_t dt   = PASTEMAC(ch,type); \
+\
+	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       dobj   = BLIS_OBJECT_INITIALIZER; \
+	obj_t       bo     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       co     = BLIS_OBJECT_INITIALIZER; \
+\
+	dim_t       m_a, n_a; \
+	dim_t       m_b, n_b; \
+\
+	bli_set_dims_with_trans( transa, m, k, &m_a, &n_a ); \
+	bli_set_dims_with_trans( transb, m, k, &m_b, &n_b ); \
+\
+	bli_obj_init_finish_1x1( dt,   ( void* )alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt_r, ( void* )beta,  &betao  ); \
+\
+	bli_obj_init_finish( dt, m_a, n_a, ( void* )a, rs_a,  cs_a, &ao ); \
+	bli_obj_init_finish( dt, k,   1,   ( void* )d, inc_d, 1,    &dobj ); \
+	bli_obj_init_finish( dt, m_b, n_b, ( void* )b, rs_b,  cs_b, &bo ); \
+	bli_obj_init_finish( dt, m,   m,            c, rs_c,  cs_c, &co ); \
+\
+	bli_obj_set_uplo( uploc, &co ); \
+	bli_obj_set_conjtrans( transa, &ao ); \
+	bli_obj_set_conjtrans( transb, &bo ); \
+\
+	bli_obj_set_struc( BLIS_HERMITIAN, &co ); \
+\
+	PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+	( \
+	  &alphao, \
+	  &ao, \
+	  &dobj, \
+	  &bo, \
+	  &betao, \
+	  &co, \
+	  cntx, \
+	  rntm  \
+	); \
+}
+
+INSERT_GENTFUNCR_BASIC( her2kd )
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
+     ( \
+             uplo_t  uploc, \
+             trans_t transa, \
+             dim_t   m, \
+             dim_t   k, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  d, inc_t inc_d, \
+       const ctype*  beta, \
+             ctype*  c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t* cntx, \
+       const rntm_t* rntm  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	const num_t dt = PASTEMAC(ch,type); \
+\
+	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       dobj   = BLIS_OBJECT_INITIALIZER; \
+	obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       co     = BLIS_OBJECT_INITIALIZER; \
+\
+	dim_t       m_a, n_a; \
+\
+	bli_set_dims_with_trans( transa, m, k, &m_a, &n_a ); \
+\
+	bli_obj_init_finish_1x1( dt, ( void* )alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt, ( void* )beta,  &betao  ); \
+\
+	bli_obj_init_finish( dt, m_a, n_a, ( void* )a, rs_a,  cs_a, &ao ); \
+	bli_obj_init_finish( dt, k,   1,   ( void* )d, inc_d, 1,    &dobj ); \
+	bli_obj_init_finish( dt, m,   m,            c, rs_c,  cs_c, &co ); \
+\
+	bli_obj_set_uplo( uploc, &co ); \
+	bli_obj_set_conjtrans( transa, &ao ); \
+\
+	bli_obj_set_struc( BLIS_SYMMETRIC, &co ); \
+\
+	PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+	( \
+	  &alphao, \
+	  &ao, \
+	  &dobj, \
+	  &betao, \
+	  &co, \
+	  cntx, \
+	  rntm  \
+	); \
+}
+
+INSERT_GENTFUNC_BASIC( syrkd )
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
+     ( \
+             uplo_t  uploc, \
+             trans_t transa, \
+             trans_t transb, \
+             dim_t   m, \
+             dim_t   k, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  d, inc_t inc_d, \
+       const ctype*  b, inc_t rs_b, inc_t cs_b, \
+       const ctype*  beta, \
+             ctype*  c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t* cntx, \
+       const rntm_t* rntm  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	const num_t dt = PASTEMAC(ch,type); \
+\
+	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       dobj   = BLIS_OBJECT_INITIALIZER; \
+	obj_t       bo     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       co     = BLIS_OBJECT_INITIALIZER; \
+\
+	dim_t       m_a, n_a; \
+	dim_t       m_b, n_b; \
+\
+	bli_set_dims_with_trans( transa, m, k, &m_a, &n_a ); \
+	bli_set_dims_with_trans( transb, m, k, &m_b, &n_b ); \
+\
+	bli_obj_init_finish_1x1( dt, ( void* )alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt, ( void* )beta,  &betao  ); \
+\
+	bli_obj_init_finish( dt, m_a, n_a, ( void* )a, rs_a,  cs_a, &ao ); \
+	bli_obj_init_finish( dt, k,   1,   ( void* )d, inc_d, 1,    &dobj ); \
+	bli_obj_init_finish( dt, m_b, n_b, ( void* )b, rs_b,  cs_b, &bo ); \
+	bli_obj_init_finish( dt, m,   m,            c, rs_c,  cs_c, &co ); \
+\
+	bli_obj_set_uplo( uploc, &co ); \
+	bli_obj_set_conjtrans( transa, &ao ); \
+	bli_obj_set_conjtrans( transb, &bo ); \
+\
+	bli_obj_set_struc( BLIS_SYMMETRIC, &co ); \
+\
+	PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+	( \
+	  &alphao, \
+	  &ao, \
+	  &dobj, \
+	  &bo, \
+	  &betao, \
+	  &co, \
+	  cntx, \
+	  rntm  \
+	); \
+}
+
+INSERT_GENTFUNC_BASIC( syr2kd )
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
+     ( \
+             uplo_t  uploc, \
+             trans_t transa, \
+             trans_t transb, \
+             dim_t   m, \
+             dim_t   k, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  d, inc_t inc_d, \
+       const ctype*  b, inc_t rs_b, inc_t cs_b, \
+       const ctype*  beta, \
+             ctype*  c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t* cntx, \
+       const rntm_t* rntm  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	const num_t dt = PASTEMAC(ch,type); \
+\
+	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       dobj   = BLIS_OBJECT_INITIALIZER; \
+	obj_t       bo     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       co     = BLIS_OBJECT_INITIALIZER; \
+\
+	dim_t       m_a, n_a; \
+	dim_t       m_b, n_b; \
+\
+	bli_set_dims_with_trans( transa, m, k, &m_a, &n_a ); \
+	bli_set_dims_with_trans( transb, k, m, &m_b, &n_b ); \
+\
+	bli_obj_init_finish_1x1( dt, ( void* )alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt, ( void* )beta,  &betao  ); \
+\
+	bli_obj_init_finish( dt, m_a, n_a, ( void* )a, rs_a,  cs_a, &ao ); \
+	bli_obj_init_finish( dt, k,   1,   ( void* )d, inc_d, 1,    &dobj ); \
+	bli_obj_init_finish( dt, m_b, n_b, ( void* )b, rs_b,  cs_b, &bo ); \
+	bli_obj_init_finish( dt, m,   m,            c, rs_c,  cs_c, &co ); \
+\
+	bli_obj_set_uplo( uploc, &co ); \
+	bli_obj_set_conjtrans( transa, &ao ); \
+	bli_obj_set_conjtrans( transb, &bo ); \
+\
+	PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+	( \
+	  &alphao, \
+	  &ao, \
+	  &dobj, \
+	  &bo, \
+	  &betao, \
+	  &co, \
+	  cntx, \
+	  rntm  \
+	); \
+}
+
+INSERT_GENTFUNC_BASIC( gemdmt )
 
 
 #undef  GENTFUNC

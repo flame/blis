@@ -61,6 +61,26 @@ GENPROT( syr2k )
 \
 void PASTEMAC(opname,_check) \
      ( \
+       const obj_t*  alpha, \
+       const obj_t*  a, \
+       const obj_t*  d, \
+       const obj_t*  b, \
+       const obj_t*  beta, \
+       const obj_t*  c, \
+       const cntx_t* cntx  \
+    );
+
+GENPROT( gemdm )
+GENPROT( gemdmt )
+GENPROT( her2kd )
+GENPROT( syr2kd )
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
              side_t  side, \
        const obj_t*  alpha, \
        const obj_t*  a, \
@@ -89,6 +109,23 @@ void PASTEMAC(opname,_check) \
 
 GENPROT( herk )
 GENPROT( syrk )
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       const obj_t*  alpha, \
+       const obj_t*  a, \
+       const obj_t*  d, \
+       const obj_t*  beta, \
+       const obj_t*  c, \
+       const cntx_t* cntx  \
+    );
+
+GENPROT( herkd )
+GENPROT( syrkd )
 
 
 #undef  GENPROT
