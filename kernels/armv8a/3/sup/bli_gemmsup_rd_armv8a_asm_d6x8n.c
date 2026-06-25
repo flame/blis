@@ -134,8 +134,8 @@ void bli_dgemmsup_rd_armv8a_inline_4x8n
     bli_dgemmsup_rd_armv8a_int_2x8
     (
       conja, conjb, 2, n_loc, k0,
-      alpha, a + 2 * rs_a0, rs_a0, cs_a0, b, rs_b0, cs_b0,
-      beta, c + 2 * rs_c0, rs_c0, cs_c0, data, cntx
+      alpha, (double*)a + 2 * rs_a0, rs_a0, cs_a0, b, rs_b0, cs_b0,
+      beta, (double*)c + 2 * rs_c0, rs_c0, cs_c0, data, cntx
     );
     b = ( double* )b + 8 * cs_b0;
     c = ( double* )c + 8 * cs_c0;
