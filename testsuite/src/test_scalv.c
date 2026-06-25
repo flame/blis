@@ -54,7 +54,7 @@ void libblis_test_scalv_deps
        test_op_t*     op
      );
 
-void libblis_test_scalv_experiment
+bool libblis_test_scalv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -135,7 +135,7 @@ void libblis_test_scalv
 
 
 
-void libblis_test_scalv_experiment
+bool libblis_test_scalv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -193,7 +193,7 @@ void libblis_test_scalv_experiment
 	// Apply the parameters.
 	bli_obj_set_conj( conjalpha, &alpha );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copyv( &y_save, &y );
@@ -218,6 +218,8 @@ void libblis_test_scalv_experiment
 	// Free the test objects.
 	bli_obj_free( &y );
 	bli_obj_free( &y_save );
+
+	return true;
 }
 
 

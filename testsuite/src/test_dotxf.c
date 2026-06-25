@@ -54,7 +54,7 @@ void libblis_test_dotxf_deps
        test_op_t*     op
      );
 
-void libblis_test_dotxf_experiment
+bool libblis_test_dotxf_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -144,7 +144,7 @@ void libblis_test_dotxf
 
 
 
-void libblis_test_dotxf_experiment
+bool libblis_test_dotxf_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -257,6 +257,8 @@ void libblis_test_dotxf_experiment
 	bli_obj_free( &x );
 	bli_obj_free( &y );
 	bli_obj_free( &y_save );
+
+	return true;
 }
 
 

@@ -246,6 +246,11 @@ Watch the output near the end. You should see the following messages, though not
 All BLIS tests passed!
 All BLAS tests passed!
 ```
+If you want to see the testsuite output as it is being run (it will also be output to the `output.testsuite` file),
+you can run `make` as follows:
+```
+$ make T=1 check
+```
 Please see the [Testsuite](Testsuite.md) document for more details on running either the BLIS testsuite or the BLAS test drivers. If you have any trouble, please report your problem to BLIS developers by opening a [new issue](https://github.com/flame/blis/issues/).
 
 

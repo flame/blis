@@ -784,7 +784,7 @@ endif
 # all compilers that accept such options: gcc, clang, and icc.
 ifneq ($(CC_VENDOR),ibm)
 ifneq ($(CC_VENDOR),NVIDIA)
-CWARNFLAGS += -Wall -Wno-unused-function -Wfatal-errors
+CWARNFLAGS += -Wall -Wno-unused-function -Wfatal-errors -Werror=pointer-arith
 else
 CWARNFLAGS += -Wall -Wno-unused-function
 endif
@@ -1031,17 +1031,29 @@ endif
 
 
 #
-# --- Adjust verbosity level manually using make V=[0,1] -----------------------
+# --- Adjust verbosity level manually using make V=[0,1] or make VERBOSE=[0,1] -----------------------
 #
+
+ENABLE_VERBOSE := no
 
 ifeq ($(V),1)
 ENABLE_VERBOSE := yes
-BLIS_ENABLE_TEST_OUTPUT := yes
 endif
 
-ifeq ($(V),0)
-ENABLE_VERBOSE := no
-BLIS_ENABLE_TEST_OUTPUT := no
+ifeq ($(VERBOSE),1)
+ENABLE_VERBOSE := yes
+endif
+
+
+
+#
+# --- Adjust testsuite output manually using make T=[0,1] -----------------------
+#
+
+ENABLE_TEST_OUTPUT := no
+
+ifeq ($(T),1)
+ENABLE_TEST_OUTPUT := yes
 endif
 
 

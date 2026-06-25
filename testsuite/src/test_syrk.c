@@ -54,7 +54,7 @@ void libblis_test_syrk_deps
        test_op_t*     op
      );
 
-void libblis_test_syrk_experiment
+bool libblis_test_syrk_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -145,7 +145,7 @@ void libblis_test_syrk
 
 
 
-void libblis_test_syrk_experiment
+bool libblis_test_syrk_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -260,6 +260,8 @@ void libblis_test_syrk_experiment
 	bli_obj_free( &a );
 	bli_obj_free( &c );
 	bli_obj_free( &c_save );
+
+	return true;
 }
 
 

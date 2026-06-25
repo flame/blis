@@ -63,7 +63,7 @@ for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator 
         TESTSUITE_WRAPPER="$SDE -cpuid_in $DIST_PATH/ci/cpuid/$ARCH.def --"
     fi
 
-    make TESTSUITE_WRAPPER="$TESTSUITE_WRAPPER" check
+    make T=1 TESTSUITE_WRAPPER="$TESTSUITE_WRAPPER" check
 
     TMP=`grep "active sub-configuration" output.testsuite`
     CONFIG=${TMP##* }

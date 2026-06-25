@@ -54,7 +54,7 @@ void libblis_test_hemm_deps
        test_op_t*     op
      );
 
-void libblis_test_hemm_experiment
+bool libblis_test_hemm_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -149,7 +149,7 @@ void libblis_test_hemm
 
 
 
-void libblis_test_hemm_experiment
+bool libblis_test_hemm_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -276,6 +276,8 @@ void libblis_test_hemm_experiment
 	bli_obj_free( &b );
 	bli_obj_free( &c );
 	bli_obj_free( &c_save );
+
+	return true;
 }
 
 
