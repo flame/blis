@@ -4,6 +4,7 @@
 
 ## Contents
 
+* [Changes in 1.3](ReleaseNotes.md#changes-in-13)
 * [Changes in 1.2](ReleaseNotes.md#changes-in-12)
 * [Changes in 1.1](ReleaseNotes.md#changes-in-11)
 * [Changes in 1.0](ReleaseNotes.md#changes-in-10)
@@ -42,6 +43,28 @@
 * [Changes in 0.0.3](ReleaseNotes.md#changes-in-003)
 * [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
+
+## Changes in 1.3:
+June 25, 2026
+
+Improvements present in 1.3:
+
+Framework:
+- Fix use-after-free of in `gemmsup` threading code
+  (Christopher Hillenbrand, Eylon Krause).
+
+Kernels:
+- Fix bugs in `firestorm` and `haswell` `gemmsup` kernels
+  (Oliver Grisel, Harsh Dave, Sam James, Paul Zander).
+
+Build system:
+- Add flags to detect arithmetic on `void*` (gcc and llvm only).
+- Don't attempt to build `knl` config with llvm 19 or later (Michał Górny).
+- Improve compiler flag ordering to preserve optimization flags (Minh Quan Ho).
+- Fix issue with (re-)installation of `blis.h`.
+
+Documentation:
+- Fix typo in `configure --help` (Michał Górny).
 
 ## Changes in 1.2
 June 25, 2025
