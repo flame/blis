@@ -75,8 +75,13 @@ void cblas_ctrmm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
 
       if( Diag == CblasUnit ) DI='U';
       else if ( Diag == CblasNonUnit ) DI='N';
-      else cblas_xerbla(5, "cblas_ctrmm", 
-                       "Illegal Diag setting, %d\n", Diag);
+      else
+      {
+         cblas_xerbla(5, "cblas_ctrmm", "Illegal Diag setting, %d\n", Diag);
+         CBLAS_CallFromC = 0;
+         RowMajorStrg = 0;
+         return;
+      }
 
       #ifdef F77_CHAR
          F77_UL = C2F_CHAR(&UL);
