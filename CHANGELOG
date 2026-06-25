@@ -1,3 +1,239 @@
+commit 578ce85c8c23843dce59fbf47a5e16f98e8c7b5e
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Jun 25 15:52:47 2026 -0500
+
+    Version file update (2.1)
+
+commit b258cb8d9da6072e796f77f81e0d840fc8d2181d
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Jun 25 15:52:21 2026 -0500
+
+    Update ReleaseNotes.md.
+
+commit fdb56b1ac72ecd99d339a158d1565c9cdc5608f1
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Jun 25 15:52:12 2026 -0500
+
+    Update CREDITS.
+
+commit e0e0127814eb4100703b601d99173445a5d91794
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Nov 11 10:18:12 2025 -0600
+
+    Update config.yml (#910)
+    
+    Details:
+    - Bump xcode version in CircleCI.
+    
+    (cherry picked from commit b5d57831a9cecd6e7e83b039be66fbf31a005062)
+
+commit 6a161f21e68e46cbcae33e8d71b7c4b49428c172
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Jun 25 15:01:34 2026 -0500
+
+    Fix firestorm gemmsup (#933)
+    
+    Details:
+    - Add comprehensive testing for gemmsup kernels.
+    - Add "repeat" flag to test experiment callback so that gemmsup kernel
+      tests can repeat over all microkernel shapes. This is a very hacky
+      solution but something more proper would require a much more
+      substantial change for a very narrow use-case.
+    - Add new interface type so that we can force all mixtures of row- and
+      column-storage for gemmsup. This is necessary to test all kernels.
+    - Some arcane trickery with the storage type (`stor3_t stor_id`), the
+      storage (row/column) of parameters, and transposition in order to a)
+      actually test all kernels, and b) ensure that kernels receive operands
+      which meet the expected constraints. For example, the RCC kernel is
+      "non-primary" for a row-major kernel, and so need to be adjusted so
+      that storage is actually like CRR.
+    - It seems highly likely that a mixture of row- and column-preferential
+      gemmsup kernels will *NEVER* work. There probably shouldn't be
+      separate preferences for each kernel.
+    - Test gemm ukrs for all microtile sizes.
+    - Add Makefile option to echo testsuite output.
+      - Use `make T=1 ...` to echo testsuite output as it is run.
+      - Output is still written to `output.testsuite` regardless.
+      - Have CI tests use this option to prevent timeouts due to inactivity.
+    - Initialize all reference sup blocksizes.
+    - Add flags (gcc+llvm) to make `void*` arith. an error
+    - Fix bug with firestorm (Apple M-series) gemmsup.
+      - One of the armv8a gemmsup kernels was performing arithmetic on `void*`.
+      - Only firestorm is affected as of now, but potentially other arm64
+        architectures if gemmsup were to be enabled.
+      - Manifested as UB (typically incorrect numerical result).
+    - Thx to Oliver Grisel (@ogrisel) for reporting and sending MRE.
+    
+    (cherry picked from commit 5e22e1c63ccbda6e4320a4d694806edd564c7c85)
+
+commit 75ecc45a2fda18f97c65f610a473dbe9bd93ef92
+Author: Eylon Eliyahu Krause <64223519+EylonKrause@users.noreply.github.com>
+Date:   Thu Jun 25 00:31:37 2026 +0300
+
+    Fix use-after-free of root thrinfo_t in sup thread decorator (#931)
+    
+    Details:
+    - `bli_l3_sup_thrinfo_update()` freed the root `thrinfo_t` node and returned a
+      replacement through its `thrinfo_t**` out-parameter, but only the local
+      'thread' pointer inside `bli_gemmsup_int()`/`bli_gemmtsup_int()` was updated.
+      The caller, `bli_l3_sup_thread_decorator_entry()`, still held the original
+      pointer and used it for the closing `bli_thrinfo_barrier()` and
+      `bli_thrinfo_free()`, reading and freeing already-freed memory
+      (heap-use-after-free followed by a double-free of the root node).
+    - This is normally masked because BLIS's sba/pba pools recycle the freed
+      block, so it only manifests when the pools are disabled (e.g.
+      `./configure --disable-sba-pools`, the configuration in #780) or under
+      AddressSanitizer (`./configure --enable-asan`).
+    - Re-factorize the thread control tree in place instead: keep the root
+      node, which the decorator still owns, and free + regrow only the subtree
+      beneath it. The shared subtree construction is factored into a new
+      `bli_l3_sup_thrinfo_grow()` helper, mirroring the existing
+      `bli_l3_thrinfo_create()`/`bli_l3_thrinfo_grow()` split, so the create and
+      update paths no longer duplicate it. `bli_l3_sup_thrinfo_update()` now
+      takes `thrinfo_t*` rather than `thrinfo_t**`.
+    - Verified on a Zen4 (Ryzen 9 8940HX, Ubuntu 24.04):
+      - `./configure --enable-asan --disable-sba-pools --disable-pba-pools auto`:
+          AddressSanitizer reports heap-use-after-free in
+          `bli_l3_sup_thread_decorator_entry` before this change; clean after.
+      - Shipping config (`./configure auto`, pools enabled, `BLIS_NUM_THREADS=4`):
+        the fast testsuite passes 2772/2772 and the BLAS test drivers all
+        pass, with no numerical regression.
+    - Fixes #919.
+    - Fixes #780.
+    - The diagnosis and the root-preserving fix strategy are due to @chillenb
+      (#919, #920); this change implements the same strategy while removing the
+      code duplication.
+    - Thanks to @EylonKrause for the updated PR (#931).
+    
+    Signed-off-by: EylonKrause <eylon1909@gmail.com>
+    Co-authored-by: Devin Matthews <damatthews@smu.edu>
+    Co-authored-by: Christopher Hillenbrand <christopher.hillenbrand@yale.edu>
+    (cherry picked from commit f650c3117c1476f2db7a6b11347af54a1bca9717)
+
+commit 087d92524f3c002c52a55aa8719bf41700d69581
+Author: Michał Górny <mgorny@quansight.com>
+Date:   Tue Nov 11 17:15:11 2025 +0100
+
+    Fix typo in `--help`: `--show-config-list` (#909)
+    
+    Details:
+    - `--show-config-lists` should be `--show-config-list` in the `--help` output.
+    
+    Signed-off-by: Michał Górny <mgorny@quansight.com>
+    (cherry picked from commit 34fa24be9ef0dfac04c89023a4981201cb33bac1)
+
+commit 29da50b9e25b01e410057ffb0c9c328a272e0982
+Author: Spring Vaught <64140045+xvyv99@users.noreply.github.com>
+Date:   Wed Nov 12 00:14:23 2025 +0800
+
+    fix(bli_gks): correct variable name in debug print statement (#906)
+    
+    Details:
+    - Incorrect variable `ind` used in memory tracing print statement changed to `id`.
+    
+    (cherry picked from commit 295a600e586a1581bc1b20b00a6ed774c8e7cbcd)
+
+commit 3722d070191e5a3a2e7feffafbdb7580d12deb12
+Author: Michał Górny <mgorny@gentoo.org>
+Date:   Tue Nov 11 05:37:20 2025 +0100
+
+    Blacklist knl for clang 19+ (#908)
+    
+    Details:
+    - KNL-specific `-mavx512er` and `-mavx512pf` flags have been removed
+      from Clang in llvm/llvm-project#92883, which was included in Clang 19.
+    - Fixes #907.
+    
+    Signed-off-by: Michał Górny <mgorny@quansight.com>
+    (cherry picked from commit 071dfce5f7b1100bedbe2e1704b0f7c65639cce4)
+
+commit 20ebcf1a318e6930c94deeadcddb88122cd808c1
+Author: harsdave <harsdave@amd.com>
+Date:   Mon Oct 20 21:10:38 2025 +0530
+
+    fix(dgemm-sup-haswell kernels): correct offset calculation on void pointers (#900)
+    
+    Details:
+    - The DGEMM sup haswell kernel was failing because the pointer offset was computed
+      on a `void *`.
+    - The offset must be calculated in units of `double`, so we now cast to `double *`
+      before applying the offset. This ensures correct indexing in the matrix and resolves
+      the kernel failure.
+    - Fixes #899
+    
+    (cherry picked from commit 5d9332ee4b5ba20b45d8d1e8baf6083cd5f952d7)
+
+commit 8f013052fdfcea4370947511564f843a7d5aa4e8
+Author: Minh Quan Ho <1337056+hominhquan@users.noreply.github.com>
+Date:   Thu Sep 25 18:27:57 2025 +0200
+
+    common.mk: fix flags concatenation order (#876)
+    
+    Details:
+    - noopt-flags were added after some CROPTFLAGS or CKOPTFLAGS, which
+      may alter expected behavior from user, since compiler only keeps
+      the last occurrence of a flag. Flags should be appended from
+      the most naive one (noopt) to the most advanced (opt) ones.
+    - This commit moves noopt-flags to the first place of all sets.
+    
+    (cherry picked from commit e23d9366885e40dad627dc957bdb5773d9c028dc)
+
+commit b4734cbc5c6433495c552dcd807ba88d1c901170
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Sep 11 19:00:41 2025 -0500
+
+    Update Haswell gemmsup fix for gcc 16 and later. (#891)
+    
+    Details:
+    - The problem persists with gcc16 so enable the fix for gcc15 *and later* (thanks @negril).
+    - Disable all vectorization, not just SLP vectorization (thanks @thesamesam).
+    
+    (cherry picked from commit 5c2b22da811b41a03905a8612e44579ad7fac48a)
+
+commit e84282f09c9267857cb687858e9f64e1a00f44fe
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Jul 25 15:37:39 2025 -0500
+
+    Fix installation of blis.h.
+    
+    (cherry picked from commit 358e689cadd6757f564a2992cf46a2f7d6fa6bb0)
+
+commit 6d5b8bfc523f5d603c87a86a1918f87dff8f5b93
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Jul 23 14:44:45 2025 -0500
+
+    Improve NVHPC support and add CI test. (#880)
+    
+    (cherry picked from commit 54a01412126688a5325f4ce27b1b67fbed457aca)
+
+commit 1ed15a5e352ff97c6e584e5db5572afe4f2aeb7b
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Jul 23 14:05:13 2025 -0500
+
+    Additional symbols needed to be made public.
+    
+    (cherry picked from commit 3a2058a59a32055f800aa222645315b684bead2a)
+
+commit 89cabc386afd12b50f56b478d1e9bad01fddbec1
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Jul 3 01:40:55 2025 +0300
+
+    Add struct/enum names for all typedefs.
+    
+    Details:
+    - Structs and enums are typedef'd to save on typing, and many struct typedefs also have a related struct name (e.g. `typedef struct foo_s {...} foo_t;`). However, not all structs have this and none of the enums do.
+    - When using BLIS from C++, an attempt to forward declare any unnamed but typedef'd fails (since it is an unnameable type). Structs with names work fine though.
+    - Adding struct/enum names *everywhere* (even where it likely doesn't make sense) sets a universal precedent, and guarantees that all structs have names where they actually might be forward declared.
+    - (p.s. it is sometimes advisable to forward declare a struct from `blis.h` rather than including the entire header at that point to avoid polluting other headers with the entire namespace [or the `#include` dependency])
+    
+    (cherry picked from commit ef98321a7c5d927fbcc7474ff2084d09bd764cc4)
+
+commit e8566eb3e773fb54d11b33e371d13f22d2941e50
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jun 24 23:49:44 2025 -0500
+
+    CHANGELOG update (2.0)
+
 commit 894b0955a250682da0d2d3f074f910aaaf88c168
 Author: Devin Matthews <damatthews@smu.edu>
 Date:   Tue Jun 24 23:39:05 2025 -0500
