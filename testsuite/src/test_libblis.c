@@ -345,6 +345,7 @@ void libblis_test_level2_ops( thread_data_t* tdata, test_params_t* params, test_
 void libblis_test_level3_ukrs( thread_data_t* tdata, test_params_t* params, test_ops_t* ops )
 {
 	libblis_test_gemm_ukr( tdata, params, &(ops->gemm_ukr) );
+	libblis_test_gemmsup_ukr( tdata, params, &(ops->gemmsup_ukr) );
 	libblis_test_trsm_ukr( tdata, params, &(ops->trsm_ukr) );
 	libblis_test_gemmtrsm_ukr( tdata, params, &(ops->gemmtrsm_ukr) );
 }
@@ -446,6 +447,7 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 
 	// Level-3 micro-kernels
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_K,   0, &(ops->gemm_ukr) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_K,   0, &(ops->gemmsup_ukr) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_NO_DIMS,  1, &(ops->trsm_ukr) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_K,   1, &(ops->gemmtrsm_ukr) );
 
@@ -1569,7 +1571,7 @@ void libblis_test_op_driver
        char*          p_types,
        char*          o_types,
        thresh_t*      thresh,
-       void (*f_exp)  (test_params_t*, // params struct
+       bool (*f_exp)  (test_params_t*, // params struct
                        test_op_t*,     // op struct
                        iface_t,        // iface
                        char*,          // datatype (current datatype)
@@ -1681,6 +1683,12 @@ void libblis_test_op_driver
 	if ( iface == BLIS_TEST_SEQ_UKERNEL )
 	{
 		mix_all_storage = DISABLE;
+	}
+	// But when testing the gemmsup micro-kernels, unconditionally *enable* the
+	// "mix all storage" option.
+	else if ( iface == BLIS_TEST_SEQ_SUP_UKERNEL )
+	{
+		mix_all_storage = ENABLE;
 	}
 
 	// Enumerate all combinations of storage schemes requested.
@@ -2029,110 +2037,114 @@ void libblis_test_op_driver
 							continue;
 						}
 
-						// Call the given experiment function. perf and resid will
-						// contain the resulting performance and residual values,
-						// respectively.
-						double perf, resid;
-						f_exp( params,
-						       op,
-						       iface,
-						       dc_str[dci],
-						       pc_str[pci],
-						       sc_str[sci],
-						       p_cur,
-						       &perf, &resid );
-
-						// Remove the sign of the residual, if there is one.
-						resid = bli_fabs( resid );
-						if ( resid == -0.0 ) resid = 0.0;
-
-						// Query the string corresponding to the residual's
-						// position relative to the thresholds.
-						char* pass_str = libblis_test_get_string_for_result( resid,
-						                                                     dt_check,
-						                                                     thresh );
-
-						// Build a string unique to the operation, datatype combo,
-						// parameter combo, and storage combo being tested.
-						char funcname_str[64];
-						libblis_test_build_function_string( BLIS_FILEDATA_PREFIX_STR,
-						                                    op->opid,
-						                                    indi,
-						                                    ind_str,
-						                                    op_str,
-						                                    is_mixed_dt,
-						                                    dc_str[dci],
-						                                    n_param_combos,
-						                                    pc_str[pci],
-						                                    sc_str[sci],
-						                                    funcname_str );
-
-						// Print all dimensions to a single string.
-						char dims_str[64];
-						libblis_test_build_dims_string( op, p_cur, dims_str );
-
-						// Count the number of dimensions that were printed to the string.
-						unsigned int n_dims_print = libblis_test_get_n_dims_from_string( dims_str );
-
-						// Output the results of the test. Use matlab format if requested.
-						// NOTE: Here we use fprintf() over libblis_test_fprintf() so
-						// that on POSIX systems the output is not intermingled. If we
-						// used libblis_test_fprintf(), we would need to enclose this
-						// conditional with the acquisition of a mutex shared among all
-						// threads to prevent intermingled output.
-						if ( params->output_matlab_format )
+						test_op_t local_op = *op;
+						for ( bool done = false; !done; )
 						{
-							fprintf( stdout,
-							         "%-*s( %3u, 1:%u ) = [%s  %7.2lf  %8.2le ]; %c %s\n",
-							         MAX_FUNC_STRING_LENGTH, funcname_str, pi, n_dims_print + 2,
-							         dims_str, perf, resid,
-							         OUTPUT_COMMENT_CHAR,
-							         pass_str );
+							// Call the given experiment function. perf and resid will
+							// contain the resulting performance and residual values,
+							// respectively.
+							double perf, resid;
+							done = f_exp( params,
+									      &local_op,
+									      iface,
+									      dc_str[dci],
+									      pc_str[pci],
+									      sc_str[sci],
+									      p_cur,
+									      &perf, &resid );
 
-							// Also output to a file if requested (and successfully
-							// opened).
-							if ( output_stream )
-							fprintf( output_stream,
-							         "%-*s( %3u, 1:%u ) = [%s  %7.2lf  %8.2le ]; %c %s\n",
-							         MAX_FUNC_STRING_LENGTH, funcname_str, pi, n_dims_print + 2,
-							         dims_str, perf, resid,
-							         OUTPUT_COMMENT_CHAR,
-							         pass_str );
-						}
-						else
-						{
-							fprintf( stdout,
-							         "%-*s      %s  %7.2lf   %8.2le   %s\n",
-							         MAX_FUNC_STRING_LENGTH, funcname_str,
-							         dims_str, perf, resid,
-							         pass_str );
+							// Remove the sign of the residual, if there is one.
+							resid = bli_fabs( resid );
+							if ( resid == -0.0 ) resid = 0.0;
 
-							// Also output to a file if requested (and successfully
-							// opened).
-							if ( output_stream )
-							fprintf( output_stream,
-							         "%-*s      %s  %7.2lf   %8.2le   %s\n",
-							         MAX_FUNC_STRING_LENGTH, funcname_str,
-							         dims_str, perf, resid,
-							         pass_str );
-						}
+							// Query the string corresponding to the residual's
+							// position relative to the thresholds.
+							char* pass_str = libblis_test_get_string_for_result( resid,
+							                                                     dt_check,
+							                                                     thresh );
 
-						// If we need to check whether to do something on failure,
-						// do so now.
-						if ( reaction_to_failure == ON_FAILURE_SLEEP_CHAR )
-						{
-							if ( strstr( pass_str, BLIS_TEST_FAIL_STRING ) == pass_str )
-								libblis_test_sleep();
-						}
-						else if ( reaction_to_failure == ON_FAILURE_ABORT_CHAR )
-						{
-							if ( strstr( pass_str, BLIS_TEST_FAIL_STRING ) == pass_str )
-								libblis_test_abort();
-						}
+							// Build a string unique to the operation, datatype combo,
+							// parameter combo, and storage combo being tested.
+							char funcname_str[64];
+							libblis_test_build_function_string( BLIS_FILEDATA_PREFIX_STR,
+							                                    local_op.opid,
+							                                    indi,
+							                                    ind_str,
+							                                    op_str,
+							                                    is_mixed_dt,
+							                                    dc_str[dci],
+							                                    n_param_combos,
+							                                    pc_str[pci],
+							                                    sc_str[sci],
+							                                    funcname_str );
 
-						// Increment the experiment counter (regardless of whether
-						// the thread executed or skipped the current experiment).
-						tdata->xc += 1;
+							// Print all dimensions to a single string.
+							char dims_str[64];
+							libblis_test_build_dims_string( &local_op, p_cur, dims_str );
+
+							// Count the number of dimensions that were printed to the string.
+							unsigned int n_dims_print = libblis_test_get_n_dims_from_string( dims_str );
+
+							// Output the results of the test. Use matlab format if requested.
+							// NOTE: Here we use fprintf() over libblis_test_fprintf() so
+							// that on POSIX systems the output is not intermingled. If we
+							// used libblis_test_fprintf(), we would need to enclose this
+							// conditional with the acquisition of a mutex shared among all
+							// threads to prevent intermingled output.
+							if ( params->output_matlab_format )
+							{
+								fprintf( stdout,
+								         "%-*s( %3u, 1:%u ) = [%s  %7.2lf  %8.2le ]; %c %s\n",
+								         MAX_FUNC_STRING_LENGTH, funcname_str, pi, n_dims_print + 2,
+								         dims_str, perf, resid,
+								         OUTPUT_COMMENT_CHAR,
+								         pass_str );
+
+								// Also output to a file if requested (and successfully
+								// opened).
+								if ( output_stream )
+								fprintf( output_stream,
+								         "%-*s( %3u, 1:%u ) = [%s  %7.2lf  %8.2le ]; %c %s\n",
+								         MAX_FUNC_STRING_LENGTH, funcname_str, pi, n_dims_print + 2,
+								         dims_str, perf, resid,
+								         OUTPUT_COMMENT_CHAR,
+								         pass_str );
+							}
+							else
+							{
+								fprintf( stdout,
+								         "%-*s      %s  %7.2lf   %8.2le   %s\n",
+								         MAX_FUNC_STRING_LENGTH, funcname_str,
+								         dims_str, perf, resid,
+								         pass_str );
+
+								// Also output to a file if requested (and successfully
+								// opened).
+								if ( output_stream )
+								fprintf( output_stream,
+								         "%-*s      %s  %7.2lf   %8.2le   %s\n",
+								         MAX_FUNC_STRING_LENGTH, funcname_str,
+								         dims_str, perf, resid,
+								         pass_str );
+							}
+
+							// If we need to check whether to do something on failure,
+							// do so now.
+							if ( reaction_to_failure == ON_FAILURE_SLEEP_CHAR )
+							{
+								if ( strstr( pass_str, BLIS_TEST_FAIL_STRING ) == pass_str )
+									libblis_test_sleep();
+							}
+							else if ( reaction_to_failure == ON_FAILURE_ABORT_CHAR )
+							{
+								if ( strstr( pass_str, BLIS_TEST_FAIL_STRING ) == pass_str )
+									libblis_test_abort();
+							}
+
+							// Increment the experiment counter (regardless of whether
+							// the thread executed or skipped the current experiment).
+							tdata->xc += 1;
+						}
 					}
 				}
 			}

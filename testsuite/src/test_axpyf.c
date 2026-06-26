@@ -54,7 +54,7 @@ void libblis_test_axpyf_deps
        test_op_t*     op
      );
 
-void libblis_test_axpyf_experiment
+bool libblis_test_axpyf_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -142,7 +142,7 @@ void libblis_test_axpyf
 
 
 
-void libblis_test_axpyf_experiment
+bool libblis_test_axpyf_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -252,6 +252,8 @@ void libblis_test_axpyf_experiment
 	bli_obj_free( &x );
 	bli_obj_free( &y );
 	bli_obj_free( &y_save );
+
+	return true;
 }
 
 

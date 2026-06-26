@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -51,9 +51,10 @@ AXPYV_KER_PROT( float,    s, axpyv_zen_int )
 AXPYV_KER_PROT( double,   d, axpyv_zen_int )
 
 // axpyv (intrinsics unrolled x10)
-AXPYV_KER_PROT( float,    s, axpyv_zen_int10 )
-AXPYV_KER_PROT( double,   d, axpyv_zen_int10 )
-
+AXPYV_KER_PROT( float,    s, axpyv_zen_int_10 )
+AXPYV_KER_PROT( double,   d, axpyv_zen_int_10 )
+AXPYV_KER_PROT( scomplex, c, axpyv_zen_int_5 )
+AXPYV_KER_PROT( dcomplex, z, axpyv_zen_int_5 )
 // dotv (intrinsics)
 DOTV_KER_PROT( float,    s, dotv_zen_int )
 DOTV_KER_PROT( double,   d, dotv_zen_int )
@@ -99,8 +100,11 @@ AXPYF_KER_PROT( float,    s, axpyf_zen_int_8 )
 AXPYF_KER_PROT( double,   d, axpyf_zen_int_8 )
 AXPYF_KER_PROT( float,    s, axpyf_zen_int_5 )
 AXPYF_KER_PROT( double,   d, axpyf_zen_int_5 )
+AXPYF_KER_PROT( scomplex,    c, axpyf_zen_int_5 )
+AXPYF_KER_PROT( dcomplex,   z, axpyf_zen_int_5 )
 
 AXPYF_KER_PROT( double,   d, axpyf_zen_int_16x4 )
+AXPYF_KER_PROT( double,   d, axpyf_zen_int_16x2 )
 AXPYF_KER_PROT( scomplex, c, axpyf_zen_int_4 )
 
 // dotxf (intrinsics)
@@ -126,7 +130,7 @@ GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x8 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x8 )
 
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x4 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x4 ) 
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x4 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x4 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x4 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x4 )
@@ -151,6 +155,33 @@ GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x16m )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x8m )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x4m )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x2m )
+//gemmsup_rv (mkernel in m dim) for mask load/store
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x16m_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x8m_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x4m_mask )
+GEMMSUP_KER_PROT( float,   s, bli_sgemmsup_rv_zen_asm_6x8m )
+GEMMSUP_KER_PROT( float,   s, bli_sgemmsup_rv_zen_asm_6x4m )
+GEMMSUP_KER_PROT( float,   s, bli_sgemmsup_rv_zen_asm_6x2m )
+
+//gemmsup_rv (mkernel in m dim) for fringe case
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x16_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x16_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x16_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x16_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x16_mask )
+
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x8_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x8_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x8_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x8_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x8_mask )
+
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x4_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x4_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x4_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x4_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x4_mask )
+
 // gemmsup_rv (mkernel in n dim)
 
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x16n )
@@ -180,34 +211,4 @@ GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_6x16n)
 GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_3x16n)
 GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_2x16n)
 GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_1x16n)
-
-GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_3x8m )
-GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_3x4m )
-GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_3x2m )
-GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_2x8 )
-GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_1x8 )
-GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_2x4 )
-GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_1x4 )
-GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_2x2 )
-GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_1x2 )
-GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x4m )
-GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x2m )
-GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_2x4 )
-GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_1x4 )
-GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_2x2 )
-GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_1x2 )
-
-// gemmsup_rv (mkernel in n dim)
-
-
-GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_3x8n )
-GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_2x8n )
-GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_1x8n )
-GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_3x4 )
-GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_3x2 )
-GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x4n )
-GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_2x4n )
-GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_1x4n )
-GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x2 )
-GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x1 )
 

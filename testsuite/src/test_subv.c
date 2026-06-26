@@ -54,7 +54,7 @@ void libblis_test_subv_deps
        test_op_t*     op
      );
 
-void libblis_test_subv_experiment
+bool libblis_test_subv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -134,7 +134,7 @@ void libblis_test_subv
 
 
 
-void libblis_test_subv_experiment
+bool libblis_test_subv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -188,7 +188,7 @@ void libblis_test_subv_experiment
 	// Apply the parameters.
 	bli_obj_set_conj( conjx, &x );
 
-	// Disable repeats since bli_copyv() is not yet tested. 
+	// Disable repeats since bli_copyv() is not yet tested.
 	//for ( i = 0; i < n_repeats; ++i )
 	{
 		time = bli_clock();
@@ -211,6 +211,8 @@ void libblis_test_subv_experiment
 	// Free the test objects.
 	bli_obj_free( &x );
 	bli_obj_free( &y );
+
+	return true;
 }
 
 

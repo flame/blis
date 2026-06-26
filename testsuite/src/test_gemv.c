@@ -54,7 +54,7 @@ void libblis_test_gemv_deps
        test_op_t*     op
      );
 
-void libblis_test_gemv_experiment
+bool libblis_test_gemv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -144,7 +144,7 @@ void libblis_test_gemv
 
 
 
-void libblis_test_gemv_experiment
+bool libblis_test_gemv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -227,7 +227,7 @@ void libblis_test_gemv_experiment
 	bli_obj_set_conjtrans( transa, &a );
 	bli_obj_set_conj( conjx, &x );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &y_save, &y );
@@ -254,6 +254,8 @@ void libblis_test_gemv_experiment
 	bli_obj_free( &x );
 	bli_obj_free( &y );
 	bli_obj_free( &y_save );
+
+	return true;
 }
 
 
@@ -341,11 +343,11 @@ void libblis_test_gemv_check
 	bli_copyv( x,      &x_temp );
 	bli_copyv( y_orig, &y_temp );
 
-	bli_acquire_vpart_f2b( BLIS_SUBPART1, 0, min_m_n, 
+	bli_acquire_vpart_f2b( BLIS_SUBPART1, 0, min_m_n,
 	                       &x_temp, &xT_temp );
-	bli_acquire_vpart_f2b( BLIS_SUBPART1, 0, min_m_n, 
+	bli_acquire_vpart_f2b( BLIS_SUBPART1, 0, min_m_n,
 	                       &y_temp, &yT_temp );
-	bli_acquire_vpart_f2b( BLIS_SUBPART1, 0, min_m_n, 
+	bli_acquire_vpart_f2b( BLIS_SUBPART1, 0, min_m_n,
 	                       y, &yT );
 
 	bli_scalv( &kappac, &xT_temp );

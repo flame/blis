@@ -274,6 +274,9 @@
 1        # gemm
 -1       #   dimensions: k
 
+1        # gemmsup
+-1       #   dimensions: k
+
 1        # trsm
 ?        #   parameters: uploa
 
