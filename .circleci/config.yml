@@ -199,6 +199,7 @@ jobs:
           command: |
             $env:DIST_PATH = "."
             $env:CC = "<< parameters.CC >>"
+            $env:PATH = "$env:PATH;C:\Users\circleci\project\blis\lib"
             $env:CXX = "<< parameters.CXX >>"
             $CONF = "<< parameters.CONF >>"
             $TEST = "<< parameters.TEST >>"
@@ -227,6 +228,11 @@ jobs:
             $CONFIGURE_OPTS = "$CONFIGURE_OPTS --enable-threading=$THR --enable-arg-max-hack --prefix=/c/Users/circleci/project/blis $CONF"
             echo "Configuring with: $CONFIGURE_OPTS"
             bash -lc "./configure $CONFIGURE_OPTS"
+            echo "config.mk"
+            cat config.mk
+            echo "bli_config.h"
+            cat bli_config.h
+
             bash -lc "mingw32-make -j4 V=1"
             bash -lc "mingw32-make install"
 
@@ -384,6 +390,10 @@ jobs:
             ls -l
             $CC --version
             $CC -v
+            echo "config.mk"
+            cat config.mk
+            echo "bli_config.h"
+            cat bli_config.h
 
             make V=1 -j2
             make install
