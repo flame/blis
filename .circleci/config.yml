@@ -233,7 +233,7 @@ jobs:
             if ($LIB_TYPE -eq "shared") { $TEST_TARGET = "checkblis-fast" }
             if ($LIB_TYPE -eq "static") { $TEST_TARGET = "check" }
             echo "Test target: $TEST_TARGET"
-            if ($TEST -eq "FAST") { bash -lc "mingw32-make $TEST_TARGET -j4 V=1" }
+            if ($TEST -eq "FAST") { bash -lc "mingw32-make $TEST_TARGET -j4 T=1 V=1" }
 
             tar zcvf blis-x86_64-win-$LIB_TYPE.tar.gz blis
 
