@@ -26,14 +26,10 @@ for THIS_CONF in $TO_TEST; do
 			armsve)
 				CPU="max,sve512=on,sme=off"
 				;;
-			firestorm)
-			thunderx2)
-			cortexa57)
-			cortexa53)
+			firestorm | thunderx2 | cortexa57 | cortexa53)
 				CPU="max,sve=off,sme=off"
 				;;
-			m4sme_p)
-			m4sme_e)
+			m4sme_*)
 				CPU="max,sve=off,sme512=on"
 				;;
 			*)
