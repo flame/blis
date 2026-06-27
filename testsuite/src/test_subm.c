@@ -54,7 +54,7 @@ void libblis_test_subm_deps
        test_op_t*     op
      );
 
-void libblis_test_subm_experiment
+bool libblis_test_subm_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -134,7 +134,7 @@ void libblis_test_subm
 
 
 
-void libblis_test_subm_experiment
+bool libblis_test_subm_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -214,6 +214,8 @@ void libblis_test_subm_experiment
 	// Free the test objects.
 	bli_obj_free( &x );
 	bli_obj_free( &y );
+
+	return true;
 }
 
 

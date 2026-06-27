@@ -373,22 +373,28 @@ void GENBARNAME(cntx_init)
 	// bli_kernel_macro_defs.h otherwise. Configurations should also initialize the
 	// blocksizes in the context explicitly, but using the correct values here helps
 	// to prevent accidents.
-	//                                                    s              d              c              z
-	bli_blksz_init_easy( &blkszs[ BLIS_KR  ],             1,             1,             1,             1 );
-	bli_blksz_init     ( &blkszs[ BLIS_MR  ],     BLIS_MR_s,     BLIS_MR_d,     BLIS_MR_c,     BLIS_MR_z,
-	                                          BLIS_PACKMR_s, BLIS_PACKMR_d, BLIS_PACKMR_c, BLIS_PACKMR_z );
-	bli_blksz_init     ( &blkszs[ BLIS_NR  ],     BLIS_NR_s,     BLIS_NR_d,     BLIS_NR_c,     BLIS_NR_z,
-	                                          BLIS_PACKNR_s, BLIS_PACKNR_d, BLIS_PACKNR_c, BLIS_PACKNR_z );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC  ],           256,           128,           128,            64 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC  ],           256,           256,           256,           256 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC  ],          4096,          4096,          4096,          4096 );
-	bli_blksz_init_easy( &blkszs[ BLIS_M2  ],          1000,          1000,          1000,          1000 );
-	bli_blksz_init_easy( &blkszs[ BLIS_N2  ],          1000,          1000,          1000,          1000 );
-	bli_blksz_init_easy( &blkszs[ BLIS_AF  ],             8,             8,             8,             8 );
-	bli_blksz_init_easy( &blkszs[ BLIS_DF  ],             6,             6,             6,             6 );
-	bli_blksz_init_easy( &blkszs[ BLIS_XF  ],             4,             4,             4,             4 );
-	bli_blksz_init_easy( &blkszs[ BLIS_BBM ],    BLIS_BBM_s,    BLIS_BBM_d,    BLIS_BBM_c,    BLIS_BBM_z );
-	bli_blksz_init_easy( &blkszs[ BLIS_BBN ],    BLIS_BBN_s,    BLIS_BBN_d,    BLIS_BBN_c,    BLIS_BBN_z );
+	//                                                       s              d              c              z
+	bli_blksz_init_easy( &blkszs[ BLIS_KR     ],             1,             1,             1,             1 );
+	bli_blksz_init     ( &blkszs[ BLIS_MR     ],     BLIS_MR_s,     BLIS_MR_d,     BLIS_MR_c,     BLIS_MR_z,
+	                                             BLIS_PACKMR_s, BLIS_PACKMR_d, BLIS_PACKMR_c, BLIS_PACKMR_z );
+	bli_blksz_init     ( &blkszs[ BLIS_NR     ],     BLIS_NR_s,     BLIS_NR_d,     BLIS_NR_c,     BLIS_NR_z,
+	                                             BLIS_PACKNR_s, BLIS_PACKNR_d, BLIS_PACKNR_c, BLIS_PACKNR_z );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC     ],           256,           128,           128,            64 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC     ],           256,           256,           256,           256 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC     ],          4096,          4096,          4096,          4096 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KR_SUP ],             1,             1,             1,             1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR_SUP ],            16,             6,             6,             3 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR_SUP ],             8,             8,             4,             4 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC_SUP ],           256,           128,           128,            64 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC_SUP ],           256,           256,           256,           256 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC_SUP ],          4096,          4096,          4096,          4096 );
+	bli_blksz_init_easy( &blkszs[ BLIS_M2     ],          1000,          1000,          1000,          1000 );
+	bli_blksz_init_easy( &blkszs[ BLIS_N2     ],          1000,          1000,          1000,          1000 );
+	bli_blksz_init_easy( &blkszs[ BLIS_AF     ],             8,             8,             8,             8 );
+	bli_blksz_init_easy( &blkszs[ BLIS_DF     ],             6,             6,             6,             6 );
+	bli_blksz_init_easy( &blkszs[ BLIS_XF     ],             4,             4,             4,             4 );
+	bli_blksz_init_easy( &blkszs[ BLIS_BBM    ],    BLIS_BBM_s,    BLIS_BBM_d,    BLIS_BBM_c,    BLIS_BBM_z );
+	bli_blksz_init_easy( &blkszs[ BLIS_BBN    ],    BLIS_BBN_s,    BLIS_BBN_d,    BLIS_BBN_c,    BLIS_BBN_z );
 
 	// -- Set level-3 small/unpacked thresholds --------------------------------
 
@@ -410,22 +416,28 @@ void GENBARNAME(cntx_init)
 	bli_cntx_set_blkszs
 	(
 	  cntx,
-	  BLIS_NC,  &blkszs[ BLIS_NC  ], BLIS_NR,
-	  BLIS_KC,  &blkszs[ BLIS_KC  ], BLIS_KR,
-	  BLIS_MC,  &blkszs[ BLIS_MC  ], BLIS_MR,
-	  BLIS_NR,  &blkszs[ BLIS_NR  ], BLIS_NR,
-	  BLIS_MR,  &blkszs[ BLIS_MR  ], BLIS_MR,
-	  BLIS_KR,  &blkszs[ BLIS_KR  ], BLIS_KR,
-	  BLIS_M2,  &blkszs[ BLIS_M2  ], BLIS_M2,
-	  BLIS_N2,  &blkszs[ BLIS_N2  ], BLIS_N2,
-	  BLIS_AF,  &blkszs[ BLIS_AF  ], BLIS_AF,
-	  BLIS_DF,  &blkszs[ BLIS_DF  ], BLIS_DF,
-	  BLIS_XF,  &blkszs[ BLIS_XF  ], BLIS_XF,
-	  BLIS_MT,  &blkszs[ BLIS_MT  ], BLIS_MT,
-	  BLIS_NT,  &blkszs[ BLIS_NT  ], BLIS_NT,
-	  BLIS_KT,  &blkszs[ BLIS_KT  ], BLIS_KT,
-	  BLIS_BBM, &blkszs[ BLIS_BBM ], BLIS_BBM,
-	  BLIS_BBN, &blkszs[ BLIS_BBN ], BLIS_BBN,
+	  BLIS_NC,     &blkszs[ BLIS_NC     ], BLIS_NR,
+	  BLIS_KC,     &blkszs[ BLIS_KC     ], BLIS_KR,
+	  BLIS_MC,     &blkszs[ BLIS_MC     ], BLIS_MR,
+	  BLIS_NR,     &blkszs[ BLIS_NR     ], BLIS_NR,
+	  BLIS_MR,     &blkszs[ BLIS_MR     ], BLIS_MR,
+	  BLIS_KR,     &blkszs[ BLIS_KR     ], BLIS_KR,
+	  BLIS_NC_SUP, &blkszs[ BLIS_NC_SUP ], BLIS_NR_SUP,
+	  BLIS_KC_SUP, &blkszs[ BLIS_KC_SUP ], BLIS_KR_SUP,
+	  BLIS_MC_SUP, &blkszs[ BLIS_MC_SUP ], BLIS_MR_SUP,
+	  BLIS_NR_SUP, &blkszs[ BLIS_NR_SUP ], BLIS_NR_SUP,
+	  BLIS_MR_SUP, &blkszs[ BLIS_MR_SUP ], BLIS_MR_SUP,
+	  BLIS_KR_SUP, &blkszs[ BLIS_KR_SUP ], BLIS_KR_SUP,
+	  BLIS_M2,     &blkszs[ BLIS_M2     ], BLIS_M2,
+	  BLIS_N2,     &blkszs[ BLIS_N2     ], BLIS_N2,
+	  BLIS_AF,     &blkszs[ BLIS_AF     ], BLIS_AF,
+	  BLIS_DF,     &blkszs[ BLIS_DF     ], BLIS_DF,
+	  BLIS_XF,     &blkszs[ BLIS_XF     ], BLIS_XF,
+	  BLIS_MT,     &blkszs[ BLIS_MT     ], BLIS_MT,
+	  BLIS_NT,     &blkszs[ BLIS_NT     ], BLIS_NT,
+	  BLIS_KT,     &blkszs[ BLIS_KT     ], BLIS_KT,
+	  BLIS_BBM,    &blkszs[ BLIS_BBM    ], BLIS_BBM,
+	  BLIS_BBN,    &blkszs[ BLIS_BBN    ], BLIS_BBN,
 	  BLIS_VA_END
 	);
 

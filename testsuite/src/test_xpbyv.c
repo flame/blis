@@ -54,7 +54,7 @@ void libblis_test_xpbyv_deps
        test_op_t*     op
      );
 
-void libblis_test_xpbyv_experiment
+bool libblis_test_xpbyv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -138,7 +138,7 @@ void libblis_test_xpbyv
 
 
 
-void libblis_test_xpbyv_experiment
+bool libblis_test_xpbyv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -198,7 +198,7 @@ void libblis_test_xpbyv_experiment
 	// Apply the parameters.
 	bli_obj_set_conj( conjx, &x );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copyv( &y_save, &y );
@@ -224,6 +224,8 @@ void libblis_test_xpbyv_experiment
 	bli_obj_free( &x );
 	bli_obj_free( &y );
 	bli_obj_free( &y_save );
+
+	return true;
 }
 
 

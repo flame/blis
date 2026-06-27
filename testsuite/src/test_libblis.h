@@ -143,6 +143,7 @@ typedef enum iface_e
 	BLIS_TEST_SEQ_UKERNEL     = 0,
 	BLIS_TEST_SEQ_FRONT_END   = 1,
 	BLIS_TEST_MT_FRONT_END    = 2,
+	BLIS_TEST_SEQ_SUP_UKERNEL = 3,
 } iface_t;
 
 
@@ -270,6 +271,7 @@ typedef struct test_ops_s
 
 	// level-3 micro-kernels
 	test_op_t gemm_ukr;
+	test_op_t gemmsup_ukr;
 	test_op_t trsm_ukr;
 	test_op_t gemmtrsm_ukr;
 
@@ -378,7 +380,7 @@ void libblis_test_op_driver
        char*          p_types,
        char*          o_types,
        thresh_t*      thresh,
-       void (*f_exp)  (test_params_t*, // params struct
+       bool (*f_exp)  (test_params_t*, // params struct
                        test_op_t*,     // op struct
                        iface_t,        // iface
                        char*,          // dc_str (current datatype string)
@@ -548,6 +550,7 @@ char libblis_test_proj_dtchar_to_precchar( char dt_char );
 
 // Level-3 micro-kernels
 #include "test_gemm_ukr.h"
+#include "test_gemmsup_ukr.h"
 #include "test_trsm_ukr.h"
 #include "test_gemmtrsm_ukr.h"
 

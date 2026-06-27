@@ -54,7 +54,7 @@ void libblis_test_axpym_deps
        test_op_t*     op
      );
 
-void libblis_test_axpym_experiment
+bool libblis_test_axpym_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -139,7 +139,7 @@ void libblis_test_axpym
 
 
 
-void libblis_test_axpym_experiment
+bool libblis_test_axpym_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -203,7 +203,7 @@ void libblis_test_axpym_experiment
 	// Apply the parameters.
 	bli_obj_set_conjtrans( transx, &x );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &y_save, &y );
@@ -229,6 +229,8 @@ void libblis_test_axpym_experiment
 	bli_obj_free( &x );
 	bli_obj_free( &y );
 	bli_obj_free( &y_save );
+
+	return true;
 }
 
 

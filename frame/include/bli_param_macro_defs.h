@@ -888,6 +888,54 @@ BLIS_INLINE ukr_t bli_stor3_ukr( stor3_t id )
 	}
 }
 
+BLIS_INLINE char bli_stor3_stora( stor3_t id )
+{
+	switch ( id )
+	{
+		case BLIS_RRR: return 'r';
+		case BLIS_RRC: return 'r';
+		case BLIS_RCR: return 'c';
+		case BLIS_RCC: return 'c';
+		case BLIS_CRR: return 'r';
+		case BLIS_CRC: return 'r';
+		case BLIS_CCR: return 'c';
+		case BLIS_CCC: return 'c';
+		default: return 'r';
+	}
+}
+
+BLIS_INLINE char bli_stor3_storb( stor3_t id )
+{
+	switch ( id )
+	{
+		case BLIS_RRR: return 'r';
+		case BLIS_RRC: return 'c';
+		case BLIS_RCR: return 'r';
+		case BLIS_RCC: return 'c';
+		case BLIS_CRR: return 'r';
+		case BLIS_CRC: return 'c';
+		case BLIS_CCR: return 'r';
+		case BLIS_CCC: return 'c';
+		default: return 'r';
+	}
+}
+
+BLIS_INLINE char bli_stor3_storc( stor3_t id )
+{
+	switch ( id )
+	{
+		case BLIS_RRR: return 'r';
+		case BLIS_RRC: return 'r';
+		case BLIS_RCR: return 'r';
+		case BLIS_RCC: return 'r';
+		case BLIS_CRR: return 'c';
+		case BLIS_CRC: return 'c';
+		case BLIS_CCR: return 'c';
+		case BLIS_CCC: return 'c';
+		default: return 'r';
+	}
+}
+
 BLIS_INLINE stor3_t bli_stor3_transa( stor3_t id )
 {
 #if 0

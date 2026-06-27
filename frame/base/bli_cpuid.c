@@ -934,6 +934,9 @@ int vpu_count( void )
 	char  model_num[5];
 	int   sku;
 
+	int   is_gold = 0;
+	int   is_slv  = 0;
+
 	get_cpu_name( cpu_name );
 
 	if ( strstr( cpu_name, "Intel(R) Xeon(R)" ) != NULL )
@@ -941,10 +944,16 @@ int vpu_count( void )
 		if (( loc = strstr( cpu_name, "Platinum" ) ))
 			return 2;
 		if ( loc == NULL )
-			loc = strstr( cpu_name, "Gold" ); // 1 or 2, tested below
+		{
+			if (( loc = strstr( cpu_name, "Gold" ) )) // 1 or 2, tested below
+				is_gold = 1;
+		}
 		if ( loc == NULL )
+		{
 			if (( loc = strstr( cpu_name, "Silver" ) ))
-				return 1;
+				// Some >=3rd gen scalable Xeon have 2 vpus.
+				is_slv = 1;
+		}
 		if ( loc == NULL )
 			if (( loc = strstr( cpu_name, "Bronze" ) ))
 				return 1;
@@ -979,15 +988,54 @@ int vpu_count( void )
 		else if (                sku == 5122 ) return 2;
 		else if ( 6299 >= sku && sku >= 6200 ) return 2; // Cascade Lake Gold
 		else if ( 5299 >= sku && sku >= 5200 ) return 1; // Cascade Lake Gold
-		else if ( 5199 >= sku && sku >= 5100 ) return 1;
-		else if ( 4199 >= sku && sku >= 4100 ) return 1;
-		else if ( 3199 >= sku && sku >= 3100 ) return 1;
+		else if ( 4299 >= sku && sku >= 4200 ) return 1; // Cascade Lake Silver
+		else if ( 5199 >= sku && sku >= 5100 ) return 1; // Skylake Gold (1 VPU)
+		else if ( 4199 >= sku && sku >= 4100 ) return 1; // Skylake Silver
+		else if ( 3199 >= sku && sku >= 3100 ) return 1; // Skylake Bronze
 		else if ( 3299 >= sku && sku >= 3200 ) return 2; // Cascade Lake W
 		else if ( 2299 >= sku && sku >= 2200 ) return 2; // Cascade Lake W
 		else if ( 2199 >= sku && sku >= 2120 ) return 2;
 		else if ( 2102 == sku || sku == 2104 ) return 2; // Gold exceptions
 		else if ( 2119 >= sku && sku >= 2100 ) return 1;
-		else return -1;
+
+		// 3rd gen Intel Scalable and W all have 2 vpus.
+		else if ( 8399 >= sku && sku >= 8300 ) return 2; // Ice Lake Platinum
+		else if ( 6399 >= sku && sku >= 6300 ) return 2; // Ice Lake Gold
+		// Some Intel Xeon 6 are in the 6300 range,
+		// but these do not have AVX512
+		else if ( 5399 >= sku && sku >= 5300 ) return 2; // Ice Lake Gold
+		else if ( 4399 >= sku && sku >= 4300 ) return 2; // Ice Lake Silver
+		else if ( 3399 >= sku && sku >= 3300 ) return 2; // Ice Lake W
+
+		// 4th gen Intel Scalable and W all have 2 vpus except 3408U
+		else if ( 8499 >= sku && sku >= 8400 ) return 2; // Sapphire Rapids Platinum
+		else if ( 6499 >= sku && sku >= 6400 ) return 2; // Sapphire Rapids Gold
+		else if ( 5499 >= sku && sku >= 5400 ) return 2; // Sapphire Rapids Gold
+		else if ( 4499 >= sku && sku >= 4400 ) return 2; // Sapphire Rapids Silver
+		else if (                sku == 3408 ) return 1;
+		else if ( 3499 >= sku && sku >= 3400 ) return 2; // Sapphire Rapids W
+
+
+		// 5th gen Intel Scalable all have 2 vpus except 3508U
+		else if ( 8599 >= sku && sku >= 8500 ) return 2; // Emerald Rapids Platinum
+		else if ( 6599 >= sku && sku >= 6500 && is_gold ) return 2; // Emerald Rapids Gold
+		else if ( 5599 >= sku && sku >= 5500 ) return 2; // Emerald Rapids Gold
+		else if ( 4599 >= sku && sku >= 4500 ) return 2; // Emerald Rapids Silver
+		else if (                sku == 3508 ) return 1;
+		else if ( 3599 >= sku && sku >= 3500 ) return 2; // Emerald Rapids W
+
+		// Intel Xeon 6 all seem to have 2 vpus.
+		// Note that the format string is different. No precious metals.
+
+		else if ( 6999 >= sku && sku >= 6900 ) return 2;
+		else if ( 6799 >= sku && sku >= 6700 ) return 2;
+		else if ( 6599 >= sku && sku >= 6500 && !(is_gold) ) return 2;
+		// Xeon 6 6300 series are AVX2-only.
+
+
+		else return 2;
+		// guess 2 vpus for unknown Xeons.
+
 	}
 	else if ( strstr( cpu_name, "Intel(R) Core(TM)" ) != NULL )
 		return 2; // All i7/i9 with avx512?

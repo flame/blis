@@ -54,7 +54,7 @@ void libblis_test_trsv_deps
        test_op_t*     op
      );
 
-void libblis_test_trsv_experiment
+bool libblis_test_trsv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -141,7 +141,7 @@ void libblis_test_trsv
 
 
 
-void libblis_test_trsv_experiment
+bool libblis_test_trsv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -217,7 +217,7 @@ void libblis_test_trsv_experiment
 	bli_obj_set_conjtrans( transa, &a );
 	bli_obj_set_diag( diaga, &a );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &x_save, &x );
@@ -243,6 +243,8 @@ void libblis_test_trsv_experiment
 	bli_obj_free( &a );
 	bli_obj_free( &x );
 	bli_obj_free( &x_save );
+
+	return true;
 }
 
 
