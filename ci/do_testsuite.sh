@@ -16,7 +16,7 @@ for THIS_CONF in $(echo ${TMP:-${CONF%%--*}} | tr , ' '); do
 
 	echo "Testing configuration: $THIS_CONF"
 
-	if [ "x$TESTSUITE_WRAPPER" != "x" ]; then
+	if [ "${CONF%%--*}" = "arm64" ] && [ "x$TESTSUITE_WRAPPER" != "x" ]; then
 		case $THIS_CONF in
 			armsve)
 				CPU="max,sve512=on,sme=off"
