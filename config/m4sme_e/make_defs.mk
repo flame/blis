@@ -1,6 +1,6 @@
 #
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -46,7 +46,7 @@ THIS_CONFIG    := m4sme_e
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
 CPPROCFLAGS    := -D_GNU_SOURCE
-CMISCFLAGS     := -O3 -std=c99 -march=native+sme2+sme-f64f64 -fno-exceptions -fno-rtti -mno-unaligned-access -I /opt/homebrew/opt/libomp/include
+CMISCFLAGS     := -O3 -std=c99 -march=armv8a+sme2+sme-f64f64 -fno-exceptions -fno-rtti -mno-unaligned-access -I /opt/homebrew/opt/libomp/include
 CPICFLAGS      := -fPIC
 CWARNFLAGS     :=
 
@@ -57,16 +57,16 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O3
 else
-COPTFLAGS      :=  -O3 -std=c99 -march=native+sme2+sme-f64f64 -fno-exceptions -fno-rtti -mno-unaligned-access
+COPTFLAGS      :=  -O3 -std=c99 -march=armv8a+sme2+sme-f64f64 -fno-exceptions -fno-rtti -mno-unaligned-access
 
 endif
 
 # Flags specific to optimized kernels.
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     :=  -march=native+sme2+sme-f64f64 -fno-exceptions -fno-rtti -mno-unaligned-access -fno-builtin
+CKVECFLAGS     :=  -march=armv8a+sme2+sme-f64f64 -fno-exceptions -fno-rtti -mno-unaligned-access -fno-builtin
 else
 ifeq ($(CC_VENDOR),clang)
-CKVECFLAGS     :=  -O3 -march=native+sme2+sme-f64f64 -fno-exceptions -fno-rtti -mno-unaligned-access -fno-builtin 
+CKVECFLAGS     :=  -O3 -march=armv8a+sme2+sme-f64f64 -fno-exceptions -fno-rtti -mno-unaligned-access -fno-builtin
 else
 $(error gcc or clang is required for this configuration.)
 endif
