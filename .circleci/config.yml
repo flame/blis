@@ -79,6 +79,7 @@ workflows:
           THR: pthreads
           CC: clang
           CXX: clang++
+          CONF: firestorm
 
       # cortexa15 build and fast testsuite (qemu)
       - build:
