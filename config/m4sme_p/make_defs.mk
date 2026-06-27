@@ -46,7 +46,7 @@ THIS_CONFIG    := m4sme_p
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
 CPPROCFLAGS    := -D_GNU_SOURCE
-CMISCFLAGS     := -O3 -std=c99 -march=armv8a+sve2+sme2+sme-f64f64 -fno-exceptions -fno-rtti -mno-unaligned-access -I /opt/homebrew/opt/libomp/include
+CMISCFLAGS     :=
 CPICFLAGS      := -fPIC
 CWARNFLAGS     :=
 
@@ -57,16 +57,17 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O3
 else
-COPTFLAGS      :=  -O3 -std=c99 -march=armv8a+sve2+sme2+sme-f64f64 -fno-exceptions -fno-rtti -mno-unaligned-access
+COPTFLAGS      :=  -O3 -std=c99 -march=armv8a -fno-exceptions -fno-rtti -mno-unaligned-access
 
 endif
 
 # Flags specific to optimized kernels.
+CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     :=  -march=armv8a+sve2+sme2+sme-f64f64 -fno-exceptions -fno-rtti -mno-unaligned-access -fno-builtin
+CKVECFLAGS     :=  -march=armv8a+sve2+sme2+sme-f64f64 -fno-builtin
 else
 ifeq ($(CC_VENDOR),clang)
-CKVECFLAGS     :=  -O3 -march=armv8a+sve2+sme2+sme-f64f64 -fno-exceptions -fno-rtti -mno-unaligned-access -fno-builtin
+CKVECFLAGS     :=  -march=armv8a+sve2+sme2+sme-f64f64 -fno-builtin
 else
 $(error gcc or clang is required for this configuration.)
 endif
@@ -75,12 +76,12 @@ endif
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+CRVECFLAGS     := -fno-builtin -funsafe-math-optimizations -ffp-contract=fast
 else
 ifeq ($(CC_VENDOR),clang)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+CRVECFLAGS     := -fno-builtin -funsafe-math-optimizations -ffp-contract=fast
 else
-CRVECFLAGS     := $(CKVECFLAGS)
+CRVECFLAGS     :=
 endif
 endif
 
