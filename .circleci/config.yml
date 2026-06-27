@@ -104,8 +104,8 @@ workflows:
           CC: clang-18
           CXX: clang++-18
           CONF: arm64--armsve,firestorm,thunderx2,cortexa57,cortexa53,m4sme_p,m4sme_e
-          CFLAGS: '--target=aarch64-linux-gnu --sysroot=/usr/aarch64-linux-gnu'
-          LDFLAGS: '--target=aarch64-linux-gnu --sysroot=/usr/aarch64-linux-gnu -fuse-ld=lld-18'
+          CFLAGS: '--target=aarch64-linux-gnu' #--sysroot=/usr/aarch64-linux-gnu'
+          LDFLAGS: '--target=aarch64-linux-gnu -fuse-ld=lld-18' #--sysroot=/usr/aarch64-linux-gnu'
           PACKAGES: 'lld-18 clang-18 gcc-14-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
           TESTSUITE_WRAPPER: 'qemu-aarch64 -cpu XXX -L /usr/aarch64-linux-gnu/'
 
