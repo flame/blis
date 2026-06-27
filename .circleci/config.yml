@@ -79,7 +79,7 @@ workflows:
           THR: pthreads
           CC: clang
           CXX: clang++
-          CONF: firestorm,m4sme_p
+          CONF: arm64--firestorm,m4sme_p
 
       # cortexa15 build and fast testsuite (qemu)
       - build:
@@ -94,7 +94,7 @@ workflows:
           os: linuxnew
           CC: aarch64-linux-gnu-gcc-14
           CXX: aarch64-linux-gnu-g++-14
-          CONF: armsve,firestorm,thunderx2,cortexa57,cortexa53,m4sme_p,m4sme_e
+          CONF: arm64--armsve,firestorm,thunderx2,cortexa57,cortexa53,m4sme_p,m4sme_e
           PACKAGES: 'gcc-14-aarch64-linux-gnu g++-14-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
           TESTSUITE_WRAPPER: 'qemu-aarch64 -cpu XXX -L /usr/aarch64-linux-gnu/'
 
@@ -258,7 +258,7 @@ jobs:
             echo "LDFLAGS           = $LDFLAGS"
             echo "TESTSUITE_WRAPPER = $TESTSUITE_WRAPPER"
 
-            $DIST_PATH/configure -p `pwd`/../install -t $THR $BLD CC=$CC $CONF
+            $DIST_PATH/configure -p `pwd`/../install -t $THR $BLD CC=$CC ${CONF%%--*}
             pwd
             ls -l
             $CC --version

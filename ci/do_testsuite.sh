@@ -11,7 +11,8 @@ export BLIS_THREAD_IMPL="single"
 
 TESTSUITE_WRAPPER_SAVE="$TESTSUITE_WRAPPER"
 
-for THIS_CONF in $(echo $CONF | tr , ' '); do
+TMP=${CONF##*--}
+for THIS_CONF in $(echo ${TMP:-${CONF%%--*}} | tr , ' '); do
 
 	echo "Testing configuration: $THIS_CONF"
 
@@ -35,7 +36,7 @@ for THIS_CONF in $(echo $CONF | tr , ' '); do
 	fi
 
 	case $CONF in
-		*,*)
+		*--*)
 			export BLIS_ARCH_TYPE="$THIS_CONF"
 			;;
 	esac
