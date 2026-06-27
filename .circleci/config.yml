@@ -104,12 +104,12 @@ workflows:
       # are compiled, only NEON kernels will be tested. (h/t to RuQing Xu)
       - build:
           os: linuxnew
-          CC: clang-17
-          CXX: clang++-17
+          CC: clang-18
+          CXX: clang++-18
           CONF: arm64
           CFLAGS: '--target=aarch64-linux-gnu --sysroot=/usr/aarch64-linux-gnu'
           LDFLAGS: '--target=aarch64-linux-gnu --sysroot=/usr/aarch64-linux-gnu --fuse-ld=lld'
-          PACKAGES: 'clang-17 libc6-dev-arm64-cross qemu-system-arm qemu-user'
+          PACKAGES: 'clang-18 libc6-dev-arm64-cross qemu-system-arm qemu-user'
           TESTSUITE_WRAPPER: 'qemu-aarch64 -cpu XXX -L /usr/aarch64-linux-gnu/'
 
       # The RISC-V targets require the qemu version available in jammy or newer.
