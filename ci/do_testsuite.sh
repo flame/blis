@@ -9,19 +9,13 @@ export BLIS_JR_NT=1
 export BLIS_IR_NT=1
 export BLIS_THREAD_IMPL="single"
 
-TO_TEST="$CONF"
-ARM64_QEMU="no"
-if [ "$CONF" = "arm64" ] && [ "$TESTSUITE_WRAPPER" != "" ]; then
-	TO_TEST="armsve firestorm thunderx2 cortexa57 cortexa53 m4sme_p m4sme_e"
-	ARM64_QEMU="yes"
-	TESTSUITE_WRAPPER_SAVE="$TESTSUITE_WRAPPER"
-fi
+TESTSUITE_WRAPPER_SAVE="$TESTSUITE_WRAPPER"
 
-for THIS_CONF in $TO_TEST; do
+for THIS_CONF in $(echo $CONF | tr , ' '); do
 
 	echo "Testing configuration: $THIS_CONF"
 
-	if [ "$ARM64_QEMU" = "yes" ]; then
+	if [ "x$TESTSUITE_WRAPPER" != "x" ]; then
 		case $THIS_CONF in
 			armsve)
 				CPU="max,sve512=on,sme=off"
@@ -37,9 +31,14 @@ for THIS_CONF in $TO_TEST; do
 				exit 1
 				;;
 		esac
-		export BLIS_ARCH_TYPE="$THIS_CONF"
 		export TESTSUITE_WRAPPER=$(echo "$TESTSUITE_WRAPPER_SAVE" | sed "s/XXX/$CPU/")
 	fi
+
+	case $CONF in
+		*,*)
+			export BLIS_ARCH_TYPE="$THIS_CONF"
+			;;
+	esac
 
 	if [ "$TEST" = "FAST" -o "$TEST" = "ALL" ]; then
 		make T=1 testblis-fast

@@ -79,7 +79,7 @@ workflows:
           THR: pthreads
           CC: clang
           CXX: clang++
-          CONF: firestorm
+          CONF: firestorm,m4sme_p
 
       # cortexa15 build and fast testsuite (qemu)
       - build:
@@ -90,26 +90,22 @@ workflows:
           TESTSUITE_WRAPPER: 'qemu-arm -cpu cortex-a15 -L /usr/arm-linux-gnueabihf/'
 
       # arm64 build and fast testsuite (gcc, qemu)
-      # NOTE: This entry omits the -cpu flag so that while both NEON and SVE kernels
-      # are compiled, only NEON kernels will be tested. (h/t to RuQing Xu)
       - build:
           os: linuxnew
           CC: aarch64-linux-gnu-gcc-14
           CXX: aarch64-linux-gnu-g++-14
-          CONF: arm64
+          CONF: armsve,firestorm,thunderx2,cortexa57,cortexa53,m4sme_p,m4sme_e
           PACKAGES: 'gcc-14-aarch64-linux-gnu g++-14-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
           TESTSUITE_WRAPPER: 'qemu-aarch64 -cpu XXX -L /usr/aarch64-linux-gnu/'
 
       # arm64 build and fast testsuite (clang, qemu)
-      # NOTE: This entry omits the -cpu flag so that while both NEON and SVE kernels
-      # are compiled, only NEON kernels will be tested. (h/t to RuQing Xu)
       - build:
           os: linuxnew
           CC: clang-18
           CXX: clang++-18
-          CONF: arm64
+          CONF: armsve,firestorm,thunderx2,cortexa57,cortexa53,m4sme_p,m4sme_e
           CFLAGS: '--target=aarch64-linux-gnu --sysroot=/usr/aarch64-linux-gnu'
-          LDFLAGS: '--target=aarch64-linux-gnu --sysroot=/usr/aarch64-linux-gnu --fuse-ld=lld'
+          LDFLAGS: '--target=aarch64-linux-gnu --sysroot=/usr/aarch64-linux-gnu -fuse-ld=lld'
           PACKAGES: 'clang-18 libc6-dev-arm64-cross qemu-system-arm qemu-user'
           TESTSUITE_WRAPPER: 'qemu-aarch64 -cpu XXX -L /usr/aarch64-linux-gnu/'
 
