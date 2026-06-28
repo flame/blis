@@ -287,6 +287,13 @@ print_usage()
                  Enabling this option WILL NEGATIVELY IMPACT PERFORMANCE.
                  Please use only for informational/debugging purposes.
 
+   --enable-mixed-precision-norm, --disable-mixed-precision-norm
+
+                 Enable (enabled by default) accumulating the single-precision
+                 vector norms (snrm2, scnrm2) in double precision, for results
+                 consistent with other BLAS implementations. Disable to restore
+                 accumulation in single precision.
+
    --enable-asan, --disable-asan
 
                  Enable (disabled by default) compiling and linking BLIS
@@ -3056,6 +3063,7 @@ blis_main()
 	enable_pba_pools='yes'
 	enable_sba_pools='yes'
 	enable_mem_tracing='no'
+	enable_mixed_precision_norm='yes'
 	int_type_size=0
 	blas_int_type_size=32
 	enable_blas='yes'
@@ -3267,6 +3275,12 @@ blis_main()
 							;;
 						disable-mem-tracing)
 							enable_mem_tracing='no'
+							;;
+						enable-mixed-precision-norm)
+							enable_mixed_precision_norm='yes'
+							;;
+						disable-mixed-precision-norm)
+							enable_mixed_precision_norm='no'
 							;;
 
 						enable-addon=*)
@@ -4059,6 +4073,13 @@ blis_main()
 		echo "${script_name}: memory tracing output is disabled."
 		enable_mem_tracing_01=0
 	fi
+	if [[ ${enable_mixed_precision_norm} = yes ]]; then
+		echo "${script_name}: double-accumulated single-precision norms (snrm2, scnrm2) are enabled."
+		enable_mixed_precision_norm_01=1
+	else
+		echo "${script_name}: double-accumulated single-precision norms (snrm2, scnrm2) are disabled."
+		enable_mixed_precision_norm_01=0
+	fi
 	if [[ ${has_memkind} = yes ]]; then
 		if [[ -z ${enable_memkind} ]]; then
 			# If no explicit option was given for libmemkind one way or the other,
@@ -4488,6 +4509,7 @@ blis_main()
 	add_config_var enable_pba_pools          enable_pba_pools_01
 	add_config_var enable_sba_pools          enable_sba_pools_01
 	add_config_var enable_mem_tracing        enable_mem_tracing_01
+	add_config_var enable_mixed_precision_norm enable_mixed_precision_norm_01
 	add_config_var int_type_size
 	add_config_var blas_int_type_size
 	add_config_var enable_sup_handling       enable_sup_handling_01

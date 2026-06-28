@@ -265,6 +265,34 @@ void PASTEMAC(ch,varname) \
 INSERT_GENTFUNCR_BASIC( norm1v_unb_var1 )
 
 
+// When mixed-precision norms are enabled (BLIS_ENABLE_MIXED_PRECISION_NORM,
+// the default), the single-precision vector norms (snrm2, scnrm2) accumulate
+// the sum of the squares in double precision. The sumsqv-based path below
+// otherwise accumulates in the working (single) precision, which is less
+// accurate than other BLAS implementations (MKL, OpenBLAS, vecLib). Overflow
+// is not a concern: a single-precision magnitude squared is at most ~1.16e77,
+// far below DBL_MAX (~1.8e308). See https://github.com/flame/blis/issues/914.
+// (Implemented as an outer helper macro because a macro body cannot itself
+// contain preprocessor directives.)
+#ifdef BLIS_ENABLE_MIXED_PRECISION_NORM
+#define BLIS_NORMFV_MIXED_PREC_PATH( ctype, ctype_r, ch, chr ) \
+	if ( sizeof( ctype_r ) == sizeof( float ) ) \
+	{ \
+		double dsumsq = 0.0; \
+		for ( dim_t i = 0; i < n; ++i ) \
+		{ \
+			const ctype  chi = *( x + ( dim_t )i * incx ); \
+			const double re  = ( double )PASTEMAC(ch,real)( chi ); \
+			const double im  = ( double )PASTEMAC(ch,imag)( chi ); \
+			dsumsq += re * re + im * im; \
+		} \
+		*norm = ( ctype_r )sqrt( dsumsq ); \
+		return; \
+	}
+#else
+#define BLIS_NORMFV_MIXED_PREC_PATH( ctype, ctype_r, ch, chr ) /* disabled */
+#endif
+
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
 \
@@ -282,6 +310,9 @@ void PASTEMAC(ch,varname) \
 	ctype_r  scale; \
 	ctype_r  sumsq; \
 	ctype_r  sqrt_sumsq; \
+\
+	/* Optionally accumulate single-precision norms in double (see above). */ \
+	BLIS_NORMFV_MIXED_PREC_PATH( ctype, ctype_r, ch, chr ) \
 \
 	/* Initialize scale and sumsq to begin the summation. */ \
 	bli_tcopys( chr,chr, *zero, scale ); \
@@ -414,6 +445,9 @@ void PASTEMAC(ch,varname) \
 	ctype_r  scale; \
 	ctype_r  sumsq; \
 	ctype_r  sqrt_sumsq; \
+\
+	/* Optionally accumulate single-precision norms in double (see above). */ \
+	BLIS_NORMFV_MIXED_PREC_PATH( ctype, ctype_r, ch, chr ) \
 \
 	/* Initialize scale and sumsq to begin the summation. */ \
 	bli_tcopys( chr,chr, *zero, scale ); \
