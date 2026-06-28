@@ -134,6 +134,8 @@ void bli_cntx_init_zen3( cntx_t* cntx )
 	  // setv
 	  BLIS_SETV_KER,  BLIS_FLOAT,  bli_ssetv_zen_int,
 	  BLIS_SETV_KER,  BLIS_DOUBLE, bli_dsetv_zen_int,
+	  BLIS_SETV_KER,   BLIS_SCOMPLEX, bli_csetv_zen_int,
+	  BLIS_SETV_KER,   BLIS_DCOMPLEX, bli_zsetv_zen_int,
 
 	  BLIS_VA_END
 	);
