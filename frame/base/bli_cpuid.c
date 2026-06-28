@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2026, Advanced Micro Devices, Inc.
    Copyright (C) 2019, Dave Love, University of Manchester
 
    Redistribution and use in source and binary forms, with or without
@@ -132,6 +132,10 @@ arch_t bli_cpuid_query_id( void )
 
 		// Check for each AMD configuration that is enabled, check for that
 		// microarchitecture. We check from most recent to most dated.
+#ifdef BLIS_CONFIG_ZEN4
+		if ( bli_cpuid_is_zen4( family, model, features ) )
+			return BLIS_ARCH_ZEN4;
+#endif
 #ifdef BLIS_CONFIG_ZEN3
 		if ( bli_cpuid_is_zen3( family, model, features ) )
 			return BLIS_ARCH_ZEN3;
@@ -282,6 +286,41 @@ bool bli_cpuid_is_penryn
 }
 
 // -----------------------------------------------------------------------------
+bool bli_cpuid_is_zen4
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	// Check for expected CPU features.
+	const uint32_t expected = FEATURE_SSE3       |
+	                          FEATURE_SSSE3      |
+	                          FEATURE_SSE41      |
+	                          FEATURE_SSE42      |
+	                          FEATURE_AVX        |
+	                          FEATURE_FMA3       |
+	                          FEATURE_AVX2       |
+	                          FEATURE_AVX512F    |
+	                          FEATURE_AVX512DQ   |
+	                          FEATURE_AVX512CD   |
+	                          FEATURE_AVX512BW   |
+	                          FEATURE_AVX512VL   |
+	                          FEATURE_AVX512VNNI |
+	                          FEATURE_AVX512BF16;
+
+	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
+
+	// For zen4 the family id is 0x19
+	if ( family != 0x19 ) return FALSE;
+
+	// All family 0x19 CPUs that support AVX512 instructions are zen4,
+	// thus no need to check model numbers here. Family 0x19 CPUs that
+	// don't support AVX512 are zen3. Their model ranges are tested in
+	// a separate function below.
+
+	return TRUE;
+}
 
 bool bli_cpuid_is_zen3
      (
@@ -625,27 +664,36 @@ bool bli_cpuid_is_cortexa9
 
 enum
 {
-                                      // input register(s)     output register
-	FEATURE_MASK_SSE3     = (1u<< 0), // cpuid[eax=1]         :ecx[0]
-	FEATURE_MASK_SSSE3    = (1u<< 9), // cpuid[eax=1]         :ecx[9]
-	FEATURE_MASK_SSE41    = (1u<<19), // cpuid[eax=1]         :ecx[19]
-	FEATURE_MASK_SSE42    = (1u<<20), // cpuid[eax=1]         :ecx[20]
-	FEATURE_MASK_AVX      = (1u<<28), // cpuid[eax=1]         :ecx[28]
-	FEATURE_MASK_AVX2     = (1u<< 5), // cpuid[eax=7,ecx=0]   :ebx[5]
-	FEATURE_MASK_FMA3     = (1u<<12), // cpuid[eax=1]         :ecx[12]
-	FEATURE_MASK_FMA4     = (1u<<16), // cpuid[eax=0x80000001]:ecx[16]
-	FEATURE_MASK_AVX512F  = (1u<<16), // cpuid[eax=7,ecx=0]   :ebx[16]
-	FEATURE_MASK_AVX512DQ = (1u<<17), // cpuid[eax=7,ecx=0]   :ebx[17]
-	FEATURE_MASK_AVX512PF = (1u<<26), // cpuid[eax=7,ecx=0]   :ebx[26]
-	FEATURE_MASK_AVX512ER = (1u<<27), // cpuid[eax=7,ecx=0]   :ebx[27]
-	FEATURE_MASK_AVX512CD = (1u<<28), // cpuid[eax=7,ecx=0]   :ebx[28]
-	FEATURE_MASK_AVX512BW = (1u<<30), // cpuid[eax=7,ecx=0]   :ebx[30]
-	FEATURE_MASK_AVX512VL = (1u<<31), // cpuid[eax=7,ecx=0]   :ebx[31]
-	FEATURE_MASK_XGETBV   = (1u<<26)|
-                            (1u<<27), // cpuid[eax=1]         :ecx[27:26]
-	XGETBV_MASK_XMM       = 0x02u,    // xcr0[1]
-	XGETBV_MASK_YMM       = 0x04u,    // xcr0[2]
-	XGETBV_MASK_ZMM       = 0xe0u     // xcr0[7:5]
+                                                    // input register(s)     output register
+	FEATURE_MASK_SSE3               = (1u<< 0), // cpuid[eax=1]          :ecx[0]
+	FEATURE_MASK_SSSE3              = (1u<< 9), // cpuid[eax=1]          :ecx[9]
+	FEATURE_MASK_SSE41              = (1u<<19), // cpuid[eax=1]          :ecx[19]
+	FEATURE_MASK_SSE42              = (1u<<20), // cpuid[eax=1]          :ecx[20]
+	FEATURE_MASK_AVX                = (1u<<28), // cpuid[eax=1]          :ecx[28]
+	FEATURE_MASK_AVX2               = (1u<< 5), // cpuid[eax=7,ecx=0]    :ebx[5]
+	FEATURE_MASK_FMA3               = (1u<<12), // cpuid[eax=1]          :ecx[12]
+	FEATURE_MASK_FMA4               = (1u<<16), // cpuid[eax=0x80000001] :ecx[16]
+	FEATURE_MASK_AVX512F            = (1u<<16), // cpuid[eax=7,ecx=0]    :ebx[16]
+	FEATURE_MASK_AVX512DQ           = (1u<<17), // cpuid[eax=7,ecx=0]    :ebx[17]
+	FEATURE_MASK_AVX512PF           = (1u<<26), // cpuid[eax=7,ecx=0]    :ebx[26]
+	FEATURE_MASK_AVX512ER           = (1u<<27), // cpuid[eax=7,ecx=0]    :ebx[27]
+	FEATURE_MASK_AVX512CD           = (1u<<28), // cpuid[eax=7,ecx=0]    :ebx[28]
+	FEATURE_MASK_AVX512BW           = (1u<<30), // cpuid[eax=7,ecx=0]    :ebx[30]
+	FEATURE_MASK_AVX512VL           = (1u<<31), // cpuid[eax=7,ecx=0]    :ebx[31]
+	FEATURE_MASK_AVX512VNNI         = (1u<<11), // cpuid[eax=7,ecx=0]    :ecx[11]
+	FEATURE_MASK_MOVDIRI            = (1u<<27), // cpuid[eax=7,ecx=0]    :ecx[27]
+	FEATURE_MASK_MOVDIR64B          = (1u<<28), // cpuid[eax=7,ecx=0]    :ecx[28]
+	FEATURE_MASK_AVX512VP2INTERSECT = (1u<< 8), // cpuid[eax=7,ecx=0]    :edx[8]
+	FEATURE_MASK_AVX512FP16         = (1u<<23), // cpuid[eax=7,ecx=0]    :edx[23]
+
+	FEATURE_MASK_AVXVNNI            = (1u<< 4), // cpuid[eax=7,ecx=1]    :eax[4]
+	FEATURE_MASK_AVX512BF16         = (1u<< 5), // cpuid[eax=7,ecx=1]    :eax[5]
+
+	FEATURE_MASK_XGETBV             = (1u<<26)|
+                                          (1u<<27), // cpuid[eax=1]          :ecx[27:26]
+	XGETBV_MASK_XMM                 = 0x02u,    // xcr0[1]
+	XGETBV_MASK_YMM                 = 0x04u,    // xcr0[2]
+	XGETBV_MASK_ZMM                 = 0xe0u,    // xcr0[7:5]
 };
 
 
@@ -707,6 +755,23 @@ uint32_t bli_cpuid_query
 		if ( bli_cpuid_has_features( ebx, FEATURE_MASK_AVX512CD ) ) *features |= FEATURE_AVX512CD;
 		if ( bli_cpuid_has_features( ebx, FEATURE_MASK_AVX512BW ) ) *features |= FEATURE_AVX512BW;
 		if ( bli_cpuid_has_features( ebx, FEATURE_MASK_AVX512VL ) ) *features |= FEATURE_AVX512VL;
+
+		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_AVX512VNNI ) ) *features |= FEATURE_AVX512VNNI;
+		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_MOVDIRI ) )    *features |= FEATURE_MOVDIRI;
+		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_MOVDIR64B ) )  *features |= FEATURE_MOVDIR64B;
+
+		if ( bli_cpuid_has_features( edx, FEATURE_MASK_AVX512VP2INTERSECT ) ) *features |= FEATURE_AVX512VP2INTERSECT;
+		if ( bli_cpuid_has_features( edx, FEATURE_MASK_AVX512FP16 ) )         *features |= FEATURE_AVX512FP16;
+
+		// This is actually a macro that modifies the last four operands,
+		// hence why they are not passed by address.
+		// This returns extended feature flags in EAX.
+		// The availability of AVX512_BF16  can be found using the
+		// 5th feature bit of the returned value
+		__cpuid_count( 7, 1, eax, ebx, ecx, edx );
+
+		if ( bli_cpuid_has_features( eax, FEATURE_MASK_AVXVNNI ) )    *features |= FEATURE_AVXVNNI;
+		if ( bli_cpuid_has_features( eax, FEATURE_MASK_AVX512BF16 ) ) *features |= FEATURE_AVX512BF16;
 	}
 
 	// Check extended processor info / features bits for AMD-specific features.

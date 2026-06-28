@@ -11,7 +11,7 @@
 x86_64:         intel64 amd64 amd64_legacy
 intel64:        skx knl haswell sandybridge penryn generic
 amd64_legacy:   excavator steamroller piledriver bulldozer generic
-amd64:          zen3 zen2 zen generic
+amd64:          zen4 zen3 zen2 zen generic
 arm64:          armsve firestorm thunderx2 cortexa57 cortexa53 generic
 arm32:          cortexa15 cortexa9 generic
 power:          power10 power9 generic
@@ -24,6 +24,7 @@ sandybridge: sandybridge
 penryn:      penryn
 
 # AMD architectures.
+zen4:        zen4/zen4/zen3/zen2/zen/haswell
 zen3:        zen3/zen3/zen2/zen/haswell
 zen2:        zen2/zen2/zen/haswell
 zen:         zen/zen/haswell
