@@ -154,6 +154,8 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  //copy
 	  BLIS_COPYV_KER,  BLIS_FLOAT,  bli_scopyv_zen_int,
 	  BLIS_COPYV_KER,  BLIS_DOUBLE, bli_dcopyv_zen_int,
+	  BLIS_COPYV_KER,  BLIS_SCOMPLEX, bli_ccopyv_zen_int,
+	  BLIS_COPYV_KER,  BLIS_DCOMPLEX, bli_zcopyv_zen_int,
 
 	  //set
 	  BLIS_SETV_KER,   BLIS_FLOAT,  bli_ssetv_zen_int,
