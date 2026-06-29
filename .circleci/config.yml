@@ -16,10 +16,10 @@ executors:
       - image: cimg/base:2024.10
   linuxnew: # Docker using the Base Convenience Image
     docker:
-      - image: cimg/base:current-22.04
+      - image: cimg/base:current-24.04
   macos: &macos-executor # macos executor running Xcode
     macos:
-      xcode: 16.4.0
+      xcode: 26.4.1
   linuxvm: # executor type
     machine:
       image: ubuntu-2204:current
@@ -102,6 +102,7 @@ workflows:
           THR: pthreads
           CC: clang
           CXX: clang++
+          CONF: arm64--firestorm,m4sme_p
 
       # cortexa15 build and fast testsuite (qemu)
       - build:
@@ -111,39 +112,25 @@ workflows:
           PACKAGES: 'gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libc6-dev-armhf-cross qemu-system-arm qemu-user'
           TESTSUITE_WRAPPER: 'qemu-arm -cpu cortex-a15 -L /usr/arm-linux-gnueabihf/'
 
-      # cortexa57 build and fast testsuite (qemu)
+      # arm64 build and fast testsuite (gcc, qemu)
       - build:
-          CC: aarch64-linux-gnu-gcc
-          CXX: aarch64-linux-gnu-g++
-          CONF: cortexa57
-          PACKAGES: 'gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
-          TESTSUITE_WRAPPER: 'qemu-aarch64 -L /usr/aarch64-linux-gnu/'
+          os: linuxnew
+          CC: aarch64-linux-gnu-gcc-14
+          CXX: aarch64-linux-gnu-g++-14
+          CONF: arm64--armsve,firestorm,thunderx2,cortexa57,cortexa53,m4sme_p,m4sme_e
+          PACKAGES: 'gcc-14-aarch64-linux-gnu g++-14-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
+          TESTSUITE_WRAPPER: 'qemu-aarch64 -cpu XXX -L /usr/aarch64-linux-gnu/'
 
-      # Apple M1 (firestorm) build and fast testsuite (qemu)
+      # arm64 build and fast testsuite (clang, qemu)
       - build:
-          CC: aarch64-linux-gnu-gcc
-          CXX: aarch64-linux-gnu-g++
-          CONF: firestorm
-          PACKAGES: 'gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
-          TESTSUITE_WRAPPER: 'qemu-aarch64 -L /usr/aarch64-linux-gnu/'
-
-      # armsve build and fast testsuite (qemu)
-      - build:
-          CC: aarch64-linux-gnu-gcc-10
-          CXX: aarch64-linux-gnu-g++-10
-          CONF: armsve
-          PACKAGES: 'gcc-10-aarch64-linux-gnu g++-10-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
-          TESTSUITE_WRAPPER: 'qemu-aarch64 -cpu max,sve=true,sve512=true -L /usr/aarch64-linux-gnu/'
-
-      # arm64 build and fast testsuite (qemu)
-      # NOTE: This entry omits the -cpu flag so that while both NEON and SVE kernels
-      # are compiled, only NEON kernels will be tested. (h/t to RuQing Xu)
-      - build:
-          CC: aarch64-linux-gnu-gcc-10
-          CXX: aarch64-linux-gnu-g++-10
-          CONF: arm64
-          PACKAGES: 'gcc-10-aarch64-linux-gnu g++-10-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
-          TESTSUITE_WRAPPER: 'qemu-aarch64 -L /usr/aarch64-linux-gnu/'
+          os: linuxnew
+          CC: clang-18
+          CXX: clang++-18
+          CONF: arm64--armsve,firestorm,thunderx2,cortexa57,cortexa53,m4sme_p,m4sme_e
+          CFLAGS: '--target=aarch64-linux-gnu' #--sysroot=/usr/aarch64-linux-gnu'
+          LDFLAGS: '--target=aarch64-linux-gnu -fuse-ld=lld-18' #--sysroot=/usr/aarch64-linux-gnu'
+          PACKAGES: 'lld-18 clang-18 gcc-14-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
+          TESTSUITE_WRAPPER: 'qemu-aarch64 -cpu XXX -L /usr/aarch64-linux-gnu/'
 
       # The RISC-V targets require the qemu version available in jammy or newer.
       # When CI is upgraded, the packages should be activated and do_script.sh
@@ -290,6 +277,9 @@ jobs:
       BLD:
         type: string
         default: ''
+      CFLAGS:
+        type: string
+        default: ''
       LDFLAGS:
         type: string
         default: ''
@@ -328,6 +318,7 @@ jobs:
             export CONF="<< parameters.CONF >>"
             export TEST="<< parameters.TEST >>"
             export BLD="<< parameters.BLD >>"
+            export CFLAGS="<< parameters.CFLAGS >>"
             export LDFLAGS="<< parameters.LDFLAGS >>"
             export SDE="<< parameters.SDE >>"
             export LEVEL0="<< parameters.LEVEL0 >>"
@@ -367,7 +358,7 @@ jobs:
 
             if [ "$CONF" = "generic_broadcast" ]; then
               export CONF=generic
-              export CFLAGS="-DBLIS_BBM_s=2 -DBLIS_BBM_d=2 -DBLIS_BBM_c=2 -DBLIS_BBM_z=2 -DBLIS_BBN_s=4 -DBLIS_BBN_d=4 -DBLIS_BBN_c=4 -DBLIS_BBN_z=4"
+              export CFLAGS="$CFLAGS -DBLIS_BBM_s=2 -DBLIS_BBM_d=2 -DBLIS_BBM_c=2 -DBLIS_BBM_z=2 -DBLIS_BBN_s=4 -DBLIS_BBN_d=4 -DBLIS_BBN_c=4 -DBLIS_BBN_z=4"
             fi
 
             echo "Configuration:"
@@ -385,7 +376,7 @@ jobs:
             echo "LDFLAGS           = $LDFLAGS"
             echo "TESTSUITE_WRAPPER = $TESTSUITE_WRAPPER"
 
-            $DIST_PATH/configure -p `pwd`/../install -t $THR $BLD CC=$CC $CONF
+            $DIST_PATH/configure -p `pwd`/../install -t $THR $BLD CC=$CC ${CONF%%--*}
             pwd
             ls -l
             $CC --version

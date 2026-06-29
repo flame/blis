@@ -1876,6 +1876,12 @@ check_compiler()
 		fi
 	fi
 
+	# sme2 support (llvm 18+, gcc 14+)
+	if [[ ! ( ( ${cc_vendor} = clang  && ${cc_major} -ge 18 ) || ( ${cc_vendor} = gcc  && ${cc_major} -ge 14 ) ) ]]; then
+		blacklistcc_add "m4sme_p"
+		blacklistcc_add "m4sme_e"
+	fi
+
 	# clang
 	if [[ ${cc_vendor} = clang ]]; then
 		if [[ ${vendor_string} = *Apple* ]]; then
@@ -2158,6 +2164,11 @@ check_os()
 {
 	if [[ ( "$(uname -s)" == "Darwin" || "$is_win" == "yes" ) && "$(uname -m)" == "arm64" ]]; then
 		blacklistos_add "armsve"
+	fi
+
+	if [[ "$is_win" == "yes" ]]; then
+		blacklistcc_add "m4sme_p"
+		blacklistcc_add "m4sme_e"
 	fi
 }
 
