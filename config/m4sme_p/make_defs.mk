@@ -64,10 +64,10 @@ endif
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     :=  -march=armv8a+sve2+sme2+sme-f64f64 -fno-builtin
+CKVECFLAGS     :=  -march=armv8a+sme2+sme-f64f64 -fno-builtin
 else
 ifeq ($(CC_VENDOR),clang)
-CKVECFLAGS     :=  -march=armv8a+sve2+sme2+sme-f64f64 -fno-builtin
+CKVECFLAGS     :=  -march=armv8a+sme2+sme-f64f64 -fno-builtin
 else
 $(error gcc or clang is required for this configuration.)
 endif
