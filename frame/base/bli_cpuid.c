@@ -866,7 +866,7 @@ uint32_t bli_cpuid_query
 			// present.
 
 			//fprintf(stderr, "xgetbv: no\n");
-			features = 0;
+			*features = 0;
 		}
 	}
 
