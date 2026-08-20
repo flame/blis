@@ -133,6 +133,7 @@ THREADING_MODEL   := @threading_model@
 # Whether the compiler supports "#pragma omp simd" via the -fopenmp-simd option.
 PRAGMA_OMP_SIMD   := @pragma_omp_simd@
 
+
 # The installation prefix, exec_prefix, libdir, includedir, and shareddir
 # values from configure tell us where to install the libraries, header files,
 # and public makefile fragments. We must first assign each substituted
@@ -213,6 +214,8 @@ MK_COMPLEX_RETURN_SCHEME := @complex_return@
 
 # Status of aocl dynamic configuration
 MK_ENABLE_AOCL_DYNAMIC := @enable_aocl_dynamic@
+
+MK_ENABLE_AOCL_ALLOC := @enable_aocl_alloc@
 
 # BLAS int size
 MK_BLAS_INT_TYPE_SIZE := @blas_int_type_size@

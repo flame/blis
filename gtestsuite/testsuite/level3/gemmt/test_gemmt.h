@@ -159,7 +159,45 @@ void test_gemmt( char storage, char uploc, char transa, char transb, gtint_t n,
 
 // Test-case logger : Used to print the test-case details based on parameters
 template <typename T>
-class gemmtGenericPrint {
+class gemmtGeneric1Print {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,gtint_t,T,T,gtint_t>> str) const {
+        char storage    = std::get<0>(str.param);
+        char uploc      = std::get<1>(str.param);
+        char transa     = std::get<2>(str.param);
+        char transb     = std::get<3>(str.param);
+        gtint_t n       = std::get<4>(str.param);
+        gtint_t k       = std::get<5>(str.param);
+        T alpha  = std::get<6>(str.param);
+        T beta   = std::get<7>(str.param);
+        gtint_t lda_inc = std::get<8>(str.param);
+
+        gtint_t ldb_inc = lda_inc;
+        gtint_t ldc_inc = lda_inc;
+
+        std::string str_name = API_PRINT;
+        str_name += "_stor_" + std::string(&storage, 1);
+        str_name += "_uploc_" + std::string(&uploc, 1);
+        str_name += "_transa_" + std::string(&transa, 1);
+        str_name += "_transb_" + std::string(&transb, 1);
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_k_" + std::to_string(k);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, n, k, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( storage, transb, k, n, ldb_inc );
+        gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', n, n, ldc_inc );
+        str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
+        str_name += "_ldb_i" + std::to_string(ldb_inc) + "_" + std::to_string(ldb);
+        str_name += "_ldc_i" + std::to_string(ldc_inc) + "_" + std::to_string(ldc);
+        return str_name;
+    }
+};
+
+// Test-case logger : Used to print the test-case details based on parameters
+template <typename T>
+class gemmtGeneric3Print {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,gtint_t,T,T,gtint_t,gtint_t,gtint_t>> str) const {
@@ -195,7 +233,46 @@ public:
 };
 
 template <typename T>
-class gemmtMemGenericPrint {
+class gemmtMemGeneric1Print {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,gtint_t,T,T,gtint_t,bool>> str) const {
+        char storage    = std::get<0>(str.param);
+        char uploc      = std::get<1>(str.param);
+        char transa     = std::get<2>(str.param);
+        char transb     = std::get<3>(str.param);
+        gtint_t n       = std::get<4>(str.param);
+        gtint_t k       = std::get<5>(str.param);
+        T alpha    = std::get<6>(str.param);
+        T beta     = std::get<7>(str.param);
+        gtint_t lda_inc = std::get<8>(str.param);
+        bool is_mem_test = std::get<9>(str.param);
+
+        gtint_t ldb_inc = lda_inc;
+        gtint_t ldc_inc = lda_inc;
+
+        std::string str_name = API_PRINT;
+        str_name += "_stor_" + std::string(&storage, 1);
+        str_name += "_uploc_" + std::string(&uploc, 1);
+        str_name += "_transa_" + std::string(&transa, 1);
+        str_name += "_transb_" + std::string(&transb, 1);
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_k_" + std::to_string(k);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, n, k, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( storage, transb, k, n, ldb_inc );
+        gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', n, n, ldc_inc );
+        str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
+        str_name += "_ldb_i" + std::to_string(ldb_inc) + "_" + std::to_string(ldb);
+        str_name += "_ldc_i" + std::to_string(ldc_inc) + "_" + std::to_string(ldc);
+        str_name = str_name + (is_mem_test ? "_mem_test_enabled" : "_mem_test_disabled");
+        return str_name;
+    }
+};
+
+template <typename T>
+class gemmtMemGeneric3Print {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,gtint_t,T,T,gtint_t,gtint_t,gtint_t,bool>> str) const {

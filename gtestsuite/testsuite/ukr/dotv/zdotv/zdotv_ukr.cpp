@@ -190,7 +190,7 @@ INSTANTIATE_TEST_SUITE_P(
 */
 #ifdef K_bli_zdotv_zen4_asm
 INSTANTIATE_TEST_SUITE_P(
-        DISABLED_bli_zdotv_zen4_asm_unitStride,
+        bli_zdotv_zen4_asm_unitStride,
         zdotvGeneric,
         ::testing::Combine(
             ::testing::Values(K_bli_zdotv_zen4_asm),

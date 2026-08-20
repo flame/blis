@@ -269,6 +269,81 @@ There are several other options that can be used when running an executable whic
 ./testsuite.util.nrm2 --help
 ```
 
+## Verification of Binary Compatibility
+The GTestSuite includes optional tooling for verifying that BLIS produces
+**bit-exact** (binary-compatible) results across different builds, platforms,
+or compiler configurations. This is important for reproducibility: two builds
+of BLIS given the same inputs should produce identical floating-point outputs
+down to every bit.
+
+Two complementary verification mechanisms are provided. Both are controlled
+entirely through CMake options and are **disabled by default** so they
+impose zero overhead during normal testing.
+
+### CRC-32 Checksum Verification (`ENABLE_CRC`)
+A CRC-32 (Cyclic Redundancy Check) is a compact hash computed over the raw
+bytes of an output buffer. By comparing the CRC of the BLIS output against the
+CRC of the reference output, we can detect any bitwise difference without
+storing or transmitting the full buffer contents.
+
+When enabled, CRC values are:
+* printed to stdout alongside each test for quick visual inspection, and
+* recorded as GTest properties so they appear in per-test JSON output files
+  (requires `-DGTEST_JSON_OUTPUT=ON`).
+
+The JSON output is the primary intended consumption path: CI pipelines or
+post-processing scripts can parse the JSON files and compare CRC values across
+builds to flag any bit-level divergence.
+
+#### CMake Configuration
+```console
+# Enable CRC verification (typically combined with JSON output)
+$ cmake .. -DENABLE_CRC=ON -DGTEST_JSON_OUTPUT=ON <other options>
+$ make && ctest
+
+# Default (CRC compiled out entirely)
+$ cmake .. <other options>
+```
+
+### Binary File Output (`ENABLE_BINARY_OUTPUT`)
+When deeper investigation is needed — for example, to locate exactly which
+elements differ — binary file output dumps the raw BLIS and reference result
+buffers to disk. Each test writes a pair of `.bin` files (one for the BLIS
+output, one for the reference) under the `blis_test_outputs/` directory.
+
+These files can be loaded into analysis tools (Python/NumPy, MATLAB, a hex
+editor, etc.) for element-by-element comparison, statistical analysis of
+rounding differences, or archival.
+
+A per-file size limit of 100 MB is enforced to prevent accidental disk
+exhaustion on large problem sizes.
+
+#### CMake Configuration
+```console
+# Enable binary output for offline analysis
+$ cmake .. -DENABLE_BINARY_OUTPUT=ON <other options>
+$ make
+$ ./testsuite.level3.gemm   # Creates .bin files under blis_test_outputs/
+
+# Default (binary output compiled out entirely)
+$ cmake .. <other options>
+```
+
+### Using Both Features Together
+CRC and binary output serve different purposes and can be enabled independently
+or together:
+
+| Feature | Purpose | Overhead | Best for |
+|---|---|---|---|
+| `ENABLE_CRC` | Detect any bitwise difference | Low (CPU only) | CI regression checks |
+| `ENABLE_BINARY_OUTPUT` | Dump full buffers to disk | High (disk I/O) | Root-cause analysis |
+
+```console
+# Full verification: detect differences via CRC, dump buffers for analysis
+$ cmake .. -DENABLE_CRC=ON -DENABLE_BINARY_OUTPUT=ON -DGTEST_JSON_OUTPUT=ON <other options>
+$ make && ctest
+```
+
 # How to Add New Tests
 There are two ways to add new tests.
 ### Modify an existing cpp file

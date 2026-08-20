@@ -72,29 +72,6 @@ err_t bli_gemmsup
 
     trans_t transa = bli_obj_conjtrans_status( a );
     trans_t transb = bli_obj_conjtrans_status( b );
-
-
-    //Don't use sup for currently unsupported storage types in cgemmsup
-    if(bli_obj_is_scomplex(c) &&
-    (((transa == BLIS_CONJ_NO_TRANSPOSE) || (transa == BLIS_CONJ_TRANSPOSE)) ||
-     ((transb == BLIS_CONJ_NO_TRANSPOSE) || (transb == BLIS_CONJ_TRANSPOSE))
-    )){
-	//printf(" gemmsup: Returning with for un-supported storage types and conjugate property in cgemmsup \n");
-	AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Unsuppported storage type for cgemm");
-	return BLIS_FAILURE;
-    }
-
-    //Don't use sup for currently unsupported storage types  in zgemmsup
-    if(bli_obj_is_dcomplex(c) &&
-    (((transa == BLIS_CONJ_NO_TRANSPOSE) || (transa == BLIS_CONJ_TRANSPOSE)) ||
-     ((transb == BLIS_CONJ_NO_TRANSPOSE) || (transb == BLIS_CONJ_TRANSPOSE))
-    )){
-	//printf(" gemmsup: Returning with for un-supported storage types and conjugate property in zgemmsup \n");
-	AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Unsuppported storage type for zgemm.");
-	return BLIS_FAILURE;
-    }
-
-
     // Obtain a valid context from the gks if necessary.
     // NOTE: This must be done before calling the _check() function, since
     // that function assumes the context pointer is valid.
@@ -106,6 +83,62 @@ err_t bli_gemmsup
     if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
     else                { rntm_l = *rntm;                       rntm = &rntm_l; }
 
+
+    //Don't use sup for currently unsupported storage types in cgemmsup
+    if(bli_obj_is_scomplex(c) &&
+    (((transa == BLIS_CONJ_NO_TRANSPOSE) || (transa == BLIS_CONJ_TRANSPOSE)) ||
+     ((transb == BLIS_CONJ_NO_TRANSPOSE) || (transb == BLIS_CONJ_TRANSPOSE))
+    )){
+	//printf(" gemmsup: Returning with for un-supported storage types and conjugate property in cgemmsup \n");
+	AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Unsupported storage type for cgemm");
+	return BLIS_FAILURE;
+    }
+
+#if defined(BLIS_FAMILY_ZEN6) || defined(BLIS_FAMILY_ZEN5) || defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64)
+{
+    arch_t arch_id = bli_arch_query_id_internal();
+
+    if(( arch_id == BLIS_ARCH_ZEN6 ) || ( arch_id == BLIS_ARCH_ZEN5 ) || ( arch_id == BLIS_ARCH_ZEN4 ))
+    {
+        //Don't use sup for currently unsupported storage types  in zgemmsup
+        if(bli_obj_is_dcomplex(c))
+        {
+            if(bli_does_conj( transa ) && bli_does_conj( transb ) )
+            {
+                //printf(" gemmsup: Returning with for un-supported storage types and conjugate property in zgemmsup \n");
+                AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Unsupported storage type for zgemm.");
+                return BLIS_FAILURE;
+            }
+            // Enforce B packing only for zgemm conjugate-transpose B input.
+            if ( bli_is_conjtrans( transb ) )
+            {
+                bli_rntm_set_pack_b(1, rntm);//packb
+            }
+        }
+    }
+    else
+    {
+        if(bli_obj_is_dcomplex(c) &&
+        (((transa == BLIS_CONJ_NO_TRANSPOSE) || (transa == BLIS_CONJ_TRANSPOSE)) ||
+        ((transb == BLIS_CONJ_NO_TRANSPOSE) || (transb == BLIS_CONJ_TRANSPOSE))
+        )){
+            //printf(" gemmsup: Returning with for un-supported storage types and conjugate property in zgemmsup \n");
+            AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Unsupported storage type for zgemm");
+            return BLIS_FAILURE;
+        }
+    }
+}
+#else
+    if(bli_obj_is_dcomplex(c) &&
+    (((transa == BLIS_CONJ_NO_TRANSPOSE) || (transa == BLIS_CONJ_TRANSPOSE)) ||
+     ((transb == BLIS_CONJ_NO_TRANSPOSE) || (transb == BLIS_CONJ_TRANSPOSE))
+    )){
+	//printf(" gemmsup: Returning with for un-supported storage types and conjugate property in zgemmsup \n");
+	AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Unsupported storage type for zgemm");
+	return BLIS_FAILURE;
+    }
+#endif
+
 #if defined(BLIS_FAMILY_ZEN6) || defined(BLIS_FAMILY_ZEN5) || defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64)
 
     // Query the architecture ID
@@ -113,7 +146,7 @@ err_t bli_gemmsup
 
     if(( arch_id == BLIS_ARCH_ZEN6 ) || ( arch_id == BLIS_ARCH_ZEN5 ) || ( arch_id == BLIS_ARCH_ZEN4 ))
     {
-        if(( bli_obj_dt(a) == BLIS_DOUBLE ) || ( bli_obj_dt(a) == BLIS_SCOMPLEX ))
+        if(( bli_obj_dt(a) == BLIS_DOUBLE ) || ( bli_obj_dt(a) == BLIS_SCOMPLEX ) || ( bli_obj_dt(a) == BLIS_DCOMPLEX ))
         {
             // Pack A to avoid RD kernels.
             if((stor_id == BLIS_CRC || stor_id == BLIS_RRC))

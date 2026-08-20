@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -136,6 +136,41 @@ bool bli_cntx_gemmsup_thresh_is_met_zen4( obj_t* a, obj_t* b, obj_t* c, cntx_t* 
 	else
 		return bli_cntx_l3_sup_thresh_is_met( a, b, c, cntx );
 }
+
+/* This function determines if we need to use single threaded or multithreaded
+    path for gemv for given matrix sizes for zen4 configuration.
+   * Returns TRUE if the dimensions fall under ST range
+   * Returns FALSE if the dimensions fall under MT range
+*/
+bool bli_gemvst_thresh_is_met_zen4( dim_t m, dim_t n, trans_t transa, num_t dt )
+{
+	if( dt == BLIS_DOUBLE )
+	{
+		if ( transa == BLIS_NO_TRANSPOSE && ( m*n < 235073 ) )       { return TRUE; }
+		if ( transa == BLIS_TRANSPOSE    && ( m*n < 26520 ) )        { return TRUE; }
+		return FALSE;
+	}
+	else if( dt == BLIS_FLOAT )
+	{
+		if ( transa == BLIS_NO_TRANSPOSE && ( m*n < 343662 ) )       { return TRUE; }
+		if ( transa == BLIS_TRANSPOSE    && ( m*n < 47085 ) )        { return TRUE; }
+		return FALSE;
+	}
+	else if( dt == BLIS_SCOMPLEX )
+	{
+		if ( transa == BLIS_NO_TRANSPOSE && ( m*n < 289608 ) )       { return TRUE; }
+		if ( transa == BLIS_TRANSPOSE    && ( m*n < 32469 ) )        { return TRUE; }
+		return FALSE;
+	}
+	else if( dt == BLIS_DCOMPLEX )
+	{
+		if ( transa == BLIS_NO_TRANSPOSE && ( m*n < 75380 ) )        { return TRUE; }
+		if ( transa == BLIS_TRANSPOSE    && ( m*n < 18208 ) )        { return TRUE; }
+		return FALSE;
+	}
+	return FALSE;
+}
+
 
 /* This function determines the ideal blocksizes for given datatype
    and num_threads.

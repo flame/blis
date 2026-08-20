@@ -113,43 +113,12 @@ DOTXF_KER_PROT( dcomplex, z, dotxf_zen4_int_8 )
 DOTXF_KER_PROT( dcomplex, z, dotxf_zen4_int_4 )
 DOTXF_KER_PROT( dcomplex, z, dotxf_zen4_int_2 )
 
-// gemv (intrinsics)
-// dgemv_n kernels for handling op(A) = 'n', i.e., transa = 'n' cases.
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx8 )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx7 )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx6 )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx5 )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx4 )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx3 )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx2 )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16mx1 )
-
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_32x8n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16x8n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_8x8n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_m_leftx8n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_32x4n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16x4n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_8x4n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_m_leftx4n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_32x3n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16x3n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_8x3n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_m_leftx3n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_32x2n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16x2n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_8x2n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_m_leftx2n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_32x1n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_16x1n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_8x1n )
-GEMV_KER_PROT( double,  d, gemv_n_zen4_int_m_leftx1n )
 
 // dgemv_t kernels for handling op(A) = 't', i.e., transa = 't' cases.
 // export gemv kernel so that it can be directly called avoiding blis overhead.
 BLIS_EXPORT void bli_dgemv_t_zen4_int
      (
-       conj_t conja,
+       trans_t transa,
        conj_t conjx,
        dim_t m,
        dim_t n,
@@ -165,13 +134,6 @@ BLIS_EXPORT void bli_dgemv_t_zen4_int
        cntx_t* restrict cntx
       );
 
-GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x7m )
-GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x6m )
-GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x5m )
-GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x4m )
-GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x3m )
-GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x2m )
-GEMV_KER_PROT( double,  d, gemv_t_zen4_int_32x1m )
 
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_l_zen4_asm_16x14)
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_zen4_asm_16x14)
@@ -456,6 +418,38 @@ err_t bli_dgemm_tiny_zen4_24x8
         double*    c, const inc_t rs_c0, const inc_t cs_c0
      );
 
+err_t bli_zgemm_tiny_zen4_12x4
+     (
+        conj_t              conja,
+        conj_t              conjb,
+        trans_t transa,
+        trans_t transb,
+        dim_t  m,
+        dim_t  n,
+        dim_t  k,
+        const dcomplex*    alpha,
+        const dcomplex*    a, const inc_t rs_a0, const inc_t cs_a0,
+        const dcomplex*    b, const inc_t rs_b0, const inc_t cs_b0,
+        const dcomplex*    beta,
+        dcomplex*    c, const inc_t rs_c0, const inc_t cs_c0
+     );
+
+err_t bli_cgemm_tiny_zen4_24x4
+     (
+        conj_t              conja,
+        conj_t              conjb,
+        trans_t transa,
+        trans_t transb,
+        dim_t  m,
+        dim_t  n,
+        dim_t  k,
+        const scomplex*    alpha,
+        const scomplex*    a, const inc_t rs_a0, const inc_t cs_a0,
+        const scomplex*    b, const inc_t rs_b0, const inc_t cs_b0,
+        const scomplex*    beta,
+        scomplex*    c, const inc_t rs_c0, const inc_t cs_c0
+     );
+
 void bli_dnorm2fv_zen4_int_unb_var1
      (
        dim_t    n,
@@ -498,6 +492,14 @@ bool bli_cntx_gemmsup_thresh_is_met_zen4
 		cntx_t* cntx
 	 );
 
+bool bli_gemvst_thresh_is_met_zen4
+   (
+    dim_t   m,
+    dim_t   n,
+    trans_t transa,
+    num_t   dt
+   );
+
 // dynamic blocksizes function
 void bli_dynamic_blkszs_zen4
     (
@@ -509,19 +511,62 @@ void bli_dynamic_blkszs_zen4
 // function for resetting zmm registers after L3 apis
 void bli_zero_zmm();
 
-void bli_dgemv_n_zen4_int_32x8_st
+void bli_sgemv_t_zen4_int
+          (
+            trans_t transa,
+            conj_t  conjx,
+            dim_t   m,
+            dim_t   n,
+            float*  alpha,
+            float*  a, inc_t rs_a, inc_t cs_a,
+            float*  x, inc_t incx,
+            float*  beta,
+            float*  y, inc_t incy,
+            cntx_t* cntx
+          );
+
+void bli_cgemv_t_zen4_int
+          (
+            trans_t transa,
+            conj_t  conjx,
+            dim_t   m,
+            dim_t   n,
+            scomplex*  alpha,
+            scomplex*  a, inc_t rs_a, inc_t cs_a,
+            scomplex*  x, inc_t incx,
+            scomplex*  beta,
+            scomplex*  y, inc_t incy,
+            cntx_t* cntx
+          );
+
+void bli_zgemv_t_zen4_int
+          (
+            trans_t transa,
+            conj_t  conjx,
+            dim_t   m,
+            dim_t   n,
+            dcomplex*  alpha,
+            dcomplex*  a, inc_t rs_a, inc_t cs_a,
+            dcomplex*  x, inc_t incx,
+            dcomplex*  beta,
+            dcomplex*  y, inc_t incy,
+            cntx_t* cntx
+          );
+
+void bli_sgemv_n_zen4_int
      (
        trans_t transa,
        conj_t  conjx,
        dim_t   m,
        dim_t   n,
-       double* alpha,
-       double* a, inc_t rs_a, inc_t cs_a,
-       double* x, inc_t incx,
-       double* beta,
-       double* y, inc_t incy,
+       float*  alpha,
+       float*  a, inc_t rs_a, inc_t cs_a,
+       float*  x, inc_t incx,
+       float*  beta,
+       float*  y, inc_t incy,
        cntx_t* cntx
      );
+
 
 void bli_dgemv_n_zen4_int
      (
@@ -537,6 +582,35 @@ void bli_dgemv_n_zen4_int
        cntx_t* cntx
      );
 
+void bli_cgemv_n_zen4_int
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       scomplex*  alpha,
+       scomplex*  a, inc_t rs_a, inc_t cs_a,
+       scomplex*  x, inc_t incx,
+       scomplex*  beta,
+       scomplex*  y, inc_t incy,
+       cntx_t* cntx
+     );
+
+void bli_zgemv_n_zen4_int
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       dcomplex*  alpha,
+       dcomplex*  a, inc_t rs_a, inc_t cs_a,
+       dcomplex*  x, inc_t incx,
+       dcomplex*  beta,
+       dcomplex*  y, inc_t incy,
+       cntx_t* cntx
+     );
+
+// Compatibility aliases retained for external callers (for example libflame)
 BLIS_EXPORT void bli_dgemv_n_zen4_int_40x2_st
      (
        trans_t transa,
@@ -551,21 +625,7 @@ BLIS_EXPORT void bli_dgemv_n_zen4_int_40x2_st
        cntx_t* cntx
      );
 
-void bli_dgemv_n_zen4_int_40x2_mt
-     (
-       trans_t transa,
-       conj_t  conjx,
-       dim_t   m,
-       dim_t   n,
-       double* alpha,
-       double* a, inc_t rs_a, inc_t cs_a,
-       double* x, inc_t incx,
-       double* beta,
-       double* y, inc_t incy,
-       cntx_t* cntx
-     );
-
-void bli_dgemv_m_zen4_int_40x8_st
+void bli_dgemv_m_zen4_int_40x8
      (
        trans_t transa,
        conj_t  conjx,
@@ -607,16 +667,3 @@ void bli_dgemv_m_zen4_int_40x8_mt_Ndiv
        cntx_t* cntx
      );
 
-     void bli_dgemv_m_zen4_int_40x8_mt_Mdiv_Ndiv
-     (
-       trans_t transa,
-       conj_t  conjx,
-       dim_t   m,
-       dim_t   n,
-       double* alpha,
-       double* a, inc_t rs_a, inc_t cs_a,
-       double* x, inc_t incx,
-       double* beta,
-       double* y, inc_t incy,
-       cntx_t* cntx
-     );

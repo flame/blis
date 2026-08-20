@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2017 - 2025, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2017 - 2026, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2018, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,9 @@
 
 #include "immintrin.h"
 #include "blis.h"
+
+#define BLIS_ASM_SYNTAX_ATT
+#include "bli_x86_asm_macros.h"
 
 // -----------------------------------------------------------------------------
 
@@ -866,163 +869,240 @@ void bli_cscalv_zen_int
 		return;
 	}
 
-	dim_t n0 = bli_abs(n);
+	// Convert absolute value of n to 64-bit unsigned integer
+	uint64_t n0 = (uint64_t)bli_abs(n);
 
-	dim_t i = 0;
 	scomplex alpha_conj;
 	float *x0 = (float *)x;
 
 	// Performs conjugation of alpha based on conjalpha
-	PASTEMAC(c, copycjs)(conjalpha, *alpha, alpha_conj)
+	PASTEMAC(c, copycjs)(conjalpha, *alpha, alpha_conj);
 
 	float real = alpha_conj.real;
 	float imag = alpha_conj.imag;
 
-	// Handling computation for unit-strided vectors
-	if ( incx == 1 )
-	{
-		dim_t const n_elem_per_reg = 8;
+	// Convert stride to 64-bit for inline assembly
+	int64_t incx0 = (int64_t)incx;
 
-		__m256 alpha_real_ymm, alpha_imag_ymm;
+	// Mask table for vmaskmovps: indexed by number of remaining complex elements (1-3)
+	// Each complex element = 2 floats, so masks activate 2, 4, or 6 lanes respectively
+	// High bit set (0x80000000) means that lane is active for load/store
+	static const uint32_t mask_table[4][8] __attribute__((aligned(32))) = {
+		{0, 0, 0, 0, 0, 0, 0, 0},                                      					// offset 0: unused
+		{0x80000000, 0x80000000, 0, 0, 0, 0, 0, 0},                   					// offset 1: 2 lanes (1 complex)
+		{0x80000000, 0x80000000, 0x80000000, 0x80000000, 0, 0, 0, 0}, 					// offset 2: 4 lanes (2 complex)
+		{0x80000000, 0x80000000, 0x80000000, 0x80000000, 0x80000000, 0x80000000, 0, 0} 	// offset 3: 6 lanes (3 complex)
+	};
 
-		alpha_real_ymm = _mm256_broadcast_ss(&real);
-		alpha_imag_ymm = _mm256_broadcast_ss(&imag);
+	// Handling computation for both unit-strided and non-unit-strided vectors in inline asm.
+	// Performs: x := alpha * x, where alpha = real + i*imag and x is a complex vector
+	begin_asm()
 
-		__m256 x_vec_ymm[4], temp_ymm[8];
+	/*
+		rax -> pointer to x vector
+		rsi -> number of complex elements remaining
+		rdx -> stride (incx)
+		r11 -> byte offset for non-unit stride
+		ymm8 -> broadcast real part of alpha
+		ymm9 -> broadcast imaginary part of alpha
+	*/
 
-		/*  Code logic
+	// ----------------------------------------------------------------
+	// Load base pointer and parameters
+	// ----------------------------------------------------------------
+	mov(var(x0), rax)                    // rax = base address of x vector
+	mov(var(n0), rsi)                    // rsi = number of complex elements
+	mov(var(incx0), rdx)                 // rdx = stride value (incx)
 
-			Consider,
-			x1= a1 + ib1, x2 = a1 + ib2
-			alpha = p + iq
+	// Broadcast alpha components to all lanes of YMM registers
+	vbroadcastss(var(real), ymm8)        // ymm8 = [real, real, real, real, real, real, real, real]
+	vbroadcastss(var(imag), ymm9)        // ymm9 = [imag, imag, imag, imag, imag, imag, imag, imag]
 
-			Vector values
-			x_vec_ymm = a1, b1, a2, b2
-			alpha_real_ymm = p, p, p, p
-			alpha_imag_ymm = q, q, q, q
+	// Check if unit stride; if not, jump to scalar loop
+	cmp(imm(1), rdx)                     // compare incx with 1
+	jne(.CSCALV_SCALAR_LOOP)             // if incx != 1, handle with scalar loop
 
-			Computation
+	// ================================================================
+	// Unit-stride vectorized loops
+	// ================================================================
 
-			All real values
-			temp_1 = x_vec_ymm * alpha_real_ymm = a1p, b1p, a2p, b2p
+	// ----------------------------------------------------------------
+	// Process 16 complex elements (32 floats, 128 bytes) per iteration
+	// ----------------------------------------------------------------
+	label(.CSCALV_LOOP16)
+	cmp(imm(16), rsi)                    // check if remaining elements >= 16
+	jl(.CSCALV_LOOP8)                    // if less, go to next smaller block
 
-			All imaginary values
-			temp_2 = x_vec_ymm * alpha_imag_ymm = a1q, b1q, a2q, b2q
+	// Load 16 complex elements (32 floats) into 4 YMM registers
+	vmovups(mem(rax, 0*32), ymm0)        // ymm0 = x[i+0:i+3] (4 complex = 8 floats)
+	vmovups(mem(rax, 1*32), ymm1)        // ymm1 = x[i+4:i+7]
+	vmovups(mem(rax, 2*32), ymm2)        // ymm2 = x[i+8:i+11]
+	vmovups(mem(rax, 3*32), ymm3)        // ymm3 = x[i+12:i+15]
 
-			permute temp_2 to get
+	// Multiply x by imaginary part: imag * x
+	vmulps(ymm9, ymm0, ymm10)            // ymm10 = imag * x[i+0:i+3]
+	vmulps(ymm9, ymm1, ymm11)            // ymm11 = imag * x[i+4:i+7]
+	vmulps(ymm9, ymm2, ymm12)            // ymm12 = imag * x[i+8:i+11]
+	vmulps(ymm9, ymm3, ymm13)            // ymm13 = imag * x[i+12:i+15]
 
-			b1q, a1q, b2q, a2q
+	// Swap real and imaginary parts (permute with pattern 0xB1 = 10110001)
+	vpermilps(imm(0xB1), ymm10, ymm10)   // swap adjacent pairs in ymm10
+	vpermilps(imm(0xB1), ymm11, ymm11)   // swap adjacent pairs in ymm11
+	vpermilps(imm(0xB1), ymm12, ymm12)   // swap adjacent pairs in ymm12
+	vpermilps(imm(0xB1), ymm13, ymm13)   // swap adjacent pairs in ymm13
 
-			addsub temp_1 and temp_2 to get the final result
-			and then store
-		*/
+	// Fused multiply-add-subtract: real*x +/- swapped(imag*x)
+	vfmaddsub231ps(ymm0, ymm8, ymm10)    // ymm10 = real*x[i+0:i+3] +/- swapped(imag*x[i+0:i+3])
+	vfmaddsub231ps(ymm1, ymm8, ymm11)    // ymm11 = real*x[i+4:i+7] +/- swapped(imag*x[i+4:i+7])
+	vfmaddsub231ps(ymm2, ymm8, ymm12)    // ymm12 = real*x[i+8:i+11] +/- swapped(imag*x[i+8:i+11])
+	vfmaddsub231ps(ymm3, ymm8, ymm13)    // ymm13 = real*x[i+12:i+15] +/- swapped(imag*x[i+12:i+15])
 
-		for (; (i + 15) < n0; i += 16)
-		{
-			x_vec_ymm[0] = _mm256_loadu_ps(x0);
-			x_vec_ymm[1] = _mm256_loadu_ps(x0 + n_elem_per_reg);
-			x_vec_ymm[2] = _mm256_loadu_ps(x0 + 2 * n_elem_per_reg);
-			x_vec_ymm[3] = _mm256_loadu_ps(x0 + 3 * n_elem_per_reg);
+	// Store results back to memory
+	vmovups(ymm10, mem(rax, 0*32))       // x[i+0:i+3] = ymm10
+	vmovups(ymm11, mem(rax, 1*32))       // x[i+4:i+7] = ymm11
+	vmovups(ymm12, mem(rax, 2*32))       // x[i+8:i+11] = ymm12
+	vmovups(ymm13, mem(rax, 3*32))       // x[i+12:i+15] = ymm13
 
-			// Compute x * alpha_imag for all vectors
-			temp_ymm[0] = _mm256_mul_ps(x_vec_ymm[0], alpha_imag_ymm);
-			temp_ymm[1] = _mm256_mul_ps(x_vec_ymm[1], alpha_imag_ymm);
-			temp_ymm[2] = _mm256_mul_ps(x_vec_ymm[2], alpha_imag_ymm);
-			temp_ymm[3] = _mm256_mul_ps(x_vec_ymm[3], alpha_imag_ymm);
+	add(imm(4*32), rax)                  // rax += 128 bytes (16 complex elements)
+	sub(imm(16), rsi)                    // reduce remaining elements by 16
+	jmp(.CSCALV_LOOP16)                  // repeat for next 16 elements
 
-			// Permute the imaginary results
-			temp_ymm[4] = _mm256_permute_ps(temp_ymm[0], 0xB1);
-			temp_ymm[5] = _mm256_permute_ps(temp_ymm[1], 0xB1);
-			temp_ymm[6] = _mm256_permute_ps(temp_ymm[2], 0xB1);
-			temp_ymm[7] = _mm256_permute_ps(temp_ymm[3], 0xB1);
+	// ----------------------------------------------------------------
+	// Process 8 complex elements (16 floats, 64 bytes)
+	// ----------------------------------------------------------------
+	label(.CSCALV_LOOP8)
+	cmp(imm(8), rsi)                     // check if remaining elements >= 8
+	jl(.CSCALV_LOOP4)                    // if less, go to next smaller block
 
-			// Compute x * alpha_real first, then add/sub the permuted imaginary part
-			// This ensures the correct operand order for the FMA operation
-			temp_ymm[0] = _mm256_mul_ps(x_vec_ymm[0], alpha_real_ymm);
-			temp_ymm[1] = _mm256_mul_ps(x_vec_ymm[1], alpha_real_ymm);
-			temp_ymm[2] = _mm256_mul_ps(x_vec_ymm[2], alpha_real_ymm);
-			temp_ymm[3] = _mm256_mul_ps(x_vec_ymm[3], alpha_real_ymm);
+	// Load 8 complex elements into 2 YMM registers
+	vmovups(mem(rax, 0*32), ymm0)        // ymm0 = x[i+0:i+3]
+	vmovups(mem(rax, 1*32), ymm1)        // ymm1 = x[i+4:i+7]
 
-			// Now add/subtract the permuted imaginary parts
-			x_vec_ymm[0] = _mm256_addsub_ps(temp_ymm[0], temp_ymm[4]);
-			x_vec_ymm[1] = _mm256_addsub_ps(temp_ymm[1], temp_ymm[5]);
-			x_vec_ymm[2] = _mm256_addsub_ps(temp_ymm[2], temp_ymm[6]);
-			x_vec_ymm[3] = _mm256_addsub_ps(temp_ymm[3], temp_ymm[7]);
+	// Multiply by imaginary part
+	vmulps(ymm9, ymm0, ymm6)             // ymm6 = imag * x[i+0:i+3]
+	vmulps(ymm9, ymm1, ymm7)             // ymm7 = imag * x[i+4:i+7]
 
-			_mm256_storeu_ps(x0, x_vec_ymm[0]);
-			_mm256_storeu_ps(x0 + n_elem_per_reg, x_vec_ymm[1]);
-			_mm256_storeu_ps(x0 + 2 * n_elem_per_reg, x_vec_ymm[2]);
-			_mm256_storeu_ps(x0 + 3 * n_elem_per_reg, x_vec_ymm[3]);
+	// Swap real and imaginary parts
+	vpermilps(imm(0xB1), ymm6, ymm6)     // swap adjacent pairs in ymm6
+	vpermilps(imm(0xB1), ymm7, ymm7)     // swap adjacent pairs in ymm7
 
-			x0 += 4 * n_elem_per_reg;
-		}
+	// Fused multiply-add-subtract
+	vfmaddsub231ps(ymm0, ymm8, ymm6)     // ymm6 = real*x[i+0:i+3] +/- swapped(imag*x[i+0:i+3])
+	vfmaddsub231ps(ymm1, ymm8, ymm7)     // ymm7 = real*x[i+4:i+7] +/- swapped(imag*x[i+4:i+7])
 
-		for (; (i + 7) < n0; i += 8)
-		{
-			x_vec_ymm[0] = _mm256_loadu_ps(x0);
-			x_vec_ymm[1] = _mm256_loadu_ps(x0 + n_elem_per_reg);
+	// Store results
+	vmovups(ymm6, mem(rax, 0*32))        // x[i+0:i+3] = ymm6
+	vmovups(ymm7, mem(rax, 1*32))        // x[i+4:i+7] = ymm7
 
-			// Compute x * alpha_imag for both vectors
-			temp_ymm[0] = _mm256_mul_ps(x_vec_ymm[0], alpha_imag_ymm);
-			temp_ymm[1] = _mm256_mul_ps(x_vec_ymm[1], alpha_imag_ymm);
+	add(imm(2*32), rax)                  // rax += 64 bytes (8 complex elements)
+	sub(imm(8), rsi)                     // reduce remaining elements by 8
 
-			// Permute the imaginary results
-			temp_ymm[2] = _mm256_permute_ps(temp_ymm[0], 0xB1);
-			temp_ymm[3] = _mm256_permute_ps(temp_ymm[1], 0xB1);
+	// ----------------------------------------------------------------
+	// Process 4 complex elements (8 floats, 32 bytes)
+	// ----------------------------------------------------------------
+	label(.CSCALV_LOOP4)
+	cmp(imm(4), rsi)                     // check if remaining elements >= 4
+	jl(.CSCALV_FRINGE)                   // if less, handle fringe elements
 
-			// Compute x * alpha_real first, then add/sub the permuted imaginary part
-			temp_ymm[0] = _mm256_mul_ps(x_vec_ymm[0], alpha_real_ymm);
-			temp_ymm[1] = _mm256_mul_ps(x_vec_ymm[1], alpha_real_ymm);
+	// Load 4 complex elements into 1 YMM register
+	vmovups(mem(rax, 0*32), ymm0)        // ymm0 = x[i+0:i+3]
 
-			// Now add/subtract the permuted imaginary parts
-			x_vec_ymm[0] = _mm256_addsub_ps(temp_ymm[0], temp_ymm[2]);
-			x_vec_ymm[1] = _mm256_addsub_ps(temp_ymm[1], temp_ymm[3]);
+	// Multiply by imaginary part
+	vmulps(ymm9, ymm0, ymm4)             // ymm4 = imag * x[i+0:i+3]
 
-			_mm256_storeu_ps(x0, x_vec_ymm[0]);
-			_mm256_storeu_ps(x0 + n_elem_per_reg, x_vec_ymm[1]);
+	// Swap real and imaginary parts
+	vpermilps(imm(0xB1), ymm4, ymm4)     // swap adjacent pairs in ymm4
 
-			x0 += 2 * n_elem_per_reg;
-		}
+	// Fused multiply-add-subtract
+	vfmaddsub231ps(ymm0, ymm8, ymm4)     // ymm4 = real*x[i+0:i+3] +/- swapped(imag*x[i+0:i+3])
 
-		for (; (i + 3) < n0; i += 4)
-		{
-			x_vec_ymm[0] = _mm256_loadu_ps(x0);
+	// Store result
+	vmovups(ymm4, mem(rax, 0*32))        // x[i+0:i+3] = ymm4
 
-			// Compute x * alpha_imag
-			temp_ymm[0] = _mm256_mul_ps(x_vec_ymm[0], alpha_imag_ymm);
+	add(imm(1*32), rax)                  // rax += 32 bytes (4 complex elements)
+	sub(imm(4), rsi)                     // reduce remaining elements by 4
 
-			// Permute the imaginary result
-			temp_ymm[1] = _mm256_permute_ps(temp_ymm[0], 0xB1);
+	// ----------------------------------------------------------------
+	// Handle fringe: 1-3 remaining complex elements (2-6 floats) using YMM with masking
+	// ----------------------------------------------------------------
+	label(.CSCALV_FRINGE)
+	test(rsi, rsi)                       // check if any elements remaining
+	jz(.CSCALV_DONE)                     // if zero, we're done
 
-			// Compute x * alpha_real first, then add/sub the permuted imaginary part
-			temp_ymm[0] = _mm256_mul_ps(x_vec_ymm[0], alpha_real_ymm);
+	// Build mask based on remaining elements (rsi = 1, 2, or 3)
+	// Load mask from mask_table[rsi]
+	mov(rsi, rcx)                        // rcx = copy of remaining elements count
+	lea(var(mask_table), r10)            // r10 = address of mask_table
+	sal(imm(5), rcx)                     // rcx *= 32 (each mask is 32 bytes = 8 ints * 4 bytes)
+	add(rcx, r10)                        // r10 = mask_table + offset
+	vmovdqu(mem(r10), ymm15)             // ymm15 = mask for vmaskmovps
 
-			// Now add/subtract the permuted imaginary part
-			x_vec_ymm[0] = _mm256_addsub_ps(temp_ymm[0], temp_ymm[1]);
+	// Masked load of remaining elements
+	vmaskmovps(mem(rax), ymm15, ymm0)    // ymm0 = masked load (1-3 complex elements)
 
-			_mm256_storeu_ps(x0, x_vec_ymm[0]);
+	// Multiply by imaginary part
+	vmulps(ymm9, ymm0, ymm4)             // ymm4 = imag * x
 
-			x0 += n_elem_per_reg;
-		}
+	// Swap real and imaginary parts
+	vpermilps(imm(0xB1), ymm4, ymm4)     // swap adjacent pairs
 
-		// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-		// This avoids a performance penalty caused by false dependencies when
-		// transitioning from AVX to SSE instructions (which may occur later,
-		// especially if BLIS is compiled with -mfpmath=sse).
-		_mm256_zeroupper();
-	}
+	// Fused multiply-add-subtract
+	vfmaddsub231ps(ymm0, ymm8, ymm4)     // ymm4 = real*x +/- swapped(imag*x)
 
-	for (; i < n0; i++)
-	{
-		float x_real, x_imag;
-		x_real = real * (*x0) - imag * (*(x0 + 1));
-		x_imag = real * (*(x0 + 1)) + imag * (*x0);
+	// Masked store of results
+	vmaskmovps(ymm4, ymm15, mem(rax))    // masked store back to memory
+	jmp(.CSCALV_DONE)                    // done with all elements
 
-		*x0 = x_real;
-		*(x0 + 1) = x_imag;
+	// ================================================================
+	// Non-unit stride scalar loop
+	// ================================================================
+	label(.CSCALV_SCALAR_LOOP)
+	lea(mem(, rdx, 8), r11)              // r11 = incx * sizeof(scomplex) = incx * 8 bytes
 
-		x0 += 2 * incx;
-	}
+	label(.CSCALV_SCALAR_ITER)
+	test(rsi, rsi)                       // check if any elements remaining
+	jz(.CSCALV_DONE)                     // if zero, we're done
+
+	// Load real and imaginary parts
+	vmovss(mem(rax), xmm0)               // xmm0 = x_real
+	vmovss(mem(rax, 4), xmm1)            // xmm1 = x_imag
+
+	// Compute complex multiplication
+	vmulss(xmm9, xmm1, xmm2)             // xmm2 = imag * x_imag
+	vmulss(xmm9, xmm0, xmm3)             // xmm3 = imag * x_real
+
+	vfmsub231ss(xmm0, xmm8, xmm2)        // xmm2 = real*x_real - imag*x_imag
+	vfmadd231ss(xmm1, xmm8, xmm3)        // xmm3 = real*x_imag + imag*x_real
+
+	// Store results
+	vmovss(xmm2, mem(rax))               // x[i].real = xmm2
+	vmovss(xmm3, mem(rax, 4))            // x[i].imag = xmm3
+
+	add(r11, rax)                        // rax += incx * 8 (move to next element)
+	sub(imm(1), rsi)                     // reduce remaining elements by 1
+	jmp(.CSCALV_SCALAR_ITER)             // repeat for next element
+
+	label(.CSCALV_DONE)
+	vzeroupper()                         // clear upper 128 bits of all YMM registers
+
+	end_asm
+	(
+		: // Output operands (none)
+		: // Input operands
+		  [x0] 		"m" (x0),
+		  [n0] 		"m" (n0),
+		  [incx0] 	"m" (incx0),
+		  [real] 	"m" (real),
+		  [imag] 	"m" (imag),
+		  [mask_table] 	"m" (mask_table)
+		: // Clobbered registers
+		  "rax",     "rsi",     "rdx",     "rcx",
+		  "r10",     "r11",     "ymm0",    "ymm1",
+		  "ymm2",    "ymm3",    "ymm4",    "ymm6",
+		  "ymm7",    "ymm8",    "ymm9",    "ymm10",
+		  "ymm11",   "ymm12",   "ymm13",   "ymm15",
+		  "cc",      "memory"
+	)
 }
 
 void bli_zscalv_zen_int

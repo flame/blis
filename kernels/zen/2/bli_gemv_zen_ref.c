@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -347,6 +347,276 @@ void bli_sgemv_zen_ref
                     rho += (*(a0 + j*inca)) * (*(x0 + j*incx));
                 }
                 (*y0) += (*alpha) * rho;
+                y0 += incy;
+                a0 += lda;
+            }
+        }
+    }
+}
+
+
+void bli_cgemv_zen_ref
+     (
+      trans_t          transa,
+      dim_t            m,
+      dim_t            n,
+      scomplex* restrict alpha,
+      scomplex* restrict a, inc_t inca, inc_t lda,
+      scomplex* restrict x, inc_t incx,
+      scomplex* restrict beta,
+      scomplex* restrict y, inc_t incy,
+      cntx_t* restrict cntx
+     )
+{
+    dim_t m0 = m;
+    dim_t n0 = n;
+    dim_t leny = m0;
+
+    scomplex* a0 = a;
+    scomplex* x0 = x;
+    scomplex* y0 = y;
+
+    if ( bli_is_trans( transa ) || bli_is_conjtrans( transa ) )
+    {
+        leny = n0;
+    }
+
+    if ( !bli_ceq1(*beta) )
+    {
+        if ( bli_ceq0(*beta) )
+        {
+            for ( dim_t i = 0; i < leny; ++i )
+            {
+                PASTEMAC(c,sets)( 0.0, 0.0, *(y0 + i*incy) );
+            }
+        }
+        else
+        {
+            for ( dim_t i = 0; i < leny; ++i )
+            {
+                PASTEMAC(c,scals)( *beta, *(y0 + i*incy) );
+            }
+        }
+    }
+
+    if ( bli_ceq0( *alpha ) ) return;
+
+    if ( bli_does_notrans( transa ) )
+    {
+        if ( incy == 1 )
+        {
+            for ( dim_t i = 0; i < n0; ++i )
+            {
+                scomplex rho;
+                PASTEMAC(c,set0s)( rho );
+                PASTEMAC(c,axpys)( *alpha, *x0, rho );
+
+                for ( dim_t j = 0; j < m0; ++j )
+                {
+                    scomplex a_val = *(a0 + j*inca);
+                    if ( bli_does_conj( transa ) )
+                        PASTEMAC(c,conjs)( a_val );
+                    
+                    PASTEMAC(c,axpys)( rho, a_val, *(y0 + j) );
+                }
+                x0 += incx;
+                a0 += lda;
+            }
+        }
+        else
+        {
+            for ( dim_t i = 0; i < n0; ++i )
+            {
+                scomplex rho;
+                PASTEMAC(c,set0s)( rho );
+                PASTEMAC(c,axpys)( *alpha, *x0, rho );
+
+                for ( dim_t j = 0; j < m0; ++j )
+                {
+                    scomplex a_val = *(a0 + j*inca);
+                    if ( bli_does_conj( transa ) )
+                        PASTEMAC(c,conjs)( a_val );
+
+                    PASTEMAC(c,axpys)( rho, a_val, *(y0 + j*incy) );
+                }
+                x0 += incx;
+                a0 += lda;
+            }
+        }
+    }
+    else
+    {
+        if ( incx == 1 )
+        {
+            for ( dim_t i = 0; i < n0; ++i )
+            {
+                scomplex rho;
+                PASTEMAC(c,sets)( 0.0, 0.0, rho );
+                for ( dim_t j = 0; j < m0; ++j )
+                {
+                    scomplex a_val = *(a0 + j*inca);
+                    if ( bli_does_conj( transa ) )
+                        PASTEMAC(c,conjs)( a_val );
+                    
+                    PASTEMAC(c,axpys)( a_val, *(x0 + j), rho );
+                }
+                PASTEMAC(c,axpys)( *alpha, rho, *y0 );
+                y0 += incy;
+                a0 += lda;
+            }
+        }
+        else
+        {
+            for ( dim_t i = 0; i < n0; ++i )
+            {
+                scomplex rho;
+                PASTEMAC(c,sets)( 0.0, 0.0, rho );
+                for ( dim_t j = 0; j < m0; ++j )
+                {
+                    scomplex a_val = *(a0 + j*inca);
+                    if ( bli_does_conj( transa ) )
+                        PASTEMAC(c,conjs)( a_val );
+                    
+                    PASTEMAC(c,axpys)( a_val, *(x0 + j*incx), rho );
+                }
+                PASTEMAC(c,axpys)( *alpha, rho, *y0 );
+                y0 += incy;
+                a0 += lda;
+            }
+        }
+    }
+}
+
+/**
+ * bli_zgemv_zen_ref( ... )
+ * This reference kernel for ZGEMV supports row/colum storage schemes for both
+ * transpose and no-transpose cases.
+ */
+void bli_zgemv_zen_ref
+     (
+      trans_t          transa,
+      dim_t            m,
+      dim_t            n,
+      dcomplex* restrict alpha,
+      dcomplex* restrict a, inc_t inca, inc_t lda,
+      dcomplex* restrict x, inc_t incx,
+      dcomplex* restrict beta,
+      dcomplex* restrict y, inc_t incy,
+      cntx_t* restrict cntx
+     )
+{
+    dim_t m0 = m;
+    dim_t n0 = n;
+    dim_t leny = m0;
+
+    dcomplex* a0 = a;
+    dcomplex* x0 = x;
+    dcomplex* y0 = y;
+
+    if ( bli_is_trans( transa ) || bli_is_conjtrans( transa ) )
+    {
+        leny = n0;
+    }
+
+    if ( !bli_zeq1(*beta) )
+    {
+        if ( bli_zeq0(*beta) )
+        {
+            for ( dim_t i = 0; i < leny; ++i )
+            {
+                PASTEMAC(z,sets)( 0.0, 0.0, *(y0 + i*incy) );
+            }
+        }
+        else
+        {
+            for ( dim_t i = 0; i < leny; ++i )
+            {
+                PASTEMAC(z,scals)( *beta, *(y0 + i*incy) );
+            }
+        }
+    }
+
+    if ( bli_zeq0( *alpha ) ) return;
+
+    if ( bli_does_notrans( transa ) )
+    {
+        if ( incy == 1 )
+        {
+            for ( dim_t i = 0; i < n0; ++i )
+            {
+                dcomplex rho;
+                PASTEMAC(z,set0s)( rho );
+                PASTEMAC(z,axpys)( *alpha, *x0, rho );
+
+                for ( dim_t j = 0; j < m0; ++j )
+                {
+                    dcomplex a_val = *(a0 + j*inca);
+                    if ( bli_does_conj( transa ) )
+                        PASTEMAC(z,conjs)( a_val );
+                    
+                    PASTEMAC(z,axpys)( rho, a_val, *(y0 + j) );
+                }
+                x0 += incx;
+                a0 += lda;
+            }
+        }
+        else
+        {
+            for ( dim_t i = 0; i < n0; ++i )
+            {
+                dcomplex rho;
+                PASTEMAC(z,set0s)( rho );
+                PASTEMAC(z,axpys)( *alpha, *x0, rho );
+
+                for ( dim_t j = 0; j < m0; ++j )
+                {
+                    dcomplex a_val = *(a0 + j*inca);
+                    if ( bli_does_conj( transa ) )
+                        PASTEMAC(z,conjs)( a_val );
+
+                    PASTEMAC(z,axpys)( rho, a_val, *(y0 + j*incy) );
+                }
+                x0 += incx;
+                a0 += lda;
+            }
+        }
+    }
+    else
+    {
+        if ( incx == 1 )
+        {
+            for ( dim_t i = 0; i < n0; ++i )
+            {
+                dcomplex rho;
+                PASTEMAC(z,sets)( 0.0, 0.0, rho );
+                for ( dim_t j = 0; j < m0; ++j )
+                {
+                    dcomplex a_val = *(a0 + j*inca);
+                    if ( bli_does_conj( transa ) )
+                        PASTEMAC(z,conjs)( a_val );
+                    
+                    PASTEMAC(z,axpys)( a_val, *(x0 + j), rho );
+                }
+                PASTEMAC(z,axpys)( *alpha, rho, *y0 );
+                y0 += incy;
+                a0 += lda;
+            }
+        }
+        else
+        {
+            for ( dim_t i = 0; i < n0; ++i )
+            {
+                dcomplex rho;
+                PASTEMAC(z,sets)( 0.0, 0.0, rho );
+                for ( dim_t j = 0; j < m0; ++j )
+                {
+                    dcomplex a_val = *(a0 + j*inca);
+                    if ( bli_does_conj( transa ) )
+                        PASTEMAC(z,conjs)( a_val );
+                    
+                    PASTEMAC(z,axpys)( a_val, *(x0 + j*incx), rho );
+                }
+                PASTEMAC(z,axpys)( *alpha, rho, *y0 );
                 y0 += incy;
                 a0 += lda;
             }

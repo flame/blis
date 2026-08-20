@@ -45,8 +45,6 @@ BLIS_THREAD_LOCAL rntm_t tl_rntm = BLIS_RNTM_INITIALIZER;
 // A mutex to allow synchronous access to global_rntm.
 bli_pthread_mutex_t global_rntm_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
 
-// ----------------------------------------------------------------------------
-
 void bli_rntm_init_from_global( rntm_t* rntm )
 {
     // We must ensure that global_rntm and tl_rntm have been initialized
@@ -1645,7 +1643,17 @@ void bli_nthreads_optimum(
 		// Query the architecture ID
 		arch_t arch_id = bli_arch_query_id_internal();
 
-		if( arch_id == BLIS_ARCH_ZEN6 || arch_id == BLIS_ARCH_ZEN5 )
+		// Conjugate ZGEMM bypass: do not reduce thread count when either
+		// operand is conjugated.  The conjugate-via-pack path is sensitive
+		// to OpenMP team-size changes between back-to-back calls (LAPACK
+		// drivers like ZGGEVX issue many of these), and the per-shape
+		// thread-count thrash from the AOCL_DYNAMIC heuristic was found to
+		// regress those drivers vs. AOCL-BLAS 5.3.  Leave n_threads_ideal
+		// at the user-requested value so the OpenMP team is reused as-is.
+		const bool dcomplex_conj_bypass = bli_obj_has_conj( a ) || bli_obj_has_conj( b );
+
+		if ( dcomplex_conj_bypass == false &&
+		     ( arch_id == BLIS_ARCH_ZEN6 || arch_id == BLIS_ARCH_ZEN5 ) )
 		{
 			/*
 				The logic for ideal thread selection is as follows:
@@ -1888,7 +1896,7 @@ void bli_nthreads_optimum(
 					n_threads_ideal = 256;
 			}
 		}
-		else if( arch_id == BLIS_ARCH_ZEN4 )
+		else if ( dcomplex_conj_bypass == false && arch_id == BLIS_ARCH_ZEN4 )
 		{
 			// Set the kernel dimensions
 			dim_t MR = 12, NR = 4;
@@ -2207,7 +2215,8 @@ void bli_nthreads_optimum(
 					n_threads_ideal = 192;
 			}
 		}
-		else // Not BLIS_ARCH_ZEN6 or BLIS_ARCH_ZEN5 or BLIS_ARCH_ZEN4
+		// Not BLIS_ARCH_ZEN6 or BLIS_ARCH_ZEN5 or BLIS_ARCH_ZEN4
+		else if ( dcomplex_conj_bypass == false )
 		{
 			if((m<=128 || n<=128 || k<=128) && ((m+n+k) <= 400))
 			{
@@ -2486,8 +2495,7 @@ void bli_nthreads_optimum(
         }
     }
 
-    dim_t n_threads_opt = bli_min(n_threads, n_threads_ideal);
-
+    dim_t n_threads_opt = bli_min( n_threads, n_threads_ideal );
     // This modifies only local rntm - therefore doesn't require mutex locks
     // for updating rntm
     bli_rntm_set_num_threads_only( n_threads_opt, rntm );
@@ -3848,49 +3856,29 @@ BLIS_INLINE void aocl_dgemv_dynamic
     dim_t size = n_elem * m_elem;
 
     // AOCL dynamic logic for transpose case
-    if (variant == BLIS_TRANSPOSE)
+    if ( bli_does_trans( variant ) )
     {
         switch ( arch_id )
         {
             case BLIS_ARCH_ZEN6:
             case BLIS_ARCH_ZEN5:
-
-                if ( size <  12000 )
-                    *nt_ideal = 1;
-                else if ( size <  27500 )
-                    *nt_ideal = 4;
-                else if ( size <  758000 )
-                    *nt_ideal = 8;
-                else if ( size <  1580000 )
-                    *nt_ideal = 16;
-                else if ( size <  3390000 )
-                    *nt_ideal = 32;
-                else if ( size <  10140000 )
-                    *nt_ideal = 64;
-                else if ( size <  14600000 )
-                    *nt_ideal = 96;
-                else
-                    // For sizes in this range, AOCL dynamic does not make any change
-                    *nt_ideal = -1;
+				if      ( size <      26520 ) *nt_ideal = 1;
+				else if ( size <      27140 ) *nt_ideal = 2;
+				else if ( size <      94788 ) *nt_ideal = 4;
+				else if ( size <    1243612 ) *nt_ideal = 8;
+				else if ( size <    3106704 ) *nt_ideal = 16;
+				else if ( size <    7734456 ) *nt_ideal = 32;
+				else                       *nt_ideal = -1;
                 break;
 
             case BLIS_ARCH_ZEN4:
-
-                if ( size < 11000 )
-                    *nt_ideal = 1;
-                else if ( size < 34500 )
-                    *nt_ideal = 4;
-                else if ( size < 707000 )
-                    *nt_ideal = 8;
-                else if ( size < 1870000 )
-                    *nt_ideal = 16;
-                else if ( size < 4800000 )
-                    *nt_ideal = 32;
-                else if ( size < 9000000 )
-                    *nt_ideal = 64;
-                else
-                    // For sizes in this range, AOCL dynamic does not make any change
-                    *nt_ideal = -1;
+				if      ( size <      26520 ) *nt_ideal = 1;
+				else if ( size <      26896 ) *nt_ideal = 2;
+				else if ( size <      96482 ) *nt_ideal = 4;
+				else if ( size <    1493851 ) *nt_ideal = 8;
+				else if ( size <    4473852 ) *nt_ideal = 16;
+				else if ( size <   16043941 ) *nt_ideal = 32;
+				else                       *nt_ideal = -1;
                 break;
 
             case BLIS_ARCH_ZEN:
@@ -3934,28 +3922,21 @@ BLIS_INLINE void aocl_dgemv_dynamic
         case BLIS_ARCH_ZEN6:
         case BLIS_ARCH_ZEN5:
             // logic tuned using linear regression
-            if ( size <= 95000 )
-                *nt_ideal = 1;
-            else if ( size <= 200000 )
-                *nt_ideal = 2;
-            else if ( size <= 750000 )
-                *nt_ideal = 8;
-            else if ( size <= 1800000 )
-                *nt_ideal = 16;
-            else if ( size <= 3800000 )
-                *nt_ideal = 32;
-            else
-                *nt_ideal = -1;
+			if      ( size <     195889 && (n_elem < 200 || m_elem < 40) ) *nt_ideal = 1;
+			else if ( size <     200108 && n_elem < 300 ) *nt_ideal = 2;
+			else if ( size <     235073 && n_elem < 400 ) *nt_ideal = 4;
+			else if ( size <    1794596 && n_elem < 1000 ) *nt_ideal = 8;
+			else if ( size <    3728210 ) *nt_ideal = 16;
+			else if ( size <   33274204 ) *nt_ideal = 32;
+			else if ( size <   66090713 ) *nt_ideal = 64;
+			else                       *nt_ideal = -1;  // nt=96 for the largest sizes
             break;
         case BLIS_ARCH_ZEN4:
-            if ( size <= 120000)
-                *nt_ideal = 1;
-            else if ( size <= 1500000)
-                *nt_ideal = 16;
-            else if ( size <= 7300000)
-                *nt_ideal = 32;
-            else
-                *nt_ideal = -1;
+			if      ( size <     235073 && (n_elem < 200 || m_elem < 40) ) *nt_ideal = 1;
+			else if ( size <    2585803 && n_elem < 1000 ) *nt_ideal = 8;
+			else if ( size <    9281592 ) *nt_ideal = 16;
+			else if ( size <   27727772 ) *nt_ideal = 32;
+			else                       *nt_ideal = -1;
             break;
         default:
             // Without this default condition, compiler will throw
@@ -3964,6 +3945,269 @@ BLIS_INLINE void aocl_dgemv_dynamic
             *nt_ideal = -1;
         }
     }
+}
+
+
+BLIS_INLINE void aocl_sgemv_dynamic
+     (
+       arch_t arch_id,
+       dim_t  m_elem,
+       dim_t  n_elem,
+       trans_t  variant,
+       dim_t* nt_ideal
+     )
+{
+    // Pick the AOCL dynamic logic based on the
+    // architecture ID
+    dim_t size = n_elem * m_elem;
+
+    // AOCL dynamic logic for transpose case
+    if ( bli_does_trans( variant ) )
+    {
+        switch ( arch_id )
+        {
+            case BLIS_ARCH_ZEN6:
+            case BLIS_ARCH_ZEN5:
+				if      ( size <      47085 ) *nt_ideal = 1;
+				else if ( size <      55096 ) *nt_ideal = 2;
+				else if ( size <     148980 ) *nt_ideal = 4;
+				else if ( size <    2039715 ) *nt_ideal = 8;
+				else if ( size <    5462600 ) *nt_ideal = 16;
+				else if ( size <   11990267 ) *nt_ideal = 32;
+				else                       *nt_ideal = -1;
+                break;
+
+            case BLIS_ARCH_ZEN4:
+				if      ( size <      47085 ) *nt_ideal = 1;
+				else if ( size <      55096 ) *nt_ideal = 2;
+				else if ( size <     181308 ) *nt_ideal = 4;
+				else if ( size <    3021800 ) *nt_ideal = 8;
+				else if ( size <    8094580 ) *nt_ideal = 16;
+				else if ( size <   26304769 ) *nt_ideal = 32;
+				else                       *nt_ideal = -1;
+                break;
+
+            case BLIS_ARCH_ZEN:
+            case BLIS_ARCH_ZEN2:
+            case BLIS_ARCH_ZEN3:
+
+                if ( size < 13000 )
+                    *nt_ideal = 1;
+                else if ( size < 17300 )
+                    *nt_ideal = 4;
+                else if ( size < 300000 )
+                    *nt_ideal = 8;
+                else if ( size < 640000 )
+                    *nt_ideal = 16;
+                else if ( size < 1700000 )
+                    *nt_ideal = 32;
+                else
+                    // For sizes in this range, AOCL dynamic does not make any change
+                    *nt_ideal = -1;
+                break;
+
+            default:
+            /*
+                Without this default condition, compiler will throw
+                a warning saying other conditions are not handled
+            */
+
+            /*
+                For other architectures, AOCL dynamic does not make any change
+            */
+            *nt_ideal = -1;
+
+        }
+    }
+
+    else
+    {
+        switch ( arch_id )
+        {
+        case BLIS_ARCH_ZEN6:
+        case BLIS_ARCH_ZEN5:
+			if      ( size <     418241 && (n_elem < 300 || m_elem < 80) ) *nt_ideal = 1;
+			else if ( size <    3021800 && n_elem < 2000) *nt_ideal = 8;
+			else if ( size <    6647960) *nt_ideal = 16;
+			else if ( size <   85501831 ) *nt_ideal = 32;
+			else                       *nt_ideal = -1;
+            break;
+        case BLIS_ARCH_ZEN4:
+			if      ( size <     343662 && (n_elem < 500 || m_elem < 80) ) *nt_ideal = 1;
+			else if ( size <     418241 && n_elem < 2000) *nt_ideal = 4;
+			else if ( size <    3021800 ) *nt_ideal = 8;
+			else if ( size <   11990267 ) *nt_ideal = 16;
+			else if ( size <   70254287 ) *nt_ideal = 32;
+			else                       *nt_ideal = -1;
+            break;
+        default:
+            // Without this default condition, compiler will throw
+            // a warning saying other conditions are not handled
+            // For other architectures, AOCL dynamic does not make any change
+            *nt_ideal = -1;
+        }
+    }
+}
+
+BLIS_INLINE void aocl_zgemv_dynamic
+     (
+       arch_t arch_id,
+       dim_t  m_elem,
+       dim_t  n_elem,
+       trans_t  variant,
+       dim_t* nt_ideal
+     )
+{
+    // Pick the AOCL dynamic logic based on the
+    // architecture ID
+    dim_t size = n_elem * m_elem;
+
+    // AOCL dynamic logic for transpose case
+	/* For complex GEMV, transa may be BLIS_CONJ_TRANSPOSE,
+	 * which should follow the same transpose thresholds;
+	 * otherwise AOCL dynamic may choose thread counts using the non-transpose table.
+	 * Use bli_is_trans(variant) || bli_is_conjtrans(variant) (or equivalent) here.
+	*/
+	if (bli_is_trans(variant) || bli_is_conjtrans(variant))
+    {
+        switch ( arch_id )
+        {
+            case BLIS_ARCH_ZEN6:
+            case BLIS_ARCH_ZEN5:
+				if      ( size <      18208 ) *nt_ideal = 1;
+				else if ( size <      38500 ) *nt_ideal = 4;
+				else if ( size <     489970 ) *nt_ideal = 8;
+				else if ( size <    1140276 ) *nt_ideal = 16;
+				else if ( size <    3128270 ) *nt_ideal = 32;
+				else                       *nt_ideal = -1;
+				break;
+            case BLIS_ARCH_ZEN4:
+				if      ( size <      18208 ) *nt_ideal = 1;
+				else if ( size <      37690 ) *nt_ideal = 4;
+				else if ( size <     580426 ) *nt_ideal = 8;
+				else if ( size <    1596186 ) *nt_ideal = 16;
+				else if ( size <    6128394 ) *nt_ideal = 32;
+				else                       *nt_ideal = -1;
+                break;
+            default:
+            	*nt_ideal = -1;
+
+        }
+    }
+
+    // AOCL dynamic logic for non-transpose case
+    else
+    {
+        switch ( arch_id )
+        {
+        case BLIS_ARCH_ZEN6:
+        case BLIS_ARCH_ZEN5:
+			if      ( size <      89208 && (n_elem < 100 || m_elem < 40) ) *nt_ideal = 1;
+			else if ( size <     210054 && n_elem < 150 ) *nt_ideal = 2;
+			else if ( size <     489970 && n_elem < 200 ) *nt_ideal = 4;
+			else if ( size <    1596186 && n_elem < 500 ) *nt_ideal = 8;
+			else if ( size <    3128270 ) *nt_ideal = 16;
+			else if ( size <    8578244 ) *nt_ideal = 32;
+			else                       *nt_ideal = -1;
+			break;
+		case BLIS_ARCH_ZEN4:
+			if      ( size <      75380 && (n_elem < 100 || m_elem < 40) ) *nt_ideal = 1;
+			else if ( size <     149742 && n_elem < 150 ) *nt_ideal = 2;
+			else if ( size <     248508 && n_elem < 200 ) *nt_ideal = 4;
+			else if ( size <    1140276 && n_elem < 500 ) *nt_ideal = 8;
+			else if ( size <    2643876 ) *nt_ideal = 16;
+			else if ( size <   12008034 ) *nt_ideal = 32;
+			else                       *nt_ideal = -1;
+			break;
+        default:
+            // Without this default condition, compiler will throw
+            // a warning saying other conditions are not handled
+            // For other architectures, AOCL dynamic does not make any change
+            *nt_ideal = -1;
+        }
+    }	
+}
+
+BLIS_INLINE void aocl_cgemv_dynamic
+     (
+       arch_t arch_id,
+       dim_t  m_elem,
+       dim_t  n_elem,
+       trans_t  variant,
+       dim_t* nt_ideal
+     )
+{
+    // Pick the AOCL dynamic logic based on the
+    // architecture ID
+    dim_t size = n_elem * m_elem;
+
+    // AOCL dynamic logic for transpose case
+
+	/* For complex GEMV, transa may be BLIS_CONJ_TRANSPOSE,
+	 * which should follow the same transpose thresholds;
+	 * otherwise AOCL dynamic may choose thread counts using the non-transpose table.
+	 * Use bli_is_trans(variant) || bli_is_conjtrans(variant) (or equivalent) here.
+	*/
+	if (bli_is_trans(variant) || bli_is_conjtrans(variant))
+    {
+        switch ( arch_id )
+        {
+            case BLIS_ARCH_ZEN6:
+            case BLIS_ARCH_ZEN5:
+				if      ( size <      32568 ) *nt_ideal = 1;
+				else if ( size <      35104 ) *nt_ideal = 2;
+				else if ( size <      63190 ) *nt_ideal = 4;
+				else if ( size <     863624 ) *nt_ideal = 8;
+				else if ( size <    1794596 ) *nt_ideal = 16;
+				else if ( size <    5368764 ) *nt_ideal = 32;
+				else                       *nt_ideal = -1;
+				break;
+            case BLIS_ARCH_ZEN4:
+				if      ( size <      32469 ) *nt_ideal = 1;
+				else if ( size <      32568 ) *nt_ideal = 2;
+				else if ( size <      66994 ) *nt_ideal = 4;
+				else if ( size <    1036316 ) *nt_ideal = 8;
+				else if ( size <    2585803 ) *nt_ideal = 16;
+				else if ( size <   11139427 ) *nt_ideal = 32;
+				else                       *nt_ideal = -1;
+                break;
+            default:
+            	*nt_ideal = -1;
+
+        }
+    }
+
+    // AOCL dynamic logic for non-transpose case
+    else
+    {
+        switch ( arch_id )
+        {
+        case BLIS_ARCH_ZEN6:
+        case BLIS_ARCH_ZEN5:
+			if      ( size <     289608 && (n_elem < 200 || m_elem < 80) ) *nt_ideal = 1;
+			else if ( size <    1036316 && n_elem < 300 ) *nt_ideal = 2;
+			else if ( size <    3106704 && n_elem < 400 ) *nt_ideal = 4;
+			else if ( size <    5368764 && n_elem < 1000 ) *nt_ideal = 8;
+			else if ( size <   13368829 ) *nt_ideal = 16;
+			else if ( size <   27727772 ) *nt_ideal = 32;
+			else                       *nt_ideal = -1;
+            break;
+        case BLIS_ARCH_ZEN4:
+			if      ( size <     289608 && (n_elem < 200 || m_elem < 80) ) *nt_ideal = 1;
+			else if ( size <     600324 && n_elem < 300 ) *nt_ideal = 2;
+			else if ( size <    1243612 && n_elem < 400 ) *nt_ideal = 4;
+			else if ( size <    4473852 && n_elem < 1000 ) *nt_ideal = 8;
+			else if ( size <    6445380 ) *nt_ideal = 16;
+			else if ( size <   19253237 ) *nt_ideal = 32;
+			else                       *nt_ideal = -1;
+            break;
+        default:
+            // Without this default condition, compiler will throw
+            // a warning saying other conditions are not handled
+            // For other architectures, AOCL dynamic does not make any change
+            *nt_ideal = -1;
+        }
+    }	
 }
 
 /*
@@ -4023,10 +4267,18 @@ void bli_nthreads_l2
                 // Function for DGEMV
                 aocl_dynamic_func_l2 = aocl_dgemv_dynamic;
             }
-            else
-            {
-                *nt_ideal = -1;
-            }
+			else if ( data_type == BLIS_FLOAT )
+			{
+				aocl_dynamic_func_l2 = aocl_sgemv_dynamic;
+			}
+			else if ( data_type == BLIS_DCOMPLEX )
+			{
+				aocl_dynamic_func_l2 = aocl_zgemv_dynamic;
+			}
+			else if ( data_type == BLIS_SCOMPLEX )
+			{
+				aocl_dynamic_func_l2 = aocl_cgemv_dynamic;
+			}
             break;
 
         default:
@@ -4109,4 +4361,3 @@ void bli_nthreads_l2
 
 #endif
 }
-

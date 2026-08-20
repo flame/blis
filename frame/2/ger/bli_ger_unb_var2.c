@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,6 +34,58 @@
 */
 
 #include "blis.h"
+
+#ifdef BLIS_ENABLE_OPENMP
+#include <omp.h>
+
+  #define INIT_NT(NT) dim_t NT = 1;
+  // if openmp enabled, spawn threads.
+  #define SPAWN_THREADS    _Pragma("omp parallel num_threads(NT)")
+
+  // helper macros
+  #define GET_TID()        omp_get_thread_num()
+  #define GET_NT_REAL()    omp_get_num_threads()
+
+  // helper macro for partitioning work.
+  #define PARTITION_WORK(N, thread_start, job_per_thread) \
+          bli_thread_vector_partition( N, GET_NT_REAL(), &thread_start, &job_per_thread, GET_TID() );
+
+  // Determine the ideal number of threads. This reuses gemv's L2 thread
+  // heuristic so that ger's work distribution matches gemv. bli_nthreads_l2
+  // internally honours AOCL_DYNAMIC when it is enabled and otherwise falls
+  // back to the number of threads requested by the user, so this is called
+  // unconditionally (matching gemv) rather than being gated on AOCL_DYNAMIC.
+  #define GET_DYNAMIC_N_THREADS(M, N, NT, ch) \
+    bli_nthreads_l2                           \
+    (                                         \
+        BLIS_GEMV_KER,                        \
+        PASTEMAC(ch,type),                    \
+        BLIS_NO_TRANSPOSE,                    \
+        bli_arch_query_id_internal(),         \
+        M,                                    \
+        N,                                    \
+        &NT                                   \
+    );
+#else
+
+  // place holder macros if openmp is not enabled. Threading (including the
+  // NT thread-count query) is only meaningful under OpenMP, so NT is neither
+  // declared nor referenced here -- this avoids an undeclared-NT compile
+  // break for non-OpenMP (e.g. pthreads) builds with AOCL_DYNAMIC enabled.
+  #define INIT_NT(NT)
+  #define SPAWN_THREADS
+  #define PARTITION_WORK(N, thread_start, job_per_thread)
+  #define GET_DYNAMIC_N_THREADS(M, N, NT, ch)
+#endif
+
+#if defined(BLIS_KERNELS_ZEN4)
+
+  // in order to keep the work distribution same between gemv and ger, gemv thresholds
+  // are also used for ger.
+  #define ZEN4_SHOULD_USE_ST_L2(M, N, dt)  bli_gemvst_thresh_is_met_zen4(M, N, BLIS_NO_TRANSPOSE, dt)
+#else
+  #define ZEN4_SHOULD_USE_ST_L2(M, N, dt)  true
+#endif
 
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
@@ -66,29 +118,97 @@ void PASTEMAC(ch,varname) \
 	/* Query the context for the kernel function pointer. */ \
 	kfp_av = bli_cntx_get_l1v_ker_dt( dt, BLIS_AXPYV_KER, cntx ); \
 \
-	for ( j = 0; j < n; ++j ) \
-	{ \
-		a1   = a + (0  )*rs_a + (j  )*cs_a; \
-		x1   = x + (0  )*incx; \
-		psi1 = y + (j  )*incy; \
+  /* Set default to single threaded code. */ \
+  bool is_st = true; \
 \
-		/* a1 = a1 + alpha * psi1 * x; */ \
-		PASTEMAC(ch,copycjs)( conjy, *psi1, alpha_psi1 ); \
-		PASTEMAC(ch,scals)( *alpha, alpha_psi1 ); \
+  /* If other L2 APIs are parallel for current arch, then parallelize GER */ \
+  switch ( bli_arch_query_id_internal() ) \
+  { \
+  case BLIS_ARCH_ZEN6: \
+  case BLIS_ARCH_ZEN5: \
+  case BLIS_ARCH_ZEN4: \
+    /* Currently only AVX512 is fully parallel for all GEMV. */ \
+    /* Use multiple threads only if GEMV would use MT for same size */ \
+    /* to ensure less probability of cache misses if multiple L2 APIs*/ \
+    /* with same inputs are invoked by the application. */ \
+    is_st = ZEN4_SHOULD_USE_ST_L2(m, n, dt); \
+    break; \
 \
-		kfp_av \
-		( \
-		  conjx, \
-		  m, \
-		  &alpha_psi1, \
-		  x1, incx, \
-		  a1, rs_a, \
-		  cntx  \
-		); \
-	} \
+  default: \
+    break; \
+  } \
+\
+  /* Avoid overhead of omp for small sizes.*/ \
+  if ( is_st ) \
+  { \
+    for ( j = 0; j < n; ++j ) \
+    { \
+      a1   = a + (0  )*rs_a + (j  )*cs_a; \
+      x1   = x + (0  )*incx; \
+      psi1 = y + (j  )*incy; \
+\
+      /* a1 = a1 + alpha * psi1 * x; */ \
+      PASTEMAC(ch,copycjs)( conjy, *psi1, alpha_psi1 ); \
+      PASTEMAC(ch,scals)( *alpha, alpha_psi1 ); \
+\
+      kfp_av \
+      ( \
+        conjx, \
+        m, \
+        &alpha_psi1, \
+        x1, incx, \
+        a1, rs_a, \
+        cntx  \
+      ); \
+    } \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3) \
+    return; \
+  } \
+\
+  /* Set num threads to 1 by default. */ \
+  INIT_NT(NT); \
+\
+  /* if AOCL_DYNAMIC is enabled, set nt to ideal number of threads.*/ \
+  GET_DYNAMIC_N_THREADS(m, n, NT, ch); \
+\
+  /* Spawn nt number of threads if openmp is enabled, else don't spawn any threads */ \
+  SPAWN_THREADS \
+  { \
+    /* Thread local variables*/ \
+    ctype*  a1_tl; \
+    ctype*  x1_tl; \
+    ctype*  psi1_tl; \
+    ctype   alpha_psi1_tl; \
+    dim_t   j_tl; \
+\
+    dim_t job_per_thread = n; \
+    dim_t thread_start   = 0; \
+    /* Partition work along N dimension (columns) if openmp is enabled*/ \
+    PARTITION_WORK(n, thread_start, job_per_thread); \
+    for ( j_tl = thread_start; j_tl < thread_start + job_per_thread; ++j_tl ) \
+    { \
+      a1_tl   = a + (0   )*rs_a + (j_tl)*cs_a; \
+      x1_tl   = x + (0   )*incx; \
+      psi1_tl = y + (j_tl)*incy; \
+\
+      /* a1 = a1 + alpha * psi1 * x; */ \
+      PASTEMAC(ch,copycjs)( conjy, *psi1_tl, alpha_psi1_tl ); \
+      PASTEMAC(ch,scals)( *alpha, alpha_psi1_tl ); \
+\
+      kfp_av \
+      ( \
+        conjx, \
+        m, \
+        &alpha_psi1_tl, \
+        x1_tl, incx, \
+        a1_tl, rs_a, \
+        cntx  \
+      ); \
+    } \
+  } \
+\
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3) \
 \
 }
 
 INSERT_GENTFUNC_BASIC0( ger_unb_var2 )
-

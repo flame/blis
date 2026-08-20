@@ -33,10 +33,9 @@
 */
 
 // This avoids a known issue with GCC15 ("error: bp cannot be used in asm here", #845).
-// Only check for version 15 since this may be fixed in 16, and also make sure the
-// compiler isn't clang since it also confusingly defines __GNUC__
-#if !defined(__clang__) && defined(__GNUC__) && __GNUC__ == 15
-#pragma GCC optimize("-fno-tree-slp-vectorize")
+// Make sure the compiler isn't clang since it also confusingly defines __GNUC__
+#if !defined(__clang__) && defined(__GNUC__) && __GNUC__ >= 15
+#pragma GCC optimize("-fno-tree-vectorize")
 #endif
 
 #include "blis.h"

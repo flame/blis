@@ -106,6 +106,7 @@ void PASTEF772S(ch,blasname,chc) \
 	  NULL  \
 	); \
 \
+	AOCL_DTL_LOG_GER_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *m, *n); \
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 \
 	/* Finalize BLIS. */ \

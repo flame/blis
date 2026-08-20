@@ -355,6 +355,25 @@ void dscal_blis_impl
       &nt
     );
 
+    if ( nt == 1 )
+    {
+        // Invoke the kernel directly, skipping the OpenMP team fork/join
+        // when only one thread is needed. Size is passed as negative to
+        // stipulate don't use SETV when alpha=0, matching the parallel path.
+        scalv_ker_ptr
+        (
+          BLIS_NO_CONJUGATE,
+          -n0,
+          (double *)alpha,
+          x0, incx0,
+          cntx
+        );
+
+        AOCL_DTL_LOG_NUM_THREADS(AOCL_DTL_LEVEL_TRACE_1, nt);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+        return;
+    }
+
     _Pragma("omp parallel num_threads(nt)")
     {
         dim_t start, end, length;
@@ -543,6 +562,25 @@ void zdscal_blis_impl
       n0,
       &nt
     );
+
+    if ( nt == 1 )
+    {
+        // Invoke the kernel directly, skipping the OpenMP team fork/join
+        // when only one thread is needed. Size is passed as negative to
+        // stipulate don't use SETV when alpha=0, matching the parallel path.
+        scalv_ker_ptr
+        (
+          BLIS_NO_CONJUGATE,
+          -n0,
+          (dcomplex *)&alpha_cast,
+          x0, incx0,
+          cntx
+        );
+
+        AOCL_DTL_LOG_NUM_THREADS(AOCL_DTL_LEVEL_TRACE_1, nt);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+        return;
+    }
 
     _Pragma("omp parallel num_threads(nt)")
     {

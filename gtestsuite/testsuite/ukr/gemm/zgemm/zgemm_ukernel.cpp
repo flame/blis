@@ -1382,3 +1382,130 @@ INSTANTIATE_TEST_SUITE_P(
 );
 #endif
 #endif
+
+
+#if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
+class zgemmTiny :
+        public ::testing::TestWithParam<std::tuple< dim_t, dim_t, dim_t, dcomplex, dcomplex, char, char, char, bool >> {};
+using T = dcomplex;
+
+TEST_P( zgemmTiny, gemm_tiny )
+{
+    dim_t m = std::get<0>(GetParam());
+    dim_t n = std::get<1>(GetParam());
+    dim_t k = std::get<2>(GetParam());
+    T alpha = std::get<3>(GetParam());
+    T beta  = std::get<4>(GetParam());
+    char storageC = std::get<5>(GetParam());
+    char transa = std::get<6>(GetParam());
+    char transb = std::get<7>(GetParam());
+    bool is_memory_test = std::get<8>(GetParam());
+
+    gtint_t lda = testinghelpers::get_leading_dimension( storageC, transa, m, k, 0 );
+    gtint_t ldb = testinghelpers::get_leading_dimension( storageC, transb, k, n, 0 );
+    gtint_t ldc = testinghelpers::get_leading_dimension( storageC, 'n', m, n, 0 );
+
+    trans_t blis_transa;
+    trans_t blis_transb;
+
+    bli_param_map_netlib_to_blis_trans( transa, &blis_transa );
+    bli_param_map_netlib_to_blis_trans( transb, &blis_transb );
+
+    bli_init_auto();
+    if( is_memory_test )
+    {
+        GTEST_SKIP() << "Memory test not implemented for zgemmTiny";
+    }
+    else
+    {
+        std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 8, storageC, transa, m, k, lda );
+        std::vector<T> b = testinghelpers::get_random_matrix<T>( -5, 2, storageC, transb, k, n, ldb );
+        std::vector<T> c = testinghelpers::get_random_matrix<T>( -3, 5, storageC, 'n', m, n, ldc );
+        std::vector<T> c_ref( c );
+
+        err_t tiny_status = bli_zgemm_tiny( blis_transa, blis_transb,
+                        m, n, k, &alpha,
+                        a.data(), 1, lda,
+                        b.data(), 1, ldb,
+                        &beta,
+                        c.data(), 1, ldc,
+                        false );
+
+        if ( tiny_status == BLIS_FAILURE )
+        {
+            GTEST_SKIP() << "Test parameters not suitable for zgemmTiny";
+        }
+
+
+        testinghelpers::ref_gemm<T>( storageC, transa, transb, m, n, k, alpha,
+                                    a.data(), lda, b.data(), ldb, beta, c_ref.data(), ldc );
+
+        computediff<T>( "C", storageC, m, n, c.data(), c_ref.data(), ldc, 1e-6 );
+    }
+}
+
+// Print test names
+class zgemmTinyPrint {
+public:
+    std::string operator()( testing::TestParamInfo<std::tuple<dim_t,dim_t,dim_t,dcomplex,dcomplex,char,char,char,bool>> str ) const
+    {
+        dim_t m = std::get<0>( str.param );
+        dim_t n = std::get<1>( str.param );
+        dim_t k = std::get<2>( str.param );
+        dcomplex alpha = std::get<3>( str.param );
+        dcomplex beta = std::get<4>( str.param );
+        char storage = std::get<5>( str.param );
+        char transa = std::get<6>( str.param );
+        char transb = std::get<7>( str.param );
+        bool mem_test = std::get<8>( str.param );
+
+        std::string str_name;
+        str_name += "_stor_" + std::string(&storage, 1);
+        str_name += "_m_" + std::to_string( m );
+        str_name += "_n_" + std::to_string( n );
+        str_name += "_k_" + std::to_string( k );
+        str_name += "_transa_" + std::string(&transa, 1);
+        str_name += "_transb_" + std::string(&transb, 1);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
+        str_name += ( mem_test ? "_mem_test_enabled" : "_mem_test_disabled" );
+
+        return str_name;
+    }
+};
+
+
+INSTANTIATE_TEST_SUITE_P(
+    ZGEMMTinyTestsAc,
+    zgemmTiny,
+    ::testing::Combine(
+        ::testing::Range(dim_t(1), dim_t(13), 1),                                                             // m
+        ::testing::Range(dim_t(1), dim_t(5), 1),                                                              // n
+        ::testing::Range(dim_t(1), dim_t(15), 1),                                                             // k
+        ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{0.0, 0.0}, dcomplex{-1.4, 1.3}),  // alpha
+        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{1.5, 2.2}),   // beta
+        ::testing::Values('c'),                                                                               // storage
+        ::testing::Values('c', 'n', 't'),                                                                     // transa
+        ::testing::Values('n', 't'),                                                                          // transb
+        ::testing::Values(false)                                                                              // no memory test
+    ),
+    zgemmTinyPrint()
+);
+
+INSTANTIATE_TEST_SUITE_P(
+    ZGEMMTinyTestsBc,
+    zgemmTiny,
+    ::testing::Combine(
+        ::testing::Range(dim_t(1), dim_t(13), 1),                                                             // m
+        ::testing::Range(dim_t(1), dim_t(5), 1),                                                              // n
+        ::testing::Range(dim_t(1), dim_t(15), 1),                                                             // k
+        ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{0.0, 0.0}, dcomplex{-1.4, 1.3}),  // alpha
+        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}, dcomplex{1.5, 2.2}),   // beta
+        ::testing::Values('c'),                                                                               // storage
+        ::testing::Values('n', 't'),                                                                          // transa
+        ::testing::Values('c', 'n', 't'),                                                                     // transb
+        ::testing::Values(false)                                                                              // no memory test
+    ),
+    zgemmTinyPrint()
+);
+#endif

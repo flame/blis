@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024-2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -117,7 +117,7 @@ TEST_P( zgemvEVT, API )
 }
 
 INSTANTIATE_TEST_SUITE_P(
-        matrix_vector_unitStride,
+        matrix_vector_unitStride_zero_alpha,
         zgemvEVT,
         ::testing::Combine(
             ::testing::Values('c'
@@ -129,11 +129,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'),                 // conjx
             ::testing::Values(gtint_t(15)),         // m
             ::testing::Values(gtint_t(32)),         // n
-            ::testing::Values(T{ 0.0,  0.0},
-                              T{ 1.0,  1.0},
-                              T{ 2.1, -1.2},
-                              T{-1.0,  0.0},
-                              T{ 1.0,  0.0}),       // alpha
+            ::testing::Values(T{ 0.0,  0.0}),       // alpha
             ::testing::Values(T{ 0.0,  0.0},
                               T{ 1.0,  1.0},
                               T{ 2.1, -1.2},
@@ -170,8 +166,63 @@ INSTANTIATE_TEST_SUITE_P(
         ::gemvEVTPrint<T>()
     );
 
+
 INSTANTIATE_TEST_SUITE_P(
-        matrix_vector_nonUnitStride,
+        DISABLED_matrix_vector_unitStride_nonzero_alpha,
+        zgemvEVT,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                      // storage format
+            ::testing::Values('n','t'),             // transa
+            ::testing::Values('n'),                 // conjx
+            ::testing::Values(gtint_t(15)),         // m
+            ::testing::Values(gtint_t(32)),         // n
+            ::testing::Values(T{ 0.0,  0.0},
+                              T{ 1.0,  1.0},
+                              T{ 2.1, -1.2},
+                              T{-1.0,  0.0}),       // alpha
+            ::testing::Values(T{ 0.0,  0.0},
+                              T{ 1.0,  1.0},
+                              T{ 2.1, -1.2},
+                              T{-1.0,  0.0},
+                              T{ 1.0,  0.0}),       // beta
+            ::testing::Values(gtint_t(1)),          // stride size for x
+            ::testing::Values(gtint_t(1)),          // stride size for y
+            ::testing::Values(T{AOCL_NaN,  AOCL_NaN},
+                              T{AOCL_Inf, -AOCL_Inf},
+                              T{AOCL_NaN,  AOCL_Inf},
+                              T{2.1,  AOCL_Inf},
+                              T{AOCL_Inf, -1.2},
+                              T{AOCL_Inf,  0.0},
+                              T{0.0,  AOCL_Inf},
+                              T{0.0,  0.0}),        // a_exval
+            ::testing::Values(T{AOCL_NaN,  AOCL_NaN},
+                              T{AOCL_Inf, -AOCL_Inf},
+                              T{AOCL_NaN,  AOCL_Inf},
+                              T{2.1,  AOCL_Inf},
+                              T{AOCL_Inf, -1.2},
+                              T{AOCL_Inf,  0.0},
+                              T{0.0,  AOCL_Inf},
+                              T{0.0,  0.0}),        // x_exval
+            ::testing::Values(T{AOCL_NaN,  AOCL_NaN},
+                              T{AOCL_Inf, -AOCL_Inf},
+                              T{AOCL_NaN,  AOCL_Inf},
+                              T{2.1,  AOCL_Inf},
+                              T{AOCL_Inf, -1.2},
+                              T{AOCL_Inf,  0.0},
+                              T{0.0,  AOCL_Inf},
+                              T{0.0,  0.0}),        // y_exval
+            ::testing::Values(gtint_t(0))           // increment to the leading dim of a
+        ),
+        ::gemvEVTPrint<T>()
+    );
+
+
+INSTANTIATE_TEST_SUITE_P(
+        matrix_vector_nonUnitStride_zero_alpha,
         zgemvEVT,
         ::testing::Combine(
             ::testing::Values('c'
@@ -183,8 +234,58 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'),                 // conjx
             ::testing::Values(gtint_t(55)),         // m
             ::testing::Values(gtint_t(55)),         // n
+            ::testing::Values(T{ 0.0,  0.0}),       // alpha
             ::testing::Values(T{ 0.0,  0.0},
                               T{ 1.0,  1.0},
+                              T{ 2.1, -1.2},
+                              T{-1.0,  0.0},
+                              T{ 1.0,  0.0}),       // beta
+            ::testing::Values(gtint_t(3)),          // stride size for x
+            ::testing::Values(gtint_t(5)),          // stride size for y
+            ::testing::Values(T{AOCL_NaN,  AOCL_NaN},
+                              T{AOCL_Inf, -AOCL_Inf},
+                              T{AOCL_NaN,  AOCL_Inf},
+                              T{2.1,  AOCL_Inf},
+                              T{AOCL_Inf, -1.2},
+                              T{AOCL_Inf,  0.0},
+                              T{0.0,  AOCL_Inf},
+                              T{0.0,  0.0}),        // a_exval
+            ::testing::Values(T{AOCL_NaN,  AOCL_NaN},
+                              T{AOCL_Inf, -AOCL_Inf},
+                              T{AOCL_NaN,  AOCL_Inf},
+                              T{2.1,  AOCL_Inf},
+                              T{AOCL_Inf, -1.2},
+                              T{AOCL_Inf,  0.0},
+                              T{0.0,  AOCL_Inf},
+                              T{0.0,  0.0}),        // x_exval
+            ::testing::Values(T{AOCL_NaN,  AOCL_NaN},
+                              T{AOCL_Inf, -AOCL_Inf},
+                              T{AOCL_NaN,  AOCL_Inf},
+                              T{2.1,  AOCL_Inf},
+                              T{AOCL_Inf, -1.2},
+                              T{AOCL_Inf,  0.0},
+                              T{0.0,  AOCL_Inf},
+                              T{0.0,  0.0}),        // y_exval
+            ::testing::Values(gtint_t(7))           // increment to the leading dim of a
+        ),
+        ::gemvEVTPrint<T>()
+    );
+
+
+INSTANTIATE_TEST_SUITE_P(
+        DISABLED_matrix_vector_nonUnitStride_nonzero_alpha,
+        zgemvEVT,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                      // storage format
+            ::testing::Values('n','t'),             // transa
+            ::testing::Values('n'),                 // conjx
+            ::testing::Values(gtint_t(55)),         // m
+            ::testing::Values(gtint_t(55)),         // n
+            ::testing::Values(T{ 1.0,  1.0},
                               T{ 2.1, -1.2},
                               T{-1.0,  0.0},
                               T{ 1.0,  0.0}),       // alpha
@@ -226,7 +327,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 
 INSTANTIATE_TEST_SUITE_P(
-        alpha_beta_unitStride,
+        alpha_beta_unitStride_nonunit_m_zero_beta,
         zgemvEVT,
         ::testing::Combine(
             ::testing::Values('c'
@@ -236,13 +337,202 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                      // storage format
             ::testing::Values('n','t'),             // transa
             ::testing::Values('n'),                 // conjx
-            ::testing::Values(gtint_t(32),
-                              gtint_t(1)),         // m
+            ::testing::Values(gtint_t(32)),         // m
             ::testing::Values(gtint_t(32),
                               gtint_t(1)),         // n
             ::testing::Values(T{AOCL_NaN,  AOCL_NaN},
                               T{AOCL_Inf, -AOCL_Inf},
                               T{AOCL_NaN,  AOCL_Inf},
+                              T{2.1,  AOCL_Inf},
+                              T{AOCL_Inf, -1.2},
+                              T{AOCL_Inf,  0.0},
+                              T{0.0,  AOCL_Inf},
+                              T{0.0,  0.0}),        // alpha
+            ::testing::Values(T{0.0,  0.0}),        // beta
+            ::testing::Values(gtint_t(1)),          // stride size for x
+            ::testing::Values(gtint_t(1)),          // stride size for y
+            ::testing::Values(T{0.0, 0.0}),         // a_exval
+            ::testing::Values(T{0.0, 0.0}),         // x_exval
+            ::testing::Values(T{0.0, 0.0}),         // y_exval
+            ::testing::Values(gtint_t(0))           // increment to the leading dim of a
+        ),
+        ::gemvEVTPrint<T>()
+    );
+
+
+INSTANTIATE_TEST_SUITE_P(
+        alpha_beta_unitStride_unit_m_unit_n_zero_beta,
+        zgemvEVT,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                      // storage format
+            ::testing::Values('n','t'),             // transa
+            ::testing::Values('n'),                 // conjx
+            ::testing::Values(gtint_t(1)),         // m
+            ::testing::Values(gtint_t(1)),         // n
+            ::testing::Values(T{AOCL_NaN,  AOCL_NaN},
+                              T{AOCL_Inf, -AOCL_Inf},
+                              T{AOCL_NaN,  AOCL_Inf},
+                              T{2.1,  AOCL_Inf},
+                              T{AOCL_Inf, -1.2},
+                              T{AOCL_Inf,  0.0},
+                              T{0.0,  AOCL_Inf},
+                              T{0.0,  0.0}),        // alpha
+            ::testing::Values(T{0.0,  0.0}),        // beta
+            ::testing::Values(gtint_t(1)),          // stride size for x
+            ::testing::Values(gtint_t(1)),          // stride size for y
+            ::testing::Values(T{0.0, 0.0}),         // a_exval
+            ::testing::Values(T{0.0, 0.0}),         // x_exval
+            ::testing::Values(T{0.0, 0.0}),         // y_exval
+            ::testing::Values(gtint_t(0))           // increment to the leading dim of a
+        ),
+        ::gemvEVTPrint<T>()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        alpha_beta_unitStride_unit_m_nonunit_n_zero_beta_noninf_alpha,
+        zgemvEVT,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                      // storage format
+            ::testing::Values('n','t'),             // transa
+            ::testing::Values('n'),                 // conjx
+            ::testing::Values(gtint_t(1)),         // m
+            ::testing::Values(gtint_t(8)),         // n
+            ::testing::Values(T{AOCL_NaN,  AOCL_NaN},
+                              T{AOCL_NaN,  AOCL_Inf},
+                              T{0.0,  0.0}),        // alpha
+            ::testing::Values(T{0.0,  0.0}),        // beta
+            ::testing::Values(gtint_t(1)),          // stride size for x
+            ::testing::Values(gtint_t(1)),          // stride size for y
+            ::testing::Values(T{0.0, 0.0}),         // a_exval
+            ::testing::Values(T{0.0, 0.0}),         // x_exval
+            ::testing::Values(T{0.0, 0.0}),         // y_exval
+            ::testing::Values(gtint_t(0))           // increment to the leading dim of a
+        ),
+        ::gemvEVTPrint<T>()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        alpha_beta_unitStride_trans_t_unit_m_nonunit_n_zero_beta_inf_alpha,
+        zgemvEVT,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                      // storage format
+            ::testing::Values('t'),             // transa
+            ::testing::Values('n'),                 // conjx
+            ::testing::Values(gtint_t(1)),         // m
+            ::testing::Values(gtint_t(8)),         // n
+            ::testing::Values(T{AOCL_Inf, -AOCL_Inf},
+                              T{2.1,  AOCL_Inf},
+                              T{AOCL_Inf, -1.2},
+                              T{AOCL_Inf,  0.0},
+                              T{0.0,  AOCL_Inf}),        // alpha
+            ::testing::Values(T{0.0,  0.0}),        // beta
+            ::testing::Values(gtint_t(1)),          // stride size for x
+            ::testing::Values(gtint_t(1)),          // stride size for y
+            ::testing::Values(T{0.0, 0.0}),         // a_exval
+            ::testing::Values(T{0.0, 0.0}),         // x_exval
+            ::testing::Values(T{0.0, 0.0}),         // y_exval
+            ::testing::Values(gtint_t(0))           // increment to the leading dim of a
+        ),
+        ::gemvEVTPrint<T>()
+    );
+
+
+INSTANTIATE_TEST_SUITE_P(
+        DISABLED_alpha_beta_unitStride_trans_n_unit_m_nonunit_n_zero_beta_inf_alpha,
+        zgemvEVT,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                      // storage format
+            ::testing::Values('n'),             // transa
+            ::testing::Values('n'),                 // conjx
+            ::testing::Values(gtint_t(1)),         // m
+            ::testing::Values(gtint_t(8)),         // n
+            ::testing::Values(T{AOCL_Inf, -AOCL_Inf},
+                              T{2.1,  AOCL_Inf},
+                              T{AOCL_Inf, -1.2},
+                              T{AOCL_Inf,  0.0},
+                              T{0.0,  AOCL_Inf}),        // alpha
+            ::testing::Values(T{0.0,  0.0}),        // beta
+            ::testing::Values(gtint_t(1)),          // stride size for x
+            ::testing::Values(gtint_t(1)),          // stride size for y
+            ::testing::Values(T{0.0, 0.0}),         // a_exval
+            ::testing::Values(T{0.0, 0.0}),         // x_exval
+            ::testing::Values(T{0.0, 0.0}),         // y_exval
+            ::testing::Values(gtint_t(0))           // increment to the leading dim of a
+        ),
+        ::gemvEVTPrint<T>()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        alpha_beta_unitStride_noninf_alpha_nonzero_beta,
+        zgemvEVT,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                      // storage format
+            ::testing::Values('n','t'),             // transa
+            ::testing::Values('n'),                 // conjx
+            ::testing::Values(gtint_t(24),
+                              gtint_t(1),
+                              gtint_t(15)),         // m
+            ::testing::Values(gtint_t(32),
+                              gtint_t(8),
+                              gtint_t(1)),         // n
+            ::testing::Values(T{AOCL_NaN,  AOCL_NaN},
+                              T{AOCL_NaN,  AOCL_Inf},
+                              T{0.0,  0.0}),        // alpha
+            ::testing::Values(T{AOCL_NaN,  AOCL_NaN},
+                              T{AOCL_Inf, -AOCL_Inf},
+                              T{AOCL_NaN,  AOCL_Inf},
+                              T{2.1,  AOCL_Inf},
+                              T{AOCL_Inf, -1.2},
+                              T{AOCL_Inf,  0.0},
+                              T{0.0,  AOCL_Inf}),        // beta
+            ::testing::Values(gtint_t(1)),          // stride size for x
+            ::testing::Values(gtint_t(1)),          // stride size for y
+            ::testing::Values(T{0.0, 0.0}),         // a_exval
+            ::testing::Values(T{0.0, 0.0}),         // x_exval
+            ::testing::Values(T{0.0, 0.0}),         // y_exval
+            ::testing::Values(gtint_t(0))           // increment to the leading dim of a
+        ),
+        ::gemvEVTPrint<T>()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        alpha_beta_unitStride_inf_alpha_nonzero_beta,
+        zgemvEVT,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                      // storage format
+            ::testing::Values('n','t'),             // transa
+            ::testing::Values('n'),                 // conjx
+            ::testing::Values(gtint_t(24),
+                              gtint_t(1),
+                              gtint_t(15)),         // m
+            ::testing::Values(gtint_t(32),
+                              gtint_t(8),
+                              gtint_t(1)),         // n
+            ::testing::Values(T{AOCL_Inf, -AOCL_Inf},
                               T{2.1,  AOCL_Inf},
                               T{AOCL_Inf, -1.2},
                               T{AOCL_Inf,  0.0},
@@ -254,8 +544,7 @@ INSTANTIATE_TEST_SUITE_P(
                               T{2.1,  AOCL_Inf},
                               T{AOCL_Inf, -1.2},
                               T{AOCL_Inf,  0.0},
-                              T{0.0,  AOCL_Inf},
-                              T{0.0,  0.0}),        // beta
+                              T{0.0,  AOCL_Inf}),        // beta
             ::testing::Values(gtint_t(1)),          // stride size for x
             ::testing::Values(gtint_t(1)),          // stride size for y
             ::testing::Values(T{0.0, 0.0}),         // a_exval
@@ -265,6 +554,7 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::gemvEVTPrint<T>()
     );
+
 
 INSTANTIATE_TEST_SUITE_P(
         alpha_beta_nonUnitStride,

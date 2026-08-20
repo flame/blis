@@ -1127,9 +1127,9 @@ LPGEMV_AVX2(bfloat16, bfloat16, float, bf16bf16f32of32)
 				&post_ops_attr
 			);
 
-			if ( mtag_b == REORDERED )
+			if(mtag_b == REORDERED)
 			{
-				adjust_B_panel_reordered_jc( &jc, jc_cur_loop );
+				adjust_B_panel_reordered_jc(&jc, jc_cur_loop);
 			}
 		}
 

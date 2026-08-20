@@ -361,7 +361,7 @@ err_t bli_dgemm_tiny_zen4_24x8
            cs_a                                 column stride of A matrix
            (b_local + (0 * cs_b) + (0 * rs_b)), B matrix offset
            rs_b                                 row stride of B matrix
-           cs_b                                 column stride of C matrix
+           cs_b                                 column stride of B matrix
            (double *)beta                       pointer to Beta value
            (c_local + 0 * cs_c + 0 * rs_c),     C matrix offset
            rs_c                                 row stride of C matrix
@@ -381,3 +381,642 @@ err_t bli_dgemm_tiny_zen4_24x8
     return BLIS_SUCCESS;
 }
 
+/**
+ * @brief
+ *
+ * Here based N dimension, it is decided whether main kernel needs to be invoked
+ * or simply jump straight to edge kernel directly.
+ * All the main kernel + remaining 3 edge kernels are registered in kernel table,
+ * which is nothing but table of function pointer and each index represents N.
+ *
+ * For N >= 4, main kernel is invoked. Remainder cases of N are handled from within.
+ * For N < 4, directly N specific edge kernel is invoked for gemm computation.
+ * @note
+ * N = 0 case never occurs.
+ */
+#define CALL_ZGEMM_KERNEL                                                                \
+        if(N >= 4)                                                                       \
+        {                                                                                \
+            zgemm_kern_fp_zen4[4](   conja,                                              \
+                                conjb,                                                   \
+                                M,                                                       \
+                                N,                                                       \
+                                K,                                                       \
+                                (dcomplex *)alpha,                                       \
+                                (a_local + (0 * rs_a) + (0 * cs_a)), /*A matrix offset*/ \
+                                rs_a,                                                    \
+                                cs_a,                                                    \
+                                (b_local + (0 * cs_b) + (0 * rs_b)), /*B matrix offset*/ \
+                                rs_b,                                                    \
+                                cs_b,                                                    \
+                                (dcomplex *)beta,                                        \
+                                (c_local + 0 * cs_c + 0 * rs_c),     /*C matrix offset*/ \
+                                rs_c,                                                    \
+                                cs_c,                                                    \
+                                &aux,                                                    \
+                                NULL                                                     \
+                            );                                                           \
+        }                                                                                \
+        else                                                                             \
+        {                                                                                \
+            zgemm_kern_fp_zen4[N](   conja,                                              \
+                                conjb,                                                   \
+                                M,                                                       \
+                                N,                                                       \
+                                K,                                                       \
+                                (dcomplex *)alpha,                                       \
+                                (a_local + (0 * rs_a) + (0 * cs_a)), /*A matrix offset*/ \
+                                rs_a,                                                    \
+                                cs_a,                                                    \
+                                (b_local + (0 * cs_b) + (0 * rs_b)), /*B matrix offset*/ \
+                                rs_b,                                                    \
+                                cs_b,                                                    \
+                                (dcomplex *)beta,                                        \
+                                (c_local + 0 * cs_c + 0 * rs_c),     /*C matrix offset*/ \
+                                rs_c,                                                    \
+                                cs_c,                                                    \
+                                &aux,                                                    \
+                                NULL                                                     \
+                            );                                                           \
+        }
+
+        /**
+ * @brief bli_zgemmsup_placeholder
+ *
+ * This is just a dummy function, which does nothing.
+ * Instead of setting 0th index kern_fp_zen4 table to NULL,
+ * this dummy function is assigned.
+ * Since we are directly calling kernels via function pointer
+ * without null checks, it is better to assign a dummy function
+ * rather than NULL, which may lead to crash.
+ */
+static void bli_zgemmsup_placeholder
+     (
+        conj_t    conja,
+        conj_t    conjb,
+        dim_t     m0,
+        dim_t     n0,
+        dim_t     k0,
+        dcomplex*    restrict alpha,
+        dcomplex*    restrict a, inc_t rs_a, inc_t cs_a,
+        dcomplex*    restrict b, inc_t rs_b, inc_t cs_b,
+        dcomplex*    restrict beta,
+        dcomplex*    restrict c, inc_t rs_c, inc_t cs_c,
+        auxinfo_t* restrict data,
+        cntx_t*    restrict cntx
+     )
+{
+    return;
+}
+
+static zgemmsup_ker_ft zgemm_kern_fp_zen4[] =
+{
+    bli_zgemmsup_placeholder,
+    bli_zgemmsup_cv_zen4_asm_12x1m,
+    bli_zgemmsup_cv_zen4_asm_12x2m,
+    bli_zgemmsup_cv_zen4_asm_12x3m,
+    bli_zgemmsup_cv_zen4_asm_12x4m,
+};
+
+err_t bli_zgemm_tiny_zen4_12x4
+     (
+        conj_t conja,
+        conj_t conjb,
+        trans_t transa,
+        trans_t transb,
+        dim_t  m,
+        dim_t  n,
+        dim_t  k,
+        const dcomplex*    alpha,
+        const dcomplex*    a, const inc_t rs_a0, const inc_t cs_a0,
+        const dcomplex*    b, const inc_t rs_b0, const inc_t cs_b0,
+        const dcomplex*    beta,
+        dcomplex*    c, const inc_t rs_c0, const inc_t cs_c0
+     )
+{
+    dcomplex *a_local = (dcomplex *)a;
+    dcomplex *b_local = (dcomplex *)b;
+    dcomplex *c_local = (dcomplex *)c;
+    guint_t cs_a = cs_a0;
+    guint_t rs_a = rs_a0;
+    guint_t cs_b = cs_b0;
+    guint_t rs_b = rs_b0;
+    guint_t cs_c = cs_c0;
+    guint_t rs_c = rs_c0;
+
+    gint_t M = m;
+    gint_t N = n;
+    gint_t K = k;
+
+    inc_t storage = 0;
+    if(transb == BLIS_NO_TRANSPOSE || transb == BLIS_CONJ_NO_TRANSPOSE)
+    {
+        storage = 1 * (rs_b == 1);     //1st bit
+    }
+    else if(transb == BLIS_TRANSPOSE || transb == BLIS_CONJ_TRANSPOSE)
+    {
+        storage = 1 * (cs_b == 1);     //1st bit
+        rs_b = cs_b0;
+        cs_b = rs_b0;
+    }
+
+    if(transa == BLIS_NO_TRANSPOSE || transa == BLIS_CONJ_NO_TRANSPOSE)
+    {
+        storage |= ((1 * (rs_a == 1)) << 1); //2nd bit
+    }
+    else if(transa == BLIS_TRANSPOSE  || transa == BLIS_CONJ_TRANSPOSE)
+    {
+        storage |= ((1 * (cs_a == 1)) << 1); //2nd bit
+        rs_a = cs_a0;
+        cs_a = rs_a0;
+    }
+
+    storage |= ((1 * (rs_c == 1)) << 2); //3rd bit
+
+    stor3_t stor_id = (stor3_t) storage;
+
+    const bool is_rrr_rrc_rcr_crr = (
+                                    stor_id == BLIS_RRR ||
+                                    stor_id == BLIS_RRC ||
+                                    stor_id == BLIS_RCR ||
+                                    stor_id == BLIS_CRR
+                                    );
+
+    const bool is_rcc_crc_ccr_ccc = !is_rrr_rrc_rcr_crr;
+    const bool row_pref = false;
+    const bool col_pref = !row_pref;
+
+    const bool is_primary = ( row_pref && is_rrr_rrc_rcr_crr ) ||
+                            ( col_pref && is_rcc_crc_ccr_ccc );
+
+    /**
+        * Based on matrix storage scheme and kernel preference,
+        * decision is made here that whether it is primary storage
+        * scheme or not.
+        */
+
+    if ( !is_primary )
+    {
+        /**
+        * For non-primary storage scheme, we configure parameters,
+        * for kernel re-use.
+        * swap A and B matrix.
+        */
+        a_local = (dcomplex *)b;
+        b_local = (dcomplex *)a;
+
+        /**
+        * The row stride (rs_a) and column stride (cs_b) of matrix A and B are swapped using XOR swap.
+        * The column stride (cs_a) and row stride (rs_b) of matrix A and B are swapped using XOR swap.
+        */
+        rs_a ^= cs_b;
+        cs_b ^= rs_a;
+        rs_a ^= cs_b;
+
+        cs_a ^= rs_b;
+        rs_b ^= cs_a;
+        cs_a ^= rs_b;
+
+        conja ^= conjb;
+        conjb ^= conja;
+        conja ^= conjb;
+
+        /**
+        * The row stride (rs_c) and column stride (cs_c) of matrix C are swapped using XOR swap.
+        */
+        rs_c ^= cs_c;
+        cs_c ^= rs_c;
+        rs_c ^= cs_c;
+
+        /**
+        * The dimensions M and N are swapped.
+        */
+        M = n;
+        N = m;
+    }
+
+    auxinfo_t aux;
+    inc_t ps_a_use = (12 * rs_a);
+    bli_auxinfo_set_ps_a( ps_a_use, &aux );
+
+    if( stor_id == BLIS_CRC || stor_id == BLIS_RRC )
+    {
+        dcomplex *a_pkr = NULL;
+        /**
+        * @brief
+        * When BLIS_PACK_BUFFER macro is set to 1, we inquire and use buffer
+        * allocated from blis memory pool.
+        * Here the size is given hard-coded, reason behind it is as explained at the definition
+        * of local static packA_buffer.
+        * Once the buffer is acquired and after sanity check, it packs A matrix in column stored fashion
+        * and pass it to cv kernel for computation.
+        * Here the macro CALL_KERNEL is final call to the kernel.
+        * Reason for having separate call to CALL_KERNEL inside the if..else.. condition is, when BLIS_PACK_BUFFER
+        * is enabled we acquire packing buffer from blis memory pool, which is also an already allocated static aligned
+        * memory buffer under the hood. So after using it needs to be returned to pool so if do not have separate conditions
+        * It will end up checking for allocated buffer even for the cases, where we do not even allocate a buffer to pack
+        * A matrix. Such as any storage scheme other than CRC and RRC.
+        */
+        mem_t local_mem_buf_A_s;
+        rntm_t rntm;
+        bli_pba_rntm_set_pba( &rntm );
+
+        dim_t mPanels = (M + 11) / 12;
+        size_t buffer_size = (mPanels * 12 * k * sizeof(dcomplex));
+
+        if(buffer_size > PACK_BUFFER_SIZE_B)
+        {
+            return BLIS_FAILURE;
+        }
+
+
+        // Get the buffer from the pool.
+        bli_pba_acquire_m(&rntm,
+                                buffer_size,
+                                BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
+                                &local_mem_buf_A_s);
+
+        dcomplex *packA_buffer = bli_mem_buffer(&local_mem_buf_A_s);
+
+        if(packA_buffer == NULL)
+        {
+			bli_pba_release( &rntm, &local_mem_buf_A_s );
+            return BLIS_FAILURE;
+        }
+
+        a_pkr = packA_buffer;
+
+        dim_t m_iter = M /12;
+        dim_t m_left = M % 12;
+
+        dcomplex *a_ptr = a_local;
+        dcomplex local_one = {1.0, 0.0};
+
+        for(int i = 0; i < m_iter; i++)
+        {
+            bli_zpackm_zen4_asm_12xk(0, BLIS_PACKED_ROWS, 12, k, k, &local_one, a_ptr, rs_a, 1, a_pkr, 12, NULL);
+            a_ptr += 12 * rs_a;
+            a_pkr += 12 * k;
+        }
+
+        if(m_left)
+        {
+            bli_zpackm_zen4_asm_12xk(0, BLIS_PACKED_ROWS, m_left, k, k, &local_one, a_ptr, rs_a, 1, a_pkr, 12, NULL);
+        }
+
+        a_local = packA_buffer;
+
+        rs_a = 1;
+        cs_a = 12;
+        ps_a_use = (12 * k);
+        bli_auxinfo_set_ps_a( ps_a_use, &aux );
+
+        /**
+        * CALL_KERNEL makes actual call to micro kernel,
+        * which is bli_dgemmsup_cv_zen4_asm_12x4m and the family of
+        * it based on value of N dimension.
+        * Arguments passed to it are as follows.
+        * conja                                whether A matrix is conjugate
+        conjb                                whether B matrix is conjugate
+        M                                    M dimension
+        N                                    N dimension
+        K                                    K dimension
+        (double *)alpha                      Pointer to alpha value
+        (a_local + (0 * rs_a) + (0 * cs_a)), A matrix offset
+        rs_a                                 row stride of A matrix
+        cs_a                                 column stride of A matrix
+        (b_local + (0 * cs_b) + (0 * rs_b)), B matrix offset
+        rs_b                                 row stride of B matrix
+        cs_b                                 column stride of B matrix
+        (double *)beta                       pointer to Beta value
+        (c_local + 0 * cs_c + 0 * rs_c),     C matrix offset
+        rs_c                                 row stride of C matrix
+        cs_c                                 column stride of C matrix
+        &aux                                 Aux structure which carries additional info
+        NULL                                 we do not use context in tiny path.
+        */
+        CALL_ZGEMM_KERNEL
+        //Return the allocated memory back to small block allocator
+        bli_pba_release(&rntm, &local_mem_buf_A_s);
+    }
+    else
+    {
+        /**
+        * CALL_KERNEL makes actual call to micro kernel,
+        * which is bli_zgemmsup_cv_zen4_asm_12x4m and the family of
+        * it based on value of N dimension.
+        * Arguments passed to it are as follows.
+        * conja                              whether A matrix is conjugate
+        conjb                                whether B matrix is conjugate
+        M                                    M dimension
+        N                                    N dimension
+        K                                    K dimension
+        (dcomplex *)alpha                      Pointer to alpha value
+        (a_local + (0 * rs_a) + (0 * cs_a)), A matrix offset
+        rs_a                                 row stride of A matrix
+        cs_a                                 column stride of A matrix
+        (b_local + (0 * cs_b) + (0 * rs_b)), B matrix offset
+        rs_b                                 row stride of B matrix
+        cs_b                                 column stride of B matrix
+        (dcomplex *)beta                       pointer to Beta value
+        (c_local + 0 * cs_c + 0 * rs_c),     C matrix offset
+        rs_c                                 row stride of C matrix
+        cs_c                                 column stride of C matrix
+        &aux                                 Aux structure which carries additional info
+        NULL                                 we do not use context in tiny path.
+        */
+        CALL_ZGEMM_KERNEL
+    }
+    return BLIS_SUCCESS;
+}
+
+/**
+ * @brief
+ *
+ * Single-precision complex (CGEMM) tiny-path dispatcher table and call macro.
+ * Mirrors the ZGEMM CALL_ZGEMM_KERNEL / zgemm_kern_fp_zen4 design. The 24x4m
+ * family is the primary CGEMM SUP kernel set on Zen4; for N >= 4 we dispatch
+ * to the 24x4m kernel (which handles N-fringe internally), and for N < 4 we
+ * jump straight to the matching N-specific edge kernel (24x{1,2,3}m).
+ * N = 0 case never occurs.
+ */
+#define CALL_CGEMM_KERNEL                                                                \
+        if(N >= 4)                                                                       \
+        {                                                                                \
+            cgemm_kern_fp_zen4[4](   conja,                                              \
+                                conjb,                                                   \
+                                M,                                                       \
+                                N,                                                       \
+                                K,                                                       \
+                                (scomplex *)alpha,                                       \
+                                (a_local + (0 * rs_a) + (0 * cs_a)), /*A matrix offset*/ \
+                                rs_a,                                                    \
+                                cs_a,                                                    \
+                                (b_local + (0 * cs_b) + (0 * rs_b)), /*B matrix offset*/ \
+                                rs_b,                                                    \
+                                cs_b,                                                    \
+                                (scomplex *)beta,                                        \
+                                (c_local + 0 * cs_c + 0 * rs_c),     /*C matrix offset*/ \
+                                rs_c,                                                    \
+                                cs_c,                                                    \
+                                &aux,                                                    \
+                                NULL                                                     \
+                            );                                                           \
+        }                                                                                \
+        else                                                                             \
+        {                                                                                \
+            cgemm_kern_fp_zen4[N](   conja,                                              \
+                                conjb,                                                   \
+                                M,                                                       \
+                                N,                                                       \
+                                K,                                                       \
+                                (scomplex *)alpha,                                       \
+                                (a_local + (0 * rs_a) + (0 * cs_a)), /*A matrix offset*/ \
+                                rs_a,                                                    \
+                                cs_a,                                                    \
+                                (b_local + (0 * cs_b) + (0 * rs_b)), /*B matrix offset*/ \
+                                rs_b,                                                    \
+                                cs_b,                                                    \
+                                (scomplex *)beta,                                        \
+                                (c_local + 0 * cs_c + 0 * rs_c),     /*C matrix offset*/ \
+                                rs_c,                                                    \
+                                cs_c,                                                    \
+                                &aux,                                                    \
+                                NULL                                                     \
+                            );                                                           \
+        }
+
+/**
+ * @brief bli_cgemmsup_placeholder
+ *
+ * Dummy function for index 0 of the CGEMM dispatch table so the unconditional
+ * cgemm_kern_fp_zen4[N] indirection cannot crash when N is out of range.
+ */
+static void bli_cgemmsup_placeholder
+     (
+        conj_t    conja,
+        conj_t    conjb,
+        dim_t     m0,
+        dim_t     n0,
+        dim_t     k0,
+        scomplex*    restrict alpha,
+        scomplex*    restrict a, inc_t rs_a, inc_t cs_a,
+        scomplex*    restrict b, inc_t rs_b, inc_t cs_b,
+        scomplex*    restrict beta,
+        scomplex*    restrict c, inc_t rs_c, inc_t cs_c,
+        auxinfo_t* restrict data,
+        cntx_t*    restrict cntx
+     )
+{
+    return;
+}
+
+static cgemmsup_ker_ft cgemm_kern_fp_zen4[] =
+{
+    bli_cgemmsup_placeholder,
+    bli_cgemmsup_cv_zen4_asm_24x1m,
+    bli_cgemmsup_cv_zen4_asm_24x2m,
+    bli_cgemmsup_cv_zen4_asm_24x3m,
+    bli_cgemmsup_cv_zen4_asm_24x4m,
+};
+
+err_t bli_cgemm_tiny_zen4_24x4
+     (
+        conj_t conja,
+        conj_t conjb,
+        trans_t transa,
+        trans_t transb,
+        dim_t  m,
+        dim_t  n,
+        dim_t  k,
+        const scomplex*    alpha,
+        const scomplex*    a, const inc_t rs_a0, const inc_t cs_a0,
+        const scomplex*    b, const inc_t rs_b0, const inc_t cs_b0,
+        const scomplex*    beta,
+        scomplex*    c, const inc_t rs_c0, const inc_t cs_c0
+     )
+{
+    scomplex *a_local = (scomplex *)a;
+    scomplex *b_local = (scomplex *)b;
+    scomplex *c_local = (scomplex *)c;
+    guint_t cs_a = cs_a0;
+    guint_t rs_a = rs_a0;
+    guint_t cs_b = cs_b0;
+    guint_t rs_b = rs_b0;
+    guint_t cs_c = cs_c0;
+    guint_t rs_c = rs_c0;
+
+    gint_t M = m;
+    gint_t N = n;
+    gint_t K = k;
+
+    inc_t storage = 0;
+    if(transb == BLIS_NO_TRANSPOSE || transb == BLIS_CONJ_NO_TRANSPOSE)
+    {
+        storage = 1 * (rs_b == 1);     //1st bit
+    }
+    else if(transb == BLIS_TRANSPOSE || transb == BLIS_CONJ_TRANSPOSE)
+    {
+        storage = 1 * (cs_b == 1);     //1st bit
+        rs_b = cs_b0;
+        cs_b = rs_b0;
+    }
+
+    if(transa == BLIS_NO_TRANSPOSE || transa == BLIS_CONJ_NO_TRANSPOSE)
+    {
+        storage |= ((1 * (rs_a == 1)) << 1); //2nd bit
+    }
+    else if(transa == BLIS_TRANSPOSE  || transa == BLIS_CONJ_TRANSPOSE)
+    {
+        storage |= ((1 * (cs_a == 1)) << 1); //2nd bit
+        rs_a = cs_a0;
+        cs_a = rs_a0;
+    }
+
+    storage |= ((1 * (rs_c == 1)) << 2); //3rd bit
+
+    stor3_t stor_id = (stor3_t) storage;
+
+    const bool is_rrr_rrc_rcr_crr = (
+                                    stor_id == BLIS_RRR ||
+                                    stor_id == BLIS_RRC ||
+                                    stor_id == BLIS_RCR ||
+                                    stor_id == BLIS_CRR
+                                    );
+
+    const bool is_rcc_crc_ccr_ccc = !is_rrr_rrc_rcr_crr;
+    const bool row_pref = false;
+    const bool col_pref = !row_pref;
+
+    const bool is_primary = ( row_pref && is_rrr_rrc_rcr_crr ) ||
+                            ( col_pref && is_rcc_crc_ccr_ccc );
+
+    /**
+        * Based on matrix storage scheme and kernel preference,
+        * decision is made here that whether it is primary storage
+        * scheme or not.
+        */
+
+    if ( !is_primary )
+    {
+        /**
+        * For non-primary storage scheme, we configure parameters,
+        * for kernel re-use.
+        * swap A and B matrix.
+        */
+        a_local = (scomplex *)b;
+        b_local = (scomplex *)a;
+
+        /**
+        * The row stride (rs_a) and column stride (cs_b) of matrix A and B are swapped using XOR swap.
+        * The column stride (cs_a) and row stride (rs_b) of matrix A and B are swapped using XOR swap.
+        */
+        rs_a ^= cs_b;
+        cs_b ^= rs_a;
+        rs_a ^= cs_b;
+
+        cs_a ^= rs_b;
+        rs_b ^= cs_a;
+        cs_a ^= rs_b;
+
+        conja ^= conjb;
+        conjb ^= conja;
+        conja ^= conjb;
+
+        /**
+        * The row stride (rs_c) and column stride (cs_c) of matrix C are swapped using XOR swap.
+        */
+        rs_c ^= cs_c;
+        cs_c ^= rs_c;
+        rs_c ^= cs_c;
+
+        /**
+        * The dimensions M and N are swapped.
+        */
+        M = n;
+        N = m;
+    }
+
+    auxinfo_t aux;
+    inc_t ps_a_use = (24 * rs_a);
+    bli_auxinfo_set_ps_a( ps_a_use, &aux );
+
+    if( stor_id == BLIS_CRC || stor_id == BLIS_RRC )
+    {
+        scomplex *a_pkr = NULL;
+        /**
+        * @brief
+        * When BLIS_PACK_BUFFER macro is set to 1, we inquire and use buffer
+        * allocated from blis memory pool.
+        * Once the buffer is acquired and after sanity check, it packs A matrix in column stored fashion
+        * and pass it to cv kernel for computation.
+        * Reason for having separate call to CALL_KERNEL inside the if..else.. condition is, when BLIS_PACK_BUFFER
+        * is enabled we acquire packing buffer from blis memory pool, which is also an already allocated static aligned
+        * memory buffer under the hood. So after using it needs to be returned to pool so if we do not have separate conditions
+        * it will end up checking for allocated buffer even for the cases, where we do not even allocate a buffer to pack
+        * A matrix. Such as any storage scheme other than CRC and RRC.
+        */
+        mem_t local_mem_buf_A_s;
+        rntm_t rntm;
+        bli_pba_rntm_set_pba( &rntm );
+
+        dim_t mPanels = (M + 23) / 24;
+        size_t buffer_size = (mPanels * 24 * k * sizeof(scomplex));
+
+        if(buffer_size > PACK_BUFFER_SIZE_B)
+        {
+            return BLIS_FAILURE;
+        }
+
+
+        // Get the buffer from the pool.
+        bli_pba_acquire_m(&rntm,
+                                buffer_size,
+                                BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
+                                &local_mem_buf_A_s);
+
+        scomplex *packA_buffer = bli_mem_buffer(&local_mem_buf_A_s);
+
+        if(packA_buffer == NULL)
+        {
+            bli_pba_release( &rntm, &local_mem_buf_A_s );
+            return BLIS_FAILURE;
+        }
+
+        a_pkr = packA_buffer;
+
+        dim_t m_iter = M /24;
+        dim_t m_left = M % 24;
+
+        scomplex *a_ptr = a_local;
+        scomplex local_one = {1.0f, 0.0f};
+
+        for(int i = 0; i < m_iter; i++)
+        {
+            bli_cpackm_zen4_asm_24xk(0, BLIS_PACKED_ROWS, 24, k, k, &local_one, a_ptr, rs_a, 1, a_pkr, 24, NULL);
+            a_ptr += 24 * rs_a;
+            a_pkr += 24 * k;
+        }
+
+        if(m_left)
+        {
+            bli_cpackm_zen4_asm_24xk(0, BLIS_PACKED_ROWS, m_left, k, k, &local_one, a_ptr, rs_a, 1, a_pkr, 24, NULL);
+        }
+
+        a_local = packA_buffer;
+
+        rs_a = 1;
+        cs_a = 24;
+        ps_a_use = (24 * k);
+        bli_auxinfo_set_ps_a( ps_a_use, &aux );
+
+        CALL_CGEMM_KERNEL
+        //Return the allocated memory back to small block allocator
+        bli_pba_release(&rntm, &local_mem_buf_A_s);
+    }
+    else
+    {
+        CALL_CGEMM_KERNEL
+    }
+    return BLIS_SUCCESS;
+}

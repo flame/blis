@@ -1003,6 +1003,22 @@ typedef enum
 
 } arch_t;
 
+// -- ISA capability tier type --
+
+// Coarse SIMD capability tiers used for x86 Zen-family kernel dispatch.
+// Ordered by capability (higher = strictly more capable) so callers may
+// compare with < / > if desired. Mapping from arch_t to a tier is
+// centralized in bli_arch_isa_tier() (see bli_arch.h); do NOT scatter
+// raw arch_t comparisons across kernel files.
+
+typedef enum
+{
+	BLIS_ISA_TIER_GENERIC = 0,  // reference path (no Zen SIMD kernel)
+	BLIS_ISA_TIER_AVX2,         // AVX2 + FMA3 (zen, zen2, zen3)
+	BLIS_ISA_TIER_AVX512        // AVX-512     (zen4, zen5, zen6, ...)
+
+} isa_tier_t;
+
 typedef enum
 {
 	// Initial value, will be selected for an unrecognized (non-integer)

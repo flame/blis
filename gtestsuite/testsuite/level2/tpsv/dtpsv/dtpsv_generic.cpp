@@ -77,7 +77,9 @@ TEST_P( dtpsvGeneric, API )
 #ifdef BLIS_INT_ELEMENT_TYPE
         double adj = 1.0;
 #else
-        double adj = 8.1;
+        // This adjustment was increased from 8.1 to accommodate the different results that
+        // occur when Netlib is built with -march=znver3 flag (8.1) vs without it (70.0).
+        double adj = 70.0;
 #endif
         thresh = adj*2*n*testinghelpers::getEpsilon<T>();
     }

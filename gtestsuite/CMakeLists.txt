@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2025, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -166,6 +166,38 @@ option(TEST_UPPERCASE_ARGS "Test upper case character arguments" OFF)
 
 # Option to enable testing with thresholds set to zero.
 option(THRESHOLD_ZERO "Set thresholds to zero" OFF)
+
+# Option to enable per-test JSON output for bitexactness CRC reporting.
+# When enabled, each test executable writes its GTest JSON output (including
+# CRC values recorded via RecordProperty) to a separate file under the
+# configured output directory. This avoids overwrite issues when ctest runs
+# multiple test binaries in parallel.
+option(GTEST_JSON_OUTPUT "Enable per-test JSON output files for CRC reporting" OFF)
+set(GTEST_JSON_OUTPUT_DIR "${CMAKE_BINARY_DIR}/gtest_json_output" CACHE PATH
+    "Directory for per-test GTest JSON output files (used when GTEST_JSON_OUTPUT is ON)")
+if(GTEST_JSON_OUTPUT)
+    file(MAKE_DIRECTORY "${GTEST_JSON_OUTPUT_DIR}")
+    if(NOT IS_DIRECTORY "${GTEST_JSON_OUTPUT_DIR}")
+        message(FATAL_ERROR "Failed to create GTest JSON output directory: '${GTEST_JSON_OUTPUT_DIR}'")
+    endif()
+    message(STATUS "Per-test JSON output enabled. Output directory: ${GTEST_JSON_OUTPUT_DIR}")
+endif()
+
+# Option to enable CRC-32 bitexact verification of test outputs.
+# When enabled, computes CRC-32 checksums for BLIS and reference outputs and records
+# them as GTest properties. Disabled by default to avoid performance overhead.
+option(ENABLE_CRC "Enable CRC-32 bitexact verification of test outputs" OFF)
+if(ENABLE_CRC)
+    message(STATUS "CRC-32 bitexact verification enabled.")
+endif()
+
+# Option to enable binary file output of test results for post-processing.
+# When enabled, BLIS and reference output buffers are written to binary files
+# under blis_test_outputs/ for offline comparison. Disabled by default.
+option(ENABLE_BINARY_OUTPUT "Enable binary file output of BLIS and reference results" OFF)
+if(ENABLE_BINARY_OUTPUT)
+    message(STATUS "Binary output of test results enabled.")
+endif()
 
 # Use EXT_VAL to get the extreme value (NaN or Inf) used for testing data that shouldn't be read.
 set(EXT_VAL "Inf" CACHE STRING "Extreme value (NaN or Inf) used for testing data that shouldn't be read")

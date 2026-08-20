@@ -90,7 +90,6 @@
     #define K_bli_zsetv_zen4_int bli_zsetv_zen4_int
     #define K_bli_dsetv_zen4_int bli_dsetv_zen4_int
     #define K_bli_ssetv_zen4_int bli_ssetv_zen4_int
-    #define K_bli_dgemv_n_zen4_int_32x8_st bli_dgemv_n_zen4_int_32x8_st
     #define K_scalv_zen4_int scalv_zen4_int
     #define K_scalv_zen4_int scalv_zen4_int
     #define K_bli_zscalv_zen4_int bli_zscalv_zen4_int
@@ -125,58 +124,74 @@
     #define K_bli_dnorm2fv_zen_int_unb_var1 bli_dnorm2fv_zen_int_unb_var1
     #define K_bli_sgemmsup_rd_zen4_asm_6x64n bli_sgemmsup_rd_zen4_asm_6x64n
     #define K_bli_sgemmsup_rd_zen4_asm_6x64m bli_sgemmsup_rd_zen4_asm_6x64m
+    #define K_bli_sgemmsup_rd_zen5_asm_6x64n bli_sgemmsup_rd_zen5_asm_6x64n
+    #define K_bli_sgemmsup_rd_zen5_asm_6x64m bli_sgemmsup_rd_zen5_asm_6x64m
     #define K_bli_sgemmsup_rv_zen4_asm_6x64n bli_sgemmsup_rv_zen4_asm_6x64n
     #define K_bli_sgemmsup_rv_zen4_asm_6x64m bli_sgemmsup_rv_zen4_asm_6x64m
     #define K_bli_sgemmsup_rv_zen4_asm_6x64n bli_sgemmsup_rv_zen4_asm_6x64n
     #define K_bli_sgemmsup_rv_zen4_asm_6x64m bli_sgemmsup_rv_zen4_asm_6x64m
     #define K_bli_dgemmtrsm_u_zen4_asm_16x14 bli_dgemmtrsm_u_zen4_asm_16x14
     #define K_bli_dgemmtrsm_l_zen4_asm_16x14 bli_dgemmtrsm_l_zen4_asm_16x14
-    #define K_bli_dgemv_n_zen bli_dgemv_n_zen
-    #define K_bli_dgemv_t_zen_int_16x1m bli_dgemv_t_zen_int_16x1m
-    #define K_bli_dgemv_t_zen_int_16x2m bli_dgemv_t_zen_int_16x2m
-    #define K_bli_dgemv_t_zen_int_16x3m bli_dgemv_t_zen_int_16x3m
-    #define K_bli_dgemv_t_zen_int_16x4m bli_dgemv_t_zen_int_16x4m
-    #define K_bli_dgemv_t_zen_int_16x5m bli_dgemv_t_zen_int_16x5m
-    #define K_bli_dgemv_t_zen_int_16x6m bli_dgemv_t_zen_int_16x6m
-    #define K_bli_dgemv_t_zen_int_16x7m bli_dgemv_t_zen_int_16x7m
+    // ZEN (AVX2) GEMV kernels
     #define K_bli_dgemv_t_zen_int bli_dgemv_t_zen_int
-    #define K_bli_dgemv_t_zen4_int_32x1m bli_dgemv_t_zen4_int_32x1m
-    #define K_bli_dgemv_t_zen4_int_32x2m bli_dgemv_t_zen4_int_32x2m
-    #define K_bli_dgemv_t_zen4_int_32x3m bli_dgemv_t_zen4_int_32x3m
-    #define K_bli_dgemv_t_zen4_int_32x4m bli_dgemv_t_zen4_int_32x4m
-    #define K_bli_dgemv_t_zen4_int_32x5m bli_dgemv_t_zen4_int_32x5m
-    #define K_bli_dgemv_t_zen4_int_32x6m bli_dgemv_t_zen4_int_32x6m
-    #define K_bli_dgemv_t_zen4_int_32x7m bli_dgemv_t_zen4_int_32x7m
+    #define K_bli_dgemv_t_zen_int_16x4 bli_dgemv_t_zen_int_16x4
+    #define K_bli_dgemv_t_zen_int_16x4_mt bli_dgemv_t_zen_int_16x4_mt
+    #define K_bli_dgemv_n_zen_int bli_dgemv_n_zen_int
+    #define K_bli_dgemv_n_zen_int_20x4 bli_dgemv_n_zen_int_20x4
+    #define K_bli_dgemv_n_zen_int_20x4_mt bli_dgemv_n_zen_int_20x4_mt
+    #define K_bli_dgemv_m_zen_int_20x4 bli_dgemv_m_zen_int_20x4
+    #define K_bli_sgemv_t_zen_int bli_sgemv_t_zen_int
+    #define K_bli_sgemv_t_zen_int_24x4 bli_sgemv_t_zen_int_24x4
+    #define K_bli_sgemv_t_zen_int_24x4_mt bli_sgemv_t_zen_int_24x4_mt
+    #define K_bli_sgemv_n_zen_int bli_sgemv_n_zen_int
+    #define K_bli_sgemv_n_zen_int_40x4 bli_sgemv_n_zen_int_40x4
+    #define K_bli_sgemv_n_zen_int_40x4_mt bli_sgemv_n_zen_int_40x4_mt
+    #define K_bli_sgemv_m_zen_int_40x4 bli_sgemv_m_zen_int_40x4
+    #define K_bli_sgemv_m_zen_int_40x4_mt_Mdiv bli_sgemv_m_zen_int_40x4_mt_Mdiv
+    #define K_bli_sgemv_m_zen_int_40x4_mt_Ndiv bli_sgemv_m_zen_int_40x4_mt_Ndiv
+    #define K_bli_cgemv_t_zen_int bli_cgemv_t_zen_int
+    #define K_bli_cgemv_t_zen_int_20x4 bli_cgemv_t_zen_int_20x4
+    #define K_bli_cgemv_t_zen_int_20x4_mt bli_cgemv_t_zen_int_20x4_mt
+    #define K_bli_cgemv_n_zen_int bli_cgemv_n_zen_int
+    #define K_bli_cgemv_n_zen_int_20x5 bli_cgemv_n_zen_int_20x5
+    #define K_bli_cgemv_n_zen_int_20x5_mt bli_cgemv_n_zen_int_20x5_mt
+    #define K_bli_zgemv_t_zen_int bli_zgemv_t_zen_int
+    #define K_bli_zgemv_t_zen_int_10x4 bli_zgemv_t_zen_int_10x4
+    #define K_bli_zgemv_t_zen_int_10x4_mt bli_zgemv_t_zen_int_10x4_mt
+    #define K_bli_zgemv_n_zen_int bli_zgemv_n_zen_int
+    #define K_bli_zgemv_n_zen_int_10x5 bli_zgemv_n_zen_int_10x5
+    #define K_bli_zgemv_n_zen_int_10x5_mt bli_zgemv_n_zen_int_10x5_mt
+    // ZEN4 (AVX-512) GEMV kernels
     #define K_bli_dgemv_t_zen4_int bli_dgemv_t_zen4_int
-    #define K_bli_dgemv_n_zen4_int_m_leftx1n bli_dgemv_n_zen4_int_m_leftx1n
-    #define K_bli_dgemv_n_zen4_int_8x1n bli_dgemv_n_zen4_int_8x1n
-    #define K_bli_dgemv_n_zen4_int_16x1n bli_dgemv_n_zen4_int_16x1n
-    #define K_bli_dgemv_n_zen4_int_32x1n bli_dgemv_n_zen4_int_32x1n
-    #define K_bli_dgemv_n_zen4_int_m_leftx2n bli_dgemv_n_zen4_int_m_leftx2n
-    #define K_bli_dgemv_n_zen4_int_8x2n bli_dgemv_n_zen4_int_8x2n
-    #define K_bli_dgemv_n_zen4_int_16x2n bli_dgemv_n_zen4_int_16x2n
-    #define K_bli_dgemv_n_zen4_int_32x2n bli_dgemv_n_zen4_int_32x2n
-    #define K_bli_dgemv_n_zen4_int_m_leftx3n bli_dgemv_n_zen4_int_m_leftx3n
-    #define K_bli_dgemv_n_zen4_int_8x3n bli_dgemv_n_zen4_int_8x3n
-    #define K_bli_dgemv_n_zen4_int_16x3n bli_dgemv_n_zen4_int_16x3n
-    #define K_bli_dgemv_n_zen4_int_32x3n bli_dgemv_n_zen4_int_32x3n
-    #define K_bli_dgemv_n_zen4_int_m_leftx4n bli_dgemv_n_zen4_int_m_leftx4n
-    #define K_bli_dgemv_n_zen4_int_8x4n bli_dgemv_n_zen4_int_8x4n
-    #define K_bli_dgemv_n_zen4_int_16x4n bli_dgemv_n_zen4_int_16x4n
-    #define K_bli_dgemv_n_zen4_int_32x4n bli_dgemv_n_zen4_int_32x4n
-    #define K_bli_dgemv_n_zen4_int_m_leftx8n bli_dgemv_n_zen4_int_m_leftx8n
-    #define K_bli_dgemv_n_zen4_int_8x8n bli_dgemv_n_zen4_int_8x8n
-    #define K_bli_dgemv_n_zen4_int_16x8n bli_dgemv_n_zen4_int_16x8n
-    #define K_bli_dgemv_n_zen4_int_32x8n bli_dgemv_n_zen4_int_32x8n
-    #define K_bli_dgemv_n_zen4_int_16mx1 bli_dgemv_n_zen4_int_16mx1
-    #define K_bli_dgemv_n_zen4_int_16mx2 bli_dgemv_n_zen4_int_16mx2
-    #define K_bli_dgemv_n_zen4_int_16mx3 bli_dgemv_n_zen4_int_16mx3
-    #define K_bli_dgemv_n_zen4_int_16mx4 bli_dgemv_n_zen4_int_16mx4
-    #define K_bli_dgemv_n_zen4_int_16mx5 bli_dgemv_n_zen4_int_16mx5
-    #define K_bli_dgemv_n_zen4_int_16mx6 bli_dgemv_n_zen4_int_16mx6
-    #define K_bli_dgemv_n_zen4_int_16mx7 bli_dgemv_n_zen4_int_16mx7
-    #define K_bli_dgemv_n_zen4_int_16mx8 bli_dgemv_n_zen4_int_16mx8
+    #define K_bli_dgemv_t_zen4_int_32x8 bli_dgemv_t_zen4_int_32x8
+    #define K_bli_dgemv_t_zen4_int_32x8_mt bli_dgemv_t_zen4_int_32x8_mt
     #define K_bli_dgemv_n_zen4_int bli_dgemv_n_zen4_int
+    #define K_bli_dgemv_n_zen4_int_40x8 bli_dgemv_n_zen4_int_40x8
+    #define K_bli_dgemv_n_zen4_int_40x8_mt bli_dgemv_n_zen4_int_40x8_mt
+    #define K_bli_dgemv_m_zen4_int_40x8 bli_dgemv_m_zen4_int_40x8
+    #define K_bli_dgemv_m_zen4_int_40x8_mt_Ndiv bli_dgemv_m_zen4_int_40x8_mt_Ndiv
+    #define K_bli_dgemv_m_zen4_int_40x8_mt_Mdiv bli_dgemv_m_zen4_int_40x8_mt_Mdiv
+    #define K_bli_sgemv_t_zen4_int bli_sgemv_t_zen4_int
+    #define K_bli_sgemv_t_zen4_int_48x8 bli_sgemv_t_zen4_int_48x8
+    #define K_bli_sgemv_t_zen4_int_48x8_mt bli_sgemv_t_zen4_int_48x8_mt
+    #define K_bli_sgemv_n_zen4_int bli_sgemv_n_zen4_int
+    #define K_bli_sgemv_n_zen4_int_80x8 bli_sgemv_n_zen4_int_80x8
+    #define K_bli_sgemv_n_zen4_int_80x8_mt bli_sgemv_n_zen4_int_80x8_mt
+    #define K_bli_sgemv_m_zen4_int_80x8 bli_sgemv_m_zen4_int_80x8
+    #define K_bli_sgemv_m_zen4_int_80x8_mt_Mdiv bli_sgemv_m_zen4_int_80x8_mt_Mdiv
+    #define K_bli_sgemv_m_zen4_int_80x8_mt_Ndiv bli_sgemv_m_zen4_int_80x8_mt_Ndiv
+    #define K_bli_cgemv_t_zen4_int bli_cgemv_t_zen4_int
+    #define K_bli_cgemv_t_zen4_int_40x8 bli_cgemv_t_zen4_int_40x8
+    #define K_bli_cgemv_t_zen4_int_40x8_mt bli_cgemv_t_zen4_int_40x8_mt
+    #define K_bli_cgemv_n_zen4_int bli_cgemv_n_zen4_int
+    #define K_bli_cgemv_n_zen4_int_40x10 bli_cgemv_n_zen4_int_40x10
+    #define K_bli_cgemv_n_zen4_int_40x10_mt bli_cgemv_n_zen4_int_40x10_mt
+    #define K_bli_zgemv_t_zen4_int bli_zgemv_t_zen4_int
+    #define K_bli_zgemv_t_zen4_int_20x8 bli_zgemv_t_zen4_int_20x8
+    #define K_bli_zgemv_t_zen4_int_20x8_mt bli_zgemv_t_zen4_int_20x8_mt
+    #define K_bli_zgemv_n_zen4_int bli_zgemv_n_zen4_int
+    #define K_bli_zgemv_n_zen4_int_20x10 bli_zgemv_n_zen4_int_20x10
+    #define K_bli_zgemv_n_zen4_int_20x10_mt bli_zgemv_n_zen4_int_20x10_mt
     #define K_bli_cgemm_zen4_int_32x4_k1_nn bli_cgemm_zen4_int_32x4_k1_nn
     #define K_bli_zgemm_zen4_int_16x4_k1_nn bli_zgemm_zen4_int_16x4_k1_nn
     #define K_bli_dgemm_zen4_int_24x8_k1_nn bli_dgemm_zen4_int_24x8_k1_nn
@@ -202,111 +217,181 @@
       #define K_bli_dgemmsup_cv_zen4_asm_24x8m_new bli_dgemmsup_rv_zen4_asm_24x8m_new
     #endif
     #ifndef K_bli_dgemv_t_zen_int
-      #define K_bli_dgemv_t_zen_int bli_dgemv_t_zen_int_avx2
+      #define K_bli_dgemv_t_zen_int bli_dgemv_t_zen_int
     #endif
-    #define K_bli_dgemv_t_zen_int_mx7_avx2 1
-    #define K_bli_dgemv_t_zen_int_mx6_avx2 1
-    #define K_bli_dgemv_t_zen_int_mx5_avx2 1
-    #define K_bli_dgemv_t_zen_int_mx4_avx2 1
-    #define K_bli_dgemv_t_zen_int_mx3_avx2 1
-    #define K_bli_dgemv_t_zen_int_mx2_avx2 1
-    #define K_bli_dgemv_t_zen_int_mx1_avx2 1
-    #ifndef K_bli_dgemv_t_zen4_int
-      #define K_bli_dgemv_t_zen4_int bli_dgemv_t_zen_int_avx512
+    #ifndef K_bli_dgemv_t_zen_int_16x4
+      #define K_bli_dgemv_t_zen_int_16x4 bli_dgemv_t_zen_int_16x4
     #endif
-    #define K_bli_dgemv_t_zen_int_mx7_avx512 1
-    #define K_bli_dgemv_t_zen_int_mx6_avx512 1
-    #define K_bli_dgemv_t_zen_int_mx5_avx512 1
-    #define K_bli_dgemv_t_zen_int_mx4_avx512 1
-    #define K_bli_dgemv_t_zen_int_mx3_avx512 1
-    #define K_bli_dgemv_t_zen_int_mx2_avx512 1
-    #define K_bli_dgemv_t_zen_int_mx1_avx512 1
+    #ifndef K_bli_dgemv_t_zen_int_16x4_mt
+      #define K_bli_dgemv_t_zen_int_16x4_mt bli_dgemv_t_zen_int_16x4_mt
+    #endif
+    #ifndef K_bli_dgemv_n_zen_int
+      #define K_bli_dgemv_n_zen_int bli_dgemv_n_zen_int
+    #endif
+    #ifndef K_bli_dgemv_n_zen_int_20x4
+      #define K_bli_dgemv_n_zen_int_20x4 bli_dgemv_n_zen_int_20x4
+    #endif
+    #ifndef K_bli_dgemv_n_zen_int_20x4_mt
+      #define K_bli_dgemv_n_zen_int_20x4_mt bli_dgemv_n_zen_int_20x4_mt
+    #endif
+    #ifndef K_bli_dgemv_m_zen_int_20x4
+      #define K_bli_dgemv_m_zen_int_20x4 bli_dgemv_m_zen_int_20x4
+    #endif
+    #ifndef K_bli_sgemv_t_zen_int
+      #define K_bli_sgemv_t_zen_int bli_sgemv_t_zen_int
+    #endif
+    #ifndef K_bli_sgemv_t_zen_int_24x4
+      #define K_bli_sgemv_t_zen_int_24x4 bli_sgemv_t_zen_int_24x4
+    #endif
+    #ifndef K_bli_sgemv_t_zen_int_24x4_mt
+      #define K_bli_sgemv_t_zen_int_24x4_mt bli_sgemv_t_zen_int_24x4_mt
+    #endif
+    #ifndef K_bli_sgemv_n_zen_int
+      #define K_bli_sgemv_n_zen_int bli_sgemv_n_zen_int
+    #endif
+    #ifndef K_bli_sgemv_n_zen_int_40x4
+      #define K_bli_sgemv_n_zen_int_40x4 bli_sgemv_n_zen_int_40x4
+    #endif
+    #ifndef K_bli_sgemv_n_zen_int_40x4_mt
+      #define K_bli_sgemv_n_zen_int_40x4_mt bli_sgemv_n_zen_int_40x4_mt
+    #endif
+    #ifndef K_bli_sgemv_m_zen_int_40x4
+      #define K_bli_sgemv_m_zen_int_40x4 bli_sgemv_m_zen_int_40x4
+    #endif
+    #ifndef K_bli_sgemv_m_zen_int_40x4_mt_Mdiv
+      #define K_bli_sgemv_m_zen_int_40x4_mt_Mdiv bli_sgemv_m_zen_int_40x4_mt_Mdiv
+    #endif
+    #ifndef K_bli_sgemv_m_zen_int_40x4_mt_Ndiv
+      #define K_bli_sgemv_m_zen_int_40x4_mt_Ndiv bli_sgemv_m_zen_int_40x4_mt_Ndiv
+    #endif
+    #ifndef K_bli_cgemv_t_zen_int
+      #define K_bli_cgemv_t_zen_int bli_cgemv_t_zen_int
+    #endif
+    #ifndef K_bli_cgemv_t_zen_int_20x4
+      #define K_bli_cgemv_t_zen_int_20x4 bli_cgemv_t_zen_int_20x4
+    #endif
+    #ifndef K_bli_cgemv_t_zen_int_20x4_mt
+      #define K_bli_cgemv_t_zen_int_20x4_mt bli_cgemv_t_zen_int_20x4_mt
+    #endif
+    #ifndef K_bli_cgemv_n_zen_int
+      #define K_bli_cgemv_n_zen_int bli_cgemv_n_zen_int
+    #endif
+    #ifndef K_bli_cgemv_n_zen_int_20x5
+      #define K_bli_cgemv_n_zen_int_20x5 bli_cgemv_n_zen_int_20x5
+    #endif
+    #ifndef K_bli_cgemv_n_zen_int_20x5_mt
+      #define K_bli_cgemv_n_zen_int_20x5_mt bli_cgemv_n_zen_int_20x5_mt
+    #endif
+    #ifndef K_bli_zgemv_t_zen_int
+      #define K_bli_zgemv_t_zen_int bli_zgemv_t_zen_int
+    #endif
+    #ifndef K_bli_zgemv_t_zen_int_10x4
+      #define K_bli_zgemv_t_zen_int_10x4 bli_zgemv_t_zen_int_10x4
+    #endif
+    #ifndef K_bli_zgemv_t_zen_int_10x4_mt
+      #define K_bli_zgemv_t_zen_int_10x4_mt bli_zgemv_t_zen_int_10x4_mt
+    #endif
+    #ifndef K_bli_zgemv_n_zen_int
+      #define K_bli_zgemv_n_zen_int bli_zgemv_n_zen_int
+    #endif
+    #ifndef K_bli_zgemv_n_zen_int_10x5
+      #define K_bli_zgemv_n_zen_int_10x5 bli_zgemv_n_zen_int_10x5
+    #endif
+    #ifndef K_bli_zgemv_n_zen_int_10x5_mt
+      #define K_bli_zgemv_n_zen_int_10x5_mt bli_zgemv_n_zen_int_10x5_mt
+    #endif
     #ifndef K_bli_ztrsm_small_zen5
       #define K_bli_ztrsm_small_zen5 bli_ztrsm_small_ZEN5
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_16mx8
-      #define K_bli_dgemv_n_zen4_int_16mx8 bli_dgemv_n_zen_int_16mx8_avx512
+    #ifndef K_bli_dgemv_t_zen4_int
+      #define K_bli_dgemv_t_zen4_int bli_dgemv_t_zen4_int
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_16mx7
-      #define K_bli_dgemv_n_zen4_int_16mx7 bli_dgemv_n_zen_int_16mx7_avx512
+    #ifndef K_bli_dgemv_t_zen4_int_32x8
+      #define K_bli_dgemv_t_zen4_int_32x8 bli_dgemv_t_zen4_int_32x8
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_16mx6
-      #define K_bli_dgemv_n_zen4_int_16mx6 bli_dgemv_n_zen_int_16mx6_avx512
+    #ifndef K_bli_dgemv_t_zen4_int_32x8_mt
+      #define K_bli_dgemv_t_zen4_int_32x8_mt bli_dgemv_t_zen4_int_32x8_mt
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_16mx5
-      #define K_bli_dgemv_n_zen4_int_16mx5 bli_dgemv_n_zen_int_16mx5_avx512
+    #ifndef K_bli_dgemv_n_zen4_int
+      #define K_bli_dgemv_n_zen4_int bli_dgemv_n_zen4_int
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_16mx4
-      #define K_bli_dgemv_n_zen4_int_16mx4 bli_dgemv_n_zen_int_16mx4_avx512
+    #ifndef K_bli_dgemv_n_zen4_int_40x8
+      #define K_bli_dgemv_n_zen4_int_40x8 bli_dgemv_n_zen4_int_40x8
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_16mx3
-      #define K_bli_dgemv_n_zen4_int_16mx3 bli_dgemv_n_zen_int_16mx3_avx512
+    #ifndef K_bli_dgemv_n_zen4_int_40x8_mt
+      #define K_bli_dgemv_n_zen4_int_40x8_mt bli_dgemv_n_zen4_int_40x8_mt
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_16mx2
-      #define K_bli_dgemv_n_zen4_int_16mx2 bli_dgemv_n_zen_int_16mx2_avx512
+    #ifndef K_bli_dgemv_m_zen4_int_40x8
+      #define K_bli_dgemv_m_zen4_int_40x8 bli_dgemv_m_zen4_int_40x8
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_16mx1
-      #define K_bli_dgemv_n_zen4_int_16mx1 bli_dgemv_n_zen_int_16mx1_avx512
+    #ifndef K_bli_dgemv_m_zen4_int_40x8_mt_Ndiv
+      #define K_bli_dgemv_m_zen4_int_40x8_mt_Ndiv bli_dgemv_m_zen4_int_40x8_mt_Ndiv
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_32x8n
-      #define K_bli_dgemv_n_zen4_int_32x8n bli_dgemv_n_zen_int_32x8n_avx512
+    #ifndef K_bli_dgemv_m_zen4_int_40x8_mt_Mdiv
+      #define K_bli_dgemv_m_zen4_int_40x8_mt_Mdiv bli_dgemv_m_zen4_int_40x8_mt_Mdiv
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_16x8n
-      #define K_bli_dgemv_n_zen4_int_16x8n bli_dgemv_n_zen_int_16x8n_avx512
+    #ifndef K_bli_sgemv_t_zen4_int
+      #define K_bli_sgemv_t_zen4_int bli_sgemv_t_zen4_int
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_8x8n
-      #define K_bli_dgemv_n_zen4_int_8x8n bli_dgemv_n_zen_int_8x8n_avx512
+    #ifndef K_bli_sgemv_t_zen4_int_48x8
+      #define K_bli_sgemv_t_zen4_int_48x8 bli_sgemv_t_zen4_int_48x8
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_m_leftx8n
-      #define K_bli_dgemv_n_zen4_int_m_leftx8n bli_dgemv_n_zen_int_m_leftx8n_avx512
+    #ifndef K_bli_sgemv_t_zen4_int_48x8_mt
+      #define K_bli_sgemv_t_zen4_int_48x8_mt bli_sgemv_t_zen4_int_48x8_mt
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_32x4n
-      #define K_bli_dgemv_n_zen4_int_32x4n bli_dgemv_n_zen_int_32x4n_avx512
+    #ifndef K_bli_sgemv_n_zen4_int
+      #define K_bli_sgemv_n_zen4_int bli_sgemv_n_zen4_int
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_16x4n
-      #define K_bli_dgemv_n_zen4_int_16x4n bli_dgemv_n_zen_int_16x4n_avx512
+    #ifndef K_bli_sgemv_n_zen4_int_80x8
+      #define K_bli_sgemv_n_zen4_int_80x8 bli_sgemv_n_zen4_int_80x8
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_8x4n
-      #define K_bli_dgemv_n_zen4_int_8x4n bli_dgemv_n_zen_int_8x4n_avx512
+    #ifndef K_bli_sgemv_n_zen4_int_80x8_mt
+      #define K_bli_sgemv_n_zen4_int_80x8_mt bli_sgemv_n_zen4_int_80x8_mt
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_m_leftx4n
-      #define K_bli_dgemv_n_zen4_int_m_leftx4n bli_dgemv_n_zen_int_m_leftx4n_avx512
+    #ifndef K_bli_sgemv_m_zen4_int_80x8
+      #define K_bli_sgemv_m_zen4_int_80x8 bli_sgemv_m_zen4_int_80x8
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_32x3n
-      #define K_bli_dgemv_n_zen4_int_32x3n bli_dgemv_n_zen_int_32x3n_avx512
+    #ifndef K_bli_sgemv_m_zen4_int_80x8_mt_Mdiv
+      #define K_bli_sgemv_m_zen4_int_80x8_mt_Mdiv bli_sgemv_m_zen4_int_80x8_mt_Mdiv
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_16x3n
-      #define K_bli_dgemv_n_zen4_int_16x3n bli_dgemv_n_zen_int_16x3n_avx512
+    #ifndef K_bli_sgemv_m_zen4_int_80x8_mt_Ndiv
+      #define K_bli_sgemv_m_zen4_int_80x8_mt_Ndiv bli_sgemv_m_zen4_int_80x8_mt_Ndiv
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_8x3n
-      #define K_bli_dgemv_n_zen4_int_8x3n bli_dgemv_n_zen_int_8x3n_avx512
+    #ifndef K_bli_cgemv_t_zen4_int
+      #define K_bli_cgemv_t_zen4_int bli_cgemv_t_zen4_int
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_m_leftx3n
-      #define K_bli_dgemv_n_zen4_int_m_leftx3n bli_dgemv_n_zen_int_m_leftx3n_avx512
+    #ifndef K_bli_cgemv_t_zen4_int_40x8
+      #define K_bli_cgemv_t_zen4_int_40x8 bli_cgemv_t_zen4_int_40x8
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_32x2n
-      #define K_bli_dgemv_n_zen4_int_32x2n bli_dgemv_n_zen_int_32x2n_avx512
+    #ifndef K_bli_cgemv_t_zen4_int_40x8_mt
+      #define K_bli_cgemv_t_zen4_int_40x8_mt bli_cgemv_t_zen4_int_40x8_mt
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_16x2n
-      #define K_bli_dgemv_n_zen4_int_16x2n bli_dgemv_n_zen_int_16x2n_avx512
+    #ifndef K_bli_cgemv_n_zen4_int
+      #define K_bli_cgemv_n_zen4_int bli_cgemv_n_zen4_int
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_8x2n
-      #define K_bli_dgemv_n_zen4_int_8x2n bli_dgemv_n_zen_int_8x2n_avx512
+    #ifndef K_bli_cgemv_n_zen4_int_40x10
+      #define K_bli_cgemv_n_zen4_int_40x10 bli_cgemv_n_zen4_int_40x10
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_m_leftx2n
-      #define K_bli_dgemv_n_zen4_int_m_leftx2n bli_dgemv_n_zen_int_m_leftx2n_avx512
+    #ifndef K_bli_cgemv_n_zen4_int_40x10_mt
+      #define K_bli_cgemv_n_zen4_int_40x10_mt bli_cgemv_n_zen4_int_40x10_mt
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_32x1n
-      #define K_bli_dgemv_n_zen4_int_32x1n bli_dgemv_n_zen_int_32x1n_avx512
+    #ifndef K_bli_zgemv_t_zen4_int
+      #define K_bli_zgemv_t_zen4_int bli_zgemv_t_zen4_int
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_16x1n
-      #define K_bli_dgemv_n_zen4_int_16x1n bli_dgemv_n_zen_int_16x1n_avx512
+    #ifndef K_bli_zgemv_t_zen4_int_20x8
+      #define K_bli_zgemv_t_zen4_int_20x8 bli_zgemv_t_zen4_int_20x8
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_8x1n
-      #define K_bli_dgemv_n_zen4_int_8x1n bli_dgemv_n_zen_int_8x1n_avx512
+    #ifndef K_bli_zgemv_t_zen4_int_20x8_mt
+      #define K_bli_zgemv_t_zen4_int_20x8_mt bli_zgemv_t_zen4_int_20x8_mt
     #endif
-    #ifndef K_bli_dgemv_n_zen4_int_m_leftx1n
-      #define K_bli_dgemv_n_zen4_int_m_leftx1n bli_dgemv_n_zen_int_m_leftx1n_avx512
+    #ifndef K_bli_zgemv_n_zen4_int
+      #define K_bli_zgemv_n_zen4_int bli_zgemv_n_zen4_int
+    #endif
+    #ifndef K_bli_zgemv_n_zen4_int_20x10
+      #define K_bli_zgemv_n_zen4_int_20x10 bli_zgemv_n_zen4_int_20x10
+    #endif
+    #ifndef K_bli_zgemv_n_zen4_int_20x10_mt
+      #define K_bli_zgemv_n_zen4_int_20x10_mt bli_zgemv_n_zen4_int_20x10_mt
     #endif
 
     #define AOCL_50

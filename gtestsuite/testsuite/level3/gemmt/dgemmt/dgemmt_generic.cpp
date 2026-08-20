@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,7 +35,21 @@
 #include <gtest/gtest.h>
 #include "level3/gemmt/test_gemmt.h"
 
-class dgemmtGeneric :
+// Two options for instantiate block, one to set lda_inc = ldb_inc = ldc_inc to
+// reduce Cartesian product, and one to allow all to be varied independently.
+class dgemmtGeneric1 :
+        public ::testing::TestWithParam<std::tuple<char,         // storage
+                                                   char,         // uplo
+                                                   char,         // transa
+                                                   char,         // transb
+                                                   gtint_t,      // n
+                                                   gtint_t,      // k
+                                                   double,       // alpha
+                                                   double,       // beta
+                                                   gtint_t,      // inc to the lda, ldb and ldc
+                                                   bool>> {};    // is memory test
+
+class dgemmtGeneric3 :
         public ::testing::TestWithParam<std::tuple<char,         // storage
                                                    char,         // uplo
                                                    char,         // transa
@@ -49,9 +63,103 @@ class dgemmtGeneric :
                                                    gtint_t,      // ldc_inc
                                                    bool>> {};    // is memory test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dgemmtGeneric);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dgemmtGeneric1);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dgemmtGeneric3);
 
-TEST_P( dgemmtGeneric, API )
+using T = double;
+void dgemmtGeneric( char storage, char uplo, char transa, char transb, gtint_t n, gtint_t k,
+                    T alpha, T beta, gtint_t lda_inc, gtint_t ldb_inc, gtint_t ldc_inc,
+                    bool is_mem_test )
+{
+    // Set the threshold for the errors:
+    // Check gtestsuite gemmt.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    double thresh;
+    if (n == 0)
+        thresh = 0.0;
+    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) &&
+             (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>()))
+        thresh = 0.0;
+    else
+    {
+        // Threshold adjustment
+#ifdef BLIS_INT_ELEMENT_TYPE
+        double adj = 4.1;
+#else
+        double adj = 4.0;
+#endif
+        thresh = adj*(3*k+1)*testinghelpers::getEpsilon<T>();
+    }
+    //----------------------------------------------------------
+    //     Call test body using these parameters
+    //----------------------------------------------------------
+
+#ifdef OPENMP_NESTED_1diff
+    #pragma omp parallel default(shared)
+    {
+	vary_num_threads();
+        //std::cout << "Inside 1diff parallel regions\n";
+        test_gemmt<T>( storage, uplo, transa, transb, n, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh, is_mem_test );
+    }
+#elif OPENMP_NESTED_2
+    #pragma omp parallel default(shared)
+    {
+    #pragma omp parallel default(shared)
+    {
+        //std::cout << "Inside 2 parallel regions\n";
+        test_gemmt<T>( storage, uplo, transa, transb, n, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh, is_mem_test );
+    }
+    }
+#elif OPENMP_NESTED_1
+    #pragma omp parallel default(shared)
+    {
+        //std::cout << "Inside 1 parallel region\n";
+        test_gemmt<T>( storage, uplo, transa, transb, n, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh, is_mem_test );
+    }
+#else
+        //std::cout << "Not inside parallel region\n";
+        test_gemmt<T>( storage, uplo, transa, transb, n, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh, is_mem_test );
+#endif
+}
+
+TEST_P( dgemmtGeneric1, API )
+{
+    using T = double;
+    //----------------------------------------------------------
+    // Initialize values from the parameters passed through
+    // test suite instantiation (INSTANTIATE_TEST_SUITE_P).
+    //----------------------------------------------------------
+    // matrix storage format(row major, column major)
+    char storage = std::get<0>(GetParam());
+    // specifies if the upper or lower triangular part of C is used
+    char uplo = std::get<1>(GetParam());
+    // denotes whether matrix a is n,c,t,h
+    char transa = std::get<2>(GetParam());
+    // denotes whether matrix b is n,c,t,h
+    char transb = std::get<3>(GetParam());
+    // matrix size n
+    gtint_t n  = std::get<4>(GetParam());
+    // matrix size k
+    gtint_t k  = std::get<5>(GetParam());
+    // specifies alpha value
+    T alpha = std::get<6>(GetParam());
+    // specifies beta value
+    T beta = std::get<7>(GetParam());
+    // lda, ldb, ldc increments.
+    // If increments are zero, then the array size matches the matrix size.
+    // If increments are nonnegative, the array size is bigger than the matrix size.
+    gtint_t lda_inc = std::get<8>(GetParam());
+    bool is_mem_test = std::get<9>(GetParam());
+
+    gtint_t ldb_inc = lda_inc;
+    gtint_t ldc_inc = lda_inc;
+
+    dgemmtGeneric( storage, uplo, transa, transb, n, k,
+                   alpha, beta, lda_inc, ldb_inc, ldc_inc, is_mem_test );
+}
+
+TEST_P( dgemmtGeneric3, API )
 {
     using T = double;
     //----------------------------------------------------------
@@ -82,127 +190,241 @@ TEST_P( dgemmtGeneric, API )
     gtint_t ldc_inc = std::get<10>(GetParam());
     bool is_mem_test = std::get<11>(GetParam());
 
-    // Set the threshold for the errors:
-    // Check gtestsuite gemmt.h or netlib source code for reminder of the
-    // functionality from which we estimate operation count per element
-    // of output, and hence the multipler for epsilon.
-    double thresh;
-    if (n == 0)
-        thresh = 0.0;
-    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) &&
-             (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>()))
-        thresh = 0.0;
-    else
-    {
-        // Threshold adjustment
-#ifdef BLIS_INT_ELEMENT_TYPE
-        double adj = 4.1;
-#else
-        double adj = 4.0;
-#endif
-        thresh = adj*(3*k+1)*testinghelpers::getEpsilon<T>();
-    }
-    //----------------------------------------------------------
-    //     Call test body using these parameters
-    //----------------------------------------------------------
-#ifdef OPENMP_NESTED_1diff
-    #pragma omp parallel default(shared)
-    {
-	vary_num_threads();
-        //std::cout << "Inside 1diff parallel regions\n";
-        test_gemmt<T>( storage, uplo, transa, transb, n, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh, is_mem_test );
-    }
-#elif OPENMP_NESTED_2
-    #pragma omp parallel default(shared)
-    {
-    #pragma omp parallel default(shared)
-    {
-        //std::cout << "Inside 2 parallel regions\n";
-        test_gemmt<T>( storage, uplo, transa, transb, n, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh, is_mem_test );
-    }
-    }
-#elif OPENMP_NESTED_1
-    #pragma omp parallel default(shared)
-    {
-        //std::cout << "Inside 1 parallel region\n";
-        test_gemmt<T>( storage, uplo, transa, transb, n, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh, is_mem_test );
-    }
-#else
-        //std::cout << "Not inside parallel region\n";
-        test_gemmt<T>( storage, uplo, transa, transb, n, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh, is_mem_test );
-#endif
+    dgemmtGeneric( storage, uplo, transa, transb, n, k,
+                   alpha, beta, lda_inc, ldb_inc, ldc_inc, is_mem_test );
 }
 
 #ifndef TEST_BLIS_TYPED
+
+// ----------------------------- alpha = 0 --------------------------------------
 INSTANTIATE_TEST_SUITE_P(
-        skinny_fringe_cases,
-        dgemmtGeneric,
+        expect_alpha0_path,
+        dgemmtGeneric1,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS_LIKE
                              ,'r'
 #endif
-            ),                                                               // storage format
-            ::testing::Values('u','l'),                                      // uplo u:upper, l:lower
-            ::testing::Values('n','t'),                                      // transa
-            ::testing::Values('n','t'),                                      // transb
-            ::testing::Range(gtint_t(1), gtint_t(30), 5),                    // n
-            ::testing::Range(gtint_t(1), gtint_t(30), 5),                    // k
-            ::testing::Values(1.0, 0.0, -2.4, 3.1),                          // alpha
-            ::testing::Values(1.0, 0.0, -2.4, 3.1),                          // beta
-            ::testing::Values(gtint_t(0), gtint_t(153)),                     // increment to the leading dim of a
-            ::testing::Values(gtint_t(0), gtint_t(122)),                     // increment to the leading dim of b
-            ::testing::Values(gtint_t(0), gtint_t(195)),                     // increment to the leading dim of c
-            ::testing::Values(true, false)                                   // is memory test
+            ),                                                           // storage format
+            ::testing::Values('u','l'),                                  // uplo u:upper, l:lower
+            ::testing::Values('n', 'c', 't'),                            // transa
+            ::testing::Values('n', 'c', 't'),                            // transb
+            ::testing::Values(1, 2, 114),                                // n
+            ::testing::Values(0, 1, 2, 79),                              // k
+            ::testing::Values(0.0),                                      // alpha
+            ::testing::Values(0.0, 1.0, -1.0, 2.3),                      // beta
+            ::testing::Values(0, 3),                                     // increment to the leading dim of a, b and c
+            ::testing::Values(true, false)                               // is memory test
         ),
-        ::gemmtMemGenericPrint<double>()
+        ::gemmtMemGeneric1Print<double>()
+    );
+
+// ----------------------------- k = 0 --------------------------------------
+INSTANTIATE_TEST_SUITE_P(
+        expect_k0_path,
+        dgemmtGeneric1,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                                           // storage format
+            ::testing::Values('u','l'),                                  // uplo u:upper, l:lower
+            ::testing::Values('n', 'c', 't'),                            // transa
+            ::testing::Values('n', 'c', 't'),                            // transb
+            ::testing::Values(1, 2, 114),                                // n
+            ::testing::Values(0),                                        // k
+            ::testing::Values(0.0, 1.0, -1.0, 2.3),                      // alpha
+            ::testing::Values(0.0, 1.0, -1.0, 2.3),                      // beta
+            ::testing::Values(0, 3),                                     // increment to the leading dim of a, b and c
+            ::testing::Values(true, false)                               // is memory test
+        ),
+        ::gemmtMemGeneric1Print<double>()
+    );
+
+//----------------------------- n = 1 ------------------------------------
+INSTANTIATE_TEST_SUITE_P(
+        expect_n1_path,
+        dgemmtGeneric1,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                                           // storage format
+            ::testing::Values('u','l'),                                  // uplo u:upper, l:lower
+            ::testing::Values('n', 'c', 't'),                            // transa
+            ::testing::Values('n', 'c', 't'),                            // transb
+            ::testing::Values(1),                                        // n
+            ::testing::Values(1, 2, 103),                                // k
+            ::testing::Values(     1.0, -1.0, 1.7),                      // alpha
+            ::testing::Values(0.0, 1.0, -1.0, 2.3),                      // beta
+            ::testing::Values(0, 3),                                     // increment to the leading dim of a, b and c
+            ::testing::Values(true, false)                               // is memory test
+        ),
+        ::gemmtMemGeneric1Print<double>()
+    );
+
+//----------------------------- k = 1 ------------------------------------
+INSTANTIATE_TEST_SUITE_P(
+        expect_k1_path,
+        dgemmtGeneric1,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                                           // storage format
+            ::testing::Values('u','l'),                                  // uplo u:upper, l:lower
+            ::testing::Values('n', 'c', 't'),                            // transa
+            ::testing::Values('n', 'c', 't'),                            // transb
+            ::testing::Values(1, 2, 79),                                 // n
+            ::testing::Values(1),                                        // k
+            ::testing::Values(     1.0, -1.0, 1.7),                      // alpha
+            ::testing::Values(0.0, 1.0, -1.0, 2.3),                      // beta
+            ::testing::Values(0, 3),                                     // increment to the leading dim of a, b and c
+            ::testing::Values(true, false)                               // is memory test
+        ),
+        ::gemmtMemGeneric1Print<double>()
+    );
+
+//-------------------- No GEMMT tiny code path yet but use this name ---------------------
+INSTANTIATE_TEST_SUITE_P(
+        expect_tiny_path,
+        dgemmtGeneric3,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                                           // storage format
+            ::testing::Values('u','l'),                                  // uplo u:upper, l:lower
+            ::testing::Values('n', 'c', 't'),                            // transa
+            ::testing::Values('n', 'c', 't'),                            // transb
+            ::testing::Values(2, 43),                                    // n
+            ::testing::Values(2, 19),                                    // k
+            ::testing::Values(     1.0, -1.0, 1.7),                      // alpha
+            ::testing::Values(0.0, 1.0, -1.0, 2.3),                      // beta
+            ::testing::Values(0, 7),                                     // increment to the leading dim of a
+            ::testing::Values(0, 4),                                     // increment to the leading dim of b
+            ::testing::Values(0, 11),                                    // increment to the leading dim of c
+            ::testing::Values(true, false)                               // is memory test
+        ),
+        ::gemmtMemGeneric3Print<double>()
+    );
+
+// ----------------------------- SUP implementation --------------------------------------
+INSTANTIATE_TEST_SUITE_P(
+        expect_sup_path,
+        dgemmtGeneric1,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                                           // storage format
+            ::testing::Values('u','l'),                                  // uplo u:upper, l:lower
+            ::testing::Values('n', 'c', 't'),                            // transa
+            ::testing::Values('n', 'c', 't'),                            // transb
+            ::testing::Values(3, 32, 253),                               // n
+            ::testing::Values(5, 17, 244),                               // k
+            ::testing::Values(     1.0, -1.0, 1.7),                      // alpha
+            ::testing::Values(0.0, 1.0, -1.0, 2.3),                      // beta
+            ::testing::Values(0, 3),                                     // increment to the leading dim of a, b and c
+            ::testing::Values(true, false)                               // is memory test
+        ),
+        ::gemmtMemGeneric1Print<double>()
+    );
+
+// ----------------------------- Native implementation --------------------------------------
+INSTANTIATE_TEST_SUITE_P(
+        expect_native_path,
+        dgemmtGeneric1,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                                           // storage format
+            ::testing::Values('u','l'),                                  // uplo u:upper, l:lower
+            ::testing::Values('n', 't'),                                 // transa
+            ::testing::Values('n', 't'),                                 // transb
+            ::testing::Values(407, 1701),                                // n
+            ::testing::Values(3, 47),                                    // k
+            ::testing::Values(     1.0, -1.0, 1.7),                      // alpha
+            ::testing::Values(0.0, 1.0, -1.0, 2.3),                      // beta
+            ::testing::Values(0, 3),                                     // increment to the leading dim of a, b and c
+            ::testing::Values(true, false)                               // is memory test
+        ),
+        ::gemmtMemGeneric1Print<double>()
     );
 
 INSTANTIATE_TEST_SUITE_P(
-        skinny,
-        dgemmtGeneric,
+        expect_native_path_Large,
+        dgemmtGeneric1,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS_LIKE
                              ,'r'
 #endif
-            ),                                                               // storage format
-            ::testing::Values('u','l'),                                      // uplo u:upper, l:lower
-            ::testing::Values('n','t'),                                      // transa
-            ::testing::Values('n','t'),                                      // transb
-            ::testing::Values(35, 537, 799),                                 // n
-            ::testing::Values(35, 537, 799),                                 // k
-            ::testing::Values(1.0, 0.0, -2.4, 3.1),                          // alpha
-            ::testing::Values(1.0, 0.0, -2.4, 3.1),                          // beta
-            ::testing::Values(gtint_t(0), gtint_t(153)),                     // increment to the leading dim of a
-            ::testing::Values(gtint_t(0), gtint_t(122)),                     // increment to the leading dim of b
-            ::testing::Values(gtint_t(0), gtint_t(195)),                     // increment to the leading dim of c
-            ::testing::Values(true, false)                                   // is memory test
+            ),                                                           // storage format
+            ::testing::Values('u','l'),                                  // uplo u:upper, l:lower
+            ::testing::Values('n', 't'),                                 // transa
+            ::testing::Values('n', 't'),                                 // transb
+            ::testing::Values(807, 6713),                                // n
+            ::testing::Values(905),                                      // k
+            ::testing::Values(     1.0, -1.0, 1.7),                      // alpha
+            ::testing::Values(0.0, 1.0, -1.0, 2.3),                      // beta
+            ::testing::Values(0, 3),                                     // increment to the leading dim of a, b and c
+            ::testing::Values(true, false)                               // is memory test
         ),
-        ::gemmtMemGenericPrint<double>()
+        ::gemmtMemGeneric1Print<double>()
     );
 
+// ----------------------------- Extreme N value --------------------------------------------
 INSTANTIATE_TEST_SUITE_P(
-        Large,
-        dgemmtGeneric,
+        extreme_N_Large,
+        dgemmtGeneric1,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS_LIKE
                              ,'r'
 #endif
-            ),                                                               // storage format
-            ::testing::Values('u','l'),                                      // uplo u:upper, l:lower
-            ::testing::Values('n','t'),                                      // transa
-            ::testing::Values('n','t'),                                      // transb
-            ::testing::Values(800, 1500),                                    // n
-            ::testing::Values(800, 1500),                                    // k
-            ::testing::Values(1.0, 0.0, -2.4, 3.1),                          // alpha
-            ::testing::Values(1.0, 0.0, -2.4, 3.1),                          // beta
-            ::testing::Values(gtint_t(0), gtint_t(153)),                     // increment to the leading dim of a
-            ::testing::Values(gtint_t(0), gtint_t(122)),                     // increment to the leading dim of b
-            ::testing::Values(gtint_t(0), gtint_t(195)),                     // increment to the leading dim of c
-            ::testing::Values(true, false)                                   // is memory test
+            ),                                                           // storage format
+            ::testing::Values('u','l'),                                  // uplo u:upper, l:lower
+            ::testing::Values('n', 't'),                                 // transa
+            ::testing::Values('n', 't'),                                 // transb
+            ::testing::Values(9689),                                     // n
+            ::testing::Values(1, 34),                                    // k
+            ::testing::Values(     1.0, -1.0, 1.7),                      // alpha
+            ::testing::Values(0.0, 1.0, -1.0, 2.3),                      // beta
+            ::testing::Values(0, 3),                                     // increment to the leading dim of a, b and c
+            ::testing::Values(true, false)                               // is memory test
         ),
-        ::gemmtMemGenericPrint<double>()
+        ::gemmtMemGeneric1Print<double>()
     );
+
+// ----------------------------- Extreme K value --------------------------------------------
+INSTANTIATE_TEST_SUITE_P(
+        extreme_K,
+        dgemmtGeneric1,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
 #endif
+            ),                                                           // storage format
+            ::testing::Values('u','l'),                                  // uplo u:upper, l:lower
+            ::testing::Values('n', 't'),                                 // transa
+            ::testing::Values('n', 't'),                                 // transb
+            ::testing::Values(1, 6),                                     // n
+            ::testing::Values(9689, 33444),                              // k
+            ::testing::Values(     1.0, -1.0, 1.7),                      // alpha
+            ::testing::Values(0.0, 1.0, -1.0, 2.3),                      // beta
+            ::testing::Values(0, 3),                                     // increment to the leading dim of a, b and c
+            ::testing::Values(true, false)                               // is memory test
+        ),
+        ::gemmtMemGeneric1Print<double>()
+    );
+
+#endif // ifndef TEST_BLIS_TYPED

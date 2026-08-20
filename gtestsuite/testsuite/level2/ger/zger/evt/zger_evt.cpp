@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024-2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,7 +40,7 @@ using RT = testinghelpers::type_info<T>::real_type;
 static RT NaN = std::numeric_limits<RT>::quiet_NaN();
 static RT Inf = std::numeric_limits<RT>::infinity();
 
-class DISABLED_zgerEVT :
+class zgerEVT :
         public ::testing::TestWithParam<std::tuple<char,        // storage
                                                    char,        // conjx
                                                    char,        // conjy
@@ -58,7 +58,7 @@ class DISABLED_zgerEVT :
                                                    gtint_t,     // yi
                                                    T>> {};      // y_exval
 
-TEST_P( DISABLED_zgerEVT, API )
+TEST_P( zgerEVT, API )
 {
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -117,9 +117,10 @@ TEST_P( DISABLED_zgerEVT, API )
                  ai, aj, a_exval, xi, x_exval, yi, y_exval, thresh );
 }
 
+
 INSTANTIATE_TEST_SUITE_P(
-        unitStride,
-        DISABLED_zgerEVT,
+        DISABLED_unitStride_zero_x_y_extreme_alpha,
+        zgerEVT,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
@@ -137,7 +138,7 @@ INSTANTIATE_TEST_SUITE_P(
             // n
             ::testing::Values( gtint_t(33) ),
             // alpha: value of scalar
-            ::testing::Values( T{1.0, 1.0}, T{2.3, -1.2}, T{NaN, NaN}, T{NaN, Inf}, T{Inf, -Inf} ),
+            ::testing::Values( T{NaN, NaN}, T{NaN, Inf}, T{Inf, -Inf} ),
             // incx: stride of x vector.
             ::testing::Values( gtint_t(1) ),
             // incy: stride of y vector.
@@ -153,18 +154,19 @@ INSTANTIATE_TEST_SUITE_P(
             // xi: index of extreme value for x.
             ::testing::Values( gtint_t(0), gtint_t(7) ),
             // x_exval: extreme value for x.
-            ::testing::Values( T{0.0, 0.0}, T{NaN, NaN}, T{NaN, Inf}, T{Inf, -Inf} ),
+            ::testing::Values( T{0.0, 0.0} ),
             // yi: index of extreme value for y.
             ::testing::Values( gtint_t(0), gtint_t(7) ),
             // y_exval: extreme value for y.
-            ::testing::Values( T{0.0, 0.0}, T{NaN, NaN}, T{NaN, Inf}, T{Inf, -Inf} )
+            ::testing::Values( T{0.0, 0.0} )
         ),
         ::gerEVTPrint<dcomplex>()
     );
 
+    
 INSTANTIATE_TEST_SUITE_P(
-        nonUnitStride,
-        DISABLED_zgerEVT,
+        unitStride_zero_x_y_scalar_alpha,
+        zgerEVT,
         ::testing::Combine(
             // storage scheme: row/col-stored matrix
             ::testing::Values( 'c'
@@ -182,13 +184,13 @@ INSTANTIATE_TEST_SUITE_P(
             // n
             ::testing::Values( gtint_t(33) ),
             // alpha: value of scalar
-            ::testing::Values( T{1.0, 1.0}, T{2.3, -1.2}, T{NaN, NaN}, T{NaN, Inf}, T{Inf, -Inf} ),
-            // incx: stride of x vector.
-            ::testing::Values( gtint_t(3) ),
+            ::testing::Values( T{0.0, 0.0}, T{1.0, 0.0}, T{0.0, 1.0}, T{2.0, 3.0} ),
+            // incx: stride of x vector
+            ::testing::Values( gtint_t(1) ),
             // incy: stride of y vector.
-            ::testing::Values( gtint_t(5) ),
+            ::testing::Values( gtint_t(1) ),
             // inc_lda: increment to the leading dim of a.
-            ::testing::Values( gtint_t(7) ),
+            ::testing::Values( gtint_t(0) ),
             // ai: index of extreme value for a.
             ::testing::Values( gtint_t(0), gtint_t(7) ),
             // aj: index of extreme value for a.
@@ -198,11 +200,196 @@ INSTANTIATE_TEST_SUITE_P(
             // xi: index of extreme value for x.
             ::testing::Values( gtint_t(0), gtint_t(7) ),
             // x_exval: extreme value for x.
-            ::testing::Values( T{0.0, 0.0}, T{NaN, NaN}, T{NaN, Inf}, T{Inf, -Inf} ),
+            ::testing::Values( T{0.0, 0.0}),
             // yi: index of extreme value for y.
             ::testing::Values( gtint_t(0), gtint_t(7) ),
             // y_exval: extreme value for y.
-            ::testing::Values( T{0.0, 0.0}, T{NaN, NaN}, T{NaN, Inf}, T{Inf, -Inf} )
+            ::testing::Values( T{0.0, 0.0})
         ),
         ::gerEVTPrint<dcomplex>()
     );
+    
+   
+INSTANTIATE_TEST_SUITE_P(
+        unitStride_nonzero_x_y,
+        zgerEVT,
+        ::testing::Combine(
+            // storage scheme: row/col-stored matrix
+            ::testing::Values( 'c'
+            // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
+#ifndef TEST_BLAS_LIKE
+                             , 'r'
+#endif
+            ),
+            // conjx: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // conjy: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // m
+            ::testing::Values( gtint_t(55) ),
+            // n
+            ::testing::Values( gtint_t(33) ),
+            // alpha: value of scalar
+            ::testing::Values( T{0.0, 0.0}, T{1.0, 0.0}, T{0.0, 1.0}, T{2.0, 3.0}, T{NaN, NaN}, T{NaN, Inf}, T{Inf, -Inf} ),
+            // incx: stride of x vector
+            ::testing::Values( gtint_t(1) ),
+            // incy: stride of y vector.
+            ::testing::Values( gtint_t(1) ),
+            // inc_lda: increment to the leading dim of a.
+            ::testing::Values( gtint_t(0) ),
+            // ai: index of extreme value for a.
+            ::testing::Values( gtint_t(0), gtint_t(7) ),
+            // aj: index of extreme value for a.
+            ::testing::Values( gtint_t(0), gtint_t(7) ),
+            // a_exval: extreme value for a.
+            ::testing::Values( T{0.0, 0.0}, T{NaN, NaN}, T{NaN, Inf}, T{Inf, -Inf} ),
+            // xi: index of extreme value for x.
+            ::testing::Values( gtint_t(0), gtint_t(7) ),
+            // x_exval: extreme value for x.
+            ::testing::Values( T{NaN, NaN}, T{NaN, Inf}, T{Inf, -Inf} ),
+            // yi: index of extreme value for y.
+            ::testing::Values( gtint_t(0), gtint_t(7) ),
+            // y_exval: extreme value for y.
+            ::testing::Values( T{NaN, NaN}, T{NaN, Inf}, T{Inf, -Inf} )
+        ),
+        ::gerEVTPrint<dcomplex>()
+    );
+    
+
+INSTANTIATE_TEST_SUITE_P(
+        DISABLED_nonUnitStride_zero_x_y_extreme_alpha,
+        zgerEVT,
+        ::testing::Combine(
+            // storage scheme: row/col-stored matrix
+            ::testing::Values( 'c'
+            // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
+#ifndef TEST_BLAS_LIKE
+                             , 'r'
+#endif
+            ),
+            // conjx: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // conjy: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // m
+            ::testing::Values( gtint_t(55) ),
+            // n
+            ::testing::Values( gtint_t(33) ),
+            // alpha: value of scalar
+            ::testing::Values( T{NaN, NaN}, T{NaN, Inf}, T{Inf, -Inf} ),
+            // incx: stride of x vector.
+            ::testing::Values( gtint_t(1) ),
+            // incy: stride of y vector.
+            ::testing::Values( gtint_t(1) ),
+            // inc_lda: increment to the leading dim of a.
+            ::testing::Values( gtint_t(0) ),
+            // ai: index of extreme value for a.
+            ::testing::Values( gtint_t(0), gtint_t(7) ),
+            // aj: index of extreme value for a.
+            ::testing::Values( gtint_t(0), gtint_t(7) ),
+            // a_exval: extreme value for a.
+            ::testing::Values( T{0.0, 0.0}, T{NaN, NaN}, T{NaN, Inf}, T{Inf, -Inf} ),
+            // xi: index of extreme value for x.
+            ::testing::Values( gtint_t(0), gtint_t(7) ),
+            // x_exval: extreme value for x.
+            ::testing::Values( T{0.0, 0.0} ),
+            // yi: index of extreme value for y.
+            ::testing::Values( gtint_t(0), gtint_t(7) ),
+            // y_exval: extreme value for y.
+            ::testing::Values( T{0.0, 0.0} )
+        ),
+        ::gerEVTPrint<dcomplex>()
+    );
+
+    
+INSTANTIATE_TEST_SUITE_P(
+        nonUnitStride_zero_x_y_scalar_alpha,
+        zgerEVT,
+        ::testing::Combine(
+            // storage scheme: row/col-stored matrix
+            ::testing::Values( 'c'
+            // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
+#ifndef TEST_BLAS_LIKE
+                             , 'r'
+#endif
+            ),
+            // conjx: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // conjy: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // m
+            ::testing::Values( gtint_t(55) ),
+            // n
+            ::testing::Values( gtint_t(33) ),
+            // alpha: value of scalar
+            ::testing::Values( T{0.0, 0.0}, T{1.0, 0.0}, T{0.0, 1.0}, T{2.0, 3.0} ),
+            // incx: stride of x vector
+            ::testing::Values( gtint_t(1) ),
+            // incy: stride of y vector.
+            ::testing::Values( gtint_t(1) ),
+            // inc_lda: increment to the leading dim of a.
+            ::testing::Values( gtint_t(0) ),
+            // ai: index of extreme value for a.
+            ::testing::Values( gtint_t(0), gtint_t(7) ),
+            // aj: index of extreme value for a.
+            ::testing::Values( gtint_t(0), gtint_t(7) ),
+            // a_exval: extreme value for a.
+            ::testing::Values( T{0.0, 0.0}, T{NaN, NaN}, T{NaN, Inf}, T{Inf, -Inf} ),
+            // xi: index of extreme value for x.
+            ::testing::Values( gtint_t(0), gtint_t(7) ),
+            // x_exval: extreme value for x.
+            ::testing::Values( T{0.0, 0.0}),
+            // yi: index of extreme value for y.
+            ::testing::Values( gtint_t(0), gtint_t(7) ),
+            // y_exval: extreme value for y.
+            ::testing::Values( T{0.0, 0.0})
+        ),
+        ::gerEVTPrint<dcomplex>()
+    );
+    
+   
+INSTANTIATE_TEST_SUITE_P(
+        nonUnitStride_nonzero_x_y,
+        zgerEVT,
+        ::testing::Combine(
+            // storage scheme: row/col-stored matrix
+            ::testing::Values( 'c'
+            // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
+#ifndef TEST_BLAS_LIKE
+                             , 'r'
+#endif
+            ),
+            // conjx: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // conjy: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // m
+            ::testing::Values( gtint_t(55) ),
+            // n
+            ::testing::Values( gtint_t(33) ),
+            // alpha: value of scalar
+            ::testing::Values( T{0.0, 0.0}, T{1.0, 0.0}, T{0.0, 1.0}, T{2.0, 3.0}, T{NaN, NaN}, T{NaN, Inf}, T{Inf, -Inf} ),
+            // incx: stride of x vector
+            ::testing::Values( gtint_t(1) ),
+            // incy: stride of y vector.
+            ::testing::Values( gtint_t(1) ),
+            // inc_lda: increment to the leading dim of a.
+            ::testing::Values( gtint_t(0) ),
+            // ai: index of extreme value for a.
+            ::testing::Values( gtint_t(0), gtint_t(7) ),
+            // aj: index of extreme value for a.
+            ::testing::Values( gtint_t(0), gtint_t(7) ),
+            // a_exval: extreme value for a.
+            ::testing::Values( T{0.0, 0.0}, T{NaN, NaN}, T{NaN, Inf}, T{Inf, -Inf} ),
+            // xi: index of extreme value for x.
+            ::testing::Values( gtint_t(0), gtint_t(7) ),
+            // x_exval: extreme value for x.
+            ::testing::Values( T{NaN, NaN}, T{NaN, Inf}, T{Inf, -Inf} ),
+            // yi: index of extreme value for y.
+            ::testing::Values( gtint_t(0), gtint_t(7) ),
+            // y_exval: extreme value for y.
+            ::testing::Values( T{NaN, NaN}, T{NaN, Inf}, T{Inf, -Inf} )
+        ),
+        ::gerEVTPrint<dcomplex>()
+    );
+    

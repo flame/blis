@@ -133,7 +133,7 @@ static float Inf = std::numeric_limits<float>::infinity();
 /* Matrix A, B, C are filled with Infs and Nans         */
 /********************************************************/
 INSTANTIATE_TEST_SUITE_P(
-        DISABLED_SMALL_Matrix,
+        SMALL_Matrix,
         sgemmEVT,
         ::testing::Combine(
             ::testing::Values('c'

@@ -6,7 +6,7 @@
 
    Copyright (C) 2018, Southern Methodist University
    Copyright (C) 2018, The University of Texas at Austin
-   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -165,8 +165,29 @@ void bli_pthread_once
        void              (*init)(void)
      )
 {
-	//pthread_once( once, init );
-	init();
+	// In the BLIS_DISABLE_SYSTEM single-threaded stub, we still must
+	// honor the "run init exactly once per once-control state" contract.
+	// Otherwise callers like bli_init_once() (which is invoked on every
+	// BLIS API entry through bli_rntm_init_from_global() and friends) will
+	// re-run bli_init_apis() on every call, re-running bli_pba_init() and
+	// reallocating the packing pool's block_ptrs[] array. Any in-flight
+	// pblk_t that was already checked out then becomes orphaned, while a
+	// subsequent checkin sees pool->top_index == 0 and writes
+	// block_ptrs[(siz_t)0 - 1], corrupting the malloc chunk header that
+	// sits immediately before the freshly-allocated block_ptrs[] buffer.
+	//
+	// BLIS_PTHREAD_ONCE_INIT is defined as 0 for this stub, so use a
+	// non-zero value to mark the once_t as "already executed". Run init()
+	// first and mark the once_t as executed only afterwards: if init() does
+	// not return normally (e.g. an abort()/longjmp escape out of
+	// bli_gks_init()), the control object is left unchanged so a later call
+	// can retry, rather than being permanently marked "done" while BLIS is
+	// only partially initialized.
+	if ( *once == BLIS_PTHREAD_ONCE_INIT )
+	{
+		init();
+		*once = BLIS_PTHREAD_ONCE_INIT + 1;
+	}
 }
 
 #if 0

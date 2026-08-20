@@ -40,7 +40,7 @@ using T = scomplex;
 static float AOCL_NAN = std::numeric_limits<float>::quiet_NaN();
 static float AOCL_INF = std::numeric_limits<float>::infinity();
 
-class DISABLED_cgemmEVT :
+class cgemmEVT :
         public ::testing::TestWithParam<std::tuple<char,       // storage format
                                                    char,       // transa
                                                    char,       // transb
@@ -63,7 +63,7 @@ class DISABLED_cgemmEVT :
                                                    gtint_t     // inc to the ldc
                                                    >> {};
 
-TEST_P( DISABLED_cgemmEVT, API )
+TEST_P( cgemmEVT, API )
 {
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -149,8 +149,8 @@ TEST_P( DISABLED_cgemmEVT, API )
 
 //Failures observed for EV: T{AOCL_INF, 0.0}
 INSTANTIATE_TEST_SUITE_P(
-        Skinny_Matrix_No_Trans,
-        DISABLED_cgemmEVT,
+        DISABLED_Skinny_Matrix_No_Trans,
+        cgemmEVT,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS_LIKE
@@ -188,8 +188,8 @@ INSTANTIATE_TEST_SUITE_P(
     );
 
 INSTANTIATE_TEST_SUITE_P(
-        Skinny_Matrix_Trans,
-        DISABLED_cgemmEVT,
+        DISABLED_Skinny_Matrix_Trans,
+        cgemmEVT,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS_LIKE
@@ -227,8 +227,8 @@ INSTANTIATE_TEST_SUITE_P(
     );
 
 INSTANTIATE_TEST_SUITE_P(
-        Skinny_Matrix_zeros_And_ExceptionValues,
-        DISABLED_cgemmEVT,
+        DISABLED_Skinny_Matrix_zeros_And_ExceptionValues,
+        cgemmEVT,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS_LIKE
@@ -266,8 +266,8 @@ INSTANTIATE_TEST_SUITE_P(
     );
 
 INSTANTIATE_TEST_SUITE_P(
-        Skinny_Matrix_Alpha_Beta,
-        DISABLED_cgemmEVT,
+        DISABLED_Skinny_Matrix_Alpha_Beta,
+        cgemmEVT,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS_LIKE
@@ -304,8 +304,8 @@ INSTANTIATE_TEST_SUITE_P(
     );
 
 INSTANTIATE_TEST_SUITE_P(
-        Large_Matrix_No_Trans,
-        DISABLED_cgemmEVT,
+        DISABLED_Large_Matrix_No_Trans,
+        cgemmEVT,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS_LIKE
@@ -339,8 +339,8 @@ INSTANTIATE_TEST_SUITE_P(
     );
 
 INSTANTIATE_TEST_SUITE_P(
-        Large_Matrix_Trans,
-        DISABLED_cgemmEVT,
+        DISABLED_Large_Matrix_Trans,
+        cgemmEVT,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS_LIKE
@@ -374,8 +374,8 @@ INSTANTIATE_TEST_SUITE_P(
     );
 
 INSTANTIATE_TEST_SUITE_P(
-        Large_Matrix_Conj,
-        DISABLED_cgemmEVT,
+        DISABLED_Large_Matrix_Conj,
+        cgemmEVT,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS_LIKE
@@ -413,8 +413,8 @@ INSTANTIATE_TEST_SUITE_P(
     );
 
 INSTANTIATE_TEST_SUITE_P(
-        Large_Matrix_zeros_And_ExcpetionValues,
-        DISABLED_cgemmEVT,
+        DISABLED_Large_Matrix_zeros_And_ExceptionValues,
+        cgemmEVT,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS_LIKE
@@ -452,8 +452,8 @@ INSTANTIATE_TEST_SUITE_P(
     );
 
 INSTANTIATE_TEST_SUITE_P(
-        Large_Matrix_Alpha_Beta,
-        DISABLED_cgemmEVT,
+        DISABLED_Large_Matrix_Alpha_Beta,
+        cgemmEVT,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS_LIKE

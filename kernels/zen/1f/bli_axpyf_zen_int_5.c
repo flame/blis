@@ -484,17 +484,17 @@ void bli_daxpyf_zen_int_5
     bli_dscals( *alpha, chi[3] );
     bli_dscals( *alpha, chi[4] );
 
-    // Broadcast the (alpha*chi?) scalars to all elements of vector registers.
-    chiv[0].v = _mm256_broadcast_sd( &chi[0] );
-    chiv[1].v = _mm256_broadcast_sd( &chi[1] );
-    chiv[2].v = _mm256_broadcast_sd( &chi[2] );
-    chiv[3].v = _mm256_broadcast_sd( &chi[3] );
-    chiv[4].v = _mm256_broadcast_sd( &chi[4] );
-
     // If there are vectorized iterations, perform them with vector
     // instructions.
     if ( inca == 1 && incy == 1 )
     {
+        // Broadcast the (alpha*chi?) scalars to all elements of vector registers.
+        chiv[0].v = _mm256_broadcast_sd( &chi[0] );
+        chiv[1].v = _mm256_broadcast_sd( &chi[1] );
+        chiv[2].v = _mm256_broadcast_sd( &chi[2] );
+        chiv[3].v = _mm256_broadcast_sd( &chi[3] );
+        chiv[4].v = _mm256_broadcast_sd( &chi[4] );
+
         // 16 elements of the result are computed per iteration
         for ( i = 0; (i + 15) < m; i += 16 )
         {
@@ -698,53 +698,99 @@ void bli_daxpyf_zen_int_5
             av[3] += n_elem_per_reg;
             av[4] += n_elem_per_reg;
         }
-
-        // If there are leftover iterations, perform them with scalar code.
-        for ( ; (i + 0) < m ; ++i )
+        
+        // Remaining elements are handled using masked operations
+        dim_t m_rem = m - i;
+        if( m_rem > 0 )
         {
-            double       y0c = *y0;
+            // Masked operations can handle upto 4 doubles at a time
+            __m256i indices = _mm256_setr_epi64x( 0, 1, 2, 3 );   // indices <- [0, 1, 2, 3] 
 
-            const double a0c = *av[0];
-            const double a1c = *av[1];
-            const double a2c = *av[2];
-            const double a3c = *av[3];
-            const double a4c = *av[4];
-
-            y0c += chi[0] * a0c;
-            y0c += chi[1] * a1c;
-            y0c += chi[2] * a2c;
-            y0c += chi[3] * a3c;
-            y0c += chi[4] * a4c;
-
-            *y0 = y0c;
-
-            av[0] += 1;
-            av[1] += 1;
-            av[2] += 1;
-            av[3] += 1;
-            av[4] += 1;
-            y0 += 1;
+            // _mm256_set1_epi64x: broadcasts m_rem to all lanes of a 256 bit register, m_rem_YMM[:] <- m_rem
+            // _mm256_cmpgt_epi64: m_rem_YMM[i] > indices[i] ? -1 : 0
+            // This operation sets -1(0xFF..F) to all the lanes of the mask where m_rem > indices[i]
+            // For example, if m_rem == 2, mask <- [-1, -1, 0, 0], this mask is subsequently
+            // used to load 2 64 bit elements from the corresponding memory locations
+            __m256i mask = _mm256_cmpgt_epi64( _mm256_set1_epi64x( m_rem ), indices ); // mask[i] <- m_rem > indices[i] ? -1 : 0
+            
+            // Perform the masked loads
+            __m256d y0cv = _mm256_maskload_pd( y0, mask );
+            __m256d a0cv = _mm256_maskload_pd( av[0], mask );
+            __m256d a1cv = _mm256_maskload_pd( av[1], mask );
+            __m256d a2cv = _mm256_maskload_pd( av[2], mask );
+            __m256d a3cv = _mm256_maskload_pd( av[3], mask );
+            __m256d a4cv = _mm256_maskload_pd( av[4], mask );
+            
+            // Perform FMAs on the masked registers
+            y0cv = _mm256_fmadd_pd( chiv[0].v, a0cv, y0cv );
+            y0cv = _mm256_fmadd_pd( chiv[1].v, a1cv, y0cv );
+            y0cv = _mm256_fmadd_pd( chiv[2].v, a2cv, y0cv );
+            y0cv = _mm256_fmadd_pd( chiv[3].v, a3cv, y0cv );
+            y0cv = _mm256_fmadd_pd( chiv[4].v, a4cv, y0cv );
+            
+            // Masked store to y0
+            _mm256_maskstore_pd( y0, mask, y0cv );
         }
+
+        // Issue vzeroupper instruction to clear upper lanes of ymm registers.
+        // This avoids a performance penalty caused by false dependencies when
+        // transitioning from AVX to SSE instructions (which may occur later,
+        // especially if BLIS is compiled with -mfpmath=sse).
+        _mm256_zeroupper();
     }
     else
     {
+        /*
+        * DAXPYF implementation for non-unit strides (inca/incy != 1).
+        * While the loop remains scalar due to non-contiguous memory access, we use
+        * SSE scalar intrinsics (_mm_fmadd_sd) to leverage the hardware's Fused
+        * Multiply-Add (FMA) unit. This maintains higher precision by 
+        * performing the multiply-add in a single step.
+        */
+        __m128d chi0v_s = _mm_load_sd( &chi[0] ); // chi0v_s[0] <- chi[0]
+                                                  // chi0v_s[1] <- 0.0 (Unused)
+        __m128d chi1v_s = _mm_load_sd( &chi[1] ); // chi1v_s[0] <- chi[1]
+                                                  // chi1v_s[1] <- 0.0 (Unused)
+        __m128d chi2v_s = _mm_load_sd( &chi[2] ); // chi2v_s[0] <- chi[2]
+                                                  // chi2v_s[1] <- 0.0 (Unused)
+        __m128d chi3v_s = _mm_load_sd( &chi[3] ); // chi3v_s[0] <- chi[3]
+                                                  // chi3v_s[1] <- 0.0 (Unused)
+        __m128d chi4v_s = _mm_load_sd( &chi[4] ); // chi4v_s[0] <- chi[4]
+                                                  // chi4v_s[1] <- 0.0 (Unused)
+
         for ( i = 0; (i + 0) < m ; ++i )
         {
-            double       y0c = *y0;
+            // Load single double into low lane of __m128d
+            __m128d y0cv_s = _mm_load_sd( y0 );     // y0cv_s[0] <- y0[0]
+                                                    // y0cv_s[1] <- 0.0 (Unused)
+            __m128d a0cv_s = _mm_load_sd( av[0] );  // a0cv_s[0] <- av[0]
+                                                    // a0cv_s[1] <- 0.0 (Unused)
+            __m128d a1cv_s = _mm_load_sd( av[1] );  // a1cv_s[0] <- av[1]
+                                                    // a1cv_s[1] <- 0.0 (Unused)
+            __m128d a2cv_s = _mm_load_sd( av[2] );  // a2cv_s[0] <- av[2]
+                                                    // a2cv_s[1] <- 0.0 (Unused)
+            __m128d a3cv_s = _mm_load_sd( av[3] );  // a3cv_s[0] <- av[3]
+                                                    // a3cv_s[1] <- 0.0 (Unused)
+            __m128d a4cv_s = _mm_load_sd( av[4] );  // a4cv_s[0] <- av[4]
+                                                    // a4cv_s[1] <- 0.0 (Unused)
+            
+            // _mm_fmadd_sd performs a scalar fused multiply-add (FMA) 
+            // on the low 64-bit double-precision element of XMM registers.
+            // This operation is done in one fused instruction
+            // with one rounding (compared to two in the scalar case)
+            y0cv_s = _mm_fmadd_sd( chi0v_s, a0cv_s, y0cv_s ); // y0cv_s[0] <- (chi0v_s[0] * a0cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi0v_s[1] (Unused)
+            y0cv_s = _mm_fmadd_sd( chi1v_s, a1cv_s, y0cv_s ); // y0cv_s[0] <- (chi1v_s[0] * a1cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi1v_s[1] (Unused)
+            y0cv_s = _mm_fmadd_sd( chi2v_s, a2cv_s, y0cv_s ); // y0cv_s[0] <- (chi2v_s[0] * a2cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi2v_s[1] (Unused)
+            y0cv_s = _mm_fmadd_sd( chi3v_s, a3cv_s, y0cv_s ); // y0cv_s[0] <- (chi3v_s[0] * a3cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi3v_s[1] (Unused)
+            y0cv_s = _mm_fmadd_sd( chi4v_s, a4cv_s, y0cv_s ); // y0cv_s[0] <- (chi4v_s[0] * a4cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi4v_s[1] (Unused)
 
-            const double a0c = *av[0];
-            const double a1c = *av[1];
-            const double a2c = *av[2];
-            const double a3c = *av[3];
-            const double a4c = *av[4];
-
-            y0c += chi[0] * a0c;
-            y0c += chi[1] * a1c;
-            y0c += chi[2] * a2c;
-            y0c += chi[3] * a3c;
-            y0c += chi[4] * a4c;
-
-            *y0 = y0c;
+            // store the accumulated value (lower lane) 
+            _mm_store_sd( y0, y0cv_s ); // y0 <- y0cv_s[0]
 
             av[0] += inca;
             av[1] += inca;
@@ -753,7 +799,6 @@ void bli_daxpyf_zen_int_5
             av[4] += inca;
             y0 += incy;
         }
-
     }
 }
 
@@ -798,9 +843,6 @@ void bli_daxpyf_zen_int_16x2
 
     double           chi0, chi1;
 
-    v2df_t           a40v, a41v;
-
-    v2df_t           y4v; 
     // If either dimension is zero, or if alpha is zero, return early.
     if ( bli_zero_dim2( m, b_n ) || bli_deq0( *alpha ) ) return;
 
@@ -849,14 +891,14 @@ void bli_daxpyf_zen_int_16x2
     bli_dscals( *alpha, chi0 );
     bli_dscals( *alpha, chi1 );
 
-    // Broadcast the (alpha*chi?) scalars to all elements of vector registers.
-    chi0v.v = _mm256_broadcast_sd( &chi0 );
-    chi1v.v = _mm256_broadcast_sd( &chi1 );
-
     // If there are vectorized iterations, perform them with vector
     // instructions.
     if ( inca == 1 && incy == 1 )
     {
+        // Broadcast the (alpha*chi?) scalars to all elements of vector registers.
+        chi0v.v = _mm256_broadcast_sd( &chi0 );
+        chi1v.v = _mm256_broadcast_sd( &chi1 );
+
         for ( i = 0; (i + 15) < m; i += 16 )
         {
             // Load the input values.
@@ -980,65 +1022,79 @@ void bli_daxpyf_zen_int_16x2
             a1 += n_elem_per_reg;
         }
 
-        for ( ; (i + 1) < m; i += 2 )
+        // Handle the remaining cases using masked operations
+        dim_t m_rem = m - i;
+        if( m_rem > 0 )
         {
-            // Load the input values.
-            y4v.v = _mm_loadu_pd( y0 + 0*n_elem_per_reg );
+            // Masked operations can handle upto 4 doubles at a time
+            __m256i indices = _mm256_setr_epi64x( 0, 1, 2, 3 );  // indices <- [0, 1, 2, 3] 
 
-            a40v.v = _mm_loadu_pd( a0 + 0*n_elem_per_reg );
+            // _mm256_set1_epi64x: broadcasts m_rem to all lanes of a 256 bit register, m_rem_YMM[:] <- m_rem
+            // _mm256_cmpgt_epi64: m_rem_YMM[i] > indices[i] ? -1 : 0
+            // This operation sets -1(0xFF..F) to all the lanes of the mask where m_rem > indices[i]
+            // For example, if m_rem == 2, mask <- [-1, -1, 0, 0], this mask is subsequently
+            // used to load 2 64 bit elements from the corresponding memory locations
+            __m256i mask = _mm256_cmpgt_epi64(_mm256_set1_epi64x( m_rem ), indices ); // mask[i] <- m_rem > indices[i] ? -1 : 0
 
-            a41v.v = _mm_loadu_pd( a1 + 0*n_elem_per_reg );
+            // Perform the masked loads
+            y0v.v = _mm256_maskload_pd( y0, mask );
+            a00v.v = _mm256_maskload_pd( a0, mask );
+            a01v.v = _mm256_maskload_pd( a1, mask );
 
-            // perform : y += alpha * x;
-            y4v.v = _mm_fmadd_pd( a40v.v, chi0v.xmm[0], y4v.v );
+            // Perform the masked FMA on the masked registers
+            y0v.v = _mm256_fmadd_pd( a00v.v, chi0v.v, y0v.v );
+            y0v.v = _mm256_fmadd_pd( a01v.v, chi1v.v, y0v.v );
 
-            y4v.v = _mm_fmadd_pd( a41v.v, chi1v.xmm[0], y4v.v );
-
-            // Store the output.
-            _mm_storeu_pd( (double *)(y0 + 0*n_elem_per_reg), y4v.v );
-
-            y0 += 2;
-            a0 += 2;
-            a1 += 2;
+            // Masked store to y0
+            _mm256_maskstore_pd( y0, mask, y0v.v );
         }
-
-        // If there are leftover iterations, perform them with scalar code.
-        for ( ; (i + 0) < m ; ++i )
-        {
-            double       y0c = *y0;
-
-            const double a0c = *a0;
-            const double a1c = *a1;
-
-            y0c += chi0 * a0c;
-            y0c += chi1 * a1c;
-
-            *y0 = y0c;
-
-            a0 += 1;
-            a1 += 1;
-            y0 += 1;
-        }
+        // Issue vzeroupper instruction to clear upper lanes of ymm registers.
+        // This avoids a performance penalty caused by false dependencies when
+        // transitioning from AVX to SSE instructions (which may occur later,
+        // especially if BLIS is compiled with -mfpmath=sse).
+        _mm256_zeroupper();
     }
     else
     {
+        /*
+        * DAXPYF implementation for non-unit strides (inca/incy != 1).
+        * While the loop remains scalar due to non-contiguous memory access, we use
+        * SSE scalar intrinsics (_mm_fmadd_sd) to leverage the hardware's Fused
+        * Multiply-Add (FMA) unit. This maintains higher precision by 
+        * performing the multiply-add in a single step.
+        */
+
+        __m128d chi0v_s = _mm_load_sd( &chi0 ); // chi0v_s[0] <- chi0
+                                                // chi0v_s[1] <- 0.0 (Unused)
+        __m128d chi1v_s = _mm_load_sd( &chi1 ); // chi1v_s[0] <- chi1
+                                                // chi1v_s[1] <- 0.0 (Unused)
+        
         for ( i = 0; (i + 0) < m ; ++i )
         {
-            double       y0c = *y0;
+            // Load single double into low lane of __m128d
+            __m128d y0cv_s = _mm_load_sd( y0 );  // y0cv_s[0] <- y0[0]
+                                                 // y0cv_s[1] <- 0.0 (Unused)
+            __m128d a0cv_s = _mm_load_sd( a0 );  // a0cv_s[0] <- a0[0]
+                                                 // a0cv_s[1] <- 0.0 (Unused)
+            __m128d a1cv_s = _mm_load_sd( a1 );  // a1cv_s[0] <- a1[0]
+                                                 // a1cv_s[1] <- 0.0 (Unused)
 
-            const double a0c = *a0;
-            const double a1c = *a1;
-
-            y0c += chi0 * a0c;
-            y0c += chi1 * a1c;
-
-            *y0 = y0c;
+            // _mm_fmadd_sd performs a scalar fused multiply-add (FMA) 
+            // on the low 64-bit double-precision element of XMM registers.
+            // This operation is done in one fused instruction
+            // with one rounding (compared to two in the scalar case)
+            y0cv_s = _mm_fmadd_sd( chi0v_s, a0cv_s, y0cv_s ); // y0cv_s[0] <- (chi0v_s[0] * a0cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi0v_s[1] (Unused)
+            y0cv_s = _mm_fmadd_sd( chi1v_s, a1cv_s, y0cv_s ); // y0cv_s[0] <- (chi1v_s[0] * a1cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi1v_s[1] (Unused)
+            
+            // store the accumulated value (lower lane) 
+            _mm_store_sd( y0, y0cv_s ); // y0 <- y0cv_s[0]
 
             a0 += inca;
             a1 += inca;
             y0 += incy;
         }
-
     }
 }
 
@@ -1083,10 +1139,6 @@ void bli_daxpyf_zen_int_16x4
     v4df_t           y0v, y1v, y2v, y3v;
 
     double           chi0, chi1, chi2, chi3;
-
-    v2df_t           y4v;
-
-    v2df_t           a40v, a41v, a42v, a43v;
 
     // If either dimension is zero, or if alpha is zero, return early.
     if ( bli_zero_dim2( m, b_n ) || bli_deq0( *alpha ) ) return;
@@ -1141,16 +1193,16 @@ void bli_daxpyf_zen_int_16x4
     bli_dscals( *alpha, chi2 );
     bli_dscals( *alpha, chi3 );
 
-    // Broadcast the (alpha*chi?) scalars to all elements of vector registers.
-    chi0v.v = _mm256_broadcast_sd( &chi0 );
-    chi1v.v = _mm256_broadcast_sd( &chi1 );
-    chi2v.v = _mm256_broadcast_sd( &chi2 );
-    chi3v.v = _mm256_broadcast_sd( &chi3 );
-
     // If there are vectorized iterations, perform them with vector
     // instructions.
     if ( inca == 1 && incy == 1 )
     {
+        // Broadcast the (alpha*chi?) scalars to all elements of vector registers.
+        chi0v.v = _mm256_broadcast_sd( &chi0 );
+        chi1v.v = _mm256_broadcast_sd( &chi1 );
+        chi2v.v = _mm256_broadcast_sd( &chi2 );
+        chi3v.v = _mm256_broadcast_sd( &chi3 );
+
         for ( i = 0; (i + 15) < m; i += 16 )
         {
             // Load the input values.
@@ -1340,90 +1392,98 @@ void bli_daxpyf_zen_int_16x4
             a3 += n_elem_per_reg;
         }
 
-        for ( ; (i + 1) < m; i += 2)
+        // Handle the remaining cases using masked operations
+        dim_t m_rem = m - i;
+        if ( m_rem > 0 )
         {
+            // Masked operations can handle upto 4 doubles at a time
+            __m256i indices = _mm256_setr_epi64x( 0, 1, 2, 3 );   // indices <- [0, 1, 2, 3] 
 
-	    // Load the input values.
-            y4v.v  = _mm_loadu_pd( y0 + 0*n_elem_per_reg );
+            // _mm256_set1_epi64x: broadcasts m_rem to all lanes of a 256 bit register, m_rem_YMM[:] <- m_rem
+            // _mm256_cmpgt_epi64: m_rem_YMM[i] > indices[i] ? -1 : 0
+            // This operation sets -1(0xFF..F) to all the lanes of the mask where m_rem > indices[i]
+            // For example, if m_rem == 2, mask <- [-1, -1, 0, 0], this mask is subsequently
+            // used to load 2 64 bit elements from the corresponding memory locations
+            __m256i mask = _mm256_cmpgt_epi64( _mm256_set1_epi64x( m_rem ), indices ); // mask[i] <- m_rem > indices[i] ? -1 : 0
 
-            a40v.v = _mm_loadu_pd( a0 + 0*n_elem_per_reg );
+            // Perform the masked loads
+            y0v.v  = _mm256_maskload_pd( y0, mask );
+            a00v.v = _mm256_maskload_pd( a0, mask );
+            a01v.v = _mm256_maskload_pd( a1, mask );
+            a02v.v = _mm256_maskload_pd( a2, mask );
+            a03v.v = _mm256_maskload_pd( a3, mask );
 
-            a41v.v = _mm_loadu_pd( a1 + 0*n_elem_per_reg );
+            // Perform the masked FMA on the masked registers
+            y0v.v = _mm256_fmadd_pd( a00v.v, chi0v.v, y0v.v );
+            y0v.v = _mm256_fmadd_pd( a01v.v, chi1v.v, y0v.v );
+            y0v.v = _mm256_fmadd_pd( a02v.v, chi2v.v, y0v.v );
+            y0v.v = _mm256_fmadd_pd( a03v.v, chi3v.v, y0v.v );
 
-            a42v.v = _mm_loadu_pd( a2 + 0*n_elem_per_reg );
-
-            a43v.v = _mm_loadu_pd( a3 + 0*n_elem_per_reg );
-
-            // perform : y += alpha * x;
-            y4v.v = _mm_fmadd_pd( a40v.v, chi0v.xmm[0], y4v.v );
-
-            y4v.v = _mm_fmadd_pd( a41v.v, chi1v.xmm[0], y4v.v );
-
-            y4v.v = _mm_fmadd_pd( a42v.v, chi2v.xmm[0], y4v.v );
-
-            y4v.v = _mm_fmadd_pd( a43v.v, chi3v.xmm[0], y4v.v );
-
-            // Store the output.
-            _mm_storeu_pd( (double *)(y0 + 0*n_elem_per_reg), y4v.v );
-
-            y0 += 2;
-            a0 += 2;
-            a1 += 2;
-            a2 += 2;
-            a3 += 2;
+            // Masked store to y0
+            _mm256_maskstore_pd( y0, mask, y0v.v );
         }
-
-        // If there are leftover iterations, perform them with scalar code.
-        for ( ; (i + 0) < m ; ++i )
-        {
-            double       y0c = *y0;
-
-            const double a0c = *a0;
-            const double a1c = *a1;
-            const double a2c = *a2;
-            const double a3c = *a3;
-
-            y0c += chi0 * a0c;
-            y0c += chi1 * a1c;
-            y0c += chi2 * a2c;
-            y0c += chi3 * a3c;
-
-            *y0 = y0c;
-
-            a0 += 1;
-            a1 += 1;
-            a2 += 1;
-            a3 += 1;
-
-            y0 += 1;
-        }
+        // Issue vzeroupper instruction to clear upper lanes of ymm registers.
+        // This avoids a performance penalty caused by false dependencies when
+        // transitioning from AVX to SSE instructions (which may occur later,
+        // especially if BLIS is compiled with -mfpmath=sse).
+        _mm256_zeroupper();
     }
     else
     {
+        /*
+        * DAXPYF implementation for non-unit strides (inca/incy != 1).
+        * While the loop remains scalar due to non-contiguous memory access, we use
+        * SSE scalar intrinsics (_mm_fmadd_sd) to leverage the hardware's Fused
+        * Multiply-Add (FMA) unit. This maintains higher precision by 
+        * performing the multiply-add in a single step.
+        */
+
+        __m128d chi0v_s = _mm_load_sd( &chi0 ); // chi0v_s[0] <- chi0[0]
+                                                // chi0v_s[1] <- 0.0 (Unused)
+        __m128d chi1v_s = _mm_load_sd( &chi1 ); // chi1v_s[0] <- chi1[0]
+                                                // chi1v_s[1] <- 0.0 (Unused)
+        __m128d chi2v_s = _mm_load_sd( &chi2 ); // chi2v_s[0] <- chi2[0]
+                                                // chi2v_s[1] <- 0.0 (Unused)
+        __m128d chi3v_s = _mm_load_sd( &chi3 ); // chi3v_s[0] <- chi3[0]
+                                                // chi3v_s[1] <- 0.0 (Unused)
+
         for ( i = 0; (i + 0) < m ; ++i )
         {
-            double       y0c = *y0;
+            // Load single double into low lane of __m128d
+            __m128d y0cv_s = _mm_load_sd( y0 ); // y0cv_s[0] <- y0[0]
+                                                // y0cv_s[1] <- 0.0 (Unused)
+            __m128d a0cv_s = _mm_load_sd( a0 ); // a0cv_s[0] <- a0[0]
+                                                // a0cv_s[1] <- 0.0 (Unused)
+            __m128d a1cv_s = _mm_load_sd( a1 ); // a1cv_s[0] <- a1[0]
+                                                // a1cv_s[1] <- 0.0 (Unused)
+            __m128d a2cv_s = _mm_load_sd( a2 ); // a2cv_s[0] <- a2[0]
+                                                // a2cv_s[1] <- 0.0 (Unused)
+            __m128d a3cv_s = _mm_load_sd( a3 ); // a3cv_s[0] <- a3[0]
+                                                // a3cv_s[1] <- 0.0 (Unused)
 
-            const double a0c = *a0;
-            const double a1c = *a1;
-            const double a2c = *a2;
-            const double a3c = *a3;
+            // _mm_fmadd_sd performs a scalar fused multiply-add (FMA) 
+            // on the low 64-bit double-precision element of XMM registers.
+            // This operation is done in one fused instruction
+            // with one rounding (compared to two in the scalar case)
+            y0cv_s = _mm_fmadd_sd( chi0v_s, a0cv_s, y0cv_s ); // y0cv_s[0] <- (chi0v_s[0] * a0cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi0v_s[1] (Unused)
+            y0cv_s = _mm_fmadd_sd( chi1v_s, a1cv_s, y0cv_s ); // y0cv_s[0] <- (chi1v_s[0] * a1cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi0v_s[1] (Unused)
+            y0cv_s = _mm_fmadd_sd( chi2v_s, a2cv_s, y0cv_s ); // y0cv_s[0] <- (chi2v_s[0] * a2cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi0v_s[1] (Unused)
+            y0cv_s = _mm_fmadd_sd( chi3v_s, a3cv_s, y0cv_s ); // y0cv_s[0] <- (chi3v_s[0] * a3cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi0v_s[1] (Unused)
 
-            y0c += chi0 * a0c;
-            y0c += chi1 * a1c;
-            y0c += chi2 * a2c;
-            y0c += chi3 * a3c;
-
-            *y0 = y0c;
+            // store the accumulated value (lower lane) 
+            _mm_store_sd( y0, y0cv_s ); // y0[0] <- y0cv_s[0]
 
             a0 += inca;
             a1 += inca;
             a2 += inca;
             a3 += inca;
 
-	    y0 += incy;
+            y0 += incy;
         }
-
     }
 }
 

@@ -46,6 +46,87 @@ void* bli_l3_thread_entry( void* data_void ) { return NULL; }
 
 //#define PRINT_THRINFO
 
+// Per-thread body of the conventional/large L3 decorator, factored out so it
+// can be invoked either inside an OpenMP parallel region (multi-threaded) or
+// directly inline (single-threaded fast path that avoids GOMP_parallel).
+// 'threads' is only used under PRINT_THRINFO (may be NULL otherwise).
+static void bli_l3_decor_body
+     (
+       dim_t        tid,
+       l3int_t      func,
+       opid_t       family,
+       pack_t       schema_a,
+       pack_t       schema_b,
+       obj_t*       alpha,
+       obj_t*       a,
+       obj_t*       b,
+       obj_t*       beta,
+       obj_t*       c,
+       cntx_t*      cntx,
+       rntm_t*      rntm,
+       cntl_t*      cntl,
+       array_t*     array,
+       thrcomm_t*   gl_comm,
+       dim_t        n_threads,
+       thrinfo_t**  threads
+     )
+{
+	// Create a thread-local copy of the master thread's rntm_t so each thread
+	// can track its own small block pool_t as it executes down the stack.
+	rntm_t           rntm_l = *rntm;
+	rntm_t* restrict rntm_p = &rntm_l;
+
+	// Check for a somewhat obscure OpenMP thread-mismatch issue. NOTE: This is
+	// a no-op when n_threads == 1 (see the early return in the callee), which
+	// is what makes it safe to call from the single-threaded fast path below,
+	// where no OpenMP parallel region exists.
+	bli_l3_thread_decorator_thread_check( n_threads, tid, gl_comm, rntm_p );
+
+	// Use the thread id to access the appropriate pool_t* within the array_t,
+	// and use it to set the sba_pool field within the rntm_t.
+	bli_sba_rntm_set_pool( tid, array, rntm_p );
+
+	obj_t      a_t, b_t, c_t;
+	cntl_t*    cntl_use;
+	thrinfo_t* thread;
+
+	// Alias thread-local copies of A, B, and C so a thread can change object
+	// properties without affecting other threads' objects.
+	bli_obj_alias_to( a, &a_t );
+	bli_obj_alias_to( b, &b_t );
+	bli_obj_alias_to( c, &c_t );
+
+	// Create a default control tree for the operation, if needed.
+	bli_l3_cntl_create_if( family, schema_a, schema_b,
+	                       &a_t, &b_t, &c_t, rntm_p, cntl, &cntl_use );
+
+	// Create the root node of the current thread's thrinfo_t structure.
+	bli_l3_thrinfo_create_root( tid, gl_comm, rntm_p, cntl_use, &thread );
+
+	// Reset the AOCL progress state for this operation.
+	tls_aoclprogress_counter = 0;
+	tls_aoclprogress_last_update = 0;
+
+	func( alpha, &a_t, &b_t, beta, &c_t, cntx, rntm_p, cntl_use, thread );
+
+	// Free the thread's local control tree.
+	bli_l3_cntl_free( rntm_p, cntl_use, thread );
+
+	#ifdef PRINT_THRINFO
+	threads[tid] = thread;
+	#else
+	( void )threads;
+
+	// NOTE: The barrier here is very important as it prevents memory being
+	// released by the chief of some thread sub-group before its peers are done
+	// using it. See PR #702 for more info. (It is a no-op for n_threads == 1.)
+	bli_thread_barrier( thread );
+
+	// Free the current thread's thrinfo_t structure.
+	bli_l3_thrinfo_free( rntm_p, thread );
+	#endif
+}
+
 void bli_l3_thread_decorator
      (
        l3int_t    func,
@@ -101,97 +182,37 @@ void bli_l3_thread_decorator
 	thrcomm_t* restrict gl_comm = bli_thrcomm_create( rntm, n_threads );
 
 
+	// LOCK 2 guard: when only one thread is requested, run the operation
+	// inline WITHOUT entering an OpenMP parallel region at all. A plain
+	// `omp parallel ... if(n_threads>1)` clause does NOT help: GCC still emits
+	// an unconditional GOMP_parallel() call, and libgomp's global per-region
+	// bookkeeping serializes highly-concurrent single-threaded gemm callers
+	// (each foreign application thread issuing its own 1-thread gemm).
+	// Skipping the GOMP_parallel() call entirely removes that serialization.
+	#ifdef PRINT_THRINFO
 	_Pragma( "omp parallel num_threads(n_threads)" )
 	{
-		// Create a thread-local copy of the master thread's rntm_t. This is
-		// necessary since we want each thread to be able to track its own
-		// small block pool_t as it executes down the function stack.
-		rntm_t           rntm_l = *rntm;
-		rntm_t* restrict rntm_p = &rntm_l;
-
-		// Query the thread's id from OpenMP.
-		const dim_t tid = omp_get_thread_num();
-
-		// Check for a somewhat obscure OpenMP thread-mismatch issue.
-		bli_l3_thread_decorator_thread_check( n_threads, tid, gl_comm, rntm_p );
-
-		// Use the thread id to access the appropriate pool_t* within the
-		// array_t, and use it to set the sba_pool field within the rntm_t.
-		// If the pool_t* element within the array_t is NULL, it will first
-		// be allocated/initialized.
-		bli_sba_rntm_set_pool( tid, array, rntm_p );
-
-
-		obj_t      a_t, b_t, c_t;
-		cntl_t*    cntl_use;
-		thrinfo_t* thread;
-
-		// Alias thread-local copies of A, B, and C. These will be the objects
-		// we pass down the algorithmic function stack. Making thread-local
-		// aliases is highly recommended in case a thread needs to change any
-		// of the properties of an object without affecting other threads'
-		// objects.
-		bli_obj_alias_to( a, &a_t );
-		bli_obj_alias_to( b, &b_t );
-		bli_obj_alias_to( c, &c_t );
-
-		// Create a default control tree for the operation, if needed.
-		bli_l3_cntl_create_if( family, schema_a, schema_b,
-		                       &a_t, &b_t, &c_t, rntm_p, cntl, &cntl_use );
-
-		// Create the root node of the current thread's thrinfo_t structure.
-		bli_l3_thrinfo_create_root( tid, gl_comm, rntm_p, cntl_use, &thread );
-
-#if 1
-		// Reset the progress state to 0 as we are starting new operations.
-		// This counter track running progress in current thread.
-		tls_aoclprogress_counter = 0;
-
-		// We send the update only after certain threshold is reached, 
-		// The threshold is defined as AOCL_PROGRESS_FREQUENCY.
-		// This variable stores the counter value when last update was sent. 
-		// It is compared with current counter value to see if it is time to
-		// send the next update.
-		tls_aoclprogress_last_update = 0;
-
-		func
-		(
-		  alpha,
-		  &a_t,
-		  &b_t,
-		  beta,
-		  &c_t,
-		  cntx,
-		  rntm_p,
-		  cntl_use,
-		  thread
-		);
-#else
-		bli_thrinfo_grow_tree
-		(
-		  rntm_p,
-		  cntl_use,
-		  thread
-		);
-#endif
-
-		// Free the thread's local control tree.
-		bli_l3_cntl_free( rntm_p, cntl_use, thread );
-
-		#ifdef PRINT_THRINFO
-		threads[tid] = thread;
-		#else
-
-		// NOTE: The barrier here is very important as it prevents memory being
-		// released by the chief of some thread sub-group before its peers are done
-		// using it. See PR #702 for more info [1].
-		// [1] https://github.com/flame/blis/pull/702
-    	bli_thread_barrier( thread );
-		
-		// Free the current thread's thrinfo_t structure.
-		bli_l3_thrinfo_free( rntm_p, thread );
-		#endif
+		bli_l3_decor_body( omp_get_thread_num(), func, family, schema_a, schema_b,
+		                   alpha, a, b, beta, c, cntx, rntm, cntl, array, gl_comm,
+		                   n_threads, threads );
 	}
+	#else
+	if ( n_threads == 1 )
+	{
+		bli_l3_decor_body( 0, func, family, schema_a, schema_b,
+		                   alpha, a, b, beta, c, cntx, rntm, cntl, array, gl_comm,
+		                   n_threads, NULL );
+	}
+	else
+	{
+		_Pragma( "omp parallel num_threads(n_threads)" )
+		{
+			bli_l3_decor_body( omp_get_thread_num(), func, family, schema_a, schema_b,
+			                   alpha, a, b, beta, c, cntx, rntm, cntl, array, gl_comm,
+			                   n_threads, NULL );
+		}
+	}
+	#endif
 
 
 	// Now global communicator is not freed in bli_l3_thrinfo_free().
@@ -224,6 +245,18 @@ void bli_l3_thread_decorator_thread_check
        rntm_t*    rntm
      )
 {
+	// This check is only meaningful when BLIS requested a team of more than one
+	// thread, and it is only valid to run from inside a parallel region that
+	// BLIS itself created. Callers may invoke the operation inline, without
+	// creating a parallel region at all, when n_threads == 1; in that case
+	// omp_get_num_threads() below would report the size of the *enclosing
+	// application* team (t > 1 when BLIS is called from within an application's
+	// OpenMP parallel region), which would spuriously trip the mismatch path
+	// and abort() even though BLIS correctly ran with a single thread. Return
+	// early so that the single-threaded case is always a no-op, regardless of
+	// whether the caller entered a parallel region.
+	if ( n_threads == 1 ) return;
+
 	dim_t n_threads_real = omp_get_num_threads();
 
 	// Check if the number of OpenMP threads created within this parallel

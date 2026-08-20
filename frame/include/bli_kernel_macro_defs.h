@@ -36,7 +36,6 @@
 #ifndef BLIS_KERNEL_MACRO_DEFS_H
 #define BLIS_KERNEL_MACRO_DEFS_H
 
-
 // -- Define default threading parameters --------------------------------------
 
 // -- Conventional (large code path) values --
@@ -93,10 +92,38 @@
 #ifdef BLIS_DISABLE_MEMKIND
   #undef BLIS_ENABLE_MEMKIND
 #endif
+// Likewise honor an explicit BLIS_DISABLE_AOCL_ALLOC (e.g. a compile-line -D) as
+// an override of a config-header BLIS_ENABLE_AOCL_ALLOC, mirroring memkind above.
+// Both overrides run before the mutual-exclusion check and the BLIS_MALLOC_*
+// selection below, so -DBLIS_DISABLE_AOCL_ALLOC cleanly forces the malloc/free
+// backend even when bli_config.h enabled the allocator.
+#ifdef BLIS_DISABLE_AOCL_ALLOC
+  #undef BLIS_ENABLE_AOCL_ALLOC
+#endif
+// memkind and the AOCL allocator pick different BLIS_MALLOC_* backends and would
+// split allocations if both are on -- allow at most one.  configure and CMake
+// resolve this gracefully (an enabled aocl allocator takes precedence and
+// libmemkind is disabled with a warning, never failing the build), so this is
+// only a last-resort backstop for hand-defined macros that bypass the build
+// system.
+#if defined(BLIS_ENABLE_MEMKIND) && defined(BLIS_ENABLE_AOCL_ALLOC)
+  #error "BLIS_ENABLE_MEMKIND and BLIS_ENABLE_AOCL_ALLOC are mutually exclusive; enable at most one (configure with --without-memkind or --disable-aocl-alloc)."
+#endif
 #ifdef BLIS_ENABLE_MEMKIND
   #include <hbwmalloc.h>
 #endif
-
+#ifdef BLIS_ENABLE_AOCL_ALLOC
+#include <stddef.h>
+// Match the hidden visibility of the definitions in aocl_allocator.h so the
+// declaration and definition agree in every build (incl. -fvisibility=default).
+#if defined(__GNUC__) || defined(__clang__)
+extern void *aocl_malloc(size_t size) __attribute__((visibility("hidden")));
+extern void  aocl_free(void *ptr)     __attribute__((visibility("hidden")));
+#else
+extern void *aocl_malloc(size_t size);
+extern void  aocl_free(void *ptr);
+#endif
+#endif
 // Memory allocation functions. These macros define the three types of
 // malloc()-style functions, and their free() counterparts: one for each
 // type of memory to be allocated.
@@ -116,6 +143,8 @@
   // instead of malloc().
   #ifdef  BLIS_ENABLE_MEMKIND
   #define BLIS_MALLOC_POOL               hbw_malloc
+  #elif defined(BLIS_ENABLE_AOCL_ALLOC)
+  #define BLIS_MALLOC_POOL               aocl_malloc
   #else
   #define BLIS_MALLOC_POOL               malloc
   #endif
@@ -127,6 +156,8 @@
   // instead of free().
   #ifdef  BLIS_ENABLE_MEMKIND
   #define BLIS_FREE_POOL                 hbw_free
+  #elif defined(BLIS_ENABLE_AOCL_ALLOC)
+  #define BLIS_FREE_POOL                 aocl_free
   #else
   #define BLIS_FREE_POOL                 free
   #endif
@@ -135,21 +166,37 @@
 // This allocation function is called to allocate memory for internally-
 // used objects and structures, such as control tree nodes.
 #ifndef BLIS_MALLOC_INTL
+#ifdef BLIS_ENABLE_AOCL_ALLOC
+#define BLIS_MALLOC_INTL                 aocl_malloc
+#else
 #define BLIS_MALLOC_INTL                 malloc
+#endif
 #endif
 
 #ifndef BLIS_FREE_INTL
+#ifdef BLIS_ENABLE_AOCL_ALLOC
+#define BLIS_FREE_INTL                   aocl_free
+#else
 #define BLIS_FREE_INTL                   free
+#endif
 #endif
 
 // This allocation function is called to allocate memory for objects
 // created by user-level API functions, such as bli_obj_create().
 #ifndef BLIS_MALLOC_USER
+#ifdef BLIS_ENABLE_AOCL_ALLOC
+#define BLIS_MALLOC_USER                 aocl_malloc
+#else
 #define BLIS_MALLOC_USER                 malloc
+#endif
 #endif
 
 #ifndef BLIS_FREE_USER
+#ifdef BLIS_ENABLE_AOCL_ALLOC
+#define BLIS_FREE_USER                   aocl_free
+#else
 #define BLIS_FREE_USER                   free
+#endif
 #endif
 
 // -- Other system-related definitions -----------------------------------------

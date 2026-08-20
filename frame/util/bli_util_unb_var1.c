@@ -1896,14 +1896,16 @@ void PASTEMAC(ch,varname) \
        rntm_t* rntm  \
      ) \
 { \
-    ctype*  one = PASTEMAC(ch,1); \
     ctype*  x0; \
     ctype*  x1; \
     ctype*  x2; \
     ctype*  chi1; \
+/*
+    ctype*  one = PASTEMAC(ch,1); \
     ctype   beta; \
     ctype   omega; \
     double  max_m_n; \
+*/ \
     uplo_t  uplox_eff; \
     dim_t   n_iter; \
     dim_t   n_elem, n_elem_max; \
@@ -1944,11 +1946,13 @@ void PASTEMAC(ch,varname) \
     } \
     else \
     { \
+/*
         max_m_n = bli_max( m, n ); \
 \
         PASTEMAC2(d,ch,sets)( max_m_n, 0.0, omega ); \
         PASTEMAC(ch,copys)( *one, beta ); \
         PASTEMAC(ch,invscals)( omega, beta ); \
+*/ \
 \
         if ( bli_is_upper( uplox_eff ) ) \
         { \

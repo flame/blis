@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2016 - 2025, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2016 - 2026, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2018 - 2020, The University of Texas at Austin. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -305,36 +305,68 @@ void bli_saxpyv_zen_int_10
             y0 += 1*n_elem_per_reg;
         }
 
-        // Issue vzeroupper instruction to clear upper lanes of ymm registers.
-        // This avoids a performance penalty caused by false dependencies when
-        // transitioning from AVX to SSE instructions (which may occur as soon
-        // as the n_left cleanup loop below if BLIS is compiled with
-        // -mfpmath=sse).
-
-        _mm256_zeroupper();
-
-        for ( ; (i + 0) < n; i += 1 )
+        dim_t n_rem = n - i;
+        if (n_rem > 0)
         {
-            *y0 += (*alpha) * (*x0);
+            __m256i indices = _mm256_setr_epi32(0, 1, 2, 3, 4, 5, 6, 7);
+            __m256i mask    = _mm256_cmpgt_epi32(_mm256_set1_epi32((int)n_rem), indices);
 
-            x0 += 1;
-            y0 += 1;
+            __m256 xv_rem = _mm256_maskload_ps(x0, mask);
+            __m256 yv_rem = _mm256_maskload_ps(y0, mask);
+            __m256 zv_rem = _mm256_fmadd_ps(xv_rem, alphav, yv_rem);
+            _mm256_maskstore_ps(y0, mask, zv_rem);
         }
     }
     else
     {
-        const float alphac = *alpha;
+        /**
+        * SAXPY implementation for non-unit strides (incx/incy != 1).
+        * * While the loop remains scalar due to non-contiguous memory access, we use
+        * SSE scalar intrinsics (_mm_fmadd_ss) to leverage the hardware's Fused
+        * Multiply-Add (FMA) unit. This reduces instruction count and maintains
+        * higher precision by performing the multiply-add in a single step.
+        */
 
-        for ( i = 0; i < n; ++i )
+        // const float alphac = *alpha;
+
+        // for ( i = 0; i < n; ++i )
+        // {
+        //     const float x0c = *x0;
+
+        //     *y0 += alphac * x0c;
+
+        //     x0 += incx;
+        //     y0 += incy;
+        // }
+
+        // --- Non-Unit Stride: Scalar-in-SIMD via Single Load/Store ---
+        // Using 128-bit load/store intrinsics to avoid masking overhead
+        __m128 alpha_s = _mm_load_ss(alpha);
+
+        for (i = 0; i < n; ++i)
         {
-            const float x0c = *x0;
+            // Load single float into low lane of __m128
+            __m128 xv = _mm_load_ss(x0);
+            __m128 yv = _mm_load_ss(y0);
 
-            *y0 += alphac * x0c;
+            // Full FMA using the 128-bit scalar intrinsic (uses FMA unit)
+            __m128 zv = _mm_fmadd_ss(alpha_s, xv, yv);
+
+            // Store single float result back
+            _mm_store_ss(y0, zv);
 
             x0 += incx;
             y0 += incy;
         }
     }
+
+    /**
+     * if the previous function call uses whether AVX or SSE,
+     * the registers might still be "dirty."
+     * so calling _mm256_zeroupper just before the function returns,
+     * regardless of which path was taken, to protect the caller.
+     */
+    _mm256_zeroupper();
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
 }
 
@@ -438,35 +470,73 @@ BLIS_EXPORT_BLIS void bli_daxpyv_zen_int_10
             y0 += 1*n_elem_per_reg;
         }
 
+        // Handle the remaining cases using masked operations
+        dim_t n_rem = n - i;
+        if ( n_rem > 0 )
+        {
+            // Masked operations can handle upto 4 doubles at a time
+            __m256i indices = _mm256_setr_epi64x( 0, 1, 2, 3 );  // indices <- [0, 1, 2, 3] 
+
+            // _mm256_set1_epi64x: broadcasts n_rem to all lanes of a 256 bit register, n_rem_YMM[:] <- n_rem
+            // _mm256_cmpgt_epi64: n_rem_YMM[i] > indices[i] ? -1 : 0
+            // This operation sets -1(0xFF..F) to all the lanes of the mask where n_rem > indices[i]
+            // For example, if n_rem == 2, mask <- [-1, -1, 0, 0], this mask is subsequently
+            // used to load 2 64 bit elements from the corresponding memory locations
+            __m256i mask    = _mm256_cmpgt_epi64( _mm256_set1_epi64x( n_rem ), indices ); // mask[i] <- n_rem > indices[i] ? -1 : 0
+            
+            // Perform the masked loads
+            __m256d xv_rem = _mm256_maskload_pd( x0, mask );
+            __m256d yv_rem = _mm256_maskload_pd( y0, mask );
+
+            // Perform the masked FMA on the masked registers
+            __m256d zv_rem = _mm256_fmadd_pd( xv_rem, alphav, yv_rem );
+
+            // Masked store to y0
+            _mm256_maskstore_pd( y0, mask, zv_rem );
+        }
+
         // Issue vzeroupper instruction to clear upper lanes of ymm registers.
         // This avoids a performance penalty caused by false dependencies when
-        // transitioning from AVX to SSE instructions (which may occur as soon
-        // as the n_left cleanup loop below if BLIS is compiled with
-        // -mfpmath=sse).
+        // transitioning from AVX to SSE instructions (which may occur later,
+        // especially if BLIS is compiled with -mfpmath=sse).
         _mm256_zeroupper();
-
-        for ( ; i < n; i += 1 )
-        {
-            *y0 += (*alpha) * (*x0);
-
-            y0 += 1;
-            x0 += 1;
-        }
     }
     else
     {
-        const double alphac = *alpha;
+        /*
+        * DAXPY implementation for non-unit strides (incx/incy != 1).
+        * While the loop remains scalar due to non-contiguous memory access, we use
+        * SSE scalar intrinsics (_mm_fmadd_sd) to leverage the hardware's Fused
+        * Multiply-Add (FMA) unit. This maintains higher precision by 
+        * performing the multiply-add in a single step.
+        */
+        __m128d alpha_s = _mm_load_sd( alpha ); // alpha_s[0] <- alpha[0]
+                                                // alpha_s[1] <- 0.0 (Unused)
 
         for ( i = 0; i < n; ++i )
         {
-            const double x0c = *x0;
+            // Load single double into low lane of __m128d
+            __m128d xv_s = _mm_load_sd( x0 );  // xv_s[0] <- x0[0]
+                                               // xv_s[1] <- 0.0 (Unused)
+            __m128d yv_s = _mm_load_sd( y0 );  // yv_s[0] <- y0[0]
+                                               // yv_s[1] <- 0.0 (Unused)
 
-            *y0 += alphac * x0c;
+            // accumulate the value in zv_s
+            // _mm_fmadd_sd performs a scalar fused multiply-add (FMA) 
+            // on the low 64-bit double-precision element of XMM registers.
+            // This operation is done in one fused instruction
+            // with one rounding (compared to two in the scalar case)
+            __m128d zv_s = _mm_fmadd_sd( alpha_s, xv_s, yv_s ); // zv_s[0] <- (alpha_s[0] * xv_s[0]) + yv_s[0]
+                                                                // zv_s[1] <- alpha_s[1] (Unused)
+
+            // store the accumulated value (lower lane) 
+            _mm_store_sd( y0, zv_s ); // y0[0] <- zv_s[0]
 
             x0 += incx;
             y0 += incy;
         }
     }
+    
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
 }
 
@@ -490,7 +560,6 @@ void bli_caxpyv_zen_int_5
 
     float*  restrict x0;
     float*  restrict y0;
-    float*  restrict alpha0;
 
     float alphaR, alphaI;
 
@@ -500,8 +569,6 @@ void bli_caxpyv_zen_int_5
     __m256           xv[10];
     __m256           xShufv[10];
     __m256           yv[10];
-
-    conj_t conjx_use = conjx;
 
     // If the vector dimension is zero, or if alpha is zero, return early.
     if ( bli_zero_dim1( n ) || PASTEMAC(c,eq0)( *alpha ) )
@@ -513,28 +580,25 @@ void bli_caxpyv_zen_int_5
     // Initialize local pointers.
     x0 = (float*)x;
     y0 = (float*)y;
-    alpha0 = (float*)alpha;
 
     alphaR = alpha->real;
     alphaI = alpha->imag;
 
+    // Broadcast the alpha scalar to all elements of a vector register.
+    if ( !bli_is_conj (conjx) ) // If BLIS_NO_CONJUGATE
+    {
+        alphaRv = _mm256_broadcast_ss( &alphaR );
+        alphaIv = _mm256_set_ps(alphaI, -alphaI, alphaI, -alphaI, alphaI, -alphaI, alphaI, -alphaI);
+
+    }
+    else
+    {
+        alphaIv = _mm256_broadcast_ss( &alphaI );
+        alphaRv = _mm256_set_ps(-alphaR, alphaR, -alphaR, alphaR, -alphaR, alphaR, -alphaR, alphaR);
+    }
+
     if ( incx == 1 && incy == 1 )
     {
-        // Broadcast the alpha scalar to all elements of a vector register.
-        if ( !bli_is_conj (conjx) ) // If BLIS_NO_CONJUGATE
-        {
-            alphaRv = _mm256_broadcast_ss( &alphaR );
-
-            alphaIv = _mm256_set_ps(alphaI, -alphaI, alphaI, -alphaI, alphaI, -alphaI, alphaI, -alphaI);
-
-        }
-        else
-        {
-            alphaIv = _mm256_broadcast_ss( &alphaI );
-
-            alphaRv = _mm256_set_ps(-alphaR, alphaR, -alphaR, alphaR, -alphaR, alphaR, -alphaR, alphaR);
-        }
-
         //----------Scalar algorithm BLIS_NO_CONJUGATE arg-------------
         // y = alpha*x + y
         // y = (aR + aIi) * (xR + xIi) + (yR + yIi)
@@ -691,85 +755,94 @@ void bli_caxpyv_zen_int_5
             x0 += 1*n_elem_per_reg;
             y0 += 1*n_elem_per_reg;
         }
-
-        // Issue vzeroupper instruction to clear upper lanes of ymm registers.
-        // This avoids a performance penalty caused by false dependencies when
-        // transitioning from AVX to SSE instructions (which may occur as soon
-        // as the n_left cleanup loop below if BLIS is compiled with
-        // -mfpmath=sse).
-        _mm256_zeroupper();
-
-        /* Residual values are calculated here
-        y0 += (alpha) * (x0); --> BLIS_NO_CONJUGATE
-        y0 += ( aR.xR - aIxI + yR ) + ( aR.xI + aI.xR + yI )i
-
-        y0 += (alpha) * conjx(x0); --> BLIS_CONJUGATE
-        y0 = ( aR.xR + aIxI + yR ) + (aI.xR - aR.xI + yI)i */
-
-        if ( !bli_is_conj(conjx_use) ) //  BLIS_NO_CONJUGATE
+        dim_t n_rem = n - i;
+        if (n_rem > 0)
         {
-            for ( ; (i + 0) < n; i += 1 )
-            {
-                // real part: ( aR.xR - aIxI + yR )
-                *y0       += *alpha0 * (*x0) - (*(alpha0 + 1)) * (*(x0+1));
-                // img part: ( aR.xI + aI.xR + yI )
-                *(y0 + 1) += *alpha0 * (*(x0+1)) +  (*(alpha0 + 1)) * (*x0);
-                x0 += 2;
-                y0 += 2;
-            }
+            // Mask for n_rem complex elements (each element is 2 floats)
+            __m256i idx = _mm256_setr_epi32(0, 0, 1, 1, 2, 2, 3, 3);
+            __m256i mask = _mm256_cmpgt_epi32(_mm256_set1_epi32((int)n_rem), idx);
+            
+            __m256 xv = _mm256_maskload_ps(x0, mask);
+            __m256 yv = _mm256_maskload_ps(y0, mask);
+            __m256 xS = _mm256_permute_ps(xv, 0xB1);
+            yv = _mm256_fmadd_ps(xv, alphaRv, yv);
+            yv = _mm256_fmadd_ps(xS, alphaIv, yv);
+            _mm256_maskstore_ps(y0, mask, yv);
         }
-        else //  BLIS_CONJUGATE
-        {
-            for ( ; (i + 0) < n; i += 1 )
-            {
-                // real part: ( aR.xR + aIxI + yR )
-                *y0       += *alpha0 * (*x0) + (*(alpha0 + 1)) * (*(x0+1));
-                // img part: (  aI.xR - aR.xI + yI )
-                *(y0 + 1) += (*(alpha0 + 1)) * (*x0) - (*alpha0) * (*(x0+1));
-                x0 += 2;
-                y0 += 2;
-            }
-        }
-
     }
     else
     {
-        const float alphar = *alpha0;
-        const float alphai = *(alpha0 + 1);
+        /**
+        * CAXPY implementation for non-unit strides (incx/incy != 1).
+        * While the loop remains scalar due to non-contiguous memory access, we use
+        * AVX2 scalar intrinsics (_mm256_fmadd_ps) to leverage the hardware's Fused
+        * Multiply-Add (FMA) unit. This reduces instruction count and maintains
+        * higher precision by performing the multiply-add in a single step.
+        */
 
-        if ( !bli_is_conj(conjx_use) )
+        // const float alphar = *alpha0;
+        // const float alphai = *(alpha0 + 1);
+
+        // if ( !bli_is_conj(conjx_use) )
+        // {
+        //     for ( i = 0; i < n; ++i )
+        //     {
+        //         const float x0c = *x0;
+        //         const float x1c = *( x0+1 );
+
+        //         *y0         += alphar * x0c - alphai * x1c;
+        //         *(y0 + 1)   += alphar * x1c + alphai * x0c;
+
+        //         x0 += incx * 2;
+        //         y0 += incy * 2;
+        //     }
+        // }
+        // else
+        // {
+        //     for ( i = 0; i < n; ++i )
+        //     {
+        //         const float x0c = *x0;
+        //         const float x1c = *( x0+1 );
+
+        //         *y0         += alphar * x0c + alphai * x1c;
+        //         *(y0 + 1)   += alphai * x0c - alphar * x1c;
+
+        //         x0 += incx * 2;
+        //         y0 += incy * 2;
+        //     }
+        // }
+
+        // --- Non-Unit Stride Cleanup (Full FMA, Single Complex Load) ---
+        // Mask for exactly one complex element (first 2 floats)
+        __m256i single_c_mask = _mm256_setr_epi32(-1, -1, 0, 0, 0, 0, 0, 0);
+
+        for (i = 0; i < n; ++i)
         {
-            for ( i = 0; i < n; ++i )
-            {
-                const float x0c = *x0;
-                const float x1c = *( x0+1 );
+            __m256 xv = _mm256_maskload_ps(x0, single_c_mask);
+            __m256 yv = _mm256_maskload_ps(y0, single_c_mask);
+            // 0xB1 swaps adjacent pairs within each 128-bit lane: [xR, xI, ...] -> [xI, xR, ...]
+            __m256 xS = _mm256_permute_ps(xv, 0xB1);
 
-                *y0         += alphar * x0c - alphai * x1c;
-                *(y0 + 1)   += alphar * x1c + alphai * x0c;
+            yv = _mm256_fmadd_ps(xv, alphaRv, yv);
+            yv = _mm256_fmadd_ps(xS, alphaIv, yv);
 
-                x0 += incx * 2;
-                y0 += incy * 2;
-            }
+            _mm256_maskstore_ps(y0, single_c_mask, yv);
+
+            x0 += incx * 2;
+            y0 += incy * 2;
         }
-        else
-        {
-            for ( i = 0; i < n; ++i )
-            {
-                const float x0c = *x0;
-                const float x1c = *( x0+1 );
-
-                *y0         += alphar * x0c + alphai * x1c;
-                *(y0 + 1)   += alphai * x0c - alphar * x1c;
-
-                x0 += incx * 2;
-                y0 += incy * 2;
-            }
-        }
-
     }
+
+    /**
+     * if the previous function call uses whether AVX or SSE,
+     * the registers might still be "dirty."
+     * so calling _mm256_zeroupper just before the function returns,
+     * regardless of which path was taken, to protect the caller.
+     */
+    _mm256_zeroupper();
+
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
 }
-
 // -----------------------------------------------------------------------------
 
 void bli_zaxpyv_zen_int_5

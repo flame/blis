@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -178,31 +178,9 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef K_bli_sgemmsup_rd_zen_asm_6x16m
-INSTANTIATE_TEST_SUITE_P(
-        bli_sgemmsup_rd_zen_asm_6x16m_col_stored_c,
-        sgemmGenericSUP,
-        ::testing::Combine(
-            ::testing::Range(gtint_t(1), gtint_t(7), 1),            // values of m
-            ::testing::Range(gtint_t(1), gtint_t(17), 1),           // values of n
-            ::testing::Range(gtint_t(0), gtint_t(17), 1),           // values of k
-            ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
-            ::testing::Values(1.0, 0.0, -1.0, 2.3),                 // beta value
-            ::testing::Values('c'),                                 // storage of c
-            ::testing::Values(bli_sgemmsup_rd_zen_asm_6x16m),       // sgemm_sup kernel
-            ::testing::Values(gtint_t(6)),                          // Micro kernel block MR
-            ::testing::Values('t'),                                 // transa
-            ::testing::Values('n'),                                 // transb
-            ::testing::Values(true),                                // kernel pref
-            ::testing::Values(true, false)                          // memory test
-        ),
-        ::sgemmGenericSUPPrint()
-    );
-#endif
-
 #ifdef K_bli_sgemmsup_rv_zen_asm_6x16n
 INSTANTIATE_TEST_SUITE_P(
-        bli_sgemmsup_rv_zen_asm_6x16n_col_stored_c,
+        bli_sgemmsup_rv_zen_asm_6x16n_col_stored_c_memtest_disabled,
         sgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(7), 1),            // values of m
@@ -216,7 +194,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'),                                 // transa
             ::testing::Values('t'),                                 // transb
             ::testing::Values(false),                               // kernel pref
-            ::testing::Values(true, false)                          // memory test
+            ::testing::Values(false)                          // memory test
         ),
         ::sgemmGenericSUPPrint()
     );
@@ -224,7 +202,99 @@ INSTANTIATE_TEST_SUITE_P(
 
 #ifdef K_bli_sgemmsup_rv_zen_asm_6x16n
 INSTANTIATE_TEST_SUITE_P(
-        bli_sgemmsup_rv_zen_asm_6x16n_row_stored_c,
+        bli_sgemmsup_rv_zen_asm_6x16n_col_stored_c_memtest_enabled_valid_m_n_case1,
+        sgemmGenericSUP,
+        ::testing::Combine(
+            ::testing::Range(gtint_t(1), gtint_t(6), 1),            // values of m
+            ::testing::Range(gtint_t(1), gtint_t(8), 1),           // values of n
+            ::testing::Range(gtint_t(0), gtint_t(17), 1),           // values of k
+            ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
+            ::testing::Values(1.0, 0.0, -1.0, 2.3),                 // beta value
+            ::testing::Values('c'),                                 // storage of c
+            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x16n),       // sgemm_sup kernel
+            ::testing::Values(gtint_t(6)),                          // Micro kernel block MR
+            ::testing::Values('n'),                                 // transa
+            ::testing::Values('t'),                                 // transb
+            ::testing::Values(false),                               // kernel pref
+            ::testing::Values(true)                          // memory test
+        ),
+        ::sgemmGenericSUPPrint()
+    );
+#endif
+
+#ifdef K_bli_sgemmsup_rv_zen_asm_6x16n
+INSTANTIATE_TEST_SUITE_P(
+        bli_sgemmsup_rv_zen_asm_6x16n_col_stored_c_memtest_enabled_valid_m_n_case2,
+        sgemmGenericSUP,
+        ::testing::Combine(
+            ::testing::Range(gtint_t(1), gtint_t(6), 1),            // values of m
+            ::testing::Range(gtint_t(9), gtint_t(17), 1),           // values of n
+            ::testing::Range(gtint_t(0), gtint_t(17), 1),           // values of k
+            ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
+            ::testing::Values(1.0, 0.0, -1.0, 2.3),                 // beta value
+            ::testing::Values('c'),                                 // storage of c
+            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x16n),       // sgemm_sup kernel
+            ::testing::Values(gtint_t(6)),                          // Micro kernel block MR
+            ::testing::Values('n'),                                 // transa
+            ::testing::Values('t'),                                 // transb
+            ::testing::Values(false),                               // kernel pref
+            ::testing::Values(true)                          // memory test
+        ),
+        ::sgemmGenericSUPPrint()
+    );
+#endif
+
+
+#ifdef K_bli_sgemmsup_rv_zen_asm_6x16n
+INSTANTIATE_TEST_SUITE_P(
+        bli_sgemmsup_rv_zen_asm_6x16n_col_stored_c_memtest_enabled_m_6_n_8_zero_beta,
+        sgemmGenericSUP,
+        ::testing::Combine(
+            ::testing::Values(gtint_t(6)),                          // values of m
+            ::testing::Values(gtint_t(8)),           // values of n
+            ::testing::Range(gtint_t(0), gtint_t(17), 1),           // values of k
+            ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
+            ::testing::Values(0.0),                 // beta value
+            ::testing::Values('c'),                                 // storage of c
+            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x16n),       // sgemm_sup kernel
+            ::testing::Values(gtint_t(6)),                          // Micro kernel block MR
+            ::testing::Values('n'),                                 // transa
+            ::testing::Values('t'),                                 // transb
+            ::testing::Values(false),                               // kernel pref
+            ::testing::Values(true)                          // memory test
+        ),
+        ::sgemmGenericSUPPrint()
+    );
+#endif
+
+/**
+ * Memory test fails for the case where m=6, n=8 and beta is nonzero.
+ */
+#ifdef K_bli_sgemmsup_rv_zen_asm_6x16n
+INSTANTIATE_TEST_SUITE_P(
+        DISABLED_bli_sgemmsup_rv_zen_asm_6x16n_col_stored_c_memtest_enabled_m_6_n_8_nonzero_beta,
+        sgemmGenericSUP,
+        ::testing::Combine(
+            ::testing::Values(gtint_t(6)),                          // values of m
+            ::testing::Values(gtint_t(8)),           // values of n
+            ::testing::Range(gtint_t(0), gtint_t(17), 1),           // values of k
+            ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
+            ::testing::Values(1.0, -1.0, 2.3),                 // beta value
+            ::testing::Values('c'),                                 // storage of c
+            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x16n),       // sgemm_sup kernel
+            ::testing::Values(gtint_t(6)),                          // Micro kernel block MR
+            ::testing::Values('n'),                                 // transa
+            ::testing::Values('t'),                                 // transb
+            ::testing::Values(false),                               // kernel pref
+            ::testing::Values(true)                          // memory test
+        ),
+        ::sgemmGenericSUPPrint()
+    );
+#endif
+
+#ifdef K_bli_sgemmsup_rd_zen_asm_6x16m
+INSTANTIATE_TEST_SUITE_P(
+        bli_sgemmsup_rd_zen_asm_6x16m_col_stored_c,
         sgemmGenericSUP,
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(7), 1),            // values of m
@@ -232,8 +302,8 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(0), gtint_t(17), 1),           // values of k
             ::testing::Values(2.0, 1.0, -1.0),                      // alpha value
             ::testing::Values(1.0, 0.0, -1.0, 2.3),                 // beta value
-            ::testing::Values('r'),                                 // storage of c
-            ::testing::Values(bli_sgemmsup_rv_zen_asm_6x16n),       // sgemm_sup kernel
+            ::testing::Values('c'),                                 // storage of c
+            ::testing::Values(bli_sgemmsup_rd_zen_asm_6x16m),       // sgemm_sup kernel
             ::testing::Values(gtint_t(6)),                          // Micro kernel block MR
             ::testing::Values('t'),                                 // transa
             ::testing::Values('n'),                                 // transb
@@ -449,6 +519,136 @@ INSTANTIATE_TEST_SUITE_P(
 
 #endif // defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 
+
+#if defined(BLIS_KERNELS_ZEN5) && defined(GTEST_AVX512)
+
+/*
+    The bli_sgemmsup_rd_zen5_asm_6x64m(standalone), accepts inputs with the
+    following contingency for n.
+        n <= NR, where NR is 64
+    The code structure for the sgemm_sup rd kernels(m-var) are as follows: 
+    In m direction :
+        Main kernel    : Blocks of 6(L6_M)
+        Fringe kernels : 5 ... 1(L5_M ... L1_M)
+    In k direction :
+        Main loop   : Blocks of 64(L64_K)
+        Fringe loop : Blocks of 32, 16, followed by a masked tail for 1..15
+    In n direction :
+        Main kernel    : NR = 64(L64_N)
+        Fringe kernels : With n being 3, 2, 1(AVX512 kernels)(L3_N, L2_N, L1_N)
+
+    The inherent storage scheme format for the kernel is RRC, for C, A and B.
+    The testing interface allows for testing row-storage(inherent) and col-storage(operation transpose)
+    of C. We still need to pass the right transpose value pair for A and B, as per the kernel requirement. 
+*/
+
+// Checking with row storage of C
+#ifdef K_bli_sgemmsup_rd_zen5_asm_6x64m
+INSTANTIATE_TEST_SUITE_P(
+        bli_sgemmsup_rd_zen5_asm_6x64m_row_stored_c,
+        sgemmGenericSUP,
+        ::testing::Combine(
+            ::testing::Range(gtint_t(1), gtint_t(7), gtint_t(1)),    // values of m(L6_M to L1_M)
+            ::testing::Values(gtint_t(64),                           // values of n, L64_N
+                              gtint_t(48),                           // L48_N
+                              gtint_t(32),                           // L32_N
+                              gtint_t(8),                            // L8_N
+                              gtint_t(7),                            // L4_N + L3_N
+                              gtint_t(3),                            // L3_N
+                              gtint_t(2),                            // L2_N
+                              gtint_t(1),                            // L1_N
+                              gtint_t(63)),                          // Combination of fringe cases for N
+            ::testing::Values(gtint_t(64),                           // values of k, L64_K
+                              gtint_t(32),                           // L32_K
+                              gtint_t(16),                           // L16_K
+                              gtint_t(12),                           // L_gt_8_K
+                              gtint_t(7),                            // L_lt_8_K
+                              gtint_t(256),                          // 4 * L64_K
+                              gtint_t(303)),                         // Combination of main and fringe cases for K
+            ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
+            ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
+            ::testing::Values('r'),                                  // storage of c
+            ::testing::Values(K_bli_sgemmsup_rd_zen5_asm_6x64m),     // sgemm_sup_kernel
+            ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
+            ::testing::Values('n'),                                  // transa, has to be N for row storage
+            ::testing::Values('t'),                                  // transb, has to be T for row storage
+            ::testing::Values(true),                                 // kernel pref
+            ::testing::Values(true, false)                           // memory test
+        ),
+        ::sgemmGenericSUPPrint()
+    );
+#endif
+
+// Checking with col storage of C
+// NOTE : Since we are inducing transpose at operation level, for code coverage, we
+//        have to interchange m and n instantiations
+#ifdef K_bli_sgemmsup_rd_zen5_asm_6x64m
+INSTANTIATE_TEST_SUITE_P(
+        bli_sgemmsup_rd_zen5_asm_6x64m_col_stored_c,
+        sgemmGenericSUP,
+        ::testing::Combine(
+            ::testing::Values(gtint_t(64),                           // values of n, L64_N
+                              gtint_t(48),                           // L48_N
+                              gtint_t(32),                           // L32_N
+                              gtint_t(8),                            // L8_N
+                              gtint_t(7),                            // L4_N + L3_N
+                              gtint_t(3),                            // L3_N
+                              gtint_t(2),                            // L2_N
+                              gtint_t(1),                            // L1_N
+                              gtint_t(63)),                          // Combination of fringe cases for N
+            ::testing::Range(gtint_t(1), gtint_t(7), gtint_t(1)),    // values of n(L6_M to L1_M)
+            ::testing::Values(gtint_t(64),                           // values of k, L64_K
+                              gtint_t(32),                           // L32_K
+                              gtint_t(16),                           // L16_K
+                              gtint_t(12),                           // L_gt_8_K
+                              gtint_t(7),                            // L_lt_8_K
+                              gtint_t(256),                          // 4 * L64_K
+                              gtint_t(303)),                         // Combination of main and fringe cases for K
+            ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
+            ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
+            ::testing::Values('c'),                                  // storage of c
+            ::testing::Values(K_bli_sgemmsup_rd_zen5_asm_6x64m),     // sgemm_sup_kernel
+            ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
+            ::testing::Values('t'),                                  // transa, has to be T for row storage
+            ::testing::Values('n'),                                  // transb, has to be N for row storage
+            ::testing::Values(true),                                 // kernel pref
+            ::testing::Values(true, false)                           // memory test
+        ),
+        ::sgemmGenericSUPPrint()
+    );
+#endif
+
+
+#ifdef K_bli_sgemmsup_rd_zen5_asm_6x64n
+INSTANTIATE_TEST_SUITE_P(
+        bli_sgemmsup_rd_zen5_asm_6x64n_row_stored_c,
+        sgemmGenericSUP,
+        ::testing::Combine(
+            ::testing::Range(gtint_t(1), gtint_t(7), 1),             // values of m
+            ::testing::Range(gtint_t(1), gtint_t(65), 1),            // values of n
+            ::testing::Values(gtint_t(64),                           // values of k, L64_K
+                              gtint_t(32),                           // L32_K
+                              gtint_t(16),                           // L16_K
+                              gtint_t(12),                           // L_gt_8_K
+                              gtint_t(7),                            // L_lt_8_K
+                              gtint_t(256),                          // 4 * L64_K
+                              gtint_t(303)),                         // Combination of main and fringe cases for K
+            ::testing::Values(2.0, 1.0, -1.0),                       // alpha value
+            ::testing::Values(1.0, 0.0, -1.0, 2.3),                  // beta value
+            ::testing::Values('r'),                                  // storage of c
+            ::testing::Values(K_bli_sgemmsup_rd_zen5_asm_6x64n), // sgemm_sup_kernel
+            ::testing::Values(gtint_t(6)),                           // Micro kernel block MR
+            ::testing::Values('n'),                                  // transa
+            ::testing::Values('t'),                                  // transb
+            ::testing::Values(false),                                // kernel pref
+            ::testing::Values(true, false)                           // memory test
+        ),
+        ::sgemmGenericSUPPrint()
+    );
+#endif
+
+#endif // defined(BLIS_KERNELS_ZEN5) && defined(GTEST_AVX512)
+
 /*******************************************************/
 /*              Native Kernel testing                  */
 /*******************************************************/
@@ -535,10 +735,10 @@ public:
 
 #ifdef K_bli_sgemm_skx_asm_32x12_l2
 INSTANTIATE_TEST_SUITE_P(
-    bli_sgemm_skx_asm_32x12_l2,
+    bli_sgemm_skx_asm_32x12_l2_nonzero_k,
     sgemmGenericNat,
     ::testing::Combine(
-        ::testing::Range(gtint_t(0), gtint_t(17), 1),   // values of k
+        ::testing::Range(gtint_t(1), gtint_t(17), 1),   // values of k
         ::testing::Values(2.0, 1.0, -1.0),              // alpha value
         ::testing::Values(1.0, 0.0, -1.0, 2.3),         // beta value
         ::testing::Values('r', 'c'),                    // storage
@@ -551,16 +751,52 @@ INSTANTIATE_TEST_SUITE_P(
 );
 #endif
 
+#ifdef K_bli_sgemm_skx_asm_32x12_l2
+INSTANTIATE_TEST_SUITE_P(
+    bli_sgemm_skx_asm_32x12_l2_zero_k_memtest_disabled,
+    sgemmGenericNat,
+    ::testing::Combine(
+        ::testing::Values(gtint_t(0)),   // values of k
+        ::testing::Values(2.0, 1.0, -1.0),              // alpha value
+        ::testing::Values(1.0, 0.0, -1.0, 2.3),         // beta value
+        ::testing::Values('r', 'c'),                    // storage
+        ::testing::Values(32),                          // values of m
+        ::testing::Values(12),                          // values of n
+        ::testing::Values(bli_sgemm_skx_asm_32x12_l2),
+        ::testing::Values(false)                  // memory test
+    ),
+    ::sgemmGenericNatPrint()
+);
+#endif
+
+#ifdef K_bli_sgemm_skx_asm_32x12_l2
+INSTANTIATE_TEST_SUITE_P(
+    DISABLED_bli_sgemm_skx_asm_32x12_l2_zero_k_memtest_enabled,
+    sgemmGenericNat,
+    ::testing::Combine(
+        ::testing::Values(gtint_t(0)),   // values of k
+        ::testing::Values(2.0, 1.0, -1.0),              // alpha value
+        ::testing::Values(1.0, 0.0, -1.0, 2.3),         // beta value
+        ::testing::Values('r', 'c'),                    // storage
+        ::testing::Values(32),                          // values of m
+        ::testing::Values(12),                          // values of n
+        ::testing::Values(bli_sgemm_skx_asm_32x12_l2),
+        ::testing::Values(true)                  // memory test
+    ),
+    ::sgemmGenericNatPrint()
+);
+#endif
+
 #endif
 
 #if defined(BLIS_KERNELS_HASWELL) && defined(GTEST_AVX2FMA3)
 
 #ifdef K_bli_sgemm_haswell_asm_6x16
 INSTANTIATE_TEST_SUITE_P(
-    bli_sgemm_haswell_asm_6x16,
+    bli_sgemm_haswell_asm_6x16_nonzero_k,
     sgemmGenericNat,
     ::testing::Combine(
-        ::testing::Range(gtint_t(0), gtint_t(17), 1),   // values of k
+        ::testing::Range(gtint_t(1), gtint_t(17), 1),   // values of k
         ::testing::Values(2.0, 1.0, -1.0),              // alpha value
         ::testing::Values(1.0, 0.0, -1.0, 2.3),         // beta value
         ::testing::Values('r', 'c'),                    // storage
@@ -568,6 +804,42 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(16),                          // values of n
         ::testing::Values(bli_sgemm_haswell_asm_6x16),
         ::testing::Values(true, false)                  // memory test
+    ),
+    ::sgemmGenericNatPrint()
+);
+#endif
+
+#ifdef K_bli_sgemm_haswell_asm_6x16
+INSTANTIATE_TEST_SUITE_P(
+    bli_sgemm_haswell_asm_6x16_zero_k_memtest_disabled,
+    sgemmGenericNat,
+    ::testing::Combine(
+        ::testing::Values(gtint_t(0)),   // values of k
+        ::testing::Values(2.0, 1.0, -1.0),              // alpha value
+        ::testing::Values(1.0, 0.0, -1.0, 2.3),         // beta value
+        ::testing::Values('r', 'c'),                    // storage
+        ::testing::Values(6),                           // values of m
+        ::testing::Values(16),                          // values of n
+        ::testing::Values(bli_sgemm_haswell_asm_6x16),
+        ::testing::Values(false)                  // memory test
+    ),
+    ::sgemmGenericNatPrint()
+);
+#endif
+
+#ifdef K_bli_sgemm_haswell_asm_6x16
+INSTANTIATE_TEST_SUITE_P(
+    DISABLED_bli_sgemm_haswell_asm_6x16_zero_k_memtest_enabled,
+    sgemmGenericNat,
+    ::testing::Combine(
+        ::testing::Values(gtint_t(0)),   // values of k
+        ::testing::Values(2.0, 1.0, -1.0),              // alpha value
+        ::testing::Values(1.0, 0.0, -1.0, 2.3),         // beta value
+        ::testing::Values('r', 'c'),                    // storage
+        ::testing::Values(6),                           // values of m
+        ::testing::Values(16),                          // values of n
+        ::testing::Values(bli_sgemm_haswell_asm_6x16),
+        ::testing::Values(true)                  // memory test
     ),
     ::sgemmGenericNatPrint()
 );

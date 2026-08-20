@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2016 - 2025, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2016 - 2026, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2018, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
@@ -268,159 +268,181 @@ void bli_ddotv_zen_int_10
        cntx_t* restrict cntx
      )
 {
-	const dim_t      n_elem_per_reg = 4;
+    const dim_t      n_elem_per_reg = 4;
 
-	dim_t            i;
+    dim_t            i;
 
-	double* restrict x0;
-	double* restrict y0;
+    double* restrict x0;
+    double* restrict y0;
 
-	double           rho0 = 0.0;
+    double           rho0 = 0.0;
 
-	__m256d          xv[5];
-	__m256d          yv[5];
-	__m256d          rhov[5];
-	v4df_t           rh;
+    __m256d          xv[5];
+    __m256d          yv[5];
+    __m256d          rhov[5];
+    v4df_t           rh;
 
-	// If the vector dimension is zero, or if alpha is zero, return early.
-	if ( bli_zero_dim1( n ) )
-	{
-		PASTEMAC(d,set0s)( *rho );
-		return;
-	}
+    // If the vector dimension is zero, return early.
+    if ( bli_zero_dim1( n ) )
+    {
+        PASTEMAC(d,set0s)( *rho );
+        return;
+    }
 
-	// Initialize local pointers.
-	x0 = x;
-	y0 = y;
+    // Initialize local pointers.
+    x0 = x;
+    y0 = y;
 
-	PASTEMAC(d,set0s)( rho0 );
+    PASTEMAC(d,set0s)( rho0 );
 
-	if ( incx == 1 && incy == 1 )
-	{
-		rhov[0] = _mm256_setzero_pd();
-		rhov[1] = _mm256_setzero_pd();
-		rhov[2] = _mm256_setzero_pd();
-		rhov[3] = _mm256_setzero_pd();
-		rhov[4] = _mm256_setzero_pd();
+    if ( incx == 1 && incy == 1 )
+    {
+        rhov[0] = _mm256_setzero_pd();
+        rhov[1] = _mm256_setzero_pd();
+        rhov[2] = _mm256_setzero_pd();
+        rhov[3] = _mm256_setzero_pd();
+        rhov[4] = _mm256_setzero_pd();
 
-		for ( i = 0; (i + 19) < n; i += 20 )
-		{
-			xv[0] = _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
-			xv[1] = _mm256_loadu_pd( x0 + 1*n_elem_per_reg );
-			xv[2] = _mm256_loadu_pd( x0 + 2*n_elem_per_reg );
-			xv[3] = _mm256_loadu_pd( x0 + 3*n_elem_per_reg );
-			xv[4] = _mm256_loadu_pd( x0 + 4*n_elem_per_reg );
+        for ( i = 0; (i + 19) < n; i += 20 )
+        {
+            xv[0] = _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
+            xv[1] = _mm256_loadu_pd( x0 + 1*n_elem_per_reg );
+            xv[2] = _mm256_loadu_pd( x0 + 2*n_elem_per_reg );
+            xv[3] = _mm256_loadu_pd( x0 + 3*n_elem_per_reg );
+            xv[4] = _mm256_loadu_pd( x0 + 4*n_elem_per_reg );
 
-			yv[0] = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
-			yv[1] = _mm256_loadu_pd( y0 + 1*n_elem_per_reg );
-			yv[2] = _mm256_loadu_pd( y0 + 2*n_elem_per_reg );
-			yv[3] = _mm256_loadu_pd( y0 + 3*n_elem_per_reg );
-			yv[4] = _mm256_loadu_pd( y0 + 4*n_elem_per_reg );
+            yv[0] = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
+            yv[1] = _mm256_loadu_pd( y0 + 1*n_elem_per_reg );
+            yv[2] = _mm256_loadu_pd( y0 + 2*n_elem_per_reg );
+            yv[3] = _mm256_loadu_pd( y0 + 3*n_elem_per_reg );
+            yv[4] = _mm256_loadu_pd( y0 + 4*n_elem_per_reg );
 
-			rhov[0] = _mm256_fmadd_pd( xv[0], yv[0], rhov[0] );
-			rhov[1] = _mm256_fmadd_pd( xv[1], yv[1], rhov[1] );
-			rhov[2] = _mm256_fmadd_pd( xv[2], yv[2], rhov[2] );
-			rhov[3] = _mm256_fmadd_pd( xv[3], yv[3], rhov[3] );
-			rhov[4] = _mm256_fmadd_pd( xv[4], yv[4], rhov[4] );
+            rhov[0] = _mm256_fmadd_pd( xv[0], yv[0], rhov[0] );
+            rhov[1] = _mm256_fmadd_pd( xv[1], yv[1], rhov[1] );
+            rhov[2] = _mm256_fmadd_pd( xv[2], yv[2], rhov[2] );
+            rhov[3] = _mm256_fmadd_pd( xv[3], yv[3], rhov[3] );
+            rhov[4] = _mm256_fmadd_pd( xv[4], yv[4], rhov[4] );
 
-			x0 += 5*n_elem_per_reg;
-			y0 += 5*n_elem_per_reg;
-		}
+            x0 += 5*n_elem_per_reg;
+            y0 += 5*n_elem_per_reg;
+        }
 
-		rhov[0] = _mm256_add_pd( rhov[3], rhov[0]) ;
-		rhov[1] = _mm256_add_pd( rhov[4], rhov[1]) ;
+        rhov[0] = _mm256_add_pd( rhov[3], rhov[0]) ;
+        rhov[1] = _mm256_add_pd( rhov[4], rhov[1]) ;
 
-		if ( (i + 11) < n )
-		{
-			xv[0] = _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
-			xv[1] = _mm256_loadu_pd( x0 + 1*n_elem_per_reg );
-			xv[2] = _mm256_loadu_pd( x0 + 2*n_elem_per_reg );
+        if ( (i + 11) < n )
+        {
+            xv[0] = _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
+            xv[1] = _mm256_loadu_pd( x0 + 1*n_elem_per_reg );
+            xv[2] = _mm256_loadu_pd( x0 + 2*n_elem_per_reg );
 
-			yv[0] = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
-			yv[1] = _mm256_loadu_pd( y0 + 1*n_elem_per_reg );
-			yv[2] = _mm256_loadu_pd( y0 + 2*n_elem_per_reg );
+            yv[0] = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
+            yv[1] = _mm256_loadu_pd( y0 + 1*n_elem_per_reg );
+            yv[2] = _mm256_loadu_pd( y0 + 2*n_elem_per_reg );
 
-			rhov[0] = _mm256_fmadd_pd( xv[0], yv[0], rhov[0] );
-			rhov[1] = _mm256_fmadd_pd( xv[1], yv[1], rhov[1] );
-			rhov[2] = _mm256_fmadd_pd( xv[2], yv[2], rhov[2] );
+            rhov[0] = _mm256_fmadd_pd( xv[0], yv[0], rhov[0] );
+            rhov[1] = _mm256_fmadd_pd( xv[1], yv[1], rhov[1] );
+            rhov[2] = _mm256_fmadd_pd( xv[2], yv[2], rhov[2] );
 
-			x0 += 3*n_elem_per_reg;
-			y0 += 3*n_elem_per_reg;
-			i  += 3*n_elem_per_reg;
-		}
+            x0 += 3*n_elem_per_reg;
+            y0 += 3*n_elem_per_reg;
+            i  += 3*n_elem_per_reg;
+        }
 
-		rhov[0] = _mm256_add_pd( rhov[2], rhov[0]) ;
+        rhov[0] = _mm256_add_pd( rhov[2], rhov[0]) ;
 
-		if ( (i + 7) < n )
-		{
-			xv[0] = _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
-			xv[1] = _mm256_loadu_pd( x0 + 1*n_elem_per_reg );
+        if ( (i + 7) < n )
+        {
+            xv[0] = _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
+            xv[1] = _mm256_loadu_pd( x0 + 1*n_elem_per_reg );
 
-			yv[0] = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
-			yv[1] = _mm256_loadu_pd( y0 + 1*n_elem_per_reg );
+            yv[0] = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
+            yv[1] = _mm256_loadu_pd( y0 + 1*n_elem_per_reg );
 
-			rhov[0] = _mm256_fmadd_pd( xv[0], yv[0], rhov[0] );
-			rhov[1] = _mm256_fmadd_pd( xv[1], yv[1], rhov[1] );
+            rhov[0] = _mm256_fmadd_pd( xv[0], yv[0], rhov[0] );
+            rhov[1] = _mm256_fmadd_pd( xv[1], yv[1], rhov[1] );
 
-			x0 += 2*n_elem_per_reg;
-			y0 += 2*n_elem_per_reg;
-			i  += 2*n_elem_per_reg;
-		}
+            x0 += 2*n_elem_per_reg;
+            y0 += 2*n_elem_per_reg;
+            i  += 2*n_elem_per_reg;
+        }
 
-		rhov[0] = _mm256_add_pd( rhov[1], rhov[0]) ;
+        rhov[0] = _mm256_add_pd( rhov[1], rhov[0]) ;
 
-		if ( (i + 3) < n )
-		{
-			xv[0] = _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
+        if ( (i + 3) < n )
+        {
+            xv[0] = _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
 
-			yv[0] = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
+            yv[0] = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
 
-			rhov[0] = _mm256_fmadd_pd( xv[0], yv[0], rhov[0] );
+            rhov[0] = _mm256_fmadd_pd( xv[0], yv[0], rhov[0] );
 
-			x0 += n_elem_per_reg;
-			y0 += n_elem_per_reg;
-			i  += n_elem_per_reg;
-		}
+            x0 += n_elem_per_reg;
+            y0 += n_elem_per_reg;
+            i  += n_elem_per_reg;
+        }
 
-		if( i < n )
-		{
-			__m256i maskVec = _mm256_loadu_si256( (__m256i *)mask_ptr[(n - i)]);
+        if( i < n )
+        {
+            __m256i maskVec = _mm256_loadu_si256( (__m256i *)mask_ptr[(n - i)]);
 
-			xv[0] = _mm256_maskload_pd( x0, maskVec );
-			yv[0] = _mm256_maskload_pd( y0, maskVec );
+            xv[0] = _mm256_maskload_pd( x0, maskVec );
+            yv[0] = _mm256_maskload_pd( y0, maskVec );
 
-			rhov[0] = _mm256_fmadd_pd( xv[0], yv[0], rhov[0] );
-			i = n;
-		}
+            rhov[0] = _mm256_fmadd_pd( xv[0], yv[0], rhov[0] );
+            i = n;
+        }
 
-		// Perform horizontal addition of the elements in the vector.
-		rh.v = _mm256_hadd_pd( rhov[0], rhov[0] );
+        // Perform horizontal addition of the elements in the vector.
+        rh.v = _mm256_hadd_pd( rhov[0], rhov[0] );
 
-		// Manually add the first and third element from above vector to finish the sum.
-		rho0 += rh.d[0]  + rh.d[2];
+        // Manually add the first and third element from above vector to finish the sum.
+        rho0 += rh.d[0]  + rh.d[2];
 
-		// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-		// This avoids a performance penalty caused by false dependencies when
-		// transitioning from AVX to SSE instructions (which may occur later,
-		// especially if BLIS is compiled with -mfpmath=sse).
-		_mm256_zeroupper();
-	}
-	else
-	{
-		for ( i = 0; i < n; ++i )
-		{
-			const double x0c = *x0;
-			const double y0c = *y0;
+        // Issue vzeroupper instruction to clear upper lanes of ymm registers.
+        // This avoids a performance penalty caused by false dependencies when
+        // transitioning from AVX to SSE instructions (which may occur later,
+        // especially if BLIS is compiled with -mfpmath=sse).
+        _mm256_zeroupper();
+    }
+    else
+    {
+        /*
+        * DDOTV implementation for non-unit strides (incx/incy != 1).
+        * While the loop remains scalar due to non-contiguous memory access, we use
+        * SSE scalar intrinsics (_mm_fmadd_sd) to leverage the hardware's Fused
+        * Multiply-Add (FMA) unit. This reduces instruction count and maintains
+        * higher precision by performing the multiply-add in a single step.
+        */
+        __m128d rho0v_s = _mm_load_sd( &rho0 ); // rho0v_s[0] <- rho0[0]
+                                                // rho0v_s[1] <- 0.0 (Unused)
 
-			rho0 += x0c * y0c;
+        for ( i = 0; i < n; ++i )
+        {
+            __m128d xv_s = _mm_load_sd( x0 ); // xv_s[0] <- x0[0]
+                                              // xv_s[1] <- 0.0 (Unused)
+            __m128d yv_s = _mm_load_sd( y0 ); // yv_s[0] <- y0[0]
+                                              // yv_s[1] <- 0.0 (Unused)
 
-			x0 += incx;
-			y0 += incy;
-		}
-	}
+            // accumulate the value in rho0v_s
+            // _mm_fmadd_sd performs a scalar fused multiply‑add (FMA) 
+            // on the low 64‑bit double‑precision element of XMM registers.
+            // This operation is done in one fused instruction
+            // with one rounding (compared to two in the scalar case)
+            rho0v_s = _mm_fmadd_sd( xv_s, yv_s, rho0v_s ); // rho0v_s[0] <- (xv_s[0] * yv_s[0]) + rho0v_s[0]
+                                                           // rho0v_s[1] <- xv_s[1] (Unused)
 
-	// Copy the final result into the output variable.
-	PASTEMAC(d,copys)( rho0, *rho );
+            x0 += incx;
+            y0 += incy;
+        }
+
+        // store the accumulated value (lower lane) 
+        // to the rho0 variable
+        _mm_store_sd( &rho0, rho0v_s ); // rho0 <- rho0v_s[0]
+    }
+
+    // Copy the final result into the output variable.
+    PASTEMAC(d,copys)( rho0, *rho );
 }
 
 // -----------------------------------------------------------------------------
