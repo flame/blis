@@ -68,3 +68,13 @@ bin/*
 
 # Gtestsuite build files
 gtestsuite/build/*
+
+# -- local dev / analysis artifacts --
+
+# clangd / tooling cache and compile database
+.cache/
+compile_commands.json
+
+# preprocessor / macro-expansion dumps
+*.expanded.c
+*.preprocessed.c

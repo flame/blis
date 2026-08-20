@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,6 +32,8 @@
 
 */
 
+#include "bli_gemm_tiny_zen5.h"
+
 // DCOPYV kernel
 COPYV_KER_PROT( double,   d, copyv_zen5_asm )
 
@@ -44,6 +46,32 @@ GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen5_asm_24x4m)
 GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen5_asm_24x3m)
 GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen5_asm_24x2m)
 GEMMSUP_KER_PROT( double,  d, gemmsup_cv_zen5_asm_24x1m)
+
+
+// sgemm sup RD kernels
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_6x64m )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_6x3m )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_6x2m )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_5x64 )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_4x64 )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_3x64 )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_2x64 )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_1x64 )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_5x3 )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_4x3 )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_3x3 )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_2x3 )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_1x3 )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_5x2 )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_4x2 )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_3x2 )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_2x2 )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_1x2 )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_6x64n )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_5x64n )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_4x64n )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_3x64n )
+GEMMSUP_KER_PROT( float, s, gemmsup_rd_zen5_asm_2x64n )
 
 // threshold functions
 bool bli_cntx_gemmsup_thresh_is_met_zen5

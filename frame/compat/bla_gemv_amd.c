@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -87,6 +87,7 @@ void PASTEF77S(ch,blasname) \
 \
     if ( *m == 0 || *n == 0 || \
          ( PASTEMAC(ch,eq0)( *alpha ) && PASTEMAC(ch,eq1)( *beta ) ) ) { \
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *m, *n); \
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
         return; \
     } \
@@ -114,6 +115,7 @@ void PASTEF77S(ch,blasname) \
        this quirky behavior; it will scale y by beta, as one would expect. */ \
     if ( m_y > 0 && n_x == 0 ) \
     { \
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *m, *n); \
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
         /* Finalize BLIS. */ \
         bli_finalize_auto(); \
@@ -146,6 +148,7 @@ void PASTEF77S(ch,blasname) \
       NULL  \
     ); \
 \
+    AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *m, *n); \
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
     /* Finalize BLIS. */ \
     bli_finalize_auto(); \
@@ -216,6 +219,7 @@ void dgemv_blis_impl
     if ( *m == 0 || *n == 0 || \
          ( PASTEMAC(d,eq0)( *alpha ) && PASTEMAC(d,eq1)( *beta ) ) )
     {
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         /* Finalize BLIS. */
         // Call to bli_finalize_auto() is not needed here
@@ -257,6 +261,7 @@ void dgemv_blis_impl
        this quirky behavior; it will scale y by beta, as one would expect. */
     if ( m_y > 0 && n_x == 0 )
     {
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         /* Finalize BLIS. */
         // Call to bli_finalize_auto() is not needed here
@@ -306,6 +311,7 @@ void dgemv_blis_impl
           cntx
         );
 
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
         return;
     }
@@ -333,6 +339,7 @@ void dgemv_blis_impl
           NULL,
           NULL
         );
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         /* Finalize BLIS. */
         // Call to bli_finalize_auto() is not needed here
@@ -361,6 +368,7 @@ void dgemv_blis_impl
           NULL
         );
 
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         /* Finalize BLIS. */
         // Call to bli_finalize_auto() is not needed here
@@ -409,6 +417,7 @@ void dgemv_blis_impl
         );
     }
 
+    AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *m, *n);
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     /* Finalize BLIS. */
     // Call to bli_finalize_auto() is not needed here
@@ -478,6 +487,7 @@ void sgemv_blis_impl
     if ( *m == 0 || *n == 0 || \
          ( PASTEMAC(s,eq0)( *alpha ) && PASTEMAC(s,eq1)( *beta ) ) )
     {
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         /* Finalize BLIS. */
         // Call to bli_finalize_auto() is not needed here
@@ -519,6 +529,7 @@ void sgemv_blis_impl
        this quirky behavior; it will scale y by beta, as one would expect. */
     if ( m_y > 0 && n_x == 0 )
     {
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         /* Finalize BLIS. */
         // Call to bli_finalize_auto() is not needed here
@@ -568,6 +579,7 @@ void sgemv_blis_impl
           cntx
         );
 
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
         return;
     }
@@ -595,6 +607,7 @@ void sgemv_blis_impl
           NULL,
           NULL
         );
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         /* Finalize BLIS. */
         // Call to bli_finalize_auto() is not needed here
@@ -635,6 +648,7 @@ void sgemv_blis_impl
         );
     }
 
+    AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *m, *n);
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     /* Finalize BLIS. */
     // Call to bli_finalize_auto() is not needed here
@@ -704,6 +718,7 @@ void cgemv_blis_impl
     if ( *m == 0 || *n == 0 || \
          ( PASTEMAC(c,eq0)( *alpha ) && PASTEMAC(c,eq1)( *beta ) ) )
     {
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         /* Finalize BLIS. */
         // Call to bli_finalize_auto() is not needed here
@@ -745,6 +760,7 @@ void cgemv_blis_impl
        this quirky behavior; it will scale y by beta, as one would expect. */
     if ( m_y > 0 && n_x == 0 )
     {
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         /* Finalize BLIS. */
         // Call to bli_finalize_auto() is not needed here
@@ -794,6 +810,7 @@ void cgemv_blis_impl
           cntx
         );
 
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
         return;
     }
@@ -851,6 +868,7 @@ void cgemv_blis_impl
         y0->real = yval.real;
         y0->imag = yval.imag;
 
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         /* Finalize BLIS. */
         // Call to bli_finalize_auto() is not needed here
@@ -874,6 +892,7 @@ void cgemv_blis_impl
           NULL,
           NULL
         );
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         /* Finalize BLIS. */
         // Call to bli_finalize_auto() is not needed here
@@ -914,6 +933,7 @@ void cgemv_blis_impl
         );
     }
 
+    AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *m, *n);
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     /* Finalize BLIS. */
     // Call to bli_finalize_auto() is not needed here
@@ -983,6 +1003,7 @@ void zgemv_blis_impl
     if ( *m == 0 || *n == 0 || \
          ( PASTEMAC(z,eq0)( *alpha ) && PASTEMAC(z,eq1)( *beta ) ) )
     {
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         /* Finalize BLIS. */
         // Call to bli_finalize_auto() is not needed here
@@ -1024,6 +1045,7 @@ void zgemv_blis_impl
        this quirky behavior; it will scale y by beta, as one would expect. */
     if ( m_y > 0 && n_x == 0 )
     {
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         /* Finalize BLIS. */
         // Call to bli_finalize_auto() is not needed here
@@ -1073,6 +1095,7 @@ void zgemv_blis_impl
           cntx
         );
 
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
         return;
     }
@@ -1130,6 +1153,7 @@ void zgemv_blis_impl
         y0->real = yval.real;
         y0->imag = yval.imag;
 
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         /* Finalize BLIS. */
         // Call to bli_finalize_auto() is not needed here
@@ -1153,6 +1177,7 @@ void zgemv_blis_impl
           NULL,
           NULL
         );
+        AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         /* Finalize BLIS. */
         // Call to bli_finalize_auto() is not needed here
@@ -1193,6 +1218,7 @@ void zgemv_blis_impl
         );
     }
 
+    AOCL_DTL_LOG_GEMV_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *m, *n);
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     /* Finalize BLIS. */
     // Call to bli_finalize_auto() is not needed here

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -36,6 +36,7 @@
 #include "blis.h"
 #include <gtest/gtest.h>
 #include "common/testing_helpers.h"
+#include "common/verification_utils.h"
 
 /**
  * This file includes the functionality used to determine correctness of the results.
@@ -306,6 +307,8 @@ testing::AssertionResult NumericalComparison(const char* var_name_char,
 template <typename T>
 void computediff( std::string var_name, T blis_sol, T ref_sol, bool nan_inf_check = false )
 {
+    testinghelpers::verification::collect_vector_data(var_name, &blis_sol, &ref_sol, 1);
+
     ComparisonHelper comp_helper(SCALAR);
     comp_helper.binary_comparison = true;
     comp_helper.nan_inf_check = nan_inf_check;
@@ -319,6 +322,8 @@ void computediff( std::string var_name, T blis_sol, T ref_sol, bool nan_inf_chec
 template <typename T>
 void computediff( std::string var_name, T blis_sol, T ref_sol, double thresh, bool nan_inf_check = false )
 {
+    testinghelpers::verification::collect_vector_data(var_name, &blis_sol, &ref_sol, 1);
+
     ComparisonHelper comp_helper(SCALAR, thresh);
     comp_helper.nan_inf_check = nan_inf_check;
     ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol, ref_sol, comp_helper);
@@ -330,6 +335,8 @@ void computediff( std::string var_name, T blis_sol, T ref_sol, double thresh, bo
 template <typename T>
 void computediff( std::string var_name, gtint_t n, T *blis_sol, T *ref_sol, gtint_t inc, bool nan_inf_check = false )
 {
+    testinghelpers::verification::collect_vector_data(var_name, blis_sol, ref_sol, testinghelpers::buff_dim(n, inc));
+
     gtint_t abs_inc = std::abs(inc);
     ComparisonHelper comp_helper(VECTOR);
     comp_helper.nan_inf_check = nan_inf_check;
@@ -357,12 +364,15 @@ void computediff( std::string var_name, gtint_t n, T *blis_sol, T *ref_sol, gtin
     }
 }
 
+
 /**
  * Relative comparison of two vectors with length n and increment inc, printing variable name.
  */
 template <typename T>
 void computediff( std::string var_name, gtint_t n, T *blis_sol, T *ref_sol, gtint_t inc, double thresh, bool nan_inf_check = false )
 {
+    testinghelpers::verification::collect_vector_data(var_name, blis_sol, ref_sol, testinghelpers::buff_dim(n, inc));
+
     gtint_t abs_inc = std::abs(inc);
     ComparisonHelper comp_helper(VECTOR, thresh);
     comp_helper.nan_inf_check = nan_inf_check;
@@ -396,6 +406,8 @@ void computediff( std::string var_name, gtint_t n, T *blis_sol, T *ref_sol, gtin
 template <typename T>
 void computediff(std::string var_name, char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gtint_t ld, bool nan_inf_check = false )
 {
+    testinghelpers::verification::collect_matrix_data(var_name, blis_sol, ref_sol, m, n, ld, storage);
+
     gtint_t i,j;
     ComparisonHelper comp_helper(MATRIX);
     comp_helper.nan_inf_check = nan_inf_check;
@@ -454,6 +466,8 @@ void computediff(std::string var_name, char storage, gtint_t m, gtint_t n, T *bl
 template <typename T>
 void computediff(std::string var_name, char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gtint_t ld, double thresh, bool nan_inf_check = false )
 {
+    testinghelpers::verification::collect_matrix_data(var_name, blis_sol, ref_sol, m, n, ld, storage);
+
     gtint_t i,j;
     ComparisonHelper comp_helper(MATRIX, thresh);
     comp_helper.nan_inf_check = nan_inf_check;
@@ -546,6 +560,8 @@ testing::AssertionResult EqualityComparison(const char* var_name_char,
 template <>
 inline void computediff<gtint_t>( std::string var_name, gtint_t blis_sol, gtint_t ref_sol, bool nan_inf_check )
 {
+    testinghelpers::verification::collect_vector_data(var_name, &blis_sol, &ref_sol, 1);
+
     ComparisonHelper comp_helper(SCALAR);
     ASSERT_PRED_FORMAT4(EqualityComparison<gtint_t>, var_name, blis_sol, ref_sol, comp_helper);
 }
@@ -556,6 +572,11 @@ inline void computediff<gtint_t>( std::string var_name, gtint_t blis_sol, gtint_
 template <>
 inline void computediff<char>( std::string var_name, char blis_sol, char ref_sol, bool nan_inf_check )
 {
+    // Widen char to gtint_t for safe CRC calculation (avoids reading beyond 1-byte boundary)
+    gtint_t blis_val = static_cast<gtint_t>(blis_sol);
+    gtint_t ref_val = static_cast<gtint_t>(ref_sol);
+    testinghelpers::verification::collect_vector_data(var_name, &blis_val, &ref_val, 1);
+
     ComparisonHelper comp_helper(SCALAR);
     ASSERT_PRED_FORMAT4(EqualityComparison<char>, var_name, blis_sol, ref_sol, comp_helper);
 }

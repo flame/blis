@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -291,6 +291,11 @@ void AOCL_DTL_log_gemm_compute_sizes(int8 loglevel,
 
 // Level-2 Logging
 
+void AOCL_DTL_log_gemv_stats(int8 loglevel,
+                            char dt_type,
+                            const f77_int m,
+                            const f77_int n);
+
 void AOCL_DTL_log_gemv_sizes(int8 loglevel,
                              char dt_type,
                              const f77_char transa,
@@ -317,6 +322,11 @@ void AOCL_DTL_log_ger_sizes(int8 loglevel,
                             const char* function_name,
                             int line
                            );
+
+void AOCL_DTL_log_ger_stats(int8 loglevel,
+                            char dt_type,
+                            const f77_int m,
+                            const f77_int n);
 
 void AOCL_DTL_log_hemv_sizes(int8 loglevel,
                              char dt_type,
@@ -866,6 +876,14 @@ void AOCL_DTL_log_matcopy2_sizes(int8 loglevel,
 
 // Level-2 Macros
 
+#define AOCL_DTL_LOG_GEMV_STATS(loglevel, dt_type, m, n)    \
+    if (tlIsLoggingEnabled) \
+        AOCL_DTL_log_gemv_stats(loglevel, dt_type, m, n);
+
+#define AOCL_DTL_LOG_GER_STATS(loglevel, dt_type, m, n)    \
+    if (tlIsLoggingEnabled) \
+        AOCL_DTL_log_ger_stats(loglevel, dt_type, m, n);
+
 #define AOCL_DTL_LOG_GEMV_INPUTS(loglevel, dt_type, transa, m, n, alp, lda, incx, beta, incy) \
     if (tlIsLoggingEnabled) \
         AOCL_DTL_log_gemv_sizes(loglevel, dt_type, transa, m, n, alp, lda, incx, beta, incy, __FILE__,\
@@ -1114,7 +1132,11 @@ void AOCL_DTL_log_matcopy2_sizes(int8 loglevel,
 
 // Level-2 Macros
 
+#define AOCL_DTL_LOG_GEMV_STATS(loglevel, dt_type, m, n)
+
 #define AOCL_DTL_LOG_GEMV_INPUTS(loglevel, dt_type, transa, m, n, alp, lda, incx, beta, incy)
+
+#define AOCL_DTL_LOG_GER_STATS(loglevel, dt_type, m, n)
 
 #define AOCL_DTL_LOG_GER_INPUTS(loglevel, dt_type, m, n, alpha, incx, incy, lda)
 

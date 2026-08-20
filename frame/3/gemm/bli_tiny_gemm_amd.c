@@ -389,26 +389,28 @@ err_t PASTEMAC( ch, tfuncname ) \
     return BLIS_SUCCESS; \
 } \
 
-GENTFUNC( scomplex, c, gemm_tiny )
-GENTFUNC( dcomplex, z, gemm_tiny )
 GENTFUNC(    float, s, gemm_tiny )
 
 /*
- * blis_dgemm_single_threaded:
+ * bli_gemm_tiny_single_threaded:
  *
- * Decide whether a DGEMM of size (M × N × K) should run
- * single-threaded (ST) or multi-threaded (MT).
+ * Datatype-generic decision of whether a tiny GEMM of size (M × N × K) should
+ * run single-threaded (ST) or multi-threaded (MT). Shared by s/d/c/z tiny
+ * paths - the caller passes the kernel's MR/NR, the per-core GFLOP rate, the
+ * threading overhead and the datatype (which selects 2 FLOPs/MAC for real or
+ * 8 for complex).
  *
  * Arguments:
  *   M, N, K    : matrix dimensions
  *   MR, NR     : Microtile of kernel
  *   GF_core    : performance per core in GFLOPs
  *   T_over_us  : per-call threading overhead in microseconds
+ *   dt         : datatype (real -> 2 FLOPs/MAC, complex -> 8 FLOPs/MAC)
  *
  * Method:
  *   - The model expects MR and NR of microkernel.
  *   - Each microkernel tile performs:
- *         FLOPs_per_K_iter = 2 * 24 * 8 = 384 FLOPs per inner-K iteration
+ *         FLOPs_per_K_iter = flops_per_mac * MR * NR  (e.g. 2*24*8 = 384 for d)
  *   - The function computes a K-threshold:
  *
  *         base = (T_over_s * GF_core * 1e9) / FLOPs_per_K_iter
@@ -443,7 +445,7 @@ GENTFUNC(    float, s, gemm_tiny )
  *   - false → prefer multi-thread
  */
 
-static bool bli_dgemm_single_threaded(dim_t M, dim_t N, dim_t K, dim_t MR, dim_t NR, double GF_core, double T_over_us)
+static bool bli_gemm_tiny_single_threaded(dim_t M, dim_t N, dim_t K, dim_t MR, dim_t NR, double GF_core, double T_over_us, num_t dt)
 {
     const double alpha = 0.3; // amortization factor
     double K_thresh = 0; 
@@ -459,8 +461,12 @@ static bool bli_dgemm_single_threaded(dim_t M, dim_t N, dim_t K, dim_t MR, dim_t
     // Tiles assigned to each thread (assuming splitting along M)
     dim_t tiles_per_thread = ( ( (tiles_M + thread_num - 1 ) / thread_num ) * tiles_N );
 
+    // FLOPs per multiply-accumulate: 2 for real (s/d), 8 for complex (c/z).
+    // GF_core must be expressed in the matching (real or complex) FLOP rate.
+    dim_t flops_per_mac = ( dt == BLIS_SCOMPLEX || dt == BLIS_DCOMPLEX ) ? 8 : 2;
+
     // Compute K threshold
-	dim_t FLOPS_per_k_iter = ((MR * NR) * 2);
+	dim_t FLOPS_per_k_iter = ((MR * NR) * flops_per_mac);
 	// base depends on parameters T_over_s and GF_core and FLOPS_per_k_iter.
 	// Where FLOPS_per_k_iter is computed based on flops per cycle and micro-kernel shape.
 	// T_over_s is thread overhead time(time of forking, barrier, joining).
@@ -492,13 +498,17 @@ err_t bli_dgemm_tiny
     arch_t arch_id = bli_arch_query_id_internal();
     bool is_mt = bli_thread_get_is_parallel();
     {
-        // Pick the kernel based on the architecture ID
-        switch ( arch_id )
+        // Dispatch on ISA capability tier rather than on individual arch_id
+        // values. bli_arch_isa_tier() is the single source of truth mapping a
+        // Zen arch to its tier, so new Zen parts only need to be added there.
+        switch ( bli_arch_isa_tier( arch_id ) )
         {
-          case BLIS_ARCH_ZEN6:
-          case BLIS_ARCH_ZEN5:
-          case BLIS_ARCH_ZEN4:
-#if defined(BLIS_FAMILY_ZEN6) || defined(BLIS_FAMILY_ZEN5) || defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64)
+          case BLIS_ISA_TIER_AVX512:
+          // Compile-time guard: the AVX-512 tiny kernel is only built when the
+          // Zen4 kernel set is present. Without it this reference would fail to
+          // link in configs that don't build those kernels (the runtime tier
+          // check alone does not guarantee the symbol exists in the binary).
+#if defined(BLIS_KERNELS_ZEN4)
               if(((m == n) && (m < 400) && (k < 1000)) ||
               ( (m != n) && (( ((m + n -k) < 1500) &&
               ((m + k-n) < 1500) && ((n + k-m) < 1500) ) ||
@@ -512,7 +522,7 @@ err_t bli_dgemm_tiny
               ((m < 10000) && (n <= 100) && (k <=100)))))
               {
                   if( (is_mt == FALSE) ||
-                  ( bli_dgemm_single_threaded(m, n, k, 24/*MR*/, 8/*NR*/, 60/*Core's Gflops*/, 15/*Threading_overhead*/) == TRUE ) )
+                  ( bli_gemm_tiny_single_threaded(m, n, k, 24/*MR*/, 8/*NR*/, 60/*Core's Gflops*/, 15/*Threading_overhead*/, BLIS_DOUBLE) == TRUE ) )
                   {
                       /* single threaded execution */
                       return bli_dgemm_tiny_zen4_24x8
@@ -535,9 +545,7 @@ err_t bli_dgemm_tiny
 #endif
               break;
 
-          case BLIS_ARCH_ZEN:
-          case BLIS_ARCH_ZEN2:
-          case BLIS_ARCH_ZEN3:
+          case BLIS_ISA_TIER_AVX2:
               if( is_mt == FALSE )
               {
                   if( ( (m <= 8)  || ( (m <= 1000) && (n <= 24) && (k >= 4) ) ) && (k <= 1500) )
@@ -568,6 +576,201 @@ err_t bli_dgemm_tiny
     return BLIS_FAILURE;
 }
 
+err_t bli_zgemm_tiny
+    (
+      trans_t transa,
+      trans_t transb,
+      dim_t  m,
+      dim_t  n,
+      dim_t  k,
+      const dcomplex*    alpha,
+      const dcomplex*    a, const inc_t rs_a0, const inc_t cs_a0,
+      const dcomplex*    b, const inc_t rs_b0, const inc_t cs_b0,
+      const dcomplex*    beta,
+      dcomplex*    c, const inc_t rs_c0, const inc_t cs_c0,
+      bool is_parallel
+    )
+{
+    // Query the architecture ID
+    arch_t arch_id = bli_arch_query_id_internal();
+    bool is_mt = is_parallel;
+    // Dispatch on ISA capability tier rather than on individual arch_id
+    // values. bli_arch_isa_tier() is the single source of truth mapping a
+    // Zen arch to its tier, so new Zen parts only need to be added there.
+    switch ( bli_arch_isa_tier( arch_id ) )
+    {
+        case BLIS_ISA_TIER_AVX512:
+        // Compile-time guard: the AVX-512 tiny kernel is only built when the
+        // Zen4 kernel set is present. Without it this reference would fail to
+        // link in configs that don't build those kernels (the runtime tier
+        // check alone does not guarantee the symbol exists in the binary).
+#if defined(BLIS_KERNELS_ZEN4)
+       /**
+        * Note: Kernel supports the following combinations of Op(A) and Op(B):
+        *   - Op(A) = A,       Op(B) = B        (NO_TRANSPOSE, NO_TRANSPOSE)
+        *   - Op(A) = A^T,     Op(B) = B        (TRANSPOSE, NO_TRANSPOSE)
+        *   - Op(A) = A,       Op(B) = B^T      (NO_TRANSPOSE, TRANSPOSE)
+        *   - Op(A) = A^T,     Op(B) = B^T      (TRANSPOSE, TRANSPOSE)
+        *   - Op(A) = conj(A), Op(B) = B        (CONJ_NO_TRANSPOSE, NO_TRANSPOSE)
+        *   - Op(A) = A^H,     Op(B) = B        (CONJ_TRANSPOSE, NO_TRANSPOSE)
+        *   - Op(A) = A,       Op(B) = conj(B)  (NO_TRANSPOSE, CONJ_NO_TRANSPOSE)
+        *   - Op(A) = A,       Op(B) = B^H      (NO_TRANSPOSE, CONJ_TRANSPOSE)
+        *   - Op(A) = A^T,     Op(B) = conj(B)  (TRANSPOSE, CONJ_NO_TRANSPOSE)
+        *   - Op(A) = A^T,     Op(B) = B^H      (TRANSPOSE, CONJ_TRANSPOSE)
+        *   - Op(A) = conj(A), Op(B) = B^T      (CONJ_NO_TRANSPOSE, TRANSPOSE)
+        *   - Op(A) = A^H,     Op(B) = B^T      (CONJ_TRANSPOSE, TRANSPOSE)
+        *
+        * However framework changes are needed for:
+        *   - Op(A) = conj(A), Op(B) = conj(B)  (CONJ_NO_TRANSPOSE, CONJ_NO_TRANSPOSE)
+        *   - Op(A) = A^H,     Op(B) = B^H      (CONJ_TRANSPOSE, CONJ_TRANSPOSE)
+        *   - Op(A) = conj(A), Op(B) = B^H      (CONJ_TRANSPOSE, CONJ_NO_TRANSPOSE)
+        *   - Op(A) = A^H,     Op(B) = conj(B)  (CONJ_NO_TRANSPOSE, CONJ_TRANSPOSE)
+        * So currently these remain unsupported for zen4/zen5.
+        * TODO: add framework support for these combinations.
+        */
+        if( ( m < 300 ) && ( n < 300 ) && ( k < 300 ) &&
+            !( bli_does_conj( transa ) && bli_does_conj( transb ) )
+          )
+        {
+            if(is_mt == FALSE)
+            {
+                /* single threaded execution */
+                return bli_zgemm_tiny_zen4_12x4
+                (
+                    ((transa == BLIS_CONJ_NO_TRANSPOSE) || (transa == BLIS_CONJ_TRANSPOSE)) ? BLIS_CONJUGATE : BLIS_NO_CONJUGATE,
+                    ((transb == BLIS_CONJ_NO_TRANSPOSE) || (transb == BLIS_CONJ_TRANSPOSE)) ? BLIS_CONJUGATE : BLIS_NO_CONJUGATE,
+                    transa,
+                    transb,
+                    m,
+                    n,
+                    k,
+                    alpha,
+                    a, rs_a0, cs_a0,
+                    b, rs_b0, cs_b0,
+                    beta,
+                    c, rs_c0, cs_c0
+                );
+            }
+        }
+#endif
+        break;
+
+        case BLIS_ISA_TIER_AVX2:
+        if( is_mt == FALSE )
+        {
+        /**
+         * Note conjugate A, B matrices are not supported for zen/2/3.
+         */
+            if( ( bli_is_notrans( transa ) && ( m < 60 ) && ( n >= 4 ) && ( n < 200 ) && ( k < 68 ) && (m % 2 == 0) ) ||
+            ( bli_is_trans( transa ) && ( m < 200 ) && ( n < 200 ) && ( k < 200 ) && ( k >= 16 ) && (m % 2 == 0) ) )
+            {
+                return bli_zgemm_tiny_zen_3x4
+                (
+                    ((transa == BLIS_CONJ_NO_TRANSPOSE) || (transa == BLIS_CONJ_TRANSPOSE)) ? BLIS_CONJUGATE : BLIS_NO_CONJUGATE,
+                    ((transb == BLIS_CONJ_NO_TRANSPOSE) || (transb == BLIS_CONJ_TRANSPOSE)) ? BLIS_CONJUGATE : BLIS_NO_CONJUGATE,
+                    transa,
+                    transb,
+                    m,
+                    n,
+                    k,
+                    alpha,
+                    a, rs_a0, cs_a0,
+                    b, rs_b0, cs_b0,
+                    beta,
+                    c, rs_c0, cs_c0
+                );
+            }
+        }
+        break;
+
+        default:
+            return BLIS_FAILURE;
+    }
+
+    return BLIS_FAILURE;
+
+}
+
+err_t bli_cgemm_tiny
+    (
+      trans_t transa,
+      trans_t transb,
+      dim_t  m,
+      dim_t  n,
+      dim_t  k,
+      const scomplex*    alpha,
+      const scomplex*    a, const inc_t rs_a0, const inc_t cs_a0,
+      const scomplex*    b, const inc_t rs_b0, const inc_t cs_b0,
+      const scomplex*    beta,
+      scomplex*    c, const inc_t rs_c0, const inc_t cs_c0,
+      bool is_parallel
+    )
+{
+    // Query the architecture ID
+    arch_t arch_id = bli_arch_query_id_internal();
+    bool is_mt = is_parallel;
+    // Dispatch on ISA capability tier rather than on individual arch_id
+    // values. bli_arch_isa_tier() is the single source of truth mapping a
+    // Zen arch to its tier, so new Zen parts only need to be added there.
+    switch ( bli_arch_isa_tier( arch_id ) )
+    {
+        case BLIS_ISA_TIER_AVX512:
+        // Compile-time guard: the AVX-512 tiny kernel is only built when the
+        // Zen4 kernel set is present. Without it this reference would fail to
+        // link in configs that don't build those kernels (the runtime tier
+        // check alone does not guarantee the symbol exists in the binary).
+#if defined(BLIS_KERNELS_ZEN4)
+       /**
+        * Note: Kernel supports ALL 16 combinations of Op(A) and Op(B) for
+        *       trans_t in {NO_TRANSPOSE, TRANSPOSE, CONJ_NO_TRANSPOSE,
+        *       CONJ_TRANSPOSE}. The conja/conjb flags forwarded to the
+        *       24x4 micro-kernel below select among the 4 conj-aware
+        *       MICRO_TILE variants (NN, CONJA, CONJB, CONJA_CONJB) which
+        *       are all implemented in bli_gemmsup_cv_zen4_asm_c24x4m.c.
+        */
+        if( ( m < 300 ) && ( n < 300 ) && ( k < 300 ) )
+        {
+            /* Route to the single-threaded tiny cgemm kernel when the caller did
+             * not request parallelism, or when the problem is too small to
+             * amortize the OpenMP team launch/barrier (e.g. 10x10x10, where 16
+             * threads ran ~4x slower than one core).
+             *
+             * GF_core is the per-core cgemm throughput = flops/cycle * clock. A
+             * 512-bit register holds 16 single-precision float lanes and the
+             * AVX-512 FMA units sustain ~32 flops/cycle, giving
+             * 32 flops/cycle * 3.7 GHz ~= 118 GFLOP/s. The 24x4 register tile is
+             * that of bli_cgemm_tiny_zen4_24x4 dispatched below. */
+            if( (is_mt == FALSE) ||
+                ( bli_gemm_tiny_single_threaded(m, n, k, 24/*MR*/, 4/*NR*/, 118/*Core's Gflops*/, 15/*Threading_overhead*/, BLIS_SCOMPLEX) == TRUE ) )
+            {
+                /* single threaded execution */
+                return bli_cgemm_tiny_zen4_24x4
+                (
+                    ((transa == BLIS_CONJ_NO_TRANSPOSE) || (transa == BLIS_CONJ_TRANSPOSE)) ? BLIS_CONJUGATE : BLIS_NO_CONJUGATE,
+                    ((transb == BLIS_CONJ_NO_TRANSPOSE) || (transb == BLIS_CONJ_TRANSPOSE)) ? BLIS_CONJUGATE : BLIS_NO_CONJUGATE,
+                    transa,
+                    transb,
+                    m,
+                    n,
+                    k,
+                    alpha,
+                    a, rs_a0, cs_a0,
+                    b, rs_b0, cs_b0,
+                    beta,
+                    c, rs_c0, cs_c0
+                );
+            }
+        }
+#endif
+        break;
+
+        default:
+            return BLIS_FAILURE;
+    }
+
+    return BLIS_FAILURE;
+
+}
 
 bool bli_is_sgemm_tiny_zen
   (

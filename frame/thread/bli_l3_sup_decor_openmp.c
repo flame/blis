@@ -46,6 +46,57 @@ void* bli_l3_sup_thread_entry( void* data_void ) { return NULL; }
 
 //#define PRINT_THRINFO
 
+// Per-thread body of the sup decorator, factored out so it can be invoked
+// either inside an OpenMP parallel region (multi-threaded) or directly inline
+// (single-threaded fast path that avoids GOMP_parallel entirely).
+static void bli_l3_sup_decor_body
+     (
+       dim_t       tid,
+       l3supint_t  func,
+       obj_t*      alpha,
+       obj_t*      a,
+       obj_t*      b,
+       obj_t*      beta,
+       obj_t*      c,
+       cntx_t*     cntx,
+       rntm_t*     rntm,
+       array_t*    array,
+       thrcomm_t*  gl_comm,
+       dim_t       n_threads
+     )
+{
+	// Create a thread-local copy of the master thread's rntm_t so each thread
+	// can track its own small block pool_t as it executes down the stack.
+	rntm_t           rntm_l = *rntm;
+	rntm_t* restrict rntm_p = &rntm_l;
+
+	// Check for a somewhat obscure OpenMP thread-mismatch issue. NOTE: This
+	// calls the same function used for the conventional/large code path, and is
+	// a no-op when n_threads == 1 (see the early return in the callee), which
+	// is what makes it safe to call from the single-threaded fast path below,
+	// where no OpenMP parallel region exists.
+	bli_l3_thread_decorator_thread_check( n_threads, tid, gl_comm, rntm_p );
+
+	// Use the thread id to access the appropriate pool_t* within the array_t,
+	// and use it to set the sba_pool field within the rntm_t.
+	bli_sba_rntm_set_pool( tid, array, rntm_p );
+
+	thrinfo_t* thread = NULL;
+
+	// Create the root node of the thread's thrinfo_t structure.
+	bli_l3_sup_thrinfo_create_root( tid, gl_comm, rntm_p, &thread );
+
+	func( alpha, a, b, beta, c, cntx, rntm_p, thread );
+
+	// NOTE: Unlike the conventional path, no barrier is needed here before
+	// freeing the thrinfo_t tree (sup pack buffers are stack-local and freed
+	// inside func(); gl_comm is freed outside the region; sub-communicators
+	// are freed only by their ochief). See the original PR #702 discussion.
+	//
+	// Free the current thread's thrinfo_t structure.
+	bli_l3_sup_thrinfo_free( rntm_p, thread );
+}
+
 err_t bli_l3_sup_thread_decorator
      (
        l3supint_t func,
@@ -84,77 +135,27 @@ err_t bli_l3_sup_thread_decorator
 	thrcomm_t* restrict gl_comm = bli_thrcomm_create( rntm, n_threads );
 
 
-	_Pragma( "omp parallel num_threads(n_threads)" )
+	// LOCK 2 guard (sup path): when only one thread is requested, run the
+	// operation inline WITHOUT entering an OpenMP parallel region at all.
+	// A plain `omp parallel ... if(n_threads>1)` clause does NOT help here:
+	// GCC still emits an unconditional GOMP_parallel() call, and libgomp's
+	// global per-region bookkeeping serializes highly-concurrent single-
+	// threaded gemm callers (each foreign application thread issuing its own
+	// 1-thread gemm). Skipping the GOMP_parallel() call entirely removes that
+	// serialization (measured ~34x aggregate throughput at 48 concurrent
+	// single-threaded DGEMM callers on a 192-core EPYC).
+	if ( n_threads == 1 )
 	{
-		// Create a thread-local copy of the master thread's rntm_t. This is
-		// necessary since we want each thread to be able to track its own
-		// small block pool_t as it executes down the function stack.
-		rntm_t           rntm_l = *rntm;
-		rntm_t* restrict rntm_p = &rntm_l;
-
-		// Query the thread's id from OpenMP.
-		const dim_t tid = omp_get_thread_num();
-
-		// Check for a somewhat obscure OpenMP thread-mismatch issue.
-		// NOTE: This calls the same function used for the conventional/large
-		// code path.
-		bli_l3_thread_decorator_thread_check( n_threads, tid, gl_comm, rntm_p );
-
-		// Use the thread id to access the appropriate pool_t* within the
-		// array_t, and use it to set the sba_pool field within the rntm_t.
-		// If the pool_t* element within the array_t is NULL, it will first
-		// be allocated/initialized.
-		bli_sba_rntm_set_pool( tid, array, rntm_p );
-
-		thrinfo_t* thread = NULL;
-
-		// Create the root node of the thread's thrinfo_t structure.
-		bli_l3_sup_thrinfo_create_root( tid, gl_comm, rntm_p, &thread );
-
-		func
-		(
-		  alpha,
-		  a,
-		  b,
-		  beta,
-		  c,
-		  cntx,
-		  rntm_p,
-		  thread
-		);
-
-		// NOTE: Unlike the conventional path (bli_l3_decor_openmp.c), no
-		// barrier is needed here before freeing the thrinfo_t tree. The
-		// conventional path requires a barrier (see PR #702 [1]) because
-		// pack buffers are cached in the control tree (cntl_t->pack_mem)
-		// and freed in the decorator; a fast chief could release a pack
-		// buffer back to the PBA pool while slower peers still read it.
-		// In the sup path this cannot happen for three reasons:
-		//
-		// 1. Pack buffers are stack-local (mem_t in var2m) and freed
-		//    inside func() by packm_sup_finalize_mem_a()/packm_sup_finalize_mem_b(),
-		//    which run after internal loop barriers — never in this decorator.
-		//
-		// 2. The global communicator (gl_comm) is freed outside the
-		//    parallel region (below), protected by the implicit OpenMP
-		//    barrier at the end of the parallel construct.
-		//
-		// 3. Sub-group communicators (when packa/packb is enabled) are
-		//    freed only by the ochief thread. Non-chief threads never
-		//    dereference the shared communicator during bli_thrinfo_free
-		//    — they only read thread-local fields (ocomm_id, free_comm).
-		//    When neither matrix is packed, no sub-communicators exist
-		//    (ocomm=NULL, free_comm=FALSE).
-		//
-		// Removing this barrier avoids a ~10% DGEMM regression at high
-		// thread counts (e.g. 96 threads) caused by the custom spin-wait
-		// barrier implementation being much slower than the OpenMP
-		// runtime's optimized barrier.
-		//
-		// [1] https://github.com/flame/blis/pull/702
-		//
-		// Free the current thread's thrinfo_t structure.
-		bli_l3_sup_thrinfo_free( rntm_p, thread );
+		bli_l3_sup_decor_body( 0, func, alpha, a, b, beta, c,
+		                       cntx, rntm, array, gl_comm, n_threads );
+	}
+	else
+	{
+		_Pragma( "omp parallel num_threads(n_threads)" )
+		{
+			bli_l3_sup_decor_body( omp_get_thread_num(), func, alpha, a, b,
+			                       beta, c, cntx, rntm, array, gl_comm, n_threads );
+		}
 	}
 
 

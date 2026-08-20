@@ -277,7 +277,7 @@ INSTANTIATE_TEST_SUITE_P(
 /* Matrix A, B, C are filled with Infs and Nans         */
 /********************************************************/
 INSTANTIATE_TEST_SUITE_P(
-        Disabled_Tiny_Matrix,
+        DISABLED_Tiny_Matrix,
         zgemmEVT,
         ::testing::Combine(
             ::testing::Values('c'
@@ -380,11 +380,11 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1080)),                               // k
             ::testing::Values(gtint_t(3)),                                  // ai
             ::testing::Values(gtint_t(0)),                                  // aj
-            ::testing::Values(T{AOCL_NAN, 2.3}, /*T{AOCL_INF, 0.0},*/ //Failure
+            ::testing::Values(T{AOCL_NAN, 2.3}, T{AOCL_INF, 0.0},
                               T{3.4, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),    // aexval
             ::testing::Values(gtint_t(0)),                                  // bi
             ::testing::Values(gtint_t(2)),                                  // bj
-            ::testing::Values(T{AOCL_NAN, 2.3}, /*T{AOCL_INF, 0.0},*/
+            ::testing::Values(T{AOCL_NAN, 2.3}, T{AOCL_INF, 0.0},
                               T{3.4, AOCL_NAN}, T{AOCL_NAN, -AOCL_INF}),    // bexval
             ::testing::Values(gtint_t(0)),                                  // ci
             ::testing::Values(gtint_t(1)),                                  // cj

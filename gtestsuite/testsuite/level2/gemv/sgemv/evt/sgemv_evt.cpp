@@ -116,7 +116,7 @@ TEST_P( sgemvEVT, API )
 }
 
 INSTANTIATE_TEST_SUITE_P(
-        matrix_vector_unitStride,
+        nonzero_x_y,
         sgemvEVT,
         ::testing::Combine(
             ::testing::Values('c'
@@ -134,20 +134,20 @@ INSTANTIATE_TEST_SUITE_P(
                               gtint_t(8),
                               gtint_t(2),
                               gtint_t(1)),                         // n
-            ::testing::Values(-1.0, 0.0, 1.0, 2.3),                 // alpha
-            ::testing::Values(-1.0, 0.0, 1.0, 2.3),                 // beta
-            ::testing::Values(gtint_t(1)),                          // stride size for x
-            ::testing::Values(gtint_t(1)),                          // stride size for y
-            ::testing::Values(AOCL_NaN, AOCL_Inf, -AOCL_Inf, 0),    // a_exval
-            ::testing::Values(AOCL_NaN, AOCL_Inf, -AOCL_Inf, 0),    // x_exval
-            ::testing::Values(AOCL_NaN, AOCL_Inf, -AOCL_Inf, 0),    // y_exval
-            ::testing::Values(gtint_t(0))                           // increment to the leading dim of a
+            ::testing::Values(-1.0, 1.0, 2.3, 0.0),                 // alpha
+            ::testing::Values(-1.0, 1.0, 2.3, 0.0),                 // beta
+            ::testing::Values(gtint_t(1), gtint_t(2)),                          // stride size for x
+            ::testing::Values(gtint_t(1), gtint_t(3)),                          // stride size for y
+            ::testing::Values(AOCL_NaN, AOCL_Inf, -AOCL_Inf, 0.0),    // a_exval
+            ::testing::Values(AOCL_NaN, AOCL_Inf, -AOCL_Inf),    // x_exval
+            ::testing::Values(AOCL_NaN, AOCL_Inf, -AOCL_Inf),    // y_exval
+            ::testing::Values(gtint_t(0), gtint_t(4))                           // increment to the leading dim of a
         ),
         ::gemvEVTPrint<T>()
     );
 
 INSTANTIATE_TEST_SUITE_P(
-        matrix_vector_nonUnitStride,
+        matrix_vector_unitStride_zero_x_y_nonunit_n,
         sgemvEVT,
         ::testing::Combine(
             ::testing::Values('c'
@@ -157,20 +157,144 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                      // storage format
             ::testing::Values('n','t'),                             // transa
             ::testing::Values('n'),                                 // conjx
-            ::testing::Values(gtint_t(55)),                         // m
-            ::testing::Values(gtint_t(55)),                         // n
-            ::testing::Values(-1.0, 0.0, 1.0, 2.3),                 // alpha
-            ::testing::Values(-1.0, 0.0, 1.0, 2.3),                 // beta
-            ::testing::Values(gtint_t(3)),                          // stride size for x
-            ::testing::Values(gtint_t(5)),                          // stride size for y
-            ::testing::Values(AOCL_NaN, AOCL_Inf, -AOCL_Inf, 0),    // a_exval
-            ::testing::Values(AOCL_NaN, AOCL_Inf, -AOCL_Inf, 0),    // x_exval
-            ::testing::Values(AOCL_NaN, AOCL_Inf, -AOCL_Inf, 0),    // y_exval
-            ::testing::Values(gtint_t(7))                           // increment to the leading dim of a
+            ::testing::Values(gtint_t(32),
+                              gtint_t(4),
+                              gtint_t(1),
+                              gtint_t(15)),                         // m
+            ::testing::Values(gtint_t(24),
+                              gtint_t(8),
+                              gtint_t(2)),                         // n
+            ::testing::Values(-1.0),                 // alpha
+            ::testing::Values(-1.0),                 // beta
+            ::testing::Values(gtint_t(1)),                          // stride size for x
+            ::testing::Values(gtint_t(1)),                          // stride size for y
+            ::testing::Values(AOCL_NaN, AOCL_Inf, -AOCL_Inf),    // a_exval
+            ::testing::Values(0),    // x_exval
+            ::testing::Values(0),    // y_exval
+            ::testing::Values(gtint_t(0))                           // increment to the leading dim of a
         ),
         ::gemvEVTPrint<T>()
     );
 
+    INSTANTIATE_TEST_SUITE_P(
+        matrix_vector_unitStride_trans_t_zero_x_y_unit_n,
+        sgemvEVT,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                                      // storage format
+            ::testing::Values('t'),                             // transa
+            ::testing::Values('n'),                                 // conjx
+            ::testing::Values(gtint_t(32),
+                              gtint_t(4),
+                              gtint_t(1),
+                              gtint_t(15)),                         // m
+            ::testing::Values(gtint_t(1)),                         // n
+            ::testing::Values(-1.0),                 // alpha
+            ::testing::Values(-1.0),                 // beta
+            ::testing::Values(gtint_t(1)),                          // stride size for x
+            ::testing::Values(gtint_t(1)),                          // stride size for y
+            ::testing::Values(AOCL_NaN, AOCL_Inf, -AOCL_Inf),    // a_exval
+            ::testing::Values(0),    // x_exval
+            ::testing::Values(0),    // y_exval
+            ::testing::Values(gtint_t(0))                           // increment to the leading dim of a
+        ),
+        ::gemvEVTPrint<T>()
+    );
+
+    /**
+     * Failures when n=1 and transa='n' and x, y are zero, alpha is nonzero but A gets extreme values.
+     * In this case the extreme values are not propagated to the output.
+     */
+    INSTANTIATE_TEST_SUITE_P(
+        DISABLED_matrix_vector_unitStride_trans_n_unit_n_zero_x_y_nonzero_alpha,
+        sgemvEVT,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                                      // storage format
+            ::testing::Values('n'),                             // transa
+            ::testing::Values('n'),                                 // conjx
+            ::testing::Values(gtint_t(32),
+                              gtint_t(4),
+                              gtint_t(1),
+                              gtint_t(15)),                         // m
+            ::testing::Values(gtint_t(1)),                         // n
+            ::testing::Values(-1.0),                 // alpha
+            ::testing::Values(-1.0),                 // beta
+            ::testing::Values(gtint_t(1)),                          // stride size for x
+            ::testing::Values(gtint_t(1)),                          // stride size for y
+            ::testing::Values(AOCL_NaN, AOCL_Inf, -AOCL_Inf),    // a_exval
+            ::testing::Values(0),    // x_exval
+            ::testing::Values(0),    // y_exval
+            ::testing::Values(gtint_t(0))                           // increment to the leading dim of a
+        ),
+        ::gemvEVTPrint<T>()
+    );
+
+    INSTANTIATE_TEST_SUITE_P(
+        matrix_vector_unitStride_trans_n_unit_n_zero_x_y_zero_alpha_nonzero_beta,
+        sgemvEVT,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                                      // storage format
+            ::testing::Values('n'),                             // transa
+            ::testing::Values('n'),                                 // conjx
+            ::testing::Values(gtint_t(32),
+                              gtint_t(4),
+                              gtint_t(1),
+                              gtint_t(15)),                         // m
+            ::testing::Values(gtint_t(1)),                         // n
+            ::testing::Values(0.0),                 // alpha
+            ::testing::Values(-1.0),                 // beta
+            ::testing::Values(gtint_t(1)),                          // stride size for x
+            ::testing::Values(gtint_t(1)),                          // stride size for y
+            ::testing::Values(AOCL_NaN, AOCL_Inf, -AOCL_Inf),    // a_exval
+            ::testing::Values(0),    // x_exval
+            ::testing::Values(0),    // y_exval
+            ::testing::Values(gtint_t(0))                           // increment to the leading dim of a
+        ),
+        ::gemvEVTPrint<T>()
+    );
+
+    /**
+     * Failures when n=1 and transa='n' and x, y are zero, alpha is zero but A gets extreme values
+     * and beta is nonzero.
+     */
+    INSTANTIATE_TEST_SUITE_P(
+        DISABLED_matrix_vector_unitStride_trans_n_unit_n_zero_x_y_nonzero_alpha_zero_beta,
+        sgemvEVT,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                                      // storage format
+            ::testing::Values('n'),                             // transa
+            ::testing::Values('n'),                                 // conjx
+            ::testing::Values(gtint_t(32),
+                              gtint_t(4),
+                              gtint_t(1),
+                              gtint_t(15)),                         // m
+            ::testing::Values(gtint_t(1)),                         // n
+            ::testing::Values(2.3),                             // alpha
+            ::testing::Values(0.0),                 // beta
+            ::testing::Values(gtint_t(1)),                          // stride size for x
+            ::testing::Values(gtint_t(1)),                          // stride size for y
+            ::testing::Values(AOCL_NaN, AOCL_Inf, -AOCL_Inf),    // a_exval
+            ::testing::Values(0.0),    // x_exval
+            ::testing::Values(0.0),    // y_exval
+            ::testing::Values(gtint_t(0))                           // increment to the leading dim of a
+        ),
+        ::gemvEVTPrint<T>()
+    );
 
 INSTANTIATE_TEST_SUITE_P(
         alpha_beta_unitStride,

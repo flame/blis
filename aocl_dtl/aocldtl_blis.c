@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -693,6 +693,36 @@ void AOCL_DTL_log_gemm_compute_sizes(int8 loglevel,
 
 // Level-2 Logging
 
+void AOCL_DTL_log_gemv_stats(int8 loglevel,
+                            char dt_type,
+                            const f77_int m,
+                            const f77_int n)
+{
+    char buffer[256];
+
+    // Execution time is in micro seconds.
+    Double execution_time = AOCL_DTL_get_time_spent();
+
+    double flops = 2.0 * m * n;
+    if (dt_type == 'c' || dt_type == 'C' || dt_type == 'z' || dt_type == 'Z')
+    {
+        flops = 4.0 * flops;
+    }
+
+    if (execution_time != 0.0)
+        sprintf(buffer, " nt=%ld %.3f ms %0.3f GFLOPS",
+                AOCL_get_requested_threads_count(),
+                execution_time/1000.0,
+                flops/(execution_time * 1e3));
+    else
+        sprintf(buffer, " nt=%ld %.3f ms",
+                AOCL_get_requested_threads_count(),
+                execution_time/1000.0);
+
+    DTL_Trace(loglevel, TRACE_TYPE_RAW, NULL, NULL, 0, buffer);
+
+}
+
 void AOCL_DTL_log_gemv_sizes(int8 loglevel,
                              char dt_type,
                              const f77_char transa,
@@ -717,12 +747,43 @@ void AOCL_DTL_log_gemv_sizes(int8 loglevel,
     DTL_get_complex_parts(dt_type, beta, &beta_real, &beta_imag);
 
     // {S, D,C, Z} { transa, m, n, alpha, lda, incx, beta, incy}
-    sprintf(buffer, "%c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld\n", tolower(dt_type),
+    sprintf(buffer, "%c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld", tolower(dt_type),
         transa, (dim_t)m, (dim_t)n, alpha_real, alpha_imag,
         (dim_t)lda, (dim_t)incx, beta_real, beta_imag, (dim_t)incy);
 
 
+    AOCL_DTL_START_PERF_TIMER();
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+}
+
+void AOCL_DTL_log_ger_stats(int8 loglevel,
+                            char dt_type,
+                            const f77_int m,
+                            const f77_int n)
+{
+    char buffer[256];
+
+    // Execution time is in micro seconds.
+    Double execution_time = AOCL_DTL_get_time_spent();
+
+    double flops = 2.0 * m * n;
+    if (dt_type == 'c' || dt_type == 'C' || dt_type == 'z' || dt_type == 'Z')
+    {
+        flops = 4.0 * flops;
+    }
+
+    if (execution_time != 0.0)
+        sprintf(buffer, " nt=%ld %.3f ms %0.3f GFLOPS",
+                AOCL_get_requested_threads_count(),
+                execution_time/1000.0,
+                flops/(execution_time * 1e3));
+    else
+        sprintf(buffer, " nt=%ld %.3f ms",
+                AOCL_get_requested_threads_count(),
+                execution_time/1000.0);
+
+    DTL_Trace(loglevel, TRACE_TYPE_RAW, NULL, NULL, 0, buffer);
+
 }
 
 void AOCL_DTL_log_ger_sizes(int8 loglevel,
@@ -743,9 +804,10 @@ void AOCL_DTL_log_ger_sizes(int8 loglevel,
 
     DTL_get_complex_parts(dt_type, alpha, &alpha_real, &alpha_imag);
 
-    sprintf(buffer, "%c %ld %ld %lf %lf %ld %ld %ld\n", tolower(dt_type),
+    sprintf(buffer, "%c %ld %ld %lf %lf %ld %ld %ld", tolower(dt_type),
             (dim_t)m, (dim_t)n, alpha_real, alpha_imag, (dim_t)incx, (dim_t)incy, (dim_t)lda);
 
+    AOCL_DTL_START_PERF_TIMER();
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
 

@@ -289,6 +289,7 @@ option(ENABLE_SMALL_MATRIX "Small matrix handling" ON)
 option(ENABLE_SUP_HANDLING "SUP matrix handling" ON)
 option(ENABLE_SMALL_MATRIX_TRSM "TRSM Small matrix handling" ON)
 option(ENABLE_TRSM_PREINVERSION "Enable TRSM preinversion" ON)
+option(ENABLE_AOCL_ALLOC "Enable aocl_alloc" OFF)
 
 set(ENABLE_AOCL_DTL "OFF" CACHE STRING "Enable DTL Usage. Use with option ALL to enable both Tracing and Logging, TRACE to enable Tracing, and LOG to enable only logging")
 set_property(CACHE ENABLE_AOCL_DTL PROPERTY STRINGS ALL TRACE LOG OFF )
@@ -568,6 +569,33 @@ else()
     message("   Internal memory pools for small blocks are disabled.")
     set(ENABLE_SBA_POOLS_01 0)
 endif()
+cmake_print_variables(ENABLE_AOCL_ALLOC)
+if(ENABLE_AOCL_ALLOC AND NOT ENABLE_SYSTEM)
+    message(WARNING "   aocl allocator requires operating system support (pthreads + mmap); disabling because ENABLE_SYSTEM=OFF.")
+    set(ENABLE_AOCL_ALLOC OFF)
+endif()
+if(ENABLE_AOCL_ALLOC AND NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|AMD64)$")
+    message(WARNING "   aocl allocator is only supported on x86_64; disabling on ${CMAKE_SYSTEM_PROCESSOR}.")
+    set(ENABLE_AOCL_ALLOC OFF)
+endif()
+if(ENABLE_AOCL_ALLOC AND NOT CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|IntelLLVM")
+    message(WARNING "   aocl allocator requires gcc or clang; disabling for compiler '${CMAKE_C_COMPILER_ID}'.")
+    set(ENABLE_AOCL_ALLOC OFF)
+endif()
+if(ENABLE_AOCL_ALLOC)
+    message("   aocl allocator is enabled.")
+    set(ENABLE_AOCL_ALLOC_01 1)
+	# ---------------------------------------------------------
+	# Enable GNU extensions
+	# ---------------------------------------------------------
+	if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+			add_compile_definitions(_GNU_SOURCE)
+	endif()
+	# ---------------------------------------------------------
+else()
+    message("   aocl allocator is disabled.")
+    set(ENABLE_AOCL_ALLOC_01 0)
+endif()
 cmake_print_variables(ENABLE_MEM_TRACING)
 if(ENABLE_MEM_TRACING)
     message("   Memory tracing output is enabled.")
@@ -576,6 +604,10 @@ else()
     message("   Memory tracing output is disabled.")
     set(ENABLE_MEM_TRACING_01 0)
 endif()
+# Capture whether libmemkind was explicitly requested ("yes") vs auto before the
+# resolution below overwrites ENABLE_MEMKIND; the aocl-allocator cross-check needs
+# to tell an explicit request from an auto-enable.
+set(MEMKIND_REQ "${ENABLE_MEMKIND}")
 cmake_print_variables(ENABLE_MEMKIND)
 if(HAS_MEMKIND)
     if(ENABLE_MEMKIND STREQUAL "auto")
@@ -607,6 +639,20 @@ else()
     set(ENABLE_MEMKIND "no")
     set(ENABLE_MEMKIND_01 0)
 endif()
+# The aocl allocator and libmemkind both redefine the BLIS_MALLOC_* backends, so
+# enabling both would split allocations across two allocators. Mirror the other
+# allocator gates (warn and auto-disable, never fail) instead of leaving the clash
+# to a hard #error in bli_kernel_macro_defs.h: an enabled aocl allocator takes
+# precedence and libmemkind is disabled.
+if(ENABLE_AOCL_ALLOC AND (ENABLE_MEMKIND STREQUAL "yes"))
+    message(WARNING "   aocl allocator is enabled; disabling libmemkind (both cannot drive BLIS_MALLOC_* at once).")
+    if(MEMKIND_REQ STREQUAL "yes")
+        message(WARNING "   Cannot honor explicit request to enable libmemkind alongside ENABLE_AOCL_ALLOC.")
+    endif()
+    set(ENABLE_MEMKIND "no")
+    set(ENABLE_MEMKIND_01 0)
+endif()
+
 cmake_print_variables(PRAGMA_OMP_SIMD)
 if(PRAGMA_OMP_SIMD)
     message("   Compiler appears to support #pragma omp simd.")
@@ -742,7 +788,6 @@ if((INT_TYPE_SIZE STREQUAL "32") AND (BLAS_INT_TYPE_SIZE STREQUAL "64"))
         To avoid the possibility of truncation, we do not allow use of 64-bit integers in the BLAS API with 32-bit integers in BLIS. \
         Please use a different configuration of integers.")
 endif()
-
 
 cmake_print_variables(ENABLE_ADDON)
 if(ENABLE_ADDON STREQUAL "")
@@ -1057,16 +1102,16 @@ set(SECURITY_FLAGS_ENABLED ${ENABLE_SECURITY_FLAGS})
 if(SECURITY_FLAGS_ENABLED)
     if(WIN32)
         # ELF-specific linker hardening flags not applicable on Windows.
-        # (Consider adding /guard:cf or /DYNAMICBASE /NXCOMPAT if using link.exe, but keep minimal here.)
-        set(LDFLAGS "")
-        message(STATUS "Security hardening flags: ENABLED (no ELF linker flags applied on Windows)")
+        # Windows-specific security flags (/GUARD:*, /cetcompat) added later.
+        set(LDFLAGS)
+        message(STATUS "Security hardening flags: ENABLED")
     else()
         set(LDFLAGS "-Wl,-z,now" "-Wl,-z,relro")
         message(STATUS "Security hardening flags: ENABLED")
     endif()
 else()
     message(STATUS "Security hardening flags: DISABLED")
-    set(LDFLAGS "")
+    set(LDFLAGS)
 endif()
 # NOTE: -lpthread is needed unconditionally because BLIS uses pthread_once()
 # to initialize itself in a thread-safe manner. The one exception to this
@@ -1147,10 +1192,29 @@ endif()
 # Macro to remove/replace absolute path within library
 list(APPEND BUILD_SYMFLAGS "-fmacro-prefix-map=${PROJECT_SOURCE_DIR}/=")
 
+set(SECURITY_LINK_FLAGS)
 if(SECURITY_FLAGS_ENABLED)
-    if(WIN32)
-        # MSVC/clang-cl: /GS is on by default in most configurations; leave explicit flags empty.
-        # Avoid -D_FORTIFY_SOURCE / -fstack-protector-strong which are GCC/Clang (ELF) specific.
+    # clang-cl only: native cl.exe also has FRONTEND_VARIANT=MSVC, so the
+    # explicit "Clang" ID check keeps it (and other MSVC-frontend toolchains)
+    # on the warning path below.
+    if(WIN32 AND
+       CMAKE_C_COMPILER_ID STREQUAL "Clang" AND
+       CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
+       CMAKE_C_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC" AND
+       CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+        # Security hardening compiler flags:
+        #   /guard:cf        - Control Flow Guard (CFG) [compiler instrumentation]
+        #   /guard:ehcont    - EH Continuation metadata [CET support]
+        set(CLANGFLAGS /guard:cf /guard:ehcont)
+        set(CXXLANGFLAGS /guard:cf /guard:ehcont)
+
+        # Linker flags:
+        #   /GUARD:CF        - Control Flow Guard (CFG) [linker tables]
+        #   /GUARD:EHCONT    - EH Continuation Guard [CET support]
+        #   /cetcompat       - CET shadow stack compatibility metadata
+        set(SECURITY_LINK_FLAGS /GUARD:CF /GUARD:EHCONT /cetcompat)
+    elseif(WIN32)
+        message(WARNING "Security hardening flags requested, but /guard:cf, /guard:ehcont and /cetcompat require an MSVC-compatible compiler/linker. Skipping Windows security flags for this toolchain.")
         set(CLANGFLAGS "")
         set(CXXLANGFLAGS "")
     else()
@@ -1161,6 +1225,7 @@ else()
     set(CLANGFLAGS "")
     set(CXXLANGFLAGS "")
 endif()
+
 # --- C Preprocessor flags ---
 # Enable clock_gettime() in time.h.
 set(CPPROCFLAGS -D_POSIX_C_SOURCE=200112L)
@@ -1384,6 +1449,7 @@ if(BUILD_SHARED_LIBS)
                         SOVERSION ${SO_VERSION_MAJOR}
                         OUTPUT_NAME ${LIBBLIS_SHARED}
                     )
+
 endif()
 if(BUILD_STATIC_LIBS OR NOT BUILD_SHARED_LIBS)
     # Build static library with proper target name.
@@ -1391,6 +1457,23 @@ if(BUILD_STATIC_LIBS OR NOT BUILD_SHARED_LIBS)
     set_target_properties(blis_static PROPERTIES
                         OUTPUT_NAME ${LIBBLIS_STATIC}
                     )
+
+endif()
+
+# AOCL Build-It-Yourself unified build: contribute BLIS' object files to the
+# single libaocl. OBJECT_LIBRARIES is a list of $<TARGET_OBJECTS:...> genexes.
+# This runs independently of the static/shared selection so that a shared-only
+# build (BUILD_SHARED_LIBS=ON, BUILD_STATIC_LIBS=OFF) still folds BLIS' objects
+# into the unified library.
+if(AOCL_TB_UNIFIED_BUILD)
+    if(NOT COMMAND aocl_tb_add_objects)
+        message(FATAL_ERROR
+            "AOCL_TB_UNIFIED_BUILD is ON but aocl_tb_add_objects() is not defined. "
+            "The unified build must be driven by the AOCL Build-It-Yourself "
+            "toolchain that provides aocl_tb_add_objects(); do not set "
+            "AOCL_TB_UNIFIED_BUILD when building BLIS standalone.")
+    endif()
+    aocl_tb_add_objects(${OBJECT_LIBRARIES})
 endif()
 
 # Create the main blis target that points to the preferred library type
@@ -1436,7 +1519,18 @@ foreach(target IN ITEMS blis_shared blis_static)
             add_dependencies(${target} flat-cblas-header)
         endif()
 
-        target_link_libraries(${target} PUBLIC ${LDFLAGS})
+        if(LDFLAGS)
+            target_link_libraries(${target} PUBLIC ${LDFLAGS})
+        endif()
+
+        # Apply to the shared lib only: static libs have no link step, and
+        # propagating /cetcompat via INTERFACE would enable hardware shadow-
+        # stack on consumer EXEs (breaks non-CET-clean paths like the
+        # testsuite's setjmp/longjmp on CET-capable HW). Downstream static
+        # consumers should add these flags to their own EXE link line.
+        if(SECURITY_LINK_FLAGS AND NOT (target STREQUAL "blis_static"))
+            target_link_options(${target} PRIVATE ${SECURITY_LINK_FLAGS})
+        endif()
 
         if(THREADING_MODEL STREQUAL "openmp")
             if((NOT ${OpenMP_libomp_LIBRARY} STREQUAL "") AND (NOT WIN32))

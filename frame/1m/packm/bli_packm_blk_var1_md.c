@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -189,8 +190,8 @@ void PASTEMAC2(chc,chp,varname) \
 \
 	dim_t             iter_dim; \
 	dim_t             n_iter; \
-	dim_t             it, ic, ip; \
-	doff_t            ic_inc, ip_inc; \
+	dim_t             it, ic; \
+	doff_t            ic_inc; \
 	dim_t             panel_len_full; \
 	dim_t             panel_len_i; \
 	dim_t             panel_len_max; \
@@ -266,7 +267,6 @@ void PASTEMAC2(chc,chp,varname) \
 \
 	{ \
 		ic_inc = panel_dim_max; \
-		ip_inc = 1; \
 	} \
 \
 	p_begin = p_cast; \
@@ -289,8 +289,8 @@ void PASTEMAC2(chc,chp,varname) \
 	   at configure-time. */ \
 	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
 \
-	for ( ic  = 0,      ip  = 0,      it  = 0; it < n_iter; \
-	      ic += ic_inc, ip += ip_inc, it += 1 ) \
+	for ( ic  = 0,      it  = 0; it < n_iter; \
+	      ic += ic_inc, it += 1 ) \
 	{ \
 		panel_dim_i = bli_min( panel_dim_max, iter_dim - ic ); \
 \

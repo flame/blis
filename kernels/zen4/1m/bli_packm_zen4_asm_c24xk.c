@@ -502,7 +502,7 @@ void bli_cpackm_zen4_asm_24xk
 
       // This section handles the edge case where both m and k have leftover iterations.
       // Thus, masked loads and masked stores are used to process only valid elements.
-      // Masking loads with AVX-512 masking the CPU only reads the lanes enabled by the mask. 
+      // Masking loads with AVX‑512 masking the CPU only reads the lanes enabled by the mask. 
       // Lanes disabled by the mask are not read from memory at all 
       // with {z} they are then zeroed in the destination register.
       label(.UPDATEKLEFTM7)

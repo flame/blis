@@ -46,6 +46,36 @@ BLIS_EXPORT_BLIS model_t bli_init_model_query_id( void );
 BLIS_EXPORT_BLIS char*  bli_arch_string( arch_t id );
 BLIS_EXPORT_BLIS char*  bli_model_string( model_t id );
 
+// Map a resolved arch_t to a coarse ISA capability tier for kernel dispatch.
+//
+// IMPORTANT: this is the single source of truth for "which SIMD tier does
+// this Zen arch belong to". When a new Zen arch is added to arch_t, add its
+// one case here -- do NOT reintroduce raw arch_id comparisons in kernel
+// files. A switch (rather than a range test on the enum's numeric values)
+// is used deliberately: the arch_t comment warns that values may be
+// added/inserted OR rearranged, so an unrecognized/future arch falls
+// through to BLIS_ISA_TIER_GENERIC (correct-but-unoptimized) instead of
+// being silently misrouted to the wrong kernel.
+BLIS_INLINE isa_tier_t bli_arch_isa_tier( arch_t arch_id )
+{
+	switch ( arch_id )
+	{
+		case BLIS_ARCH_ZEN6:
+		case BLIS_ARCH_ZEN5:
+		case BLIS_ARCH_ZEN4:
+			return BLIS_ISA_TIER_AVX512;
+
+		case BLIS_ARCH_ZEN3:
+		case BLIS_ARCH_ZEN2:
+		case BLIS_ARCH_ZEN:
+			return BLIS_ISA_TIER_AVX2;
+
+		// Intel / ARM / Power / GENERIC / ERROR -> reference path.
+		default:
+			return BLIS_ISA_TIER_GENERIC;
+	}
+}
+
 #if defined(BLIS_IS_BUILDING_LIBRARY) || defined(BLIS_CONFIGURETIME_CPUID)
 
 extern arch_t g_arch_id;

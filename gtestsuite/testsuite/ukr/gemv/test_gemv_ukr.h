@@ -41,6 +41,75 @@
 #include <stdexcept>
 #include <algorithm>
 
+// Function-pointer types for the GEMV micro-kernels/tiled callers under test.
+// All GEMV kernels share the same BLIS-typed signature, taking trans_t as the
+// first argument. These are declared here (rather than in blis.h) so the ukr
+// test harnesses can parameterize over kernel pointers of the correct type.
+typedef void (*sgemv_ker)( trans_t, conj_t, dim_t, dim_t, float*,    float*,    inc_t, inc_t, float*,    inc_t, float*,    float*,    inc_t, cntx_t* );
+typedef void (*dgemv_ker)( trans_t, conj_t, dim_t, dim_t, double*,   double*,   inc_t, inc_t, double*,   inc_t, double*,   double*,   inc_t, cntx_t* );
+typedef void (*cgemv_ker)( trans_t, conj_t, dim_t, dim_t, scomplex*, scomplex*, inc_t, inc_t, scomplex*, inc_t, scomplex*, scomplex*, inc_t, cntx_t* );
+typedef void (*zgemv_ker)( trans_t, conj_t, dim_t, dim_t, dcomplex*, dcomplex*, inc_t, inc_t, dcomplex*, inc_t, dcomplex*, dcomplex*, inc_t, cntx_t* );
+
+// The tiled single-thread callers and the multi-thread wrappers are compiled
+// into the library but are not prototyped in the public blis.h. The ukr tests
+// reference them directly, so forward-declare them here with C linkage. These
+// are harmless if the corresponding kernel is absent from the build under test:
+// instantiation is gated by the K_* macros, so an unreferenced declaration
+// never triggers a link requirement.
+#define GEMV_UKR_KER_PROT( ctype, fname ) \
+    void fname( trans_t, conj_t, dim_t, dim_t, ctype*, ctype*, inc_t, inc_t, \
+                ctype*, inc_t, ctype*, ctype*, inc_t, cntx_t* );
+#ifdef __cplusplus
+extern "C" {
+#endif
+// --- float (AVX2 / AVX-512) ---
+GEMV_UKR_KER_PROT( float, bli_sgemv_t_zen_int_24x4 )
+GEMV_UKR_KER_PROT( float, bli_sgemv_t_zen_int_24x4_mt )
+GEMV_UKR_KER_PROT( float, bli_sgemv_n_zen_int_40x4 )
+GEMV_UKR_KER_PROT( float, bli_sgemv_n_zen_int_40x4_mt )
+GEMV_UKR_KER_PROT( float, bli_sgemv_m_zen_int_40x4 )
+GEMV_UKR_KER_PROT( float, bli_sgemv_m_zen_int_40x4_mt_Mdiv )
+GEMV_UKR_KER_PROT( float, bli_sgemv_m_zen_int_40x4_mt_Ndiv )
+GEMV_UKR_KER_PROT( float, bli_sgemv_t_zen4_int_48x8 )
+GEMV_UKR_KER_PROT( float, bli_sgemv_t_zen4_int_48x8_mt )
+GEMV_UKR_KER_PROT( float, bli_sgemv_n_zen4_int_80x8 )
+GEMV_UKR_KER_PROT( float, bli_sgemv_n_zen4_int_80x8_mt )
+GEMV_UKR_KER_PROT( float, bli_sgemv_m_zen4_int_80x8 )
+GEMV_UKR_KER_PROT( float, bli_sgemv_m_zen4_int_80x8_mt_Mdiv )
+GEMV_UKR_KER_PROT( float, bli_sgemv_m_zen4_int_80x8_mt_Ndiv )
+// --- double (AVX2 / AVX-512) ---
+GEMV_UKR_KER_PROT( double, bli_dgemv_t_zen_int_16x4 )
+GEMV_UKR_KER_PROT( double, bli_dgemv_t_zen_int_16x4_mt )
+GEMV_UKR_KER_PROT( double, bli_dgemv_n_zen_int_20x4 )
+GEMV_UKR_KER_PROT( double, bli_dgemv_n_zen_int_20x4_mt )
+GEMV_UKR_KER_PROT( double, bli_dgemv_m_zen_int_20x4 )
+GEMV_UKR_KER_PROT( double, bli_dgemv_t_zen4_int_32x8 )
+GEMV_UKR_KER_PROT( double, bli_dgemv_t_zen4_int_32x8_mt )
+GEMV_UKR_KER_PROT( double, bli_dgemv_n_zen4_int_40x8 )
+GEMV_UKR_KER_PROT( double, bli_dgemv_n_zen4_int_40x8_mt )
+// --- scomplex (AVX2 / AVX-512) ---
+GEMV_UKR_KER_PROT( scomplex, bli_cgemv_t_zen_int_20x4 )
+GEMV_UKR_KER_PROT( scomplex, bli_cgemv_t_zen_int_20x4_mt )
+GEMV_UKR_KER_PROT( scomplex, bli_cgemv_n_zen_int_20x5 )
+GEMV_UKR_KER_PROT( scomplex, bli_cgemv_n_zen_int_20x5_mt )
+GEMV_UKR_KER_PROT( scomplex, bli_cgemv_t_zen4_int_40x8 )
+GEMV_UKR_KER_PROT( scomplex, bli_cgemv_t_zen4_int_40x8_mt )
+GEMV_UKR_KER_PROT( scomplex, bli_cgemv_n_zen4_int_40x10 )
+GEMV_UKR_KER_PROT( scomplex, bli_cgemv_n_zen4_int_40x10_mt )
+// --- dcomplex (AVX2 / AVX-512) ---
+GEMV_UKR_KER_PROT( dcomplex, bli_zgemv_t_zen_int_10x4 )
+GEMV_UKR_KER_PROT( dcomplex, bli_zgemv_t_zen_int_10x4_mt )
+GEMV_UKR_KER_PROT( dcomplex, bli_zgemv_n_zen_int_10x5 )
+GEMV_UKR_KER_PROT( dcomplex, bli_zgemv_n_zen_int_10x5_mt )
+GEMV_UKR_KER_PROT( dcomplex, bli_zgemv_t_zen4_int_20x8 )
+GEMV_UKR_KER_PROT( dcomplex, bli_zgemv_t_zen4_int_20x8_mt )
+GEMV_UKR_KER_PROT( dcomplex, bli_zgemv_n_zen4_int_20x10 )
+GEMV_UKR_KER_PROT( dcomplex, bli_zgemv_n_zen4_int_20x10_mt )
+#ifdef __cplusplus
+}
+#endif
+#undef GEMV_UKR_KER_PROT
+
 template<typename T, typename FT>
 static void test_gemv_ukr_conja( FT ukr_fp, char storage, char transa, char conjx, gtint_t m, gtint_t n,
                 T alpha, gtint_t lda_inc, gtint_t incx, T beta, gtint_t incy,
@@ -93,8 +162,10 @@ static void test_gemv_ukr_conja( FT ukr_fp, char storage, char transa, char conj
     // Getting conja from blis_transa
     conj_t conja = bli_extract_conj(blis_transa);
 
-    // Creating cntx
-    cntx_t* cntx = NULL;
+    // Creating cntx. The GEMV entry-points look up L1V kernels (scalv/copyv)
+    // from the context for the alpha==0 and conj-x/incy-buffering paths, so a
+    // valid context is required (the framework always supplies one).
+    cntx_t* cntx = bli_gks_query_cntx();
 
     // Copying the contents of y to y_ref
     memcpy( y_ref, y, size_y );
@@ -199,8 +270,10 @@ static void test_gemv_ukr_transa( FT ukr_fp, char storage, char transa, char con
     trans_t blis_transa;
     testinghelpers::char_to_blis_trans( transa, &blis_transa );
 
-    // Creating cntx
-    cntx_t* cntx = NULL;
+    // Creating cntx. The GEMV entry-points look up L1V kernels (scalv/copyv)
+    // from the context for the alpha==0 and conj-x/incy-buffering paths, so a
+    // valid context is required (the framework always supplies one).
+    cntx_t* cntx = bli_gks_query_cntx();
 
     // Copying the contents of y to y_ref
     memcpy( y_ref, y, size_y );

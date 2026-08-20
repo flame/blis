@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -293,8 +293,14 @@ siz_t bli_packm_init_pack
 	// will then use that value to acquire an appropriate block of memory
 	// from the memory allocator.
 
-	// Extract the element size for the packed object.
-	elem_size_p = bli_obj_elem_size( p );
+	// Size the packed buffer by the target datatype rather than by P's
+	// element size field. P was aliased from A above, so that field still
+	// reflects A's storage datatype; when A is packed to a wider target
+	// datatype (mixed-precision/mixed-domain), using it would under-size the
+	// buffer and the packm kernel would then write past the end of it.
+	// The field itself is deliberately left alone: bli_gemm_ker_var2() reads
+	// it back to detect mixed precision and select the generic macro kernel.
+	elem_size_p = bli_dt_size( dt_tar );
 
 	// Set the row and column strides of p based on the pack schema.
 	if      ( bli_is_row_packed( schema ) &&

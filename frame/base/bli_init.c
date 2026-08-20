@@ -34,6 +34,10 @@
 */
 
 #include "blis.h"
+#ifdef BLIS_ENABLE_AOCL_ALLOC
+#define EXPORT_AOCL_ALLOCATOR
+#include "aocl_allocator.h"
+#endif
 
 // Make thread settings local to each thread calling BLIS routines.
 // (The definition resides in bli_rntm.c.)
@@ -113,6 +117,10 @@ void bli_finalize_once( void )
 
 void bli_init_apis( void )
 {
+
+#ifdef BLIS_ENABLE_AOCL_ALLOC
+	aocl_alloc_ini();
+#endif
 	// Initialize various sub-APIs.
 	bli_gks_init();
 	bli_ind_init();
@@ -139,6 +147,9 @@ void bli_finalize_apis( void )
 	bli_ind_finalize();
 	bli_gks_finalize();
 
+#ifdef BLIS_ENABLE_AOCL_ALLOC
+	aocl_alloc_fini();
+#endif
 	// Reset the control variable that will allow (re-)initialization.
 	// NOTE: We must initialize a fresh pthread_once_t object and THEN copy the
 	// contents to the static control variable because some implementations of

@@ -321,6 +321,14 @@ void bli_gemm_front
 		switch (bli_arch_query_id_internal() )
 		{
 		case BLIS_ARCH_ZEN6:
+		#if defined(BLIS_KERNELS_ZEN6)
+			cntx_copy = *cntx; // create a copy of cntx.
+			cntx_dynamic = &cntx_copy; // use local copy of cntx for GEMM
+			// dynamically set blocksizes according to num threads
+			bli_dynamic_blkszs_zen6(n_threads, cntx_dynamic, bli_obj_dt(c));
+			break;
+		#endif //BLIS_KERNELS_ZEN6
+
 		case BLIS_ARCH_ZEN5:
 		#if defined(BLIS_KERNELS_ZEN5)
 			cntx_copy = *cntx; // create a copy of cntx.

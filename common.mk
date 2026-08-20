@@ -591,6 +591,11 @@ ifeq ($(MK_ENABLE_SECURITY_FLAGS),yes)
   SECURITY_FLAGS_ENABLED := yes
 endif
 
+AOCL_ALLOC_ENABLED := no
+ifeq ($(MK_ENABLE_AOCL_ALLOC),yes)
+  AOCL_ALLOC_ENABLED := yes
+endif
+
 ifeq ($(SECURITY_FLAGS_ENABLED),yes)
   # Only add ELF linker hardening flags on non-Windows (gcc/clang toolchains)
   ifneq ($(IS_WIN),yes)
@@ -844,6 +849,14 @@ ifeq ($(SECURITY_FLAGS_ENABLED),yes)
     ifneq ($(filter gcc clang,$(CC_VENDOR)),)
       CLANGFLAGS += -D_FORTIFY_SOURCE=2 -fstack-protector-strong
     endif
+  endif
+endif
+# AOCL alloc is gated to gcc/clang at configure/CMake time. Add the GNU feature
+# macro whenever it is enabled on Linux so MAP_ANONYMOUS / MADV_HUGEPAGE resolve
+# regardless of the toolchain the flag was set with.
+ifeq ($(OS_NAME),Linux)
+  ifeq ($(AOCL_ALLOC_ENABLED),yes)
+    CLANGFLAGS += -D_GNU_SOURCE
   endif
 endif
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CLANGFLAGS,$(c))))
@@ -1204,7 +1217,6 @@ REF_KER_I_PATHS += -I$(DIST_PATH)/frame/include
 # NOTE: We no longer need every header path in the source tree since we
 # now #include the monolithic/flattened blis.h instead.
 CINCFLAGS       := -I$(BASE_INC_PATH) $(REF_KER_I_PATHS)
-
 # If CBLAS is enabled, we also include the path to the cblas.h directory so
 # that the compiler will be able to find cblas.h as the CBLAS source code is
 # being compiled.

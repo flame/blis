@@ -56,8 +56,10 @@ typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      );
 
 // INSERT_GENTDEF( gemv )
-// Currently only generating the function type for double datatype.
-GENTDEF( double, d, gemv, _ft_conja )
+GENTDEF( float,    s, gemv, _ft_conja )
+GENTDEF( double,   d, gemv, _ft_conja )
+GENTDEF( scomplex, c, gemv, _ft_conja )
+GENTDEF( dcomplex, z, gemv, _ft_conja )
 
 
 #undef  GENTDEF
@@ -78,5 +80,7 @@ typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      );
 
 // INSERT_GENTDEF( gemv )
-// Currently only generating the function type for double datatype.
-GENTDEF( double, d, gemv, _ft_transa )
+GENTDEF( float,    s, gemv, _ft_transa )
+GENTDEF( double,   d, gemv, _ft_transa )
+GENTDEF( scomplex, c, gemv, _ft_transa )
+GENTDEF( dcomplex, z, gemv, _ft_transa )

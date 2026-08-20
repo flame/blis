@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -149,7 +149,7 @@ foreach(dir ${test_files})
     if(TEST_INPUT_ARGS)
       target_compile_definitions(${exec_name} PUBLIC TEST_INPUT_ARGS)
     endif()
-
+    
     if(OPENMP_NESTED STREQUAL "1")
       target_compile_definitions(testinghelpers PUBLIC OPENMP_NESTED_1)
     elseif(OPENMP_NESTED STREQUAL "2")
@@ -158,7 +158,12 @@ foreach(dir ${test_files})
       target_compile_definitions(testinghelpers PUBLIC OPENMP_NESTED_1diff)
     endif()
 
-    add_test(NAME ${exec_name} COMMAND ${exec_name})
+    if(GTEST_JSON_OUTPUT)
+      add_test(NAME ${exec_name} COMMAND ${exec_name}
+        "--gtest_output=json:${GTEST_JSON_OUTPUT_DIR}/${exec_name}.json")
+    else()
+      add_test(NAME ${exec_name} COMMAND ${exec_name})
+    endif()
     if(REF_CBLAS STREQUAL "MKL")
       set_property(TEST ${exec_name} PROPERTY ENVIRONMENT ${MKL_ENV})
     endif()

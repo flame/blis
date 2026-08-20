@@ -90,6 +90,12 @@
 #define BLIS_DISABLE_SBA_POOLS
 #endif
 
+#if @enable_aocl_alloc@
+#define BLIS_ENABLE_AOCL_ALLOC
+#else
+#define BLIS_DISABLE_AOCL_ALLOC
+#endif
+
 #if @enable_mem_tracing@
 #define BLIS_ENABLE_MEM_TRACING
 #else

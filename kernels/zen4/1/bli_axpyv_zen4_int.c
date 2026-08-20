@@ -287,11 +287,34 @@ void bli_saxpyv_zen4_int
     }
     else
     {
-        // Scalar code for non-unit stride
+        /**
+        * SAXPY implementation for non-unit strides (incx/incy != 1).
+        * * While the loop remains scalar due to non-contiguous memory access, we use
+        * SSE scalar intrinsics (_mm_fmadd_ss) to leverage the hardware's Fused
+        * Multiply-Add (FMA) unit. This reduces instruction count and maintains
+        * higher precision by performing the multiply-add in a single step.
+        */
+
+        // // Scalar code for non-unit stride
+        // for (dim_t i = 0; i < n; ++i)
+        // {
+        //     *y0 += (*alpha0) * (*x0);
+
+        //     x0 += incx;
+        //     y0 += incy;
+        // }
+
+        // Use scalar SSE FMA for non-unit stride
+        __m128 alphas = _mm_set_ss(*alpha0);
         for (dim_t i = 0; i < n; ++i)
         {
-            *y0 += (*alpha0) * (*x0);
-            
+            // Load single float from x0 and y0
+            __m128 xv = _mm_load_ss(x0);
+            __m128 yv = _mm_load_ss(y0);
+            // FMA: yv = (xv * alphas) + yv
+            yv = _mm_fmadd_ss(xv, alphas, yv);
+            // Store single float back to y0
+            _mm_store_ss(y0, yv);
             x0 += incx;
             y0 += incy;
         }

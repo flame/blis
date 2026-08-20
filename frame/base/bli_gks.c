@@ -285,6 +285,9 @@ void bli_gks_finalize( void )
 
 	}
 	// END CRITICAL SECTION
+
+	const bli_pthread_once_t once_new = BLIS_PTHREAD_ONCE_INIT;
+	gks_once_init = once_new;
 }
 
 // -----------------------------------------------------------------------------

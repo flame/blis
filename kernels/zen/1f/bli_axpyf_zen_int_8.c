@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2018, The University of Texas at Austin
-   Copyright (C) 2016 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2016 - 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -443,367 +443,455 @@ void bli_daxpyf_zen_int_8
 	m_viter[3] = ( m_left ) / ( n_elem_per_reg * n_iter_unroll[3] );
 	m_left  = ( m_left ) % ( n_elem_per_reg * n_iter_unroll[3] );
 
-	// If there is anything that would interfere with our use of contiguous
-	// vector loads/stores, override m_viter and m_left to use scalar code
-	// for all iterations.
-	if ( inca != 1 || incy != 1 )
-	{
-		m_viter[0] = m_viter[1] = m_viter[2] = m_viter[3] = 0;
-		m_left  = m;
-	}
+    // av points to the 8 columns under consideration
+    av[0]   = a + 0*lda;
+    av[1]   = a + 1*lda;
+    av[2]   = a + 2*lda;
+    av[3]   = a + 3*lda;
+    av[4]   = a + 4*lda;
+    av[5]   = a + 5*lda;
+    av[6]   = a + 6*lda;
+    av[7]   = a + 7*lda;
+    y0   = y;
 
-	// av points to the 8 columns under consideration
-	av[0]   = a + 0*lda;
-	av[1]   = a + 1*lda;
-	av[2]   = a + 2*lda;
-	av[3]   = a + 3*lda;
-	av[4]   = a + 4*lda;
-	av[5]   = a + 5*lda;
-	av[6]   = a + 6*lda;
-	av[7]   = a + 7*lda;
-	y0   = y;
+    chi[0] = *( x + 0*incx );
+    chi[1] = *( x + 1*incx );
+    chi[2] = *( x + 2*incx );
+    chi[3] = *( x + 3*incx );
+    chi[4] = *( x + 4*incx );
+    chi[5] = *( x + 5*incx );
+    chi[6] = *( x + 6*incx );
+    chi[7] = *( x + 7*incx );
 
-	chi[0] = *( x + 0*incx );
-	chi[1] = *( x + 1*incx );
-	chi[2] = *( x + 2*incx );
-	chi[3] = *( x + 3*incx );
-	chi[4] = *( x + 4*incx );
-	chi[5] = *( x + 5*incx );
-	chi[6] = *( x + 6*incx );
-	chi[7] = *( x + 7*incx );
+    // Scale each chi scalar by alpha.
+    PASTEMAC(d,scals)( *alpha, chi[0] );
+    PASTEMAC(d,scals)( *alpha, chi[1] );
+    PASTEMAC(d,scals)( *alpha, chi[2] );
+    PASTEMAC(d,scals)( *alpha, chi[3] );
+    PASTEMAC(d,scals)( *alpha, chi[4] );
+    PASTEMAC(d,scals)( *alpha, chi[5] );
+    PASTEMAC(d,scals)( *alpha, chi[6] );
+    PASTEMAC(d,scals)( *alpha, chi[7] );
 
-	// Scale each chi scalar by alpha.
-	PASTEMAC(d,scals)( *alpha, chi[0] );
-	PASTEMAC(d,scals)( *alpha, chi[1] );
-	PASTEMAC(d,scals)( *alpha, chi[2] );
-	PASTEMAC(d,scals)( *alpha, chi[3] );
-	PASTEMAC(d,scals)( *alpha, chi[4] );
-	PASTEMAC(d,scals)( *alpha, chi[5] );
-	PASTEMAC(d,scals)( *alpha, chi[6] );
-	PASTEMAC(d,scals)( *alpha, chi[7] );
+    
+    if ( inca == 1 && incy == 1 )
+    {
+        // Broadcast the (alpha*chi?) scalars to all elements of vector registers.
+        chiv[0].v = _mm256_broadcast_sd( &chi[0] );
+        chiv[1].v = _mm256_broadcast_sd( &chi[1] );
+        chiv[2].v = _mm256_broadcast_sd( &chi[2] );
+        chiv[3].v = _mm256_broadcast_sd( &chi[3] );
+        chiv[4].v = _mm256_broadcast_sd( &chi[4] );
+        chiv[5].v = _mm256_broadcast_sd( &chi[5] );
+        chiv[6].v = _mm256_broadcast_sd( &chi[6] );
+        chiv[7].v = _mm256_broadcast_sd( &chi[7] );
 
-	// Broadcast the (alpha*chi?) scalars to all elements of vector registers.
-	chiv[0].v = _mm256_broadcast_sd( &chi[0] );
-	chiv[1].v = _mm256_broadcast_sd( &chi[1] );
-	chiv[2].v = _mm256_broadcast_sd( &chi[2] );
-	chiv[3].v = _mm256_broadcast_sd( &chi[3] );
-	chiv[4].v = _mm256_broadcast_sd( &chi[4] );
-	chiv[5].v = _mm256_broadcast_sd( &chi[5] );
-	chiv[6].v = _mm256_broadcast_sd( &chi[6] );
-	chiv[7].v = _mm256_broadcast_sd( &chi[7] );
+        // If there are vectorized iterations, perform them with vector
+        // instructions.
+        // 16 elements of the result are computed per iteration
+        for ( i = 0; i < m_viter[0]; ++i )
+        {
+            // Load the input values.
+            yv[0].v = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
+            yv[1].v = _mm256_loadu_pd( y0 + 1*n_elem_per_reg );
+            yv[2].v = _mm256_loadu_pd( y0 + 2*n_elem_per_reg );
+            yv[3].v = _mm256_loadu_pd( y0 + 3*n_elem_per_reg );
 
-	// If there are vectorized iterations, perform them with vector
-	// instructions.
-	// 16 elements of the result are computed per iteration
-	for ( i = 0; i < m_viter[0]; ++i )
-	{
-		// Load the input values.
-		yv[0].v = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
-		yv[1].v = _mm256_loadu_pd( y0 + 1*n_elem_per_reg );
-		yv[2].v = _mm256_loadu_pd( y0 + 2*n_elem_per_reg );
-		yv[3].v = _mm256_loadu_pd( y0 + 3*n_elem_per_reg );
+            a_vec[0].v = _mm256_loadu_pd( av[0] + 0*n_elem_per_reg );
+            a_vec[1].v = _mm256_loadu_pd( av[1] + 0*n_elem_per_reg );
+            a_vec[2].v = _mm256_loadu_pd( av[2] + 0*n_elem_per_reg );
+            a_vec[3].v = _mm256_loadu_pd( av[3] + 0*n_elem_per_reg );
+            a_vec[4].v = _mm256_loadu_pd( av[4] + 0*n_elem_per_reg );
+            a_vec[5].v = _mm256_loadu_pd( av[5] + 0*n_elem_per_reg );
+            a_vec[6].v = _mm256_loadu_pd( av[6] + 0*n_elem_per_reg );
+            a_vec[7].v = _mm256_loadu_pd( av[7] + 0*n_elem_per_reg );
+            
+            a_vec[8].v = _mm256_loadu_pd( av[0] + 1*n_elem_per_reg );
+            a_vec[9].v = _mm256_loadu_pd( av[1] + 1*n_elem_per_reg );
+            a_vec[10].v = _mm256_loadu_pd( av[2] + 1*n_elem_per_reg );
+            a_vec[11].v = _mm256_loadu_pd( av[3] + 1*n_elem_per_reg );
+            a_vec[12].v = _mm256_loadu_pd( av[4] + 1*n_elem_per_reg );
+            a_vec[13].v = _mm256_loadu_pd( av[5] + 1*n_elem_per_reg );
+            a_vec[14].v = _mm256_loadu_pd( av[6] + 1*n_elem_per_reg );
+            a_vec[15].v = _mm256_loadu_pd( av[7] + 1*n_elem_per_reg );
 
-		a_vec[0].v = _mm256_loadu_pd( av[0] + 0*n_elem_per_reg );
-		a_vec[1].v = _mm256_loadu_pd( av[1] + 0*n_elem_per_reg );
-		a_vec[2].v = _mm256_loadu_pd( av[2] + 0*n_elem_per_reg );
-		a_vec[3].v = _mm256_loadu_pd( av[3] + 0*n_elem_per_reg );
-		a_vec[4].v = _mm256_loadu_pd( av[4] + 0*n_elem_per_reg );
-		a_vec[5].v = _mm256_loadu_pd( av[5] + 0*n_elem_per_reg );
-		a_vec[6].v = _mm256_loadu_pd( av[6] + 0*n_elem_per_reg );
-		a_vec[7].v = _mm256_loadu_pd( av[7] + 0*n_elem_per_reg );
-		
-		a_vec[8].v = _mm256_loadu_pd( av[0] + 1*n_elem_per_reg );
-		a_vec[9].v = _mm256_loadu_pd( av[1] + 1*n_elem_per_reg );
-		a_vec[10].v = _mm256_loadu_pd( av[2] + 1*n_elem_per_reg );
-		a_vec[11].v = _mm256_loadu_pd( av[3] + 1*n_elem_per_reg );
-		a_vec[12].v = _mm256_loadu_pd( av[4] + 1*n_elem_per_reg );
-		a_vec[13].v = _mm256_loadu_pd( av[5] + 1*n_elem_per_reg );
-		a_vec[14].v = _mm256_loadu_pd( av[6] + 1*n_elem_per_reg );
-		a_vec[15].v = _mm256_loadu_pd( av[7] + 1*n_elem_per_reg );
+            a_vec[16].v = _mm256_loadu_pd( av[0] + 2*n_elem_per_reg );
+            a_vec[17].v = _mm256_loadu_pd( av[1] + 2*n_elem_per_reg );
+            a_vec[18].v = _mm256_loadu_pd( av[2] + 2*n_elem_per_reg );
+            a_vec[19].v = _mm256_loadu_pd( av[3] + 2*n_elem_per_reg );
+            a_vec[20].v = _mm256_loadu_pd( av[4] + 2*n_elem_per_reg );
+            a_vec[21].v = _mm256_loadu_pd( av[5] + 2*n_elem_per_reg );
+            a_vec[22].v = _mm256_loadu_pd( av[6] + 2*n_elem_per_reg );
+            a_vec[23].v = _mm256_loadu_pd( av[7] + 2*n_elem_per_reg );
 
-		a_vec[16].v = _mm256_loadu_pd( av[0] + 2*n_elem_per_reg );
-		a_vec[17].v = _mm256_loadu_pd( av[1] + 2*n_elem_per_reg );
-		a_vec[18].v = _mm256_loadu_pd( av[2] + 2*n_elem_per_reg );
-		a_vec[19].v = _mm256_loadu_pd( av[3] + 2*n_elem_per_reg );
-		a_vec[20].v = _mm256_loadu_pd( av[4] + 2*n_elem_per_reg );
-		a_vec[21].v = _mm256_loadu_pd( av[5] + 2*n_elem_per_reg );
-		a_vec[22].v = _mm256_loadu_pd( av[6] + 2*n_elem_per_reg );
-		a_vec[23].v = _mm256_loadu_pd( av[7] + 2*n_elem_per_reg );
+            a_vec[24].v = _mm256_loadu_pd( av[0] + 3*n_elem_per_reg );
+            a_vec[25].v = _mm256_loadu_pd( av[1] + 3*n_elem_per_reg );
+            a_vec[26].v = _mm256_loadu_pd( av[2] + 3*n_elem_per_reg );
+            a_vec[27].v = _mm256_loadu_pd( av[3] + 3*n_elem_per_reg );
+            a_vec[28].v = _mm256_loadu_pd( av[4] + 3*n_elem_per_reg );
+            a_vec[29].v = _mm256_loadu_pd( av[5] + 3*n_elem_per_reg );
+            a_vec[30].v = _mm256_loadu_pd( av[6] + 3*n_elem_per_reg );
+            a_vec[31].v = _mm256_loadu_pd( av[7] + 3*n_elem_per_reg );
 
-		a_vec[24].v = _mm256_loadu_pd( av[0] + 3*n_elem_per_reg );
-		a_vec[25].v = _mm256_loadu_pd( av[1] + 3*n_elem_per_reg );
-		a_vec[26].v = _mm256_loadu_pd( av[2] + 3*n_elem_per_reg );
-		a_vec[27].v = _mm256_loadu_pd( av[3] + 3*n_elem_per_reg );
-		a_vec[28].v = _mm256_loadu_pd( av[4] + 3*n_elem_per_reg );
-		a_vec[29].v = _mm256_loadu_pd( av[5] + 3*n_elem_per_reg );
-		a_vec[30].v = _mm256_loadu_pd( av[6] + 3*n_elem_per_reg );
-		a_vec[31].v = _mm256_loadu_pd( av[7] + 3*n_elem_per_reg );
+            // perform : y += alpha * x;
+            yv[0].v = _mm256_fmadd_pd( a_vec[0].v, chiv[0].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[1].v, chiv[1].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[2].v, chiv[2].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[3].v, chiv[3].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[4].v, chiv[4].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[5].v, chiv[5].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[6].v, chiv[6].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[7].v, chiv[7].v, yv[0].v );
 
-		// perform : y += alpha * x;
-		yv[0].v = _mm256_fmadd_pd( a_vec[0].v, chiv[0].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[1].v, chiv[1].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[2].v, chiv[2].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[3].v, chiv[3].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[4].v, chiv[4].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[5].v, chiv[5].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[6].v, chiv[6].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[7].v, chiv[7].v, yv[0].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[8].v, chiv[0].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[9].v, chiv[1].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[10].v, chiv[2].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[11].v, chiv[3].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[12].v, chiv[4].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[13].v, chiv[5].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[14].v, chiv[6].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[15].v, chiv[7].v, yv[1].v );
 
-		yv[1].v = _mm256_fmadd_pd( a_vec[8].v, chiv[0].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[9].v, chiv[1].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[10].v, chiv[2].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[11].v, chiv[3].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[12].v, chiv[4].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[13].v, chiv[5].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[14].v, chiv[6].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[15].v, chiv[7].v, yv[1].v );
+            yv[2].v = _mm256_fmadd_pd( a_vec[16].v, chiv[0].v, yv[2].v );
+            yv[2].v = _mm256_fmadd_pd( a_vec[17].v, chiv[1].v, yv[2].v );
+            yv[2].v = _mm256_fmadd_pd( a_vec[18].v, chiv[2].v, yv[2].v );
+            yv[2].v = _mm256_fmadd_pd( a_vec[19].v, chiv[3].v, yv[2].v );
+            yv[2].v = _mm256_fmadd_pd( a_vec[20].v, chiv[4].v, yv[2].v );
+            yv[2].v = _mm256_fmadd_pd( a_vec[21].v, chiv[5].v, yv[2].v );
+            yv[2].v = _mm256_fmadd_pd( a_vec[22].v, chiv[6].v, yv[2].v );
+            yv[2].v = _mm256_fmadd_pd( a_vec[23].v, chiv[7].v, yv[2].v );
 
-		yv[2].v = _mm256_fmadd_pd( a_vec[16].v, chiv[0].v, yv[2].v );
-		yv[2].v = _mm256_fmadd_pd( a_vec[17].v, chiv[1].v, yv[2].v );
-		yv[2].v = _mm256_fmadd_pd( a_vec[18].v, chiv[2].v, yv[2].v );
-		yv[2].v = _mm256_fmadd_pd( a_vec[19].v, chiv[3].v, yv[2].v );
-		yv[2].v = _mm256_fmadd_pd( a_vec[20].v, chiv[4].v, yv[2].v );
-		yv[2].v = _mm256_fmadd_pd( a_vec[21].v, chiv[5].v, yv[2].v );
-		yv[2].v = _mm256_fmadd_pd( a_vec[22].v, chiv[6].v, yv[2].v );
-		yv[2].v = _mm256_fmadd_pd( a_vec[23].v, chiv[7].v, yv[2].v );
+            yv[3].v = _mm256_fmadd_pd( a_vec[24].v, chiv[0].v, yv[3].v );
+            yv[3].v = _mm256_fmadd_pd( a_vec[25].v, chiv[1].v, yv[3].v );
+            yv[3].v = _mm256_fmadd_pd( a_vec[26].v, chiv[2].v, yv[3].v );
+            yv[3].v = _mm256_fmadd_pd( a_vec[27].v, chiv[3].v, yv[3].v );
+            yv[3].v = _mm256_fmadd_pd( a_vec[28].v, chiv[4].v, yv[3].v );
+            yv[3].v = _mm256_fmadd_pd( a_vec[29].v, chiv[5].v, yv[3].v );
+            yv[3].v = _mm256_fmadd_pd( a_vec[30].v, chiv[6].v, yv[3].v );
+            yv[3].v = _mm256_fmadd_pd( a_vec[31].v, chiv[7].v, yv[3].v );
 
-		yv[3].v = _mm256_fmadd_pd( a_vec[24].v, chiv[0].v, yv[3].v );
-		yv[3].v = _mm256_fmadd_pd( a_vec[25].v, chiv[1].v, yv[3].v );
-		yv[3].v = _mm256_fmadd_pd( a_vec[26].v, chiv[2].v, yv[3].v );
-		yv[3].v = _mm256_fmadd_pd( a_vec[27].v, chiv[3].v, yv[3].v );
-		yv[3].v = _mm256_fmadd_pd( a_vec[28].v, chiv[4].v, yv[3].v );
-		yv[3].v = _mm256_fmadd_pd( a_vec[29].v, chiv[5].v, yv[3].v );
-		yv[3].v = _mm256_fmadd_pd( a_vec[30].v, chiv[6].v, yv[3].v );
-		yv[3].v = _mm256_fmadd_pd( a_vec[31].v, chiv[7].v, yv[3].v );
+            // Store the output.
+            _mm256_storeu_pd( (y0 + 0*n_elem_per_reg), yv[0].v );
+            _mm256_storeu_pd( (y0 + 1*n_elem_per_reg), yv[1].v );
+            _mm256_storeu_pd( (y0 + 2*n_elem_per_reg), yv[2].v );
+            _mm256_storeu_pd( (y0 + 3*n_elem_per_reg), yv[3].v );
 
-		// Store the output.
-		_mm256_storeu_pd( (y0 + 0*n_elem_per_reg), yv[0].v );
-		_mm256_storeu_pd( (y0 + 1*n_elem_per_reg), yv[1].v );
-		_mm256_storeu_pd( (y0 + 2*n_elem_per_reg), yv[2].v );
-		_mm256_storeu_pd( (y0 + 3*n_elem_per_reg), yv[3].v );
+            y0 += n_elem_per_reg * n_iter_unroll[0];
+            av[0] += n_elem_per_reg * n_iter_unroll[0];
+            av[1] += n_elem_per_reg * n_iter_unroll[0];
+            av[2] += n_elem_per_reg * n_iter_unroll[0];
+            av[3] += n_elem_per_reg * n_iter_unroll[0];
+            av[4] += n_elem_per_reg * n_iter_unroll[0];
+            av[5] += n_elem_per_reg * n_iter_unroll[0];
+            av[6] += n_elem_per_reg * n_iter_unroll[0];
+            av[7] += n_elem_per_reg * n_iter_unroll[0];
+        }
 
-		y0 += n_elem_per_reg * n_iter_unroll[0];
-		av[0] += n_elem_per_reg * n_iter_unroll[0];
-		av[1] += n_elem_per_reg * n_iter_unroll[0];
-		av[2] += n_elem_per_reg * n_iter_unroll[0];
-		av[3] += n_elem_per_reg * n_iter_unroll[0];
-		av[4] += n_elem_per_reg * n_iter_unroll[0];
-		av[5] += n_elem_per_reg * n_iter_unroll[0];
-		av[6] += n_elem_per_reg * n_iter_unroll[0];
-		av[7] += n_elem_per_reg * n_iter_unroll[0];
-	}
+        // 12 elements of the result are computed per iteration
+        for ( i = 0; i < m_viter[1]; ++i )
+        {
+            // Load the input values.
+            yv[0].v = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
+            yv[1].v = _mm256_loadu_pd( y0 + 1*n_elem_per_reg );
+            yv[2].v = _mm256_loadu_pd( y0 + 2*n_elem_per_reg );
 
-	// 12 elements of the result are computed per iteration
-	for ( i = 0; i < m_viter[1]; ++i )
-	{
-		// Load the input values.
-		yv[0].v = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
-		yv[1].v = _mm256_loadu_pd( y0 + 1*n_elem_per_reg );
-		yv[2].v = _mm256_loadu_pd( y0 + 2*n_elem_per_reg );
+            a_vec[0].v = _mm256_loadu_pd( av[0] + 0*n_elem_per_reg );
+            a_vec[1].v = _mm256_loadu_pd( av[1] + 0*n_elem_per_reg );
+            a_vec[2].v = _mm256_loadu_pd( av[2] + 0*n_elem_per_reg );
+            a_vec[3].v = _mm256_loadu_pd( av[3] + 0*n_elem_per_reg );
+            a_vec[4].v = _mm256_loadu_pd( av[4] + 0*n_elem_per_reg );
+            a_vec[5].v = _mm256_loadu_pd( av[5] + 0*n_elem_per_reg );
+            a_vec[6].v = _mm256_loadu_pd( av[6] + 0*n_elem_per_reg );
+            a_vec[7].v = _mm256_loadu_pd( av[7] + 0*n_elem_per_reg );
+            
+            a_vec[8].v = _mm256_loadu_pd( av[0] + 1*n_elem_per_reg );
+            a_vec[9].v = _mm256_loadu_pd( av[1] + 1*n_elem_per_reg );
+            a_vec[10].v = _mm256_loadu_pd( av[2] + 1*n_elem_per_reg );
+            a_vec[11].v = _mm256_loadu_pd( av[3] + 1*n_elem_per_reg );
+            a_vec[12].v = _mm256_loadu_pd( av[4] + 1*n_elem_per_reg );
+            a_vec[13].v = _mm256_loadu_pd( av[5] + 1*n_elem_per_reg );
+            a_vec[14].v = _mm256_loadu_pd( av[6] + 1*n_elem_per_reg );
+            a_vec[15].v = _mm256_loadu_pd( av[7] + 1*n_elem_per_reg );
 
-		a_vec[0].v = _mm256_loadu_pd( av[0] + 0*n_elem_per_reg );
-		a_vec[1].v = _mm256_loadu_pd( av[1] + 0*n_elem_per_reg );
-		a_vec[2].v = _mm256_loadu_pd( av[2] + 0*n_elem_per_reg );
-		a_vec[3].v = _mm256_loadu_pd( av[3] + 0*n_elem_per_reg );
-		a_vec[4].v = _mm256_loadu_pd( av[4] + 0*n_elem_per_reg );
-		a_vec[5].v = _mm256_loadu_pd( av[5] + 0*n_elem_per_reg );
-		a_vec[6].v = _mm256_loadu_pd( av[6] + 0*n_elem_per_reg );
-		a_vec[7].v = _mm256_loadu_pd( av[7] + 0*n_elem_per_reg );
-		
-		a_vec[8].v = _mm256_loadu_pd( av[0] + 1*n_elem_per_reg );
-		a_vec[9].v = _mm256_loadu_pd( av[1] + 1*n_elem_per_reg );
-		a_vec[10].v = _mm256_loadu_pd( av[2] + 1*n_elem_per_reg );
-		a_vec[11].v = _mm256_loadu_pd( av[3] + 1*n_elem_per_reg );
-		a_vec[12].v = _mm256_loadu_pd( av[4] + 1*n_elem_per_reg );
-		a_vec[13].v = _mm256_loadu_pd( av[5] + 1*n_elem_per_reg );
-		a_vec[14].v = _mm256_loadu_pd( av[6] + 1*n_elem_per_reg );
-		a_vec[15].v = _mm256_loadu_pd( av[7] + 1*n_elem_per_reg );
+            a_vec[16].v = _mm256_loadu_pd( av[0] + 2*n_elem_per_reg );
+            a_vec[17].v = _mm256_loadu_pd( av[1] + 2*n_elem_per_reg );
+            a_vec[18].v = _mm256_loadu_pd( av[2] + 2*n_elem_per_reg );
+            a_vec[19].v = _mm256_loadu_pd( av[3] + 2*n_elem_per_reg );
+            a_vec[20].v = _mm256_loadu_pd( av[4] + 2*n_elem_per_reg );
+            a_vec[21].v = _mm256_loadu_pd( av[5] + 2*n_elem_per_reg );
+            a_vec[22].v = _mm256_loadu_pd( av[6] + 2*n_elem_per_reg );
+            a_vec[23].v = _mm256_loadu_pd( av[7] + 2*n_elem_per_reg );
 
-		a_vec[16].v = _mm256_loadu_pd( av[0] + 2*n_elem_per_reg );
-		a_vec[17].v = _mm256_loadu_pd( av[1] + 2*n_elem_per_reg );
-		a_vec[18].v = _mm256_loadu_pd( av[2] + 2*n_elem_per_reg );
-		a_vec[19].v = _mm256_loadu_pd( av[3] + 2*n_elem_per_reg );
-		a_vec[20].v = _mm256_loadu_pd( av[4] + 2*n_elem_per_reg );
-		a_vec[21].v = _mm256_loadu_pd( av[5] + 2*n_elem_per_reg );
-		a_vec[22].v = _mm256_loadu_pd( av[6] + 2*n_elem_per_reg );
-		a_vec[23].v = _mm256_loadu_pd( av[7] + 2*n_elem_per_reg );
+            // perform : y += alpha * x;
+            yv[0].v = _mm256_fmadd_pd( a_vec[0].v, chiv[0].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[1].v, chiv[1].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[2].v, chiv[2].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[3].v, chiv[3].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[4].v, chiv[4].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[5].v, chiv[5].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[6].v, chiv[6].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[7].v, chiv[7].v, yv[0].v );
 
-		// perform : y += alpha * x;
-		yv[0].v = _mm256_fmadd_pd( a_vec[0].v, chiv[0].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[1].v, chiv[1].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[2].v, chiv[2].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[3].v, chiv[3].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[4].v, chiv[4].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[5].v, chiv[5].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[6].v, chiv[6].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[7].v, chiv[7].v, yv[0].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[8].v, chiv[0].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[9].v, chiv[1].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[10].v, chiv[2].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[11].v, chiv[3].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[12].v, chiv[4].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[13].v, chiv[5].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[14].v, chiv[6].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[15].v, chiv[7].v, yv[1].v );
 
-		yv[1].v = _mm256_fmadd_pd( a_vec[8].v, chiv[0].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[9].v, chiv[1].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[10].v, chiv[2].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[11].v, chiv[3].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[12].v, chiv[4].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[13].v, chiv[5].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[14].v, chiv[6].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[15].v, chiv[7].v, yv[1].v );
+            yv[2].v = _mm256_fmadd_pd( a_vec[16].v, chiv[0].v, yv[2].v );
+            yv[2].v = _mm256_fmadd_pd( a_vec[17].v, chiv[1].v, yv[2].v );
+            yv[2].v = _mm256_fmadd_pd( a_vec[18].v, chiv[2].v, yv[2].v );
+            yv[2].v = _mm256_fmadd_pd( a_vec[19].v, chiv[3].v, yv[2].v );
+            yv[2].v = _mm256_fmadd_pd( a_vec[20].v, chiv[4].v, yv[2].v );
+            yv[2].v = _mm256_fmadd_pd( a_vec[21].v, chiv[5].v, yv[2].v );
+            yv[2].v = _mm256_fmadd_pd( a_vec[22].v, chiv[6].v, yv[2].v );
+            yv[2].v = _mm256_fmadd_pd( a_vec[23].v, chiv[7].v, yv[2].v );
 
-		yv[2].v = _mm256_fmadd_pd( a_vec[16].v, chiv[0].v, yv[2].v );
-		yv[2].v = _mm256_fmadd_pd( a_vec[17].v, chiv[1].v, yv[2].v );
-		yv[2].v = _mm256_fmadd_pd( a_vec[18].v, chiv[2].v, yv[2].v );
-		yv[2].v = _mm256_fmadd_pd( a_vec[19].v, chiv[3].v, yv[2].v );
-		yv[2].v = _mm256_fmadd_pd( a_vec[20].v, chiv[4].v, yv[2].v );
-		yv[2].v = _mm256_fmadd_pd( a_vec[21].v, chiv[5].v, yv[2].v );
-		yv[2].v = _mm256_fmadd_pd( a_vec[22].v, chiv[6].v, yv[2].v );
-		yv[2].v = _mm256_fmadd_pd( a_vec[23].v, chiv[7].v, yv[2].v );
+            // Store the output.
+            _mm256_storeu_pd( (y0 + 0*n_elem_per_reg), yv[0].v );
+            _mm256_storeu_pd( (y0 + 1*n_elem_per_reg), yv[1].v );
+            _mm256_storeu_pd( (y0 + 2*n_elem_per_reg), yv[2].v );
 
-		// Store the output.
-		_mm256_storeu_pd( (y0 + 0*n_elem_per_reg), yv[0].v );
-		_mm256_storeu_pd( (y0 + 1*n_elem_per_reg), yv[1].v );
-		_mm256_storeu_pd( (y0 + 2*n_elem_per_reg), yv[2].v );
+            y0 += n_elem_per_reg * n_iter_unroll[1];
+            av[0] += n_elem_per_reg * n_iter_unroll[1];
+            av[1] += n_elem_per_reg * n_iter_unroll[1];
+            av[2] += n_elem_per_reg * n_iter_unroll[1];
+            av[3] += n_elem_per_reg * n_iter_unroll[1];
+            av[4] += n_elem_per_reg * n_iter_unroll[1];
+            av[5] += n_elem_per_reg * n_iter_unroll[1];
+            av[6] += n_elem_per_reg * n_iter_unroll[1];
+            av[7] += n_elem_per_reg * n_iter_unroll[1];
+        }
 
-		y0 += n_elem_per_reg * n_iter_unroll[1];
-		av[0] += n_elem_per_reg * n_iter_unroll[1];
-		av[1] += n_elem_per_reg * n_iter_unroll[1];
-		av[2] += n_elem_per_reg * n_iter_unroll[1];
-		av[3] += n_elem_per_reg * n_iter_unroll[1];
-		av[4] += n_elem_per_reg * n_iter_unroll[1];
-		av[5] += n_elem_per_reg * n_iter_unroll[1];
-		av[6] += n_elem_per_reg * n_iter_unroll[1];
-		av[7] += n_elem_per_reg * n_iter_unroll[1];
-	}
+        // 8 elements of the result are computed per iteration
+        for ( i = 0; i < m_viter[2]; ++i )
+        {
+            // Load the input values.
+            yv[0].v = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
+            yv[1].v = _mm256_loadu_pd( y0 + 1*n_elem_per_reg );
 
-	// 8 elements of the result are computed per iteration
-	for ( i = 0; i < m_viter[2]; ++i )
-	{
-		// Load the input values.
-		yv[0].v = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
-		yv[1].v = _mm256_loadu_pd( y0 + 1*n_elem_per_reg );
+            a_vec[0].v = _mm256_loadu_pd( av[0] + 0*n_elem_per_reg );
+            a_vec[1].v = _mm256_loadu_pd( av[1] + 0*n_elem_per_reg );
+            a_vec[2].v = _mm256_loadu_pd( av[2] + 0*n_elem_per_reg );
+            a_vec[3].v = _mm256_loadu_pd( av[3] + 0*n_elem_per_reg );
+            a_vec[4].v = _mm256_loadu_pd( av[4] + 0*n_elem_per_reg );
+            a_vec[5].v = _mm256_loadu_pd( av[5] + 0*n_elem_per_reg );
+            a_vec[6].v = _mm256_loadu_pd( av[6] + 0*n_elem_per_reg );
+            a_vec[7].v = _mm256_loadu_pd( av[7] + 0*n_elem_per_reg );
+            
+            a_vec[8].v = _mm256_loadu_pd( av[0] + 1*n_elem_per_reg );
+            a_vec[9].v = _mm256_loadu_pd( av[1] + 1*n_elem_per_reg );
+            a_vec[10].v = _mm256_loadu_pd( av[2] + 1*n_elem_per_reg );
+            a_vec[11].v = _mm256_loadu_pd( av[3] + 1*n_elem_per_reg );
+            a_vec[12].v = _mm256_loadu_pd( av[4] + 1*n_elem_per_reg );
+            a_vec[13].v = _mm256_loadu_pd( av[5] + 1*n_elem_per_reg );
+            a_vec[14].v = _mm256_loadu_pd( av[6] + 1*n_elem_per_reg );
+            a_vec[15].v = _mm256_loadu_pd( av[7] + 1*n_elem_per_reg );
 
-		a_vec[0].v = _mm256_loadu_pd( av[0] + 0*n_elem_per_reg );
-		a_vec[1].v = _mm256_loadu_pd( av[1] + 0*n_elem_per_reg );
-		a_vec[2].v = _mm256_loadu_pd( av[2] + 0*n_elem_per_reg );
-		a_vec[3].v = _mm256_loadu_pd( av[3] + 0*n_elem_per_reg );
-		a_vec[4].v = _mm256_loadu_pd( av[4] + 0*n_elem_per_reg );
-		a_vec[5].v = _mm256_loadu_pd( av[5] + 0*n_elem_per_reg );
-		a_vec[6].v = _mm256_loadu_pd( av[6] + 0*n_elem_per_reg );
-		a_vec[7].v = _mm256_loadu_pd( av[7] + 0*n_elem_per_reg );
-		
-		a_vec[8].v = _mm256_loadu_pd( av[0] + 1*n_elem_per_reg );
-		a_vec[9].v = _mm256_loadu_pd( av[1] + 1*n_elem_per_reg );
-		a_vec[10].v = _mm256_loadu_pd( av[2] + 1*n_elem_per_reg );
-		a_vec[11].v = _mm256_loadu_pd( av[3] + 1*n_elem_per_reg );
-		a_vec[12].v = _mm256_loadu_pd( av[4] + 1*n_elem_per_reg );
-		a_vec[13].v = _mm256_loadu_pd( av[5] + 1*n_elem_per_reg );
-		a_vec[14].v = _mm256_loadu_pd( av[6] + 1*n_elem_per_reg );
-		a_vec[15].v = _mm256_loadu_pd( av[7] + 1*n_elem_per_reg );
+            // perform : y += alpha * x;
+            yv[0].v = _mm256_fmadd_pd( a_vec[0].v, chiv[0].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[1].v, chiv[1].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[2].v, chiv[2].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[3].v, chiv[3].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[4].v, chiv[4].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[5].v, chiv[5].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[6].v, chiv[6].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[7].v, chiv[7].v, yv[0].v );
 
-		// perform : y += alpha * x;
-		yv[0].v = _mm256_fmadd_pd( a_vec[0].v, chiv[0].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[1].v, chiv[1].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[2].v, chiv[2].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[3].v, chiv[3].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[4].v, chiv[4].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[5].v, chiv[5].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[6].v, chiv[6].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[7].v, chiv[7].v, yv[0].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[8].v, chiv[0].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[9].v, chiv[1].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[10].v, chiv[2].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[11].v, chiv[3].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[12].v, chiv[4].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[13].v, chiv[5].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[14].v, chiv[6].v, yv[1].v );
+            yv[1].v = _mm256_fmadd_pd( a_vec[15].v, chiv[7].v, yv[1].v );
 
-		yv[1].v = _mm256_fmadd_pd( a_vec[8].v, chiv[0].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[9].v, chiv[1].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[10].v, chiv[2].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[11].v, chiv[3].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[12].v, chiv[4].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[13].v, chiv[5].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[14].v, chiv[6].v, yv[1].v );
-		yv[1].v = _mm256_fmadd_pd( a_vec[15].v, chiv[7].v, yv[1].v );
+            // Store the output.
+            _mm256_storeu_pd( (y0 + 0*n_elem_per_reg), yv[0].v );
+            _mm256_storeu_pd( (y0 + 1*n_elem_per_reg), yv[1].v );
 
-		// Store the output.
-		_mm256_storeu_pd( (y0 + 0*n_elem_per_reg), yv[0].v );
-		_mm256_storeu_pd( (y0 + 1*n_elem_per_reg), yv[1].v );
+            y0 += n_elem_per_reg * n_iter_unroll[2];
+            av[0] += n_elem_per_reg * n_iter_unroll[2];
+            av[1] += n_elem_per_reg * n_iter_unroll[2];
+            av[2] += n_elem_per_reg * n_iter_unroll[2];
+            av[3] += n_elem_per_reg * n_iter_unroll[2];
+            av[4] += n_elem_per_reg * n_iter_unroll[2];
+            av[5] += n_elem_per_reg * n_iter_unroll[2];
+            av[6] += n_elem_per_reg * n_iter_unroll[2];
+            av[7] += n_elem_per_reg * n_iter_unroll[2];
+        }
 
-		y0 += n_elem_per_reg * n_iter_unroll[2];
-		av[0] += n_elem_per_reg * n_iter_unroll[2];
-		av[1] += n_elem_per_reg * n_iter_unroll[2];
-		av[2] += n_elem_per_reg * n_iter_unroll[2];
-		av[3] += n_elem_per_reg * n_iter_unroll[2];
-		av[4] += n_elem_per_reg * n_iter_unroll[2];
-		av[5] += n_elem_per_reg * n_iter_unroll[2];
-		av[6] += n_elem_per_reg * n_iter_unroll[2];
-		av[7] += n_elem_per_reg * n_iter_unroll[2];
-	}
+        // 4 elements of the result are computed per iteration
+        for ( i = 0; i < m_viter[3]; ++i )
+        {
+            // Load the input values.
+            yv[0].v = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
 
-	// 4 elements of the result are computed per iteration
-	for ( i = 0; i < m_viter[3]; ++i )
-	{
-		// Load the input values.
-		yv[0].v = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
+            a_vec[0].v = _mm256_loadu_pd( av[0] + 0*n_elem_per_reg );
+            a_vec[1].v = _mm256_loadu_pd( av[1] + 0*n_elem_per_reg );
+            a_vec[2].v = _mm256_loadu_pd( av[2] + 0*n_elem_per_reg );
+            a_vec[3].v = _mm256_loadu_pd( av[3] + 0*n_elem_per_reg );
+            a_vec[4].v = _mm256_loadu_pd( av[4] + 0*n_elem_per_reg );
+            a_vec[5].v = _mm256_loadu_pd( av[5] + 0*n_elem_per_reg );
+            a_vec[6].v = _mm256_loadu_pd( av[6] + 0*n_elem_per_reg );
+            a_vec[7].v = _mm256_loadu_pd( av[7] + 0*n_elem_per_reg );
 
-		a_vec[0].v = _mm256_loadu_pd( av[0] + 0*n_elem_per_reg );
-		a_vec[1].v = _mm256_loadu_pd( av[1] + 0*n_elem_per_reg );
-		a_vec[2].v = _mm256_loadu_pd( av[2] + 0*n_elem_per_reg );
-		a_vec[3].v = _mm256_loadu_pd( av[3] + 0*n_elem_per_reg );
-		a_vec[4].v = _mm256_loadu_pd( av[4] + 0*n_elem_per_reg );
-		a_vec[5].v = _mm256_loadu_pd( av[5] + 0*n_elem_per_reg );
-		a_vec[6].v = _mm256_loadu_pd( av[6] + 0*n_elem_per_reg );
-		a_vec[7].v = _mm256_loadu_pd( av[7] + 0*n_elem_per_reg );
+            // perform : y += alpha * x;
+            yv[0].v = _mm256_fmadd_pd( a_vec[0].v, chiv[0].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[1].v, chiv[1].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[2].v, chiv[2].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[3].v, chiv[3].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[4].v, chiv[4].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[5].v, chiv[5].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[6].v, chiv[6].v, yv[0].v );
+            yv[0].v = _mm256_fmadd_pd( a_vec[7].v, chiv[7].v, yv[0].v );
 
-		// perform : y += alpha * x;
-		yv[0].v = _mm256_fmadd_pd( a_vec[0].v, chiv[0].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[1].v, chiv[1].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[2].v, chiv[2].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[3].v, chiv[3].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[4].v, chiv[4].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[5].v, chiv[5].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[6].v, chiv[6].v, yv[0].v );
-		yv[0].v = _mm256_fmadd_pd( a_vec[7].v, chiv[7].v, yv[0].v );
+            // Store the output.
+            _mm256_storeu_pd( (y0 + 0*n_elem_per_reg), yv[0].v );
 
-		// Store the output.
-		_mm256_storeu_pd( (y0 + 0*n_elem_per_reg), yv[0].v );
+            y0 += n_elem_per_reg;
+            av[0] += n_elem_per_reg;
+            av[1] += n_elem_per_reg;
+            av[2] += n_elem_per_reg;
+            av[3] += n_elem_per_reg;
+            av[4] += n_elem_per_reg;
+            av[5] += n_elem_per_reg;
+            av[6] += n_elem_per_reg;
+            av[7] += n_elem_per_reg;
+        }
 
-		y0 += n_elem_per_reg;
-		av[0] += n_elem_per_reg;
-		av[1] += n_elem_per_reg;
-		av[2] += n_elem_per_reg;
-		av[3] += n_elem_per_reg;
-		av[4] += n_elem_per_reg;
-		av[5] += n_elem_per_reg;
-		av[6] += n_elem_per_reg;
-		av[7] += n_elem_per_reg;
-	}
+        if ( m_left > 0 )
+        {
+            __m256i indices = _mm256_setr_epi64x( 0, 1, 2, 3 );   // indices <- [0, 1, 2, 3] 
 
-	// If there are leftover iterations, perform them with scalar code.
-	for ( i = 0; i < m_left ; ++i )
-	{
-		double       y0c = *y0;
+            // _mm256_set1_epi64x: broadcasts m_left to all lanes of a 256 bit register, m_left_YMM[:] <- m_left
+            // _mm256_cmpgt_epi64: m_left_YMM[i] > indices[i] ? -1 : 0
+            // This operation sets -1(0xFF..F) to all the lanes of the mask where m_left > indices[i]
+            // For example, if m_left == 2, mask <- [-1, -1, 0, 0], this mask is subsequently
+            // used to load 2 64 bit elements from the corresponding memory locations
+            __m256i mask = _mm256_cmpgt_epi64( _mm256_set1_epi64x( m_left ), indices );  // mask[i] <- m_left > indices[i] ? -1 : 0
 
-		const double a0c = *av[0];
-		const double a1c = *av[1];
-		const double a2c = *av[2];
-		const double a3c = *av[3];
-		const double a4c = *av[4];
-		const double a5c = *av[5];
-		const double a6c = *av[6];
-		const double a7c = *av[7];
+            // Perform the masked loads
+            __m256d y0cv = _mm256_maskload_pd( y0, mask );
+            __m256d a0cv = _mm256_maskload_pd( av[0], mask );
+            __m256d a1cv = _mm256_maskload_pd( av[1], mask );
+            __m256d a2cv = _mm256_maskload_pd( av[2], mask );
+            __m256d a3cv = _mm256_maskload_pd( av[3], mask );
+            __m256d a4cv = _mm256_maskload_pd( av[4], mask );
+            __m256d a5cv = _mm256_maskload_pd( av[5], mask );
+            __m256d a6cv = _mm256_maskload_pd( av[6], mask );
+            __m256d a7cv = _mm256_maskload_pd( av[7], mask );
 
-		y0c += chi[0] * a0c;
-		y0c += chi[1] * a1c;
-		y0c += chi[2] * a2c;
-		y0c += chi[3] * a3c;
-		y0c += chi[4] * a4c;
-		y0c += chi[5] * a5c;
-		y0c += chi[6] * a6c;
-		y0c += chi[7] * a7c;
+            // Perform the masked FMA on the masked registers
+            y0cv = _mm256_fmadd_pd( chiv[0].v, a0cv, y0cv );
+            y0cv = _mm256_fmadd_pd( chiv[1].v, a1cv, y0cv );
+            y0cv = _mm256_fmadd_pd( chiv[2].v, a2cv, y0cv );
+            y0cv = _mm256_fmadd_pd( chiv[3].v, a3cv, y0cv );
+            y0cv = _mm256_fmadd_pd( chiv[4].v, a4cv, y0cv );
+            y0cv = _mm256_fmadd_pd( chiv[5].v, a5cv, y0cv );
+            y0cv = _mm256_fmadd_pd( chiv[6].v, a6cv, y0cv );
+            y0cv = _mm256_fmadd_pd( chiv[7].v, a7cv, y0cv );
 
-		*y0 = y0c;
+            // Masked store to y0
+            _mm256_maskstore_pd( y0, mask, y0cv );
+        }
 
-		av[0] += inca;
-		av[1] += inca;
-		av[2] += inca;
-		av[3] += inca;
-		av[4] += inca;
-		av[5] += inca;
-		av[6] += inca;
-		av[7] += inca;
-		y0 += incy;
-	}
+        // Issue vzeroupper instruction to clear upper lanes of ymm registers.
+        // This avoids a performance penalty caused by false dependencies when
+        // transitioning from AVX to SSE instructions (which may occur later,
+        // especially if BLIS is compiled with -mfpmath=sse).
+        _mm256_zeroupper();
+    }
+    else
+    {
+        // If there is anything that would interfere with our use of contiguous
+        // vector loads/stores, override m_viter and m_left to use scalar code
+        // for all iterations.
+        m_viter[0] = m_viter[1] = m_viter[2] = m_viter[3] = 0;
+        m_left  = m;
+
+        /*
+        * DAXPYF implementation for non-unit strides (inca/incy != 1).
+        * While the loop remains scalar due to non-contiguous memory access, we use
+        * SSE scalar intrinsics (_mm_fmadd_sd) to leverage the hardware's Fused
+        * Multiply-Add (FMA) unit. This maintains higher precision by 
+        * performing the multiply-add in a single step.
+        */
+        __m128d chi0v_s = _mm_load_sd( &chi[0] ); // chi0v_s[0] <- chi[0]
+                                                  // chi0v_s[1] <- 0.0 (Unused)
+        __m128d chi1v_s = _mm_load_sd( &chi[1] ); // chi1v_s[0] <- chi[1]
+                                                  // chi1v_s[1] <- 0.0 (Unused)
+        __m128d chi2v_s = _mm_load_sd( &chi[2] ); // chi2v_s[0] <- chi[2]
+                                                  // chi2v_s[1] <- 0.0 (Unused)
+        __m128d chi3v_s = _mm_load_sd( &chi[3] ); // chi3v_s[0] <- chi[3]
+                                                  // chi3v_s[1] <- 0.0 (Unused)
+        __m128d chi4v_s = _mm_load_sd( &chi[4] ); // chi4v_s[0] <- chi[4]
+                                                  // chi4v_s[1] <- 0.0 (Unused)
+        __m128d chi5v_s = _mm_load_sd( &chi[5] ); // chi5v_s[0] <- chi[5]
+                                                  // chi5v_s[1] <- 0.0 (Unused)
+        __m128d chi6v_s = _mm_load_sd( &chi[6] ); // chi6v_s[0] <- chi[6]
+                                                  // chi6v_s[1] <- 0.0 (Unused)
+        __m128d chi7v_s = _mm_load_sd( &chi[7] ); // chi7v_s[0] <- chi[7]
+                                                  // chi7v_s[1] <- 0.0 (Unused)
+        for ( i = 0; i < m_left ; ++i )
+        {
+            // Load single double into low lane of __m128d
+            __m128d y0cv_s = _mm_load_sd( y0);      // y0cv_s[0] <- y0[0]
+                                                    // y0cv_s[1] <- 0.0 (Unused)
+            __m128d a0cv_s = _mm_load_sd( av[0] );  // a0cv_s[0] <- av[0]
+                                                    // a0cv_s[1] <- 0.0 (Unused)
+            __m128d a1cv_s = _mm_load_sd( av[1] );  // a1cv_s[0] <- av[1]
+                                                    // a1cv_s[1] <- 0.0 (Unused)
+            __m128d a2cv_s = _mm_load_sd( av[2] );  // a2cv_s[0] <- av[2]
+                                                    // a2cv_s[1] <- 0.0 (Unused)
+            __m128d a3cv_s = _mm_load_sd( av[3] );  // a3cv_s[0] <- av[3]
+                                                    // a3cv_s[1] <- 0.0 (Unused)
+            __m128d a4cv_s = _mm_load_sd( av[4] );  // a4cv_s[0] <- av[4]
+                                                    // a4cv_s[1] <- 0.0 (Unused)
+            __m128d a5cv_s = _mm_load_sd( av[5] );  // a5cv_s[0] <- av[5]
+                                                    // a5cv_s[1] <- 0.0 (Unused)
+            __m128d a6cv_s = _mm_load_sd( av[6] );  // a6cv_s[0] <- av[6]
+                                                    // a6cv_s[1] <- 0.0 (Unused)
+            __m128d a7cv_s = _mm_load_sd( av[7] );  // a7cv_s[0] <- av[7]
+                                                    // a7cv_s[1] <- 0.0 (Unused)
+
+            // _mm_fmadd_sd performs a scalar fused multiply-add (FMA) 
+            // on the low 64-bit double-precision element of XMM registers.
+            // This operation is done in one fused instruction
+            // with one rounding (compared to two in the scalar case)
+            y0cv_s = _mm_fmadd_sd( chi0v_s, a0cv_s, y0cv_s ); // y0cv_s[0] <- (chi0v_s[0] * a0cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi0v_s[1] (Unused)
+            y0cv_s = _mm_fmadd_sd( chi1v_s, a1cv_s, y0cv_s ); // y0cv_s[0] <- (chi1v_s[0] * a1cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi1v_s[1] (Unused)
+            y0cv_s = _mm_fmadd_sd( chi2v_s, a2cv_s, y0cv_s ); // y0cv_s[0] <- (chi2v_s[0] * a2cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi2v_s[1] (Unused)
+            y0cv_s = _mm_fmadd_sd( chi3v_s, a3cv_s, y0cv_s ); // y0cv_s[0] <- (chi3v_s[0] * a3cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi3v_s[1] (Unused)
+            y0cv_s = _mm_fmadd_sd( chi4v_s, a4cv_s, y0cv_s ); // y0cv_s[0] <- (chi4v_s[0] * a4cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi4v_s[1] (Unused)
+            y0cv_s = _mm_fmadd_sd( chi5v_s, a5cv_s, y0cv_s ); // y0cv_s[0] <- (chi5v_s[0] * a5cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi5v_s[1] (Unused)
+            y0cv_s = _mm_fmadd_sd( chi6v_s, a6cv_s, y0cv_s ); // y0cv_s[0] <- (chi6v_s[0] * a6cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi6v_s[1] (Unused)
+            y0cv_s = _mm_fmadd_sd( chi7v_s, a7cv_s, y0cv_s ); // y0cv_s[0] <- (chi7v_s[0] * a7cv_s[0]) + y0cv_s[0]
+                                                              // y0cv_s[1] <- chi7v_s[1] (Unused)
+
+            // store the accumulated value (lower lane) 
+            _mm_store_sd( y0, y0cv_s ); // y0 <- y0cv_s[0]
+ 
+            av[0] += inca;
+            av[1] += inca;
+            av[2] += inca;
+            av[3] += inca;
+            av[4] += inca;
+            av[5] += inca;
+            av[6] += inca;
+            av[7] += inca;
+            y0 += incy;
+        }
+    }    
 }
-

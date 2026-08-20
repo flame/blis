@@ -171,7 +171,7 @@
     if ( PASTECH2( THRESH_GEMM_, ch, _TINY_ZEN5_AVX2 )( transa, transb, m, n, k, is_parallel ) ) \
       LOOKUP_AVX2_UKR( ch, stor_id, ukr_support, gemmtiny_ukr_info ) \
     else if ( PASTECH2( THRESH_GEMM_, ch, _TINY_ZEN5_AVX512 )( stor_id, transa, transb, m, n, k, is_parallel ) ) \
-      LOOKUP_AVX512_UKR( ch, stor_id, ukr_support, gemmtiny_ukr_info ) \
+      LOOKUP_ZEN5_UKR( ch, stor_id, ukr_support, gemmtiny_ukr_info ) \
     break;
 
 #endif

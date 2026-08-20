@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -108,8 +108,9 @@ static double AOCL_NAN = std::numeric_limits<double>::quiet_NaN();
 static double AOCL_INF = std::numeric_limits<double>::infinity();
 
 #ifndef TEST_BLIS_TYPED
+
 INSTANTIATE_TEST_SUITE_P(
-        Native,
+        expect_sup_path,
         dgemmtEVT,
         ::testing::Combine(
             ::testing::Values('c'
@@ -118,10 +119,10 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
             ),                                                               // storage format
             ::testing::Values('u','l'),                                      // uplo u:upper, l:lower
-            ::testing::Values('n','t'),                                      // transa
-            ::testing::Values('n','t'),                                      // transb
-            ::testing::Values(7, 800),                                       // n
-            ::testing::Values(7, 800),                                       // k
+            ::testing::Values('n', 'c', 't'),                                // transa
+            ::testing::Values('n', 'c', 't'),                                // transb
+            ::testing::Values(3, 32, 253),                                   // n
+            ::testing::Values(5, 17, 244),                                   // k
             ::testing::Values(2.4, AOCL_NAN/*, AOCL_INF, -AOCL_INF*/),       // alpha //commented values fail
             ::testing::Values(2.4/*, AOCL_NAN*/, AOCL_INF, -AOCL_INF),       // beta //commented values fail
             ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of a
@@ -129,8 +130,35 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of c
             ::testing::Values(0.0, AOCL_NAN, AOCL_INF, -AOCL_INF),           // extreme value for A matrix
             ::testing::Values(0.0, AOCL_NAN, AOCL_INF, -AOCL_INF),           // extreme value for B matrix
-            ::testing::Values(0.0, AOCL_NAN, AOCL_INF, -AOCL_INF)            // extreme value for B matrix
+            ::testing::Values(0.0, AOCL_NAN, AOCL_INF, -AOCL_INF)            // extreme value for C matrix
         ),
         ::gemmtEVTPrint<double>()
     );
+
+INSTANTIATE_TEST_SUITE_P(
+        expect_native_path,
+        dgemmtEVT,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS_LIKE
+                             ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('u','l'),                                      // uplo u:upper, l:lower
+            ::testing::Values('n', 'c', 't'),                                // transa
+            ::testing::Values('n', 'c', 't'),                                // transb
+            ::testing::Values(7, 407),                                       // n
+            ::testing::Values(3, 47),                                        // k
+            ::testing::Values(2.4, AOCL_NAN/*, AOCL_INF, -AOCL_INF*/),       // alpha //commented values fail
+            ::testing::Values(2.4/*, AOCL_NAN*/, AOCL_INF, -AOCL_INF),       // beta //commented values fail
+            ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of a
+            ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of b
+            ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of c
+            ::testing::Values(0.0, AOCL_NAN, AOCL_INF, -AOCL_INF),           // extreme value for A matrix
+            ::testing::Values(0.0, AOCL_NAN, AOCL_INF, -AOCL_INF),           // extreme value for B matrix
+            ::testing::Values(0.0, AOCL_NAN, AOCL_INF, -AOCL_INF)            // extreme value for C matrix
+        ),
+        ::gemmtEVTPrint<double>()
+    );
+
 #endif

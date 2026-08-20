@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2025, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2026, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -160,7 +160,18 @@ GEMV_KER_PROT( scomplex, c,  gemv_zen_int_4x4 )
 GEMV_KER_PROT( dcomplex, z,  gemv_zen_int_4x4 )
 
 // gemv (intrinsics)
-GEMV_KER_PROT( double,  d, gemv_t_zen_int )
+void bli_dgemv_t_zen_int
+    ( 
+      trans_t transa,
+      conj_t conjx,
+      dim_t m, dim_t n,
+      double* restrict alpha,
+      double* restrict a, inc_t rs, inc_t cs,
+      double* restrict x, inc_t incx,
+      double* restrict beta,
+      double* restrict y, inc_t incy,
+      cntx_t* restrict cntx
+    );
 GEMV_KER_PROT( double,  d, gemv_t_zen_int_16x7m )
 GEMV_KER_PROT( double,  d, gemv_t_zen_int_16x6m )
 GEMV_KER_PROT( double,  d, gemv_t_zen_int_16x5m )
@@ -357,6 +368,22 @@ err_t bli_dgemm_tiny_zen_6x8
         const double*    b, const inc_t rs_b0, const inc_t cs_b0,
         const double*    beta,
         double*    c, const inc_t rs_c0, const inc_t cs_c0
+     );
+
+err_t bli_zgemm_tiny_zen_3x4
+     (
+        conj_t              conja,
+        conj_t              conjb,
+        trans_t transa,
+        trans_t transb,
+        dim_t  m,
+        dim_t  n,
+        dim_t  k,
+        const dcomplex*    alpha,
+        const dcomplex*    a, const inc_t rs_a0, const inc_t cs_a0,
+        const dcomplex*    b, const inc_t rs_b0, const inc_t cs_b0,
+        const dcomplex*    beta,
+        dcomplex*    c, const inc_t rs_c0, const inc_t cs_c0
      );
 
 err_t bli_dgemm_small
@@ -558,6 +585,33 @@ void bli_sgemv_zen_ref
        cntx_t* restrict cntx
      );
 
+void bli_cgemv_zen_ref
+    (
+       trans_t          transa,
+       dim_t            m,
+       dim_t            b_n,
+       scomplex* restrict alpha,
+       scomplex* restrict a, inc_t inca, inc_t lda,
+       scomplex* restrict x, inc_t incx,
+       scomplex* restrict beta,
+       scomplex* restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     );
+
+void bli_zgemv_zen_ref
+    (
+       trans_t          transa,
+       dim_t            m,
+       dim_t            b_n,
+       dcomplex* restrict alpha,
+       dcomplex* restrict a, inc_t inca, inc_t lda,
+       dcomplex* restrict x, inc_t incx,
+       dcomplex* restrict beta,
+       dcomplex* restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     );
+
+
 void bli_dgemv_n_zen
      (
        trans_t transa,
@@ -569,5 +623,103 @@ void bli_dgemv_n_zen
        double* x, inc_t incx,
        double* beta,
        double* y, inc_t incy,
+       cntx_t* cntx
+     );
+
+void bli_sgemv_t_zen_int
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       float*  alpha,
+       float*  a, inc_t rs_a, inc_t cs_a,
+       float*  x, inc_t incx,
+       float*  beta,
+       float*  y, inc_t incy,
+       cntx_t* cntx
+     );
+
+void bli_cgemv_t_zen_int
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       scomplex*  alpha,
+       scomplex*  a, inc_t rs_a, inc_t cs_a,
+       scomplex*  x, inc_t incx,
+       scomplex*  beta,
+       scomplex*  y, inc_t incy,
+       cntx_t* cntx
+     );
+
+void bli_zgemv_t_zen_int
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       dcomplex*  alpha,
+       dcomplex*  a, inc_t rs_a, inc_t cs_a,
+       dcomplex*  x, inc_t incx,
+       dcomplex*  beta,
+       dcomplex*  y, inc_t incy,
+       cntx_t* cntx
+     );
+
+void bli_sgemv_n_zen_int
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       float*  alpha,
+       float*  a, inc_t rs_a, inc_t cs_a,
+       float*  x, inc_t incx,
+       float*  beta,
+       float*  y, inc_t incy,
+       cntx_t* cntx
+     );
+
+void bli_dgemv_n_zen_int
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double* alpha,
+       double* a, inc_t rs_a, inc_t cs_a,
+       double* x, inc_t incx,
+       double* beta,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     );
+
+void bli_cgemv_n_zen_int
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       scomplex*  alpha,
+       scomplex*  a, inc_t rs_a, inc_t cs_a,
+       scomplex*  x, inc_t incx,
+       scomplex*  beta,
+       scomplex*  y, inc_t incy,
+       cntx_t* cntx
+     );
+
+void bli_zgemv_n_zen_int
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       dcomplex*  alpha,
+       dcomplex*  a, inc_t rs_a, inc_t cs_a,
+       dcomplex*  x, inc_t incx,
+       dcomplex*  beta,
+       dcomplex*  y, inc_t incy,
        cntx_t* cntx
      );
