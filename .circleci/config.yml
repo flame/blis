@@ -17,6 +17,9 @@ executors:
   linuxnew: # Docker using the Base Convenience Image
     docker:
       - image: cimg/base:current-22.04
+  linuxnoble: # Docker using Ubuntu 24.04 for newer cross-architecture tooling
+    docker:
+      - image: cimg/base:current-24.04
   macos: &macos-executor # macos executor running Xcode
     macos:
       xcode: 16.4.0
@@ -144,6 +147,15 @@ workflows:
           CONF: arm64
           PACKAGES: 'gcc-10-aarch64-linux-gnu g++-10-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user'
           TESTSUITE_WRAPPER: 'qemu-aarch64 -L /usr/aarch64-linux-gnu/'
+
+      # IBM z15 build and fast testsuite (qemu)
+      - build:
+          os: linuxnoble
+          CC: s390x-linux-gnu-gcc
+          CXX: s390x-linux-gnu-g++
+          CONF: z15
+          PACKAGES: 'gcc-s390x-linux-gnu g++-s390x-linux-gnu libc6-dev-s390x-cross qemu-user'
+          TESTSUITE_WRAPPER: 'qemu-s390x -cpu max -L /usr/s390x-linux-gnu/'
 
       # The RISC-V targets require the qemu version available in jammy or newer.
       # When CI is upgraded, the packages should be activated and do_script.sh
