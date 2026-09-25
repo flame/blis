@@ -2525,6 +2525,15 @@ void bli_zgemm_haswell_asm_3x4
 	lea(mem(, rsi, 2), rsi)
 	lea(mem(, rsi, 2), rdx) // rdx = 2*cs_c;
 
+	// now avoid loading C if beta == 0
+	vxorpd(ymm0, ymm0, ymm0) // set ymm0 to zero.
+	vucomisd(xmm0, xmm1) // set ZF if beta_r == 0.
+	sete(r8b) // r8b = ( ZF == 1 ? 1 : 0 );
+	vucomisd(xmm0, xmm2) // set ZF if beta_i == 0.
+	sete(r9b) // r9b = ( ZF == 1 ? 1 : 0 );
+	and(r8b, r9b) // clear ZF if r8b & r9b == 1.
+	jne(.ZBETAZERO) // if ZF = 0 (beta == 0), jump to beta == 0 case
+
 	cmp(imm(16), rsi) // set ZF if (16*cs_c) == 16.
 	jz(.ZROWSTORED) // jump to row storage case
 
@@ -2612,6 +2621,66 @@ void bli_zgemm_haswell_asm_3x4
 	ZGEMM_OUTPUT_RS
 
 
+
+	jmp(.ZDONE) // jump to end.
+
+	/* beta == 0: C must not be read (it may be uninitialized). */
+	label(.ZBETAZERO)
+
+	cmp(imm(16), rsi) // set ZF if (16*cs_c) == 16.
+	jz(.ZROWSTORBZ) // jump to row storage case
+
+	label(.ZGENSTORBZ)
+
+	vmovapd(ymm4, ymm0)
+	ZGEMM_OUTPUT_GS
+	add(rdx, rcx) // c += 2*cs_c;
+
+	vmovapd(ymm5, ymm0)
+	ZGEMM_OUTPUT_GS
+	mov(r11, rcx) // rcx = c + 1*rs_c
+
+	vmovapd(ymm8, ymm0)
+	ZGEMM_OUTPUT_GS
+	add(rdx, rcx) // c += 2*cs_c;
+
+	vmovapd(ymm9, ymm0)
+	ZGEMM_OUTPUT_GS
+	mov(r12, rcx) // rcx = c + 2*rs_c
+
+	vmovapd(ymm12, ymm0)
+	ZGEMM_OUTPUT_GS
+	add(rdx, rcx) // c += 2*cs_c;
+
+	vmovapd(ymm13, ymm0)
+	ZGEMM_OUTPUT_GS
+
+	jmp(.ZDONE) // jump to end.
+
+	label(.ZROWSTORBZ)
+
+	vmovapd(ymm4, ymm0)
+	ZGEMM_OUTPUT_RS
+	add(rdx, rcx) // c += 2*cs_c;
+
+	vmovapd(ymm5, ymm0)
+	ZGEMM_OUTPUT_RS
+	mov(r11, rcx) // rcx = c + 1*rs_c
+
+	vmovapd(ymm8, ymm0)
+	ZGEMM_OUTPUT_RS
+	add(rdx, rcx) // c += 2*cs_c;
+
+	vmovapd(ymm9, ymm0)
+	ZGEMM_OUTPUT_RS
+	mov(r12, rcx) // rcx = c + 2*rs_c
+
+	vmovapd(ymm12, ymm0)
+	ZGEMM_OUTPUT_RS
+	add(rdx, rcx) // c += 2*cs_c;
+
+	vmovapd(ymm13, ymm0)
+	ZGEMM_OUTPUT_RS
 
 	jmp(.ZDONE) // jump to end.
 
