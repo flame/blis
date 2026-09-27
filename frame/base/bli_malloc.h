@@ -59,6 +59,12 @@ void  bli_ffree_align( free_ft f, void* p );
 void* bli_fmalloc_noalign( malloc_ft f, size_t size, err_t* r_val );
 void  bli_ffree_noalign( free_ft f, void* p );
 
+#ifdef BLIS_ENABLE_HUGEPAGE_POOL
+// Huge-page-backed pool allocator (see bli_malloc.c). malloc()/free()-compatible.
+void* bli_hugepage_malloc( size_t size );
+void  bli_hugepage_free  ( void*  p    );
+#endif
+
 void  bli_fmalloc_align_check( malloc_ft f, size_t size, size_t align_size );
 void  bli_fmalloc_post_check( void* p );
 
