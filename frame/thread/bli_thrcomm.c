@@ -261,8 +261,53 @@ void bli_thrcomm_barrier_atomic( dim_t t_id, thrcomm_t* comm )
 		// If the current thread is NOT the last thread to have arrived, then
 		// it spins on the sense variable until that sense variable changes at
 		// which time these threads will exit the barrier.
-		while ( __atomic_load_n( &comm->barrier_sense, __ATOMIC_ACQUIRE ) == orig_sense )
-			; // Empty loop body.
+
+		// A progressive back-off scheme is employed: the configuration (or
+		// configuration family) defines zero or more (up to three) mechanisms
+		// for backoff along with the maximum number of attempts to acquire for
+		// each mechanism. The "outermost" mechanism always gets an unlimited
+		// number of attempts
+
+#ifndef BLIS_BARRIER_YIELD_1
+#define BLIS_BARRIER_YIELD_1
+#endif
+
+#ifdef BLIS_BARRIER_BACKOFF_2
+#define BLIS_BARRIER_BACKOFF_COND_1 i < BLIS_BARRIER_BACKOFF_1
+#else
+#define BLIS_BARRIER_BACKOFF_COND_1 true
+#endif
+
+#ifdef BLIS_BARRIER_BACKOFF_3
+#define BLIS_BARRIER_BACKOFF_COND_2 i < BLIS_BARRIER_BACKOFF_2
+#else
+#define BLIS_BARRIER_BACKOFF_COND_2 true
+#endif
+
+// Always "true" since there is no other backoff mechanism after this
+#define BLIS_BARRIER_BACKOFF_COND_3 true
+
+		// Backoff mechanism 1 (e.g. pause, defaults to an empty loop)
+		for ( gint_t i = 0 ; BLIS_BARRIER_BACKOFF_COND_1 &&
+		                     __atomic_load_n( &comm->barrier_sense, __ATOMIC_ACQUIRE ) == orig_sense ; i++ )
+			BLIS_BARRIER_YIELD_1;
+
+#ifdef BLIS_BARRIER_BACKOFF_2
+
+		// Backoff mechanism 2 (e.g. sched_yield)
+		for ( gint_t i = 0 ; BLIS_BARRIER_BACKOFF_COND_2 &&
+		                     __atomic_load_n( &comm->barrier_sense, __ATOMIC_ACQUIRE ) == orig_sense ; i++ )
+			BLIS_BARRIER_YIELD_2;
+
+#ifdef BLIS_BARRIER_BACKOFF_3
+
+		// Backoff mechanism 3 (e.g. sleep)
+		for ( gint_t i = 0 ; BLIS_BARRIER_BACKOFF_COND_3 &&
+		                     __atomic_load_n( &comm->barrier_sense, __ATOMIC_ACQUIRE ) == orig_sense ; i++ )
+			BLIS_BARRIER_YIELD_3;
+
+#endif //BLIS_BARRIER_BACKOFF_3
+#endif //BLIS_BARRIER_BACKOFF_2
 	}
 }
 
