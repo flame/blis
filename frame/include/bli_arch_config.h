@@ -87,7 +87,9 @@ INSERT_GENTCONF
 #endif
 
 // -- AMD64 architectures --
-
+#ifdef BLIS_FAMILY_ZEN4
+#include "bli_family_zen4.h"
+#endif
 #ifdef BLIS_FAMILY_ZEN3
 #include "bli_family_zen3.h"
 #endif
@@ -219,7 +221,9 @@ INSERT_GENTCONF
 #endif
 
 // -- AMD64 architectures --
-
+#ifdef BLIS_KERNELS_ZEN4
+#include "bli_kernels_zen4.h"
+#endif
 #ifdef BLIS_KERNELS_ZEN2
 #include "bli_kernels_zen2.h"
 #endif
