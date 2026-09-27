@@ -185,11 +185,23 @@ BLIS_INLINE bool bli_cntx_get_ukr_prefs_dt( num_t dt, kerid_t ukr_id, const cntx
 
 BLIS_INLINE bool bli_cntx_l3_sup_thresh_is_met( num_t dt, dim_t m, dim_t n, dim_t k, const cntx_t* cntx )
 {
+#ifdef BLIS_SUP_THRESH_ALL
+	// Take the SUP (skinny/unpacked) path only when *every* dimension is below
+	// its threshold, i.e. the matrix is small in all three dims. Shapes that
+	// are skinny in one dimension but large in another (rank-k updates, tall
+	// panels) are then handled by the packed native path, which is markedly
+	// faster for them on GB10 (measured: 4000x4000x64 native 677 vs SUP 474
+	// GFLOP/s). The default OR-semantics below would misroute those to SUP.
+	return ( m < bli_cntx_get_blksz_def_dt( dt, BLIS_MT, cntx ) &&
+	         n < bli_cntx_get_blksz_def_dt( dt, BLIS_NT, cntx ) &&
+	         k < bli_cntx_get_blksz_def_dt( dt, BLIS_KT, cntx ) );
+#else
 	if ( m < bli_cntx_get_blksz_def_dt( dt, BLIS_MT, cntx ) ) return TRUE;
 	if ( n < bli_cntx_get_blksz_def_dt( dt, BLIS_NT, cntx ) ) return TRUE;
 	if ( k < bli_cntx_get_blksz_def_dt( dt, BLIS_KT, cntx ) ) return TRUE;
 
 	return FALSE;
+#endif
 }
 
 // -----------------------------------------------------------------------------
