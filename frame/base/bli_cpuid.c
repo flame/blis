@@ -1154,6 +1154,9 @@ static uint32_t get_coretype
 #define ARM_CPU_PART_CORTEX_V1 0xd40
 #define ARM_CPU_PART_CORTEX_N2 0xd49
 #define ARM_CPU_PART_CORTEX_R82 0xd15
+	//   NVIDIA GB10 (DGX Spark) clusters:
+#define ARM_CPU_PART_CORTEX_X925 0xd85
+#define ARM_CPU_PART_CORTEX_A725 0xd87
 	//
 	// APM_CPU_PART_POTENZA 0x000
 	//
@@ -1201,6 +1204,22 @@ static uint32_t get_coretype
 		case ARM_CPU_IMP_ARM:		// ARM
 			switch (part)
 			{
+#ifdef BLIS_CONFIG_CORTEXX925
+				// NVIDIA GB10: use the cortexx925 config for BOTH the X925
+				// performance cores and the A725 efficiency cores -- a single
+				// code path across the heterogeneous chip. cortexx925 runs
+				// within ~2% of a dedicated A725 config on the A725 cores across
+				// all kernels, so affinity-free heterogeneous execution wins
+				// over per-core config selection.
+				case ARM_CPU_PART_CORTEX_X925:
+				case ARM_CPU_PART_CORTEX_A725:
+					return BLIS_ARCH_CORTEXX925;
+#elif defined(BLIS_CONFIG_CORTEXA725)
+				// Standalone Cortex-A725 build (non-GB10 A725 hardware): only
+				// reached when cortexx925 is not part of the build.
+				case ARM_CPU_PART_CORTEX_A725:
+					return BLIS_ARCH_CORTEXA725;
+#endif
 #ifdef BLIS_CONFIG_CORTEXA57
 				case ARM_CPU_PART_CORTEX_A57:
 					return BLIS_ARCH_CORTEXA57;

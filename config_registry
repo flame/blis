@@ -12,7 +12,7 @@ x86_64:         intel64 amd64 amd64_legacy
 intel64:        skx knl haswell sandybridge penryn generic
 amd64_legacy:   excavator steamroller piledriver bulldozer generic
 amd64:          zen3 zen2 zen generic
-arm64:          armsve firestorm thunderx2 cortexa57 cortexa53 generic
+arm64:          cortexx925 armsve firestorm thunderx2 cortexa57 cortexa53 generic
 arm32:          cortexa15 cortexa9 generic
 power:          power10 power9 generic
 
@@ -36,6 +36,12 @@ bulldozer:   bulldozer
 armsve:      armsve/armsve
 a64fx:       a64fx/armsve
 
+# NVIDIA GB10 Cortex-X925 (6 pipes x 128b); also used for GB10's A725 cores.
+cortexx925:        cortexx925/armv8a
+# Cortex-A725 (2 pipes x 128b) standalone config; not auto-selected on GB10,
+# where the cortexx925 code path is used for both core types. Build explicitly
+# (./configure cortexa725) for non-GB10 A725 hardware.
+cortexa725:        cortexa725/armv8a
 # ARM Neon64 (4 pipes x 128b) architectures.
 altramax:    altramax/armv8a
 altra:       altra/armv8a

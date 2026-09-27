@@ -1805,6 +1805,9 @@ check_compiler()
 	#
 	#   armsve: clang11+, gcc10+
 	#
+	#   cortexx925: clang19+, gcc14+
+	#   cortexa725: clang19+, gcc14+
+	#
 	#   generic: any
 	#
 	# Note: These compiler requirements were originally modeled after similar
@@ -1860,6 +1863,11 @@ check_compiler()
 		if [[ ${cc_major} -lt 10 ]]; then
 			blacklistcc_add "armsve"
 		fi
+		if [[ ${cc_major} -lt 14 ]]; then
+			# -mcpu=cortex-x925 and -mcpu=cortex-a725 require gcc 14 or newer.
+			blacklistcc_add "cortexx925"
+			blacklistcc_add "cortexa725"
+		fi
 	fi
 
 	# icc
@@ -1900,6 +1908,9 @@ check_compiler()
 				blacklistcc_add "knl"
 				blacklistcc_add "skx"
 			fi
+			# Apple clang does not yet target the Armv9.2 Cortex-X925/A725.
+			blacklistcc_add "cortexx925"
+			blacklistcc_add "cortexa725"
 		else
 			if [[ ${cc_major} -lt 3 ]]; then
 				echoerr_unsupportedcc
@@ -1924,6 +1935,11 @@ check_compiler()
 			fi
 			if [[ ${cc_major} -lt 11 ]]; then
 				blacklistcc_add "armsve"
+			fi
+			if [[ ${cc_major} -lt 19 ]]; then
+				# cortex-x925 and cortex-a725 require clang 19 or newer.
+				blacklistcc_add "cortexx925"
+				blacklistcc_add "cortexa725"
 			fi
 			if [[ ${cc_major} -ge 19 ]]; then
 				blacklistcc_add "knl"
