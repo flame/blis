@@ -15,6 +15,7 @@ amd64:          zen3 zen2 zen generic
 arm64:          armsve firestorm thunderx2 cortexa57 cortexa53 generic
 arm32:          cortexa15 cortexa9 generic
 power:          power10 power9 generic
+zarch:					z15 generic
 
 # Intel architectures.
 skx:         skx/skx/haswell/zen
@@ -53,6 +54,7 @@ cortexa9:    cortexa9/armv7a
 # IBM architectures.
 power10:     power10
 power9:      power9
+z15:				 z15/zarch
 bgq:         bgq
 
 # RISC-V architectures.
