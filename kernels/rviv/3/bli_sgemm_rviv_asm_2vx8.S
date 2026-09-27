@@ -34,10 +34,13 @@
 
 */
 
-GEMM_UKR_PROT( float,    s, gemm_rviv_4vx4 )
-GEMM_UKR_PROT( double,   d, gemm_rviv_4vx4 )
-GEMM_UKR_PROT( scomplex, c, gemm_rviv_4vx4 )
-GEMM_UKR_PROT( dcomplex, z, gemm_rviv_4vx4 )
-GEMM_UKR_PROT( float,    s, gemm_rviv_2vx8 )
-GEMM_UKR_PROT( double,   d, gemm_rviv_2vx8 )
-GEMM_UKR_PROT( double,   d, gemm_rviv_8x8 )
+#define REALNAME bli_sgemm_rviv_asm_2vx8
+#define DATASIZE 4
+#define VTYPE e32
+#define FLOAD flw
+#define FZERO(fr) fcvt.s.w fr, x0
+#define FEQ feq.s
+#define VLE vle32.v
+#define VSE vse32.v
+
+#include "bli_sdgemm_rviv_asm_2vx8.h"
