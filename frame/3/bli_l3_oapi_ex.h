@@ -66,6 +66,27 @@ GENPROT( gemm_def )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
      ( \
+       const obj_t*  alpha, \
+       const obj_t*  a, \
+       const obj_t*  d, \
+       const obj_t*  b, \
+       const obj_t*  beta, \
+       const obj_t*  c, \
+       const cntx_t* cntx, \
+       const rntm_t* rntm  \
+     );
+
+GENPROT( gemdm )
+GENPROT( gemdmt )
+GENPROT( her2kd )
+GENPROT( syr2kd )
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+     ( \
              side_t  side, \
        const obj_t*  alpha, \
        const obj_t*  a, \
@@ -96,6 +117,24 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
 
 GENPROT( herk )
 GENPROT( syrk )
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
+     ( \
+       const obj_t*  alpha, \
+       const obj_t*  a, \
+       const obj_t*  d, \
+       const obj_t*  beta, \
+       const obj_t*  c, \
+       const cntx_t* cntx, \
+       const rntm_t* rntm  \
+     );
+
+GENPROT( herkd )
+GENPROT( syrkd )
 
 
 #undef  GENPROT

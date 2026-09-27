@@ -64,6 +64,28 @@ INSERT_GENTPROT_BASIC( gemm )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
      ( \
+             trans_t transa, \
+             trans_t transb, \
+             dim_t   m, \
+             dim_t   n, \
+             dim_t   k, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  d, inc_t inc_d, \
+       const ctype*  b, inc_t rs_b, inc_t cs_b, \
+       const ctype*  beta, \
+             ctype*  c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t* cntx, \
+       const rntm_t* rntm  \
+     );
+
+INSERT_GENTPROT_BASIC( gemdm )
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
+     ( \
              side_t  side, \
              uplo_t  uploa, \
              conj_t  conja, \
@@ -166,6 +188,95 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
 
 INSERT_GENTPROT_BASIC( gemmt )
 INSERT_GENTPROT_BASIC( syr2k )
+
+
+#undef  GENTPROTR
+#define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
+     ( \
+             uplo_t   uploc, \
+             trans_t  transa, \
+             dim_t    m, \
+             dim_t    k, \
+       const ctype_r* alpha, \
+       const ctype*   a, inc_t rs_a, inc_t cs_a, \
+       const ctype_r* d, inc_t inc_d, \
+       const ctype_r* beta, \
+             ctype*   c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t*  cntx, \
+       const rntm_t*  rntm  \
+     );
+
+INSERT_GENTPROTR_BASIC( herkd )
+
+
+#undef  GENTPROTR
+#define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
+     ( \
+             uplo_t   uploc, \
+             trans_t  transa, \
+             trans_t  transb, \
+             dim_t    m, \
+             dim_t    k, \
+       const ctype*   alpha, \
+       const ctype*   a, inc_t rs_a, inc_t cs_a, \
+       const ctype*   d, inc_t inc_d, \
+       const ctype*   b, inc_t rs_b, inc_t cs_b, \
+       const ctype_r* beta, \
+             ctype*   c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t*  cntx, \
+       const rntm_t*  rntm  \
+     );
+
+INSERT_GENTPROTR_BASIC( her2kd )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
+     ( \
+             uplo_t  uploc, \
+             trans_t transa, \
+             dim_t   m, \
+             dim_t   k, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  d, inc_t inc_d, \
+       const ctype*  beta, \
+             ctype*  c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t* cntx, \
+       const rntm_t* rntm  \
+     );
+
+INSERT_GENTPROT_BASIC( syrkd )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
+     ( \
+             uplo_t  uploc, \
+             trans_t transa, \
+             trans_t transb, \
+             dim_t   m, \
+             dim_t   k, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  d, inc_t inc_d, \
+       const ctype*  b, inc_t rs_b, inc_t cs_b, \
+       const ctype*  beta, \
+             ctype*  c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t* cntx, \
+       const rntm_t* rntm  \
+     );
+
+INSERT_GENTPROT_BASIC( gemdmt )
+INSERT_GENTPROT_BASIC( syr2kd )
 
 
 #undef  GENTPROT
