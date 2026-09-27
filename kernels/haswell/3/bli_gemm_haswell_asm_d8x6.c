@@ -412,15 +412,15 @@ void bli_sgemm_haswell_asm_16x6
 	end_asm(
 	: // output operands (none)
 	: // input operands
-	  [k_iter] "m" (k_iter), // 0
-	  [k_left] "m" (k_left), // 1
-	  [a]      "m" (a),      // 2
-	  [b]      "m" (b),      // 3
-	  [alpha]  "m" (alpha),  // 4
-	  [beta]   "m" (beta),   // 5
-	  [c]      "m" (c),      // 6
-	  [rs_c]   "m" (rs_c),   // 7
-	  [cs_c]   "m" (cs_c)/*,   // 8
+	  [k_iter] "g" (k_iter), // 0
+	  [k_left] "g" (k_left), // 1
+	  [a]      "g" (a),      // 2
+	  [b]      "g" (b),      // 3
+	  [alpha]  "g" (alpha),  // 4
+	  [beta]   "g" (beta),   // 5
+	  [c]      "g" (c),      // 6
+	  [rs_c]   "g" (rs_c),   // 7
+	  [cs_c]   "g" (cs_c)/*,   // 8
 	  [b_next] "m" (b_next), // 9
 	  [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
@@ -796,15 +796,15 @@ void bli_dgemm_haswell_asm_8x6
 	end_asm(
 	: // output operands (none)
 	: // input operands
-	  [k_iter] "m" (k_iter), // 0
-	  [k_left] "m" (k_left), // 1
-	  [a]      "m" (a),      // 2
-	  [b]      "m" (b),      // 3
-	  [alpha]  "m" (alpha),  // 4
-	  [beta]   "m" (beta),   // 5
-	  [c]      "m" (c),      // 6
-	  [rs_c]   "m" (rs_c),   // 7
-	  [cs_c]   "m" (cs_c)/*,   // 8
+	  [k_iter] "g" (k_iter), // 0
+	  [k_left] "g" (k_left), // 1
+	  [a]      "g" (a),      // 2
+	  [b]      "g" (b),      // 3
+	  [alpha]  "g" (alpha),  // 4
+	  [beta]   "g" (beta),   // 5
+	  [c]      "g" (c),      // 6
+	  [rs_c]   "g" (rs_c),   // 7
+	  [cs_c]   "g" (cs_c)/*,   // 8
 	  [b_next] "m" (b_next), // 9
 	  [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
@@ -1187,15 +1187,15 @@ void bli_cgemm_haswell_asm_8x3
 	end_asm(
 	: // output operands (none)
 	: // input operands
-	  [k_iter] "m" (k_iter), // 0
-	  [k_left] "m" (k_left), // 1
-	  [a]      "m" (a),      // 2
-	  [b]      "m" (b),      // 3
-	  [alpha]  "m" (alpha),  // 4
-	  [beta]   "m" (beta),   // 5
-	  [c]      "m" (c),      // 6
-	  [rs_c]   "m" (rs_c),   // 7
-	  [cs_c]   "m" (cs_c)/*,   // 8
+	  [k_iter] "g" (k_iter), // 0
+	  [k_left] "g" (k_left), // 1
+	  [a]      "g" (a),      // 2
+	  [b]      "g" (b),      // 3
+	  [alpha]  "g" (alpha),  // 4
+	  [beta]   "g" (beta),   // 5
+	  [c]      "g" (c),      // 6
+	  [rs_c]   "g" (rs_c),   // 7
+	  [cs_c]   "g" (cs_c)/*,   // 8
 	  [b_next] "m" (b_next), // 9
 	  [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
@@ -1579,15 +1579,15 @@ void bli_zgemm_haswell_asm_4x3
 	end_asm(
 	: // output operands (none)
 	: // input operands
-	  [k_iter] "m" (k_iter), // 0
-	  [k_left] "m" (k_left), // 1
-	  [a]      "m" (a),      // 2
-	  [b]      "m" (b),      // 3
-	  [alpha]  "m" (alpha),  // 4
-	  [beta]   "m" (beta),   // 5
-	  [c]      "m" (c),      // 6
-	  [rs_c]   "m" (rs_c),   // 7
-	  [cs_c]   "m" (cs_c)/*,   // 8
+	  [k_iter] "g" (k_iter), // 0
+	  [k_left] "g" (k_left), // 1
+	  [a]      "g" (a),      // 2
+	  [b]      "g" (b),      // 3
+	  [alpha]  "g" (alpha),  // 4
+	  [beta]   "g" (beta),   // 5
+	  [c]      "g" (c),      // 6
+	  [rs_c]   "g" (rs_c),   // 7
+	  [cs_c]   "g" (cs_c)/*,   // 8
 	  [b_next] "m" (b_next), // 9
 	  [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
