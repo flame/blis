@@ -535,16 +535,19 @@ add_config_var()
 	var="${2:-${sub_var}}"
 
 	#
-	# Use the | character in the substitution command to avoid mangling variables
-	# which contain forward slashes (e.g. paths). There *shouldn't* be any variables
-	# that have | in them...
+	# Record the name of the @anchor@ and the name of the shell variable that
+	# holds its value. The value itself is not looked up until the config file
+	# is generated (see generate_config_file()), so that it is never subjected
+	# to shell or Perl expansion. This allows values (e.g. paths) to contain
+	# characters such as @, $, \, and |.
 	#
-	config_substitutions="${config_substitutions} -e \\\"s|\@${sub_var}\@|\${${var}}|g;\\\""
+	config_sub_names+=("${sub_var}")
+	config_sub_vars+=("${var}")
 }
 
 generate_config_file()
 {
-	local in_file out_file sub
+	local in_file out_file i var sub_args
 
 	in_file="$1"
 	out_file="$2"
@@ -552,15 +555,26 @@ generate_config_file()
 	echo "${script_name}: creating ${out_file} from ${in_file}"
 
 	#
-	# Use 'eval' to expand the variable references.
+	# Build a list of anchor/value pairs. Each value is obtained by indirect
+	# expansion of the corresponding variable name.
 	#
-	eval "sub=\"${config_substitutions}\""
+	sub_args=()
+	for i in "${!config_sub_names[@]}"; do
+		var="${config_sub_vars[$i]}"
+		sub_args+=("${config_sub_names[$i]}" "${!var}")
+	done
 
 	#
-	# 'eval' also has to be used here to get the proper quoting.
-	# This 'eval' CAN NOT be combined with the one above.
+	# Pass the anchor/value pairs to Perl as command line arguments (rather
+	# than embedding the values in the Perl code) so that they are inserted
+	# verbatim, without any interpolation. The pairs are removed from @ARGV
+	# before the input file is read so that Perl reads from stdin instead.
 	#
-	eval "perl -p ${sub} <\"${in_file}\" >\"${out_file}\""
+	# shellcheck disable=2016
+	perl -p -e 'BEGIN { %subs = @ARGV; @ARGV = ();
+	                    $anchors = join("|", map { quotemeta } keys %subs); }' \
+	        -e 's/\@($anchors)\@/$subs{$1}/g;' \
+	        "${sub_args[@]}" <"${in_file}" >"${out_file}"
 }
 
 #
@@ -2997,31 +3011,27 @@ blis_main()
 	prefix_flag=''
 
 	# The installation exec_prefix, assigned its default value, and a flag to
-	# track whether or not it was given by the user. Double-escaping the
-	# variable is necessary because it will pass through 'eval' twice.
+	# track whether or not it was given by the user.
 	# shellcheck disable=2016
-	exec_prefix='\\\${prefix}'
+	exec_prefix='${prefix}'
 	exec_prefix_flag=''
 
 	# The installation libdir, assigned its default value, and a flag to
-	# track whether or not it was given by the user. Double-escaping the
-	# variable is necessary because it will pass through 'eval' twice.
+	# track whether or not it was given by the user.
 	# shellcheck disable=2016
-	libdir='\\\${exec_prefix}/lib'
+	libdir='${exec_prefix}/lib'
 	libdir_flag=''
 
 	# The installation includedir, assigned its default value, and a flag to
-	# track whether or not it was given by the user. Double-escaping the
-	# variable is necessary because it will pass through 'eval' twice.
+	# track whether or not it was given by the user.
 	# shellcheck disable=2016
-	includedir='\\\${prefix}/include'
+	includedir='${prefix}/include'
 	includedir_flag=''
 
 	# The installation sharedir, assigned its default value, and a flag to
-	# track whether or not it was given by the user. Double-escaping the
-	# variable is necessary because it will pass through 'eval' twice.
+	# track whether or not it was given by the user.
 	# shellcheck disable=2016
-	sharedir='\\\${prefix}/share'
+	sharedir='${prefix}/share'
 	sharedir_flag=''
 
 	# The preset value of CFLAGS, CXXFLAGS, and LDFLAGS (ie: compiler and linker flags
@@ -4334,7 +4344,7 @@ blis_main()
 
 	# Create a #define for the configuration family (config_name).
 	uconf=$(echo "${config_name}" | tr '[:lower:]' '[:upper:]')
-	config_name_define="#define BLIS_FAMILY_${uconf}\n"
+	config_name_define="#define BLIS_FAMILY_${uconf}"$'\n'
 
 	# Create a list of #defines, one for each configuration in config_list.
 	config_list_defines=""
@@ -4345,7 +4355,7 @@ blis_main()
 
 		# Create a #define and add it to the running list.
 		config_define="BLIS_CONFIG_${uconf}"
-		config_list_defines="${config_list_defines}#define ${config_define}\n"
+		config_list_defines="${config_list_defines}#define ${config_define}"$'\n'
 	done
 
 	# Create a list of #defines, one for each kernel set in kernel_list.
@@ -4357,7 +4367,7 @@ blis_main()
 
 		# Create a #define and add it to the running list.
 		kernel_define="BLIS_KERNELS_${uconf}"
-		kernel_list_defines="${kernel_list_defines}#define ${kernel_define}\n"
+		kernel_list_defines="${kernel_list_defines}#define ${kernel_define}"$'\n'
 	done
 
 	# Create a list of #includes, one for each addon in addon_list.
@@ -4366,7 +4376,7 @@ blis_main()
 
 		# Create a #define and add it to the running list.
 		addon_header="\"${addon}.h\""
-		addon_list_includes="${addon_list_includes}#include ${addon_header}\n"
+		addon_list_includes="${addon_list_includes}#include ${addon_header}"$'\n'
 	done
 
 	# Make sure that omit_symbol_list only contains lowercase letters, digits,
@@ -4388,7 +4398,7 @@ blis_main()
 
 		# Create a #define and add it to the running list.
 		omit_define="BLIS_DISABLE_${sym}"
-		omit_symbol_list_defines="${omit_symbol_list_defines}#define ${omit_define}\n"
+		omit_symbol_list_defines="${omit_symbol_list_defines}#define ${omit_define}"$'\n'
 	done
 
 
@@ -4973,10 +4983,10 @@ plugin_main()
 	add_config_var sharedir
 
 	# Other paths which we'll need to build the plugin
-	prefix=$(get_config_var prefix | sed 's/\$/\\\\\\$/g')
-	exec_prefix=$(get_config_var exec_prefix | sed 's/\$/\\\\\\$/g')
-	libdir=$(get_config_var libdir | sed 's/\$/\\\\\\$/g')
-	includedir=$(get_config_var includedir | sed 's/\$/\\\\\\$/g')
+	prefix=$(get_config_var prefix)
+	exec_prefix=$(get_config_var exec_prefix)
+	libdir=$(get_config_var libdir)
+	includedir=$(get_config_var includedir)
 	add_config_var prefix
 	add_config_var exec_prefix
 	add_config_var libdir
