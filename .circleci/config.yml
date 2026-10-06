@@ -173,6 +173,10 @@ workflows:
           CONF: sifive_x280
           BLD: --disable-shared
           LDFLAGS: -static
+      - build:
+          CONF: sifive_rvv
+          BLD: --disable-shared
+          LDFLAGS: -static
 
 jobs:
   win-build:
@@ -375,6 +379,12 @@ jobs:
               export CC=$DIST_PATH/../toolchain/riscv/bin/clang;
               export CXX=$DIST_PATH/../toolchain/riscv/bin/clang++;
               export TESTSUITE_WRAPPER="$DIST_PATH/../toolchain/qemu-riscv64 -cpu rv64,vext_spec=v1.0,v=true,vlen=512 -B 0x100000";
+            fi
+            if [ "$CONF" = "sifive_rvv" ]; then
+              $DIST_PATH/ci/do_riscv.sh "$CONF";
+              export CC=$DIST_PATH/../toolchain/riscv/bin/clang;
+              export CXX=$DIST_PATH/../toolchain/riscv/bin/clang++;
+              export TESTSUITE_WRAPPER="$DIST_PATH/../toolchain/qemu-riscv64 -cpu rv64,vext_spec=v1.0,v=true,vlen=128 -B 0x100000";
             fi
 
             if [ "$CONF" = "generic_broadcast" ]; then

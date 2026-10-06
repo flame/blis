@@ -67,13 +67,16 @@
 // segment stores with more than 4 fields, this is usually m1.
 // LMUL_MR is an LMUL large enough to hold MR floats (for spackm, cpackm)
 // or doubles (for dpackm, zpackm). LMUL_NR is analogous.
+// LMUL_MR must hold MR elements at the minimum supported VLEN (128); with m1
+// that only holds for VLEN >= 512, and otherwise the lda != 1 path packs only
+// VLMAX of the MR rows.
 
 // Single precision real
 #define DATATYPE float
 #define PRECISION_CHAR s
 #define PREC 32
 #define LMUL m1
-#define LMUL_MR m1
+#define LMUL_MR m2
 #define LMUL_NR m4
 #define FLT_SIZE sizeof(float)
 #define MR 7
@@ -96,7 +99,7 @@
 #define PRECISION_CHAR d
 #define PREC 64
 #define LMUL m1
-#define LMUL_MR m1
+#define LMUL_MR m4
 #define LMUL_NR m4
 #define FLT_SIZE sizeof(double)
 #define MR 7
@@ -120,7 +123,7 @@
 #define PRECISION_CHAR c
 #define PREC 32
 #define LMUL m1
-#define LMUL_MR m1
+#define LMUL_MR m2
 #define LMUL_NR m2
 #define FLT_SIZE sizeof(float)
 #define MR 6
@@ -145,7 +148,7 @@
 #define PRECISION_CHAR z
 #define PREC 64
 #define LMUL m1
-#define LMUL_MR m1
+#define LMUL_MR m4
 #define LMUL_NR m2
 #define FLT_SIZE sizeof(double)
 #define MR 6
