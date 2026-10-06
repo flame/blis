@@ -87,15 +87,10 @@ endif
 
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
-ifeq ($(CC_VENDOR),gcc)
-# Lower compiler optimization. cinvscalv fails at -O1
-CRVECFLAGS     := $(CKVECFLAGS) -O0
-else
 ifeq ($(CC_VENDOR),clang)
 CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
 else
 CRVECFLAGS     := $(CKVECFLAGS)
-endif
 endif
 
 # Store all of the variables here to new variables containing the
