@@ -14,7 +14,7 @@ case $1 in
 	"rv64iv")
 	TARBALL=riscv64-glibc-ubuntu-20.04-gcc-nightly-${TAG}-nightly.tar.gz
 	;;
-	"sifive_x280")
+	"sifive_x280"|"sifive_rvv")
 	TARBALL=riscv64-glibc-ubuntu-20.04-llvm-nightly-${TAG}-nightly.tar.gz
 	;;
 	*)
