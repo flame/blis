@@ -7,6 +7,7 @@
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
    Copyright (C) 2020, Advanced Micro Devices, Inc.
+	 Copyright (C) 2026, IBM Corp.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -999,6 +1000,9 @@ typedef enum arch_e
 	BLIS_ARCH_POWER9,
 	BLIS_ARCH_POWER7,
 	BLIS_ARCH_BGQ,
+
+	// IBM/zArch
+	BLIS_ARCH_Z15,
 
 	// RISC-V
 	BLIS_ARCH_RV32I,

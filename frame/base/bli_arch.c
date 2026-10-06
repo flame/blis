@@ -204,7 +204,8 @@ arch_t bli_arch_query_id_impl( void )
 		    defined BLIS_FAMILY_X86_64  || \
 		    defined BLIS_FAMILY_ARM64   || \
 		    defined BLIS_FAMILY_ARM32   || \
-		    defined BLIS_FAMILY_POWER
+		    defined BLIS_FAMILY_POWER		|| \
+				defined BLIS_FAMILY_ZARCH
 		id = bli_cpuid_query_id();
 		#endif
 
@@ -300,6 +301,10 @@ arch_t bli_arch_query_id_impl( void )
 		id = BLIS_ARCH_BGQ;
 		#endif
 
+		#ifdef BLIS_FAMILY_Z15
+		id = BLIS_ARCH_Z15;
+		#endif
+
 		// RISC-V microarchitectures
 		#ifdef BLIS_FAMILY_RV32I
 		id = BLIS_ARCH_RV32I;
@@ -381,6 +386,8 @@ static const char* config_name[ BLIS_NUM_ARCHS ] =
     "power9",
     "power7",
     "bgq",
+
+		"z15",
 
     "rv32i",
     "rv64i",

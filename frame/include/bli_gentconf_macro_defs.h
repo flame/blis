@@ -174,8 +174,9 @@
 #define INSERT_GENTCONF_CORTEXA9
 #endif
 
-		// -- IBM architectures ------------------------------------------------
+// -- IBM architectures ------------------------------------------------
 
+// -- IBM/Power --
 #ifdef BLIS_CONFIG_POWER10
 #define INSERT_GENTCONF_POWER10 GENTCONF( POWER10, power10 )
 #else
@@ -195,6 +196,13 @@
 #define INSERT_GENTCONF_BGQ GENTCONF( BGQ, bgq )
 #else
 #define INSERT_GENTCONF_BGQ
+#endif
+
+// -- IBM/zArch --
+#ifdef BLIS_CONFIG_Z15
+#define INSERT_GENTCONF_Z15 GENTCONF( Z15, z15 )
+#else
+#define INSERT_GENTCONF_Z15
 #endif
 
 // -- RISC-V architectures ----------------------------------------------------
@@ -279,6 +287,8 @@ INSERT_GENTCONF_POWER10 \
 INSERT_GENTCONF_POWER9 \
 INSERT_GENTCONF_POWER7 \
 INSERT_GENTCONF_BGQ \
+\
+INSERT_GENTCONF_Z15 \
 \
 INSERT_GENTCONF_RV32I \
 INSERT_GENTCONF_RV64I \
