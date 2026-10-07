@@ -251,7 +251,7 @@ void bli_gemm_ker_var2
 			// Set the current offset into the C matrix in the auxinfo_t
 			// object.
 			bli_auxinfo_set_off_m( off_m + i, &aux );
-			bli_auxinfo_set_off_m( off_n + j, &aux );
+			bli_auxinfo_set_off_n( off_n + j, &aux );
 
 			// Edge case handling now occurs within the microkernel itself.
 			// Invoke the gemm micro-kernel.
