@@ -34,6 +34,64 @@
 
 #include "blis.h"
 
+// -- Optional OpenMP row-parallel axpyf loop for gemv (no-transpose) ---------
+// gemv accumulates A's columns into y, so we cannot split the column loop
+// without a reduction. Instead we split y's rows (n_elem): each thread runs
+// the full column loop over its own contiguous band of rows, with offset A/y
+// pointers -- disjoint outputs, no reduction. Beta-scaling of y already
+// happened (serially) before this loop. Enabled via BLIS_ENABLE_L1_OPENMP.
+#ifdef BLIS_ENABLE_L1_OPENMP
+#include <omp.h>
+#ifndef BLIS_L2_MT_THRESHOLD
+#define BLIS_L2_MT_THRESHOLD 262144   // min m*n to thread
+#endif
+#define BLI_GEMV_V2_AXPYF_LOOP( kfp_af, conja, conjx, n_elem, n_iter, b_fuse, \
+                                alpha, a, rs_at, cs_at, x, incx, y, incy, cntx, mn ) \
+{ \
+	if ( ( uint64_t )(mn) >= ( uint64_t )BLIS_L2_MT_THRESHOLD && \
+	     omp_get_active_level() == 0 && omp_get_max_threads() > 1 ) \
+	{ \
+		_Pragma( "omp parallel" ) \
+		{ \
+			const dim_t nt_ = omp_get_num_threads(), tid_ = omp_get_thread_num(); \
+			const dim_t bs_ = (n_elem) / nt_, rm_ = (n_elem) % nt_; \
+			const dim_t r0_ = tid_ * bs_ + ( tid_ < rm_ ? tid_ : rm_ ); \
+			const dim_t rl_ = bs_ + ( tid_ < rm_ ? 1 : 0 ); \
+			if ( rl_ > 0 ) { \
+				dim_t i_, f_; \
+				for ( i_ = 0; i_ < (n_iter); i_ += f_ ) { \
+					f_ = bli_determine_blocksize_dim_f( i_, (n_iter), (b_fuse) ); \
+					kfp_af( (conja), (conjx), rl_, f_, (alpha), \
+					        (a) + r0_*(rs_at) + i_*(cs_at), (rs_at), (cs_at), \
+					        (x) + i_*(incx), (incx), (y) + r0_*(incy), (incy), (cntx) ); \
+				} \
+			} \
+		} \
+	} \
+	else { \
+		dim_t i_, f_; \
+		for ( i_ = 0; i_ < (n_iter); i_ += f_ ) { \
+			f_ = bli_determine_blocksize_dim_f( i_, (n_iter), (b_fuse) ); \
+			kfp_af( (conja), (conjx), (n_elem), f_, (alpha), \
+			        (a) + i_*(cs_at), (rs_at), (cs_at), \
+			        (x) + i_*(incx), (incx), (y), (incy), (cntx) ); \
+		} \
+	} \
+}
+#else
+#define BLI_GEMV_V2_AXPYF_LOOP( kfp_af, conja, conjx, n_elem, n_iter, b_fuse, \
+                                alpha, a, rs_at, cs_at, x, incx, y, incy, cntx, mn ) \
+{ \
+	dim_t i_, f_; \
+	for ( i_ = 0; i_ < (n_iter); i_ += f_ ) { \
+		f_ = bli_determine_blocksize_dim_f( i_, (n_iter), (b_fuse) ); \
+		kfp_af( (conja), (conjx), (n_elem), f_, (alpha), \
+		        (a) + i_*(cs_at), (rs_at), (cs_at), \
+		        (x) + i_*(incx), (incx), (y), (incy), (cntx) ); \
+	} \
+}
+#endif
+
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
 \
@@ -101,28 +159,11 @@ void PASTEMAC(ch,varname) \
 	axpyf_ker_ft kfp_af = bli_cntx_get_ukr_dt( dt, BLIS_AXPYF_KER, cntx ); \
 	b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_AF, cntx ); \
 \
-	for ( i = 0; i < n_iter; i += f ) \
-	{ \
-		f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse ); \
-\
-		A1 = a + (0  )*rs_at + (i  )*cs_at; \
-		x1 = x + (i  )*incx; \
-		y1 = y + (0  )*incy; \
-\
-		/* y = y + alpha * A1 * x1; */ \
-		kfp_af \
-		( \
-		  conja, \
-		  conjx, \
-		  n_elem, \
-		  f, \
-		  alpha, \
-		  A1, rs_at, cs_at, \
-		  x1, incx, \
-		  y1, incy, \
-		  cntx  \
-		); \
-	} \
+	/* y = y + alpha * A * x, row-parallel when enabled (see macro above). */ \
+	( void )A1; ( void )x1; ( void )y1; ( void )i; ( void )f; \
+	BLI_GEMV_V2_AXPYF_LOOP( kfp_af, conja, conjx, n_elem, n_iter, b_fuse, \
+	                        alpha, a, rs_at, cs_at, x, incx, y, incy, cntx, \
+	                        ( uint64_t )m * ( uint64_t )n ); \
 }
 
 INSERT_GENTFUNC_BASIC( gemv_unf_var2 )

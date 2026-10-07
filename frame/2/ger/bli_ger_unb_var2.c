@@ -34,6 +34,56 @@
 
 #include "blis.h"
 
+// Optional OpenMP column-parallel rank-1 update (ger). Each column of A is an
+// independent axpyv (A[:,j] += alpha*conj(y[j]) * x), so we split the columns
+// across threads -- disjoint output, no reduction. The per-column kernel is the
+// raw axpyv micro-kernel (not the threaded tapi wrapper), so there is no
+// nesting. Enabled via BLIS_ENABLE_L1_OPENMP.
+#ifdef BLIS_ENABLE_L1_OPENMP
+#include <omp.h>
+#ifndef BLIS_L2_MT_THRESHOLD
+#define BLIS_L2_MT_THRESHOLD 262144
+#endif
+#define BLI_GER_V2_COLS( ch, ctype, kfp_av, conjx, conjy, m, n, alpha, x, incx, y, incy, a, rs_a, cs_a, cntx ) \
+{ \
+	if ( ( uint64_t )(m)*( uint64_t )(n) >= ( uint64_t )BLIS_L2_MT_THRESHOLD && \
+	     omp_get_active_level() == 0 && omp_get_max_threads() > 1 ) \
+	{ \
+		_Pragma( "omp parallel" ) \
+		{ \
+			const dim_t nt_ = omp_get_num_threads(), tid_ = omp_get_thread_num(); \
+			const dim_t bs_ = (n) / nt_, rm_ = (n) % nt_; \
+			const dim_t j0_ = tid_*bs_ + ( tid_ < rm_ ? tid_ : rm_ ); \
+			const dim_t j1_ = j0_ + bs_ + ( tid_ < rm_ ? 1 : 0 ); \
+			for ( dim_t j_ = j0_; j_ < j1_; ++j_ ) { \
+				ctype ap_; \
+				bli_tcopycjs( ch,ch, (conjy), *((y) + j_*(incy)), ap_ ); \
+				bli_tscals( ch,ch,ch, *(alpha), ap_ ); \
+				kfp_av( (conjx), (m), &ap_, (x), (incx), (a) + j_*(cs_a), (rs_a), (cntx) ); \
+			} \
+		} \
+	} \
+	else { \
+		for ( dim_t j_ = 0; j_ < (n); ++j_ ) { \
+			ctype ap_; \
+			bli_tcopycjs( ch,ch, (conjy), *((y) + j_*(incy)), ap_ ); \
+			bli_tscals( ch,ch,ch, *(alpha), ap_ ); \
+			kfp_av( (conjx), (m), &ap_, (x), (incx), (a) + j_*(cs_a), (rs_a), (cntx) ); \
+		} \
+	} \
+}
+#else
+#define BLI_GER_V2_COLS( ch, ctype, kfp_av, conjx, conjy, m, n, alpha, x, incx, y, incy, a, rs_a, cs_a, cntx ) \
+{ \
+	for ( dim_t j_ = 0; j_ < (n); ++j_ ) { \
+		ctype ap_; \
+		bli_tcopycjs( ch,ch, (conjy), *((y) + j_*(incy)), ap_ ); \
+		bli_tscals( ch,ch,ch, *(alpha), ap_ ); \
+		kfp_av( (conjx), (m), &ap_, (x), (incx), (a) + j_*(cs_a), (rs_a), (cntx) ); \
+	} \
+}
+#endif
+
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
 \
@@ -61,26 +111,8 @@ void PASTEMAC(ch,varname) \
 	/* Query the context for the kernel function pointer. */ \
 	axpyv_ker_ft kfp_av = bli_cntx_get_ukr_dt( dt, BLIS_AXPYV_KER, cntx ); \
 \
-	for ( j = 0; j < n; ++j ) \
-	{ \
-		a1   = a + (0  )*rs_a + (j  )*cs_a; \
-		x1   = x + (0  )*incx; \
-		psi1 = y + (j  )*incy; \
-\
-		/* a1 = a1 + alpha * psi1 * x; */ \
-		bli_tcopycjs( ch,ch, conjy, *psi1, alpha_psi1 ); \
-		bli_tscals( ch,ch,ch, *alpha, alpha_psi1 ); \
-\
-		kfp_av \
-		( \
-		  conjx, \
-		  m, \
-		  &alpha_psi1, \
-		  x1, incx, \
-		  a1, rs_a, \
-		  cntx  \
-		); \
-	} \
+	( void )a1; ( void )x1; ( void )psi1; ( void )alpha_psi1; ( void )j; \
+	BLI_GER_V2_COLS( ch, ctype, kfp_av, conjx, conjy, m, n, alpha, x, incx, y, incy, a, rs_a, cs_a, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC( ger_unb_var2 )

@@ -34,6 +34,62 @@
 
 #include "blis.h"
 
+// -- Optional OpenMP output-parallel dotxf loop for gemv (transpose) ---------
+// var1 computes each output element independently (dotxf: y1 = beta*y1 +
+// alpha*A1*x over f output entries), so the output loop is disjoint and can be
+// split directly across threads -- no reduction. Each thread owns a contiguous
+// band [i0,i1) of output indices; f is clamped to the band. Beta is applied by
+// dotxf per output element. Enabled via BLIS_ENABLE_L1_OPENMP.
+#ifdef BLIS_ENABLE_L1_OPENMP
+#include <omp.h>
+#ifndef BLIS_L2_MT_THRESHOLD
+#define BLIS_L2_MT_THRESHOLD 262144
+#endif
+#define BLI_GEMV_V1_DOTXF_LOOP( kfp_df, conja, conjx, n_elem, n_iter, b_fuse, \
+                                alpha, a, rs_at, cs_at, x, incx, beta, y, incy, cntx, mn ) \
+{ \
+	if ( ( uint64_t )(mn) >= ( uint64_t )BLIS_L2_MT_THRESHOLD && \
+	     omp_get_active_level() == 0 && omp_get_max_threads() > 1 ) \
+	{ \
+		_Pragma( "omp parallel" ) \
+		{ \
+			const dim_t nt_ = omp_get_num_threads(), tid_ = omp_get_thread_num(); \
+			const dim_t bs_ = (n_iter) / nt_, rm_ = (n_iter) % nt_; \
+			const dim_t i0_ = tid_ * bs_ + ( tid_ < rm_ ? tid_ : rm_ ); \
+			const dim_t i1_ = i0_ + bs_ + ( tid_ < rm_ ? 1 : 0 ); \
+			dim_t i_, f_; \
+			for ( i_ = i0_; i_ < i1_; i_ += f_ ) { \
+				f_ = bli_determine_blocksize_dim_f( i_, i1_, (b_fuse) ); \
+				kfp_df( (conja), (conjx), (n_elem), f_, (alpha), \
+				        (a) + i_*(rs_at), (cs_at), (rs_at), (x), (incx), \
+				        (beta), (y) + i_*(incy), (incy), (cntx) ); \
+			} \
+		} \
+	} \
+	else { \
+		dim_t i_, f_; \
+		for ( i_ = 0; i_ < (n_iter); i_ += f_ ) { \
+			f_ = bli_determine_blocksize_dim_f( i_, (n_iter), (b_fuse) ); \
+			kfp_df( (conja), (conjx), (n_elem), f_, (alpha), \
+			        (a) + i_*(rs_at), (cs_at), (rs_at), (x), (incx), \
+			        (beta), (y) + i_*(incy), (incy), (cntx) ); \
+		} \
+	} \
+}
+#else
+#define BLI_GEMV_V1_DOTXF_LOOP( kfp_df, conja, conjx, n_elem, n_iter, b_fuse, \
+                                alpha, a, rs_at, cs_at, x, incx, beta, y, incy, cntx, mn ) \
+{ \
+	dim_t i_, f_; \
+	for ( i_ = 0; i_ < (n_iter); i_ += f_ ) { \
+		f_ = bli_determine_blocksize_dim_f( i_, (n_iter), (b_fuse) ); \
+		kfp_df( (conja), (conjx), (n_elem), f_, (alpha), \
+		        (a) + i_*(rs_at), (cs_at), (rs_at), (x), (incx), \
+		        (beta), (y) + i_*(incy), (incy), (cntx) ); \
+	} \
+}
+#endif
+
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
 \
@@ -72,30 +128,11 @@ void PASTEMAC(ch,varname) \
 	dotxf_ker_ft kfp_df = bli_cntx_get_ukr_dt( dt, BLIS_DOTXF_KER, cntx ); \
 	b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_DF, cntx ); \
 \
-	for ( i = 0; i < n_iter; i += f ) \
-	{ \
-		f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse ); \
-\
-		A1 = a + (i  )*rs_at + (0  )*cs_at; \
-		x1 = x + (0  )*incy; \
-		y1 = y + (i  )*incy; \
-\
-		/* y1 = beta * y1 + alpha * A1 * x; */ \
-		kfp_df \
-		( \
-		  conja, \
-		  conjx, \
-		  n_elem, \
-		  f, \
-		  alpha, \
-		  A1,   cs_at, rs_at, \
-		  x1,   incx, \
-		  beta, \
-		  y1,   incy, \
-		  cntx  \
-		); \
-\
-	} \
+	/* y = beta*y + alpha * op(A) * x, output-parallel when enabled. */ \
+	( void )A1; ( void )x1; ( void )y1; ( void )i; ( void )f; \
+	BLI_GEMV_V1_DOTXF_LOOP( kfp_df, conja, conjx, n_elem, n_iter, b_fuse, \
+	                        alpha, a, rs_at, cs_at, x, incx, beta, y, incy, cntx, \
+	                        ( uint64_t )m * ( uint64_t )n ); \
 }
 
 INSERT_GENTFUNC_BASIC( gemv_unf_var1 )
