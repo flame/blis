@@ -38,6 +38,143 @@
 //#define BLIS_ENABLE_MEM_TRACING
 
 // -----------------------------------------------------------------------------
+// Huge-page-backed pool allocator.
+//
+// When BLIS_ENABLE_HUGEPAGE_POOL is defined, BLIS's internal memory pools
+// (used for the packed A/B/C buffers, which are the hot, repeatedly-streamed
+// operands of level-3 operations) are backed by explicit huge pages instead
+// of ordinary 4 KiB pages. This reduces dTLB pressure and page walks when
+// streaming large packed panels through the cache hierarchy.
+//
+// Allocation strategy, per block, largest page first (as requested):
+//   1 GiB explicit huge pages (MAP_HUGETLB | MAP_HUGE_1GB) when the request is
+//     large enough to justify them and the OS has 1 GiB pages reserved;
+//   2 MiB explicit huge pages (MAP_HUGETLB | MAP_HUGE_2MB) otherwise, when the
+//     OS has 2 MiB pages reserved;
+//   ordinary malloc() as the always-succeeding fallback (identical to BLIS's
+//   default behaviour, so there is never a regression when no hugetlb pool is
+//   configured -- and on a THP=always system malloc's large mmap-backed
+//   allocations are transparently promoted to huge pages by the kernel anyway).
+//
+// hugetlb blocks are obtained with mmap() and released with munmap(); malloc
+// blocks with malloc()/free(). A small header just before the returned pointer
+// records which path was taken (and the mmap base/length) so the matching
+// deallocator can be used. The signatures match malloc()/free(), so these plug
+// directly into BLIS_MALLOC_POOL / BLIS_FREE_POOL.
+#ifdef BLIS_ENABLE_HUGEPAGE_POOL
+
+#include <sys/mman.h>
+#include <stdint.h>
+
+#ifndef MAP_HUGETLB
+#define MAP_HUGETLB 0x40000
+#endif
+#ifndef MAP_HUGE_SHIFT
+#define MAP_HUGE_SHIFT 26
+#endif
+#ifndef MAP_HUGE_2MB
+#define MAP_HUGE_2MB (21 << MAP_HUGE_SHIFT)
+#endif
+#ifndef MAP_HUGE_1GB
+#define MAP_HUGE_1GB (30 << MAP_HUGE_SHIFT)
+#endif
+
+#define BLI_HP_2MB   ( (size_t)2  * 1024 * 1024 )
+#define BLI_HP_1GB   ( (size_t)1024 * 1024 * 1024 )
+#define BLI_HP_HDR   ( (size_t)64 )            // >= sizeof(bli_hp_hdr_t)
+#define BLI_HP_MAGIC ( (size_t)0x48554745504f4f4cULL ) // "HUGEPOOL"
+
+enum { BLI_HP_MALLOC = 0, BLI_HP_MMAP = 1 };
+
+// Header stored in the BLI_HP_HDR bytes immediately before the returned
+// pointer: how the block was obtained, the raw base to hand back to the
+// deallocator, and the mapping length (mmap only), plus a magic sentinel.
+typedef struct { void* base; size_t len; int mode; size_t magic; } bli_hp_hdr_t;
+
+static size_t bli_hp_round_up( size_t x, size_t a ) { return ( x + a - 1 ) & ~( a - 1 ); }
+
+// Try an explicit-hugetlb mmap of a whole huge pages worth. Returns NULL if the
+// OS has no such pages reserved (mmap fails with ENOMEM).
+static void* bli_hp_try_hugetlb( size_t len, int huge_flag )
+{
+	void* p = mmap( NULL, len, PROT_READ | PROT_WRITE,
+	                MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB | huge_flag, -1, 0 );
+	return ( p == MAP_FAILED ) ? NULL : p;
+}
+
+static void* bli_hp_finish( void* base, size_t len, int mode )
+{
+	// The header occupies the first BLI_HP_HDR bytes of the block; the payload
+	// begins right after it. The payload need not be huge-page aligned: an
+	// entire MAP_HUGETLB mapping is backed by huge pages regardless, and the
+	// caller (bli_fmalloc_align) applies its own alignment on top.
+	bli_hp_hdr_t* h = ( bli_hp_hdr_t* )base;
+	h->base  = base;
+	h->len   = len;
+	h->mode  = mode;
+	h->magic = BLI_HP_MAGIC;
+	return ( void* )( ( int8_t* )base + BLI_HP_HDR );
+}
+
+void* bli_hugepage_malloc( size_t size )
+{
+	if ( size == 0 ) return NULL;
+
+	// Resolve environment controls once per process (see coding note: never
+	// call getenv() repeatedly on a hot path).
+	//   BLI_HP_DEBUG   - trace each allocation and the page size chosen.
+	//   BLI_HP_DISABLE - force the plain malloc() path (huge pages off).
+	static int dbg = -1, off = -1;
+	if ( dbg < 0 ) dbg = ( getenv( "BLI_HP_DEBUG"   ) != NULL );
+	if ( off < 0 ) off = ( getenv( "BLI_HP_DISABLE" ) != NULL );
+
+	size_t need = size + BLI_HP_HDR;
+
+	// 1 GiB explicit huge pages for large requests.
+	if ( !off && size >= BLI_HP_1GB )
+	{
+		size_t len  = bli_hp_round_up( need, BLI_HP_1GB );
+		void*  base = bli_hp_try_hugetlb( len, MAP_HUGE_1GB );
+		if ( dbg ) fprintf( stderr, "[hp] size=%zu -> 1GB %s\n", size, base?"OK":"FAIL" );
+		if ( base ) return bli_hp_finish( base, len, BLI_HP_MMAP );
+	}
+	// 2 MiB explicit huge pages otherwise.
+	if ( !off && size >= BLI_HP_2MB )
+	{
+		size_t len  = bli_hp_round_up( need, BLI_HP_2MB );
+		void*  base = bli_hp_try_hugetlb( len, MAP_HUGE_2MB );
+		if ( dbg ) fprintf( stderr, "[hp] size=%zu -> 2MB %s\n", size, base?"OK":"FAIL" );
+		if ( base ) return bli_hp_finish( base, len, BLI_HP_MMAP );
+	}
+	// Fallback: ordinary malloc (no regression vs. BLIS's default pool).
+	{
+		if ( dbg ) fprintf( stderr, "[hp] size=%zu -> malloc\n", size );
+		void* base = malloc( need );
+		if ( base == NULL ) return NULL;
+		return bli_hp_finish( base, 0, BLI_HP_MALLOC );
+	}
+}
+
+void bli_hugepage_free( void* p )
+{
+	if ( p == NULL ) return;
+
+	// The header sits in [user - BLI_HP_HDR, user); its start is not fixed
+	// relative to the raw base (alignment slack varies), so scan is avoided by
+	// reading the header at the known offset used by bli_hp_finish().
+	bli_hp_hdr_t* h = ( bli_hp_hdr_t* )( ( int8_t* )p - BLI_HP_HDR );
+
+	// Defensive: if the header magic is wrong, this pointer did not come from
+	// bli_hugepage_malloc(); fall back to free() rather than corrupting state.
+	if ( h->magic != BLI_HP_MAGIC ) { free( p ); return; }
+
+	if ( h->mode == BLI_HP_MMAP ) munmap( h->base, h->len );
+	else                          free( h->base );
+}
+
+#endif // BLIS_ENABLE_HUGEPAGE_POOL
+
+// -----------------------------------------------------------------------------
 
 // NOTE: These functions are no longer used. Instead, the relevant sections
 // of code call bli_fmalloc_align() and pass in the desired malloc()-like

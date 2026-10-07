@@ -115,6 +115,10 @@
   // instead of malloc().
   #ifdef  BLIS_ENABLE_MEMKIND
   #define BLIS_MALLOC_POOL               hbw_malloc
+  #elif defined(BLIS_ENABLE_HUGEPAGE_POOL)
+  // Back the internal memory pools with explicit huge pages (1 GiB if
+  // available, else 2 MiB, else transparent huge pages). See bli_malloc.c.
+  #define BLIS_MALLOC_POOL               bli_hugepage_malloc
   #else
   #define BLIS_MALLOC_POOL               malloc
   #endif
@@ -126,6 +130,8 @@
   // instead of free().
   #ifdef  BLIS_ENABLE_MEMKIND
   #define BLIS_FREE_POOL                 hbw_free
+  #elif defined(BLIS_ENABLE_HUGEPAGE_POOL)
+  #define BLIS_FREE_POOL                 bli_hugepage_free
   #else
   #define BLIS_FREE_POOL                 free
   #endif
