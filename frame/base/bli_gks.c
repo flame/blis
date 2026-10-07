@@ -55,6 +55,104 @@ static cntx_t* cached_cntx = NULL;
 
 // -----------------------------------------------------------------------------
 
+// Optional run-time overrides of the level-3 cache blocksizes. <dt> is S, D,
+// C or Z, and MR/NR are the sub-configuration's register blocksizes for that
+// datatype:
+//
+//   default                 max
+//   BLIS_MR_IN_MC_<dt>      BLIS_MR_IN_MC_MAX_<dt>     MC = MR * value
+//   BLIS_NR_IN_NC_<dt>      BLIS_NR_IN_NC_MAX_<dt>     NC = NR * value
+//   BLIS_KC_<dt>            BLIS_KC_MAX_<dt>           KC = value
+//
+// For each blocksize:
+//   - neither variable set: the sub-configuration's default and max are kept;
+//   - only the default set: default and max are both set to it;
+//   - only the max set:     the max is set, the default is kept;
+//   - both set:             each one is set to its own value.
+// Unset variables and values that are not positive integers are ignored.
+//
+// NOTE: Complex datatypes computed via the 1m induced method use the real
+// domain's (S/D) blocksizes, so the C/Z variables only take effect when the
+// sub-configuration provides native complex gemm microkernels.
+
+static void bli_gks_env_blksz
+     (
+       cntx_t*     cntx,
+       num_t       dt,
+       const char* dt_ch, // "S", "D", "C" or "Z"
+       bszid_t     bs_id,
+       dim_t       unit,  // MR or NR for multipliers, 1 for absolute values
+       const char* name   // "MR_IN_MC", "NR_IN_NC" or "KC"
+     )
+{
+	char env_def[ 64 ];
+	char env_max[ 64 ];
+
+	snprintf( env_def, sizeof( env_def ), "BLIS_%s_%s",     name, dt_ch );
+	snprintf( env_max, sizeof( env_max ), "BLIS_%s_MAX_%s", name, dt_ch );
+
+	const gint_t def = bli_env_get_var( env_def, -1 );
+	const gint_t max = bli_env_get_var( env_max, -1 );
+
+	if ( def <= 0 && max <= 0 ) return;
+
+	if ( def > 0 ) bli_cntx_set_blksz_def_dt( dt, bs_id, unit * def, cntx );
+
+	// Unless it is given explicitly, the max follows the default (as with
+	// bli_blksz_init_easy()).
+	bli_cntx_set_blksz_max_dt( dt, bs_id, unit * ( max > 0 ? max : def ), cntx );
+
+	// The partitioning code (bli_determine_blocksize()) assumes max >= default.
+	const dim_t b_def = bli_cntx_get_blksz_def_dt( dt, bs_id, cntx );
+	const dim_t b_max = bli_cntx_get_blksz_max_dt( dt, bs_id, cntx );
+
+	if ( b_max < b_def )
+	{
+		fprintf( stderr, "libblis: %s / %s: max blocksize (%ld) is smaller "
+		                 "than the default blocksize (%ld).\n",
+		         env_def, env_max, ( long )b_max, ( long )b_def );
+		bli_abort();
+	}
+}
+
+static void bli_gks_apply_env_blkszs( cntx_t* cntx )
+{
+	const num_t       dts[ 4 ]    = { BLIS_FLOAT, BLIS_DOUBLE, BLIS_SCOMPLEX, BLIS_DCOMPLEX };
+	const char* const dt_chs[ 4 ] = { "S",        "D",         "C",           "Z"           };
+
+	for ( dim_t i = 0; i < 4; ++i )
+	{
+		// Register blocksizes are tied to the microkernels, so they always
+		// come from the sub-configuration.
+		const dim_t mr_dt = bli_cntx_get_blksz_def_dt( dts[ i ], BLIS_MR, cntx );
+		const dim_t nr_dt = bli_cntx_get_blksz_def_dt( dts[ i ], BLIS_NR, cntx );
+
+		bli_gks_env_blksz( cntx, dts[ i ], dt_chs[ i ], BLIS_MC, mr_dt, "MR_IN_MC" );
+		bli_gks_env_blksz( cntx, dts[ i ], dt_chs[ i ], BLIS_NC, nr_dt, "NR_IN_NC" );
+		bli_gks_env_blksz( cntx, dts[ i ], dt_chs[ i ], BLIS_KC, 1,     "KC"       );
+	}
+
+	// Re-run the checks that bli_gks_register_cntx() applied to the
+	// sub-configuration's own values.
+	const blksz_t* mc = bli_cntx_get_blksz( BLIS_MC, cntx );
+	const blksz_t* nc = bli_cntx_get_blksz( BLIS_NC, cntx );
+	const blksz_t* kc = bli_cntx_get_blksz( BLIS_KC, cntx );
+	const blksz_t* mr = bli_cntx_get_blksz( BLIS_MR, cntx );
+	const blksz_t* nr = bli_cntx_get_blksz( BLIS_NR, cntx );
+	const blksz_t* kr = bli_cntx_get_blksz( BLIS_KR, cntx );
+	err_t          e_val;
+
+	e_val = bli_check_valid_mc_mod_mult( mc, mr ); bli_check_error_code( e_val );
+	e_val = bli_check_valid_nc_mod_mult( nc, nr ); bli_check_error_code( e_val );
+	e_val = bli_check_valid_kc_mod_mult( kc, kr ); bli_check_error_code( e_val );
+#ifndef BLIS_RELAX_MCNR_NCMR_CONSTRAINTS
+	e_val = bli_check_valid_mc_mod_mult( mc, nr ); bli_check_error_code( e_val );
+	e_val = bli_check_valid_nc_mod_mult( nc, mr ); bli_check_error_code( e_val );
+#endif
+}
+
+// -----------------------------------------------------------------------------
+
 int bli_gks_init( void )
 {
 	// NOTE: This function is called once by ONLY ONE application thread per
@@ -76,6 +174,12 @@ int bli_gks_init( void )
 	                       PASTEMAC(cntx_init_,config,_ref) );
 
 	INSERT_GENTCONF
+
+	// Apply the optional environment-variable overrides of the cache
+	// blocksizes to the context of the sub-configuration selected for this
+	// run. This must happen before that context is cached (below) and before
+	// the packing memory pools are sized (bli_memsys_init()).
+	bli_gks_apply_env_blkszs( ( cntx_t* )bli_gks_query_cntx_noinit() );
 
 #ifdef BLIS_ENABLE_GKS_CACHING
 	// Deep-query and cache the native and induced method contexts so they are
