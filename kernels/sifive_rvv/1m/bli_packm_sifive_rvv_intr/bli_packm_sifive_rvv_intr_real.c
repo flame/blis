@@ -332,12 +332,12 @@ PACKM(PRECISION_CHAR, void)
 
                 for (size_t i = 0; i < vl; ++i) {
                     DATATYPE* restrict p_tmp2 = p_tmp;
-                    size_t avl = cdim_max - cdim;
-                    while (avl) {
-                        size_t vl = VSETVL(PREC, LMUL_NR)(avl);
-                        VSE_V_F(PREC, LMUL_NR)(p_tmp2, zero_padding, vl);
-                        p_tmp2 += vl;
-                        avl -= vl;
+                    size_t avl2 = cdim_max - cdim;
+                    while (avl2) {
+                        size_t vl2 = VSETVL(PREC, LMUL_NR)(avl2);
+                        VSE_V_F(PREC, LMUL_NR)(p_tmp2, zero_padding, vl2);
+                        p_tmp2 += vl2;
+                        avl2 -= vl2;
                     }
                     p_tmp += ldp;
                 }
