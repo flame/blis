@@ -218,13 +218,13 @@ PACKM(PRECISION_CHAR, void)
                 p += vl * ldp;
                 avl -= vl;
             }
-            
+
             RVV_TYPE_FX(PREC, LMUL_MR, 2) zero_padding = VUNDEFINED_FX(PREC, LMUL_MR, 2)();
             zero_padding = VSET_V_F(PREC, LMUL_MR, 2)(zero_padding, 0, VFMV_V_F(PREC, LMUL_MR)(0., -1));
             zero_padding = VSET_V_F(PREC, LMUL_MR, 2)(zero_padding, 1, VFMV_V_F(PREC, LMUL_MR)(0., -1));
             for (size_t i = n; i < n_max; ++i) {
                 DATATYPE* restrict p_tmp = p;
-                size_t avl = cdim_max; 
+                size_t avl = cdim_max;
                 while (avl) {
                     size_t vl = VSETVL(PREC, LMUL_MR)(avl);
                     VSSEG2_V_F(PREC, LMUL_MR, 2)((BASE_DT*) p_tmp, zero_padding, vl);
@@ -250,8 +250,8 @@ PACKM(PRECISION_CHAR, void)
                         acol = VLSEG2_V_F(PREC, LMUL_MR, 2)((BASE_DT*) a_tmp, vl);
                     else
                         acol = VLSSEG2_V_F(PREC, LMUL_MR, 2)((BASE_DT*) a_tmp, 2 * FLT_SIZE * inca, vl);
-                    RVV_TYPE_F(PREC, LMUL_MR) acol_r = VGET_V_F(PREC, LMUL_MR, 2)(acol, 0); 
-                    RVV_TYPE_F(PREC, LMUL_MR) acol_i = VGET_V_F(PREC, LMUL_MR, 2)(acol, 1); 
+                    RVV_TYPE_F(PREC, LMUL_MR) acol_r = VGET_V_F(PREC, LMUL_MR, 2)(acol, 0);
+                    RVV_TYPE_F(PREC, LMUL_MR) acol_i = VGET_V_F(PREC, LMUL_MR, 2)(acol, 1);
 
                     if (PASTEMAC(PRECISION_CHAR, eq1)(*kappa)) {
                         if (bli_is_conj(conja)) {
@@ -274,7 +274,7 @@ PACKM(PRECISION_CHAR, void)
                     p_tmp += vl;
                     avl -= vl;
                 }
-                 
+
                 avl = cdim_max - cdim;
                 while (avl) {
                     size_t vl = VSETVL(PREC, LMUL_MR)(avl);
@@ -282,14 +282,14 @@ PACKM(PRECISION_CHAR, void)
                     p_tmp += vl;
                     avl -= vl;
                 }
-                 
+
                 a += lda;
                 p += ldp;
             }
 
             for (size_t i = n; i < n_max; ++i) {
                 DATATYPE* restrict p_tmp = p;
-                size_t avl = cdim_max; 
+                size_t avl = cdim_max;
                 while (avl) {
                     size_t vl = VSETVL(PREC, LMUL_MR)(avl);
                     VSSEG2_V_F(PREC, LMUL_MR, 2)((BASE_DT*) p_tmp, zero_padding, vl);
@@ -375,7 +375,7 @@ PACKM(PRECISION_CHAR, void)
                         ablock = VSET_V_F(PREC, LMUL, 8)(ablock, 7, kappa_arow3_i);
                         VSSSEG8_V_F(PREC, LMUL, 8)((BASE_DT*) p_tmp, 2 * FLT_SIZE * ldp, ablock, vl);
                     }
-                    
+
                     a_tmp += 4 * inca;
                     p_tmp += 4;
                     cdim_tmp -= 4;
@@ -488,14 +488,14 @@ PACKM(PRECISION_CHAR, void)
                             break;
                         }
                     }
-                    
+
                     p_tmp += cdim_tmp;
                 }
 
                 // pad lower edge
                 for (size_t i = 0; i < vl; ++i) {
                     DATATYPE* restrict p_tmp2 = p_tmp;
-                    size_t avl = cdim_max - cdim; 
+                    size_t avl = cdim_max - cdim;
                     while (avl) {
                         size_t vl = VSETVL(PREC, LMUL_NR)(avl);
                         VSSEG2_V_F(PREC, LMUL_NR, 2)((BASE_DT*) p_tmp2, zero_padding, vl);
@@ -509,11 +509,11 @@ PACKM(PRECISION_CHAR, void)
                 p += vl * ldp;
                 avl -= vl;
             }
-            
+
             // pad right edge
             for (size_t i = n; i < n_max; ++i) {
                 DATATYPE* restrict p_tmp = p;
-                size_t avl = cdim_max; 
+                size_t avl = cdim_max;
                 while (avl) {
                     size_t vl = VSETVL(PREC, LMUL_NR)(avl);
                     VSSEG2_V_F(PREC, LMUL_NR, 2)((BASE_DT*) p_tmp, zero_padding, vl);
@@ -538,8 +538,8 @@ PACKM(PRECISION_CHAR, void)
                         acol = VLSEG2_V_F(PREC, LMUL_NR, 2)((BASE_DT*) a_tmp, vl);
                     else
                         acol = VLSSEG2_V_F(PREC, LMUL_NR, 2)((BASE_DT*) a_tmp, 2 * FLT_SIZE * inca, vl);
-                    RVV_TYPE_F(PREC, LMUL_NR) acol_r = VGET_V_F(PREC, LMUL_NR, 2)(acol, 0); 
-                    RVV_TYPE_F(PREC, LMUL_NR) acol_i = VGET_V_F(PREC, LMUL_NR, 2)(acol, 1); 
+                    RVV_TYPE_F(PREC, LMUL_NR) acol_r = VGET_V_F(PREC, LMUL_NR, 2)(acol, 0);
+                    RVV_TYPE_F(PREC, LMUL_NR) acol_i = VGET_V_F(PREC, LMUL_NR, 2)(acol, 1);
 
                     if (PASTEMAC(PRECISION_CHAR, eq1)(*kappa)) {
                         if (bli_is_conj(conja)) {
@@ -562,7 +562,7 @@ PACKM(PRECISION_CHAR, void)
                     p_tmp += vl;
                     avl -= vl;
                 }
-                 
+
                 avl = cdim_max - cdim;
                 while (avl) {
                     size_t vl = VSETVL(PREC, LMUL_NR)(avl);
@@ -570,14 +570,14 @@ PACKM(PRECISION_CHAR, void)
                     p_tmp += vl;
                     avl -= vl;
                 }
-                 
+
                 a += lda;
                 p += ldp;
             }
 
             for (size_t i = n; i < n_max; ++i) {
                 DATATYPE* restrict p_tmp = p;
-                size_t avl = cdim_max; 
+                size_t avl = cdim_max;
                 while (avl) {
                     size_t vl = VSETVL(PREC, LMUL_NR)(avl);
                     VSSEG2_V_F(PREC, LMUL_NR, 2)((BASE_DT*) p_tmp, zero_padding, vl);
