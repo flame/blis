@@ -81,6 +81,21 @@
              void*   p,             inc_t ldp, \
        const void*   params  \
 
+#define packmd_cxk_params \
+\
+             conj_t  conja, \
+             pack_t  schema, \
+             dim_t   cdim, \
+             dim_t   cdim_max, \
+             dim_t   cdim_bcast, \
+             dim_t   n, \
+             dim_t   n_max, \
+       const void*   kappa, \
+       const void*   a, inc_t inca, inc_t lda, \
+       const void*   d, inc_t incd, \
+             void*   p,             inc_t ldp, \
+       const void*   params  \
+
 
 // unpackm_cxk kernel
 

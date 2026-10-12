@@ -51,6 +51,7 @@ typedef void (*PASTECH(opname,_ker_ft)) \
 
 GENTDEF( packm )
 GENTDEF( packm_cxk )
+GENTDEF( packmd_cxk )
 GENTDEF( unpackm_cxk )
 GENTDEF( packm_cxc_diag )
 
