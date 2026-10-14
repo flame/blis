@@ -250,6 +250,12 @@ void PASTEMAC(her2k,BLIS_OAPI_EX_SUF)
 	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, &ah );
 	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, b, &bh );
 
+	// The imaginary components of the diagonal elements of C are assumed
+	// to be zero and need not be set on input. Explicitly set them to zero
+	// so that whatever they contain (e.g. NaN) does not leak into the real
+	// components when C is scaled by beta.
+	bli_setid( &BLIS_ZERO, c );
+
 	// Invoke gemmt twice, using beta only the first time.
 	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)(   alpha, a, &bh,      beta, c, cntx, rntm );
 	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( &alphah, b, &ah, &BLIS_ONE, c, cntx, rntm );
@@ -310,6 +316,12 @@ void PASTEMAC(herk,BLIS_OAPI_EX_SUF)
 
 	obj_t ah;
 	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, &ah );
+
+	// The imaginary components of the diagonal elements of C are assumed
+	// to be zero and need not be set on input. Explicitly set them to zero
+	// so that whatever they contain (e.g. NaN) does not leak into the real
+	// components when C is scaled by beta.
+	bli_setid( &BLIS_ZERO, c );
 
 	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, a, &ah, beta, c, cntx, rntm );
 

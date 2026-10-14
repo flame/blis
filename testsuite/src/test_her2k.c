@@ -233,6 +233,16 @@ bool libblis_test_her2k_experiment
 	bli_mkherm( &c );
 	bli_mktrim( &c );
 
+	// Set the imaginary components of the diagonal of C to NaN. They are
+	// assumed to be zero on input, so the implementation must ignore them.
+	{
+		obj_t qnan;
+
+		bli_obj_scalar_init_detached( bli_dt_proj_to_real( dt_c ), &qnan );
+		bli_setsc( NAN, 0.0, &qnan );
+		bli_setid( &qnan, &c );
+	}
+
 	// Save C and set its structure and uplo properties.
 	bli_obj_set_struc( BLIS_HERMITIAN, &c_save );
 	bli_obj_set_uplo( uploc, &c_save );
