@@ -103,6 +103,28 @@ void bli_l3_thread_decorator
 	if ( rntm != NULL ) rntm_l = *rntm;
 	else bli_rntm_init_from_global( &rntm_l );
 
+#ifdef BLIS_SMALL_MT_THRESHOLD
+	// Force single-threaded execution for problems too small for the cost of
+	// spawning threads and their barriers to pay off. Without this, tiny GEMMs
+	// spend nearly all their time in thread setup (e.g. on GB10, 16x16x16 ran
+	// at ~1 GFLOP/s with 10 threads vs ~11 single-threaded). Gated per-config.
+	{
+		const uint64_t work = ( uint64_t )bli_obj_length( c ) *
+		                      ( uint64_t )bli_obj_width ( c ) *
+		                      ( uint64_t )bli_obj_width ( a );
+		// Single-precision real GEMM uses a larger register tile (8x12 vs 6x8),
+		// so small matrices have too few micro-tiles to parallelize well; its
+		// crossover to worthwhile threading is ~8x larger than double's.
+		uint64_t thresh = ( uint64_t )( BLIS_SMALL_MT_THRESHOLD );
+		if ( bli_obj_is_float( c ) ) thresh *= 8;
+		if ( work < thresh )
+		{
+			bli_rntm_set_ways_only( 1, 1, 1, 1, 1, &rntm_l );
+			bli_rntm_set_num_threads_only( 1, &rntm_l );
+		}
+	}
+#endif
+
 	// Set the number of ways for each loop, if needed, depending on what
 	// kind of information is already stored in the rntm_t object.
 	bli_rntm_factorize

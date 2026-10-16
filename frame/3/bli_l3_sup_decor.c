@@ -109,6 +109,24 @@ err_t bli_l3_sup_thread_decorator
 {
 	rntm_t rntm_l = *rntm;
 
+#ifdef BLIS_SMALL_MT_THRESHOLD
+	// Force single-threaded execution for problems too small for thread-spawn
+	// overhead to pay off. Small matrices take the SUP path, so this check is
+	// the one that actually fires for tiny GEMMs. Gated per-config.
+	{
+		const uint64_t work = ( uint64_t )bli_obj_length( c ) *
+		                      ( uint64_t )bli_obj_width ( c ) *
+		                      ( uint64_t )bli_obj_width ( a );
+		uint64_t thresh = ( uint64_t )( BLIS_SMALL_MT_THRESHOLD );
+		if ( bli_obj_is_float( c ) ) thresh *= 8;
+		if ( work < thresh )
+		{
+			bli_rntm_set_ways_only( 1, 1, 1, 1, 1, &rntm_l );
+			bli_rntm_set_num_threads_only( 1, &rntm_l );
+		}
+	}
+#endif
+
 	// Query the threading implementation and the number of threads requested.
 	timpl_t ti = bli_rntm_thread_impl( &rntm_l );
 	dim_t   nt = bli_rntm_num_threads( &rntm_l );
