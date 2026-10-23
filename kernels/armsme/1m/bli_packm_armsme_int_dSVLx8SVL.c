@@ -802,6 +802,7 @@ __arm_new( "za" ) __arm_locally_streaming void bli_dpackm_armsme_int_SVLx8SVL
 						for ( uint64_t trow = 0; trow < SVL; trow += 4 )
 						{
 							// 1. Create undefined default vectors
+							svfloat64_t undef_v = svundef_f64();
 							svfloat64x4_t undef_x4 = svundef4_f64();
 
 							// 2. Default all load arrays to empty
