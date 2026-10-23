@@ -425,9 +425,7 @@ __arm_new( "za" ) __arm_locally_streaming void bli_dpackm_armsme_int_4SVLx2SVL
 								inca * SVL;
 
 							// 1. Create undefined default vectors
-							svfloat64_t undef_v = svundef_f64();
-							svfloat64x4_t undef_x4 = svcreate4( undef_v,
-								undef_v, undef_v, undef_v );
+							svfloat64x4_t undef_x4 = svundef4_f64();
 
 							// 2. Default all load arrays to empty to guarantee
 							// safety
@@ -862,9 +860,7 @@ __arm_new( "za" ) __arm_locally_streaming void bli_dpackm_armsme_int_4SVLx2SVL
 								inca * 3 * SVL;
 
 							// 1. Create undefined default vectors
-							svfloat64_t undef_v = svundef_f64();
-							svfloat64x2_t undef_x2 = svcreate2( undef_v,
-								undef_v );
+							svfloat64x2_t undef_x2 = svundef2_f64();
 
 							// 2. Default all load arrays to empty to guarantee
 							// safety

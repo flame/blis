@@ -344,9 +344,7 @@ __arm_new( "za" ) __arm_locally_streaming void bli_dpackm_armsme_int_SVLx8SVL
 						const uint64_t tile_UL_corner = (trow)*inca + col;
 
 						// 1. Create undefined default vectors
-						svfloat64_t undef_v = svundef_f64();
-						svfloat64x4_t undef_x4 = svcreate4( undef_v, undef_v,
-							undef_v, undef_v );
+						svfloat64x4_t undef_x4 = svundef4_f64();
 
 						// 2. Default all load arrays to empty
 						svfloat64x4_t zp0 = undef_x4, zp1 = undef_x4,
@@ -804,9 +802,7 @@ __arm_new( "za" ) __arm_locally_streaming void bli_dpackm_armsme_int_SVLx8SVL
 						for ( uint64_t trow = 0; trow < SVL; trow += 4 )
 						{
 							// 1. Create undefined default vectors
-							svfloat64_t undef_v = svundef_f64();
-							svfloat64x4_t undef_x4 = svcreate4( undef_v,
-								undef_v, undef_v, undef_v );
+							svfloat64x4_t undef_x4 = svundef4_f64();
 
 							// 2. Default all load arrays to empty
 							svfloat64x4_t zq0 = undef_x4, zq1 = undef_x4,
