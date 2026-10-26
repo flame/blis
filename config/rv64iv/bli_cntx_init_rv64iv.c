@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2026, Yicheng Kang
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -51,13 +52,21 @@ void bli_cntx_init_rv64iv( cntx_t* cntx )
 
 	if ( v >= 4 )
 	{
-		const uint32_t mr_s = 4 * v;
+		// For VLEN = 256 (v == 8), sgemm uses the 2vx12 kernel: MR = 2*v,
+		// NR = 12 (12 FMAs per vector load of A). It is limited to VLEN 256,
+		// where it was measured: at VLEN >= 1024 its MR*NR tile would exceed
+		// the default BLIS_STACK_BUF_MAX_SIZE. Everything else keeps 4vx4.
+		const bool     s2vx12 = v == 8;
+		const uint32_t mr_s = s2vx12 ? 2 * v : 4 * v;
+		const uint32_t nr_s = s2vx12 ? 12 : 4;
+		const uint32_t mc_s = s2vx12 ? bli_max( 1, 320 / mr_s ) * mr_s : 20 * mr_s;
+		const uint32_t kc_s = s2vx12 ? 512 : 640;
 		const uint32_t mr_d = 2 * v;
 		const uint32_t mr_c = 2 * v;
 		const uint32_t mr_z = v;
 
 		// TODO: Register different kernels based on the value
-		// of v to avoid MC becoming too big. (e.g. 2vx8)
+		// of v to avoid MC becoming too big for the other datatypes.
 
 		// Update the context with optimized native gemm micro-kernels.
 		bli_cntx_set_ukrs
@@ -65,7 +74,8 @@ void bli_cntx_init_rv64iv( cntx_t* cntx )
 		  cntx,
 
 		  // level-3
-		  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_rviv_4vx4,
+		  BLIS_GEMM_UKR, BLIS_FLOAT,    s2vx12 ? bli_sgemm_rviv_2vx12
+		                                       : bli_sgemm_rviv_4vx4,
 		  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_rviv_4vx4,
 		  BLIS_GEMM_UKR, BLIS_SCOMPLEX, bli_cgemm_rviv_4vx4,
 		  BLIS_GEMM_UKR, BLIS_DCOMPLEX, bli_zgemm_rviv_4vx4,
@@ -90,9 +100,9 @@ void bli_cntx_init_rv64iv( cntx_t* cntx )
 		// Initialize level-3 blocksize objects with architecture-specific values.
 		//                                              s        d        c        z
 		bli_blksz_init_easy( &blkszs[ BLIS_MR ],     mr_s,    mr_d,    mr_c,    mr_z );
-		bli_blksz_init_easy( &blkszs[ BLIS_NR ],        4,       4,       4,       4 );
-		bli_blksz_init_easy( &blkszs[ BLIS_MC ],  20*mr_s, 20*mr_d, 60*mr_c, 30*mr_z );
-		bli_blksz_init_easy( &blkszs[ BLIS_KC ],      640,     320,     320,     160 );
+		bli_blksz_init_easy( &blkszs[ BLIS_NR ],     nr_s,       4,       4,       4 );
+		bli_blksz_init_easy( &blkszs[ BLIS_MC ],     mc_s, 20*mr_d, 60*mr_c, 30*mr_z );
+		bli_blksz_init_easy( &blkszs[ BLIS_KC ],     kc_s,     320,     320,     160 );
 		bli_blksz_init_easy( &blkszs[ BLIS_NC ],     3072,    3072,    3072,    3072 );
 
 		// Update the context with the current architecture's register and cache
