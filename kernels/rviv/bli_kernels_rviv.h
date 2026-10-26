@@ -33,6 +33,7 @@
 */
 
 GEMM_UKR_PROT( float,    s, gemm_rviv_4vx4 )
+GEMM_UKR_PROT( float,    s, gemm_rviv_2vx12 )
 GEMM_UKR_PROT( double,   d, gemm_rviv_4vx4 )
 GEMM_UKR_PROT( scomplex, c, gemm_rviv_4vx4 )
 GEMM_UKR_PROT( dcomplex, z, gemm_rviv_4vx4 )
