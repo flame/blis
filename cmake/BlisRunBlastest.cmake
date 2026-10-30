@@ -1,6 +1,4 @@
-# Runs one blastest driver in SCRATCH and validates its output, mirroring
-# blastest/check-blastest.sh (fails if any summary contains "****").
-# Args: -DEXE=<driver> -DINPUT=<stdin file or ""> -DLEVEL=<1|2|3> -DSCRATCH=<dir>
+# Runs one blastest driver in SCRATCH and mirrors blastest/check-blastest.sh.
 
 # Always start from a clean scratch: a stale out.* from a previously crashed
 # run must not false-fail this one.
@@ -9,20 +7,19 @@ file(MAKE_DIRECTORY "${SCRATCH}")
 set(out "${SCRATCH}/out.driver")
 
 if(LEVEL STREQUAL "1")
-  execute_process(COMMAND "${EXE}"
-                  RESULT_VARIABLE rv
-                  OUTPUT_FILE "${out}"
-                  ERROR_QUIET)
+    execute_process(COMMAND "${EXE}" RESULT_VARIABLE rv OUTPUT_FILE "${out}" ERROR_QUIET)
 else()
-  execute_process(COMMAND "${EXE}"
-                  RESULT_VARIABLE rv
-                  INPUT_FILE "${INPUT}"
-                  OUTPUT_FILE "${out}"
-                  ERROR_QUIET
-                  WORKING_DIRECTORY "${SCRATCH}")
+    execute_process(
+        COMMAND "${EXE}"
+        RESULT_VARIABLE rv
+        INPUT_FILE "${INPUT}"
+        OUTPUT_FILE "${out}"
+        ERROR_QUIET
+        WORKING_DIRECTORY "${SCRATCH}"
+    )
 endif()
 if(NOT rv EQUAL 0)
-  message(FATAL_ERROR "${EXE} exited with status ${rv}")
+    message(FATAL_ERROR "${EXE} exited with status ${rv}")
 endif()
 
 # Drivers write their summaries into files named by the first record of the
@@ -30,12 +27,12 @@ endif()
 file(GLOB summaries "${SCRATCH}/out.*")
 set(failed FALSE)
 foreach(s ${summaries})
-  file(STRINGS "${s}" bad REGEX "\\*\\*\\*\\*")
-  if(bad)
-    set(failed TRUE)
-    message(STATUS "failures found in ${s}:\n${bad}")
-  endif()
+    file(STRINGS "${s}" bad REGEX "\\*\\*\\*\\*")
+    if(bad)
+        set(failed TRUE)
+        message(STATUS "failures found in ${s}:\n${bad}")
+    endif()
 endforeach()
 if(failed)
-  message(FATAL_ERROR "BLAS test driver reported failures (see ${SCRATCH}/out.*)")
+    message(FATAL_ERROR "BLAS test driver reported failures (see ${SCRATCH}/out.*)")
 endif()

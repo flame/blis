@@ -1,6 +1,6 @@
 # Building BLIS with CMake
 
-BLIS can be built with CMake (≥ 4.0) instead of `configure` + `make`. The
+BLIS can be built with CMake (≥ 3.20) instead of `configure` + `make`. The
 CMake build ports the full feature surface: configuration families with
 hardware auto-detection, per-kernel-set ISA compilation, threading models
 (single/pthreads/OpenMP/HPX), BLAS and CBLAS compatibility layers, addons,
@@ -10,15 +10,15 @@ sandboxes, static and shared libraries, the testsuite, the reference-BLAS
 ## Quick start
 
 ```sh
-cmake -S . -B build -DBLIS_CONFIG=auto -DBLIS_THREADING=openmp
-cmake --build build -j
-ctest --test-dir build -L fast          # fast correctness check
-ctest --test-dir build                  # full testsuite + BLAS tests
-ctest --test-dir build -L blastest      # netlib BLAS tests only
-cmake --install build --prefix /opt/blis
+cmake -S . -B out -DBLIS_CONFIG=auto -DBLIS_THREADING=openmp
+cmake --build out -j
+ctest --test-dir out -L fast          # fast correctness check
+ctest --test-dir out                  # full testsuite + BLAS tests
+ctest --test-dir out -L blastest      # netlib BLAS tests only
+cmake --install out --prefix /opt/blis
 ```
 
-`cmake --build build --target uninstall` removes a previous installation.
+`cmake --build out --target uninstall` removes a previous installation.
 It runs the four `uninstall-*` targets and also removes `lib/cmake/blis`
 and `blis.pc`.
 
@@ -34,6 +34,7 @@ and `blis.pc`.
 | | Libraries install to `${BLIS_INSTALL_EXEC_PREFIX}/${CMAKE_INSTALL_LIBDIR}`. |
 | | `blis.pc`, `config.mk`, `uninstall-old`, and Darwin install name all use this dir.
 | `--sharedir`                 | `BLIS_INSTALL_SHAREDIR`           | empty   |
+| `make install` layout        | `BLIS_INSTALL_LAYOUT={make,gnu}`  | `make`  |
 | `--enable/disable-static`    | `BLIS_ENABLE_STATIC`              | `ON`    |
 | `--enable/disable-shared`    | `BLIS_ENABLE_SHARED`              | `ON`    |
 | `-e {public,all}`            | `BLIS_EXPORT_SHARED`              | `public`|
@@ -58,7 +59,9 @@ and `blis.pc`.
 | `-a NAME`                    | `BLIS_ENABLE_ADDONS="a;b"`        | empty   |
 | `-s NAME`                    | `BLIS_SANDBOX=name`               | empty   |
 | `--enable-amd-frame-tweaks`  | `BLIS_ENABLE_AMD_FRAME_TWEAKS`    | `OFF`   |
-| `--enable-arg-max-hack`      | off; largest archive line is 59 KB, under host `ARG_MAX` | - |
+| `--enable/disable-arg-max-hack` | `BLIS_ENABLE_ARG_MAX_HACK`     | `OFF`   |
+| `--enable/disable-verbose-make` | `BLIS_ENABLE_VERBOSE_MAKE`     | `OFF`   |
+| `--show-config-list`         | `BLIS_SHOW_CONFIG_LIST`         | `OFF`   |
 | `--disable-system/-tls`      | `BLIS_ENABLE_SYSTEM/BLIS_ENABLE_TLS` | `ON` |
 | `-r {slab,rr,tlb}`           | `BLIS_THREAD_JRIR_PARTITION`      | `slab`  |
 | `--force-version=x.y.z`      | `BLIS_FORCE_VERSION`              | unset   |
@@ -89,7 +92,7 @@ Notes on deliberate differences from the make build:
   `make uninstall` → `uninstall` target, `make install INSTALL_HH=yes` →
   `-DBLIS_INSTALL_VENDOR_CPP_HEADERS=ON`.
 - testsuite/, blastest/ and examples/ additionally work as *standalone*
-  CMake projects against an installed BLIS (`cmake -S <dir> -B build
+  CMake projects against an installed BLIS (`cmake -S <dir> -B out
   -DCMAKE_PREFIX_PATH=<prefix>`), replacing their share/blis-based
   standalone Makefiles.
 - Out-of-tree *plugins* are ordinary CMake projects that
@@ -138,6 +141,10 @@ Notes on deliberate differences from the make build:
   wins and skips the check. Do not add arguments to it.
 - `TESTSUITE_WRAPPER` replaces `CMAKE_CROSSCOMPILING_EMULATOR`. Each test has
   one launcher.
+- With `BLIS_IS_MSVC` (cl, clang-cl or clang targeting windows-msvc) the
+  DLL is `libblis.<major>.dll` and its import library is `libblis.lib`.
+  The static library is `libblis_static.lib` when the shared library also
+  builds, and `libblis.lib` in a static-only build.
 
 ## Make targets as CMake targets
 

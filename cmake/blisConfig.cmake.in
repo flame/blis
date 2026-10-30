@@ -1,29 +1,21 @@
-# Same macro configure_package_config_file's PACKAGE_INIT defines. That macro
-# also writes the configure-time prefix into this file, which goes stale under
-# `cmake --install --prefix`, DESTDIR or an exec-prefix layout.
-macro(check_required_components _NAME)
-  foreach(comp ${${_NAME}_FIND_COMPONENTS})
-    if(NOT ${_NAME}_${comp}_FOUND AND ${_NAME}_FIND_REQUIRED_${comp})
-      set(${_NAME}_FOUND FALSE)
-    endif()
-  endforeach()
-endmacro()
+@PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
+
 if(@BLIS_NEEDS_THREADS@)
-  set(THREADS_PREFER_PTHREAD_FLAG ON)
-  find_dependency(Threads)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_dependency(Threads)
 endif()
 if(@BLIS_NEEDS_OPENMP@)
-  find_dependency(OpenMP)
+    find_dependency(OpenMP)
 endif()
 if(@BLIS_NEEDS_MEMKIND@)
-  find_library(MEMKIND_LIBRARY memkind)
-  if(NOT MEMKIND_LIBRARY)
-    set(blis_FOUND FALSE)
-    set(blis_NOT_FOUND_MESSAGE "blis was built with memkind but libmemkind was not found")
-    return()
-  endif()
+    find_library(MEMKIND_LIBRARY memkind)
+    if(NOT MEMKIND_LIBRARY)
+        set(blis_FOUND FALSE)
+        set(blis_NOT_FOUND_MESSAGE "blis was built with memkind but libmemkind was not found")
+        return()
+    endif()
 endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/blisTargets.cmake")
@@ -40,7 +32,7 @@ set(blis_CONFIG_LIST "@BLIS_CONFIG_LIST@")
 @BLISPLUGIN_EXPORTS@
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/BlisPluginHelpers.cmake")
-  include("${CMAKE_CURRENT_LIST_DIR}/BlisPluginHelpers.cmake")
+    include("${CMAKE_CURRENT_LIST_DIR}/BlisPluginHelpers.cmake")
 endif()
 
 check_required_components(blis)

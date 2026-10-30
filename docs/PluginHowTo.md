@@ -38,7 +38,7 @@ Plugins are defined completely externally to BLIS (that is, the BLIS source code
 **Note (CMake builds):** when BLIS is built with CMake (see [BuildSystemCMake.md](BuildSystemCMake.md)), the make-based `configure-plugin` script and the `$PREFIX/share/blis/*.mk` fragments are not installed. Instead, plugins are ordinary CMake projects that use `find_package(blis)` and the helper functions exported alongside it (`blis_plugin_frame_flags`, `blis_plugin_kernel_flags <cfg>`, `blis_plugin_refkern_flags <cfg> DEFS_HEADER <h>`), which apply the exact per-subconfiguration ISA/optimization flags that the installed BLIS was built with. A minimal `CMakeLists.txt`:
 
 ```cmake
-cmake_minimum_required(VERSION 4.0)
+cmake_minimum_required(VERSION 3.20...4.4)
 project(blis_plugin_hello C)
 find_package(blis REQUIRED)
 

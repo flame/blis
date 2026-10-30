@@ -1,52 +1,53 @@
 # Helper functions for out-of-tree BLIS plugins (the CMake replacement for
-# make's configure-plugin machinery). Included by blisConfig.cmake; requires
-# the blisConfig-defined variables:
-#   blis_FRAME_CFLAGS          frame-class flags for general plugin sources
-#   blis_KERNEL_CFLAGS_<c>     kernel-class flags for subconfiguration <c>
-#                             (as in BLIS's own kernels, incl. -DBLIS_CNAME*)
-#   blis_REFKERN_CFLAGS_<c>    reference-kernel flags for <c> (minus the
-#                             BLIS-internal -DBLIS_IN_REF_KERNEL/-include;
-#                             add your plugin's own defs header there)
-#   blis_CONFIG_LIST           enabled subconfigurations
-#   blis_INCLUDE_DIRS          installed blis/cblas include dirs
+# make's configure-plugin machinery). Included by blisConfig.cmake.
 
-# blis_plugin_frame_flags(<target>): apply include dirs + frame-class flags.
+function(_blis_plugin_apply target flags)
+    # One SHELL: group: CMake de-duplicates option items and would split
+    # repeated two-word flags ('--diag_suppress A --diag_suppress B').
+    target_compile_options(${target} PRIVATE "SHELL:${flags}")
+    target_include_directories(${target} PRIVATE ${blis_INCLUDE_DIRS})
+endfunction()
+
 function(blis_plugin_frame_flags target)
-  separate_arguments(_f UNIX_COMMAND "${blis_FRAME_CFLAGS}")
-  target_compile_options(${target} PRIVATE ${_f})
-  target_include_directories(${target} PRIVATE ${blis_INCLUDE_DIRS})
+    _blis_plugin_apply(${target} "${blis_FRAME_CFLAGS}")
 endfunction()
 
-# blis_plugin_kernel_flags(<target> <cfg>): apply include dirs + the kernel
-# flags of subconfiguration <cfg> (handles ISA-specific flags like
-# -mavx2/-march=haswell for haswell, so the same target can be built once per
-# subconfiguration as an OBJECT library).
+# Kernel flags of <cfg> carry ISA flags like -mavx2/-march=haswell, so the same
+# target can be built once per subconfiguration as an OBJECT library.
 function(blis_plugin_kernel_flags target cfg)
-  if(NOT DEFINED blis_KERNEL_CFLAGS_${cfg})
-    message(FATAL_ERROR
-      "blis_plugin_kernel_flags: '${cfg}' is not among the enabled "
-      "subconfigurations (${blis_CONFIG_LIST})")
-  endif()
-  separate_arguments(_f UNIX_COMMAND "${blis_KERNEL_CFLAGS_${cfg}}")
-  target_compile_options(${target} PRIVATE ${_f})
-  target_include_directories(${target} PRIVATE ${blis_INCLUDE_DIRS})
+    if(NOT DEFINED blis_KERNEL_CFLAGS_${cfg})
+        message(
+            FATAL_ERROR
+            "blis_plugin_kernel_flags: '${cfg}' is not among the enabled "
+            "subconfigurations (${blis_CONFIG_LIST})"
+        )
+    endif()
+    _blis_plugin_apply(${target} "${blis_KERNEL_CFLAGS_${cfg}}")
 endfunction()
 
-# blis_plugin_refkern_flags(<target> <cfg> [DEFS_HEADER <h>]): apply include
-# dirs + reference-kernel flags of <cfg>; DEFS_HEADER is force-included
-# (like BLIS's own bli_kernel_defs_<c>.h) for blocksize/ukernel macros.
+# DEFS_HEADER is force-included (like BLIS's own bli_kernel_defs_<c>.h) for
+# blocksize/ukernel macros.
 function(blis_plugin_refkern_flags target cfg)
-  cmake_parse_arguments(P "" "DEFS_HEADER" "" ${ARGN})
-  if(NOT DEFINED blis_REFKERN_CFLAGS_${cfg})
-    message(FATAL_ERROR
-      "blis_plugin_refkern_flags: '${cfg}' is not among the enabled "
-      "subconfigurations (${blis_CONFIG_LIST})")
-  endif()
-  separate_arguments(_f UNIX_COMMAND "${blis_REFKERN_CFLAGS_${cfg}}")
-  target_compile_options(${target} PRIVATE ${_f})
-  if(P_DEFS_HEADER)
-    target_compile_options(${target} PRIVATE
-      -DBLIS_IN_REF_KERNEL=1 -include "${P_DEFS_HEADER}")
-  endif()
-  target_include_directories(${target} PRIVATE ${blis_INCLUDE_DIRS})
+    cmake_parse_arguments(P "" "DEFS_HEADER" "" ${ARGN})
+    if(NOT DEFINED blis_REFKERN_CFLAGS_${cfg})
+        message(
+            FATAL_ERROR
+            "blis_plugin_refkern_flags: '${cfg}' is not among the enabled "
+            "subconfigurations (${blis_CONFIG_LIST})"
+        )
+    endif()
+    _blis_plugin_apply(${target} "${blis_REFKERN_CFLAGS_${cfg}}")
+    if(P_DEFS_HEADER)
+        # Escape like blis_flag_group (BlisLibraries.cmake is not visible to an
+        # installed plugin): the SHELL: group re-parses with
+        # separate_arguments(UNIX_COMMAND), so the item needs real quote
+        # characters and doubled backslashes to survive as one argv item.
+        string(REPLACE "\\" "\\\\" _hdr "${P_DEFS_HEADER}")
+        string(REPLACE "\"" "\\\"" _hdr "${_hdr}")
+        if(CMAKE_C_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+            target_compile_options(${target} PRIVATE "SHELL:-DBLIS_IN_REF_KERNEL=1 \"/FI${_hdr}\"")
+        else()
+            target_compile_options(${target} PRIVATE "SHELL:-DBLIS_IN_REF_KERNEL=1 -include \"${_hdr}\"")
+        endif()
+    endif()
 endfunction()
