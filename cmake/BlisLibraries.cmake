@@ -172,6 +172,10 @@ if(BLIS_ENABLE_SHARED)
             VERSION "${BLIS_SO_MMB}"
             SOVERSION "${BLIS_SO_MAJOR}"
     )
+    if(APPLE)
+        # make links with no -compatibility_version or -current_version; keep ld's 0.0.0 fields, not CMake's VERSION/SOVERSION defaults. No released dylib has other fields. make does not give Mach-O version flags, and no one released this CMake build. Equal fields let a make-built dylib replace a CMake-built one.
+        set_target_properties(blis_shared PROPERTIES MACHO_COMPATIBILITY_VERSION "" MACHO_CURRENT_VERSION "")
+    endif()
     if(APPLE AND NOT BLIS_DARWIN_RPATH)
         set_target_properties(blis_shared PROPERTIES INSTALL_NAME_DIR "${BLIS_INSTALL_FULL_LIBDIR}")
     endif()
@@ -191,6 +195,7 @@ if(BLIS_ENABLE_SHARED)
     blis_flag_group(_blis_shared_optgroup ${_blis_shared_opts})
     target_link_options(blis_shared PRIVATE ${_blis_shared_optgroup})
     target_link_options(blis_shared INTERFACE "$<BUILD_INTERFACE:${_blis_shared_optgroup}>")
+    # shortcut: make puts these flags on compile lines only, where ld ignores them; drop if upstream common.mk moves them to the link line.
     if(WIN32 AND BLIS_IS_MSVC STREQUAL "no" AND BLIS_CC_VENDOR MATCHES "^(gcc|clang|aocc)$")
         if(BLIS_EXPORT_SHARED STREQUAL "all")
             target_link_options(blis_shared PRIVATE "SHELL:-Wl,--export-all-symbols -Wl,--enable-auto-import")

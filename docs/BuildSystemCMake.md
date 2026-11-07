@@ -22,6 +22,10 @@ cmake --install out --prefix /opt/blis
 It runs the four `uninstall-*` targets and also removes `lib/cmake/blis`
 and `blis.pc`.
 
+The auto-detected config caches, so a second configure in the same build
+dir does not detect again. Change it with `-DBLIS_CONFIG=<name>` or a
+new build dir.
+
 ## Option mapping (`configure` → CMake)
 
 | configure                    | CMake cache variable              | default |

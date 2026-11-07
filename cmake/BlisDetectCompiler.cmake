@@ -8,8 +8,11 @@
 # function blis_compute_blacklist(<out_var>) -> list of blacklisted
 # subconfig names given the detected toolchain and host OS.
 
+# cond is a whole if() condition in one string. ${} expansion does not split
+# on spaces, so if() would see one argument and always test false; split first.
 macro(_blis_set_yesno var cond)
-    if(${cond})
+    separate_arguments(_blis_cond NATIVE_COMMAND "${cond}")
+    if(${_blis_cond})
         set(${var} yes)
     else()
         set(${var} no)
@@ -50,7 +53,7 @@ elseif(_cc_version MATCHES "Apple")
     set(BLIS_APPLE_CLANG yes)
 elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     set(BLIS_CC_VENDOR gcc)
-elseif(CMAKE_C_COMPILER_ID MATCHES "^(Apple)?Clang$")
+elseif(CMAKE_C_COMPILER_ID MATCHES "^(Apple)?Clang$|^ARMClang$") # armclang: configure treats armclang as clang
     set(BLIS_CC_VENDOR clang)
 elseif(CMAKE_C_COMPILER_ID STREQUAL "Intel")
     set(BLIS_CC_VENDOR icc)
@@ -68,6 +71,13 @@ message(STATUS "BLIS: C compiler vendor: ${BLIS_CC_VENDOR} (${CMAKE_C_COMPILER_V
 # --- version-range booleans (yes/no strings, like config.mk) ---
 string(REPLACE "." ";" _cv "${CMAKE_C_COMPILER_VERSION}")
 list(GET _cv 0 _vmaj)
+# configure gets the revision as the third dot component (missing = 0).
+list(LENGTH _cv _cn)
+if(_cn GREATER 2)
+    list(GET _cv 2 _vrev)
+else()
+    set(_vrev 0)
+endif()
 
 if(BLIS_CC_VENDOR STREQUAL "gcc")
     _blis_set_yesno(BLIS_GCC_OT_4_9_0 "CMAKE_C_COMPILER_VERSION VERSION_LESS 4.9.0")
@@ -79,7 +89,10 @@ else()
         set(BLIS_GCC_OT_${v} no)
     endforeach()
 endif()
-if(BLIS_CC_VENDOR MATCHES "clang|aocc")
+# configure sets the clang booleans only when the vendor is clang; aocc keeps
+# the no defaults (its CMAKE_C_COMPILER_VERSION is the LLVM version).
+# ARMClang: CMAKE_C_COMPILER_VERSION is armclang's own release number, not the "based on LLVM" version.
+if(BLIS_CC_VENDOR STREQUAL "clang")
     _blis_set_yesno(BLIS_CLANG_OT_9_0_0 "CMAKE_C_COMPILER_VERSION VERSION_LESS 9.0.0")
     _blis_set_yesno(BLIS_CLANG_OT_12_0_0 "CMAKE_C_COMPILER_VERSION VERSION_LESS 12.0.0")
 else()
@@ -87,8 +100,16 @@ else()
     set(BLIS_CLANG_OT_12_0_0 no)
 endif()
 if(BLIS_CC_VENDOR STREQUAL "aocc")
-    _blis_set_yesno(BLIS_AOCC_OT_2_0_0 "CMAKE_C_COMPILER_VERSION VERSION_LESS 2.0.0")
-    _blis_set_yesno(BLIS_AOCC_OT_3_0_0 "CMAKE_C_COMPILER_VERSION VERSION_LESS 3.0.0")
+    # The AOCC release is not CMAKE_C_COMPILER_VERSION (the LLVM version).
+    # Parse the release from the --version text the way configure does.
+    if(_cc_version MATCHES "AOCC.LLVM.2")
+        string(REGEX MATCH "AOCC.LLVM.[0-9]+\\.[0-9]+\\.?[0-9]*" _aocc_tag "${_cc_version}")
+    else()
+        string(REGEX MATCH "AOCC_[0-9]+\\.[0-9]+\\.?[0-9]*" _aocc_tag "${_cc_version}")
+    endif()
+    string(REGEX MATCH "[0-9]+\\.[0-9]+\\.?[0-9]*" _aocc_rel "${_aocc_tag}")
+    _blis_set_yesno(BLIS_AOCC_OT_2_0_0 "_aocc_rel VERSION_LESS 2.0.0")
+    _blis_set_yesno(BLIS_AOCC_OT_3_0_0 "_aocc_rel VERSION_LESS 3.0.0")
 else()
     set(BLIS_AOCC_OT_2_0_0 no)
     set(BLIS_AOCC_OT_3_0_0 no)
@@ -227,7 +248,8 @@ function(blis_compute_blacklist out_var)
         if(CMAKE_C_COMPILER_VERSION VERSION_LESS 15)
             message(FATAL_ERROR "BLIS requires icc 15 or newer")
         endif()
-        if(CMAKE_C_COMPILER_VERSION MATCHES "^15\\.0\\.")
+        # configure: icc 15.0.1+ is needed for skx (revision below 1 blacklists).
+        if(_vmaj EQUAL 15 AND _vrev LESS 1)
             list(APPEND blacklist skx)
         endif()
         if(_vmaj EQUAL 18)

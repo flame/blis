@@ -141,6 +141,12 @@ function(blis_get_cflags cfg class out)
 endfunction()
 
 # Flag scaffolding (mirrors common.mk)
+# CMake's CMAKE_COLOR_DIAGNOSTICS default adds a color flag make withholds;
+# the configs carry color in CMISCFLAGS already.
+set(CMAKE_C_COMPILE_OPTIONS_COLOR_DIAGNOSTICS "")
+set(CMAKE_C_COMPILE_OPTIONS_COLOR_DIAGNOSTICS_OFF "")
+set(CMAKE_CXX_COMPILE_OPTIONS_COLOR_DIAGNOSTICS "")
+set(CMAKE_CXX_COMPILE_OPTIONS_COLOR_DIAGNOSTICS_OFF "")
 # NOTE: make's CFLAGS/CXXFLAGS "preset" (env at configure time) maps to
 # CMAKE_C_FLAGS/CMAKE_CXX_FLAGS: CMake seeds them from the same env vars and
 # puts them ahead of target options, the preset's place in the flag chain.
@@ -160,7 +166,7 @@ if(NOT BLIS_CC_VENDOR STREQUAL "ibm")
         list(APPEND BLIS_GLOBAL_CWARNFLAGS -Wall -Wno-unused-function)
     endif()
 endif()
-if(BLIS_CC_VENDOR MATCHES "clang|aocc")
+if(BLIS_CC_VENDOR STREQUAL "clang")
     list(APPEND BLIS_GLOBAL_CWARNFLAGS -Wno-tautological-compare -Wno-pass-failed)
 endif()
 if(BLIS_CC_VENDOR STREQUAL "NVIDIA")
@@ -186,33 +192,42 @@ endif()
 
 set(BLIS_CTHREADFLAGS "")
 if("openmp" IN_LIST BLIS_THREADING_MODELS)
-    list(APPEND BLIS_CTHREADFLAGS -fopenmp)
     find_package(OpenMP REQUIRED COMPONENTS C)
 endif()
-if("pthreads" IN_LIST BLIS_THREADING_MODELS)
-    list(APPEND BLIS_CTHREADFLAGS -pthread)
+# shortcut: aocc gets -fopenmp although common.mk omits it; drop when upstream common.mk adds aocc.
+if((BLIS_CC_VENDOR STREQUAL "gcc" OR BLIS_CC_VENDOR STREQUAL "icc" OR BLIS_CC_VENDOR STREQUAL "clang"
+    OR BLIS_CC_VENDOR STREQUAL "aocc") AND "openmp" IN_LIST BLIS_THREADING_MODELS)
+    list(APPEND BLIS_CTHREADFLAGS -fopenmp)
 endif()
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads)
+# common.mk adds the threading flags only in its gcc, icc and clang blocks.
+# shortcut: aocc gets -pthread although common.mk omits it; drop when upstream common.mk adds aocc.
+if((BLIS_CC_VENDOR STREQUAL "gcc" OR BLIS_CC_VENDOR STREQUAL "icc" OR BLIS_CC_VENDOR STREQUAL "clang"
+    OR BLIS_CC_VENDOR STREQUAL "aocc"))
+    if("pthreads" IN_LIST BLIS_THREADING_MODELS)
+        list(APPEND BLIS_CTHREADFLAGS -pthread)
+    endif()
+endif()
 
 set(BLIS_ASANFLAGS "")
 if(BLIS_ENABLE_ASAN)
     set(BLIS_ASANFLAGS -fsanitize=address)
 endif()
 
+# shortcut: aocc gets -fopenmp-simd although common.mk omits it; drop when upstream common.mk adds aocc.
 set(BLIS_COMPSIMDFLAGS "")
 if(enable_pragma_omp_simd)
     if(BLIS_CC_VENDOR STREQUAL "icc")
         set(BLIS_COMPSIMDFLAGS -qopenmp-simd)
-    else()
+    elseif(BLIS_CC_VENDOR STREQUAL "gcc" OR BLIS_CC_VENDOR STREQUAL "clang" OR BLIS_CC_VENDOR STREQUAL "aocc")
         set(BLIS_COMPSIMDFLAGS -fopenmp-simd)
     endif()
 endif()
 
 # Symbol-visibility flags (common.mk BUILD_SYMFLAGS table).
+# shortcut: aocc gets clang's visibility flags although common.mk omits them; drop when upstream common.mk adds aocc.
 set(BLIS_SYMFLAGS "")
-if(BLIS_ENABLE_SHARED AND NOT WIN32)
-    if(BLIS_CC_VENDOR STREQUAL "gcc" OR BLIS_CC_VENDOR STREQUAL "icc" OR BLIS_CC_VENDOR MATCHES "clang|aocc")
+if(BLIS_ENABLE_SHARED)
+    if(BLIS_CC_VENDOR STREQUAL "icc" OR (NOT WIN32 AND BLIS_CC_VENDOR MATCHES "^(gcc|clang|aocc)$"))
         if(BLIS_EXPORT_SHARED STREQUAL "all")
             set(BLIS_SYMFLAGS -fvisibility=default)
         else()

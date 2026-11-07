@@ -150,9 +150,16 @@ if(BUILD_TESTING)
     blis_register_testsuite_tests()
     # blastest drivers call lsame_/xerbla_, which may be omitted from the
     # library (lapack-compat mode): in that case those symbols must come from
-    # a real LAPACK, so the bundled drivers cannot link.
+    # a real LAPACK, so the bundled drivers cannot link. The drivers never
+    # call xerbla_array, so omitting it alone keeps them linkable; match the
+    # names exactly, as make does by symbol.
+    set(_omit_names "")
+    foreach(_sym ${_omit_list})
+        string(STRIP "${_sym}" _sym)
+        list(APPEND _omit_names "${_sym}")
+    endforeach()
     set(_blat_blocked FALSE)
-    if(_omit_list MATCHES "lsame" OR _omit_list MATCHES "xerbla")
+    if("lsame" IN_LIST _omit_names OR "xerbla" IN_LIST _omit_names)
         set(_blat_blocked TRUE)
     endif()
     if(BLIS_EFFECTIVE_BLAS AND NOT _blat_blocked)

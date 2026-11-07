@@ -8,6 +8,7 @@ if(BLIS_ENABLE_STATIC)
 endif()
 if(BLIS_ENABLE_SHARED)
     set_target_properties(blis_shared PROPERTIES EXPORT_NAME blis)
+    # The double install is deliberate: the components feed make's partial install targets (install-libs gets the real file, install-lib-symlinks the symlinks).
     install(
         TARGETS blis_shared
         EXPORT blisTargets
@@ -22,6 +23,62 @@ if(BLIS_ENABLE_SHARED)
             COMPONENT libs
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         )
+    endif()
+    if(APPLE AND NOT BLIS_DARWIN_RPATH)
+        # The link stamps the configure-time libdir, as make does. This rewrite
+        # follows the effective prefix with the blis.pc mechanism; DESTDIR stays out.
+        # A plain install matches the stamped id, so it skips the rewrite.
+        if(IS_ABSOLUTE "${BLIS_INSTALL_LIBDIR}")
+            set(_blis_iddir "${BLIS_INSTALL_LIBDIR}")
+            set(_blis_idcfgdir "${BLIS_INSTALL_LIBDIR}")
+        else()
+            set(_blis_iddir "@BLIS_INSTALL_PREFIX@/${BLIS_INSTALL_LIBDIR}")
+            set(_blis_idcfgdir "${CMAKE_INSTALL_PREFIX}/${BLIS_INSTALL_LIBDIR}")
+        endif()
+        set(_blis_idtool "${CMAKE_INSTALL_NAME_TOOL}")
+        if(_blis_idtool MATCHES "NOTFOUND")
+            set(_blis_idtool "")
+        elseif(NOT IS_ABSOLUTE "${_blis_idtool}")
+            # find_program keeps its result when the result variable has a value.
+            # The minimum is 3.20 and NO_CACHE is a 3.21 option. Clear the normal and cache entry.
+            unset(_blis_idtool_search)
+            unset(_blis_idtool_search CACHE)
+            find_program(_blis_idtool_search "${_blis_idtool}")
+            if(_blis_idtool_search MATCHES "NOTFOUND")
+                set(_blis_idtool "")
+            else()
+                set(_blis_idtool "${_blis_idtool_search}")
+            endif()
+        endif()
+        foreach(_blis_idc libs lib-symlinks)
+            install(
+                CODE
+                    "set(_blis_iddir \"${_blis_iddir}\")\nset(_blis_idcfgdir \"${_blis_idcfgdir}\")\nset(_blis_idtool \"${_blis_idtool}\")\nset(_blis_dylib \"$<TARGET_FILE_NAME:blis_shared>\")\nset(_blis_idname \"$<TARGET_SONAME_FILE_NAME:blis_shared>\")"
+                COMPONENT ${_blis_idc}
+            )
+            install(
+                CODE
+                    [[
+    string(REPLACE "@BLIS_INSTALL_PREFIX@" "${CMAKE_INSTALL_PREFIX}" _blis_iddir "${_blis_iddir}")
+    set(_blis_idfile "$ENV{DESTDIR}${_blis_iddir}/${_blis_dylib}")
+    # IS_EXECUTABLE is a 3.29 condition; the minimum is 3.20. EXISTS catches an
+    # empty or missing tool. A tool that exists but cannot start fails below.
+    if(NOT EXISTS "${_blis_idtool}")
+        message(FATAL_ERROR "BLIS: install-name tool '${_blis_idtool}' is empty or missing; the id of ${_blis_dylib} keeps the stale value ${_blis_idcfgdir}/${_blis_idname}")
+    endif()
+    if(EXISTS "${_blis_idfile}" AND NOT IS_SYMLINK "${_blis_idfile}")
+        execute_process(
+            COMMAND "${_blis_idtool}" -id "${_blis_iddir}/${_blis_idname}" "${_blis_idfile}"
+            RESULT_VARIABLE _blis_idres
+        )
+        if(NOT _blis_idres EQUAL 0)
+            message(FATAL_ERROR "BLIS: install-name tool '${_blis_idtool}' -id failed for ${_blis_idfile}; the id keeps the stale value ${_blis_idcfgdir}/${_blis_idname}")
+        endif()
+    endif()
+  ]]
+                COMPONENT ${_blis_idc}
+            )
+        endforeach()
     endif()
 endif()
 

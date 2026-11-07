@@ -9,8 +9,9 @@ function(blis_autodetect out_var)
     message(STATUS "BLIS: auto-detecting sub-configuration...")
 
     # --- RISC-V: preprocess-time detection (works even when cross-compiling) ---
+    _blis_toolchain_flags(_tf)
     execute_process(
-        COMMAND "${CMAKE_C_COMPILER}" -E "${BLIS_SOURCE_DIR}/build/detect/riscv/bli_riscv_cpuid.h"
+        COMMAND "${CMAKE_C_COMPILER}" ${_tf} -E "${BLIS_SOURCE_DIR}/build/detect/riscv/bli_riscv_cpuid.h"
         RESULT_VARIABLE _rv
         OUTPUT_VARIABLE _out
         ERROR_QUIET

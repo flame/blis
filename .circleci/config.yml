@@ -6,7 +6,6 @@ branches:
     - dev
     - amd
     - /r[0-9]+.x/
-    - cmake-port
 
 orbs:
   win: circleci/windows@5.1.0
@@ -175,7 +174,7 @@ workflows:
           BLD: --disable-shared
           LDFLAGS: -static
 
-      # ---- CMake CI, ported 1:1 from .github/workflows/cmake.yml ----
+      # ---- CMake CI ----
       # Linux gcc/clang x {single,openmp,pthreads}, with install and consumer checks
       - cmake-linux:
           name: cmake-linux-gcc-single
@@ -482,7 +481,7 @@ jobs:
       - store_artifacts:
           path: output.testsuite
 
-  # ---- CMake CI, ported 1:1 from .github/workflows/cmake.yml ----
+  # ---- CMake CI ----
   # Linux gcc/clang x {single,openmp,pthreads}: build, test, install, consumers.
   cmake-linux:
     parameters:
@@ -514,12 +513,12 @@ jobs:
             esac
 
       - run:
-          name: OpenMP runtime for clang (libomp; not covered by setup-cpp)
+          name: OpenMP runtime for clang (libomp)
           command: |
             if [ "<< parameters.cc >>" = clang ] && [ "<< parameters.thr >>" = openmp ]; then
               if command -v sudo >/dev/null; then SUDO=sudo; else SUDO=; fi
-              # setup-cpp's llvm and ubuntu's libomp-dev differ in version; omp.h
-              # lives in the clang resource dir of the matching libomp-*-dev.
+              # apt's clang and libomp-dev can have different versions.
+              # omp.h lives in the resource dir of the matching libomp-*-dev.
               $SUDO apt-get update -qq && $SUDO apt-get install -y -qq "libomp-$($CC -dumpversion | cut -d. -f1)-dev"
             fi
 
@@ -621,7 +620,7 @@ jobs:
           name: Test (fast)
           command: ctest --test-dir _build -R 'blis-test-(fast|mixed)' --output-on-failure
 
-  # s390x cross build with the same qemu emulator settings as the GitHub job.
+  # s390x cross build.
   cmake-linux-s390x-z15:
     executor: linuxnoble
     steps:
@@ -696,15 +695,40 @@ jobs:
           name: Configure + build (firestorm = Apple Silicon)
           command: |
             cmake -S . -B _build -G Ninja -DBLIS_CONFIG=firestorm \
-              -DBLIS_THREADING='<< parameters.thr >>' -DBLIS_ENABLE_CBLAS=ON
+              -DBLIS_THREADING='<< parameters.thr >>' -DBLIS_ENABLE_CBLAS=ON \
+              -DCMAKE_INSTALL_PREFIX="$PWD/_install"
             cmake --build _build -j 4
 
       - run:
           name: Test (fast)
           command: ctest --test-dir _build -R blis-test-fast --output-on-failure
 
-  # Windows ucrt64 gcc through msys2 (upstream's choco mingw cannot give ucrt64
-  # gcc, so msys2 comes from choco; C:\tools\msys64 is its default install dir).
+      - run:
+          name: Install
+          command: cmake --install _build
+
+      - run:
+          name: Install-name of the installed dylib
+          command: |
+            test "$(otool -D "$PWD/_install/lib/libblis.4.dylib" | tail -1)" = \
+                 "$PWD/_install/lib/libblis.4.dylib"
+
+      - run:
+          name: Consumer via pkg-config (no DYLD_* variables)
+          command: |
+            mkdir -p consumer
+            printf '%s\n' '#include "blis.h"' \
+              'int main(void){ return bli_info_get_version_str() == 0; }' \
+              > consumer/main.c
+            export PKG_CONFIG_PATH="$PWD/_install/share/pkgconfig"
+            cc $(pkg-config --cflags blis) consumer/main.c \
+               $(pkg-config --libs blis) -lm -o consumer/pc
+            unset DYLD_LIBRARY_PATH DYLD_FALLBACK_LIBRARY_PATH DYLD_INSERT_LIBRARIES
+            ./consumer/pc
+
+  # Windows ucrt64 gcc through msys2. The win-build choco mingw cannot
+  # give ucrt64 gcc, so msys2 comes from choco. C:\tools\msys64 is the
+  # default install dir of msys2.
   # The testsuite parser rejects CRLF input files; keep LF as before.
   cmake-windows-ucrt64-gcc:
     executor:
@@ -736,8 +760,8 @@ jobs:
             C:\tools\msys64\usr\bin\bash -eo pipefail -c 'export PATH=$PWD/_build/lib:/ucrt64/bin:/usr/bin:/bin:$PATH; ctest --test-dir _build -R blis-test-fast --output-on-failure'
 
   # Windows + LLVM clang with the MSVC environment (vcvars64), mirroring
-  # upstream's AppVeyor Windows-clang flow (clang gnu-driver, windows-msvc
-  # target). MSVC's cl itself is not supported by BLIS.
+  # the AppVeyor Windows-clang flow in .appveyor.yml (clang gnu-driver,
+  # windows-msvc target). BLIS does not support MSVC's cl itself.
   cmake-windows-clang-msvc:
     executor:
       name: win/default
@@ -781,9 +805,8 @@ jobs:
             cmd /c _step.cmd
             exit $LASTEXITCODE
 
-  # clang-cl: cl-compatible driver with clang code-gen. Not covered by
-  # upstream CI; flags are accepted as verified against clang-18's clang-cl
-  # driver. MSVC's own cl is unsupported (as in upstream BLIS).
+  # clang-cl: cl-compatible driver with clang code-gen. The flags work
+  # with clang-18's clang-cl driver. BLIS does not support MSVC's own cl.
   cmake-windows-clang-cl:
     executor:
       name: win/default

@@ -11,7 +11,13 @@ if(NOT BLIS_IS_MSVC STREQUAL "yes")
     blis_add_link(m -lm)
 endif()
 # pthread library: -lpthread by default (LIBPTHREAD overrides it), needed for
-# pthread_once unless --disable-system.
+# pthread_once unless --disable-system. common.mk links the raw $(LIBPTHREAD)
+# on every OS, so Darwin keeps -lpthread where Threads::Threads drops it.
+# The Bionic probe runs here because the pthread items below need its result.
+if(BLIS_HOST_OS STREQUAL "Linux")
+    include(CheckCSourceCompiles)
+    check_c_source_compiles("#ifndef __BIONIC__\n#error not bionic\n#endif\nint main(void){return 0;}" BLIS_ON_BIONIC)
+endif()
 set(_blis_libpthread FALSE)
 if(BLIS_ENABLE_SYSTEM)
     if(BLIS_CC_VENDOR STREQUAL "icc")
@@ -25,7 +31,19 @@ if(BLIS_ENABLE_SYSTEM)
         else()
             set(_blis_libpthread_lib "${LIBPTHREAD}")
         endif()
-        blis_add_link(Threads::Threads "${_blis_libpthread_lib}")
+        # Split the override into one link item for each word, as make's
+        # unquoted $(LIBPTHREAD) is shell-split. blis.pc keeps the raw string.
+        separate_arguments(_blis_libpthread_items UNIX_COMMAND "${_blis_libpthread_lib}")
+        # Bionic keeps pthread in libc and the NDK ships no libpthread, so the
+        # default -lpthread becomes Threads::Threads there. An explicit
+        # LIBPTHREAD override still goes in raw, split as above.
+        # shortcut: Bionic link items use Threads::Threads while make keeps raw
+        # -lpthread in LDFLAGS, drop when common.mk drops -lpthread on Bionic.
+        if(NOT DEFINED LIBPTHREAD AND (BLIS_ON_BIONIC OR BLIS_HOST_OS STREQUAL "Android"))
+            find_package(Threads)
+            set(_blis_libpthread_items Threads::Threads)
+        endif()
+        blis_add_link("${_blis_libpthread_items}" "${_blis_libpthread_lib}")
     endif()
 endif()
 if(enable_memkind AND NOT BLIS_DEBUG_TYPE STREQUAL "sde")
@@ -34,14 +52,22 @@ endif()
 if(BLIS_ENABLE_ASAN)
     blis_add_link(-fsanitize=address -fsanitize=address)
 endif()
-if("openmp" IN_LIST BLIS_THREADING_MODELS)
+# shortcut: aocc gets -fopenmp although common.mk omits it; drop when upstream common.mk adds aocc.
+if((BLIS_CC_VENDOR STREQUAL "gcc" OR BLIS_CC_VENDOR STREQUAL "icc" OR BLIS_CC_VENDOR STREQUAL "clang"
+    OR BLIS_CC_VENDOR STREQUAL "aocc") AND "openmp" IN_LIST BLIS_THREADING_MODELS)
     blis_add_link(-fopenmp -fopenmp)
 endif()
-if("pthreads" IN_LIST BLIS_THREADING_MODELS)
-    # common.mk adds LIBPTHREAD (empty without system support) to blis.pc.
-    blis_add_link(-pthread "")
-    if(_blis_libpthread)
-        list(APPEND BLIS_PC_LIBS "${_blis_libpthread_lib}")
+# common.mk adds the threading link flags only in its gcc, icc and clang blocks.
+# shortcut: aocc gets -pthread although common.mk omits it; drop when upstream common.mk adds aocc.
+if(BLIS_CC_VENDOR STREQUAL "gcc" OR BLIS_CC_VENDOR STREQUAL "icc" OR BLIS_CC_VENDOR STREQUAL "clang" OR BLIS_CC_VENDOR STREQUAL "aocc")
+    # configure:3821 and BlisOptions.cmake:192 force single threading when system support is off, so this branch never sees pthreads with BLIS_ENABLE_SYSTEM OFF.
+    if("pthreads" IN_LIST BLIS_THREADING_MODELS)
+        # The pthreads blocks add LIBPTHREAD to LDFLAGS again, so blis.pc
+        # carries it twice (the unconditional copy sits above).
+        if(_blis_libpthread)
+            # shortcut: make links LIBPTHREAD twice for pthreads; CMake links it once so a whole-archive override does not duplicate symbols.
+            list(APPEND BLIS_PC_LIBS "${_blis_libpthread_lib}")
+        endif()
     endif()
 endif()
 foreach(c ${BLIS_CONFIG_LIST_FAM})
@@ -77,10 +103,9 @@ else()
     set(BLIS_CXXLANGFLAGS -std=c++11)
 endif()
 
-if(UNIX AND NOT APPLE)
-    # common.mk appends -lrt last (after the threading and HPX flags), except on Android/Bionic.
-    include(CheckCSourceCompiles)
-    check_c_source_compiles("#ifndef __BIONIC__\n#error not bionic\n#endif\nint main(void){return 0;}" BLIS_ON_BIONIC)
+if(BLIS_HOST_OS STREQUAL "Linux")
+    # common.mk adds -lrt for OS_NAME Linux only, last (after the threading and
+    # HPX flags), except on Android/Bionic.
     if(NOT BLIS_ON_BIONIC)
         blis_add_link(rt -lrt)
     endif()
