@@ -21,6 +21,8 @@
 
 This document describes how to configure, compile, and install a BLIS library on your local system.
 
+**Note:** BLIS also ships with a CMake-based build; see [BuildSystemCMake.md](BuildSystemCMake.md) for instructions and a full option-mapping table.
+
 The BLIS build system was designed for use with GNU/Linux (or some other sane UNIX). Other requirements are:
 
   * Python (2.7 or later for python2; 3.4 or later for python3)

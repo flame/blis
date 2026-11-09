@@ -1,0 +1,53 @@
+# Helper functions for out-of-tree BLIS plugins (the CMake replacement for
+# make's configure-plugin machinery). Included by blisConfig.cmake.
+
+function(_blis_plugin_apply target flags)
+    # One SHELL: group: CMake de-duplicates option items and would split
+    # repeated two-word flags ('--diag_suppress A --diag_suppress B').
+    target_compile_options(${target} PRIVATE "SHELL:${flags}")
+    target_include_directories(${target} PRIVATE ${blis_INCLUDE_DIRS})
+endfunction()
+
+function(blis_plugin_frame_flags target)
+    _blis_plugin_apply(${target} "${blis_FRAME_CFLAGS}")
+endfunction()
+
+# Kernel flags of <cfg> carry ISA flags like -mavx2/-march=haswell, so the same
+# target can be built once per subconfiguration as an OBJECT library.
+function(blis_plugin_kernel_flags target cfg)
+    if(NOT DEFINED blis_KERNEL_CFLAGS_${cfg})
+        message(
+            FATAL_ERROR
+            "blis_plugin_kernel_flags: '${cfg}' is not among the enabled "
+            "subconfigurations (${blis_CONFIG_LIST})"
+        )
+    endif()
+    _blis_plugin_apply(${target} "${blis_KERNEL_CFLAGS_${cfg}}")
+endfunction()
+
+# DEFS_HEADER is force-included (like BLIS's own bli_kernel_defs_<c>.h) for
+# blocksize/ukernel macros.
+function(blis_plugin_refkern_flags target cfg)
+    cmake_parse_arguments(P "" "DEFS_HEADER" "" ${ARGN})
+    if(NOT DEFINED blis_REFKERN_CFLAGS_${cfg})
+        message(
+            FATAL_ERROR
+            "blis_plugin_refkern_flags: '${cfg}' is not among the enabled "
+            "subconfigurations (${blis_CONFIG_LIST})"
+        )
+    endif()
+    _blis_plugin_apply(${target} "${blis_REFKERN_CFLAGS_${cfg}}")
+    if(P_DEFS_HEADER)
+        # Escape like blis_flag_group (BlisLibraries.cmake is not visible to an
+        # installed plugin): the SHELL: group re-parses with
+        # separate_arguments(UNIX_COMMAND), so the item needs real quote
+        # characters and doubled backslashes to survive as one argv item.
+        string(REPLACE "\\" "\\\\" _hdr "${P_DEFS_HEADER}")
+        string(REPLACE "\"" "\\\"" _hdr "${_hdr}")
+        if(CMAKE_C_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+            target_compile_options(${target} PRIVATE "SHELL:-DBLIS_IN_REF_KERNEL=1 \"/FI${_hdr}\"")
+        else()
+            target_compile_options(${target} PRIVATE "SHELL:-DBLIS_IN_REF_KERNEL=1 -include \"${_hdr}\"")
+        endif()
+    endif()
+endfunction()

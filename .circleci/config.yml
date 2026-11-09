@@ -174,6 +174,66 @@ workflows:
           BLD: --disable-shared
           LDFLAGS: -static
 
+      # ---- CMake CI ----
+      # Linux gcc/clang x {single,openmp,pthreads}, with install and consumer checks
+      - cmake-linux:
+          name: cmake-linux-gcc-single
+          cc: gcc
+          thr: single
+      - cmake-linux:
+          name: cmake-linux-gcc-openmp
+          cc: gcc
+          thr: openmp
+      - cmake-linux:
+          name: cmake-linux-gcc-pthreads
+          cc: gcc
+          thr: pthreads
+      - cmake-linux:
+          name: cmake-linux-clang-single
+          cc: clang
+          thr: single
+      - cmake-linux:
+          name: cmake-linux-clang-openmp
+          cc: clang
+          thr: openmp
+      - cmake-linux:
+          name: cmake-linux-clang-pthreads
+          cc: clang
+          thr: pthreads
+
+      # 5 config jobs
+      - cmake-linux-config:
+          name: cmake-linux-config-auto
+          config: auto
+      - cmake-linux-config:
+          name: cmake-linux-config-x86_64
+          config: x86_64
+      - cmake-linux-config:
+          name: cmake-linux-config-zen3
+          config: zen3
+      - cmake-linux-config:
+          name: cmake-linux-config-sandybridge
+          config: sandybridge
+      - cmake-linux-config:
+          name: cmake-linux-config-generic
+          config: generic
+
+      # s390x under qemu
+      - cmake-linux-s390x-z15
+
+      # macOS, Apple clang (no OpenMP)
+      - cmake-macos:
+          name: cmake-macos-single
+          thr: single
+      - cmake-macos:
+          name: cmake-macos-pthreads
+          thr: pthreads
+
+      # Windows
+      - cmake-windows-ucrt64-gcc
+      - cmake-windows-clang-msvc
+      - cmake-windows-clang-cl
+
 jobs:
   win-build:
     parameters:
@@ -420,3 +480,370 @@ jobs:
 
       - store_artifacts:
           path: output.testsuite
+
+  # ---- CMake CI ----
+  # Linux gcc/clang x {single,openmp,pthreads}: build, test, install, consumers.
+  cmake-linux:
+    parameters:
+      cc:
+        type: string
+      thr:
+        type: string
+    executor: linuxnoble
+    steps:
+      - checkout
+
+      - run:
+          name: Install build tools
+          command: |
+            export CC=<< parameters.cc >>
+            echo "export CC=$CC" >> "$BASH_ENV"
+            if command -v sudo >/dev/null; then SUDO=sudo; else SUDO=; fi
+            $SUDO apt-get update -qq && $SUDO apt-get install -y -qq gcc g++ clang libomp-dev ninja-build python3-pip
+
+      - run:
+          name: Install cmake 4 with pip when the image provides an older cmake
+          command: |
+            v=$(cmake --version 2>/dev/null | head -1 || true)
+            case "$v" in
+              "cmake version 4"*) ;;
+              *) python3 -m pip install --user --quiet --break-system-packages cmake
+                 echo "export PATH=$(python3 -m site --user-base)/bin:\$PATH" >> "$BASH_ENV"
+                 ;;
+            esac
+
+      - run:
+          name: OpenMP runtime for clang (libomp)
+          command: |
+            if [ "<< parameters.cc >>" = clang ] && [ "<< parameters.thr >>" = openmp ]; then
+              if command -v sudo >/dev/null; then SUDO=sudo; else SUDO=; fi
+              # apt's clang and libomp-dev can have different versions.
+              # omp.h lives in the resource dir of the matching libomp-*-dev.
+              $SUDO apt-get update -qq && $SUDO apt-get install -y -qq "libomp-$($CC -dumpversion | cut -d. -f1)-dev"
+            fi
+
+      - run:
+          name: Configure
+          command: |
+            cmake -S . -B _build -G Ninja \
+              -DBLIS_CONFIG=haswell -DBLIS_THREADING='<< parameters.thr >>' \
+              -DCMAKE_INSTALL_PREFIX="$PWD/_install"
+
+      - run:
+          name: Build
+          command: cmake --build _build -j 4
+
+      - run:
+          name: Test (BLIS testsuite, fast)
+          command: ctest --test-dir _build -R blis-test-fast --output-on-failure
+
+      - run:
+          name: Test (reference BLAS drivers)
+          command: ctest --test-dir _build -L blastest --output-on-failure
+
+      - run:
+          name: Install
+          command: cmake --install _build
+
+      - run:
+          name: Consumer via find_package
+          command: |
+            cat >main.c \<<'EOF'
+            #include "blis.h"
+            int main(void){ return bli_info_get_version_str() == 0; }
+            EOF
+            mkdir -p consumer && mv main.c consumer/main.c
+            cat >consumer/CMakeLists.txt \<<'EOF'
+            cmake_minimum_required(VERSION 3.20...4.4)
+            project(consumer C)
+            find_package(blis REQUIRED)
+            add_executable(c main.c)
+            target_link_libraries(c PRIVATE blis::blis)
+            EOF
+            cmake -S consumer -B consumer/build -DCMAKE_PREFIX_PATH="$PWD/_install"
+            cmake --build consumer/build
+            LD_LIBRARY_PATH="$PWD/_install/lib" ./consumer/build/c
+
+      - run:
+          name: Consumer via pkg-config
+          command: |
+            export PKG_CONFIG_PATH="$PWD/_install/share/pkgconfig"
+            cc $(pkg-config --cflags blis) consumer/main.c \
+               $(pkg-config --libs blis) -lm -o consumer/pc
+            LD_LIBRARY_PATH="$PWD/_install/lib" ./consumer/pc
+
+      - run:
+          name: Standalone testsuite against installed package
+          command: |
+            cmake -S testsuite -B ts-build -G Ninja \
+              -DCMAKE_PREFIX_PATH="$PWD/_install"
+            cmake --build ts-build
+            (cd testsuite && ../ts-build/test_libblis.x \
+              -g input.general.fast -o input.operations.fast > ../output.testsuite)
+            grep -q 'Exiting normally' output.testsuite
+            ! grep -q FAILURE output.testsuite
+
+  # 5 BLIS_CONFIG variants with cblas and fast/mixed tests.
+  cmake-linux-config:
+    parameters:
+      config:
+        type: string
+    executor: linuxnoble
+    steps:
+      - checkout
+
+      - run:
+          name: Install build tools
+          command: |
+            if command -v sudo >/dev/null; then SUDO=sudo; else SUDO=; fi
+            $SUDO apt-get update -qq && $SUDO apt-get install -y -qq gcc g++ clang libomp-dev ninja-build python3-pip
+
+      - run:
+          name: Install cmake 4 with pip when the image provides an older cmake
+          command: |
+            v=$(cmake --version 2>/dev/null | head -1 || true)
+            case "$v" in
+              "cmake version 4"*) ;;
+              *) python3 -m pip install --user --quiet --break-system-packages cmake
+                 echo "export PATH=$(python3 -m site --user-base)/bin:\$PATH" >> "$BASH_ENV"
+                 ;;
+            esac
+
+      - run:
+          name: Configure + build
+          command: |
+            cmake -S . -B _build -G Ninja -DBLIS_CONFIG=<< parameters.config >> \
+              -DBLIS_ENABLE_CBLAS=ON
+            cmake --build _build -j 4
+
+      - run:
+          name: Test (fast)
+          command: ctest --test-dir _build -R 'blis-test-(fast|mixed)' --output-on-failure
+
+  # s390x cross build.
+  cmake-linux-s390x-z15:
+    executor: linuxnoble
+    steps:
+      - checkout
+
+      - run:
+          name: Install build tools + cross toolchain
+          command: |
+            if command -v sudo >/dev/null; then SUDO=sudo; else SUDO=; fi
+            $SUDO apt-get update -qq
+            $SUDO apt-get install -y -qq gcc g++ clang libomp-dev ninja-build python3-pip \
+              gcc-s390x-linux-gnu g++-s390x-linux-gnu libc6-dev-s390x-cross qemu-user
+
+      - run:
+          name: Install cmake 4 with pip when the image provides an older cmake
+          command: |
+            v=$(cmake --version 2>/dev/null | head -1 || true)
+            case "$v" in
+              "cmake version 4"*) ;;
+              *) python3 -m pip install --user --quiet --break-system-packages cmake
+                 echo "export PATH=$(python3 -m site --user-base)/bin:\$PATH" >> "$BASH_ENV"
+                 ;;
+            esac
+
+      - run:
+          name: Configure
+          command: |
+            cmake -S . -B _build -G Ninja \
+              -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=s390x \
+              -DCMAKE_C_COMPILER=s390x-linux-gnu-gcc \
+              -DCMAKE_CXX_COMPILER=s390x-linux-gnu-g++ \
+              -DCMAKE_CROSSCOMPILING_EMULATOR='qemu-s390x;-cpu;max;-L;/usr/s390x-linux-gnu/' \
+              -DCMAKE_FIND_ROOT_PATH=/usr/s390x-linux-gnu \
+              -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
+              -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+              -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
+              -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
+              -DBLIS_CONFIG=z15 -DBLIS_ENABLE_CBLAS=ON
+
+      - run:
+          name: Build
+          command: cmake --build _build -j 4
+
+      - run:
+          name: Test (BLIS testsuite, fast)
+          command: ctest --test-dir _build -R blis-test-fast --output-on-failure
+
+      - run:
+          name: Test (reference BLAS drivers)
+          command: ctest --test-dir _build -L blastest --output-on-failure
+
+  # macOS, Apple clang (no bundled OpenMP; single/pthreads only).
+  cmake-macos:
+    parameters:
+      thr:
+        type: string
+    executor: macos
+    steps:
+      - checkout
+
+      - run:
+          name: Install build tools
+          command: |
+            command -v ninja >/dev/null || brew install ninja
+            v=$(cmake --version 2>/dev/null | head -1 || true)
+            case "$v" in
+              "cmake version 4"*) ;;
+              *) brew install cmake ;;
+            esac
+
+      - run:
+          name: Configure + build (firestorm = Apple Silicon)
+          command: |
+            cmake -S . -B _build -G Ninja -DBLIS_CONFIG=firestorm \
+              -DBLIS_THREADING='<< parameters.thr >>' -DBLIS_ENABLE_CBLAS=ON \
+              -DCMAKE_INSTALL_PREFIX="$PWD/_install"
+            cmake --build _build -j 4
+
+      - run:
+          name: Test (fast)
+          command: ctest --test-dir _build -R blis-test-fast --output-on-failure
+
+      - run:
+          name: Install
+          command: cmake --install _build
+
+      - run:
+          name: Install-name of the installed dylib
+          command: |
+            test "$(otool -D "$PWD/_install/lib/libblis.4.dylib" | tail -1)" = \
+                 "$PWD/_install/lib/libblis.4.dylib"
+
+      - run:
+          name: Consumer via pkg-config (no DYLD_* variables)
+          command: |
+            mkdir -p consumer
+            printf '%s\n' '#include "blis.h"' \
+              'int main(void){ return bli_info_get_version_str() == 0; }' \
+              > consumer/main.c
+            export PKG_CONFIG_PATH="$PWD/_install/share/pkgconfig"
+            cc $(pkg-config --cflags blis) consumer/main.c \
+               $(pkg-config --libs blis) -lm -o consumer/pc
+            unset DYLD_LIBRARY_PATH DYLD_FALLBACK_LIBRARY_PATH DYLD_INSERT_LIBRARIES
+            ./consumer/pc
+
+  # Windows ucrt64 gcc through msys2. The win-build choco mingw cannot
+  # give ucrt64 gcc, so msys2 comes from choco. C:\tools\msys64 is the
+  # default install dir of msys2.
+  # The testsuite parser rejects CRLF input files; keep LF as before.
+  cmake-windows-ucrt64-gcc:
+    executor:
+      name: win/default
+    steps:
+      - run: git config --global core.autocrlf input
+
+      - checkout
+
+      - run:
+          name: Installing Dependencies
+          command: |
+            choco install msys2
+            C:\tools\msys64\usr\bin\bash -eo pipefail -c 'export PATH=/usr/bin:/bin:$PATH; pacman -Sy --noconfirm --needed mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-ninja mingw-w64-ucrt-x86_64-python'
+
+      - run:
+          name: Install cmake 4 with pip when the msys2 cmake is older
+          command: |
+            C:\tools\msys64\usr\bin\bash -eo pipefail -c 'export PATH=/ucrt64/bin:/usr/bin:/bin:$PATH; v=$(cmake --version 2>/dev/null | head -1 || true); case $v in cmake?version?4*) ;; *) python -m pip install --quiet cmake ;; esac'
+
+      - run:
+          name: Configure + build
+          command: |
+            C:\tools\msys64\usr\bin\bash -eo pipefail -c 'export PATH=/ucrt64/bin:/usr/bin:/bin:$PATH; cmake --version; cmake -S . -B _build -G Ninja -DBLIS_CONFIG=haswell -DBLIS_THREADING=single -DBLIS_ENABLE_CBLAS=ON; cmake --build _build -j 4'
+
+      - run:
+          name: Test (fast)
+          command: |
+            C:\tools\msys64\usr\bin\bash -eo pipefail -c 'export PATH=$PWD/_build/lib:/ucrt64/bin:/usr/bin:/bin:$PATH; ctest --test-dir _build -R blis-test-fast --output-on-failure'
+
+  # Windows + LLVM clang with the MSVC environment (vcvars64), mirroring
+  # the AppVeyor Windows-clang flow in .appveyor.yml (clang gnu-driver,
+  # windows-msvc target). BLIS does not support MSVC's cl itself.
+  cmake-windows-clang-msvc:
+    executor:
+      name: win/default
+    steps:
+      - run: git config --global core.autocrlf input
+
+      - checkout
+
+      - run:
+          name: Setup C/C++ toolchain (llvm clang + msvc env + cmake + ninja)
+          command: choco install llvm cmake ninja
+
+      - run:
+          name: Configure + build
+          command: |
+            $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath | Select-Object -First 1
+            if (-not $vs) { Write-Error "vcvars64: no Visual Studio with the C++ toolset found"; exit 1 }
+            @"
+            @echo off
+            call "$vs\VC\Auxiliary\Build\vcvars64.bat" >nul 2>&1 || exit /b 1
+            where clang || exit /b 1
+            clang --version || exit /b 1
+            set "CC=clang"
+            cmake -S . -B _build -G Ninja -DBLIS_CONFIG=haswell -DBLIS_THREADING=single -DBLIS_ENABLE_CBLAS=ON -DCMAKE_C_COMPILER=clang || exit /b 1
+            cmake --build _build -j 4 || exit /b 1
+            "@ | Set-Content -Path _step.cmd -Encoding ascii
+            cmd /c _step.cmd
+            exit $LASTEXITCODE
+
+      - run:
+          name: Test (fast)
+          command: |
+            $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath | Select-Object -First 1
+            if (-not $vs) { Write-Error "vcvars64: no Visual Studio with the C++ toolset found"; exit 1 }
+            @"
+            @echo off
+            call "$vs\VC\Auxiliary\Build\vcvars64.bat" >nul 2>&1 || exit /b 1
+            set "PATH=%CD%\_build\lib;%PATH%"
+            ctest --test-dir _build -R blis-test-fast --output-on-failure || exit /b 1
+            "@ | Set-Content -Path _step.cmd -Encoding ascii
+            cmd /c _step.cmd
+            exit $LASTEXITCODE
+
+  # clang-cl: cl-compatible driver with clang code-gen. The flags work
+  # with clang-18's clang-cl driver. BLIS does not support MSVC's own cl.
+  cmake-windows-clang-cl:
+    executor:
+      name: win/default
+    steps:
+      - run: git config --global core.autocrlf input
+
+      - checkout
+
+      - run:
+          name: Setup C/C++ toolchain (llvm, msvc env, cmake, ninja)
+          command: choco install llvm cmake ninja
+
+      - run:
+          name: Configure + build
+          command: |
+            $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath | Select-Object -First 1
+            if (-not $vs) { Write-Error "vcvars64: no Visual Studio with the C++ toolset found"; exit 1 }
+            @"
+            @echo off
+            call "$vs\VC\Auxiliary\Build\vcvars64.bat" >nul 2>&1 || exit /b 1
+            where clang-cl || exit /b 1
+            cmake -S . -B _build -G Ninja -DBLIS_CONFIG=haswell -DBLIS_THREADING=single -DBLIS_ENABLE_CBLAS=ON -DCMAKE_C_COMPILER=clang-cl || exit /b 1
+            cmake --build _build -j 4 || exit /b 1
+            "@ | Set-Content -Path _step.cmd -Encoding ascii
+            cmd /c _step.cmd
+            exit $LASTEXITCODE
+
+      - run:
+          name: Test (fast)
+          command: |
+            $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath | Select-Object -First 1
+            if (-not $vs) { Write-Error "vcvars64: no Visual Studio with the C++ toolset found"; exit 1 }
+            @"
+            @echo off
+            call "$vs\VC\Auxiliary\Build\vcvars64.bat" >nul 2>&1 || exit /b 1
+            set "PATH=%CD%\_build\lib;%PATH%"
+            ctest --test-dir _build -R blis-test-fast --output-on-failure || exit /b 1
+            "@ | Set-Content -Path _step.cmd -Encoding ascii
+            cmd /c _step.cmd
+            exit $LASTEXITCODE
